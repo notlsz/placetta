@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getAudioContext } from "voice-glow";
+import { CLIPS } from "./voices.generated";
 
 /**
  * A stand-in voice for when there's no microphone (an embedded preview, a denied prompt):
@@ -48,33 +50,79 @@ export function useNarrow(px = 1024) {
   return n;
 }
 
+/** FNV-1a over the reply text; the same function names the recorded clips in scripts/make-voices.py. */
+export const fnv = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(16).padStart(8, "0"); };
+
+/** Start (or resume) the shared audio context from a click, so replies can play when they arrive. */
+export const unlockAudio = () => { try { getAudioContext(); } catch { /* no Web Audio */ } };
+
+// Natural-sounding female voices the browser may have, best first; used when a reply has no recorded clip.
+const FEMALE: Record<string, RegExp[]> = {
+  en: [/Ava.*Natural/i, /Aria.*Natural/i, /Jenny.*Natural/i, /Emma.*Natural/i, /Michelle.*Natural/i, /^Google US English$/i, /Samantha/i, /^Ava\b/i, /Allison/i, /Zoe/i, /Susan/i, /Karen/i, /Serena/i, /female/i],
+  zh: [/Xiaoxiao.*Natural/i, /Xiaoyi.*Natural/i, /Xiaohan.*Natural/i, /普通话/, /Ting-?Ting/i, /Lili/i, /Meijia/i, /Yu-?shu/i, /female/i],
+};
+function pickVoice(lang: string) {
+  const all = window.speechSynthesis.getVoices(), two = lang.slice(0, 2).toLowerCase();
+  const mine = all.filter(v => v.lang.toLowerCase().startsWith(two));
+  for (const re of FEMALE[two] ?? []) { const v = mine.find(x => re.test(x.name)); if (v) return v; }
+  return mine[0];
+}
+
 /**
- * Read replies aloud (speechSynthesis), with a per-frame level for VoiceBeam that follows the speech:
- * a kick on every word boundary that decays, over a soft floor so voices without boundary events still move it.
+ * Speak a reply in a natural female voice. Scripted replies play their recorded clip and the glow follows the
+ * real audio through an analyser; anything else falls back to the browser's best female voice, with the glow
+ * kicked on each word boundary.
  */
 export function useSpeak() {
-  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
-  const [speaking, setSpeaking] = useState(false);
+  const supported = typeof window !== "undefined" && ("speechSynthesis" in window || "Audio" in window);
+  const [speaking, setSpeaking] = useState<string | null>(null);
   const last = useRef(0);
+  const audio = useRef<HTMLAudioElement | null>(null);
+  const an = useRef<AnalyserNode | null>(null);
+  const buf = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const stop = useCallback(() => {
+    if (audio.current) { audio.current.pause(); audio.current = null; }
+    an.current = null;
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    setSpeaking(null);
+  }, []);
   const speak = useCallback((text: string, lang: string) => {
-    if (!supported || !text) return;
-    const ss = window.speechSynthesis; ss.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = 1.02;
-    const two = lang.slice(0, 2).toLowerCase(), vs = ss.getVoices().filter(v => v.lang.toLowerCase().startsWith(two));
-    const v = vs.find(x => /natural|premium|enhanced|neural/i.test(x.name)) ?? vs[0]; if (v) u.voice = v;
-    u.onstart = () => { last.current = performance.now(); setSpeaking(true); };
+    if (!text) return;
+    stop();
+    const clip = CLIPS[(lang.startsWith("zh") ? "zh" : "en") + ":" + fnv(text)];
+    if (clip) {
+      const a = new Audio(clip); audio.current = a;
+      try {
+        const ctx = getAudioContext();
+        if (ctx) { const node = ctx.createMediaElementSource(a), x = ctx.createAnalyser(); x.fftSize = 1024; node.connect(x); x.connect(ctx.destination); an.current = x; buf.current = new Uint8Array(x.fftSize); }
+      } catch { an.current = null; }
+      a.onplay = () => setSpeaking(text);
+      const done = () => { if (audio.current === a) { audio.current = null; an.current = null; setSpeaking(null); } };
+      a.onended = done; a.onerror = done;
+      a.play().catch(() => setSpeaking(null));
+      return;
+    }
+    if (!("speechSynthesis" in window)) return;
+    const ss = window.speechSynthesis;
+    const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = 1; u.pitch = 1.05;
+    const v = pickVoice(lang); if (v) u.voice = v;
+    u.onstart = () => { last.current = performance.now(); setSpeaking(text); };
     u.onboundary = () => { last.current = performance.now(); };
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
+    u.onend = () => setSpeaking(null);
+    u.onerror = () => setSpeaking(null);
     ss.speak(u);
-  }, [supported]);
-  const stop = useCallback(() => { if (supported) window.speechSynthesis.cancel(); setSpeaking(false); }, [supported]);
+  }, [stop]);
   const level = useCallback(() => {
     if (!speaking) return 0;
+    const x = an.current, b = buf.current;
+    if (x && b) {
+      x.getByteTimeDomainData(b); let sum = 0;
+      for (let i = 0; i < b.length; i++) { const d = (b[i] - 128) / 128; sum += d * d; }
+      return Math.min(1, Math.sqrt(sum / b.length) * 4.2);
+    }
     const now = performance.now(), kick = Math.exp(-((now - last.current) / 1000) * 4.5);
-    const floor = 0.28 + 0.18 * Math.abs(Math.sin(now / 1000 * 6.3));
-    return Math.min(1, Math.max(kick * 0.85, floor));
+    return Math.min(1, Math.max(kick * 0.85, 0.28 + 0.18 * Math.abs(Math.sin(now / 1000 * 6.3))));
   }, [speaking]);
-  useEffect(() => () => { if (supported) window.speechSynthesis.cancel(); }, [supported]);
+  useEffect(() => () => stop(), [stop]);
   return { supported, speaking, speak, stop, level };
 }

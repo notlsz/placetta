@@ -19,6 +19,8 @@ export const I = {
   x: () => <svg {...sv} width={18} height={18}><path d="M6 6l12 12M18 6L6 18" /></svg>,
   plus: () => <svg {...sv} width={18} height={18}><path d="M12 5v14M5 12h14" /></svg>,
   spark: () => <svg width={14} height={14} viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.5c.4 4.6 2.9 7.1 7.5 7.5v.1c-4.6.4-7.1 2.9-7.5 7.5h-.1c-.4-4.6-2.9-7.1-7.5-7.5V10c4.6-.4 7.1-2.9 7.5-7.5z" /></svg>,
+  speaker: () => <svg {...sv} width={15} height={15}><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" /></svg>,
+  stopSq: () => <svg {...sv} width={13} height={13}><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor" stroke="none" /></svg>,
   chev: () => <svg {...sv} width={14} height={14}><path d="M6 9l6 6 6-6" /></svg>,
   pay: () => <svg {...sv}><rect x="3" y="5.5" width="18" height="13" rx="2.5" /><path d="M3 10h18M7 15h3" /></svg>,
   sign: () => <svg {...sv}><path d="M4 20h6M15.5 4.5l4 4L9 19H5v-4z" /></svg>,

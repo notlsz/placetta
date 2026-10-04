@@ -5,7 +5,7 @@ import { demoAgent, type AgentBackend, type Reply, type Request, type Step } fro
 import { SAMPLE_CASE, SUGGESTIONS, type Approval, type Autonomy, type Bi, type Case, type Level } from "./model";
 import { STRINGS, fmt, type Key, type Lang } from "./i18n";
 import { Logo } from "./Logo";
-import { useNarrow, useSimulatedVoice, useSpeak, useSpeechToText } from "./hooks";
+import { unlockAudio, useNarrow, useSimulatedVoice, useSpeak, useSpeechToText } from "./hooks";
 import { ApprovalCard, I, ResolvedCard, StatusChip } from "./ui";
 
 const agent: AgentBackend = demoAgent;
@@ -59,6 +59,7 @@ export default function App() {
 
   const run = useCallback(async (req: Request, shown: string, voice = false) => {
     if (running) return;
+    unlockAudio(); tts.stop();
     const uid = nextId.current++, aid = nextId.current++, t0 = performance.now();
     setMsgs(m => [...m, { id: uid, role: "user", text: shown }, { id: aid, role: "agent", steps: [], active: 0 }]);
     if ("text" in req) setAsked(a => [...a, req.text]);
@@ -107,7 +108,7 @@ export default function App() {
 
   const startVoice = useCallback(async () => {
     if (running) return;
-    tts.stop(); setNote(""); setHeard(""); setView("agent");
+    unlockAudio(); tts.stop(); setNote(""); setHeard(""); setView("agent");
     if (!mic.supported || !micAllowedHere()) { simulate(); return; }
     const s = await mic.start();
     if (s) { setVoice("mic"); if (!stt.start(lang === "zh" ? "zh-CN" : "en-US")) setNote("noSttNote"); return; }
@@ -117,6 +118,7 @@ export default function App() {
 
   /* derived */
   const orbState: OrbState = listening ? "listening" : running && step ? step.state : tts.speaking ? "composing" : "breathing";
+  const sayTurn = useCallback((text: string) => { unlockAudio(); if (tts.speaking === text) tts.stop(); else tts.speak(text, lang === "zh" ? "zh-CN" : "en-US"); }, [tts, lang]);
   const done = kase.filings.filter(f => DONE.includes(f.status)).length;
   const open = useMemo(() => SUGGESTIONS.filter(s => !asked.includes(s.en) && !asked.includes(s.zh)), [asked]);
   const level = useCallback(() => Math.max(sim.level(), tts.level()), [sim, tts]);
@@ -144,7 +146,7 @@ export default function App() {
   const agentView = (
     <div className="col">
       <section className="hero">
-        <ThinkingOrb state={orbState} size={64} theme="light" color={INK} dotSize={1.25} aria-label={t("agentName")} />
+        <div className="lens"><ThinkingOrb state={orbState} size={64} theme="light" color={INK} dotSize={1.25} aria-label={t("agentName")} /></div>
         <h1>{t(greetKey())}</h1>
         <p className="lede">{t(nNeeds ? "summary" : "summaryNone", { r: kase.running.length, n: nNeeds, place: t("shortPlace") })}</p>
         <div className="casechip">
@@ -157,7 +159,7 @@ export default function App() {
 
       <section className="block">
         <h2 className="label">{t("running")}</h2>
-        <ul className="runs">
+        <ul className="runs card">
           {kase.running.map(r => (
             <li key={r.id}>
               <ThinkingOrb state={r.state} size={20} theme="light" color={INK} aria-label={b(r.label)} />
@@ -177,7 +179,7 @@ export default function App() {
       {msgs.length > 0 && <div className="convo">
         {msgs.map(m => m.role === "user"
           ? <div key={m.id} className="you"><p>{m.text}</p></div>
-          : <Turn key={m.id} m={m} b={b} t={t} busy={running} pending={kase.approvals} closed={kase.closed} onApprove={approve} />)}
+          : <Turn key={m.id} m={m} b={b} t={t} busy={running} pending={kase.approvals} closed={kase.closed} onApprove={approve} speaking={tts.speaking} onSay={sayTurn} />)}
       </div>}
     </div>
   );
@@ -264,7 +266,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="scroll" ref={scroller}>{content}</main>
+      <main className={"scroll" + (view === "agent" ? " wash" : "")} ref={scroller}>{content}</main>
 
       {view === "agent" && (
         <div className="dock">
@@ -290,7 +292,7 @@ export default function App() {
         <div className="voice" role="dialog" aria-modal="true" aria-label={t("listening")}>
           <button type="button" className="vclose" aria-label={t("close")} onClick={() => endVoice(false)}><I.x /></button>
           <div className="vmid">
-            <div className="vorb"><ThinkingOrb state="listening" size={64} theme="light" color={INK} dotSize={1.2} aria-label={t("listening")} /></div>
+            <div className="vorb lens"><ThinkingOrb state="listening" size={64} theme="light" color={INK} dotSize={1.2} aria-label={t("listening")} /></div>
             <p className="vlabel">{t("listening")}</p>
             <p className={"vtext" + (heard ? "" : " hint")} aria-live="polite">{heard || t("tapDone")}</p>
             {note && <p className="vnote">{t(note)}</p>}
@@ -309,13 +311,15 @@ export default function App() {
 }
 
 /** One agent turn: Legora-style working log, then the answer and anything it needs from you. */
-function Turn({ m, b, t, busy, pending, closed, onApprove }: {
+function Turn({ m, b, t, busy, pending, closed, onApprove, speaking, onSay }: {
   m: AgentTurn; b: (x: Bi) => string; t: (k: Key, v?: Record<string, string | number>) => string;
   busy: boolean; pending: Approval[]; closed: Approval[]; onApprove: (a: Approval, files?: string[]) => void;
+  speaking: string | null; onSay: (text: string) => void;
 }) {
   const [show, setShow] = useState(false);
   const live = !m.reply;
   const cur = live ? m.steps[m.active] : undefined;
+  const said = m.reply ? m.reply.text.map(b).join(" ") : "";
   return (
     <div className="turn">
       <div className="work">
@@ -325,6 +329,7 @@ function Turn({ m, b, t, busy, pending, closed, onApprove }: {
           {!live && m.steps.length > 0 && (
             <button type="button" onClick={() => setShow(s => !s)} aria-expanded={show}>{t("stepsN", { n: m.steps.length })}<span className={show ? "up" : ""}><I.chev /></span></button>
           )}
+          {said && <button type="button" className={"say" + (speaking === said ? " on" : "")} onClick={() => onSay(said)}>{speaking === said ? <I.stopSq /> : <I.speaker />}{speaking === said ? t("stopListen") : t("listen")}</button>}
         </div>
         {(live || show) && (
           <ol className="steps">
