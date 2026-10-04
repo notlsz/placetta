@@ -1,357 +1,246 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ThinkingOrb, type OrbState } from "thinking-orbs";
-import { VoiceBeam, useMicrophone } from "voice-glow";
-import { demoAgent, type AgentBackend, type Reply, type Request, type Step } from "./agent";
-import { SAMPLE_CASE, SUGGESTIONS, type Approval, type Autonomy, type Bi, type Case, type Level } from "./model";
-import { STRINGS, fmt, type Key, type Lang } from "./i18n";
+import { ThinkingOrb } from "thinking-orbs";
+import { audit, demoAgent, setFact, setField, type AgentBackend, type Reply, type Request, type Step } from "./agent";
+import { AgentPanel } from "./AgentPanel";
+import { AppCtx, type Ctx, type Tab, type View } from "./ctx";
+import { ApproveModal, AppDrawer } from "./Drawer";
+import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
+import { applicationPdf, auditCsv, docBlob, downloads, saveFile } from "./files";
+import { unlockAudio, useNarrow, useSpeak } from "./hooks";
+import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo } from "./Logo";
-import { unlockAudio, useNarrow, useSimulatedVoice, useSpeak, useSpeechToText } from "./hooks";
-import { ApprovalCard, I, ResolvedCard, StatusChip } from "./ui";
+import { B, SAMPLE, same, type Bi, type Doc, type LicenseHit, type Workspace } from "./model";
+import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, INK, Overview, Settings } from "./pages";
+import { daysUntil, inDays, nowIso } from "./time";
+import { I } from "./ui";
 
 const agent: AgentBackend = demoAgent;
-
-type View = "agent" | "filings" | "activity" | "settings";
-type AgentTurn = { id: number; role: "agent"; steps: Step[]; active: number; reply?: Reply; ms?: number };
-type Msg = { id: number; role: "user"; text: string } | AgentTurn;
-
-const INK = "#3F7FC4";   // orb dots, light-blue family
-const BEAM = ["#7DB3EA", "#A5CDF5", "#6FA7E3", "#8FD5EE", "#BCD2F7", "#B2E0F4", "#C9C2F5"];
-const BAND = { core: "#FFFFFF", above: "#94C2F0", mid: "#C6DEF8", below: "#A3D9EF" };
-const LEVELS: Level[] = ["federal", "state", "county", "city"];
-const DONE = ["approved", "filed"];
 
 const readLang = (): Lang => {
   try { const v = localStorage.getItem("placetta-agent-lang"); if (v === "en" || v === "zh") return v; } catch { /* storage blocked */ }
   return navigator.language?.toLowerCase().startsWith("zh") ? "zh" : "en";
 };
-const inFrame = (() => { try { return window.self !== window.top; } catch { return true; } })();
-const micAllowedHere = () => {
-  const d = document as unknown as { permissionsPolicy?: { allowsFeature(f: string): boolean }; featurePolicy?: { allowsFeature(f: string): boolean } };
-  const p = d.permissionsPolicy ?? d.featurePolicy;
-  try { return p ? p.allowsFeature("microphone") : true; } catch { return true; }
-};
-const greetKey = (): Key => { const h = new Date().getHours(); return h < 12 ? "greet_m" : h < 18 ? "greet_a" : "greet_e"; };
+
+const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
+  { v: "overview", k: "nav_overview", Icon: I.overview },
+  { v: "apps", k: "nav_apps", Icon: I.apps },
+  { v: "docs", k: "nav_docs", Icon: I.docs },
+  { v: "deadlines", k: "nav_deadlines", Icon: I.deadlines },
+  { v: "audit", k: "nav_audit", Icon: I.audit },
+  { v: "context", k: "nav_context", Icon: I.context },
+];
 
 export default function App() {
   /* language */
   const [lang, setLang] = useState<Lang>(readLang);
-  const t = useCallback((k: Key, v?: Record<string, string | number>) => (v ? fmt(STRINGS[lang][k], v) : STRINGS[lang][k]), [lang]);
+  const t = useCallback((k: Key, v?: Record<string, string | number>) => (v ? fmt(S[k][lang], v) : S[k][lang]), [lang]);
   const b = useCallback((x: Bi) => x[lang], [lang]);
   useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
     try { localStorage.setItem("placetta-agent-lang", lang); } catch { /* storage blocked */ }
   }, [lang]);
-  const narrow = useNarrow(760);
-  const [view, setView] = useState<View>("agent");
 
-  /* the case */
-  const [kase, setKase] = useState<Case>(SAMPLE_CASE);
-  const [autonomy, setAutonomy] = useState<Autonomy>("submit");
+  /* layout */
+  const wide = !useNarrow(1180);
+  const phone = useNarrow(860);
+  const [panelOpen, setPanelOpen] = useState(() => window.innerWidth >= 1180);
+  const [navOpen, setNavOpen] = useState(false);
+  const dock = wide && panelOpen;
+  const [view, setView] = useState<View>("overview");
+  const [drawer, setDrawer] = useState<{ id: string; tab: Tab; edit: boolean } | null>(null);
+  const [modal, setModal] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastT = useRef(0);
+  const say = useCallback((s: string) => { setToast(s); clearTimeout(toastT.current); toastT.current = window.setTimeout(() => setToast(null), 2800); }, []);
+  const main = useRef<HTMLElement>(null);
+  const go = useCallback((v: View) => { setView(v); setNavOpen(false); main.current?.scrollTo({ top: 0 }); }, []);
 
-  /* conversation */
-  const [msgs, setMsgs] = useState<Msg[]>([]);
-  const [running, setRunning] = useState(false);
+  /* workspace and agent */
+  const [ws, setWs] = useState<Workspace>(SAMPLE);
+  const wsRef = useRef(ws);
+  useEffect(() => { wsRef.current = ws; }, [ws]);
+  const [feed, setFeed] = useState<FeedItem[]>(INITIAL_FEED);
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [step, setStep] = useState<Step | null>(null);
+  const [uploading, setUploading] = useState<{ app: string; item: string } | null>(null);
+  const [match, setMatch] = useState<{ what: string; where: string; hits: LicenseHit[] } | null>(null);
+  const [matching, setMatching] = useState(false);
   const [asked, setAsked] = useState<string[]>([]);
-  const [draft, setDraft] = useState("");
-  const nextId = useRef(1);
+  const nextId = useRef(100);
+  const nid = () => nextId.current++;
   const tts = useSpeak();
+  const kept = useRef(new Map<string, File>());   // files you uploaded this session, so they download as themselves
+  useEffect(() => { void downloads(); }, []);
 
-  const run = useCallback(async (req: Request, shown: string, voice = false) => {
-    if (running) return;
+  const run = useCallback(async (req: Request, shown: string | null, voice = false) => {
+    if (busyRef.current) return;
+    busyRef.current = true; setBusy(true);
     unlockAudio(); tts.stop();
-    const uid = nextId.current++, aid = nextId.current++, t0 = performance.now();
-    setMsgs(m => [...m, { id: uid, role: "user", text: shown }, { id: aid, role: "agent", steps: [], active: 0 }]);
+    const aid = nid(), t0 = performance.now();
+    setFeed(f => [...f, ...(shown ? [{ id: nid(), kind: "user" as const, text: shown }] : []), { id: aid, kind: "turn", at: nowIso(), steps: [], active: 0 }]);
     if ("text" in req) setAsked(a => [...a, req.text]);
-    setRunning(true); setView("agent");
-    const upd = (f: (m: AgentTurn) => Partial<AgentTurn>) => setMsgs(ms => ms.map(m => (m.id === aid && m.role === "agent" ? { ...m, ...f(m) } : m)));
+    if ("upload" in req) setUploading({ app: req.upload.app, item: req.upload.item });
+    if ("match" in req) { setMatching(true); setView("find"); }
+    const upd = (f: (m: Turn) => Partial<Turn>) => setFeed(ms => ms.map(m => (m.id === aid && m.kind === "turn" ? { ...m, ...f(m) } : m)));
     let said = "";
     try {
-      await agent.run(req, { lang, autonomy, current: kase }, e => {
+      await agent.run(req, { lang, current: wsRef.current }, e => {
         if (e.type === "step") { setStep(e.step); upd(m => ({ steps: [...m.steps, e.step], active: e.index })); }
-        else if (e.type === "update") setKase(e.patch);
-        else { upd(() => ({ reply: e.reply, active: -1, ms: performance.now() - t0 })); said = e.reply.text.map(b).join(" "); }
+        else if (e.type === "update") setWs(e.patch);
+        else {
+          const r: Reply = e.reply;
+          upd(() => ({ reply: r, active: -1, ms: performance.now() - t0 }));
+          said = r.text.map(x => x[lang]).join(" ");
+          if (r.matches) setMatch(r.matches);
+        }
       }, new AbortController().signal);
     } catch { /* stopped */ }
-    setRunning(false); setStep(null);
+    busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if (voice && said) tts.speak(said, lang === "zh" ? "zh-CN" : "en-US");
-  }, [running, lang, autonomy, kase, b, tts]);
+  }, [lang, tts]);
 
-  const ask = useCallback((text: string, voice = false) => { const q = text.trim(); if (q) { setDraft(""); run({ text: q }, q, voice); } }, [run]);
-  const approve = useCallback((a: Approval, files?: string[]) => run({ approve: a.id, files }, t("approvedMsg", { x: b(a.title) })), [run, t, b]);
+  const ask = useCallback((text: string, voice = false) => {
+    const q = text.trim(); if (!q) return;
+    if (!wide) setPanelOpen(true);
+    run({ text: q }, q, voice);
+  }, [run, wide]);
 
-  /* voice */
-  const mic = useMicrophone();
-  const sim = useSimulatedVoice();
-  const [voice, setVoice] = useState<"off" | "mic" | "sim">("off");
-  const [heard, setHeard] = useState("");
-  const [note, setNote] = useState<"" | "simNote" | "deniedNote" | "noSttNote">("");
-  const stt = useSpeechToText(useCallback((s: string) => setHeard(s), []));
-  const typer = useRef<number[]>([]);
-  const clearTyper = () => { typer.current.forEach(clearTimeout); typer.current = []; };
-  const listening = (voice === "mic" && mic.state === "live") || voice === "sim";
+  const approve = useCallback((id: string) => {
+    const a = wsRef.current.approvals.find(x => x.id === id); if (!a) return;
+    run({ approve: id }, `${S.approvedIt[lang]}: ${a.title[lang]}`);
+  }, [run, lang]);
 
-  const endVoice = useCallback((send: boolean, text?: string) => {
-    clearTyper(); mic.stop(); stt.stop(); sim.stop(); setVoice("off");
-    const said = (text ?? heard).trim(); setHeard("");
-    if (send && said) ask(said, true);
-  }, [mic, stt, sim, ask, heard]);
+  const upload = useCallback((app: string, item: string, files?: File[]) => {
+    files?.forEach(f => kept.current.set(f.name, f));
+    if (!app) {
+      // Straight to Documents, no application yet.
+      if (!files?.length) return;
+      const docs: Doc[] = files.map((f, i) => ({ id: `d-u-${Date.now().toString(36)}-${i}`, name: f.name, kind: (f.name.split(".").pop()?.toLowerCase() ?? "pdf") as Doc["kind"], size: f.size, by: "you", at: nowIso(), tag: B("Uploaded", "已上传") }));
+      setWs(w => docs.reduce((acc, d) => audit("you", B("Uploaded", "上传"), same(d.name))({ ...acc, docs: [d, ...acc.docs] }), w));
+      say(lang === "zh" ? `已添加到文件：${files.map(f => f.name).join("、")}` : `Added to Documents: ${files.map(f => f.name).join(", ")}`);
+      return;
+    }
+    const list = (files ?? []).map(f => ({ name: f.name, size: f.size }));
+    const shown = files?.length ? `${S.upload[lang]}: ${list.map(f => f.name).join(", ")}` : S.useSample[lang];
+    run({ upload: { app, item, files: list } }, shown);
+  }, [run, lang, say]);
 
-  // No microphone here: a speech-shaped level drives the glow while the next suggestion is "heard", then it sends like a real turn.
-  const simulate = useCallback(() => {
-    const line = b(SUGGESTIONS.find(s => !asked.includes(b(s))) ?? SUGGESTIONS[0]);
-    setVoice("sim"); setNote("simNote"); sim.start(); setHeard("");
-    const per = lang === "zh" ? 210 : 66;
-    for (let i = 1; i <= line.length; i++) typer.current.push(window.setTimeout(() => setHeard(line.slice(0, i)), 700 + i * per));
-    typer.current.push(window.setTimeout(() => endVoice(true, line), 700 + line.length * per + 1000));
-  }, [asked, b, lang, sim, endVoice]);
+  const save = useCallback(async (name: string, blob: Blob) => {
+    const r = await saveFile(name, blob);
+    if (r === "saved") say(t("t_saved")); else if (r === "unavailable") say(t("t_noDl"));
+  }, [say, t]);
 
-  const startVoice = useCallback(async () => {
-    if (running) return;
-    unlockAudio(); tts.stop(); setNote(""); setHeard(""); setView("agent");
-    if (!mic.supported || !micAllowedHere()) { simulate(); return; }
-    const s = await mic.start();
-    if (s) { setVoice("mic"); if (!stt.start(lang === "zh" ? "zh-CN" : "en-US")) setNote("noSttNote"); return; }
-    if (inFrame) simulate(); else setNote("deniedNote");
-  }, [running, tts, mic, simulate, stt, lang]);
-  useEffect(() => () => clearTyper(), []);
+  const ctx: Ctx = useMemo(() => ({
+    lang, t, b, ws, busy, live: step, uploading,
+    go,
+    ask,
+    run: (req, shown) => { if ("text" in req && !wide) setPanelOpen(true); void run(req, shown); },
+    openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : "check"), edit: !!edit }); },
+    openApproval: id => setModal(id),
+    approve,
+    upload,
+    download: id => {
+      const d = wsRef.current.docs.find(x => x.id === id); if (!d) return;
+      const own = kept.current.get(d.name);
+      if (own && d.by === "you") { void save(d.name, own); return; }
+      const f = docBlob(d, wsRef.current); void save(f.name, f.blob);
+    },
+    downloadApp: id => { const a = wsRef.current.apps.find(x => x.id === id); if (a) void save(a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-application.pdf", applicationPdf(a)); },
+    exportAudit: () => void save(`placetta-audit-trail-${inDays(0)}.csv`, auditCsv(wsRef.current.audit)),
+    editFields: (app, values) => {
+      const a = wsRef.current.apps.find(x => x.id === app); if (!a) return;
+      setWs(w => {
+        let n = w;
+        for (const [k, v] of Object.entries(values)) n = setField(app, k, v, B("You edited", "您修改的"))(n);
+        const labels = a.fields.filter(f => f.id in values).map(f => f.label);
+        return audit("you", B("Edited application", "修改申请"), a.name, B(labels.map(l => l.en).join(", "), labels.map(l => l.zh).join("、")))(n);
+      });
+      say(t("edited"));
+    },
+    editFact: (id, value) => {
+      const f = wsRef.current.facts.find(x => x.id === id); if (!f) return;
+      const text = B(`${f.label.en}: ${value}`, `${f.label.zh}：${value}`);
+      setWs(w => audit("agent", B("Committed to memory", "存入记忆"), B("Context", "资料"), text)(audit("you", B("Edited fact", "修改资料"), f.label, same(value))(setFact({ ...f, value: same(value), source: B("You edited", "您修改的") })(w))));
+      setFeed(fd => [...fd, { id: nid(), kind: "memory", text }]);
+      say(`${t("committed")}: ${text[lang]}`);
+    },
+  }), [lang, t, b, ws, busy, step, uploading, go, ask, run, approve, upload, save, say, wide]);
 
-  /* derived */
-  const orbState: OrbState = listening ? "listening" : running && step ? step.state : tts.speaking ? "composing" : "breathing";
-  const sayTurn = useCallback((text: string) => { unlockAudio(); if (tts.speaking === text) tts.stop(); else tts.speak(text, lang === "zh" ? "zh-CN" : "en-US"); }, [tts, lang]);
-  const done = kase.filings.filter(f => DONE.includes(f.status)).length;
-  const open = useMemo(() => SUGGESTIONS.filter(s => !asked.includes(s.en) && !asked.includes(s.zh)), [asked]);
-  const level = useCallback(() => Math.max(sim.level(), tts.level()), [sim, tts]);
-  const nNeeds = kase.approvals.length;
+  /* page */
+  const page = {
+    overview: <Overview />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
+    find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
+  }[view];
+  const soon = ws.deadlines.filter(d => { const n = daysUntil(d.date); return n >= 0 && n <= 30; }).length;
+  const badge: Partial<Record<View, number>> = { overview: ws.approvals.length, deadlines: soon };
 
-  const scroller = useRef<HTMLElement>(null);
-  const needsRef = useRef<HTMLElement>(null);
-  useEffect(() => { const el = scroller.current; if (el && msgs.length) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); }, [msgs]);
-  const ta = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => { const el = ta.current; if (!el) return; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 132) + "px"; }, [draft]);
-  const attach = useRef<HTMLInputElement>(null);
-  const onFiles = (names: string[]) => {
-    const docs = kase.approvals.find(a => a.id === "a-docs");
-    if (docs) approve(docs, names); else ask(t("attach") + ": " + names.join(", "));
-  };
-  useEffect(() => { scroller.current?.scrollTo({ top: 0 }); }, [view]);
-  const goNeeds = () => { setView("agent"); requestAnimationFrame(() => needsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })); };
-
-  const tabs: { v: View; label: string }[] = [
-    { v: "agent", label: t("nav_agent") }, { v: "filings", label: t("nav_filings") },
-    { v: "activity", label: t("nav_activity") }, { v: "settings", label: t("nav_settings") },
-  ];
-
-  /* ------------------------------ views ------------------------------ */
-  const agentView = (
-    <div className="col">
-      <section className="hero">
-        <div className="lens"><ThinkingOrb state={orbState} size={64} theme="light" color={INK} dotSize={1.25} aria-label={t("agentName")} /></div>
-        <h1>{t(greetKey())}</h1>
-        <p className="lede">{t(nNeeds ? "summary" : "summaryNone", { r: kase.running.length, n: nNeeds, place: t("shortPlace") })}</p>
-        <div className="casechip">
-          <span className="cc-name">{b(kase.name)}</span>
-          <span className="cc-goal">{t("goal", { g: b(kase.goal) })}</span>
-          <span className="cc-prog"><i style={{ width: `${(done / kase.filings.length) * 100}%` }} /></span>
-          <span className="cc-num">{done}/{kase.filings.length}</span>
-        </div>
-      </section>
-
-      <section className="block">
-        <h2 className="label">{t("running")}</h2>
-        <ul className="runs card">
-          {kase.running.map(r => (
-            <li key={r.id}>
-              <ThinkingOrb state={r.state} size={20} theme="light" color={INK} aria-label={b(r.label)} />
-              <span>{b(r.label)}</span>
-              {r.detail && <small>{b(r.detail)}</small>}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="block" ref={needsRef}>
-        <h2 className="label">{t("nav_needs")}{nNeeds > 0 && <em>{nNeeds}</em>}</h2>
-        {nNeeds === 0 ? <p className="quiet">{t("emptyNeeds")}</p>
-          : <div className="stack">{kase.approvals.map(a => <ApprovalCard key={a.id} a={a} b={b} t={t} busy={running} onApprove={f => approve(a, f)} />)}</div>}
-      </section>
-
-      {msgs.length > 0 && <div className="convo">
-        {msgs.map(m => m.role === "user"
-          ? <div key={m.id} className="you"><p>{m.text}</p></div>
-          : <Turn key={m.id} m={m} b={b} t={t} busy={running} pending={kase.approvals} closed={kase.closed} onApprove={approve} speaking={tts.speaking} onSay={sayTurn} />)}
-      </div>}
-    </div>
-  );
-
-  const filingsView = (
-    <div className="col wide">
-      <header className="pagehd"><h1>{t("nav_filings")}</h1><p>{t("filingsSub")}</p></header>
-      <div className="table">
-        <div className="tr th"><span>{t("th_filing")}</span><span>{t("th_level")}</span><span>{t("th_status")}</span><span>{t("th_next")}</span></div>
-        {LEVELS.flatMap(l => kase.filings.filter(f => f.level === l)).map(f => (
-          <div key={f.id} className={"tr" + (f.critical ? " crit" : "")}>
-            <span className="f-name"><b>{b(f.name)}</b><small>{b(f.agency)}</small></span>
-            <span className="f-lvl">{t(("lv_" + f.level) as Key)}</span>
-            <span><StatusChip s={f.status} t={t} /></span>
-            <span className="f-next">{f.critical && <em>{t("critical")}</em>}{f.next ? b(f.next) : ""}</span>
-          </div>
-        ))}
+  const side = (
+    <nav className={"side" + (navOpen ? " open" : "")} aria-label="Workspace">
+      <div className="side-top">
+        <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={22} /></button>
+        {phone && <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>}
       </div>
-    </div>
-  );
-
-  const activityView = (
-    <div className="col">
-      <header className="pagehd"><h1>{t("nav_activity")}</h1><p>{t("activitySub")}</p></header>
-      <h2 className="label">{t("running")}</h2>
-      <ul className="runs">
-        {kase.running.map(r => (
-          <li key={r.id}><ThinkingOrb state={r.state} size={20} theme="light" color={INK} aria-label={b(r.label)} /><span>{b(r.label)}</span>{r.detail && <small>{b(r.detail)}</small>}</li>
+      <div className="wsname"><b>{b(ws.business)}</b><span>{t("sampleWs")}</span></div>
+      <ul className="nav">
+        {NAV.map(n => (
+          <li key={n.v}><button type="button" aria-current={view === n.v ? "page" : undefined} onClick={() => go(n.v)}><n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}</button></li>
         ))}
       </ul>
-      <h2 className="label">{t("nav_activity")}</h2>
-      <ol className="log">
-        {kase.activity.map(x => (
-          <li key={x.id} className={"by-" + x.actor}>
-            <i aria-hidden="true" />
-            <div><p>{b(x.text)}</p><small>{x.who ? b(x.who) : t(("actor_" + x.actor) as Key)}<span>{b(x.when)}</span></small></div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-
-  const settingsView = (
-    <div className="col">
-      <header className="pagehd"><h1>{t("nav_settings")}</h1><p>{t("connSub")}</p></header>
-      <h2 className="label">{t("autonomyTitle")}</h2>
-      <div className="auto" role="radiogroup" aria-label={t("autonomyTitle")}>
-        {(["prepare", "ask", "submit"] as Autonomy[]).map(a => (
-          <label key={a} className={"auto-opt" + (autonomy === a ? " on" : "")}>
-            <input type="radio" name="autonomy" id={"au-" + a} checked={autonomy === a} onChange={() => setAutonomy(a)} />
-            <span className="radio" aria-hidden="true" />
-            <span className="auto-tx"><b>{t(("au_" + a) as Key)}</b><span>{t(("aud_" + a) as Key)}</span></span>
-          </label>
-        ))}
-      </div>
-      <h2 className="label">{t("nav_connections")}</h2>
-      <ul className="conns">
-        {kase.connections.map(c => (
-          <li key={c.id}>
-            <div><b>{b(c.name)}</b><span>{t(("lv_" + c.level) as Key)}<i />{b(c.detail)}</span></div>
-            {c.state === "connected" ? <span className="cstate">{t("connected")}</span> : <button type="button" className="ghost">{t("connect")}</button>}
-          </li>
+      <ul className="nav">
+        <li><button type="button" aria-current={view === "find" ? "page" : undefined} onClick={() => go("find")}><I.find /><span>{t("nav_find")}</span></button></li>
+      </ul>
+      <p className="nav-h">{t("locations")}</p>
+      <ul className="nav locs">
+        {ws.locations.map(l => (
+          <li key={l.id}><button type="button" onClick={() => {
+            if (l.id === "fremont") { setMatch(m => m && /fremont|弗里蒙特/i.test(m.where) ? m : null); go("find"); if (!match || !/fremont|弗里蒙特/i.test(match.where)) void run({ match: { what: lang === "zh" ? "奶茶店" : "Milk tea shop", where: lang === "zh" ? "加州弗里蒙特" : "Fremont, CA" } }, null); }
+            else go("overview");
+          }}><I.pin /><span>{b(l.name)}<small>{b(l.county)}</small></span>{l.state === "mapping" && <em className="map">{t("mapping")}</em>}</button></li>
         ))}
       </ul>
-      <p className="quiet small">{t("vaultNote")}</p>
-    </div>
+      <div className="side-bot">
+        <button type="button" className={"setb" + (view === "settings" ? " on" : "")} onClick={() => go("settings")}><I.settings /><span>{t("nav_settings")}</span></button>
+        <div className="lang" role="group" aria-label={t("langSwitch")}>
+          <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
+          <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
+        </div>
+      </div>
+    </nav>
   );
 
-  const content = { agent: agentView, filings: filingsView, activity: activityView, settings: settingsView }[view];
-
   return (
-    <div className="app">
-      <header className="bar">
-        <button type="button" className="brand" onClick={() => setView("agent")} aria-label={t("nav_agent")}><Logo lang={lang} height={narrow ? 21 : 23} /></button>
-        <nav className="seg" aria-label="Views">
-          {tabs.map(x => <button key={x.v} type="button" aria-current={view === x.v ? "page" : undefined} onClick={() => setView(x.v)}>{x.label}</button>)}
-        </nav>
-        <div className="bar-r">
-          {nNeeds > 0 && <button type="button" className="needs" onClick={goNeeds}><i />{t("needsCount", { n: nNeeds })}</button>}
-          <div className="lang" role="group" aria-label={t("langSwitch")}>
-            <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
-            <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
-          </div>
-        </div>
-      </header>
-
-      <main className={"scroll" + (view === "agent" ? " wash" : "")} ref={scroller}>{content}</main>
-
-      {view === "agent" && (
-        <div className="dock">
-          {open.length > 0 && !running && (
-            <div className="sugg">{open.map(s => <button key={s.en} type="button" onClick={() => ask(b(s))}>{b(s)}</button>)}</div>
+    <AppCtx.Provider value={ctx}>
+      <div className={"shell" + (dock ? " docked" : "") + (phone ? " phone" : "")}>
+        {side}
+        {phone && navOpen && <div className="navscrim" onClick={() => setNavOpen(false)} />}
+        <div className="mainwrap">
+          {phone && (
+            <header className="mbar">
+              <button type="button" className="icbtn" onClick={() => setNavOpen(true)} aria-label="Menu"><I.menu /></button>
+              <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={20} /></button>
+              <div className="lang" role="group" aria-label={t("langSwitch")}>
+                <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
+                <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
+              </div>
+            </header>
           )}
-          <VoiceBeam className="beam" level={level} processing={running} theme="light" colors={BEAM} bandColors={BAND} idle={0.12} scale={narrow ? 0.95 : 1.15}>
-            <form className="composer" onSubmit={e => { e.preventDefault(); ask(draft); }}>
-              <button type="button" className="ic" aria-label={t("attach")} onClick={() => attach.current?.click()} disabled={running}><I.plus /></button>
-              <input ref={attach} type="file" multiple hidden onChange={e => { const n = Array.from(e.target.files ?? []).map(f => f.name); e.target.value = ""; if (n.length) onFiles(n); }} />
-              <label htmlFor="ask" className="sr">{t("askPh")}</label>
-              <textarea id="ask" ref={ta} rows={1} value={draft} placeholder={t("askPh")} onChange={e => setDraft(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); ask(draft); } }} />
-              <button type="button" className="ic mic" aria-label={t("talk")} onClick={startVoice} disabled={running}><I.mic /></button>
-              <button type="submit" className="send" disabled={!draft.trim() || running} aria-label={t("send")}><I.send /></button>
-            </form>
-          </VoiceBeam>
-          <p className="foot">{note && !listening ? t(note) : t("footnote")}</p>
+          <main className="content" ref={main}>{page}</main>
         </div>
-      )}
-
-      {listening && (
-        <div className="voice" role="dialog" aria-modal="true" aria-label={t("listening")}>
-          <button type="button" className="vclose" aria-label={t("close")} onClick={() => endVoice(false)}><I.x /></button>
-          <div className="vmid">
-            <div className="vorb lens"><ThinkingOrb state="listening" size={64} theme="light" color={INK} dotSize={1.2} aria-label={t("listening")} /></div>
-            <p className="vlabel">{t("listening")}</p>
-            <p className={"vtext" + (heard ? "" : " hint")} aria-live="polite">{heard || t("tapDone")}</p>
-            {note && <p className="vnote">{t(note)}</p>}
-          </div>
-          <VoiceBeam className="vbeam" type="mobile" stream={voice === "mic" ? mic.stream : null} level={sim.level} theme="light"
-            colors={BEAM} bandColors={BAND} scale={narrow ? 1 : 1.6} reach={narrow ? 3 : 2.6} idle={0.2}>
-            <div className="vbar">
-              <button type="button" className="vbtn" onClick={() => endVoice(false)}>{t("cancel")}</button>
-              <button type="button" className="vbtn main" onClick={() => endVoice(true)}><I.check />{t("done")}</button>
-            </div>
-          </VoiceBeam>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** One agent turn: Legora-style working log, then the answer and anything it needs from you. */
-function Turn({ m, b, t, busy, pending, closed, onApprove, speaking, onSay }: {
-  m: AgentTurn; b: (x: Bi) => string; t: (k: Key, v?: Record<string, string | number>) => string;
-  busy: boolean; pending: Approval[]; closed: Approval[]; onApprove: (a: Approval, files?: string[]) => void;
-  speaking: string | null; onSay: (text: string) => void;
-}) {
-  const [show, setShow] = useState(false);
-  const live = !m.reply;
-  const cur = live ? m.steps[m.active] : undefined;
-  const said = m.reply ? m.reply.text.map(b).join(" ") : "";
-  return (
-    <div className="turn">
-      <div className="work">
-        <div className="work-hd">
-          {live && cur ? <ThinkingOrb state={cur.state} size={20} theme="light" color={INK} aria-label={b(cur.label)} /> : <span className="spark"><I.spark /></span>}
-          <span>{live ? t("workingOn") : t("workedFor", { s: Math.max(1, Math.round((m.ms ?? 0) / 1000)) })}</span>
-          {!live && m.steps.length > 0 && (
-            <button type="button" onClick={() => setShow(s => !s)} aria-expanded={show}>{t("stepsN", { n: m.steps.length })}<span className={show ? "up" : ""}><I.chev /></span></button>
-          )}
-          {said && <button type="button" className={"say" + (speaking === said ? " on" : "")} onClick={() => onSay(said)}>{speaking === said ? <I.stopSq /> : <I.speaker />}{speaking === said ? t("stopListen") : t("listen")}</button>}
-        </div>
-        {(live || show) && (
-          <ol className="steps">
-            {m.steps.map((s, i) => {
-              const now = live && i === m.active;
-              return <li key={i} className={now ? "now" : ""}><i aria-hidden="true" /><span>{b(s.label)}</span></li>;
-            })}
-          </ol>
+        {(dock || panelOpen) && (
+          <AgentPanel feed={feed} step={step} tts={tts} mode={dock ? "dock" : "sheet"} onHide={() => setPanelOpen(false)} asked={asked} />
         )}
+        {!dock && !panelOpen && (
+          <button type="button" className={"fab" + (busy ? " live" : "")} onClick={() => setPanelOpen(true)}>
+            <ThinkingOrb state={busy && step ? step.state : "breathing"} size={20} theme="light" color={INK} aria-hidden="true" />
+            <span>{busy && step ? step.label[lang] + "…" : t("showPanel")}</span>
+            {ws.approvals.length > 0 && !busy && <em>{ws.approvals.length}</em>}
+          </button>
+        )}
+        {drawer && <AppDrawer id={drawer.id} tab={drawer.tab} edit={drawer.edit} onTab={tab => setDrawer(d => (d ? { ...d, tab, edit: false } : d))} onClose={() => setDrawer(null)} />}
+        {modal && <ApproveModal id={modal} onClose={() => setModal(null)} />}
+        {toast && <div className="toast" role="status">{toast}</div>}
       </div>
-      {m.reply && (
-        <div className="answer">
-          {m.reply.text.map((p, i) => <p key={i}>{b(p)}</p>)}
-          {m.reply.chain && <ol className="chain">{m.reply.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
-          {m.reply.approvals?.map(id => {
-            const a = pending.find(x => x.id === id);
-            if (a) return <ApprovalCard key={id} a={a} b={b} t={t} busy={busy} onApprove={f => onApprove(a, f)} />;
-            const k = closed.find(x => x.id === id);
-            return k ? <ResolvedCard key={id} title={k.title} b={b} t={t} /> : null;
-          })}
-        </div>
-      )}
-    </div>
+    </AppCtx.Provider>
   );
 }

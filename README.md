@@ -1,17 +1,25 @@
 # Placetta Agent
 
-The workspace for Placetta's licensing agent. You give it a goal ("open the San Jose shop by March"), and it maps every license from the city up to the federal government, files what it can on its own, watches agencies for decisions, and comes to you before it pays, signs or sends anything.
+The workspace for Placetta's licensing agent. It opens on the state of your licenses, not on a chat box: every application with its status, what it costs, what's due, and what the agent needs from you. The agent works in a side panel, where you can watch each step it takes and the site it's using.
 
-- **Agent**: talk or type to the agent. Each step it takes shows a small orb; answers can carry approval cards you act on in place.
-- **Filings**: every license with its level (federal, state, county, city), status and next step. The ones on the path to opening day are flagged.
-- **Needs you**: the approval queue. Paying fees, signing applications, uploading documents and messaging people always stop here first.
-- **Activity**: what the agent is running in the background right now, and a log of every action by the agent, by you and by agencies.
-- **Connections**: the agency accounts it files through, your vault (card, documents), and how much it may do on its own: prepare only, ask before submitting, or file on its own while still asking before paying or signing.
+## What's in it
 
-Two effects from Libraries.dev are wired in:
+- **Overview**: "Here's where your 10 applications stand." Status counts, the approvals waiting for you, the applications that matter most, what's coming up, notes from the agent, what it knows about the business, and what it's running in the background.
+- **Applications**: every license from the city up to the federal government, with status, fee, usual processing time and next step. Open one to see:
+  - **Checklist**: the documents it needs. Upload one (or use a sample) and the agent reads it and fills the application from it, showing what it pulled out.
+  - **Application**: the filled form, exactly as it will be entered on the agency's site. You can edit it.
+  - **Fees**: the breakdown, how long the agency usually takes, renewals and the agency's own page.
+  - **Receipt**: the receipt once it's filed.
+- **Documents**: everything you uploaded, everything the agent prepared and everything the agencies sent back, as file cards with size and download.
+- **Deadlines**: due dates, renewals and agency processing estimates, with the action that handles each one.
+- **Audit trail**: every action by the agent, by you and by the agencies, timestamped. Export it as CSV.
+- **Context**: the facts the agent fills applications from. Edit one and it's committed to memory for the next filing.
+- **Find licenses**: say what the business does and where; get the licenses it needs, with fees, timelines and links to each agency.
+- **Settings**: the agency accounts the agent files through and the approval rules.
 
-- **ThinkingOrb** (`thinking-orbs`): the 64px orb by the agent's name follows what it's doing; background tasks and running steps get 20px orbs.
-- **VoiceBeam** (`voice-glow`): wraps the message box. Tap Talk and it follows your voice from the microphone; while the agent works it becomes a travelling beam; when the agent reads its answer aloud, the glow follows its speech.
+### The approval rule
+
+The agent prepares on its own but never files, pays or sends a message without you. Every submission opens an approval that shows what the agent will do step by step, the exact data it will submit, the attachments and the fee, with **Approve & file** and **Edit first**. Your answer goes in the audit trail.
 
 ## Run it
 
@@ -19,56 +27,54 @@ Two effects from Libraries.dev are wired in:
 npm install
 npm run dev          # http://localhost:5173
 npm run build        # production build in dist/
-npm run build:single # one self-contained HTML file in dist-single/ (used for the shareable preview)
+npm run build:single # one self-contained HTML file in dist-single/
 ```
 
-The microphone needs a secure context (https or localhost) and is started from the Talk button, as the browser requires. Where the browser has speech recognition (Chrome, Edge, Safari), what you say is typed into the message box.
+## Voice
+
+- **Talking to it**: the microphone button opens voice mode. The VoiceBeam glow follows your voice, and in Chrome, Edge and Safari what you say is typed for you. The browser only allows the microphone on https, on localhost, or in a file you open from your own computer. Embedded previews (like a shared Claude link) block it; there, voice mode plays a simulated voice so the flow can still be seen.
+- **It talking back**: replies to a voice message are read aloud, and every reply has a Listen button. The demo's replies are recorded ahead of time with a natural neural voice (Kokoro, Apache-2.0: `af_heart` in English, `zf_xiaoxiao` in Chinese) and the glow follows the real audio. For a live agent, send each reply to a text-to-speech API (ElevenLabs, OpenAI, or Azure neural voices such as `en-US-AvaMultilingualNeural` and `zh-CN-XiaoxiaoNeural`) and play the audio the same way; `useSpeak` in `src/hooks.ts` already handles playback and the glow.
+- To re-record after changing the replies:
+
+```bash
+npx esbuild scripts/dump-replies.ts --bundle --platform=node --format=esm --outfile=/tmp/dump.mjs
+node /tmp/dump.mjs > replies.json
+python3 scripts/make-voices.py replies.json kokoro-v1.0.int8.onnx voices-v1.0.bin   # writes src/voices.generated.ts
+```
+
+## Connecting the real agent
+
+The app only needs a stream of events, so replacing the demo is one function in `src/agent.ts`:
+
+```ts
+export interface AgentBackend {
+  run(req: Request, ctx: { lang, current: Workspace }, onEvent: (e: AgentEvent) => void, signal: AbortSignal): Promise<void>;
+}
+// Request    = { text } | { approve: approvalId } | { upload: { app, item, files } } | { match: { what, where } }
+// AgentEvent = { type: "step", index, step: { state: OrbState, label: { en, zh }, tool?: "sanjoseca.gov" } }
+//            | { type: "update", patch: (w: Workspace) => Workspace }
+//            | { type: "reply", reply: { text, chain?, approvals?, apps?, files?, memory?, matches?, next? } }
+```
+
+Stream a `step` each time the model starts a tool call, naming the site in `tool` so the person can see where it is working. Anything that files, pays or sends must come back as an approval; the person's answer arrives as `{ approve: id }`. Pick the orb `state` that matches the work: `searching` (looking up rules or statuses), `connecting` (agency portals, dependencies), `solving` (ordering, checking), `weaving` (combining sources), `shaping` (filling a form), `composing` (writing), `working` (anything else).
 
 ## Where things are
 
 | File | What it does |
 | --- | --- |
-| `src/App.tsx` | Layout, the four views (Agent, Filings, Activity, Settings), conversation state, orb states, voice mode |
-| `src/agent.ts` | The agent contract (`AgentBackend`), case updates and the scripted demo agent |
-| `src/model.ts` | The data the agent keeps per location (filings, running tasks, approvals, activity, connections) and the sample case |
-| `src/ui.tsx` | Approval cards, level and status tags, icons |
-| `src/i18n.ts` | English and Chinese interface text |
-| `src/hooks.ts` | Speech-to-text, reading answers aloud, the simulated voice, the narrow-screen switch |
-| `src/Logo.tsx` | The Placetta and 快哉 lockups, traced from the brand artwork |
+| `src/App.tsx` | Layout, workspace state, running the agent, downloads |
+| `src/pages.tsx` | Overview, Applications, Documents, Deadlines, Audit trail, Context, Find licenses, Settings |
+| `src/Drawer.tsx` | An application opened (checklist, filled form, fees, receipt) and the approval dialog |
+| `src/AgentPanel.tsx` | The agent panel: live steps, replies with files, approvals and memories, the composer and voice mode |
+| `src/agent.ts` | The agent contract, workspace patches and the scripted demo agent |
+| `src/model.ts` | Workspace types and the sample workspace |
+| `src/files.ts` | Receipts and filled applications as PDF, the audit trail as CSV, saving files |
+| `src/hooks.ts` | Speech to text, reading replies aloud, the simulated voice |
+| `src/i18n.ts`, `src/time.ts` | English and Chinese text, dates and money |
 | `src/styles.css` | Tokens (white and light blue) and all styles |
 
-## Connecting the real agent
+## Before launch
 
-The app only needs a stream of events, so replacing the demo is one function:
-
-```ts
-export interface AgentBackend {
-  run(req: { text: string } | { approve: string; files?: string[] }, ctx: { lang, autonomy, current: Case },
-      onEvent: (e: AgentEvent) => void, signal: AbortSignal): Promise<void>;
-}
-// AgentEvent = { type: "step", index, step: { state: OrbState, label: { en, zh } } }
-//            | { type: "update", patch: (c: Case) => Case }   // a filing changes status, a log entry, a new approval
-//            | { type: "reply", reply: { text, chain?, approvals? } }
-```
-
-Have your backend (the model plus its tools: rule lookup, agency portals, form filling) stream a `step` event each time it starts something, then a `reply`. Pick the orb `state` that matches the work:
-
-| Agent is… | Orb state |
-| --- | --- |
-| looking up rules or statuses | `searching` |
-| matching permits to agencies, checking dependencies | `connecting` |
-| working out the filing order | `solving` |
-| combining material from several sources | `weaving` |
-| filling in a form | `shaping` |
-| writing the answer | `composing` |
-| anything else | `working` |
-| idle / hearing the user | `breathing` / `listening` |
-
-Every action that spends money, signs, sends a message or submits (when the autonomy setting says to ask) should come back as an approval first; the person's answer arrives as `{ approve: id }`.
-
-## Notes on the two packages
-
-- The installed `thinking-orbs` (0.3.2) takes `theme="light" | "dark" | "auto"` rather than a `dark` boolean, and accepts `color` to tint the dots. The app is white and light blue in every setting, so it pins `theme="light"` and tints the dots blue.
-- `voice-glow` defaults to `theme="dark"`; the app passes `theme="light"` and blue `colors` and `bandColors` so the glow stays in the Placetta blues.
-- Embedded previews (like the shared Claude link) can't use the microphone. There, Talk plays a simulated voice and "hears" a sample question, so the whole voice flow can still be seen. On your own https site or localhost the real microphone drives the glow.
-- The sample case and the demo agent's answers are scripted examples, not legal advice. Check every rule against the issuing agency before relying on it.
+- The sample workspace, its fees and its processing times are made up for the demo. Check every requirement against the issuing agency.
+- The footer's data-handling note describes what the app enforces (approvals, the audit trail, cards kept in a vault). It makes no compliance certification claims. Add a SOC 2 or similar badge only once you have the report.
+- Receipts and documents downloaded from the demo are stamped "sample" and are not filed with any agency.

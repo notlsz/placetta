@@ -42,7 +42,7 @@ export function useSpeechToText(onText: (text: string) => void) {
   return { supported: !!Ctor, start, stop };
 }
 
-/** Narrow screens get the chat and the plan as two tabs. */
+/** True below the given width. */
 export function useNarrow(px = 1024) {
   const q = `(max-width: ${px - 1}px)`;
   const [n, setN] = useState(() => window.matchMedia(q).matches);
@@ -126,3 +126,4 @@ export function useSpeak() {
   useEffect(() => () => stop(), [stop]);
   return { supported, speaking, speak, stop, level };
 }
+export type Speaker = ReturnType<typeof useSpeak>;
