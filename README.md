@@ -35,7 +35,7 @@ The microphone needs a secure context (https or localhost) and is started from t
 | `src/i18n.ts` | English and Chinese interface text |
 | `src/hooks.ts` | Speech-to-text, reading answers aloud, the simulated voice, the narrow-screen switch |
 | `src/Logo.tsx` | The Placetta and 快哉 lockups, traced from the brand artwork |
-| `src/styles.css` | Tokens (light and dark) and all styles |
+| `src/styles.css` | Tokens (white and light blue) and all styles |
 
 ## Connecting the real agent
 
