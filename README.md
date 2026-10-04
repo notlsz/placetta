@@ -28,7 +28,7 @@ The microphone needs a secure context (https or localhost) and is started from t
 
 | File | What it does |
 | --- | --- |
-| `src/App.tsx` | Layout, the five views, conversation state, orb states, voice mode |
+| `src/App.tsx` | Layout, the four views (Agent, Filings, Activity, Settings), conversation state, orb states, voice mode |
 | `src/agent.ts` | The agent contract (`AgentBackend`), case updates and the scripted demo agent |
 | `src/model.ts` | The data the agent keeps per location (filings, running tasks, approvals, activity, connections) and the sample case |
 | `src/ui.tsx` | Approval cards, level and status tags, icons |
