@@ -1,25 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-/** Light or dark, from an explicit data-theme on <html> first, then the OS setting. */
-export function useDark() {
-  const read = () => {
-    const t = document.documentElement.getAttribute("data-theme");
-    if (t === "dark") return true;
-    if (t === "light") return false;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  };
-  const [dark, setDark] = useState(read);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const on = () => setDark(read());
-    mq.addEventListener("change", on);
-    const mo = new MutationObserver(on);
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => { mq.removeEventListener("change", on); mo.disconnect(); };
-  }, []);
-  return dark;
-}
-
 /**
  * A stand-in voice for when there's no microphone (an embedded preview, a denied prompt):
  * a per-frame level shaped like speech — syllables riding on phrase swells — for VoiceBeam's `level` getter.
@@ -66,4 +46,35 @@ export function useNarrow(px = 1024) {
   const [n, setN] = useState(() => window.matchMedia(q).matches);
   useEffect(() => { const mq = window.matchMedia(q); const on = () => setN(mq.matches); mq.addEventListener("change", on); return () => mq.removeEventListener("change", on); }, [q]);
   return n;
+}
+
+/**
+ * Read replies aloud (speechSynthesis), with a per-frame level for VoiceBeam that follows the speech:
+ * a kick on every word boundary that decays, over a soft floor so voices without boundary events still move it.
+ */
+export function useSpeak() {
+  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
+  const [speaking, setSpeaking] = useState(false);
+  const last = useRef(0);
+  const speak = useCallback((text: string, lang: string) => {
+    if (!supported || !text) return;
+    const ss = window.speechSynthesis; ss.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = 1.02;
+    const two = lang.slice(0, 2).toLowerCase(), vs = ss.getVoices().filter(v => v.lang.toLowerCase().startsWith(two));
+    const v = vs.find(x => /natural|premium|enhanced|neural/i.test(x.name)) ?? vs[0]; if (v) u.voice = v;
+    u.onstart = () => { last.current = performance.now(); setSpeaking(true); };
+    u.onboundary = () => { last.current = performance.now(); };
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    ss.speak(u);
+  }, [supported]);
+  const stop = useCallback(() => { if (supported) window.speechSynthesis.cancel(); setSpeaking(false); }, [supported]);
+  const level = useCallback(() => {
+    if (!speaking) return 0;
+    const now = performance.now(), kick = Math.exp(-((now - last.current) / 1000) * 4.5);
+    const floor = 0.28 + 0.18 * Math.abs(Math.sin(now / 1000 * 6.3));
+    return Math.min(1, Math.max(kick * 0.85, floor));
+  }, [speaking]);
+  useEffect(() => () => { if (supported) window.speechSynthesis.cancel(); }, [supported]);
+  return { supported, speaking, speak, stop, level };
 }
