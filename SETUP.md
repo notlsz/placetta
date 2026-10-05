@@ -1,10 +1,24 @@
 # Launch checklist
 
-Everything below is a setting or a secret only you can add. The database, security rules and server functions are already live in the Supabase project **Placetta** (`esquxzcfsylffuijvzec`). Until the secrets are set, the agent, voice and checkout answer "not configured" instead of failing silently.
+The database, security rules and server functions are already live in the Supabase project **Placetta** (`esquxzcfsylffuijvzec`). What's left is hosting the app and adding your keys. Until the keys are set, the agent, voice and checkout answer "not configured" instead of failing silently.
+
+## The fast way: one command
+
+Unzip `placetta-source.zip`, then in that folder:
+
+```bash
+npm install
+npx supabase login          # once
+npm run launch
+```
+
+It asks for your Anthropic, Azure and Stripe keys (hidden as you type), creates the Stripe prices and webhook, sets every server secret, builds the app, offers to deploy it to Netlify, and checks each function. Then it prints the three dashboard steps below (sign-in URLs, email sender, staff). Use a Stripe test key (`sk_test_`) first; run it again with the live key when the test filing works.
+
+The sections below are the same steps by hand.
 
 ## 1. Put the app online
 
-- Upload `placetta-app.zip` (the production build) to Vercel or Netlify, or connect this repo and set:
+- Drag the unzipped `placetta-app.zip` folder onto app.netlify.com/drop, or connect this repo to Vercel or Netlify and set:
   - `VITE_SUPABASE_URL=https://esquxzcfsylffuijvzec.supabase.co`
   - `VITE_SUPABASE_KEY=sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p` (publishable, safe in the browser)
   - Build command `npm run build`, output folder `dist`.

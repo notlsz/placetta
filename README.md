@@ -101,4 +101,4 @@ The database enforces the approval rule: customers can only request a filing or 
 
 ## Before launch
 
-See **SETUP.md**. In short: host the app, set the sign-in URLs and an email sender, add staff, add the secrets, create the Stripe prices and webhook, and have a lawyer review the legal pages. The sample workspace's fees and timelines are estimates for the demo. No compliance certification is claimed.
+Run `npm run launch` (keys, Stripe prices and webhook, secrets, build, Netlify deploy, checks), then follow **SETUP.md** for the three dashboard steps. By hand: host the app, set the sign-in URLs and an email sender, add staff, add the secrets, create the Stripe prices and webhook, and have a lawyer review the legal pages. The sample workspace's fees and timelines are estimates for the demo. No compliance certification is claimed.

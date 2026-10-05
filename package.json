@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "build:single": "tsc -b && vite build --mode single",
-    "postinstall": "node scripts/patch-bot-avatars.mjs"
+    "postinstall": "node scripts/patch-bot-avatars.mjs",
+    "launch": "node scripts/launch.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
