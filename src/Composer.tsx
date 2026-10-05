@@ -112,13 +112,17 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
             <p className={"vtext" + (heard ? "" : " hint")} aria-live="polite">{heard || t("tapDone")}</p>
             {note && <p className="vnote">{t(note)}</p>}
           </div>
-          <VoiceBeam className="vbeam" type="mobile" stream={voice === "mic" ? mic.stream : null} level={sim.level} theme="light"
-            colors={BEAM} bandColors={BAND} scale={window.innerWidth < 760 ? 1 : 1.6} reach={window.innerWidth < 760 ? 3 : 2.6} idle={0.2}>
+          <div className="vfoot">
+            {/* The glow sits in its own tall layer behind the buttons and fades out toward the top, so it never shows an edge. */}
+            <VoiceBeam className="vbeam" aria-hidden="true" type="mobile" stream={voice === "mic" ? mic.stream : null} level={sim.level} theme="light"
+              colors={BEAM} bandColors={BAND} borderRadius={0} scale={window.innerWidth < 760 ? 1 : 1.6} reach={window.innerWidth < 760 ? 3 : 2.6} idle={0.2}>
+              <div className="vbeam-fill" />
+            </VoiceBeam>
             <div className="vbar">
               <button type="button" className="vbtn" onClick={() => endVoice(false)}>{t("cancel")}</button>
               <button type="button" className="vbtn primary" onClick={() => endVoice(true)}><I.check />{t("done")}</button>
             </div>
-          </VoiceBeam>
+          </div>
         </div>
       )}
     </div>

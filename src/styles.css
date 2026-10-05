@@ -551,8 +551,11 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .vtext { margin: 0; max-width: 20ch; font: 400 clamp(24px, 4.6vh, 36px)/1.2 var(--display); letter-spacing: -.03em; color: var(--ink); text-wrap: balance; min-height: 1.2em; }
 .vtext.hint { font-size: clamp(18px, 3vh, 22px); color: var(--ink3); max-width: 26ch; }
 .vnote { margin: 22px 0 0; max-width: 46ch; font-size: 12.5px; color: var(--ink3); text-wrap: balance; }
-.vbeam { border-radius: 0; }
-.vbar { display: flex; align-items: center; justify-content: center; gap: 12px; height: clamp(104px, 19vh, 150px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.vfoot { position: relative; }
+/* Taller than the bar and masked to fade upward: the glow rises past the buttons and dissolves into the page, no visible top. */
+.voice .vbeam { position: absolute; left: 0; right: 0; bottom: 0; height: clamp(320px, 52vh, 520px); border-radius: 0; pointer-events: none; -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 100%); mask-image: linear-gradient(to top, #000 0%, #000 30%, transparent 100%); }
+.vbeam-fill { height: 100%; }
+.vbar { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 12px; height: clamp(104px, 19vh, 150px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 .vbtn { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px; border-radius: 99px; background: rgba(255, 255, 255, .88); color: var(--ink); font-size: 15px; box-shadow: 0 0 0 1px rgba(14, 17, 22, .08), 0 4px 14px rgba(45, 75, 120, .1); }
 .vbtn.primary { background: var(--ink); color: #fff; box-shadow: none; }
 
