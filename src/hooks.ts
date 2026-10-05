@@ -56,11 +56,13 @@ export const fnv = (s: string) => { let h = 2166136261; for (let i = 0; i < s.le
 /** Start (or resume) the shared audio context from a click, so replies can play when they arrive. */
 export const unlockAudio = () => { try { getAudioContext(); } catch { /* no Web Audio */ } };
 
-// Natural-sounding female voices the browser may have, best first; used when a reply has no recorded clip.
+// Young, natural-sounding female voices the browser may have, best first; used for live replies, which have no recording.
+// Edge ships Microsoft's neural voices (Emma and Ava read young); Safari and Chrome on a Mac have Samantha, Ava and Google's.
 const FEMALE: Record<string, RegExp[]> = {
-  en: [/Ava.*Natural/i, /Aria.*Natural/i, /Jenny.*Natural/i, /Emma.*Natural/i, /Michelle.*Natural/i, /^Google US English$/i, /Samantha/i, /^Ava\b/i, /Allison/i, /Zoe/i, /Susan/i, /Karen/i, /Serena/i, /female/i],
-  zh: [/Xiaoxiao.*Natural/i, /Xiaoyi.*Natural/i, /Xiaohan.*Natural/i, /普通话/, /Ting-?Ting/i, /Lili/i, /Meijia/i, /Yu-?shu/i, /female/i],
+  en: [/Emma.*(Natural|Online)/i, /Ava.*(Natural|Online|Premium|Enhanced)/i, /Jenny.*Natural/i, /Aria.*Natural/i, /Michelle.*Natural/i, /Samantha.*(Premium|Enhanced)/i, /^Google US English$/i, /^Ava\b/i, /Allison/i, /Samantha/i, /Zoe/i, /Susan/i, /Karen/i, /female/i],
+  zh: [/Xiaoyi.*(Natural|Online)/i, /Xiaoxiao.*(Natural|Online)/i, /Xiaohan.*Natural/i, /Xiaomo.*Natural/i, /Google\s*普通话/, /普通话/, /Ting-?Ting/i, /Lili/i, /Meijia/i, /female/i],
 };
+if (typeof window !== "undefined" && "speechSynthesis" in window) { try { window.speechSynthesis.getVoices(); } catch { /* voices load later */ } }
 function pickVoice(lang: string) {
   const all = window.speechSynthesis.getVoices(), two = lang.slice(0, 2).toLowerCase();
   const mine = all.filter(v => v.lang.toLowerCase().startsWith(two));
@@ -104,7 +106,7 @@ export function useSpeak() {
     }
     if (!("speechSynthesis" in window)) return;
     const ss = window.speechSynthesis;
-    const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = 1; u.pitch = 1.05;
+    const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = lang.startsWith("zh") ? 1.03 : 1.06; u.pitch = 1.08;
     const v = pickVoice(lang); if (v) u.voice = v;
     u.onstart = () => { last.current = performance.now(); setSpeaking(text); };
     u.onboundary = () => { last.current = performance.now(); };
