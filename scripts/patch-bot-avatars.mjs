@@ -17,7 +17,8 @@ const BLUSH = `  ${MARK}
   }
 `;
 
-for (const file of ["node_modules/bot-avatars/dist/index.es.js", "node_modules/bot-avatars/dist/index.cjs"]) {
+// The app bundles the ES build; the CommonJS build is minified differently and is not used, so only the ES build is patched.
+for (const file of ["node_modules/bot-avatars/dist/index.es.js"]) {
   if (!existsSync(file)) continue;
   const src = readFileSync(file, "utf8");
   if (src.includes(MARK)) continue;
