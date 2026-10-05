@@ -24,6 +24,9 @@ begin
     update public.app_settings set payments_on = true; ok := false;
   exception when insufficient_privilege then ok := true; end;
   res := res || jsonb_build_object('users cannot flip the switch', ok and not public.payments_on());
+  declare t1 text := public.calendar_token(w, false); t2 text := public.calendar_token(w, true); begin
+    res := res || jsonb_build_object('owner resets the calendar link', t2 <> t1 and public.calendar_token(w, false) = t2);
+  end;
   execute 'reset role';
 
   update public.app_settings set payments_on = true;
