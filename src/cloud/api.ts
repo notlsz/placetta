@@ -15,8 +15,25 @@ const KEY = (import.meta.env.VITE_SUPABASE_KEY as string | undefined) ?? "";
 export const cloudConfigured = !!(URL_ && KEY);
 export const LEGAL_BASE = (import.meta.env.VITE_LEGAL_BASE as string | undefined) ?? "https://placetta.com";
 
+/** The artifact preview runs the real app against a stand-in backend in the browser (src/cloud/preview.ts). */
+export const PREVIEW = !!import.meta.env.VITE_PREVIEW;
+let previewFetch: typeof fetch | null = null;
+export async function preparePreview() { if (PREVIEW && !previewFetch) previewFetch = (await import("./preview")).previewFetch as typeof fetch; }
+/** fetch, or the preview backend. */
+const net: typeof fetch = (input, init) => (previewFetch ? previewFetch(input, init) : fetch(input, init));
+/* Session storage that survives a browser with storage turned off (the preview frame). */
+const mem = new Map<string, string>();
+const store = {
+  getItem: (k: string) => { try { return localStorage.getItem(k); } catch { return mem.get(k) ?? null; } },
+  setItem: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { mem.set(k, v); } },
+  removeItem: (k: string) => { try { localStorage.removeItem(k); } catch { mem.delete(k); } },
+};
+
 let sb: SupabaseClient | null = null;
-export const supabase = () => (sb ??= createClient(URL_, KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } }));
+export const supabase = () => (sb ??= createClient(URL_, KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: !PREVIEW, flowType: "pkce", storage: store },
+  global: { fetch: net },
+}));
 
 export type ApiError = { code: string; message: string };
 const err = (code: string, message: string): ApiError => ({ code, message });
@@ -76,7 +93,7 @@ export async function whoami(): Promise<Me> {
 export type Provider = "google" | "azure";
 export async function authProviders(): Promise<Record<Provider, boolean>> {
   try {
-    const res = await fetch(`${URL_}/auth/v1/settings`, { headers: { apikey: KEY } });
+    const res = await net(`${URL_}/auth/v1/settings`, { headers: { apikey: KEY } });
     const j = await res.json() as { external?: Record<string, boolean> };
     return { google: !!j.external?.google, azure: !!j.external?.azure };
   } catch { return { google: false, azure: false }; }
@@ -270,7 +287,7 @@ export const agentCall = (ws: string, request: Record<string, unknown>, o: { dee
 
 export async function ttsAudio(ws: string, text: string, lang: string): Promise<ArrayBuffer | null> {
   const s = await getSession(); if (!s) return null;
-  const res = await fetch(`${URL_}/functions/v1/tts`, { method: "POST", headers: { "content-type": "application/json", apikey: KEY, Authorization: `Bearer ${s.access_token}` }, body: JSON.stringify({ workspace_id: ws, text, lang: lang.startsWith("zh") ? "zh" : "en" }) });
+  const res = await net(`${URL_}/functions/v1/tts`, { method: "POST", headers: { "content-type": "application/json", apikey: KEY, Authorization: `Bearer ${s.access_token}` }, body: JSON.stringify({ workspace_id: ws, text, lang: lang.startsWith("zh") ? "zh" : "en" }) });
   if (!res.ok) return null;
   return res.arrayBuffer();
 }

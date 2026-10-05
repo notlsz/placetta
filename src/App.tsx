@@ -150,7 +150,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const history = useRef<Msg[]>([]);
   const abort = useRef<AbortController | null>(null);
   useEffect(() => {
-    if (cloud) {
+    if (cloud && !api.PREVIEW) {
       const m = wsRef.current.meta, loc = m?.city ? { city: m.city, region: m.region } : undefined;
       setModel(serverModel((body, d) => api.agentCall(cloud.wsId, body, { deep: d, location: loc }) as never));
       return;
@@ -316,7 +316,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   /* the account's own abilities, for Settings, approvals and the plans sheet */
   const cloudCtx: CloudCtx | null = useMemo(() => {
     if (!cloud) return null;
-    const goTo = (url: string) => { window.location.href = url; };
+    const goTo = (url: string) => {
+      // In the preview there's no Stripe or provider to visit: the stand-in backend switches it on, so just reload.
+      if (url.startsWith("preview:")) {
+        void Promise.all([api.getBilling(cloud.wsId).then(setBilling), api.listIntegrations(cloud.wsId).then(setIntegrations)]).then(() => { setPlans(null); void refresh(); });
+        say(url === "preview:billing" ? (lang === "zh" ? "预览：方案已开通（实际应用会跳转到 Stripe 付款）。" : "Preview: plan on. The live app takes payment through Stripe here.") : (lang === "zh" ? "预览：已连接（实际应用会跳转到对方网站授权）。" : "Preview: connected. The live app sends you to the provider to approve."));
+        return;
+      }
+      window.location.href = url;
+    };
     const fail = (e: unknown) => say((e as api.ApiError).message ?? String(e));
     return {
       email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner,

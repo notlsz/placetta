@@ -109,6 +109,9 @@ function SignIn({ lang }: { lang: Lang }) {
         </form>
       )}
       {err && <p className="gate-err" role="alert">{err}</p>}
+      {api.PREVIEW && <p className="gate-preview">{sent
+        ? L(B("Preview: no email is sent. The code is 123456.", "预览：不会发送邮件，验证码是 123456。"))
+        : L(B("Preview: accounts live only in this browser. Any email works; an @placetta.com email signs you in as the Placetta team, which works the filing queue.", "预览：账户只保存在此浏览器中。任意邮箱都可以；使用 @placetta.com 邮箱登录即为快哉团队，可处理申报队列。"))}</p>}
     </div>
   );
 }

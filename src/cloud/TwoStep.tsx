@@ -35,6 +35,7 @@ export function TwoStepSetup({ lang, onDone, onCancel }: { lang: Lang; onDone: (
         <button type="button" className="sbtn quiet" onClick={onCancel}>{L(B("Cancel", "取消"))}</button>
       </form>
       {err && <p className="gate-err" role="alert">{err}</p>}
+      {api.PREVIEW && <p className="gate-preview">{L(B("Preview: the code is 123456.", "预览：验证码是 123456。"))}</p>}
     </div>
   );
 }
@@ -59,6 +60,7 @@ export function TwoStepCode({ lang, factorId, onDone, onSignOut }: { lang: Lang;
         <button type="button" className="sbtn quiet wide" onClick={onSignOut}>{L(B("Sign out", "退出登录"))}</button>
       </form>
       {err && <p className="gate-err" role="alert">{err}</p>}
+      {api.PREVIEW && <p className="gate-preview">{L(B("Preview: the code is 123456.", "预览：验证码是 123456。"))}</p>}
       <p className="gate-note">{L(B("Lost your phone? Email support@placetta.com from this address and we'll verify it's you.", "手机丢失？请用此邮箱发信至 support@placetta.com，我们核实身份后为您处理。"))}</p>
     </div>
   );

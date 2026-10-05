@@ -803,6 +803,7 @@ a.sbtn { color: var(--ink); }
 .sbtn.sso { gap: 10px; font-weight: 500; }
 .gate-or { display: flex; align-items: center; gap: 12px; margin: 2px 0; font-size: 12.5px; color: var(--ink3); }
 .gate-or::before, .gate-or::after { content: ""; flex: 1; height: 1px; background: rgba(14, 17, 22, .1); }
+.gate-preview { margin: 10px 0 0; max-width: 44ch; padding: 8px 12px; border-radius: 12px; background: var(--sky-wash); font-size: 12.5px; color: var(--blue-deep); }
 .gate-note { margin: 8px 0 0; max-width: 40ch; font-size: 12.5px; color: var(--ink3); }
 .gate-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; padding: 20px; font-size: 12.5px; color: var(--ink3); }
 .gate-foot button, .gate-foot a { color: var(--ink3); } .gate-foot button:hover, .gate-foot a:hover { color: var(--ink); }

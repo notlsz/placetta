@@ -128,11 +128,11 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
 
 /** Data handling, the way Legora puts it: quietly, at the bottom. The full note lives in Settings. */
 export function Footer({ full }: { full?: boolean }) {
-  const { t } = useApp();
+  const { t, cloud } = useApp();
   return (
     <footer className={"foot" + (full ? " full" : "")}>
       {full ? <p><b>{t("foot_data")}</b>{t("foot_text")}</p> : <p>{t("foot_short")}</p>}
-      <p>{t("foot_sample")}</p>
+      {!cloud && <p>{t("foot_sample")}</p>}
     </footer>
   );
 }
