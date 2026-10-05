@@ -2,19 +2,20 @@ import type { ReactNode } from "react";
 import { BotAvatar, type BotAvatarType } from "bot-avatars";
 import { BorderBeam } from "border-beam";
 
-/* Placetta's agent as a small plush character: a soft Ritz-Carlton-blue cloud with blushed cheeks with a smile (bot-avatars).
+/* Placetta's agent as a small plush character: a soft pastel-blue cloud with blushed cheeks with a smile (bot-avatars).
    It hops while it works and looks around while it waits. Each background job gets its own little bot. */
 
-const INK = "#04101C";   // near-black navy, so the eyes read on the deep blue
-/* Ritz-Carlton blue (#006B95) with soft pink cheeks (#F0ADD3). The plush shader shifts colour, so the base is tuned until the
-   rendered body measures about #096C9C. Background-job bots share the blue family. */
-const CLOUD = "#007A93";
+const INK = "#132A55";   // the landing page navy
+/* The Ritz-Carlton pastel blue (the soft "memorable" blue from its 2015 identity; no official code is published, so it is
+   matched to about #A4C8E1) with pink cheeks (#F0ADD3). The plush shader shifts colour a lot, so these settings were tuned by
+   measuring the rendered body. Background-job bots share the family. */
+const CLOUD = "#A4C8E1";
 const BLUSH = "#F0ADD3";
-const BLUES = ["#007A93", "#0A86A0", "#006F88", "#1B8FA8", "#00809A"];
+const BLUES = [CLOUD];   // the shader turns lighter tints grey, so every job bot uses the same blue; shapes tell them apart
 (globalThis as unknown as { __botBlush?: string }).__botBlush = BLUSH;   // read by the blush patch (scripts/patch-bot-avatars.mjs)
 /* bot-avatars holds every plush bot back (opacity 0) until all of them have baked, up to 4 s on slow devices.
    The first frames are already good, so show each one straight away. */
-const SOFT = { shading: "fabric" as const, saturation: 1.5, brightness: 1.45, ink: INK, style: { opacity: 1, transition: "none" } };
+const SOFT = { shading: "fabric" as const, saturation: 2.3, brightness: 1.6, ink: INK, style: { opacity: 1, transition: "none" } };
 
 export function AgentBot({ size, busy, label = "Placetta", interactive = true }: { size: number; busy?: boolean; label?: string; interactive?: boolean }) {
   return (
