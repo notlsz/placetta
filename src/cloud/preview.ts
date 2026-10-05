@@ -262,6 +262,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       return fnErr("bad_request", "Unknown action.");
     }
     case "team": {
+      if (body.action === "remove") return rpc("remove_member", { ws, p_user: body.user_id }, c).then(async r => (r.ok ? json({ ok: true, removed: body.user_id }) : fnErr("bad_request", (await r.json()).message)));
       const no = needOwner(); if (no) return no;
       if (body.action === "invite") {
         const email = String(body.email ?? "").trim().toLowerCase();

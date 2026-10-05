@@ -275,7 +275,7 @@ async function rpcVoid(name: string, args: Record<string, unknown>) {
 }
 export const revokeInvite = (id: string) => rpcVoid("revoke_invite", { p_id: id });
 export const setRole = (ws: string, user: string, role: Role) => rpcVoid("set_member_role", { ws, p_user: user, p_role: role });
-export const removeMember = (ws: string, user: string) => rpcVoid("remove_member", { ws, p_user: user });
+export const removeMember = (ws: string, user: string) => fn<{ removed: string }>("team", { action: "remove", workspace_id: ws, user_id: user });
 
 export const checkout = (ws: string, plan: "entry" | "starter" | "growth", o: { markets?: number; extra_locations?: number } = {}) =>
   fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: location.origin + location.pathname });

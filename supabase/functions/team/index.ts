@@ -1,7 +1,8 @@
 // team: invite people to a workspace and email them.
-// POST {workspace_id, action, ...}. Owners only.
-//   invite {email, role: "owner" | "member", return_url?}   records the invite (the database checks and audits it), then emails it
-//   resend {id, return_url?}                                emails an open invite again
+// POST {workspace_id, action, ...}.
+//   invite {email, role: "owner" | "member", return_url?}   owners: records the invite (the database checks and audits it), then emails it
+//   resend {id, return_url?}                                owners: emails an open invite again
+//   remove {user_id}                                        owners remove anyone; anyone can remove themselves (leave)
 // The invite is accepted when that email signs in (accept_invites in the database), so the email only has to get them to sign in:
 // new people get Supabase's invite email, people with an account get a sign-in link.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -44,6 +45,23 @@ serve(async (req) => {
   const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
   const ws = uuidParam(body.workspace_id, "workspace_id");
+
+  if (body.action === "remove") {
+    const target = uuidParam(body.user_id, "user_id");
+    // The database checks who may remove whom, keeps the last owner, and writes the audit entry.
+    const { data: role, error } = await userClient(jwt).rpc("check_remove_member", { ws, p_user: target });
+    if (error) throw new HttpError("bad_request", (error.message ?? "Couldn't remove them.").replace(/^.*?:\s/, ""));
+    const { error: delError } = await admin.from("workspace_members").delete().eq("workspace_id", ws).eq("user_id", target);
+    if (delError) throw new Error(`member removal failed: ${delError.code ?? ""}`);
+    // Two owners removing each other at the same moment could leave none: put this one back if so.
+    const { count } = await admin.from("workspace_members").select("user_id", { count: "exact", head: true }).eq("workspace_id", ws).eq("role", "owner");
+    if (!count) {
+      await admin.from("workspace_members").insert({ workspace_id: ws, user_id: target, role: role ?? "owner" });
+      throw new HttpError("bad_request", "Add another owner first. A workspace needs one.");
+    }
+    return ok({ removed: target });
+  }
+
   await requireAccess(ws, user, jwt, "owner");
   const redirectTo = allowedReturn(body.return_url, appOrigins()) ?? undefined;
 
@@ -77,5 +95,5 @@ serve(async (req) => {
     return ok({ id, sent: await sendInvite(inv.email as string, redirectTo) });
   }
 
-  throw new HttpError("bad_request", "Unknown action. Use invite or resend.");
+  throw new HttpError("bad_request", "Unknown action. Use invite, resend or remove.");
 });
