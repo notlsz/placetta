@@ -8,6 +8,7 @@ import { B, same, type Bi, type Store, type Workspace } from "../model";
 import type { Lang } from "../i18n";
 import * as api from "./api";
 import { normalize, type CloudSession } from "./session";
+import { consumeHandoff, readHandoff } from "./handoff";
 import { TwoStepCode } from "./TwoStep";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
@@ -26,7 +27,7 @@ function Frame({ lang, setLang, children }: { lang: Lang; setLang: (l: Lang) => 
   return (
     <div className="gate">
       <header className="gate-top">
-        <Logo lang={lang} height={18} />
+        {api.PREVIEW ? <Logo lang={lang} height={18} /> : <a href="/" className="gate-home" aria-label="Placetta home"><Logo lang={lang} height={18} /></a>}
         <div className="lang" role="group" aria-label="Language">
           <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
           <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
@@ -58,7 +59,8 @@ const MicrosoftMark = () => (
 
 function SignIn({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
-  const [email, setEmail] = useState("");
+  const [hand] = useState(readHandoff);
+  const [email, setEmail] = useState(hand?.email ?? "");
   const [sent, setSent] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -85,8 +87,8 @@ function SignIn({ lang }: { lang: Lang }) {
   return (
     <div className="gate-card">
       <div className="gate-bot"><AgentBot size={84} /></div>
-      <h1>{sent ? L(B("Check your email.", "请查收邮件。")) : L(B("Sign in to Placetta.", "登录快哉。"))}</h1>
-      <p className="gate-sub">{sent ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`)) : L(B("Licenses, permits and daily compliance for every store. New here? Signing in creates your account. Invited by a teammate? Use the email they invited.", "每家门店的执照、许可与日常合规。第一次来？登录即创建账户。受同事邀请？请使用被邀请的邮箱。"))}</p>
+      <h1>{sent ? L(B("Check your email.", "请查收邮件。")) : hand ? L(B("Your license plan is one step away.", "您的执照计划只差一步。")) : L(B("Sign in to Placetta.", "登录快哉。"))}</h1>
+      <p className="gate-sub">{sent ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`)) : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs. Signing in creates your account.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。登录即创建账户。")) : L(B("Licenses, permits and daily compliance for every store. New here? Signing in creates your account. Invited by a teammate? Use the email they invited.", "每家门店的执照、许可与日常合规。第一次来？登录即创建账户。受同事邀请？请使用被邀请的邮箱。"))}</p>
       {!sent && (providers.google || providers.azure) && (
         <div className="gate-sso">
           {providers.google && <button type="button" className="sbtn line wide sso" disabled={busy} onClick={() => void withProvider("google")}><GoogleMark />{L(B("Continue with Google", "使用 Google 继续"))}</button>}
@@ -142,7 +144,9 @@ function parsePlace(v: string): { city: string; state: string } | null {
 
 function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: string; onCreated: (id: string) => void; onCancel?: () => void }) {
   const L = (x: Bi) => x[lang];
-  const [f, setF] = useState({ brand: "", sell: "", other: "", place: "", state: "", when: -1, entity: "", street: "", more: false });
+  // answers from the website's questionnaire, if they came that way
+  const [hand] = useState(readHandoff);
+  const [f, setF] = useState({ brand: hand?.brand ?? "", sell: hand?.sell ?? "", other: hand?.other ?? "", place: hand?.place ?? "", state: "", when: hand?.when ?? -1, entity: "", street: "", more: false });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [doc, setDoc] = useState<string | null>(null);
@@ -181,7 +185,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       stores: [store],
       meta: { city, region: st, what, entity: f.entity.trim() || undefined },
     });
-    try { onCreated(await api.createWorkspace(f.brand.trim(), ws)); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
+    try { const id = await api.createWorkspace(f.brand.trim(), ws); if (hand) consumeHandoff(); onCreated(id); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
   return (
     <div className="gate-card wide">
@@ -255,7 +259,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
 type Phase = { k: "loading" } | { k: "signin" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
 
 export function CloudRoot() {
-  const [lang, setLangState] = useState<Lang>(readLang);
+  const [lang, setLangState] = useState<Lang>(() => readHandoff()?.lang ?? readLang());
   const setLang = (l: Lang) => { setLangState(l); try { localStorage.setItem("placetta-agent-lang", l); } catch { /* blocked */ } };
   useEffect(() => { document.documentElement.lang = lang === "zh" ? "zh-CN" : "en"; }, [lang]);
   const [phase, setPhase] = useState<Phase>({ k: "loading" });

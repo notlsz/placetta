@@ -49,9 +49,18 @@ The agent prepares on its own but never files, pays or sends a message without y
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm run build        # production build in dist/
-npm run build:single # one self-contained HTML file in dist-single/
+npm run build        # the whole site in dist/: the website at /, the app at /app/
+npm run build:single # the app as one self-contained HTML file in dist-single/
 ```
+
+### One site: website and app
+
+The website (`site/`: landing page, privacy and terms) and the app ship as one Vercel project on one domain, the way
+Vanta runs vanta.com and its app. **Log in** in the website's header opens the app. **Get my plan** saves the request to
+`public.plan_requests`, then (for email contacts) hands the answers to the app through localStorage on the same
+origin: sign-in opens with the email filled in, onboarding with the business, market, what it sells and when, and the
+agent starts mapping licenses as soon as the workspace exists. WeChat contacts get the team follow-up instead.
+`vercel.json` gives each half its own Content Security Policy (the website has inline scripts; the app has none).
 
 ## Voice
 

@@ -45,7 +45,7 @@ Left for you after that: turn on the Stripe customer portal, and have each teamm
   - Members: logs, documents, the agent.
   - A workspace always keeps at least one owner. Every team change is in the audit trail.
 - **Sessions**: sign out here or everywhere (Settings, Security).
-- **Hosting headers**: a strict Content Security Policy (scripts only from the app, data only to Supabase), no framing, HSTS, and long caching for hashed assets. Both `_headers` (Netlify) and `vercel.json` (Vercel) are included.
+- **Hosting headers** (`vercel.json`): a strict Content Security Policy for the app (scripts only from the app, data only to Supabase), a separate one for the website, no framing, HSTS, and long caching for hashed assets.
 
 ## Sign in with Google or Microsoft
 

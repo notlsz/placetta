@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { useApp } from "./ctx";
 import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
@@ -8,6 +8,7 @@ import type { Key } from "./i18n";
 import { AgentBot, TaskBot, Working } from "./Bot";
 import { StoresStrip } from "./Stores";
 import { B } from "./model";
+import { takeAutostart } from "./cloud/handoff";
 
 export const INK = "#4D73A3";
 const LEVELS: Level[] = ["federal", "state", "county", "city"];
@@ -88,10 +89,12 @@ function LiveLine() {
 /* -------------------------------- overview -------------------------------- */
 
 function Welcome() {
-  const { b, ws, ask, busy, cloud } = useApp();
+  const { b, ws, ask, busy, cloud, mode } = useApp();
   const place = ws.meta?.city ?? (ws.locations[0] ? b(ws.locations[0].name) : "");
   const what = ws.meta?.what ?? "";
   const start = () => ask(b(B(`Map every license, permit and registration ${b(ws.business)} needs to open its store${place ? ` in ${place}` : ""}${what ? `, which sells ${what.charAt(0).toLowerCase() + what.slice(1)}` : ""}. Prepare an application for each one, fill what you can from Context, and tell me what you need from me.`, `梳理${b(ws.business)}${place ? `在${place}` : ""}${what ? `开设${what}` : "开店"}所需的全部执照、许可和登记，为每一项准备申请，用资料填写能填的内容，并告诉我还需要我提供什么。`)));
+  // Came from the website's "Get my plan": start mapping as soon as the agent is ready, once.
+  useEffect(() => { if (cloud && mode === "server" && cloud.plan !== "none" && takeAutostart()) setTimeout(start, 0); }, [mode]);   // after this commit, once the agent is wired up // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="page home">
       <header className="hero">

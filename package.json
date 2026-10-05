@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "build:single": "tsc -b && vite build --mode single",
