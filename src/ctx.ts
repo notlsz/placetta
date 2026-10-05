@@ -12,6 +12,13 @@ export type Ctx = {
   ws: Workspace;
   busy: boolean;
   live: Step | null;
+  mode: "claude" | "api" | "demo";
+  apiName: string;
+  deep: boolean;
+  setDeep(v: boolean): void;
+  stop(): void;
+  applyKey(key: string, model: string, remember: boolean): void;
+  dropKey(): void;
   uploading: { app: string; item: string } | null;
   go(v: View): void;
   ask(text: string, voice?: boolean): void;

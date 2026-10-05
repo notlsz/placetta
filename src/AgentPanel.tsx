@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ThinkingOrb, type OrbState } from "thinking-orbs";
+import { ThinkingOrb } from "thinking-orbs";
 import { Composer } from "./Composer";
 import { useApp } from "./ctx";
 import type { FeedItem, Turn } from "./feed";
@@ -7,6 +7,7 @@ import type { Bi } from "./model";
 import { unlockAudio, type Speaker } from "./hooks";
 import { NeedRow, INK } from "./pages";
 import { AppArtifact, FileCard, I } from "./ui";
+import { AgentBot, Working } from "./Bot";
 
 /** The agent, beside the work: what it's doing now, every step with the site it used, and what each run produced. */
 export function AgentPanel({ feed, tts, mode, onHide, asked }: {
@@ -19,14 +20,13 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
   const sig = feed.length + ":" + (last && last.kind === "turn" ? last.steps.length + (last.reply ? "r" : "") : "");
   useEffect(() => { const el = scroller.current; if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); }, [sig]);
 
-  const orb: OrbState = busy && live ? live.state : tts.speaking ? "composing" : "breathing";
   const agencies = ws.connections.filter(c => c.state === "connected" && c.level !== "vault").length;
   const say = useCallback((text: string) => { unlockAudio(); if (tts.speaking === text) tts.stop(); else tts.speak(text, lang === "zh" ? "zh-CN" : "en-US"); }, [tts, lang]);
 
   return (
     <aside className={"panel " + mode} aria-label={t("agentName")}>
       <header className="pn-h">
-        <span className="pn-orb lens"><ThinkingOrb state={orb} size={32} theme="light" color={INK} dotSize={1.1} aria-label={t("agentName")} /></span>
+        <span className="pn-bot"><AgentBot size={44} busy={busy} label={t("agentName")} /></span>
         <span className="pn-t">
           <b>{t("agentName")}</b>
           <small aria-live="polite">{busy && live ? b(live.label) + "…" : t("idle", { n: agencies })}</small>
@@ -75,7 +75,8 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
         {listen}
       </div>
       {(live || show) && m.steps.length > 0 && (
-        <ol className="steps">
+        <Working on={live} size="sm">
+        <ol className={"steps" + (live ? " live" : "")}>
           {m.steps.map((s, i) => {
             const st = live ? (i < m.active ? "done" : i === m.active ? "now" : "next") : "done";
             return (
@@ -86,7 +87,9 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
             );
           })}
         </ol>
+        </Working>
       )}
+      {live && m.draft && <p className="drafting" aria-live="polite">{m.draft}</p>}
       {r && (
         <div className="answer">
           {r.text.map((p, i) => <p key={i}>{b(p)}</p>)}

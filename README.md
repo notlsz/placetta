@@ -21,6 +21,21 @@ The workspace for Placetta's licensing agent. It opens on the state of your lice
 
 The agent prepares on its own but never files, pays or sends a message without you. Every submission opens an approval that shows what the agent will do step by step, the exact data it will submit, the attachments and the fee, with **Approve & file** and **Edit first**. Your answer goes in the audit trail.
 
+## The agent
+
+- **Live in the shared Claude link.** The agent is Claude, on the viewer's own Claude account through the artifact's `sample` capability; the first message asks them to allow it. It reads the workspace and acts through page tools: add an application, fill its fields, change its status, ask for approval to file, draft a message for approval, add a deadline, remember a fact, and list licenses. Find licenses asks Claude for the list for any business and place, and uploaded images and text files are read for real.
+- **Live anywhere else with an API key.** Open Settings, paste an Anthropic API key and pick a model. The key stays in the browser and goes only to `api.anthropic.com`.
+- **Demo script otherwise.** With neither, the scripted demo answers, so the product can still be walked through.
+- **What it can't do here.** It can't browse or reach agency portals, so requirements and fees come from the model's knowledge and are labelled estimates. Approving a filing in this sample workspace simulates it. For production, put the model and the portal integrations behind your own backend and keep the same events (`src/agent.ts`).
+- **The rule.** Whatever the model decides, filing, paying and sending only happen after the person approves in the app.
+
+## Effects from Libraries.dev
+
+- **Bot avatars** (`bot-avatars`): the agent is an original plush light-blue cloud (`src/Bot.tsx`) that looks around while it waits and hops while it works; each background job has its own small bot.
+- **Orb** (`thinking-orbs`): inline thinking states for each step the agent takes.
+- **Voice** (`voice-glow`): the glow around the message box and along the bottom of voice mode.
+- **Beam** (`border-beam`): rides the border of things in progress only: the live step list, the overview's live line, a file being read, a license search, and applications Placetta is preparing.
+
 ## Run it
 
 ```bash
@@ -67,6 +82,8 @@ Stream a `step` each time the model starts a tool call, naming the site in `tool
 | `src/Drawer.tsx` | An application opened (checklist, filled form, fees, receipt) and the approval dialog |
 | `src/AgentPanel.tsx` | The agent panel: live steps, replies with files, approvals and memories |
 | `src/Composer.tsx` | The message box with the VoiceBeam glow, and voice mode |
+| `src/live.ts` | The live agent: Claude through the viewer or the API, the workspace prompt and the page tools |
+| `src/Bot.tsx` | The plush agent bot, the background-job bots and the in-progress beam |
 | `src/agent.ts` | The agent contract, workspace patches and the scripted demo agent |
 | `src/model.ts` | Workspace types and the sample workspace |
 | `src/files.ts` | Receipts and filled applications as PDF, the audit trail as CSV, saving files |

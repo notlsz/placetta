@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ThinkingOrb, type OrbState } from "thinking-orbs";
 import { VoiceBeam, useMicrophone } from "voice-glow";
 import { useApp } from "./ctx";
 import { unlockAudio, useSimulatedVoice, useSpeechToText, type Speaker } from "./hooks";
 import { SUGGESTIONS } from "./model";
 import { I } from "./ui";
+import { AgentBot } from "./Bot";
 
-const INK = "#3F7FC4";
 const BEAM = ["#7DB3EA", "#A5CDF5", "#6FA7E3", "#8FD5EE", "#BCD2F7", "#B2E0F4", "#C9C2F5"];
 const BAND = { core: "#FFFFFF", above: "#94C2F0", mid: "#C6DEF8", below: "#A3D9EF" };
 
@@ -23,7 +22,7 @@ const micAllowedHere = () => {
  * Voice mode lives here too, so there is only ever one microphone session.
  */
 export function Composer({ variant, tts, asked, showLive = true }: { variant: "dock" | "panel"; tts: Speaker; asked: string[]; showLive?: boolean }) {
-  const { t, b, lang, busy, live, ask, upload } = useApp();
+  const { t, b, lang, busy, live, ask, upload, stop } = useApp();
   const [draft, setDraft] = useState("");
 
   const mic = useMicrophone();
@@ -67,7 +66,6 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const attach = useRef<HTMLInputElement>(null);
   const send = () => { const q = draft.trim(); if (q && !busy) { setDraft(""); ask(q); } };
   const level = useCallback(() => Math.max(sim.level(), tts.level()), [sim, tts]);
-  const orb: OrbState = busy && live ? live.state : tts.speaking ? "composing" : "breathing";
   const dock = variant === "dock";
 
   return (
@@ -80,14 +78,16 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
       )}
       <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={dock ? 0.16 : 0.1} scale={dock ? 1.1 : 0.9}>
         <form className="composer" onSubmit={e => { e.preventDefault(); send(); }}>
-          {dock && <span className="c-orb" aria-hidden="true"><ThinkingOrb state={orb} size={20} theme="light" color={INK} /></span>}
+          {dock && <span className="c-bot" aria-hidden="true"><AgentBot size={34} busy={busy} interactive={false} /></span>}
           {!dock && <button type="button" className="ic" aria-label={t("attach")} title={t("attach")} onClick={() => attach.current?.click()} disabled={busy}><I.plus /></button>}
           <input ref={attach} type="file" multiple hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload("", "", f); }} />
           <label htmlFor={"ask-" + variant} className="sr">{t("askPh")}</label>
           <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={t("askPh")} onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
           <button type="button" className="ic mic" aria-label={t("talk")} title={t("talk")} onClick={startVoice} disabled={busy}><I.mic /></button>
-          <button type="submit" className="sendb" disabled={!draft.trim() || busy} aria-label={t("send")}><I.send /></button>
+          {busy
+            ? <button type="button" className="sendb stop" onClick={stop} aria-label={t("stop")} title={t("stop")}><I.stopSq /></button>
+            : <button type="submit" className="sendb" disabled={!draft.trim()} aria-label={t("send")}><I.send /></button>}
         </form>
       </VoiceBeam>
       {note && !listening && <p className="c-note">{t(note)}</p>}
@@ -96,7 +96,7 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
         <div className="voice" role="dialog" aria-modal="true" aria-label={t("listening")}>
           <button type="button" className="vclose" aria-label={t("close")} onClick={() => endVoice(false)}><I.x /></button>
           <div className="vmid">
-            <div className="vorb lens"><ThinkingOrb state="listening" size={64} theme="light" color={INK} dotSize={1.2} aria-label={t("listening")} /></div>
+            <div className="vbot"><AgentBot size={156} label={t("listening")} /></div>
             <p className="vlabel">{t("listening")}</p>
             <p className={"vtext" + (heard ? "" : " hint")} aria-live="polite">{heard || t("tapDone")}</p>
             {note && <p className="vnote">{t(note)}</p>}

@@ -5,6 +5,8 @@ import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status 
 import { daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
 import { FileCard, Footer, I, LevelTag, Pill, StatusChip, feeTotal } from "./ui";
 import type { Key } from "./i18n";
+import { API_MODELS } from "./live";
+import { AgentBot, TaskBot, Working } from "./Bot";
 
 export const INK = "#3F7FC4";
 const LEVELS: Level[] = ["federal", "state", "county", "city"];
@@ -54,10 +56,12 @@ export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
 function AppRow({ a }: { a: Application }) {
   const { b, openApp } = useApp();
   return (
-    <button type="button" className={"row arow" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)}>
-      <span className="arow-n"><b>{b(a.name)}</b><small>{a.next ? b(a.next) : b(a.agency)}</small></span>
-      <StatusChip s={a.status} />
-    </button>
+    <Working on={a.status === "draft"} size="line">
+      <button type="button" className={"row arow" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)}>
+        <span className="arow-n"><b>{b(a.name)}</b><small>{a.next ? b(a.next) : b(a.agency)}</small></span>
+        <StatusChip s={a.status} />
+      </button>
+    </Working>
   );
 }
 
@@ -65,7 +69,7 @@ function AppRow({ a }: { a: Application }) {
 function LiveLine() {
   const { b, lang, ws, busy, live } = useApp();
   const last = ws.audit.find(a => a.actor === "agent");
-  if (busy && live) return <p className="liveline on" aria-live="polite"><ThinkingOrb state={live.state} size={20} theme="light" color={INK} aria-hidden="true" /><span>{b(live.label)}…</span>{live.tool && <em className="site">{live.tool}</em>}</p>;
+  if (busy && live) return <Working on size="line"><p className="liveline on" aria-live="polite"><ThinkingOrb state={live.state} size={20} theme="light" color={INK} aria-hidden="true" /><span>{b(live.label)}…</span>{live.tool && <em className="site">{live.tool}</em>}</p></Working>;
   if (!last) return null;
   return <p className="liveline"><span className="ll-dot" aria-hidden="true" /><span>{b(last.action)}: {b(last.object)}</span><em>{fmtAgo(last.at, lang)}</em></p>;
 }
@@ -82,7 +86,7 @@ export function Overview() {
   return (
     <div className="page home">
       <header className="hero">
-        <div className="lens hero-orb"><ThinkingOrb state={busy ? "working" : "breathing"} size={64} theme="light" color={INK} dotSize={1.25} aria-hidden="true" /></div>
+        <div className="hero-bot"><AgentBot size={120} busy={busy} /></div>
         <h1>{t("ov_title", { n })}</h1>
         <p className="lede">{t("ov_state", { a: approved, r: agency, n: you })}</p>
         <div className="progress" aria-label={t("ov_done", { d: approved + agency, n })}>
@@ -137,7 +141,7 @@ export function Overview() {
           <SecHead title={t("running")} />
           <ul className="tray runs">
             {ws.running.map(r => (
-              <li key={r.id} className="row"><ThinkingOrb state={r.state} size={20} theme="light" color={INK} aria-label={b(r.label)} /><span>{b(r.label)}{r.detail && <small>{b(r.detail)}</small>}</span></li>
+              <li key={r.id} className="row"><TaskBot id={r.id} label={b(r.label)} /><span>{b(r.label)}{r.detail && <small>{b(r.detail)}</small>}</span></li>
             ))}
           </ul>
         </section>
@@ -176,13 +180,15 @@ export function Applications() {
                 {rows.map(a => {
                   const fee = feeTotal(a);
                   return (
-                    <button type="button" key={a.id} className={"tr row" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)} role="row">
+                    <Working key={a.id} on={a.status === "draft"} size="line">
+                    <button type="button" className={"tr row" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)} role="row">
                       <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small></span>
                       <span className="c-st"><StatusChip s={a.status} /></span>
                       <span className="c-fee">{fee ? money(fee) : t("free")}</span>
                       <span className="c-est">{b(a.est)}</span>
                       <span className="c-next">{a.critical && <em>{t("critical")}</em>}{a.next ? b(a.next) : ""}</span>
                     </button>
+                    </Working>
                   );
                 })}
               </div>
@@ -338,7 +344,7 @@ export function ContextPage() {
 /* ------------------------------ find licenses ------------------------------ */
 
 export function FindLicenses({ result, live }: { result: { what: string; where: string; hits: LicenseHit[] } | null; live: string | null }) {
-  const { t, b, lang, run, busy, openApp, ask } = useApp();
+  const { t, b, lang, run, busy, openApp, ask, mode } = useApp();
   const [what, setWhat] = useState(result?.what ?? "");
   const [where, setWhere] = useState(result?.where ?? "");
   const go = (w = what, p = where) => { const W = w.trim() || b({ en: "Milk tea shop", zh: "奶茶店" }), P = p.trim() || b({ en: "San Jose, CA", zh: "加州圣何塞" }); setWhat(W); setWhere(P); run({ match: { what: W, where: P } }, lang === "zh" ? `查找许可：${W}，${P}` : `Find licenses: ${W} in ${P}`); };
@@ -356,10 +362,10 @@ export function FindLicenses({ result, live }: { result: { what: string; where: 
       <div className="examples">{examples.map(([w, p]) => <button key={w + p} type="button" disabled={busy} onClick={() => go(w, p)}>{w}, {p}</button>)}</div>
 
       {live && (
-        <div className="matching" aria-live="polite">
+        <Working on size="line"><div className="matching" aria-live="polite">
           <ThinkingOrb state="searching" size={20} theme="light" color={INK} aria-label={live} />
           <span>{live}</span>
-        </div>
+        </div></Working>
       )}
 
       {result && !live && (
@@ -384,7 +390,8 @@ export function FindLicenses({ result, live }: { result: { what: string; where: 
                       <span className="hit-a">
                         {h.have ? <button type="button" className="pill quiet sm" onClick={() => openApp(h.have!)}><I.check />{t("fd_have")}</button>
                           : h.carry ? <em className="carry">{t("fd_carry")}</em>
-                            : /Statement of Information/.test(h.name.en) ? <button type="button" className="pill primary sm" disabled={busy} onClick={() => ask(lang === "zh" ? "准备信息声明" : "Prepare the Statement of Information")}><I.plus />{t("fd_add")}</button> : null}
+                            : mode !== "demo" ? <button type="button" className="pill primary sm" disabled={busy} onClick={() => ask(lang === "zh" ? `把“${b(h.name)}”（${b(h.agency)}）加入我的申请，并尽量填好` : `Add the ${b(h.name)} (${b(h.agency)}) to my applications and fill what you can`)}><I.plus />{t("fd_add")}</button>
+                          : /Statement of Information/.test(h.name.en) ? <button type="button" className="pill primary sm" disabled={busy} onClick={() => ask(lang === "zh" ? "准备信息声明" : "Prepare the Statement of Information")}><I.plus />{t("fd_add")}</button> : null}
                       </span>
                     </div>
                   ))}
@@ -401,11 +408,40 @@ export function FindLicenses({ result, live }: { result: { what: string; where: 
 
 /* -------------------------------- settings -------------------------------- */
 
+function AgentSettings() {
+  const { t, mode, apiName, applyKey, dropKey, deep, setDeep } = useApp();
+  const [key, setKey] = useState("");
+  const [id, setId] = useState(API_MODELS[0].id);
+  const [remember, setRemember] = useState(false);
+  return (
+    <section className="sec">
+      <SecHead title={t("set_agent")} />
+      <div className="tray">
+        <div className="row agent-mode"><span className={"am-dot " + mode} aria-hidden="true" /><span>{mode === "claude" ? t("mode_claude") : mode === "api" ? t("mode_api", { m: apiName }) : t("mode_demo")}</span></div>
+        {mode !== "demo" && (
+          <label className="row check"><input type="checkbox" checked={deep} onChange={e => setDeep(e.target.checked)} /><span><b>{t("deep")}</b><small>{t("deepNote")}</small></span></label>
+        )}
+        {mode === "api" && <div className="row"><button type="button" className="pill quiet sm" onClick={dropKey}>{t("key_drop")}</button></div>}
+        {mode === "demo" && (
+          <form className="row keyform" onSubmit={e => { e.preventDefault(); if (key.trim()) { applyKey(key.trim(), id, remember); setKey(""); } }}>
+            <label><span>{t("key_label")}</span><input type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} placeholder="sk-ant-..." /></label>
+            <label><span>{t("key_model")}</span><select value={id} onChange={e => setId(e.target.value)}>{API_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select></label>
+            <label className="check"><input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} /><span>{t("key_remember")}</span></label>
+            <button type="submit" className="pill ink sm" disabled={!key.trim()}>{t("key_use")}</button>
+            <p className="note">{t("key_note")}</p>
+          </form>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function Settings() {
   const { t, b, ws } = useApp();
   return (
     <div className="page narrow">
       <PageHead title={t("nav_settings")} sub={t("set_sub")} />
+      <AgentSettings />
       <section className="sec">
         <SecHead title={t("set_rules")} />
         <ul className="tray rules">

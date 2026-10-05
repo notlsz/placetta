@@ -5,6 +5,7 @@ import type { Application, CheckItem, Doc } from "./model";
 import { fmtStamp, money } from "./time";
 import { FileCard, I, LevelTag, Modal, Pill, Sample, Sheet, StatusChip, feeTotal } from "./ui";
 import { INK } from "./pages";
+import { Working } from "./Bot";
 
 /* ------------------------- application, opened ------------------------- */
 
@@ -70,7 +71,7 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
       </span>
       <div className="ck-body">
         <b>{b(c.label)}</b>
-        {reading ? <small>{t("reading")}…</small>
+        {reading ? <Working on size="sm"><span className="reading-pill">{t("reading")}…</span></Working>
           : dep ? <small>{t("comesFrom", { x: b(dep.name) })}</small>
             : c.note ? <small>{b(c.note)}</small>
               : c.state === "auto" ? <small>{t("prepares")}</small> : null}
@@ -216,7 +217,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         )}
       </div>
       <footer className="m-f">
-        <p>{t("ap_note")}</p>
+        <p>{t("ap_note")} {t("ap_sim")}</p>
         <div className="m-btns">
           {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
           <Pill kind="ink" disabled={busy} onClick={() => { approve(a.id); onClose(); }}>{b(a.action)}</Pill>

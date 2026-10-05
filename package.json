@@ -11,6 +11,8 @@
     "build:single": "tsc -b && vite build --mode single"
   },
   "dependencies": {
+    "border-beam": "^1.4.1",
+    "bot-avatars": "^0.2.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "thinking-orbs": "^0.3.2",

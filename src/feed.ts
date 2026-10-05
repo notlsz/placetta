@@ -4,7 +4,7 @@ import { ago } from "./time";
 
 /* The agent panel's feed: what you said, each run with its steps and reply, and memories it committed. */
 
-export type Turn = { id: number; kind: "turn"; at: string; steps: Step[]; active: number; reply?: Reply; ms?: number };
+export type Turn = { id: number; kind: "turn"; at: string; steps: Step[]; active: number; reply?: Reply; ms?: number; draft?: string };
 export type FeedItem =
   | { id: number; kind: "user"; text: string }
   | Turn

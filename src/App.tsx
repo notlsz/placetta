@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ThinkingOrb } from "thinking-orbs";
-import { audit, demoAgent, setFact, setField, type AgentBackend, type Reply, type Request, type Step } from "./agent";
+import { audit, demoAgent, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
+import { AgentBot } from "./Bot";
 import { AppCtx, type Ctx, type Tab, type View } from "./ctx";
 import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
+import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, type Model, type Turn as Msg } from "./live";
 import { applicationPdf, auditCsv, docBlob, downloads, saveFile } from "./files";
 import { unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
@@ -15,7 +16,8 @@ import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicens
 import { daysUntil, inDays, nowIso } from "./time";
 import { I } from "./ui";
 
-const agent: AgentBackend = demoAgent;
+const KEY = "placetta-api-key", KEY_MODEL = "placetta-api-model";
+const readKey = () => { try { return { key: localStorage.getItem(KEY) ?? "", model: localStorage.getItem(KEY_MODEL) ?? API_MODELS[0].id }; } catch { return { key: "", model: API_MODELS[0].id }; } };
 
 const readLang = (): Lang => {
   try { const v = localStorage.getItem("placetta-agent-lang"); if (v === "en" || v === "zh") return v; } catch { /* storage blocked */ }
@@ -76,6 +78,25 @@ export default function App() {
   const kept = useRef(new Map<string, File>());   // files you uploaded this session, so they download as themselves
   useEffect(() => { void downloads(); }, []);
 
+  /* the model behind the agent: Claude in a viewer, the API with a key, or the demo script */
+  const [model, setModel] = useState<Model | null>(null);
+  const [apiName, setApiName] = useState("");
+  const [deep, setDeep] = useState(false);
+  const history = useRef<Msg[]>([]);
+  const abort = useRef<AbortController | null>(null);
+  useEffect(() => {
+    let on = true;
+    void claudeModel().then(m => {
+      if (!on) return;
+      if (m) { setModel(m); return; }
+      const saved = readKey();
+      if (saved.key) { setModel(apiModel(saved.key, saved.model)); setApiName(API_MODELS.find(x => x.id === saved.model)?.label ?? saved.model); }
+    });
+    return () => { on = false; };
+  }, []);
+  const modelRef = useRef<Model | null>(null);
+  useEffect(() => { modelRef.current = model; }, [model]);
+
   const run = useCallback(async (req: Request, shown: string | null, voice = false) => {
     if (busyRef.current) return;
     busyRef.current = true; setBusy(true);
@@ -87,22 +108,38 @@ export default function App() {
     if ("match" in req) { setMatching(true); setView("find"); }
     const upd = (f: (m: Turn) => Partial<Turn>) => setFeed(ms => ms.map(m => (m.id === aid && m.kind === "turn" ? { ...m, ...f(m) } : m)));
     let said = "";
+    const ctl = new AbortController(); abort.current = ctl;
+    const onEvent = (e: AgentEvent) => {
+      if (e.type === "step") { setStep(e.step); upd(m => ({ steps: [...m.steps, e.step], active: e.index })); }
+      else if (e.type === "update") setWs(e.patch);
+      else if (e.type === "draft") upd(() => ({ draft: e.text }));
+      else {
+        const r: Reply = e.reply;
+        upd(() => ({ reply: r, active: -1, ms: performance.now() - t0, draft: undefined }));
+        said = r.text.map(x => x[lang]).join(" ");
+        if (r.matches) setMatch(r.matches);
+        if ("text" in req && modelRef.current) history.current.push({ role: "user", content: req.text }, { role: "assistant", content: said });
+      }
+    };
+    const m = modelRef.current;
+    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep) : demoAgent;
     try {
-      await agent.run(req, { lang, current: wsRef.current }, e => {
-        if (e.type === "step") { setStep(e.step); upd(m => ({ steps: [...m.steps, e.step], active: e.index })); }
-        else if (e.type === "update") setWs(e.patch);
-        else {
-          const r: Reply = e.reply;
-          upd(() => ({ reply: r, active: -1, ms: performance.now() - t0 }));
-          said = r.text.map(x => x[lang]).join(" ");
-          if (r.matches) setMatch(r.matches);
-        }
-      }, new AbortController().signal);
-    } catch { /* stopped */ }
+      await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
+    } catch (err) {
+      const code = (err as { code?: string })?.code ?? ((err as Error)?.name === "AbortError" ? "cancelled" : "upstream_error");
+      if (code === "cancelled") upd(m2 => ({ reply: { text: [B("Stopped.", "已停止。")] }, active: -1, steps: m2.steps }));
+      else if (m && PERMANENT.includes(code)) {
+        // This view can't use Claude after all: say so once and answer from the demo script.
+        setModel(null); say(t("liveOff"));
+        upd(() => ({ steps: [], active: 0 }));
+        try { await demoAgent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal); } catch { /* stopped */ }
+      } else upd(() => ({ reply: { text: [code === "rate_limited" ? B("Claude is busy for your account right now. Try again in a little while.", "您的 Claude 账户暂时繁忙，请稍后再试。") : B("I couldn't reach Claude just now. Try again in a moment.", "暂时无法连接 Claude，请稍后再试。")] }, active: -1 }));
+    }
+    abort.current = null;
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if (voice && said) tts.speak(said, lang === "zh" ? "zh-CN" : "en-US");
-    else if (said && !panelRef.current) say(said.split(/(?<=[.。])\s*/)[0]);
-  }, [lang, tts, say]);
+    else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
+  }, [lang, tts, say, t, deep]);
 
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
@@ -137,6 +174,13 @@ export default function App() {
 
   const ctx: Ctx = useMemo(() => ({
     lang, t, b, ws, busy, live: step, uploading,
+    mode: model ? model.kind : "demo", apiName, deep, setDeep,
+    stop: () => abort.current?.abort(),
+    applyKey: (key, id, remember) => {
+      setModel(apiModel(key, id)); setApiName(API_MODELS.find(x => x.id === id)?.label ?? id);
+      try { if (remember) { localStorage.setItem(KEY, key); localStorage.setItem(KEY_MODEL, id); } else { localStorage.removeItem(KEY); localStorage.removeItem(KEY_MODEL); } } catch { /* storage blocked */ }
+    },
+    dropKey: () => { setModel(null); setApiName(""); try { localStorage.removeItem(KEY); localStorage.removeItem(KEY_MODEL); } catch { /* storage blocked */ } },
     go,
     ask,
     run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
@@ -169,7 +213,7 @@ export default function App() {
       setFeed(fd => [...fd, { id: nid(), kind: "memory", text }]);
       say(`${t("committed")}: ${text[lang]}`);
     },
-  }), [lang, t, b, ws, busy, step, uploading, go, ask, run, approve, upload, save, say]);
+  }), [lang, t, b, ws, busy, step, uploading, model, apiName, deep, go, ask, run, approve, upload, save, say]);
 
   /* page */
   const page = {
@@ -182,12 +226,12 @@ export default function App() {
   const side = (
     <nav className={"side" + (navOpen ? " open" : "")} aria-label="Workspace">
       <div className="side-top">
-        <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={22} /></button>
+        <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={17} /></button>
         {phone && <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>}
       </div>
       <div className="wsname"><b>{b(ws.business)}</b><span>{t("sampleWs")}</span></div>
       <button type="button" className={"askb" + (panelOpen ? " on" : "")} onClick={() => { setPanelOpen(o => !o); setNavOpen(false); }}>
-        <span className="lens" aria-hidden="true"><ThinkingOrb state={busy && step ? step.state : "breathing"} size={20} theme="light" color="#3F7FC4" /></span>
+        <span className="ask-bot" aria-hidden="true"><AgentBot size={32} busy={busy} interactive={false} /></span>
         <span>{t("showPanel")}</span>
         {ws.approvals.length > 0 && <em>{ws.approvals.length}</em>}
       </button>
@@ -227,7 +271,7 @@ export default function App() {
           {phone && (
             <header className="mbar">
               <button type="button" className="icbtn" onClick={() => setNavOpen(true)} aria-label="Menu"><I.menu /></button>
-              <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={20} /></button>
+              <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={16} /></button>
               <div className="lang" role="group" aria-label={t("langSwitch")}>
                 <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
                 <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>

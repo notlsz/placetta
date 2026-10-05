@@ -36,6 +36,7 @@ export type Context = { lang: Lang; current: Workspace };
 export type AgentEvent =
   | { type: "step"; index: number; step: Step }
   | { type: "update"; patch: (w: Workspace) => Workspace }
+  | { type: "draft"; text: string }
   | { type: "reply"; reply: Reply };
 
 export interface AgentBackend {
@@ -332,6 +333,45 @@ function send(): Plan {
   };
 }
 
+/** Approvals the live agent created: file any application, or send any drafted message, once the person approves. */
+function generic(id: string, ctx: Context): Plan {
+  const ap = ctx.current.approvals.find(a => a.id === id);
+  if (!ap) return FALLBACK();
+  if (ap.kind === "send") {
+    const to = ap.data?.find(f => f.id === "to")?.value ?? "";
+    return {
+      steps: [S("working", `Sending the message to ${to}`, `向 ${to} 发送消息`)],
+      updates: [all(dropApproval(id), audit("you", B("Approved message", "批准消息"), ap.title), audit("agent", B("Sent message", "发送消息"), same(to)))],
+      reply: { text: [B(`Sent to ${to}.`, `已发送给 ${to}。`)] },
+    };
+  }
+  const a = ctx.current.apps.find(x => x.id === ap.app);
+  if (!a) return FALLBACK();
+  const fee = a.fees.reduce((s, f) => s + f.amount, 0);
+  const site = a.source.label || "";
+  const portal = site ? B(`${site}`, `${site}`) : B("the agency's portal", "机构门户");
+  const rid = "d-r-" + a.id, name = a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1);
+  const receipt = a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) + "-receipt.pdf";
+  return {
+    steps: [
+      S("connecting", `Signing in to ${portal.en} with your saved account`, `使用您保存的账户登录 ${portal.zh}`, site || undefined),
+      S("working", `Submitting the ${name}`, `提交${a.name.zh}`, site || undefined),
+      ...(fee ? [S("working", `Paying $${fee.toLocaleString("en-US")} with the card ending 4821`, `使用尾号 4821 的银行卡支付 $${fee.toLocaleString("en-US")}`)] : []),
+      S("weaving", "Saving the receipt to Documents", "将收据保存到文件"),
+    ],
+    updates: [all(
+      dropApproval(id),
+      audit("you", B("Approved filing", "批准提交"), a.name, fee ? same(`$${fee.toLocaleString("en-US")}`) : B("No fee", "无需费用")),
+      audit("agent", B("Submitted application", "提交申请"), a.name, site ? same(site) : undefined),
+      ...(fee ? [audit("agent", B("Paid fee", "支付费用"), a.name, B(`$${fee.toLocaleString("en-US")}, card ending 4821`, `$${fee.toLocaleString("en-US")}，尾号 4821 的银行卡`))] : []),
+      addDoc(doc(rid, receipt, 90_000, "agent", a.id, B("Receipt", "收据"))),
+      setApp(a.id, { status: "review", receipt: rid, next: B("Filed just now. Placetta is watching for a decision", "刚刚提交，快哉正在跟进审批") }),
+      addTask({ id: "r-" + a.id, state: "searching", label: B(`Watching for a decision on the ${name}`, `跟进${a.name.zh}的审批`), detail: B("Started just now", "刚刚开始") }),
+    )],
+    reply: { text: [B(`Filed the ${name} with ${a.agency.en}${fee ? ` and paid the $${fee.toLocaleString("en-US")} fee` : ""}. The receipt is in Documents.`, `已向${a.agency.zh}提交${a.name.zh}${fee ? `并支付 $${fee.toLocaleString("en-US")} 费用` : ""}。收据在文件中。`)], files: [rid] },
+  };
+}
+
 /* --------------------------------- uploads -------------------------------- */
 
 const SAMPLE_FILES: Record<string, { name: string; size: number }> = {
@@ -441,7 +481,7 @@ function match(what: string, where: string): Plan {
 /* ---------------------------------- run ---------------------------------- */
 
 function plan(req: Request, ctx: Context): Plan {
-  if ("approve" in req) return req.approve === "a-staff" ? send() : FILE[req.approve] ? file(req.approve, ctx) : FALLBACK();
+  if ("approve" in req) return req.approve === "a-staff" ? send() : FILE[req.approve] ? file(req.approve, ctx) : generic(req.approve, ctx);
   if ("upload" in req) return upload(req.upload, ctx);
   if ("match" in req) return match(req.match.what, req.match.where);
   return SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx) ?? FALLBACK();
