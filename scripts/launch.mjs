@@ -13,7 +13,7 @@
 
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { copyFileSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import readline from "node:readline";
@@ -243,14 +243,14 @@ async function main() {
   console.log(`\n${bold("Building the app")}`);
   const env = { VITE_SUPABASE_URL: SUPABASE_URL, VITE_SUPABASE_KEY: PUBLISHABLE };
   if (!run("npm", ["run", "build"], { env })) { console.log(red("Build failed. Fix the error above and run this again.")); process.exit(1); }
-  copyFileSync("vercel.json", "dist/vercel.json");
 
   let origin = app;
-  const deploy = (await ask("\nDeploy to Netlify now? It asks you to log in and pick or create a site. [y/N] ")).toLowerCase().startsWith("y");
+  const deploy = (await ask("\nDeploy to Vercel now? It asks you to log in and pick or create a project. [y/N] ")).toLowerCase().startsWith("y");
   if (deploy) {
-    const ok = run("npx", ["--yes", "netlify-cli", "deploy", "--prod", "--dir", "dist"]);
-    if (!ok) console.log(red("Netlify deploy did not finish. You can drag the dist folder onto app.netlify.com/drop instead."));
-    if (!origin) origin = (await ask("Paste the live site address Netlify printed (https://...): ")).replace(/\/+$/, "");
+    // Vercel builds from the project folder with vercel.json and .env.production.
+    const ok = run("npx", ["--yes", "vercel", "deploy", "--prod"]);
+    if (!ok) console.log(red("Vercel deploy did not finish. You can also import the GitHub repo at vercel.com/new."));
+    if (!origin) origin = (await ask("Paste the live site address Vercel printed (https://...): ")).replace(/\/+$/, "");
   }
   if (origin) secrets.APP_ORIGINS = origin;
   else console.log(dim("No app address yet, so checkout, invites and integrations won't know where to send people back. Run this again once the app is online."));
@@ -261,6 +261,11 @@ async function main() {
   }
   if (TOKEN) {
     await configureAuth({ ...auth, origin });
+    // Plans only apply once there's a way to pay: with Stripe set up, switch payments on.
+    if (sk) {
+      try { await sql("update public.app_settings set payments_on = true, updated_at = now()"); console.log(`  ${green("on")}  payments: plans now apply`); }
+      catch (e) { console.log(`  ${red("not switched on")}  payments: ${e.message}`); }
+    }
     const emails = staff.split(",").map((e) => e.trim()).filter((e) => /^[^@\s']+@[^@\s']+\.[^@\s']+$/.test(e));
     if (emails.length) {
       try { await sql(`insert into public.staff_emails (email) values ${emails.map((e) => `('${e}')`).join(", ")} on conflict do nothing`); console.log(`  ${green("added")}  team: ${emails.join(", ")}`); }

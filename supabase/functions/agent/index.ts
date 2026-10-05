@@ -91,7 +91,8 @@ Deno.serve(async (req) => {
   const pageTools = (Array.isArray(r.tools) ? (r.tools as Block[]) : [])
     .filter((t) => t && typeof t.name === "string" && !("type" in t))
     .slice(0, 24);
-  const research = body.research !== false;
+  // Research for conversations (page tools) and deep lookups; plain extraction (reading an upload) doesn't need the web.
+  const research = body.research !== false && (pageTools.length > 0 || !!body.deep);
   const loc = (body.location ?? {}) as Record<string, unknown>;
   const userLocation = typeof loc.city === "string" && loc.city
     ? { type: "approximate", city: String(loc.city).slice(0, 80), region: String(loc.region ?? "").slice(0, 80) || undefined, country: "US" }
@@ -107,7 +108,8 @@ Deno.serve(async (req) => {
   if (typeof r.system === "string" && r.system) payload.system = r.system.slice(0, 80000);
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
   if (tools.length) payload.tools = tools;
-  if (JSON.stringify(payload).length > 1_500_000) return fail(413, "bad_request", "That request is too large.");
+  // Room for one PDF of up to 4.5 MB (about 6 MB once base64-encoded) plus the conversation.
+  if (JSON.stringify(payload).length > 8_000_000) return fail(413, "bad_request", "That request is too large.");
 
   let { res, text } = await callClaude(key, payload, research ? FETCH_BETA : null);
   // If web fetch isn't available on this account, retry with web search only.

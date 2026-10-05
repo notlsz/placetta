@@ -54,10 +54,12 @@ export type QueueRow = Filing & { business: string; approver_email: string | nul
 export type Billing = {
   workspace_id: string; entry_markets: number; entry_paid_at: string | null; subscription_status: string | null;
   subscription_plan: string | null; current_period_end: string | null; comped: boolean; stripe_customer_id: string | null;
+  /** Payments aren't switched on yet (no Stripe): everything is open, as the database's plan_of() says. */
+  free?: boolean;
 };
 export type Plan = "none" | "entry" | "monthly";
 export const planOf = (b: Billing | null): Plan =>
-  !b ? "none" : b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.entry_markets > 0 ? "entry" : "none";
+  !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.entry_markets > 0 ? "entry" : "none";
 export type DocRow = { id: string; workspace_id: string; app_id: string | null; filing_id: string | null; name: string; path: string; size: number; mime: string | null; source: string; created_at: string };
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
 export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack";
@@ -236,9 +238,13 @@ export async function downloadDoc(path: string): Promise<Blob> {
 /* ------------------------------ billing ------------------------------ */
 
 export async function getBilling(ws: string): Promise<Billing | null> {
-  const { data, error } = await supabase().from("billing").select("workspace_id, entry_markets, entry_paid_at, subscription_status, subscription_plan, current_period_end, comped, stripe_customer_id").eq("workspace_id", ws).maybeSingle();
+  const [{ data, error }, settings] = await Promise.all([
+    supabase().from("billing").select("workspace_id, entry_markets, entry_paid_at, subscription_status, subscription_plan, current_period_end, comped, stripe_customer_id").eq("workspace_id", ws).maybeSingle(),
+    // No settings row (an older database, or the preview) means plans apply as before.
+    supabase().from("app_settings").select("payments_on").maybeSingle().then(r => r, () => ({ data: null })),
+  ]);
   if (error) throw fromPg(error);
-  return data as Billing | null;
+  return data ? { ...(data as Billing), free: (settings.data as { payments_on?: boolean } | null)?.payments_on === false } : null;
 }
 
 /* ------------------------------ edge functions ------------------------------ */

@@ -25,10 +25,12 @@ export type Model = {
   kind: "claude" | "api" | "server";
   tools: boolean;
   images: boolean;
+  /** Reads PDFs (the Messages API's document blocks). */
+  pdfs: boolean;
   /** Takes instructions as a system prompt (the API and the server); the viewer's Claude gets them as the first turn. */
   system: boolean;
   chat(turns: Turn[], o: { tools?: Tool[]; onText?: (text: string) => void; signal: AbortSignal; deep?: boolean; system?: string; onSources?: (s: Source[]) => void }): Promise<string>;
-  json<T>(prompt: string, o: { signal: AbortSignal; deep?: boolean; images?: Blob[] }): Promise<T>;
+  json<T>(prompt: string, o: { signal: AbortSignal; deep?: boolean; images?: Blob[]; pdfs?: Blob[] }): Promise<T>;
 };
 export type LiveError = { code: string; message: string };
 /** Codes after which this view can't use Claude at all: fall back to the demo. */
@@ -49,7 +51,7 @@ export async function claudeModel(): Promise<Model | null> {
   const lim = await sample.limits().catch(() => null);
   const max = lim?.tools?.maxCount ?? 0;
   return {
-    kind: "claude", tools: max > 0, images: !!lim?.images, system: false,
+    kind: "claude", tools: max > 0, images: !!lim?.images, pdfs: false, system: false,
     async chat(turns, o) {
       const { text } = await sample(turns, {
         signal: o.signal, cache: false, modelTier: o.deep ? "default" : "quick",
@@ -91,7 +93,7 @@ function messagesModel(kind: "api" | "server", send: Transport): Model {
     return acc;
   }, []);
   return {
-    kind, tools: true, images: true, system: true,
+    kind, tools: true, images: true, pdfs: true, system: true,
     async chat(turns, o) {
       const messages = fold(turns);
       const tools = (o.tools ?? []).map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
@@ -121,10 +123,18 @@ function messagesModel(kind: "api" | "server", send: Transport): Model {
     },
     async json(prompt, o) {
       const content: unknown[] = [];
+      for (const pdf of o.pdfs ?? []) content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: await blobToBase64(pdf) } });
       for (const img of o.images ?? []) content.push({ type: "image", source: { type: "base64", media_type: img.type || "image/png", data: await blobToBase64(img) } });
       content.push({ type: "text", text: prompt });
-      const data = await send({ messages: [{ role: "user", content }], max_tokens: 3000 }, o.signal, !!o.deep);
-      return parseJson(data.content.filter(c => c.type === "text").map(c => c.text).join(""));
+      const messages: { role: string; content: unknown }[] = [{ role: "user", content }];
+      let text = "";
+      for (let round = 0; round < 4; round++) {
+        const data = await send({ messages, max_tokens: 3000 }, o.signal, !!o.deep);
+        text += data.content.filter(c => c.type === "text").map(c => c.text).join("");
+        if (data.stop_reason !== "pause_turn") break;   // a long research step: let it carry on
+        messages.push({ role: "assistant", content: data.content });
+      }
+      return parseJson(text);
     },
   };
 }
@@ -432,6 +442,9 @@ export function toHits(list: unknown[], w: Workspace): LicenseHit[] {
 
 const READABLE_TEXT = /\.(txt|csv|md|json|tsv)$/i;
 const READABLE_IMAGE = /\.(png|jpe?g|webp|gif)$/i;
+const READABLE_PDF = /\.pdf$/i;
+/** Keeps the request well under the server's limit once base64-encoded. */
+const PDF_MAX = 4_500_000;
 
 /** Plain, sharp prose: no bold markers, and never an em dash. */
 export const clean = (s: string) => s.replace(/\*\*/g, "").replace(/\s*\u2014\s*/g, ", ").replace(/,\s*,/g, ",").trim();
@@ -496,9 +509,13 @@ Write name, agency, fee and timeline in ${LANG[lang]}. Include only items that c
         step({ state: "shaping", label: B(`Reading ${f.name}`, `读取 ${f.name}`) });
         apply(w => audit("you", B("Uploaded", "上传"), same(f.name), app.name)(addDoc({ id: did, name: f.name, kind: (f.name.split(".").pop()?.toLowerCase() ?? "pdf") as Doc["kind"], size: f.size, by: "you", at: nowIso(), app: app.id, tag: B("Uploaded", "已上传"), path: o.paths?.get(f.name) })(w)));
         const canImage = READABLE_IMAGE.test(f.name) && model.images, canText = READABLE_TEXT.test(f.name);
-        if (!canImage && !canText) {
+        const canPdf = READABLE_PDF.test(f.name) && model.pdfs && f.size <= PDF_MAX;
+        if (!canImage && !canText && !canPdf) {
           apply(setCheck(app.id, req.upload.item, { state: "done", doc: did }));
-          onEvent({ type: "reply", reply: { text: [B(`Added ${f.name} to the checklist. I can't read this file type here, so check the fields on the Application tab.`, `已将 ${f.name} 加入清单。这里无法读取此类文件，请在“申请表”中核对各项内容。`)], apps: [app.id] } });
+          const big = READABLE_PDF.test(f.name) && model.pdfs;
+          onEvent({ type: "reply", reply: { text: [big
+            ? B(`Added ${f.name} to the checklist. It's over 4.5 MB, too large for me to read, so check the fields on the Application tab.`, `已将 ${f.name} 加入清单。文件超过 4.5 MB，无法读取，请在“申请表”中核对各项内容。`)
+            : B(`Added ${f.name} to the checklist. I can't read this file type here, so check the fields on the Application tab.`, `已将 ${f.name} 加入清单。这里无法读取此类文件，请在“申请表”中核对各项内容。`)], apps: [app.id] } });
           return;
         }
         step({ state: "weaving", label: B("Pulling out what the application needs", "提取申请所需信息") });
@@ -507,7 +524,7 @@ Write name, agency, fee and timeline in ${LANG[lang]}. Include only items that c
         const out = await model.json<{ fields?: { label: string; value: string }[]; facts?: { label: string; value: string }[] }>(
           `This document was uploaded for "${item?.label[lang] ?? ""}" on the application "${app.name[lang]}". The application's fields are: ${JSON.stringify(labels)}.
 Read it and reply with only JSON: {"fields": [{"label": one of the field labels, "value": string}], "facts": [{"label": string, "value": string}]}: the fields it fills, and up to 5 other key facts (dates, numbers, names). Only what the document actually says; no guesses. Write values as they appear.${canText ? "\n\nDocument:\n" + body : ""}`,
-          { signal, images: canImage ? [f] : undefined });
+          { signal, images: canImage ? [f] : undefined, pdfs: canPdf ? [f] : undefined });
         const fields = arr(out?.fields).map(x => x as { label: string; value: string }).filter(x => labels.includes(String(x.label)) && str(x.value));
         const facts = arr(out?.facts).map(x => x as { label: string; value: string }).filter(x => str(x.label) && str(x.value)).slice(0, 5);
         apply(w => ({ ...w, apps: w.apps.map(a => (a.id !== app.id ? a : { ...a, fields: a.fields.map(fl => { const hit = fields.find(x => x.label === fl.label[lang]); return hit ? { ...fl, value: str(hit.value, 200), from: same(lang === "zh" ? `来自 ${f.name}` : `From ${f.name}`) } : fl; }) })) }));
