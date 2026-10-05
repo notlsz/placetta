@@ -59,7 +59,7 @@ function Checklist({ a }: { a: Application }) {
 }
 
 function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
-  const { b, t, ws, uploading, upload, busy } = useApp();
+  const { b, t, ws, uploading, upload, busy, cloud } = useApp();
   const input = useRef<HTMLInputElement>(null);
   const doc = c.doc ? ws.docs.find(d => d.id === c.doc) : undefined;
   const dep = c.dep ? ws.apps.find(x => x.id === c.dep) : undefined;
@@ -85,7 +85,7 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
         {c.state === "missing" && !c.dep && !reading && (
           <div className="ck-act">
             <button type="button" className="pill ink sm" disabled={busy} onClick={() => input.current?.click()}><I.upload />{t("upload")}</button>
-            <button type="button" className="pill quiet sm" disabled={busy} onClick={() => upload(a.id, c.id)}>{t("useSample")}</button>
+            {!cloud && <button type="button" className="pill quiet sm" disabled={busy} onClick={() => upload(a.id, c.id)}>{t("useSample")}</button>}
             <input ref={input} type="file" hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload(a.id, c.id, f); }} />
           </div>
         )}
@@ -175,7 +175,7 @@ function Receipt({ a }: { a: Application }) {
 /* ------------------------------- approval ------------------------------- */
 
 export function ApproveModal({ id, onClose }: { id: string; onClose: () => void }) {
-  const { b, t, lang, ws, approve, openApp, busy } = useApp();
+  const { b, t, lang, ws, approve, openApp, busy, cloud } = useApp();
   const a = ws.approvals.find(x => x.id === id);
   if (!a) return null;
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
@@ -212,12 +212,12 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
               {app.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{f.amount ? money(f.amount) : t("free")}</dd></div>)}
               <div className="tot"><dt>{t("total")}</dt><dd>{fee ? money(fee) : t("free")}</dd></div>
             </dl>
-            {fee > 0 && <p className="note">{t("paidAfter")}</p>}
+            {fee > 0 && <p className="note">{cloud ? t("paidDirect") : t("paidAfter")}</p>}
           </section>
         )}
       </div>
       <footer className="m-f">
-        <p>{t("ap_note")} {t("ap_sim")}</p>
+        <p>{t("ap_note")} {cloud ? (a.kind === "file" ? t("ap_team") : "") : t("ap_sim")}</p>
         <div className="m-btns">
           {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
           <Pill kind="ink" disabled={busy} onClick={() => { approve(a.id); onClose(); }}>{b(a.action)}</Pill>

@@ -7,9 +7,14 @@ export const fmt = (s: string, v: Record<string, string | number>) => s.replace(
 export const S = {
   agentName: B("Placetta", "快哉"),
   sampleWs: B("Sample workspace", "示例工作区"),
+  collapseMenu: B("Collapse menu", "收起菜单"),
+  expandMenu: B("Expand menu", "展开菜单"),
   sampleTag: B("Sample", "示例"),
 
   nav_overview: B("Overview", "概览"),
+  nav_stores: B("Stores", "门店"),
+  nav_queue: B("Filing queue", "申报队列"),
+  today: B("Today", "今天"),
   nav_apps: B("Applications", "申请"),
   nav_docs: B("Documents", "文件"),
   nav_deadlines: B("Deadlines", "截止日期"),
@@ -22,6 +27,7 @@ export const S = {
   langSwitch: B("Language", "语言"),
 
   ov_title: B("Here's where your {n} applications stand.", "您的 {n} 项申请，进展如下。"),
+  ov_title1: B("Here's where your application stands.", "您的申请，进展如下。"),
   ov_sub: B("{biz} in {place}. {goal}.", "{biz}，{place}。{goal}。"),
   ov_state: B("{a} approved, {r} with the agencies, {n} waiting on you.", "{a} 项已批准，{r} 项在机构审核中，{n} 项等您处理。"),
   ov_done: B("{d} of {n} filed or approved", "已提交或批准 {d}/{n}"),
@@ -44,6 +50,7 @@ export const S = {
 
   s_approved: B("Approved", "已批准"),
   s_review: B("In review", "审核中"),
+  s_filing: B("With our team", "快哉团队办理中"),
   s_ready: B("Ready to file", "可以提交"),
   s_needs: B("Needs you", "需要您处理"),
   s_draft: B("Preparing", "准备中"),
@@ -100,12 +107,14 @@ export const S = {
 
   working: B("Working", "处理中"),
   idle: B("Watching {n} agencies for you", "正在为您跟进 {n} 个机构"),
+  idleNew: B("Ready when you are", "随时为您效劳"),
   waitingYou: B("Waiting for your approval", "等待您批准"),
   approvedIt: B("Approved", "已批准"),
   committed: B("Committed to memory", "已存入记忆"),
   workedFor: B("Worked for {s}s", "用时 {s} 秒"),
   stepsN: B("{n} steps", "{n} 个步骤"),
   askPh: B("Ask Placetta or give it a task", "向快哉提问或布置任务"),
+  askPhShort: B("Ask Placetta", "问快哉"),
   attach: B("Add files", "添加文件"),
   talk: B("Talk", "语音"),
   send: B("Send", "发送"),
@@ -141,6 +150,7 @@ export const S = {
   actor_agent: B("Placetta", "快哉"),
   actor_you: B("You", "您"),
   actor_agency: B("Agency", "机构"),
+  actor_team: B("Placetta team", "快哉团队"),
 
   cx_sub: B("What Placetta knows about your business. It fills every application from these facts, so change one here and the next filing uses it.", "快哉掌握的企业资料。所有申请都根据这些资料填写，在这里修改后，下一次申请就会使用新内容。"),
   g_business: B("Business", "企业"),
@@ -187,6 +197,8 @@ export const S = {
 
   liveOff: B("Claude isn't available here, so Placetta is answering from the demo script.", "此处无法使用 Claude，快哉改用演示脚本回答。"),
   stop: B("Stop", "停止"),
+  ap_team: B("Placetta's filing team checks it against the agency's current requirements and submits it. Agency fees are paid by you directly to the agency, through the payment link we send.", "快哉申报团队会对照机构现行要求核对后提交。机构费用由您通过我们发送的付款链接直接支付给机构。"),
+  paidDirect: B("Paid by you directly to the agency, through the payment link we send. Placetta never charges agency fees.", "由您通过我们发送的付款链接直接支付给机构。快哉从不代收机构费用。"),
   ap_sim: B("This is a sample workspace: approving simulates the filing, and nothing reaches a real agency.", "这是示例工作区：批准后仅模拟提交，不会发送到真实机构。"),
   set_agent: B("Agent", "助理"),
   mode_claude: B("Live: Claude answers, using your Claude account. The first message asks you to allow it.", "实时：由 Claude 回答，使用您的 Claude 账户。第一次发消息时会请您允许。"),

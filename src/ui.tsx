@@ -37,6 +37,18 @@ export const I = {
   form: () => <svg {...sv} width={18} height={18}><rect x="5" y="3.5" width="14" height="17" rx="2" /><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4" /></svg>,
   card: () => <svg {...sv}><rect x="3" y="5.5" width="18" height="13" rx="2.5" /><path d="M3 10h18M7 15h3" /></svg>,
   message: () => <svg {...sv}><path d="M4 5h16v11H9l-5 4z" /></svg>,
+  store: () => <svg {...sv}><path d="M4 9.5V20h16V9.5M3 9.5l1.6-5h14.8l1.6 5M3 9.5c0 1.4 1.1 2.5 2.5 2.5S8 10.9 8 9.5c0 1.4 1.1 2.5 2.5 2.5S13 10.9 13 9.5c0 1.4 1.1 2.5 2.5 2.5S18 10.9 18 9.5c0 1.4 1.1 2.5 2.5 2.5" /><path d="M10 20v-5h4v5" /></svg>,
+  plug: () => <svg {...sv}><path d="M9 3v5M15 3v5M6.5 8h11v3.5a5.5 5.5 0 0 1-11 0zM12 17v4" /></svg>,
+  key: () => <svg {...sv}><circle cx="8" cy="15" r="4" /><path d="M11 12l8.5-8.5M16.5 7l2.5 2.5M14 9.5l2 2" /></svg>,
+  user: () => <svg {...sv}><circle cx="12" cy="8.5" r="3.8" /><path d="M4.5 20c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5" /></svg>,
+  globe: () => <svg {...sv}><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5s1.2-6.1 3.6-8.5z" /></svg>,
+  help: () => <svg {...sv}><circle cx="12" cy="12" r="8.5" /><path d="M9.6 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17h.01" /></svg>,
+  scale: () => <svg {...sv}><path d="M12 4v16M7 20h10M5 7h14M7.5 7l-3 6.5h6zM16.5 7l-3 6.5h6z" /></svg>,
+  logout: () => <svg {...sv}><path d="M14 4.5h4.5a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H14M10 16.5L5.5 12 10 7.5M5.5 12H16" /></svg>,
+  bell: () => <svg {...sv}><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15zM10 20.5h4" /></svg>,
+  thermo: () => <svg {...sv}><path d="M10 14.5V5a2 2 0 0 1 4 0v9.5a3.5 3.5 0 1 1-4 0z" /><path d="M12 9v7" /></svg>,
+  queue: () => <svg {...sv}><rect x="4" y="4" width="16" height="5" rx="1.5" /><rect x="4" y="11" width="16" height="4" rx="1.5" /><path d="M4 19h10" /></svg>,
+  copy: () => <svg {...sv} width={14} height={14}><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M5 15.5V6a1 1 0 0 1 1-1h9.5" /></svg>,
   clip: () => <svg {...sv}><path d="M20.5 11.5l-8.3 8.3a5 5 0 0 1-7-7l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9" /></svg>,
 };
 
@@ -126,9 +138,10 @@ export function Footer({ full }: { full?: boolean }) {
 }
 
 /** Legora's pill: a label, then the arrow in a white circle. "quiet" drops the circle. */
-export function Pill({ children, onClick, disabled, kind = "primary", sm }: { children: ReactNode; onClick: () => void; disabled?: boolean; kind?: "primary" | "ink" | "quiet"; sm?: boolean }) {
+/** Without onClick it submits its form. */
+export function Pill({ children, onClick, disabled, kind = "primary", sm }: { children: ReactNode; onClick?: () => void; disabled?: boolean; kind?: "primary" | "ink" | "quiet"; sm?: boolean }) {
   return (
-    <button type="button" className={"pill " + kind + (sm ? " sm" : "")} onClick={onClick} disabled={disabled}>
+    <button type={onClick ? "button" : "submit"} className={"pill " + kind + (sm ? " sm" : "")} onClick={onClick} disabled={disabled}>
       <span>{children}</span>{kind !== "quiet" && <i aria-hidden="true"><I.arrow /></i>}
     </button>
   );

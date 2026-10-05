@@ -22,15 +22,7 @@ export const INITIAL_FEED: FeedItem[] = [
     ],
     reply: {
       text: [B("Here's where things stand: 2 applications are approved, 1 is with the city, and 3 need you. The sign permit is ready to file and only needs your approval.", "目前进展：2 项申请已获批准，1 项在市政府审核中，3 项需要您处理。招牌许可已可提交，只等您批准。")],
-      apps: ["sign"],
       approvals: ["a-sign"],
-    },
-  },
-  {
-    id: 2, kind: "turn", at: ago(60), active: -1, steps: [],
-    reply: {
-      text: [B("Heads up: your LLC Statement of Information is due in 21 days. I can draft it from what I already know, so it only needs a look from you.", "提醒一下：您的有限责任公司信息声明将在 21 天后到期。我可以根据已有资料起草，您只需看一眼。")],
-      next: { label: B("Draft it", "起草"), req: { text: "Prepare the Statement of Information" } },
     },
   },
 ];

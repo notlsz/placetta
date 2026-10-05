@@ -3,12 +3,13 @@ import { ThinkingOrb } from "thinking-orbs";
 import { useApp } from "./ctx";
 import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
-import { FileCard, Footer, I, LevelTag, Pill, StatusChip, feeTotal } from "./ui";
+import { FileCard, Footer, I, Pill, StatusChip, feeTotal } from "./ui";
 import type { Key } from "./i18n";
-import { API_MODELS } from "./live";
 import { AgentBot, TaskBot, Working } from "./Bot";
+import { StoresStrip } from "./Stores";
+import { B } from "./model";
 
-export const INK = "#3F7FC4";
+export const INK = "#4D73A3";
 const LEVELS: Level[] = ["federal", "state", "county", "city"];
 const ORDER: Status[] = ["ready", "needs", "draft", "review", "waiting", "todo", "approved"];
 const byPriority = (a: Application, b: Application) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status) || Number(!!b.critical) - Number(!!a.critical);
@@ -33,15 +34,25 @@ function SecHead({ title, count, more, onMore }: { title: string; count?: number
   );
 }
 
-const KIND_ICON = { file: I.form, send: I.message, upload: I.clip };
+const KIND_ICON = { file: I.form, send: I.message, upload: I.clip, pay: I.card };
 
 /** Something only you can do: frosted, with the one action it needs. */
 export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
-  const { b, t, lang, ws, busy, openApproval, openApp } = useApp();
+  const { b, t, lang, ws, busy, openApproval, openApp, approve, cloud } = useApp();
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
-  const fee = app && a.kind === "file" ? feeTotal(app) : 0;
+  const fee = a.kind === "pay" ? a.fee ?? 0 : app && a.kind === "file" ? feeTotal(app) : 0;
   const Icon = KIND_ICON[a.kind];
-  const sub = [a.agency && b(a.agency), a.kind === "file" && (fee ? money(fee) : t("free"))].filter(Boolean).join(lang === "zh" ? "，" : ", ");
+  const sub = [a.agency && b(a.agency), (a.kind === "file" || a.kind === "pay") && (fee ? money(fee) : t("free"))].filter(Boolean).join(lang === "zh" ? "，" : ", ");
+  if (a.kind === "pay") return (
+    <div className={"appr k-pay" + (compact ? " compact" : "")}>
+      <span className={"appr-ico k-" + a.kind}><Icon /></span>
+      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}</span>
+      <span className="appr-btns">
+        <button type="button" className="pill quiet sm" disabled={busy} onClick={() => a.filing && void cloud?.markPaid(a.filing)}>{b(B("I've paid", "我已付款"))}</button>
+        <Pill onClick={() => approve(a.id)} sm={compact}>{b(B("Pay the agency", "去付款"))}</Pill>
+      </span>
+    </div>
+  );
   return (
     <div className={"appr" + (compact ? " compact" : "")}>
       <span className={"appr-ico k-" + a.kind}><Icon /></span>
@@ -76,9 +87,33 @@ function LiveLine() {
 
 /* -------------------------------- overview -------------------------------- */
 
+function Welcome() {
+  const { b, ws, ask, busy, cloud } = useApp();
+  const place = ws.meta?.city ?? (ws.locations[0] ? b(ws.locations[0].name) : "");
+  const what = ws.meta?.what ?? "";
+  const start = () => ask(b(B(`Map every license, permit and registration ${b(ws.business)} needs to open its store${place ? ` in ${place}` : ""}${what ? `, which sells ${what.charAt(0).toLowerCase() + what.slice(1)}` : ""}. Prepare an application for each one, fill what you can from Context, and tell me what you need from me.`, `梳理${b(ws.business)}${place ? `在${place}` : ""}${what ? `开设${what}` : "开店"}所需的全部执照、许可和登记，为每一项准备申请，用资料填写能填的内容，并告诉我还需要我提供什么。`)));
+  return (
+    <div className="page home">
+      <header className="hero">
+        <div className="hero-bot"><AgentBot size={96} busy={busy} /></div>
+        <h1>{b(B(`Let's get ${b(ws.business)} licensed.`, `一起为${b(ws.business)}办齐执照。`))}</h1>
+        <p className="lede">{b(B("Placetta maps every license your store needs, in order, from the city to the federal government, and prepares each application. You approve; our team files.", "快哉按顺序梳理门店从市级到联邦所需的全部执照，并准备好每一份申请。您批准，团队提交。"))}</p>
+        <div className="hero-act">
+          {cloud && cloud.plan === "none"
+            ? <Pill kind="ink" onClick={() => cloud.openPlans("start")}>{b(B("Get your entry plan, $299", "开通开店计划，$299"))}</Pill>
+            : <Pill kind="ink" disabled={busy} onClick={start}>{b(B("Map my licenses", "梳理我的执照"))}</Pill>}
+        </div>
+        {cloud && cloud.plan === "none" && <p className="ctx">{b(B("One market, one time. Credited toward your first year.", "每个市场一次性付费，可抵扣首年费用。"))}</p>}
+      </header>
+      <Footer />
+    </div>
+  );
+}
+
 export function Overview() {
   const { t, b, ws, lang, go, ask, busy } = useApp();
   const n = ws.apps.length;
+  if (!n) return <Welcome />;
   const c = (s: Status[]) => ws.apps.filter(a => s.includes(a.status)).length;
   const approved = c(["approved"]), agency = c(["review"]), you = c(["ready", "needs"]);
   const soon = [...ws.deadlines].filter(d => daysUntil(d.date) >= 0).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 4);
@@ -87,15 +122,22 @@ export function Overview() {
     <div className="page home">
       <header className="hero">
         <div className="hero-bot"><AgentBot size={120} busy={busy} /></div>
-        <h1>{t("ov_title", { n })}</h1>
+        <h1>{n === 1 ? t("ov_title1") : t("ov_title", { n })}</h1>
         <p className="lede">{t("ov_state", { a: approved, r: agency, n: you })}</p>
         <div className="progress" aria-label={t("ov_done", { d: approved + agency, n })}>
           <span className="bar"><i style={{ width: `${((approved + agency) / n) * 100}%` }} /></span>
           <span className="pl">{t("ov_done", { d: approved + agency, n })}</span>
         </div>
-        <p className="ctx">{t("ov_sub", { biz: b(ws.business), place: b(ws.locations[0].name), goal: b(ws.goal) })}</p>
+        {ws.locations[0] && <p className="ctx">{t("ov_sub", { biz: b(ws.business), place: b(ws.locations[0].name), goal: b(ws.goal) })}</p>}
         <LiveLine />
       </header>
+
+      {(ws.stores ?? []).length > 0 && (
+        <section className="sec">
+          <SecHead title={t("nav_stores")} more={t("viewAll")} onMore={() => go("stores")} />
+          <StoresStrip onOpen={() => go("stores")} />
+        </section>
+      )}
 
       <section className="sec">
         <SecHead title={t("needsYou")} count={ws.approvals.length} />
@@ -407,61 +449,3 @@ export function FindLicenses({ result, live }: { result: { what: string; where: 
 }
 
 /* -------------------------------- settings -------------------------------- */
-
-function AgentSettings() {
-  const { t, mode, apiName, applyKey, dropKey, deep, setDeep } = useApp();
-  const [key, setKey] = useState("");
-  const [id, setId] = useState(API_MODELS[0].id);
-  const [remember, setRemember] = useState(false);
-  return (
-    <section className="sec">
-      <SecHead title={t("set_agent")} />
-      <div className="tray">
-        <div className="row agent-mode"><span className={"am-dot " + mode} aria-hidden="true" /><span>{mode === "claude" ? t("mode_claude") : mode === "api" ? t("mode_api", { m: apiName }) : t("mode_demo")}</span></div>
-        {mode !== "demo" && (
-          <label className="row check"><input type="checkbox" checked={deep} onChange={e => setDeep(e.target.checked)} /><span><b>{t("deep")}</b><small>{t("deepNote")}</small></span></label>
-        )}
-        {mode === "api" && <div className="row"><button type="button" className="pill quiet sm" onClick={dropKey}>{t("key_drop")}</button></div>}
-        {mode === "demo" && (
-          <form className="row keyform" onSubmit={e => { e.preventDefault(); if (key.trim()) { applyKey(key.trim(), id, remember); setKey(""); } }}>
-            <label><span>{t("key_label")}</span><input type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} placeholder="sk-ant-..." /></label>
-            <label><span>{t("key_model")}</span><select value={id} onChange={e => setId(e.target.value)}>{API_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select></label>
-            <label className="check"><input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} /><span>{t("key_remember")}</span></label>
-            <button type="submit" className="pill ink sm" disabled={!key.trim()}>{t("key_use")}</button>
-            <p className="note">{t("key_note")}</p>
-          </form>
-        )}
-      </div>
-    </section>
-  );
-}
-
-export function Settings() {
-  const { t, b, ws } = useApp();
-  return (
-    <div className="page narrow">
-      <PageHead title={t("nav_settings")} sub={t("set_sub")} />
-      <AgentSettings />
-      <section className="sec">
-        <SecHead title={t("set_rules")} />
-        <ul className="tray rules">
-          {(["set_rule1", "set_rule2", "set_rule3"] as Key[]).map(k => <li key={k} className="row"><span>{t(k)}</span><em><I.lock />{t("alwaysOn")}</em></li>)}
-        </ul>
-        <p className="note">{t("set_ruleNote")}</p>
-      </section>
-      <section className="sec">
-        <SecHead title={t("set_conn")} />
-        <ul className="tray conns">
-          {ws.connections.map(c => (
-            <li key={c.id} className="row">
-              <span className="conn-tx"><b>{b(c.name)}</b><small>{b(c.detail)}</small></span>
-              <LevelTag l={c.level} />
-              {c.state === "connected" ? <em className="ok"><i />{t("connected")}</em> : <button type="button" className="pill primary sm">{t("connect")}</button>}
-            </li>
-          ))}
-        </ul>
-      </section>
-      <Footer full />
-    </div>
-  );
-}

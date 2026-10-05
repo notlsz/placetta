@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getAudioContext } from "voice-glow";
-import { CLIPS } from "./voices.generated";
 
 /**
  * A stand-in voice for when there's no microphone (an embedded preview, a denied prompt):
@@ -70,40 +69,57 @@ function pickVoice(lang: string) {
   return mine[0];
 }
 
+// The recorded clips are large, so they load after the page is up, not with it.
+type Clips = Record<string, string>;
+let clipsP: Promise<Clips> | null = null;
+export const loadClips = () => (clipsP ??= import("./voices.generated").then(m => m.CLIPS).catch(() => ({} as Clips)));
+/* The recorded clips are the demo's scripted replies. The signed-in app speaks live replies with the server voice, so it never downloads them. */
+const DEMO = !(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_KEY);
+if (DEMO && typeof window !== "undefined") (window.requestIdleCallback ?? ((f: () => void) => setTimeout(f, 1500)))(() => void loadClips());
+
+const toBytes = (dataUrl: string) => { const b64 = dataUrl.slice(dataUrl.indexOf(",") + 1), bin = atob(b64), out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out.buffer; };
+
 /**
- * Speak a reply in a natural female voice. Scripted replies play their recorded clip and the glow follows the
- * real audio through an analyser; anything else falls back to the browser's best female voice, with the glow
- * kicked on each word boundary.
+ * Speak a reply in a natural young female voice, best source first:
+ *   1. the recorded clip for a scripted reply (Kokoro, recorded ahead of time),
+ *   2. the account's server voice (Azure neural) for anything else,
+ *   3. the browser's best female voice.
+ * Audio is decoded straight into Web Audio, so it plays inside embedded previews whose security policy
+ * blocks media URLs, and the glow follows the real audio through an analyser.
  */
-export function useSpeak() {
-  const supported = typeof window !== "undefined" && ("speechSynthesis" in window || "Audio" in window);
+export function useSpeak(remote?: (text: string, lang: string) => Promise<ArrayBuffer | null>) {
+  const supported = typeof window !== "undefined" && ("speechSynthesis" in window || "AudioContext" in window);
   const [speaking, setSpeaking] = useState<string | null>(null);
   const last = useRef(0);
-  const audio = useRef<HTMLAudioElement | null>(null);
+  const src = useRef<AudioBufferSourceNode | null>(null);
+  const el = useRef<HTMLAudioElement | null>(null);
   const an = useRef<AnalyserNode | null>(null);
   const buf = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const token = useRef(0);
   const stop = useCallback(() => {
-    if (audio.current) { audio.current.pause(); audio.current = null; }
+    token.current++;
+    try { src.current?.stop(); } catch { /* already stopped */ }
+    src.current = null;
+    if (el.current) { el.current.pause(); el.current = null; }
     an.current = null;
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     setSpeaking(null);
   }, []);
-  const speak = useCallback((text: string, lang: string) => {
-    if (!text) return;
-    stop();
-    const clip = CLIPS[(lang.startsWith("zh") ? "zh" : "en") + ":" + fnv(text)];
-    if (clip) {
-      const a = new Audio(clip); audio.current = a;
-      try {
-        const ctx = getAudioContext();
-        if (ctx) { const node = ctx.createMediaElementSource(a), x = ctx.createAnalyser(); x.fftSize = 1024; node.connect(x); x.connect(ctx.destination); an.current = x; buf.current = new Uint8Array(x.fftSize); }
-      } catch { an.current = null; }
-      a.onplay = () => setSpeaking(text);
-      const done = () => { if (audio.current === a) { audio.current = null; an.current = null; setSpeaking(null); } };
-      a.onended = done; a.onerror = done;
-      a.play().catch(() => setSpeaking(null));
-      return;
-    }
+
+  const playBytes = useCallback(async (bytes: ArrayBuffer, text: string, my: number) => {
+    const ctx = getAudioContext();
+    if (!ctx) throw new Error("no audio");
+    if (ctx.state === "suspended") await ctx.resume().catch(() => undefined);
+    const audio = await ctx.decodeAudioData(bytes.slice(0));
+    if (token.current !== my) return;
+    const s = ctx.createBufferSource(), x = ctx.createAnalyser();
+    s.buffer = audio; x.fftSize = 1024; s.connect(x); x.connect(ctx.destination);
+    src.current = s; an.current = x; buf.current = new Uint8Array(x.fftSize);
+    s.onended = () => { if (src.current === s) { src.current = null; an.current = null; setSpeaking(null); } };
+    setSpeaking(text); s.start();
+  }, []);
+
+  const browserVoice = useCallback((text: string, lang: string) => {
     if (!("speechSynthesis" in window)) return;
     const ss = window.speechSynthesis;
     const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = lang.startsWith("zh") ? 1.03 : 1.06; u.pitch = 1.08;
@@ -113,7 +129,32 @@ export function useSpeak() {
     u.onend = () => setSpeaking(null);
     u.onerror = () => setSpeaking(null);
     ss.speak(u);
-  }, [stop]);
+  }, []);
+
+  const speak = useCallback((text: string, lang: string) => {
+    if (!text) return;
+    stop();
+    const my = token.current;
+    try { const ctx = getAudioContext(); if (ctx?.state === "suspended") void ctx.resume(); } catch { /* no Web Audio */ }   // inside the click
+    void (async () => {
+      const clip = remote ? undefined : (await loadClips())[(lang.startsWith("zh") ? "zh" : "en") + ":" + fnv(text)];
+      if (token.current !== my) return;
+      if (clip) {
+        try { await playBytes(toBytes(clip), text, my); return; } catch { /* try an element next */ }
+        try {
+          const a = new Audio(clip); el.current = a;
+          a.onplay = () => setSpeaking(text);
+          a.onended = a.onerror = () => { if (el.current === a) { el.current = null; setSpeaking(null); } };
+          await a.play(); return;
+        } catch { el.current = null; }
+      }
+      if (remote) {
+        try { const bytes = await remote(text, lang); if (token.current !== my) return; if (bytes) { await playBytes(bytes, text, my); return; } } catch { /* fall back */ }
+      }
+      if (token.current === my) browserVoice(text, lang);
+    })();
+  }, [stop, playBytes, browserVoice, remote]);
+
   const level = useCallback(() => {
     if (!speaking) return 0;
     const x = an.current, b = buf.current;

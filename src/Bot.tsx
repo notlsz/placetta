@@ -2,16 +2,22 @@ import type { ReactNode } from "react";
 import { BotAvatar, type BotAvatarType } from "bot-avatars";
 import { BorderBeam } from "border-beam";
 
-/* Placetta's agent as a small plush character: a soft light-blue cloud with a smile (bot-avatars).
+/* Placetta's agent as a small plush character: a soft Miami-blue cloud with blushed cheeks with a smile (bot-avatars).
    It hops while it works and looks around while it waits. Each background job gets its own little bot. */
 
-const INK = "#192F47";
-const BLUES = ["#B7D8F8", "#C6E0FA", "#A9CFF5", "#BCD9F7", "#CFE4FB"];
-const SOFT = { shading: "fabric" as const, saturation: 1.5, brightness: 1.1, ink: INK };
+const INK = "#132A55";   // the landing page navy
+/* A bright, light Miami blue with soft pink cheeks (#F0ADD3). Background-job bots share the blue family. */
+const CLOUD = "#4DD6F2";
+const BLUSH = "#F0ADD3";
+const BLUES = ["#4DD6F2", "#6FDDF5", "#3FC9EC", "#86E2F7", "#5AD3F0"];
+(globalThis as unknown as { __botBlush?: string }).__botBlush = BLUSH;   // read by the blush patch (scripts/patch-bot-avatars.mjs)
+/* bot-avatars holds every plush bot back (opacity 0) until all of them have baked, up to 4 s on slow devices.
+   The first frames are already good, so show each one straight away. */
+const SOFT = { shading: "fabric" as const, saturation: 2.3, brightness: 1.6, ink: INK, style: { opacity: 1, transition: "none" } };
 
 export function AgentBot({ size, busy, label = "Placetta", interactive = true }: { size: number; busy?: boolean; label?: string; interactive?: boolean }) {
   return (
-    <BotAvatar type="cloud" face="mouth" color="#B7D8F8" size={size} state={busy ? "working" : "default"} interactive={interactive}
+    <BotAvatar type="cloud" face="mouth" color={CLOUD} size={size} state={busy ? "working" : "default"} interactive={interactive}
       turn={size < 40 ? 0.5 : 1} jumpEvery={size < 40 ? 0 : 9} aria-label={label} {...SOFT} />
   );
 }

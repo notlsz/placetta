@@ -1,0 +1,267 @@
+import { useState } from "react";
+import { useApp } from "./ctx";
+import { B, type Cert, type Store } from "./model";
+import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
+import { daysUntil, fmtDay, fmtIn, inDays } from "./time";
+import { I, Pill, StatusChip } from "./ui";
+
+/* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
+   a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. */
+
+function Ring({ score, band, size = 64 }: { score: number; band: Readiness["band"]; size?: number }) {
+  const r = (size - 8) / 2, c = 2 * Math.PI * r;
+  return (
+    <svg className={"ring b-" + band} width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+      <circle cx={size / 2} cy={size / 2} r={r} className="ring-bg" />
+      <circle cx={size / 2} cy={size / 2} r={r} className="ring-fg" strokeDasharray={`${(c * score) / 100} ${c}`} transform={`rotate(-90 ${size / 2} ${size / 2})`} />
+      <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle">{score}</text>
+    </svg>
+  );
+}
+
+function Grade({ s }: { s: Store }) {
+  const { b, lang } = useApp();
+  if (!s.grade) return null;
+  return (
+    <span className={"grade g-" + s.grade.letter} title={b(B(`Health inspection grade, ${fmtDay(s.grade.date, "en", true)}`, `卫生检查评级，${fmtDay(s.grade.date, "zh", true)}`))}>
+      <b>{s.grade.letter === "P" ? (lang === "zh" ? "待定" : "Pending") : s.grade.letter}</b>
+    </span>
+  );
+}
+
+function Value({ s, big }: { s: Store; big?: boolean }) {
+  const { b } = useApp();
+  const v = valueOf(s);
+  const rows = [
+    { k: B("Open on time", "按期开业"), v: v.onTime, ok: v.good[0] },
+    { k: B("Stay open", "持续营业"), v: v.open, ok: v.good[1] },
+    { k: B("No fines", "零罚款"), v: v.fines, ok: v.good[2] },
+  ];
+  return (
+    <dl className={"value" + (big ? " big" : "")}>
+      {rows.map((r, i) => <div key={i} className={r.ok ? "ok" : "warn"}><dt>{b(r.k)}</dt><dd>{b(r.v)}</dd></div>)}
+    </dl>
+  );
+}
+
+function StoreCard({ s, onOpen }: { s: Store; onOpen: () => void }) {
+  const { b, t, ws, lang } = useApp();
+  const r = readiness(s, ws);
+  const logs = todayLogs(s);
+  const expiring = s.certs.filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; });
+  return (
+    <button type="button" className="store" onClick={onOpen}>
+      <div className="store-top">
+        <Ring score={r.score} band={r.band} />
+        <div className="store-name">
+          <b>{b(s.name)}</b>
+          <span>{b(r.label)}{s.stage === "opening" && s.projectedOpen ? (lang === "zh" ? `，预计 ${fmtDay(s.projectedOpen, lang, true)} 开业` : `. Opening ${fmtDay(s.projectedOpen, lang, true)}`) : ""}</span>
+        </div>
+        <Grade s={s} />
+      </div>
+      <Value s={s} />
+      {s.stage === "open" && (
+        <div className="store-today">
+          <span className="st-lbl">{t("today")}</span>
+          {logs.map(l => <span key={l.kind} className={"logdot" + (l.log?.done ? " on" : "")} title={b(l.label)}>{l.log?.done ? <I.check /> : null}{b(B(l.kind === "temps" ? "Temps" : l.kind === "cleaning" ? "Cleaning" : "Pests", l.kind === "temps" ? "温度" : l.kind === "cleaning" ? "清洁" : "虫害"))}</span>)}
+          {expiring.length > 0 && <em className="warnline">{b(B(`${expiring.length} certificate expiring`, `${expiring.length} 张证书即将到期`))}</em>}
+        </div>
+      )}
+    </button>
+  );
+}
+
+function Section({ title, sub, children, side }: { title: string; sub?: string; children: React.ReactNode; side?: React.ReactNode }) {
+  return (
+    <section className="sec">
+      <div className="sec-h"><h2>{title}</h2>{side}</div>
+      {sub && <p className="sec-sub">{sub}</p>}
+      {children}
+    </section>
+  );
+}
+
+function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
+  const { b, t, lang, ws, ask, busy, updateStore, openApp } = useApp();
+  const r = readiness(s, ws);
+  const [reading, setReading] = useState("");
+  const [askTemp, setAskTemp] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [cert, setCert] = useState<Omit<Cert, "id">>({ person: "", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(365) });
+  const log = (kind: "temps" | "cleaning" | "pest", value?: string) => updateStore(s.id, x => ({
+    ...x, logs: [...x.logs.filter(l => !(l.date === inDays(0) && l.kind === kind)), { date: inDays(0), kind, done: true, by: lang === "zh" ? "您" : "You", reading: value }],
+  }), { action: B("Logged", "记录"), object: s.name, detail: B(kind === "temps" ? `Temperatures${value ? ": " + value : ""}` : kind === "cleaning" ? "Cleaning and sanitizing" : "Pest check", kind === "temps" ? `温度${value ? "：" + value : ""}` : kind === "cleaning" ? "清洁与消毒" : "虫害检查") });
+  const covered = usLocations(ws) >= FWW_THRESHOLD;
+  const apps = ws.apps.filter(a => s.apps?.includes(a.id));
+
+  return (
+    <div className="page narrow store-detail">
+      <button type="button" className="back" onClick={onBack}><I.chevR />{t("nav_stores")}</button>
+      <header className="sd-head">
+        <Ring score={r.score} band={r.band} size={92} />
+        <div>
+          <h1>{b(s.name)}</h1>
+          <p>{s.address}</p>
+        </div>
+        <Grade s={s} />
+      </header>
+
+      <div className="parts">
+        {r.parts.map(p => (
+          <div key={p.key} className="part">
+            <span className="part-l">{b(p.label)}</span>
+            <span className="bar"><i style={{ width: `${(100 * p.got) / p.max}%` }} /></span>
+            <span className="part-n">{b(p.note)}</span>
+          </div>
+        ))}
+      </div>
+
+      <Section title={b(B("What Placetta is worth here", "快哉在这家店的价值"))}>
+        <Value s={s} big />
+      </Section>
+
+      {s.stage === "open" && (
+        <Section title={b(B("Today's logs", "今日记录"))} sub={b(B("What an inspector asks to see. Takes a minute.", "检查员会查看的记录，一分钟完成。"))}>
+          <ul className="tray">
+            {todayLogs(s).map(l => (
+              <li key={l.kind} className="row logrow">
+                <span className={"logic" + (l.log?.done ? " on" : "")}>{l.log?.done ? <I.check /> : l.kind === "temps" ? <I.thermo /> : null}</span>
+                <span className="lr-tx"><b>{b(l.label)}</b><small>{l.log?.done ? [l.log.reading, l.log.by && b(B(`by ${l.log.by}`, `记录人：${l.log.by}`))].filter(Boolean).join(lang === "zh" ? "，" : ", ") : b(l.hint)}</small></span>
+                {!l.log?.done && (l.kind === "temps" && askTemp
+                  ? <form className="inl" onSubmit={e => { e.preventDefault(); if (reading.trim()) { log("temps", reading.trim()); setReading(""); setAskTemp(false); } }}>
+                      <input autoFocus value={reading} onChange={e => setReading(e.target.value)} placeholder={b(B("Walk-in 38°F, reach-in 36°F", "冷库 38°F，冷柜 36°F"))} aria-label={b(l.label)} />
+                      <Pill kind="ink" sm>{b(B("Save", "保存"))}</Pill>
+                    </form>
+                  : <Pill sm onClick={() => (l.kind === "temps" ? setAskTemp(true) : log(l.kind))}>{b(B("Log it", "记录"))}</Pill>)}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      <Section title={b(B("Staff certificates", "员工证书"))} side={<button type="button" className="more" onClick={() => setAdding(a => !a)}>{b(B("Add", "添加"))}</button>}>
+        {adding && (
+          <form className="certform" onSubmit={e => { e.preventDefault(); if (!cert.person.trim()) return; updateStore(s.id, x => ({ ...x, certs: [...x.certs, { ...cert, person: cert.person.trim(), id: "c" + Date.now().toString(36) }] }), { action: B("Added certificate", "添加证书"), object: s.name, detail: B(`${cert.person}: ${cert.kind.en}`, `${cert.person}：${cert.kind.zh}`) }); setAdding(false); setCert(c => ({ ...c, person: "" })); }}>
+            <input value={cert.person} onChange={e => setCert(c => ({ ...c, person: e.target.value }))} placeholder={b(B("Name", "姓名"))} aria-label={b(B("Name", "姓名"))} />
+            <input value={b(cert.kind)} onChange={e => setCert(c => ({ ...c, kind: B(e.target.value, e.target.value) }))} aria-label={b(B("Certificate", "证书"))} />
+            <input type="date" value={cert.expires} onChange={e => setCert(c => ({ ...c, expires: e.target.value }))} aria-label={b(B("Expires", "到期日"))} />
+            <Pill kind="ink" sm>{b(B("Save", "保存"))}</Pill>
+          </form>
+        )}
+        {s.certs.length ? (
+          <ul className="tray">
+            {[...s.certs].sort((x, y) => x.expires.localeCompare(y.expires)).map(c => {
+              const d = daysUntil(c.expires);
+              return (
+                <li key={c.id} className="row certrow">
+                  <span className="lr-tx"><b>{c.person}</b><small>{b(c.kind)}</small></span>
+                  <span className={"cert-exp" + (d < 0 ? " bad" : d <= 30 ? " warn" : "")}>{d < 0 ? b(B("Expired", "已过期")) : fmtIn(d, lang)}<small>{fmtDay(c.expires, lang, true)}</small></span>
+                  {d <= 30 && <Pill sm disabled={busy} onClick={() => ask(b(B(`Draft a text to ${c.person} to renew their ${c.kind.en} before ${c.expires}`, `起草短信提醒 ${c.person} 在 ${c.expires} 前续期${c.kind.zh}`)))}>{b(B("Remind", "提醒"))}</Pill>}
+                </li>
+              );
+            })}
+          </ul>
+        ) : <p className="quiet">{b(B("No certificates yet.", "暂无证书。"))}</p>}
+      </Section>
+
+      {s.rules.includes("nyc_fww") && s.schedule && (
+        <Section title={b(B("Schedules (NYC Fair Workweek)", "排班（纽约公平工作周法）"))}
+          sub={covered
+            ? b(B("Your chain is covered. Schedules go out 14 days ahead, and every late change owes the worker a premium.", "您的连锁品牌受该法约束：排班须提前 14 天发布，每次临时变更都需向员工支付补偿。"))
+            : b(B(`Required once a chain has ${FWW_THRESHOLD} or more locations nationally. You have ${usLocations(ws)}, so this is tracked as good practice.`, `连锁品牌在全美达到 ${FWW_THRESHOLD} 家门店后适用。您目前有 ${usLocations(ws)} 家，此项按良好做法跟踪。`))}>
+          <dl className="tray kv">
+            <div className="row"><dt>{b(B("Posted through", "已排班至"))}</dt><dd>
+              <input type="date" className="plain-date" value={s.schedule.postedThrough} onChange={e => { const v = e.target.value; if (v) updateStore(s.id, x => ({ ...x, schedule: x.schedule && { ...x.schedule, postedThrough: v } }), { action: B("Updated schedule", "更新排班"), object: s.name, detail: B(`Posted through ${v}`, `已排至 ${v}`) }); }} />
+              <small>{daysUntil(s.schedule.postedThrough) >= 14 ? b(B("14 days ahead", "已提前 14 天")) : b(B("Less than 14 days ahead", "不足 14 天"))}</small>
+            </dd></div>
+            <div className="row"><dt>{b(B("Changes this week", "本周变更"))}</dt><dd>{s.schedule.changes}</dd></div>
+            <div className="row"><dt>{b(B("Premium pay owed", "应付补偿"))}</dt><dd>${s.schedule.premiumOwed}</dd></div>
+            <div className="row"><dt>{b(B("Source", "来源"))}</dt><dd>{b(s.schedule.source)}</dd></div>
+          </dl>
+          <p className="note"><a href={FWW_SOURCE} target="_blank" rel="noreferrer">nyc.gov<I.ext /></a> {b(B("Connect Square and schedules are checked automatically.", "连接 Square 后，排班会自动检查。"))}</p>
+        </Section>
+      )}
+
+      {s.mock && (
+        <Section title={b(B("Mock inspection", "模拟检查"))} sub={b(B(`Last run ${fmtDay(s.mock.date, "en", true)}. Fix what fails before the real inspector finds it.`, `上次 ${fmtDay(s.mock.date, "zh", true)}。在真正检查前修好未通过的项目。`))}
+          side={<button type="button" className="more" onClick={() => updateStore(s.id, x => ({ ...x, mock: x.mock && { date: inDays(0), checks: x.mock.checks.map(c => ({ ...c, ok: null })) } }), { action: B("Started a mock inspection", "开始模拟检查"), object: s.name })}>{b(B("Run again", "重新检查"))}</button>}>
+          <ul className="tray mock">
+            {s.mock.checks.map(c => (
+              <li key={c.id} className="row">
+                <span className="lr-tx"><b>{b(c.label)}</b><small>{b(c.area)}</small></span>
+                <div className="seg sm" role="group" aria-label={b(c.label)}>
+                  <button type="button" aria-pressed={c.ok === true} onClick={() => updateStore(s.id, x => ({ ...x, mock: x.mock && { ...x.mock, checks: x.mock.checks.map(y => (y.id === c.id ? { ...y, ok: true } : y)) } }))}>{b(B("Pass", "通过"))}</button>
+                  <button type="button" aria-pressed={c.ok === false} onClick={() => updateStore(s.id, x => ({ ...x, mock: x.mock && { ...x.mock, checks: x.mock.checks.map(y => (y.id === c.id ? { ...y, ok: false } : y)) } }))}>{b(B("Fix", "待改"))}</button>
+                </div>
+                {c.ok === false && <Pill sm disabled={busy} onClick={() => ask(b(B(`How do we fix this before an inspection at ${s.name.en}: ${c.label.en}?`, `检查前如何整改${s.name.zh}的这一项：${c.label.zh}？`)))}>{b(B("How to fix", "如何整改"))}</Pill>}
+              </li>
+            ))}
+          </ul>
+          {s.rules.includes("nyc_grades") && <p className="note"><a href={GRADES_SOURCE} target="_blank" rel="noreferrer">{b(B("How NYC inspects and grades", "纽约市如何检查和评级"))}<I.ext /></a></p>}
+        </Section>
+      )}
+
+      {s.permits && s.permits.length > 0 && (
+        <Section title={b(B("Permits on file", "现有许可"))}>
+          <ul className="tray">
+            {s.permits.map((p, i) => { const d = daysUntil(p.expires); return (
+              <li key={i} className="row certrow"><span className="lr-tx"><b>{b(p.name)}</b></span><span className={"cert-exp" + (d <= 45 ? " warn" : "")}>{d > 3000 ? b(B("No expiry", "长期有效")) : fmtIn(d, lang)}{d <= 3000 && <small>{fmtDay(p.expires, lang, true)}</small>}</span></li>
+            ); })}
+          </ul>
+        </Section>
+      )}
+
+      {apps.length > 0 && (
+        <Section title={t("nav_apps")}>
+          <div className="tray">
+            {apps.map(a => (
+              <button key={a.id} type="button" className="row arow" onClick={() => openApp(a.id)}>
+                <span className="arow-n"><b>{b(a.name)}</b><small>{a.next ? b(a.next) : b(a.agency)}</small></span>
+                <StatusChip s={a.status} />
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
+    </div>
+  );
+}
+
+export function Stores() {
+  const { t, b, ws, ask, busy } = useApp();
+  const [open, setOpen] = useState<string | null>(null);
+  const stores = ws.stores ?? [];
+  const s = stores.find(x => x.id === open);
+  if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
+  return (
+    <div className="page">
+      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p>{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p></div></header>
+      {stores.length ? (
+        <div className="stores">{stores.map(x => <StoreCard key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>
+      ) : (
+        <div className="empty">
+          <p>{b(B("Add your first store and Placetta starts tracking its readiness every day.", "添加第一家门店，快哉每天跟踪它的迎检就绪度。"))}</p>
+          <Pill kind="ink" disabled={busy} onClick={() => ask(b(B("Help me add my first store", "帮我添加第一家门店")))}>{b(B("Add a store", "添加门店"))}</Pill>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** A compact line per store for the overview. */
+export function StoresStrip({ onOpen }: { onOpen: () => void }) {
+  const { b, ws } = useApp();
+  const stores = ws.stores ?? [];
+  if (!stores.length) return null;
+  return (
+    <div className="stores-strip">
+      {stores.map(s => { const r = readiness(s, ws); return (
+        <button key={s.id} type="button" className="ss" onClick={onOpen}>
+          <Ring score={r.score} band={r.band} size={44} />
+          <span><b>{b(s.name)}</b><small>{b(r.label)}</small></span>
+          <Grade s={s} />
+        </button>
+      ); })}
+    </div>
+  );
+}

@@ -31,6 +31,7 @@ export type Reply = {
   memory?: Bi[];            // facts committed to memory
   matches?: { what: string; where: string; hits: LicenseHit[] };
   next?: { label: Bi; req: Request };
+  sources?: { title: string; url: string }[];   // official pages the agent read, cited
 };
 export type Context = { lang: Lang; current: Workspace };
 export type AgentEvent =

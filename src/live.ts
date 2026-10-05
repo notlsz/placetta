@@ -19,12 +19,15 @@ import type { Lang } from "./i18n";
  * ------------------------------------------------------------------ */
 
 export type Turn = { role: "user" | "assistant"; content: string };
+export type Source = { title: string; url: string };
 export type Tool = { name: string; description: string; inputSchema: { type: "object"; properties: Record<string, unknown>; required?: string[] }; execute: (input: Record<string, unknown>) => unknown };
 export type Model = {
-  kind: "claude" | "api";
+  kind: "claude" | "api" | "server";
   tools: boolean;
   images: boolean;
-  chat(turns: Turn[], o: { tools?: Tool[]; onText?: (text: string) => void; signal: AbortSignal; deep?: boolean }): Promise<string>;
+  /** Takes instructions as a system prompt (the API and the server); the viewer's Claude gets them as the first turn. */
+  system: boolean;
+  chat(turns: Turn[], o: { tools?: Tool[]; onText?: (text: string) => void; signal: AbortSignal; deep?: boolean; system?: string; onSources?: (s: Source[]) => void }): Promise<string>;
   json<T>(prompt: string, o: { signal: AbortSignal; deep?: boolean; images?: Blob[] }): Promise<T>;
 };
 export type LiveError = { code: string; message: string };
@@ -46,7 +49,7 @@ export async function claudeModel(): Promise<Model | null> {
   const lim = await sample.limits().catch(() => null);
   const max = lim?.tools?.maxCount ?? 0;
   return {
-    kind: "claude", tools: max > 0, images: !!lim?.images,
+    kind: "claude", tools: max > 0, images: !!lim?.images, system: false,
     async chat(turns, o) {
       const { text } = await sample(turns, {
         signal: o.signal, cache: false, modelTier: o.deep ? "default" : "quick",
@@ -63,7 +66,6 @@ export async function claudeModel(): Promise<Model | null> {
 
 export const API_MODELS = [{ id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5" }, { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5" }];
 
-type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> };
 async function blobToBase64(b: Blob) {
   const buf = new Uint8Array(await b.arrayBuffer()); let s = "";
   for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode(...buf.subarray(i, i + 0x8000));
@@ -77,8 +79,58 @@ const parseJson = (t: string) => {
   throw { code: "invalid_json", message: "No JSON in the reply" };
 };
 
+type Transport = (body: Record<string, unknown>, signal: AbortSignal, deep: boolean) => Promise<{ content: Block[]; stop_reason: string }>;
+type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] };
+
+/** The Messages API tool loop, over any transport: the browser straight to Anthropic, or Placetta's server. */
+function messagesModel(kind: "api" | "server", send: Transport): Model {
+  // the API wants alternating roles: fold consecutive turns of the same role together
+  const fold = (turns: Turn[]) => turns.reduce<{ role: string; content: unknown }[]>((acc, t) => {
+    const last = acc[acc.length - 1];
+    if (last && last.role === t.role && typeof last.content === "string") last.content += "\n\n" + t.content; else acc.push({ role: t.role, content: t.content });
+    return acc;
+  }, []);
+  return {
+    kind, tools: true, images: true, system: true,
+    async chat(turns, o) {
+      const messages = fold(turns);
+      const tools = (o.tools ?? []).map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
+      const sources = new Map<string, Source>();
+      let all = "";
+      for (let round = 0; round < 8; round++) {
+        const data = await send({ messages, max_tokens: 2000, ...(o.system ? { system: o.system } : {}), ...(tools.length ? { tools } : {}) }, o.signal, !!o.deep);
+        for (const c of data.content) for (const ci of c.citations ?? []) if (ci.url && !sources.has(ci.url)) sources.set(ci.url, { url: ci.url, title: ci.title || ci.url });
+        if (sources.size) o.onSources?.([...sources.values()]);
+        const text = data.content.filter(c => c.type === "text").map(c => c.text).join("");
+        if (text) { all += (all ? "\n\n" : "") + text; o.onText?.(all); }
+        if (data.stop_reason === "pause_turn") { messages.push({ role: "assistant", content: data.content }); continue; }   // a long research step: let it carry on
+        const uses = data.content.filter(c => c.type === "tool_use");
+        if (!uses.length || data.stop_reason !== "tool_use") return all;
+        messages.push({ role: "assistant", content: data.content });
+        const results = await Promise.all(uses.map(async u => {
+          const tool = o.tools!.find(t => t.name === u.name);
+          try {
+            if (!tool) throw new Error(`No tool named ${u.name}`);
+            const out = await tool.execute(u.input ?? {});
+            return { type: "tool_result", tool_use_id: u.id, content: typeof out === "string" ? out : JSON.stringify(out ?? "ok") };
+          } catch (e) { return { type: "tool_result", tool_use_id: u.id, content: "Error: " + ((e as Error)?.message ?? String(e)), is_error: true }; }
+        }));
+        messages.push({ role: "user", content: results });
+      }
+      return all;
+    },
+    async json(prompt, o) {
+      const content: unknown[] = [];
+      for (const img of o.images ?? []) content.push({ type: "image", source: { type: "base64", media_type: img.type || "image/png", data: await blobToBase64(img) } });
+      content.push({ type: "text", text: prompt });
+      const data = await send({ messages: [{ role: "user", content }], max_tokens: 3000 }, o.signal, !!o.deep);
+      return parseJson(data.content.filter(c => c.type === "text").map(c => c.text).join(""));
+    },
+  };
+}
+
 export function apiModel(key: string, model: string): Model {
-  const call = async (body: Record<string, unknown>, signal: AbortSignal) => {
+  return messagesModel("api", async (body, signal) => {
     let res: Response;
     try {
       res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -91,46 +143,18 @@ export function apiModel(key: string, model: string): Model {
       const msg = await res.text().catch(() => "");
       throw { code: res.status === 401 || res.status === 403 ? "unauthorized" : res.status === 429 ? "rate_limited" : "upstream_error", message: msg.slice(0, 300) };
     }
-    return res.json() as Promise<{ content: Block[]; stop_reason: string }>;
-  };
-  // the API wants alternating roles: fold consecutive turns of the same role together
-  const fold = (turns: Turn[]) => turns.reduce<{ role: string; content: unknown }[]>((acc, t) => {
-    const last = acc[acc.length - 1];
-    if (last && last.role === t.role && typeof last.content === "string") last.content += "\n\n" + t.content; else acc.push({ role: t.role, content: t.content });
-    return acc;
-  }, []);
-  return {
-    kind: "api", tools: true, images: true,
-    async chat(turns, o) {
-      const messages = fold(turns);
-      const tools = (o.tools ?? []).map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
-      let all = "";
-      for (let round = 0; round < 6; round++) {
-        const data = await call({ messages, ...(tools.length ? { tools } : {}) }, o.signal);
-        const text = data.content.filter(c => c.type === "text").map(c => c.text).join("");
-        if (text) { all += (all ? "\n\n" : "") + text; o.onText?.(all); }
-        const uses = data.content.filter(c => c.type === "tool_use");
-        if (!uses.length || data.stop_reason !== "tool_use") return all;
-        messages.push({ role: "assistant", content: data.content });
-        const results = await Promise.all(uses.map(async u => {
-          const tool = o.tools!.find(t => t.name === u.name);
-          try {
-            const out = await tool!.execute(u.input ?? {});
-            return { type: "tool_result", tool_use_id: u.id, content: typeof out === "string" ? out : JSON.stringify(out ?? "ok") };
-          } catch (e) { return { type: "tool_result", tool_use_id: u.id, content: "Error: " + ((e as Error)?.message ?? String(e)), is_error: true }; }
-        }));
-        messages.push({ role: "user", content: results });
-      }
-      return all;
-    },
-    async json(prompt, o) {
-      const content: unknown[] = [];
-      for (const img of o.images ?? []) content.push({ type: "image", source: { type: "base64", media_type: img.type || "image/png", data: await blobToBase64(img) } });
-      content.push({ type: "text", text: prompt });
-      const data = await call({ messages: [{ role: "user", content }] }, o.signal);
-      return parseJson(data.content.filter(c => c.type === "text").map(c => c.text).join(""));
-    },
-  };
+    return res.json();
+  });
+}
+
+/** Claude through Placetta's server: the company key, research on official sites with citations, plan and usage checks. */
+export function serverModel(call: (body: Record<string, unknown>, deep: boolean) => Promise<{ content: Block[]; stop_reason: string }>): Model {
+  return messagesModel("server", (body, signal, deep) => new Promise((resolve, reject) => {
+    if (signal.aborted) return reject({ code: "cancelled", message: "Stopped" });
+    const off = () => reject({ code: "cancelled", message: "Stopped" });
+    signal.addEventListener("abort", off, { once: true });
+    call(body, deep).then(resolve, reject).finally(() => signal.removeEventListener("abort", off));
+  }));
 }
 
 /* ------------------------------- the prompt -------------------------------- */
@@ -156,17 +180,20 @@ function snapshot(w: Workspace, lang: Lang) {
   };
 }
 
-function rules(w: Workspace, lang: Lang) {
+function rules(w: Workspace, lang: Lang, account: boolean, research: boolean) {
   return `You are Placetta (快哉), an agent that gets business licenses and permits in place for the person you are talking to. You work inside their Placetta workspace, shown below as JSON. Today is ${inDays(0)}.
 
 What you can do: use the tools to add applications the business needs, fill their fields from the workspace facts, update statuses, ask for approval to file, draft messages for approval, add deadlines, remember facts the person tells you, and show a list of licenses. When the person asks for something a tool can do, do it rather than describe it.
 
 Rules:
-- You never file, pay or send anything yourself. Filing and paying happen only after the person approves in the app: call request_filing_approval to put a filing in front of them, and draft_message for anything sent on their behalf.
+- You never file, pay or send anything yourself. Call request_filing_approval to put a filing in front of the person, and draft_message for anything sent on their behalf.${account ? `
+- After the person approves, Placetta's filing team checks the application against the agency's current requirements and submits it. Government fees are paid by the business directly to the agency, through the payment link the team sends. Never say a filing is submitted until the workspace shows it.` : ""}
 - Never invent the person's facts. If a field needs information you don't have, leave it empty and ask for it in one question.
+- Never ask for a Social Security number, ITIN, or bank or card numbers in chat. The team collects those on the agency's own site.${research ? `
+- Research requirements, fees and processing times on official government websites with web_search and web_fetch: the agency's own pages (.gov, state, county and city sites). Portals that point to agencies (america.gov, usa.gov, sba.gov) are fine for finding the right agency, but read and cite the agency's own page, never the portal. Use the agency's root domain as the application's agency_url. If you can't confirm something on an official page, call it an estimate.` : `
 - Requirements, fees and processing times come from your general knowledge: call them estimates to confirm with the agency, and never present a guess as a confirmed rule. Use only agencies' official root domains as links.
-- You cannot browse the web or reach agency portals from here.
-- Reply in ${LANG[lang]}, in one to three short sentences of plain prose: no markdown, no lists, no headings. Lead with what you did or found.
+- You cannot browse the web or reach agency portals from here.`}
+- Reply in ${LANG[lang]}. Be sharp and concise: one to three short sentences of plain prose, no markdown, no lists, no headings, and never an em dash. Lead with what you did or found.
 
 Workspace:
 ${JSON.stringify(snapshot(w, lang))}`;
@@ -184,11 +211,12 @@ let seq = 0;
 
 type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; matches?: Reply["matches"]; lastToolAt: number };
 
-function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace) => void, step: (s: Step) => void, made: Made, lang: Lang, textLen: () => number): Tool[] {
+function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace) => void, step: (s: Step) => void, made: Made, lang: Lang, textLen: () => number, account: boolean): Tool[] {
   const L = (en: string, zh: string) => B(en, zh);
   const findApp = (id: unknown) => { const a = get().apps.find(x => x.id === str(id)); if (!a) throw new Error(`No application with id "${str(id)}". Use an id from the workspace.`); return a; };
   // "Business tax registration" reads "the business tax registration" mid-sentence; acronyms and proper names keep their capitals
-  const nm = (a: Application) => { const n = a.name[lang]; return lang === "en" && /^[A-Z][a-z]/.test(n) && !/^(Employer Identification|Statement of)/.test(n) ? n.charAt(0).toLowerCase() + n.slice(1) : n; };
+  // "the business tax registration" mid-sentence; Title Case names ("Food Service Establishment Permit") and acronyms stay as they are
+  const nm = (a: Application) => { const n = a.name[lang]; const titled = n.split(/\s+/).filter(w => /^[A-Z]/.test(w)).length > 1; return lang === "en" && /^[A-Z][a-z]/.test(n) && !titled ? n.charAt(0).toLowerCase() + n.slice(1) : n; };
   const mark = () => { made.lastToolAt = textLen(); };
   const fieldList = (v: unknown, fromDefault: string): Field[] => arr(v).map((f, i) => {
     const o = f as Record<string, unknown>; const label = str(o.label, 80);
@@ -207,6 +235,7 @@ function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace)
         fields: { type: "array", items: { type: "object", properties: { label: { type: "string" }, value: { type: "string" }, source: { type: "string" } }, required: ["label"] } },
         checklist: { type: "array", items: { type: "object", properties: { item: { type: "string" }, have: { type: "boolean" } }, required: ["item"] } },
         next_step: { type: "string" },
+        store_id: { type: "string", description: "The store this is for, when the business has more than one" },
       }, required: ["name", "agency", "level"] },
       execute(i) {
         const name = str(i.name, 120), agency = str(i.agency, 160);
@@ -225,6 +254,9 @@ function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace)
           source: { label: domainOf(url), url }, form: str(i.form) ? same(str(i.form, 120)) : undefined, fields, checklist,
         };
         apply(w => audit("agent", L("Prepared application", "准备申请"), app.name, same(`${fields.filter(f => f.value).length}/${fields.length}`))(addApp(app)(w)));
+        // file it under its store: the one named, or the only one
+        apply(w => { const st = w.stores ?? []; const target = st.find(x => x.id === str(i.store_id)) ?? (st.length === 1 ? st[0] : undefined);
+          return target ? { ...w, stores: st.map(x => (x.id === target.id ? { ...x, apps: [...new Set([...(x.apps ?? []), id])] } : x)) } : w; });
         made.apps.add(id); mark();
         return { application_id: id, status, empty_fields: fields.filter(f => !f.value).map(f => f.label.en) };
       },
@@ -275,9 +307,15 @@ function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace)
         if (existing) { made.approvals.push(existing.id); return { approval_id: existing.id, note: "Already waiting for approval" }; }
         const fee = a.fees.reduce((s, f) => s + f.amount, 0);
         const does = arr(i.what_happens).map(s => same(str(s, 200))).filter(s => s.en);
+        const site = a.source.label || a.agency.en;
         const ap: Approval = {
           id: "ap-" + a.id, kind: "file", app: a.id, title: L(`File the ${nm(a)}`, `提交${nm(a)}`), agency: a.agency, action: B("Approve & file", "批准并提交"),
-          does: does.length ? does : [L(`Submit the application below to ${a.agency.en}`, `向${a.agency.zh}提交下方申请`), ...(fee ? [L(`Pay $${fee} with the card ending 4821`, `使用尾号 4821 的银行卡支付 $${fee}`)] : []), L("Save the receipt to Documents", "将收据保存到文件")],
+          does: account ? [
+            L("Placetta's filing team checks it against the agency's current requirements", "快哉申报团队对照机构现行要求逐项核对"),
+            L(`They submit the application below on ${site}, with its attachments`, `在 ${site} 上提交下方申请及附件`),
+            ...(fee ? [L(`The agency's fee (about $${fee}) is paid by you directly to the agency, through the payment link we send`, `机构费用（约 $${fee}）由您通过我们发送的付款链接直接支付给机构`)] : []),
+            L("The receipt and every status change appear here", "收据和每次状态变化都会显示在这里"),
+          ] : does.length ? does : [L(`Submit the application below to ${a.agency.en}`, `向${a.agency.zh}提交下方申请`), ...(fee ? [L(`Pay $${fee} with the card ending 4821`, `使用尾号 4821 的银行卡支付 $${fee}`)] : []), L("Save the receipt to Documents", "将收据保存到文件")],
         };
         S("composing", L(`Asking for your approval to file the ${nm(a)}`, `请您批准提交${nm(a)}`));
         apply(w => audit("agent", L("Asked for approval", "请求批准"), a.name, fee ? same(`$${fee}`) : undefined)(setApp(a.id, { status: "ready", next: L("Ready to file. Waiting for your approval", "可以提交，等待您批准") })(addApproval(ap)(w))));
@@ -334,6 +372,30 @@ function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace)
       },
     },
     {
+      name: "add_store",
+      description: "Add a store (location) to the workspace so Placetta tracks its licenses and, once open, its daily readiness.",
+      inputSchema: { type: "object", properties: {
+        name: { type: "string", description: "Short name, e.g. 'Flushing, Main St'" }, address: { type: "string" },
+        city: { type: "string" }, state: { type: "string", description: "Two-letter state code" },
+        stage: { type: "string", enum: ["opening", "open"] }, planned_open: { type: "string", description: "YYYY-MM-DD" },
+      }, required: ["name", "city", "state"] },
+      execute(i) {
+        const name = str(i.name, 80), city = str(i.city, 60), st = str(i.state, 2).toUpperCase();
+        if (!name || !city) throw new Error("name and city are required");
+        const nyc = st === "NY" && /^(new york|nyc|manhattan|brooklyn|queens|bronx|the bronx|staten island|flushing|astoria|long island city)$/i.test(city);
+        const id = slug(name) + "-" + seq++;
+        S("connecting", L(`Adding ${name}`, `添加${name}`));
+        const planned = /^\d{4}-\d{2}-\d{2}$/.test(str(i.planned_open)) ? str(i.planned_open) : undefined;
+        apply(w => audit("agent", L("Added a store", "添加门店"), same(name), same([str(i.address, 120), city, st].filter(Boolean).join(", ")))({
+          ...w, stores: [...(w.stores ?? []), { id, name: same(name), address: [str(i.address, 120), city, st].filter(Boolean).join(", "), stage: i.stage === "open" ? "open" : "opening", plannedOpen: planned,
+            rules: nyc ? ["nyc_grades", "nyc_fww"] : [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }],
+          locations: w.locations.some(l => l.name.en.toLowerCase() === city.toLowerCase()) ? w.locations : [...w.locations, { id: slug(city), name: same(city), county: same(st), state: "active" }],
+        }));
+        mark();
+        return { store_id: id, nyc_rules: nyc };
+      },
+    },
+    {
       name: "show_licenses",
       description: "Show a list of the licenses a business needs in a place, in the Find licenses view. Use when the person asks what they need somewhere.",
       inputSchema: { type: "object", properties: {
@@ -371,8 +433,13 @@ export function toHits(list: unknown[], w: Workspace): LicenseHit[] {
 const READABLE_TEXT = /\.(txt|csv|md|json|tsv)$/i;
 const READABLE_IMAGE = /\.(png|jpe?g|webp|gif)$/i;
 
-/** An AgentBackend driven by a real model. Approvals and sample uploads still run the deterministic flows. */
-export function liveAgent(model: Model, history: Turn[], files: Map<string, File>, deep: boolean): AgentBackend {
+/** Plain, sharp prose: no bold markers, and never an em dash. */
+export const clean = (s: string) => s.replace(/\*\*/g, "").replace(/\s*\u2014\s*/g, ", ").replace(/,\s*,/g, ",").trim();
+const official = (url: string) => { const h = domainOf(url); return /\.(gov|mil|us)$/.test(h) || /^(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov)$/.test(h); };
+
+/** An AgentBackend driven by a real model. Approvals and sample uploads still run the deterministic flows.
+ *  `account`: a signed-in workspace (real filings by the team). `paths`: stored files by name, for uploads. */
+export function liveAgent(model: Model, history: Turn[], files: Map<string, File>, deep: boolean, o: { account?: boolean; paths?: Map<string, string> } = {}): AgentBackend {
   return {
     async run(req: Request, ctx, onEvent: (e: AgentEvent) => void, signal) {
       let ws = ctx.current;
@@ -385,14 +452,20 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         let streamed = "";
         const made: Made = { apps: new Set(), approvals: [], memory: [], lastToolAt: 0 };
         step({ state: "searching", label: B("Reading your workspace", "读取您的工作区") });
-        const tools = model.tools ? makeTools(() => ws, apply, step, made, lang, () => streamed.length) : undefined;
-        const turns: Turn[] = [{ role: "user", content: rules(ws, lang) }, ...history.slice(-12), { role: "user", content: req.text }];
+        const tools = model.tools ? makeTools(() => ws, apply, step, made, lang, () => streamed.length, !!o.account) : undefined;
+        const research = model.kind === "server";
+        const brief = rules(ws, lang, !!o.account, research);
+        const turns: Turn[] = [...(model.system ? [] : [{ role: "user" as const, content: brief }]), ...history.slice(-12), { role: "user", content: req.text }];
+        let sources: Source[] = [];
         const text = await model.chat(turns, {
-          tools, signal, deep,
-          onText: t => { streamed = t; onEvent({ type: "draft", text: t.slice(made.lastToolAt).trim() }); },
+          tools, signal, deep, system: model.system ? brief : undefined,
+          onText: t => { streamed = t; onEvent({ type: "draft", text: clean(t.slice(made.lastToolAt)) }); },
+          onSources: s => { sources = s; },
         });
-        const final = (text.slice(made.lastToolAt).trim() || text.trim()).replace(/\*\*/g, "");
-        onEvent({ type: "reply", reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, matches: made.matches } });
+        const final = clean(text.slice(made.lastToolAt).trim() || text.trim());
+        // cite agency pages first; keep at most four
+        const cited = [...sources.filter(x => official(x.url)), ...sources.filter(x => !official(x.url))].slice(0, 4);
+        onEvent({ type: "reply", reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, matches: made.matches, sources: cited.length ? cited : undefined } });
         return;
       }
 
@@ -421,7 +494,7 @@ Write name, agency, fee and timeline in ${LANG[lang]}. Include only items that c
         const f = real[0], item = app.checklist.find(c => c.id === req.upload.item);
         const did = `d-up-${app.id}-${req.upload.item}-${Date.now().toString(36)}`;
         step({ state: "shaping", label: B(`Reading ${f.name}`, `读取 ${f.name}`) });
-        apply(w => audit("you", B("Uploaded", "上传"), same(f.name), app.name)(addDoc({ id: did, name: f.name, kind: (f.name.split(".").pop()?.toLowerCase() ?? "pdf") as Doc["kind"], size: f.size, by: "you", at: nowIso(), app: app.id, tag: B("Uploaded", "已上传") })(w)));
+        apply(w => audit("you", B("Uploaded", "上传"), same(f.name), app.name)(addDoc({ id: did, name: f.name, kind: (f.name.split(".").pop()?.toLowerCase() ?? "pdf") as Doc["kind"], size: f.size, by: "you", at: nowIso(), app: app.id, tag: B("Uploaded", "已上传"), path: o.paths?.get(f.name) })(w)));
         const canImage = READABLE_IMAGE.test(f.name) && model.images, canText = READABLE_TEXT.test(f.name);
         if (!canImage && !canText) {
           apply(setCheck(app.id, req.upload.item, { state: "done", doc: did }));
@@ -433,7 +506,7 @@ Write name, agency, fee and timeline in ${LANG[lang]}. Include only items that c
         const body = canText ? (await f.text()).slice(0, 12000) : "";
         const out = await model.json<{ fields?: { label: string; value: string }[]; facts?: { label: string; value: string }[] }>(
           `This document was uploaded for "${item?.label[lang] ?? ""}" on the application "${app.name[lang]}". The application's fields are: ${JSON.stringify(labels)}.
-Read it and reply with only JSON: {"fields": [{"label": one of the field labels, "value": string}], "facts": [{"label": string, "value": string}]} — fields it fills, and up to 5 other key facts (dates, numbers, names). Only what the document actually says; no guesses. Write values as they appear.${canText ? "\n\nDocument:\n" + body : ""}`,
+Read it and reply with only JSON: {"fields": [{"label": one of the field labels, "value": string}], "facts": [{"label": string, "value": string}]}: the fields it fills, and up to 5 other key facts (dates, numbers, names). Only what the document actually says; no guesses. Write values as they appear.${canText ? "\n\nDocument:\n" + body : ""}`,
           { signal, images: canImage ? [f] : undefined });
         const fields = arr(out?.fields).map(x => x as { label: string; value: string }).filter(x => labels.includes(String(x.label)) && str(x.value));
         const facts = arr(out?.facts).map(x => x as { label: string; value: string }).filter(x => str(x.label) && str(x.value)).slice(0, 5);

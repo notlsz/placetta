@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { VoiceBeam, useMicrophone } from "voice-glow";
 import { useApp } from "./ctx";
-import { unlockAudio, useSimulatedVoice, useSpeechToText, type Speaker } from "./hooks";
+import { unlockAudio, useNarrow, useSimulatedVoice, useSpeechToText, type Speaker } from "./hooks";
 import { SUGGESTIONS } from "./model";
 import { I } from "./ui";
 import { AgentBot } from "./Bot";
 
-const BEAM = ["#7DB3EA", "#A5CDF5", "#6FA7E3", "#8FD5EE", "#BCD2F7", "#B2E0F4", "#C9C2F5"];
-const BAND = { core: "#FFFFFF", above: "#94C2F0", mid: "#C6DEF8", below: "#A3D9EF" };
+const BEAM = ["#7399C6", "#9DB8DA", "#5F88BA", "#B9CFE8", "#8FAED3", "#C9D8EC", "#A7BFE0"];
+const BAND = { core: "#FFFFFF", above: "#8FAED3", mid: "#C9D8EC", below: "#B9CFE8" };
+
+/** Close enough to count as the same question: most of the suggestion's words are already in something asked. */
+const STOP = new Set(["the", "a", "an", "our", "my", "we", "is", "are", "to", "of", "for", "from", "what", "whats", "what's", "do", "does", "can", "you", "me", "and", "in", "on"]);
+const words = (s: string) => s.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff ]/g, " ").split(/\s+/).filter(w => w && !STOP.has(w));
+const near = (asked: string, sugg: string) => {
+  if (/[\u4e00-\u9fff]/.test(sugg)) { const a = new Set(asked), hit = [...sugg].filter(c => a.has(c)).length; return hit / sugg.length >= 0.6; }
+  const a = new Set(words(asked)), s = words(sugg); return s.length > 0 && s.filter(w => a.has(w) || a.has(w.replace(/s$/, ""))).length / s.length >= 0.5;
+};
 
 const inFrame = (() => { try { return window.self !== window.top; } catch { return true; } })();
 const micAllowedHere = () => {
@@ -34,7 +42,8 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const typer = useRef<number[]>([]);
   const clearTyper = () => { typer.current.forEach(clearTimeout); typer.current = []; };
   const listening = (voice === "mic" && mic.state === "live") || voice === "sim";
-  const open = useMemo(() => SUGGESTIONS.filter(s => !asked.includes(s.en) && !asked.includes(s.zh)), [asked]);
+  const open = useMemo(() => SUGGESTIONS.filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked]);
+  const narrow = useNarrow(560);
 
   const endVoice = useCallback((send: boolean, text?: string) => {
     clearTyper(); mic.stop(); stt.stop(); sim.stop(); setVoice("off");
@@ -67,6 +76,8 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const send = () => { const q = draft.trim(); if (q && !busy) { setDraft(""); ask(q); } };
   const level = useCallback(() => Math.max(sim.level(), tts.level()), [sim, tts]);
   const dock = variant === "dock";
+  // voice mode fits any height: the bot shrinks on short screens (an embedded preview can be under 500px tall)
+  const botSize = Math.round(Math.min(150, Math.max(78, (typeof window === "undefined" ? 800 : window.innerHeight) * 0.19)));
 
   return (
     <div className={"composer-wrap " + variant}>
@@ -82,7 +93,7 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
           {!dock && <button type="button" className="ic" aria-label={t("attach")} title={t("attach")} onClick={() => attach.current?.click()} disabled={busy}><I.plus /></button>}
           <input ref={attach} type="file" multiple hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload("", "", f); }} />
           <label htmlFor={"ask-" + variant} className="sr">{t("askPh")}</label>
-          <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={t("askPh")} onChange={e => setDraft(e.target.value)}
+          <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={narrow ? t("askPhShort") : t("askPh")} onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
           <button type="button" className="ic mic" aria-label={t("talk")} title={t("talk")} onClick={startVoice} disabled={busy}><I.mic /></button>
           {busy
@@ -96,7 +107,7 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
         <div className="voice" role="dialog" aria-modal="true" aria-label={t("listening")}>
           <button type="button" className="vclose" aria-label={t("close")} onClick={() => endVoice(false)}><I.x /></button>
           <div className="vmid">
-            <div className="vbot"><AgentBot size={156} label={t("listening")} /></div>
+            <div className="vbot" style={{ width: botSize, height: botSize }}><AgentBot size={botSize} label={t("listening")} /></div>
             <p className="vlabel">{t("listening")}</p>
             <p className={"vtext" + (heard ? "" : " hint")} aria-live="polite">{heard || t("tapDone")}</p>
             {note && <p className="vnote">{t(note)}</p>}

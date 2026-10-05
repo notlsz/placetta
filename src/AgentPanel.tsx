@@ -29,7 +29,7 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
         <span className="pn-bot"><AgentBot size={44} busy={busy} label={t("agentName")} /></span>
         <span className="pn-t">
           <b>{t("agentName")}</b>
-          <small aria-live="polite">{busy && live ? b(live.label) + "…" : t("idle", { n: agencies })}</small>
+          <small aria-live="polite">{busy && live ? b(live.label) + "…" : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
         </span>
         <button type="button" className="icbtn" onClick={onHide} aria-label={t("hidePanel")} title={t("hidePanel")}><I.x /></button>
       </header>
@@ -103,6 +103,9 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
           {pending.map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
           {r.memory?.map((x, i) => <Memory key={i} text={x} />)}
+          {r.sources && r.sources.length > 0 && (
+            <p className="sources"><span>{b({ en: "Sources", zh: "来源" })}</span>{r.sources.map(x => { let h = x.url; try { h = new URL(x.url).hostname.replace(/^www\./, ""); } catch { /* keep */ } return <a key={x.url} href={x.url} target="_blank" rel="noreferrer" title={x.title}>{h}</a>; })}</p>
+          )}
           {r.matches && <button type="button" className="pill quiet" onClick={() => go("find")}>{b({ en: "Open the results", zh: "查看结果" })}</button>}
           {r.next && <button type="button" className="pill primary sm" disabled={busy} onClick={() => run(r.next!.req, b(r.next!.label))}><span>{b(r.next.label)}</span><i aria-hidden="true"><I.arrow /></i></button>}
         </div>

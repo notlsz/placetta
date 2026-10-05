@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "build:single": "tsc -b && vite build --mode single"
+    "build:single": "tsc -b && vite build --mode single",
+    "postinstall": "node scripts/patch-bot-avatars.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "border-beam": "^1.4.1",
     "bot-avatars": "^0.2.2",
     "react": "^19.2.8",

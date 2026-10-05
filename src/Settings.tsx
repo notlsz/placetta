@@ -1,0 +1,211 @@
+import { useState, type ReactNode } from "react";
+import { useApp } from "./ctx";
+import { B, type Bi } from "./model";
+import { API_MODELS } from "./live";
+import { fmtAgo, fmtDay } from "./time";
+import { Footer, I } from "./ui";
+import type { IntegrationKind } from "./cloud/api";
+
+/* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
+   one primary action per group. Only what a business needs to get and stay compliant. */
+
+type Row = { label: Bi; sub?: ReactNode; right?: ReactNode; icon?: ReactNode };
+function Group({ id, title, note, rows, children }: { id: string; title: Bi; note?: Bi; rows?: Row[]; children?: ReactNode }) {
+  const { b } = useApp();
+  return (
+    <section className="sg" id={"set-" + id}>
+      <h2>{b(title)}</h2>
+      {note && <p className="sg-note">{b(note)}</p>}
+      {rows && rows.length > 0 && (
+        <ul className="sg-list">
+          {rows.map((r, i) => (
+            <li key={i} className="sg-row">
+              {r.icon && <span className="sg-ico">{r.icon}</span>}
+              <span className="sg-tx"><b>{b(r.label)}</b>{r.sub && <small>{r.sub}</small>}</span>
+              {r.right && <span className="sg-r">{r.right}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {children}
+    </section>
+  );
+}
+
+const Btn = ({ children, onClick, kind = "quiet", disabled }: { children: ReactNode; onClick: () => void; kind?: "quiet" | "ink" | "line"; disabled?: boolean }) =>
+  <button type="button" className={"sbtn " + kind} onClick={onClick} disabled={disabled}>{children}</button>;
+
+const Tile = ({ t, c }: { t: string; c: string }) => <span className="tile" style={{ background: c }} aria-hidden="true">{t}</span>;
+
+const INTEGRATIONS: { group: Bi; items: { kind: IntegrationKind | "feed" | "square" | "toast"; name: string; zh?: string; why: Bi; tile: [string, string] }[] }[] = [
+  { group: B("Email", "邮件"), items: [
+    { kind: "gmail", name: "Gmail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), tile: ["G", "#EA4335"] },
+    { kind: "outlook_mail", name: "Outlook Mail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), tile: ["O", "#0A64C8"] },
+  ] },
+  { group: B("Calendar", "日历"), items: [
+    { kind: "gcal", name: "Google Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), tile: ["31", "#1A73E8"] },
+    { kind: "outlook_cal", name: "Outlook Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), tile: ["O", "#0F6CBD"] },
+    { kind: "feed", name: "Calendar feed", zh: "日历订阅", why: B("Any calendar app: subscribe with a private link", "任何日历应用：用私密链接订阅"), tile: ["iCal", "#5C6B7A"] },
+  ] },
+  { group: B("Documents", "文件"), items: [
+    { kind: "gdrive", name: "Google Drive", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), tile: ["D", "#188038"] },
+    { kind: "dropbox", name: "Dropbox", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), tile: ["Db", "#0061FE"] },
+  ] },
+  { group: B("Sales, payroll and accounting", "销售、薪资与财务"), items: [
+    { kind: "square", name: "Square", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), tile: ["Sq", "#1A1A1A"] },
+    { kind: "toast", name: "Toast", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), tile: ["T", "#FF4C00"] },
+    { kind: "quickbooks", name: "QuickBooks", why: B("Gross receipts for business tax and renewals", "营业总额用于营业税和续期"), tile: ["QB", "#2CA01C"] },
+  ] },
+  { group: B("Team", "团队"), items: [
+    { kind: "slack", name: "Slack", why: B("Filing updates in your team's channel", "申报进展推送到团队频道"), tile: ["S", "#4A154B"] },
+  ] },
+];
+
+function Integrations() {
+  const { b, lang, cloud, say } = useApp();
+  const [feed, setFeed] = useState("");
+  const conn = (k: string) => cloud?.integrations.find(i => i.kind === k);
+  const demo = () => say(lang === "zh" ? "登录您的快哉账户后即可连接。" : "Sign in to your Placetta account to connect.");
+  const request = (name: string) => { window.location.href = `mailto:support@placetta.com?subject=${encodeURIComponent(`Connect ${name}`)}&body=${encodeURIComponent(`Please connect ${name} for our workspace.`)}`; };
+  return (
+    <Group id="integrations" title={B("Integrations", "集成")} note={B("Only what gets you licensed and keeps you compliant. Placetta reads what a task needs and nothing else; disconnect any time.", "只连接拿证和保持合规所需的服务。快哉只读取任务所需的内容，可随时断开。")}>
+      {INTEGRATIONS.map(g => (
+        <div key={g.group.en} className="sg-sub">
+          <h3>{b(g.group)}</h3>
+          <ul className="sg-list">
+            {g.items.map(it => {
+              const c = it.kind === "feed" || it.kind === "square" || it.kind === "toast" ? undefined : conn(it.kind);
+              let right: ReactNode;
+              if (it.kind === "feed") right = cloud ? <Btn onClick={async () => { try { const u = await cloud.feedUrl(); setFeed(u); await navigator.clipboard?.writeText(u).catch(() => undefined); say(lang === "zh" ? "订阅链接已复制" : "Link copied"); } catch (e) { say((e as { message: string }).message); } }}>{lang === "zh" ? "复制链接" : "Copy link"}</Btn> : <Btn onClick={demo}>{lang === "zh" ? "复制链接" : "Copy link"}</Btn>;
+              else if (it.kind === "square" || it.kind === "toast") right = <Btn onClick={() => request(it.name)}>{lang === "zh" ? "申请接入" : "Request"}</Btn>;
+              else if (c) right = <Btn onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{lang === "zh" ? "断开" : "Disconnect"}</Btn>;
+              else right = <Btn kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{lang === "zh" ? "连接" : "Connect"}</Btn>;
+              const status = c ? (c.status === "error" ? <em className="bad">{lang === "zh" ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><i />{c.account ?? (lang === "zh" ? "已连接" : "Connected")}</em>) : null;
+              return (
+                <li key={it.kind} className="sg-row">
+                  <Tile t={it.tile[0]} c={it.tile[1]} />
+                  <span className="sg-tx"><b>{lang === "zh" && it.zh ? it.zh : it.name}</b><small>{b(it.why)}{it.kind === "toast" ? (lang === "zh" ? "。需 Toast 合作伙伴审批。" : ". Needs Toast partner approval.") : ""}</small>{status}</span>
+                  <span className="sg-r">{right}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+      {feed && <p className="sg-note mono">{feed}</p>}
+    </Group>
+  );
+}
+
+function Logins() {
+  const { b, lang, cloud, ws } = useApp();
+  const [adding, setAdding] = useState(false);
+  const [f, setF] = useState({ agency: "", url: "", username: "", password: "", note: "" });
+  if (!cloud) {
+    return (
+      <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Our filing team opens one only to file for you, and each opening shows in your audit trail.", "加密保存在保险库中的机构门户登录信息。申报团队只在为您提交时打开，每次打开都会记入审计记录。")}
+        rows={ws.connections.filter(c => c.level !== "vault").map(c => ({ label: c.name, sub: b(c.detail), icon: <I.key />, right: c.state === "connected" ? <em className="ok"><i />{lang === "zh" ? "已保存" : "Saved"}</em> : <Btn kind="line" onClick={() => undefined}>{lang === "zh" ? "添加" : "Add"}</Btn> }))} />
+    );
+  }
+  return (
+    <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Our filing team opens one only to file for you, and each opening shows in your audit trail. Never save Social Security or bank numbers here.", "加密保存在保险库中的机构门户登录信息。申报团队只在为您提交时打开，每次打开都会记入审计记录。请勿在此保存社会安全号或银行账号。")}
+      rows={cloud.logins.map(l => ({ label: { en: l.agency, zh: l.agency }, icon: <I.key />,
+        sub: <>{l.username}{l.last_opened_at ? (lang === "zh" ? `，团队上次打开 ${fmtAgo(l.last_opened_at, lang)}` : `. Team last opened it ${fmtAgo(l.last_opened_at, lang)}`) : ""}</>,
+        right: <Btn onClick={() => void cloud.removeLogin(l.id)}>{lang === "zh" ? "删除" : "Remove"}</Btn> }))}>
+      {adding ? (
+        <form className="sg-form" onSubmit={e => { e.preventDefault(); if (!f.agency.trim() || !f.username.trim() || !f.password) return; void cloud.saveLogin({ agency: f.agency.trim(), url: f.url.trim() || undefined, username: f.username.trim(), password: f.password, note: f.note.trim() || undefined }).then(() => { setAdding(false); setF({ agency: "", url: "", username: "", password: "", note: "" }); }); }}>
+          <input placeholder={lang === "zh" ? "机构，例如 CDTFA" : "Agency, e.g. CDTFA"} value={f.agency} onChange={e => setF({ ...f, agency: e.target.value })} aria-label="Agency" />
+          <input placeholder="https://…" value={f.url} onChange={e => setF({ ...f, url: e.target.value })} aria-label="Website" />
+          <input placeholder={lang === "zh" ? "用户名" : "Username"} autoComplete="off" value={f.username} onChange={e => setF({ ...f, username: e.target.value })} aria-label="Username" />
+          <input type="password" placeholder={lang === "zh" ? "密码" : "Password"} autoComplete="new-password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} aria-label="Password" />
+          <div className="sg-form-act"><Btn onClick={() => setAdding(false)}>{lang === "zh" ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink">{lang === "zh" ? "加密保存" : "Save encrypted"}</button></div>
+        </form>
+      ) : <div className="sg-act"><Btn kind="line" onClick={() => setAdding(true)}><I.plus />{lang === "zh" ? "添加登录" : "Add a login"}</Btn></div>}
+    </Group>
+  );
+}
+
+export function Settings() {
+  const { t, b, lang, setLang, cloud, mode, apiName, deep, setDeep, voiceOn, setVoiceOn, applyKey, dropKey, exportAudit, openLegal, ws } = useApp();
+  const [key, setKey] = useState("");
+  const [id, setId] = useState(API_MODELS[0].id);
+  const [remember, setRemember] = useState(false);
+  const bl = cloud?.billing;
+  const planName = !cloud ? B("Growth plan (sample)", "成长版（示例）")
+    : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
+    : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
+  const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
+  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
+
+  return (
+    <div className="page settings">
+      <header className="ph"><div className="ph-tx"><h1>{t("nav_settings")}</h1></div></header>
+      <div className="set-grid">
+        <nav className="set-nav" aria-label={t("nav_settings")}>
+          {SECTIONS.map(([k, l]) => <a key={k} href={"#set-" + k} onClick={e => { e.preventDefault(); document.getElementById("set-" + k)?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>{b(l)}</a>)}
+        </nav>
+        <div className="set-col">
+          <Group id="account" title={B("Account", "账户")} rows={cloud ? [
+            { label: B("Email", "邮箱"), sub: cloud.email, icon: <I.user /> },
+            { label: B("Business", "企业"), sub: b(ws.business), icon: <I.store />, right: <Btn onClick={cloud.newWorkspace}>{lang === "zh" ? "新建企业" : "New business"}</Btn> },
+            { label: B("Sign out", "退出登录"), icon: <I.logout />, right: <Btn onClick={cloud.signOut}>{lang === "zh" ? "退出" : "Sign out"}</Btn> },
+          ] : [{ label: B("Sample workspace", "示例工作区"), sub: b(B("Everything here is sample data. Create an account to save your own business.", "这里都是示例数据。注册账户即可保存您自己的企业。")), icon: <I.user /> }]} />
+
+          <Group id="billing" title={B("Plan and billing", "方案与账单")} note={B("Payment methods and invoices are handled by Stripe; Placetta never sees card numbers. Government fees are paid by you directly to each agency.", "付款方式和发票由 Stripe 处理，快哉看不到卡号。政府规费由您直接支付给各机构。")}
+            rows={[
+              { label: planName, sub: renew || (cloud?.plan === "entry" ? b(B("Credited toward your first year on an annual plan", "可抵扣年度方案首年费用")) : undefined), icon: <I.card />,
+                right: cloud ? <>{cloud.plan !== "monthly" && <Btn kind="ink" onClick={() => cloud.openPlans(cloud.plan === "none" ? "start" : "file")}>{lang === "zh" ? "选择方案" : "Choose a plan"}</Btn>}{bl?.stripe_customer_id && <Btn onClick={() => void cloud.portal()}>{lang === "zh" ? "管理账单" : "Manage billing"}</Btn>}</> : undefined },
+            ]} />
+
+          <Integrations />
+          <Logins />
+
+          <Group id="approvals" title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never files, pays or sends without your approval, and that can't be turned off.", "快哉会自行准备材料，但未经您批准绝不提交、付款或发送，此项无法关闭。")}
+            rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you", "代您发送的每一条消息")].map(l => ({ label: l, icon: <I.lock />, right: <em className="lock">{t("alwaysOn")}</em> }))} />
+
+          <Group id="agent" title={B("Agent and voice", "助理与语音")} rows={[
+            { label: mode === "server" ? B("Live", "实时") : mode === "claude" ? B("Live through your Claude account", "通过您的 Claude 账户实时运行") : mode === "api" ? B(`Live: Claude API (${apiName})`, `实时：Claude API（${apiName}）`) : B("Demo answers", "演示回答"),
+              sub: mode === "server" ? b(B("Researches official agency pages and cites them. Answers are short; nothing is filed without you.", "查阅机构官方页面并注明出处。回答简短，未经您批准不会提交任何内容。")) : mode === "demo" ? b(B("Scripted replies for the sample workspace.", "示例工作区的脚本回复。")) : undefined, icon: <I.spark /> },
+            ...(mode !== "demo" ? [{ label: B("Think longer on hard questions", "复杂问题多思考一会儿"), sub: t("deepNote"), right: <label className="switch"><input type="checkbox" checked={deep} onChange={e => setDeep(e.target.checked)} /><i /></label> }] : []),
+            { label: B("Read every reply aloud", "朗读每一条回复"), sub: b(B("Voice messages are always answered aloud.", "语音消息始终会语音回复。")), right: <label className="switch"><input type="checkbox" checked={voiceOn} onChange={e => setVoiceOn(e.target.checked)} /><i /></label> },
+            ...(mode === "api" ? [{ label: B("Anthropic API key", "Anthropic API 密钥"), right: <Btn onClick={dropKey}>{t("key_drop")}</Btn> }] : []),
+          ]}>
+            {mode === "demo" && !cloud && (
+              <form className="sg-form keyform" onSubmit={e => { e.preventDefault(); if (key.trim()) { applyKey(key.trim(), id, remember); setKey(""); } }}>
+                <input type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} placeholder={`${t("key_label")}: sk-ant-...`} aria-label={t("key_label")} />
+                <select value={id} onChange={e => setId(e.target.value)} aria-label={t("key_model")}>{API_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select>
+                <label className="check"><input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} /><span>{t("key_remember")}</span></label>
+                <div className="sg-form-act"><button type="submit" className="sbtn ink" disabled={!key.trim()}>{t("key_use")}</button></div>
+                <p className="sg-note">{t("key_note")}</p>
+              </form>
+            )}
+          </Group>
+
+          <Group id="language" title={B("Language", "语言")} rows={[
+            { label: B("English", "English"), right: <label className="radio"><input type="radio" name="lang" checked={lang === "en"} onChange={() => setLang("en")} /><i /></label> },
+            { label: B("简体中文", "简体中文"), right: <label className="radio"><input type="radio" name="lang" checked={lang === "zh"} onChange={() => setLang("zh")} /><i /></label> },
+          ]} />
+
+          <Group id="data" title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
+            { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), icon: <I.download />, right: <Btn onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
+            { label: B("Export the audit trail", "导出审计记录"), sub: "CSV", icon: <I.audit />, right: <Btn onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> },
+            { label: B("Delete your data", "删除数据"), sub: b(B("Email us and we delete it, except records the law requires us to keep.", "发邮件给我们即可删除，法律要求保留的记录除外。")), icon: <I.x />, right: <a className="sbtn quiet" href="mailto:support@placetta.com?subject=Delete%20my%20data">{lang === "zh" ? "申请删除" : "Ask to delete"}</a> },
+          ]} />
+
+          <Group id="help" title={B("Help", "帮助")} rows={[
+            { label: B("Email support", "邮件支持"), sub: "support@placetta.com", icon: <I.help />, right: <a className="sbtn quiet" href="mailto:support@placetta.com">{lang === "zh" ? "写邮件" : "Email"}</a> },
+            { label: B("Report a problem", "报告问题"), icon: <I.bell />, right: <a className="sbtn quiet" href="mailto:support@placetta.com?subject=Problem%20report">{lang === "zh" ? "报告" : "Report"}</a> },
+            { label: B("How Placetta's AI works", "快哉的 AI 如何工作"), icon: <I.spark />, right: <Btn onClick={() => openLegal("ai")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
+          ]} />
+
+          <Group id="legal" title={B("Legal", "法律")} note={B("Replies are generated by AI and can be wrong. Nothing is filed, paid or sent without your approval.", "回复由 AI 生成，可能有误。未经您批准，不会提交、付款或发送任何内容。")} rows={[
+            { label: B("Terms of Service", "服务条款"), icon: <I.scale />, right: <Btn onClick={() => openLegal("terms")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
+            { label: B("Privacy Policy", "隐私政策"), icon: <I.lock />, right: <Btn onClick={() => openLegal("privacy")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
+            { label: B("Filing Authorization", "申报授权书"), sub: cloud ? b(B("You gave it when you created this workspace", "您在创建工作区时已授权")) : undefined, icon: <I.form />, right: <Btn onClick={() => openLegal("authorization")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
+          ]} />
+          <Footer full />
+        </div>
+      </div>
+    </div>
+  );
+}

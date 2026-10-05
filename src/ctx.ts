@@ -1,21 +1,52 @@
 import { createContext, useContext } from "react";
 import type { Request, Step } from "./agent";
 import type { Bf, Lang, T } from "./i18n";
-import type { Workspace } from "./model";
+import type { Bi, Store, Workspace } from "./model";
+import type { AgencyLogin, Billing, Filing, Integration, IntegrationKind, Plan } from "./cloud/api";
 
-export type View = "overview" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings";
+export type View = "overview" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue";
 export type Tab = "check" | "form" | "fees" | "receipt";
+
+/** What a signed-in account adds: billing, integrations, saved logins, the filing queue and data controls. */
+export type CloudCtx = {
+  email: string;
+  staff: boolean;
+  wsId: string;
+  plan: Plan;
+  billing: Billing | null;
+  filings: Filing[];
+  integrations: Integration[];
+  logins: AgencyLogin[];
+  workspaces: { id: string; name: string }[];
+  openPlans(reason?: "start" | "file"): void;
+  checkout(plan: "entry" | "starter" | "growth", o?: { markets?: number; extra_locations?: number }): Promise<void>;
+  portal(): Promise<void>;
+  connect(kind: IntegrationKind): Promise<void>;
+  disconnect(kind: IntegrationKind): Promise<void>;
+  saveLogin(l: { id?: string; agency: string; url?: string; username: string; password?: string; note?: string }): Promise<void>;
+  removeLogin(id: string): Promise<void>;
+  feedUrl(rotate?: boolean): Promise<string>;
+  markPaid(filingId: string): Promise<void>;
+  cancelFiling(filingId: string): Promise<void>;
+  exportData(): void;
+  switchTo(id: string): void;
+  newWorkspace(): void;
+  signOut(): void;
+};
 
 /** What every page and panel can read and do. */
 export type Ctx = {
   lang: Lang; t: T; b: Bf;
+  setLang(l: Lang): void;
   ws: Workspace;
   busy: boolean;
   live: Step | null;
-  mode: "claude" | "api" | "demo";
+  mode: "claude" | "api" | "server" | "demo";
   apiName: string;
   deep: boolean;
   setDeep(v: boolean): void;
+  voiceOn: boolean;
+  setVoiceOn(v: boolean): void;
   stop(): void;
   applyKey(key: string, model: string, remember: boolean): void;
   dropKey(): void;
@@ -32,6 +63,10 @@ export type Ctx = {
   exportAudit(): void;
   editFields(app: string, values: Record<string, string>): void;
   editFact(id: string, value: string): void;
+  updateStore(id: string, f: (s: Store) => Store, log?: { action: Bi; object: Bi; detail?: Bi }): void;
+  say(text: string): void;
+  openLegal(id: string): void;
+  cloud: CloudCtx | null;
 };
 
 export const AppCtx = createContext<Ctx | null>(null);

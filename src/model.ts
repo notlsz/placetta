@@ -11,9 +11,9 @@ export const same = (s: string): Bi => ({ en: s, zh: s });
 
 export type Level = "federal" | "state" | "county" | "city";
 /** approved: issued. review: filed, the agency is reviewing. ready: complete, waiting for your approval.
- *  needs: needs a document or answer from you. draft: Placetta is preparing it. waiting: blocked by another application. todo: not started. */
-export type Status = "approved" | "review" | "ready" | "needs" | "draft" | "waiting" | "todo";
-export type Actor = "agent" | "you" | "agency";
+ *  filing: approved by you, with Placetta's filing team. needs: needs a document or answer from you. draft: Placetta is preparing it. waiting: blocked by another application. todo: not started. */
+export type Status = "approved" | "review" | "filing" | "ready" | "needs" | "draft" | "waiting" | "todo";
+export type Actor = "agent" | "you" | "agency" | "team";
 
 export type Field = { id: string; label: Bi; value: string; from?: Bi };
 export type Fee = { label: Bi; amount: number };
@@ -47,12 +47,12 @@ export type Application = {
 };
 
 export type DocKind = "pdf" | "xlsx" | "jpg" | "docx" | "csv" | "zip";
-export type Doc = { id: string; name: string; kind: DocKind; size: number; by: Actor; at: string; app?: string; tag: Bi };
+export type Doc = { id: string; name: string; kind: DocKind; size: number; by: Actor; at: string; app?: string; tag: Bi; path?: string };   // path: stored file in the account
 
 export type Deadline = { id: string; date: string; kind: "due" | "renewal" | "estimate" | "milestone"; title: Bi; agency?: Bi; app?: string; ask?: Bi; prompt?: Bi };
 export type Nudge = { id: string; tone: "warn" | "info"; text: Bi; ask: Bi; prompt: Bi; sample?: boolean };
 
-export type ApprovalKind = "file" | "send" | "upload";
+export type ApprovalKind = "file" | "send" | "upload" | "pay";
 export type Approval = {
   id: string;
   kind: ApprovalKind;
@@ -62,6 +62,9 @@ export type Approval = {
   does: Bi[];               // exactly what Placetta will do, in order
   data?: Field[];           // for messages; filings show the application's own fields
   action: Bi;
+  url?: string;             // pay: the agency's payment link
+  fee?: number;             // pay: the amount the agency asks for
+  filing?: string;          // pay: the filing it belongs to
 };
 
 export type Audit = { id: string; at: string; actor: Actor; who?: Bi; action: Bi; object: Bi; detail?: Bi };
@@ -70,6 +73,33 @@ export type Fact = { id: string; group: FactGroup; label: Bi; value: Bi; source:
 export type Task = { id: string; state: OrbState; label: Bi; detail?: Bi };
 export type Connection = { id: string; name: Bi; level: Level | "vault"; state: "connected" | "missing"; detail: Bi };
 export type Location = { id: string; name: Bi; county: Bi; state: "active" | "mapping" };
+
+/* ----------------------------- stores (daily compliance) ----------------------------- */
+// Vanta's shape for restaurants: every store inspection-ready every day, measured, with the three numbers that
+// show the value: opened on time, stayed open, no fines.
+export type LogKind = "temps" | "cleaning" | "pest";
+export type DailyLog = { date: string; kind: LogKind; done: boolean; by?: string; reading?: string };
+export type Cert = { id: string; person: string; kind: Bi; expires: string };
+export type MockCheck = { id: string; area: Bi; label: Bi; ok: boolean | null };
+export type StoreRule = "nyc_grades" | "nyc_fww";
+export type Store = {
+  id: string;
+  name: Bi;
+  address: string;
+  stage: "open" | "opening";
+  plannedOpen?: string;          // the date the brand planned to open
+  opened?: string;               // the date it opened
+  projectedOpen?: string;        // for stores still opening: where the critical path lands now
+  grade?: { letter: "A" | "B" | "C" | "P"; date: string };   // P: grade pending
+  rules: StoreRule[];            // local regimes that apply (NYC letter grades, NYC Fair Workweek)
+  logs: DailyLog[];              // the last two weeks of daily food-safety logs
+  certs: Cert[];                 // staff certificates and their expiry
+  schedule?: { postedThrough: string; changes: number; premiumOwed: number; source: Bi };
+  mock?: { date: string; checks: MockCheck[] };
+  value: { closures: number; fines: number; caught: number };   // fines paid; problems caught before an inspector did
+  apps?: string[];               // applications that belong to this store
+  permits?: { name: Bi; expires: string }[];   // permits on file for an open store
+};
 
 export type Workspace = {
   business: Bi;
@@ -85,6 +115,8 @@ export type Workspace = {
   facts: Fact[];
   running: Task[];
   connections: Connection[];
+  stores?: Store[];
+  meta?: { mapped?: boolean; city?: string; region?: string; entity?: string; what?: string };   // account workspaces only
 };
 
 /* ------------------------------------------------------------------ */
@@ -112,6 +144,48 @@ const fromCtx = B("From Context", "来自资料");
 const fromLease = B("From your lease", "来自租约");
 const fromPhotos = B("From storefront photos", "来自门店照片");
 const fromYou = B("You told me", "您告诉我的");
+
+/* Sample stores: one open in Queens (NYC rules apply), one opening in San Jose. All sample data. */
+const days = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => inDays(from + i));
+const LOG_MISSED = new Set([inDays(-9) + "pest", inDays(-4) + "cleaning"]);
+export const SAMPLE_STORES: Store[] = [
+  {
+    id: "flushing", name: B("Flushing, Main St", "法拉盛 Main St 店"), address: "Main St, Flushing, NY (sample)", stage: "open",
+    plannedOpen: inDays(-131), opened: inDays(-131), grade: { letter: "A", date: inDays(-41) }, rules: ["nyc_grades", "nyc_fww"],
+    logs: days(-13, -1).flatMap(d => (["temps", "cleaning", "pest"] as LogKind[]).map((k): DailyLog => ({ date: d, kind: k, done: !LOG_MISSED.has(d + k), by: k === "temps" ? "Wen" : "Marco", reading: k === "temps" ? "Walk-in 38°F, reach-in 36°F" : undefined })))
+      .concat([{ date: inDays(0), kind: "temps", done: true, by: "Wen", reading: "Walk-in 37°F, reach-in 36°F" }, { date: inDays(0), kind: "cleaning", done: true, by: "Marco" }, { date: inDays(0), kind: "pest", done: false }]),
+    certs: [
+      { id: "c1", person: "Wen L.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(412) },
+      { id: "c2", person: "Marco D.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(19) },
+      { id: "c3", person: "Ana P.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(233) },
+    ],
+    schedule: { postedThrough: inDays(15), changes: 1, premiumOwed: 0, source: B("Entered by you", "您录入的") },
+    mock: { date: inDays(-6), checks: [
+      { id: "m1", area: B("Temperature", "温度"), label: B("Cold food held at 41°F or below", "冷藏食品保持在 41°F 以下"), ok: true },
+      { id: "m2", area: B("Temperature", "温度"), label: B("Thermometer in every fridge", "每台冰箱都有温度计"), ok: false },
+      { id: "m3", area: B("Hygiene", "卫生"), label: B("Hand sink stocked and unblocked", "洗手池备品齐全且畅通"), ok: true },
+      { id: "m4", area: B("Hygiene", "卫生"), label: B("Gloves or utensils for ready-to-eat food", "即食食品使用手套或器具"), ok: true },
+      { id: "m5", area: B("Pests", "虫害"), label: B("No signs of pests; service log current", "无虫害迹象，防治记录最新"), ok: true },
+      { id: "m6", area: B("Storage", "存放"), label: B("Food stored 6 inches off the floor", "食品离地 6 英寸存放"), ok: true },
+      { id: "m7", area: B("People", "人员"), label: B("A certified supervisor on duty", "有持证主管在岗"), ok: true },
+      { id: "m8", area: B("Posting", "张贴"), label: B("Letter grade and permit displayed", "字母评级和许可证已张贴"), ok: true },
+    ] },
+    value: { closures: 0, fines: 0, caught: 3 },
+    permits: [
+      { name: B("Food Service Establishment permit", "餐饮服务场所许可证"), expires: inDays(212) },
+      { name: B("Certificate of Authority (sales tax)", "销售税授权证书"), expires: inDays(9999) },
+      { name: B("Sidewalk sign approval", "人行道招牌批准"), expires: inDays(41) },
+    ],
+  },
+  {
+    id: "sanjose", name: B("San Jose, North First St", "圣何塞 North First St 店"), address: ADDR, stage: "opening",
+    plannedOpen: inDays(162), projectedOpen: inDays(154), rules: [], logs: [], certs: [
+      { id: "c4", person: "Jun H.", kind: B("California Food Handler Card", "加州食品从业人员卡"), expires: inDays(1080) },
+    ],
+    value: { closures: 0, fines: 0, caught: 1 },
+    apps: ["ein", "seller", "edd", "handler", "plancheck", "pto", "btc", "building", "sign", "fire"],
+  },
+];
 
 export const SAMPLE: Workspace = {
   business: B("Moonleaf Tea", "Moonleaf Tea 奶茶"),
@@ -314,6 +388,7 @@ export const SAMPLE: Workspace = {
     { id: "r-rules", state: "working", label: B("Watching rule changes in San Jose and Santa Clara County", "监测圣何塞市和圣克拉拉县的法规变化"), detail: B("Daily", "每天") },
     { id: "r-edd", state: "shaping", label: B("Finishing the employer registration", "完成雇主登记"), detail: B("Ready today", "今天可完成") },
   ],
+  stores: SAMPLE_STORES,
   connections: [
     { id: "c-irs", name: B("IRS", "美国国税局"), level: "federal", state: "connected", detail: B("EIN on file", "EIN 已存档") },
     { id: "c-cdtfa", name: B("CDTFA online services", "加州税费管理局在线服务"), level: "state", state: "connected", detail: B("Seller's permit account", "销售许可证账户") },
