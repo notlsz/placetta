@@ -45,7 +45,8 @@ export type DocRow = { id: string; workspace_id: string; app_id: string | null; 
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
 export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack";
 export type AgencyLogin = { id: string; agency: string; url: string | null; username: string; note: string | null; created_at: string; last_opened_at: string | null };
-export type WorkspaceRow = { id: string; name: string; state: Partial<Workspace>; authorized_at: string | null; created_at: string };
+export type Role = "owner" | "member";
+export type WorkspaceRow = { id: string; name: string; state: Partial<Workspace>; authorized_at: string | null; created_at: string; role: Role };
 type AuditRow = { id: number; client_id: string | null; actor: Audit["actor"] | "team"; action: Bi; object: Bi; detail: Bi | null; created_at: string };
 
 /* ------------------------------ session ------------------------------ */
@@ -60,19 +61,81 @@ export async function verifyCode(email: string, token: string) {
   const { error } = await supabase().auth.verifyOtp({ email, token, type: "email" });
   if (error) throw err("auth", error.message);
 }
-export const signOut = () => supabase().auth.signOut();
-export async function whoami(): Promise<{ id: string; email: string; staff: boolean }> {
+/** Sign out here, or on every device (revokes every session's refresh token). */
+export const signOut = (everywhere = false) => supabase().auth.signOut({ scope: everywhere ? "global" : "local" });
+
+export type Me = { id: string; email: string; staff: boolean; staff_email: boolean; two_step: boolean; aal: string };
+export async function whoami(): Promise<Me> {
   const { data, error } = await supabase().rpc("whoami");
   if (error) throw fromPg(error);
-  return data as { id: string; email: string; staff: boolean };
+  const d = data as Partial<Me> & { id: string; email: string; staff: boolean };
+  return { staff_email: d.staff, two_step: false, aal: "aal1", ...d };
+}
+
+/* Sign in with Google or Microsoft. Each shows only when it's turned on in Supabase (Authentication, Providers). */
+export type Provider = "google" | "azure";
+export async function authProviders(): Promise<Record<Provider, boolean>> {
+  try {
+    const res = await fetch(`${URL_}/auth/v1/settings`, { headers: { apikey: KEY } });
+    const j = await res.json() as { external?: Record<string, boolean> };
+    return { google: !!j.external?.google, azure: !!j.external?.azure };
+  } catch { return { google: false, azure: false }; }
+}
+export async function signInWith(provider: Provider) {
+  const { error } = await supabase().auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: location.origin + location.pathname, ...(provider === "azure" ? { scopes: "email openid profile" } : {}) },
+  });
+  if (error) throw err("auth", error.message);
+}
+
+/* Two-step sign-in with an authenticator app (TOTP). Once it's on, the account reaches nothing until the code is entered. */
+export type TwoStep = { current: string; next: string; factorId: string | null };
+export async function twoStepStatus(): Promise<TwoStep> {
+  const a = supabase().auth.mfa;
+  const [{ data: lvl }, { data: f }] = await Promise.all([a.getAuthenticatorAssuranceLevel(), a.listFactors()]);
+  const verified = (f?.totp ?? []).find(x => x.status === "verified");
+  return { current: lvl?.currentLevel ?? "aal1", next: lvl?.nextLevel ?? "aal1", factorId: verified?.id ?? null };
+}
+export async function twoStepEnroll(): Promise<{ id: string; qr: string; secret: string }> {
+  const a = supabase().auth.mfa;
+  // A setup that was started and never finished blocks a new one: clear it first.
+  const { data: f } = await a.listFactors();
+  for (const x of (f?.all ?? []).filter(x => x.status !== "verified")) await a.unenroll({ factorId: x.id });
+  const { data, error } = await a.enroll({ factorType: "totp", friendlyName: "Authenticator " + new Date().toISOString().slice(0, 10) });
+  if (error || !data) throw err("auth", error?.message ?? "Couldn't start two-step sign-in.");
+  // The QR code arrives as an SVG data URI that may not be URL-encoded; encode it so every browser draws it.
+  const raw = data.totp.qr_code, i = raw.indexOf(",");
+  const svg = i > 0 && raw.slice(i + 1).trimStart().startsWith("<") ? raw.slice(i + 1) : null;
+  const qr = svg ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg) : raw;
+  return { id: data.id, qr, secret: data.totp.secret };
+}
+export async function twoStepVerify(factorId: string, code: string) {
+  const { error } = await supabase().auth.mfa.challengeAndVerify({ factorId, code });
+  if (error) throw err("auth", /invalid|expired/i.test(error.message) ? "That code didn't work. Use the newest code from the app." : error.message);
+}
+export async function twoStepOff(factorId: string) {
+  const { error } = await supabase().auth.mfa.unenroll({ factorId });
+  if (error) throw err("auth", error.message);
+  await supabase().auth.refreshSession();
 }
 
 /* ------------------------------ workspaces ------------------------------ */
 
 export async function myWorkspaces(): Promise<WorkspaceRow[]> {
-  const { data, error } = await supabase().from("workspaces").select("id, name, state, authorized_at, created_at").order("created_at");
-  if (error) throw fromPg(error);
-  return (data ?? []) as WorkspaceRow[];
+  const { data, error } = await supabase().rpc("my_workspaces");
+  if (!error) return (data ?? []) as WorkspaceRow[];
+  if (error.code !== "PGRST202") throw fromPg(error);
+  // Before the teams migration: every member is an owner.
+  const old = await supabase().from("workspaces").select("id, name, state, authorized_at, created_at").order("created_at");
+  if (old.error) throw fromPg(old.error);
+  return ((old.data ?? []) as WorkspaceRow[]).map(r => ({ ...r, role: "owner" as const }));
+}
+/** Join every workspace this email was invited to. Returns how many. */
+export async function acceptInvites(): Promise<number> {
+  const { data, error } = await supabase().rpc("accept_invites");
+  if (error) { if (error.code === "PGRST202") return 0; throw fromPg(error); }
+  return (data as number) ?? 0;
 }
 export async function createWorkspace(name: string, state: Workspace): Promise<string> {
   const { data, error } = await supabase().rpc("create_workspace", { p_name: name, p_state: strip(state), p_authorized: true });
@@ -174,6 +237,29 @@ async function fn<T>(name: string, body: Record<string, unknown>): Promise<T> {
   }
   return data as T;
 }
+/* ------------------------------ team ------------------------------ */
+
+export type Member = { user_id: string; email: string; role: Role; joined_at: string; you: boolean; two_step: boolean };
+export type Invite = { id: string; email: string; role: Role; created_at: string; expires_at: string };
+export type Team = { me: Role | null; members: Member[]; invites: Invite[] };
+export async function teamList(ws: string): Promise<Team> {
+  const { data, error } = await supabase().rpc("team_list", { ws });
+  if (error) throw fromPg(error);
+  return data as Team;
+}
+/** Records the invite and emails it. sent: "invite" (new person), "sign_in_link" (has an account) or "not_sent". */
+export const invite = (ws: string, email: string, role: Role) =>
+  fn<{ id: string; sent: "invite" | "sign_in_link" | "not_sent" }>("team", { action: "invite", workspace_id: ws, email, role, return_url: location.origin + location.pathname });
+export const resendInvite = (ws: string, id: string) =>
+  fn<{ id: string; sent: "invite" | "sign_in_link" | "not_sent" }>("team", { action: "resend", workspace_id: ws, id, return_url: location.origin + location.pathname });
+async function rpcVoid(name: string, args: Record<string, unknown>) {
+  const { error } = await supabase().rpc(name, args);
+  if (error) throw fromPg(error);
+}
+export const revokeInvite = (id: string) => rpcVoid("revoke_invite", { p_id: id });
+export const setRole = (ws: string, user: string, role: Role) => rpcVoid("set_member_role", { ws, p_user: user, p_role: role });
+export const removeMember = (ws: string, user: string) => rpcVoid("remove_member", { ws, p_user: user });
+
 export const checkout = (ws: string, plan: "entry" | "starter" | "growth", o: { markets?: number; extra_locations?: number } = {}) =>
   fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: location.origin + location.pathname });
 export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { action: "portal", workspace_id: ws, return_url: location.origin + location.pathname });

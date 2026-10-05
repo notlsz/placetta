@@ -19,6 +19,29 @@ const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
+/** The session's assurance level from its JWT (verified by getUser above): "aal2" after two-step sign-in. */
+function aalOf(jwt: string): string {
+  try {
+    const part = jwt.split(".")[1] ?? "";
+    const claims = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=")));
+    return typeof claims.aal === "string" ? claims.aal : "aal1";
+  } catch { return "aal1"; }
+}
+
+/** owner, member, staff (with two-step), mfa_required, staff_mfa_required or none. Same rules as the database. */
+async function accessFor(ws: string, user: { id: string; email?: string; email_confirmed_at?: string }, jwt: string): Promise<string> {
+  const { data, error } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  if (!error) return String(data);
+  // Fail closed: only a missing function (before the teams migration) falls back, and then every member is an owner.
+  if (error.code !== "PGRST202") return "none";
+  const { data: m } = await admin.from("workspace_members").select("role").eq("workspace_id", ws).eq("user_id", user.id).maybeSingle();
+  if (m) return m.role === "owner" ? "owner" : "member";
+  if (!user.email_confirmed_at) return "none";
+  const { data: s } = await admin.from("staff_emails").select("email").eq("email", (user.email ?? "").toLowerCase()).maybeSingle();
+  return s ? "staff" : "none";
+}
+
+
 const origins = () => (Deno.env.get("APP_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 function safeReturn(url: unknown): string | null {
   try {
@@ -53,8 +76,10 @@ Deno.serve(async (req) => {
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   const ws = String(body.workspace_id ?? "");
-  const { data: member } = await admin.from("workspace_members").select("role").eq("workspace_id", ws).eq("user_id", user.id).maybeSingle();
-  if (!member) return fail(403, "forbidden", "This isn't your workspace.");
+  const access = await accessFor(ws, user, jwt);
+  if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
+  if (access === "member") return fail(403, "forbidden", "Only an owner can change the plan or billing.");
+  if (access !== "owner") return fail(403, "forbidden", "This isn't your workspace.");
   const back = safeReturn(body.return_url);
   if (!back) return fail(400, "bad_request", "Unknown return address. Add the app's origin to APP_ORIGINS.");
 

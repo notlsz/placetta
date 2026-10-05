@@ -220,6 +220,7 @@ const PRIVACY_EN = `This policy explains how Placetta Inc. ("Placetta", "we") ha
 
 ## What we collect
 
+- Account information: your email address, your name if you sign in with Google or Microsoft (we receive only your basic profile), the workspaces you belong to and your role, and whether two-step sign-in is on.
 - Workspace information: details about your business, and about the people in it, that you give us so we can fill applications.
 - Documents you upload, and the applications and messages prepared in your workspace.
 - Your conversations with the agent and your approvals.
@@ -328,6 +329,7 @@ const PRIVACY_ZH = `本政策说明企业使用 placetta.com 和快哉应用时�
 
 ## 我们收集哪些信息
 
+- 账户信息：您的邮箱地址；若使用 Google 或 Microsoft 登录，还包括您的姓名（我们只获取基本资料）；您所属的工作区和角色；以及是否开启了两步登录。
 - 工作区信息：为填写申请，您向我们提供的企业信息及企业相关人员信息。
 - 您上传的文件，以及在您工作区中准备的申请和消息。
 - 您与智能体的对话，以及您的批准记录。

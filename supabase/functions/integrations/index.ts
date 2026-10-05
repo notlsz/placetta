@@ -1,5 +1,5 @@
 // integrations: connect and use the customer's mail, calendar, files, books and Slack.
-// POST {workspace_id, action, ...}. Members of the workspace only.
+// POST {workspace_id, action, ...}. Members of the workspace; owners only to connect, disconnect or send mail.
 import type { User } from "npm:@supabase/supabase-js@2";
 import {
   admin,
@@ -9,12 +9,12 @@ import {
   b64urlDecode,
   b64urlEncode,
   HttpError,
-  isMember,
+  accessFor,
   type L10n,
   ok,
   optText,
   readBody,
-  requireMember,
+  requireAccess,
   requireUser,
   same,
   serve,
@@ -735,7 +735,7 @@ const finish: Action = async (c) => {
 
   let member = false;
   try {
-    member = await isMember(c.ws, c.user.id);
+    member = (await accessFor(c.ws, c.user, c.jwt)) === "owner";
   } catch (e) {
     await dropSecret(p.secret_id);
     throw e;
@@ -801,6 +801,7 @@ const feedUrl: Action = async (c) => {
   if (error || typeof data !== "string") {
     console.error("calendar_token failed:", error?.code ?? "");
     if (/not your workspace/i.test(error?.message ?? "")) throw new HttpError("forbidden", "You are not a member of this workspace.");
+    if (/only an owner/i.test(error?.message ?? "")) throw new HttpError("forbidden", "Only an owner can reset the calendar link.");
     throw new Error("calendar_token failed");
   }
   if (rotate) {
@@ -830,13 +831,16 @@ const ACTIONS: Record<string, Action> = {
   feed_url: feedUrl,
 };
 
+/** What only an owner can do: connect or disconnect an account, and send mail or Slack posts as the business. */
+const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost]);
+
 serve(async (req) => {
   const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
   const ws = uuidParam(body.workspace_id, "workspace_id");
   const action = typeof body.action === "string" && Object.hasOwn(ACTIONS, body.action) ? ACTIONS[body.action] : null;
   if (!action) throw new HttpError("bad_request", `Unknown action. Use one of: ${Object.keys(ACTIONS).join(", ")}.`);
-  // finish checks membership itself, after claiming the pending row, so a mismatch also discards it.
-  if (action !== finish) await requireMember(ws, user.id);
+  // finish checks access itself, after claiming the pending row, so a mismatch also discards it.
+  if (action !== finish) await requireAccess(ws, user, jwt, OWNER_ONLY.has(action) ? "owner" : "member");
   return await action({ user, jwt, ws, body });
 });

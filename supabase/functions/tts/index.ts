@@ -13,6 +13,29 @@ const fail = (status: number, code: string, message: string) =>
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
+
+/** The session's assurance level from its JWT (verified by getUser above): "aal2" after two-step sign-in. */
+function aalOf(jwt: string): string {
+  try {
+    const part = jwt.split(".")[1] ?? "";
+    const claims = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=")));
+    return typeof claims.aal === "string" ? claims.aal : "aal1";
+  } catch { return "aal1"; }
+}
+
+/** owner, member, staff (with two-step), mfa_required, staff_mfa_required or none. Same rules as the database. */
+async function accessFor(ws: string, user: { id: string; email?: string; email_confirmed_at?: string }, jwt: string): Promise<string> {
+  const { data, error } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  if (!error) return String(data);
+  // Fail closed: only a missing function (before the teams migration) falls back, and then every member is an owner.
+  if (error.code !== "PGRST202") return "none";
+  const { data: m } = await admin.from("workspace_members").select("role").eq("workspace_id", ws).eq("user_id", user.id).maybeSingle();
+  if (m) return m.role === "owner" ? "owner" : "member";
+  if (!user.email_confirmed_at) return "none";
+  const { data: s } = await admin.from("staff_emails").select("email").eq("email", (user.email ?? "").toLowerCase()).maybeSingle();
+  return s ? "staff" : "none";
+}
+
 // A bright, young-sounding voice in each language; the prosody lifts it slightly toward a 21-year-old.
 const VOICE = { en: Deno.env.get("TTS_VOICE_EN") ?? "en-US-AvaMultilingualNeural", zh: Deno.env.get("TTS_VOICE_ZH") ?? "zh-CN-XiaoxiaoNeural" };
 const DAILY_CHARS = Number(Deno.env.get("TTS_DAILY_CHARS") ?? "20000");
@@ -37,8 +60,9 @@ Deno.serve(async (req) => {
   const text = String(body.text ?? "").replace(/[\u0000-\u0008\u000B-\u001F]/g, " ").trim().slice(0, 1500);
   if (!text) return fail(400, "bad_request", "Nothing to read.");
 
-  const { data: member } = await admin.from("workspace_members").select("role").eq("workspace_id", ws).eq("user_id", user.id).maybeSingle();
-  if (!member) return fail(403, "forbidden", "This isn't your workspace.");
+  const access = await accessFor(ws, user, jwt);
+  if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
+  if (access !== "owner" && access !== "member") return fail(403, "forbidden", "This isn't your workspace.");
   const today = new Date().toISOString().slice(0, 10);
   const { data: usage } = await admin.from("agent_usage").select("tts_chars").eq("workspace_id", ws).eq("day", today).maybeSingle();
   if ((usage?.tts_chars ?? 0) + text.length > DAILY_CHARS) return fail(429, "rate_limited", "Today's voice limit is reached.");

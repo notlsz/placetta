@@ -1,18 +1,18 @@
 // logins: the secure store for agency portal logins.
 // POST {workspace_id, action, ...}
-//   save   {agency, url?, username, password, note?, id?}  members: create, or update when id is given
-//   reveal {id}                                           Placetta staff only: returns the password, audited
-//   delete {id}                                           members
+//   save   {agency, url?, username, password, note?, id?}  owners: create, or update when id is given
+//   reveal {id}                                           Placetta staff signed in with two-step: returns the password, audited
+//   delete {id}                                           owners
 // Passwords live only in the vault. They are never logged and never written to the audit log.
 import {
   admin,
   audit,
   HttpError,
-  isStaff,
   ok,
   optText,
   readBody,
-  requireMember,
+  requireAccess,
+  requireStaffTwoStep,
   requireUser,
   same,
   serve,
@@ -82,13 +82,13 @@ async function vaultDrop(id: string): Promise<void> {
 }
 
 serve(async (req) => {
-  const { user } = await requireUser(req);
+  const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
   const ws = uuidParam(body.workspace_id, "workspace_id");
   const action = body.action;
 
   if (action === "save") {
-    await requireMember(ws, user.id);
+    await requireAccess(ws, user, jwt, "owner");
     const agency = text(body.agency, "agency", 1, 160);
     const username = text(body.username, "username", 1, 200);
     const url = httpsUrl(body.url);
@@ -134,7 +134,7 @@ serve(async (req) => {
   }
 
   if (action === "reveal") {
-    if (!(await isStaff(user))) throw new HttpError("forbidden", "Only the Placetta team can open saved logins.");
+    await requireStaffTwoStep(user, jwt);
     const id = uuidParam(body.id, "id");
     const row = await findLogin(ws, id);
     const { data: secret, error } = await admin.rpc("vault_get", { p_id: row.secret_id });
@@ -163,7 +163,7 @@ serve(async (req) => {
   }
 
   if (action === "delete") {
-    await requireMember(ws, user.id);
+    await requireAccess(ws, user, jwt, "owner");
     const id = uuidParam(body.id, "id");
     const row = await findLogin(ws, id);
     const { error } = await admin.from("agency_logins").delete().eq("id", row.id).eq("workspace_id", ws);

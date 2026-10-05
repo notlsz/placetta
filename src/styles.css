@@ -704,6 +704,25 @@ a.sbtn { color: var(--ink); }
 .sg-form .sg-note { grid-column: 1 / -1; margin: 0; }
 .sg-form-act { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
 .sg-act { margin-top: 10px; }
+.sg-select { height: 34px; padding: 0 28px 0 12px; border: 0; border-radius: 999px; background: var(--mist2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23596372' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 11px center; font-size: 13.5px; color: var(--ink); appearance: none; }
+.sg-form.invite { grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; }
+.sg-form.invite .sg-select { height: 38px; background-color: #fff; box-shadow: 0 0 0 1px rgba(14, 17, 22, .1); }
+.sg-form.invite .sbtn { height: 38px; }
+.twostep { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px 20px; margin-top: 12px; padding: 16px; border-radius: 16px; background: var(--mist); }
+.ts-steps { grid-column: 1 / -1; margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--ink2); display: grid; gap: 4px; }
+.ts-qr { display: grid; place-items: center; width: 184px; height: 184px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(14, 17, 22, .06); }
+.ts-qr img { display: block; }
+.ts-wait { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--sky); border-top-color: var(--blue-ink); animation: spin 0.9s linear infinite; }
+.ts-key { align-self: start; margin: 0; font-size: 13px; color: var(--ink3); }
+.ts-key code { display: block; margin-top: 6px; font: 500 13.5px/1.5 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .04em; color: var(--ink); word-break: break-all; }
+.ts-form { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; align-self: end; }
+.ts-form input { width: 150px; height: 38px; padding: 0 12px; border: 0; border-radius: 12px; background: #fff; font-size: 15px; letter-spacing: .12em; box-shadow: 0 0 0 1px rgba(14, 17, 22, .1); outline: 0; }
+.ts-form input:focus { box-shadow: 0 0 0 1.5px var(--blue), 0 0 0 4px rgba(115, 153, 198, .2); }
+.ts-form .sbtn { height: 38px; }
+.twostep .gate-err { grid-column: 1 / -1; margin: 0; }
+.q-lock { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; max-width: 520px; padding: 22px 24px; border-radius: 20px; background: var(--mist); }
+.q-lock svg { width: 22px; height: 22px; color: var(--blue-ink); }
+.q-lock p { margin: 0; font-size: 14.5px; color: var(--ink2); }
 
 /* ------------------------------ plans ------------------------------ */
 .plans .plan { display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 20px; background: var(--mist); }
@@ -780,6 +799,11 @@ a.sbtn { color: var(--ink); }
 .gate-card form:not(.onb) { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 .gate-card input { height: 46px; font-size: 15px; }
 .gate-err { margin: 6px 0 0; font-size: 13.5px; color: #C0473A; }
+.gate-sso { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.sbtn.sso { gap: 10px; font-weight: 500; }
+.gate-or { display: flex; align-items: center; gap: 12px; margin: 2px 0; font-size: 12.5px; color: var(--ink3); }
+.gate-or::before, .gate-or::after { content: ""; flex: 1; height: 1px; background: rgba(14, 17, 22, .1); }
+.gate-note { margin: 8px 0 0; max-width: 40ch; font-size: 12.5px; color: var(--ink3); }
 .gate-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; padding: 20px; font-size: 12.5px; color: var(--ink3); }
 .gate-foot button, .gate-foot a { color: var(--ink3); } .gate-foot button:hover, .gate-foot a:hover { color: var(--ink); }
 .onb { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
@@ -907,5 +931,10 @@ a.sbtn { color: var(--ink); }
   .sg-row .sg-r { grid-column: 2; }
   .sg-row:not(:has(.sg-ico)):not(:has(.tile)) .sg-r { grid-column: 1 / -1; }
   .sg-form { grid-template-columns: minmax(0, 1fr); }
+  .sg-form.invite { grid-template-columns: minmax(0, 1fr) auto; }
+  .sg-form.invite input { grid-column: 1 / -1; }
+  .twostep { grid-template-columns: minmax(0, 1fr); justify-items: start; }
+  .ts-form { grid-column: 1; }
   .gate-card h1 { font-size: 28px; }
 }
+@keyframes spin { to { transform: rotate(360deg); } }

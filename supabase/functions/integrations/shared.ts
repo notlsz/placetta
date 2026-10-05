@@ -1,6 +1,6 @@
 // Shared helpers for the Placetta edge functions.
 // The MCP deploy only uploads files inside a function's own folder, so this file is copied into
-// integrations/, oauth-callback/ and logins/. Keep the copies identical.
+// integrations/, oauth-callback/, logins/ and team/. Keep the copies identical.
 import { createClient, type SupabaseClient, type User } from "npm:@supabase/supabase-js@2";
 
 export const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
@@ -19,10 +19,11 @@ export function userClient(jwt: string): SupabaseClient {
 
 // ------------------------------------------------------------------ responses
 
-export type Code = "unauthorized" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error";
+export type Code = "unauthorized" | "mfa_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error";
 
 const STATUS: Record<Code, number> = {
   unauthorized: 401,
+  mfa_required: 401,
   forbidden: 403,
   bad_request: 400,
   not_found: 404,
@@ -128,12 +129,47 @@ export async function requireUser(req: Request): Promise<{ user: User; jwt: stri
   return { user: data.user, jwt: m[1] };
 }
 
+/** The session's assurance level, from its JWT (already verified by getUser): "aal2" after two-step sign-in. */
+export function aalOf(jwt: string): string {
+  try {
+    const part = jwt.split(".")[1] ?? "";
+    const b64 = part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=");
+    const claims = JSON.parse(atob(b64));
+    return typeof claims.aal === "string" ? claims.aal : "aal1";
+  } catch {
+    return "aal1";
+  }
+}
+
+export type Access = "owner" | "member" | "staff" | "mfa_required" | "staff_mfa_required" | "none";
+
+/** What this user may do in this workspace: owner, member, staff (with two-step), or why not. Same rules as the database. */
+export async function accessFor(ws: string, user: User, jwt: string): Promise<Access> {
+  const { data, error } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  if (!error) return String(data) as Access;
+  if (error.code !== "PGRST202") throw new Error(`access lookup failed: ${error.code ?? ""}`);
+  // Before the teams migration: members are owners, staff need only their email.
+  const { data: m } = await admin.from("workspace_members").select("role").eq("workspace_id", ws).eq("user_id", user.id).maybeSingle();
+  if (m) return (m.role === "owner" ? "owner" : "member");
+  return (await isStaff(user)) ? "staff" : "none";
+}
+
 export async function isMember(ws: string, uid: string): Promise<boolean> {
   const { data, error } = await admin.from("workspace_members").select("user_id").eq("workspace_id", ws).eq("user_id", uid).maybeSingle();
   if (error) throw new Error(`membership lookup failed: ${error.code ?? ""}`);
   return !!data;
 }
 
+/** Owners and members (need "member"), or owners only (need "owner"). Two-step is enforced for anyone who turned it on. */
+export async function requireAccess(ws: string, user: User, jwt: string, need: "member" | "owner"): Promise<Access> {
+  const a = await accessFor(ws, user, jwt);
+  if (a === "mfa_required") throw new HttpError("mfa_required", "Finish two-step sign-in to continue.");
+  if (a === "owner" || (need === "member" && a === "member")) return a;
+  if (a === "member") throw new HttpError("forbidden", "Only an owner of this workspace can do that.");
+  throw new HttpError("forbidden", "You are not a member of this workspace.");
+}
+
+/** Kept for callers that only need membership. */
 export async function requireMember(ws: string, uid: string): Promise<void> {
   if (!(await isMember(ws, uid))) throw new HttpError("forbidden", "You are not a member of this workspace.");
 }
@@ -145,6 +181,12 @@ export async function isStaff(user: User): Promise<boolean> {
   const { data, error } = await admin.from("staff_emails").select("email").eq("email", email).maybeSingle();
   if (error) throw new Error(`staff lookup failed: ${error.code ?? ""}`);
   return !!data;
+}
+
+/** Placetta staff signed in with two-step: needed to open a customer's saved login. */
+export async function requireStaffTwoStep(user: User, jwt: string): Promise<void> {
+  if (!(await isStaff(user))) throw new HttpError("forbidden", "Only the Placetta team can do that.");
+  if (aalOf(jwt) !== "aal2") throw new HttpError("mfa_required", "Turn on two-step sign-in and use it to open saved logins.");
 }
 
 // ------------------------------------------------------------------ audit log

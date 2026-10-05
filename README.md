@@ -74,7 +74,12 @@ python3 scripts/make-voices.py replies.json kokoro-v1.0.int8.onnx voices-v1.0.bi
 | `functions/tts` | Azure neural voice for replies |
 | `functions/billing`, `functions/stripe-webhook` | Stripe Checkout and the customer portal; the webhook turns plans on and off |
 | `functions/integrations`, `functions/oauth-callback`, `functions/calendar-feed` | Email, calendar, files, books and Slack, plus an ICS feed of deadlines |
-| `functions/logins` | Saves agency logins to Vault; only staff can reveal one, and each reveal is audited |
+| `functions/logins` | Saves agency logins to Vault (owners); only staff signed in with two-step can reveal one, and each reveal is audited |
+| `functions/team` | Invites teammates by email; the invite is accepted when that email signs in |
+
+Accounts: sign in with an email code, Google or Microsoft; optional two-step sign-in with an authenticator app (required for the Placetta team); owners and members per workspace. The database enforces all of it: someone with two-step on reaches nothing until they enter the code, only owners approve, pay, connect accounts and invite, and staff need two-step for any customer record.
+
+Tests: `scripts/test-db.sh` applies every migration to a local Postgres and checks roles, invites and two-step as each kind of user.
 
 The database enforces the approval rule: customers can only request a filing or cancel a request, a filing can't be marked submitted until the requirements are checked, and every change writes an audit row.
 

@@ -21,7 +21,7 @@ import { I } from "./ui";
 import * as api from "./cloud/api";
 import { withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
-import { Queue } from "./cloud/Ops";
+import { Queue, QueueLocked } from "./cloud/Ops";
 
 const KEY = "placetta-api-key", KEY_MODEL = "placetta-api-model";
 const readKey = () => { try { return { key: localStorage.getItem(KEY) ?? "", model: localStorage.getItem(KEY_MODEL) ?? API_MODELS[0].id }; } catch { return { key: "", model: API_MODELS[0].id }; } };
@@ -223,11 +223,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     run({ text: q }, q, voice);
   }, [run]);
 
+  /* Owners approve, pay, connect accounts and manage billing; members do the day-to-day work. The database enforces it too. */
+  const owner = !cloud || cloud.role === "owner";
+  const ownerOk = useCallback(() => {
+    if (owner) return true;
+    say(lang === "zh" ? "只有所有者可以执行此操作。请联系团队中的所有者。" : "Only an owner can do that. Ask an owner on your team.");
+    return false;
+  }, [owner, say, lang]);
+
   /* approvals: in the demo they run the scripted flow; in an account they go to the team, the outbox or the agency */
   const approve = useCallback(async (id: string) => {
     const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
     const shown = `${S.approvedIt[lang]}: ${a.title[lang]}`;
     if (!cloud) { run({ approve: id }, shown); return; }
+    if (!ownerOk()) return;
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
     if (a.kind === "file") {
       if (plan !== "monthly") { setPlans("file"); return; }
@@ -274,7 +283,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     run({ approve: id }, shown);
-  }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations]);
+  }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk]);
 
   const upload = useCallback(async (app: string, item: string, files?: File[]) => {
     if (cloud && files?.length) {
@@ -310,24 +319,25 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const goTo = (url: string) => { window.location.href = url; };
     const fail = (e: unknown) => say((e as api.ApiError).message ?? String(e));
     return {
-      email: cloud.me.email, staff: cloud.me.staff, wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces,
-      openPlans: r => setPlans(r ?? "start"),
-      checkout: async (p, o) => { try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
-      portal: async () => { try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
-      connect: async kind => { try { goTo((await api.connectUrl(cloud.wsId, kind)).url); } catch (e) { fail(e); } },
-      disconnect: async kind => { try { await api.integration(cloud.wsId, "disconnect", { kind }); setIntegrations(await api.listIntegrations(cloud.wsId)); } catch (e) { fail(e); } },
-      saveLogin: async l => { try { await api.saveLogin(cloud.wsId, l); setLogins(await api.listLogins(cloud.wsId)); say(lang === "zh" ? "登录信息已加密保存。" : "Saved and encrypted."); } catch (e) { fail(e); } },
-      removeLogin: async id => { try { await api.removeLogin(cloud.wsId, id); setLogins(await api.listLogins(cloud.wsId)); } catch (e) { fail(e); } },
+      email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner,
+      wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces,
+      openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
+      checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
+      portal: async () => { if (!ownerOk()) return; try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
+      connect: async kind => { if (!ownerOk()) return; try { goTo((await api.connectUrl(cloud.wsId, kind)).url); } catch (e) { fail(e); } },
+      disconnect: async kind => { if (!ownerOk()) return; try { await api.integration(cloud.wsId, "disconnect", { kind }); setIntegrations(await api.listIntegrations(cloud.wsId)); } catch (e) { fail(e); } },
+      saveLogin: async l => { if (!ownerOk()) return; try { await api.saveLogin(cloud.wsId, l); setLogins(await api.listLogins(cloud.wsId)); say(lang === "zh" ? "登录信息已加密保存。" : "Saved and encrypted."); } catch (e) { fail(e); } },
+      removeLogin: async id => { if (!ownerOk()) return; try { await api.removeLogin(cloud.wsId, id); setLogins(await api.listLogins(cloud.wsId)); } catch (e) { fail(e); } },
       feedUrl: async rotate => (await api.integration<{ url: string }>(cloud.wsId, "feed_url", { rotate: !!rotate })).url,
-      markPaid: async id => { try { await api.markPaid(id); await refresh(); say(lang === "zh" ? "已告知团队，他们会继续提交。" : "Thanks. The team will finish the submission."); } catch (e) { fail(e); } },
-      cancelFiling: async id => { try { await api.cancelFiling(id); await refresh(); } catch (e) { fail(e); } },
+      markPaid: async id => { if (!ownerOk()) return; try { await api.markPaid(id); await refresh(); say(lang === "zh" ? "已告知团队，他们会继续提交。" : "Thanks. The team will finish the submission."); } catch (e) { fail(e); } },
+      cancelFiling: async id => { if (!ownerOk()) return; try { await api.cancelFiling(id); await refresh(); } catch (e) { fail(e); } },
       exportData: () => {
         const data = { exported: nowIso(), workspace: api.strip(wsRef.current), audit: wsRef.current.audit, filings, documents: docs.map(d => ({ name: d.name, size: d.size, created_at: d.created_at, source: d.source })) };
         void save(`placetta-data-${inDays(0)}.json`, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
       },
-      switchTo: cloud.switchTo, newWorkspace: cloud.newWorkspace, signOut: cloud.signOut,
+      switchTo: cloud.switchTo, newWorkspace: cloud.newWorkspace, signOut: cloud.signOut, reopen: cloud.reopen,
     };
-  }, [cloud, plan, billing, filings, integrations, logins, docs, say, lang, refresh, save]);
+  }, [cloud, plan, billing, filings, integrations, logins, docs, say, lang, refresh, save, owner, ownerOk]);
 
   const ctx: Ctx = useMemo(() => ({
     lang, t, b, setLang, ws: view_, busy, live: step, uploading,
@@ -384,7 +394,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const page = {
     overview: <Overview />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
     find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
-    queue: cloud?.me.staff ? <Queue /> : <Overview />,
+    queue: cloud?.me.staff ? <Queue /> : cloud?.me.staff_email ? <QueueLocked /> : <Overview />,
   }[view];
   const soon = view_.deadlines.filter(d => { const n = daysUntil(d.date); return n >= 0 && n <= 30; }).length;
   const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, deadlines: soon };
@@ -423,7 +433,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       </ul>
       <ul className="nav">
         <li><button type="button" aria-current={view === "find" ? "page" : undefined} onClick={() => go("find")} title={slim ? t("nav_find") : undefined}><I.find /><span>{t("nav_find")}</span></button></li>
-        {cloud?.me.staff && <li><button type="button" aria-current={view === "queue" ? "page" : undefined} onClick={() => go("queue")} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></button></li>}
+        {(cloud?.me.staff || cloud?.me.staff_email) && <li><button type="button" aria-current={view === "queue" ? "page" : undefined} onClick={() => go("queue")} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></button></li>}
       </ul>
       {view_.locations.length > 0 && <p className="nav-h">{t("locations")}</p>}
       <ul className="nav locs">

@@ -149,3 +149,20 @@ export function Queue() {
     </div>
   );
 }
+
+/** Staff who haven't signed in with two-step yet: the queue holds customers' records and saved logins, so it waits for that. */
+export function QueueLocked() {
+  const { lang, go } = useApp();
+  const zh = lang === "zh";
+  return (
+    <div className="page queue">
+      <header className="ph"><div className="ph-tx"><h1>{zh ? "申报队列" : "Filing queue"}</h1>
+        <p>{zh ? "队列包含客户记录和已保存的登录信息，需要两步登录才能打开。" : "The queue holds customers' records and saved logins, so it opens only after two-step sign-in."}</p></div></header>
+      <div className="q-lock">
+        <I.lock />
+        <p>{zh ? "在设置中开启两步登录，然后用验证码登录即可打开队列。" : "Turn on two-step sign-in in Settings, then sign in with the code to open the queue."}</p>
+        <Pill kind="ink" onClick={() => { go("settings"); setTimeout(() => document.getElementById("set-security")?.scrollIntoView({ block: "start" }), 120); }}>{zh ? "设置两步登录" : "Set up two-step sign-in"}</Pill>
+      </div>
+    </div>
+  );
+}

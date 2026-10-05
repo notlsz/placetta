@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 /* Takes Placetta from preview to production in one run:
-     1. asks for your keys (typed keys are hidden and never written to disk, except a temporary file the Supabase CLI reads)
-     2. creates the Stripe prices and the webhook (test or live, depending on the key)
-     3. sets every Edge Function secret in the Placetta Supabase project
-     4. builds the app and, if you want, deploys it to Netlify
-     5. checks each server function is configured
-   Run from the repo root:  npm install && node scripts/launch.mjs
-   Needs Node 18+. The first run of the Supabase CLI asks you to log in (npx supabase login). */
+     1. asks for your keys (typed keys are hidden; nothing is written to disk except a temporary file the Supabase CLI reads)
+     2. brings the database up to date (applies any migration the project doesn't have yet)
+     3. deploys every server function
+     4. creates the Stripe prices and the webhook (test or live, depending on the key)
+     5. sets every server secret
+     6. configures sign-in: your app address, your email sender and templates, Google and Microsoft, two-step sign-in
+     7. builds the app and, if you want, deploys it to Netlify
+     8. adds your team and checks each server function
+   Run from the repo root:  npm install && npm run launch
+   Needs Node 18+ and a Supabase access token (supabase.com/dashboard/account/tokens). */
 
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { copyFileSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import readline from "node:readline";
@@ -61,10 +64,72 @@ function ask(question, { hidden = false, fallback = "" } = {}) {
   });
 }
 
+let TOKEN = "";   // Supabase access token: given to the Supabase CLI and the Management API, never saved
 function run(cmd, args, opts = {}) {
-  const r = spawnSync(cmd, args, { stdio: "inherit", shell: process.platform === "win32", ...opts });
+  const env = { ...process.env, ...(TOKEN ? { SUPABASE_ACCESS_TOKEN: TOKEN } : {}), ...(opts.env ?? {}) };
+  const r = spawnSync(cmd, args, { stdio: "inherit", shell: process.platform === "win32", ...opts, env });
   return r.status === 0;
 }
+
+/* ------------------------------------------------ Supabase Management API */
+
+async function mgmt(method, path, body) {
+  const res = await fetch(`https://api.supabase.com/v1/projects/${REF}/${path}`, {
+    method, headers: { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let data; try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+  if (!res.ok) throw new Error(`${path}: ${typeof data === "object" && data?.message ? data.message : res.status}`);
+  return data;
+}
+const sql = (query) => mgmt("POST", "database/query", { query });
+
+/** Applies, in order, every migration in supabase/migrations whose name the project hasn't recorded yet. */
+async function migrate() {
+  console.log(`\n${bold("Database")}`);
+  const done = new Set((await sql("select name from supabase_migrations.schema_migrations")).map((r) => r.name));
+  const files = readdirSync("supabase/migrations").filter((f) => /^\d+_.+\.sql$/.test(f)).sort();
+  let applied = 0;
+  for (const f of files) {
+    const [, version, name] = /^(\d+)_(.+)\.sql$/.exec(f);
+    if (done.has(name)) continue;
+    const body = readFileSync(join("supabase/migrations", f), "utf8");
+    await sql(body);
+    await sql(`insert into supabase_migrations.schema_migrations(version, name, statements) values ('${version}', '${name.replace(/'/g, "")}', array[$placetta_migration$${body}$placetta_migration$])`);
+    console.log(`  applied ${name}`); applied++;
+  }
+  if (!applied) console.log("  already up to date");
+}
+
+/** Sign-in settings, through the Management API. Each part is sent on its own so one problem doesn't stop the rest. */
+async function configureAuth(o) {
+  console.log(`\n${bold("Sign-in")}`);
+  const parts = [];
+  if (o.origin) parts.push(["app address", { site_url: o.origin, uri_allow_list: [o.origin, `${o.origin}/**`].join(",") }]);
+  parts.push(["two-step sign-in", { mfa_totp_enroll_enabled: true, mfa_totp_verify_enabled: true }]);
+  if (o.resend) parts.push(["email sender (Resend)", { smtp_host: "smtp.resend.com", smtp_port: 465, smtp_user: "resend", smtp_pass: o.resend, smtp_admin_email: o.from, smtp_sender_name: "Placetta", external_email_enabled: true, mailer_autoconfirm: false }]);
+  parts.push(["email templates", {
+    mailer_subjects_magic_link: "Your Placetta sign-in code",
+    mailer_templates_magic_link_content: EMAIL("Your sign-in code is", "{{ .Token }}", "Or sign in with this link", "{{ .ConfirmationURL }}"),
+    mailer_subjects_confirmation: "Your Placetta sign-in code",
+    mailer_templates_confirmation_content: EMAIL("Your sign-in code is", "{{ .Token }}", "Or confirm with this link", "{{ .ConfirmationURL }}"),
+    mailer_subjects_invite: "You're invited to Placetta",
+    mailer_templates_invite_content: EMAIL("A teammate invited you to their Placetta workspace.", "", "Accept the invite", "{{ .ConfirmationURL }}"),
+  }]);
+  if (o.google) parts.push(["Google sign-in", { external_google_enabled: true, external_google_client_id: o.google.id, external_google_secret: o.google.secret }]);
+  if (o.microsoft) parts.push(["Microsoft sign-in", { external_azure_enabled: true, external_azure_client_id: o.microsoft.id, external_azure_secret: o.microsoft.secret, external_azure_url: "https://login.microsoftonline.com/common" }]);
+  for (const [label, body] of parts) {
+    try { await mgmt("PATCH", "config/auth", body); console.log(`  ${green("set")}  ${label}`); }
+    catch (e) { console.log(`  ${red("not set")}  ${label}: ${e.message}. Set it in the dashboard (Authentication).`); }
+  }
+}
+
+const EMAIL = (lead, code, linkText, link) => `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 24px;color:#0E1116">
+<p style="font-size:15px;margin:0 0 12px">${lead}</p>
+${code ? `<p style="font-size:32px;letter-spacing:6px;font-weight:600;margin:0 0 20px">${code}</p>` : ""}
+<p style="margin:0 0 24px"><a href="${link}" style="display:inline-block;background:#0E1116;color:#fff;text-decoration:none;padding:10px 18px;border-radius:999px;font-size:14px">${linkText}</a></p>
+<p style="font-size:12px;color:#6B7280;margin:0">If you didn't ask for this, you can ignore this email.</p>
+</div>`;
 
 async function stripe(key, method, path, form, idem) {
   const res = await fetch(`https://api.stripe.com/v1/${path}`, {
@@ -140,7 +205,10 @@ async function main() {
   console.log(bold("Placetta: preview to production\n"));
   console.log(dim("Leave anything blank to skip it. Keys you type are hidden.\n"));
 
+  TOKEN = await ask("Supabase access token (supabase.com/dashboard/account/tokens): ", { hidden: true });
+  if (!TOKEN) console.log(dim("  No token: the database update, function deploy and sign-in settings are skipped. The CLI will ask you to log in for secrets."));
   const app = (await ask("App address (e.g. https://app.placetta.com, or blank if you'll deploy to Netlify now): ")).replace(/\/+$/, "");
+
   const secrets = {};
   const anthropic = await ask("Anthropic API key (sk-ant-...): ", { hidden: true });
   if (anthropic) secrets.ANTHROPIC_API_KEY = anthropic;
@@ -150,11 +218,30 @@ async function main() {
     secrets.AZURE_SPEECH_REGION = await ask("Azure Speech region [eastus]: ", { fallback: "eastus" });
   }
   const sk = await ask("Stripe secret key (sk_test_... to try it first, sk_live_... to charge): ", { hidden: true });
+
+  const auth = {};
+  if (TOKEN) {
+    console.log(dim("\nSign-in emails need your own sender. Resend is the quickest: resend.com, add your domain, create an API key."));
+    auth.resend = await ask("Resend API key (re_...): ", { hidden: true });
+    if (auth.resend) auth.from = await ask("Send sign-in emails from [no-reply@placetta.com]: ", { fallback: "no-reply@placetta.com" });
+    console.log(dim(`\nGoogle and Microsoft sign-in are optional. Their redirect address is ${SUPABASE_URL}/auth/v1/callback`));
+    const gid = await ask("Google OAuth client ID: ");
+    if (gid) auth.google = { id: gid, secret: await ask("Google OAuth client secret: ", { hidden: true }) };
+    const mid = await ask("Microsoft (Entra ID) application ID: ");
+    if (mid) auth.microsoft = { id: mid, secret: await ask("Microsoft client secret: ", { hidden: true }) };
+  }
+  const staff = (await ask("Your team's emails for the filing queue, comma separated (blank to skip): ")).toLowerCase();
+
+  if (TOKEN) {
+    await migrate();
+    console.log(`\n${bold("Server functions")}`);
+    if (!run("npx", ["--yes", "supabase", "functions", "deploy", "--project-ref", REF, "--use-api"])) console.log(red("  Function deploy failed. See the error above, then run this again."));
+  }
   if (sk) { secrets.STRIPE_SECRET_KEY = sk; await setupStripe(sk, secrets); }
   secrets.OAUTH_STATE_SECRET = randomBytes(32).toString("hex");
 
   console.log(`\n${bold("Building the app")}`);
-  const env = { ...process.env, VITE_SUPABASE_URL: SUPABASE_URL, VITE_SUPABASE_KEY: PUBLISHABLE };
+  const env = { VITE_SUPABASE_URL: SUPABASE_URL, VITE_SUPABASE_KEY: PUBLISHABLE };
   if (!run("npm", ["run", "build"], { env })) { console.log(red("Build failed. Fix the error above and run this again.")); process.exit(1); }
   copyFileSync("vercel.json", "dist/vercel.json");
 
@@ -166,19 +253,30 @@ async function main() {
     if (!origin) origin = (await ask("Paste the live site address Netlify printed (https://...): ")).replace(/\/+$/, "");
   }
   if (origin) secrets.APP_ORIGINS = origin;
-  else console.log(dim("No app address yet, so checkout and integrations will refuse to return anywhere. Run this again once the app is online."));
+  else console.log(dim("No app address yet, so checkout, invites and integrations won't know where to send people back. Run this again once the app is online."));
 
   if (!setSecrets(secrets)) {
-    console.log(red("\nSetting secrets failed. Run `npx supabase login` and try again, or add them in the dashboard: Edge Functions, Secrets."));
+    console.log(red("\nSetting secrets failed. Check the access token, or add them in the dashboard: Edge Functions, Secrets."));
     process.exit(1);
+  }
+  if (TOKEN) {
+    await configureAuth({ ...auth, origin });
+    const emails = staff.split(",").map((e) => e.trim()).filter((e) => /^[^@\s']+@[^@\s']+\.[^@\s']+$/.test(e));
+    if (emails.length) {
+      try { await sql(`insert into public.staff_emails (email) values ${emails.map((e) => `('${e}')`).join(", ")} on conflict do nothing`); console.log(`  ${green("added")}  team: ${emails.join(", ")}`); }
+      catch (e) { console.log(`  ${red("not added")}  team: ${e.message}`); }
+    }
   }
   await check();
 
-  const staff = await ask("\nYour team's email for the filing queue (blank to skip): ");
-  console.log(`\n${bold("Three things only the dashboard can do")} (supabase.com/dashboard/project/${REF})`);
-  console.log(`  1. Authentication, URL Configuration: Site URL ${origin || "<your app address>"}; add the same to Redirect URLs.`);
-  console.log("  2. Authentication, Emails, SMTP Settings: add your sender (Resend, Postmark or SES). Then in the Magic Link template add: Your code: {{ .Token }}");
-  console.log(`  3. SQL Editor: insert into public.staff_emails (email) values ('${(staff || "you@placetta.com").toLowerCase()}');`);
+  console.log(`\n${bold("Left to do")}`);
+  if (!TOKEN) {
+    console.log(`  Dashboard (supabase.com/dashboard/project/${REF}): Authentication, URL Configuration (Site URL ${origin || "<your app>"}), SMTP Settings, and SQL Editor:`);
+    console.log("  run supabase/migrations/20261005050000_teams_roles_two_step.sql, then: insert into public.staff_emails (email) values ('you@placetta.com');");
+  }
+  if (TOKEN && !auth.resend) console.log("  Add an email sender (Authentication, Emails, SMTP). Without one, sign-in emails only reach your Supabase team.");
+  console.log("  Turn on the Stripe customer portal (Settings, Billing, Customer portal).");
+  console.log("  Your team: sign in, turn on two-step sign-in in Settings, Security. The filing queue opens after that.");
   console.log(`\nThen sign up at ${origin || "your app"}, buy the entry plan${sk && !sk.includes("_live_") ? " with Stripe's test card 4242 4242 4242 4242" : ""}, and file one test application end to end.`);
 }
 

@@ -1,0 +1,13 @@
+# Placetta's Supabase project. Used by the Supabase CLI (npm run launch deploys the functions with it).
+project_id = "esquxzcfsylffuijvzec"
+
+# These three are called by Stripe, the OAuth providers and calendar apps, which can't send a Supabase session.
+# Each checks its own signature or token instead.
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.oauth-callback]
+verify_jwt = false
+
+[functions.calendar-feed]
+verify_jwt = false

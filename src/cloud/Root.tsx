@@ -8,9 +8,11 @@ import { B, same, type Bi, type Store, type Workspace } from "../model";
 import type { Lang } from "../i18n";
 import * as api from "./api";
 import { normalize, type CloudSession } from "./session";
+import { TwoStepCode } from "./TwoStep";
 
-/* Signed-in Placetta: sign in with an email link or code, create the business (with the filing authorization),
-   then the workspace itself. Workspaces, files and the audit trail live in the account. */
+/* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
+   Invites to a teammate's workspace are accepted on sign-in. New businesses start with onboarding (and the filing
+   authorization); the workspace, files and the audit trail live in the account. */
 
 const STATES: [string, string][] = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"], ["DC", "District of Columbia"], ["FL", "Florida"], ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"], ["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"], ["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"], ["ME", "Maine"], ["MD", "Maryland"], ["MA", "Massachusetts"], ["MI", "Michigan"], ["MN", "Minnesota"], ["MS", "Mississippi"], ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"], ["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"], ["NM", "New Mexico"], ["NY", "New York"], ["NC", "North Carolina"], ["ND", "North Dakota"], ["OH", "Ohio"], ["OK", "Oklahoma"], ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"], ["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"], ["TX", "Texas"], ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"], ["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"], ["WY", "Wyoming"]];
 const NYC = /^(new york|nyc|manhattan|brooklyn|queens|bronx|the bronx|staten island|flushing|astoria|long island city)$/i;
@@ -47,13 +49,29 @@ function Frame({ lang, setLang, children }: { lang: Lang; setLang: (l: Lang) => 
   );
 }
 
+const GoogleMark = () => (
+  <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+);
+const MicrosoftMark = () => (
+  <svg width="15" height="15" viewBox="0 0 23 23" aria-hidden="true"><path fill="#F35325" d="M1 1h10v10H1z"/><path fill="#81BC06" d="M12 1h10v10H12z"/><path fill="#05A6F0" d="M1 12h10v10H1z"/><path fill="#FFBA08" d="M12 12h10v10H12z"/></svg>
+);
+
 function SignIn({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
+  const [err, setErr] = useState(() => new URLSearchParams(location.search).get("error_description") ?? "");
+  const [providers, setProviders] = useState<Record<api.Provider, boolean>>({ google: false, azure: false });
+  useEffect(() => {
+    void api.authProviders().then(setProviders);
+    if (new URLSearchParams(location.search).get("error")) history.replaceState(null, "", location.pathname + location.hash);
+  }, []);
+  const withProvider = async (p: api.Provider) => {
+    setBusy(true); setErr("");
+    try { await api.signInWith(p); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
+  };
   const send = async () => {
     if (!/\S+@\S+\.\S+/.test(email)) { setErr(L(B("Enter your work email.", "请输入工作邮箱。"))); return; }
     setBusy(true); setErr("");
@@ -68,7 +86,14 @@ function SignIn({ lang }: { lang: Lang }) {
     <div className="gate-card">
       <div className="gate-bot"><AgentBot size={84} /></div>
       <h1>{sent ? L(B("Check your email.", "请查收邮件。")) : L(B("Sign in to Placetta.", "登录快哉。"))}</h1>
-      <p className="gate-sub">{sent ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`)) : L(B("Licenses, permits and daily compliance for every store. New here? The same email creates your account.", "每家门店的执照、许可与日常合规。第一次来？用同一个邮箱即可创建账户。"))}</p>
+      <p className="gate-sub">{sent ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`)) : L(B("Licenses, permits and daily compliance for every store. New here? Signing in creates your account. Invited by a teammate? Use the email they invited.", "每家门店的执照、许可与日常合规。第一次来？登录即创建账户。受同事邀请？请使用被邀请的邮箱。"))}</p>
+      {!sent && (providers.google || providers.azure) && (
+        <div className="gate-sso">
+          {providers.google && <button type="button" className="sbtn line wide sso" disabled={busy} onClick={() => void withProvider("google")}><GoogleMark />{L(B("Continue with Google", "使用 Google 继续"))}</button>}
+          {providers.azure && <button type="button" className="sbtn line wide sso" disabled={busy} onClick={() => void withProvider("azure")}><MicrosoftMark />{L(B("Continue with Microsoft", "使用 Microsoft 继续"))}</button>}
+          <span className="gate-or">{L(B("or", "或"))}</span>
+        </div>
+      )}
       {!sent ? (
         <form onSubmit={e => { e.preventDefault(); void send(); }}>
           <label className="sr" htmlFor="gate-email">Email</label>
@@ -159,7 +184,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "onboard"; email: string; back?: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
+type Phase = { k: "loading" } | { k: "signin" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
 
 export function CloudRoot() {
   const [lang, setLangState] = useState<Lang>(readLang);
@@ -172,10 +197,16 @@ export function CloudRoot() {
   const open = useCallback(async (wsId: string, notice?: string) => {
     setPhase({ k: "loading" });
     try {
+      const two = await api.twoStepStatus();
+      if (two.next === "aal2" && two.current !== "aal2" && two.factorId) { setPhase({ k: "twostep", factorId: two.factorId }); return; }
+      const joined = await api.acceptInvites().catch(() => 0);
       const me = await api.whoami();
-      const rows = await api.myWorkspaces();
+      let rows = await api.myWorkspaces();
+      // The Placetta team works from the filing queue; give them a workspace of their own to open it from.
+      if (!rows.length && me.staff_email) { await api.createWorkspace("Placetta team", normalize("Placetta team", {})); rows = await api.myWorkspaces(); }
       const row = rows.find(r => r.id === wsId) ?? rows[0];
       if (!row) { setPhase({ k: "onboard", email: me.email }); return; }
+      if (joined) notice = lang === "zh" ? `已加入 ${joined} 个团队工作区。` : `You joined ${joined} team workspace${joined > 1 ? "s" : ""}.`;
       lastWs.set(row.id);
       const params = new URLSearchParams(location.search);
       if (params.get("connect_finish")) {
@@ -190,11 +221,12 @@ export function CloudRoot() {
         api.listAudit(row.id), api.getBilling(row.id), api.listFilings(row.id), api.listDocs(row.id), api.listIntegrations(row.id), api.listLogins(row.id),
       ]);
       setPhase({ k: "app", s: {
-        me, wsId: row.id, initial: normalize(row.name, row.state), audit, billing, filings, docs, integrations, logins,
+        me, role: row.role, wsId: row.id, initial: normalize(row.name, row.state), audit, billing, filings, docs, integrations, logins,
         workspaces: rows.map(r => ({ id: r.id, name: r.name })), notice,
         switchTo: id => void open(id),
         newWorkspace: () => setPhase({ k: "onboard", email: me.email, back: row.id }),
-        signOut: () => { void api.signOut().then(() => setPhase({ k: "signin" })); },
+        signOut: everywhere => { void api.signOut(!!everywhere).then(() => setPhase({ k: "signin" })); },
+        reopen: () => void open(row.id),
       } });
       // the webhook can land a moment after Stripe sends people back: look again shortly
       if (params.get("billing") === "success") setTimeout(() => window.dispatchEvent(new Event("focus")), 4000);
@@ -215,6 +247,7 @@ export function CloudRoot() {
     <Frame lang={lang} setLang={setLang}>
       {phase.k === "loading" && <div className="gate-card"><div className="gate-bot"><AgentBot size={84} busy /></div><p className="gate-sub">{L(B("Opening your workspace…", "正在打开工作区…"))}</p></div>}
       {phase.k === "signin" && <SignIn lang={lang} />}
+      {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back ? () => void open(phase.back!) : undefined} />}
       {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Try again", "重试"))}</button></div>}
     </Frame>

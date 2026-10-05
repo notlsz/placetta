@@ -10,7 +10,15 @@ export type Tab = "check" | "form" | "fees" | "receipt";
 /** What a signed-in account adds: billing, integrations, saved logins, the filing queue and data controls. */
 export type CloudCtx = {
   email: string;
+  /** Placetta staff signed in with two-step: sees the filing queue. */
   staff: boolean;
+  /** On the staff list but not yet signed in with two-step. */
+  staffEmail: boolean;
+  /** Two-step sign-in is on for this account. */
+  twoStep: boolean;
+  /** owner: approves, pays, connects, invites. member: day-to-day work. */
+  role: "owner" | "member";
+  owner: boolean;
   wsId: string;
   plan: Plan;
   billing: Billing | null;
@@ -31,7 +39,8 @@ export type CloudCtx = {
   exportData(): void;
   switchTo(id: string): void;
   newWorkspace(): void;
-  signOut(): void;
+  signOut(everywhere?: boolean): void;
+  reopen(): void;
 };
 
 /** What every page and panel can read and do. */

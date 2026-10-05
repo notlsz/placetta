@@ -1,9 +1,11 @@
 import { B, same, type Approval, type Audit, type Doc, type Workspace } from "../model";
-import type { AgencyLogin, Billing, DocRow, Filing, Integration } from "./api";
+import type { AgencyLogin, Billing, DocRow, Filing, Integration, Me, Role } from "./api";
 
 /** Everything a signed-in workspace starts with. */
 export type CloudSession = {
-  me: { id: string; email: string; staff: boolean };
+  me: Me;
+  /** This person's role in this workspace: owners approve, pay, connect and invite. */
+  role: Role;
   wsId: string;
   initial: Workspace;
   audit: Audit[];
@@ -16,7 +18,9 @@ export type CloudSession = {
   notice?: string;
   switchTo(id: string): void;
   newWorkspace(): void;
-  signOut(): void;
+  signOut(everywhere?: boolean): void;
+  /** Load the workspace again (after two-step sign-in changes, or a role change). */
+  reopen(): void;
 };
 
 /** A saved state may be missing lists (older saves, a fresh workspace): fill them in. */
