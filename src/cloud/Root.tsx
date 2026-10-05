@@ -116,62 +116,127 @@ function SignIn({ lang }: { lang: Lang }) {
   );
 }
 
+/* Onboarding in four quick answers: the name, what it sells (tap a chip), where (one "City, state" field with suggestions)
+   and when (tap a chip). Legal entity and street are optional and tucked away. Agreeing and creating is one click. */
+const SELLS: { en: string; zh: string }[] = [
+  { en: "Milk tea", zh: "奶茶" }, { en: "Coffee", zh: "咖啡" }, { en: "Bakery and desserts", zh: "烘焙甜品" },
+  { en: "Restaurant", zh: "餐厅" }, { en: "Grocery", zh: "超市" }, { en: "Retail", zh: "零售" },
+];
+const WHEN: { en: string; zh: string; months: number | null }[] = [
+  { en: "Within 3 months", zh: "3 个月内", months: 3 }, { en: "In 3 to 6 months", zh: "3 到 6 个月", months: 6 },
+  { en: "In 6 to 12 months", zh: "6 到 12 个月", months: 12 }, { en: "Already open", zh: "已开业", months: 0 }, { en: "Not sure yet", zh: "还不确定", months: null },
+];
+const CITIES = ["New York, NY", "Flushing, NY", "Brooklyn, NY", "Manhattan, NY", "Queens, NY", "Jersey City, NJ", "Edison, NJ", "Boston, MA", "Philadelphia, PA",
+  "Washington, DC", "Chicago, IL", "Houston, TX", "Dallas, TX", "Austin, TX", "Atlanta, GA", "Miami, FL", "Orlando, FL", "Seattle, WA", "Bellevue, WA", "Portland, OR",
+  "San Francisco, CA", "San Jose, CA", "Oakland, CA", "Cupertino, CA", "Fremont, CA", "Los Angeles, CA", "Arcadia, CA", "Irvine, CA", "San Gabriel, CA", "San Diego, CA",
+  "Las Vegas, NV", "Phoenix, AZ", "Denver, CO", "Minneapolis, MN", "Detroit, MI", "Columbus, OH", "Honolulu, HI"];
+
+/** "Flushing, NY" or "Flushing, New York" -> city and two-letter state. */
+function parsePlace(v: string): { city: string; state: string } | null {
+  const m = /^\s*([^,]+?)\s*,\s*([A-Za-z .]+?)\s*$/.exec(v);
+  if (!m) return null;
+  const st = m[2].trim().toLowerCase().replace(/\./g, "");
+  const hit = STATES.find(([c, n]) => c.toLowerCase() === st || n.toLowerCase() === st);
+  return hit ? { city: m[1].trim(), state: hit[0] } : null;
+}
+
 function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: string; onCreated: (id: string) => void; onCancel?: () => void }) {
   const L = (x: Bi) => x[lang];
-  const [f, setF] = useState({ brand: "", entity: "", what: "", street: "", city: "", state: "NY", month: "", agree: false });
+  const [f, setF] = useState({ brand: "", sell: "", other: "", place: "", state: "", when: -1, entity: "", street: "", more: false });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [doc, setDoc] = useState<string | null>(null);
   const d = LEGAL.find(x => x.id === doc);
+  const parsed = parsePlace(f.place);
+  const needState = !!f.place.trim() && !parsed && !f.place.includes(",");
+  const what = f.sell === "other" ? f.other.trim() : SELLS.find(x => x.en === f.sell)?.[lang === "zh" ? "zh" : "en"] ?? "";
   const create = async () => {
-    if (!f.brand.trim() || !f.city.trim() || !f.what.trim()) { setErr(L(B("Add the business name, what it sells and the city.", "请填写企业名称、经营内容和城市。"))); return; }
-    if (!f.agree) { setErr(L(B("Tick the authorization to continue.", "请勾选授权后继续。"))); return; }
+    const city = parsed?.city ?? f.place.replace(/,.*$/, "").trim();
+    const state = parsed?.state ?? f.state;
+    if (!f.brand.trim()) { setErr(L(B("Add the business name.", "请填写企业名称。"))); return; }
+    if (!what) { setErr(L(B("Pick what the store sells.", "请选择门店经营内容。"))); return; }
+    if (!city || !state) { setErr(L(B("Add the city and state, like Flushing, NY.", "请填写城市和州，例如 Flushing, NY。"))); return; }
     setBusy(true); setErr("");
-    const city = f.city.trim(), st = STATES.find(s => s[0] === f.state)?.[1] ?? f.state, nyc = f.state === "NY" && NYC.test(city);
-    const month = f.month ? new Date(f.month + "-15T12:00:00") : null;
+    const st = STATES.find(s => s[0] === state)?.[1] ?? state, nyc = state === "NY" && NYC.test(city);
+    const w = WHEN[f.when];
+    const month = w && w.months ? new Date(Date.now() + w.months * 30.4 * 864e5) : null;
+    const monthIso = month ? month.toISOString().slice(0, 7) : "";
     const monthEn = month ? month.toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "";
     const monthZh = month ? `${month.getFullYear()} 年 ${month.getMonth() + 1} 月` : "";
+    const open = w?.months === 0;
     const store: Store = {
-      id: slug(city), name: same(f.street.trim() ? `${city}, ${f.street.trim()}` : city), address: [f.street.trim(), city, f.state].filter(Boolean).join(", "),
-      stage: "opening", plannedOpen: f.month ? f.month + "-15" : undefined, rules: nyc ? ["nyc_grades", "nyc_fww"] : [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [],
+      id: slug(city), name: same(f.street.trim() ? `${city}, ${f.street.trim()}` : city), address: [f.street.trim(), city, state].filter(Boolean).join(", "),
+      stage: open ? "open" : "opening", plannedOpen: monthIso ? monthIso + "-15" : undefined, rules: nyc ? ["nyc_grades", "nyc_fww"] : [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [],
     };
     const ws: Workspace = normalize(f.brand.trim(), {
       business: same(f.brand.trim()), goal: month ? B(`Open by ${monthEn}`, `${monthZh}开业`) : same(""),
       locations: [{ id: slug(city), name: same(city), county: same(st), state: "active" }],
       facts: [
         ...(f.entity.trim() ? [{ id: "f-entity", group: "business" as const, label: B("Legal entity", "法律实体"), value: same(f.entity.trim()), source: B("You told me", "您告诉我的") }] : []),
-        { id: "f-sell", group: "operations", label: B("What you sell", "销售内容"), value: same(f.what.trim()), source: B("You told me", "您告诉我的") },
+        { id: "f-sell", group: "operations", label: B("What you sell", "销售内容"), value: same(what), source: B("You told me", "您告诉我的") },
         { id: "f-addr", group: "location", label: B("Storefront", "门店"), value: same(store.address), source: B("You told me", "您告诉我的") },
         ...(month ? [{ id: "f-open", group: "location" as const, label: B("Target opening", "目标开业"), value: B(monthEn, monthZh), source: B("You told me", "您告诉我的") }] : []),
         { id: "f-appr", group: "rules", label: B("Needs your approval", "需要您批准"), value: B("Every filing, payment and message", "每一次提交、付款和消息"), source: B("Always on", "始终开启"), locked: true },
       ],
       stores: [store],
-      meta: { city, region: st, what: f.what.trim(), entity: f.entity.trim() || undefined },
+      meta: { city, region: st, what, entity: f.entity.trim() || undefined },
     });
     try { onCreated(await api.createWorkspace(f.brand.trim(), ws)); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
   return (
     <div className="gate-card wide">
       <h1>{L(B("Tell us about the business.", "介绍一下您的企业。"))}</h1>
-      <p className="gate-sub">{L(B(`Signed in as ${email}. Placetta uses this to map every license your first store needs.`, `已登录 ${email}。快哉会据此梳理第一家门店所需的全部执照。`))}</p>
+      <p className="gate-sub">{L(B(`Four quick answers and Placetta maps every license your first store needs. Signed in as ${email}.`, `回答四个问题，快哉就会梳理第一家门店所需的全部执照。已登录 ${email}。`))}</p>
       <form className="onb" onSubmit={e => { e.preventDefault(); void create(); }}>
-        <label>{L(B("Business or brand", "企业或品牌"))}<input value={f.brand} onChange={e => setF({ ...f, brand: e.target.value })} placeholder="Moonleaf Tea" autoFocus /></label>
-        <label>{L(B("Legal entity, if formed", "法律实体（如已成立）"))}<input value={f.entity} onChange={e => setF({ ...f, entity: e.target.value })} placeholder="Moonleaf Tea LLC" /></label>
-        <label className="full">{L(B("What the store sells", "门店经营内容"))}<input value={f.what} onChange={e => setF({ ...f, what: e.target.value })} placeholder={L(B("Milk tea and packaged snacks", "奶茶和预包装零食"))} /></label>
-        <label className="full">{L(B("Street address, if you have one", "街道地址（如已确定）"))}<input value={f.street} onChange={e => setF({ ...f, street: e.target.value })} placeholder="38 Main St" /></label>
-        <label>{L(B("City", "城市"))}<input value={f.city} onChange={e => setF({ ...f, city: e.target.value })} placeholder="Flushing" /></label>
-        <label>{L(B("State", "州"))}<select value={f.state} onChange={e => setF({ ...f, state: e.target.value })}>{STATES.map(([c, n]) => <option key={c} value={c}>{n}</option>)}</select></label>
-        <label>{L(B("Target opening", "目标开业"))}<input type="month" value={f.month} onChange={e => setF({ ...f, month: e.target.value })} /></label>
-        <label className="agree full">
-          <input type="checkbox" checked={f.agree} onChange={e => setF({ ...f, agree: e.target.checked })} />
-          <span>{L(B("I authorize Placetta to prepare applications for this business and to submit the ones I approve, as its authorized agent for that limited purpose. I have authority to act for the business, and I agree to the ", "我授权快哉为本企业准备申请，并作为该有限目的的授权代理人提交我批准的申请。我有权代表本企业行事，并同意"))}
-            <button type="button" className="lnk" onClick={() => setDoc("authorization")}>{L(B("Filing Authorization", "申报授权书"))}</button>{L(B(", ", "、"))}
-            <button type="button" className="lnk" onClick={() => setDoc("terms")}>{L(B("Terms", "服务条款"))}</button>{L(B(" and ", "和"))}
-            <button type="button" className="lnk" onClick={() => setDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(".", "。"))}</span>
+        <label className="q">
+          <span>{L(B("Business name", "企业名称"))}</span>
+          <input id="onb-brand" value={f.brand} onChange={e => setF({ ...f, brand: e.target.value })} placeholder="Moonleaf Tea" autoComplete="organization" autoFocus />
         </label>
-        <div className="onb-act full">
+
+        <fieldset className="q">
+          <legend>{L(B("What does the store sell?", "门店经营什么？"))}</legend>
+          <div className="chips" role="radiogroup">
+            {SELLS.map(x => <button key={x.en} type="button" role="radio" aria-checked={f.sell === x.en} className="chip" onClick={() => setF({ ...f, sell: x.en })}>{L(x)}</button>)}
+            <button type="button" role="radio" aria-checked={f.sell === "other"} className="chip" onClick={() => setF({ ...f, sell: "other" })}>{L(B("Something else", "其他"))}</button>
+          </div>
+          {f.sell === "other" && <input id="onb-other" value={f.other} onChange={e => setF({ ...f, other: e.target.value })} placeholder={L(B("e.g. Hot pot and bubble tea", "例如：火锅和珍珠奶茶"))} aria-label={L(B("What the store sells", "门店经营内容"))} autoFocus />}
+        </fieldset>
+
+        <label className="q">
+          <span>{L(B("Where is the first store?", "第一家门店在哪里？"))}</span>
+          <input id="onb-place" list="onb-cities" value={f.place} onChange={e => setF({ ...f, place: e.target.value })} placeholder="Flushing, NY" autoComplete="address-level2" />
+          <datalist id="onb-cities">{CITIES.map(c => <option key={c} value={c} />)}</datalist>
+          {needState && (
+            <select id="onb-state" value={f.state} onChange={e => setF({ ...f, state: e.target.value })} aria-label={L(B("State", "州"))}>
+              <option value="">{L(B("Which state?", "哪个州？"))}</option>
+              {STATES.map(([c, n]) => <option key={c} value={c}>{n}</option>)}
+            </select>
+          )}
+        </label>
+
+        <fieldset className="q">
+          <legend>{L(B("When do you want to open?", "计划什么时候开业？"))}</legend>
+          <div className="chips" role="radiogroup">
+            {WHEN.map((x, i) => <button key={x.en} type="button" role="radio" aria-checked={f.when === i} className="chip" onClick={() => setF({ ...f, when: i })}>{L(x)}</button>)}
+          </div>
+        </fieldset>
+
+        {f.more ? (
+          <div className="q two">
+            <label><span>{L(B("Legal entity, if formed", "法律实体（如已成立）"))}</span><input id="onb-entity" value={f.entity} onChange={e => setF({ ...f, entity: e.target.value })} placeholder="Moonleaf Tea LLC" /></label>
+            <label><span>{L(B("Street address", "街道地址"))}</span><input id="onb-street" value={f.street} onChange={e => setF({ ...f, street: e.target.value })} placeholder="38 Main St" autoComplete="address-line1" /></label>
+          </div>
+        ) : (
+          <button type="button" className="lnk more" onClick={() => setF({ ...f, more: true })}>{L(B("Add the legal entity or street address (optional)", "添加法律实体或街道地址（选填）"))}</button>
+        )}
+
+        <p className="onb-legal">{L(B("By creating the workspace, you authorize Placetta to prepare applications for this business and to submit the ones you approve, as its authorized agent for that limited purpose. You confirm you have authority to act for the business and agree to the ", "创建工作区即表示您授权快哉为本企业准备申请，并作为该有限目的的授权代理人提交您批准的申请。您确认有权代表本企业行事，并同意"))}
+          <button type="button" className="lnk" onClick={() => setDoc("authorization")}>{L(B("Filing Authorization", "申报授权书"))}</button>{L(B(", ", "、"))}
+          <button type="button" className="lnk" onClick={() => setDoc("terms")}>{L(B("Terms", "服务条款"))}</button>{L(B(" and ", "和"))}
+          <button type="button" className="lnk" onClick={() => setDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(".", "。"))}</p>
+        <div className="onb-act">
           {onCancel && <button type="button" className="sbtn quiet" onClick={onCancel}>{L(B("Cancel", "取消"))}</button>}
-          <button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : L(B("Create workspace", "创建工作区"))}</button>
+          <button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : L(B("Agree and create workspace", "同意并创建工作区"))}</button>
         </div>
       </form>
       {err && <p className="gate-err" role="alert">{err}</p>}
