@@ -3,7 +3,7 @@ import { ThinkingOrb } from "thinking-orbs";
 import { useApp, type Tab } from "./ctx";
 import type { Application, CheckItem, Doc } from "./model";
 import { fmtStamp, money } from "./time";
-import { FileCard, I, LevelTag, Modal, Sample, Sheet, StatusChip, feeTotal } from "./ui";
+import { FileCard, I, LevelTag, Modal, Pill, Sample, Sheet, StatusChip, feeTotal } from "./ui";
 import { INK } from "./pages";
 
 /* ------------------------- application, opened ------------------------- */
@@ -33,7 +33,7 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
           <a href={a.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{a.source.label}<I.ext /></a>
         </p>
         {a.next && <p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
-        <nav className="tabs" role="tablist">
+        <nav className="seg tabs" role="tablist">
           {tabs.map(x => <button key={x.k} type="button" role="tab" aria-selected={tab === x.k} onClick={() => onTab(x.k)}>{x.l}{x.n && <span>{x.n}</span>}</button>)}
         </nav>
       </header>
@@ -46,7 +46,7 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
       {appr && (
         <footer className="sh-f">
           <span><I.pause />{t("waitingYou")}</span>
-          <button type="button" className="btn ink" disabled={busy} onClick={() => openApproval(appr.id)}>{t("review")}<I.arrow /></button>
+          <Pill kind="ink" disabled={busy} onClick={() => openApproval(appr.id)}>{t("review")}</Pill>
         </footer>
       )}
     </Sheet>
@@ -83,8 +83,8 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
         )}
         {c.state === "missing" && !c.dep && !reading && (
           <div className="ck-act">
-            <button type="button" className="btn ink sm" disabled={busy} onClick={() => input.current?.click()}><I.upload />{t("upload")}</button>
-            <button type="button" className="btn ghost sm" disabled={busy} onClick={() => upload(a.id, c.id)}>{t("useSample")}</button>
+            <button type="button" className="pill ink sm" disabled={busy} onClick={() => input.current?.click()}><I.upload />{t("upload")}</button>
+            <button type="button" className="pill quiet sm" disabled={busy} onClick={() => upload(a.id, c.id)}>{t("useSample")}</button>
             <input ref={input} type="file" hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload(a.id, c.id, f); }} />
           </div>
         )}
@@ -123,11 +123,11 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
       </div>
       <div className="form-act">
         {edit ? <>
-          <button type="button" className="btn ink" onClick={save}>{t("save")}</button>
-          <button type="button" className="btn ghost" onClick={() => { setVals(Object.fromEntries(a.fields.map(f => [f.id, f.value]))); setEdit(false); }}>{t("cancel")}</button>
+          <button type="button" className="pill ink" onClick={save}>{t("save")}</button>
+          <button type="button" className="pill quiet" onClick={() => { setVals(Object.fromEntries(a.fields.map(f => [f.id, f.value]))); setEdit(false); }}>{t("cancel")}</button>
         </> : <>
-          {canEdit && <button type="button" className="btn soft" onClick={() => setEdit(true)}><I.pencil />{t("edit")}</button>}
-          <button type="button" className="btn ghost" onClick={() => downloadApp(a.id)}><I.download />{t("download")} PDF</button>
+          {canEdit && <button type="button" className="pill quiet" onClick={() => setEdit(true)}><I.pencil />{t("edit")}</button>}
+          <button type="button" className="pill quiet" onClick={() => downloadApp(a.id)}><I.download />{t("download")} PDF</button>
         </>}
       </div>
       <p className="note">{t("formFor")}</p>
@@ -218,8 +218,8 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
       <footer className="m-f">
         <p>{t("ap_note")}</p>
         <div className="m-btns">
-          {app && <button type="button" className="btn ghost" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
-          <button type="button" className="btn ink" disabled={busy} onClick={() => { approve(a.id); onClose(); }}>{b(a.action)}</button>
+          {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
+          <Pill kind="ink" disabled={busy} onClick={() => { approve(a.id); onClose(); }}>{b(a.action)}</Pill>
         </div>
       </footer>
     </Modal>

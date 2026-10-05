@@ -21,8 +21,11 @@ export const S = {
   mapping: B("Mapping", "梳理中"),
   langSwitch: B("Language", "语言"),
 
-  ov_title: B("Here's where your {n} applications stand.", "您的 {n} 项申请进展如下。"),
+  ov_title: B("Here's where your {n} applications stand.", "您的 {n} 项申请，进展如下。"),
   ov_sub: B("{biz} in {place}. {goal}.", "{biz}，{place}。{goal}。"),
+  ov_state: B("{a} approved, {r} with the agencies, {n} waiting on you.", "{a} 项已批准，{r} 项在机构审核中，{n} 项等您处理。"),
+  ov_done: B("{d} of {n} filed or approved", "已提交或批准 {d}/{n}"),
+  foot_short: B("Nothing is filed, paid or sent without your approval, and every action is in the audit trail.", "未经您批准，不会提交、付款或发送任何内容；每项操作都记录在审计记录中。"),
   st_approved: B("Approved", "已批准"),
   st_agency: B("With agencies", "机构审核中"),
   st_you: B("Need you", "需要您处理"),

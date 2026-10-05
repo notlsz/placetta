@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { audit, demoAgent, setFact, setField, type AgentBackend, type Reply, type Request, type Step } from "./agent";
 import { AgentPanel } from "./AgentPanel";
+import { Composer } from "./Composer";
 import { AppCtx, type Ctx, type Tab, type View } from "./ctx";
 import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
@@ -10,7 +11,7 @@ import { unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo } from "./Logo";
 import { B, SAMPLE, same, type Bi, type Doc, type LicenseHit, type Workspace } from "./model";
-import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, INK, Overview, Settings } from "./pages";
+import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, Overview, Settings } from "./pages";
 import { daysUntil, inDays, nowIso } from "./time";
 import { I } from "./ui";
 
@@ -41,9 +42,11 @@ export default function App() {
   }, [lang]);
 
   /* layout */
-  const wide = !useNarrow(1180);
+  const wide = !useNarrow(1200);
   const phone = useNarrow(860);
-  const [panelOpen, setPanelOpen] = useState(() => window.innerWidth >= 1180);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const panelRef = useRef(false);
+  useEffect(() => { panelRef.current = panelOpen; }, [panelOpen]);
   const [navOpen, setNavOpen] = useState(false);
   const dock = wide && panelOpen;
   const [view, setView] = useState<View>("overview");
@@ -51,7 +54,7 @@ export default function App() {
   const [modal, setModal] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const toastT = useRef(0);
-  const say = useCallback((s: string) => { setToast(s); clearTimeout(toastT.current); toastT.current = window.setTimeout(() => setToast(null), 2800); }, []);
+  const say = useCallback((s: string) => { setToast(s); clearTimeout(toastT.current); toastT.current = window.setTimeout(() => setToast(null), Math.max(2800, s.length * 55)); }, []);
   const main = useRef<HTMLElement>(null);
   const go = useCallback((v: View) => { setView(v); setNavOpen(false); main.current?.scrollTo({ top: 0 }); }, []);
 
@@ -98,13 +101,14 @@ export default function App() {
     } catch { /* stopped */ }
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if (voice && said) tts.speak(said, lang === "zh" ? "zh-CN" : "en-US");
-  }, [lang, tts]);
+    else if (said && !panelRef.current) say(said.split(/(?<=[.。])\s*/)[0]);
+  }, [lang, tts, say]);
 
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
-    if (!wide) setPanelOpen(true);
+    setPanelOpen(true);
     run({ text: q }, q, voice);
-  }, [run, wide]);
+  }, [run]);
 
   const approve = useCallback((id: string) => {
     const a = wsRef.current.approvals.find(x => x.id === id); if (!a) return;
@@ -135,7 +139,7 @@ export default function App() {
     lang, t, b, ws, busy, live: step, uploading,
     go,
     ask,
-    run: (req, shown) => { if ("text" in req && !wide) setPanelOpen(true); void run(req, shown); },
+    run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
     openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : "check"), edit: !!edit }); },
     openApproval: id => setModal(id),
     approve,
@@ -165,7 +169,7 @@ export default function App() {
       setFeed(fd => [...fd, { id: nid(), kind: "memory", text }]);
       say(`${t("committed")}: ${text[lang]}`);
     },
-  }), [lang, t, b, ws, busy, step, uploading, go, ask, run, approve, upload, save, say, wide]);
+  }), [lang, t, b, ws, busy, step, uploading, go, ask, run, approve, upload, save, say]);
 
   /* page */
   const page = {
@@ -182,6 +186,11 @@ export default function App() {
         {phone && <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>}
       </div>
       <div className="wsname"><b>{b(ws.business)}</b><span>{t("sampleWs")}</span></div>
+      <button type="button" className={"askb" + (panelOpen ? " on" : "")} onClick={() => { setPanelOpen(o => !o); setNavOpen(false); }}>
+        <span className="lens" aria-hidden="true"><ThinkingOrb state={busy && step ? step.state : "breathing"} size={20} theme="light" color="#3F7FC4" /></span>
+        <span>{t("showPanel")}</span>
+        {ws.approvals.length > 0 && <em>{ws.approvals.length}</em>}
+      </button>
       <ul className="nav">
         {NAV.map(n => (
           <li key={n.v}><button type="button" aria-current={view === n.v ? "page" : undefined} onClick={() => go(n.v)}><n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}</button></li>
@@ -225,18 +234,10 @@ export default function App() {
               </div>
             </header>
           )}
-          <main className="content" ref={main}>{page}</main>
+          <main className={"content" + (view === "overview" ? " wash" : "")} ref={main}>{page}</main>
+          {!panelOpen && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} /></div>}
         </div>
-        {(dock || panelOpen) && (
-          <AgentPanel feed={feed} step={step} tts={tts} mode={dock ? "dock" : "sheet"} onHide={() => setPanelOpen(false)} asked={asked} />
-        )}
-        {!dock && !panelOpen && (
-          <button type="button" className={"fab" + (busy ? " live" : "")} onClick={() => setPanelOpen(true)}>
-            <ThinkingOrb state={busy && step ? step.state : "breathing"} size={20} theme="light" color={INK} aria-hidden="true" />
-            <span>{busy && step ? step.label[lang] + "…" : t("showPanel")}</span>
-            {ws.approvals.length > 0 && !busy && <em>{ws.approvals.length}</em>}
-          </button>
-        )}
+        {panelOpen && <AgentPanel feed={feed} tts={tts} mode={dock ? "dock" : "sheet"} onHide={() => setPanelOpen(false)} asked={asked} />}
         {drawer && <AppDrawer id={drawer.id} tab={drawer.tab} edit={drawer.edit} onTab={tab => setDrawer(d => (d ? { ...d, tab, edit: false } : d))} onClose={() => setDrawer(null)} />}
         {modal && <ApproveModal id={modal} onClose={() => setModal(null)} />}
         {toast && <div className="toast" role="status">{toast}</div>}

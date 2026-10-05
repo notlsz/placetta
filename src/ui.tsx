@@ -75,7 +75,6 @@ export function AppArtifact({ a }: { a: Application }) {
         <b>{b(a.form ?? a.name)}</b>
         <span>{lang === "zh" ? `${b(a.agency)}，已填 ${filled}/${a.fields.length} 项` : `${b(a.agency)}. ${filled} of ${a.fields.length} fields filled`}</span>
       </span>
-      <StatusChip s={a.status} />
       <span className="achev" aria-hidden="true"><I.chevR /></span>
     </button>
   );
@@ -115,12 +114,22 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
   );
 }
 
-export function Footer() {
+/** Data handling, the way Legora puts it: quietly, at the bottom. The full note lives in Settings. */
+export function Footer({ full }: { full?: boolean }) {
   const { t } = useApp();
   return (
-    <footer className="foot">
-      <p><b>{t("foot_data")}</b>{t("foot_text")}</p>
-      <p className="foot-s">{t("foot_sample")}</p>
+    <footer className={"foot" + (full ? " full" : "")}>
+      {full ? <p><b>{t("foot_data")}</b>{t("foot_text")}</p> : <p>{t("foot_short")}</p>}
+      <p>{t("foot_sample")}</p>
     </footer>
+  );
+}
+
+/** Legora's pill: a label, then the arrow in a white circle. "quiet" drops the circle. */
+export function Pill({ children, onClick, disabled, kind = "primary", sm }: { children: ReactNode; onClick: () => void; disabled?: boolean; kind?: "primary" | "ink" | "quiet"; sm?: boolean }) {
+  return (
+    <button type="button" className={"pill " + kind + (sm ? " sm" : "")} onClick={onClick} disabled={disabled}>
+      <span>{children}</span>{kind !== "quiet" && <i aria-hidden="true"><I.arrow /></i>}
+    </button>
   );
 }

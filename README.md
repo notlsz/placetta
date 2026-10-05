@@ -1,6 +1,6 @@
 # Placetta Agent
 
-The workspace for Placetta's licensing agent. It opens on the state of your licenses, not on a chat box: every application with its status, what it costs, what's due, and what the agent needs from you. The agent works in a side panel, where you can watch each step it takes and the site it's using.
+The workspace for Placetta's licensing agent. It opens on the state of your licenses, not on a chat box: every application with its status, what it costs, what's due, and what the agent needs from you. The agent waits in a glowing message box at the bottom of every page; ask it something and its panel opens beside the work, where you can watch each step it takes and the site it's using.
 
 ## What's in it
 
@@ -65,13 +65,14 @@ Stream a `step` each time the model starts a tool call, naming the site in `tool
 | `src/App.tsx` | Layout, workspace state, running the agent, downloads |
 | `src/pages.tsx` | Overview, Applications, Documents, Deadlines, Audit trail, Context, Find licenses, Settings |
 | `src/Drawer.tsx` | An application opened (checklist, filled form, fees, receipt) and the approval dialog |
-| `src/AgentPanel.tsx` | The agent panel: live steps, replies with files, approvals and memories, the composer and voice mode |
+| `src/AgentPanel.tsx` | The agent panel: live steps, replies with files, approvals and memories |
+| `src/Composer.tsx` | The message box with the VoiceBeam glow, and voice mode |
 | `src/agent.ts` | The agent contract, workspace patches and the scripted demo agent |
 | `src/model.ts` | Workspace types and the sample workspace |
 | `src/files.ts` | Receipts and filled applications as PDF, the audit trail as CSV, saving files |
 | `src/hooks.ts` | Speech to text, reading replies aloud, the simulated voice |
 | `src/i18n.ts`, `src/time.ts` | English and Chinese text, dates and money |
-| `src/styles.css` | Tokens (white and light blue) and all styles |
+| `src/styles.css` | Tokens (white and light blue, one warm accent for what needs you) and all styles |
 
 ## Before launch
 
