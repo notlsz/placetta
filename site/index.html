@@ -1556,7 +1556,7 @@ html[lang="zh-CN"] .ctas .ctah{letter-spacing:0;line-height:1.2}
 /* ============ copy ============ */
 const T = {
 en:{
- "nav.how":"How it works", "nav.faq":"FAQ","nav.login":"Log in",
+ "nav.how":"How it works", "nav.faq":"FAQ","nav.login":"Log in","nav.app":"Open app",
  "q.goT":"Your plan is ready to build.","q.goP":"Confirm {c} and Placetta maps every license, permit and registration for {m}, with fees and timelines, in a few minutes.","q.go":"Build my plan","q.goN":"Free. Nothing is filed or paid without your approval.",
  "cta.plan":"Get your entry plan",
  "hero.badge":"31,107+ businesses served by our team since 2016",
@@ -1638,7 +1638,7 @@ en:{
  "faq.sub":"Something else? Email <a href=\"mailto:support@placetta.com\">support@placetta.com</a>."
 },
 zh:{
- "nav.how":"运作方式", "nav.faq":"常见问题","nav.login":"登录",
+ "nav.how":"运作方式", "nav.faq":"常见问题","nav.login":"登录","nav.app":"进入应用",
  "q.goT":"可以开始生成您的计划了。","q.goP":"确认 {c} 后，快哉会在几分钟内梳理{m}所需的全部执照、许可和登记，并附上费用和时间。","q.go":"生成我的计划","q.goN":"免费。未经您批准，不会提交或支付任何费用。",
  "cta.plan":"获取开店计划",
  "hero.badge":"自 2016 年起，我们的团队已服务 31,107+ 家企业",
@@ -2755,6 +2755,14 @@ if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getE
 
 /* ============ boot ============ */
 applyAll(); setPlay(vPlaying); onScroll(); requestAnimationFrame(vLoop); updateResume(); startScene(); renderMap();
+(function signedIn(){
+  // Someone already signed in to the app on this site sees "Open app" instead of "Log in".
+  try {
+    const s = JSON.parse(localStorage.getItem("sb-esquxzcfsylffuijvzec-auth-token") || "null");
+    if (!s || !s.refresh_token) return;
+    document.querySelectorAll('a[href="/app/"][data-i18n="nav.login"]').forEach(a => { a.dataset.i18n = "nav.app"; a.textContent = t("nav.app"); });
+  } catch(e){}
+})();
 (function featurePlay(){
   document.querySelectorAll(".fcard").forEach(card => {
     const steps = [...card.querySelectorAll("[data-st]")], bar = card.querySelector(".fprog i"), chips = card.querySelectorAll(".fchips li").length;

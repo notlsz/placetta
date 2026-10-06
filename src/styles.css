@@ -582,9 +582,9 @@ button.wsname b { grid-column: 1; overflow: hidden; text-overflow: ellipsis; whi
 button.wsname span { grid-column: 1; }
 button.wsname svg { grid-column: 2; grid-row: 1 / 3; align-self: center; color: var(--ink3); }
 .wsmenu { position: absolute; top: calc(100% - 6px); left: 4px; right: 4px; z-index: 30; display: flex; flex-direction: column; padding: 6px; border-radius: 16px; background: #fff; box-shadow: var(--lift); animation: pop .18s ease-out; }
-.wsmenu button { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 10px; font-size: 14px; color: var(--ink); }
-.wsmenu button:hover { background: var(--mist); }
-.wsmenu button svg { color: var(--ink3); }
+.wsmenu button, .wsmenu a { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 10px; font-size: 14px; color: var(--ink); text-decoration: none; }
+.wsmenu button:hover, .wsmenu a:hover { background: var(--mist); }
+.wsmenu button svg, .wsmenu a svg { color: var(--ink3); }
 .wsmenu button[aria-current="true"] svg { margin-left: auto; color: var(--blue-ink); }
 .slim .wsname-wrap { display: none; }
 

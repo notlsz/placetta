@@ -29,7 +29,7 @@ const readFlag = (k: string) => { try { return localStorage.getItem(k) === "1"; 
 const writeFlag = (k: string, v: boolean) => { try { localStorage.setItem(k, v ? "1" : "0"); } catch { /* storage blocked */ } };
 
 const readLang = (): Lang => {
-  try { const v = localStorage.getItem("placetta-agent-lang"); if (v === "en" || v === "zh") return v; } catch { /* storage blocked */ }
+  try { const v = localStorage.getItem("placetta-lang") ?? localStorage.getItem("placetta-agent-lang"); if (v === "en" || v === "zh") return v; } catch { /* storage blocked */ }
   return navigator.language?.toLowerCase().startsWith("zh") ? "zh" : "en";
 };
 
@@ -77,7 +77,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const b = useCallback((x: Bi) => x[lang], [lang]);
   useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
-    try { localStorage.setItem("placetta-agent-lang", lang); } catch { /* storage blocked */ }
+    try { localStorage.setItem("placetta-lang", lang); localStorage.setItem("placetta-agent-lang", lang); } catch { /* storage blocked */ }
   }, [lang]);
 
   /* layout */
@@ -533,6 +533,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           <div className="wsmenu" role="menu">
             {cloud.workspaces.map(x => <button key={x.id} type="button" role="menuitem" aria-current={x.id === cloud.wsId} onClick={() => { setWsMenu(false); if (x.id !== cloud.wsId) cloud.switchTo(x.id); }}>{x.name}{x.id === cloud.wsId && <I.check />}</button>)}
             <button type="button" role="menuitem" onClick={() => { setWsMenu(false); cloud.newWorkspace(); }}><I.plus />{b(B("New business", "新建企业"))}</button>
+            <a role="menuitem" href="/"><I.globe />{b(B("Placetta website", "快哉官网"))}</a>
             <button type="button" role="menuitem" onClick={() => { setWsMenu(false); cloud.signOut(); }}><I.logout />{b(B("Sign out", "退出登录"))}</button>
           </div>
         )}
