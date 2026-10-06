@@ -1,5 +1,3 @@
--- Every two minutes, ask agent-run to pick up any task whose instance died mid-run (no heartbeat for three minutes).
--- Uses the vault's monitor key, like the daily monitor. Where pg_cron isn't available (a local database) this does nothing.
 do $$
 begin
   if not exists (select 1 from pg_available_extensions where name = 'pg_cron') then

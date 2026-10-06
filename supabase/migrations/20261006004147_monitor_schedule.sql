@@ -1,5 +1,3 @@
--- Run the monitor every day at 12:15 UTC (8:15 in New York) with pg_cron, calling the `monitor` function with the
--- vault's monitor key. Where pg_cron isn't available (a local database) this does nothing.
 do $$
 begin
   if not exists (select 1 from pg_available_extensions where name = 'pg_cron') then

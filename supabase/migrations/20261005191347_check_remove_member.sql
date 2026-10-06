@@ -1,5 +1,4 @@
--- Removing someone (owners) or leaving (anyone): the database checks and records it; the team function then removes the
--- membership. (Live projects without remove_member use this; the team function removes the row with the service role.)
+-- Removing someone (owners) or leaving (anyone): the database checks and records it; the team function then removes the membership.
 create or replace function public.check_remove_member(ws uuid, p_user uuid) returns text
 language plpgsql security definer set search_path = '' as $$
 declare cur text; who text;

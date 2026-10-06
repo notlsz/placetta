@@ -1,4 +1,3 @@
--- The calendar link: any member can read it, only an owner can reset it. Resetting swaps the token in place.
 create or replace function public.calendar_token(ws uuid, p_rotate boolean default false) returns text
 language plpgsql security definer set search_path = '' as $$
 declare t text;

@@ -39,7 +39,7 @@ begin
   t := public.team_list(w);
   res := res || jsonb_build_object('owner sees invite', jsonb_array_length(t->'invites') = 1, 'team has two', jsonb_array_length(t->'members') = 2,
                                    'invites table visible to owner', (select count(*) from public.workspace_invites) = 1);
-  begin perform public.remove_member(w, a); res := res || '{"last owner protected": false}'; exception when others then res := res || '{"last owner protected": true}'; end;
+  begin perform public.check_remove_member(w, a); res := res || '{"last owner protected": false}'; exception when others then res := res || '{"last owner protected": true}'; end;
   begin
     insert into public.filings (workspace_id, app_id, title, payload) values (w, 'x-food', '{"en":"Food","zh":"Food"}', '{"fields":[],"checklist":[],"attachments":[],"does":[]}');
     res := res || '{"owner can request filing": true}';
@@ -83,7 +83,11 @@ begin
   -- owner A promotes C, then leaves
   perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated', 'aal', 'aal1')::text, true);
   perform public.set_member_role(w, c, 'owner');
-  perform public.remove_member(w, a);
+  -- as the team function does: the database checks and records it, then the membership row goes
+  perform public.check_remove_member(w, a);
+  execute 'reset role';
+  delete from public.workspace_members where workspace_id = w and user_id = a;
+  execute 'set local role authenticated';
   res := res || jsonb_build_object('owner left after promoting', not public.is_member(w));
 
   -- a Microsoft-only account with the invited address can't claim an invite or staff access

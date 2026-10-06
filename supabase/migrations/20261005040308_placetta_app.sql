@@ -1,21 +1,12 @@
 -- Placetta app: customer workspaces, the filing queue the Placetta team works from, private documents,
 -- an append-only audit log, billing state written only by Stripe, and agent usage.
---
--- Who can do what
---   customers  read and edit their own workspace, upload files, approve filings (which queues them for the team),
---              cancel a request the team hasn't started, and add audit entries for their own actions
---   team       (emails listed in public.staff_emails) see every workspace and move filings through the queue
---   server     (service role: edge functions, Stripe webhook) writes billing and usage
--- Nothing here deletes customer records; workspaces cascade only if deleted with the service role.
-
--- ---------------------------------------------------------------- helpers
 
 create table public.staff_emails (
   email text primary key check (email = lower(email)),
   added_at timestamptz not null default now()
 );
 comment on table public.staff_emails is 'Placetta team members. Anyone who signs in with one of these emails sees the filing queue. Add with: insert into staff_emails values (''name@placetta.com'');';
-alter table public.staff_emails enable row level security;  -- no policies: service role and SQL editor only
+alter table public.staff_emails enable row level security;
 
 create or replace function public.is_staff() returns boolean
 language sql stable security definer set search_path = '' as $$
@@ -25,13 +16,11 @@ language sql stable security definer set search_path = '' as $$
   );
 $$;
 
--- ---------------------------------------------------------------- workspaces
-
 create table public.workspaces (
   id uuid primary key default gen_random_uuid(),
   name text not null check (length(name) between 1 and 120),
   state jsonb not null default '{}'::jsonb check (pg_column_size(state) < 4000000),
-  authorized_at timestamptz,            -- the customer authorized Placetta to prepare and submit the filings they approve
+  authorized_at timestamptz,
   authorized_by uuid references auth.users(id),
   created_by uuid not null references auth.users(id),
   created_at timestamptz not null default now(),
@@ -53,21 +42,18 @@ language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.workspace_members m where m.workspace_id = ws and m.user_id = auth.uid());
 $$;
 
--- ---------------------------------------------------------------- billing (Stripe writes it)
-
 create table public.billing (
   workspace_id uuid primary key references public.workspaces(id) on delete cascade,
   stripe_customer_id text,
-  entry_markets int not null default 0 check (entry_markets >= 0),   -- entry plans paid, one per market
+  entry_markets int not null default 0 check (entry_markets >= 0),
   entry_paid_at timestamptz,
   subscription_id text,
-  subscription_status text,          -- Stripe's status: active, trialing, past_due, canceled, ...
+  subscription_status text,
   current_period_end timestamptz,
-  comped boolean not null default false,   -- pilots and friends: full access without Stripe
+  comped boolean not null default false,
   updated_at timestamptz not null default now()
 );
 
-/** 'monthly' (files with the team), 'entry' (the agent maps and prepares), or 'none'. */
 create or replace function public.plan_of(ws uuid) returns text
 language sql stable security definer set search_path = '' as $$
   select coalesce((
@@ -85,27 +71,25 @@ language sql stable security definer set search_path = '' as $$
      and exists (select 1 from public.workspaces w where w.id = ws and w.authorized_at is not null);
 $$;
 
--- ---------------------------------------------------------------- filings: the team's queue
-
 create table public.filings (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
   app_id text not null,
-  title jsonb not null,               -- {en, zh}
+  title jsonb not null,
   agency jsonb,
   portal_url text,
   fee_estimate numeric(10, 2) not null default 0,
-  payload jsonb not null,             -- exactly what the customer approved: form, fields, checklist, attachments
+  payload jsonb not null,
   status text not null default 'requested'
     check (status in ('requested', 'in_progress', 'submitted', 'accepted', 'needs_info', 'rejected', 'canceled')),
   approved_by uuid not null references auth.users(id),
   approved_at timestamptz not null default now(),
   assigned_to uuid references auth.users(id),
-  requirements_checked boolean not null default false,   -- the team checked it against the agency's current requirements
+  requirements_checked boolean not null default false,
   confirmation_number text,
   fee_paid numeric(10, 2),
   receipt_path text,
-  note text,                          -- what the customer sees when it needs information or is returned
+  note text,
   submitted_at timestamptz,
   decided_at timestamptz,
   created_at timestamptz not null default now(),
@@ -118,7 +102,6 @@ create unique index filings_one_open_per_app on public.filings(workspace_id, app
 create or replace function public.filings_guard() returns trigger
 language plpgsql security definer set search_path = '' as $$
 declare
-  staff boolean := public.is_staff();
   customer boolean := auth.uid() is not null and not public.is_staff();
 begin
   if tg_op = 'INSERT' then
@@ -163,8 +146,6 @@ begin
 end $$;
 create trigger filings_guard before insert or update on public.filings for each row execute function public.filings_guard();
 
--- ---------------------------------------------------------------- documents (files live in the private bucket)
-
 create table public.documents (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
@@ -180,12 +161,10 @@ create table public.documents (
 );
 create index documents_workspace on public.documents(workspace_id);
 
--- ---------------------------------------------------------------- audit log: append only
-
 create table public.audit_log (
   id bigint generated always as identity primary key,
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
-  client_id text,                     -- the app's id for the entry, so a retry never doubles it
+  client_id text,
   actor text not null check (actor in ('you', 'agent', 'team', 'agency')),
   actor_id uuid default auth.uid(),
   action jsonb not null,
@@ -227,8 +206,6 @@ begin
 end $$;
 create trigger filings_audit after insert or update on public.filings for each row execute function public.filings_audit();
 
--- ---------------------------------------------------------------- agent usage (edge functions write it)
-
 create table public.agent_usage (
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
   day date not null default current_date,
@@ -248,14 +225,10 @@ language sql security definer set search_path = '' as $$
     output_tokens = u.output_tokens + excluded.output_tokens, tts_chars = u.tts_chars + excluded.tts_chars;
 $$;
 
--- ---------------------------------------------------------------- timestamps
-
 create or replace function public.touch() returns trigger language plpgsql set search_path = '' as $$
 begin new.updated_at := now(); return new; end $$;
 create trigger workspaces_touch before update on public.workspaces for each row execute function public.touch();
 create trigger billing_touch before update on public.billing for each row execute function public.touch();
-
--- ---------------------------------------------------------------- what the app calls
 
 create or replace function public.create_workspace(p_name text, p_state jsonb, p_authorized boolean) returns uuid
 language plpgsql security definer set search_path = '' as $$
@@ -282,7 +255,6 @@ language sql stable security definer set search_path = '' as $$
   from auth.users u where u.id = auth.uid();
 $$;
 
-/** The team's queue: every filing with the business it's for and who approved it. */
 create or replace function public.filing_queue() returns table (
   id uuid, workspace_id uuid, business text, approver_email text, app_id text, title jsonb, agency jsonb, portal_url text,
   fee_estimate numeric, payload jsonb, status text, approved_at timestamptz, assigned_to uuid, assignee_email text,
@@ -303,8 +275,6 @@ begin
     order by case f.status when 'requested' then 0 when 'in_progress' then 1 when 'needs_info' then 2 when 'submitted' then 3 else 4 end,
              f.approved_at;
 end $$;
-
--- ---------------------------------------------------------------- row level security
 
 alter table public.workspaces enable row level security;
 alter table public.workspace_members enable row level security;
@@ -348,7 +318,6 @@ create policy "members log their own actions, team logs theirs" on public.audit_
 create policy "members and team read usage" on public.agent_usage for select to authenticated
   using (public.is_member(workspace_id) or public.is_staff());
 
--- Least privilege on top of RLS: nothing for anonymous visitors; members edit only a workspace's name and state.
 revoke all on public.workspaces, public.workspace_members, public.billing, public.filings, public.documents,
               public.audit_log, public.agent_usage, public.staff_emails from anon;
 revoke insert, update, delete on public.workspaces, public.workspace_members, public.billing, public.agent_usage, public.staff_emails from authenticated;
@@ -362,9 +331,7 @@ revoke execute on function public.create_workspace(text, jsonb, boolean), public
   from public, anon;
 grant execute on function public.create_workspace(text, jsonb, boolean), public.whoami(), public.filing_queue(),
   public.is_staff(), public.is_member(uuid), public.plan_of(uuid), public.can_file(uuid) to authenticated;
--- track_usage: service role only
-
--- ---------------------------------------------------------------- private file storage
+revoke execute on function public.track_usage(uuid, int, bigint, bigint, bigint) from authenticated;
 
 insert into storage.buckets (id, name, public, file_size_limit)
 values ('documents', 'documents', false, 52428800)

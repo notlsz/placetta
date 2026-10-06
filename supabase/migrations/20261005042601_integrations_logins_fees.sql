@@ -1,8 +1,5 @@
 -- Integrations, the agency-login vault, calendar feeds, and the "customer pays the agency" step.
-
--- ---------------------------------------------------------------- the customer pays agency fees directly
 -- Nothing is dropped: "payment due" is a needs_info filing that carries the agency's payment link.
--- The customer pays the agency, then marks it paid (needs_info with a payment link -> in_progress).
 
 alter table public.filings add column if not exists payment_url text, add column if not exists customer_paid_at timestamptz;
 
@@ -95,7 +92,6 @@ begin
   return null;
 end $$;
 
-/** The team's queue, with the payment fields. (filing_queue stays for older clients.) */
 create or replace function public.filing_queue_v2() returns table (
   id uuid, workspace_id uuid, business text, approver_email text, app_id text, title jsonb, agency jsonb, portal_url text,
   fee_estimate numeric, payload jsonb, status text, approved_at timestamptz, assigned_to uuid, assignee_email text,
@@ -119,8 +115,6 @@ end $$;
 revoke execute on function public.filing_queue_v2() from public, anon;
 grant execute on function public.filing_queue_v2() to authenticated;
 
--- ---------------------------------------------------------------- secrets: only the server reads or writes them
-
 create or replace function public.vault_put(p_secret text, p_name text, p_id uuid default null) returns uuid
 language plpgsql security definer set search_path = '' as $$
 begin
@@ -143,17 +137,15 @@ $$;
 
 revoke execute on function public.vault_put(text, text, uuid), public.vault_get(uuid), public.vault_drop(uuid) from public, anon, authenticated;
 
--- ---------------------------------------------------------------- integrations
-
 create table public.integrations (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
   kind text not null check (kind in ('gmail', 'gcal', 'gdrive', 'outlook_mail', 'outlook_cal', 'dropbox', 'quickbooks', 'slack')),
-  account text,                         -- the email, company or channel shown in Settings
+  account text,
   scopes text,
   status text not null default 'connected' check (status in ('connected', 'error')),
   error text,
-  secret_id uuid,                       -- vault secret holding the tokens; never readable by the app
+  secret_id uuid,
   meta jsonb not null default '{}'::jsonb,
   connected_by uuid references auth.users(id),
   connected_at timestamptz not null default now(),
@@ -168,8 +160,6 @@ revoke insert, update, delete on public.integrations from authenticated;
 revoke select on public.integrations from authenticated;
 grant select (id, workspace_id, kind, account, scopes, status, error, meta, connected_by, connected_at, last_used_at) on public.integrations to authenticated;
 
--- ---------------------------------------------------------------- agency logins (secure credentials store)
-
 create table public.agency_logins (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
@@ -177,7 +167,7 @@ create table public.agency_logins (
   url text,
   username text not null check (length(username) between 1 and 200),
   note text,
-  secret_id uuid not null,              -- vault secret with the password
+  secret_id uuid not null,
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -193,8 +183,6 @@ revoke insert, update, delete on public.agency_logins from authenticated;
 revoke select on public.agency_logins from authenticated;
 grant select (id, workspace_id, agency, url, username, note, created_by, created_at, updated_at, last_opened_at, last_opened_by) on public.agency_logins to authenticated;
 
--- ---------------------------------------------------------------- calendar feed: deadlines in any calendar app
-
 create table public.calendar_feeds (
   workspace_id uuid primary key references public.workspaces(id) on delete cascade,
   token text not null unique,
@@ -203,7 +191,6 @@ create table public.calendar_feeds (
 alter table public.calendar_feeds enable row level security;
 revoke all on public.calendar_feeds from anon, authenticated;
 
-/** The workspace's private calendar feed token, made on first use. Rotate with p_rotate. */
 create or replace function public.calendar_token(ws uuid, p_rotate boolean default false) returns text
 language plpgsql security definer set search_path = '' as $$
 declare t text;
@@ -220,5 +207,4 @@ end $$;
 revoke execute on function public.calendar_token(uuid, boolean) from public, anon;
 grant execute on function public.calendar_token(uuid, boolean) to authenticated;
 
--- ---------------------------------------------------------------- outbound HTTP from the database (health checks of the functions)
 create extension if not exists pg_net with schema extensions;
