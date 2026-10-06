@@ -70,13 +70,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 .hdr.light .logo,.hdr.light nav a,.hdr.light .lgt{color:var(--ink)}
 .hdr.light .b-white{background:var(--ink);color:#fff}
 /* ---------- hero ---------- */
-.hero{position:relative;height:max(846px,100svh);width:100%;overflow:hidden;background:var(--gs);color:#fff}
-@media (min-width:1024px){.hero{height:max(846px,100vh)}}
+/* the hero is exactly one screen tall: everything in it is visible on arrival */
+.hero{position:relative;height:100vh;height:100svh;min-height:640px;width:100%;overflow:hidden;background:var(--gs);color:#fff}
+@media (min-width:1024px){.hero{height:100vh;min-height:640px}}
 .hero>svg{position:absolute;inset:0;width:100%;height:100%}
 .hvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;filter:saturate(.75) contrast(.95) blur(2px);transform:scale(1.04)}
 .hin{position:absolute;top:0;bottom:0;left:50%;width:100%;max-width:1512px;transform:translateX(-50%)}
-.hl{position:absolute;left:24px;right:24px;top:300px;display:flex;flex-direction:column;gap:16px;animation:hel .9s cubic-bezier(.16,1,.3,1) .15s both}
-@media (min-width:1024px){.hl{left:80px;right:auto;top:auto;bottom:168px;width:728px;gap:24px}}
+.hl{position:absolute;left:24px;right:24px;bottom:124px;display:flex;flex-direction:column;gap:16px;animation:hel .9s cubic-bezier(.16,1,.3,1) .15s both}
+@media (min-width:1024px){.hl{left:80px;right:auto;bottom:clamp(132px,17vh,168px);width:728px;gap:24px}}
+@media (min-width:1024px) and (max-height:800px){.hl{gap:16px;bottom:120px}.hero h1{font-size:42px}.hstack{gap:22px}}
+@media (max-width:1023px) and (max-height:700px){.hl{gap:12px;bottom:112px}.hero h1{font-size:30px}.hsub{font-size:14px}}
 @keyframes hel{0%{opacity:.01;transform:translateX(-64px)}100%{opacity:1;transform:none}}
 .badge{display:flex;align-items:center;gap:6px}
 .badge p{font-size:13px;line-height:1.4;text-shadow:0 1px 8px rgba(0,0,0,.35)}
@@ -821,7 +824,7 @@ html[lang="zh-CN"] .qh{letter-spacing:0}
 /* ---------- hero scene, brand strip, counters ---------- */
 .hbot{position:absolute;left:24px;right:24px;bottom:28px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;animation:hel .9s cubic-bezier(.16,1,.3,1) .35s both}
 .hbot p{font-size:13px;line-height:1.4;color:rgba(255,255,255,.85);white-space:nowrap}
-@media (min-width:1024px){.hbot{left:80px;right:80px;bottom:72px;flex-direction:row;align-items:center;gap:24px}.hbot p{font-size:16px}}
+@media (min-width:1024px){.hbot{left:80px;right:80px;bottom:clamp(40px,7vh,72px);flex-direction:row;align-items:center;gap:24px}.hbot p{font-size:16px}}
 .mq{position:relative;flex:1;min-width:0;width:100%;overflow:hidden;padding-block:6px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
 .mqt{display:flex;align-items:center;width:max-content;animation:mq 70s linear infinite}
 .mq:hover .mqt{animation-play-state:paused}
