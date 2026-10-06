@@ -96,7 +96,7 @@ html[lang="zh-CN"] .hero h1{line-height:1.15;letter-spacing:0}
 .hbot span{font-size:16px;line-height:1.4;color:rgba(255,255,255,.62)}
 /* backed by: investors behind the brands we serve */
 .inv{padding:44px 0 4px}
-@media (min-width:1024px){.inv{padding:64px 0 0}.invr{max-width:870px;margin-inline:auto}}
+@media (min-width:1024px){.inv{padding:64px 0 0}.invr{max-width:1040px;margin-inline:auto}}
 .invl{text-align:center;font-size:14px;line-height:1.4;color:var(--ink2)}
 .invr{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:26px 40px;margin-top:22px}
 @media (min-width:1024px){.invr{gap:28px 56px;margin-top:26px}}
@@ -1036,9 +1036,9 @@ html[lang="zh-CN"] .fct h3{letter-spacing:0}
 
 .fnote{margin-top:14px;font-size:12px;color:var(--muted)}
 /* proof band */
-.proof{padding:40px 0 0}
-.prow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 16px}
-@media (min-width:1024px){.proof{padding:56px 0 0}.prow{grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}}
+.proof{margin-top:72px}
+.prow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 20px;background:var(--white);border-radius:20px;padding:32px 24px}
+@media (min-width:1024px){.proof{margin-top:112px}.prow{grid-template-columns:repeat(4,minmax(0,1fr));gap:32px;padding:48px 56px;border-radius:24px}}
 .pst{display:flex;flex-direction:column;gap:6px}
 .pst b{font-weight:400;font-size:32px;line-height:1;letter-spacing:-.8px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 @media (min-width:1024px){.pst b{font-size:40px;letter-spacing:-1px}}
@@ -1222,12 +1222,12 @@ html[lang="zh-CN"] .ctas .ctah{letter-spacing:0;line-height:1.2}
 
 <!-- ======================= PROOF ======================= -->
 <section class="proof rv" data-rv="up" id="proof" aria-label="Track record" data-i18n-aria="aria.proof">
-  <div class="ctr prow">
+  <div class="ctr"><div class="prow">
     <div class="pst"><b>31,107+</b><span data-i18n="pf.s1">businesses served by our team since 2016</span></div>
     <div class="pst"><b data-i18n="pf.n2">3+ a day</b><span data-i18n="pf.s2">new US businesses served by our team, on average</span></div>
     <div class="pst"><b>50</b><span data-i18n="pf.s3">US states covered, plus 170+ countries</span></div>
     <div class="pst"><b data-i18n="pf.n4">5 months</b><span data-i18n="pf.s4">saved in approval time for CHAGEE</span></div>
-  </div>
+  </div></div>
 </section>
 
 <!-- ======================= COST OF WAITING ======================= -->
@@ -2304,7 +2304,7 @@ const INV = [
   {k:"sequoia", n:["Sequoia","红杉资本"], h:16}, {k:"a16z", n:["Andreessen Horowitz","安德森·霍洛维茨"], h:28}, {k:"openai", n:["OpenAI","OpenAI"], h:28},
   {k:"nvidia", n:["NVIDIA","英伟达"], h:24}, {k:"foundersfund", n:["Founders Fund","创始人基金"], h:54},
   {k:"greylock", n:["Greylock","格雷洛克"], h:26}, {k:"yc", n:["Y Combinator","Y Combinator 创业加速器"], h:32}, {k:"softbank", n:["SoftBank","软银"], h:22},
-  {k:"hongshan", n:["HongShan","红杉中国"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}
+  {k:"hongshan", n:["HongShan","红杉中国"], h:38}, {k:"hillhouse", n:["Hillhouse Investment","高瓴投资"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}
 ];
 function renderInv(){ const i = L(); document.getElementById("invR").innerHTML = INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${esc(v.n[i])}" style="--h:${v.h}px" loading="lazy" decoding="async">`).join(""); }
 function renderStrip(){
