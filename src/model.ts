@@ -409,6 +409,13 @@ export const SUGGESTIONS: Bi[] = [
   B("What's blocking our opening date?", "什么在拖慢我们的开业日期？"),
   B("Add a second shop in Fremont", "在弗里蒙特开第二家店"),
 ];
+/** With a live agent: tasks it does end to end. */
+export const LIVE_SUGGESTIONS: Bi[] = [
+  B("Where does everything stand, and what's next?", "现在各项进展如何，下一步是什么？"),
+  B("Review my documents and set up renewal reminders", "审阅我的文件并设置续期提醒"),
+  B("Draft the letter asking the landlord for consent", "起草请房东出具同意书的信"),
+  B("Check my email for agency replies", "查看邮件中机构的回复"),
+];
 
 /* ------------------------- license matcher ------------------------- */
 

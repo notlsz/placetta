@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { VoiceBeam, useMicrophone } from "voice-glow";
 import { useApp } from "./ctx";
 import { unlockAudio, useNarrow, useSimulatedVoice, useSpeechToText, type Speaker } from "./hooks";
-import { SUGGESTIONS } from "./model";
+import { LIVE_SUGGESTIONS, SUGGESTIONS } from "./model";
 import { I } from "./ui";
 import { AgentBot } from "./Bot";
 
@@ -30,7 +30,7 @@ const micAllowedHere = () => {
  * Voice mode lives here too, so there is only ever one microphone session.
  */
 export function Composer({ variant, tts, asked, showLive = true }: { variant: "dock" | "panel"; tts: Speaker; asked: string[]; showLive?: boolean }) {
-  const { t, b, lang, busy, live, ask, upload, stop } = useApp();
+  const { t, b, lang, busy, live, ask, upload, stop, mode } = useApp();
   const [draft, setDraft] = useState("");
 
   const mic = useMicrophone();
@@ -42,7 +42,8 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const typer = useRef<number[]>([]);
   const clearTyper = () => { typer.current.forEach(clearTimeout); typer.current = []; };
   const listening = (voice === "mic" && mic.state === "live") || voice === "sim";
-  const open = useMemo(() => SUGGESTIONS.filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked]);
+  // the sample's scripted demo answers its own suggestions; a live agent gets tasks it does end to end
+  const open = useMemo(() => (mode === "demo" ? SUGGESTIONS : LIVE_SUGGESTIONS).filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked, mode]);
   const narrow = useNarrow(560);
 
   const endVoice = useCallback((send: boolean, text?: string) => {

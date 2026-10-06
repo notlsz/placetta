@@ -249,7 +249,7 @@ export function Applications() {
 /* -------------------------------- documents -------------------------------- */
 
 export function Documents() {
-  const { t, ws, upload, busy } = useApp();
+  const { t, b, ws, upload, busy, ask, mode } = useApp();
   const [f, setF] = useState<"all" | "you" | "agent" | "agency">("all");
   const input = useRef<HTMLInputElement>(null);
   const docs = ws.docs.filter(d => f === "all" || d.by === f);
@@ -257,6 +257,7 @@ export function Documents() {
   return (
     <div className="page">
       <PageHead title={t("nav_docs")} sub={t("docs_sub")}>
+        {mode !== "demo" && ws.docs.some(d => d.by !== "agent") && <Pill kind="quiet" disabled={busy} onClick={() => ask(b(B("Review my documents: list each license, permit and certificate with its number and expiry, and set up renewal reminders.", "审阅我的文件：列出每项执照、许可和证书的编号与到期日，并设置续期提醒。")))}>{b(B("Review with Placetta", "让快哉审阅"))}</Pill>}
         <Pill kind="ink" disabled={busy} onClick={() => input.current?.click()}>{t("upload")}</Pill>
         <input ref={input} type="file" multiple hidden onChange={e => { const fs = Array.from(e.target.files ?? []); e.target.value = ""; if (fs.length) upload("", "", fs); }} />
       </PageHead>

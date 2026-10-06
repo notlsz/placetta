@@ -24,7 +24,10 @@ const daysUntil = (from: string, to: string) => Math.round((Date.parse(to + "T00
 const isDate = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
 const bi = (v: unknown): Bi => (v && typeof v === "object" && "en" in v ? { en: String((v as Bi).en ?? ""), zh: String((v as Bi).zh ?? (v as Bi).en ?? "") } : { en: String(v ?? ""), zh: String(v ?? "") });
 /** "expires in 12 days" / "12 天后到期", with today and tomorrow spelled out. */
-const when = (n: number, en: string, zh: string): Bi => (n <= 0 ? { en: `${en} today`, zh: `今天${zh}` } : n === 1 ? { en: `${en} tomorrow`, zh: `明天${zh}` } : { en: `${en} in ${n} days`, zh: `${n} 天后${zh}` });
+const when = (n: number, en: string, zh: string): Bi => {
+  const e = n <= 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`, z = n <= 0 ? "今天" : n === 1 ? "明天" : `${n} 天后`;
+  return { en: en ? `${en} ${e}` : e, zh: z + zh };
+};
 /** The first threshold a date has crossed, so each one makes one update: 14, 7, 3, 1 and 0 days out. */
 const bucket = (n: number, steps: number[]) => steps.find((s) => n <= s);
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -43,7 +46,7 @@ export function deadlineUpdates(ws: string, list: unknown, today: string): Updat
     } else if (n >= 0) {
       const b = bucket(n, [0, 1, 3, 7, 14]);
       if (b !== undefined) out.push({ workspace_id: ws, kind: "deadline", app_id: d.app ?? null, dedupe: `deadline:${d.id}:${d.date}:${b}`,
-        title: { en: `${title.en}: ${when(n, "due", "截止").en}`, zh: `${title.zh}：${when(n, "due", "截止").zh}` },
+        title: { en: `${title.en}: ${when(n, d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").en}`, zh: `${title.zh}：${when(n, d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").zh}` },
         body: { en: `Date: ${d.date}.`, zh: `日期：${d.date}。` } });
     } else if (d.kind === "due" && n >= -30) {
       out.push({ workspace_id: ws, kind: "deadline", app_id: d.app ?? null, dedupe: `overdue:${d.id}:${d.date}`,

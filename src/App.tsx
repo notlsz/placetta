@@ -50,10 +50,10 @@ function localUpdates(w: Workspace): UpdateItem[] {
   const out: UpdateItem[] = [];
   for (const d of w.deadlines) {
     const n = daysUntil(d.date);
-    const when = (en: string, zh: string) => (n <= 0 ? B(`${en} today`, `今天${zh}`) : n === 1 ? B(`${en} tomorrow`, `明天${zh}`) : B(`${en} in ${n} days`, `${n} 天后${zh}`));
+    const when = (en: string, zh: string) => { const e = n <= 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`; return B(en ? `${en} ${e}` : e, (n <= 0 ? "今天" : n === 1 ? "明天" : `${n} 天后`) + zh); };
     const at = new Date(Date.now() - Math.max(0, 14 - Math.abs(n)) * 36e5).toISOString();
     if (d.kind === "renewal" && n >= 0 && n <= 60) out.push({ id: "lu-" + d.id, kind: "renewal", title: B(`${d.title.en}: ${when("expires", "到期").en}`, `${d.title.zh}：${when("expires", "到期").zh}`), body: B(`Expires ${d.date}.`, `${d.date} 到期。`), app: d.app, at, read: false, prompt: B(`Start the renewal: ${d.title.en}, expiring ${d.date}.`, `开始续办：${d.title.zh}，${d.date} 到期。`) });
-    else if (d.kind !== "renewal" && n >= 0 && n <= 14) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`${d.title.en}: ${when("due", "截止").en}`, `${d.title.zh}：${when("due", "截止").zh}`), body: B(`Date: ${d.date}.`, `日期：${d.date}。`), app: d.app, at, read: false, prompt: d.prompt ?? B(`Get this done before ${d.date}: ${d.title.en}.`, `在 ${d.date} 前完成：${d.title.zh}。`) });
+    else if (d.kind !== "renewal" && n >= 0 && n <= 14) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`${d.title.en}: ${when(d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").en}`, `${d.title.zh}：${when(d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").zh}`), body: B(`Date: ${d.date}.`, `日期：${d.date}。`), app: d.app, at, read: false, prompt: d.prompt ?? B(`Get this done before ${d.date}: ${d.title.en}.`, `在 ${d.date} 前完成：${d.title.zh}。`) });
     else if (d.kind === "due" && n < 0 && n >= -30) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`Overdue: ${d.title.en}`, `已逾期：${d.title.zh}`), body: B(`It was due ${d.date}.`, `截止日期为 ${d.date}。`), app: d.app, at, read: false, prompt: B(`This is overdue: ${d.title.en}. What do we do now?`, `已逾期：${d.title.zh}。现在该怎么办？`) });
   }
   return out.sort((x, y) => y.at.localeCompare(x.at));
@@ -208,7 +208,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   useEffect(() => { filingsRef.current = filings; integrationsRef.current = integrations; }, [filings, integrations]);
   const services = useMemo<Services | undefined>(() => (!cloud ? undefined : {
     filings: () => filingsRef.current,
-    connected: () => integrationsRef.current.filter(i => i.status === "connected").map(i => i.kind),
+    // the preview's "connected" apps are stand-ins with no mailbox or drive behind them
+    connected: () => (api.PREVIEW ? [] : integrationsRef.current.filter(i => i.status === "connected").map(i => i.kind)),
     integration: (action, body) => api.integration(cloud.wsId, action, body),
     saveFile: async (file, appId) => { const row = await api.uploadDoc(cloud.wsId, file, appId); paths.current.set(file.name, row.path); void refreshRef.current(); return { path: row.path }; },
     readFile: path => api.downloadDoc(path),
