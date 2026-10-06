@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.117.2",
     "border-beam": "^1.4.1",
     "bot-avatars": "^0.2.2",
+    "fflate": "^0.8.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "thinking-orbs": "^0.3.2",

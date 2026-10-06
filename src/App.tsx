@@ -6,7 +6,7 @@ import { AgentBot } from "./Bot";
 import { AppCtx, type CloudCtx, type Ctx, type Tab, type View } from "./ctx";
 import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
-import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, serverModel, type Model, type Turn as Msg } from "./live";
+import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, serverModel, type Model, type Services, type Turn as Msg } from "./live";
 import { applicationPdf, auditCsv, docBlob, downloads, saveFile } from "./files";
 import { unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
@@ -134,6 +134,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       if (all) { const [i, l] = await Promise.all([api.listIntegrations(cloud.wsId), api.listLogins(cloud.wsId)]); setIntegrations(i); setLogins(l); }
     } catch { /* offline: try again next tick */ }
   }, [cloud]);
+  const refreshRef = useRef(refresh);
+  useEffect(() => { refreshRef.current = refresh; }, [refresh]);
   useEffect(() => {
     if (!cloud) return;
     const tick = () => { if (document.visibilityState === "visible") void refresh(); };
@@ -165,6 +167,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     return () => { on = false; };
   }, [cloud]);
   const modelRef = useRef<Model | null>(null);
+  /* The account's hands for the agent: the team's filings, connected apps and stored files (read fresh at each call). */
+  const filingsRef = useRef(filings), integrationsRef = useRef(integrations);
+  useEffect(() => { filingsRef.current = filings; integrationsRef.current = integrations; }, [filings, integrations]);
+  const services = useMemo<Services | undefined>(() => (!cloud ? undefined : {
+    filings: () => filingsRef.current,
+    connected: () => integrationsRef.current.filter(i => i.status === "connected").map(i => i.kind),
+    integration: (action, body) => api.integration(cloud.wsId, action, body),
+    saveFile: async (file, appId) => { const row = await api.uploadDoc(cloud.wsId, file, appId); paths.current.set(file.name, row.path); void refreshRef.current(); return { path: row.path }; },
+    readFile: path => api.downloadDoc(path),
+  }), [cloud]);
   useEffect(() => { modelRef.current = model; }, [model]);
 
   const pushTurn = useCallback((shown: string | null, reply: Reply) => {
@@ -197,7 +209,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       }
     };
     const m = modelRef.current;
-    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current }) : demoAgent;
+    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services }) : demoAgent;
     try {
       await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
     } catch (err) {
@@ -215,7 +227,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if ((voice || voiceOn) && said) tts.speak(said, lang === "zh" ? "zh-CN" : "en-US");
     else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
-  }, [lang, tts, say, t, deep, cloud, voiceOn]);
+  }, [lang, tts, say, t, deep, cloud, voiceOn, services]);
 
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
@@ -264,17 +276,19 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
     if (a.kind === "send") {
       const to = a.data?.find(f => f.id === "to")?.value ?? "", body = a.data?.find(f => f.id === "msg")?.value ?? "";
+      const subject = a.data?.find(f => f.id === "subject")?.value || a.title.en;
       const mail = integrations.find(i => (i.kind === "gmail" || i.kind === "outlook_mail") && i.status === "connected");
       const email = to.match(/\S+@\S+\.\S+/)?.[0] ?? "";
       try {
         if (mail && email) {
-          await api.integration(cloud.wsId, "mail_send", { kind: mail.kind, to: email, subject: a.title.en, body, approved: true });
+          const emails = to.split(/[,;\s]+/).filter(x => /\S+@\S+\.\S+/.test(x));
+          await api.integration(cloud.wsId, "mail_send", { kind: mail.kind, to: emails.length > 1 ? emails : email, subject, body, approved: true });
           setWs(x => audit("you", B("Approved and sent", "批准并发送"), a.title, same(email))(dropApproval(id)(x)));
           say(lang === "zh" ? `已从 ${mail.account ?? "您的邮箱"} 发出。` : `Sent from ${mail.account ?? "your mailbox"}.`);
         } else {
           await navigator.clipboard?.writeText(body).catch(() => undefined);
           const tel = to.replace(/[^\d+]/g, "");
-          if (email) window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(a.title.en)}&body=${encodeURIComponent(body)}`;
+          if (email) window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
           else if (tel.length >= 10) window.location.href = `sms:${tel}?&body=${encodeURIComponent(body)}`;
           setWs(x => audit("you", B("Approved the message", "批准消息"), a.title, same(to))(dropApproval(id)(x)));
           say(lang === "zh" ? "消息已复制。连接邮箱后，批准即可直接发送。" : "Message copied. Connect your email in Settings and approving sends it.");
@@ -367,7 +381,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       const d = wsRef.current.docs.find(x => x.id === id); if (!d) return;
       if (cloud && d.path) { try { void save(d.name, await api.downloadDoc(d.path)); } catch (e) { say((e as api.ApiError).message); } return; }
       const own = kept.current.get(d.name);
-      if (own && d.by === "you") { void save(d.name, own); return; }
+      if (own && (d.by === "you" || d.by === "agent")) { void save(d.name, own); return; }
       const f = docBlob(d, wsRef.current); void save(f.name, f.blob);
     },
     downloadApp: id => { const a = wsRef.current.apps.find(x => x.id === id); if (a) void save(a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-application.pdf", applicationPdf(a)); },

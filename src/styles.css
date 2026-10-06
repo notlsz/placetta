@@ -440,6 +440,13 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .answer p { margin: 0; font-size: 15px; line-height: 1.6; }
 .answer > .pill { align-self: flex-start; }
 .made { display: flex; flex-direction: column; gap: 6px; }
+.gtable { margin: 0; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+.gtable figcaption { padding: 10px 14px 8px; font-size: 12.5px; font-weight: 600; color: var(--ink2); }
+.gt-scroll { overflow-x: auto; }
+.gtable table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.gtable th { text-align: left; font-weight: 500; color: var(--ink3); padding: 6px 14px; border-top: 1px solid var(--line); white-space: nowrap; }
+.gtable td { padding: 8px 14px; border-top: 1px solid var(--line); color: var(--ink); vertical-align: top; }
+.gtable td:first-child { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink2); }
 .chain { list-style: none; margin: 0; padding: 0; counter-reset: c; display: flex; flex-direction: column; }
 .chain li { position: relative; display: flex; align-items: center; gap: 10px; min-height: 30px; font-size: 14px; }
 .chain li::before { counter-increment: c; content: counter(c); flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--sky); color: var(--blue-ink); font-size: 11px; font-weight: 600; position: relative; z-index: 1; }

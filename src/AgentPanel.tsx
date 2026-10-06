@@ -100,6 +100,15 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
               {r.files?.map(id => { const d = ws.docs.find(x => x.id === id); return d ? <FileCard key={id} d={d} compact /> : null; })}
             </div>
           ) : null}
+          {r.table && r.table.rows.length > 0 && (
+            <figure className="gtable">
+              <figcaption>{b(r.table.title)}</figcaption>
+              <div className="gt-scroll"><table>
+                <thead><tr>{r.table.columns.map((c, i) => <th key={i} scope="col">{b(c)}</th>)}</tr></thead>
+                <tbody>{r.table.rows.map((row, i) => <tr key={i}>{row.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody>
+              </table></div>
+            </figure>
+          )}
           {pending.map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
           {r.memory?.map((x, i) => <Memory key={i} text={x} />)}

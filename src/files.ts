@@ -114,3 +114,34 @@ export function auditCsv(rows: Audit[]): Blob {
   const lines = [["Time", "By", "Action", "On", "Details"].map(q).join(","), ...rows.map(a => [fmtStamp(a.at), by(a), a.action.en, a.object.en, a.detail?.en ?? ""].map(q).join(","))];
   return new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv" });
 }
+
+/* ------------------------------ Word documents ------------------------------ */
+
+const xml = (s: string) => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+const run = (t: string, bold = false, size?: number) =>
+  `<w:r><w:rPr>${bold ? "<w:b/>" : ""}${size ? `<w:sz w:val="${size}"/>` : ""}<w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Microsoft YaHei"/></w:rPr><w:t xml:space="preserve">${xml(t)}</w:t></w:r>`;
+/** **bold** spans inside a line. */
+const runs = (line: string, size?: number) => line.split(/(\*\*[^*]+\*\*)/).filter(Boolean).map(p => (p.startsWith("**") && p.endsWith("**") ? run(p.slice(2, -2), true, size) : run(p, false, size))).join("");
+const para = (body: string, o: { space?: number; indent?: boolean } = {}) =>
+  `<w:p><w:pPr><w:spacing w:after="${o.space ?? 160}"/>${o.indent ? '<w:ind w:left="360" w:hanging="240"/>' : ""}</w:pPr>${body}</w:p>`;
+
+/** A real .docx from simple text: "# " and "## " headings, "- " bullets, **bold**, blank lines between paragraphs. Opens in Word, Pages and Google Docs. */
+export async function docx(title: string, text: string): Promise<Blob> {
+  const { zipSync, strToU8 } = await import("fflate");
+  const body: string[] = [para(run(title, true, 32), { space: 240 })];
+  for (const raw of text.replace(/\r\n?/g, "\n").split("\n")) {
+    const line = raw.trimEnd();
+    if (!line.trim()) continue;
+    if (/^#\s/.test(line)) body.push(para(run(line.replace(/^#\s+/, ""), true, 28), { space: 200 }));
+    else if (/^##+\s/.test(line)) body.push(para(run(line.replace(/^#+\s+/, ""), true, 24), { space: 120 }));
+    else if (/^\s*[-*•]\s/.test(line)) body.push(para(run("•  ") + runs(line.replace(/^\s*[-*•]\s+/, "")), { space: 80, indent: true }));
+    else body.push(para(runs(line)));
+  }
+  const files = {
+    "[Content_Types].xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`,
+    "_rels/.rels": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`,
+    "word/document.xml": `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body.join("")}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>`,
+  };
+  const zipped = zipSync(Object.fromEntries(Object.entries(files).map(([k, v]) => [k, strToU8(v)])), { level: 6 });
+  return new Blob([zipped as BlobPart], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+}

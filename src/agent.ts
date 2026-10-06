@@ -32,6 +32,7 @@ export type Reply = {
   matches?: { what: string; where: string; hits: LicenseHit[] };
   next?: { label: Bi; req: Request };
   sources?: { title: string; url: string }[];   // official pages the agent read, cited
+  table?: { title: Bi; columns: Bi[]; rows: string[][] };   // a grid the agent built, e.g. reviewed documents
 };
 export type Context = { lang: Lang; current: Workspace };
 export type AgentEvent =
