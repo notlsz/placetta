@@ -95,7 +95,7 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
 }
 
 function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
-  const { b, t, editFields, downloadApp } = useApp();
+  const { b, t, editFields, downloadApp, cloud } = useApp();
   const canEdit = !["approved", "review"].includes(a.status) && a.fields.length > 0;
   const [edit, setEdit] = useState(startEdit && canEdit);
   const [vals, setVals] = useState<Record<string, string>>(() => Object.fromEntries(a.fields.map(f => [f.id, f.value])));
@@ -108,7 +108,7 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
   return (
     <div className="formwrap">
       <div className="paper">
-        <div className="paper-h"><span>{b(a.agency)}</span><b>{b(a.form ?? a.name)}</b><Sample /></div>
+        <div className="paper-h"><span>{b(a.agency)}</span><b>{b(a.form ?? a.name)}</b>{!cloud && <Sample />}</div>
         <dl>
           {a.fields.map(f => (
             <div key={f.id} className={f.value ? "" : "empty"}>
