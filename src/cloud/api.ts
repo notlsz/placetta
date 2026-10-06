@@ -1,5 +1,6 @@
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import type { Audit, Bi, Workspace } from "../model";
+import type { Reply, Step } from "../core";
 
 /* ------------------------------------------------------------------ *
  * Placetta's backend (Supabase): accounts, saved workspaces, private
@@ -162,11 +163,8 @@ export async function createWorkspace(name: string, state: Workspace): Promise<s
   return data as string;
 }
 /** What's saved: the workspace minus the audit trail (kept server side) and anything derived from filings. */
-export function strip(w: Workspace): Partial<Workspace> {
-  const { audit: _a, ...rest } = w;
-  void _a;
-  return { ...rest, approvals: w.approvals.filter(a => a.kind !== "pay") };
-}
+import { stripState as strip } from "../core";
+export { strip };
 export async function saveState(id: string, w: Workspace) {
   const { error } = await supabase().from("workspaces").update({ state: strip(w), name: w.business.en.slice(0, 120) || "Workspace" }).eq("id", id);
   if (error) throw fromPg(error);
@@ -233,6 +231,43 @@ export async function downloadDoc(path: string): Promise<Blob> {
   const { data, error } = await supabase().storage.from("documents").download(path);
   if (error || !data) throw err("download", error?.message ?? "Couldn't download the file.");
   return data;
+}
+
+/* ------------------------------ agent runs ------------------------------ */
+
+/** The agent working on the server: it carries on if the app is closed. */
+export type RunRow = { id: string; kind: "task" | "watch"; prompt: string; status: "running" | "done" | "failed" | "stopped"; steps: Step[]; draft: string | null; reply: Reply | null; error: string | null; created_at: string; updated_at: string; seen_at?: string | null };
+/** Start a task on the server. null when this server doesn't run the agent itself (an older deploy): the app runs it in the browser. */
+export async function startRun(ws: string, o: { prompt: string; history: { role: string; content: string }[]; lang: string; deep: boolean }): Promise<string | null> {
+  const { data, error } = await supabase().functions.invoke("agent-run", { body: { action: "start", workspace_id: ws, ...o } });
+  if (!error) return (data as { id: string }).id;
+  const ctx = (error as { context?: Response }).context;
+  if (ctx?.status === 404) return null;
+  let e: ApiError = err("upstream_error", "Couldn't reach Placetta. Try again.");
+  try { const j = await ctx?.json(); if (j?.error?.code) e = err(j.error.code, j.error.message); } catch { /* not JSON */ }
+  if (ctx?.status === 402) e = err("payment_required", e.message);
+  throw e;
+}
+export async function pollRun(id: string): Promise<RunRow> {
+  const { data, error } = await supabase().rpc("poll_agent_run", { p_id: id });
+  if (error) throw fromPg(error);
+  return data as RunRow;
+}
+export async function stopRun(id: string) {
+  const { error } = await supabase().rpc("stop_agent_run", { p_id: id });
+  if (error) throw fromPg(error);
+}
+/** The last day's tasks: one still running to follow again, or one that finished while the app was closed. */
+export async function recentRuns(ws: string): Promise<RunRow[]> {
+  const { data, error } = await supabase().from("agent_runs").select("id, kind, prompt, status, steps, draft, reply, error, created_at, updated_at, seen_at")
+    .eq("workspace_id", ws).eq("kind", "task").gt("created_at", new Date(Date.now() - 864e5).toISOString()).order("created_at", { ascending: false }).limit(3);
+  if (error) throw fromPg(error);
+  return (data ?? []) as RunRow[];
+}
+export async function loadWorkspace(ws: string): Promise<{ name: string; state: Partial<Workspace> }> {
+  const { data, error } = await supabase().from("workspaces").select("name, state").eq("id", ws).single();
+  if (error) throw fromPg(error);
+  return data as { name: string; state: Partial<Workspace> };
 }
 
 /* ------------------------------ updates ------------------------------ */

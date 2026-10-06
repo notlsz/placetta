@@ -19,7 +19,7 @@ import { LegalReader } from "./Legal";
 import { daysUntil, inDays, nowIso } from "./time";
 import { I } from "./ui";
 import * as api from "./cloud/api";
-import { withServer, type CloudSession } from "./cloud/session";
+import { normalize, withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
 import { Queue, QueueLocked } from "./cloud/Ops";
 
@@ -137,12 +137,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   /* account: save the workspace, log the audit trail, keep filings, files and billing fresh */
   const synced = useRef(new Set((cloud?.audit ?? []).map(a => a.id)));
+  const serverRun = useRef<string | null>(null);
   const saveT = useRef(0);
   const lastSaved = useRef("");
   useEffect(() => {
     if (!cloud) return;
     clearTimeout(saveT.current);
     saveT.current = window.setTimeout(() => {
+      if (serverRun.current) return;   // the agent is saving on the server; take its result when it's done
       const body = JSON.stringify(api.strip(ws));
       if (body !== lastSaved.current) { lastSaved.current = body; api.saveState(cloud.wsId, ws).catch(() => { lastSaved.current = ""; say(lang === "zh" ? "保存失败，稍后会重试。" : "Couldn't save. It will retry."); }); }
       const fresh = ws.audit.filter(a => !synced.current.has(a.id) && (a.actor === "you" || a.actor === "agent"));
@@ -221,7 +223,33 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!panelRef.current) say(reply.text.map(x => x[lang]).join(" ").split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
   }, [lang, say]);
 
-  const run = useCallback(async (req: Request, shown: string | null, voice = false) => {
+  /* A task on the server: show its steps as they're saved, then take the workspace it left. */
+  const follow = useCallback(async (id: string, onEvent: (e: AgentEvent) => void, signal: AbortSignal) => {
+    if (!cloud) return;
+    serverRun.current = id;
+    try {
+      let shown = 0, draft = "", r: api.RunRow;
+      for (;;) {
+        if (signal.aborted) { await api.stopRun(id).catch(() => undefined); throw { code: "cancelled" }; }
+        r = await api.pollRun(id);
+        r.steps.slice(shown).forEach((s, i) => onEvent({ type: "step", index: shown + i, step: s }));
+        shown = r.steps.length;
+        if (r.draft && r.draft !== draft) { draft = r.draft; onEvent({ type: "draft", text: draft }); }
+        if (r.status !== "running") break;
+        await new Promise(res => setTimeout(res, 900));
+      }
+      const row = await api.loadWorkspace(cloud.wsId);
+      const next = normalize(row.name, row.state);
+      lastSaved.current = JSON.stringify(api.strip(next));
+      setWs(w => ({ ...next, audit: w.audit }));
+      void refresh(true);
+      if (r.status === "done" && r.reply) onEvent({ type: "reply", reply: r.reply });
+      else if (r.status === "stopped") throw { code: "cancelled" };
+      else throw { code: "run_failed", message: r.error ?? "" };
+    } finally { serverRun.current = null; }
+  }, [cloud, refresh]);
+
+  const run = useCallback(async (req: Request, shown: string | null, voice = false, resumeId?: string) => {
     if (busyRef.current) return;
     busyRef.current = true; setBusy(true);
     unlockAudio(); tts.stop();
@@ -246,9 +274,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       }
     };
     const m = modelRef.current;
-    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services }) : demoAgent;
+    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent }) : demoAgent;
     try {
-      await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
+      // In an account the agent works on the server, so it carries on if the app is closed.
+      const id = resumeId ?? (cloud && !api.PREVIEW && "text" in req && m ? await api.startRun(cloud.wsId, { prompt: req.text, history: history.current.slice(-12), lang, deep }) : null);
+      if (id) await follow(id, onEvent, ctl.signal);
+      else await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
     } catch (err) {
       const code = (err as { code?: string })?.code ?? ((err as Error)?.name === "AbortError" ? "cancelled" : "upstream_error");
       if (code === "cancelled") upd(m2 => ({ reply: { text: [B("Stopped.", "已停止。")] }, active: -1, steps: m2.steps }));
@@ -258,13 +289,27 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         setModel(null); say(t("liveOff"));
         upd(() => ({ steps: [], active: 0 }));
         try { await demoAgent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal); } catch { /* stopped */ }
-      } else upd(() => ({ reply: { text: [code === "rate_limited" ? B("The agent is busy right now. Try again in a little while.", "助理暂时繁忙，请稍后再试。") : code === "not_configured" ? B("The agent isn't set up on the server yet. Placetta's team has been told.", "服务器端尚未配置助理，已通知快哉团队。") : B("I couldn't reach the agent just now. Try again in a moment.", "暂时无法连接助理，请稍后再试。")] }, active: -1 }));
+      } else if ((code === "busy" || code === "run_failed") && (err as { message?: string }).message) upd(() => ({ reply: { text: [same((err as { message: string }).message)] }, active: -1 }));
+      else upd(() => ({ reply: { text: [code === "rate_limited" ? B("The agent is busy right now. Try again in a little while.", "助理暂时繁忙，请稍后再试。") : code === "not_configured" ? B("The agent isn't set up on the server yet. Placetta's team has been told.", "服务器端尚未配置助理，已通知快哉团队。") : B("I couldn't reach the agent just now. Try again in a moment.", "暂时无法连接助理，请稍后再试。")] }, active: -1 }));
     }
     abort.current = null;
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if ((voice || voiceOn) && said) tts.speak(said, lang === "zh" ? "zh-CN" : "en-US");
     else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
-  }, [lang, tts, say, t, deep, cloud, voiceOn, services]);
+  }, [lang, tts, say, t, deep, cloud, voiceOn, services, follow]);
+
+  /* Back in the app: follow a task still running on the server, or show one that finished while it was closed. */
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (!cloud || api.PREVIEW || resumed.current) return;
+    resumed.current = true;
+    void api.recentRuns(cloud.wsId).then(rs => {
+      const live = rs.find(r => r.status === "running");
+      if (live) { setPanelOpen(true); void run({ text: live.prompt }, live.prompt, false, live.id); return; }
+      const missed = rs.find(r => r.status === "done" && r.reply && (!r.seen_at || Date.parse(r.updated_at) - Date.parse(r.seen_at) > 20_000));
+      if (missed?.reply) { pushTurn(missed.prompt, missed.reply); setPanelOpen(true); void api.pollRun(missed.id).catch(() => undefined); }
+    }, () => undefined);
+  }, [cloud, run, pushTurn]);
 
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
@@ -281,7 +326,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   }, [owner, say, lang]);
 
   /* approvals: in the demo they run the scripted flow; in an account they go to the team, the outbox or the agency */
+  /* While a task runs on the server it owns the workspace; changes wait until it's done (or stopped). */
+  const held = useCallback(() => {
+    if (!serverRun.current) return false;
+    say(lang === "zh" ? "快哉正在处理工作区，完成后（或停止后）再修改。" : "Placetta is working on the workspace. Make changes when it's done, or stop it.");
+    return true;
+  }, [say, lang]);
+
   const approve = useCallback(async (id: string) => {
+    if (held()) return;
     const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
     const shown = `${S.approvedIt[lang]}: ${a.title[lang]}`;
     if (!cloud) { run({ approve: id }, shown); return; }
@@ -334,9 +387,10 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     run({ approve: id }, shown);
-  }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk]);
+  }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk, held]);
 
   const upload = useCallback(async (app: string, item: string, files?: File[]) => {
+    if (held()) return;
     if (cloud && files?.length) {
       try {
         for (const f of files) { const row = await api.uploadDoc(cloud.wsId, f, app || undefined); paths.current.set(f.name, row.path); }
@@ -357,7 +411,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const list = (files ?? []).map(f => ({ name: f.name, size: f.size }));
     const shown = files?.length ? `${S.upload[lang]}: ${list.map(f => f.name).join(", ")}` : S.useSample[lang];
     run({ upload: { app, item, files: list } }, shown);
-  }, [run, lang, say, cloud, refresh]);
+  }, [run, lang, say, cloud, refresh, held]);
 
   const save = useCallback(async (name: string, blob: Blob) => {
     const r = await saveFile(name, blob);
@@ -424,6 +478,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     downloadApp: id => { const a = wsRef.current.apps.find(x => x.id === id); if (a) void save(a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-application.pdf", applicationPdf(a)); },
     exportAudit: () => void save(`placetta-audit-trail-${inDays(0)}.csv`, auditCsv(wsRef.current.audit)),
     editFields: (app, values) => {
+      if (held()) return;
       const a = wsRef.current.apps.find(x => x.id === app); if (!a) return;
       setWs(w => {
         let n = w;
@@ -434,13 +489,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       say(t("edited"));
     },
     editFact: (id, value) => {
+      if (held()) return;
       const f = wsRef.current.facts.find(x => x.id === id); if (!f) return;
       const text = B(`${f.label.en}: ${value}`, `${f.label.zh}：${value}`);
       setWs(w => audit("agent", B("Committed to memory", "存入记忆"), B("Context", "资料"), text)(audit("you", B("Edited fact", "修改资料"), f.label, same(value))(setFact({ ...f, value: same(value), source: B("You edited", "您修改的") })(w))));
       setFeed(fd => [...fd, { id: nid(), kind: "memory", text }]);
       say(`${t("committed")}: ${text[lang]}`);
     },
-    updateStore: (id, f, log) => setWs(w => {
+    updateStore: (id, f, log) => !held() && setWs(w => {
       const next = { ...w, stores: (w.stores ?? []).map(s => (s.id === id ? f(s) : s)) };
       return log ? audit("you", log.action, log.object, log.detail)(next) : next;
     }),
@@ -448,7 +504,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     openLegal: id => setLegal(id),
     cloud: cloudCtx,
     updates, readUpdates,
-  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, run, approve, upload, save, say, cloud, cloudCtx, updates, readUpdates]);
+  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, run, approve, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
 
   /* page */
   const page = {

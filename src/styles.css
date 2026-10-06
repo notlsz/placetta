@@ -448,7 +448,12 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .gtable td { padding: 8px 10px; border-top: 1px solid var(--line); color: var(--ink); vertical-align: top; }
 .gtable th:first-child, .gtable td:first-child { padding-left: 14px; }
 .gtable td:first-child { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink2); }
-.gtable td:last-child { white-space: nowrap; padding-right: 14px; }
+.gtable td:last-child { padding-right: 14px; }
+.gtable td:nth-child(3) .cv { white-space: nowrap; }
+/* the document's own words behind a value */
+q.cite { display: block; margin-top: 3px; font-size: 11.5px; line-height: 1.35; color: var(--ink3); font-style: italic; quotes: "\201C" "\201D"; max-width: 260px; white-space: normal; overflow-wrap: break-word; }
+.gtable q.cite { min-width: 8.5em; max-width: 13em; }
+.paper dd q.cite { margin-top: 2px; }
 .chain { list-style: none; margin: 0; padding: 0; counter-reset: c; display: flex; flex-direction: column; }
 .chain li { position: relative; display: flex; align-items: center; gap: 10px; min-height: 30px; font-size: 14px; }
 .chain li::before { counter-increment: c; content: counter(c); flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--sky); color: var(--blue-ink); font-size: 11px; font-weight: 600; position: relative; z-index: 1; }

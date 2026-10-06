@@ -79,7 +79,7 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
         {c.extracted && (
           <div className="extract">
             <span className="ex-h"><I.spark />{t("placettaRead")}</span>
-            <dl>{c.extracted.map(([k, v], i) => <div key={i}><dt>{b(k)}</dt><dd>{v}</dd></div>)}</dl>
+            <dl>{c.extracted.map(([k, v, q], i) => <div key={i}><dt>{b(k)}</dt><dd>{v}{q && <q className="cite">{q}</q>}</dd></div>)}</dl>
           </div>
         )}
         {c.state === "missing" && !c.dep && !reading && (
@@ -117,6 +117,7 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
                 {edit ? <input value={vals[f.id] ?? ""} onChange={e => setVals(v => ({ ...v, [f.id]: e.target.value }))} aria-label={b(f.label)} />
                   : <span>{f.value || t("empty")}</span>}
                 {f.from && !edit && <small>{b(f.from)}</small>}
+                {f.quote && !edit && <q className="cite">{f.quote}</q>}
               </dd>
             </div>
           ))}

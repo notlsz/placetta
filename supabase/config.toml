@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.monitor]
 verify_jwt = false
+
+[functions.agent-run]
+verify_jwt = false

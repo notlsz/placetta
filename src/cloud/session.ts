@@ -23,14 +23,7 @@ export type CloudSession = {
   reopen(): void;
 };
 
-/** A saved state may be missing lists (older saves, a fresh workspace): fill them in. */
-export function normalize(name: string, s: Partial<Workspace>): Workspace {
-  return {
-    business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
-    deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
-    facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta,
-  };
-}
+export { normalizeState as normalize } from "../core";
 
 const kindOf = (name: string) => (name.split(".").pop()?.toLowerCase() ?? "pdf") as Doc["kind"];
 const money = (n: number) => "$" + n.toLocaleString("en-US", { maximumFractionDigits: 2 });

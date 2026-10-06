@@ -4,6 +4,9 @@
 //   team (submitted, approved, returned, action needed) and agency fees still unpaid after two days.
 // New updates show in the app's Updates; when RESEND_API_KEY and MAIL_FROM are set, owners also get them by email,
 // and the Placetta team gets an email about approved filings nobody has picked up for a day.
+// Once a week per workspace (on a weekday picked from its id, so the load spreads), it also starts the agent's
+// background check (agent-run, kind "watch"): each submitted application's status on the agency's own lookup page, and
+// new or changed rules for that business and city. That needs ANTHROPIC_API_KEY; WEEKLY_CHECKS=off turns it off.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -12,6 +15,8 @@ const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE
 const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM = Deno.env.get("MAIL_FROM") ?? "";
 const APP = ((Deno.env.get("APP_ORIGINS") ?? "").split(",")[0] ?? "").trim().replace(/\/+$/, "");
+const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
+const MAX_WATCHES = Number(Deno.env.get("WEEKLY_CHECKS_PER_DAY") ?? "40");
 
 type Bi = { en: string; zh: string };
 type Deadline = { id: string; date: string; kind: "due" | "renewal" | "estimate" | "milestone"; title: Bi; app?: string };
@@ -77,6 +82,16 @@ export function filingUpdates(f: Filing, since: string, now: number): Update[] {
   return out;
 }
 
+/** The weekday (0 to 6, UTC) a workspace gets its weekly check: fixed per workspace, spread across the week. */
+export function weekdayOf(id: string) { let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 7; }
+/** Workspaces due their weekly check today: they have applications to watch, it's their weekday, and none ran in the last six days. */
+export function watchDue(rows: { id: string; state: unknown }[], weekday: number, recent: Set<string>): string[] {
+  return rows.filter((w) => {
+    const apps = ((w.state ?? {}) as { apps?: unknown }).apps;
+    return Array.isArray(apps) && apps.length > 0 && weekdayOf(w.id) === weekday && !recent.has(w.id);
+  }).map((w) => w.id);
+}
+
 async function sendMail(to: string[], subject: string, text: string, html: string) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -115,6 +130,7 @@ Deno.serve(async (req) => {
   const created: Update[] = [];
   const byWs = new Map<string, Update[]>();
   const names = new Map<string, string>();
+  const all: { id: string; state: unknown }[] = [];
   for (let from = 0; ; from += 500) {
     const { data: rows, error } = await admin.from("workspaces").select("id, name, state").order("created_at").range(from, from + 499);
     if (error) return json(500, { error: "workspaces: " + error.code });
@@ -122,6 +138,7 @@ Deno.serve(async (req) => {
       names.set(w.id, String(w.name ?? "Your business"));
       const st = (w.state ?? {}) as { deadlines?: unknown };
       byWs.set(w.id, deadlineUpdates(w.id, st.deadlines, today));
+      all.push({ id: w.id, state: { apps: (w.state as { apps?: unknown } | null)?.apps } });
     }
     if (!rows || rows.length < 500) break;
   }
@@ -168,6 +185,23 @@ Deno.serve(async (req) => {
     }
   }
 
+  // The weekly checks: agent-run takes each one in the background and reports back as an Update when something changed.
+  let watches = 0;
+  if (Deno.env.get("ANTHROPIC_API_KEY") && Deno.env.get("WEEKLY_CHECKS") !== "off") {
+    const { data: recent } = await admin.from("agent_runs").select("workspace_id").eq("kind", "watch").gt("created_at", new Date(now - 6 * 864e5).toISOString());
+    for (const id of watchDue(all, started.getUTCDay(), new Set((recent ?? []).map((r) => r.workspace_id as string))).slice(0, MAX_WATCHES)) {
+      const { data: plan } = await admin.rpc("plan_of", { ws: id });
+      if (plan === "none") continue;
+      // in the language the person last used with the agent
+      const { data: last } = await admin.from("agent_runs").select("lang").eq("workspace_id", id).eq("kind", "task").order("created_at", { ascending: false }).limit(1);
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/agent-run`, {
+        method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": req.headers.get("x-monitor-key") ?? "" },
+        body: JSON.stringify({ action: "watch", workspace_id: id, lang: last?.[0]?.lang === "zh" ? "zh" : "en" }),
+      }).catch(() => null);
+      if (res?.ok) watches++; else console.error("weekly check", id, res?.status ?? "unreachable");
+    }
+  }
+
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, email: !!(RESEND && FROM) });
+  return json(200, { ok: true, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, email: !!(RESEND && FROM), weekly_checks: watches });
 });

@@ -5,9 +5,8 @@ import { ago, inDays } from "./time";
    fees and source; the documents behind them; deadlines; the approval queue; an audit trail of every
    action; and the facts the agent has committed to memory. Everything here is sample data. */
 
-export type Bi = { en: string; zh: string };
-export const B = (en: string, zh: string): Bi => ({ en, zh });
-export const same = (s: string): Bi => ({ en: s, zh: s });
+import { B, same, type Bi } from "./bi";
+export { B, same, type Bi };
 
 export type Level = "federal" | "state" | "county" | "city";
 /** approved: issued. review: filed, the agency is reviewing. ready: complete, waiting for your approval.
@@ -15,7 +14,7 @@ export type Level = "federal" | "state" | "county" | "city";
 export type Status = "approved" | "review" | "filing" | "ready" | "needs" | "draft" | "waiting" | "todo";
 export type Actor = "agent" | "you" | "agency" | "team";
 
-export type Field = { id: string; label: Bi; value: string; from?: Bi };
+export type Field = { id: string; label: Bi; value: string; from?: Bi; quote?: string };   // quote: the document's own words the value came from
 export type Fee = { label: Bi; amount: number };
 export type CheckItem = {
   id: string;
@@ -23,7 +22,7 @@ export type CheckItem = {
   state: "done" | "missing" | "auto";   // auto: Placetta prepares it
   doc?: string;                          // document id once it's in
   note?: Bi;
-  extracted?: [Bi, string][];            // what the agent read out of the upload
+  extracted?: [Bi, string, string?][];   // what the agent read out of the upload, with the words it read it from
   dep?: string;                          // comes from another application, not an upload
 };
 

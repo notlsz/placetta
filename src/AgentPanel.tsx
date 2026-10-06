@@ -105,7 +105,7 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
               <figcaption>{b(r.table.title)}</figcaption>
               <div className="gt-scroll"><table>
                 <thead><tr>{r.table.columns.map((c, i) => <th key={i} scope="col">{b(c)}</th>)}</tr></thead>
-                <tbody>{r.table.rows.map((row, i) => <tr key={i}>{row.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody>
+                <tbody>{r.table.rows.map((row, i) => <tr key={i}>{row.map((c, j) => { const q = r.table?.cite?.[i]?.[j]; return <td key={j}><span className="cv">{c}</span>{q && <q className="cite">{q}</q>}</td>; })}</tr>)}</tbody>
               </table></div>
             </figure>
           )}
