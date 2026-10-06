@@ -734,11 +734,11 @@ html[lang="zh-CN"] .wm .wm-zh{display:block}
 .stnote{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.8)}
 .ctas .stnote{font-size:13px;line-height:1.4;letter-spacing:0}
 .stnote a{color:#fff;text-underline-offset:3px}
-.stalt{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.stalt{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:2px}
 /* phones: the hero already has the plan form, so the bar keeps Log in and drops its plan button */
 @media (max-width:559px){.hdr .right .btn[data-open="nav"]{display:none}.hdr .login{background:#fff;color:var(--ink);padding:9px 14px;border-radius:8px;white-space:nowrap}.hdr.light .login{background:var(--ink);color:#fff}}
-.stalt a{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;font-size:14px;line-height:16px;letter-spacing:-.28px;text-decoration:none;transition:background-color .2s}
-.stalt a:hover{background:rgba(255,255,255,.24)}
+.stalt a{display:inline-flex;align-items:center;gap:6px;padding:2px 0;color:rgba(255,255,255,.88);font-size:14px;line-height:18px;letter-spacing:-.2px;text-decoration:none;transition:color .2s}
+.stalt a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
 .stalt i{font-style:normal;opacity:.7}
 .howtry{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:15px;color:var(--gs-ink);text-decoration:none;font-weight:500}
 .howtry:hover{text-decoration:underline;text-underline-offset:3px}
@@ -1197,14 +1197,13 @@ html[lang="zh-CN"] .ctas .ctah{letter-spacing:0;line-height:1.2}
       </div>
       <div class="hstack">
         <h1 data-i18n="hero.h1">Open your first US&nbsp;store<br>months sooner.</h1>
-        <p class="hsub" data-i18n="hero.sub">Our AI agent maps every license and permit your store needs and prepares each application. You approve, our team files, and Placetta keeps it all current, in English or Chinese.</p>
+        <p class="hsub" data-i18n="hero.sub">Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.</p>
         <div class="stwrap">
           <form class="starter" data-src="hero" novalidate>
             <label class="sr" for="st-hero" data-i18n="st.label">Where are you opening?</label>
             <input id="st-hero" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
             <button type="submit" class="btn b-white" data-i18n="st.btn">Get my plan</button>
           </form>
-          <p class="stnote"><span data-i18n="st.note">$299 per market, credited in full to any yearly plan.</span> <a href="#sample" data-i18n="hero.sample">See a sample plan</a></p>
           <p class="stalt"><a href="/app/" data-track="hero_try_agent"><span data-i18n="hero.try">Try the agent</span><i aria-hidden="true">→</i></a><a href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo"><span data-i18n="hero.demo">Book a demo</span><i aria-hidden="true">→</i></a></p>
         </div>
       </div>
@@ -1594,7 +1593,7 @@ en:{
  "mon.l.aff2":"Affects", "mon.due":"Deadline in {n} days", "mon.due1":"Deadline in 1 day", "mon.duet":"Deadline today", "mon.dayn":"days left", "mon.day1":"day left",
  "inv.l":"The brands we serve are backed by",
  "map.n3":"3+ a day", "map.s3":"new US businesses served by our team, on average, since 2016", "map.n3w":"7+ a day", "map.s3w":"new businesses served by our team worldwide, on average, since 2016",
- "hero.h1":"Open your first US&nbsp;store<br>months sooner.", "hero.sub":"Our AI agent maps every license and permit your store needs and prepares each application. You approve, our team files, and Placetta keeps it all current, in English or Chinese.",
+ "hero.h1":"Open your first US&nbsp;store<br>months sooner.", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
  "fqr.t":"Prefer WeChat? Scan to add Placetta.",
  "q.wc":"Prefer WeChat? Scan to add Placetta.",
  "mon.cnt2":"{n} tracked", "mon.dl6":"Next 6 months", "mon.d1":"1 day", "mon.dn":"{n} days",
@@ -1676,7 +1675,7 @@ zh:{
  "mon.l.aff2":"涉及", "mon.due":"距截止还有 {n} 天", "mon.due1":"距截止还有 1 天", "mon.duet":"今天截止", "mon.dayn":"天后截止", "mon.day1":"天后截止",
  "inv.l":"我们服务的品牌获得以下机构投资",
  "map.n3":"每天 3 家以上", "map.s3":"2016 年以来，我们的团队平均每天新服务的美国企业", "map.n3w":"每天 7 家以上", "map.s3w":"2016 年以来，我们的团队平均每天在全球新服务的企业",
- "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"快哉的智能代理梳理门店所需的全部执照和许可证，并准备好每一份申请。您确认后由我们的团队提交，之后持续为您维护，中英文均可。",
+ "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
  "fqr.t":"更习惯用微信？扫码添加快哉。",
  "q.wc":"更习惯用微信？扫码添加快哉。",
  "mon.cnt2":"共 {n} 条", "mon.dl6":"未来 6 个月", "mon.d1":"1 天", "mon.dn":"{n} 天",
