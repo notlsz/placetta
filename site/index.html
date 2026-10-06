@@ -96,10 +96,10 @@ html[lang="zh-CN"] .hero h1{line-height:1.15;letter-spacing:0}
 .hbot span{font-size:16px;line-height:1.4;color:rgba(255,255,255,.62)}
 /* backed by: investors behind the brands we serve */
 .inv{padding:44px 0 4px}
-@media (min-width:1024px){.inv{padding:64px 0 0}.invr{max-width:1040px;margin-inline:auto}}
+@media (min-width:1024px){.inv{padding:64px 0 0}.invr{max-width:1180px;margin-inline:auto}}
 .invl{text-align:center;font-size:14px;line-height:1.4;color:var(--ink2)}
 .invr{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:26px 40px;margin-top:22px}
-@media (min-width:1024px){.invr{gap:28px 56px;margin-top:26px}}
+@media (min-width:1024px){.invr{gap:28px 52px;margin-top:26px}}
 .invr img{display:block;width:auto;height:calc(var(--h) * .8);opacity:.6;transition:opacity .2s}
 @media (min-width:1024px){.invr img{height:var(--h)}}
 .invr img:hover{opacity:.95}
@@ -2304,7 +2304,7 @@ const INV = [
   {k:"berkshire", n:["Berkshire Hathaway","伯克希尔·哈撒韦"], h:17}, {k:"hongshan", n:["HongShan","红杉中国"], h:38}, {k:"a16z", n:["Andreessen Horowitz","安德森·霍洛维茨"], h:28}, {k:"openai", n:["OpenAI","OpenAI"], h:28},
   {k:"nvidia", n:["NVIDIA","英伟达"], h:24}, {k:"foundersfund", n:["Founders Fund","创始人基金"], h:54},
   {k:"greylock", n:["Greylock","格雷洛克"], h:26}, {k:"yc", n:["Y Combinator","Y Combinator 创业加速器"], h:32}, {k:"softbank", n:["SoftBank","软银"], h:22},
-  {k:"sequoia", n:["Sequoia","红杉资本"], h:16}, {k:"hillhouse", n:["Hillhouse Investment","高瓴投资"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}
+  {k:"sequoia", n:["Sequoia","红杉资本"], h:16}, {k:"hillhouse", n:["Hillhouse Investment","高瓴投资"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}, {k:"azureworld", n:["AzureWorld","湛蓝领域"], h:38}
 ];
 function renderInv(){ const i = L(); document.getElementById("invR").innerHTML = INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${esc(v.n[i])}" style="--h:${v.h}px" loading="lazy" decoding="async">`).join(""); }
 function renderStrip(){
