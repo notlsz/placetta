@@ -239,6 +239,8 @@ async function main() {
   }
   if (sk) { secrets.STRIPE_SECRET_KEY = sk; await setupStripe(sk, secrets); }
   secrets.OAUTH_STATE_SECRET = randomBytes(32).toString("hex");
+  // The same sender powers the daily update emails from the monitor.
+  if (auth.resend) { secrets.RESEND_API_KEY = auth.resend; secrets.MAIL_FROM = `Placetta <${auth.from}>`; }
 
   console.log(`\n${bold("Building the app")}`);
   const env = { VITE_SUPABASE_URL: SUPABASE_URL, VITE_SUPABASE_KEY: PUBLISHABLE };

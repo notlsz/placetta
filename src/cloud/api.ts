@@ -235,6 +235,16 @@ export async function downloadDoc(path: string): Promise<Blob> {
   return data;
 }
 
+/* ------------------------------ updates ------------------------------ */
+
+export type UpdateRow = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team"; title: Bi; body: Bi | null; app_id: string | null; created_at: string; read_at: string | null };
+export async function listUpdates(ws: string): Promise<UpdateRow[]> {
+  const { data, error } = await supabase().from("updates").select("id, kind, title, body, app_id, created_at, read_at").eq("workspace_id", ws).order("created_at", { ascending: false }).limit(60);
+  if (error) throw fromPg(error);
+  return (data ?? []) as UpdateRow[];
+}
+export const readUpdates = (ws: string) => supabase().rpc("read_updates", { ws }).then(({ error }) => { if (error) throw fromPg(error); });
+
 /* ------------------------------ billing ------------------------------ */
 
 export async function getBilling(ws: string): Promise<Billing | null> {

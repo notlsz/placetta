@@ -444,9 +444,11 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .gtable figcaption { padding: 10px 14px 8px; font-size: 12.5px; font-weight: 600; color: var(--ink2); }
 .gt-scroll { overflow-x: auto; }
 .gtable table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.gtable th { text-align: left; font-weight: 500; color: var(--ink3); padding: 6px 14px; border-top: 1px solid var(--line); white-space: nowrap; }
-.gtable td { padding: 8px 14px; border-top: 1px solid var(--line); color: var(--ink); vertical-align: top; }
-.gtable td:first-child { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink2); }
+.gtable th { text-align: left; font-weight: 500; color: var(--ink3); padding: 6px 10px; border-top: 1px solid var(--line); white-space: nowrap; }
+.gtable td { padding: 8px 10px; border-top: 1px solid var(--line); color: var(--ink); vertical-align: top; }
+.gtable th:first-child, .gtable td:first-child { padding-left: 14px; }
+.gtable td:first-child { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink2); }
+.gtable td:last-child { white-space: nowrap; padding-right: 14px; }
 .chain { list-style: none; margin: 0; padding: 0; counter-reset: c; display: flex; flex-direction: column; }
 .chain li { position: relative; display: flex; align-items: center; gap: 10px; min-height: 30px; font-size: 14px; }
 .chain li::before { counter-increment: c; content: counter(c); flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--sky); color: var(--blue-ink); font-size: 11px; font-weight: 600; position: relative; z-index: 1; }
@@ -956,3 +958,22 @@ a.sbtn { color: var(--ink); }
   .gate-card h1 { font-size: 28px; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ------------------------------ updates ------------------------------ */
+.updates { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.upd { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 14px 16px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+.upd.unread { box-shadow: 0 0 0 1px rgba(77, 115, 163, .28), 0 10px 28px -20px rgba(45, 75, 120, .45); }
+.upd-ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--mist); color: var(--ink2); }
+.upd.k-renewal .upd-ic, .upd.k-deadline .upd-ic { background: var(--warm-soft); color: var(--warm); }
+.upd.k-filing .upd-ic { background: var(--sky-wash); color: var(--blue-ink); }
+.upd.k-payment .upd-ic { background: #fdf0f0; color: #a14a4a; }
+.upd-tx { min-width: 0; }
+.upd-t { margin: 0; font-size: 14.5px; font-weight: 500; color: var(--ink); }
+.upd-b { margin: 3px 0 0; font-size: 13.5px; color: var(--ink2); }
+.upd-m { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 0; font-size: 12px; color: var(--ink3); }
+.upd-m em { font-style: normal; color: var(--blue-ink); font-weight: 600; }
+.upd-act { display: flex; gap: 6px; align-self: center; }
+.upd-act .sbtn { height: 32px; padding: 0 12px; font-size: 13px; }
+.empty-up { padding: 28px 20px; border-radius: 16px; background: var(--mist); color: var(--ink2); font-size: 14px; }
+.empty-up p { margin: 0; }
+@media (max-width: 640px) { .upd { grid-template-columns: auto minmax(0, 1fr); } .upd-act { grid-column: 2; justify-self: start; } }

@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.calendar-feed]
 verify_jwt = false
+
+[functions.monitor]
+verify_jwt = false

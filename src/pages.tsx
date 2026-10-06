@@ -313,6 +313,51 @@ export function Deadlines() {
 
 /* ------------------------------- audit trail ------------------------------- */
 
+/* --------------------------------- updates --------------------------------- */
+
+/** The inbox: what changed and what's coming up, found by the daily monitor. Each one opens the application or hands it to the agent. */
+export function UpdatesPage() {
+  const { b, lang, updates, readUpdates, openApp, ask, ws, cloud } = useApp();
+  const unread = updates.filter(u => !u.read).length;
+  // seen once the page has been open a moment
+  useEffect(() => { if (!unread) return; const id = setTimeout(readUpdates, 1500); return () => clearTimeout(id); }, [unread, readUpdates]);
+  const KIND: Record<string, { label: { en: string; zh: string }; Icon: () => React.ReactElement }> = {
+    deadline: { label: B("Deadline", "截止日期"), Icon: I.deadlines }, renewal: { label: B("Renewal", "续期"), Icon: I.deadlines },
+    filing: { label: B("Filing", "申报"), Icon: I.apps }, payment: { label: B("Payment", "付款"), Icon: I.card }, team: { label: B("Team", "团队"), Icon: I.user },
+  };
+  return (
+    <div className="page">
+      <PageHead title={b(B("Updates", "动态"))} sub={b(cloud
+        ? B("Placetta checks every morning for filing changes, deadlines and renewals, and emails the owners when something needs them.", "快哉每天早上检查申报进展、截止日期和续期，有需要处理的事项时会发邮件通知所有者。")
+        : B("What changed and what's coming up, checked every morning.", "每天早上检查的最新进展和即将到来的事项。"))} />
+      {updates.length === 0 ? (
+        <div className="empty-up"><p>{b(B("Nothing new. Deadlines, renewals and filing changes show up here as they happen.", "暂无新动态。截止日期、续期和申报进展会在发生时显示在这里。"))}</p></div>
+      ) : (
+        <ul className="updates">
+          {updates.map(u => {
+            const k = KIND[u.kind] ?? KIND.team, app = u.app ? ws.apps.find(a => a.id === u.app) : undefined;
+            return (
+              <li key={u.id} className={"upd k-" + u.kind + (u.read ? "" : " unread")}>
+                <span className="upd-ic" aria-hidden="true"><k.Icon /></span>
+                <div className="upd-tx">
+                  <p className="upd-t">{b(u.title)}</p>
+                  {u.body && <p className="upd-b">{b(u.body)}</p>}
+                  <p className="upd-m"><span>{b(k.label)}</span><span>{fmtAgo(u.at, lang)}</span>{!u.read && <em>{b(B("New", "新"))}</em>}</p>
+                </div>
+                <div className="upd-act">
+                  {app && <button type="button" className="sbtn quiet" onClick={() => openApp(app.id)}>{b(B("Open", "打开"))}</button>}
+                  {u.prompt && <button type="button" className="sbtn ink" onClick={() => ask(b(u.prompt!))}>{b(B("Handle it", "去处理"))}</button>}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <Footer />
+    </div>
+  );
+}
+
 export function AuditTrail() {
   const { t, b, ws, exportAudit } = useApp();
   const [f, setF] = useState<"all" | "agent" | "you" | "agency">("all");

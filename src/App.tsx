@@ -11,8 +11,8 @@ import { applicationPdf, auditCsv, docBlob, downloads, saveFile } from "./files"
 import { unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo, Mark } from "./Logo";
-import { B, SAMPLE, same, type Bi, type Doc, type LicenseHit, type Workspace } from "./model";
-import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, Overview } from "./pages";
+import { B, SAMPLE, same, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
+import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, Overview, UpdatesPage } from "./pages";
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
 import { LegalReader } from "./Legal";
@@ -35,6 +35,7 @@ const readLang = (): Lang => {
 
 const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
   { v: "overview", k: "nav_overview", Icon: I.overview },
+  { v: "updates", k: "nav_updates", Icon: I.bell },
   { v: "stores", k: "nav_stores", Icon: I.store },
   { v: "apps", k: "nav_apps", Icon: I.apps },
   { v: "docs", k: "nav_docs", Icon: I.docs },
@@ -42,6 +43,28 @@ const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
   { v: "audit", k: "nav_audit", Icon: I.audit },
   { v: "context", k: "nav_context", Icon: I.context },
 ];
+
+/** Updates worked out from the workspace itself: due dates in the next two weeks, overdue ones and renewals in the next
+ *  60 days, the same rules the server's daily monitor follows. Used for the sample, and before the monitor's first run. */
+function localUpdates(w: Workspace): UpdateItem[] {
+  const out: UpdateItem[] = [];
+  for (const d of w.deadlines) {
+    const n = daysUntil(d.date);
+    const when = (en: string, zh: string) => (n <= 0 ? B(`${en} today`, `今天${zh}`) : n === 1 ? B(`${en} tomorrow`, `明天${zh}`) : B(`${en} in ${n} days`, `${n} 天后${zh}`));
+    const at = new Date(Date.now() - Math.max(0, 14 - Math.abs(n)) * 36e5).toISOString();
+    if (d.kind === "renewal" && n >= 0 && n <= 60) out.push({ id: "lu-" + d.id, kind: "renewal", title: B(`${d.title.en}: ${when("expires", "到期").en}`, `${d.title.zh}：${when("expires", "到期").zh}`), body: B(`Expires ${d.date}.`, `${d.date} 到期。`), app: d.app, at, read: false, prompt: B(`Start the renewal: ${d.title.en}, expiring ${d.date}.`, `开始续办：${d.title.zh}，${d.date} 到期。`) });
+    else if (d.kind !== "renewal" && n >= 0 && n <= 14) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`${d.title.en}: ${when("due", "截止").en}`, `${d.title.zh}：${when("due", "截止").zh}`), body: B(`Date: ${d.date}.`, `日期：${d.date}。`), app: d.app, at, read: false, prompt: d.prompt ?? B(`Get this done before ${d.date}: ${d.title.en}.`, `在 ${d.date} 前完成：${d.title.zh}。`) });
+    else if (d.kind === "due" && n < 0 && n >= -30) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`Overdue: ${d.title.en}`, `已逾期：${d.title.zh}`), body: B(`It was due ${d.date}.`, `截止日期为 ${d.date}。`), app: d.app, at, read: false, prompt: B(`This is overdue: ${d.title.en}. What do we do now?`, `已逾期：${d.title.zh}。现在该怎么办？`) });
+  }
+  return out.sort((x, y) => y.at.localeCompare(x.at));
+}
+const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
+  renewal: B(`Start this renewal: ${u.title.en}`, `开始续办：${u.title.zh}`),
+  deadline: B(`Get this done: ${u.title.en}`, `完成这项：${u.title.zh}`),
+  payment: B(`Help me pay this agency fee: ${u.title.en}`, `帮我支付这笔机构费用：${u.title.zh}`),
+  filing: B(`What's the status and the next step: ${u.title.en}`, `进展和下一步是什么：${u.title.zh}`),
+  team: B(`Tell me more: ${u.title.en}`, `详细说说：${u.title.zh}`),
+})[u.kind];
 
 const PLAN_LABEL: Record<string, Bi> = {
   starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版"),
@@ -88,6 +111,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [docs, setDocs] = useState(cloud?.docs ?? []);
   const [integrations, setIntegrations] = useState(cloud?.integrations ?? []);
   const [logins, setLogins] = useState(cloud?.logins ?? []);
+  const [serverUpdates, setServerUpdates] = useState<api.UpdateRow[]>([]);
+  const [readLocal, setReadLocal] = useState<Set<string>>(() => new Set());
   const view_ = useMemo(() => (cloud ? withServer(ws, filings, docs) : ws), [cloud, ws, filings, docs]);
   const wsRef = useRef(view_);
   useEffect(() => { wsRef.current = view_; }, [view_]);
@@ -128,12 +153,23 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const refresh = useCallback(async (all = false) => {
     if (!cloud) return;
     try {
-      const [f, d, bl, au] = await Promise.all([api.listFilings(cloud.wsId), api.listDocs(cloud.wsId), api.getBilling(cloud.wsId), api.listAudit(cloud.wsId)]);
-      setFilings(f); setDocs(d); setBilling(bl);
+      const [f, d, bl, au, up] = await Promise.all([api.listFilings(cloud.wsId), api.listDocs(cloud.wsId), api.getBilling(cloud.wsId), api.listAudit(cloud.wsId), api.listUpdates(cloud.wsId).catch(() => null)]);
+      setFilings(f); setDocs(d); setBilling(bl); if (up) setServerUpdates(up);
       setWs(w => { const server = new Set(au.map(a => a.id)); au.forEach(a => synced.current.add(a.id)); return { ...w, audit: [...w.audit.filter(a => !server.has(a.id) && !synced.current.has(a.id)), ...au] }; });
       if (all) { const [i, l] = await Promise.all([api.listIntegrations(cloud.wsId), api.listLogins(cloud.wsId)]); setIntegrations(i); setLogins(l); }
     } catch { /* offline: try again next tick */ }
   }, [cloud]);
+  useEffect(() => { if (cloud) void api.listUpdates(cloud.wsId).then(setServerUpdates, () => undefined); }, [cloud]);
+  /* the Updates inbox: the monitor's updates in an account (worked out locally until its first run), the sample's otherwise */
+  const updates = useMemo<UpdateItem[]>(() => {
+    if (cloud && serverUpdates.length) return serverUpdates.map(u => ({ id: u.id, kind: u.kind, title: u.title, body: u.body ?? undefined, app: u.app_id ?? undefined, at: u.created_at, read: !!u.read_at, prompt: askFor(u) }));
+    return localUpdates(view_).map(u => ({ ...u, read: readLocal.has(u.id) }));
+  }, [cloud, serverUpdates, view_, readLocal]);
+  const readUpdates = useCallback(() => {
+    if (!updates.some(u => !u.read)) return;
+    setReadLocal(new Set(updates.map(u => u.id)));
+    if (cloud && serverUpdates.some(u => !u.read_at)) void api.readUpdates(cloud.wsId).then(() => setServerUpdates(us => us.map(u => ({ ...u, read_at: u.read_at ?? nowIso() }))), () => undefined);
+  }, [updates, cloud, serverUpdates]);
   const refreshRef = useRef(refresh);
   useEffect(() => { refreshRef.current = refresh; }, [refresh]);
   useEffect(() => {
@@ -410,16 +446,17 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     say,
     openLegal: id => setLegal(id),
     cloud: cloudCtx,
-  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, run, approve, upload, save, say, cloud, cloudCtx]);
+    updates, readUpdates,
+  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, run, approve, upload, save, say, cloud, cloudCtx, updates, readUpdates]);
 
   /* page */
   const page = {
-    overview: <Overview />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
+    overview: <Overview />, updates: <UpdatesPage />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
     find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
     queue: cloud?.me.staff ? <Queue /> : cloud?.me.staff_email ? <QueueLocked /> : <Overview />,
   }[view];
   const soon = view_.deadlines.filter(d => { const n = daysUntil(d.date); return n >= 0 && n <= 30; }).length;
-  const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, deadlines: soon };
+  const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, updates: updates.filter(u => !u.read).length, deadlines: soon };
   const wsSub = cloud ? (billing?.free && !billing.subscription_status ? b(B("Early access", "抢先体验")) : plan === "monthly" ? b(PLAN_LABEL[billing?.subscription_plan ?? ""] ?? B("Monthly plan", "月度方案")) : plan === "entry" ? b(B("Entry plan", "开店计划")) : b(B("No plan yet", "尚未开通"))) : t("sampleWs");
 
   const slim = slimPref && !phone;

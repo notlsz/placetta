@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react";
 import type { Request, Step } from "./agent";
 import type { Bf, Lang, T } from "./i18n";
-import type { Bi, Store, Workspace } from "./model";
+import type { Bi, Store, UpdateItem, Workspace } from "./model";
 import type { AgencyLogin, Billing, Filing, Integration, IntegrationKind, Plan } from "./cloud/api";
 
-export type View = "overview" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue";
+export type View = "overview" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue";
 export type Tab = "check" | "form" | "fees" | "receipt";
 
 /** What a signed-in account adds: billing, integrations, saved logins, the filing queue and data controls. */
@@ -76,6 +76,9 @@ export type Ctx = {
   say(text: string): void;
   openLegal(id: string): void;
   cloud: CloudCtx | null;
+  /** The Updates inbox: newest first. */
+  updates: UpdateItem[];
+  readUpdates(): void;
 };
 
 export const AppCtx = createContext<Ctx | null>(null);

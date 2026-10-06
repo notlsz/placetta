@@ -19,6 +19,7 @@ export const S = {
   nav_docs: B("Documents", "文件"),
   nav_deadlines: B("Deadlines", "截止日期"),
   nav_audit: B("Audit trail", "审计记录"),
+  nav_updates: B("Updates", "动态"),
   nav_context: B("Context", "资料"),
   nav_find: B("Find licenses", "查找许可"),
   nav_settings: B("Settings", "设置"),

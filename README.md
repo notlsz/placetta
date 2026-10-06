@@ -37,6 +37,34 @@ The agent prepares on its own but never files, pays or sends a message without y
 - **In the app** the agent runs on the server with web search and web fetch, researches the issuing agency's own pages and cites them. Approving a filing sends it to the team's queue.
 - **The rule.** Whatever the model decides, filing, paying and sending only happen after the person approves in the app.
 
+### What it does (account)
+
+The agent is an operator: it chains tools until the job is done, then reports. In an account it can:
+
+| Task | Tool | Needs |
+|---|---|---|
+| Map every license, prepare and fill each application, add due dates | `prepare_application`, `fill_fields`, `add_deadline` | |
+| Say where everything stands and what's next | `check_progress` (applications, the team's filings, confirmation numbers, overdue and next-30-day deadlines) | |
+| Ask to file (the team files after you approve) | `request_filing_approval` | approval |
+| Find and read agency email | `search_email`, `read_email` | Gmail or Outlook |
+| Write and send email | `send_email` (sent from your mailbox once you approve) | approval |
+| Put inspections and deadlines on your calendar | `add_calendar_event` | Google or Outlook Calendar |
+| Pull a lease or plan from your drive into an application and read it | `find_files`, `import_file` | Drive or Dropbox |
+| Write a cover letter, consent request, narrative or SOP as a Word file | `draft_document` | |
+| Build a registry of licenses and certificates with renewal reminders | `review_documents` | |
+| Revenue for gross-receipts taxes | `get_income` | QuickBooks |
+
+Uploads (PDF, Word, images, text) are read into the application's fields. Email, files and web pages are treated as
+data, never as instructions.
+
+### Background: the monitor and Updates
+
+`supabase/functions/monitor` runs every morning (pg_cron, 12:15 UTC) and writes **Updates**: deadlines in the next two
+weeks and overdue ones, renewals in the next 60 days, filing changes from the team (submitted, approved, returned,
+action needed) and agency fees still unpaid. They show in the app's Updates inbox; with `RESEND_API_KEY` and
+`MAIL_FROM` set (the launcher sets both from the Resend key), owners get them by email and the team is told about
+approved filings nobody has picked up for a day. The call is authenticated with a random key kept in the vault.
+
 ## Effects from Libraries.dev
 
 - **Bot avatars** (`bot-avatars`): the agent is an original plush light-blue cloud (`src/Bot.tsx`) that looks around while it waits and hops while it works; each background job has its own small bot.

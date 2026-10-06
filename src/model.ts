@@ -67,6 +67,9 @@ export type Approval = {
   filing?: string;          // pay: the filing it belongs to
 };
 
+/** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
+export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
+
 export type Audit = { id: string; at: string; actor: Actor; who?: Bi; action: Bi; object: Bi; detail?: Bi };
 export type FactGroup = "business" | "location" | "operations" | "rules";
 export type Fact = { id: string; group: FactGroup; label: Bi; value: Bi; source: Bi; locked?: boolean };
