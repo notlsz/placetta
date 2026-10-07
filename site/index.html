@@ -1092,6 +1092,16 @@ html[lang="zh-CN"] .pst b{letter-spacing:0}
 .tsx .tsq{margin:0}
 .tsx .tsp img.tsav{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none}
 .tsw{display:flex;flex-direction:column;gap:2px;min-width:0}
+/* case studies: tabs match the testimonial tabs; cards are white with a soft lift */
+#case .cshd.cshd{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;gap:14px;margin:72px 0 20px}
+#case .cstabs{max-width:100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px 2px 18px;margin:-2px -2px -16px}
+#case .cstabs::-webkit-scrollbar{display:none}
+#case .cstabs .tstab{flex:none;min-width:132px}
+#case .cstabs .tstab[aria-selected="true"] span{color:var(--ink2)}
+#case .cscard{background:#fff;border-radius:24px;box-shadow:0 1px 2px rgba(15,27,51,.04),0 18px 48px rgba(15,27,51,.07)}
+#case .teatabs{background:var(--bg)}
+#case .csl .belst div{border-color:rgba(15,27,51,.07)}
+@media (min-width:1024px){#case .cscard{padding:40px}}
 /* testimonial name tabs (from the earlier design): who is speaking, with an 8s progress line */
 .tsbar{display:flex;justify-content:flex-start;margin:0 0 16px}
 @media (min-width:1024px){.tsbar{justify-content:flex-end;margin-bottom:20px}}
@@ -1680,7 +1690,7 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
     <div class="tsgrid" id="tsGrid"></div>
     <div class="cshd">
       <h3 class="h3" data-i18n="bel.cases">Case studies</h3>
-      <div class="beltabs casetabs" role="tablist" id="caseTabs" aria-label="Case studies" data-i18n-aria="bel.cases"></div>
+      <div class="tstabs cstabs" role="tablist" id="caseTabs" aria-label="Case studies" data-i18n-aria="bel.cases"></div>
     </div>
     <div class="cscard" id="caseCard">
       <div class="csl" id="caseBody" role="tabpanel">
@@ -1923,7 +1933,7 @@ en:{
  "mon.k1":"rule changes tracked in your markets", "mon.k2":"high-impact changes that need action", "mon.k3":"days to your next deadline",
  "bel.ex":"Example plan", "case.c5":"Changes the map", "case.c6":"Decides the site",
  "aria.app":"Sample entry plan",
- "tea.tabs":"Example plans", "tea.mk":"Steps", "tea.btn":"Plan my US opening", "tea.src":"", "tea.c1":"Sets the opening date", "tea.c2":"Takes longest", "tea.c3":"Biggest risk", "tea.c4":"Every shipment",
+ "tea.tabs":"Example plans", "tea.sub":"Five tea houses", "tea.mk":"Steps", "tea.btn":"Plan my US opening", "tea.src":"", "tea.c1":"Sets the opening date", "tea.c2":"Takes longest", "tea.c3":"Biggest risk", "tea.c4":"Every shipment",
  "app.loc":"Tianxin Village, Wuyi Mountains → first US store in San José, CA",
  "st.note":"$299 per market, credited in full to any yearly plan.",
  "q.fine":"$299 per market, credited toward your first year. No call required. Ready instantly.",
@@ -2006,7 +2016,7 @@ zh:{
  "mon.k1":"项规则变化正在跟踪", "mon.k2":"项高影响变化需要处理", "mon.k3":"天后到达下一个截止日",
  "bel.ex":"示例方案", "case.c5":"改变选址", "case.c6":"决定选址",
  "aria.app":"示例开店计划",
- "tea.tabs":"示例方案", "tea.mk":"环节", "tea.btn":"规划我的美国开店", "tea.src":"", "tea.c1":"决定开业时间", "tea.c2":"耗时最长", "tea.c3":"风险最大", "tea.c4":"每次发货",
+ "tea.tabs":"示例方案", "tea.sub":"五家茶企", "tea.mk":"环节", "tea.btn":"规划我的美国开店", "tea.src":"", "tea.c1":"决定开业时间", "tea.c2":"耗时最长", "tea.c3":"风险最大", "tea.c4":"每次发货",
  "app.loc":"武夷山天心村 → 加州圣何塞首家美国门店",
  "st.note":"每个市场 299 美元，可全额抵扣任一年度方案。",
  "q.fine":"每个市场 299 美元，可抵扣首年订阅费用。无需电话沟通，即时生成。",
@@ -2297,7 +2307,7 @@ function caseUI(D, ids, o){
   function render(anim){
     const i = L(), c = D[st.c], m = c.mk[st.m], rows = $("rows");
     const lon = !!(lead && lead.on());
-    $("tabs").innerHTML = (lead ? `<button type="button" role="tab" data-case="-1" aria-selected="${lon}" aria-controls="${lead.panel}" tabindex="${lon ? 0 : -1}">${lead.label()}</button>` : "") + D.map((x, k) => `<button type="button" role="tab" data-case="${k}" aria-selected="${!lon && k === st.c}" aria-controls="${ids.body}" tabindex="${!lon && k === st.c ? 0 : -1}">${x.sym ? `<svg viewBox="${x.vb}" aria-hidden="true"><use href="#${x.sym}"/></svg>` : ""}${nm(x.tab || x.n)}</button>`).join("");
+    $("tabs").innerHTML = (lead ? `<button type="button" role="tab" class="tstab" data-case="-1" aria-selected="${lon}" aria-controls="${lead.panel}" tabindex="${lon ? 0 : -1}">${lead.label()}</button>` : "") + D.map((x, k) => `<button type="button" role="tab"${lead ? ' class="tstab"' : ""} data-case="${k}" aria-selected="${!lon && k === st.c}" aria-controls="${ids.body}" tabindex="${!lon && k === st.c ? 0 : -1}">${lead ? `<b>${nm(x.tab || x.n)}</b><span>${t(x.ex ? "bel.ex" : "bel.tag")}</span>` : `${x.sym ? `<svg viewBox="${x.vb}" aria-hidden="true"><use href="#${x.sym}"/></svg>` : ""}${nm(x.tab || x.n)}`}</button>`).join("");
     const logo = $("logo"); logo.innerHTML = Array.isArray(c.logo) ? c.logo[i] : c.logo; logo.setAttribute("role", "img"); logo.setAttribute("aria-label", nm(c.n));
     if (ids.nm) $("nm").textContent = c.nm ? c.nm[i] : "";
     const tag = $("body").querySelector(".beltag"); if (tag) { tag.hidden = !!c.notag && !c.ex; tag.textContent = t(c.ex ? "bel.ex" : "bel.tag"); }
@@ -2330,7 +2340,7 @@ function caseUI(D, ids, o){
 // one section: "Tea houses" opens the five tea-house plans, the other tabs are single case studies
 let teaOn = true;
 const showTea = () => { document.getElementById("teaCard").hidden = !teaOn; document.getElementById("caseCard").hidden = teaOn; };
-const caseLead = {panel: "teaBody", label: () => `<span class="lgl">${t("tea.tabs")}</span><span class="lsh">${t("tea.tab1")}</span>`, on: () => teaOn, set: v => { teaOn = v; showTea(); renderCases(v ? undefined : "case"); renderTea(v ? "case" : undefined); }};
+const caseLead = {panel: "teaBody", label: () => `<b>${t("tea.tabs")}</b><span>${t("tea.sub")}</span>`, on: () => teaOn, set: v => { teaOn = v; showTea(); renderCases(v ? undefined : "case"); renderTea(v ? "case" : undefined); }};
 const renderCases = caseUI(CASES, {tabs: "caseTabs", body: "caseBody", logo: "caseLogo", t: "caseT", p: "caseP", st: "caseSt", win: "caseWin", mtabs: "belTabs", rows: "belRows", src: "belSrc"}, {ev: "case", lead: caseLead});
 const renderTea = caseUI(TEA, {tabs: "teaTabs", body: "teaBody", logo: "teaLogo", nm: "teaNm", t: "teaT", p: "teaP", st: "teaSt", win: "teaWin", mtabs: "teaMk", rows: "teaRows", src: "teaSrc"}, {ev: "tea", pre: "tea.src"});
 function renderBel(anim){ showTea(); renderCases(anim); renderTea(anim); }
