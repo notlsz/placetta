@@ -190,7 +190,8 @@ begin
   return f;
 end $$;
 
--- The worker takes the oldest queued portal filing; skip locked so two workers never share one.
+-- The worker takes the oldest queued portal filing; skip locked so two workers never share one. A filing whose
+-- browser session is still held open for a hand-back (provider_ref "held-until:<time>") is left to that worker.
 create or replace function public.claim_agent_filing() returns setof public.filings
 language plpgsql security definer set search_path = '' as $$
 begin
@@ -199,8 +200,22 @@ begin
     agent_started_at = coalesce(f.agent_started_at, now()), attempts = f.attempts + 1
   where f.id = (select id from public.filings
     where agent_state = 'queued' and channel = 'portal' and status not in ('canceled','accepted','rejected')
+      and not (coalesce(provider_ref, '') like 'held-until:%' and substr(provider_ref, 12)::timestamptz > now())
     order by updated_at limit 1 for update skip locked)
   returning f.*;
+end $$;
+
+-- The worker holding the session takes the filing back once the customer has done their part.
+create or replace function public.take_held_filing(p_id uuid) returns boolean
+language plpgsql security definer set search_path = '' as $$
+declare n int;
+begin
+  update public.filings set agent_state = 'running', provider_ref = null,
+    agent_log = agent_log || jsonb_build_array(jsonb_build_object('at', now(), 'kind', 'resume',
+      'en', 'You finished your step. Placetta carries on.', 'zh', '您已完成这一步，快哉继续办理。'))
+  where id = p_id and agent_state = 'queued' and provider_ref like 'held-until:%';
+  get diagnostics n = row_count;
+  return n = 1;
 end $$;
 
 -- Team tasks: what the agent hands to people (stuck runs, failed replays, stale destinations, two-key reviews).
@@ -319,9 +334,9 @@ revoke all on public.agent_skills from anon;
 revoke insert, update, delete on public.agent_skills from authenticated;
 -- Only the service role writes skills (the worker records them, the team switches them through Ops).
 
-revoke execute on function public.claim_agent_filing(), public.requeue_stuck_filings(),
+revoke execute on function public.claim_agent_filing(), public.requeue_stuck_filings(), public.take_held_filing(uuid),
   public.filing_agent_step(uuid, jsonb, jsonb, boolean) from public, anon, authenticated;
-grant execute on function public.claim_agent_filing(), public.requeue_stuck_filings(),
+grant execute on function public.claim_agent_filing(), public.requeue_stuck_filings(), public.take_held_filing(uuid),
   public.filing_agent_step(uuid, jsonb, jsonb, boolean) to service_role;
 revoke execute on function public.filing_queue_v3(), public.finish_team_task(uuid) from public, anon;
 grant execute on function public.filing_queue_v3(), public.finish_team_task(uuid) to authenticated;
