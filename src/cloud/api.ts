@@ -95,7 +95,10 @@ async function pinRpc(fn: string, args: Record<string, unknown> = {}): Promise<P
     if (/pin_format/.test(m)) throw err("pin_format", m);
     throw fromPg(error);
   }
-  return data as PinStatus;
+  // a wrong PIN comes back as data, not an error, so the server keeps its count of tries
+  const d = data as PinStatus & { error?: string; hint?: string };
+  if (d?.error === "pin_wrong" || d?.error === "pin_locked") throw err(d.error, d.hint ?? "");
+  return d;
 }
 export const pinStatus = () => pinRpc("pin_status");
 export const pinSet = (pin: string, current?: string) => pinRpc("pin_set", { p_pin: pin, p_current: current ?? null });
