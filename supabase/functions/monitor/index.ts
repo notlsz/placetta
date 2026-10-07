@@ -21,7 +21,7 @@ const MAX_WATCHES = Number(Deno.env.get("WEEKLY_CHECKS_PER_DAY") ?? "40");
 type Bi = { en: string; zh: string };
 type Deadline = { id: string; date: string; kind: "due" | "renewal" | "estimate" | "milestone"; title: Bi; app?: string };
 type Update = { workspace_id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team"; title: Bi; body?: Bi; app_id?: string | null; dedupe: string };
-type Filing = { id: string; workspace_id: string; app_id: string; title: Bi; status: string; updated_at: string; approved_at: string | null; payment_url: string | null; customer_paid_at: string | null; fee_paid: number | null; confirmation_number: string | null; assigned_to: string | null; note: string | null };
+type Filing = { id: string; workspace_id: string; app_id: string; title: Bi; status: string; agent_state?: string | null; updated_at: string; approved_at: string | null; payment_url: string | null; customer_paid_at: string | null; fee_paid: number | null; confirmation_number: string | null; assigned_to: string | null; note: string | null };
 
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const day = (d: Date) => d.toISOString().slice(0, 10);
@@ -72,6 +72,11 @@ export function filingUpdates(f: Filing, since: string, now: number): Update[] {
     };
     const s = said[f.status];
     if (s) out.push({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `filing:${f.id}:${f.status}:${f.updated_at.slice(0, 10)}`, title: s[0], body: s[1] });
+  }
+  if (f.agent_state === "needs_you" && f.updated_at > since) {
+    out.push({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `needs_you:${f.id}:${f.updated_at.slice(0, 10)}`,
+      title: { en: `Placetta needs you for a step: ${t.en}`, zh: `需要您完成一步：${t.zh}` },
+      body: { en: "Open the filing to finish it. Placetta carries on right after.", zh: "打开该申请完成这一步，快哉随后继续办理。" } });
   }
   if (f.status === "needs_info" && f.payment_url && !f.customer_paid_at && now - Date.parse(f.updated_at) > 2 * 864e5) {
     const week = Math.floor(now / (7 * 864e5));
@@ -143,7 +148,7 @@ Deno.serve(async (req) => {
     if (!rows || rows.length < 500) break;
   }
   const { data: filings, error: fe } = await admin.from("filings")
-    .select("id, workspace_id, app_id, title, status, updated_at, approved_at, payment_url, customer_paid_at, fee_paid, confirmation_number, assigned_to, note")
+    .select("id, workspace_id, app_id, title, status, agent_state, updated_at, approved_at, payment_url, customer_paid_at, fee_paid, confirmation_number, assigned_to, note")
     .neq("status", "canceled");
   if (fe) return json(500, { error: "filings: " + fe.code });
   for (const f of (filings ?? []) as Filing[]) byWs.get(f.workspace_id)?.push(...filingUpdates(f, since, now));
@@ -202,6 +207,12 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Self-filing: requeue stuck runs, refresh faxes and letters on their way, flag destinations older than 90 days.
+  const sweep = await fetch(`${SUPABASE_URL}/functions/v1/file`, {
+    method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": req.headers.get("x-monitor-key") ?? "" }, body: "{}",
+  }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!sweep) console.error("self-filing sweep did not run");
+
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, email: !!(RESEND && FROM), weekly_checks: watches });
+  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, email: !!(RESEND && FROM), weekly_checks: watches });
 });

@@ -9,6 +9,7 @@ import {
   b64urlDecode,
   b64urlEncode,
   HttpError,
+  hmacSha256,
   accessFor,
   type L10n,
   ok,
@@ -21,6 +22,7 @@ import {
   signState,
   SUPABASE_URL,
   text,
+  timingSafeEqual,
   userClient,
   utf8,
   uuidParam,
@@ -332,52 +334,136 @@ function base64Lines(bytes: Uint8Array): string {
   return (btoa(bin).match(/.{1,76}/g) ?? []).join("\r\n");
 }
 
+type Attachment = { name: string; mime: string; bytes: Uint8Array };
+const MAX_ATTACHMENTS = 5, MAX_ATTACH_BYTES = 15 * 1024 * 1024, GRAPH_INLINE_BYTES = 3 * 1024 * 1024;
+
+/** Attachments by documents path: at most 5 files and 15 MB, each in this workspace's folder and in its documents. */
+async function loadAttachments(ws: string, v: unknown, allowed?: Set<string>): Promise<Attachment[]> {
+  if (v === undefined || v === null) return [];
+  if (!Array.isArray(v)) throw new HttpError("bad_request", "attachments must be a list of { path }.");
+  if (v.length > MAX_ATTACHMENTS) throw new HttpError("bad_request", `Attach at most ${MAX_ATTACHMENTS} files.`);
+  const out: Attachment[] = [];
+  let total = 0;
+  for (const a of v) {
+    const path = typeof a?.path === "string" ? a.path : "";
+    if (!path.startsWith(`${ws}/`) || path.includes("..") || path.length > 500) throw new HttpError("bad_request", "That file isn't in this workspace.");
+    if (allowed && !allowed.has(path)) throw new HttpError("forbidden", "Only the files the customer approved can be attached.");
+    const { data: doc, error } = await admin.from("documents").select("name, mime").eq("workspace_id", ws).eq("path", path).maybeSingle();
+    if (error) throw new Error(`document lookup failed: ${error.code ?? ""}`);
+    if (!doc) throw new HttpError("not_found", "That file isn't in Documents.");
+    const dl = await admin.storage.from("documents").download(path);
+    if (dl.error || !dl.data) throw new HttpError("not_found", `Couldn't open ${doc.name}.`);
+    const bytes = new Uint8Array(await dl.data.arrayBuffer());
+    total += bytes.length;
+    if (total > MAX_ATTACH_BYTES) throw new HttpError("bad_request", "Attachments can be at most 15 MB in total.");
+    out.push({ name: String(doc.name).replace(/[\r\n"]/g, " ").slice(0, 200), mime: doc.mime || "application/octet-stream", bytes });
+  }
+  return out;
+}
+
+const plainB64 = (bytes: Uint8Array) => base64Lines(bytes).replace(/\r\n/g, "");
+
+/** The Gmail message: plain text, or multipart/mixed with the text first and one part per file. */
+export function gmailMime(to: string[], subject: string, content: string, files: Attachment[]): string {
+  const textPart = ['Content-Type: text/plain; charset="UTF-8"', "Content-Transfer-Encoding: base64", "", base64Lines(utf8(content.replace(/\n/g, "\r\n")))];
+  const head = [`To: ${to.join(", ")}`, `Subject: ${encodeHeader(subject)}`, "MIME-Version: 1.0"];
+  if (!files.length) return [...head, ...textPart].join("\r\n");
+  const boundary = `placetta_${b64urlEncode(crypto.getRandomValues(new Uint8Array(18)))}`;
+  const parts = [`--${boundary}`, ...textPart];
+  for (const f of files) {
+    const name = encodeHeader(f.name);
+    parts.push(`--${boundary}`, `Content-Type: ${f.mime.replace(/[\r\n;"]/g, "")}; name="${name}"`, `Content-Disposition: attachment; filename="${name}"`,
+      "Content-Transfer-Encoding: base64", "", base64Lines(f.bytes));
+  }
+  parts.push(`--${boundary}--`, "");
+  return [...head, `Content-Type: multipart/mixed; boundary="${boundary}"`, "", ...parts].join("\r\n");
+}
+
+/** Send from the workspace's own Gmail or Outlook. Returns the provider's message id and the account it went from. */
+async function sendFrom(ws: string, kindParamValue: unknown, to: string[], subject: string, content: string, files: Attachment[]) {
+  const kind = await pickKind(ws, kindParamValue, ["gmail", "outlook_mail"], "Connect Gmail or Outlook in Settings.");
+  const conn = await Conn.open(ws, kind);
+  let id = "";
+  if (kind === "gmail") {
+    const r = await conn.callJson<{ id?: string }>(`${GMAIL}/messages/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ raw: b64urlEncode(utf8(gmailMime(to, subject, content, files))) }),
+    });
+    id = r.id ?? "";
+  } else {
+    const size = files.reduce((n, f) => n + f.bytes.length, 0);
+    if (size > GRAPH_INLINE_BYTES) throw new HttpError("bad_request", "Outlook takes at most about 3 MB of attachments in one message. Send it by fax or mail instead.");
+    const message = {
+      subject,
+      body: { contentType: "Text", content },
+      toRecipients: to.map((address) => ({ emailAddress: { address } })),
+      attachments: files.map((f) => ({ "@odata.type": "#microsoft.graph.fileAttachment", name: f.name, contentType: f.mime, contentBytes: plainB64(f.bytes) })),
+    };
+    // A draft first, so the message has an id to record, then send it.
+    const draft = await conn.callJson<{ id?: string }>(`${GRAPH}/me/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(message),
+    });
+    if (!draft.id) throw new HttpError("upstream_error", "Outlook didn't create the message. Try again.");
+    await conn.callJson(`${GRAPH}/me/messages/${enc(draft.id)}/send`, { method: "POST" });
+    id = draft.id;
+  }
+  return { kind, id, account: conn.row.account ?? "" };
+}
+
+function mailInput(body: Record<string, unknown>) {
+  const to = recipients(body.to);
+  const subject = text(body.subject, "subject", 1, 300).replace(/[\r\n]+/g, " ");
+  if (typeof body.body !== "string" || !body.body.trim()) throw new HttpError("bad_request", "body is required.");
+  if (body.body.length > 50000) throw new HttpError("bad_request", "body is too long (at most 50000 characters).");
+  return { to, subject, content: body.body.replace(/\r\n?/g, "\n") };
+}
+
 const mailSend: Action = async (c) => {
   if (c.body.approved !== true) throw new HttpError("bad_request", "The customer must approve this message before it is sent.");
-  const to = recipients(c.body.to);
-  const subject = text(c.body.subject, "subject", 1, 300).replace(/[\r\n]+/g, " ");
-  if (typeof c.body.body !== "string" || !c.body.body.trim()) throw new HttpError("bad_request", "body is required.");
-  if (c.body.body.length > 50000) throw new HttpError("bad_request", "body is too long (at most 50000 characters).");
-  const content = c.body.body.replace(/\r\n?/g, "\n");
-  const kind = await pickKind(c.ws, c.body.kind, ["gmail", "outlook_mail"], "Connect Gmail or Outlook in Settings.");
-  const conn = await Conn.open(c.ws, kind);
-
-  if (kind === "gmail") {
-    const mime = [
-      `To: ${to.join(", ")}`,
-      `Subject: ${encodeHeader(subject)}`,
-      "MIME-Version: 1.0",
-      'Content-Type: text/plain; charset="UTF-8"',
-      "Content-Transfer-Encoding: base64",
-      "",
-      base64Lines(utf8(content.replace(/\n/g, "\r\n"))),
-    ].join("\r\n");
-    await conn.callJson(`${GMAIL}/messages/send`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ raw: b64urlEncode(utf8(mime)) }),
-    });
-  } else {
-    await conn.callJson(`${GRAPH}/me/sendMail`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: { subject, body: { contentType: "Text", content }, toRecipients: to.map((address) => ({ emailAddress: { address } })) },
-        saveToSentItems: true,
-      }),
-    });
-  }
+  const { to, subject, content } = mailInput(c.body);
+  const files = await loadAttachments(c.ws, c.body.attachments);
+  const { kind, account } = await sendFrom(c.ws, c.body.kind, to, subject, content, files);
 
   const list = to.join(", ");
-  const via = conn.row.account ? ` (${conn.row.account})` : "";
+  const via = account ? ` (${account})` : "";
   await audit({
     ...you(c),
     action: { en: `Sent email to ${list}`, zh: `已发送邮件至 ${list}` },
     object: same(subject),
-    detail: { en: `Via ${NAMES[kind].en}${via}`, zh: `通过 ${NAMES[kind].zh}${via}` },
+    detail: { en: `Via ${NAMES[kind].en}${via}${files.length ? `, ${files.length} attached` : ""}`, zh: `通过 ${NAMES[kind].zh}${via}${files.length ? `，附件 ${files.length} 个` : ""}` },
   });
   return ok({ kind });
 };
+
+/** The file function's server-to-server path: sends one running email filing, only its approved files. */
+async function filerMailSend(body: Record<string, unknown>): Promise<Response> {
+  const ws = uuidParam(body.workspace_id, "workspace_id");
+  const filingId = uuidParam(body.filing_id, "filing_id");
+  const { data: f, error } = await admin.from("filings").select("id, workspace_id, payload, agent_state, channel, submit_clicked_at")
+    .eq("id", filingId).eq("workspace_id", ws).maybeSingle();
+  if (error) throw new Error(`filing lookup failed: ${error.code ?? ""}`);
+  if (!f) throw new HttpError("not_found", "No such filing.");
+  if (f.agent_state !== "running" || f.channel !== "email") throw new HttpError("forbidden", "This filing isn't being sent by email right now.");
+  if (!f.submit_clicked_at) throw new HttpError("forbidden", "Record the send before sending.");
+  const p = (f.payload ?? {}) as Record<string, unknown>;
+  const approved = new Set<string>([p.pdf_path, ...(Array.isArray(p.attachments) ? p.attachments.map((a: { path?: string }) => a?.path) : [])].filter((x): x is string => typeof x === "string"));
+  const { to, subject, content } = mailInput(body);
+  const files = await loadAttachments(ws, body.attachments, approved);
+  return ok(await sendFrom(ws, body.kind, to, subject, content, files));
+}
+
+/** True when the request carries the file function's shared secret. */
+async function fromFiler(req: Request): Promise<boolean> {
+  const got = req.headers.get("x-filer-secret");
+  if (!got) return false;
+  const want = Deno.env.get("FILER_SECRET") ?? "";
+  if (want.length < 32) throw new HttpError("not_configured", "FILER_SECRET is not set.");
+  // Compare HMACs so the comparison is constant-time whatever the lengths.
+  const k = "placetta-filer";
+  if (!timingSafeEqual(await hmacSha256(k + want, got), await hmacSha256(k + want, want))) throw new HttpError("unauthorized", "Wrong filer key.");
+  return true;
+}
 
 // ------------------------------------------------------------------ calendar
 
@@ -835,6 +921,11 @@ const ACTIONS: Record<string, Action> = {
 const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost]);
 
 serve(async (req) => {
+  if (await fromFiler(req)) {
+    const body = await readBody(req);
+    if (body.action !== "mail_send") throw new HttpError("bad_request", "The filer may only send mail.");
+    return await filerMailSend(body);
+  }
   const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
   const ws = uuidParam(body.workspace_id, "workspace_id");

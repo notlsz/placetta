@@ -14,6 +14,8 @@ export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" 
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
 export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean };
 
+export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
+
 export type OfficialForm = {
   id: string;
   form: string;               // the number as the agency prints it
@@ -37,6 +39,7 @@ export type OfficialForm = {
   attach?: Bi[];
   foreign?: Bi;               // what's different for a China-based owner
   fill?: "ss4" | "cbp5106";   // Placetta fills the official PDF itself
+  sign?: SignSpot;            // where a signature and its date go on the official PDF (PDF points, page from 0)
   checked: "form" | "page" | "known";   // known: from Placetta's library of official sites; re-read before filing
   order: number;              // where it falls in an opening: lower first
 };
@@ -55,6 +58,8 @@ export const FORMS: OfficialForm[] = [
     fee: 0, feeNote: B("The IRS charges nothing. Sites that charge for an EIN are resellers.", "IRS 不收费。收费办理 EIN 的网站都是中介。"),
     takes: B("Fax: about 4 business days. Mail: about 4 to 5 weeks. Phone: issued on the call.", "传真约 4 个工作日；邮寄约 4 至 5 周；电话当场发号。"),
     fill: "ss4", checked: "form",
+    // The Signature line under "Name and title" (f1_44), checked by rendering page 1 with pdftoppm.
+    sign: { page: 0, x: 100, y: 38, w: 215, h: 20, date: { x: 356, y: 41, size: 9 } },
     foreign: B("Line 7b: a responsible party with no SSN or ITIN writes \"Foreign\" per the instructions. A single-member LLC owned by a foreign company checks \"Other\" on line 9a and writes \"Foreign-owned U.S. disregarded entity\", then files Form 5472 each year.", "第 7b 行：负责人没有 SSN 或 ITIN 时，按说明填写 \"Foreign\"。由外国公司单一持有的 LLC 在第 9a 行勾选 \"Other\"，填写 \"Foreign-owned U.S. disregarded entity\"，此后每年申报 5472 表。"),
     fields: [
       F("l1", "1", "Legal name of entity", "实体法定名称"),

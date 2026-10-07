@@ -84,3 +84,24 @@ export async function fillOfficial(formId: string, fields: Field[]): Promise<Blo
   const out = await doc.save();
   return new Blob([out as BlobPart], { type: "application/pdf" });
 }
+
+/** Draw a signature image (PNG) on the form's signature line with today's date in its date box. One filing, one
+    signature: callers never keep the image for another form. Returns the signed PDF, or null when the form has no spot. */
+export async function stampSignature(pdfBytes: Uint8Array, png: Uint8Array, formId: string, today = new Date()): Promise<Uint8Array | null> {
+  const spot = formById(formId)?.sign;
+  if (!spot) return null;
+  const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
+  const doc = await PDFDocument.load(pdfBytes);
+  const page = doc.getPages()[spot.page];
+  if (!page) return null;
+  const img = await doc.embedPng(png);
+  const scale = Math.min(spot.w / img.width, spot.h / img.height);
+  const w = img.width * scale, h = img.height * scale;
+  page.drawImage(img, { x: spot.x, y: spot.y + (spot.h - h) / 2, width: w, height: h });
+  if (spot.date) {
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const d = `${String(today.getMonth() + 1).padStart(2, "0")}/${String(today.getDate()).padStart(2, "0")}/${today.getFullYear()}`;
+    page.drawText(d, { x: spot.date.x, y: spot.date.y, size: spot.date.size, font, color: rgb(0, 0, 0) });
+  }
+  return await doc.save();
+}

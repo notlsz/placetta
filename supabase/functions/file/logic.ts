@@ -1,0 +1,149 @@
+// The dispatcher's decisions, kept free of I/O so they can be tested: is this agency switched on, is the filing
+// complete, which channel sends it, and is the owner foreign. index.ts does the sending.
+import type { Dest } from "./destinations.ts";
+
+export type Bi = { en: string; zh: string };
+export type Channel = "email" | "fax" | "mail" | "portal" | "team";
+export type LogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string };
+
+export type Payload = {
+  official?: string;
+  form?: Bi;
+  fields?: { id?: string; label: Bi; value: string }[];
+  checklist?: { label: Bi; state: string; doc?: string }[];
+  attachments?: { name: string; path: string }[];
+  pdf_path?: string;                                // the filled official PDF, signed when the agency takes a signature
+  signature?: { name: string; title?: string; signed_at: string; kind: "typed" | "drawn" };
+  us_address?: boolean;                             // false when the business has no US address
+};
+
+export type Filing = {
+  id: string; workspace_id: string; app_id: string; title: Bi; status: string; payload: Payload;
+  channel: Channel | null; agent_state: string | null; agent_log: LogEntry[]; handoff_url: string | null;
+  provider_ref: string | null; submit_clicked_at: string | null; attempts: number; requirements_checked: boolean;
+  confirmation_number: string | null; portal_url: string | null;
+};
+
+export type Env = {
+  agencies: string[];        // FILER_AGENCIES: form ids allowed to self-file
+  channels: Channel[];       // FILER_CHANNELS: channels switched on
+  portalWorker: boolean;     // FILER_ENABLED=1
+  dryRun: boolean;           // FILER_DRY_RUN=1
+  twoKey: number;            // FILER_TWO_KEY: the team reviews each agency's first N filings (default 10)
+  fax: boolean;              // TELNYX_API_KEY, TELNYX_FAX_CONNECTION_ID and TELNYX_FAX_FROM set
+  mail: boolean;             // LOB_API_KEY and LOB_FROM set
+};
+
+export function envFrom(get: (k: string) => string | undefined): Env {
+  const list = (k: string) => (get(k) ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const two = Number(get("FILER_TWO_KEY") ?? "10");
+  return {
+    agencies: list("FILER_AGENCIES"),
+    channels: list("FILER_CHANNELS").filter((c): c is Channel => ["email", "fax", "mail", "portal"].includes(c)),
+    portalWorker: get("FILER_ENABLED") === "1",
+    dryRun: get("FILER_DRY_RUN") === "1",
+    twoKey: Number.isFinite(two) && two >= 0 ? Math.floor(two) : 10,
+    fax: !!(get("TELNYX_API_KEY") && get("TELNYX_FAX_CONNECTION_ID") && get("TELNYX_FAX_FROM")),
+    mail: !!(get("LOB_API_KEY") && get("LOB_FROM")),
+  };
+}
+
+/** The kill switch: off unless this form id is listed in FILER_AGENCIES. */
+export const killSwitchOn = (f: Filing, env: Env): boolean => !!f.payload.official && env.agencies.includes(f.payload.official.toLowerCase());
+
+/** SSN or ITIN shapes. Placetta never stores or sends one. */
+export const SECRET_NUMBER = /\b\d{3}-?\d{2}-?\d{4}\b|\b9\d{2}-?[78]\d-?\d{4}\b/;
+const SECRET_LABEL = /\b(ssn|itin|social security|passport)\b|社会安全号|护照号/i;
+
+/** The owner applies from outside the US: SS-4 line 7b says "Foreign", or the business has no US address. */
+export function isForeign(p: Payload): boolean {
+  if (p.us_address === false) return true;
+  const l7b = p.fields?.find((x) => x.id === "l7b")?.value ?? "";
+  return /^\s*foreign\s*$/i.test(l7b);
+}
+
+export type Problem = { en: string; zh: string; kind: "missing" | "secret" | "signature" | "file" };
+
+/** Everything that must be true before anything is sent. Empty when the filing can go. */
+export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<string> }): Problem[] {
+  const out: Problem[] = [];
+  const p = f.payload;
+  for (const x of p.fields ?? []) {
+    const v = (x.value ?? "").trim();
+    if (SECRET_NUMBER.test(v)) {
+      out.push({ kind: "secret", en: `${x.label.en} has an SSN or ITIN. Placetta never sends one; that line is filled on the agency's own site or by hand.`, zh: `${x.label.zh}含有 SSN 或 ITIN。快哉从不发送这类号码，请在机构网站上或手写填写。` });
+    } else if (!v && !SECRET_LABEL.test(x.label.en)) {
+      out.push({ kind: "missing", en: `${x.label.en} is empty`, zh: `${x.label.zh}未填写` });
+    }
+  }
+  for (const c of p.checklist ?? []) {
+    if (c.state === "missing") out.push({ kind: "missing", en: `Not ready: ${c.label.en}`, zh: `尚未完成：${c.label.zh}` });
+  }
+  for (const a of p.attachments ?? []) {
+    if (!a.path?.startsWith(`${f.workspace_id}/`) || !ctx.docPaths.has(a.path)) out.push({ kind: "file", en: `${a.name} isn't in Documents`, zh: `文件中找不到 ${a.name}` });
+  }
+  const paperless = !!d?.portal;
+  if (d && !paperless) {
+    if (!p.pdf_path) out.push({ kind: "file", en: "The filled official form is missing. Approve it again from the application.", zh: "缺少已填写的官方表格。请在申请中重新批准。" });
+    else if (!p.pdf_path.startsWith(`${f.workspace_id}/`) || !ctx.docPaths.has(p.pdf_path)) out.push({ kind: "file", en: "The filled official form isn't in Documents.", zh: "文件中找不到已填写的官方表格。" });
+    if ((d.signature === "typed" || d.signature === "drawn") && !p.signature) {
+      out.push({ kind: "signature", en: "The form needs the signer's signature. Approve it again and sign in the card.", zh: "表格需要签署人签名。请重新批准并在卡片中签名。" });
+    }
+    if (d.signature === "drawn" && p.signature?.kind === "typed") {
+      out.push({ kind: "signature", en: "This agency needs a drawn signature, not a typed one.", zh: "该机构需要手绘签名，而不是打字签名。" });
+    }
+  }
+  return out;
+}
+
+export type Facts = { hasLogin: boolean; mailConnected: boolean };
+
+/** The first channel that fits, in order: portal, email, fax, mail, else the team. A wet signature rules out
+    every channel that would send our copy (email, fax and mail); the person signs it themselves. */
+export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Channel {
+  if (!d) return "team";
+  const on = (c: Channel) => env.channels.includes(c);
+  if (d.portal && facts.hasLogin && env.portalWorker && on("portal")) return "portal";
+  if (d.signature === "wet") return "team";
+  if (d.email && facts.mailConnected && on("email")) return "email";
+  if (d.fax && env.fax && on("fax")) return "fax";
+  if (d.mail && env.mail && on("mail")) return "mail";
+  return "team";
+}
+
+/** The agency's fax number or address for this owner. */
+export function faxTo(d: Dest, p: Payload): string | null {
+  if (!d.fax) return null;
+  return isForeign(p) ? (d.fax.foreign ?? null) : d.fax.us;
+}
+export function mailTo(d: Dest, p: Payload) {
+  if (!d.mail) return null;
+  return isForeign(p) && d.mail.foreign ? d.mail.foreign : d.mail;
+}
+
+/** True once the team approved this filing's review (two-key period), recorded in its log. */
+export const teamApproved = (f: Filing) => f.agent_log.some((e) => e.kind === "two_key_ok");
+
+/** The email the agency receives: plain, bilingual only in the customer's own copy. */
+export function emailFor(f: Filing): { subject: string; body: string } {
+  const form = f.payload.form?.en || f.title.en;
+  const name = f.payload.fields?.find((x) => x.id === "l1")?.value || "";
+  return {
+    subject: `${form}${name ? `: ${name}` : ""}`.slice(0, 280),
+    body: [
+      "Hello,",
+      "",
+      `Attached is ${form}${name ? ` for ${name}` : ""}, submitted on the applicant's behalf with their authorization.`,
+      "Please reply to this email with any questions or the result.",
+      "",
+      "Thank you.",
+    ].join("\n"),
+  };
+}
+
+export const CHANNEL_SAID: Record<Exclude<Channel, "team">, Bi> = {
+  email: { en: "by email", zh: "通过邮件" },
+  fax: { en: "by fax", zh: "通过传真" },
+  mail: { en: "by certified mail", zh: "通过挂号信" },
+  portal: { en: "on the agency's site", zh: "在机构网站上" },
+};

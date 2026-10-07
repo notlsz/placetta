@@ -1,6 +1,6 @@
 // Shared helpers for the Placetta edge functions.
 // The MCP deploy only uploads files inside a function's own folder, so this file is copied into
-// integrations/, oauth-callback/, logins/ and team/. Keep the copies identical.
+// integrations/, oauth-callback/, logins/, team/ and file/. Keep the copies identical.
 import { createClient, type SupabaseClient, type User } from "npm:@supabase/supabase-js@2";
 
 export const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
