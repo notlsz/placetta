@@ -1071,3 +1071,14 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .sg-row.pick:hover b { color: var(--blue-ink); }
 :root[data-theme="dark"] .brand { color: #E6EDF6; }
 :root[data-theme="dark"] .appr { background: linear-gradient(180deg, #1B212B 0%, #161B23 100%); border-color: rgba(255, 255, 255, .06); }
+.tile.logo { background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .08); color: var(--ink2); }
+.tile.logo img { width: 20px; height: 20px; object-fit: contain; }
+.tile.logo.wide img { width: 28px; height: 12px; }
+:root[data-theme="dark"] .tile.logo { background: #F4F6F9; color: #5B6470; }
+.sbtn.pinned { gap: 6px; }
+.sbtn.pinned svg { width: 13px; height: 13px; }
+.pin-in { width: 140px; height: 42px; padding: 0 14px; border: 0; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .12); font: 600 18px/1 var(--sans); letter-spacing: .4em; color: var(--ink); outline: 0; }
+.pin-in:focus { box-shadow: 0 0 0 1.5px var(--blue), 0 0 0 4px rgba(115, 153, 198, .2); }
+.pinform { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pin-form { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.pin-msg { margin: 0; font-size: 13.5px; color: #C0473A; }

@@ -88,6 +88,32 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
   if (!c) return pgErr("Sign in first.", "42501", 401);
   const ws = String(body.ws ?? "");
   switch (fn) {
+    case "pin_status": case "pin_set": case "pin_unlock": case "pin_clear": case "pin_lock": {
+      const pins = (db.tables.account_pins ??= []) as { user_id: string; pin: string; fails: number; locked_until: string | null; unlocked_until: string | null }[];
+      const later = (m: number) => new Date(Date.now() + m * 6e4).toISOString();
+      let r = pins.find(x => x.user_id === c.sub);
+      const status = () => { const x = (db.tables.account_pins as typeof pins).find(y => y.user_id === c.sub); return json({ on: !!x, unlocked_until: x?.unlocked_until && x.unlocked_until > now() ? x.unlocked_until : null, locked_until: x?.locked_until && x.locked_until > now() ? x.locked_until : null }); };
+      const check = (pin: unknown): Response | null => {
+        if (!r) return null;
+        if (r.locked_until && r.locked_until > now()) return json({ code: "P0001", message: "pin_locked", hint: r.locked_until, details: null }, 400);
+        if (String(pin ?? "") === r.pin) { Object.assign(r, { fails: 0, locked_until: null, unlocked_until: later(15) }); save(); return null; }
+        r.fails += 1;
+        if (r.fails >= 5) { Object.assign(r, { fails: 0, locked_until: later(15), unlocked_until: null }); save(); return json({ code: "P0001", message: "pin_locked", hint: r.locked_until, details: null }, 400); }
+        save(); return json({ code: "P0001", message: "pin_wrong", hint: String(5 - r.fails), details: null }, 400);
+      };
+      if (fn === "pin_status") return status();
+      if (fn === "pin_lock") { if (r) { r.unlocked_until = null; save(); } return status(); }
+      if (fn === "pin_set") {
+        if (!/^\d{6}$/.test(String(body.p_pin ?? ""))) return pgErr("pin_format");
+        const bad = check(body.p_current); if (bad) return bad;
+        if (r) Object.assign(r, { pin: String(body.p_pin), fails: 0, locked_until: null, unlocked_until: later(15) });
+        else pins.push(r = { user_id: c.sub, pin: String(body.p_pin), fails: 0, locked_until: null, unlocked_until: later(15) });
+        save(); return status();
+      }
+      const bad = check(body.p_pin); if (bad) return bad;
+      if (fn === "pin_clear") { db.tables.account_pins = pins.filter(x => x.user_id !== c.sub); save(); }
+      return status();
+    }
     case "whoami": return json({ id: c.sub, email: userOf(c.sub).email, staff: isStaff(c), staff_email: staffEmail(c.sub), two_step: twoStepOn(c.sub), aal: c.aal });
     case "my_workspaces":
       if (!mfaOk(c)) return json([]);
@@ -316,6 +342,7 @@ async function auth(req: Request, url: URL): Promise<Response> {
   const c = claims(req);
   if (p === "/logout") { if (c) { for (const [k, v] of Object.entries(db.sessions)) if (k === c.sid || (url.searchParams.get("scope") === "global" && v.user_id === c.sub)) delete db.sessions[k]; save(); } return new Response(null, { status: 204 }); }
   if (!c || !userOf(c.sub)) return json({ code: 401, msg: "Sign in again." }, 401);
+  if (p === "/user" && req.method === "PUT" && body.password !== undefined && String(body.password).length < 8) return json({ code: 422, error_code: "weak_password", msg: "Password should be at least 8 characters." }, 422);
   if (p === "/user") return json(publicUser(c.sub));
   if (p === "/factors" && req.method === "POST") {
     db.factors = db.factors.filter(f => !(f.user_id === c.sub && f.status === "unverified"));

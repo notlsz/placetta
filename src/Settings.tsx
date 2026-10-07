@@ -1,13 +1,23 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./model";
 import { API_MODELS } from "./live";
 import { fmtAgo, fmtDay } from "./time";
-import { Footer, I } from "./ui";
+import { Footer, I, Modal } from "./ui";
 import { useTheme, type Theme } from "./hooks";
 import * as api from "./cloud/api";
 import type { IntegrationKind } from "./cloud/api";
 import { TwoStepSetup } from "./cloud/TwoStep";
+import gmailLogo from "./assets/integrations/gmail.png";
+import outlookLogo from "./assets/integrations/outlook.svg";
+import gcalLogo from "./assets/integrations/calendar.png";
+import gdriveLogo from "./assets/integrations/drive.png";
+import dropboxLogo from "./assets/integrations/dropbox.svg";
+import squareLogo from "./assets/integrations/square.svg";
+import toastLogo from "./assets/integrations/toast.svg";
+import qbLogo from "./assets/integrations/quickbooks.svg";
+import slackLogo from "./assets/integrations/slack.png";
+
 
 /* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
    one primary action per group. Only what a business needs to get and stay compliant. */
@@ -35,32 +45,40 @@ function Group({ id, title, note, rows, children }: { id: string; title: Bi; not
   );
 }
 
-const Btn = ({ children, onClick, kind = "quiet", disabled }: { children: ReactNode; onClick: () => void; kind?: "quiet" | "ink" | "line"; disabled?: boolean }) =>
-  <button type="button" className={"sbtn " + kind} onClick={onClick} disabled={disabled}>{children}</button>;
+/* The settings PIN: when it's on and not unlocked, sensitive controls ask for it first. */
+type PinCtx = { locked: boolean; guard: (fn: () => void) => void };
+const PinLock = createContext<PinCtx>({ locked: false, guard: fn => fn() });
+const usePin = () => useContext(PinLock);
 
-const Tile = ({ t, c }: { t: string; c: string }) => <span className="tile" style={{ background: c }} aria-hidden="true">{t}</span>;
+const Btn = ({ children, onClick, kind = "quiet", disabled, guard }: { children: ReactNode; onClick: () => void; kind?: "quiet" | "ink" | "line"; disabled?: boolean; guard?: boolean }) => {
+  const pin = usePin();
+  const locked = guard && pin.locked;
+  return <button type="button" className={"sbtn " + kind + (locked ? " pinned" : "")} onClick={() => (guard ? pin.guard(onClick) : onClick())} disabled={disabled}>{locked && <I.lock />}{children}</button>;
+};
 
-const INTEGRATIONS: { group: Bi; items: { kind: IntegrationKind | "feed" | "square" | "toast"; name: string; zh?: string; why: Bi; tile: [string, string] }[] }[] = [
+const Tile = ({ logo, wide }: { logo?: string; wide?: boolean }) => <span className={"tile logo" + (wide ? " wide" : "")} aria-hidden="true">{logo ? <img src={logo} alt="" /> : <I.deadlines />}</span>;
+
+const INTEGRATIONS: { group: Bi; items: { kind: IntegrationKind | "feed" | "square" | "toast"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean }[] }[] = [
   { group: B("Email", "邮件"), items: [
-    { kind: "gmail", name: "Gmail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), tile: ["G", "#EA4335"] },
-    { kind: "outlook_mail", name: "Outlook Mail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), tile: ["O", "#0A64C8"] },
+    { kind: "gmail", name: "Gmail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), logo: gmailLogo },
+    { kind: "outlook_mail", name: "Outlook Mail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), logo: outlookLogo },
   ] },
   { group: B("Calendar", "日历"), items: [
-    { kind: "gcal", name: "Google Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), tile: ["31", "#1A73E8"] },
-    { kind: "outlook_cal", name: "Outlook Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), tile: ["O", "#0F6CBD"] },
-    { kind: "feed", name: "Calendar feed", zh: "日历订阅", why: B("Any calendar app: subscribe with a private link", "任何日历应用：用私密链接订阅"), tile: ["iCal", "#5C6B7A"] },
+    { kind: "gcal", name: "Google Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), logo: gcalLogo },
+    { kind: "outlook_cal", name: "Outlook Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), logo: outlookLogo },
+    { kind: "feed", name: "Calendar feed", zh: "日历订阅", why: B("Any calendar app: subscribe with a private link", "任何日历应用：用私密链接订阅"),  },
   ] },
   { group: B("Documents", "文件"), items: [
-    { kind: "gdrive", name: "Google Drive", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), tile: ["D", "#188038"] },
-    { kind: "dropbox", name: "Dropbox", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), tile: ["Db", "#0061FE"] },
+    { kind: "gdrive", name: "Google Drive", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: gdriveLogo },
+    { kind: "dropbox", name: "Dropbox", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: dropboxLogo },
   ] },
   { group: B("Sales, payroll and accounting", "销售、薪资与财务"), items: [
-    { kind: "square", name: "Square", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), tile: ["Sq", "#1A1A1A"] },
-    { kind: "toast", name: "Toast", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), tile: ["T", "#FF4C00"] },
-    { kind: "quickbooks", name: "QuickBooks", why: B("Gross receipts for business tax and renewals", "营业总额用于营业税和续期"), tile: ["QB", "#2CA01C"] },
+    { kind: "square", name: "Square", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), logo: squareLogo },
+    { kind: "toast", name: "Toast", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), logo: toastLogo, wide: true },
+    { kind: "quickbooks", name: "QuickBooks", why: B("Gross receipts for business tax and renewals", "营业总额用于营业税和续期"), logo: qbLogo },
   ] },
   { group: B("Team", "团队"), items: [
-    { kind: "slack", name: "Slack", why: B("Filing updates in your team's channel", "申报进展推送到团队频道"), tile: ["S", "#4A154B"] },
+    { kind: "slack", name: "Slack", why: B("Filing updates in your team's channel", "申报进展推送到团队频道"), logo: slackLogo },
   ] },
 ];
 
@@ -79,15 +97,15 @@ function Integrations() {
             {g.items.map(it => {
               const c = it.kind === "feed" || it.kind === "square" || it.kind === "toast" ? undefined : conn(it.kind);
               let right: ReactNode;
-              if (it.kind === "feed") right = cloud ? <Btn onClick={async () => { try { const u = await cloud.feedUrl(); setFeed(u); await navigator.clipboard?.writeText(u).catch(() => undefined); say(lang === "zh" ? "订阅链接已复制" : "Link copied"); } catch (e) { say((e as { message: string }).message); } }}>{lang === "zh" ? "复制链接" : "Copy link"}</Btn> : <Btn onClick={demo}>{lang === "zh" ? "复制链接" : "Copy link"}</Btn>;
+              if (it.kind === "feed") right = cloud ? <Btn guard onClick={async () => { try { const u = await cloud.feedUrl(); setFeed(u); await navigator.clipboard?.writeText(u).catch(() => undefined); say(lang === "zh" ? "订阅链接已复制" : "Link copied"); } catch (e) { say((e as { message: string }).message); } }}>{lang === "zh" ? "复制链接" : "Copy link"}</Btn> : <Btn onClick={demo}>{lang === "zh" ? "复制链接" : "Copy link"}</Btn>;
               else if (it.kind === "square" || it.kind === "toast") right = <Btn onClick={() => request(it.name)}>{lang === "zh" ? "申请接入" : "Request"}</Btn>;
               else if (cloud && !cloud.owner) right = c ? undefined : <em className="lock">{lang === "zh" ? "由所有者连接" : "Owners connect"}</em>;
-              else if (c) right = <Btn onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{lang === "zh" ? "断开" : "Disconnect"}</Btn>;
-              else right = <Btn kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{lang === "zh" ? "连接" : "Connect"}</Btn>;
+              else if (c) right = <Btn guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{lang === "zh" ? "断开" : "Disconnect"}</Btn>;
+              else right = <Btn guard kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{lang === "zh" ? "连接" : "Connect"}</Btn>;
               const status = c ? (c.status === "error" ? <em className="bad">{lang === "zh" ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><i />{c.account ?? (lang === "zh" ? "已连接" : "Connected")}</em>) : null;
               return (
                 <li key={it.kind} className="sg-row">
-                  <Tile t={it.tile[0]} c={it.tile[1]} />
+                  <Tile logo={it.logo} wide={it.wide} />
                   <span className="sg-tx"><b>{lang === "zh" && it.zh ? it.zh : it.name}</b><small>{b(it.why)}{it.kind === "toast" ? (lang === "zh" ? "。需 Toast 合作伙伴审批。" : ". Needs Toast partner approval.") : ""}</small>{status}</span>
                   <span className="sg-r">{right}</span>
                 </li>
@@ -115,7 +133,7 @@ function Logins() {
     <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Our filing team opens one only to file for you, and each opening shows in your audit trail. Never save Social Security or bank numbers here.", "加密保存在保险库中的机构门户登录信息。申报团队只在为您提交时打开，每次打开都会记入审计记录。请勿在此保存社会安全号或银行账号。")}
       rows={cloud.logins.map(l => ({ label: { en: l.agency, zh: l.agency }, icon: <I.key />,
         sub: <>{l.username}{l.last_opened_at ? (lang === "zh" ? `，团队上次打开 ${fmtAgo(l.last_opened_at, lang)}` : `. Team last opened it ${fmtAgo(l.last_opened_at, lang)}`) : ""}</>,
-        right: cloud.owner ? <Btn onClick={() => void cloud.removeLogin(l.id)}>{lang === "zh" ? "删除" : "Remove"}</Btn> : undefined }))}>
+        right: cloud.owner ? <Btn guard onClick={() => void cloud.removeLogin(l.id)}>{lang === "zh" ? "删除" : "Remove"}</Btn> : undefined }))}>
       {!cloud.owner ? <p className="sg-note">{lang === "zh" ? "只有所有者可以添加或删除登录信息。" : "Only owners can add or remove saved logins."}</p> : adding ? (
         <form className="sg-form" onSubmit={e => { e.preventDefault(); if (!f.agency.trim() || !f.username.trim() || !f.password) return; void cloud.saveLogin({ agency: f.agency.trim(), url: f.url.trim() || undefined, username: f.username.trim(), password: f.password, note: f.note.trim() || undefined }).then(() => { setAdding(false); setF({ agency: "", url: "", username: "", password: "", note: "" }); }); }}>
           <input placeholder={lang === "zh" ? "机构，例如 CDTFA" : "Agency, e.g. CDTFA"} value={f.agency} onChange={e => setF({ ...f, agency: e.target.value })} aria-label="Agency" />
@@ -124,7 +142,7 @@ function Logins() {
           <input type="password" placeholder={lang === "zh" ? "密码" : "Password"} autoComplete="new-password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} aria-label="Password" />
           <div className="sg-form-act"><Btn onClick={() => setAdding(false)}>{lang === "zh" ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink">{lang === "zh" ? "加密保存" : "Save encrypted"}</button></div>
         </form>
-      ) : <div className="sg-act"><Btn kind="line" onClick={() => setAdding(true)}><I.plus />{lang === "zh" ? "添加登录" : "Add a login"}</Btn></div>}
+      ) : <div className="sg-act"><Btn guard kind="line" onClick={() => setAdding(true)}><I.plus />{lang === "zh" ? "添加登录" : "Add a login"}</Btn></div>}
     </Group>
   );
 }
@@ -147,7 +165,9 @@ function Team() {
   const sentNote = (sent: string, email: string) => sent === "not_sent"
     ? (zh ? `已邀请 ${email}，但邮件没发出去。请让对方用这个邮箱登录。` : `Invited ${email}, but the email didn't send. Ask them to sign in with that address.`)
     : (zh ? `已邀请 ${email}。对方用这个邮箱登录即可加入。` : `Invited ${email}. They join when they sign in with that address.`);
+  const pin = usePin();
   const invite = async () => {
+    if (pin.locked) { pin.guard(() => void invite()); return; }
     const email = f.email.trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(email)) { say(zh ? "请输入有效的邮箱。" : "Enter a valid email."); return; }
     setBusy(true);
@@ -162,18 +182,18 @@ function Team() {
       right: m.you
         ? (m.role !== "owner" || owners > 1 ? <Btn onClick={() => { if (window.confirm(zh ? "确定离开这个工作区？" : "Leave this workspace?")) void act(async () => { await api.removeMember(wsId, m.user_id); cloud.switchTo(""); }); }}>{zh ? "离开" : "Leave"}</Btn> : undefined)
         : owner ? <>
-            <select className="sg-select" value={m.role} aria-label={zh ? "角色" : "Role"} onChange={e => void act(() => api.setRole(wsId, m.user_id, e.target.value as api.Role), zh ? "角色已更新" : "Role updated")}>
+            <select className="sg-select" value={m.role} aria-label={zh ? "角色" : "Role"} onChange={e => { const v = e.target.value as api.Role; pin.guard(() => void act(() => api.setRole(wsId, m.user_id, v), zh ? "角色已更新" : "Role updated")); }}>
               <option value="owner">{roleName("owner")}</option><option value="member">{roleName("member")}</option>
             </select>
-            <Btn onClick={() => { if (window.confirm(zh ? `将 ${m.email} 移出工作区？` : `Remove ${m.email}?`)) void act(() => api.removeMember(wsId, m.user_id), zh ? "已移出" : "Removed"); }}>{zh ? "移出" : "Remove"}</Btn>
+            <Btn guard onClick={() => { if (window.confirm(zh ? `将 ${m.email} 移出工作区？` : `Remove ${m.email}?`)) void act(() => api.removeMember(wsId, m.user_id), zh ? "已移出" : "Removed"); }}>{zh ? "移出" : "Remove"}</Btn>
           </> : undefined,
     })),
     ...(team?.invites ?? []).map(i => ({
       label: { en: i.email, zh: i.email }, icon: <I.bell />,
       sub: <>{roleName(i.role)}{zh ? "，已邀请，等待登录" : ", invited, waiting for them to sign in"}</>,
       right: <>
-        <Btn onClick={() => void act(async () => { const r = await api.resendInvite(wsId, i.id); say(sentNote(r.sent, i.email)); })}>{zh ? "重发" : "Resend"}</Btn>
-        <Btn onClick={() => void act(() => api.revokeInvite(i.id), zh ? "邀请已取消" : "Invite canceled")}>{zh ? "取消" : "Cancel"}</Btn>
+        <Btn guard onClick={() => void act(async () => { const r = await api.resendInvite(wsId, i.id); say(sentNote(r.sent, i.email)); })}>{zh ? "重发" : "Resend"}</Btn>
+        <Btn guard onClick={() => void act(() => api.revokeInvite(i.id), zh ? "邀请已取消" : "Invite canceled")}>{zh ? "取消" : "Cancel"}</Btn>
       </>,
     })),
   ];
@@ -201,6 +221,18 @@ function Security() {
   const zh = lang === "zh";
   const [setup, setSetup] = useState(false);
   const [factor, setFactor] = useState<string | null>(null);
+  const [pw, setPw] = useState<{ open: boolean; a: string; b: string; show: boolean; busy: boolean }>({ open: false, a: "", b: "", show: false, busy: false });
+  const savePw = async () => {
+    if (pw.a.length < 8) { say(zh ? "密码至少 8 个字符。" : "Use at least 8 characters."); return; }
+    if (pw.a !== pw.b) { say(zh ? "两次输入的密码不一致。" : "The passwords don't match."); return; }
+    setPw(x => ({ ...x, busy: true }));
+    try { await api.changePassword(pw.a); setPw({ open: false, a: "", b: "", show: false, busy: false }); say(zh ? "密码已更新。下次可用新密码登录。" : "Password changed. Use it next time you sign in."); }
+    catch (e) {
+      const c = (e as api.ApiError).code;
+      say(c === "weak" ? (zh ? "这个密码太弱了，换一个更长或更复杂的。" : "That password is too weak. Try a longer one.") : c === "same" ? (zh ? "新密码不能与旧密码相同。" : "Pick a password different from your current one.") : c === "reauth" ? (zh ? "为安全起见，请退出后重新登录，再修改密码。" : "For security, sign out and back in, then change it.") : (e as api.ApiError).message);
+      setPw(x => ({ ...x, busy: false }));
+    }
+  };
   useEffect(() => { if (cloud) void api.twoStepStatus().then(s => setFactor(s.factorId)).catch(() => undefined); }, [cloud]);
   if (!cloud) return null;
   const on = !!factor;
@@ -212,12 +244,102 @@ function Security() {
         { label: B("Two-step sign-in", "两步登录"), icon: <I.lock />,
           sub: on ? (zh ? "已开启：身份验证器应用" : "On: authenticator app") : (zh ? "未开启" : "Off"),
           right: on
-            ? <Btn onClick={() => { if (window.confirm(zh ? "确定关闭两步登录？" : "Turn off two-step sign-in?")) void api.twoStepOff(factor!).then(() => { setFactor(null); say(zh ? "已关闭两步登录" : "Two-step sign-in is off"); cloud.reopen(); }).catch(e => say((e as api.ApiError).message)); }}>{zh ? "关闭" : "Turn off"}</Btn>
-            : !setup ? <Btn kind="ink" onClick={() => setSetup(true)}>{zh ? "开启" : "Turn on"}</Btn> : undefined },
+            ? <Btn guard onClick={() => { if (window.confirm(zh ? "确定关闭两步登录？" : "Turn off two-step sign-in?")) void api.twoStepOff(factor!).then(() => { setFactor(null); say(zh ? "已关闭两步登录" : "Two-step sign-in is off"); cloud.reopen(); }).catch(e => say((e as api.ApiError).message)); }}>{zh ? "关闭" : "Turn off"}</Btn>
+            : !setup ? <Btn guard kind="ink" onClick={() => setSetup(true)}>{zh ? "开启" : "Turn on"}</Btn> : undefined },
+        { label: B("Password", "密码"), icon: <I.key />, sub: zh ? "用邮箱和密码登录，或改用邮箱验证码。" : "Sign in with your email and password, or with an email code.",
+          right: !pw.open ? <Btn guard onClick={() => setPw(x => ({ ...x, open: true }))}>{zh ? "修改密码" : "Change password"}</Btn> : undefined },
         { label: B("Sign out everywhere", "在所有设备上退出"), sub: zh ? "退出所有设备上的登录，包括这台。" : "Ends every session on every device, including this one.", icon: <I.logout />,
           right: <Btn onClick={() => { if (window.confirm(zh ? "在所有设备上退出？" : "Sign out on every device?")) cloud.signOut(true); }}>{zh ? "全部退出" : "Sign out all"}</Btn> },
       ]}>
+      {pw.open && (
+        <form className="sg-form pwform" onSubmit={e => { e.preventDefault(); void savePw(); }}>
+          <input id="pw-new" type={pw.show ? "text" : "password"} autoComplete="new-password" placeholder={zh ? "新密码（至少 8 个字符）" : "New password (8+ characters)"} value={pw.a} onChange={e => setPw(x => ({ ...x, a: e.target.value }))} aria-label={zh ? "新密码" : "New password"} autoFocus />
+          <input id="pw-again" type={pw.show ? "text" : "password"} autoComplete="new-password" placeholder={zh ? "再次输入新密码" : "Type it again"} value={pw.b} onChange={e => setPw(x => ({ ...x, b: e.target.value }))} aria-label={zh ? "确认新密码" : "Confirm new password"} />
+          <label className="check"><input type="checkbox" checked={pw.show} onChange={e => setPw(x => ({ ...x, show: e.target.checked }))} /><span>{zh ? "显示密码" : "Show passwords"}</span></label>
+          <div className="sg-form-act"><Btn onClick={() => setPw({ open: false, a: "", b: "", show: false, busy: false })}>{zh ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink" disabled={pw.busy || !pw.a || !pw.b}>{pw.busy ? "…" : zh ? "保存新密码" : "Save new password"}</button></div>
+        </form>
+      )}
       {setup && <TwoStepSetup lang={lang} onCancel={() => setSetup(false)} onDone={() => { setSetup(false); say(zh ? "两步登录已开启" : "Two-step sign-in is on"); cloud.reopen(); }} />}
+    </Group>
+  );
+}
+
+/* ------------------------------ settings PIN ------------------------------ */
+
+const digits = (v: string) => v.replace(/\D/g, "").slice(0, 6);
+function PinInput({ id, value, onChange, label, auto }: { id: string; value: string; onChange: (v: string) => void; label: string; auto?: boolean }) {
+  return <input id={id} className="pin-in" type="password" inputMode="numeric" autoComplete="off" maxLength={6} placeholder="••••••" value={value} onChange={e => onChange(digits(e.target.value))} aria-label={label} autoFocus={auto} />;
+}
+const pinError = (e: unknown, zh: boolean) => {
+  const x = e as api.ApiError;
+  if (x.code === "pin_wrong") return zh ? `PIN 不对。还可以再试 ${x.message} 次。` : `That PIN is wrong. ${x.message} tr${x.message === "1" ? "y" : "ies"} left.`;
+  if (x.code === "pin_locked") return zh ? "错误次数太多，PIN 已锁定 15 分钟。" : "Too many wrong tries. The PIN is locked for 15 minutes.";
+  if (x.code === "pin_format") return zh ? "PIN 必须是 6 位数字。" : "The PIN must be 6 digits.";
+  return x.message ?? String(e);
+};
+
+/** Asks for the PIN, then does what was asked. */
+function PinPrompt({ title, action, onDone, onClose }: { title: string; action: (pin: string) => Promise<api.PinStatus>; onDone: (s: api.PinStatus) => void; onClose: () => void }) {
+  const { lang } = useApp();
+  const zh = lang === "zh";
+  const [v, setV] = useState(""), [msg, setMsg] = useState(""), [busy, setBusy] = useState(false);
+  const go = async () => {
+    if (v.length !== 6) { setMsg(zh ? "请输入 6 位 PIN。" : "Enter your 6-digit PIN."); return; }
+    setBusy(true); setMsg("");
+    try { onDone(await action(v)); } catch (e) { setMsg(pinError(e, zh)); setV(""); }
+    setBusy(false);
+  };
+  return (
+    <Modal label={title} onClose={onClose}>
+      <header className="m-h"><span className="m-eyebrow"><I.lock />{zh ? "设置 PIN" : "Settings PIN"}</span><h2>{title}</h2>
+        <p>{zh ? "输入您的 6 位 PIN。解锁后 15 分钟内可修改受保护的设置。" : "Enter your 6-digit PIN. Protected settings stay unlocked for 15 minutes."}</p></header>
+      <form className="m-body pin-form" onSubmit={e => { e.preventDefault(); void go(); }}>
+        <PinInput id="pin-ask" value={v} onChange={setV} label="PIN" auto />
+        {msg && <p className="pin-msg" role="alert">{msg}</p>}
+        <div className="sg-form-act"><Btn onClick={onClose}>{zh ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink" disabled={busy || v.length !== 6}>{busy ? "…" : zh ? "确定" : "Continue"}</button></div>
+      </form>
+    </Modal>
+  );
+}
+
+function PinGroup({ st, setSt, ask }: { st: api.PinStatus | null; setSt: (s: api.PinStatus) => void; ask: (title: string, action: (pin: string) => Promise<api.PinStatus>, then?: () => void) => void }) {
+  const { lang, say } = useApp();
+  const zh = lang === "zh";
+  const [form, setForm] = useState<null | "new" | "change">(null);
+  const [a, setA] = useState(""), [b2, setB2] = useState(""), [cur, setCur] = useState("");
+  const [busy, setBusy] = useState(false);
+  if (!st) return null;
+  const unlocked = !!st.unlocked_until && st.unlocked_until > new Date().toISOString();
+  const until = st.unlocked_until ? new Date(st.unlocked_until).toLocaleTimeString(zh ? "zh-CN" : "en-US", { hour: "numeric", minute: "2-digit" }) : "";
+  const save = async () => {
+    if (a.length !== 6) { say(zh ? "PIN 必须是 6 位数字。" : "The PIN must be 6 digits."); return; }
+    if (a !== b2) { say(zh ? "两次输入的 PIN 不一致。" : "The PINs don't match."); return; }
+    if (/^(\d)\1{5}$/.test(a) || "0123456789".includes(a) || "9876543210".includes(a)) { say(zh ? "这个 PIN 太容易猜到，换一个。" : "That PIN is too easy to guess. Pick another."); return; }
+    setBusy(true);
+    try { setSt(await api.pinSet(a, form === "change" ? cur : undefined)); setForm(null); setA(""); setB2(""); setCur(""); say(form === "change" ? (zh ? "PIN 已更换。" : "PIN changed.") : (zh ? "设置 PIN 已开启。" : "Settings PIN is on.")); }
+    catch (e) { say(pinError(e, zh)); }
+    setBusy(false);
+  };
+  const sub = !st.on ? (zh ? "未开启。开启后，修改密码、两步登录、团队、机构登录、集成、账单和数据导出都需要先输入 6 位 PIN。" : "Off. Turn it on and changing your password, two-step sign-in, team, agency logins, integrations, billing and data exports first asks for a 6-digit PIN.")
+    : st.locked_until ? (zh ? "错误次数太多，已锁定 15 分钟。" : "Locked for 15 minutes after too many wrong tries.")
+      : unlocked ? (zh ? `已解锁，${until} 自动重新锁定。` : `Unlocked. Locks again at ${until}.`)
+        : (zh ? "已开启。受保护的设置已锁定。" : "On. Protected settings are locked.");
+  return (
+    <Group id="pin" title={B("Settings PIN", "设置 PIN")} note={B("Like an account PIN in a game: even someone signed in as you can't change protected settings without it. Placetta keeps only a scrambled copy, and 5 wrong tries lock it for 15 minutes.", "类似游戏里的账户 PIN：即使有人登录了您的账户，没有 PIN 也改不了受保护的设置。快哉只保存加密后的 PIN，连续输错 5 次会锁定 15 分钟。")}
+      rows={[{ label: B("Settings PIN", "设置 PIN"), icon: <I.lock />, sub,
+        right: !st.on ? (!form ? <Btn kind="ink" onClick={() => setForm("new")}>{zh ? "开启" : "Turn on"}</Btn> : undefined) : <>
+          {unlocked ? <Btn onClick={() => void api.pinLock().then(setSt)}>{zh ? "立即锁定" : "Lock now"}</Btn> : <Btn kind="ink" onClick={() => ask(zh ? "解锁设置" : "Unlock settings", api.pinUnlock)}>{zh ? "解锁" : "Unlock"}</Btn>}
+          {!form && <Btn onClick={() => setForm("change")}>{zh ? "更换 PIN" : "Change PIN"}</Btn>}
+          <Btn onClick={() => ask(zh ? "关闭设置 PIN" : "Turn off the settings PIN", api.pinClear, () => say(zh ? "设置 PIN 已关闭。" : "Settings PIN is off."))}>{zh ? "关闭" : "Turn off"}</Btn>
+        </> }]}>
+      {form && (
+        <form className="sg-form pinform" onSubmit={e => { e.preventDefault(); void save(); }}>
+          {form === "change" && <PinInput id="pin-cur" value={cur} onChange={setCur} label={zh ? "当前 PIN" : "Current PIN"} auto />}
+          <PinInput id="pin-new" value={a} onChange={setA} label={zh ? "新 PIN" : "New PIN"} auto={form === "new"} />
+          <PinInput id="pin-again" value={b2} onChange={setB2} label={zh ? "再次输入 PIN" : "Type it again"} />
+          <div className="sg-form-act"><Btn onClick={() => { setForm(null); setA(""); setB2(""); setCur(""); }}>{zh ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink" disabled={busy || a.length !== 6 || b2.length !== 6 || (form === "change" && cur.length !== 6)}>{busy ? "…" : zh ? "保存 PIN" : "Save PIN"}</button></div>
+        </form>
+      )}
     </Group>
   );
 }
@@ -228,15 +350,24 @@ export function Settings() {
   const [id, setId] = useState(API_MODELS[0].id);
   const [remember, setRemember] = useState(false);
   const [theme, setTheme] = useTheme();
+  const [pinSt, setPinSt] = useState<api.PinStatus | null>(null);
+  const [now, setNow] = useState(() => new Date().toISOString());
+  const [prompt, setPrompt] = useState<{ title: string; action: (pin: string) => Promise<api.PinStatus>; then?: () => void } | null>(null);
+  useEffect(() => { if (cloud) void api.pinStatus().then(setPinSt, () => setPinSt(null)); }, [cloud]);
+  useEffect(() => { const id = window.setInterval(() => setNow(new Date().toISOString()), 15000); return () => window.clearInterval(id); }, []);
+  const pinLocked = !!pinSt?.on && !(pinSt.unlocked_until && pinSt.unlocked_until > now);
+  const ask = (title: string, action: (pin: string) => Promise<api.PinStatus>, then?: () => void) => setPrompt({ title, action, then });
+  const pinCtx: PinCtx = { locked: pinLocked, guard: fn => (pinLocked ? ask(lang === "zh" ? "输入 PIN 以继续" : "Enter your PIN to continue", api.pinUnlock, fn) : fn()) };
   const bl = cloud?.billing;
   const planName = !cloud ? B("Growth plan (sample)", "成长版（示例）")
     : bl?.free && !bl.subscription_status ? B("Early access, everything included", "抢先体验，全部功能开放")
     : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
     : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
-  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
+  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
 
   return (
+    <PinLock.Provider value={pinCtx}>
     <div className="page settings">
       <header className="ph"><div className="ph-tx"><h1>{t("nav_settings")}</h1></div></header>
       <div className="set-grid">
@@ -254,11 +385,12 @@ export function Settings() {
 
           <Team />
           <Security />
+          {cloud && <PinGroup st={pinSt} setSt={st => { setPinSt(st); setNow(new Date().toISOString()); }} ask={ask} />}
 
           <Group id="billing" title={B("Plan and billing", "方案与账单")} note={B("Payment methods and invoices are handled by Stripe; Placetta never sees card numbers. Government fees are paid by you directly to each agency.", "付款方式和发票由 Stripe 处理，快哉看不到卡号。政府规费由您直接支付给各机构。")}
             rows={[
               { label: planName, sub: renew || (bl?.free && !bl.subscription_status ? b(B("Paid plans start later. Nothing is charged now.", "付费方案稍后推出，现在不收取任何费用。")) : cloud?.plan === "entry" ? b(B("Credited toward your first year on an annual plan", "可抵扣年度方案首年费用")) : undefined), icon: <I.card />,
-                right: cloud && !cloud.owner ? <em className="lock">{lang === "zh" ? "由所有者管理" : "Managed by owners"}</em> : cloud ? <>{cloud.plan !== "monthly" && <Btn kind="ink" onClick={() => cloud.openPlans(cloud.plan === "none" ? "start" : "file")}>{lang === "zh" ? "选择方案" : "Choose a plan"}</Btn>}{bl?.stripe_customer_id && <Btn onClick={() => void cloud.portal()}>{lang === "zh" ? "管理账单" : "Manage billing"}</Btn>}</> : undefined },
+                right: cloud && !cloud.owner ? <em className="lock">{lang === "zh" ? "由所有者管理" : "Managed by owners"}</em> : cloud ? <>{cloud.plan !== "monthly" && <Btn guard kind="ink" onClick={() => cloud.openPlans(cloud.plan === "none" ? "start" : "file")}>{lang === "zh" ? "选择方案" : "Choose a plan"}</Btn>}{bl?.stripe_customer_id && <Btn guard onClick={() => void cloud.portal()}>{lang === "zh" ? "管理账单" : "Manage billing"}</Btn>}</> : undefined },
             ]} />
 
           <Integrations />
@@ -295,9 +427,9 @@ export function Settings() {
           ]} />
 
           <Group id="data" title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
-            { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), icon: <I.download />, right: <Btn onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
-            { label: B("Export the audit trail", "导出审计记录"), sub: "CSV", icon: <I.audit />, right: <Btn onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> },
-            { label: B("Delete your data", "删除数据"), sub: b(B("Email us and we delete it, except records the law requires us to keep.", "发邮件给我们即可删除，法律要求保留的记录除外。")), icon: <I.x />, right: <a className="sbtn quiet" href="mailto:support@placetta.com?subject=Delete%20my%20data">{lang === "zh" ? "申请删除" : "Ask to delete"}</a> },
+            { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), icon: <I.download />, right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
+            { label: B("Export the audit trail", "导出审计记录"), sub: "CSV", icon: <I.audit />, right: <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> },
+            { label: B("Delete your data", "删除数据"), sub: b(B("Email us and we delete it, except records the law requires us to keep.", "发邮件给我们即可删除，法律要求保留的记录除外。")), icon: <I.x />, right: <Btn guard onClick={() => { window.location.href = "mailto:support@placetta.com?subject=Delete%20my%20data"; }}>{lang === "zh" ? "申请删除" : "Ask to delete"}</Btn> },
           ]} />
 
           <Group id="help" title={B("Help", "帮助")} rows={[
@@ -315,6 +447,8 @@ export function Settings() {
           <Footer full />
         </div>
       </div>
+      {prompt && <PinPrompt title={prompt.title} action={prompt.action} onClose={() => setPrompt(null)} onDone={st => { setPinSt(st); setNow(new Date().toISOString()); const then = prompt.then; setPrompt(null); if (then) setTimeout(then, 0); }} />}
     </div>
+    </PinLock.Provider>
   );
 }

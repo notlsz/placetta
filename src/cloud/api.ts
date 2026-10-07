@@ -83,6 +83,31 @@ export async function signInPassword(email: string, password: string) {
   if (error) throw err(error.code === "invalid_credentials" ? "bad_login" : error.status === 429 ? "rate_limited" : "auth", error.message);
 }
 /** Creates the account. `confirm` is true when Supabase still wants the email confirmed before the first sign-in. */
+/* ------------------------------ settings PIN ------------------------------ */
+/** A 6-digit PIN that locks sensitive settings. Kept hashed on the server; 5 wrong tries lock it for 15 minutes. */
+export type PinStatus = { on: boolean; unlocked_until: string | null; locked_until: string | null };
+async function pinRpc(fn: string, args: Record<string, unknown> = {}): Promise<PinStatus> {
+  const { data, error } = await supabase().rpc(fn, args);
+  if (error) {
+    const m = error.message ?? "", h = (error as { hint?: string }).hint ?? "";
+    if (/pin_wrong/.test(m)) throw err("pin_wrong", h);
+    if (/pin_locked/.test(m)) throw err("pin_locked", h);
+    if (/pin_format/.test(m)) throw err("pin_format", m);
+    throw fromPg(error);
+  }
+  return data as PinStatus;
+}
+export const pinStatus = () => pinRpc("pin_status");
+export const pinSet = (pin: string, current?: string) => pinRpc("pin_set", { p_pin: pin, p_current: current ?? null });
+export const pinUnlock = (pin: string) => pinRpc("pin_unlock", { p_pin: pin });
+export const pinClear = (pin: string) => pinRpc("pin_clear", { p_pin: pin });
+export const pinLock = () => pinRpc("pin_lock");
+
+/** Set a new password for the signed-in person. Works for accounts made with a code too (it adds a password). */
+export async function changePassword(password: string) {
+  const { error } = await supabase().auth.updateUser({ password });
+  if (error) throw err(error.code === "weak_password" ? "weak" : error.code === "same_password" ? "same" : error.code === "reauthentication_needed" ? "reauth" : error.status === 429 ? "rate_limited" : "auth", error.message);
+}
 export async function signUpPassword(email: string, password: string): Promise<{ confirm: boolean }> {
   const { data, error } = await supabase().auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
   if (error) throw err(error.code === "user_already_exists" ? "exists" : error.code === "weak_password" ? "weak" : error.status === 429 ? "rate_limited" : "auth", error.message);
