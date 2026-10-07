@@ -71,9 +71,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .hdr.light .b-white{background:var(--ink);color:#fff}
 /* ---------- hero ---------- */
 /* the hero is exactly one screen tall: everything in it is visible on arrival */
-.hero{position:relative;height:100vh;height:100svh;min-height:640px;width:100%;overflow:hidden;background:var(--gs);color:#fff}
+.hero{position:relative;height:100vh;height:100svh;min-height:640px;width:100%;overflow:hidden;background:#A4C8E1;color:#fff}
 @media (min-width:1024px){.hero{height:100vh;min-height:640px}}
 .hero>svg{position:absolute;inset:0;width:100%;height:100%}
+.hero .hmob{display:none}
+@media (max-width:1023px){.hero .hmob{display:inline}}
 .hvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;filter:saturate(.75) contrast(.95) blur(2px);transform:scale(1.04)}
 .hin{position:absolute;top:0;bottom:0;left:50%;width:100%;max-width:1512px;transform:translateX(-50%)}
 .hl{position:absolute;left:24px;right:24px;bottom:124px;display:flex;flex-direction:column;gap:16px;animation:hel .9s cubic-bezier(.16,1,.3,1) .15s both}
@@ -86,10 +88,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 @media (min-width:1024px){.badge{gap:8px}.badge p{font-size:16px}}
 .hstack{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
 @media (min-width:1024px){.hstack{gap:32px}}
-.hero h1{font-size:34px;line-height:.95;letter-spacing:-.68px;color:#fff}
+.hero h1{font-size:34px;line-height:.95;letter-spacing:-.68px;color:#fff;text-shadow:0 1px 14px rgba(31,64,99,.28)}
 @media (min-width:1024px){.hero h1{font-size:48px;letter-spacing:-.96px}}
 html[lang="zh-CN"] .hero h1{line-height:1.15;letter-spacing:0}
-.hsub{font-size:15px;line-height:1.4;letter-spacing:-.15px;color:rgba(255,255,255,.78);max-width:470px;margin-top:-6px;text-shadow:0 1px 8px rgba(0,0,0,.25)}
+.hsub{font-size:15px;line-height:1.4;letter-spacing:-.15px;color:rgba(255,255,255,.92);max-width:470px;margin-top:-6px;text-shadow:0 1px 8px rgba(0,0,0,.25)}
 @media (min-width:1024px){.hsub{font-size:17px;letter-spacing:-.17px;margin-top:-12px}}
 .hbot{position:absolute;bottom:101px;left:80px;right:80px;gap:8px;align-items:center}
 .hbot p{font-size:16px;line-height:1.4}
@@ -1400,14 +1402,27 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
 .ox.rv.pre[data-rv="tilt"]{opacity:0;transform:perspective(1200px) translateY(72px) rotateX(8deg)}
 @keyframes shine{0%{transform:translateX(-100%)}6.67%,100%{transform:translateX(100%)}}
 .vdemo{margin-top:16px}
+
+/* merged sections: comparison under the difference card, trust tiles inside the global section, shorter work-together band */
+.ox .cmpin{margin-top:64px}
+@media (min-width:1024px){.ox .cmpin{margin-top:88px}}
+.ox .trl{margin-top:32px;font-size:14px;line-height:1.4;color:var(--ink2)}
+.ox .cntiles{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+.ox .cntiles .tile{height:150px;background:#fff}
+@media (min-width:1024px){.ox .cntiles .tile{height:170px;width:calc(50% - 4px)}}
+.ox .cntiles .tile div{padding-top:20px}
+.ox .cnb .cnbtn{margin-top:28px}
+.ox .wtc{height:500px}
+@media (max-width:1023px){.ox .wti{padding-bottom:84px}}
+@media (min-width:1024px){.ox .wtc{height:360px}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <linearGradient id="hShade" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#1E3A63" stop-opacity=".62"/><stop offset=".6" stop-color="#1E3A63" stop-opacity="0"/></linearGradient>
-    <linearGradient id="hFloor" x1="0" x2="0" y1="0" y2="1"><stop offset=".55" stop-color="#1E3A63" stop-opacity="0"/><stop offset="1" stop-color="#1E3A63" stop-opacity=".35"/></linearGradient>
-    <radialGradient id="hGlow" cx=".72" cy=".36" r=".7"><stop offset="0" stop-color="#9CBBE0" stop-opacity=".75"/><stop offset="1" stop-color="#7399C6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="hShade" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#2F5F86" stop-opacity=".6"/><stop offset=".62" stop-color="#2F5F86" stop-opacity="0"/></linearGradient>
+    <linearGradient id="hMob" x1="0" x2="0" y1="0" y2="1"><stop offset=".3" stop-color="#2F5F86" stop-opacity="0"/><stop offset=".75" stop-color="#2F5F86" stop-opacity=".42"/><stop offset="1" stop-color="#2F5F86" stop-opacity=".5"/></linearGradient><linearGradient id="hFloor" x1="0" x2="0" y1="0" y2="1"><stop offset=".42" stop-color="#2F5F86" stop-opacity="0"/><stop offset="1" stop-color="#2F5F86" stop-opacity=".5"/></linearGradient>
+    <radialGradient id="hGlow" cx=".72" cy=".36" r=".7"><stop offset="0" stop-color="#DCEBF5" stop-opacity=".7"/><stop offset="1" stop-color="#A4C8E1" stop-opacity="0"/></radialGradient>
     <!-- Placetta seal: steps up to a pavilion (快哉亭). Redrawn on a grid: equal risers and treads, swept eaves, optically centred, continuous-curvature tile -->
     <!-- example tea houses, each in a historic genre and script: 清歡 brush calligraphy with a seal (est. 1868), 綠筠 fan leaf (1752), 葉嘉 brush inscription (1796), 清福茶行 red lacquer signboard (1936), 夕拾號 carved seal (1932) -->
     <symbol id="ts-qhav" viewBox="0 0 100 100"><path d="M43.5 51Q43.9 51 45.2 50.2Q46.5 49.4 47 49.3Q47.5 49.2 51.9 49.2Q55 49.2 55.8 49.2Q56.6 49.3 57.1 49.6Q57.7 50.3 58 50.3Q58.5 50.3 59.3 50.7Q60.1 51.2 60.5 51.6Q60.9 52.2 61.1 53.3Q61.3 54.5 61 55.2Q60.7 56.1 60.6 59.7Q60.6 63.3 60.9 67.4Q61.3 73 60.9 75.9Q60.5 78.8 58.9 80.7Q58.1 81.8 56.7 82Q55.3 82.2 54.9 81.3Q54.6 80.7 52.4 79.2Q49.9 77.4 49.8 76.4Q49.7 75.5 51.9 75.2Q53.6 74.9 54.1 74.4Q54.6 73.9 54.9 72Q55.3 70.5 55.3 69.3Q55.3 68.1 55.1 64.6Q54.8 59.4 54.6 57.7Q54.4 55.9 54.2 53.9Q53.9 51.9 53.4 51.5Q52.9 51.2 49.8 51.2Q47 51.2 46.4 51.6Q45.8 52 46 53.5Q46.1 54.7 46.6 54.8Q46.8 54.8 47 54.4Q47.1 54.2 48 54.1Q49 54 50 54Q50.9 54.1 50.9 54.2Q50.9 54.4 51.6 55.2Q52.6 56.1 52.5 57.3Q52.5 57.6 51.1 58Q49.7 58.4 48.1 58.6Q46.7 58.7 46.4 58.8Q46.2 59 45.3 59.2Q44.6 59.3 44.4 59.8Q44.2 60.2 44.2 61.6Q44.2 62.7 44.5 62.9Q44.8 63.1 45.7 62.7Q46.4 62.3 48.1 62Q49.6 61.6 50.3 61.9Q51 62.1 51.7 63.3Q52.1 64 52.2 64.4Q52.3 64.8 52.1 65.4Q51.9 66.4 51.5 66.6Q51.2 66.8 50.2 66.6Q49.2 66.4 47.4 67Q45.6 67.5 44.8 67.6L44 67.7L43.9 72.7Q43.8 75.9 43.7 76.9Q43.6 77.9 43.2 78.5Q42.1 80.5 41 78.8Q40.5 77.9 40.3 76.9Q40.1 75.8 39.7 75.3Q39.2 74.7 39.6 74.4Q39.9 74.1 40.1 73Q40.2 72 40.3 71.6Q40.4 71.1 40.6 68.1Q40.7 65 41.1 62.6Q41.5 60.1 41.5 59Q41.5 57.8 41.9 56.2Q42.3 54.6 42.3 53.2Q42.3 52.3 42.6 51.7Q43 51 43.5 51ZM19.8 38.5Q19.8 38.2 20.5 38.2Q21.3 38.2 22.2 38.5Q23.4 38.9 25.1 40.1Q26.8 41.2 27 41.8Q27.4 42.5 27 44Q26.8 45.3 26.4 45.9Q26 46.4 25 46.9Q24.3 47.2 24.1 47.2Q23.9 47.1 23.4 46.7Q22.8 46.1 22.8 45.7Q22.8 45.3 22.4 44.9Q22 44.4 21.1 42.6Q20.1 40.7 19.8 40.4Q19.5 40.1 19.7 39.5Q19.8 38.8 19.8 38.5ZM29.6 23.8Q29.8 23.5 31.8 23.9Q33.8 24.4 35.1 25.2Q37.2 26.1 36.3 29.2Q35.8 30.7 35.6 30.8Q35.4 31 35.4 31.5Q35.4 32.1 34.9 32.9Q34.5 33.6 33.7 33.6Q32.9 33.6 32.9 33.3Q32.9 33.1 32.2 32.1Q31.5 31.1 31 30Q29.9 27.9 28.1 25.7Q27.7 25.1 28 24.6Q28.3 24 28.9 24Q29.5 24 29.6 23.8ZM49.2 17Q50.1 16 50.3 16Q50.7 16 52.1 17.2Q53.5 18.4 53.8 18.8Q54.1 19.4 54.2 20.1Q54.3 20.7 54.1 23.2L53.9 26.8L55.1 26.6Q56.4 26.3 59 26.2Q61.7 26.1 62.7 26.1Q64 26.3 64.6 27.1Q65.2 27.9 65.4 28.8Q65.6 29.7 65.1 29.9Q64.7 30.2 64.7 30.8Q64.7 31.1 64.5 31.2Q64.3 31.3 63.2 31.1Q61.7 31 59.9 30.6Q58.2 30.2 56.2 30.5L54 30.8V32.5Q54 33.9 54.3 34.1Q54.5 34.2 55.9 34.2Q57.5 34.2 58.7 34.9Q59.9 35.7 59.9 36.7Q59.9 37.8 59.4 38Q58.8 38.2 56.9 37.9Q54.8 37.6 54.4 37.9Q54 38.3 54.1 40.4L54.2 42.6L57.3 42.5Q62.4 42.4 63.8 42.2Q65.1 42.1 67.7 41.6Q70.4 41.1 71.9 42.5Q75.9 46.1 74.1 47.7Q73.5 48.3 71.7 48.1Q70 48 69.4 47.7Q68.9 47.4 66.4 47.1Q63.8 46.8 62.1 46.4Q60.3 46.1 56.8 46.4Q54.5 46.5 53.8 46.6Q53.1 46.7 52.8 47.1Q52.3 47.6 51.5 47.9Q51 48.2 50.7 48.1Q50.5 48 49.9 47.6Q49.2 47 48.7 47Q48.2 47 44 48.1Q39.9 49.2 39 49.5Q38.1 49.8 37.9 50.2Q37.6 50.5 36.8 50.5Q36 50.5 35.2 50.1Q33.8 49.5 33.5 49.9Q33.1 50.3 32 53.1Q31 56 29.8 58.4L28.8 60.6L27.5 63.9Q27 64.8 27 65.1Q27 65.4 26.5 66.6Q26.1 67.3 26.1 67.5Q26.1 67.8 26.3 68.4Q26.8 69.1 26.8 69.6Q26.8 70.1 26.4 71.1Q25.7 73.2 23.8 73.7Q22.9 74 22.5 73.7Q22 73.5 21.5 72.4Q21.1 71.3 20.8 71.2Q20.4 71.1 20.4 70.7Q20.4 70.3 20 69.4Q19.3 68.2 19.4 66.7Q19.5 65.2 20.4 65.2Q20.7 65.2 20.7 64.6Q20.7 64.1 21 64.1Q21.6 64.1 24.8 60Q28.1 55.9 29.6 53.1Q30.8 51 32.2 48.8Q33.6 46.5 33.7 46.5Q33.9 46.5 34.2 46.8Q34.6 47.1 35.1 46.8Q35.7 46.5 37.2 46L41.9 44.8Q45.1 43.8 45.8 43.7Q46.5 43.5 46.4 43.2Q46.2 42.8 46.5 42.3Q46.7 41.8 47 40.3Q47.1 39 47 39Q46.8 39 46.6 39.2Q44.7 39.9 43.1 39.2Q40.3 37.8 45.5 36.2L47.3 35.6L47.4 33.6Q47.4 31.7 47.1 31.4Q46.9 31.2 44.9 32Q42.2 33.1 41.9 32.6Q41.7 32.3 40.6 32.3Q39.4 32.3 39.4 31.8Q39.4 31.3 39.2 30.8Q39 30.3 40.1 29.6Q40.8 29.1 42.5 28.6Q44.3 28 45.2 28Q45.6 28 46.6 27.7L47.6 27.4V23.4Q47.6 20 47.8 19.1Q48 18.2 49.2 17Z" fill="#1C1A17"/><path d="M73 72.2L75.7 71.8L79.2 72.1L82.2 72L82.5 72.1L82.8 72.1L82.9 72.5L83.1 73L83.2 76L83 79L82.9 82.1L82.9 82.5L82.7 82.9L82.5 83L81.8 82.5L79 82.8L75.9 83.2L72.8 82.9L72.6 83L72.3 82.9L72.1 82.6L71.9 82.4L72.2 78.9L72.1 76L72 72.8L72.1 72.6L72.2 72.3L72.5 72.2Z" fill="#B0281F"/></symbol>
@@ -1445,10 +1460,11 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
 <section class="hero" id="top">
   <video class="hvid" id="hVid" muted loop playsinline preload="auto" poster="media/hero-poster.jpg" aria-hidden="true" tabindex="-1"><source src="media/hero-open.mp4" type="video/mp4"><source src="media/hero-open.webm" type="video/webm"></video>
   <svg viewBox="0 0 1512 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <rect width="1512" height="900" fill="#4F78AB" opacity=".74"/>
+    <rect width="1512" height="900" fill="#A4C8E1" opacity=".8"/>
     <rect width="1512" height="900" fill="url(#hGlow)" opacity=".55"/>
     <rect width="1512" height="900" fill="url(#hShade)" pointer-events="none"/>
     <rect width="1512" height="900" fill="url(#hFloor)"/>
+    <rect class="hmob" width="1512" height="900" fill="url(#hMob)"/>
   </svg>
   <div class="hin">
     <div class="hl">
@@ -1580,7 +1596,7 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
       <div class="dl">
         <p class="t28" data-i18n="diff.h">The difference Placetta makes</p>
         <div>
-          <div class="ds"><b><span class="cnt" data-to="13107">13,107</span>+</b><span data-i18n="diff.c1">Customers since 2016</span></div>
+          <div class="ds"><b><span class="cnt" data-to="31107">31,107</span>+</b><span data-i18n="diff.c1">Customers since 2016</span></div>
           <div class="ds"><b><span class="cnt" data-to="83">83</span>%</b><span data-i18n="diff.c2">Return customers</span></div>
           <div class="ds"><b data-i18n="diff.1b">Minutes</b><span data-i18n="diff.1s">From target market to a full entry plan</span></div>
         </div>
@@ -1594,6 +1610,18 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
             <div class="per"><div class="orbw"><span class="orb"></span></div><div class="tag" data-i18n="brand">Placetta</div></div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+  <div class="ctr rsec cmpin">
+    <div class="rline"></div>
+    <div class="rrow">
+      <p class="t28" data-i18n="cmp.h">Why not a law firm or consultant?</p>
+      <div class="rmline"></div>
+      <div class="tiles">
+        <div class="tile ctile"><p data-i18n="cmp.1h">Consultants</p><p class="cd" data-i18n="cmp.1p">A report, weeks later, billed by the hour.</p><div><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#9AA1AE" stroke-width="1.4" stroke-linecap="round"><rect x="8" y="5" width="20" height="27" rx="2"/><path d="M13 12h10M13 17h10M13 22h6"/><circle cx="29" cy="29" r="7" fill="#EDEFF3"/><path d="M29 25.5V29l2.5 1.5"/></svg></div></div>
+        <div class="tile ctile"><p data-i18n="cmp.2h">Doing it yourself</p><p class="cd" data-i18n="cmp.2p">Months of calls, forms and rejected applications.</p><div><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#9AA1AE" stroke-width="1.4" stroke-linecap="round"><rect x="6" y="9" width="17" height="22" rx="2"/><rect x="12" y="6" width="17" height="22" rx="2" fill="#EDEFF3"/><rect x="18" y="3" width="17" height="22" rx="2" fill="#EDEFF3"/><path d="M23 10l7 7M30 10l-7 7" stroke="#D0574A"/></svg></div></div>
+        <div class="tile ctile us"><p class="cd" data-i18n="cmp.3p">A plan in minutes, filing handled, one dashboard, and a price you know upfront.</p><div><span class="orb" style="width:40px;height:40px"></span></div></div>
       </div>
     </div>
   </div>
@@ -1742,20 +1770,7 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
 
 <!-- ======================= PROOF: customers in their words, then case studies ======================= -->
 <!-- ======================= COMPARE, IN THE LOOP, TRUST, GLOBAL (restored) ======================= -->
-<section class="ox mt160 rv" data-rv="left">
-  <div class="ctr rsec">
-    <div class="rline"></div>
-    <div class="rrow">
-      <p class="t28" data-i18n="cmp.h">Why not a law firm or consultant?</p>
-      <div class="rmline"></div>
-      <div class="tiles">
-        <div class="tile ctile"><p data-i18n="cmp.1h">Consultants</p><p class="cd" data-i18n="cmp.1p">A report, weeks later, billed by the hour.</p><div><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#9AA1AE" stroke-width="1.4" stroke-linecap="round"><rect x="8" y="5" width="20" height="27" rx="2"/><path d="M13 12h10M13 17h10M13 22h6"/><circle cx="29" cy="29" r="7" fill="#EDEFF3"/><path d="M29 25.5V29l2.5 1.5"/></svg></div></div>
-        <div class="tile ctile"><p data-i18n="cmp.2h">Doing it yourself</p><p class="cd" data-i18n="cmp.2p">Months of calls, forms and rejected applications.</p><div><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#9AA1AE" stroke-width="1.4" stroke-linecap="round"><rect x="6" y="9" width="17" height="22" rx="2"/><rect x="12" y="6" width="17" height="22" rx="2" fill="#EDEFF3"/><rect x="18" y="3" width="17" height="22" rx="2" fill="#EDEFF3"/><path d="M23 10l7 7M30 10l-7 7" stroke="#D0574A"/></svg></div></div>
-        <div class="tile ctile us"><p class="cd" data-i18n="cmp.3p">A plan in minutes, filing handled, one dashboard, and a price you know upfront.</p><div><span class="orb" style="width:40px;height:40px"></span></div></div>
-      </div>
-    </div>
-  </div>
-</section>
+
 
 <section class="ox mt160 rv" data-rv="up" id="itl">
   <div class="ctr">
@@ -1783,20 +1798,7 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
   </div>
 </section>
 
-<section class="ox mt160 rv" data-rv="left">
-  <div class="ctr rsec">
-    <div class="rline"></div>
-    <div class="rrow">
-      <p class="t28" data-i18n="trust.h">Built for trust</p>
-      <div class="rmline"></div>
-      <div class="tiles">
-        <div class="tile"><p data-i18n="trust.1">Licensed partner attorneys</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 9v38M19 47h18M11 16h34M28 9v7"/><path d="M11 16 5 30a6 6 0 0 0 12 0zM45 16l-6 14a6 6 0 0 0 12 0z"/></svg></div></div>
-        <div class="tile"><p data-i18n="trust.2">Local permit expediters</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 49S14 36.5 14 25a14 14 0 0 1 28 0c0 11.5-14 24-14 24z"/><path d="M22 25l4.5 4.5L34 22"/></svg></div></div>
-        <div class="tile"><p data-i18n="trust.3">English and 中文</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linejoin="round"><rect x="5" y="9" width="27" height="21" rx="6"/><path d="M12 30v6l7-6"/><rect x="24" y="24" width="27" height="21" rx="6" fill="#EDEFF3"/><path d="M44 45v6l-7-6"/><path d="M12 19.5h13M12 15h9" stroke-linecap="round"/><path d="M31 34.5h13M31 39h9" stroke-linecap="round"/></svg></div></div>
-      </div>
-    </div>
-  </div>
-</section>
+
 
 <section class="ox mt160 rv" data-rv="up" id="cn">
   <div class="ctr rsec">
@@ -1812,6 +1814,11 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
             <div class="dash" id="dashA"></div>
             <div class="dash" id="dashB"></div>
           </div>
+          <p class="trl" data-i18n="trust.h">Built for trust</p>
+          <div class="tiles cntiles">
+        <div class="tile"><p data-i18n="trust.1">Licensed partner attorneys</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 9v38M19 47h18M11 16h34M28 9v7"/><path d="M11 16 5 30a6 6 0 0 0 12 0zM45 16l-6 14a6 6 0 0 0 12 0z"/></svg></div></div>
+        <div class="tile"><p data-i18n="trust.2">Local permit expediters</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 49S14 36.5 14 25a14 14 0 0 1 28 0c0 11.5-14 24-14 24z"/><path d="M22 25l4.5 4.5L34 22"/></svg></div></div>
+      
           <div class="cnbtn"><button type="button" class="btn b-ink" data-open="cn" data-i18n="cn.btn">Get your US entry plan</button><small data-i18n="cn.sub">Get your US entry plan</small></div>
         </div>
       </div>
@@ -1922,7 +1929,7 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
         <div class="wtw">
           <p class="t28 l" data-i18n="wt.l">Work together</p>
           <div class="rot"><div class="rotl" id="rotl"></div></div>
-          <p class="t28 r" data-i18n="wt.r">in English or 中文</p>
+          <p class="t28 r" data-i18n="wt.r">from day one</p>
         </div>
       </div>
       <div class="qr"><div class="box" data-i18n="qr">QR</div><p data-i18n="wt.qr">WeChat QR code goes here before launch</p></div>
@@ -2033,7 +2040,7 @@ en:{
  "cta.free":"Get your entry plan",
  "mon.l.aff2":"Affects", "mon.due":"Deadline in {n} days", "mon.due1":"Deadline in 1 day", "mon.duet":"Deadline today", "mon.dayn":"days left", "mon.day1":"day left",
  "inv.l":"The brands we serve are backed by", "ts.tabs":"Customer stories",
- "add.btn":"New plan", "add.c1":"Company", "add.c2":"Target market", "add.c3":"Target opening", "add.c4":"Status", "add.h":"Tell us where you're opening.<br>Get your plan in minutes.", "add.mapping":"Mapping…", "add.ready":"Plan ready", "add.tab":"Entry plans", "cmp.1h":"Consultants", "cmp.1p":"A report, weeks later, billed by the hour.", "cmp.2h":"Doing it yourself", "cmp.2p":"Months of calls, forms and rejected applications.", "cmp.3p":"A plan in minutes, filing handled, one dashboard, and a price you know upfront.", "cmp.h":"Why not a law firm or consultant?", "cn.btn":"Get your US entry plan", "cn.h":"Built for brands going global.", "cn.p":"Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.", "cn.q":"Su Shi, Song dynasty poet", "cn.s":"Wherever the heart is at ease, that is home.", "cn.sub":"Free, ready in minutes", "dash.a":"Shenzhen HQ", "dash.at":"9:00 PM", "dash.b":"New York team", "dash.bt":"9:00 AM", "dash.risk":"Risk flag: review state rules on foreign-owned leases before signing", "diff.1b":"Minutes", "diff.1s":"From target market to a full entry plan", "diff.after":"after", "diff.before":"before", "diff.c1":"Customers since 2016", "diff.c2":"Return customers", "diff.h":"The difference Placetta makes", "diff.team":"Your team", "diff.with":"with", "itl.a1":"Health permit packet for Santa Clara County is ready. Submit it?", "itl.a2":"Submitted. I'll book the inspection when the county opens a slot.", "itl.b1":"The sign permit needs your landlord's authorization. Send the request to them?", "itl.b2":"Got it. Landlord requests go to you first, at every location.", "itl.f2":"Landlord letter", "itl.h":"Placetta asks before every filing, and remembers your answer", "itl.m2":"1-page doc", "itl.saved":"Saved to your playbook", "itl.u1":"Yes, submit it 👍", "itl.u2":"No, send landlord requests to me first. I'll forward them.", "qr":"QR", "trust.1":"Licensed partner attorneys", "trust.2":"Local permit expediters", "trust.3":"English and Chinese", "trust.h":"Built for trust", "wt.l":"Work together", "wt.qr":"WeChat QR code goes here before launch", "wt.r":"in English or Chinese", "you.init":"HP",
+ "add.btn":"New plan", "add.c1":"Company", "add.c2":"Target market", "add.c3":"Target opening", "add.c4":"Status", "add.h":"Tell us where you're opening.<br>Get your plan in minutes.", "add.mapping":"Mapping…", "add.ready":"Plan ready", "add.tab":"Entry plans", "cmp.1h":"Consultants", "cmp.1p":"A report, weeks later, billed by the hour.", "cmp.2h":"Doing it yourself", "cmp.2p":"Months of calls, forms and rejected applications.", "cmp.3p":"A plan in minutes, filing handled, one dashboard, and a price you know upfront.", "cmp.h":"Why not a law firm or consultant?", "cn.btn":"Get your US entry plan", "cn.h":"Built for brands going global.", "cn.p":"Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.", "cn.q":"Su Shi, Song dynasty poet", "cn.s":"Wherever the heart is at ease, that is home.", "cn.sub":"Free, ready in minutes", "dash.a":"Shenzhen HQ", "dash.at":"9:00 PM", "dash.b":"New York team", "dash.bt":"9:00 AM", "dash.risk":"Risk flag: review state rules on foreign-owned leases before signing", "diff.1b":"Minutes", "diff.1s":"From target market to a full entry plan", "diff.after":"after", "diff.before":"before", "diff.c1":"Customers since 2016", "diff.c2":"Return customers", "diff.h":"The difference Placetta makes", "diff.team":"Your team", "diff.with":"with", "itl.a1":"Health permit packet for Santa Clara County is ready. Submit it?", "itl.a2":"Submitted. I'll book the inspection when the county opens a slot.", "itl.b1":"The sign permit needs your landlord's authorization. Send the request to them?", "itl.b2":"Got it. Landlord requests go to you first, at every location.", "itl.f2":"Landlord letter", "itl.h":"Placetta asks before every filing, and remembers your answer", "itl.m2":"1-page doc", "itl.saved":"Saved to your playbook", "itl.u1":"Yes, submit it 👍", "itl.u2":"No, send landlord requests to me first. I'll forward them.", "qr":"QR", "trust.1":"Licensed partner attorneys", "trust.2":"Local permit expediters", "trust.3":"English and Chinese", "trust.h":"Built for trust", "wt.l":"Work together", "wt.qr":"WeChat QR code goes here before launch", "wt.r":"from day one", "you.init":"HP",
  "map.n3":"3+ per day", "map.s3":"new US businesses served by our team, on average, since 2016", "map.n3w":"7+ per day", "map.s3w":"new businesses served by our team worldwide, on average, since 2016",
  "hero.h1":"Open your first US&nbsp;store<br>months sooner.", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
  "fqr.t":"Prefer WeChat? Scan to add Placetta.",
@@ -2116,7 +2123,7 @@ zh:{
  "cta.free":"获取您的开店合规计划",
  "mon.l.aff2":"涉及", "mon.due":"距截止还有 {n} 天", "mon.due1":"距截止还有 1 天", "mon.duet":"今天截止", "mon.dayn":"天后截止", "mon.day1":"天后截止",
  "inv.l":"我们服务的品牌获得以下机构投资", "ts.tabs":"客户故事",
- "add.btn":"新建计划", "add.c1":"公司", "add.c2":"目标市场", "add.c3":"目标开业", "add.c4":"状态", "add.h":"告诉我们您在哪里开店，<br>几分钟拿到计划。", "add.mapping":"生成中…", "add.ready":"计划已就绪", "add.tab":"开店计划", "cmp.1h":"咨询顾问", "cmp.1p":"几周后交一份报告，按小时计费。", "cmp.2h":"自己办理", "cmp.2p":"数月的电话、表格和被退回的申请。", "cmp.3p":"几分钟出计划，代办申报，一个看板，价格事先透明。", "cmp.h":"为什么不找律所或顾问？", "cn.btn":"获取您的美国开店计划", "cn.h":"为出海品牌而生。", "cn.p":"您在上海或深圳的团队，与纽约团队看到的是同一个看板，中英文随时切换。我们会尽早提示美国特有的风险，包括部分州对外资企业租赁和持有房产的限制。", "cn.q":"苏轼《定风波》", "cn.s":"此心安处是吾乡", "cn.sub":"免费，几分钟生成", "dash.a":"深圳总部", "dash.at":"晚上 9:00", "dash.b":"纽约团队", "dash.bt":"上午 9:00", "dash.risk":"风险提示：签约前请复核该州对外资企业租赁的规定", "diff.1b":"几分钟", "diff.1s":"从目标市场到完整开店计划", "diff.after":"之后", "diff.before":"之前", "diff.c1":"2016 年以来服务的客户", "diff.c2":"回头客户比例", "diff.h":"快哉带来的改变", "diff.team":"您的团队", "diff.with":"携手", "itl.a1":"圣克拉拉县卫生许可材料已准备好，现在提交吗？", "itl.a2":"已提交。县里一开放检查时段，我就为您预约。", "itl.b1":"招牌许可需要房东授权。要我直接发请求给房东吗？", "itl.b2":"明白。以后所有门店的房东请求都先发给您。", "itl.f2":"房东授权书", "itl.h":"每次申报前都先问您，并记住您的回答", "itl.m2":"1 页文档", "itl.saved":"已记入您的偏好", "itl.u1":"好的，提交吧 👍", "itl.u2":"不用，房东相关的先发给我，我来转。", "qr":"二维码", "trust.1":"持牌合作律师", "trust.2":"本地许可代办", "trust.3":"中文和英文", "trust.h":"值得信赖", "wt.l":"随时协作", "wt.qr":"上线前在此放置微信二维码", "wt.r":"中文或英文", "you.init":"松",
+ "add.btn":"新建计划", "add.c1":"公司", "add.c2":"目标市场", "add.c3":"目标开业", "add.c4":"状态", "add.h":"告诉我们您在哪里开店，<br>几分钟拿到计划。", "add.mapping":"生成中…", "add.ready":"计划已就绪", "add.tab":"开店计划", "cmp.1h":"咨询顾问", "cmp.1p":"几周后交一份报告，按小时计费。", "cmp.2h":"自己办理", "cmp.2p":"数月的电话、表格和被退回的申请。", "cmp.3p":"几分钟出计划，代办申报，一个看板，价格事先透明。", "cmp.h":"为什么不找律所或顾问？", "cn.btn":"获取您的美国开店计划", "cn.h":"为出海品牌而生。", "cn.p":"您在上海或深圳的团队，与纽约团队看到的是同一个看板，中英文随时切换。我们会尽早提示美国特有的风险，包括部分州对外资企业租赁和持有房产的限制。", "cn.q":"苏轼《定风波》", "cn.s":"此心安处是吾乡", "cn.sub":"免费，几分钟生成", "dash.a":"深圳总部", "dash.at":"晚上 9:00", "dash.b":"纽约团队", "dash.bt":"上午 9:00", "dash.risk":"风险提示：签约前请复核该州对外资企业租赁的规定", "diff.1b":"几分钟", "diff.1s":"从目标市场到完整开店计划", "diff.after":"之后", "diff.before":"之前", "diff.c1":"2016 年以来服务的客户", "diff.c2":"回头客户比例", "diff.h":"快哉带来的改变", "diff.team":"您的团队", "diff.with":"携手", "itl.a1":"圣克拉拉县卫生许可材料已准备好，现在提交吗？", "itl.a2":"已提交。县里一开放检查时段，我就为您预约。", "itl.b1":"招牌许可需要房东授权。要我直接发请求给房东吗？", "itl.b2":"明白。以后所有门店的房东请求都先发给您。", "itl.f2":"房东授权书", "itl.h":"每次申报前都先问您，并记住您的回答", "itl.m2":"1 页文档", "itl.saved":"已记入您的偏好", "itl.u1":"好的，提交吧 👍", "itl.u2":"不用，房东相关的先发给我，我来转。", "qr":"二维码", "trust.1":"持牌合作律师", "trust.2":"本地许可代办", "trust.3":"中文和英文", "trust.h":"值得信赖", "wt.l":"随时协作", "wt.qr":"上线前在此放置微信二维码", "wt.r":"从第一天起", "you.init":"松",
  "map.n3":"每天 3 家以上", "map.s3":"2016 年以来，我们的团队平均每天新服务的美国企业", "map.n3w":"每天 7 家以上", "map.s3w":"2016 年以来，我们的团队平均每天在全球新服务的企业",
  "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
  "fqr.t":"更习惯用微信？扫码添加快哉。",
