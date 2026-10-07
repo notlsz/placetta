@@ -103,20 +103,6 @@ html[lang="zh-CN"] .hero h1{line-height:1.15;letter-spacing:0}
 .invr img{display:block;width:auto;height:calc(var(--h) * .8);opacity:.6;transition:opacity .2s}
 @media (min-width:1024px){.invr img{height:var(--h)}}
 .invr img:hover{opacity:.95}
-/* student founders: school names set as quiet serif wordmarks */
-.uni{margin-top:88px}
-@media (min-width:1024px){.uni{margin-top:112px}}
-.unir{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:20px 32px;margin:22px auto 0;max-width:1240px}
-@media (min-width:1024px){.unir{gap:28px 28px;margin-top:28px;max-width:1190px}html[lang="zh-CN"] .unir{max-width:1100px}}
-.unir .u{display:inline-flex;align-items:center;gap:8px;opacity:.62;transition:opacity .2s}
-.unir .u:hover{opacity:1}
-.unir .u img{display:block;width:auto;height:28px;filter:grayscale(1) contrast(1.15);transition:filter .2s}
-.unir .u:hover img{filter:none}
-.unir .u span{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Noto Serif SC","Songti SC",serif;font-size:19px;line-height:1.2;letter-spacing:.2px;color:var(--ink);white-space:nowrap}
-@media (max-width:1023px){.unir{gap:16px 22px}.unir .u span{font-size:16px}html[lang="zh-CN"] .unir .u span{font-size:15px}}
-@media (min-width:1024px){.unir .u img{height:38px}.unir .u span{font-size:20px}}
-html[lang="zh-CN"] .unir .u span{font-size:17px;letter-spacing:1px}
-@media (min-width:1024px){html[lang="zh-CN"] .unir .u span{font-size:18px}}
 .vcard{position:relative;display:flex;align-items:center;justify-content:center;padding:28px 16px 72px;aspect-ratio:9/16;width:100%;clip-path:inset(0 round 16px);border-radius:16px;background:var(--gs-l)}
 @media (min-width:640px){.vcard{aspect-ratio:4/3;max-height:none}}
 @media (min-width:1024px){.vcard{aspect-ratio:1288/731}}
@@ -1247,14 +1233,6 @@ html[lang="zh-CN"] .ctas .ctah{letter-spacing:0;line-height:1.2}
   </div></div>
 </section>
 
-<!-- ======================= STUDENT FOUNDERS ======================= -->
-<section class="uni rv" data-rv="up" id="students" aria-labelledby="uniL">
-  <div class="ctr">
-    <p class="invl" id="uniL" data-i18n="uni.l">Supporting student founders from</p>
-    <div class="unir"><span class="u"><img src="logos/schools/princeton.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.princeton">Princeton</span></span><span class="u"><img src="logos/schools/penn.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.penn">Penn</span></span><span class="u"><img src="logos/schools/harvard.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.harvard">Harvard</span></span><span class="u"><img src="logos/schools/tsinghua.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.tsinghua">Tsinghua</span></span><span class="u"><img src="logos/schools/peking.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.peking">Peking University</span></span><span class="u"><img src="logos/schools/stanford.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.stanford">Stanford</span></span><span class="u"><img src="logos/schools/oxford.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.oxford">Oxford</span></span><span class="u"><img src="logos/schools/hku.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.hku">HKU</span></span><span class="u"><img src="logos/schools/ucla.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.ucla">UCLA</span></span><span class="u"><img src="logos/schools/berkeley.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.berkeley">Berkeley</span></span><span class="u"><img src="logos/schools/columbia.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.columbia">Columbia</span></span><span class="u"><img src="logos/schools/cornell.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.cornell">Cornell</span></span><span class="u"><img src="logos/schools/mit.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.mit">MIT</span></span><span class="u"><img src="logos/schools/caltech.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.caltech">Caltech</span></span><span class="u"><img src="logos/schools/uchicago.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.uchicago">UChicago</span></span><span class="u"><img src="logos/schools/usc.png" alt="" width="40" height="40" loading="lazy" decoding="async"><span data-i18n="uni.usc">USC</span></span></div>
-  </div>
-</section>
-
 <!-- ======================= COST OF WAITING ======================= -->
 <section class="sec rv" data-rv="up" id="cost" aria-labelledby="costH">
   <div class="ctr">
@@ -1616,7 +1594,7 @@ en:{
  "mbar.t":"Entry plan, $299 per market",
  "cta.free":"Get your entry plan",
  "mon.l.aff2":"Affects", "mon.due":"Deadline in {n} days", "mon.due1":"Deadline in 1 day", "mon.duet":"Deadline today", "mon.dayn":"days left", "mon.day1":"day left",
- "inv.l":"The brands we serve are backed by","uni.l":"Supporting student founders from","uni.princeton":"Princeton","uni.penn":"Penn","uni.harvard":"Harvard","uni.tsinghua":"Tsinghua","uni.peking":"Peking University","uni.stanford":"Stanford","uni.oxford":"Oxford","uni.hku":"HKU","uni.ucla":"UCLA","uni.berkeley":"Berkeley","uni.columbia":"Columbia","uni.cornell":"Cornell","uni.mit":"MIT","uni.caltech":"Caltech","uni.uchicago":"UChicago","uni.usc":"USC",
+ "inv.l":"The brands we serve are backed by",
  "map.n3":"3+ per day", "map.s3":"new US businesses served by our team, on average, since 2016", "map.n3w":"7+ per day", "map.s3w":"new businesses served by our team worldwide, on average, since 2016",
  "hero.h1":"Open your first US&nbsp;store<br>months sooner.", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
  "fqr.t":"Prefer WeChat? Scan to add Placetta.",
@@ -1698,7 +1676,7 @@ zh:{
  "mbar.t":"开店计划，每个市场 299 美元",
  "cta.free":"获取您的开店合规计划",
  "mon.l.aff2":"涉及", "mon.due":"距截止还有 {n} 天", "mon.due1":"距截止还有 1 天", "mon.duet":"今天截止", "mon.dayn":"天后截止", "mon.day1":"天后截止",
- "inv.l":"我们服务的品牌获得以下机构投资","uni.l":"支持来自以下院校的学生创业者","uni.princeton":"普林斯顿","uni.penn":"宾大","uni.harvard":"哈佛","uni.tsinghua":"清华","uni.peking":"北大","uni.stanford":"斯坦福","uni.oxford":"牛津","uni.hku":"港大","uni.ucla":"加大洛杉矶","uni.berkeley":"伯克利","uni.columbia":"哥大","uni.cornell":"康奈尔","uni.mit":"麻省理工","uni.caltech":"加州理工","uni.uchicago":"芝大","uni.usc":"南加大",
+ "inv.l":"我们服务的品牌获得以下机构投资",
  "map.n3":"每天 3 家以上", "map.s3":"2016 年以来，我们的团队平均每天新服务的美国企业", "map.n3w":"每天 7 家以上", "map.s3w":"2016 年以来，我们的团队平均每天在全球新服务的企业",
  "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
  "fqr.t":"更习惯用微信？扫码添加快哉。",
