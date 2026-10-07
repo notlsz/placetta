@@ -77,6 +77,19 @@ export async function sendSignIn(email: string) {
   const { error } = await supabase().auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname } });
   if (error) throw err(error.status === 429 ? "rate_limited" : "auth", error.message);
 }
+/** Email and password: works without any email being sent once "Confirm email" is off in Supabase. */
+export async function signInPassword(email: string, password: string) {
+  const { error } = await supabase().auth.signInWithPassword({ email, password });
+  if (error) throw err(error.code === "invalid_credentials" ? "bad_login" : error.status === 429 ? "rate_limited" : "auth", error.message);
+}
+/** Creates the account. `confirm` is true when Supabase still wants the email confirmed before the first sign-in. */
+export async function signUpPassword(email: string, password: string): Promise<{ confirm: boolean }> {
+  const { data, error } = await supabase().auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
+  if (error) throw err(error.code === "user_already_exists" ? "exists" : error.code === "weak_password" ? "weak" : error.status === 429 ? "rate_limited" : "auth", error.message);
+  // an existing email comes back with no identities and no session (Supabase hides that the account exists)
+  if (!data.session && data.user && (data.user.identities ?? []).length === 0) throw err("exists", "An account with this email already exists.");
+  return { confirm: !data.session };
+}
 export async function verifyCode(email: string, token: string) {
   const { error } = await supabase().auth.verifyOtp({ email, token, type: "email" });
   if (error) throw err("auth", error.message);
@@ -101,6 +114,8 @@ export async function authProviders(): Promise<Record<Provider, boolean>> {
     return { google: !!j.external?.google, azure: !!j.external?.azure };
   } catch { return { google: false, azure: false }; }
 }
+/** Where accounts and data live (the Supabase project's region). */
+export const REGION = { id: "us", label: { en: "United States", zh: "美国" } } as const;
 export async function signInWith(provider: Provider) {
   const { error } = await supabase().auth.signInWithOAuth({
     provider,

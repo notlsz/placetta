@@ -287,11 +287,25 @@ async function auth(req: Request, url: URL): Promise<Response> {
   const body = req.method === "GET" || req.method === "DELETE" ? {} : await req.json().catch(() => ({})) as Record<string, string>;
   if (p === "/settings") return json({ external: { email: true, google: false, azure: false }, disable_signup: false });
   if (p === "/otp") return json({});
+  if (p === "/signup") {
+    const email = String(body.email ?? "").trim().toLowerCase();
+    if (db.users.some(x => x.email === email)) return json({ code: 422, error_code: "user_already_exists", msg: "User already registered" }, 422);
+    if (String(body.password ?? "").length < 6) return json({ code: 422, error_code: "weak_password", msg: "Password should be at least 6 characters." }, 422);
+    const u = { id: uuid(), email, created_at: now() }; db.users.push(u); save();
+    return json(session(u.id));
+  }
   if (p === "/verify") {
     if (String(body.token) !== PREVIEW_CODE) return json({ code: 403, error_code: "otp_expired", msg: `That code didn't work. In the preview it's ${PREVIEW_CODE}.` }, 403);
     const email = String(body.email ?? "").trim().toLowerCase();
     let u = db.users.find(x => x.email === email);
     if (!u) { u = { id: uuid(), email, created_at: now() }; db.users.push(u); }
+    return json(session(u.id));
+  }
+  if (p === "/token" && url.searchParams.get("grant_type") === "password") {
+    const email = String(body.email ?? "").trim().toLowerCase();
+    const u = db.users.find(x => x.email === email);
+    // the preview has no real passwords: any password signs an existing preview account in
+    if (!u) return json({ code: 400, error_code: "invalid_credentials", msg: "Invalid login credentials" }, 400);
     return json(session(u.id));
   }
   if (p === "/token") {

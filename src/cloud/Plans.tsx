@@ -35,7 +35,7 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
             <p>{b(B("Credited toward your first year on an annual plan.", "可抵扣年度方案首年费用。"))}</p>
             <div className="plan-act">
               <label className="mk">{b(B("Markets", "市场数"))}
-                <select value={markets} onChange={e => setMarkets(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}</select>
+                <select aria-label={b(B("Markets", "市场数"))} value={markets} onChange={e => setMarkets(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}</select>
               </label>
               <Pill kind="ink" disabled={!!busy} onClick={() => void go("entry")}>{busy === "entry" ? "…" : b(B(`Pay $${299 * markets}`, `支付 $${299 * markets}`))}</Pill>
             </div>
@@ -56,7 +56,7 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
             <span className="price">$5,000+<small>{lang === "zh" ? " /月" : " /month"}</small></span>
             <p>{b(B("Billed annually. 26+ locations, any number of markets.", "按年计费。26 家门店以上，市场数量不限。"))}</p>
             <ul>{[B("Everything in Growth", "包含成长版全部功能"), B("Unlimited markets", "市场数量不限"), B("A named compliance lead", "专属合规负责人")].map((f, i) => <li key={i}><I.check />{b(f)}</li>)}</ul>
-            <a className="pill primary" href="mailto:support@placetta.com?subject=Scale%20plan">{b(B("Talk to us", "联系我们"))}</a>
+            <a className="pill primary" href="mailto:support@placetta.com?subject=Scale%20plan"><span>{b(B("Talk to us", "联系我们"))}</span><i aria-hidden="true"><I.arrow /></i></a>
           </section>
         </div>
         <p className="note">{b(B("Extra locations are $100 a month each. Government fees are paid by you directly to each agency, through the payment link we send. Payments are handled by Stripe.", "超出的门店每家每月 100 美元。政府规费由您通过我们发送的付款链接直接支付给各机构。付款由 Stripe 处理。"))}</p>

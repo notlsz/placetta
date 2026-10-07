@@ -24,6 +24,11 @@ const lastWs = { get: () => { try { return localStorage.getItem("placetta-ws") ?
 function Frame({ lang, setLang, children }: { lang: Lang; setLang: (l: Lang) => void; children: React.ReactNode }) {
   const [doc, setDoc] = useState<string | null>(null);
   const d = LEGAL.find(x => x.id === doc);
+  useEffect(() => {
+    const on = (e: Event) => setDoc((e as CustomEvent<string>).detail);
+    window.addEventListener("placetta:doc", on);
+    return () => window.removeEventListener("placetta:doc", on);
+  }, []);
   return (
     <div className="gate">
       <header className="gate-top">
@@ -57,14 +62,60 @@ const MicrosoftMark = () => (
   <svg width="15" height="15" viewBox="0 0 23 23" aria-hidden="true"><path fill="#F35325" d="M1 1h10v10H1z"/><path fill="#81BC06" d="M12 1h10v10H12z"/><path fill="#05A6F0" d="M1 12h10v10H1z"/><path fill="#FFBA08" d="M12 12h10v10H12z"/></svg>
 );
 
+const HELP_URL = api.PREVIEW ? "https://placetta.vercel.app/help/#sign-in" : "/help/#sign-in";
+const openDoc = (id: string) => window.dispatchEvent(new CustomEvent("placetta:doc", { detail: id }));
+
+/* Region: where the account and its data live. One region today; the others show as not available yet. */
+function RegionPick({ lang }: { lang: Lang }) {
+  const L = (x: Bi) => x[lang];
+  const [open, setOpen] = useState(false);
+  const regions: { id: string; label: Bi; on: boolean }[] = [
+    { id: "us", label: B("United States", "美国"), on: true },
+    { id: "eu", label: B("Europe", "欧洲"), on: false },
+    { id: "ap", label: B("Asia Pacific", "亚太"), on: false },
+  ];
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest(".region")) setOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", close); document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", esc); };
+  }, [open]);
+  return (
+    <div className="region">
+      <button type="button" className="region-btn" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(o => !o)}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.3 3 14.7 0 18M12 3c-3 3.3-3 14.7 0 18"/></svg>
+        <span>{L(B("Region", "区域"))}: <b>{L(api.REGION.label)}</b></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      {open && (
+        <ul className="region-menu" role="listbox" aria-label={L(B("Region", "区域"))}>
+          {regions.map(r => (
+            <li key={r.id} role="option" aria-selected={r.id === api.REGION.id} aria-disabled={!r.on}>
+              <button type="button" disabled={!r.on} onClick={() => setOpen(false)}>
+                <span>{L(r.label)}</span>
+                {r.id === api.REGION.id ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg> : <small>{L(B("Not available yet", "暂未开放"))}</small>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function SignIn({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
   const [hand] = useState(readHandoff);
   const [email, setEmail] = useState(hand?.email ?? "");
-  const [sent, setSent] = useState(false);
+  const [step, setStep] = useState<"email" | "password" | "code" | "confirm">("email");
+  const [mode, setMode] = useState<"signin" | "create">("signin");
+  const [pw, setPw] = useState("");
+  const [show, setShow] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(() => new URLSearchParams(location.search).get("error_description") ?? "");
+  const [noAccount, setNoAccount] = useState(false);
   const [providers, setProviders] = useState<Record<api.Provider, boolean>>({ google: false, azure: false });
   useEffect(() => {
     void api.authProviders().then(setProviders);
@@ -74,46 +125,109 @@ function SignIn({ lang }: { lang: Lang }) {
     setBusy(true); setErr("");
     try { await api.signInWith(p); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
-  const send = async () => {
-    if (!/\S+@\S+\.\S+/.test(email)) { setErr(L(B("Enter your work email.", "请输入工作邮箱。"))); return; }
+  const okEmail = () => /\S+@\S+\.\S+/.test(email.trim());
+  const next = () => {
+    if (!okEmail()) { setErr(L(B("Enter your work email.", "请输入工作邮箱。"))); return; }
+    setErr(""); setNoAccount(false); setPw(""); setStep("password");
+  };
+  const mailErr = (e: api.ApiError) => e.code === "rate_limited"
+    ? L(B("Too many emails were sent just now. Sign in with a password, or try again in an hour.", "刚刚发送的邮件太多。请用密码登录，或一小时后再试。"))
+    : /invalid/i.test(e.message) ? L(B("We can't email this address yet. Sign in with a password instead.", "暂时无法向该邮箱发送邮件，请改用密码登录。")) : e.message;
+  const submitPw = async () => {
+    if (mode === "create" && pw.length < 8) { setErr(L(B("Use at least 8 characters.", "密码至少 8 位。"))); return; }
+    if (!pw) { setErr(L(B("Enter your password.", "请输入密码。"))); return; }
+    setBusy(true); setErr(""); setNoAccount(false);
+    try {
+      if (mode === "signin") await api.signInPassword(email.trim(), pw);
+      else { const r = await api.signUpPassword(email.trim(), pw); if (r.confirm) { setStep("confirm"); setBusy(false); return; } }
+      // the session change takes it from here
+    } catch (e) {
+      const x = e as api.ApiError;
+      if (x.code === "bad_login") { setErr(L(B("That password doesn't match, or there's no account for this email yet.", "密码不正确，或该邮箱尚未注册。"))); setNoAccount(true); }
+      else if (x.code === "exists") { setErr(L(B("An account with this email already exists. Sign in instead.", "该邮箱已注册，请直接登录。"))); setMode("signin"); }
+      else if (x.code === "weak") setErr(L(B("Pick a stronger password: at least 8 characters, not a common one.", "请设置更安全的密码：至少 8 位，避免常见密码。")));
+      else setErr(x.message);
+      setBusy(false);
+    }
+  };
+  const sendCode = async () => {
     setBusy(true); setErr("");
-    try { await api.sendSignIn(email.trim()); setSent(true); } catch (e) { setErr((e as api.ApiError).message); }
+    try { await api.sendSignIn(email.trim()); setStep("code"); } catch (e) { setErr(mailErr(e as api.ApiError)); }
     setBusy(false);
   };
   const verify = async () => {
     setBusy(true); setErr("");
     try { await api.verifyCode(email.trim(), code.trim()); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
+  const title = step === "code" ? L(B("Check your email.", "请查收邮件。"))
+    : step === "confirm" ? L(B("Confirm your email.", "请确认邮箱。"))
+    : step === "password" ? (mode === "create" ? L(B("Create your password.", "设置密码。")) : L(B("Enter your password.", "输入密码。")))
+    : hand ? L(B("Your license plan is one step away.", "您的执照计划只差一步。")) : L(B("Sign in to Placetta.", "登录快哉。"));
+  const sub = step === "code" ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`))
+    : step === "confirm" ? L(B(`We sent a confirmation link to ${email}. Open it, then sign in with your password.`, `确认链接已发送至 ${email}。打开链接后，用密码登录。`))
+    : step === "password" ? null
+    : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。"))
+    : L(B("New or invited? Sign in with your work email.", "新用户或受邀成员，请用工作邮箱登录。"));
   return (
     <div className="gate-card">
       <div className="gate-bot"><AgentBot size={84} /></div>
-      <h1>{sent ? L(B("Check your email.", "请查收邮件。")) : hand ? L(B("Your license plan is one step away.", "您的执照计划只差一步。")) : L(B("Sign in to Placetta.", "登录快哉。"))}</h1>
-      <p className="gate-sub">{sent ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`)) : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs. Signing in creates your account.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。登录即创建账户。")) : L(B("New or invited? Sign in with your work email.", "新用户或受邀成员，请用工作邮箱登录。"))}</p>
-      {!sent && (providers.google || providers.azure) && (
+      <RegionPick lang={lang} />
+      <h1>{title}</h1>
+      {sub && <p className="gate-sub">{sub}</p>}
+      {step === "password" && (
+        <p className="gate-sub gate-id"><span>{email.trim()}</span><button type="button" className="lnk" onClick={() => { setStep("email"); setErr(""); }}>{L(B("Edit", "修改"))}</button></p>
+      )}
+      {step === "email" && (providers.google || providers.azure) && (
         <div className="gate-sso">
           {providers.google && <button type="button" className="sbtn line wide sso" disabled={busy} onClick={() => void withProvider("google")}><GoogleMark />{L(B("Continue with Google", "使用 Google 继续"))}</button>}
           {providers.azure && <button type="button" className="sbtn line wide sso" disabled={busy} onClick={() => void withProvider("azure")}><MicrosoftMark />{L(B("Continue with Microsoft", "使用 Microsoft 继续"))}</button>}
           <span className="gate-or">{L(B("or", "或"))}</span>
         </div>
       )}
-      {!sent ? (
-        <form onSubmit={e => { e.preventDefault(); void send(); }}>
+      {step === "email" && (
+        <form onSubmit={e => { e.preventDefault(); next(); }}>
           <label className="sr" htmlFor="gate-email">{L(B("Email", "邮箱"))}</label>
-          <input id="gate-email" type="email" autoComplete="email" inputMode="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={L(B("you@company.com", "you@company.com"))} autoFocus />
-          <button type="submit" className="sbtn ink wide" disabled={busy}>{busy ? "…" : L(B("Continue with email", "用邮箱继续"))}</button>
+          <input id="gate-email" type="email" autoComplete="username" inputMode="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={L(B("you@company.com", "you@company.com"))} autoFocus />
+          <button type="submit" className="sbtn ink wide" disabled={busy}>{L(B("Continue", "继续"))}</button>
         </form>
-      ) : (
+      )}
+      {step === "password" && (
+        <form onSubmit={e => { e.preventDefault(); void submitPw(); }}>
+          <input type="email" autoComplete="username" value={email} readOnly hidden />
+          <label className="sr" htmlFor="gate-pw">{L(B("Password", "密码"))}</label>
+          <div className="pwrap">
+            <input id="gate-pw" type={show ? "text" : "password"} autoComplete={mode === "create" ? "new-password" : "current-password"} value={pw} onChange={e => setPw(e.target.value)} placeholder={mode === "create" ? L(B("At least 8 characters", "至少 8 位")) : L(B("Password", "密码"))} autoFocus />
+            <button type="button" className="pshow" onClick={() => setShow(v => !v)} aria-label={show ? L(B("Hide password", "隐藏密码")) : L(B("Show password", "显示密码"))}>{show ? L(B("Hide", "隐藏")) : L(B("Show", "显示"))}</button>
+          </div>
+          <button type="submit" className="sbtn ink wide" disabled={busy}>{busy ? "…" : mode === "create" ? L(B("Create account", "创建账户")) : L(B("Sign in", "登录"))}</button>
+          {noAccount && mode === "signin" && <button type="button" className="sbtn line wide" onClick={() => { setMode("create"); setErr(""); setNoAccount(false); }}>{L(B("Create an account with this email", "用此邮箱创建账户"))}</button>}
+          <p className="gate-alt">
+            {mode === "signin"
+              ? <>{L(B("New to Placetta?", "第一次使用？"))} <button type="button" className="lnk" onClick={() => { setMode("create"); setErr(""); setNoAccount(false); }}>{L(B("Create an account", "创建账户"))}</button></>
+              : <>{L(B("Already have an account?", "已有账户？"))} <button type="button" className="lnk" onClick={() => { setMode("signin"); setErr(""); }}>{L(B("Sign in", "登录"))}</button></>}
+          </p>
+          <p className="gate-alt"><button type="button" className="lnk" disabled={busy} onClick={() => void sendCode()}>{L(B("Email me a code instead", "改用邮箱验证码"))}</button></p>
+        </form>
+      )}
+      {step === "code" && (
         <form onSubmit={e => { e.preventDefault(); void verify(); }}>
           <label className="sr" htmlFor="gate-code">Code</label>
           <input id="gate-code" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))} placeholder={L(B("6-digit code", "6 位验证码"))} autoFocus />
           <button type="submit" className="sbtn ink wide" disabled={busy || code.length < 6}>{busy ? "…" : L(B("Sign in", "登录"))}</button>
-          <button type="button" className="sbtn quiet wide" onClick={() => { setSent(false); setCode(""); }}>{L(B("Use a different email", "换一个邮箱"))}</button>
+          <button type="button" className="sbtn quiet wide" onClick={() => { setStep("password"); setCode(""); }}>{L(B("Use a password instead", "改用密码登录"))}</button>
         </form>
       )}
+      {step === "confirm" && <button type="button" className="sbtn line wide" onClick={() => { setMode("signin"); setStep("password"); setPw(""); }}>{L(B("I've confirmed, sign in", "已确认，去登录"))}</button>}
       {err && <p className="gate-err" role="alert">{err}</p>}
-      {api.PREVIEW && <p className="gate-preview">{sent
+      {(step === "email" || step === "password") && (
+        <div className="gate-legal">
+          <p>{L(B("By proceeding, you affirm your understanding and acceptance of our ", "继续即表示您已理解并接受我们的"))}<button type="button" className="lnk" onClick={() => openDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(", which sets out the rules and expectations governing your use of our services.", "，其中规定了您使用我们服务时适用的规则与要求。"))}</p>
+          <a href={HELP_URL} target={api.PREVIEW ? "_blank" : undefined} rel="noopener">{L(B("Need help signing in?", "登录遇到问题？"))}</a>
+        </div>
+      )}
+      {api.PREVIEW && <p className="gate-preview">{step === "code"
         ? L(B("Preview: no email is sent. The code is 123456.", "预览：不会发送邮件，验证码是 123456。"))
-        : L(B("Preview: accounts live only in this browser. Any email works; an @placetta.com email signs you in as the Placetta team, which works the filing queue.", "预览：账户只保存在此浏览器中。任意邮箱都可以；使用 @placetta.com 邮箱登录即为快哉团队，可处理申报队列。"))}</p>}
+        : L(B("Preview: accounts live only in this browser. Any email and password work; an @placetta.com email signs you in as the Placetta team, which works the filing queue.", "预览：账户只保存在此浏览器中。任意邮箱和密码都可以；使用 @placetta.com 邮箱会以快哉团队身份登录，可处理申报队列。"))}</p>}
     </div>
   );
 }
