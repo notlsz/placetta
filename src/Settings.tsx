@@ -161,6 +161,7 @@ function Team() {
   const wsId = cloud?.wsId ?? "";
   const load = useCallback(async () => { if (!wsId) return; try { setTeam(await api.teamList(wsId)); } catch { setTeam({ me: null, members: [], invites: [] }); } }, [wsId]);
   useEffect(() => { void load(); }, [load]);
+  const pin = usePin();
   if (!cloud) return null;
   const owner = cloud.owner;
   const owners = team?.members.filter(m => m.role === "owner").length ?? 0;
@@ -169,7 +170,6 @@ function Team() {
   const sentNote = (sent: string, email: string) => sent === "not_sent"
     ? (zh ? `已邀请 ${email}，但邮件没发出去。请让对方用这个邮箱登录。` : `Invited ${email}, but the email didn't send. Ask them to sign in with that address.`)
     : (zh ? `已邀请 ${email}。对方用这个邮箱登录即可加入。` : `Invited ${email}. They join when they sign in with that address.`);
-  const pin = usePin();
   const invite = async () => {
     if (pin.locked) { pin.guard(() => void invite()); return; }
     const email = f.email.trim().toLowerCase();

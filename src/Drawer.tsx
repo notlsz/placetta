@@ -267,6 +267,7 @@ function Receipt({ a }: { a: Application }) {
 export function ApproveModal({ id, onClose }: { id: string; onClose: () => void }) {
   const { b, t, lang, ws, approve, openApp, busy, cloud } = useApp();
   const a = ws.approvals.find(x => x.id === id);
+  const [sig, setSig] = useState<Signed | null>(null);
   if (!a) return null;
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
   const fee = app && a.kind === "file" ? feeTotal(app) : 0;
@@ -274,7 +275,6 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const data = a.kind === "send" || a.kind === "change" ? a.data ?? [] : app?.fields ?? [];
   const off = app?.official ? formById(app.official) : undefined;
   const needSig = !!cloud && a.kind === "file" && !!off?.sign && !!off.esign;
-  const [sig, setSig] = useState<Signed | null>(null);
   return (
     <Modal label={b(a.title)} onClose={onClose} wide>
       <header className="m-h">
