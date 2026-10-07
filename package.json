@@ -11,7 +11,8 @@
     "build:single": "tsc -b && vite build --mode single",
     "postinstall": "node scripts/patch-bot-avatars.mjs",
     "launch": "node scripts/launch.mjs",
-    "build:agent": "node scripts/build-agent.mjs"
+    "build:agent": "node scripts/build-agent.mjs",
+    "guides": "npx tsx scripts/build-guides.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
