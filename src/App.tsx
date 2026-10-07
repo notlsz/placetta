@@ -58,6 +58,24 @@ function localUpdates(w: Workspace): UpdateItem[] {
   }
   return out.sort((x, y) => y.at.localeCompare(x.at));
 }
+/** Filing changes as they happen: the team or the agency moved a filing, so it shows in Updates right away (the daily
+ *  monitor's digest says the same, by email). Mirrors the monitor's wording so the two never disagree. */
+function liveFilingUpdates(fs: api.Filing[]): UpdateItem[] {
+  const out: UpdateItem[] = [];
+  const money = (n: number) => "$" + n.toLocaleString("en-US");
+  for (const f of fs) {
+    const t = B(f.title.en.replace(/^File the /, "the ").replace(/^the (.)/, (_, c: string) => c.toUpperCase()), f.title.zh.replace(/^提交/, "")), prompt = B(`Where does this stand: ${t.en}?`, `这一项进展如何：${t.zh}？`);
+    const add = (k: string, at: string | null | undefined, kind: UpdateItem["kind"], title: Bi, body?: Bi) => { if (at) out.push({ id: `fl-${f.id}-${k}`, kind, title, body, app: f.app_id, at, read: false, prompt }); };
+    // each step the filing has passed, at the time it happened
+    if (f.status === "in_progress") add("started", f.updated_at, "filing", B(`The filing team started: ${t.en}`, `申报团队已开始办理：${t.zh}`));
+    if (f.status === "needs_info") add("needs-" + f.updated_at.slice(0, 16), f.updated_at, f.payment_url ? "payment" : "filing", B(`Action needed: ${t.en}`, `需要您处理：${t.zh}`),
+      f.payment_url ? B(`The agency fee${f.fee_paid ? ` (${money(f.fee_paid)})` : ""} is ready to pay.`, `机构费用${f.fee_paid ? `（${money(f.fee_paid)}）` : ""}可以支付了。`) : f.note ? same(f.note) : undefined);
+    add("submitted", f.submitted_at, "filing", B(`Submitted to the agency: ${t.en}`, `已提交至机构：${t.zh}`), f.confirmation_number ? B(`Confirmation ${f.confirmation_number}.`, `确认号 ${f.confirmation_number}。`) : undefined);
+    if (f.status === "accepted") add("accepted", f.decided_at ?? f.updated_at, "filing", B(`Approved by the agency: ${t.en}`, `机构已批准：${t.zh}`), B("The approval is in Documents when the agency sends it.", "机构发来批准文件后会放在“文件”中。"));
+    if (f.status === "rejected") add("rejected", f.decided_at ?? f.updated_at, "filing", B(`Returned by the agency: ${t.en}`, `被机构退回：${t.zh}`), f.note ? same(f.note) : B("The team will tell you what to fix.", "团队会告诉您需要修改什么。"));
+  }
+  return out;
+}
 const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
   renewal: B(`Start this renewal: ${u.title.en}`, `开始续办：${u.title.zh}`),
   deadline: B(`Get this done: ${u.title.en}`, `完成这项：${u.title.zh}`),
@@ -164,9 +182,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   useEffect(() => { if (cloud) void api.listUpdates(cloud.wsId).then(setServerUpdates, () => undefined); }, [cloud]);
   /* the Updates inbox: the monitor's updates in an account (worked out locally until its first run), the sample's otherwise */
   const updates = useMemo<UpdateItem[]>(() => {
-    if (cloud && serverUpdates.length) return serverUpdates.map(u => ({ id: u.id, kind: u.kind, title: u.title, body: u.body ?? undefined, app: u.app_id ?? undefined, at: u.created_at, read: !!u.read_at, prompt: askFor(u) }));
-    return localUpdates(view_).map(u => ({ ...u, read: readLocal.has(u.id) }));
-  }, [cloud, serverUpdates, view_, readLocal]);
+    const base = cloud && serverUpdates.length
+      ? serverUpdates.map(u => ({ id: u.id, kind: u.kind, title: u.title, body: u.body ?? undefined, app: u.app_id ?? undefined, at: u.created_at, read: !!u.read_at, prompt: askFor(u) }))
+      : localUpdates(view_).map(u => ({ ...u, read: readLocal.has(u.id) }));
+    if (!cloud) return base;
+    const seen = new Set(base.map(u => u.title.en));
+    const live = liveFilingUpdates(filings).filter(u => !seen.has(u.title.en)).map(u => ({ ...u, read: readLocal.has(u.id) }));
+    return [...live, ...base].sort((x, y) => y.at.localeCompare(x.at));
+  }, [cloud, serverUpdates, view_, readLocal, filings]);
   const readUpdates = useCallback(() => {
     if (!updates.some(u => !u.read)) return;
     setReadLocal(new Set(updates.map(u => u.id)));
@@ -333,6 +356,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     return true;
   }, [say, lang]);
 
+  /* An approval that met the plan wall: kept (in this browser, so it survives the trip to Stripe) and sent to the team
+     as soon as the annual plan is on, as the plans sheet promises. */
+  const PENDING = "placetta-pending-filing";
+  const hold = (id: string | null) => { try { if (id) localStorage.setItem(PENDING, id); else localStorage.removeItem(PENDING); } catch { /* storage blocked */ } pendingFiling.current = id; };
+  const pendingFiling = useRef<string | null>((() => { try { return localStorage.getItem(PENDING); } catch { return null; } })());
+
   const approve = useCallback(async (id: string) => {
     if (held()) return;
     const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
@@ -341,7 +370,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!ownerOk()) return;
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
     if (a.kind === "file") {
-      if (plan !== "monthly") { setPlans("file"); return; }
+      if (plan !== "monthly") { hold(id); setPlans("file"); return; }
       const app = w.apps.find(x => x.id === a.app); if (!app) return;
       const appDocs = app.checklist.map(c => (c.doc ? w.docs.find(d => d.id === c.doc) : undefined));
       try {
@@ -360,7 +389,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         pushTurn(shown, { text: [B(`Sent to Placetta's filing team. They check the ${app.name.en.toLowerCase()} against the agency's current requirements and submit it. If the agency charges a fee, you'll get its payment link here.`, `已交给快哉申报团队。他们会对照机构现行要求核对${app.name.zh}后提交。如需缴纳机构费用，付款链接会发到这里。`)] });
       } catch (e) {
         const er = e as api.ApiError;
-        if (er.code === "plan_required") setPlans("file"); else say(er.message);
+        if (er.code === "plan_required") { hold(id); setPlans("file"); } else say(er.message);
       }
       return;
     }
@@ -388,6 +417,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
     run({ approve: id }, shown);
   }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk, held]);
+  useEffect(() => {
+    const id = pendingFiling.current;
+    if (!cloud || plan !== "monthly" || !id) return;
+    hold(null);
+    if (view_.approvals.some(a => a.id === id && a.kind === "file")) void approve(id);
+  }, [cloud, plan, view_.approvals, approve]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const upload = useCallback(async (app: string, item: string, files?: File[]) => {
     if (held()) return;
@@ -425,7 +460,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       // In the preview there's no Stripe or provider to visit: the stand-in backend switches it on, so just reload.
       if (url.startsWith("preview:")) {
         void Promise.all([api.getBilling(cloud.wsId).then(setBilling), api.listIntegrations(cloud.wsId).then(setIntegrations)]).then(() => { setPlans(null); void refresh(); });
-        say(url === "preview:billing" ? (lang === "zh" ? "预览：方案已开通（实际应用会跳转到 Stripe 付款）。" : "Preview: plan on. The live app takes payment through Stripe here.") : (lang === "zh" ? "预览：已连接（实际应用会跳转到对方网站授权）。" : "Preview: connected. The live app sends you to the provider to approve."));
+        say(url === "preview:billing" ? (lang === "zh" ? "方案已开通。" : "Your plan is on.") : (lang === "zh" ? "已连接。" : "Connected."));
         return;
       }
       window.location.href = url;
@@ -437,7 +472,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
       checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
       portal: async () => { if (!ownerOk()) return; try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
-      connect: async kind => { if (!ownerOk()) return; try { goTo((await api.connectUrl(cloud.wsId, kind)).url); } catch (e) { fail(e); } },
+      connect: async kind => { if (!ownerOk()) return; try { goTo((await api.connectUrl(cloud.wsId, kind)).url); } catch (e) { if ((e as api.ApiError).code === "not_configured") say(lang === "zh" ? "这个连接即将开放。在此之前，可把机构来信转发到 support@placetta.com，团队会帮您添加。" : "This connection opens soon. Until then, forward agency emails to support@placetta.com and the team adds them for you."); else fail(e); } },
       disconnect: async kind => { if (!ownerOk()) return; try { await api.integration(cloud.wsId, "disconnect", { kind }); setIntegrations(await api.listIntegrations(cloud.wsId)); } catch (e) { fail(e); } },
       saveLogin: async l => { if (!ownerOk()) return; try { await api.saveLogin(cloud.wsId, l); setLogins(await api.listLogins(cloud.wsId)); say(lang === "zh" ? "登录信息已加密保存。" : "Saved and encrypted."); } catch (e) { fail(e); } },
       removeLogin: async id => { if (!ownerOk()) return; try { await api.removeLogin(cloud.wsId, id); setLogins(await api.listLogins(cloud.wsId)); } catch (e) { fail(e); } },

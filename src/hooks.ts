@@ -170,3 +170,29 @@ export function useSpeak(remote?: (text: string, lang: string) => Promise<ArrayB
   return { supported, speaking, speak, stop, level };
 }
 export type Speaker = ReturnType<typeof useSpeak>;
+
+/* ------------------------------- appearance ------------------------------- */
+
+export type Theme = "light" | "dark" | "system";
+const THEME_KEY = "placetta-theme";
+export const readTheme = (): Theme => { try { const v = localStorage.getItem(THEME_KEY); if (v === "light" || v === "dark" || v === "system") return v; } catch { /* storage blocked */ } return "light"; };
+const systemDark = () => { try { return matchMedia("(prefers-color-scheme: dark)").matches; } catch { return false; } };
+/** Put the theme on the page: Light, Dark, or whatever the device uses. */
+export function applyTheme(t: Theme) {
+  document.documentElement.dataset.theme = t === "system" ? (systemDark() ? "dark" : "light") : t;
+}
+/** The appearance setting, kept in this browser and followed live when it's "system". */
+export function useTheme(): [Theme, (t: Theme) => void] {
+  const [theme, set] = useState<Theme>(readTheme);
+  useEffect(() => {
+    applyTheme(theme);
+    try { localStorage.setItem(THEME_KEY, theme); } catch { /* storage blocked */ }
+    if (theme !== "system") return;
+    let mq: MediaQueryList | null = null;
+    try { mq = matchMedia("(prefers-color-scheme: dark)"); } catch { return; }
+    const on = () => applyTheme("system");
+    mq.addEventListener("change", on);
+    return () => mq?.removeEventListener("change", on);
+  }, [theme]);
+  return [theme, set];
+}

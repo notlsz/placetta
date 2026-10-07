@@ -4,6 +4,7 @@ import { B, type Bi } from "./model";
 import { API_MODELS } from "./live";
 import { fmtAgo, fmtDay } from "./time";
 import { Footer, I } from "./ui";
+import { useTheme, type Theme } from "./hooks";
 import * as api from "./cloud/api";
 import type { IntegrationKind } from "./cloud/api";
 import { TwoStepSetup } from "./cloud/TwoStep";
@@ -11,7 +12,7 @@ import { TwoStepSetup } from "./cloud/TwoStep";
 /* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
    one primary action per group. Only what a business needs to get and stay compliant. */
 
-type Row = { label: Bi; sub?: ReactNode; right?: ReactNode; icon?: ReactNode };
+type Row = { label: Bi; sub?: ReactNode; right?: ReactNode; icon?: ReactNode; pick?: () => void };
 function Group({ id, title, note, rows, children }: { id: string; title: Bi; note?: Bi; rows?: Row[]; children?: ReactNode }) {
   const { b } = useApp();
   return (
@@ -21,7 +22,7 @@ function Group({ id, title, note, rows, children }: { id: string; title: Bi; not
       {rows && rows.length > 0 && (
         <ul className="sg-list">
           {rows.map((r, i) => (
-            <li key={i} className="sg-row">
+            <li key={i} className={"sg-row" + (r.pick ? " pick" : "")} onClick={r.pick}>
               {r.icon && <span className="sg-ico">{r.icon}</span>}
               <span className="sg-tx"><b>{b(r.label)}</b>{r.sub && <small>{r.sub}</small>}</span>
               {r.right && <span className="sg-r">{r.right}</span>}
@@ -226,13 +227,14 @@ export function Settings() {
   const [key, setKey] = useState("");
   const [id, setId] = useState(API_MODELS[0].id);
   const [remember, setRemember] = useState(false);
+  const [theme, setTheme] = useTheme();
   const bl = cloud?.billing;
   const planName = !cloud ? B("Growth plan (sample)", "成长版（示例）")
     : bl?.free && !bl.subscription_status ? B("Early access, everything included", "抢先体验，全部功能开放")
     : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
     : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
-  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
+  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
 
   return (
     <div className="page settings">
@@ -246,7 +248,7 @@ export function Settings() {
             { label: B("Email", "邮箱"), sub: <>{cloud.email}{lang === "zh" ? `，${cloud.owner ? "所有者" : "成员"}` : `, ${cloud.owner ? "owner" : "member"}`}</>, icon: <I.user /> },
             { label: B("Business", "企业"), sub: b(ws.business), icon: <I.store />, right: <Btn onClick={cloud.newWorkspace}>{lang === "zh" ? "新建企业" : "New business"}</Btn> },
             { label: B("Sign out", "退出登录"), icon: <I.logout />, right: <Btn onClick={cloud.signOut}>{lang === "zh" ? "退出" : "Sign out"}</Btn> },
-            ...(api.PREVIEW ? [{ label: B("Preview data", "预览数据"), sub: b(B("Accounts and workspaces in this preview live only in this browser.", "此预览中的账户和工作区只保存在此浏览器中。")), icon: <I.spark />,
+            ...(api.PREVIEW ? [{ label: B("Data in this browser", "此浏览器中的数据"), sub: b(B("Your accounts and workspaces here are kept in this browser. Start over clears them.", "这里的账户和工作区保存在此浏览器中，重新开始会清空。")), icon: <I.spark />,
               right: <Btn onClick={() => { void import("./cloud/preview").then(m => { m.resetPreview(); location.reload(); }); }}>{lang === "zh" ? "清空重来" : "Start over"}</Btn> }] : []),
           ] : [{ label: B("Sample workspace", "示例工作区"), sub: b(B("Everything here is sample data. Create an account to save your own business.", "这里都是示例数据。注册账户即可保存您自己的企业。")), icon: <I.user /> }]} />
 
@@ -283,9 +285,13 @@ export function Settings() {
             )}
           </Group>
 
+          <Group id="appearance" title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([
+            ["light", B("Light", "浅色"), <I.sun />], ["dark", B("Dark", "深色"), <I.moon />], ["system", B("Match this device", "跟随设备"), <I.monitor />],
+          ] as [Theme, Bi, ReactNode][]).map(([k, l, ic]) => ({ label: l, icon: ic, pick: () => setTheme(k), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="theme" checked={theme === k} onChange={() => setTheme(k)} aria-label={b(l)} /><i /></label> }))} />
+
           <Group id="language" title={B("Language", "语言")} rows={[
-            { label: B("English", "English"), right: <label className="radio"><input type="radio" name="lang" checked={lang === "en"} onChange={() => setLang("en")} /><i /></label> },
-            { label: B("简体中文", "简体中文"), right: <label className="radio"><input type="radio" name="lang" checked={lang === "zh"} onChange={() => setLang("zh")} /><i /></label> },
+            { label: B("English", "English"), pick: () => setLang("en"), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="lang" checked={lang === "en"} onChange={() => setLang("en")} /><i /></label> },
+            { label: B("简体中文", "简体中文"), pick: () => setLang("zh"), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="lang" checked={lang === "zh"} onChange={() => setLang("zh")} /><i /></label> },
           ]} />
 
           <Group id="data" title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
@@ -295,6 +301,7 @@ export function Settings() {
           ]} />
 
           <Group id="help" title={B("Help", "帮助")} rows={[
+            { label: B("Help Center", "帮助中心"), sub: b(B("Guides for every part of Placetta", "快哉各项功能的使用指南")), icon: <I.help />, right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.vercel.app/help/" : "/help/"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
             { label: B("Email support", "邮件支持"), sub: "support@placetta.com", icon: <I.help />, right: <a className="sbtn quiet" href="mailto:support@placetta.com">{lang === "zh" ? "写邮件" : "Email"}</a> },
             { label: B("Report a problem", "报告问题"), icon: <I.bell />, right: <a className="sbtn quiet" href="mailto:support@placetta.com?subject=Problem%20report">{lang === "zh" ? "报告" : "Report"}</a> },
             { label: B("How Placetta's AI works", "快哉的 AI 如何工作"), icon: <I.spark />, right: <Btn onClick={() => openLegal("ai")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },

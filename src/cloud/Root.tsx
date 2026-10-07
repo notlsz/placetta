@@ -226,8 +226,8 @@ function SignIn({ lang }: { lang: Lang }) {
         </div>
       )}
       {api.PREVIEW && <p className="gate-preview">{step === "code"
-        ? L(B("Preview: no email is sent. The code is 123456.", "预览：不会发送邮件，验证码是 123456。"))
-        : L(B("Preview: accounts live only in this browser. Any email and password work; an @placetta.com email signs you in as the Placetta team, which works the filing queue.", "预览：账户只保存在此浏览器中。任意邮箱和密码都可以；使用 @placetta.com 邮箱会以快哉团队身份登录，可处理申报队列。"))}</p>}
+        ? L(B("No email is sent here. The code is 123456.", "这里不会发送邮件，验证码是 123456。"))
+        : L(B("Accounts here are kept in this browser. Any email and password work; an @placetta.com email signs you in as the Placetta filing team.", "这里的账户保存在此浏览器中。任意邮箱和密码都可以；使用 @placetta.com 邮箱会以快哉申报团队身份登录。"))}</p>}
     </div>
   );
 }
@@ -237,6 +237,7 @@ function SignIn({ lang }: { lang: Lang }) {
 const SELLS: { en: string; zh: string }[] = [
   { en: "Milk tea", zh: "奶茶" }, { en: "Coffee", zh: "咖啡" }, { en: "Bakery and desserts", zh: "烘焙甜品" },
   { en: "Restaurant", zh: "餐厅" }, { en: "Grocery", zh: "超市" }, { en: "Retail", zh: "零售" },
+  { en: "Importer or online seller", zh: "进口商或电商卖家" }, { en: "Warehouse or 3PL", zh: "仓库或第三方物流" },
 ];
 const WHEN: { en: string; zh: string; months: number | null }[] = [
   { en: "Within 3 months", zh: "3 个月内", months: 3 }, { en: "In 3 to 6 months", zh: "3 到 6 个月", months: 6 },
@@ -304,7 +305,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   return (
     <div className="gate-card wide">
       <h1>{L(B("Tell us about the business.", "介绍一下您的企业。"))}</h1>
-      <p className="gate-sub">{L(B(`Four quick answers and Placetta maps every license your first store needs. Signed in as ${email}.`, `回答四个问题，快哉就会梳理第一家门店所需的全部执照。已登录 ${email}。`))}</p>
+      <p className="gate-sub">{L(B(`Four quick answers and Placetta maps every license and registration your first location needs. Signed in as ${email}.`, `回答四个问题，快哉就会梳理第一个营业地点所需的全部执照与登记。已登录 ${email}。`))}</p>
       <form className="onb" onSubmit={e => { e.preventDefault(); void create(); }}>
         <label className="q">
           <span>{L(B("Business name", "企业名称"))}</span>
@@ -312,7 +313,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
         </label>
 
         <fieldset className="q">
-          <legend>{L(B("What does the store sell?", "门店经营什么？"))}</legend>
+          <legend>{L(B("What does the business do?", "企业做什么业务？"))}</legend>
           <div className="chips" role="radiogroup">
             {SELLS.map(x => <button key={x.en} type="button" role="radio" aria-checked={f.sell === x.en} className="chip" onClick={() => setF({ ...f, sell: x.en })}>{L(x)}</button>)}
             <button type="button" role="radio" aria-checked={f.sell === "other"} className="chip" onClick={() => setF({ ...f, sell: "other" })}>{L(B("Something else", "其他"))}</button>
@@ -321,7 +322,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
         </fieldset>
 
         <label className="q">
-          <span>{L(B("Where is the first store?", "第一家门店在哪里？"))}</span>
+          <span>{L(B("Where is the first location?", "第一个营业地点在哪里？"))}</span>
           <input id="onb-place" list="onb-cities" value={f.place} onChange={e => setF({ ...f, place: e.target.value })} placeholder="Flushing, NY" autoComplete="address-level2" />
           <datalist id="onb-cities">{CITIES.map(c => <option key={c} value={c} />)}</datalist>
           {needState && (

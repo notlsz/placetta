@@ -43,6 +43,7 @@ export type Application = {
   checklist: CheckItem[];
   receipt?: string;          // document id
   renews?: Bi;
+  official?: string;         // the official form in the library (src/forms/registry.ts) this application is
 };
 
 export type DocKind = "pdf" | "xlsx" | "jpg" | "docx" | "csv" | "zip";

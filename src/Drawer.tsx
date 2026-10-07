@@ -2,6 +2,9 @@ import { useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { useApp, type Tab } from "./ctx";
 import type { Application, CheckItem, Doc } from "./model";
+import { formById, METHOD } from "./forms/registry";
+import { saveFile } from "./files";
+import { fmtDay } from "./time";
 import { fmtStamp, money } from "./time";
 import { FileCard, I, LevelTag, Modal, Pill, Sample, Sheet, StatusChip, feeTotal } from "./ui";
 import { INK } from "./pages";
@@ -16,6 +19,7 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
   const appr = ws.approvals.find(x => x.app === id && x.kind !== "upload");
   const done = a.checklist.filter(c => c.state !== "missing").length;
   const tabs: { k: Tab; l: string; n?: string }[] = [
+    { k: "progress", l: t("tab_progress") },
     { k: "check", l: t("tab_check"), n: `${done}/${a.checklist.length}` },
     { k: "form", l: t("tab_form") },
     { k: "fees", l: t("tab_fees") },
@@ -39,6 +43,7 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
         </nav>
       </header>
       <div className="sh-body">
+        {tab === "progress" && <Progress a={a} />}
         {tab === "check" && <Checklist a={a} />}
         {tab === "form" && <FormPreview key={a.id + String(edit)} a={a} startEdit={edit} />}
         {tab === "fees" && <Fees a={a} />}
@@ -51,6 +56,58 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
         </footer>
       )}
     </Sheet>
+  );
+}
+
+/* ------------------------------- progress ------------------------------- */
+
+type StepState = "done" | "now" | "next" | "blocked";
+/** Every step from prepared to issued, live: the application's status, its checklist and the filing team's record. */
+function Progress({ a }: { a: Application }) {
+  const { b, lang, ws, cloud, openApproval } = useApp();
+  const zh = lang === "zh";
+  const f = cloud?.filings.find(x => x.app_id === a.id && x.status !== "canceled");
+  const missing = a.checklist.filter(c => c.state === "missing").length, empty = a.fields.filter(x => !x.value).length;
+  const prepAt = [...ws.audit].reverse().find(x => x.object.en === a.name.en)?.at;
+  const appr = ws.approvals.find(x => x.app === a.id && x.kind === "file");
+  const pay = ws.approvals.find(x => x.app === a.id && x.kind === "pay");
+  const st = a.status;
+  const past = (s: string[]) => s.includes(st);
+  const day = (iso?: string | null) => (iso ? fmtDay(iso, lang, true) : "");
+  const off = a.official ? formById(a.official) : undefined;
+  const tbc = /^(to be confirmed|待确认)$/i.test(b(a.est));
+  const steps: { k: string; s: StepState; t: string; d?: string; act?: { l: string; go: () => void } }[] = [
+    { k: "prep", s: "done", t: zh ? "快哉准备了申请" : "Placetta prepared the application", d: [off ? off.form : "", day(prepAt)].filter(Boolean).join(zh ? "，" : ", ") },
+    { k: "you", s: past(["ready", "filing", "review", "approved"]) || (!missing && !empty) ? "done" : "now",
+      t: zh ? "资料与文件" : "Answers and documents",
+      d: past(["ready", "filing", "review", "approved"]) || (!missing && !empty) ? (zh ? "已齐全" : "Complete") : [missing ? (zh ? `还差 ${missing} 份文件` : `${missing} document${missing === 1 ? "" : "s"} still needed`) : "", empty ? (zh ? `${empty} 项信息待填` : `${empty} answer${empty === 1 ? "" : "s"} still needed`) : ""].filter(Boolean).join(zh ? "，" : ", ") },
+    { k: "approve", s: past(["filing", "review", "approved"]) || !!f ? "done" : st === "ready" ? "now" : "next",
+      t: zh ? "您批准提交" : "You approve the filing", d: f ? (zh ? `已于 ${day(f.approved_at)} 批准` : `Approved ${day(f.approved_at)}`) : undefined,
+      act: appr ? { l: zh ? "查看并批准" : "Review and approve", go: () => openApproval(appr.id) } : undefined },
+    { k: "team", s: past(["review", "approved"]) ? "done" : st === "filing" || (f && ["requested", "in_progress", "needs_info"].includes(f.status)) ? (pay ? "blocked" : "now") : "next",
+      t: zh ? "申报团队核对并提交" : "The filing team checks and submits it",
+      d: pay ? (zh ? "等待您向机构付款" : "Waiting for you to pay the agency fee") : f?.status === "needs_info" && f.note ? f.note : f?.requirements_checked ? (zh ? "已按机构现行要求核对" : "Checked against the agency's current requirements") : f ? (zh ? "团队已接手" : "With the team") : undefined,
+      act: pay ? { l: zh ? "去付款" : "Pay the agency", go: () => openApproval(pay.id) } : undefined },
+    { k: "agency", s: st === "approved" ? "done" : st === "review" ? "now" : "next",
+      t: zh ? "机构审核" : "The agency reviews it",
+      d: f?.submitted_at ? [zh ? `${day(f.submitted_at)} 提交` : `Submitted ${day(f.submitted_at)}`, f.confirmation_number ? (zh ? `确认号 ${f.confirmation_number}` : `confirmation ${f.confirmation_number}`) : "", tbc ? "" : zh ? `通常需要：${b(a.est)}` : `usually takes ${b(a.est)}`].filter(Boolean).join(zh ? "，" : ", ") : tbc ? undefined : (zh ? `通常需要：${b(a.est)}` : `Usually takes ${b(a.est)}`) },
+    { k: "done", s: st === "approved" ? "done" : "next", t: zh ? "批准并发证" : "Approved and issued",
+      d: st === "approved" ? [f?.decided_at ? day(f.decided_at) : "", a.renews ? b(a.renews) : ""].filter(Boolean).join(zh ? "。" : ". ") : a.renews ? (zh ? `续期：${b(a.renews)}` : `Renewal: ${b(a.renews)}`) : undefined },
+  ];
+  const cur = steps.findIndex(s => s.s !== "done");
+  return (
+    <div className="pg">
+      <p className="pg-live"><i />{cloud ? (zh ? "实时更新：团队或机构有任何进展，这里会立即显示。" : "Live: every change from the team or the agency shows here as it happens.") : (zh ? "示例进度" : "Sample progress")}</p>
+      <ol className="pg-steps">
+        {steps.map((s, i) => (
+          <li key={s.k} className={"st-" + s.s + (i === cur ? " cur" : "")}>
+            <span className="dot" aria-hidden="true">{s.s === "done" ? <I.check /> : i + 1}</span>
+            <div><b>{s.t}</b>{s.d && <small>{s.d}</small>}{s.act && i === cur && <button type="button" className="pill ink sm" onClick={s.act.go}>{s.act.l}</button>}</div>
+          </li>
+        ))}
+      </ol>
+      {f?.note && f.status !== "needs_info" && <p className="note">{zh ? "团队备注：" : "From the team: "}{f.note}</p>}
+    </div>
   );
 }
 
@@ -95,7 +152,8 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
 }
 
 function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
-  const { b, t, editFields, downloadApp, cloud } = useApp();
+  const { b, t, lang, say, editFields, downloadApp, cloud } = useApp();
+  const [making, setMaking] = useState(false);
   const canEdit = !["approved", "review"].includes(a.status) && a.fields.length > 0;
   const [edit, setEdit] = useState(startEdit && canEdit);
   const [vals, setVals] = useState<Record<string, string>>(() => Object.fromEntries(a.fields.map(f => [f.id, f.value])));
@@ -105,8 +163,31 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
     if (Object.keys(changed).length) editFields(a.id, changed);
     setEdit(false);
   };
+  const off = a.official ? formById(a.official) : undefined;
+  const official = async () => {
+    if (!off) return;
+    setMaking(true);
+    try {
+      const { fillOfficial } = await import("./forms/fill");
+      const blob = await fillOfficial(off.id, a.fields);
+      if (blob) { const r = await saveFile(`${off.id}-${a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40)}.pdf`, blob); if (r === "unavailable") say(t("t_noDl")); }
+    } catch { say(lang === "zh" ? "无法生成官方表格，请稍后再试。" : "Couldn't make the official form. Try again."); }
+    setMaking(false);
+  };
   return (
     <div className="formwrap">
+      {off && (
+        <div className="official">
+          <div className="off-h"><I.form /><div><b>{off.form}</b><span>{b(off.title)}</span></div></div>
+          <p>{lang === "zh" ? `${off.agency.zh}。${METHOD[off.method].zh}。${off.how.zh}` : `${off.agency.en}. ${METHOD[off.method].en}. ${off.how.en}`}</p>
+          {off.foreign && <p className="off-note">{b(off.foreign)}</p>}
+          <div className="off-act">
+            {off.fill && <button type="button" className="pill ink sm" disabled={making} onClick={() => void official()}><I.download />{making ? "…" : lang === "zh" ? "下载已填写的官方表格" : "Download the filled official form"}</button>}
+            <a className="pill quiet sm" href={off.pdf ?? off.url} target="_blank" rel="noopener noreferrer">{off.pdf ? (lang === "zh" ? "官方表格" : "Official form") : (lang === "zh" ? "机构办理入口" : "Agency filing page")}<I.ext /></a>
+            {off.info !== (off.pdf ?? off.url) && <a className="pill quiet sm" href={off.info} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "机构说明" : "Agency page"}<I.ext /></a>}
+          </div>
+        </div>
+      )}
       <div className="paper">
         <div className="paper-h"><span>{b(a.agency)}</span><b>{b(a.form ?? a.name)}</b>{!cloud && <Sample />}</div>
         <dl>
@@ -129,10 +210,10 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
           <button type="button" className="pill quiet" onClick={() => { setVals(Object.fromEntries(a.fields.map(f => [f.id, f.value]))); setEdit(false); }}>{t("cancel")}</button>
         </> : <>
           {canEdit && <button type="button" className="pill quiet" onClick={() => setEdit(true)}><I.pencil />{t("edit")}</button>}
-          <button type="button" className="pill quiet" onClick={() => downloadApp(a.id)}><I.download />{t("download")} PDF</button>
+          <button type="button" className="pill quiet" onClick={() => downloadApp(a.id)}><I.download />{a.official ? (lang === "zh" ? "下载字段清单" : "Download the field sheet") : t("download") + " PDF"}</button>
         </>}
       </div>
-      <p className="note">{t("formFor")}</p>
+      <p className="note">{a.official ? (lang === "zh" ? "这些是机构官方表格上的栏目，按表格顺序排列。快哉从不保存社会安全号、ITIN 或护照号，这些由签署人手写。" : "These are the lines on the agency's own form, in its order. Placetta never stores an SSN, ITIN or passport number; the signer writes those by hand.") : t("formFor")}</p>
     </div>
   );
 }

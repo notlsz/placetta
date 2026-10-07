@@ -74,6 +74,7 @@ export const S = {
   estimates: B("Fees and times are estimates from each agency's published information. Placetta confirms them before anything is paid.", "费用和时间是根据各机构公开信息的估算，付款前快哉会再次核实。"),
 
   tab_check: B("Checklist", "清单"),
+  tab_progress: B("Progress", "进度"),
   tab_form: B("Application", "申请表"),
   tab_fees: B("Fees", "费用"),
   tab_receipt: B("Receipt", "收据"),

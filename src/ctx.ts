@@ -5,7 +5,7 @@ import type { Bi, Store, UpdateItem, Workspace } from "./model";
 import type { AgencyLogin, Billing, Filing, Integration, IntegrationKind, Plan } from "./cloud/api";
 
 export type View = "overview" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue";
-export type Tab = "check" | "form" | "fees" | "receipt";
+export type Tab = "progress" | "check" | "form" | "fees" | "receipt";
 
 /** What a signed-in account adds: billing, integrations, saved logins, the filing queue and data controls. */
 export type CloudCtx = {

@@ -92,7 +92,9 @@ function Welcome() {
   const { b, ws, ask, busy, cloud, mode } = useApp();
   const place = ws.meta?.city ?? (ws.locations[0] ? b(ws.locations[0].name) : "");
   const what = ws.meta?.what ?? "";
-  const start = () => ask(b(B(`Map every license, permit and registration ${b(ws.business)} needs to open its store${place ? ` in ${place}` : ""}${what ? `, which sells ${what.charAt(0).toLowerCase() + what.slice(1)}` : ""}. Prepare an application for each one, fill what you can from Context, and tell me what you need from me.`, `梳理${b(ws.business)}${place ? `在${place}` : ""}${what ? `开设${what}` : "开店"}所需的全部执照、许可和登记，为每一项准备申请，用资料填写能填的内容，并告诉我还需要我提供什么。`)));
+  const ops = /importer|seller|warehouse|3pl/i.test(what);
+  const whatZh = ({ "Importer or online seller": "进口商或电商卖家", "Warehouse or 3PL": "仓库或第三方物流" } as Record<string, string>)[what] ?? what;
+  const start = () => ask(b(B(`Map every license, permit and registration ${b(ws.business)} needs ${ops ? `to operate${place ? ` in ${place}` : ""} as ${/^[aeiou]/i.test(what) ? "an" : "a"} ${what.toLowerCase()}` : `to open its store${place ? ` in ${place}` : ""}${what ? `, which sells ${what.charAt(0).toLowerCase() + what.slice(1)}` : ""}`}. Use the agencies' official forms. Prepare an application for each one, fill what you can from Context, and tell me what you need from me.`, `梳理${b(ws.business)}${place ? `在${place}` : ""}${ops ? `以${whatZh}身份经营` : what ? `开设${what}` : "开店"}所需的全部执照、许可和登记，使用各机构的官方表格，为每一项准备申请，用资料填写能填的内容，并告诉我还需要我提供什么。`)));
   // Came from the website's "Get my plan": start mapping as soon as the agent is ready, once.
   useEffect(() => { if (cloud && mode === "server" && cloud.plan !== "none" && takeAutostart()) setTimeout(start, 0); }, [mode]);   // after this commit, once the agent is wired up // eslint-disable-line react-hooks/exhaustive-deps
   return (

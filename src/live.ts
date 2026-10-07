@@ -8,6 +8,7 @@ import type { Application, Approval, Doc, Field, FactGroup, Level, LicenseHit, S
 import { inDays, nowIso } from "./time";
 import { docx } from "./files";
 import type { Lang } from "./i18n";
+import { FORMS, METHOD, formById, formsFor, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
 
 /* ------------------------------------------------------------------ *
  * The live agent: a real model reads the workspace and acts on it
@@ -180,7 +181,7 @@ function snapshot(w: Workspace, lang: Lang) {
     business: b(w.business), goal: b(w.goal), today: inDays(0),
     locations: w.locations.map(l => `${b(l.name)} (${b(l.county)})`),
     applications: w.apps.map(a => ({
-      id: a.id, name: b(a.name), agency: b(a.agency), level: a.level, status: a.status, next: a.next ? b(a.next) : undefined,
+      id: a.id, name: b(a.name), official_form: a.official, agency: b(a.agency), level: a.level, status: a.status, next: a.next ? b(a.next) : undefined,
       fee_usd: a.fees.reduce((s, f) => s + f.amount, 0), takes: b(a.est), sets_opening_date: a.critical || undefined,
       empty_fields: a.fields.filter(f => !f.value).map(f => b(f.label)),
       missing_documents: a.checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: b(c.label) })),
@@ -201,7 +202,8 @@ export function rules(w: Workspace, lang: Lang, account: boolean, research: bool
 
 How you work:
 - You are an operator, not a chatbot. ${tools ? "When the person asks for something your tools can do, do it now, in as many steps as it takes, then say what you did. Don't describe what you could do, don't ask permission to prepare things, and don't stop after one step when the job needs more." : "Answer directly and concretely."}${tools ? `
-- Chain the tools. To map a business: prepare_application once for each license it needs, fill each from Context, add_deadline for due dates, then request_filing_approval for the ones that are ready. For progress or "what's next": check_progress first${has(MAIL) ? ", then search_email for recent mail from the agencies and read_email what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${has(DRIVES) ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
+- Use the agencies' real forms, never a template. find_official_forms returns the official form for each filing (form number, agency, how it's filed, official link, fee and the form's own fields by line). When a form is there, prepare_application with its official_form_id and fill its fields with the form's own labels. Only when the library has nothing for a filing, research the agency's official page and name the exact form or online service it uses.
+- Chain the tools. To map a business: find_official_forms for its business and place, then prepare_application once for each license it needs, fill each from Context, add_deadline for due dates, then request_filing_approval for the ones that are ready. For progress or "what's next": check_progress first${has(MAIL) ? ", then search_email for recent mail from the agencies and read_email what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${has(DRIVES) ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
 - Only filing, paying and sending need the person. request_filing_approval${account ? "" : ", draft_message"} and send_email put those in front of them to approve. Everything else (preparing, filling, drafting documents, adding deadlines${has(CAL) ? ", calendar events" : ""}${has(DRIVES) ? ", importing files" : ""}, remembering facts) you just do.` : ""}${apps.length ? `
 - Connected apps: ${apps.join(", ")}.` : ""}${account && missing.length ? `
 - Not connected: ${missing.join(", ")}. If a task needs one, say so in one sentence and point to Settings, Integrations.` : ""}
@@ -293,6 +295,14 @@ const applyExtract = (appId: string, itemId: string | undefined, docId: string, 
   return audit("agent", B("Extracted data", "提取信息"), same(name), same([...fields, ...facts].map(x => x.label).join(", ") || "-"))(n);
 };
 
+/** An official form's own fields, in its order, with the values the agent gave matched by label, field id or line number. */
+function officialFields(off: OfficialForm, given: Field[]): Field[] {
+  return off.fields.map(o => {
+    const g = given.find(x => { const k = x.label.en.toLowerCase().replace(/^line\s+/, ""); return k === o.label.en.toLowerCase() || x.label.en === o.label.zh || k === o.id || k === o.line.toLowerCase() || k === o.line.toLowerCase() + ": " + o.label.en.toLowerCase(); });
+    return { id: o.id, label: B(`${/^\d/.test(o.line) ? "Line " : ""}${o.line}: ${o.label.en}`, `${/^\d/.test(o.line) ? "第 " + o.line + " 行" : o.line}：${o.label.zh}`), value: g?.value ?? "", from: g?.from };
+  });
+}
+
 export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace) => void, step: (s: Step) => void, made: Made, lang: Lang, textLen: () => number, account: boolean, x: X): Tool[] {
   const L = (en: string, zh: string) => B(en, zh);
   const findApp = (id: unknown) => { const a = get().apps.find(x => x.id === str(id)); if (!a) throw new Error(`No application with id "${str(id)}". Use an id from the workspace.`); return a; };
@@ -309,9 +319,41 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
 
   return [
     {
-      name: "prepare_application",
-      description: "Add a license, permit or registration the business needs to the workspace, with what you can already fill in. Returns its id. Does not file anything.",
+      name: "find_official_forms",
+      description: "The official forms library: the agencies' real forms for a business and place, in filing order, with form number, agency, how it's filed, official link, fee and the form's own fields by line. Call it before preparing applications. Also searches by words (a form number like SS-4, or 'seller's permit').",
       inputSchema: { type: "object", properties: {
+        business: { type: "string", description: "What the business does, e.g. 'milk tea shop', 'lifestyle retail chain', 'Amazon seller importing goods', '3PL warehouse'" },
+        place: { type: "string", description: "City and state, e.g. 'Flushing, NY'" },
+        search: { type: "string", description: "Words to search for instead, e.g. 'SS-4' or 'sales tax'" },
+        hires_staff: { type: "boolean" }, imports_goods: { type: "boolean" }, new_us_company: { type: "boolean", description: "They still need to form the US company" },
+        foreign_company_registers: { type: "boolean", description: "A company formed outside this state or country registers to do business here" },
+        builds_out: { type: "boolean", description: "Construction or remodeling of the space" }, exterior_sign: { type: "boolean" },
+        hazmat_or_batteries: { type: "boolean" }, sells_cosmetics: { type: "boolean" }, food_warehouse: { type: "boolean" }, manhattan_below_96th: { type: "boolean" },
+      } },
+      execute(i) {
+        const segment = segmentOf(str(i.business) || get().business.en);
+        const place = str(i.place) || get().locations.map(l => `${l.name.en}, ${l.county.en}`).join("; ");
+        const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}),
+          ...(i.builds_out ? { buildout: true } : {}), ...(i.exterior_sign ? { signage: true } : {}), ...(i.hazmat_or_batteries ? { hazmat: true } : {}), ...(i.sells_cosmetics ? { cosmetics: true } : {}),
+          ...(i.food_warehouse || segment === "restaurant" ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}) };
+        const list: OfficialForm[] = str(i.search) ? searchForms({ text: str(i.search), where: str(i.place) || undefined }) : formsFor({ segment, where: place, needs });
+        S("searching", L(`Finding the official forms for ${str(i.search) || place || "the business"}`, `查找${str(i.search) || place || "这家企业"}的官方表格`));
+        mark();
+        return {
+          segment, place,
+          forms: list.slice(0, 30).map(f => ({ official_form_id: f.id, form: f.form, title: f.title[lang], agency: f.agency[lang], level: f.level, how_filed: `${METHOD[f.method][lang]}. ${f.how[lang]}`, official_link: f.url, info: f.info,
+            fee_usd: f.fee, fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`),
+            attachments: f.attach?.map(a => a[lang]), for_china_based_owners: f.foreign?.[lang], placetta_fills_official_pdf: !!f.fill })),
+          not_in_library: list.length ? "Local permits for places outside New York City, Los Angeles and Houston: research the city and county pages." : "Nothing in the library for this. Research the agency's official page.",
+          library_size: FORMS.length,
+        };
+      },
+    },
+    {
+      name: "prepare_application",
+      description: "Add a license, permit or registration the business needs to the workspace, with what you can already fill in. With official_form_id (from find_official_forms) it becomes the agency's real form: its number, agency, link, fee and fields by line, which you fill by their labels. Returns its id and the fields still empty. Does not file anything.",
+      inputSchema: { type: "object", properties: {
+        official_form_id: { type: "string", description: "The id from find_official_forms. Use it whenever the library has the form." },
         name: { type: "string" }, agency: { type: "string" }, level: { type: "string", enum: LEVELS },
         fee_usd: { type: "number", description: "Typical total fee in USD, 0 if none" }, processing_time: { type: "string" },
         agency_url: { type: "string", description: "The agency's official home page" }, form: { type: "string", description: "The form or online service used" },
@@ -319,21 +361,30 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         checklist: { type: "array", items: { type: "object", properties: { item: { type: "string" }, have: { type: "boolean" } }, required: ["item"] } },
         next_step: { type: "string" },
         store_id: { type: "string", description: "The store this is for, when the business has more than one" },
-      }, required: ["name", "agency", "level"] },
+      }, required: [] },
       execute(i) {
-        const name = str(i.name, 120), agency = str(i.agency, 160);
-        if (!name || !agency) throw new Error("name and agency are required");
-        const level = (LEVELS.includes(i.level as Level) ? i.level : "state") as Level;
-        const url = okUrl(str(i.agency_url, 200)), fee = Math.max(0, Number(i.fee_usd) || 0);
-        const fields = fieldList(i.fields, lang === "zh" ? "来自资料" : "From Context");
-        const checklist = arr(i.checklist).map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter(c => c.label.en);
-        const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => !f.value) ? "draft" : "ready";
+        const off = str(i.official_form_id) ? formById(str(i.official_form_id)) : undefined;
+        if (str(i.official_form_id) && !off) throw new Error(`No official form "${str(i.official_form_id)}". Use an id from find_official_forms, or leave it out.`);
+        const name = off ? off.title[lang] : str(i.name, 120), agency = off ? off.agency[lang] : str(i.agency, 160);
+        if (!name || !agency) throw new Error("name and agency are required (or an official_form_id)");
+        const level = off ? off.level : (LEVELS.includes(i.level as Level) ? i.level : "state") as Level;
+        const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee_usd) || 0);
+        const given = fieldList(i.fields, lang === "zh" ? "来自资料" : "From Context");
+        const fields = off && off.fields.length ? officialFields(off, given) : given;
+        const checklist = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
+        // an official form whose lines aren't in the library yet stays with Placetta until its fields are filled
+        const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => !f.value) || (off && !fields.length) ? "draft" : "ready";
         const id = "x-" + slug(name) + "-" + seq++;
         S("shaping", L(`Preparing the ${/^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name}`, `准备${name}`), domainOf(url) || undefined);
-        const app: Application = {
+        const app: Application = off ? {
+          id, name: off.title, agency: off.agency, level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, official: off.id,
+          fees: [{ label: L("Government fee", "政府规费"), amount: fee }], feeNote: off.feeNote ?? (off.fee == null ? L("Set by the agency's fee schedule. The filing team confirms it before you pay.", "按机构收费标准计算，团队会在您付款前确认。") : L("The agency's published fee. The filing team confirms it before you pay.", "机构公布的费用，团队会在您付款前确认。")),
+          est: off.takes ?? (str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认")), renews: off.renews,
+          source: { label: domainOf(off.info), url: off.info }, form: same(off.form), fields, checklist,
+        } : {
           id, name: same(name), agency: same(agency), level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined,
           fees: [{ label: L("Estimated fee", "预估费用"), amount: fee }], feeNote: L("Estimate from Placetta. Confirm with the agency before paying.", "快哉的估算，付款前请向机构确认。"),
-          est: same(str(i.processing_time, 120) || (lang === "zh" ? "待确认" : "To be confirmed")),
+          est: str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认"),
           source: { label: domainOf(url), url }, form: str(i.form) ? same(str(i.form, 120)) : undefined, fields, checklist,
         };
         apply(w => audit("agent", L("Prepared application", "准备申请"), app.name, same(`${fields.filter(f => f.value).length}/${fields.length}`))(addApp(app)(w)));
@@ -355,7 +406,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           if (x.id !== a.id) return x;
           const fields = [...x.fields];
           for (const f of incoming) {
-            const k = fields.findIndex(y => y.label.en.toLowerCase() === f.label.en.toLowerCase() || y.label.zh === f.label.en);
+            const key = f.label.en.toLowerCase().replace(/^line\s+/, "");
+            const k = fields.findIndex(y => y.label.en.toLowerCase() === f.label.en.toLowerCase() || y.label.zh === f.label.en || y.id === f.label.en || (!!a.official && (y.id === "l" + key || formById(a.official)?.fields.find(o => o.id === y.id)?.line.toLowerCase() === key)));
             if (k >= 0) fields[k] = { ...fields[k], value: f.value, from: f.from, quote: fields[k].value === f.value ? fields[k].quote : undefined }; else fields.push(f);
           }
           return { ...x, fields, status: x.status === "draft" && fields.every(f => f.value) && !x.checklist.some(c => c.state === "missing") ? "ready" : x.status };
