@@ -59,7 +59,10 @@ Deno.serve(async (req) => {
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   const ws = String(body.workspace_id ?? "");
-  const lang = body.lang === "zh" ? "zh" : "en";
+  // en and zh have their own voices; any other language is read by the multilingual voice in that language
+  const tag = typeof body.lang === "string" && /^[a-z]{2,3}(-[A-Za-z0-9]{2,4})?$/.test(body.lang) ? body.lang : "en";
+  const lang = tag === "zh" || tag.startsWith("zh-") ? "zh" : "en";
+  const other = lang === "en" && tag !== "en" && !tag.startsWith("en-") ? tag : null;
   const text = String(body.text ?? "").replace(/[\u0000-\u0008\u000B-\u001F]/g, " ").trim().slice(0, 1500);
   if (!text) return fail(400, "bad_request", "Nothing to read.");
 
@@ -71,7 +74,8 @@ Deno.serve(async (req) => {
   if ((usage?.tts_chars ?? 0) + text.length > DAILY_CHARS) return fail(429, "rate_limited", "Today's voice limit is reached.");
 
   const ssml = (voice: string) => `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="${lang === "zh" ? "zh-CN" : "en-US"}">` +
-    (voice.includes("DragonHD") ? `<voice name="${voice}">${xml(text)}</voice>` : `<voice name="${voice}"><mstts:express-as style="friendly">${xml(text)}</mstts:express-as></voice>`) + `</speak>`;
+    (other ? `<voice name="${voice}"><lang xml:lang="${other}">${xml(text)}</lang></voice>`
+      : voice.includes("DragonHD") ? `<voice name="${voice}">${xml(text)}</voice>` : `<voice name="${voice}"><mstts:express-as style="friendly">${xml(text)}</mstts:express-as></voice>`) + `</speak>`;
   const say = (voice: string) => fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
     method: "POST",
     headers: {
@@ -82,7 +86,7 @@ Deno.serve(async (req) => {
     },
     body: ssml(voice),
   });
-  let res = await say(VOICE[lang]);
+  let res = await say(other ? FALLBACK.en : VOICE[lang]);
   if (!res.ok && res.status !== 429 && res.status !== 401) res = await say(FALLBACK[lang]);
   if (!res.ok) {
     console.error("azure tts", res.status, (await res.text()).slice(0, 200));

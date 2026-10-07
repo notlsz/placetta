@@ -6,10 +6,12 @@ import {
 import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
-import { inDays, nowIso } from "./time";
+import { inDays, money, nowIso } from "./time";
+import { replyLanguage } from "./langs";
+import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills";
 import { docx } from "./files";
 import type { Lang } from "./i18n";
-import { FORMS, METHOD, formById, formsFor, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
+import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
 
 /* ------------------------------------------------------------------ *
  * The live agent: a real model reads the workspace and acts on it
@@ -183,7 +185,7 @@ function snapshot(w: Workspace, lang: Lang) {
     locations: w.locations.map(l => `${b(l.name)} (${b(l.county)})`),
     applications: w.apps.map(a => ({
       id: a.id, name: b(a.name), official_form: a.official, agency: b(a.agency), level: a.level, status: a.status, next: a.next ? b(a.next) : undefined,
-      fee_usd: a.fees.reduce((s, f) => s + f.amount, 0), takes: b(a.est), sets_opening_date: a.critical || undefined,
+      fee: a.fees.reduce((s, f) => s + f.amount, 0), currency: a.currency ?? "USD", takes: b(a.est), sets_opening_date: a.critical || undefined,
       empty_fields: a.fields.filter(f => !f.value).map(f => b(f.label)),
       missing_documents: a.checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: b(c.label) })),
     })),
@@ -196,7 +198,7 @@ function snapshot(w: Workspace, lang: Lang) {
   };
 }
 
-export function rules(w: Workspace, lang: Lang, account: boolean, research: boolean, connected: string[], tools: boolean, extra: { me?: string } = {}) {
+export function rules(w: Workspace, lang: Lang, account: boolean, research: boolean, connected: string[], tools: boolean, extra: { me?: string; speak?: string } = {}) {
   const book = extra.me ? w.memories?.[extra.me] : undefined, mem = memoryBrief(book), ms = book?.settings;
   const has = (k: string[]) => connected.some(c => k.includes(c));
   const apps = connected.map(c => APP_NAMES[c]).filter(Boolean);
@@ -211,6 +213,7 @@ How you work:
 - You can change anything in the workspace the person can: add stores (add_store shows it in Stores right away), rename the business, edit facts, deadlines and applications, and change everyday settings (language, theme, accent color, reading replies aloud) with change_setting. Changing something that already exists in a way they may not want, like moving a store to a different city or removing a store or an application, goes through update_store, remove_store or remove_application: that puts a confirmation in front of them and nothing changes until they confirm. Say you've asked them to confirm; never say it's done before they do. After a store moves, map the new city's permits.
 - Never touch these yourself, even if asked; point to Settings instead: their password, settings PIN, two-step sign-in, team members and roles, billing, agency logins, integrations, and deleting data.${ms ? `
 - Memory: what you know about the person is below under Memory. Use it when it changes the answer; don't recite it.${ms.generate ? " When they tell you something durable about themselves, their preferences or their work, save it with memory_save (one short fact per call)." : " Saving new memories is off: only memory_save when they explicitly ask you to remember something."}${ms.sensitive ? "" : " Never save health, religion, politics, finances or other sensitive details."}${ms.searchChats ? " search_past_chats finds what they said in earlier chats when they refer to it." : ""}` : ""}
+- Skills: before a job, if one of the Skills below fits, skill_read it and follow it; a form skill fills the lines it knows by itself. After you work out something that will come up again (a city's local permits the library didn't have, an agency's quirks, a way this business works), skill_save it${w.skillsAuto === false ? " only if they ask (creating skills automatically is off)" : ""}. That's how you get faster each time.
 - Only filing, paying and sending need the person. request_filing_approval${account ? "" : ", draft_message"} and send_email put those in front of them to approve. Everything else (preparing, filling, drafting documents, adding deadlines${has(CAL) ? ", calendar events" : ""}${has(DRIVES) ? ", importing files" : ""}, remembering facts) you just do.` : ""}${apps.length ? `
 - Connected apps: ${apps.join(", ")}.` : ""}${account && missing.length ? `
 - Not connected: ${missing.join(", ")}. If a task needs one, say so in one sentence and point to Settings, Integrations.` : ""}
@@ -224,7 +227,10 @@ Rules:
 - Research requirements, fees and processing times on official government websites with web_search and web_fetch: the agency's own pages (.gov, state, county and city sites). Portals that point to agencies (usa.gov, sba.gov) are fine for finding the right agency, but read and cite the agency's own page. Use the agency's root domain as the application's agency_url. If you can't confirm something on an official page, call it an estimate.` : `
 - Requirements, fees and processing times come from your general knowledge: call them estimates to confirm with the agency, and never present a guess as a confirmed rule. Use only agencies' official root domains as links.
 - You cannot browse the web or reach agency portals from here.`}
-- Reply in ${LANG[lang]}. Be sharp and concise: two to four short sentences of plain prose, no markdown, no lists, no headings, and never an em dash. Lead with what you did, then what's next.
+- Reply in ${extra.speak ?? replyLanguage(lang)}. Be sharp and concise: two to four short sentences of plain prose, no markdown, no lists, no headings, and never an em dash. Lead with what you did, then what's next.
+
+Skills:
+${skillIndex(w) || "(none)"}
 
 Workspace:
 ${JSON.stringify(snapshot(w, lang))}${mem ? `
@@ -257,7 +263,7 @@ export type Services = {
   /** Low-risk settings the agent may change for the person. Returns what it was set to. */
   setting?(key: string, value: string): string;
 };
-export type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"]; lastToolAt: number };
+export type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; skills: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"]; lastToolAt: number };
 export type X = { model: Model; files: Map<string, File>; svc?: Services; signal: AbortSignal };
 
 const MAIL = ["gmail", "outlook_mail"], CAL = ["gcal", "outlook_cal"], DRIVES = ["gdrive", "dropbox"];
@@ -329,6 +335,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     return { id: slug(label) || "f" + i, label: same(label), value: str(o.value, 200), from: str(o.source, 80) ? same(str(o.source, 80)) : same(fromDefault) };
   }).filter(f => f.label.en);
   const S = (state: OrbState, label: Bi, tool?: string) => step({ state, label, tool });
+  const touches = new Map<string, number>(), touch = (id: string) => touches.set(id, (touches.get(id) ?? 0) + 1);
   const hasAny = (kinds: string[]) => !!x.svc?.connected().some(k => kinds.includes(k));
 
   return [
@@ -337,7 +344,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       description: "The official forms library: the agencies' real forms for a business and place, in filing order, with form number, agency, how it's filed, official link, fee and the form's own fields by line. Call it before preparing applications. Also searches by words (a form number like SS-4, or 'seller's permit').",
       inputSchema: { type: "object", properties: {
         business: { type: "string", description: "What the business does, e.g. 'milk tea shop', 'lifestyle retail chain', 'Amazon seller importing goods', '3PL warehouse'" },
-        place: { type: "string", description: "City and state, e.g. 'Flushing, NY'" },
+        place: { type: "string", description: "City and state or country, e.g. 'Flushing, NY', 'Shanghai', 'London', 'Dubai'" },
         search: { type: "string", description: "Words to search for instead, e.g. 'SS-4' or 'sales tax'" },
         hires_staff: { type: "boolean" }, imports_goods: { type: "boolean" }, new_us_company: { type: "boolean", description: "They still need to form the US company" },
         foreign_company_registers: { type: "boolean", description: "A company formed outside this state or country registers to do business here" },
@@ -353,12 +360,15 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const list: OfficialForm[] = str(i.search) ? searchForms({ text: str(i.search), where: str(i.place) || undefined }) : formsFor({ segment, where: place, needs });
         S("searching", L(`Finding the official forms for ${str(i.search) || place || "the business"}`, `查找${str(i.search) || place || "这家企业"}的官方表格`));
         mark();
+        const info = placeInfo(place);
         return {
-          segment, place,
+          segment, place, country: info.country ?? "unknown", city: info.city?.en, currency: info.currency,
           forms: list.slice(0, 30).map(f => ({ official_form_id: f.id, form: f.form, title: f.title[lang], agency: f.agency[lang], level: f.level, how_filed: `${METHOD[f.method][lang]}. ${f.how[lang]}`, official_link: f.url, info: f.info,
-            fee_usd: f.fee, fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`),
-            attachments: f.attach?.map(a => a[lang]), for_china_based_owners: f.foreign?.[lang], placetta_fills_official_pdf: !!f.fill })),
-          not_in_library: list.length ? "Local permits for places outside New York City, Los Angeles and Houston: research the city and county pages." : "Nothing in the library for this. Research the agency's official page.",
+            fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`),
+            attachments: f.attach?.map(a => a[lang]), for_foreign_owners: f.foreign?.[lang], placetta_fills_official_pdf: !!f.fill, reread_agency_page_first: f.checked === "known" })),
+          not_in_library: !info.country ? "This place isn't in the library yet. Research its national and local requirements on the government's own sites, prepare each one, then skill_save what you learned so the next business there goes faster."
+            : !info.local ? `The national${info.country === "US" ? ", state" : ""} steps are here; ${info.city ? info.city.en + "'s" : "the city's"} own local permits aren't. Research the city's official pages for them, then skill_save the local steps you found.`
+            : list.length ? "Check the agency pages for anything local not listed (signage, alcohol, outdoor seating)." : "Nothing in the library for this. Research the agency's official page.",
           library_size: FORMS.length,
         };
       },
@@ -369,7 +379,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       inputSchema: { type: "object", properties: {
         official_form_id: { type: "string", description: "The id from find_official_forms. Use it whenever the library has the form." },
         name: { type: "string" }, agency: { type: "string" }, level: { type: "string", enum: LEVELS },
-        fee_usd: { type: "number", description: "Typical total fee in USD, 0 if none" }, processing_time: { type: "string" },
+        fee: { type: "number", description: "Typical total fee in the local currency, 0 if none" }, currency: { type: "string", description: "ISO currency of the fee, e.g. USD, CNY, GBP, EUR, AED" }, processing_time: { type: "string" },
         agency_url: { type: "string", description: "The agency's official home page" }, form: { type: "string", description: "The form or online service used" },
         fields: { type: "array", items: { type: "object", properties: { label: { type: "string" }, value: { type: "string" }, source: { type: "string" } }, required: ["label"] } },
         checklist: { type: "array", items: { type: "object", properties: { item: { type: "string" }, have: { type: "boolean" } }, required: ["item"] } },
@@ -382,21 +392,24 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const name = off ? off.title[lang] : str(i.name, 120), agency = off ? off.agency[lang] : str(i.agency, 160);
         if (!name || !agency) throw new Error("name and agency are required (or an official_form_id)");
         const level = off ? off.level : (LEVELS.includes(i.level as Level) ? i.level : "state") as Level;
-        const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee_usd) || 0);
+        const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee ?? i.fee_usd) || 0);
+        const currency = (off?.currency ?? (/^[A-Z]{3}$/.test(str(i.currency)) ? str(i.currency) : "USD"));
         const given = fieldList(i.fields, lang === "zh" ? "来自资料" : "From Context");
-        const fields = off && off.fields.length ? officialFields(off, given) : given;
+        // a form skill fills the lines that don't depend on the store from the last filing of the same form
+        const known = off ? prefill(get(), off.id) : new Map();
+        const fields = (off && off.fields.length ? officialFields(off, given) : given).map(f => (!f.value && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
         const checklist = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
         // an official form whose lines aren't in the library yet stays with Placetta until its fields are filled
         const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => !f.value) || (off && !fields.length) ? "draft" : "ready";
         const id = "x-" + slug(name) + "-" + seq++;
         S("shaping", L(`Preparing the ${/^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name}`, `准备${name}`), domainOf(url) || undefined);
         const app: Application = off ? {
-          id, name: off.title, agency: off.agency, level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, official: off.id,
+          id, name: off.title, agency: off.agency, level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, official: off.id, ...(currency !== "USD" ? { currency } : {}),
           fees: [{ label: L("Government fee", "政府规费"), amount: fee }], feeNote: off.feeNote ?? (off.fee == null ? L("Set by the agency's fee schedule. The filing team confirms it before you pay.", "按机构收费标准计算，团队会在您付款前确认。") : L("The agency's published fee. The filing team confirms it before you pay.", "机构公布的费用，团队会在您付款前确认。")),
           est: off.takes ?? (str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认")), renews: off.renews,
           source: { label: domainOf(off.info), url: off.info }, form: same(off.form), fields, checklist,
         } : {
-          id, name: same(name), agency: same(agency), level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined,
+          id, name: same(name), agency: same(agency), level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, ...(currency !== "USD" ? { currency } : {}),
           fees: [{ label: L("Estimated fee", "预估费用"), amount: fee }], feeNote: L("Estimate from Placetta. Confirm with the agency before paying.", "快哉的估算，付款前请向机构确认。"),
           est: str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认"),
           source: { label: domainOf(url), url }, form: str(i.form) ? same(str(i.form, 120)) : undefined, fields, checklist,
@@ -405,8 +418,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // file it under its store: the one named, or the only one
         apply(w => { const st = w.stores ?? []; const target = st.find(x => x.id === str(i.store_id)) ?? (st.length === 1 ? st[0] : undefined);
           return target ? { ...w, stores: st.map(x => (x.id === target.id ? { ...x, apps: [...new Set([...(x.apps ?? []), id])] } : x)) } : w; });
-        made.apps.add(id); mark();
-        return { application_id: id, status, empty_fields: fields.filter(f => !f.value).map(f => f.label.en) };
+        made.apps.add(id); touch(id); mark();
+        return { application_id: id, status, empty_fields: fields.filter(f => !f.value).map(f => f.label.en), ...(known.size ? { filled_from_skill: known.size } : {}) };
       },
     },
     {
@@ -427,7 +440,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           return { ...x, fields, status: x.status === "draft" && fields.every(f => f.value) && !x.checklist.some(c => c.state === "missing") ? "ready" : x.status };
         }) }));
         apply(audit("agent", L("Filled fields", "填写字段"), a.name, same(incoming.map(f => f.label.en).join(", "))));
-        made.apps.add(a.id); mark();
+        made.apps.add(a.id); touch(a.id); mark();
         return { still_empty: get().apps.find(x => x.id === a.id)!.fields.filter(f => !f.value).map(f => f.label.en) };
       },
     },
@@ -462,13 +475,16 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           does: account ? [
             L("Placetta's filing team checks it against the agency's current requirements", "快哉申报团队对照机构现行要求逐项核对"),
             L(`They submit the application below on ${site}, with its attachments`, `在 ${site} 上提交下方申请及附件`),
-            ...(fee ? [L(`The agency's fee (about $${fee}) is paid by you directly to the agency, through the payment link we send`, `机构费用（约 $${fee}）由您通过我们发送的付款链接直接支付给机构`)] : []),
+            ...(fee ? [L(`The agency's fee (about ${money(fee, a.currency)}) is paid by you directly to the agency, through the payment link we send`, `机构费用（约 ${money(fee, a.currency)}）由您通过我们发送的付款链接直接支付给机构`)] : []),
             L("The receipt and every status change appear here", "收据和每次状态变化都会显示在这里"),
-          ] : does.length ? does : [L(`Submit the application below to ${a.agency.en}`, `向${a.agency.zh}提交下方申请`), ...(fee ? [L(`Pay $${fee} with the card ending 4821`, `使用尾号 4821 的银行卡支付 $${fee}`)] : []), L("Save the receipt to Documents", "将收据保存到文件")],
+          ] : does.length ? does : [L(`Submit the application below to ${a.agency.en}`, `向${a.agency.zh}提交下方申请`), ...(fee ? [L(`Pay ${money(fee, a.currency)} with the card ending 4821`, `使用尾号 4821 的银行卡支付 ${money(fee, a.currency)}`)] : []), L("Save the receipt to Documents", "将收据保存到文件")],
         };
         S("composing", L(`Asking for your approval to file the ${nm(a)}`, `请您批准提交${nm(a)}`));
-        apply(w => audit("agent", L("Asked for approval", "请求批准"), a.name, fee ? same(`$${fee}`) : undefined)(setApp(a.id, { status: "ready", next: L("Ready to file. Waiting for your approval", "可以提交，等待您批准") })(addApproval(ap)(w))));
+        apply(w => audit("agent", L("Asked for approval", "请求批准"), a.name, fee ? same(money(fee, a.currency)) : undefined)(setApp(a.id, { status: "ready", next: L("Ready to file. Waiting for your approval", "可以提交，等待您批准") })(addApproval(ap)(w))));
         made.approvals.push(ap.id); made.apps.add(a.id); mark();
+        // learn it: the next filing of this form fills itself
+        const off = a.official ? formById(a.official) : undefined;
+        if (off) { const before = get().skills?.length ?? 0; apply(w => learnForm(w, get().apps.find(x => x.id === a.id) ?? a, off.form, off.agency, touches.get(a.id) ?? 1)); if ((get().skills?.length ?? 0) > before) made.skills.push(B(`File ${off.form}`, `申报${off.form}`)); }
         return { approval_id: ap.id };
       },
     },
@@ -518,6 +534,40 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         apply(w => audit("agent", L("Committed to memory", "存入记忆"), L("Context", "资料"), text)(setFact({ id: existing?.id ?? "f-x-" + seq++, group: existing?.group ?? group, label: existing?.label ?? same(label), value: same(value), source: L("You told me", "您告诉我的") })(w)));
         made.memory.push(text); mark();
         return { ok: true };
+      },
+    },
+    {
+      name: "skill_read",
+      description: "Read a skill's full instructions before doing that kind of job. Skills are listed under Skills; follow the one that fits.",
+      inputSchema: { type: "object" as const, properties: { id: { type: "string" } }, required: ["id"] },
+      execute(i: Record<string, unknown>) {
+        const sk = activeSkills(get()).find(s => s.id === str(i.id));
+        if (!sk) throw new Error(`No skill "${str(i.id)}". Use an id from the Skills list.`);
+        S("weaving", L(`Using the skill: ${sk.name.en}`, `使用技能：${sk.name.zh}`));
+        apply(w => (w.skills ?? []).some(x => x.id === sk.id) ? { ...w, skills: (w.skills ?? []).map(x => (x.id === sk.id ? { ...x, uses: x.uses + 1 } : x)) } : w);
+        mark();
+        return { name: sk.name[lang], instructions: sk.body, ...(sk.fills ? { lines_and_sources: sk.fills } : {}) };
+      },
+    },
+    {
+      name: "skill_save",
+      description: "Save what you just worked out as a skill, so next time it's one step: the local permits you researched for a city the library doesn't cover (kind place), or a way of working this business repeats (kind workflow). Write it as numbered steps another agent could follow, with the official links. Never put personal data, ID numbers or passwords in a skill. Updating an existing skill: pass its id.",
+      inputSchema: { type: "object" as const, properties: {
+        id: { type: "string", description: "To update an existing skill" }, kind: { type: "string", enum: ["place", "workflow"] },
+        name: { type: "string", description: "Short, starts with a verb, e.g. 'Open a milk tea shop in Xiamen'" }, description: { type: "string", description: "One sentence: what it does and when to use it" },
+        steps: { type: "string", description: "The instructions, numbered" }, city: { type: "string", description: "For a place skill: the city" },
+      }, required: ["kind", "name", "description", "steps"] },
+      execute(i: Record<string, unknown>) {
+        if (get().skillsAuto === false && !str(i.id)) return { saved: false, why: "Creating skills automatically is off in Settings, Skills." };
+        const name = str(i.name, 80), desc = str(i.description, 300), body = str(i.steps, 4000);
+        if (!name || !body) throw new Error("name and steps are required");
+        if (/\b\d{3}-?\d{2}-?\d{4}\b|password|passcode|\b\d{13,19}\b/i.test(body)) throw new Error("A skill can't hold ID numbers, card numbers or passwords. Take them out and save again.");
+        const kind = str(i.kind) === "place" ? "place" : "workflow";
+        const key = kind === "place" && str(i.city) ? "place:" + str(i.city, 60).toLowerCase() : undefined;
+        S("weaving", L(`Learning a skill: ${name}`, `学习技能：${name}`));
+        apply(putSkill({ ...(str(i.id) ? { id: str(i.id) } : {}), ...(key ? { key } : {}), kind, source: "auto", name: same(name), description: same(desc), body }));
+        made.skills.push(same(name)); mark();
+        return { saved: true };
       },
     },
     {
@@ -693,7 +743,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             days_since_update: f ? Math.floor((Date.now() - Date.parse(f.updated_at)) / 864e5) : undefined, team_note: f?.note ?? undefined,
             missing_documents: a.checklist.filter(c => c.state === "missing").map(c => c.label[lang]),
             empty_fields: a.fields.filter(fl => !fl.value).map(fl => fl.label[lang]),
-            fee_usd: a.fees.reduce((sum, fe) => sum + fe.amount, 0), takes: a.est[lang],
+            fee: a.fees.reduce((sum, fe) => sum + fe.amount, 0), currency: a.currency ?? "USD", takes: a.est[lang],
           };
         });
         const count = (k: string) => apps.filter(a => a.waiting_on === k).length;
@@ -961,7 +1011,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
 
       if ("text" in req) {
         let streamed = "";
-        const made: Made = { apps: new Set(), approvals: [], memory: [], files: [], lastToolAt: 0 };
+        const made: Made = { apps: new Set(), approvals: [], memory: [], skills: [], files: [], lastToolAt: 0 };
         step({ state: "searching", label: B("Reading your workspace", "读取您的工作区") });
         const tools = model.tools ? makeTools(() => ws, apply, step, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal }) : undefined;
         const research = model.kind === "server";
@@ -976,7 +1026,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         const final = clean(text.slice(made.lastToolAt).trim() || text.trim());
         // cite agency pages first; keep at most four
         const cited = [...sources.filter(x => official(x.url)), ...sources.filter(x => !official(x.url))].slice(0, 4);
-        onEvent({ type: "reply", reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, matches: made.matches,
+        onEvent({ type: "reply", reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
           files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } });
         return;
       }
@@ -984,9 +1034,9 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
       if ("match" in req) {
         const { what, where } = req.match;
         step({ state: "weaving", label: B(`Working out what a ${what.toLowerCase()} needs`, `分析${what}需要哪些许可`) });
-        step({ state: "searching", label: B(`Listing licenses in ${where}, from the city to the federal level`, `列出${where}从市级到联邦的许可`) });
-        const list = await model.json<unknown[]>(`List the business licenses, permits and registrations a "${what}" needs to open and operate in "${where}", from the city up to the federal government.
-Reply with only a JSON array. Each item: {"name": string, "agency": string, "level": "federal"|"state"|"county"|"city", "fee": string (typical fee in USD, or "Varies"), "timeline": string (typical processing time), "url": string (the agency's official home page, https, root domain; "" if unsure)}.
+        step({ state: "searching", label: B(`Listing licenses in ${where}, from the city to the national level`, `列出${where}从市级到国家的许可`) });
+        const list = await model.json<unknown[]>(`List the business licenses, permits and registrations a "${what}" needs to open and operate in "${where}", from the city up to the national government (federal in the US).
+Reply with only a JSON array. Each item: {"name": string, "agency": string, "level": "federal"|"state"|"county"|"city", "fee": string (typical fee in the local currency with its symbol, e.g. "$50", "£100", "¥0", or "Varies"), "timeline": string (typical processing time), "url": string (the agency's official home page, https, root domain; "" if unsure)}.
 Write name, agency, fee and timeline in ${LANG[lang]}. Include only items that commonly apply, at most 14.`, { signal, deep: true });
         const hits = toHits(Array.isArray(list) ? list : [], ws);
         step({ state: "connecting", label: B("Comparing with your workspace", "与您的工作区比对") });

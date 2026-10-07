@@ -20,7 +20,7 @@ export type RunState = {
   text: string;
   lastToolAt: number;
   sources: Source[];
-  made: { apps: string[]; approvals: string[]; memory: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"] };
+  made: { apps: string[]; approvals: string[]; memory: Bi[]; skills?: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"] };
 };
 
 const MAX_ROUNDS = 16;
@@ -33,7 +33,7 @@ export function startState(history: Turn[], prompt: string): RunState {
     return acc;
   }, []);
   if (messages[0]?.role === "assistant") messages.shift();
-  return { messages, rounds: 0, text: "", lastToolAt: 0, sources: [], made: { apps: [], approvals: [], memory: [], files: [] } };
+  return { messages, rounds: 0, text: "", lastToolAt: 0, sources: [], made: { apps: [], approvals: [], memory: [], skills: [], files: [] } };
 }
 
 /** Run rounds until the reply is ready, or until `until` (a timestamp) is near: then return the state to save and resume. */
@@ -44,8 +44,8 @@ export async function runRounds(o: {
   round?: (state: RunState) => Promise<void>;
 }): Promise<{ reply: Reply } | { paused: RunState }> {
   const st = o.state;
-  const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt };
-  const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, files: made.files, matches: made.matches, table: made.table } });
+  const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt };
+  const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
   const model = messagesModel("server", (body, _signal, deep) => o.send(body, deep));
   const tools = makeTools(o.ws, o.apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal });
   const system = rules(o.ws(), o.lang, o.account, true, o.svc?.connected() ?? [], true);
@@ -81,6 +81,6 @@ export async function runRounds(o: {
 
   const final = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim()) || (o.lang === "zh" ? "完成了。" : "Done.");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
-  return { reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, matches: made.matches,
+  return { reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
     files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } };
 }

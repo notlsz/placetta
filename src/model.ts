@@ -16,6 +16,8 @@ export type Actor = "agent" | "you" | "agency" | "team";
 
 export type Field = { id: string; label: Bi; value: string; from?: Bi; quote?: string };   // quote: the document's own words the value came from
 export type Fee = { label: Bi; amount: number };
+/** ISO currency of an application's fees; USD when absent. */
+export type Currency = string;
 export type CheckItem = {
   id: string;
   label: Bi;
@@ -35,6 +37,7 @@ export type Application = {
   next?: Bi;
   critical?: boolean;        // on the chain that sets the opening date
   fees: Fee[];
+  currency?: Currency;
   feeNote?: Bi;
   est: Bi;                   // how long the agency usually takes
   source: { label: string; url: string };
@@ -128,6 +131,18 @@ export type Workspace = {
   meta?: { mapped?: boolean; city?: string; region?: string; entity?: string; what?: string };   // account workspaces only
   memories?: Record<string, MemoryBook>;   // each person's memory, by user id
   chats?: Record<string, ChatLine[]>;      // each person's past chats with the agent, by user id, for "search past chats"
+  skills?: Skill[];                        // how Placetta gets things done here: learned as it works, or written by you
+  skillsAuto?: boolean;                    // let Placetta create skills as it works (on unless turned off)
+};
+/** A skill: instructions Placetta follows for one kind of job. "auto" ones it wrote itself from a job it finished;
+ *  "form" skills also carry where each line of an official form came from, so the next filing of it fills itself. */
+export type SkillSource = "placetta" | "auto" | "you";
+export type Skill = {
+  id: string; name: Bi; description: Bi; body: string; source: SkillSource; on: boolean;
+  kind: "form" | "place" | "workflow" | "custom";
+  key?: string;                            // form:<official form id> or place:<city code>
+  fills?: { line: string; from: string }[]; // form skills: each line and where its value came from (never the value)
+  uses: number; created: string; updated: string; lastSteps?: number; firstSteps?: number;
 };
 export type MemoryKind = "you" | "topic" | "area";
 export type MemoryFile = { id: string; kind: MemoryKind; name: string; summary: string; lines: string[]; updated: string; sensitive?: boolean };

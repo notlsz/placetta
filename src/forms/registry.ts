@@ -1,5 +1,6 @@
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
+import { WORLD_FORMS, worldPlaces } from "./world";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -7,7 +8,8 @@ import type { Level } from "../model";
    filing team re-checks the current requirements before submitting, as it does for every filing. */
 
 export type Segment = "restaurant" | "retail" | "seller" | "warehouse";
-export type Where = "US" | "NY" | "NYC" | "CA" | "LA" | "LAC" | "TX" | "HOU";
+/** Where a form applies: "US", a state ("NY"), a US city ("NYC"), a country ("GB") or a city abroad ("GB-LON"). */
+export type Where = string;
 export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" | "insurer" | "none";
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
 export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean };
@@ -26,7 +28,8 @@ export type OfficialForm = {
   url: string;                // where it's filed: the portal, or the official PDF
   pdf?: string;               // the official PDF
   info: string;               // the agency's page about it
-  fee: number | null;         // government fee, USD; null when it varies
+  fee: number | null;         // government fee in the local currency (USD unless currency says otherwise); null when it varies
+  currency?: string;
   feeNote?: Bi;
   takes?: Bi;
   renews?: Bi;
@@ -34,7 +37,7 @@ export type OfficialForm = {
   attach?: Bi[];
   foreign?: Bi;               // what's different for a China-based owner
   fill?: "ss4" | "cbp5106";   // Placetta fills the official PDF itself
-  checked: "form" | "page";
+  checked: "form" | "page" | "known";   // known: from Placetta's library of official sites; re-read before filing
   order: number;              // where it falls in an opening: lower first
 };
 
@@ -411,6 +414,8 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
+FORMS.push(...WORLD_FORMS);
+
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 
 /** What kind of business it is, from what it sells. */
@@ -423,18 +428,31 @@ export function segmentOf(text: string): Segment {
 }
 
 const NYC = /\b(new york city|nyc|manhattan|brooklyn|queens|bronx|staten island|flushing|astoria|long island city|elmhurst|sunset park|chinatown, ny)\b|纽约市|法拉盛|曼哈顿|皇后区|布鲁克林/i;
-/** Where it is: the jurisdictions whose forms apply. */
+/** Where it is: the jurisdictions whose forms apply, at home and abroad. */
 export function placesOf(where: string): Where[] {
   const w = where.toLowerCase();
-  const out: Where[] = ["US"];
-  if (NYC.test(w) || /,\s*ny\b|new york|纽约/.test(w)) out.push("NY");
-  if (NYC.test(w)) out.push("NYC");
-  if (/,\s*ca\b|california|加州|los angeles|洛杉矶|san francisco|旧金山|irvine|arcadia|alhambra|san gabriel/.test(w)) out.push("CA");
-  if (/los angeles|洛杉矶|\bla\b/.test(w)) out.push("LA", "LAC");
-  else if (/arcadia|alhambra|san gabriel|monterey park|rowland heights|pasadena|long beach|torrance|el monte/.test(w)) out.push("LAC");
-  if (/,\s*tx\b|texas|德州|houston|休斯顿|dallas|austin|plano/.test(w)) out.push("TX");
-  if (/houston|休斯顿/.test(w)) out.push("HOU");
+  const world = worldPlaces(where);
+  const abroad = !!world.country && world.country.code !== "US";
+  const out: Where[] = abroad ? [] : ["US"];
+  if (!abroad) {
+    if (NYC.test(w) || /,\s*ny\b|new york|纽约/.test(w)) out.push("NY");
+    if (NYC.test(w)) out.push("NYC");
+    if (/,\s*ca\b|california|加州|los angeles|洛杉矶|san francisco|旧金山|san jose|圣何塞|irvine|arcadia|alhambra|san gabriel/.test(w)) out.push("CA");
+    if (/los angeles|洛杉矶|\bla\b/.test(w)) out.push("LA", "LAC");
+    else if (/arcadia|alhambra|san gabriel|monterey park|rowland heights|pasadena|long beach|torrance|el monte/.test(w)) out.push("LAC");
+    if (/,\s*tx\b|texas|德州|houston|休斯顿|dallas|达拉斯|austin|奥斯汀|plano/.test(w)) out.push("TX");
+    if (/houston|休斯顿/.test(w)) out.push("HOU");
+  }
+  for (const code of world.codes) if (!out.includes(code) && code !== "US") out.push(code);
   return out;
+}
+
+/** What the library knows about a place: its country, its city, and whether the city has its own local steps. */
+export function placeInfo(where: string) {
+  const p = worldPlaces(where);
+  const us = !p.country || p.country.code === "US";
+  const usLocal = us && /new york|nyc|flushing|manhattan|brooklyn|queens|los angeles|洛杉矶|houston|休斯顿|纽约|法拉盛/i.test(where);
+  return { country: p.country?.code ?? (us ? "US" : undefined), city: p.city, local: p.known || usLocal, currency: p.country?.currency ?? "USD" };
 }
 
 /** The forms an opening needs, in the order they're filed. */

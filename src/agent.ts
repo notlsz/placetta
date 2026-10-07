@@ -221,7 +221,7 @@ const FALLBACK = (): Plan => ({
   steps: [S("searching", "Looking up the rules that apply", "查找适用的法规"), S("composing", "Writing a reply", "撰写回复")],
   reply: { text: [
     B("I can take that on. Tell me the city and what the location will do, for example serve food, store goods or sell retail.", "这件事我可以接手。请告诉我城市名称，以及门店的用途，例如餐饮、仓储或零售。"),
-    B("I'll list every license from the city up to the federal level, prepare each one and bring it to you to approve before anything is filed.", "我会列出从市级到联邦的每一张许可证，逐一准备好，并在提交前交给您批准。"),
+    B("I'll list every license from the city up to the national level, prepare each one and bring it to you to approve before anything is filed.", "我会列出从市级到国家的每一张许可证，逐一准备好，并在提交前交给您批准。"),
   ] },
 });
 

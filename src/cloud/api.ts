@@ -378,7 +378,7 @@ export const agentCall = (ws: string, request: Record<string, unknown>, o: { dee
 
 export async function ttsAudio(ws: string, text: string, lang: string): Promise<ArrayBuffer | null> {
   const s = await getSession(); if (!s) return null;
-  const res = await net(`${URL_}/functions/v1/tts`, { method: "POST", headers: { "content-type": "application/json", apikey: KEY, Authorization: `Bearer ${s.access_token}` }, body: JSON.stringify({ workspace_id: ws, text, lang: lang.startsWith("zh") ? "zh" : "en" }) });
+  const res = await net(`${URL_}/functions/v1/tts`, { method: "POST", headers: { "content-type": "application/json", apikey: KEY, Authorization: `Bearer ${s.access_token}` }, body: JSON.stringify({ workspace_id: ws, text, lang: lang.startsWith("zh") ? "zh" : lang.startsWith("en") ? "en" : lang }) });
   if (!res.ok) return null;
   return res.arrayBuffer();
 }

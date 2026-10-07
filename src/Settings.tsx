@@ -6,7 +6,9 @@ import { fmtAgo, fmtDay } from "./time";
 import { Footer, I, Modal } from "./ui";
 import { ACCENTS, applyAccent, readAccent, useTheme, type Theme } from "./hooks";
 import { IMPORT_PROMPT, PREFS, PROFILE, importMemory } from "./memory";
-import type { MemoryFile, MemoryKind } from "./model";
+import type { MemoryFile, MemoryKind, Skill, SkillSource } from "./model";
+import { allSkills, dropSkill, putSkill, toggleSkill } from "./skills";
+import { LANGUAGES, readSpeak, saveSpeak, speakOf, uiLangOf } from "./langs";
 import * as api from "./cloud/api";
 import type { IntegrationKind } from "./cloud/api";
 import { TwoStepSetup } from "./cloud/TwoStep";
@@ -362,6 +364,129 @@ function MemoryGroup() {
   );
 }
 
+/* ------------------------------ skills ------------------------------ */
+
+const SRC_LABEL: Record<SkillSource, Bi> = { placetta: B("Placetta", "快哉"), auto: B("Learned by Placetta", "快哉自学"), you: B("You", "您") };
+
+function SkillEditor({ sk, onClose }: { sk: Skill | "new"; onClose: () => void }) {
+  const { lang, editWs, say } = useApp();
+  const zh = lang === "zh";
+  const fresh = sk === "new", ro = !fresh && sk.source === "placetta";
+  const [name, setName] = useState(fresh ? "" : sk.name[lang]);
+  const [desc, setDesc] = useState(fresh ? "" : sk.description[lang]);
+  const [body, setBody] = useState(fresh ? "" : sk.body);
+  const save = () => {
+    if (!name.trim() || !body.trim()) { say(zh ? "请填写名称和说明。" : "Add a name and the instructions."); return; }
+    if (/\b\d{3}-?\d{2}-?\d{4}\b|\b\d{13,19}\b/.test(body)) { say(zh ? "技能里不能包含证件号或卡号。" : "A skill can't hold ID or card numbers."); return; }
+    editWs(putSkill({ ...(fresh ? {} : { id: sk.id }), name: { en: name.trim(), zh: name.trim() }, description: { en: desc.trim(), zh: desc.trim() }, body: body.trim(), source: fresh ? "you" : sk.source, kind: fresh ? "custom" : sk.kind }));
+    say(fresh ? (zh ? "技能已创建。" : "Skill created.") : (zh ? "技能已更新。" : "Skill updated."));
+    onClose();
+  };
+  return (
+    <Modal label={fresh ? (zh ? "创建技能" : "Create skill") : sk.name[lang]} onClose={onClose} wide>
+      <header className="m-h"><span className="m-eyebrow"><I.spark />{zh ? "技能" : "Skill"}{!fresh && <>{zh ? "，" : ", "}{SRC_LABEL[sk.source][lang]}</>}</span>
+        <h2>{fresh ? (zh ? "创建技能" : "Create a skill") : sk.name[lang]}</h2>
+        {!fresh && sk.uses > 0 && <p>{zh ? `已使用 ${sk.uses} 次` : `Used ${sk.uses} time${sk.uses === 1 ? "" : "s"}`}{sk.firstSteps && sk.lastSteps ? (zh ? `。第一次用了 ${sk.firstSteps} 步，最近一次 ${sk.lastSteps} 步。` : `. The first took ${sk.firstSteps} step${sk.firstSteps === 1 ? "" : "s"}, the last took ${sk.lastSteps}.`) : "."}</p>}</header>
+      <div className="m-body skedit">
+        <label><span>{zh ? "名称" : "Name"}</span><input value={name} onChange={e => setName(e.target.value)} readOnly={ro} placeholder={zh ? "例如：在厦门开奶茶店" : "e.g. Open a milk tea shop in Xiamen"} maxLength={80} /></label>
+        <label><span>{zh ? "用途" : "What it's for"}</span><input value={desc} onChange={e => setDesc(e.target.value)} readOnly={ro} placeholder={zh ? "一句话说明它做什么、什么时候用" : "One sentence: what it does and when to use it"} maxLength={300} /></label>
+        <label><span>{zh ? "说明" : "Instructions"}</span><textarea className="memedit" rows={12} value={body} onChange={e => setBody(e.target.value)} readOnly={ro} placeholder={zh ? "1. 第一步……\n2. ……" : "1. First...\n2. ..."} /></label>
+        {!fresh && sk.fills && sk.fills.length > 0 && <p className="sg-note">{zh ? `记得 ${sk.fills.length} 行表格各自的来源，下次会自动填写。` : `Remembers where ${sk.fills.length} lines of the form come from, so the next one fills itself.`}</p>}
+        {ro ? <p className="sg-note">{zh ? "快哉内置技能，可以关闭但不能修改。" : "Built into Placetta. You can turn it off but not edit it."}</p> : null}
+        <div className="sg-form-act">
+          <Btn onClick={onClose}>{ro ? (zh ? "关闭" : "Close") : zh ? "取消" : "Cancel"}</Btn>
+          {!ro && <button type="button" className="sbtn ink" onClick={save}>{fresh ? (zh ? "创建" : "Create") : zh ? "保存" : "Save"}</button>}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function SkillsGroup() {
+  const { lang, ws, editWs, say } = useApp();
+  const zh = lang === "zh";
+  const [open, setOpen] = useState<Skill | "new" | null>(null);
+  const [q, setQ] = useState("");
+  const all = allSkills(ws);
+  const match = (s: Skill) => !q.trim() || `${s.name.en} ${s.name.zh} ${s.description.en} ${s.description.zh}`.toLowerCase().includes(q.trim().toLowerCase());
+  const mine = all.filter(s => s.source !== "placetta").filter(match), ours = all.filter(s => s.source === "placetta").filter(match);
+  const auto = ws.skillsAuto !== false;
+  const table = (rows: Skill[]) => (
+    <table className="memt skt">
+      <thead><tr><th>{zh ? "名称" : "Name"}</th><th>{zh ? "说明" : "Description"}</th><th>{zh ? "更新" : "Updated"}</th><th><span className="sr">{zh ? "开关与操作" : "On and actions"}</span></th></tr></thead>
+      <tbody>{rows.map(s => (
+        <tr key={s.id} className={s.on ? "" : "off"}>
+          <td><button type="button" className="sk-n" onClick={() => setOpen(s)}><b>{s.name[lang]}</b><small>{SRC_LABEL[s.source][lang]}{s.uses ? (zh ? `，用过 ${s.uses} 次` : `, used ${s.uses}x`) : ""}</small></button></td>
+          <td>{s.description[lang]}</td>
+          <td className="when">{fmtDay(s.updated, lang, true)}</td>
+          <td className="acts">
+            <Toggle on={s.on} set={v => editWs(toggleSkill(s.id, v))} label={(zh ? "启用 " : "Turn on ") + s.name[lang]} />
+            {s.source !== "placetta" && <button type="button" className="sbtn quiet" aria-label={zh ? `删除 ${s.name.zh}` : `Delete ${s.name.en}`} onClick={() => { if (window.confirm(zh ? `删除技能“${s.name.zh}”？` : `Delete the skill "${s.name.en}"?`)) { editWs(dropSkill(s.id)); say(zh ? "已删除。" : "Deleted."); } }}><I.x /></button>}
+          </td>
+        </tr>
+      ))}</tbody>
+    </table>
+  );
+  return (
+    <Group id="skills" title={B("Skills", "技能")} note={B("Skills teach Placetta how you work. It learns new ones as it fills forms and researches new cities, so the next time is faster, and you can write your own.", "技能教快哉按您的方式做事。它在填写表格、调研新城市时自动学习新技能，下次更快完成；您也可以自己编写。")}
+      rows={[{ label: B("Create skills automatically", "自动创建技能"), sub: zh ? "快哉弄清一件以后还会用到的事时（某张表怎么填、某个新城市需要哪些许可），自动存为技能。" : "When Placetta works out something it'll need again (how a form is filled, what a new city requires), it saves it as a skill.", right: <Toggle on={auto} set={v => editWs(w => ({ ...w, skillsAuto: v }))} label="Create skills automatically" /> }]}>
+      <div className="sk-bar">
+        <input className="sk-q" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={zh ? "搜索技能" : "Search skills"} aria-label={zh ? "搜索技能" : "Search skills"} />
+        <Btn kind="ink" onClick={() => setOpen("new")}><I.plus />{zh ? "创建技能" : "Create skill"}</Btn>
+      </div>
+      <div className="sg-sub mem">
+        <h3>{zh ? "您的技能" : "Your skills"}</h3>
+        {mine.length ? table(mine) : (
+          <div className="sk-empty">
+            <I.spark />
+            <b>{q ? (zh ? "没有匹配的技能" : "No skills match") : zh ? "添加您的第一个技能" : "Add your first skills"}</b>
+            {!q && <p>{zh ? "技能教快哉按您的方式做事。快哉会在工作中自动创建，您也可以自己编写。" : "Skills teach Placetta how you work. Placetta creates them as it works, or create your own."}</p>}
+          </div>
+        )}
+      </div>
+      <div className="sg-sub mem">
+        <h3>{zh ? "来自快哉" : "From Placetta"}</h3>
+        {ours.length ? table(ours) : <p className="sg-note">{zh ? "没有匹配的技能。" : "No skills match."}</p>}
+      </div>
+      {open && <SkillEditor sk={open} onClose={() => setOpen(null)} />}
+    </Group>
+  );
+}
+
+/* ------------------------------ language ------------------------------ */
+
+function LanguageGroup() {
+  const { lang, setLang } = useApp();
+  const zh = lang === "zh";
+  const [picked, setPicked] = useState(() => readSpeak());
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const cur = picked && uiLangOf(picked.code) === lang ? picked : speakOf(lang === "zh" ? "zh-CN" : "en-US")!;
+  const list = LANGUAGES.filter(l => !q.trim() || `${l.native} ${l.en} ${l.code}`.toLowerCase().includes(q.trim().toLowerCase()));
+  const pick = (code: string) => { saveSpeak(code); setPicked(speakOf(code) ?? null); setLang(uiLangOf(code)); setOpen(false); setQ(""); };
+  return (
+    <Group id="language" title={B("Language", "语言")} note={B("Placetta writes and speaks to you in this language, and drafts agency letters in the agency's own language. Menus and pages show in English, or Chinese for the Chinese options.", "快哉用这里选择的语言与您交流，并用机构所在地的语言起草致机构的信函。菜单和页面显示英文，选择中文时显示中文。")}
+      rows={[{ label: B("Language", "语言"), sub: <>{cur.native}{cur.native !== cur.en ? <span className="quiet">, {cur.en}</span> : null}</>, icon: <I.globe />, right: <Btn onClick={() => setOpen(true)}>{zh ? "更改" : "Change"}</Btn> }]}>
+      {open && (
+        <Modal label={zh ? "语言" : "Language"} onClose={() => { setOpen(false); setQ(""); }}>
+          <header className="m-h"><span className="m-eyebrow"><I.globe />{zh ? "语言" : "Language"}</span><h2>{zh ? "选择语言" : "Choose a language"}</h2></header>
+          <div className="m-body langpick">
+            <input type="search" autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder={zh ? "搜索语言" : "Search languages"} aria-label={zh ? "搜索语言" : "Search languages"} />
+            <p className="sg-note" aria-live="polite">{zh ? `找到 ${list.length} 种语言` : `${list.length} language${list.length === 1 ? "" : "s"} found`}</p>
+            <ul role="listbox" aria-label={zh ? "语言" : "Languages"}>
+              {list.map(l => (
+                <li key={l.code}><button type="button" role="option" aria-selected={l.code === cur.code} onClick={() => pick(l.code)}>
+                  <span><b dir="auto">{l.native}</b>{l.native !== l.en && <small>{l.en}</small>}</span>{l.code === cur.code && <I.check />}
+                </button></li>
+              ))}
+            </ul>
+          </div>
+        </Modal>
+      )}
+    </Group>
+  );
+}
+
 /* ------------------------------ settings PIN ------------------------------ */
 
 const digits = (v: string) => v.replace(/\D/g, "").slice(0, 6);
@@ -443,7 +568,7 @@ function PinGroup({ st, setSt, ask }: { st: api.PinStatus | null; setSt: (s: api
 }
 
 export function Settings() {
-  const { t, b, lang, setLang, cloud, mode, apiName, deep, setDeep, voiceOn, setVoiceOn, applyKey, dropKey, exportAudit, openLegal, ws } = useApp();
+  const { t, b, lang, cloud, mode, apiName, deep, setDeep, voiceOn, setVoiceOn, applyKey, dropKey, exportAudit, openLegal, ws } = useApp();
   const [key, setKey] = useState("");
   const [id, setId] = useState(API_MODELS[0].id);
   const [remember, setRemember] = useState(false);
@@ -465,7 +590,7 @@ export function Settings() {
     : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
     : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
-  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ...(cloud ? [["memory", B("Memory", "记忆")]] as [string, Bi][] : []), ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
+  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ...(cloud ? [["memory", B("Memory", "记忆")]] as [string, Bi][] : []), ["skills", B("Skills", "技能")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
 
   return (
     <PinLock.Provider value={pinCtx}>
@@ -519,6 +644,7 @@ export function Settings() {
           </Group>
 
           <MemoryGroup />
+          <SkillsGroup />
 
           <Group id="appearance" title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([
             ["light", B("Light", "浅色"), <I.sun />], ["dark", B("Dark", "深色"), <I.moon />], ["system", B("Match this device", "跟随设备"), <I.monitor />],
@@ -535,10 +661,7 @@ export function Settings() {
             </div>
           </Group>
 
-          <Group id="language" title={B("Language", "语言")} rows={[
-            { label: B("English", "English"), pick: () => setLang("en"), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="lang" checked={lang === "en"} onChange={() => setLang("en")} /><i /></label> },
-            { label: B("简体中文", "简体中文"), pick: () => setLang("zh"), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="lang" checked={lang === "zh"} onChange={() => setLang("zh")} /><i /></label> },
-          ]} />
+          <LanguageGroup />
 
           <Group id="data" title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
             { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), icon: <I.download />, right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },

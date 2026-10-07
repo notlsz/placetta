@@ -41,5 +41,8 @@ export const fmtIn = (n: number, lang: Lang) => {
   return n === 0 ? "Today" : n === 1 ? "Tomorrow" : n < 0 ? `${-n} days late` : `In ${n} days`;
 };
 
-export const money = (n: number) => "$" + n.toLocaleString("en-US");
+export const money = (n: number, currency = "USD") => {
+  if (currency === "USD") return "$" + n.toLocaleString("en-US");
+  try { return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: n % 1 ? 2 : 0 }).format(n); } catch { return `${n.toLocaleString("en-US")} ${currency}`; }
+};
 export const bytes = (n: number) => (n >= 1_000_000 ? (n / 1_000_000).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1000)) + " KB");

@@ -43,7 +43,7 @@ export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
   const fee = a.kind === "pay" ? a.fee ?? 0 : app && a.kind === "file" ? feeTotal(app) : 0;
   const Icon = KIND_ICON[a.kind];
-  const sub = [a.agency && b(a.agency), (a.kind === "file" || a.kind === "pay") && (fee ? money(fee) : t("free"))].filter(Boolean).join(lang === "zh" ? "，" : ", ");
+  const sub = [a.agency && b(a.agency), (a.kind === "file" || a.kind === "pay") && (fee ? money(fee, a.kind === "file" ? app?.currency : undefined) : t("free"))].filter(Boolean).join(lang === "zh" ? "，" : ", ");
   if (a.kind === "pay") return (
     <div className={"appr k-pay" + (compact ? " compact" : "")}>
       <span className={"appr-ico k-" + a.kind}><Icon /></span>
@@ -102,7 +102,7 @@ function Welcome() {
       <header className="hero">
         <div className="hero-bot"><AgentBot size={96} busy={busy} /></div>
         <h1>{b(B(`Let's get ${b(ws.business)} licensed.`, `一起为${b(ws.business)}办齐执照。`))}</h1>
-        <p className="lede">{b(B("Placetta maps every license your store needs, in order, from the city to the federal government, and prepares each application. You approve; our team files.", "快哉按顺序梳理门店从市级到联邦所需的全部执照，并准备好每一份申请。您批准，团队提交。"))}</p>
+        <p className="lede">{b(B("Placetta maps every license your store needs, in order, from the city to the national government, and prepares each application. You approve; our team files.", "快哉按顺序梳理门店从市级到国家所需的全部执照，并准备好每一份申请。您批准，团队提交。"))}</p>
         <div className="hero-act">
           {cloud && cloud.plan === "none"
             ? <Pill kind="ink" onClick={() => cloud.openPlans("start")}>{b(B("Get your entry plan, $299", "开通开店计划，$299"))}</Pill>
@@ -231,7 +231,7 @@ export function Applications() {
                     <button type="button" className={"tr row" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)} role="row">
                       <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small></span>
                       <span className="c-st"><StatusChip s={a.status} /></span>
-                      <span className="c-fee">{fee ? money(fee) : t("free")}</span>
+                      <span className="c-fee">{fee ? money(fee, a.currency) : t("free")}</span>
                       <span className="c-est">{b(a.est)}</span>
                       <span className="c-next">{a.critical && <em>{t("critical")}</em>}{a.next ? b(a.next) : ""}</span>
                     </button>

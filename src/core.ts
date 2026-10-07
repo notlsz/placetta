@@ -20,6 +20,7 @@ export type Reply = {
   apps?: string[];          // application previews to open
   files?: string[];         // documents
   memory?: Bi[];            // facts committed to memory
+  skills?: Bi[];            // skills learned on this run
   matches?: { what: string; where: string; hits: LicenseHit[] };
   next?: { label: Bi; req: Request };
   sources?: { title: string; url: string }[];   // official pages the agent read, cited
@@ -63,7 +64,7 @@ export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
   return {
     business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
-    facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats,
+    facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto,
   };
 }
 /** What's saved: everything but the audit trail (that has its own table) and payment cards (made from the filings). */

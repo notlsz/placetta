@@ -224,8 +224,8 @@ function Fees({ a }: { a: Application }) {
   return (
     <div className="fees">
       <dl className="card feelist">
-        {a.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{f.amount ? money(f.amount) : t("free")}</dd></div>)}
-        <div className="tot"><dt>{t("total")}</dt><dd>{total ? money(total) : t("free")}</dd></div>
+        {a.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{f.amount ? money(f.amount, a.currency) : t("free")}</dd></div>)}
+        <div className="tot"><dt>{t("total")}</dt><dd>{total ? money(total, a.currency) : t("free")}</dd></div>
       </dl>
       {a.feeNote && <p className="note">{b(a.feeNote)}</p>}
       {total > 0 && <p className="note">{t("paidAfter")}</p>}
@@ -248,7 +248,7 @@ function Receipt({ a }: { a: Application }) {
       <FileCard d={d} />
       <dl className="card kv">
         <div><dt>{t("au_time")}</dt><dd className="mono">{fmtStamp(d.at)}</dd></div>
-        <div><dt>{t("ap_fee")}</dt><dd>{total ? money(total) : t("free")}</dd></div>
+        <div><dt>{t("ap_fee")}</dt><dd>{total ? money(total, a.currency) : t("free")}</dd></div>
       </dl>
     </div>
   );
@@ -291,8 +291,8 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
           <section>
             <h3>{t("ap_fee")}</h3>
             <dl className="kv feelist">
-              {app.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{f.amount ? money(f.amount) : t("free")}</dd></div>)}
-              <div className="tot"><dt>{t("total")}</dt><dd>{fee ? money(fee) : t("free")}</dd></div>
+              {app.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{f.amount ? money(f.amount, app.currency) : t("free")}</dd></div>)}
+              <div className="tot"><dt>{t("total")}</dt><dd>{fee ? money(fee, app.currency) : t("free")}</dd></div>
             </dl>
             {fee > 0 && <p className="note">{cloud ? t("paidDirect") : t("paidAfter")}</p>}
           </section>

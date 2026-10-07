@@ -77,6 +77,8 @@ export type Ctx = {
   /** This person's memory (Settings, Memory), and a way to change it. */
   memory: MemoryBook | null;
   setMemory(f: (b: MemoryBook) => MemoryBook): void;
+  /** Change the workspace directly (Settings: skills). */
+  editWs(f: (w: Workspace) => Workspace): void;
   say(text: string): void;
   openLegal(id: string): void;
   cloud: CloudCtx | null;

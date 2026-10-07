@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { speakTag } from "./langs";
 import { VoiceBeam, useMicrophone } from "voice-glow";
 import { useApp } from "./ctx";
 import { unlockAudio, useNarrow, useSimulatedVoice, useSpeechToText, type Speaker } from "./hooks";
@@ -67,7 +68,7 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
     // the sample demo shows what talking looks like; a real workspace never pretends to hear you
     if (!mic.supported || !micAllowedHere()) { if (mode === "demo") simulate(); else setNote("frameNote"); return; }
     const s = await mic.start();
-    if (s) { setVoice("mic"); if (!stt.start(lang === "zh" ? "zh-CN" : "en-US")) setNote("noSttNote"); return; }
+    if (s) { setVoice("mic"); if (!stt.start(speakTag(lang))) setNote("noSttNote"); return; }
     if (inFrame && mode === "demo") simulate(); else setNote(inFrame ? "frameNote" : "deniedNote");
   }, [busy, tts, mic, simulate, stt, lang, mode]);
   useEffect(() => () => clearTyper(), []);

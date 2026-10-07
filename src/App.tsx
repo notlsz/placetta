@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { applyChange } from "./core";
 import { emptyBook } from "./memory";
@@ -330,7 +331,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
     abort.current = null;
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
-    if ((voice || voiceOn) && said) tts.speak(said, lang === "zh" ? "zh-CN" : "en-US");
+    if ((voice || voiceOn) && said) tts.speak(said, speakTag(lang));
     else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
   }, [lang, tts, say, t, deep, cloud, voiceOn, services, follow]);
 
@@ -551,6 +552,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       say(`${t("committed")}: ${text[lang]}`);
     },
     memory: cloud ? view_.memories?.[cloud.me.id] ?? emptyBook() : null,
+    editWs: f => setWs(f),
     setMemory: f => { if (cloud) { const me = cloud.me.id; setWs(w => ({ ...w, memories: { ...(w.memories ?? {}), [me]: f(w.memories?.[me] ?? emptyBook()) } })); } },
     updateStore: (id, f, log) => !held() && setWs(w => {
       const next = { ...w, stores: (w.stores ?? []).map(s => (s.id === id ? f(s) : s)) };
