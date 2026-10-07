@@ -118,7 +118,7 @@ export const CITIES: City[] = [
     .map(([k, en, zh]) => c(k + "-" + en.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6), k, en, zh, [en.toLowerCase(), zh], false)),
 
   /* US tier 1 beyond New York, Los Angeles and Houston (their forms are in the main library) */
-  c("SF", "US", "San Francisco", "旧金山", ["san francisco", "旧金山", "三藩市", "sf, ca", "soma", "mission district"], true, "CA"),
+  c("SF", "US", "San Francisco", "旧金山", ["san francisco", "旧金山", "三藩市", "sf", "soma", "mission district"], true, "CA"),
   c("SJ", "US", "San Jose", "圣何塞", ["san jose", "圣何塞", "圣荷西"], true, "CA"),
   c("CHI", "US", "Chicago", "芝加哥", ["chicago", "芝加哥", "chinatown chicago", "the loop", "wicker park"], true, "IL"),
   c("SEA", "US", "Seattle", "西雅图", ["seattle", "西雅图", "capitol hill", "international district"], true, "WA"),

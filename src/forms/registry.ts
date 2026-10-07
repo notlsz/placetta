@@ -443,7 +443,7 @@ export function placesOf(where: string): Where[] {
   if (!abroad) {
     if (NYC.test(w) || /,\s*ny\b|new york|纽约/.test(w)) out.push("NY");
     if (NYC.test(w)) out.push("NYC");
-    if (/,\s*ca\b|california|加州|los angeles|洛杉矶|san francisco|旧金山|san jose|圣何塞|irvine|arcadia|alhambra|san gabriel/.test(w)) out.push("CA");
+    if (/,\s*ca\b|california|加州|los angeles|洛杉矶|san francisco|\bsf\b|旧金山|san jose|圣何塞|irvine|arcadia|alhambra|san gabriel/.test(w)) out.push("CA");
     if (/los angeles|洛杉矶|\bla\b/.test(w)) out.push("LA", "LAC");
     else if (/arcadia|alhambra|san gabriel|monterey park|rowland heights|pasadena|long beach|torrance|el monte/.test(w)) out.push("LAC");
     if (/,\s*tx\b|texas|德州|houston|休斯顿|dallas|达拉斯|austin|奥斯汀|plano/.test(w)) out.push("TX");
