@@ -25,15 +25,15 @@ button{font:inherit;color:inherit;cursor:pointer}
 .back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink2);text-decoration:none;padding:6px 10px 6px 6px;margin-left:-6px;border-radius:8px;white-space:nowrap}
 .back:hover{background:var(--card);color:var(--ink)}
 .brand{display:flex;align-items:center;gap:9px;margin:0 auto;font-size:17px;font-weight:500;letter-spacing:-.2px;text-decoration:none}
-.brand svg{width:24px;height:24px}
+.brand{color:#192F47}
 .lt{display:flex;align-items:center;gap:2px;font-size:13px;color:var(--muted)}
 .lt button{border:0;background:none;padding:6px 6px;border-radius:6px;color:var(--muted)}
 .lt button[aria-pressed="true"]{color:var(--ink);font-weight:500}
-@media (max-width:479px){.brand .wm{display:none}}
+
 .wm{display:inline-flex;align-items:center}
 .wm svg{display:block;width:auto;fill:currentColor}
-.wm .wm-en{height:.963em;margin:-.23em 0 -.209em;color:#192F47}
-.wm .wm-zh{display:none;height:.84em}
+.wm .wm-en,.wm .wm-zh{height:22px}
+.wm .wm-zh{display:none}
 html[lang="zh-CN"] .wm .wm-en{display:none}
 html[lang="zh-CN"] .wm .wm-zh{display:block}
 
