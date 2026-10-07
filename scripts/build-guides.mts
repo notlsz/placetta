@@ -96,13 +96,14 @@ const ORG = { "@context": "https://schema.org", "@type": "Organization", name: "
 /* Sponsors: shown on every guide. A logo in scripts/sponsors/<name>.svg or .png replaces the name when it's added. Paid links
    carry rel="sponsored", as search engines require. */
 const SPONSORS: { name: string; url: string | null; logo?: string }[] = [
-  { name: "Faramir", url: null },               // add the site's URL to link it
+  { name: "Faramir", url: "https://faramir.xyz" },
   { name: "Belluh", url: "https://belluh.com" },
+  { name: "DeepSeek", url: "https://www.deepseek.com" },
 ];
 const LOGOS = SPONSORS.flatMap(sp => ["svg", "png"].flatMap(ext => { try { return [{ name: sp.name, file: `${slug(sp.name)}.${ext}`, bytes: readFileSync(`scripts/sponsors/${slug(sp.name)}.${ext}`) }]; } catch { return []; } }));
 const sponsorLogo = (s: (typeof SPONSORS)[number]) => { const x = LOGOS.find(y => y.name === s.name); return x ? `/guides/sponsors/${x.file}` : undefined; };
 const sponsors = (l: L) => `<aside class="sponsors" aria-label="${l === "zh" ? "赞助方" : "Sponsors"}"><span>${l === "zh" ? "赞助方" : "Sponsored by"}</span>${SPONSORS.map(sp => {
-  const logo = sp.logo ?? sponsorLogo(sp), inner = logo ? `<img src="${logo}" alt="${esc(sp.name)}" height="22">` : `<b>${esc(sp.name)}</b>`;
+  const logo = sp.logo ?? sponsorLogo(sp), inner = logo ? `<img src="${logo}" alt="${esc(sp.name)}" height="20">` : `<b>${esc(sp.name)}</b>`;
   return sp.url ? `<a href="${sp.url}" rel="sponsored noopener" target="_blank" data-track="sponsor_${slug(sp.name)}">${inner}</a>` : `<span class="sp">${inner}</span>`;
 }).join("")}</aside>`;
 
