@@ -241,16 +241,27 @@ export async function logAudit(ws: string, uid: string, entries: Audit[]) {
 
 /* ------------------------------ filings ------------------------------ */
 
-const FILING_COLS = "id, workspace_id, app_id, title, agency, portal_url, fee_estimate, payload, status, approved_at, requirements_checked, confirmation_number, fee_paid, receipt_path, note, payment_url, customer_paid_at, submitted_at, decided_at, updated_at, channel, agent_state, agent_log, handoff_url, submit_clicked_at, attempts";
+const BASE_COLS = "id, workspace_id, app_id, title, agency, portal_url, fee_estimate, payload, status, approved_at, requirements_checked, confirmation_number, fee_paid, receipt_path, note, payment_url, customer_paid_at, submitted_at, decided_at, updated_at";
+const AGENT_COLS = BASE_COLS + ", channel, agent_state, agent_log, handoff_url, submit_clicked_at, attempts";
+/* Until the self-filing migration is applied the agent columns don't exist (42703): fall back to the base columns. */
+let agentCols = true;
+const missingCol = (e: { code?: string } | null) => e?.code === "42703" || e?.code === "PGRST204";
 export async function listFilings(ws: string): Promise<Filing[]> {
-  const { data, error } = await supabase().from("filings").select(FILING_COLS).eq("workspace_id", ws).order("approved_at", { ascending: false });
+  const q = (cols: string) => supabase().from("filings").select(cols).eq("workspace_id", ws).order("approved_at", { ascending: false });
+  let { data, error } = await q(agentCols ? AGENT_COLS : BASE_COLS);
+  if (agentCols && missingCol(error)) { agentCols = false; ({ data, error } = await q(BASE_COLS)); }
   if (error) throw fromPg(error);
-  return (data ?? []) as Filing[];
+  return (data ?? []) as unknown as Filing[];
 }
 export async function requestFiling(ws: string, f: { app_id: string; title: Bi; agency?: Bi; portal_url?: string; fee_estimate: number; payload: FilingPayload }) {
-  const { data, error } = await supabase().from("filings").insert({ workspace_id: ws, ...f }).select(FILING_COLS).single();
+  let { data, error } = await supabase().from("filings").insert({ workspace_id: ws, ...f }).select(agentCols ? AGENT_COLS : BASE_COLS).single();
+  if (agentCols && missingCol(error)) {
+    // the insert itself may have happened; read it back rather than inserting twice
+    agentCols = false;
+    ({ data, error } = await supabase().from("filings").select(BASE_COLS).eq("workspace_id", ws).eq("app_id", f.app_id).order("approved_at", { ascending: false }).limit(1).single());
+  }
   if (error) throw error.code === "42501" ? err("plan_required", "Filing by the Placetta team is part of the monthly plan.") : fromPg(error);
-  return data as Filing;
+  return data as unknown as Filing;
 }
 export async function cancelFiling(id: string) {
   const { error } = await supabase().from("filings").update({ status: "canceled" }).eq("id", id);
