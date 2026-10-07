@@ -88,7 +88,7 @@ function SignIn({ lang }: { lang: Lang }) {
     <div className="gate-card">
       <div className="gate-bot"><AgentBot size={84} /></div>
       <h1>{sent ? L(B("Check your email.", "请查收邮件。")) : hand ? L(B("Your license plan is one step away.", "您的执照计划只差一步。")) : L(B("Sign in to Placetta.", "登录快哉。"))}</h1>
-      <p className="gate-sub">{sent ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`)) : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs. Signing in creates your account.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。登录即创建账户。")) : L(B("Licenses, permits and daily compliance for every store. New here? Signing in creates your account. Invited by a teammate? Use the email they invited.", "每家门店的执照、许可与日常合规。第一次来？登录即创建账户。受同事邀请？请使用被邀请的邮箱。"))}</p>
+      <p className="gate-sub">{sent ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`)) : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs. Signing in creates your account.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。登录即创建账户。")) : L(B("New or invited? Sign in with your work email.", "新用户或受邀成员，请用工作邮箱登录。"))}</p>
       {!sent && (providers.google || providers.azure) && (
         <div className="gate-sso">
           {providers.google && <button type="button" className="sbtn line wide sso" disabled={busy} onClick={() => void withProvider("google")}><GoogleMark />{L(B("Continue with Google", "使用 Google 继续"))}</button>}
