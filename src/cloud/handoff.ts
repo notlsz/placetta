@@ -8,7 +8,7 @@ const AUTO = "placetta-autostart";
 const DAYS = 3;
 
 /** What the website saves (see site/index.html, submit()). */
-type Saved = { v: 1; at: number; email?: string; company?: string; market?: string; industry?: string; opening?: string; plang?: string };
+type Saved = { v: 1; at: number; email?: string; company?: string; market?: string; industry?: string; opening?: string; plang?: string; sell?: string };
 
 export type Handoff = { email: string; brand: string; place: string; sell: string; other: string; when: number; lang?: Lang };
 
@@ -24,7 +24,9 @@ export function readHandoff(): Handoff | null {
     const s = JSON.parse(localStorage.getItem(KEY) ?? "null") as Saved | null;
     if (!s || s.v !== 1 || typeof s.at !== "number" || Date.now() - s.at > DAYS * 864e5) return null;
     const market = clip(s.market, 80);
-    const [sell, other] = SELL[clip(s.industry, 20)] ?? ["", ""];
+    // the guides send the onboarding chip itself ("Milk tea", "Retail"...); the questionnaire sends its industry
+    const chip = clip(s.sell, 60);
+    const [sell, other] = chip ? [chip, ""] : SELL[clip(s.industry, 20)] ?? ["", ""];
     const email = clip(s.email, 254);
     return {
       email: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? email : "",

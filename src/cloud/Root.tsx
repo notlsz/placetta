@@ -69,11 +69,14 @@ const openDoc = (id: string) => window.dispatchEvent(new CustomEvent("placetta:d
 function RegionPick({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
   const [open, setOpen] = useState(false);
-  const regions: { id: string; label: Bi; on: boolean }[] = [
-    { id: "us", label: B("United States", "美国"), on: true },
-    { id: "eu", label: B("Europe", "欧洲"), on: false },
-    { id: "ap", label: B("Asia Pacific", "亚太"), on: false },
+  const regions: { id: string; code: string; label: Bi; on: boolean }[] = [
+    { id: "us", code: "US", label: B("United States", "美国"), on: true },
+    { id: "eu", code: "EU", label: B("Europe", "欧洲"), on: false },
+    { id: "ap", code: "APAC", label: B("Asia Pacific", "亚太"), on: false },
+    { id: "au", code: "AU", label: B("Australia", "澳大利亚"), on: false },
   ];
+  const cur = regions.find(r => r.id === api.REGION.id) ?? regions[0];
+  const globe = <svg className="rg-globe" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.3 3 14.7 0 18M12 3c-3 3.3-3 14.7 0 18"/></svg>;
   useEffect(() => {
     if (!open) return;
     const close = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest(".region")) setOpen(false); };
@@ -83,18 +86,17 @@ function RegionPick({ lang }: { lang: Lang }) {
   }, [open]);
   return (
     <div className="region">
-      <button type="button" className="region-btn" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(o => !o)}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.3 3 14.7 0 18M12 3c-3 3.3-3 14.7 0 18"/></svg>
-        <span>{L(B("Region", "区域"))}: <b>{L(api.REGION.label)}</b></span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <button type="button" className="region-btn" aria-haspopup="listbox" aria-expanded={open} aria-label={`${L(B("Region", "区域"))}: ${L(cur.label)}`} onClick={() => setOpen(o => !o)}>
+        <span className="rg-k">{L(B("Region", "区域"))}</span>
+        <b>{cur.code}</b>
+        <svg className="rg-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       {open && (
         <ul className="region-menu" role="listbox" aria-label={L(B("Region", "区域"))}>
           {regions.map(r => (
-            <li key={r.id} role="option" aria-selected={r.id === api.REGION.id} aria-disabled={!r.on}>
-              <button type="button" disabled={!r.on} onClick={() => setOpen(false)}>
-                <span>{L(r.label)}</span>
-                {r.id === api.REGION.id ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg> : <small>{L(B("Not available yet", "暂未开放"))}</small>}
+            <li key={r.id} role="option" aria-selected={r.id === cur.id} aria-disabled={!r.on}>
+              <button type="button" disabled={!r.on} title={r.on ? L(r.label) : `${L(r.label)}: ${L(B("not available yet", "暂未开放"))}`} onClick={() => setOpen(false)}>
+                {globe}<span>{r.code}</span>
               </button>
             </li>
           ))}
