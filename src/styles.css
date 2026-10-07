@@ -1152,3 +1152,9 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .sigpad canvas { width: 100%; max-width: 600px; height: 160px; border: 1px dashed currentColor; border-radius: 12px; background: #fff; touch-action: none; display: block; }
 .sigpad-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .sigpad-row input { flex: 1 1 140px; min-width: 0; }
+
+/* the still cloud on touch screens (see GateBot): floats instead of the live canvas */
+.gate-cloud { width: 84px; height: auto; user-select: none; -webkit-user-select: none; animation: gate-float 3.2s ease-in-out infinite; }
+.gate-cloud.busy { animation-duration: 1.1s; }
+@keyframes gate-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@media (prefers-reduced-motion: reduce) { .gate-cloud { animation: none; } }

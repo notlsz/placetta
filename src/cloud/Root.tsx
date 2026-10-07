@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import App from "../App";
-import { AgentBot } from "../Bot";
+import { GateBot } from "../Bot";
 import { LegalBody } from "../Legal";
 import { LEGAL } from "../legal";
 import { Logo } from "../Logo";
@@ -172,7 +172,7 @@ function SignIn({ lang }: { lang: Lang }) {
     : L(B("New or invited? Sign in with your work email.", "新用户或受邀成员，请用工作邮箱登录。"));
   return (
     <div className="gate-card">
-      <div className="gate-bot"><AgentBot size={84} /></div>
+      <div className="gate-bot"><GateBot /></div>
       <RegionPick lang={lang} />
       <h1>{title}</h1>
       {sub && <p className="gate-sub">{sub}</p>}
@@ -434,7 +434,7 @@ export function CloudRoot() {
   if (phase.k === "app") return <App key={phase.s.wsId} cloud={phase.s} />;
   return (
     <Frame lang={lang} setLang={setLang}>
-      {phase.k === "loading" && <div className="gate-card"><div className="gate-bot"><AgentBot size={84} busy /></div><p className="gate-sub">{L(B("Opening your workspace…", "正在打开工作区…"))}</p></div>}
+      {phase.k === "loading" && <div className="gate-card"><div className="gate-bot"><GateBot busy /></div><p className="gate-sub">{L(B("Opening your workspace…", "正在打开工作区…"))}</p></div>}
       {phase.k === "signin" && <SignIn lang={lang} />}
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back ? () => void open(phase.back!) : undefined} />}

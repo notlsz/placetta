@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { BotAvatar, type BotAvatarType } from "bot-avatars";
 import { BorderBeam } from "border-beam";
+import cloudPng from "./assets/agent-cloud.png";
 
 /* Placetta's agent as a small plush character: a soft pastel-blue cloud with blushed cheeks with a smile (bot-avatars).
    It hops while it works and looks around while it waits. Each background job gets its own little bot. */
@@ -38,4 +39,12 @@ export function TaskBot({ id, size = 26, label }: { id: string; size?: number; l
 export function Working({ on, size = "sm", children }: { on: boolean; size?: "sm" | "md" | "line"; children: ReactNode }) {
   if (!on) return <>{children}</>;
   return <BorderBeam size={size} theme="light" colorVariant="ice" strength={0.9} className="beam-wrap">{children}</BorderBeam>;
+}
+
+/* Phones (iOS Safari above all) render the live plush canvas with blown-out brightness and flicker, so touch screens get
+   a still of the same cloud, rendered from this component, with a gentle CSS float. */
+const touch = typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches || /iP(hone|ad|od)/.test(navigator.userAgent));
+export function GateBot({ busy }: { busy?: boolean }) {
+  if (!touch) return <AgentBot size={84} busy={busy} />;
+  return <img className={"gate-cloud" + (busy ? " busy" : "")} src={cloudPng} width={84} height={72} alt="Placetta" draggable={false} />;
 }
