@@ -84,7 +84,7 @@ const countryName = (code: string): Bi => { const c = COUNTRIES.find(x => x.code
 const priv = readFileSync("site/privacy.html", "utf8");
 const BRAND = (priv.match(/<span class="wm">[\s\S]*?<\/svg><\/span>/) ?? [""])[0];
 const FAVICON = (priv.match(/<link rel="(?:icon|apple-touch-icon|manifest)"[^>]*>/g) ?? []).join("\n");
-const FONTS = "https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@500&family=Noto+Sans+SC:wght@400;500&display=swap";
+const FONTS = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500&display=swap";
 const UI = {
   home: B("Home", "首页"), guides: B("Guides", "指南"), cities: B("Cities", "城市"), answers: B("Answers", "问答"), forms: B("Official forms", "官方表格"),
   plan: B("Get my plan", "获取我的方案"), privacy: B("Privacy Policy", "隐私政策"), terms: B("Terms and Conditions", "服务条款"),
@@ -393,7 +393,7 @@ ${rel.length ? `<section class="more"><h2>${l === "zh" ? "完整指南" : "Full 
     const ps = placesUsed.filter(p => REGION(p.country) === r.id);
     return `<div class="panel" id="r-${r.id}" role="tabpanel" aria-labelledby="t-${r.id}"><ul class="citygrid">${ps.map(p => {
       const gs = guides.filter(g => g.place === p);
-      return `<li class="city" data-f="${esc((p.name.en + " " + p.name.zh + " " + countryName(p.country).en + " " + countryName(p.country).zh).toLowerCase())}"><a class="city-h" href="${cityPath(p, l)}"><b>${esc(p.name[l])}</b><span>${esc(countryName(p.country)[l])}</span></a><ul>${gs.slice(0, 4).map(g => `<li><a href="${guidePath(g, l)}">${esc(g.biz.plural[l])}</a></li>`).join("")}</ul><a class="city-all" href="${cityPath(p, l)}">${l === "zh" ? `全部 ${gs.length + topicPages.filter(x => x.place === p).length} 份指南` : `All ${gs.length + topicPages.filter(x => x.place === p).length} guides`}</a></li>`;
+      return `<li class="city" data-f="${esc((p.name.en + " " + p.name.zh + " " + countryName(p.country).en + " " + countryName(p.country).zh).toLowerCase())}"><a class="city-h" href="${cityPath(p, l)}"><b>${esc(p.name[l])}</b><span>${esc(countryName(p.country)[l])}</span></a><p class="city-biz">${gs.slice(0, 5).map(g => `<a href="${guidePath(g, l)}">${esc(g.biz.plural[l])}</a>`).join("")}</p><a class="city-all" href="${cityPath(p, l)}">${l === "zh" ? `全部 ${gs.length + topicPages.filter(x => x.place === p).length} 份指南` : `All ${gs.length + topicPages.filter(x => x.place === p).length} guides`}</a></li>`;
     }).join("")}</ul></div>`;
   }).join("");
   const agencies = [...new Set(FORMS.map(f => where(f, l)))];
