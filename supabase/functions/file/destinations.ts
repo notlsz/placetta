@@ -18,6 +18,18 @@ export type Dest = {
 
 /** Verified destinations. Only these are used. */
 export const DEST: Record<string, Dest> = {
+  "irs-ss4": {
+    // Foreign applicants: the IRS lists 855-215-1627 for faxes sent from within the US (Placetta's fax number is
+    // in the US) and 304-707-9471 from outside it.
+    fax: { us: "+18556416935", foreign: "+18552151627" },
+    mail: {
+      name: "Internal Revenue Service", line1: "Attn: EIN Operation", city: "Cincinnati", state: "OH", zip: "45999",
+      foreign: { name: "Internal Revenue Service", line1: "Attn: EIN International Operation", city: "Cincinnati", state: "OH", zip: "45999" },
+    },
+    signature: "wet",                                 // until the IRS e-signature list includes Form SS-4
+    checked: "2026-10-07",                            // page last reviewed 28-Apr-2026
+    source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-ss-4",
+  },
 };
 
 /**
@@ -25,11 +37,6 @@ export const DEST: Record<string, Dest> = {
  * move an entry into DEST once every value is confirmed on the source page.
  */
 export const TO_VERIFY: Record<string, { source: string; note: string; partial?: Partial<Dest> }> = {
-  "irs-ss4": {
-    source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-ss-4",
-    note: "Copy the fax numbers for applicants inside and outside the US and both mailing addresses from the IRS page. Signature stays wet until the IRS e-signature list includes Form SS-4.",
-    partial: { signature: "wet" },
-  },
   "cbp-5106": {
     source: "https://www.cbp.gov/newsroom/publications/forms",
     note: "Usually goes through the customs broker. Leave it to the team at first.",
