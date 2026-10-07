@@ -1090,6 +1090,20 @@ html[lang="zh-CN"] .pst b{letter-spacing:0}
 .tsx .tsq{margin:0}
 .tsx .tsp img.tsav{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none}
 .tsw{display:flex;flex-direction:column;gap:2px;min-width:0}
+/* testimonial name tabs (from the earlier design): who is speaking, with an 8s progress line */
+.tsbar{display:flex;justify-content:flex-start;margin:0 0 16px}
+@media (min-width:1024px){.tsbar{justify-content:flex-end;margin-bottom:20px}}
+.tstabs{display:flex;gap:8px;flex-wrap:wrap}
+.tstab{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:150px;padding:10px 14px 12px;border:0;border-radius:12px;background:var(--card);font:inherit;text-align:left;color:var(--ink2);cursor:pointer;transition:background-color .3s,color .3s}
+.tstab b{font-size:14px;font-weight:500;color:inherit}
+.tstab span{font-size:12px;color:var(--muted)}
+.tstab[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(15,27,51,.05),0 8px 20px rgba(15,27,51,.06)}
+.tstab i{position:absolute;left:14px;right:14px;bottom:6px;height:2px;border-radius:2px;background:#E3E7EE;overflow:hidden}
+.tstab i b{display:block;height:100%;width:0;background:var(--gs-d)}
+.tstab[aria-selected="true"] i b{animation:tsfill 8s linear forwards}
+.tsbar.hold .tstab i b{animation-play-state:paused}
+@keyframes tsfill{to{width:100%}}
+@media (prefers-reduced-motion:reduce){.tstab[aria-selected="true"] i b{animation:none;width:100%}}
 .tsx .tsp .tsctl{display:flex;flex-direction:row;align-items:center;gap:6px;margin-left:auto}
 .tsx .tsp .tsw span{font-size:13px;color:var(--muted)}
 .tsx .tsp .tsn{display:inline;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:4px}
@@ -1808,6 +1822,7 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
 <section class="sec rv" data-rv="up" id="case" aria-labelledby="caseH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="caseH" data-i18n="proof.h">Brands open sooner with Placetta.</h2><p class="sub" data-i18n="proof.sub">Operators in their own words, and the entry plans we map for brands like theirs.</p></div>
+    <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
     <div class="tsgrid" id="tsGrid"></div>
     <div class="cshd">
       <h3 class="h3" data-i18n="bel.cases">Case studies</h3>
@@ -2017,7 +2032,7 @@ en:{
  "mbar.t":"Entry plan, $299 per market",
  "cta.free":"Get your entry plan",
  "mon.l.aff2":"Affects", "mon.due":"Deadline in {n} days", "mon.due1":"Deadline in 1 day", "mon.duet":"Deadline today", "mon.dayn":"days left", "mon.day1":"day left",
- "inv.l":"The brands we serve are backed by",
+ "inv.l":"The brands we serve are backed by", "ts.tabs":"Customer stories",
  "add.btn":"New plan", "add.c1":"Company", "add.c2":"Target market", "add.c3":"Target opening", "add.c4":"Status", "add.h":"Tell us where you're opening.<br>Get your plan in minutes.", "add.mapping":"Mapping…", "add.ready":"Plan ready", "add.tab":"Entry plans", "cmp.1h":"Consultants", "cmp.1p":"A report, weeks later, billed by the hour.", "cmp.2h":"Doing it yourself", "cmp.2p":"Months of calls, forms and rejected applications.", "cmp.3p":"A plan in minutes, filing handled, one dashboard, and a price you know upfront.", "cmp.h":"Why not a law firm or consultant?", "cn.btn":"Get your US entry plan", "cn.h":"Built for brands going global.", "cn.p":"Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.", "cn.q":"Su Shi, Song dynasty poet", "cn.s":"Wherever the heart is at ease, that is home.", "cn.sub":"Free, ready in minutes", "dash.a":"Shenzhen HQ", "dash.at":"9:00 PM", "dash.b":"New York team", "dash.bt":"9:00 AM", "dash.risk":"Risk flag: review state rules on foreign-owned leases before signing", "diff.1b":"Minutes", "diff.1s":"From target market to a full entry plan", "diff.after":"after", "diff.before":"before", "diff.c1":"Customers since 2016", "diff.c2":"Return customers", "diff.h":"The difference Placetta makes", "diff.team":"Your team", "diff.with":"with", "itl.a1":"Health permit packet for Santa Clara County is ready. Submit it?", "itl.a2":"Submitted. I'll book the inspection when the county opens a slot.", "itl.b1":"The sign permit needs your landlord's authorization. Send the request to them?", "itl.b2":"Got it. Landlord requests go to you first, at every location.", "itl.f2":"Landlord letter", "itl.h":"Placetta asks before every filing, and remembers your answer", "itl.m2":"1-page doc", "itl.saved":"Saved to your playbook", "itl.u1":"Yes, submit it 👍", "itl.u2":"No, send landlord requests to me first. I'll forward them.", "qr":"QR", "trust.1":"Licensed partner attorneys", "trust.2":"Local permit expediters", "trust.3":"English and Chinese", "trust.h":"Built for trust", "wt.l":"Work together", "wt.qr":"WeChat QR code goes here before launch", "wt.r":"in English or Chinese", "you.init":"HP",
  "map.n3":"3+ per day", "map.s3":"new US businesses served by our team, on average, since 2016", "map.n3w":"7+ per day", "map.s3w":"new businesses served by our team worldwide, on average, since 2016",
  "hero.h1":"Open your first US&nbsp;store<br>months sooner.", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
@@ -2100,7 +2115,7 @@ zh:{
  "mbar.t":"开店计划，每个市场 299 美元",
  "cta.free":"获取您的开店合规计划",
  "mon.l.aff2":"涉及", "mon.due":"距截止还有 {n} 天", "mon.due1":"距截止还有 1 天", "mon.duet":"今天截止", "mon.dayn":"天后截止", "mon.day1":"天后截止",
- "inv.l":"我们服务的品牌获得以下机构投资",
+ "inv.l":"我们服务的品牌获得以下机构投资", "ts.tabs":"客户故事",
  "add.btn":"新建计划", "add.c1":"公司", "add.c2":"目标市场", "add.c3":"目标开业", "add.c4":"状态", "add.h":"告诉我们您在哪里开店，<br>几分钟拿到计划。", "add.mapping":"生成中…", "add.ready":"计划已就绪", "add.tab":"开店计划", "cmp.1h":"咨询顾问", "cmp.1p":"几周后交一份报告，按小时计费。", "cmp.2h":"自己办理", "cmp.2p":"数月的电话、表格和被退回的申请。", "cmp.3p":"几分钟出计划，代办申报，一个看板，价格事先透明。", "cmp.h":"为什么不找律所或顾问？", "cn.btn":"获取您的美国开店计划", "cn.h":"为出海品牌而生。", "cn.p":"您在上海或深圳的团队，与纽约团队看到的是同一个看板，中英文随时切换。我们会尽早提示美国特有的风险，包括部分州对外资企业租赁和持有房产的限制。", "cn.q":"苏轼《定风波》", "cn.s":"此心安处是吾乡", "cn.sub":"免费，几分钟生成", "dash.a":"深圳总部", "dash.at":"晚上 9:00", "dash.b":"纽约团队", "dash.bt":"上午 9:00", "dash.risk":"风险提示：签约前请复核该州对外资企业租赁的规定", "diff.1b":"几分钟", "diff.1s":"从目标市场到完整开店计划", "diff.after":"之后", "diff.before":"之前", "diff.c1":"2016 年以来服务的客户", "diff.c2":"回头客户比例", "diff.h":"快哉带来的改变", "diff.team":"您的团队", "diff.with":"携手", "itl.a1":"圣克拉拉县卫生许可材料已准备好，现在提交吗？", "itl.a2":"已提交。县里一开放检查时段，我就为您预约。", "itl.b1":"招牌许可需要房东授权。要我直接发请求给房东吗？", "itl.b2":"明白。以后所有门店的房东请求都先发给您。", "itl.f2":"房东授权书", "itl.h":"每次申报前都先问您，并记住您的回答", "itl.m2":"1 页文档", "itl.saved":"已记入您的偏好", "itl.u1":"好的，提交吧 👍", "itl.u2":"不用，房东相关的先发给我，我来转。", "qr":"二维码", "trust.1":"持牌合作律师", "trust.2":"本地许可代办", "trust.3":"中文和英文", "trust.h":"值得信赖", "wt.l":"随时协作", "wt.qr":"上线前在此放置微信二维码", "wt.r":"中文或英文", "you.init":"松",
  "map.n3":"每天 3 家以上", "map.s3":"2016 年以来，我们的团队平均每天新服务的美国企业", "map.n3w":"每天 7 家以上", "map.s3w":"2016 年以来，我们的团队平均每天在全球新服务的企业",
  "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
@@ -3155,29 +3170,35 @@ document.getElementById("monitor").addEventListener("click", e => {
 
 /* ============ testimonials: real customer quotes ============ */
 const TS = [
-  {logo: "logos/ink/chagee.png", lh: 30, alt: ["CHAGEE", "霸王茶姬"], n: "Jackie", ph: "media/people/jackie.jpg", big: "media/people/jackie-l.jpg", rl: ["Owner, CHAGEE", "店主，霸王茶姬"],
+  {logo: "logos/ink/chagee.png", lh: 30, alt: ["CHAGEE", "霸王茶姬"], n: "Jackie", co: ["CHAGEE", "霸王茶姬"], ph: "media/people/jackie.jpg", big: "media/people/jackie-l.jpg", rl: ["Owner, CHAGEE", "店主，霸王茶姬"],
    q: ["Placetta saves us months in approval time.", "快哉为我们节省了数月的审批时间。"],
    st: ["5 months", "5 个月"], sl: ["saved in approval time", "节省的审批时间"]},
-  {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
+  {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", co: ["Starbucks", "星巴克"], ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
    q: ["Placetta has taken over the tedious regulatory approvals so my team can focus on scaling instead of filings.", "快哉接手了繁琐的监管审批，让我的团队专注于扩张，而不是埋头申报。"],
    st: ["Hands-off", "全程代办"], sl: ["regulatory approvals", "繁琐的监管审批"]}
 ];
 let tsK = 0, tsHold = false;
-const ARL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
-const ARR = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+function renderTsTabs(){
+  const i = L();
+  document.getElementById("tsTabs").innerHTML = TS.map((v, k) => `<button type="button" role="tab" class="tstab" data-ts="${k}" aria-selected="${k === tsK}" aria-controls="tsGrid"><b>${v.n}</b><span>${v.co[i]}</span><i><b></b></i></button>`).join("");
+}
 function renderTs(swap){
   const i = L(), x = TS[tsK];
+  renderTsTabs();
   document.getElementById("tsGrid").innerHTML = `<figure class="tsx${swap ? " sw" : ""}">
     <div class="tsl"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async"><blockquote class="tsq">“${x.q[i]}”</blockquote>
       <figcaption class="tsp"><img class="tsav" src="${x.ph}" alt="" width="44" height="44" decoding="async"><span class="tsw"><b>${x.n}</b><span>${x.rl[i]}</span></span>
-        <span class="tsctl"><span class="tsn">${tsK + 1} / ${TS.length}</span><button type="button" data-ts="-1" aria-label="${i ? "上一位" : "Previous"}">${ARL}</button><button type="button" data-ts="1" aria-label="${i ? "下一位" : "Next"}">${ARR}</button></span></figcaption></div>
+        </span></figcaption></div>
     <div class="tsph"><img src="${x.big}" alt="${esc(x.n + ", " + x.rl[i])}" decoding="async"><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
   </figure>`;
 }
-document.getElementById("tsGrid").addEventListener("click", e => { const b = e.target.closest("[data-ts]"); if (!b) return; tsK = (tsK + Number(b.dataset.ts) + TS.length) % TS.length; renderTs(true); track("testimonial_nav", {to: tsK}); });
-document.getElementById("tsGrid").addEventListener("mouseenter", () => { tsHold = true; });
-document.getElementById("tsGrid").addEventListener("mouseleave", () => { tsHold = false; });
-if (!RM) setInterval(() => { if (tsHold || document.hidden) return; tsK = (tsK + 1) % TS.length; renderTs(true); }, 8000);
+let tsT = null;
+function tsNext(){ clearTimeout(tsT); if (RM) return; tsT = setTimeout(() => { if (document.hidden) { tsNext(); renderTsTabs(); return; } tsK = (tsK + 1) % TS.length; renderTs(true); tsNext(); }, 8000); }
+document.getElementById("tsTabs").addEventListener("click", e => { const b = e.target.closest("[data-ts]"); if (!b) return; const k = Number(b.dataset.ts); if (k !== tsK) { tsK = k; renderTs(true); track("testimonial_nav", {to: tsK}); } if (!tsHold) tsNext(); });
+["tsGrid", "tsTabs"].forEach(id => { const el = document.getElementById(id);
+  el.addEventListener("mouseenter", () => { tsHold = true; clearTimeout(tsT); document.getElementById("tsBar").classList.add("hold"); });
+  el.addEventListener("mouseleave", () => { tsHold = false; document.getElementById("tsBar").classList.remove("hold"); renderTsTabs(); tsNext(); }); });
+tsNext();
 
 /* ============ WeChat QR: set WECHAT_QR to the image path and it appears in the final call to action and the form ============ */
 const WECHAT_QR = "";
