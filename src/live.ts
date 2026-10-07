@@ -4,7 +4,8 @@ import {
   type AgentBackend, type AgentEvent, type Reply, type Request, type Step,
 } from "./core";
 import { B, same, type Bi } from "./bi";
-import type { Application, Approval, Doc, Field, FactGroup, Level, LicenseHit, Status, Workspace } from "./model";
+import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Workspace } from "./model";
+import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { inDays, nowIso } from "./time";
 import { docx } from "./files";
 import type { Lang } from "./i18n";
@@ -186,6 +187,7 @@ function snapshot(w: Workspace, lang: Lang) {
       empty_fields: a.fields.filter(f => !f.value).map(f => b(f.label)),
       missing_documents: a.checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: b(c.label) })),
     })),
+    stores: (w.stores ?? []).map(st => ({ id: st.id, name: b(st.name), address: st.address, stage: st.stage, planned_open: st.plannedOpen, applications: st.apps })),
     waiting_for_approval: w.approvals.map(a => ({ id: a.id, title: b(a.title), application: a.app })),
     deadlines: [...w.deadlines].sort((x, y) => x.date.localeCompare(y.date)).slice(0, 8).map(d => `${d.date}: ${b(d.title)}`),
     facts: w.facts.map(f => `${b(f.label)}: ${b(f.value)}`),
@@ -194,7 +196,8 @@ function snapshot(w: Workspace, lang: Lang) {
   };
 }
 
-export function rules(w: Workspace, lang: Lang, account: boolean, research: boolean, connected: string[], tools: boolean) {
+export function rules(w: Workspace, lang: Lang, account: boolean, research: boolean, connected: string[], tools: boolean, extra: { me?: string } = {}) {
+  const book = extra.me ? w.memories?.[extra.me] : undefined, mem = memoryBrief(book), ms = book?.settings;
   const has = (k: string[]) => connected.some(c => k.includes(c));
   const apps = connected.map(c => APP_NAMES[c]).filter(Boolean);
   const missing = [["Email (Gmail or Outlook)", MAIL], ["a calendar", CAL], ["Google Drive or Dropbox", DRIVES], ["QuickBooks", ["quickbooks"]]].filter(([, k]) => !has(k as string[])).map(([n]) => n);
@@ -204,6 +207,10 @@ How you work:
 - You are an operator, not a chatbot. ${tools ? "When the person asks for something your tools can do, do it now, in as many steps as it takes, then say what you did. Don't describe what you could do, don't ask permission to prepare things, and don't stop after one step when the job needs more." : "Answer directly and concretely."}${tools ? `
 - Use the agencies' real forms, never a template. find_official_forms returns the official form for each filing (form number, agency, how it's filed, official link, fee and the form's own fields by line). When a form is there, prepare_application with its official_form_id and fill its fields with the form's own labels. Only when the library has nothing for a filing, research the agency's official page and name the exact form or online service it uses.
 - Chain the tools. To map a business: find_official_forms for its business and place, then prepare_application once for each license it needs, fill each from Context, add_deadline for due dates, then request_filing_approval for the ones that are ready. For progress or "what's next": check_progress first${has(MAIL) ? ", then search_email for recent mail from the agencies and read_email what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${has(DRIVES) ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
+- Act, don't advise. When the person asks for something, do every step you can yourself, start to end, in this turn: research the requirement (start from usa.gov or sba.gov if it helps you find the agency, then read and cite the agency's own page), find the official form, prepare the application, fill every line of the form from Context, memory and their documents, draft any letter it needs, add the deadlines and put the filing up for approval. Ask only for facts you truly can't find, all in one question at the end. Never stop at an explanation when you could have done the step.
+- You can change anything in the workspace the person can: add stores (add_store shows it in Stores right away), rename the business, edit facts, deadlines and applications, and change everyday settings (language, theme, accent color, reading replies aloud) with change_setting. Changing something that already exists in a way they may not want, like moving a store to a different city or removing a store or an application, goes through update_store, remove_store or remove_application: that puts a confirmation in front of them and nothing changes until they confirm. Say you've asked them to confirm; never say it's done before they do. After a store moves, map the new city's permits.
+- Never touch these yourself, even if asked; point to Settings instead: their password, settings PIN, two-step sign-in, team members and roles, billing, agency logins, integrations, and deleting data.${ms ? `
+- Memory: what you know about the person is below under Memory. Use it when it changes the answer; don't recite it.${ms.generate ? " When they tell you something durable about themselves, their preferences or their work, save it with memory_save (one short fact per call)." : " Saving new memories is off: only memory_save when they explicitly ask you to remember something."}${ms.sensitive ? "" : " Never save health, religion, politics, finances or other sensitive details."}${ms.searchChats ? " search_past_chats finds what they said in earlier chats when they refer to it." : ""}` : ""}
 - Only filing, paying and sending need the person. request_filing_approval${account ? "" : ", draft_message"} and send_email put those in front of them to approve. Everything else (preparing, filling, drafting documents, adding deadlines${has(CAL) ? ", calendar events" : ""}${has(DRIVES) ? ", importing files" : ""}, remembering facts) you just do.` : ""}${apps.length ? `
 - Connected apps: ${apps.join(", ")}.` : ""}${account && missing.length ? `
 - Not connected: ${missing.join(", ")}. If a task needs one, say so in one sentence and point to Settings, Integrations.` : ""}
@@ -220,7 +227,10 @@ Rules:
 - Reply in ${LANG[lang]}. Be sharp and concise: two to four short sentences of plain prose, no markdown, no lists, no headings, and never an em dash. Lead with what you did, then what's next.
 
 Workspace:
-${JSON.stringify(snapshot(w, lang))}`;
+${JSON.stringify(snapshot(w, lang))}${mem ? `
+
+Memory (what you know about the person):
+${mem}` : ""}`;
 }
 
 /* -------------------------------- the tools -------------------------------- */
@@ -242,6 +252,10 @@ export type Services = {
   /** Store a file in Documents (and the account); returns its storage path. */
   saveFile(file: File, appId?: string): Promise<{ path: string }>;
   readFile(path: string): Promise<Blob>;
+  /** The signed-in person's user id: their memory and past chats live under it. */
+  me?: string;
+  /** Low-risk settings the agent may change for the person. Returns what it was set to. */
+  setting?(key: string, value: string): string;
 };
 export type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"]; lastToolAt: number };
 export type X = { model: Model; files: Map<string, File>; svc?: Services; signal: AbortSignal };
@@ -530,6 +544,122 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         return { store_id: id, nyc_rules: nyc };
       },
     },
+    {
+      name: "update_store",
+      description: "Change a store. A new name or opening date changes right away. A new place (city, state or address) asks the person to confirm first, then moves the store and sets its old local permits aside. Use for 'switch this store to another location'.",
+      inputSchema: { type: "object", properties: { store_id: { type: "string" }, name: { type: "string" }, planned_open: { type: "string", description: "YYYY-MM-DD" }, city: { type: "string" }, state: { type: "string", description: "Two-letter state code" }, address: { type: "string" }, reason: { type: "string" } }, required: ["store_id"] },
+      execute(i) {
+        const st = (get().stores ?? []).find(x => x.id === str(i.store_id));
+        if (!st) throw new Error(`No store "${str(i.store_id)}". Use an id from the workspace's stores.`);
+        const planned = /^\d{4}-\d{2}-\d{2}$/.test(str(i.planned_open)) ? str(i.planned_open) : undefined;
+        const city = str(i.city, 60), state = str(i.state, 2).toUpperCase();
+        if (!city) {
+          S("connecting", L(`Updating ${st.name[lang]}`, `更新${st.name[lang]}`));
+          apply(w => audit("agent", L("Updated a store", "更新门店"), st.name)({ ...w, stores: (w.stores ?? []).map(x => (x.id === st.id ? { ...x, name: str(i.name) ? same(str(i.name, 80)) : x.name, plannedOpen: planned ?? x.plannedOpen } : x)) }));
+          mark(); return { ok: true, changed_now: true };
+        }
+        if (!state) throw new Error("state is required with a new city");
+        const to = [str(i.address, 120), city, state].filter(Boolean).join(", ");
+        const change: Change = { op: "move_store", store: st.id, name: str(i.name, 80) || undefined, address: str(i.address, 120) || undefined, city, state, planned_open: planned };
+        const id = "ap-chg-" + seq++;
+        S("composing", L(`Asking you to confirm moving ${st.name[lang]}`, `请您确认迁移${st.name[lang]}`));
+        apply(w => audit("agent", L("Asked to confirm a change", "请求确认更改"), st.name, same(to))(addApproval({
+          id, kind: "change", change, title: L(`Move ${st.name.en} to ${city}, ${state}`, `将${st.name.zh}迁至${city}, ${state}`), action: B("Confirm the move", "确认迁移"),
+          does: [L(`Change the store's location from ${st.address} to ${to}`, `将门店地址从 ${st.address} 改为 ${to}`), L("Set aside the old city's local permits that aren't approved yet", "暂停旧城市尚未获批的地方许可"), L(`Map the permits ${city} needs`, `梳理${city}所需的许可`)],
+          data: [{ id: "from", label: L("From", "原地址"), value: st.address }, { id: "to", label: L("To", "新地址"), value: to }, ...(str(i.reason) ? [{ id: "why", label: L("Why", "原因"), value: str(i.reason, 200) }] : [])],
+        })(w)));
+        made.approvals.push(id); mark();
+        return { confirmation_requested: true, approval_id: id, note: "Nothing changes until the person confirms in the app." };
+      },
+    },
+    {
+      name: "remove_store",
+      description: "Remove a store the business no longer plans. Asks the person to confirm first.",
+      inputSchema: { type: "object", properties: { store_id: { type: "string" }, reason: { type: "string" } }, required: ["store_id"] },
+      execute(i) {
+        const st = (get().stores ?? []).find(x => x.id === str(i.store_id));
+        if (!st) throw new Error(`No store "${str(i.store_id)}".`);
+        const id = "ap-chg-" + seq++, change: Change = { op: "remove_store", store: st.id };
+        apply(addApproval({ id, kind: "change", change, title: L(`Remove ${st.name.en}`, `移除${st.name.zh}`), action: B("Confirm removal", "确认移除"),
+          does: [L(`Remove ${st.name.en} (${st.address}) from Stores`, `从门店中移除${st.name.zh}（${st.address}）`)], data: str(i.reason) ? [{ id: "why", label: L("Why", "原因"), value: str(i.reason, 200) }] : [] }));
+        made.approvals.push(id); mark();
+        return { confirmation_requested: true, approval_id: id };
+      },
+    },
+    {
+      name: "remove_application",
+      description: "Remove an application that isn't needed (not one already filed). Asks the person to confirm first.",
+      inputSchema: { type: "object", properties: { application_id: { type: "string" }, reason: { type: "string" } }, required: ["application_id"] },
+      execute(i) {
+        const a = findApp(i.application_id);
+        if (["filing", "review", "approved"].includes(a.status)) throw new Error("It's already with the filing team or the agency; it can't be removed here.");
+        const id = "ap-chg-" + seq++, change: Change = { op: "remove_app", app: a.id };
+        apply(addApproval({ id, kind: "change", change, title: L(`Remove the ${nm(a)}`, `移除${nm(a)}`), action: B("Confirm removal", "确认移除"),
+          does: [L(`Remove the ${nm(a)} and its checklist from Applications`, `从申请中移除${nm(a)}及其清单`)], data: str(i.reason) ? [{ id: "why", label: L("Why", "原因"), value: str(i.reason, 200) }] : [] }));
+        made.approvals.push(id); mark();
+        return { confirmation_requested: true, approval_id: id };
+      },
+    },
+    {
+      name: "edit_workspace",
+      description: "Rename the business or change its goal.",
+      inputSchema: { type: "object", properties: { business_name: { type: "string" }, goal: { type: "string" } } },
+      execute(i) {
+        const name = str(i.business_name, 80), goal = str(i.goal, 200);
+        if (!name && !goal) throw new Error("business_name or goal is required");
+        S("weaving", L("Updating the workspace", "更新工作区"));
+        apply(w => audit("agent", L("Updated the workspace", "更新工作区"), name ? same(name) : w.business)({ ...w, business: name ? same(name) : w.business, goal: goal ? same(goal) : w.goal }));
+        mark(); return { ok: true };
+      },
+    },
+    {
+      name: "edit_deadline",
+      description: "Change a deadline's date or title, or remove it.",
+      inputSchema: { type: "object", properties: { deadline_id: { type: "string" }, date: { type: "string", description: "YYYY-MM-DD" }, title: { type: "string" }, remove: { type: "boolean" } }, required: ["deadline_id"] },
+      execute(i) {
+        const d = get().deadlines.find(x => x.id === str(i.deadline_id));
+        if (!d) throw new Error(`No deadline "${str(i.deadline_id)}".`);
+        if (i.remove) { apply(w => audit("agent", L("Removed a deadline", "删除截止日期"), d.title)({ ...w, deadlines: w.deadlines.filter(x => x.id !== d.id) })); mark(); return { removed: true }; }
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(str(i.date)) ? str(i.date) : d.date;
+        apply(w => audit("agent", L("Changed a deadline", "修改截止日期"), d.title, same(date))({ ...w, deadlines: w.deadlines.map(x => (x.id === d.id ? { ...x, date, title: str(i.title) ? same(str(i.title, 160)) : x.title } : x)) }));
+        mark(); return { ok: true };
+      },
+    },
+    ...(x.svc?.setting ? [{
+      name: "change_setting",
+      description: "Change one of the person's everyday settings: theme (light, dark or system), language (en or zh), accent_color (a hex color like #2F7D6D, or default), read_aloud (on or off).",
+      inputSchema: { type: "object" as const, properties: { setting: { type: "string", enum: ["theme", "language", "accent_color", "read_aloud"] }, value: { type: "string" } }, required: ["setting", "value"] },
+      execute(i: Record<string, unknown>) { const r = x.svc!.setting!(str(i.setting), str(i.value, 40)); S("connecting", L(`Changed ${str(i.setting)}`, `已更改 ${str(i.setting)}`)); mark(); return { set_to: r }; },
+    }] : []),
+    ...(x.svc?.me ? [{
+      name: "memory_save",
+      description: "Save one short, durable fact about the person (who they are, how they like to work, a topic or an area they're working on) to their memory.",
+      inputSchema: { type: "object" as const, properties: { kind: { type: "string", enum: ["you", "topic", "area"] }, file: { type: "string", description: "Profile or Preferences for kind you; else the topic or area's name" }, fact: { type: "string" }, summary: { type: "string", description: "One line describing the file, when it's new" }, they_asked: { type: "boolean", description: "They explicitly asked you to remember it" } }, required: ["kind", "file", "fact"] },
+      execute(i: Record<string, unknown>) {
+        const me = x.svc!.me!, book = get().memories?.[me] ?? emptyBook();
+        if (!book.settings.generate && !i.they_asked) return { saved: false, why: "Generating memory is off. Only save what they explicitly ask you to remember." };
+        const next = rememberFact(book, { kind: (["you", "topic", "area"].includes(str(i.kind)) ? str(i.kind) : "you") as MemoryKind, file: str(i.file, 60) || "Profile", fact: str(i.fact, 400), summary: str(i.summary, 160) || undefined });
+        if (!next) return { saved: false, why: "That's a sensitive topic and saving sensitive topics is off." };
+        S("weaving", L("Saving to memory", "存入记忆"));
+        apply(w => ({ ...w, memories: { ...(w.memories ?? {}), [me]: next } }));
+        made.memory.push(same(str(i.fact, 200))); mark(); return { saved: true };
+      },
+    }, {
+      name: "memory_search",
+      description: "Search what you remember about the person.",
+      inputSchema: { type: "object" as const, properties: { query: { type: "string" } }, required: ["query"] },
+      execute(i: Record<string, unknown>) { mark(); return { results: searchMemory(get().memories?.[x.svc!.me!] ?? emptyBook(), str(i.query, 200)) }; },
+    }, {
+      name: "search_past_chats",
+      description: "Search the person's earlier chats with you for something they said before.",
+      inputSchema: { type: "object" as const, properties: { query: { type: "string" } }, required: ["query"] },
+      execute(i: Record<string, unknown>) {
+        const me = x.svc!.me!, book = get().memories?.[me] ?? emptyBook();
+        if (!book.settings.searchChats) return { results: [], why: "Searching past chats is off in Settings, Memory." };
+        S("searching", L("Searching past chats", "搜索以往对话")); mark();
+        return { results: searchChats(get().chats?.[me] ?? [], str(i.query, 200)) };
+      },
+    }] : []),
     {
       name: "show_licenses",
       description: "Show a list of the licenses a business needs in a place, in the Find licenses view. Use when the person asks what they need somewhere.",
@@ -835,7 +965,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         step({ state: "searching", label: B("Reading your workspace", "读取您的工作区") });
         const tools = model.tools ? makeTools(() => ws, apply, step, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal }) : undefined;
         const research = model.kind === "server";
-        const brief = rules(ws, lang, !!o.account, research, o.services?.connected() ?? [], !!tools);
+        const brief = rules(ws, lang, !!o.account, research, o.services?.connected() ?? [], !!tools, { me: o.services?.me });
         const turns: Turn[] = [...(model.system ? [] : [{ role: "user" as const, content: brief }]), ...history.slice(-12), { role: "user", content: req.text }];
         let sources: Source[] = [];
         const text = await model.chat(turns, {

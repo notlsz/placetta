@@ -36,8 +36,11 @@ async function accessFor(ws: string, user: { id: string; email?: string; email_c
   return s ? "staff" : "none";
 }
 
-// A bright, young-sounding voice in each language; the prosody lifts it slightly toward a 21-year-old.
-const VOICE = { en: Deno.env.get("TTS_VOICE_EN") ?? "en-US-AvaMultilingualNeural", zh: Deno.env.get("TTS_VOICE_ZH") ?? "zh-CN-XiaoxiaoNeural" };
+// A warm, young woman's voice in each language. The HD voice sounds like a person talking, not reading; when the
+// region doesn't offer it, the neural voice of the same speaker answers instead. No pitch or speed tricks: those are
+// what make a voice sound like a bot.
+const VOICE = { en: Deno.env.get("TTS_VOICE_EN") ?? "en-US-Ava:DragonHDLatestNeural", zh: Deno.env.get("TTS_VOICE_ZH") ?? "zh-CN-Xiaoxiao:DragonHDFlashLatestNeural" };
+const FALLBACK = { en: "en-US-AvaMultilingualNeural", zh: "zh-CN-XiaoxiaoNeural" };
 const DAILY_CHARS = Number(Deno.env.get("TTS_DAILY_CHARS") ?? "20000");
 
 const xml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
@@ -67,18 +70,20 @@ Deno.serve(async (req) => {
   const { data: usage } = await admin.from("agent_usage").select("tts_chars").eq("workspace_id", ws).eq("day", today).maybeSingle();
   if ((usage?.tts_chars ?? 0) + text.length > DAILY_CHARS) return fail(429, "rate_limited", "Today's voice limit is reached.");
 
-  const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${lang === "zh" ? "zh-CN" : "en-US"}">` +
-    `<voice name="${VOICE[lang]}"><prosody rate="+6%" pitch="+4%">${xml(text)}</prosody></voice></speak>`;
-  const res = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+  const ssml = (voice: string) => `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="${lang === "zh" ? "zh-CN" : "en-US"}">` +
+    (voice.includes("DragonHD") ? `<voice name="${voice}">${xml(text)}</voice>` : `<voice name="${voice}"><mstts:express-as style="friendly">${xml(text)}</mstts:express-as></voice>`) + `</speak>`;
+  const say = (voice: string) => fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
     method: "POST",
     headers: {
       "Ocp-Apim-Subscription-Key": key,
       "Content-Type": "application/ssml+xml",
-      "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3",
+      "X-Microsoft-OutputFormat": "audio-24khz-96kbitrate-mono-mp3",
       "User-Agent": "placetta",
     },
-    body: ssml,
+    body: ssml(voice),
   });
+  let res = await say(VOICE[lang]);
+  if (!res.ok && res.status !== 429 && res.status !== 401) res = await say(FALLBACK[lang]);
   if (!res.ok) {
     console.error("azure tts", res.status, (await res.text()).slice(0, 200));
     return fail(res.status === 429 ? 429 : 502, res.status === 429 ? "rate_limited" : "upstream_error", "The voice service didn't answer. Try again.");

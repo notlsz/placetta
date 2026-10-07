@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
+import { applyChange } from "./core";
+import { emptyBook } from "./memory";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
 import { AgentBot } from "./Bot";
@@ -8,7 +10,7 @@ import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
 import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, serverModel, type Model, type Services, type Turn as Msg } from "./live";
 import { applicationPdf, auditCsv, docBlob, downloads, saveFile } from "./files";
-import { unlockAudio, useNarrow, useSpeak } from "./hooks";
+import { applyAccent, saveTheme, unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo, Mark } from "./Logo";
 import { B, SAMPLE, same, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
@@ -238,6 +240,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     integration: (action, body) => api.integration(cloud.wsId, action, body),
     saveFile: async (file, appId) => { const row = await api.uploadDoc(cloud.wsId, file, appId); paths.current.set(file.name, row.path); void refreshRef.current(); return { path: row.path }; },
     readFile: path => api.downloadDoc(path),
+    me: cloud.me.id,
+    setting: (key, value) => {
+      const v = value.trim().toLowerCase();
+      if (key === "theme" && (v === "light" || v === "dark" || v === "system")) { saveTheme(v); return v; }
+      if (key === "language" && (v === "en" || v === "zh" || v.startsWith("chin") || v.startsWith("eng"))) { const l = v.startsWith("zh") || v.startsWith("chin") ? "zh" : "en"; setLang(l); return l; }
+      if (key === "accent_color") return applyAccent(v === "default" ? "" : v) || "default";
+      if (key === "read_aloud") { const on = /^(on|true|yes)$/.test(v); setVoiceOn(on); return on ? "on" : "off"; }
+      throw new Error("Not a setting the agent can change. Point the person to Settings.");
+    },
   }), [cloud]);
   useEffect(() => { modelRef.current = model; }, [model]);
 
@@ -294,6 +305,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         said = r.text.map(x => x[lang]).join(" ");
         if (r.matches) setMatch(r.matches);
         if ("text" in req && modelRef.current) history.current.push({ role: "user", content: req.text }, { role: "assistant", content: said });
+        // past chats, kept per person so the agent can search them later (Settings, Memory)
+        if ("text" in req && cloud && said) { const me = cloud.me.id, at = nowIso(); setWs(w => ({ ...w, chats: { ...(w.chats ?? {}), [me]: [...(w.chats?.[me] ?? []), { at, role: "you" as const, text: req.text.slice(0, 2000) }, { at, role: "agent" as const, text: said.slice(0, 2000) }].slice(-300) } })); }
       }
     };
     const m = modelRef.current;
@@ -366,6 +379,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (held()) return;
     const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
     const shown = `${S.approvedIt[lang]}: ${a.title[lang]}`;
+    if (a.kind === "change" && a.change) {
+      const c = a.change;
+      setWs(x => audit("you", B("Confirmed a change", "确认更改"), a.title)(dropApproval(id)(applyChange(c)(x))));
+      say(lang === "zh" ? "已更改。" : "Done. It's changed.");
+      return;
+    }
     if (!cloud) { run({ approve: id }, shown); return; }
     if (!ownerOk()) return;
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
@@ -531,6 +550,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       setFeed(fd => [...fd, { id: nid(), kind: "memory", text }]);
       say(`${t("committed")}: ${text[lang]}`);
     },
+    memory: cloud ? view_.memories?.[cloud.me.id] ?? emptyBook() : null,
+    setMemory: f => { if (cloud) { const me = cloud.me.id; setWs(w => ({ ...w, memories: { ...(w.memories ?? {}), [me]: f(w.memories?.[me] ?? emptyBook()) } })); } },
     updateStore: (id, f, log) => !held() && setWs(w => {
       const next = { ...w, stores: (w.stores ?? []).map(s => (s.id === id ? f(s) : s)) };
       return log ? audit("you", log.action, log.object, log.detail)(next) : next;

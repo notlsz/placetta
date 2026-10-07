@@ -52,7 +52,7 @@ export type Doc = { id: string; name: string; kind: DocKind; size: number; by: A
 export type Deadline = { id: string; date: string; kind: "due" | "renewal" | "estimate" | "milestone"; title: Bi; agency?: Bi; app?: string; ask?: Bi; prompt?: Bi };
 export type Nudge = { id: string; tone: "warn" | "info"; text: Bi; ask: Bi; prompt: Bi; sample?: boolean };
 
-export type ApprovalKind = "file" | "send" | "upload" | "pay";
+export type ApprovalKind = "file" | "send" | "upload" | "pay" | "change";
 export type Approval = {
   id: string;
   kind: ApprovalKind;
@@ -65,7 +65,13 @@ export type Approval = {
   url?: string;             // pay: the agency's payment link
   fee?: number;             // pay: the amount the agency asks for
   filing?: string;          // pay: the filing it belongs to
+  change?: Change;          // change: what the agent will change once you confirm
 };
+/** A change to something that already exists, which the agent only makes after you confirm it. */
+export type Change =
+  | { op: "move_store"; store: string; name?: string; address?: string; city: string; state: string; planned_open?: string }
+  | { op: "remove_store"; store: string }
+  | { op: "remove_app"; app: string };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
 export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
@@ -120,7 +126,14 @@ export type Workspace = {
   connections: Connection[];
   stores?: Store[];
   meta?: { mapped?: boolean; city?: string; region?: string; entity?: string; what?: string };   // account workspaces only
+  memories?: Record<string, MemoryBook>;   // each person's memory, by user id
+  chats?: Record<string, ChatLine[]>;      // each person's past chats with the agent, by user id, for "search past chats"
 };
+export type MemoryKind = "you" | "topic" | "area";
+export type MemoryFile = { id: string; kind: MemoryKind; name: string; summary: string; lines: string[]; updated: string; sensitive?: boolean };
+export type MemorySettings = { searchChats: boolean; generate: boolean; sensitive: boolean };
+export type MemoryBook = { settings: MemorySettings; files: MemoryFile[] };
+export type ChatLine = { at: string; role: "you" | "agent"; text: string };
 
 /* ------------------------------------------------------------------ */
 

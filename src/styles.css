@@ -1082,3 +1082,28 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .pinform { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .pin-form { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .pin-msg { margin: 0; font-size: 13.5px; color: #C0473A; }
+/* accent color */
+.swatches { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
+.sw { width: 30px; height: 30px; border: 0; border-radius: 50%; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); }
+.sw[aria-checked="true"] { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ink); }
+.sw-own { position: relative; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; background: conic-gradient(#e44, #ec4, #4c6, #4ce, #46e, #c4e, #e44); cursor: pointer; }
+.sw-own input { position: absolute; inset: -8px; width: 46px; height: 46px; opacity: 0; cursor: pointer; }
+.sw-hex { width: 104px; height: 34px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .12); font: 500 13.5px/1 ui-monospace, Menlo, monospace; color: var(--ink); outline: 0; }
+/* memory */
+.mem h3 { margin-top: 18px; }
+.memt { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.memt th { text-align: left; font-weight: 500; color: var(--ink3); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.memt td { padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink2); }
+.memt td b { font-weight: 500; color: var(--ink); white-space: nowrap; }
+.memt td em { color: var(--ink3); font-style: normal; }
+.memt .when { white-space: nowrap; color: var(--ink3); }
+.memt .acts { white-space: nowrap; text-align: right; }
+.memt .acts .sbtn { height: 28px; padding: 0 10px; font-size: 12.5px; }
+@media (max-width: 640px) { .memt th:nth-child(3), .memt td:nth-child(3) { display: none; } }
+.memedit { width: 100%; padding: 12px 14px; border: 0; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .12); font: 400 14px/1.55 var(--sans); color: var(--ink); resize: vertical; outline: 0; }
+.memimp section + section { margin-top: 22px; }
+.memimp h3 { display: flex; align-items: center; gap: 10px; }
+.memimp .num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--on-ink); font-size: 12px; }
+.mempr { max-height: 220px; overflow: auto; margin: 10px 0; padding: 12px 14px; border-radius: 12px; background: var(--mist); font: 12.5px/1.55 ui-monospace, Menlo, monospace; white-space: pre-wrap; color: var(--ink2); }
+.sg-sub.mem, .sg-sub.accent { display: block; }
+.sg-sub.mem h3, .sg-sub.accent h3 { margin: 18px 0 8px; }

@@ -4,7 +4,9 @@ import { B, type Bi } from "./model";
 import { API_MODELS } from "./live";
 import { fmtAgo, fmtDay } from "./time";
 import { Footer, I, Modal } from "./ui";
-import { useTheme, type Theme } from "./hooks";
+import { ACCENTS, applyAccent, readAccent, useTheme, type Theme } from "./hooks";
+import { IMPORT_PROMPT, PREFS, PROFILE, importMemory } from "./memory";
+import type { MemoryFile, MemoryKind } from "./model";
 import * as api from "./cloud/api";
 import type { IntegrationKind } from "./cloud/api";
 import { TwoStepSetup } from "./cloud/TwoStep";
@@ -264,6 +266,102 @@ function Security() {
   );
 }
 
+/* ---------------------------------- memory ---------------------------------- */
+
+const ago = (iso: string, zh: boolean) => fmtAgo(iso, zh ? "zh" : "en");
+function Toggle({ on, set, label }: { on: boolean; set: (v: boolean) => void; label: string }) {
+  return <label className="switch" onClick={e => e.stopPropagation()}><input type="checkbox" checked={on} onChange={e => set(e.target.checked)} aria-label={label} /><i /></label>;
+}
+
+function MemoryGroup() {
+  const { lang, memory, setMemory, say } = useApp();
+  const zh = lang === "zh";
+  const [view, setView] = useState<MemoryFile | null>(null);
+  const [draft, setDraft] = useState("");
+  const [imp, setImp] = useState<0 | 1>(0);
+  const [paste, setPaste] = useState("");
+  if (!memory) return null;
+  const st = memory.settings;
+  const set = (k: keyof typeof st) => (v: boolean) => setMemory(b => ({ ...b, settings: { ...b.settings, [k]: v } }));
+  const files = memory.files;
+  const you = [files.find(f => f.id === "profile") ?? PROFILE(), files.find(f => f.id === "preferences") ?? PREFS()];
+  const group = (k: MemoryKind) => files.filter(f => f.kind === k).sort((a, b) => a.name.localeCompare(b.name));
+  const table = (title: string, rows: MemoryFile[]) => (
+    <div className="sg-sub mem">
+      <h3>{title}</h3>
+      {rows.length ? (
+        <table className="memt">
+          <thead><tr><th>{zh ? "名称" : "Name"}</th><th>{zh ? "摘要" : "Summary"}</th><th>{zh ? "最后更新" : "Last updated"}</th><th><span className="sr">{zh ? "操作" : "Actions"}</span></th></tr></thead>
+          <tbody>{rows.map(f => (
+            <tr key={f.id}>
+              <td><b>{f.name}</b></td>
+              <td>{f.summary}{f.lines.length ? "" : <em>{zh ? "（暂无内容）" : " (nothing yet)"}</em>}</td>
+              <td className="when">{files.includes(f) ? ago(f.updated, zh) : "-"}</td>
+              <td className="acts">
+                <button type="button" className="sbtn quiet" onClick={() => { setView(f); setDraft(f.lines.join("\n")); }}>{zh ? "查看" : "View"}</button>
+                {files.includes(f) && <button type="button" className="sbtn quiet" aria-label={zh ? `删除 ${f.name}` : `Delete ${f.name}`} onClick={() => { if (window.confirm(zh ? `删除“${f.name}”中的全部记忆？` : `Delete everything in ${f.name}?`)) setMemory(b => ({ ...b, files: b.files.filter(x => x.id !== f.id) })); }}><I.x /></button>}
+              </td>
+            </tr>
+          ))}</tbody>
+        </table>
+      ) : <p className="sg-note">{zh ? "还没有。和快哉聊得越多，这里会越充实。" : "Nothing yet. This fills in as you work with Placetta."}</p>}
+    </div>
+  );
+  return (
+    <Group id="memory" title={B("Memory", "记忆")} note={B("What Placetta remembers about you, so you don't have to repeat yourself. Only you can see your memory, and you can edit or delete any of it.", "快哉记住的关于您的信息，让您不必重复说明。只有您能看到自己的记忆，并可随时编辑或删除。")}
+      rows={[
+        { label: B("Search and reference past chats", "搜索并引用以往对话"), sub: zh ? "允许快哉在以往的对话中查找相关细节。" : "Let Placetta look up relevant details from your earlier chats.", right: <Toggle on={st.searchChats} set={set("searchChats")} label="Search past chats" /> },
+        { label: B("Generate memory from chats", "从对话中生成记忆"), sub: zh ? "允许快哉从对话中记住关于您和您工作的持久信息。" : "Let Placetta remember lasting details about you and your work from your chats.", right: <Toggle on={st.generate} set={set("generate")} label="Generate memory" /> },
+        { label: B("Include sensitive topics in memory", "记忆中包含敏感话题"), sub: zh ? "允许保存健康、宗教信仰、政治或财务等敏感细节。" : "Let Placetta save sensitive details like health, religious beliefs, politics or finances.", right: <Toggle on={st.sensitive} set={set("sensitive")} label="Include sensitive topics" /> },
+        { label: B("Import memory from other AI assistants", "从其他 AI 助手导入记忆"), sub: zh ? "把其他 AI 助手对您的了解带到快哉。我们会给您一段提示词，用来取出那边的记忆。" : "Bring what another AI assistant knows about you. We'll give you a prompt that gets your memory out of it.", right: <Btn onClick={() => { setImp(1); setPaste(""); }}>{zh ? "开始导入" : "Start import"}</Btn> },
+      ]}>
+      {table(zh ? "您" : "You", you)}
+      {table(zh ? "话题" : "Topics", group("topic"))}
+      {table(zh ? "领域" : "Areas", group("area"))}
+      {view && (
+        <Modal label={view.name} onClose={() => setView(null)}>
+          <header className="m-h"><span className="m-eyebrow"><I.spark />{zh ? "记忆" : "Memory"}</span><h2>{view.name}</h2><p>{view.summary}</p></header>
+          <div className="m-body">
+            <p className="sg-note">{zh ? "每行一条。可直接修改、增加或删除。" : "One fact per line. Edit, add or delete lines."}</p>
+            <textarea className="memedit" value={draft} onChange={e => setDraft(e.target.value)} rows={12} aria-label={view.name} />
+            <div className="sg-form-act">
+              <Btn onClick={() => setView(null)}>{zh ? "取消" : "Cancel"}</Btn>
+              <button type="button" className="sbtn ink" onClick={() => {
+                const lines = draft.split("\n").map(l => l.replace(/^[-*•]\s*/, "").trim()).filter(Boolean).slice(0, 60);
+                setMemory(b => { const exists = b.files.some(x => x.id === view.id); const f = { ...view, lines, updated: new Date().toISOString() }; return { ...b, files: exists ? b.files.map(x => (x.id === view.id ? f : x)) : [...b.files, f] }; });
+                setView(null); say(zh ? "记忆已更新。" : "Memory updated.");
+              }}>{zh ? "保存" : "Save"}</button>
+            </div>
+          </div>
+        </Modal>
+      )}
+      {imp === 1 && (
+        <Modal label={zh ? "导入记忆" : "Import memory"} onClose={() => setImp(0)} wide>
+          <header className="m-h"><span className="m-eyebrow"><I.spark />{zh ? "记忆" : "Memory"}</span><h2>{zh ? "把记忆导入快哉" : "Import memory to Placetta"}</h2></header>
+          <div className="m-body memimp">
+            <section><h3><span className="num">1</span>{zh ? "把这段提示词复制到您在其他 AI 助手的对话中" : "Copy this prompt into a chat with your other AI assistant"}</h3>
+              <pre className="mempr">{IMPORT_PROMPT}</pre>
+              <Btn onClick={() => { void navigator.clipboard?.writeText(IMPORT_PROMPT).then(() => say(zh ? "已复制" : "Copied"), () => say(zh ? "无法复制，请手动选中复制" : "Couldn't copy. Select the text and copy it.")); }}>{zh ? "复制提示词" : "Copy prompt"}</Btn>
+            </section>
+            <section><h3><span className="num">2</span>{zh ? "把结果粘贴到下面，加入快哉的记忆" : "Paste the results below to add them to Placetta's memory"}</h3>
+              <textarea className="memedit" rows={8} value={paste} onChange={e => setPaste(e.target.value)} placeholder="[2026-01-05] - …" aria-label={zh ? "粘贴导出的记忆" : "Paste the exported memory"} />
+              <div className="sg-form-act">
+                <Btn onClick={() => setImp(0)}>{zh ? "取消" : "Cancel"}</Btn>
+                <button type="button" className="sbtn ink" disabled={!paste.trim()} onClick={() => {
+                  let added = 0, skipped = 0;
+                  setMemory(b => { const r = importMemory(b, paste); added = r.added; skipped = r.skipped; return r.book; });
+                  setTimeout(() => say(zh ? `已加入 ${added} 条记忆${skipped ? `，${skipped} 条敏感内容未保存` : ""}。` : `Added ${added} memor${added === 1 ? "y" : "ies"}${skipped ? `. ${skipped} sensitive item${skipped === 1 ? " was" : "s were"} left out` : ""}.`), 0);
+                  setImp(0);
+                }}>{zh ? "加入记忆" : "Add to memory"}</button>
+              </div>
+            </section>
+          </div>
+        </Modal>
+      )}
+    </Group>
+  );
+}
+
 /* ------------------------------ settings PIN ------------------------------ */
 
 const digits = (v: string) => v.replace(/\D/g, "").slice(0, 6);
@@ -350,6 +448,9 @@ export function Settings() {
   const [id, setId] = useState(API_MODELS[0].id);
   const [remember, setRemember] = useState(false);
   const [theme, setTheme] = useTheme();
+  const [accent, setAccent] = useState(readAccent);
+  const [hex, setHex] = useState(readAccent);
+  useEffect(() => { if (accent) applyAccent(accent); }, [theme, accent]);
   const [pinSt, setPinSt] = useState<api.PinStatus | null>(null);
   const [now, setNow] = useState(() => new Date().toISOString());
   const [prompt, setPrompt] = useState<{ title: string; action: (pin: string) => Promise<api.PinStatus>; then?: () => void } | null>(null);
@@ -364,7 +465,7 @@ export function Settings() {
     : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
     : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
-  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
+  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ...(cloud ? [["memory", B("Memory", "记忆")]] as [string, Bi][] : []), ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
 
   return (
     <PinLock.Provider value={pinCtx}>
@@ -417,9 +518,22 @@ export function Settings() {
             )}
           </Group>
 
+          <MemoryGroup />
+
           <Group id="appearance" title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([
             ["light", B("Light", "浅色"), <I.sun />], ["dark", B("Dark", "深色"), <I.moon />], ["system", B("Match this device", "跟随设备"), <I.monitor />],
-          ] as [Theme, Bi, ReactNode][]).map(([k, l, ic]) => ({ label: l, icon: ic, pick: () => setTheme(k), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="theme" checked={theme === k} onChange={() => setTheme(k)} aria-label={b(l)} /><i /></label> }))} />
+          ] as [Theme, Bi, ReactNode][]).map(([k, l, ic]) => ({ label: l, icon: ic, pick: () => setTheme(k), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="theme" checked={theme === k} onChange={() => setTheme(k)} aria-label={b(l)} /><i /></label> }))}>
+            <div className="sg-sub accent">
+              <h3>{lang === "zh" ? "主题色" : "Accent color"}</h3>
+              <p className="sg-note">{lang === "zh" ? "按钮、链接、高亮和助理光效的颜色。选一个，或输入您自己的颜色。" : "The color of buttons, links, highlights and the agent's glow. Pick one or enter your own."}</p>
+              <div className="swatches" role="radiogroup" aria-label={lang === "zh" ? "主题色" : "Accent color"}>
+                {ACCENTS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={(accent || ACCENTS[0]).toLowerCase() === c.toLowerCase()} className="sw" style={{ background: c }} aria-label={i === 0 ? (lang === "zh" ? "快哉蓝（默认）" : "Placetta blue (default)") : c} onClick={() => setAccent(applyAccent(i === 0 ? "" : c))} />)}
+                <label className="sw-own"><input type="color" value={accent || ACCENTS[0]} onChange={e => setAccent(applyAccent(e.target.value))} aria-label={lang === "zh" ? "自选颜色" : "Choose a color"} /></label>
+                <input className="sw-hex" value={hex} onChange={e => { const v = e.target.value.trim(); setHex(v); if (/^#?[0-9a-f]{6}$/i.test(v)) setAccent(applyAccent(v.startsWith("#") ? v : "#" + v)); }} placeholder="#4D73A3" aria-label="Hex" maxLength={7} spellCheck={false} />
+                {accent && <Btn onClick={() => { setAccent(applyAccent("")); setHex(""); }}>{lang === "zh" ? "恢复默认" : "Reset"}</Btn>}
+              </div>
+            </div>
+          </Group>
 
           <Group id="language" title={B("Language", "语言")} rows={[
             { label: B("English", "English"), pick: () => setLang("en"), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="lang" checked={lang === "en"} onChange={() => setLang("en")} /><i /></label> },

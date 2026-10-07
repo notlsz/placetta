@@ -58,7 +58,7 @@ export const unlockAudio = () => { try { getAudioContext(); } catch { /* no Web 
 // Young, natural-sounding female voices the browser may have, best first; used for live replies, which have no recording.
 // Edge ships Microsoft's neural voices (Emma and Ava read young); Safari and Chrome on a Mac have Samantha, Ava and Google's.
 const FEMALE: Record<string, RegExp[]> = {
-  en: [/Emma.*(Natural|Online)/i, /Ava.*(Natural|Online|Premium|Enhanced)/i, /Jenny.*Natural/i, /Aria.*Natural/i, /Michelle.*Natural/i, /Samantha.*(Premium|Enhanced)/i, /^Google US English$/i, /^Ava\b/i, /Allison/i, /Samantha/i, /Zoe/i, /Susan/i, /Karen/i, /female/i],
+  en: [/Ava.*(Natural|Online|Premium|Enhanced)/i, /Emma.*(Natural|Online)/i, /Jenny.*(Natural|Online)/i, /Aria.*(Natural|Online)/i, /Michelle.*Natural/i, /Zoe.*(Premium|Enhanced)/i, /Samantha.*(Premium|Enhanced)/i, /Allison.*(Premium|Enhanced)/i, /^Ava\b/i, /^Zoe\b/i, /^Google US English$/i, /Allison/i, /Samantha/i, /Susan/i, /Karen/i, /female/i],
   zh: [/Xiaoyi.*(Natural|Online)/i, /Xiaoxiao.*(Natural|Online)/i, /Xiaohan.*Natural/i, /Xiaomo.*Natural/i, /Google\s*普通话/, /普通话/, /Ting-?Ting/i, /Lili/i, /Meijia/i, /female/i],
 };
 if (typeof window !== "undefined" && "speechSynthesis" in window) { try { window.speechSynthesis.getVoices(); } catch { /* voices load later */ } }
@@ -122,7 +122,8 @@ export function useSpeak(remote?: (text: string, lang: string) => Promise<ArrayB
   const browserVoice = useCallback((text: string, lang: string) => {
     if (!("speechSynthesis" in window)) return;
     const ss = window.speechSynthesis;
-    const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = lang.startsWith("zh") ? 1.03 : 1.06; u.pitch = 1.08;
+    // the voice's own pace and pitch: nudging them is what makes a browser voice sound robotic
+    const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = 1; u.pitch = 1;
     const v = pickVoice(lang); if (v) u.voice = v;
     u.onstart = () => { last.current = performance.now(); setSpeaking(text); };
     u.onboundary = () => { last.current = performance.now(); };
@@ -180,10 +181,13 @@ const systemDark = () => { try { return matchMedia("(prefers-color-scheme: dark)
 /** Put the theme on the page: Light, Dark, or whatever the device uses. */
 export function applyTheme(t: Theme) {
   document.documentElement.dataset.theme = t === "system" ? (systemDark() ? "dark" : "light") : t;
+  const a = readAccent(); if (a) applyAccent(a);
 }
+export function saveTheme(t: Theme) { try { localStorage.setItem(THEME_KEY, t); } catch { /* storage blocked */ } applyTheme(t); window.dispatchEvent(new Event("placetta-theme")); }
 /** The appearance setting, kept in this browser and followed live when it's "system". */
 export function useTheme(): [Theme, (t: Theme) => void] {
   const [theme, set] = useState<Theme>(readTheme);
+  useEffect(() => { const on = () => set(readTheme()); window.addEventListener("placetta-theme", on); return () => window.removeEventListener("placetta-theme", on); }, []);
   useEffect(() => {
     applyTheme(theme);
     try { localStorage.setItem(THEME_KEY, theme); } catch { /* storage blocked */ }
@@ -195,4 +199,26 @@ export function useTheme(): [Theme, (t: Theme) => void] {
     return () => mq?.removeEventListener("change", on);
   }, [theme]);
   return [theme, set];
+}
+
+/* -------------------------------- accent color -------------------------------- */
+
+const ACCENT_KEY = "placetta-accent";
+export const ACCENTS = ["#4D73A3", "#2F7D6D", "#7A5AB8", "#C25B7A", "#C7772B", "#3A3F47"];
+const hexOk = (v: string) => /^#[0-9a-f]{6}$/i.test(v);
+const mix = (hex: string, to: number, t: number) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255].map(x => Math.round(x + (to - x) * t)); return "#" + c.map(x => x.toString(16).padStart(2, "0")).join(""); };
+export const readAccent = () => { try { const v = localStorage.getItem(ACCENT_KEY) ?? ""; return hexOk(v) ? v : ""; } catch { return ""; } };
+/** Your own color for buttons, links, highlights and the agent's glow; "" puts back Placetta blue. */
+export function applyAccent(hex: string) {
+  const r = document.documentElement.style;
+  if (!hexOk(hex)) { for (const k of ["--blue", "--blue-ink", "--blue-deep", "--sky", "--sky-wash", "--hover-sky"]) r.removeProperty(k); try { localStorage.removeItem(ACCENT_KEY); } catch { /* storage blocked */ } return ""; }
+  const dark = document.documentElement.dataset.theme === "dark";
+  r.setProperty("--blue", dark ? mix(hex, 255, .25) : mix(hex, 255, .2));
+  r.setProperty("--blue-ink", dark ? mix(hex, 255, .4) : hex);
+  r.setProperty("--blue-deep", dark ? mix(hex, 255, .55) : mix(hex, 0, .2));
+  r.setProperty("--sky", dark ? mix(hex, 14, .72) : mix(hex, 255, .82));
+  r.setProperty("--sky-wash", dark ? mix(hex, 14, .84) : mix(hex, 255, .92));
+  r.setProperty("--hover-sky", dark ? mix(hex, 14, .62) : mix(hex, 255, .74));
+  try { localStorage.setItem(ACCENT_KEY, hex); } catch { /* storage blocked */ }
+  return hex;
 }

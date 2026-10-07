@@ -263,7 +263,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
   const fee = app && a.kind === "file" ? feeTotal(app) : 0;
   const atts = app ? app.checklist.map(c => (c.doc ? ws.docs.find(d => d.id === c.doc) : undefined)).filter((d): d is Doc => !!d) : [];
-  const data = a.kind === "send" ? a.data ?? [] : app?.fields ?? [];
+  const data = a.kind === "send" || a.kind === "change" ? a.data ?? [] : app?.fields ?? [];
   return (
     <Modal label={b(a.title)} onClose={onClose} wide>
       <header className="m-h">

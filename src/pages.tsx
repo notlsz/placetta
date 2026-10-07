@@ -35,7 +35,7 @@ function SecHead({ title, count, more, onMore }: { title: string; count?: number
   );
 }
 
-const KIND_ICON = { file: I.form, send: I.message, upload: I.clip, pay: I.card };
+const KIND_ICON = { file: I.form, send: I.message, upload: I.clip, pay: I.card, change: I.pencil };
 
 /** Something only you can do: frosted, with the one action it needs. */
 export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {

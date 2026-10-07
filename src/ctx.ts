@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import type { MemoryBook } from "./model";
 import type { Request, Step } from "./agent";
 import type { Bf, Lang, T } from "./i18n";
 import type { Bi, Store, UpdateItem, Workspace } from "./model";
@@ -73,6 +74,9 @@ export type Ctx = {
   editFields(app: string, values: Record<string, string>): void;
   editFact(id: string, value: string): void;
   updateStore(id: string, f: (s: Store) => Store, log?: { action: Bi; object: Bi; detail?: Bi }): void;
+  /** This person's memory (Settings, Memory), and a way to change it. */
+  memory: MemoryBook | null;
+  setMemory(f: (b: MemoryBook) => MemoryBook): void;
   say(text: string): void;
   openLegal(id: string): void;
   cloud: CloudCtx | null;

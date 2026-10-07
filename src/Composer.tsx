@@ -37,7 +37,7 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const sim = useSimulatedVoice();
   const [voice, setVoice] = useState<"off" | "mic" | "sim">("off");
   const [heard, setHeard] = useState("");
-  const [note, setNote] = useState<"" | "simNote" | "deniedNote" | "noSttNote">("");
+  const [note, setNote] = useState<"" | "simNote" | "deniedNote" | "noSttNote" | "frameNote">("");
   const stt = useSpeechToText(useCallback((s: string) => setHeard(s), []));
   const typer = useRef<number[]>([]);
   const clearTyper = () => { typer.current.forEach(clearTimeout); typer.current = []; };
@@ -64,11 +64,12 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const startVoice = useCallback(async () => {
     if (busy) return;
     unlockAudio(); tts.stop(); setNote(""); setHeard("");
-    if (!mic.supported || !micAllowedHere()) { simulate(); return; }
+    // the sample demo shows what talking looks like; a real workspace never pretends to hear you
+    if (!mic.supported || !micAllowedHere()) { if (mode === "demo") simulate(); else setNote("frameNote"); return; }
     const s = await mic.start();
     if (s) { setVoice("mic"); if (!stt.start(lang === "zh" ? "zh-CN" : "en-US")) setNote("noSttNote"); return; }
-    if (inFrame) simulate(); else setNote("deniedNote");
-  }, [busy, tts, mic, simulate, stt, lang]);
+    if (inFrame && mode === "demo") simulate(); else setNote(inFrame ? "frameNote" : "deniedNote");
+  }, [busy, tts, mic, simulate, stt, lang, mode]);
   useEffect(() => () => clearTyper(), []);
 
   const ta = useRef<HTMLTextAreaElement>(null);

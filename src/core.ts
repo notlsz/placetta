@@ -1,8 +1,8 @@
 import type { OrbState } from "thinking-orbs";
-import type { Application, Approval, Audit, Bi, CheckItem, Deadline, Doc, Fact, LicenseHit, Task, Workspace } from "./model";
+import type { Application, Approval, Audit, Bi, Change, CheckItem, Deadline, Doc, Fact, LicenseHit, Store, Task, Workspace } from "./model";
 import type { Lang } from "./i18n";
 import { nowIso } from "./time";
-import { same } from "./bi";
+import { B, same } from "./bi";
 
 /* The agent's contract and the patches it makes to a workspace. No sample data here: this runs in the browser and,
    for background work, on the server. */
@@ -63,7 +63,7 @@ export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
   return {
     business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
-    facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta,
+    facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats,
   };
 }
 /** What's saved: everything but the audit trail (that has its own table) and payment cards (made from the filings). */
@@ -72,3 +72,22 @@ export function stripState(w: Workspace): Partial<Workspace> {
   void _a;
   return { ...rest, approvals: w.approvals.filter(a => a.kind !== "pay") };
 }
+
+/** Make a change you confirmed: move a store to a new place, remove a store, or remove an application. */
+export const applyChange = (c: Change): P => w => {
+  if (c.op === "move_store") {
+    const nyc = c.state.toUpperCase() === "NY" && /^(new york|nyc|manhattan|brooklyn|queens|bronx|the bronx|staten island|flushing|astoria|long island city)$/i.test(c.city);
+    const address = [c.address, c.city, c.state.toUpperCase()].filter(Boolean).join(", ");
+    const name = c.name ?? (c.address ? `${c.city}, ${c.address.split(",")[0].replace(/^\d+\s+/, "")}` : c.city);
+    const stores = (w.stores ?? []).map(x => (x.id === c.store ? { ...x, name: same(name), address, plannedOpen: c.planned_open ?? x.plannedOpen, rules: nyc ? ["nyc_grades", "nyc_fww"] as Store["rules"] : [] } : x));
+    const added = w.locations.some(l => l.name.en.toLowerCase() === c.city.toLowerCase()) ? w.locations : [...w.locations, { id: c.city.toLowerCase().replace(/[^a-z0-9]+/g, "-"), name: same(c.city), county: same(c.state.toUpperCase()), state: "active" as const }];
+    // a city no store is in any more drops off the list
+    const locations = added.filter(l => stores.some(x => x.address.toLowerCase().includes(l.name.en.toLowerCase())) || !(w.stores ?? []).some(x => x.address.toLowerCase().includes(l.name.en.toLowerCase())));
+    // the old place's local permits no longer apply: they wait for the agent to map the new place
+    const old = new Set(w.stores?.find(x => x.id === c.store)?.apps ?? []);
+    const apps = w.apps.map(a => (old.has(a.id) && (a.level === "city" || a.level === "county") && a.status !== "approved" ? { ...a, status: "waiting" as const, next: B(`The store moved to ${c.city}. Placetta maps the new city's permits`, `门店已迁至${c.city}，快哉将重新梳理当地许可`) } : a));
+    return { ...w, stores, locations, apps, meta: w.meta && w.stores?.[0]?.id === c.store ? { ...w.meta, city: c.city, region: c.state.toUpperCase() } : w.meta };
+  }
+  if (c.op === "remove_store") return { ...w, stores: (w.stores ?? []).filter(x => x.id !== c.store) };
+  return { ...w, apps: w.apps.filter(a => a.id !== c.app), approvals: w.approvals.filter(a => a.app !== c.app) };
+};
