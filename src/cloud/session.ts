@@ -49,7 +49,7 @@ export function withServer(w: Workspace, filings: Filing[], docs: DocRow[]): Wor
     if (!f) return a;
     const receipt = f.receipt_path ? allDocs.find(d => d.path === f.receipt_path)?.id : undefined;
     switch (f.status) {
-      case "requested": return { ...a, status: "filing" as const, next: B("With Placetta's filing team", "快哉申报团队已接手") };
+      case "requested": return { ...a, status: "filing" as const, next: B("Placetta is filing it", "快哉正在提交") };
       case "in_progress": return { ...a, status: "filing" as const, next: f.customer_paid_at ? B("Fee paid. Our team is submitting it", "费用已付，团队正在提交") : B("Our team is preparing the submission", "团队正在准备提交") };
       case "needs_info":
         if (f.payment_url) {

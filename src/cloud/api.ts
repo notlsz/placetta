@@ -46,10 +46,17 @@ export type Filing = {
   payload: FilingPayload; status: FilingStatus; approved_at: string; requirements_checked: boolean; confirmation_number: string | null;
   fee_paid: number | null; receipt_path: string | null; note: string | null; payment_url: string | null; customer_paid_at: string | null;
   submitted_at: string | null; decided_at: string | null; updated_at: string;
+  channel?: FilingChannel | null; agent_state?: AgentState | null; agent_log?: AgentLogEntry[]; handoff_url?: string | null;
+  submit_clicked_at?: string | null; attempts?: number;
 };
+export type FilingChannel = "email" | "fax" | "mail" | "portal" | "team";
+export type AgentState = "queued" | "running" | "needs_you" | "done" | "failed" | "handoff";
+export type AgentLogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string };
 export type FilingPayload = {
   form?: Bi; fields: { label: Bi; value: string; from?: Bi }[]; checklist: { label: Bi; state: string; doc?: string }[];
   attachments: { name: string; path: string }[]; does: Bi[]; source?: { label: string; url: string };
+  official?: string; pdf_path?: string;                          // the official form id and the filled (signed) PDF
+  signature?: { name: string; title?: string; signed_at: string; kind: "typed" | "drawn" };
 };
 export type QueueRow = Filing & { business: string; approver_email: string | null; assignee_email: string | null; assigned_to: string | null };
 export type Billing = {
@@ -234,7 +241,7 @@ export async function logAudit(ws: string, uid: string, entries: Audit[]) {
 
 /* ------------------------------ filings ------------------------------ */
 
-const FILING_COLS = "id, workspace_id, app_id, title, agency, portal_url, fee_estimate, payload, status, approved_at, requirements_checked, confirmation_number, fee_paid, receipt_path, note, payment_url, customer_paid_at, submitted_at, decided_at, updated_at";
+const FILING_COLS = "id, workspace_id, app_id, title, agency, portal_url, fee_estimate, payload, status, approved_at, requirements_checked, confirmation_number, fee_paid, receipt_path, note, payment_url, customer_paid_at, submitted_at, decided_at, updated_at, channel, agent_state, agent_log, handoff_url, submit_clicked_at, attempts";
 export async function listFilings(ws: string): Promise<Filing[]> {
   const { data, error } = await supabase().from("filings").select(FILING_COLS).eq("workspace_id", ws).order("approved_at", { ascending: false });
   if (error) throw fromPg(error);
@@ -337,6 +344,22 @@ export async function getBilling(ws: string): Promise<Billing | null> {
 
 /* ------------------------------ edge functions ------------------------------ */
 
+/* Self-filing: the file function checks an approved filing and submits it by email, fax, mail or the agency's site. */
+type FileView = { filing: Pick<Filing, "id" | "status" | "channel" | "agent_state" | "agent_log" | "handoff_url" | "confirmation_number" | "submit_clicked_at"> };
+export const fileNow = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "start" });
+export const resumeFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "resume" });
+export const filingStatus = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "status" });
+export const teamFiling = (ws: string, filingId: string, action: "team_approve" | "take_over") => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action });
+/** Upload the filled official form for a filing before it's approved, so its path can go in the frozen payload. */
+export async function uploadForm(ws: string, appId: string, name: string, bytes: Blob): Promise<string> {
+  const path = `${ws}/filings/${appId}-${Date.now()}-${name.replace(/[^\w.-]+/g, "_")}`;
+  const up = await supabase().storage.from("documents").upload(path, bytes, { contentType: "application/pdf", upsert: false });
+  if (up.error) throw err("upload_failed", "Couldn't save the filled form. Try again.");
+  const { error } = await supabase().from("documents").insert({ workspace_id: ws, app_id: appId, name, path, size: bytes.size, mime: "application/pdf", source: "agent" });
+  if (error) throw fromPg(error);
+  return path;
+}
+
 async function fn<T>(name: string, body: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase().functions.invoke(name, { body });
   if (error) {
@@ -410,6 +433,8 @@ export const revealLogin = (ws: string, id: string) => fn<{ agency: string; url:
 /* ------------------------------ team ------------------------------ */
 
 export async function queue(): Promise<QueueRow[]> {
+  const v3 = await supabase().rpc("filing_queue_v3");
+  if (!v3.error) return (v3.data ?? []) as QueueRow[];
   const { data, error } = await supabase().rpc("filing_queue_v2");
   if (error) throw fromPg(error);
   return (data ?? []) as QueueRow[];

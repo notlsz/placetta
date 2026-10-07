@@ -6,7 +6,8 @@ import { emptyBook } from "./memory";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
 import { AgentBot } from "./Bot";
-import { AppCtx, type CloudCtx, type Ctx, type Tab, type View } from "./ctx";
+import { AppCtx, type CloudCtx, type Ctx, type Signed, type Tab, type View } from "./ctx";
+import { formById } from "./forms/registry";
 import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
 import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, serverModel, type Model, type Services, type Turn as Msg } from "./live";
@@ -209,6 +210,18 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     return () => { clearInterval(id); window.removeEventListener("focus", focus); };
   }, [cloud, refresh]);
 
+  /* while Placetta is filing, check every 5 seconds (faxes and letters also ask their provider) */
+  const agentBusy = filings.filter(f => f.agent_state === "queued" || f.agent_state === "running");
+  const busyKey = agentBusy.map(f => f.id).join(",");
+  useEffect(() => {
+    if (!cloud || !busyKey) return;
+    const id = window.setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      void Promise.all(busyKey.split(",").map(fid => api.filingStatus(cloud.wsId, fid).catch(() => null))).then(() => refreshRef.current());
+    }, 5000);
+    return () => clearInterval(id);
+  }, [cloud, busyKey]);
+
   /* the model behind the agent: Placetta's server for an account; Claude in a viewer; the API with a key; or the demo script */
   const [model, setModel] = useState<Model | null>(null);
   const [apiName, setApiName] = useState("");
@@ -376,7 +389,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const hold = (id: string | null) => { try { if (id) localStorage.setItem(PENDING, id); else localStorage.removeItem(PENDING); } catch { /* storage blocked */ } pendingFiling.current = id; };
   const pendingFiling = useRef<string | null>((() => { try { return localStorage.getItem(PENDING); } catch { return null; } })());
 
-  const approve = useCallback(async (id: string) => {
+  const approve = useCallback(async (id: string, sig?: Signed) => {
     if (held()) return;
     const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
     const shown = `${S.approvedIt[lang]}: ${a.title[lang]}`;
@@ -394,19 +407,40 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       const app = w.apps.find(x => x.id === a.app); if (!app) return;
       const appDocs = app.checklist.map(c => (c.doc ? w.docs.find(d => d.id === c.doc) : undefined));
       try {
-        await api.requestFiling(cloud.wsId, {
+        // The agency's own form, filled (and signed when the agency takes a drawn signature), saved before approval
+        // so its path is part of what the customer approves.
+        const off = app.official ? formById(app.official) : undefined;
+        let pdf_path: string | undefined, signature: api.FilingPayload["signature"];
+        if (off?.fill) {
+          const { fillOfficial, stampSignature } = await import("./forms/fill");
+          const blob = await fillOfficial(off.id, app.fields);
+          if (blob) {
+            let bytes: Uint8Array = new Uint8Array(await blob.arrayBuffer());
+            if (sig?.png && off.esign) {
+              const signed = await stampSignature(bytes, sig.png, off.id);
+              if (signed) { bytes = signed; signature = { name: sig.name, title: sig.title, signed_at: nowIso(), kind: sig.kind }; }
+            }
+            pdf_path = await api.uploadForm(cloud.wsId, app.id, `${off.form.split(" (")[0]}${signature ? " signed" : ""}.pdf`, new Blob([bytes as BlobPart], { type: "application/pdf" }));
+          }
+        }
+        const filing = await api.requestFiling(cloud.wsId, {
           app_id: app.id, title: a.title, agency: app.agency, portal_url: app.source.url || undefined, fee_estimate: app.fees.reduce((s, f) => s + f.amount, 0),
           payload: {
-            form: app.form, source: app.source, does: a.does,
-            fields: app.fields.map(f => ({ label: f.label, value: f.value, from: f.from })),
+            form: app.form, source: app.source, does: a.does, official: app.official, pdf_path, signature,
+            fields: app.fields.map(f => ({ id: f.id, label: f.label, value: f.value, from: f.from })),
             checklist: app.checklist.map((c, i) => ({ label: c.label, state: c.state, doc: appDocs[i]?.path })),
             attachments: appDocs.filter((d): d is Doc => !!d?.path).map(d => ({ name: d.name, path: d.path! })),
           },
         });
         setWs(x => setApp(app.id, { status: "filing" })(dropApproval(id)(x)));
+        const v = await api.fileNow(cloud.wsId, filing.id).catch(() => null);
         void refresh();
         setPanelOpen(true);
-        pushTurn(shown, { text: [B(`Sent to Placetta's filing team. They check the ${app.name.en.toLowerCase()} against the agency's current requirements and submit it. If the agency charges a fee, you'll get its payment link here.`, `已交给快哉申报团队。他们会对照机构现行要求核对${app.name.zh}后提交。如需缴纳机构费用，付款链接会发到这里。`)] });
+        const st = v?.filing.agent_state, last = v?.filing.agent_log?.at(-1);
+        pushTurn(shown, { text: [st === "handoff" || !v
+          ? B(`Sent to the Placetta team. They check the ${app.name.en.toLowerCase()} against the agency's current requirements and submit it. If the agency charges a fee, you'll get its payment link here.`, `已交给快哉团队。他们会对照机构现行要求核对${app.name.zh}后提交。如需缴纳机构费用，付款链接会发到这里。`)
+          : st === "needs_you" && last ? B(`One step needs you first: ${last.en}`, `需要您先完成一步：${last.zh}`)
+          : B(`Filing it now: Placetta checked the ${app.name.en.toLowerCase()} against the agency's requirements and is submitting it. Progress shows live on the application.`, `正在提交：快哉已对照机构要求核对${app.name.zh}，正在提交。进度会实时显示在申请中。`)] });
       } catch (e) {
         const er = e as api.ApiError;
         if (er.code === "plan_required") { hold(id); setPlans("file"); } else say(er.message);
@@ -498,6 +532,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       removeLogin: async id => { if (!ownerOk()) return; try { await api.removeLogin(cloud.wsId, id); setLogins(await api.listLogins(cloud.wsId)); } catch (e) { fail(e); } },
       feedUrl: async rotate => (await api.integration<{ url: string }>(cloud.wsId, "feed_url", { rotate: !!rotate })).url,
       markPaid: async id => { if (!ownerOk()) return; try { await api.markPaid(id); await refresh(); say(lang === "zh" ? "已告知团队，他们会继续提交。" : "Thanks. The team will finish the submission."); } catch (e) { fail(e); } },
+      resumeFiling: async id => { try { await api.resumeFiling(cloud.wsId, id); await refresh(); say(lang === "zh" ? "好的，快哉继续办理。" : "Thanks. Placetta carries on."); } catch (e) { fail(e); } },
       cancelFiling: async id => { if (!ownerOk()) return; try { await api.cancelFiling(id); await refresh(); } catch (e) { fail(e); } },
       exportData: () => {
         const data = { exported: nowIso(), workspace: api.strip(wsRef.current), audit: wsRef.current.audit, filings, documents: docs.map(d => ({ name: d.name, size: d.size, created_at: d.created_at, source: d.source })) };
@@ -521,7 +556,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
     openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : "check"), edit: !!edit }); },
     openApproval: id => setModal(id),
-    approve: id => void approve(id),
+    approve: (id, sig) => void approve(id, sig),
     upload: (app, item, files) => void upload(app, item, files),
     download: async id => {
       const d = wsRef.current.docs.find(x => x.id === id); if (!d) return;

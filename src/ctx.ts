@@ -36,6 +36,7 @@ export type CloudCtx = {
   removeLogin(id: string): Promise<void>;
   feedUrl(rotate?: boolean): Promise<string>;
   markPaid(filingId: string): Promise<void>;
+  resumeFiling(filingId: string): Promise<void>;
   cancelFiling(filingId: string): Promise<void>;
   exportData(): void;
   switchTo(id: string): void;
@@ -66,7 +67,7 @@ export type Ctx = {
   run(req: Request, shown: string | null): void;
   openApp(id: string, tab?: Tab, edit?: boolean): void;
   openApproval(id: string): void;
-  approve(id: string): void;
+  approve(id: string, sig?: Signed): void;
   upload(app: string, item: string, files?: File[]): void;
   download(docId: string): void;
   downloadApp(appId: string): void;
@@ -89,3 +90,6 @@ export type Ctx = {
 
 export const AppCtx = createContext<Ctx | null>(null);
 export const useApp = () => { const c = useContext(AppCtx); if (!c) throw new Error("no app context"); return c; };
+
+/** A signature drawn or typed in the approval card. Belongs to one filing; never kept for another form. */
+export type Signed = { png?: Uint8Array; name: string; title?: string; kind: "typed" | "drawn" };

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
-import { useApp, type Tab } from "./ctx";
+import { useApp, type Signed, type Tab } from "./ctx";
 import type { Application, CheckItem, Doc } from "./model";
 import { formById, METHOD } from "./forms/registry";
 import { saveFile } from "./files";
@@ -84,9 +84,9 @@ function Progress({ a }: { a: Application }) {
     { k: "approve", s: past(["filing", "review", "approved"]) || !!f ? "done" : st === "ready" ? "now" : "next",
       t: zh ? "您批准提交" : "You approve the filing", d: f ? (zh ? `已于 ${day(f.approved_at)} 批准` : `Approved ${day(f.approved_at)}`) : undefined,
       act: appr ? { l: zh ? "查看并批准" : "Review and approve", go: () => openApproval(appr.id) } : undefined },
-    { k: "team", s: past(["review", "approved"]) ? "done" : st === "filing" || (f && ["requested", "in_progress", "needs_info"].includes(f.status)) ? (pay ? "blocked" : "now") : "next",
-      t: zh ? "申报团队核对并提交" : "The filing team checks and submits it",
-      d: pay ? (zh ? "等待您向机构付款" : "Waiting for you to pay the agency fee") : f?.status === "needs_info" && f.note ? f.note : f?.requirements_checked ? (zh ? "已按机构现行要求核对" : "Checked against the agency's current requirements") : f ? (zh ? "团队已接手" : "With the team") : undefined,
+    { k: "team", s: past(["review", "approved"]) || f?.status === "submitted" ? "done" : st === "filing" || (f && ["requested", "in_progress", "needs_info"].includes(f.status)) ? (pay || f?.agent_state === "needs_you" ? "blocked" : "now") : "next",
+      t: f?.agent_state && f.channel !== "team" ? (zh ? `快哉核对并${CHANNEL[f.channel ?? "portal"]?.zh ?? ""}提交` : `Placetta checks it and submits it ${CHANNEL[f.channel ?? "portal"]?.en ?? ""}`) : (zh ? "快哉核对并提交" : "Placetta checks and submits it"),
+      d: pay ? (zh ? "等待您向机构付款" : "Waiting for you to pay the agency fee") : f?.agent_state === "needs_you" ? (zh ? "需要您完成一步" : "Needs you for one step") : f?.status === "needs_info" && f.note ? f.note : f?.agent_log?.length ? (zh ? f.agent_log.at(-1)!.zh : f.agent_log.at(-1)!.en) : f?.requirements_checked ? (zh ? "已按机构现行要求核对" : "Checked against the agency's current requirements") : f ? (zh ? "快哉已接手" : "With Placetta") : undefined,
       act: pay ? { l: zh ? "去付款" : "Pay the agency", go: () => openApproval(pay.id) } : undefined },
     { k: "agency", s: st === "approved" ? "done" : st === "review" ? "now" : "next",
       t: zh ? "机构审核" : "The agency reviews it",
@@ -106,6 +106,14 @@ function Progress({ a }: { a: Application }) {
           </li>
         ))}
       </ol>
+      {f?.agent_state === "needs_you" && <FinishStep f={f} />}
+      {f?.agent_log && f.agent_log.length > 0 && (
+        <details className="pg-log" open={f.agent_state === "running" || f.agent_state === "queued"}>
+          <summary>{zh ? `快哉的操作记录（${f.agent_log.length}）` : `What Placetta did (${f.agent_log.length})`}</summary>
+          <ol>{f.agent_log.filter(e => e.kind !== "quiet").map((e, i) => <li key={i}><small>{e.at ? fmtStamp(e.at).slice(5, 16) : ""}</small> {zh ? e.zh : e.en}</li>)}</ol>
+          {f.receipt_path && <p><small>{zh ? "回执已保存在“文件”中。" : "The receipt is in Documents."}</small></p>}
+        </details>
+      )}
       {f?.note && f.status !== "needs_info" && <p className="note">{zh ? "团队备注：" : "From the team: "}{f.note}</p>}
     </div>
   );
@@ -264,6 +272,9 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const fee = app && a.kind === "file" ? feeTotal(app) : 0;
   const atts = app ? app.checklist.map(c => (c.doc ? ws.docs.find(d => d.id === c.doc) : undefined)).filter((d): d is Doc => !!d) : [];
   const data = a.kind === "send" || a.kind === "change" ? a.data ?? [] : app?.fields ?? [];
+  const off = app?.official ? formById(app.official) : undefined;
+  const needSig = !!cloud && a.kind === "file" && !!off?.sign && !!off.esign;
+  const [sig, setSig] = useState<Signed | null>(null);
   return (
     <Modal label={b(a.title)} onClose={onClose} wide>
       <header className="m-h">
@@ -287,6 +298,13 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
             <div className="files">{atts.map(d => <FileCard key={d.id} d={d} compact />)}</div>
           </section>
         )}
+        {needSig && (
+          <section>
+            <h3>{lang === "zh" ? "签名" : "Signature"}</h3>
+            <p className="note">{lang === "zh" ? "签名只用于这份表格，不会保存用于其他表格。" : "Your signature goes on this form only and is never kept for another."}</p>
+            <SignaturePad onChange={setSig} />
+          </section>
+        )}
         {app && a.kind === "file" && (
           <section>
             <h3>{t("ap_fee")}</h3>
@@ -302,9 +320,58 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <p>{t("ap_note")} {cloud ? (a.kind === "file" ? t("ap_team") : "") : t("ap_sim")}</p>
         <div className="m-btns">
           {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
-          <Pill kind="ink" disabled={busy} onClick={() => { approve(a.id); onClose(); }}>{b(a.action)}</Pill>
+          <Pill kind="ink" disabled={busy || (needSig && !sig)} onClick={() => { approve(a.id, sig ?? undefined); onClose(); }}>{b(a.action)}</Pill>
         </div>
       </footer>
     </Modal>
+  );
+}
+
+const CHANNEL: Record<string, { en: string; zh: string }> = {
+  email: { en: "by email", zh: "通过邮件" }, fax: { en: "by fax", zh: "通过传真" }, mail: { en: "by certified mail", zh: "通过挂号信" }, portal: { en: "on the agency's site", zh: "在机构网站上" },
+};
+
+/** A hand-back: what Placetta needs, the live view to do it in, and "I've done it, carry on". */
+function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>["filings"][number] }) {
+  const { lang, cloud, busy } = useApp();
+  const zh = lang === "zh";
+  const ask = [...(f.agent_log ?? [])].reverse().find(e => ["need_person", "needs_you", "wet_signature"].includes(e.kind));
+  return (
+    <div className="finish-step" role="status">
+      <b>{zh ? "完成这一步" : "Finish this step"}</b>
+      <p>{ask ? (zh ? ask.zh : ask.en) : zh ? "快哉需要您完成一步。" : "Placetta needs you for one step."}</p>
+      <div className="m-btns">
+        {f.handoff_url && <a className="pill quiet sm" href={f.handoff_url} target="_blank" rel="noopener noreferrer">{zh ? "打开" : "Open"}<I.ext /></a>}
+        <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id)}>{zh ? "我已完成，继续" : "I've done it, carry on"}</button>
+      </div>
+    </div>
+  );
+}
+
+/** Sign inside the approval card: a canvas with pointer events and Clear, plus the signer's name and title. */
+export function SignaturePad({ onChange }: { onChange: (s: Signed | null) => void }) {
+  const { lang } = useApp();
+  const zh = lang === "zh";
+  const cv = useRef<HTMLCanvasElement>(null);
+  const drawing = useRef(false), inked = useRef(false);
+  const [name, setName] = useState(""), [title, setTitle] = useState("");
+  const emit = (n = name, t = title) => {
+    const c = cv.current;
+    if (!c || !inked.current || !n.trim()) { onChange(null); return; }
+    c.toBlob(async b => { if (b) onChange({ png: new Uint8Array(await b.arrayBuffer()), name: n.trim(), title: t.trim() || undefined, kind: "drawn" }); }, "image/png");
+  };
+  const at = (e: React.PointerEvent<HTMLCanvasElement>) => { const r = e.currentTarget.getBoundingClientRect(); return [(e.clientX - r.left) * (e.currentTarget.width / r.width), (e.clientY - r.top) * (e.currentTarget.height / r.height)] as const; };
+  return (
+    <div className="sigpad">
+      <canvas ref={cv} width={600} height={160} aria-label={zh ? "签名区" : "Signature pad"}
+        onPointerDown={e => { drawing.current = true; e.currentTarget.setPointerCapture(e.pointerId); const ctx = e.currentTarget.getContext("2d")!; const [x, y] = at(e); ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#111"; ctx.beginPath(); ctx.moveTo(x, y); }}
+        onPointerMove={e => { if (!drawing.current) return; const ctx = e.currentTarget.getContext("2d")!; const [x, y] = at(e); ctx.lineTo(x, y); ctx.stroke(); inked.current = true; }}
+        onPointerUp={() => { drawing.current = false; emit(); }} />
+      <div className="sigpad-row">
+        <input placeholder={zh ? "签署人姓名" : "Signer's name"} value={name} onChange={e => { setName(e.target.value); emit(e.target.value, title); }} />
+        <input placeholder={zh ? "职务" : "Title"} value={title} onChange={e => { setTitle(e.target.value); emit(name, e.target.value); }} />
+        <button type="button" className="pill quiet sm" onClick={() => { const c = cv.current; c?.getContext("2d")?.clearRect(0, 0, c.width, c.height); inked.current = false; onChange(null); }}>{zh ? "清除" : "Clear"}</button>
+      </div>
+    </div>
   );
 }

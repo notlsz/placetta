@@ -129,12 +129,12 @@ function Logins() {
   const [f, setF] = useState({ agency: "", url: "", username: "", password: "", note: "" });
   if (!cloud) {
     return (
-      <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Our filing team opens one only to file for you, and each opening shows in your audit trail.", "加密保存在保险库中的机构门户登录信息。申报团队只在为您提交时打开，每次打开都会记入审计记录。")}
+      <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Placetta opens one only to file for you, and each opening shows in your audit trail.", "加密保存在保险库中的机构门户登录信息。快哉只在为您提交时打开，每次打开都会记入审计记录。")}
         rows={ws.connections.filter(c => c.level !== "vault").map(c => ({ label: c.name, sub: b(c.detail), icon: <I.key />, right: c.state === "connected" ? <em className="ok"><i />{lang === "zh" ? "已保存" : "Saved"}</em> : <Btn kind="line" onClick={() => undefined}>{lang === "zh" ? "添加" : "Add"}</Btn> }))} />
     );
   }
   return (
-    <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Our filing team opens one only to file for you, and each opening shows in your audit trail. Never save Social Security or bank numbers here.", "加密保存在保险库中的机构门户登录信息。申报团队只在为您提交时打开，每次打开都会记入审计记录。请勿在此保存社会安全号或银行账号。")}
+    <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Placetta opens one only to file for you, and each opening shows in your audit trail. Never save Social Security or bank numbers here.", "加密保存在保险库中的机构门户登录信息。快哉只在为您提交时打开，每次打开都会记入审计记录。请勿在此保存社会安全号或银行账号。")}
       rows={cloud.logins.map(l => ({ label: { en: l.agency, zh: l.agency }, icon: <I.key />,
         sub: <>{l.username}{l.last_opened_at ? (lang === "zh" ? `，团队上次打开 ${fmtAgo(l.last_opened_at, lang)}` : `. Team last opened it ${fmtAgo(l.last_opened_at, lang)}`) : ""}</>,
         right: cloud.owner ? <Btn guard onClick={() => void cloud.removeLogin(l.id)}>{lang === "zh" ? "删除" : "Remove"}</Btn> : undefined }))}>

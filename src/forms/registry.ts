@@ -39,6 +39,7 @@ export type OfficialForm = {
   attach?: Bi[];
   foreign?: Bi;               // what's different for a China-based owner
   fill?: "ss4" | "cbp5106";   // Placetta fills the official PDF itself
+  esign?: boolean;            // the agency accepts a drawn signature on this form (from its own page)
   sign?: SignSpot;            // where a signature and its date go on the official PDF (PDF points, page from 0)
   checked: "form" | "page" | "known";   // known: from Placetta's library of official sites; re-read before filing
   order: number;              // where it falls in an opening: lower first

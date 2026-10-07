@@ -37,6 +37,9 @@ function Detail({ f, me, onChange }: { f: api.QueueRow; me: string; onChange: ()
   const act = async (patch: Parameters<typeof api.updateFiling>[1], done?: string) => {
     try { await api.updateFiling(f.id, patch); if (done) say(done); onChange(); return true; } catch (e) { say((e as api.ApiError).message); return false; }
   };
+  const agent = async (action: "team_approve" | "take_over") => {
+    try { await api.teamFiling(f.workspace_id, f.id, action); say(action === "team_approve" ? "Approved. Placetta is sending it." : "It's yours now."); onChange(); } catch (e) { say((e as api.ApiError).message); }
+  };
   const reveal = async (id: string) => {
     try { const r = await api.revealLogin(f.workspace_id, id); setShown(s => ({ ...s, [id]: r.password })); setTimeout(() => setShown(s => { const n = { ...s }; delete n[id]; return n; }), 30_000); }
     catch (e) { say((e as api.ApiError).message); }
@@ -65,6 +68,21 @@ function Detail({ f, me, onChange }: { f: api.QueueRow; me: string; onChange: ()
           </ul>
         )}
       </section>
+
+      {f.agent_state && (
+        <section>
+          <h3>{lang === "zh" ? "快哉的运行" : "Placetta's run"}</h3>
+          <p className="q-line"><span>{f.channel ?? "-"}</span><span>{f.agent_state}</span>{f.attempts ? <span>{f.attempts} tries</span> : null}{f.submit_clicked_at ? <span>submit pressed {f.submit_clicked_at.slice(0, 16)}</span> : null}{f.handoff_url ? <a href={f.handoff_url} target="_blank" rel="noreferrer">Live view<I.ext /></a> : null}</p>
+          <ol className="q-log">{(f.agent_log ?? []).map((e, i) => <li key={i}><small>{e.at?.slice(5, 16).replace("T", " ")}</small> {e.en}{e.ref ? <code> {e.ref}</code> : null}</li>)}</ol>
+          {f.agent_state === "handoff" && (
+            <div className="m-btns">
+              {f.channel !== "team" && <button type="button" className="pill ink sm" onClick={() => void agent("team_approve")}>Approve review and send</button>}
+              <button type="button" className="pill quiet sm" onClick={() => void agent("take_over")}>Take over</button>
+            </div>
+          )}
+          {(f.agent_state === "running" || f.agent_state === "queued" || f.agent_state === "needs_you") && <button type="button" className="pill quiet sm" onClick={() => void agent("take_over")}>Take over</button>}
+        </section>
+      )}
 
       <section>
         <h3>{lang === "zh" ? "客户批准的内容" : "What the customer approved"}</h3>

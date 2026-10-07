@@ -201,7 +201,7 @@ export const S = {
 
   liveOff: B("Claude isn't available here, so Placetta is answering from the demo script.", "此处无法使用 Claude，快哉改用演示脚本回答。"),
   stop: B("Stop", "停止"),
-  ap_team: B("Placetta's filing team checks it against the agency's current requirements and submits it. Agency fees are paid by you directly to the agency, through the payment link we send.", "快哉申报团队会对照机构现行要求核对后提交。机构费用由您通过我们发送的付款链接直接支付给机构。"),
+  ap_team: B("Placetta checks it against the agency's current requirements and submits it by email, fax, certified mail or the agency's site, then saves the confirmation. It asks you only for a CAPTCHA, an identity check, a payment or a handwritten signature. Agency fees are paid by you directly to the agency.", "快哉会对照机构现行要求核对，通过邮件、传真、挂号信或机构网站提交，并保存回执。只有遇到验证码、身份验证、付款或手写签名时才会请您处理。机构费用由您直接支付给机构。"),
   paidDirect: B("Paid by you directly to the agency, through the payment link we send. Placetta never charges agency fees.", "由您通过我们发送的付款链接直接支付给机构。快哉从不代收机构费用。"),
   ap_sim: B("This is a sample workspace: approving simulates the filing, and nothing reaches a real agency.", "这是示例工作区：批准后仅模拟提交，不会发送到真实机构。"),
   set_agent: B("Agent", "助理"),

@@ -221,7 +221,7 @@ How you work:
 
 Rules:
 - You never file, pay or send anything yourself.${account ? `
-- After the person approves a filing, Placetta's filing team checks it against the agency's current requirements and submits it. Government fees are paid by the business directly to the agency, through the payment link the team sends. Never say a filing is submitted until the workspace shows it.` : ""}
+- After the person approves a filing, Placetta checks it against the agency's requirements, submits it by email, fax, certified mail or the agency's site (or hands it to the Placetta team when no automatic channel fits), and saves the confirmation. It asks the person only for a CAPTCHA, an identity check, a payment or a handwritten signature. Government fees are paid by the business directly to the agency. Never say a filing is submitted until the workspace shows it.` : ""}
 - Never invent the person's facts. If something is missing, leave it empty (or [in brackets] in a draft) and ask for it in one question at the end.
 - Never ask for a Social Security number, ITIN, or bank or card numbers in chat. The team collects those on the agency's own site.${research ? `
 - Research requirements, fees and processing times on official government websites with web_search and web_fetch: the agency's own pages (.gov, state, county and city sites). Portals that point to agencies (usa.gov, sba.gov) are fine for finding the right agency, but read and cite the agency's own page. Use the agency's root domain as the application's agency_url. If you can't confirm something on an official page, call it an estimate.` : `
@@ -251,7 +251,7 @@ let seq = 0;
 
 /** What a signed-in workspace adds to the agent's hands: the team's filings, the person's connected apps and stored files. */
 export type Services = {
-  filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null }[];
+  filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[] }[];
   /** Connected integration kinds: gmail, outlook_mail, gcal, outlook_cal, gdrive, dropbox, quickbooks, slack. */
   connected(): string[];
   integration<T>(action: string, body: Record<string, unknown>): Promise<T>;
@@ -473,8 +473,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const ap: Approval = {
           id: "ap-" + a.id, kind: "file", app: a.id, title: L(`File the ${nm(a)}`, `提交${nm(a)}`), agency: a.agency, action: B("Approve & file", "批准并提交"),
           does: account ? [
-            L("Placetta's filing team checks it against the agency's current requirements", "快哉申报团队对照机构现行要求逐项核对"),
-            L(`They submit the application below on ${site}, with its attachments`, `在 ${site} 上提交下方申请及附件`),
+            L("Placetta checks it against the agency's current requirements", "快哉对照机构现行要求逐项核对"),
+            L(`Placetta submits the application below to ${site} by email, fax, certified mail or the agency's site, with its attachments, and saves the confirmation`, `快哉通过邮件、传真、挂号信或机构网站向 ${site} 提交下方申请及附件，并保存回执`),
+            L("If the agency asks for a CAPTCHA, an identity check, a payment or a handwritten signature, Placetta asks you to do that one step", "如机构要求验证码、身份验证、付款或手写签名，快哉会请您完成这一步"),
             ...(fee ? [L(`The agency's fee (about ${money(fee, a.currency)}) is paid by you directly to the agency, through the payment link we send`, `机构费用（约 ${money(fee, a.currency)}）由您通过我们发送的付款链接直接支付给机构`)] : []),
             L("The receipt and every status change appear here", "收据和每次状态变化都会显示在这里"),
           ] : does.length ? does : [L(`Submit the application below to ${a.agency.en}`, `向${a.agency.zh}提交下方申请`), ...(fee ? [L(`Pay ${money(fee, a.currency)} with the card ending 4821`, `使用尾号 4821 的银行卡支付 ${money(fee, a.currency)}`)] : []), L("Save the receipt to Documents", "将收据保存到文件")],
@@ -741,6 +742,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             id: a.id, name: a.name[lang], agency: a.agency[lang], status: a.status, waiting_on: on(a.status), next: a.next?.[lang],
             confirmation: f?.confirmation_number ?? undefined, submitted: f?.submitted_at?.slice(0, 10), last_update: f?.updated_at?.slice(0, 10),
             days_since_update: f ? Math.floor((Date.now() - Date.parse(f.updated_at)) / 864e5) : undefined, team_note: f?.note ?? undefined,
+            placetta_filing: f?.agent_state ? { state: f.agent_state, channel: f.channel ?? undefined, needs_you: f.agent_state === "needs_you", log: (f.agent_log ?? []).filter(e => e.kind !== "quiet").slice(-5).map(e => e[lang]) } : undefined,
             missing_documents: a.checklist.filter(c => c.state === "missing").map(c => c.label[lang]),
             empty_fields: a.fields.filter(fl => !fl.value).map(fl => fl.label[lang]),
             fee: a.fees.reduce((sum, fe) => sum + fe.amount, 0), currency: a.currency ?? "USD", takes: a.est[lang],

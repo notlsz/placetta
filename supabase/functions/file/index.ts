@@ -19,7 +19,7 @@ import {
 } from "./shared.ts";
 import { DEST, staleDestinations, type Dest } from "./destinations.ts";
 import {
-  check, CHANNEL_SAID, emailFor, envFrom, faxTo, type Filing, isForeign, killSwitchOn, type LogEntry, mailTo, pick, teamApproved,
+  check, emailFor, envFrom, faxTo, type Filing, isForeign, killSwitchOn, type LogEntry, mailTo, pick, teamApproved,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));

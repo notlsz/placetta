@@ -251,6 +251,21 @@ const MOON = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke
 /* Sections and articles. Each article: id, title, lede, body (HTML with <h2 id> headings). */
 const S = [
  {id:"essentials", t:["Placetta essentials","快哉入门"], d:["Signing in, your workspace and your entry plan.","登录、工作区与开店合规计划。"], a:[
+  {id:"self-filing", t:["How Placetta submits your filings","快哉如何提交申请"], l:["What happens after you tap Approve and file, and when Placetta asks you for help.","点击“批准并提交”之后会发生什么，以及快哉何时需要您协助。"], b:[`
+<h2 id="how">What happens after you approve</h2>
+<ol><li>Placetta checks the application against the agency's requirements: every line filled, every document attached, the signature where the agency takes one.</li><li>It submits exactly what you approved, by email from your connected mailbox, by fax, by certified mail or on the agency's website. Nothing you didn't approve is ever sent.</li><li>It saves the confirmation, fax report or mail tracking to Documents, and every step shows in the application's progress and your audit trail.</li></ol>
+<h2 id="you">When Placetta asks you</h2>
+<p>Placetta stops and shows a <b>Finish this step</b> card when the agency asks for a CAPTCHA, an identity check (such as ID.me or Login.gov), a code sent to your phone, its fee, or a handwritten signature. Open the agency's page from the card, do that one step, then tap <b>I've done it, carry on</b>. Placetta never types a card or bank number and never enters a Social Security, ITIN or passport number.</p>
+<h2 id="team">When the team takes over</h2>
+<p>If an agency isn't switched on for automatic filing yet, or a page looks different from what Placetta expects, the Placetta team submits it instead. Nothing is ever submitted twice.</p>
+`,`
+<h2 id="how">批准之后会发生什么</h2>
+<ol><li>快哉对照机构要求核对申请：每一项都已填写，所有文件都已附上，机构接受签名时签名也已完成。</li><li>快哉只提交您批准的内容，方式包括从您连接的邮箱发送邮件、传真、挂号信或机构网站。</li><li>回执、传真报告或邮件追踪号会保存到“文件”，每一步都会显示在申请进度和审计记录中。</li></ol>
+<h2 id="you">快哉何时需要您</h2>
+<p>当机构要求验证码、身份验证（如 ID.me 或 Login.gov）、发送到您手机的验证码、缴费或手写签名时，快哉会暂停并显示“完成这一步”卡片。从卡片打开机构页面完成这一步后，点击“我已完成，继续”。快哉从不输入银行卡或账户号码，也从不填写社会安全号、ITIN 或护照号码。</p>
+<h2 id="team">何时由团队接手</h2>
+<p>如果某个机构尚未开通自动提交，或页面与预期不同，将由快哉团队提交。任何申请都不会被重复提交。</p>
+`]},
   {id:"sign-in", t:["Signing in to Placetta","登录快哉"], l:["How to sign in or create an account, and what to do if you were invited by a teammate.","如何登录或创建账户，以及受同事邀请时该怎么做。"], b:[`
 <h2 id="new">Create an account</h2>
 <ol><li>Go to <a href="/app/">placetta.vercel.app/app</a> and enter your work email.</li><li>Choose <b>Create an account</b> and pick a password of at least 8 characters.</li><li>You're signed in. Placetta asks four quick questions about your business to set up your workspace.</li></ol>

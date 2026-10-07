@@ -266,6 +266,31 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       if (body.action === "feed_url") return json({ ok: true, url: `https://calendar.placetta.com/preview/${ws.slice(0, 8)}.ics` });
       return json({ ok: true });
     }
+    case "file": {
+      // The App Preview walks the log over a few seconds and ends submitted with a clearly labeled example confirmation.
+      if (!member) return fnErr("forbidden", "You are not a member of this workspace.", 403);
+      const f = t("filings").find(x => x.id === body.filing_id && x.workspace_id === ws); if (!f) return fnErr("not_found", "No such filing.", 404);
+      const view = () => json({ ok: true, filing: { id: f.id, status: f.status, channel: f.channel ?? null, agent_state: f.agent_state ?? null, agent_log: f.agent_log ?? [], handoff_url: null, confirmation_number: f.confirmation_number ?? null, submit_clicked_at: f.submit_clicked_at ?? null } });
+      if (body.action === "start" && !f.agent_state) {
+        const at = (s: number) => new Date(Date.now() + s * 1000).toISOString();
+        Object.assign(f, { channel: "fax", agent_state: "running", status: "in_progress", requirements_checked: true, preview_steps: [
+          { at: at(0), en: "Checked against the agency's requirements", zh: "已按机构要求核对", kind: "check" },
+          { at: at(2), en: "Faxing it to the agency (preview example)", zh: "正在传真至机构（预览示例）", kind: "submit" },
+          { at: at(5), en: "Faxed to the agency. Delivered. (preview example)", zh: "已传真至机构，已送达。（预览示例）", kind: "submitted" },
+        ], agent_log: [] });
+        save();
+      }
+      const steps = (f.preview_steps ?? []) as { at: string }[];
+      if (steps.length) {
+        f.agent_log = steps.filter(x => x.at <= now());
+        if ((f.agent_log as unknown[]).length === steps.length && f.status !== "submitted") {
+          Object.assign(f, { status: "submitted", agent_state: "done", confirmation_number: "EXAMPLE-0001 (preview)", submitted_at: now(), submit_clicked_at: now() });
+          audit(ws, c.sub, "agent", "Submitted by Placetta by fax (preview example)", "快哉已通过传真提交（预览示例）", f.title as { en: string; zh: string });
+        }
+        save();
+      }
+      return view();
+    }
     case "logins": {
       if (body.action === "reveal") {
         if (!staffEmail(c.sub)) return fnErr("forbidden", "Only the Placetta team can do that.", 403);

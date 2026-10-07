@@ -32,7 +32,7 @@ The agent researches requirements on official government websites and cites the 
 
 The agent never files, pays or sends anything on its own. Every filing and every message needs your approval in the app.
 
-After you approve an application, our filing team checks it against the agency's current requirements and submits it on the agency's website on your behalf. Some agencies require your own signature or an in-person step. You complete those yourself.
+After you approve an application, Placetta's software checks it against the agency's current requirements and submits it on your behalf by email from your connected mailbox, by fax, by certified mail or on the agency's website, using the saved logins you choose to keep with us. When no automatic channel fits, our filing team submits it. Placetta stops and asks you whenever an agency requires a CAPTCHA, an identity check, a payment or your handwritten signature, and some agencies require an in-person step. You complete those yourself. Placetta never types a card or bank number and never sends a Social Security, ITIN or passport number.
 
 Our Filing Authorization sets out the limited authority you give us to file for you.
 
@@ -253,7 +253,7 @@ Only the following process your information, and only to run the service:
 - Anthropic processes content with its Claude models so the agent can do its work.
 - Microsoft Azure turns the agent's replies into speech when the app speaks them.
 - Stripe processes payments.
-- Our filing team checks and submits the applications you approve.
+- Placetta checks and submits the applications you approve, by email, fax, certified mail or the agency's website, with our filing team as backup.
 - Government agencies receive the applications you approve.
 - The services you connect, as described below.
 
@@ -273,7 +273,7 @@ You can disconnect any integration at any time in Settings.
 
 ## Agency portal logins
 
-If you save logins for agency websites, they are encrypted in a vault. Our filing team opens them only to file for you, and every opening is recorded in your audit trail.
+If you save logins for agency websites, they are encrypted in a vault. Placetta's filing software, and our filing team when it takes over, open them only to file for you, and every opening is recorded in your audit trail.
 
 ## Retention
 
@@ -449,8 +449,8 @@ It covers nothing else. It is not a general power of attorney.
 
 - The agent prepares the application from your information and documents.
 - You review it in the app and decide whether to approve it.
-- Our filing team checks it against the agency's current requirements.
-- Our filing team submits it on the agency's website on your behalf.
+- Placetta checks it against the agency's current requirements.
+- Placetta's software submits exactly what you approved, by email, fax, certified mail or the agency's website, or our filing team does when no automatic channel fits.
 - Every step is recorded in your audit trail.
 
 ## What we never do
@@ -468,7 +468,7 @@ By granting this authorization, you confirm that:
 
 ## Agency portal logins
 
-If you save logins for agency websites, they are encrypted in a vault. Our filing team opens them only to file for you, and every opening is recorded in your audit trail.
+If you save logins for agency websites, they are encrypted in a vault. Placetta's filing software, and our filing team when it takes over, open them only to file for you, and every opening is recorded in your audit trail.
 
 ## Agencies decide
 
@@ -552,7 +552,7 @@ The agent researches requirements on official government websites and cites the 
 
 The agent never files, pays or sends anything by itself. Every filing and every message needs your approval in the app.
 
-After you approve a filing, our filing team checks it against the agency's current requirements before submitting it. You always pay government fees yourself, directly to the agency.
+After you approve a filing, Placetta checks it against the agency's current requirements before submitting it. You always pay government fees yourself, directly to the agency.
 
 ## It can be wrong
 
