@@ -1537,7 +1537,7 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
 /* experts wall: every advisor portrait as a drifting pixel mosaic, rows sliding opposite ways while a slow wave
    sharpens some faces and dissolves others. No pointer interaction. */
 .xpwall{position:relative;height:300px;margin-bottom:44px;border-radius:20px;overflow:hidden;background:#0F1B33}
-@media (min-width:1024px){.xpwall{height:420px;margin-bottom:56px}}
+@media (min-width:1024px){.xpwall{height:460px;margin-bottom:56px}}
 .xpwall canvas{display:block;width:100%;height:100%;pointer-events:none}
 .xpwall::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(244,245,247,.0),rgba(244,245,247,0) 85%),radial-gradient(120% 90% at 50% 50%,transparent 60%,rgba(15,27,51,.35))}
 /* experts: a typographic tapestry. The companies are set as running lines of serif type and the advisors' portraits
@@ -3524,39 +3524,44 @@ function renderXp(){
   art.querySelectorAll(".xpf").forEach(el => xpDraw(el.firstChild, +el.dataset.k, xpPx[0]));
 }
 
-/* the wall: rows of pixel portraits drifting in opposite directions; a diagonal wave sets each tile's resolution */
+/* the wall: every advisor once, a field of pixel portraits riding two interfering waves, with the waveforms drawn
+   faintly behind them in the brand blue and green. */
 (function xpWallInit(){
   const cv = document.getElementById("xpWall"); if (!cv) return;
-  const g = cv.getContext("2d"), LV = [5, 8, 12, 18, 28, 44], cache = [];   // per portrait, one small canvas per pixel level
-  let W = 0, H = 0, dpr = 1, T = 64, ready = 0, run = false, t0 = performance.now();
-  const imgs = Array.from({length: XPN}, (_, k) => { const im = new Image(); im.decoding = "async"; im.onload = () => {
-    cache[k] = LV.map(n => { const c = document.createElement("canvas"); c.width = c.height = n; const cg = c.getContext("2d"); cg.imageSmoothingEnabled = true; cg.drawImage(im, 0, 0, n, n); return c; });
-    ready++; if (!run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; return im; });
-  const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; T = W < 640 ? 54 : 78; };
+  const g = cv.getContext("2d"), PX = 22, tiles = [];
+  let W = 0, H = 0, dpr = 1, run = false, t0 = performance.now(), loaded = 0;
+  for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => {
+    const c = document.createElement("canvas"); c.width = c.height = PX; const cg = c.getContext("2d"); cg.drawImage(im, 0, 0, PX, PX); tiles[k] = c;
+    if (++loaded === XPN && !run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
+  let cols = 8, rows = 4, T = 80, gx = 0, gy = 0;
+  const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr;
+    rows = Math.max(3, Math.round(Math.sqrt(XPN * H / W))); cols = Math.ceil(XPN / rows);
+    T = Math.min((W * .94) / cols, (H * .8) / rows) * .82; gx = (W - cols * T / .82) / 2; gy = (H - rows * T / .82) / 2; };
   size(); addEventListener("resize", size);
-  // a fixed shuffle so neighbours differ
-  const seq = Array.from({length: 997}, (_, i) => (i * 7 + Math.floor(i / XPN) * 3) % XPN);
+  const wave = (x, y, t) => Math.sin(x * 0.011 - t * 1.1) * 0.6 + Math.sin((x + y) * 0.019 - t * 1.7 + 1.3) * 0.4;
   function frame(now){
-    const t = (now - t0) / 1000, gap = 4, step = T + gap, rows = Math.ceil(H / step) + 1;
-    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.imageSmoothingEnabled = false; g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H);
-    const yOff = (H - rows * step + gap) / 2;
-    for (let r = 0; r < rows; r++) {
-      const dir = r % 2 ? 1 : -1, speed = 10 + (r % 3) * 6, off = ((dir * t * speed) % step + step) % step, y = yOff + r * step;
-      const first = Math.floor((dir * t * speed) / step);
-      for (let c = -1; c * step - off < W + step; c++) {
-        const x = c * step + off - step, idx = seq[((c - first) % 997 + 997 + r * 31) % 997], tiles = cache[idx]; if (!tiles) continue;
-        // the wave: a soft diagonal band of clarity sweeping across
-        const w = Math.sin((x / W) * 3.2 - (y / H) * 1.6 - t * 0.55) * 0.5 + 0.5, lvl = Math.min(LV.length - 1, Math.floor(Math.pow(w, 2.2) * LV.length));
-        g.globalAlpha = 0.55 + 0.45 * w;
-        g.drawImage(tiles[lvl], x, y, T, T);
-      }
+    const t = RM ? 0 : (now - t0) / 1000, cell = T / .82, amp = Math.min(22, cell * .22);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H);
+    // waveforms
+    g.lineWidth = 1.2;
+    [["rgba(164,200,225,.32)", 0], ["rgba(77,134,92,.42)", 2.1], ["rgba(164,200,225,.18)", 4.2]].forEach(([col, ph], n) => {
+      g.strokeStyle = col; g.beginPath();
+      for (let x = 0; x <= W; x += 6) { const y = H / 2 + (H * .28 + n * 14) * (Math.sin(x * (0.006 + n * .002) - t * (0.8 + n * .3) + ph) * .7 + Math.sin(x * 0.017 - t * 1.4 + ph) * .3); x ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.stroke(); });
+    // portraits
+    g.imageSmoothingEnabled = false;
+    for (let k = 0; k < XPN; k++) {
+      const r = Math.floor(k / cols), inRow = r === rows - 1 ? XPN - r * cols : cols, c = k - r * cols;
+      const cx = gx + (c + (cols - inRow) / 2 + .5) * cell, cy = gy + (r + .5) * cell, w = wave(cx, cy, t);
+      const s = T * (0.9 + 0.12 * Math.sin(cx * 0.02 + cy * 0.015 - t * 2.1)), y = cy + w * amp;
+      if (tiles[k]) { g.globalAlpha = .78 + .22 * (w * .5 + .5); g.drawImage(tiles[k], cx - s / 2, y - s / 2, s, s); }
     }
     g.globalAlpha = 1;
-    if (run) requestAnimationFrame(frame);
+    if (run && !RM) requestAnimationFrame(frame);
   }
-  if (RM) return;
   new IntersectionObserver(es => es.forEach(e => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); })).observe(cv);
 })();
+
 (function bindXp(){
   const art = document.getElementById("xpArt"); if (!art) return;
   const sec = document.getElementById("experts");
