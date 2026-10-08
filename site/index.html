@@ -1466,11 +1466,7 @@ html[lang="en"] .fslogan{font-family:var(--serif);font-weight:300;font-size:26px
 #experts{margin-top:112px}
 @media (min-width:1024px){#experts{margin-top:184px}}
 #experts .rrow{gap:36px}
-.xpppl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:32px 0 40px}
-@media (min-width:640px){.xpppl{grid-template-columns:repeat(5,minmax(0,1fr))}}
-@media (min-width:1024px){.xpppl{grid-template-columns:repeat(7,minmax(0,1fr));gap:12px}}
 @media (min-width:1024px){.xpppl{gap:16px;margin-bottom:48px}}
-.xpppl img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:14px}
 #experts .rrow>.t28{width:auto;line-height:1.1}
 /* experts: a quiet four-column directory in the trust-row layout */
 .xpcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 24px;width:100%}
@@ -1486,6 +1482,82 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
 @media (min-width:1024px){.ox .wtw .t28,.wtw.ox .t28{font-size:46px;letter-spacing:-.02em}.ox .wtw .rot,.wtw.ox .rot{width:250px}}
 .ox .wtc,.wtc.ox{height:460px!important}
 @media (min-width:1024px){.ox .wtc,.wtc.ox{height:560px!important}}
+/* agencies: region list on the left, the selected region's agencies in one window on the right */
+.agrow{display:flex;flex-direction:column;gap:28px}
+@media (min-width:1024px){.agrow{display:grid;grid-template-columns:272px minmax(0,1fr);gap:44px;align-items:start}}
+@media (min-width:1280px){.agrow{grid-template-columns:336px minmax(0,1fr);gap:102px}}
+.agleft{display:flex;flex-direction:column;gap:24px;min-width:0}
+@media (min-width:1024px){.agleft{gap:48px}}
+.aglist{display:flex;flex-direction:column}
+.agb{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:54px;border:0;border-bottom:1px solid var(--line);background:none;padding:10px 0;font:inherit;text-align:left;color:var(--muted);cursor:pointer;transition:color .3s}
+.agb span{font-size:18px;line-height:1.2}
+.agb small{font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;transition:color .3s}
+.agb:hover{color:var(--ink2)}
+.agb[aria-selected="true"]{color:var(--ink)}
+.agb[aria-selected="true"] small{color:var(--ink2)}
+.agb:focus-visible{outline:2px solid var(--gs);outline-offset:2px;border-radius:4px}
+.agright{min-width:0}
+.agcard{display:flex;flex-direction:column;gap:12px;border-radius:16px;background:var(--card);padding:10px}
+@media (min-width:768px){.agcard{padding:20px}}
+@media (max-width:1023px){.aglist .agcard{margin:12px 0 14px}}
+.agwin{border-radius:16px;background:#fff;box-shadow:0 18px 44px rgba(15,27,51,.08),0 1px 2px rgba(15,27,51,.04);padding:6px 6px 8px}
+.agwh{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:14px 14px 8px}
+.agwh>p:first-child{display:flex;align-items:baseline;gap:10px}
+.agwh>p:first-child b{font-weight:500;font-size:17px;line-height:1.2;color:var(--ink)}
+.agwh>p:first-child span{font-size:13px;color:var(--muted)}
+.agws{display:flex;flex-wrap:wrap;gap:6px}
+.agws .agt{display:inline-flex;align-items:baseline;gap:6px}
+.agws .agt b{font-weight:600;font-variant-numeric:tabular-nums}
+.agi{display:grid;grid-template-columns:minmax(0,1fr);margin:0;padding:0;list-style:none}
+@media (min-width:640px){.agi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.agi{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.agi li{display:flex;flex-direction:column;gap:3px;min-width:0;padding:11px 14px;border-radius:12px;transition:background-color .15s}
+.agi li:hover{background:#F6F8FB}
+.agi .agh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.agi .agh b{min-width:0;font-weight:600;font-size:15.5px;line-height:1.25;letter-spacing:-.1px;color:var(--ink)}
+.agi small{font-size:12.5px;line-height:1.35;color:var(--ink2)}
+.agi span{font-size:12px;line-height:1.35;color:var(--muted)}
+.agwin.sw .agi li{animation:agin .4s cubic-bezier(.2,.8,.2,1) var(--d,0ms) both}
+@keyframes agin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.agkey{display:flex;flex-wrap:wrap;gap:8px 20px;margin:0;padding:10px 14px;list-style:none;border:1px solid var(--line);border-radius:12px;background:#fff}
+.agkey li{display:flex;align-items:center;gap:8px;font-size:12px;line-height:1.35;color:var(--ink2)}
+.agleft .agkey{flex-direction:column;gap:12px;padding:0;border:0;border-radius:0;background:none}
+.agleft .agkey li{align-items:flex-start;flex-direction:column;gap:5px;font-size:13px;color:var(--ink2)}
+.agkey li span{text-wrap:pretty}
+@media (max-width:1023px){.agwh>p:first-child{display:none}.agwh{padding-top:10px}}
+.agnote{margin-top:16px;font-size:12.5px;line-height:1.45;color:var(--muted)}
+.agt{flex:none;padding:3px 8px;border-radius:999px;font-style:normal;font-size:11px;font-weight:500;line-height:1.3;white-space:nowrap}
+.agt.agt-f{background:#E8F3EC;color:#2E7149}
+.agt.agt-p{background:#EEF3F9;color:#4F78A8}
+.agt.agt-m{background:#F1F2F5;color:#5B6578}
+@media (min-width:1024px) and (max-width:1279px){.agi li{padding:10px 11px}.agi .agh{flex-wrap:wrap;gap:4px 6px}.agi .agh b{font-size:14.5px}}
+@media (min-width:1024px) and (max-height:820px){.agcard{padding:16px}.agwh{padding:12px 12px 4px}.agi li{padding-top:8px;padding-bottom:8px}.agleft{gap:32px}.agb{min-height:48px}}
+#agencies{margin-top:160px}
+
+/* experts: a typographic tapestry. The companies are set as running lines of serif type and the advisors' portraits
+   sit among the words like glyphs, pixelated until you hover, when one resolves and lifts. Portraits are drawn to
+   canvas (no image to open, drag or save from the page). */
+.xph{margin-bottom:36px}
+@media (min-width:1024px){.xph{margin-bottom:48px}}
+.xpart{display:flex;flex-direction:column;gap:30px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+@media (min-width:1024px){.xpart{gap:40px}}
+.xprow{display:grid;grid-template-columns:1fr;gap:10px;padding-top:18px;border-top:1px solid var(--line)}
+@media (min-width:1024px){.xprow{grid-template-columns:220px minmax(0,1fr);gap:32px;padding-top:24px}}
+.xpcat{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:10px}
+html[lang="zh-CN"] .xpcat{letter-spacing:.04em}
+.xpflow{font-family:var(--serif);font-weight:300;font-size:24px;line-height:1.75;letter-spacing:-.01em;color:var(--ink)}
+@media (min-width:1024px){.xpflow{font-size:36px;line-height:1.62}}
+html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
+.xpn{transition:color .25s}
+.xps{color:var(--faint);margin:0 .3em;font-weight:300}
+.xpflow:hover .xpn{color:var(--muted)}
+.xpflow .xpn:hover{color:var(--ink)}
+.xpf{position:relative;display:inline-block;vertical-align:-.18em;width:1.08em;height:1.08em;margin:0 .26em;border-radius:.22em;overflow:hidden;
+  transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s,border-radius .45s;transform-origin:50% 60%;cursor:crosshair;z-index:1}
+.xpf canvas{display:block;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
+.xpf.on{transform:scale(2.6);z-index:5;border-radius:.16em;box-shadow:0 18px 40px rgba(15,27,51,.22)}
+@media (hover:none){.xpf.on{transform:scale(2.2)}}
+@media (prefers-reduced-motion:reduce){.xpf{transition:none}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -1819,38 +1891,9 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
 
 <!-- ======================= EXPERTS: where our experts worked before ======================= -->
 <section class="mt160 rv" data-rv="up" id="experts" aria-labelledby="xpH">
-  <div class="ctr rsec">
-    <div class="rline"></div>
-    <div class="rrow">
-      <p class="t28" id="xpH" data-i18n="xp.h">Our experts previously worked at</p>
-      <div class="rmline"></div>
-      <div class="rbody">
-        <div class="xpppl" aria-label="Placetta advisors" data-i18n-aria="xp.ppl">
-          <img src="media/people/advisor-1.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-2.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-3.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-4.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-5.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-6.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-7.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-8.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-9.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-10.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-11.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-12.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-13.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-14.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-15.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-16.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-17.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-18.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-19.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-20.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="media/people/advisor-21.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
-        </div>
-        <div class="xpcols" id="xpR"></div>
-      </div>
-    </div>
+  <div class="ctr">
+    <p class="t28 xph" id="xpH" data-i18n="xp.h">Our experts previously worked at</p>
+    <div class="xpart" id="xpArt" aria-label="Where our experts worked before, with their portraits" data-i18n-aria="xp.ppl"></div>
   </div>
 </section>
 
@@ -1903,6 +1946,25 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ======================= AGENCIES A PLAN COVERS (names set in type; no agency seals or logos) ======================= -->
+<section class="mt160 rv" data-rv="up" id="agencies" aria-labelledby="agH">
+  <div class="ctr">
+    <div class="agrow">
+      <div class="agleft">
+        <p class="t28" id="agH" data-i18n="agy.h">Every agency your expansion touches, and who handles it</p>
+        <div class="aglist" id="agTabs" role="tablist" aria-labelledby="agH"></div>
+      </div>
+      <div class="agright" id="agRight">
+        <div class="agcard" id="agCard">
+          <div class="agwin" id="agWin" role="tabpanel" aria-live="polite"></div>
+          <ul class="agkey" id="agKey"><li><em class="agt agt-f" data-i18n="agy.tf">We file</em><span data-i18n="agy.kf">Placetta's agents prepare and submit it</span></li><li><em class="agt agt-p" data-i18n="agy.tp">With partners</em><span data-i18n="agy.kp">Agents prepare it, a licensed broker, lawyer or lab files it</span></li><li><em class="agt agt-m" data-i18n="agy.tm">We monitor</em><span data-i18n="agy.km">Agents track the rules and flag every change</span></li></ul>
+        </div>
+      </div>
+    </div>
+    <p class="agnote" data-i18n="agy.note">Placetta is not affiliated with or endorsed by any government agency.</p>
   </div>
 </section>
 
@@ -2146,7 +2208,7 @@ en:{
  "inv.l":"The brands we serve are backed by", "ts.tabs":"Customer stories",
  "add.btn":"New plan", "add.c1":"Company", "add.c2":"Target market", "add.c3":"Target opening", "add.c4":"Status", "add.h":"Tell us where you're opening.<br>Get your plan in minutes.", "add.mapping":"Mapping…", "add.ready":"Plan ready", "add.tab":"Entry plans", "cmp.1h":"Consultants", "cmp.1p":"A report, weeks later, billed by the hour.", "cmp.2h":"Doing it yourself", "cmp.2p":"Months of calls, forms and rejected applications.", "cmp.3p":"A plan in minutes, filing handled, one dashboard, and a price you know upfront.", "cmp.h":"Why not a law firm or consultant?", "cn.btn":"Get your US entry plan", "cn.h":"Built for brands going global.", "cn.p":"Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.", "cn.q":"Su Shi, Song dynasty poet", "cn.s":"Wherever the heart is at ease, that is home.", "cn.sub":"Free, ready in minutes", "dash.a":"Shenzhen HQ", "dash.at":"9:00 PM", "dash.b":"New York team", "dash.bt":"9:00 AM", "dash.risk":"Risk flag: review state rules on foreign-owned leases before signing", "diff.1b":"Minutes", "diff.1s":"From target market to a full entry plan", "diff.after":"after", "diff.before":"before", "diff.c1":"Customers since 2016", "diff.c2":"Return customers", "diff.h":"The difference Placetta makes", "diff.team":"Your team", "diff.with":"with", "itl.a1":"Health permit packet for Santa Clara County is ready. Submit it?", "itl.a2":"Submitted. I'll book the inspection when the county opens a slot.", "itl.b1":"The sign permit needs your landlord's authorization. Send the request to them?", "itl.b2":"Got it. Landlord requests go to you first, at every location.", "itl.f2":"Landlord letter", "itl.h":"Placetta asks before every filing, and remembers your answer", "itl.m2":"1-page doc", "itl.saved":"Saved to your playbook", "itl.u1":"Yes, submit it 👍", "itl.u2":"No, send landlord requests to me first. I'll forward them.", "qr":"QR", "trust.1":"Licensed partner attorneys", "trust.2":"Local permit expediters", "trust.3":"English and Chinese", "trust.h":"Built for trust", "wt.l":"Work together", "wt.qr":"WeChat QR code goes here before launch", "wt.r":"from day one", "you.init":"HP",
  "map.n3":"3+ per day", "map.s3":"new US businesses served by our team, on average, since 2016", "map.n3w":"7+ per day", "map.s3w":"new businesses served by our team worldwide, on average, since 2016",
- "xp.h":"Our experts previously worked at", "xp.ppl":"Placetta advisors", "hero.h1":"Open your first US&nbsp;store<br><em>months sooner.</em>", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
+ "xp.h":"Our experts previously worked at", "agy.n":"{n} agencies", "agy.h":"Every agency your expansion touches, and who handles it", "agy.tf":"We file", "agy.tp":"With partners", "agy.tm":"We monitor", "agy.kf":"Placetta's agents prepare and submit it", "agy.kp":"Agents prepare it, a licensed broker, lawyer or lab files it", "agy.km":"Agents track the rules and flag every change", "agy.note":"Placetta is not affiliated with or endorsed by any government agency.", "xp.ppl":"Placetta advisors", "hero.h1":"Open your first US&nbsp;store<br><em>months sooner.</em>", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
  "fqr.t":"Prefer WeChat? Scan to add Placetta.",
  "q.wc":"Prefer WeChat? Scan to add Placetta.",
  "mon.cnt2":"{n} tracked", "mon.dl6":"Next 6 months", "mon.d1":"1 day", "mon.dn":"{n} days",
@@ -2229,7 +2291,7 @@ zh:{
  "inv.l":"我们服务的品牌获得以下机构投资", "ts.tabs":"客户故事",
  "add.btn":"新建计划", "add.c1":"公司", "add.c2":"目标市场", "add.c3":"目标开业", "add.c4":"状态", "add.h":"告诉我们您在哪里开店，<br>几分钟拿到计划。", "add.mapping":"生成中…", "add.ready":"计划已就绪", "add.tab":"开店计划", "cmp.1h":"咨询顾问", "cmp.1p":"几周后交一份报告，按小时计费。", "cmp.2h":"自己办理", "cmp.2p":"数月的电话、表格和被退回的申请。", "cmp.3p":"几分钟出计划，代办申报，一个看板，价格事先透明。", "cmp.h":"为什么不找律所或顾问？", "cn.btn":"获取您的美国开店计划", "cn.h":"为出海品牌而生。", "cn.p":"您在上海或深圳的团队，与纽约团队看到的是同一个看板，中英文随时切换。我们会尽早提示美国特有的风险，包括部分州对外资企业租赁和持有房产的限制。", "cn.q":"苏轼《定风波》", "cn.s":"此心安处是吾乡", "cn.sub":"免费，几分钟生成", "dash.a":"深圳总部", "dash.at":"晚上 9:00", "dash.b":"纽约团队", "dash.bt":"上午 9:00", "dash.risk":"风险提示：签约前请复核该州对外资企业租赁的规定", "diff.1b":"几分钟", "diff.1s":"从目标市场到完整开店计划", "diff.after":"之后", "diff.before":"之前", "diff.c1":"2016 年以来服务的客户", "diff.c2":"回头客户比例", "diff.h":"快哉带来的改变", "diff.team":"您的团队", "diff.with":"携手", "itl.a1":"圣克拉拉县卫生许可材料已准备好，现在提交吗？", "itl.a2":"已提交。县里一开放检查时段，我就为您预约。", "itl.b1":"招牌许可需要房东授权。要我直接发请求给房东吗？", "itl.b2":"明白。以后所有门店的房东请求都先发给您。", "itl.f2":"房东授权书", "itl.h":"每次申报前都先问您，并记住您的回答", "itl.m2":"1 页文档", "itl.saved":"已记入您的偏好", "itl.u1":"好的，提交吧 👍", "itl.u2":"不用，房东相关的先发给我，我来转。", "qr":"二维码", "trust.1":"持牌合作律师", "trust.2":"本地许可代办", "trust.3":"中文和英文", "trust.h":"值得信赖", "wt.l":"随时协作", "wt.qr":"上线前在此放置微信二维码", "wt.r":"从第一天起", "you.init":"松",
  "map.n3":"每天 3 家以上", "map.s3":"2016 年以来，我们的团队平均每天新服务的美国企业", "map.n3w":"每天 7 家以上", "map.s3w":"2016 年以来，我们的团队平均每天在全球新服务的企业",
- "xp.h":"我们的专家曾任职于", "xp.ppl":"快哉顾问", "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
+ "xp.h":"我们的专家曾任职于", "agy.n":"{n} 个机构", "agy.h":"出海涉及的每一个机构，以及由谁负责", "agy.tf":"代为申报", "agy.tp":"联合伙伴", "agy.tm":"持续监测", "agy.kf":"由快哉智能代理准备并提交", "agy.kp":"由智能代理准备，持牌报关行、律师或实验室提交", "agy.km":"智能代理持续跟踪规则，并提示每一项变化", "agy.note":"快哉与任何政府机构均无隶属关系，也未获其背书。", "xp.ppl":"快哉顾问", "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
  "fqr.t":"更习惯用微信？扫码添加快哉。",
  "q.wc":"更习惯用微信？扫码添加快哉。",
  "mon.cnt2":"共 {n} 条", "mon.dl6":"未来 6 个月", "mon.d1":"1 天", "mon.dn":"{n} 天",
@@ -3394,8 +3456,66 @@ function paintRot(){
 if (!RM) setInterval(() => { rIdx = (rIdx + 1) % CH.length; paintRot(); }, 2000);
 
 const XPG = [[["Government and academia", "政府与学术界"], [["U.S. FDA", "美国食品药品监督管理局"], ["Harvard University", "哈佛大学"], ["MIT", "麻省理工学院"], ["University of Pennsylvania", "宾夕法尼亚大学"], ["Princeton University", "普林斯顿大学"], ["Stanford University", "斯坦福大学"]]], [["AI and technology", "人工智能与科技"], [["OpenAI", "OpenAI"], ["Google", "谷歌"], ["Amazon", "亚马逊"], ["Huawei", "华为"], ["TikTok", "TikTok"], ["NVIDIA", "英伟达"], ["Tesla", "特斯拉"], ["TSMC", "台积电"]]], [["Trading and finance", "交易与金融"], [["Jane Street", "简街资本"], ["Citadel", "城堡投资"], ["Hudson River Trading", "哈德逊河交易"], ["Optiver", "澳帝华"], ["Renaissance Technologies", "文艺复兴科技"], ["Goldman Sachs", "高盛"], ["J.P. Morgan", "摩根大通"], ["Blackstone", "黑石集团"]]], [["Consumer, health and logistics", "消费、医疗与物流"], [["Walmart", "沃尔玛"], ["Costco", "开市客"], ["Johnson & Johnson", "强生"], ["DHL", "DHL"], ["Maersk", "马士基"]]]];
-function renderXp(){ const i = L(); document.getElementById("xpR").innerHTML = XPG.map(g => `<div class="xpc"><p>${g[0][i]}</p><ul>${g[1].map(x => `<li>${x[i]}</li>`).join("")}</ul></div>`).join(""); }
+/* experts tapestry: company names with the advisors' portraits woven in, each portrait pixelated until hovered */
+const XPN = 21, xpImgs = [], xpPx = [7, 11, 18, 32, 64];
+function xpImg(k){ if (!xpImgs[k]) { const im = new Image(); im.decoding = "async"; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; xpImgs[k] = im; } return xpImgs[k]; }
+function xpDraw(cv, k, px){
+  const im = xpImg(k); if (!im.complete || !im.naturalWidth) { im.addEventListener("load", () => xpDraw(cv, k, cv._px || px), {once: true}); return; }
+  const S = cv.width, g = cv.getContext("2d"), t = xpDraw.tmp || (xpDraw.tmp = document.createElement("canvas")), tg = t.getContext("2d");
+  cv._px = px;
+  if (px >= S) { g.imageSmoothingEnabled = true; g.drawImage(im, 0, 0, S, S); return; }
+  t.width = t.height = px; tg.imageSmoothingEnabled = true; tg.drawImage(im, 0, 0, px, px);
+  g.imageSmoothingEnabled = false; g.clearRect(0, 0, S, S); g.drawImage(t, 0, 0, px, px, 0, 0, S, S);
+}
+function xpResolve(el, on){
+  const cv = el.firstChild, k = +el.dataset.k; el.classList.toggle("on", on); clearInterval(el._t);
+  if (RM) { xpDraw(cv, k, on ? cv.width : xpPx[0]); return; }
+  let step = on ? 0 : xpPx.length; const seq = on ? [...xpPx, cv.width] : [...xpPx].reverse();
+  let n = 0; el._t = setInterval(() => { xpDraw(cv, k, seq[n]); if (++n >= seq.length) clearInterval(el._t); }, 45);
+}
+function renderXp(){
+  const i = L(), art = document.getElementById("xpArt"); if (!art) return;
+  // spread the portraits across the rows in proportion to the names, one after every name or so
+  const total = XPG.reduce((a, g) => a + g[1].length, 0); let k = 0, used = 0;
+  art.innerHTML = XPG.map((g, r) => {
+    const names = g[1], share = r === XPG.length - 1 ? XPN - used : Math.round(XPN * names.length / total); used += share;
+    const slots = new Set(Array.from({length: share}, (_, j) => Math.floor((j + .5) * names.length / share)));
+    const parts = names.map((x, j) => `<span class="xpn">${x[i]}</span>` + (slots.has(j) && k < XPN ? `<span class="xpf" data-k="${k++}" aria-hidden="true"><canvas width="128" height="128"></canvas></span>` : j < names.length - 1 ? `<span class="xps" aria-hidden="true">/</span>` : ""));
+    return `<div class="xprow"><p class="xpcat">${g[0][i]}</p><p class="xpflow">${parts.join("")}</p></div>`;
+  }).join("");
+  art.querySelectorAll(".xpf").forEach(el => xpDraw(el.firstChild, +el.dataset.k, xpPx[0]));
+}
+(function bindXp(){
+  const art = document.getElementById("xpArt"); if (!art) return;
+  const sec = document.getElementById("experts");
+  ["contextmenu", "dragstart", "copy"].forEach(ev => sec.addEventListener(ev, e => e.preventDefault()));
+  art.addEventListener("pointerover", e => { const f = e.target.closest(".xpf"); if (f && e.pointerType !== "touch") xpResolve(f, true); });
+  art.addEventListener("pointerout", e => { const f = e.target.closest(".xpf"); if (f && e.pointerType !== "touch" && !f.contains(e.relatedTarget)) xpResolve(f, false); });
+  art.addEventListener("click", e => { const f = e.target.closest(".xpf"); if (!f) return; const on = !f.classList.contains("on"); art.querySelectorAll(".xpf.on").forEach(x => x !== f && xpResolve(x, false)); xpResolve(f, on); });
+})();
 
+const AGG = [[["United States", "美国"], [["CBP", "CBP", "U.S. Customs and Border Protection", "美国海关与边境保护局", "Customs, tariffs, forced-labor checks", "报关、关税、强迫劳动审查", "p"], ["FDA", "FDA", "Food and Drug Administration", "美国食品药品监督管理局", "Food, cosmetics, devices", "食品、化妆品、医疗器械", "f"], ["FCC", "FCC", "Federal Communications Commission", "美国联邦通信委员会", "Radios and electronics", "无线电与电子产品", "p"], ["CPSC", "CPSC", "Consumer Product Safety Commission", "美国消费品安全委员会", "Product certificates and eFiling", "产品合规证书与电子申报", "f"], ["FTC", "FTC", "Federal Trade Commission", "美国联邦贸易委员会", "Advertising, reviews and data", "广告、评价与数据", "m"], ["State and local", "州与地方", "State, county and city offices", "州、县、市政府部门", "Registration, health, building, fire", "公司登记、卫生、建筑、消防", "f"], ["USDA", "USDA", "Department of Agriculture", "美国农业部", "Plants, animals, organic", "动植物产品、有机认证", "f"], ["EPA", "EPA", "Environmental Protection Agency", "美国环境保护署", "Chemicals and pesticides", "化学品与农药", "f"], ["TTB", "TTB", "Alcohol and Tobacco Tax and Trade Bureau", "美国酒类和烟草税务贸易局", "Alcohol permits and labels", "酒类许可与标签", "f"], ["CFIUS", "CFIUS", "Committee on Foreign Investment in the U.S.", "美国外国投资委员会", "Foreign investment review", "外国投资审查", "p"], ["BIS", "BIS", "Bureau of Industry and Security", "美国商务部工业与安全局", "Export controls", "出口管制", "m"], ["OFAC", "OFAC", "Office of Foreign Assets Control", "美国财政部海外资产控制办公室", "Sanctions screening", "制裁筛查", "m"], ["USPTO", "USPTO", "Patent and Trademark Office", "美国专利商标局", "Trademarks", "商标", "p"], ["USCIS", "USCIS", "Citizenship and Immigration Services", "美国公民及移民服务局", "Visas for your team", "员工签证", "p"], ["SEC", "SEC", "Securities and Exchange Commission", "美国证券交易委员会", "Securities offerings", "证券发行", "p"]]], [["Canada", "加拿大"], [["CBSA", "CBSA", "Canada Border Services Agency", "加拿大边境服务局", "Customs and duties", "海关与关税", "p"], ["CFIA", "CFIA", "Canadian Food Inspection Agency", "加拿大食品检验局", "Food licences, plants, animals", "食品许可与动植物", "f"], ["Health Canada", "加拿大卫生部", "Federal health department", "联邦卫生部门", "Cosmetics, health and consumer products", "化妆品、健康产品与消费品", "f"], ["ISED", "ISED", "Innovation, Science and Economic Development Canada", "加拿大创新、科学及经济发展部", "Foreign investment review", "外国投资审查", "p"], ["Competition Bureau", "加拿大竞争局", "Competition Bureau Canada", "加拿大竞争局", "Advertising and labeling", "广告与标签", "m"]]], [["Mexico", "墨西哥"], [["ANAM", "ANAM", "National Customs Agency", "墨西哥国家海关署", "Customs", "海关", "p"], ["COFEPRIS", "COFEPRIS", "Federal Commission for Protection against Sanitary Risks", "墨西哥联邦卫生风险保护委员会", "Health, food, cosmetics", "卫生、食品与化妆品", "p"], ["SE", "SE", "Secretariat of Economy", "墨西哥经济部", "Foreign investment, product standards", "外国投资与产品标准", "p"], ["IMPI", "IMPI", "Mexican Institute of Industrial Property", "墨西哥工业产权局", "Trademarks", "商标", "p"], ["PROFECO", "PROFECO", "Federal Consumer Protection Agency", "墨西哥联邦消费者保护署", "Consumer protection and labeling", "消费者保护与标签", "m"]]], [["Europe", "欧洲"], [["EC", "EC", "European Commission", "欧盟委员会", "AI, digital and competition rules", "人工智能、数字与竞争规则", "m"], ["EMA", "EMA", "European Medicines Agency", "欧洲药品管理局", "Medicines", "药品", "p"], ["EFSA", "EFSA", "European Food Safety Authority", "欧洲食品安全局", "Food safety", "食品安全", "m"]]]];
+let agSel = 0;
+const agWide = matchMedia("(min-width:1024px)");
+// wide screens: the window sits on the right; narrower: it opens right beneath the selected region
+// the legend sits under the region list on wide screens and inside the card otherwise
+function placeAg(){ const card = document.getElementById("agCard"), home = document.getElementById("agRight"), btn = document.getElementById("agTab" + agSel), key = document.getElementById("agKey");
+  const keyHome = agWide.matches ? document.querySelector(".agleft") : card; if (key.parentNode !== keyHome) keyHome.appendChild(key);
+  if (agWide.matches || !btn) { if (card.parentNode !== home) home.appendChild(card); } else if (btn.nextElementSibling !== card) btn.after(card); }
+function renderAg(swap){
+  const i = L(), g = AGG[agSel], tabs = document.getElementById("agTabs"), win = document.getElementById("agWin");
+  document.getElementById("agRight").appendChild(document.getElementById("agCard"));
+  tabs.innerHTML = AGG.map((r, k) => `<button type="button" class="agb" role="tab" id="agTab${k}" aria-selected="${k === agSel}" aria-controls="agWin" tabindex="${k === agSel ? 0 : -1}"><span>${r[0][i]}</span><small>${r[1].length}</small></button>`).join("");
+  const cnt = ["f", "p", "m"].map(x => [x, g[1].filter(a => a[6] === x).length]).filter(x => x[1]);
+  win.setAttribute("aria-labelledby", "agTab" + agSel);
+  win.innerHTML = `<div class="agwh"><p><b>${g[0][i]}</b><span>${t("agy.n").replace("{n}", g[1].length)}</span></p><p class="agws">${cnt.map(([x, n]) => `<em class="agt agt-${x}">${t("agy.t" + x)}<b>${n}</b></em>`).join("")}</p></div>` +
+    `<ul class="agi">${g[1].map((a, k) => `<li style="--d:${k * 22}ms"><div class="agh"><b>${a[i]}</b><em class="agt agt-${a[6]}">${t("agy.t" + a[6])}</em></div><small>${a[2 + i]}</small><span>${a[4 + i]}</span></li>`).join("")}</ul>`;
+  placeAg();
+  if (swap && !RM) { win.classList.remove("sw"); void win.offsetWidth; win.classList.add("sw"); }
+}
+document.getElementById("agTabs").addEventListener("click", e => { const b = e.target.closest(".agb"); if (!b) return; const k = +b.id.slice(5); if (k === agSel) return; agSel = k; renderAg(true); document.getElementById("agTab" + k).focus({preventScroll: true}); });
+document.getElementById("agTabs").addEventListener("keydown", e => { const d = {ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1}[e.key]; if (!d || !e.target.closest(".agb")) return; e.preventDefault(); agSel = (agSel + d + AGG.length) % AGG.length; renderAg(true); document.getElementById("agTab" + agSel).focus(); });
+agWide.addEventListener("change", placeAg);
 const cntDone = new WeakSet();
 function runCount(el){
   if (cntDone.has(el)) return; cntDone.add(el);
@@ -3408,7 +3528,7 @@ function runCount(el){
 const cntIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ runCount(e.target); cntIO.unobserve(e.target); } }), {threshold:.6});
 function bindCounters(){ document.querySelectorAll(".ox .cnt").forEach(el => { if (!cntDone.has(el)) cntIO.observe(el); }); }
 
-function renderOld(){ document.querySelectorAll(".ox .cnt").forEach(el => { el.textContent = (+el.dataset.to).toLocaleString("en-US"); }); renderBefore(); renderRot(); renderAddRow(false); renderDash(); renderXp(); }
+function renderOld(){ document.querySelectorAll(".ox .cnt").forEach(el => { el.textContent = (+el.dataset.to).toLocaleString("en-US"); }); renderBefore(); renderRot(); renderAddRow(false); renderDash(); renderXp(); renderAg(false); }
 new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) document.getElementById("itl").classList.add("itl-on"); }), {threshold:.25}).observe(document.getElementById("itl"));
 new IntersectionObserver(es => es.forEach(e => {
   if (e.isIntersecting && !aRunning && !RM){ aRunning = true; addCycle(); }
