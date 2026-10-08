@@ -1466,6 +1466,9 @@ html[lang="en"] .fslogan{font-family:var(--serif);font-weight:300;font-size:26px
 #experts{margin-top:112px}
 @media (min-width:1024px){#experts{margin-top:184px}}
 #experts .rrow{gap:36px}
+.xpppl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:32px 0 40px;max-width:640px}
+@media (min-width:1024px){.xpppl{gap:16px;margin-bottom:48px}}
+.xpppl img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:16px}
 #experts .rrow>.t28{width:auto;line-height:1.1}
 /* experts: a quiet four-column directory in the trust-row layout */
 .xpcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 24px;width:100%}
@@ -1819,7 +1822,14 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
     <div class="rrow">
       <p class="t28" id="xpH" data-i18n="xp.h">Our experts previously worked at</p>
       <div class="rmline"></div>
-      <div class="rbody"><div class="xpcols" id="xpR"></div></div>
+      <div class="rbody">
+        <div class="xpppl" aria-label="Placetta advisors" data-i18n-aria="xp.ppl">
+          <img src="media/people/advisor-1.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
+          <img src="media/people/advisor-2.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
+          <img src="media/people/advisor-3.jpg" alt="" width="512" height="512" loading="lazy" decoding="async">
+        </div>
+        <div class="xpcols" id="xpR"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -2116,7 +2126,7 @@ en:{
  "inv.l":"The brands we serve are backed by", "ts.tabs":"Customer stories",
  "add.btn":"New plan", "add.c1":"Company", "add.c2":"Target market", "add.c3":"Target opening", "add.c4":"Status", "add.h":"Tell us where you're opening.<br>Get your plan in minutes.", "add.mapping":"Mapping…", "add.ready":"Plan ready", "add.tab":"Entry plans", "cmp.1h":"Consultants", "cmp.1p":"A report, weeks later, billed by the hour.", "cmp.2h":"Doing it yourself", "cmp.2p":"Months of calls, forms and rejected applications.", "cmp.3p":"A plan in minutes, filing handled, one dashboard, and a price you know upfront.", "cmp.h":"Why not a law firm or consultant?", "cn.btn":"Get your US entry plan", "cn.h":"Built for brands going global.", "cn.p":"Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.", "cn.q":"Su Shi, Song dynasty poet", "cn.s":"Wherever the heart is at ease, that is home.", "cn.sub":"Free, ready in minutes", "dash.a":"Shenzhen HQ", "dash.at":"9:00 PM", "dash.b":"New York team", "dash.bt":"9:00 AM", "dash.risk":"Risk flag: review state rules on foreign-owned leases before signing", "diff.1b":"Minutes", "diff.1s":"From target market to a full entry plan", "diff.after":"after", "diff.before":"before", "diff.c1":"Customers since 2016", "diff.c2":"Return customers", "diff.h":"The difference Placetta makes", "diff.team":"Your team", "diff.with":"with", "itl.a1":"Health permit packet for Santa Clara County is ready. Submit it?", "itl.a2":"Submitted. I'll book the inspection when the county opens a slot.", "itl.b1":"The sign permit needs your landlord's authorization. Send the request to them?", "itl.b2":"Got it. Landlord requests go to you first, at every location.", "itl.f2":"Landlord letter", "itl.h":"Placetta asks before every filing, and remembers your answer", "itl.m2":"1-page doc", "itl.saved":"Saved to your playbook", "itl.u1":"Yes, submit it 👍", "itl.u2":"No, send landlord requests to me first. I'll forward them.", "qr":"QR", "trust.1":"Licensed partner attorneys", "trust.2":"Local permit expediters", "trust.3":"English and Chinese", "trust.h":"Built for trust", "wt.l":"Work together", "wt.qr":"WeChat QR code goes here before launch", "wt.r":"from day one", "you.init":"HP",
  "map.n3":"3+ per day", "map.s3":"new US businesses served by our team, on average, since 2016", "map.n3w":"7+ per day", "map.s3w":"new businesses served by our team worldwide, on average, since 2016",
- "xp.h":"Our experts previously worked at", "hero.h1":"Open your first US&nbsp;store<br><em>months sooner.</em>", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
+ "xp.h":"Our experts previously worked at", "xp.ppl":"Placetta advisors", "hero.h1":"Open your first US&nbsp;store<br><em>months sooner.</em>", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
  "fqr.t":"Prefer WeChat? Scan to add Placetta.",
  "q.wc":"Prefer WeChat? Scan to add Placetta.",
  "mon.cnt2":"{n} tracked", "mon.dl6":"Next 6 months", "mon.d1":"1 day", "mon.dn":"{n} days",
@@ -2199,7 +2209,7 @@ zh:{
  "inv.l":"我们服务的品牌获得以下机构投资", "ts.tabs":"客户故事",
  "add.btn":"新建计划", "add.c1":"公司", "add.c2":"目标市场", "add.c3":"目标开业", "add.c4":"状态", "add.h":"告诉我们您在哪里开店，<br>几分钟拿到计划。", "add.mapping":"生成中…", "add.ready":"计划已就绪", "add.tab":"开店计划", "cmp.1h":"咨询顾问", "cmp.1p":"几周后交一份报告，按小时计费。", "cmp.2h":"自己办理", "cmp.2p":"数月的电话、表格和被退回的申请。", "cmp.3p":"几分钟出计划，代办申报，一个看板，价格事先透明。", "cmp.h":"为什么不找律所或顾问？", "cn.btn":"获取您的美国开店计划", "cn.h":"为出海品牌而生。", "cn.p":"您在上海或深圳的团队，与纽约团队看到的是同一个看板，中英文随时切换。我们会尽早提示美国特有的风险，包括部分州对外资企业租赁和持有房产的限制。", "cn.q":"苏轼《定风波》", "cn.s":"此心安处是吾乡", "cn.sub":"免费，几分钟生成", "dash.a":"深圳总部", "dash.at":"晚上 9:00", "dash.b":"纽约团队", "dash.bt":"上午 9:00", "dash.risk":"风险提示：签约前请复核该州对外资企业租赁的规定", "diff.1b":"几分钟", "diff.1s":"从目标市场到完整开店计划", "diff.after":"之后", "diff.before":"之前", "diff.c1":"2016 年以来服务的客户", "diff.c2":"回头客户比例", "diff.h":"快哉带来的改变", "diff.team":"您的团队", "diff.with":"携手", "itl.a1":"圣克拉拉县卫生许可材料已准备好，现在提交吗？", "itl.a2":"已提交。县里一开放检查时段，我就为您预约。", "itl.b1":"招牌许可需要房东授权。要我直接发请求给房东吗？", "itl.b2":"明白。以后所有门店的房东请求都先发给您。", "itl.f2":"房东授权书", "itl.h":"每次申报前都先问您，并记住您的回答", "itl.m2":"1 页文档", "itl.saved":"已记入您的偏好", "itl.u1":"好的，提交吧 👍", "itl.u2":"不用，房东相关的先发给我，我来转。", "qr":"二维码", "trust.1":"持牌合作律师", "trust.2":"本地许可代办", "trust.3":"中文和英文", "trust.h":"值得信赖", "wt.l":"随时协作", "wt.qr":"上线前在此放置微信二维码", "wt.r":"从第一天起", "you.init":"松",
  "map.n3":"每天 3 家以上", "map.s3":"2016 年以来，我们的团队平均每天新服务的美国企业", "map.n3w":"每天 7 家以上", "map.s3w":"2016 年以来，我们的团队平均每天在全球新服务的企业",
- "xp.h":"我们的专家曾任职于", "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
+ "xp.h":"我们的专家曾任职于", "xp.ppl":"快哉顾问", "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
  "fqr.t":"更习惯用微信？扫码添加快哉。",
  "q.wc":"更习惯用微信？扫码添加快哉。",
  "mon.cnt2":"共 {n} 条", "mon.dl6":"未来 6 个月", "mon.d1":"1 天", "mon.dn":"{n} 天",
