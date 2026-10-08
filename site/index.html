@@ -1555,9 +1555,41 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 .xpf{position:relative;display:inline-block;vertical-align:-.18em;width:1.08em;height:1.08em;margin:0 .26em;border-radius:.22em;overflow:hidden;
   transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s,border-radius .45s;transform-origin:50% 60%;cursor:crosshair;z-index:1}
 .xpf canvas{display:block;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
-.xpf.on{transform:scale(2.6);z-index:5;border-radius:.16em;box-shadow:0 18px 40px rgba(15,27,51,.22)}
-@media (hover:none){.xpf.on{transform:scale(2.2)}}
+.xpf.on{z-index:5;box-shadow:0 0 0 2px var(--bg),0 0 0 3px rgba(15,27,51,.25)}
 @media (prefers-reduced-motion:reduce){.xpf{transition:none}}
+
+/* agencies as art: a colour-blocked mosaic. Green tiles are filings we make, blue tiles are filed with partners,
+   pale tiles are the rules we watch. Big serif acronyms, the full name and what it covers set small beneath. */
+#agencies .agcard{background:none;padding:0}
+#agencies .agwin{background:none;box-shadow:none;padding:0}
+#agencies .agwh{padding:0 0 16px}
+#agencies .agi{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;grid-auto-flow:dense}
+@media (min-width:768px){#agencies .agi{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1280px){#agencies .agi{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}}
+#agencies .agi li{position:relative;justify-content:space-between;gap:10px;min-height:150px;padding:16px 16px 14px;border-radius:16px;overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .35s}
+@media (min-width:1024px){#agencies .agi li{min-height:196px;padding:16px 18px 16px}}
+#agencies .agi li:nth-child(7n+1){grid-column:span 2}
+#agencies .agi li:hover{transform:translateY(-3px);filter:saturate(1.08)}
+#agencies .agi .agh{flex-direction:column-reverse;align-items:flex-start;gap:12px}
+#agencies .agi .agh b{font-family:var(--serif);font-weight:300;font-size:38px;line-height:.98;letter-spacing:-.02em;overflow-wrap:normal;word-break:normal}
+@media (min-width:1024px){#agencies .agi .agh b{font-size:46px}}
+#agencies .agi li:nth-child(7n+1) .agh b{font-size:56px}
+@media (min-width:1024px){#agencies .agi li:nth-child(7n+1) .agh b{font-size:72px}}
+#agencies .agi small{font-size:13px;line-height:1.3;margin-top:auto}
+#agencies .agi span{font-size:12px}
+#agencies .agk-f{background:#4D865C;color:#fff}
+#agencies .agk-f .agh b,#agencies .agk-f small{color:#fff}
+#agencies .agk-f span{color:rgba(255,255,255,.72)}
+#agencies .agk-p{background:#A4C8E1}
+#agencies .agk-p .agh b,#agencies .agk-p small{color:#0F1B33}
+#agencies .agk-p span{color:rgba(15,27,51,.62)}
+#agencies .agk-m{background:#E2EDF5;background-image:radial-gradient(rgba(77,134,92,.18) 1px,transparent 1.2px);background-size:9px 9px}
+#agencies .agk-m .agh b,#agencies .agk-m small{color:#0F1B33}
+#agencies .agt.agt-f{background:#4D865C;color:#fff}
+#agencies .agt.agt-p{background:#A4C8E1;color:#0F1B33}
+#agencies .agt.agt-m{background:#E2EDF5;color:#0F1B33}
+#agencies .agi li .agt{background:rgba(255,255,255,.22);color:inherit;backdrop-filter:blur(4px)}
+#agencies .agk-p .agt,#agencies .agk-m .agt{background:rgba(255,255,255,.55);color:#0F1B33}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3509,7 +3541,7 @@ function renderAg(swap){
   const cnt = ["f", "p", "m"].map(x => [x, g[1].filter(a => a[6] === x).length]).filter(x => x[1]);
   win.setAttribute("aria-labelledby", "agTab" + agSel);
   win.innerHTML = `<div class="agwh"><p><b>${g[0][i]}</b><span>${t("agy.n").replace("{n}", g[1].length)}</span></p><p class="agws">${cnt.map(([x, n]) => `<em class="agt agt-${x}">${t("agy.t" + x)}<b>${n}</b></em>`).join("")}</p></div>` +
-    `<ul class="agi">${g[1].map((a, k) => `<li style="--d:${k * 22}ms"><div class="agh"><b>${a[i]}</b><em class="agt agt-${a[6]}">${t("agy.t" + a[6])}</em></div><small>${a[2 + i]}</small><span>${a[4 + i]}</span></li>`).join("")}</ul>`;
+    `<ul class="agi">${g[1].map((a, k) => `<li class="agk-${a[6]}" style="--d:${k * 22}ms"><div class="agh"><b>${a[i]}</b><em class="agt agt-${a[6]}">${t("agy.t" + a[6])}</em></div><small>${a[2 + i]}</small><span>${a[4 + i]}</span></li>`).join("")}</ul>`;
   placeAg();
   if (swap && !RM) { win.classList.remove("sw"); void win.offsetWidth; win.classList.add("sw"); }
 }
