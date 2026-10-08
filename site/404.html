@@ -20,7 +20,7 @@
   --cw:.6em; /* one monospace column */
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%}
+html,body{margin:0;min-height:100%;overflow-x:clip}
 body{min-height:100dvh;background:linear-gradient(180deg,var(--surface) 0,var(--shallow) 13%,var(--mid) 42%,var(--deep) 74%,var(--abyss) 100%);
   color:var(--foam);font:400 16px/1.45 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden;display:flex;flex-direction:column}
 html[lang="zh-CN"] body{font-family:var(--zh)}
@@ -28,23 +28,39 @@ a{color:inherit}
 pre{margin:0;font-family:var(--mono);white-space:pre}
 
 /* the surface */
-.top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:18px max(16px,4vw) 0}
+.top{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:18px max(16px,4vw) 0}
 .brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:600;letter-spacing:-.3px;font-size:17px}
 .brand img{width:20px;height:20px}
 .gauge{font:500 12px/1 var(--mono);letter-spacing:.08em;color:var(--ink);opacity:.72;text-transform:uppercase}
-.waves{position:relative;margin-top:14px;overflow:hidden;color:var(--foam);font-size:15px;line-height:1.05;opacity:.9;user-select:none}
+.waves{position:relative;z-index:2;margin-top:14px;overflow:hidden;color:var(--foam);font-size:15px;line-height:1.05;opacity:.9;user-select:none}
 .waves pre:nth-child(2){opacity:.45}
 
 /* the deep */
-.sea{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4vh 16px 0}
-.stage{position:relative;font-size:min(14px,calc((100vw - 32px) / 49.2))} /* 82 columns across */
-.whale{color:var(--whale);line-height:1.15;animation:swim 7s ease-in-out infinite;text-shadow:0 0 18px rgba(164,200,225,.25)}
-@keyframes swim{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(-.6em,-.5em) rotate(-.6deg)}50%{transform:translate(0,-.9em) rotate(0)}75%{transform:translate(.6em,-.4em) rotate(.6deg)}}
+.snow{position:fixed;inset:0;z-index:0;pointer-events:none}
+.rays{position:fixed;inset:0 0 auto;height:110vh;z-index:0;pointer-events:none;overflow:hidden;
+  -webkit-mask:linear-gradient(180deg,#000 0,rgba(0,0,0,.55) 40%,transparent 85%);mask:linear-gradient(180deg,#000 0,rgba(0,0,0,.55) 40%,transparent 85%)}
+.rays i{position:absolute;top:-10vh;height:130vh;transform-origin:50% 0;background:linear-gradient(180deg,rgba(244,249,253,.22),rgba(244,249,253,0));filter:blur(14px);animation:sway 14s ease-in-out infinite alternate}
+.rays i:nth-child(1){left:12%;width:7vw;--r:14deg}
+.rays i:nth-child(2){left:30%;width:3vw;--r:10deg;animation-duration:11s;opacity:.7}
+.rays i:nth-child(3){left:46%;width:9vw;--r:12deg;animation-duration:17s}
+.rays i:nth-child(4){left:66%;width:4vw;--r:8deg;animation-duration:12s;opacity:.6}
+.rays i:nth-child(5){left:82%;width:6vw;--r:11deg;animation-duration:15s;opacity:.8}
+@keyframes sway{from{transform:rotate(calc(var(--r) - 3deg));opacity:.55}to{transform:rotate(calc(var(--r) + 3deg));opacity:1}}
+.sea{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3vh 0 0}
+.stage{position:relative;width:min(1240px,96vw);animation:glide 22s ease-in-out infinite}
+@keyframes glide{0%,100%{transform:translate(1.2vw,0)}50%{transform:translate(-1.2vw,-1.4vh)}}
+.stage::before{content:"";position:absolute;inset:8% 6% 14% 2%;border-radius:50%;background:radial-gradient(closest-side,rgba(120,175,225,.20),transparent);filter:blur(30px)}
+.whale{position:relative;line-height:1;font-size:6px;letter-spacing:0;font-weight:500;
+  background:linear-gradient(180deg,#FFFFFF 0%,#D6E9F8 30%,#8DB8E0 58%,#4475A8 82%,#2A4E80 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-user-select:none;user-select:none}
+.whale.glow{position:absolute;inset:0;background:none;color:rgba(160,205,245,.85);filter:blur(6px);opacity:.7}
+.far{position:absolute;right:3%;top:-2%;width:24%;opacity:.26;filter:blur(.6px);animation:far 30s ease-in-out infinite}
+@keyframes far{0%,100%{transform:translate(0,0)}50%{transform:translate(-3vw,1vh)}}
 .bubbles{position:absolute;inset:0;pointer-events:none}
 .bubbles span{position:absolute;font-family:var(--mono);color:var(--foam);opacity:0;animation:rise var(--t,5s) linear forwards}
 @keyframes rise{0%{opacity:0;transform:translate(0,0)}12%{opacity:.85}100%{opacity:0;transform:translate(var(--dx,0),var(--dy,-40vh))}}
 
-.copy{position:relative;z-index:2;text-align:center;max-width:560px;margin-top:5vh}
+.copy{position:relative;z-index:2;text-align:center;max-width:560px;margin-top:3vh;padding:0 16px}
 .code{font:500 12px/1 var(--mono);letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
 h1{margin:14px 0 0;font-weight:500;font-size:clamp(32px,5.4vw,52px);line-height:1.04;letter-spacing:-.035em}
 .sub{margin:14px auto 0;max-width:440px;color:var(--mute);font-size:16px}
@@ -60,8 +76,8 @@ h1{margin:14px 0 0;font-weight:500;font-size:clamp(32px,5.4vw,52px);line-height:
 /* the seabed */
 .bed{position:relative;width:100%;margin-top:6vh;overflow:hidden;color:rgba(164,200,225,.38);font-size:14px;line-height:1.1;user-select:none;text-align:center}
 
-@media (max-width:640px){.copy{margin-top:3vh}.sub{font-size:15px}.waves{font-size:13px}.bed{font-size:12px}}
-@media (prefers-reduced-motion:reduce){.whale{animation:none}.bubbles{display:none}}
+@media (max-width:640px){.stage{width:118vw;margin-left:0}.far{top:-30%}.copy{margin-top:5vh}.sub{font-size:15px}.waves{font-size:13px}.bed{font-size:12px}}
+@media (prefers-reduced-motion:reduce){.stage,.rays i{animation:none}.bubbles{display:none}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 </head>
@@ -70,32 +86,22 @@ h1{margin:14px 0 0;font-weight:500;font-size:clamp(32px,5.4vw,52px);line-height:
   <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20">placetta</a>
   <span class="gauge" id="gauge" aria-hidden="true">Depth 404 m</span>
 </header>
+<div class="rays" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+<canvas class="snow" id="snow" aria-hidden="true"></canvas>
 <div class="waves" aria-hidden="true"><pre id="w1"></pre><pre id="w2"></pre></div>
 
 <main class="sea">
   <div class="stage" aria-hidden="true">
-<pre class="whale" id="whale">                                                                     ___     ___
-                                                                     \  '._.'  /
-           ___________..........___________                           '.     .'
-      _.-''                                ''''--..__                   )   (
-   .-'                                               ''-._    /|       /   .'
-  /    .                                                  '-./_|     .'   /
- |   ( @ )                                                    '-.__.'   .'
- |     '                                                              .'
- |'-.____________                                                   .'
-  \  - - - - - - ''--.___                                        .-'
-   '.  - - - - - - - - - ''--..__                          __.-''
-     '-._  - - - - - - - - - - - ''--..____________...--'''
-         ''--..______\    '-.__..--''''
-                      '-._    '.
-                          '-.__)</pre>
+    <div class="far"><pre class="whale" id="far"></pre></div>
+    <pre class="whale glow" id="glow"></pre>
+    <pre class="whale" id="whale"></pre>
     <div class="bubbles" id="bubbles"></div>
   </div>
 
   <div class="copy">
     <p class="code" id="code">Error 404 · 404 metres down</p>
     <h1 id="h1">This page swam off.</h1>
-    <p class="sub" id="sub">Nothing lives at this address except a blue whale. Head back up, or let us map the permits for the address you actually care about.</p>
+    <p class="sub" id="sub">Down here there is nothing but the largest animal that has ever lived. Head back up, or let us map the permits for the address you actually care about.</p>
     <div class="go">
       <a class="btn b1" href="/app/" id="c1">Get my plan</a>
       <a class="btn b2" href="/" id="c2">Back to the surface</a>
@@ -106,6 +112,7 @@ h1{margin:14px 0 0;font-weight:500;font-size:clamp(32px,5.4vw,52px);line-height:
   <pre class="bed" id="bed" aria-hidden="true"></pre>
 </main>
 
+<script src="/whale.js"></script>
 <script>
 (() => {
   const zh = /^zh/i.test(navigator.language || "");
@@ -113,7 +120,7 @@ h1{margin:14px 0 0;font-weight:500;font-size:clamp(32px,5.4vw,52px);line-height:
     document.documentElement.lang = "zh-CN";
     document.title = "页面未找到 · 快哉 Placetta";
     const T = { gauge: "深度 404 米", code: "错误 404 · 水下 404 米", h1: "这个页面游走了。",
-      sub: "这个地址上只有一头蓝鲸。回到水面，或者让我们为您真正关心的地址梳理所需许可。",
+      sub: "这里只有地球上有史以来最大的动物。回到水面，或者让我们为您真正关心的地址梳理所需许可。",
       c1: "获取我的方案", c2: "回到水面", c3: "城市指南" };
     for (const k in T) document.getElementById(k).textContent = T[k];
   }
@@ -138,33 +145,84 @@ h1{margin:14px 0 0;font-weight:500;font-size:clamp(32px,5.4vw,52px);line-height:
   ].join("\n");
   bed.textContent = kelp(0);
 
-  /* bubbles from the blowhole */
-  const stage = document.querySelector(".stage"), box = document.getElementById("bubbles"), whale = document.getElementById("whale");
+  /* the whale: re-rendered as ASCII every frame, sized to the screen */
+  const whale = document.getElementById("whale"), stage = document.querySelector(".stage"), box = document.getElementById("bubbles");
+  let cols = 0, rows = 0, cell = 0, blow = { c: 0, r: 0 };
+  const fit = () => {
+    const w = stage.clientWidth;
+    cols = innerWidth < 520 ? 96 : innerWidth < 900 ? 150 : 186;
+    rows = Math.round(cols * 0.22);
+    cell = w / (cols * 0.6);                       // font-size in px: one column is .6em
+    whale.style.fontSize = glow.style.fontSize = cell.toFixed(3) + "px";
+    far.style.fontSize = (far.parentElement.clientWidth / (90 * 0.6)).toFixed(3) + "px";
+  };
+  const glow = document.getElementById("glow");
+  const far = document.getElementById("far");
+  const draw = t => {
+    const f = window.WhaleASCII.frame(t, cols, rows); whale.textContent = f.text; glow.textContent = f.text; blow = f.blow;
+    far.textContent = window.WhaleASCII.frame(t * 1.15 + 2, 90, 20).text;   // a second whale, far off in the blue
+  };
+  fit(); draw(1.6);
+  addEventListener("resize", () => { fit(); draw(performance.now() / 1000 + 1.6); });
+
   const puff = () => {
     if (document.hidden) return;
-    const r = whale.getBoundingClientRect(), s = stage.getBoundingClientRect(), cw = r.width / 82, lh = r.height / 15;
-    const n = 2 + (Math.random() * 3 | 0);
+    const cw = cell * 0.6, n = 3 + (Math.random() * 4 | 0);
     for (let i = 0; i < n; i++) {
       const b = document.createElement("span");
-      b.textContent = "oO°.·"[Math.random() * 5 | 0];
-      b.style.left = (r.left - s.left + cw * (13 + Math.random() * 4)) + "px";
-      b.style.top = (r.top - s.top + lh * (1.4 + Math.random())) + "px";
-      b.style.fontSize = (0.8 + Math.random() * 0.7).toFixed(2) + "em";
-      b.style.setProperty("--t", (3.5 + Math.random() * 3).toFixed(2) + "s");
-      b.style.setProperty("--dx", ((Math.random() - .5) * 4).toFixed(2) + "em");
-      b.style.setProperty("--dy", -(r.top - s.top + lh * 2 + 120 + Math.random() * 80).toFixed(0) + "px");
-      b.style.animationDelay = (i * .35).toFixed(2) + "s";
+      b.textContent = "oO°o.·"[Math.random() * 6 | 0];
+      b.style.left = (blow.c * cw + (Math.random() - .5) * cw * 4) + "px";
+      b.style.top = (blow.r * cell - cell * 2) + "px";
+      b.style.fontSize = (9 + Math.random() * 9).toFixed(0) + "px";
+      b.style.setProperty("--t", (4 + Math.random() * 3).toFixed(2) + "s");
+      b.style.setProperty("--dx", ((Math.random() - .5) * 60).toFixed(0) + "px");
+      b.style.setProperty("--dy", -(blow.r * cell + 160 + Math.random() * 120).toFixed(0) + "px");
+      b.style.animationDelay = (i * .28).toFixed(2) + "s";
       b.addEventListener("animationend", () => b.remove());
       box.appendChild(b);
     }
   };
 
+  /* marine snow drifting past (the whale is moving), and a school of small fish for scale */
+  const cv = document.getElementById("snow"), cx = cv.getContext("2d");
+  let SW = 0, SH = 0, dpr = 1;
+  const size = () => { dpr = Math.min(2, devicePixelRatio || 1); SW = innerWidth; SH = innerHeight; cv.width = SW * dpr; cv.height = SH * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  size(); addEventListener("resize", size);
+  const flakes = Array.from({ length: Math.round(Math.min(160, SW / 8)) }, () => ({ x: Math.random(), y: Math.random(), z: .3 + Math.random() * .7, p: Math.random() * 6.28 }));
+  const school = Array.from({ length: 16 }, (_, i) => ({ dx: (Math.random() - .5) * 120, dy: (Math.random() - .5) * 46, p: Math.random() * 6.28, s: .8 + Math.random() * .5 }));
+  const sea = (t, dt) => {
+    cx.clearRect(0, 0, SW, SH);
+    for (const f of flakes) {
+      f.x += dt * 0.012 * f.z; f.y += dt * 0.006 * f.z; if (f.x > 1.02) f.x = -.02; if (f.y > 1.02) f.y = -.02;
+      const y = f.y * SH, a = Math.min(1, y / (SH * .25));
+      cx.globalAlpha = (.12 + .38 * f.z) * a;
+      cx.fillStyle = "#DCEBF7";
+      cx.beginPath(); cx.arc(f.x * SW + Math.sin(t * .6 + f.p) * 4, y, .5 + f.z * 1.3, 0, 6.29); cx.fill();
+    }
+    // the school crosses every 34 s, small against the whale
+    const k = ((t + 13) % 34) / 34, gx = SW * (1.15 - k * 1.3), gy = stage.getBoundingClientRect().bottom + 14 + Math.sin(t * .4) * 10;
+    cx.font = "500 11px " + getComputedStyle(document.body).getPropertyValue("--mono");
+    cx.fillStyle = "#EAF3FB";
+    for (const f of school) {
+      cx.globalAlpha = .55;
+      cx.fillText("<><", gx + f.dx * f.s + Math.sin(t * 2 + f.p) * 3, gy + f.dy + Math.cos(t * 1.6 + f.p) * 2);
+    }
+    cx.globalAlpha = 1;
+  };
+  sea(0, 0);
+
   if (still) return;
-  let f = 0;
+  let f = 0, last = performance.now(), lastW = 0;
   setInterval(() => { o++; waves(); }, 180);
   setInterval(() => { f ^= 1; bed.textContent = kelp(f); }, 1400);
-  puff(); setInterval(puff, 2600);
-
+  setTimeout(puff, 900); setInterval(puff, 3800);
+  const loop = now => {
+    const t = now / 1000, dt = Math.min(.05, (now - last) / 1000); last = now;
+    if (now - lastW > 50) { draw(t + 1.6); lastW = now; }   // the whale at 20 fps
+    sea(t, dt);
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
