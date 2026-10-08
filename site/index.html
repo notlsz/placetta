@@ -1534,6 +1534,12 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
 @media (min-width:1024px) and (max-height:820px){.agcard{padding:16px}.agwh{padding:12px 12px 4px}.agi li{padding-top:8px;padding-bottom:8px}.agleft{gap:32px}.agb{min-height:48px}}
 #agencies{margin-top:160px}
 
+/* experts wall: every advisor portrait as a drifting pixel mosaic, rows sliding opposite ways while a slow wave
+   sharpens some faces and dissolves others. No pointer interaction. */
+.xpwall{position:relative;height:300px;margin-bottom:44px;border-radius:20px;overflow:hidden;background:#0F1B33}
+@media (min-width:1024px){.xpwall{height:420px;margin-bottom:56px}}
+.xpwall canvas{display:block;width:100%;height:100%;pointer-events:none}
+.xpwall::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(244,245,247,.0),rgba(244,245,247,0) 85%),radial-gradient(120% 90% at 50% 50%,transparent 60%,rgba(15,27,51,.35))}
 /* experts: a typographic tapestry. The companies are set as running lines of serif type and the advisors' portraits
    sit among the words like glyphs, pixelated until you hover, when one resolves and lifts. Portraits are drawn to
    canvas (no image to open, drag or save from the page). */
@@ -1552,8 +1558,7 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 .xps{color:var(--faint);margin:0 .3em;font-weight:300}
 .xpflow:hover .xpn{color:var(--muted)}
 .xpflow .xpn:hover{color:var(--ink)}
-.xpf{position:relative;display:inline-block;vertical-align:-.18em;width:1.08em;height:1.08em;margin:0 .26em;border-radius:.22em;overflow:hidden;
-  transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s,border-radius .45s;transform-origin:50% 60%;cursor:crosshair;z-index:1}
+.xpf{position:relative;display:inline-block;vertical-align:-.18em;width:1.08em;height:1.08em;margin:0 .26em;border-radius:.22em;overflow:hidden;pointer-events:none}
 .xpf canvas{display:block;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
 .xpf.on{z-index:5;box-shadow:0 0 0 2px var(--bg),0 0 0 3px rgba(15,27,51,.25)}
 @media (prefers-reduced-motion:reduce){.xpf{transition:none}}
@@ -1925,6 +1930,7 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 <section class="mt160 rv" data-rv="up" id="experts" aria-labelledby="xpH">
   <div class="ctr">
     <p class="t28 xph" id="xpH" data-i18n="xp.h">Our experts previously worked at</p>
+    <div class="xpwall" aria-hidden="true"><canvas id="xpWall"></canvas></div>
     <div class="xpart" id="xpArt" aria-label="Where our experts worked before, with their portraits" data-i18n-aria="xp.ppl"></div>
   </div>
 </section>
@@ -3489,7 +3495,7 @@ if (!RM) setInterval(() => { rIdx = (rIdx + 1) % CH.length; paintRot(); }, 2000)
 
 const XPG = [[["Government and academia", "政府与学术界"], [["U.S. FDA", "美国食品药品监督管理局"], ["Harvard University", "哈佛大学"], ["MIT", "麻省理工学院"], ["University of Pennsylvania", "宾夕法尼亚大学"], ["Princeton University", "普林斯顿大学"], ["Stanford University", "斯坦福大学"]]], [["AI and technology", "人工智能与科技"], [["OpenAI", "OpenAI"], ["Google", "谷歌"], ["Amazon", "亚马逊"], ["Huawei", "华为"], ["TikTok", "TikTok"], ["NVIDIA", "英伟达"], ["Tesla", "特斯拉"], ["TSMC", "台积电"]]], [["Trading and finance", "交易与金融"], [["Jane Street", "简街资本"], ["Citadel", "城堡投资"], ["Hudson River Trading", "哈德逊河交易"], ["Optiver", "澳帝华"], ["Renaissance Technologies", "文艺复兴科技"], ["Goldman Sachs", "高盛"], ["J.P. Morgan", "摩根大通"], ["Blackstone", "黑石集团"]]], [["Consumer, health and logistics", "消费、医疗与物流"], [["Walmart", "沃尔玛"], ["Costco", "开市客"], ["Johnson & Johnson", "强生"], ["DHL", "DHL"], ["Maersk", "马士基"]]]];
 /* experts tapestry: company names with the advisors' portraits woven in, each portrait pixelated until hovered */
-const XPN = 21, xpImgs = [], xpPx = [7, 11, 18, 32, 64];
+const XPN = 27, xpImgs = [], xpPx = [7, 11, 18, 32, 64];
 function xpImg(k){ if (!xpImgs[k]) { const im = new Image(); im.decoding = "async"; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; xpImgs[k] = im; } return xpImgs[k]; }
 function xpDraw(cv, k, px){
   const im = xpImg(k); if (!im.complete || !im.naturalWidth) { im.addEventListener("load", () => xpDraw(cv, k, cv._px || px), {once: true}); return; }
@@ -3517,13 +3523,44 @@ function renderXp(){
   }).join("");
   art.querySelectorAll(".xpf").forEach(el => xpDraw(el.firstChild, +el.dataset.k, xpPx[0]));
 }
+
+/* the wall: rows of pixel portraits drifting in opposite directions; a diagonal wave sets each tile's resolution */
+(function xpWallInit(){
+  const cv = document.getElementById("xpWall"); if (!cv) return;
+  const g = cv.getContext("2d"), LV = [5, 8, 12, 18, 28, 44], cache = [];   // per portrait, one small canvas per pixel level
+  let W = 0, H = 0, dpr = 1, T = 64, ready = 0, run = false, t0 = performance.now();
+  const imgs = Array.from({length: XPN}, (_, k) => { const im = new Image(); im.decoding = "async"; im.onload = () => {
+    cache[k] = LV.map(n => { const c = document.createElement("canvas"); c.width = c.height = n; const cg = c.getContext("2d"); cg.imageSmoothingEnabled = true; cg.drawImage(im, 0, 0, n, n); return c; });
+    ready++; if (!run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; return im; });
+  const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; T = W < 640 ? 54 : 78; };
+  size(); addEventListener("resize", size);
+  // a fixed shuffle so neighbours differ
+  const seq = Array.from({length: 997}, (_, i) => (i * 7 + Math.floor(i / XPN) * 3) % XPN);
+  function frame(now){
+    const t = (now - t0) / 1000, gap = 4, step = T + gap, rows = Math.ceil(H / step) + 1;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.imageSmoothingEnabled = false; g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H);
+    const yOff = (H - rows * step + gap) / 2;
+    for (let r = 0; r < rows; r++) {
+      const dir = r % 2 ? 1 : -1, speed = 10 + (r % 3) * 6, off = ((dir * t * speed) % step + step) % step, y = yOff + r * step;
+      const first = Math.floor((dir * t * speed) / step);
+      for (let c = -1; c * step - off < W + step; c++) {
+        const x = c * step + off - step, idx = seq[((c - first) % 997 + 997 + r * 31) % 997], tiles = cache[idx]; if (!tiles) continue;
+        // the wave: a soft diagonal band of clarity sweeping across
+        const w = Math.sin((x / W) * 3.2 - (y / H) * 1.6 - t * 0.55) * 0.5 + 0.5, lvl = Math.min(LV.length - 1, Math.floor(Math.pow(w, 2.2) * LV.length));
+        g.globalAlpha = 0.55 + 0.45 * w;
+        g.drawImage(tiles[lvl], x, y, T, T);
+      }
+    }
+    g.globalAlpha = 1;
+    if (run) requestAnimationFrame(frame);
+  }
+  if (RM) return;
+  new IntersectionObserver(es => es.forEach(e => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); })).observe(cv);
+})();
 (function bindXp(){
   const art = document.getElementById("xpArt"); if (!art) return;
   const sec = document.getElementById("experts");
   ["contextmenu", "dragstart", "copy"].forEach(ev => sec.addEventListener(ev, e => e.preventDefault()));
-  art.addEventListener("pointerover", e => { const f = e.target.closest(".xpf"); if (f && e.pointerType !== "touch") xpResolve(f, true); });
-  art.addEventListener("pointerout", e => { const f = e.target.closest(".xpf"); if (f && e.pointerType !== "touch" && !f.contains(e.relatedTarget)) xpResolve(f, false); });
-  art.addEventListener("click", e => { const f = e.target.closest(".xpf"); if (!f) return; const on = !f.classList.contains("on"); art.querySelectorAll(".xpf.on").forEach(x => x !== f && xpResolve(x, false)); xpResolve(f, on); });
 })();
 
 const AGG = [[["United States", "美国"], [["CBP", "CBP", "U.S. Customs and Border Protection", "美国海关与边境保护局", "Customs, tariffs, forced-labor checks", "报关、关税、强迫劳动审查", "p"], ["FDA", "FDA", "Food and Drug Administration", "美国食品药品监督管理局", "Food, cosmetics, devices", "食品、化妆品、医疗器械", "f"], ["FCC", "FCC", "Federal Communications Commission", "美国联邦通信委员会", "Radios and electronics", "无线电与电子产品", "p"], ["CPSC", "CPSC", "Consumer Product Safety Commission", "美国消费品安全委员会", "Product certificates and eFiling", "产品合规证书与电子申报", "f"], ["FTC", "FTC", "Federal Trade Commission", "美国联邦贸易委员会", "Advertising, reviews and data", "广告、评价与数据", "m"], ["State and local", "州与地方", "State, county and city offices", "州、县、市政府部门", "Registration, health, building, fire", "公司登记、卫生、建筑、消防", "f"], ["USDA", "USDA", "Department of Agriculture", "美国农业部", "Plants, animals, organic", "动植物产品、有机认证", "f"], ["EPA", "EPA", "Environmental Protection Agency", "美国环境保护署", "Chemicals and pesticides", "化学品与农药", "f"], ["TTB", "TTB", "Alcohol and Tobacco Tax and Trade Bureau", "美国酒类和烟草税务贸易局", "Alcohol permits and labels", "酒类许可与标签", "f"], ["CFIUS", "CFIUS", "Committee on Foreign Investment in the U.S.", "美国外国投资委员会", "Foreign investment review", "外国投资审查", "p"], ["BIS", "BIS", "Bureau of Industry and Security", "美国商务部工业与安全局", "Export controls", "出口管制", "m"], ["OFAC", "OFAC", "Office of Foreign Assets Control", "美国财政部海外资产控制办公室", "Sanctions screening", "制裁筛查", "m"], ["USPTO", "USPTO", "Patent and Trademark Office", "美国专利商标局", "Trademarks", "商标", "p"], ["USCIS", "USCIS", "Citizenship and Immigration Services", "美国公民及移民服务局", "Visas for your team", "员工签证", "p"], ["SEC", "SEC", "Securities and Exchange Commission", "美国证券交易委员会", "Securities offerings", "证券发行", "p"]]], [["Canada", "加拿大"], [["CBSA", "CBSA", "Canada Border Services Agency", "加拿大边境服务局", "Customs and duties", "海关与关税", "p"], ["CFIA", "CFIA", "Canadian Food Inspection Agency", "加拿大食品检验局", "Food licences, plants, animals", "食品许可与动植物", "f"], ["Health Canada", "加拿大卫生部", "Federal health department", "联邦卫生部门", "Cosmetics, health and consumer products", "化妆品、健康产品与消费品", "f"], ["ISED", "ISED", "Innovation, Science and Economic Development Canada", "加拿大创新、科学及经济发展部", "Foreign investment review", "外国投资审查", "p"], ["Competition Bureau", "加拿大竞争局", "Competition Bureau Canada", "加拿大竞争局", "Advertising and labeling", "广告与标签", "m"]]], [["Mexico", "墨西哥"], [["ANAM", "ANAM", "National Customs Agency", "墨西哥国家海关署", "Customs", "海关", "p"], ["COFEPRIS", "COFEPRIS", "Federal Commission for Protection against Sanitary Risks", "墨西哥联邦卫生风险保护委员会", "Health, food, cosmetics", "卫生、食品与化妆品", "p"], ["SE", "SE", "Secretariat of Economy", "墨西哥经济部", "Foreign investment, product standards", "外国投资与产品标准", "p"], ["IMPI", "IMPI", "Mexican Institute of Industrial Property", "墨西哥工业产权局", "Trademarks", "商标", "p"], ["PROFECO", "PROFECO", "Federal Consumer Protection Agency", "墨西哥联邦消费者保护署", "Consumer protection and labeling", "消费者保护与标签", "m"]]], [["Europe", "欧洲"], [["EC", "EC", "European Commission", "欧盟委员会", "AI, digital and competition rules", "人工智能、数字与竞争规则", "m"], ["EMA", "EMA", "European Medicines Agency", "欧洲药品管理局", "Medicines", "药品", "p"], ["EFSA", "EFSA", "European Food Safety Authority", "欧洲食品安全局", "Food safety", "食品安全", "m"]]]];
