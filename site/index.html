@@ -1536,10 +1536,10 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
 
 /* experts wall: every advisor portrait as a drifting pixel mosaic, rows sliding opposite ways while a slow wave
    sharpens some faces and dissolves others. No pointer interaction. */
-.xpwall{position:relative;height:300px;margin-bottom:44px;border-radius:20px;overflow:hidden;background:#0F1B33}
-@media (min-width:1024px){.xpwall{height:460px;margin-bottom:56px}}
+.xpwall{position:relative;margin-bottom:44px;border-radius:20px;overflow:hidden;background:#0F1B33}
+@media (min-width:1024px){.xpwall{margin-bottom:56px}}
 .xpwall canvas{display:block;width:100%;height:100%;pointer-events:none}
-.xpwall::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(244,245,247,.0),rgba(244,245,247,0) 85%),radial-gradient(120% 90% at 50% 50%,transparent 60%,rgba(15,27,51,.35))}
+.xpwall::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(130% 110% at 50% 50%,transparent 62%,rgba(15,27,51,.3))}
 /* experts: a typographic tapestry. The companies are set as running lines of serif type and the advisors' portraits
    sit among the words like glyphs, pixelated until you hover, when one resolves and lifts. Portraits are drawn to
    canvas (no image to open, drag or save from the page). */
@@ -3524,39 +3524,38 @@ function renderXp(){
   art.querySelectorAll(".xpf").forEach(el => xpDraw(el.firstChild, +el.dataset.k, xpPx[0]));
 }
 
-/* the wall: every advisor once, a field of pixel portraits riding two interfering waves, with the waveforms drawn
-   faintly behind them in the brand blue and green. */
+/* the wall: a mosaic. Every advisor once, set edge to edge as small pixel tesserae (two plain tesserae in the brand
+   blue and green fill the last cells). Waves of two frequencies roll across it: each tessera breathes in and out
+   and catches the light as the crest passes, so the whole surface ripples like tile under moving water. */
 (function xpWallInit(){
   const cv = document.getElementById("xpWall"); if (!cv) return;
-  const g = cv.getContext("2d"), PX = 22, tiles = [];
-  let W = 0, H = 0, dpr = 1, run = false, t0 = performance.now(), loaded = 0;
+  const g = cv.getContext("2d"), PX = 20, tiles = [];
+  let W = 0, H = 0, dpr = 1, run = false, t0 = performance.now(), loaded = 0, cols = 11, rows = 3, cell = 100, order = [];
   for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => {
-    const c = document.createElement("canvas"); c.width = c.height = PX; const cg = c.getContext("2d"); cg.drawImage(im, 0, 0, PX, PX); tiles[k] = c;
+    const c = document.createElement("canvas"); c.width = c.height = PX; c.getContext("2d").drawImage(im, 0, 0, PX, PX); tiles[k] = c;
     if (++loaded === XPN && !run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
-  let cols = 8, rows = 4, T = 80, gx = 0, gy = 0;
-  const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr;
-    rows = Math.max(3, Math.round(Math.sqrt(XPN * H / W))); cols = Math.ceil(XPN / rows);
-    T = Math.min((W * .94) / cols, (H * .8) / rows) * .82; gx = (W - cols * T / .82) / 2; gy = (H - rows * T / .82) / 2; };
+  const size = () => {
+    dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth;
+    cols = W < 640 ? 6 : W < 1024 ? 8 : 11; rows = Math.ceil(XPN / cols); cell = W / cols; H = rows * cell;
+    cv.style.height = H + "px"; cv.parentElement.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr;
+    // spread the faces so no two neighbours share a backdrop colour more than needed, plain tesserae at the end
+    order = Array.from({length: cols * rows}, (_, i) => i < XPN ? (i * 13) % XPN : -1 - (i - XPN));
+  };
   size(); addEventListener("resize", size);
-  const wave = (x, y, t) => Math.sin(x * 0.011 - t * 1.1) * 0.6 + Math.sin((x + y) * 0.019 - t * 1.7 + 1.3) * 0.4;
+  const PLAIN = ["#A4C8E1", "#4D865C", "#7399C6", "#2F5F86", "#A4C8E1"];
   function frame(now){
-    const t = RM ? 0 : (now - t0) / 1000, cell = T / .82, amp = Math.min(22, cell * .22);
-    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H);
-    // waveforms
-    g.lineWidth = 1.2;
-    [["rgba(164,200,225,.32)", 0], ["rgba(77,134,92,.42)", 2.1], ["rgba(164,200,225,.18)", 4.2]].forEach(([col, ph], n) => {
-      g.strokeStyle = col; g.beginPath();
-      for (let x = 0; x <= W; x += 6) { const y = H / 2 + (H * .28 + n * 14) * (Math.sin(x * (0.006 + n * .002) - t * (0.8 + n * .3) + ph) * .7 + Math.sin(x * 0.017 - t * 1.4 + ph) * .3); x ? g.lineTo(x, y) : g.moveTo(x, y); }
-      g.stroke(); });
-    // portraits
-    g.imageSmoothingEnabled = false;
-    for (let k = 0; k < XPN; k++) {
-      const r = Math.floor(k / cols), inRow = r === rows - 1 ? XPN - r * cols : cols, c = k - r * cols;
-      const cx = gx + (c + (cols - inRow) / 2 + .5) * cell, cy = gy + (r + .5) * cell, w = wave(cx, cy, t);
-      const s = T * (0.9 + 0.12 * Math.sin(cx * 0.02 + cy * 0.015 - t * 2.1)), y = cy + w * amp;
-      if (tiles[k]) { g.globalAlpha = .78 + .22 * (w * .5 + .5); g.drawImage(tiles[k], cx - s / 2, y - s / 2, s, s); }
+    const t = RM ? 0 : (now - t0) / 1000;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H); g.imageSmoothingEnabled = false;
+    for (let i = 0; i < order.length; i++) {
+      const c = i % cols, r = Math.floor(i / cols), cx = (c + .5) * cell, cy = (r + .5) * cell;
+      const w1 = Math.sin(cx * 0.0105 - cy * 0.006 - t * 1.25), w2 = Math.sin((cx + cy) * 0.021 - t * 2.3 + 1.1), w = w1 * .65 + w2 * .35;
+      const s = cell * (0.9 + 0.1 * w), x = cx - s / 2, y = cy - s / 2, k = order[i];
+      if (k >= 0) { if (tiles[k]) g.drawImage(tiles[k], x, y, s, s); }
+      else { g.fillStyle = PLAIN[(-1 - k) % PLAIN.length]; g.fillRect(x, y, s, s); }
+      // light catching the crest, shadow in the trough
+      g.fillStyle = w > 0 ? `rgba(255,255,255,${(w * .16).toFixed(3)})` : `rgba(15,27,51,${(-w * .26).toFixed(3)})`;
+      g.fillRect(x, y, s, s);
     }
-    g.globalAlpha = 1;
     if (run && !RM) requestAnimationFrame(frame);
   }
   new IntersectionObserver(es => es.forEach(e => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); })).observe(cv);
