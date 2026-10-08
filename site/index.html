@@ -754,6 +754,18 @@ html[lang="zh-CN"] .wm .wm-zh{display:block}
 /* ---------- plan request stepper ---------- */
 .sheet{max-width:560px;padding:18px 28px 28px}
 @media (max-width:640px){.modal{align-items:flex-end;padding:0}.sheet{max-width:none;border-radius:18px 18px 0 0;max-height:94dvh;padding:14px 16px calc(20px + env(safe-area-inset-bottom,0px))}}
+/* the Beam around the sheet when it opens from the hero (site/beam.js, loaded on first open) */
+.beam-host{width:100%;max-width:560px;display:flex}
+.beam-host>.beam-ride{width:100%;border-radius:18px;padding:2px;background:rgba(255,255,255,.14)}
+.beam-host>.beam-off{padding:0;background:none}
+/* border-beam paints small fixed color spots sized for buttons; on a sheet this big we color the whole sweep instead,
+   in the site's blues, and let the package's own rotating mask do the riding */
+.beam-ride[data-active]::after,.beam-ride[data-fading]::after{background:conic-gradient(from 0deg,#8CC4EE,#3F7FE8,#2C5FD0,#6FB0E8,#8CC4EE)!important;padding:2px!important;filter:none!important}
+.beam-ride[data-active]::before,.beam-ride[data-fading]::before{background:radial-gradient(120% 60% at 50% 0,rgba(63,127,232,.10),transparent 70%)!important;box-shadow:inset 0 0 14px 2px rgba(63,127,232,.22)!important}
+.beam-ride [data-beam-bloom]{background:conic-gradient(from 0deg,#8CC4EE,#3F7FE8,#2C5FD0,#6FB0E8,#8CC4EE)!important}
+.beam-slot{display:flex;width:100%}
+.beam-slot>.sheet{max-width:none}
+@media (max-width:640px){.beam-host{max-width:none}.beam-host>.beam-ride{border-radius:20px 20px 0 0;padding-bottom:0}}
 .qtop{display:flex;align-items:center;gap:12px;margin-bottom:26px}
 .qbtn{width:32px;height:32px;flex-shrink:0;border:0;border-radius:8px;background:var(--bg);display:grid;place-items:center;color:var(--ink2)}
 .qbtn:hover{background:var(--card)}
@@ -2582,6 +2594,11 @@ function sendLead(src){
     .catch(() => track("plan_request_save_failed", {status: 0}));
 }
 
+/* the Beam rides the sheet's border when Get my plan is clicked in the hero; its bundle loads once, ahead of time when idle */
+let beamP = null;
+function beamLoad(){ return beamP || (beamP = new Promise(r => { const sc = document.createElement("script"); sc.src = "/beam.js"; sc.async = true; sc.onload = r; sc.onerror = r; document.head.appendChild(sc); })); }
+function beam(on){ if (!on && !beamP) return; beamLoad().then(() => window.placettaBeam && window.placettaBeam(on && !modal.hidden)); }
+addEventListener("load", () => setTimeout(() => (window.requestIdleCallback || setTimeout)(beamLoad), 2500));
 function openForm(src, preset){
   source = src; lastFocus = document.activeElement; leaveShown = false;
   if (submitted && qStep > 3){ Q = blankQ(); qStep = 0; submitted = false; try { localStorage.removeItem("placetta-sent"); } catch(e){} }
@@ -2591,6 +2608,7 @@ function openForm(src, preset){
   document.getElementById("qLeave").hidden = true;
   modal.hidden = false; document.body.style.overflow = "hidden";
   renderStep(); updateMbar();
+  beam(src === "hero");
   track("form_open", {source, audience: audienceOf(src), resumed, start_step: qStep + 1});
 }
 function closeForm(force){
@@ -2606,6 +2624,7 @@ function closeForm(force){
   }
   if (qStep <= 3) track("form_abandon", {step: qStep + 1, source});
   modal.hidden = true; document.body.style.overflow = ""; document.getElementById("qLeave").hidden = true;
+  beam(false);
   if (lastFocus && lastFocus.focus) lastFocus.focus();
   updateResume(); updateMbar();
 }

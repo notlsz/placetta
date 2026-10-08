@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && vite build",
+    "build": "tsc -b && node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && npm run beam && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "build:single": "tsc -b && vite build --mode single",
     "postinstall": "node scripts/patch-bot-avatars.mjs",
     "launch": "node scripts/launch.mjs",
     "build:agent": "node scripts/build-agent.mjs",
-    "guides": "npx tsx scripts/build-guides.mts"
+    "guides": "npx tsx scripts/build-guides.mts",
+    "beam": "esbuild src/site/beam.tsx --bundle --minify --format=iife --jsx=automatic --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=site/beam.js --log-level=warning"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

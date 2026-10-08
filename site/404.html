@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Page not found · Placetta</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#A4C8E1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500&display=swap">
+<style>
+:root{
+  --surface:#A4C8E1; --shallow:#5F8FBE; --mid:#1F4170; --deep:#0F1B33; --abyss:#0A1428;
+  --whale:#D6E7F5; --foam:#F4F9FD; --ink:#0F1B33; --mute:rgba(214,231,245,.62);
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --zh:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --cw:.6em; /* one monospace column */
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{min-height:100dvh;background:linear-gradient(180deg,var(--surface) 0,var(--shallow) 13%,var(--mid) 42%,var(--deep) 74%,var(--abyss) 100%);
+  color:var(--foam);font:400 16px/1.45 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden;display:flex;flex-direction:column}
+html[lang="zh-CN"] body{font-family:var(--zh)}
+a{color:inherit}
+pre{margin:0;font-family:var(--mono);white-space:pre}
+
+/* the surface */
+.top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:18px max(16px,4vw) 0}
+.brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:600;letter-spacing:-.3px;font-size:17px}
+.brand img{width:20px;height:20px}
+.gauge{font:500 12px/1 var(--mono);letter-spacing:.08em;color:var(--ink);opacity:.72;text-transform:uppercase}
+.waves{position:relative;margin-top:14px;overflow:hidden;color:var(--foam);font-size:15px;line-height:1.05;opacity:.9;user-select:none}
+.waves pre:nth-child(2){opacity:.45}
+
+/* the deep */
+.sea{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4vh 16px 0}
+.stage{position:relative;font-size:min(14px,calc((100vw - 32px) / 49.2))} /* 82 columns across */
+.whale{color:var(--whale);line-height:1.15;animation:swim 7s ease-in-out infinite;text-shadow:0 0 18px rgba(164,200,225,.25)}
+@keyframes swim{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(-.6em,-.5em) rotate(-.6deg)}50%{transform:translate(0,-.9em) rotate(0)}75%{transform:translate(.6em,-.4em) rotate(.6deg)}}
+.bubbles{position:absolute;inset:0;pointer-events:none}
+.bubbles span{position:absolute;font-family:var(--mono);color:var(--foam);opacity:0;animation:rise var(--t,5s) linear forwards}
+@keyframes rise{0%{opacity:0;transform:translate(0,0)}12%{opacity:.85}100%{opacity:0;transform:translate(var(--dx,0),var(--dy,-40vh))}}
+
+.copy{position:relative;z-index:2;text-align:center;max-width:560px;margin-top:5vh}
+.code{font:500 12px/1 var(--mono);letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+h1{margin:14px 0 0;font-weight:500;font-size:clamp(32px,5.4vw,52px);line-height:1.04;letter-spacing:-.035em}
+.sub{margin:14px auto 0;max-width:440px;color:var(--mute);font-size:16px}
+.go{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:999px;text-decoration:none;font-weight:500;font-size:15px;transition:background .2s,transform .2s}
+.btn:active{transform:scale(.98)}
+.b1{background:var(--foam);color:var(--ink)}
+.b1:hover{background:#fff}
+.b2{color:var(--foam);box-shadow:inset 0 0 0 1px rgba(214,231,245,.32)}
+.b2:hover{background:rgba(214,231,245,.08)}
+.btn:focus-visible{outline:2px solid var(--foam);outline-offset:3px}
+
+/* the seabed */
+.bed{position:relative;width:100%;margin-top:6vh;overflow:hidden;color:rgba(164,200,225,.38);font-size:14px;line-height:1.1;user-select:none;text-align:center}
+
+@media (max-width:640px){.copy{margin-top:3vh}.sub{font-size:15px}.waves{font-size:13px}.bed{font-size:12px}}
+@media (prefers-reduced-motion:reduce){.whale{animation:none}.bubbles{display:none}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20">placetta</a>
+  <span class="gauge" id="gauge" aria-hidden="true">Depth 404 m</span>
+</header>
+<div class="waves" aria-hidden="true"><pre id="w1"></pre><pre id="w2"></pre></div>
+
+<main class="sea">
+  <div class="stage" aria-hidden="true">
+<pre class="whale" id="whale">                                                                     ___     ___
+                                                                     \  '._.'  /
+           ___________..........___________                           '.     .'
+      _.-''                                ''''--..__                   )   (
+   .-'                                               ''-._    /|       /   .'
+  /    .                                                  '-./_|     .'   /
+ |   ( @ )                                                    '-.__.'   .'
+ |     '                                                              .'
+ |'-.____________                                                   .'
+  \  - - - - - - ''--.___                                        .-'
+   '.  - - - - - - - - - ''--..__                          __.-''
+     '-._  - - - - - - - - - - - ''--..____________...--'''
+         ''--..______\    '-.__..--''''
+                      '-._    '.
+                          '-.__)</pre>
+    <div class="bubbles" id="bubbles"></div>
+  </div>
+
+  <div class="copy">
+    <p class="code" id="code">Error 404 · 404 metres down</p>
+    <h1 id="h1">This page swam off.</h1>
+    <p class="sub" id="sub">Nothing lives at this address except a blue whale. Head back up, or let us map the permits for the address you actually care about.</p>
+    <div class="go">
+      <a class="btn b1" href="/app/" id="c1">Get my plan</a>
+      <a class="btn b2" href="/" id="c2">Back to the surface</a>
+      <a class="btn b2" href="/guides/" id="c3">City guides</a>
+    </div>
+  </div>
+
+  <pre class="bed" id="bed" aria-hidden="true"></pre>
+</main>
+
+<script>
+(() => {
+  const zh = /^zh/i.test(navigator.language || "");
+  if (zh) {
+    document.documentElement.lang = "zh-CN";
+    document.title = "页面未找到 · 快哉 Placetta";
+    const T = { gauge: "深度 404 米", code: "错误 404 · 水下 404 米", h1: "这个页面游走了。",
+      sub: "这个地址上只有一头蓝鲸。回到水面，或者让我们为您真正关心的地址梳理所需许可。",
+      c1: "获取我的方案", c2: "回到水面", c3: "城市指南" };
+    for (const k in T) document.getElementById(k).textContent = T[k];
+  }
+
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* waves on the surface: two swells drifting at different speeds */
+  const W = 240, swell = (a, b) => { let s = ""; for (let i = 0; i < W; i++) s += Math.sin(i * a) + Math.sin(i * b) > .6 ? "^" : Math.sin(i * a * 1.7) > .2 ? "~" : "-"; return s; };
+  const s1 = swell(.31, .13), s2 = swell(.22, .41).replace(/-/g, " ");
+  const w1 = document.getElementById("w1"), w2 = document.getElementById("w2");
+  let o = 0;
+  const waves = () => { w1.textContent = (s1.slice(o % W) + s1).slice(0, W); w2.textContent = (s2.slice(W - (o * 2 % W)) + s2).slice(0, W); };
+  waves();
+
+  /* the seabed, with kelp that sways */
+  const bed = document.getElementById("bed");
+  const kelp = f => [
+    "      " + (f ? ")" : "(") + "                      " + (f ? "(" : ")") + "                                  " + (f ? ")" : "(") + "          ",
+    "     " + (f ? "( )" : ") (") + "        _          " + (f ? ") (" : "( )") + "        o                    " + (f ? "( )" : ") (") + "         ",
+    "  .  " + (f ? ") (" : "( )") + "   _.-' '-._      " + (f ? "( )" : ") (") + "   .   _.-''-._      .        " + (f ? ") (" : "( )") + "   .     ",
+    "_.--''''--.._.--'''      ''-.._.--''''--..__.-'''        '''-.._.--''''--..__.--''"
+  ].join("\n");
+  bed.textContent = kelp(0);
+
+  /* bubbles from the blowhole */
+  const stage = document.querySelector(".stage"), box = document.getElementById("bubbles"), whale = document.getElementById("whale");
+  const puff = () => {
+    if (document.hidden) return;
+    const r = whale.getBoundingClientRect(), s = stage.getBoundingClientRect(), cw = r.width / 82, lh = r.height / 15;
+    const n = 2 + (Math.random() * 3 | 0);
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement("span");
+      b.textContent = "oO°.·"[Math.random() * 5 | 0];
+      b.style.left = (r.left - s.left + cw * (13 + Math.random() * 4)) + "px";
+      b.style.top = (r.top - s.top + lh * (1.4 + Math.random())) + "px";
+      b.style.fontSize = (0.8 + Math.random() * 0.7).toFixed(2) + "em";
+      b.style.setProperty("--t", (3.5 + Math.random() * 3).toFixed(2) + "s");
+      b.style.setProperty("--dx", ((Math.random() - .5) * 4).toFixed(2) + "em");
+      b.style.setProperty("--dy", -(r.top - s.top + lh * 2 + 120 + Math.random() * 80).toFixed(0) + "px");
+      b.style.animationDelay = (i * .35).toFixed(2) + "s";
+      b.addEventListener("animationend", () => b.remove());
+      box.appendChild(b);
+    }
+  };
+
+  if (still) return;
+  let f = 0;
+  setInterval(() => { o++; waves(); }, 180);
+  setInterval(() => { f ^= 1; bed.textContent = kelp(f); }, 1400);
+  puff(); setInterval(puff, 2600);
+
+})();
+</script>
+</body>
+</html>
