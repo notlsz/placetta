@@ -100,13 +100,14 @@ html[lang="zh-CN"] .hero h1{line-height:1.15;letter-spacing:0}
 .hbot span{font-size:16px;line-height:1.4;color:rgba(255,255,255,.62)}
 /* backed by: investors behind the brands we serve */
 .inv{padding:44px 0 4px}
-@media (min-width:1024px){.inv{padding:64px 0 0}.invr{max-width:1180px;margin-inline:auto}}
-.invl{text-align:center;font-size:14px;line-height:1.4;color:var(--ink2)}
+@media (min-width:1024px){.inv{padding:88px 0 24px}.invr{max-width:1288px;margin-inline:auto}}
+.invl{text-align:center;font-size:12px;line-height:1.4;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+html[lang="zh-CN"] .invl{letter-spacing:.2em}
 .invr{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:26px 40px;margin-top:22px}
-@media (min-width:1024px){.invr{gap:28px 52px;margin-top:26px}}
-.invr img{display:block;width:auto;height:calc(var(--h) * .8);opacity:.6;transition:opacity .2s}
-@media (min-width:1024px){.invr img{height:var(--h)}}
-.invr img:hover{opacity:.95}
+@media (min-width:1024px){.invr{gap:30px 44px;margin-top:28px}}
+.invr img{display:block;width:auto;height:calc(var(--h) * .85);opacity:.8;filter:saturate(0) brightness(.55);transition:opacity .2s,filter .2s}
+@media (min-width:1024px){.invr img{height:calc(var(--h) * 1.08)}}
+.invr img:hover{opacity:1;filter:none}
 .vcard{position:relative;display:flex;align-items:center;justify-content:center;padding:28px 16px 72px;aspect-ratio:9/16;width:100%;clip-path:inset(0 round 16px);border-radius:16px;background:var(--gs-l)}
 @media (min-width:640px){.vcard{aspect-ratio:4/3;max-height:none}}
 @media (min-width:1024px){.vcard{aspect-ratio:1288/731}}
@@ -142,6 +143,8 @@ html[lang="zh-CN"] .hero h1{line-height:1.15;letter-spacing:0}
 .p-q{background:#F1F2F5;color:#8B92A1}
 .p-r{background:#FBF1DF;color:#93651E}
 .p-b{background:#F8E5E2;color:#9C3A2E}
+.p-o{background:#E3EFE6;color:#2F6B40}
+.tr.smp p{font-size:14px;color:var(--ink2)}.tr.smp p:first-child{color:var(--ink)}
 .aside{display:none;background:rgba(244,246,250,.7);border-radius:16px;margin:4px 12px 12px 0;padding:18px;min-width:0;flex-direction:column;gap:16px}
 @media (min-width:860px){.aside{display:flex}}
 .proj small{display:block;font-size:12px;color:var(--muted)}
@@ -236,6 +239,12 @@ html[lang="zh-CN"] .tsr strong{letter-spacing:0}
 .ds:first-child{padding-top:0}
 .ds:last-child{border-bottom:0;padding-bottom:0}
 .ds b{font-weight:400;font-size:28px;line-height:1;letter-spacing:-.28px}
+.cbig{justify-content:space-between}
+.ctile .cmpn{display:block;font-family:var(--serif);font-weight:300;font-size:44px;line-height:1;letter-spacing:-.02em;color:var(--ink);margin:2px 0 6px}
+.cbn{display:flex;flex-direction:column;gap:14px;padding:8px 0 24px}
+.cbn b{font-family:var(--serif);font-weight:300;font-size:64px;line-height:.95;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+@media (min-width:1024px){.cbn b{font-size:84px}}
+.cbn span{font-size:16px;line-height:1.4;color:var(--ink2);max-width:300px}
 .ds span{font-size:14px;line-height:1.2;letter-spacing:-.14px}
 @media (min-width:1024px){.ds span{font-size:16px;letter-spacing:-.16px}}
 .ds b span{font-size:inherit;letter-spacing:inherit;line-height:inherit}
@@ -1545,6 +1554,11 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
 @media (min-width:1024px) and (max-width:1279px){.agi li{padding:10px 11px}.agi .agh{flex-wrap:wrap;gap:4px 6px}.agi .agh b{font-size:14.5px}}
 @media (min-width:1024px) and (max-height:820px){.agcard{padding:16px}.agwh{padding:12px 12px 4px}.agi li{padding-top:8px;padding-bottom:8px}.agleft{gap:32px}.agb{min-height:48px}}
 #agencies{margin-top:160px}
+#agencies .agright{display:flex;flex-direction:column;gap:20px}
+#agencies .agmap{background:var(--card)}
+@media (min-width:1024px){#agencies .agmap{padding:22px 24px}#agencies .mpstats b{font-size:26px}}
+.agmore{display:block;margin:14px auto 0;padding:11px 18px;border:1px solid var(--line);border-radius:999px;background:#fff;font:inherit;font-size:14px;color:var(--ink);cursor:pointer;transition:border-color .2s,background .2s}
+.agmore:hover{border-color:#C9D2DE;background:#F6F8FB}
 
 /* experts wall: every advisor portrait as a drifting pixel mosaic, rows sliding opposite ways while a slow wave
    sharpens some faces and dissolves others. No pointer interaction. */
@@ -1729,11 +1743,10 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
           <div class="tbd">
             <div class="tr th"><p data-i18n="add.c1">Company</p><p data-i18n="add.c2">Target market</p><p class="hide-m" data-i18n="add.c3">Target opening</p><p class="hide-m" data-i18n="add.c4">Status</p></div>
             <div class="tr nr" id="newRow"><p id="nr1"></p><p id="nr2"></p><p class="hide-m" id="nr3"></p><p class="hide-m"><span class="pill p-q" id="nr4"></span></p></div>
-            <div class="tr"><div><div class="sk" style="width:123px"></div></div><div><div class="sk" style="width:134px"></div></div><div class="hide-m"><div class="sk" style="width:96px"></div></div><div class="hide-m"><div class="sk" style="width:84px"></div></div></div>
-            <div class="tr"><div><div class="sk" style="width:156px"></div></div><div><div class="sk" style="width:118px"></div></div><div class="hide-m"><div class="sk" style="width:99px"></div></div><div class="hide-m"><div class="sk" style="width:70px"></div></div></div>
-            <div class="tr"><div><div class="sk" style="width:117px"></div></div><div><div class="sk" style="width:136px"></div></div><div class="hide-m"><div class="sk" style="width:112px"></div></div><div class="hide-m"><div class="sk" style="width:88px"></div></div></div>
-            <div class="tr"><div><div class="sk" style="width:137px"></div></div><div><div class="sk" style="width:147px"></div></div><div class="hide-m"><div class="sk" style="width:90px"></div></div><div class="hide-m"><div class="sk" style="width:76px"></div></div></div>
-            <div class="tr"><div><div class="sk" style="width:149px"></div></div><div><div class="sk" style="width:121px"></div></div><div class="hide-m"><div class="sk" style="width:104px"></div></div><div class="hide-m"><div class="sk" style="width:82px"></div></div></div>
+            <div class="tr smp"><p data-i18n="add.r1c">Lantern Noodle Bar</p><p data-i18n="add.r1m">Houston, TX</p><p class="hide-m" data-i18n="add.r1d">Jun 2027</p><p class="hide-m"><span class="pill p-r" data-i18n="add.s1"></span></p></div>
+            <div class="tr smp"><p data-i18n="add.r2c">Copperleaf Coffee</p><p data-i18n="add.r2m">Seattle, WA</p><p class="hide-m" data-i18n="add.r2d">Sep 2027</p><p class="hide-m"><span class="pill p-r" data-i18n="add.s2"></span></p></div>
+            <div class="tr smp"><p data-i18n="add.r3c">Golden Ox Hot Pot</p><p data-i18n="add.r3m">Flushing, NY</p><p class="hide-m" data-i18n="add.r3d">Jan 2027</p><p class="hide-m"><span class="pill p-d" data-i18n="add.s3"></span></p></div>
+            <div class="tr smp"><p data-i18n="add.r4c">Jade Bun Bakery</p><p data-i18n="add.r4m">Irvine, CA</p><p class="hide-m" data-i18n="add.r4d">Opened Aug 2026</p><p class="hide-m"><span class="pill p-o" data-i18n="add.s4"></span></p></div>
           </div>
         </div>
       </div>
@@ -1750,27 +1763,14 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
   </div>
 </section>
 
-<!-- ======================= PROOF ======================= -->
-<section class="proof rv" data-rv="up" id="proof" aria-label="Track record" data-i18n-aria="aria.proof">
-  <div class="ctr"><div class="prow">
-    <div class="pst"><b>31,000+</b><span data-i18n="pf.s1">businesses served by our team since 2016</span></div>
-    <div class="pst"><b data-i18n="pf.n2">3+ per day</b><span data-i18n="pf.s2">new US businesses served by our team, on average</span></div>
-    <div class="pst"><b>50</b><span data-i18n="pf.s3">US states covered, plus 170+ countries</span></div>
-    <div class="pst"><b data-i18n="pf.n4">5 months</b><span data-i18n="pf.s4">saved in approval time for CHAGEE</span></div>
-  </div></div>
-</section>
-
 <!-- ======================= COST OF WAITING ======================= -->
 <section class="sec rv" data-rv="up" id="cost" aria-labelledby="costH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="costH" data-i18n="cost.h">The cost of waiting.</h2><p class="sub" data-i18n="cost.sub">Every month a permit runs late is another month of rent with no revenue.</p></div>
     <div class="drow">
-      <div class="dl">
-        <div>
-          <button type="button" class="ds dsb" data-story="2"><b data-i18n="cost.s1b">3–6 months</b><span data-i18n="cost.s1s">The typical permit phase for a new restaurant</span></button>
-          <button type="button" class="ds dsb" data-story="0"><b data-i18n="cost.s2b">8 months instead of 2</b><span data-i18n="cost.s2s">One Sacramento restaurant's wait, at an estimated cost of $1M</span></button>
-          <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
-        </div>
+      <div class="dl cbig">
+        <div class="cbn"><b id="costBig">$120,000</b><span id="costCap" data-i18n="cost.cap">in rent paid before your first sale</span></div>
+        <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
       </div>
       <div class="dcard wcard" id="wcard"></div>
     </div>
@@ -1856,7 +1856,7 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
       <div class="dl">
         <p class="t28" data-i18n="diff.h">The difference Placetta makes</p>
         <div>
-          <div class="ds"><b>31,000+</b><span data-i18n="diff.c1">Customers since 2016</span></div>
+          <div class="ds"><b data-i18n="diff.2b">6 → 1</b><span data-i18n="diff.2s">Offices you chase, down to one team that handles them all</span></div>
           <div class="ds"><b data-i18n="diff.1b">Minutes</b><span data-i18n="diff.1s">From target market to a full entry plan</span></div>
         </div>
       </div>
@@ -1878,9 +1878,9 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
       <p class="t28" data-i18n="cmp.h">Why not a law firm or consultant?</p>
       <div class="rmline"></div>
       <div class="tiles">
-        <div class="tile ctile"><p data-i18n="cmp.1h">Consultants</p><p class="cd" data-i18n="cmp.1p">A report, weeks later, billed by the hour.</p><div><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#9AA1AE" stroke-width="1.4" stroke-linecap="round"><rect x="8" y="5" width="20" height="27" rx="2"/><path d="M13 12h10M13 17h10M13 22h6"/><circle cx="29" cy="29" r="7" fill="#EDEFF3"/><path d="M29 25.5V29l2.5 1.5"/></svg></div></div>
-        <div class="tile ctile"><p data-i18n="cmp.2h">Doing it yourself</p><p class="cd" data-i18n="cmp.2p">Months of calls, forms and rejected applications.</p><div><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#9AA1AE" stroke-width="1.4" stroke-linecap="round"><rect x="6" y="9" width="17" height="22" rx="2"/><rect x="12" y="6" width="17" height="22" rx="2" fill="#EDEFF3"/><rect x="18" y="3" width="17" height="22" rx="2" fill="#EDEFF3"/><path d="M23 10l7 7M30 10l-7 7" stroke="#D0574A"/></svg></div></div>
-        <div class="tile ctile us"><p class="cd" data-i18n="cmp.3p">A plan in minutes, filing handled, one dashboard, and a price you know upfront.</p><div><span class="orb" style="width:40px;height:40px"></span></div></div>
+        <div class="tile ctile"><p data-i18n="cmp.1h">Consultants</p><b class="cmpn" data-i18n="cmp.1n">Weeks</b><p class="cd" data-i18n="cmp.1p">A report, weeks later, billed by the hour.</p><div><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#9AA1AE" stroke-width="1.4" stroke-linecap="round"><rect x="8" y="5" width="20" height="27" rx="2"/><path d="M13 12h10M13 17h10M13 22h6"/><circle cx="29" cy="29" r="7" fill="#EDEFF3"/><path d="M29 25.5V29l2.5 1.5"/></svg></div></div>
+        <div class="tile ctile"><p data-i18n="cmp.2h">Doing it yourself</p><b class="cmpn" data-i18n="cmp.2n">Months</b><p class="cd" data-i18n="cmp.2p">Months of calls, forms and rejected applications.</p><div><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#9AA1AE" stroke-width="1.4" stroke-linecap="round"><rect x="6" y="9" width="17" height="22" rx="2"/><rect x="12" y="6" width="17" height="22" rx="2" fill="#EDEFF3"/><rect x="18" y="3" width="17" height="22" rx="2" fill="#EDEFF3"/><path d="M23 10l7 7M30 10l-7 7" stroke="#D0574A"/></svg></div></div>
+        <div class="tile ctile us"><p data-i18n="brand">Placetta</p><b class="cmpn" data-i18n="cmp.3n">Minutes</b><p class="cd" data-i18n="cmp.3p">A plan in minutes, filing handled, one dashboard, and a price you know upfront.</p><div><span class="orb" style="width:40px;height:40px"></span></div></div>
       </div>
     </div>
   </div>
@@ -1957,18 +1957,16 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
   </div>
 </section>
 
-<!-- ======================= WHERE WE WORK (maps) ======================= -->
-<section class="sec rv" data-rv="up" id="map" aria-labelledby="mapH">
+<!-- ======================= AGENCIES A PLAN COVERS (names set in type; no agency seals or logos) ======================= -->
+<section class="mt160 rv" data-rv="up" id="agencies" aria-labelledby="agH">
   <div class="ctr">
-    <div class="mphead">
-      <div class="mpt"><h2 class="h2" id="mapH" data-i18n="map.h">Where we work</h2><p class="sub mpsub" id="mpSub" data-i18n="map.sub">From São Paulo to Nairobi to Kuala Lumpur, one team files the paperwork. The darker the market, the more brands we open there.</p></div>
-      <div class="mptabs" role="tablist" aria-label="Map" data-i18n-aria="aria.map">
-        <button type="button" role="tab" data-mv="us" aria-selected="true" data-i18n="map.us">United States</button>
-        <button type="button" role="tab" data-mv="world" aria-selected="false" data-i18n="map.world">Worldwide</button>
-        <button type="button" role="tab" data-mv="freight" aria-selected="false" data-i18n="map.fr">Freight</button>
+    <div class="agrow">
+      <div class="agleft">
+        <h2 class="t28" id="agH" data-i18n="agy.h">Where we work, and every agency we handle</h2>
+        <div class="aglist" id="agTabs" role="tablist" aria-labelledby="agH"></div>
       </div>
-    </div>
-    <div class="mpcard">
+      <div class="agright" id="agRight">
+    <div class="mpcard agmap" id="agMap">
       <div class="mpstats">
         <div><b id="mpN1">50</b><span id="mpS1" data-i18n="map.s1">US states covered</span></div>
         <div class="mpx"><b>170+</b><span data-i18n="map.s2">countries covered</span></div>
@@ -1996,18 +1994,6 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ======================= AGENCIES A PLAN COVERS (names set in type; no agency seals or logos) ======================= -->
-<section class="mt160 rv" data-rv="up" id="agencies" aria-labelledby="agH">
-  <div class="ctr">
-    <div class="agrow">
-      <div class="agleft">
-        <p class="t28" id="agH" data-i18n="agy.h">Every agency your expansion touches, and who handles it</p>
-        <div class="aglist" id="agTabs" role="tablist" aria-labelledby="agH"></div>
-      </div>
-      <div class="agright" id="agRight">
         <div class="agcard" id="agCard">
           <div class="agwin" id="agWin" role="tabpanel" aria-live="polite"></div>
           <ul class="agkey" id="agKey"><li><em class="agt agt-f" data-i18n="agy.tf">We file</em><span data-i18n="agy.kf">Placetta's agents prepare and submit it</span></li><li><em class="agt agt-p" data-i18n="agy.tp">With partners</em><span data-i18n="agy.kp">Agents prepare it, a licensed broker, lawyer or lab files it</span></li><li><em class="agt agt-m" data-i18n="agy.tm">We monitor</em><span data-i18n="agy.km">Agents track the rules and flag every change</span></li></ul>
@@ -2256,9 +2242,9 @@ en:{
  "cta.free":"Get your entry plan",
  "mon.l.aff2":"Affects", "mon.due":"Deadline in {n} days", "mon.due1":"Deadline in 1 day", "mon.duet":"Deadline today", "mon.dayn":"days left", "mon.day1":"day left",
  "inv.l":"The brands we serve are backed by", "ts.tabs":"Customer stories",
- "add.btn":"New plan", "add.c1":"Company", "add.c2":"Target market", "add.c3":"Target opening", "add.c4":"Status", "add.h":"Tell us where you're opening.<br>Get your plan in minutes.", "add.mapping":"Mapping…", "add.ready":"Plan ready", "add.tab":"Entry plans", "cmp.1h":"Consultants", "cmp.1p":"A report, weeks later, billed by the hour.", "cmp.2h":"Doing it yourself", "cmp.2p":"Months of calls, forms and rejected applications.", "cmp.3p":"A plan in minutes, filing handled, one dashboard, and a price you know upfront.", "cmp.h":"Why not a law firm or consultant?", "cn.btn":"Get your US entry plan", "cn.h":"Built for brands going global.", "cn.p":"Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.", "cn.q":"Su Shi, Song dynasty poet", "cn.s":"Wherever the heart is at ease, that is home.", "cn.sub":"Free, ready in minutes", "dash.a":"Shenzhen HQ", "dash.at":"9:00 PM", "dash.b":"New York team", "dash.bt":"9:00 AM", "dash.risk":"Risk flag: review state rules on foreign-owned leases before signing", "diff.1b":"Minutes", "diff.1s":"From target market to a full entry plan", "diff.after":"after", "diff.before":"before", "diff.c1":"Customers since 2016", "diff.c2":"Return customers", "diff.h":"The difference Placetta makes", "diff.team":"Your team", "diff.with":"with", "itl.a1":"Health permit packet for Santa Clara County is ready. Submit it?", "itl.a2":"Submitted. I'll book the inspection when the county opens a slot.", "itl.b1":"The sign permit needs your landlord's authorization. Send the request to them?", "itl.b2":"Got it. Landlord requests go to you first, at every location.", "itl.f2":"Landlord letter", "itl.h":"Placetta asks before every filing, and remembers your answer", "itl.m2":"1-page doc", "itl.saved":"Saved to your playbook", "itl.u1":"Yes, submit it 👍", "itl.u2":"No, send landlord requests to me first. I'll forward them.", "qr":"QR", "trust.1":"Licensed partner attorneys", "trust.2":"Local permit expediters", "trust.3":"English and Chinese", "trust.h":"Built for trust", "wt.l":"Work together", "wt.qr":"WeChat QR code goes here before launch", "wt.r":"from day one", "you.init":"HP",
+ "add.btn":"New plan", "add.c1":"Company", "add.c2":"Target market", "add.c3":"Target opening", "add.c4":"Status", "add.h":"Tell us where you're opening.<br>Get your plan in minutes.", "add.mapping":"Mapping…", "add.ready":"Plan ready", "add.r1c":"Lantern Noodle Bar", "add.r1m":"Houston, TX", "add.r1d":"Jun 2027", "add.r2c":"Copperleaf Coffee", "add.r2m":"Seattle, WA", "add.r2d":"Sep 2027", "add.r3c":"Golden Ox Hot Pot", "add.r3m":"Flushing, NY", "add.r3d":"Jan 2027", "add.r4c":"Jade Bun Bakery", "add.r4m":"Irvine, CA", "add.r4d":"Opened Aug 2026", "add.s1":"Filing", "add.s2":"In review", "add.s3":"Approved", "add.s4":"Open", "add.tab":"Entry plans", "cmp.1h":"Consultants", "cmp.1n":"Weeks", "cmp.2n":"Months", "cmp.3n":"Minutes", "cmp.1p":"A report, weeks later, billed by the hour.", "cmp.2h":"Doing it yourself", "cmp.2p":"Months of calls, forms and rejected applications.", "cmp.3p":"A plan in minutes, filing handled, one dashboard. $299 per market to start.", "cmp.h":"Why not a law firm or consultant?", "cn.btn":"Get your US entry plan", "cn.h":"Built for brands going global.", "cn.p":"Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.", "cn.q":"Su Shi, Song dynasty poet", "cn.s":"Wherever the heart is at ease, that is home.", "cn.sub":"Free, ready in minutes", "dash.a":"Shenzhen HQ", "dash.at":"9:00 PM", "dash.b":"New York team", "dash.bt":"9:00 AM", "dash.risk":"Risk flag: review state rules on foreign-owned leases before signing", "diff.1b":"Minutes", "diff.1s":"From target market to a full entry plan", "diff.after":"after", "diff.before":"before", "diff.c1":"Customers since 2016", "diff.2b":"6 → 1", "diff.2s":"Offices you chase, down to one team that handles them all", "diff.c2":"Return customers", "diff.h":"The difference Placetta makes", "diff.team":"Your team", "diff.with":"with", "itl.a1":"Health permit packet for Santa Clara County is ready. Submit it?", "itl.a2":"Submitted. I'll book the inspection when the county opens a slot.", "itl.b1":"The sign permit needs your landlord's authorization. Send the request to them?", "itl.b2":"Got it. Landlord requests go to you first, at every location.", "itl.f2":"Landlord letter", "itl.h":"Placetta asks before every filing, and remembers your answer", "itl.m2":"1-page doc", "itl.saved":"Saved to your playbook", "itl.u1":"Yes, submit it 👍", "itl.u2":"No, send landlord requests to me first. I'll forward them.", "qr":"QR", "trust.1":"Licensed partner attorneys", "trust.2":"Local permit expediters", "trust.3":"English and Chinese", "trust.h":"Built for trust", "wt.l":"Work together", "wt.qr":"WeChat QR code goes here before launch", "wt.r":"from day one", "you.init":"HP",
  "map.n3":"3+ per day", "map.s3":"new US businesses served by our team, on average, since 2016", "map.n3w":"7+ per day", "map.s3w":"new businesses served by our team worldwide, on average, since 2016",
- "xp.h":"Our experts previously worked at:", "agy.n":"{n} agencies", "agy.h":"Every agency your expansion touches, and who handles it", "agy.tf":"We file", "agy.tp":"With partners", "agy.tm":"We monitor", "agy.kf":"Placetta's agents prepare and submit it", "agy.kp":"Agents prepare it, a licensed broker, lawyer or lab files it", "agy.km":"Agents track the rules and flag every change", "agy.note":"Placetta is not affiliated with or endorsed by any government agency.", "xp.ppl":"Placetta advisors", "hero.h1":"Open your first US&nbsp;store<br><em>months sooner.</em>", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
+ "xp.h":"Our experts previously worked at:", "agy.n":"{n} agencies", "agy.all":"See all {n} agencies in {r}", "agy.less":"Show fewer", "agy.h":"Where we work, and every agency we handle", "agy.tf":"We file", "agy.tp":"With partners", "agy.tm":"We monitor", "agy.kf":"Placetta's agents prepare and submit it", "agy.kp":"Agents prepare it, a licensed broker, lawyer or lab files it", "agy.km":"Agents track the rules and flag every change", "agy.note":"Placetta is not affiliated with or endorsed by any government agency.", "xp.ppl":"Placetta advisors", "hero.h1":"Open your first US&nbsp;store<br><em>months sooner.</em>", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
  "fqr.t":"Prefer WeChat? Scan to add Placetta.",
  "q.wc":"Prefer WeChat? Scan to add Placetta.",
  "mon.cnt2":"{n} tracked", "mon.dl6":"Next 6 months", "mon.d1":"1 day", "mon.dn":"{n} days",
@@ -2277,7 +2263,7 @@ en:{
  "aria.map":"Map", "aria.restart":"Restart", "aria.pause":"Pause", "aria.play":"Play", "aria.brands":"Brands", "aria.lang":"Language", "aria.nav":"Primary", "aria.close":"Close", "aria.back":"Back",
  "price.h":"Priced by locations, billed annually.",
  "brand":"Placetta",
- "cost.s1b":"3–6 months", "cost.s1s":"The typical permit phase for a new restaurant", "cost.s2b":"8 months instead of 2", "cost.s2s":"One Sacramento restaurant's wait, at an estimated cost of $1M", "cost.s3s":"New state and local laws passed every year", "cost.s3src":"Source: Gusto",
+ "cost.s1b":"3–6 months", "cost.s1s":"The typical permit phase for a new restaurant", "cost.s2b":"8 months instead of 2", "cost.s2s":"One Sacramento restaurant's wait, at an estimated cost of $1M", "cost.s3s":"New state and local laws passed every year", "cost.s3src":"Source: Gusto", "cost.cap":"in rent paid before your first sale, waiting on {m} months of permits",
  "calc.l":"Your monthly rent", "calc.r":"Rent paid with zero revenue", "calc.mo":"months", "calc.n":"Rent alone, before payroll, build-out and lost sales.",
  "how.h":"Mapped by an agent. Filed by our team.",
  "lm.plan":"Entry plan", "lm.wallet":"Renewal calendar",
@@ -2339,9 +2325,9 @@ zh:{
  "cta.free":"获取您的开店合规计划",
  "mon.l.aff2":"涉及", "mon.due":"距截止还有 {n} 天", "mon.due1":"距截止还有 1 天", "mon.duet":"今天截止", "mon.dayn":"天后截止", "mon.day1":"天后截止",
  "inv.l":"我们服务的品牌获得以下机构投资", "ts.tabs":"客户故事",
- "add.btn":"新建计划", "add.c1":"公司", "add.c2":"目标市场", "add.c3":"目标开业", "add.c4":"状态", "add.h":"告诉我们您在哪里开店，<br>几分钟拿到计划。", "add.mapping":"生成中…", "add.ready":"计划已就绪", "add.tab":"开店计划", "cmp.1h":"咨询顾问", "cmp.1p":"几周后交一份报告，按小时计费。", "cmp.2h":"自己办理", "cmp.2p":"数月的电话、表格和被退回的申请。", "cmp.3p":"几分钟出计划，代办申报，一个看板，价格事先透明。", "cmp.h":"为什么不找律所或顾问？", "cn.btn":"获取您的美国开店计划", "cn.h":"为出海品牌而生。", "cn.p":"您在上海或深圳的团队，与纽约团队看到的是同一个看板，中英文随时切换。我们会尽早提示美国特有的风险，包括部分州对外资企业租赁和持有房产的限制。", "cn.q":"苏轼《定风波》", "cn.s":"此心安处是吾乡", "cn.sub":"免费，几分钟生成", "dash.a":"深圳总部", "dash.at":"晚上 9:00", "dash.b":"纽约团队", "dash.bt":"上午 9:00", "dash.risk":"风险提示：签约前请复核该州对外资企业租赁的规定", "diff.1b":"几分钟", "diff.1s":"从目标市场到完整开店计划", "diff.after":"之后", "diff.before":"之前", "diff.c1":"2016 年以来服务的客户", "diff.c2":"回头客户比例", "diff.h":"快哉带来的改变", "diff.team":"您的团队", "diff.with":"携手", "itl.a1":"圣克拉拉县卫生许可材料已准备好，现在提交吗？", "itl.a2":"已提交。县里一开放检查时段，我就为您预约。", "itl.b1":"招牌许可需要房东授权。要我直接发请求给房东吗？", "itl.b2":"明白。以后所有门店的房东请求都先发给您。", "itl.f2":"房东授权书", "itl.h":"每次申报前都先问您，并记住您的回答", "itl.m2":"1 页文档", "itl.saved":"已记入您的偏好", "itl.u1":"好的，提交吧 👍", "itl.u2":"不用，房东相关的先发给我，我来转。", "qr":"二维码", "trust.1":"持牌合作律师", "trust.2":"本地许可代办", "trust.3":"中文和英文", "trust.h":"值得信赖", "wt.l":"随时协作", "wt.qr":"上线前在此放置微信二维码", "wt.r":"从第一天起", "you.init":"松",
+ "add.btn":"新建计划", "add.c1":"公司", "add.c2":"目标市场", "add.c3":"目标开业", "add.c4":"状态", "add.h":"告诉我们您在哪里开店，<br>几分钟拿到计划。", "add.mapping":"生成中…", "add.ready":"计划已就绪", "add.r1c":"灯笼面馆", "add.r1m":"得州休斯顿", "add.r1d":"2027年6月", "add.r2c":"铜叶咖啡", "add.r2m":"华盛顿州西雅图", "add.r2d":"2027年9月", "add.r3c":"金牛火锅", "add.r3m":"纽约法拉盛", "add.r3d":"2027年1月", "add.r4c":"玉包烘焙", "add.r4m":"加州尔湾", "add.r4d":"2026年8月已开业", "add.s1":"申报中", "add.s2":"审核中", "add.s3":"已批准", "add.s4":"已开业", "add.tab":"开店计划", "cmp.1h":"咨询顾问", "cmp.1n":"几周", "cmp.2n":"几个月", "cmp.3n":"几分钟", "cmp.1p":"几周后交一份报告，按小时计费。", "cmp.2h":"自己办理", "cmp.2p":"数月的电话、表格和被退回的申请。", "cmp.3p":"几分钟出计划，代办申报，一个看板。每个市场 299 美元起。", "cmp.h":"为什么不找律所或顾问？", "cn.btn":"获取您的美国开店计划", "cn.h":"为出海品牌而生。", "cn.p":"您在上海或深圳的团队，与纽约团队看到的是同一个看板，中英文随时切换。我们会尽早提示美国特有的风险，包括部分州对外资企业租赁和持有房产的限制。", "cn.q":"苏轼《定风波》", "cn.s":"此心安处是吾乡", "cn.sub":"免费，几分钟生成", "dash.a":"深圳总部", "dash.at":"晚上 9:00", "dash.b":"纽约团队", "dash.bt":"上午 9:00", "dash.risk":"风险提示：签约前请复核该州对外资企业租赁的规定", "diff.1b":"几分钟", "diff.1s":"从目标市场到完整开店计划", "diff.after":"之后", "diff.before":"之前", "diff.c1":"2016 年以来服务的客户", "diff.2b":"6 → 1", "diff.2s":"原本要跑的 6 个部门，变成一个团队全部搞定", "diff.c2":"回头客户比例", "diff.h":"快哉带来的改变", "diff.team":"您的团队", "diff.with":"携手", "itl.a1":"圣克拉拉县卫生许可材料已准备好，现在提交吗？", "itl.a2":"已提交。县里一开放检查时段，我就为您预约。", "itl.b1":"招牌许可需要房东授权。要我直接发请求给房东吗？", "itl.b2":"明白。以后所有门店的房东请求都先发给您。", "itl.f2":"房东授权书", "itl.h":"每次申报前都先问您，并记住您的回答", "itl.m2":"1 页文档", "itl.saved":"已记入您的偏好", "itl.u1":"好的，提交吧 👍", "itl.u2":"不用，房东相关的先发给我，我来转。", "qr":"二维码", "trust.1":"持牌合作律师", "trust.2":"本地许可代办", "trust.3":"中文和英文", "trust.h":"值得信赖", "wt.l":"随时协作", "wt.qr":"上线前在此放置微信二维码", "wt.r":"从第一天起", "you.init":"松",
  "map.n3":"每天 3 家以上", "map.s3":"2016 年以来，我们的团队平均每天新服务的美国企业", "map.n3w":"每天 7 家以上", "map.s3w":"2016 年以来，我们的团队平均每天在全球新服务的企业",
- "xp.h":"我们的专家曾任职于：", "agy.n":"{n} 个机构", "agy.h":"出海涉及的每一个机构，以及由谁负责", "agy.tf":"代为申报", "agy.tp":"联合伙伴", "agy.tm":"持续监测", "agy.kf":"由快哉智能代理准备并提交", "agy.kp":"由智能代理准备，持牌报关行、律师或实验室提交", "agy.km":"智能代理持续跟踪规则，并提示每一项变化", "agy.note":"快哉与任何政府机构均无隶属关系，也未获其背书。", "xp.ppl":"快哉顾问", "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
+ "xp.h":"我们的专家曾任职于：", "agy.n":"{n} 个机构", "agy.all":"查看{r}全部 {n} 个机构", "agy.less":"收起", "agy.h":"我们覆盖的市场，以及经手的每一个机构", "agy.tf":"代为申报", "agy.tp":"联合伙伴", "agy.tm":"持续监测", "agy.kf":"由快哉智能代理准备并提交", "agy.kp":"由智能代理准备，持牌报关行、律师或实验室提交", "agy.km":"智能代理持续跟踪规则，并提示每一项变化", "agy.note":"快哉与任何政府机构均无隶属关系，也未获其背书。", "xp.ppl":"快哉顾问", "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
  "fqr.t":"更习惯用微信？扫码添加快哉。",
  "q.wc":"更习惯用微信？扫码添加快哉。",
  "mon.cnt2":"共 {n} 条", "mon.dl6":"未来 6 个月", "mon.d1":"1 天", "mon.dn":"{n} 天",
@@ -2360,7 +2346,7 @@ zh:{
  "aria.map":"地图", "aria.restart":"重播", "aria.pause":"暂停", "aria.play":"播放", "aria.brands":"合作品牌", "aria.lang":"语言", "aria.nav":"主导航", "aria.close":"关闭", "aria.back":"返回",
  "price.h":"按门店数量定价，按年计费。",
  "brand":"快哉",
- "cost.s1b":"3–6 个月", "cost.s1s":"新餐厅常见的许可审批周期", "cost.s2b":"8 个月，而非 2 个月", "cost.s2s":"萨克拉门托一家餐厅的等待，预估损失约 100 万美元", "cost.s3s":"美国每年新通过的州和地方法律", "cost.s3src":"来源：Gusto",
+ "cost.s1b":"3–6 个月", "cost.s1s":"新餐厅常见的许可审批周期", "cost.s2b":"8 个月，而非 2 个月", "cost.s2s":"萨克拉门托一家餐厅的等待，预估损失约 100 万美元", "cost.s3s":"美国每年新通过的州和地方法律", "cost.s3src":"来源：Gusto", "cost.cap":"开业前白付的房租：许可审批拖了 {m} 个月",
  "calc.l":"您的月租金", "calc.r":"无收入期间支付的房租", "calc.mo":"个月", "calc.n":"仅计房租，不含人工、装修和销售损失。",
  "how.h":"智能代理全面梳理，快哉团队代为申报。",
  "lm.plan":"开店计划", "lm.wallet":"续期日历",
@@ -2531,6 +2517,7 @@ function paintCalc(){
   document.getElementById("rentOut").textContent = money(rent);
   document.getElementById("rentLbl").textContent = L() ? `${t("calc.r")}，共 ${a===b?a:a+"–"+b} ${t("calc.mo")}` : `${t("calc.r")} for ${a===b?a:a+"–"+b} ${t("calc.mo")}`;
   document.getElementById("rentRes").textContent = a === b ? money(rent*a) : `${money(rent*a)}–${money(rent*b)}`;
+  const big = document.getElementById("costBig"); if (big) { big.textContent = money(rent * b); document.getElementById("costCap").textContent = t("cost.cap").replace("{m}", b); }
 }
 function setStoryIdx(k){ if (k === sIdx) return; sIdx = k; track("cost_story", {story: STORIES[k].src}); renderCost(); }
 document.querySelectorAll("[data-story]").forEach(b => b.addEventListener("click", () => setStoryIdx(+b.dataset.story)));
@@ -3170,7 +3157,7 @@ function renderMap(){
   document.querySelectorAll(".mpstats .mpx").forEach(d => { d.hidden = fr; });
   document.getElementById("mpN1").textContent = fr ? "3,000+" : "50";
   document.getElementById("mpS1").textContent = t(fr ? "map.fs" : "map.s1");
-  document.getElementById("mpSub").textContent = t(fr ? "map.subfr" : "map.sub");
+  
   if (fr) { document.querySelectorAll("[data-mv]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.mv === mView))); mddClose(false); return; }
   const items = mItems(), desc = mSvg.querySelector("desc").outerHTML;
   mSvg.setAttribute("viewBox", mView === "us" ? "0 0 975 610" : "0 0 960 480");
@@ -3480,7 +3467,7 @@ function renderBefore(){ if (!document.getElementById("before")) return; const i
 
 const isLg = () => innerWidth >= 1024;
 const ADDS = [
- {c:["Hollow Pine Tea Co.","松隐茶社"],m:["San José, CA","加州圣何塞"],d:["Mar 2027","2027年3月"]},
+ {c:["Qinghuan Tea House","青環茶舍"],m:["San José, CA","加州圣何塞"],d:["Mar 2027","2027年3月"]},
  {c:["Lantern Noodle Bar","灯笼面馆"],m:["Houston, TX","得州休斯顿"],d:["Jun 2027","2027年6月"]},
  {c:["Copperleaf Coffee","铜叶咖啡"],m:["Seattle, WA","华盛顿州西雅图"],d:["Sep 2027","2027年9月"]}
 ];
@@ -3525,7 +3512,7 @@ function paintRot(){
 }
 if (!RM) setInterval(() => { rIdx = (rIdx + 1) % CH.length; paintRot(); }, 2000);
 
-const XPG = [[["Government and academia", "政府与学术界"], [["U.S. FDA", "美国食品药品监督管理局"], ["Harvard University", "哈佛大学"], ["MIT", "麻省理工学院"], ["University of Pennsylvania", "宾夕法尼亚大学"], ["Princeton University", "普林斯顿大学"], ["Stanford University", "斯坦福大学"]]], [["North America: customs, ports and regulators", "北美：海关、港口与监管机构"], [["U.S. Customs and Border Protection", "美国海关与边境保护局"], ["Port Authority of NY & NJ", "纽约新泽西港务局"], ["Port of Los Angeles", "洛杉矶港"], ["Port of Long Beach", "长滩港"], ["Port Houston", "休斯敦港"], ["Georgia Ports Authority", "佐治亚港务局"], ["Northwest Seaport Alliance", "西北海港联盟"], ["Port of Oakland", "奥克兰港"], ["USDA", "美国农业部"], ["FCC", "美国联邦通信委员会"], ["CPSC", "美国消费品安全委员会"], ["FTC", "美国联邦贸易委员会"], ["EPA", "美国环境保护署"], ["TTB", "美国酒类和烟草税务贸易局"], ["Canada Border Services Agency", "加拿大边境服务局"], ["Port of Vancouver", "温哥华港"], ["Port of Montreal", "蒙特利尔港"], ["CFIA", "加拿大食品检验局"], ["Health Canada", "加拿大卫生部"]]], [["Mexico: customs, ports and regulators", "墨西哥：海关、港口与监管机构"], [["ANAM (National Customs Agency)", "墨西哥国家海关署"], ["Port of Manzanillo", "曼萨尼约港"], ["Port of Lázaro Cárdenas", "拉萨罗卡德纳斯港"], ["Port of Veracruz", "韦拉克鲁斯港"], ["COFEPRIS", "墨西哥联邦卫生风险保护委员会"], ["Secretaría de Economía", "墨西哥经济部"], ["SAT", "墨西哥税务局"], ["IMPI", "墨西哥工业产权局"]]], [["Europe: customs, ports and regulators", "欧洲：海关、港口与监管机构"], [["European Commission (DG TAXUD)", "欧盟委员会税收与关税同盟总司"], ["Port of Rotterdam", "鹿特丹港"], ["Port of Antwerp-Bruges", "安特卫普-布鲁日港"], ["Port of Hamburg", "汉堡港"], ["EMA", "欧洲药品管理局"], ["EFSA", "欧洲食品安全局"], ["ECHA", "欧洲化学品管理局"], ["EUIPO", "欧盟知识产权局"], ["HMRC", "英国税务海关总署"], ["UK Border Force", "英国边境部队"]]], [["AI and technology", "人工智能与科技"], [["OpenAI", "OpenAI"], ["Google", "谷歌"], ["Amazon", "亚马逊"], ["Huawei", "华为"], ["TikTok", "TikTok"], ["NVIDIA", "英伟达"], ["Tesla", "特斯拉"], ["TSMC", "台积电"]]], [["Trading and finance", "交易与金融"], [["Jane Street", "简街资本"], ["Citadel", "城堡投资"], ["Hudson River Trading", "哈德逊河交易"], ["Optiver", "澳帝华"], ["Renaissance Technologies", "文艺复兴科技"], ["Goldman Sachs", "高盛"], ["J.P. Morgan", "摩根大通"], ["Blackstone", "黑石集团"]]], [["Consumer, health and logistics", "消费、医疗与物流"], [["Walmart", "沃尔玛"], ["Costco", "开市客"], ["Johnson & Johnson", "强生"], ["DHL", "DHL"], ["Maersk", "马士基"]]]];
+const XPG = [[["Government and academia", "政府与学术界"], [["U.S. FDA", "美国食品药品监督管理局"], ["Harvard University", "哈佛大学"], ["MIT", "麻省理工学院"], ["University of Pennsylvania", "宾夕法尼亚大学"], ["Princeton University", "普林斯顿大学"], ["Stanford University", "斯坦福大学"]]], [["Customs", "海关"], [["U.S. Customs and Border Protection", "美国海关与边境保护局"], ["Mexico's National Customs Agency (ANAM)", "墨西哥国家海关署（ANAM）"], ["EU Customs Union (DG TAXUD)", "欧盟关税同盟（DG TAXUD）"]]], [["AI and technology", "人工智能与科技"], [["OpenAI", "OpenAI"], ["Google", "谷歌"], ["Amazon", "亚马逊"], ["Huawei", "华为"], ["TikTok", "TikTok"], ["NVIDIA", "英伟达"], ["Tesla", "特斯拉"], ["TSMC", "台积电"]]], [["Trading and finance", "交易与金融"], [["Jane Street", "简街资本"], ["Citadel", "城堡投资"], ["Hudson River Trading", "哈德逊河交易"], ["Optiver", "澳帝华"], ["Renaissance Technologies", "文艺复兴科技"], ["Goldman Sachs", "高盛"], ["J.P. Morgan", "摩根大通"], ["Blackstone", "黑石集团"]]], [["Consumer, health and logistics", "消费、医疗与物流"], [["Walmart", "沃尔玛"], ["Costco", "开市客"], ["Johnson & Johnson", "强生"], ["DHL", "DHL"], ["Maersk", "马士基"]]]];
 /* experts tapestry: company names with the advisors' portraits woven in, each portrait pixelated until hovered */
 const XPN = 60, xpImgs = [], xpPx = [7, 11, 18, 32, 64];
 function xpImg(k){ if (!xpImgs[k]) { const im = new Image(); im.decoding = "async"; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; xpImgs[k] = im; } return xpImgs[k]; }
@@ -3661,11 +3648,26 @@ function renderXp(){
 })();
 
 const AGG = [[["United States", "美国"], [["CBP", "CBP", "U.S. Customs and Border Protection", "美国海关与边境保护局", "Customs, tariffs, forced-labor checks", "报关、关税、强迫劳动审查", "p"], ["FDA", "FDA", "Food and Drug Administration", "美国食品药品监督管理局", "Food, cosmetics, devices", "食品、化妆品、医疗器械", "f"], ["FCC", "FCC", "Federal Communications Commission", "美国联邦通信委员会", "Radios and electronics", "无线电与电子产品", "p"], ["CPSC", "CPSC", "Consumer Product Safety Commission", "美国消费品安全委员会", "Product certificates and eFiling", "产品合规证书与电子申报", "f"], ["FTC", "FTC", "Federal Trade Commission", "美国联邦贸易委员会", "Advertising, reviews and data", "广告、评价与数据", "m"], ["State and local", "州与地方", "State, county and city offices", "州、县、市政府部门", "Registration, health, building, fire", "公司登记、卫生、建筑、消防", "f"], ["USDA", "USDA", "Department of Agriculture", "美国农业部", "Plants, animals, organic", "动植物产品、有机认证", "f"], ["EPA", "EPA", "Environmental Protection Agency", "美国环境保护署", "Chemicals and pesticides", "化学品与农药", "f"], ["TTB", "TTB", "Alcohol and Tobacco Tax and Trade Bureau", "美国酒类和烟草税务贸易局", "Alcohol permits and labels", "酒类许可与标签", "f"], ["CFIUS", "CFIUS", "Committee on Foreign Investment in the U.S.", "美国外国投资委员会", "Foreign investment review", "外国投资审查", "p"], ["BIS", "BIS", "Bureau of Industry and Security", "美国商务部工业与安全局", "Export controls", "出口管制", "m"], ["OFAC", "OFAC", "Office of Foreign Assets Control", "美国财政部海外资产控制办公室", "Sanctions screening", "制裁筛查", "m"], ["USPTO", "USPTO", "Patent and Trademark Office", "美国专利商标局", "Trademarks", "商标", "p"], ["USCIS", "USCIS", "Citizenship and Immigration Services", "美国公民及移民服务局", "Visas for your team", "员工签证", "p"], ["SEC", "SEC", "Securities and Exchange Commission", "美国证券交易委员会", "Securities offerings", "证券发行", "p"], ["IRS", "IRS", "Internal Revenue Service", "美国国税局", "Employer ID (EIN) and federal tax", "雇主识别号（EIN）与联邦税务", "f"], ["DOL", "DOL", "Department of Labor", "美国劳工部", "Wages, hours and hiring rules", "工资、工时与雇佣规则", "m"], ["OSHA", "OSHA", "Occupational Safety and Health Administration", "职业安全与健康管理局", "Workplace safety", "工作场所安全", "m"], ["FinCEN", "FinCEN", "Financial Crimes Enforcement Network", "金融犯罪执法局", "Beneficial ownership reporting", "受益所有人申报", "m"], ["USTR", "USTR", "Office of the U.S. Trade Representative", "美国贸易代表办公室", "Section 301 tariffs and exclusions", "301 关税与豁免", "m"], ["NHTSA", "NHTSA", "National Highway Traffic Safety Administration", "国家公路交通安全管理局", "Vehicles and vehicle equipment", "汽车与汽车配件", "m"]]], [["Canada", "加拿大"], [["CBSA", "CBSA", "Canada Border Services Agency", "加拿大边境服务局", "Customs and duties", "海关与关税", "p"], ["CFIA", "CFIA", "Canadian Food Inspection Agency", "加拿大食品检验局", "Food licences, plants, animals", "食品许可与动植物", "f"], ["Health Canada", "加拿大卫生部", "Federal health department", "联邦卫生部门", "Cosmetics, health and consumer products", "化妆品、健康产品与消费品", "f"], ["ISED", "ISED", "Innovation, Science and Economic Development Canada", "加拿大创新、科学及经济发展部", "Foreign investment review", "外国投资审查", "p"], ["Competition Bureau", "加拿大竞争局", "Competition Bureau Canada", "加拿大竞争局", "Advertising and labeling", "广告与标签", "m"], ["CRA", "CRA", "Canada Revenue Agency", "加拿大税务局", "Business number, GST/HST, import account", "企业编号、GST/HST、进口账户", "f"], ["IRCC", "IRCC", "Immigration, Refugees and Citizenship Canada", "加拿大移民、难民与公民部", "Work permits for your team", "团队工作许可", "p"], ["CIPO", "CIPO", "Canadian Intellectual Property Office", "加拿大知识产权局", "Trademarks", "商标", "p"], ["ECCC", "ECCC", "Environment and Climate Change Canada", "加拿大环境与气候变化部", "Chemicals and new substances", "化学品与新物质", "m"], ["Transport Canada", "加拿大交通部", "Transport Canada", "加拿大交通部", "Vehicles, tires and child seats", "汽车、轮胎与儿童座椅", "m"], ["GAC", "GAC", "Global Affairs Canada", "加拿大全球事务部", "Import and export permits, sanctions", "进出口许可与制裁", "m"]]], [["Mexico", "墨西哥"], [["ANAM", "ANAM", "National Customs Agency", "墨西哥国家海关署", "Customs", "海关", "p"], ["COFEPRIS", "COFEPRIS", "Federal Commission for Protection against Sanitary Risks", "墨西哥联邦卫生风险保护委员会", "Health, food, cosmetics", "卫生、食品与化妆品", "p"], ["SE", "SE", "Secretariat of Economy", "墨西哥经济部", "Foreign investment, product standards", "外国投资与产品标准", "p"], ["IMPI", "IMPI", "Mexican Institute of Industrial Property", "墨西哥工业产权局", "Trademarks", "商标", "p"], ["PROFECO", "PROFECO", "Federal Consumer Protection Agency", "墨西哥联邦消费者保护署", "Consumer protection and labeling", "消费者保护与标签", "m"], ["SAT", "SAT", "Tax Administration Service", "墨西哥税务局", "Tax ID (RFC) and importer registry", "税号（RFC）与进口商登记", "p"], ["SENASICA", "SENASICA", "National Service for Agri-Food Health, Safety and Quality", "国家农业食品卫生、安全与质量服务局", "Plant and animal imports", "动植物进口", "p"], ["IMSS", "IMSS", "Mexican Social Security Institute", "墨西哥社会保障局", "Employer registration", "雇主登记", "p"], ["SEMARNAT", "SEMARNAT", "Secretariat of Environment and Natural Resources", "环境与自然资源部", "Environmental permits", "环境许可", "m"], ["INM", "INM", "National Migration Institute", "国家移民局", "Visas and work permits", "签证与工作许可", "p"]]], [["Europe", "欧洲"], [["EC", "EC", "European Commission", "欧盟委员会", "AI, digital and competition rules", "人工智能、数字与竞争规则", "m"], ["EMA", "EMA", "European Medicines Agency", "欧洲药品管理局", "Medicines", "药品", "p"], ["EFSA", "EFSA", "European Food Safety Authority", "欧洲食品安全局", "Food safety", "食品安全", "m"], ["ECHA", "ECHA", "European Chemicals Agency", "欧洲化学品管理局", "REACH and chemical registration", "REACH 与化学品注册", "m"], ["EUIPO", "EUIPO", "EU Intellectual Property Office", "欧盟知识产权局", "EU trademarks and designs", "欧盟商标与外观设计", "p"], ["DG TAXUD", "DG TAXUD", "EU customs union (national customs authorities)", "欧盟关税同盟（各国海关）", "Customs, EORI number, duties", "海关、EORI 号码与关税", "p"], ["Notified bodies", "公告机构", "EU notified bodies", "欧盟公告机构", "CE marking for regulated products", "受监管产品的 CE 认证", "p"], ["DPAs", "数据保护机构", "National data protection authorities", "各国数据保护机构", "GDPR", "GDPR", "m"], ["EU AI Office", "欧盟人工智能办公室", "European AI Office", "欧盟人工智能办公室", "AI Act obligations", "《人工智能法案》义务", "m"]]], [["United Kingdom", "英国"], [["Companies House", "英国公司注册处", "Companies House", "英国公司注册处", "Company registration", "公司注册", "f"], ["HMRC", "HMRC", "HM Revenue and Customs", "英国税务海关总署", "Customs, VAT and EORI", "海关、增值税与 EORI", "p"], ["FSA", "FSA", "Food Standards Agency", "英国食品标准局", "Food business registration and safety", "食品经营登记与安全", "p"], ["MHRA", "MHRA", "Medicines and Healthcare products Regulatory Agency", "药品和保健产品监管局", "Medicines and medical devices", "药品与医疗器械", "p"], ["OPSS", "OPSS", "Office for Product Safety and Standards", "产品安全与标准办公室", "Product safety and UKCA marking", "产品安全与 UKCA 标志", "m"], ["ICO", "ICO", "Information Commissioner's Office", "信息专员办公室", "Data protection", "数据保护", "m"], ["UKIPO", "UKIPO", "UK Intellectual Property Office", "英国知识产权局", "Trademarks", "商标", "p"]]], [["China", "中国"], [["SAMR", "市场监管总局", "State Administration for Market Regulation", "国家市场监督管理总局", "Company registration, standards, food business", "企业登记、标准与食品经营", "p"], ["GACC", "海关总署", "General Administration of Customs", "海关总署", "Imports, exporter and food facility registration", "进出口与境外食品企业注册", "p"], ["NMPA", "药监局", "National Medical Products Administration", "国家药品监督管理局", "Drugs, cosmetics, devices", "药品、化妆品与医疗器械", "p"], ["CNIPA", "知识产权局", "China National Intellectual Property Administration", "国家知识产权局", "Trademarks and patents", "商标与专利", "p"], ["MOFCOM", "商务部", "Ministry of Commerce", "商务部", "Foreign investment and trade", "外商投资与贸易", "m"], ["CAC", "网信办", "Cyberspace Administration of China", "国家互联网信息办公室", "Data and cross-border transfers", "数据与跨境传输", "m"]]], [["Japan", "日本"], [["MHLW", "厚生劳动省", "Ministry of Health, Labour and Welfare", "厚生劳动省", "Food imports, drugs, cosmetics", "食品进口、药品与化妆品", "p"], ["Japan Customs", "日本海关", "Japan Customs", "日本海关", "Imports and duties", "进口与关税", "p"], ["METI", "经济产业省", "Ministry of Economy, Trade and Industry", "经济产业省", "Product safety marks and trade", "产品安全标志与贸易", "m"], ["JPO", "JPO", "Japan Patent Office", "日本特许厅", "Trademarks", "商标", "p"], ["PPC", "PPC", "Personal Information Protection Commission", "个人信息保护委员会", "Data protection", "数据保护", "m"]]], [["Singapore", "新加坡"], [["ACRA", "ACRA", "Accounting and Corporate Regulatory Authority", "会计与企业管制局", "Company registration", "公司注册", "p"], ["SFA", "SFA", "Singapore Food Agency", "新加坡食品局", "Food licences and imports", "食品执照与进口", "p"], ["HSA", "HSA", "Health Sciences Authority", "卫生科学局", "Health products and cosmetics", "健康产品与化妆品", "p"], ["Singapore Customs", "新加坡海关", "Singapore Customs", "新加坡海关", "Imports, permits and GST", "进口、许可与消费税", "p"]]]];
-let agSel = 0;
+let agSel = 0, agAll = false;
+const AGTOP = 7;   // first tile spans two cells, so seven fill two rows of four
+// each region tab also points the map: the US map for the United States, the world map zoomed to the country otherwise
+const AGMAP = ["us", "CA", "MX", "EU", "GB", "CN", "JP", "SG"], EUK = ["FR", "DE", "IT", "ES", "PL", "NL", "BE", "AT", "PT", "SE"];
+function agSyncMap(){
+  const key = AGMAP[agSel]; if (!key) return;
+  if (key === "us") { if (mView !== "us") { mView = "us"; mSel = null; renderMap(); } else selectMarket(null); return; }
+  if (mView !== "world") { mView = "world"; mSel = null; renderMap(); }
+  if (key !== "EU") { selectMarket(key); return; }
+  selectMarket(null);
+  const its = (mSvg._items || []).filter(x => EUK.includes(x.key) && x.d); if (!its.length) return;
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; its.forEach(it => { const q = bigBox(it.d); x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x + q.w); y1 = Math.max(y1, q.y + q.h); });
+  const full = FULLVB(), asp = full[2] / full[3]; let w = (x1 - x0) * 1.35, h = (y1 - y0) * 1.35; if (w / h < asp) w = h * asp; else h = w / asp;
+  zoomTo([(x0 + x1) / 2 - w / 2, (y0 + y1) / 2 - h / 2, w, h]);
+}
 const agWide = matchMedia("(min-width:1024px)");
 // wide screens: the window sits on the right; narrower: it opens right beneath the selected region
 // the legend sits under the region list on wide screens and inside the card otherwise
-function placeAg(){ const card = document.getElementById("agCard"), home = document.getElementById("agRight"), btn = document.getElementById("agTab" + agSel), key = document.getElementById("agKey");
+function placeAg(){ const mapEl = document.getElementById("agMap"), mapHome = agWide.matches ? document.getElementById("agRight") : document.querySelector(".agleft"); if (mapEl && mapEl.parentNode !== mapHome) { if (agWide.matches) mapHome.prepend(mapEl); else document.getElementById("agH").after(mapEl); }
+  const card = document.getElementById("agCard"), home = document.getElementById("agRight"), btn = document.getElementById("agTab" + agSel), key = document.getElementById("agKey");
   const keyHome = agWide.matches ? document.querySelector(".agleft") : card; if (key.parentNode !== keyHome) keyHome.appendChild(key);
   if (agWide.matches || !btn) { if (card.parentNode !== home) home.appendChild(card); } else if (btn.nextElementSibling !== card) btn.after(card); }
 function renderAg(swap){
@@ -3675,12 +3677,13 @@ function renderAg(swap){
   const cnt = ["f", "p", "m"].map(x => [x, g[1].filter(a => a[6] === x).length]).filter(x => x[1]);
   win.setAttribute("aria-labelledby", "agTab" + agSel);
   win.innerHTML = `<div class="agwh"><p><b>${g[0][i]}</b><span>${t("agy.n").replace("{n}", g[1].length)}</span></p><p class="agws">${cnt.map(([x, n]) => `<em class="agt agt-${x}">${t("agy.t" + x)}<b>${n}</b></em>`).join("")}</p></div>` +
-    `<ul class="agi">${g[1].map((a, k) => `<li class="agk-${a[6]}" style="--d:${k * 22}ms"><div class="agh"><b>${a[i]}</b><em class="agt agt-${a[6]}">${t("agy.t" + a[6])}</em></div><small>${a[2 + i]}</small><span>${a[4 + i]}</span></li>`).join("")}</ul>`;
+    `<ul class="agi">${(agAll ? g[1] : g[1].slice(0, AGTOP)).map((a, k) => `<li class="agk-${a[6]}" style="--d:${k * 22}ms"><div class="agh"><b>${a[i]}</b><em class="agt agt-${a[6]}">${t("agy.t" + a[6])}</em></div><small>${a[2 + i]}</small><span>${a[4 + i]}</span></li>`).join("")}</ul>` + (g[1].length > AGTOP ? `<button type="button" class="agmore" id="agMore" aria-expanded="${agAll}">${agAll ? t("agy.less") : t("agy.all").replace("{n}", g[1].length).replace("{r}", g[0][i])}</button>` : "");
   placeAg();
   if (swap && !RM) { win.classList.remove("sw"); void win.offsetWidth; win.classList.add("sw"); }
 }
-document.getElementById("agTabs").addEventListener("click", e => { const b = e.target.closest(".agb"); if (!b) return; const k = +b.id.slice(5); if (k === agSel) return; agSel = k; renderAg(true); document.getElementById("agTab" + k).focus({preventScroll: true}); });
-document.getElementById("agTabs").addEventListener("keydown", e => { const d = {ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1}[e.key]; if (!d || !e.target.closest(".agb")) return; e.preventDefault(); agSel = (agSel + d + AGG.length) % AGG.length; renderAg(true); document.getElementById("agTab" + agSel).focus(); });
+document.getElementById("agWin").addEventListener("click", e => { if (!e.target.closest("#agMore")) return; agAll = !agAll; renderAg(false); track("agencies_all", {region: agSel, open: agAll}); });
+document.getElementById("agTabs").addEventListener("click", e => { const b = e.target.closest(".agb"); if (!b) return; const k = +b.id.slice(5); if (k === agSel) return; agSel = k; agAll = false; renderAg(true); agSyncMap(); document.getElementById("agTab" + k).focus({preventScroll: true}); });
+document.getElementById("agTabs").addEventListener("keydown", e => { const d = {ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1}[e.key]; if (!d || !e.target.closest(".agb")) return; e.preventDefault(); agSel = (agSel + d + AGG.length) % AGG.length; agAll = false; renderAg(true); agSyncMap(); document.getElementById("agTab" + agSel).focus(); });
 agWide.addEventListener("change", placeAg);
 const cntDone = new WeakSet();
 function runCount(el){
@@ -3721,7 +3724,7 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
     const tick = () => {
       if (!seen) { t = setTimeout(tick, 400); return; }
       if (k < steps.length) { k++; show(k); t = setTimeout(tick, Number(steps[Math.min(k, steps.length - 1)].dataset.ms) || 600); }
-      else { t = setTimeout(() => { k = 0; show(0); t = setTimeout(tick, 700); }, 3600); }
+      // once played, the card stays complete: never blank again
     };
     new IntersectionObserver(es => { seen = es.some(e => e.isIntersecting); }, {threshold: .35}).observe(card);
     tick();
