@@ -61,6 +61,48 @@ export function deadlineUpdates(ws: string, list: unknown, today: string): Updat
   return out;
 }
 
+type StorePermit = { name?: unknown; expires?: unknown };
+type StoreRow = { id?: unknown; name?: unknown; stage?: unknown; permits?: unknown };
+
+/** Every open store's permits: a renewal update at 60, 30, 14, 7 and 1 days out, and when one has lapsed. */
+export function storeUpdates(ws: string, stores: unknown, today: string): Update[] {
+  const out: Update[] = [];
+  for (const raw of Array.isArray(stores) ? stores : []) {
+    const s = raw as StoreRow;
+    if (typeof s?.id !== "string") continue;
+    const store = bi(s.name);
+    for (const p of Array.isArray(s.permits) ? (s.permits as StorePermit[]) : []) {
+      if (!p || !isDate(p.expires)) continue;
+      const n = daysUntil(today, p.expires), name = bi(p.name);
+      const b = n >= 0 ? bucket(n, [1, 7, 14, 30, 60]) : undefined;
+      if (b !== undefined) out.push({ workspace_id: ws, kind: "renewal", dedupe: `permit:${s.id}:${name.en}:${p.expires}:${b}`,
+        title: { en: `${store.en}: ${name.en} ${when(n, "expires", "到期").en}`, zh: `${store.zh}：${name.zh}${when(n, "expires", "到期").zh}` },
+        body: { en: `Expires ${p.expires}. Placetta can start the renewal now.`, zh: `${p.expires} 到期。快哉现在就可以开始续办。` } });
+      else if (n < 0 && n >= -30) out.push({ workspace_id: ws, kind: "renewal", dedupe: `lapsed:${s.id}:${name.en}:${p.expires}`,
+        title: { en: `Lapsed: ${store.en}, ${name.en}`, zh: `已过期：${store.zh}，${name.zh}` },
+        body: { en: `It expired ${p.expires}. Operating without it risks a fine or a closure.`, zh: `已于 ${p.expires} 过期。无证经营可能被罚款或停业。` } });
+    }
+  }
+  return out;
+}
+
+/** Monday's week ahead for one workspace: what's due in 14 days, what renews in 60, what Placetta is filing. */
+export function weekAhead(ws: string, state: { deadlines?: unknown; stores?: unknown } | null, openFilings: number, today: string): Update | null {
+  const dl = (Array.isArray(state?.deadlines) ? state!.deadlines as Deadline[] : []).filter((d) => d && isDate(d.date));
+  const due = dl.filter((d) => d.kind !== "renewal" && daysUntil(today, d.date) >= 0 && daysUntil(today, d.date) <= 14).length;
+  let renew = dl.filter((d) => d.kind === "renewal" && daysUntil(today, d.date) >= 0 && daysUntil(today, d.date) <= 60).length;
+  for (const s of Array.isArray(state?.stores) ? state!.stores as StoreRow[] : [])
+    for (const p of Array.isArray(s?.permits) ? s.permits as StorePermit[] : []) if (isDate(p?.expires) && daysUntil(today, p.expires) >= 0 && daysUntil(today, p.expires) <= 60) renew++;
+  const stores = Array.isArray(state?.stores) ? state!.stores.length : 0;
+  if (!due && !renew && !openFilings && !stores) return null;
+  const week = today;   // the Monday it runs
+  const parts = [due && `${due} due in the next 2 weeks`, renew && `${renew} renewal${renew === 1 ? "" : "s"} in the next 60 days`, openFilings && `${openFilings} filing${openFilings === 1 ? "" : "s"} in progress`].filter(Boolean) as string[];
+  const zh = [due && `未来两周 ${due} 项到期`, renew && `未来 60 天 ${renew} 项续期`, openFilings && `${openFilings} 项申请办理中`].filter(Boolean) as string[];
+  return { workspace_id: ws, kind: "deadline", dedupe: `week:${week}`,
+    title: { en: `Your week: ${parts.length ? parts.join(", ") : `${stores} store${stores === 1 ? "" : "s"} all clear`}`, zh: `本周概览：${zh.length ? zh.join("，") : `${stores} 家门店一切正常`}` },
+    body: { en: "Open Placetta for the full list. Placetta handles what it can and asks you only for what it can't.", zh: "打开快哉查看完整清单。快哉能办的都会办好，只在必要时请您处理。" } };
+}
+
 export function filingUpdates(f: Filing, since: string, now: number): Update[] {
   const out: Update[] = [], t = bi(f.title);
   if (f.updated_at > since) {
@@ -136,13 +178,15 @@ Deno.serve(async (req) => {
   const byWs = new Map<string, Update[]>();
   const names = new Map<string, string>();
   const all: { id: string; state: unknown }[] = [];
+  const states = new Map<string, { deadlines?: unknown; stores?: unknown } | null>();
   for (let from = 0; ; from += 500) {
     const { data: rows, error } = await admin.from("workspaces").select("id, name, state").order("created_at").range(from, from + 499);
     if (error) return json(500, { error: "workspaces: " + error.code });
     for (const w of rows ?? []) {
       names.set(w.id, String(w.name ?? "Your business"));
       const st = (w.state ?? {}) as { deadlines?: unknown };
-      byWs.set(w.id, deadlineUpdates(w.id, st.deadlines, today));
+      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, today), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, today)]);
+      states.set(w.id, (w.state ?? null) as { deadlines?: unknown; stores?: unknown } | null);
       all.push({ id: w.id, state: { apps: (w.state as { apps?: unknown } | null)?.apps } });
     }
     if (!rows || rows.length < 500) break;
@@ -152,6 +196,12 @@ Deno.serve(async (req) => {
     .neq("status", "canceled");
   if (fe) return json(500, { error: "filings: " + fe.code });
   for (const f of (filings ?? []) as Filing[]) byWs.get(f.workspace_id)?.push(...filingUpdates(f, since, now));
+  // Mondays: the week ahead, for every workspace with something on it.
+  if (started.getUTCDay() === 1) {
+    const open = new Map<string, number>();
+    for (const f of (filings ?? []) as Filing[]) if (["requested", "in_progress", "needs_info", "submitted"].includes(f.status)) open.set(f.workspace_id, (open.get(f.workspace_id) ?? 0) + 1);
+    for (const [ws, list] of byWs) { const u = weekAhead(ws, states.get(ws) ?? null, open.get(ws) ?? 0, today); if (u) list.push(u); }
+  }
 
   // Record them; the unique (workspace, dedupe) key keeps a day's run from repeating an earlier one.
   for (const [ws, list] of byWs) {

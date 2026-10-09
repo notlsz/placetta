@@ -405,7 +405,10 @@ export const revokeInvite = (id: string) => rpcVoid("revoke_invite", { p_id: id 
 export const setRole = (ws: string, user: string, role: Role) => rpcVoid("set_member_role", { ws, p_user: user, p_role: role });
 export const removeMember = (ws: string, user: string) => fn<{ removed: string }>("team", { action: "remove", workspace_id: ws, user_id: user });
 
-export const checkout = (ws: string, plan: "entry" | "starter" | "growth", o: { markets?: number; extra_locations?: number } = {}) =>
+export type LocationPrice = { amount: number; currency: string; interval: string | null; interval_count: number | null };
+export const locationPrices = (ws: string) => fn<{ location: LocationPrice | null; opening: LocationPrice | null }>("billing", { action: "prices", workspace_id: ws, return_url: location.origin + location.pathname });
+export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: location.origin + location.pathname });
+export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number } = {}) =>
   fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: location.origin + location.pathname });
 export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { action: "portal", workspace_id: ws, return_url: location.origin + location.pathname });
 
@@ -462,4 +465,12 @@ export async function uploadReceipt(f: QueueRow, file: File): Promise<string> {
   if (error && !/duplicate/i.test(error.message)) throw fromPg(error);
   await updateFiling(f.id, { receipt_path: path });
   return path;
+}
+
+/* What Placetta has learned from real filings: per official form, how long the agency took and how often it bounced
+   one back. The server returns a form only once 3 or more filings of it were decided. */
+export async function filingStats(): Promise<import("../plan").FormStat[]> {
+  const { data, error } = await supabase().rpc("filing_stats");
+  if (error) return [];
+  return (data ?? []) as import("../plan").FormStat[];
 }

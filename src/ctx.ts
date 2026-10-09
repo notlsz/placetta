@@ -28,7 +28,7 @@ export type CloudCtx = {
   logins: AgencyLogin[];
   workspaces: { id: string; name: string }[];
   openPlans(reason?: "start" | "file"): void;
-  checkout(plan: "entry" | "starter" | "growth", o?: { markets?: number; extra_locations?: number }): Promise<void>;
+  checkout(plan: "entry" | "starter" | "growth" | "locations", o?: { markets?: number; extra_locations?: number }): Promise<void>;
   portal(): Promise<void>;
   connect(kind: IntegrationKind): Promise<void>;
   disconnect(kind: IntegrationKind): Promise<void>;

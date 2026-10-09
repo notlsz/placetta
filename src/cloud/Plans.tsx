@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import * as api from "./api";
 import { useApp } from "../ctx";
 import { B } from "../model";
 import { I, Modal, Pill } from "../ui";
@@ -17,8 +18,11 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
   const { b, t, lang, cloud } = useApp();
   const [markets, setMarkets] = useState(1);
   const [busy, setBusy] = useState("");
+  const [prices, setPrices] = useState<{ location: api.LocationPrice | null; opening: api.LocationPrice | null } | null>(null);
+  const wsId = cloud?.wsId;
+  useEffect(() => { if (wsId) void api.locationPrices(wsId).then(setPrices, () => setPrices(null)); }, [wsId]);
   if (!cloud) return null;
-  const go = async (p: "entry" | "starter" | "growth") => { setBusy(p); await cloud.checkout(p, p === "entry" ? { markets } : {}); setBusy(""); };
+  const go = async (p: "entry" | "starter" | "growth" | "locations") => { setBusy(p); await cloud.checkout(p, p === "entry" ? { markets } : {}); setBusy(""); };
   const showEntry = cloud.plan === "none";
   return (
     <Modal label={b(B("Plans", "方案"))} onClose={onClose} wide>
@@ -41,6 +45,7 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
             </div>
           </section>
         )}
+        {prices?.location && <PerLocation p={prices.location} o={prices.opening} busy={busy === "locations"} disabled={!!busy} onGo={() => void go("locations")} />}
         <div className="tiers">
           {TIERS.map(x => (
             <section key={x.id} className={"plan" + (x.tag ? " hl" : "")}>
@@ -62,5 +67,25 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
         <p className="note">{b(B("Extra locations are $100 a month each. Government fees are paid by you directly to each agency, through the payment link we send. Payments are handled by Stripe.", "超出的门店每家每月 100 美元。政府规费由您通过我们发送的付款链接直接支付给各机构。付款由 Stripe 处理。"))}</p>
       </div>
     </Modal>
+  );
+}
+
+/* Per location: one price per store, read from Stripe, so it grows with the chain. Shown once the prices are set. */
+function PerLocation({ p, o, busy, disabled, onGo }: { p: api.LocationPrice; o: api.LocationPrice | null; busy: boolean; disabled: boolean; onGo: () => void }) {
+  const { b, lang, ws } = useApp();
+  const zh = lang === "zh";
+  const money = (x: api.LocationPrice) => (x.currency === "USD" ? "$" : x.currency + " ") + x.amount.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  const per = p.interval === "year" ? (zh ? " /店/年" : " per store a year") : p.interval === "month" ? (zh ? " /店/月" : " per store a month") : "";
+  const n = (ws.stores ?? []).length;
+  return (
+    <section className="plan hl perloc">
+      <div className="plan-h"><b>{b(B("Per location", "按门店计费"))}</b><em>{b(B("Grows with your chain", "随门店数量增长"))}</em></div>
+      <span className="price">{money(p)}<small>{per}</small></span>
+      <p>{o ? (zh ? `新门店另收一次性开店费 ${money(o)}。` : `Plus ${money(o)} once for each new store we open.`) : ""} {zh ? "每家门店的全部许可、续期、检查与申报，由快哉持续跟进。" : "Every permit, renewal, inspection and filing for each store, handled for as long as it's open."}</p>
+      <div className="plan-act">
+        <span className="mk">{zh ? `${Math.max(1, n)} 家门店` : `${Math.max(1, n)} store${Math.max(1, n) === 1 ? "" : "s"}`}</span>
+        <Pill kind="ink" disabled={disabled} onClick={onGo}>{busy ? "…" : b(B("Choose per location", "选择按门店计费"))}</Pill>
+      </div>
+    </section>
   );
 }

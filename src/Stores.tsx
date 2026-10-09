@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useApp } from "./ctx";
 import { B, type Cert, type Store } from "./model";
 import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
 import { daysUntil, fmtDay, fmtIn, inDays } from "./time";
 import { I, Pill, StatusChip } from "./ui";
+import { saveFile } from "./files";
+import { parseStoreList, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
+import * as api from "./cloud/api";
 
 /* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
    a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. */
@@ -227,15 +230,88 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
   );
 }
 
+/* Many stores at once: paste the expansion list, get every permit per store with fees, real agency times and the date
+   to file by, then add them all. The plan shows before anything is filed or paid. */
+function BulkPlan({ onClose }: { onClose: () => void }) {
+  const { b, lang, ws, editWs, say, cloud } = useApp();
+  const zh = lang === "zh";
+  const [text, setText] = useState("");
+  const [stats, setStats] = useState<FormStat[]>([]);
+  useEffect(() => { if (cloud) void api.filingStats().then(setStats); }, [cloud]);
+  const today = inDays(0);
+  const rows = useMemo(() => parseStoreList(text), [text]);
+  const plans = useMemo(() => planStores(rows, ws.business.en || ws.goal.en, stats, today), [rows, ws.business.en, ws.goal.en, stats, today]);
+  const fees = plans.reduce((s, p) => s + p.fees, 0), forms = plans.reduce((s, p) => s + p.forms.length, 0), late = plans.filter(p => p.late).length;
+  const add = () => {
+    const { stores, deadlines } = toWorkspace(plans, ws.stores ?? []);
+    editWs(w => ({ ...w, stores: [...(w.stores ?? []), ...stores], deadlines: [...w.deadlines.filter(d => !deadlines.some(x => x.id === d.id)), ...deadlines] }));
+    if (cloud?.owner && cloud.plan === "monthly") void api.syncLocations(cloud.wsId).catch(() => undefined);
+    say(zh ? `已添加 ${stores.length} 家门店和 ${deadlines.length} 个提交截止日期。` : `Added ${stores.length} store${stores.length === 1 ? "" : "s"} and ${deadlines.length} file-by date${deadlines.length === 1 ? "" : "s"}.`);
+    onClose();
+  };
+  const usd = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  return (
+    <section className="bulk">
+      <header className="bulk-h">
+        <h2>{zh ? "一次规划多家门店" : "Plan many stores at once"}</h2>
+        <button type="button" className="icbtn" onClick={onClose} aria-label={zh ? "关闭" : "Close"}><I.x /></button>
+      </header>
+      <p className="bulk-sub">{zh ? "每行一家门店：店名、地址、开业日期，用制表符、分号或竖线分隔。可直接从表格粘贴。" : "One store per line: name, address and opening date, separated by tabs, semicolons or pipes. Paste straight from your spreadsheet."}</p>
+      <textarea className="bulk-in" rows={6} value={text} onChange={e => setText(e.target.value)} spellCheck={false}
+        placeholder={"Flushing\t136-20 Roosevelt Ave, Flushing, NY 11354\t2026-12-15\nIrvine; 4250 Barranca Pkwy, Irvine, CA 92604; 1/20/2027"} />
+      {plans.length > 0 && (<>
+        <div className="bulk-sum">
+          <span><b>{plans.length}</b>{zh ? " 家门店" : plans.length === 1 ? " store" : " stores"}</span>
+          <span><b>{forms}</b>{zh ? " 份官方表格" : " official forms"}</span>
+          <span><b>{usd(fees)}</b>{zh ? " 政府规费（已知部分）" : " in known government fees"}</span>
+          {late > 0 && <span className="warn"><b>{late}</b>{zh ? " 家门店已来不及按期开业" : late === 1 ? " store already can't open on time" : " stores already can't open on time"}</span>}
+        </div>
+        <div className="bulk-list">
+          {plans.map((p, i) => (
+            <details key={i} className={"bulk-store" + (p.late ? " late" : "")} open={plans.length <= 3}>
+              <summary>
+                <b>{p.row.name}</b><span>{p.row.address}</span>
+                <small>{p.row.opening ? (zh ? `${fmtDay(p.row.opening, lang, true)} 开业` : `Opens ${fmtDay(p.row.opening, lang, true)}`) : (zh ? "未填开业日期" : "No opening date")}{p.fileFirst ? (zh ? `，最早需在 ${fmtDay(p.fileFirst, lang, true)} 前提交` : `. First filing due ${fmtDay(p.fileFirst, lang, true)}`) : ""}</small>
+              </summary>
+              <ol>
+                {p.forms.map(f => (
+                  <li key={f.form.id} className={f.late ? "late" : ""}>
+                    <span className="bf-n"><b>{f.form.form}</b> {b(f.form.title)}</span>
+                    <span className="bf-a">{b(f.form.agency)}</span>
+                    <span className="bf-m">
+                      {f.form.fee == null ? (zh ? "费用视情况而定" : "Fee varies") : f.form.fee === 0 ? (zh ? "免费" : "No fee") : usd(f.form.fee)}
+                      {f.days != null && <>{zh ? "，" : ", "}{f.daysFrom === "placetta" ? (zh ? `实际约 ${f.days} 天（快哉提交记录）` : `about ${f.days} days in Placetta's filings`) : (zh ? `机构公布约 ${f.days} 天` : `about ${f.days} days per the agency`)}</>}
+                      {f.fileBy && <>{zh ? "，" : ", "}<b>{zh ? `${fmtDay(f.fileBy, lang, true)} 前提交` : `file by ${fmtDay(f.fileBy, lang, true)}`}</b></>}
+                      {f.everyMonths && <>{zh ? "，" : ", "}{f.everyMonths === 12 ? (zh ? "每年续期" : "renews yearly") : f.everyMonths === 24 ? (zh ? "每两年续期" : "renews every 2 years") : (zh ? `每 ${f.everyMonths} 个月续期` : `renews every ${f.everyMonths} months`)}</>}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              {p.varies > 0 && <p className="note">{zh ? `另有 ${p.varies} 项费用按机构标准计算，提交前会确认。` : `${p.varies} more fee${p.varies === 1 ? " is" : "s are"} set by the agency's schedule and confirmed before filing.`}</p>}
+            </details>
+          ))}
+        </div>
+        <div className="m-btns">
+          <button type="button" className="pill quiet" onClick={() => void saveFile("placetta-store-plan.csv", new Blob([planCsv(plans)], { type: "text/csv" }))}><I.download />{zh ? "导出 CSV" : "Export CSV"}</button>
+          <Pill kind="ink" onClick={add}>{zh ? `添加 ${plans.length} 家门店` : `Add ${plans.length} store${plans.length === 1 ? "" : "s"}`}</Pill>
+        </div>
+      </>)}
+    </section>
+  );
+}
+
 export function Stores() {
-  const { t, b, ws, ask, busy } = useApp();
+  const { t, b, ws, ask, busy, lang } = useApp();
   const [open, setOpen] = useState<string | null>(null);
+  const [bulk, setBulk] = useState(false);
   const stores = ws.stores ?? [];
   const s = stores.find(x => x.id === open);
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
   return (
     <div className="page">
-      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p>{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p></div></header>
+      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p>{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p></div>
+        {!bulk && <Pill onClick={() => setBulk(true)}>{lang === "zh" ? "规划多家门店" : "Plan many stores"}</Pill>}</header>
+      {bulk && <BulkPlan onClose={() => setBulk(false)} />}
       {stores.length ? (
         <div className="stores">{stores.map(x => <StoreCard key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>
       ) : (

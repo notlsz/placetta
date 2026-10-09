@@ -13,7 +13,8 @@
     "launch": "node scripts/launch.mjs",
     "build:agent": "node scripts/build-agent.mjs",
     "guides": "npx tsx scripts/build-guides.mts",
-    "beam": "esbuild src/site/beam.tsx --bundle --minify --format=iife --jsx=automatic --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=site/beam.js --log-level=warning"
+    "beam": "esbuild src/site/beam.tsx --bundle --minify --format=iife --jsx=automatic --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=site/beam.js --log-level=warning",
+    "test:plan": "esbuild scripts/plan-test.ts --bundle --platform=node --format=esm --outfile=.plan-test.mjs '--external:*.pdf?inline' --log-level=error && node .plan-test.mjs; rm -f .plan-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

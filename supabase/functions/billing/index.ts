@@ -3,7 +3,9 @@
 //   STRIPE_PRICE_STARTER  Starter, billed annually ($750 a month)
 //   STRIPE_PRICE_GROWTH   Growth, billed annually ($2,000 a month)
 //   STRIPE_PRICE_EXTRA_LOCATION  optional, $100 a month per extra location
-// Scale is quoted by the team, so it has no checkout.
+//   STRIPE_PRICE_LOCATION per open or opening store, recurring (the "Per location" plan; quantity = stores)
+//   STRIPE_PRICE_OPENING  optional, one time per new store (charged at checkout, then on the next invoice as stores are added)
+// Scale is quoted by the team, so it has no checkout. Actions: prices (any member), checkout, portal, sync_locations (owners).
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const CORS = {
@@ -63,6 +65,31 @@ async function stripe(path: string, params: Record<string, string>) {
   return data;
 }
 
+async function stripeGet(path: string) {
+  const res = await fetch(`https://api.stripe.com/v1/${path}`, { headers: { Authorization: `Bearer ${Deno.env.get("STRIPE_SECRET_KEY")}` } });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message ?? "Stripe error");
+  return data;
+}
+
+/** The per-location prices as Stripe has them, so the app never shows a number Stripe doesn't charge. */
+async function locationPrices() {
+  const one = async (id: string | undefined) => {
+    if (!id) return null;
+    const p = await stripeGet(`prices/${encodeURIComponent(id)}`);
+    return { amount: (p.unit_amount ?? 0) / 100, currency: String(p.currency ?? "usd").toUpperCase(), interval: p.recurring?.interval ?? null, interval_count: p.recurring?.interval_count ?? null };
+  };
+  const [location, opening] = await Promise.all([one(Deno.env.get("STRIPE_PRICE_LOCATION")), one(Deno.env.get("STRIPE_PRICE_OPENING"))]);
+  return { location, opening };
+}
+
+/** The workspace's stores (open and opening), from its saved state. */
+async function storeIds(ws: string): Promise<string[]> {
+  const { data } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
+  const stores = (data?.state as { stores?: { id?: unknown }[] } | null)?.stores;
+  return Array.isArray(stores) ? stores.map((s) => s?.id).filter((x): x is string => typeof x === "string").slice(0, 2000) : [];
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
@@ -78,12 +105,16 @@ Deno.serve(async (req) => {
   const ws = String(body.workspace_id ?? "");
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
+  if (body.action === "prices") {
+    if (access !== "owner" && access !== "member") return fail(403, "forbidden", "This isn't your workspace.");
+    try { return json(200, { ok: true, ...(await locationPrices()) }); } catch (e) { return fail(502, "upstream_error", (e as Error).message.slice(0, 200)); }
+  }
   if (access === "member") return fail(403, "forbidden", "Only an owner can change the plan or billing.");
   if (access !== "owner") return fail(403, "forbidden", "This isn't your workspace.");
   const back = safeReturn(body.return_url);
   if (!back) return fail(400, "bad_request", "Unknown return address. Add the app's origin to APP_ORIGINS.");
 
-  const { data: bill } = await admin.from("billing").select("stripe_customer_id").eq("workspace_id", ws).maybeSingle();
+  const { data: bill } = await admin.from("billing").select("stripe_customer_id, subscription_id, charged_store_ids").eq("workspace_id", ws).maybeSingle();
   const customer = bill?.stripe_customer_id as string | null | undefined;
 
   try {
@@ -91,6 +122,41 @@ Deno.serve(async (req) => {
       if (!customer) return fail(409, "no_customer", "There's no billing account yet.");
       const s = await stripe("billing_portal/sessions", { customer, return_url: back });
       return json(200, { ok: true, url: s.url });
+    }
+
+    if (body.action === "checkout" && body.plan === "locations") {
+      const loc = Deno.env.get("STRIPE_PRICE_LOCATION"), opening = Deno.env.get("STRIPE_PRICE_OPENING");
+      if (!loc) return fail(503, "not_configured", "Set STRIPE_PRICE_LOCATION for per-location billing.");
+      const ids = await storeIds(ws);
+      const p: Record<string, string> = {
+        mode: "subscription", success_url: `${back}?billing=success`, cancel_url: `${back}?billing=canceled`,
+        client_reference_id: ws, "metadata[workspace_id]": ws, "metadata[plan]": "locations",
+        "subscription_data[metadata][workspace_id]": ws, "subscription_data[metadata][plan]": "locations",
+        "line_items[0][price]": loc, "line_items[0][quantity]": String(Math.max(1, ids.length)),
+        allow_promotion_codes: "true",
+      };
+      if (opening && ids.length) { p["line_items[1][price]"] = opening; p["line_items[1][quantity]"] = String(ids.length); }
+      if (customer) p.customer = customer; else if (user.email) p.customer_email = user.email;
+      const sess = await stripe("checkout/sessions", p);
+      await admin.from("billing").upsert({ workspace_id: ws, charged_store_ids: ids }, { onConflict: "workspace_id" });
+      return json(200, { ok: true, url: sess.url });
+    }
+
+    if (body.action === "sync_locations") {
+      // Keep the subscription's store count in step with the workspace, and add the opening fee for new stores.
+      const subId = bill?.subscription_id as string | null | undefined;
+      const loc = Deno.env.get("STRIPE_PRICE_LOCATION"), opening = Deno.env.get("STRIPE_PRICE_OPENING");
+      if (!subId || !loc) return json(200, { ok: true, synced: false });
+      const sub = await stripeGet(`subscriptions/${encodeURIComponent(subId)}`);
+      if (sub?.metadata?.plan !== "locations" || !["active", "trialing", "past_due"].includes(sub.status)) return json(200, { ok: true, synced: false });
+      const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => i.price?.id === loc);
+      const ids = await storeIds(ws);
+      if (item && item.quantity !== Math.max(1, ids.length)) await stripe(`subscription_items/${item.id}`, { quantity: String(Math.max(1, ids.length)), proration_behavior: "create_prorations" });
+      const charged = new Set<string>((bill?.charged_store_ids as string[] | null) ?? []);
+      const fresh = ids.filter((id) => !charged.has(id));
+      if (opening && fresh.length && sub.customer) await stripe("invoiceitems", { customer: String(sub.customer), price: opening, quantity: String(fresh.length), subscription: subId, "metadata[workspace_id]": ws });
+      if (fresh.length) await admin.from("billing").update({ charged_store_ids: [...charged, ...fresh] }).eq("workspace_id", ws);
+      return json(200, { ok: true, synced: true, stores: ids.length, new_openings: fresh.length });
     }
 
     if (body.action === "checkout") {

@@ -248,6 +248,8 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
   const needOwner = () => (owner ? null : fnErr("forbidden", member ? "Only an owner of this workspace can do that." : "You are not a member of this workspace.", 403));
   switch (name) {
     case "billing": {
+      if (body.action === "prices") return json({ ok: true, location: null, opening: null });   // set in Stripe on the live app
+      if (body.action === "sync_locations") return json({ ok: true, synced: false });
       const no = needOwner(); if (no) return no;
       if (body.action === "portal") return fnErr("not_configured", "Billing management opens Stripe on the live app.", 409);
       const b = t("billing").find(x => x.workspace_id === ws); if (b) Object.assign(b, PLAN_SET[String(body.plan)] ?? {}, { stripe_customer_id: "cus_preview" });
