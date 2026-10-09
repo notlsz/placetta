@@ -55,6 +55,12 @@ Deno.serve(async (req) => {
           patch.entry_paid_at = new Date().toISOString();
           await log(ws, { en: "Paid", zh: "已付款" }, "entry");
         }
+        if (o.mode === "subscription" && o.metadata?.plan === "locations") {
+          // The stores at checkout paid their opening fee in it; later stores are charged by billing's sync_locations.
+          const { data: w } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
+          const stores = (w?.state as { stores?: { id?: unknown }[] } | null)?.stores;
+          patch.charged_store_ids = Array.isArray(stores) ? stores.map((x) => x?.id).filter((x): x is string => typeof x === "string") : [];
+        }
         if (Object.keys(patch).length) await admin.from("billing").update(patch).eq("workspace_id", ws);
       }
     } else if (event.type.startsWith("customer.subscription.")) {

@@ -138,8 +138,7 @@ Deno.serve(async (req) => {
       if (opening && ids.length) { p["line_items[1][price]"] = opening; p["line_items[1][quantity]"] = String(ids.length); }
       if (customer) p.customer = customer; else if (user.email) p.customer_email = user.email;
       const sess = await stripe("checkout/sessions", p);
-      await admin.from("billing").upsert({ workspace_id: ws, charged_store_ids: ids }, { onConflict: "workspace_id" });
-      return json(200, { ok: true, url: sess.url });
+      return json(200, { ok: true, url: sess.url });   // the webhook records which stores were charged, once it's paid
     }
 
     if (body.action === "sync_locations") {
