@@ -2,6 +2,7 @@
 // the company's Claude key, picks the model, adds research tools (web search and web fetch, so requirements
 // come from the agencies' own pages with citations), enforces membership, plan and a daily limit, and logs usage.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { callModel, type Tier } from "../_shared/llm.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -46,19 +47,13 @@ const FETCH_BETA = "web-fetch-2025-09-10";
 
 type Block = Record<string, unknown>;
 
-async function callClaude(key: string, payload: Record<string, unknown>, beta: string | null) {
-  const headers: Record<string, string> = { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" };
-  if (beta) headers["anthropic-beta"] = beta;
-  const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(payload) });
-  const text = await res.text();
-  return { res, text };
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
-  const key = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!key) return fail(503, "not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
+  const env = (k: string) => Deno.env.get(k);
+  const KEYS = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY"];
+  if (!KEYS.some((k) => env(k))) return fail(503, "not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
 
   const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
   const { data: auth } = await admin.auth.getUser(jwt);
@@ -111,23 +106,16 @@ Deno.serve(async (req) => {
   // Room for one PDF of up to 4.5 MB (about 6 MB once base64-encoded) plus the conversation.
   if (JSON.stringify(payload).length > 8_000_000) return fail(413, "bad_request", "That request is too large.");
 
-  let { res, text } = await callClaude(key, payload, research ? FETCH_BETA : null);
-  // If web fetch isn't available on this account, retry with web search only.
-  if (res.status === 400 && research && /web_fetch|beta/i.test(text)) {
-    payload.tools = [...pageTools, search];
-    ({ res, text } = await callClaude(key, payload, null));
+  // Cheapest capable model first: extraction runs on the fast route, conversations on the standard one, deep lookups on the deep one.
+  const tier: Tier = body.deep ? "deep" : (!research && !pageTools.length) ? "fast" : "standard";
+  const out = await callModel(env, { payload, tier, research, beta: research ? FETCH_BETA : null }, body.deep ? MODEL_DEEP : MODEL,
+    research ? { search, fetch: fetchTool, pageTools } : null);
+  if (!out.ok) {
+    console.error("models", out.model, out.status, out.text.slice(0, 300));
+    const code = out.status === 429 || out.status === 529 ? "rate_limited" : out.status === 401 || out.status === 503 ? "not_configured" : "upstream_error";
+    return fail(code === "rate_limited" ? 429 : 502, code, code === "rate_limited" ? "The agent is busy. Try again in a moment." : "Couldn't reach the agent's model. Try again.");
   }
-  // If search isn't enabled for the organization either, answer without research rather than failing.
-  if (res.status === 400 && research && /web_search/i.test(text)) {
-    payload.tools = pageTools.length ? pageTools : undefined;
-    ({ res, text } = await callClaude(key, payload, null));
-  }
-  if (!res.ok) {
-    console.error("anthropic", res.status, text.slice(0, 300));
-    const code = res.status === 429 || res.status === 529 ? "rate_limited" : res.status === 401 ? "not_configured" : "upstream_error";
-    return fail(code === "rate_limited" ? 429 : 502, code, code === "rate_limited" ? "Claude is busy. Try again in a moment." : "Couldn't reach Claude. Try again.");
-  }
-  const data = JSON.parse(text) as { usage?: { input_tokens?: number; output_tokens?: number } };
+  const data = out.data as { usage?: { input_tokens?: number; output_tokens?: number } };
   await admin.rpc("track_usage", { ws, p_calls: 1, p_in: data.usage?.input_tokens ?? 0, p_out: data.usage?.output_tokens ?? 0, p_tts: 0 });
   return json(200, data);
 });

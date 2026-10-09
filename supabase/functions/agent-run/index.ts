@@ -9,6 +9,7 @@
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { callModel } from "../_shared/llm.ts";
 // @ts-types="./agent.d.ts"
 import { normalizeState, runRounds, startState, stripState, type Reply, type RunState, type Services, type Step } from "./agent.js";
 
@@ -62,18 +63,12 @@ async function handOver(runId: string, token: string | null) {
 
 /* ------------------------------ the model ------------------------------ */
 
-async function callClaude(key: string, payload: Record<string, unknown>, beta: string | null) {
-  const headers: Record<string, string> = { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" };
-  if (beta) headers["anthropic-beta"] = beta;
-  const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(payload) });
-  return { res, text: await res.text() };
-}
 
 /** One model call: the company key, research on official sites, the daily limit and usage, as in the agent function. */
 async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal) {
   if (signal.aborted) throw err("cancelled", "Stopped");
-  const key = env("ANTHROPIC_API_KEY");
-  if (!key) throw err("not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
+  if (!["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY"].some((k) => env(k)))
+    throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
   const { data: usage } = await admin.from("agent_usage").select("calls").eq("workspace_id", ws).eq("day", new Date().toISOString().slice(0, 10)).maybeSingle();
   if ((usage?.calls ?? 0) >= DAILY_CALLS) throw err("rate_limited", "Today's agent limit is reached. It resets at midnight UTC.");
   const pageTools = (Array.isArray(body.tools) ? (body.tools as Block[]) : []).filter((t) => t && typeof t.name === "string" && !("type" in t)).slice(0, 24);
@@ -85,14 +80,13 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   if (typeof body.system === "string" && body.system) payload.system = body.system.slice(0, 80000);
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
   if (tools.length) payload.tools = tools;
-  let { res, text } = await callClaude(key, payload, research ? FETCH_BETA : null);
-  if (res.status === 400 && research && /web_fetch|beta/i.test(text)) { payload.tools = [...pageTools, search]; ({ res, text } = await callClaude(key, payload, null)); }
-  if (res.status === 400 && research && /web_search/i.test(text)) { payload.tools = pageTools.length ? pageTools : undefined; ({ res, text } = await callClaude(key, payload, null)); }
-  if (!res.ok) {
-    console.error("anthropic", res.status, text.slice(0, 300));
-    throw res.status === 429 || res.status === 529 ? err("rate_limited", "Claude is busy. Try again in a moment.") : err(res.status === 401 ? "not_configured" : "upstream_error", "Couldn't reach Claude. Try again.");
+  const out = await callModel((k) => Deno.env.get(k), { payload, tier: deep ? "deep" : "standard", research, beta: research ? FETCH_BETA : null }, deep ? MODEL_DEEP : MODEL,
+    research ? { search, fetch: fetchTool, pageTools } : null);
+  if (!out.ok) {
+    console.error("models", out.model, out.status, out.text.slice(0, 300));
+    throw out.status === 429 || out.status === 529 ? err("rate_limited", "The agent is busy. Try again in a moment.") : err(out.status === 401 || out.status === 503 ? "not_configured" : "upstream_error", "Couldn't reach the agent's model. Try again.");
   }
-  const data = JSON.parse(text) as { content: Block[]; stop_reason: string; usage?: { input_tokens?: number; output_tokens?: number } };
+  const data = out.data as { content: Block[]; stop_reason: string; usage?: { input_tokens?: number; output_tokens?: number } };
   await admin.rpc("track_usage", { ws, p_calls: 1, p_in: data.usage?.input_tokens ?? 0, p_out: data.usage?.output_tokens ?? 0, p_tts: 0 });
   return data as { content: never[]; stop_reason: string };
 }
