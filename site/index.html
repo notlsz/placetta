@@ -3531,6 +3531,8 @@ function xpResolve(el, on){
   let step = on ? 0 : xpPx.length; const seq = on ? [...xpPx, cv.width] : [...xpPx].reverse();
   let n = 0; el._t = setInterval(() => { xpDraw(cv, k, seq[n]); if (++n >= seq.length) clearInterval(el._t); }, 45);
 }
+// portrait swaps in the company tapestry: slot -> advisor photo index (photos past the tapestry slots are otherwise unused there)
+const XPSWAP = {15: 52};   // Tesla
 function renderXp(){
   const i = L(), art = document.getElementById("xpArt"); if (!art) return;
   // spread the portraits across the rows in proportion to the names, one after every name or so
@@ -3538,7 +3540,7 @@ function renderXp(){
   art.innerHTML = XPG.map((g, r) => {
     const names = g[1], share = r === XPG.length - 1 ? XPN - used : Math.round(XPN * names.length / total); used += share;
     const slots = new Set(Array.from({length: share}, (_, j) => Math.floor((j + .5) * names.length / share)));
-    const parts = names.map((x, j) => `<span class="xpn">${x[i]}</span>` + (slots.has(j) && k < XPN ? `<span class="xpf" data-k="${k++}" aria-hidden="true"><canvas width="128" height="128"></canvas></span>` : j < names.length - 1 ? `<span class="xps" aria-hidden="true">/</span>` : ""));
+    const parts = names.map((x, j) => `<span class="xpn">${x[i]}</span>` + (slots.has(j) && k < XPN ? `<span class="xpf" data-k="${XPSWAP[k] ?? k}" data-slot="${k++}" aria-hidden="true"><canvas width="128" height="128"></canvas></span>` : j < names.length - 1 ? `<span class="xps" aria-hidden="true">/</span>` : ""));
     return `<div class="xprow"><p class="xpcat">${g[0][i]}</p><p class="xpflow">${parts.join("")}</p></div>`;
   }).join("");
   art.querySelectorAll(".xpf").forEach(el => xpDraw(el.firstChild, +el.dataset.k, 128));
