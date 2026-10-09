@@ -519,6 +519,11 @@ html[lang="zh-CN"] .mnttl{letter-spacing:0}
 .mnmkp button em{font-style:normal;font-size:12px;color:var(--muted)}
 .mnsa{margin-left:10px;padding:0;border:0;background:none;font:inherit;color:var(--gs-ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .mnsa:hover{color:var(--ink)}
+/* the alerts call to action: button and its caption centred on each other, and centred against the headline */
+.mncta{flex-direction:column;align-items:center;text-align:center;gap:8px}
+.mncta small{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 10px}.mncta .mnsa{margin-left:0}
+@media (max-width:1023px){.mncta{align-self:center}}
+@media (min-width:1024px){.mnhd{align-items:center}.mncta{align-items:center}}
 .mnempty{padding:12px 10px;font-size:13px;line-height:1.45;color:var(--muted)}
 .mnpv{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:rgba(15,27,51,.38);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .mnpv[hidden]{display:none}
@@ -3409,16 +3414,16 @@ const TS = [
    st: ["Hands-off", "全程代办"], sl: ["regulatory approvals", "繁琐的监管审批"]},
   {logo: "logos/ink/eth-zurich.svg", lh: 26, alt: ["ETH Zürich", "苏黎世联邦理工学院"], vlogo: "logos/ink/faramir.svg", vlh: 28, valt: "Faramir", n: "Matteo", co: ["ETH Zürich", "苏黎世联邦理工"], ph: "media/people/matteo.jpg", big: "media/people/matteo-l.jpg", rl: ["Faramir, ETH Zürich", "Faramir，苏黎世联邦理工学院"],
    q: ["Simple. Extremely easy to use.", "简单，非常好用。"],
-   st: ["Effortless", "轻松上手"], sl: ["setup, start to finish", "从开始到完成，一路顺畅"]},
+   st: ["Every permit", "每一项许可"], sl: ["mapped and prepared for him", "都已梳理并备好材料"]},
   {logo: "logos/ink/princeton.png", lh: 44, alt: ["Princeton University", "普林斯顿大学"], vlogo: "logos/ink/belluh.svg", vlh: 32, valt: "Belluh", n: "Odelia", co: ["Princeton", "普林斯顿大学"], ph: "media/people/odelia.jpg", big: "media/people/odelia-l.jpg", rl: ["Belluh (acq., 7 figures), Princeton University", "Belluh（已被收购，七位数），普林斯顿大学"],
    q: ["I was introduced to this platform by my best friend. Placetta's founders worked with me to understand my exact needs and navigate the regulatory landscape.", "我经朋友介绍认识这个平台。快哉的创始人和我一起梳理了我的具体需求，带我走过了整个监管流程。"],
-   st: ["Tailored", "量身定制"], sl: ["guidance through the regulatory landscape", "带你走通整个监管流程"]},
+   st: ["1-on-1", "一对一"], sl: ["with Placetta's founders", "由快哉创始人亲自对接"]},
   {logo: "logos/ink/stanford.svg", lh: 30, alt: ["Stanford University", "斯坦福大学"], n: "Stefan", co: ["Stanford", "斯坦福大学"], ph: "media/people/stefan.jpg", big: "media/people/stefan-l.jpg", rl: ["Stanford University", "斯坦福大学"],
    q: ["Experts are fantastic! I was connected with an ex-Partner from Goldman Sachs, who assisted with our GTM and business model.", "专家团队太棒了！我被对接到一位前高盛合伙人，他帮我们梳理了市场进入策略和商业模式。"],
-   st: ["Real experts", "真正的专家"], sl: ["on GTM and business model", "把关市场进入与商业模式"]},
+   st: ["Expert on call", "专家随时在线"], sl: ["for strategy, not just paperwork", "不只是填表，更懂战略"]},
   {logo: "logos/ink/yale.svg", lh: 34, alt: ["Yale University", "耶鲁大学"], n: "Jean", co: ["Yale", "耶鲁大学"], ph: "media/people/jean.jpg", big: "media/people/jean-l.jpg", rl: ["Yale University · $1.5M NSF research grant", "耶鲁大学 · 获美国国家科学基金会 150 万美元研究资助"],
    q: ["They were the fastest company I've worked with.", "他们是我合作过的速度最快的公司。"],
-   st: ["Fastest", "最快"], sl: ["team I've worked with", "我合作过的团队里"]}
+   st: ["Fastest", "最快"], sl: ["team he has worked with", "他合作过的团队中速度第一"]}
 ];
 let tsK = 0, tsHold = false;
 function renderTsTabs(){
