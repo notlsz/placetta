@@ -3547,14 +3547,14 @@ function renderXp(){
    lit from above and shaded toward the belly. It breathes and bobs on the navy deep while light ripples across it. */
 (function xpWallInit(){
   const cv = document.getElementById("xpWall"); if (!cv) return;
-  const g = cv.getContext("2d"), PX = 16, tiles = [], mk = document.createElement("canvas"), mg = mk.getContext("2d", {willReadFrequently: true});
+  const g = cv.getContext("2d"), PX = 64, tiles = [], mk = document.createElement("canvas"), mg = mk.getContext("2d", {willReadFrequently: true});
   let W = 0, H = 0, dpr = 1, run = false, t0 = performance.now(), loaded = 0, cols = 80, rows = 28, cell = 15, sc = 1, offX = 0, offY = 0;
   // the still whale is drawn once at 4x the cell grid; each frame its rear columns are shifted up and down along a
   // travelling wave and the result is box-filtered down to one pixel per cell
   const SS = 4, st = document.createElement("canvas"), sg = st.getContext("2d"), bt = document.createElement("canvas"), bg = bt.getContext("2d"),
     hf = document.createElement("canvas"), hg = hf.getContext("2d");
   for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => {
-    const c = document.createElement("canvas"); c.width = c.height = PX; c.getContext("2d").drawImage(im, 0, 0, PX, PX); tiles[k] = c;
+    const c = document.createElement("canvas"); c.width = c.height = PX; const cg = c.getContext("2d"); cg.imageSmoothingQuality = "high"; cg.drawImage(im, 0, 0, PX, PX); tiles[k] = c;
     if (++loaded === XPN && !run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
   const size = () => {
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth;
@@ -3615,7 +3615,7 @@ function renderXp(){
     hg.clearRect(0, 0, hf.width, hf.height); hg.drawImage(bt, 0, 0, hf.width, hf.height);
     mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, cols, rows); mg.drawImage(hf, 0, 0, cols, rows);
     const m = mg.getImageData(0, 0, cols, rows).data;
-    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H); g.imageSmoothingEnabled = false;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
     // water streaming past: specks and thin streaks drift toward the tail at different depths
     for (let i = 0; i < 90; i++) {
       const z = .4 + (i % 5) * .15, px = ((i * 97.3 + t * 42 * z) % (W + 40)) - 20, py = (i * 53.7) % H;
@@ -3630,7 +3630,7 @@ function renderXp(){
       if (G > 128) { g.fillStyle = "#0A1426"; g.fillRect(x, y, cell, cell); continue; }       // eye, mouth
       const k = face(c, rs); if (tiles[k]) g.drawImage(tiles[k], x + .5, y + .5, cell - 1, cell - 1);
       // lit from above, darker toward the belly, with a band of light rippling along the body
-      const v = rs / rows, shade = B > 128 ? .05 : Math.min(.7, Math.max(0, (v - .35) * 1.1)) - .06;
+      const v = rs / rows, shade = B > 128 ? .03 : Math.min(.32, Math.max(0, (v - .45) * .8)) - .02;   // light touch, so every face stays clear
       g.fillStyle = shade > 0 ? `rgba(11,22,42,${shade.toFixed(3)})` : `rgba(235,244,252,${(-shade).toFixed(3)})`;
       g.fillRect(x + .5, y + .5, cell - 1, cell - 1);
     }
