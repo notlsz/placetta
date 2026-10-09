@@ -974,6 +974,10 @@ html[lang="zh-CN"] .mnhero .mnttl{letter-spacing:0}
 @media (max-width:1023px){.mntop2{flex-direction:column-reverse;gap:8px}.mncd{text-align:left;display:flex;align-items:baseline;gap:8px}.mncd b{font-size:34px}.mncd span,.mncd small{margin-top:0}.mnhero .mndt{padding:20px 18px 14px}.mnhero .mnfoot{padding:0 18px 18px}.mnhero .mnttl{font-size:19px}}
 @media (min-width:1024px){.mnsc .mnls{max-height:168px}}
 @media (min-width:1024px) and (max-height:820px){.mnkpi{margin-bottom:12px}.mnkpi strong{font-size:42px}.mnhero .mndt{padding:18px 24px 12px}.mncd b{font-size:38px}.mnsc .mnls{max-height:112px}.mnsc .mnd{padding:5px 8px}.mnsc .mnch{padding-top:11px}}
+/* monitor: no inner scrollers; the list shows the top changes and a button for the rest */
+.mnmore{display:block;width:calc(100% - 8px);margin:6px 4px 2px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+.mnmore:hover{border-color:#C9D2DE}
+#monitor .mnls,#monitor .mndl,#monitor .mndt{max-height:none!important;overflow:visible!important;-webkit-mask-image:none;mask-image:none}
 @media (min-width:1024px) and (max-height:820px){#monitor .mnstage{padding-top:22px;padding-bottom:22px}}
 /* v79: plan rows sit in one seamless white panel, no gaps and no dividers */
 .belrows{gap:0;background:#fff;border-radius:20px;box-shadow:0 18px 44px rgba(15,27,51,.10),0 1px 2px rgba(15,27,51,.04);overflow:hidden}
@@ -2309,7 +2313,7 @@ en:{
  "mon.cnt2":"{n} tracked", "mon.dl6":"Next 6 months", "mon.d1":"1 day", "mon.dn":"{n} days",
  "final.h":"Stay ahead of your competitors. Hire Placetta.",
  "map.any":"Choose a market", "map.anyus":"Choose a state", "map.q":"Search countries and regions", "map.qus":"Search states", "map.none":"No match. Try another name.",
- "mon.i.high":"High", "mon.i.med":"Medium", "mon.i.low":"Watch", "mon.l.means":"What it means for you", "mon.l.next":"What to do next", "mon.plan":"Get a plan for {m}", "mon.dl":"Upcoming deadlines", "mon.alert":"Get alerts for my markets", "mon.live":"Live feed, every change linked to its source",
+ "mon.i.high":"High", "mon.i.med":"Medium", "mon.i.low":"Watch", "mon.l.means":"What it means for you", "mon.l.next":"What to do next", "mon.plan":"Get a plan for {m}", "mon.dl":"Upcoming deadlines", "mon.alert":"Get alerts for my markets", "mon.live":"Live feed, every change linked to its source", "mon.all":"See all {n} changes",
  "app.t1":"Entry plan", "app.t2":"Filings", "app.t3":"Documents", "app.t4":"Renewals",
  "mon.f.all":"All", "mon.f.pol":"Politics and trade", "mon.f.reg":"Regulation", "mon.f.lab":"Labor", "mon.f.ind":"Industry", "mon.lv.high":"High impact", "mon.lv.med":"Medium impact", "mon.lv.low":"Watch", "mon.today":"Today", "mon.note":"Summaries for information only, not legal advice. Each item links to its source.",
  "app.reqs":"Requirements", "app.toast":"{p} approved", "app.toastS":"{a}, just now",
@@ -2392,7 +2396,7 @@ zh:{
  "mon.cnt2":"共 {n} 条", "mon.dl6":"未来 6 个月", "mon.d1":"1 天", "mon.dn":"{n} 天",
  "final.h":"领先对手，选择快哉。",
  "map.any":"选择市场", "map.anyus":"选择州", "map.q":"搜索国家和地区", "map.qus":"搜索州", "map.none":"没有匹配项，请换个名称试试。",
- "mon.live":"实时更新，每条变化均附来源", "mon.i.high":"较大", "mon.i.med":"中等", "mon.i.low":"关注", "mon.l.means":"对您意味着什么", "mon.l.next":"下一步该做什么", "mon.plan":"获取{m}开店计划", "mon.dl":"即将到来的截止日期", "mon.alert":"订阅我的市场提醒",
+ "mon.live":"实时更新，每条变化均附来源", "mon.all":"查看全部 {n} 条变化", "mon.i.high":"较大", "mon.i.med":"中等", "mon.i.low":"关注", "mon.l.means":"对您意味着什么", "mon.l.next":"下一步该做什么", "mon.plan":"获取{m}开店计划", "mon.dl":"即将到来的截止日期", "mon.alert":"订阅我的市场提醒",
  "app.t1":"开店计划", "app.t2":"申报", "app.t3":"文件", "app.t4":"续期",
  "mon.f.all":"全部", "mon.f.pol":"政治与贸易", "mon.f.reg":"监管", "mon.f.lab":"用工", "mon.f.ind":"行业", "mon.lv.high":"影响较大", "mon.lv.med":"影响中等", "mon.lv.low":"持续关注", "mon.today":"今天", "mon.note":"摘要仅供参考，不构成法律意见。每条动态均附来源链接。",
  "app.reqs":"全部要求", "app.toast":"{p}已批准", "app.toastS":"{a}，刚刚",
@@ -3369,6 +3373,7 @@ function monFeatured(){
   return 0;
 }
 const NEXT_IC = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+let monAll = false;
 function renderMon(center){
   const i = L();
   if (monSel < 0 || monSel >= MON.length){ monSel = monFeatured(); center = true; }
@@ -3381,9 +3386,11 @@ function renderMon(center){
     (nx ? `<div><strong>${nx.n}</strong><span>${t("mon.k3").replace("{m}", monCode(nx.x.mk)).replace("{s}", nx.x.s[i])}</span></div>` : "") +
     `<p class="mnlive"><i aria-hidden="true"></i>${t("mon.live")}</p>`;
   const list = document.getElementById("mnList");
+  if (!list.dataset.mb) { list.dataset.mb = 1; list.addEventListener("click", e => { if (!e.target.closest("#mnMore")) return; e.stopPropagation(); monAll = !monAll; renderMon(false); }, true); }
   const rank = {high: 0, med: 1, low: 2};
   const order = MON.map((x, k) => k).filter(k => keep(MON[k])).sort((a, b) => rank[MON[a].lv] - rank[MON[b].lv] || (MON[a].d < MON[b].d ? 1 : -1));
-  list.innerHTML = order.map(k => [MON[k], k]).map(([x, k]) => `<button type="button" class="mnr${k === monSel ? " on" : ""}" role="option" aria-selected="${k === monSel}" data-ti="${k}"><span class="t">${x.t[i]}</span><span class="pill ${monPill(x.lv)}">${t("mon.i." + x.lv)}</span><span class="m"><b>${monCode(x.mk)}</b>${monDate(x.d)}</span></button>`).join("");
+  const MNTOP = 5, shown = monAll ? order : order.slice(0, MNTOP).concat(order.slice(MNTOP).filter(k => k === monSel));
+  list.innerHTML = shown.map(k => [MON[k], k]).map(([x, k]) => `<button type="button" class="mnr${k === monSel ? " on" : ""}" role="option" aria-selected="${k === monSel}" data-ti="${k}"><span class="t">${x.t[i]}</span><span class="pill ${monPill(x.lv)}">${t("mon.i." + x.lv)}</span><span class="m"><b>${monCode(x.mk)}</b>${monDate(x.d)}</span></button>`).join("") + (order.length > MNTOP ? `<button type="button" class="mnmore" id="mnMore" aria-expanded="${monAll}">${monAll ? t("agy.less") : t("mon.all").replace("{n}", order.length)}</button>` : "");
   if (center){ const on = list.querySelector(".on"); if (on){ const top = on.offsetTop - list.offsetTop; if (top < list.scrollTop || top + on.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = Math.max(0, top - 8); } }
   renderMonDetail(MON[monSel]);
   const dls = MON_DL.map(x => ({x, n: monDays(x.d)})).filter(o => o.n >= 0 && keep(o.x)).slice(0, 3);
