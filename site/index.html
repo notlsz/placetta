@@ -1558,6 +1558,10 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
 #agencies .agright{display:flex;flex-direction:column;gap:20px}
 #agencies .agmap{background:var(--card)}
 @media (min-width:1024px){#agencies .agmap{padding:22px 24px}#agencies .mpstats b{font-size:26px}}
+#agencies .agmap{position:relative}
+#agencies .agmtabs{align-self:flex-start;background:#E4E9F0}
+#agencies .agmtabs button{white-space:nowrap}
+@media (max-width:1023px){#agencies .agmtabs{align-self:stretch}#agencies .agmtabs button{flex:1;padding:8px 4px;font-size:13px}}
 .agmore{display:block;margin:14px auto 0;padding:11px 18px;border:1px solid var(--line);border-radius:999px;background:#fff;font:inherit;font-size:14px;color:var(--ink);cursor:pointer;transition:border-color .2s,background .2s}
 .agmore:hover{border-color:#C9D2DE;background:#F6F8FB}
 
@@ -1968,6 +1972,7 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
       </div>
       <div class="agright" id="agRight">
     <div class="mpcard agmap" id="agMap">
+      <div class="mptabs agmtabs" role="tablist" aria-label="Map" data-i18n-aria="aria.map"><button type="button" role="tab" data-mv="us" aria-selected="true" data-i18n="map.us">United States</button><button type="button" role="tab" data-mv="world" aria-selected="false" data-i18n="map.world">Worldwide</button><button type="button" role="tab" data-mv="freight" aria-selected="false" data-i18n="map.fr">Freight</button></div>
       <div class="mpstats">
         <div><b id="mpN1">50</b><span id="mpS1" data-i18n="map.s1">US states covered</span></div>
         <div class="mpx"><b>170+</b><span data-i18n="map.s2">countries covered</span></div>
