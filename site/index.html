@@ -367,6 +367,12 @@ html[lang="zh-CN"] .belst strong{letter-spacing:0}
 .cnbtn{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .cnbtn small{font-size:13px;color:var(--muted)}
 .faq{display:flex;flex-direction:column;width:100%}
+.fq button .fqn{flex:none;width:34px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--faint);transition:color .3s}
+.fq button .fqt{flex:1;min-width:0}
+.fq.on button .fqn,.fq button:hover .fqn{color:var(--gs-d)}
+.fq .tg>div p a{color:var(--gs-ink);text-decoration:underline;text-underline-offset:3px}
+.faqcta{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:28px;padding:20px;border-radius:16px;background:var(--card);max-width:320px}
+.faqcta p{font-size:14px;line-height:1.45;color:var(--ink2)}
 .fq{border-bottom:1px solid var(--line)}
 .fq:first-child{border-top:1px solid var(--line)}
 @media (min-width:1024px){.fq:first-child{border-top:0}}
@@ -925,12 +931,16 @@ html[lang="zh-CN"] .qh{letter-spacing:0}
 #vcard .risk{border:0;background:#fff;border-radius:14px;box-shadow:0 8px 24px rgba(15,27,51,.06)}
 @media (max-width:1023px){#vcard .aside{margin:0 16px 16px}}
 /* ===== v78 monitor: value first, one featured alert, a quiet side column ===== */
-.mnkpi{display:flex;flex-wrap:wrap;gap:10px 48px;margin:0 2px 18px}
+.mnkpi{display:flex;flex-wrap:wrap;align-items:center;gap:10px 48px;margin:0 2px 20px}
 .mnkpi div{display:flex;align-items:baseline;gap:10px;min-width:0}
-.mnkpi strong{flex:none;font-weight:400;font-size:36px;line-height:1;letter-spacing:-1px;color:var(--ink);font-variant-numeric:tabular-nums}
+.mnkpi strong{flex:none;font-family:var(--serif);font-weight:300;font-size:52px;line-height:.9;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+.mnlive{display:inline-flex;align-items:center;gap:8px;margin-left:auto;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.75);font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.mnlive i{width:7px;height:7px;border-radius:50%;background:#3E9B5C;box-shadow:0 0 0 0 rgba(62,155,92,.5)}
+@media (prefers-reduced-motion:no-preference){.mnlive i{animation:mnlv 2s ease-out infinite}}
+@keyframes mnlv{0%{box-shadow:0 0 0 0 rgba(62,155,92,.5)}70%{box-shadow:0 0 0 8px rgba(62,155,92,0)}100%{box-shadow:0 0 0 0 rgba(62,155,92,0)}}
 .mnkpi strong.hi{color:var(--hi)}
 .mnkpi span{display:block;max-width:190px;font-size:13px;line-height:1.35;color:var(--ink2)}
-@media (max-width:639px){.mnkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}.mnkpi div{flex-direction:column;gap:4px}.mnkpi strong{font-size:28px}.mnkpi span{font-size:12px}}
+@media (max-width:639px){.mnkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}.mnkpi div{flex-direction:column;gap:4px}.mnkpi strong{font-size:36px}.mnkpi span{font-size:12px}.mnlive{grid-column:1/-1;justify-self:start;margin-left:0}}
 .mngrid{display:grid;grid-template-columns:minmax(0,1fr);gap:0;border-radius:22px;background:#fff;box-shadow:0 30px 70px rgba(15,27,51,.14),0 1px 2px rgba(15,27,51,.04)}
 @media (min-width:1024px){.mngrid{grid-template-columns:minmax(0,1fr) 300px;align-items:stretch}}
 @media (min-width:1280px){.mngrid{grid-template-columns:minmax(0,1fr) 330px}}
@@ -962,7 +972,7 @@ html[lang="zh-CN"] .mnhero .mnttl{letter-spacing:0}
 .mnsc .mnd .n{font-size:24px}
 @media (max-width:1023px){.mntop2{flex-direction:column-reverse;gap:8px}.mncd{text-align:left;display:flex;align-items:baseline;gap:8px}.mncd b{font-size:34px}.mncd span,.mncd small{margin-top:0}.mnhero .mndt{padding:20px 18px 14px}.mnhero .mnfoot{padding:0 18px 18px}.mnhero .mnttl{font-size:19px}}
 @media (min-width:1024px){.mnsc .mnls{max-height:168px}}
-@media (min-width:1024px) and (max-height:820px){.mnkpi{margin-bottom:12px}.mnkpi strong{font-size:30px}.mnhero .mndt{padding:18px 24px 12px}.mncd b{font-size:38px}.mnsc .mnls{max-height:112px}.mnsc .mnd{padding:5px 8px}.mnsc .mnch{padding-top:11px}}
+@media (min-width:1024px) and (max-height:820px){.mnkpi{margin-bottom:12px}.mnkpi strong{font-size:42px}.mnhero .mndt{padding:18px 24px 12px}.mncd b{font-size:38px}.mnsc .mnls{max-height:112px}.mnsc .mnd{padding:5px 8px}.mnsc .mnch{padding-top:11px}}
 @media (min-width:1024px) and (max-height:820px){#monitor .mnstage{padding-top:22px;padding-bottom:22px}}
 /* v79: plan rows sit in one seamless white panel, no gaps and no dividers */
 .belrows{gap:0;background:#fff;border-radius:20px;box-shadow:0 18px 44px rgba(15,27,51,.10),0 1px 2px rgba(15,27,51,.04);overflow:hidden}
@@ -1118,7 +1128,7 @@ html[lang="zh-CN"] .pst b{letter-spacing:0}
 .tsgrid{margin-bottom:56px}
 @media (min-width:1024px){.tsgrid{margin-bottom:64px}}
 .tsx{display:grid;grid-template-columns:minmax(0,1fr);margin:0;border-radius:20px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(15,27,51,.04),0 24px 60px rgba(15,27,51,.07)}
-@media (min-width:900px){.tsx{grid-template-columns:minmax(0,7fr) minmax(0,5fr);min-height:460px}}
+@media (min-width:900px){.tsx{grid-template-columns:minmax(0,2fr) minmax(0,1fr);min-height:400px}}
 .tsx.sw .tsl,.tsx.sw .tsph .tsbg{animation:tsin .5s cubic-bezier(.2,.8,.2,1)}
 .tsx .tsl{min-width:0}
 .tsx .tsl img.tslg{height:var(--lh)}
@@ -1162,7 +1172,7 @@ html[lang="zh-CN"] .tsx .tsl .tswm{font-family:var(--zhserif)}
 .tsctl button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:50%;background:var(--bg);color:var(--ink);transition:background-color .2s}
 .tsctl button:hover{background:var(--card)}
 .tsph{position:relative;min-height:340px;background:#C9DAEE;overflow:hidden}
-@media (max-width:899px){.tsph{min-height:0;aspect-ratio:4/3}}
+@media (max-width:899px){.tsph{min-height:0;aspect-ratio:16/10}}
 .tsph .tsbg{position:absolute;inset:0;background:#C9DAEE 50% 30%/cover no-repeat}
 .tsph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(10,23,48,.72) 100%)}
 .tsrs{position:absolute;left:24px;right:24px;bottom:22px;z-index:1;display:flex;flex-direction:column;gap:6px;color:#fff}
@@ -2103,7 +2113,7 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 
 <section class="sec rv" data-rv="up" id="faq" aria-labelledby="faqH">
   <div class="ctr faqrow">
-    <div class="sh"><h2 class="h2" id="faqH" data-i18n="faq.h">Questions</h2><p class="sub" data-i18n="faq.sub">Something else? Email <a href="mailto:support@placetta.com">support@placetta.com</a>.</p></div>
+    <div class="sh"><h2 class="h2" id="faqH" data-i18n="faq.h">Questions</h2><p class="sub" data-i18n="faq.sub">Something else? Email <a href="mailto:support@placetta.com">support@placetta.com</a>.</p><div class="faqcta"><p data-i18n="faq.talk">Talk to a person on our team, in English or Chinese.</p><a class="btn b-ink" href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="faq_demo" data-i18n="hero.demo">Book a demo</a></div></div>
     <div class="faq" id="faqList"></div>
   </div>
 </section>
@@ -2262,7 +2272,7 @@ en:{
  "mon.cnt2":"{n} tracked", "mon.dl6":"Next 6 months", "mon.d1":"1 day", "mon.dn":"{n} days",
  "final.h":"Stay ahead of your competitors. Hire Placetta.",
  "map.any":"Choose a market", "map.anyus":"Choose a state", "map.q":"Search countries and regions", "map.qus":"Search states", "map.none":"No match. Try another name.",
- "mon.i.high":"High", "mon.i.med":"Medium", "mon.i.low":"Watch", "mon.l.means":"What it means for you", "mon.l.next":"What to do next", "mon.plan":"Get a plan for {m}", "mon.dl":"Upcoming deadlines", "mon.alert":"Get alerts for my markets",
+ "mon.i.high":"High", "mon.i.med":"Medium", "mon.i.low":"Watch", "mon.l.means":"What it means for you", "mon.l.next":"What to do next", "mon.plan":"Get a plan for {m}", "mon.dl":"Upcoming deadlines", "mon.alert":"Get alerts for my markets", "mon.live":"Live feed, every change linked to its source",
  "app.t1":"Entry plan", "app.t2":"Filings", "app.t3":"Documents", "app.t4":"Renewals",
  "mon.f.all":"All", "mon.f.pol":"Politics and trade", "mon.f.reg":"Regulation", "mon.f.lab":"Labor", "mon.f.ind":"Industry", "mon.lv.high":"High impact", "mon.lv.med":"Medium impact", "mon.lv.low":"Watch", "mon.today":"Today", "mon.note":"Summaries for information only, not legal advice. Each item links to its source.",
  "app.reqs":"Requirements", "app.toast":"{p} approved", "app.toastS":"{a}, just now",
@@ -2284,7 +2294,7 @@ en:{
  "resume":"Finish your {m} entry plan",
  "mbar.r":"Finish your plan, step {n} of 4", "mbar.b":"Get my plan", "mbar.rb":"Continue",
  "map.h":"Where we work", "map.sub":"From São Paulo to Nairobi to Kuala Lumpur, one team files the paperwork. The darker the market, the more brands we open there.", "map.us":"United States", "map.world":"Worldwide", "map.s1":"US states covered", "map.s2":"countries covered", "map.desc":"Map of markets where Placetta handles compliance", "map.pick":"Choose a market", "map.prompt":"Pick a state or country to start a plan there.", "map.go":"Get your entry plan for {m}", "map.t1":"Most brand openings", "map.t2":"Active market", "map.t3":"Growing market", "map.t4":"Covered",
- "faq.h":"Questions",
+ "faq.h":"Questions", "faq.talk":"Talk to a person on our team, in English or Chinese.",
  "foot.pricing":"Pricing", "foot.guides":"License guides", "foot.privacy":"Privacy policy", "foot.terms":"Terms & conditions", "foot.wechat":"WeChat",
  "done.btn":"Back to the page",
  "nav.cases":"Customers",
@@ -2345,7 +2355,7 @@ zh:{
  "mon.cnt2":"共 {n} 条", "mon.dl6":"未来 6 个月", "mon.d1":"1 天", "mon.dn":"{n} 天",
  "final.h":"领先对手，选择快哉。",
  "map.any":"选择市场", "map.anyus":"选择州", "map.q":"搜索国家和地区", "map.qus":"搜索州", "map.none":"没有匹配项，请换个名称试试。",
- "mon.i.high":"较大", "mon.i.med":"中等", "mon.i.low":"关注", "mon.l.means":"对您意味着什么", "mon.l.next":"下一步该做什么", "mon.plan":"获取{m}开店计划", "mon.dl":"即将到来的截止日期", "mon.alert":"订阅我的市场提醒",
+ "mon.live":"实时更新，每条变化均附来源", "mon.i.high":"较大", "mon.i.med":"中等", "mon.i.low":"关注", "mon.l.means":"对您意味着什么", "mon.l.next":"下一步该做什么", "mon.plan":"获取{m}开店计划", "mon.dl":"即将到来的截止日期", "mon.alert":"订阅我的市场提醒",
  "app.t1":"开店计划", "app.t2":"申报", "app.t3":"文件", "app.t4":"续期",
  "mon.f.all":"全部", "mon.f.pol":"政治与贸易", "mon.f.reg":"监管", "mon.f.lab":"用工", "mon.f.ind":"行业", "mon.lv.high":"影响较大", "mon.lv.med":"影响中等", "mon.lv.low":"持续关注", "mon.today":"今天", "mon.note":"摘要仅供参考，不构成法律意见。每条动态均附来源链接。",
  "app.reqs":"全部要求", "app.toast":"{p}已批准", "app.toastS":"{a}，刚刚",
@@ -2367,7 +2377,7 @@ zh:{
  "resume":"完成您的{m}开店计划",
  "mbar.r":"完成您的计划（第 {n}/4 步）", "mbar.b":"获取计划", "mbar.rb":"继续",
  "map.h":"业务覆盖", "map.sub":"从圣保罗到内罗毕，再到吉隆坡，同一支团队为您办妥所有手续。颜色越深，我们在当地帮助开店的品牌越多。", "map.us":"美国", "map.world":"全球", "map.s1":"个美国州", "map.s2":"个国家和地区", "map.desc":"快哉提供合规服务的市场地图", "map.pick":"选择市场", "map.prompt":"点击任意州或国家，开始规划在当地开店。", "map.go":"获取{m}开店计划", "map.t1":"开店最多", "map.t2":"活跃市场", "map.t3":"增长市场", "map.t4":"已覆盖",
- "faq.h":"常见问题",
+ "faq.h":"常见问题", "faq.talk":"直接与我们团队的人沟通，中英文均可。",
  "foot.pricing":"价格", "foot.guides":"执照指南", "foot.privacy":"隐私政策", "foot.terms":"服务条款", "foot.wechat":"微信",
  "done.btn":"返回页面",
  "nav.cases":"客户案例",
@@ -2414,7 +2424,8 @@ const TIERS = [
  {l:["Scale","规模版"],v:["$5,000+","5,000+ 美元"],u:["/month","/月"],n:["Billed annually. 26+ locations, any number of markets.","按年计费。26 家门店以上，市场数量不限。"],f:[["Everything in Growth","包含成长版全部功能"],["Unlimited markets","市场数量不限"],["SSO, API and audit log","单点登录、接口与审计日志"],["A named compliance lead","专属合规负责人"]]}
 ];
 const FAQ = [
- [["How much does it cost?","费用是多少？"],["Start with a $299 entry plan for any market, ready instantly and credited toward your first year. Plans are billed annually. Starter is $750 a month for up to 5 locations in one market. Growth is $2,000 a month for up to 25 locations in three markets. Scale starts at $5,000 a month for 26+ locations in any number of markets. Every plan includes AI-prepared filings for every opening, automatic license renewals and the policy monitor. Extra locations are $100 a month each. In-person partner work is quoted per step before we start. Government fees are paid by you directly to each agency, through the payment link we send.","先以 299 美元获取任一市场的开店合规计划，即时生成，可抵扣首年订阅费用。所有方案按年计费：入门版每月 750 美元，1 个市场最多 5 家门店；成长版每月 2,000 美元，3 个市场最多 25 家门店；规模版每月 5,000 美元起，26 家门店以上，市场数量不限。每个方案都包含每次开店的智能申报、执照自动续期和政策监测。超出的门店每家每月 100 美元。线下合作伙伴的工作在开始前逐项报价。政府规费由您通过我们发送的付款链接直接支付给各机构。"]],
+ [["How much does it cost?","费用是多少？"],["Start with a $299 entry plan for any market, credited toward your first year. Plans start at $750 a month, billed annually, and include filings for every opening, automatic renewals and the policy monitor. Government fees are paid by you directly to each agency. <a href=\"#pricing\">See all plans</a>","先以 299 美元获取任一市场的开店计划，可抵扣首年费用。订阅方案每月 750 美元起，按年计费，包含每次开店的申报、执照自动续期和政策监测。政府规费由您直接支付给各机构。<a href=\"#pricing\">查看全部方案</a>"]],
+ [["What happens if an agency rejects a filing?","如果申请被政府退回怎么办？"],["Our team reads the agency's reason, corrects the application with you, and resubmits it. Before anything is filed, the agent checks each application for missing documents and form errors, and nothing goes in without your approval.","我们的团队会根据机构给出的原因，与您一起修正申请并重新提交。在任何申请提交之前，智能代理都会检查是否缺少文件或存在表格错误，且未经您批准不会提交。"]],
  [["Who pays the government fees?","政府规费由谁支付？"],["You do, directly to each agency. When a fee is due, we send you the agency's payment link. Your plan lists estimated fees upfront, and the agency sets the final amount.","由您直接支付给各政府机构。需要缴费时，我们会把机构的付款链接发给您。您的计划会提前列出预估费用，最终金额以机构为准。"]],
  [["Who files the applications?","申请由谁提交？"],["Placetta's AI agent prepares each application from your documents. You review and approve it, then our team files it and follows up with the agency until it's decided.","快哉的智能代理根据您的资料准备每一份申请。您审阅并确认后，由我们的团队提交，并与政府部门持续跟进，直至有结果。"]],
  [["Is this legal advice?","这是法律意见吗？"],["No. Placetta is software and a managed service. Where a step requires a licensed attorney, we connect you with a partner firm.","不是。快哉是软件和托管服务。如某一步骤需要持牌律师，我们会为您对接合作律所。"]],
@@ -2656,10 +2667,10 @@ function renderBel(anim){ showTea(); renderCases(anim); renderTea(anim); }
 
 /* ============ pricing, faq ============ */
 function renderPrice(){ const i = L(); document.getElementById("tiers").innerHTML = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul></div>`).join(""); }
-let fOpen = -1;
+let fOpen = 0;
 function renderFaq(){
   const i = L();
-  document.getElementById("faqList").innerHTML = FAQ.map((f,k) => `<div class="fq ${k===fOpen?"on":""}"><button type="button" data-f="${k}" aria-expanded="${k===fOpen}">${f[0][i]}<svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></button><div class="tg"><div><p>${f[1][i]}</p></div></div></div>`).join("");
+  document.getElementById("faqList").innerHTML = FAQ.map((f,k) => `<div class="fq ${k===fOpen?"on":""}"><button type="button" data-f="${k}" aria-expanded="${k===fOpen}"><span class="fqt">${f[0][i]}</span><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></button><div class="tg"><div><p>${f[1][i]}</p></div></div></div>`).join("");
   document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { const k = +b.dataset.f; fOpen = fOpen === k ? -1 : k; renderFaq(); }));
 }
 
@@ -3328,7 +3339,8 @@ function renderMon(center){
   document.getElementById("mnCnt").textContent = t("mon.cnt2").replace("{n}", MON.filter(keep).length);
   const items = MON.filter(keep), nx = MON_DL.map(x => ({x, n: monDays(x.d)})).filter(o => o.n >= 0 && keep(o.x))[0];
   document.getElementById("mnKpi").innerHTML = `<div><strong>${items.length}</strong><span>${t("mon.k1")}</span></div><div><strong class="hi">${items.filter(x => x.lv === "high").length}</strong><span>${t("mon.k2")}</span></div>` +
-    (nx ? `<div><strong>${nx.n}</strong><span>${t("mon.k3").replace("{m}", monCode(nx.x.mk)).replace("{s}", nx.x.s[i])}</span></div>` : "");
+    (nx ? `<div><strong>${nx.n}</strong><span>${t("mon.k3").replace("{m}", monCode(nx.x.mk)).replace("{s}", nx.x.s[i])}</span></div>` : "") +
+    `<p class="mnlive"><i aria-hidden="true"></i>${t("mon.live")}</p>`;
   const list = document.getElementById("mnList");
   const rank = {high: 0, med: 1, low: 2};
   const order = MON.map((x, k) => k).filter(k => keep(MON[k])).sort((a, b) => rank[MON[a].lv] - rank[MON[b].lv] || (MON[a].d < MON[b].d ? 1 : -1));
