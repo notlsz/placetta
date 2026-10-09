@@ -252,6 +252,10 @@ html[lang="zh-CN"] .tsr strong{letter-spacing:0}
 @media (min-width:1024px){.dcard{gap:48px;border-radius:16px;padding:63px 24px 64px}}
 @media (min-width:1280px){.dcard{width:850px;flex-shrink:0;padding-inline:44px}}
 .per{display:flex;flex-direction:column;align-items:center;gap:4px}
+.pain{display:inline-block;padding:3px 8px;border-radius:999px;background:#F8E5E2;color:#9C3A2E;font-size:9.5px;line-height:1.3;font-weight:500;white-space:nowrap}
+@media (min-width:1024px){.pain{font-size:11.5px;padding:4px 10px}}
+@media (prefers-reduced-motion:no-preference){.pain{animation:painb 3.2s ease-in-out infinite}.per:nth-child(2) .pain{animation-delay:.5s}.per:nth-child(3) .pain{animation-delay:1s}.per:nth-child(4) .pain{animation-delay:1.5s}.per:nth-child(5) .pain{animation-delay:2s}.per:nth-child(6) .pain{animation-delay:2.5s}}
+@keyframes painb{0%,70%,100%{transform:none}78%{transform:translateY(-3px)}86%{transform:none}}
 @media (min-width:1024px){.per{gap:10px}}
 .tag{display:flex;align-items:center;justify-content:center;height:34px;width:84px;border-radius:5px;padding:0 6px;background:rgba(255,255,255,.62);text-align:center;font-size:9px;line-height:1.25;font-weight:510}
 @media (min-width:1024px){.tag{height:48px;width:110px;border-radius:8px;padding:0 14px;font-size:12px;line-height:1.4}}
@@ -3406,16 +3410,16 @@ const TS = [
    st: ["5 months", "5 个月"], sl: ["saved in approval time", "节省的审批时间"]},
   {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", co: ["Starbucks", "星巴克"], ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
    q: ["Placetta has taken over the tedious regulatory approvals so my team can focus on scaling instead of filings.", "快哉接手了繁琐的监管审批，让我的团队专注于扩张，而不是埋头申报。"],
-   st: ["Hands-off", "全程代办"], sl: ["regulatory approvals", "繁琐的监管审批"]},
+   st: ["50 states", "50 个州"], sl: ["of approvals, one team handles them all", "的审批，一个团队全部代办"]},
   {logo: "logos/ink/eth-zurich.svg", lh: 26, alt: ["ETH Zürich", "苏黎世联邦理工学院"], vlogo: "logos/ink/faramir.svg", vlh: 20, valt: "Faramir", n: "Matteo", co: ["ETH Zürich", "苏黎世联邦理工"], ph: "media/people/matteo.jpg", big: "media/people/matteo-l.jpg", rl: ["Faramir, ETH Zürich", "Faramir，苏黎世联邦理工学院"],
    q: ["Simple. Extremely easy to use.", "简单，非常好用。"],
-   st: ["Every permit", "每一项许可"], sl: ["mapped and prepared for him", "都已梳理并备好材料"]},
+   st: ["$299", "299 美元"], sl: ["per market, plan ready in minutes", "一个市场，几分钟出计划"]},
   {logo: "logos/ink/princeton.png", lh: 44, alt: ["Princeton University", "普林斯顿大学"], vlogo: "logos/ink/belluh.svg", vlh: 22, valt: "Belluh", n: "Odelia", co: ["Princeton", "普林斯顿大学"], ph: "media/people/odelia.jpg", big: "media/people/odelia-l.jpg", rl: ["Belluh (acq., 7 figures), Princeton University", "Belluh（已被收购，七位数），普林斯顿大学"],
    q: ["I was introduced to this platform by my best friend. Placetta's founders worked with me to understand my exact needs and navigate the regulatory landscape.", "我经朋友介绍认识这个平台。快哉的创始人和我一起梳理了我的具体需求，带我走过了整个监管流程。"],
    st: ["7 figures", "七位数"], sl: ["Belluh acquisition", "Belluh 被收购金额"]},
   {logo: "logos/ink/stanford.svg", lh: 30, alt: ["Stanford University", "斯坦福大学"], n: "Stefan", co: ["Stanford", "斯坦福大学"], ph: "media/people/stefan.jpg", big: "media/people/stefan-l.jpg", rl: ["Stanford University", "斯坦福大学"],
    q: ["Experts are fantastic! I was connected with an ex-Partner from Goldman Sachs, who assisted with our GTM and business model.", "专家团队太棒了！我被对接到一位前高盛合伙人，他帮我们梳理了市场进入策略和商业模式。"],
-   st: ["Expert on call", "专家随时在线"], sl: ["for strategy, not just paperwork", "不只是填表，更懂战略"]},
+   st: ["50+ experts", "50+ 位专家"], sl: ["from Goldman Sachs, the FDA, OpenAI and more", "来自高盛、FDA、OpenAI 等"]},
   {logo: "logos/ink/yale.svg", lh: 34, alt: ["Yale University", "耶鲁大学"], n: "Jean", co: ["Yale", "耶鲁大学"], ph: "media/people/jean.jpg", big: "media/people/jean-l.jpg", rl: ["Yale University · $1.5M NSF research grant", "耶鲁大学 · 获美国国家科学基金会 150 万美元研究资助"],
    q: ["They were the fastest company I've worked with.", "他们是我合作过的速度最快的公司。"],
    st: ["$1.5M", "150 万美元"], sl: ["NSF research grant won", "获美国国家科学基金会研究资助"]}
@@ -3451,7 +3455,7 @@ if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getE
 
 /* ============ boot ============ */
 /* ============ restored sections (from the earlier site) ============ */
-const BEFORE = [["City business license office","市营业执照办公室"],["County health department","县卫生部门"],["Fire marshal","消防部门"],["Building department","建筑部门"],["State tax agency","州税务机构"],["Permit consultant","许可顾问"]];
+const BEFORE = [["City business license office","市营业执照办公室","On hold","电话排队中"],["County health department","县卫生部门","Form sent back","表格被退回"],["Fire marshal","消防部门","Inspection pending","等待检查"],["Building department","建筑部门","Plans resubmitted","图纸重新提交"],["State tax agency","州税务机构","Separate login","另一个账户"],["Permit consultant","许可顾问","Billed hourly","按小时计费"]];
 
 
 const DASHROWS = [
@@ -3470,7 +3474,7 @@ function renderDash(){
 }
 
 
-function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map(b => `<div class="per"><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div></div>`).join(""); }
+function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map(b => `<div class="per"><span class="pain">${b[2 + i]}</span><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div></div>`).join(""); }
 
 
 const isLg = () => innerWidth >= 1024;
