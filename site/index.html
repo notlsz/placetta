@@ -1690,6 +1690,36 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 #agencies .agt.agt-m{background:#E2EDF5;color:#0F1B33}
 #agencies .agi li .agt{background:rgba(255,255,255,.22);color:inherit;backdrop-filter:blur(4px)}
 #agencies .agk-p .agt,#agencies .agk-m .agt{background:rgba(255,255,255,.55);color:#0F1B33}
+
+/* your newest teammate */
+.tmg{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:900px){.tmg{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tmc{border-radius:20px;background:var(--card);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.tmhd{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tmhd b{font-size:15px;color:var(--ink)}
+.tmr{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tmr li{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px 14px}
+.tmr .av{width:34px;height:34px;border-radius:50%;background:var(--gs-ll);color:var(--gs-ink);display:grid;place-items:center;font-size:13px;font-weight:600;flex-shrink:0}
+.tmr .orb{width:34px;height:34px}
+.tmr li>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tmr b{font-size:14px;color:var(--ink);font-weight:600}
+.tmr small{font-size:13px;color:var(--ink2)}
+.tmr .me{box-shadow:0 0 0 1.5px var(--gs),0 14px 34px rgba(77,115,163,.16)}
+.tmr em{font-style:normal;display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:var(--gs-ink)}
+.tmr .live{width:7px;height:7px;border-radius:50%;background:var(--ok);flex-shrink:0;animation:tmpulse 2s ease-in-out infinite}
+@keyframes tmpulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.tmr .live{animation:none}}
+.tmj{margin:0;background:#fff;border-radius:14px;padding:4px 14px}
+.tmj div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid #F0F2F5}
+.tmj div:last-child{border-bottom:0}
+.tmj dt{font-size:12px;color:var(--muted);padding-top:1px}
+.tmj dd{margin:0;font-size:14px;line-height:1.4;color:var(--ink)}
+.tmw{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tmw li{display:grid;grid-template-columns:30px 22px minmax(0,1fr);align-items:start;gap:10px;background:#fff;border-radius:14px;padding:11px 14px}
+.tmw .d{font-size:12px;color:var(--muted);padding-top:3px}
+.tmw .orb{width:22px;height:22px}
+.tmw p{margin:0;font-size:14px;line-height:1.4;color:var(--ink)}
+#teammate .howtry{margin-top:20px}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -1748,15 +1778,15 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
         <p data-i18n="hero.badge">31,000+ businesses served by our team since 2016</p>
       </div>
       <div class="hstack">
-        <h1 data-i18n="hero.h1">Open your first US&nbsp;store<br><em>months sooner.</em></h1>
-        <p class="hsub" data-i18n="hero.sub">Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.</p>
+        <h1 data-i18n="hero.h1">Meet Placetta,<br><em>your AI permits manager.</em></h1>
+        <p class="hsub" data-i18n="hero.sub">Placetta joins your expansion team. It maps every license your US stores need, prepares each filing and keeps them all current. Our team files after you approve, in English or Chinese.</p>
         <div class="stwrap">
           <form class="starter" data-src="hero" novalidate>
             <label class="sr" for="st-hero" data-i18n="st.label">Where are you opening?</label>
             <input id="st-hero" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
             <button type="submit" class="btn b-white" data-i18n="st.btn">Get my plan</button>
           </form>
-          <p class="stalt"><a href="/app/" data-track="hero_try_agent"><span data-i18n="hero.try">Try the agent</span><i aria-hidden="true">→</i></a><a href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo"><span data-i18n="hero.demo">Book a demo</span><i aria-hidden="true">→</i></a></p>
+          <p class="stalt"><a href="/app/" data-track="hero_try_agent"><span data-i18n="hero.try">Put Placetta to work</span><i aria-hidden="true">→</i></a><a href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo"><span data-i18n="hero.demo">Book a demo</span><i aria-hidden="true">→</i></a></p>
         </div>
       </div>
     </div>
@@ -1829,6 +1859,48 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
   <div class="ctr">
     <p class="invl" id="invL" data-i18n="inv.l">The brands we serve are backed by</p>
     <div class="invr" id="invR"></div>
+  </div>
+</section>
+
+<!-- ======================= YOUR NEWEST TEAMMATE ======================= -->
+<section class="sec rv" data-rv="up" id="teammate" aria-labelledby="tmH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="tmH" data-i18n="tm.h">Your newest teammate.</h2><p class="sub" data-i18n="tm.sub">Add Placetta to your expansion team like any other hire. It owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.</p></div>
+    <div class="tmg">
+      <article class="tmc">
+        <div class="tmhd"><b data-i18n="tm.team">US expansion team</b><span class="atag" data-i18n="tm.sample">Sample team</span></div>
+        <ul class="tmr">
+          <li><span class="av" data-i18n="tm.a1">Y</span><span><b data-i18n="tm.r1">You</b><small data-i18n="tm.r1s">Head of US expansion</small></span></li>
+          <li><span class="av" data-i18n="tm.a2">R</span><span><b data-i18n="tm.r2">Real estate lead</b><small data-i18n="tm.r2s">Sites and leases</small></span></li>
+          <li><span class="av" data-i18n="tm.a3">C</span><span><b data-i18n="tm.r3">Construction manager</b><small data-i18n="tm.r3s">Build-out and inspections</small></span></li>
+          <li class="me"><span class="orb"></span><span><b data-i18n="tm.r4">Placetta</b><small data-i18n="tm.r4s">Permits and licenses</small><em><i class="live"></i><span data-i18n="tm.now">Working now: San José health permit packet</span></em></span></li>
+        </ul>
+      </article>
+      <article class="tmc">
+        <div class="tmhd"><b data-i18n="tm.jd">Role card</b><span class="atag" data-i18n="tm.jdt">Placetta</span></div>
+        <dl class="tmj">
+          <div><dt data-i18n="tm.k1">Role</dt><dd data-i18n="tm.v1">Permits and licenses manager</dd></div>
+          <div><dt data-i18n="tm.k2">Reports to</dt><dd data-i18n="tm.v2">You</dd></div>
+          <div><dt data-i18n="tm.k3">Hours</dt><dd data-i18n="tm.v3">Always on, every time zone</dd></div>
+          <div><dt data-i18n="tm.k4">Languages</dt><dd data-i18n="tm.v4">English and Chinese</dd></div>
+          <div><dt data-i18n="tm.k5">Works in</dt><dd data-i18n="tm.v5">Gmail, Outlook, Slack, Google Calendar, Google Drive</dd></div>
+          <div><dt data-i18n="tm.k6">Owns</dt><dd data-i18n="tm.v6">Every license each store needs, in order, filed on time and renewed before it lapses</dd></div>
+          <div><dt data-i18n="tm.k7">Asks you for</dt><dd data-i18n="tm.v7">Approvals, signatures, agency fees and ID checks</dd></div>
+          <div><dt data-i18n="tm.k8">Never</dt><dd data-i18n="tm.v8">Files anything you have not approved</dd></div>
+        </dl>
+      </article>
+      <article class="tmc">
+        <div class="tmhd"><b data-i18n="tm.wk">A week with Placetta</b><span class="atag" data-i18n="tm.wks">Sample week</span></div>
+        <ol class="tmw">
+          <li><span class="d" data-i18n="tm.d1">Mon</span><span class="orb"></span><p data-i18n="tm.m1">Your week ahead: 3 filings due across 2 stores. Each one is ready for review.</p></li>
+          <li><span class="d" data-i18n="tm.d2">Tue</span><span class="orb"></span><p data-i18n="tm.m2">The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.</p></li>
+          <li><span class="d" data-i18n="tm.d3">Wed</span><span class="orb"></span><p data-i18n="tm.m3">Filed with Santa Clara County. The receipt is saved to your drive.</p></li>
+          <li><span class="d" data-i18n="tm.d4">Thu</span><span class="orb"></span><p data-i18n="tm.m4">The county asked for a revised floor plan. I let the construction manager know.</p></li>
+          <li><span class="d" data-i18n="tm.d5">Fri</span><span class="orb"></span><p data-i18n="tm.m5">The business tax certificate renews in 30 days. The renewal is drafted.</p></li>
+        </ol>
+      </article>
+    </div>
+    <a class="howtry" href="/app/" data-track="teammate_try"><span data-i18n="tm.cta">Put Placetta to work on your stores</span><span aria-hidden="true">→</span></a>
   </div>
 </section>
 
@@ -2301,9 +2373,9 @@ en:{
  "nav.how":"How it works", "nav.faq":"FAQ","nav.login":"Log in","nav.app":"Open app",
  "q.goT":"Your plan is ready to build.","q.goP":"Confirm {c} and Placetta maps every license, permit and registration for {m}, with fees and timelines, in a few minutes.","q.go":"Build my plan","q.goN":"Free. Nothing is filed or paid without your approval.",
  "cta.plan":"Get your entry plan",
- "hero.badge":"31,000+ businesses served by our team since 2016",
+ "tm.cta":"Put Placetta to work on your stores","tm.m5":"The business tax certificate renews in 30 days. The renewal is drafted.","tm.m4":"The county asked for a revised floor plan. I let the construction manager know.","tm.m3":"Filed with Santa Clara County. The receipt is saved to your drive.","tm.m2":"The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.","tm.m1":"Your week ahead: 3 filings due across 2 stores. Each one is ready for review.","tm.d5":"Fri","tm.d4":"Thu","tm.d3":"Wed","tm.d2":"Tue","tm.d1":"Mon","tm.wks":"Sample week","tm.wk":"A week with Placetta","tm.v8":"Files anything you have not approved","tm.k8":"Never","tm.v7":"Approvals, signatures, agency fees and ID checks","tm.k7":"Asks you for","tm.v6":"Every license each store needs, in order, filed on time and renewed before it lapses","tm.k6":"Owns","tm.v5":"Gmail, Outlook, Slack, Google Calendar, Google Drive","tm.k5":"Works in","tm.v4":"English and Chinese","tm.k4":"Languages","tm.v3":"Always on, every time zone","tm.k3":"Hours","tm.v2":"You","tm.k2":"Reports to","tm.v1":"Permits and licenses manager","tm.k1":"Role","tm.jdt":"Placetta","tm.jd":"Role card","tm.now":"Working now: San José health permit packet","tm.r4":"Placetta","tm.r4s":"Permits and licenses","tm.r3s":"Build-out and inspections","tm.r3":"Construction manager","tm.r2s":"Sites and leases","tm.r2":"Real estate lead","tm.r1s":"Head of US expansion","tm.a1":"Y","tm.a2":"R","tm.a3":"C","tm.r1":"You","tm.sample":"Sample team","tm.team":"US expansion team","tm.sub":"Add Placetta to your expansion team like any other hire. It owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.","tm.h":"Your newest teammate.","hero.badge":"31,000+ businesses served by our team since 2016",
  "brands.l":"Franchise operators of",
- "hero.sample":"See a sample plan","hero.try":"Try the agent","hero.demo":"Book a demo","how.try":"Try it on your store","aria.proof":"Track record","pf.s1":"businesses served by our team since 2016","pf.n2":"3+ per day","pf.s2":"new US businesses served by our team, on average","pf.s3":"US states covered, plus 170+ countries","pf.n4":"5 months","pf.s4":"saved in approval time for CHAGEE","ag.h":"Watch the agent work.","ag.p":"It reads your documents, checks each agency's own site, fills the forms and drafts the letters. Every value shows the words it came from, and nothing is filed until you approve.","aria.ag":"Sample agent run","ag.tag":"Sample run","ag.l1":"Read your lease and LLC filing","ag.l2":"Checked Santa Clara County and City of San José requirements","ag.l2s":"Sources: sccgov.org, sanjoseca.gov","ag.l3":"Found 8 requirements, in order, with estimated fees","ag.l4":"Filled the health permit plan check from your lease","ag.l4q":"Tenant: Qinghuan Tea House LLC","ag.l5":"Drafted the landlord consent letter","ag.l5s":"landlord-consent.docx, saved to Documents","ag.l6":"Waiting for your approval before anything is filed",
+ "hero.sample":"See a sample plan","hero.try":"Put Placetta to work","hero.demo":"Book a demo","how.try":"Try it on your store","aria.proof":"Track record","pf.s1":"businesses served by our team since 2016","pf.n2":"3+ per day","pf.s2":"new US businesses served by our team, on average","pf.s3":"US states covered, plus 170+ countries","pf.n4":"5 months","pf.s4":"saved in approval time for CHAGEE","ag.h":"Watch the agent work.","ag.p":"It reads your documents, checks each agency's own site, fills the forms and drafts the letters. Every value shows the words it came from, and nothing is filed until you approve.","aria.ag":"Sample agent run","ag.tag":"Sample run","ag.l1":"Read your lease and LLC filing","ag.l2":"Checked Santa Clara County and City of San José requirements","ag.l2s":"Sources: sccgov.org, sanjoseca.gov","ag.l3":"Found 8 requirements, in order, with estimated fees","ag.l4":"Filled the health permit plan check from your lease","ag.l4q":"Tenant: Qinghuan Tea House LLC","ag.l5":"Drafted the landlord consent letter","ag.l5s":"landlord-consent.docx, saved to Documents","ag.l6":"Waiting for your approval before anything is filed",
  "app.proj":"Projected opening", "app.date":"Mar 2027", "app.est":"Estimate, not a guarantee", "app.risk":"Risk check: review state rules on foreign-owned leases before you sign.", "app.week":"Week", "app.done":"approved",
  "st.q":"Queued", "st.r":"In review", "st.d":"Approved", "st.b":"Blocked",
  "cost.h":"The cost of waiting.",
@@ -2334,7 +2406,7 @@ en:{
  "inv.l":"The brands we serve are backed by", "ts.tabs":"Customer stories",
  "add.btn":"New plan", "add.c1":"Company", "add.c2":"Target market", "add.c3":"Target opening", "add.c4":"Status", "add.h":"Tell us where you're opening.<br>Get your plan in minutes.", "add.mapping":"Mapping…", "add.ready":"Plan ready", "add.r1c":"Lantern Noodle Bar", "add.r1m":"Houston, TX", "add.r1d":"Jun 2027", "add.r2c":"Copperleaf Coffee", "add.r2m":"Seattle, WA", "add.r2d":"Sep 2027", "add.r3c":"Golden Ox Hot Pot", "add.r3m":"Flushing, NY", "add.r3d":"Jan 2027", "add.r4c":"Jade Bun Bakery", "add.r4m":"Irvine, CA", "add.r4d":"Opened Aug 2026", "add.s1":"Filing", "add.s2":"In review", "add.s3":"Approved", "add.s4":"Open", "add.tab":"Entry plans", "cmp.1h":"Consultants", "cmp.1n":"Weeks", "cmp.2n":"Months", "cmp.3n":"Minutes", "cmp.1p":"A report, weeks later, billed by the hour.", "cmp.2h":"Doing it yourself", "cmp.2p":"Months of calls, forms and rejected applications.", "cmp.3p":"A plan in minutes, filing handled, one dashboard. $299 per market to start.", "cmp.h":"Why not a law firm or consultant?", "cn.btn":"Get your US entry plan", "cn.h":"Built for brands going global.", "cn.p":"Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.", "cn.q":"Su Shi, Song dynasty poet", "cn.s":"Wherever the heart is at ease, that is home.", "cn.sub":"Free, ready in minutes", "dash.a":"Shenzhen HQ", "dash.at":"9:00 PM", "dash.b":"New York team", "dash.bt":"9:00 AM", "dash.risk":"Risk flag: review state rules on foreign-owned leases before signing", "diff.1b":"Minutes", "diff.1s":"From target market to a full entry plan", "diff.after":"after", "diff.before":"before", "diff.c1":"Customers since 2016", "diff.2b":"6 → 1", "diff.2s":"Offices you chase, down to one team that handles them all", "diff.c2":"Return customers", "diff.h":"The difference Placetta makes", "diff.team":"Your team", "diff.with":"with", "itl.a1":"Health permit packet for Santa Clara County is ready. Submit it?", "itl.a2":"Submitted. I'll book the inspection when the county opens a slot.", "itl.b1":"The sign permit needs your landlord's authorization. Send the request to them?", "itl.b2":"Got it. Landlord requests go to you first, at every location.", "itl.f2":"Landlord letter", "itl.h":"Placetta asks before every filing, and remembers your answer", "itl.m2":"1-page doc", "itl.saved":"Saved to your playbook", "itl.u1":"Yes, submit it 👍", "itl.u2":"No, send landlord requests to me first. I'll forward them.", "qr":"QR", "trust.1":"Licensed partner attorneys", "trust.2":"Local permit expediters", "trust.1s":"When a filing legally needs a lawyer, a licensed partner attorney reviews and signs it.", "trust.2s":"In-person filings, pick-ups and inspections, handled in the city where you open.", "trust.ap":"Your approval, every time", "trust.3s":"Nothing is filed until you approve it, and every value shows the source it came from.", "trust.3":"English and Chinese", "trust.h":"Built for trust", "wt.l":"Work together", "wt.qr":"WeChat QR code goes here before launch", "wt.r":"from day one", "you.init":"HP",
  "map.n3":"3+ per day", "map.s3":"new US businesses served by our team, on average, since 2016", "map.n3w":"7+ per day", "map.s3w":"new businesses served by our team worldwide, on average, since 2016",
- "xp.h":"Our experts previously worked at:", "agy.n":"{n} agencies", "agy.all":"See all {n} agencies in {r}", "agy.less":"Show fewer", "agy.h":"Where we work, and every agency we handle", "agy.tf":"We file", "agy.tp":"With partners", "agy.tm":"We monitor", "agy.kf":"Placetta's agents prepare and submit it", "agy.kp":"Agents prepare it, a licensed broker, lawyer or lab files it", "agy.km":"Agents track the rules and flag every change", "agy.note":"Placetta is not affiliated with or endorsed by any government agency.", "xp.ppl":"Placetta advisors", "hero.h1":"Open your first US&nbsp;store<br><em>months sooner.</em>", "hero.sub":"Our AI agent maps and prepares every permit your store needs. Our team files them, in English or Chinese.",
+ "xp.h":"Our experts previously worked at:", "agy.n":"{n} agencies", "agy.all":"See all {n} agencies in {r}", "agy.less":"Show fewer", "agy.h":"Where we work, and every agency we handle", "agy.tf":"We file", "agy.tp":"With partners", "agy.tm":"We monitor", "agy.kf":"Placetta's agents prepare and submit it", "agy.kp":"Agents prepare it, a licensed broker, lawyer or lab files it", "agy.km":"Agents track the rules and flag every change", "agy.note":"Placetta is not affiliated with or endorsed by any government agency.", "xp.ppl":"Placetta advisors", "hero.h1":"Meet Placetta,<br><em>your AI permits manager.</em>", "hero.sub":"Placetta joins your expansion team. It maps every license your US stores need, prepares each filing and keeps them all current. Our team files after you approve, in English or Chinese.",
  "fqr.t":"Prefer WeChat? Scan to add Placetta.",
  "q.wc":"Prefer WeChat? Scan to add Placetta.",
  "mon.cnt2":"{n} tracked", "mon.dl6":"Next 6 months", "mon.d1":"1 day", "mon.dn":"{n} days",
@@ -2384,9 +2456,9 @@ zh:{
  "nav.how":"运作方式", "nav.faq":"常见问题","nav.login":"登录","nav.app":"进入应用",
  "q.goT":"可以开始生成您的计划了。","q.goP":"确认 {c} 后，快哉会在几分钟内梳理{m}所需的全部执照、许可和登记，并附上费用和时间。","q.go":"生成我的计划","q.goN":"免费。未经您批准，不会提交或支付任何费用。",
  "cta.plan":"获取开店计划",
- "hero.badge":"自 2016 年起，我们的团队已服务 31,000+ 家企业",
+ "tm.cta":"让快哉为您的门店工作","tm.m5":"营业税证书 30 天后到期，续期申请已起草。","tm.m4":"县政府要求提供修改后的平面图，我已通知工程经理。","tm.m3":"已向圣克拉拉县提交，回执已保存到您的云端硬盘。","tm.m2":"圣何塞卫生许可申请材料已准备好。您确认后，我会交给团队提交。","tm.m1":"本周安排：2 家门店共有 3 项申请到期，均已准备好供您审阅。","tm.d5":"周五","tm.d4":"周四","tm.d3":"周三","tm.d2":"周二","tm.d1":"周一","tm.wks":"示例一周","tm.wk":"与快哉共事的一周","tm.v8":"提交任何未经您确认的申请","tm.k8":"绝不","tm.v7":"确认、签名、政府费用和身份核验","tm.k7":"需要您提供","tm.v6":"每家门店所需的每一项证照，按顺序按时提交，到期前完成续期","tm.k6":"负责","tm.v5":"Gmail、Outlook、Slack、Google 日历、Google 云端硬盘","tm.k5":"工作工具","tm.v4":"中文和英文","tm.k4":"语言","tm.v3":"全天候，覆盖所有时区","tm.k3":"工作时间","tm.v2":"您","tm.k2":"汇报对象","tm.v1":"许可与证照经理","tm.k1":"岗位","tm.jdt":"快哉","tm.jd":"岗位卡","tm.now":"正在处理：圣何塞卫生许可申请材料","tm.r4":"快哉","tm.r4s":"许可与证照","tm.r3s":"装修与验收","tm.r3":"工程经理","tm.r2s":"选址与租约","tm.r2":"选址负责人","tm.r1s":"美国拓展负责人","tm.a1":"您","tm.a2":"址","tm.a3":"工","tm.r1":"您","tm.sample":"示例团队","tm.team":"美国拓展团队","tm.sub":"像招聘新同事一样，把快哉加入您的拓展团队。它负责每家门店的许可与证照，在团队现有的工具里工作，只有需要真人处理的事才会找您。","tm.h":"您团队的新成员。","hero.badge":"自 2016 年起，我们的团队已服务 31,000+ 家企业",
  "brands.l":"合作加盟商来自",
- "hero.sample":"查看示例计划","hero.try":"试用智能代理","hero.demo":"预约演示","how.try":"用您的门店试一试","aria.proof":"业绩","pf.s1":"自 2016 年起，我们团队服务过的企业","pf.n2":"每天 3 家以上","pf.s2":"我们团队平均每天服务的美国新企业","pf.s3":"覆盖美国各州，以及 170 多个国家和地区","pf.n4":"5 个月","pf.s4":"为霸王茶姬节省的审批时间","ag.h":"看智能代理如何工作。","ag.p":"它读取您的文件，查询各政府机构的官方网站，填写表格并起草信函。每一项数据都标明出处原文，未经您确认不会提交任何申请。","aria.ag":"智能代理运行示例","ag.tag":"运行示例","ag.l1":"已读取您的租约和 LLC 注册文件","ag.l2":"已核对圣克拉拉县和圣何塞市的要求","ag.l2s":"来源：sccgov.org、sanjoseca.gov","ag.l3":"找到 8 项要求，已排序并附预估费用","ag.l4":"已根据租约填写卫生许可图纸审查申请","ag.l4q":"租户：Qinghuan Tea House LLC","ag.l5":"已起草房东同意函","ag.l5s":"landlord-consent.docx，已保存到文件","ag.l6":"等待您的确认，确认前不会提交任何申请",
+ "hero.sample":"查看示例计划","hero.try":"让快哉开始工作","hero.demo":"预约演示","how.try":"用您的门店试一试","aria.proof":"业绩","pf.s1":"自 2016 年起，我们团队服务过的企业","pf.n2":"每天 3 家以上","pf.s2":"我们团队平均每天服务的美国新企业","pf.s3":"覆盖美国各州，以及 170 多个国家和地区","pf.n4":"5 个月","pf.s4":"为霸王茶姬节省的审批时间","ag.h":"看智能代理如何工作。","ag.p":"它读取您的文件，查询各政府机构的官方网站，填写表格并起草信函。每一项数据都标明出处原文，未经您确认不会提交任何申请。","aria.ag":"智能代理运行示例","ag.tag":"运行示例","ag.l1":"已读取您的租约和 LLC 注册文件","ag.l2":"已核对圣克拉拉县和圣何塞市的要求","ag.l2s":"来源：sccgov.org、sanjoseca.gov","ag.l3":"找到 8 项要求，已排序并附预估费用","ag.l4":"已根据租约填写卫生许可图纸审查申请","ag.l4q":"租户：Qinghuan Tea House LLC","ag.l5":"已起草房东同意函","ag.l5s":"landlord-consent.docx，已保存到文件","ag.l6":"等待您的确认，确认前不会提交任何申请",
  "app.proj":"预计开业", "app.date":"2027年3月", "app.est":"预估时间，非承诺", "app.risk":"风险检查：签约前请复核该州对外资企业租赁的规定。", "app.week":"第", "app.done":"已批准",
  "st.q":"排队中", "st.r":"审核中", "st.d":"已批准", "st.b":"受阻",
  "cost.h":"等待的代价。",
@@ -2417,7 +2489,7 @@ zh:{
  "inv.l":"我们服务的品牌获得以下机构投资", "ts.tabs":"客户故事",
  "add.btn":"新建计划", "add.c1":"公司", "add.c2":"目标市场", "add.c3":"目标开业", "add.c4":"状态", "add.h":"告诉我们您在哪里开店，<br>几分钟拿到计划。", "add.mapping":"生成中…", "add.ready":"计划已就绪", "add.r1c":"灯笼面馆", "add.r1m":"得州休斯顿", "add.r1d":"2027年6月", "add.r2c":"铜叶咖啡", "add.r2m":"华盛顿州西雅图", "add.r2d":"2027年9月", "add.r3c":"金牛火锅", "add.r3m":"纽约法拉盛", "add.r3d":"2027年1月", "add.r4c":"玉包烘焙", "add.r4m":"加州尔湾", "add.r4d":"2026年8月已开业", "add.s1":"申报中", "add.s2":"审核中", "add.s3":"已批准", "add.s4":"已开业", "add.tab":"开店计划", "cmp.1h":"咨询顾问", "cmp.1n":"几周", "cmp.2n":"几个月", "cmp.3n":"几分钟", "cmp.1p":"几周后交一份报告，按小时计费。", "cmp.2h":"自己办理", "cmp.2p":"数月的电话、表格和被退回的申请。", "cmp.3p":"几分钟出计划，代办申报，一个看板。每个市场 299 美元起。", "cmp.h":"为什么不找律所或顾问？", "cn.btn":"获取您的美国开店计划", "cn.h":"为出海品牌而生。", "cn.p":"您在上海或深圳的团队，与纽约团队看到的是同一个看板，中英文随时切换。我们会尽早提示美国特有的风险，包括部分州对外资企业租赁和持有房产的限制。", "cn.q":"苏轼《定风波》", "cn.s":"此心安处是吾乡", "cn.sub":"免费，几分钟生成", "dash.a":"深圳总部", "dash.at":"晚上 9:00", "dash.b":"纽约团队", "dash.bt":"上午 9:00", "dash.risk":"风险提示：签约前请复核该州对外资企业租赁的规定", "diff.1b":"几分钟", "diff.1s":"从目标市场到完整开店计划", "diff.after":"之后", "diff.before":"之前", "diff.c1":"2016 年以来服务的客户", "diff.2b":"6 → 1", "diff.2s":"原本要跑的 6 个部门，变成一个团队全部搞定", "diff.c2":"回头客户比例", "diff.h":"快哉带来的改变", "diff.team":"您的团队", "diff.with":"携手", "itl.a1":"圣克拉拉县卫生许可材料已准备好，现在提交吗？", "itl.a2":"已提交。县里一开放检查时段，我就为您预约。", "itl.b1":"招牌许可需要房东授权。要我直接发请求给房东吗？", "itl.b2":"明白。以后所有门店的房东请求都先发给您。", "itl.f2":"房东授权书", "itl.h":"每次申报前都先问您，并记住您的回答", "itl.m2":"1 页文档", "itl.saved":"已记入您的偏好", "itl.u1":"好的，提交吧 👍", "itl.u2":"不用，房东相关的先发给我，我来转。", "qr":"二维码", "trust.1":"持牌合作律师", "trust.2":"本地许可代办", "trust.1s":"需要律师的申报，由持牌合作律师审核并签署。", "trust.2s":"现场递交、取件和检查，由开店所在城市的代办团队完成。", "trust.ap":"每一步都由您批准", "trust.3s":"未经您批准，任何申报都不会提交；每个数值都标明出处。", "trust.3":"中文和英文", "trust.h":"值得信赖", "wt.l":"随时协作", "wt.qr":"上线前在此放置微信二维码", "wt.r":"从第一天起", "you.init":"松",
  "map.n3":"每天 3 家以上", "map.s3":"2016 年以来，我们的团队平均每天新服务的美国企业", "map.n3w":"每天 7 家以上", "map.s3w":"2016 年以来，我们的团队平均每天在全球新服务的企业",
- "xp.h":"我们的专家曾任职于：", "agy.n":"{n} 个机构", "agy.all":"查看{r}全部 {n} 个机构", "agy.less":"收起", "agy.h":"我们覆盖的市场，以及经手的每一个机构", "agy.tf":"代为申报", "agy.tp":"联合伙伴", "agy.tm":"持续监测", "agy.kf":"由快哉智能代理准备并提交", "agy.kp":"由智能代理准备，持牌报关行、律师或实验室提交", "agy.km":"智能代理持续跟踪规则，并提示每一项变化", "agy.note":"快哉与任何政府机构均无隶属关系，也未获其背书。", "xp.ppl":"快哉顾问", "hero.h1":"首家美国门店，<br>提前数月开业。", "hero.sub":"智能代理梳理并准备门店所需的每一项许可，我们的团队以中文或英文为您提交。",
+ "xp.h":"我们的专家曾任职于：", "agy.n":"{n} 个机构", "agy.all":"查看{r}全部 {n} 个机构", "agy.less":"收起", "agy.h":"我们覆盖的市场，以及经手的每一个机构", "agy.tf":"代为申报", "agy.tp":"联合伙伴", "agy.tm":"持续监测", "agy.kf":"由快哉智能代理准备并提交", "agy.kp":"由智能代理准备，持牌报关行、律师或实验室提交", "agy.km":"智能代理持续跟踪规则，并提示每一项变化", "agy.note":"快哉与任何政府机构均无隶属关系，也未获其背书。", "xp.ppl":"快哉顾问", "hero.h1":"认识快哉，<br><em>您的 AI 证照经理。</em>", "hero.sub":"快哉加入您的拓展团队，梳理美国门店所需的每一项证照，准备每一份申请，并持续保持有效。经您确认后，我们的团队以中文或英文为您提交。",
  "fqr.t":"更习惯用微信？扫码添加快哉。",
  "q.wc":"更习惯用微信？扫码添加快哉。",
  "mon.cnt2":"共 {n} 条", "mon.dl6":"未来 6 个月", "mon.d1":"1 天", "mon.dn":"{n} 天",
