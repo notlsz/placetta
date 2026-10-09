@@ -1198,6 +1198,29 @@ html[lang="zh-CN"] .tsrs strong{letter-spacing:0}
 html[lang="zh-CN"] .plan .pv{letter-spacing:0}
 .plan .pv small{font-size:15px;letter-spacing:0;color:var(--muted)}
 .plan .pn{margin-top:10px;font-size:14px;line-height:1.45;color:var(--ink2)}
+@media (max-width:899px){.plan.pfeat{order:-1}}   /* phones: the recommended plan comes first */
+.plan .pps{margin-top:8px;font-size:14px;font-weight:500;color:var(--gs-ink)}
+.plan .pcta{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding-top:24px}
+.plan .pcta .btn{width:100%;justify-content:center;text-align:center}
+.plan .pcta small{font-size:12px;line-height:1.4;color:var(--muted);text-align:center}
+.btn.b-out{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.b-out:hover{box-shadow:inset 0 0 0 1px #C3CCD8}
+.panchor{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:14px;padding:22px 24px;border-radius:20px;background:#fff;box-shadow:0 1px 2px rgba(15,27,51,.04)}
+@media (min-width:768px){.panchor{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:28px;padding:26px 32px}}
+.panl{font-size:13px;color:var(--muted)}
+.panv{margin-top:4px;font-family:var(--serif);font-weight:300;font-size:40px;line-height:1;letter-spacing:-.02em}
+.pan1 .panv{color:#9C3A2E}.pan2 .panv{color:var(--gs-ink)}
+.pans{margin-top:6px;font-size:13.5px;line-height:1.45;color:var(--ink2)}
+.panvs{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--faint)}
+.pproof{margin:0 0 18px;font-size:13px;color:var(--ink2);text-align:center}
+.pquote{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:20px 0 0;padding:18px 24px;border-radius:16px;background:var(--card)}
+.pquote blockquote{margin:0;font-size:17px;line-height:1.35;color:var(--ink)}
+.pquote figcaption{margin-left:auto;font-size:13px;color:var(--ink2)}
+.pfaq{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-top:12px}
+@media (min-width:900px){.pfaq{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}}
+.pfaq>div{padding:16px 20px;border-radius:14px;border:1px solid var(--line)}
+.pfaq p{font-size:14.5px;font-weight:500;color:var(--ink)}
+.pfaq span{display:block;margin-top:6px;font-size:13.5px;line-height:1.45;color:var(--ink2)}
 .plan .plist{gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(15,27,51,.08)}
 .plan .plist li{align-items:flex-start}
 .plan .plist p{font-size:14.5px;line-height:1.35;opacity:1}
@@ -1974,8 +1997,20 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 <section class="sec rv" data-rv="up" id="pricing" aria-labelledby="priceH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="priceH" data-i18n="price.h">Priced by locations, billed annually.</h2><p class="sub" data-i18n="price.sub">Every plan includes filings for every opening, automatic license renewals and the policy monitor.</p></div>
+    <div class="panchor">
+      <div class="pan1"><p class="panl" data-i18n="price.an.l">A store waiting on permits</p><p class="panv" data-i18n="price.an.v">$15,000 a month</p><p class="pans" data-i18n="price.an.s">in rent, with no sales. Our example store in "The cost of waiting".</p></div>
+      <div class="panvs" aria-hidden="true">vs</div>
+      <div class="pan2"><p class="panl" data-i18n="price.an.l2">Placetta Growth, for 25 stores</p><p class="panv" data-i18n="price.an.v2">$2,000 a month</p><p class="pans" data-i18n="price.an.s2">One month of waiting pays for more than seven months of Placetta.</p></div>
+    </div>
+    <p class="pproof"><span data-i18n="price.proof">31,000+ businesses served by our team since 2016</span></p>
     <div class="plans" id="tiers"></div>
     <p class="pfine" data-i18n="price.fine">Extra locations are $100 a month each. In-person partner work, like inspections and attorney sign-off, is quoted per step before we start. Government fees are paid by you directly to each agency, through the payment link we send.</p>
+    <figure class="pquote"><img src="logos/ink/chagee.png" alt="CHAGEE" style="height:22px"><blockquote data-i18n="price.q">“Placetta saves us months in approval time.”</blockquote><figcaption><b>Jackie</b> <span data-i18n="price.qr">Owner, CHAGEE · 5 months saved</span></figcaption></figure>
+    <div class="pfaq">
+      <div><p data-i18n="price.f1q">Is the $299 credited?</p><span data-i18n="price.f1a">Yes. Your entry plan is credited in full toward your first year on any plan.</span></div>
+      <div><p data-i18n="price.f2q">Who pays government fees?</p><span data-i18n="price.f2a">You pay each agency directly, through the payment link we send. Estimated fees are in your plan upfront.</span></div>
+      <div><p data-i18n="price.f3q">What if a filing is rejected?</p><span data-i18n="price.f3a">Our team reads the reason, corrects it with you and resubmits. Nothing is filed without your approval.</span></div>
+    </div>
     <div class="pentry"><p data-i18n="price.entry"><b>Not ready for a plan?</b> Get an entry plan for any market for $299, ready instantly and credited toward your first year.</p><button type="button" class="btn b-ink" data-open="pricing" data-i18n="cta.free">Get your entry plan</button></div>
   </div>
 </section>
@@ -2259,7 +2294,7 @@ en:{
  "st.note":"$299 per market, credited in full to any yearly plan.",
  "q.fine":"$299 per market, credited toward your first year. No call required. Ready instantly.",
  "mon.price":"Included in every monthly plan",
- "price.fine":"Extra locations are $100 a month each. In-person partner work, like inspections and attorney sign-off, is quoted per step before we start. Government fees are paid by you directly to each agency, through the payment link we send.", "price.entry":"<b>Not ready for a plan?</b> Get an entry plan for any market for $299, ready instantly and credited toward your first year.",
+ "price.risk":"Or start with a $299 entry plan, credited in full.", "price.an.l":"A store waiting on permits", "price.an.v":"$15,000 a month", "price.an.s":"in rent, with no sales. The example store in \"The cost of waiting\".", "price.an.l2":"Placetta Growth, for up to 25 stores", "price.an.v2":"$2,000 a month", "price.an.s2":"One month of waiting costs more than seven months of Placetta.", "price.proof":"31,000+ businesses served by our team since 2016", "price.q":"“Placetta saves us months in approval time.”", "price.qr":"Owner, CHAGEE · 5 months saved", "price.f1q":"Is the $299 credited?", "price.f1a":"Yes. Your entry plan is credited in full toward your first year on any plan.", "price.f2q":"Who pays government fees?", "price.f2a":"You pay each agency directly, through the payment link we send. Estimated fees are in your plan upfront.", "price.f3q":"What if a filing is rejected?", "price.f3a":"Our team reads the reason, corrects it with you and resubmits. Nothing is filed without your approval.", "price.fine":"Extra locations are $100 a month each. In-person partner work, like inspections and attorney sign-off, is quoted per step before we start. Government fees are paid by you directly to each agency, through the payment link we send.", "price.entry":"<b>Not ready for a plan?</b> Get an entry plan for any market for $299, ready instantly and credited toward your first year.",
  "bel.ya":"Approval", "bel.yf":"Filing", "bel.yr":"Rule", "bel.cases":"Case studies", "bel.crit2":"Sets the payout cycle", "bel.tag":"Case study", "bel.tabs":"Markets", "bel.crit":"Sets the launch date", "bel.src":"Source: ", "bel.srcs":"Sources: ", "bel.btn":"Plan my next markets",
  "q.doneT":"Your plan is ready.", "q.doneP":"Your {m} entry plan is generated instantly and sent to {c}.", "q.n1":"Your plan is built instantly from your answers for {m}.", "q.n2":"It lists every requirement, in order, with timelines and fees.",
  "mon.allm":"All markets", "mon.sample":"See a sample alert", "mon.none2":"No deadlines in this market in the next 6 months.", "mon.al.to":"To: your team", "mon.al.subj":"Action needed: {t}", "mon.al.note":"Sample alert built from a real, sourced rule change.", "mon.body3":"Every rule change in your markets, with what it means for your stores and what to do next.", "mon.app":"Placetta Monitor",
@@ -2342,7 +2377,7 @@ zh:{
  "st.note":"每个市场 299 美元，可全额抵扣任一年度方案。",
  "q.fine":"每个市场 299 美元，可抵扣首年订阅费用。无需电话沟通，即时生成。",
  "mon.price":"所有月度方案均包含",
- "price.fine":"超出的门店每家每月 100 美元。检查、律师签字等线下合作伙伴工作，在开始前逐项报价。政府规费由您通过我们发送的付款链接直接支付给各机构。", "price.entry":"<b>还没准备好订阅？</b>先以 299 美元获取任一市场的开店合规计划，即时生成，可抵扣首年订阅费用。",
+ "price.risk":"或先以 299 美元获取开店计划，全额抵扣。", "price.an.l":"一家等待许可的门店", "price.an.v":"每月 15,000 美元", "price.an.s":"房租照付，却没有营业收入（即“等待的代价”中的示例门店）。", "price.an.l2":"快哉成长版，最多 25 家门店", "price.an.v2":"每月 2,000 美元", "price.an.s2":"多等一个月的损失，超过七个月的快哉费用。", "price.proof":"自 2016 年起，我们的团队已服务 31,000+ 家企业", "price.q":"“快哉为我们节省了数月的审批时间。”", "price.qr":"霸王茶姬店主 · 节省 5 个月", "price.f1q":"299 美元可以抵扣吗？", "price.f1a":"可以。开店计划费用可全额抵扣任一方案的首年费用。", "price.f2q":"政府规费由谁支付？", "price.f2a":"由您通过我们发送的付款链接直接支付给各机构。预估费用会提前列在计划中。", "price.f3q":"申请被退回怎么办？", "price.f3a":"我们的团队会根据原因与您一起修正并重新提交。未经您批准，不会提交任何申请。", "price.fine":"超出的门店每家每月 100 美元。检查、律师签字等线下合作伙伴工作，在开始前逐项报价。政府规费由您通过我们发送的付款链接直接支付给各机构。", "price.entry":"<b>还没准备好订阅？</b>先以 299 美元获取任一市场的开店合规计划，即时生成，可抵扣首年订阅费用。",
  "bel.ya":"审批", "bel.yf":"备案", "bel.yr":"合规", "bel.cases":"客户案例", "bel.crit2":"决定付款周期", "bel.tag":"客户案例", "bel.tabs":"市场", "bel.crit":"决定上线时间", "bel.src":"来源：", "bel.srcs":"来源：", "bel.btn":"规划我的下一个市场",
  "q.doneT":"您的计划已生成。", "q.doneP":"您的{m}开店计划即时生成，并发送至 {c}。", "q.n1":"根据您对{m}的回答，即时生成您的计划。", "q.n2":"计划列出每一项要求、办理顺序、时间和费用。",
  "mon.allm":"全部市场", "mon.sample":"查看提醒示例", "mon.none2":"该市场未来 6 个月没有截止日期。", "mon.al.to":"收件人：您的团队", "mon.al.subj":"需要处理：{t}", "mon.al.note":"示例提醒，内容来自真实且附来源的规则变化。", "mon.body3":"您所在市场的每项规则变化，附上对门店的影响和下一步建议。", "mon.app":"快哉监测",
@@ -2422,9 +2457,9 @@ const STORIES = [
   src:["DoorDash Merchants","DoorDash 商家平台"],mo:[3,6],cells:i=> i<3?"r": i<6?"m":"",leg:["r","m"]}
 ];
 const TIERS = [
- {l:["Starter","入门版"],v:["$750","750 美元"],u:["/month","/月"],n:["Billed annually. Up to 5 locations in one market.","按年计费。1 个市场，最多 5 家门店。"],f:[["AI prepares and files every permit for every opening","每次开店的全部许可，由智能代理准备并提交"],["License wallet with automatic renewals","执照钱包，自动续期"],["Policy monitor and deadline alerts","政策监测与截止日期提醒"],["Dashboard in English and Chinese","中英文看板"]]},
- {l:["Growth","成长版"],v:["$2,000","2,000 美元"],u:["/month","/月"],tag:["Recommended for chains","连锁品牌推荐"],hl:1,n:["Billed annually. Up to 25 locations in three markets.","按年计费。3 个市场，最多 25 家门店。"],f:[["Everything in Starter","包含入门版全部功能"],["Openings in several markets at once","多个市场同时开店"],["HQ view with roles for each team","总部视图，按团队分配权限"],["Priority filing queue","优先申报通道"]]},
- {l:["Scale","规模版"],v:["$5,000+","5,000+ 美元"],u:["/month","/月"],n:["Billed annually. 26+ locations, any number of markets.","按年计费。26 家门店以上，市场数量不限。"],f:[["Everything in Growth","包含成长版全部功能"],["Unlimited markets","市场数量不限"],["SSO, API and audit log","单点登录、接口与审计日志"],["A named compliance lead","专属合规负责人"]]}
+ {l:["Starter","入门版"],v:["$750","750 美元"],u:["/month","/月"],ps:["$150 per store a month","每家门店每月 150 美元"],cta:["Start with Starter","选择入门版"],n:["Billed annually. Up to 5 locations in one market.","按年计费。1 个市场，最多 5 家门店。"],f:[["AI prepares and files every permit for every opening","每次开店的全部许可，由智能代理准备并提交"],["License wallet with automatic renewals","执照钱包，自动续期"],["Policy monitor and deadline alerts","政策监测与截止日期提醒"],["Dashboard in English and Chinese","中英文看板"]]},
+ {l:["Growth","成长版"],v:["$2,000","2,000 美元"],u:["/month","/月"],ps:["$80 per store a month","每家门店每月 80 美元"],cta:["Start with Growth","选择成长版"],tag:["Recommended for chains","连锁品牌推荐"],hl:1,n:["Billed annually. Up to 25 locations in three markets.","按年计费。3 个市场，最多 25 家门店。"],f:[["Everything in Starter","包含入门版全部功能"],["Openings in several markets at once","多个市场同时开店"],["HQ view with roles for each team","总部视图，按团队分配权限"],["Priority filing queue","优先申报通道"]]},
+ {l:["Scale","规模版"],v:["$5,000+","5,000+ 美元"],u:["/month","/月"],ps:["Volume pricing per store","按门店数量阶梯定价"],cta:["Talk to us","联系我们"],mail:1,n:["Billed annually. 26+ locations, any number of markets.","按年计费。26 家门店以上，市场数量不限。"],f:[["Everything in Growth","包含成长版全部功能"],["Unlimited markets","市场数量不限"],["SSO, API and audit log","单点登录、接口与审计日志"],["A named compliance lead","专属合规负责人"]]}
 ];
 const FAQ = [
  [["How much does it cost?","费用是多少？"],["Start with a $299 entry plan for any market, credited toward your first year. Plans start at $750 a month, billed annually, and include filings for every opening, automatic renewals and the policy monitor. Government fees are paid by you directly to each agency. <a href=\"#pricing\">See all plans</a>","先以 299 美元获取任一市场的开店计划，可抵扣首年费用。订阅方案每月 750 美元起，按年计费，包含每次开店的申报、执照自动续期和政策监测。政府规费由您直接支付给各机构。<a href=\"#pricing\">查看全部方案</a>"]],
@@ -2669,7 +2704,7 @@ const renderTea = caseUI(TEA, {tabs: "teaTabs", body: "teaBody", logo: "teaLogo"
 function renderBel(anim){ showTea(); renderCases(anim); renderTea(anim); }
 
 /* ============ pricing, faq ============ */
-function renderPrice(){ const i = L(); document.getElementById("tiers").innerHTML = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul></div>`).join(""); }
+function renderPrice(){ const i = L(); document.getElementById("tiers").innerHTML = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Placetta%20Scale" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}<small>${t("price.risk")}</small></div></div>`).join(""); }
 let fOpen = 0;
 function renderFaq(){
   const i = L();
@@ -2951,6 +2986,8 @@ addEventListener("keydown", e => {
     if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length-1].focus(); } else if (!e.shiftKey && document.activeElement === f[f.length-1]) { e.preventDefault(); f[0].focus(); } }
 });
 document.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => openForm(b.dataset.open)));
+// plan buttons are re-rendered on every language switch, so they are handled by delegation
+document.getElementById("tiers").addEventListener("click", e => { const b = e.target.closest("[data-open]"); if (b) { track("price_plan_click", {plan: b.textContent}); openForm(b.dataset.open); } });
 document.querySelectorAll("form.starter").forEach(f => f.addEventListener("submit", e => {
   e.preventDefault(); const v = f.querySelector("input").value.trim();
   track("starter_submit", {source: f.dataset.src, has_market: !!v});
