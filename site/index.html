@@ -1104,6 +1104,9 @@ html[lang="zh-CN"] .pst b{letter-spacing:0}
 .tsx.sw .tsl,.tsx.sw .tsph .tsbg{animation:tsin .5s cubic-bezier(.2,.8,.2,1)}
 .tsx .tsl{min-width:0}
 .tsx .tsl img.tslg{height:var(--lh)}
+.tsx .tslgs{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tsx .tslgd{width:1px;height:34px;background:#D5DCE6}
+@media (max-width:640px){.tsx .tslgs{gap:12px}.tsx .tslgs img.tslg{height:calc(var(--lh) * .8)}.tsx .tslgd{height:26px}}
 .tsx .tsl .tswm{margin:0;font-family:var(--serif);font-size:24px;line-height:1.1;letter-spacing:-.01em;color:var(--ink)}
 html[lang="zh-CN"] .tsx .tsl .tswm{font-family:var(--zhserif)}
 .tsx .tsq{margin:0}
@@ -3404,12 +3407,12 @@ const TS = [
   {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", co: ["Starbucks", "星巴克"], ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
    q: ["Placetta has taken over the tedious regulatory approvals so my team can focus on scaling instead of filings.", "快哉接手了繁琐的监管审批，让我的团队专注于扩张，而不是埋头申报。"],
    st: ["Hands-off", "全程代办"], sl: ["regulatory approvals", "繁琐的监管审批"]},
-  {logo: "logos/ink/eth-zurich.svg", lh: 26, alt: ["ETH Zürich", "苏黎世联邦理工学院"], n: "Matteo", co: ["ETH Zürich", "苏黎世联邦理工"], ph: "media/people/matteo.jpg", big: "media/people/matteo-l.jpg", rl: ["Faramir, ETH Zürich", "Faramir，苏黎世联邦理工学院"],
+  {logo: "logos/ink/eth-zurich.svg", lh: 26, alt: ["ETH Zürich", "苏黎世联邦理工学院"], vlogo: "logos/ink/faramir.svg", vlh: 30, valt: "Faramir", n: "Matteo", co: ["ETH Zürich", "苏黎世联邦理工"], ph: "media/people/matteo.jpg", big: "media/people/matteo-l.jpg", rl: ["Faramir, ETH Zürich", "Faramir，苏黎世联邦理工学院"],
    q: ["Simple. Extremely easy to use.", "简单，非常好用。"],
-   st: ["ETH Zürich", "苏黎世联邦理工"], sl: ["Faramir", "Faramir"]},
-  {logo: "logos/ink/princeton.png", lh: 44, alt: ["Princeton University", "普林斯顿大学"], n: "Odelia", co: ["Princeton", "普林斯顿大学"], ph: "media/people/odelia.jpg", big: "media/people/odelia-l.jpg", rl: ["Belluh (acq., 7 figures), Princeton University", "Belluh（已被收购，七位数），普林斯顿大学"],
+   st: ["Effortless", "轻松上手"], sl: ["setup, start to finish", "从开始到完成，一路顺畅"]},
+  {logo: "logos/ink/princeton.png", lh: 44, alt: ["Princeton University", "普林斯顿大学"], vlogo: "logos/ink/belluh.svg", vlh: 32, valt: "Belluh", n: "Odelia", co: ["Princeton", "普林斯顿大学"], ph: "media/people/odelia.jpg", big: "media/people/odelia-l.jpg", rl: ["Belluh (acq., 7 figures), Princeton University", "Belluh（已被收购，七位数），普林斯顿大学"],
    q: ["I was introduced to this platform by my best friend. Placetta's founders worked with me to understand my exact needs and navigate the regulatory landscape.", "我是经最好的朋友介绍认识这个平台的。快哉的创始人和我一起梳理了我的具体需求，带我走过了整个监管流程。"],
-   st: ["7 figures", "七位数"], sl: ["Belluh, acquired", "Belluh 被收购金额"]}
+   st: ["Tailored", "量身定制"], sl: ["guidance through the regulatory landscape", "带你走通整个监管流程"]}
 ];
 let tsK = 0, tsHold = false;
 function renderTsTabs(){
@@ -3420,7 +3423,7 @@ function renderTs(swap){
   const i = L(), x = TS[tsK];
   renderTsTabs();
   document.getElementById("tsGrid").innerHTML = `<figure class="tsx${swap ? " sw" : ""}">
-    <div class="tsl">${x.logo ? `<img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async">` : `<p class="tswm">${x.wm[i]}</p>`}<blockquote class="tsq">“${x.q[i]}”</blockquote>
+    <div class="tsl">${x.logo ? `<div class="tslgs"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async">${x.vlogo ? `<span class="tslgd" aria-hidden="true"></span><img class="tslg" src="${x.vlogo}" alt="${esc(x.valt)}" style="--lh:${x.vlh}px" decoding="async">` : ""}</div>` : `<p class="tswm">${x.wm[i]}</p>`}<blockquote class="tsq">“${x.q[i]}”</blockquote>
       <figcaption class="tsp"><span class="tsav" aria-hidden="true" style="background-image:url('${x.ph}')"></span><span class="tsw"><b>${x.n}</b><span>${x.rl[i]}</span></span>
         </span></figcaption></div>
     <div class="tsph"><div class="tsbg" role="img" aria-label="${esc(x.n + ", " + x.rl[i])}" style="background-image:url('${x.big}')"></div><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
