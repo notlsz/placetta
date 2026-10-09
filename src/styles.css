@@ -688,6 +688,10 @@ button.wsname svg { grid-column: 2; grid-row: 1 / 3; align-self: center; color: 
 .set-nav a { padding: 7px 10px; border-radius: 10px; font-size: 13.5px; color: var(--ink2); }
 .set-nav a:hover { background: var(--mist); color: var(--ink); }
 .set-col { max-width: 720px; min-width: 0; }
+/* settings: the scroll stops just above the Ask bar, no empty run-out below the last section */
+.page.settings { padding-bottom: 112px; }
+.page.settings .foot { margin-top: 40px; }
+@media (max-width: 760px) { .page.settings { padding-bottom: 96px; } }
 .sg { padding: 26px 0; border-top: 1px solid var(--line); scroll-margin-top: 20px; }
 .sg:first-child { padding-top: 0; border-top: 0; }
 .sg h2 { margin: 0 0 6px; font: 500 18px/1.3 var(--display); letter-spacing: -.015em; }
