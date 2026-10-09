@@ -1104,6 +1104,8 @@ html[lang="zh-CN"] .pst b{letter-spacing:0}
 .tsx.sw .tsl,.tsx.sw .tsph .tsbg{animation:tsin .5s cubic-bezier(.2,.8,.2,1)}
 .tsx .tsl{min-width:0}
 .tsx .tsl img.tslg{height:var(--lh)}
+.tsx .tsl .tswm{margin:0;font-family:var(--serif);font-size:24px;line-height:1.1;letter-spacing:-.01em;color:var(--ink)}
+html[lang="zh-CN"] .tsx .tsl .tswm{font-family:var(--zhserif)}
 .tsx .tsq{margin:0}
 .tsx .tsp .tsav{width:44px;height:44px;border-radius:50%;background:#C9DAEE center/cover no-repeat;flex:none}
 #tsGrid .tsav,#tsGrid .tsbg{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none;pointer-events:none}
@@ -1561,7 +1563,7 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 .xpflow:hover .xpn{color:var(--muted)}
 .xpflow .xpn:hover{color:var(--ink)}
 .xpf{position:relative;display:inline-block;vertical-align:-.18em;width:1.08em;height:1.08em;margin:0 .26em;border-radius:.22em;overflow:hidden;pointer-events:none}
-.xpf canvas{display:block;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
+.xpf canvas{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .xpf.on{z-index:5;box-shadow:0 0 0 2px var(--bg),0 0 0 3px rgba(15,27,51,.25)}
 @media (prefers-reduced-motion:reduce){.xpf{transition:none}}
 
@@ -3401,7 +3403,13 @@ const TS = [
    st: ["5 months", "5 个月"], sl: ["saved in approval time", "节省的审批时间"]},
   {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", co: ["Starbucks", "星巴克"], ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
    q: ["Placetta has taken over the tedious regulatory approvals so my team can focus on scaling instead of filings.", "快哉接手了繁琐的监管审批，让我的团队专注于扩张，而不是埋头申报。"],
-   st: ["Hands-off", "全程代办"], sl: ["regulatory approvals", "繁琐的监管审批"]}
+   st: ["Hands-off", "全程代办"], sl: ["regulatory approvals", "繁琐的监管审批"]},
+  {wm: ["ETH Zürich", "苏黎世联邦理工学院"], n: "Jimiano", co: ["ETH Zürich", "苏黎世联邦理工"], ph: "media/people/jimiano.jpg", big: "media/people/jimiano-l.jpg", rl: ["University venture, ETH Zürich", "高校创业项目，苏黎世联邦理工学院"],
+   q: ["Simple. Extremely easy to use.", "简单，非常好用。"],
+   st: ["ETH Zürich", "苏黎世联邦理工"], sl: ["University venture", "高校创业项目"]},
+  {wm: ["Princeton University", "普林斯顿大学"], n: "Odelia", co: ["Princeton", "普林斯顿大学"], ph: "media/people/odelia.jpg", big: "media/people/odelia-l.jpg", rl: ["University venture, Princeton University", "高校创业项目，普林斯顿大学"],
+   q: ["I was introduced to this platform by my best friend. Placetta's founders worked with me to understand my exact needs and navigate the regulatory landscape.", "我是经最好的朋友介绍认识这个平台的。快哉的创始人和我一起梳理了我的具体需求，带我走过了整个监管流程。"],
+   st: ["Princeton", "普林斯顿"], sl: ["University venture", "高校创业项目"]}
 ];
 let tsK = 0, tsHold = false;
 function renderTsTabs(){
@@ -3412,7 +3420,7 @@ function renderTs(swap){
   const i = L(), x = TS[tsK];
   renderTsTabs();
   document.getElementById("tsGrid").innerHTML = `<figure class="tsx${swap ? " sw" : ""}">
-    <div class="tsl"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async"><blockquote class="tsq">“${x.q[i]}”</blockquote>
+    <div class="tsl">${x.logo ? `<img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async">` : `<p class="tswm">${x.wm[i]}</p>`}<blockquote class="tsq">“${x.q[i]}”</blockquote>
       <figcaption class="tsp"><span class="tsav" aria-hidden="true" style="background-image:url('${x.ph}')"></span><span class="tsw"><b>${x.n}</b><span>${x.rl[i]}</span></span>
         </span></figcaption></div>
     <div class="tsph"><div class="tsbg" role="img" aria-label="${esc(x.n + ", " + x.rl[i])}" style="background-image:url('${x.big}')"></div><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
@@ -3505,7 +3513,7 @@ if (!RM) setInterval(() => { rIdx = (rIdx + 1) % CH.length; paintRot(); }, 2000)
 
 const XPG = [[["Government and academia", "政府与学术界"], [["U.S. FDA", "美国食品药品监督管理局"], ["Harvard University", "哈佛大学"], ["MIT", "麻省理工学院"], ["University of Pennsylvania", "宾夕法尼亚大学"], ["Princeton University", "普林斯顿大学"], ["Stanford University", "斯坦福大学"]]], [["AI and technology", "人工智能与科技"], [["OpenAI", "OpenAI"], ["Google", "谷歌"], ["Amazon", "亚马逊"], ["Huawei", "华为"], ["TikTok", "TikTok"], ["NVIDIA", "英伟达"], ["Tesla", "特斯拉"], ["TSMC", "台积电"]]], [["Trading and finance", "交易与金融"], [["Jane Street", "简街资本"], ["Citadel", "城堡投资"], ["Hudson River Trading", "哈德逊河交易"], ["Optiver", "澳帝华"], ["Renaissance Technologies", "文艺复兴科技"], ["Goldman Sachs", "高盛"], ["J.P. Morgan", "摩根大通"], ["Blackstone", "黑石集团"]]], [["Consumer, health and logistics", "消费、医疗与物流"], [["Walmart", "沃尔玛"], ["Costco", "开市客"], ["Johnson & Johnson", "强生"], ["DHL", "DHL"], ["Maersk", "马士基"]]]];
 /* experts tapestry: company names with the advisors' portraits woven in, each portrait pixelated until hovered */
-const XPN = 47, xpImgs = [], xpPx = [7, 11, 18, 32, 64];
+const XPN = 52, xpImgs = [], xpPx = [7, 11, 18, 32, 64];
 function xpImg(k){ if (!xpImgs[k]) { const im = new Image(); im.decoding = "async"; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; xpImgs[k] = im; } return xpImgs[k]; }
 function xpDraw(cv, k, px){
   const im = xpImg(k); if (!im.complete || !im.naturalWidth) { im.addEventListener("load", () => xpDraw(cv, k, cv._px || px), {once: true}); return; }
@@ -3531,7 +3539,7 @@ function renderXp(){
     const parts = names.map((x, j) => `<span class="xpn">${x[i]}</span>` + (slots.has(j) && k < XPN ? `<span class="xpf" data-k="${k++}" aria-hidden="true"><canvas width="128" height="128"></canvas></span>` : j < names.length - 1 ? `<span class="xps" aria-hidden="true">/</span>` : ""));
     return `<div class="xprow"><p class="xpcat">${g[0][i]}</p><p class="xpflow">${parts.join("")}</p></div>`;
   }).join("");
-  art.querySelectorAll(".xpf").forEach(el => xpDraw(el.firstChild, +el.dataset.k, xpPx[0]));
+  art.querySelectorAll(".xpf").forEach(el => xpDraw(el.firstChild, +el.dataset.k, 128));
 }
 
 /* the wall: a blue whale made of the advisors. A whale silhouette (tail raised, spout rising) is drawn on a grid of
