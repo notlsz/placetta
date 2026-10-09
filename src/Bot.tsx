@@ -18,7 +18,7 @@ const BLUES = [CLOUD];   // the shader turns lighter tints grey, so every job bo
    The first frames are already good, so show each one straight away. */
 const SOFT = { shading: "fabric" as const, saturation: 2.3, brightness: 1.6, ink: INK, style: { opacity: 1, transition: "none" } };
 
-export function AgentBot({ size, busy, label = "Placetta", interactive = true }: { size: number; busy?: boolean; label?: string; interactive?: boolean }) {
+export function AgentBot({ size, busy, label = "Odelia", interactive = true }: { size: number; busy?: boolean; label?: string; interactive?: boolean }) {
   return (
     <BotAvatar type="cloud" face="mouth" color={CLOUD} size={size} state={busy ? "working" : "default"} interactive={interactive}
       turn={size < 40 ? 0.5 : 1} jumpEvery={size < 40 ? 0 : 9} aria-label={label} {...SOFT} />
