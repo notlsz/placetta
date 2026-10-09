@@ -3502,7 +3502,7 @@ if (!RM) setInterval(() => { rIdx = (rIdx + 1) % CH.length; paintRot(); }, 2000)
 
 const XPG = [[["Government and academia", "政府与学术界"], [["U.S. FDA", "美国食品药品监督管理局"], ["Harvard University", "哈佛大学"], ["MIT", "麻省理工学院"], ["University of Pennsylvania", "宾夕法尼亚大学"], ["Princeton University", "普林斯顿大学"], ["Stanford University", "斯坦福大学"]]], [["AI and technology", "人工智能与科技"], [["OpenAI", "OpenAI"], ["Google", "谷歌"], ["Amazon", "亚马逊"], ["Huawei", "华为"], ["TikTok", "TikTok"], ["NVIDIA", "英伟达"], ["Tesla", "特斯拉"], ["TSMC", "台积电"]]], [["Trading and finance", "交易与金融"], [["Jane Street", "简街资本"], ["Citadel", "城堡投资"], ["Hudson River Trading", "哈德逊河交易"], ["Optiver", "澳帝华"], ["Renaissance Technologies", "文艺复兴科技"], ["Goldman Sachs", "高盛"], ["J.P. Morgan", "摩根大通"], ["Blackstone", "黑石集团"]]], [["Consumer, health and logistics", "消费、医疗与物流"], [["Walmart", "沃尔玛"], ["Costco", "开市客"], ["Johnson & Johnson", "强生"], ["DHL", "DHL"], ["Maersk", "马士基"]]]];
 /* experts tapestry: company names with the advisors' portraits woven in, each portrait pixelated until hovered */
-const XPN = 34, xpImgs = [], xpPx = [7, 11, 18, 32, 64];
+const XPN = 47, xpImgs = [], xpPx = [7, 11, 18, 32, 64];
 function xpImg(k){ if (!xpImgs[k]) { const im = new Image(); im.decoding = "async"; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; xpImgs[k] = im; } return xpImgs[k]; }
 function xpDraw(cv, k, px){
   const im = xpImg(k); if (!im.complete || !im.naturalWidth) { im.addEventListener("load", () => xpDraw(cv, k, cv._px || px), {once: true}); return; }
