@@ -1101,11 +1101,12 @@ html[lang="zh-CN"] .pst b{letter-spacing:0}
 @media (min-width:1024px){.tsgrid{margin-bottom:64px}}
 .tsx{display:grid;grid-template-columns:minmax(0,1fr);margin:0;border-radius:20px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(15,27,51,.04),0 24px 60px rgba(15,27,51,.07)}
 @media (min-width:900px){.tsx{grid-template-columns:minmax(0,7fr) minmax(0,5fr);min-height:460px}}
-.tsx.sw .tsl,.tsx.sw .tsph img{animation:tsin .5s cubic-bezier(.2,.8,.2,1)}
+.tsx.sw .tsl,.tsx.sw .tsph .tsbg{animation:tsin .5s cubic-bezier(.2,.8,.2,1)}
 .tsx .tsl{min-width:0}
 .tsx .tsl img.tslg{height:var(--lh)}
 .tsx .tsq{margin:0}
-.tsx .tsp img.tsav{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none}
+.tsx .tsp .tsav{width:44px;height:44px;border-radius:50%;background:#C9DAEE center/cover no-repeat;flex:none}
+#tsGrid .tsav,#tsGrid .tsbg{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none;pointer-events:none}
 .tsw{display:flex;flex-direction:column;gap:2px;min-width:0}
 /* case studies: tabs match the testimonial tabs; cards are white with a soft lift */
 #case .cshd.cshd{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;gap:14px;margin:72px 0 20px}
@@ -1138,7 +1139,7 @@ html[lang="zh-CN"] .pst b{letter-spacing:0}
 .tsctl button:hover{background:var(--card)}
 .tsph{position:relative;min-height:340px;background:#C9DAEE;overflow:hidden}
 @media (max-width:899px){.tsph{min-height:0;aspect-ratio:4/3}}
-.tsph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.tsph .tsbg{position:absolute;inset:0;background:#C9DAEE 50% 30%/cover no-repeat}
 .tsph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(10,23,48,.72) 100%)}
 .tsrs{position:absolute;left:24px;right:24px;bottom:22px;z-index:1;display:flex;flex-direction:column;gap:6px;color:#fff}
 @media (min-width:1024px){.tsrs{left:32px;bottom:30px}}
@@ -3412,11 +3413,13 @@ function renderTs(swap){
   renderTsTabs();
   document.getElementById("tsGrid").innerHTML = `<figure class="tsx${swap ? " sw" : ""}">
     <div class="tsl"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async"><blockquote class="tsq">“${x.q[i]}”</blockquote>
-      <figcaption class="tsp"><img class="tsav" src="${x.ph}" alt="" width="44" height="44" decoding="async"><span class="tsw"><b>${x.n}</b><span>${x.rl[i]}</span></span>
+      <figcaption class="tsp"><span class="tsav" aria-hidden="true" style="background-image:url('${x.ph}')"></span><span class="tsw"><b>${x.n}</b><span>${x.rl[i]}</span></span>
         </span></figcaption></div>
-    <div class="tsph"><img src="${x.big}" alt="${esc(x.n + ", " + x.rl[i])}" decoding="async"><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
+    <div class="tsph"><div class="tsbg" role="img" aria-label="${esc(x.n + ", " + x.rl[i])}" style="background-image:url('${x.big}')"></div><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
   </figure>`;
 }
+/* testimonial portraits are CSS backgrounds (no image menu, no drag, no open-in-tab); the card blocks the menu and drag too */
+["contextmenu", "dragstart", "copy"].forEach(ev => document.getElementById("tsGrid").addEventListener(ev, e => { if (e.target.closest(".tsph,.tsp")) e.preventDefault(); }));
 let tsT = null;
 function tsNext(){ clearTimeout(tsT); if (RM) return; tsT = setTimeout(() => { if (document.hidden) { tsNext(); renderTsTabs(); return; } tsK = (tsK + 1) % TS.length; renderTs(true); tsNext(); }, 8000); }
 document.getElementById("tsTabs").addEventListener("click", e => { const b = e.target.closest("[data-ts]"); if (!b) return; const k = Number(b.dataset.ts); if (k !== tsK) { tsK = k; renderTs(true); track("testimonial_nav", {to: tsK}); } if (!tsHold) tsNext(); });
@@ -3537,7 +3540,11 @@ function renderXp(){
 (function xpWallInit(){
   const cv = document.getElementById("xpWall"); if (!cv) return;
   const g = cv.getContext("2d"), PX = 16, tiles = [], mk = document.createElement("canvas"), mg = mk.getContext("2d", {willReadFrequently: true});
-  let W = 0, H = 0, dpr = 1, run = false, t0 = performance.now(), loaded = 0, cols = 80, rows = 28, cell = 15;
+  let W = 0, H = 0, dpr = 1, run = false, t0 = performance.now(), loaded = 0, cols = 80, rows = 28, cell = 15, sc = 1, offX = 0, offY = 0;
+  // the still whale is drawn once at 4x the cell grid; each frame its rear columns are shifted up and down along a
+  // travelling wave and the result is box-filtered down to one pixel per cell
+  const SS = 4, st = document.createElement("canvas"), sg = st.getContext("2d"), bt = document.createElement("canvas"), bg = bt.getContext("2d"),
+    hf = document.createElement("canvas"), hg = hf.getContext("2d");
   for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => {
     const c = document.createElement("canvas"); c.width = c.height = PX; c.getContext("2d").drawImage(im, 0, 0, PX, PX); tiles[k] = c;
     if (++loaded === XPN && !run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
@@ -3545,31 +3552,60 @@ function renderXp(){
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth;
     cell = W < 640 ? 7 : W < 1024 ? 11 : 14; cols = Math.floor(W / cell); rows = Math.round(cols * 0.42); H = rows * cell;
     cv.style.height = H + "px"; cv.parentElement.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr; mk.width = cols; mk.height = rows;
+    sc = Math.min(cols / 1000, rows / 420) * .9; offX = (cols - 1000 * sc) / 2; offY = (rows - 420 * sc) / 2;
+    st.width = bt.width = cols * SS; st.height = bt.height = rows * SS; hf.width = cols * 2; hf.height = rows * 2;
+    if (BODY) still(); sd = null;
   };
-  size(); addEventListener("resize", size);
+  let BODY = null;
   // the whale, in a 1000 x 420 design space, facing left with its flukes raised
-  const BODY = new Path2D("M60 262C60 182 170 137 330 132C480 127 600 162 690 222C730 247 760 242 790 202C805 182 812 152 805 127C770 117 735 92 720 62C770 72 815 92 830 112C850 82 890 62 945 57C920 92 880 127 845 142C835 182 815 232 770 272C700 332 560 352 400 350C230 348 100 332 60 262Z");
+  BODY = new Path2D("M60 262C60 182 170 137 330 132C480 127 600 162 690 222C730 247 760 242 790 202C805 182 812 152 805 127C770 117 735 92 720 62C770 72 815 92 830 112C850 82 890 62 945 57C920 92 880 127 845 142C835 182 815 232 770 272C700 332 560 352 400 350C230 348 100 332 60 262Z");
   const FIN = new Path2D("M300 330C330 350 360 380 405 392C392 366 368 342 340 328Z");
   const MOUTH = new Path2D("M62 272C120 288 190 296 250 292");
   const SPOUT = [[168, 92, 14], [150, 62, 11], [188, 58, 11], [132, 36, 8], [206, 32, 8], [168, 30, 9]];
+  // the still whale, in mask colours: red = whale, yellow = eye and mouth line (dark), blue = spout
+  function still(){
+    sg.setTransform(1, 0, 0, 1, 0, 0); sg.clearRect(0, 0, st.width, st.height);
+    sg.setTransform(sc * SS, 0, 0, sc * SS, offX * SS, offY * SS);
+    sg.fillStyle = "rgb(255,0,0)"; sg.fill(BODY); sg.fill(FIN);
+    sg.fillStyle = "rgb(255,255,0)"; sg.beginPath(); sg.arc(150, 240, 11, 0, 7); sg.fill();
+    sg.strokeStyle = "rgb(255,255,0)"; sg.lineWidth = 7; sg.lineCap = "round"; sg.stroke(MOUTH);
+    sg.fillStyle = "rgb(0,0,255)"; SPOUT.forEach(([x, y, r]) => { sg.beginPath(); sg.arc(x, y, r, 0, 7); sg.fill(); });
+  }
+  /* the stroke. A whale swims by bending its tail stock up and down. Here the tail curls about the root of the stock:
+     each point turns about that root by an angle that grows with its distance from it, so the stock bends in a smooth
+     arc and the flukes, furthest out, sweep the widest and trail a beat behind. The beat is a little quicker on the
+     power (down) stroke. Front of the body, fin, eye and spout never move. */
+  const PX0 = 735, PY0 = 275, R0 = 40, R1 = 250, AMAX = .2, OM = 1.5, LAG = 1.1;
+  let sd = null;   // the still whale's pixels, read once per resize
+  size(); addEventListener("resize", size);
   const face = (c, r) => ((c * 7 + r * 13) % XPN + XPN) % XPN;
   function frame(now){
     const t = RM ? 0 : (now - t0) / 1000;
-    // draw the mask: red = whale, green = eye and mouth line (dark), blue = spout
-    // swimming: only the tail moves. Everything behind the tail stock swings as one piece around it, eased, so the
-    // flukes beat smoothly while the body, fin and spout hold still; the water streams past.
-    const sc = Math.min(cols / 1000, rows / 420) * .9, beat = Math.sin(t * 1.9), ease = beat * (1 - .18 * beat * beat);
-    const offX = (cols - 1000 * sc) / 2, offY = (rows - 420 * sc) / 2;
-    mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, cols, rows);
-    mg.setTransform(sc, 0, 0, sc, offX, offY);
-    mg.fillStyle = "rgb(255,0,0)";
-    mg.save(); mg.beginPath(); mg.rect(0, 0, 780, 420); mg.clip(); mg.fill(BODY); mg.restore();
-    mg.save(); mg.translate(770, 240); mg.rotate(ease * .3); mg.translate(-770, -240);
-    mg.beginPath(); mg.rect(752, 0, 260, 420); mg.clip(); mg.fill(BODY); mg.restore();
-    mg.fill(FIN);
-    mg.fillStyle = "rgb(255,255,0)"; mg.beginPath(); mg.arc(150, 240, 11, 0, 7); mg.fill();
-    mg.strokeStyle = "rgb(255,255,0)"; mg.lineWidth = 7; mg.lineCap = "round"; mg.stroke(MOUTH);
-    mg.fillStyle = "rgb(0,0,255)"; SPOUT.forEach(([x, y, r]) => { mg.beginPath(); mg.arc(x, y, r, 0, 7); mg.fill(); });
+    const W4 = st.width, H4 = st.height, k = sc * SS, px = (offX + PX0 * sc) * SS, py = (offY + PY0 * sc) * SS;
+    if (!sd || sd.width !== W4) sd = sg.getImageData(0, 0, W4, H4);
+    const out = bg.createImageData(W4, H4), o = out.data, src = sd.data, x0 = Math.floor((offX + 640 * sc) * SS);
+    // everything left of the tail is copied as is
+    for (let y = 0; y < H4; y++) o.set(src.subarray(y * W4 * 4, (y * W4 + x0) * 4), y * W4 * 4);
+    const ph0 = OM * t, r0 = R0 * k, r1 = R1 * k;
+    for (let y = 0; y < H4; y++) for (let x = x0; x < W4; x++) {
+      const dx = x + .5 - px, dy = y + .5 - py, d = Math.hypot(dx, dy);
+      let sx = x, sy = y;
+      if (d > r0) {
+        const u = Math.min(1, (d - r0) / (r1 - r0)), e = u * u * (3 - 2 * u), ph = ph0 - LAG * u;
+        // only the part behind the root curls; a soft ramp across x keeps the belly joint seamless
+        const wx = Math.min(1, Math.max(0, (x - x0) / (40 * k)));
+        const a = -AMAX * e * wx * (Math.sin(ph) + .18 * Math.sin(2 * ph)), ca = Math.cos(a), sa = Math.sin(a);
+        sx = Math.round(px + dx * ca - dy * sa - .5); sy = Math.round(py + dx * sa + dy * ca - .5);
+        if (sx < 0 || sy < 0 || sx >= W4 || sy >= H4) continue;
+      }
+      const i = (y * W4 + x) * 4, j = (sy * W4 + sx) * 4;
+      o[i] = src[j]; o[i + 1] = src[j + 1]; o[i + 2] = src[j + 2]; o[i + 3] = src[j + 3];
+    }
+    bg.putImageData(out, 0, 0);
+    // 4x -> 2x -> 1x: each halving averages a 2x2 block, so edge cells come out partly covered and fade smoothly
+    hg.imageSmoothingEnabled = mg.imageSmoothingEnabled = true;
+    hg.clearRect(0, 0, hf.width, hf.height); hg.drawImage(bt, 0, 0, hf.width, hf.height);
+    mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, cols, rows); mg.drawImage(hf, 0, 0, cols, rows);
     const m = mg.getImageData(0, 0, cols, rows).data;
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H); g.imageSmoothingEnabled = false;
     // water streaming past: specks and thin streaks drift toward the tail at different depths
