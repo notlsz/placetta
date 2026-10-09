@@ -34,6 +34,7 @@ export type OfficialForm = {
   currency?: string;
   feeNote?: Bi;
   takes?: Bi;
+  takesSource?: string;       // the agency page that states that time, and when we read it
   renews?: Bi;
   fields: FormField[];        // as printed on the form or asked by the portal
   attach?: Bi[];
@@ -106,7 +107,7 @@ export const FORMS: OfficialForm[] = [
     id: "cbp-5106", form: "CBP Form 5106 (06/26)", title: B("Create/Update Importer Identity Form", "进口商身份创建/更新表"),
     agency: B("U.S. Customs and Border Protection", "美国海关与边境保护局（CBP）"), level: "federal", where: "US", segments: ["seller", "warehouse", "retail"], needs: { imports: true }, method: "pdf_mail", order: 30,
     how: B("Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record.", "提交给 CBP（通常经由报关行），或在 ACE 门户中创建。以进口商身份首次报关前必须完成。"),
-    url: "https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf", pdf: "https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf", info: "https://www.cbp.gov/newsroom/publications/forms",
+    url: "https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf", pdf: "https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf", info: "https://www.cbp.gov/newsroom/publications/forms", takes: B("Up to 5 business days.", "最多 5 个工作日。"), takesSource: "https://www.cbp.gov/sites/default/files/documents/Policy%20and%20Procedures%20Form%205106_2.pdf (2026-10-09)",
     fee: 0, fill: "cbp5106", checked: "form",
     foreign: B("A U.S. entity uses its EIN in block 1B. Officers in block 3J give a passport number instead of an SSN; Placetta leaves those for the officer to write by hand.", "美国实体在 1B 栏填写 EIN。3J 栏的高管可用护照号代替 SSN，快哉会留空由本人手写。"),
     fields: [
@@ -141,7 +142,7 @@ export const FORMS: OfficialForm[] = [
     id: "cbp-301", form: "CBP Form 301", title: B("Customs Bond", "海关保证金（关税担保）"),
     agency: B("U.S. Customs and Border Protection", "美国海关与边境保护局（CBP）"), level: "federal", where: "US", segments: ["seller", "warehouse", "retail"], needs: { imports: true }, method: "portal", order: 35,
     how: B("Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries.", "通过 CBP 认可的担保公司购买，通常由报关行代为电子提交。连续保证金覆盖一年内的全部报关。"),
-    url: "https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf", pdf: "https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf", info: "https://www.cbp.gov/trade/priority-issues/bonds",
+    url: "https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf", pdf: "https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf", info: "https://www.cbp.gov/trade/priority-issues/bonds", takes: B("At least 5 business days for review.", "审核至少需要 5 个工作日。"), takesSource: "https://www.cbp.gov/sites/default/files/documents/Bonds%20General%20Guidelines.pdf (2026-10-09)",
     fee: null, feeNote: B("No CBP fee. The surety charges a premium; a continuous bond is at least $50,000 of coverage.", "CBP 不收费。担保公司收取保费；连续保证金额度至少 50,000 美元。"), renews: B("Continuous bonds renew yearly.", "连续保证金每年续保。"), checked: "page", fields: [],
   },
   {
@@ -154,7 +155,7 @@ export const FORMS: OfficialForm[] = [
     id: "fda-ffr", form: "FDA Food Facility Registration (Form FDA 3537)", title: B("Food Facility Registration", "食品设施注册"),
     agency: B("U.S. Food and Drug Administration", "美国食品药品监督管理局（FDA）"), level: "federal", where: "US", segments: ["seller", "warehouse"], needs: { food: true }, method: "online", order: 45,
     how: B("Filed online in FDA Industry Systems. Required for facilities that make, pack or hold food for U.S. consumption, including foreign ones. Restaurants and retail food stores are exempt.", "在 FDA 行业系统在线提交。生产、包装或储存供美国消费食品的设施（包括境外设施）必须注册；餐厅和零售食品店豁免。"),
-    url: "https://www.access.fda.gov/", info: "https://www.fda.gov/food/online-registration-food-facilities", fee: 0, renews: B("Renew between October 1 and December 31 of every even-numbered year.", "每逢偶数年 10 月 1 日至 12 月 31 日续期。"), checked: "page", fields: [],
+    url: "https://www.access.fda.gov/", info: "https://www.fda.gov/food/online-registration-food-facilities", takes: B("Number issued on screen as soon as an online registration with a valid UFI is submitted; foreign facilities wait for U.S. agent confirmation.", "网上提交且 UFI 有效时，注册号当即在页面显示；外国设施需等待美国代理人确认。"), takesSource: "https://fda.gov/media/166887/download?attachment= (2026-10-09)", fee: 0, renews: B("Renew between October 1 and December 31 of every even-numbered year.", "每逢偶数年 10 月 1 日至 12 月 31 日续期。"), checked: "page", fields: [],
   },
   {
     id: "fda-5066", form: "Form FDA 5066", title: B("Cosmetic product facility registration (MoCRA)", "化妆品生产设施注册（MoCRA）"),
@@ -200,7 +201,7 @@ export const FORMS: OfficialForm[] = [
     id: "ny-dos-pub", form: "Certificate of Publication", title: B("LLC publication within 120 days", "LLC 成立公告（120 天内）"),
     agency: B("New York Department of State, Division of Corporations", "纽约州务院公司处"), level: "state", where: "NY", segments: ALL, needs: { newEntity: true }, method: "pdf_mail", order: 13,
     how: B("Publish a notice in two newspapers chosen by the county clerk for six weeks, then file the certificate with the affidavits.", "在县书记官指定的两份报纸上连续刊登六周，然后提交证明及刊登宣誓书。"),
-    url: "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0", info: "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0",
+    url: "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0", info: "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0", takes: B("No standard time published; paid expedited processing within 24 hours ($25).", "未公布标准处理时间；付费加急可在 24 小时内处理（25 美元）。"), takesSource: "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0 (2026-10-09)",
     fee: 50, feeNote: B("Plus the newspapers' charges, which vary by county.", "另付报社刊登费，各县不同。"), checked: "page", fields: [],
   },
   {
@@ -230,7 +231,7 @@ export const FORMS: OfficialForm[] = [
     id: "nyc-fse", form: "Food Service Establishment Permit", title: B("Food Service Establishment Permit", "餐饮服务场所许可证"),
     agency: B("NYC Department of Health and Mental Hygiene", "纽约市卫生与心理健康局"), level: "city", where: "NYC", segments: ["restaurant"], method: "portal", order: 75,
     how: B("Apply on NYC Business. The Health Department inspects before issuing; letter grades follow.", "在 NYC Business 申请，卫生局检查合格后发证，之后实行字母评级。"),
-    url: "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit", info: "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit",
+    url: "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit", info: "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit", renews: B("Every year.", "每年续期一次。"), takes: B("You may open 22 days after applying, even before the pre-permit inspection.", "提交申请 22 天后即可开业，即使尚未进行发证前检查。"), takesSource: "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit (2026-10-09)",
     fee: 280, checked: "page",
     fields: [F("legal", "Business", "Legal name and trade name", "法定名称与营业名称"), F("addr", "Premises", "Premises address", "场所地址"), F("owner", "Owner", "Owner or officers", "所有人或高管"), F("fpc", "Supervisor", "Food Protection Certificate number of a supervisor", "主管的食品保护证书编号"), F("seats", "Operation", "Seats and hours", "座位数与营业时间")],
     attach: [B("Food Protection Certificate", "食品保护证书"), B("Certificate of Occupancy or letter of no objection", "占用证或无异议函"), B("Lease", "租约")],
@@ -239,7 +240,7 @@ export const FORMS: OfficialForm[] = [
     id: "nyc-fpc", form: "Food Protection Certificate", title: B("Food Protection Certificate (course and exam)", "食品保护证书（课程与考试）"),
     agency: B("NYC Department of Health and Mental Hygiene", "纽约市卫生与心理健康局"), level: "city", where: "NYC", segments: ["restaurant"], method: "online", order: 70,
     how: B("Free online course, then an in-person exam. A certified supervisor must be on site whenever you are open.", "免费在线课程，之后线下考试。营业时必须有持证主管在场。"),
-    url: "https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page", info: "https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page",
+    url: "https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page", info: "https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page", renews: B("Does not expire.", "永久有效，无需续期。"), takes: B("Certificate arrives 2 to 6 weeks after the exam.", "考试后 2 至 6 周收到证书。"), takesSource: "https://www.nyc.gov/assets/doh/downloads/pdf/hany/food-protection-course-faq.pdf (2026-10-09)",
     fee: 24.6, feeNote: B("The exam fee; the course is free.", "考试费用；课程免费。"), checked: "page", fields: [],
   },
   {
@@ -266,7 +267,7 @@ export const FORMS: OfficialForm[] = [
     id: "ca-llc-1", form: "Form LLC-1", title: B("Articles of Organization (California LLC)", "组织章程（加州 LLC）"),
     agency: B("California Secretary of State", "加州州务卿"), level: "state", where: "CA", segments: ALL, needs: { newEntity: true }, method: "online", order: 12,
     how: B("Filed online in bizfile Online.", "在 bizfile Online 在线提交。"),
-    url: "https://bizfileonline.sos.ca.gov/", info: "https://www.sos.ca.gov/business-programs/business-entities/forms", fee: 70,
+    url: "https://bizfileonline.sos.ca.gov/", info: "https://www.sos.ca.gov/business-programs/business-entities/forms", takes: B("Online filings are currently reviewed about 3 days after receipt (mail about 8 days), per the Oct 8, 2026 queue.", "截至 2026 年 10 月 8 日，网上提交约在收到后 3 天内开始审核（邮寄约 8 天）。"), takesSource: "https://www.sos.ca.gov/business-programs/business-entities/processing-times (2026-10-09)", fee: 70,
     renews: B("Statement of Information (LLC-12, $20) within 90 days, then every two years.", "90 天内提交信息声明（LLC-12，20 美元），之后每两年一次。"), checked: "page",
     fields: [F("name", "1", "Limited liability company name", "有限责任公司名称"), F("office", "2a", "Initial street address of designated office in California", "加州指定办公室街道地址"), F("mail", "2b", "Initial mailing address, if different", "邮寄地址（如不同）"), F("agent", "3", "Agent for service of process", "法律文书送达代理人"), F("mgmt", "4", "Management", "管理方式", ["One manager", "More than one manager", "All LLC member(s)"])],
   },
@@ -274,7 +275,7 @@ export const FORMS: OfficialForm[] = [
     id: "ca-llc-5", form: "Form LLC-5", title: B("Application to Register a Foreign LLC", "外州/外国 LLC 注册申请"),
     agency: B("California Secretary of State", "加州州务卿"), level: "state", where: "CA", segments: ALL, needs: { foreignEntity: true }, method: "online", order: 12,
     how: B("Filed in bizfile Online with a certificate of good standing from the home state or country.", "在 bizfile Online 提交，并附注册地出具的存续证明。"),
-    url: "https://bizfileonline.sos.ca.gov/", info: "https://www.sos.ca.gov/business-programs/business-entities/forms", fee: 70, checked: "page", fields: [],
+    url: "https://bizfileonline.sos.ca.gov/", info: "https://www.sos.ca.gov/business-programs/business-entities/forms", takes: B("Online filings are currently reviewed about 3 days after receipt (mail about 8 days), per the Oct 8, 2026 queue.", "截至 2026 年 10 月 8 日，网上提交约在收到后 3 天内开始审核（邮寄约 8 天）。"), takesSource: "https://www.sos.ca.gov/business-programs/business-entities/processing-times (2026-10-09)", fee: 70, checked: "page", fields: [],
   },
   {
     id: "ca-ftb-3522", form: "FTB 3522", title: B("LLC annual tax ($800)", "LLC 年度税（800 美元）"),
@@ -287,14 +288,14 @@ export const FORMS: OfficialForm[] = [
     id: "ca-cdtfa", form: "CDTFA seller's permit (online registration)", title: B("Seller's permit", "销售许可证"),
     agency: B("California Department of Tax and Fee Administration", "加州税费管理局（CDTFA）"), level: "state", where: "CA", segments: ALL, method: "online", order: 20,
     how: B("Register online before your first sale; one permit for each location.", "首笔销售前在线登记，每个门店一张。"),
-    url: "https://onlineservices.cdtfa.ca.gov/", info: "https://cdtfa.ca.gov/services/registration.htm", fee: 0, feeNote: B("Free. CDTFA may ask for a security deposit.", "免费。CDTFA 可能要求缴纳保证金。"), checked: "page",
+    url: "https://onlineservices.cdtfa.ca.gov/", info: "https://cdtfa.ca.gov/services/registration.htm", renews: B("Does not expire.", "永久有效，无需续期。"), takes: B("Often issued the same day.", "通常可当天发放。"), takesSource: "https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm (2026-10-09)", fee: 0, feeNote: B("Free. CDTFA may ask for a security deposit.", "免费。CDTFA 可能要求缴纳保证金。"), checked: "page",
     fields: [F("legal", "Business", "Ownership type, legal name and FEIN", "所有权类型、法定名称与 FEIN"), F("addr", "Location", "Business location in California", "加州营业地址"), F("sells", "Activity", "What you sell (NAICS)", "销售内容（NAICS）"), F("people", "Owners", "Officers, members or managers", "高管、成员或经理"), F("start", "Sales", "Start date and expected monthly taxable sales", "开始日期与预计月应税销售额")],
   },
   {
     id: "ca-edd-de1", form: "DE 1", title: B("Registration Form for Commercial Employers", "商业雇主登记表"),
     agency: B("California Employment Development Department", "加州就业发展局（EDD）"), level: "state", where: "CA", segments: ALL, needs: { employees: true }, method: "online", order: 60,
     how: B("Register in e-Services for Business within 15 days of paying over $100 in wages.", "支付工资超过 100 美元后 15 天内在 e-Services for Business 登记。"),
-    url: "https://edd.ca.gov/en/payroll_taxes/save_time_and_register_online/", pdf: "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf", info: "https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/", fee: 0, checked: "page", fields: [],
+    url: "https://edd.ca.gov/en/payroll_taxes/save_time_and_register_online/", pdf: "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf", info: "https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/", takes: B("Mail-in registration takes about 10 to 14 days; online is faster.", "邮寄登记约需 10 至 14 天；网上登记更快。"), takesSource: "https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/ (2026-10-09)", fee: 0, checked: "page", fields: [],
   },
   {
     id: "ca-sb54", form: "SB 54 producer registration", title: B("Packaging producer registration (EPR)", "包装生产者登记（生产者延伸责任）"),
@@ -314,13 +315,13 @@ export const FORMS: OfficialForm[] = [
     id: "la-btrc", form: "Business Tax Registration Certificate (BTRC)", title: B("City of Los Angeles business tax registration", "洛杉矶市营业税登记证"),
     agency: B("City of Los Angeles Office of Finance", "洛杉矶市财政办公室"), level: "city", where: "LA", segments: ALL, method: "online", order: 22,
     how: B("Register online within 30 days of starting business in the city.", "在市内开业后 30 天内在线登记。"),
-    url: "https://finance.lacity.gov/register-new-business", info: "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc", fee: null, feeNote: B("Tax depends on the business class and gross receipts.", "税额取决于业务类别和营业总额。"), renews: B("Renew every year.", "每年续期。"), checked: "page", fields: [],
+    url: "https://finance.lacity.gov/register-new-business", info: "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc", takes: B("Temporary certificate issued immediately; permanent one mailed in 4 to 6 weeks.", "临时证书即时发放；正式证书 4 至 6 周内寄出。"), takesSource: "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc (2026-10-09)", fee: null, feeNote: B("Tax depends on the business class and gross receipts.", "税额取决于业务类别和营业总额。"), renews: B("Renew every year.", "每年续期。"), checked: "page", fields: [],
   },
   {
     id: "lac-plan-check", form: "Retail Food Facility Plan Review Service Request (Rev 11/2025)", title: B("Food facility plan check", "食品设施图纸审查"),
     agency: B("Los Angeles County Department of Public Health, Environmental Health", "洛杉矶县公共卫生局环境卫生处"), level: "county", where: "LAC", segments: ["restaurant"], needs: { buildout: true }, method: "portal", order: 50,
     how: B("Submit plans before building out; approval comes before the public health permit.", "装修施工前提交图纸，获批后才能申请公共卫生许可证。"),
-    url: "http://publichealth.lacounty.gov/eh/i-want-to/submit-electronic-plan.htm", pdf: "http://publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf", info: "http://publichealth.lacounty.gov/eh/inspection/retail-plan-check.htm", fee: null, checked: "page",
+    url: "http://publichealth.lacounty.gov/eh/i-want-to/submit-electronic-plan.htm", pdf: "http://publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf", info: "http://publichealth.lacounty.gov/eh/inspection/retail-plan-check.htm", takes: B("Plan review within 20 working days.", "图纸审核在 20 个工作日内完成。"), takesSource: "http://publichealth.lacounty.gov/eh/docs/retailplanchecknew.pdf (2026-10-09)", fee: null, checked: "page",
     fields: [], attach: [B("Scaled floor plan, equipment and finish schedules", "按比例绘制的平面图、设备与装修清单"), B("Menu", "菜单")],
   },
   {
@@ -333,13 +334,13 @@ export const FORMS: OfficialForm[] = [
     id: "la-ladbs", form: "Application for Building Permit and Certificate of Occupancy", title: B("Building permit and Certificate of Occupancy", "建筑许可证与占用证"),
     agency: B("Los Angeles Department of Building and Safety", "洛杉矶建筑与安全局（LADBS）"), level: "city", where: "LA", segments: ["restaurant", "retail", "warehouse"], needs: { buildout: true }, method: "portal", order: 52,
     how: B("Tenant improvements and changes of use go through plan check; a new use gets a new Certificate of Occupancy.", "租户装修和用途变更需图纸审查；新用途需取得新的占用证。"),
-    url: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", pdf: "https://www.ladbs.org/docs/default-source/forms/plan-check-2023/application-for-building-permit-or-grading-and-certificate-of-occupancy-pc-str-app01.pdf", info: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", fee: null, checked: "page", fields: [],
+    url: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", pdf: "https://www.ladbs.org/docs/default-source/forms/plan-check-2023/application-for-building-permit-or-grading-and-certificate-of-occupancy-pc-str-app01.pdf", info: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", takes: B("Plans are returned within weeks, depending on workload.", "图纸视工作量在数周内返还。"), takesSource: "https://dbs.lacity.gov/services/plan-review-permitting/plan-check-permit/regular-plan-check (2026-10-09)", fee: null, checked: "page", fields: [],
   },
   {
     id: "la-lafd-ops", form: "LAFD operational fire permits", title: B("Fire permits for high-piled storage and hazardous materials", "高堆货物与危险品消防许可证"),
     agency: B("Los Angeles Fire Department, Fire Prevention Bureau", "洛杉矶消防局防火处"), level: "city", where: "LA", segments: ["warehouse", "retail"], needs: { hazmat: true }, method: "portal", order: 78,
     how: B("Needed when storage or batteries cross fire code thresholds; inspected before issue.", "储存或电池数量超过消防规范门槛时需要，发证前检查。"),
-    url: "https://lafd.org/operational-fire-permits", info: "https://lafd.org/operational-fire-permits", fee: null, checked: "page", fields: [],
+    url: "https://lafd.org/operational-fire-permits", info: "https://lafd.org/operational-fire-permits", renews: B("Every year.", "每年续期一次。"), fee: null, checked: "page", fields: [],
   },
   {
     id: "la-cupa-hmbp", form: "Hazardous Materials Business Plan (CERS)", title: B("Hazardous materials business plan", "危险品业务计划"),
@@ -353,26 +354,26 @@ export const FORMS: OfficialForm[] = [
     id: "tx-205", form: "Form 205", title: B("Certificate of Formation (Texas LLC)", "成立证书（德州 LLC）"),
     agency: B("Texas Secretary of State", "德州州务卿"), level: "state", where: "TX", segments: ALL, needs: { newEntity: true }, method: "online", order: 12,
     how: B("Filed online in SOSDirect, or by mail or fax.", "通过 SOSDirect 在线提交，也可邮寄或传真。"),
-    url: "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", pdf: "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", info: "https://www.sos.state.tx.us/corp/instructions/205.shtml", fee: 300, checked: "page",
+    url: "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", pdf: "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", info: "https://www.sos.state.tx.us/corp/instructions/205.shtml", takes: B("No standard time published; paid expedited service typically takes 2 to 3 business days.", "未公布标准处理时间；付费加急服务通常需 2 至 3 个工作日。"), takesSource: "https://www.sos.state.tx.us/express.shtml (2026-10-09)", fee: 300, checked: "page",
     fields: [F("name", "Article 1", "Entity name", "实体名称"), F("agent", "Article 2", "Registered agent and Texas registered office", "注册代理人与德州注册办公室"), F("gov", "Article 3", "Governing authority: managers or members, with names and addresses", "管理方式：经理或成员，及其姓名地址"), F("purpose", "Article 4", "Purpose", "经营目的"), F("organizer", "Organizer", "Organizer name and address", "组织人姓名与地址")],
   },
   {
     id: "tx-304", form: "Form 304", title: B("Application for Registration of a Foreign LLC", "外州/外国 LLC 注册申请"),
     agency: B("Texas Secretary of State", "德州州务卿"), level: "state", where: "TX", segments: ALL, needs: { foreignEntity: true }, method: "online", order: 12,
     how: B("Filed in SOSDirect with a certificate of existence from the home jurisdiction.", "通过 SOSDirect 提交，并附注册地出具的存续证明。"),
-    url: "https://www.sos.texas.gov/corp/forms/304_boc.pdf", pdf: "https://www.sos.texas.gov/corp/forms/304_boc.pdf", info: "https://www.sos.state.tx.us/corp/instructions/304.shtml", fee: 750, checked: "page", fields: [],
+    url: "https://www.sos.texas.gov/corp/forms/304_boc.pdf", pdf: "https://www.sos.texas.gov/corp/forms/304_boc.pdf", info: "https://www.sos.state.tx.us/corp/instructions/304.shtml", takes: B("No standard time published; paid expedited service typically takes 2 to 3 business days.", "未公布标准处理时间；付费加急服务通常需 2 至 3 个工作日。"), takesSource: "https://www.sos.state.tx.us/express.shtml (2026-10-09)", fee: 750, checked: "page", fields: [],
   },
   {
     id: "tx-503", form: "Form 503", title: B("Assumed Name Certificate (DBA)", "假定名称证书（DBA）"),
     agency: B("Texas Secretary of State", "德州州务卿"), level: "state", where: "TX", segments: ALL, method: "online", order: 14,
     how: B("Filed when the store trades under a name other than the legal name.", "门店使用与法定名称不同的名称经营时提交。"),
-    url: "https://www.sos.state.tx.us/corp/forms/503_boc.pdf", pdf: "https://www.sos.state.tx.us/corp/forms/503_boc.pdf", info: "https://www.sos.state.tx.us/corp/instructions/503.shtml", fee: 25, renews: B("Valid up to 10 years.", "最长有效 10 年。"), checked: "page", fields: [],
+    url: "https://www.sos.state.tx.us/corp/forms/503_boc.pdf", pdf: "https://www.sos.state.tx.us/corp/forms/503_boc.pdf", info: "https://www.sos.state.tx.us/corp/instructions/503.shtml", takes: B("No standard time published; paid expedited service typically takes 2 to 3 business days.", "未公布标准处理时间；付费加急服务通常需 2 至 3 个工作日。"), takesSource: "https://www.sos.state.tx.us/express.shtml (2026-10-09)", fee: 25, renews: B("Valid up to 10 years.", "最长有效 10 年。"), checked: "page", fields: [],
   },
   {
     id: "tx-ap201", form: "AP-201", title: B("Texas Sales and Use Tax Permit Application", "德州销售与使用税许可证申请"),
     agency: B("Texas Comptroller of Public Accounts", "德州审计长办公室"), level: "state", where: "TX", segments: ALL, method: "online", order: 20,
     how: B("Apply online in eSystems before your first sale; one permit for each location.", "首笔销售前通过 eSystems 在线申请，每个门店一张。"),
-    url: "https://comptroller.texas.gov/taxes/permit/", info: "https://comptroller.texas.gov/taxes/permit/", fee: 0, feeNote: B("Free. A security may be required.", "免费，可能需要缴纳担保金。"), checked: "page", fields: [],
+    url: "https://comptroller.texas.gov/taxes/permit/", info: "https://comptroller.texas.gov/taxes/permit/", renews: B("Does not expire.", "永久有效，无需续期。"), takes: B("Permit arrives in about 2 to 3 weeks.", "约 2 至 3 周收到许可证。"), takesSource: "https://comptroller.texas.gov/taxes/permit/ (2026-10-09)", fee: 0, feeNote: B("Free. A security may be required.", "免费，可能需要缴纳担保金。"), checked: "page", fields: [],
   },
   {
     id: "tx-franchise", form: "Franchise Tax Report and Public Information Report (05-102)", title: B("Franchise tax annual report", "特许经营税年度报告"),
@@ -384,7 +385,7 @@ export const FORMS: OfficialForm[] = [
     id: "tx-twc", form: "Employer registration (unemployment tax)", title: B("Unemployment tax account", "失业保险税账户"),
     agency: B("Texas Workforce Commission", "德州劳动力委员会"), level: "state", where: "TX", segments: ALL, needs: { employees: true }, method: "online", order: 60,
     how: B("Register online once you pay wages in Texas.", "在德州支付工资后在线登记。"),
-    url: "https://www.twc.texas.gov/services/register-tax", info: "https://www.twc.texas.gov/services/register-tax", fee: 0, checked: "page", fields: [],
+    url: "https://www.twc.texas.gov/services/register-tax", info: "https://www.twc.texas.gov/services/register-tax", takes: B("Account number issued instantly online.", "网上登记后即时获得账号。"), takesSource: "https://www.twc.texas.gov/services/register-tax (2026-10-09)", fee: 0, checked: "page", fields: [],
   },
 
   /* -------------------------------- Houston -------------------------------- */
@@ -398,25 +399,25 @@ export const FORMS: OfficialForm[] = [
     id: "hou-sign", form: "On-premises sign permit (HPW Code 1112)", title: B("Sign permit", "招牌许可证"),
     agency: B("City of Houston, Sign Administration", "休斯顿市招牌管理处"), level: "city", where: "HOU", segments: STORES, needs: { signage: true }, method: "portal", order: 80,
     how: B("Filed with the Houston Permitting Center before the sign goes up.", "安装招牌前向休斯顿许可中心提交。"),
-    url: "https://www.houstonpermittingcenter.org/hpwcode1112", info: "https://houstonpermittingcenter.org/building-code-enforcement/sign-administration", fee: null, checked: "page", fields: [],
+    url: "https://www.houstonpermittingcenter.org/hpwcode1112", info: "https://houstonpermittingcenter.org/building-code-enforcement/sign-administration", renews: B("Every year.", "每年续期一次。"), takes: B("About 4 to 11 business days.", "约 4 至 11 个工作日。"), takesSource: "https://www.houstonpermittingcenter.org/hpwcode1112 (2026-10-09)", fee: null, checked: "page", fields: [],
   },
   {
     id: "hou-plan-review", form: "Food establishment plan review", title: B("Food establishment plan review", "食品场所图纸审查"),
     agency: B("Houston Health Department", "休斯顿卫生局"), level: "city", where: "HOU", segments: ["restaurant"], needs: { buildout: true }, method: "portal", order: 50,
     how: B("Submit plans before building or remodeling a food establishment.", "新建或改建食品场所前提交图纸。"),
-    url: "https://www.houstonhealth.org/food-permits/opening-food-establishment", info: "https://www.houstonhealth.org/food-permits/opening-food-establishment", fee: null, checked: "page", fields: [],
+    url: "https://www.houstonhealth.org/food-permits/opening-food-establishment", info: "https://www.houstonhealth.org/food-permits/opening-food-establishment", takes: B("No standard time published; expedited review in 1 to 2 business days.", "未公布标准处理时间；加急审核需 1 至 2 个工作日。"), takesSource: "https://www.houstonhealth.org/media/4206/download (2026-10-09)", fee: null, checked: "page", fields: [],
   },
   {
     id: "hou-food-dealer", form: "Food Dealer permit (HHD1003)", title: B("Food dealer permit", "食品经营许可证"),
     agency: B("Houston Health Department", "休斯顿卫生局"), level: "city", where: "HOU", segments: ["restaurant"], method: "portal", order: 76,
     how: B("The operating permit, issued after plan review and inspection.", "经营许可证，图纸审查和检查合格后发放。"),
-    url: "https://www.houstonpermittingcenter.org/hhd1003", info: "https://www.houstonpermittingcenter.org/hhd1003", fee: null, renews: B("Every year.", "每年。"), checked: "page", fields: [],
+    url: "https://www.houstonpermittingcenter.org/hhd1003", info: "https://www.houstonpermittingcenter.org/hhd1003", takes: B("Up to 15 business days.", "最多 15 个工作日。"), takesSource: "https://www.houstonpermittingcenter.org/hhd1003 (2026-10-09)", fee: null, renews: B("Every year.", "每年。"), checked: "page", fields: [],
   },
   {
     id: "hou-fire", form: "Fire prevention permits", title: B("Fire permits for hazardous materials and high-piled storage", "危险品与高堆货物消防许可证"),
     agency: B("Houston Fire Department, Fire Marshal's Office", "休斯顿消防局消防署"), level: "city", where: "HOU", segments: ["warehouse", "retail"], needs: { hazmat: true }, method: "in_person", order: 78,
     how: B("Needed when storage or batteries cross fire code thresholds.", "储存或电池数量超过消防规范门槛时需要。"),
-    url: "https://www.houstontx.gov/fire/formsandpermits", info: "https://www.houstonpermittingcenter.org/fire-marshal-office", fee: null, checked: "page", fields: [],
+    url: "https://www.houstontx.gov/fire/formsandpermits", info: "https://www.houstonpermittingcenter.org/fire-marshal-office", renews: B("Every year.", "每年续期一次。"), fee: null, checked: "page", fields: [],
   },
 ];
 

@@ -51,7 +51,8 @@ export function parseStoreList(text: string): StoreRow[] {
 /** "about 4 business days", "4 to 5 weeks", "two weeks": the longer end, in calendar days. null when not stated. */
 export function publishedDays(takes?: Bi): number | null {
   const t = (takes?.en ?? "").toLowerCase();
-  if (!t) return null;
+  if (!t || /^no standard time/.test(t)) return null;   // only an expedited time is published: no deadline from it
+  if (/same day|instantly|immediately|on screen as soon as|issued on the call/.test(t) && !/\d/.test(t)) return 1;
   const word: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, eight: 8, ten: 10, twelve: 12 };
   let best: number | null = null;
   for (const m of t.matchAll(/(\d+|one|two|three|four|five|six|eight|ten|twelve)(?:\s*(?:to|-|–)\s*(\d+))?\s*(business days?|days?|weeks?|months?)/g)) {
@@ -132,4 +133,14 @@ export function planCsv(plans: StorePlan[]): string {
   for (const p of plans) for (const f of p.forms) lines.push([p.row.name, p.row.address, p.row.opening ?? "", f.form.form, f.form.title.en, f.form.agency.en, f.form.how.en,
     f.form.fee ?? "varies", f.days ?? "", f.daysFrom === "placetta" ? "Placetta filings" : f.daysFrom === "agency" ? "agency's published time" : "", f.fileBy ?? "", f.everyMonths ?? "", f.form.url].map(q).join(","));
   return lines.join("\n");
+}
+
+/** A store that just opened: each renewing permit it needed, with an expiry from that agency's renewal cycle,
+    so renewals are tracked from day one. Upload the certificates to replace these with the exact dates. */
+export function permitsOnOpening(row: StoreRow, business: string, opened: string): { name: Bi; expires: string }[] {
+  const plan = planStore(row, segmentOf(business), [], opened);
+  return plan.forms.filter(f => f.everyMonths && f.everyMonths >= 3).map(f => {
+    const d = new Date(opened + "T12:00:00Z"); d.setUTCMonth(d.getUTCMonth() + f.everyMonths!);
+    return { name: B(`${f.form.form} (estimated)`, `${f.form.form}（估算）`), expires: d.toISOString().slice(0, 10) };
+  });
 }

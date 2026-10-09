@@ -5,7 +5,7 @@ import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocat
 import { daysUntil, fmtDay, fmtIn, inDays } from "./time";
 import { I, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
-import { parseStoreList, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
+import { parseStoreList, permitsOnOpening, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
 import * as api from "./cloud/api";
 
 /* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
@@ -107,6 +107,11 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
           <p>{s.address}</p>
         </div>
         <Grade s={s} />
+        {s.stage === "opening" && <Pill disabled={busy} onClick={() => {
+          const today = inDays(0), est = permitsOnOpening({ name: s.name.en, address: s.address }, ws.business.en || ws.goal.en, today);
+          updateStore(s.id, x => ({ ...x, stage: "open", opened: today, permits: [...(x.permits ?? []), ...est.filter(e => !(x.permits ?? []).some(p => p.name.en === e.name.en))] }),
+            { action: B("Opened", "开业"), object: s.name, detail: B(`${est.length} renewals now tracked`, `已跟踪 ${est.length} 项续期`) });
+        }}>{lang === "zh" ? "标记为已开业" : "Mark opened"}</Pill>}
       </header>
 
       <div className="parts">
@@ -206,6 +211,7 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
 
       {s.permits && s.permits.length > 0 && (
         <Section title={b(B("Permits on file", "现有许可"))}>
+          {s.permits.some(p => /\(estimated\)/.test(p.name.en)) && <p className="note">{b(B("Dates marked estimated follow each agency's renewal cycle from the opening day. Upload the certificates and Placetta sets the exact dates.", "标注“估算”的日期按各机构的续期周期从开业日推算。上传证书后，快哉会设置准确日期。"))}</p>}
           <ul className="tray">
             {s.permits.map((p, i) => { const d = daysUntil(p.expires); return (
               <li key={i} className="row certrow"><span className="lr-tx"><b>{b(p.name)}</b></span><span className={"cert-exp" + (d <= 45 ? " warn" : "")}>{d > 3000 ? b(B("No expiry", "长期有效")) : fmtIn(d, lang)}{d <= 3000 && <small>{fmtDay(p.expires, lang, true)}</small>}</span></li>
