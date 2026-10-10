@@ -1,6 +1,7 @@
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import { WORLD_FORMS, worldPlaces } from "./world";
+import { LOCAL_US } from "./local-us";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -421,7 +422,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US);
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 
@@ -451,6 +452,8 @@ export function placesOf(where: string): Where[] {
     if (/houston|休斯顿/.test(w)) out.push("HOU");
   }
   for (const code of world.codes) if (!out.includes(code) && code !== "US") out.push(code);
+  // Santa Clara County runs food permits for San José and the rest of the county
+  if (!abroad && (out.includes("SJ") || /santa clara|sunnyvale|mountain view|cupertino|milpitas|palo alto|campbell|los gatos|saratoga|gilroy|morgan hill/.test(w)) && !out.includes("SCC")) { out.push("SCC"); if (!out.includes("CA")) out.push("CA"); }
   return out;
 }
 

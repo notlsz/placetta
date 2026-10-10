@@ -124,7 +124,7 @@ export const CITIES: City[] = [
   c("SEA", "US", "Seattle", "西雅图", ["seattle", "西雅图", "capitol hill", "international district"], true, "WA"),
   c("BOS", "US", "Boston", "波士顿", ["boston", "波士顿", "back bay", "cambridge, ma"], true, "MA"),
   c("MIA", "US", "Miami", "迈阿密", ["miami", "迈阿密", "brickell", "wynwood", "miami beach"], true, "FL"),
-  c("DAL", "US", "Dallas", "达拉斯", ["dallas", "达拉斯", "plano", "richardson"], true, "TX"),
+  c("DAL", "US", "Dallas", "达拉斯", ["dallas", "达拉斯"], true, "TX"),
   c("AUS", "US", "Austin", "奥斯汀", ["austin", "奥斯汀"], true, "TX"),
   c("DC", "US", "Washington, DC", "华盛顿特区", ["washington, dc", "washington dc", "d.c.", "华盛顿特区"], true, "DC"),
   c("ATL", "US", "Atlanta", "亚特兰大", ["atlanta", "亚特兰大", "duluth, ga"], true, "GA"),
