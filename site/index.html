@@ -1756,6 +1756,26 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 @media (max-width:767px){.mnduo{grid-template-columns:minmax(0,1fr)}}
 .mnnew{font-style:normal;font-weight:600;color:#2F6B40}
 #monitor .mnsc .mnr{padding-top:7px;padding-bottom:7px}
+/* monitor hierarchy: 1 headline + countdown, 2 what to do, 3 everything else quiet */
+#monitor .mncatch{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin:0 0 26px;padding:0;border:0;background:none;font-size:13px;color:var(--ink2)}
+#monitor .mncatch .orb{width:20px;height:20px}
+#monitor .mncatch b{font-weight:600;color:var(--ink)}
+#monitor .mncatch span:last-child{color:#2F6B40}
+#monitor .mnhero .mndt{padding:24px 28px 8px}
+#monitor .mnmeta{margin-bottom:8px}
+#monitor .mntop2{margin-top:0;align-items:flex-end}
+#monitor .mnhero .mnttl{font-size:26px;line-height:1.25;letter-spacing:-.5px}
+#monitor .mncd b{font-size:56px}
+.mnrisk{margin-top:16px;font-size:15px;line-height:1.5;color:var(--ink2)}
+.mnrisk b{margin-right:8px;font-weight:600;color:var(--hi)}
+.mnrisk.k-cost b{color:#9A5B00}.mnrisk.k-time b{color:var(--hi)}
+#monitor .mnhero .mndo{margin-top:28px;padding:22px 22px;background:var(--gs-ll);box-shadow:none}
+#monitor .mnhero .mndo p{font-size:17px;font-weight:600}
+#monitor .mndone{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:20px;font-size:12.5px;color:var(--muted)}
+#monitor .mndone svg{width:15px;height:15px;padding:2px;background:none;color:#2F6B40}
+#monitor .mndone .it{gap:4px}
+#monitor .mnhero .mnfoot{padding:24px 28px 24px}
+@media (max-width:1023px){#monitor .mnhero .mndt{padding:20px 18px 8px}#monitor .mnhero .mnttl{font-size:20px}#monitor .mncd b{font-size:38px}#monitor .mntop2{align-items:flex-start}#monitor .mnhero .mnfoot{padding:12px 18px 18px}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3552,7 +3572,7 @@ function renderMon(center){
   const rank = {high: 0, med: 1, low: 2};
   const fresh = x => x.d.length === 10 && monDays(x.d) >= -7;
   const order = MON.map((x, k) => k).filter(k => keep(MON[k])).sort((a, b) => (fresh(MON[b]) - fresh(MON[a])) || rank[MON[a].lv] - rank[MON[b].lv] || (MON[a].d < MON[b].d ? 1 : -1));
-  const MNTOP = 3, shown = monAll ? order : order.slice(0, MNTOP).concat(order.slice(MNTOP).filter(k => k === monSel));
+  const MNTOP = 2, shown = monAll ? order : order.slice(0, MNTOP).concat(order.slice(MNTOP).filter(k => k === monSel));
   list.innerHTML = shown.map(k => [MON[k], k]).map(([x, k]) => `<button type="button" class="mnr${k === monSel ? " on" : ""}" role="option" aria-selected="${k === monSel}" data-ti="${k}"><span class="t">${x.t[i]}</span><span class="pill ${monPill(x.lv)}">${t("mon.i." + x.lv)}</span><span class="m"><b>${monCode(x.mk)}</b>${monDate(x.d)}${fresh(x) ? `<i class="mnnew">${t("mon.new")}</i>` : ""}</span></button>`).join("") + (order.length > MNTOP ? `<button type="button" class="mnmore" id="mnMore" aria-expanded="${monAll}">${monAll ? t("agy.less") : t("mon.all").replace("{n}", order.length)}</button>` : "");
   if (center){ const on = list.querySelector(".on"); if (on){ const top = on.offsetTop - list.offsetTop; if (top < list.scrollTop || top + on.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = Math.max(0, top - 8); } }
   renderMonDetail(MON[monSel]);
@@ -3570,13 +3590,13 @@ function monLead(x, dd){
 }
 function renderMonDetail(x){
   const i = L(), w = monWl(x.mk), dd = MON_DL.find(d => d.mk === x.mk && d.u === x.u && monDays(d.d) >= 0), due = dd ? monDays(dd.d) : undefined;
-  document.getElementById("mnDet").innerHTML = `<div class="mncatch"><span class="orb"></span><p><b>${t("mon.catch")}</b><span>${monLead(x, dd)}</span></p></div><div class="mndt">
-      <div class="mnmeta"><span class="pill ${monPill(x.lv)}">${t("mon.lv." + x.lv)}</span><span class="mkn">${w.n[i]}</span><span>${t("mon.f." + x.c)}</span><span>${monDate(x.d)}</span></div>
-      <div class="mntop2"><p class="mnttl">${x.h[i]}</p>${due !== undefined && dd ? `<div class="mncd ${monCls(due)}"><b>${due}</b><span>${t(due === 1 ? "mon.day1" : "mon.dayn")}</span><small>${monDate(dd.d)}</small></div>` : ""}</div>
-      <div class="mnduo"><div class="mnimp k-${x.imp ? x.imp[0] : "risk"}"><b>${t("mon.imp." + (x.imp ? x.imp[0] : "risk"))}</b><p>${x.imp ? x.imp[1][i] : x.m[i]}</p></div><div class="mndo"><span class="ic">${NEXT_IC}</span><div><b>${t("mon.l.next")}</b><p>${x.act[i]}</p></div></div></div>
-      <div class="mndone"><span class="lb">${t("mon.done")}</span>${[t("mon.dn1"), t("mon.dn2").replace("{m}", w.n[i]), dd ? t("mon.dn3") : t("mon.dn4")].map(s => `<span class="it">${TICK_IC}${s}</span>`).join("")}</div>
-      ${x.imp ? `<p class="mnlbl">${t("mon.l.means")}</p><p class="mntxt">${x.m[i]}</p>` : ""}
-      <div class="mnaff"><span>${t("mon.l.aff2")}</span>${x.per.map(p => `<em>${p[i]}</em>`).join("")}</div>
+  const kind = x.imp ? x.imp[0] : "risk";
+  document.getElementById("mnDet").innerHTML = `<div class="mndt">
+      <p class="mncatch"><span class="orb"></span><b>${t("mon.catch")}</b><span>${monLead(x, dd)}</span></p>
+      <div class="mntop2"><div><div class="mnmeta"><span class="pill ${monPill(x.lv)}">${t("mon.lv." + x.lv)}</span><span class="mkn">${w.n[i]}</span><span>${monDate(x.d)}</span></div><p class="mnttl">${x.h[i]}</p></div>${due !== undefined && dd ? `<div class="mncd ${monCls(due)}"><b>${due}</b><span>${t(due === 1 ? "mon.day1" : "mon.dayn")}</span><small>${monDate(dd.d)}</small></div>` : ""}</div>
+      <p class="mnrisk k-${kind}"><b>${t("mon.imp." + kind)}</b>${x.imp ? x.imp[1][i] : x.m[i]}</p>
+      <div class="mndo"><span class="ic">${NEXT_IC}</span><div><b>${t("mon.l.next")}</b><p>${x.act[i]}</p></div></div>
+      <p class="mndone">${t("mon.done")} ${[t("mon.dn1"), t("mon.dn2"), dd ? t("mon.dn3") : t("mon.dn4")].map(s => `<span class="it">${TICK_IC}${s}</span>`).join("")}</p>
     </div>
     <div class="mnfoot"><a href="${x.u}" target="_blank" rel="noopener">${t("src")}${i ? "：" : ": "}${x.s[i]} ↗</a><button type="button" class="btn b-ink" data-plan="${x.mk}">${t("mon.plan").replace("{m}", w.n[i])}</button></div>`;
 }
