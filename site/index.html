@@ -1692,35 +1692,40 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 #agencies .agi li .agt{background:rgba(255,255,255,.22);color:inherit;backdrop-filter:blur(4px)}
 #agencies .agk-p .agt,#agencies .agk-m .agt{background:rgba(255,255,255,.55);color:#0F1B33}
 
-/* your newest teammate */
-.tmg{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
-@media (min-width:900px){.tmg{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.tmc{border-radius:20px;background:var(--card);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
-.tmhd{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.tmhd b{font-size:15px;color:var(--ink)}
-.tmr{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.tmr li{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px 14px}
-.tmr .av{width:34px;height:34px;border-radius:50%;background:var(--gs-ll);color:var(--gs-ink);display:grid;place-items:center;font-size:13px;font-weight:600;flex-shrink:0}
-.tmr .orb{width:34px;height:34px}
-.tmr li>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
-.tmr b{font-size:14px;color:var(--ink);font-weight:600}
-.tmr small{font-size:13px;color:var(--ink2)}
-.tmr .me{box-shadow:0 0 0 1.5px var(--gs),0 14px 34px rgba(77,115,163,.16)}
-.tmr em{font-style:normal;display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:var(--gs-ink)}
-.tmr .live{width:7px;height:7px;border-radius:50%;background:var(--ok);flex-shrink:0;animation:tmpulse 2s ease-in-out infinite}
+/* your newest teammate: same cards as the feature row */
+.tmfeat{margin-top:0}
+.tmrow,.tmid{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #F0F2F5}
+.fhd+.tmrow,.tmid{border-top:0}
+.tmid{padding:2px 0 10px}
+.tmrow .av,.tmmsg .av{flex:none;width:28px;height:28px;border-radius:50%;background:var(--gs-ll);color:var(--gs-ink);display:grid;place-items:center;font-size:11.5px;font-weight:600}
+.tmrow .orb{width:28px;height:28px}.tmid .orb{width:38px;height:38px}
+.tmrow .nm,.tmid .nm{flex:1;min-width:0;display:flex;flex-direction:column}
+.tmrow b,.tmid b{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.tmid b{font-size:14px}
+.tmrow small,.tmid small{font-size:11.5px;color:var(--muted);line-height:1.3}
+.tmrow.me{margin:2px -8px 0;padding:8px;border-top-color:transparent;border-radius:10px;background:var(--gs-ll);box-shadow:inset 0 0 0 1px var(--gs-l)}
+.tmlive{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#2F7A4C;background:var(--okbg);border-radius:999px;padding:3px 8px}
+.tmlive i{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:tmpulse 1.8s ease-in-out infinite}
+.tmnow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;font-size:11.5px;line-height:1.35;color:var(--gs-ink)}
+.tmdots{flex:none;display:inline-flex;gap:3px}
+.tmdots i{width:4px;height:4px;border-radius:50%;background:var(--gs);animation:tmdot 1.2s ease-in-out infinite}
+.tmdots i:nth-child(2){animation-delay:.15s}.tmdots i:nth-child(3){animation-delay:.3s}
 @keyframes tmpulse{50%{opacity:.35}}
-@media (prefers-reduced-motion:reduce){.tmr .live{animation:none}}
-.tmj{margin:0;background:#fff;border-radius:14px;padding:4px 14px}
-.tmj div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid #F0F2F5}
-.tmj div:last-child{border-bottom:0}
-.tmj dt{font-size:12px;color:var(--muted);padding-top:1px}
-.tmj dd{margin:0;font-size:14px;line-height:1.4;color:var(--ink)}
-.tmw{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.tmw li{display:grid;grid-template-columns:30px 22px minmax(0,1fr);align-items:start;gap:10px;background:#fff;border-radius:14px;padding:11px 14px}
-.tmw .d{font-size:12px;color:var(--muted);padding-top:3px}
-.tmw .orb{width:22px;height:22px}
-.tmw p{margin:0;font-size:14px;line-height:1.4;color:var(--ink)}
-#teammate .howtry{margin-top:20px}
+@keyframes tmdot{0%,60%,100%{transform:none;opacity:.4}30%{transform:translateY(-3px);opacity:1}}
+.tmapps{padding-top:10px;border-top:1px solid #F0F2F5}
+.tmapps small{display:block;font-size:11.5px;color:var(--muted);margin-bottom:7px}
+.tmapps div{display:flex;flex-wrap:wrap;gap:5px}
+.tmapps span{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink);background:#F5F7FA;border-radius:999px;padding:4px 9px}
+.tmapps span i{width:6px;height:6px;border-radius:2px}
+.tmapps em{font-style:normal}
+.tmmsg{display:flex;gap:9px;align-items:flex-start;padding:7px 0}
+.tmmsg .orb{flex:none;width:28px;height:28px}
+.tmmsg small{display:block;font-size:11px;color:var(--muted);line-height:1.3}
+.tmmsg small b{font-weight:600;color:var(--ink);margin-right:4px}
+.tmmsg p{margin-top:2px;font-size:12.5px;line-height:1.45;color:var(--ink)}
+.tmmsg.you p{display:inline-block;background:var(--gs-ll);border-radius:10px;padding:5px 9px}
+@media (prefers-reduced-motion:reduce){.tmlive i,.tmdots i{animation:none}}
+#teammate .howtry{margin-top:24px}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -1867,38 +1872,45 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 <section class="sec rv" data-rv="up" id="teammate" aria-labelledby="tmH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="tmH" data-i18n="tm.h">Your newest teammate.</h2><p class="sub" data-i18n="tm.sub">Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.</p></div>
-    <div class="tmg">
-      <article class="tmc">
-        <div class="tmhd"><b data-i18n="tm.team">US expansion team</b><span class="atag" data-i18n="tm.sample">Sample team</span></div>
-        <ul class="tmr">
-          <li><span class="av" data-i18n="tm.a1">Y</span><span><b data-i18n="tm.r1">You</b><small data-i18n="tm.r1s">Head of US expansion</small></span></li>
-          <li><span class="av" data-i18n="tm.a2">R</span><span><b data-i18n="tm.r2">Real estate lead</b><small data-i18n="tm.r2s">Sites and leases</small></span></li>
-          <li><span class="av" data-i18n="tm.a3">C</span><span><b data-i18n="tm.r3">Construction manager</b><small data-i18n="tm.r3s">Build-out and inspections</small></span></li>
-          <li class="me"><span class="orb"></span><span><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.r4s">Permits and licenses</small><em><i class="live"></i><span data-i18n="tm.now">Working now: San José health permit packet</span></em></span></li>
-        </ul>
+    <div class="feat tmfeat">
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c1h">She joins your team</h3><p data-i18n="tm.c1p">Add Odelia like any other hire. She has a seat on your expansion team and a status you can see.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fhd"><b data-i18n="tm.team">US expansion team</b><span data-i18n="tm.sample">Sample team</span></div>
+            <div class="tmrow" data-st data-ms="320"><span class="av" data-i18n="tm.a1">Y</span><span class="nm"><b data-i18n="tm.r1">You</b><small data-i18n="tm.r1s">Head of US expansion</small></span></div>
+            <div class="tmrow" data-st data-ms="320"><span class="av" data-i18n="tm.a2">R</span><span class="nm"><b data-i18n="tm.r2">Real estate lead</b><small data-i18n="tm.r2s">Sites and leases</small></span></div>
+            <div class="tmrow" data-st data-ms="650"><span class="av" data-i18n="tm.a3">C</span><span class="nm"><b data-i18n="tm.r3">Construction manager</b><small data-i18n="tm.r3s">Build-out and inspections</small></span></div>
+            <div class="tmrow me" data-st data-ms="600"><span class="orb"></span><span class="nm"><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.r4s">Permits and licenses</small></span><span class="tmlive"><i></i><span data-i18n="tm.on">Online</span></span></div>
+            <div class="tmnow" data-st data-ms="700"><span data-i18n="tm.now">Working now: San José health permit packet</span><span class="tmdots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+          </div>
+          <div class="ftoast" data-st data-ms="800"><span class="orb"></span><span><b data-i18n="tm.t1">Odelia joined your team</b><small data-i18n="tm.t1s">US expansion, permits and licenses</small></span></div>
+        </div>
       </article>
-      <article class="tmc">
-        <div class="tmhd"><b data-i18n="tm.jd">Role card</b><span class="atag" data-i18n="tm.jdt">Odelia</span></div>
-        <dl class="tmj">
-          <div><dt data-i18n="tm.k1">Role</dt><dd data-i18n="tm.v1">Permits and licenses manager</dd></div>
-          <div><dt data-i18n="tm.k2">Reports to</dt><dd data-i18n="tm.v2">You</dd></div>
-          <div><dt data-i18n="tm.k3">Hours</dt><dd data-i18n="tm.v3">Always on, every time zone</dd></div>
-          <div><dt data-i18n="tm.k4">Languages</dt><dd data-i18n="tm.v4">English and Chinese</dd></div>
-          <div><dt data-i18n="tm.k5">Works in</dt><dd data-i18n="tm.v5">Gmail, Outlook, Slack, Google Calendar, Google Drive</dd></div>
-          <div><dt data-i18n="tm.k6">Owns</dt><dd data-i18n="tm.v6">Every license each store needs, in order, filed on time and renewed before it lapses</dd></div>
-          <div><dt data-i18n="tm.k7">Asks you for</dt><dd data-i18n="tm.v7">Approvals, signatures, agency fees and ID checks</dd></div>
-          <div><dt data-i18n="tm.k8">Never</dt><dd data-i18n="tm.v8">Files anything you have not approved</dd></div>
-        </dl>
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c2h">She knows her job</h3><p data-i18n="tm.c2p">One role, owned end to end: every license, filed on time and renewed before it lapses.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="tmid" data-st data-ms="450"><span class="orb"></span><span class="nm"><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.v1">Permits and licenses manager</small></span><span class="tmlive"><i></i><span data-i18n="tm.on">Online</span></span></div>
+            <div class="fcrow" data-st data-ms="300"><span class="nm" data-i18n="tm.k2">Reports to</span><span class="dt" data-i18n="tm.v2">You</span></div>
+            <div class="fcrow" data-st data-ms="300"><span class="nm" data-i18n="tm.k3">Hours</span><span class="dt" data-i18n="tm.v3s">Always on</span></div>
+            <div class="fcrow" data-st data-ms="450"><span class="nm" data-i18n="tm.k4">Languages</span><span class="dt" data-i18n="tm.v4">English and Chinese</span></div>
+            <div class="tmapps" data-st data-ms="700"><small data-i18n="tm.k5">Works in</small><div><span><i style="background:#EA4335"></i>Gmail</span><span><i style="background:#0F6CBD"></i>Outlook</span><span><i style="background:#611F69"></i>Slack</span><span><i style="background:#4285F4"></i><em data-i18n="tm.gcal">Google Calendar</em></span><span><i style="background:#1FA463"></i><em data-i18n="tm.gdrive">Google Drive</em></span></div></div>
+          </div>
+          <div class="ftoast" data-st data-ms="800"><span class="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span><span><b data-i18n="tm.t2">Never files without your approval</b><small data-i18n="tm.t2s">You sign, pay agency fees and pass ID checks</small></span></div>
+        </div>
       </article>
-      <article class="tmc">
-        <div class="tmhd"><b data-i18n="tm.wk">A week with Odelia</b><span class="atag" data-i18n="tm.wks">Sample week</span></div>
-        <ol class="tmw">
-          <li><span class="d" data-i18n="tm.d1">Mon</span><span class="orb"></span><p data-i18n="tm.m1">Your week ahead: 3 filings due across 2 stores. Each one is ready for review.</p></li>
-          <li><span class="d" data-i18n="tm.d2">Tue</span><span class="orb"></span><p data-i18n="tm.m2">The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.</p></li>
-          <li><span class="d" data-i18n="tm.d3">Wed</span><span class="orb"></span><p data-i18n="tm.m3">Filed with Santa Clara County. The receipt is saved to your drive.</p></li>
-          <li><span class="d" data-i18n="tm.d4">Thu</span><span class="orb"></span><p data-i18n="tm.m4">The county asked for a revised floor plan. I let the construction manager know.</p></li>
-          <li><span class="d" data-i18n="tm.d5">Fri</span><span class="orb"></span><p data-i18n="tm.m5">The business tax certificate renews in 30 days. The renewal is drafted.</p></li>
-        </ol>
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c3h">She reports in</h3><p data-i18n="tm.c3p">Updates arrive where your team already talks: Slack, email and your calendar.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fhd"><b>#us-expansion</b><span data-i18n="tm.wks">Sample week</span></div>
+            <div class="tmmsg" data-st data-ms="650"><span class="orb"></span><div><small><b data-i18n="tm.r4">Odelia</b> <span data-i18n="tm.d2">Tue</span></small><p data-i18n="tm.m2">The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.</p></div></div>
+            <div class="tmmsg you" data-st data-ms="600"><span class="av" data-i18n="tm.a1">Y</span><div><small><b data-i18n="tm.r1">You</b> <span data-i18n="tm.d2">Tue</span></small><p data-i18n="tm.you">Approved. Go ahead.</p></div></div>
+            <div class="tmmsg" data-st data-ms="650"><span class="orb"></span><div><small><b data-i18n="tm.r4">Odelia</b> <span data-i18n="tm.d3">Wed</span></small><p data-i18n="tm.m3">Filed with Santa Clara County. The receipt is saved to your drive.</p></div></div>
+          </div>
+          <div class="ftoast" data-st data-ms="800"><span class="orb"></span><span><b data-i18n="tm.t3">Renewal drafted</b><small data-i18n="tm.t3s">Business tax certificate, 30 days before it lapses</small></span></div>
+        </div>
       </article>
     </div>
     <a class="howtry" href="/app/" data-track="teammate_try"><span data-i18n="tm.cta">Put Odelia to work on your stores</span><span aria-hidden="true">→</span></a>
@@ -2374,7 +2386,7 @@ en:{
  "nav.how":"How it works", "nav.faq":"FAQ","nav.login":"Log in","nav.app":"Open app",
  "q.goT":"Your plan is ready to build.","q.goP":"Confirm {c} and Placetta maps every license, permit and registration for {m}, with fees and timelines, in a few minutes.","q.go":"Build my plan","q.goN":"Free. Nothing is filed or paid without your approval.",
  "cta.plan":"Get your entry plan",
- "tm.cta":"Put Odelia to work on your stores","tm.m5":"The business tax certificate renews in 30 days. The renewal is drafted.","tm.m4":"The county asked for a revised floor plan. I let the construction manager know.","tm.m3":"Filed with Santa Clara County. The receipt is saved to your drive.","tm.m2":"The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.","tm.m1":"Your week ahead: 3 filings due across 2 stores. Each one is ready for review.","tm.d5":"Fri","tm.d4":"Thu","tm.d3":"Wed","tm.d2":"Tue","tm.d1":"Mon","tm.wks":"Sample week","tm.wk":"A week with Odelia","tm.v8":"Files anything you have not approved","tm.k8":"Never","tm.v7":"Approvals, signatures, agency fees and ID checks","tm.k7":"Asks you for","tm.v6":"Every license each store needs, in order, filed on time and renewed before it lapses","tm.k6":"Owns","tm.v5":"Gmail, Outlook, Slack, Google Calendar, Google Drive","tm.k5":"Works in","tm.v4":"English and Chinese","tm.k4":"Languages","tm.v3":"Always on, every time zone","tm.k3":"Hours","tm.v2":"You","tm.k2":"Reports to","tm.v1":"Permits and licenses manager","tm.k1":"Role","tm.jdt":"Odelia","tm.jd":"Role card","tm.now":"Working now: San José health permit packet","tm.r4":"Odelia","tm.r4s":"Permits and licenses","tm.r3s":"Build-out and inspections","tm.r3":"Construction manager","tm.r2s":"Sites and leases","tm.r2":"Real estate lead","tm.r1s":"Head of US expansion","tm.a1":"Y","tm.a2":"R","tm.a3":"C","tm.r1":"You","tm.sample":"Sample team","tm.team":"US expansion team","tm.sub":"Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.","tm.h":"Your newest teammate.","hero.badge":"31,000+ businesses served by our team since 2016",
+ "tm.cta":"Put Odelia to work on your stores","tm.m5":"The business tax certificate renews in 30 days. The renewal is drafted.","tm.m4":"The county asked for a revised floor plan. I let the construction manager know.","tm.m3":"Filed with Santa Clara County. The receipt is saved to your drive.","tm.m2":"The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.","tm.m1":"Your week ahead: 3 filings due across 2 stores. Each one is ready for review.","tm.d5":"Fri","tm.d4":"Thu","tm.d3":"Wed","tm.d2":"Tue","tm.d1":"Mon","tm.wks":"Sample week","tm.wk":"A week with Odelia","tm.v8":"Files anything you have not approved","tm.k8":"Never","tm.v7":"Approvals, signatures, agency fees and ID checks","tm.k7":"Asks you for","tm.v6":"Every license each store needs, in order, filed on time and renewed before it lapses","tm.k6":"Owns","tm.v5":"Gmail, Outlook, Slack, Google Calendar, Google Drive","tm.k5":"Works in","tm.v4":"English and Chinese","tm.k4":"Languages","tm.v3":"Always on, every time zone","tm.k3":"Hours","tm.v2":"You","tm.k2":"Reports to","tm.v1":"Permits and licenses manager","tm.k1":"Role","tm.jdt":"Odelia","tm.jd":"Role card","tm.now":"Working now: San José health permit packet","tm.r4":"Odelia","tm.r4s":"Permits and licenses","tm.r3s":"Build-out and inspections","tm.r3":"Construction manager","tm.r2s":"Sites and leases","tm.r2":"Real estate lead","tm.r1s":"Head of US expansion","tm.a1":"Y","tm.a2":"R","tm.a3":"C","tm.r1":"You","tm.sample":"Sample team","tm.team":"US expansion team","tm.sub":"Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.","tm.c1h":"She joins your team","tm.c1p":"Add Odelia like any other hire. She has a seat on your expansion team and a status you can see.","tm.on":"Online","tm.t1":"Odelia joined your team","tm.t1s":"US expansion, permits and licenses","tm.c2h":"She knows her job","tm.c2p":"One role, owned end to end: every license, filed on time and renewed before it lapses.","tm.v3s":"Always on","tm.gcal":"Google Calendar","tm.gdrive":"Google Drive","tm.t2":"Never files without your approval","tm.t2s":"You sign, pay agency fees and pass ID checks","tm.c3h":"She reports in","tm.c3p":"Updates arrive where your team already talks: Slack, email and your calendar.","tm.you":"Approved. Go ahead.","tm.t3":"Renewal drafted","tm.t3s":"Business tax certificate, 30 days before it lapses","tm.h":"Your newest teammate.","hero.badge":"31,000+ businesses served by our team since 2016",
  "brands.l":"Franchise operators of",
  "hero.sample":"See a sample plan","hero.try":"Put Odelia to work","hero.demo":"Book a demo","how.try":"Try it on your store","aria.proof":"Track record","pf.s1":"businesses served by our team since 2016","pf.n2":"3+ per day","pf.s2":"new US businesses served by our team, on average","pf.s3":"US states covered, plus 170+ countries","pf.n4":"5 months","pf.s4":"saved in approval time for CHAGEE","ag.h":"Watch Odelia work.","ag.p":"She reads your documents, checks each agency's own site, fills the forms and drafts the letters. Every value shows the words it came from, and nothing is filed until you approve.","aria.ag":"Sample agent run","ag.tag":"Sample run","ag.l1":"Read your lease and LLC filing","ag.l2":"Checked Santa Clara County and City of San José requirements","ag.l2s":"Sources: sccgov.org, sanjoseca.gov","ag.l3":"Found 8 requirements, in order, with estimated fees","ag.l4":"Filled the health permit plan check from your lease","ag.l4q":"Tenant: Qinghuan Tea House LLC","ag.l5":"Drafted the landlord consent letter","ag.l5s":"landlord-consent.docx, saved to Documents","ag.l6":"Waiting for your approval before anything is filed",
  "app.proj":"Projected opening", "app.date":"Mar 2027", "app.est":"Estimate, not a guarantee", "app.risk":"Risk check: review state rules on foreign-owned leases before you sign.", "app.week":"Week", "app.done":"approved",
@@ -2457,7 +2469,7 @@ zh:{
  "nav.how":"运作方式", "nav.faq":"常见问题","nav.login":"登录","nav.app":"进入应用",
  "q.goT":"可以开始生成您的计划了。","q.goP":"确认 {c} 后，快哉会在几分钟内梳理{m}所需的全部执照、许可和登记，并附上费用和时间。","q.go":"生成我的计划","q.goN":"免费。未经您批准，不会提交或支付任何费用。",
  "cta.plan":"获取开店计划",
- "tm.cta":"让 Odelia 为您的门店工作","tm.m5":"营业税证书 30 天后到期，续期申请已起草。","tm.m4":"县政府要求提供修改后的平面图，我已通知工程经理。","tm.m3":"已向圣克拉拉县提交，回执已保存到您的云端硬盘。","tm.m2":"圣何塞卫生许可申请材料已准备好。您确认后，我会交给团队提交。","tm.m1":"本周安排：2 家门店共有 3 项申请到期，均已准备好供您审阅。","tm.d5":"周五","tm.d4":"周四","tm.d3":"周三","tm.d2":"周二","tm.d1":"周一","tm.wks":"示例一周","tm.wk":"与 Odelia 共事的一周","tm.v8":"提交任何未经您确认的申请","tm.k8":"绝不","tm.v7":"确认、签名、政府费用和身份核验","tm.k7":"需要您提供","tm.v6":"每家门店所需的每一项证照，按顺序按时提交，到期前完成续期","tm.k6":"负责","tm.v5":"Gmail、Outlook、Slack、Google 日历、Google 云端硬盘","tm.k5":"工作工具","tm.v4":"中文和英文","tm.k4":"语言","tm.v3":"全天候，覆盖所有时区","tm.k3":"工作时间","tm.v2":"您","tm.k2":"汇报对象","tm.v1":"许可与证照经理","tm.k1":"岗位","tm.jdt":"Odelia","tm.jd":"岗位卡","tm.now":"正在处理：圣何塞卫生许可申请材料","tm.r4":"Odelia","tm.r4s":"许可与证照","tm.r3s":"装修与验收","tm.r3":"工程经理","tm.r2s":"选址与租约","tm.r2":"选址负责人","tm.r1s":"美国拓展负责人","tm.a1":"您","tm.a2":"址","tm.a3":"工","tm.r1":"您","tm.sample":"示例团队","tm.team":"美国拓展团队","tm.sub":"像招聘新同事一样，把快哉的 AI 智能代理 Odelia 加入您的拓展团队。她负责每家门店的许可与证照，在团队现有的工具里工作，只有需要真人处理的事才会找您。","tm.h":"您团队的新成员。","hero.badge":"自 2016 年起，我们的团队已服务 31,000+ 家企业",
+ "tm.cta":"让 Odelia 为您的门店工作","tm.m5":"营业税证书 30 天后到期，续期申请已起草。","tm.m4":"县政府要求提供修改后的平面图，我已通知工程经理。","tm.m3":"已向圣克拉拉县提交，回执已保存到您的云端硬盘。","tm.m2":"圣何塞卫生许可申请材料已准备好。您确认后，我会交给团队提交。","tm.m1":"本周安排：2 家门店共有 3 项申请到期，均已准备好供您审阅。","tm.d5":"周五","tm.d4":"周四","tm.d3":"周三","tm.d2":"周二","tm.d1":"周一","tm.wks":"示例一周","tm.wk":"与 Odelia 共事的一周","tm.v8":"提交任何未经您确认的申请","tm.k8":"绝不","tm.v7":"确认、签名、政府费用和身份核验","tm.k7":"需要您提供","tm.v6":"每家门店所需的每一项证照，按顺序按时提交，到期前完成续期","tm.k6":"负责","tm.v5":"Gmail、Outlook、Slack、Google 日历、Google 云端硬盘","tm.k5":"工作工具","tm.v4":"中文和英文","tm.k4":"语言","tm.v3":"全天候，覆盖所有时区","tm.k3":"工作时间","tm.v2":"您","tm.k2":"汇报对象","tm.v1":"许可与证照经理","tm.k1":"岗位","tm.jdt":"Odelia","tm.jd":"岗位卡","tm.now":"正在处理：圣何塞卫生许可申请材料","tm.r4":"Odelia","tm.r4s":"许可与证照","tm.r3s":"装修与验收","tm.r3":"工程经理","tm.r2s":"选址与租约","tm.r2":"选址负责人","tm.r1s":"美国拓展负责人","tm.a1":"您","tm.a2":"址","tm.a3":"工","tm.r1":"您","tm.sample":"示例团队","tm.team":"美国拓展团队","tm.sub":"像招聘新同事一样，把快哉的 AI 智能代理 Odelia 加入您的拓展团队。她负责每家门店的许可与证照，在团队现有的工具里工作，只有需要真人处理的事才会找您。","tm.c1h":"她加入您的团队","tm.c1p":"像招聘新同事一样加入 Odelia。她在您的拓展团队中有自己的位置，工作状态一目了然。","tm.on":"在线","tm.t1":"Odelia 已加入您的团队","tm.t1s":"美国拓展，许可与证照","tm.c2h":"她清楚自己的职责","tm.c2p":"一个岗位，从头负责到底：每一项证照按时提交，到期前完成续期。","tm.v3s":"全天候","tm.gcal":"Google 日历","tm.gdrive":"Google 云端硬盘","tm.t2":"未经您确认，绝不提交","tm.t2s":"签名、政府费用和身份核验由您完成","tm.c3h":"她主动向您汇报","tm.c3p":"进展直接发到团队已在用的地方：Slack、邮件和日历。","tm.you":"确认，提交吧。","tm.t3":"续期申请已起草","tm.t3s":"营业税证书，到期前 30 天","tm.h":"您团队的新成员。","hero.badge":"自 2016 年起，我们的团队已服务 31,000+ 家企业",
  "brands.l":"合作加盟商来自",
  "hero.sample":"查看示例计划","hero.try":"让 Odelia 开始工作","hero.demo":"预约演示","how.try":"用您的门店试一试","aria.proof":"业绩","pf.s1":"自 2016 年起，我们团队服务过的企业","pf.n2":"每天 3 家以上","pf.s2":"我们团队平均每天服务的美国新企业","pf.s3":"覆盖美国各州，以及 170 多个国家和地区","pf.n4":"5 个月","pf.s4":"为霸王茶姬节省的审批时间","ag.h":"看 Odelia 如何工作。","ag.p":"她读取您的文件，查询各政府机构的官方网站，填写表格并起草信函。每一项数据都标明出处原文，未经您确认不会提交任何申请。","aria.ag":"智能代理运行示例","ag.tag":"运行示例","ag.l1":"已读取您的租约和 LLC 注册文件","ag.l2":"已核对圣克拉拉县和圣何塞市的要求","ag.l2s":"来源：sccgov.org、sanjoseca.gov","ag.l3":"找到 8 项要求，已排序并附预估费用","ag.l4":"已根据租约填写卫生许可图纸审查申请","ag.l4q":"租户：Qinghuan Tea House LLC","ag.l5":"已起草房东同意函","ag.l5s":"landlord-consent.docx，已保存到文件","ag.l6":"等待您的确认，确认前不会提交任何申请",
  "app.proj":"预计开业", "app.date":"2027年3月", "app.est":"预估时间，非承诺", "app.risk":"风险检查：签约前请复核该州对外资企业租赁的规定。", "app.week":"第", "app.done":"已批准",
