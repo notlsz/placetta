@@ -869,6 +869,7 @@ html[lang="zh-CN"] .qh{letter-spacing:0}
 .mq{position:relative;flex:1;min-width:0;width:100%;overflow:hidden;padding-block:6px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
 .mqt{display:flex;align-items:center;width:max-content;animation:mq 70s linear infinite;will-change:transform;backface-visibility:hidden}
 .mq:hover .mqt{animation-play-state:paused}
+.mq.mqs{overflow-x:hidden;overflow-y:hidden}.mq.mqs .mqt{animation:none;will-change:auto;backface-visibility:visible;transform:none}
 .mqt span{flex-shrink:0;padding-right:40px;font-size:15px;line-height:1.4;font-weight:510;letter-spacing:-.15px;color:#fff;opacity:.9;white-space:nowrap}
 @media (min-width:1024px){.mqt span{font-size:17px;padding-right:48px}}
 @media (max-width:767px){.mqt span{padding-right:32px}.mqt span.lg img{height:24px}.mqt span.lg.tall img{height:30px}.mqt span.lg.mid img{height:17px}.mqt span.lg.thin img{height:12px}}
@@ -3148,6 +3149,25 @@ function renderStrip(){
   t.style.animationDuration = Math.round(list.length * 1.25) + "s";
 }
 renderStrip();
+/* Phones: iOS Safari drops a very wide animated layer under a mask, so the strip vanished. There it scrolls the
+   container instead (scrolled content is tiled natively, at any width), paused when off screen. */
+(() => {
+  const mq = document.querySelector(".mq"), t = document.getElementById("mqt");
+  if (!mq || !(innerWidth < 768 || matchMedia("(pointer:coarse)").matches)) return;
+  mq.classList.add("mqs");
+  if (RM) return;
+  let x = 0, last = 0, on = true;
+  new IntersectionObserver(es => { on = es[0].isIntersecting; }).observe(mq);
+  const step = now => {
+    const dt = Math.min(64, now - (last || now)); last = now;
+    if (on && !document.hidden) {
+      const half = t.scrollWidth / 2;
+      if (half > 0) { x = (x + dt * 0.04) % half; mq.scrollLeft = x; }
+    }
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+})();
 
 /* ============ hero: real footage under a blue tint ============ */
 const HMAP = JSON.parse(document.getElementById("mapdata").textContent);
