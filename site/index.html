@@ -1726,6 +1726,23 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 .tmmsg.you p{display:inline-block;background:var(--gs-ll);border-radius:10px;padding:5px 9px}
 @media (prefers-reduced-motion:reduce){.tmlive i,.tmdots i{animation:none}}
 #teammate .howtry{margin-top:24px}
+/* monitor in Alven's manner: one flat soft card, plain sans numbers with hairlines, a white panel without heavy shadows */
+#monitor .mnstage{background:var(--card);border-radius:16px;padding:12px}
+@media (min-width:768px){#monitor .mnstage{padding:20px}}
+#monitor .mnstage::before,#monitor .mnstage::after{display:none}
+#monitor .mnkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:start;gap:0;margin:4px 0 20px}
+#monitor .mnkpi>div{flex-direction:column;align-items:flex-start;gap:10px;padding:4px 24px 4px 4px;border-right:1px solid var(--line);margin-right:24px}
+#monitor .mnkpi>div:nth-of-type(3){border-right:0}
+#monitor .mnkpi strong{font-family:inherit;font-weight:400;font-size:28px;line-height:1;letter-spacing:-.28px}
+#monitor .mnkpi span{font-size:14px;line-height:1.2;letter-spacing:-.14px;color:var(--ink2);max-width:220px}
+#monitor .mnlive{align-self:start;background:#fff;border:1px solid var(--line)}
+#monitor .mngrid{border-radius:16px;box-shadow:none;border:1px solid var(--line)}
+#monitor .mnside{background:#fff;border-top:1px solid var(--line)}
+@media (min-width:1024px){#monitor .mnside{border-top:0;border-left:1px solid var(--line)}}
+#monitor .mnsc .mnr.on{background:var(--card);box-shadow:none}
+#monitor .mnhero .mndo{background:var(--card)}
+#monitor .mncd b{font-family:inherit;font-weight:400}
+@media (max-width:639px){#monitor .mnkpi{grid-template-columns:repeat(3,minmax(0,1fr));gap:0}#monitor .mnkpi>div{padding:0 10px 0 0;margin-right:10px}#monitor .mnkpi strong{font-size:24px}#monitor .mnkpi span{font-size:12px}#monitor .mnlive{grid-column:1/-1;margin-top:14px}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
