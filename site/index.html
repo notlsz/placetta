@@ -1730,19 +1730,19 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 #monitor .mnstage{background:var(--card);border-radius:16px;padding:12px}
 @media (min-width:768px){#monitor .mnstage{padding:20px}}
 #monitor .mnstage::before,#monitor .mnstage::after{display:none}
-#monitor .mnkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:start;gap:0;margin:4px 0 20px}
-#monitor .mnkpi>div{flex-direction:column;align-items:flex-start;gap:10px;padding:4px 24px 4px 4px;border-right:1px solid var(--line);margin-right:24px}
-#monitor .mnkpi>div:nth-of-type(3){border-right:0}
-#monitor .mnkpi strong{font-family:inherit;font-weight:400;font-size:28px;line-height:1;letter-spacing:-.28px}
-#monitor .mnkpi span{font-size:14px;line-height:1.2;letter-spacing:-.14px;color:var(--ink2);max-width:220px}
 #monitor .mnlive{align-self:start;background:#fff;border:1px solid var(--line)}
 #monitor .mngrid{border-radius:16px;box-shadow:none;border:1px solid var(--line)}
 #monitor .mnside{background:#fff;border-top:1px solid var(--line)}
 @media (min-width:1024px){#monitor .mnside{border-top:0;border-left:1px solid var(--line)}}
 #monitor .mnsc .mnr.on{background:var(--card);box-shadow:none}
 #monitor .mnhero .mndo{background:var(--card)}
-#monitor .mncd b{font-family:inherit;font-weight:400}
-@media (max-width:639px){#monitor .mnkpi{grid-template-columns:repeat(3,minmax(0,1fr));gap:0}#monitor .mnkpi>div{padding:0 10px 0 0;margin-right:10px}#monitor .mnkpi strong{font-size:24px}#monitor .mnkpi span{font-size:12px}#monitor .mnlive{grid-column:1/-1;margin-top:14px}}
+.mncatch{display:flex;align-items:center;gap:12px;margin:0;padding:14px 28px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#EAF3EC,rgba(234,243,236,0))}
+.mncatch .orb{flex:none;width:30px;height:30px}
+.mncatch p{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:15px;color:var(--ink)}
+.mncatch b{font-weight:600}
+.mncatch span{font-size:14px;color:#2F6B40}
+@media (max-width:1023px){.mncatch{padding:12px 18px}}
+@media (min-width:1024px){.mnhero .mncatch{border-radius:16px 0 0 0}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2418,7 +2418,7 @@ en:{
  "map.fr":"Freight", "map.fs":"containers of customer goods we help bring into new markets every year", "map.subfr":"Beyond permits, we help customers get their goods into each new market, by sea, air, rail and road.",
  "foot.slogan":"Open anywhere. We handle the paperwork.",
  "fl.desc":"Map of the sea, air, rail and road routes our customers' containers travel between Asia, the Americas, Europe, the Middle East, Africa and Australia, including the Arctic route", "fl.msea":"By sea", "fl.mair":"By air", "fl.mrail":"By rail", "fl.mroad":"By road",
- "mon.k1":"rule changes tracked in your markets", "mon.k2":"high-impact changes that need action", "mon.k3":"days to your next deadline",
+ "mon.k1":"rule changes Odelia is watching in your markets", "mon.catch":"Odelia caught this for you", "mon.catchd":"{n} days before the deadline, with the next step ready", "mon.k2":"high-impact changes, each with what to do next", "mon.k3":"days to your next deadline. You won't miss it",
  "bel.ex":"Case study", "case.c5":"Changes the map", "case.c6":"Decides the site",
  "aria.app":"Sample entry plan",
  "tea.tabs":"Example plans", "tea.sub":"Five tea houses", "tea.mk":"Steps", "tea.btn":"Plan my US opening", "tea.src":"", "tea.c1":"Sets the opening date", "tea.c2":"Takes longest", "tea.c3":"Biggest risk", "tea.c4":"Every shipment",
@@ -2501,7 +2501,7 @@ zh:{
  "map.fr":"跨境货运", "map.fs":"个货柜：每年我们协助客户运入新市场的货物", "map.subfr":"除了办理许可，我们还协助客户把货物运进每个新市场，海陆空铁皆可。",
  "foot.slogan":"开到哪里，手续都交给快哉。",
  "fl.desc":"客户货柜经海运、空运、铁路和公路往返于亚洲、美洲、欧洲、中东、非洲和澳洲之间的路线地图，包括北极航线", "fl.msea":"海运", "fl.mair":"空运", "fl.mrail":"铁路", "fl.mroad":"公路",
- "mon.k1":"项规则变化正在跟踪", "mon.k2":"项高影响变化需要处理", "mon.k3":"天后到达下一个截止日",
+ "mon.k1":"项规则变化，Odelia 正在跟踪", "mon.catch":"Odelia 为您发现了这项变化", "mon.catchd":"距离截止日还有 {n} 天，下一步已为您准备好", "mon.k2":"项高影响变化，每项都附下一步", "mon.k3":"天后到达下一个截止日，不会错过",
  "bel.ex":"案例研究", "case.c5":"改变选址", "case.c6":"决定选址",
  "aria.app":"示例开店计划",
  "tea.tabs":"示例方案", "tea.sub":"五家茶企", "tea.mk":"环节", "tea.btn":"规划我的美国开店", "tea.src":"", "tea.c1":"决定开业时间", "tea.c2":"耗时最长", "tea.c3":"风险最大", "tea.c4":"每次发货",
@@ -3548,7 +3548,7 @@ function renderMon(center){
 }
 function renderMonDetail(x){
   const i = L(), w = monWl(x.mk), due = monNext(x.mk), dd = MON_DL.find(d => d.mk === x.mk && monDays(d.d) >= 0);
-  document.getElementById("mnDet").innerHTML = `<div class="mndt">
+  document.getElementById("mnDet").innerHTML = `<div class="mncatch"><span class="orb"></span><p><b>${t("mon.catch")}</b>${due !== undefined && dd ? `<span>${t("mon.catchd").replace("{n}", due)}</span>` : ""}</p></div><div class="mndt">
       <div class="mnmeta"><span class="pill ${monPill(x.lv)}">${t("mon.lv." + x.lv)}</span><span class="mkn">${w.n[i]}</span><span>${t("mon.f." + x.c)}</span><span>${monDate(x.d)}</span></div>
       <div class="mntop2"><p class="mnttl">${x.h[i]}</p>${due !== undefined && dd ? `<div class="mncd ${monCls(due)}"><b>${due}</b><span>${t(due === 1 ? "mon.day1" : "mon.dayn")}</span><small>${monDate(dd.d)}</small></div>` : ""}</div>
       <div class="mndo"><span class="ic">${NEXT_IC}</span><div><b>${t("mon.l.next")}</b><p>${x.act[i]}</p></div></div>
