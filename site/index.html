@@ -1882,6 +1882,24 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 #cn .cnlm{position:absolute;left:16px;right:16px;bottom:12px;width:max-content;max-width:calc(100% - 32px);font-size:11.5px;color:var(--gs-ink);background:rgba(255,255,255,.75);border-radius:999px;padding:3px 10px}
 .frme{display:flex!important;align-items:center;gap:8px}.frme .orb{flex:none;width:20px;height:20px}
 #frNew p{color:var(--ink)}
+
+/* pricing math: one big number per side, the second line quieter, no rules */
+.pmc{padding:22px 24px 14px}
+.pml{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font-size:13px;font-weight:500;color:var(--ink2);background:#fff;border-radius:999px;padding:5px 12px 5px 6px;margin-bottom:4px}
+.pmc.us .pml{background:var(--gs-ll);color:var(--gs-ink)}
+.pml .orb{width:20px;height:20px}
+.pmx{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#F6E3E0;color:#B3473B;font-style:normal;font-size:13px;line-height:1}
+.pms{border-top:0;padding:14px 0}
+.pms.pmain{padding-top:16px}
+.pms.pmain b{font-family:var(--serif);font-size:clamp(40px,4.4vw,56px);letter-spacing:-1px}
+.pmc:not(.us) .pms.pmain b{color:#9A3B30}
+.pms:not(.pmain) b{font-size:22px;color:var(--ink2)}
+.pmc.us .pms:not(.pmain) b{color:var(--gs-ink)}
+.pms:not(.pmain) span{font-size:13.5px;color:var(--muted)}
+.pmbar{display:block;height:8px;border-radius:999px;background:rgba(15,27,51,.06);overflow:hidden}
+.pmbar i{display:block;height:100%;border-radius:999px}
+.pmbar.bad i{width:100%;background:linear-gradient(90deg,#E9A79E,#C9574A)}
+.pmbar.good i{width:1%;min-width:8px;background:var(--gs)}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2360,12 +2378,12 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
     <div class="pmath">
       <p class="t28" data-i18n="price.m.h">The math on waiting</p>
       <div class="pmgrid">
-        <div class="pmc"><p class="pml" data-i18n="price.m.bad">Without Placetta</p>
-          <div class="pms"><b data-i18n="price.an.v">$15,000 a month</b><span data-i18n="price.m.s1">Rent on a store that's waiting on permits, with no sales</span></div>
+        <div class="pmc"><p class="pml"><i class="pmx" aria-hidden="true">×</i><span data-i18n="price.m.bad">Without Placetta</span></p>
+          <div class="pms pmain"><b data-i18n="price.an.v">$15,000 a month</b><i class="pmbar bad" aria-hidden="true"><i></i></i><span data-i18n="price.m.s1">Rent on a store that's waiting on permits, with no sales</span></div>
           <div class="pms"><b data-i18n="price.ex.v">$2,000–$7,500</b><span data-i18n="price.ex.s">for one opening, before agency fees.</span></div>
         </div>
-        <div class="pmc us"><p class="pml" data-i18n="price.m.good">With Odelia</p>
-          <div class="pms"><b data-i18n="price.an.v2">$149 a month</b><span data-i18n="price.m.s2">Per location, with every license, certificate and inspection kept current</span></div>
+        <div class="pmc us"><p class="pml"><span class="orb" aria-hidden="true"></span><span data-i18n="price.m.good">With Odelia</span></p>
+          <div class="pms pmain"><b data-i18n="price.an.v2">$149 a month</b><i class="pmbar good" aria-hidden="true"><i></i></i><span data-i18n="price.m.s2">Per location, with every license, certificate and inspection kept current</span></div>
           <div class="pms"><b data-i18n="price.ex.v2">$3,500</b><span data-i18n="price.m.s3">Per new store opening, credited against the yearly plan</span></div>
         </div>
       </div>
