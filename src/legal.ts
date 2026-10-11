@@ -51,9 +51,10 @@ You pay government fees directly to each agency. We send you the agency's paymen
 Placetta's fees are billed through Stripe.
 
 - Entry plan: $299 per market, paid once. The $299 is credited toward your first year.
-- Monthly plan: from $750 per month. It covers filing by our team, tracking and renewals.
+- Location plan: $149 per location per month, billed yearly. It covers tracking, filing and renewals for each location.
+- Openings: $3,500 per new store, credited against the yearly plan.
 
-You can cancel the monthly plan at any time. Cancellation takes effect at the end of the current billing period.
+You can cancel the location plan at any time. Cancellation takes effect at the end of the current billing period.
 
 Fees are non-refundable, except where the law requires a refund.
 
@@ -156,9 +157,10 @@ const TERMS_ZH = `本条款是您与 Placetta Inc.（中文名称“快哉”，
 快哉的服务费通过 Stripe 收取。
 
 - 入门套餐：每个市场 299 美元，一次性付费。这 299 美元可抵扣您第一年的费用。
-- 月度套餐：每月 750 美元起，包括由我们团队代为申报、进度跟踪和续期。
+- 门店套餐：每家门店每月 149 美元，按年计费，包括每家门店的跟踪、申报和续期。
+- 新店开业：每家新店 3,500 美元，可抵扣年度套餐。
 
-月度套餐可随时取消，取消在当前计费周期结束时生效。
+门店套餐可随时取消，取消在当前计费周期结束时生效。
 
 除法律另有规定外，已付费用不予退还。
 

@@ -7,12 +7,6 @@ import { I, Modal, Pill } from "../ui";
 /* The plans sheet: the entry plan to start the agent, and the annual plans for filing by the team.
    Prices match the landing page. Agency fees are always paid by the business to the agency. */
 
-const TIERS = [
-  { id: "starter" as const, name: B("Starter", "入门版"), price: "$750", note: B("Billed annually. Up to 5 locations in one market.", "按年计费。1 个市场，最多 5 家门店。"),
-    f: [B("Our team files every approved application", "团队提交每一份您批准的申请"), B("License wallet with automatic renewals", "执照钱包，自动续期"), B("Policy monitor and deadline alerts", "政策监测与截止提醒"), B("Store readiness and daily logs", "门店迎检就绪度与每日记录")] },
-  { id: "growth" as const, name: B("Growth", "成长版"), price: "$2,000", tag: B("For growing chains", "适合扩张中的连锁品牌"), note: B("Billed annually. Up to 25 locations in three markets.", "按年计费。3 个市场，最多 25 家门店。"),
-    f: [B("Everything in Starter", "包含入门版全部功能"), B("Openings in several markets at once", "多个市场同时开店"), B("HQ view with roles for each team", "总部视图，按团队分配权限"), B("Priority filing queue", "优先申报通道")] },
-];
 
 export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: () => void }) {
   const { b, t, lang, cloud } = useApp();
@@ -28,8 +22,8 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
     <Modal label={b(B("Plans", "方案"))} onClose={onClose} wide>
       <header className="m-h">
         <span className="m-eyebrow"><I.card />{b(B("Plans", "方案"))}</span>
-        <h2>{reason === "file" ? b(B("Filing by our team is part of the annual plans.", "由团队代为申报属于年度方案。")) : b(B("Start with one market.", "从一个市场开始。"))}</h2>
-        <p>{reason === "file" ? b(B("Your approval is saved. Pick a plan and the team takes it from here.", "您的批准已保存。选择方案后，团队即可接手。")) : b(B("The agent maps every license your store needs, in order, with fees and timelines, and prepares each application.", "助理按顺序列出门店所需的全部许可、费用与时间，并准备好每一份申请。"))}</p>
+        <h2>{reason === "file" ? b(B("Filing is part of the yearly plan.", "申报包含在年度套餐中。")) : b(B("Start with one market.", "从一个市场开始。"))}</h2>
+        <p>{reason === "file" ? b(B("Your approval is saved. Start the plan and Odelia takes it from here.", "您的确认已保存。开通套餐后，由 Odelia 接手。")) : b(B("The agent maps every license your store needs, in order, with fees and timelines, and prepares each application.", "助理按顺序列出门店所需的全部许可、费用与时间，并准备好每一份申请。"))}</p>
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body plans">
@@ -46,25 +40,15 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
           </section>
         )}
         {prices?.location && <PerLocation p={prices.location} o={prices.opening} busy={busy === "locations"} disabled={!!busy} onGo={() => void go("locations")} />}
-        <div className="tiers">
-          {TIERS.map(x => (
-            <section key={x.id} className={"plan" + (x.tag ? " hl" : "")}>
-              <div className="plan-h"><b>{b(x.name)}</b>{x.tag && <em>{b(x.tag)}</em>}</div>
-              <span className="price">{x.price}<small>{lang === "zh" ? " /月" : " /month"}</small></span>
-              <p>{b(x.note)}</p>
-              <ul>{x.f.map((f, i) => <li key={i}><I.check />{b(f)}</li>)}</ul>
-              <Pill kind={x.tag ? "ink" : "primary"} disabled={!!busy} onClick={() => void go(x.id)}>{busy === x.id ? "…" : b(B(`Choose ${x.name.en}`, `选择${x.name.zh}`))}</Pill>
-            </section>
-          ))}
-          <section className="plan">
-            <div className="plan-h"><b>{b(B("Scale", "规模版"))}</b></div>
-            <span className="price">$5,000+<small>{lang === "zh" ? " /月" : " /month"}</small></span>
-            <p>{b(B("Billed annually. 26+ locations, any number of markets.", "按年计费。26 家门店以上，市场数量不限。"))}</p>
-            <ul>{[B("Everything in Growth", "包含成长版全部功能"), B("Unlimited markets", "市场数量不限"), B("A named compliance lead", "专属合规负责人")].map((f, i) => <li key={i}><I.check />{b(f)}</li>)}</ul>
-            <a className="pill primary" href="mailto:support@placetta.com?subject=Scale%20plan"><span>{b(B("Talk to us", "联系我们"))}</span><i aria-hidden="true"><I.arrow /></i></a>
+        {!prices?.location && (
+          <section className="plan hl perloc">
+            <div className="plan-h"><b>{b(B("Every location", "每家门店"))}</b><em>{b(B("For franchise chains", "连锁加盟品牌"))}</em></div>
+            <span className="price">$149<small>{lang === "zh" ? " /店/月" : " per location a month"}</small></span>
+            <p>{b(B("Billed yearly. Plus $3,500 once for each new store opening, credited against the yearly plan. Licenses, renewals, staff certificates, vendor service proof, inspection prep and rule changes for every store.", "按年计费。每家新店开业另收 3,500 美元，可抵扣年度套餐。每家门店的执照、续期、员工证书、供应商服务凭证、检查准备和规则变化。"))}</p>
+            <a className="pill primary" href="mailto:support@placetta.com?subject=Odelia%20for%20our%20locations"><span>{b(B("Talk to us", "联系我们"))}</span><i aria-hidden="true"><I.arrow /></i></a>
           </section>
-        </div>
-        <p className="note">{b(B("Extra locations are $100 a month each. Government fees are paid by you directly to each agency, through the payment link we send. Payments are handled by Stripe.", "超出的门店每家每月 100 美元。政府规费由您通过我们发送的付款链接直接支付给各机构。付款由 Stripe 处理。"))}</p>
+        )}
+        <p className="note">{b(B("Exceptions handled by people are quoted per step. Government fees are paid by you directly to each agency. Payments are handled by Stripe.", "由专人处理的例外事项按步骤报价。政府规费由您直接支付给各机构。付款由 Stripe 处理。"))}</p>
       </div>
     </Modal>
   );
