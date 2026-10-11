@@ -2087,6 +2087,27 @@ html[lang="zh-CN"] .pfrow b{font-family:var(--zhserif);font-weight:400}
 #cn .secl li{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:12px;background:var(--card);font-size:14.5px;line-height:1.4;color:var(--ink)}
 #cn .secl svg{flex:none;margin-top:1px}
 @media (max-width:1023px){#cn .cnsec{margin-top:48px}}
+/* no pills: every badge becomes plain text, statuses keep a small coloured dot (Alven-quiet) */
+body .pill,body .asx,body .agt,body .ty,body .frpill,body .jbchip,body .mnlive,body .pml,body .ptag,body .atag,body .cnlm,body .dchip,body .fchips li{background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;backdrop-filter:none!important}
+body .pill,body .asx,body .agt,body .ty,body .frpill{display:inline-flex!important;align-items:center;gap:6px;font-size:12px;font-weight:500;line-height:1.2}
+body .pill::before,body .asx::before,body .agt::before,body .ty::before,body .frpill::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.9}
+body .p-d,body .p-o,body .asx.d,body .agt-f,body .fr-ok{color:#2F7A4C!important}
+body .p-r,body .asx.r,body .fr-w{color:#93651E!important}
+body .p-b,body .asx.b{color:#A9473B!important}
+body .p-q,body .asx.q,body .agt-m,body .ty.y-r{color:#6B7385!important}
+body .p-m,body .agt-p,body .ty.y-f,body .fr-b{color:var(--gs-ink)!important}
+body .jbchip{gap:8px;font-size:13px;color:var(--ink2)}
+body .jbf .jbchip{color:rgba(220,232,245,.85)}
+body .mnlive{gap:8px}
+body .pml{gap:8px;font-size:13px;font-weight:500}
+body .ptag{font-size:12px;font-weight:600;color:var(--gs-ink)}
+body .atag{font-size:11.5px;color:var(--muted)}
+body .cnlm{font-size:12px;font-weight:600;color:var(--gs-ink);text-shadow:0 1px 8px rgba(244,245,247,.95),0 0 2px rgba(244,245,247,.9)}
+body .dchip{text-shadow:0 1px 8px rgba(244,245,247,.95)}
+body .fchips li{font-size:12.5px}
+body .ptcur em{border-radius:4px}
+body .agi .agk-f .agt{color:#fff!important}
+body .agi .agk-p .agt,body .agi .agk-m .agt{color:#24406F!important}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
