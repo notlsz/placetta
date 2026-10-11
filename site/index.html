@@ -4316,26 +4316,109 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   const sceneImg = new Image(); sceneImg.decoding = "async";
   sceneImg.onload = () => { if (cur === 3) { cur = -1; go(3); } };
   sceneImg.src = "media/industries/game-studios-bw.jpg";
+  // the Monkey King, our own drawing in the Peking opera manner: white mask, red peach, gold eyes, the golden band
+  const mkCv = document.createElement("canvas"); mkCv.width = 400; mkCv.height = 470;
+  (function drawMonkey(){
+    const g2 = mkCv.getContext("2d"), TAU = Math.PI * 2;
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const E = (x, y, rx, ry, f, rot = 0) => { g2.fillStyle = f; g2.beginPath(); g2.ellipse(x, y, rx, ry, rot, 0, TAU); g2.fill(); };
+    const rg = (x, y, r0, r1, stops) => { const q = g2.createRadialGradient(x, y, r0, x, y, r1); stops.forEach(([o, c]) => q.addColorStop(o, c)); return q; };
+    const lg = (x0, y0, x1, y1, stops) => { const q = g2.createLinearGradient(x0, y0, x1, y1); stops.forEach(([o, c]) => q.addColorStop(o, c)); return q; };
+    // robe, folds and a gold-edged collar
+    g2.fillStyle = lg(0, 340, 0, 470, [[0, "#9A2E26"], [1, "#4E1814"]]); g2.beginPath(); g2.moveTo(10, 470); g2.bezierCurveTo(20, 396, 72, 350, 140, 340); g2.lineTo(260, 340); g2.bezierCurveTo(328, 350, 380, 396, 390, 470); g2.closePath(); g2.fill();
+    g2.strokeStyle = "rgba(30,8,8,.55)"; g2.lineWidth = 5; [[118, 360, 96, 470], [282, 360, 304, 470], [168, 372, 160, 470], [232, 372, 240, 470]].forEach(([a1, b1, a2, b2]) => { g2.beginPath(); g2.moveTo(a1, b1); g2.quadraticCurveTo((a1 + a2) / 2 + 8, (b1 + b2) / 2, a2, b2); g2.stroke(); });
+    g2.fillStyle = "#2A0E0C"; g2.beginPath(); g2.moveTo(146, 338); g2.lineTo(200, 446); g2.lineTo(254, 338); g2.closePath(); g2.fill();
+    g2.strokeStyle = lg(140, 0, 260, 0, [[0, "#B8862F"], [.5, "#F4D27C"], [1, "#B8862F"]]); g2.lineWidth = 12; g2.lineJoin = "round"; g2.beginPath(); g2.moveTo(138, 334); g2.lineTo(200, 452); g2.lineTo(262, 334); g2.stroke();
+    // pauldrons: layered gold plates
+    [[74, 392, -.45, 1], [326, 392, .45, -1]].forEach(([x, y, r, sd]) => {
+      for (let k = 2; k >= 0; k--) E(x + sd * k * 8, y + k * 14, 70 - k * 8, 34 - k * 4, rg(x - sd * 20, y - 18 + k * 14, 4, 80, [[0, "#F6D888"], [.45, "#C8913A"], [1, "#5E3C14"]]), r);
+    });
+    // mane: hundreds of tufts, longest on the crown, dark at the root and light at the tip
+    for (let i = 0; i < 520; i++) {
+      const a = rnd() * TAU, up = Math.max(0, -Math.sin(a)), len = 34 + rnd() * 30 + up * up * 46, r0 = 96 + rnd() * 22;
+      const x0 = 200 + Math.cos(a) * r0 * .95, y0 = 226 + Math.sin(a) * r0, x1 = 200 + Math.cos(a + (rnd() - .5) * .2) * (r0 + len) * .95, y1 = 226 + Math.sin(a + (rnd() - .5) * .2) * (r0 + len);
+      g2.strokeStyle = lg(x0, y0, x1, y1, [[0, "#5C3A1E"], [.6, rnd() < .5 ? "#B5844E" : "#9E7042"], [1, "#E6C089"]]); g2.lineWidth = 3 + rnd() * 5; g2.lineCap = "round";
+      g2.beginPath(); g2.moveTo(x0, y0); g2.quadraticCurveTo((x0 + x1) / 2 + (rnd() - .5) * 14, (y0 + y1) / 2, x1, y1); g2.stroke();
+    }
+    E(200, 230, 112, 124, rg(200, 220, 30, 130, [[0, "#B98A55"], [1, "#6E4824"]]));
+    // ears
+    [[82, 238], [318, 238]].forEach(([x, y]) => { E(x, y, 22, 28, "#D9B48A"); E(x, y + 2, 11, 16, "#8E5440"); });
+    // the white mask, shaded like skin
+    E(200, 242, 88, 108, rg(200, 230, 10, 108, [[0, "#FBF2E2"], [.7, "#EBDCC2"], [1, "#B9A586"]]));
+    // the red peach over the brow
+    g2.fillStyle = rg(200, 190, 8, 92, [[0, "#E2533F"], [1, "#8E2A20"]]); g2.beginPath(); g2.moveTo(200, 258);
+    g2.bezierCurveTo(156, 236, 120, 200, 140, 162); g2.bezierCurveTo(158, 134, 190, 142, 200, 164);
+    g2.bezierCurveTo(210, 142, 242, 134, 260, 162); g2.bezierCurveTo(280, 200, 244, 236, 200, 258); g2.fill();
+    // fierce almond eyes: heavy black lids, small gold irises
+    [[160, 216, -1], [240, 216, 1]].forEach(([x, y, sd]) => {
+      g2.fillStyle = "#121117"; g2.beginPath(); g2.moveTo(x - sd * 36, y + 6); g2.quadraticCurveTo(x - sd * 4, y - 26, x + sd * 34, y - 10); g2.quadraticCurveTo(x + sd * 6, y + 18, x - sd * 36, y + 6); g2.fill();
+      g2.fillStyle = "#F0C25A"; g2.beginPath(); g2.moveTo(x - sd * 26, y + 3); g2.quadraticCurveTo(x - sd * 2, y - 16, x + sd * 24, y - 7); g2.quadraticCurveTo(x + sd * 4, y + 10, x - sd * 26, y + 3); g2.fill();
+      E(x + sd * 2, y - 3, 7, 8, "#121117"); E(x + sd * 4, y - 6, 2.2, 2.2, "#FFF6DC");
+    });
+    // brows sweeping down to a frown
+    g2.strokeStyle = "#121117"; g2.lineCap = "round"; g2.lineWidth = 11;
+    g2.beginPath(); g2.moveTo(112, 182); g2.quadraticCurveTo(152, 170, 192, 196); g2.moveTo(288, 182); g2.quadraticCurveTo(248, 170, 208, 196); g2.stroke();
+    // muzzle, nose, a half smile
+    E(200, 300, 54, 40, rg(200, 292, 6, 58, [[0, "#F2DDC0"], [1, "#B99876"]]));
+    E(192, 276, 5, 3.5, "#2A1A18"); E(208, 276, 5, 3.5, "#2A1A18");
+    g2.strokeStyle = "#4A1512"; g2.lineWidth = 5; g2.beginPath(); g2.moveTo(172, 308); g2.quadraticCurveTo(202, 314, 230, 302); g2.stroke();
+    // the golden band, burnished, with its curls
+    g2.strokeStyle = "#5E3C14"; g2.lineWidth = 20; g2.beginPath(); g2.ellipse(200, 242, 104, 118, 0, Math.PI * 1.13, Math.PI * 1.87); g2.stroke();
+    g2.strokeStyle = lg(100, 0, 300, 0, [[0, "#B8862F"], [.5, "#FBE29A"], [1, "#B8862F"]]); g2.lineWidth = 12; g2.beginPath(); g2.ellipse(200, 242, 104, 118, 0, Math.PI * 1.13, Math.PI * 1.87); g2.stroke();
+    E(200, 124, 15, 13, "#5E3C14"); E(200, 124, 11, 9, "#F6D483"); E(200, 124, 4, 4, "#9A6A24");
+    [[106, 184], [294, 184]].forEach(([x, y]) => { E(x, y, 11, 11, "#5E3C14"); E(x, y, 7, 7, "#F6D483"); });
+  })();
   function sceneCells(){
-    // a window on the rider and the tiger, cut to the panel's shape so it fills edge to edge, sharpened so the stripes,
-    // armour and face read at tile size, and faded into the navy at the edges instead of ending in a hard rectangle
-    const iw = sceneImg.naturalWidth, ih = sceneImg.naturalHeight, ah = Math.round(rows * (W < 640 ? .66 : .8)), SS = 3;
-    const sh = Math.min(ih * (W < 640 ? .6 : .8), iw * (W < 640 ? .62 : .8) * ah / cols), sw = sh * cols / ah, sx = Math.max(0, Math.min(iw - sw, iw * .532 - sw / 2)), sy = Math.max(0, Math.min(ih - sh, ih * (W < 640 ? .5 : .54) - sh / 2));
-    const X = cols * SS, Y = ah * SS; mk.width = X; mk.height = Y; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, X, Y); mg.imageSmoothingQuality = "high";
-    mg.drawImage(sceneImg, sx, sy, sw, sh, 0, 0, X, Y);
-    const d = mg.getImageData(0, 0, X, Y).data, L = new Float32Array(cols * ah);
+    // a diagonal cut: the tiger rider on the left in cool greys, the Monkey King on the right in colour,
+    // and the golden staff as the cut itself. Proportions follow the panel so it fits phones, small laptops and desktops.
+    const nar = W < 640, ah = Math.round(rows * (nar ? .7 : .8)), SS = 3, X = cols * SS, Y = ah * SS;
+    // size both figures by height, then fit the pair (and the cut between them) to the width and centre it
+    const iw = sceneImg.naturalWidth, ih = sceneImg.naturalHeight, bx0 = .3 * iw, by0 = .2 * ih, bw = .5 * iw, bh = .78 * ih;
+    let f = ah * 1.02 / bh, mf = ah * .98 / mkCv.height;
+    const sep = Math.max(6, cols * .06), need = bw * f * .9 + sep + mkCv.width * mf, k = Math.min(1, cols * .96 / need);
+    f *= k; mf *= k;
+    const tw = bw * f * .9, mw = mkCv.width * mf, mh = mkCv.height * mf, x0 = (cols - (tw + sep + mw)) / 2;
+    const cut = x0 + tw + sep / 2, tilt = ah * .1, lx = r => cut - tilt + 2 * tilt * r / ah;
+    const sw = Math.max(1.1, cols / 190), gap = sw + Math.max(1, cols / 140);
+    const cx = x0 + tw * .5, cy = ah * .5, mx = cut + sep / 2, my = ah - mh;
+    mk.width = X; mk.height = Y; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, X, Y); mg.imageSmoothingQuality = "high";
+    const ox0 = cx - (bx0 + bw / 2) * f, oy0 = cy - (by0 + bh / 2) * f;
+    mg.drawImage(sceneImg, ox0 * SS, oy0 * SS, iw * f * SS, ih * f * SS);
+    let d = mg.getImageData(0, 0, X, Y).data;
+    const L = new Float32Array(cols * ah);
     for (let r = 0; r < ah; r++) for (let c = 0; c < cols; c++) { let v = 0; for (let y = 0; y < SS; y++) for (let x = 0; x < SS; x++) v += d[((r * SS + y) * X + c * SS + x) * 4]; L[r * cols + c] = v / (SS * SS * 255); }
-    const B = new Float32Array(L.length), R = 3;   // a small box blur for the unsharp mask
+    const B = new Float32Array(L.length), R = 3;
     for (let r = 0; r < ah; r++) for (let c = 0; c < cols; c++) { let v = 0, n = 0; for (let y = Math.max(0, r - R); y <= Math.min(ah - 1, r + R); y++) for (let x = Math.max(0, c - R); x <= Math.min(cols - 1, c + R); x++) { v += L[y * cols + x]; n++; } B[r * cols + c] = v / n; }
-    const px = (x, y) => [Math.round((x - sx) / sw * cols), Math.round((y - sy) / sh * ah)], eyes = [px(iw * .578, ih * .713), px(iw * .619, ih * .725)];
-    const fade = (i, n, m) => { const e = Math.min(i, n - 1 - i) / m; return e >= 1 ? 1 : e <= 0 ? 0 : e * e * (3 - 2 * e); };
-    const [scx, scy] = px(iw * .55, ih * .55), spot = (c, r) => { const q = Math.hypot((c - scx) / (cols * .62), (r - scy) / (ah * .72)); return q < .62 ? 1 : q > 1 ? .18 : 1 - .82 * ((q - .62) / .38); };   // the rider and tiger stay bright, the courtyard recedes
+    const eyes = [[iw * .578, ih * .713], [iw * .619, ih * .725]].map(([x, y]) => [ox0 + x * f, oy0 + y * f]);
+    const scx = ox0 + iw * .55 * f, scy = oy0 + ih * .56 * f, rx = bw * f * .62, ry = bh * f * .62;
+    const spot = (c, r) => { const q = Math.hypot((c - scx) / rx, (r - scy) / ry); return q < .7 ? 1 : q > 1.1 ? 0 : 1 - (q - .7) / .4; };
+    const ease = e => e >= 1 ? 1 : e <= 0 ? 0 : e * e * (3 - 2 * e);
+    // the Monkey King, fitted into the right side
+    mg.clearRect(0, 0, X, Y); mg.drawImage(mkCv, mx * SS, my * SS, mw * SS, mh * SS);
+    d = mg.getImageData(0, 0, X, Y).data;
     const out = [];
     for (let r = 0; r < ah; r++) for (let c = 0; c < cols; c++) {
-      const v0 = L[r * cols + c], v = v0 + .5 * (v0 - B[r * cols + c]);   // unsharp: edges and stripes pop
-      const w2 = Math.min(1, Math.max(0, (v - .035) / .66)) * fade(c, cols, cols * .07) * fade(r, ah, ah * .1) * spot(c, r);
-      if (eyes.some(([ex, ey]) => Math.hypot(c - ex, (r - ey) * 1.6) <= Math.max(1.2, cols / 140))) { out.push({c, r, ty: 8, rgb: [255, 186, 72]}); continue; }   // the tiger's eyes, amber
-      if (w2 > .05) out.push({c, r, ty: 7, lum: Math.pow(w2, 1.25)});
+      const dx = c + .5 - lx(r + .5), t = (r + .5) / ah;
+      if (Math.abs(dx) <= sw && (t < .035 || t > .965)) continue;
+      if (Math.abs(dx) <= sw) {   // the staff: gold, banded red near each end, catching light down its middle
+        const band = (t > .06 && t < .12) || (t > .88 && t < .94), hi = 1 - Math.abs(dx) / sw;
+        out.push({c, r, ty: 8, rgb: band ? [196, 62, 46] : [Math.round(196 + 52 * hi), Math.round(150 + 54 * hi), Math.round(62 + 50 * hi)]}); continue;
+      }
+      if (dx < -gap) {
+        if (eyes.some(([ex, ey]) => Math.hypot(c - ex, (r - ey) * 1.6) <= Math.max(1.2, cols / 140))) { out.push({c, r, ty: 8, rgb: [255, 186, 72]}); continue; }
+        const v0 = L[r * cols + c], v = v0 + .5 * (v0 - B[r * cols + c]);
+        const w2 = Math.min(1, Math.max(0, (v - .035) / .66)) * spot(c, r) * ease(c / (cols * .05)) * ease(r / (ah * .06)) * ease((ah - 1 - r) / (ah * .08)) * ease((-dx - gap) / 3);
+        if (w2 > .05) out.push({c, r, ty: 7, lum: Math.pow(w2, 1.25)});
+      } else if (dx > gap) {
+        let n = 0, rr = 0, gg = 0, bb = 0;
+        for (let y = 0; y < SS; y++) for (let x = 0; x < SS; x++) { const i = ((r * SS + y) * X + c * SS + x) * 4; if (d[i + 3] < 120) continue; n++; rr += d[i]; gg += d[i + 1]; bb += d[i + 2]; }
+        if (n < 5) continue;
+        rr /= n; gg /= n; bb /= n; const l = (rr * .3 + gg * .59 + bb * .11) / 255, mx2 = Math.max(rr, gg, bb), sat = mx2 ? (mx2 - Math.min(rr, gg, bb)) / mx2 : 0;
+        const gold = rr > 185 && gg > 125 && bb < gg * .72 && sat > .42, red = rr > 110 && gg < rr * .48 && sat > .5 && r < ah * .62;
+        if (gold || red) { out.push({c, r, ty: 8, rgb: [Math.round(rr), Math.round(gg), Math.round(bb)]}); continue; }   // the band, the eyes, the plates and the peach keep their colour
+        const w3 = Math.min(1, Math.max(0, (l - .06) / .86)) * ease((ah - 1 - r) / (ah * .1));
+        if (w3 > .05) out.push({c, r, ty: 7, lum: Math.pow(w3, 1.1)});
+      }
     }
     return out;
   }
