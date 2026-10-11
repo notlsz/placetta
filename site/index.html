@@ -1973,6 +1973,7 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .inphoto{position:absolute;left:50%;top:44%;height:74%;width:auto;max-width:86%;object-fit:contain;transform:translate(-50%,-50%) scale(.96);opacity:0;transition:opacity .6s ease,transform .8s cubic-bezier(.22,1,.36,1);pointer-events:none;-webkit-user-drag:none;user-select:none;filter:drop-shadow(0 30px 40px rgba(0,0,0,.35))}
 .inphoto.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 @media (max-width:1023px){.inphoto{height:70%;top:42%}}
+@media (max-width:1023px){.inlist .inpanel{margin:4px 0 12px;min-height:300px;max-width:none;width:100%}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3879,6 +3880,13 @@ function renderInd(k){
   document.querySelectorAll(".inb").forEach(b => { const on = +b.dataset.k === inK; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
   const key = IN_KEYS[inK], ct = document.getElementById("inCapT"); if (!ct) return;
   ct.textContent = t("in." + key); document.getElementById("inCapP").textContent = t("in." + key + "p");
+  // phones: the picture opens right under the chosen sector, like an accordion; wider screens keep it on the right
+  const pn = document.querySelector(".inpanel"), row = document.querySelector(".inrow"), btn = document.querySelector(`.inb[data-k="${inK}"]`);
+  if (pn && row && btn){
+    if (!matchMedia("(min-width:1024px)").matches){ if (btn.nextElementSibling !== pn) btn.after(pn); }
+    else if (pn.parentElement !== row) row.appendChild(pn);
+    dispatchEvent(new Event("inresize"));
+  }
   if (window.inArt) window.inArt(inK);
 }
 (function(){
@@ -4061,10 +4069,11 @@ function renderXp(){
 /* industries art: each sector drawn as a mosaic of small tiles on the deep navy, the same way the experts' whale is
    made. Clicking a sector sends the tiles flying from one picture to the next. Shapes live in a 1000 x 420 box:
    red = body, yellow = dark detail, blue = light (steam, smoke, glass). */
+addEventListener("resize", () => { const pn = document.querySelector(".inpanel"); if (pn && (matchMedia("(min-width:1024px)").matches === (pn.parentElement.classList.contains("inlist")))) renderInd(); });
 (function inArtInit(){
   const cv = document.getElementById("inCv"); if (!cv) return;
   const g = cv.getContext("2d"), mk = document.createElement("canvas"), mg = mk.getContext("2d", {willReadFrequently: true});
-  let W = 0, H = 0, dpr = 1, cell = 14, cols = 0, rows = 0, sc = 1, ox = 0, oy = 0, cur = -1, tiles = [], tA = 0, run = false, t0 = performance.now();
+  let looping = false, kickUntil = 0, W = 0, H = 0, dpr = 1, cell = 14, cols = 0, rows = 0, sc = 1, ox = 0, oy = 0, cur = -1, tiles = [], tA = 0, run = false, t0 = performance.now();
   const R = "rgb(255,0,0)", Y = "rgb(255,255,0)", B = "rgb(0,0,255)";
   const rr = (x, y, w, h, r, c) => { mg.fillStyle = c; mg.beginPath(); mg.roundRect(x, y, w, h, r); mg.fill(); };
   const ln = (pts, w, c) => { mg.strokeStyle = c; mg.lineWidth = w; mg.lineCap = mg.lineJoin = "round"; mg.beginPath(); pts.forEach(([x, y], i) => i ? mg.lineTo(x, y) : mg.moveTo(x, y)); mg.stroke(); };
@@ -4152,7 +4161,7 @@ function renderXp(){
       const src = live.length ? live[Math.floor(i * live.length / T.length)] : null;
       next.push({fc: src ? src.c : d.c + (Math.random() - .5) * 8, fr: src ? src.r : rows + 2 + Math.random() * 6, c: 0, r: 0, tc: d.c, tr: d.r, ty: d.ty, fty: src ? src.ty : d.ty, j: Math.random(), out: 0, a0: src ? 1 : 0});
     });
-    tiles = next; if (!run) frame(performance.now());
+    tiles = next; kick();
   }
   function size(){
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
@@ -4177,17 +4186,18 @@ function renderXp(){
       g.beginPath(); g.roundRect(gx + c * cell, gy + r * cell, s, s, Math.min(3, s / 4)); g.fill();
     }
     g.globalAlpha = 1;
-    if (run && !RM) requestAnimationFrame(frame);
   }
+  function loop(now){ frame(now); if (!RM && (run || now < kickUntil)) requestAnimationFrame(loop); else looping = false; }
+  function kick(){ kickUntil = performance.now() + 1800; if (!looping){ looping = true; requestAnimationFrame(loop); } }
   // tech shows the company's own robot photo instead of a mosaic
   const PHOTO = {2: document.getElementById("inPhoto")};
   window.inArt = k => {
     Object.entries(PHOTO).forEach(([pk, el]) => el && el.classList.toggle("on", +pk === k));
-    if (PHOTO[k]) { cur = k; tiles = []; if (!run) frame(performance.now()); return; }
+    if (PHOTO[k]) { cur = k; tiles = []; kick(); return; }
     if (k !== cur) go(k);
   };
-  addEventListener("resize", size); size(); window.inArt(typeof inK === "number" ? inK : 0);
-  new IntersectionObserver(es => es.forEach(e => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); })).observe(cv);
+  addEventListener("resize", size); addEventListener("inresize", () => { if (cv.clientWidth !== W || cv.clientHeight !== H) size(); }); size(); window.inArt(typeof inK === "number" ? inK : 0);
+  new IntersectionObserver(es => es.forEach(e => { run = e.isIntersecting; if (run) kick(); })).observe(cv);
 })();
 
 (function bindXp(){
