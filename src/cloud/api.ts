@@ -129,6 +129,18 @@ export async function verifyCode(email: string, token: string) {
   const { error } = await supabase().auth.verifyOtp({ email, token, type: "email" });
   if (error) throw err("auth", error.message);
 }
+/** Phone: a one-time code by text message. Needs an SMS provider (e.g. Twilio) set in Supabase, Authentication, Phone. */
+export async function sendPhoneCode(phone: string) {
+  const { error } = await supabase().auth.signInWithOtp({ phone, options: { shouldCreateUser: true, channel: "sms" } });
+  if (error) {
+    const m = error.message ?? "";
+    throw err(error.status === 429 ? "rate_limited" : /provider|disabled|not enabled|unsupported/i.test(m) ? "phone_off" : /invalid|phone/i.test(m) ? "bad_phone" : "auth", m);
+  }
+}
+export async function verifyPhoneCode(phone: string, token: string) {
+  const { error } = await supabase().auth.verifyOtp({ phone, token, type: "sms" });
+  if (error) throw err("auth", error.message);
+}
 /** Sign out here, or on every device (revokes every session's refresh token). */
 export const signOut = (everywhere = false) => supabase().auth.signOut({ scope: everywhere ? "global" : "local" });
 
@@ -136,8 +148,11 @@ export type Me = { id: string; email: string; staff: boolean; staff_email: boole
 export async function whoami(): Promise<Me> {
   const { data, error } = await supabase().rpc("whoami");
   if (error) throw fromPg(error);
-  const d = data as Partial<Me> & { id: string; email: string; staff: boolean };
-  return { staff_email: d.staff, two_step: false, aal: "aal1", ...d };
+  const d = data as Partial<Me> & { id: string; email: string | null; staff: boolean };
+  // people who signed in by text message have a phone and no email
+  let email = d.email ?? "";
+  if (!email) { const ph = (await getSession())?.user.phone; if (ph) email = "+" + ph.replace(/^\+/, ""); }
+  return { staff_email: d.staff, two_step: false, aal: "aal1", ...d, email };
 }
 
 /* Sign in with Google or Microsoft. Each shows only when it's turned on in Supabase (Authentication, Providers). */

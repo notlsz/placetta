@@ -110,7 +110,10 @@ function SignIn({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
   const [hand] = useState(readHandoff);
   const [email, setEmail] = useState(hand?.email ?? "");
-  const [step, setStep] = useState<"email" | "password" | "code" | "confirm">("email");
+  const [step, setStep] = useState<"email" | "password" | "code" | "confirm" | "phone" | "phonecode">("email");
+  const [cc, setCc] = useState("+1");
+  const [phone, setPhone] = useState("");
+  const e164 = () => cc + phone.replace(/\D/g, "").replace(/^0+/, "");
   const [mode, setMode] = useState<"signin" | "create">("signin");
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
@@ -161,11 +164,32 @@ function SignIn({ lang }: { lang: Lang }) {
     setBusy(true); setErr("");
     try { await api.verifyCode(email.trim(), code.trim()); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
-  const title = step === "code" ? L(B("Check your email.", "请查收邮件。"))
+  const sendPhone = async () => {
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 6) { setErr(L(B("Enter your phone number.", "请输入手机号。"))); return; }
+    setBusy(true); setErr("");
+    try { await api.sendPhoneCode(e164()); setCode(""); setStep("phonecode"); }
+    catch (e) {
+      const x = e as api.ApiError;
+      setErr(x.code === "phone_off" ? L(B("Phone sign-in isn't available yet. Use your email for now.", "手机号登录暂未开通，请先使用邮箱登录。"))
+        : x.code === "bad_phone" ? L(B("That number doesn't look right. Check the country code.", "号码格式不正确，请检查国家或地区代码。"))
+        : x.code === "rate_limited" ? L(B("Too many codes. Wait a minute, then try again.", "验证码发送过于频繁，请稍候再试。")) : x.message);
+    }
+    setBusy(false);
+  };
+  const verifyPhone = async () => {
+    setBusy(true); setErr("");
+    try { await api.verifyPhoneCode(e164(), code.trim()); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
+  };
+  const title = step === "phone" ? L(B("Enter your phone number.", "输入您的手机号。"))
+    : step === "phonecode" ? L(B("Check your messages.", "请查收短信。"))
+    : step === "code" ? L(B("Check your email.", "请查收邮件。"))
     : step === "confirm" ? L(B("Confirm your email.", "请确认邮箱。"))
     : step === "password" ? (mode === "create" ? L(B("Create your password.", "设置密码。")) : L(B("Enter your password.", "输入密码。")))
     : hand ? L(B("Your license plan is one step away.", "您的执照计划只差一步。")) : L(B("Sign in to Placetta.", "登录快哉。"));
-  const sub = step === "code" ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`))
+  const sub = step === "phone" ? L(B("Log in or sign up with your phone number. No password needed.", "用手机号登录或注册，无需密码。"))
+    : step === "phonecode" ? L(B(`We texted a 6-digit code to ${cc} ${phone}.`, `6 位验证码已发送至 ${cc} ${phone}。`))
+    : step === "code" ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`))
     : step === "confirm" ? L(B(`We sent a confirmation link to ${email}. Open it, then sign in with your password.`, `确认链接已发送至 ${email}。打开链接后，用密码登录。`))
     : step === "password" ? null
     : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。"))
@@ -191,6 +215,31 @@ function SignIn({ lang }: { lang: Lang }) {
           <label className="sr" htmlFor="gate-email">{L(B("Email", "邮箱"))}</label>
           <input id="gate-email" type="email" autoComplete="username" inputMode="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={L(B("you@company.com", "you@company.com"))} autoFocus />
           <button type="submit" className="sbtn ink wide" disabled={busy}>{L(B("Continue", "继续"))}</button>
+        </form>
+      )}
+      {step === "email" && <span className="gate-or">{L(B("or", "或"))}</span>}
+      {step === "email" && <button type="button" className="sbtn line wide sso gate-phone" disabled={busy} onClick={() => { setErr(""); setStep("phone"); }}><PhoneMark />{L(B("Continue with phone", "使用手机号继续"))}</button>}
+      {step === "phone" && (
+        <form onSubmit={e => { e.preventDefault(); void sendPhone(); }}>
+          <div className="phrow">
+            <label className="sr" htmlFor="gate-cc">{L(B("Country code", "国家或地区代码"))}</label>
+            <select id="gate-cc" value={cc} onChange={e => setCc(e.target.value)}>
+              {[["+1", "US +1"], ["+86", "CN +86"], ["+852", "HK +852"], ["+886", "TW +886"], ["+65", "SG +65"], ["+44", "UK +44"], ["+81", "JP +81"], ["+82", "KR +82"], ["+61", "AU +61"], ["+971", "AE +971"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+            <label className="sr" htmlFor="gate-phone">{L(B("Phone number", "手机号"))}</label>
+            <input id="gate-phone" type="tel" inputMode="tel" autoComplete="tel-national" value={phone} onChange={e => setPhone(e.target.value.replace(/[^\d\s()-]/g, "").slice(0, 20))} placeholder={cc === "+86" ? "138 0013 8000" : "(212) 555 0123"} autoFocus />
+          </div>
+          <button type="submit" className="sbtn ink wide" disabled={busy}>{busy ? "…" : L(B("Send code", "发送验证码"))}</button>
+          <button type="button" className="sbtn quiet wide" onClick={() => { setStep("email"); setErr(""); }}>{L(B("Use email instead", "改用邮箱"))}</button>
+        </form>
+      )}
+      {step === "phonecode" && (
+        <form onSubmit={e => { e.preventDefault(); void verifyPhone(); }}>
+          <label className="sr" htmlFor="gate-pcode">Code</label>
+          <input id="gate-pcode" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))} placeholder={L(B("6-digit code", "6 位验证码"))} autoFocus />
+          <button type="submit" className="sbtn ink wide" disabled={busy || code.length < 6}>{busy ? "…" : L(B("Sign in", "登录"))}</button>
+          <button type="button" className="sbtn quiet wide" disabled={busy} onClick={() => void sendPhone()}>{L(B("Send a new code", "重新发送验证码"))}</button>
+          <button type="button" className="sbtn quiet wide" onClick={() => { setStep("phone"); setCode(""); setErr(""); }}>{L(B("Change number", "更换号码"))}</button>
         </form>
       )}
       {step === "password" && (
@@ -221,13 +270,13 @@ function SignIn({ lang }: { lang: Lang }) {
       )}
       {step === "confirm" && <button type="button" className="sbtn line wide" onClick={() => { setMode("signin"); setStep("password"); setPw(""); }}>{L(B("I've confirmed, sign in", "已确认，去登录"))}</button>}
       {err && <p className="gate-err" role="alert">{err}</p>}
-      {(step === "email" || step === "password") && (
+      {(step === "email" || step === "password" || step === "phone") && (
         <div className="gate-legal">
           <p>{L(B("By proceeding, you affirm your understanding and acceptance of our ", "继续即表示您已理解并接受我们的"))}<button type="button" className="lnk" onClick={() => openDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(", which sets out the rules and expectations governing your use of our services.", "，其中规定了您使用我们服务时适用的规则与要求。"))}</p>
           <a href={HELP_URL} target={api.PREVIEW ? "_blank" : undefined} rel="noopener">{L(B("Need help signing in?", "登录遇到问题？"))}</a>
         </div>
       )}
-      {api.PREVIEW && <p className="gate-preview">{step === "code"
+      {api.PREVIEW && <p className="gate-preview">{step === "phonecode" ? L(B("No text is sent here. The code is 123456.", "这里不会发送短信，验证码是 123456。")) : step === "code"
         ? L(B("No email is sent here. The code is 123456.", "这里不会发送邮件，验证码是 123456。"))
         : L(B("Accounts here are kept in this browser. Any email and password work; an @placetta.com email signs you in as the Placetta filing team.", "这里的账户保存在此浏览器中。任意邮箱和密码都可以；使用 @placetta.com 邮箱会以快哉申报团队身份登录。"))}</p>}
     </div>
@@ -441,4 +490,8 @@ export function CloudRoot() {
       {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Try again", "重试"))}</button></div>}
     </Frame>
   );
+}
+
+function PhoneMark() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5" /><path d="M10.5 18.5h3" /></svg>;
 }

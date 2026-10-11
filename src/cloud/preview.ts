@@ -338,7 +338,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
 async function auth(req: Request, url: URL): Promise<Response> {
   const p = url.pathname.replace("/auth/v1", "");
   const body = req.method === "GET" || req.method === "DELETE" ? {} : await req.json().catch(() => ({})) as Record<string, string>;
-  if (p === "/settings") return json({ external: { email: true, google: false, azure: false }, disable_signup: false });
+  if (p === "/settings") return json({ external: { email: true, phone: true, google: false, azure: false }, disable_signup: false });
   if (p === "/otp") return json({});
   if (p === "/signup") {
     const email = String(body.email ?? "").trim().toLowerCase();
@@ -349,7 +349,7 @@ async function auth(req: Request, url: URL): Promise<Response> {
   }
   if (p === "/verify") {
     if (String(body.token) !== PREVIEW_CODE) return json({ code: 403, error_code: "otp_expired", msg: `That code didn't work. In the preview it's ${PREVIEW_CODE}.` }, 403);
-    const email = String(body.email ?? "").trim().toLowerCase();
+    const email = String(body.email ?? (body.phone ? `${String(body.phone).replace(/\D/g, "")}@phone.preview` : "")).trim().toLowerCase();
     let u = db.users.find(x => x.email === email);
     if (!u) { u = { id: uuid(), email, created_at: now() }; db.users.push(u); }
     return json(session(u.id));
