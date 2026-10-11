@@ -4076,7 +4076,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
 (function inArtInit(){
   const cv = document.getElementById("inCv"); if (!cv) return;
   const g = cv.getContext("2d"), mk = document.createElement("canvas"), mg = mk.getContext("2d", {willReadFrequently: true});
-  let looping = false, kickUntil = 0, W = 0, H = 0, dpr = 1, cell = 14, cols = 0, rows = 0, sc = 1, ox = 0, oy = 0, cur = -1, tiles = [], tA = 0, run = false, t0 = performance.now();
+  let looping = false, kickUntil = 0, W = 0, H = 0, dpr = 1, baseCell = 10, cell = 14, cols = 0, rows = 0, sc = 1, ox = 0, oy = 0, cur = -1, tiles = [], tA = 0, run = false, t0 = performance.now();
   const R = "rgb(255,0,0)", Y = "rgb(255,255,0)", B = "rgb(0,0,255)", J = "rgb(0,255,0)", G = "rgb(255,0,255)", S = "rgb(0,255,255)", D = "rgb(0,0,100)";
   const rr = (x, y, w, h, r, c) => { mg.fillStyle = c; mg.beginPath(); mg.roundRect(x, y, w, h, r); mg.fill(); };
   const ln = (pts, w, c) => { mg.strokeStyle = c; mg.lineWidth = w; mg.lineCap = mg.lineJoin = "round"; mg.beginPath(); pts.forEach(([x, y], i) => i ? mg.lineTo(x, y) : mg.moveTo(x, y)); mg.stroke(); };
@@ -4157,7 +4157,23 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     for (let y = 0; y < 210; y++) for (let x = 0; x < 500; x++) if (d[(y * 500 + x) * 4 + 3] > 60) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
     return BB[k] = [x0 * 2, y0 * 2, (x1 - x0 + 1) * 2, (y1 - y0 + 1) * 2];
   }
+  // game studios: tiles sampled straight from the photo, each tile its own shade, on a finer grid
+  const sceneImg = new Image(); sceneImg.decoding = "async";
+  sceneImg.onload = () => { if (cur === 3) { tiles = []; cur = -1; go(3); } };
+  sceneImg.src = "media/industries/game-studios-bw.jpg";
+  function sceneCells(){
+    const iw = sceneImg.naturalWidth, ih = sceneImg.naturalHeight, ah = Math.round(rows * .82), f = Math.max(cols / iw, ah / ih);
+    mk.width = cols; mk.height = ah; mg.setTransform(1, 0, 0, 1, 0, 0); mg.imageSmoothingQuality = "high";
+    mg.drawImage(sceneImg, (cols - iw * f) / 2, (ah - ih * f) / 2, iw * f, ih * f);
+    const d = mg.getImageData(0, 0, cols, ah).data, out = [];
+    for (let r = 0; r < ah; r++) for (let c = 0; c < cols; c++) {
+      const i = (r * cols + c) * 4, v = (d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11) / 255;
+      const w = Math.min(1, Math.max(0, (v - .035) / .46)); if (w > .05) out.push({c, r, ty: 7, lum: Math.pow(w, 1.15)});   // levels: the photo's blacks to the navy, its highlights to white
+    }
+    return out;
+  }
   function cells(k){
+    if (k === 3 && sceneImg.naturalWidth) return sceneCells();
     const big = k === 2, scene = k === 3;   // the robot and the game scene are traced from photos and need more tiles
     const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * (scene ? 1 : .78), ah = rows * (scene ? .8 : big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
     const fx = (cols - bw * f) / 2 - bx * f, fy = rows * (scene ? 0 : big ? .04 : cols < 60 ? .1 : .12) + (ah - bh * f) / 2 - by * f;
@@ -4174,18 +4190,20 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   const ease = u => u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
   function go(k){
     if (!cols) return;
+    const want = k === 3 ? Math.max(4, Math.round(baseCell * .55)) : baseCell;
+    if (want !== cell) { cell = want; cols = Math.floor(W / cell); rows = Math.floor(H / cell); tiles = []; }
     const T = cells(k); cur = k; tA = performance.now();
     T.sort((a, b) => a.c - b.c || a.r - b.r);
     const live = tiles.filter(x => x.out === 0).sort((a, b) => a.tc - b.tc || a.tr - b.tr), next = [];
     T.forEach((d, i) => {
       const src = live.length ? live[Math.floor(i * live.length / T.length)] : null;
-      next.push({fc: src ? src.c : d.c + (Math.random() - .5) * 8, fr: src ? src.r : rows + 2 + Math.random() * 6, c: 0, r: 0, tc: d.c, tr: d.r, ty: d.ty, fty: src ? src.ty : d.ty, j: Math.random(), out: 0, a0: src ? 1 : 0});
+      next.push({fc: src ? src.c : d.c + (Math.random() - .5) * 8, fr: src ? src.r : rows + 2 + Math.random() * 6, c: 0, r: 0, tc: d.c, tr: d.r, ty: d.ty, fty: src ? src.ty : d.ty, lum: d.lum, flum: src ? src.lum : d.lum, j: Math.random(), out: 0, a0: src ? 1 : 0});
     });
     tiles = next; kick();
   }
   function size(){
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
-    cell = W < 640 ? 7 : W < 900 ? 8 : 10; cols = Math.floor(W / cell); rows = Math.floor(H / cell);
+    baseCell = W < 640 ? 7 : W < 900 ? 8 : 10; cell = cur === 3 ? Math.max(4, Math.round(baseCell * .55)) : baseCell; cols = Math.floor(W / cell); rows = Math.floor(H / cell);
     cv.width = W * dpr; cv.height = H * dpr;
     sc = Math.min(cols / 1000, rows / 420) * .84; ox = (cols - 1000 * sc) / 2; oy = (rows - 420 * sc) / 2 - rows * .06;
     if (cur >= 0 && !PHOTO[cur]) { const k = cur; tiles = []; go(k); }
@@ -4196,13 +4214,18 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     const t = RM ? 0 : (now - t0) / 1000, u0 = RM ? 1 : Math.min(1, (now - tA) / 1100);
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H);
     for (let i = 0; i < 60; i++) { const z = .4 + (i % 5) * .15, px = ((i * 97.3 + t * 18 * z) % (W + 40)) - 20, py = (i * 53.7) % H; g.fillStyle = `rgba(164,200,225,${(.04 + z * .05).toFixed(3)})`; g.fillRect(px, py, 2, 2); }
-    const gx = (W - cols * cell) / 2, gy = (H - rows * cell) / 2, s = cell - 1.5;
+    const gx = (W - cols * cell) / 2, gy = (H - rows * cell) / 2, s = cell - (cell < 7 ? 1 : 1.5);
     for (const x of tiles) {
       const u = ease(Math.min(1, Math.max(0, (u0 * 1.35 - x.j * .35)))) ;
       const c = x.fc + (x.tc - x.fc) * u, r = x.fr + (x.tr - x.fr) * u + (u === 1 && !RM ? Math.sin(t * 1.6 + x.tc * .18) * .12 : 0);
-      const a = x.a0 + (1 - x.a0) * u, ty = u > .5 ? x.ty : x.fty, base = COL[ty];
-      const light = ty === 1 || ty === 4 ? 0 : ty === 3 || ty === 6 ? 8 : (1 - x.tr / rows) * 30 + 22 * Math.max(0, Math.sin(t * 1.2 - x.tc * .12));
-      g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, base[0] + light)},${Math.min(255, base[1] + light)},${Math.min(255, base[2] + light * .8)})`;
+      const a = x.a0 + (1 - x.a0) * u, ty = u > .5 ? x.ty : x.fty;
+      if (ty === 7) {   // a photo tile: its own shade, cool grey from the navy up to near white
+        const v = (u > .5 ? x.lum : x.flum) ?? .6, sh = 5 * Math.max(0, Math.sin(t * 1.2 - x.tc * .08));
+        g.globalAlpha = a; g.fillStyle = `rgb(${Math.round(22 + 226 * v + sh)},${Math.round(32 + 216 * v + sh)},${Math.round(54 + 196 * v + sh)})`;
+      } else {
+        const base = COL[ty], light = ty === 1 || ty === 4 ? 0 : ty === 3 || ty === 6 ? 8 : (1 - x.tr / rows) * 30 + 22 * Math.max(0, Math.sin(t * 1.2 - x.tc * .12));
+        g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, base[0] + light)},${Math.min(255, base[1] + light)},${Math.min(255, base[2] + light * .8)})`;
+      }
       g.beginPath(); g.roundRect(gx + c * cell, gy + r * cell, s, s, Math.min(3, s / 4)); g.fill();
     }
     g.globalAlpha = 1;
