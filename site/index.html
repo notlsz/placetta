@@ -2068,6 +2068,25 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .jbt{background:#fff;border:1px dashed #D3D9E3}
 .tstab .tsres{display:block;margin-top:2px;font-style:normal;font-size:12px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
 .tstab[aria-selected="false"] .tsres{color:var(--ink2)}
+
+/* proof band: the team's record as Alven-style numbers above the stories, no rules */
+.pfrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 20px;margin:4px 0 40px}
+@media (min-width:1024px){.pfrow{grid-template-columns:repeat(4,minmax(0,1fr));gap:32px;margin:8px 0 56px}}
+.pfrow div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pfrow b{font-family:var(--serif);font-weight:300;font-size:40px;line-height:1;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+@media (min-width:1024px){.pfrow b{font-size:56px}}
+html[lang="zh-CN"] .pfrow b{font-family:var(--zhserif);font-weight:400}
+.pfrow span{max-width:230px;font-size:13.5px;line-height:1.4;color:var(--ink2)}
+/* security: what is true today, in plain words */
+#cn .cnsec{margin-top:72px}
+#cn .cnsec .il{gap:14px}
+#cn .seclink{display:inline-block;margin-top:0;font-size:14px;color:var(--gs-d,#3B5F8E);text-decoration:underline;text-underline-offset:3px}
+#cn .secl{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;width:100%;margin:0;padding:0;list-style:none}
+@media (min-width:768px){#cn .secl{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+@media (min-width:1280px){#cn .secl{width:850px}}
+#cn .secl li{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:12px;background:var(--card);font-size:14.5px;line-height:1.4;color:var(--ink)}
+#cn .secl svg{flex:none;margin-top:1px}
+@media (max-width:1023px){#cn .cnsec{margin-top:48px}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2201,6 +2220,12 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 <section class="sec rv" data-rv="up" id="case" aria-labelledby="caseH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="caseH" data-i18n="proof.h">Brands open sooner with Placetta.</h2><p class="sub" data-i18n="proof.sub">Operators in their own words, and the entry plans we map for brands like theirs.</p></div>
+    <div class="pfrow" role="list" aria-label="Track record" data-i18n-aria="aria.proof">
+      <div role="listitem"><b>31,000+</b><span data-i18n="pf.s1">businesses served by our team since 2016</span></div>
+      <div role="listitem"><b>3+</b><span data-i18n="pf.s2b">new US businesses served by our team each day, on average</span></div>
+      <div role="listitem"><b>50</b><span data-i18n="pf.s3">US states covered, plus 170+ countries</span></div>
+      <div role="listitem"><b data-i18n="pf.n4">5 months</b><span data-i18n="pf.s4">saved in approval time for CHAGEE</span></div>
+    </div>
     <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
     <div class="tsgrid" id="tsGrid"></div>
     <div class="cshd">
@@ -2484,6 +2509,10 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
         <div class="tile"><p data-i18n="trust.ap">Your approval, every time</p><p class="tsub" data-i18n="trust.3s">Nothing is filed until you approve it, and every value shows the source it came from.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="8" width="32" height="40" rx="4"/><path d="M20 18h16M20 25h16M20 32h8"/><path d="m29 39 4 4 8-9"/></svg></div></div>
       </div>
     </div>
+    <div class="irow cnsec">
+      <div class="il"><h2 class="t28" data-i18n="sec.h">Security</h2><a class="seclink" href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a></div>
+      <div class="ir"><ul class="secl"><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.1">Agency logins encrypted in a vault</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.2">Every use of a login is logged</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.3">A full audit trail of every action</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.4">Nothing filed, paid or sent without your approval</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.5">Payments run through Stripe, and we never see full card numbers</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.6">Your content is never sold or used to train AI models</span></li></ul></div>
+    </div>
   </div>
 </section>
 
@@ -2745,7 +2774,7 @@ en:{
  "f3.h":"Kept current after you open", "f3.p":"Renewal dates, inspections and rule changes, tracked for every location.", "f3.r1":"Health permit", "f3.r1d":"Due in 30 days", "f3.r2":"Business tax certificate", "f3.r2d":"Renews Jan 2027", "f3.r3":"Fire inspection", "f3.r3d":"Due Jun 2027", "f3.r4":"New city rule on menu labels", "f3.r4d":"Action needed", "f3.t":"Health permit renewal filed", "f3.ts":"Santa Clara County DEH, just now",
  "feat.note":"Product screens show sample data.",
  "mon.h2":"Rules change after you open.<br>We tell you what to do.",
- "proof.h":"Brands open sooner with Placetta.", "proof.sub":"Operators in their own words, and the entry plans we map for brands like theirs.",
+ "proof.h":"Brands open sooner with Placetta.", "pf.s2b":"new US businesses served by our team each day, on average", "sec.h":"Security", "sec.link":"Read our privacy policy", "sec.1":"Agency logins encrypted in a vault", "sec.2":"Every use of a login is logged", "sec.3":"A full audit trail of every action", "sec.4":"Nothing filed, paid or sent without your approval", "sec.5":"Payments run through Stripe, and we never see full card numbers", "sec.6":"Your content is never sold or used to train AI models", "proof.sub":"Operators in their own words, and the entry plans we map for brands like theirs.",
  "price.sub":"$149 per location a month, billed yearly. Headquarters signs once, and each franchisee pays for its own stores.",
  "faq.sub":"Something else? Email <a href=\"mailto:support@placetta.com\">support@placetta.com</a>."
 },
@@ -2828,7 +2857,7 @@ zh:{
  "f3.h":"开业之后，持续合规", "f3.p":"所有门店的续期日期、检查和规则变化，全部跟踪。", "f3.r1":"卫生许可", "f3.r1d":"30 天后到期", "f3.r2":"营业税证书", "f3.r2d":"2027年1月续期", "f3.r3":"消防年检", "f3.r3d":"2027年6月到期", "f3.r4":"市里新规：菜单标签", "f3.r4d":"需要处理", "f3.t":"卫生许可续期已提交", "f3.ts":"圣克拉拉县环境卫生局，刚刚",
  "feat.note":"产品界面中的数据均为示例。",
  "mon.h2":"开店之后，规则仍在变化。<br>我们告诉您该怎么做。",
- "proof.h":"品牌借助快哉，更早开业。", "proof.sub":"听听加盟商怎么说，再看看我们为同类品牌梳理的开店计划。",
+ "proof.h":"品牌借助快哉，更早开业。", "pf.s2b":"我们团队平均每天服务的美国新企业", "sec.h":"数据安全", "sec.link":"阅读隐私政策", "sec.1":"政府网站登录信息加密存放于保险库", "sec.2":"每次使用登录信息都有记录", "sec.3":"每一步操作都有完整审计记录", "sec.4":"未经您批准，不提交、不付款、不发送", "sec.5":"付款由 Stripe 处理，我们看不到完整卡号", "sec.6":"您的内容绝不出售，也不用于训练 AI 模型", "proof.sub":"听听加盟商怎么说，再看看我们为同类品牌梳理的开店计划。",
  "price.sub":"每家门店每月 149 美元，按年计费。总部签约一次，每位加盟商为自己的门店付费。",
  "faq.sub":"还有其他问题？请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"
 }};
