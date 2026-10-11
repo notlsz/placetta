@@ -4074,7 +4074,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   const cv = document.getElementById("inCv"); if (!cv) return;
   const g = cv.getContext("2d"), mk = document.createElement("canvas"), mg = mk.getContext("2d", {willReadFrequently: true});
   let looping = false, kickUntil = 0, W = 0, H = 0, dpr = 1, cell = 14, cols = 0, rows = 0, sc = 1, ox = 0, oy = 0, cur = -1, tiles = [], tA = 0, run = false, t0 = performance.now();
-  const R = "rgb(255,0,0)", Y = "rgb(255,255,0)", B = "rgb(0,0,255)";
+  const R = "rgb(255,0,0)", Y = "rgb(255,255,0)", B = "rgb(0,0,255)", J = "rgb(0,255,0)", G = "rgb(255,0,255)", S = "rgb(0,255,255)";
   const rr = (x, y, w, h, r, c) => { mg.fillStyle = c; mg.beginPath(); mg.roundRect(x, y, w, h, r); mg.fill(); };
   const ln = (pts, w, c) => { mg.strokeStyle = c; mg.lineWidth = w; mg.lineCap = mg.lineJoin = "round"; mg.beginPath(); pts.forEach(([x, y], i) => i ? mg.lineTo(x, y) : mg.moveTo(x, y)); mg.stroke(); };
   const ci = (x, y, r, c) => { mg.fillStyle = c; mg.beginPath(); mg.arc(x, y, r, 0, 7); mg.fill(); };
@@ -4090,10 +4090,11 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       poly([[330, 150], [670, 150], [700, 385], [300, 385]], R); ln([[330, 150], [670, 150]], 8, Y);
       mg.strokeStyle = R; mg.lineWidth = 24; mg.beginPath(); mg.arc(500, 150, 92, Math.PI, 0); mg.stroke();
       ci(420, 190, 9, Y); ci(580, 190, 9, Y); rr(440, 255, 120, 60, 10, B); },
-    () => { // a humanoid robot mid-kick, traced from its photo: a 128 x 128 grid, run-length coded by row
-      const C = {r: R, y: R, b: B}, N = 128, z = 420 / N, x0 = 290;   // dark joints read as body on the navy
-      "128.|128.|128.|128.|128.|128.|69.4yr54.|36.b32.r4yr34.3r16.|10.r4y21.b.4r26.r6yr33.y3br14.|10.6y20.6r26.8y32.b2y4b13.|10.7y17.7r4.r4y17.10y30.ybr5b13.|10.8y15.5y2rb4.r8y13.6y4ryr26.3y8br11.|11.4y2r2y12.yr7y6.r8y12.12y25.5y6b2yr10.|11.5y2r2y4.b3.12y6.2b8y11.8y3r2y6.5r12.7y5b3y10.|12.5y2r3yry2r13yry4.3br8yrb10.3y5r3y5.r2b4r11.7y5b3y10.|13.5y2r4yr16y3r3b3r7yr5b7.3yr6y2.2r4br3br9.r7y4b4y10.|14.6yr3yr17y3rb6r4y3r8b4.9y4r3b8r7.2b4y5b5y10.|15.28y9rb7r6b5r9y4r2b10r6.10b6y10.|16.27y10r3b6r3b7r6y4ry14ry4.y8b2.5y10.|17.9y2.17y8r5b10r3b2r3yr3b18r10y6.3y11.|18.7y9.2y7.2y8r7b14ry2r6b16r9y20.|18.7y19.2y7r9bryry4ry3ryry6b15r2b3yr4y20.|19.5y20.3y6r13b3yry3rbryr5b16r2b7y20.|45.3y5r15b2r3yr3yr6b7rb3r3br2b7y20.|46.3y6r15b8yr5b6r3br8b5y21.|46.4y6r15b5yryr6b5r13b3y22.|47.3y6r16bry3r2yr6br16b3y22.|47.4y5r17b5ryr6br15b2ry23.|48.4y4r17b5r2yr5b2r14b2ry23.|49.3y5rbr2br12b5ryr5b2r13b4r23.|49.4y7r14b5r2yr14b4rb5r22.|50.4y7rbr11b5r2yr2b3r4b11r4b2r20.|51.y2r2y7r12b5r2yryrb2r2b6r3y7rbr20.|52.2y7r2yr11b5r4yr2br2br3y3r2yrb3rbrbr20.|52.r11y2b2y2r6b5r3y6r5y4rb3r3b2y20.|52.r11y2b2y5r2b7r4y3rbr4y2rb8r2y20.|52.12y2r3y14r2yr2brbr3yr4b2rbr2yr2y20.|52.23y8ry3rbrb4r4b4r3yr2y20.|53.4yr20y5r3y6r6br2br5y21.|53.4y2r20y5r3y3rb2r3br2b2r6y21.|54.8y3r3yr6y5ry2r5y3b11r3yr22.|55.6y2r2br7y7ry2r5ybrb8ryr27.|56.4y3r3br7y6r2y2r5yrb3r5y29.|56.3y5r3b7y5r12y4ry32.|56.2y6r3br7yr10y4r3y35.|57.2ry5r2br17y2ry2r2y36.|57.2ry5r2b2r14yr2.2r3y37.|58.3y8r11y48.|58.3y7r5yryry51.|59.2y2r9y56.|59.14y55.|60.5y6r3y54.|61.4y7r3y53.|62.y3r3b4r3y52.|62.2y4rb5r2y52.|63.2yry7r2y52.|63.3y9ry52.|63.3y9ry52.|63.2y11r52.|64.2y10r52.|64.5r2b5r52.|64.7rb4r52.|64.2y4r3b3r52.|63.ryr7by2r52.|63.2r8bry53.|63.2r8b2r53.|64.r8br54.|64.r8br54.|64.r8br54.|64.r8br54.|64.r8b55.|64.2r7b55.|64.2r7b55.|64.3r6b55.|64.4r5b55.|64.7r2b55.|64.7r2b55.|64.7r2b55.|64.9r55.|64.2ry5rb55.|64.r2y5rb55.|64.4yry3r55.|63.7y3r55.|63.7y2ry55.|63.8yry55.|63.8yry55.|63.4y3r3y55.|63.3y6ry55.|63.3y6ry55.|63.3y7r55.|64.y7ry55.|65.8r55.|64.8ry55.|64.8ry55.|64.8ry55.|64.10r54.|64.10r54.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|66.6r56.|66.6r56.|67.5r56.|67.5y56.|67.5y56.|67.4yr56.|67.5y56.|67.5y56.|67.5y56.|67.5y56.|67.5y56.|67.6y55.|67.6y55.|67.6y55.|66.7y55.|66.7yr54.|66.7y55.|65.8y55.|65.8y55.|66.5y57.|128.|128.|128.".split("|").forEach((row, gy) => { let gx = 0;
-        for (const m of row.matchAll(/(\d*)([.ryb])/g)) { const n = +(m[1] || 1);
+    () => { // the humanoid robot mid-kick, traced from its photo: 128 x 128, run-length coded by row.
+      // r = brushed metal, b = highlight, j = black joints and gloves, g = the glowing visor
+      const C = {r: S, b: B, j: J, g: G}, N = 128, z = 420 / N, x0 = 290;
+      "128.|128.|128.|128.|128.|128.|69.4jr54.|12.j23.b32.r4jr34.4r15.|10.r4j21.b.4r26.8j32.rj2rgr14.|10.6j19.b6rb25.8j32.r2j2rgr13.|10.7j17.j6r4.r5j16.10j30.jgr5g13.|10.8j14.r5j2rb4.r9j12.6jrjr3j26.3j6gb2r11.|11.4j2r2j12.9j6.r8j12.12j25.5j7gjr10.|11.5jr4j3.b3.12j6.2b8j11.9jr3j6.5r12.7j5g3j10.|12.5j2r3jrj2r15j4.3br8j2r9.4j5r3j4.2rb5r11.7j5g3j10.|13.6jr4jr16j3r3b3r7jr6b6.3jr6j2.2r4br3br9.r8j4g3j10.|14.6jr21j3rb5r5j3r8b4.9j4r3b8r7.b2g3j6g4j10.|15.29j8r2br2j3r5b6r9j2rjr2b11r5.r9g6j10.|16.27j10r3brj4r3b3rj3r7j3r2j13rj4.j7gj2.5j10.|17.9j2.17j8r5b10r3b2r3jr3b17r11j6.3j11.|18.7j8.3j2.j4.3j7r7b14r2jr6b15r10j20.|18.7j19.3j6r9b4j4rj3r3j6b16r4jr4j20.|19.5j20.3j6r13b3jrj3rbrjr5b16r9j20.|21.j23.4j4r15bjr8j6b11r2b3r8j20.|46.3j6r15b8jr5b8rbr5br7j21.|46.4j6r15b5jrjr6b6r10b2r3j22.|47.4j5r3br12b3j2r2jr6b3r13br3j22.|47.4j5r17b5rjr6b2r14b2rj23.|48.4j4r17b5r2jr5b2r14b2rj23.|48.5j4rbr2br11b6rjr5b3r11b4rj23.|49.5j6r14b5r2jr5br8b4rb5r22.|50.4j7rbr11b5r2jr2b2rj4b17r20.|51.j2r2j6rj12b5r2jrjrb2r2b3rj2r3j9r20.|52.2j6r3jr11b5r4jr2brb2r3jr4jrb3rb3r20.|52.12j2b3jr5b6r3j6r5j8r3b2j20.|51.2r11j2b3j4rb8r4j5r4j2rb7r3j20.|52.13jr3j14r2j2rb3r3jr3b3rbr2jr2j20.|52.24j7rjrjrb6r4b3r7j20.|53.4jr20j4r4j6r6br2b6j21.|53.4j2r20j4r4j3rb2r3br2b2r6j21.|54.8j3r3jr6j4r2jr6jr2b9r5jr22.|55.6j2r2br8j5r9j2rb7r2jr27.|56.5j2r3br7j5r10jrb3r5j29.|56.4j4r3b8j3r13jr2jrj32.|56.2j7r2br18jr6j35.|57.jrj5r2br17jr2jr3jr35.|57.r2j6rbr16j2.5j37.|58.3j8r11j48.|58.3j6r10jr50.|59.3jr9j56.|59.14j55.|60.5j6r4j53.|61.4j7r3j53.|62.j3r3b4r3j52.|62.2j4rb4r3j52.|63.2jrj7r2j52.|63.4j7r2j52.|63.3j9rj52.|63.2jrj9r52.|64.2j10r52.|64.5rb6r52.|64.6r2b4r52.|64.2j4r3b3r52.|63.rjr7bj2r52.|63.jr8b2j53.|63.2r8b2r53.|64.r8br54.|64.r8br54.|64.r8br54.|64.r8br54.|64.r8br54.|64.2r7b55.|64.2r7b55.|64.3r6b55.|64.5r4b55.|64.7r2b55.|64.7r2b55.|64.7rbr55.|64.9r55.|64.2rj5rb55.|64.r3j4rb55.|64.6j3r55.|63.7j3r55.|63.8jrj55.|63.8jrj55.|63.8jrj55.|63.4j2r4j55.|63.3j5r2j55.|63.3j6rj55.|63.3j7r55.|64.2j5r2j55.|65.7rj55.|64.8rj55.|64.8rj55.|64.8r2j54.|64.8rjr54.|64.10r54.|64.9r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|66.7r55.|66.6r56.|67.4rj56.|67.5j56.|67.5j56.|67.4jr56.|67.5j56.|67.5j56.|67.5j56.|67.5j56.|67.5j56.|67.6j55.|67.6j55.|67.6j55.|66.7j55.|66.8j54.|66.7j55.|65.8j55.|65.8j55.|66.5j57.|128.|128.|128.".split("|").forEach((row, gy) => { let gx = 0;
+        for (const m of row.matchAll(/(\d*)([.rbjg])/g)) { const n = +(m[1] || 1);
           if (m[2] !== ".") { mg.fillStyle = C[m[2]]; mg.fillRect(x0 + gx * z, gy * z, n * z + .5, z + .5); } gx += n; } }); },
     () => { // an open shipping box, products peeking out, a shipping label
       poly([[420, 160], [455, 52], [775, 52], [740, 160]], R);
@@ -4155,9 +4156,9 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     mg.setTransform(f * SS, 0, 0, f * SS, fx * SS, fy * SS); SH[k]();
     const d = mg.getImageData(0, 0, mk.width, mk.height).data, out = [];
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      let n = 0, red = 0, yel = 0, blu = 0;
-      for (let y = 0; y < SS; y++) for (let x = 0; x < SS; x++) { const i = (((r * SS + y) * cols * SS) + c * SS + x) * 4; if (d[i + 3] > 100) { n++; if (d[i] > 128 && d[i + 1] > 128) yel++; else if (d[i + 2] > 128) blu++; else red++; } }
-      if (n >= 5) out.push({c, r, ty: yel > red && yel >= blu ? 1 : blu > red ? 2 : 0});
+      let n = 0, red = 0, yel = 0, blu = 0, joi = 0, glo = 0, sil = 0;
+      for (let y = 0; y < SS; y++) for (let x = 0; x < SS; x++) { const i = (((r * SS + y) * cols * SS) + c * SS + x) * 4; if (d[i + 3] > 100) { n++; if (d[i] > 128 && d[i + 1] > 128) yel++; else if (d[i] > 128 && d[i + 2] > 128) glo++; else if (d[i + 1] > 128 && d[i + 2] > 128) sil++; else if (d[i + 2] > 128) blu++; else if (d[i + 1] > 128) joi++; else red++; } }
+      if (n >= 5) out.push({c, r, ty: glo >= 2 ? 4 : yel > red && yel >= blu ? 1 : sil >= joi && sil >= blu && sil > red ? 5 : joi > red && joi >= blu ? 3 : blu > red ? 2 : 0});
     }
     return out;
   }
@@ -4180,7 +4181,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     sc = Math.min(cols / 1000, rows / 420) * .84; ox = (cols - 1000 * sc) / 2; oy = (rows - 420 * sc) / 2 - rows * .06;
     if (cur >= 0 && !PHOTO[cur]) { const k = cur; tiles = []; go(k); }
   }
-  const COL = [[115, 153, 198], [10, 20, 38], [214, 228, 242]];
+  const COL = [[115, 153, 198], [10, 20, 38], [214, 228, 242], [92, 104, 126], [64, 205, 255], [172, 188, 208]];   // body, dark detail, light, graphite joint, visor glow, brushed metal
   function frame(now){
     if (!W) return;
     const t = RM ? 0 : (now - t0) / 1000, u0 = RM ? 1 : Math.min(1, (now - tA) / 1100);
@@ -4191,7 +4192,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       const u = ease(Math.min(1, Math.max(0, (u0 * 1.35 - x.j * .35)))) ;
       const c = x.fc + (x.tc - x.fc) * u, r = x.fr + (x.tr - x.fr) * u + (u === 1 && !RM ? Math.sin(t * 1.6 + x.tc * .18) * .12 : 0);
       const a = x.a0 + (1 - x.a0) * u, ty = u > .5 ? x.ty : x.fty, base = COL[ty];
-      const light = ty === 1 ? 0 : (1 - x.tr / rows) * 30 + 22 * Math.max(0, Math.sin(t * 1.2 - x.tc * .12));
+      const light = ty === 1 || ty === 4 ? 0 : ty === 3 ? 8 : (1 - x.tr / rows) * 30 + 22 * Math.max(0, Math.sin(t * 1.2 - x.tc * .12));
       g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, base[0] + light)},${Math.min(255, base[1] + light)},${Math.min(255, base[2] + light * .8)})`;
       g.beginPath(); g.roundRect(gx + c * cell, gy + r * cell, s, s, Math.min(3, s / 4)); g.fill();
     }
