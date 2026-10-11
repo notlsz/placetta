@@ -1977,6 +1977,27 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .inphoto.incover{left:0;top:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 40%;transform:scale(1.04);filter:none}
 .inphoto.incover.on{transform:scale(1)}
 @media (max-width:1023px){.inphoto.incover{height:100%;top:0}}
+/* the twin dashboards, Alven-quiet: hairline card, plain status text with a dot, one warning line */
+#cn .dash{padding:16px 18px 14px!important;border:1px solid #ECEEF2!important;border-radius:16px!important;background:#fff;box-shadow:0 20px 44px rgba(15,27,51,.08)!important;gap:0!important}
+#cn .dh2{display:flex;align-items:center;gap:10px;padding-bottom:12px}
+#cn .dav{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;letter-spacing:.02em}
+#cn .dwho{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+#cn .dwho b{font-size:13.5px;font-weight:600;color:var(--ink)}
+#cn .dwho small{font-size:11.5px;color:var(--muted)}
+#cn .dlive{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#2F7A4C}
+#cn .dlive i{width:6px;height:6px;border-radius:50%;background:#3F9A62;box-shadow:0 0 0 3px rgba(63,154,98,.15)}
+#cn .dprog{display:flex;align-items:center;gap:10px;padding:10px 0 6px;border-top:1px solid #F0F2F5;font-size:11.5px;color:var(--ink2)}
+#cn .dprog span{flex:none}
+#cn .dprog i{flex:1;height:4px;border-radius:999px;background:#EEF1F5;overflow:hidden}
+#cn .dprog b{display:block;height:100%;border-radius:inherit;background:var(--ink)}
+#cn .dr2{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #F3F4F7;font-size:13px;color:var(--ink)}
+#cn .dr2 span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cn .dst{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2)}
+#cn .dst i{width:6px;height:6px;border-radius:50%}
+#cn .dst.s-d i{background:#3F9A62}#cn .dst.s-r i{background:#D9932B}#cn .dst.s-b i{background:#C9574A}
+#cn .dst.s-b{color:#A9473B}
+#cn .drk{display:flex;align-items:flex-start;gap:8px;padding-top:11px;font-size:12px;line-height:1.4;color:#8A5A12}
+#cn .drk svg{flex:none;margin-top:1px}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3838,10 +3859,14 @@ const DASHROWS = [
 const DASHPILL = {d:["p-d","Approved","已完成"], r:["p-r","In review","审核中"], b:["p-b","Blocked","等待验收"]};
 function renderDash(){
   if (!document.getElementById("dashA")) return;
-  const i = L();
-  const body = DASHROWS.map(([n, st]) => `<div class="dr"><span>${n[i]}</span><span class="pill ${DASHPILL[st][0]}">${DASHPILL[st][1 + i]}</span></div>`).join("") + `<div class="risk">${t("dash.risk")}</div>`;
-  document.getElementById("dashA").innerHTML = `<div class="dh"><b>${t("dash.a")}</b><span>${t("dash.at")}</span></div>` + body;
-  document.getElementById("dashB").innerHTML = `<div class="dh"><b>${t("dash.b")}</b><span>${t("dash.bt")}</span></div>` + body;
+  // the same dashboard, live in two offices: Shenzhen always reads it in Chinese, New York in English
+  const T2 = (k, j) => (j ? T.zh : T.en)[k], done = DASHROWS.filter(r => r[1] === "d").length;
+  const card = (j, name, time, av) => `<div class="dh2"><span class="dav">${av}</span><span class="dwho"><b>${T2(name, j)}</b><small>${T2(time, j)} · ${j ? "中文" : "English"}</small></span><span class="dlive"><i></i>${j ? "实时同步" : "Synced"}</span></div>` +
+    `<div class="dprog"><span>${j ? `已完成 ${done}/${DASHROWS.length}` : `${done} of ${DASHROWS.length} approved`}</span><i><b style="width:${Math.round(done / DASHROWS.length * 100)}%"></b></i></div>` +
+    DASHROWS.map(([n, st]) => `<div class="dr2"><span>${n[j]}</span><span class="dst s-${st}"><i></i>${DASHPILL[st][1 + j]}</span></div>`).join("") +
+    `<div class="drk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20zM12 10v4M12 17h.01"/></svg><span>${T2("dash.risk", j).replace(/^(Risk flag: |风险提示：)/, "").replace(/^./, c => c.toUpperCase())}</span></div>`;
+  document.getElementById("dashA").innerHTML = card(1, "dash.a", "dash.at", "深");
+  document.getElementById("dashB").innerHTML = card(0, "dash.b", "dash.bt", "NY");
 }
 
 
