@@ -4090,15 +4090,11 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       poly([[330, 150], [670, 150], [700, 385], [300, 385]], R); ln([[330, 150], [670, 150]], 8, Y);
       mg.strokeStyle = R; mg.lineWidth = 24; mg.beginPath(); mg.arc(500, 150, 92, Math.PI, 0); mg.stroke();
       ci(420, 190, 9, Y); ci(580, 190, 9, Y); rr(440, 255, 120, 60, 10, B); },
-    () => { // a humanoid robot, waving
-      rr(452, 8, 96, 82, 34, R); rr(468, 34, 64, 24, 12, Y); rr(484, 86, 32, 16, 6, R);
-      rr(420, 100, 160, 128, 44, R); rr(462, 126, 76, 40, 14, B);
-      ci(420, 122, 26, R); ci(580, 122, 26, R);
-      ln([[412, 132], [384, 198], [382, 262]], 30, R); ci(382, 272, 18, R);
-      ln([[588, 132], [646, 92], [664, 30]], 30, R); ci(666, 22, 18, R);
-      rr(438, 222, 124, 42, 16, R); ln([[438, 236], [562, 236]], 5, Y);
-      ln([[470, 258], [464, 330], [466, 396]], 34, R); ln([[530, 258], [536, 330], [534, 396]], 34, R);
-      ci(464, 330, 18, R); ci(536, 330, 18, R); rr(440, 392, 50, 22, 9, R); rr(510, 392, 50, 22, 9, R); },
+    () => { // a humanoid robot mid-kick, traced from its photo: a 128 x 128 grid, run-length coded by row
+      const C = {r: R, y: R, b: B}, N = 128, z = 420 / N, x0 = 290;   // dark joints read as body on the navy
+      "128.|128.|128.|128.|128.|128.|69.4yr54.|36.b32.r4yr34.3r16.|10.r4y21.b.4r26.r6yr33.y3br14.|10.6y20.6r26.8y32.b2y4b13.|10.7y17.7r4.r4y17.10y30.ybr5b13.|10.8y15.5y2rb4.r8y13.6y4ryr26.3y8br11.|11.4y2r2y12.yr7y6.r8y12.12y25.5y6b2yr10.|11.5y2r2y4.b3.12y6.2b8y11.8y3r2y6.5r12.7y5b3y10.|12.5y2r3yry2r13yry4.3br8yrb10.3y5r3y5.r2b4r11.7y5b3y10.|13.5y2r4yr16y3r3b3r7yr5b7.3yr6y2.2r4br3br9.r7y4b4y10.|14.6yr3yr17y3rb6r4y3r8b4.9y4r3b8r7.2b4y5b5y10.|15.28y9rb7r6b5r9y4r2b10r6.10b6y10.|16.27y10r3b6r3b7r6y4ry14ry4.y8b2.5y10.|17.9y2.17y8r5b10r3b2r3yr3b18r10y6.3y11.|18.7y9.2y7.2y8r7b14ry2r6b16r9y20.|18.7y19.2y7r9bryry4ry3ryry6b15r2b3yr4y20.|19.5y20.3y6r13b3yry3rbryr5b16r2b7y20.|45.3y5r15b2r3yr3yr6b7rb3r3br2b7y20.|46.3y6r15b8yr5b6r3br8b5y21.|46.4y6r15b5yryr6b5r13b3y22.|47.3y6r16bry3r2yr6br16b3y22.|47.4y5r17b5ryr6br15b2ry23.|48.4y4r17b5r2yr5b2r14b2ry23.|49.3y5rbr2br12b5ryr5b2r13b4r23.|49.4y7r14b5r2yr14b4rb5r22.|50.4y7rbr11b5r2yr2b3r4b11r4b2r20.|51.y2r2y7r12b5r2yryrb2r2b6r3y7rbr20.|52.2y7r2yr11b5r4yr2br2br3y3r2yrb3rbrbr20.|52.r11y2b2y2r6b5r3y6r5y4rb3r3b2y20.|52.r11y2b2y5r2b7r4y3rbr4y2rb8r2y20.|52.12y2r3y14r2yr2brbr3yr4b2rbr2yr2y20.|52.23y8ry3rbrb4r4b4r3yr2y20.|53.4yr20y5r3y6r6br2br5y21.|53.4y2r20y5r3y3rb2r3br2b2r6y21.|54.8y3r3yr6y5ry2r5y3b11r3yr22.|55.6y2r2br7y7ry2r5ybrb8ryr27.|56.4y3r3br7y6r2y2r5yrb3r5y29.|56.3y5r3b7y5r12y4ry32.|56.2y6r3br7yr10y4r3y35.|57.2ry5r2br17y2ry2r2y36.|57.2ry5r2b2r14yr2.2r3y37.|58.3y8r11y48.|58.3y7r5yryry51.|59.2y2r9y56.|59.14y55.|60.5y6r3y54.|61.4y7r3y53.|62.y3r3b4r3y52.|62.2y4rb5r2y52.|63.2yry7r2y52.|63.3y9ry52.|63.3y9ry52.|63.2y11r52.|64.2y10r52.|64.5r2b5r52.|64.7rb4r52.|64.2y4r3b3r52.|63.ryr7by2r52.|63.2r8bry53.|63.2r8b2r53.|64.r8br54.|64.r8br54.|64.r8br54.|64.r8br54.|64.r8b55.|64.2r7b55.|64.2r7b55.|64.3r6b55.|64.4r5b55.|64.7r2b55.|64.7r2b55.|64.7r2b55.|64.9r55.|64.2ry5rb55.|64.r2y5rb55.|64.4yry3r55.|63.7y3r55.|63.7y2ry55.|63.8yry55.|63.8yry55.|63.4y3r3y55.|63.3y6ry55.|63.3y6ry55.|63.3y7r55.|64.y7ry55.|65.8r55.|64.8ry55.|64.8ry55.|64.8ry55.|64.10r54.|64.10r54.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|66.6r56.|66.6r56.|67.5r56.|67.5y56.|67.5y56.|67.4yr56.|67.5y56.|67.5y56.|67.5y56.|67.5y56.|67.5y56.|67.6y55.|67.6y55.|67.6y55.|66.7y55.|66.7yr54.|66.7y55.|65.8y55.|65.8y55.|66.5y57.|128.|128.|128.".split("|").forEach((row, gy) => { let gx = 0;
+        for (const m of row.matchAll(/(\d*)([.ryb])/g)) { const n = +(m[1] || 1);
+          if (m[2] !== ".") { mg.fillStyle = C[m[2]]; mg.fillRect(x0 + gx * z, gy * z, n * z + .5, z + .5); } gx += n; } }); },
     () => { // stacked parcels
       rr(300, 225, 240, 160, 8, R); rr(545, 265, 180, 120, 8, R); rr(380, 105, 220, 116, 8, R);
       ln([[420, 225], [420, 385]], 9, Y); ln([[635, 265], [635, 385]], 9, Y); ln([[490, 105], [490, 221]], 9, Y);
@@ -4139,8 +4135,9 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     return BB[k] = [x0 * 2, y0 * 2, (x1 - x0 + 1) * 2, (y1 - y0 + 1) * 2];
   }
   function cells(k){
-    const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * .78, ah = rows * (cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
-    const fx = (cols - bw * f) / 2 - bx * f, fy = rows * (cols < 60 ? .1 : .12) + (ah - bh * f) / 2 - by * f;
+    const big = k === 2;   // the robot is traced from a photo and needs more tiles to read
+    const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * .78, ah = rows * (big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
+    const fx = (cols - bw * f) / 2 - bx * f, fy = rows * (big ? .04 : cols < 60 ? .1 : .12) + (ah - bh * f) / 2 - by * f;
     mk.width = cols * SS; mk.height = rows * SS; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, mk.width, mk.height);
     mg.setTransform(f * SS, 0, 0, f * SS, fx * SS, fy * SS); SH[k]();
     const d = mg.getImageData(0, 0, mk.width, mk.height).data, out = [];
