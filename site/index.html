@@ -4077,7 +4077,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   const cv = document.getElementById("inCv"); if (!cv) return;
   const g = cv.getContext("2d"), mk = document.createElement("canvas"), mg = mk.getContext("2d", {willReadFrequently: true});
   let looping = false, kickUntil = 0, W = 0, H = 0, dpr = 1, cell = 14, cols = 0, rows = 0, sc = 1, ox = 0, oy = 0, cur = -1, tiles = [], tA = 0, run = false, t0 = performance.now();
-  const R = "rgb(255,0,0)", Y = "rgb(255,255,0)", B = "rgb(0,0,255)", J = "rgb(0,255,0)", G = "rgb(255,0,255)", S = "rgb(0,255,255)";
+  const R = "rgb(255,0,0)", Y = "rgb(255,255,0)", B = "rgb(0,0,255)", J = "rgb(0,255,0)", G = "rgb(255,0,255)", S = "rgb(0,255,255)", D = "rgb(0,0,100)";
   const rr = (x, y, w, h, r, c) => { mg.fillStyle = c; mg.beginPath(); mg.roundRect(x, y, w, h, r); mg.fill(); };
   const ln = (pts, w, c) => { mg.strokeStyle = c; mg.lineWidth = w; mg.lineCap = mg.lineJoin = "round"; mg.beginPath(); pts.forEach(([x, y], i) => i ? mg.lineTo(x, y) : mg.moveTo(x, y)); mg.stroke(); };
   const ci = (x, y, r, c) => { mg.fillStyle = c; mg.beginPath(); mg.arc(x, y, r, 0, 7); mg.fill(); };
@@ -4099,15 +4099,12 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       "128.|128.|128.|128.|128.|128.|69.4jr54.|12.j23.b32.r4jr34.4r15.|10.r4j21.b.4r26.8j32.rj2rgr14.|10.6j19.b6rb25.8j32.r2j2rgr13.|10.7j17.j6r4.r5j16.10j30.jgr5g13.|10.8j14.r5j2rb4.r9j12.6jrjr3j26.3j6gb2r11.|11.4j2r2j12.9j6.r8j12.12j25.5j7gjr10.|11.5jr4j3.b3.12j6.2b8j11.9jr3j6.5r12.7j5g3j10.|12.5j2r3jrj2r15j4.3br8j2r9.4j5r3j4.2rb5r11.7j5g3j10.|13.6jr4jr16j3r3b3r7jr6b6.3jr6j2.2r4br3br9.r8j4g3j10.|14.6jr21j3rb5r5j3r8b4.9j4r3b8r7.b2g3j6g4j10.|15.29j8r2br2j3r5b6r9j2rjr2b11r5.r9g6j10.|16.27j10r3brj4r3b3rj3r7j3r2j13rj4.j7gj2.5j10.|17.9j2.17j8r5b10r3b2r3jr3b17r11j6.3j11.|18.7j8.3j2.j4.3j7r7b14r2jr6b15r10j20.|18.7j19.3j6r9b4j4rj3r3j6b16r4jr4j20.|19.5j20.3j6r13b3jrj3rbrjr5b16r9j20.|21.j23.4j4r15bjr8j6b11r2b3r8j20.|46.3j6r15b8jr5b8rbr5br7j21.|46.4j6r15b5jrjr6b6r10b2r3j22.|47.4j5r3br12b3j2r2jr6b3r13br3j22.|47.4j5r17b5rjr6b2r14b2rj23.|48.4j4r17b5r2jr5b2r14b2rj23.|48.5j4rbr2br11b6rjr5b3r11b4rj23.|49.5j6r14b5r2jr5br8b4rb5r22.|50.4j7rbr11b5r2jr2b2rj4b17r20.|51.j2r2j6rj12b5r2jrjrb2r2b3rj2r3j9r20.|52.2j6r3jr11b5r4jr2brb2r3jr4jrb3rb3r20.|52.12j2b3jr5b6r3j6r5j8r3b2j20.|51.2r11j2b3j4rb8r4j5r4j2rb7r3j20.|52.13jr3j14r2j2rb3r3jr3b3rbr2jr2j20.|52.24j7rjrjrb6r4b3r7j20.|53.4jr20j4r4j6r6br2b6j21.|53.4j2r20j4r4j3rb2r3br2b2r6j21.|54.8j3r3jr6j4r2jr6jr2b9r5jr22.|55.6j2r2br8j5r9j2rb7r2jr27.|56.5j2r3br7j5r10jrb3r5j29.|56.4j4r3b8j3r13jr2jrj32.|56.2j7r2br18jr6j35.|57.jrj5r2br17jr2jr3jr35.|57.r2j6rbr16j2.5j37.|58.3j8r11j48.|58.3j6r10jr50.|59.3jr9j56.|59.14j55.|60.5j6r4j53.|61.4j7r3j53.|62.j3r3b4r3j52.|62.2j4rb4r3j52.|63.2jrj7r2j52.|63.4j7r2j52.|63.3j9rj52.|63.2jrj9r52.|64.2j10r52.|64.5rb6r52.|64.6r2b4r52.|64.2j4r3b3r52.|63.rjr7bj2r52.|63.jr8b2j53.|63.2r8b2r53.|64.r8br54.|64.r8br54.|64.r8br54.|64.r8br54.|64.r8br54.|64.2r7b55.|64.2r7b55.|64.3r6b55.|64.5r4b55.|64.7r2b55.|64.7r2b55.|64.7rbr55.|64.9r55.|64.2rj5rb55.|64.r3j4rb55.|64.6j3r55.|63.7j3r55.|63.8jrj55.|63.8jrj55.|63.8jrj55.|63.4j2r4j55.|63.3j5r2j55.|63.3j6rj55.|63.3j7r55.|64.2j5r2j55.|65.7rj55.|64.8rj55.|64.8rj55.|64.8r2j54.|64.8rjr54.|64.10r54.|64.9r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|65.8r55.|66.7r55.|66.6r56.|67.4rj56.|67.5j56.|67.5j56.|67.4jr56.|67.5j56.|67.5j56.|67.5j56.|67.5j56.|67.5j56.|67.6j55.|67.6j55.|67.6j55.|66.7j55.|66.8j54.|66.7j55.|65.8j55.|65.8j55.|66.5j57.|128.|128.|128.".split("|").forEach((row, gy) => { let gx = 0;
         for (const m of row.matchAll(/(\d*)([.rbjg])/g)) { const n = +(m[1] || 1);
           if (m[2] !== ".") { mg.fillStyle = C[m[2]]; mg.fillRect(x0 + gx * z, gy * z, n * z + .5, z + .5); } gx += n; } }); },
-    () => { // a game controller with a few floating pixels
-      mg.fillStyle = R; mg.beginPath(); mg.moveTo(330, 150); mg.lineTo(670, 150); mg.bezierCurveTo(760, 150, 800, 210, 812, 280); mg.lineTo(828, 352);
-      mg.bezierCurveTo(840, 410, 770, 430, 735, 385); mg.lineTo(690, 322); mg.lineTo(310, 322); mg.lineTo(265, 385); mg.bezierCurveTo(230, 430, 160, 410, 172, 352);
-      mg.lineTo(188, 280); mg.bezierCurveTo(200, 210, 240, 150, 330, 150); mg.fill();
-      rr(318, 196, 26, 82, 6, Y); rr(290, 224, 82, 26, 6, Y);
-      ci(668, 202, 17, B); ci(706, 238, 17, B); ci(630, 238, 17, Y); ci(668, 274, 17, Y);
-      ci(420, 290, 30, Y); ci(580, 290, 30, Y); rr(470, 196, 26, 14, 6, B); rr(506, 196, 26, 14, 6, B);
-      rr(360, 126, 80, 26, 10, R); rr(560, 126, 80, 26, 10, R);
-      [[250, 70, 22], [740, 60, 18], [500, 40, 14], [820, 120, 12]].forEach(([x, y, r]) => rr(x - r / 2, y - r / 2, r, r, 3, B)); },
+    () => { // game studios: the supplied scene (a rider on a white tiger under a temple roof) as tiles, 118 x 86,
+      // run-length coded by row; d = dim, r = mid, b = bright (the tiger and the rider's armour)
+      const C = {r: R, b: B, d: D}, N = 118, z = 420 / 86, x0 = 500 - N * z / 2;
+      "8d110.|rd.dr5d108.|2r7drd107.|.d3rd.2d2r2d100.d4.|3.2d2rd2.drd105.|5.5d101.3d2rd.|8.2d3.d95.4d.3d.|5.3d101.5d.3d|112.6d|111.4d.2d|d13.d97.5d.|4d10.d88.4d5.5d.|.2d99.6d5.2d2.d|d21.d3.d3.d9.d6.d6.d47.7d.d2.d4.|d18.d5.2d2.2d2.d6.2d.2d2.2d5.2d2.d2.d2.d2.2d5.2d2.2d.2d9.2d2.2d.d3.5d.d.d.d4.|16.d5.d2.2d2.2d2.d2.2d2.2d.2d2.2d2.d2.2d.2d2.d2.rd.2d2.d2.2d2.2d.3d.2d2.d2.2d2.2d7.2d11.|29.2d2.d2.2d2.d2.2d2.d3.d2.2d.2d2.d2.2d.2d2.d3.d2.2d2.2d.6d.2d13.2d9.|17.3d.2d2.2d2.d2.2d2.2d2.d2.2d2.2d2.d2.2d2.d2.d6.d2.2d2.rd.2d2.2d.2d.3d2.2d2.d3.d2.2d.2d9.|18.5d.drd.drd.dr2.rd.drd.2r.drd.dr2.2r.drd.rd.2d.drd.dr2.2r.drd.dr2.rd.dr2.rd2.2d.dr2.2d2.2d8.|2d16.d.drd.drd.drd.2rd.rd.drd.2r2.2r.drd.rd.drd.2d.2r2.rd.drd.2r.drd.2r2.2r.drd.drd.2r.drd.drd.2d8.|2.d18.rd.drd.drd.2r.d2r.2rd.2r.d2r.dr2d2r.drd.dr.drd.2r.drd.2rd.2r.drd.2r.d2r.drd.drd.2r2.rd.d9.|19.2drd.drd.2rd.2r.drd.drd.2r.drd.drd.2r.drd.dr.drd.2r2d2r.2rd.2r.d2r.2rd.2r.d2r.d2r.drd.2rd10.|20.dr2.2rd.2r2d2r.drd.2rd.2r.d2r.2rd.dr.d2r.2r.drd.2r.d2r.2rd.2r2d2r.drd.2r2d2r.d2r.drd.2d11.|20.drd.dr.d2r.d2r.drd.2rd.2r.d2r2drd.2r2.rd.2r.drd.drd.2r.d2r.drd.2r.drd.drd.2rd.2rd.2r2d12.|20.3d.2d.d2r.d2rd2r3dr2.2r2drd.2rd.2r.drd.dr.drd.3r.2r2d2r.drd.drd.2r.d2r.2rd.3d.drd13.|21.2d.2r.d2r.d2r.2rd.2r2drd.drd.drd.2r.drd.dr2d2r.drd.2rd.4d2r.drd.2r2d2r.d2r.drd.2d14.|29.d.3d.10d.drd.drd.4drd.2r2d2r4d.drd.drd.rd.dr6d2r4d.3d.d15.|22.d25.d.d.d8.dr4.r4.d.3d25.d15.|63.r2br51.|53.2d7.d4b51.|53.2r7.r4br50.|54.2r6.d2.d2r50.|55.drd5.2brdr50.|52.r3.dr.d.d5r2d49.|51.2r4.r2b.7r50.|50.2d5.r2bd2.dr.rbr49.|47.d2rd5.d2r2br2.d.r3bd47.|46.3rd7.r4b3rd5br46.|47.r9.2b.5r7b46.|56.5r12b45.|55.2r2.2d2r10bd44.|55.2r4d2r4b2r3b2r44.|54.dr4d.2r2b5r3bd44.|54.6r.dr2b3rd4brd43.|54.5r2.rd2r2brd5bd43.|54.2r.2r2d3r3b2r6b2r41.|54.2r2drd4rb3r2b3r4br33.d2r4.|53.d2r.d2.2rdrbr6br4br32.dr6.|54.2r5.2r4br11br30.2r6.|50.d.d2r5.d2r3br13b38.|43.r5b2r2.r8.d2b2r2b3r8br37.|42.rbr2d2r4.2d5.r2d2br2b3r10b37.|41.rb11.rd4.2r.br2br13b37.|41.bd11.rd.d.2d.3rbr14b27.rd8.|40.2r2.d11.4d2.2rb2r10br3bd26.3d5.r.|38.dr14.5d2.3rbr2br4br7bd27.2r5.2r|6.6d.4d17.drd2r7.d5.5drd.d2rbr2br2br2b2dr4brd26.drd2r3d2r|7.4d2.2d.d16.d4r13.dr3d2r2d5rb2rb5rd6br29.5d2r|7.dr2d3.2d16.5d14.r2d.4rd4r2br7br6bd30.d3r2d|5.d8.3d8.d24.3d2.d2r.2rd.r2br8brbr4b27.d3.r4d|d.d.2d.d.d.d.4d.d.d4.d24.5d.r2d2rd.rb2r4brbrbr2brbrbr11.2d.d.d.d2.d.d.3d4.3d|2.d2.d2.2d8.d6.d28.d3.2r2d.rbr2d2b2r3br10bd21.d6.d.d|3d2.d.3d2.d.2d2.d32.d2.2d.d2r.r.rbr.2r2b2rb6r6br8.d10.d.3d2.d2.d.|d.d.2d.d.d.d2.3d.d.d4.d23.4d.r2d3rdr.rbr.rdr2b3rd4r4b2rd7.2d.d.d.d2.d.d.d.d2.r3d.|d.d.2d.10d.d.d.d2.d22.5d.r2d3rd3rbrd3rb2rb6r4b2r8.2d.d.d.d2.d.d.d.d2.5d|d.d.2d.10d.d.d.d2.d22.5d.3d3rdrbrbrdrdrb7r3b4rd8.2d.d.d4.d.d.d3.6d|d.d.2d.3d.d.4d.d.d4.d22.8d5r.rbrb2d.3b4rdr3b5r8.2d.d.d4.d.d.10d|d.d.2d.d8.d8.d25.d3.d6rdb2rd.r2b3rd2r4br4bd7.2d10.d2.2r.d3.2d|d.d.2d.d.d5.2d.d6.d29.2d9rd.2rb3rd3r5br2br8.d5.d2.d.d4.rd2.2d.|d.d.2d3.d4.d.d8.d29.2d8r.2rd3b5rbr4br2brd7.d4.2d.d2.d9.2d|4.2d3.d15.d30.d6rbr.d3rb5r4brbrd3br7.d12.d6.2d.|d.4d.17d.2d19.d8.2d6r2bd.rd.d5r3b2r3b3r2d5.2d.12d.3d2.d2.|59d7rdr2d9rd2r2b4r5d.23dr|56d2r6dr2d10rd6rb3r28drd|7d.d.46d8r4d2r2d11r3br2d4.25d|d2rd2rd3r3d.2d8.2d24.3d2.3d8r.2drd7r4d9rd13rd2r2d5rd2r|d4rd7r6d4.9d3rd8rd5.d.d4.2d.6r3.d9r3d2rd2r4d.9rd7rdrd3r2dr|12r20d2r2d5rd2rd.4dr6d2r3d4r4d10rd6r6d.3d2rdrd3r2d2rdrdr5d|12r6d7rdr4dr11dr3dr2dr2d2r10dr4d3rd5r2d7r2dr3drdr6dr13dr|r17d5r27drd3r2d9r3drd2rd5r2d2r6d2r17d5r2d3r|12dr7drdr18dr7d.4d2rd9r6dr2d2r12dr12d.d2rd.rb8r|11d2r7dr2dr2d4r21dr2d4rd8r16dr3d3r14d3rd10r|20dr3dr2d3r24d4r2d7r6dr2d2rd4rdr3d3r3d2r11d10rd|20d2r7dr4dr14dr3d4r5d5r7d8r9d5r11d10rd|2d3rd2r5dr2drd3rdr2d2r4d5r14drd5r4d6r8d2rd3r4d2r4d4r10d2rd2rd3rd3r|rdr4dr4drd2r5dr3d2r5d2r19d4r2d8r13d2r10dr9dr2d12rd".split("|").forEach((row, gy) => { let gx = 0;
+        for (const m of row.matchAll(/(\d*)([.rbd])/g)) { const n = +(m[1] || 1);
+          if (m[2] !== ".") { mg.fillStyle = C[m[2]]; mg.fillRect(x0 + gx * z, gy * z, n * z + .5, z + .5); } gx += n; } }); },
     () => { // an open shipping box, products peeking out, a shipping label
       poly([[420, 160], [455, 52], [775, 52], [740, 160]], R);
       poly([[300, 205], [195, 150], [330, 112], [420, 160]], R);
@@ -4161,16 +4158,16 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     return BB[k] = [x0 * 2, y0 * 2, (x1 - x0 + 1) * 2, (y1 - y0 + 1) * 2];
   }
   function cells(k){
-    const big = k === 2;   // the robot is traced from a photo and needs more tiles to read
-    const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * .78, ah = rows * (big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
-    const fx = (cols - bw * f) / 2 - bx * f, fy = rows * (big ? .04 : cols < 60 ? .1 : .12) + (ah - bh * f) / 2 - by * f;
+    const big = k === 2, scene = k === 3;   // the robot and the game scene are traced from photos and need more tiles
+    const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * (scene ? 1 : .78), ah = rows * (scene ? .8 : big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
+    const fx = (cols - bw * f) / 2 - bx * f, fy = rows * (scene ? 0 : big ? .04 : cols < 60 ? .1 : .12) + (ah - bh * f) / 2 - by * f;
     mk.width = cols * SS; mk.height = rows * SS; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, mk.width, mk.height);
     mg.setTransform(f * SS, 0, 0, f * SS, fx * SS, fy * SS); SH[k]();
     const d = mg.getImageData(0, 0, mk.width, mk.height).data, out = [];
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      let n = 0, red = 0, yel = 0, blu = 0, joi = 0, glo = 0, sil = 0;
-      for (let y = 0; y < SS; y++) for (let x = 0; x < SS; x++) { const i = (((r * SS + y) * cols * SS) + c * SS + x) * 4; if (d[i + 3] > 100) { n++; if (d[i] > 128 && d[i + 1] > 128) yel++; else if (d[i] > 128 && d[i + 2] > 128) glo++; else if (d[i + 1] > 128 && d[i + 2] > 128) sil++; else if (d[i + 2] > 128) blu++; else if (d[i + 1] > 128) joi++; else red++; } }
-      if (n >= 5) out.push({c, r, ty: glo >= 2 ? 4 : yel > red && yel >= blu ? 1 : sil >= joi && sil >= blu && sil > red ? 5 : joi > red && joi >= blu ? 3 : blu > red ? 2 : 0});
+      let n = 0, red = 0, yel = 0, blu = 0, joi = 0, glo = 0, sil = 0, dim = 0;
+      for (let y = 0; y < SS; y++) for (let x = 0; x < SS; x++) { const i = (((r * SS + y) * cols * SS) + c * SS + x) * 4; if (d[i + 3] > 100) { n++; if (d[i] > 128 && d[i + 1] > 128) yel++; else if (d[i] > 128 && d[i + 2] > 128) glo++; else if (d[i + 1] > 128 && d[i + 2] > 128) sil++; else if (d[i + 2] > 128) blu++; else if (d[i + 1] > 128) joi++; else if (d[i + 2] > 60) dim++; else red++; } }
+      if (n >= 5) out.push({c, r, ty: dim > red && dim >= blu ? 6 : glo >= 2 ? 4 : yel > red && yel >= blu ? 1 : sil >= joi && sil >= blu && sil > red ? 5 : joi > red && joi >= blu ? 3 : blu > red ? 2 : 0});
     }
     return out;
   }
@@ -4193,7 +4190,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     sc = Math.min(cols / 1000, rows / 420) * .84; ox = (cols - 1000 * sc) / 2; oy = (rows - 420 * sc) / 2 - rows * .06;
     if (cur >= 0 && !PHOTO[cur]) { const k = cur; tiles = []; go(k); }
   }
-  const COL = [[115, 153, 198], [10, 20, 38], [214, 228, 242], [92, 104, 126], [64, 205, 255], [172, 188, 208]];   // body, dark detail, light, graphite joint, visor glow, brushed metal
+  const COL = [[115, 153, 198], [10, 20, 38], [214, 228, 242], [92, 104, 126], [64, 205, 255], [172, 188, 208], [38, 60, 96]];   // body, dark detail, light, graphite joint, visor glow, brushed metal
   function frame(now){
     if (!W) return;
     const t = RM ? 0 : (now - t0) / 1000, u0 = RM ? 1 : Math.min(1, (now - tA) / 1100);
@@ -4204,7 +4201,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       const u = ease(Math.min(1, Math.max(0, (u0 * 1.35 - x.j * .35)))) ;
       const c = x.fc + (x.tc - x.fc) * u, r = x.fr + (x.tr - x.fr) * u + (u === 1 && !RM ? Math.sin(t * 1.6 + x.tc * .18) * .12 : 0);
       const a = x.a0 + (1 - x.a0) * u, ty = u > .5 ? x.ty : x.fty, base = COL[ty];
-      const light = ty === 1 || ty === 4 ? 0 : ty === 3 ? 8 : (1 - x.tr / rows) * 30 + 22 * Math.max(0, Math.sin(t * 1.2 - x.tc * .12));
+      const light = ty === 1 || ty === 4 ? 0 : ty === 3 || ty === 6 ? 8 : (1 - x.tr / rows) * 30 + 22 * Math.max(0, Math.sin(t * 1.2 - x.tc * .12));
       g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, base[0] + light)},${Math.min(255, base[1] + light)},${Math.min(255, base[2] + light * .8)})`;
       g.beginPath(); g.roundRect(gx + c * cell, gy + r * cell, s, s, Math.min(3, s / 4)); g.fill();
     }
@@ -4213,7 +4210,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   function loop(now){ frame(now); if (!RM && (run || now < kickUntil)) requestAnimationFrame(loop); else looping = false; }
   function kick(){ kickUntil = performance.now() + 1800; if (!looping){ looping = true; requestAnimationFrame(loop); } }
   // every sector, tech included, is drawn as a mosaic
-  const PHOTO = {3: document.getElementById("inPhotoGm")};   // game studios: the supplied scene, toned to the panel
+  const PHOTO = {};   // every sector is a mosaic; game studios is traced from the supplied scene
   window.inArt = k => {
     Object.entries(PHOTO).forEach(([pk, el]) => el && el.classList.toggle("on", +pk === k));
     if (PHOTO[k]) { cur = k; tiles = []; kick(); return; }
