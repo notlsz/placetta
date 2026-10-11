@@ -4134,11 +4134,15 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       for (let x = x0; x <= x1; x += 6) { pa.push([x, cy + a * Math.sin((x - x0) / 62)]); pb.push([x, cy - a * Math.sin((x - x0) / 62)]); }
       for (let x = x0 + 16; x < x1; x += 44) { const y = a * Math.sin((x - x0) / 62); ln([[x, cy + y], [x, cy - y]], 8, B); }
       ln(pa, 30, R); ln(pb, 30, R); },
-    () => { // a car, side on
-      mg.fillStyle = R; mg.beginPath(); mg.moveTo(170, 320); mg.lineTo(170, 268); mg.bezierCurveTo(175, 245, 230, 236, 300, 230); mg.lineTo(390, 168); mg.bezierCurveTo(430, 150, 590, 148, 640, 168);
-      mg.lineTo(740, 230); mg.bezierCurveTo(800, 236, 838, 250, 838, 285); mg.lineTo(838, 320); mg.closePath(); mg.fill();
-      poly([[410, 178], [500, 172], [500, 228], [345, 230]], B); poly([[518, 172], [620, 176], [690, 228], [518, 228]], B);
-      ci(300, 322, 56, Y); ci(705, 322, 56, Y); ci(300, 322, 30, R); ci(705, 322, 30, R); rr(790, 258, 40, 16, 6, B); },
+    () => { // a sleek electric car, side on: blue body, light glass, graphite tyres on silver rims, glowing light bar
+      mg.fillStyle = R; mg.beginPath(); mg.moveTo(140, 300); mg.lineTo(140, 262); mg.bezierCurveTo(142, 244, 170, 236, 210, 232);
+      mg.lineTo(300, 224); mg.bezierCurveTo(360, 186, 420, 150, 520, 146); mg.bezierCurveTo(600, 146, 640, 176, 690, 214);
+      mg.lineTo(800, 228); mg.bezierCurveTo(846, 236, 866, 252, 868, 276); mg.lineTo(866, 300); mg.closePath(); mg.fill();
+      poly([[318, 226], [380, 186], [430, 166], [510, 160], [510, 224]], B); poly([[528, 160], [590, 164], [632, 186], [668, 216], [528, 224]], B);
+      ln([[519, 156], [519, 298]], 6, J); ln([[300, 266], [790, 266]], 4, J);
+      rr(800, 240, 62, 10, 5, G); rr(142, 250, 30, 9, 4, G);
+      [[280, 302], [730, 302]].forEach(([x, y]) => { ci(x, y, 70, Y); ci(x, y, 56, J); ci(x, y, 36, S); ci(x, y, 12, J);
+        for (let k = 0; k < 5; k++) { const an = k * Math.PI * 2 / 5; ln([[x + 14 * Math.cos(an), y + 14 * Math.sin(an)], [x + 33 * Math.cos(an), y + 33 * Math.sin(an)]], 5, J); } }); },
     () => { // a container ship
       poly([[150, 300], [860, 300], [820, 378], [195, 378]], R); ln([[160, 318], [850, 318]], 8, Y);
       for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) rr(240 + c * 58, 240 - r * 44, 52, 38, 4, (r + c) % 3 === 1 ? B : R);
@@ -4159,41 +4163,53 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   }
   // game studios: tiles sampled straight from the photo, each tile its own shade, on a finer grid
   const sceneImg = new Image(); sceneImg.decoding = "async";
-  sceneImg.onload = () => { if (cur === 3) { tiles = []; cur = -1; go(3); } };
+  sceneImg.onload = () => { if (cur === 3) { cur = -1; go(3); } };
   sceneImg.src = "media/industries/game-studios-bw.jpg";
   function sceneCells(){
-    const iw = sceneImg.naturalWidth, ih = sceneImg.naturalHeight, ah = Math.round(rows * .82), f = Math.min(cols / iw, ah / ih) * .9;   // zoomed out: the whole scene, with a margin
-    mk.width = cols; mk.height = ah; mg.setTransform(1, 0, 0, 1, 0, 0); mg.imageSmoothingQuality = "high";
-    mg.clearRect(0, 0, cols, ah); mg.drawImage(sceneImg, (cols - iw * f) / 2, (ah - ih * f) / 2, iw * f, ih * f);
+    // the whole scene, pillars included, zoomed out with a small margin
+    const iw = sceneImg.naturalWidth, ih = sceneImg.naturalHeight, ah = Math.round(rows * (W < 640 ? .64 : .82)), f = Math.min(cols / iw, ah / ih) * .94;
+    mk.width = cols; mk.height = ah; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, cols, ah); mg.imageSmoothingQuality = "high";
+    mg.drawImage(sceneImg, (cols - iw * f) / 2, (ah - ih * f) / 2, iw * f, ih * f);
     const d = mg.getImageData(0, 0, cols, ah).data, out = [];
     for (let r = 0; r < ah; r++) for (let c = 0; c < cols; c++) {
-      const i = (r * cols + c) * 4, v = (d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11) / 255;
-      const w = Math.min(1, Math.max(0, (v - .035) / .46)); if (w > .05) out.push({c, r, ty: 7, lum: Math.pow(w, 1.15)});   // levels: the photo's blacks to the navy, its highlights to white
+      const i = (r * cols + c) * 4; if (!d[i + 3]) continue;
+      const v = (d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11) / 255, w2 = Math.min(1, Math.max(0, (v - .035) / .46));
+      if (w2 > .05) out.push({c, r, ty: 7, lum: Math.pow(w2, 1.15)});   // levels: the photo's blacks to the navy, its highlights to white
     }
     return out;
   }
+
+
   // tech: the robot cut out of its photo; each tile keeps the photo's colour, lifted so black joints still show on navy
   const botImg = new Image(); botImg.decoding = "async";
-  botImg.onload = () => { if (cur === 2) { tiles = []; cur = -1; go(2); } };
+  botImg.onload = () => { if (cur === 2) { cur = -1; go(2); } };
   botImg.src = "media/industries/tech-robot-cut.png";
   function botCells(){
-    const iw = botImg.naturalWidth, ih = botImg.naturalHeight, ah = rows * .77, f = Math.min(cols * .8 / iw, ah / ih);
-    const w = Math.round(iw * f), h = Math.round(ih * f), x0 = Math.round((cols - w) / 2), y0 = Math.round(rows * .03);
-    mk.width = cols; mk.height = rows; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, cols, rows); mg.imageSmoothingQuality = "high";
+    // drawn at 3x and read per tile: a tile is a black joint when most of it is dark, so knees, elbows and gloves stay crisp
+    const SS = 3, iw = botImg.naturalWidth, ih = botImg.naturalHeight, ah = rows * .77, f = Math.min(cols * .8 / iw, ah / ih) * SS;
+    const w = Math.round(iw * f), h = Math.round(ih * f), X = cols * SS, Y = rows * SS, x0 = Math.round((X - w) / 2), y0 = Math.round(rows * .03 * SS);
+    mk.width = X; mk.height = Y; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, X, Y); mg.imageSmoothingQuality = "high";
     mg.drawImage(botImg, x0, y0, w, h);
-    const d = mg.getImageData(0, 0, cols, rows).data, out = [];
+    const d = mg.getImageData(0, 0, X, Y).data, out = [];
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      const i = (r * cols + c) * 4; if (d[i + 3] < 110) continue;
-      const R0 = d[i], G0 = d[i + 1], B0 = d[i + 2], glow = B0 > R0 + 45 && B0 > 130;
-      // metal stays silver, blacks lift to graphite, the visor glows
-      const rgb = glow ? [70, 200, 255] : [Math.round(64 + R0 * .74), Math.round(72 + G0 * .72), Math.round(92 + B0 * .66)];
+      let n = 0, dark = 0, glow = 0, lum = 0;
+      for (let y = 0; y < SS; y++) for (let x = 0; x < SS; x++) {
+        const i = ((r * SS + y) * X + c * SS + x) * 4; if (d[i + 3] < 110) continue;
+        const R0 = d[i], G0 = d[i + 1], B0 = d[i + 2], l = R0 * .3 + G0 * .59 + B0 * .11; n++;
+        if (B0 > R0 + 45 && B0 > 130 && c > cols * .62 && r < rows * .16) glow++; else if (l < 72) dark++; else lum += l;
+      }
+      if (n < 5) continue;
+      let rgb;
+      if (glow >= 2) rgb = [70, 205, 255];                         // the visor
+      else if (dark > n * .45) rgb = [58, 66, 86];                   // black joints, gloves and feet as graphite
+      else { const v = Math.min(1, Math.max(0, (lum / (n - dark) - 80) / 160)); rgb = [Math.round(120 + 128 * v), Math.round(132 + 116 * v), Math.round(156 + 96 * v)]; }   // brushed silver
       out.push({c, r, ty: 8, rgb});
     }
     return out;
   }
   function cells(k){
     if (k === 2 && botImg.naturalWidth) return botCells();
-    if (k === 3 && sceneImg.naturalWidth) return sceneCells();
+    if (k === 3) return sceneImg.naturalWidth ? sceneCells() : [];   // the photo loads first; its onload draws it
     const big = k === 2, scene = k === 3;   // the robot and the game scene are traced from photos and need more tiles
     const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * (scene ? 1 : .78), ah = rows * (scene ? .8 : big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
     const fx = (cols - bw * f) / 2 - bx * f, fy = rows * (scene ? 0 : big ? .04 : cols < 60 ? .1 : .12) + (ah - bh * f) / 2 - by * f;
@@ -4210,7 +4226,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   const ease = u => u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
   function go(k){
     if (!cols) return;
-    const want = k === 3 ? Math.max(4, Math.round(baseCell * .55)) : k === 2 ? Math.max(4, Math.round(baseCell * .6)) : baseCell;
+    const want = k === 3 ? Math.max(3, Math.round(baseCell * .5)) : k === 2 ? Math.max(4, Math.round(baseCell * .6)) : baseCell;
     if (want !== cell) { cell = want; cols = Math.floor(W / cell); rows = Math.floor(H / cell); tiles = []; }
     const T = cells(k); cur = k; tA = performance.now();
     T.sort((a, b) => a.c - b.c || a.r - b.r);
@@ -4223,7 +4239,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   }
   function size(){
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
-    baseCell = W < 640 ? 7 : W < 900 ? 8 : 10; cell = cur === 3 ? Math.max(4, Math.round(baseCell * .55)) : cur === 2 ? Math.max(4, Math.round(baseCell * .6)) : baseCell; cols = Math.floor(W / cell); rows = Math.floor(H / cell);
+    baseCell = W < 640 ? 7 : W < 900 ? 8 : 10; cell = cur === 3 ? Math.max(3, Math.round(baseCell * .5)) : cur === 2 ? Math.max(4, Math.round(baseCell * .6)) : baseCell; cols = Math.floor(W / cell); rows = Math.floor(H / cell);
     cv.width = W * dpr; cv.height = H * dpr;
     sc = Math.min(cols / 1000, rows / 420) * .84; ox = (cols - 1000 * sc) / 2; oy = (rows - 420 * sc) / 2 - rows * .06;
     if (cur >= 0 && !PHOTO[cur]) { const k = cur; tiles = []; go(k); }
@@ -4234,7 +4250,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     const t = RM ? 0 : (now - t0) / 1000, u0 = RM ? 1 : Math.min(1, (now - tA) / 1100);
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = "#0F1B33"; g.fillRect(0, 0, W, H);
     for (let i = 0; i < 60; i++) { const z = .4 + (i % 5) * .15, px = ((i * 97.3 + t * 18 * z) % (W + 40)) - 20, py = (i * 53.7) % H; g.fillStyle = `rgba(164,200,225,${(.04 + z * .05).toFixed(3)})`; g.fillRect(px, py, 2, 2); }
-    const gx = (W - cols * cell) / 2, gy = (H - rows * cell) / 2, s = cell - (cell < 7 ? 1 : 1.5);
+    const gx = (W - cols * cell) / 2, gy = (H - rows * cell) / 2, s = cell - (cell < 5 ? .7 : cell < 7 ? 1 : 1.5);
     for (const x of tiles) {
       const u = ease(Math.min(1, Math.max(0, (u0 * 1.35 - x.j * .35)))) ;
       const c = x.fc + (x.tc - x.fc) * u, r = x.fr + (x.tr - x.fr) * u + (u === 1 && !RM ? Math.sin(t * 1.6 + x.tc * .18) * .12 : 0);
