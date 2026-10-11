@@ -4162,9 +4162,9 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   sceneImg.onload = () => { if (cur === 3) { tiles = []; cur = -1; go(3); } };
   sceneImg.src = "media/industries/game-studios-bw.jpg";
   function sceneCells(){
-    const iw = sceneImg.naturalWidth, ih = sceneImg.naturalHeight, ah = Math.round(rows * .82), f = Math.max(cols / iw, ah / ih);
+    const iw = sceneImg.naturalWidth, ih = sceneImg.naturalHeight, ah = Math.round(rows * .82), f = Math.min(cols / iw, ah / ih) * .9;   // zoomed out: the whole scene, with a margin
     mk.width = cols; mk.height = ah; mg.setTransform(1, 0, 0, 1, 0, 0); mg.imageSmoothingQuality = "high";
-    mg.drawImage(sceneImg, (cols - iw * f) / 2, (ah - ih * f) / 2, iw * f, ih * f);
+    mg.clearRect(0, 0, cols, ah); mg.drawImage(sceneImg, (cols - iw * f) / 2, (ah - ih * f) / 2, iw * f, ih * f);
     const d = mg.getImageData(0, 0, cols, ah).data, out = [];
     for (let r = 0; r < ah; r++) for (let c = 0; c < cols; c++) {
       const i = (r * cols + c) * 4, v = (d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11) / 255;
@@ -4172,7 +4172,27 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     }
     return out;
   }
+  // tech: the robot cut out of its photo; each tile keeps the photo's colour, lifted so black joints still show on navy
+  const botImg = new Image(); botImg.decoding = "async";
+  botImg.onload = () => { if (cur === 2) { tiles = []; cur = -1; go(2); } };
+  botImg.src = "media/industries/tech-robot-cut.png";
+  function botCells(){
+    const iw = botImg.naturalWidth, ih = botImg.naturalHeight, ah = rows * .77, f = Math.min(cols * .8 / iw, ah / ih);
+    const w = Math.round(iw * f), h = Math.round(ih * f), x0 = Math.round((cols - w) / 2), y0 = Math.round(rows * .03);
+    mk.width = cols; mk.height = rows; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, cols, rows); mg.imageSmoothingQuality = "high";
+    mg.drawImage(botImg, x0, y0, w, h);
+    const d = mg.getImageData(0, 0, cols, rows).data, out = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const i = (r * cols + c) * 4; if (d[i + 3] < 110) continue;
+      const R0 = d[i], G0 = d[i + 1], B0 = d[i + 2], glow = B0 > R0 + 45 && B0 > 130;
+      // metal stays silver, blacks lift to graphite, the visor glows
+      const rgb = glow ? [70, 200, 255] : [Math.round(64 + R0 * .74), Math.round(72 + G0 * .72), Math.round(92 + B0 * .66)];
+      out.push({c, r, ty: 8, rgb});
+    }
+    return out;
+  }
   function cells(k){
+    if (k === 2 && botImg.naturalWidth) return botCells();
     if (k === 3 && sceneImg.naturalWidth) return sceneCells();
     const big = k === 2, scene = k === 3;   // the robot and the game scene are traced from photos and need more tiles
     const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * (scene ? 1 : .78), ah = rows * (scene ? .8 : big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
@@ -4190,20 +4210,20 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   const ease = u => u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
   function go(k){
     if (!cols) return;
-    const want = k === 3 ? Math.max(4, Math.round(baseCell * .55)) : baseCell;
+    const want = k === 3 ? Math.max(4, Math.round(baseCell * .55)) : k === 2 ? Math.max(4, Math.round(baseCell * .6)) : baseCell;
     if (want !== cell) { cell = want; cols = Math.floor(W / cell); rows = Math.floor(H / cell); tiles = []; }
     const T = cells(k); cur = k; tA = performance.now();
     T.sort((a, b) => a.c - b.c || a.r - b.r);
     const live = tiles.filter(x => x.out === 0).sort((a, b) => a.tc - b.tc || a.tr - b.tr), next = [];
     T.forEach((d, i) => {
       const src = live.length ? live[Math.floor(i * live.length / T.length)] : null;
-      next.push({fc: src ? src.c : d.c + (Math.random() - .5) * 8, fr: src ? src.r : rows + 2 + Math.random() * 6, c: 0, r: 0, tc: d.c, tr: d.r, ty: d.ty, fty: src ? src.ty : d.ty, lum: d.lum, flum: src ? src.lum : d.lum, j: Math.random(), out: 0, a0: src ? 1 : 0});
+      next.push({fc: src ? src.c : d.c + (Math.random() - .5) * 8, fr: src ? src.r : rows + 2 + Math.random() * 6, c: 0, r: 0, tc: d.c, tr: d.r, ty: d.ty, fty: src ? src.ty : d.ty, lum: d.lum, flum: src ? src.lum : d.lum, rgb: d.rgb, frgb: src ? src.rgb : d.rgb, j: Math.random(), out: 0, a0: src ? 1 : 0});
     });
     tiles = next; kick();
   }
   function size(){
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
-    baseCell = W < 640 ? 7 : W < 900 ? 8 : 10; cell = cur === 3 ? Math.max(4, Math.round(baseCell * .55)) : baseCell; cols = Math.floor(W / cell); rows = Math.floor(H / cell);
+    baseCell = W < 640 ? 7 : W < 900 ? 8 : 10; cell = cur === 3 ? Math.max(4, Math.round(baseCell * .55)) : cur === 2 ? Math.max(4, Math.round(baseCell * .6)) : baseCell; cols = Math.floor(W / cell); rows = Math.floor(H / cell);
     cv.width = W * dpr; cv.height = H * dpr;
     sc = Math.min(cols / 1000, rows / 420) * .84; ox = (cols - 1000 * sc) / 2; oy = (rows - 420 * sc) / 2 - rows * .06;
     if (cur >= 0 && !PHOTO[cur]) { const k = cur; tiles = []; go(k); }
@@ -4219,7 +4239,10 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       const u = ease(Math.min(1, Math.max(0, (u0 * 1.35 - x.j * .35)))) ;
       const c = x.fc + (x.tc - x.fc) * u, r = x.fr + (x.tr - x.fr) * u + (u === 1 && !RM ? Math.sin(t * 1.6 + x.tc * .18) * .12 : 0);
       const a = x.a0 + (1 - x.a0) * u, ty = u > .5 ? x.ty : x.fty;
-      if (ty === 7) {   // a photo tile: its own shade, cool grey from the navy up to near white
+      if (ty === 8) {   // a robot tile in its photo colour, with a slow sheen
+        const q = (u > .5 ? x.rgb : x.frgb) || [170, 186, 206], sh = 10 * Math.max(0, Math.sin(t * 1.3 - x.tc * .07 + x.tr * .03));
+        g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, q[0] + sh)},${Math.min(255, q[1] + sh)},${Math.min(255, q[2] + sh)})`;
+      } else if (ty === 7) {   // a photo tile: its own shade, cool grey from the navy up to near white
         const v = (u > .5 ? x.lum : x.flum) ?? .6, sh = 5 * Math.max(0, Math.sin(t * 1.2 - x.tc * .08));
         g.globalAlpha = a; g.fillStyle = `rgb(${Math.round(22 + 226 * v + sh)},${Math.round(32 + 216 * v + sh)},${Math.round(54 + 196 * v + sh)})`;
       } else {
