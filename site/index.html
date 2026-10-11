@@ -1105,7 +1105,7 @@ html[lang="zh-CN"] .pst b{letter-spacing:0}
 .agw .agp{margin-top:10px;font-size:15px;line-height:1.45;color:var(--ink2)}
 .agw .howtry{margin-top:16px}
 .aglog{background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(15,27,51,.04),0 16px 40px rgba(15,27,51,.07);padding:14px 16px 10px}
-.aglh{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid #F0F2F5}
+.aglh{display:flex;align-items:center;gap:10px;padding-bottom:6px}
 .aglh .orb{width:26px;height:26px}
 .aglh b{font-size:13.5px;font-weight:500;color:var(--ink)}
 .aglh .atag{margin-left:auto}
@@ -1853,15 +1853,23 @@ html[lang="zh"] .gbq blockquote,html[lang="zh-CN"] .gbq blockquote{font-family:v
 @media (max-width:767px){.frt{margin-bottom:-4px;transform:translateX(12px)}}
 @media (max-width:480px){.frui .frs{grid-template-columns:7px minmax(0,1fr);row-gap:4px;align-items:start}.frui .frd{margin-top:6px}.frs .st{grid-column:2;align-items:flex-start;text-align:left}}
 
-/* going global: product UI over a blurred photo, as in the rest of the page */
-.cnstage{position:relative;isolation:isolate;overflow:hidden;border-radius:16px;padding:28px 16px 76px}
-.cnstage::before{content:"";position:absolute;inset:-30px;z-index:-2;background:url(media/hero-poster.jpg) center/cover;filter:blur(22px) saturate(.9);transform:scale(1.1)}
-.cnstage::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(220,230,242,.55),rgba(115,153,198,.35))}
-@media (min-width:900px){.cnstage{padding:40px 36px 84px}.ox .cnstage .twin{grid-template-columns:1fr 1fr;gap:16px}}
-.ox .cnstage .dash{border:0;box-shadow:0 24px 50px rgba(15,27,51,.22),0 1px 2px rgba(15,27,51,.06)}
-.cntoast{position:absolute;left:16px;bottom:18px;max-width:calc(100% - 32px)}
-@media (min-width:900px){.cntoast{left:36px;bottom:24px}}
-@media (max-width:639px){.ox .cntiles .tile{width:100%;min-height:0}.ox .cntiles .tile div{padding-top:8px;justify-content:flex-start}}
+/* going global, laid out like the in-the-loop section */
+#cn .cnq{display:flex;flex-direction:column;gap:6px}
+#cn .cnq p{font-family:var(--serif);font-size:20px;line-height:1.3;color:var(--ink)}
+html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
+#cn .cnq span{font-size:13px;color:var(--muted)}
+#cn .cnlp{font-size:15px;line-height:1.5;color:var(--ink2)}
+#cn .icol{max-width:360px}
+#cn .dash{width:100%;border:0;box-shadow:0 18px 44px rgba(15,27,51,.08),0 1px 2px rgba(15,27,51,.04)}
+#cn .cntrust{margin-top:56px}
+#cn .dash .dh{border-bottom:0;padding-bottom:2px}
+#cn .cntiles{margin-top:0;gap:12px}
+#cn .cntiles{flex-wrap:nowrap;width:100%;gap:24px}
+@media (min-width:1280px){#cn .cntiles{width:850px}}
+#cn .cntiles .tile{flex:1 1 0;min-width:0;width:auto;min-height:200px;background:var(--card)}
+#cn .icard{height:auto;padding:32px 20px}
+@media (max-width:767px){#cn .cntiles{flex-direction:column}}
+@media (max-width:767px){#cn .cntiles .tile{min-height:0}#cn .cntiles .tile div{padding-top:12px}}
 /* franchise table, same build as Alven's "Just add Alven" panel */
 .frc .frsub{margin-top:12px;max-width:560px;padding-inline:16px;text-align:center;font-size:15px;line-height:1.5;color:var(--ink2)}
 @media (min-width:1024px){.ox .addc.frc{height:720px}}
@@ -2260,30 +2268,25 @@ html[lang="zh"] .gbq blockquote,html[lang="zh-CN"] .gbq blockquote{font-family:v
 
 <!-- ======================= BUILT FOR BRANDS GOING GLOBAL, BUILT FOR TRUST ======================= -->
 <section class="ox mt160 rv" data-rv="up" id="cn">
-  <div class="ctr rsec">
-    <div class="rline"></div>
-    <div class="rrow">
-      <p class="t28" data-i18n="cn.h">Built for brands going global.</p>
-      <div class="rmline"></div>
-      <div class="rbody">
-        <div class="cnb">
-          <div class="cnq"><p data-i18n="cn.s">此心安处是吾乡</p><span data-i18n="cn.q">Wherever the heart is at ease, that is home. (Su Shi)</span></div>
-          <p data-i18n="cn.p">Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.</p>
-          <div class="cnstage">
-            <div class="twin">
-              <div class="dash" id="dashA"></div>
-              <div class="dash" id="dashB"></div>
-            </div>
-            <div class="ftoast cntoast"><span class="orb"></span><span><b data-i18n="cn.t">Lease risk flagged for both teams</b><small data-i18n="cn.ts">Odelia, before the lease is signed</small></span></div>
-          </div>
-          <p class="trl" data-i18n="trust.h">Built for trust</p>
-          <div class="tiles cntiles">
+  <div class="ctr">
+    <div class="irow">
+      <div class="il">
+        <h2 class="t28" data-i18n="cn.h">Built for brands going global.</h2>
+        <div class="cnq"><p data-i18n="cn.s">Wherever the heart is at ease, that is home.</p><span data-i18n="cn.q">Su Shi, Song dynasty poet</span></div>
+        <p class="cnlp" data-i18n="cn.p">Your team in Shanghai or Shenzhen sees the same dashboard as your team in New York, in Chinese or English. We flag US-specific risks early, including state laws that limit leases and property ownership for some foreign-owned companies.</p>
+        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="cn" data-i18n="cn.btn">Get your US entry plan</button></div>
+      </div>
+      <div class="ir">
+        <div class="icard"><div class="icol"><div class="dash" id="dashA"></div></div></div>
+        <div class="icard"><div class="icol"><div class="dash" id="dashB"></div></div></div>
+      </div>
+    </div>
+    <div class="irow cntrust">
+      <div class="il"><h2 class="t28" data-i18n="trust.h">Built for trust</h2></div>
+      <div class="ir tiles cntiles">
         <div class="tile"><p data-i18n="trust.1">Licensed partner attorneys</p><p class="tsub" data-i18n="trust.1s">When a filing legally needs a lawyer, a licensed partner attorney reviews and signs it.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 9v38M19 47h18M11 16h34M28 9v7"/><path d="M11 16 5 30a6 6 0 0 0 12 0zM45 16l-6 14a6 6 0 0 0 12 0z"/></svg></div></div>
         <div class="tile"><p data-i18n="trust.2">Local permit expediters</p><p class="tsub" data-i18n="trust.2s">In-person filings, pick-ups and inspections, handled in the city where you open.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 49S14 36.5 14 25a14 14 0 0 1 28 0c0 11.5-14 24-14 24z"/><path d="M22 25l4.5 4.5L34 22"/></svg></div></div>
         <div class="tile"><p data-i18n="trust.ap">Your approval, every time</p><p class="tsub" data-i18n="trust.3s">Nothing is filed until you approve it, and every value shows the source it came from.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="8" width="32" height="40" rx="4"/><path d="M20 18h16M20 25h16M20 32h8"/><path d="m29 39 4 4 8-9"/></svg></div></div>
-      
-          <div class="cnbtn"><button type="button" class="btn b-ink" data-open="cn" data-i18n="cn.btn">Get your US entry plan</button><small data-i18n="cn.sub">Get your US entry plan</small></div>
-        </div>
       </div>
     </div>
   </div>
