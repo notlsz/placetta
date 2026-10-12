@@ -6,12 +6,15 @@
 //
 // POST {action: "start", workspace_id, prompt, history?, lang?, deep?}         a member (Supabase session)
 // POST {action: "continue", run_id, token?} | {action: "watchdog"} | {action: "watch", workspace_id}   the server itself (monitor key)
+// POST {action: "selftest"}   the monitor key: short real-model runs on in-memory scratch workspaces (selftest.ts);
+//                             returns {ok, model, checks: [{name, pass, detail, ms}], total_ms} in under 140 s
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { callModel } from "../_shared/llm.ts";
 // @ts-types="./agent.d.ts"
 import { normalizeState, runRounds, startState, stripState, type Reply, type RunState, type Services, type Step } from "./agent.js";
+import { selftest } from "./selftest.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
@@ -27,6 +30,8 @@ const MODEL = env("AGENT_MODEL", "claude-sonnet-5-5"), MODEL_DEEP = env("AGENT_M
 const CHUNK_MS = Number(env("AGENT_CHUNK_SECONDS", "70")) * 1000;
 const STALE_MS = 3 * 60_000, MAX_ATTEMPTS = 8;
 const FETCH_BETA = "web-fetch-2025-09-10";
+const MAX_TOOLS = 48;
+const MODEL_KEYS = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY"];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
@@ -67,11 +72,12 @@ async function handOver(runId: string, token: string | null) {
 /** One model call: the company key, research on official sites, the daily limit and usage, as in the agent function. */
 async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal) {
   if (signal.aborted) throw err("cancelled", "Stopped");
-  if (!["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY"].some((k) => env(k)))
+  if (!MODEL_KEYS.some((k) => env(k)))
     throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
   const { data: usage } = await admin.from("agent_usage").select("calls").eq("workspace_id", ws).eq("day", new Date().toISOString().slice(0, 10)).maybeSingle();
   if ((usage?.calls ?? 0) >= DAILY_CALLS) throw err("rate_limited", "Today's agent limit is reached. It resets at midnight UTC.");
-  const pageTools = (Array.isArray(body.tools) ? (body.tools as Block[]) : []).filter((t) => t && typeof t.name === "string" && !("type" in t)).slice(0, 24);
+  // Odelia has about 31 tools in a signed-in workspace; a cap of 24 silently dropped email, calendar, drive and QuickBooks.
+  const pageTools = (Array.isArray(body.tools) ? (body.tools as Block[]) : []).filter((t) => t && typeof t.name === "string" && !("type" in t)).slice(0, MAX_TOOLS);
   const research = pageTools.length > 0 || deep;
   const userLocation = location?.city ? { type: "approximate", city: String(location.city).slice(0, 80), region: String(location.region ?? "").slice(0, 80) || undefined, country: "US" } : undefined;
   const search = { type: "web_search_20250305", name: "web_search", max_uses: 5, ...(userLocation ? { user_location: userLocation } : {}) };
@@ -96,7 +102,7 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
 const safeName = (n: string) => n.replace(/[^\w.\-一-鿿]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120) || "document";
 
 async function servicesFor(ws: string, run: Run, token: string | null): Promise<Services> {
-  const { data: filings } = await admin.from("filings").select("app_id, status, confirmation_number, submitted_at, updated_at, note, payment_url").eq("workspace_id", ws).order("approved_at", { ascending: false });
+  const { data: filings } = await admin.from("filings").select("app_id, status, confirmation_number, submitted_at, updated_at, note, payment_url, agent_state, channel, agent_log").eq("workspace_id", ws).order("approved_at", { ascending: false });
   // Connected apps act as the person, so they need the person's session: runs the monitor starts don't touch them.
   const { data: ints } = token ? await admin.from("integrations").select("kind, status").eq("workspace_id", ws) : { data: [] as { kind: string; status: string }[] };
   return {
@@ -246,8 +252,13 @@ export async function handle(req: Request): Promise<Response> {
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   const action = String(body.action ?? "start");
 
-  if (action === "continue" || action === "watchdog" || action === "watch") {
+  if (action === "continue" || action === "watchdog" || action === "watch" || action === "selftest") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
+    if (action === "selftest") {
+      // short real-model runs on scratch workspaces held in memory: no workspace is read or written
+      if (!MODEL_KEYS.some((k) => env(k))) return json(200, { ok: false, model: null, checks: [{ name: "a model key is set", pass: false, detail: "Add ANTHROPIC_API_KEY (or another model key) in the Edge Function secrets.", ms: 0 }], total_ms: 0 });
+      return json(200, await selftest((k) => Deno.env.get(k), { budgetMs: Number(body.budget_ms) || undefined }));
+    }
     if (action === "continue") {
       const id = String(body.run_id ?? "");
       if (!UUID.test(id)) return fail(400, "bad_request", "run_id is required.");

@@ -10,11 +10,13 @@ export type RunState = { messages: { role: string; content: unknown }[]; rounds:
 export type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] };
 export type Send = (body: Record<string, unknown>, deep: boolean) => Promise<{ content: Block[]; stop_reason: string }>;
 export type Services = {
-  filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null }[];
+  filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[] }[];
   connected(): string[];
   integration<T>(action: string, body: Record<string, unknown>): Promise<T>;
   saveFile(file: File, appId?: string): Promise<{ path: string }>;
   readFile(path: string): Promise<Blob>;
+  me?: string;
+  setting?(key: string, value: string): string;
 };
 export declare function normalizeState(name: string, s: Record<string, unknown>): Workspace;
 export declare function stripState(w: Workspace): Record<string, unknown>;
@@ -23,4 +25,5 @@ export declare function runRounds(o: {
   state: RunState; ws: () => Workspace; apply: (p: (w: Workspace) => Workspace) => void; step: (s: Step) => void; draft?: (text: string) => void;
   send: Send; lang: "en" | "zh"; deep: boolean; account: boolean; svc?: Services; files?: Map<string, File>; signal: AbortSignal; until: number;
   round?: (state: RunState) => Promise<void>;
+  research?: boolean; maxRounds?: number;
 }): Promise<{ reply: Reply } | { paused: RunState }>;
