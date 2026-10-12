@@ -103,7 +103,7 @@ async function anthropic(f: Fetch, key: string, payload: Record<string, unknown>
 
 /** Anthropic with its research tools, stepping down when the account lacks web fetch or web search. */
 async function viaAnthropic(f: Fetch, key: string, call: Call, model: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null) {
-  const payload = { ...call.payload, model };
+  const payload: Record<string, unknown> = { ...call.payload, model };
   let { res, text } = await anthropic(f, key, payload, call.beta);
   if (research && res.status === 400 && /web_fetch|beta/i.test(text)) { payload.tools = [...research.pageTools, research.search]; ({ res, text } = await anthropic(f, key, payload, null)); }
   if (research && res.status === 400 && /web_search/i.test(text)) { payload.tools = research.pageTools.length ? research.pageTools : undefined; ({ res, text } = await anthropic(f, key, payload, null)); }

@@ -79,7 +79,7 @@ type AuditRow = { id: number; client_id: string | null; actor: Audit["actor"] | 
 /* ------------------------------ session ------------------------------ */
 
 export const getSession = async () => (await supabase().auth.getSession()).data.session;
-export const onAuth = (fn: (s: Session | null) => void) => supabase().auth.onAuthStateChange((_e, s) => fn(s)).data.subscription;
+export const onAuth = (fn: (s: Session | null, event: string) => void) => supabase().auth.onAuthStateChange((e, s) => fn(s, e)).data.subscription;
 export async function sendSignIn(email: string) {
   const { error } = await supabase().auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname } });
   if (error) throw err(error.status === 429 ? "rate_limited" : "auth", error.message);
@@ -141,6 +141,11 @@ export async function verifyPhoneCode(phone: string, token: string) {
   const { error } = await supabase().auth.verifyOtp({ phone, token, type: "sms" });
   if (error) throw err("auth", error.message);
 }
+/** Emails a link to set a new password. The link opens the app with a recovery session (the PASSWORD_RECOVERY event). */
+export async function sendPasswordReset(email: string) {
+  const { error } = await supabase().auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  if (error) throw err(error.status === 429 ? "rate_limited" : "auth", error.message);
+}
 /** Sign out here, or on every device (revokes every session's refresh token). */
 export const signOut = (everywhere = false) => supabase().auth.signOut({ scope: everywhere ? "global" : "local" });
 
@@ -155,14 +160,16 @@ export async function whoami(): Promise<Me> {
   return { staff_email: d.staff, two_step: false, aal: "aal1", ...d, email };
 }
 
-/* Sign in with Google or Microsoft. Each shows only when it's turned on in Supabase (Authentication, Providers). */
+/* Sign in with Google, Microsoft or a phone number. Each shows only when it's turned on in Supabase (Authentication, Providers);
+   phone also needs an SMS provider there. Anything the settings don't confirm stays hidden. */
 export type Provider = "google" | "azure";
-export async function authProviders(): Promise<Record<Provider, boolean>> {
+export type SignInOptions = Record<Provider | "phone", boolean>;
+export async function authProviders(): Promise<SignInOptions> {
   try {
     const res = await net(`${URL_}/auth/v1/settings`, { headers: { apikey: KEY } });
     const j = await res.json() as { external?: Record<string, boolean> };
-    return { google: !!j.external?.google, azure: !!j.external?.azure };
-  } catch { return { google: false, azure: false }; }
+    return { google: !!j.external?.google, azure: !!j.external?.azure, phone: j.external?.phone === true };
+  } catch { return { google: false, azure: false, phone: false }; }
 }
 /** Where accounts and data live (the Supabase project's region). */
 export const REGION = { id: "us", label: { en: "United States", zh: "美国" } } as const;
@@ -421,6 +428,9 @@ async function rpcVoid(name: string, args: Record<string, unknown>) {
 export const revokeInvite = (id: string) => rpcVoid("revoke_invite", { p_id: id });
 export const setRole = (ws: string, user: string, role: Role) => rpcVoid("set_member_role", { ws, p_user: user, p_role: role });
 export const removeMember = (ws: string, user: string) => fn<{ removed: string }>("team", { action: "remove", workspace_id: ws, user_id: user });
+/** Deletes the signed-in account: workspaces it owns alone go with it, other memberships end. Refused while one of those
+   workspaces has a paid plan running (code subscription_active), and needs two-step first when it's on (mfa_required). */
+export const deleteAccount = () => fn<{ deleted: true; workspaces: number }>("team", { action: "delete_account", confirm: "DELETE" });
 
 export type LocationPrice = { amount: number; currency: string; interval: string | null; interval_count: number | null };
 export const locationPrices = (ws: string) => fn<{ location: LocationPrice | null; opening: LocationPrice | null }>("billing", { action: "prices", workspace_id: ws, return_url: location.origin + location.pathname });

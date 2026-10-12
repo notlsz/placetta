@@ -252,9 +252,12 @@ We do not sell personal information. We do not use it for advertising. We do not
 Only the following process your information, and only to run the service:
 
 - Supabase stores your workspace, documents and audit log in its US East region.
-- Anthropic processes content with its Claude models so the agent can do its work.
-- Microsoft Azure turns the agent's replies into speech when the app speaks them.
+- Anthropic processes content with its Claude models so the agent can do its work. Where we configure it, some of that work goes instead to models from OpenAI, Google (Gemini), DeepSeek, OpenRouter or Groq.
+- Microsoft Azure Speech turns the agent's replies into speech when the app speaks them.
 - Stripe processes payments.
+- Resend delivers the emails we send you, such as deadline reminders and filing updates.
+- Telnyx sends the applications we file by fax.
+- Lob prints and mails the applications we file by mail.
 - Placetta checks and submits the applications you approve, by email, fax, certified mail or the agency's website, with our filing team as backup.
 - Government agencies receive the applications you approve.
 - The services you connect, as described below.
@@ -295,7 +298,7 @@ No system is perfectly secure. If you think someone else has accessed your works
 ## Your choices and rights
 
 - Download your workspace data from Settings.
-- Ask us to delete your data by emailing support@placetta.com.
+- Delete your account in Settings, or ask us to delete your data by emailing support@placetta.com.
 - Disconnect integrations in Settings.
 - Revoke your Filing Authorization by emailing support@placetta.com.
 
@@ -361,9 +364,12 @@ const PRIVACY_ZH = `本政策说明企业使用 placetta.com 和快哉应用时�
 只有以下各方会处理您的信息，且仅为运行本服务：
 
 - Supabase：在其美国东部区域存储您的工作区、文件和审计记录。
-- Anthropic：通过其 Claude 模型处理内容，使智能体能够完成工作。
-- Microsoft Azure：应用朗读回复时，将智能体的回复转换为语音。
+- Anthropic：通过其 Claude 模型处理内容，使智能体能够完成工作。在我们配置的情况下，部分工作改由 OpenAI、Google（Gemini）、DeepSeek、OpenRouter 或 Groq 的模型处理。
+- Microsoft Azure Speech：应用朗读回复时，将智能体的回复转换为语音。
 - Stripe：处理付款。
+- Resend：发送我们发给您的邮件，例如截止日期提醒和申报进展。
+- Telnyx：以传真方式发送我们提交的申请。
+- Lob：打印并邮寄我们以邮寄方式提交的申请。
 - 我们的申报团队：核对并提交您批准的申请。
 - 政府机构：接收您批准的申请。
 - 您连接的服务：详见下文“集成”。
@@ -404,7 +410,7 @@ const PRIVACY_ZH = `本政策说明企业使用 placetta.com 和快哉应用时�
 ## 您的选择和权利
 
 - 在“设置”中下载您的工作区数据。
-- 发邮件至 support@placetta.com，要求删除您的数据。
+- 在“设置”中删除账户，或发邮件至 support@placetta.com，要求删除您的数据。
 - 在“设置”中断开集成。
 - 发邮件至 support@placetta.com，撤销申报授权。
 

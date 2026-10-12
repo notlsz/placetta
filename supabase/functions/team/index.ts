@@ -3,18 +3,23 @@
 //   invite {email, role: "owner" | "member", return_url?}   owners: records the invite (the database checks and audits it), then emails it
 //   resend {id, return_url?}                                owners: emails an open invite again
 //   remove {user_id}                                        owners remove anyone; anyone can remove themselves (leave)
+//   delete_account {confirm: "DELETE"}                      no workspace_id: deletes the caller's account (see deleteAccount)
 // The invite is accepted when that email signs in (accept_invites in the database), so the email only has to get them to sign in:
 // new people get Supabase's invite email, people with an account get a sign-in link.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, type User } from "npm:@supabase/supabase-js@2";
 import {
+  aalOf,
   admin,
   allowedReturn,
   appOrigins,
+  audit,
   HttpError,
+  json,
   ok,
   readBody,
   requireAccess,
   requireUser,
+  same,
   serve,
   SUPABASE_URL,
   text,
@@ -41,9 +46,101 @@ async function sendInvite(email: string, redirectTo: string | undefined): Promis
   return "sign_in_link";
 }
 
+/** A paid plan still running (Stripe would keep charging it): the account can't be deleted until it's canceled. */
+const PAID = ["active", "trialing", "past_due"];
+
+/** Every stored file under a workspace's folder in the documents bucket (paths are ws/..., at most a few folders deep). */
+async function storedFiles(prefix: string, depth = 0, out: string[] = []): Promise<string[]> {
+  if (depth > 4 || out.length > 5000) return out;
+  const { data, error } = await admin.storage.from("documents").list(prefix, { limit: 1000 });
+  if (error) {
+    console.error("storage list failed:", (error.message ?? "").slice(0, 160));
+    return out;
+  }
+  for (const o of data ?? []) {
+    const path = `${prefix}/${o.name}`;
+    if (o.id === null) await storedFiles(path, depth + 1, out); // a folder
+    else out.push(path);
+  }
+  return out;
+}
+
+/**
+ * delete_account {confirm: "DELETE"}: the signed-in person deletes their account.
+ * Workspaces they own alone are deleted with everything in them (refused while one has a paid plan running);
+ * on the others they just leave. Then the auth user is deleted. Two-step first when it's on.
+ */
+async function deleteAccount(user: User, jwt: string, body: Record<string, unknown>): Promise<Response> {
+  if (body.confirm !== "DELETE") throw new HttpError("bad_request", "Type DELETE to confirm.");
+  const { data: mfa, error: mfaError } = await admin.auth.admin.mfa.listFactors({ userId: user.id });
+  const factors = mfaError ? (user.factors ?? []) : (mfa?.factors ?? []);
+  if (factors.some((f) => f.status === "verified") && aalOf(jwt) !== "aal2") {
+    throw new HttpError("mfa_required", "Finish two-step sign-in to delete your account.");
+  }
+
+  const { data: mine, error } = await admin.from("workspace_members").select("workspace_id, role").eq("user_id", user.id);
+  if (error) throw new Error(`membership lookup failed: ${error.code ?? ""}`);
+  const owned = (mine ?? []).filter((m) => m.role === "owner").map((m) => m.workspace_id as string);
+  const others = (mine ?? []).filter((m) => m.role !== "owner").map((m) => m.workspace_id as string);
+  // Workspaces where this person is the only owner go with the account; where another owner remains, they just leave.
+  const alone: string[] = [];
+  if (owned.length) {
+    const { data: owners, error: ownersError } = await admin.from("workspace_members").select("workspace_id, user_id").in("workspace_id", owned).eq("role", "owner");
+    if (ownersError) throw new Error(`owner lookup failed: ${ownersError.code ?? ""}`);
+    for (const ws of owned) {
+      if ((owners ?? []).some((o) => o.workspace_id === ws && o.user_id !== user.id)) others.push(ws);
+      else alone.push(ws);
+    }
+  }
+
+  if (alone.length) {
+    const { data: paid, error: billingError } = await admin.from("billing").select("workspace_id").in("workspace_id", alone).in("subscription_status", PAID);
+    if (billingError) throw new Error(`billing lookup failed: ${billingError.code ?? ""}`);
+    if (paid?.length) {
+      const { data: names } = await admin.from("workspaces").select("name").in("id", paid.map((p) => p.workspace_id as string));
+      const list = (names ?? []).map((n) => n.name as string).join(", ");
+      return json({ error: { code: "subscription_active", message: `Cancel the paid plan for ${list || "your workspace"} in Manage billing first, then delete your account.` } }, 409);
+    }
+  }
+
+  // Leave the shared workspaces, with a line in each audit trail.
+  if (others.length) {
+    const { error: leaveError } = await admin.from("workspace_members").delete().eq("user_id", user.id).in("workspace_id", others);
+    if (leaveError) throw new Error(`leaving workspaces failed: ${leaveError.code ?? ""}`);
+    for (const ws of others) {
+      await audit({ workspace_id: ws, actor: "you", actor_id: null, action: { en: "Deleted their account and left the workspace", zh: "删除了账户并离开了工作区" }, object: same(user.email ?? user.phone ?? "") });
+    }
+  }
+
+  // Delete the workspaces they owned alone. Members, billing, filings, documents, the audit trail and the rest cascade.
+  if (alone.length) {
+    const files = (await Promise.all(alone.map((ws) => storedFiles(ws)))).flat();
+    const { error: wsError } = await admin.from("workspaces").delete().in("id", alone);
+    if (wsError) throw new Error(`workspace deletion failed: ${wsError.code ?? ""}`);
+    for (let i = 0; i < files.length; i += 100) {
+      const { error: rmError } = await admin.storage.from("documents").remove(files.slice(i, i + 100));
+      if (rmError) console.error("storage remove failed:", (rmError.message ?? "").slice(0, 160));
+    }
+  }
+
+  const { error: pinError } = await admin.from("account_pins").delete().eq("user_id", user.id);
+  if (pinError) console.error("pin removal failed:", pinError.code ?? "");
+
+  // The account itself. A hard delete needs the auth.users references set to "on delete set null"
+  // (migration 20261012200000_account_deletion); until that's applied, a soft delete scrubs the account instead.
+  const { error: delError } = await admin.auth.admin.deleteUser(user.id);
+  if (delError) {
+    console.error("hard delete failed, soft deleting:", (delError.message ?? "").slice(0, 160));
+    const { error: softError } = await admin.auth.admin.deleteUser(user.id, true);
+    if (softError) throw new Error(`account deletion failed: ${(softError.message ?? "").slice(0, 120)}`);
+  }
+  return ok({ deleted: true, workspaces: alone.length });
+}
+
 serve(async (req) => {
   const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
+  if (body.action === "delete_account") return await deleteAccount(user, jwt, body);
   const ws = uuidParam(body.workspace_id, "workspace_id");
 
   if (body.action === "remove") {
