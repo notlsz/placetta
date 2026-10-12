@@ -1543,6 +1543,8 @@ html[lang="en"] .ox .cnq p,html[lang="en"] .cnq.ox p{font-family:inherit;font-si
 .t28{letter-spacing:-.01em}
 @media (min-width:1024px){.t28{font-size:32px}}
 .ctas .ctah,.ctas p.ctah{font-size:clamp(40px,5.6vw,80px);line-height:1;letter-spacing:-.025em}
+@media (min-width:1024px){.ctas .ctah,.ctas p.ctah{max-width:1200px;font-size:clamp(40px,5vw,74px)}}
+@media (max-width:1023px){.ctas .ctah,.ctas p.ctah{max-width:none;font-size:min(7vw,52px)}}   /* line one fits on one line, Hire Odelia sits on its own */
 .pst b{letter-spacing:-.02em}
 @media (min-width:1024px){.pst b{font-size:52px}}
 .ds b,.ox .ds b,.ds.ox b{font-size:36px;letter-spacing:-.02em}
@@ -1904,7 +1906,7 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .frcap{margin-top:14px;text-align:center;font-size:14px;color:var(--ink2)}
 /* industries: Alven's "does what property managers do" sticky list + grey panel */
 .insec{margin-top:160px}
-@media (min-width:1024px){.inscroll{height:550vh}.instick{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center}}
+@media (min-width:1024px){.inscroll{height:320vh}.instick{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center}}
 .inrow{display:flex;flex-direction:column;gap:24px}
 @media (min-width:1024px){.inrow{flex-direction:row;justify-content:space-between;align-items:stretch;gap:40px;height:min(719px,calc(100vh - 120px))}}
 .inl{display:flex;flex-direction:column;gap:24px}
@@ -2114,6 +2116,7 @@ body .agi .agk-p .agt,body .agi .agk-m .agt{color:#24406F!important}
 
 /* backed by operators: a quiet wall of marks, ink on the card grey, no rules */
 .bkh{margin-bottom:28px}
+#backers{padding-top:136px}@media (max-width:767px){#backers{padding-top:88px}}
 @media (min-width:1024px){.bkh{margin-bottom:40px}}
 .bkg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}
 @media (min-width:640px){.bkg{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -2124,6 +2127,7 @@ body .agi .agk-p .agt,body .agi .agk-m .agt{color:#24406F!important}
 .bkg img{display:block;width:30px;height:30px;object-fit:contain;opacity:.82;-webkit-user-drag:none;user-select:none}
 .bkg span{font-size:14px;line-height:1.25;letter-spacing:-.14px;color:var(--ink);font-weight:500}
 .bkg li.nm span{font-family:var(--serif);font-weight:400;font-size:19px;letter-spacing:-.2px}
+.bkg li.wm img{width:104px;height:104px;margin:-37px 0}.bkg li.wm span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}@media (max-width:767px){.bkg li.wm img{width:76px;height:76px;margin:-26px 0}}
 html[lang="zh-CN"] .bkg li.nm span{font-family:var(--zhserif)}
 
 .hbk{display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-top:22px;font-size:13.5px;line-height:1.35;color:rgba(255,255,255,.86);text-decoration:none}
@@ -2689,7 +2693,7 @@ html[lang="zh-CN"] .bkg li.nm span{font-family:var(--zhserif)}
 <!-- ======================= FINAL CTA ======================= -->
 <section class="ctas rv" data-rv="up" aria-labelledby="finalH">
   <div>
-    <h2 class="ctah" id="finalH" data-i18n="final.h">Stay ahead of your competitors. Hire Odelia.</h2>
+    <h2 class="ctah" id="finalH" data-i18n="final.h">Stay ahead of your competitors.<br>Hire Odelia.</h2>
     <div class="stwrap light">
       <form class="starter" data-src="final" novalidate>
         <label class="sr" for="st-final" data-i18n="st.label">Where are you opening?</label>
@@ -2796,7 +2800,7 @@ en:{
  "fqr.t":"Prefer WeChat? Scan to add Placetta.", "wt.qr":"Scan to open Placetta on your phone",
  "q.wc":"Prefer WeChat? Scan to add Placetta.",
  "mon.cnt2":"{n} tracked", "mon.dl6":"Next 6 months", "mon.d1":"1 day", "mon.dn":"{n} days",
- "final.h":"Stay ahead of your competitors. Hire Odelia.",
+ "final.h":"Stay ahead of your competitors.<br>Hire Odelia.",
  "map.any":"Choose a market", "map.anyus":"Choose a state", "map.q":"Search countries and regions", "map.qus":"Search states", "map.none":"No match. Try another name.",
  "mon.i.high":"High", "mon.i.med":"Medium", "mon.i.low":"Watch", "mon.l.means":"What it means for you", "mon.l.next":"What to do next", "mon.plan":"Get a plan for {m}", "mon.dl":"Upcoming deadlines", "mon.alert":"Get alerts for my markets", "mon.live":"Live feed, every change linked to its source", "mon.all":"See all {n} changes",
  "app.t1":"Entry plan", "app.t2":"Filings", "app.t3":"Documents", "app.t4":"Renewals",
@@ -2834,7 +2838,7 @@ en:{
  "f3.h":"Kept current after you open", "f3.p":"Renewal dates, inspections and rule changes, tracked for every location.", "f3.r1":"Health permit", "f3.r1d":"Due in 30 days", "f3.r2":"Business tax certificate", "f3.r2d":"Renews Jan 2027", "f3.r3":"Fire inspection", "f3.r3d":"Due Jun 2027", "f3.r4":"New city rule on menu labels", "f3.r4d":"Action needed", "f3.t":"Health permit renewal filed", "f3.ts":"Santa Clara County DEH, just now",
  "feat.note":"Product screens show sample data.",
  "mon.h2":"Rules change after you open.<br>We tell you what to do.",
- "proof.h":"Brands open sooner with Placetta.", "bk.h":"Backed by operators from", "bk.hero":"Backed by operators from OpenAI, Anthropic, SpaceX and 15 more", "pf.s2b":"new US businesses served by our team each day, on average", "sec.h":"Security", "sec.link":"Read our privacy policy", "sec.1":"Agency logins encrypted in a vault", "sec.2":"Every use of a login is logged", "sec.3":"A full audit trail of every action", "sec.4":"Nothing filed, paid or sent without your approval", "sec.5":"Payments run through Stripe, and we never see full card numbers", "sec.6":"Your content is never sold or used to train AI models", "proof.sub":"Operators in their own words, and the entry plans we map for brands like theirs.",
+ "proof.h":"Brands open sooner with Placetta.", "bk.h":"Backed by operators from", "bk.hero":"Backed by operators from OpenAI, Anthropic, SpaceX and 21 more", "pf.s2b":"new US businesses served by our team each day, on average", "sec.h":"Security", "sec.link":"Read our privacy policy", "sec.1":"Agency logins encrypted in a vault", "sec.2":"Every use of a login is logged", "sec.3":"A full audit trail of every action", "sec.4":"Nothing filed, paid or sent without your approval", "sec.5":"Payments run through Stripe, and we never see full card numbers", "sec.6":"Your content is never sold or used to train AI models", "proof.sub":"Operators in their own words, and the entry plans we map for brands like theirs.",
  "price.sub":"$149 per location a month, billed yearly. Headquarters signs once, and each franchisee pays for its own stores.",
  "faq.sub":"Something else? Email <a href=\"mailto:support@placetta.com\">support@placetta.com</a>."
 },
@@ -2879,7 +2883,7 @@ zh:{
  "fqr.t":"更习惯用微信？扫码添加快哉。", "wt.qr":"扫码在手机上打开快哉",
  "q.wc":"更习惯用微信？扫码添加快哉。",
  "mon.cnt2":"共 {n} 条", "mon.dl6":"未来 6 个月", "mon.d1":"1 天", "mon.dn":"{n} 天",
- "final.h":"领先对手，让 Odelia 加入您的团队。",
+ "final.h":"领先对手。<br>让 Odelia 加入您的团队。",
  "map.any":"选择市场", "map.anyus":"选择州", "map.q":"搜索国家和地区", "map.qus":"搜索州", "map.none":"没有匹配项，请换个名称试试。",
  "mon.live":"实时更新，每条变化均附来源", "mon.all":"查看全部 {n} 条变化", "mon.i.high":"较大", "mon.i.med":"中等", "mon.i.low":"关注", "mon.l.means":"对您意味着什么", "mon.l.next":"下一步该做什么", "mon.plan":"获取{m}开店计划", "mon.dl":"即将到来的截止日期", "mon.alert":"订阅我的市场提醒",
  "app.t1":"开店计划", "app.t2":"申报", "app.t3":"文件", "app.t4":"续期",
@@ -2917,7 +2921,7 @@ zh:{
  "f3.h":"开业之后，持续合规", "f3.p":"所有门店的续期日期、检查和规则变化，全部跟踪。", "f3.r1":"卫生许可", "f3.r1d":"30 天后到期", "f3.r2":"营业税证书", "f3.r2d":"2027年1月续期", "f3.r3":"消防年检", "f3.r3d":"2027年6月到期", "f3.r4":"市里新规：菜单标签", "f3.r4d":"需要处理", "f3.t":"卫生许可续期已提交", "f3.ts":"圣克拉拉县环境卫生局，刚刚",
  "feat.note":"产品界面中的数据均为示例。",
  "mon.h2":"开店之后，规则仍在变化。<br>我们告诉您该怎么做。",
- "proof.h":"品牌借助快哉，更早开业。", "bk.h":"我们的投资人来自", "bk.hero":"投资人来自 OpenAI、Anthropic、SpaceX 等 18 家公司", "pf.s2b":"我们团队平均每天服务的美国新企业", "sec.h":"数据安全", "sec.link":"阅读隐私政策", "sec.1":"政府网站登录信息加密存放于保险库", "sec.2":"每次使用登录信息都有记录", "sec.3":"每一步操作都有完整审计记录", "sec.4":"未经您批准，不提交、不付款、不发送", "sec.5":"付款由 Stripe 处理，我们看不到完整卡号", "sec.6":"您的内容绝不出售，也不用于训练 AI 模型", "proof.sub":"听听加盟商怎么说，再看看我们为同类品牌梳理的开店计划。",
+ "proof.h":"品牌借助快哉，更早开业。", "bk.h":"我们的投资人来自", "bk.hero":"投资人来自 OpenAI、Anthropic、SpaceX 等 24 家公司", "pf.s2b":"我们团队平均每天服务的美国新企业", "sec.h":"数据安全", "sec.link":"阅读隐私政策", "sec.1":"政府网站登录信息加密存放于保险库", "sec.2":"每次使用登录信息都有记录", "sec.3":"每一步操作都有完整审计记录", "sec.4":"未经您批准，不提交、不付款、不发送", "sec.5":"付款由 Stripe 处理，我们看不到完整卡号", "sec.6":"您的内容绝不出售，也不用于训练 AI 模型", "proof.sub":"听听加盟商怎么说，再看看我们为同类品牌梳理的开店计划。",
  "price.sub":"每家门店每月 149 美元，按年计费。总部签约一次，每位加盟商为自己的门店付费。",
  "faq.sub":"还有其他问题？请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"
 }};
@@ -3521,11 +3525,12 @@ const INV = [
   {k:"sequoia", n:["Sequoia","红杉资本"], h:16}, {k:"hillhouse", n:["Hillhouse Investment","高瓴投资"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}, {k:"azureworld", n:["AzureWorld","湛蓝领域"], h:38}
 ];
 /* backers: operators who invested in Placetta, shown with their company's mark; a missing file falls back to the name */
-const BK = [["openai","OpenAI","OpenAI","png"],["anthropic","Anthropic","Anthropic"],["spacex","SpaceX","SpaceX"],["tesla","Tesla","特斯拉"],["amazon","Amazon","亚马逊"],["deepmind","Google DeepMind","Google DeepMind"],["deepseek","DeepSeek","深度求索"],["janestreet","Jane Street","Jane Street"],["deshaw","D. E. Shaw","D. E. Shaw"],["renaissance","Renaissance Technologies","文艺复兴科技"],["cursor","Cursor","Cursor"],["nvidia","NVIDIA","英伟达"],["google","Google","谷歌"],["baidu","Baidu","百度"],["tencent","Tencent","腾讯"],["bytedance","ByteDance","字节跳动"],["alibaba","Alibaba","阿里巴巴"],["huawei","Huawei","华为"]];
-const BK_FILES = new Set(["openai","anthropic","spacex","tesla","deepmind","deepseek","cursor","nvidia","google","baidu","bytedance","alibaba","huawei"]);
+const BK = [["openai","OpenAI","OpenAI","png"],["anthropic","Anthropic","Anthropic"],["spacex","SpaceX","SpaceX"],["tesla","Tesla","特斯拉"],["amazon","Amazon","亚马逊"],["deepmind","Google DeepMind","Google DeepMind"],["deepseek","DeepSeek","深度求索"],["janestreet","Jane Street","Jane Street"],["deshaw","D. E. Shaw","D. E. Shaw"],["renaissance","Renaissance Technologies","文艺复兴科技"],["cursor","Cursor","Cursor"],["nvidia","NVIDIA","英伟达"],["google","Google","谷歌"],["baidu","Baidu","百度"],["tencent","Tencent","腾讯"],["bytedance","ByteDance","字节跳动"],["alibaba","Alibaba","阿里巴巴"],["huawei","Huawei","华为"],["goldmansachs","Goldman Sachs","高盛"],["merrilllynch","Merrill Lynch","美林"],["deutschebank","Deutsche Bank","德意志银行"],["blackstone","Blackstone","黑石"],["binance","Binance","币安"],["coinbase","Coinbase","Coinbase"]];
+const BK_WORD = new Set(["goldmansachs","coinbase"]);   // marks that are themselves the wordmark: shown large, the name label hidden
+const BK_FILES = new Set(["openai","anthropic","spacex","tesla","amazon","deepmind","deepseek","cursor","nvidia","google","baidu","tencent","bytedance","alibaba","huawei","goldmansachs","deutschebank","binance","coinbase"]);
 function renderBk(){ const hb = document.getElementById("hBk"); if (hb) hb.innerHTML = `<span class="hbkm" aria-hidden="true">${BK.filter(b => BK_FILES.has(b[0])).slice(0, 5).map(([k, , , ext]) => `<img src="logos/backers/${k}.${ext || "svg"}" alt="" decoding="async" draggable="false">`).join("")}</span><span>${esc(t("bk.hero"))}</span>`;
   const el = document.getElementById("bkG"); if (!el) return; const i = L();
-  el.innerHTML = BK.map(([k, en, zh, ext]) => `<li${BK_FILES.has(k) ? "" : ' class="nm"'}>${BK_FILES.has(k) ? `<img src="logos/backers/${k}.${ext || "svg"}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false">` : ""}<span>${esc(i ? zh : en)}</span></li>`).join(""); }
+  el.innerHTML = BK.map(([k, en, zh, ext]) => `<li${BK_FILES.has(k) ? (BK_WORD.has(k) ? ' class="wm"' : "") : ' class="nm"'}>${BK_FILES.has(k) ? `<img src="logos/backers/${k}.${ext || "svg"}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false">` : ""}<span>${esc(i ? zh : en)}</span></li>`).join(""); }
 function renderInv(){ if (!document.getElementById("invR")) return; const i = L(); document.getElementById("invR").innerHTML = INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${esc(v.n[i])}" style="--h:${v.h}px" loading="lazy" decoding="async">`).join(""); }
 function renderStrip(){
   const item = (b, hide) => {
@@ -4413,7 +4418,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     for (let r = 0; r < ah; r++) for (let c = 0; c < cols; c++) {
       const v0 = L[r * cols + c], v = v0 + .5 * (v0 - B[r * cols + c]);   // unsharp: edges and stripes pop
       const w2 = Math.min(1, Math.max(0, (v - .035) / .66)) * fade(c, cols, cols * .07) * fade(r, ah, ah * .1) * spot(c, r);
-      if (eyes.some(([ex, ey]) => Math.hypot(c - ex, (r - ey) * 1.6) <= Math.max(1.2, cols / 140))) { out.push({c, r, ty: 8, rgb: [255, 186, 72]}); continue; }   // the tiger's eyes, amber
+      if (eyes.some(([ex, ey]) => Math.hypot(c - ex, (r - ey) * 1.6) <= Math.max(1.2, cols / 140))) { out.push({c, r, ty: 7, lum: 1}); continue; }   // the tiger's eyes, the brightest tiles
       if (w2 > .05) out.push({c, r, ty: 7, lum: Math.pow(w2, 1.25)});
     }
     return out;
@@ -4442,7 +4447,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       if (n < 5) continue;
       let rgb;
       if (glow >= 2) rgb = [70, 205, 255];                         // the visor
-      else if (dark > n * .45) rgb = [58, 66, 86];                   // black joints, gloves and feet as graphite
+      else if (dark > n * .45) rgb = [70, 78, 98];                   // black joints, gloves and feet: the dim end of the ramp
       else { const v = Math.min(1, Math.max(0, (lum / (n - dark) - 80) / 160)); rgb = [Math.round(120 + 128 * v), Math.round(132 + 116 * v), Math.round(156 + 96 * v)]; }   // brushed silver
       out.push({c, r, ty: 8, rgb});
     }
@@ -4520,7 +4525,9 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     sc = Math.min(cols / 1000, rows / 420) * .84; ox = (cols - 1000 * sc) / 2; oy = (rows - 420 * sc) / 2 - rows * .06;
     if (cur >= 0 && !PHOTO[cur]) { const k = cur; tiles = []; go(k); }
   }
-  const COL = [[115, 153, 198], [10, 20, 38], [214, 228, 242], [92, 104, 126], [64, 205, 255], [172, 188, 208], [38, 60, 96]];   // body, dark detail, light, graphite joint, visor glow, brushed metal
+  const COL = [[115, 153, 198], [10, 20, 38], [214, 228, 242], [92, 104, 126], [64, 205, 255], [172, 188, 208], [38, 60, 96]];
+  // the palette as a ramp, dim navy blue to body blue to near white: photo-traced sectors (the robot, the tiger) are shaded along it
+  const ramp = v => { v = Math.min(1, Math.max(0, v)); const A = [34, 54, 92], M = COL[0], Z = COL[2], [p, q, w] = v < .5 ? [A, M, v * 2] : [M, Z, v * 2 - 1]; return [p[0] + (q[0] - p[0]) * w, p[1] + (q[1] - p[1]) * w, p[2] + (q[2] - p[2]) * w]; };   // body, dark detail, light, graphite joint, visor glow, brushed metal
   function frame(now){
     if (!W) return;
     const t = RM ? 0 : (now - t0) / 1000, u0 = RM ? 1 : Math.min(1, (now - tA) / 1100);
@@ -4531,12 +4538,13 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       const u = ease(Math.min(1, Math.max(0, (u0 * 1.35 - x.j * .35)))) ;
       const c = x.fc + (x.tc - x.fc) * u, r = x.fr + (x.tr - x.fr) * u + (u === 1 && !RM ? Math.sin(t * 1.6 + x.tc * .18) * .12 : 0);
       const a = x.a0 + (1 - x.a0) * u, ty = u > .5 ? x.ty : x.fty;
-      if (ty === 8) {   // a robot tile in its photo colour, with a slow sheen
+      if (ty === 8) {   // a robot tile: its photo brightness on the same blue ramp as every other sector, the visor keeps its glow, with a slow sheen
         const q = (u > .5 ? x.rgb : x.frgb) || [170, 186, 206], sh = 10 * Math.max(0, Math.sin(t * 1.3 - x.tc * .07 + x.tr * .03));
-        g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, q[0] + sh)},${Math.min(255, q[1] + sh)},${Math.min(255, q[2] + sh)})`;
+        const c3 = q[2] > q[0] + 100 ? COL[4] : ramp((q[0] * .3 + q[1] * .59 + q[2] * .11 - 58) / 190);
+        g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, c3[0] + sh)},${Math.min(255, c3[1] + sh)},${Math.min(255, c3[2] + sh)})`;
       } else if (ty === 7) {   // a photo tile: its own shade, cool grey from the navy up to near white
-        const v = (u > .5 ? x.lum : x.flum) ?? .6, sh = 5 * Math.max(0, Math.sin(t * 1.2 - x.tc * .08));
-        g.globalAlpha = a; g.fillStyle = `rgb(${Math.round(22 + 226 * v + sh)},${Math.round(32 + 216 * v + sh)},${Math.round(54 + 196 * v + sh)})`;
+        const v = (u > .5 ? x.lum : x.flum) ?? .6, sh = 5 * Math.max(0, Math.sin(t * 1.2 - x.tc * .08)), c3 = ramp(v);
+        g.globalAlpha = a; g.fillStyle = `rgb(${Math.round(c3[0] + sh)},${Math.round(c3[1] + sh)},${Math.round(c3[2] + sh)})`;
       } else {
         const base = COL[ty], light = ty === 1 || ty === 4 ? 0 : ty === 3 || ty === 6 ? 8 : (1 - x.tr / rows) * 30 + 22 * Math.max(0, Math.sin(t * 1.2 - x.tc * .12));
         g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, base[0] + light)},${Math.min(255, base[1] + light)},${Math.min(255, base[2] + light * .8)})`;
