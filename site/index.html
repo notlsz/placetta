@@ -2111,6 +2111,28 @@ body .ptcur em{border-radius:4px}
 body .agi .agk-f .agt{color:#fff!important}
 body .agi .agk-p .agt,body .agi .agk-m .agt{color:#24406F!important}
 .lg.big img{height:54px!important;margin:-9px 0}
+
+/* backed by operators: a quiet wall of marks, ink on the card grey, no rules */
+.bkh{margin-bottom:28px}
+@media (min-width:1024px){.bkh{margin-bottom:40px}}
+.bkg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}
+@media (min-width:640px){.bkg{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1024px){.bkg{grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}}
+.bkg li{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:112px;padding:18px 12px;border-radius:14px;background:var(--card);text-align:center;transition:background .25s}
+@media (min-width:1024px){.bkg li{min-height:132px}}
+.bkg li:hover{background:#E8ECF2}
+.bkg img{display:block;width:30px;height:30px;object-fit:contain;opacity:.82;-webkit-user-drag:none;user-select:none}
+.bkg span{font-size:14px;line-height:1.25;letter-spacing:-.14px;color:var(--ink);font-weight:500}
+.bkg li.nm span{font-family:var(--serif);font-weight:400;font-size:19px;letter-spacing:-.2px}
+html[lang="zh-CN"] .bkg li.nm span{font-family:var(--zhserif)}
+
+.hbk{display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-top:22px;font-size:13.5px;line-height:1.35;color:rgba(255,255,255,.86);text-decoration:none}
+.hbk:hover{color:#fff}
+.hbkm{display:inline-flex;align-items:center;gap:10px}
+.hbkm img{width:18px;height:18px;object-fit:contain;filter:brightness(0) invert(1);opacity:.9}
+@media (max-width:639px){.bkg{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.bkg li{min-height:92px;padding:12px 6px;gap:8px;border-radius:12px}.bkg img{width:24px;height:24px}.bkg span{font-size:12px}.bkg li.nm span{font-size:15px}.hbk{font-size:12.5px;margin-top:16px}}
+@media (min-width:1024px) and (max-height:820px){.hbk{margin-top:12px}.hero h1{font-size:54px;line-height:1.02}.hsub{font-size:17px}}
+@media (min-width:1024px) and (max-height:740px){.hero h1{font-size:48px}.hsub{font-size:16px;line-height:1.42}.hbk{margin-top:10px}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2179,6 +2201,7 @@ body .agi .agk-p .agt,body .agi .agk-m .agt{color:#24406F!important}
           </form>
           <p class="stalt"><a href="/app/" data-track="hero_try_agent"><span data-i18n="hero.try">Put Odelia to work</span><i aria-hidden="true">→</i></a><a href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo"><span data-i18n="hero.demo">Book a demo</span><i aria-hidden="true">→</i></a></p>
         </div>
+        <a class="hbk" href="#backers" id="hBk"></a>
       </div>
     </div>
     <div class="hbot"><p data-i18n="brands.l">Franchise operators of</p><div class="mq" aria-label="Brands" data-i18n-aria="aria.brands"><div class="mqt" id="mqt"></div></div></div>
@@ -2527,6 +2550,14 @@ body .agi .agk-p .agt,body .agi .agk-m .agt{color:#24406F!important}
   </div>
 </section>
 
+<!-- ======================= BACKED BY OPERATORS ======================= -->
+<section class="mt160 rv" data-rv="up" id="backers" aria-labelledby="bkH">
+  <div class="ctr">
+    <p class="t28 bkh" id="bkH" data-i18n="bk.h">Backed by operators from</p>
+    <ul class="bkg" id="bkG"></ul>
+  </div>
+</section>
+
 <!-- ======================= EXPERTS ======================= -->
 <section class="mt160 rv" data-rv="up" id="experts" aria-labelledby="xpH">
   <div class="ctr">
@@ -2785,7 +2816,7 @@ en:{
  "f3.h":"Kept current after you open", "f3.p":"Renewal dates, inspections and rule changes, tracked for every location.", "f3.r1":"Health permit", "f3.r1d":"Due in 30 days", "f3.r2":"Business tax certificate", "f3.r2d":"Renews Jan 2027", "f3.r3":"Fire inspection", "f3.r3d":"Due Jun 2027", "f3.r4":"New city rule on menu labels", "f3.r4d":"Action needed", "f3.t":"Health permit renewal filed", "f3.ts":"Santa Clara County DEH, just now",
  "feat.note":"Product screens show sample data.",
  "mon.h2":"Rules change after you open.<br>We tell you what to do.",
- "proof.h":"Brands open sooner with Placetta.", "pf.s2b":"new US businesses served by our team each day, on average", "sec.h":"Security", "sec.link":"Read our privacy policy", "sec.1":"Agency logins encrypted in a vault", "sec.2":"Every use of a login is logged", "sec.3":"A full audit trail of every action", "sec.4":"Nothing filed, paid or sent without your approval", "sec.5":"Payments run through Stripe, and we never see full card numbers", "sec.6":"Your content is never sold or used to train AI models", "proof.sub":"Operators in their own words, and the entry plans we map for brands like theirs.",
+ "proof.h":"Brands open sooner with Placetta.", "bk.h":"Backed by operators from", "bk.hero":"Backed by operators from OpenAI, Anthropic, SpaceX and 15 more", "pf.s2b":"new US businesses served by our team each day, on average", "sec.h":"Security", "sec.link":"Read our privacy policy", "sec.1":"Agency logins encrypted in a vault", "sec.2":"Every use of a login is logged", "sec.3":"A full audit trail of every action", "sec.4":"Nothing filed, paid or sent without your approval", "sec.5":"Payments run through Stripe, and we never see full card numbers", "sec.6":"Your content is never sold or used to train AI models", "proof.sub":"Operators in their own words, and the entry plans we map for brands like theirs.",
  "price.sub":"$149 per location a month, billed yearly. Headquarters signs once, and each franchisee pays for its own stores.",
  "faq.sub":"Something else? Email <a href=\"mailto:support@placetta.com\">support@placetta.com</a>."
 },
@@ -2868,7 +2899,7 @@ zh:{
  "f3.h":"开业之后，持续合规", "f3.p":"所有门店的续期日期、检查和规则变化，全部跟踪。", "f3.r1":"卫生许可", "f3.r1d":"30 天后到期", "f3.r2":"营业税证书", "f3.r2d":"2027年1月续期", "f3.r3":"消防年检", "f3.r3d":"2027年6月到期", "f3.r4":"市里新规：菜单标签", "f3.r4d":"需要处理", "f3.t":"卫生许可续期已提交", "f3.ts":"圣克拉拉县环境卫生局，刚刚",
  "feat.note":"产品界面中的数据均为示例。",
  "mon.h2":"开店之后，规则仍在变化。<br>我们告诉您该怎么做。",
- "proof.h":"品牌借助快哉，更早开业。", "pf.s2b":"我们团队平均每天服务的美国新企业", "sec.h":"数据安全", "sec.link":"阅读隐私政策", "sec.1":"政府网站登录信息加密存放于保险库", "sec.2":"每次使用登录信息都有记录", "sec.3":"每一步操作都有完整审计记录", "sec.4":"未经您批准，不提交、不付款、不发送", "sec.5":"付款由 Stripe 处理，我们看不到完整卡号", "sec.6":"您的内容绝不出售，也不用于训练 AI 模型", "proof.sub":"听听加盟商怎么说，再看看我们为同类品牌梳理的开店计划。",
+ "proof.h":"品牌借助快哉，更早开业。", "bk.h":"我们的投资人来自", "bk.hero":"投资人来自 OpenAI、Anthropic、SpaceX 等 18 家公司", "pf.s2b":"我们团队平均每天服务的美国新企业", "sec.h":"数据安全", "sec.link":"阅读隐私政策", "sec.1":"政府网站登录信息加密存放于保险库", "sec.2":"每次使用登录信息都有记录", "sec.3":"每一步操作都有完整审计记录", "sec.4":"未经您批准，不提交、不付款、不发送", "sec.5":"付款由 Stripe 处理，我们看不到完整卡号", "sec.6":"您的内容绝不出售，也不用于训练 AI 模型", "proof.sub":"听听加盟商怎么说，再看看我们为同类品牌梳理的开店计划。",
  "price.sub":"每家门店每月 149 美元，按年计费。总部签约一次，每位加盟商为自己的门店付费。",
  "faq.sub":"还有其他问题？请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"
 }};
@@ -2939,7 +2970,7 @@ function applyStatic(){
 const phS = matchMedia("(max-width:639px)");
 function applyPh(){ document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPhS && phS.matches ? el.dataset.i18nPhS : el.dataset.i18nPh); }); }
 phS.addEventListener("change", applyPh);
-function applyAll(){ applyStatic(); if (typeof renderOld === "function") renderOld(); renderApp(); renderCost(); renderPrice(); renderFaq(); renderTs(); if (typeof renderMon === "function") renderMon(); if (typeof renderBel === "function") renderBel(false); if (typeof renderStrip === "function") renderStrip(); if (typeof renderInv === "function") renderInv(); if (typeof renderFlows === "function") renderFlows(); }
+function applyAll(){ applyStatic(); if (typeof renderBk === "function") renderBk(); if (typeof renderOld === "function") renderOld(); renderApp(); renderCost(); renderPrice(); renderFaq(); renderTs(); if (typeof renderMon === "function") renderMon(); if (typeof renderBel === "function") renderBel(false); if (typeof renderStrip === "function") renderStrip(); if (typeof renderInv === "function") renderInv(); if (typeof renderFlows === "function") renderFlows(); }
 function setLang(l){ if (l === lang) return; lang = l; try { localStorage.setItem("placetta-lang", l); } catch(e){} track("language_switch", {to: l}); applyAll(); if (typeof renderMap === "function") renderMap(); if (!document.getElementById("modal").hidden) renderStep(); if (typeof updateResume === "function") updateResume(); }
 document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { setLang(b.dataset.lang); document.getElementById("lMenu").hidden = true; document.getElementById("lBtn").setAttribute("aria-expanded","false"); }));
 document.getElementById("lBtn").addEventListener("click", e => { const m = document.getElementById("lMenu"); m.hidden = !m.hidden; e.currentTarget.setAttribute("aria-expanded", String(!m.hidden)); });
@@ -3471,6 +3502,12 @@ const INV = [
   {k:"greylock", n:["Greylock","格雷洛克"], h:26}, {k:"yc", n:["Y Combinator","Y Combinator 创业加速器"], h:32}, {k:"softbank", n:["SoftBank","软银"], h:22},
   {k:"sequoia", n:["Sequoia","红杉资本"], h:16}, {k:"hillhouse", n:["Hillhouse Investment","高瓴投资"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}, {k:"azureworld", n:["AzureWorld","湛蓝领域"], h:38}
 ];
+/* backers: operators who invested in Placetta, shown with their company's mark; a missing file falls back to the name */
+const BK = [["openai","OpenAI","OpenAI","png"],["anthropic","Anthropic","Anthropic"],["spacex","SpaceX","SpaceX"],["tesla","Tesla","特斯拉"],["amazon","Amazon","亚马逊"],["deepmind","Google DeepMind","Google DeepMind"],["deepseek","DeepSeek","深度求索"],["janestreet","Jane Street","Jane Street"],["deshaw","D. E. Shaw","D. E. Shaw"],["renaissance","Renaissance Technologies","文艺复兴科技"],["cursor","Cursor","Cursor"],["nvidia","NVIDIA","英伟达"],["google","Google","谷歌"],["baidu","Baidu","百度"],["tencent","Tencent","腾讯"],["bytedance","ByteDance","字节跳动"],["alibaba","Alibaba","阿里巴巴"],["huawei","Huawei","华为"]];
+const BK_FILES = new Set(["openai","anthropic","spacex","tesla","deepmind","deepseek","cursor","nvidia","google","baidu","bytedance","alibaba","huawei"]);
+function renderBk(){ const hb = document.getElementById("hBk"); if (hb) hb.innerHTML = `<span class="hbkm" aria-hidden="true">${BK.filter(b => BK_FILES.has(b[0])).slice(0, 5).map(([k, , , ext]) => `<img src="logos/backers/${k}.${ext || "svg"}" alt="" decoding="async" draggable="false">`).join("")}</span><span>${esc(t("bk.hero"))}</span>`;
+  const el = document.getElementById("bkG"); if (!el) return; const i = L();
+  el.innerHTML = BK.map(([k, en, zh, ext]) => `<li${BK_FILES.has(k) ? "" : ' class="nm"'}>${BK_FILES.has(k) ? `<img src="logos/backers/${k}.${ext || "svg"}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false">` : ""}<span>${esc(i ? zh : en)}</span></li>`).join(""); }
 function renderInv(){ if (!document.getElementById("invR")) return; const i = L(); document.getElementById("invR").innerHTML = INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${esc(v.n[i])}" style="--h:${v.h}px" loading="lazy" decoding="async">`).join(""); }
 function renderStrip(){
   const item = (b, hide) => {
