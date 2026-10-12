@@ -54,12 +54,36 @@ function view(f: Filing) {
   };
 }
 
+/** Tells the team right away when work lands in their queue (the monitor still sends a daily reminder for anything left waiting). */
+async function alertTeam(f: Filing, kind: string, title: string) {
+  const key = Deno.env.get("RESEND_API_KEY"), from = Deno.env.get("MAIL_FROM");
+  if (!key || !from) return;
+  const { data: staff } = await admin.from("staff_emails").select("email");
+  const to = (staff ?? []).map((s) => s.email as string).filter(Boolean);
+  if (!to.length) return;
+  const { data: w } = await admin.from("workspaces").select("name").eq("id", f.workspace_id).maybeSingle();
+  const app = (Deno.env.get("APP_ORIGINS") ?? "").split(",").map((x) => x.trim()).filter(Boolean)[0] ?? "";
+  const esc = (x: string) => x.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
+  const what = f.title?.en ?? "A filing", who = (w?.name as string | undefined) ?? "a customer";
+  const subject = kind === "destination_stale" ? `Team task: ${title}` : `New for the team: ${what} (${who})`;
+  const text = `${what} for ${who}\n\n${title}\n\n${app ? `Filing queue: ${app}/app/` : ""}`;
+  const html = `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif"><p><b>${esc(what)}</b> for ${esc(who)}</p><p>${esc(title)}</p>${app ? `<p><a href="${esc(app)}/app/">Open the filing queue</a></p>` : ""}</div>`;
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to, subject, text, html }),
+    });
+    if (!r.ok) console.error("team alert failed:", r.status);
+  } catch (e) { console.error("team alert failed:", (e as Error).message); }
+}
+
 async function teamTask(f: Filing, kind: string, title: string, detail?: unknown) {
-  const { error } = await admin.from("team_tasks").upsert(
+  const { data, error } = await admin.from("team_tasks").upsert(
     { kind, filing_id: f.id, workspace_id: f.workspace_id, title, detail: detail ?? null, dedupe: `${kind}:${f.id}:${f.attempts}` },
     { onConflict: "dedupe", ignoreDuplicates: true },
-  );
-  if (error) console.error("team task insert failed:", error.code ?? "");
+  ).select("id");
+  if (error) { console.error("team task insert failed:", error.code ?? ""); return; }
+  if (data?.length) await alertTeam(f, kind, title);   // only the first time, never for a repeat
 }
 
 async function toTeam(f: Filing, en: string, zh: string, kind = "handoff") {

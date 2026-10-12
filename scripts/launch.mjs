@@ -25,13 +25,12 @@ const ANON_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const WEBHOOK_URL = `${SUPABASE_URL}/functions/v1/stripe-webhook`;
 const WEBHOOK_EVENTS = ["checkout.session.completed", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"];
 
-/* Prices match the landing page: Starter $750 and Growth $2,000 a month billed annually, $100 a month per extra location,
-   and the $299 entry plan per market. Stripe needs every recurring item in one checkout on the same interval, so all are yearly. */
+/* Prices match the landing page: $149 a location a month billed yearly, $3,500 once per new store opening,
+   and the $299 entry plan per market. Stripe needs every recurring item in one checkout on the same interval, so the plan is yearly. */
 const PRICES = [
   { secret: "STRIPE_PRICE_ENTRY", lookup: "placetta_entry", name: "Placetta Entry plan (per market)", cents: 29_900, yearly: false },
-  { secret: "STRIPE_PRICE_STARTER", lookup: "placetta_starter_yearly", name: "Placetta Starter", cents: 900_000, yearly: true },
-  { secret: "STRIPE_PRICE_GROWTH", lookup: "placetta_growth_yearly", name: "Placetta Growth", cents: 2_400_000, yearly: true },
-  { secret: "STRIPE_PRICE_EXTRA_LOCATION", lookup: "placetta_extra_location_yearly", name: "Placetta extra location", cents: 120_000, yearly: true },
+  { secret: "STRIPE_PRICE_LOCATION", lookup: "placetta_location_yearly", name: "Placetta per location (billed yearly)", cents: 178_800, yearly: true },
+  { secret: "STRIPE_PRICE_OPENING", lookup: "placetta_opening", name: "Placetta new store opening", cents: 350_000, yearly: false },
 ];
 
 const bold = (s) => `\x1b[1m${s}\x1b[0m`, dim = (s) => `\x1b[2m${s}\x1b[0m`, green = (s) => `\x1b[32m${s}\x1b[0m`, red = (s) => `\x1b[31m${s}\x1b[0m`;
@@ -235,6 +234,8 @@ async function main() {
   if (TOKEN) {
     await migrate();
     console.log(`\n${bold("Server functions")}`);
+    // Odelia's server copy is bundled from src (tools, prompts, skills); rebuild it so the server never runs an old agent.
+    if (!run("npm", ["run", "build:agent"])) console.log(red("  Agent bundle failed to build. See the error above."));
     if (!run("npx", ["--yes", "supabase", "functions", "deploy", "--project-ref", REF, "--use-api"])) console.log(red("  Function deploy failed. See the error above, then run this again."));
   }
   if (sk) { secrets.STRIPE_SECRET_KEY = sk; await setupStripe(sk, secrets); }

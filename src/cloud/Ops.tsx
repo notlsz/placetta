@@ -18,6 +18,14 @@ const GROUPS: { key: string; label: Bi; match: (f: api.QueueRow) => boolean }[] 
   { key: "done", label: B("Done", "已完成"), match: f => ["accepted", "rejected", "canceled"].includes(f.status) },
 ];
 
+/* Why a task landed with the team (the file function writes these). */
+const KIND: Record<string, Bi> = {
+  handoff: B("Submit it", "需团队提交"),
+  review: B("Final check before sending", "发送前核对"),
+  check_agency: B("Check it reached the agency", "核实机构是否收到"),
+  destination_stale: B("Re-check where this form is sent", "重新核实提交地址"),
+};
+
 function Copy({ text }: { text: string }) {
   const { say, lang } = useApp();
   return <button type="button" className="icbtn copy" title={lang === "zh" ? "复制" : "Copy"} aria-label={lang === "zh" ? "复制" : "Copy"} onClick={() => { void navigator.clipboard?.writeText(text); say(lang === "zh" ? "已复制" : "Copied"); }}><I.copy /></button>;
@@ -142,7 +150,12 @@ export function Queue() {
   const [rows, setRows] = useState<api.QueueRow[]>([]);
   const [sel, setSel] = useState<string | null>(null);
   const [me, setMe] = useState("");
-  const load = useCallback(async () => { try { setRows(await api.queue()); } catch (e) { say((e as api.ApiError).message); } }, [say]);
+  const [tasks, setTasks] = useState<api.TeamTask[]>([]);
+  const load = useCallback(async () => {
+    try { setRows(await api.queue()); } catch (e) { say((e as api.ApiError).message); }
+    setTasks(await api.teamTasks());
+  }, [say]);
+  const finish = async (id: string) => { try { await api.finishTeamTask(id); setTasks(t => t.filter(x => x.id !== id)); say(lang === "zh" ? "已完成" : "Done"); } catch (e) { say((e as api.ApiError).message); } };
   useEffect(() => { void load(); void api.getSession().then(s => setMe(s?.user.id ?? "")); const id = setInterval(() => void load(), 20_000); return () => clearInterval(id); }, [load]);
   const cur = useMemo(() => rows.find(r => r.id === sel) ?? null, [rows, sel]);
   return (
@@ -150,6 +163,20 @@ export function Queue() {
       <header className="ph"><div className="ph-tx"><h1>{lang === "zh" ? "申报队列" : "Filing queue"}</h1><p>{lang === "zh" ? "客户批准的每一份申请。核对要求、提交、发送付款链接、上传收据。" : "Every application a customer approved. Check the requirements, submit, send the payment link, upload the receipt."}</p></div></header>
       <div className="q-grid">
         <div className="q-list">
+          {tasks.length > 0 && (
+            <section className="sec">
+              <div className="sec-h"><h2>{lang === "zh" ? "团队待办" : "Team tasks"}<em>{tasks.length}</em></h2></div>
+              <div className="tray">{tasks.map(t => (
+                <div key={t.id} className="row q-row-btn q-task">
+                  <button type="button" className="arow-n" onClick={() => { if (t.filing_id) setSel(t.filing_id); }} disabled={!t.filing_id}>
+                    <b>{t.title}</b><small>{[t.business, KIND[t.kind] ? b(KIND[t.kind]) : t.kind].filter(Boolean).join(lang === "zh" ? "，" : ", ")}</small>
+                  </button>
+                  <small className="ago">{fmtAgo(t.created_at, lang)}</small>
+                  <Pill sm kind="quiet" onClick={() => void finish(t.id)}>{lang === "zh" ? "完成" : "Done"}</Pill>
+                </div>
+              ))}</div>
+            </section>
+          )}
           {GROUPS.map(g => { const list = rows.filter(g.match); if (!list.length && g.key === "done") return null; return (
             <section key={g.key} className="sec">
               <div className="sec-h"><h2>{b(g.label)}{list.length ? <em>{list.length}</em> : null}</h2></div>

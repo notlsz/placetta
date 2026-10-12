@@ -60,6 +60,8 @@ Deno.serve(async (req) => {
           const { data: w } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
           const stores = (w?.state as { stores?: { id?: unknown }[] } | null)?.stores;
           patch.charged_store_ids = Array.isArray(stores) ? stores.map((x) => x?.id).filter((x): x is string => typeof x === "string") : [];
+          // The entry plans were credited in this checkout, so they are never credited again.
+          if (Number(o.metadata?.entry_credit) > 0) patch.entry_credited_at = new Date().toISOString();
         }
         if (Object.keys(patch).length) await admin.from("billing").update(patch).eq("workspace_id", ws);
       }

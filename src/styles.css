@@ -785,6 +785,9 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .q-row-btn { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; text-align: left; }
 .q-row-btn:hover, .q-row-btn.on { background: var(--card); }
 .q-row-btn .ago { font-size: 12px; color: var(--ink3); }
+.q-task { grid-template-columns: minmax(0, 1fr) auto auto; }
+.q-task .arow-n { display: grid; text-align: left; background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; min-width: 0; }
+.q-task .arow-n:disabled { cursor: default; }
 .q-detail { position: sticky; top: 16px; padding: 22px 24px; border-radius: 22px; background: var(--card); box-shadow: var(--frost), 0 0 0 1px rgba(var(--e), .05); }
 .q-detail.empty { display: grid; place-items: center; min-height: 240px; background: var(--mist); box-shadow: none; color: var(--ink3); }
 .q-detail h2 { margin: 6px 0 4px; font: 400 26px/1.15 var(--display); letter-spacing: -.025em; }

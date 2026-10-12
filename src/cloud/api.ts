@@ -470,6 +470,16 @@ export async function queue(): Promise<QueueRow[]> {
   if (error) throw fromPg(error);
   return (data ?? []) as QueueRow[];
 }
+export type TeamTask = { id: string; kind: string; filing_id: string | null; workspace_id: string | null; business: string | null; title: string; detail: unknown; created_at: string };
+export async function teamTasks(): Promise<TeamTask[]> {
+  const { data, error } = await supabase().rpc("team_tasks_open");
+  if (error) return [];   // before the migration, or not staff: show nothing rather than fail the queue
+  return (data ?? []) as TeamTask[];
+}
+export async function finishTeamTask(id: string) {
+  const { error } = await supabase().rpc("finish_team_task", { p_id: id });
+  if (error) throw fromPg(error);
+}
 export async function updateFiling(id: string, patch: Partial<Pick<Filing, "status" | "requirements_checked" | "confirmation_number" | "fee_paid" | "receipt_path" | "note" | "payment_url">> & { assigned_to?: string | null }) {
   const { error } = await supabase().from("filings").update(patch).eq("id", id);
   if (error) throw fromPg(error);
