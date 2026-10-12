@@ -568,7 +568,7 @@ AI output can be wrong. Review every application and message before you approve 
 
 ## Models and your data
 
-- The agent runs on Claude models from Anthropic.
+- The agent runs on Claude models from Anthropic. Where we configure it, some work runs on models from OpenAI, Google (Gemini), DeepSeek, OpenRouter or Groq instead.
 - Spoken replies are generated with Microsoft Azure text to speech.
 - We do not use your content to train AI models.
 
@@ -606,7 +606,7 @@ AI 生成的内容可能有误。批准前，请审核每一份申请和每一�
 
 ## 模型与您的数据
 
-- 智能体基于 Anthropic 的 Claude 模型运行。
+- 智能体基于 Anthropic 的 Claude 模型运行。在我们配置的情况下，部分工作改由 OpenAI、Google（Gemini）、DeepSeek、OpenRouter 或 Groq 的模型处理。
 - 语音回复由 Microsoft Azure 文字转语音服务生成。
 - 我们不会用您的内容训练 AI 模型。
 
