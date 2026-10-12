@@ -8,6 +8,7 @@
      6. configures sign-in: your app address, your email sender and templates, Google and Microsoft, two-step sign-in
      7. builds the app and, if you want, deploys it to Netlify
      8. adds your team and checks each server function
+     9. runs Odelia's live self-test on the deployed agent (npm run selftest runs it again any time)
    Run from the repo root:  npm install && npm run launch
    Needs Node 18+ and a Supabase access token (supabase.com/dashboard/account/tokens). */
 
@@ -17,6 +18,7 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "n
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import readline from "node:readline";
+import { runSelftest } from "./selftest-lib.mjs";
 
 const REF = "esquxzcfsylffuijvzec";
 const SUPABASE_URL = `https://${REF}.supabase.co`;
@@ -276,8 +278,12 @@ async function main() {
     }
   }
   await check();
+  // Odelia on the deployed functions with a real model: runs once the functions are deployed and the model key is set.
+  let selftest = null;
+  if (TOKEN) selftest = await runSelftest({ ref: REF, token: TOKEN });
 
   console.log(`\n${bold("Left to do")}`);
+  if (selftest && !selftest.ok) console.log(`  Odelia's self-test didn't pass${selftest.error ? ` (${selftest.error})` : ""}. Check the model key in the Edge Function secrets and the agent-run logs, then run: npm run selftest`);
   if (!TOKEN) {
     console.log(`  Dashboard (supabase.com/dashboard/project/${REF}): Authentication, URL Configuration (Site URL ${origin || "<your app>"}), SMTP Settings, and SQL Editor:`);
     console.log("  run supabase/migrations/20261005050000_teams_roles_two_step.sql, then: insert into public.staff_emails (email) values ('you@placetta.com');");

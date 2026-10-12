@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
   // The app's own tools only; server tools are added here so the client can't change their limits.
   const pageTools = (Array.isArray(r.tools) ? (r.tools as Block[]) : [])
     .filter((t) => t && typeof t.name === "string" && !("type" in t))
-    .slice(0, 24);
+    .slice(0, 48);   // the app sends about 31 in a signed-in workspace; 24 silently dropped email, calendar, drive and QuickBooks
   // Research for conversations (page tools) and deep lookups; plain extraction (reading an upload) doesn't need the web.
   const research = body.research !== false && (pageTools.length > 0 || !!body.deep);
   const loc = (body.location ?? {}) as Record<string, unknown>;

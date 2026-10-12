@@ -37,22 +37,22 @@ export const BUILTIN: Skill[] = [
 3. Prepare the renewal application early and put it up for approval.
 4. If email is connected, search_email for agency notices and act on them.`),
   P("inspection-ready", B("Get a store inspection-ready", "让门店随时迎检"), B("Walks a store through what the inspector checks, finds every gap in permits, certificates, logs and vendor proof, and turns each one into a fix with a date.", "按检查员的检查项逐一排查门店，找出许可、证书、日志和服务商证明的每个缺口，并为每项定好整改日期。"),
-    `1. show_licenses and check_progress for the store; list every permit, certificate and log with its status.
+    `1. check_progress for the store; list every permit, certificate and log with its status.
 2. Check the items inspectors cite most: a manager with the food protection certificate on site, food handler cards, temperature and cleaning logs, pest control and hood cleaning proof, posted permits and letter grade.
-3. For each gap: update_store with the gap, add_deadline for the fix (7 days for anything an inspector would cite as critical, 30 days otherwise), and prepare_application where a filing fixes it.
+3. For each gap: add_deadline for the fix (7 days for anything an inspector would cite as critical, 30 days otherwise), remember what's missing as a fact, and prepare_application where a filing fixes it.
 4. draft_document a one-page "before the inspector comes" checklist for the manager, in their language.
-5. After any real inspection, read the result, update_store, and turn every cited violation into a fix the same day.`),
+5. After any real inspection, review_documents the report, and turn every cited violation into a fix with add_deadline the same day.`),
   P("vendor-services", B("Book vendor services", "预约服务商"), B("Tracks hood cleaning, pest control, fire extinguishers, backflow and grease traps at every store, books each one before it's due and keeps the proof.", "跟踪每家门店的排烟罩清洗、虫害防治、灭火器、防回流装置和隔油池，到期前预约并保存证明。"),
     `1. For each store, list the recurring services its permits and its fire and health inspections rely on: kitchen hood and duct cleaning, pest control, fire extinguisher service, fire suppression system service, backflow testing, grease trap pumping.
 2. add_deadline for each from the date on its last service tag or invoice. If no date is known, ask once and record it.
 3. 21 days before each is due, draft_message to the store's vendor (or the vendor the person names) to book it, for approval. Never book or pay on your own.
-4. When it's done, review_documents for the tag or invoice, update_store with the date and the proof, and set the next deadline.`),
+4. When it's done, review_documents for the tag or invoice, remember the service date, and add_deadline for the next one.`),
   P("nothing-lapses", B("Make sure nothing lapses", "确保证照零过期"), B("Watches every license, permit, certificate and service Odelia owns at every store, and escalates anything at risk of lapsing before it costs a fine or a closure.", "盯住 Odelia 负责的每家门店的每项执照、许可、证书和服务，在可能过期导致罚款或停业前及时上报。"),
     `1. Each day, check_progress across every store and list every item Odelia owns with its due date and status.
 2. Anything due in 30 days and not prepared: prepare it now and request_filing_approval.
-3. Anything due in 7 days and not filed: tell the person in plain words what is at risk (a fine, a closure, a lost grade), what is missing, and the one thing they need to do. Also flag it for the Placetta team.
-4. Anything past due: file the late renewal or the cure at once, and draft_document a short note of what happened and what changed so it doesn't repeat.
-5. Keep a running record per store: items owned, renewed on time, late, and fines. That record backs Placetta's fine promise.`),
+3. Anything due in 7 days and not filed: tell the person in plain words what is at risk (a fine, a closure, a lost grade), what is missing, and the one thing they need to do.
+4. Anything past due: prepare the late renewal or the cure at once and request_filing_approval (never file it yourself), and draft_document a short note of what happened and what changed so it doesn't repeat.
+5. Keep a running record per store with remember: items owned, renewed on time, late, and fines. That record backs Placetta's fine promise.`),
   P("importer-filings", B("Import food and products", "食品与商品进口"), B("For brands shipping goods into the US: importer registrations, FDA facility registration and renewals, prior notice for every food shipment, supplier verification and customs paperwork.", "面向向美国发货的品牌：进口商登记、FDA 食品设施注册及续期、每批食品的预先通知、供应商核查及报关文件。"),
     `1. find_official_forms for the product type (food, cosmetics, devices, consumer products) and the US.
 2. Food: confirm every foreign facility that makes, packs or holds the product has an FDA food facility registration; renewals run October 1 to December 31 of every even-numbered year, so add_deadline for each.
