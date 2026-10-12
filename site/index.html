@@ -2182,6 +2182,13 @@ body #agencies .agt-f{color:#1F3F6B!important}
 body #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
 #cn .dash .dchip{position:relative;z-index:1;background:rgba(255,255,255,.88)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:999px!important;padding:5px 11px!important}
 #cn .cnc .cnlm{background:rgba(255,255,255,.85)!important;border-radius:999px!important;padding:4px 11px!important}
+/* testimonials: no large portrait; the person is the small round photo by their name, the right panel carries their result */
+.tsph.tsnp{background:#EEF2F8;min-height:0}.tsph.tsnp::before,.tsph.tsnp::after{display:none}
+@media (min-width:900px){.tsx{min-height:0}}
+@media (max-width:899px){.tsph.tsnp{aspect-ratio:auto;min-height:120px}}
+.tsnp .tsrs{color:var(--ink)}
+.tsnp .tsrs small{color:rgba(15,27,51,.6)}
+.tsx .tsp .tsav{width:52px;height:52px}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -4058,7 +4065,7 @@ function renderTs(swap){
     <div class="tsl">${x.logo ? `<div class="tslgs"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async">${x.vlogo ? `<span class="tslgd" aria-hidden="true"></span><img class="tslg" src="${x.vlogo}" alt="${esc(x.valt)}" style="--lh:${x.vlh}px" decoding="async">` : ""}</div>` : `<p class="tswm">${x.wm[i]}</p>`}<blockquote class="tsq">“${x.q[i]}”</blockquote>
       <figcaption class="tsp"><span class="tsav" aria-hidden="true" style="background-image:url('${x.ph}')"></span><span class="tsw"><b>${x.n}</b><span>${x.rl[i]}</span></span>
         </span></figcaption></div>
-    <div class="tsph"><div class="tsbg" role="img" aria-label="${esc(x.n + ", " + x.rl[i])}" style="background-image:url('${x.big}')"></div><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
+    <div class="tsph tsnp"><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
   </figure>`;
 }
 /* testimonial portraits are CSS backgrounds (no image menu, no drag, no open-in-tab); the card blocks the menu and drag too */
