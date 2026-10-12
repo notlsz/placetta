@@ -2218,6 +2218,32 @@ body #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
 .wklogo{display:inline-flex;align-items:center;justify-content:center;background:#0C0C0B;border-radius:12px;padding:14px 20px}
 .wklogo svg{display:block;height:132px;width:auto}
 @media (max-width:767px){.wklogo svg{height:108px}}
+
+/* UI pass: every section at the same finish */
+/* work together: deep navy, full-contrast type */
+.ox .wtc>svg rect:last-of-type{fill:rgba(15,27,51,.76)}
+.wtc .wtw .t28{color:#fff}
+.wtc .rotl{color:#fff}
+/* testimonials: the quote and name sit together in the middle of the white side, no dead gap */
+@media (min-width:900px){#case .tsx .tsl{justify-content:center}#case .tsx .tsp{margin-top:8px}#case .tsx .tslgs,#case .tsx .tswm{margin-bottom:8px}}
+@media (min-width:1024px){#case .tsq{font-size:36px;line-height:1.22;letter-spacing:-.8px}}
+/* built for trust and security: Alven cards, white with a hairline, no grey slabs */
+#cn .cntiles .tile{background:#fff;border:1px solid #ebebeb;border-radius:20px;box-shadow:none}
+#cn .secl{display:grid;grid-template-columns:minmax(0,1fr);gap:0;border:1px solid #ebebeb;border-radius:20px;background:#fff;overflow:hidden}
+@media (min-width:768px){#cn .secl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#cn .secl li{border-radius:0;background:none;border-bottom:1px solid #f0f0f0;padding:18px 20px}
+@media (min-width:768px){#cn .secl li:nth-child(odd){border-right:1px solid #f0f0f0}#cn .secl li:nth-last-child(-n+2){border-bottom:0}}
+@media (max-width:767px){#cn .secl li:last-child{border-bottom:0}}
+/* backers without a mark file: set as a wordmark, not a serif caption */
+.bkg li.nm span{font-family:var(--sans,inherit)!important;font-weight:650;font-size:17px;letter-spacing:-.4px;color:var(--ink)}
+/* experts: clean names, no small photos breaking each line */
+#experts .xpf,#experts .xps{display:none}
+#experts .xpflow{display:flex;flex-wrap:wrap;gap:2px 26px}
+/* give Odelia a job: the first role is a white card like the rest, not a dark slab */
+.jbf{background:#fff;color:var(--ink);border:1px solid #ebebeb;box-shadow:none}
+.jbf b{color:var(--ink)}
+.jbf p{color:var(--muted)}
+body .jbf .jbchip{color:var(--ink2)}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2740,7 +2766,7 @@ body #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
         <rect x="0" y="0" width="1600" height="1000" fill="#7399C6"/>
         <rect x="0" y="0" width="1600" height="1000" fill="url(#gMaj)"/>
         <use href="#fp" style="color:rgba(255,255,255,.5)"/>
-        <rect x="0" y="0" width="1600" height="1000" fill="rgba(15,27,51,.5)"/>
+        <rect x="0" y="0" width="1600" height="1000" fill="rgba(15,27,51,.74)"/>
       </svg>
       <div class="wti">
         <div class="wtw">
