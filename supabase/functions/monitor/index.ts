@@ -4,6 +4,8 @@
 //   team (submitted, approved, returned, action needed) and agency fees still unpaid after two days.
 // New updates show in the app's Updates; when RESEND_API_KEY and MAIL_FROM are set, owners also get them by email,
 // and the Placetta team gets an email about approved filings nobody has picked up for a day.
+// Mondays, with email on, each headquarters email a workspace shares with (hq_links) gets one page across every
+// franchisee that shared with it: totals, then one line per store at risk. hq_reports keeps it to once a week.
 // Once a week per workspace (on a weekday picked from its id, so the load spreads), it also starts the agent's
 // background check (agent-run, kind "watch"): each submitted application's status on the agency's own lookup page, and
 // new or changed rules for that business and city. That needs ANTHROPIC_API_KEY; WEEKLY_CHECKS=off turns it off.
@@ -165,6 +167,57 @@ ${link ? `<p><a href="${esc(link)}" style="display:inline-block;background:#0E11
   return { subject: `${business}: ${items.length} update${items.length === 1 ? "" : "s"} from Placetta`, text, html };
 }
 
+/* ------------------------------ the weekly headquarters report ------------------------------ */
+
+type HqItem = { kind?: string; title?: unknown; date?: string };
+type HqStore = { id?: string; name?: unknown; stage?: string; status?: string; due_30?: number; overdue?: number; pending?: number; next?: HqItem | null };
+export type HqWeekly = { hq_email: string; workspace_id: string; name: string; brand: string | null; stores: HqStore[] | null };
+
+/** One page for one headquarters email: totals, then each store that's overdue or due within 30 days, worst first. */
+export function hqReport(rows: HqWeekly[], today: string) {
+  const brands = [...new Set(rows.map((r) => r.brand).filter((b): b is string => !!b))];
+  const brand = brands.length === 1 ? brands[0] : "";
+  const lines = rows.flatMap((r) => (Array.isArray(r.stores) ? r.stores : []).map((s) => ({ ...s, franchisee: r.name })));
+  const count = (st: string) => lines.filter((l) => l.status === st).length;
+  const t = { stores: lines.length, current: count("current"), due: count("due"), overdue: count("overdue") };
+  const rank = (st?: string) => (st === "overdue" ? 0 : 1);
+  const risk = lines.filter((l) => l.status === "overdue" || l.status === "due")
+    .sort((a, b) => rank(a.status) - rank(b.status) || String(a.next?.date ?? "9999").localeCompare(String(b.next?.date ?? "9999")));
+  const say = (l: (typeof risk)[number]) => {
+    const date = l.next?.date;
+    const n = isDate(date) ? daysUntil(today, date) : null;
+    const item = l.next ? bi(l.next.title).en || "Unnamed item" : "Item";
+    const when = n === null ? "" : n < 0 ? `${-n} day${n === -1 ? "" : "s"} overdue` : n === 0 ? "due today" : `due in ${n} day${n === 1 ? "" : "s"}`;
+    const more = (l.overdue ?? 0) + (l.due_30 ?? 0) - 1;
+    return { where: `${l.franchisee}, ${bi(l.name).en}`, what: `${item}${date ? `, ${date}` : ""}${when ? ` (${when})` : ""}${more > 0 ? `, and ${more} more` : ""}` };
+  };
+  const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
+  const head = `${brand ? brand + ": " : ""}${plural(t.stores, "store")}, ${t.current} fully current, ${t.due} due in 30 days, ${t.overdue} overdue`;
+  const subject = `${brand ? brand + " " : ""}weekly store status: ${t.overdue ? `${t.overdue} overdue` : t.due ? `${t.due} due soon` : "all current"}`;
+  const link = APP ? `${APP}/app/` : "";
+  const across = `Across ${plural(rows.length, "franchisee")}, week of ${today}.`;
+  const clear = "Every store is current. Nothing is due in the next 30 days.";
+  const why = "You get this because a franchisee shared its store status with this email in Placetta. Ask them to remove it to stop.";
+  const text = `${head}\n${across}\n\n` +
+    (risk.length ? `At risk:\n${risk.map((l) => { const x = say(l); return `- ${x.where}: ${x.what}`; }).join("\n")}` : clear) +
+    `${link ? `\n\nSee every store live: ${link}` : ""}\n\n${why}\n`;
+  const tile = (n: number, label: string, color = "#0E1116") =>
+    `<td style="padding:12px 14px;background:#F5F7FA;border-radius:12px;width:25%"><div style="font-size:24px;color:${color}">${n}</div><div style="font-size:12px;color:#5B6470">${label}</div></td>`;
+  const riskRows = risk.map((l) => {
+    const x = say(l);
+    return `<tr><td style="padding:8px 0;border-top:1px solid #ECF0F5;vertical-align:top"><b>${esc(x.where)}</b><br><span style="color:${l.status === "overdue" ? "#C0473A" : "#A86F14"}">${esc(x.what)}</span></td></tr>`;
+  }).join("");
+  const html = `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;padding:28px 22px;color:#0E1116">
+<p style="font-size:13px;color:#5B6470;margin:0 0 6px">Placetta for headquarters</p>
+<h1 style="font-size:20px;margin:0 0 4px">${esc(brand ? `${brand}: weekly store status` : "Weekly store status")}</h1>
+<p style="font-size:13px;color:#5B6470;margin:0 0 18px">${esc(across)}</p>
+<table role="presentation" cellspacing="6" style="width:100%;border-collapse:separate;margin:0 0 18px"><tr>${tile(t.stores, "Stores")}${tile(t.current, "Fully current")}${tile(t.due, "Due in 30 days", t.due ? "#A86F14" : "#0E1116")}${tile(t.overdue, "Overdue", t.overdue ? "#C0473A" : "#0E1116")}</tr></table>
+${risk.length ? `<h2 style="font-size:15px;margin:0 0 8px">At risk</h2><table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.45">${riskRows}</table>` : `<p style="font-size:14px;margin:0">${clear}</p>`}
+${link ? `<p style="margin:22px 0 0"><a href="${esc(link)}" style="display:inline-block;background:#0E1116;color:#fff;text-decoration:none;padding:10px 18px;border-radius:999px;font-size:14px">See every store live</a></p>` : ""}
+<p style="font-size:12px;color:#98A0AB;margin:22px 0 0">${why}</p></div>`;
+  return { subject, text, html };
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json(405, { error: "Use POST." });
   const { data: okKey } = await admin.rpc("monitor_key_ok", { p_key: req.headers.get("x-monitor-key") ?? "" });
@@ -240,6 +293,22 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Mondays: the one-page report for each headquarters email, once a week (a row in hq_reports is the claim).
+  let hqSent = 0;
+  if (RESEND && FROM && started.getUTCDay() === 1) {
+    const { data: hq, error: he } = await admin.rpc("hq_weekly");
+    if (he) console.error("hq_weekly", he.code);
+    const byEmail = new Map<string, HqWeekly[]>();
+    for (const r of (hq ?? []) as HqWeekly[]) byEmail.set(r.hq_email, [...(byEmail.get(r.hq_email) ?? []), r]);
+    for (const [email, rows] of byEmail) {
+      const { data: claim, error: ce } = await admin.from("hq_reports").upsert({ hq_email: email, week: today }, { onConflict: "hq_email,week", ignoreDuplicates: true }).select("hq_email");
+      if (ce || !claim?.length) continue;   // already sent this week
+      const m = hqReport(rows, today);
+      if (await sendMail([email], m.subject, m.text, m.html)) hqSent++;
+      else await admin.from("hq_reports").delete().eq("hq_email", email).eq("week", today);   // let a later run try again
+    }
+  }
+
   // The weekly checks: agent-run takes each one in the background and reports back as an Update when something changed.
   let watches = 0;
   if (Deno.env.get("ANTHROPIC_API_KEY") && Deno.env.get("WEEKLY_CHECKS") !== "off") {
@@ -264,5 +333,5 @@ Deno.serve(async (req) => {
   if (!sweep) console.error("self-filing sweep did not run");
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, email: !!(RESEND && FROM), weekly_checks: watches });
+  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches });
 });

@@ -50,6 +50,7 @@ export const I = {
   logout: () => <svg {...sv}><path d="M14 4.5h4.5a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H14M10 16.5L5.5 12 10 7.5M5.5 12H16" /></svg>,
   bell: () => <svg {...sv}><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15zM10 20.5h4" /></svg>,
   thermo: () => <svg {...sv}><path d="M10 14.5V5a2 2 0 0 1 4 0v9.5a3.5 3.5 0 1 1-4 0z" /><path d="M12 9v7" /></svg>,
+  hq: () => <svg {...sv}><path d="M4.5 20.5V6.5l7-3v17M11.5 9.5h8v11M2.5 20.5h19M7.5 8.5v.01M7.5 12v.01M7.5 15.5v.01M15 13v.01M15 16.5v.01" /></svg>,
   queue: () => <svg {...sv}><rect x="4" y="4" width="16" height="5" rx="1.5" /><rect x="4" y="11" width="16" height="4" rx="1.5" /><path d="M4 19h10" /></svg>,
   copy: () => <svg {...sv} width={14} height={14}><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M5 15.5V6a1 1 0 0 1 1-1h9.5" /></svg>,
   clip: () => <svg {...sv}><path d="M20.5 11.5l-8.3 8.3a5 5 0 0 1-7-7l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9" /></svg>,

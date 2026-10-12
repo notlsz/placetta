@@ -11,6 +11,7 @@ import { allSkills, dropSkill, putSkill, toggleSkill } from "./skills";
 import { LANGUAGES, readSpeak, saveSpeak, speakOf, uiLangOf } from "./langs";
 import * as api from "./cloud/api";
 import type { IntegrationKind } from "./cloud/api";
+import type { HqLink } from "./hq";
 import { TwoStepSetup } from "./cloud/TwoStep";
 import gmailLogo from "./assets/integrations/gmail.png";
 import outlookLogo from "./assets/integrations/outlook.svg";
@@ -215,6 +216,56 @@ function Team() {
           <button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : zh ? "邀请" : "Invite"}</button>
         </form>
       )}
+    </Group>
+  );
+}
+
+/** Headquarters: share this workspace's store status, read only, with the brand's headquarters. */
+function HqShare() {
+  const { lang, cloud, say, ws } = useApp();
+  const zh = lang === "zh";
+  const pin = usePin();
+  const [links, setLinks] = useState<HqLink[] | null>(null);
+  const [f, setF] = useState({ email: "", brand: "" });
+  const [busy, setBusy] = useState(false);
+  const wsId = cloud?.wsId ?? "";
+  const load = useCallback(async () => { if (!wsId) return; try { setLinks(await api.hqLinks(wsId)); } catch { setLinks([]); } }, [wsId]);
+  useEffect(() => { void load(); }, [load]);
+  if (!cloud) return null;
+  const share = async () => {
+    if (pin.locked) { pin.guard(() => void share()); return; }
+    const email = f.email.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) { say(zh ? "请输入有效的邮箱。" : "Enter a valid email."); return; }
+    setBusy(true);
+    try {
+      await api.hqShare(wsId, email, f.brand);
+      say(zh ? `已与 ${email} 共享。对方用这个邮箱登录快哉即可查看。` : `Shared with ${email}. They see your stores when they sign in to Placetta with that address.`);
+      setF({ email: "", brand: "" }); await load();
+    } catch (e) { say((e as api.ApiError).message); }
+    setBusy(false);
+  };
+  const remove = (l: HqLink) => {
+    if (!window.confirm(zh ? `停止与 ${l.hq_email} 共享门店状态？` : `Stop sharing store status with ${l.hq_email}?`)) return;
+    pin.guard(() => void api.hqUnshare(l.id).then(() => { say(zh ? "已停止共享" : "Stopped sharing"); return load(); }, e => say((e as api.ApiError).message)));
+  };
+  const n = (ws.stores ?? []).length;
+  return (
+    <Group id="hq" title={B("Headquarters", "总部")}
+      note={B(`Headquarters sees each of your ${n} store${n === 1 ? "" : "s"}: stage, licenses current, due soon or overdue, and applications pending. Never your documents, logins, chats or staff. They also get a one-page summary every Monday.`,
+        `总部可以看到您 ${n} 家门店各自的阶段、有效执照、即将到期或逾期事项，以及办理中的申请，但看不到您的文件、登录信息、对话或员工信息。总部每周一还会收到一页摘要。`)}
+      rows={(links ?? []).map(l => ({
+        label: { en: l.hq_email, zh: l.hq_email }, icon: <I.hq />,
+        sub: <>{l.brand ? (zh ? `品牌：${l.brand}，` : `${l.brand}, `) : ""}{zh ? `${fmtDay(l.created_at, lang, true)} 起共享` : `shared since ${fmtDay(l.created_at, lang, true)}`}</>,
+        right: cloud.owner ? <Btn guard onClick={() => remove(l)}>{zh ? "移除" : "Remove"}</Btn> : undefined,
+      }))}>
+      {links && links.length === 0 && !cloud.owner && <p className="sg-note">{zh ? "尚未与总部共享。" : "Not shared with headquarters yet."}</p>}
+      {cloud.owner ? (
+        <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void share(); }}>
+          <input type="email" autoComplete="off" placeholder={zh ? "总部邮箱" : "Headquarters email"} value={f.email} onChange={e => setF({ ...f, email: e.target.value })} aria-label={zh ? "总部邮箱" : "Headquarters email"} />
+          <input autoComplete="off" placeholder={zh ? "品牌（选填）" : "Brand (optional)"} value={f.brand} maxLength={120} onChange={e => setF({ ...f, brand: e.target.value })} aria-label={zh ? "品牌" : "Brand"} />
+          <button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : zh ? "共享" : "Share"}</button>
+        </form>
+      ) : <p className="sg-note">{zh ? "只有所有者可以与总部共享或停止共享。" : "Only owners can share with headquarters or stop sharing."}</p>}
     </Group>
   );
 }
@@ -624,7 +675,7 @@ export function Settings() {
     : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
     : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
-  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ...(cloud ? [["memory", B("Memory", "记忆")]] as [string, Bi][] : []), ["skills", B("Skills", "技能")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
+  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["hq", B("Headquarters", "总部")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ...(cloud ? [["memory", B("Memory", "记忆")]] as [string, Bi][] : []), ["skills", B("Skills", "技能")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
 
   return (
     <PinLock.Provider value={pinCtx}>
@@ -644,6 +695,7 @@ export function Settings() {
           ] : [{ label: B("Sample workspace", "示例工作区"), sub: b(B("Everything here is sample data. Create an account to save your own business.", "这里都是示例数据。注册账户即可保存您自己的企业。")), icon: <I.user /> }]} />
 
           <Team />
+          <HqShare />
           <Security />
           {cloud && <PinGroup st={pinSt} setSt={st => { setPinSt(st); setNow(new Date().toISOString()); }} ask={ask} />}
 

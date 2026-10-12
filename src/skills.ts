@@ -65,7 +65,8 @@ export const BUILTIN: Skill[] = [
 2. Count: stores fully current, items renewed on time, filings approved, items due in 30 days, items at risk, fines.
 3. List each store at risk in one line: the item, the date, what's needed, who owns it.
 4. draft_document the report in English and in the headquarters' language, and draft_message it to headquarters for approval.
-5. Name the stores that are all current first. Owners compare, and the list moves the stragglers.`),
+5. Name the stores that are all current first. Owners compare, and the list moves the stragglers.
+6. Franchisees share with headquarters in Settings, Headquarters: HQ then sees every linked franchisee's stores live in its Headquarters view and gets this summary by email each Monday. Share only store status, never documents, logins or chats.`),
   P("agency-letters", B("Write to an agency", "致函政府机构"), B("Drafts letters, narratives and statements an agency asks for, in the agency's language, ready to approve and send.", "起草机构要求的信函、说明和声明，使用该机构的语言，待批准后发送。"),
     `1. Write in the agency's language (English for US agencies, Chinese for Chinese agencies, the local language elsewhere) with a translation for the person if it differs.
 2. Use the application's facts and cite the requirement it answers.

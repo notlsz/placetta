@@ -10,6 +10,8 @@ import * as api from "./api";
 import { normalize, type CloudSession } from "./session";
 import { consumeHandoff, readHandoff } from "./handoff";
 import { TwoStepCode } from "./TwoStep";
+import { HqHome } from "../Headquarters";
+import type { HqRow } from "../hq";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
    Invites to a teammate's workspace are accepted on sign-in. New businesses start with onboarding (and the filing
@@ -479,7 +481,7 @@ function SetPassword({ lang, onDone, onCancel }: { lang: Lang; onDone: () => voi
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
+type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "hq"; email: string; rows: HqRow[] } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
 
 export function CloudRoot() {
   const [lang, setLangState] = useState<Lang>(() => readHandoff()?.lang ?? readLang());
@@ -502,8 +504,10 @@ export function CloudRoot() {
       let rows = await api.myWorkspaces();
       // The Placetta team works from the filing queue; give them a workspace of their own to open it from.
       if (!rows.length && me.staff_email) { await api.createWorkspace("Placetta team", normalize("Placetta team", {})); rows = await api.myWorkspaces(); }
+      // Headquarters: franchisees that shared their stores with this email (read only, never forces onboarding)
+      const hq = await api.hqStores().catch(() => [] as HqRow[]);
       const row = rows.find(r => r.id === wsId) ?? rows[0];
-      if (!row) { setPhase({ k: "onboard", email: me.email }); return; }
+      if (!row) { setPhase(hq.length ? { k: "hq", email: me.email, rows: hq } : { k: "onboard", email: me.email }); return; }
       if (joined) notice = lang === "zh" ? `已加入 ${joined} 个团队工作区。` : `You joined ${joined} team workspace${joined > 1 ? "s" : ""}.`;
       lastWs.set(row.id);
       const params = new URLSearchParams(location.search);
@@ -520,7 +524,7 @@ export function CloudRoot() {
       ]);
       setPhase({ k: "app", s: {
         me, role: row.role, wsId: row.id, initial: normalize(row.name, row.state), audit, billing, filings, docs, integrations, logins,
-        workspaces: rows.map(r => ({ id: r.id, name: r.name })), notice,
+        workspaces: rows.map(r => ({ id: r.id, name: r.name })), hq, notice,
         switchTo: id => void open(id),
         newWorkspace: () => setPhase({ k: "onboard", email: me.email, back: row.id }),
         signOut: everywhere => { void api.signOut(!!everywhere).then(() => setPhase({ k: "signin" })); },
@@ -545,13 +549,15 @@ export function CloudRoot() {
   const recovered = () => { recovering.current = false; booted.current = true; void open(lastWs.get()); };
 
   if (phase.k === "app") return <App key={phase.s.wsId} cloud={phase.s} />;
+  if (phase.k === "hq") return <HqHome lang={lang} setLang={setLang} email={phase.email} rows={phase.rows}
+    onNew={() => setPhase({ k: "onboard", email: phase.email, back: "" })} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />;
   return (
     <Frame lang={lang} setLang={setLang}>
       {phase.k === "loading" && <div className="gate-card"><div className="gate-bot"><GateBot busy /></div><p className="gate-sub">{L(B("Opening your workspace…", "正在打开工作区…"))}</p></div>}
       {phase.k === "signin" && <SignIn lang={lang} />}
       {phase.k === "recover" && <SetPassword lang={lang} onDone={recovered} onCancel={() => { recovering.current = false; void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
-      {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back ? () => void open(phase.back!) : undefined} />}
+      {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back !== undefined ? () => void open(phase.back!) : undefined} />}
       {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Try again", "重试"))}</button></div>}
     </Frame>
   );

@@ -14,6 +14,7 @@ export const S = {
   nav_overview: B("Overview", "概览"),
   nav_stores: B("Stores", "门店"),
   nav_queue: B("Filing queue", "申报队列"),
+  nav_hq: B("Headquarters", "总部"),
   today: B("Today", "今天"),
   nav_apps: B("Applications", "申请"),
   nav_docs: B("Documents", "文件"),

@@ -1,6 +1,7 @@
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import type { Audit, Bi, Workspace } from "../model";
 import type { Reply, Step } from "../core";
+import type { HqLink, HqRow } from "../hq";
 
 /* ------------------------------------------------------------------ *
  * Placetta's backend (Supabase): accounts, saved workspaces, private
@@ -432,7 +433,28 @@ export const removeMember = (ws: string, user: string) => fn<{ removed: string }
    workspaces has a paid plan running (code subscription_active), and needs two-step first when it's on (mfa_required). */
 export const deleteAccount = () => fn<{ deleted: true; workspaces: number }>("team", { action: "delete_account", confirm: "DELETE" });
 
-export type LocationPrice = { amount: number; currency: string; interval: string | null; interval_count: number | null };
+/* ------------------------------ headquarters ------------------------------ */
+
+/** Every franchisee that shared its stores with this account's (proven) email. [] before the migration is applied. */
+export async function hqStores(): Promise<HqRow[]> {
+  const { data, error } = await supabase().rpc("hq_stores");
+  if (error) { if (error.code === "PGRST202" || error.code === "42883") return []; throw fromPg(error); }
+  return ((data ?? []) as HqRow[]).map(r => ({ ...r, stores: Array.isArray(r.stores) ? r.stores : [] }));
+}
+/** The headquarters emails this workspace shares with. */
+export async function hqLinks(ws: string): Promise<HqLink[]> {
+  const { data, error } = await supabase().rpc("hq_links_for", { ws });
+  if (error) { if (error.code === "PGRST202" || error.code === "42883") return []; throw fromPg(error); }
+  return (data ?? []) as HqLink[];
+}
+export async function hqShare(ws: string, email: string, brand?: string): Promise<string> {
+  const { data, error } = await supabase().rpc("hq_share", { ws, p_email: email, p_brand: brand?.trim() || null });
+  if (error) throw fromPg(error);
+  return data as string;
+}
+export const hqUnshare = (id: string) => rpcVoid("hq_unshare", { p_id: id });
+
+export type LocationPrice ={ amount: number; currency: string; interval: string | null; interval_count: number | null };
 export const locationPrices = (ws: string) => fn<{ location: LocationPrice | null; opening: LocationPrice | null }>("billing", { action: "prices", workspace_id: ws, return_url: location.origin + location.pathname });
 export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: location.origin + location.pathname });
 export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number } = {}) =>

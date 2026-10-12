@@ -1,5 +1,6 @@
 import { B, same, type Approval, type Audit, type Doc, type Workspace } from "../model";
 import type { AgencyLogin, Billing, DocRow, Filing, Integration, Me, Role } from "./api";
+import type { HqRow } from "../hq";
 
 /** Everything a signed-in workspace starts with. */
 export type CloudSession = {
@@ -15,6 +16,8 @@ export type CloudSession = {
   integrations: Integration[];
   logins: AgencyLogin[];
   workspaces: { id: string; name: string }[];
+  /** Franchisees that shared their stores with this account's email: the Headquarters view. */
+  hq: HqRow[];
   notice?: string;
   switchTo(id: string): void;
   newWorkspace(): void;

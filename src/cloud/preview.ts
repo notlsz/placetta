@@ -174,8 +174,68 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
       return json(t("filings").map((f): Row => ({ ...f, business: t("workspaces").find(w => w.id === f.workspace_id)?.name ?? "", approver_email: userOf(String(f.approved_by))?.email ?? null, assignee_email: f.assigned_to ? userOf(String(f.assigned_to))?.email ?? null : null }))
         .sort((a, b) => ((order.indexOf(String(a.status)) + 5) % 9) - ((order.indexOf(String(b.status)) + 5) % 9)));
     }
+    case "hq_share": {
+      if (!isOwner(ws, c)) return pgErr("Only an owner can share with headquarters.");
+      const email = String(body.p_email ?? "").trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return pgErr("Enter a valid email address.");
+      const brand = String(body.p_brand ?? "").trim().slice(0, 120) || null;
+      const open = t("hq_links").find(l => l.workspace_id === ws && l.hq_email === email && !l.revoked_at);
+      if (open) { open.brand = brand; save(); return json(open.id); }
+      if (t("hq_links").filter(l => l.workspace_id === ws && !l.revoked_at).length >= 10) return pgErr("Up to 10 headquarters emails per workspace. Remove one first.");
+      const id = uuid();
+      t("hq_links").push({ id, workspace_id: ws, hq_email: email, brand, created_by: c.sub, created_at: now(), revoked_at: null });
+      audit(ws, c.sub, "you", "Shared store status with headquarters", "与总部共享门店状态", { en: email, zh: email });
+      save(); return json(id);
+    }
+    case "hq_unshare": {
+      const l = t("hq_links").find(x => x.id === body.p_id && !x.revoked_at); if (!l) return pgErr("That link is gone.");
+      if (!isOwner(String(l.workspace_id), c)) return pgErr("Only an owner can stop sharing with headquarters.");
+      l.revoked_at = now(); audit(String(l.workspace_id), c.sub, "you", "Stopped sharing store status with headquarters", "停止与总部共享门店状态", { en: String(l.hq_email), zh: String(l.hq_email) });
+      save(); return json(null);
+    }
+    case "hq_links_for": {
+      if (!isMember(ws, c)) return pgErr("Not your workspace.");
+      return json(t("hq_links").filter(l => l.workspace_id === ws && !l.revoked_at).map(l => ({ id: l.id, hq_email: l.hq_email, brand: l.brand, created_at: l.created_at })));
+    }
+    case "hq_stores": {
+      if (!mfaOk(c)) return json([]);
+      const email = userOf(c.sub).email.toLowerCase();
+      return json(t("hq_links").filter(l => l.hq_email === email && !l.revoked_at).flatMap(l => {
+        const w = t("workspaces").find(x => x.id === l.workspace_id);
+        return w ? [{ workspace_id: w.id, name: w.name, brand: l.brand ?? null, stores: hqSummary((w.state ?? {}) as Row) }] : [];
+      }));
+    }
     default: return pgErr(`Not in the preview: ${fn}`, "PGRST202", 404);
   }
+}
+
+/** The preview's copy of the database's hq_summary(): per store, only stage, address, counts and the next item due. */
+function hqSummary(st: Row) {
+  const arr = (v: unknown) => (Array.isArray(v) ? v : []) as Row[];
+  const bi = (v: unknown) => (v && typeof v === "object" ? { en: String((v as Row).en ?? (v as Row).zh ?? ""), zh: String((v as Row).zh ?? (v as Row).en ?? "") } : { en: String(v ?? ""), zh: String(v ?? "") });
+  const day = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v) && !isNaN(Date.parse(v.slice(0, 10))) ? v.slice(0, 10) : null);
+  const today = new Date().toISOString().slice(0, 10), in30 = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+  const stores = arr(st.stores).filter(s => s && typeof s === "object");
+  const apps = arr(st.apps).filter(a => a && typeof a === "object" && a.id);
+  const deadlines = arr(st.deadlines).filter(d => d && typeof d === "object" && (d.kind === "due" || d.kind === "renewal"));
+  return stores.map((s, i) => {
+    const mine = apps.filter(a => stores.length === 1 || (Array.isArray(s.apps) && s.apps.includes(a.id)));
+    const items = [
+      ...arr(s.permits).map(p => ({ kind: "permit", title: bi(p.name), date: day(p.expires) })),
+      ...deadlines.filter(d => (d.app ? mine.some(a => a.id === d.app && !(d.kind === "due" && a.status === "approved")) : stores.length === 1))
+        .map(d => ({ kind: String(d.kind), title: bi(d.title), date: day(d.date) })),
+    ].filter((x): x is { kind: string; title: { en: string; zh: string }; date: string } => !!x.date).sort((a, b) => a.date.localeCompare(b.date));
+    const overdue = items.filter(x => x.date < today).length, due_30 = items.filter(x => x.date >= today && x.date <= in30).length;
+    const approved = mine.filter(a => a.status === "approved").length;
+    return {
+      id: String(s.id ?? `store-${i + 1}`), name: bi(s.name), stage: s.stage === "open" ? "open" : "opening", address: String(s.address ?? ""),
+      planned_open: day(s.plannedOpen), projected_open: day(s.projectedOpen), opened: day(s.opened),
+      grade: ["A", "B", "C", "P"].includes(String((s.grade as Row | undefined)?.letter)) ? (s.grade as Row).letter : null,
+      current: items.filter(x => x.kind === "permit" && x.date > in30).length + (s.stage === "open" ? 0 : approved),
+      due_30, overdue, pending: mine.length - approved,
+      status: overdue ? "overdue" : due_30 ? "due" : "current", next: items[0] ?? null,
+    };
+  });
 }
 
 async function rest(req: Request, url: URL, c: { sub: string; aal: string } | null): Promise<Response> {
