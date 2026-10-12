@@ -268,6 +268,39 @@ function Security() {
   );
 }
 
+/** Deleting the account: type DELETE, then the server deletes it and this device signs out. */
+function DeleteAccount({ onClose }: { onClose: () => void }) {
+  const { b, cloud } = useApp();
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  if (!cloud) return null;
+  const go = async () => {
+    if (typed.trim() !== "DELETE") { setMsg(b(B("Type DELETE to confirm.", "请输入 DELETE 以确认。"))); return; }
+    setBusy(true); setMsg("");
+    try { await api.deleteAccount(); cloud.signOut(); }
+    catch (e) {
+      const x = e as api.ApiError;
+      setMsg(x.code === "subscription_active" ? b(B("A workspace you own alone still has a paid plan. Cancel it in Manage billing first, then delete your account.", "您单独拥有的工作区仍有付费方案。请先在“管理账单”中取消，再删除账户。"))
+        : x.code === "mfa_required" ? b(B("Two-step sign-in is on. Sign out, sign back in with your code, then try again.", "您已开启两步登录。请退出后用验证码重新登录，再试一次。"))
+        : x.message);
+      setBusy(false);
+    }
+  };
+  return (
+    <Modal label={b(B("Delete your account", "删除账户"))} onClose={onClose}>
+      <header className="m-h"><span className="m-eyebrow"><I.x />{b(B("Data controls", "数据管理"))}</span><h2>{b(B("Delete your account", "删除账户"))}</h2>
+        <p>{b(B("This can't be undone. Workspaces where you are the only owner are deleted for everyone on them, with their files, filings and audit trail. On workspaces with another owner, you just leave. Records the law requires us to keep, such as billing records, stay.", "此操作无法撤销。您是唯一所有者的工作区将被删除，其中的文件、申报和审计记录也会一并删除，工作区内的其他成员也将无法再访问。在还有其他所有者的工作区中，您只会退出。法律要求我们保留的记录（例如账单记录）会继续保留。"))}</p></header>
+      <form className="m-body" onSubmit={e => { e.preventDefault(); void go(); }}>
+        <label className="sr" htmlFor="del-confirm">{b(B("Type DELETE to confirm", "输入 DELETE 以确认"))}</label>
+        <input id="del-confirm" autoComplete="off" autoCapitalize="characters" spellCheck={false} value={typed} onChange={e => setTyped(e.target.value)} placeholder={b(B("Type DELETE to confirm", "输入 DELETE 以确认"))} autoFocus />
+        {msg && <p className="pin-msg" role="alert">{msg}</p>}
+        <div className="sg-form-act"><Btn onClick={onClose}>{b(B("Cancel", "取消"))}</Btn><button type="submit" className="sbtn ink" disabled={busy || typed.trim() !== "DELETE"}>{busy ? "…" : b(B("Delete my account", "删除我的账户"))}</button></div>
+      </form>
+    </Modal>
+  );
+}
+
 /* ---------------------------------- memory ---------------------------------- */
 
 const ago = (iso: string, zh: boolean) => fmtAgo(iso, zh ? "zh" : "en");
@@ -577,6 +610,7 @@ export function Settings() {
   const [hex, setHex] = useState(readAccent);
   useEffect(() => { if (accent) applyAccent(accent); }, [theme, accent]);
   const [pinSt, setPinSt] = useState<api.PinStatus | null>(null);
+  const [del, setDel] = useState(false);
   const [now, setNow] = useState(() => new Date().toISOString());
   const [prompt, setPrompt] = useState<{ title: string; action: (pin: string) => Promise<api.PinStatus>; then?: () => void } | null>(null);
   useEffect(() => { if (cloud) void api.pinStatus().then(setPinSt, () => setPinSt(null)); }, [cloud]);
@@ -666,8 +700,10 @@ export function Settings() {
           <Group id="data" title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
             { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), icon: <I.download />, right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
             { label: B("Export the audit trail", "导出审计记录"), sub: "CSV", icon: <I.audit />, right: <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> },
-            { label: B("Delete your data", "删除数据"), sub: b(B("Email us and we delete it, except records the law requires us to keep.", "发邮件给我们即可删除，法律要求保留的记录除外。")), icon: <I.x />, right: <Btn guard onClick={() => { window.location.href = "mailto:support@placetta.com?subject=Delete%20my%20data"; }}>{lang === "zh" ? "申请删除" : "Ask to delete"}</Btn> },
-          ]} />
+            ...(cloud ? [{ label: B("Delete your account", "删除账户"), sub: b(B("Deletes your account and the workspaces you own alone, except records the law requires us to keep.", "删除您的账户和您单独拥有的工作区，法律要求保留的记录除外。")), icon: <I.x />, right: <Btn guard onClick={() => setDel(true)}>{b(B("Delete my account", "删除我的账户"))}</Btn> }] : []),
+          ]}>
+            {del && <DeleteAccount onClose={() => setDel(false)} />}
+          </Group>
 
           <Group id="help" title={B("Help", "帮助")} rows={[
             { label: B("Help Center", "帮助中心"), sub: b(B("Guides for every part of Placetta", "快哉各项功能的使用指南")), icon: <I.help />, right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.vercel.app/help/" : "/help/"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },

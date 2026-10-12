@@ -110,7 +110,7 @@ function SignIn({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
   const [hand] = useState(readHandoff);
   const [email, setEmail] = useState(hand?.email ?? "");
-  const [step, setStep] = useState<"email" | "password" | "code" | "confirm" | "phone" | "phonecode">("email");
+  const [step, setStep] = useState<"email" | "password" | "code" | "confirm" | "phone" | "phonecode" | "reset">("email");
   const [cc, setCc] = useState("+1");
   const [phone, setPhone] = useState("");
   const e164 = () => cc + phone.replace(/\D/g, "").replace(/^0+/, "");
@@ -121,7 +121,7 @@ function SignIn({ lang }: { lang: Lang }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(() => new URLSearchParams(location.search).get("error_description") ?? "");
   const [noAccount, setNoAccount] = useState(false);
-  const [providers, setProviders] = useState<Record<api.Provider, boolean>>({ google: false, azure: false });
+  const [providers, setProviders] = useState<api.SignInOptions>({ google: false, azure: false, phone: false });
   useEffect(() => {
     void api.authProviders().then(setProviders);
     if (new URLSearchParams(location.search).get("error")) history.replaceState(null, "", location.pathname + location.hash);
@@ -160,6 +160,12 @@ function SignIn({ lang }: { lang: Lang }) {
     try { await api.sendSignIn(email.trim()); setStep("code"); } catch (e) { setErr(mailErr(e as api.ApiError)); }
     setBusy(false);
   };
+  const sendReset = async () => {
+    if (!okEmail()) { setErr(L(B("Enter your work email.", "请输入工作邮箱。"))); return; }
+    setBusy(true); setErr(""); setNoAccount(false);
+    try { await api.sendPasswordReset(email.trim()); setStep("reset"); } catch (e) { setErr(mailErr(e as api.ApiError)); }
+    setBusy(false);
+  };
   const verify = async () => {
     setBusy(true); setErr("");
     try { await api.verifyCode(email.trim(), code.trim()); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
@@ -185,12 +191,14 @@ function SignIn({ lang }: { lang: Lang }) {
     : step === "phonecode" ? L(B("Check your messages.", "请查收短信。"))
     : step === "code" ? L(B("Check your email.", "请查收邮件。"))
     : step === "confirm" ? L(B("Confirm your email.", "请确认邮箱。"))
+    : step === "reset" ? L(B("Check your email.", "请查收邮件。"))
     : step === "password" ? (mode === "create" ? L(B("Create your password.", "设置密码。")) : L(B("Enter your password.", "输入密码。")))
     : hand ? L(B("Your license plan is one step away.", "您的执照计划只差一步。")) : L(B("Sign in to Placetta.", "登录快哉。"));
   const sub = step === "phone" ? L(B("Log in or sign up with your phone number. No password needed.", "用手机号登录或注册，无需密码。"))
     : step === "phonecode" ? L(B(`We texted a 6-digit code to ${cc} ${phone}.`, `6 位验证码已发送至 ${cc} ${phone}。`))
     : step === "code" ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`))
     : step === "confirm" ? L(B(`We sent a confirmation link to ${email}. Open it, then sign in with your password.`, `确认链接已发送至 ${email}。打开链接后，用密码登录。`))
+    : step === "reset" ? L(B(`If there's an account for ${email}, we sent it a link to set a new password. Open it on this device.`, `如果 ${email} 已注册，我们已向其发送设置新密码的链接。请在此设备上打开。`))
     : step === "password" ? null
     : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。"))
     : L(B("New or invited? Sign in with your work email.", "新用户或受邀成员，请用工作邮箱登录。"));
@@ -217,8 +225,8 @@ function SignIn({ lang }: { lang: Lang }) {
           <button type="submit" className="sbtn ink wide" disabled={busy}>{L(B("Continue", "继续"))}</button>
         </form>
       )}
-      {step === "email" && <span className="gate-or">{L(B("or", "或"))}</span>}
-      {step === "email" && <button type="button" className="sbtn line wide sso gate-phone" disabled={busy} onClick={() => { setErr(""); setStep("phone"); }}><PhoneMark />{L(B("Continue with phone", "使用手机号继续"))}</button>}
+      {step === "email" && providers.phone && <span className="gate-or">{L(B("or", "或"))}</span>}
+      {step === "email" && providers.phone && <button type="button" className="sbtn line wide sso gate-phone" disabled={busy} onClick={() => { setErr(""); setStep("phone"); }}><PhoneMark />{L(B("Continue with phone", "使用手机号继续"))}</button>}
       {step === "phone" && (
         <form onSubmit={e => { e.preventDefault(); void sendPhone(); }}>
           <div className="phrow">
@@ -251,6 +259,7 @@ function SignIn({ lang }: { lang: Lang }) {
             <button type="button" className="pshow" onClick={() => setShow(v => !v)} aria-label={show ? L(B("Hide password", "隐藏密码")) : L(B("Show password", "显示密码"))}>{show ? L(B("Hide", "隐藏")) : L(B("Show", "显示"))}</button>
           </div>
           <button type="submit" className="sbtn ink wide" disabled={busy}>{busy ? "…" : mode === "create" ? L(B("Create account", "创建账户")) : L(B("Sign in", "登录"))}</button>
+          {mode === "signin" && <p className="gate-alt"><button type="button" className="lnk" disabled={busy} onClick={() => void sendReset()}>{L(B("Forgot password?", "忘记密码？"))}</button></p>}
           {noAccount && mode === "signin" && <button type="button" className="sbtn line wide" onClick={() => { setMode("create"); setErr(""); setNoAccount(false); }}>{L(B("Create an account with this email", "用此邮箱创建账户"))}</button>}
           <p className="gate-alt">
             {mode === "signin"
@@ -268,6 +277,7 @@ function SignIn({ lang }: { lang: Lang }) {
           <button type="button" className="sbtn quiet wide" onClick={() => { setStep("password"); setCode(""); }}>{L(B("Use a password instead", "改用密码登录"))}</button>
         </form>
       )}
+      {step === "reset" && <button type="button" className="sbtn line wide" onClick={() => { setStep("password"); setPw(""); setErr(""); }}>{L(B("Back to sign in", "返回登录"))}</button>}
       {step === "confirm" && <button type="button" className="sbtn line wide" onClick={() => { setMode("signin"); setStep("password"); setPw(""); }}>{L(B("I've confirmed, sign in", "已确认，去登录"))}</button>}
       {err && <p className="gate-err" role="alert">{err}</p>}
       {(step === "email" || step === "password" || step === "phone") && (
@@ -422,14 +432,64 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
+/* After a password reset link: the recovery session is signed in, and the only thing it does first is set a new password. */
+function SetPassword({ lang, onDone, onCancel }: { lang: Lang; onDone: () => void; onCancel: () => void }) {
+  const L = (x: Bi) => x[lang];
+  const [a, setA] = useState("");
+  const [b, setB] = useState("");
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  // With two-step on, the password changes only from a two-step session: ask for the code first.
+  const [factor, setFactor] = useState<string | null>(null);
+  useEffect(() => { void api.twoStepStatus().then(t => { if (t.next === "aal2" && t.current !== "aal2" && t.factorId) setFactor(t.factorId); }).catch(() => undefined); }, []);
+  const save = async () => {
+    if (a.length < 8) { setErr(L(B("Use at least 8 characters.", "密码至少 8 位。"))); return; }
+    if (a !== b) { setErr(L(B("The passwords don't match.", "两次输入的密码不一致。"))); return; }
+    setBusy(true); setErr("");
+    try { await api.changePassword(a); onDone(); }
+    catch (e) {
+      const x = e as api.ApiError;
+      setErr(x.code === "weak" ? L(B("Pick a stronger password: at least 8 characters, not a common one.", "请设置更安全的密码：至少 8 位，避免常见密码。"))
+        : x.code === "same" ? L(B("Pick a password different from your current one.", "新密码不能与旧密码相同。"))
+        : x.code === "reauth" ? L(B("This link has expired. Ask for a new one from the sign-in page.", "该链接已失效，请在登录页重新获取。"))
+        : x.code === "rate_limited" ? L(B("Too many tries. Wait a minute, then try again.", "尝试次数过多，请稍候再试。")) : x.message);
+      setBusy(false);
+    }
+  };
+  if (factor) return <TwoStepCode lang={lang} factorId={factor} onDone={() => setFactor(null)} onSignOut={onCancel} />;
+  return (
+    <div className="gate-card">
+      <div className="gate-bot"><GateBot /></div>
+      <h1>{L(B("Set a new password.", "设置新密码。"))}</h1>
+      <p className="gate-sub">{L(B("Use it the next time you sign in.", "下次登录时使用新密码。"))}</p>
+      <form onSubmit={e => { e.preventDefault(); void save(); }}>
+        <label className="sr" htmlFor="gate-newpw">{L(B("New password", "新密码"))}</label>
+        <div className="pwrap">
+          <input id="gate-newpw" type={show ? "text" : "password"} autoComplete="new-password" value={a} onChange={e => setA(e.target.value)} placeholder={L(B("At least 8 characters", "至少 8 位"))} autoFocus />
+          <button type="button" className="pshow" onClick={() => setShow(v => !v)} aria-label={show ? L(B("Hide password", "隐藏密码")) : L(B("Show password", "显示密码"))}>{show ? L(B("Hide", "隐藏")) : L(B("Show", "显示"))}</button>
+        </div>
+        <label className="sr" htmlFor="gate-newpw2">{L(B("Type it again", "再次输入"))}</label>
+        <input id="gate-newpw2" type={show ? "text" : "password"} autoComplete="new-password" value={b} onChange={e => setB(e.target.value)} placeholder={L(B("Type it again", "再次输入"))} />
+        <button type="submit" className="sbtn ink wide" disabled={busy || !a || !b}>{busy ? "…" : L(B("Save and continue", "保存并继续"))}</button>
+        <button type="button" className="sbtn quiet wide" disabled={busy} onClick={onCancel}>{L(B("Cancel and sign out", "取消并退出"))}</button>
+      </form>
+      {err && <p className="gate-err" role="alert">{err}</p>}
+    </div>
+  );
+}
+
+type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
 
 export function CloudRoot() {
   const [lang, setLangState] = useState<Lang>(() => readHandoff()?.lang ?? readLang());
   const setLang = (l: Lang) => { setLangState(l); try { localStorage.setItem("placetta-lang", l); localStorage.setItem("placetta-agent-lang", l); } catch { /* blocked */ } };
   useEffect(() => { document.documentElement.lang = lang === "zh" ? "zh-CN" : "en"; }, [lang]);
-  const [phase, setPhase] = useState<Phase>({ k: "loading" });
+  const [phase, setPhaseRaw] = useState<Phase>({ k: "loading" });
   const booted = useRef(false);
+  // A password reset link signs in with a recovery session: hold everything else until the new password is set.
+  const recovering = useRef(false);
+  const setPhase = useCallback((p: Phase) => { if (!recovering.current) setPhaseRaw(p); }, []);
   const L = (x: Bi) => x[lang];
 
   const open = useCallback(async (wsId: string, notice?: string) => {
@@ -471,20 +531,25 @@ export function CloudRoot() {
     } catch (e) {
       setPhase({ k: "error", msg: (e as api.ApiError).message ?? String(e) });
     }
-  }, [lang]);
+  }, [lang, setPhase]);
 
   useEffect(() => {
     const boot = () => { if (booted.current) return; booted.current = true; void open(lastWs.get()); };
     void api.getSession().then(s => (s ? boot() : setPhase({ k: "signin" })));
-    const sub = api.onAuth(s => { if (s) boot(); else { booted.current = false; setPhase({ k: "signin" }); } });
+    const sub = api.onAuth((s, event) => {
+      if (event === "PASSWORD_RECOVERY" && s) { recovering.current = true; setPhaseRaw({ k: "recover" }); return; }
+      if (s) boot(); else { recovering.current = false; booted.current = false; setPhase({ k: "signin" }); }
+    });
     return () => sub.unsubscribe();
-  }, [open]);
+  }, [open, setPhase]);
+  const recovered = () => { recovering.current = false; booted.current = true; void open(lastWs.get()); };
 
   if (phase.k === "app") return <App key={phase.s.wsId} cloud={phase.s} />;
   return (
     <Frame lang={lang} setLang={setLang}>
       {phase.k === "loading" && <div className="gate-card"><div className="gate-bot"><GateBot busy /></div><p className="gate-sub">{L(B("Opening your workspace…", "正在打开工作区…"))}</p></div>}
       {phase.k === "signin" && <SignIn lang={lang} />}
+      {phase.k === "recover" && <SetPassword lang={lang} onDone={recovered} onCancel={() => { recovering.current = false; void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back ? () => void open(phase.back!) : undefined} />}
       {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Try again", "重试"))}</button></div>}

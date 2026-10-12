@@ -315,6 +315,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       return fnErr("bad_request", "Unknown action.");
     }
     case "team": {
+      if (body.action === "delete_account") return fnErr("not_configured", "Deleting an account runs on the live app. Start over in Settings clears this preview.", 503);
       if (body.action === "remove") return rpc("remove_member", { ws, p_user: body.user_id }, c).then(async r => (r.ok ? json({ ok: true, removed: body.user_id }) : fnErr("bad_request", (await r.json()).message)));
       const no = needOwner(); if (no) return no;
       if (body.action === "invite") {
@@ -339,7 +340,7 @@ async function auth(req: Request, url: URL): Promise<Response> {
   const p = url.pathname.replace("/auth/v1", "");
   const body = req.method === "GET" || req.method === "DELETE" ? {} : await req.json().catch(() => ({})) as Record<string, string>;
   if (p === "/settings") return json({ external: { email: true, phone: true, google: false, azure: false }, disable_signup: false });
-  if (p === "/otp") return json({});
+  if (p === "/otp" || p === "/recover") return json({});
   if (p === "/signup") {
     const email = String(body.email ?? "").trim().toLowerCase();
     if (db.users.some(x => x.email === email)) return json({ code: 422, error_code: "user_already_exists", msg: "User already registered" }, 422);
