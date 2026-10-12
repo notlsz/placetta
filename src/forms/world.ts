@@ -132,8 +132,13 @@ export const CITIES: City[] = [
   c("LV", "US", "Las Vegas", "拉斯维加斯", ["las vegas", "拉斯维加斯", "henderson, nv"], true, "NV"),
   c("SAT", "US", "San Antonio", "圣安东尼奥", ["san antonio", "圣安东尼奥"], true, "TX"),
   c("TPA", "US", "Tampa", "坦帕", ["tampa", "坦帕", "ybor city"], true, "FL"),
-  ...([["Phoenix", "凤凰城", "AZ"], ["San Diego", "圣地亚哥", "CA"], ["Denver", "丹佛", "CO"], ["Portland", "波特兰", "OR"], ["Minneapolis", "明尼阿波利斯", "MN"],
-    ["Detroit", "底特律", "MI"], ["Orlando", "奥兰多", "FL"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
+  c("SDG", "US", "San Diego", "圣地亚哥", ["san diego", "圣地亚哥", "圣迭戈", "convoy street", "kearny mesa"], true, "CA"),
+  c("IRV", "US", "Irvine", "尔湾", ["irvine", "尔湾"], true, "CA"),
+  c("ORL", "US", "Orlando", "奥兰多", ["orlando", "奥兰多"], true, "FL"),
+  c("FTW", "US", "Fort Worth", "沃斯堡", ["fort worth", "沃斯堡", "沃思堡"], true, "TX"),
+  c("PHX", "US", "Phoenix", "凤凰城", ["phoenix", "凤凰城", "菲尼克斯"], true, "AZ"),
+  ...([["Denver", "丹佛", "CO"], ["Portland", "波特兰", "OR"], ["Minneapolis", "明尼阿波利斯", "MN"],
+    ["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
     .map(([en, zh, st]) => c("US-" + en.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6), "US", en, zh, [en.toLowerCase(), zh], false, st)),
 ];
 
@@ -147,6 +152,7 @@ export const STATES: { code: string; en: string; zh: string; names: RegExp }[] =
   { code: "GA", en: "Georgia", zh: "佐治亚州", names: /georgia(?!n)|,\s*ga\b|佐治亚/i },
   { code: "PA", en: "Pennsylvania", zh: "宾夕法尼亚州", names: /pennsylvania|,\s*pa\b|宾州|宾夕法尼亚/i },
   { code: "NV", en: "Nevada", zh: "内华达州", names: /nevada|,\s*nv\b|内华达/i },
+  { code: "AZ", en: "Arizona", zh: "亚利桑那州", names: /arizona|,\s*az\b|亚利桑那/i },
   { code: "NJ", en: "New Jersey", zh: "新泽西州", names: /new jersey|,\s*nj\b|新泽西/i },
 ];
 
