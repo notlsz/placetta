@@ -270,6 +270,179 @@ function HqShare() {
   );
 }
 
+/* ------------------------------ text and call Odelia ------------------------------ */
+
+/** A phone number as E.164, the way the server checks it: 10 digits (or 11 with a leading 1) are US, else +country code. */
+function toE164(s: string): string | null {
+  const t = s.trim();
+  if (!t || t.length > 32 || /[^\d\s().+-]/.test(t) || t.indexOf("+") > 0) return null;
+  let d = t.replace(/\D/g, "");
+  if (t.startsWith("00")) d = d.slice(2);
+  else if (!t.startsWith("+")) { if (d.length === 10) d = "1" + d; else if (!(d.length === 11 && d.startsWith("1"))) return null; }
+  if (!/^[1-9]\d{7,14}$/.test(d) || (d.startsWith("1") && !/^1[2-9]\d{2}[2-9]\d{6}$/.test(d))) return null;
+  return "+" + d;
+}
+const prettyPhone = (e: string) => { const m = /^\+1(\d{3})(\d{3})(\d{4})$/.exec(e); return m ? `+1 (${m[1]}) ${m[2]}-${m[3]}` : e; };
+const deviceTz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles"; } catch { return "America/Los_Angeles"; } };
+const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`);
+const hourLabel = (v: string, zh: boolean) => { const [h, m] = v.split(":").map(Number); const d = new Date(2026, 0, 1, h || 0, m || 0); return d.toLocaleTimeString(zh ? "zh-CN" : "en-US", { hour: "numeric", minute: "2-digit" }); };
+
+/** A contact card for Odelia's number, so texts from her show up with her name. */
+function saveContact(number: string, zh: boolean) {
+  const vcf = ["BEGIN:VCARD", "VERSION:3.0", "N:;Odelia;;;", zh ? "FN:Odelia（快哉）" : "FN:Odelia (Placetta)", zh ? "ORG:快哉" : "ORG:Placetta", zh ? "TITLE:AI 合规助理" : "TITLE:AI compliance agent",
+    `TEL;TYPE=CELL,VOICE,TEXT:${number}`, zh ? "NOTE:发短信或打电话问 Odelia 关于执照、许可和截止日期的问题。" : "NOTE:Text or call Odelia about your licenses, permits and deadlines.", "URL:https://placetta.com", "END:VCARD"].join("\r\n");
+  const url = URL.createObjectURL(new Blob([vcf + "\r\n"], { type: "text/vcard;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = "Odelia.vcf"; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/** Text and call Odelia: link a phone, then text or call her like a coworker. She texts (or calls) first when something needs you. */
+function PhoneGroup() {
+  const { lang, cloud, say } = useApp();
+  const zh = lang === "zh";
+  const pin = usePin();
+  const [line, setLine] = useState<api.OdeliaLine | null>(null);
+  const [st, setSt] = useState<api.PhoneStatus | null>(null);
+  const [num, setNum] = useState("");
+  const [code, setCode] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [all, setAll] = useState(false);
+  const load = useCallback(async () => { try { setSt(await api.phoneStatus()); } catch { setSt({ link: null, log: [] }); } }, []);
+  useEffect(() => { if (!cloud) return; void api.odeliaLine().then(setLine); void load(); }, [cloud, load]);
+  const link = st?.link ?? null;
+  // Odelia answers texts and calls in the language you use here.
+  useEffect(() => { if (link?.verified && link.lang !== lang) void api.phonePrefs({ lang }).then(setSt).catch(() => undefined); }, [link?.verified, link?.lang, lang]);
+  if (!cloud || !line) return null;
+
+  const errText = (code: string) => ({
+    pin_required: zh ? "请先用设置 PIN 解锁。" : "Unlock settings with your PIN first.",
+    phone_format: zh ? "请输入手机号，例如 (415) 555-0134；美国以外的号码请加国家代码，例如 +86。" : "Enter a mobile number, like (415) 555-0134, or with its country code, like +86.",
+    phone_taken: zh ? "这个号码无法关联。请换一个号码，或发邮件至 support@placetta.com。" : "That number can't be linked. Use another one, or email support@placetta.com.",
+    phone_rate_limited: zh ? "验证码发送次数太多，请一小时后再试。" : "Too many codes. Try again in an hour.",
+    code_wrong: zh ? "验证码不对，请再试一次。" : "That code isn't right. Try again.",
+    code_locked: zh ? "错误次数太多。请重新发送验证码。" : "Too many wrong tries. Send a new code.",
+    code_expired: zh ? "验证码已过期。请重新发送。" : "That code expired. Send a new one.",
+    not_configured: zh ? "短信功能还没有设置好。" : "Texting isn't set up yet.",
+    opted_out: zh ? `这个号码曾回复 STOP 退订 Odelia 的短信。请先发送 START 到 ${line.display ?? ""}，再重新发送验证码。` : `This number texted STOP to Odelia. Text START to ${line.display ?? ""}, then send the code again.`,
+    send_failed: zh ? "验证码没有发出。请检查号码后重试。" : "The code didn't go through. Check the number and try again.",
+  } as Record<string, string>)[code];
+  const act = async (fn: () => Promise<api.PhoneStatus>, done?: string) => {
+    setBusy(true); setMsg("");
+    try {
+      const s = await fn(); setSt(s);
+      if (s.error) setMsg(errText(s.error) ?? s.error); else if (done) say(done);
+      return s;
+    } catch (e) { const x = e as api.ApiError; setMsg(errText(x.code) ?? x.message); return null; }
+    finally { setBusy(false); }
+  };
+  const start = async () => {
+    if (pin.locked) { pin.guard(() => void start()); return; }
+    const e164 = toE164(num || link?.number || "");
+    if (!e164) { setMsg(errText("phone_format")); return; }
+    const s = await act(() => api.phoneStart(e164, deviceTz(), lang));
+    if (s) { setAdding(false); setCode(""); setNum(""); setTimeout(() => void load(), 3000); }   // look again to show whether it went out
+  };
+  const confirm = async () => {
+    const c = code.replace(/\D/g, "");
+    if (c.length !== 6) { setMsg(zh ? "请输入 6 位验证码。" : "Enter the 6-digit code."); return; }
+    const s = await act(() => api.phoneConfirm(c), zh ? "号码已关联。现在可以给 Odelia 发短信了。" : "Your phone is linked. Text Odelia anytime.");
+    if (s && !s.error) setCode("");
+  };
+  const remove = () => {
+    if (!window.confirm(zh ? "取消关联这个号码？Odelia 将不再回复它的短信和来电。" : "Unlink this number? Odelia stops answering its texts and calls.")) return;
+    void act(() => api.phoneRemove(), zh ? "已取消关联" : "Phone unlinked");
+  };
+  const prefs = (p: Parameters<typeof api.phonePrefs>[0]) => void act(() => api.phonePrefs(p));
+
+  if (!line.configured) {
+    return (
+      <Group id="phone" title={B("Text and call Odelia", "发短信或致电 Odelia")}
+        note={B("Text or call Odelia like a coworker, and she texts you first when something needs you. Texting isn't set up yet. Check back soon, or email support@placetta.com.", "像和同事一样给 Odelia 发短信或打电话，有事需要您时她也会先发短信给您。短信功能还没有设置好。请稍后再来看看，或发邮件至 support@placetta.com。")} />
+    );
+  }
+  const number = line.number ?? "";
+  const verified = !!link?.verified;
+  const codeStep = !!link && !verified && !adding && (link.code_pending || busy);
+  const showForm = !verified && (adding || !link || (!link.code_pending && !busy));
+  const lastErr = link && !verified && link.last_error ? errText(link.last_error) : "";
+  const log = st?.log ?? [];
+  const who = (r: api.PhoneLogRow) => r.channel === "voice" ? (zh ? "通话" : "Call")
+    : r.direction === "in" ? (zh ? "您发的短信" : "You texted") : (zh ? "Odelia 发的短信" : "Odelia texted");
+
+  const rows: Row[] = [
+    { label: B("Odelia's number", "Odelia 的号码"), icon: <I.phone />,
+      sub: <>{line.display}{line.voice ? (zh ? "，可发短信或打电话" : ", for texts and calls") : (zh ? "，可发短信" : ", for texts")}</>,
+      right: <>{number && <a className="sbtn quiet" href={`sms:${number}`}>{zh ? "发短信" : "Text"}</a>}<Btn onClick={() => saveContact(number, zh)}><I.download />{zh ? "保存联系人" : "Save contact"}</Btn></> },
+    { label: B("Your phone", "您的手机"), icon: <I.user />,
+      sub: link ? <>{prettyPhone(link.number)}{verified ? (link.opted_out ? (zh ? `，已回复 STOP 退订短信。发送 START 到 ${line.display} 可重新开启。` : `, texts are off because it texted STOP. Text START to ${line.display} to turn them back on.`) : (zh ? "，已验证" : ", verified")) : (zh ? "，等待验证" : ", waiting for the code")}</> : (zh ? "未关联" : "Not linked"),
+      right: verified ? <Btn guard onClick={remove}>{zh ? "取消关联" : "Remove"}</Btn> : link ? <Btn onClick={() => void act(() => api.phoneRemove())}>{zh ? "取消" : "Cancel"}</Btn> : undefined },
+    ...(verified ? [
+      { label: B("Texts about important updates", "重要更新短信通知"), icon: <I.message />,
+        sub: zh ? "有事等您批准，或 7 天内到期时发短信。每天最多 3 条。" : "When something needs your approval or is due within 7 days. At most 3 a day.",
+        right: <Toggle on={link!.texts_on} set={v => prefs({ texts: v })} label={zh ? "重要更新短信" : "Texts about important updates"} /> },
+      { label: B("Calls for urgent items", "紧急事项来电"), icon: <I.bell />,
+        sub: line.voice ? (zh ? "可能被停业、检查未通过，或逾期事项影响开业时致电。每天最多 1 通。" : "A closure risk, a failed inspection, or something overdue that blocks opening. At most 1 a day.") : (zh ? "来电功能还没有设置好，紧急事项会改为短信通知。" : "Calls aren't set up yet, so urgent items come by text."),
+        right: <Toggle on={link!.calls_on} set={v => prefs({ calls: v })} label={zh ? "紧急事项来电" : "Calls for urgent items"} /> },
+      { label: B("Quiet hours", "免打扰时段"), icon: <I.moon />,
+        sub: zh ? `这段时间不发短信也不打电话，按${link!.tz === deviceTz() ? "这台设备的" : ` ${link!.tz} `}时间。您主动联系时，Odelia 随时回复。` : `No texts or calls from Odelia then, in ${link!.tz === deviceTz() ? "this device's time zone" : link!.tz}. She always answers when you reach out.`,
+        right: <>
+          <select className="sg-select" value={link!.quiet_start} aria-label={zh ? "开始" : "From"} onChange={e => prefs({ quietStart: e.target.value, tz: deviceTz() })}>
+            {[...new Set([...HOURS, link!.quiet_start])].map(h => <option key={h} value={h}>{hourLabel(h, zh)}</option>)}
+          </select>
+          <span className="quiet">{zh ? "至" : "to"}</span>
+          <select className="sg-select" value={link!.quiet_end} aria-label={zh ? "结束" : "Until"} onChange={e => prefs({ quietEnd: e.target.value, tz: deviceTz() })}>
+            {[...new Set([...HOURS, link!.quiet_end])].map(h => <option key={h} value={h}>{hourLabel(h, zh)}</option>)}
+          </select>
+        </> },
+    ] as Row[] : []),
+  ];
+
+  return (
+    <Group id="phone" title={B("Text and call Odelia", "发短信或致电 Odelia")}
+      note={B("Text or call Odelia like a coworker. She answers from your workspace, starts work for you, and texts you first when something needs you. Filing, paying, sending and deleting still wait for your approval in the app.", "像和同事一样给 Odelia 发短信或打电话。她根据您的工作区回答问题、替您开始办理，有事需要您时会先发短信给您。提交、付款、发送和删除仍需您在应用中批准。")}
+      rows={rows}>
+      {showForm && (
+        <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void start(); }}>
+          <input type="tel" inputMode="tel" autoComplete="tel" placeholder={link && !adding ? prettyPhone(link.number) : zh ? "您的手机号" : "Your mobile number"} value={num} onChange={e => setNum(e.target.value)} aria-label={zh ? "手机号" : "Mobile number"} />
+          {link && <Btn onClick={() => { setAdding(false); setNum(""); setMsg(""); }}>{zh ? "取消" : "Cancel"}</Btn>}
+          <button type="submit" className={"sbtn ink" + (pin.locked ? " pinned" : "")} disabled={busy || (!num.trim() && !link)}>{pin.locked && <I.lock />}{busy ? "…" : zh ? "发送验证码" : "Send code"}</button>
+          <p className="sg-note">{zh ? "我们会发送一个 6 位验证码。关联后，用这个号码发短信或打电话就能联系 Odelia。可能产生短信和流量费用，回复 STOP 可随时退订。" : "We'll text a 6-digit code. Once linked, texts and calls from this number reach Odelia as you. Msg and data rates may apply. Reply STOP anytime to opt out."}</p>
+        </form>
+      )}
+      {codeStep && (
+        <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void confirm(); }}>
+          <input className="pin-in" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000" value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} aria-label={zh ? "验证码" : "Code"} autoFocus />
+          <Btn onClick={() => void start()} disabled={busy}>{zh ? "重新发送" : "Send a new code"}</Btn>
+          <button type="submit" className="sbtn ink" disabled={busy || code.length !== 6}>{busy ? "…" : zh ? "验证" : "Verify"}</button>
+          <p className="sg-note">{zh ? `验证码已发送到 ${prettyPhone(link!.number)}，10 分钟内有效。` : `We texted a code to ${prettyPhone(link!.number)}. It works for 10 minutes.`}{" "}
+            <button type="button" className="linkish" onClick={() => { setAdding(true); setNum(""); setMsg(""); }}>{zh ? "换一个号码" : "Use another number"}</button></p>
+        </form>
+      )}
+      {!verified && !adding && link && !link.code_pending && !busy && !lastErr && <p className="sg-note">{zh ? "验证码已过期或未送达。请重新发送。" : "The code expired or didn't arrive. Send a new one."}</p>}
+      {(msg || lastErr) && <p className="pin-msg" role="alert">{msg || lastErr}</p>}
+      {verified && (
+        <div className="sg-sub">
+          <h3>{zh ? "最近的短信和通话" : "Recent texts and calls"}</h3>
+          {log.length ? (
+            <ul className="sg-list">
+              {(all ? log : log.slice(0, 8)).map(r => (
+                <li key={r.id} className="sg-row">
+                  <span className="sg-ico">{r.channel === "voice" ? <I.phone /> : <I.message />}</span>
+                  <span className="sg-tx"><b>{r.body || (zh ? "（无内容）" : "(no text)")}</b><small>{who(r)}{zh ? "，" : ", "}{fmtAgo(r.created_at, lang)}</small></span>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="sg-note">{zh ? `还没有记录。发短信到 ${line.display} 开始吧。` : `Nothing yet. Text ${line.display} to start.`}</p>}
+          {log.length > 8 && <div className="sg-act"><Btn onClick={() => setAll(v => !v)}>{all ? (zh ? "收起" : "Show less") : (zh ? "显示全部" : "Show all")}</Btn></div>}
+        </div>
+      )}
+    </Group>
+  );
+}
+
 /** Two-step sign-in and sessions. */
 function Security() {
   const { lang, cloud, say } = useApp();
@@ -675,7 +848,7 @@ export function Settings() {
     : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
     : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
-  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["hq", B("Headquarters", "总部")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ...(cloud ? [["memory", B("Memory", "记忆")]] as [string, Bi][] : []), ["skills", B("Skills", "技能")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
+  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["hq", B("Headquarters", "总部")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ...(cloud ? [["phone", B("Text and call Odelia", "发短信或致电 Odelia")], ["memory", B("Memory", "记忆")]] as [string, Bi][] : []), ["skills", B("Skills", "技能")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
 
   return (
     <PinLock.Provider value={pinCtx}>
@@ -729,6 +902,7 @@ export function Settings() {
             )}
           </Group>
 
+          <PhoneGroup />
           <MemoryGroup />
           <SkillsGroup />
 

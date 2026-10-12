@@ -173,6 +173,44 @@ async function setupStripe(key, secrets) {
   console.log(dim("  Turn on the customer portal in Stripe (Settings, Billing, Customer portal) so people can manage cards and invoices."));
 }
 
+/* Text and call Odelia (Telnyx). The number, its messaging profile and its Call Control application are set up in
+   Telnyx's portal (SETUP.md, "Text and call Odelia"); this asks for their IDs and, if you have none yet, creates the
+   AI Assistant that talks on calls. Each call sends its own instructions, voice and tools, so the stored one is a shell. */
+async function setupTelnyx(secrets) {
+  console.log(`\n${bold("Text and call Odelia")} ${dim("(Telnyx. Leave blank to skip; Settings then says texting isn't set up yet.)")}`);
+  const key = await ask("Telnyx API key (KEY...): ", { hidden: true });
+  if (!key) return;
+  secrets.TELNYX_API_KEY = key;
+  const pub = await ask("Telnyx public key, for webhook signatures (Account, Keys and credentials, Public key): ");
+  if (pub) secrets.TELNYX_PUBLIC_KEY = pub.trim();
+  const num = (await ask("Odelia's phone number in Telnyx (+1...): ")).replace(/[^\d+]/g, "");
+  if (num) secrets.ODELIA_NUMBER = num.startsWith("+") ? num : `+1${num.replace(/^1(?=\d{10}$)/, "")}`;
+  const profile = await ask(`Messaging profile ID (its inbound webhook is ${SUPABASE_URL}/functions/v1/odelia-sms): `);
+  if (profile) secrets.TELNYX_MESSAGING_PROFILE_ID = profile.trim();
+  const conn = await ask(`Call Control application ID for calls (webhook ${SUPABASE_URL}/functions/v1/odelia-voice), blank for texts only: `);
+  if (!conn) return;
+  secrets.TELNYX_VOICE_CONNECTION_ID = conn.trim();
+  let assistant = (await ask("Telnyx AI Assistant ID (blank to create one named Odelia): ")).trim();
+  if (!assistant) {
+    try {
+      const res = await fetch("https://api.telnyx.com/v2/ai/assistants", {
+        method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "Odelia (Placetta)", description: "Placetta's AI compliance agent on the phone. odelia-voice sends each call's instructions, voice and tools.",
+          instructions: "You are Odelia, Placetta's AI compliance agent. Follow the instructions sent with each call.",
+          telephony_settings: { user_idle_reply_secs: 8, user_idle_timeout_secs: 30, time_limit_secs: 900 },
+          privacy_settings: { data_retention: false },
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      assistant = String(body?.id ?? body?.data?.id ?? "");
+      if (!res.ok || !assistant) throw new Error(body?.errors?.[0]?.detail ?? `HTTP ${res.status}`);
+      console.log(`  ${green("created")}  AI Assistant ${assistant}`);
+    } catch (e) { console.log(`  ${red("not created")}  AI Assistant: ${e.message}. Create one in Telnyx (AI, Assistants) and run this again.`); }
+  }
+  if (assistant) secrets.TELNYX_ASSISTANT_ID = assistant;
+}
+
 function setSecrets(secrets) {
   const names = Object.keys(secrets);
   if (!names.length) return true;
@@ -200,6 +238,11 @@ async function check() {
     const word = status === expected ? green("keys set") : status === 503 ? red("missing keys") : red(status ? `couldn't check (HTTP ${status})` : "couldn't reach it");
     console.log(`  ${word}  ${label}`);
   }
+  // Text and call Odelia says for itself whether its Telnyx secrets are all there.
+  const line = await fetch(`${SUPABASE_URL}/functions/v1/odelia-sms`, { method: "POST", headers: { Authorization: `Bearer ${ANON_JWT}`, apikey: ANON_JWT, "Content-Type": "application/json" }, body: JSON.stringify({ action: "line" }) })
+    .then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  console.log(`  ${line ? (line.configured ? green("keys set") : dim("not set up")) : red("couldn't reach it")}  Texting Odelia${line?.configured ? ` (${line.display})` : ""}`);
+  if (line) console.log(`  ${line.voice ? green("keys set") : dim("not set up")}  Calling Odelia`);
 }
 
 async function main() {
@@ -219,6 +262,7 @@ async function main() {
     secrets.AZURE_SPEECH_REGION = await ask("Azure Speech region [eastus]: ", { fallback: "eastus" });
   }
   const sk = await ask("Stripe secret key (sk_test_... to try it first, sk_live_... to charge): ", { hidden: true });
+  await setupTelnyx(secrets);
 
   const auth = {};
   if (TOKEN) {

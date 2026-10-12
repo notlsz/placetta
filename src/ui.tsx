@@ -37,6 +37,7 @@ export const I = {
   form: () => <svg {...sv} width={18} height={18}><rect x="5" y="3.5" width="14" height="17" rx="2" /><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4" /></svg>,
   card: () => <svg {...sv}><rect x="3" y="5.5" width="18" height="13" rx="2.5" /><path d="M3 10h18M7 15h3" /></svg>,
   message: () => <svg {...sv}><path d="M4 5h16v11H9l-5 4z" /></svg>,
+  phone: () => <svg {...sv}><path d="M6.5 3.5h3l1.5 4-2 1.3a10 10 0 0 0 6.2 6.2l1.3-2 4 1.5v3a2 2 0 0 1-2 2A15.5 15.5 0 0 1 4.5 5.5a2 2 0 0 1 2-2z" /></svg>,
   store: () => <svg {...sv}><path d="M4 9.5V20h16V9.5M3 9.5l1.6-5h14.8l1.6 5M3 9.5c0 1.4 1.1 2.5 2.5 2.5S8 10.9 8 9.5c0 1.4 1.1 2.5 2.5 2.5S13 10.9 13 9.5c0 1.4 1.1 2.5 2.5 2.5S18 10.9 18 9.5c0 1.4 1.1 2.5 2.5 2.5" /><path d="M10 20v-5h4v5" /></svg>,
   plug: () => <svg {...sv}><path d="M9 3v5M15 3v5M6.5 8h11v3.5a5.5 5.5 0 0 1-11 0zM12 17v4" /></svg>,
   key: () => <svg {...sv}><circle cx="8" cy="15" r="4" /><path d="M11 12l8.5-8.5M16.5 7l2.5 2.5M14 9.5l2 2" /></svg>,

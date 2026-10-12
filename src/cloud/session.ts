@@ -19,6 +19,8 @@ export type CloudSession = {
   /** Franchisees that shared their stores with this account's email: the Headquarters view. */
   hq: HqRow[];
   notice?: string;
+  /** An approval to open right away: Odelia's texts link to /app/?ws=...&approval=... */
+  approval?: string;
   switchTo(id: string): void;
   newWorkspace(): void;
   signOut(everywhere?: boolean): void;

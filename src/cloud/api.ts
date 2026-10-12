@@ -533,3 +533,35 @@ export async function filingStats(): Promise<import("../plan").FormStat[]> {
   if (error) return [];
   return (data ?? []) as import("../plan").FormStat[];
 }
+
+/* ------------------------------ text and call Odelia ------------------------------ */
+/** The phone this person linked to text and call Odelia, and what they want to hear about and when. */
+export type PhoneLink = {
+  number: string; verified: boolean; verified_at: string | null; texts_on: boolean; calls_on: boolean; quiet_start: string; quiet_end: string;
+  tz: string; lang: "en" | "zh"; opted_out: boolean; last_error: string | null; code_pending: boolean;
+};
+export type PhoneLogRow = { id: number; direction: "in" | "out"; channel: "sms" | "voice"; kind: string; body: string; created_at: string };
+export type PhoneStatus = { link: PhoneLink | null; log: PhoneLogRow[]; error?: string };
+/** Whether texting and calls are set up on the server, and Odelia's number. */
+export type OdeliaLine = { configured: boolean; voice: boolean; number: string | null; display: string | null };
+const PHONE_CODES = ["pin_required", "phone_format", "phone_taken", "phone_rate_limited", "phone_none", "mfa_required", "time_format"];
+async function phoneRpc(name: string, args: Record<string, unknown> = {}): Promise<PhoneStatus> {
+  const { data, error } = await supabase().rpc(name, args);
+  if (error) {
+    if (error.code === "PGRST202" || error.code === "42883") throw err("not_configured", "Texting Odelia isn't set up yet.");
+    const code = PHONE_CODES.find(c => (error.message ?? "").includes(c));
+    throw code ? err(code, error.message) : fromPg(error);
+  }
+  const d = data as PhoneStatus;
+  return { link: d?.link ?? null, log: Array.isArray(d?.log) ? d.log : [], error: d?.error };
+}
+export const phoneStatus = () => phoneRpc("phone_status");
+/** Texts a 6-digit code to the number (the settings PIN must be unlocked when it's on). */
+export const phoneStart = (number: string, tz: string, lang: "en" | "zh") => phoneRpc("phone_link_start", { p_number: number, p_tz: tz, p_lang: lang });
+/** A wrong code comes back as { error: "code_wrong" | "code_locked" | "code_expired" }, not a thrown error. */
+export const phoneConfirm = (code: string) => phoneRpc("phone_link_confirm", { p_code: code });
+export const phoneRemove = () => phoneRpc("phone_link_remove");
+export const phonePrefs = (p: { texts?: boolean; calls?: boolean; quietStart?: string; quietEnd?: string; tz?: string; lang?: "en" | "zh" }) =>
+  phoneRpc("phone_prefs", { p_texts: p.texts ?? null, p_calls: p.calls ?? null, p_quiet_start: p.quietStart ?? null, p_quiet_end: p.quietEnd ?? null, p_tz: p.tz ?? null, p_lang: p.lang ?? null });
+export const odeliaLine = (): Promise<OdeliaLine> =>
+  fn<OdeliaLine>("odelia-sms", { action: "line" }).catch(() => ({ configured: false, voice: false, number: null, display: null }));

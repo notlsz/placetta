@@ -25,6 +25,23 @@ export type RunState = {
 
 const MAX_ROUNDS = 16;
 
+/** Where the person asked: the app, a text message, or a phone call (answered by text when it's done). */
+export type Channel = "app" | "sms" | "voice";
+/** From a text or a call nothing is deleted outright (removing a store or an application already waits for a confirmation in the app). */
+export function phoneRefuses(channel: Channel | undefined, tool: string, input: Record<string, unknown>): boolean {
+  return (channel === "sms" || channel === "voice") && tool === "edit_deadline" && !!input.remove;
+}
+/** How to write for a phone: short plain texts, one question at a time, and nothing that needs the app done by text. */
+export function channelHint(channel: Channel | undefined): string {
+  if (channel !== "sms" && channel !== "voice") return "";
+  return `
+
+This conversation is by phone, not in the app: ${channel === "sms" ? "they texted you" : "they asked on a call with you"}, and your reply goes to them as a text message.
+- Write two or three short plain sentences, about 400 characters at most. No markdown, no lists, no headings, no links (Placetta adds the links). Ask at most one question, at the end.
+- Never file, pay, send an email or delete anything from a text, and never ask them to approve by replying. Prepare everything as usual and put it up for approval with your tools: Placetta texts them a link to that exact approval in the app. Say so in one short sentence.
+- Never ask for Social Security, ITIN, bank or card numbers by text.`;
+}
+
 /** A fresh run: the recent conversation (folded so roles alternate) and the new request. */
 export function startState(history: Turn[], prompt: string): RunState {
   const messages = [...history.slice(-12), { role: "user" as const, content: prompt }].reduce<{ role: string; content: unknown }[]>((acc, t) => {
@@ -40,6 +57,8 @@ export function startState(history: Turn[], prompt: string): RunState {
 export async function runRounds(o: {
   state: RunState; ws: () => Workspace; apply: (p: (w: Workspace) => Workspace) => void; step: (s: Step) => void; draft?: (text: string) => void;
   send: Send; lang: Lang; deep: boolean; account: boolean; svc?: Services; files?: Map<string, File>; signal: AbortSignal; until: number;
+  /** Where the person asked (a text or a call changes how Odelia writes). */
+  channel?: Channel;
   /** After each round's tools have run: the moment to save. */
   round?: (state: RunState) => Promise<void>;
   /** The model can search and read official sites (web_search, web_fetch). On unless the caller turns it off. */
@@ -52,7 +71,7 @@ export async function runRounds(o: {
   const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
   const model = messagesModel("server", (body, _signal, deep) => o.send(body, deep));
   const tools = makeTools(o.ws, o.apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal });
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) });
+  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + channelHint(o.channel);
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
@@ -73,7 +92,13 @@ export async function runRounds(o: {
     if (!uses.length || data.stop_reason !== "tool_use") { finished = true; break; }
     st.messages.push({ role: "assistant", content: data.content });
     const results = [];
-    for (const u of uses) results.push(await runTool(tools, u));
+    for (const u of uses) {
+      if (phoneRefuses(o.channel, String(u.name ?? ""), (u.input ?? {}) as Record<string, unknown>)) {
+        results.push({ type: "tool_result", tool_use_id: String(u.id ?? ""), content: "Error: Nothing is deleted from a text or a call. Tell them to remove it in the app.", is_error: true });
+        continue;
+      }
+      results.push(await runTool(tools, u));
+    }
     st.messages.push({ role: "user", content: results });
     await o.round?.(save());
   }

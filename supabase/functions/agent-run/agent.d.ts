@@ -26,4 +26,7 @@ export declare function runRounds(o: {
   send: Send; lang: "en" | "zh"; deep: boolean; account: boolean; svc?: Services; files?: Map<string, File>; signal: AbortSignal; until: number;
   round?: (state: RunState) => Promise<void>;
   research?: boolean; maxRounds?: number;
+  channel?: Channel;
 }): Promise<{ reply: Reply } | { paused: RunState }>;
+export type Channel = "app" | "sms" | "voice";
+export declare function channelHint(channel: Channel | undefined): string;

@@ -17,3 +17,10 @@ verify_jwt = false
 
 [functions.agent-run]
 verify_jwt = false
+
+# Odelia by text and phone: Telnyx calls these (each checks the Telnyx signature, its per-call token or the monitor key).
+[functions.odelia-sms]
+verify_jwt = false
+
+[functions.odelia-voice]
+verify_jwt = false
