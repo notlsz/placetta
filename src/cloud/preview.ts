@@ -174,6 +174,24 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
       return json(t("filings").map((f): Row => ({ ...f, business: t("workspaces").find(w => w.id === f.workspace_id)?.name ?? "", approver_email: userOf(String(f.approved_by))?.email ?? null, assignee_email: f.assigned_to ? userOf(String(f.assigned_to))?.email ?? null : null }))
         .sort((a, b) => ((order.indexOf(String(a.status)) + 5) % 9) - ((order.indexOf(String(b.status)) + 5) % 9)));
     }
+    case "team_tasks_open": {
+      if (!isStaff(c)) return pgErr("Placetta team only.");
+      // Two clearly labeled examples the first time, so the team's section shows in the preview.
+      if (!db.tables.team_tasks) {
+        const ws = t("workspaces")[0];
+        db.tables.team_tasks = [
+          { id: uuid(), kind: "handoff", filing_id: null, workspace_id: ws?.id ?? null, title: "Self-filing isn't on for this agency yet. The Placetta team submits it. (preview example)", detail: null, created_at: now(), done_at: null },
+          { id: uuid(), kind: "destination_stale", filing_id: null, workspace_id: null, title: "Re-check NYC DOHMH destinations (last checked 2026-07-01) on nyc.gov (preview example)", detail: null, created_at: now(), done_at: null },
+        ];
+        save();
+      }
+      return json(t("team_tasks").filter(x => !x.done_at).map((x): Row => ({ ...x, business: t("workspaces").find(w => w.id === x.workspace_id)?.name ?? null })));
+    }
+    case "finish_team_task": {
+      if (!isStaff(c)) return pgErr("Placetta team only.");
+      const x = t("team_tasks").find(y => y.id === body.p_id); if (x && !x.done_at) { x.done_at = now(); save(); }
+      return json(null);
+    }
     case "hq_share": {
       if (!isOwner(ws, c)) return pgErr("Only an owner can share with headquarters.");
       const email = String(body.p_email ?? "").trim().toLowerCase();
@@ -308,7 +326,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
   const needOwner = () => (owner ? null : fnErr("forbidden", member ? "Only an owner of this workspace can do that." : "You are not a member of this workspace.", 403));
   switch (name) {
     case "billing": {
-      if (body.action === "prices") return json({ ok: true, location: null, opening: null });   // set in Stripe on the live app
+      if (body.action === "prices") return json({ ok: true, location: { amount: 1788, currency: "USD", interval: "year", interval_count: 1 }, opening: { amount: 3500, currency: "USD", interval: null, interval_count: null } });   // the prices the launcher creates in Stripe
       if (body.action === "sync_locations") return json({ ok: true, synced: false });
       const no = needOwner(); if (no) return no;
       if (body.action === "portal") return fnErr("not_configured", "Billing management opens Stripe on the live app.", 409);

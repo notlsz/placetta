@@ -169,7 +169,7 @@ export function Queue() {
               <div className="tray">{tasks.map(t => (
                 <div key={t.id} className="row q-row-btn q-task">
                   <button type="button" className="arow-n" onClick={() => { if (t.filing_id) setSel(t.filing_id); }} disabled={!t.filing_id}>
-                    <b>{t.title}</b><small>{[t.business, KIND[t.kind] ? b(KIND[t.kind]) : t.kind].filter(Boolean).join(lang === "zh" ? "，" : ", ")}</small>
+                    <b title={t.title}>{t.title}</b><small>{[t.business, KIND[t.kind] ? b(KIND[t.kind]) : t.kind].filter(Boolean).join(lang === "zh" ? "，" : ", ")}</small>
                   </button>
                   <small className="ago">{fmtAgo(t.created_at, lang)}</small>
                   <Pill sm kind="quiet" onClick={() => void finish(t.id)}>{lang === "zh" ? "完成" : "Done"}</Pill>

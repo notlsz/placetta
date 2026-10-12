@@ -59,13 +59,16 @@ function PerLocation({ p, o, busy, disabled, onGo }: { p: api.LocationPrice; o: 
   const { b, lang, ws } = useApp();
   const zh = lang === "zh";
   const money = (x: api.LocationPrice) => (x.currency === "USD" ? "$" : x.currency + " ") + x.amount.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  const per = p.interval === "year" ? (zh ? " /店/年" : " per store a year") : p.interval === "month" ? (zh ? " /店/月" : " per store a month") : "";
+  // A yearly price shows as the monthly figure the site quotes ($149 a location a month, billed yearly).
+  const yearly = p.interval === "year" && (p.interval_count ?? 1) === 1;
+  const shown: api.LocationPrice = yearly ? { ...p, amount: Math.round((p.amount / 12) * 100) / 100 } : p;
+  const per = yearly ? (zh ? " /店/月，按年计费" : " per location a month, billed yearly") : p.interval === "year" ? (zh ? " /店/年" : " per store a year") : p.interval === "month" ? (zh ? " /店/月" : " per store a month") : "";
   const n = (ws.stores ?? []).length;
   return (
     <section className="plan hl perloc">
       <div className="plan-h"><b>{b(B("Per location", "按门店计费"))}</b><em>{b(B("Grows with your chain", "随门店数量增长"))}</em></div>
-      <span className="price">{money(p)}<small>{per}</small></span>
-      <p>{o ? (zh ? `新门店另收一次性开店费 ${money(o)}。` : `Plus ${money(o)} once for each new store we open.`) : ""} {zh ? "每家门店的全部许可、续期、检查与申报，由快哉持续跟进。" : "Every permit, renewal, inspection and filing for each store, handled for as long as it's open."}</p>
+      <span className="price">{money(shown)}<small>{per}</small></span>
+      <p>{o ? (zh ? `每家新店开业另收一次 ${money(o)}，可抵扣该店首年费用。` : `Plus ${money(o)} once for each new store opening, credited against that store's first year.`) : ""} {zh ? "每家门店的全部许可、续期、检查与申报，由快哉持续跟进。" : "Every permit, renewal, inspection and filing for each store, handled for as long as it's open."}</p>
       <div className="plan-act">
         <span className="mk">{zh ? `${Math.max(1, n)} 家门店` : `${Math.max(1, n)} store${Math.max(1, n) === 1 ? "" : "s"}`}</span>
         <Pill kind="ink" disabled={disabled} onClick={onGo}>{busy ? "…" : b(B("Choose per location", "选择按门店计费"))}</Pill>
