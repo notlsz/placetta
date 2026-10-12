@@ -4,13 +4,14 @@
    Per city: a city page, a guide per kind of business (12) and a page per topic (8). Plus a page per official form,
    a page per question and the hub. Each page ends in the same conversion: the plan for your exact address.
    Run: npm run guides (output is committed; Vite copies site/ into dist/). */
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { CITIES, COUNTRIES } from "../src/forms/world.ts";
 import { FORMS, METHOD, formById, formsFor, type Needs, type OfficialForm, type Segment } from "../src/forms/registry.ts";
 import { ANSWERS } from "./guides-answers.mts";
 
 const ORIGIN = "https://placetta.com";
-const TODAY = new Date().toISOString().slice(0, 10);
+const TODAY = process.env.GUIDES_TODAY ?? new Date().toISOString().slice(0, 10);
 type L = "en" | "zh";
 type Bi = { en: string; zh: string };
 const B = (en: string, zh: string): Bi => ({ en, zh });
@@ -227,7 +228,7 @@ const rail = (forms: OfficialForm[], l: L, extra = "") => {
   return `<aside class="rail"><div class="rail-in">
 <p class="rail-h">${UI.onPage[l]}</p>
 <ol>${forms.map((f, i) => `<li><a href="#s${i + 1}">${esc(t(f.title, l))}</a></li>`).join("")}</ol>
-<div class="sum"><p>${l === "zh" ? "固定政府规费" : "Fixed government fees"}</p><b>${money(c.total, c.cur)}</b><small>${l === "zh" ? `另有 ${c.varies.length} 项视业务而定，${c.free.length} 项免费` : `${c.varies.length} more depend on the business; ${c.free.length} are free`}</small><a class="btn" href="#get-plan" data-track="rail_cta">${UI.plan[l]}</a></div>
+<div class="sum"><p>${l === "zh" ? "固定政府规费" : "Fixed government fees"}</p><b>${c.total || !c.varies.length ? money(c.total, c.cur) : (l === "zh" ? "视业务而定" : "Varies")}</b><small>${l === "zh" ? `另有 ${c.varies.length} 项视业务而定，${c.free.length} 项免费` : `${c.varies.length} more depend on the business; ${c.free.length} are free`}</small><a class="btn" href="#get-plan" data-track="rail_cta">${UI.plan[l]}</a></div>
 ${extra}
 </div></aside>`;
 };
@@ -239,7 +240,20 @@ const embed = (title: string, forms: OfficialForm[], url: string, l: L) => {
 /* ------------------------------------------------------------ build */
 
 const urls: { path: string; alt: string; pri: number }[] = [];
-const write = (path: string, html: string) => { const file = "site" + path.replace(/\/$/, "/index.html"); mkdirSync(file.slice(0, file.lastIndexOf("/")), { recursive: true }); writeFileSync(file, html); };
+/* Each page keeps the date its content last changed: the build hashes the page with today's date masked, and only a page
+   whose hash moved gets today's date (in the "Updated" line, the JSON-LD and the sitemap's lastmod). */
+const DATES_FILE = "scripts/guides-dates.json";
+const DATES: Record<string, { h: string; d: string }> = existsSync(DATES_FILE) ? JSON.parse(readFileSync(DATES_FILE, "utf8")) : {};
+const NEXT_DATES: typeof DATES = {};
+const fmtDay = (iso: string, l: L) => (l === "zh" ? iso.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, "$1 年 $2 月 $3 日") : new Date(iso + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+const lastmodOf = (path: string) => NEXT_DATES[path]?.d ?? TODAY;
+const write = (path: string, html: string) => {
+  const masked = html.split(TODAY).join("\u0000ISO").split(fmtDay(TODAY, "en")).join("\u0000EN").split(fmtDay(TODAY, "zh")).join("\u0000ZH");
+  const h = createHash("sha256").update(masked).digest("hex").slice(0, 16), prev = DATES[path], d = prev && prev.h === h ? prev.d : TODAY;
+  NEXT_DATES[path] = { h, d };
+  const out = masked.split("\u0000ISO").join(d).split("\u0000EN").join(fmtDay(d, "en")).split("\u0000ZH").join(fmtDay(d, "zh"));
+  const file = "site" + path.replace(/\/$/, "/index.html"); mkdirSync(file.slice(0, file.lastIndexOf("/")), { recursive: true }); writeFileSync(file, out);
+};
 const keepOg = (() => { try { return readFileSync("site/guides/og.png"); } catch { return null; } })();
 rmSync("site/guides", { recursive: true, force: true });
 
@@ -358,6 +372,13 @@ ${users.length ? `<aside class="rail"><div class="rail-in"><p class="rail-h">${l
     urls.push({ path: formPath(f, l), alt: formPath(f, o), pri: 0.6 });
   }
 
+  /* related answers: the ones sharing a form or a city first, then the next ones in the list, so every answer gets links */
+  const related = (a: (typeof ANSWERS)[number]) => {
+    const i = ANSWERS.indexOf(a), places = new Set([...(a.plan ?? []).map(x => x.place), a.cost?.place].filter(Boolean));
+    const score = (x: (typeof ANSWERS)[number]) => 2 * x.forms.filter(f => a.forms.includes(f)).length + [...(x.plan ?? []).map(y => y.place), x.cost?.place].filter(pl => pl && places.has(pl)).length;
+    return ANSWERS.filter(x => x !== a).map(x => ({ x, s: score(x), d: (ANSWERS.indexOf(x) - i + ANSWERS.length) % ANSWERS.length }))
+      .sort((p, q) => q.s - p.s || p.d - q.d).slice(0, 8).map(r => r.x);
+  };
   /* a page per question */
   for (const a of ANSWERS) {
     let short = a.a[l], forms = a.forms.map(id => formById(id)!).filter(Boolean);
@@ -374,11 +395,11 @@ ${users.length ? `<aside class="rail"><div class="rail-in"><p class="rail-h">${l
     const body = `${hero(q, l === "zh" ? "简明答案，附官方表格和机构链接。" : "The short answer, with the official forms and the agencies' own links.", [`${UI.updated[l]} ${day(l)}`, l === "zh" ? "来源：各机构官网" : "Sources: the agencies' own sites"])}
 <div class="cols wrap"><div class="main">
 <section class="answer"><h2>${l === "zh" ? "简明答案" : "The short answer"}</h2><p>${esc(clean(short))}</p></section>
-<section><h2>${l === "zh" ? (a.cost ? "每项申请及费用" : "相关表格") : (a.cost ? "Every filing and its fee" : "The forms involved")}</h2><ol class="cards">${items}</ol></section>
+${forms.length ? `<section><h2>${l === "zh" ? (a.cost ? "每项申请及费用" : "相关表格") : (a.cost ? "Every filing and its fee" : "The forms involved")}</h2><ol class="cards">${items}</ol></section>` : ""}
 ${rel.length ? `<section class="more"><h2>${l === "zh" ? "完整指南" : "Full guides"}</h2><ul class="links">${rel.map(g => `<li><a href="${guidePath(g, l)}">${esc(guideLabel(g, l))}</a></li>`).join("")}</ul></section>` : ""}
 <p class="fine">${l === "zh" ? "这是一般信息，不是法律或税务意见。各机构要求可能变化，提交前请以机构官网为准。" : "General information, not legal or tax advice. Agency requirements change; check the agency's page before you file."}</p>
 </div>
-<aside class="rail"><div class="rail-in"><p class="rail-h">${l === "zh" ? "更多问答" : "More answers"}</p><ul>${ANSWERS.filter(x => x !== a).slice(0, 8).map(x => `<li><a href="${answerPath(x.slug, l)}">${esc(x.q[l])}</a></li>`).join("")}</ul></div></aside>
+<aside class="rail"><div class="rail-in"><p class="rail-h">${l === "zh" ? "更多问答" : "More answers"}</p><ul>${related(a).map(x => `<li><a href="${answerPath(x.slug, l)}">${esc(x.q[l])}</a></li>`).join("")}</ul></div></aside>
 </div>`;
     const ld = { "@context": "https://schema.org", "@type": "FAQPage", inLanguage: l === "zh" ? "zh-CN" : "en", mainEntity: [{ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: clean(short) } }] };
     write(answerPath(a.slug, l), page({ l, path: answerPath(a.slug, l), alt: answerPath(a.slug, o), title: q, desc: clean(short).slice(0, 155), body, ld: [ld], kind: "answer", ctx: { place },
@@ -466,10 +487,11 @@ ${guides.map(g => `### ${g.biz.plural.en} in ${g.place.name.en}\n${ORIGIN}${guid
 `);
 
 const site = ["/", "/help/", "/privacy.html", "/terms.html"].map(p => `<url><loc>${ORIGIN}${p}</loc></url>`);
-const sm = urls.map(u => `<url><loc>${ORIGIN}${u.path}</loc><lastmod>${TODAY}</lastmod><priority>${u.pri}</priority><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "zh-CN" : "en"}" href="${ORIGIN}${u.path}"/><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "en" : "zh-CN"}" href="${ORIGIN}${u.alt}"/></url>`);
+const sm = urls.map(u => `<url><loc>${ORIGIN}${u.path}</loc><lastmod>${lastmodOf(u.path)}</lastmod><priority>${u.pri}</priority><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "zh-CN" : "en"}" href="${ORIGIN}${u.path}"/><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "en" : "zh-CN"}" href="${ORIGIN}${u.alt}"/></url>`);
 writeFileSync("site/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...site, ...sm].join("\n")}\n</urlset>\n`);
+writeFileSync(DATES_FILE, JSON.stringify(Object.fromEntries(Object.entries(NEXT_DATES).sort()), null, 0).replace(/},"/g, '},\n"') + "\n");
 // search engines and AI answer engines are welcome on the website and the guides; the app stays private
-const bots = ["Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended", "Baiduspider", "Bytespider", "DuckDuckBot"];
+const bots = ["Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended", "Baiduspider", "Bytespider", "Sogou web spider", "360Spider", "YisouSpider", "YandexBot", "DuckDuckBot", "meta-externalagent", "MistralAI-User", "cohere-ai"];
 writeFileSync("site/robots.txt", `${bots.map(b => `User-agent: ${b}\nAllow: /\nDisallow: /app/\n`).join("\n")}\nUser-agent: *\nAllow: /\nDisallow: /app/\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
 writeFileSync("site/guides/urls.txt", urls.map(u => ORIGIN + u.path).join("\n") + "\n");
 console.log(`guides: ${urls.length} pages: per language ${placesUsed.length} cities, ${guides.length} business guides, ${topicPages.length} topic pages, ${FORMS.length} form pages, ${ANSWERS.length} answers`);
