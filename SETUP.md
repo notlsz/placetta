@@ -22,6 +22,7 @@ It asks for (typing is hidden, nothing is saved):
 | Stripe secret key | dashboard.stripe.com. Use `sk_test_` first, `sk_live_` when the test filing works. |
 | Resend API key and sender | resend.com: add your domain, create a key. Sign-in emails need it. |
 | Google and Microsoft sign-in (optional) | See "Sign in with Google or Microsoft" below |
+| Telnyx, for texting and calling Odelia (optional) | See "Text and call Odelia" below. It can create the AI Assistant for you. |
 | Your team's emails | Whoever works the filing queue |
 
 Then it:
@@ -88,6 +89,11 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `OAUTH_STATE_SECRET` | Any long random string. |
 | `AGENT_DAILY_CALLS`, `TTS_DAILY_CHARS` | Optional caps per workspace a day. Defaults 400 and 20,000. |
 | `AGENT_MODEL`, `AGENT_MODEL_DEEP` | Optional. Defaults `claude-sonnet-5-5` and `claude-opus-5-5`. |
+| `TELNYX_API_KEY`, `TELNYX_PUBLIC_KEY` | Telnyx API key, and the public key that signs its webhooks. Already used for fax; also texting and calling Odelia. |
+| `ODELIA_NUMBER` | Odelia's number in Telnyx, E.164 (`+14155550134`). |
+| `TELNYX_MESSAGING_PROFILE_ID` | The messaging profile the number is on. Without it (and the three above), Settings says texting isn't set up yet. |
+| `TELNYX_VOICE_CONNECTION_ID`, `TELNYX_ASSISTANT_ID` | The Call Control application the number is on, and the Telnyx AI Assistant that talks. Without them, calls get a short apology and a text. |
+| `ODELIA_VOICE_EN`, `ODELIA_VOICE_ZH`, `ODELIA_STT_MODEL`, `ODELIA_VOICE_MODEL` | Optional. Defaults `AWS.Polly.Joanna-Neural`, `AWS.Polly.Zhiyu-Neural`, `deepgram/nova-3`, and the assistant's own model. |
 
 ## Stripe
 
@@ -108,6 +114,23 @@ Every provider uses one redirect address: `https://esquxzcfsylffuijvzec.supabase
 | Slack | `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET` | Incoming webhook only. |
 
 The calendar feed needs nothing. Square and Toast show as "Request" until a partner integration exists.
+
+## Text and call Odelia (Telnyx)
+
+Owners link their phone in Settings, Text and call Odelia (a 6-digit code proves it's theirs), then text or call Odelia's number like a coworker. She answers from their workspace, starts work in the background and texts the result, and texts (or calls, if they opted in) first when something needs them: at most 3 texts and 1 call a day, never in their quiet hours (9pm to 8am theirs by default). Nothing is filed, paid, sent or deleted by text or voice: the text links to the exact approval in the app.
+
+In Telnyx (portal.telnyx.com):
+
+1. **Number**: buy a US number with SMS and voice. That's `ODELIA_NUMBER`.
+2. **Messaging profile**: create one, inbound webhook `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/odelia-sms` (API v2), and put the number on it. Its ID is `TELNYX_MESSAGING_PROFILE_ID`. Optional: auto-responses for STOP, START and HELP on the profile (`/v2/messaging_profiles/{id}/autoresp_configs`); without them `odelia-sms` sends the replies itself.
+3. **Carrier registration, before anything is delivered**: US carriers block application texts from unregistered numbers. For a local number, register a 10DLC brand and campaign (Messaging, 10DLC) and assign the number to the campaign; for a toll-free number, complete toll-free verification. Describe the use case as account notifications and customer care, and the opt-in as: the account holder enters their number in Settings and confirms a texted code; STOP opts out, HELP gets help. Approval takes days to a few weeks.
+4. **Calls**: create a Call Control application (Voice, Programmable Voice) with webhook `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/odelia-voice` (API v2) and an outbound voice profile that allows the US, and put the number on it. Its ID is `TELNYX_VOICE_CONNECTION_ID`.
+5. **AI Assistant**: the launcher creates one named Odelia if you leave its ID blank (or create it under AI, Assistants). Each call sends its own instructions, greeting, voice, speech recognition and tools, so it needs nothing else. Its ID is `TELNYX_ASSISTANT_ID`.
+6. **Public key**: Account, Keys and credentials, Public key. That's `TELNYX_PUBLIC_KEY` (already set if fax is on).
+
+Then run the migration (`20261013000000_odelia_phone.sql`) and deploy `odelia-sms` and `odelia-voice` (the launcher does both). A pg_cron job sends the outbox every 10 minutes while anything is waiting.
+
+How it stays safe: Telnyx webhooks are checked against the public key and refused if older than five minutes. A number is linked to one person only, and linking needs the settings PIN when it's on. Texts start the agent as that person, with the same member and plan checks as the app, and answers only ever go to the verified number. A call whose caller ID isn't fully attested (STIR/SHAKEN "A") gets a 4-digit code texted to the number on file, and Odelia says nothing about the account until the caller says it.
 
 ## Before the first paying customer
 

@@ -25,6 +25,23 @@ export type RunState = {
 
 const MAX_ROUNDS = 16;
 
+/** Where the person asked: the app, a text message, or a phone call (answered by text when it's done). */
+export type Channel = "app" | "sms" | "voice";
+/** From a text or a call nothing is deleted outright (removing a store or an application already waits for a confirmation in the app). */
+export function phoneRefuses(channel: Channel | undefined, tool: string, input: Record<string, unknown>): boolean {
+  return (channel === "sms" || channel === "voice") && tool === "edit_deadline" && !!input.remove;
+}
+/** How to write for a phone: short plain texts, one question at a time, and nothing that needs the app done by text. */
+export function channelHint(channel: Channel | undefined): string {
+  if (channel !== "sms" && channel !== "voice") return "";
+  return `
+
+This conversation is by phone, not in the app: ${channel === "sms" ? "they texted you" : "they asked on a call with you"}, and your reply goes to them as a text message.
+- Write two or three short plain sentences, about 400 characters at most. No markdown, no lists, no headings, no links (Placetta adds the links). Ask at most one question, at the end.
+- Never file, pay, send an email or delete anything from a text, and never ask them to approve by replying. Prepare everything as usual and put it up for approval with your tools: Placetta texts them a link to that exact approval in the app. Say so in one short sentence.
+- Never ask for Social Security, ITIN, bank or card numbers by text.`;
+}
+
 /** A fresh run: the recent conversation (folded so roles alternate) and the new request. */
 export function startState(history: Turn[], prompt: string): RunState {
   const messages = [...history.slice(-12), { role: "user" as const, content: prompt }].reduce<{ role: string; content: unknown }[]>((acc, t) => {
@@ -40,6 +57,8 @@ export function startState(history: Turn[], prompt: string): RunState {
 export async function runRounds(o: {
   state: RunState; ws: () => Workspace; apply: (p: (w: Workspace) => Workspace) => void; step: (s: Step) => void; draft?: (text: string) => void;
   send: Send; lang: Lang; deep: boolean; account: boolean; svc?: Services; files?: Map<string, File>; signal: AbortSignal; until: number;
+  /** Where the person asked (a text or a call changes how Odelia writes). */
+  channel?: Channel;
   /** After each round's tools have run: the moment to save. */
   round?: (state: RunState) => Promise<void>;
 }): Promise<{ reply: Reply } | { paused: RunState }> {
@@ -48,7 +67,7 @@ export async function runRounds(o: {
   const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
   const model = messagesModel("server", (body, _signal, deep) => o.send(body, deep));
   const tools = makeTools(o.ws, o.apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal });
-  const system = rules(o.ws(), o.lang, o.account, true, o.svc?.connected() ?? [], true);
+  const system = rules(o.ws(), o.lang, o.account, true, o.svc?.connected() ?? [], true) + channelHint(o.channel);
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
 
@@ -71,6 +90,7 @@ export async function runRounds(o: {
       const tool = tools.find(t => t.name === u.name);
       try {
         if (!tool) throw new Error(`No tool named ${u.name}`);
+        if (phoneRefuses(o.channel, u.name ?? "", u.input ?? {})) throw new Error("Nothing is deleted from a text or a call. Tell them to remove it in the app.");
         const out = await tool.execute(u.input ?? {});
         results.push({ type: "tool_result", tool_use_id: u.id, content: typeof out === "string" ? out : JSON.stringify(out ?? "ok") });
       } catch (e) { results.push({ type: "tool_result", tool_use_id: u.id, content: "Error: " + ((e as Error)?.message ?? String(e)), is_error: true }); }

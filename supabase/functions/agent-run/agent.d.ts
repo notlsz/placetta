@@ -23,4 +23,7 @@ export declare function runRounds(o: {
   state: RunState; ws: () => Workspace; apply: (p: (w: Workspace) => Workspace) => void; step: (s: Step) => void; draft?: (text: string) => void;
   send: Send; lang: "en" | "zh"; deep: boolean; account: boolean; svc?: Services; files?: Map<string, File>; signal: AbortSignal; until: number;
   round?: (state: RunState) => Promise<void>;
+  channel?: Channel;
 }): Promise<{ reply: Reply } | { paused: RunState }>;
+export type Channel = "app" | "sms" | "voice";
+export declare function channelHint(channel: Channel | undefined): string;

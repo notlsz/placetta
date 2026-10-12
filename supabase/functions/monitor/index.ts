@@ -9,7 +9,11 @@
 // Once a week per workspace (on a weekday picked from its id, so the load spreads), it also starts the agent's
 // background check (agent-run, kind "watch"): each submitted application's status on the agency's own lookup page, and
 // new or changed rules for that business and city. That needs ANTHROPIC_API_KEY; WEEKLY_CHECKS=off turns it off.
+// Owners who linked a phone (Settings, Text and call Odelia) also hear about what matters most there: a call for
+// something urgent if they want calls, a text for what needs them this week. Those go into odelia_outbox, and
+// odelia-sms sends them outside their quiet hours, at most one call and three texts a day.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -129,6 +133,12 @@ export function filingUpdates(f: Filing, since: string, now: number): Update[] {
       body: { en: `The team submits it as soon as the fee${f.fee_paid ? ` ($${f.fee_paid})` : ""} is paid.`, zh: `费用${f.fee_paid ? `（$${f.fee_paid}）` : ""}支付后，团队会立即提交。` } });
   }
   return out;
+}
+
+/** The applications that set a workspace's opening date (critical): overdue or returned, they're urgent. */
+export function criticalApps(state: unknown): Set<string> {
+  const apps = ((state ?? {}) as { apps?: unknown }).apps;
+  return new Set((Array.isArray(apps) ? apps : []).filter((a) => a && typeof a === "object" && (a as { critical?: unknown }).critical === true).map((a) => String((a as { id?: unknown }).id ?? "")));
 }
 
 /** The weekday (0 to 6, UTC) a workspace gets its weekly check: fixed per workspace, spread across the week. */
@@ -265,6 +275,35 @@ Deno.serve(async (req) => {
     created.push(...list.filter((u) => got.has(u.dedupe)));
   }
 
+  // Phones: urgent items become a call (or a text), important ones a text, for owners who linked a phone.
+  let phoned = 0;
+  const notices = created.map((u) => ({ u, level: urgency(u, criticalApps(all.find((w) => w.id === u.workspace_id)?.state)) })).filter((x) => x.level);
+  if (notices.length) {
+    const wsIds = [...new Set(notices.map((x) => x.u.workspace_id))];
+    const { data: owners } = await admin.from("workspace_members").select("workspace_id, user_id").in("workspace_id", wsIds).eq("role", "owner");
+    const ownerIds = [...new Set((owners ?? []).map((o) => o.user_id as string))];
+    const { data: links } = ownerIds.length
+      ? await admin.from("phone_links").select("user_id, lang, texts_on, calls_on").in("user_id", ownerIds).not("verified_at", "is", null).is("opted_out_at", null)
+      : { data: [] as { user_id: string; lang: string; texts_on: boolean; calls_on: boolean }[] };
+    const byUser = new Map((links ?? []).map((l) => [l.user_id as string, l]));
+    const rows = [];
+    for (const { u, level } of notices) {
+      for (const o of (owners ?? []).filter((x) => x.workspace_id === u.workspace_id)) {
+        const l = byUser.get(o.user_id as string);
+        if (!l || (!l.texts_on && !(level === "urgent" && l.calls_on))) continue;
+        const lang = l.lang === "zh" ? "zh" : "en";
+        rows.push({ user_id: o.user_id, workspace_id: u.workspace_id, kind: level === "urgent" && l.calls_on ? "call" : "text", urgent: level === "urgent",
+          body: noticeText(u, names.get(u.workspace_id) ?? "", lang), link: appLink(APP, u.workspace_id) || null, dedupe: `update:${u.workspace_id}:${u.dedupe}`.slice(0, 300) });
+      }
+    }
+    if (rows.length) {
+      const { data: queued, error } = await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true }).select("id");
+      if (error) console.error("odelia outbox", error.code); else phoned = queued?.length ?? 0;
+      // Send what's outside quiet hours now rather than at the next 10-minute sweep.
+      if (phoned) await fetch(`${SUPABASE_URL}/functions/v1/odelia-sms`, { method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": req.headers.get("x-monitor-key") ?? "" }, body: JSON.stringify({ action: "flush" }) }).catch(() => null);
+    }
+  }
+
   let emailed = 0, team = 0;
   if (RESEND && FROM) {
     const fresh = new Map<string, Update[]>();
@@ -333,5 +372,5 @@ Deno.serve(async (req) => {
   if (!sweep) console.error("self-filing sweep did not run");
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches });
+  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned });
 });

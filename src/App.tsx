@@ -137,6 +137,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [serverUpdates, setServerUpdates] = useState<api.UpdateRow[]>([]);
   const [readLocal, setReadLocal] = useState<Set<string>>(() => new Set());
   const view_ = useMemo(() => (cloud ? withServer(ws, filings, docs) : ws), [cloud, ws, filings, docs]);
+  /* A link from one of Odelia's texts opens that exact approval (approving still happens here, in the app). */
+  const linked = useRef(cloud?.approval ?? null);
+  useEffect(() => {
+    const id = linked.current; if (!id) return;
+    linked.current = null;
+    if (view_.approvals.some(a => a.id === id)) { go("overview"); setModal(id); }
+    else say(lang === "zh" ? "这项批准已经处理过了。" : "That approval is already taken care of.");
+  }, [view_.approvals, go, say, lang]);
   const wsRef = useRef(view_);
   useEffect(() => { wsRef.current = view_; }, [view_]);
   const plan = cloud ? api.planOf(billing) : "monthly";

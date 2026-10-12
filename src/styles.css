@@ -1094,6 +1094,9 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .pinform { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .pin-form { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .pin-msg { margin: 0; font-size: 13.5px; color: #C0473A; }
+#set-phone > .pin-msg { margin-top: 10px; }
+#set-phone .sg-r .quiet { font-size: 13.5px; }
+.linkish { padding: 0; border: 0; background: none; font: inherit; color: var(--blue-ink); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 /* accent color */
 .swatches { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
 .sw { width: 30px; height: 30px; border: 0; border-radius: 50%; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); }

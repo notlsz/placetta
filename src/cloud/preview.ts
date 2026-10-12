@@ -114,6 +114,56 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
       if (fn === "pin_clear") { db.tables.account_pins = pins.filter(x => x.user_id !== c.sub); save(); }
       return status();
     }
+    case "phone_status": case "phone_link_start": case "phone_link_confirm": case "phone_link_remove": case "phone_prefs": {
+      // Text and call Odelia, in this browser: the code is always 123456, and nothing is really texted.
+      if (!mfaOk(c)) return pgErr("mfa_required");
+      type Link = { user_id: string; number: string; verified_at: string | null; texts_on: boolean; calls_on: boolean; quiet_start: string; quiet_end: string; tz: string; lang: "en" | "zh"; code_until: string | null; tries: number };
+      const links = (db.tables.phone_links ??= []) as unknown as Link[];
+      const log = (db.tables.odelia_messages ??= []) as Row[];
+      let l = links.find(x => x.user_id === c.sub);
+      const later = (m: number) => new Date(Date.now() + m * 6e4).toISOString();
+      const status = (extra: Record<string, unknown> = {}) => json({
+        link: l ? { number: l.number, verified: !!l.verified_at, verified_at: l.verified_at, texts_on: l.texts_on, calls_on: l.calls_on, quiet_start: l.quiet_start, quiet_end: l.quiet_end,
+          tz: l.tz, lang: l.lang, opted_out: false, last_error: null, code_pending: !l.verified_at && !!l.code_until && l.code_until > now() } : null,
+        log: log.filter(m => m.user_id === c.sub).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)) || Number(b.id) - Number(a.id)).slice(0, 30)
+          .map(m => ({ id: m.id, direction: m.direction, channel: m.channel, kind: m.kind, body: m.body, created_at: m.created_at })),
+        ...extra,
+      });
+      const note = (direction: "in" | "out", kind: string, body: string) => log.push({ id: log.length + 1, user_id: c.sub, direction, channel: "sms", kind, body, created_at: now() });
+      if (fn === "phone_status") return status();
+      if (fn === "phone_link_start") {
+        const p = ((db.tables.account_pins ?? []) as { user_id: string; unlocked_until: string | null }[]).find(x => x.user_id === c.sub);
+        if (p && !(p.unlocked_until && p.unlocked_until > now())) return pgErr("pin_required");
+        const n = String(body.p_number ?? "");
+        if (!/^\+[1-9]\d{7,14}$/.test(n)) return pgErr("phone_format");
+        if (links.some(x => x.number === n && x.verified_at && x.user_id !== c.sub)) return pgErr("phone_taken");
+        const lang = body.p_lang === "zh" ? "zh" : "en";
+        if (!l) links.push(l = { user_id: c.sub, number: n, verified_at: null, texts_on: true, calls_on: false, quiet_start: "21:00", quiet_end: "08:00", tz: String(body.p_tz || "America/Los_Angeles"), lang, code_until: null, tries: 0 });
+        else if (l.number !== n) Object.assign(l, { number: n, verified_at: null });
+        Object.assign(l, { code_until: later(10), tries: 0, lang });
+        note("out", "code", lang === "zh" ? `已发送验证码（预览中验证码为 ${PREVIEW_CODE}）` : `Sent a verification code (in the preview it's ${PREVIEW_CODE})`);
+        save(); return status();
+      }
+      if (fn === "phone_link_confirm") {
+        if (!l) return pgErr("phone_none");
+        if (l.verified_at) return status();
+        if (!l.code_until || l.code_until <= now()) return status({ error: "code_expired" });
+        if (l.tries >= 5) return status({ error: "code_locked" });
+        if (String(body.p_code ?? "").replace(/\D/g, "") !== PREVIEW_CODE) { l.tries++; save(); return status({ error: l.tries >= 5 ? "code_locked" : "code_wrong" }); }
+        Object.assign(l, { verified_at: now(), code_until: null });
+        note("out", "system", l.lang === "zh" ? "您好，我是快哉的 Odelia。保存这个号码，有任何执照、许可或截止日期的问题都可以发短信或打电话给我。回复 STOP 退订。" : "Hi, it's Odelia from Placetta. Save this number and text or call me anytime about your licenses, permits and deadlines. Reply STOP to opt out.");
+        save(); return status();
+      }
+      if (fn === "phone_link_remove") { db.tables.phone_links = links.filter(x => x.user_id !== c.sub) as unknown as Row[]; l = undefined; save(); return status(); }
+      if (!l) return pgErr("phone_none");
+      const hm = (v: unknown) => v == null || (typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(v));
+      if (!hm(body.p_quiet_start) || !hm(body.p_quiet_end)) return pgErr("time_format");
+      Object.assign(l, {
+        texts_on: typeof body.p_texts === "boolean" ? body.p_texts : l.texts_on, calls_on: typeof body.p_calls === "boolean" ? body.p_calls : l.calls_on,
+        quiet_start: body.p_quiet_start ?? l.quiet_start, quiet_end: body.p_quiet_end ?? l.quiet_end, tz: body.p_tz ?? l.tz, lang: body.p_lang === "zh" || body.p_lang === "en" ? body.p_lang : l.lang,
+      });
+      save(); return status();
+    }
     case "whoami": return json({ id: c.sub, email: userOf(c.sub).email, staff: isStaff(c), staff_email: staffEmail(c.sub), two_step: twoStepOn(c.sub), aal: c.aal });
     case "my_workspaces":
       if (!mfaOk(c)) return json([]);
@@ -410,6 +460,8 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       return json({ ok: true, id: body.id, sent: "sign_in_link" });
     }
     case "tts": return fnErr("not_configured", "The live voice runs on the live app.", 503);
+    // A made-up number (555-01xx is reserved for examples): the section works, nothing is texted.
+    case "odelia-sms": return body.action === "line" ? json({ configured: true, voice: true, number: "+14155550134", display: "+1 (415) 555-0134" }) : fnErr("not_configured", "Texting runs on the live app.", 503);
     default: return fnErr("not_configured", "Not in the preview.", 503);
   }
 }

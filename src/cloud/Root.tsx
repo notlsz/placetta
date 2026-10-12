@@ -524,7 +524,7 @@ export function CloudRoot() {
       ]);
       setPhase({ k: "app", s: {
         me, role: row.role, wsId: row.id, initial: normalize(row.name, row.state), audit, billing, filings, docs, integrations, logins,
-        workspaces: rows.map(r => ({ id: r.id, name: r.name })), hq, notice,
+        workspaces: rows.map(r => ({ id: r.id, name: r.name })), hq, notice, approval: row.id === params.get("ws") ? params.get("approval") ?? undefined : undefined,
         switchTo: id => void open(id),
         newWorkspace: () => setPhase({ k: "onboard", email: me.email, back: row.id }),
         signOut: everywhere => { void api.signOut(!!everywhere).then(() => setPhase({ k: "signin" })); },
@@ -538,7 +538,8 @@ export function CloudRoot() {
   }, [lang, setPhase]);
 
   useEffect(() => {
-    const boot = () => { if (booted.current) return; booted.current = true; void open(lastWs.get()); };
+    // A link from one of Odelia's texts names the workspace (?ws=) it's about.
+    const boot = () => { if (booted.current) return; booted.current = true; void open(new URLSearchParams(location.search).get("ws") || lastWs.get()); };
     void api.getSession().then(s => (s ? boot() : setPhase({ k: "signin" })));
     const sub = api.onAuth((s, event) => {
       if (event === "PASSWORD_RECOVERY" && s) { recovering.current = true; setPhaseRaw({ k: "recover" }); return; }

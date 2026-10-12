@@ -6,17 +6,22 @@
 //
 // POST {action: "start", workspace_id, prompt, history?, lang?, deep?}         a member (Supabase session)
 // POST {action: "continue", run_id, token?} | {action: "watchdog"} | {action: "watch", workspace_id}   the server itself (monitor key)
+// POST {action: "start_as", user_id, workspace_id, prompt, channel: "sms"|"voice", reply_to, history?, lang?}
+//      odelia-sms and odelia-voice (monitor key), for a person who texted or called from their verified number. The
+//      same member and plan checks as "start"; the answer is texted to reply_to when the run finishes.
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { callModel } from "../_shared/llm.ts";
+import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
+import { linkOf, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 // @ts-types="./agent.d.ts"
 import { normalizeState, runRounds, startState, stripState, type Reply, type RunState, type Services, type Step } from "./agent.js";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
 type Block = Record<string, unknown>;
-type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string };
+type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice"; reply_to?: string | null };
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -195,6 +200,7 @@ export async function work(runId: string, token: string | null) {
       round: async (st) => { await commit(); await admin.from("agent_runs").update({ state: st, steps, draft, heartbeat_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running"); },
       draft: (t) => { draft = t; flush(); },
       send: (body, deep) => model(ws, body, deep, location, ctl.signal) as never,
+      channel: run.channel === "sms" || run.channel === "voice" ? run.channel : undefined,
     });
     await commit();
     if ("paused" in out) {
@@ -209,17 +215,55 @@ export async function work(runId: string, token: string | null) {
     if (code === "cancelled" || ctl.signal.aborted) await admin.from("agent_runs").update({ steps, draft: null, state: null, updated_at: new Date().toISOString() }).eq("id", runId);
     else {
       console.error("run failed", runId, code, String((e as Error)?.message ?? e).slice(0, 200));
-      await admin.from("agent_runs").update({ status: "failed", error: code === "rate_limited" || code === "not_configured" ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running");
+      const { data: failed } = await admin.from("agent_runs").update({ status: "failed", error: code === "rate_limited" || code === "not_configured" ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running").select("id");
+      // Someone who asked by text or on a call hears about it the same way.
+      if (failed?.length) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
   }
 }
 
+/**
+ * The answer to someone who texted or called: plain text, at most three messages, ending with the link to the exact
+ * approval waiting in the app (or the app, when there are several or the answer runs long). Nothing is approved by text.
+ */
+async function textBack(run: Run, text: string, approvals: string[]) {
+  if ((run.channel !== "sms" && run.channel !== "voice") || !run.reply_to || !run.created_by) return;
+  const link = await linkOf(admin, run.created_by);
+  // Only ever to the number this person verified, and only while it's still theirs.
+  if (!link?.verified_at || link.number !== normalizePhone(run.reply_to)) return;
+  const origin = appOrigin(env);
+  const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : null) : "";
+  const segments = splitSms(text, { max: 3, lang: run.lang, more: appLink(origin, run.workspace_id), tail: approve ? `${SAY.approve[run.lang]} ${approve}` : undefined });
+  await textUser(admin, env, { link, workspace_id: run.workspace_id, segments, kind: "reply", run_id: run.id });
+}
+
+/** Owners who asked for texts hear when an approval is waiting that nobody saw in the app; the outbox holds it for their quiet hours. */
+async function queueApprovalTexts(run: Run, title: { en: string; zh: string }, approvals: string[]) {
+  if (!approvals.length) return;
+  const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", run.workspace_id).eq("role", "owner");
+  const ids = (owners ?? []).map((o) => o.user_id as string);
+  if (!ids.length) return;
+  const { data: links } = await admin.from("phone_links").select("user_id, lang").in("user_id", ids).not("verified_at", "is", null).eq("texts_on", true).is("opted_out_at", null);
+  const origin = appOrigin(env);
+  const rows = (links ?? []).map((l) => ({
+    user_id: l.user_id, workspace_id: run.workspace_id, kind: "text", urgent: false, dedupe: `approval:${run.id}`,
+    body: l.lang === "zh" ? `${title.zh}。有 ${approvals.length} 项等待您批准。` : `${title.en}. ${approvals.length} item${approvals.length === 1 ? " is" : "s are"} waiting for your approval.`,
+    link: appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : null) || null,
+  }));
+  if (rows.length) await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
+}
+
 async function finish(run: Run, reply: Reply, steps: Step[]) {
   const now = new Date().toISOString();
   await admin.from("agent_runs").update({ status: "done", reply, steps, draft: null, state: null, updated_at: now }).eq("id", run.id).eq("status", "running");
   const said = reply.text.map((t) => t.en).join(" ").trim();
+  // Asked by text or on a call: the answer goes back by text, which is where they're watching.
+  if (run.channel === "sms" || run.channel === "voice") {
+    await textBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim() || SAY.ack[run.lang], reply.approvals ?? []).catch((e) => console.error("text back", String(e).slice(0, 120)));
+    return;
+  }
   if (run.kind === "watch" && /^no changes\.?$/i.test(said)) return;
   // Someone watching in the app already sees it; otherwise it becomes an Update and an email.
   const { data: seen } = await admin.from("agent_runs").select("seen_at").eq("id", run.id).maybeSingle();
@@ -235,6 +279,7 @@ async function finish(run: Run, reply: Reply, steps: Step[]) {
   const waiting = (reply.approvals ?? []).length;
   const app = (env("APP_ORIGINS").split(",")[0] ?? "").trim().replace(/\/+$/, "");
   await sendMail(emails, title.en, `${said}${waiting ? `\n\n${waiting} item${waiting === 1 ? "" : "s"} waiting for your approval.` : ""}${app ? `\n\nOpen Placetta: ${app}/app/` : ""}\n`);
+  await queueApprovalTexts(run, title, reply.approvals ?? []).catch((e) => console.error("approval texts", String(e).slice(0, 120)));
 }
 
 /* ------------------------------ requests ------------------------------ */
@@ -272,6 +317,37 @@ export async function handle(req: Request): Promise<Response> {
     const prompt = WATCH[lang](meta.what ?? "", where);
     const { data: run, error } = await admin.from("agent_runs").insert({ workspace_id: ws, kind: "watch", prompt, lang, state: startState([], prompt) }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the check.");
+    bg(work(run.id, null));
+    return json(202, { id: run.id });
+  }
+
+  // start_as: someone texted or called Odelia from their verified number (odelia-sms and odelia-voice, with the monitor key)
+  if (action === "start_as") {
+    if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
+    const uid = String(body.user_id ?? ""), ws = String(body.workspace_id ?? "");
+    const channel = body.channel === "voice" ? "voice" : body.channel === "sms" ? "sms" : null;
+    const replyTo = normalizePhone(body.reply_to);
+    if (!UUID.test(uid) || !UUID.test(ws) || !channel || !replyTo) return fail(400, "bad_request", "user_id, workspace_id, channel and reply_to are required.");
+    // The number must still be this person's verified number, and they must still be a member with a plan.
+    const link = await linkOf(admin, uid);
+    if (!link?.verified_at || link.number !== replyTo) return fail(403, "forbidden", "That number isn't linked to this person.");
+    const may = await mayUseAgent(admin, ws, uid);
+    if (may === "not_member") return fail(403, "forbidden", "This isn't their workspace.");
+    if (may === "no_plan") return fail(402, "payment_required", "Get the entry plan to start the agent.");
+    if (!env("ANTHROPIC_API_KEY")) return fail(503, "not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
+    const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
+    if (!prompt) return fail(400, "bad_request", "prompt is required.");
+    const { data: busy } = await admin.from("agent_runs").select("id").eq("workspace_id", ws).eq("kind", "task").eq("status", "running").gt("heartbeat_at", new Date(Date.now() - STALE_MS).toISOString()).limit(1);
+    if (busy?.length) return fail(409, "busy", "Placetta is still working on the last task.");
+    const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-8)
+      .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 2000) }));
+    const { data: run, error } = await admin.from("agent_runs").insert({
+      workspace_id: ws, created_by: uid, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: false,
+      state: startState(history, prompt), channel, reply_to: replyTo,
+    }).select("id").single();
+    if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
+    await admin.from("phone_links").update({ last_workspace_id: ws }).eq("user_id", uid);
+    // No session token: connected apps (mail, drives) act as the person and stay with runs started in the app.
     bg(work(run.id, null));
     return json(202, { id: run.id });
   }
