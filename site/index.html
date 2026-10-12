@@ -4390,12 +4390,31 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     }
     return out;
   }
+  // home and furniture: the brands' own wordmarks laid out under the sofa as fine tiles, the same light blue as the mosaic
+  const FK = 10, FURN = [["ligne-roset", .79], ["natuzzi", 1], ["boconcept", 1], ["oppein", 1], ["gautier", 1], ["calligaris", 1], ["schmidt", 1]].map(([n, ch]) => {   // ch: keep the top of the mark only (Ligne Roset drops "depuis 1860", too fine for tiles)
+    const im = new Image(); im.decoding = "async"; im.ch = ch; im.onload = () => { if (cur === FK && FURN.every(x => x.naturalWidth)) { cur = -1; go(FK); } }; im.src = "logos/" + n + ".png"; return im; });
+  function logoCells(top){
+    if (!FURN.every(x => x.naturalWidth)) return [];
+    const narrow = cols < 70, sub = Math.max(2, Math.round(cell / (narrow ? 1.75 : 2.1))), X = cols * sub, Y = rows * sub, SS = 3;
+    const H0 = (narrow ? 14 : 29) / (cell / sub);   // the logo's height in fine tiles, balanced by its shape below
+    const box = FURN.map(im => { const ar = im.naturalWidth / (im.naturalHeight * im.ch), h = Math.min(H0 * 1.7, Math.max(H0 * .66, H0 * Math.sqrt(4.6 / ar))); return [im, Math.round(h * ar), Math.round(h)]; });
+    const gap = Math.round(H0 * (narrow ? 1.1 : 1.6)), per = narrow ? [3, 2, 2] : [4, 3], lines = []; let i = 0; per.forEach(n => { lines.push(box.slice(i, i + n)); i += n; });
+    mk.width = X * SS; mk.height = Y * SS; mg.setTransform(SS, 0, 0, SS, 0, 0); mg.clearRect(0, 0, X, Y); mg.imageSmoothingQuality = "high";
+    const lh = H0 * 1.25, lg = H0 * (narrow ? .7 : .85); let y = top * sub;
+    lines.forEach(L => { const tw = L.reduce((a, b) => a + b[1], 0) + gap * (L.length - 1); let x = (X - tw) / 2;
+      L.forEach(([im, bw, bh]) => { mg.drawImage(im, 0, 0, im.naturalWidth, im.naturalHeight * im.ch, Math.round(x), Math.round(y + (lh - bh) / 2), bw, bh); x += bw + gap; }); y += lh + lg; });
+    const d = mg.getImageData(0, 0, X * SS, Y * SS).data, out = [];
+    for (let yy = 0; yy < Y; yy++) for (let xx = 0; xx < X; xx++) { let v = 0; for (let q = 0; q < SS; q++) for (let w = 0; w < SS; w++) v += d[((yy * SS + q) * X * SS + xx * SS + w) * 4 + 3];
+      if (v > 255 * SS * SS * .42) out.push({c: xx / sub, r: yy / sub, ty: 2, sz: 1 / sub}); }
+    return out;
+  }
   function cells(k){
     if (k === 2 && botImg.naturalWidth) return botCells();
     if (k === 3) return sceneImg.naturalWidth ? sceneCells() : [];   // the photo loads first; its onload draws it
     const big = k === 2, scene = k === 3;   // the robot and the game scene are traced from photos and need more tiles
-    const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * (scene ? 1 : .78), ah = rows * (scene ? .8 : big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
-    const fx = (cols - bw * f) / 2 - bx * f, fy = rows * (scene ? 0 : big ? .04 : cols < 60 ? .1 : .12) + (ah - bh * f) / 2 - by * f;
+    const fu = k === FK && FURN.every(x => x.naturalWidth);   // furniture with its brands: a smaller sofa, the wordmarks beneath
+    const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * (scene ? 1 : fu ? .62 : .78), ah = rows * (scene ? .8 : big ? .74 : fu ? (cols < 60 ? .26 : .4) : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
+    const fx = (cols - bw * f) / 2 - bx * f, fy = rows * (scene ? 0 : big ? .04 : fu ? (cols < 60 ? .05 : .09) : cols < 60 ? .1 : .12) + (ah - bh * f) / 2 - by * f;
     mk.width = cols * SS; mk.height = rows * SS; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, mk.width, mk.height);
     mg.setTransform(f * SS, 0, 0, f * SS, fx * SS, fy * SS); SH[k]();
     const d = mg.getImageData(0, 0, mk.width, mk.height).data, out = [];
@@ -4404,6 +4423,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
       for (let y = 0; y < SS; y++) for (let x = 0; x < SS; x++) { const i = (((r * SS + y) * cols * SS) + c * SS + x) * 4; if (d[i + 3] > 100) { n++; if (d[i] > 128 && d[i + 1] > 128) yel++; else if (d[i] > 128 && d[i + 2] > 128) glo++; else if (d[i + 1] > 128 && d[i + 2] > 128) sil++; else if (d[i + 2] > 128) blu++; else if (d[i + 1] > 128) joi++; else if (d[i + 2] > 60) dim++; else red++; } }
       if (n >= 5) out.push({c, r, ty: dim > red && dim >= blu ? 6 : glo >= 2 ? 4 : yel > red && yel >= blu ? 1 : sil >= joi && sil >= blu && sil > red ? 5 : joi > red && joi >= blu ? 3 : blu > red ? 2 : 0});
     }
+    if (fu) { let lo = 0; out.forEach(t => { if (t.r > lo) lo = t.r; }); out.push(...logoCells(lo + (cols < 60 ? 2.5 : 4))); }
     return out;
   }
   const ease = u => u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
@@ -4416,7 +4436,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     const live = tiles.filter(x => x.out === 0).sort((a, b) => a.tc - b.tc || a.tr - b.tr), next = [];
     T.forEach((d, i) => {
       const src = live.length ? live[Math.floor(i * live.length / T.length)] : null;
-      next.push({fc: src ? src.c : d.c + (Math.random() - .5) * 8, fr: src ? src.r : rows + 2 + Math.random() * 6, c: 0, r: 0, tc: d.c, tr: d.r, ty: d.ty, fty: src ? src.ty : d.ty, lum: d.lum, flum: src ? src.lum : d.lum, rgb: d.rgb, frgb: src ? src.rgb : d.rgb, j: Math.random(), out: 0, a0: src ? 1 : 0});
+      next.push({fc: src ? src.c : d.c + (Math.random() - .5) * 8, fr: src ? src.r : rows + 2 + Math.random() * 6, c: 0, r: 0, tc: d.c, tr: d.r, ty: d.ty, fty: src ? src.ty : d.ty, lum: d.lum, flum: src ? src.lum : d.lum, rgb: d.rgb, frgb: src ? src.rgb : d.rgb, sz: d.sz || 1, j: Math.random(), out: 0, a0: src ? 1 : 0});
     });
     tiles = next; kick();
   }
@@ -4448,7 +4468,8 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
         const base = COL[ty], light = ty === 1 || ty === 4 ? 0 : ty === 3 || ty === 6 ? 8 : (1 - x.tr / rows) * 30 + 22 * Math.max(0, Math.sin(t * 1.2 - x.tc * .12));
         g.globalAlpha = a; g.fillStyle = `rgb(${Math.min(255, base[0] + light)},${Math.min(255, base[1] + light)},${Math.min(255, base[2] + light * .8)})`;
       }
-      if (cell < 5) g.fillRect(gx + c * cell, gy + r * cell, s, s); else { g.beginPath(); g.roundRect(gx + c * cell, gy + r * cell, s, s, Math.min(3, s / 4)); g.fill(); }
+      if (x.sz < 1) { const q = Math.max(1, cell * x.sz - .45); g.fillRect(gx + c * cell, gy + r * cell, q, q); }   // a brand-wordmark tile, on the finer grid
+      else if (cell < 5) g.fillRect(gx + c * cell, gy + r * cell, s, s); else { g.beginPath(); g.roundRect(gx + c * cell, gy + r * cell, s, s, Math.min(3, s / 4)); g.fill(); }
     }
     g.globalAlpha = 1;
   }
