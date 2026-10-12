@@ -2154,6 +2154,34 @@ html[lang="zh-CN"] .bkg li.nm span{font-family:var(--zhserif)}
 .ox .qr,.qr.ox{text-decoration:none;z-index:3}
 .ox .qr .qrimg,.qr.ox .qrimg{display:block;width:64px;height:64px;border-radius:6px;background:#fff;padding:3px;image-rendering:pixelated}
 @media (max-width:639px){.ox .qr .qrimg,.qr.ox .qrimg{width:52px;height:52px}.ox .qr,.qr.ox{right:12px;bottom:12px}}
+
+/* agencies: we file in dark blue, with partners in light blue, we monitor in pale blue */
+#agencies .agk-f{background:#1F3F6B;color:#fff;box-shadow:none}
+#agencies .agk-p{background:#A4C8E1}
+#agencies .agk-m{background:#E2EDF5;background-image:radial-gradient(rgba(31,63,107,.14) 1px,transparent 1.2px);background-size:9px 9px;box-shadow:none}
+#agencies .agk-f .agh b,#agencies .agk-f small{color:#fff}
+#agencies .agk-f span{color:rgba(255,255,255,.7)}
+#agencies .agk-p .agh b,#agencies .agk-p small,#agencies .agk-m .agh b,#agencies .agk-m small{color:#0F1B33}
+#agencies .agk-p span,#agencies .agk-m span{color:rgba(15,27,51,.62)}
+#agencies .agi li:hover{filter:none}
+#agencies .agi .agh b{font-size:32px}
+@media (min-width:1024px){#agencies .agi .agh b{font-size:38px}}
+#agencies .agi li:nth-child(7n+1) .agh b{font-size:44px}
+@media (min-width:1024px){#agencies .agi li:nth-child(7n+1) .agh b{font-size:56px}}
+#agencies .agi li .agt,#agencies .agk-p .agt,#agencies .agk-m .agt{background:none!important;backdrop-filter:none;padding:0;font-size:11.5px;font-weight:500;letter-spacing:.02em;color:#0F1B33!important}
+#agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
+#agencies .agkey .agt{background:none!important;padding:0;font-weight:600;color:var(--ink)!important}
+#agencies .agwh .agt,#agencies .agws .agt{color:var(--ink2)!important}
+#agencies .agkey .agt::after{content:"";display:inline-block;width:12px;height:12px;margin-left:8px;vertical-align:-1px;border-radius:3px}
+#agencies .agkey .agt-f::after{background:#1F3F6B}
+#agencies .agkey .agt-p::after{background:#A4C8E1}
+#agencies .agkey .agt-m::after{background:#E2EDF5;box-shadow:inset 0 0 0 1px #C9D6E4}
+
+body #agencies .agt-f{color:#1F3F6B!important}
+#agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
+body #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
+#cn .dash .dchip{position:relative;z-index:1;background:rgba(255,255,255,.88)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:999px!important;padding:5px 11px!important}
+#cn .cnc .cnlm{background:rgba(255,255,255,.85)!important;border-radius:999px!important;padding:4px 11px!important}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -4062,7 +4090,6 @@ const DASHPILL = {d:["p-d","Approved","已完成"], r:["p-r","In review","审核
 function renderDash(){
   if (!document.getElementById("dashA")) return;
   // Alven's in-the-loop cards: the plan as a task list, Odelia's note under it, and what she did with it.
-  // Shenzhen always reads it in Chinese, New York in English.
   const T2 = (k, j) => (j ? T.zh : T.en)[k];
   const IC = {
     d: '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.2 8.4l3.1 3.1L12.8 5" fill="none" stroke="#2F6B40" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -4075,8 +4102,9 @@ function renderDash(){
     `<svg class="dconn" width="16" height="22" viewBox="0 0 16 22" aria-hidden="true"><path d="M8 0v22" stroke="#D3D9E3"/></svg>` +
     `<div class="bub"><div><span class="orb av"></span><div class="bc"><p>${T2("dash.risk", j)}</p></div></div></div>` +
     `<div class="ichip dchip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9D9D9C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>${j ? "已同步给" + other : "Shared with " + other}</span></div>`;
-  document.getElementById("dashA").innerHTML = card(1, "dash.a", "dash.at", "深", "纽约团队");
-  document.getElementById("dashB").innerHTML = card(0, "dash.b", "dash.bt", "NY", "Shenzhen HQ");
+  const j = L();   // both teams read the page's language: fully English on the English page, fully Chinese on the Chinese one
+  document.getElementById("dashA").innerHTML = card(j, "dash.a", "dash.at", j ? "深" : "SZ", T2("dash.b", j));
+  document.getElementById("dashB").innerHTML = card(j, "dash.b", "dash.bt", j ? "纽" : "NY", T2("dash.a", j));
 }
 
 
@@ -4574,7 +4602,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   let timers = [], on = false;
   const at = (ms, f) => timers.push(setTimeout(f, ms));
   const step = k => steps.forEach((li, i) => li.classList.toggle("on", i === k));
-  const aim = el => { if (!el) return; const r = el.getBoundingClientRect(), w = win.getBoundingClientRect(); cur.style.transform = `translate(${r.left - w.left + Math.min(r.width - 20, 60)}px,${r.top - w.top + r.height / 2}px)`; };
+  const aim = el => { if (!el) return; const r = el.getBoundingClientRect(), w = win.getBoundingClientRect(), fld = el.classList.contains("ptf"); cur.style.transform = fld ? `translate(${r.right - w.left - 74}px,${r.top - w.top + r.height - 16}px)` : `translate(${r.left - w.left + Math.min(r.width - 20, 60)}px,${r.top - w.top + r.height / 2}px)`; };   // on a field she points at its right end, clear of the text she types
   function reset(){ timers.forEach(clearTimeout); timers = []; win.className = "ptwin"; fs.forEach(f => { f.classList.remove("on", "done"); const v = f.querySelector(".ptv"); if (v) v.textContent = ""; }); toast.classList.remove("on"); step(-1); }
   function type(f, t0){ const v = f.querySelector(".ptv"), txt = v ? v.dataset.v : ""; at(t0, () => { fs.forEach(x => x.classList.remove("on")); f.classList.add("on"); aim(f); });
     if (v) for (let i = 1; i <= txt.length; i++) at(t0 + 300 + i * 34, () => { v.textContent = txt.slice(0, i); });
