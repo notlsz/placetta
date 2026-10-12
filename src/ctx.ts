@@ -3,9 +3,10 @@ import type { MemoryBook } from "./model";
 import type { Request, Step } from "./agent";
 import type { Bf, Lang, T } from "./i18n";
 import type { Bi, Store, UpdateItem, Workspace } from "./model";
+import type { HqRow } from "./hq";
 import type { AgencyLogin, Billing, Filing, Integration, IntegrationKind, Plan } from "./cloud/api";
 
-export type View = "overview" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue";
+export type View = "overview" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue" | "hq";
 export type Tab = "progress" | "check" | "form" | "fees" | "receipt";
 
 /** What a signed-in account adds: billing, integrations, saved logins, the filing queue and data controls. */
@@ -27,6 +28,8 @@ export type CloudCtx = {
   integrations: Integration[];
   logins: AgencyLogin[];
   workspaces: { id: string; name: string }[];
+  /** Franchisees that shared their stores with this email: shows the Headquarters view. */
+  hq: HqRow[];
   openPlans(reason?: "start" | "file"): void;
   checkout(plan: "entry" | "starter" | "growth" | "locations", o?: { markets?: number; extra_locations?: number }): Promise<void>;
   portal(): Promise<void>;

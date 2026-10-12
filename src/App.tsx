@@ -19,6 +19,7 @@ import { B, SAMPLE, same, type Bi, type Doc, type LicenseHit, type UpdateItem, t
 import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, Overview, UpdatesPage } from "./pages";
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
+import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
 import { daysUntil, inDays, nowIso } from "./time";
 import { I } from "./ui";
@@ -522,7 +523,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const fail = (e: unknown) => say((e as api.ApiError).message ?? String(e));
     return {
       email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner,
-      wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces,
+      wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces, hq: cloud.hq,
       openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
       checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
       portal: async () => { if (!ownerOk()) return; try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
@@ -611,6 +612,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     overview: <Overview />, updates: <UpdatesPage />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
     find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
     queue: cloud?.me.staff ? <Queue /> : cloud?.me.staff_email ? <QueueLocked /> : <Overview />,
+    hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : <Overview />,
   }[view];
   const soon = view_.deadlines.filter(d => { const n = daysUntil(d.date); return n >= 0 && n <= 30; }).length;
   const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, updates: updates.filter(u => !u.read).length, deadlines: soon };
@@ -650,6 +652,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       </ul>
       <ul className="nav">
         <li><button type="button" aria-current={view === "find" ? "page" : undefined} onClick={() => go("find")} title={slim ? t("nav_find") : undefined}><I.find /><span>{t("nav_find")}</span></button></li>
+        {!!cloud?.hq.length && <li><button type="button" aria-current={view === "hq" ? "page" : undefined} onClick={() => go("hq")} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></button></li>}
         {(cloud?.me.staff || cloud?.me.staff_email) && <li><button type="button" aria-current={view === "queue" ? "page" : undefined} onClick={() => go("queue")} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></button></li>}
       </ul>
       {view_.locations.length > 0 && <p className="nav-h">{t("locations")}</p>}
