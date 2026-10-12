@@ -82,6 +82,8 @@ export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<strin
   for (const a of p.attachments ?? []) {
     if (!a.path?.startsWith(`${f.workspace_id}/`) || !ctx.docPaths.has(a.path)) out.push({ kind: "file", en: `${a.name} isn't in Documents`, zh: `文件中找不到 ${a.name}` });
   }
+  const signed = signedCopy(f);
+  if (signed && (!signed.startsWith(`${f.workspace_id}/`) || !ctx.docPaths.has(signed))) out.push({ kind: "file", en: "The signed copy isn't in Documents. Upload it again.", zh: "文件中找不到签名件，请重新上传。" });
   const paperless = !!d?.portal;
   if (d && !paperless) {
     if (!p.pdf_path) out.push({ kind: "file", en: "The filled official form is missing. Approve it again from the application.", zh: "缺少已填写的官方表格。请在申请中重新批准。" });
@@ -104,7 +106,7 @@ export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Ch
   if (!d) return "team";
   const on = (c: Channel) => env.channels.includes(c);
   if (d.portal && facts.hasLogin && env.portalWorker && on("portal")) return "portal";
-  if (d.signature === "wet") return "team";
+  if (d.signature === "wet") return signedCopy(f) && canFaxSigned(d, env) ? "fax" : "team";
   if (d.email && facts.mailConnected && on("email")) return "email";
   if (d.fax && env.fax && on("fax")) return "fax";
   if (d.mail && env.mail && on("mail")) return "mail";
@@ -120,6 +122,16 @@ export function mailTo(d: Dest, p: Payload) {
   if (!d.mail) return null;
   return isForeign(p) && d.mail.foreign ? d.mail.foreign : d.mail;
 }
+
+/** The hand-signed copy the person uploaded for a wet-signature form, if any: its Documents path, kept in the log
+    (the payload is frozen once approved). */
+export const signedCopy = (f: Filing): string | undefined => [...f.agent_log].reverse().find((e) => e.kind === "signed_copy")?.ref;
+
+/** What gets faxed: the hand-signed copy when there is one, otherwise the filled form. */
+export const faxFile = (f: Filing): string | undefined => signedCopy(f) ?? f.payload.pdf_path;
+
+/** Placetta can fax a hand-signed copy for this form when the agency takes faxes and fax is switched on. */
+export const canFaxSigned = (d: Dest | undefined, env: Env): boolean => !!d?.fax && env.fax && env.channels.includes("fax");
 
 /** True once the team approved this filing's review (two-key period), recorded in its log. */
 export const teamApproved = (f: Filing) => f.agent_log.some((e) => e.kind === "two_key_ok");

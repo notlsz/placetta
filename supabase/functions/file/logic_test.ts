@@ -1,7 +1,7 @@
 // deno test supabase/functions/file/logic_test.ts
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
-import { check, emailFor, envFrom, faxTo, type Filing, isForeign, killSwitchOn, mailTo, pick, teamApproved } from "./logic.ts";
+import { canFaxSigned, check, emailFor, envFrom, faxFile, faxTo, type Filing, isForeign, killSwitchOn, mailTo, pick, signedCopy, teamApproved } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
 const b = (s: string) => ({ en: s, zh: s });
@@ -63,6 +63,24 @@ Deno.test("pick: portal, email, fax, mail, team in order", () => {
 });
 Deno.test("pick: a wet signature never goes by email, fax or mail", () => {
   assertEquals(pick(filing(), dest({ signature: "wet", email: "a@x.gov" }), ENV, { hasLogin: false, mailConnected: true }), "team");
+});
+Deno.test("wet signature: a hand-signed copy goes by fax, never by email or mail", () => {
+  const signedLog = [{ en: "", zh: "", kind: "signed_copy", ref: `${WS}/receipts/signed.pdf` }];
+  const f = filing({}, { agent_log: signedLog });
+  assertEquals(signedCopy(f), `${WS}/receipts/signed.pdf`);
+  assertEquals(faxFile(f), `${WS}/receipts/signed.pdf`);
+  assertEquals(faxFile(filing()), `${WS}/filings/f1.pdf`);
+  assertEquals(pick(f, dest({ signature: "wet", email: "a@x.gov" }), ENV, { hasLogin: false, mailConnected: true }), "fax");
+  assertEquals(pick(f, dest({ signature: "wet", fax: undefined }), ENV, { hasLogin: false, mailConnected: true }), "team");
+  const faxOff = envFrom((k) => (k === "FILER_CHANNELS" ? "email,mail" : k.startsWith("TELNYX") ? "x" : undefined));
+  assert(!canFaxSigned(dest({ signature: "wet" }), faxOff));
+  assertEquals(pick(f, dest({ signature: "wet" }), faxOff, { hasLogin: false, mailConnected: true }), "team");
+});
+Deno.test("check: the signed copy must be in this workspace's Documents", () => {
+  const f = (ref: string) => filing({}, { agent_log: [{ en: "", zh: "", kind: "signed_copy", ref }] });
+  assertEquals(check(f(`${WS}/receipts/s.pdf`), dest({ signature: "wet" }), { docPaths: new Set([...docs, `${WS}/receipts/s.pdf`]) }), []);
+  assert(check(f(`${WS}/receipts/missing.pdf`), dest({ signature: "wet" }), { docPaths: docs }).some((x) => x.kind === "file"));
+  assert(check(f("other/s.pdf"), dest({ signature: "wet" }), { docPaths: new Set([...docs, "other/s.pdf"]) }).some((x) => x.kind === "file"));
 });
 Deno.test("foreign owners get the foreign fax and address", () => {
   const f = filing();

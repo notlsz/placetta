@@ -37,6 +37,7 @@ export type CloudCtx = {
   feedUrl(rotate?: boolean): Promise<string>;
   markPaid(filingId: string): Promise<void>;
   resumeFiling(filingId: string): Promise<void>;
+  uploadSigned(filingId: string, appId: string, file: File): Promise<void>;
   cancelFiling(filingId: string): Promise<void>;
   exportData(): void;
   switchTo(id: string): void;
