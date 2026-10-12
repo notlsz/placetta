@@ -3,6 +3,7 @@
 // POST { workspace_id, filing_id, action }
 //   start   the customer just approved it: check it, pick the channel, send (or queue it for the portal worker)
 //   resume  "I've done my part, carry on" after a hand-back
+//   signed  { path } the hand-signed copy of a wet-signature form, uploaded to Documents: Placetta faxes it
 //   status  refresh a fax or letter that's on its way
 //   team_approve, take_over   the Placetta team (two-step) in the two-key period, or taking a run over
 // POST { action: "sweep" } with x-monitor-key: the monitor's run (stuck runs, fax and mail status, stale destinations)
@@ -19,7 +20,8 @@ import {
 } from "./shared.ts";
 import { DEST, staleDestinations, type Dest } from "./destinations.ts";
 import {
-  check, emailFor, envFrom, faxTo, type Filing, isForeign, killSwitchOn, type LogEntry, mailTo, pick, teamApproved,
+  canFaxSigned, check, emailFor, envFrom, faxFile, faxTo, type Filing, isForeign, killSwitchOn, type LogEntry, mailTo, pick, signedCopy,
+  teamApproved,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
@@ -75,7 +77,7 @@ async function needsYou(f: Filing, en: string, zh: string, handoff_url: string |
 
 async function docPaths(f: Filing): Promise<Set<string>> {
   const p = f.payload;
-  const want = [p.pdf_path, ...(p.attachments ?? []).map((a) => a.path)].filter((x): x is string => typeof x === "string");
+  const want = [p.pdf_path, signedCopy(f), ...(p.attachments ?? []).map((a) => a.path)].filter((x): x is string => typeof x === "string");
   if (!want.length) return new Set();
   const { data, error } = await admin.from("documents").select("path").eq("workspace_id", f.workspace_id).in("path", want);
   if (error) throw new Error(`documents lookup failed: ${error.code ?? ""}`);
@@ -190,7 +192,7 @@ async function sendFax(f: Filing, d: Dest, retry = false) {
   const to = faxTo(d, f.payload);
   if (!to) return await toTeam(f, "There's no fax number for this applicant.", "没有适用于该申请人的传真号码。");
   const g = retry ? f : await markSubmit(f, `Faxing it to ${to}${isForeign(f.payload) ? " (international applicants)" : ""}`, `正在传真至 ${to}`);
-  const media_url = await signedUrl(f.payload.pdf_path!);
+  const media_url = await signedUrl(faxFile(f)!);
   const res = await fetch(`${TELNYX}/faxes`, {
     method: "POST",
     headers: { Authorization: `Bearer ${Deno.env.get("TELNYX_API_KEY")}`, "Content-Type": "application/json" },
@@ -327,6 +329,13 @@ async function start(f: Filing, req: Request, by: string) {
   if (channel === "team" && d?.signature === "wet" && !d.portal) {
     const where = d.fax ? `fax it to ${faxTo(d, f.payload)}` : d.mail ? `mail it to ${mailTo(d, f.payload)?.name}, ${mailTo(d, f.payload)?.city}` : "send it to the agency";
     const whereZh = d.fax ? `传真至 ${faxTo(d, f.payload)}` : d.mail ? `寄往 ${mailTo(d, f.payload)?.name}` : "交给机构";
+    if (canFaxSigned(d, e)) {
+      // ref "upload": the app shows an upload button for the signed copy.
+      return view(await step(f, log(
+        "This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then upload a scan or a clear photo of the signed page here. Placetta faxes it to the agency and saves the confirmation.",
+        "该机构要求手写签名。请从“文件”下载已填写的表格，手写签名后，在此上传签名页的扫描件或清晰照片。快哉会将其传真给机构并保存送达确认。",
+        "wet_signature", "upload"), { channel: "team", requirements_checked: true, agent_state: "needs_you", handoff_url: null }));
+    }
     return await needsYou(await step(f, null, { channel: "team", requirements_checked: true }),
       `This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then ${where}. Tap "I've done it" when it's sent.`,
       `该机构要求手写签名。请从“文件”下载已填写的表格，手写签名后${whereZh}。发出后点击“我已完成”。`, null, "wet_signature");
@@ -360,6 +369,42 @@ async function resume(f: Filing, by: string) {
   return await startAgain(g);
 }
 const startAgain = (f: Filing) => start(f, new Request("https://local"), "resume");
+
+/** The person signed a wet-signature form by hand and uploaded it: check the file, turn a photo into a PDF the fax
+    service takes, record it, and run the filing again so it goes by fax. */
+async function signed(f: Filing, path: string, by: string) {
+  if (f.agent_state !== "needs_you") throw new HttpError("bad_request", "This filing isn't waiting for a signed copy.");
+  const last = [...f.agent_log].reverse().find((e) => ["needs_you", "wet_signature", "need_person"].includes(e.kind));
+  if (last?.kind !== "wet_signature") throw new HttpError("bad_request", "This filing isn't waiting for a signed copy.");
+  const d = DEST[f.payload.official ?? ""];
+  if (!canFaxSigned(d, env())) throw new HttpError("bad_request", "Placetta can't fax this form yet. Send it yourself, then tap \"I've done it\".");
+  if (!path.startsWith(`${f.workspace_id}/`)) throw new HttpError("bad_request", "That file isn't in this workspace.");
+  const { data: doc, error } = await admin.from("documents").select("path, name, mime").eq("workspace_id", f.workspace_id).eq("path", path).maybeSingle();
+  if (error) throw new Error(`documents lookup failed: ${error.code ?? ""}`);
+  if (!doc) throw new HttpError("bad_request", "Upload the signed copy to Documents first.");
+  const mime = String(doc.mime ?? "").toLowerCase();
+  let faxPath = path;
+  if (mime !== "application/pdf") {
+    if (!/^image\/(jpeg|jpg|png)$/.test(mime)) throw new HttpError("bad_request", "Upload the signed copy as a PDF, JPG or PNG.");
+    const dl = await admin.storage.from("documents").download(path);
+    if (dl.error || !dl.data) throw new Error("Couldn't read the signed copy.");
+    const bytes = new Uint8Array(await dl.data.arrayBuffer());
+    if (bytes.length > 15 * 1024 * 1024) throw new HttpError("bad_request", "The photo is too large. Upload one under 15 MB.");
+    const pdf = await PDFDocument.create();
+    const img = mime === "image/png" ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
+    // Letter size, the image scaled to fit inside half-inch margins.
+    const W = 612, H = 792, M = 36, k = Math.min((W - 2 * M) / img.width, (H - 2 * M) / img.height);
+    const page = pdf.addPage([W, H]);
+    page.drawImage(img, { x: (W - img.width * k) / 2, y: (H - img.height * k) / 2, width: img.width * k, height: img.height * k });
+    const saved = await saveReceipt(f, "signed-form.pdf", await pdf.save(), "application/pdf");
+    if (!saved) throw new Error("Couldn't save the signed copy as a PDF.");
+    faxPath = saved;
+  }
+  const g = await step(f, log("You signed it by hand and uploaded it. Placetta faxes it to the agency.", "您已手写签名并上传，快哉将传真给机构。", "signed_copy", faxPath),
+    { agent_state: null, handoff_url: null });
+  console.log("signed copy uploaded by", by.slice(0, 120));
+  return await startAgain(g);
+}
 
 async function refreshStatus(f: Filing) {
   if (f.channel === "fax") return await refreshFax(f);
@@ -447,5 +492,6 @@ serve(async (req) => {
   if (action === "status") return ok(await refreshStatus(f));
   if (action === "resume") return ok(await resume(f, user.email ?? user.id));
   if (action === "start") return ok(await start(f, req, user.email ?? user.id));
-  throw new HttpError("bad_request", "action must be start, resume or status.");
+  if (action === "signed") return ok(await signed(f, String(body.path ?? "").slice(0, 500), user.email ?? user.id));
+  throw new HttpError("bad_request", "action must be start, resume, signed or status.");
 });

@@ -374,6 +374,8 @@ export async function getBilling(ws: string): Promise<Billing | null> {
 type FileView = { filing: Pick<Filing, "id" | "status" | "channel" | "agent_state" | "agent_log" | "handoff_url" | "confirmation_number" | "submit_clicked_at"> };
 export const fileNow = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "start" });
 export const resumeFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "resume" });
+/** The hand-signed copy of a wet-signature form, already in Documents: Placetta faxes it. */
+export const signedCopy = (ws: string, filingId: string, path: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "signed", path });
 export const filingStatus = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "status" });
 export const teamFiling = (ws: string, filingId: string, action: "team_approve" | "take_over") => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action });
 /** Upload the filled official form for a filing before it's approved, so its path can go in the frozen payload. */

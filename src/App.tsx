@@ -533,6 +533,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       feedUrl: async rotate => (await api.integration<{ url: string }>(cloud.wsId, "feed_url", { rotate: !!rotate })).url,
       markPaid: async id => { if (!ownerOk()) return; try { await api.markPaid(id); await refresh(); say(lang === "zh" ? "已告知团队，他们会继续提交。" : "Thanks. The team will finish the submission."); } catch (e) { fail(e); } },
       resumeFiling: async id => { try { await api.resumeFiling(cloud.wsId, id); await refresh(); say(lang === "zh" ? "好的，快哉继续办理。" : "Thanks. Placetta carries on."); } catch (e) { fail(e); } },
+      uploadSigned: async (id, appId, file) => {
+        try {
+          const row = await api.uploadDoc(cloud.wsId, file, appId);
+          await api.signedCopy(cloud.wsId, id, row.path); await refresh();
+          say(lang === "zh" ? "已收到签名件，快哉正在传真给机构。" : "Got the signed copy. Placetta is faxing it to the agency.");
+        } catch (e) { fail(e); }
+      },
       cancelFiling: async id => { if (!ownerOk()) return; try { await api.cancelFiling(id); await refresh(); } catch (e) { fail(e); } },
       exportData: () => {
         const data = { exported: nowIso(), workspace: api.strip(wsRef.current), audit: wsRef.current.audit, filings, documents: docs.map(d => ({ name: d.name, size: d.size, created_at: d.created_at, source: d.source })) };
