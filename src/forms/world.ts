@@ -130,6 +130,8 @@ export const CITIES: City[] = [
   c("ATL", "US", "Atlanta", "亚特兰大", ["atlanta", "亚特兰大", "duluth, ga"], true, "GA"),
   c("PHL", "US", "Philadelphia", "费城", ["philadelphia", "philly", "费城"], true, "PA"),
   c("LV", "US", "Las Vegas", "拉斯维加斯", ["las vegas", "拉斯维加斯", "henderson, nv"], true, "NV"),
+  c("SAT", "US", "San Antonio", "圣安东尼奥", ["san antonio", "圣安东尼奥"], true, "TX"),
+  c("TPA", "US", "Tampa", "坦帕", ["tampa", "坦帕", "ybor city"], true, "FL"),
   ...([["Phoenix", "凤凰城", "AZ"], ["San Diego", "圣地亚哥", "CA"], ["Denver", "丹佛", "CO"], ["Portland", "波特兰", "OR"], ["Minneapolis", "明尼阿波利斯", "MN"],
     ["Detroit", "底特律", "MI"], ["Orlando", "奥兰多", "FL"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
     .map(([en, zh, st]) => c("US-" + en.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6), "US", en, zh, [en.toLowerCase(), zh], false, st)),

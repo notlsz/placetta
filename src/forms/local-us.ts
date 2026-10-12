@@ -1,10 +1,11 @@
 // City and county steps for San José (Santa Clara County), San Francisco and Dallas, copied from the agencies' own
-// pages on 2026-10-10. Times and renewals appear only where the agency states them; fees are null where they vary.
+// pages on 2026-10-10; San Antonio and Tampa (Hillsborough County) on 2026-10-12. Times and renewals appear only where the agency states them; fees are null where they vary.
 import { B } from "../bi";
 import type { OfficialForm } from "./registry";
 
 const R = "restaurant" as const, T = "retail" as const, S = "seller" as const, W = "warehouse" as const;
 const SRC = (u: string) => `${u} (2026-10-10)`;
+const SRC12 = (u: string) => `${u} (2026-10-12)`;
 
 export const LOCAL_US: OfficialForm[] = [
   /* ------------------------------- San José and Santa Clara County ------------------------------- */
@@ -175,5 +176,40 @@ export const LOCAL_US: OfficialForm[] = [
     url: "https://dallascityhall.com/departments/fire-rescue/Pages/Prevention-and-Investigation-Bureau.aspx",
     info: "https://dallascityhall.com/departments/fire-rescue/Pages/Prevention-and-Investigation-Bureau.aspx",
     fee: 250, checked: "page", fields: [],
+  },
+
+  /* -------------------------------------------- San Antonio -------------------------------------------- */
+  {
+    id: "sat-co", form: "Application for Certificate of Occupancy", title: B("Certificate of Occupancy", "占用证"),
+    agency: B("City of San Antonio Development Services", "圣安东尼奥市开发服务局"), level: "city", where: "SAT", segments: [R, T, W], method: "in_person", order: 62,
+    how: B("Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections.", "新企业与场所现有业务类型不同时须办理；用途不变、仅更换业主或租户的，只需更新现有占用证上的名称。通常需通过建筑、电气、机械、管道和消防检查。"),
+    url: "https://www.sanantonio.gov/DSD/Business/CofO", info: "https://www.sanantonio.gov/DSD/Business/CofO",
+    fee: null, checked: "page", fields: [],
+  },
+  {
+    id: "sat-food", form: "Food Establishment License", title: B("Food establishment license", "食品经营场所执照"),
+    agency: B("San Antonio Metropolitan Health District (Metro Health)", "圣安东尼奥大都会卫生区（Metro Health）"), level: "city", where: "SAT", segments: [R], needs: { food: true }, method: "in_person", order: 76,
+    how: B("Once the space is zoned for the use and the Certificate of Occupancy requirements are complete, buy the license at the Development and Business Services Center, 1901 S. Alamo.", "场所分区允许该用途且完成占用证要求后，到南阿拉莫街 1901 号开发与商业服务中心购买执照。"),
+    url: "https://www.sanantonio.gov/Health/FoodLicensing/FAQs", info: "https://www.sanantonio.gov/Health/FoodLicensing",
+    fee: null, checked: "page", fields: [],
+  },
+
+  /* ------------------------------------- Tampa and Hillsborough County ------------------------------------- */
+  {
+    id: "hc-business-tax", form: "Local Business Tax Receipt (BTExpress)", title: B("Hillsborough County local business tax receipt", "希尔斯伯勒县地方营业税收据"),
+    agency: B("Hillsborough County Tax Collector", "希尔斯伯勒县税务征收处"), level: "county", where: "TPA", segments: [R, T, S, W], method: "online", order: 56,
+    how: B("Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs.", "开始经营前办理：在 BTExpress 一次性在线填完申请，提供企业名称、SSN 或 EIN、县内实际地址，以及业务所需的州或县执照。"),
+    url: "https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/", info: "https://www.hillstaxfl.gov/taxes/business-tax-services/",
+    fee: null, feeNote: B("Set by business category; applications from April 1 to June 30 pay the half-year rate.", "按业务类别计算；4 月 1 日至 6 月 30 日申请的按半年费率缴纳。"),
+    takes: B("Reviewed in 3 to 5 business days, then paid and printed online.", "3 至 5 个工作日审核，之后在线缴费并打印。"),
+    takesSource: SRC12("https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/"),
+    renews: B("Every year; all receipts expire September 30, with renewal from July 1.", "每年续期；所有收据于 9 月 30 日到期，7 月 1 日起可续期。"), checked: "page", fields: [],
+  },
+  {
+    id: "tpa-business-tax", form: "New Business Tax Receipt Application", title: B("City of Tampa business tax receipt", "坦帕市营业税收据"),
+    agency: B("City of Tampa Business Tax", "坦帕市营业税办公室"), level: "city", where: "TPA", segments: [R, T, S, W], method: "online", order: 58,
+    how: B("A business inside Tampa city limits files the new business application online; the city may inspect the site.", "位于坦帕市界内的企业在线提交新企业申请，市政府可能进行现场检查。"),
+    url: "https://www.tampa.gov/service/new-business-tax-receipt-application", info: "https://www.tampa.gov/business-tax",
+    fee: null, checked: "page", fields: [],
   },
 ];

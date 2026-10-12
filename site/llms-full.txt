@@ -1,6 +1,6 @@
 # Placetta license guides (full text)
 
-Updated 2026-10-10. Source: https://placetta.com/guides/. General information, not legal advice; check each agency's page before filing.
+Updated 2026-10-12. Source: https://placetta.com/guides/. General information, not legal advice; check each agency's page before filing.
 
 ## Answers
 ### How do I get an EIN without an SSN or ITIN?
@@ -62,6 +62,21 @@ Register with the local Administration for Market Regulation on the city's one-s
 
 ### Do I need a food business license in China?
 Yes to make or serve food: apply online after the business license, with the floor plan, equipment list and food safety manager. Selling only prepackaged food needs a filing instead. The license is valid for 5 years. https://placetta.com/guides/answers/china-food-business-license.html
+
+### Does a new California LLC have to pay the $800 tax in its first year?
+Yes. Every LLC whose articles are accepted in California, or that does business there, owes the $800 annual tax from its first taxable year, which starts when the Secretary of State files the articles. Pay it with Form FTB 3522 by the 15th day of the 4th month of that year, then every year after. An LLC formed in another state that registers or starts business in California after that date pays right away. https://placetta.com/guides/answers/california-llc-800-tax-first-year.html
+
+### Does a Texas LLC have to file a franchise tax report if it owes no tax?
+Yes. Franchise tax applies to every taxable entity formed in Texas or doing business there, and reports are due May 15 each year. Since the 2024 report year there is no No Tax Due Report: an entity with annualized total revenue at or below the no tax due threshold ($2,650,000 for 2026 and 2027 reports) owes nothing but still files a Public Information Report or an Ownership Information Report. https://placetta.com/guides/answers/texas-franchise-tax-no-tax-due.html
+
+### Do I need a sales tax permit in Texas?
+Yes if you are engaged in business in Texas and sell, lease or rent taxable goods or provide taxable services. Apply online before your first sale, with one permit for each location. It's free, though the Comptroller may require a security; the permit arrives in about 2 to 3 weeks and doesn't expire. https://placetta.com/guides/answers/texas-sales-tax-permit.html
+
+### How do I get a restaurant permit in New York City?
+Apply for the Health Department's Food Service Establishment Permit online, or in person by appointment; new applications aren't accepted by mail. It costs $280, you need a Food Protection Certificate holder or a course registration when you apply, and you may open 22 days after applying, even before the pre-permit inspection. It renews every year. https://placetta.com/guides/answers/nyc-food-service-establishment-permit.html
+
+### How much does a US customs bond cost?
+CBP charges nothing for the bond itself (CBP Form 301); you pay a premium to a CBP-approved surety, usually arranged by your customs broker. A continuous bond covers a year of entries with at least $50,000 of coverage and renews yearly. CBP takes at least 5 business days to review it. https://placetta.com/guides/answers/how-much-does-a-customs-bond-cost.html
 
 ## City guides
 ### Milk tea and bubble tea shops in New York City
@@ -4836,3 +4851,261 @@ https://placetta.com/guides/las-vegas/warehouse-3pl.html
 5. ACE Secure Data Portal account for importers, U.S. Customs and Border Protection. Applied for online in ACE. Lets you see your entries, duties and bond. Fee: Free. https://www.cbp.gov/trade/automated/getting-started/portal-applying
 6. Hazardous materials registration, Pipeline and Hazardous Materials Safety Administration (DOT). Filed online when you ship or offer certain hazardous materials in bulk, such as large lithium battery shipments. Fee: Varies. https://hazmatonline.phmsa.dot.gov/services/
 7. Las Vegas business license, City of Las Vegas, Business Licensing. Get the city or Clark County business license, depending on where the store is. Fee: Varies. https://www.lasvegasnevada.gov
+
+### Milk tea and bubble tea shops in San Antonio
+https://placetta.com/guides/san-antonio/milk-tea-shop.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+6. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+7. Food establishment license, San Antonio Metropolitan Health District (Metro Health). Once the space is zoned for the use and the Certificate of Occupancy requirements are complete, buy the license at the Development and Business Services Center, 1901 S. Alamo. Fee: Varies. https://www.sanantonio.gov/Health/FoodLicensing/FAQs
+8. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Coffee shops in San Antonio
+https://placetta.com/guides/san-antonio/coffee-shop.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+6. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+7. Food establishment license, San Antonio Metropolitan Health District (Metro Health). Once the space is zoned for the use and the Certificate of Occupancy requirements are complete, buy the license at the Development and Business Services Center, 1901 S. Alamo. Fee: Varies. https://www.sanantonio.gov/Health/FoodLicensing/FAQs
+8. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Restaurants in San Antonio
+https://placetta.com/guides/san-antonio/restaurant.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+6. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+7. Food establishment license, San Antonio Metropolitan Health District (Metro Health). Once the space is zoned for the use and the Certificate of Occupancy requirements are complete, buy the license at the Development and Business Services Center, 1901 S. Alamo. Fee: Varies. https://www.sanantonio.gov/Health/FoodLicensing/FAQs
+8. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Hot pot restaurants in San Antonio
+https://placetta.com/guides/san-antonio/hot-pot-restaurant.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+6. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+7. Food establishment license, San Antonio Metropolitan Health District (Metro Health). Once the space is zoned for the use and the Certificate of Occupancy requirements are complete, buy the license at the Development and Business Services Center, 1901 S. Alamo. Fee: Varies. https://www.sanantonio.gov/Health/FoodLicensing/FAQs
+8. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Bakeries in San Antonio
+https://placetta.com/guides/san-antonio/bakery.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+6. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+7. Food establishment license, San Antonio Metropolitan Health District (Metro Health). Once the space is zoned for the use and the Certificate of Occupancy requirements are complete, buy the license at the Development and Business Services Center, 1901 S. Alamo. Fee: Varies. https://www.sanantonio.gov/Health/FoodLicensing/FAQs
+8. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Dessert shops in San Antonio
+https://placetta.com/guides/san-antonio/dessert-shop.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+6. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+7. Food establishment license, San Antonio Metropolitan Health District (Metro Health). Once the space is zoned for the use and the Certificate of Occupancy requirements are complete, buy the license at the Development and Business Services Center, 1901 S. Alamo. Fee: Varies. https://www.sanantonio.gov/Health/FoodLicensing/FAQs
+8. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Grocery stores in San Antonio
+https://placetta.com/guides/san-antonio/grocery-store.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+6. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+7. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Retail stores in San Antonio
+https://placetta.com/guides/san-antonio/retail-store.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+6. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+7. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Cosmetics stores in San Antonio
+https://placetta.com/guides/san-antonio/cosmetics-store.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Create/Update Importer Identity Form, U.S. Customs and Border Protection. Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record. Fee: Free. https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf
+6. Customs Bond, U.S. Customs and Border Protection. Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries. Fee: Varies. https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf
+7. Cosmetic product facility registration (MoCRA), U.S. Food and Drug Administration. Filed online in Cosmetics Direct by the facility that makes or processes the cosmetics. Fee: Free. https://www.fda.gov/cosmetics/registration-listing-cosmetic-product-facilities-and-products
+8. Cosmetic product listing (MoCRA), U.S. Food and Drug Administration. Filed online in Cosmetics Direct by the brand (the responsible person on the label), one listing per product. Fee: Free. https://www.fda.gov/cosmetics/registration-listing-cosmetic-product-facilities-and-products
+9. Product safety certificate, filed electronically at entry, U.S. Consumer Product Safety Commission. The importer issues the certificate itself (there is no government form) and, under the eFiling rule, files the certificate data with CBP at entry. Fee: Free. https://www.cpsc.gov/eFiling
+10. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+11. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+12. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Toy stores in San Antonio
+https://placetta.com/guides/san-antonio/toy-store.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Create/Update Importer Identity Form, U.S. Customs and Border Protection. Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record. Fee: Free. https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf
+6. Customs Bond, U.S. Customs and Border Protection. Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries. Fee: Varies. https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf
+7. Product safety certificate, filed electronically at entry, U.S. Consumer Product Safety Commission. The importer issues the certificate itself (there is no government form) and, under the eFiling rule, files the certificate data with CBP at entry. Fee: Free. https://www.cpsc.gov/eFiling
+8. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+9. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+10. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Importers and online sellers in San Antonio
+https://placetta.com/guides/san-antonio/importer-ecommerce.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Create/Update Importer Identity Form, U.S. Customs and Border Protection. Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record. Fee: Free. https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf
+6. Customs Bond, U.S. Customs and Border Protection. Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries. Fee: Varies. https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf
+7. ACE Secure Data Portal account for importers, U.S. Customs and Border Protection. Applied for online in ACE. Lets you see your entries, duties and bond. Fee: Free. https://www.cbp.gov/trade/automated/getting-started/portal-applying
+8. Product safety certificate, filed electronically at entry, U.S. Consumer Product Safety Commission. The importer issues the certificate itself (there is no government form) and, under the eFiling rule, files the certificate data with CBP at entry. Fee: Free. https://www.cpsc.gov/eFiling
+9. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Warehouses and 3PLs in San Antonio
+https://placetta.com/guides/san-antonio/warehouse-3pl.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. Certificate of Formation (Texas LLC), Texas Secretary of State. Filed online in SOSDirect, or by mail or fax. Fee: $300. https://www.sos.state.tx.us/corp/forms/205_boc.pdf
+3. Assumed Name Certificate (DBA), Texas Secretary of State. Filed when the store trades under a name other than the legal name. Fee: $25. https://www.sos.state.tx.us/corp/forms/503_boc.pdf
+4. Texas Sales and Use Tax Permit Application, Texas Comptroller of Public Accounts. Apply online in eSystems before your first sale; one permit for each location. Fee: Free. https://comptroller.texas.gov/taxes/permit/
+5. Create/Update Importer Identity Form, U.S. Customs and Border Protection. Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record. Fee: Free. https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf
+6. Customs Bond, U.S. Customs and Border Protection. Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries. Fee: Varies. https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf
+7. ACE Secure Data Portal account for importers, U.S. Customs and Border Protection. Applied for online in ACE. Lets you see your entries, duties and bond. Fee: Free. https://www.cbp.gov/trade/automated/getting-started/portal-applying
+8. Hazardous materials registration, Pipeline and Hazardous Materials Safety Administration (DOT). Filed online when you ship or offer certain hazardous materials in bulk, such as large lithium battery shipments. Fee: Varies. https://hazmatonline.phmsa.dot.gov/services/
+9. Unemployment tax account, Texas Workforce Commission. Register online once you pay wages in Texas. Fee: Free. https://www.twc.texas.gov/services/register-tax
+10. Certificate of Occupancy, City of San Antonio Development Services. Needed when the new business is a different type of business than the one in the building now; a new owner or tenant with the same use only updates the name on the existing certificate. Expect building, electrical, mechanical, plumbing and fire inspections. Fee: Varies. https://www.sanantonio.gov/DSD/Business/CofO
+11. Franchise tax annual report, Texas Comptroller of Public Accounts. Filed every year by May 15, even when no tax is due. Fee: Free. https://comptroller.texas.gov/taxes/franchise/
+
+### Milk tea and bubble tea shops in Tampa
+https://placetta.com/guides/tampa/milk-tea-shop.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+4. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+5. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+6. Restaurant license, Florida DBPR, Division of Hotels and Restaurants. Restaurants get the state food service license after plan review and inspection. Fee: Varies. https://www2.myfloridalicense.com
+
+### Coffee shops in Tampa
+https://placetta.com/guides/tampa/coffee-shop.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+4. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+5. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+6. Restaurant license, Florida DBPR, Division of Hotels and Restaurants. Restaurants get the state food service license after plan review and inspection. Fee: Varies. https://www2.myfloridalicense.com
+
+### Restaurants in Tampa
+https://placetta.com/guides/tampa/restaurant.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+4. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+5. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+6. Restaurant license, Florida DBPR, Division of Hotels and Restaurants. Restaurants get the state food service license after plan review and inspection. Fee: Varies. https://www2.myfloridalicense.com
+
+### Hot pot restaurants in Tampa
+https://placetta.com/guides/tampa/hot-pot-restaurant.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+4. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+5. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+6. Restaurant license, Florida DBPR, Division of Hotels and Restaurants. Restaurants get the state food service license after plan review and inspection. Fee: Varies. https://www2.myfloridalicense.com
+
+### Bakeries in Tampa
+https://placetta.com/guides/tampa/bakery.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+4. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+5. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+6. Restaurant license, Florida DBPR, Division of Hotels and Restaurants. Restaurants get the state food service license after plan review and inspection. Fee: Varies. https://www2.myfloridalicense.com
+
+### Dessert shops in Tampa
+https://placetta.com/guides/tampa/dessert-shop.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+4. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+5. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+6. Restaurant license, Florida DBPR, Division of Hotels and Restaurants. Restaurants get the state food service license after plan review and inspection. Fee: Varies. https://www2.myfloridalicense.com
+
+### Grocery stores in Tampa
+https://placetta.com/guides/tampa/grocery-store.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+4. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+5. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+
+### Retail stores in Tampa
+https://placetta.com/guides/tampa/retail-store.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+4. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+5. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+
+### Cosmetics stores in Tampa
+https://placetta.com/guides/tampa/cosmetics-store.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Create/Update Importer Identity Form, U.S. Customs and Border Protection. Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record. Fee: Free. https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf
+4. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+5. Customs Bond, U.S. Customs and Border Protection. Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries. Fee: Varies. https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf
+6. Cosmetic product facility registration (MoCRA), U.S. Food and Drug Administration. Filed online in Cosmetics Direct by the facility that makes or processes the cosmetics. Fee: Free. https://www.fda.gov/cosmetics/registration-listing-cosmetic-product-facilities-and-products
+7. Cosmetic product listing (MoCRA), U.S. Food and Drug Administration. Filed online in Cosmetics Direct by the brand (the responsible person on the label), one listing per product. Fee: Free. https://www.fda.gov/cosmetics/registration-listing-cosmetic-product-facilities-and-products
+8. Product safety certificate, filed electronically at entry, U.S. Consumer Product Safety Commission. The importer issues the certificate itself (there is no government form) and, under the eFiling rule, files the certificate data with CBP at entry. Fee: Free. https://www.cpsc.gov/eFiling
+9. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+10. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+
+### Toy stores in Tampa
+https://placetta.com/guides/tampa/toy-store.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Create/Update Importer Identity Form, U.S. Customs and Border Protection. Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record. Fee: Free. https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf
+4. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+5. Customs Bond, U.S. Customs and Border Protection. Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries. Fee: Varies. https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf
+6. Product safety certificate, filed electronically at entry, U.S. Consumer Product Safety Commission. The importer issues the certificate itself (there is no government form) and, under the eFiling rule, files the certificate data with CBP at entry. Fee: Free. https://www.cpsc.gov/eFiling
+7. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+8. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+
+### Importers and online sellers in Tampa
+https://placetta.com/guides/tampa/importer-ecommerce.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Create/Update Importer Identity Form, U.S. Customs and Border Protection. Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record. Fee: Free. https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf
+4. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+5. Customs Bond, U.S. Customs and Border Protection. Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries. Fee: Varies. https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf
+6. ACE Secure Data Portal account for importers, U.S. Customs and Border Protection. Applied for online in ACE. Lets you see your entries, duties and bond. Fee: Free. https://www.cbp.gov/trade/automated/getting-started/portal-applying
+7. Product safety certificate, filed electronically at entry, U.S. Consumer Product Safety Commission. The importer issues the certificate itself (there is no government form) and, under the eFiling rule, files the certificate data with CBP at entry. Fee: Free. https://www.cpsc.gov/eFiling
+8. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+9. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
+
+### Warehouses and 3PLs in Tampa
+https://placetta.com/guides/tampa/warehouse-3pl.html
+1. Application for Employer Identification Number (EIN), Internal Revenue Service. Owners with an SSN or ITIN apply online. A company whose responsible party has neither (most China-based owners) faxes or mails Form SS-4, or calls the IRS international line. Fee: Free. https://www.irs.gov/pub/irs-pdf/fss4.pdf
+2. LLC formation, Florida Division of Corporations (Sunbiz). Form the LLC or register a foreign company online. Fee: $125. https://dos.fl.gov/sunbiz/
+3. Create/Update Importer Identity Form, U.S. Customs and Border Protection. Sent to CBP (usually through your customs broker), or created in the ACE portal. Needed before your first entry as importer of record. Fee: Free. https://www.cbp.gov/sites/default/files/2026-06/cbp_form_5106.pdf
+4. Sales tax registration, Florida Department of Revenue. Register for sales and use tax before the first sale. Fee: Free. https://floridarevenue.com
+5. Customs Bond, U.S. Customs and Border Protection. Bought from a CBP-approved surety, usually through your customs broker, who files it electronically. A continuous bond covers a year of entries. Fee: Varies. https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf
+6. ACE Secure Data Portal account for importers, U.S. Customs and Border Protection. Applied for online in ACE. Lets you see your entries, duties and bond. Fee: Free. https://www.cbp.gov/trade/automated/getting-started/portal-applying
+7. Hazardous materials registration, Pipeline and Hazardous Materials Safety Administration (DOT). Filed online when you ship or offer certain hazardous materials in bulk, such as large lithium battery shipments. Fee: Varies. https://hazmatonline.phmsa.dot.gov/services/
+8. Hillsborough County local business tax receipt, Hillsborough County Tax Collector. Get it before you start trading: apply online in BTExpress in one sitting, with the business name, SSN or EIN, a physical county address and any state or county license the business needs. Fee: Varies. https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/
+9. City of Tampa business tax receipt, City of Tampa Business Tax. A business inside Tampa city limits files the new business application online; the city may inspect the site. Fee: Varies. https://www.tampa.gov/service/new-business-tax-receipt-application
