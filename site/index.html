@@ -4040,16 +4040,16 @@ const TS = [
    st: ["9 filings", "9 项申报"], sl: ["permits and filings handled, approved in 4 months", "许可与申报全部代办，4 个月获批"]},
   {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", co: ["Starbucks", "星巴克"], ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
    q: ["Placetta has taken over the tedious regulatory approvals so my team can focus on scaling instead of filings.", "快哉接手了繁琐的监管审批，让我的团队专注于扩张，而不是埋头申报。"],
-   st: ["50 states", "50 个州"], sl: ["of approvals, one team handles them all", "的审批，一个团队全部代办"]},
+   st: ["Hands-off", "全程代办"], sl: ["approvals taken over, so his team stays on scaling", "审批全部接手，团队专注扩张"]},
   {logo: "logos/ink/yale.svg", lh: 34, alt: ["Yale University", "耶鲁大学"], n: "Jean", co: ["Yale", "耶鲁大学"], ph: "media/people/jean.jpg", big: "media/people/jean-l.jpg", rl: ["Yale University, $1.5M NSF research grant", "耶鲁大学，获美国国家科学基金会 150 万美元研究资助"],
    q: ["They were the fastest company I've worked with.", "他们是我合作过的速度最快的公司。"],
-   st: ["Fastest", "最快"], sl: ["company she has worked with", "她合作过的公司中最快的一家"]},
+   st: ["Fastest", "最快"], sl: ["company Jean has worked with", "Jean 合作过的公司中最快的一家"]},
   {logo: "logos/ink/princeton.png", lh: 44, alt: ["Princeton University", "普林斯顿大学"], vlogo: "logos/ink/belluh.svg", vlh: 22, valt: "Belluh", n: "Odelia", co: ["Princeton", "普林斯顿大学"], ph: "media/people/odelia.jpg", big: "media/people/odelia-l.jpg", rl: ["Belluh (acq., 7 figures), Princeton University", "Belluh（已被收购，七位数），普林斯顿大学"],
    q: ["I was introduced to this platform by my best friend. Placetta's founders worked with me to understand my exact needs and navigate the regulatory landscape.", "我经朋友介绍认识这个平台。快哉的创始人和我一起梳理了我的具体需求，带我走过了整个监管流程。"],
-   st: ["7 figures", "七位数"], sl: ["Belluh acquisition", "Belluh 被收购金额"]},
+   st: ["Founder-led", "创始人亲自对接"], sl: ["her exact needs and the rules that applied, mapped with Placetta's founders", "快哉创始人亲自梳理她的需求和适用规定"]},
   {logo: "logos/ink/eth-zurich.svg", lh: 26, alt: ["ETH Zürich", "苏黎世联邦理工学院"], vlogo: "logos/ink/faramir.svg", vlh: 20, valt: "Faramir", n: "Matteo", co: ["ETH Zürich", "苏黎世联邦理工"], ph: "media/people/matteo.jpg", big: "media/people/matteo-l.jpg", rl: ["Faramir, ETH Zürich", "Faramir，苏黎世联邦理工学院"],
    q: ["Simple. Extremely easy to use.", "简单，非常好用。"],
-   st: ["$299", "299 美元"], sl: ["per market, plan ready in minutes", "一个市场，几分钟出计划"]}
+   st: ["Simple", "简单"], sl: ["and extremely easy to use, in his words", "他的原话：非常好用"]}
 ];
 let tsK = 0, tsHold = false;
 document.addEventListener("click", e => { const b = e.target.closest(".tsx"); if (!b) return; const t2 = document.querySelector(`.tstab[data-ts="${b.dataset.ts}"]`); if (t2) { t2.click(); document.getElementById("tsBar").scrollIntoView({behavior: RM ? "auto" : "smooth", block: "center"}); } });
