@@ -1,6 +1,6 @@
 # Placetta
 
-> Placetta gets the business licenses, permits and registrations a company needs to open in a new market (restaurants, cafes, milk tea shops, retail stores, importers and warehouses), fills the official government forms and keeps them current. It covers 50 cities across the US, China, Europe and the Middle East, in English and Chinese.
+> Placetta gets the business licenses, permits and registrations a company needs to open in a new market (restaurants, cafes, milk tea shops, retail stores, importers and warehouses), fills the official government forms and keeps them current. It covers 55 cities across the US, China, Europe and the Middle East, in English and Chinese.
 
 Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Facts come from Placetta's library of official forms; agencies change requirements, so check the agency's page before filing.
 
@@ -36,6 +36,14 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Do I need a sales tax permit in Texas?](https://placetta.com/guides/answers/texas-sales-tax-permit.html)
 - [How do I get a restaurant permit in New York City?](https://placetta.com/guides/answers/nyc-food-service-establishment-permit.html)
 - [How much does a US customs bond cost?](https://placetta.com/guides/answers/how-much-does-a-customs-bond-cost.html)
+- [Can a Chinese investor get an E-2 visa?](https://placetta.com/guides/answers/is-china-an-e2-treaty-country.html)
+- [How does a foreign owner get an ITIN?](https://placetta.com/guides/answers/how-to-get-an-itin.html)
+- [Does a Chinese company need a US attorney to file a trademark?](https://placetta.com/guides/answers/us-trademark-for-chinese-companies.html)
+- [Do food shipments from China need FDA Prior Notice?](https://placetta.com/guides/answers/fda-prior-notice-for-food-imports.html)
+- [Is the $800 de minimis exemption still available for imports?](https://placetta.com/guides/answers/de-minimis-800-exemption-status.html)
+- [Does a single-member LLC with no employees need an EIN?](https://placetta.com/guides/answers/does-a-single-member-llc-need-an-ein.html)
+- [Do restaurant workers in California need a food handler card?](https://placetta.com/guides/answers/california-food-handler-card.html)
+- [Can a foreigner form an LLC in Texas?](https://placetta.com/guides/answers/can-a-foreigner-form-a-texas-llc.html)
 
 ## Cities
 - [New York City, United States](https://placetta.com/guides/new-york-city/)
@@ -88,6 +96,11 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Las Vegas, United States](https://placetta.com/guides/las-vegas/)
 - [San Antonio, United States](https://placetta.com/guides/san-antonio/)
 - [Tampa, United States](https://placetta.com/guides/tampa/)
+- [San Diego, United States](https://placetta.com/guides/san-diego/)
+- [Irvine, United States](https://placetta.com/guides/irvine/)
+- [Orlando, United States](https://placetta.com/guides/orlando/)
+- [Fort Worth, United States](https://placetta.com/guides/fort-worth/)
+- [Phoenix, United States](https://placetta.com/guides/phoenix/)
 
 ## Optional
 - [Restaurants in New York City](https://placetta.com/guides/new-york-city/restaurant.html): 10 filings
@@ -227,3 +240,18 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Restaurants in Tampa](https://placetta.com/guides/tampa/restaurant.html): 6 filings
 - [Retail stores in Tampa](https://placetta.com/guides/tampa/retail-store.html): 5 filings
 - [Importers and online sellers in Tampa](https://placetta.com/guides/tampa/importer-ecommerce.html): 9 filings
+- [Restaurants in San Diego](https://placetta.com/guides/san-diego/restaurant.html): 9 filings
+- [Retail stores in San Diego](https://placetta.com/guides/san-diego/retail-store.html): 8 filings
+- [Importers and online sellers in San Diego](https://placetta.com/guides/san-diego/importer-ecommerce.html): 11 filings
+- [Restaurants in Irvine](https://placetta.com/guides/irvine/restaurant.html): 8 filings
+- [Retail stores in Irvine](https://placetta.com/guides/irvine/retail-store.html): 7 filings
+- [Importers and online sellers in Irvine](https://placetta.com/guides/irvine/importer-ecommerce.html): 11 filings
+- [Restaurants in Orlando](https://placetta.com/guides/orlando/restaurant.html): 6 filings
+- [Retail stores in Orlando](https://placetta.com/guides/orlando/retail-store.html): 5 filings
+- [Importers and online sellers in Orlando](https://placetta.com/guides/orlando/importer-ecommerce.html): 9 filings
+- [Restaurants in Fort Worth](https://placetta.com/guides/fort-worth/restaurant.html): 9 filings
+- [Retail stores in Fort Worth](https://placetta.com/guides/fort-worth/retail-store.html): 7 filings
+- [Importers and online sellers in Fort Worth](https://placetta.com/guides/fort-worth/importer-ecommerce.html): 9 filings
+- [Restaurants in Phoenix](https://placetta.com/guides/phoenix/restaurant.html): 6 filings
+- [Retail stores in Phoenix](https://placetta.com/guides/phoenix/retail-store.html): 4 filings
+- [Importers and online sellers in Phoenix](https://placetta.com/guides/phoenix/importer-ecommerce.html): 7 filings

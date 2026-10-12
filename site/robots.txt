@@ -58,7 +58,35 @@ User-agent: Bytespider
 Allow: /
 Disallow: /app/
 
+User-agent: Sogou web spider
+Allow: /
+Disallow: /app/
+
+User-agent: 360Spider
+Allow: /
+Disallow: /app/
+
+User-agent: YisouSpider
+Allow: /
+Disallow: /app/
+
+User-agent: YandexBot
+Allow: /
+Disallow: /app/
+
 User-agent: DuckDuckBot
+Allow: /
+Disallow: /app/
+
+User-agent: meta-externalagent
+Allow: /
+Disallow: /app/
+
+User-agent: MistralAI-User
+Allow: /
+Disallow: /app/
+
+User-agent: cohere-ai
 Allow: /
 Disallow: /app/
 

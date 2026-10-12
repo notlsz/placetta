@@ -13,7 +13,7 @@ export type Segment = "restaurant" | "retail" | "seller" | "warehouse";
 export type Where = string;
 export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" | "insurer" | "none";
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
-export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean };
+export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean };   // reference: listed in the library and answers, never added to a plan
 
 export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
 
@@ -157,6 +157,30 @@ export const FORMS: OfficialForm[] = [
     agency: B("U.S. Food and Drug Administration", "美国食品药品监督管理局（FDA）"), level: "federal", where: "US", segments: ["seller", "warehouse"], needs: { food: true }, method: "online", order: 45,
     how: B("Filed online in FDA Industry Systems. Required for facilities that make, pack or hold food for U.S. consumption, including foreign ones. Restaurants and retail food stores are exempt.", "在 FDA 行业系统在线提交。生产、包装或储存供美国消费食品的设施（包括境外设施）必须注册；餐厅和零售食品店豁免。"),
     url: "https://www.access.fda.gov/", info: "https://www.fda.gov/food/online-registration-food-facilities", takes: B("Number issued on screen as soon as an online registration with a valid UFI is submitted; foreign facilities wait for U.S. agent confirmation.", "网上提交且 UFI 有效时，注册号当即在页面显示；外国设施需等待美国代理人确认。"), takesSource: "https://fda.gov/media/166887/download?attachment= (2026-10-09)", fee: 0, renews: B("Renew between October 1 and December 31 of every even-numbered year.", "每逢偶数年 10 月 1 日至 12 月 31 日续期。"), checked: "page", fields: [],
+  },
+  {
+    id: "irs-w7", form: "Form W-7", title: B("Application for IRS Individual Taxpayer Identification Number (ITIN)", "个人报税识别号（ITIN）申请"),
+    agency: B("Internal Revenue Service", "美国国税局（IRS）"), level: "federal", where: "US", segments: ALL, needs: { reference: true }, method: "pdf_mail", order: 11,
+    how: B("For people who need a US tax number but can't get a Social Security number. File Form W-7 with a US federal tax return unless an exception applies, and either mail it with original or certified identity documents, use a Certifying Acceptance Agent, or book an IRS Taxpayer Assistance Center.", "适用于需要美国税号但无法取得社会安全号的个人。除符合例外情形外，W-7 表须随美国联邦报税表一并提交；可附原件或签发机构认证副本邮寄，也可通过认证受理代理人（CAA）或预约 IRS 纳税人援助中心办理。"),
+    url: "https://www.irs.gov/pub/irs-pdf/fw7.pdf", pdf: "https://www.irs.gov/pub/irs-pdf/fw7.pdf", info: "https://www.irs.gov/instructions/iw7",
+    takes: B("Allow 7 weeks for the IRS to send the application status.", "IRS 约 7 周内通知申请结果。"), takesSource: "https://www.irs.gov/instructions/iw7 (2026-10-12)",
+    fee: 0, checked: "page", fields: [],
+  },
+  {
+    id: "uspto-tm", form: "USPTO trademark application", title: B("US trademark application", "美国商标注册申请"),
+    agency: B("United States Patent and Trademark Office", "美国专利商标局（USPTO）"), level: "federal", where: "US", segments: ALL, needs: { reference: true }, method: "online", order: 95,
+    how: B("Filed online with the USPTO. An applicant domiciled outside the US, including a China-based company, must be represented by a US-licensed attorney, and every applicant gives and keeps current its domicile address.", "向 USPTO 在线提交。住所在美国境外的申请人（包括中国公司）必须委托持美国执照的律师代理；所有申请人都须提供并及时更新住所地址。"),
+    url: "https://www.uspto.gov/trademarks/apply", info: "https://www.uspto.gov/trademarks/basics/do-i-need-attorney",
+    fee: null, feeNote: B("$350 base application fee for each class of goods or services; other fees may apply.", "每个商品或服务类别基本申请费 350 美元，另可能产生其他费用。"),
+    foreign: B("A foreign-domiciled applicant must have a US-licensed attorney represent it.", "住所在境外的申请人必须由持美国执照的律师代理。"),
+    checked: "page", fields: [],
+  },
+  {
+    id: "fda-prior-notice", form: "FDA Prior Notice of Imported Food", title: B("Prior Notice for imported food", "进口食品预先通报（Prior Notice）"),
+    agency: B("U.S. Food and Drug Administration", "美国食品药品监督管理局（FDA）"), level: "federal", where: "US", segments: ["seller", "warehouse"], needs: { reference: true }, method: "online", order: 47,
+    how: B("Submitted for each food shipment before it arrives, through FDA's Prior Notice System Interface or CBP's ABI/ACS, by anyone with the required information. At least 2 hours ahead by road, 4 by rail or air and 8 by water; for international mail, before the food is sent.", "每批进口食品抵达前，由掌握所需信息的任何人通过 FDA 预先通报系统（PNSI）或 CBP 的 ABI/ACS 提交。公路运输至少提前 2 小时，铁路或空运 4 小时，海运 8 小时；国际邮件须在寄出前提交。"),
+    url: "https://www.access.fda.gov/", info: "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/guidance-industry-what-you-need-know-about-prior-notice-imported-food-shipments",
+    fee: null, checked: "page", fields: [],
   },
   {
     id: "fda-5066", form: "Form FDA 5066", title: B("Cosmetic product facility registration (MoCRA)", "化妆品生产设施注册（MoCRA）"),

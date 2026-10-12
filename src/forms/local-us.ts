@@ -1,5 +1,5 @@
 // City and county steps for San José (Santa Clara County), San Francisco and Dallas, copied from the agencies' own
-// pages on 2026-10-10; San Antonio and Tampa (Hillsborough County) on 2026-10-12. Times and renewals appear only where the agency states them; fees are null where they vary.
+// pages on 2026-10-10; San Antonio, Tampa, San Diego, Irvine, Orlando, Fort Worth and Phoenix (with Arizona) on 2026-10-12. Times and renewals appear only where the agency states them; fees are null where they vary.
 import { B } from "../bi";
 import type { OfficialForm } from "./registry";
 
@@ -211,5 +211,149 @@ export const LOCAL_US: OfficialForm[] = [
     how: B("A business inside Tampa city limits files the new business application online; the city may inspect the site.", "位于坦帕市界内的企业在线提交新企业申请，市政府可能进行现场检查。"),
     url: "https://www.tampa.gov/service/new-business-tax-receipt-application", info: "https://www.tampa.gov/business-tax",
     fee: null, checked: "page", fields: [],
+  },
+
+  /* ---------------------------------------- San Diego (city and county) ---------------------------------------- */
+  {
+    id: "sdg-business-tax", form: "Business Tax Certificate application", title: B("City of San Diego Business Tax Certificate", "圣地亚哥市营业税证书"),
+    agency: B("City of San Diego, Office of the City Treasurer", "圣地亚哥市财务官办公室"), level: "city", where: "SDG", segments: [R, T, S, W], method: "online", order: 50,
+    how: B("Every business operating in the City of San Diego registers, online on the Treasurer's portal, by mail or in person by appointment. Late fees apply to applications received 15 days after the business start date.", "在圣地亚哥市经营的所有企业都须登记，可在财务官门户在线申请、邮寄或预约现场办理。开业 15 天后才提交的申请将加收滞纳金。"),
+    url: "https://pay.sandiego.gov/BTaxApp", info: "https://www.sandiego.gov/treasurer/taxesfees/btax/btaxhow",
+    fee: null, feeNote: B("Set by the city; a per-employee Minimum Wage Enforcement Fee applies.", "由市政府核定，另按员工人数收取最低工资执法费。"),
+    takes: B("Allow up to two weeks to receive the certificate.", "收到证书最长约两周。"), takesSource: SRC12("https://www.sandiego.gov/treasurer/taxesfees/btax/btaxhow"),
+    checked: "page", fields: [],
+  },
+  {
+    id: "sdg-co", form: "Certificate of Occupancy (Information Bulletin 585)", title: B("Certificate of Occupancy", "占用证"),
+    agency: B("City of San Diego Development Services", "圣地亚哥市开发服务局"), level: "city", where: "SDG", segments: [R, T, W], method: "portal", order: 62,
+    how: B("Issued after the final inspection of building permit work. Needed for a change of occupancy classification or a tenant improvement in a shell building; not needed for a change of owner or tenant when the occupancy doesn't change.", "建筑许可工程最终检查通过后签发。改变占用分类或在毛坯楼内装修时需要；仅更换业主或租户且占用性质不变时不需要。"),
+    url: "https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585", info: "https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585",
+    fee: null, checked: "page", fields: [],
+  },
+  {
+    id: "sdc-plan-check", form: "Food facility plan check", title: B("Food facility plan check", "食品设施图纸审查"),
+    agency: B("County of San Diego Department of Environmental Health and Quality", "圣地亚哥县环境卫生与质量局"), level: "county", where: "SDG", segments: [R], needs: { food: true, buildout: true }, method: "in_person", order: 60,
+    how: B("Submit at least three sets of plans with the application and fee to a DEHQ office; plans are approved before the building permit is issued.", "向县环境卫生与质量局（DEHQ）办公室提交至少三套图纸及申请表和费用；图纸须在签发建筑许可前获批。"),
+    url: "https://www.sandiegocounty.gov/content/sdc/deh/fhd/food/food_faq.html", info: "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_plancheckreference.pdf",
+    fee: null, feeNote: B("Based on the size of the establishment.", "按场所面积计算。"),
+    takes: B("Plans are approved or rejected within 20 working days of receipt.", "收到图纸后 20 个工作日内批准或退回。"), takesSource: SRC12("https://www.sandiegocounty.gov/content/sdc/deh/fhd/food/food_faq.html"),
+    checked: "page", fields: [],
+  },
+  {
+    id: "sdc-health-permit", form: "Public Health Permit (retail food facility)", title: B("Public health permit (food facility)", "公共卫生许可证（食品设施）"),
+    agency: B("County of San Diego Department of Environmental Health and Quality", "圣地亚哥县环境卫生与质量局"), level: "county", where: "SDG", segments: [R], needs: { food: true }, method: "in_person", order: 76,
+    how: B("Required by law for every retail food facility in San Diego County.", "依法要求，圣地亚哥县所有零售食品设施都须取得。"),
+    url: "https://www.sandiegocounty.gov/content/sdc/deh/fhd/food/food_faq.html", info: "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_newbusiness664.pdf",
+    fee: null, feeNote: B("Based on the size and type of the business.", "按业务规模和类型计算。"), checked: "page", fields: [],
+  },
+
+  /* --------------------------------------- Irvine and Orange County (CA) --------------------------------------- */
+  {
+    id: "irv-license", form: "Business License application", title: B("City of Irvine business license", "尔湾市营业执照"),
+    agency: B("City of Irvine Community Development, Business Licensing", "尔湾市社区发展局营业执照处"), level: "city", where: "IRV", segments: [R, T, S, W], method: "online", order: 50,
+    how: B("A city tax rather than a regulatory license: apply online or at the public counter, confirm first that the use is allowed at the address, and display the license at the business.", "这是市政税而非监管许可：可在线或到公共柜台申请，先确认该地址允许此用途，并在营业场所张贴执照。"),
+    url: "https://cityofirvine.gov/community-development/business-licensing", info: "https://cityofirvine.gov/community-development/business-licensing",
+    fee: null, feeNote: B("$78.37 for under 10 employees, $156.88 for 10 or more (new), including the $4 state fee.", "员工少于 10 人为 78.37 美元，10 人及以上为 156.88 美元（新申请，含 4 美元州费用）。"),
+    renews: B("Every 12 months from the first day of the application month.", "自申请当月第一天起每 12 个月续期一次。"), checked: "page", fields: [],
+  },
+  {
+    id: "oc-plan-check", form: "Food facility plan check", title: B("Food facility plan check", "食品设施图纸审查"),
+    agency: B("Orange County Health Care Agency, Environmental Health", "橙县卫生保健局环境卫生处"), level: "county", where: "IRV", segments: [R], needs: { food: true, buildout: true }, method: "online", order: 60,
+    how: B("Submit the plan check online with three sets of plans and specifications before construction; the fee is set at conditional approval.", "施工前在线提交图纸审查申请及三套图纸和规格说明；费用在有条件批准时核定。"),
+    url: "https://www.ochealthinfo.com/services-programs/environmental-health/plan-check", info: "https://www.ochealthinfo.com/services-programs/environmental-health/plan-check",
+    fee: null, takes: B("The initial plan review usually takes 20 working days.", "首次图纸审查通常需要 20 个工作日。"), takesSource: SRC12("https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit"),
+    checked: "page", fields: [],
+  },
+  {
+    id: "oc-health-permit", form: "Food Facility Health Permit application", title: B("Food facility health permit", "食品设施卫生许可证"),
+    agency: B("Orange County Health Care Agency, Environmental Health", "橙县卫生保健局环境卫生处"), level: "county", where: "IRV", segments: [R], needs: { food: true }, method: "pdf_mail", order: 76,
+    how: B("Every food facility that stores, prepares, packages, serves or vends food needs a valid health permit; book inspections 5 working days ahead.", "储存、加工、包装、供应或售卖食品的设施都须持有有效卫生许可证；检查须提前 5 个工作日预约。"),
+    url: "https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf", info: "https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit",
+    fee: null, checked: "page", fields: [],
+  },
+
+  /* -------------------------------------- Orlando and Orange County (FL) -------------------------------------- */
+  {
+    id: "orl-business-tax", form: "Business Tax Receipt and Certificate of Use", title: B("City of Orlando business tax receipt and certificate of use", "奥兰多市营业税收据与使用证"),
+    agency: B("City of Orlando, Permitting Services", "奥兰多市许可服务处"), level: "city", where: "ORL", segments: [R, T, S, W], method: "online", order: 55,
+    how: B("Businesses inside city limits apply online with the Sunbiz registration, EIN and any state license; the certificate of use confirms the zoning allows the business. Get it before the county receipt.", "市界内企业在线申请，提交 Sunbiz 登记、EIN 及所需州执照；使用证用于确认分区允许该业务。须先于县营业税收据办理。"),
+    url: "https://orlando.opencounter.com/permits/business-tax-receipt", info: "https://www.orlando.gov/Building-Development/Permits-Inspections/Other/Get-a-Permit-for-Your-Business/Get-a-Business-Tax-Receipt",
+    fee: null, feeNote: B("Based on square footage, number of workers or inventory value.", "按面积、员工人数或库存价值计算。"),
+    takes: B("A billing summary within 10 business days of processing; the receipt is mailed after payment.", "受理后 10 个工作日内寄送账单，付款后邮寄收据。"), takesSource: SRC12("https://www.orlando.gov/Building-Development/Permits-Inspections/Other/Get-a-Permit-for-Your-Business/Get-a-Business-Tax-Receipt"),
+    renews: B("Every year; receipts expire September 30.", "每年续期；收据于 9 月 30 日到期。"), checked: "page", fields: [],
+  },
+  {
+    id: "ocfl-business-tax", form: "Local Business Tax Receipt", title: B("Orange County (FL) local business tax receipt", "奥兰治县（佛州）地方营业税收据"),
+    agency: B("Orange County Tax Collector", "奥兰治县税务征收处"), level: "county", where: "ORL", segments: [R, T, S, W], method: "online", order: 57,
+    how: B("Apply online or in person after the city receipt, uploading the city receipt, Sunbiz registration, any state license and the EIN.", "取得市营业税收据后在线或现场申请，上传市收据、Sunbiz 登记、所需州执照和 EIN。"),
+    url: "https://county-taxes.net/fl-orange/btexpress", info: "https://www.octaxcol.com/taxes/business-taxes/obtain-new-business-tax-receipt/",
+    fee: null, checked: "page", fields: [],
+  },
+
+  /* ------------------------------------------------ Fort Worth ------------------------------------------------ */
+  {
+    id: "ftw-co", form: "Certificate of Occupancy", title: B("Certificate of Occupancy", "占用证"),
+    agency: B("City of Fort Worth Development Services", "沃斯堡市开发服务局"), level: "city", where: "FTW", segments: [R, T, W], method: "portal", order: 62,
+    how: B("Every building used in Fort Worth needs one. Apply on Accela Citizen Access: same use as before is an existing-ordinance permit, a new use is a change of use with plan review. Issued after all final inspections pass.", "沃斯堡所有使用中的建筑都须取得。在 Accela Citizen Access 申请：沿用原用途的按现行条例许可办理，新用途须按用途变更办理并经图纸审查。全部最终检查通过后签发。"),
+    url: "https://aca-prod.accela.com/CFW", info: "https://www.fortworthtexas.gov/departments/development-services/permits/certificate-of-occupancy",
+    fee: null, checked: "page", fields: [],
+  },
+  {
+    id: "ftw-plan-review", form: "Food establishment plan review", title: B("Food establishment plan review", "食品经营场所图纸审查"),
+    agency: B("City of Fort Worth Consumer Health", "沃斯堡市消费者健康处"), level: "city", where: "FTW", segments: [R], needs: { food: true, buildout: true }, method: "in_person", order: 60,
+    how: B("Needed before a food establishment is built, extensively remodeled or converted; fees are paid before the review starts.", "食品经营场所新建、大规模改建或改造前须先审查图纸；须先缴费才开始审查。"),
+    url: "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review", info: "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review",
+    fee: null, feeNote: B("$175 to $525, by square footage, per the city's fee schedule.", "按面积计算，175 至 525 美元（依市收费表）。"), checked: "page", fields: [],
+  },
+  {
+    id: "ftw-food-permit", form: "Food establishment permit", title: B("Food establishment permit", "食品经营场所许可证"),
+    agency: B("City of Fort Worth Consumer Health", "沃斯堡市消费者健康处"), level: "city", where: "FTW", segments: [R], needs: { food: true }, method: "in_person", order: 76,
+    how: B("Issued by Consumer Health after the Certificate of Occupancy and a permit inspection, before any food preparation starts.", "取得占用证并通过许可检查后，由消费者健康处在开始食品加工前签发。"),
+    url: "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review", info: "https://www.fortworthtexas.gov/files/assets/public/v/2/environmental-services/health/documents/fw-food-ordinance-chpt-16.pdf",
+    fee: null, feeNote: B("Three tiers from $258 to $773 in the city's fee schedule.", "依市收费表分三档，258 至 773 美元。"),
+    renews: B("Every year.", "每年。"), checked: "page", fields: [],
+  },
+
+  /* --------------------------------------- Arizona, Phoenix, Maricopa County --------------------------------------- */
+  {
+    id: "az-llc", form: "Articles of Organization (Form L010)", title: B("Arizona LLC formation", "亚利桑那州 LLC 设立"),
+    agency: B("Arizona Corporation Commission", "亚利桑那州公司委员会"), level: "state", where: "AZ", segments: [R, T, S, W], needs: { newEntity: true }, method: "online", order: 12,
+    how: B("File the Articles of Organization online, by mail or in person. Publication is required: if the statutory agent is in Maricopa or Pima County the Commission publishes it, otherwise publish a notice in a newspaper.", "可在线、邮寄或现场提交组织章程。须公告：法定代理人位于马里科帕县或皮马县的由委员会代为公告，否则须在报纸刊登公告。"),
+    url: "https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf", pdf: "https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf", info: "https://www.azcc.gov/faqs/BusinessServicesFAQs",
+    fee: null, feeNote: B("$50 under the Commission's fee schedule; online filing is listed at $85; expedited service costs more.", "依委员会收费表为 50 美元；在线提交标示为 85 美元；加急另收费。"),
+    takes: B("Regular processing is typically 14 to 16 days.", "常规处理通常为 14 至 16 天。"), takesSource: SRC12("https://www.azcc.gov/faqs/BusinessServicesFAQs"),
+    foreign: B("An LLC formed in another state or abroad files a Foreign Registration Statement (Form L025, $150) with a certificate of good standing dated within 60 days.", "在外州或境外成立的 LLC 须提交外地登记声明（L025 表，150 美元），并附 60 天内出具的存续证明。"),
+    checked: "page", fields: [],
+  },
+  {
+    id: "az-tpt", form: "Arizona Joint Tax Application (JT-1/UC-001)", title: B("Transaction privilege tax (TPT) license", "交易特许税（TPT）执照"),
+    agency: B("Arizona Department of Revenue", "亚利桑那州税务局"), level: "state", where: "AZ", segments: [R, T, S], method: "online", order: 20,
+    how: B("A business selling taxable products or services gets a license for each location, online on AZTaxes.gov or with the paper JT-1. The same application registers employers with the Department of Economic Security for unemployment insurance.", "销售应税商品或服务的企业须为每个门店取得执照，可在 AZTaxes.gov 在线申请或提交纸质 JT-1 表。同一申请也可向经济安全部办理雇主失业保险登记。"),
+    url: "https://azdor.gov/transaction-privilege-tax/tpt-license/applying-tpt-license", info: "https://azdor.gov/business/transaction-privilege-tax/tpt-license",
+    fee: null, feeNote: B("$12 for each location to the state, plus city license fees ($50 in Phoenix).", "每个门店向州缴纳 12 美元，另加城市执照费（凤凰城为 50 美元）。"),
+    takes: B("Online, the license number is issued the same day and the certificate is mailed in 7 to 10 business days.", "在线申请当天取得执照号码，证书 7 至 10 个工作日内寄出。"), takesSource: SRC12("https://azdor.gov/transaction-privilege-tax/tpt-license/applying-tpt-license"),
+    renews: B("Every year, due January 1; no state renewal fee, city fees still apply.", "每年 1 月 1 日续期；州不收续期费，城市费用照收。"), checked: "page", fields: [],
+  },
+  {
+    id: "phx-co", form: "Construction Permit Plan Review Application and Certificate of Occupancy", title: B("Building permit and Certificate of Occupancy", "建筑许可证与占用证"),
+    agency: B("City of Phoenix Planning and Development", "凤凰城规划与发展局"), level: "city", where: "PHX", segments: [R, T, W], method: "portal", order: 62,
+    how: B("Tenant improvements of a newly occupied space or a change of occupancy go through plan review; the Certificate of Occupancy is generated once all inspections pass and stays with the address. Phoenix doesn't issue a general business license.", "新入驻场所装修或改变占用类型须经图纸审查；全部检查通过后自动生成占用证，并随地址保留。凤凰城不签发一般营业执照。"),
+    url: "https://www.phoenix.gov/administration/departments/pdd/commercial-multifamily-building/commercial-process-overview.html", info: "https://www.phoenix.gov/administration/departments/pdd/residential-building/resident-plan-reviews/certificate-of-occupancy.html",
+    fee: null, checked: "page", fields: [],
+  },
+  {
+    id: "mc-plan-review", form: "Plan Review Application (food establishment)", title: B("Food establishment plan review", "食品经营场所图纸审查"),
+    agency: B("Maricopa County Environmental Services", "马里科帕县环境服务局"), level: "county", where: "PHX", segments: [R], needs: { food: true, buildout: true }, method: "online", order: 60,
+    how: B("Apply in the county Permit Center with the supporting documents before construction starts; the county advises applying 6 to 8 weeks ahead.", "开工前在县许可中心提交申请及证明文件；县政府建议提前 6 至 8 周申请。"),
+    url: "https://maricopacountyaz-energovweb.tylerhost.net/apps/selfservice#/home", info: "https://www.maricopa.gov/3973/PermanentFixed-Businesses",
+    fee: null, feeNote: B("$728 or $885 for eating and drinking places by seating, $919 for other food establishments.", "餐饮场所按座位数为 728 或 885 美元，其他食品场所为 919 美元。"), checked: "page", fields: [],
+  },
+  {
+    id: "mc-food-permit", form: "Food Establishment Permit", title: B("Food establishment permit", "食品经营场所许可证"),
+    agency: B("Maricopa County Environmental Services", "马里科帕县环境服务局"), level: "county", where: "PHX", segments: [R], needs: { food: true }, method: "online", order: 76,
+    how: B("Apply in the county Permit Center; after the final inspection, pay the annual permit fee to receive the permit and open.", "在县许可中心申请；最终检查后缴纳年度许可费即可领证开业。"),
+    url: "https://maricopacountyaz-energovweb.tylerhost.net/apps/selfservice#/home", info: "https://www.maricopa.gov/4996/New-Application-Guidance",
+    fee: null, feeNote: B("$373 to $411 a year depending on the class.", "按类别每年 373 至 411 美元。"),
+    renews: B("Every year from the issue date.", "自签发之日起每年续期。"), checked: "page", fields: [],
   },
 ];
