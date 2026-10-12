@@ -38,6 +38,36 @@
     (navigator.clipboard ? navigator.clipboard.writeText(ta.value).then(done, () => { document.execCommand("copy"); done(); }) : (document.execCommand("copy"), done()));
   }));
 
+  /* real counts: one view per visitor per day and one helpful vote per visitor, counted by page_hit() in Supabase.
+     Views show only once a page has had a few hundred; nothing shows if the count can't be read. */
+  const STATS = "https://esquxzcfsylffuijvzec.supabase.co/rest/v1/rpc/page_hit", SKEY = "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p";
+  const VIEWS_MIN = 300, HELPFUL_MIN = 10, path = location.pathname.toLowerCase();
+  const get = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
+  const set = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
+  const hit = (view, helpful) => fetch(STATS, { method: "POST", headers: { apikey: SKEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_path: path, p_view: view, p_helpful: helpful }) }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  const fmt = n => n.toLocaleString(zh ? "zh-CN" : "en-US");
+  const box = document.querySelector("[data-helpful]");
+  if (path.startsWith("/guides/")) {
+    const day = String(Math.floor(Date.now() / 864e5)), seen = get("pv:" + path) === day, voted = !!get("ph:" + path);
+    hit(!seen, false).then(s => {
+      if (!s) return;
+      set("pv:" + path, day);
+      const meta = document.querySelector(".hero .meta");
+      if (meta && s.views >= VIEWS_MIN) { const sp = document.createElement("span"); sp.textContent = zh ? fmt(s.views) + " 次浏览" : fmt(s.views) + " views"; meta.appendChild(sp); }
+      if (!box) return;
+      const btn = box.querySelector(".hbtn"), out = box.querySelector(".hcount");
+      const show = n => { out.textContent = n >= HELPFUL_MIN ? (zh ? fmt(n) + " 人觉得有帮助" : fmt(n) + " people found this helpful") : ""; };
+      const thanks = () => { btn.disabled = true; btn.textContent = zh ? "谢谢反馈" : "Thanks for letting us know"; };
+      show(s.helpful); if (voted) thanks(); box.hidden = false;
+      btn.addEventListener("click", () => {
+        if (get("ph:" + path)) return;
+        set("ph:" + path, "1"); thanks(); track("guides_helpful");
+        hit(false, true).then(r => r && show(r.helpful));
+      });
+    });
+  }
+
   /* the conversion */
   document.querySelectorAll("[data-track]").forEach(a => a.addEventListener("click", () => track("guides_cta", { where: a.dataset.track })));
   const SUPA = "https://esquxzcfsylffuijvzec.supabase.co", KEY = "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p";

@@ -154,6 +154,7 @@ ${[crumbs, ...o.ld].map(x => `<script type="application/ld+json">${JSON.stringif
 <main id="main">
 <nav class="crumbs wrap" aria-label="Breadcrumb"><ol>${o.crumbs.map(([n, p], i) => (i < o.crumbs.length - 1 ? `<li><a href="${p}">${esc(n)}</a></li>` : `<li aria-current="page">${esc(n)}</li>`)).join("")}</ol></nav>
 ${o.body}
+<section class="wrap helpful" data-helpful hidden><p>${l === "zh" ? "这一页对您有帮助吗？" : "Was this page helpful?"}</p><button type="button" class="hbtn">${l === "zh" ? "有帮助" : "Yes, it helped"}</button><span class="hcount" aria-live="polite"></span></section>
 ${convert(l, o.ctx ?? {})}
 </main>
 <a class="dock" href="#get-plan" data-track="dock_cta">${esc(cityName ? (l === "zh" ? `获取${cityName}的开店方案` : `Get my plan for ${cityName}`) : UI.plan[l])}</a>

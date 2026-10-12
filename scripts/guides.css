@@ -248,3 +248,11 @@ html[lang="zh-CN"] .cv-copy h2{letter-spacing:0;line-height:1.3}
 .foot nav a:hover{color:var(--ink)}
 .foot small{color:var(--muted)}
 .foot .brand{display:inline-flex;text-decoration:none}
+/* was this helpful: real votes, shown only once the count can be read */
+.helpful{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:48px;margin-bottom:56px;padding-top:24px;border-top:1px solid var(--rule);font-size:15px;color:var(--ink2)}
+.helpful[hidden]{display:none}
+.helpful p{margin:0}
+.hbtn{font:500 14px/1 var(--sans);color:var(--ink);background:var(--white);border:1px solid var(--rule2);border-radius:999px;padding:10px 16px;cursor:pointer}
+.hbtn:hover:not(:disabled){border-color:var(--ink2)}
+.hbtn:disabled{cursor:default;color:var(--muted)}
+.hcount{color:var(--muted);font-size:14px}
