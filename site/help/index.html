@@ -168,6 +168,7 @@ main{min-width:0}
 .sdr a span{display:block;margin-top:2px;font-size:13.5px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sdr mark{background:var(--wash);color:var(--accent);border-radius:3px}
 .sdr .empty{padding:28px 12px;text-align:center;color:var(--ink2);font-size:14px}
+.hviews{margin-left:12px}.hviews:empty{display:none}.fbc{color:var(--ink3);font-size:13px}.fbc:empty{display:none}
 </style>
 </head>
 <body>
@@ -208,7 +209,7 @@ main{min-width:0}
       <div>
         <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
         <article class="art" id="art"></article>
-        <div class="fb" id="fb"><span data-t="helpful">Was this page helpful?</span><button type="button" data-v="yes" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11M3 11h4v10H3zM7 10l4-7c1.7 0 2.8 1.4 2.4 3L13 9h6a2 2 0 0 1 2 2.3l-1.4 7.6A2.5 2.5 0 0 1 17.1 21H7"/></svg><span data-t="yes">Yes</span></button><button type="button" data-v="no" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)"><path d="M7 10v11M3 11h4v10H3zM7 10l4-7c1.7 0 2.8 1.4 2.4 3L13 9h6a2 2 0 0 1 2 2.3l-1.4 7.6A2.5 2.5 0 0 1 17.1 21H7"/></svg><span data-t="no">No</span></button><span id="fbThanks" hidden data-t="thanks">Thanks for telling us.</span></div>
+        <div class="fb" id="fb"><span data-t="helpful">Was this page helpful?</span><button type="button" data-v="yes" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11M3 11h4v10H3zM7 10l4-7c1.7 0 2.8 1.4 2.4 3L13 9h6a2 2 0 0 1 2 2.3l-1.4 7.6A2.5 2.5 0 0 1 17.1 21H7"/></svg><span data-t="yes">Yes</span></button><button type="button" data-v="no" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)"><path d="M7 10v11M3 11h4v10H3zM7 10l4-7c1.7 0 2.8 1.4 2.4 3L13 9h6a2 2 0 0 1 2 2.3l-1.4 7.6A2.5 2.5 0 0 1 17.1 21H7"/></svg><span data-t="no">No</span></button><span id="fbThanks" hidden data-t="thanks">Thanks for telling us.</span><span class="fbc" id="fbCount" aria-live="polite"></span></div>
         <div class="pn" id="pn"></div>
       </div>
       <aside class="toc" id="toc" aria-label="On this page"></aside>
@@ -500,17 +501,33 @@ function renderSide(){
     S.map(s => `<div class="grp${open.has(s.id) ? " open" : ""}" data-g="${s.id}"><button type="button" class="gbtn" aria-expanded="${open.has(s.id)}">${s.t[i]}${CHEV}</button><ul>${s.a.map(a => `<li><a href="${href(s, a)}"${cur && cur.a === a ? ' aria-current="page"' : ""}>${a.t[i]}</a></li>`).join("")}</ul></div>`).join("") +
     `<div class="sfoot"><a href="mailto:support@placetta.com">${u("contact")}</a><a href="/">${u("site")}</a></div>`;
 }
+/* real counts, the same as the guides: one view per visitor per day and one "yes" per visitor, counted by page_hit() */
+const STATS = "https://esquxzcfsylffuijvzec.supabase.co/rest/v1/rpc/page_hit", SKEY = "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p";
+const lsGet = k => { try { return localStorage.getItem(k); } catch (x) { return null; } }, lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (x) {} };
+const pageHit = (path, view, helpful) => fetch(STATS, { method: "POST", headers: { apikey: SKEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_path: path, p_view: view, p_helpful: helpful }) }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+const nfmt = n => n.toLocaleString(L() ? "zh-CN" : "en-US");
+function showCounts(st){
+  if (!st) return;
+  $("hViews").textContent = st.views > 0 ? (L() ? nfmt(st.views) + " 次浏览" : nfmt(st.views) + (st.views === 1 ? " view" : " views")) : "";
+  $("fbCount").textContent = st.helpful > 0 ? (L() ? nfmt(st.helpful) + " 人觉得有帮助" : nfmt(st.helpful) + (st.helpful === 1 ? " person found this helpful" : " people found this helpful")) : "";
+}
+function hstats(f){
+  const path = "/help/" + f.s.id + "/" + f.a.id, day = String(Math.floor(Date.now() / 864e5)), seen = lsGet("pv:" + path) === day;
+  $("fbCount").textContent = "";
+  if (lsGet("ph:" + path)) { const y = document.querySelector('#fb [data-v="yes"]'); if (y) y.setAttribute("aria-pressed", "true"); }
+  pageHit(path, !seen, false).then(st => { if (!st || !cur || cur.a !== f.a) return; lsSet("pv:" + path, day); showCounts(st); });
+}
 function renderArticle(f){
   const i = L(), list = all(), k = list.findIndex(x => x.a === f.a);
   document.title = f.a.t[i] + " | " + u("h1");
   $("crumbs").innerHTML = `<a href="#/">${u("home")}</a>${CHEV}<a href="${href(f.s, f.s.a[0])}">${f.s.t[i]}</a>`;
-  $("art").innerHTML = `<h1>${f.a.t[i]}</h1><p class="lede">${f.a.l[i]}</p>${f.a.b[i]}<p class="upd">${u("updated")}</p>`;
+  $("art").innerHTML = `<h1>${f.a.t[i]}</h1><p class="lede">${f.a.l[i]}</p>${f.a.b[i]}<p class="upd">${u("updated")}<span class="hviews" id="hViews"></span></p>`;
   const hs = [...document.querySelectorAll("#art h2[id]")];
   $("toc").innerHTML = hs.length ? `<b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h13"/></svg>${u("onpage")}</b><nav>` + hs.map(h => `<a href="#/${f.s.id}/${f.a.id}/${h.id}" data-h="${h.id}">${esc(h.textContent)}</a>`).join("") + "</nav>" : "";
   const p = list[k - 1], n = list[k + 1];
   $("pn").innerHTML = (p ? `<a href="${href(p.s, p.a)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 6-6 6 6 6"/></svg><span><small>${u("prev")}</small>${p.a.t[i]}</span></a>` : "") + (n ? `<a class="nx" href="${href(n.s, n.a)}"><span><small>${u("next")}</small>${n.a.t[i]}</span>${CHEV}</a>` : "");
   document.querySelectorAll("#fb button").forEach(b => b.setAttribute("aria-pressed", "false")); $("fbThanks").hidden = true;
-  $("mbarSec").textContent = f.s.t[i]; $("mbarTitle").textContent = f.a.t[i];
+  $("mbarSec").textContent = f.s.t[i]; $("mbarTitle").textContent = f.a.t[i]; hstats(f);
   spy();
 }
 function route(){
@@ -583,7 +600,7 @@ document.addEventListener("click", e => {
   if (!$("langMenu").hidden && !e.target.closest(".lmenu")) toggleLang(false);
   if (document.body.classList.contains("nav-open") && !e.target.closest(".side,#menuBtn")) { document.body.classList.remove("nav-open"); $("menuBtn").setAttribute("aria-expanded", "false"); }
 });
-$("fb").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; document.querySelectorAll("#fb [data-v]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); $("fbThanks").hidden = false; });
+$("fb").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; document.querySelectorAll("#fb [data-v]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); $("fbThanks").hidden = false; if (b.dataset.v === "yes" && cur) { const path = "/help/" + cur.s.id + "/" + cur.a.id; if (!lsGet("ph:" + path)) { lsSet("ph:" + path, "1"); const a = cur.a; pageHit(path, false, true).then(st => { if (cur && cur.a === a) showCounts(st); }); } } });
 addEventListener("scroll", spy, {passive: true});
 addEventListener("hashchange", route);
 try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ev => { let saved = null; try { saved = localStorage.getItem("placetta-theme"); } catch (x) {} if (!saved) { document.documentElement.dataset.theme = ev.matches ? "dark" : "light"; paintTheme(); } }); } catch (x) {}

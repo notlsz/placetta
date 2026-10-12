@@ -39,9 +39,9 @@
   }));
 
   /* real counts: one view per visitor per day and one helpful vote per visitor, counted by page_hit() in Supabase.
-     Views show only once a page has had a few hundred; nothing shows if the count can't be read. */
+     The button shows on every page; views and votes show as soon as they can be read. */
   const STATS = "https://esquxzcfsylffuijvzec.supabase.co/rest/v1/rpc/page_hit", SKEY = "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p";
-  const VIEWS_MIN = 300, HELPFUL_MIN = 10, path = location.pathname.toLowerCase();
+  const VIEWS_MIN = 1, HELPFUL_MIN = 1, path = location.pathname.toLowerCase();
   const get = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
   const set = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
   const hit = (view, helpful) => fetch(STATS, { method: "POST", headers: { apikey: SKEY, "Content-Type": "application/json" },
@@ -50,21 +50,24 @@
   const box = document.querySelector("[data-helpful]");
   if (path.startsWith("/guides/")) {
     const day = String(Math.floor(Date.now() / 864e5)), seen = get("pv:" + path) === day, voted = !!get("ph:" + path);
-    hit(!seen, false).then(s => {
-      if (!s) return;
-      set("pv:" + path, day);
-      const meta = document.querySelector(".hero .meta");
-      if (meta && s.views >= VIEWS_MIN) { const sp = document.createElement("span"); sp.textContent = zh ? fmt(s.views) + " 次浏览" : fmt(s.views) + " views"; meta.appendChild(sp); }
-      if (!box) return;
-      const btn = box.querySelector(".hbtn"), out = box.querySelector(".hcount");
-      const show = n => { out.textContent = n >= HELPFUL_MIN ? (zh ? fmt(n) + " 人觉得有帮助" : fmt(n) + " people found this helpful") : ""; };
-      const thanks = () => { btn.disabled = true; btn.textContent = zh ? "谢谢反馈" : "Thanks for letting us know"; };
-      show(s.helpful); if (voted) thanks(); box.hidden = false;
+    // the button is on every page from the start; the counts fill in as soon as they're read
+    const btn = box && box.querySelector(".hbtn"), out = box && box.querySelector(".hcount");
+    const show = n => { if (out) out.textContent = n >= HELPFUL_MIN ? (zh ? fmt(n) + " 人觉得有帮助" : fmt(n) + (n === 1 ? " person found this helpful" : " people found this helpful")) : ""; };
+    const thanks = () => { btn.disabled = true; btn.textContent = zh ? "谢谢反馈" : "Thanks for letting us know"; };
+    if (box) {
+      if (voted) thanks(); box.hidden = false;
       btn.addEventListener("click", () => {
         if (get("ph:" + path)) return;
         set("ph:" + path, "1"); thanks(); track("guides_helpful");
         hit(false, true).then(r => r && show(r.helpful));
       });
+    }
+    hit(!seen, false).then(s => {
+      if (!s) return;
+      set("pv:" + path, day);
+      const meta = document.querySelector(".hero .meta");
+      if (meta && s.views >= VIEWS_MIN) { const sp = document.createElement("span"); sp.textContent = zh ? fmt(s.views) + " 次浏览" : fmt(s.views) + (s.views === 1 ? " view" : " views"); meta.appendChild(sp); }
+      show(s.helpful);
     });
   }
 
