@@ -4430,20 +4430,25 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     return out;
   }
   // home and furniture: the brands' own wordmarks laid out under the sofa as fine tiles, the same light blue as the mosaic
-  const FK = 10, FURN = [["ligne-roset", .79], ["natuzzi", 1], ["boconcept", 1], ["oppein", 1], ["gautier", 1], ["calligaris", 1], ["schmidt", 1]].map(([n, ch]) => {   // ch: keep the top of the mark only (Ligne Roset drops "depuis 1860", too fine for tiles)
-    const im = new Image(); im.decoding = "async"; im.ch = ch; im.onload = () => { if (cur === FK && FURN.every(x => x.naturalWidth)) { cur = -1; go(FK); } }; im.src = "logos/" + n + ".png"; return im; });
-  function logoPlan(){   // where the wordmark block goes: sizes, lines, and the caption it has to stay above
+  // sectors that carry brand wordmarks as fine tiles under their mosaic: file name and how much of the mark's height to keep
+  // (Ligne Roset drops "depuis 1860", too fine for tiles). A sector shows its set once every file has loaded.
+  const LOGOSETS = {
+    10: [["ligne-roset", .79], ["natuzzi", 1], ["boconcept", 1], ["oppein", 1], ["gautier", 1], ["calligaris", 1], ["schmidt", 1]],   // home and furniture
+  };
+  const SETS = {}; Object.entries(LOGOSETS).forEach(([k, list]) => { SETS[k] = list.map(([n, ch]) => {
+    const im = new Image(); im.decoding = "async"; im.ch = ch; im.onload = () => { if (cur === +k && SETS[k].every(x => x.naturalWidth)) { cur = -1; go(+k); } }; im.src = "logos/" + n + ".png"; return im; }); });
+  const hasSet = k => !!SETS[k] && SETS[k].every(x => x.naturalWidth);
+  function logoPlan(k){   // where the wordmark block goes: sizes, lines, and the caption it has to stay above
     const narrow = cols < 70, sub = Math.max(2, Math.round(cell / (narrow ? 1.75 : 2.1)));
-    const H0 = (narrow ? 14 : 29) / (cell / sub);   // the logo's height in fine tiles (about 29px on desktop), balanced by its shape below
-    const box = FURN.map(im => { const ar = im.naturalWidth / (im.naturalHeight * im.ch), h = Math.min(H0 * 1.7, Math.max(H0 * .66, H0 * Math.sqrt(4.6 / ar))); return [im, Math.round(h * ar), Math.round(h)]; });
-    const gap = Math.round(H0 * (narrow ? 1.1 : 1.6)), per = narrow ? [3, 2, 2] : [4, 3], lines = []; let i = 0; per.forEach(n => { lines.push(box.slice(i, i + n)); i += n; });
+    const H0 = (narrow ? 11 : 21) / (cell / sub);   // the logo's height in fine tiles (about 21px on desktop), balanced by its shape below
+    const set = SETS[k], box = set.map(im => { const ar = im.naturalWidth / (im.naturalHeight * im.ch), h = Math.min(H0 * 1.7, Math.max(H0 * .66, H0 * Math.sqrt(4.6 / ar))); return [im, Math.round(h * ar), Math.round(h)]; });
+    const gap = Math.round(H0 * (narrow ? 1.1 : 1.6)), n = set.length, per = [], lines = []; for (let m = n; m > 0;) { const q = narrow ? Math.min(m, m === 4 ? 2 : 3) : Math.min(m, Math.ceil(n / Math.ceil(n / 4))); per.push(q); m -= q; } let i = 0; per.forEach(n => { lines.push(box.slice(i, i + n)); i += n; });
     const lh = H0 * 1.25, lg = H0 * (narrow ? .7 : .85), blockH = lines.length * lh + (lines.length - 1) * lg;
     const cap = document.getElementById("inCap"), capRow = cap && cap.offsetHeight ? (cap.getBoundingClientRect().top - cv.getBoundingClientRect().top - (H - rows * cell) / 2) / cell : rows * .8;
     const end = capRow - (narrow ? 1.6 : 2.4);   // the wordmarks always end clear of the sector's caption
     return {narrow, sub, gap, lines, lh, lg, blockRows: blockH / sub, end};
   }
   function logoCells(top, P){
-    if (!FURN.every(x => x.naturalWidth)) return [];
     const {sub, gap, lines, lh, lg} = P, X = cols * sub, Y = rows * sub, SS = 3;
     mk.width = X * SS; mk.height = Y * SS; mg.setTransform(SS, 0, 0, SS, 0, 0); mg.clearRect(0, 0, X, Y); mg.imageSmoothingQuality = "high";
     let y = top * sub;
@@ -4458,9 +4463,9 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     if (k === 2 && botImg.naturalWidth) return botCells();
     if (k === 3) return sceneImg.naturalWidth ? sceneCells() : [];   // the photo loads first; its onload draws it
     const big = k === 2, scene = k === 3;   // the robot and the game scene are traced from photos and need more tiles
-    const fu = k === FK && FURN.every(x => x.naturalWidth);   // furniture with its brands: a smaller sofa, the wordmarks beneath
-    const P = fu ? logoPlan() : null, sofaTop = rows * (cols < 60 ? .05 : .07), sofaGap = cols < 60 ? 2.5 : 4, room = fu ? Math.max(rows * .16, P.end - P.blockRows - sofaGap - sofaTop) : 0;   // the sofa takes what the logos and caption leave
-    const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * (scene ? 1 : fu ? .62 : .78), ah = fu ? Math.min(room, rows * (cols < 60 ? .26 : .4)) : rows * (scene ? .8 : big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
+    const fu = hasSet(k);   // a sector with its brands: a smaller mosaic, the wordmarks beneath
+    const P = fu ? logoPlan(k) : null, sofaTop = rows * (cols < 60 ? .05 : .07), sofaGap = cols < 60 ? 2.5 : 4, room = fu ? Math.max(rows * .16, P.end - P.blockRows - sofaGap - sofaTop) : 0;   // the sofa takes what the logos and caption leave
+    const [bx, by, bw, bh] = bounds(k), SS = 3, aw = cols * (scene ? 1 : fu ? .76 : .78), ah = fu ? Math.min(room, rows * (cols < 60 ? .36 : .54)) : rows * (scene ? .8 : big ? .74 : cols < 60 ? .56 : .6), f = Math.min(aw / bw, ah / bh);
     const fx = (cols - bw * f) / 2 - bx * f, fy = (fu ? sofaTop + Math.max(0, (P.end - P.blockRows - sofaGap - sofaTop - ah) * .45) : rows * (scene ? 0 : big ? .04 : cols < 60 ? .1 : .12)) + (ah - bh * f) / 2 - by * f;
     mk.width = cols * SS; mk.height = rows * SS; mg.setTransform(1, 0, 0, 1, 0, 0); mg.clearRect(0, 0, mk.width, mk.height);
     mg.setTransform(f * SS, 0, 0, f * SS, fx * SS, fy * SS); SH[k]();
