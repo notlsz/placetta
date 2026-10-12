@@ -2248,6 +2248,11 @@ body .jbf .jbchip{color:var(--ink2)}
 /* pricing, lighter: the waiting math is two numbers, the second rows go */
 #pricing .pmc .pms:not(.pmain){display:none}
 #pricing .pmc{padding-bottom:20px}
+
+/* backers whose file is the full wordmark: drawn at their own proportions, the label hidden */
+.bkg li.wl img{width:auto;height:var(--h);max-width:82%;object-fit:contain}
+.bkg li.wl span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:767px){.bkg li.wl img{height:calc(var(--h) * .8)}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3620,12 +3625,13 @@ const INV = [
   {k:"sequoia", n:["Sequoia","红杉资本"], h:16}, {k:"hillhouse", n:["Hillhouse Investment","高瓴投资"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}, {k:"azureworld", n:["AzureWorld","湛蓝领域"], h:38}
 ];
 /* backers: operators who invested in Placetta, shown with their company's mark; a missing file falls back to the name */
-const BK = [["openai","OpenAI","OpenAI","png"],["anthropic","Anthropic","Anthropic"],["spacex","SpaceX","SpaceX"],["tesla","Tesla","特斯拉"],["amazon","Amazon","亚马逊"],["deepmind","Google DeepMind","Google DeepMind"],["deepseek","DeepSeek","深度求索"],["janestreet","Jane Street","Jane Street"],["apollo","Apollo","阿波罗"],["renaissance","Renaissance Technologies","文艺复兴科技"],["cursor","Cursor","Cursor"],["nvidia","NVIDIA","英伟达"],["google","Google","谷歌"],["baidu","Baidu","百度"],["tencent","Tencent","腾讯"],["bytedance","ByteDance","字节跳动"],["alibaba","Alibaba","阿里巴巴"],["huawei","Huawei","华为"],["goldmansachs","Goldman Sachs","高盛"],["merrilllynch","Merrill Lynch","美林"],["deutschebank","Deutsche Bank","德意志银行"],["blackstone","Blackstone","黑石"],["binance","Binance","币安"],["coinbase","Coinbase","Coinbase"]];
-const BK_WORD = new Set(["goldmansachs","coinbase"]);   // marks that are themselves the wordmark: shown large, the name label hidden
-const BK_FILES = new Set(["openai","anthropic","spacex","tesla","amazon","deepmind","deepseek","cursor","nvidia","google","baidu","tencent","bytedance","alibaba","huawei","goldmansachs","deutschebank","binance","coinbase"]);
+const BK = [["openai","OpenAI","OpenAI","png"],["anthropic","Anthropic","Anthropic"],["spacex","SpaceX","SpaceX"],["tesla","Tesla","特斯拉"],["amazon","Amazon","亚马逊"],["deepmind","Google DeepMind","Google DeepMind"],["deepseek","DeepSeek","深度求索"],["janestreet","Jane Street","Jane Street"],["apollo","Apollo","阿波罗"],["renaissance","Renaissance Technologies","文艺复兴科技","png"],["cursor","Cursor","Cursor"],["nvidia","NVIDIA","英伟达"],["google","Google","谷歌"],["baidu","Baidu","百度"],["tencent","Tencent","腾讯"],["bytedance","ByteDance","字节跳动"],["alibaba","Alibaba","阿里巴巴"],["huawei","Huawei","华为"],["goldmansachs","Goldman Sachs","高盛"],["merrilllynch","Merrill Lynch","美林"],["deutschebank","Deutsche Bank","德意志银行"],["blackstone","Blackstone","黑石"],["binance","Binance","币安"],["coinbase","Coinbase","Coinbase"]];
+const BK_WORD = new Set(["goldmansachs","coinbase"]);
+const BK_WIDE = {janestreet: 30, apollo: 17, renaissance: 18, merrilllynch: 30, blackstone: 26};   // full wordmark files: drawn at their own shape, the name label hidden   // marks that are themselves the wordmark: shown large, the name label hidden
+const BK_FILES = new Set(["openai","anthropic","spacex","tesla","amazon","deepmind","deepseek","cursor","nvidia","google","baidu","tencent","bytedance","alibaba","huawei","goldmansachs","deutschebank","binance","coinbase","janestreet","apollo","renaissance","merrilllynch","blackstone"]);
 function renderBk(){ const hb = document.getElementById("hBk"); if (hb) hb.innerHTML = `<span class="hbkm" aria-hidden="true">${BK.filter(b => BK_FILES.has(b[0])).slice(0, 5).map(([k, , , ext]) => `<img src="logos/backers/${k}.${ext || "svg"}" alt="" decoding="async" draggable="false">`).join("")}</span><span>${esc(t("bk.hero"))}</span>`;
   const el = document.getElementById("bkG"); if (!el) return; const i = L();
-  el.innerHTML = BK.map(([k, en, zh, ext]) => `<li${BK_FILES.has(k) ? (BK_WORD.has(k) ? ' class="wm"' : "") : ' class="nm"'}>${BK_FILES.has(k) ? `<img src="logos/backers/${k}.${ext || "svg"}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false">` : ""}<span>${esc(i ? zh : en)}</span></li>`).join(""); }
+  el.innerHTML = BK.map(([k, en, zh, ext]) => `<li${BK_FILES.has(k) ? (BK_WIDE[k] ? ' class="wl"' : BK_WORD.has(k) ? ' class="wm"' : "") : ' class="nm"'}>${BK_FILES.has(k) ? `<img src="logos/backers/${k}.${ext || "svg"}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false"${BK_WIDE[k] ? ` style="--h:${BK_WIDE[k]}px"` : ""}>` : ""}<span>${esc(i ? zh : en)}</span></li>`).join(""); }
 function renderInv(){ if (!document.getElementById("invR")) return; const i = L(); document.getElementById("invR").innerHTML = INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${esc(v.n[i])}" style="--h:${v.h}px" loading="lazy" decoding="async">`).join(""); }
 function renderStrip(){
   const item = (b, hide) => {
