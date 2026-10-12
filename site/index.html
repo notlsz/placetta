@@ -4501,7 +4501,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   // sectors that carry brand wordmarks as fine tiles under their mosaic: file name and how much of the mark's height to keep
   // (Ligne Roset drops "depuis 1860", too fine for tiles). A sector shows its set once every file has loaded.
   const LOGOSETS = {
-    // 2: technology, 7: healthcare, 9: logistics — add [file, 1] pairs once their logo files are in logos/
+    // 2: technology, 7: healthcare, 9: logistics: add [file, 1] pairs once their logo files are in logos/
     10: [["ligne-roset", .79], ["natuzzi", 1], ["boconcept", 1], ["oppein", 1], ["gautier", 1], ["calligaris", 1], ["schmidt", 1]],   // home and furniture
   };
   const SETS = {}; Object.entries(LOGOSETS).forEach(([k, list]) => { SETS[k] = list.map(([n, ch]) => {
