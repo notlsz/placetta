@@ -49,6 +49,7 @@ function urgency(u2, critical) {
   const isCritical = !!u2.app_id && critical.has(u2.app_id);
   if (head === "lapsed") return "urgent";
   if (head === "opening") return parts[2] === "late" ? "important" : null;
+  if (head === "record") return parts[1] === "urgent" ? "urgent" : parts[1] === "news" ? "important" : null;
   if (/inspection/.test(title) && /(fail|returned|overdue|closure|closed)/.test(title)) return "urgent";
   if (head === "overdue") return isCritical ? "urgent" : "important";
   if (head === "filing" && parts[2] === "rejected") return isCritical ? "urgent" : "important";
@@ -64,10 +65,10 @@ function noticeText(u2, business, lang) {
 }
 function appLink(origin, ws, approval) {
   if (!origin) return "";
-  const q = new URLSearchParams();
-  if (ws) q.set("ws", ws);
-  if (approval) q.set("approval", approval);
-  const qs = q.toString();
+  const q2 = new URLSearchParams();
+  if (ws) q2.set("ws", ws);
+  if (approval) q2.set("approval", approval);
+  const qs = q2.toString();
   return `${origin}/app/${qs ? "?" + qs : ""}`;
 }
 
@@ -205,12 +206,12 @@ function Ee(t, i, s, l = {}) {
     let B = H(w, /* @__PURE__ */ new Set());
     (B > D || !M) && (D = B, M = w);
   }
-  let q = Fe(s, D), _ = M;
+  let q2 = Fe(s, D), _ = M;
   for (let w = 0; w < 20 && k.get(_.id); w++) _ = S.get(k.get(_.id));
   let Q = D > 0 ? { app: _.id, name: _.name, status: _.status, on: Ne[_.status], why: _e(_, i) } : void 0;
-  if (!t.plannedOpen) return { verdict: "no_date", landing: q, slack: null, blocker: Q, guessed: x, basis: v };
-  let G = fe(q, t.plannedOpen);
-  return { verdict: G < 0 ? "late" : G < 7 ? "tight" : "on_track", landing: q, slack: G, blocker: Q, guessed: x, basis: v };
+  if (!t.plannedOpen) return { verdict: "no_date", landing: q2, slack: null, blocker: Q, guessed: x, basis: v };
+  let G = fe(q2, t.plannedOpen);
+  return { verdict: G < 0 ? "late" : G < 7 ? "tight" : "on_track", landing: q2, slack: G, blocker: Q, guessed: x, basis: v };
 }
 function De(t) {
   let i = t.basis.published + t.basis.guessed > 0 ? "About " : "", s = i ? "\u7EA6 " : "", l = (c, d) => t.blocker ? e(`${c}. ${t.blocker.name.en}: ${t.blocker.why.en.charAt(0).toLowerCase() + t.blocker.why.en.slice(1)}`, `${d}\u3002${t.blocker.name.zh}\uFF1A${t.blocker.why.zh}`) : e(c, d);
@@ -230,6 +231,115 @@ function De(t) {
   }
 }
 
+// src/opendata.ts
+function parseAddress(address) {
+  const parts = address.split(",").map((s) => s.trim()).filter(Boolean);
+  const m2 = /^\s*(\d+(?:-\d+)?[A-Z]?)\s+(.+)$/i.exec(parts[0] ?? "");
+  if (!m2) return null;
+  const street = m2[2].toUpperCase().replace(/\./g, "").replace(/\s+/g, " ").trim();
+  const words = street.split(" ").filter((w) => !/^(N|S|E|W|NORTH|SOUTH|EAST|WEST|ST|STREET|AVE|AVENUE|BLVD|BOULEVARD|RD|ROAD|DR|DRIVE|LN|LANE|PL|PLACE|WAY|CT|COURT|PKWY|PARKWAY|HWY|HIGHWAY|SUITE|STE|UNIT|#.*)$/.test(w));
+  const first = words[0] ?? street.split(" ")[0];
+  const core = /^\d+(ST|ND|RD|TH)$/.test(first) ? first.replace(/(ST|ND|RD|TH)$/, "") : first;
+  const zip = /\b(\d{5})(?:-\d{4})?\b/.exec(parts.slice(1).join(" "))?.[1] ?? null;
+  const city = (parts.length >= 3 ? parts[parts.length - 2] : parts[1] ?? "").replace(/\b[A-Z]{2}\b\s*\d{5}.*$/, "").trim();
+  return { number: m2[1].toUpperCase(), street, core: core.replace(/'/g, ""), zip, city };
+}
+var NYC = /new york|nyc|manhattan|brooklyn|queens|bronx|staten island|flushing|astoria|jamaica|long island city|bayside|elmhurst|forest hills|jackson heights|sunset park|bensonhurst|williamsburg/i;
+function cityOf(address) {
+  if (NYC.test(address) || /\bNY\s*1[01]\d{3}\b/.test(address)) return "nyc";
+  if (/san francisco|\bSF\b|,\s*CA\s*941\d{2}/i.test(address)) return "sf";
+  if (/los angeles|,\s*CA\s*900\d{2}/i.test(address)) return "la";
+  if (/austin/i.test(address) && /\bTX\b|texas/i.test(address)) return "austin";
+  return null;
+}
+var day = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null;
+var q = (s) => encodeURIComponent(s);
+var like = (s) => s.replace(/'/g, "''");
+async function socrata(f2, url) {
+  const res = await f2(url, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(8e3) });
+  if (!res.ok) throw new Error(`open data ${res.status}`);
+  const rows = await res.json();
+  return Array.isArray(rows) ? rows : [];
+}
+async function cityRecords(address, o2 = {}) {
+  const f2 = o2.f ?? fetch, a2 = parseAddress(address), city = cityOf(address);
+  if (!a2 || !city) return [];
+  const since = new Date(Date.parse((o2.today ?? (/* @__PURE__ */ new Date()).toISOString().slice(0, 10)) + "T00:00:00Z") - (o2.days ?? 365) * 864e5).toISOString().slice(0, 10);
+  const out = [];
+  if (city === "nyc") {
+    const zip = a2.zip ? ` AND zipcode='${a2.zip}'` : "";
+    const rows = await socrata(f2, `https://data.cityofnewyork.us/resource/43nn-pn8j.json?$limit=40&$order=${q("inspection_date DESC")}&$where=${q(`building in ('${like(a2.number)}','${like(a2.number.replace(/-/g, ""))}') AND upper(street) like '%${like(a2.core)}%'${zip} AND inspection_date >= '${since}'`)}`);
+    const by = /* @__PURE__ */ new Map();
+    for (const r2 of rows) {
+      const k = `${r2.camis}:${day(r2.inspection_date)}`;
+      by.set(k, [...by.get(k) ?? [], r2]);
+    }
+    for (const [k, rs] of by) {
+      const r2 = rs[0], crit = rs.filter((x) => x.critical_flag === "Critical").length;
+      const closed = /closed/i.test(r2.action ?? "");
+      out.push({
+        source: "nyc_inspections",
+        kind: "inspection",
+        id: `nyc_inspections:${k}`,
+        title: `Health inspection${r2.dba ? ` (${r2.dba})` : ""}`,
+        status: r2.grade ? `Grade ${r2.grade}` : closed ? "Closed by the Health Department" : r2.score ? `Score ${r2.score}` : (r2.action ?? "Inspected").slice(0, 80),
+        date: day(r2.grade_date) ?? day(r2.inspection_date),
+        detail: [crit && `${crit} critical violation${crit > 1 ? "s" : ""}`, rs.find((x) => x.critical_flag === "Critical")?.violation_description?.slice(0, 160)].filter(Boolean).join(": ") || void 0,
+        urgent: closed || crit >= 2 || (Number(r2.score) || 0) >= 28,
+        url: `https://a816-health.nyc.gov/ABCEatsRestaurants/#/Search`
+      });
+    }
+    const dob = await socrata(f2, `https://data.cityofnewyork.us/resource/rbx6-tga4.json?$limit=20&$order=${q("approved_date DESC")}&$where=${q(`house_no in ('${like(a2.number)}','${like(a2.number.replace(/-/g, ""))}') AND upper(street_name) like '%${like(a2.core)}%'${a2.zip ? ` AND zip_code='${a2.zip}'` : ""} AND approved_date >= '${since}'`)}`);
+    for (const r2 of dob) out.push({
+      source: "nyc_dob",
+      kind: "permit",
+      id: `nyc_dob:${r2.job_filing_number ?? r2.tracking_number}:${r2.work_type}:${r2.permit_status}`,
+      title: `${r2.work_type ?? "Building"} permit`,
+      status: r2.permit_status ?? "Approved",
+      date: day(r2.approved_date),
+      detail: r2.job_description?.slice(0, 160),
+      url: "https://a810-dobnow.nyc.gov/publish/Index.html#!/"
+    });
+  } else if (city === "sf") {
+    const rows = await socrata(f2, `https://data.sfgov.org/resource/i98e-djp9.json?$limit=20&$order=${q("status_date DESC")}&$where=${q(`street_number='${like(a2.number)}' AND upper(street_name) like '%${like(a2.core)}%' AND status_date >= '${since}'`)}`);
+    for (const r2 of rows) out.push({
+      source: "sf_permits",
+      kind: "permit",
+      id: `sf_permits:${r2.permit_number}:${r2.status}`,
+      title: `${r2.permit_type_definition ?? "Building"} permit`,
+      status: r2.status ?? "",
+      date: day(r2.status_date),
+      detail: r2.description?.slice(0, 160),
+      url: `https://dbiweb02.sfgov.org/dbipts/default.aspx?page=Permit&PermitNumber=${q(r2.permit_number ?? "")}`
+    });
+  } else if (city === "la") {
+    const rows = await socrata(f2, `https://data.lacity.org/resource/pi9x-tg5x.json?$limit=20&$order=${q("status_date DESC")}&$where=${q(`upper(primary_address) like '${like(a2.number)} %${like(a2.core)}%'${a2.zip ? ` AND zip_code='${a2.zip}'` : ""} AND status_date >= '${since}'`)}`);
+    for (const r2 of rows) out.push({
+      source: "la_permits",
+      kind: "permit",
+      id: `la_permits:${r2.permit_nbr}:${r2.status_desc}`,
+      title: `${r2.permit_type ?? "Building"} permit`,
+      status: r2.status_desc ?? "",
+      date: day(r2.status_date),
+      detail: r2.work_desc?.slice(0, 160),
+      url: "https://www.ladbsservices2.lacity.org/OnlineServices/"
+    });
+  } else if (city === "austin") {
+    const rows = await socrata(f2, `https://data.austintexas.gov/resource/3syk-w9eu.json?$limit=20&$order=${q("statusdate DESC")}&$where=${q(`upper(original_address1) like '${like(a2.number)} %${like(a2.core)}%' AND statusdate >= '${since}'`)}`);
+    for (const r2 of rows) out.push({
+      source: "austin_permits",
+      kind: "permit",
+      id: `austin_permits:${r2.permit_number}:${r2.status_current}`,
+      title: r2.permit_type_desc ?? "Permit",
+      status: r2.status_current ?? "",
+      date: day(r2.statusdate),
+      detail: r2.description?.slice(0, 160),
+      url: r2.link?.url ?? "https://abc.austintexas.gov/"
+    });
+  }
+  return out.sort((x, y2) => (y2.date ?? "").localeCompare(x.date ?? "")).slice(0, 20);
+}
+
 // supabase/functions/monitor/index.ts
 var admin = (0, import_supabase_js_2.createClient)(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"), {
   auth: { persistSession: false, autoRefreshToken: false }
@@ -240,7 +350,7 @@ var APP = ((Deno.env.get("APP_ORIGINS") ?? "").split(",")[0] ?? "").trim().repla
 var SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 var MAX_WATCHES = Number(Deno.env.get("WEEKLY_CHECKS_PER_DAY") ?? "40");
 var json = (status, body) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
-var day = (d) => d.toISOString().slice(0, 10);
+var day2 = (d) => d.toISOString().slice(0, 10);
 var daysUntil = (from, to) => Math.round((Date.parse(to + "T00:00:00Z") - Date.parse(from + "T00:00:00Z")) / 864e5);
 var isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
 var bi = (v) => v && typeof v === "object" && "en" in v ? { en: String(v.en ?? ""), zh: String(v.zh ?? v.en ?? "") } : { en: String(v ?? ""), zh: String(v ?? "") };
@@ -345,6 +455,35 @@ function openingUpdates(ws, state, today, ev = {}) {
       title: { en: `${store.en}: ${line.en}`, zh: `${store.zh}\uFF1A${line.zh}` },
       body: { en: `Planned opening ${s.plannedOpen}; permits in hand around ${p2.landing}. Ask Odelia to catch it up.`, zh: `\u8BA1\u5212 ${s.plannedOpen} \u5F00\u4E1A\uFF1B\u9884\u8BA1 ${p2.landing} \u524D\u540E\u53D6\u5F97\u5168\u90E8\u8BB8\u53EF\u3002\u53EF\u4EE5\u8BA9 Odelia \u8FFD\u56DE\u8FDB\u5EA6\u3002` }
     });
+  }
+  return out;
+}
+async function recordUpdates(ws, state, today, o2 = {}) {
+  const stores = state?.stores ?? [];
+  const out = [];
+  let n2 = 0;
+  for (const s of Array.isArray(stores) ? stores : []) {
+    if (typeof s?.address !== "string" || typeof s.id !== "string" || !cityOf(s.address)) continue;
+    if (n2++ >= (o2.max ?? 25)) break;
+    let recs = [];
+    try {
+      recs = await cityRecords(s.address, { days: o2.days ?? 14, today, f: o2.f });
+    } catch (e2) {
+      console.error("city records", e2.message);
+      continue;
+    }
+    const store = bi(s.name);
+    for (const r2 of recs) {
+      const good = r2.kind === "permit" && /issued|approved|signed off|complete|final/i.test(r2.status);
+      const level = r2.urgent ? "urgent" : good ? "news" : "info";
+      out.push({
+        workspace_id: ws,
+        kind: "filing",
+        dedupe: `record:${level}:${r2.id}`,
+        title: { en: `${store.en}: ${r2.title}, ${r2.status}`, zh: `${store.zh}\uFF1A${r2.title}\uFF0C${r2.status}` },
+        body: { en: [r2.date && `Posted by the city on ${r2.date}.`, r2.detail, `See it: ${r2.url}`].filter(Boolean).join(" "), zh: [r2.date && `\u57CE\u5E02\u4E8E ${r2.date} \u516C\u5E03\u3002`, r2.detail, `\u67E5\u770B\uFF1A${r2.url}`].filter(Boolean).join(" ") }
+      });
+    }
   }
   return out;
 }
@@ -503,7 +642,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json(405, { error: "Use POST." });
   const { data: okKey } = await admin.rpc("monitor_key_ok", { p_key: req.headers.get("x-monitor-key") ?? "" });
   if (okKey !== true) return json(401, { error: "unauthorized" });
-  const started = /* @__PURE__ */ new Date(), today = day(started), now = started.getTime();
+  const started = /* @__PURE__ */ new Date(), today = day2(started), now = started.getTime();
   const { data: settings } = await admin.from("app_settings").select("monitor_last_run").maybeSingle();
   const since = settings?.monitor_last_run ?? new Date(now - 864e5).toISOString();
   const created = [];
@@ -533,6 +672,16 @@ Deno.serve(async (req) => {
     sent.set(f2.workspace_id, m2);
   }
   for (const [ws, list] of byWs) list.push(...openingUpdates(ws, states.get(ws) ?? null, today, { submitted: sent.get(ws) ?? {} }));
+  if ((Deno.env.get("RECORDS") ?? "on") !== "off") {
+    let budget = Math.max(0, Number(Deno.env.get("RECORDS_PER_RUN") ?? "40") || 0);
+    const queue = [...byWs.keys()].filter((ws) => ((states.get(ws) ?? {}).stores ?? []).length);
+    while (queue.length && budget > 0) {
+      const batch = queue.splice(0, 8);
+      const got = await Promise.all(batch.map((ws) => recordUpdates(ws, states.get(ws) ?? null, today, { max: Math.min(5, budget) })));
+      batch.forEach((ws, i) => byWs.get(ws).push(...got[i]));
+      budget -= batch.length * 5;
+    }
+  }
   if (started.getUTCDay() === 1) {
     const open = /* @__PURE__ */ new Map();
     for (const f2 of filings ?? []) if (["requested", "in_progress", "needs_info", "submitted"].includes(f2.status)) open.set(f2.workspace_id, (open.get(f2.workspace_id) ?? 0) + 1);
@@ -664,6 +813,7 @@ export {
   filingUpdates,
   hqReport,
   openingUpdates,
+  recordUpdates,
   storeUpdates,
   watchDue,
   weekAhead,
