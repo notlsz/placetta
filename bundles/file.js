@@ -42,10 +42,10 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/file/index.ts
+// supabase/functions/file/index.ts
 var import_npm_pdf_lib_1_17 = __toESM(require_npm_pdf_lib_1_17(), 1);
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/file/shared.ts
+// supabase/functions/file/shared.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
 var SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 var SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -166,7 +166,7 @@ function b64urlDecode(s) {
 var utf8 = (s) => new TextEncoder().encode(s);
 var STATE_TTL_MS = 10 * 60 * 1e3;
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/file/destinations.ts
+// supabase/functions/file/destinations.ts
 var DEST = {
   "irs-ss4": {
     // Foreign applicants: the IRS lists 855-215-1627 for faxes sent from within the US (Placetta's fax number is
@@ -185,14 +185,103 @@ var DEST = {
     checked: "2026-10-07",
     // page last reviewed 28-Apr-2026
     source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-ss-4"
-  }
+  },
+  // ---- From the line-by-line research of 2026-10-13 (research/lines). Each value is copied from the source page. ----
+  "hou-food-dealer": {
+    email: "Food-COO@houstontx.gov",
+    // "Applications can be submitted via email at Food-COO@houstontx.gov."
+    signature: "none",
+    // the form has no signature line
+    checked: "2026-10-13",
+    source: "https://www.houstonhealth.org/media/14901/download"
+  },
+  "hou-co": {
+    email: "Occupancy.Inspections@houstontx.gov",
+    // printed on CE-1045-A
+    mail: { name: "City of Houston, Occupancy Inspections Section", line1: "P.O. Box 2688", city: "Houston", state: "TX", zip: "77252-2688" },
+    signature: "wet",
+    // an "Applicant Signature" line; electronic signatures not addressed
+    checked: "2026-10-13",
+    source: "https://www.houstonpermittingcenter.org/media/941/download"
+  },
+  "ny-dol-100": {
+    fax: { us: "+15184858010" },
+    mail: { name: "NYS Department of Labor, Unemployment Insurance Division, Registration Section", line1: "Harriman State Office Campus, Building 12", city: "Albany", state: "NY", zip: "12240-0339" },
+    portal: "www.businessexpress.ny.gov",
+    signature: "wet",
+    // "This form must be signed by the person completing it."
+    checked: "2026-10-13",
+    source: "https://dol.ny.gov/system/files/documents/2021/02/nys100-1.pdf"
+  },
+  "ny-dos-pub": {
+    mail: { name: "New York Department of State, Division of Corporations", line1: "One Commerce Plaza, 99 Washington Avenue", city: "Albany", state: "NY", zip: "12231" },
+    signature: "wet",
+    checked: "2026-10-13",
+    source: "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0"
+  },
+  "tx-ap201": {
+    email: "sales.applications@cpa.texas.gov",
+    // paper AP-201, for owners without an SSN
+    fax: { us: "+15129360010" },
+    signature: "wet",
+    checked: "2026-10-13",
+    source: "https://comptroller.texas.gov/taxes/permit/"
+  },
+  "tx-205": {
+    mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    signature: "drawn",
+    // "A wet ink signature is not required. Copies and electronically signed documents are accepted."
+    checked: "2026-10-13",
+    source: "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml"
+  },
+  "tx-304": {
+    mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    signature: "drawn",
+    checked: "2026-10-13",
+    source: "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml"
+  },
+  "tx-503": {
+    mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    signature: "drawn",
+    checked: "2026-10-13",
+    source: "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml"
+  },
+  "aus-food-plan-review": {
+    email: "ehsd.service@austintexas.gov",
+    mail: { name: "Environmental Health Services Division", line1: "P.O. Box 142529", city: "Austin", state: "TX", zip: "78714" },
+    signature: "wet",
+    checked: "2026-10-13",
+    source: "https://austintexas.gov/sites/default/files/files/APH%20Comms/Plan_Review_FFE_EN_061424.pdf"
+  },
+  "aus-food-preopening": {
+    email: "ehsd.service@austintexas.gov",
+    mail: { name: "Environmental Health Services Division", line1: "P.O. Box 142529", city: "Austin", state: "TX", zip: "78714" },
+    portal: "myhealthdepartment.com",
+    signature: "wet",
+    checked: "2026-10-13",
+    source: "https://www.austintexas.gov/sites/default/files/files/APH%20Comms/Food-Pre-Opening-Revise.pdf"
+  },
+  "aus-food-permit": {
+    mail: { name: "Environmental Health Services Division", line1: "P.O. Box 142529", city: "Austin", state: "TX", zip: "78714" },
+    signature: "wet",
+    // names must match the photo ID; email is not a route for this form
+    checked: "2026-10-13",
+    source: "https://www.austintexas.gov/sites/default/files/files/Health/Environmental/Food/Operational_Permit_Application_FFE_EN_110118_TC.pdf"
+  },
+  "dal-co": { portal: "aca-prod.accela.com", signature: "typed", checked: "2026-10-13", source: "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx" },
+  "dal-building": { portal: "aca-prod.accela.com", signature: "typed", checked: "2026-10-13", source: "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/3.%20Applying%20for%20a%20Commercial%20Alteration%20and%20Addition%20Application.pdf" },
+  "sf-business-registration": { portal: "etaxstatement.sfgov.org", signature: "typed", checked: "2026-10-13", source: "https://sftreasurer.org/business/register-business" },
+  "sj-building-ti": { portal: "sjpermits.org", signature: "drawn", checked: "2026-10-13", source: "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement" },
+  "sj-sign": { portal: "sjpermits.org", signature: "drawn", checked: "2026-10-13", source: "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits" },
+  "aus-building": { portal: "abc.austintexas.gov", signature: "typed", checked: "2026-10-13", source: "https://www.austintexas.gov/development-services/commercial-plan-review" },
+  "la-ladbs": { portal: "eplanla.lacity.org", signature: "typed", checked: "2026-10-13", source: "https://dbs.lacity.gov/" }
 };
 function staleDestinations(today, days = 90, dest = DEST) {
   const now = Date.parse(today + "T00:00:00Z");
   return Object.entries(dest).filter(([, d]) => now - Date.parse(d.checked + "T00:00:00Z") > days * 864e5).map(([id, d]) => ({ id, checked: d.checked, source: d.source }));
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/file/logic.ts
+// supabase/functions/file/logic.ts
 function envFrom(get) {
   const list = (k) => (get(k) ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
   const two = Number(get("FILER_TWO_KEY") ?? "10");
@@ -284,7 +373,7 @@ function emailFor(f) {
   };
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/file/index.ts
+// supabase/functions/file/index.ts
 var env = () => envFrom((k) => Deno.env.get(k));
 var COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path";
 var log = (en, zh, kind = "info", ref) => ({ en, zh, kind, ...ref ? { ref } : {} });
