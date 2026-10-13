@@ -25,7 +25,7 @@ import {
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
-const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path";
+const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate";
 const log = (en: string, zh: string, kind = "info", ref?: string): LogEntry => ({ en, zh, kind, ...(ref ? { ref } : {}) });
 
 // ------------------------------------------------------------------ the filing row
@@ -221,7 +221,7 @@ async function sendFax(f: Filing, d: Dest, retry = false) {
   const res = await fetch(`${TELNYX}/faxes`, {
     method: "POST",
     headers: { Authorization: `Bearer ${Deno.env.get("TELNYX_API_KEY")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ connection_id: Deno.env.get("TELNYX_FAX_CONNECTION_ID"), from: Deno.env.get("TELNYX_FAX_FROM"), to, media_url, quality: "high", monochrome: true }),
+    body: JSON.stringify({ connection_id: Deno.env.get("TELNYX_FAX_CONNECTION_ID"), from: Deno.env.get("TELNYX_FAX_FROM"), to, media_url, quality: d.faxQuality ?? "high", monochrome: true }),
     signal: AbortSignal.timeout(30000),
   }).catch((e) => { console.error("telnyx:", describe(e)); return null; });
   const body = res ? await res.json().catch(() => ({})) : {};

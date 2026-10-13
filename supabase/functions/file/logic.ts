@@ -22,6 +22,7 @@ export type Filing = {
   channel: Channel | null; agent_state: string | null; agent_log: LogEntry[]; handoff_url: string | null;
   provider_ref: string | null; submit_clicked_at: string | null; attempts: number; requirements_checked: boolean;
   confirmation_number: string | null; portal_url: string | null;
+  fee_estimate?: number | string | null;            // the agency fee; paid by the person, so never sent by email, fax or mail
 };
 
 export type Env = {
@@ -102,10 +103,15 @@ export type Facts = { hasLogin: boolean; mailConnected: boolean };
 
 /** The first channel that fits, in order: portal, email, fax, mail, else the team. A wet signature rules out
     every channel that would send our copy (email, fax and mail); the person signs it themselves. */
+/** The filing carries an agency fee. */
+export const feeDue = (f: Filing): boolean => Number(f.fee_estimate ?? 0) > 0;
+
 export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Channel {
   if (!d) return "team";
   const on = (c: Channel) => env.channels.includes(c);
-  if (d.portal && facts.hasLogin && env.portalWorker && on("portal")) return "portal";
+  if (d.portal && (facts.hasLogin || d.noLogin) && env.portalWorker && on("portal")) return "portal";
+  // An agency fee can't travel in an email, a fax or a letter from Placetta: the team takes the filing with the payment.
+  if (feeDue(f)) return "team";
   if (d.signature === "wet") return signedCopy(f) && canFaxSigned(d, env) ? "fax" : "team";
   if (d.email && facts.mailConnected && on("email")) return "email";
   if (d.fax && env.fax && on("fax")) return "fax";

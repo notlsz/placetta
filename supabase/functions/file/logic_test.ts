@@ -100,3 +100,14 @@ Deno.test("the agency email names the form and the business", () => {
   assertEquals(e.subject, "Form SS-4: Acme LLC");
   assert(e.body.includes("authorization"));
 });
+
+Deno.test("a filing with an agency fee never goes by email, fax or mail; a portal still takes it", () => {
+  const paid = filing({}, { fee_estimate: 250 });
+  assertEquals(pick(paid, dest({ email: "a@x.gov" }), ENV, { hasLogin: false, mailConnected: true }), "team");
+  assertEquals(pick(paid, dest({ portal: "x.gov" }), ENV, { hasLogin: true, mailConnected: true }), "portal");
+  assertEquals(pick(filing({}, { fee_estimate: "0.00" }), dest({ email: "a@x.gov" }), ENV, { hasLogin: false, mailConnected: true }), "email");
+});
+Deno.test("a portal that files without an account runs with no saved login", () => {
+  assertEquals(pick(filing(), dest({ portal: "x.gov", noLogin: true }), ENV, { hasLogin: false, mailConnected: false }), "portal");
+  assertEquals(pick(filing(), dest({ portal: "x.gov" }), ENV, { hasLogin: false, mailConnected: false }), "fax");
+});
