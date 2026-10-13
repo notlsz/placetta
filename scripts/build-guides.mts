@@ -486,7 +486,7 @@ ${ANSWERS.map(a => {
 ${guides.map(g => `### ${g.biz.plural.en} in ${g.place.name.en}\n${ORIGIN}${guidePath(g, "en")}\n${g.forms.map((f, i) => `${i + 1}. ${f.title.en}, ${f.agency.en}. ${clean(f.how.en)} Fee: ${fee(f, "en")}. ${f.url}`).join("\n")}`).join("\n\n")}
 `);
 
-const site = ["/", "/help/", "/privacy.html", "/terms.html"].map(p => `<url><loc>${ORIGIN}${p}</loc></url>`);
+const site = ["/", "/help/", "/privacy.html", "/terms.html", "/authorization.html", "/ai.html"].map(p => `<url><loc>${ORIGIN}${p}</loc></url>`);
 const sm = urls.map(u => `<url><loc>${ORIGIN}${u.path}</loc><lastmod>${lastmodOf(u.path)}</lastmod><priority>${u.pri}</priority><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "zh-CN" : "en"}" href="${ORIGIN}${u.path}"/><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "en" : "zh-CN"}" href="${ORIGIN}${u.alt}"/></url>`);
 writeFileSync("site/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...site, ...sm].join("\n")}\n</urlset>\n`);
 writeFileSync(DATES_FILE, JSON.stringify(Object.fromEntries(Object.entries(NEXT_DATES).sort()), null, 0).replace(/},"/g, '},\n"') + "\n");

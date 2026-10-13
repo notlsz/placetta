@@ -1,7 +1,7 @@
 -- Proof of consent for texts and calls (TCPA; the FCC's 2024 ruling that AI voices are "artificial" voices, and its
 -- 2025 revocation rule). Every change to a person's phone consent is written to an append-only ledger: linking a
 -- number, turning texts or calls on or off, STOP and START, and unlinking. Each row keeps the number, what changed, the
--- version of the disclosure the person saw in Settings, and when. Rows outlive the account (user_id becomes null) so
+-- version of the disclosure the person saw in Settings, and when. Rows outlive the account (the id stays, unlinked) so
 -- consent can still be shown if a call is ever challenged; they're kept 5 years. Safe to run twice.
 
 -- The version of the consent text shown in Settings, "Text and call Odelia" (src/Settings.tsx). Change both together.
@@ -10,7 +10,7 @@ language sql immutable set search_path = '' as $$ select '2026-10-13'::text $$;
 
 create table if not exists public.phone_consent_log (
   id bigint generated always as identity primary key,
-  user_id uuid references auth.users(id) on delete set null,
+  user_id uuid,   -- no foreign key: the record must survive the account (and be written while it's being deleted)
   number text not null,
   event text not null check (event in ('linked', 'texts_on', 'texts_off', 'calls_on', 'calls_off', 'stop', 'start', 'unlinked')),
   disclosure_version text not null,
