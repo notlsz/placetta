@@ -14,6 +14,8 @@
 // odelia-sms sends them outside their quiet hours, at most one call and three texts a day.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
+// @deno-types="../_shared/opening.d.ts"
+import { normalizeState, openingLine, openingPath } from "../_shared/opening.js";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -88,6 +90,29 @@ export function storeUpdates(ws: string, stores: unknown, today: string): Update
         title: { en: `Lapsed: ${store.en}, ${name.en}`, zh: `已过期：${store.zh}，${name.zh}` },
         body: { en: `It expired ${p.expires}. Operating without it risks a fine or a closure.`, zh: `已于 ${p.expires} 过期。无证经营可能被罚款或停业。` } });
     }
+  }
+  return out;
+}
+
+/**
+ * Stores still opening whose permits no longer keep the opening date (or barely do): one update each time the verdict
+ * or the step holding it up changes, naming that step. A late one also reaches the owner's phone.
+ */
+export function openingUpdates(ws: string, state: unknown, today: string): Update[] {
+  if (!state || typeof state !== "object") return [];
+  let w: ReturnType<typeof normalizeState>;
+  try { w = normalizeState("", state as Record<string, unknown>); } catch { return []; }
+  const out: Update[] = [];
+  for (const s of Array.isArray(w.stores) ? w.stores : []) {
+    if (!s || s.stage !== "opening" || typeof s.id !== "string" || !isDate(s.plannedOpen)) continue;
+    let p;
+    try { p = openingPath(s, w, today); } catch { continue; }
+    if (p.verdict !== "late" && p.verdict !== "tight") continue;
+    const line = openingLine(p), store = bi(s.name);
+    if (!line) continue;
+    out.push({ workspace_id: ws, kind: "deadline", app_id: p.blocker?.app ?? null, dedupe: `opening:${s.id}:${p.verdict}:${p.blocker?.app ?? ""}:${p.blocker?.status ?? ""}`,
+      title: { en: `${store.en}: ${line.en}`, zh: `${store.zh}：${line.zh}` },
+      body: { en: `Planned opening ${s.plannedOpen}; permits in hand around ${p.landing}. Ask Odelia to catch it up.`, zh: `计划 ${s.plannedOpen} 开业；预计 ${p.landing} 前后取得全部许可。可以让 Odelia 追回进度。` } });
   }
   return out;
 }
@@ -248,7 +273,7 @@ Deno.serve(async (req) => {
     for (const w of rows ?? []) {
       names.set(w.id, String(w.name ?? "Your business"));
       const st = (w.state ?? {}) as { deadlines?: unknown };
-      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, today), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, today)]);
+      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, today), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, today), ...openingUpdates(w.id, w.state, today)]);
       states.set(w.id, (w.state ?? null) as { deadlines?: unknown; stores?: unknown } | null);
       all.push({ id: w.id, state: { apps: (w.state as { apps?: unknown } | null)?.apps } });
     }

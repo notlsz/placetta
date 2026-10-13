@@ -15,6 +15,18 @@ import { readdirSync, readFileSync } from "node:fs";
 
 /* ------------------------------------------------------------------ checks */
 
+
+/** What a person would really put on lines with a format (the check before approval refuses a name in a phone line). */
+const real = (label: string): string | undefined =>
+  /\b(ssn|social security|itin)\b/i.test(label) ? "123-45-6789"
+  : /\b(ein|fein)\b|employer identification/i.test(label) ? "12-3456789"
+  : /e-?mail/i.test(label) ? "mei@luckyleaf.com"
+  : /phone|telephone|mobile|\bcell\b|\bfax\b/i.test(label) ? "718-555-0100"
+  : /\bzip\b|postal code/i.test(label) ? "11354"
+  : /^state$/i.test(label) ? "NY"
+  : /date|expir|opening|start|effective|birth/i.test(label) && !/update|candidate|mandate/i.test(label) ? "2027-01-15"
+  : undefined;
+
 let failed = 0, passed = 0;
 const ok = (cond: unknown, m: string, detail?: unknown) => {
   if (cond) { passed++; console.log("ok  ", m); }
@@ -159,7 +171,7 @@ async function mapStore() {
         const prepared = c.outs("prepare_application").filter(p => !p.already_in_workspace);
         const ss4 = prepared.find(p => String(p.application_id).includes("employer-identification"))!, fse = prepared.find(p => String(p.application_id).includes("food-service"))!;
         return ask(
-          ["fill_fields", { application_id: ss4.application_id, fields: (ss4.empty_fields as string[]).map(l => ({ label: l, value: "Lucky Leaf Tea LLC (" + l.slice(0, 12) + ")", source: "From Context" })) }],
+          ["fill_fields", { application_id: ss4.application_id, fields: (ss4.empty_fields as string[]).map(l => ({ label: l, value: real(l) ?? "Lucky Leaf Tea LLC (" + l.slice(0, 12) + ")", source: "From Context" })) }],
           // the form's own label without its "Business:" prefix: used to add a duplicate field and leave the line empty
           ["fill_fields", { application_id: fse.application_id, fields: [{ label: "Legal name and trade name", value: "Lucky Leaf Tea LLC, Lucky Leaf" }, { label: "Premises address", value: "136-20 Roosevelt Ave, Flushing, NY 11354" }, { label: "Owner", value: "Mei Chen" }, { label: "Seats and hours", value: "12 seats, 10am to 10pm" }] }],
           ["add_deadline", { date: "2027-03-01", title: "Planned opening", kind: "due" }],

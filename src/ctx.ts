@@ -74,7 +74,7 @@ export type Ctx = {
   run(req: Request, shown: string | null): void;
   openApp(id: string, tab?: Tab, edit?: boolean): void;
   openApproval(id: string): void;
-  approve(id: string, sig?: Signed): void;
+  approve(id: string, sig?: Signed): void | Promise<void>;
   upload(app: string, item: string, files?: File[]): void;
   download(docId: string): void;
   downloadApp(appId: string): void;

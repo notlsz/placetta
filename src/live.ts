@@ -7,6 +7,7 @@ import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { daysFromNow, money, nowIso } from "./time";
+import { openingLine, openingPath, preflight } from "./smart";
 import { replyLanguage } from "./langs";
 import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills";
 import { docx } from "./files";
@@ -628,13 +629,17 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             L("The receipt and every status change appear here", "收据和每次状态变化都会显示在这里"),
           ] : does.length ? does : [L(`Submit the application below to ${a.agency.en}`, `向${a.agency.zh}提交下方申请`), ...(fee ? [L(`Pay ${money(fee, a.currency)} with the card ending 4821`, `使用尾号 4821 的银行卡支付 ${money(fee, a.currency)}`)] : []), L("Save the receipt to Documents", "将收据保存到文件")],
         };
+        // a second look at every line before the person sees it: what's wrong goes back to Odelia, not to them
+        const pf = preflight(get(), ap, daysFromNow(0));
+        if (pf.errors.length) return { approval_requested: false, why: "The check before approval found lines that are wrong. Nothing was put in front of the person.",
+          fix: pf.errors.map(e => `${e.label.en}: ${e.note.en}`), do_next: "Correct these with fill_fields from the documents; ask the person only for what no document shows. Then call this again." };
         S("composing", L(`Asking for your approval to file the ${nm(a)}`, `请您批准提交${nm(a)}`));
         apply(w => audit("agent", L("Asked for approval", "请求批准"), a.name, fee ? same(money(fee, a.currency)) : undefined)(setApp(a.id, { status: "ready", next: L("Ready to file. Waiting for your approval", "可以提交，等待您批准") })(addApproval(ap)(w))));
         made.approvals.push(ap.id); made.apps.add(a.id); mark();
         // learn it: the next filing of this form fills itself
         const off = a.official ? formById(a.official) : undefined;
         if (off) { const before = get().skills?.length ?? 0; apply(w => learnForm(w, get().apps.find(x => x.id === a.id) ?? a, off.form, off.agency, touches.get(a.id) ?? 1)); if ((get().skills?.length ?? 0) > before) made.skills.push(B(`File ${off.form}`, `申报${off.form}`)); }
-        return { approval_id: ap.id };
+        return { approval_id: ap.id, checked_lines: pf.checked, ...(pf.warnings.length ? { worth_mentioning: pf.warnings.map(e => `${e.label.en}: ${e.note.en}`) } : {}) };
       },
     },
     {
@@ -920,7 +925,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "check_progress",
-      description: "Get where everything stands: each application's store, status, who it's waiting on (you, Placetta's team or the agency), confirmation numbers, days since the last update, missing documents and empty fields, approvals waiting, overdue items and deadlines in the next 30 days. Pass store_id (or a city) for one store. Call it first for any question about progress, status or what's next.",
+      description: "Get where everything stands: each application's store, status, who it's waiting on (you, Placetta's team or the agency), confirmation numbers, days since the last update, missing documents and empty fields, approvals waiting, overdue items and deadlines in the next 30 days, and for each store still opening whether its permits keep the opening date (days to spare, and the one step holding it up: lead with that when it's late or tight). Pass store_id (or a city) for one store. Call it first for any question about progress, status or what's next.",
       inputSchema: { type: "object", properties: { store_id: { type: "string", description: "Only this store, by id, name or city" } } },
       execute(i) {
         const all = get(), today = daysFromNow(0), stores = all.stores ?? [];
@@ -950,9 +955,16 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           };
         });
         const count = (k: string) => apps.filter(a => a.waiting_on === k).length;
+        // where each opening store's permits put its opening date, and the one step holding it up
+        const opening = (st: Store) => {
+          if (st.stage !== "opening") return undefined;
+          const p = openingPath(st, all, today);
+          return { verdict: p.verdict, permits_in_hand_by: p.landing ?? undefined, days_to_spare: p.slack ?? undefined, holding_it_up: p.blocker ? { application_id: p.blocker.app, name: p.blocker.name[lang], waiting_on: p.blocker.on, why: p.blocker.why[lang] } : undefined,
+            say: openingLine(p)?.[lang], estimated_without_agency_time: p.guessed || undefined };
+        };
         mark();
         return {
-          today, ...(pick ? { store: { id: pick.id, name: pick.name[lang], address: pick.address, stage: pick.stage, planned_open: pick.plannedOpen } } : stores.length > 1 ? { stores: stores.map(x => ({ id: x.id, name: x.name[lang], stage: x.stage })) } : {}),
+          today, ...(pick ? { store: { id: pick.id, name: pick.name[lang], address: pick.address, stage: pick.stage, planned_open: pick.plannedOpen, opening: opening(pick) } } : stores.length ? { stores: stores.map(x => ({ id: x.id, name: x.name[lang], stage: x.stage, planned_open: x.plannedOpen, opening: opening(x) })) } : {}),
           counts: { done: count("done"), with_agency: count("agency"), with_placetta_team: count("placetta_team"), waiting_on_the_person: count("you"), for_odelia_to_prepare: count("odelia"), waiting_on_someone_else: count("someone_else") },
           applications: apps,
           approvals_waiting: w.approvals.map(a => ({ id: a.id, kind: a.kind, title: a.title[lang] })),

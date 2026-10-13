@@ -5,6 +5,8 @@ import { useApp } from "./ctx";
 import { unlockAudio, useNarrow, useSimulatedVoice, useSpeechToText, type Speaker } from "./hooks";
 import { LIVE_SUGGESTIONS, SUGGESTIONS } from "./model";
 import { I } from "./ui";
+import { suggestions } from "./smart";
+import { daysFromNow } from "./time";
 import { AgentBot } from "./Bot";
 
 const BEAM = ["#7399C6", "#9DB8DA", "#5F88BA", "#B9CFE8", "#8FAED3", "#C9D8EC", "#A7BFE0"];
@@ -31,7 +33,7 @@ const micAllowedHere = () => {
  * Voice mode lives here too, so there is only ever one microphone session.
  */
 export function Composer({ variant, tts, asked, showLive = true }: { variant: "dock" | "panel"; tts: Speaker; asked: string[]; showLive?: boolean }) {
-  const { t, b, lang, busy, live, ask, upload, stop, mode } = useApp();
+  const { t, b, lang, busy, live, ask, upload, stop, mode, ws } = useApp();
   const [draft, setDraft] = useState("");
 
   const mic = useMicrophone();
@@ -44,7 +46,8 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const clearTyper = () => { typer.current.forEach(clearTimeout); typer.current = []; };
   const listening = (voice === "mic" && mic.state === "live") || voice === "sim";
   // the sample's scripted demo answers its own suggestions; a live agent gets tasks it does end to end
-  const open = useMemo(() => (mode === "demo" ? SUGGESTIONS : LIVE_SUGGESTIONS).filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked, mode]);
+  // a live agent's come from the workspace as it is now: a store slipping, filings waiting, a permit about to lapse
+  const open = useMemo(() => (mode === "demo" ? SUGGESTIONS : suggestions(ws, daysFromNow(0), LIVE_SUGGESTIONS)).filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked, mode, ws]);
   const narrow = useNarrow(560);
 
   const endVoice = useCallback((send: boolean, text?: string) => {

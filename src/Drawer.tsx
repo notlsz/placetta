@@ -5,7 +5,8 @@ import type { Application, CheckItem, Doc } from "./model";
 import { formById, METHOD } from "./forms/registry";
 import { saveFile } from "./files";
 import { fmtDay } from "./time";
-import { fmtStamp } from "./time";
+import { daysFromNow, fmtStamp } from "./time";
+import { preflight } from "./smart";
 import { FileCard, I, LevelTag, Modal, Pill, Sample, Sheet, StatusChip, feeText, feeTotal } from "./ui";
 import { INK } from "./pages";
 import { filingBlockers } from "./core";
@@ -276,7 +277,9 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const off = app?.official ? formById(app.official) : undefined;
   const needSig = !!cloud && a.kind === "file" && !!off?.sign && !!off.esign;
   const left = app && a.kind === "file" ? filingBlockers(app) : { empty: [], missing: [] };
-  const blocked = left.empty.length + left.missing.length > 0;
+  const pf = preflight(ws, a, daysFromNow(0));
+  const blocked = left.empty.length + left.missing.length + pf.errors.length > 0;
+  const zh = lang === "zh";
   return (
     <Modal label={b(a.title)} onClose={onClose} wide>
       <header className="m-h">
@@ -286,7 +289,19 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body">
-        {blocked && (
+        {(a.kind === "file" || a.kind === "send" || a.kind === "change") && pf.checked > 0 && (
+          <section className={"ap-check" + (pf.errors.length ? " bad" : pf.warnings.length ? " warn" : " ok")} aria-live="polite">
+            <h3><I.check />{pf.errors.length || pf.warnings.length
+              ? (zh ? `已核对 ${pf.checked} 项：${pf.errors.length ? `${pf.errors.length} 项需要更正` : ""}${pf.errors.length && pf.warnings.length ? "，" : ""}${pf.warnings.length ? `${pf.warnings.length} 项请留意` : ""}` : `Checked ${pf.checked} lines: ${[pf.errors.length && `${pf.errors.length} to fix`, pf.warnings.length && `${pf.warnings.length} to look at`].filter(Boolean).join(", ")}`)
+              : (zh ? `已核对 ${pf.checked} 项，格式、日期、地址和费用均无问题` : `Checked ${pf.checked} lines: formats, dates, address and fee all check out`)}</h3>
+            {(pf.errors.length > 0 || pf.warnings.length > 0) && (
+              <ul>
+                {[...pf.errors, ...pf.warnings].map((c, i) => <li key={i} className={c.level}><b>{b(c.label)}</b> {b(c.note)}</li>)}
+              </ul>
+            )}
+          </section>
+        )}
+        {left.empty.length + left.missing.length > 0 && (
           <section className="ap-left" role="alert">
             <h3>{lang === "zh" ? "提交前还需要" : "Needed before it can be filed"}</h3>
             <ul>

@@ -22,7 +22,8 @@ import { Stores } from "./Stores";
 import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
 import { UPDATED } from "./legal";
-import { daysUntil, inDays, nowIso } from "./time";
+import { daysFromNow, daysUntil, inDays, nowIso } from "./time";
+import { preflight } from "./smart";
 import { I, Modal } from "./ui";
 import * as api from "./cloud/api";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
@@ -439,6 +440,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     // every kind of filing: nothing goes out with an empty field or a missing document
     const filingApp = a.kind === "file" ? w.apps.find(x => x.id === a.app) : undefined;
     if (filingApp && !readyToFile(filingApp)) { say(blockersSay(filingApp)[lang]); return; }
+    // and nothing goes out with a line the second look says is wrong (an EIN that isn't one, an expired date)
+    const pf = a.kind === "file" || a.kind === "send" ? preflight(w, a, daysFromNow(0)) : null;
+    if (pf?.errors.length) { say(lang === "zh" ? `还不能提交：${pf.errors.map(e => `${e.label.zh}（${e.note.zh}）`).join("；")}` : `Not yet: ${pf.errors.map(e => `${e.label.en} (${e.note.en})`).join("; ")}`); return; }
     if (a.kind === "change" && a.change) {
       const c = a.change;
       setWs(x => audit("you", B("Confirmed a change", "确认更改"), a.title)(dropApproval(id)(applyChange(c)(x))));

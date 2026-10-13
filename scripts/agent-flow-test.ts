@@ -11,6 +11,17 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readiness } from "../src/stores.ts";
 import { B, SAMPLE, same, type Workspace } from "../src/model";
 
+/** A believable answer for a form line, so the check before approval sees real-looking values (it refuses "test value" as a phone). */
+const plausible = (label: string) =>
+  /\b(ein|fein)\b|employer identification/i.test(label) ? "12-3456789"
+  : /\b(ssn|social security|itin)\b/i.test(label) ? "123-45-6789"
+  : /e-?mail/i.test(label) ? "owner@moonleaf.com"
+  : /phone|telephone|mobile|\bcell\b|\bfax\b/i.test(label) ? "512-555-0100"
+  : /\bzip\b|postal code/i.test(label) ? "78701"
+  : /^state$/i.test(label) ? "TX"
+  : /date|expir|opening|start|effective|birth/i.test(label) && !/update|candidate|mandate/i.test(label) ? "2027-03-01"
+  : "test value";
+
 let fails = 0;
 const ok = (cond: unknown, m: string) => { if (cond) console.log("ok  ", m); else { console.error("FAIL", m); fails++; } };
 
@@ -85,7 +96,7 @@ for (const c of CASES) {
 
   // fill the rest, then: apps without missing documents go for approval; apps with them don't
   for (const a of w.apps.filter(a => ids.includes(a.id))) {
-    const empty = a.fields.filter(f => !f.value).map(f => ({ label: f.label.en, value: "test value" }));
+    const empty = a.fields.filter(f => !f.value).map(f => ({ label: f.label.en, value: plausible(f.label.en) }));
     if (empty.length) await run(T("fill_fields"), { application_id: a.id, fields: empty });
   }
   let asked = 0, held = 0;
@@ -188,8 +199,12 @@ ok(!["N/A", "None", "0", "No", "Unknown Pleasures LLC", "TBD Holdings Inc", "-5"
   ok(!!up.err && k.get().apps.find(a => a.id === id)!.status !== "ready", "edge: it can't be marked ready by hand, only through approval");
 
   await k.call("fill_fields", { application_id: id, fields: [{ label: "Owner or responsible person", value: "Jamie Chen" }, { label: "Contact email", value: "ops@example.com" }] });
-  const left = k.get().apps.find(a => a.id === id)!.fields.filter(f => isBlank(f.value)).map(f => ({ label: f.label.en, value: "x" }));
+  const left = k.get().apps.find(a => a.id === id)!.fields.filter(f => isBlank(f.value)).map(f => ({ label: f.label.en, value: plausible(f.label.en) }));
   if (left.length) await k.call("fill_fields", { application_id: id, fields: left });
+  await k.call("fill_fields", { application_id: id, fields: [{ label: "Contact email", value: "ops at example" }] });
+  const refused = (await k.call("request_filing_approval", { application_id: id })).r!;
+  ok(refused.approval_requested === false && (refused.fix as string[]).some(x => /Contact email/.test(x)) && !k.get().approvals.some(x => x.app === id), "edge: a malformed email goes back to Odelia, never to the person");
+  await k.call("fill_fields", { application_id: id, fields: [{ label: "Contact email", value: "ops@example.com" }] });
   const ap = (await k.call("request_filing_approval", { application_id: id })).r!;
   ok(!!ap.approval_id, "edge: complete, it goes for approval");
   ok((await k.call("request_filing_approval", { application_id: id })).r!.note === "Already waiting for approval", "edge: asking twice doesn't make two approvals");

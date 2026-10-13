@@ -3,7 +3,10 @@ import { ThinkingOrb } from "thinking-orbs";
 import { useApp } from "./ctx";
 import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
-import { FileCard, Footer, I, Pill, StatusChip, feeText, feeTotal } from "./ui";
+import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
+import { preflight } from "./smart";
+import { readyToFile } from "./core";
+import { formById } from "./forms/registry";
 import type { Key } from "./i18n";
 import { AgentBot, TaskBot, Working } from "./Bot";
 import { StoresStrip } from "./Stores";
@@ -38,6 +41,50 @@ function SecHead({ title, count, more, onMore }: { title: string; count?: number
 const KIND_ICON = { file: I.form, send: I.message, upload: I.clip, pay: I.card, change: I.pencil };
 
 /** Something only you can do: frosted, with the one action it needs. */
+/**
+ * Approval fatigue is how a rubber stamp starts. Filings that passed every check (complete, no line flagged, no
+ * signature to draw) can be approved together, from one list that still names each one and its fee. Anything with a
+ * flag, a signature or a payment stays one at a time.
+ */
+function BatchApprove() {
+  const { b, lang, ws, busy, approve, cloud } = useApp();
+  const [open, setOpen] = useState(false);
+  const [going, setGoing] = useState(false);
+  const zh = lang === "zh";
+  const today = new Date().toISOString().slice(0, 10);
+  const clean = ws.approvals.filter(a => {
+    if (a.kind !== "file") return false;
+    const app = ws.apps.find(x => x.id === a.app);
+    if (!app || !readyToFile(app)) return false;
+    const off = app.official ? formById(app.official) : undefined;
+    if (cloud && off?.sign && off.esign) return false;
+    const pf = preflight(ws, a, today);
+    return !pf.errors.length && !pf.warnings.length;
+  });
+  if (clean.length < 2 || (cloud && cloud.plan !== "monthly")) return null;
+  const go = async () => { setGoing(true); try { for (const a of clean) await approve(a.id); } finally { setGoing(false); setOpen(false); } };
+  return (
+    <>
+      <div className="batch-row">
+        <span>{zh ? `${clean.length} 份申请已通过全部核对，没有需要留意的地方。` : `${clean.length} filings passed every check with nothing flagged.`}</span>
+        <Pill disabled={busy} sm onClick={() => setOpen(true)}>{zh ? `一起批准 ${clean.length} 份` : `Approve ${clean.length} together`}</Pill>
+      </div>
+      {open && (
+        <Modal label={zh ? "一起批准" : "Approve together"} onClose={() => setOpen(false)}>
+          <header className="m-h"><h2>{zh ? `批准 ${clean.length} 份申请` : `Approve ${clean.length} filings`}</h2><p>{zh ? "每份都已逐项核对。批准后交由快哉团队提交，机构费用由您直接支付。" : "Each was checked line by line. Once approved, Placetta's team files them; agency fees are paid by you directly."}</p></header>
+          <div className="m-body">
+            <ol className="batch-list">{clean.map(a => { const app = ws.apps.find(x => x.id === a.app)!; return <li key={a.id}><b>{b(a.title)}</b>{a.agency ? `, ${b(a.agency)}` : ""}. {feeTotal(app) ? money(feeTotal(app), app.currency) : zh ? "无费用" : "No fee"}</li>; })}</ol>
+          </div>
+          <footer className="m-f"><div className="m-btns">
+            <button type="button" className="pill quiet" onClick={() => setOpen(false)}>{zh ? "逐份查看" : "Review one by one"}</button>
+            <Pill kind="ink" disabled={busy || going} onClick={() => void go()}>{zh ? "全部批准" : "Approve all"}</Pill>
+          </div></footer>
+        </Modal>
+      )}
+    </>
+  );
+}
+
 export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
   const { b, t, lang, ws, busy, openApproval, openApp, approve, cloud } = useApp();
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
@@ -108,7 +155,7 @@ function Welcome() {
             ? <Pill kind="ink" onClick={() => cloud.openPlans("start")}>{b(B("Get your entry plan, $299", "开通开店计划，$299"))}</Pill>
             : <Pill kind="ink" disabled={busy} onClick={start}>{b(B("Map my licenses", "梳理我的执照"))}</Pill>}
         </div>
-        {cloud && cloud.plan === "none" && <p className="ctx">{b(B("One market, one time. Credited toward your first year.", "每个市场一次性付费，可抵扣首年费用。"))}</p>}
+        {cloud && cloud.plan === "none" && <p className="ctx">{b(B("One market, one time. Credited toward your first year if you start a plan within 60 days.", "每个市场一次性付费；60 天内开通套餐可抵扣首年费用。"))}</p>}
       </header>
       <Footer />
     </div>
@@ -146,6 +193,7 @@ export function Overview() {
 
       <section className="sec">
         <SecHead title={t("needsYou")} count={ws.approvals.length} />
+        <BatchApprove />
         {ws.approvals.length ? <div className="stack">{ws.approvals.map(a => <NeedRow key={a.id} a={a} />)}</div> : <p className="quiet">{t("allClear")}</p>}
       </section>
 
