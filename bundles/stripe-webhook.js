@@ -88,6 +88,14 @@ Deno.serve(async (req) => {
           patch.entry_paid_at = (/* @__PURE__ */ new Date()).toISOString();
           await log(ws, { en: "Paid", zh: "\u5DF2\u4ED8\u6B3E" }, "entry");
         }
+        if (o.mode === "payment" && o.metadata?.kind === "pack" && o.payment_status === "paid") {
+          const usd = Math.max(0, Math.min(1e3, Number(o.metadata?.credit_usd) || 0));
+          if (usd > 0) {
+            const { error } = await admin.rpc("ai_add_credit", { ws, p_usd: usd });
+            if (error) throw new Error(error.message);
+            await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: null, action: { en: "Added an Odelia pack", zh: "\u8D2D\u4E70 Odelia \u52A0\u91CF\u5305" }, object: { en: `$${usd} of Odelia allowance`, zh: `$${usd} Odelia \u989D\u5EA6` } });
+          }
+        }
         if (o.mode === "subscription" && o.metadata?.plan === "locations") {
           const { data: bc } = await admin.from("billing").select("checkout_store_ids").eq("workspace_id", ws).maybeSingle();
           const listed = bc?.checkout_store_ids;
@@ -106,12 +114,16 @@ Deno.serve(async (req) => {
       if (ws) {
         const end = o.current_period_end ?? o.items?.data?.[0]?.current_period_end;
         const status = event.type === "customer.subscription.deleted" ? "canceled" : String(o.status);
+        const locPrice = Deno.env.get("STRIPE_PRICE_LOCATION");
+        const items = o.items?.data ?? [];
+        const paid = status === "active" || status === "trialing" ? items.filter((i) => locPrice && i.price?.id === locPrice).reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
         await admin.from("billing").update({
           stripe_customer_id: o.customer,
           subscription_id: o.id,
           subscription_status: status,
           subscription_plan: o.metadata?.plan ?? null,
-          current_period_end: end ? new Date(end * 1e3).toISOString() : null
+          current_period_end: end ? new Date(end * 1e3).toISOString() : null,
+          paid_locations: paid
         }).eq("workspace_id", ws);
         if (event.type === "customer.subscription.created") await log(ws, { en: "Started", zh: "\u5F00\u901A" }, o.metadata?.plan ?? "starter");
         if (event.type === "customer.subscription.deleted") await log(ws, { en: "Ended", zh: "\u5DF2\u7ED3\u675F" }, o.metadata?.plan ?? "starter");

@@ -1,1 +1,1 @@
-Temporary: each Supabase function from main@c7f7d4dc bundled to one file, for deploying without a Supabase token. Delete after deploy.
+Temporary: Supabase functions from main@31b5468f bundled to one file each, for deploying without a Supabase token. Safe to delete.

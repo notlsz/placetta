@@ -388,10 +388,10 @@ var LINES = {
 };
 function greeting(lang, name, mode, business) {
   if (lang === "zh") {
-    const hi2 = `\u60A8\u597D${name ? `\uFF0C${name}` : ""}\uFF0C\u6211\u662F\u5FEB\u54C9\u7684 Odelia\u3002`;
+    const hi2 = `\u60A8\u597D${name ? `\uFF0C${name}` : ""}\uFF0C\u6211\u662F\u5FEB\u54C9\u7684 AI \u52A9\u7406 Odelia\u3002\u672C\u6B21\u901A\u8BDD\u4F1A\u88AB\u8F6C\u5F55\uFF0C\u4EE5\u4FBF\u4E3A\u60A8\u529E\u7406\u3002`;
     return mode === "code" ? `${hi2}\u4E3A\u4E86\u4FDD\u62A4\u60A8\u7684\u8D26\u6237\uFF0C\u6211\u521A\u628A 4 \u4F4D\u9A8C\u8BC1\u7801\u53D1\u5230\u4E86\u60A8\u8D26\u6237\u4E0A\u7684\u624B\u673A\u53F7\u3002\u8BF7\u544A\u8BC9\u6211\u9A8C\u8BC1\u7801\u3002` : mode === "outbound" ? `${hi2}\u6211\u6253\u7535\u8BDD\u662F\u4E3A\u4E86${business}\u7684\u4E00\u4EF6\u6025\u4E8B\u3002\u73B0\u5728\u65B9\u4FBF\u8BF4\u4E24\u53E5\u5417\uFF1F` : `${hi2}\u6709\u4EC0\u4E48\u53EF\u4EE5\u5E2E\u60A8\uFF1F`;
   }
-  const hi = `Hi${name ? ` ${name}` : ""}, it's Odelia from Placetta.`;
+  const hi = `Hi${name ? ` ${name}` : ""}, it's Odelia, Placetta's AI assistant. This call is transcribed so I can help.`;
   return mode === "code" ? `${hi} To keep your account safe, I just texted a 4-digit code to the phone number on your account. What's the code?` : mode === "outbound" ? `${hi} I'm calling about something urgent at ${business}. Is now a good time?` : `${hi} What can I do for you?`;
 }
 function instructions(o) {
