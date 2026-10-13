@@ -678,6 +678,14 @@ Integrations are optional. You decide which ones to connect, and we use each onl
 
 You can disconnect any integration at any time in Settings.
 
+Placetta's use and transfer to any other app of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements: https://developers.google.com/terms/api-services-user-data-policy
+
+- We use Gmail, Google Calendar and Google Drive data only to provide the features you use in Placetta, as listed above.
+- We don't use it for advertising, and we don't sell it.
+- People at Placetta don't read it, except with your permission, for security, or where the law requires.
+- We don't use it, or any other customer content, to train or improve AI models. The AI models that process it on your behalf are bound not to train on it.
+- Google data is stored in the United States with our hosting provider and deleted when you disconnect the integration or delete your account.
+
 ## Agency portal logins
 
 If you save logins for agency websites, they are encrypted in a vault. Placetta's filing software, and our filing team when it takes over, open them only to file for you, and every opening is recorded in your audit trail.
@@ -862,6 +870,14 @@ const PRIVACY_ZH = `生效日期：${UPDATED}。
 - Slack：发布进度更新。
 
 您可以随时在“设置”中断开任何一项集成。
+
+快哉对从 Google API 获得的信息的使用及向其他应用的传输，将遵守《Google API 服务用户数据政策》，包括其中的“有限使用”要求：https://developers.google.com/terms/api-services-user-data-policy
+
+- 我们只将 Gmail、Google Calendar 和 Google Drive 的数据用于提供您在快哉中使用的上述功能。
+- 我们不将其用于广告，也不出售。
+- 除非获得您的许可、出于安全需要或法律要求，快哉的人员不会查看这些数据。
+- 我们不使用这些数据或任何其他客户内容训练或改进 AI 模型。代您处理数据的 AI 模型也不得使用其进行训练。
+- Google 数据存储在美国的托管服务商处，并在您断开该集成或删除账户时删除。
 
 ## 机构网站登录信息
 
