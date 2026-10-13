@@ -1,4 +1,5 @@
-// Stripe Checkout and the billing portal. Prices live in Stripe; their ids come from the Edge Function secrets:
+// Stripe Checkout and the billing portal. Prices live in Stripe, found by lookup key and made on first use
+// (_shared/stripe_catalog.ts), so STRIPE_SECRET_KEY is the only Stripe secret needed. A secret below, when set, wins:
 //   STRIPE_PRICE_ENTRY         one-time $299 a market; credited toward the first year only within 60 days of buying it
 //   STRIPE_PRICE_LOCATION      Essentials: $149 a location a month, billed yearly (quantity = stores, open or opening)
 //   STRIPE_PRICE_LOCATION_PRO  Pro: $299 a location a month, billed yearly (inspection readiness, a larger Odelia allowance)
@@ -11,6 +12,7 @@
 // Credits: entry plans bought in the last 60 days come off the first invoice. Opening fees are not credited.
 // Scale is quoted by the team, so it has no checkout. Actions: prices (any member), checkout, portal, sync_locations (owners).
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { ensureWebhook, priceId, type Item } from "../_shared/stripe_catalog.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -87,8 +89,9 @@ async function locationPrices() {
     const p = await stripeGet(`prices/${encodeURIComponent(id)}`);
     return { amount: (p.unit_amount ?? 0) / 100, currency: String(p.currency ?? "usd").toUpperCase(), interval: p.recurring?.interval ?? null, interval_count: p.recurring?.interval_count ?? null };
   };
-  const [location, pro, opening, opening_food, guarantee, pack] = await Promise.all([PRICE.essentials(), PRICE.pro(), PRICE.retail(), Deno.env.get("STRIPE_PRICE_OPENING_FOOD"), PRICE.guarantee(), PRICE.pack()].map(one));
-  return { location, pro, opening, opening_food, guarantee, pack };
+  const ids = await Promise.all((["essentials", "pro", "retail", "food", "guarantee", "pack", "entry"] as Item[]).map(price));
+  const [location, pro, opening, opening_food, guarantee, pack, entry] = await Promise.all(ids.map(one));
+  return { location, pro, opening, opening_food, guarantee, pack, entry };
 }
 
 type Kind = "retail" | "food" | "complex";
@@ -108,20 +111,30 @@ async function stores(ws: string): Promise<{ id: string; name: string; opening: 
         kind: (s.kind === "retail" || s.kind === "food" || s.kind === "complex" ? s.kind : fallback) as Kind }))
     : [];
 }
-const PRICE = {
-  entry: () => Deno.env.get("STRIPE_PRICE_ENTRY"), essentials: () => Deno.env.get("STRIPE_PRICE_LOCATION"), pro: () => Deno.env.get("STRIPE_PRICE_LOCATION_PRO"),
-  retail: () => Deno.env.get("STRIPE_PRICE_OPENING"), food: () => Deno.env.get("STRIPE_PRICE_OPENING_FOOD") ?? Deno.env.get("STRIPE_PRICE_OPENING"),
-  guarantee: () => Deno.env.get("STRIPE_PRICE_GUARANTEE"), pack: () => Deno.env.get("STRIPE_PRICE_PACK"),
-};
+const env = (k: string) => Deno.env.get(k);
+/** A price id from the catalog: its secret, else found or made in Stripe by lookup key. */
+const price = (i: Item) => priceId(i, env);
 /** Line items for the openings: one per kind, plus the guarantee when asked for. Complex stores are left to a quote. */
-function openingItems(list: { opening: boolean; kind: Kind }[], guarantee: boolean): [string, number][] {
+async function openingItems(list: { opening: boolean; kind: Kind }[], guarantee: boolean): Promise<[string, number][]> {
   const n = (k: Kind) => list.filter((s) => s.opening && s.kind === k).length;
   const retail = n("retail"), food = n("food");
   const items: [string, number][] = [];
-  if (retail && PRICE.retail()) items.push([PRICE.retail()!, retail]);
-  if (food && PRICE.food()) items.push([PRICE.food()!, food]);
-  if (guarantee && retail + food && PRICE.guarantee()) items.push([PRICE.guarantee()!, retail + food]);
+  if (retail) items.push([(await price("retail"))!, retail]);
+  if (food) items.push([(await price("food"))!, food]);
+  if (guarantee && retail + food) items.push([(await price("guarantee"))!, retail + food]);
   return items;
+}
+
+/** The webhook's signing secret lives here when Placetta made the endpoint itself (service role only). */
+const config = {
+  async get(key: string) { const { data } = await admin.from("stripe_config").select("value").eq("key", key).maybeSingle(); return (data?.value as string | undefined) ?? undefined; },
+  async set(key: string, value: string) { const { error } = await admin.from("stripe_config").upsert({ key, value, updated_at: new Date().toISOString() }); if (error) throw new Error(error.message); },
+};
+/** Before anyone pays: Stripe must be able to tell us, or the payment would never reach the workspace. */
+async function webhookReady(): Promise<Response | null> {
+  const how = await ensureWebhook(env, config, `${Deno.env.get("SUPABASE_URL")}/functions/v1/stripe-webhook`);
+  if (how === "manual") return fail(503, "not_configured", "A Stripe webhook to Placetta was made by hand. Set STRIPE_WEBHOOK_SECRET to its signing secret.");
+  return null;
 }
 /** A complex opening (liquor, major build-out) goes to the team for a quote, once per store. */
 async function askForQuote(ws: string, list: { id: string; name: string; opening: boolean; kind: Kind }[]) {
@@ -140,7 +153,7 @@ async function yearOfLocation(loc: string): Promise<{ cents: number; currency: s
 
 /** The entry plan price in cents (what each market's $299 entry plan is credited at). */
 async function entryCents(): Promise<number> {
-  const id = Deno.env.get("STRIPE_PRICE_ENTRY");
+  const id = await price("entry");
   if (!id) return 0;
   try { return Number((await stripeGet(`prices/${encodeURIComponent(id)}`)).unit_amount) || 0; } catch { return 0; }
 }
@@ -181,8 +194,10 @@ Deno.serve(async (req) => {
 
     if (body.action === "checkout" && body.plan === "locations") {
       const tier = body.tier === "pro" ? "pro" : "essentials", guarantee = body.guarantee === true;
-      const loc = tier === "pro" ? PRICE.pro() : PRICE.essentials();
-      if (!loc) return fail(503, "not_configured", `Set ${tier === "pro" ? "STRIPE_PRICE_LOCATION_PRO" : "STRIPE_PRICE_LOCATION"} for per-location billing.`);
+      const loc = await price(tier);
+      if (!loc) return fail(503, "not_configured", "Set STRIPE_SECRET_KEY for per-location billing.");
+      const notReady = await webhookReady();
+      if (notReady) return notReady;
       const all = await stores(ws);
       const p: Record<string, string> = {
         mode: "subscription", success_url: `${back}?billing=success`, cancel_url: `${back}?billing=canceled`,
@@ -191,7 +206,7 @@ Deno.serve(async (req) => {
         "line_items[0][price]": loc, "line_items[0][quantity]": String(Math.max(1, all.length)),
       };
       // Stores already open pay no opening fee; each store still opening pays it once, by kind; complex ones are quoted.
-      openingItems(all, guarantee).forEach(([price, qty], i) => { p[`line_items[${i + 1}][price]`] = price; p[`line_items[${i + 1}][quantity]`] = String(qty); });
+      (await openingItems(all, guarantee)).forEach(([price, qty], i) => { p[`line_items[${i + 1}][price]`] = price; p[`line_items[${i + 1}][quantity]`] = String(qty); });
       const quoted = await askForQuote(ws, all);
       // The entry plans are credited toward the first year when bought in the last 60 days.
       const year = await yearOfLocation(loc);
@@ -214,10 +229,10 @@ Deno.serve(async (req) => {
     if (body.action === "sync_locations") {
       // Keep the subscription's store count in step with the workspace, and add the opening fee for new stores.
       const subId = bill?.subscription_id as string | null | undefined;
-      if (!subId || !PRICE.essentials()) return json(200, { ok: true, synced: false });
+      if (!subId) return json(200, { ok: true, synced: false });
       const sub = await stripeGet(`subscriptions/${encodeURIComponent(subId)}`);
       if (sub?.metadata?.plan !== "locations" || !["active", "trialing", "past_due"].includes(sub.status)) return json(200, { ok: true, synced: false });
-      const locs = [PRICE.essentials(), PRICE.pro()].filter(Boolean);
+      const locs = (await Promise.all([price("essentials"), price("pro")])).filter(Boolean);
       const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => locs.includes(i.price?.id));
       const all = await stores(ws);
       if (item && item.quantity !== Math.max(1, all.length)) await stripe(`subscription_items/${item.id}`, { quantity: String(Math.max(1, all.length)), proration_behavior: "create_prorations" });
@@ -225,8 +240,8 @@ Deno.serve(async (req) => {
       const fresh = all.filter((s) => !charged.has(s.id));
       const openings = fresh.filter((s) => s.opening && s.kind !== "complex").length;
       // a new store still opening: its opening fee (and the guarantee, when the plan has it) on the next invoice
-      if (sub.customer) for (const [price, qty] of openingItems(fresh, sub.metadata?.guarantee === "1"))
-        await stripe("invoiceitems", { customer: String(sub.customer), "pricing[price]": price, quantity: String(qty), subscription: subId, "metadata[workspace_id]": ws });
+      if (sub.customer) for (const [id, qty] of await openingItems(fresh, sub.metadata?.guarantee === "1"))
+        await stripe("invoiceitems", { customer: String(sub.customer), "pricing[price]": id, quantity: String(qty), subscription: subId, "metadata[workspace_id]": ws });
       await askForQuote(ws, fresh);
       if (fresh.length) await admin.from("billing").update({ charged_store_ids: [...charged, ...fresh.map((s) => s.id)] }).eq("workspace_id", ws);
       return json(200, { ok: true, synced: true, stores: all.length, new_openings: openings });
@@ -235,15 +250,17 @@ Deno.serve(async (req) => {
     // An Odelia pack: more AI allowance on top of the plan, carried over until it's used (like Devin's extra ACUs).
     // Only for a paid plan: a trial or an ended entry plan moves to a plan instead.
     if (body.action === "pack") {
-      const price = Deno.env.get("STRIPE_PRICE_PACK");
-      if (!price) return fail(503, "not_configured", "Set STRIPE_PRICE_PACK for Odelia packs.");
+      const pack = await price("pack");
+      if (!pack) return fail(503, "not_configured", "Set STRIPE_SECRET_KEY for Odelia packs.");
+      const notReady = await webhookReady();
+      if (notReady) return notReady;
       const { data: budget } = await admin.rpc("ai_budget", { ws });
       const plan = (budget as { plan?: string } | null)?.plan;
       if (plan !== "monthly" && plan !== "entry" && plan !== "comped") return fail(409, "plan_required", "Packs add to a plan. Pick a plan first.");
       const packs = Math.max(1, Math.min(10, Math.floor(Number(body.packs) || 1)));
       const credit = Math.max(1, Number(Deno.env.get("PACK_CREDIT_USD") ?? "25"));
       const p: Record<string, string> = {
-        mode: "payment", "line_items[0][price]": price, "line_items[0][quantity]": String(packs),
+        mode: "payment", "line_items[0][price]": pack, "line_items[0][quantity]": String(packs),
         success_url: `${back}?billing=success`, cancel_url: `${back}?billing=cancel`, client_reference_id: ws,
         "metadata[workspace_id]": ws, "metadata[kind]": "pack", "metadata[packs]": String(packs), "metadata[credit_usd]": String(credit * packs),
       };
@@ -254,13 +271,15 @@ Deno.serve(async (req) => {
 
     if (body.action === "checkout") {
       const plan = String(body.plan ?? "");
-      const price = { entry: Deno.env.get("STRIPE_PRICE_ENTRY"), starter: Deno.env.get("STRIPE_PRICE_STARTER"), growth: Deno.env.get("STRIPE_PRICE_GROWTH") }[plan as "entry"];
-      if (!price) return fail(plan === "entry" || plan === "starter" || plan === "growth" ? 503 : 400, plan ? "not_configured" : "bad_request", `Set the Stripe price for the ${plan || "chosen"} plan.`);
+      const chosen = plan === "entry" ? await price("entry") : { starter: Deno.env.get("STRIPE_PRICE_STARTER"), growth: Deno.env.get("STRIPE_PRICE_GROWTH") }[plan as "starter"];
+      if (!chosen) return fail(plan === "entry" || plan === "starter" || plan === "growth" ? 503 : 400, plan ? "not_configured" : "bad_request", `Set the Stripe price for the ${plan || "chosen"} plan.`);
+      const notReady = await webhookReady();
+      if (notReady) return notReady;
       const markets = Math.max(1, Math.min(20, Math.floor(Number(body.markets) || 1)));
       const extra = Math.max(0, Math.min(500, Math.floor(Number(body.extra_locations) || 0)));
       const p: Record<string, string> = {
         mode: plan === "entry" ? "payment" : "subscription",
-        "line_items[0][price]": price,
+        "line_items[0][price]": chosen,
         "line_items[0][quantity]": plan === "entry" ? String(markets) : "1",
         success_url: `${back}?billing=success`,
         cancel_url: `${back}?billing=cancel`,
