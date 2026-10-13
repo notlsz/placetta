@@ -50,7 +50,8 @@ async function accessFor(ws: string, user: { id: string; email?: string; email_c
 }
 
 
-const origins = () => (Deno.env.get("APP_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+// The app's own addresses, plus its Vercel address (which keeps working when a custom domain isn't connected).
+const origins = () => [...(Deno.env.get("APP_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean), "https://placetta.vercel.app"];
 function safeReturn(url: unknown): string | null {
   try {
     const u = new URL(String(url));

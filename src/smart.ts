@@ -7,9 +7,9 @@
 // Pure functions: the app, the agent's tools, the monitor and the tests all call them; nothing here talks to a server.
 import { B, type Bi } from "./bi";
 import { filingBlockers, isBlank } from "./core";
-import { formById } from "./forms/registry";
+import { formById, placesOf, segmentOf } from "./forms/registry";
 import type { Application, Approval, Field, Status, Store, Workspace } from "./model";
-import { publishedDays } from "./plan";
+import { publishedDays, type FormStat } from "./plan";
 
 /* ------------------------------------------------------------------ preflight */
 
@@ -113,7 +113,8 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
   const add = (c: Check | null | undefined, field?: string) => { if (c) (c.level === "error" ? errors : warnings).push({ ...c, field }); };
 
   for (const f of fields) {
-    const v = f.value ?? "", label = f.label.en;
+    // "Line 7a: Name of responsible party" is matched on what the line asks, not its number
+    const v = f.value ?? "", label = f.label.en.replace(/^(line\s+)?[^:]{1,16}:\s+(?=\S)/i, "");
     checked++;
     if (isBlank(v)) continue;   // empty lines are filingBlockers' job, shown above the checks
     if (/^(n\/?a|none|not applicable|无|不适用)$/i.test(v.trim())) continue;   // a real answer: there isn't one
@@ -132,9 +133,33 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
     const fee = app.fees.reduce((s, x) => s + x.amount, 0);
     if (off && off.fee != null && !app.fees.some(x => x.tbd) && Math.abs(fee - off.fee) > 0.5)
       add(warn(B("Fee", "费用"), B(`$${fee} here; the agency publishes $${off.fee}. Check before paying.`, `此处为 $${fee}，机构公布为 $${off.fee}。付款前请核对。`)));
+    const s = storeOfApp(w, app.id);
+    if (off) {
+      // the right agency for where the store is: an NYC form for an Austin store is the costliest mistake there is
+      checked++;
+      const places = s?.address ? placesOf(s.address) : [];
+      if (places.length > 1 && !places.includes(off.where))
+        add(err(B("Agency", "机构"), B(`This is ${off.agency.en}'s form (${off.where}); ${s!.name.en} is at ${s!.address}. It goes to the wrong agency.`, `这是${off.agency.zh}的表格（${off.where}）；${s!.name.zh}位于 ${s!.address}。会提交到错误的机构。`)));
+      // the right kind of business
+      checked++;
+      const seg = segmentOf([w.business.en, ...w.facts.filter(x => /what you sell|business type|cuisine/i.test(x.label.en)).map(x => x.value.en)].join(" "));
+      if (w.business.en && !off.segments.includes(seg))
+        add(warn(B("Business type", "业务类型"), B(`${off.form} is for ${off.segments.join(" or ")} businesses; this one reads as ${seg}. Make sure it applies.`, `${off.form} 适用于${off.segments.join("或")}类业务；本企业看起来属于 ${seg}。请确认适用。`)));
+      // every line the agency's own form asks, and every attachment it lists
+      checked++;
+      const have = new Set(app.fields.map(x => x.id));
+      const gone = off.fields.filter(x => !have.has(x.id));
+      if (off.fields.length && gone.length)
+        add(warn(B("Form lines", "表格栏目"), B(`The agency's form also asks for ${gone.slice(0, 3).map(x => x.label.en).join("; ")}${gone.length > 3 ? ` and ${gone.length - 3} more` : ""}, which aren't on this application.`, `机构表格还要求填写：${gone.slice(0, 3).map(x => x.label.zh).join("；")}${gone.length > 3 ? ` 等 ${gone.length} 项` : ""}，本申请中没有。`)));
+      checked++;
+      const words = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(x => x.length > 3);
+      const listed = app.checklist.map(c => new Set(words(c.label.en)));
+      const unlisted = (off.attach ?? []).filter(at => { const k = words(at.en); return k.length && !listed.some(l => k.filter(x => l.has(x)).length / k.length >= 0.5); });
+      if (unlisted.length)
+        add(warn(B("Attachments", "附件"), B(`The agency also lists ${unlisted.slice(0, 2).map(x => x.en).join("; ")}${unlisted.length > 2 ? " and more" : ""} as attachments.`, `机构还要求附上：${unlisted.slice(0, 2).map(x => x.zh).join("；")}${unlisted.length > 2 ? " 等" : ""}。`)));
+    }
     // the same form isn't already filed for the same store
     checked++;
-    const s = storeOfApp(w, app.id);
     const twin = app.official ? w.apps.find(x => x.id !== app.id && x.official === app.official && storeOfApp(w, x.id)?.id === s?.id && ["filing", "review", "approved"].includes(x.status)) : undefined;
     if (twin) add(warn(B("Already filed", "已提交过"), B(`${twin.name.en} for this ${s ? "store" : "business"} is already ${twin.status === "approved" ? "approved" : "filed"}. Filing again may pay the fee twice.`, `该${s ? "门店" : "企业"}的${twin.name.zh}已${twin.status === "approved" ? "获批" : "提交"}。再次提交可能重复缴费。`)));
   }
@@ -157,18 +182,29 @@ export type OpeningPath = {
   slack: number | null;          // planned opening minus landing, in days (negative: late)
   blocker?: { app: string; name: Bi; status: Status; on: "you" | "odelia" | "team" | "agency" | "someone_else"; why: Bi };
   guessed: number;               // permits with no published agency time, counted at 30 days
+  basis: { measured: number; published: number; guessed: number };   // where each permit's time came from
 };
+/** What makes the estimate real: when each application went to the agency, and how long Placetta's own filings of
+    each form took (filing_stats, only forms with 3 or more). */
+export type Evidence = { submitted?: Record<string, string>; stats?: FormStat[] };
 
 const BUFFER = 7;
 const addDays = (iso: string, n: number) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const between = (a: string, b: string) => Math.round((Date.parse(b + "T12:00:00Z") - Date.parse(a + "T12:00:00Z")) / 864e5);
 
-/** Days still to go for one application from today, before counting what it waits on. */
-function remaining(a: Application): { days: number; guessed: boolean } {
+/** Days still to go for one application from today, before counting what it waits on. The agency's time is, in
+    order: Placetta's own filings of that form (the slow end, p90), the agency's published time, else 30 days. An
+    application already with the agency counts from the day it was submitted. */
+function remaining(a: Application, ev: Evidence, today: string): { days: number; from: "measured" | "published" | "guessed" | "done" } {
+  if (a.status === "approved") return { days: 0, from: "done" };
+  const st = a.official ? ev.stats?.find(x => x.form === a.official && x.n >= 3) : undefined;
   const pub = publishedDays(a.est);
-  const agency = pub ?? 30;
-  const by: Record<Status, number> = { approved: 0, review: Math.ceil(agency / 2), filing: agency + 2, ready: agency + 3, needs: agency + BUFFER, draft: agency + BUFFER, todo: agency + BUFFER, waiting: agency + BUFFER };
-  return { days: by[a.status], guessed: pub == null && a.status !== "approved" };
+  const agency = st ? st.p90_days : pub ?? 30;
+  const from = st ? "measured" : pub != null ? "published" : "guessed";
+  const sent = ev.submitted?.[a.id];
+  const inReview = sent ? Math.max(2, agency - Math.max(0, between(sent.slice(0, 10), today))) : Math.ceil(agency / 2);
+  const by: Record<Exclude<Status, "approved">, number> = { review: inReview, filing: agency + 2, ready: agency + 3, needs: agency + BUFFER, draft: agency + BUFFER, todo: agency + BUFFER, waiting: agency + BUFFER };
+  return { days: by[a.status as Exclude<Status, "approved">], from };
 }
 
 const ON: Record<Status, NonNullable<OpeningPath["blocker"]>["on"]> = { approved: "agency", review: "agency", filing: "team", ready: "you", needs: "you", draft: "odelia", todo: "odelia", waiting: "someone_else" };
@@ -187,10 +223,12 @@ function why(a: Application, w: Workspace): Bi {
 }
 
 /** Where a store's permits put its opening, what's holding it up, and how much room is left. */
-export function openingPath(s: Store, w: Workspace, today: string): OpeningPath {
-  if (s.stage === "open") return { verdict: "open", landing: s.opened ?? null, slack: null, guessed: 0 };
+export function openingPath(s: Store, w: Workspace, today: string, ev: Evidence = {}): OpeningPath {
+  const none = { measured: 0, published: 0, guessed: 0 };
+  if (s.stage === "open") return { verdict: "open", landing: s.opened ?? null, slack: null, guessed: 0, basis: none };
   const apps = w.apps.filter(a => (s.apps ?? []).includes(a.id));
-  if (!apps.length) return { verdict: "not_mapped", landing: null, slack: null, guessed: 0 };
+  if (!apps.length) return { verdict: "not_mapped", landing: null, slack: null, guessed: 0, basis: none };
+  const basis = { ...none };
   const byId = new Map(w.apps.map(a => [a.id, a]));
   const finish = new Map<string, number>(), via = new Map<string, string | undefined>();
   let guessed = 0;
@@ -205,8 +243,9 @@ export function openingPath(s: Store, w: Workspace, today: string): OpeningPath 
       const f = visit(dep, seen);
       if (f > start) { start = f; from = dep.id; }
     }
-    const r = remaining(a);
-    if (r.guessed) guessed++;
+    const r = remaining(a, ev, today);
+    if (r.from !== "done") basis[r.from]++;
+    if (r.from === "guessed") guessed++;
     const end = start + r.days;
     finish.set(a.id, end); via.set(a.id, from);
     return end;
@@ -218,22 +257,33 @@ export function openingPath(s: Store, w: Workspace, today: string): OpeningPath 
   let b = last!;
   for (let i = 0; i < 20 && via.get(b.id); i++) b = byId.get(via.get(b.id)!)!;
   const blocker = far > 0 ? { app: b.id, name: b.name, status: b.status, on: ON[b.status], why: why(b, w) } : undefined;
-  if (!s.plannedOpen) return { verdict: "no_date", landing, slack: null, blocker, guessed };
+  if (!s.plannedOpen) return { verdict: "no_date", landing, slack: null, blocker, guessed, basis };
   const slack = between(landing, s.plannedOpen);
-  return { verdict: slack < 0 ? "late" : slack < 7 ? "tight" : "on_track", landing, slack, blocker, guessed };
+  return { verdict: slack < 0 ? "late" : slack < 7 ? "tight" : "on_track", landing, slack, blocker, guessed, basis };
 }
 
 /** One line for a store card or a text: "On track, 12 days to spare" / "9 days late: health permit, needs your lease". */
 export function openingLine(p: OpeningPath): Bi | null {
+  // only Placetta's own filing times are measured; anything else is said as an estimate
+  const ab = p.basis.published + p.basis.guessed > 0 ? "About " : "", az = ab ? "约 " : "";
   const tail = (en: string, zh: string) => p.blocker ? B(`${en}. ${p.blocker.name.en}: ${p.blocker.why.en.charAt(0).toLowerCase() + p.blocker.why.en.slice(1)}`, `${zh}。${p.blocker.name.zh}：${p.blocker.why.zh}`) : B(en, zh);
   switch (p.verdict) {
-    case "on_track": return B(`On track, ${p.slack} days to spare`, `进度正常，还有 ${p.slack} 天余量`);
-    case "tight": return tail(`Tight: ${p.slack} day${p.slack === 1 ? "" : "s"} to spare`, `时间紧张：仅余 ${p.slack} 天`);
-    case "late": return tail(`${-p.slack!} day${p.slack === -1 ? "" : "s"} behind the opening date`, `比开业日期晚 ${-p.slack!} 天`);
+    case "on_track": return B(`On track, ${ab.toLowerCase()}${p.slack} days to spare`, `进度正常，还有${az}${p.slack} 天余量`);
+    case "tight": return tail(`Tight: ${ab.toLowerCase()}${p.slack} day${p.slack === 1 ? "" : "s"} to spare`, `时间紧张：仅余${az}${p.slack} 天`);
+    case "late": return tail(`${ab}${-p.slack!} day${p.slack === -1 ? "" : "s"} behind the opening date`, `比开业日期晚${az}${-p.slack!} 天`);
     case "no_date": return p.landing ? B(`Permits in hand around ${p.landing}`, `预计 ${p.landing} 前后取得全部许可`) : null;
     case "not_mapped": return B("Permits not mapped yet", "尚未梳理许可");
     default: return null;
   }
+}
+
+/** Where the estimate comes from, in one sentence, so nobody plans rent around a guess without knowing it. */
+export function basisLine(p: OpeningPath): Bi | null {
+  const { measured: m, published: pu, guessed: g } = p.basis;
+  if (!m && !pu && !g) return null;
+  const en = [m && `Placetta's own filing times for ${m}`, pu && `the agency's published time for ${pu}`, g && `an assumed 30 days for ${g} with no published time`].filter(Boolean).join(", ");
+  const zh = [m && `${m} 项按快哉实际办理时间`, pu && `${pu} 项按机构公布时间`, g && `${g} 项无公布时间，按 30 天估算`].filter(Boolean).join("，");
+  return B(`Estimate from ${en}. Submitted applications count from the day they went in.`, `估算依据：${zh}。已提交的申请从提交当天起算。`);
 }
 
 /* ---------------------------------------------------------------- suggestions */

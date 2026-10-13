@@ -1283,6 +1283,7 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .opening-line.late { color: #b91c1c; }
 .opening-line.tight { color: #b45309; }
 .opening-line.on_track { color: #15803d; }
+.opening-basis { display: block; margin-top: 4px; color: var(--muted, #6b7280); font-size: 12px; }
 .batch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 12px; background: color-mix(in oklab, #15803d 5%, var(--bg, #fff)); border: 1px solid color-mix(in oklab, #15803d 20%, transparent); margin-bottom: 8px; font-size: 14px; }
 .batch-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
 

@@ -98,7 +98,7 @@ export function storeUpdates(ws: string, stores: unknown, today: string): Update
  * Stores still opening whose permits no longer keep the opening date (or barely do): one update each time the verdict
  * or the step holding it up changes, naming that step. A late one also reaches the owner's phone.
  */
-export function openingUpdates(ws: string, state: unknown, today: string): Update[] {
+export function openingUpdates(ws: string, state: unknown, today: string, ev: { submitted?: Record<string, string> } = {}): Update[] {
   if (!state || typeof state !== "object") return [];
   let w: ReturnType<typeof normalizeState>;
   try { w = normalizeState("", state as Record<string, unknown>); } catch { return []; }
@@ -106,7 +106,7 @@ export function openingUpdates(ws: string, state: unknown, today: string): Updat
   for (const s of Array.isArray(w.stores) ? w.stores : []) {
     if (!s || s.stage !== "opening" || typeof s.id !== "string" || !isDate(s.plannedOpen)) continue;
     let p;
-    try { p = openingPath(s, w, today); } catch { continue; }
+    try { p = openingPath(s, w, today, ev); } catch { continue; }
     if (p.verdict !== "late" && p.verdict !== "tight") continue;
     const line = openingLine(p), store = bi(s.name);
     if (!line) continue;
@@ -273,17 +273,21 @@ Deno.serve(async (req) => {
     for (const w of rows ?? []) {
       names.set(w.id, String(w.name ?? "Your business"));
       const st = (w.state ?? {}) as { deadlines?: unknown };
-      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, today), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, today), ...openingUpdates(w.id, w.state, today)]);
+      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, today), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, today)]);
       states.set(w.id, (w.state ?? null) as { deadlines?: unknown; stores?: unknown } | null);
       all.push({ id: w.id, state: { apps: (w.state as { apps?: unknown } | null)?.apps } });
     }
     if (!rows || rows.length < 500) break;
   }
   const { data: filings, error: fe } = await admin.from("filings")
-    .select("id, workspace_id, app_id, title, status, agent_state, updated_at, approved_at, payment_url, customer_paid_at, fee_paid, confirmation_number, assigned_to, note")
+    .select("id, workspace_id, app_id, title, status, agent_state, updated_at, approved_at, payment_url, customer_paid_at, fee_paid, confirmation_number, assigned_to, note, submitted_at")
     .neq("status", "canceled");
   if (fe) return json(500, { error: "filings: " + fe.code });
   for (const f of (filings ?? []) as Filing[]) byWs.get(f.workspace_id)?.push(...filingUpdates(f, since, now));
+  // stores slipping past their opening date, counting each application with the agency from the day it went in
+  const sent = new Map<string, Record<string, string>>();
+  for (const f of (filings ?? []) as (Filing & { submitted_at?: string | null })[]) if (f.submitted_at) { const m = sent.get(f.workspace_id) ?? {}; m[f.app_id] ??= f.submitted_at; sent.set(f.workspace_id, m); }
+  for (const [ws, list] of byWs) list.push(...openingUpdates(ws, states.get(ws) ?? null, today, { submitted: sent.get(ws) ?? {} }));
   // Mondays: the week ahead, for every workspace with something on it.
   if (started.getUTCDay() === 1) {
     const open = new Map<string, number>();

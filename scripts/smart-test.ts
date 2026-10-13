@@ -2,7 +2,7 @@
    (openingPath) and the next asks from the workspace (suggestions). Run: npm run test:smart */
 import { normalizeState } from "../src/core";
 import { B, same, type Application, type Approval, type Store, type Workspace } from "../src/model";
-import { cityOf, openingLine, openingPath, parseDate, preflight, suggestions } from "../src/smart";
+import { basisLine, cityOf, openingLine, openingPath, parseDate, preflight, suggestions } from "../src/smart";
 
 let fails = 0;
 const ok = (cond: unknown, m: string, extra?: unknown) => { if (cond) console.log("ok  ", m); else { console.error("FAIL", m, extra ?? ""); fails++; } };
@@ -107,6 +107,46 @@ const f = (label: string, value: string) => ({ id: label, label: same(label), va
   // everything approved: lands today
   const done = openingPath(store({ apps: ["lease"], plannedOpen: plus(5) }), ws({ apps: [lease] }), TODAY);
   ok(done.landing === TODAY && done.verdict === "tight" && done.slack === 5 && !done.blocker, "all approved: permits in hand now, nothing holding it up", done);
+}
+
+/* ---------------- substance, not just format ---------------- */
+{
+  // an NYC food permit on an Austin store goes to the wrong agency; a Flushing store is right
+  const fse = app("f1", { official: "nyc-fse", fields: [f("Seating", "40")] });
+  const austin = store({ id: "sa", address: "500 Congress Ave, Austin, TX 78701", apps: ["f1"] });
+  const wrong = preflight(ws({ business: same("Golden Ox Noodle"), apps: [fse], stores: [austin] }), fileAp("f1"), TODAY);
+  ok(wrong.errors.some(e => e.label.en === "Agency" && /wrong agency/.test(e.note.en)), "a New York City form on an Austin store is stopped", wrong.errors);
+  const right = preflight(ws({ business: same("Golden Ox Noodle"), apps: [fse], stores: [store({ apps: ["f1"] })] }), fileAp("f1"), TODAY);
+  ok(!right.errors.some(e => e.label.en === "Agency"), "the same form on a Flushing store goes through");
+  ok(right.warnings.some(w => w.label.en === "Form lines"), "lines the agency's own form asks that the application lacks are named", right.warnings);
+  // a food permit for a clothing store
+  const clothes = preflight(ws({ business: same("Northwind Apparel clothing boutique"), apps: [fse], stores: [store({ apps: ["f1"] })] }), fileAp("f1"), TODAY);
+  ok(clothes.warnings.some(w => w.label.en === "Business type"), "a food permit for a clothing store is questioned", clothes.warnings);
+  // "Line 9b: Phone" is checked as a phone line
+  const lined = app("l1", { fields: [f("Line 9b: Applicant's telephone number", "call me")] });
+  ok(preflight(ws({ apps: [lined] }), fileAp("l1"), TODAY).errors.length === 1, "a numbered line is checked on what it asks");
+}
+
+/* ---------------- the estimate stands on evidence ---------------- */
+{
+  const inReview = app("r", { status: "review", est: same("about 4 weeks") });
+  const s = store({ apps: ["r"], plannedOpen: plus(30) });
+  const w = ws({ apps: [inReview] });
+  // no submission date: half the agency time
+  ok(openingPath(s, w, TODAY).landing === plus(14), "with the agency, no date known: half its time", openingPath(s, w, TODAY));
+  // submitted 25 days ago of 28: 3 days left
+  const sent = openingPath(s, w, TODAY, { submitted: { r: plus(-25) + "T10:00:00Z" } });
+  ok(sent.landing === plus(3), "submitted 25 days ago: counted from that day", sent);
+  // overdue at the agency still leaves a couple of days, never a date in the past
+  ok(openingPath(s, w, TODAY, { submitted: { r: plus(-60) } }).landing === plus(2), "past the agency's time: 2 days, not the past");
+  // Placetta's own filings of that form win over the published time, and the line stops saying "about"
+  const official = app("o", { status: "needs", est: same("about 2 weeks"), official: "nyc-fse" });
+  const so = store({ apps: ["o"], plannedOpen: plus(60) });
+  const measured = openingPath(so, ws({ apps: [official] }), TODAY, { stats: [{ form: "nyc-fse", n: 12, median_days: 20, p90_days: 31, rejected_pct: 8 }] });
+  ok(measured.landing === plus(38) && measured.basis.measured === 1 && !/about/.test(openingLine(measured)!.en), "measured times: precise, no 'about'", { measured, line: openingLine(measured) });
+  const published = openingPath(so, ws({ apps: [official] }), TODAY);
+  ok(/about/.test(openingLine(published)!.en) && /agency's published time for 1/.test(basisLine(published)!.en), "published times: said as an estimate, and why", basisLine(published));
+  ok(openingPath(so, ws({ apps: [official] }), TODAY, { stats: [{ form: "nyc-fse", n: 2, median_days: 5, p90_days: 6, rejected_pct: 0 }] }).basis.measured === 0, "two filings aren't enough to measure");
 }
 
 /* ---------------- suggestions ---------------- */

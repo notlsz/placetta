@@ -7,7 +7,7 @@ import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { daysFromNow, money, nowIso } from "./time";
-import { openingLine, openingPath, preflight } from "./smart";
+import { basisLine, openingLine, openingPath, preflight } from "./smart";
 import { replyLanguage } from "./langs";
 import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills";
 import { docx } from "./files";
@@ -958,9 +958,11 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // where each opening store's permits put its opening date, and the one step holding it up
         const opening = (st: Store) => {
           if (st.stage !== "opening") return undefined;
-          const p = openingPath(st, all, today);
+          const submitted: Record<string, string> = {};
+          for (const f of x.svc?.filings() ?? []) if (f.submitted_at && f.status !== "canceled" && !submitted[f.app_id]) submitted[f.app_id] = f.submitted_at;
+          const p = openingPath(st, all, today, { submitted });
           return { verdict: p.verdict, permits_in_hand_by: p.landing ?? undefined, days_to_spare: p.slack ?? undefined, holding_it_up: p.blocker ? { application_id: p.blocker.app, name: p.blocker.name[lang], waiting_on: p.blocker.on, why: p.blocker.why[lang] } : undefined,
-            say: openingLine(p)?.[lang], estimated_without_agency_time: p.guessed || undefined };
+            say: openingLine(p)?.[lang], how_estimated: basisLine(p)?.[lang], estimated_without_agency_time: p.guessed || undefined };
         };
         mark();
         return {

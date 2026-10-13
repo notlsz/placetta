@@ -4,7 +4,7 @@ import { useApp } from "./ctx";
 import { B, type Cert, type Store } from "./model";
 import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
 import { daysFromNow, daysUntil, fmtDay, fmtIn, inDays } from "./time";
-import { openingLine, openingPath } from "./smart";
+import { basisLine, openingLine, openingPath, type Evidence } from "./smart";
 import { I, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
 import { parseStoreList, permitsOnOpening, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
@@ -49,15 +49,28 @@ function Value({ s, big }: { s: Store; big?: boolean }) {
   );
 }
 
+/** Placetta's own filing times (once per page load) and when each application went to the agency. */
+let statsOnce: Promise<FormStat[]> | null = null;
+function useEvidence(): Evidence {
+  const { cloud } = useApp();
+  const [stats, setStats] = useState<FormStat[]>([]);
+  useEffect(() => { if (!cloud) return; statsOnce ??= api.filingStats().catch(() => []); void statsOnce.then(setStats); }, [cloud]);
+  return useMemo(() => {
+    const submitted: Record<string, string> = {};
+    for (const f of cloud?.filings ?? []) if (f.submitted_at && f.status !== "canceled" && !submitted[f.app_id]) submitted[f.app_id] = f.submitted_at;
+    return { submitted, stats };
+  }, [cloud?.filings, stats]);
+}
+
 /** A store still opening, with its projected opening where its permits put it today. */
-function withPath(s: Store, ws: Parameters<typeof openingPath>[1]) {
-  const p = s.stage === "opening" ? openingPath(s, ws, daysFromNow(0)) : null;
+function withPath(s: Store, ws: Parameters<typeof openingPath>[1], ev: Evidence = {}) {
+  const p = s.stage === "opening" ? openingPath(s, ws, daysFromNow(0), ev) : null;
   return { p, line: p ? openingLine(p) : null, s: p?.landing && p.verdict !== "not_mapped" ? { ...s, projectedOpen: p.landing } : s };
 }
 
 function StoreCard({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   const { b, t, ws, lang } = useApp();
-  const { p, line, s } = withPath(raw, ws);
+  const { p, line, s } = withPath(raw, ws, useEvidence());
   const r = readiness(s, ws);
   const logs = todayLogs(s);
   const expiring = s.certs.filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; });
@@ -97,6 +110,7 @@ function Section({ title, sub, children, side }: { title: string; sub?: string; 
 function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
   const { b, t, lang, ws, ask, busy, updateStore, openApp } = useApp();
   const r = readiness(s, ws);
+  const ev = useEvidence();
   const [reading, setReading] = useState("");
   const [askTemp, setAskTemp] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -123,10 +137,11 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
             { action: B("Opened", "开业"), object: s.name, detail: B(`${est.length} renewals now tracked`, `已跟踪 ${est.length} 项续期`) });
         }}>{lang === "zh" ? "标记为已开业" : "Mark opened"}</Pill>}
       </header>
-      {(() => { const { p, line } = withPath(s, ws); return line && p && p.verdict !== "not_mapped" ? (
+      {(() => { const { p, line } = withPath(s, ws, ev); const basis = p ? basisLine(p) : null; return line && p && p.verdict !== "not_mapped" ? (
         <p className={"opening-line " + p.verdict}>
           {b(line)}
           {p.blocker && (p.verdict === "late" || p.verdict === "tight") && <> <button type="button" className="pill quiet sm" disabled={busy} onClick={() => ask(lang === "zh" ? `${s.name.zh}进度落后，怎样追回？先处理${p.blocker!.name.zh}。` : `${s.name.en} is behind. How do we get it back on schedule? Start with the ${p.blocker!.name.en}.`)}>{lang === "zh" ? "让 Odelia 追回进度" : "Have Odelia catch it up"}</button></>}
+          {basis && <small className="opening-basis">{b(basis)}</small>}
         </p>) : null; })()}
 
       <div className="parts">
@@ -140,7 +155,7 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
       </div>
 
       <Section title={b(B("What Placetta is worth here", "快哉在这家店的价值"))}>
-        <Value s={withPath(s, ws).s} big />
+        <Value s={withPath(s, ws, ev).s} big />
       </Section>
 
       {s.stage === "open" && (
