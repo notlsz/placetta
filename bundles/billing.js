@@ -144,7 +144,7 @@ async function accessFor(ws, user, jwt) {
   const { data: s } = await admin.from("staff_emails").select("email").eq("email", (user.email ?? "").toLowerCase()).maybeSingle();
   return s ? "staff" : "none";
 }
-var origins = () => (Deno.env.get("APP_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+var origins = () => [...(Deno.env.get("APP_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean), "https://placetta.vercel.app"];
 function safeReturn(url) {
   try {
     const u = new URL(String(url));
