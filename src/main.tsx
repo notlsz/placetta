@@ -6,7 +6,8 @@ import { cloudConfigured, preparePreview } from "./cloud/api";
 import { CloudRoot } from "./cloud/Root";
 import { applyTheme, readTheme } from "./hooks";
 
-applyTheme(readTheme());
+// Signed in or not is decided by CloudRoot, which keeps the sign-in screens light; start light there so they never flash dark.
+if (cloudConfigured) document.documentElement.dataset.theme = "light"; else applyTheme(readTheme());
 
 // With the backend configured (VITE_SUPABASE_URL and VITE_SUPABASE_KEY), people sign in and work in their own
 // workspace. Without it (the shareable preview), the app runs the sample workspace as a demo.

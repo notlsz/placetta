@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import App from "../App";
 import { GateBot } from "../Bot";
 import { LegalBody } from "../Legal";
@@ -11,6 +11,7 @@ import { normalize, type CloudSession } from "./session";
 import { consumeHandoff, readHandoff } from "./handoff";
 import { TwoStepCode } from "./TwoStep";
 import { HqHome } from "../Headquarters";
+import { applyTheme, readTheme } from "../hooks";
 import type { HqRow } from "../hq";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
@@ -579,6 +580,12 @@ export function CloudRoot() {
     return () => sub.unsubscribe();
   }, [open, setPhase]);
   const recovered = () => { recovering.current = false; booted.current = true; void open(lastWs.get()); };
+
+  // Sign in, sign up, reset, two-step and setup are always light; the workspace follows the person's appearance setting.
+  const gate = phase.k !== "app" && phase.k !== "hq";
+  useLayoutEffect(() => {
+    if (gate) document.documentElement.dataset.theme = "light"; else applyTheme(readTheme());
+  }, [gate]);
 
   if (phase.k === "app") return <App key={phase.s.wsId} cloud={phase.s} />;
   if (phase.k === "hq") return <HqHome lang={lang} setLang={setLang} email={phase.email} rows={phase.rows}
