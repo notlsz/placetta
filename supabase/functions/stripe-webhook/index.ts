@@ -86,12 +86,14 @@ Deno.serve(async (req) => {
         const end = o.current_period_end ?? o.items?.data?.[0]?.current_period_end;
         const status = event.type === "customer.subscription.deleted" ? "canceled" : String(o.status);
         // the locations paid for, which size Odelia's monthly allowance
-        const locPrice = Deno.env.get("STRIPE_PRICE_LOCATION");
+        const locPrices = [Deno.env.get("STRIPE_PRICE_LOCATION"), Deno.env.get("STRIPE_PRICE_LOCATION_PRO")].filter(Boolean);
         const items = (o.items?.data ?? []) as { price?: { id?: string }; quantity?: number }[];
-        const paid = status === "active" || status === "trialing" ? items.filter((i) => locPrice && i.price?.id === locPrice).reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
+        const paid = status === "active" || status === "trialing" ? items.filter((i) => locPrices.includes(i.price?.id)).reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
+        // Pro (by its price, or the tier on the subscription) sizes a larger Odelia allowance
+        const pro = items.some((i) => i.price?.id && i.price.id === Deno.env.get("STRIPE_PRICE_LOCATION_PRO")) || o.metadata?.tier === "pro";
         await admin.from("billing").update({
           stripe_customer_id: o.customer, subscription_id: o.id, subscription_status: status,
-          subscription_plan: o.metadata?.plan ?? null, current_period_end: end ? new Date(end * 1000).toISOString() : null,
+          subscription_plan: pro ? "pro" : o.metadata?.plan ?? null, current_period_end: end ? new Date(end * 1000).toISOString() : null,
           paid_locations: paid,
         }).eq("workspace_id", ws);
         if (event.type === "customer.subscription.created") await log(ws, { en: "Started", zh: "开通" }, o.metadata?.plan ?? "starter");

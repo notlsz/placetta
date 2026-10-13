@@ -31,7 +31,7 @@ export type CloudCtx = {
   /** Franchisees that shared their stores with this email: shows the Headquarters view. */
   hq: HqRow[];
   openPlans(reason?: "start" | "file"): void;
-  checkout(plan: "entry" | "starter" | "growth" | "locations", o?: { markets?: number; extra_locations?: number }): Promise<void>;
+  checkout(plan: "entry" | "starter" | "growth" | "locations", o?: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean }): Promise<void>;
   portal(): Promise<void>;
   buyPack(): Promise<void>;
   connect(kind: IntegrationKind): Promise<void>;

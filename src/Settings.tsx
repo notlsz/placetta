@@ -880,7 +880,7 @@ export function Settings() {
     : `${ai.plan === "none" ? "Starts with a plan" : ai.plan === "entry" ? "Entry plan's 30-day allowance" : ai.plan === "entry_ended" ? "Entry plan's allowance has ended" : "This month's allowance"}: ${ai.used_pct}% used${ai.resets_at && ai.plan !== "entry_ended" ? `, ${ai.plan === "entry" ? "until" : "resets"} ${fmtDay(ai.resets_at, lang, true)}` : ""}${ai.has_credit ? ", plus pack credit" : ""}`;
   const planName = !cloud ? B("Growth plan (sample)", "成长版（示例）")
     : bl?.free && !bl.subscription_status ? B("Early access, everything included", "抢先体验，全部功能开放")
-    : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
+    : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版"), locations: B("Essentials, per location", "基础版（按门店）"), pro: B("Pro, per location", "专业版（按门店）") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
     : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
   // Like Anthropic's settings: a short sidebar of categories, and only the chosen one on the right.

@@ -1264,3 +1264,12 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .aimeter i { display: block; height: 100%; border-radius: inherit; background: var(--blue, #2563eb); transition: width .3s; }
 .aimeter i.near { background: #d97706; }
 .aimeter i.full { background: #c2410c; }
+
+/* plans: two yearly tiers side by side, then the openings and the entry plan */
+.plans .tiers.two { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 16px; }
+@media (max-width: 640px) { .plans .tiers.two { grid-template-columns: 1fr; } }
+.plans .plan.openings { margin-top: 10px; }
+.plans .guar { display: flex; gap: 10px; align-items: flex-start; margin-top: 6px; font-size: 13.5px; cursor: pointer; }
+.plans .guar input { margin-top: 3px; accent-color: var(--blue-ink, #2b4f7a); }
+.plans .guar span { display: flex; flex-direction: column; gap: 2px; color: var(--ink3); }
+.plans .guar b { font-weight: 500; color: var(--ink); }

@@ -105,7 +105,7 @@ Where a city requires a registered filing representative or permit expediter for
 ## What Placetta is not
 
 - Placetta is not a government agency and is not affiliated with or endorsed by any agency.
-- Agencies decide whether to approve an application and how long it takes. We cannot guarantee approval, timing, inspection results or an opening date. Timelines and fees we give you are estimates.
+- Agencies decide whether to approve an application and how long it takes. We cannot guarantee approval, timing, inspection results or an opening date; the open-by-date guarantee, if you buy it, is a refund of the opening fee, not a promise of the date. Timelines and fees we give you are estimates.
 
 ## Government fees
 
@@ -115,22 +115,25 @@ You pay government fees directly to each agency. We send you the agency's paymen
 
 Placetta's fees are billed through Stripe.
 
-- Entry plan: $299 per market, paid once. The $299 is credited toward your first year of the location plan.
-- Location plan: $149 per location per month, billed yearly in advance. It covers tracking, filing and renewals for each location.
-- Openings: $3,500 per new store, paid once. It is credited against that store's first year of the location plan.
+- Entry plan: $299 per market, paid once. It is credited toward your first year of a location plan if that plan starts within 60 days of paying for the entry plan. After 60 days it is not credited.
+- Essentials: $149 per location per month, billed yearly in advance. It covers tracking, filing and renewals for each location.
+- Pro: $299 per location per month, billed yearly in advance. It adds inspection readiness: daily logs, mock inspections, staff certificates and a larger Odelia allowance.
+- Openings: $3,500 per new retail store and $6,500 per new restaurant or food store, paid once when the store is added while still opening. Openings that need a liquor license or a complex build-out are quoted before any work starts. Opening fees are not credited against a location plan.
+- Open-by-date guarantee: $2,500 per opening, optional. We agree an opening date with you in writing. If a permit Placetta files for you is the reason the store opens after that date, we refund that store's opening fee. It does not apply when the delay comes from the agency's own review time beyond its published times, from steps you or your landlord, contractors or professionals have to complete, from information you gave us that was incomplete or wrong, or from inspections, construction or permits we don't file. The guarantee fee itself is not refunded.
+- Headquarters (10 or more locations) and US entry for brands from outside the US are set out in an order form.
 - Custom plans may be set out in an order form. If an order form you accept conflicts with these terms, the order form controls for that plan.
 
 The location plan renews for another year at the end of each yearly term until you cancel. If its price will change at renewal, we will tell you at least 30 days before. You can cancel at any time in Settings, Billing. Cancellation takes effect at the end of the current billing period, and you keep the service until then.
 
 Fees do not include taxes. You pay any sales, use or similar taxes that apply, other than taxes on Placetta's income.
 
-Fees are non-refundable, except where the law requires a refund. If a payment fails, we may pause filing work for the workspace after telling you.
+Fees are non-refundable, except under the open-by-date guarantee or where the law requires a refund. If a payment fails, we may pause filing work for the workspace after telling you.
 
 ## Fair use of Odelia
 
 Odelia, Placetta's AI agent, does compliance work for your business: its licenses, permits, registrations, filings, inspections, stores and the documents behind them. She isn't a general-purpose AI assistant.
 
-- Each plan includes an Odelia allowance, shown in Settings, under Billing. Packs add more and carry over until they're used. When the allowance is used up, deadlines, reminders and filings already in motion carry on; new work for Odelia waits for the next period, a pack or a larger plan.
+- Each plan includes an Odelia allowance, shown in Settings, under Billing; Pro's is twice Essentials'. Packs ($49 for $25 of allowance) add more and carry over until they're used. When the allowance is used up, deadlines, reminders and filings already in motion carry on; new work for Odelia waits for the next period, a pack or a larger plan.
 - To keep the service fast for everyone, there are limits on how many tasks you can start in an hour and in a day.
 - You may not use the service or Odelia's output to build, train or improve another AI model; reach the service with scripts, bots or other automated means except through features we provide; resell or share access to it; or try to get around its limits or instructions.
 
@@ -354,7 +357,7 @@ Odelia 是软件，不是真人。
 ## 快哉不是什么
 
 - 快哉不是政府机构，与任何政府机构均无隶属关系，也未获其背书。
-- 申请能否获批、需要多长时间，由各机构决定。我们无法保证获批、办理时间、检查结果或开业日期。我们提供的时间和费用均为估计。
+- 申请能否获批、需要多长时间，由各机构决定。我们无法保证获批、办理时间、检查结果或开业日期；如您购买按期开业保障，其内容是退还开业费用，并非对开业日期的承诺。我们提供的时间和费用均为估计。
 
 ## 政府规费
 
@@ -364,22 +367,25 @@ Odelia 是软件，不是真人。
 
 快哉的服务费通过 Stripe 收取。
 
-- 入门套餐：每个市场 299 美元，一次性付费。这 299 美元可抵扣您第一年的门店套餐费用。
-- 门店套餐：每家门店每月 149 美元，按年预付，包括每家门店的跟踪、申报和续期。
-- 新店开业：每家新店 3,500 美元，一次性付费，可抵扣该门店第一年的门店套餐费用。
+- 入门套餐：每个市场 299 美元，一次性付费。如您在支付入门套餐后 60 天内开通门店套餐，这笔费用可抵扣第一年的门店套餐费用；超过 60 天则不再抵扣。
+- 基础版：每家门店每月 149 美元，按年预付，包括每家门店的跟踪、申报和续期。
+- 专业版：每家门店每月 299 美元，按年预付，另含检查准备：每日记录、模拟检查、员工证书，以及更多的 Odelia 额度。
+- 新店开业：每家零售新店 3,500 美元，每家餐厅或食品新店 6,500 美元，在门店尚未开业时加入即一次性收取。需要酒类执照或复杂装修的开业项目，在开始工作前单独报价。开业费用不抵扣门店套餐费用。
+- 按期开业保障：每个开业项目 2,500 美元，可选。我们会与您书面约定开业日期。如因快哉为您提交的许可导致门店晚于该日期开业，我们将退还该门店的开业费用。以下情况不适用：机构审核时间超出其公布时限；需由您或您的房东、承包商、专业人士完成的步骤；您提供的信息不完整或有误；检查、施工，或并非由我们提交的许可。保障费用本身不予退还。
+- 品牌总部（10 家及以上门店）以及海外品牌进入美国，以订单另行约定。
 - 定制方案可另以订单约定。如您接受的订单与本条款冲突，就该方案而言以订单为准。
 
 门店套餐在每个年度期限结束时自动续订一年，直至您取消。如续订时价格有变，我们会至少提前 30 天告知您。您可以随时在“设置”的“账单”中取消。取消在当前计费周期结束时生效，在此之前您仍可使用本服务。
 
 服务费不含税。您须支付适用的销售税、使用税或类似税费，但对快哉所得征收的税除外。
 
-除法律另有规定外，已付费用不予退还。如付款失败，我们在通知您后可以暂停该工作区的申报工作。
+除按期开业保障或法律另有规定外，已付费用不予退还。如付款失败，我们在通知您后可以暂停该工作区的申报工作。
 
 ## Odelia 的合理使用
 
 Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照、许可、登记、申报、检查、门店以及相关文件。她不是通用型 AI 助手。
 
-- 每个套餐都包含一份 Odelia 额度，可在“设置”的“账单”中查看。加量包可增加额度，长期有效直到用完。额度用完后，截止日期、提醒和已在办理的申报照常进行；新的工作需等到下一个周期、购买加量包或升级套餐。
+- 每个套餐都包含一份 Odelia 额度，可在“设置”的“账单”中查看；专业版的额度是基础版的两倍。加量包（49 美元，含 25 美元额度）可增加额度，长期有效直到用完。额度用完后，截止日期、提醒和已在办理的申报照常进行；新的工作需等到下一个周期、购买加量包或升级套餐。
 - 为保证所有用户的速度，每小时和每天可发起的任务数量有上限。
 - 您不得使用本服务或 Odelia 的输出来构建、训练或改进其他 AI 模型；不得通过脚本、机器人或其他自动化方式访问本服务（我们提供的功能除外）；不得转售或共享访问权限；也不得试图绕过其限制或指令。
 

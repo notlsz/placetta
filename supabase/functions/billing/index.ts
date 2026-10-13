@@ -1,10 +1,14 @@
 // Stripe Checkout and the billing portal. Prices live in Stripe; their ids come from the Edge Function secrets:
-//   STRIPE_PRICE_ENTRY    one-time $299, quantity = markets
-//   STRIPE_PRICE_LOCATION $149 a location a month, billed yearly (the "Per location" plan; quantity = stores, open or opening)
-//   STRIPE_PRICE_OPENING  one time $3,500 per store still opening (at checkout, then on the next invoice as stores are added)
+//   STRIPE_PRICE_ENTRY         one-time $299 a market; credited toward the first year only within 60 days of buying it
+//   STRIPE_PRICE_LOCATION      Essentials: $149 a location a month, billed yearly (quantity = stores, open or opening)
+//   STRIPE_PRICE_LOCATION_PRO  Pro: $299 a location a month, billed yearly (inspection readiness, a larger Odelia allowance)
+//   STRIPE_PRICE_OPENING       one time $3,500 per retail store still opening
+//   STRIPE_PRICE_OPENING_FOOD  one time $6,500 per restaurant or food store still opening
+//   STRIPE_PRICE_GUARANTEE     one time $2,500 per opening, optional: the open-by-date guarantee
+// Liquor and complex build-outs are quoted by the team (a team task), never charged at checkout.
 //   STRIPE_PRICE_STARTER / _GROWTH / _EXTRA_LOCATION  older plans, kept only for anyone already on them
 //   STRIPE_PRICE_PACK     one time, an Odelia pack: PACK_CREDIT_USD (default $25) more AI allowance per pack
-// Credits: unspent entry plans come off the first invoice, and each opening fee is credited against that store's first year.
+// Credits: entry plans bought in the last 60 days come off the first invoice. Opening fees are not credited.
 // Scale is quoted by the team, so it has no checkout. Actions: prices (any member), checkout, portal, sync_locations (owners).
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -83,17 +87,47 @@ async function locationPrices() {
     const p = await stripeGet(`prices/${encodeURIComponent(id)}`);
     return { amount: (p.unit_amount ?? 0) / 100, currency: String(p.currency ?? "usd").toUpperCase(), interval: p.recurring?.interval ?? null, interval_count: p.recurring?.interval_count ?? null };
   };
-  const [location, opening] = await Promise.all([one(Deno.env.get("STRIPE_PRICE_LOCATION")), one(Deno.env.get("STRIPE_PRICE_OPENING"))]);
-  return { location, opening };
+  const [location, pro, opening, opening_food, guarantee, pack] = await Promise.all([PRICE.essentials(), PRICE.pro(), PRICE.retail(), Deno.env.get("STRIPE_PRICE_OPENING_FOOD"), PRICE.guarantee(), PRICE.pack()].map(one));
+  return { location, pro, opening, opening_food, guarantee, pack };
 }
 
-/** The workspace's stores (open and opening), from its saved state. Only a store whose stage is "opening" owes the opening fee. */
-async function stores(ws: string): Promise<{ id: string; opening: boolean }[]> {
+type Kind = "retail" | "food" | "complex";
+const FOOD = /tea|coffee|caf[eé]|restaurant|food|kitchen|bakery|hot ?pot|noodle|dessert|ice cream|boba|bubble|juice|bar\b|grill|pizza|sushi|dumpling|奶茶|茶|咖啡|餐|火锅|面|甜品|烘焙|食/i;
+/**
+ * The workspace's stores (open and opening), from its saved state. Only a store whose stage is "opening" owes the opening
+ * fee: retail or food (from the store's own kind, else what the business sells), and complex ones are quoted by the team.
+ */
+async function stores(ws: string): Promise<{ id: string; name: string; opening: boolean; kind: Kind }[]> {
   const { data } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
-  const list = (data?.state as { stores?: { id?: unknown; stage?: unknown }[] } | null)?.stores;
+  const st = data?.state as { stores?: { id?: unknown; name?: { en?: string }; stage?: unknown; kind?: unknown }[]; business?: { en?: string }; facts?: { label?: { en?: string }; value?: { en?: string } }[] } | null;
+  const sells = [st?.business?.en ?? "", ...(st?.facts ?? []).filter((f) => /what you sell|business type|cuisine|menu/i.test(f.label?.en ?? "")).map((f) => f.value?.en ?? "")].join(" ");
+  const fallback: Kind = FOOD.test(sells) ? "food" : "retail";
+  const list = st?.stores;
   return Array.isArray(list)
-    ? list.filter((s) => typeof s?.id === "string").slice(0, 2000).map((s) => ({ id: s.id as string, opening: s.stage === "opening" }))
+    ? list.filter((s) => typeof s?.id === "string").slice(0, 2000).map((s) => ({ id: s.id as string, name: String(s.name?.en ?? s.id), opening: s.stage === "opening",
+        kind: (s.kind === "retail" || s.kind === "food" || s.kind === "complex" ? s.kind : fallback) as Kind }))
     : [];
+}
+const PRICE = {
+  entry: () => Deno.env.get("STRIPE_PRICE_ENTRY"), essentials: () => Deno.env.get("STRIPE_PRICE_LOCATION"), pro: () => Deno.env.get("STRIPE_PRICE_LOCATION_PRO"),
+  retail: () => Deno.env.get("STRIPE_PRICE_OPENING"), food: () => Deno.env.get("STRIPE_PRICE_OPENING_FOOD") ?? Deno.env.get("STRIPE_PRICE_OPENING"),
+  guarantee: () => Deno.env.get("STRIPE_PRICE_GUARANTEE"), pack: () => Deno.env.get("STRIPE_PRICE_PACK"),
+};
+/** Line items for the openings: one per kind, plus the guarantee when asked for. Complex stores are left to a quote. */
+function openingItems(list: { opening: boolean; kind: Kind }[], guarantee: boolean): [string, number][] {
+  const n = (k: Kind) => list.filter((s) => s.opening && s.kind === k).length;
+  const retail = n("retail"), food = n("food");
+  const items: [string, number][] = [];
+  if (retail && PRICE.retail()) items.push([PRICE.retail()!, retail]);
+  if (food && PRICE.food()) items.push([PRICE.food()!, food]);
+  if (guarantee && retail + food && PRICE.guarantee()) items.push([PRICE.guarantee()!, retail + food]);
+  return items;
+}
+/** A complex opening (liquor, major build-out) goes to the team for a quote, once per store. */
+async function askForQuote(ws: string, list: { id: string; name: string; opening: boolean; kind: Kind }[]) {
+  const rows = list.filter((s) => s.opening && s.kind === "complex").map((s) => ({ kind: "quote", workspace_id: ws, title: `Quote the opening for ${s.name}`, detail: { store_id: s.id }, dedupe: `quote:${ws}:${s.id}` }));
+  if (rows.length) await admin.from("team_tasks").upsert(rows, { onConflict: "dedupe", ignoreDuplicates: true });
+  return rows.length;
 }
 
 /** One year of the per-location price, in cents: what an opening fee is credited against. */
@@ -135,7 +169,7 @@ Deno.serve(async (req) => {
   const back = safeReturn(body.return_url);
   if (!back) return fail(400, "bad_request", "Unknown return address. Add the app's origin to APP_ORIGINS.");
 
-  const { data: bill } = await admin.from("billing").select("stripe_customer_id, subscription_id, charged_store_ids, entry_markets, entry_credited_at").eq("workspace_id", ws).maybeSingle();
+  const { data: bill } = await admin.from("billing").select("stripe_customer_id, subscription_id, charged_store_ids, entry_markets, entry_paid_at, entry_credited_at").eq("workspace_id", ws).maybeSingle();
   const customer = bill?.stripe_customer_id as string | null | undefined;
 
   try {
@@ -146,25 +180,26 @@ Deno.serve(async (req) => {
     }
 
     if (body.action === "checkout" && body.plan === "locations") {
-      const loc = Deno.env.get("STRIPE_PRICE_LOCATION"), opening = Deno.env.get("STRIPE_PRICE_OPENING");
-      if (!loc) return fail(503, "not_configured", "Set STRIPE_PRICE_LOCATION for per-location billing.");
+      const tier = body.tier === "pro" ? "pro" : "essentials", guarantee = body.guarantee === true;
+      const loc = tier === "pro" ? PRICE.pro() : PRICE.essentials();
+      if (!loc) return fail(503, "not_configured", `Set ${tier === "pro" ? "STRIPE_PRICE_LOCATION_PRO" : "STRIPE_PRICE_LOCATION"} for per-location billing.`);
       const all = await stores(ws);
-      const openings = all.filter((s) => s.opening).length;
       const p: Record<string, string> = {
         mode: "subscription", success_url: `${back}?billing=success`, cancel_url: `${back}?billing=canceled`,
-        client_reference_id: ws, "metadata[workspace_id]": ws, "metadata[plan]": "locations",
-        "subscription_data[metadata][workspace_id]": ws, "subscription_data[metadata][plan]": "locations",
+        client_reference_id: ws, "metadata[workspace_id]": ws, "metadata[plan]": "locations", "metadata[tier]": tier, "metadata[guarantee]": guarantee ? "1" : "0",
+        "subscription_data[metadata][workspace_id]": ws, "subscription_data[metadata][plan]": "locations", "subscription_data[metadata][tier]": tier, "subscription_data[metadata][guarantee]": guarantee ? "1" : "0",
         "line_items[0][price]": loc, "line_items[0][quantity]": String(Math.max(1, all.length)),
       };
-      // Stores already open pay no opening fee; each store still opening pays it once.
-      if (opening && openings) { p["line_items[1][price]"] = opening; p["line_items[1][quantity]"] = String(openings); }
-      // Credits the site promises: the $299 entry plans toward the first year, and each opening fee against that store's first year.
+      // Stores already open pay no opening fee; each store still opening pays it once, by kind; complex ones are quoted.
+      openingItems(all, guarantee).forEach(([price, qty], i) => { p[`line_items[${i + 1}][price]`] = price; p[`line_items[${i + 1}][quantity]`] = String(qty); });
+      const quoted = await askForQuote(ws, all);
+      // The entry plans are credited toward the first year when bought in the last 60 days.
       const year = await yearOfLocation(loc);
-      const entry = bill?.entry_credited_at ? 0 : (Number(bill?.entry_markets) || 0) * (await entryCents());
-      const openingCredit = opening && openings ? Math.min(year.cents, Number((await stripeGet(`prices/${encodeURIComponent(opening)}`)).unit_amount) || 0) * openings : 0;
-      const credit = entry + openingCredit;
+      const fresh = bill?.entry_paid_at && Date.now() - Date.parse(String(bill.entry_paid_at)) <= 60 * 864e5;
+      const entry = bill?.entry_credited_at || !fresh ? 0 : (Number(bill?.entry_markets) || 0) * (await entryCents());
+      const credit = entry;
       if (credit > 0) {
-        const c = await stripe("coupons", { amount_off: String(credit), currency: year.currency, duration: "once", max_redemptions: "1", name: "Entry plan and opening credits", "metadata[workspace_id]": ws });
+        const c = await stripe("coupons", { amount_off: String(credit), currency: year.currency, duration: "once", max_redemptions: "1", name: "Entry plan credit", "metadata[workspace_id]": ws });
         p["discounts[0][coupon]"] = c.id;
         p["metadata[entry_credit]"] = String(entry);
       } else p.allow_promotion_codes = "true";
@@ -173,30 +208,26 @@ Deno.serve(async (req) => {
       // The stores this checkout bills for: once it's paid, the webhook counts exactly these, so a store added while
       // the person is on Stripe's page still gets its opening fee on the next invoice.
       await admin.from("billing").update({ checkout_store_ids: all.map((s) => s.id) }).eq("workspace_id", ws);
-      return json(200, { ok: true, url: sess.url });   // the webhook records which stores were counted, once it's paid
+      return json(200, { ok: true, url: sess.url, ...(quoted ? { quoted } : {}) });   // the webhook records which stores were counted, once it's paid
     }
 
     if (body.action === "sync_locations") {
       // Keep the subscription's store count in step with the workspace, and add the opening fee for new stores.
       const subId = bill?.subscription_id as string | null | undefined;
-      const loc = Deno.env.get("STRIPE_PRICE_LOCATION"), opening = Deno.env.get("STRIPE_PRICE_OPENING");
-      if (!subId || !loc) return json(200, { ok: true, synced: false });
+      if (!subId || !PRICE.essentials()) return json(200, { ok: true, synced: false });
       const sub = await stripeGet(`subscriptions/${encodeURIComponent(subId)}`);
       if (sub?.metadata?.plan !== "locations" || !["active", "trialing", "past_due"].includes(sub.status)) return json(200, { ok: true, synced: false });
-      const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => i.price?.id === loc);
+      const locs = [PRICE.essentials(), PRICE.pro()].filter(Boolean);
+      const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => locs.includes(i.price?.id));
       const all = await stores(ws);
       if (item && item.quantity !== Math.max(1, all.length)) await stripe(`subscription_items/${item.id}`, { quantity: String(Math.max(1, all.length)), proration_behavior: "create_prorations" });
       const charged = new Set<string>((bill?.charged_store_ids as string[] | null) ?? []);
       const fresh = all.filter((s) => !charged.has(s.id));
-      const openings = fresh.filter((s) => s.opening).length;
-      if (opening && openings && sub.customer) {
-        await stripe("invoiceitems", { customer: String(sub.customer), "pricing[price]": opening, quantity: String(openings), subscription: subId, "metadata[workspace_id]": ws });
-        // Each opening fee is credited against that store's yearly plan.
-        const year = await yearOfLocation(loc);
-        const fee = Number((await stripeGet(`prices/${encodeURIComponent(opening)}`)).unit_amount) || 0;
-        const credit = Math.min(year.cents, fee) * openings;
-        if (credit > 0) await stripe("invoiceitems", { customer: String(sub.customer), amount: String(-credit), currency: year.currency, description: `Opening fee credited against the yearly plan (${openings} store${openings === 1 ? "" : "s"})`, subscription: subId, "metadata[workspace_id]": ws });
-      }
+      const openings = fresh.filter((s) => s.opening && s.kind !== "complex").length;
+      // a new store still opening: its opening fee (and the guarantee, when the plan has it) on the next invoice
+      if (sub.customer) for (const [price, qty] of openingItems(fresh, sub.metadata?.guarantee === "1"))
+        await stripe("invoiceitems", { customer: String(sub.customer), "pricing[price]": price, quantity: String(qty), subscription: subId, "metadata[workspace_id]": ws });
+      await askForQuote(ws, fresh);
       if (fresh.length) await admin.from("billing").update({ charged_store_ids: [...charged, ...fresh.map((s) => s.id)] }).eq("workspace_id", ws);
       return json(200, { ok: true, synced: true, stores: all.length, new_openings: openings });
     }

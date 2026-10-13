@@ -376,7 +376,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
   const needOwner = () => (owner ? null : fnErr("forbidden", member ? "Only an owner of this workspace can do that." : "You are not a member of this workspace.", 403));
   switch (name) {
     case "billing": {
-      if (body.action === "prices") return json({ ok: true, location: { amount: 1788, currency: "USD", interval: "year", interval_count: 1 }, opening: { amount: 3500, currency: "USD", interval: null, interval_count: null } });   // the prices the launcher creates in Stripe
+      if (body.action === "prices") return json({ ok: true, location: { amount: 1788, currency: "USD", interval: "year", interval_count: 1 }, pro: { amount: 3588, currency: "USD", interval: "year", interval_count: 1 }, opening: { amount: 3500, currency: "USD", interval: null, interval_count: null }, opening_food: { amount: 6500, currency: "USD", interval: null, interval_count: null }, guarantee: { amount: 2500, currency: "USD", interval: null, interval_count: null }, pack: { amount: 49, currency: "USD", interval: null, interval_count: null } });   // the prices the launcher creates in Stripe
       if (body.action === "sync_locations") return json({ ok: true, synced: false });
       const no = needOwner(); if (no) return no;
       if (body.action === "portal") return fnErr("not_configured", "Billing management opens Stripe on the live app.", 409);

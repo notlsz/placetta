@@ -26,7 +26,7 @@ const ENV: Record<string, string> = {
   ANTHROPIC_API_KEY: "sk-ant-e2e", APP_ORIGINS: APP, RESEND_API_KEY: "re_e2e", MAIL_FROM: "Placetta <hello@placetta.test>",
   TELNYX_API_KEY: "KEY_e2e", TELNYX_PUBLIC_KEY: b64(await crypto.subtle.exportKey("raw", telnyxKeys.publicKey)), ODELIA_NUMBER: ODELIA,
   TELNYX_MESSAGING_PROFILE_ID: "mp_e2e", TELNYX_VOICE_CONNECTION_ID: "conn_e2e", TELNYX_ASSISTANT_ID: "assistant-e2e",
-  STRIPE_SECRET_KEY: "sk_test_e2e", STRIPE_WEBHOOK_SECRET: "whsec_e2e", STRIPE_PRICE_LOCATION: "price_location", STRIPE_PRICE_OPENING: "price_opening", STRIPE_PRICE_ENTRY: "price_entry", STRIPE_PRICE_PACK: "price_pack", PACK_CREDIT_USD: "25",
+  STRIPE_SECRET_KEY: "sk_test_e2e", STRIPE_WEBHOOK_SECRET: "whsec_e2e", STRIPE_PRICE_LOCATION: "price_location", STRIPE_PRICE_OPENING: "price_opening", STRIPE_PRICE_LOCATION_PRO: "price_location_pro", STRIPE_PRICE_OPENING_FOOD: "price_opening_food", STRIPE_PRICE_GUARANTEE: "price_guarantee", STRIPE_PRICE_ENTRY: "price_entry", STRIPE_PRICE_PACK: "price_pack", PACK_CREDIT_USD: "25",
   OAUTH_STATE_SECRET: "e2e-oauth-state-secret-0123456789abcdef",
   // self-filing: on for Form SS-4 by fax only, without the two-key review, so a filing can go all the way
   FILER_AGENCIES: "irs-ss4", FILER_CHANNELS: "fax", FILER_TWO_KEY: "0", TELNYX_FAX_CONNECTION_ID: "fax_conn_e2e", TELNYX_FAX_FROM: "+12125550101", FILER_SECRET: "e2e-filer-secret-0123456789abcdef0123",
@@ -635,13 +635,34 @@ try {
 
   /* ---------------- e. billing ---------------- */
   await scenario("e. billing", async () => {
+    const checkout = async (extra: Record<string, unknown> = {}) => {
+      mark = recorded.length;
+      const r = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/`, ...extra }, { jwt: owner.jwt });
+      return { r, sess: since(mark).find((x) => x.service === "stripe" && x.path === "/v1/checkout/sessions")?.body, cpn: since(mark).find((x) => x.service === "stripe" && x.path === "/v1/coupons")?.body };
+    };
+    // Pro with the open-by-date guarantee: the Pro price per location, a food opening, and the guarantee for it
+    const pro = await checkout({ tier: "pro", guarantee: true });
+    check("Pro with the guarantee: Pro per location, the food opening fee, one guarantee", pro.r.status === 200 && pro.sess?.line_items?.["0"]?.price === "price_location_pro" && pro.sess?.line_items?.["0"]?.quantity === "2" && pro.sess?.line_items?.["1"]?.price === "price_opening_food" && pro.sess?.line_items?.["1"]?.quantity === "1" && pro.sess?.line_items?.["2"]?.price === "price_guarantee" && pro.sess?.line_items?.["2"]?.quantity === "1" && pro.sess?.metadata?.tier === "pro" && pro.sess?.metadata?.guarantee === "1" && pro.sess?.["subscription_data"]?.metadata?.tier === "pro", pro.sess);
+    // the entry plan is credited only within 60 days of paying for it
+    await sql`update public.billing set entry_paid_at = now() - interval '61 days' where workspace_id = ${ws}`;
+    const stale = await checkout();
+    check("an entry plan paid over 60 days ago isn't credited", stale.r.status === 200 && !stale.cpn && !stale.sess?.discounts && stale.sess?.allow_promotion_codes === "true", { cpn: stale.cpn, sess: stale.sess?.metadata });
+    await sql`update public.billing set entry_paid_at = now() - interval '2 days' where workspace_id = ${ws}`;
+    // a complex opening (liquor, major build-out) is quoted by the team, not charged at checkout
+    await saveState((s) => ({ ...s, stores: [...s.stores, { id: "st-bar", name: same("Bar, 40th Rd"), address: "1 40th Rd, Flushing, NY", stage: "opening", kind: "complex", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] as typeof s.stores }));
+    const cx = await checkout();
+    const quotes = await sql`select title, dedupe from public.team_tasks where kind = 'quote' and workspace_id = ${ws}`;
+    check("a complex opening goes to the team for a quote, with no fee at checkout", cx.r.status === 200 && cx.r.data?.quoted === 1 && cx.sess?.line_items?.["0"]?.quantity === "3" && cx.sess?.line_items?.["1"]?.quantity === "1" && !cx.sess?.line_items?.["2"] && quotes.length === 1 && /Bar, 40th Rd/.test(quotes[0].title), { li: cx.sess?.line_items, quotes });
+    await checkout();
+    check("asking again doesn't add a second quote task", (await sql`select count(*)::int n from public.team_tasks where kind = 'quote' and workspace_id = ${ws}`)[0].n === 1);
+    await saveState((s) => ({ ...s, stores: s.stores.filter((x) => x.id !== "st-bar") }));
     mark = recorded.length;
     const co = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
     check("checkout answers with Stripe's URL", co.status === 200 && /^https:\/\/checkout\.stripe\.com\//.test(co.data?.url ?? ""), co);
     const sess = since(mark).find((x) => x.service === "stripe" && x.path === "/v1/checkout/sessions")?.body;
-    check("line items: 2 locations (one open, one opening), 1 opening fee", sess?.line_items?.["0"]?.price === "price_location" && sess?.line_items?.["0"]?.quantity === "2" && sess?.line_items?.["1"]?.price === "price_opening" && sess?.line_items?.["1"]?.quantity === "1", sess?.line_items);
+    check("line items: 2 locations (one open, one opening), 1 restaurant opening fee", sess?.line_items?.["0"]?.price === "price_location" && sess?.line_items?.["0"]?.quantity === "2" && sess?.line_items?.["1"]?.price === "price_opening_food" && sess?.line_items?.["1"]?.quantity === "1" && !sess?.line_items?.["2"], sess?.line_items);
     const cpn = since(mark).find((x) => x.service === "stripe" && x.path === "/v1/coupons")?.body;
-    check("a one-time coupon of the $299 entry plan plus a year of one location", cpn?.amount_off === String(29900 + 14900 * 12) && cpn?.duration === "once" && sess?.discounts?.["0"]?.coupon, { cpn, discounts: sess?.discounts });
+    check("a one-time coupon of the $299 entry plan only (opening fees aren't credited)", cpn?.amount_off === "29900" && cpn?.duration === "once" && sess?.discounts?.["0"]?.coupon, { cpn, discounts: sess?.discounts });
     check("the session carries the workspace and the entry credit", sess?.metadata?.workspace_id === ws && sess?.metadata?.plan === "locations" && sess?.metadata?.entry_credit === "29900" && sess?.customer === "cus_goldenox", sess?.metadata);
     mark = recorded.length;
     const portal = await call("billing", { action: "portal", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
@@ -670,6 +691,14 @@ try {
     const [pl] = await sql`select paid_locations from public.billing where workspace_id = ${ws}`;
     const bud = (await sql`select public.ai_budget(${ws}) as b`)[0].b;
     check("the subscription's location quantity sizes Odelia's allowance", pl.paid_locations === 2 && bud.plan === "monthly" && Number(bud.budget_usd) >= 50, { pl, bud });
+    // moving up to Pro (from the billing portal): the webhook sees the Pro price and doubles the allowance
+    const proSub = { ...sub, items: { ...sub.items, data: [{ ...sub.items.data[0], price: stripeState.prices.price_location_pro }] } };
+    const up = await stripePost({ id: "evt_sub_pro", type: "customer.subscription.updated", data: { object: proSub } });
+    const [bp] = await sql`select subscription_plan, paid_locations from public.billing where workspace_id = ${ws}`;
+    const budPro = (await sql`select public.ai_budget(${ws}) as b`)[0].b;
+    check("a Pro subscription is recorded as Pro, with twice the allowance", up.status === 200 && bp.subscription_plan === "pro" && bp.paid_locations === 2 && Number(budPro.budget_usd) >= 100, { bp, budPro });
+    const down = await stripePost({ id: "evt_sub_essentials", type: "customer.subscription.updated", data: { object: sub } });
+    check("back on Essentials", down.status === 200 && (await sql`select subscription_plan from public.billing where workspace_id = ${ws}`)[0].subscription_plan === "locations");
     // an Odelia pack: Stripe Checkout, then the webhook adds credit that carries over
     mark = recorded.length;
     const pk = await call("billing", { action: "pack", packs: 2, workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
@@ -685,14 +714,14 @@ try {
     const again = await stripePost({ id: "evt_cs_locations", type: "checkout.session.completed", data: { object: {} } });
     check("a repeated event is applied once", again.data?.duplicate === true, again);
 
-    // a new store still opening: its opening fee on the next invoice, credited against its first year
+    // a new store still opening: its opening fee on the next invoice, not credited
     await saveState((s) => ({ ...s, stores: [...s.stores, { id: "st-bayside", name: same("Bayside, Bell Blvd"), address: "39-01 Bell Blvd, Bayside, NY 11361", stage: "opening", plannedOpen: day(150), rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] as typeof s.stores }));
     mark = recorded.length;
     const sync = await call("billing", { action: "sync_locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
     const items = since(mark).filter((x) => x.service === "stripe" && x.path === "/v1/invoiceitems");
     check("sync_locations succeeds", sync.status === 200 && sync.data?.synced === true && sync.data?.new_openings === 1, sync);
     check("the subscription now counts 3 locations", sub.items.data[0].quantity === 3);
-    check("an opening fee invoice item and a negative credit of one year", items.length === 2 && items.every((x) => x.status === 200) && (items[0].body.pricing?.price ?? items[0].body.price) === "price_opening" && items[0].body.quantity === "1" && items[1].body.amount === String(-14900 * 12), items.map((x) => ({ s: x.status, b: x.body })));
+    check("one restaurant opening fee on the next invoice, and no credit against it", items.length === 1 && items[0].status === 200 && (items[0].body.pricing?.price ?? items[0].body.price) === "price_opening_food" && items[0].body.quantity === "1", items.map((x) => ({ s: x.status, b: x.body })));
     // a store that's already open: counted, no opening fee
     await saveState((s) => ({ ...s, stores: [...s.stores, { id: "st-astoria", name: same("Astoria, Steinway St"), address: "31-01 Steinway St, Astoria, NY 11103", stage: "open", opened: "2024-05-01", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] as typeof s.stores }));
     mark = recorded.length;

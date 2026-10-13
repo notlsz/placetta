@@ -44,6 +44,11 @@ begin
   g := public.ai_gate(wm, x, 'call', null);
   res := res || jsonb_build_object('spent credit still counts this period', (g->'budget'->>'limit_usd')::numeric between 59.9 and 60.1);
 
+  -- Pro: twice the allowance per location
+  update public.billing set subscription_plan = 'pro' where workspace_id = wm;
+  res := res || jsonb_build_object('Pro doubles the allowance per location', (public.ai_budget(wm)->>'budget_usd')::numeric = 100);
+  update public.billing set subscription_plan = 'locations' where workspace_id = wm;
+
   -- Opening: $50 a month more for each paid store still opening
   insert into public.billing (workspace_id, subscription_status, paid_locations, charged_store_ids) values (wo, 'active', 3, '{s1,s2}');
   res := res || jsonb_build_object('opening stores add budget only when paid and opening', (public.ai_budget(wo)->>'budget_usd')::numeric = 125);

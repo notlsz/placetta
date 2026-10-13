@@ -90,7 +90,7 @@ const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
 })[u.kind];
 
 const PLAN_LABEL: Record<string, Bi> = {
-  starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版"),
+  starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版"), locations: B("Essentials, per location", "基础版（按门店）"), pro: B("Pro, per location", "专业版（按门店）"),
 };
 
 export default function App({ cloud }: { cloud?: CloudSession }) {

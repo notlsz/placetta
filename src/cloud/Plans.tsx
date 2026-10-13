@@ -8,71 +8,84 @@ import { I, Modal, Pill } from "../ui";
    Prices match the landing page. Agency fees are always paid by the business to the agency. */
 
 
+type Prices = api.PlanPrices;
+const FOOD = /tea|coffee|caf[eé]|restaurant|food|kitchen|bakery|hot ?pot|noodle|dessert|ice cream|boba|bubble|juice|bar\b|grill|pizza|sushi|dumpling|奶茶|茶|咖啡|餐|火锅|面|甜品|烘焙|食/i;
+const usd = (x: api.LocationPrice | null | undefined, monthly = false) => !x ? "" : "$" + (monthly && x.interval === "year" ? Math.round(x.amount / 12) : x.amount).toLocaleString("en-US", { maximumFractionDigits: 0 });
+
 export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: () => void }) {
-  const { b, t, lang, cloud } = useApp();
+  const { b, t, lang, cloud, ws } = useApp();
+  const zh = lang === "zh";
   const [markets, setMarkets] = useState(1);
   const [busy, setBusy] = useState("");
-  const [prices, setPrices] = useState<{ location: api.LocationPrice | null; opening: api.LocationPrice | null } | null>(null);
+  const [guarantee, setGuarantee] = useState(false);
+  const [prices, setPrices] = useState<Prices | null>(null);
   const wsId = cloud?.wsId;
   useEffect(() => { if (wsId) void api.locationPrices(wsId).then(setPrices, () => setPrices(null)); }, [wsId]);
   if (!cloud) return null;
-  const go = async (p: "entry" | "starter" | "growth" | "locations") => { setBusy(p); await cloud.checkout(p, p === "entry" ? { markets } : {}); setBusy(""); };
+  const stores = ws.stores ?? [];
+  const n = Math.max(1, stores.length);
+  // what this checkout would bill: every store, and an opening fee for each store still opening, by kind
+  const sells = [ws.business.en, ...ws.facts.filter(f => /what you sell|business type|cuisine|menu/i.test(f.label.en)).map(f => f.value.en)].join(" ");
+  const kindOf = (s: (typeof stores)[number]) => (s as { kind?: string }).kind ?? (FOOD.test(sells) ? "food" : "retail");
+  const opening = stores.filter(s => s.stage === "opening");
+  const food = opening.filter(s => kindOf(s) === "food").length, retail = opening.filter(s => kindOf(s) === "retail").length, complex = opening.filter(s => kindOf(s) === "complex").length;
+  const go = async (p: "entry" | "essentials" | "pro") => {
+    setBusy(p);
+    if (p === "entry") await cloud.checkout("entry", { markets });
+    else await cloud.checkout("locations", { tier: p, guarantee });
+    setBusy("");
+  };
   const showEntry = cloud.plan === "none";
+  const tier = (key: "essentials" | "pro", price: api.LocationPrice | null | undefined, name: [string, string], tag: [string, string], items: [string, string][]) => (
+    <section className={"plan perloc" + (key === "pro" ? " hl" : "")}>
+      <div className="plan-h"><b>{zh ? name[1] : name[0]}</b><em>{zh ? tag[1] : tag[0]}</em></div>
+      <span className="price">{usd(price, true) || (key === "pro" ? "$299" : "$149")}<small>{zh ? " /店/月，按年计费" : " a location a month, billed yearly"}</small></span>
+      <ul>{items.map(([en, z], i) => <li key={i}><I.check />{zh ? z : en}</li>)}</ul>
+      <div className="plan-act">
+        <span className="mk">{zh ? `${n} 家门店` : `${n} store${n === 1 ? "" : "s"}`}</span>
+        <Pill kind={key === "pro" ? "ink" : undefined} disabled={!!busy || !price} onClick={() => void go(key)}>{busy === key ? "…" : zh ? `选择${name[1]}` : `Choose ${name[0]}`}</Pill>
+      </div>
+    </section>
+  );
   return (
     <Modal label={b(B("Plans", "方案"))} onClose={onClose} wide>
       <header className="m-h">
         <span className="m-eyebrow"><I.card />{b(B("Plans", "方案"))}</span>
-        <h2>{reason === "file" ? b(B("Filing is part of the yearly plan.", "申报包含在年度套餐中。")) : b(B("Start with one market.", "从一个市场开始。"))}</h2>
-        <p>{reason === "file" ? b(B("Your approval is saved. Start the plan and Odelia takes it from here.", "您的确认已保存。开通套餐后，由 Odelia 接手。")) : b(B("The agent maps every license your store needs, in order, with fees and timelines, and prepares each application.", "助理按顺序列出门店所需的全部许可、费用与时间，并准备好每一份申请。"))}</p>
+        <h2>{reason === "file" ? b(B("Filing is part of the yearly plan.", "申报包含在年度方案中。")) : b(B("Open on time. Stay open. No fines.", "按时开业，持续营业，零罚款。"))}</h2>
+        <p>{reason === "file" ? b(B("Your approval is saved. Start the plan and Odelia takes it from here.", "您的确认已保存。开通方案后，由 Odelia 接手。")) : b(B("Billed per location, yearly. Odelia does the work; our team files and answers to the agencies.", "按门店、按年计费。Odelia 负责工作，我们的团队负责申报并与机构对接。"))}</p>
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body plans">
+        <div className="tiers two">
+          {tier("essentials", prices?.location, ["Essentials", "基础版"], ["Every license, kept current", "全部证照，始终有效"], [
+            ["Every permit and license mapped and filed", "梳理并申报全部许可与执照"], ["Renewals and deadlines handled before they lapse", "到期前完成续期，不错过截止日期"], ["Rule changes for each store's city and county", "跟进每家门店所在城市和县的规则变化"], ["Odelia's allowance: $25 a location a month", "Odelia 额度：每店每月 25 美元"]])}
+          {tier("pro", prices?.pro, ["Pro", "专业版"], ["Inspection ready, every day", "每天都能迎检"], [
+            ["Everything in Essentials", "包含基础版全部内容"], ["Daily inspection-readiness logs and mock inspections", "每日迎检记录与模拟检查"], ["Staff certificates and vendor proof tracked", "跟踪员工证书与供应商凭证"], ["Twice Odelia's allowance: $50 a location a month", "双倍 Odelia 额度：每店每月 50 美元"]])}
+        </div>
+        {opening.length > 0 && (
+          <section className="plan openings">
+            <div className="plan-h"><b>{zh ? `${opening.length} 家门店正在筹备开业` : `${opening.length} store${opening.length === 1 ? "" : "s"} still opening`}</b></div>
+            <p>{[retail && (zh ? `零售 ${retail} 家，每家 ${usd(prices?.opening) || "$3,500"}` : `${retail} retail at ${usd(prices?.opening) || "$3,500"} each`), food && (zh ? `餐饮 ${food} 家，每家 ${usd(prices?.opening_food) || "$6,500"}` : `${food} restaurant or food at ${usd(prices?.opening_food) || "$6,500"} each`), complex && (zh ? `${complex} 家含酒类或大型装修，由团队报价` : `${complex} with liquor or a major build-out, quoted by our team`)].filter(Boolean).join(zh ? "；" : "; ")}{zh ? "。每家门店的全部开业许可，直到开业当天。" : ". Every permit each store needs, through opening day."}</p>
+            {prices?.guarantee && retail + food > 0 && (
+              <label className="guar"><input type="checkbox" checked={guarantee} onChange={e => setGuarantee(e.target.checked)} />
+                <span><b>{zh ? `按期开业保障，每家 ${usd(prices.guarantee)}` : `Open-by-date guarantee, ${usd(prices.guarantee)} a store`}</b>{zh ? "如因快哉负责的许可导致延期开业，退还该店开业费用。" : "If a permit Placetta handles makes you open late, that store's opening fee is refunded."}</span></label>
+            )}
+          </section>
+        )}
         {showEntry && (
           <section className="plan entry">
-            <div className="plan-h"><b>{b(B("Entry plan", "开店计划"))}</b><span className="price">$299<small>{b(B(" per market, one time", " 每个市场，一次性"))}</small></span></div>
-            <p>{b(B("Credited toward your first year on an annual plan.", "可抵扣年度方案首年费用。"))}</p>
+            <div className="plan-h"><b>{b(B("Not ready for a yearly plan? The entry plan", "还没准备好年度方案？先开通开店计划"))}</b><span className="price">$299<small>{b(B(" per market, one time", " 每个市场，一次性"))}</small></span></div>
+            <p>{b(B("Every license for one market mapped, in order, with fees and timelines, and each application prepared. Credited in full if you start a yearly plan within 60 days.", "梳理一个市场所需的全部许可，按顺序列出费用与时间，并准备好每份申请。60 天内开通年度方案可全额抵扣。"))}</p>
             <div className="plan-act">
               <label className="mk">{b(B("Markets", "市场数"))}
-                <select aria-label={b(B("Markets", "市场数"))} value={markets} onChange={e => setMarkets(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}</select>
+                <select aria-label={b(B("Markets", "市场数"))} value={markets} onChange={e => setMarkets(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(k => <option key={k} value={k}>{k}</option>)}</select>
               </label>
-              <Pill kind="ink" disabled={!!busy} onClick={() => void go("entry")}>{busy === "entry" ? "…" : b(B(`Pay $${299 * markets}`, `支付 $${299 * markets}`))}</Pill>
+              <Pill disabled={!!busy} onClick={() => void go("entry")}>{busy === "entry" ? "…" : b(B(`Pay $${299 * markets}`, `支付 $${299 * markets}`))}</Pill>
             </div>
           </section>
         )}
-        {prices?.location && <PerLocation p={prices.location} o={prices.opening} busy={busy === "locations"} disabled={!!busy} onGo={() => void go("locations")} />}
-        {!prices?.location && (
-          <section className="plan hl perloc">
-            <div className="plan-h"><b>{b(B("Every location", "每家门店"))}</b><em>{b(B("For franchise chains", "连锁加盟品牌"))}</em></div>
-            <span className="price">$149<small>{lang === "zh" ? " /店/月" : " per location a month"}</small></span>
-            <p>{b(B("Billed yearly. Plus $3,500 once for each new store opening, credited against the yearly plan. Licenses, renewals, staff certificates, vendor service proof, inspection prep and rule changes for every store.", "按年计费。每家新店开业另收 3,500 美元，可抵扣年度套餐。每家门店的执照、续期、员工证书、供应商服务凭证、检查准备和规则变化。"))}</p>
-            <a className="pill primary" href="mailto:support@placetta.com?subject=Odelia%20for%20our%20locations"><span>{b(B("Talk to us", "联系我们"))}</span><i aria-hidden="true"><I.arrow /></i></a>
-          </section>
-        )}
-        <p className="note">{b(B("Exceptions handled by people are quoted per step. Government fees are paid by you directly to each agency. Payments are handled by Stripe.", "由专人处理的例外事项按步骤报价。政府规费由您直接支付给各机构。付款由 Stripe 处理。"))}</p>
+        <p className="note">{b(B("Ten or more locations: headquarters plans from $25,000 a year, with every store on one dashboard. Overseas brands entering the US: company setup through the first store, quoted. Government fees are paid by you directly to each agency, at cost. Payments are handled by Stripe.", "10 家及以上门店：总部方案每年 25,000 美元起，所有门店一屏掌握。海外品牌进入美国：从公司设立到首店开业，单独报价。政府规费由您按实际金额直接支付给各机构。付款由 Stripe 处理。"))} <a href="mailto:support@placetta.com?subject=Headquarters%20plan">{b(B("Talk to us", "联系我们"))}</a></p>
       </div>
     </Modal>
-  );
-}
-
-/* Per location: one price per store, read from Stripe, so it grows with the chain. Shown once the prices are set. */
-function PerLocation({ p, o, busy, disabled, onGo }: { p: api.LocationPrice; o: api.LocationPrice | null; busy: boolean; disabled: boolean; onGo: () => void }) {
-  const { b, lang, ws } = useApp();
-  const zh = lang === "zh";
-  const money = (x: api.LocationPrice) => (x.currency === "USD" ? "$" : x.currency + " ") + x.amount.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  // A yearly price shows as the monthly figure the site quotes ($149 a location a month, billed yearly).
-  const yearly = p.interval === "year" && (p.interval_count ?? 1) === 1;
-  const shown: api.LocationPrice = yearly ? { ...p, amount: Math.round((p.amount / 12) * 100) / 100 } : p;
-  const per = yearly ? (zh ? " /店/月，按年计费" : " per location a month, billed yearly") : p.interval === "year" ? (zh ? " /店/年" : " per store a year") : p.interval === "month" ? (zh ? " /店/月" : " per store a month") : "";
-  const n = (ws.stores ?? []).length;
-  return (
-    <section className="plan hl perloc">
-      <div className="plan-h"><b>{b(B("Per location", "按门店计费"))}</b><em>{b(B("Grows with your chain", "随门店数量增长"))}</em></div>
-      <span className="price">{money(shown)}<small>{per}</small></span>
-      <p>{o ? (zh ? `每家新店开业另收一次 ${money(o)}，可抵扣该店首年费用。` : `Plus ${money(o)} once for each new store opening, credited against that store's first year.`) : ""} {zh ? "每家门店的全部许可、续期、检查与申报，由快哉持续跟进。" : "Every permit, renewal, inspection and filing for each store, handled for as long as it's open."}</p>
-      <div className="plan-act">
-        <span className="mk">{zh ? `${Math.max(1, n)} 家门店` : `${Math.max(1, n)} store${Math.max(1, n) === 1 ? "" : "s"}`}</span>
-        <Pill kind="ink" disabled={disabled} onClick={onGo}>{busy ? "…" : b(B("Choose per location", "选择按门店计费"))}</Pill>
-      </div>
-    </section>
   );
 }

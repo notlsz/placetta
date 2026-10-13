@@ -56,8 +56,11 @@ function telnyx(req: Request, path: string, body: any): Response {
 export const STRIPE_DEFAULT_VERSION = "2025-09-30.clover";
 export const stripeState = {
   prices: {
-    price_location: { id: "price_location", object: "price", unit_amount: 14900, currency: "usd", type: "recurring", recurring: { interval: "month", interval_count: 1 } },
+    price_location: { id: "price_location", object: "price", unit_amount: 178800, currency: "usd", type: "recurring", recurring: { interval: "year", interval_count: 1 } },
+    price_location_pro: { id: "price_location_pro", object: "price", unit_amount: 358800, currency: "usd", type: "recurring", recurring: { interval: "year", interval_count: 1 } },
     price_opening: { id: "price_opening", object: "price", unit_amount: 350000, currency: "usd", type: "one_time", recurring: null },
+    price_opening_food: { id: "price_opening_food", object: "price", unit_amount: 650000, currency: "usd", type: "one_time", recurring: null },
+    price_guarantee: { id: "price_guarantee", object: "price", unit_amount: 250000, currency: "usd", type: "one_time", recurring: null },
     price_entry: { id: "price_entry", object: "price", unit_amount: 29900, currency: "usd", type: "one_time", recurring: null },
     price_pack: { id: "price_pack", object: "price", unit_amount: 4900, currency: "usd", type: "one_time", recurring: null },
   } as Record<string, any>,

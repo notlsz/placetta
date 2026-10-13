@@ -457,9 +457,10 @@ export async function hqShare(ws: string, email: string, brand?: string): Promis
 export const hqUnshare = (id: string) => rpcVoid("hq_unshare", { p_id: id });
 
 export type LocationPrice ={ amount: number; currency: string; interval: string | null; interval_count: number | null };
-export const locationPrices = (ws: string) => fn<{ location: LocationPrice | null; opening: LocationPrice | null }>("billing", { action: "prices", workspace_id: ws, return_url: location.origin + location.pathname });
+export type PlanPrices = { location: LocationPrice | null; pro?: LocationPrice | null; opening: LocationPrice | null; opening_food?: LocationPrice | null; guarantee?: LocationPrice | null; pack?: LocationPrice | null };
+export const locationPrices = (ws: string) => fn<PlanPrices>("billing", { action: "prices", workspace_id: ws, return_url: location.origin + location.pathname });
 export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: location.origin + location.pathname });
-export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number } = {}) =>
+export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean } = {}) =>
   fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: location.origin + location.pathname });
 export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { action: "portal", workspace_id: ws, return_url: location.origin + location.pathname });
 /** An Odelia pack: more AI allowance, carried over until it's used. */
