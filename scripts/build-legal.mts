@@ -9,6 +9,9 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { LEGAL, UPDATED, type LegalDoc } from "../src/legal.ts";
 
+// An anchor for an English heading, so other pages can link to a section (/terms#plans-and-billing).
+const slug = (h: string) => { const id = h.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); return /^[a-z]/.test(id) ? ` id="${id}"` : ""; };
+
 type Lang = "en" | "zh";
 const PAGE: Record<LegalDoc["id"], { file: string; desc: Record<Lang, string> }> = {
   terms: { file: "terms.html", desc: { en: "The terms that govern your use of Placetta.", zh: "您使用快哉须遵守的条款。" } },
@@ -54,7 +57,7 @@ function bodyHtml(text: string): string {
   return text.trim().split(/\n\s*\n/).map(blk => {
     const lines = blk.split("\n");
     if (lines.every(l => l.startsWith("- "))) return `<ul class="dot">\n${lines.map(l => `<li>${linkify(l.slice(2))}</li>`).join("\n")}\n</ul>`;
-    if (lines[0].startsWith("## ")) return `<h2>${esc(lines[0].slice(3))}</h2>${lines.length > 1 ? `\n<p>${linkify(lines.slice(1).join(" "))}</p>` : ""}`;
+    if (lines[0].startsWith("## ")) return `<h2${slug(lines[0].slice(3))}>${esc(lines[0].slice(3))}</h2>${lines.length > 1 ? `\n<p>${linkify(lines.slice(1).join(" "))}</p>` : ""}`;
     return `<p>${linkify(lines.join(" "))}</p>`;
   }).join("\n");
 }
