@@ -35,8 +35,28 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/stripe-webhook/index.ts
+// supabase/functions/stripe-webhook/index.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
+
+// supabase/functions/_shared/stripe_catalog.ts
+var CATALOG = {
+  entry: { env: "STRIPE_PRICE_ENTRY", lookup: "placetta_entry", name: "Placetta entry plan", description: "Every license, permit and registration for one market, in order, with timelines and agency fees.", cents: 29900 },
+  essentials: { env: "STRIPE_PRICE_LOCATION", lookup: "placetta_essentials_year", name: "Placetta Essentials", description: "Per location, billed yearly: every license tracked and renewals filed, with Odelia.", cents: 178800, year: true },
+  pro: { env: "STRIPE_PRICE_LOCATION_PRO", lookup: "placetta_pro_year", name: "Placetta Pro", description: "Per location, billed yearly: Essentials plus daily logs, mock inspections and twice the Odelia allowance.", cents: 358800, year: true },
+  retail: { env: "STRIPE_PRICE_OPENING", lookup: "placetta_opening_retail", name: "Store opening, retail", description: "Every permit for a new retail store, filed and tracked to approval.", cents: 35e4 },
+  food: { env: "STRIPE_PRICE_OPENING_FOOD", lookup: "placetta_opening_food", name: "Store opening, restaurant or food", description: "Every permit for a new restaurant or food store, filed and tracked to approval.", cents: 65e4 },
+  guarantee: { env: "STRIPE_PRICE_GUARANTEE", lookup: "placetta_guarantee", name: "Open-by-date guarantee", description: "If a permit Placetta files makes the store open late, the opening fee is refunded.", cents: 25e4 },
+  pack: { env: "STRIPE_PRICE_PACK", lookup: "placetta_odelia_pack", name: "Odelia pack", description: "$25 more Odelia allowance, carried over until it's used.", cents: 4900 }
+};
+function itemOf(price, env) {
+  if (!price) return void 0;
+  return Object.keys(CATALOG).find((k) => price.id && env(CATALOG[k].env) === price.id || price.lookup_key && price.lookup_key === CATALOG[k].lookup);
+}
+async function webhookSecret(env, store) {
+  return env("STRIPE_WEBHOOK_SECRET") ?? await store.get("webhook_secret");
+}
+
+// supabase/functions/stripe-webhook/index.ts
 var admin = (0, import_supabase_js_2.createClient)(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"), {
   auth: { persistSession: false, autoRefreshToken: false }
 });
@@ -68,7 +88,11 @@ async function log(ws, action, plan) {
 }
 Deno.serve(async (req) => {
   if (req.method !== "POST") return reply(405, { error: "POST only" });
-  const secret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  const secret = await webhookSecret((k) => Deno.env.get(k), {
+    get: async (key) => (await admin.from("stripe_config").select("value").eq("key", key).maybeSingle()).data?.value ?? void 0,
+    set: async () => {
+    }
+  });
   if (!secret) return reply(503, { error: "Set STRIPE_WEBHOOK_SECRET." });
   const raw = await req.text();
   if (!await verified(raw, req.headers.get("stripe-signature") ?? "", secret)) return reply(400, { error: "Bad signature." });
@@ -114,14 +138,16 @@ Deno.serve(async (req) => {
       if (ws) {
         const end = o.current_period_end ?? o.items?.data?.[0]?.current_period_end;
         const status = event.type === "customer.subscription.deleted" ? "canceled" : String(o.status);
-        const locPrice = Deno.env.get("STRIPE_PRICE_LOCATION");
+        const env = (k) => Deno.env.get(k);
         const items = o.items?.data ?? [];
-        const paid = status === "active" || status === "trialing" ? items.filter((i) => locPrice && i.price?.id === locPrice).reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
+        const located = items.filter((i) => ["essentials", "pro"].includes(itemOf(i.price, env) ?? ""));
+        const paid = status === "active" || status === "trialing" ? located.reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
+        const pro = located.length ? located.some((i) => itemOf(i.price, env) === "pro") : o.metadata?.tier === "pro";
         await admin.from("billing").update({
           stripe_customer_id: o.customer,
           subscription_id: o.id,
           subscription_status: status,
-          subscription_plan: o.metadata?.plan ?? null,
+          subscription_plan: pro ? "pro" : o.metadata?.plan ?? null,
           current_period_end: end ? new Date(end * 1e3).toISOString() : null,
           paid_locations: paid
         }).eq("workspace_id", ws);

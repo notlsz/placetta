@@ -35,8 +35,86 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/billing/index.ts
+// supabase/functions/billing/index.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
+
+// supabase/functions/_shared/stripe_catalog.ts
+var CATALOG = {
+  entry: { env: "STRIPE_PRICE_ENTRY", lookup: "placetta_entry", name: "Placetta entry plan", description: "Every license, permit and registration for one market, in order, with timelines and agency fees.", cents: 29900 },
+  essentials: { env: "STRIPE_PRICE_LOCATION", lookup: "placetta_essentials_year", name: "Placetta Essentials", description: "Per location, billed yearly: every license tracked and renewals filed, with Odelia.", cents: 178800, year: true },
+  pro: { env: "STRIPE_PRICE_LOCATION_PRO", lookup: "placetta_pro_year", name: "Placetta Pro", description: "Per location, billed yearly: Essentials plus daily logs, mock inspections and twice the Odelia allowance.", cents: 358800, year: true },
+  retail: { env: "STRIPE_PRICE_OPENING", lookup: "placetta_opening_retail", name: "Store opening, retail", description: "Every permit for a new retail store, filed and tracked to approval.", cents: 35e4 },
+  food: { env: "STRIPE_PRICE_OPENING_FOOD", lookup: "placetta_opening_food", name: "Store opening, restaurant or food", description: "Every permit for a new restaurant or food store, filed and tracked to approval.", cents: 65e4 },
+  guarantee: { env: "STRIPE_PRICE_GUARANTEE", lookup: "placetta_guarantee", name: "Open-by-date guarantee", description: "If a permit Placetta files makes the store open late, the opening fee is refunded.", cents: 25e4 },
+  pack: { env: "STRIPE_PRICE_PACK", lookup: "placetta_odelia_pack", name: "Odelia pack", description: "$25 more Odelia allowance, carried over until it's used.", cents: 4900 }
+};
+var WEBHOOK_EVENTS = ["checkout.session.completed", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"];
+var VERSION = "2025-03-31.basil";
+function client(env2, f = fetch) {
+  const key = () => env2("STRIPE_SECRET_KEY") ?? "";
+  const headers = (extra = {}) => ({ Authorization: `Bearer ${key()}`, "Stripe-Version": VERSION, ...extra });
+  async function get(path) {
+    const r = await f(`https://api.stripe.com/v1/${path}`, { headers: headers() });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d?.error?.message ?? "Stripe error");
+    return d;
+  }
+  async function post(path, params, idem) {
+    const r = await f(`https://api.stripe.com/v1/${path}`, { method: "POST", headers: headers({ "Content-Type": "application/x-www-form-urlencoded", ...idem ? { "Idempotency-Key": idem } : {} }), body: new URLSearchParams(params) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d?.error?.message ?? "Stripe error");
+    return d;
+  }
+  async function del(path) {
+    const r = await f(`https://api.stripe.com/v1/${path}`, { method: "DELETE", headers: headers() });
+    if (!r.ok) throw new Error((await r.json())?.error?.message ?? "Stripe error");
+  }
+  return { get, post, del };
+}
+var memo = /* @__PURE__ */ new Map();
+async function priceId(item, env2, f = fetch) {
+  const d = CATALOG[item];
+  const set = env2(d.env);
+  if (set) return set;
+  if (!env2("STRIPE_SECRET_KEY")) return void 0;
+  const hit = memo.get(d.lookup);
+  if (hit) return hit;
+  const s = client(env2, f);
+  const found = await s.get(`prices?active=true&limit=1&lookup_keys[]=${encodeURIComponent(d.lookup)}`);
+  let id = found?.data?.[0]?.id;
+  if (!id) {
+    const p = {
+      currency: "usd",
+      unit_amount: String(d.cents),
+      lookup_key: d.lookup,
+      "product_data[name]": d.name,
+      "product_data[metadata][placetta]": item,
+      "metadata[placetta]": item
+    };
+    if (d.year) p["recurring[interval]"] = "year";
+    id = (await s.post("prices", p, `placetta-catalog-${d.lookup}-${d.cents}`)).id;
+  }
+  memo.set(d.lookup, id);
+  return id;
+}
+async function ensureWebhook(env2, store, url, f = fetch) {
+  if (env2("STRIPE_WEBHOOK_SECRET")) return "env";
+  if (await store.get("webhook_secret")) return "stored";
+  const s = client(env2, f);
+  const list = await s.get("webhook_endpoints?limit=100");
+  const ours = (list?.data ?? []).filter((e) => e.url === url);
+  if (ours.some((e) => e.metadata?.placetta !== "1")) return "manual";
+  for (const e of ours) await s.del(`webhook_endpoints/${e.id}`);
+  const p = { url, "metadata[placetta]": "1", api_version: VERSION, description: "Placetta billing" };
+  WEBHOOK_EVENTS.forEach((ev, i) => p[`enabled_events[${i}]`] = ev);
+  const made = await s.post("webhook_endpoints", p, `placetta-webhook-${url}-${ours.map((e) => e.id).join(",")}`);
+  if (!made?.secret) throw new Error("Stripe made the webhook without a signing secret.");
+  await store.set("webhook_secret", made.secret);
+  await store.set("webhook_endpoint", made.id);
+  return "created";
+}
+
+// supabase/functions/billing/index.ts
 var CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -109,13 +187,54 @@ async function locationPrices() {
     const p = await stripeGet(`prices/${encodeURIComponent(id)}`);
     return { amount: (p.unit_amount ?? 0) / 100, currency: String(p.currency ?? "usd").toUpperCase(), interval: p.recurring?.interval ?? null, interval_count: p.recurring?.interval_count ?? null };
   };
-  const [location, opening] = await Promise.all([one(Deno.env.get("STRIPE_PRICE_LOCATION")), one(Deno.env.get("STRIPE_PRICE_OPENING"))]);
-  return { location, opening };
+  const ids = await Promise.all(["essentials", "pro", "retail", "food", "guarantee", "pack", "entry"].map(price));
+  const [location, pro, opening, opening_food, guarantee, pack, entry] = await Promise.all(ids.map(one));
+  return { location, pro, opening, opening_food, guarantee, pack, entry };
 }
+var FOOD = /tea|coffee|caf[eé]|restaurant|food|kitchen|bakery|hot ?pot|noodle|dessert|ice cream|boba|bubble|juice|bar\b|grill|pizza|sushi|dumpling|奶茶|茶|咖啡|餐|火锅|面|甜品|烘焙|食/i;
 async function stores(ws) {
   const { data } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
-  const list = data?.state?.stores;
-  return Array.isArray(list) ? list.filter((s) => typeof s?.id === "string").slice(0, 2e3).map((s) => ({ id: s.id, opening: s.stage === "opening" })) : [];
+  const st = data?.state;
+  const sells = [st?.business?.en ?? "", ...(st?.facts ?? []).filter((f) => /what you sell|business type|cuisine|menu/i.test(f.label?.en ?? "")).map((f) => f.value?.en ?? "")].join(" ");
+  const fallback = FOOD.test(sells) ? "food" : "retail";
+  const list = st?.stores;
+  return Array.isArray(list) ? list.filter((s) => typeof s?.id === "string").slice(0, 2e3).map((s) => ({
+    id: s.id,
+    name: String(s.name?.en ?? s.id),
+    opening: s.stage === "opening",
+    kind: s.kind === "retail" || s.kind === "food" || s.kind === "complex" ? s.kind : fallback
+  })) : [];
+}
+var env = (k) => Deno.env.get(k);
+var price = (i) => priceId(i, env);
+async function openingItems(list, guarantee) {
+  const n = (k) => list.filter((s) => s.opening && s.kind === k).length;
+  const retail = n("retail"), food = n("food");
+  const items = [];
+  if (retail) items.push([await price("retail"), retail]);
+  if (food) items.push([await price("food"), food]);
+  if (guarantee && retail + food) items.push([await price("guarantee"), retail + food]);
+  return items;
+}
+var config = {
+  async get(key) {
+    const { data } = await admin.from("stripe_config").select("value").eq("key", key).maybeSingle();
+    return data?.value ?? void 0;
+  },
+  async set(key, value) {
+    const { error } = await admin.from("stripe_config").upsert({ key, value, updated_at: (/* @__PURE__ */ new Date()).toISOString() });
+    if (error) throw new Error(error.message);
+  }
+};
+async function webhookReady() {
+  const how = await ensureWebhook(env, config, `${Deno.env.get("SUPABASE_URL")}/functions/v1/stripe-webhook`);
+  if (how === "manual") return fail(503, "not_configured", "A Stripe webhook to Placetta was made by hand. Set STRIPE_WEBHOOK_SECRET to its signing secret.");
+  return null;
+}
+async function askForQuote(ws, list) {
+  const rows = list.filter((s) => s.opening && s.kind === "complex").map((s) => ({ kind: "quote", workspace_id: ws, title: `Quote the opening for ${s.name}`, detail: { store_id: s.id }, dedupe: `quote:${ws}:${s.id}` }));
+  if (rows.length) await admin.from("team_tasks").upsert(rows, { onConflict: "dedupe", ignoreDuplicates: true });
+  return rows.length;
 }
 async function yearOfLocation(loc) {
   const p = await stripeGet(`prices/${encodeURIComponent(loc)}`);
@@ -124,7 +243,7 @@ async function yearOfLocation(loc) {
   return { cents: Math.round((p.unit_amount ?? 0) * per / n), currency: String(p.currency ?? "usd") };
 }
 async function entryCents() {
-  const id = Deno.env.get("STRIPE_PRICE_ENTRY");
+  const id = await price("entry");
   if (!id) return 0;
   try {
     return Number((await stripeGet(`prices/${encodeURIComponent(id)}`)).unit_amount) || 0;
@@ -161,7 +280,7 @@ Deno.serve(async (req) => {
   if (access !== "owner") return fail(403, "forbidden", "This isn't your workspace.");
   const back = safeReturn(body.return_url);
   if (!back) return fail(400, "bad_request", "Unknown return address. Add the app's origin to APP_ORIGINS.");
-  const { data: bill } = await admin.from("billing").select("stripe_customer_id, subscription_id, charged_store_ids, entry_markets, entry_credited_at").eq("workspace_id", ws).maybeSingle();
+  const { data: bill } = await admin.from("billing").select("stripe_customer_id, subscription_id, charged_store_ids, entry_markets, entry_paid_at, entry_credited_at").eq("workspace_id", ws).maybeSingle();
   const customer = bill?.stripe_customer_id;
   try {
     if (body.action === "portal") {
@@ -170,10 +289,12 @@ Deno.serve(async (req) => {
       return json(200, { ok: true, url: s.url });
     }
     if (body.action === "checkout" && body.plan === "locations") {
-      const loc = Deno.env.get("STRIPE_PRICE_LOCATION"), opening = Deno.env.get("STRIPE_PRICE_OPENING");
-      if (!loc) return fail(503, "not_configured", "Set STRIPE_PRICE_LOCATION for per-location billing.");
+      const tier = body.tier === "pro" ? "pro" : "essentials", guarantee = body.guarantee === true;
+      const loc = await price(tier);
+      if (!loc) return fail(503, "not_configured", "Set STRIPE_SECRET_KEY for per-location billing.");
+      const notReady = await webhookReady();
+      if (notReady) return notReady;
       const all = await stores(ws);
-      const openings = all.filter((s) => s.opening).length;
       const p = {
         mode: "subscription",
         success_url: `${back}?billing=success`,
@@ -181,21 +302,26 @@ Deno.serve(async (req) => {
         client_reference_id: ws,
         "metadata[workspace_id]": ws,
         "metadata[plan]": "locations",
+        "metadata[tier]": tier,
+        "metadata[guarantee]": guarantee ? "1" : "0",
         "subscription_data[metadata][workspace_id]": ws,
         "subscription_data[metadata][plan]": "locations",
+        "subscription_data[metadata][tier]": tier,
+        "subscription_data[metadata][guarantee]": guarantee ? "1" : "0",
         "line_items[0][price]": loc,
         "line_items[0][quantity]": String(Math.max(1, all.length))
       };
-      if (opening && openings) {
-        p["line_items[1][price]"] = opening;
-        p["line_items[1][quantity]"] = String(openings);
-      }
+      (await openingItems(all, guarantee)).forEach(([price2, qty], i) => {
+        p[`line_items[${i + 1}][price]`] = price2;
+        p[`line_items[${i + 1}][quantity]`] = String(qty);
+      });
+      const quoted = await askForQuote(ws, all);
       const year = await yearOfLocation(loc);
-      const entry = bill?.entry_credited_at ? 0 : (Number(bill?.entry_markets) || 0) * await entryCents();
-      const openingCredit = opening && openings ? Math.min(year.cents, Number((await stripeGet(`prices/${encodeURIComponent(opening)}`)).unit_amount) || 0) * openings : 0;
-      const credit = entry + openingCredit;
+      const fresh = bill?.entry_paid_at && Date.now() - Date.parse(String(bill.entry_paid_at)) <= 60 * 864e5;
+      const entry = bill?.entry_credited_at || !fresh ? 0 : (Number(bill?.entry_markets) || 0) * await entryCents();
+      const credit = entry;
       if (credit > 0) {
-        const c = await stripe("coupons", { amount_off: String(credit), currency: year.currency, duration: "once", max_redemptions: "1", name: "Entry plan and opening credits", "metadata[workspace_id]": ws });
+        const c = await stripe("coupons", { amount_off: String(credit), currency: year.currency, duration: "once", max_redemptions: "1", name: "Entry plan credit", "metadata[workspace_id]": ws });
         p["discounts[0][coupon]"] = c.id;
         p["metadata[entry_credit]"] = String(entry);
       } else p.allow_promotion_codes = "true";
@@ -203,33 +329,31 @@ Deno.serve(async (req) => {
       else if (user.email) p.customer_email = user.email;
       const sess = await stripe("checkout/sessions", p);
       await admin.from("billing").update({ checkout_store_ids: all.map((s) => s.id) }).eq("workspace_id", ws);
-      return json(200, { ok: true, url: sess.url });
+      return json(200, { ok: true, url: sess.url, ...quoted ? { quoted } : {} });
     }
     if (body.action === "sync_locations") {
       const subId = bill?.subscription_id;
-      const loc = Deno.env.get("STRIPE_PRICE_LOCATION"), opening = Deno.env.get("STRIPE_PRICE_OPENING");
-      if (!subId || !loc) return json(200, { ok: true, synced: false });
+      if (!subId) return json(200, { ok: true, synced: false });
       const sub = await stripeGet(`subscriptions/${encodeURIComponent(subId)}`);
       if (sub?.metadata?.plan !== "locations" || !["active", "trialing", "past_due"].includes(sub.status)) return json(200, { ok: true, synced: false });
-      const item = (sub.items?.data ?? []).find((i) => i.price?.id === loc);
+      const locs = (await Promise.all([price("essentials"), price("pro")])).filter(Boolean);
+      const item = (sub.items?.data ?? []).find((i) => locs.includes(i.price?.id));
       const all = await stores(ws);
       if (item && item.quantity !== Math.max(1, all.length)) await stripe(`subscription_items/${item.id}`, { quantity: String(Math.max(1, all.length)), proration_behavior: "create_prorations" });
       const charged = new Set(bill?.charged_store_ids ?? []);
       const fresh = all.filter((s) => !charged.has(s.id));
-      const openings = fresh.filter((s) => s.opening).length;
-      if (opening && openings && sub.customer) {
-        await stripe("invoiceitems", { customer: String(sub.customer), "pricing[price]": opening, quantity: String(openings), subscription: subId, "metadata[workspace_id]": ws });
-        const year = await yearOfLocation(loc);
-        const fee = Number((await stripeGet(`prices/${encodeURIComponent(opening)}`)).unit_amount) || 0;
-        const credit = Math.min(year.cents, fee) * openings;
-        if (credit > 0) await stripe("invoiceitems", { customer: String(sub.customer), amount: String(-credit), currency: year.currency, description: `Opening fee credited against the yearly plan (${openings} store${openings === 1 ? "" : "s"})`, subscription: subId, "metadata[workspace_id]": ws });
-      }
+      const openings = fresh.filter((s) => s.opening && s.kind !== "complex").length;
+      if (sub.customer) for (const [id, qty] of await openingItems(fresh, sub.metadata?.guarantee === "1"))
+        await stripe("invoiceitems", { customer: String(sub.customer), "pricing[price]": id, quantity: String(qty), subscription: subId, "metadata[workspace_id]": ws });
+      await askForQuote(ws, fresh);
       if (fresh.length) await admin.from("billing").update({ charged_store_ids: [...charged, ...fresh.map((s) => s.id)] }).eq("workspace_id", ws);
       return json(200, { ok: true, synced: true, stores: all.length, new_openings: openings });
     }
     if (body.action === "pack") {
-      const price = Deno.env.get("STRIPE_PRICE_PACK");
-      if (!price) return fail(503, "not_configured", "Set STRIPE_PRICE_PACK for Odelia packs.");
+      const pack = await price("pack");
+      if (!pack) return fail(503, "not_configured", "Set STRIPE_SECRET_KEY for Odelia packs.");
+      const notReady = await webhookReady();
+      if (notReady) return notReady;
       const { data: budget } = await admin.rpc("ai_budget", { ws });
       const plan = budget?.plan;
       if (plan !== "monthly" && plan !== "entry" && plan !== "comped") return fail(409, "plan_required", "Packs add to a plan. Pick a plan first.");
@@ -237,7 +361,7 @@ Deno.serve(async (req) => {
       const credit = Math.max(1, Number(Deno.env.get("PACK_CREDIT_USD") ?? "25"));
       const p = {
         mode: "payment",
-        "line_items[0][price]": price,
+        "line_items[0][price]": pack,
         "line_items[0][quantity]": String(packs),
         success_url: `${back}?billing=success`,
         cancel_url: `${back}?billing=cancel`,
@@ -254,13 +378,15 @@ Deno.serve(async (req) => {
     }
     if (body.action === "checkout") {
       const plan = String(body.plan ?? "");
-      const price = { entry: Deno.env.get("STRIPE_PRICE_ENTRY"), starter: Deno.env.get("STRIPE_PRICE_STARTER"), growth: Deno.env.get("STRIPE_PRICE_GROWTH") }[plan];
-      if (!price) return fail(plan === "entry" || plan === "starter" || plan === "growth" ? 503 : 400, plan ? "not_configured" : "bad_request", `Set the Stripe price for the ${plan || "chosen"} plan.`);
+      const chosen = plan === "entry" ? await price("entry") : { starter: Deno.env.get("STRIPE_PRICE_STARTER"), growth: Deno.env.get("STRIPE_PRICE_GROWTH") }[plan];
+      if (!chosen) return fail(plan === "entry" || plan === "starter" || plan === "growth" ? 503 : 400, plan ? "not_configured" : "bad_request", `Set the Stripe price for the ${plan || "chosen"} plan.`);
+      const notReady = await webhookReady();
+      if (notReady) return notReady;
       const markets = Math.max(1, Math.min(20, Math.floor(Number(body.markets) || 1)));
       const extra = Math.max(0, Math.min(500, Math.floor(Number(body.extra_locations) || 0)));
       const p = {
         mode: plan === "entry" ? "payment" : "subscription",
-        "line_items[0][price]": price,
+        "line_items[0][price]": chosen,
         "line_items[0][quantity]": plan === "entry" ? String(markets) : "1",
         success_url: `${back}?billing=success`,
         cancel_url: `${back}?billing=cancel`,
