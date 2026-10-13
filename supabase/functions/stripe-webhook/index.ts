@@ -55,6 +55,15 @@ Deno.serve(async (req) => {
           patch.entry_paid_at = new Date().toISOString();
           await log(ws, { en: "Paid", zh: "已付款" }, "entry");
         }
+        if (o.mode === "payment" && o.metadata?.kind === "pack" && o.payment_status === "paid") {
+          // the credit was set by the billing function when it made this checkout
+          const usd = Math.max(0, Math.min(1000, Number(o.metadata?.credit_usd) || 0));
+          if (usd > 0) {
+            const { error } = await admin.rpc("ai_add_credit", { ws, p_usd: usd });
+            if (error) throw new Error(error.message);
+            await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: null, action: { en: "Added an Odelia pack", zh: "购买 Odelia 加量包" }, object: { en: `$${usd} of Odelia allowance`, zh: `$${usd} Odelia 额度` } });
+          }
+        }
         if (o.mode === "subscription" && o.metadata?.plan === "locations") {
           // The stores this checkout billed for are counted; later stores are charged by billing's sync_locations.
           // (Older checkouts without the list fall back to the stores in the workspace now.)
@@ -76,9 +85,14 @@ Deno.serve(async (req) => {
       if (ws) {
         const end = o.current_period_end ?? o.items?.data?.[0]?.current_period_end;
         const status = event.type === "customer.subscription.deleted" ? "canceled" : String(o.status);
+        // the locations paid for, which size Odelia's monthly allowance
+        const locPrice = Deno.env.get("STRIPE_PRICE_LOCATION");
+        const items = (o.items?.data ?? []) as { price?: { id?: string }; quantity?: number }[];
+        const paid = status === "active" || status === "trialing" ? items.filter((i) => locPrice && i.price?.id === locPrice).reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
         await admin.from("billing").update({
           stripe_customer_id: o.customer, subscription_id: o.id, subscription_status: status,
           subscription_plan: o.metadata?.plan ?? null, current_period_end: end ? new Date(end * 1000).toISOString() : null,
+          paid_locations: paid,
         }).eq("workspace_id", ws);
         if (event.type === "customer.subscription.created") await log(ws, { en: "Started", zh: "开通" }, o.metadata?.plan ?? "starter");
         if (event.type === "customer.subscription.deleted") await log(ws, { en: "Ended", zh: "已结束" }, o.metadata?.plan ?? "starter");
