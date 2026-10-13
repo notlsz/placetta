@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { openSettings } from "./Settings";
 import { useApp } from "./ctx";
 import { B, type Cert, type Store } from "./model";
 import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
@@ -317,7 +318,7 @@ export function Stores() {
     <div className="page">
       <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p>{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p></div>
         <div className="ph-acts">
-          {cloud?.owner && stores.length > 0 && <Pill onClick={() => { go("settings"); setTimeout(() => document.getElementById("set-hq")?.scrollIntoView({ block: "start" }), 120); }}>{lang === "zh" ? "与总部共享" : "Share with headquarters"}</Pill>}
+          {cloud?.owner && stores.length > 0 && <Pill onClick={() => openSettings(go, "hq")}>{lang === "zh" ? "与总部共享" : "Share with headquarters"}</Pill>}
           {!bulk && <Pill onClick={() => setBulk(true)}>{lang === "zh" ? "规划多家门店" : "Plan many stores"}</Pill>}
         </div></header>
       {bulk && <BulkPlan onClose={() => setBulk(false)} />}

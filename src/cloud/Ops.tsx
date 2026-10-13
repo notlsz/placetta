@@ -4,6 +4,7 @@ import { B, type Bi } from "../model";
 import { fmtAgo, money } from "../time";
 import { I, Pill } from "../ui";
 import * as api from "./api";
+import { openSettings } from "../Settings";
 
 /* The Placetta team's filing queue. Each request is exactly what the customer approved: the form, the fields,
    the attachments and the agency site. The team checks it against the agency's current requirements, submits it,
@@ -206,7 +207,7 @@ export function QueueLocked() {
       <div className="q-lock">
         <I.lock />
         <p>{zh ? "在设置中开启两步登录，然后用验证码登录即可打开队列。" : "Turn on two-step sign-in in Settings, then sign in with the code to open the queue."}</p>
-        <Pill kind="ink" onClick={() => { go("settings"); setTimeout(() => document.getElementById("set-security")?.scrollIntoView({ block: "start" }), 120); }}>{zh ? "设置两步登录" : "Set up two-step sign-in"}</Pill>
+        <Pill kind="ink" onClick={() => openSettings(go, "security")}>{zh ? "设置两步登录" : "Set up two-step sign-in"}</Pill>
       </div>
     </div>
   );

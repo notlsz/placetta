@@ -28,8 +28,9 @@ import slackLogo from "./assets/integrations/slack.png";
    one primary action per group. Only what a business needs to get and stay compliant. */
 
 type Row = { label: Bi; sub?: ReactNode; right?: ReactNode; icon?: ReactNode; pick?: () => void };
-function Group({ id, title, note, rows, children }: { id: string; title: Bi; note?: Bi; rows?: Row[]; children?: ReactNode }) {
+function Group({ id, title, note, rows, children, hidden }: { id: string; title: Bi; note?: Bi; rows?: Row[]; children?: ReactNode; hidden?: boolean }) {
   const { b } = useApp();
+  if (hidden) return null;
   return (
     <section className="sg" id={"set-" + id}>
       <h2>{b(title)}</h2>
@@ -824,6 +825,29 @@ function PinGroup({ st, setSt, ask }: { st: api.PinStatus | null; setSt: (s: api
   );
 }
 
+/* Settings categories, Anthropic style: a few clear groups in the sidebar, one shown at a time. */
+const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
+  { id: "general", label: B("General", "通用"), items: ["account", "appearance", "language"] },
+  { id: "team", label: B("Team", "团队"), items: ["team", "hq"] },
+  { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "phone", "approvals", "memory", "skills"] },
+  { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
+  { id: "billing", label: B("Billing", "账单"), items: ["billing"] },
+  { id: "security", label: B("Security", "安全"), items: ["security", "pin"] },
+  { id: "privacy", label: B("Privacy and data", "隐私与数据"), items: ["data"] },
+  { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
+];
+const CLOUD_ONLY = new Set(["team", "hq", "security", "pin", "phone", "memory"]);
+const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
+const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
+let settingsTarget: string | null = null;
+const takeSettingsTarget = () => { const t = settingsTarget; settingsTarget = null; return t; };
+/** Opens Settings at one section (e.g. "hq", "security"), switching to its category. */
+export function openSettings(go: (v: "settings") => void, section: string) {
+  settingsTarget = section;
+  go("settings");
+  window.dispatchEvent(new CustomEvent("placetta:settings", { detail: section }));
+}
+
 export function Settings() {
   const { t, b, lang, cloud, mode, apiName, deep, setDeep, voiceOn, setVoiceOn, applyKey, dropKey, exportAudit, openLegal, ws } = useApp();
   const [key, setKey] = useState("");
@@ -848,7 +872,17 @@ export function Settings() {
     : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
     : cloud.plan === "entry" ? B(`Entry plan, ${bl?.entry_markets ?? 1} market${(bl?.entry_markets ?? 1) > 1 ? "s" : ""}`, `开店计划，${bl?.entry_markets ?? 1} 个市场`) : B("No plan yet", "尚未开通");
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
-  const SECTIONS: [string, Bi][] = [["account", B("Account", "账户")], ...(cloud ? [["team", B("Team", "团队")], ["hq", B("Headquarters", "总部")], ["security", B("Security", "安全")], ["pin", B("Settings PIN", "设置 PIN")]] as [string, Bi][] : []), ["billing", B("Plan and billing", "方案与账单")], ["integrations", B("Integrations", "集成")], ["logins", B("Agency logins", "机构登录")], ["approvals", B("Approvals", "批准")], ["agent", B("Agent and voice", "助理与语音")], ...(cloud ? [["phone", B("Text and call Odelia", "发短信或致电 Odelia")], ["memory", B("Memory", "记忆")]] as [string, Bi][] : []), ["skills", B("Skills", "技能")], ["appearance", B("Appearance", "外观")], ["language", B("Language", "语言")], ["data", B("Data controls", "数据管理")], ["help", B("Help", "帮助")], ["legal", B("Legal", "法律")]];
+  // Like Anthropic's settings: a short sidebar of categories, and only the chosen one on the right.
+  const CATS = SETTINGS_CATS.map(c => ({ ...c, items: c.items.filter(k => cloud || !CLOUD_ONLY.has(k)) })).filter(c => c.items.length);
+  const [cat, setCatRaw] = useState<string>(() => catOf(takeSettingsTarget() ?? "") ?? readCat() ?? "general");
+  const setCat = (c: string) => { setCatRaw(c); try { localStorage.setItem("placetta-settings-cat", c); } catch { /* storage off */ } };
+  useEffect(() => {
+    const on = (e: Event) => { const k = (e as CustomEvent<string>).detail; const c = catOf(k); if (c) { setCat(c); setTimeout(() => document.getElementById("set-" + k)?.scrollIntoView({ block: "start" }), 60); } };
+    window.addEventListener("placetta:settings", on);
+    return () => window.removeEventListener("placetta:settings", on);
+  }, []);
+  const active = CATS.find(c => c.id === cat) ?? CATS[0];
+  const show = (k: string) => active.items.includes(k);
 
   return (
     <PinLock.Provider value={pinCtx}>
@@ -856,10 +890,10 @@ export function Settings() {
       <header className="ph"><div className="ph-tx"><h1>{t("nav_settings")}</h1></div></header>
       <div className="set-grid">
         <nav className="set-nav" aria-label={t("nav_settings")}>
-          {SECTIONS.map(([k, l]) => <a key={k} href={"#set-" + k} onClick={e => { e.preventDefault(); document.getElementById("set-" + k)?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>{b(l)}</a>)}
+          {CATS.map(c => <button key={c.id} type="button" className="set-tab" aria-current={c.id === active.id ? "page" : undefined} onClick={() => { setCat(c.id); window.scrollTo({ top: 0 }); }}>{b(c.label)}</button>)}
         </nav>
         <div className="set-col">
-          <Group id="account" title={B("Account", "账户")} rows={cloud ? [
+          <Group id="account" hidden={!show("account")} title={B("Account", "账户")} rows={cloud ? [
             { label: B("Email", "邮箱"), sub: <>{cloud.email}{lang === "zh" ? `，${cloud.owner ? "所有者" : "成员"}` : `, ${cloud.owner ? "owner" : "member"}`}</>, icon: <I.user /> },
             { label: B("Business", "企业"), sub: b(ws.business), icon: <I.store />, right: <Btn onClick={cloud.newWorkspace}>{lang === "zh" ? "新建企业" : "New business"}</Btn> },
             { label: B("Sign out", "退出登录"), icon: <I.logout />, right: <Btn onClick={cloud.signOut}>{lang === "zh" ? "退出" : "Sign out"}</Btn> },
@@ -867,24 +901,21 @@ export function Settings() {
               right: <Btn onClick={() => { void import("./cloud/preview").then(m => { m.resetPreview(); location.reload(); }); }}>{lang === "zh" ? "清空重来" : "Start over"}</Btn> }] : []),
           ] : [{ label: B("Sample workspace", "示例工作区"), sub: b(B("Everything here is sample data. Create an account to save your own business.", "这里都是示例数据。注册账户即可保存您自己的企业。")), icon: <I.user /> }]} />
 
-          <Team />
-          <HqShare />
-          <Security />
-          {cloud && <PinGroup st={pinSt} setSt={st => { setPinSt(st); setNow(new Date().toISOString()); }} ask={ask} />}
+          {show("team") && <Team />}
+          {show("hq") && <HqShare />}
+          {show("security") && <Security />}
+          {cloud && show("pin") && <PinGroup st={pinSt} setSt={st => { setPinSt(st); setNow(new Date().toISOString()); }} ask={ask} />}
 
-          <Group id="billing" title={B("Plan and billing", "方案与账单")} note={B("Payment methods and invoices are handled by Stripe; Placetta never sees card numbers. Government fees are paid by you directly to each agency.", "付款方式和发票由 Stripe 处理，快哉看不到卡号。政府规费由您直接支付给各机构。")}
+          <Group id="billing" hidden={!show("billing")} title={B("Plan and billing", "方案与账单")} note={B("Payment methods and invoices are handled by Stripe; Placetta never sees card numbers. Government fees are paid by you directly to each agency.", "付款方式和发票由 Stripe 处理，快哉看不到卡号。政府规费由您直接支付给各机构。")}
             rows={[
               { label: planName, sub: renew || (bl?.free && !bl.subscription_status ? b(B("Paid plans start later. Nothing is charged now.", "付费方案稍后推出，现在不收取任何费用。")) : cloud?.plan === "entry" ? b(B("Credited toward your first year on an annual plan", "可抵扣年度方案首年费用")) : undefined), icon: <I.card />,
                 right: cloud && !cloud.owner ? <em className="lock">{lang === "zh" ? "由所有者管理" : "Managed by owners"}</em> : cloud ? <>{cloud.plan !== "monthly" && <Btn guard kind="ink" onClick={() => cloud.openPlans(cloud.plan === "none" ? "start" : "file")}>{lang === "zh" ? "选择方案" : "Choose a plan"}</Btn>}{bl?.stripe_customer_id && <Btn guard onClick={() => void cloud.portal()}>{lang === "zh" ? "管理账单" : "Manage billing"}</Btn>}</> : undefined },
             ]} />
 
-          <Integrations />
-          <Logins />
+          {show("integrations") && <Integrations />}
+          {show("logins") && <Logins />}
 
-          <Group id="approvals" title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never files, pays or sends without your approval, and that can't be turned off.", "快哉会自行准备材料，但未经您批准绝不提交、付款或发送，此项无法关闭。")}
-            rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you", "代您发送的每一条消息")].map(l => ({ label: l, icon: <I.lock />, right: <em className="lock">{t("alwaysOn")}</em> }))} />
-
-          <Group id="agent" title={B("Agent and voice", "助理与语音")} rows={[
+          <Group id="agent" hidden={!show("agent")} title={B("Agent and voice", "助理与语音")} rows={[
             { label: mode === "server" ? B("Live", "实时") : mode === "claude" ? B("Live through your Claude account", "通过您的 Claude 账户实时运行") : mode === "api" ? B(`Live: Claude API (${apiName})`, `实时：Claude API（${apiName}）`) : B("Demo answers", "演示回答"),
               sub: mode === "server" ? b(B("Researches official agency pages and cites them. Answers are short; nothing is filed without you.", "查阅机构官方页面并注明出处。回答简短，未经您批准不会提交任何内容。")) : mode === "demo" ? b(B("Scripted replies for the sample workspace.", "示例工作区的脚本回复。")) : undefined, icon: <I.spark /> },
             ...(mode !== "demo" ? [{ label: B("Think longer on hard questions", "复杂问题多思考一会儿"), sub: t("deepNote"), right: <label className="switch"><input type="checkbox" checked={deep} onChange={e => setDeep(e.target.checked)} /><i /></label> }] : []),
@@ -902,11 +933,13 @@ export function Settings() {
             )}
           </Group>
 
-          <PhoneGroup />
-          <MemoryGroup />
-          <SkillsGroup />
+          {show("phone") && <PhoneGroup />}
+          <Group id="approvals" hidden={!show("approvals")} title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never files, pays or sends without your approval, and that can't be turned off.", "快哉会自行准备材料，但未经您批准绝不提交、付款或发送，此项无法关闭。")}
+            rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you", "代您发送的每一条消息")].map(l => ({ label: l, icon: <I.lock />, right: <em className="lock">{t("alwaysOn")}</em> }))} />
+          {show("memory") && <MemoryGroup />}
+          {show("skills") && <SkillsGroup />}
 
-          <Group id="appearance" title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([
+          <Group id="appearance" hidden={!show("appearance")} title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([
             ["light", B("Light", "浅色"), <I.sun />], ["dark", B("Dark", "深色"), <I.moon />], ["system", B("Match this device", "跟随设备"), <I.monitor />],
           ] as [Theme, Bi, ReactNode][]).map(([k, l, ic]) => ({ label: l, icon: ic, pick: () => setTheme(k), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="theme" checked={theme === k} onChange={() => setTheme(k)} aria-label={b(l)} /><i /></label> }))}>
             <div className="sg-sub accent">
@@ -921,9 +954,9 @@ export function Settings() {
             </div>
           </Group>
 
-          <LanguageGroup />
+          {show("language") && <LanguageGroup />}
 
-          <Group id="data" title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
+          <Group id="data" hidden={!show("data")} title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
             { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), icon: <I.download />, right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
             { label: B("Export the audit trail", "导出审计记录"), sub: "CSV", icon: <I.audit />, right: <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> },
             ...(cloud ? [{ label: B("Delete your account", "删除账户"), sub: b(B("Deletes your account and the workspaces you own alone, except records the law requires us to keep.", "删除您的账户和您单独拥有的工作区，法律要求保留的记录除外。")), icon: <I.x />, right: <Btn guard onClick={() => setDel(true)}>{b(B("Delete my account", "删除我的账户"))}</Btn> }] : []),
@@ -931,14 +964,14 @@ export function Settings() {
             {del && <DeleteAccount onClose={() => setDel(false)} />}
           </Group>
 
-          <Group id="help" title={B("Help", "帮助")} rows={[
+          <Group id="help" hidden={!show("help")} title={B("Help", "帮助")} rows={[
             { label: B("Help Center", "帮助中心"), sub: b(B("Guides for every part of Placetta", "快哉各项功能的使用指南")), icon: <I.help />, right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.vercel.app/help/" : "/help/"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
             { label: B("Email support", "邮件支持"), sub: "support@placetta.com", icon: <I.help />, right: <a className="sbtn quiet" href="mailto:support@placetta.com">{lang === "zh" ? "写邮件" : "Email"}</a> },
             { label: B("Report a problem", "报告问题"), icon: <I.bell />, right: <a className="sbtn quiet" href="mailto:support@placetta.com?subject=Problem%20report">{lang === "zh" ? "报告" : "Report"}</a> },
             { label: B("How Placetta's AI works", "快哉的 AI 如何工作"), icon: <I.spark />, right: <Btn onClick={() => openLegal("ai")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
           ]} />
 
-          <Group id="legal" title={B("Legal", "法律")} note={B("Replies are generated by AI and can be wrong. Nothing is filed, paid or sent without your approval.", "回复由 AI 生成，可能有误。未经您批准，不会提交、付款或发送任何内容。")} rows={[
+          <Group id="legal" hidden={!show("legal")} title={B("Legal", "法律")} note={B("Replies are generated by AI and can be wrong. Nothing is filed, paid or sent without your approval.", "回复由 AI 生成，可能有误。未经您批准，不会提交、付款或发送任何内容。")} rows={[
             { label: B("Terms of Service", "服务条款"), icon: <I.scale />, right: <Btn onClick={() => openLegal("terms")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
             { label: B("Privacy Policy", "隐私政策"), icon: <I.lock />, right: <Btn onClick={() => openLegal("privacy")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
             { label: B("Filing Authorization", "申报授权书"), sub: cloud ? b(B("You gave it when you created this workspace", "您在创建工作区时已授权")) : undefined, icon: <I.form />, right: <Btn onClick={() => openLegal("authorization")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
