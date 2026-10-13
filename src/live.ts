@@ -8,6 +8,7 @@ import type { Application, Approval, Change, Doc, Field, FactGroup, Level, Licen
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { daysFromNow, money, nowIso } from "./time";
 import { basisLine, openingLine, openingPath, preflight } from "./smart";
+import { cityOf as recordsCity, cityRecords } from "./opendata";
 import { replyLanguage } from "./langs";
 import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills";
 import { docx } from "./files";
@@ -923,6 +924,27 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const hits = toHits(arr(i.licenses), get());
         made.matches = { what: business, where: location, hits }; mark();
         return { shown: hits.length };
+      },
+    },
+    {
+      name: "city_records",
+      description: "Read what the city itself has published for a store's address: building permits filed, approved, issued or expired (New York City, San Francisco, Los Angeles, Austin) and, in New York City, health inspections with the letter grade and critical violations. Free and instant, straight from the city's open data. Use it to confirm a permit was issued, see a new grade or a failed inspection, or check what work is already permitted at an address before planning. Pass store_id, or an address.",
+      inputSchema: { type: "object", properties: { store_id: { type: "string" }, address: { type: "string", description: "Street address with city, state and ZIP, when there's no store yet" }, days: { type: "number", description: "How far back, default 365" } } },
+      async execute(i) {
+        const stores = get().stores ?? [];
+        const st = str(i?.store_id) ? stores.find(x => x.id === str(i.store_id) || x.name.en.toLowerCase() === str(i.store_id).toLowerCase()) : undefined;
+        const address = st?.address ?? str(i?.address, 200);
+        if (!address) throw new Error(`Pass store_id or an address. Stores: ${stores.map(x => `"${x.id}" (${x.address})`).join(", ") || "none"}.`);
+        if (!recordsCity(address)) return { address, covered: false, note: "The city's open records are read for New York City, San Francisco, Los Angeles and Austin. For this address, check the agency's own lookup page." };
+        S("searching", L(`Reading the city's records for ${address}`, `查询 ${address} 的城市公开记录`));
+        try {
+          const recs = await cityRecords(address, { days: Math.max(7, Math.min(3650, Number(i?.days) || 365)) });
+          mark();
+          return { address, covered: true, records: recs.map(r => ({ kind: r.kind, title: r.title, status: r.status, date: r.date, detail: r.detail, needs_attention: r.urgent || undefined, see: r.url })),
+            note: recs.length ? undefined : "Nothing published for this address in that period. A new application can take a few days to appear." };
+        } catch (e) {
+          return { address, covered: true, error: `The city's records didn't answer (${(e as Error).message}). Try again later or use the agency's lookup page.` };
+        }
       },
     },
     {

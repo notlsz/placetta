@@ -26,7 +26,7 @@ const ENV: Record<string, string> = {
   ANTHROPIC_API_KEY: "sk-ant-e2e", APP_ORIGINS: APP, RESEND_API_KEY: "re_e2e", MAIL_FROM: "Placetta <hello@placetta.test>",
   TELNYX_API_KEY: "KEY_e2e", TELNYX_PUBLIC_KEY: b64(await crypto.subtle.exportKey("raw", telnyxKeys.publicKey)), ODELIA_NUMBER: ODELIA,
   TELNYX_MESSAGING_PROFILE_ID: "mp_e2e", TELNYX_VOICE_CONNECTION_ID: "conn_e2e", TELNYX_ASSISTANT_ID: "assistant-e2e",
-  STRIPE_SECRET_KEY: "sk_test_e2e", STRIPE_WEBHOOK_SECRET: "whsec_e2e", STRIPE_PRICE_LOCATION: "price_location", STRIPE_PRICE_OPENING: "price_opening", STRIPE_PRICE_LOCATION_PRO: "price_location_pro", STRIPE_PRICE_OPENING_FOOD: "price_opening_food", STRIPE_PRICE_GUARANTEE: "price_guarantee", STRIPE_PRICE_ENTRY: "price_entry", STRIPE_PRICE_PACK: "price_pack", PACK_CREDIT_USD: "25",
+  STRIPE_SECRET_KEY: "sk_test_e2e", STRIPE_WEBHOOK_SECRET: "whsec_e2e", STRIPE_PRICE_LOCATION: "price_location", STRIPE_PRICE_OPENING: "price_opening", STRIPE_PRICE_LOCATION_PRO: "price_location_pro", STRIPE_PRICE_OPENING_FOOD: "price_opening_food", STRIPE_PRICE_GUARANTEE: "price_guarantee", STRIPE_PRICE_ENTRY: "price_entry", STRIPE_PRICE_PACK: "price_pack", PACK_CREDIT_USD: "25", RECORDS: "off",
   OAUTH_STATE_SECRET: "e2e-oauth-state-secret-0123456789abcdef",
   // self-filing: on for Form SS-4 by fax only, without the two-key review, so a filing can go all the way
   FILER_AGENCIES: "irs-ss4", FILER_CHANNELS: "fax", FILER_TWO_KEY: "0", TELNYX_FAX_CONNECTION_ID: "fax_conn_e2e", TELNYX_FAX_FROM: "+12125550101", FILER_SECRET: "e2e-filer-secret-0123456789abcdef0123",

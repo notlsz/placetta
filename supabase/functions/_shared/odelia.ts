@@ -249,6 +249,7 @@ export function urgency(u: UpdateLike, critical: Set<string>): "urgent" | "impor
   const isCritical = !!u.app_id && critical.has(u.app_id);
   if (head === "lapsed") return "urgent";
   if (head === "opening") return parts[2] === "late" ? "important" : null;   // a store slipping past its opening date
+  if (head === "record") return parts[1] === "urgent" ? "urgent" : parts[1] === "news" ? "important" : null;   // what the city posted
   if (/inspection/.test(title) && /(fail|returned|overdue|closure|closed)/.test(title)) return "urgent";
   if (head === "overdue") return isCritical ? "urgent" : "important";
   if (head === "filing" && parts[2] === "rejected") return isCritical ? "urgent" : "important";

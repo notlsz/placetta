@@ -16,6 +16,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { normalizeState, openingLine, openingPath } from "../_shared/opening.js";
+import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -113,6 +114,32 @@ export function openingUpdates(ws: string, state: unknown, today: string, ev: { 
     out.push({ workspace_id: ws, kind: "deadline", app_id: p.blocker?.app ?? null, dedupe: `opening:${s.id}:${p.verdict}:${p.blocker?.app ?? ""}:${p.blocker?.status ?? ""}`,
       title: { en: `${store.en}: ${line.en}`, zh: `${store.zh}：${line.zh}` },
       body: { en: `Planned opening ${s.plannedOpen}; permits in hand around ${p.landing}. Ask Odelia to catch it up.`, zh: `计划 ${s.plannedOpen} 开业；预计 ${p.landing} 前后取得全部许可。可以让 Odelia 追回进度。` } });
+  }
+  return out;
+}
+
+/**
+ * What the city posted this week for each store's address: a permit issued or expired, a new letter grade, a failed
+ * inspection or a closure. One update per record and status; a closure or a bad inspection reaches the phone right
+ * away, an issued permit as good news. At most `max` stores a run, so the city's open data isn't hammered.
+ */
+export async function recordUpdates(ws: string, state: unknown, today: string, o: { f?: typeof fetch; max?: number; days?: number } = {}): Promise<Update[]> {
+  const stores = ((state as { stores?: unknown } | null)?.stores ?? []) as { id?: unknown; name?: unknown; address?: unknown }[];
+  const out: Update[] = [];
+  let n = 0;
+  for (const s of Array.isArray(stores) ? stores : []) {
+    if (typeof s?.address !== "string" || typeof s.id !== "string" || !cityOf(s.address)) continue;
+    if (n++ >= (o.max ?? 25)) break;
+    let recs: CityRecord[] = [];
+    try { recs = await cityRecords(s.address, { days: o.days ?? 14, today, f: o.f }); } catch (e) { console.error("city records", (e as Error).message); continue; }
+    const store = bi(s.name);
+    for (const r of recs) {
+      const good = r.kind === "permit" && /issued|approved|signed off|complete|final/i.test(r.status);
+      const level = r.urgent ? "urgent" : good ? "news" : "info";
+      out.push({ workspace_id: ws, kind: "filing", dedupe: `record:${level}:${r.id}`,
+        title: { en: `${store.en}: ${r.title}, ${r.status}`, zh: `${store.zh}：${r.title}，${r.status}` },
+        body: { en: [r.date && `Posted by the city on ${r.date}.`, r.detail, `See it: ${r.url}`].filter(Boolean).join(" "), zh: [r.date && `城市于 ${r.date} 公布。`, r.detail, `查看：${r.url}`].filter(Boolean).join(" ") } });
+    }
   }
   return out;
 }
@@ -288,6 +315,18 @@ Deno.serve(async (req) => {
   const sent = new Map<string, Record<string, string>>();
   for (const f of (filings ?? []) as (Filing & { submitted_at?: string | null })[]) if (f.submitted_at) { const m = sent.get(f.workspace_id) ?? {}; m[f.app_id] ??= f.submitted_at; sent.set(f.workspace_id, m); }
   for (const [ws, list] of byWs) list.push(...openingUpdates(ws, states.get(ws) ?? null, today, { submitted: sent.get(ws) ?? {} }));
+  // what the cities posted for each store's address (RECORDS=off turns it off)
+  // at most 40 stores a run, 8 workspaces at a time, so the run stays well inside the function's time limit
+  if ((Deno.env.get("RECORDS") ?? "on") !== "off") {
+    let budget = Math.max(0, Number(Deno.env.get("RECORDS_PER_RUN") ?? "40") || 0);
+    const queue = [...byWs.keys()].filter((ws) => (((states.get(ws) ?? {}) as { stores?: unknown[] }).stores ?? []).length);
+    while (queue.length && budget > 0) {
+      const batch = queue.splice(0, 8);
+      const got = await Promise.all(batch.map((ws) => recordUpdates(ws, states.get(ws) ?? null, today, { max: Math.min(5, budget) })));
+      batch.forEach((ws, i) => byWs.get(ws)!.push(...got[i]));
+      budget -= batch.length * 5;
+    }
+  }
   // Mondays: the week ahead, for every workspace with something on it.
   if (started.getUTCDay() === 1) {
     const open = new Map<string, number>();

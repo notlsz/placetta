@@ -237,13 +237,14 @@ async function progress() {
   const r = await agent({
     ws, svc, prompt: "What's next?",
     script: [
-      () => ask(["check_progress", {}]),
+      () => ask(["check_progress", {}], ["city_records", { address: "1500 Main St, Dallas, TX 75201" }]),
       () => ask(["search_email", { query: "from:health.nyc.gov", days: 30 }]),
       c => ask(["read_email", { id: (c.out("search_email").messages as { id: string }[])[0].id, kind: "gmail" }]),
       () => say("Your health permit is with the agency (confirmation PA-2291) and the inspection is on 2026-11-20. Next: upload the lease for the other permit."),
     ],
   });
   const p = callNamed(r, "check_progress")[0].parsed!;
+  ok(callNamed(r, "city_records")[0].parsed?.covered === false, "city records: a city without open data says so and points to the agency's lookup");
   eq(p.counts, { done: 0, with_agency: 1, with_placetta_team: 0, waiting_on_the_person: 1, for_odelia_to_prepare: 1, waiting_on_someone_else: 0 }, "counts: a draft is Odelia's to prepare, not waiting on the person");
   eq((p.applications as { id: string; confirmation?: string }[]).find(a => a.id === "a-filed")?.confirmation, "PA-2291", "the team's confirmation number comes through");
   eq((p.overdue as { id: string }[]).map(d => d.id), ["dl-late"], "overdue deadlines carry their id");
