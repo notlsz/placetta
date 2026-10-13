@@ -1,0 +1,71 @@
+{
+  "statuscode": 400,
+  "message": "Success.",
+  "resultcount": 9,
+  "totalrecordcount": 9,
+  "result": [
+    {
+      "FEINumber": "3009871234", "FirmName": "NAM VIET SEAFOOD JOINT STOCK COMPANY", "AddressLine1": "LOT 12, TRA NOC INDUSTRIAL ZONE", "AddressLine2": null,
+      "City": "CAN THO", "State": null, "ZipCode": null, "CountryCode": "VN", "CountryName": "Vietnam",
+      "IndustryCode": "16", "IndustryCodeDescription": "Fishery/Seafood Prod", "ProductCategory": "Food/Cosmetics", "ProductCode": "16AGT99",
+      "ProductCodeDescription": "CATFISH, FROZEN, FISHERY/SEAFOOD PRODUCTS", "RefusalDate": "2026-10-09", "ShipmentID": "AQZ-1188820-4/1/1",
+      "FDASampleAnalysis": "Yes", "PrivateLabAnalysis": "No", "RefusalCharges": "9", "FirmProfile": "https://datadashboard.fda.gov/oii/fd/fdprofile.htm?FEIs=3009871234"
+    },
+    {
+      "FEINumber": "3012345678", "FirmName": "FUJIAN XINGHE FOOD CO., LTD.", "AddressLine1": "NO. 8 JINSHAN ROAD", "AddressLine2": "HULI DISTRICT",
+      "City": "XIAMEN", "State": null, "ZipCode": "361000", "CountryCode": "CN", "CountryName": "China",
+      "IndustryCode": "04", "IndustryCodeDescription": "Macaroni/Noodle Prod", "ProductCategory": "Food/Cosmetics", "ProductCode": "04ABT07",
+      "ProductCodeDescription": "RICE NOODLES, DRY", "RefusalDate": "2026-10-08", "ShipmentID": "BWE-5521134-7/2/1",
+      "FDASampleAnalysis": "No", "PrivateLabAnalysis": "No", "RefusalCharges": "218, 482", "FirmProfile": "https://datadashboard.fda.gov/oii/fd/fdprofile.htm?FEIs=3012345678"
+    },
+    {
+      "FEINumber": "3012345678", "FirmName": "FUJIAN XINGHE FOOD CO., LTD.", "AddressLine1": "NO. 8 JINSHAN ROAD", "AddressLine2": "HULI DISTRICT",
+      "City": "XIAMEN", "State": null, "ZipCode": "361000", "CountryCode": "CN", "CountryName": "China",
+      "IndustryCode": "04", "IndustryCodeDescription": "Macaroni/Noodle Prod", "ProductCategory": "Food/Cosmetics", "ProductCode": "04ABT07",
+      "ProductCodeDescription": "RICE NOODLES, DRY", "RefusalDate": "2026-10-08", "ShipmentID": "BWE-5521134-7/2/2",
+      "FDASampleAnalysis": "No", "PrivateLabAnalysis": "No", "RefusalCharges": "218, 482, 324", "FirmProfile": "https://datadashboard.fda.gov/oii/fd/fdprofile.htm?FEIs=3012345678"
+    },
+    {
+      "FEINumber": "3017770001", "FirmName": "KAOHSIUNG CANNERY CORP.", "AddressLine1": "NO. 21 LINHAI 3RD ROAD", "AddressLine2": null,
+      "City": "KAOHSIUNG", "State": null, "ZipCode": "812", "CountryCode": "TW", "CountryName": "Taiwan",
+      "IndustryCode": "24", "IndustryCodeDescription": "Vegetables/Vegetable Products", "ProductCategory": "Food/Cosmetics", "ProductCode": "24FEE20",
+      "ProductCodeDescription": "BAMBOO SHOOTS, CANNED", "RefusalDate": "2026-10-07", "ShipmentID": "112-4410098-3/1/1",
+      "FDASampleAnalysis": "No", "PrivateLabAnalysis": "No", "RefusalCharges": "62, 83", "FirmProfile": "https://datadashboard.fda.gov/oii/fd/fdprofile.htm?FEIs=3017770001"
+    },
+    {
+      "FEINumber": "3012345678", "FirmName": "FUJIAN XINGHE FOOD CO., LTD.", "AddressLine1": "NO. 8 JINSHAN ROAD", "AddressLine2": "HULI DISTRICT",
+      "City": "XIAMEN", "State": null, "ZipCode": "361000", "CountryCode": "CN", "CountryName": "China",
+      "IndustryCode": "07", "IndustryCodeDescription": "Snack Food Item", "ProductCategory": "Food/Cosmetics", "ProductCode": "07BYT02",
+      "ProductCodeDescription": "RICE CRACKERS", "RefusalDate": "2026-09-30", "ShipmentID": "BWE-5519002-1/1/1",
+      "FDASampleAnalysis": "Yes", "PrivateLabAnalysis": "No", "RefusalCharges": "9", "FirmProfile": "https://datadashboard.fda.gov/oii/fd/fdprofile.htm?FEIs=3012345678"
+    },
+    {
+      "FEINumber": "3006660420", "FirmName": "UJI MATCHA EN CO., LTD.", "AddressLine1": "1-5 MYORAKUJI", "AddressLine2": null,
+      "City": "UJI", "State": null, "ZipCode": "611-0021", "CountryCode": "JP", "CountryName": "Japan",
+      "IndustryCode": "31", "IndustryCodeDescription": "Coffee/Tea", "ProductCategory": "Food/Cosmetics", "ProductCode": "31BHT04",
+      "ProductCodeDescription": "GREEN TEA, POWDERED", "RefusalDate": "2026-10-01", "ShipmentID": "EV8-0091223-5/1/1",
+      "FDASampleAnalysis": "No", "PrivateLabAnalysis": "No", "RefusalCharges": "3886", "FirmProfile": "https://datadashboard.fda.gov/oii/fd/fdprofile.htm?FEIs=3006660420"
+    },
+    {
+      "FEINumber": null, "FirmName": "SEOUL \"GOOD\" SNACKS, INC.", "AddressLine1": "45 GANGNAM-DAERO", "AddressLine2": "",
+      "City": "SEOUL", "State": null, "ZipCode": "06236", "CountryCode": "KR", "CountryName": "South Korea",
+      "IndustryCode": "33", "IndustryCodeDescription": "Candy W/O Choc/Special/Chew Gum", "ProductCategory": "Food/Cosmetics", "ProductCode": "33LYT01",
+      "ProductCodeDescription": "HARD CANDY", "RefusalDate": "2026-09-29", "ShipmentID": "M33-2290017-9/3/1",
+      "FDASampleAnalysis": "No", "PrivateLabAnalysis": "No", "RefusalCharges": "9999, 249", "FirmProfile": null
+    },
+    {
+      "FEINumber": "3001110002", "FirmName": "CHIANG MAI FRUIT CO., LTD.", "AddressLine1": "99 MOO 4", "AddressLine2": null,
+      "City": "CHIANG MAI", "State": null, "ZipCode": "50000", "CountryCode": "TH", "CountryName": "Thailand",
+      "IndustryCode": "21", "IndustryCodeDescription": "Fruit/Fruit Prod", "ProductCategory": "Food/Cosmetics", "ProductCode": "21TET01",
+      "ProductCodeDescription": "MANGO, DRIED", "RefusalDate": "2026-10-10", "ShipmentID": "AJ5-0012345-6/1/1",
+      "FDASampleAnalysis": "No", "PrivateLabAnalysis": "No", "RefusalCharges": "3300", "FirmProfile": "https://datadashboard.fda.gov/oii/fd/fdprofile.htm?FEIs=3001110002"
+    },
+    {
+      "FEINumber": "3002223334", "FirmName": "GUADALAJARA SALSAS S.A. DE C.V.", "AddressLine1": "AV. VALLARTA 100", "AddressLine2": null,
+      "City": "GUADALAJARA", "State": null, "ZipCode": "44100", "CountryCode": "MX", "CountryName": "Mexico",
+      "IndustryCode": "27", "IndustryCodeDescription": "Dressing/Condiment", "ProductCategory": "Food/Cosmetics", "ProductCode": "27YYT99",
+      "ProductCodeDescription": "SALSA", "RefusalDate": "2026-10-09", "ShipmentID": "ABC-0000001-1/1/1",
+      "FDASampleAnalysis": "No", "PrivateLabAnalysis": "No", "RefusalCharges": "83", "FirmProfile": null
+    }
+  ]
+}

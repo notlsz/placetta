@@ -18,6 +18,8 @@
     "test:agent": "esbuild scripts/agent-test.ts --bundle --platform=node --format=esm --outfile=.agent-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .agent-test.mjs; s=$?; rm -f .agent-test.mjs; exit $s",
     "test:flow": "esbuild scripts/agent-flow-test.ts --bundle --platform=node --format=esm --outfile=.agent-flow-test.mjs '--external:*.pdf?inline' --packages=external --jsx=automatic --log-level=error && node .agent-flow-test.mjs; s=$?; rm -f .agent-flow-test.mjs; exit $s",
     "selftest": "node scripts/selftest.mjs",
+    "leads:fda": "node scripts/fda-leads.mjs",
+    "test:fda": "node --test scripts/fda-leads.test.mjs",
     "test:e2e": "deno run -A --no-check --no-lock --node-modules-dir=none scripts/e2e/run.ts"
   },
   "dependencies": {
