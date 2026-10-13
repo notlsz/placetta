@@ -116,7 +116,7 @@ python3 scripts/make-voices.py replies.json kokoro-v1.0.int8.onnx voices-v1.0.bi
 
 Accounts: sign in with an email code, Google or Microsoft; optional two-step sign-in with an authenticator app (required for the Placetta team); owners and members per workspace. The database enforces all of it: someone with two-step on reaches nothing until they enter the code, only owners approve, pay, connect accounts and invite, and staff need two-step for any customer record.
 
-Tests: `scripts/test-db.sh` applies every migration to a local Postgres and checks roles, invites and two-step as each kind of user.
+Tests: `scripts/test-db.sh` applies every migration to a local Postgres and checks roles, invites and two-step as each kind of user. `npm run test:e2e` (Deno, Postgres binaries and psql; it downloads PostgREST once) runs the whole backend locally: every migration, PostgREST, a stand-in Supabase gateway and the real edge functions, with Anthropic (a scripted model driving the real agent loop), Telnyx, Stripe and Resend as recording stubs. It covers app chat, texting and calling Odelia, proactive texts, billing, filing, headquarters and account deletion.
 
 The database enforces the approval rule: customers can only request a filing or cancel a request, a filing can't be marked submitted until the requirements are checked, and every change writes an audit row.
 

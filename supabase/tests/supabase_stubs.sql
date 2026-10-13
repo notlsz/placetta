@@ -28,3 +28,13 @@ alter default privileges in schema public grant all on tables to anon, authentic
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 create table auth.identities (id uuid primary key default gen_random_uuid(), user_id uuid references auth.users(id) on delete cascade, provider text not null);
+-- pg_net: requests are queued (net.http_request_queue) instead of sent; the e2e harness (scripts/e2e) delivers them.
+create schema if not exists net;
+create table net.http_request_queue (id bigserial primary key, method text not null default 'POST', url text not null, headers jsonb,
+  body jsonb, timeout_milliseconds int, created_at timestamptz not null default now(), delivered_at timestamptz);
+create function net.http_post(url text, body jsonb default '{}'::jsonb, params jsonb default '{}'::jsonb,
+  headers jsonb default '{"Content-Type": "application/json"}'::jsonb, timeout_milliseconds int default 5000) returns bigint
+language sql as $$ insert into net.http_request_queue (url, headers, body, timeout_milliseconds) values (url, headers, body, timeout_milliseconds) returning id $$;
+-- More of GoTrue's auth.users, for the functions that read or delete accounts.
+alter table auth.users add column if not exists phone text, add column if not exists deleted_at timestamptz,
+  add column if not exists last_sign_in_at timestamptz, add column if not exists is_anonymous boolean not null default false;
