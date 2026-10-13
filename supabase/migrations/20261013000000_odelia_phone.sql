@@ -61,7 +61,7 @@ create table if not exists public.odelia_messages (
   workspace_id uuid references public.workspaces(id) on delete set null,
   direction text not null check (direction in ('in', 'out')),
   channel text not null check (channel in ('sms', 'voice')),
-  kind text not null default 'chat' check (kind in ('chat', 'ack', 'reply', 'code', 'update', 'urgent', 'system', 'call')),
+  kind text not null default 'chat' check (kind in ('chat', 'ack', 'reply', 'code', 'update', 'urgent', 'system', 'call', 'missed')),
   body text not null default '' check (length(body) <= 2000),
   provider_id text,                                              -- Telnyx's message id (or call:<call control id>)
   run_id uuid references public.agent_runs(id) on delete set null,

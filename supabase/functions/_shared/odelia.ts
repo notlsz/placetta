@@ -405,7 +405,7 @@ export const SAY = {
   noWorkspace: { en: "Your number is linked, but you're not on a Placetta workspace anymore.", zh: "您的号码已关联，但您已不在任何快哉工作区中。" },
   failed: { en: "Sorry, I hit a problem on that one. Try again, or open Placetta.", zh: "抱歉，这件事处理时出了问题。请再试一次，或打开快哉。" },
   stranger: { en: "This is Odelia from Placetta. This number isn't linked to an account. To text me, link it in Placetta, Settings, Text and call Odelia. Reply STOP to opt out.", zh: "我是快哉的 Odelia。这个号码还没有关联账户。如需给我发短信，请在快哉的“设置”中打开“发短信或致电 Odelia”关联号码。回复 STOP 退订。" },
-  picture: { en: "I can't open pictures by text yet. Upload it in Placetta and I'll read it there.", zh: "我暂时无法通过短信查看图片。请在快哉中上传，我会在那里读取。" },
+  picture: { en: "I can only open photos and PDFs by text. Upload other files in Placetta and I'll read them there.", zh: "短信中我只能打开照片和 PDF。其他文件请在快哉中上传，我会在那里读取。" },
   flood: { en: "That's a lot of texts at once. I'll pick up again in a little while.", zh: "短信有点多，我稍后再继续处理。" },
   approve: { en: "Approve in the app:", zh: "请在应用中批准：" },
   open: { en: "Open Placetta:", zh: "打开快哉：" },

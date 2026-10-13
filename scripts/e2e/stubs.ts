@@ -16,7 +16,10 @@ const rid = (p: string) => `${p}${crypto.randomUUID().replace(/-/g, "").slice(0,
 
 export const telnyxState = { blocked: new Set<string>(), failActions: new Set<string>(), messages: 0 };
 
+/** A texted photo, as Telnyx serves inbound MMS media (a 1x1 PNG). */
+export const MMS_PNG = Uint8Array.from(atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="), (c) => c.charCodeAt(0));
 function telnyx(req: Request, path: string, body: any): Response {
+  if (req.method === "GET" && path.startsWith("/media/")) return new Response(MMS_PNG, { status: 200, headers: { "Content-Type": "image/png" } });
   if (!/^Bearer \S+/.test(req.headers.get("authorization") ?? "")) return json(401, { errors: [{ code: "10009", title: "Authentication failed" }] });
   if (req.method === "POST" && path === "/v2/messages") {
     for (const k of ["from", "to", "text"]) if (typeof body?.[k] !== "string" || !body[k]) return json(422, { errors: [{ code: "10004", title: "Missing required parameter", detail: k }] });
@@ -219,8 +222,11 @@ async function anthropic(req: Request, path: string, body: any): Promise<Respons
   if (bad) { stubErrors.push(`anthropic 400: ${bad}`); return json(400, { type: "error", error: { type: "invalid_request_error", message: bad } }); }
   const msgs = body.messages as { role: string; content: unknown }[];
   let pi = -1;
-  for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].role === "user" && typeof msgs[i].content === "string") { pi = i; break; }
-  const prompt = pi >= 0 ? String(msgs[pi].content) : "";
+  // The prompt is the last user turn that's the person's words: a string, or (with an image or PDF attached) blocks
+  // that carry text and no tool results.
+  const words = (c: unknown) => typeof c === "string" ? c : Array.isArray(c) && !c.some((b: Block) => b.type === "tool_result") ? c.filter((b: Block) => b.type === "text").map((b: Block) => b.text).join("\n") : null;
+  for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].role === "user" && words(msgs[i].content) !== null) { pi = i; break; }
+  const prompt = pi >= 0 ? String(words(msgs[pi].content)) : "";
   const round = msgs.slice(pi + 1).filter((m) => m.role === "assistant").length;
   const results: Ctx["results"] = [];
   const nameOf = new Map<string, string>();
@@ -259,7 +265,7 @@ async function anthropic(req: Request, path: string, body: any): Promise<Respons
 
 /* ------------------------------ the patched fetch ------------------------------ */
 
-const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "api.stripe.com": "stripe", "api.resend.com": "resend" };
+const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.stripe.com": "stripe", "api.resend.com": "resend" };
 
 export function patchFetch(local: (u: URL) => boolean) {
   const realFetch = globalThis.fetch.bind(globalThis);

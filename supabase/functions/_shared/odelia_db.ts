@@ -19,7 +19,7 @@ export async function linkOf(admin: SupabaseClient, userId: string): Promise<Lin
   return (data as Link | null) ?? null;
 }
 
-export type Kind = "chat" | "ack" | "reply" | "code" | "update" | "urgent" | "system" | "call";
+export type Kind = "chat" | "ack" | "reply" | "code" | "update" | "urgent" | "system" | "call" | "missed";
 /** Log one text or call. Returns the row's id, or null when it's already logged (Telnyx retried a webhook) or failed. */
 export async function logMessage(admin: SupabaseClient, row: { user_id: string | null; workspace_id?: string | null; direction: "in" | "out"; channel: Channel; kind: Kind; body: string; provider_id?: string | null; run_id?: string | null }): Promise<number | null> {
   const { data, error } = await admin.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2000), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null }).select("id").maybeSingle();

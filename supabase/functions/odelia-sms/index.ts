@@ -117,17 +117,82 @@ async function inbound(p: Inbound, logId: number) {
     } else await textUser(admin, env, { link, workspace_id: ws.id, segments: splitSms(SAY.whichWs[lang](all.map((w) => w.name).slice(0, 8)), { max: 1 }), kind: "system" });
     return;
   }
-  const hasMedia = Array.isArray(p.media) && p.media.length > 0;
-  if (!text) { if (hasMedia) await textUser(admin, env, { link, workspace_id: ws.id, segments: [SAY.picture[lang]], kind: "system" }); return; }
+  // Photos and PDFs they text (an inspection report, a permit, a lease page) go into Documents, and Odelia reads them.
+  const media = Array.isArray(p.media) ? (p.media as Media[]) : [];
+  const saved = media.length ? await saveMedia(media, ws.id, link.user_id, lang) : [];
+  const skipped = media.length - saved.length;
+  if (!text && !saved.length) { if (media.length) await textUser(admin, env, { link, workspace_id: ws.id, segments: [SAY.picture[lang]], kind: "system" }); return; }
+  const names = saved.map((f) => f.name).join(", ");
+  const note = saved.length
+    ? (lang === "zh"
+      ? `\n\n（对方通过短信发来 ${saved.length} 个文件，已存入“文件”：${names}。请用 review_documents 读取这些文件名${text ? "，再回答上面的问题" : "，并告诉对方你读到了什么、有什么要做的"}。只说文件里写明的内容。）`
+      : `\n\n(They texted ${saved.length} file${saved.length === 1 ? "" : "s"}, now saved in Documents: ${names}. Read ${saved.length === 1 ? "it" : "them"} with review_documents using those names${text ? ", then answer what they asked" : ", then tell them what it is and anything they need to do"}. Only say what the document itself says.)`)
+    : "";
+  const lost = skipped > 0 ? (lang === "zh" ? `\n\n（另有 ${skipped} 个附件无法打开，只支持照片和 PDF。）` : `\n\n(${skipped} other attachment${skipped === 1 ? "" : "s"} couldn't be opened; only photos and PDFs work by text.)`) : "";
+  const ask = text || (lang === "zh" ? "我发了一个文件给你。" : "I sent you a file.");
+  if (!text) await admin.from("odelia_messages").update({ body: ask }).eq("id", logId);
+  await startRun(link, ws.id, ask + note + lost, logId);
+}
 
-  await startRun(link, ws.id, text + (hasMedia ? (lang === "zh" ? "\n\n（对方还发了一张图片，短信中无法查看。）" : "\n\n(They also sent a picture, which you can't see by text.)") : ""), logId);
+type Media = { url?: string; content_type?: string; size?: number };
+const MEDIA_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "application/pdf": "pdf" };
+const MEDIA_MAX = 10 * 1024 * 1024;
+
+/** Downloads up to 5 photos or PDFs from the text, stores each in the workspace's Documents (storage, the documents table
+ *  and the workspace's own list), and returns what was saved. Anything else, or anything too big, is skipped. */
+async function saveMedia(media: Media[], ws: string, uid: string, lang: "en" | "zh") {
+  const out: { name: string; path: string; size: number; mime: string }[] = [];
+  const stamp = new Date().toISOString().slice(0, 10);
+  for (const [i, m] of media.slice(0, 5).entries()) {
+    const mime = String(m.content_type ?? "").toLowerCase().split(";")[0].trim();
+    const ext = MEDIA_TYPES[mime];
+    if (!ext || !m.url || (m.size ?? 0) > MEDIA_MAX) continue;
+    let host = "";
+    try { const u = new URL(m.url); if (u.protocol !== "https:") continue; host = u.hostname; } catch { continue; }
+    try {
+      // Telnyx's own media links take the API key; any other host gets no credentials.
+      const key = env("TELNYX_API_KEY");
+      const res = await fetch(m.url, { headers: key && /(^|\.)telnyx\.com$/i.test(host) ? { Authorization: `Bearer ${key}` } : {} });
+      if (!res.ok) continue;
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      if (!bytes.length || bytes.length > MEDIA_MAX) continue;
+      const name = `${lang === "zh" ? "短信" : "Text"} ${stamp} ${i + 1}.${ext}`;
+      const path = `${ws}/sms/${crypto.randomUUID()}/${name.replace(/\s+/g, "-")}`;
+      const up = await admin.storage.from("documents").upload(path, new Blob([bytes], { type: mime }), { contentType: mime, upsert: false });
+      if (up.error) continue;
+      const { error } = await admin.from("documents").insert({ workspace_id: ws, name, path, size: bytes.length, mime, source: "customer", uploaded_by: uid });
+      if (error) { await admin.storage.from("documents").remove([path]); continue; }
+      out.push({ name, path, size: bytes.length, mime });
+    } catch (e) { console.error("media", String(e).slice(0, 160)); }
+  }
+  if (out.length) {
+    // The workspace's own list of documents is what the agent reads from.
+    const { data } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
+    const state = (data?.state ?? {}) as { docs?: unknown[] };
+    const docs = Array.isArray(state.docs) ? state.docs : [];
+    const at = new Date().toISOString();
+    const added = out.map((f) => ({ id: "d-" + crypto.randomUUID().slice(0, 8), name: f.name, kind: f.mime === "application/pdf" ? "pdf" : "jpg", size: f.size, by: "you", at, tag: { en: "Texted", zh: "短信发送" }, path: f.path }));
+    await admin.from("workspaces").update({ state: { ...state, docs: [...added, ...docs] } }).eq("id", ws);
+  }
+  return out;
 }
 
 /** The recent text conversation in this workspace (the last 12 hours), as turns for the agent. */
 async function history(link: Link, ws: string, beforeId: number) {
   const { data } = await admin.from("odelia_messages").select("id, direction, kind, body").eq("user_id", link.user_id).eq("workspace_id", ws).eq("channel", "sms")
     .in("kind", ["chat", "reply"]).lt("id", beforeId).gt("created_at", new Date(Date.now() - 12 * 3600e3).toISOString()).order("id", { ascending: false }).limit(8);
-  return (data ?? []).reverse().map((m) => ({ role: m.direction === "in" ? "user" : "assistant", content: String(m.body ?? "") }));
+  // An empty turn (a photo with no words) would make the model refuse the whole conversation, so it's left out, and the
+  // turns are merged so they still alternate.
+  const turns: { role: "user" | "assistant"; content: string }[] = [];
+  for (const m of (data ?? []).reverse()) {
+    const content = String(m.body ?? "").trim();
+    if (!content) continue;
+    const role = m.direction === "in" ? "user" as const : "assistant" as const;
+    const last = turns.at(-1);
+    if (last?.role === role) last.content += "\n\n" + content; else turns.push({ role, content });
+  }
+  while (turns[0]?.role === "assistant") turns.shift();
+  return turns;
 }
 
 async function startRun(link: Link, ws: string, prompt: string, logId: number) {

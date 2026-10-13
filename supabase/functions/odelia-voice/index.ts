@@ -183,10 +183,10 @@ async function textInstead(call: Call) {
   if (!call.user_id || !call.outbox_id) return;
   const [{ data: o }, link] = await Promise.all([admin.from("odelia_outbox").select("body, link, workspace_id").eq("id", call.outbox_id).maybeSingle(), linkOf(admin, call.user_id)]);
   if (!o || !link?.verified_at || !link.texts_on) return;
-  const already = await admin.from("odelia_messages").select("id", { count: "exact", head: true }).eq("user_id", call.user_id).eq("kind", "urgent").eq("channel", "sms").gt("created_at", call.answered_at ?? new Date(Date.now() - 3600e3).toISOString());
+  const already = await admin.from("odelia_messages").select("id", { count: "exact", head: true }).eq("user_id", call.user_id).eq("kind", "missed").eq("channel", "sms").gt("created_at", call.answered_at ?? new Date(Date.now() - 3600e3).toISOString());
   if (already.count) return;
   const text = `${SAY.missed[link.lang]} ${o.body}`;
-  await textUser(admin, env, { link, workspace_id: o.workspace_id, segments: splitSms(text, { max: 1, lang: link.lang, tail: o.link || appLink(appOrigin(env), o.workspace_id) || undefined }), kind: "urgent" });
+  await textUser(admin, env, { link, workspace_id: o.workspace_id, segments: splitSms(text, { max: 1, lang: link.lang, tail: o.link || appLink(appOrigin(env), o.workspace_id) || undefined }), kind: "missed" });
 }
 
 async function event(type: string, p: CallPayload) {

@@ -44,7 +44,7 @@ This conversation is by phone, not in the app: ${channel === "sms" ? "they texte
 
 /** A fresh run: the recent conversation (folded so roles alternate) and the new request. */
 export function startState(history: Turn[], prompt: string): RunState {
-  const messages = [...history.slice(-12), { role: "user" as const, content: prompt }].reduce<{ role: string; content: unknown }[]>((acc, t) => {
+  const messages = [...history.slice(-12).filter(t => typeof t.content !== "string" || t.content.trim()), { role: "user" as const, content: prompt }].reduce<{ role: string; content: unknown }[]>((acc, t) => {
     const last = acc[acc.length - 1];
     if (last && last.role === t.role && typeof last.content === "string") last.content += "\n\n" + t.content; else acc.push({ role: t.role, content: t.content });
     return acc;

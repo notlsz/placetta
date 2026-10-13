@@ -108,9 +108,9 @@ async function telnyxPost(fn: string, event: unknown, o: { badKey?: boolean; ts?
   const res = await call(fn, null, { raw, headers: { "telnyx-signature-ed25519": sig, "telnyx-timestamp": ts, "user-agent": "telnyx-webhooks" } });
   return { ...res, raw, ts, sig };
 }
-const smsEvent = (from: string, text: string, id: string = crypto.randomUUID()) => ({
+const smsEvent = (from: string, text: string, id: string = crypto.randomUUID(), media: unknown[] = []) => ({
   data: { event_type: "message.received", id: crypto.randomUUID(), occurred_at: new Date().toISOString(), record_type: "event",
-    payload: { id, record_type: "message", direction: "inbound", type: "SMS", text, media: [], from: { phone_number: from, carrier: "T-Mobile USA", line_type: "Wireless" }, to: [{ phone_number: ODELIA, status: "webhook_delivered" }], received_at: new Date().toISOString() } },
+    payload: { id, record_type: "message", direction: "inbound", type: media.length ? "MMS" : "SMS", text, media, from: { phone_number: from, carrier: "T-Mobile USA", line_type: "Wireless" }, to: [{ phone_number: ODELIA, status: "webhook_delivered" }], received_at: new Date().toISOString() } },
   meta: { attempt: 1, delivered_to: `${GATEWAY}/functions/v1/odelia-sms` },
 });
 const callEvent = (type: string, p: Record<string, unknown>) => ({
@@ -294,6 +294,13 @@ try {
       { tool: "check_progress", input: {}, delayMs: 9000 },
       { text: "The health inspection checks hot and cold holding temperatures, handwashing sinks and pest control. Want me to add a mock inspection?" },
     ] },
+    { name: "sms-photo", match: (p) => /texted 1 file, now saved in Documents/.test(p), turns: [
+      { tool: "review_documents", input: (c) => ({ documents: [/Documents: ([^.]+?)\. Read/.exec(c.prompt)?.[1] ?? ""] }) },
+      { text: "That's your Food Service Establishment Permit, number 50123456. It expires " + day(40) + ", and I added a renewal reminder." },
+    ] },
+    { name: "sms-photo-read", match: (p) => /^Read this document \(Text /.test(p), turns: [
+      { text: JSON.stringify({ document_type: "Food Service Establishment Permit", number: "50123456", issuer: "NYC Department of Health and Mental Hygiene", holder: "Lotus Tea", issued: "", expires: day(40), quotes: { number: "Permit No. 50123456", issuer: "NYC Department of Health and Mental Hygiene", holder: "Lotus Tea", expires: "Expires " + day(40) } }) },
+    ] },
     { name: "sms-model-down", match: (p) => p.includes("anything new from the city"), turns: [{ error: 529 }] },
     { name: "sms-remove-store", match: (p) => p.includes("Remove the Roosevelt Ave store"), turns: [
       { tool: "remove_store", input: { store_id: "st-roosevelt", reason: "Lease fell through" } },
@@ -318,6 +325,19 @@ try {
     check("the agent was told it's answering a text", /This conversation is by phone/.test(sys) && /they texted you/.test(sys));
     const log = await sql`select direction, kind, run_id from public.odelia_messages where user_id = ${owner.id} and channel = 'sms' and kind in ('chat', 'reply') order by id`;
     check("both sides are logged against the run", log.length === 2 && log.every((l) => l.run_id === run.id), log);
+
+    // a photo by text: saved to Documents, read by the agent, answered by text
+    mark = recorded.length;
+    await telnyxPost("odelia-sms", smsEvent(OWNER_PHONE, "", "msg-in-photo", [{ url: "https://media.telnyx.com/media/e2e-permit.png", content_type: "image/png", size: 68, hash_sha256: "x" }]));
+    await settle();
+    const [doc] = await sql`select name, path, mime, source, uploaded_by from public.documents where workspace_id = ${ws} and path like ${ws + "/sms/%"} order by created_at desc limit 1`;
+    check("a texted photo is stored in Documents as the owner's", doc && doc.mime === "image/png" && doc.source === "customer" && doc.uploaded_by === owner.id, doc);
+    const [wsRow] = await sql`select state from public.workspaces where id = ${ws}`;
+    check("the photo is in the workspace's document list", (wsRow?.state?.docs ?? []).some((d: { path?: string }) => d.path === doc?.path));
+    const photoCall = modelCalls.filter((c) => c.script === "sms-photo-read");
+    check("the agent read the photo itself (image sent to the model)", photoCall.length === 1 && JSON.stringify(photoCall[0].payload.messages).includes('"type":"image"'), photoCall.map((c) => c.round));
+    const outP = sms(mark, OWNER_PHONE).map((x) => String(x.body.text));
+    check("the answer about the photo is texted back", outP.length === 1 && /50123456/.test(outP[0]) && markdownFree(outP[0]), outP);
 
     // a long answer: at most three texts, the last pointing to the app
     mark = recorded.length;
@@ -380,7 +400,7 @@ try {
     check("an unknown number gets one explanation, then silence", toStranger.length === 1 && /isn't linked to an account/.test(toStranger[0].body.text), toStranger.map((x) => x.body.text));
     const [stranger] = await sql`select messages, replied_at from public.odelia_strangers where number = ${STRANGER}`;
     check("strangers are counted, their words not kept", stranger?.messages === 2 && (await sql`select count(*)::int n from public.odelia_messages where user_id is null and direction = 'in' and body <> ''`)[0].n === 0, stranger);
-    check("no run for a stranger", (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === 7);
+    check("no run for a stranger", (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === 8);
 
     // STOP, HELP, START
     mark = recorded.length;
@@ -391,7 +411,7 @@ try {
     mark = recorded.length;
     await telnyxPost("odelia-sms", smsEvent(OWNER_PHONE, "What's due this month?", "msg-in-9"));
     await settle();
-    check("after STOP, a question gets no run and no text", sms(mark).length === 0 && (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === 7, sms(mark).map((x) => x.body.text));
+    check("after STOP, a question gets no run and no text", sms(mark).length === 0 && (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === 8, sms(mark).map((x) => x.body.text));
     mark = recorded.length;
     await telnyxPost("odelia-sms", smsEvent(OWNER_PHONE, "help", "msg-in-10"));
     await settle();
@@ -411,7 +431,7 @@ try {
     check("a stale timestamp is rejected", old.status === 401, old);
     const replay = await call("odelia-sms", null, { raw: r1.raw, headers: { "telnyx-signature-ed25519": r1.sig, "telnyx-timestamp": r1.ts } });
     await settle();
-    check("a replayed message id is ignored", replay.status === 200 && replay.data?.duplicate === true && sms(mark).length === 0 && (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === 7, replay);
+    check("a replayed message id is ignored", replay.status === 200 && replay.data?.duplicate === true && sms(mark).length === 0 && (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === 8, replay);
   });
 
   /* ---------------- c. voice ---------------- */
