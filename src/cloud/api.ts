@@ -82,7 +82,7 @@ type AuditRow = { id: number; client_id: string | null; actor: Audit["actor"] | 
 export const getSession = async () => (await supabase().auth.getSession()).data.session;
 export const onAuth = (fn: (s: Session | null, event: string) => void) => supabase().auth.onAuthStateChange((e, s) => fn(s, e)).data.subscription;
 export async function sendSignIn(email: string) {
-  const { error } = await supabase().auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname } });
+  const { error } = await supabase().auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: appHome() } });
   if (error) throw err(error.status === 429 ? "rate_limited" : "auth", error.message);
 }
 /** Email and password: works without any email being sent once "Confirm email" is off in Supabase. */
@@ -120,7 +120,7 @@ export async function changePassword(password: string) {
   if (error) throw err(error.code === "weak_password" ? "weak" : error.code === "same_password" ? "same" : error.code === "reauthentication_needed" ? "reauth" : error.status === 429 ? "rate_limited" : "auth", error.message);
 }
 export async function signUpPassword(email: string, password: string): Promise<{ confirm: boolean }> {
-  const { data, error } = await supabase().auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
+  const { data, error } = await supabase().auth.signUp({ email, password, options: { emailRedirectTo: appHome() } });
   if (error) throw err(error.code === "user_already_exists" ? "exists" : error.code === "weak_password" ? "weak" : error.status === 429 ? "rate_limited" : "auth", error.message);
   // an existing email comes back with no identities and no session (Supabase hides that the account exists)
   if (!data.session && data.user && (data.user.identities ?? []).length === 0) throw err("exists", "An account with this email already exists.");
@@ -144,7 +144,7 @@ export async function verifyPhoneCode(phone: string, token: string) {
 }
 /** Emails a link to set a new password. The link opens the app with a recovery session (the PASSWORD_RECOVERY event). */
 export async function sendPasswordReset(email: string) {
-  const { error } = await supabase().auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  const { error } = await supabase().auth.resetPasswordForEmail(email, { redirectTo: appHome() });
   if (error) throw err(error.status === 429 ? "rate_limited" : "auth", error.message);
 }
 /** Sign out here, or on every device (revokes every session's refresh token). */
@@ -177,7 +177,7 @@ export const REGION = { id: "us", label: { en: "United States", zh: "美国" } }
 export async function signInWith(provider: Provider) {
   const { error } = await supabase().auth.signInWithOAuth({
     provider,
-    options: { redirectTo: location.origin + location.pathname, ...(provider === "azure" ? { scopes: "email openid profile" } : {}) },
+    options: { redirectTo: appHome(), ...(provider === "azure" ? { scopes: "email openid profile" } : {}) },
   });
   if (error) throw err("auth", error.message);
 }
@@ -266,6 +266,10 @@ export const termsAgreed = {
 
 /** What's saved: the workspace minus the audit trail (kept server side) and anything derived from filings. */
 import { stripState as strip } from "../core";
+
+/** Where sign-in links, invites and checkout come back to: the app's home address, whatever page it was opened from
+    (deep addresses like /app/settings/billing aren't on the sign-in redirect allow list). */
+const appHome = () => location.origin + (import.meta.env.BASE_URL.startsWith("/") ? import.meta.env.BASE_URL : location.pathname);
 export { strip };
 export async function saveState(id: string, w: Workspace) {
   const { error } = await supabase().from("workspaces").update({ state: strip(w), name: w.business.en.slice(0, 120) || "Workspace" }).eq("id", id);
@@ -450,9 +454,9 @@ export async function teamList(ws: string): Promise<Team> {
 }
 /** Records the invite and emails it. sent: "invite" (new person), "sign_in_link" (has an account) or "not_sent". */
 export const invite = (ws: string, email: string, role: Role) =>
-  fn<{ id: string; sent: "invite" | "sign_in_link" | "not_sent" }>("team", { action: "invite", workspace_id: ws, email, role, return_url: location.origin + location.pathname });
+  fn<{ id: string; sent: "invite" | "sign_in_link" | "not_sent" }>("team", { action: "invite", workspace_id: ws, email, role, return_url: appHome() });
 export const resendInvite = (ws: string, id: string) =>
-  fn<{ id: string; sent: "invite" | "sign_in_link" | "not_sent" }>("team", { action: "resend", workspace_id: ws, id, return_url: location.origin + location.pathname });
+  fn<{ id: string; sent: "invite" | "sign_in_link" | "not_sent" }>("team", { action: "resend", workspace_id: ws, id, return_url: appHome() });
 async function rpcVoid(name: string, args: Record<string, unknown>) {
   const { error } = await supabase().rpc(name, args);
   if (error) throw fromPg(error);
@@ -487,13 +491,13 @@ export const hqUnshare = (id: string) => rpcVoid("hq_unshare", { p_id: id });
 
 export type LocationPrice ={ amount: number; currency: string; interval: string | null; interval_count: number | null };
 export type PlanPrices = { location: LocationPrice | null; pro?: LocationPrice | null; opening: LocationPrice | null; opening_food?: LocationPrice | null; guarantee?: LocationPrice | null; pack?: LocationPrice | null };
-export const locationPrices = (ws: string) => fn<PlanPrices>("billing", { action: "prices", workspace_id: ws, return_url: location.origin + location.pathname });
-export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: location.origin + location.pathname });
+export const locationPrices = (ws: string) => fn<PlanPrices>("billing", { action: "prices", workspace_id: ws, return_url: appHome() });
+export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: appHome() });
 export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean } = {}) =>
-  fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: location.origin + location.pathname });
-export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { action: "portal", workspace_id: ws, return_url: location.origin + location.pathname });
+  fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: appHome() });
+export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { action: "portal", workspace_id: ws, return_url: appHome() });
 /** An Odelia pack: more AI allowance, carried over until it's used. */
-export const buyPack = (ws: string, packs = 1) => fn<{ url: string }>("billing", { action: "pack", workspace_id: ws, packs, return_url: location.origin + location.pathname });
+export const buyPack = (ws: string, packs = 1) => fn<{ url: string }>("billing", { action: "pack", workspace_id: ws, packs, return_url: appHome() });
 /** How much of this period's Odelia allowance is used. */
 export type AiStatus = { plan: "none" | "entry" | "entry_ended" | "monthly" | "comped"; used_pct: number; resets_at: string | null; has_credit: boolean };
 export async function aiStatus(ws: string): Promise<AiStatus | null> {
@@ -522,7 +526,7 @@ export async function listIntegrations(ws: string): Promise<Integration[]> {
   return (data ?? []) as Integration[];
 }
 export const integration = <T>(ws: string, action: string, body: Record<string, unknown> = {}) => fn<T>("integrations", { workspace_id: ws, action, ...body });
-export const connectUrl = (ws: string, kind: IntegrationKind) => integration<{ url: string }>(ws, "connect", { kind, return_to: location.origin + location.pathname });
+export const connectUrl = (ws: string, kind: IntegrationKind) => integration<{ url: string }>(ws, "connect", { kind, return_to: appHome() });
 
 /* ------------------------------ agency logins ------------------------------ */
 

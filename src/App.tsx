@@ -6,6 +6,7 @@ import { emptyBook } from "./memory";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
 import { AgentBot } from "./Bot";
+import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { AppCtx, type CloudCtx, type Ctx, type Signed, type Tab, type View } from "./ctx";
 import { formById } from "./forms/registry";
 import { ApproveModal, AppDrawer } from "./Drawer";
@@ -116,7 +117,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [slimPref, setSlimPref] = useState(() => readFlag("placetta-side-slim"));
   useEffect(() => writeFlag("placetta-side-slim", slimPref), [slimPref]);
   const dock = wide && panelOpen;
-  const [view, setView] = useState<View>("overview");
+  const [view, setView] = useState<View>(() => readRoute().view);
   const [drawer, setDrawer] = useState<{ id: string; tab: Tab; edit: boolean } | null>(null);
   const [modal, setModal] = useState<string | null>(null);
   const [legal, setLegal] = useState<string | null>(null);
@@ -127,7 +128,24 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const toastT = useRef(0);
   const say = useCallback((s: string) => { setToast(s); clearTimeout(toastT.current); toastT.current = window.setTimeout(() => setToast(null), Math.max(2800, s.length * 55)); }, []);
   const main = useRef<HTMLElement>(null);
-  const go = useCallback((v: View) => { setView(v); setNavOpen(false); setWsMenu(false); main.current?.scrollTo({ top: 0 }); }, []);
+  const go = useCallback((v: View) => { setView(v); setRoute(v); setNavOpen(false); setWsMenu(false); main.current?.scrollTo({ top: 0 }); }, []);
+  // Back and Forward move between pages; a Settings address also picks its category.
+  useEffect(() => {
+    const on = () => {
+      const r = readRoute(); setView(r.view); setNavOpen(false); main.current?.scrollTo({ top: 0 });
+      if (r.view === "settings" && r.sub) window.dispatchEvent(new CustomEvent("placetta:settings", { detail: r.sub }));
+    };
+    addEventListener("popstate", on);
+    return () => removeEventListener("popstate", on);
+  }, []);
+  // An address for a page this account can't open (the team queue, headquarters) goes to the overview.
+  const canQueue = !!(cloud?.me.staff || cloud?.me.staff_email), canHq = !!cloud?.hq.length;
+  useEffect(() => {
+    if ((view === "queue" && !canQueue) || (view === "hq" && !canHq)) { setView("overview"); setRoute("overview", undefined, true); }
+    else if (view !== "settings") setRoute(view, undefined, true);
+  }, [view, canQueue, canHq]);
+  /** A sidebar link: a real address (open in a new tab, copy, bookmark), handled in place on a plain click. */
+  const navLink = (v: View) => ({ href: hrefOf(v), onClick: (e: React.MouseEvent) => { if (!plainClick(e)) return; e.preventDefault(); go(v); } });
   useEffect(() => { if (cloud?.notice) say(cloud.notice); }, [cloud, say]);
 
   /* the workspace: the sample, or the account's saved one with the server's facts laid on top */
@@ -697,13 +715,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       </button>
       <ul className="nav">
         {NAV.map(n => (
-          <li key={n.v}><button type="button" aria-current={view === n.v ? "page" : undefined} onClick={() => go(n.v)} title={slim ? t(n.k) : undefined}><n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}</button></li>
+          <li key={n.v}><a {...navLink(n.v)} aria-current={view === n.v ? "page" : undefined} title={slim ? t(n.k) : undefined}><n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}</a></li>
         ))}
       </ul>
       <ul className="nav">
-        <li><button type="button" aria-current={view === "find" ? "page" : undefined} onClick={() => go("find")} title={slim ? t("nav_find") : undefined}><I.find /><span>{t("nav_find")}</span></button></li>
-        {!!cloud?.hq.length && <li><button type="button" aria-current={view === "hq" ? "page" : undefined} onClick={() => go("hq")} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></button></li>}
-        {(cloud?.me.staff || cloud?.me.staff_email) && <li><button type="button" aria-current={view === "queue" ? "page" : undefined} onClick={() => go("queue")} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></button></li>}
+        <li><a {...navLink("find")} aria-current={view === "find" ? "page" : undefined} title={slim ? t("nav_find") : undefined}><I.find /><span>{t("nav_find")}</span></a></li>
+        {!!cloud?.hq.length && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
+        {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
       </ul>
       {view_.locations.length > 0 && <p className="nav-h">{t("locations")}</p>}
       <ul className="nav locs">
@@ -715,7 +733,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         ))}
       </ul>
       <div className="side-bot">
-        <button type="button" className={"setb" + (view === "settings" ? " on" : "")} onClick={() => go("settings")} title={slim ? t("nav_settings") : undefined}><I.settings /><span>{t("nav_settings")}</span></button>
+        <a {...navLink("settings")} className={"setb" + (view === "settings" ? " on" : "")} aria-current={view === "settings" ? "page" : undefined} title={slim ? t("nav_settings") : undefined}><I.settings /><span>{t("nav_settings")}</span></a>
         <div className="lang" role="group" aria-label={t("langSwitch")}>
           <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
           <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>

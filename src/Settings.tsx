@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./model";
 import { API_MODELS } from "./live";
@@ -885,8 +886,9 @@ export function Settings() {
   const renew = bl?.current_period_end ? (lang === "zh" ? `${fmtDay(bl.current_period_end, lang, true)} 续费` : `Renews ${fmtDay(bl.current_period_end, lang, true)}`) : "";
   // Like Anthropic's settings: a short sidebar of categories, and only the chosen one on the right.
   const CATS = SETTINGS_CATS.map(c => ({ ...c, items: c.items.filter(k => cloud || !CLOUD_ONLY.has(k)) })).filter(c => c.items.length);
-  const [cat, setCatRaw] = useState<string>(() => catOf(takeSettingsTarget() ?? "") ?? readCat() ?? "general");
-  const setCat = (c: string) => { setCatRaw(c); try { localStorage.setItem("placetta-settings-cat", c); } catch { /* storage off */ } };
+  const [cat, setCatRaw] = useState<string>(() => catOf(takeSettingsTarget() ?? "") ?? catOf(readRoute().sub ?? "") ?? readCat() ?? "general");
+  const setCat = (c: string, step = false) => { setCatRaw(c); setRoute("settings", c, !step); try { localStorage.setItem("placetta-settings-cat", c); } catch { /* storage off */ } };
+  useEffect(() => { setRoute("settings", cat, true); }, []);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const on = (e: Event) => { const k = (e as CustomEvent<string>).detail; const c = catOf(k); if (c) { setCat(c); setTimeout(() => document.getElementById("set-" + k)?.scrollIntoView({ block: "start" }), 60); } };
     window.addEventListener("placetta:settings", on);
@@ -901,7 +903,7 @@ export function Settings() {
       <header className="ph"><div className="ph-tx"><h1>{t("nav_settings")}</h1></div></header>
       <div className="set-grid">
         <nav className="set-nav" aria-label={t("nav_settings")}>
-          {CATS.map(c => <button key={c.id} type="button" className="set-tab" aria-current={c.id === active.id ? "page" : undefined} onClick={() => { setCat(c.id); window.scrollTo({ top: 0 }); }}>{b(c.label)}</button>)}
+          {CATS.map(c => <a key={c.id} className="set-tab" href={hrefOf("settings", c.id)} aria-current={c.id === active.id ? "page" : undefined} onClick={e => { if (!plainClick(e)) return; e.preventDefault(); setCat(c.id, true); window.scrollTo({ top: 0 }); }}>{b(c.label)}</a>)}
         </nav>
         <div className="set-col">
           <Group id="account" hidden={!show("account")} title={B("Account", "账户")} rows={cloud ? [
