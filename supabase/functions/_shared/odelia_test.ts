@@ -263,3 +263,9 @@ Deno.test("app links and sending", async () => {
   const blocked = await sendSms(env, "+14155550134", "hi", (() => Promise.resolve(new Response(JSON.stringify({ errors: [{ code: "40300", title: "Blocked due to STOP message" }] }), { status: 400 }))) as unknown as typeof fetch);
   assertEquals([blocked.ok, blocked.code], [false, "40300"]);
 });
+
+Deno.test("plain-language opt-outs count as STOP (FCC any reasonable means)", async () => {
+  const { keyword } = await import("./odelia.ts");
+  for (const t of ["Stop texting me", "please stop calling me", "Don't text me anymore", "remove me", "不要再发短信了", "STOP"]) if (keyword(t) !== "stop") throw new Error(`not an opt-out: ${t}`);
+  for (const t of ["stop the renewal", "Don't file the permit yet", "What should I stop doing?"]) if (keyword(t) !== null) throw new Error(`wrongly an opt-out: ${t}`);
+});

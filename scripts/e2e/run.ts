@@ -236,6 +236,8 @@ try {
     const wrong = await rpc("phone_link_confirm", { p_code: code === "000000" ? "111111" : "000000" }, owner.jwt);
     check("a wrong code is refused as data", wrong.status === 200 && wrong.data?.error === "code_wrong" && wrong.data?.link?.verified === false, wrong);
     const ok = await rpc("phone_link_confirm", { p_code: code }, owner.jwt);
+    const consent = await sql`select event, disclosure_version from public.phone_consent_log where user_id = ${owner.id} order by id`;
+    check("linking records consent with the disclosure version (linked, texts on)", consent.map((r) => r.event).join(",") === "linked,texts_on" && consent.every((r) => r.disclosure_version === "2026-10-13"), consent);
     check("the right code verifies the phone", ok.status === 200 && ok.data?.link?.verified === true, ok);
     const [msg] = await sql`select body from public.odelia_messages where user_id = ${owner.id} and kind = 'code'`;
     check("the code itself isn't logged", msg && !String(msg.body).includes(code ?? "x"), msg);
@@ -408,6 +410,7 @@ try {
     await settle();
     const [l1] = await sql`select opted_out_at from public.phone_links where user_id = ${owner.id}`;
     check("STOP opts the owner out and confirms once", !!l1.opted_out_at && sms(mark, OWNER_PHONE).length === 1 && /won't get more texts/.test(sms(mark, OWNER_PHONE)[0].body.text), sms(mark, OWNER_PHONE).map((x) => x.body.text));
+    check("STOP is written to the consent ledger", (await sql`select count(*)::int n from public.phone_consent_log where user_id = ${owner.id} and event = 'stop'`)[0].n === 1);
     mark = recorded.length;
     await telnyxPost("odelia-sms", smsEvent(OWNER_PHONE, "What's due this month?", "msg-in-9"));
     await settle();

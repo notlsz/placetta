@@ -348,6 +348,9 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Consent records for texts and calls are kept 5 years, then dropped.
+  await admin.from("phone_consent_log").delete().lt("at", new Date(now - 5 * 365.25 * 864e5).toISOString());
+
   // The weekly checks: agent-run takes each one in the background and reports back as an Update when something changed.
   let watches = 0;
   if (Deno.env.get("ANTHROPIC_API_KEY") && Deno.env.get("WEEKLY_CHECKS") !== "off") {

@@ -403,6 +403,7 @@ function PhoneGroup() {
 
   return (
     <Group id="phone" title={B("Text and call Odelia", "发短信或致电 Odelia")}
+      // The consent text: when it changes, bump phone_consent_version() (supabase/migrations/..._phone_consent_log.sql).
       note={B("Text or call Odelia like a coworker. She answers from your workspace, starts work for you, and texts you first when something needs you. Odelia is an AI: her calls use an AI voice and are transcribed, and texts and transcripts are kept in your workspace. Filing, paying, sending and deleting still wait for your approval in the app.", "像和同事一样给 Odelia 发短信或打电话。她根据您的工作区回答问题、替您开始办理，有事需要您时会先发短信给您。Odelia 是 AI：通话使用 AI 语音并会被转录，短信和通话记录保存在您的工作区中。提交、付款、发送和删除仍需您在应用中批准。")}
       rows={rows}>
       {showForm && (

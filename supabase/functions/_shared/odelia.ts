@@ -77,11 +77,14 @@ const STOP = new Set(["STOP", "STOPALL", "STOP ALL", "UNSUBSCRIBE", "CANCEL", "E
 const START = new Set(["START", "UNSTOP", "SUBSCRIBE", "RESUME"]);
 const HELP = new Set(["HELP", "INFO", "帮助"]);
 export type Keyword = "stop" | "start" | "help";
+// The FCC's revocation rule (in force April 11, 2025): consent can be revoked by "any reasonable means", so a short text
+// that plainly asks us to stop counts too, not only the keyword. Kept to short, unambiguous asks.
+const OPT_OUT_PHRASE = /^(PLEASE )?(STOP|DON'?T|DO NOT|NO MORE) (TEXTING|TEXT|MESSAGING|CALLING|CALL|CONTACTING)( ME)?( ANYMORE| AGAIN)?( PLEASE)?$|^(REMOVE ME|TAKE ME OFF( YOUR LIST)?|LEAVE ME ALONE)$|^(不要再?(发短信|打电话|联系我)了?|别再?(发|打)了?)$/u;
 
 export function keyword(text: unknown): Keyword | null {
   if (typeof text !== "string") return null;
   const k = text.trim().replace(/[\s.!?。！？]+$/u, "").replace(/\s+/g, " ").toUpperCase();
-  if (STOP.has(k)) return "stop";
+  if (STOP.has(k) || OPT_OUT_PHRASE.test(k)) return "stop";
   if (START.has(k)) return "start";
   if (HELP.has(k)) return "help";
   return null;
