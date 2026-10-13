@@ -62,8 +62,12 @@ export const setFact = (f: Fact): P => w => ({ ...w, facts: w.facts.some(x => x.
 
 /** What stops an application from being filed: fields still empty and documents still missing. Every filing path
     (the agent's request, the approval sheet, the demo and the cloud) checks this, for every kind of business. */
+/** A value that isn't one yet: empty, whitespace, or a stand-in ("TBD", "unknown", "[owner name]", "?", "待定").
+    "N/A" and "None" are real answers and count. The database's filings check uses the same rule. */
+export const BLANK = /^(?:|tbd|tbc|to be (?:confirmed|determined|added)|unknown|pending|placeholder|xxx+|\?+|-+|_+|\.{3}|…|\[[^\]]*\]|<[^>]*>|\{[^}]*\}|待定|未知|待确认|待补充)$/i;
+export const isBlank = (v: string | undefined | null) => BLANK.test((v ?? "").trim());
 export function filingBlockers(a: Pick<Application, "fields" | "checklist">): { empty: Bi[]; missing: Bi[] } {
-  return { empty: a.fields.filter(f => !f.value.trim()).map(f => f.label), missing: a.checklist.filter(c => c.state === "missing").map(c => c.label) };
+  return { empty: a.fields.filter(f => isBlank(f.value)).map(f => f.label), missing: a.checklist.filter(c => c.state === "missing").map(c => c.label) };
 }
 export const readyToFile = (a: Pick<Application, "fields" | "checklist">) => { const b = filingBlockers(a); return !b.empty.length && !b.missing.length; };
 /** One sentence naming what's left, for the person. */
@@ -105,6 +109,14 @@ export const applyChange = (c: Change): P => w => {
     const apps = w.apps.map(a => (old.has(a.id) && (a.level === "city" || a.level === "county") && a.status !== "approved" ? { ...a, status: "waiting" as const, next: B(`The store moved to ${c.city}. Placetta maps the new city's permits`, `门店已迁至${c.city}，快哉将重新梳理当地许可`) } : a));
     return { ...w, stores, locations, apps, meta: w.meta && w.stores?.[0]?.id === c.store ? { ...w.meta, city: c.city, region: c.state.toUpperCase() } : w.meta };
   }
-  if (c.op === "remove_store") return { ...w, stores: (w.stores ?? []).filter(x => x.id !== c.store) };
+  if (c.op === "remove_store") {
+    // its applications that aren't filed go with it (and their approvals and deadlines); filed ones stay as the record
+    const gone = w.stores?.find(x => x.id === c.store);
+    const drop = new Set((gone?.apps ?? []).filter(id => !["filing", "review", "approved"].includes(w.apps.find(a => a.id === id)?.status ?? "")));
+    const stores = (w.stores ?? []).filter(x => x.id !== c.store);
+    const city = gone?.address.split(",").slice(-2, -1)[0]?.trim().toLowerCase();
+    const locations = city && !stores.some(x => x.address.toLowerCase().includes(city)) ? w.locations.filter(l => l.name.en.toLowerCase() !== city) : w.locations;
+    return { ...w, stores, locations, apps: w.apps.filter(a => !drop.has(a.id)), approvals: w.approvals.filter(a => !a.app || !drop.has(a.app)), deadlines: w.deadlines.filter(d => !d.app || !drop.has(d.app)) };
+  }
   return { ...w, apps: w.apps.filter(a => a.id !== c.app), approvals: w.approvals.filter(a => a.app !== c.app) };
 };
