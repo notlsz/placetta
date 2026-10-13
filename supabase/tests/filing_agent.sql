@@ -80,6 +80,14 @@ begin
   select * into row from public.filings where id = f;
   res := res || jsonb_build_object('stuck run after submit goes to the team', row.agent_state = 'handoff' and row.channel = 'team'
     and exists (select 1 from public.team_tasks where filing_id = f and kind = 'check_agency'));
+  res := res || jsonb_build_object('a filing already with the team gets no extra handoff task',
+    not exists (select 1 from public.team_tasks where filing_id = f and kind = 'handoff'));
+  -- The agent's audit entries are upserted on (workspace_id, client_id), as PostgREST sends it (no index predicate).
+  insert into public.audit_log (workspace_id, client_id, actor, action, object) values (w, 'x-e2e-1', 'agent', '{"en":"a","zh":"a"}', '{"en":"o","zh":"o"}')
+    on conflict (workspace_id, client_id) do nothing;
+  insert into public.audit_log (workspace_id, client_id, actor, action, object) values (w, 'x-e2e-1', 'agent', '{"en":"a","zh":"a"}', '{"en":"o","zh":"o"}')
+    on conflict (workspace_id, client_id) do nothing;
+  res := res || jsonb_build_object('audit upsert on (workspace_id, client_id) works once', (select count(*) from public.audit_log where workspace_id = w and client_id = 'x-e2e-1') = 1);
 
   -- A second filing, stuck before submit: requeued, then handed over after 3 tries.
   insert into public.filings (workspace_id, app_id, title, payload, approved_by) values (w, 'llc', '{"en":"LLC","zh":"LLC"}', '{"official":"ca-llc1"}', a) returning id into f2;

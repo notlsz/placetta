@@ -52,11 +52,15 @@ function safeReturn(url: unknown): string | null {
   } catch { return null; }
 }
 
+/** Every request names the API version it's written for, so it doesn't change with the account's default. Since
+    2025-03-31.basil an invoice item takes pricing[price], not price (a newer account rejects price outright). */
+const STRIPE_VERSION = "2025-03-31.basil";
+
 async function stripe(path: string, params: Record<string, string>) {
   const key = Deno.env.get("STRIPE_SECRET_KEY")!;
   const res = await fetch(`https://api.stripe.com/v1/${path}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/x-www-form-urlencoded" },
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/x-www-form-urlencoded", "Stripe-Version": STRIPE_VERSION },
     body: new URLSearchParams(params),
   });
   const data = await res.json();
@@ -65,7 +69,7 @@ async function stripe(path: string, params: Record<string, string>) {
 }
 
 async function stripeGet(path: string) {
-  const res = await fetch(`https://api.stripe.com/v1/${path}`, { headers: { Authorization: `Bearer ${Deno.env.get("STRIPE_SECRET_KEY")}` } });
+  const res = await fetch(`https://api.stripe.com/v1/${path}`, { headers: { Authorization: `Bearer ${Deno.env.get("STRIPE_SECRET_KEY")}`, "Stripe-Version": STRIPE_VERSION } });
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error?.message ?? "Stripe error");
   return data;
@@ -182,7 +186,7 @@ Deno.serve(async (req) => {
       const fresh = all.filter((s) => !charged.has(s.id));
       const openings = fresh.filter((s) => s.opening).length;
       if (opening && openings && sub.customer) {
-        await stripe("invoiceitems", { customer: String(sub.customer), price: opening, quantity: String(openings), subscription: subId, "metadata[workspace_id]": ws });
+        await stripe("invoiceitems", { customer: String(sub.customer), "pricing[price]": opening, quantity: String(openings), subscription: subId, "metadata[workspace_id]": ws });
         // Each opening fee is credited against that store's yearly plan.
         const year = await yearOfLocation(loc);
         const fee = Number((await stripeGet(`prices/${encodeURIComponent(opening)}`)).unit_amount) || 0;

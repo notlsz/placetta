@@ -15,6 +15,11 @@ verify_jwt = false
 [functions.monitor]
 verify_jwt = false
 
+# file checks every request itself (the person's session, the monitor key, or the Telnyx signature on fax webhooks),
+# and the monitor's daily sweep and Telnyx's fax webhooks carry no Supabase session.
+[functions.file]
+verify_jwt = false
+
 [functions.agent-run]
 verify_jwt = false
 

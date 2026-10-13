@@ -188,7 +188,8 @@ async function sendEmail(f: Filing, d: Dest) {
   try {
     res = await fetch(`${SUPABASE_URL}/functions/v1/integrations`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-filer-secret": secret },
+      // The gateway checks a JWT on integrations: the service role's passes it; x-filer-secret is what integrations checks.
+      headers: { "Content-Type": "application/json", "x-filer-secret": secret, Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""}` },
       body: JSON.stringify({ action: "mail_send", workspace_id: f.workspace_id, filing_id: f.id, to: [d.email], subject, body, attachments: files }),
       signal: AbortSignal.timeout(60000),
     });
