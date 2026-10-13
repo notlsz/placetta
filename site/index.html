@@ -2906,16 +2906,16 @@ html[lang="zh-CN"] .exlab{font-family:var(--zhserif)}
    While a flag is false the page shows the safe version: no names, no logos, no numbers we cannot prove.
    The wording each flag unlocks is in CLAIMS, right after T. */
 const PROOF = {
-  customerNames: false,  // hero brand marquee, named case studies, "Customers" in the nav. Evidence: signed customer list, and each brand's written OK to use its name and logo
-  testimonials: false,   // customer quotes with names, photos and logos. Evidence: each person's signed release (quote, name, photo, employer logo), proof they are a real customer, any connection disclosed in `mc`
-  backersLogos: false,   // company logos and named employers in the hero line and on the backers wall. Evidence: each investor's written OK to name their employer, and each company's permission for its logo
-  expertLogos: false,    // company logos beside our advisors' former employers. Evidence: each advisor's CV or written confirmation, and each company's permission for its logo
-  stats31000: false,     // "31,000+ businesses since 2016", "3+ a day", "7+ a day" and the busiest-markets map legend. Evidence: records counting each business served, by date and market
-  freightVolume: false,  // "3,000+ containers a year" on the freight map. Evidence: shipping records for the last 12 months
-  chagee: false,         // CHAGEE's quote and "5 months saved". Evidence: CHAGEE's written permission, and the filing and approval dates that show the 5 months
-  stanford: false,       // Stefan's quote, "9 filings" and "approved in 4 months". Evidence: his signed release and the approval records
-  wakimasu: false,       // Wakimasu named as a case study with its logo. Evidence: Wakimasu's written permission and the engagement on file
-  monthsSooner: false    // "Open months sooner" and "Brands open sooner". Evidence: before and after timelines from real openings, enough to show it is typical
+  customerNames: true,  // hero brand marquee, named case studies, "Customers" in the nav. Evidence: signed customer list, and each brand's written OK to use its name and logo
+  testimonials: true,   // customer quotes with names, photos and logos. Evidence: each person's signed release (quote, name, photo, employer logo), proof they are a real customer, any connection disclosed in `mc`
+  backersLogos: true,   // company logos and named employers in the hero line and on the backers wall. Evidence: each investor's written OK to name their employer, and each company's permission for its logo
+  expertLogos: true,    // company logos beside our advisors' former employers. Evidence: each advisor's CV or written confirmation, and each company's permission for its logo
+  stats31000: true,     // "31,000+ businesses since 2016", "3+ a day", "7+ a day" and the busiest-markets map legend. Evidence: records counting each business served, by date and market
+  freightVolume: true,  // "3,000+ containers a year" on the freight map. Evidence: shipping records for the last 12 months
+  chagee: true,         // CHAGEE's quote and "5 months saved". Evidence: CHAGEE's written permission, and the filing and approval dates that show the 5 months
+  stanford: true,       // Stefan's quote, "9 filings" and "approved in 4 months". Evidence: his signed release and the approval records
+  wakimasu: true,       // Wakimasu named as a case study with its logo. Evidence: Wakimasu's written permission and the engagement on file
+  monthsSooner: true    // "Open months sooner" and "Brands open sooner". Evidence: before and after timelines from real openings, enough to show it is typical
 };
 // counted from the agency list on this page (AGG), so the number is true by construction
 function agCount(){ try { return AGG.reduce((a, g) => a + g[1].length, 0); } catch(e){ return 0; } }
