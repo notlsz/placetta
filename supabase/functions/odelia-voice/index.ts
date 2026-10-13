@@ -93,12 +93,18 @@ function instructions(o: { lang: Lang; name: string | null; business: string; ve
   ].filter(Boolean).join("\n\n");
 }
 
-/** Their first name, if the account has one. */
-async function firstName(uid: string): Promise<string | null> {
+/** Their first name: from the account, or else from the workspace's Context (the owner or contact they named). */
+async function firstName(uid: string, ws?: string): Promise<string | null> {
   const { data } = await admin.auth.admin.getUserById(uid);
   const m = (data?.user?.user_metadata ?? {}) as { full_name?: string; name?: string; first_name?: string };
-  const n = String(m.first_name ?? m.full_name ?? m.name ?? "").trim().split(/\s+/)[0];
-  return n && n.length <= 40 ? n : null;
+  let n = String(m.first_name ?? m.full_name ?? m.name ?? "").trim().split(/\s+/)[0];
+  if (!n && ws) {
+    const { data: w } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
+    const facts = ((w?.state as { facts?: { label?: { en?: string }; value?: { en?: string } }[] } | null)?.facts ?? []);
+    const f = facts.find((x) => /^(owner|contact name|responsible person)/i.test(x.label?.en ?? "") && !/^you\b/i.test(x.value?.en ?? ""));
+    n = String(f?.value?.en ?? "").trim().split(/[\s,]+/)[0];
+  }
+  return n && n.length <= 40 && /^[\p{L}'-]+$/u.test(n) ? n : null;
 }
 
 async function briefFor(ws: string, lang: Lang) {
@@ -170,7 +176,7 @@ async function incoming(p: CallPayload) {
     const sent = !error && (await textUser(admin, env, { link, workspace_id: ws.id, segments: [SAY.callCode[lang](code)], kind: "code", logBody: lang === "zh" ? "已发送通话验证码" : "Sent a call code" })).ok;
     if (!sent) { await answerThen("unverifiable"); return; }
   }
-  const assistant = await assistantFor({ ccid, lang, name: await firstName(link.user_id), ws, verified });
+  const assistant = await assistantFor({ ccid, lang, name: await firstName(link.user_id, ws?.id), ws, verified });
   const r = await cmd(ccid, "answer", { assistant, client_state: clientState({ k: "talk", l: lang }), command_id: `answer-${ccid}`.slice(0, 120) });
   if (!r.ok) {
     console.error("answer with assistant", r.status, r.code, r.detail);
@@ -221,7 +227,7 @@ async function event(type: string, p: CallPayload) {
       admin.from("workspaces").select("id, name").eq("id", call.workspace_id).maybeSingle(),
     ]);
     if (!w) { await cmd(ccid, "hangup", {}); return; }
-    const assistant = await assistantFor({ ccid, lang: call.lang, name: await firstName(call.user_id), ws: { id: w.id, name: String(w.name ?? "") }, verified: true, outbound: String(o?.body ?? "") });
+    const assistant = await assistantFor({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: true, outbound: String(o?.body ?? "") });
     const r = await cmd(ccid, "ai_assistant_start", { assistant, client_state: clientState({ k: "talk", l: call.lang }) });
     if (!r.ok) { console.error("assistant start", r.status, r.code, r.detail); await sayAndHangUp(ccid, call.lang, LINES.sorry[call.lang]); await textInstead(call); }
     return;

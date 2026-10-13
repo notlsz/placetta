@@ -307,7 +307,7 @@ function BulkPlan({ onClose }: { onClose: () => void }) {
 }
 
 export function Stores() {
-  const { t, b, ws, ask, busy, lang } = useApp();
+  const { t, b, ws, ask, busy, lang, cloud, go } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [bulk, setBulk] = useState(false);
   const stores = ws.stores ?? [];
@@ -316,7 +316,10 @@ export function Stores() {
   return (
     <div className="page">
       <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p>{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p></div>
-        {!bulk && <Pill onClick={() => setBulk(true)}>{lang === "zh" ? "规划多家门店" : "Plan many stores"}</Pill>}</header>
+        <div className="ph-acts">
+          {cloud?.owner && stores.length > 0 && <Pill onClick={() => { go("settings"); setTimeout(() => document.getElementById("set-hq")?.scrollIntoView({ block: "start" }), 120); }}>{lang === "zh" ? "与总部共享" : "Share with headquarters"}</Pill>}
+          {!bulk && <Pill onClick={() => setBulk(true)}>{lang === "zh" ? "规划多家门店" : "Plan many stores"}</Pill>}
+        </div></header>
       {bulk && <BulkPlan onClose={() => setBulk(false)} />}
       {stores.length ? (
         <div className="stores">{stores.map(x => <StoreCard key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>

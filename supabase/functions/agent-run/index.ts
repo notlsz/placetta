@@ -31,6 +31,8 @@ const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY
 const env = (k: string, d = "") => Deno.env.get(k) ?? d;
 const DAILY_CALLS = Number(env("AGENT_DAILY_CALLS", "400"));
 const MODEL = env("AGENT_MODEL", "claude-sonnet-5-5"), MODEL_DEEP = env("AGENT_MODEL_DEEP", "claude-opus-5-5");
+/** The model for texts and calls, where a fast answer matters most. Same as AGENT_MODEL unless set (e.g. a faster model). */
+const MODEL_PHONE = env("AGENT_MODEL_PHONE", "") || MODEL;
 /** Work per instance before saving and handing over (the free plan stops an instance at 150 s). */
 const CHUNK_MS = Number(env("AGENT_CHUNK_SECONDS", "70")) * 1000;
 const STALE_MS = 3 * 60_000, MAX_ATTEMPTS = 8;
@@ -75,7 +77,8 @@ async function handOver(runId: string, token: string | null) {
 
 
 /** One model call: the company key, research on official sites, the daily limit and usage, as in the agent function. */
-async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal) {
+async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, phone = false) {
+  const standard = phone ? MODEL_PHONE : MODEL;
   if (signal.aborted) throw err("cancelled", "Stopped");
   if (!MODEL_KEYS.some((k) => env(k)))
     throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
@@ -87,11 +90,11 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   const userLocation = location?.city ? { type: "approximate", city: String(location.city).slice(0, 80), region: String(location.region ?? "").slice(0, 80) || undefined, country: "US" } : undefined;
   const search = { type: "web_search_20250305", name: "web_search", max_uses: 5, ...(userLocation ? { user_location: userLocation } : {}) };
   const fetchTool = { type: "web_fetch_20250910", name: "web_fetch", max_uses: 4, citations: { enabled: true }, max_content_tokens: 24000 };
-  const payload: Record<string, unknown> = { model: deep ? MODEL_DEEP : MODEL, max_tokens: Math.min(Math.max(Number(body.max_tokens) || 2000, 256), 4000), messages: body.messages };
+  const payload: Record<string, unknown> = { model: deep ? MODEL_DEEP : standard, max_tokens: Math.min(Math.max(Number(body.max_tokens) || 2000, 256), 4000), messages: body.messages };
   if (typeof body.system === "string" && body.system) payload.system = body.system.slice(0, 80000);
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
   if (tools.length) payload.tools = tools;
-  const out = await callModel((k) => Deno.env.get(k), { payload, tier: deep ? "deep" : "standard", research, beta: research ? FETCH_BETA : null }, deep ? MODEL_DEEP : MODEL,
+  const out = await callModel((k) => Deno.env.get(k), { payload, tier: deep ? "deep" : "standard", research, beta: research ? FETCH_BETA : null }, deep ? MODEL_DEEP : standard,
     research ? { search, fetch: fetchTool, pageTools } : null);
   if (!out.ok) {
     console.error("models", out.model, out.status, out.text.slice(0, 300));
@@ -205,7 +208,7 @@ export async function work(runId: string, token: string | null) {
       // after each round: save the work and where the conversation is, so a fresh instance can carry on
       round: async (st) => { await commit(); await admin.from("agent_runs").update({ state: st, steps, draft, heartbeat_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running"); },
       draft: (t) => { draft = t; flush(); },
-      send: (body, deep) => model(ws, body, deep, location, ctl.signal) as never,
+      send: (body, deep) => model(ws, body, deep, location, ctl.signal, run.channel === "sms" || run.channel === "voice") as never,
       channel: run.channel === "sms" || run.channel === "voice" ? run.channel : undefined,
     });
     await commit();

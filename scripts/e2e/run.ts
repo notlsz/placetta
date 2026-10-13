@@ -616,6 +616,8 @@ try {
     const member = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: hq.jwt });
     check("someone else can't check out this workspace", member.status === 403, member);
 
+    // a store added while the person is on Stripe's page isn't counted as paid for by this checkout
+    await sql`update public.workspaces set state = jsonb_set(state, '{stores}', (state->'stores') || '[{"id":"st-late","name":{"en":"Late store","zh":"新店"},"stage":"opening","address":"1 Late St, Queens, NY"}]'::jsonb) where id = ${ws}`;
     // Stripe: checkout completed, subscription created
     const sub = { id: "sub_goldenox", object: "subscription", status: "active", customer: "cus_goldenox", metadata: { workspace_id: ws, plan: "locations" },
       items: { object: "list", data: [{ id: "si_location", object: "subscription_item", price: stripeState.prices.price_location, quantity: 2, current_period_end: Math.floor(Date.now() / 1000) + 365 * 864e2 }] } };
@@ -623,6 +625,8 @@ try {
     const done = await stripePost({ id: "evt_cs_locations", type: "checkout.session.completed", data: { object: { id: "cs_test_1", object: "checkout.session", mode: "subscription", payment_status: "paid", customer: "cus_goldenox", subscription: sub.id, metadata: sess?.metadata ?? {} } } });
     const [b1] = await sql`select charged_store_ids, entry_credited_at from public.billing where workspace_id = ${ws}`;
     check("checkout.session.completed records the charged stores and the entry credit", done.status === 200 && JSON.stringify(b1.charged_store_ids) === JSON.stringify(["st-main", "st-roosevelt"]) && !!b1.entry_credited_at, b1);
+    check("a store added during checkout isn't marked as paid for", !(b1.charged_store_ids as string[]).includes("st-late"), b1);
+    await sql`update public.workspaces set state = jsonb_set(state, '{stores}', (select coalesce(jsonb_agg(x), '[]'::jsonb) from jsonb_array_elements(state->'stores') x where x->>'id' <> 'st-late')) where id = ${ws}`;
     const created = await stripePost({ id: "evt_sub_created", type: "customer.subscription.created", data: { object: sub } });
     const [b2] = await sql`select subscription_id, subscription_status, subscription_plan, current_period_end from public.billing where workspace_id = ${ws}`;
     check("customer.subscription.created makes the plan monthly", created.status === 200 && b2.subscription_status === "active" && b2.subscription_plan === "locations" && !!b2.current_period_end && (await rpc("plan_of", { ws }, SERVICE_KEY)).data === "monthly", b2);

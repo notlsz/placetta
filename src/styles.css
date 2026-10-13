@@ -1248,3 +1248,4 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .answer ol.prose-l { list-style: decimal; }
 .answer ul.prose-l { list-style: disc; }
 .answer .prose-l li::marker { color: var(--ink2, #6b7280); }
+.ph-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }

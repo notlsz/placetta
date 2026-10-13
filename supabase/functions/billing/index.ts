@@ -169,6 +169,9 @@ Deno.serve(async (req) => {
       } else p.allow_promotion_codes = "true";
       if (customer) p.customer = customer; else if (user.email) p.customer_email = user.email;
       const sess = await stripe("checkout/sessions", p);
+      // The stores this checkout bills for: once it's paid, the webhook counts exactly these, so a store added while
+      // the person is on Stripe's page still gets its opening fee on the next invoice.
+      await admin.from("billing").update({ checkout_store_ids: all.map((s) => s.id) }).eq("workspace_id", ws);
       return json(200, { ok: true, url: sess.url });   // the webhook records which stores were counted, once it's paid
     }
 

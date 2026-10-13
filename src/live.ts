@@ -6,7 +6,7 @@ import {
 import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
-import { inDays, money, nowIso } from "./time";
+import { daysFromNow, money, nowIso } from "./time";
 import { replyLanguage } from "./langs";
 import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills";
 import { docx } from "./files";
@@ -203,7 +203,7 @@ const LANG = { en: "English", zh: "Simplified Chinese" };
 function snapshot(w: Workspace, lang: Lang) {
   const b = (x: Bi) => x[lang];
   return {
-    business: b(w.business), goal: b(w.goal), today: inDays(0),
+    business: b(w.business), goal: b(w.goal), today: daysFromNow(0),
     locations: w.locations.map(l => `${b(l.name)} (${b(l.county)})`),
     applications: w.apps.map(a => ({
       id: a.id, name: b(a.name), official_form: a.official, agency: b(a.agency), level: a.level, status: a.status, next: a.next ? b(a.next) : undefined,
@@ -214,7 +214,7 @@ function snapshot(w: Workspace, lang: Lang) {
     stores: (w.stores ?? []).map(st => ({ id: st.id, name: b(st.name), address: st.address, stage: st.stage, planned_open: st.plannedOpen, applications: st.apps })),
     waiting_for_approval: w.approvals.map(a => ({ id: a.id, title: b(a.title), application: a.app })),
     // with ids, so edit_deadline can name one; the next ones first, then the latest that passed
-    deadlines: [...w.deadlines.filter(d => d.date >= inDays(0)).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 10), ...w.deadlines.filter(d => d.date < inDays(0)).sort((x, y) => y.date.localeCompare(x.date)).slice(0, 3)]
+    deadlines: [...w.deadlines.filter(d => d.date >= daysFromNow(0)).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 10), ...w.deadlines.filter(d => d.date < daysFromNow(0)).sort((x, y) => y.date.localeCompare(x.date)).slice(0, 3)]
       .map(d => ({ id: d.id, date: d.date, title: b(d.title), kind: d.kind, ...(d.app ? { application: d.app } : {}) })),
     facts: w.facts.map(f => `${b(f.label)}: ${b(f.value)}`),
     documents: w.docs.slice(0, 30).map(d => (d.app ? `${d.name} (application ${d.app})` : d.name)),
@@ -231,7 +231,7 @@ export function rules(w: Workspace, lang: Lang, account: boolean, research: bool
   const apps = connected.map(c => APP_NAMES[c]).filter(Boolean);
   const missing = [["Email (Gmail or Outlook)", MAIL], ["a calendar", CAL], ["Google Drive or Dropbox", DRIVES], ["QuickBooks", ["quickbooks"]]].filter(([, k]) => !has(k as string[])).map(([n]) => n);
   const mail = has(MAIL) && can("search_email"), drives = has(DRIVES) && can("find_files"), cal = has(CAL) && can("add_calendar_event");
-  return `You are Odelia, the AI compliance agent at Placetta (快哉). Introduce yourself as Odelia when it's natural, and if anyone asks, say plainly that you are an AI, not a person. You get business licenses, permits and registrations done for the business you work for, and keep them current. You work inside its Placetta workspace (JSON below). Today is ${inDays(0)}.
+  return `You are Odelia, the AI compliance agent at Placetta (快哉). Introduce yourself as Odelia when it's natural, and if anyone asks, say plainly that you are an AI, not a person. You get business licenses, permits and registrations done for the business you work for, and keep them current. You work inside its Placetta workspace (JSON below). Today is ${daysFromNow(0)}.
 
 How you work:
 - You are an operator, not a chatbot. ${tools ? "When the person asks for something your tools can do, do it now, in as many steps as it takes, then say what you did. Don't describe what you could do, don't ask permission to prepare things, and don't stop after one step when the job needs more." : "Answer directly and concretely."}
@@ -670,7 +670,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         S("connecting", L(`Adding a deadline: ${title}`, `添加截止日期：${title}`));
         apply(w => audit("agent", L("Added deadline", "添加截止日期"), same(title), same(date))(addDeadline({ id, date, title: same(title), agency: str(i.agency) ? same(str(i.agency, 120)) : app?.agency, kind, app: app?.id })(w)));
         mark();
-        return { deadline_id: id, ...(date < inDays(0) ? { note: "That date has already passed." } : {}) };
+        return { deadline_id: id, ...(date < daysFromNow(0) ? { note: "That date has already passed." } : {}) };
       },
     },
     {
@@ -759,7 +759,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           locations: w.locations.some(l => l.name.en.toLowerCase() === city.toLowerCase()) ? w.locations : [...w.locations, { id: slug(city), name: same(city), county, state: "active" }],
         }));
         mark();
-        return { store_id: id, address, county: county.en, nyc_rules: nyc, ...(planned && planned < inDays(0) && i.stage !== "open" ? { note: "That opening date has passed. Ask whether it's open already or the date moved." } : {}), next: "Map its permits: find_official_forms for this place, then prepare_application with this store_id for each city and county one." };
+        return { store_id: id, address, county: county.en, nyc_rules: nyc, ...(planned && planned < daysFromNow(0) && i.stage !== "open" ? { note: "That opening date has passed. Ask whether it's open already or the date moved." } : {}), next: "Map its permits: find_official_forms for this place, then prepare_application with this store_id for each city and county one." };
       },
     },
     {
@@ -921,7 +921,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       description: "Get where everything stands: each application's store, status, who it's waiting on (you, Placetta's team or the agency), confirmation numbers, days since the last update, missing documents and empty fields, approvals waiting, overdue items and deadlines in the next 30 days. Pass store_id (or a city) for one store. Call it first for any question about progress, status or what's next.",
       inputSchema: { type: "object", properties: { store_id: { type: "string", description: "Only this store, by id, name or city" } } },
       execute(i) {
-        const all = get(), today = inDays(0), stores = all.stores ?? [];
+        const all = get(), today = daysFromNow(0), stores = all.stores ?? [];
         const q = str(i?.store_id).toLowerCase();
         const hits = q ? stores.filter(x => x.id.toLowerCase() === q).concat(stores.filter(x => x.id.toLowerCase() !== q && (x.name.en.toLowerCase().includes(q) || x.address.toLowerCase().includes(q)))) : [];
         if (q && hits.length > 1 && hits[0].id.toLowerCase() !== q) throw new Error(`"${str(i?.store_id)}" matches ${hits.length} stores: ${hits.map(x => `"${x.id}" (${x.name.en}, ${x.address})`).join(", ")}. Pass one store_id, or leave it out for all.`);
@@ -955,7 +955,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           applications: apps,
           approvals_waiting: w.approvals.map(a => ({ id: a.id, kind: a.kind, title: a.title[lang] })),
           overdue: w.deadlines.filter(d => d.date < today && (d.kind === "due" || d.kind === "renewal")).map(d => ({ id: d.id, date: d.date, title: d.title[lang], kind: d.kind })),
-          next_30_days: [...w.deadlines].filter(d => d.date >= today && d.date <= inDays(30)).sort((p, q) => p.date.localeCompare(q.date)).map(d => ({ id: d.id, date: d.date, title: d.title[lang], kind: d.kind })),
+          next_30_days: [...w.deadlines].filter(d => d.date >= today && d.date <= daysFromNow(30)).sort((p, q) => p.date.localeCompare(q.date)).map(d => ({ id: d.id, date: d.date, title: d.title[lang], kind: d.kind })),
           mailbox_connected: hasAny(MAIL),
         };
       },
@@ -1018,7 +1018,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           }
           rows.push([d.name, o]);
         }
-        const today = inDays(0);
+        const today = daysFromNow(0);
         const dated = (v?: string) => (/^\d{4}-\d{2}-\d{2}$/.test(str(v)) ? str(v) : "");
         for (const [name, o] of rows) {
           const exp = dated(o?.expires); if (!exp || !o) continue;

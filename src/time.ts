@@ -9,6 +9,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 /** A local calendar date n days from today, as YYYY-MM-DD. */
 export const inDays = (n: number) => { const d = new Date(startOfDay(new Date(T0)).getTime() + n * DAY + DAY / 2); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+/** A local calendar date n days from right now (not from when the page or server instance started), as YYYY-MM-DD.
+ *  For real dates: deadlines, "today", windows. inDays stays anchored for the sample workspace. */
+export const daysFromNow = (n: number) => { const d = new Date(startOfDay(new Date()).getTime() + n * DAY + DAY / 2); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
 /** A timestamp a number of minutes ago, as an ISO string. */
 export const ago = (min: number) => new Date(T0 - min * 60_000).toISOString();
 export const nowIso = () => new Date().toISOString();

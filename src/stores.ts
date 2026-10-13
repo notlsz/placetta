@@ -1,5 +1,5 @@
 import { B, type Bi, type Store, type Workspace, type LogKind } from "./model";
-import { daysUntil, inDays } from "./time";
+import { daysFromNow, daysUntil } from "./time";
 
 /* Inspection readiness, every day: a score per store from what an inspector would look at, and the three
    numbers that show the value: opened on time, stayed open, no fines. */
@@ -41,7 +41,7 @@ export function readiness(s: Store, w: Workspace): Readiness {
   const soon = permits.filter(p => { const d = daysUntil(p.expires); return d >= 0 && d <= 45; }).length;
   parts.push({ key: "permits", label: B("Permits", "许可证"), got: 35 * pOk, max: 35, note: soon ? B(`${soon} renewing soon`, `${soon} 项即将续期`) : B("All current", "全部有效") });
 
-  const week = Array.from({ length: 7 }, (_, i) => inDays(-7 + i));
+  const week = Array.from({ length: 7 }, (_, i) => daysFromNow(-7 + i));
   const expected = week.length * 3;
   const done = s.logs.filter(l => week.includes(l.date) && l.done).length;
   parts.push({ key: "logs", label: B("Daily logs, last 7 days", "近 7 天每日记录"), got: (25 * done) / expected, max: 25, note: B(`${done} of ${expected} done`, `完成 ${done}/${expected}`) });
@@ -91,4 +91,4 @@ export function valueOf(s: Store): { onTime: Bi; open: Bi; fines: Bi; good: [boo
   return { onTime, open, fines, good: [onTimeGood, openGood, s.value.fines === 0] };
 }
 
-export const todayLogs = (s: Store) => LOG_KINDS.map(k => ({ ...k, log: s.logs.find(l => l.date === inDays(0) && l.kind === k.kind) }));
+export const todayLogs = (s: Store) => LOG_KINDS.map(k => ({ ...k, log: s.logs.find(l => l.date === daysFromNow(0) && l.kind === k.kind) }));

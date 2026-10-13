@@ -5,6 +5,7 @@
 //   node scripts/leads.mjs                 last 7 days, all of NYC
 //   node scripts/leads.mjs --days 3        last 3 days
 //   node scripts/leads.mjs --cuisine Chinese,Japanese,Korean,Coffee/Tea
+//   node scripts/leads.mjs --all            every cuisine (the default is Asian cuisines, Placetta's core customers)
 //
 // Writes leads/<date>.csv: one row per store, worst reason first, with the phone number and the line to open with.
 // Source: https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j
@@ -13,7 +14,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const DAYS = +arg("--days", 7);
-const CUISINES = (arg("--cuisine", "") || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+// Asian cuisines by default: the Health Department's own labels, matched as substrings ("Asian/Asian Fusion", "Chinese/Japanese"...).
+const ASIAN = ["chinese", "japanese", "korean", "thai", "vietnamese", "southeast asian", "asian", "filipino", "indonesian", "taiwanese", "malaysian", "hawaiian"];
+const CUISINES = process.argv.includes("--all") ? [] : (arg("--cuisine", "") ? arg("--cuisine", "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean) : ASIAN);
 const API = "https://data.cityofnewyork.us/resource/43nn-pn8j.json";
 
 export async function fetchRows(days = DAYS) {

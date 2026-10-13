@@ -89,6 +89,7 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `OAUTH_STATE_SECRET` | Any long random string. |
 | `AGENT_DAILY_CALLS`, `TTS_DAILY_CHARS` | Optional caps per workspace a day. Defaults 400 and 20,000. |
 | `AGENT_MODEL`, `AGENT_MODEL_DEEP` | Optional. Defaults `claude-sonnet-5-5` and `claude-opus-5-5`. |
+| `AGENT_MODEL_PHONE` | Optional. The model for texts and calls; defaults to `AGENT_MODEL`. Set a faster one (e.g. `claude-haiku-4-5-20251001`) if text replies feel slow. |
 | `TELNYX_API_KEY`, `TELNYX_PUBLIC_KEY` | Telnyx API key, and the public key that signs its webhooks. Already used for fax; also texting and calling Odelia. |
 | `ODELIA_NUMBER` | Odelia's number in Telnyx, E.164 (`+14155550134`). |
 | `TELNYX_MESSAGING_PROFILE_ID` | The messaging profile the number is on. Without it (and the three above), Settings says texting isn't set up yet. |

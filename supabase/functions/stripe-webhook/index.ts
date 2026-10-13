@@ -56,10 +56,16 @@ Deno.serve(async (req) => {
           await log(ws, { en: "Paid", zh: "已付款" }, "entry");
         }
         if (o.mode === "subscription" && o.metadata?.plan === "locations") {
-          // The stores at checkout paid their opening fee in it; later stores are charged by billing's sync_locations.
-          const { data: w } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
-          const stores = (w?.state as { stores?: { id?: unknown }[] } | null)?.stores;
-          patch.charged_store_ids = Array.isArray(stores) ? stores.map((x) => x?.id).filter((x): x is string => typeof x === "string") : [];
+          // The stores this checkout billed for are counted; later stores are charged by billing's sync_locations.
+          // (Older checkouts without the list fall back to the stores in the workspace now.)
+          const { data: bc } = await admin.from("billing").select("checkout_store_ids").eq("workspace_id", ws).maybeSingle();
+          const listed = bc?.checkout_store_ids as string[] | null | undefined;
+          if (Array.isArray(listed)) patch.charged_store_ids = listed;
+          else {
+            const { data: w } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
+            const stores = (w?.state as { stores?: { id?: unknown }[] } | null)?.stores;
+            patch.charged_store_ids = Array.isArray(stores) ? stores.map((x) => x?.id).filter((x): x is string => typeof x === "string") : [];
+          }
           // The entry plans were credited in this checkout, so they are never credited again.
           if (Number(o.metadata?.entry_credit) > 0) patch.entry_credited_at = new Date().toISOString();
         }
