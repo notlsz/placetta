@@ -73,7 +73,7 @@ export const FORMS: OfficialForm[] = [
       F("l5b", "5b", "City, state, and ZIP code", "城市、州与邮编"),
       F("l6", "6", "County and state where principal business is located", "主要营业地所在县和州"),
       F("l7a", "7a", "Name of responsible party", "负责人姓名"),
-      F("l7b", "7b", "SSN, ITIN, or EIN of responsible party", "负责人 SSN、ITIN 或 EIN", undefined, B("Placetta never stores an SSN or ITIN. Write \"Foreign\" if there is none, or the signer fills it in by hand.", "快哉从不保存 SSN 或 ITIN。没有时填写 \"Foreign\"，或由签署人手写。")),
+      F("l7b", "7b", "SSN, ITIN, or EIN of responsible party", "负责人 SSN、ITIN 或 EIN", undefined, B("Placetta never stores an SSN or ITIN. Write \"Foreign\" if there is none, or \"By hand\" and the signer writes it on the signed copy.", "快哉从不保存 SSN 或 ITIN。没有时填写 \"Foreign\"；或填写 \"手写\"，由签署人在签字件上手写。")),
       F("l8a", "8a", "Is this application for a limited liability company (LLC)?", "是否为有限责任公司（LLC）申请？", ["Yes", "No"]),
       F("l8b", "8b", "If 8a is \"Yes\", the number of LLC members", "若 8a 为\"是\"，LLC 成员人数"),
       F("l8c", "8c", "If 8a is \"Yes\", was the LLC organized in the United States?", "若 8a 为\"是\"，LLC 是否在美国成立？", ["Yes", "No"]),

@@ -63,8 +63,11 @@ const PDFS: Record<string, () => Promise<string>> = {
 };
 const FILL = { ss4, cbp5106 };
 
+/** "By hand": the line is answered, and the signer writes it on the printed copy (an SSN, an ITIN, a passport number).
+ *  It counts as filled, and nothing is printed in that box. */
+export const BY_HAND = /^(by hand|written by hand|(the )?signer (writes|fills)( it)?( in)? by hand|手写|由签署人手写|签署人手写)\.?$/i;
 /** The values by form field id: the application's fields carry the form's field ids. */
-export const valuesOf = (fields: Field[]) => Object.fromEntries(fields.filter(f => f.value).map(f => [f.id, f.value]));
+export const valuesOf = (fields: Field[]) => Object.fromEntries(fields.filter(f => f.value && !BY_HAND.test(f.value.trim())).map(f => [f.id, f.value]));
 
 /** The agency's own PDF with the answers written in. Returns null when Placetta can't fill this form itself. */
 export async function fillOfficial(formId: string, fields: Field[]): Promise<Blob | null> {

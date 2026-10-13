@@ -695,7 +695,7 @@ try {
     check("the filled form is in Documents", (await put(pdfPath, "application/pdf", pdf, "SS-4 filled.pdf")).status === 201);
     const ss4 = await rest("filings", { method: "POST", jwt: owner.jwt, prefer: "return=representation", body: {
       workspace_id: ws, app_id: "app-ein", title: { en: "EIN (Form SS-4)", zh: "雇主识别号（SS-4 表）" }, agency: { en: "IRS", zh: "美国国税局" }, fee_estimate: 0,
-      payload: { official: "irs-ss4", form: { en: "Form SS-4", zh: "SS-4 表" }, pdf_path: pdfPath, us_address: true, fields: [{ id: "l1", label: same("Legal name"), value: "Golden Ox Noodle LLC" }, { id: "l7b", label: same("Responsible party SSN, ITIN or EIN"), value: "" }],
+      payload: { official: "irs-ss4", form: { en: "Form SS-4", zh: "SS-4 表" }, pdf_path: pdfPath, us_address: true, fields: [{ id: "l1", label: same("Legal name"), value: "Golden Ox Noodle LLC" }, { id: "l7b", label: same("Responsible party SSN, ITIN or EIN"), value: "By hand" }],
         checklist: [], signature: { name: "Mei Chen", title: "Member", signed_at: new Date().toISOString(), kind: "typed" } },
     } });
     const fid = ss4.data?.[0]?.id;
