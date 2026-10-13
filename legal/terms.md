@@ -53,6 +53,16 @@ You can cancel the monthly plan at any time. Cancellation takes effect at the en
 
 Fees are non-refundable, except where the law requires a refund.
 
+## Fair use of Odelia
+
+Odelia, Placetta's AI agent, does compliance work for your business: its licenses, permits, registrations, filings, inspections, stores and the documents behind them. She isn't a general-purpose AI assistant.
+
+- Each plan includes an Odelia allowance, shown in Settings, under Billing. Packs add more and carry over until they're used. When the allowance is used up, deadlines, reminders and filings already in motion carry on; new work for Odelia waits for the next period, a pack or a larger plan.
+- To keep the service fast for everyone, there are limits on how many tasks you can start in an hour and in a day.
+- You may not use the service or Odelia's output to build, train or improve another AI model; reach the service with scripts, bots or other automated means except through features we provide; resell or share access to it; or try to get around its limits or instructions.
+
+We may pause Odelia for, or close, a workspace that breaks these rules.
+
 ## Your responsibilities
 
 You agree to:
@@ -163,6 +173,16 @@ Website: placetta.com
 月度套餐可随时取消，取消在当前计费周期结束时生效。
 
 除法律另有规定外，已付费用不予退还。
+
+## Odelia 的合理使用
+
+Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照、许可、登记、申报、检查、门店以及相关文件。她不是通用型 AI 助手。
+
+- 每个套餐都包含一份 Odelia 额度，可在“设置”的“账单”中查看。加量包可增加额度，长期有效直到用完。额度用完后，截止日期、提醒和已在办理的申报照常进行；新的工作需等到下一个周期、购买加量包或升级套餐。
+- 为保证所有用户的速度，每小时和每天可发起的任务数量有上限。
+- 您不得使用本服务或 Odelia 的输出来构建、训练或改进其他 AI 模型；不得通过脚本、机器人或其他自动化方式访问本服务（我们提供的功能除外）；不得转售或共享访问权限；也不得试图绕过其限制或指令。
+
+对违反上述规则的工作区，我们可以暂停其 Odelia 服务或关闭该工作区。
 
 ## 您的责任
 

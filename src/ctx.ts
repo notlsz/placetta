@@ -33,6 +33,7 @@ export type CloudCtx = {
   openPlans(reason?: "start" | "file"): void;
   checkout(plan: "entry" | "starter" | "growth" | "locations", o?: { markets?: number; extra_locations?: number }): Promise<void>;
   portal(): Promise<void>;
+  buyPack(): Promise<void>;
   connect(kind: IntegrationKind): Promise<void>;
   disconnect(kind: IntegrationKind): Promise<void>;
   saveLogin(l: { id?: string; agency: string; url?: string; username: string; password?: string; note?: string }): Promise<void>;

@@ -329,9 +329,11 @@ export async function startRun(ws: string, o: { prompt: string; history: { role:
   if (ctx?.status === 404) return null;
   let e: ApiError = err("upstream_error", "Couldn't reach Placetta. Try again.");
   try { const j = await ctx?.json(); if (j?.error?.code) e = err(j.error.code, j.error.message); } catch { /* not JSON */ }
-  if (ctx?.status === 402) e = err("payment_required", e.message);
+  if (ctx?.status === 402 && !LIMITS.includes(e.code)) e = err("payment_required", e.message);
   throw e;
 }
+/** Odelia's allowance and rate limits: the server's own words go to the person, with the way to keep going. */
+export const LIMITS = ["over_budget", "trial_used", "entry_ended", "rate_limited", "paused", "task_limit"];
 export async function pollRun(id: string): Promise<RunRow> {
   const { data, error } = await supabase().rpc("poll_agent_run", { p_id: id });
   if (error) throw fromPg(error);
@@ -402,7 +404,7 @@ async function fn<T>(name: string, body: Record<string, unknown>): Promise<T> {
     const ctx = (error as { context?: Response }).context;
     let e: ApiError = err("upstream_error", "Couldn't reach Placetta. Try again.");
     try { const j = await ctx?.json(); if (j?.error?.code) e = err(j.error.code, j.error.message); } catch { /* not JSON */ }
-    if (ctx?.status === 402) e = err("payment_required", e.message);
+    if (ctx?.status === 402 && !LIMITS.includes(e.code)) e = err("payment_required", e.message);
     throw e;
   }
   return data as T;
@@ -460,6 +462,16 @@ export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", 
 export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number } = {}) =>
   fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: location.origin + location.pathname });
 export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { action: "portal", workspace_id: ws, return_url: location.origin + location.pathname });
+/** An Odelia pack: more AI allowance, carried over until it's used. */
+export const buyPack = (ws: string, packs = 1) => fn<{ url: string }>("billing", { action: "pack", workspace_id: ws, packs, return_url: location.origin + location.pathname });
+/** How much of this period's Odelia allowance is used. */
+export type AiStatus = { plan: "trial" | "entry" | "entry_ended" | "monthly" | "comped"; used_pct: number; resets_at: string | null; has_credit: boolean };
+export async function aiStatus(ws: string): Promise<AiStatus | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("ai_status", { ws });
+  if (error) return null;   // an older database without budgets: nothing to show
+  return data as AiStatus;
+}
 
 /** The agent's model call through the server (company key, research tools, plan and usage checks). */
 export const agentCall = (ws: string, request: Record<string, unknown>, o: { deep?: boolean; research?: boolean; location?: { city: string; region?: string } } = {}) =>

@@ -1258,3 +1258,9 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .answer ul.prose-l { list-style: disc; }
 .answer .prose-l li::marker { color: var(--ink2, #6b7280); }
 .ph-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Settings: Odelia's allowance this period */
+.aimeter { display: inline-block; width: 120px; height: 6px; border-radius: 999px; background: color-mix(in oklab, currentColor 12%, transparent); overflow: hidden; vertical-align: middle; }
+.aimeter i { display: block; height: 100%; border-radius: inherit; background: var(--blue, #2563eb); transition: width .3s; }
+.aimeter i.near { background: #d97706; }
+.aimeter i.full { background: #c2410c; }

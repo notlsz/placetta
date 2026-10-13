@@ -101,12 +101,35 @@ async function anthropic(f: Fetch, key: string, payload: Record<string, unknown>
   return { res, text: await res.text() };
 }
 
+/**
+ * Prompt caching: Odelia's instructions and tools (about 6,500 tokens) are the same on every round, and each round
+ * repeats the conversation so far. Marking the end of each as cacheable makes those repeats cost a tenth.
+ */
+export function withCache(payload: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...payload };
+  if (typeof out.system === "string" && out.system) out.system = [{ type: "text", text: out.system, cache_control: { type: "ephemeral" } }];
+  const tools = Array.isArray(out.tools) ? [...(out.tools as Block[])] : [];
+  if (tools.length) { tools[tools.length - 1] = { ...tools[tools.length - 1], cache_control: { type: "ephemeral" } }; out.tools = tools; }
+  const msgs = Array.isArray(out.messages) ? [...(out.messages as Block[])] : [];
+  const last = msgs.length - 1;
+  if (last >= 0 && msgs[last].role === "user") {
+    const c = msgs[last].content;
+    const blocks = typeof c === "string" ? [{ type: "text", text: c }] : Array.isArray(c) ? [...(c as Block[])] : [];
+    if (blocks.length && (blocks[blocks.length - 1].type === "text" || blocks[blocks.length - 1].type === "tool_result")) {
+      blocks[blocks.length - 1] = { ...blocks[blocks.length - 1], cache_control: { type: "ephemeral" } };
+      msgs[last] = { ...msgs[last], content: blocks };
+      out.messages = msgs;
+    }
+  }
+  return out;
+}
+
 /** Anthropic with its research tools, stepping down when the account lacks web fetch or web search. */
 async function viaAnthropic(f: Fetch, key: string, call: Call, model: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null) {
-  const payload: Record<string, unknown> = { ...call.payload, model };
+  const payload: Record<string, unknown> = withCache({ ...call.payload, model });
   let { res, text } = await anthropic(f, key, payload, call.beta);
-  if (research && res.status === 400 && /web_fetch|beta/i.test(text)) { payload.tools = [...research.pageTools, research.search]; ({ res, text } = await anthropic(f, key, payload, null)); }
-  if (research && res.status === 400 && /web_search/i.test(text)) { payload.tools = research.pageTools.length ? research.pageTools : undefined; ({ res, text } = await anthropic(f, key, payload, null)); }
+  if (research && res.status === 400 && /web_fetch|beta/i.test(text)) { payload.tools = withCache({ tools: [...research.pageTools, research.search] }).tools; ({ res, text } = await anthropic(f, key, payload, null)); }
+  if (research && res.status === 400 && /web_search/i.test(text)) { payload.tools = research.pageTools.length ? withCache({ tools: research.pageTools }).tools : undefined; ({ res, text } = await anthropic(f, key, payload, null)); }
   return { res, text };
 }
 

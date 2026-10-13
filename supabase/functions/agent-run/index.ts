@@ -15,6 +15,7 @@
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { callModel } from "../_shared/llm.ts";
+import { gate, record } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 // @ts-types="./agent.d.ts"
@@ -29,7 +30,8 @@ type Run = { id: string; workspace_id: string; created_by: string | null; kind: 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
 const env = (k: string, d = "") => Deno.env.get(k) ?? d;
-const DAILY_CALLS = Number(env("AGENT_DAILY_CALLS", "400"));
+/** One task's ceiling: a task that costs more than this stops and says so, so a loop can't eat a month's budget. */
+const TASK_LIMIT_USD = Number(env("AI_TASK_LIMIT_USD", "1.5"));
 const MODEL = env("AGENT_MODEL", "claude-sonnet-5-5"), MODEL_DEEP = env("AGENT_MODEL_DEEP", "claude-opus-5-5");
 /** The model for texts and calls, where a fast answer matters most. Same as AGENT_MODEL unless set (e.g. a faster model). */
 const MODEL_PHONE = env("AGENT_MODEL_PHONE", "") || MODEL;
@@ -77,13 +79,16 @@ async function handOver(runId: string, token: string | null) {
 
 
 /** One model call: the company key, research on official sites, the daily limit and usage, as in the agent function. */
-async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, phone = false) {
+async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, phone = false, who: { uid: string | null; spent: number } = { uid: null, spent: 0 }) {
   const standard = phone ? MODEL_PHONE : MODEL;
   if (signal.aborted) throw err("cancelled", "Stopped");
   if (!MODEL_KEYS.some((k) => env(k)))
     throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
-  const { data: usage } = await admin.from("agent_usage").select("calls").eq("workspace_id", ws).eq("day", new Date().toISOString().slice(0, 10)).maybeSingle();
-  if ((usage?.calls ?? 0) >= DAILY_CALLS) throw err("rate_limited", "Today's agent limit is reached. It resets at midnight UTC.");
+  if (who.spent >= TASK_LIMIT_USD) throw err("task_limit", "This task grew too large for one go, so I stopped here. Ask for the next part on its own.");
+  // budget, rate limits and the company's ceiling; past 80% of the budget, no deep model
+  const g = await gate(admin, (k) => Deno.env.get(k), ws, who.uid, "call");
+  if (!g.ok) throw err(g.code, g.message);
+  if (g.tier === "reduced") deep = false;
   // Odelia has about 31 tools in a signed-in workspace; a cap of 24 silently dropped email, calendar, drive and QuickBooks.
   const pageTools = (Array.isArray(body.tools) ? (body.tools as Block[]) : []).filter((t) => t && typeof t.name === "string" && !("type" in t)).slice(0, MAX_TOOLS);
   const research = pageTools.length > 0 || deep;
@@ -100,8 +105,8 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
     console.error("models", out.model, out.status, out.text.slice(0, 300));
     throw out.status === 429 || out.status === 529 ? err("rate_limited", "The agent is busy. Try again in a moment.") : err(out.status === 401 || out.status === 503 ? "not_configured" : "upstream_error", "Couldn't reach the agent's model. Try again.");
   }
-  const data = out.data as { content: Block[]; stop_reason: string; usage?: { input_tokens?: number; output_tokens?: number } };
-  await admin.rpc("track_usage", { ws, p_calls: 1, p_in: data.usage?.input_tokens ?? 0, p_out: data.usage?.output_tokens ?? 0, p_tts: 0 });
+  const data = out.data as { content: Block[]; stop_reason: string; usage?: Record<string, never> };
+  who.spent += await record(admin, g.event, out.model, data.usage);
   return data as { content: never[]; stop_reason: string };
 }
 
@@ -199,6 +204,7 @@ export async function work(runId: string, token: string | null) {
 
   try {
     const svc = await servicesFor(ws, run, token);
+    const who = { uid: run.created_by, spent: 0 };
     const state = run.state ?? startState([], run.prompt);
     const location = cur.meta?.city ? { city: cur.meta.city, region: cur.meta.region } : undefined;
     const out = await runRounds({
@@ -208,7 +214,7 @@ export async function work(runId: string, token: string | null) {
       // after each round: save the work and where the conversation is, so a fresh instance can carry on
       round: async (st) => { await commit(); await admin.from("agent_runs").update({ state: st, steps, draft, heartbeat_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running"); },
       draft: (t) => { draft = t; flush(); },
-      send: (body, deep) => model(ws, body, deep, location, ctl.signal, run.channel === "sms" || run.channel === "voice") as never,
+      send: (body, deep) => model(ws, body, deep, location, ctl.signal, run.channel === "sms" || run.channel === "voice", who) as never,
       channel: run.channel === "sms" || run.channel === "voice" ? run.channel : undefined,
     });
     await commit();
@@ -224,7 +230,7 @@ export async function work(runId: string, token: string | null) {
     if (code === "cancelled" || ctl.signal.aborted) await admin.from("agent_runs").update({ steps, draft: null, state: null, updated_at: new Date().toISOString() }).eq("id", runId);
     else {
       console.error("run failed", runId, code, String((e as Error)?.message ?? e).slice(0, 200));
-      const { data: failed } = await admin.from("agent_runs").update({ status: "failed", error: code === "rate_limited" || code === "not_configured" ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running").select("id");
+      const { data: failed } = await admin.from("agent_runs").update({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "trial_used", "entry_ended", "paused", "task_limit"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running").select("id");
       // Someone who asked by text or on a call hears about it the same way.
       if (failed?.length) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
     }
@@ -349,6 +355,8 @@ export async function handle(req: Request): Promise<Response> {
     if (may === "not_member") return fail(403, "forbidden", "This isn't their workspace.");
     if (may === "no_plan") return fail(402, "payment_required", "Get the entry plan to start the agent.");
     if (!env("ANTHROPIC_API_KEY")) return fail(503, "not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
+    const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
+    if (!tg.ok) return fail(tg.status, tg.code, tg.message);
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
     const { data: busy } = await admin.from("agent_runs").select("id").eq("workspace_id", ws).eq("kind", "task").eq("status", "running").gt("heartbeat_at", new Date(Date.now() - STALE_MS).toISOString()).limit(1);
@@ -384,6 +392,8 @@ export async function handle(req: Request): Promise<Response> {
   if (!env("ANTHROPIC_API_KEY")) return fail(503, "not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
   const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
   if (!prompt) return fail(400, "bad_request", "prompt is required.");
+  const tg = await gate(admin, (k) => Deno.env.get(k), ws, user.id, "task");
+  if (!tg.ok) return fail(tg.status, tg.code, tg.message);
   // one task at a time per workspace
   const { data: busy } = await admin.from("agent_runs").select("id").eq("workspace_id", ws).eq("kind", "task").eq("status", "running").gt("heartbeat_at", new Date(Date.now() - STALE_MS).toISOString()).limit(1);
   if (busy?.length) return fail(409, "busy", "Placetta is still working on the last task.");

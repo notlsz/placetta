@@ -59,6 +59,7 @@ export const stripeState = {
     price_location: { id: "price_location", object: "price", unit_amount: 14900, currency: "usd", type: "recurring", recurring: { interval: "month", interval_count: 1 } },
     price_opening: { id: "price_opening", object: "price", unit_amount: 350000, currency: "usd", type: "one_time", recurring: null },
     price_entry: { id: "price_entry", object: "price", unit_amount: 29900, currency: "usd", type: "one_time", recurring: null },
+    price_pack: { id: "price_pack", object: "price", unit_amount: 4900, currency: "usd", type: "one_time", recurring: null },
   } as Record<string, any>,
   coupons: new Map<string, any>(),
   subscriptions: new Map<string, any>(),

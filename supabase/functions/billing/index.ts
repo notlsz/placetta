@@ -3,6 +3,7 @@
 //   STRIPE_PRICE_LOCATION $149 a location a month, billed yearly (the "Per location" plan; quantity = stores, open or opening)
 //   STRIPE_PRICE_OPENING  one time $3,500 per store still opening (at checkout, then on the next invoice as stores are added)
 //   STRIPE_PRICE_STARTER / _GROWTH / _EXTRA_LOCATION  older plans, kept only for anyone already on them
+//   STRIPE_PRICE_PACK     one time, an Odelia pack: PACK_CREDIT_USD (default $25) more AI allowance per pack
 // Credits: unspent entry plans come off the first invoice, and each opening fee is credited against that store's first year.
 // Scale is quoted by the team, so it has no checkout. Actions: prices (any member), checkout, portal, sync_locations (owners).
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -198,6 +199,26 @@ Deno.serve(async (req) => {
       }
       if (fresh.length) await admin.from("billing").update({ charged_store_ids: [...charged, ...fresh.map((s) => s.id)] }).eq("workspace_id", ws);
       return json(200, { ok: true, synced: true, stores: all.length, new_openings: openings });
+    }
+
+    // An Odelia pack: more AI allowance on top of the plan, carried over until it's used (like Devin's extra ACUs).
+    // Only for a paid plan: a trial or an ended entry plan moves to a plan instead.
+    if (body.action === "pack") {
+      const price = Deno.env.get("STRIPE_PRICE_PACK");
+      if (!price) return fail(503, "not_configured", "Set STRIPE_PRICE_PACK for Odelia packs.");
+      const { data: budget } = await admin.rpc("ai_budget", { ws });
+      const plan = (budget as { plan?: string } | null)?.plan;
+      if (plan !== "monthly" && plan !== "entry" && plan !== "comped") return fail(409, "plan_required", "Packs add to a plan. Pick a plan first.");
+      const packs = Math.max(1, Math.min(10, Math.floor(Number(body.packs) || 1)));
+      const credit = Math.max(1, Number(Deno.env.get("PACK_CREDIT_USD") ?? "25"));
+      const p: Record<string, string> = {
+        mode: "payment", "line_items[0][price]": price, "line_items[0][quantity]": String(packs),
+        success_url: `${back}?billing=success`, cancel_url: `${back}?billing=cancel`, client_reference_id: ws,
+        "metadata[workspace_id]": ws, "metadata[kind]": "pack", "metadata[packs]": String(packs), "metadata[credit_usd]": String(credit * packs),
+      };
+      if (customer) p.customer = customer; else if (user.email) p.customer_email = user.email;
+      const s = await stripe("checkout/sessions", p);
+      return json(200, { ok: true, url: s.url });
     }
 
     if (body.action === "checkout") {

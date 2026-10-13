@@ -22,7 +22,7 @@ import { Stores } from "./Stores";
 import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
 import { daysUntil, inDays, nowIso } from "./time";
-import { I } from "./ui";
+import { I, Modal } from "./ui";
 import * as api from "./cloud/api";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
@@ -119,6 +119,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [modal, setModal] = useState<string | null>(null);
   const [legal, setLegal] = useState<string | null>(null);
   const [plans, setPlans] = useState<null | "start" | "file">(null);
+  const [limitHit, setLimitHit] = useState(false);
   const [wsMenu, setWsMenu] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastT = useRef(0);
@@ -342,6 +343,21 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     } catch (err) {
       const code = (err as { code?: string })?.code ?? ((err as Error)?.name === "AbortError" ? "cancelled" : "upstream_error");
       if (code === "cancelled") upd(m2 => ({ reply: { text: [B("Stopped.", "已停止。")] }, active: -1, steps: m2.steps }));
+      else if (api.LIMITS.includes(code)) {
+        // the allowance or a rate limit: say exactly why, and open the way to keep going
+        const zh: Record<string, string> = {
+          over_budget: "本期的 Odelia 额度已用完。购买加量包或升级方案即可继续；截止日期、提醒和已在办理的申报不受影响。",
+          trial_used: "Odelia 的免费体验额度已用完。选择方案即可继续。",
+          entry_ended: "开店计划附带的 30 天 Odelia 服务已结束。升级为年度方案即可继续，开店计划费用可全额抵扣。",
+          rate_limited: "一次请求太多了，请稍后再试。",
+          paused: "Odelia 暂时暂停，请稍后再试。",
+          task_limit: "这个任务太大，我先停在这里。请把下一部分单独交给我。",
+        };
+        const msg = (err as { message?: string }).message ?? "";
+        upd(() => ({ reply: { text: [B(msg, zh[code] ?? msg)] }, active: -1 }));
+        if (cloud && (code === "trial_used" || code === "entry_ended")) setPlans("start");
+        else if (cloud && code === "over_budget") setLimitHit(true);
+      }
       else if (code === "payment_required") { upd(() => ({ reply: { text: [B("Start with the entry plan and I'll map every license this business needs.", "先开通开店计划，我就为您梳理所需的全部许可。")] }, active: -1 })); setPlans("start"); }
       else if (!cloud && m && PERMANENT.includes(code)) {
         // This view can't use Claude after all: say so once and answer from the demo script.
@@ -538,6 +554,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
       checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
       portal: async () => { if (!ownerOk()) return; try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
+      buyPack: async () => { if (!ownerOk()) return; try { goTo((await api.buyPack(cloud.wsId)).url); } catch (e) { if ((e as api.ApiError).code === "plan_required") setPlans("start"); else fail(e); } },
       connect: async kind => { if (!ownerOk()) return; try { goTo((await api.connectUrl(cloud.wsId, kind)).url); } catch (e) { if ((e as api.ApiError).code === "not_configured") say(lang === "zh" ? "这个连接即将开放。在此之前，可把机构来信转发到 support@placetta.com，团队会帮您添加。" : "This connection opens soon. Until then, forward agency emails to support@placetta.com and the team adds them for you."); else fail(e); } },
       disconnect: async kind => { if (!ownerOk()) return; try { await api.integration(cloud.wsId, "disconnect", { kind }); setIntegrations(await api.listIntegrations(cloud.wsId)); } catch (e) { fail(e); } },
       saveLogin: async l => { if (!ownerOk()) return; try { await api.saveLogin(cloud.wsId, l); setLogins(await api.listLogins(cloud.wsId)); say(lang === "zh" ? "登录信息已加密保存。" : "Saved and encrypted."); } catch (e) { fail(e); } },
@@ -709,6 +726,18 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         {modal && <ApproveModal id={modal} onClose={() => setModal(null)} />}
         {legal && <LegalReader id={legal} onClose={() => setLegal(null)} />}
         {plans && cloudCtx && <Plans reason={plans} onClose={() => setPlans(null)} />}
+        {limitHit && cloudCtx && (
+          <Modal label={lang === "zh" ? "Odelia 额度" : "Odelia allowance"} onClose={() => setLimitHit(false)}>
+            <header className="m-h"><h2>{lang === "zh" ? "本期的 Odelia 额度已用完" : "This period's Odelia allowance is used"}</h2>
+              <p>{lang === "zh" ? "每个方案都包含一份 Odelia 额度。截止日期、提醒和已在办理的申报照常进行。要让 Odelia 继续处理新的工作，可以购买加量包（额度长期有效），或为更多门店升级方案。" : "Every plan includes an Odelia allowance. Deadlines, reminders and filings already in motion carry on. To keep Odelia taking new work, add a pack (it carries over until it's used) or move up a plan for more locations."}</p></header>
+            <footer className="m-f"><div className="m-btns">
+              {cloudCtx.owner ? <>
+                <button type="button" className="pill quiet" onClick={() => { setLimitHit(false); setPlans("start"); }}>{lang === "zh" ? "查看方案" : "See plans"}</button>
+                <button type="button" className="pill ink" onClick={() => { setLimitHit(false); void cloudCtx.buyPack(); }}>{lang === "zh" ? "购买加量包" : "Add a pack"}</button>
+              </> : <p className="note">{lang === "zh" ? "请工作区所有者购买加量包或升级方案。" : "Ask a workspace owner to add a pack or move up a plan."}</p>}
+            </div></footer>
+          </Modal>
+        )}
         {toast && <div className="toast" role="status">{toast}</div>}
       </div>
     </AppCtx.Provider>
