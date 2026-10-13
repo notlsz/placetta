@@ -1,0 +1,59 @@
+{
+  "ca-cdtfa": {
+    "instructions": "https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm",
+    "submit_page": "https://cdtfa.ca.gov/services/registration.htm",
+    "titles_seen": [
+      "Online Services — Registration - CDTFA - CA.gov",
+      "Applying for a Seller's Permit - Publication 107, Do You Need a California Seller's Permit?",
+      "Obtaining a Seller's Permit - CDTFA - CA.gov"
+    ],
+    "note": "No blank PDF form surfaced; registration is online. Also seen: https://cdtfa.ca.gov/taxes-and-fees/faqseller.htm"
+  },
+  "ca-llc-5": {
+    "form_pdf": "https://bizfileonline.sos.ca.gov/api/report/GetImageByNum/033125203119110062203205011098124115240083031111",
+    "instructions": "https://www.sos.ca.gov/business-programs/business-entities/forms",
+    "submit_page": "https://www.sos.ca.gov/business-programs/business-entities/forms",
+    "titles_seen": [
+      "Secretary of State LLC-5 Application to Register a Foreign Limited",
+      "Secretary of State LLC-5 This Space For Office Use Only",
+      "Forms, Samples and Fees :: California Secretary of State",
+      "Frequently Asked Questions :: California Secretary of State"
+    ],
+    "note": "Two different bizfileonline GetImageByNum links titled LLC-5 appeared (the other ends ...036 and ...111 variants; one is 157109229253089063199136020032028140036175066093). These are opaque image IDs and may be older revisions, so the forms page is the safer pointer. Also seen: https://www.sos.ca.gov/business-programs/business-entities/faqs"
+  },
+  "ca-edd-de1": {
+    "form_pdf": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf",
+    "instructions": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1i.pdf",
+    "submit_page": "https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/",
+    "titles_seen": [
+      "Fast and Secure Online Registration - EDD - CA.gov",
+      "INSTRUCTIONS FOR COMPLETING THE COMMERCIAL EMPLOYER",
+      "Step 3: Register for a Payroll Tax Account - EDD - CA.gov",
+      "Enroll in e-Services for Business as an Employer - EDD - CA.gov"
+    ],
+    "note": "Existing library URLs confirmed by search. Online registration page: https://edd.ca.gov/en/payroll_taxes/save_time_and_register_online/"
+  },
+  "ca-ftb-3522": {
+    "form_pdf": "https://www.ftb.ca.gov/forms/2026/2026-3522.pdf",
+    "instructions": "https://www.ftb.ca.gov/file/business/types/limited-liability-company/index.html",
+    "submit_page": "https://www.ftb.ca.gov/file/business/types/limited-liability-company/index.html",
+    "titles_seen": [
+      "2026 Instructions for Form FTB 3522 LLC Tax Voucher General Information",
+      "Limited liability company - Franchise Tax Board - CA.gov",
+      "2025 Instructions for Form FTB 3522 LLC Tax Voucher. General Information"
+    ],
+    "note": "Existing library URLs confirmed. 2026 version is the one in the library; 2025 version at https://www.ftb.ca.gov/forms/2025/2025-3522.pdf. Did not search for the /pay/ page separately."
+  },
+  "ca-llc-1": {
+    "form_pdf": "https://bpd.cdn.sos.ca.gov/llc/forms/llcconv.pdf",
+    "instructions": "https://www.sos.ca.gov/business-programs/business-entities/forms",
+    "submit_page": "https://www.sos.ca.gov/business-programs/business-entities/starting-business/types",
+    "titles_seen": [
+      "Forms, Samples and Fees :: California Secretary of State",
+      "Starting a Business",
+      "Limited Liability Company - Articles of Organization",
+      "LLC Formation (llcbizfile.sos.ca.gov/registration)"
+    ],
+    "note": "The llcconv.pdf titled 'Limited Liability Company - Articles of Organization' looks like the conversion form (name 'llcconv'), not LLC-1 itself; verify before using as form_pdf. No clear LLC-1 PDF turned up. Online formation also seen at https://llcbizfile.sos.ca.gov/registration"
+  }
+}

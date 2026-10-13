@@ -1,0 +1,35 @@
+{
+  "tx-ap201": {
+    "instructions": "https://comptroller.texas.gov/help/sales-tax-registration/requirements.php/",
+    "submit_page": "https://comptroller.texas.gov/taxes/permit/",
+    "titles_seen": ["Texas Online Tax Registration Application", "Sales Tax Permit Requirements - Texas Comptroller", "Texas Sales and Use Tax Forms", "Texas Sales and Use Tax Frequently Asked Questions"],
+    "note": "No blank AP-201 PDF appeared in results. The Comptroller page is titled 'Texas Online Tax Registration Application' (online application). Forms list at https://comptroller.texas.gov/taxes/sales/forms/ was seen but not confirmed to hold AP-201."
+  },
+  "tx-304": {
+    "form_pdf": "https://www.sos.texas.gov/corp/forms/304_boc.pdf",
+    "instructions": "https://www.sos.state.tx.us/corp/instructions/304.shtml",
+    "submit_page": "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml",
+    "titles_seen": ["304 boc", "Form 304 — Instructions for Application for Registration of a Foreign Limited Liability Company", "Filing & Other General FAQs", "SOSDirect - An Online Business Service from the Office of the Secretary of State", "Contact the Corporations Section"],
+    "note": "Alternate submit page: https://www.sos.state.tx.us/corp/sosda/index.shtml (SOSDirect online). Both sos.state.tx.us and sos.texas.gov hosts appear in results; sos.texas.gov looks like the current host."
+  },
+  "tx-503": {
+    "form_pdf": "https://www.sos.texas.gov/corp/forms/503_boc.pdf",
+    "instructions": "https://www.sos.texas.gov/corp/instructions/503.shtml",
+    "submit_page": "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml",
+    "titles_seen": ["503 boc", "Form 503 — Instructions for Assumed Name Certificate", "503 boc instructions", "INSTRUCTIONS FOR FILING AN ASSUMED NAME CERTIFICATE", "Filing & Other General FAQs"],
+    "note": "Also seen: https://www.sos.state.tx.us/corp/forms/instructions/503-boc-instructions.pdf and https://direct.sos.state.tx.us/help/help-corp-filing-503.html (SOSDirect online filing help). Form 503 is for filings with the SOS; assumed names for sole proprietors/partnerships may instead go to county clerk (not verified in results)."
+  },
+  "tx-twc": {
+    "instructions": "https://www.twc.texas.gov/ui/tax/uitaxreg.html",
+    "submit_page": "https://www.twc.texas.gov/services/register-tax",
+    "titles_seen": ["register tax", "www.twc.texas.gov (uitaxreg.html)", "www.twc.texas.gov (uitataxserv/filing)"],
+    "note": "Result titles for TWC pages were generic; page content not confirmed. Also seen: https://www.twc.texas.gov/uitataxserv/filing"
+  },
+  "tx-205": {
+    "form_pdf": "https://www.sos.state.tx.us/corp/forms/205_boc.pdf",
+    "instructions": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+    "submit_page": "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml",
+    "titles_seen": ["205 boc", "Form 205 — Instructions for Certificate of Formation—Limited Liability Company", "Form 205—General Information (205_boc.doc)", "SOSDirect - An Online Business Service from the Office of the Secretary of State"],
+    "note": "Also available as Word doc: https://www.sos.state.tx.us/corp/forms/205_boc.doc. SOSDirect page: https://www.sos.state.tx.us/corp/sosda/index.shtml"
+  }
+}

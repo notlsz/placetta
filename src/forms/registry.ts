@@ -2,6 +2,7 @@ import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import { WORLD_FORMS, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
+import { LINES } from "./lines";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -43,7 +44,8 @@ export type OfficialForm = {
   fill?: "ss4" | "cbp5106";   // Placetta fills the official PDF itself
   esign?: boolean;            // the agency accepts a drawn signature on this form (from its own page)
   sign?: SignSpot;            // where a signature and its date go on the official PDF (PDF points, page from 0)
-  checked: "form" | "page" | "known";   // known: from Placetta's library of official sites; re-read before filing
+  checked: "form" | "page" | "known";
+  lines?: { status: "mapped" | "page_only"; read: string; seen: string; sources: string[]; submit: { email?: string; fax?: string; portal?: string; signature: string; source: string } };   // the line-by-line research   // known: from Placetta's library of official sites; re-read before filing
   order: number;              // where it falls in an opening: lower first
 };
 
@@ -359,7 +361,7 @@ export const FORMS: OfficialForm[] = [
     id: "la-ladbs", form: "Application for Building Permit and Certificate of Occupancy", title: B("Building permit and Certificate of Occupancy", "建筑许可证与占用证"),
     agency: B("Los Angeles Department of Building and Safety", "洛杉矶建筑与安全局（LADBS）"), level: "city", where: "LA", segments: ["restaurant", "retail", "warehouse"], needs: { buildout: true }, method: "portal", order: 52,
     how: B("Tenant improvements and changes of use go through plan check; a new use gets a new Certificate of Occupancy.", "租户装修和用途变更需图纸审查；新用途需取得新的占用证。"),
-    url: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", pdf: "https://www.ladbs.org/docs/default-source/forms/plan-check-2023/application-for-building-permit-or-grading-and-certificate-of-occupancy-pc-str-app01.pdf", info: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", takes: B("Plans are returned within weeks, depending on workload.", "图纸视工作量在数周内返还。"), takesSource: "https://dbs.lacity.gov/services/plan-review-permitting/plan-check-permit/regular-plan-check (2026-10-09)", fee: null, checked: "page", fields: [],
+    url: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", info: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", takes: B("Plans are returned within weeks, depending on workload.", "图纸视工作量在数周内返还。"), takesSource: "https://dbs.lacity.gov/services/plan-review-permitting/plan-check-permit/regular-plan-check (2026-10-09)", fee: null, checked: "page", fields: [],
   },
   {
     id: "la-lafd-ops", form: "LAFD operational fire permits", title: B("Fire permits for high-piled storage and hazardous materials", "高堆货物与危险品消防许可证"),
@@ -431,8 +433,8 @@ export const FORMS: OfficialForm[] = [
   /* -------------------------------- Houston -------------------------------- */
   {
     id: "hou-co", form: "Certificate of Occupancy (HPW Code 1106)", title: B("Certificate of Occupancy", "占用证"),
-    agency: B("City of Houston, Houston Permitting Center", "休斯顿市许可中心"), level: "city", where: "HOU", segments: ["restaurant", "retail", "warehouse"], method: "portal", order: 54,
-    how: B("Needed for a new tenant use or change of use inside city limits.", "市内新租户用途或用途变更时需要。"),
+    agency: B("City of Houston, Houston Permitting Center", "休斯顿市许可中心"), level: "city", where: "HOU", segments: ["restaurant", "retail", "warehouse"], method: "pdf_mail", order: 54,
+    how: B("Form CE-1045-A, emailed to Occupancy Inspections (Occupancy.Inspections@houstontx.gov); iPermits is only for paying afterwards. Needed for a new tenant use or change of use inside city limits.", "填写 CE-1045-A 表，电邮至占用检查科（Occupancy.Inspections@houstontx.gov）；iPermits 仅用于事后缴费。市内新租户用途或用途变更时需要。"),
     url: "https://www.houstonpermittingcenter.org/hpwcode1106", info: "https://www.houstonpermittingcenter.org/hpwcode1106", fee: null, checked: "page", fields: [],
   },
   {
@@ -449,8 +451,8 @@ export const FORMS: OfficialForm[] = [
   },
   {
     id: "hou-food-dealer", form: "Food Dealer permit (HHD1003)", title: B("Food dealer permit", "食品经营许可证"),
-    agency: B("Houston Health Department", "休斯顿卫生局"), level: "city", where: "HOU", segments: ["restaurant"], method: "portal", order: 76,
-    how: B("The operating permit, issued after plan review and inspection.", "经营许可证，图纸审查和检查合格后发放。"),
+    agency: B("Houston Health Department", "休斯顿卫生局"), level: "city", where: "HOU", segments: ["restaurant"], method: "pdf_mail", order: 76,
+    how: B("The operating permit, issued after plan review and inspection. The application is emailed to Food-COO@houstontx.gov.", "经营许可证，图纸审查和检查合格后发放。申请表电邮至 Food-COO@houstontx.gov。"),
     url: "https://www.houstonpermittingcenter.org/hhd1003", info: "https://www.houstonpermittingcenter.org/hhd1003", takes: B("Up to 15 business days.", "最多 15 个工作日。"), takesSource: "https://www.houstonpermittingcenter.org/hhd1003 (2026-10-09)", fee: null, renews: B("Every year.", "每年。"), checked: "page", fields: [],
   },
   {
@@ -462,6 +464,17 @@ export const FORMS: OfficialForm[] = [
 ];
 
 FORMS.push(...WORLD_FORMS, ...LOCAL_US);
+// The line-by-line research (src/forms/lines.ts): each form's questions as the agency prints them, the attachments it
+// lists, and how it is submitted. It replaces a shorter list of lines, never a longer one.
+for (const f of FORMS) {
+  const l = LINES[f.id];
+  if (!l) continue;
+  if (l.fields.length >= f.fields.length) f.fields = l.fields;
+  const have = new Set((f.attach ?? []).map(a => a.en.toLowerCase()));
+  f.attach = [...(f.attach ?? []), ...l.attach.filter(a => !have.has(a.en.toLowerCase()))];
+  if (l.status === "mapped") f.checked = "form";
+  f.lines = { status: l.status, read: l.read, seen: l.seen, sources: l.sources, submit: { email: l.submit.email, fax: l.submit.fax, portal: l.submit.portal, signature: l.submit.signature, source: l.submit.source } };
+}
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 

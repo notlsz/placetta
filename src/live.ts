@@ -369,7 +369,9 @@ const applyExtract = (appId: string, itemId: string | undefined, docId: string, 
 function officialFields(off: OfficialForm, given: Field[]): Field[] {
   return off.fields.map(o => {
     const g = given.find(x => { const k = x.label.en.toLowerCase().replace(/^line\s+/, ""); return k === o.label.en.toLowerCase() || x.label.en === o.label.zh || k === o.id || k === o.line.toLowerCase() || k === o.line.toLowerCase() + ": " + o.label.en.toLowerCase(); });
-    return { id: o.id, label: B(`${/^\d/.test(o.line) ? "Line " : ""}${o.line}: ${o.label.en}`, `${/^\d/.test(o.line) ? "第 " + o.line + " 行" : o.line}：${o.label.zh}`), value: g?.value ?? "", from: g?.from };
+    // a line with no number of its own (an online form's question) is just its question
+    const label = o.line ? B(`${/^\d/.test(o.line) ? "Line " : ""}${o.line}: ${o.label.en}`, `${/^\d/.test(o.line) ? "第 " + o.line + " 行" : o.line}：${o.label.zh}`) : o.label;
+    return { id: o.id, label, value: g?.value ?? "", from: g?.from };
   });
 }
 
@@ -418,7 +420,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
   const nm = (a: Application) => { const n = a.name[lang]; const titled = n.split(/\s+/).filter(w => /^[A-Z]/.test(w)).length > 1; return lang === "en" && /^[A-Z][a-z]/.test(n) && !titled ? n.charAt(0).toLowerCase() + n.slice(1) : n; };
   const mark = () => { made.lastToolAt = textLen(); };
   const fieldList = (v: unknown, fromDefault: string): Field[] => arr(v).map((f, i) => {
-    const o = f as Record<string, unknown>; const label = str(o.label, 80);
+    const o = f as Record<string, unknown>; const label = str(o.label, 160);   // official lines can be long; a cut label would never match its line
     return { id: slug(label) || "f" + i, label: same(label), value: str(o.value, 200), from: str(o.source, 80) ? same(str(o.source, 80)) : same(fromDefault) };
   }).filter(f => f.label.en);
   const S = (state: OrbState, label: Bi, tool?: string) => step({ state, label, tool });

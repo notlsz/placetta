@@ -1,6 +1,8 @@
 /* The checks that make an approval a decision (preflight), where each opening store's permits put its opening date
    (openingPath) and the next asks from the workspace (suggestions). Run: npm run test:smart */
 import { normalizeState } from "../src/core";
+import { FORMS } from "../src/forms/registry";
+import { LINES } from "../src/forms/lines";
 import { B, same, type Application, type Approval, type Store, type Workspace } from "../src/model";
 import { basisLine, cityOf, openingLine, openingPath, parseDate, preflight, suggestions } from "../src/smart";
 
@@ -147,6 +149,19 @@ const f = (label: string, value: string) => ({ id: label, label: same(label), va
   const published = openingPath(so, ws({ apps: [official] }), TODAY);
   ok(/about/.test(openingLine(published)!.en) && /agency's published time for 1/.test(basisLine(published)!.en), "published times: said as an estimate, and why", basisLine(published));
   ok(openingPath(so, ws({ apps: [official] }), TODAY, { stats: [{ form: "nyc-fse", n: 2, median_days: 5, p90_days: 6, rejected_pct: 0 }] }).basis.measured === 0, "two filings aren't enough to measure");
+}
+
+/* ---------------- the forms library, line by line ---------------- */
+{
+  const OFFICIAL = /\.gov$|\.gov\.|nyc\.gov|lacity\.gov|lacity\.org|lacounty\.gov|sfgov\.org|sf\.gov|sftreasurer\.org|sanjoseca\.gov|santaclaracounty\.gov|austintexas\.gov|dallascityhall\.com|dallas\.gov|houstontx\.gov|houstonpermittingcenter\.org|houstonhealth\.org|state\.tx\.us|texas\.gov|ny\.gov|ca\.gov|irs\.gov|fincen\.gov|lafd\.org|sfplanning\.org|sfdph\.org/;
+  const entries = Object.entries(LINES);
+  ok(entries.length >= 45, "45+ core forms researched line by line from the agencies", entries.length);
+  const bad = entries.filter(([, l]) => !l.sources.length || l.sources.some(u => !OFFICIAL.test(new URL(u).hostname)));
+  ok(!bad.length, "every source is the agency's own site", bad.map(([id, l]) => [id, l.sources]));
+  const sfSign = FORMS.find(f => f.id === "sf-sign")!, houCo = FORMS.find(f => f.id === "hou-co")!;
+  ok(/PermitSF/.test(sfSign.form) && houCo.method === "pdf_mail" && /Occupancy\.Inspections@houstontx\.gov/.test(houCo.how.en), "the outdated entries the research found are fixed");
+  const mapped = FORMS.filter(f => f.lines?.status === "mapped");
+  ok(mapped.length >= 20 && mapped.every(f => f.checked === "form" && f.fields.length >= 5), "mapped forms carry their lines and count as read from the form", mapped.length);
 }
 
 /* ---------------- suggestions ---------------- */

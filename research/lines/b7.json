@@ -1,0 +1,1363 @@
+{
+  "sf-business-registration": {
+    "status": "mapped",
+    "form_seen": "Business Registration Application, City & County of San Francisco Office of the Treasurer & Tax Collector (4-page PDF, revised 11/28/2022); online New Business Registration Application as described on sftreasurer.org/business/register-business",
+    "read_on": "2026-10-13",
+    "sources": [
+      {
+        "url": "https://sftreasurer.org/business/register-business",
+        "what": "application page / instructions"
+      },
+      {
+        "url": "https://sftreasurer.org/media/695/download",
+        "what": "official PDF (Business Registration Application, rev. 11/28/2022)"
+      }
+    ],
+    "fields": [
+      {
+        "id": "organization_type",
+        "line": "Organization Type",
+        "en": "Organization Type (check one)",
+        "zh": "组织类型（单选）",
+        "options": [
+          "Sole Proprietorship",
+          "Venture",
+          "Public Agency",
+          "General Partnership",
+          "Limited Partnership",
+          "Limited Liability Company",
+          "Limited Liability Partnership",
+          "B-Corporation",
+          "C-Corporation",
+          "S-Corporation"
+        ]
+      },
+      {
+        "id": "nonprofit",
+        "line": "Organization Type",
+        "en": "Non-profit",
+        "zh": "是否为非营利组织",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "business_name",
+        "line": "Business Identification",
+        "en": "Business Name (as shown on your income tax return)",
+        "zh": "企业名称（与所得税申报表一致）"
+      },
+      {
+        "id": "business_tax_id",
+        "line": "Business Identification",
+        "en": "Business Tax ID (SSN, FEIN, or TIN)",
+        "zh": "企业税号（SSN、FEIN 或 TIN）"
+      },
+      {
+        "id": "sf_start_date",
+        "line": "Business Identification",
+        "en": "Start Date in SF (MM/DD/YYYY)",
+        "zh": "在旧金山开始营业日期（月/日/年）",
+        "hint_en": "Future dates not accepted.",
+        "hint_zh": "不接受未来日期。"
+      },
+      {
+        "id": "telephone",
+        "line": "Business Identification",
+        "en": "Telephone # / EXT",
+        "zh": "电话号码 / 分机"
+      },
+      {
+        "id": "business_email",
+        "line": "Business Identification",
+        "en": "Business Email Address",
+        "zh": "企业电子邮箱",
+        "hint_en": "The DocuSign signature request is sent to the email entered on the Business Identification page.",
+        "hint_zh": "DocuSign 电子签名邮件会发送到此邮箱。"
+      },
+      {
+        "id": "mailing_address",
+        "line": "Business Identification",
+        "en": "Business Mailing Address, City, State, Zip",
+        "zh": "企业邮寄地址（城市、州、邮编）",
+        "hint_en": "The only address the office sends mail to; the certificate is mailed here.",
+        "hint_zh": "税务局只向此地址寄信，营业登记证书也寄到这里。"
+      },
+      {
+        "id": "city_vendor",
+        "line": "Business Identification",
+        "en": "Are you establishing this business to be a vendor (City Bidder/Supplier) or participate in procurement with the City?",
+        "zh": "设立此企业是否为成为市政府供应商/投标人或参与市政府采购？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "supplier_bidder_id",
+        "line": "Business Identification",
+        "en": "Supplier ID / Bidder ID",
+        "zh": "供应商编号 / 投标人编号"
+      },
+      {
+        "id": "correspondence_id",
+        "line": "Business Identification",
+        "en": "Correspondence ID",
+        "zh": "来函编号",
+        "hint_en": "From the top right of any letter from the Treasurer's office instructing you to register.",
+        "hint_zh": "如收到税务局通知信，编号在信件右上角。"
+      },
+      {
+        "id": "change_of_ownership",
+        "line": "Business Identification",
+        "en": "Is this a change of ownership?",
+        "zh": "是否为所有权变更？",
+        "options": [
+          "No",
+          "Yes - Change in Entity's Organization Type",
+          "Yes - Change in Entity's Ownership"
+        ]
+      },
+      {
+        "id": "previous_ban",
+        "line": "Business Identification",
+        "en": "Business Account Number of previous business",
+        "zh": "原企业的营业账户号码（BAN）"
+      },
+      {
+        "id": "previous_business_name",
+        "line": "Business Identification",
+        "en": "Previous business name",
+        "zh": "原企业名称"
+      },
+      {
+        "id": "owner_name",
+        "line": "Ownership Information",
+        "en": "Owner Name",
+        "zh": "所有人姓名/名称",
+        "hint_en": "Repeat the ownership block for each owner; officers are optional.",
+        "hint_zh": "每位所有人各填一组；高管信息可选。"
+      },
+      {
+        "id": "owner_tax_id",
+        "line": "Ownership Information",
+        "en": "Owner Business Tax ID (SSN, FEIN, or TIN)",
+        "zh": "所有人税号（SSN、FEIN 或 TIN）"
+      },
+      {
+        "id": "owner_email",
+        "line": "Ownership Information",
+        "en": "Owner Email Address",
+        "zh": "所有人电子邮箱"
+      },
+      {
+        "id": "owner_phone",
+        "line": "Ownership Information",
+        "en": "Owner Telephone # / EXT",
+        "zh": "所有人电话 / 分机"
+      },
+      {
+        "id": "owner_mailing_address",
+        "line": "Ownership Information",
+        "en": "Owner Mailing Address, City, State, Zip",
+        "zh": "所有人邮寄地址（城市、州、邮编）"
+      },
+      {
+        "id": "all_activities_in_sf",
+        "line": "Business Information",
+        "en": "Are all your business activities wholly within San Francisco?",
+        "zh": "您的所有经营活动是否都在旧金山境内？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "avg_employees",
+        "line": "1",
+        "en": "What is the average number of employees per week, including those outside of San Francisco?",
+        "zh": "每周平均员工人数（包括旧金山以外的员工）是多少？"
+      },
+      {
+        "id": "sf_payroll",
+        "line": "2",
+        "en": "What is the estimated San Francisco payroll expense?",
+        "zh": "预计旧金山工资支出是多少？"
+      },
+      {
+        "id": "sf_gross_receipts",
+        "line": "3",
+        "en": "What is the estimated San Francisco gross receipts for the current calendar year?",
+        "zh": "本日历年预计在旧金山的总收入是多少？",
+        "hint_en": "Drives the registration fee tier.",
+        "hint_zh": "决定登记费档位。"
+      },
+      {
+        "id": "business_personal_property",
+        "line": "4",
+        "en": "Does this business have taxable Business Personal Property in San Francisco?",
+        "zh": "企业在旧金山是否拥有应税营业动产（设备、家具等）？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "residential_rental_4plus",
+        "line": "5",
+        "en": "Does this business receive rental income from four or more residential units in one building?",
+        "zh": "企业是否从同一栋楼的四个或以上住宅单元收取租金？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "cannabis_tax",
+        "line": "6",
+        "en": "Is this business subject to the cannabis tax?",
+        "zh": "企业是否需缴纳大麻税？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "fee_exempt",
+        "line": "7",
+        "en": "Is this business exempt from paying the Registration fee?",
+        "zh": "企业是否免缴登记费？",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "hint_en": "Documentation required if Yes.",
+        "hint_zh": "如选“是”，需提供免税证明文件。"
+      },
+      {
+        "id": "ownership_taxes_fees",
+        "line": "Ownership Taxes and Fees",
+        "en": "Ownership taxes and fees (Yes/No each)",
+        "zh": "所有权层面的税费（逐项选择是/否）",
+        "options": [
+          "Access Line Tax",
+          "Telephone Users Tax",
+          "Utility Users Tax",
+          "Traffic Congestion Mitigation Tax"
+        ]
+      },
+      {
+        "id": "prior_year_receipts_payroll",
+        "line": "Prior Year Gross Receipts and Payroll",
+        "en": "Tax Year / San Francisco Gross Receipts / San Francisco Payroll Expense",
+        "zh": "以往年度：纳税年度 / 旧金山总收入 / 旧金山工资支出",
+        "hint_en": "Required if the SF start date is before July 1 of the current year.",
+        "hint_zh": "如在旧金山开业日期早于本年7月1日，则必填。"
+      },
+      {
+        "id": "naics_code",
+        "line": "",
+        "en": "Six digit 2022 NAICS code that best matches your principal business activity",
+        "zh": "最符合主要经营活动的六位数 2022 年 NAICS 行业代码",
+        "hint_en": "Asked in the online application (not on the 2022 PDF); displayed on the registration certificate.",
+        "hint_zh": "网上申请中填写（2022版纸质表无此项）；会显示在登记证书上。"
+      },
+      {
+        "id": "business_activities",
+        "line": "Identification of Business Activities",
+        "en": "Select all business activities that apply at each San Francisco location",
+        "zh": "勾选每个旧金山营业地点涉及的全部经营活动",
+        "options": [
+          "Accommodations (Includes Short Term Rental Hosts)",
+          "Administrative and Support Services",
+          "Arts, Entertainment, and Recreation",
+          "Biotechnology",
+          "Certain Services",
+          "Clean Technology",
+          "Construction",
+          "Financial Services",
+          "Food Services",
+          "Information",
+          "Insurance",
+          "Manufacturing",
+          "Private Education and Health Services",
+          "Professional, Scientific, and Technical Services",
+          "Real Estate and Rental and Leasing Services",
+          "Retail Trade",
+          "Transportation and Warehousing (Non Taxi)",
+          "Utilities",
+          "Wholesale Trade",
+          "Activity Not Listed"
+        ]
+      },
+      {
+        "id": "fyf_commercial_location",
+        "line": "First Year Free 1",
+        "en": "Is this a commercial use location in San Francisco?",
+        "zh": "此地点是否为旧金山的商业用途场所？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "fyf_participate",
+        "line": "First Year Free 2",
+        "en": "Do you want to participate in the First Year Free program?",
+        "zh": "是否参加“首年免费”计划？",
+        "options": [
+          "Yes, I want to participate",
+          "No, I do not want to participate"
+        ]
+      },
+      {
+        "id": "fyf_15m_acknowledgment",
+        "line": "First Year Free",
+        "en": "I understand that if this business has more than $15,000,000 in SF gross receipts for the calendar year... (waived amounts become payable)",
+        "zh": "我了解如本日历年旧金山总收入超过1500万美元，已免除的费用须补缴",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "fyf_data_sharing",
+        "line": "First Year Free",
+        "en": "Agree that eligibility and gross receipts data may be shared with other City departments",
+        "zh": "同意资格及总收入数据可与市政府其他部门共享",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "location_taxes_fees",
+        "line": "Location Taxes and Fees",
+        "en": "Location taxes and fees (Yes/No each)",
+        "zh": "营业地点层面的税费（逐项选择是/否）",
+        "options": [
+          "Short Term Residential Rental",
+          "Transient Occupancy Tax, Tourism Improvement District & Moscone Expansion District Fees",
+          "Transient Occupancy Tax Small Operator",
+          "Parking Tax",
+          "Cigarette Litter Abatement",
+          "Sugary Drinks Tax"
+        ]
+      },
+      {
+        "id": "location_dba",
+        "line": "Location",
+        "en": "Location Trade Name (DBA)",
+        "zh": "营业地点商号（DBA）",
+        "hint_en": "Repeat for each location, DBA, or FBN.",
+        "hint_zh": "每个地点、DBA 或虚拟商号各填一组。"
+      },
+      {
+        "id": "location_start_date",
+        "line": "Location",
+        "en": "Location Start Date in SF (MM/DD/YYYY)",
+        "zh": "该地点在旧金山开始营业日期（月/日/年）"
+      },
+      {
+        "id": "location_address",
+        "line": "Location",
+        "en": "Location Address, City, State, Zip",
+        "zh": "营业地点地址（城市、州、邮编）"
+      },
+      {
+        "id": "signer_name_title",
+        "line": "Certification",
+        "en": "Print Full Name, Title (authorized registrant)",
+        "zh": "签署人全名及职务（授权登记人）",
+        "hint_en": "Officer, general partner, member manager, etc.; an agent may sign only under a valid Power of Attorney.",
+        "hint_zh": "须为高管、普通合伙人、管理成员等；代理人须持有效授权书。"
+      }
+    ],
+    "attach": [
+      {
+        "en": "Proof of exempt status (only if claiming exemption from the registration fee)",
+        "zh": "免税身份证明（仅在申请免缴登记费时提供）"
+      }
+    ],
+    "destination": {
+      "portal": "etaxstatement.sfgov.org",
+      "signature": "typed",
+      "evidence": "\"After you submit the application, you will receive an email from DocuSign ... Your electronic signature is the final authorization needed to create a new business tax account.\"",
+      "source": "https://sftreasurer.org/business/register-business"
+    },
+    "notes": "Online-only filing at https://etaxstatement.sfgov.org/NewBusinessRegistration/application; then DocuSign e-signature sent to the business email - unsigned applications are deleted after 15 days. Then pay via etaxstatement.sfgov.org/OnlineBTPayment/ (some applications are reviewed before payment is allowed). Fields mapped from the paper PDF (rev 11/28/2022, header address Taxpayer Assistance, City Hall Room 140, #1 Dr. Carlton B. Goodlett Place, SF CA 94102) plus the NAICS question the online flow adds; the PDF is not listed on sftreasurer.org/find-form and the register page offers no mail/in-person filing, so don't use the PDF to file. 2026-27 fees: $55 (SF gross receipts $0-$100,000) up to $60,000 (>$200M) plus a $4 state fee; administrative offices pay $500-$35,000 based on payroll; First Year Free may waive initial fees. The page gives the registration deadline as 30 days after starting business, but its meta description says 15 days. It gives the renewal deadline as the last day of February, but the meta description says May. Certificate mailing time is stated as both 5-10 and 10-15 business days."
+  },
+  "sf-reg": {
+    "status": "mapped",
+    "form_seen": "Business Registration Application, City & County of San Francisco Office of the Treasurer & Tax Collector (4-page PDF, revised 11/28/2022); online New Business Registration Application as described on sftreasurer.org/business/register-business",
+    "read_on": "2026-10-13",
+    "sources": [
+      {
+        "url": "https://sftreasurer.org/business/register-business",
+        "what": "application page / instructions"
+      },
+      {
+        "url": "https://sftreasurer.org/media/695/download",
+        "what": "official PDF (Business Registration Application, rev. 11/28/2022)"
+      }
+    ],
+    "fields": [
+      {
+        "id": "organization_type",
+        "line": "Organization Type",
+        "en": "Organization Type (check one)",
+        "zh": "组织类型（单选）",
+        "options": [
+          "Sole Proprietorship",
+          "Venture",
+          "Public Agency",
+          "General Partnership",
+          "Limited Partnership",
+          "Limited Liability Company",
+          "Limited Liability Partnership",
+          "B-Corporation",
+          "C-Corporation",
+          "S-Corporation"
+        ]
+      },
+      {
+        "id": "nonprofit",
+        "line": "Organization Type",
+        "en": "Non-profit",
+        "zh": "是否为非营利组织",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "business_name",
+        "line": "Business Identification",
+        "en": "Business Name (as shown on your income tax return)",
+        "zh": "企业名称（与所得税申报表一致）"
+      },
+      {
+        "id": "business_tax_id",
+        "line": "Business Identification",
+        "en": "Business Tax ID (SSN, FEIN, or TIN)",
+        "zh": "企业税号（SSN、FEIN 或 TIN）"
+      },
+      {
+        "id": "sf_start_date",
+        "line": "Business Identification",
+        "en": "Start Date in SF (MM/DD/YYYY)",
+        "zh": "在旧金山开始营业日期（月/日/年）",
+        "hint_en": "Future dates not accepted.",
+        "hint_zh": "不接受未来日期。"
+      },
+      {
+        "id": "telephone",
+        "line": "Business Identification",
+        "en": "Telephone # / EXT",
+        "zh": "电话号码 / 分机"
+      },
+      {
+        "id": "business_email",
+        "line": "Business Identification",
+        "en": "Business Email Address",
+        "zh": "企业电子邮箱",
+        "hint_en": "The DocuSign signature request is sent to the email entered on the Business Identification page.",
+        "hint_zh": "DocuSign 电子签名邮件会发送到此邮箱。"
+      },
+      {
+        "id": "mailing_address",
+        "line": "Business Identification",
+        "en": "Business Mailing Address, City, State, Zip",
+        "zh": "企业邮寄地址（城市、州、邮编）",
+        "hint_en": "The only address the office sends mail to; the certificate is mailed here.",
+        "hint_zh": "税务局只向此地址寄信，营业登记证书也寄到这里。"
+      },
+      {
+        "id": "city_vendor",
+        "line": "Business Identification",
+        "en": "Are you establishing this business to be a vendor (City Bidder/Supplier) or participate in procurement with the City?",
+        "zh": "设立此企业是否为成为市政府供应商/投标人或参与市政府采购？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "supplier_bidder_id",
+        "line": "Business Identification",
+        "en": "Supplier ID / Bidder ID",
+        "zh": "供应商编号 / 投标人编号"
+      },
+      {
+        "id": "correspondence_id",
+        "line": "Business Identification",
+        "en": "Correspondence ID",
+        "zh": "来函编号",
+        "hint_en": "From the top right of any letter from the Treasurer's office instructing you to register.",
+        "hint_zh": "如收到税务局通知信，编号在信件右上角。"
+      },
+      {
+        "id": "change_of_ownership",
+        "line": "Business Identification",
+        "en": "Is this a change of ownership?",
+        "zh": "是否为所有权变更？",
+        "options": [
+          "No",
+          "Yes - Change in Entity's Organization Type",
+          "Yes - Change in Entity's Ownership"
+        ]
+      },
+      {
+        "id": "previous_ban",
+        "line": "Business Identification",
+        "en": "Business Account Number of previous business",
+        "zh": "原企业的营业账户号码（BAN）"
+      },
+      {
+        "id": "previous_business_name",
+        "line": "Business Identification",
+        "en": "Previous business name",
+        "zh": "原企业名称"
+      },
+      {
+        "id": "owner_name",
+        "line": "Ownership Information",
+        "en": "Owner Name",
+        "zh": "所有人姓名/名称",
+        "hint_en": "Repeat the ownership block for each owner; officers are optional.",
+        "hint_zh": "每位所有人各填一组；高管信息可选。"
+      },
+      {
+        "id": "owner_tax_id",
+        "line": "Ownership Information",
+        "en": "Owner Business Tax ID (SSN, FEIN, or TIN)",
+        "zh": "所有人税号（SSN、FEIN 或 TIN）"
+      },
+      {
+        "id": "owner_email",
+        "line": "Ownership Information",
+        "en": "Owner Email Address",
+        "zh": "所有人电子邮箱"
+      },
+      {
+        "id": "owner_phone",
+        "line": "Ownership Information",
+        "en": "Owner Telephone # / EXT",
+        "zh": "所有人电话 / 分机"
+      },
+      {
+        "id": "owner_mailing_address",
+        "line": "Ownership Information",
+        "en": "Owner Mailing Address, City, State, Zip",
+        "zh": "所有人邮寄地址（城市、州、邮编）"
+      },
+      {
+        "id": "all_activities_in_sf",
+        "line": "Business Information",
+        "en": "Are all your business activities wholly within San Francisco?",
+        "zh": "您的所有经营活动是否都在旧金山境内？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "avg_employees",
+        "line": "1",
+        "en": "What is the average number of employees per week, including those outside of San Francisco?",
+        "zh": "每周平均员工人数（包括旧金山以外的员工）是多少？"
+      },
+      {
+        "id": "sf_payroll",
+        "line": "2",
+        "en": "What is the estimated San Francisco payroll expense?",
+        "zh": "预计旧金山工资支出是多少？"
+      },
+      {
+        "id": "sf_gross_receipts",
+        "line": "3",
+        "en": "What is the estimated San Francisco gross receipts for the current calendar year?",
+        "zh": "本日历年预计在旧金山的总收入是多少？",
+        "hint_en": "Drives the registration fee tier.",
+        "hint_zh": "决定登记费档位。"
+      },
+      {
+        "id": "business_personal_property",
+        "line": "4",
+        "en": "Does this business have taxable Business Personal Property in San Francisco?",
+        "zh": "企业在旧金山是否拥有应税营业动产（设备、家具等）？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "residential_rental_4plus",
+        "line": "5",
+        "en": "Does this business receive rental income from four or more residential units in one building?",
+        "zh": "企业是否从同一栋楼的四个或以上住宅单元收取租金？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "cannabis_tax",
+        "line": "6",
+        "en": "Is this business subject to the cannabis tax?",
+        "zh": "企业是否需缴纳大麻税？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "fee_exempt",
+        "line": "7",
+        "en": "Is this business exempt from paying the Registration fee?",
+        "zh": "企业是否免缴登记费？",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "hint_en": "Documentation required if Yes.",
+        "hint_zh": "如选“是”，需提供免税证明文件。"
+      },
+      {
+        "id": "ownership_taxes_fees",
+        "line": "Ownership Taxes and Fees",
+        "en": "Ownership taxes and fees (Yes/No each)",
+        "zh": "所有权层面的税费（逐项选择是/否）",
+        "options": [
+          "Access Line Tax",
+          "Telephone Users Tax",
+          "Utility Users Tax",
+          "Traffic Congestion Mitigation Tax"
+        ]
+      },
+      {
+        "id": "prior_year_receipts_payroll",
+        "line": "Prior Year Gross Receipts and Payroll",
+        "en": "Tax Year / San Francisco Gross Receipts / San Francisco Payroll Expense",
+        "zh": "以往年度：纳税年度 / 旧金山总收入 / 旧金山工资支出",
+        "hint_en": "Required if the SF start date is before July 1 of the current year.",
+        "hint_zh": "如在旧金山开业日期早于本年7月1日，则必填。"
+      },
+      {
+        "id": "naics_code",
+        "line": "",
+        "en": "Six digit 2022 NAICS code that best matches your principal business activity",
+        "zh": "最符合主要经营活动的六位数 2022 年 NAICS 行业代码",
+        "hint_en": "Asked in the online application (not on the 2022 PDF); displayed on the registration certificate.",
+        "hint_zh": "网上申请中填写（2022版纸质表无此项）；会显示在登记证书上。"
+      },
+      {
+        "id": "business_activities",
+        "line": "Identification of Business Activities",
+        "en": "Select all business activities that apply at each San Francisco location",
+        "zh": "勾选每个旧金山营业地点涉及的全部经营活动",
+        "options": [
+          "Accommodations (Includes Short Term Rental Hosts)",
+          "Administrative and Support Services",
+          "Arts, Entertainment, and Recreation",
+          "Biotechnology",
+          "Certain Services",
+          "Clean Technology",
+          "Construction",
+          "Financial Services",
+          "Food Services",
+          "Information",
+          "Insurance",
+          "Manufacturing",
+          "Private Education and Health Services",
+          "Professional, Scientific, and Technical Services",
+          "Real Estate and Rental and Leasing Services",
+          "Retail Trade",
+          "Transportation and Warehousing (Non Taxi)",
+          "Utilities",
+          "Wholesale Trade",
+          "Activity Not Listed"
+        ]
+      },
+      {
+        "id": "fyf_commercial_location",
+        "line": "First Year Free 1",
+        "en": "Is this a commercial use location in San Francisco?",
+        "zh": "此地点是否为旧金山的商业用途场所？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "fyf_participate",
+        "line": "First Year Free 2",
+        "en": "Do you want to participate in the First Year Free program?",
+        "zh": "是否参加“首年免费”计划？",
+        "options": [
+          "Yes, I want to participate",
+          "No, I do not want to participate"
+        ]
+      },
+      {
+        "id": "fyf_15m_acknowledgment",
+        "line": "First Year Free",
+        "en": "I understand that if this business has more than $15,000,000 in SF gross receipts for the calendar year... (waived amounts become payable)",
+        "zh": "我了解如本日历年旧金山总收入超过1500万美元，已免除的费用须补缴",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "fyf_data_sharing",
+        "line": "First Year Free",
+        "en": "Agree that eligibility and gross receipts data may be shared with other City departments",
+        "zh": "同意资格及总收入数据可与市政府其他部门共享",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "location_taxes_fees",
+        "line": "Location Taxes and Fees",
+        "en": "Location taxes and fees (Yes/No each)",
+        "zh": "营业地点层面的税费（逐项选择是/否）",
+        "options": [
+          "Short Term Residential Rental",
+          "Transient Occupancy Tax, Tourism Improvement District & Moscone Expansion District Fees",
+          "Transient Occupancy Tax Small Operator",
+          "Parking Tax",
+          "Cigarette Litter Abatement",
+          "Sugary Drinks Tax"
+        ]
+      },
+      {
+        "id": "location_dba",
+        "line": "Location",
+        "en": "Location Trade Name (DBA)",
+        "zh": "营业地点商号（DBA）",
+        "hint_en": "Repeat for each location, DBA, or FBN.",
+        "hint_zh": "每个地点、DBA 或虚拟商号各填一组。"
+      },
+      {
+        "id": "location_start_date",
+        "line": "Location",
+        "en": "Location Start Date in SF (MM/DD/YYYY)",
+        "zh": "该地点在旧金山开始营业日期（月/日/年）"
+      },
+      {
+        "id": "location_address",
+        "line": "Location",
+        "en": "Location Address, City, State, Zip",
+        "zh": "营业地点地址（城市、州、邮编）"
+      },
+      {
+        "id": "signer_name_title",
+        "line": "Certification",
+        "en": "Print Full Name, Title (authorized registrant)",
+        "zh": "签署人全名及职务（授权登记人）",
+        "hint_en": "Officer, general partner, member manager, etc.; an agent may sign only under a valid Power of Attorney.",
+        "hint_zh": "须为高管、普通合伙人、管理成员等；代理人须持有效授权书。"
+      }
+    ],
+    "attach": [
+      {
+        "en": "Proof of exempt status (only if claiming exemption from the registration fee)",
+        "zh": "免税身份证明（仅在申请免缴登记费时提供）"
+      }
+    ],
+    "destination": {
+      "portal": "etaxstatement.sfgov.org",
+      "signature": "typed",
+      "evidence": "\"After you submit the application, you will receive an email from DocuSign ... Your electronic signature is the final authorization needed to create a new business tax account.\"",
+      "source": "https://sftreasurer.org/business/register-business"
+    },
+    "notes": "Same form as sf-business-registration (library duplicate: generic sftreasurer.org entry for the same SF Business Registration Certificate); consider merging. Online-only filing at https://etaxstatement.sfgov.org/NewBusinessRegistration/application; then DocuSign e-signature sent to the business email - unsigned applications are deleted after 15 days. Then pay via etaxstatement.sfgov.org/OnlineBTPayment/ (some applications are reviewed before payment is allowed). Fields mapped from the paper PDF (rev 11/28/2022, header address Taxpayer Assistance, City Hall Room 140, #1 Dr. Carlton B. Goodlett Place, SF CA 94102) plus the NAICS question the online flow adds; the PDF is not listed on sftreasurer.org/find-form and the register page offers no mail/in-person filing, so don't use the PDF to file. 2026-27 fees: $55 (SF gross receipts $0-$100,000) up to $60,000 (>$200M) plus a $4 state fee; administrative offices pay $500-$35,000 based on payroll; First Year Free may waive initial fees. The page gives the registration deadline as 30 days after starting business, but its meta description says 15 days. It gives the renewal deadline as the last day of February, but the meta description says May. Certificate mailing time is stated as both 5-10 and 10-15 business days."
+  },
+  "sf-dph-health-permit": {
+    "status": "page_only",
+    "form_seen": "Online Food Permit Application (SFDPH Environmental Health Branch); no form number or version shown",
+    "read_on": "2026-10-13",
+    "sources": [
+      {
+        "url": "https://www.sf.gov/get-health-permit-open-restaurant-bar-or-other-retail-food-location",
+        "what": "application page"
+      },
+      {
+        "url": "https://www.sfdph.org/dph/EH/Food/Permits/default.asp",
+        "what": "instructions"
+      },
+      {
+        "url": "https://www.sf.gov/resource--2023--food-permit-application-forms",
+        "what": "supplemental forms page"
+      }
+    ],
+    "fields": [
+      {
+        "id": "business_account_number",
+        "line": "",
+        "en": "Business Account Number (BAN)",
+        "zh": "营业账户号码（BAN）",
+        "hint_en": "From San Francisco business registration (Treasurer & Tax Collector).",
+        "hint_zh": "来自旧金山税务局的营业登记。"
+      },
+      {
+        "id": "location_id_number",
+        "line": "",
+        "en": "Location ID Number (LIN)",
+        "zh": "营业地点编号（LIN）",
+        "hint_en": "Also from business registration; sf.gov links a BAN/LIN lookup.",
+        "hint_zh": "同样来自营业登记；sf.gov 提供 BAN/LIN 查询。"
+      },
+      {
+        "id": "federal_taxpayer_id",
+        "line": "",
+        "en": "Federal taxpayer ID",
+        "zh": "联邦纳税人识别号"
+      }
+    ],
+    "attach": [
+      {
+        "en": "Menu (depending on business type)",
+        "zh": "菜单（视业态而定）"
+      },
+      {
+        "en": "Floor plan (depending on business type)",
+        "zh": "平面图（视业态而定）"
+      },
+      {
+        "en": "Any additional forms the online application directs you to complete and attach",
+        "zh": "网上申请中要求填写并上传的其他补充表格"
+      }
+    ],
+    "destination": {
+      "signature": "typed",
+      "evidence": "\"Step 1 – Complete the application. Step 2 – Sign the Form Electronically. Step 3 – Pay the Application fee (if applicable).\"",
+      "source": "https://www.sfdph.org/dph/EH/Food/Permits/default.asp"
+    },
+    "notes": "The application is online only and can be saved and resumed, but neither official page shows the portal URL or host (link targets weren't captured and sf.gov blocks direct fetch), so portal is left blank. The sfdph.org page still labels the online process 'Coming Soon!' and also tells applicants to bring documents to a Duty Officer appointment ((415) 252-3912). sf.gov treats the online application as live. Prerequisites: a location, SF business registration (BAN/LIN), at least one certified Food Safety Manager, and food handler cards for other food handlers. Apply at least 1 month before opening; sfdph says 6 weeks if construction or remodeling is involved. A change of ownership or entity type needs a new permit. Fees follow the EHB Fee Schedule, which I didn't read, so no amounts. For questions about supplemental documents, sf.gov names EnvHealth.DPH@sfdph.org as a contact, not as a place to submit. Closure forms are mailed to Environmental Health Branch, 49 South Van Ness Avenue, Suite 600, San Francisco, CA 94103."
+  },
+  "sf-dph-plan-check": {
+    "status": "mapped",
+    "form_seen": "DPH PLAN REVIEW APPLICATION (no revision date printed; file path 2023-07)",
+    "read_on": "2026-10-13",
+    "sources": [
+      {
+        "url": "https://sf.gov/sites/default/files/2023-07/PlanCheckApplication.pdf",
+        "what": "official PDF"
+      },
+      {
+        "url": "https://www.sf.gov/plan-check-guide-building-and-remodeling-food-facility",
+        "what": "instructions"
+      }
+    ],
+    "fields": [
+      {
+        "id": "business_address",
+        "line": "Business Information",
+        "en": "Business Address",
+        "zh": "营业地址"
+      },
+      {
+        "id": "business_name",
+        "line": "Business Information",
+        "en": "Business Name",
+        "zh": "企业名称"
+      },
+      {
+        "id": "building_permit_application_no",
+        "line": "Business Information",
+        "en": "Building Permit Application #",
+        "zh": "建筑许可申请编号",
+        "hint_en": "From the DBI building permit application; ask that 'health' be added as a routing station.",
+        "hint_zh": "来自建筑检查局（DBI）的建筑许可申请；申请时要求将“卫生部门”列为审批环节。"
+      },
+      {
+        "id": "applicant_name",
+        "line": "Applicant Information",
+        "en": "Applicant Name (print)",
+        "zh": "申请人姓名（正楷）"
+      },
+      {
+        "id": "applicant_title",
+        "line": "Applicant Information",
+        "en": "Applicant Title (business owner, architect, contractor, permit expediter, etc.)",
+        "zh": "申请人身份（业主、建筑师、承包商、许可代办等）"
+      },
+      {
+        "id": "email",
+        "line": "Applicant Information",
+        "en": "Email Address",
+        "zh": "电子邮箱"
+      },
+      {
+        "id": "phone",
+        "line": "Applicant Information",
+        "en": "Phone Number",
+        "zh": "电话号码"
+      },
+      {
+        "id": "date",
+        "line": "Applicant Information",
+        "en": "Date",
+        "zh": "日期"
+      },
+      {
+        "id": "plan_review_service",
+        "line": "Plan Review Service Requested For",
+        "en": "Plan Review Service Requested For (select as applicable)",
+        "zh": "申请的图纸审查服务（按需勾选）",
+        "options": [
+          "New Construction",
+          "Remodel of an Existing Facility",
+          "Consultation Only",
+          "Field Site Evaluation",
+          "Office Preliminary Review"
+        ]
+      },
+      {
+        "id": "food_facility_type",
+        "line": "Food Facility Type",
+        "en": "Food Facility Type - Select One",
+        "zh": "食品场所类型（单选）",
+        "options": [
+          "Restaurant",
+          "Bar + Restaurant",
+          "Bar Only",
+          "Coffee/Tea Shop",
+          "Deli",
+          "Market",
+          "Commissary",
+          "Micro Kitchen/Employee Cafeteria",
+          "Other"
+        ]
+      },
+      {
+        "id": "food_facility_type_other",
+        "line": "Food Facility Type",
+        "en": "Other (fill in the blank)",
+        "zh": "其他（请注明）"
+      },
+      {
+        "id": "food_prep_facility",
+        "line": "Food Facility Type",
+        "en": "Food Facility with Food/Drink Preparation",
+        "zh": "有食品/饮品加工的场所"
+      },
+      {
+        "id": "will_cook",
+        "line": "Food Facility Type",
+        "en": "Will you cook food?",
+        "zh": "是否烹饪食物？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "will_cool",
+        "line": "Food Facility Type",
+        "en": "Will you be cooling down food?",
+        "zh": "是否需要冷却熟食？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "will_wash_thaw",
+        "line": "Food Facility Type",
+        "en": "Will you need to wash, rinse, soak, or thaw food such as fruits/vegetables, and or meat?",
+        "zh": "是否需要清洗、冲洗、浸泡或解冻蔬果和/或肉类？",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "prepackaged_only",
+        "line": "Food Facility Type",
+        "en": "Prepackaged Food Facility Only, Without Food/Drink Preparation",
+        "zh": "仅销售预包装食品，无食品/饮品加工"
+      },
+      {
+        "id": "non_food_facility_type",
+        "line": "Non-Food Facility Type",
+        "en": "Non-Food Facility Type (select as applicable)",
+        "zh": "非食品场所类型（按需勾选）",
+        "options": [
+          "Laundry Facility with washers, dryers, extractors",
+          "Pet Shop/Kennel/Pet Hospital with Overnight Animal Boarding"
+        ]
+      }
+    ],
+    "attach": [
+      {
+        "en": "Construction plans, drawn to scale, including all equipment and finish schedules",
+        "zh": "按比例绘制的施工图纸，含全部设备清单和装修材料表"
+      },
+      {
+        "en": "DPH Plan Review Fee payment",
+        "zh": "公共卫生局图纸审查费"
+      }
+    ],
+    "destination": {
+      "signature": "unknown",
+      "evidence": "Form requires 'Signature' and 'Date' from the applicant; no statement on electronic or wet signature. \"Construction plan submissions and fee payments are accepted at The Permit Center at 49 South Van Ness Avenue, DPH Counters 82/83, Monday-Friday 9-3PM.\"",
+      "source": "https://sf.gov/sites/default/files/2023-07/PlanCheckApplication.pdf"
+    },
+    "notes": "Submitted in person with the DBI building permit at the Permit Center, 49 South Van Ness Avenue, DPH Counters 82/83. There's no destination key for in-person filing, so the address is recorded here. The form says submissions are accepted Monday-Friday 9-3, but the sf.gov guide lists Counter 83 hours as Monday, Tuesday, Thursday and Friday 7am-4pm and Wednesday 9am-4pm. The guide also says 'you may be able to submit your plans digitally' but names no channel. No fee amount appears on either page; staff confirm it at the appointment or after online submission. Pay online by invoice number, at Counter 83 (check, Visa, Mastercard), or by mail with a check payable to SFDPH, memo 'DPH Plan Check Fee for [project address]', to SFDPH, 49 South Van Ness Avenue, Suite 600, San Francisco, CA 94103. That mailing address is for fee payment only, not the application. Department contact: 415-252-3800. Required for submittal: this application, construction plans, and the fee payment. The form reminds applicants that new businesses or ownership changes must also apply for a DPH Health Permit to Operate at least 1 month before opening."
+  },
+  "sf-formula-retail": {
+    "status": "mapped",
+    "form_seen": "PLANNING APPLICATION - FORMULA RETAIL AFFIDAVIT (Affidavit for Formula Retail Establishments), V. 08.17.2020",
+    "read_on": "2026-10-13",
+    "sources": [
+      {
+        "url": "https://sfplanning.org/sites/default/files/forms/Formula_Retail_Affidavit.pdf",
+        "what": "official PDF"
+      },
+      {
+        "url": "https://sfplanning.org/resource/formula-retail-establishments",
+        "what": "application page"
+      },
+      {
+        "url": "https://sfplanning.org/permit/chain-stores-businesses",
+        "what": "instructions"
+      }
+    ],
+    "fields": [
+      {
+        "id": "planning_record_number",
+        "line": "Header",
+        "en": "Planning Application Record Number",
+        "zh": "规划申请记录编号"
+      },
+      {
+        "id": "project_address",
+        "line": "1",
+        "en": "Project Address",
+        "zh": "项目地址"
+      },
+      {
+        "id": "block_lot",
+        "line": "1",
+        "en": "Block/Lot(s)",
+        "zh": "街区/地块编号（Block/Lot）"
+      },
+      {
+        "id": "proposed_use",
+        "line": "2",
+        "en": "Proposed Use (Use Category Per Article 7 or 8)",
+        "zh": "拟议用途（按规划法第7或第8条的用途类别）"
+      },
+      {
+        "id": "proposed_business_name",
+        "line": "2",
+        "en": "Proposed Business Name",
+        "zh": "拟用商号名称"
+      },
+      {
+        "id": "business_description",
+        "line": "2",
+        "en": "Description of Business, Including Products and/or Services",
+        "zh": "业务描述（含产品和/或服务）"
+      },
+      {
+        "id": "building_permit_application_no",
+        "line": "2",
+        "en": "Building Permit Application No. (if applicable)",
+        "zh": "建筑许可申请编号（如适用）"
+      },
+      {
+        "id": "conditional_use_case_no",
+        "line": "2",
+        "en": "Conditional Use Case No. (if applicable)",
+        "zh": "有条件使用许可案件编号（如适用）"
+      },
+      {
+        "id": "locations_worldwide",
+        "line": "3.A",
+        "en": "Number of existing locations this business has worldwide",
+        "zh": "该品牌全球现有门店数量"
+      },
+      {
+        "id": "locations_sf",
+        "line": "3.B",
+        "en": "Number of existing locations in San Francisco",
+        "zh": "旧金山现有门店数量"
+      },
+      {
+        "id": "std_array_of_merchandise",
+        "line": "4.A",
+        "en": "Standardized feature: Array of Merchandise",
+        "zh": "标准化特征：商品组合",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "std_trademark",
+        "line": "4.B",
+        "en": "Standardized feature: Trademark",
+        "zh": "标准化特征：商标",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "std_servicemark",
+        "line": "4.C",
+        "en": "Standardized feature: Servicemark",
+        "zh": "标准化特征：服务商标",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "std_decor",
+        "line": "4.D",
+        "en": "Standardized feature: Décor",
+        "zh": "标准化特征：装潢",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "std_color_scheme",
+        "line": "4.E",
+        "en": "Standardized feature: Color Scheme",
+        "zh": "标准化特征：配色方案",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "std_facade",
+        "line": "4.F",
+        "en": "Standardized feature: Façade",
+        "zh": "标准化特征：门面外观",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "std_uniform_apparel",
+        "line": "4.G",
+        "en": "Standardized feature: Uniform Apparel",
+        "zh": "标准化特征：员工制服",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "std_signage",
+        "line": "4.H",
+        "en": "Standardized feature: Signage",
+        "zh": "标准化特征：招牌标识",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "id": "std_total",
+        "line": "4 TOTAL",
+        "en": "TOTAL: Enter the total number of Yes/No answers above",
+        "zh": "合计：填写以上“是/否”答案的数量"
+      },
+      {
+        "id": "affiant_name",
+        "line": "5",
+        "en": "Name (Printed)",
+        "zh": "签署人姓名（正楷）"
+      },
+      {
+        "id": "affiant_date",
+        "line": "5",
+        "en": "Date",
+        "zh": "日期"
+      },
+      {
+        "id": "relationship_to_project",
+        "line": "5",
+        "en": "Relationship to Project (i.e. Owner, Architect, etc.)",
+        "zh": "与项目的关系（如业主、建筑师等）"
+      },
+      {
+        "id": "affiant_phone",
+        "line": "5",
+        "en": "Phone",
+        "zh": "电话"
+      },
+      {
+        "id": "affiant_email",
+        "line": "5",
+        "en": "Email",
+        "zh": "电子邮箱"
+      }
+    ],
+    "attach": [],
+    "destination": {
+      "signature": "unknown",
+      "evidence": "Affidavit is signed 'Under penalty of perjury'; neither the PDF nor the resource page states whether electronic or wet signatures are accepted.",
+      "source": "https://sfplanning.org/sites/default/files/forms/Formula_Retail_Affidavit.pdf"
+    },
+    "notes": "This is not a standalone filing. The affidavit 'must accompany any Building Permit Application' (or Permit Application) for alterations, new construction, commercial tenant improvements, change of use, or signage related to the use, so it goes wherever that permit is filed. No official page gives its own submission channel. The PDF lists 49 South Van Ness Avenue, Suite 1400, San Francisco, CA 94103 under 'APPLICATION PACKET' without saying it is a submission address, so I left mail out. Section 5 also contains declarations a)-e), acknowledgments signed under penalty of perjury that I didn't transcribe. The PDF is fillable, but browser-entered text isn't retained, so download it before filling. If Conditional Use Authorization is required, also file the 'Conditional Use for Formula Retail Authorization Supplemental' (sfplanning.org/resource/formula-retail-cua-supplemental). That triggers a Planning Commission hearing and possibly 30-day neighborhood notification. Contact: Planning counter 628.652.7300, pic@sfgov.org. The resource page was last updated 05/10/2026, but the form version is still 08.17.2020. I used the library's url; 'info' (sfplanning.org/permit/chain-stores-businesses) also resolves."
+  },
+  "sf-sign": {
+    "status": "page_only",
+    "form_seen": "PermitSF online sign/awning permit application (Form 4/7 no longer used for signs and awnings as of June 29, 2026)",
+    "read_on": "2026-10-13",
+    "sources": [
+      {
+        "url": "https://sf.gov/step-by-step/get-permit-install-sign-or-awning",
+        "what": "application page / instructions"
+      },
+      {
+        "url": "https://www.sf.gov/june-29-2026-updates-for-permitsf",
+        "what": "instructions (PermitSF transition notice)"
+      },
+      {
+        "url": "https://www.sf.gov/629-reroofing-sign-and-awning-permits-move-to-the-permitsf-portal",
+        "what": "instructions (PermitSF transition notice)"
+      }
+    ],
+    "fields": [
+      {
+        "id": "sign_awning_types",
+        "line": "",
+        "en": "Sign and awning types",
+        "zh": "招牌及雨篷类型",
+        "hint_en": "One application can cover multiple signs and awnings at the same address.",
+        "hint_zh": "同一地址的多个招牌和雨篷可在一份申请中提交。"
+      },
+      {
+        "id": "heights_measurements_weights",
+        "line": "",
+        "en": "Heights, measurements, and weights",
+        "zh": "高度、尺寸及重量"
+      },
+      {
+        "id": "projection_distance",
+        "line": "",
+        "en": "Projection distance from the building face",
+        "zh": "伸出建筑立面的距离"
+      },
+      {
+        "id": "sidewalk_support_structures",
+        "line": "",
+        "en": "Any sidewalk support structures",
+        "zh": "是否有人行道上的支撑结构"
+      },
+      {
+        "id": "attachment_method",
+        "line": "",
+        "en": "Attachment method",
+        "zh": "安装固定方式"
+      },
+      {
+        "id": "illumination_type",
+        "line": "",
+        "en": "Illumination type",
+        "zh": "照明类型",
+        "hint_en": "Illuminated signs also need a DBI electrical permit and inspection.",
+        "hint_zh": "发光招牌还需向建筑检查局申请电气许可并接受电气检查。"
+      },
+      {
+        "id": "occupancy_class",
+        "line": "",
+        "en": "Building occupancy class",
+        "zh": "建筑使用类别（Occupancy Class）"
+      },
+      {
+        "id": "existing_use",
+        "line": "",
+        "en": "Existing use",
+        "zh": "现有用途"
+      },
+      {
+        "id": "construction_type",
+        "line": "",
+        "en": "Construction type",
+        "zh": "建筑结构类型"
+      },
+      {
+        "id": "planning_approval_letter",
+        "line": "",
+        "en": "Planning Approval Letter (if the building is a landmark)",
+        "zh": "规划局批准函（如建筑为地标建筑）"
+      },
+      {
+        "id": "contractor_license_number",
+        "line": "",
+        "en": "Contractor license number",
+        "zh": "承包商执照号码",
+        "hint_en": "C-45 contractors can install all sign/awning types including illuminated; D-42 only non-electrical signs and awnings.",
+        "hint_zh": "C-45 承包商可安装所有招牌/雨篷（含发光招牌）；D-42 只能安装非电气招牌和雨篷。"
+      },
+      {
+        "id": "contractor_ban",
+        "line": "",
+        "en": "Contractor Business Account Number (BAN)",
+        "zh": "承包商营业账户号码（BAN）"
+      },
+      {
+        "id": "business_information_ban",
+        "line": "",
+        "en": "Business information, including BAN",
+        "zh": "企业信息（含营业账户号码 BAN）"
+      },
+      {
+        "id": "valuation",
+        "line": "",
+        "en": "Valuation of materials and labor",
+        "zh": "材料及人工估价"
+      },
+      {
+        "id": "plans_pdf",
+        "line": "",
+        "en": "Plans uploaded as a PDF",
+        "zh": "上传 PDF 格式图纸"
+      }
+    ],
+    "attach": [
+      {
+        "en": "Construction drawings (PDF) showing sign/awning area and dimensions, height from ground to bottom, projection from building face, and lettering dimensions",
+        "zh": "施工图纸（PDF），须标明招牌/雨篷面积和尺寸、离地高度、伸出立面距离及字体尺寸"
+      },
+      {
+        "en": "If applying for a property owner: owner's driver's license (JPEG/JPG) and the last section of a Property Owner Disclosure Form",
+        "zh": "如代业主申请：业主驾照（JPEG/JPG）及业主披露表最后一部分"
+      },
+      {
+        "en": "If applying for a licensed contractor not authorized in PermitSF: contractor's driver's license and the last section of a Licensed Contractor Statement Form",
+        "zh": "如代未在 PermitSF 授权的持照承包商申请：承包商驾照及持照承包商声明表最后一部分"
+      },
+      {
+        "en": "Planning Approval Letter (landmark buildings)",
+        "zh": "规划局批准函（地标建筑）"
+      },
+      {
+        "en": "Title 24 Compliance Affidavit (illuminated signs, before the electrical inspection)",
+        "zh": "Title 24 合规声明（发光招牌，电气检查前上传）"
+      }
+    ],
+    "destination": {
+      "signature": "typed",
+      "evidence": "\"Apply online for permits for all signs and awnings at PermitSF ... The Form 4/7 will no longer be used for these permits.\" / \"paper applications will no longer be accepted for signs or awnings.\"",
+      "source": "https://www.sf.gov/june-29-2026-updates-for-permitsf"
+    },
+    "notes": "ALERT: the library names 'Form 4 / Form 7 sign permit', but since Monday June 29, 2026 sign and awning permits (including Awning Amnesty legalization) are filed only through the PermitSF online portal. Form 4/7 is no longer used and paper applications are not accepted. The PermitSF portal host wasn't shown on any official page I could read, so portal is blank. Questions go to PermitSF@sfgov.org. Signature is set to 'typed' because the only filing route is the official online portal. I didn't see an attestation step. Fields come from the sf.gov step-by-step list of what the online form asks, not from the form itself. After filing, review results arrive by email with markups in Attachments; only the primary applicant can revise, by deleting the old attachment and uploading the new one via Update Application. Pay online in PermitSF or with cash/check at the Permit Center kiosk; no fee amounts were shown. A final inspection is required, plus an electrical inspection for illuminated signs. A Public Works street space permit may be needed. Most signs and awnings also have location-based zoning rules. The library url 'www.sf.gov/step-by-step--get-permit-install-sign-or-awning' is robots-blocked, so use the info URL sf.gov/step-by-step/get-permit-install-sign-or-awning. Agency: the page refers to DBI for electrical permits; PermitSF is the citywide permit portal."
+  }
+}

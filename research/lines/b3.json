@@ -1,0 +1,51 @@
+{
+ "la-btrc": {"status": "page_only", "form_seen": "Business Tax Registration Certificate (online registration checklist)", "read_on": "2026-10-13",
+  "sources": [{"url": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc", "what": "application page"}],
+  "fields": [
+   {"id": "tax_id", "line": "", "en": "Federal EIN (partnership, corporation, LLC, trust) or SSN (sole proprietor)", "zh": "联邦 EIN（合伙、公司、LLC、信托）或 SSN（独资）"},
+   {"id": "activity", "line": "", "en": "Business activity description", "zh": "业务活动描述"},
+   {"id": "legal_name", "line": "", "en": "Legal business name", "zh": "企业法定名称"},
+   {"id": "dba", "line": "", "en": "Fictitious name (DBA)", "zh": "虚构商号（DBA）"},
+   {"id": "start_date", "line": "", "en": "Business start date in the City of Los Angeles", "zh": "在洛杉矶市开始营业日期"},
+   {"id": "business_address", "line": "", "en": "Business address", "zh": "营业地址"},
+   {"id": "mailing_address", "line": "", "en": "Primary mailing address, if different", "zh": "主要邮寄地址（如不同）"},
+   {"id": "contact", "line": "", "en": "Contact name, phone and email", "zh": "联系人姓名、电话及邮箱"}
+  ],
+  "attach": [],
+  "destination": {"signature": "typed", "evidence": "The fastest way to register is online; the paper form may be submitted by email or at a contact center.", "source": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc"},
+  "notes": "A temporary certificate is issued on completion; the permanent BTRC is mailed in 4 to 6 weeks. The first year's tax is paid at renewal. Under $100,000 global gross receipts may qualify for the Small Business Exemption if renewed on time. The online application also flags Police, Fire or Tobacco permits."},
+ "lac-plan-check": {"status": "page_only", "form_seen": "Retail Food Facility Plan Check Application (electronic submittal)", "read_on": "2026-10-13",
+  "sources": [{"url": "https://admin.publichealth.lacounty.gov/eh/i-want-to/submit-electronic-plan.htm", "what": "electronic plan submittal instructions"}, {"url": "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm", "what": "permit steps"}],
+  "fields": [
+   {"id": "site", "line": "", "en": "Name and address of the site or project", "zh": "项目或场所名称及地址"},
+   {"id": "square_footage", "line": "", "en": "Square footage", "zh": "面积（平方英尺）"},
+   {"id": "scope", "line": "", "en": "Proposed scope of work or construction", "zh": "拟施工范围"},
+   {"id": "contact", "line": "", "en": "Contact person or firm that receives the returned plans", "zh": "接收退回图纸的联系人或公司"}
+  ],
+  "attach": [{"en": "Plans in PDF (floor plan, equipment, plumbing, finishes per the Retail Construction Guide)", "zh": "PDF 图纸（按零售施工指南包含平面、设备、给排水及饰面）"}, {"en": "Specification sheets for equipment, ventilation, water heater and finishes", "zh": "设备、通风、热水器及饰面的规格表"}],
+  "destination": {"email": "DPH-PlanCheck_Food@ph.lacounty.gov", "signature": "unknown", "evidence": "Send an email to DPH-PlanCheck_Food@ph.lacounty.gov saying you wish to submit electronic plans; you receive a SharePoint link to upload them. Do not email plans to your plan check inspector.", "source": "https://admin.publichealth.lacounty.gov/eh/i-want-to/submit-electronic-plan.htm"},
+  "notes": "Review starts only after the invoiced plan check fee is paid (card fee 2.22%, $1.49 minimum). Plan Check Program (626) 430-5560. The service request PDF redirects to an http address and could not be read."},
+ "lac-health-permit": {"status": "page_only", "form_seen": "Public Health Permit/License Application", "read_on": "2026-10-13",
+  "sources": [{"url": "https://publichealth.lacounty.gov/eh/about/permit.htm", "what": "permits page"}],
+  "fields": [],
+  "attach": [{"en": "The completed application, handed to the plan checker at the final inspection", "zh": "填好的申请表，在最终检查时交给图纸审查员"}],
+  "destination": {"signature": "unknown", "evidence": "A permit application will be provided by the plan checker once construction is complete; provide it to the plan checker with the required documents at the final inspection. Do not send a payment unless you have received an invoice.", "source": "https://publichealth.lacounty.gov/eh/about/permit.htm"},
+  "notes": "Not mailed in for new facilities: it comes from and goes back to the plan checker at the final inspection. Change of ownership: the inspector takes it at the inspection. Questions: EHPermits@ph.lacounty.gov, (888) 700-9995."},
+ "la-ladbs": {"status": "page_only", "form_seen": "Building permit (ePlanLA / PermitLA)", "read_on": "2026-10-13",
+  "sources": [{"url": "https://dbs.lacity.gov/", "what": "LA Department of Building and Safety home (ladbs.org now redirects here)"}],
+  "fields": [],
+  "attach": [{"en": "Plans for plan check (ePlanLA), unless the work qualifies for an express permit (PermitLA)", "zh": "供审查的图纸（ePlanLA），符合快速许可条件者除外（PermitLA）"}],
+  "destination": {"portal": "eplanla.lacity.org", "signature": "typed", "evidence": "Projects that need plan check are filed online in ePlanLA; simple express projects in PermitLA; both need an Angeleno account.", "source": "https://dbs.lacity.gov/"},
+  "notes": "ladbs.org now redirects to dbs.lacity.gov, so the library's PDF link is dead. A temporary Certificate of Occupancy is paid online."},
+ "la-lafd-ops": {"status": "page_only", "form_seen": "LAFD fire permit (through the Office of Finance)", "read_on": "2026-10-13",
+  "sources": [{"url": "https://lafd.org/operational-fire-permits", "what": "agency page"}],
+  "fields": [
+   {"id": "legal_name", "line": "Referral slip", "en": "Legal name and BTRC account number", "zh": "法定名称及 BTRC 账号"},
+   {"id": "permit_type", "line": "Referral slip", "en": "Type of fire permit", "zh": "消防许可类型"},
+   {"id": "business_type", "line": "Referral slip", "en": "Type of business", "zh": "业务类型"},
+   {"id": "address", "line": "Referral slip", "en": "Business address and legal description", "zh": "营业地址及法定地块描述"}
+  ],
+  "attach": [{"en": "Business Tax Registration Certificate", "zh": "营业税登记证"}],
+  "destination": {"signature": "unknown", "evidence": "At the Office of Finance Public Counter staff prepare a Business Referral Slip; LADBS Zoning signs and stamps it; the fee is paid at the Office of Finance, which sends an Authorization Form to LAFD for inspection.", "source": "https://lafd.org/operational-fire-permits"},
+  "notes": "In person by appointment, not online. Renewal payments due December 31, payable online. Office of Finance: Finance.CustomerService@lacity.org, (844) 663-4411."}
+}

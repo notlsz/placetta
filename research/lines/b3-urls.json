@@ -1,0 +1,34 @@
+{
+  "la-btrc": {
+    "instructions": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc",
+    "submit_page": "https://finance.lacity.gov/register-new-business",
+    "titles_seen": ["how register btrc", "Register Your Business", "a Welcome%20Kit%202025 (https://finance.lacity.gov/sites/g/files/wph1721/files/2025-12/a_Welcome%20Kit%202025.pdf)", "business tax registration certificate (business.lacity.gov)"],
+    "note": "Library URLs still appear in results. Also seen: https://finance.lacity.gov/how-register-btrc (short alias) and a 2025 Welcome Kit PDF on finance.lacity.gov."
+  },
+  "lac-plan-check": {
+    "form_pdf": "http://publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf",
+    "instructions": "https://publichealth.lacounty.gov/eh/inspection/retail-plan-check.htm",
+    "submit_page": "https://admin.publichealth.lacounty.gov/eh/i-want-to/submit-electronic-plan.htm",
+    "titles_seen": ["About Retail Food Facility Plan Check", "Electronic Plan Submittal Instructions", "Construction Requirements for Retail Food Facilities", "retail food facility plan check additional service request"],
+    "note": "form_pdf is the library's existing URL; it did NOT appear in search results. Results instead showed a related PDF titled 'retail food facility plan check additional service request' (https://admin.publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-check-additional-service-request.pdf), so the form name/path may have changed or be separate. Verify form_pdf later. Submit page and instructions confirmed under publichealth.lacounty.gov (also admin. host mirror)."
+  },
+  "lac-health-permit": {
+    "instructions": "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+    "submit_page": "https://publichealth.lacounty.gov/eh/about/permit.htm",
+    "titles_seen": ["How to Obtain a Restaurant (Food Facility) Permit", "Obtaining a Public Health Permit/License", "how to obtain restaurant food facility permit (PDF at https://admin.publichealth.lacounty.gov/eh/docs/permit/how-to-obtain-restaurant-food-facility-permit.pdf)"],
+    "note": "The library's application PDF (http://publichealth.lacounty.gov/eh/docs/permit/Public-Health-Permit-License-Application.pdf) did not appear in search results; not confirmed, so form_pdf left out. The 'Obtaining a Public Health Permit/License' page is the likely place that links the application."
+  },
+  "la-ladbs": {
+    "form_pdf": "https://www.ladbs.org/docs/default-source/forms/plan-check-2023/application-for-building-permit-or-grading-and-certificate-of-occupancy-pc-str-app01.pdf",
+    "instructions": "https://ladbs.org/services/getting-started/about-the-construction-process/permit-application-information/16",
+    "submit_page": "https://ladbs.org/forms-publications/forms/permit-applications",
+    "titles_seen": ["application for building permit or grading and certificate of occupancy pc str app01", "Permit Applications", "Permit Application Information"],
+    "note": "form_pdf confirmed matching library URL (PC.STR.APP01). Library portal URL is dbs.lacity.gov (new domain); search results still show ladbs.org pages, so both domains appear to be in use. submit_page is the forms/permit applications listing, not a confirmed 'how to submit' page."
+  },
+  "la-lafd-ops": {
+    "instructions": "https://lafd.org/operational-fire-permits",
+    "submit_page": "https://lafd.org/fire-permits",
+    "titles_seen": ["operational fire permits", "Fire Permits", "LAFD Application for Fire Project (https://lafd.org/sites/default/files/LAFD_Application_for%20Fire_Project.pdf)", "Fire Prevention (https://fps.lafd.org/home/)"],
+    "note": "Library URL confirmed. fps.lafd.org / fims.lafd.org appear to be the Fire Prevention permit system portal. The 'Application for Fire Project' PDF is not confirmed to be the operational permit form, so form_pdf left out."
+  }
+}

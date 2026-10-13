@@ -60,7 +60,7 @@ const warn = (label: Bi, note: Bi): Check => ({ level: "warn", label, note });
 const RULES: Rule[] = [
   // "SSN, ITIN, or EIN of responsible party" takes either kind of number
   { test: /\b(ssn|social security|itin)\b/i, check: (v, c) =>
-      /^(\d{3}|\*{3}|x{3})-?(\d{2}|\*{2}|x{2})-?\d{4}$/i.test(v.trim()) || (/\bein\b/i.test(c.label) && /^\d{2}-?\d{7}$/.test(v.trim())) ? null
+      /^(\d{3}|\*{3}|x{3})-?(\d{2}|\*{2}|x{2})-?\d{4}$/i.test(v.trim()) || (/\b(f?ein|tin|tax id)\b/i.test(c.label) && /^\d{2}-?\d{7}$/.test(v.trim())) ? null
       : err(B(c.label, c.label), B("A Social Security number or ITIN is 9 digits.", "社会安全号或 ITIN 为 9 位数字。")) },
   { test: /\b(ein|fein)\b|employer identification|federal (tax|employer) id/i, check: (v, c) =>
       /^\d{2}-?\d{7}$/.test(v.trim()) ? null

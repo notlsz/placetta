@@ -1,0 +1,42 @@
+{
+  "nyc-fse": {
+    "form_pdf": "https://www.nyc.gov/assets/doh/downloads/pdf/environmental/fse-application-packet.pdf",
+    "instructions": "https://www.nyc.gov/site/doh/business/permits-and-licenses/restaurants.page",
+    "submit_page": "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit",
+    "titles_seen": ["Food Service Establishment Permit - MyCity Business - NYC.gov", "Restaurants and Other Food Service Establishments", "fse-application-packet.pdf", "Food Establishment Permit · NYC311 - NYC.gov"],
+    "note": "Library URL still appears current. The packet PDF title is only 'fse-application-packet.pdf', so confirm it is the current application packet. Also seen: https://portal.311.nyc.gov/article/?kanumber=KA-01878 and https://www.nyc.gov/site/doh/business/permits-licenses.page."
+  },
+  "nyc-sign": {
+    "instructions": "https://www.nyc.gov/site/buildings/safety/sign-permit-reqs.page",
+    "submit_page": "https://www.nyc.gov/site/buildings/property-or-business-owner/sign-permit.page",
+    "form_pdf": "https://www.nyc.gov/assets/buildings/pdf/build_sign_filing_guided.pdf",
+    "titles_seen": ["Sign Permit - Buildings", "Sign Permit Requirements", "SIGN (build_sign_filing_guided.pdf)", "Permit Applications Through DOB NOW - Buildings", "DOB NOW - Buildings"],
+    "note": "Sign permits are filed online in DOB NOW: Build. The 'form_pdf' is a guided-filing walkthrough, not a blank form. Also seen: https://www.nyc.gov/site/buildings/industry/permit-applications-through-dob-now.page."
+  },
+  "nyc-co": {
+    "instructions": "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page",
+    "submit_page": "https://www.nyc.gov/site/buildings/dob/find-building-data.page",
+    "titles_seen": ["Certificate of Occupancy - Buildings", "Find Building Data - Buildings", "Obtain a Certificate of Occupancy - Buildings", "Certificate of Occupancy - NYC Business", "Buildings Information System - MyCity Business - NYC.gov"],
+    "note": "This is a check of an existing C of O, not a filing, so there is no blank form. 'submit_page' is the building-data lookup page. Also seen: https://www.nyc.gov/site/buildings/industry/obtain-a-co.page (obtaining a new C of O) and https://nyc-business.nyc.gov/nycbusiness/description/certificate-of-occupancy."
+  },
+  "nyc-crt": {
+    "form_pdf": "https://www.nyc.gov/site/finance/business/business-forms-commercial-rent.page",
+    "instructions": "https://www.nyc.gov/site/finance/business/business-commercial-rent-tax-crt.page",
+    "submit_page": "https://www.nyc.gov/site/finance/business/business-commercial-rent-tax-crt.page",
+    "titles_seen": ["Business Commercial Rent Tax - CRT", "Commercial Rent Tax (CRT) Returns", "CR-Q1 - COMMERCIAL RENT TAX RETURN", "Instructions for Form CR-Q1", "Instructions for Form CR-Q2", "Commercial Rent Tax · NYC311 - NYC.gov"],
+    "note": "'form_pdf' is the returns listing page (HTML), not a single PDF. Current returns are the quarterly CR-Q1 to CR-Q4 (2025-26 versions seen, e.g. https://www.nyc.gov/assets/finance/downloads/pdf/commercial_rent/cr-q1-2025-26-wkst.pdf). Library info URL nyc.gov/site/finance/business/business-commercial-rent-tax-crt.page still appears current."
+  },
+  "ny-dol-100": {
+    "form_pdf": "https://dol.ny.gov/system/files/documents/2021/02/nys100-1.pdf",
+    "instructions": "https://dol.ny.gov/nys100-doc",
+    "submit_page": "https://dol.ny.gov/register-unemployment-insurance-0",
+    "titles_seen": ["Registration for Unemployment Insurance, Withholding, and Wage Reporting for General Business Employers", "Register for Unemployment Insurance", "New York State Employer Registration for Unemployment ...", "New York Business Express"],
+    "note": "The library pdf (dol.ny.gov/system/files/documents/2024/03/nys100.pdf) did not appear in results. The URLs found are a 2021 PDF, https://forms.labor.ny.gov/UI/NYS100.pdf and https://www.labor.ny.gov/formsdocs/ui/nys100.pdf; check which is current. Online registration is via https://applications.labor.ny.gov/eRegWeb/registerEmployer/uiEPMWelcomeMain.faces."
+  },
+  "ny-dos-pub": {
+    "instructions": "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0",
+    "submit_page": "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0",
+    "titles_seen": ["Certificate of Publication for Domestic Limited Liability Company", "Certificate of Publication (professional service) for Domestic Limited Liability Company", "Domestic Limited Liability Companies"],
+    "note": "Library URL confirmed in results. Search snippets show no PDF link or mailing address, so the form PDF and submission details must be read from that page. Alternate node URL: https://dos.ny.gov/node/16241. Professional-service LLC variant: https://dos.ny.gov/certificate-publication-professional-service-domestic-limited-liability-company-0."
+  }
+}

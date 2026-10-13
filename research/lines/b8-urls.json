@@ -1,0 +1,38 @@
+{
+  "sj-business-tax": {
+    "instructions": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration",
+    "submit_page": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate",
+    "titles_seen": ["City of San José (business-tax-registration)", "City of San José (register-for-a-business-tax-certificate)", "City of San José (finance/tax-forms-permits-resources)"],
+    "note": "Both library URLs confirmed in results. Also seen: https://sanjoseca.gov/your-government/departments-offices/finance/tax-forms-permits-resources (Finance forms list). Several sanjoseca.gov showpublisheddocument PDFs appeared with generic titles, so they were not picked as form_pdf."
+  },
+  "sj-btc": {
+    "instructions": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration",
+    "submit_page": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate",
+    "titles_seen": ["City of San José (business-tax-registration)", "City of San José (register-for-a-business-tax-certificate)"],
+    "note": "Library URL is only the sanjoseca.gov homepage; replace with the two business-tax-registration pages. Duplicate of sj-business-tax."
+  },
+  "scc-plan-check": {
+    "instructions": "https://deh.santaclaracounty.gov/submit-plan-review-restaurants-grocery-stores-and-other-retail-food-storefronts",
+    "submit_page": "https://deh.santaclaracounty.gov/submit-plan-review-restaurants-grocery-stores-and-other-retail-food-storefronts",
+    "titles_seen": ["Submit plan review for restaurants, grocery stores and other retail food storefronts", "Permits and compliance for retail food storefronts and other fixed food facilities", "Fixed Food Facilities Plan Review & Change of Ownership (scceh.org)"],
+    "note": "Library URL (long compliance-retail-food-operations path) did not appear in results; the shorter URL shown here is the current-looking one. No blank form PDF turned up in results. An older scceh.org page (Fixed Food Facilities Plan Review & Change of Ownership) also appeared, suggesting the old domain is superseded by deh.santaclaracounty.gov."
+  },
+  "scc-health-permit": {
+    "instructions": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility",
+    "submit_page": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/permits-and-compliance-retail-food-storefronts",
+    "titles_seen": ["Application New Food Facility", "Permits and compliance for retail food storefronts and other fixed food facilities", "Retail food operations compliance"],
+    "note": "Library points to the plan review page; results show a separate 'Application New Food Facility' page that better fits the permit application. No blank form PDF seen in results. 'Apply for ...' hub: https://deh.santaclaracounty.gov/i-want/apply"
+  },
+  "sj-building-ti": {
+    "instructions": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement",
+    "submit_page": "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/building-online-permits",
+    "titles_seen": ["City of San José (tenant-improvement)", "City of San José (building-online-permits)", "Online Permits at SJPermits.org", "City of San José (help-for-sjpermits-sjeplans)", "City of San José (commercial-permit-service)"],
+    "note": "Library info URL confirmed. Also seen: https://sanjoseca.gov/?NavID=7550 (Online Permits at SJPermits.org), https://www.sanjoseca.gov/businesses/development-services-permit-center/help-for-sjpermits-sjeplans, https://www.sanjoseca.gov/business/development-services-permit-center/building-permit-services-appointments/commercial-permit-service. Portal is online-only; no blank form PDF."
+  },
+  "sj-sign": {
+    "instructions": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/planning-division/start-a-new-project-or-use/applications-and-appointments",
+    "submit_page": "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits",
+    "titles_seen": ["City of San José (planning-division applications-and-appointments)", "Planning Applications and Appointments (sanjoseca.gov/?navid=2580)", "City of San José (resources-checklist)", "City of San José (online-permits-at-sjpermits-org/building-online-permits)"],
+    "note": "Library info URL confirmed in results. The planning-online-permits submit URL did not itself appear in results (the sibling building-online-permits page did), so it is unverified. Sign-related sanjoseca.gov showpublisheddocument PDFs (e.g. https://www.sanjoseca.gov/home/showpublisheddocument/15381/638900946952300000) appeared with only generic titles, so not claimed as the form_pdf."
+  }
+}

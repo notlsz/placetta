@@ -23,7 +23,7 @@ const plausible = (label: string) =>
   : "test value";
 
 let fails = 0;
-const ok = (cond: unknown, m: string) => { if (cond) console.log("ok  ", m); else { console.error("FAIL", m); fails++; } };
+const ok = (cond: unknown, m: string, extra?: unknown) => { if (cond) console.log("ok  ", m); else { console.error("FAIL", m, extra === undefined ? "" : JSON.stringify(extra).slice(0, 600)); fails++; } };
 
 const base = (): Workspace => ({
   ...normalizeState("Moonleaf Tea", {}),
@@ -105,7 +105,7 @@ for (const c of CASES) {
     const r = (await run(T("request_filing_approval"), { application_id: id })).r!;
     const missing = a.checklist.some(c => c.state === "missing");
     if (missing) { held++; ok(r.approval_requested === false && (r.missing_documents as string[]).length > 0, `${tag}: ${a.name.en} held for its documents`); }
-    else { asked++; ok(!!r.approval_id, `${tag}: ${a.name.en} goes for approval once complete`); }
+    else { asked++; ok(!!r.approval_id, `${tag}: ${a.name.en} goes for approval once complete`, r); }
   }
   console.log(`     ${tag}: ${asked} ready for approval, ${held} waiting on documents`);
 

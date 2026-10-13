@@ -112,10 +112,10 @@ export const LOCAL_US: OfficialForm[] = [
     fee: 470, feeNote: B("$470 application fee with the first inspection. The annual restaurant license fee is waived as of 2026.", "申请费 470 美元，含首次检查。自 2026 年起餐厅年度执照费豁免。"), checked: "page", fields: [],
   },
   {
-    id: "sf-sign", form: "Form 4 / Form 7 sign permit", title: B("Sign and awning permit", "招牌及雨篷许可"),
+    id: "sf-sign", form: "Sign and awning permit (PermitSF)", title: B("Sign and awning permit", "招牌及雨篷许可"),
     agency: B("San Francisco Department of Building Inspection", "旧金山建筑检查局"), level: "city", where: "SF", segments: [R, T, W], needs: { signage: true }, method: "portal", order: 80,
-    how: B("Submit the sign permit form and drawings online, answer plan review, pay, then book the final inspection. Lit signs also need an electrical permit.", "在线提交招牌许可表和图纸，回复审查意见并缴费后预约最终检查。灯箱招牌另需电气许可。"),
-    url: "https://www.sf.gov/step-by-step--get-permit-install-sign-or-awning", info: "https://sf.gov/step-by-step/get-permit-install-sign-or-awning",
+    how: B("Online only through PermitSF since June 29, 2026 (Forms 4 and 7 retired): submit drawings, answer plan review, pay, then book the final inspection. Lit signs also need an electrical permit.", "自 2026 年 6 月 29 日起仅可通过 PermitSF 在线申请（第 4、7 号表已停用）：提交图纸，回复审查意见并缴费后预约最终检查。灯箱招牌另需电气许可。"),
+    url: "https://sf.gov/step-by-step/get-permit-install-sign-or-awning", info: "https://sf.gov/step-by-step/get-permit-install-sign-or-awning",
     fee: null, checked: "page", fields: [],
   },
   {

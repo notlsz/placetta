@@ -1,0 +1,51 @@
+{
+  "dal-plan-review": {
+    "form_pdf": "https://dallascityhall.com/departments/codecompliance/Admin1/ApplyforaPermit/Documents/CCS-FRM-424%20Food%20Establishment%20Applcation.pdf",
+    "instructions": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+    "submit_page": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+    "titles_seen": ["food establishment", "CCS FRM 424 Food Establishment Applcation", "dallas.gov FOODESTABLISHMENTPERMIT2.pdf"],
+    "note": "Library entry points to Planning and Development / Building Inspection Health-Inspections page. Search results show food establishment applications and permits sit under Dallas Code Compliance Services, Consumer Health (CCS-FRM-424), so the agency and URL in the library may be outdated. No plan-review-specific form title appeared in results; CCS-FRM-424 is the food establishment application, not confirmed as the plan review form."
+  },
+  "dal-building": {
+    "form_pdf": "",
+    "instructions": "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/3.%20Applying%20for%20a%20Commercial%20Alteration%20and%20Addition%20Application.pdf",
+    "submit_page": "https://dallascityhall.com/departments/sustainabledevelopment/guide/Pages/default.aspx",
+    "titles_seen": ["dallascityhall.com (3. Applying for a Commercial Alteration and Addition Application.pdf)", "Page Content (sustainabledevelopment/guide)"],
+    "note": "Application is a DallasNow portal flow; the PDF is a how-to guide, not a blank form. The guide page URL is the Planning and Development guide landing page; its exact content was not visible in results."
+  },
+  "dal-sign": {
+    "form_pdf": "",
+    "instructions": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Documents/Signs/SIGN%20PERMITS%20-%20SPSD%20Checklist.pdf",
+    "submit_page": "https://dallas.gov/departments/sustainabledevelopment/buildinginspection/Pages/Signs.aspx",
+    "titles_seen": ["Permitting & Inspections (dallas.gov Signs.aspx)", "SIGN PERMITS - SPSD Checklist"],
+    "note": "Library URL (dallascityhall.com Signs.aspx) also appears under the dallas.gov domain; both official."
+  },
+  "aus-co": {
+    "form_pdf": "https://Austintexas.gov/sites/default/files/files/Development_Services/COM_ChangeOfUseSubmittalRequirements.pdf",
+    "instructions": "https://www.austintexas.gov/development-services/certificate-occupancy",
+    "submit_page": "https://www.austintexas.gov/development-services/small-business-permitting",
+    "titles_seen": ["Certificate of Occupancy", "COM ChangeOfUseSubmittalRequirements", "Small Business Permitting", "RES AmnestyCertificateOfOccupancyApplication"],
+    "note": "form_pdf is the commercial change-of-use submittal requirements document, not a blank application form. A dedicated Certificate of Occupancy page exists and is a better primary URL than the small-business-permitting page in the library. The Amnesty CO application PDF is residential and not a match."
+  },
+  "aus-food-plan-review": {
+    "form_pdf": "https://austintexas.gov/sites/default/files/files/APH%20Comms/Plan_Review_FFE_EN_061424.pdf",
+    "instructions": "https://www.austintexas.gov/health/fixed-food-establishments",
+    "submit_page": "https://www.austintexas.gov/node/426185",
+    "titles_seen": ["Plan Review FFE EN 061424", "Fixed Food Establishments", "Apply For a Permit"],
+    "note": "Library URL (health/programs/fixed-food-establishments) is also shown by results as Austin Public Health; newer URL austintexas.gov/health/fixed-food-establishments and austintexas.gov/department/fixed-food-establishments appear. Submit method on node/426185 not confirmed from result title alone."
+  },
+  "aus-food-permit": {
+    "form_pdf": "https://www.austintexas.gov/sites/default/files/files/Health/Environmental/Food/Operational_Permit_Application_FFE_EN_110118_TC.pdf",
+    "instructions": "https://www.austintexas.gov/health/fixed-food-establishments",
+    "submit_page": "https://www.austintexas.gov/node/426185",
+    "titles_seen": ["Operational Permit Application FFE EN 110118 TC", "For Office Use Only (Food Enterprise Permit_093021.pdf)", "Fixed Food Establishments", "Apply For a Permit"],
+    "note": "The operational permit PDF is dated 2018 (110118) in its filename and may be superseded; a Food Enterprise Permit_093021.pdf (2021) at https://www.austintexas.gov/sites/default/files/files/Food%20Enterprise%20Permit_093021.pdf also appeared and may be newer. Library info URL (permit-fee-schedule) did not appear in results."
+  },
+  "aus-food-preopening": {
+    "form_pdf": "https://www.austintexas.gov/sites/default/files/files/APH%20Comms/Food-Pre-Opening-Revise.pdf",
+    "instructions": "https://www.austintexas.gov/health/fixed-food-establishments",
+    "submit_page": "https://www.austintexas.gov/node/426185",
+    "titles_seen": ["Food Pre Opening Revise", "Fixed Food Establishments", "Apply For a Permit"],
+    "note": "Pre-opening PDF title is 'Food Pre Opening Revise'; confirm it is the application and not a checklist. Submit method not confirmed from titles."
+  }
+}

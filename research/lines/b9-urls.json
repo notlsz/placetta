@@ -1,0 +1,35 @@
+{
+  "irs-5472": {
+    "form_pdf": "https://www.irs.gov/pub/irs-pdf/f5472.pdf",
+    "instructions": "https://www.irs.gov/instructions/i5472",
+    "submit_page": "https://www.irs.gov/instructions/i5472",
+    "titles_seen": ["Instructions for Form 5472 (12/2024)", "Instructions for Form 5472 (Rev. December 2024)"],
+    "note": "Search showed only the instructions page (irs.gov/instructions/i5472) and PDF (irs.gov/pub/irs-pdf/i5472.pdf); the f5472.pdf and about-form-5472 URLs in the library were not shown in results. Filing address/method is inside the instructions, not confirmed from a result title."
+  },
+  "fincen-boir": {
+    "instructions": "https://www.fincen.gov/boi",
+    "submit_page": "https://boiefiling.fincen.gov/",
+    "titles_seen": ["Beneficial Ownership Information Reporting", "BOI E-FILING - FinCEN", "Beneficial Ownership Information Reporting Filing Instructions (boiefiling.fincen.gov/resources/BOIR_Filing_Instructions.pdf)", "FinCEN Removes Beneficial Ownership Reporting Requirements for U.S. Companies and U.S. Persons, Sets New Deadlines for Foreign Companies", "FinCEN Permanently Ends Beneficial Ownership Reporting Requirements for Millions of Small Business Owners", "Frequently Asked Questions", "Final Rule: Questions and Answers (fincen.gov/system/files/2026-08/QAs_BOIFinalRule.pdf)"],
+    "note": "Titles suggest rules changed: BOIR requirements removed for U.S. companies and U.S. persons, with deadlines for foreign companies, and a final rule (Aug 2026 Q&A). Library entry should be re-verified for applicability and wording (e.g. 'foreign reporting company' meaning). Filing instructions PDF: https://boiefiling.fincen.gov/resources/BOIR_Filing_Instructions.pdf. No blank form PDF (online filing only)."
+  },
+  "aus-building": {
+    "instructions": "https://www.austintexas.gov/development-services/commercial-plan-review",
+    "submit_page": "https://www.austintexas.gov/development-services/apply-standalone-permit",
+    "titles_seen": ["Commercial Plan Review", "Apply for a Standalone Permit", "Types of Permits", "Forms & Applications", "Austin Build + Connect (AB+C)"],
+    "note": "The jotform URL in the library did not appear in results (jotform is not a .gov domain), so not recorded. Austin Build + Connect page: https://www.austintexas.gov/development-services/austin-build-connect-abc. Verify whether the web form is still the current route."
+  },
+  "aus-sign": {
+    "form_pdf": "https://www.austintexas.gov/sites/default/files/files/Development_Services/DAC_SignPermitApplication.pdf",
+    "instructions": "https://www.austintexas.gov/development-services/sign-permits",
+    "submit_page": "https://www.austintexas.gov/development-services/sign-permits",
+    "titles_seen": ["Sign Permits", "Sign Permit Application For Office Use Only"],
+    "note": "A PDF sign permit application exists (title 'Sign Permit Application For Office Use Only'); it appears to be a DAC (Development Assistance Center) form, may be outdated vs AB+C portal. Submission method not confirmed from titles."
+  },
+  "ny-dtf-17": {
+    "form_pdf": "https://www.tax.ny.gov/pdf/current_forms/st/dtf17att_fill_in.pdf",
+    "instructions": "https://www.tax.ny.gov/pdf/current_forms/st/dtf17i.pdf",
+    "submit_page": "https://www.tax.ny.gov/bus/st/register.htm",
+    "titles_seen": ["Instructions for Form DTF-17 - Tax.NY.gov", "Register as a sales tax vendor - Tax.NY.gov", "How to Register for New York State Sales Tax - Tax.NY.gov", "New York Business Express - Application to Register for a Sales Tax Certificate of Authority", "Form DTF-17-ATT Schedule of Business Locations For a ...", "DTF-17.1 (1/24) Department of Taxation and Finance Business Contact and ...", "Instructions for the application for a Sales Tax Certificate of Authority (tax.ny.gov/e-services/elcoa/)"],
+    "note": "The library 'pdf' (dtf17att_fill_in.pdf) is only the Schedule of Business Locations attachment (DTF-17-ATT), not the main application; no main DTF-17 blank PDF surfaced in results. Related: DTF-17.1 https://www.tax.ny.gov/pdf/current_forms/st/dtf17_1.pdf; online route https://www.businessexpress.ny.gov/app/answers/cms/a_id/2058/kw/DTF-17 ; how-to https://www.tax.ny.gov/pubs_and_bulls/tg_bulletins/st/how_to_register_for_nys_sales_tax.htm"
+  }
+}

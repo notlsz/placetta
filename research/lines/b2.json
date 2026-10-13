@@ -1,0 +1,203 @@
+{
+  "ca-cdtfa": {
+    "status": "page_only",
+    "form_seen": "CDTFA Online Services registration (permit, license or account); no paper form. Pub 107 'Applying for a Seller's Permit' (Revision July 2024)",
+    "read_on": "2026-10-13",
+    "sources": [
+      { "url": "https://cdtfa.ca.gov/services/registration.htm", "what": "application page (information needed list)" },
+      { "url": "https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "identification", "line": "", "en": "A valid form of identification", "zh": "有效身份证件",
+        "hint_en": "Driver's License, City ID Card, Employment Authorization Card, Matricula Consular ID, Military ID, Non Immigrant Visa, Non-U.S. Driver's License, Non-U.S. ID, Non-U.S. Passport, Permanent Resident Alien Card, State ID, Tribal Photo ID, U.S. Passport Card, U.S. Passport, or U.S. Visa",
+        "hint_zh": "驾照、市政身份证、工作许可卡、墨西哥领事证、军人证、非移民签证、外国驾照、外国身份证、外国护照、绿卡、州身份证、部落带照片身份证、美国护照卡、美国护照或美国签证均可" },
+      { "id": "ssn_itin", "line": "", "en": "Social Security Number (SSN) or Individual Taxpayer ID (ITIN)", "zh": "社会安全号码（SSN）或个人纳税识别号（ITIN）" },
+      { "id": "email", "line": "", "en": "Email address", "zh": "电子邮箱" },
+      { "id": "supplier", "line": "", "en": "Supplier name/address", "zh": "供应商名称及地址" },
+      { "id": "personal_references", "line": "", "en": "Personal references", "zh": "个人推荐人" },
+      { "id": "bookkeeper", "line": "", "en": "Bookkeeper/accountant address and phone number (if applicable)", "zh": "簿记员/会计师的地址和电话（如适用）" },
+      { "id": "fein", "line": "", "en": "FEIN (partnerships, corporations, LLCs, LLPs, LPs, trusts, estates, etc.)", "zh": "联邦雇主识别号（EIN），合伙、公司、LLC 等实体需提供" },
+      { "id": "sos_entity_number", "line": "", "en": "California Secretary of State Entity Number (Corporation, LLP, LP, LLC)", "zh": "加州州务卿实体编号（公司、LLP、LP、LLC 需提供）" },
+      { "id": "officers", "line": "", "en": "Officer, Member, or Partner Information (date of birth, SSN, or driver's license and address)", "zh": "高管、成员或合伙人信息（出生日期、SSN 或驾照号、地址）" },
+      { "id": "agency_name", "line": "", "en": "Agency name (Federal, State, and Local Government)", "zh": "机构名称（仅限联邦、州和地方政府）" },
+      { "id": "books_contact", "line": "", "en": "Contact information of the person(s) who maintains the books and records (name, address, phone)", "zh": "账簿和记录保管人的联系方式（姓名、地址、电话）" },
+      { "id": "projected_monthly_sales", "line": "", "en": "Projected monthly sales", "zh": "预计每月销售额" },
+      { "id": "projected_monthly_taxable_sales", "line": "", "en": "Projected monthly taxable sales", "zh": "预计每月应税销售额" },
+      { "id": "products_sold", "line": "", "en": "Products to be sold", "zh": "拟销售的产品" }
+    ],
+    "attach": [],
+    "destination": {
+      "portal": "onlineservices.cdtfa.ca.gov",
+      "signature": "typed",
+      "evidence": "Online Services Registration is \"a convenient way to register online for a permit, license, or account with us\" (Begin Registration links to https://onlineservices.cdtfa.ca.gov/eServ/?Link=RegLanding). Pub 107: \"You can also register in person at any of our offices.\"",
+      "source": "https://cdtfa.ca.gov/services/registration.htm"
+    },
+    "notes": "Free: Pub 107 says \"There is no charge for a seller's permit\" but CDTFA \"may ask you for a security deposit\" depending on business type and expected taxable sales. Pub 107 also says applicants need bank account details and estimated income. Temporary permits are valid up to 90 days. The online questions themselves sit behind the eServ flow; fields above are CDTFA's published 'information needed' list, not the screen-by-screen questions. No mailing address published for seller's permit applications (in person at any CDTFA office is the alternative)."
+  },
+
+  "ca-llc-5": {
+    "status": "mapped",
+    "form_seen": "LLC-5 (REV 11/2020) Application to Register a Foreign Limited Liability Company (LLC)",
+    "read_on": "2026-10-13",
+    "sources": [
+      { "url": "https://bizfileonline.sos.ca.gov/api/report/GetImageByNum/033125203119110062203205011098124115240083031111", "what": "official PDF (filed LLC-5 image on bizfile; used for layout only)" },
+      { "url": "https://www.sos.ca.gov/business-programs/business-entities/forms/limited-liability-companies-foreign-out-state-or-out-country", "what": "application page" },
+      { "url": "https://www.sos.ca.gov/business-programs/business-entities/faqs", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "llc_name", "line": "1a", "en": "LLC Name", "zh": "LLC 名称",
+        "hint_en": "Enter the exact name of the LLC as listed on your attached Certificate of Good Standing.", "hint_zh": "须与所附存续证明（Certificate of Good Standing）上的名称完全一致" },
+      { "id": "ca_alternate_name", "line": "1b", "en": "California Alternate Name, If Required", "zh": "加州备用名称（如需）",
+        "hint_en": "Only enter an alternate name if the LLC name in 1a is not available in California.", "hint_zh": "仅当 1a 的名称在加州不可用时填写" },
+      { "id": "formation_date", "line": "2a", "en": "Date LLC was formed in home jurisdiction (MMDDYYYY)", "zh": "在注册地成立 LLC 的日期（月日年）",
+        "hint_en": "Must match the attached Certificate of Good Standing.", "hint_zh": "须与所附存续证明一致" },
+      { "id": "home_jurisdiction", "line": "2b", "en": "Jurisdiction (State, foreign country or place where this LLC is formed.)", "zh": "成立地（州、外国或其他地区）" },
+      { "id": "authority_statement", "line": "2c", "en": "Authority Statement: This LLC currently has powers and privileges to conduct business in the place entered in 2b", "zh": "授权声明：本 LLC 目前在 2b 所填地区拥有经营权利" },
+      { "id": "principal_exec_office", "line": "3a", "en": "Street Address of Principal Executive Office - Do not enter a P.O. Box", "zh": "主要行政办公室街道地址（不可填邮政信箱）" },
+      { "id": "principal_office_ca", "line": "3b", "en": "Street Address of Principal Office in California, if any - Do not enter a P.O. Box", "zh": "加州主要办公室街道地址（如有，不可填邮政信箱）" },
+      { "id": "mailing_address", "line": "3c", "en": "Mailing Address of Principal Executive Office, if different than item 3a", "zh": "主要行政办公室邮寄地址（如与 3a 不同）" },
+      { "id": "agent_individual_name", "line": "4a", "en": "California Agent's First Name, Middle Name, Last Name, Suffix (if agent is not a corporation)", "zh": "加州送达代理人姓名（个人代理人）",
+        "hint_en": "Individual agent: complete 4a and 4b only. Must provide either Individual OR Corporation.", "hint_zh": "个人代理人只填 4a 和 4b；个人或公司代理人二选一" },
+      { "id": "agent_individual_address", "line": "4b", "en": "Street Address (if agent is not a corporation) - Do not enter a P.O. Box", "zh": "个人代理人的加州街道地址（不可填邮政信箱）" },
+      { "id": "agent_corporation", "line": "4c", "en": "California Registered Corporate Agent's Name (if agent is a corporation)", "zh": "加州注册公司代理人名称（公司代理人）",
+        "hint_en": "Do not complete Item 4a or 4b.", "hint_zh": "选择公司代理人时不要填 4a、4b" },
+      { "id": "signer_name", "line": "5", "en": "Type or Print Name", "zh": "签署人姓名（打印）",
+        "hint_en": "By signing, I affirm under penalty of perjury that the information herein is true and correct and that I am authorized to sign on behalf of the foreign LLC. Title not required.", "hint_zh": "签署即在伪证罪责任下声明信息真实且本人有权代表该外州 LLC 签署；无需填写职位" }
+    ],
+    "attach": [
+      { "en": "Current Certificate of Good Standing issued by the government agency where the LLC was formed", "zh": "LLC 成立地政府机构出具的最新存续证明（Certificate of Good Standing）" }
+    ],
+    "destination": {
+      "portal": "bizfileonline.sos.ca.gov",
+      "signature": "typed",
+      "evidence": "\"Electronic signatures on filings submitted through the Secretary of State's online process are the only\" acceptable electronic signatures; FAQ: \"File a Registration – Out-of-State LLC online at bizfileOnline.sos.ca.gov.\"",
+      "source": "https://www.sos.ca.gov/business-programs/business-entities/faqs"
+    },
+    "notes": "Fee $70.00 (forms page and printed on form; plus optional copy fees $1 first page/$0.50 each attachment page and $5 certification). Online 5 days or less vs PDF 10+ days. Paper PDF linked at https://bpd.cdn.sos.ca.gov/llc/forms/llc-5.pdf but I could not open it, so the revision shown (REV 11/2020) comes from a filed image and may be stale; the bizfile online screens may word items differently. Computer-generated/font signatures are NOT accepted on paper filings. No filing mailing address confirmed (forms page only says forms 'can be submitted by mail or in person' and points to the contact page). Form warns registered LLCs may owe the $800 FTB annual tax."
+  },
+
+  "ca-edd-de1": {
+    "status": "mapped",
+    "form_seen": "DE 1 Rev. 79 (3-16) (INTERNET) Commercial Employer Account Registration and Update Form; instructions DE 1-I (2-16) (INTERNET)",
+    "read_on": "2026-10-13",
+    "sources": [
+      { "url": "https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf", "what": "official PDF" },
+      { "url": "https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de1i.pdf", "what": "instructions" },
+      { "url": "https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/", "what": "application page" }
+    ],
+    "fields": [
+      { "id": "request_type", "line": "A", "en": "I WANT TO (Select only one box)", "zh": "申请事项（只选一项）",
+        "options": ["Register for a New Employer Account Number", "Request Account for CalJOBS", "Update Employer Account Information", "Report a Purchase of Business", "Report a Sale of Business", "Reopen a Previously Closed Account", "Close Employer Account", "Report a Change in Status: Business Ownership, Entity Type, or Name"] },
+      { "id": "employer_type", "line": "B", "en": "EMPLOYER TYPE", "zh": "雇主类型",
+        "options": ["COMMERCIAL", "PACIFIC MARITIME", "FISHING BOAT"] },
+      { "id": "taxpayer_type", "line": "C", "en": "TAXPAYER TYPE (Select only one type)", "zh": "纳税人类型（只选一项）",
+        "options": ["Individual Owner", "Limited Partnership", "Joint Venture", "Co-Ownership", "Association", "Receivership", "General Partnership", "Limited Liability Company (LLC)", "Estate Administration", "Corporation", "Limited Liability Partnership (LLP)", "Trusteeship", "Other (Specify)"] },
+      { "id": "first_payroll_date", "line": "D", "en": "FIRST PAYROLL DATE (MM/DD/YYYY): First payroll date wages paid exceeded $100", "zh": "首次发薪日期（工资首次超过 100 美元的日期）",
+        "hint_en": "Do not submit until wages over $100 have been paid to one or more employees in a calendar quarter.", "hint_zh": "在一个季度内向员工支付工资超过 100 美元后才需提交" },
+      { "id": "e1_individual_family", "line": "E1", "en": "INDIVIDUAL OWNER (Only): Do you only employ your spouse, parent(s), or minor child(ren) (under 18)?", "zh": "仅限个人业主：是否只雇用配偶、父母或未满 18 岁子女？", "options": ["Yes", "No"] },
+      { "id": "e2_coowner_children", "line": "E2", "en": "CO-OWNERSHIP (Only): Do you only employ your minor child(ren) (under 18)?", "zh": "仅限共同所有：是否只雇用未满 18 岁子女？", "options": ["Yes", "No"] },
+      { "id": "e3_partnership_parents", "line": "E3", "en": "PARTNERSHIP (Consisting of siblings only.): Do you only employ your parent(s)?", "zh": "仅限兄弟姐妹组成的合伙：是否只雇用父母？", "options": ["Yes", "No"] },
+      { "id": "employees_in_ca", "line": "F", "en": "Do you have employees working in California?", "zh": "是否有员工在加州工作？", "options": ["Yes", "No"] },
+      { "id": "employees_residing_ca_outside", "line": "F", "en": "Do you have employees residing in California that are working outside of California?", "zh": "是否有居住在加州但在加州以外工作的员工？", "options": ["Yes", "No"] },
+      { "id": "owner_info", "line": "G", "en": "INDIVIDUAL OWNER/CO-OWNER INFORMATION: Name, Title, SSN, CA Driver License Number", "zh": "个人业主/共同所有人信息：姓名、职位、SSN、加州驾照号" },
+      { "id": "officer_member_info", "line": "H", "en": "CORPORATE OFFICER(S), PARTNERS, OR LLC MEMBER(S), MANAGER(S): Name, Title, SSN, CA Driver License No.", "zh": "公司高管、合伙人或 LLC 成员/经理信息：姓名、职位、SSN、加州驾照号",
+        "hint_en": "Foreign individuals or entities are marked in the SSN/FEIN box.", "hint_zh": "外国个人或实体在 SSN/FEIN 栏中注明" },
+      { "id": "legal_name", "line": "I", "en": "LEGAL NAME OF ORGANIZATION", "zh": "组织法定名称",
+        "hint_en": "Corporation/LLC/LLP/LP: enter exactly as it appears on official registration documents.", "hint_zh": "公司/LLC 等须与官方注册文件完全一致" },
+      { "id": "dba", "line": "J", "en": "DOING BUSINESS AS (DBA) (If applicable)", "zh": "经营名称（DBA，如适用）" },
+      { "id": "fein", "line": "K", "en": "FEDERAL EMPLOYER IDENTIFICATION NUMBER (FEIN)", "zh": "联邦雇主识别号（FEIN）",
+        "hint_en": "Or note that you have applied for one.", "hint_zh": "如已申请尚未获得，请注明" },
+      { "id": "ownership_began", "line": "L", "en": "DATE OWNERSHIP BEGAN (MM/DD/YYYY)", "zh": "所有权开始日期（月/日/年）" },
+      { "id": "state_of_incorporation", "line": "M", "en": "STATE OR PROVINCE OF INCORPORATION/ORGANIZATION", "zh": "公司注册/组建所在州或省" },
+      { "id": "sos_entity_number", "line": "N", "en": "CALIFORNIA SECRETARY OF STATE ENTITY NUMBER", "zh": "加州州务卿实体编号" },
+      { "id": "physical_location", "line": "O", "en": "PHYSICAL BUSINESS LOCATION (street, unit, city, state, ZIP, country, business phone)", "zh": "实际营业地址（街道、单元、城市、州、邮编、国家、营业电话）",
+        "hint_en": "PO Box or Private Mail Box not accepted. List all addresses if you have multiple California locations.", "hint_zh": "不接受邮政信箱或私人信箱；在加州有多个地点须全部列出" },
+      { "id": "mailing_address", "line": "P", "en": "MAILING ADDRESS (Same as above / street, unit, city, state, ZIP, country, phone)", "zh": "邮寄地址（可勾选同上）",
+        "hint_en": "PO Box or Private Mail Box acceptable. Include a daytime phone number.", "hint_zh": "可用邮政信箱；请附白天联系电话" },
+      { "id": "email", "line": "Q", "en": "E-MAIL: Check to allow e-mail contact; Valid E-mail Address", "zh": "电子邮箱（勾选是否允许邮件联系）" },
+      { "id": "products_services", "line": "R", "en": "INDUSTRY ACTIVITY: Describe in detail your specific product/services", "zh": "行业活动：详细描述具体产品/服务" },
+      { "id": "industry", "line": "R", "en": "Select your business industry", "zh": "选择所属行业",
+        "options": ["Services", "Retail", "Wholesale", "Manufacturing", "Temporary Services", "Leasing Employer", "Professional Employer Organization", "Other (Specify)"] },
+      { "id": "contact_person", "line": "S", "en": "CONTACT PERSON: Name, Contact Phone Number, E-mail Address, Relation, Address", "zh": "联系人：姓名、电话、邮箱、关系、地址",
+        "hint_en": "Outside accountant, agent or tax representative requires a Power of Attorney Declaration (DE 48).", "hint_zh": "如联系人为外部会计、代理人或税务代表，需附授权委托书 DE 48" },
+      { "id": "declarant", "line": "T", "en": "DECLARATION: Name, Title, Phone Number, Date", "zh": "声明：签署人姓名、职位、电话、日期",
+        "hint_en": "Must be signed by an individual having the authority to sign on behalf of the business under penalty of perjury.", "hint_zh": "须由有权代表企业者在伪证罪责任下签署" }
+    ],
+    "attach": [
+      { "en": "Power of Attorney Declaration (DE 48), if the contact is an outside accountant, agent, or tax representative", "zh": "授权委托书 DE 48（联系人为外部会计、代理人或税务代表时）" },
+      { "en": "List of all physical business addresses, if multiple California locations", "zh": "如在加州有多个营业地点，附全部地址清单" }
+    ],
+    "destination": {
+      "fax": "+19166549211",
+      "mail": { "name": "Employment Development Department, Account Services Group, MIC 28", "line1": "PO Box 826880", "line2": "", "city": "Sacramento", "state": "CA", "zip": "94280-0001" },
+      "signature": "unknown",
+      "evidence": "\"This declaration must be signed by an individual having the authority to sign on behalf of the business under penalty of perjury.\" (no statement on original vs electronic signature for the paper DE 1)",
+      "source": "https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/"
+    },
+    "notes": "Fax 1-916-654-9211 and the MIC 28 address confirmed on the current Step 3 page and the DE 1-I. EDD: 'Mail-in registrations may take 10–14 days'; 'If you have already registered online, do not use this option.' Online route is e-Services for Business (linked from https://edd.ca.gov/en/payroll_taxes/e-Services_for_Business/); I did not confirm the app host, so portal is left blank. Form is old (Rev. 79, 3-16) but is the one EDD currently links. No fee."
+  },
+
+  "ca-ftb-3522": {
+    "status": "mapped",
+    "form_seen": "2026 California Form 3522 LLC Tax Voucher (taxable year 2026); footer reads 'FTB 3522 2025'",
+    "read_on": "2026-10-13",
+    "sources": [
+      { "url": "https://www.ftb.ca.gov/forms/2026/2026-3522.pdf", "what": "official PDF (voucher + instructions)" },
+      { "url": "https://www.ftb.ca.gov/pay/bank-account/index.asp", "what": "application page (Web Pay)" }
+    ],
+    "fields": [
+      { "id": "tax_year", "line": "", "en": "For calendar year 2026 or fiscal year beginning (mm/dd/yyyy) and ending (mm/dd/yyyy)", "zh": "2026 日历年度，或财政年度起止日期（月/日/年）" },
+      { "id": "llc_name", "line": "", "en": "Limited liability company name", "zh": "有限责任公司名称" },
+      { "id": "sos_file_number", "line": "", "en": "California Secretary of State (SOS) file number", "zh": "加州州务卿（SOS）档案编号" },
+      { "id": "dba", "line": "", "en": "DBA", "zh": "经营名称（DBA）" },
+      { "id": "fein", "line": "", "en": "FEIN", "zh": "联邦雇主识别号（FEIN）" },
+      { "id": "address", "line": "", "en": "Address (suite, room, PO box, or PMB no.)", "zh": "地址（套房、房间号、邮政信箱或私人信箱号）" },
+      { "id": "city", "line": "", "en": "City", "zh": "城市" },
+      { "id": "state", "line": "", "en": "State", "zh": "州" },
+      { "id": "zip", "line": "", "en": "ZIP code", "zh": "邮编" },
+      { "id": "telephone", "line": "", "en": "Telephone", "zh": "电话" },
+      { "id": "amount", "line": "", "en": "Amount of payment", "zh": "付款金额",
+        "hint_en": "Annual LLC tax of $800 for taxable year 2026.", "hint_zh": "2026 纳税年度 LLC 年税 800 美元" }
+    ],
+    "attach": [
+      { "en": "Check or money order payable to the \"Franchise Tax Board\" (write SOS file number, FEIN and \"2026 FTB 3522\" on it; enclose, do not staple)", "zh": "抬头为 \"Franchise Tax Board\" 的支票或汇票（注明 SOS 档案号、FEIN 和 \"2026 FTB 3522\"；随附但不要钉在一起）" }
+    ],
+    "destination": {
+      "mail": { "name": "Franchise Tax Board", "line1": "PO Box 942857", "line2": "", "city": "Sacramento", "state": "CA", "zip": "94257-0531" },
+      "portal": "webapp.ftb.ca.gov",
+      "signature": "unknown",
+      "evidence": "\"If paying by Web Pay, do not file form FTB 3522.\" The voucher has no signature line.",
+      "source": "https://www.ftb.ca.gov/forms/2026/2026-3522.pdf"
+    },
+    "notes": "Payment voucher, not an application. $800 due by the 15th day of the 4th month of the taxable year (April 15, 2026 for calendar-year LLCs); next business day if weekend/holiday. Paying online via Web Pay (free, bank account) or credit card replaces the voucher: 'If no payment is due or paid electronically, do not mail this voucher.' FTB notes 'some recently registered business entities may not be able to use the FTB Web Pay application'. Library URL https://www.ftb.ca.gov/pay/ was not opened; Web Pay host taken from an official search result (webapp.ftb.ca.gov/WebPay). For taxable year 2027 the library will need the 2027 voucher."
+  },
+
+  "ca-llc-1": {
+    "status": "mapped",
+    "form_seen": "Articles of Organization – Limited Liability Company, bizfile Online filing (online version; paper Form LLC-1 PDF not opened)",
+    "read_on": "2026-10-13",
+    "sources": [
+      { "url": "https://bizfileonline.sos.ca.gov/api/report/GetImageByNum/003172173107208126066081196077178205239040019253", "what": "official PDF (filed online Articles image on bizfile; used for layout only)" },
+      { "url": "https://www.sos.ca.gov/business-programs/business-entities/forms/limited-liability-companies-california-domestic", "what": "application page" },
+      { "url": "https://www.sos.ca.gov/business-programs/business-entities/faqs", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "entity_name", "line": "1", "en": "Entity Name", "zh": "实体名称" },
+      { "id": "designated_office_ca", "line": "2a", "en": "Initial Street Address of Designated Office in California", "zh": "加州指定办公室初始街道地址" },
+      { "id": "initial_mailing_address", "line": "2b", "en": "Initial Mailing Address", "zh": "初始邮寄地址" },
+      { "id": "agent_for_service", "line": "3", "en": "Agent for Service of Process", "zh": "法律文书送达代理人" },
+      { "id": "management_structure", "line": "4", "en": "Management Structure", "zh": "管理结构" },
+      { "id": "purpose_statement", "line": "5", "en": "Purpose Statement (printed: any lawful act or activity under the CA Revised Uniform LLC Act)", "zh": "经营宗旨（固定文本：从事加州修订版统一 LLC 法允许的任何合法活动）" },
+      { "id": "organizer", "line": "", "en": "Organizer (Electronic Signature)", "zh": "组建人（电子签名）",
+        "hint_en": "The organizer affirms the information contained herein is true and correct.", "hint_zh": "组建人确认所填信息真实无误" }
+    ],
+    "attach": [],
+    "destination": {
+      "portal": "bizfileonline.sos.ca.gov",
+      "signature": "typed",
+      "evidence": "\"Electronic signatures on filings submitted through the Secretary of State's online process are the only\" acceptable electronic signatures; FAQ: \"File Articles of Organization online at bizfileOnline.sos.ca.gov.\"",
+      "source": "https://www.sos.ca.gov/business-programs/business-entities/faqs"
+    },
+    "notes": "Fee $70.00 (domestic LLC forms page). Online 5 days or less vs PDF 10+ days. FAQ: 'The online form has been drafted to meet the minimum statutory requirements.' Paper PDF is https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf (linked from the SOS domestic LLC forms page) but I could not open it, so revision and checkbox options (e.g. management choices, individual vs corporate agent) are unconfirmed and not listed. The library's first-pass PDF llcconv.pdf is the conversion form, not LLC-1; do not use it. Sub-fields of items 3 and 4 are on the bizfile screens and not printed on the filed image. No filing mailing address confirmed."
+  }
+}
