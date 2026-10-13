@@ -35,10 +35,10 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/agent/index.ts
+// supabase/functions/agent/index.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/_shared/llm.ts
+// supabase/functions/_shared/llm.ts
 var OPENAI_STYLE = {
   openai: { url: "https://api.openai.com/v1/chat/completions", key: "OPENAI_API_KEY" },
   deepseek: { url: "https://api.deepseek.com/chat/completions", key: "DEEPSEEK_API_KEY" },
@@ -194,7 +194,7 @@ async function callModel(env, call, fallbackModel, research, f = fetch) {
   return last;
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/_shared/ai_cost.ts
+// supabase/functions/_shared/ai_cost.ts
 var PRICES = [
   [/fable/, { in: 10, out: 50 }],
   [/opus-5-5/, { in: 4, out: 20 }],
@@ -220,7 +220,7 @@ function costOf(model, u) {
   return Math.round(usd * 1e6) / 1e6;
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/_shared/ai_gate.ts
+// supabase/functions/_shared/ai_gate.ts
 var mins = (s) => {
   const m = Math.max(1, Math.ceil((s ?? 60) / 60));
   return m >= 90 ? `${Math.round(m / 60)} hours` : `${m} minute${m === 1 ? "" : "s"}`;
@@ -230,9 +230,9 @@ function refusal(code, retry) {
     case "over_budget":
       return { status: 402, message: "You've used this period's Odelia allowance. Add a pack or move up a plan to keep going. Deadlines, reminders and filings already in motion carry on." };
     case "plan_required":
-      return { status: 402, message: "Odelia works on a paid plan. Pick a plan to start: the $299 entry plan maps every license for a market and is credited in full." };
+      return { status: 402, message: "Odelia works on a paid plan. Pick a plan to start: the $299 entry plan maps every license for a market, and it is credited if a yearly plan starts within 60 days." };
     case "entry_ended":
-      return { status: 402, message: "Your entry plan's 30 days with Odelia are over. Move to a yearly plan to keep going; your entry payment is credited." };
+      return { status: 402, message: "Your entry plan's 30 days with Odelia are over. Move to a yearly plan to keep going; your entry payment is credited if you start within 60 days of paying it." };
     case "rate_limited":
       return { status: 429, message: `That's a lot at once. Odelia can take more in about ${mins(retry)}.` };
     case "paused":
@@ -263,7 +263,7 @@ async function record(admin2, event, model, usage) {
   return cost;
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/agent/index.ts
+// supabase/functions/agent/index.ts
 var CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
