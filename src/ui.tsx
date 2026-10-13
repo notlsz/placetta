@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import type { Application, Doc, Level, Status } from "./model";
 import { useApp } from "./ctx";
-import { bytes, fmtAgo } from "./time";
+import { bytes, fmtAgo, money } from "./time";
 import type { Key } from "./i18n";
 
 const sv = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
@@ -62,6 +62,36 @@ export const StatusChip = ({ s }: { s: Status }) => { const { t } = useApp(); re
 export const Sample = () => { const { t } = useApp(); return <span className="sample">{t("sampleTag")}</span>; };
 
 export const feeTotal = (a: Application) => a.fees.reduce((s, f) => s + f.amount, 0);
+/** The fee as the person reads it: an amount, "from $X" when the agency sets the rest, "Set by the agency", or "No fee". */
+export const feeText = (a: Pick<Application, "fees" | "currency">, t: (k: Key) => string, f?: Application["fees"][number]) => {
+  const n = f ? f.amount : a.fees.reduce((s, x) => s + x.amount, 0), open = f ? !!f.tbd : a.fees.some(x => x.tbd);
+  return n ? money(n, a.currency) + (open ? "+" : "") : open ? t("feeTbd") : t("free");
+};
+
+/** An answer as the agent wrote it: paragraphs, "- " bullets and "1. " steps, line breaks kept. */
+export function Prose({ text }: { text: string }) {
+  const out: ReactNode[] = [];
+  let para: string[] = [], list: { ordered: boolean; items: string[] } | null = null;
+  const flushP = () => { if (para.length) out.push(<p key={out.length}>{para.flatMap((l, i) => (i ? [<br key={i} />, l] : [l]))}</p>); para = []; };
+  const flushL = () => { if (list) { const items = list.items.map((x, i) => <li key={i}>{x}</li>); out.push(list.ordered ? <ol key={out.length} className="prose-l">{items}</ol> : <ul key={out.length} className="prose-l">{items}</ul>); } list = null; };
+  for (const raw of text.split("\n")) {
+    const line = raw.trim(), bullet = /^[-*•]\s+(.*)/.exec(line), num = /^\d+[.)]\s+(.*)/.exec(line);
+    if (!line) { flushP(); flushL(); continue; }
+    if (bullet || num) {
+      flushP();
+      const ordered = !!num;
+      if (list && list.ordered !== ordered) flushL();
+      list ??= { ordered, items: [] };
+      list.items.push((bullet ?? num)![1]);
+      continue;
+    }
+    // a wrapped line right after a bullet belongs to it
+    if (list && /^\s{2,}/.test(raw)) { list.items[list.items.length - 1] += " " + line; continue; }
+    flushL(); para.push(line);
+  }
+  flushP(); flushL();
+  return <>{out}</>;
+}
 
 /** Alven-style file card: a type tile, the name, size and where it came from, and a download button. */
 export function FileCard({ d, compact }: { d: Doc; compact?: boolean }) {

@@ -72,6 +72,7 @@ export const S = {
   th_takes: B("Usually takes", "通常耗时"),
   th_next: B("Next", "下一步"),
   free: B("No fee", "免费"),
+  feeTbd: B("Set by the agency", "由机构核定"),
   estimates: B("Fees and times are estimates from each agency's published information. Placetta confirms them before anything is paid.", "费用和时间是根据各机构公开信息的估算，付款前快哉会再次核实。"),
 
   tab_check: B("Checklist", "清单"),

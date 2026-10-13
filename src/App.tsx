@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
-import { applyChange } from "./core";
+import { applyChange, blockersSay, readyToFile } from "./core";
 import { emptyBook } from "./memory";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
@@ -402,6 +402,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (held()) return;
     const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
     const shown = `${S.approvedIt[lang]}: ${a.title[lang]}`;
+    // every kind of filing: nothing goes out with an empty field or a missing document
+    const filingApp = a.kind === "file" ? w.apps.find(x => x.id === a.app) : undefined;
+    if (filingApp && !readyToFile(filingApp)) { say(blockersSay(filingApp)[lang]); return; }
     if (a.kind === "change" && a.change) {
       const c = a.change;
       setWs(x => audit("you", B("Confirmed a change", "确认更改"), a.title)(dropApproval(id)(applyChange(c)(x))));

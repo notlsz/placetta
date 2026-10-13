@@ -1,15 +1,16 @@
 import type { OrbState } from "thinking-orbs";
 import {
-  addApp, addApproval, addDeadline, addDoc, audit, setApp, setCheck, setFact,
+  addApp, addApproval, addDeadline, addDoc, audit, filingBlockers, setApp, setCheck, setFact,
   type AgentBackend, type AgentEvent, type Reply, type Request, type Step,
 } from "./core";
 import { B, same, type Bi } from "./bi";
-import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Workspace } from "./model";
+import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { inDays, money, nowIso } from "./time";
 import { replyLanguage } from "./langs";
 import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills";
 import { docx } from "./files";
+import { countyOf } from "./counties";
 import type { Lang } from "./i18n";
 import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
 
@@ -257,7 +258,7 @@ Rules:
 - Research requirements, fees and processing times on official government websites with web_search and web_fetch: the agency's own pages (.gov, state, county and city sites). Portals that point to agencies (usa.gov, sba.gov) are fine for finding the right agency, but read and cite the agency's own page. Use the agency's root domain as the application's agency_url. If you can't confirm something on an official page, call it an estimate.` : `
 - Beyond the forms library, requirements, fees and processing times come from your general knowledge: call them estimates to confirm with the agency, and never present a guess as a confirmed rule. Use only agencies' official root domains as links.
 - You cannot browse the web or reach agency portals from here.`}
-- Reply in ${extra.speak ?? replyLanguage(lang)}, or in the language the person writes in if it's a different one. Be sharp and concise: two to four short sentences of plain prose by default, no markdown, no lists, no headings, and never an em dash. Lead with what you did, then what's next. Go longer only when they ask for detail.
+- Reply in ${extra.speak ?? replyLanguage(lang)}, or in the language the person writes in if it's a different one. Be sharp and concise: two to four short sentences of plain prose by default, no headings, no bold, and never an em dash. When you report on several applications or ask for several missing things, a short "- " list (one line each) is fine. Lead with what you did, then what's next. Go longer only when they ask for detail.
 
 Skills:
 ${skillIndex(w) || "(none)"}
@@ -368,6 +369,41 @@ function officialFields(off: OfficialForm, given: Field[]): Field[] {
   });
 }
 
+/** The lines every agency asks for, whatever the business or the form: used when the library doesn't list a form's
+    own lines yet (or for an application with no form), filled from Context and the store it's for. */
+export function coreFields(w: Workspace, store?: Store): Field[] {
+  const fact = (re: RegExp) => w.facts.find(f => re.test(f.label.en) && f.value.en.trim());
+  const one = (w.stores ?? []).length <= 1;
+  const row = (id: string, en: string, zh: string, f?: { value: Bi; source?: Bi } | string, from?: Bi): Field => {
+    const value = typeof f === "string" ? f : f?.value.en ?? "";
+    return { id, label: B(en, zh), value, from: value ? (typeof f === "string" ? from : f?.source) ?? B("From Context", "来自资料") : undefined };
+  };
+  const owner = w.facts.find(f => /^owner|responsible|^contact name/i.test(f.label.en) && f.value.en.trim() && !/^you\b/i.test(f.value.en));
+  return [
+    row("core-legal-name", "Legal business name", "法定企业名称", fact(/^legal (business )?name$|^company name$/i)),
+    row("core-dba", "Name the store trades under (DBA)", "门店经营名称（DBA）", fact(/^(dba|trade name|brand)/i) ?? w.business.en, B("From Context", "来自资料")),
+    row("core-entity", "Entity type and state formed", "实体类型及注册州", fact(/^entity/i)),
+    row("core-ein", "Federal tax ID (EIN)", "联邦税号（EIN）", fact(/^ein$|tax id/i)),
+    row("core-owner", "Owner or responsible person", "负责人", owner),
+    row("core-address", "Business location address", "经营地址", store?.address || (one ? fact(/storefront|^address|location/i) : undefined), store ? B("From Stores", "来自门店") : undefined),
+    row("core-phone", "Business phone", "企业电话", fact(/phone/i)),
+    row("core-email", "Contact email", "联系邮箱", fact(/e-?mail/i)),
+    row("core-activity", "What the business does there", "经营内容", fact(/what you sell|activity|business type|products/i)),
+    row("core-start", "Start date at this location", "该地点开始经营日期", store?.plannedOpen ?? (one ? fact(/target opening|opening date|start date/i) : undefined), store?.plannedOpen ? B("From Stores", "来自门店") : undefined),
+  ];
+}
+/** Core lines that are the same for the whole business: filled once, they fill every open application and Context. */
+const SHARED: Record<string, [Bi, FactGroup]> = {
+  "core-legal-name": [B("Legal name", "法定名称"), "business"], "core-entity": [B("Entity", "实体类型"), "business"], "core-ein": [B("EIN", "EIN"), "business"],
+  "core-owner": [B("Owner or responsible person", "负责人"), "business"], "core-phone": [B("Business phone", "企业电话"), "business"], "core-email": [B("Contact email", "联系邮箱"), "business"],
+};
+/** Core fields with what the agent gave matched by label, then anything else it gave. */
+function withCore(core: Field[], given: Field[]): Field[] {
+  const used = new Set<Field>();
+  const out = core.map(c => { const g = given.find(x => x.label.en.toLowerCase() === c.label.en.toLowerCase() || x.id === c.id); if (g) used.add(g); return g?.value ? { ...c, value: g.value, from: g.from } : c; });
+  return [...out, ...given.filter(g => !used.has(g))];
+}
+
 export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace) => void, step: (s: Step) => void, made: Made, lang: Lang, textLen: () => number, account: boolean, x: X): Tool[] {
   const L = (en: string, zh: string) => B(en, zh);
   const findApp = (id: unknown) => { const a = get().apps.find(x => x.id === str(id)); if (!a) throw new Error(`No application with id "${str(id)}". Use an id from the workspace.`); return a; };
@@ -414,7 +450,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         return {
           segment, place, country: info.country ?? "unknown", city: info.city?.en, currency: info.currency,
           forms: list.slice(0, 30).map(f => ({ official_form_id: f.id, form: f.form, title: f.title[lang], agency: f.agency[lang], level: f.level, how_filed: `${METHOD[f.method][lang]}. ${f.how[lang]}`, official_link: f.url, info: f.info,
-            fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`),
+            fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.length ? f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`) : "Not listed yet: prepare_application adds the lines every agency asks; read the official link for the rest",
             attachments: f.attach?.map(a => a[lang]), for_foreign_owners: f.foreign?.[lang], placetta_fills_official_pdf: !!f.fill, reread_agency_page_first: f.checked === "known" })),
           not_in_library: !info.country ? "This place isn't in the library yet. Research its national and local requirements on the government's own sites, prepare each one, then skill_save what you learned so the next business there goes faster."
             : !info.local ? `The national${info.country === "US" ? ", state" : ""} steps are here; ${info.city ? info.city.en + "'s" : "the city's"} own local permits aren't. Research the city's official pages for them, then skill_save the local steps you found.`
@@ -434,7 +470,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         fields: { type: "array", description: "Values you already have, by the form's own labels. Never a guess.", items: { type: "object", properties: { label: { type: "string" }, value: { type: "string" }, source: { type: "string" } }, required: ["label"] } },
         checklist: { type: "array", description: "Documents the filing needs beyond the form's own attachments", items: { type: "object", properties: { item: { type: "string" }, have: { type: "boolean" } }, required: ["item"] } },
         next_step: { type: "string" },
-        store_id: { type: "string", description: "The store this is for, when the business has more than one (from add_store or the workspace's stores)" },
+        store_id: { type: "string", description: "The store this is for (from add_store or the workspace's stores). Required for a city or county permit when the business has more than one store" },
       }, required: [] },
       execute(i) {
         const off = str(i.official_form_id) ? formById(str(i.official_form_id)) : undefined;
@@ -453,9 +489,13 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee ?? i.fee_usd) || 0);
         const currency = (off?.currency ?? (/^[A-Z]{3}$/.test(str(i.currency)) ? str(i.currency) : "USD"));
         const given = fieldList(i.fields, lang === "zh" ? "来自资料" : "From Context");
+        const listed = !!off?.fields.length;
+        // a city or county permit is for one store; with several stores the agent says which
+        const lvl = off ? off.level : (LEVELS.includes(i.level as Level) ? i.level as Level : "state");
+        if (stores.length > 1 && !target && (lvl === "city" || lvl === "county")) throw new Error(`This business has ${stores.length} stores and a ${lvl} permit is for one of them. Pass store_id (one of ${stores.map(x => `"${x.id}" (${x.name.en})`).join(", ")}).`);
         // a form skill fills the lines that don't depend on the store from the last filing of the same form
         const known = off ? prefill(get(), off.id) : new Map();
-        const fields = (off && off.fields.length ? officialFields(off, given) : given).map(f => (!f.value && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
+        const fields = (listed ? officialFields(off!, given) : withCore(coreFields(get(), target), given)).map(f => (!f.value && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
         const checklist = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
         // an official form whose lines aren't in the library yet stays with Placetta until its fields are filled
         const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => !f.value) || (off && !fields.length) ? "draft" : "ready";
@@ -463,7 +503,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         S("shaping", L(`Preparing the ${/^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name}`, `准备${name}`), domainOf(url) || undefined);
         const app: Application = off ? {
           id, name: off.title, agency: off.agency, level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, official: off.id, ...(currency !== "USD" ? { currency } : {}),
-          fees: [{ label: L("Government fee", "政府规费"), amount: fee }], feeNote: off.feeNote ?? (off.fee == null ? L("Set by the agency's fee schedule. The filing team confirms it before you pay.", "按机构收费标准计算，团队会在您付款前确认。") : L("The agency's published fee. The filing team confirms it before you pay.", "机构公布的费用，团队会在您付款前确认。")),
+          fees: [{ label: L("Government fee", "政府规费"), amount: fee, ...(off.fee == null ? { tbd: true } : {}) }], feeNote: off.feeNote ?? (off.fee == null ? L("Set by the agency's fee schedule. The filing team confirms it before you pay.", "按机构收费标准计算，团队会在您付款前确认。") : L("The agency's published fee. The filing team confirms it before you pay.", "机构公布的费用，团队会在您付款前确认。")),
           est: off.takes ?? (str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认")), renews: off.renews,
           source: { label: domainOf(off.info), url: off.info }, form: same(off.form), fields, checklist,
         } : {
@@ -473,10 +513,14 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           source: { label: domainOf(url), url }, form: str(i.form) ? same(str(i.form, 120)) : undefined, fields, checklist,
         };
         apply(w => audit("agent", L("Prepared application", "准备申请"), app.name, same(`${fields.filter(f => f.value).length}/${fields.length}`))(addApp(app)(w)));
+        // file it under its store: the one named, or the only one
         if (target) apply(w => ({ ...w, stores: (w.stores ?? []).map(x => (x.id === target.id ? { ...x, apps: [...new Set([...(x.apps ?? []), id])] } : x)) }));
         made.apps.add(id); touch(id); mark();
-        return { application_id: id, status, ...(target ? { store_id: target.id } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
-          empty_fields: fields.filter(f => !f.value).map(f => f.label.en), missing_documents: checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: c.label.en })), ...(known.size ? { filled_from_skill: known.size } : {}) };
+        return { application_id: id, status, ...(target ? { store_id: target.id, store: target.name.en } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
+          fee: off?.fee ?? (off ? null : fee), fee_note: app.feeNote?.en,
+          empty_fields: fields.filter(f => !f.value).map(f => f.label.en), missing_documents: checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: c.label.en })), ...(known.size ? { filled_from_skill: known.size } : {}),
+          ...(!listed ? { fields_note: off ? "The library doesn't list this form's own lines yet: these are the lines every agency asks. Read the official link and fill_fields with every other line the form asks for." : "Add every line the agency's form asks for with fill_fields." } : {}),
+          ...(!off && !fee ? { fee_note_for_you: "No fee given. If the agency charges one, pass it: an estimate is shown as one." } : {}) };
       },
     },
     {
@@ -504,9 +548,28 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           return { ...x, fields, status: x.status === "draft" && fields.every(f => f.value) && !x.checklist.some(c => c.state === "missing") ? "ready" : x.status };
         }) }));
         apply(audit("agent", L("Filled fields", "填写字段"), a.name, same(incoming.map(f => f.label.en).join(", "))));
+        // the lines that are the same for the whole business (owner, phone, email, EIN...) fill every open application and Context
+        // matched by the core line's own label or id, whichever form the answer was typed into
+        const coreLabel = new Map(coreFields(get()).filter(f => SHARED[f.id]).map(f => [f.label.en.toLowerCase(), f.id]));
+        const wide = incoming.map(g => ({ id: coreLabel.get(g.label.en.toLowerCase()) ?? (SHARED[g.label.en] ? g.label.en : ""), value: g.value, from: g.from })).filter(f => f.id && f.value);
+        let also = 0;
+        if (wide.length) apply(w => {
+          const apps = w.apps.map(x => {
+            if (["filing", "review", "approved"].includes(x.status)) return x;
+            let hit = false;
+            const fields = x.fields.map(f => { const v = wide.find(y => y.id === f.id); if (v && !f.value) { hit = true; return { ...f, value: v.value, from: v.from }; } return f; });
+            if (!hit) return x;
+            also++;
+            return { ...x, fields, status: x.status === "draft" && fields.every(f => f.value) && !x.checklist.some(c => c.state === "missing") ? "ready" as Status : x.status };
+          });
+          let n: Workspace = { ...w, apps };
+          for (const f of wide) { const [label, group] = SHARED[f.id]; const had = n.facts.find(x => x.label.en.toLowerCase() === label.en.toLowerCase()); n = setFact({ id: had?.id ?? "f-x-" + f.id, group: had?.group ?? group, label: had?.label ?? label, value: same(f.value), source: L("You told me", "您告诉我的") })(n); }
+          return n;
+        });
         made.apps.add(a.id); touch(a.id); mark();
         const now = get().apps.find(x => x.id === a.id)!;
-        return { status: now.status, still_empty: now.fields.filter(f => !f.value).map(f => f.label.en), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}) };
+        return { status: now.status, still_empty: now.fields.filter(f => !f.value).map(f => f.label.en), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
+          ...(also ? { also_filled_on: `${also} other open application${also === 1 ? "" : "s"}, and saved to Context` } : {}) };
       },
     },
     {
@@ -528,10 +591,16 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "request_filing_approval",
-      description: "Put a complete application in front of the person to approve: they see the exact data, attachments and fee, and only their approval in the app sends it to Placetta's filing team. You never file, pay or submit anything yourself. It refuses an application with empty fields or missing documents and says what's missing: fill what you can, then ask the person for the rest in one question.",
+      description: "Put a complete application in front of the person to approve: they see the exact data, attachments and fee, and only their approval in the app sends it to Placetta's filing team. You never file, pay or submit anything yourself. Only works once every field is filled and every checklist document is in; otherwise it returns what's left: fill what you can, then ask the person for the rest in one short list.",
       inputSchema: { type: "object", properties: { application_id: { type: "string" }, what_happens: { type: "array", items: { type: "string" }, description: "The exact steps that follow approval, in order (used outside a signed-in workspace)" } }, required: ["application_id"] },
       execute(i) {
         const a = findApp(i.application_id); notFiled(a);
+        const bl = filingBlockers(a);
+        if (bl.empty.length || bl.missing.length) {
+          apply(setApp(a.id, { status: bl.missing.length ? "needs" : "draft" }));
+          return { approval_requested: false, why: "Not ready: nothing is filed with an empty field or a missing document.", empty_fields: bl.empty.map(x => x.en), missing_documents: bl.missing.map(x => x.en),
+            do_next: "Fill what you can with fill_fields. Ask the person for the rest in one short list. Write letters with draft_document; ask them to upload the other documents. Then call this again." };
+        }
         const existing = get().approvals.find(x => x.app === a.id && x.kind === "file");
         if (existing) { made.approvals.push(existing.id); mark(); return { approval_id: existing.id, note: "Already waiting for approval" }; }
         const g = gaps(a);
@@ -673,10 +742,10 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         apply(w => audit("agent", L("Added a store", "添加门店"), same(name), same([str(i.address, 120), city, st].filter(Boolean).join(", ")))({
           ...w, stores: [...(w.stores ?? []), { id, name: same(name), address: [str(i.address, 120), city, st].filter(Boolean).join(", "), stage: i.stage === "open" ? "open" : "opening", plannedOpen: planned,
             rules: nyc ? ["nyc_grades", "nyc_fww"] : [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }],
-          locations: w.locations.some(l => l.name.en.toLowerCase() === city.toLowerCase()) ? w.locations : [...w.locations, { id: slug(city), name: same(city), county: same(st), state: "active" }],
+          locations: w.locations.some(l => l.name.en.toLowerCase() === city.toLowerCase()) ? w.locations : [...w.locations, { id: slug(city), name: same(city), county: countyOf(city, st), state: "active" }],
         }));
         mark();
-        return { store_id: id, nyc_rules: nyc };
+        return { store_id: id, county: countyOf(city, st).en, nyc_rules: nyc, next: "Map its permits: find_official_forms for this place, then prepare_application with this store_id for each city and county one." };
       },
     },
     {
@@ -834,10 +903,16 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "check_progress",
-      description: "Get where everything stands: each application's status, who it's waiting on (you, Placetta's team or the agency), confirmation numbers, days since the last update, missing documents and empty fields, approvals waiting, overdue items and deadlines in the next 30 days. Call it first for any question about progress, status or what's next.",
-      inputSchema: { type: "object", properties: {} },
-      execute() {
-        const w = get(), today = inDays(0);
+      description: "Get where everything stands: each application's store, status, who it's waiting on (you, Placetta's team or the agency), confirmation numbers, days since the last update, missing documents and empty fields, approvals waiting, overdue items and deadlines in the next 30 days. Pass store_id (or a city) for one store. Call it first for any question about progress, status or what's next.",
+      inputSchema: { type: "object", properties: { store_id: { type: "string", description: "Only this store, by id, name or city" } } },
+      execute(i) {
+        const all = get(), today = inDays(0), stores = all.stores ?? [];
+        const q = str(i?.store_id).toLowerCase();
+        const pick = q ? stores.find(x => x.id.toLowerCase() === q) ?? stores.find(x => x.name.en.toLowerCase().includes(q) || x.address.toLowerCase().includes(q)) : undefined;
+        if (q && !pick) throw new Error(`No store matches "${str(i?.store_id)}". Stores: ${stores.map(x => `"${x.id}" (${x.name.en})`).join(", ") || "none"}.`);
+        const storeOf = (id: string) => stores.find(x => (x.apps ?? []).includes(id));
+        // the business's own registrations (EIN, entity, state tax) belong to no single store
+        const w = pick ? { ...all, apps: all.apps.filter(a => storeOf(a.id)?.id === pick.id), approvals: all.approvals.filter(a => !!a.app && storeOf(a.app)?.id === pick.id), deadlines: all.deadlines.filter(d => !!d.app && storeOf(d.app)?.id === pick.id) } : all;
         S("searching", L(`Checking progress on ${w.apps.length} application${w.apps.length === 1 ? "" : "s"}`, `检查 ${w.apps.length} 项申请的进度`));
         const latest = new Map<string, ReturnType<Services["filings"]>[number]>();
         for (const f of x.svc?.filings() ?? []) if (f.status !== "canceled" && !latest.has(f.app_id)) latest.set(f.app_id, f);
@@ -846,19 +921,20 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const apps = w.apps.map(a => {
           const f = latest.get(a.id);
           return {
-            id: a.id, name: a.name[lang], agency: a.agency[lang], status: a.status, waiting_on: on(a.status), next: a.next?.[lang],
+            id: a.id, name: a.name[lang], store: storeOf(a.id)?.name[lang] ?? (stores.length > 1 ? "whole business" : undefined), agency: a.agency[lang], status: a.status, waiting_on: on(a.status), next: a.next?.[lang],
             confirmation: f?.confirmation_number ?? undefined, submitted: f?.submitted_at?.slice(0, 10), last_update: f?.updated_at?.slice(0, 10),
             days_since_update: f ? Math.floor((Date.now() - Date.parse(f.updated_at)) / 864e5) : undefined, team_note: f?.note ?? undefined,
             placetta_filing: f?.agent_state ? { state: f.agent_state, channel: f.channel ?? undefined, needs_you: f.agent_state === "needs_you", log: (f.agent_log ?? []).filter(e => e.kind !== "quiet").slice(-5).map(e => e[lang]) } : undefined,
             missing_documents: a.checklist.filter(c => c.state === "missing").map(c => c.label[lang]),
             empty_fields: a.fields.filter(fl => !fl.value).map(fl => fl.label[lang]),
-            fee: a.fees.reduce((sum, fe) => sum + fe.amount, 0), currency: a.currency ?? "USD", takes: a.est[lang],
+            fee: a.fees.reduce((sum, fe) => sum + fe.amount, 0), fee_set_by_agency: a.fees.some(fe => fe.tbd) || undefined, currency: a.currency ?? "USD", takes: a.est[lang],
           };
         });
         const count = (k: string) => apps.filter(a => a.waiting_on === k).length;
         mark();
         return {
-          today, counts: { done: count("done"), with_agency: count("agency"), with_placetta_team: count("placetta_team"), waiting_on_the_person: count("you"), for_odelia_to_prepare: count("odelia"), waiting_on_someone_else: count("someone_else") },
+          today, ...(pick ? { store: { id: pick.id, name: pick.name[lang], address: pick.address, stage: pick.stage, planned_open: pick.plannedOpen } } : stores.length > 1 ? { stores: stores.map(x => ({ id: x.id, name: x.name[lang], stage: x.stage })) } : {}),
+          counts: { done: count("done"), with_agency: count("agency"), with_placetta_team: count("placetta_team"), waiting_on_the_person: count("you"), for_odelia_to_prepare: count("odelia"), waiting_on_someone_else: count("someone_else") },
           applications: apps,
           approvals_waiting: w.approvals.map(a => ({ id: a.id, kind: a.kind, title: a.title[lang] })),
           overdue: w.deadlines.filter(d => d.date < today && (d.kind === "due" || d.kind === "renewal")).map(d => ({ id: d.id, date: d.date, title: d.title[lang], kind: d.kind })),

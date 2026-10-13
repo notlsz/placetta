@@ -1,5 +1,5 @@
 // City and county steps for San José (Santa Clara County), San Francisco and Dallas, copied from the agencies' own
-// pages on 2026-10-10; San Antonio, Tampa, San Diego, Irvine, Orlando, Fort Worth and Phoenix (with Arizona) on 2026-10-12. Times and renewals appear only where the agency states them; fees are null where they vary.
+// pages on 2026-10-10; Austin (Travis County) on 2026-10-12; San Antonio, Tampa, San Diego, Irvine, Orlando, Fort Worth and Phoenix (with Arizona) on 2026-10-12. Times and renewals appear only where the agency states them; fees are null where they vary.
 import { B } from "../bi";
 import type { OfficialForm } from "./registry";
 
@@ -176,6 +176,64 @@ export const LOCAL_US: OfficialForm[] = [
     url: "https://dallascityhall.com/departments/fire-rescue/Pages/Prevention-and-Investigation-Bureau.aspx",
     info: "https://dallascityhall.com/departments/fire-rescue/Pages/Prevention-and-Investigation-Bureau.aspx",
     fee: 250, checked: "page", fields: [],
+  },
+
+  /* ---------------------------------------------- Austin (Travis County) ---------------------------------------------- */
+  {
+    id: "aus-co", form: "Certificate of Occupancy (change of use)", title: B("Certificate of Occupancy", "占用证"),
+    agency: B("City of Austin Development Services", "奥斯汀市开发服务局"), level: "city", where: "AUS", segments: [R, T, W], method: "portal", order: 62,
+    how: B("Needed when the space's use changes or after construction; it may include a site plan exemption and building plan review. For a food business it comes through Austin Public Health's pre-opening inspection.", "场所用途变更或施工完成后需要办理，可能包括场地规划豁免和建筑图纸审查。食品企业通过奥斯汀公共卫生局的开业前检查取得。"),
+    url: "https://www.austintexas.gov/development-services/small-business-permitting", info: "https://www.austintexas.gov/development-services/small-business-permitting",
+    fee: null, feeNote: B("Set by the city's development fee schedule.", "按市开发收费标准计算。"),
+    takes: B("Change-of-use reviews now take about two weeks (three review disciplines since October 2025).", "用途变更审查现约两周（自 2025 年 10 月起缩减为三个审查专业）。"),
+    takesSource: SRC12("https://www.austintexas.gov/development-services/small-business-permitting"), checked: "page", fields: [],
+  },
+  {
+    id: "aus-building", form: "Commercial Building Permit Web Form", title: B("Building permit for a tenant finish-out", "租户装修建筑许可证"),
+    agency: B("City of Austin Development Services", "奥斯汀市开发服务局"), level: "city", where: "AUS", segments: [R, T, W], needs: { buildout: true }, method: "online", order: 65,
+    how: B("Apply with the city's commercial building permit web form (not AB+C) to build, alter or convert the space, with plans for commercial plan review.", "通过市商业建筑许可网上表单（而非 AB+C）申请新建、改建或改变场所用途，并提交商业图纸审查所需图纸。"),
+    url: "https://austintexas.jotform.com/austin-dsd/commercial-building-permit-web-form", info: "https://www.austintexas.gov/development-services/commercial-plan-review",
+    fee: null, feeNote: B("Set by the city's building fee schedule, by project value.", "按市建筑收费标准依工程估值计算。"), checked: "page", fields: [],
+  },
+  {
+    id: "aus-food-plan-review", form: "Food Enterprise Plan Review Application", title: B("Food establishment plan review", "食品经营场所图纸审查"),
+    agency: B("City of Austin Development Services, with Austin Public Health", "奥斯汀市开发服务局（会同奥斯汀公共卫生局）"), level: "city", where: "AUS", segments: [R], needs: { food: true, buildout: true }, method: "online", order: 66,
+    how: B("For new construction or a remodel: inside the City of Austin, apply online through Development Services; in unincorporated Travis County, through Austin Public Health's My Health Department portal.", "新建或改建适用：奥斯汀市内通过开发服务局在线申请；特拉维斯县非建制区通过奥斯汀公共卫生局 My Health Department 门户申请。"),
+    url: "https://www.austintexas.gov/health/programs/fixed-food-establishments", info: "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+    fee: 312, feeNote: B("$312 for new construction; a remodel is $221 under 2,500 sq ft, $266 up to 10,000 sq ft, $312 above.", "新建 312 美元；改建 2,500 平方英尺以下 221 美元，1 万平方英尺以下 266 美元，以上 312 美元。"),
+    checked: "page", fields: [],
+    attach: [B("Floor plan, to scale", "按比例绘制的平面图"), B("Equipment list with spec sheets", "设备清单及规格表"), B("Menu", "菜单")],
+  },
+  {
+    id: "aus-food-preopening", form: "Pre-Opening Inspection Application", title: B("Pre-opening health inspection", "开业前卫生检查"),
+    agency: B("Austin Public Health, Environmental Health Services", "奥斯汀公共卫生局环境卫生服务处"), level: "city", where: "AUS", segments: [R], needs: { food: true }, method: "portal", order: 74,
+    how: B("Apply on the My Health Department portal (Retail and Wholesale Food Applications, Pre-Opening Inspection), in person at 1520 Rutherford Ln, or by mail. Needed for a new place, a remodel or a change of owner; the place must pass before the permit is issued.", "通过 My Health Department 门户（零售与批发食品申请 → 开业前检查）申请，或到 Rutherford Ln 1520 号现场办理，或邮寄。新场所、改建或变更业主时需要；通过后才会发放许可证。"),
+    url: "https://www.austintexas.gov/health/programs/fixed-food-establishments", info: "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+    fee: 178, feeNote: B("$178 in the City of Austin. A re-inspection is $134.", "奥斯汀市内 178 美元，复检 134 美元。"), checked: "page", fields: [],
+  },
+  {
+    id: "aus-food-permit", form: "Food Enterprise Operational Permit Application", title: B("Food enterprise permit (fixed food establishment)", "食品企业许可证（固定食品场所）"),
+    agency: B("Austin Public Health, Environmental Health Services", "奥斯汀公共卫生局环境卫生服务处"), level: "city", where: "AUS", segments: [R], needs: { food: true }, method: "portal", order: 76,
+    how: B("Issued after the pre-opening inspection passes. Apply on the My Health Department portal (Food Enterprise, Operational Permit Application), in person or by mail. A certified food manager must be on site whenever the place is open.", "开业前检查通过后发放。通过 My Health Department 门户（食品企业 → 营业许可申请）、现场或邮寄申请。营业期间须始终有一名注册食品经理在场。"),
+    url: "https://www.austintexas.gov/health/programs/fixed-food-establishments", info: "https://www.austintexas.gov/health/permit-fee-schedule",
+    fee: null, feeNote: B("$309 to $927 a year in the City of Austin, by risk level and annual food sales.", "奥斯汀市内每年 309 至 927 美元，按风险等级和年食品销售额计算。"),
+    renews: B("Every year, one year from the issue date. The renewal notice comes 45 days before.", "每年续期，自签发之日起一年有效，到期前 45 天寄送续期通知。"),
+    checked: "page", fields: [],
+    attach: [B("Certified food manager certificate", "注册食品经理证书"), B("Texas sales and use tax permit", "德州销售与使用税许可证")],
+  },
+  {
+    id: "aus-sign", form: "Sign Permit (AB+C)", title: B("Sign permit", "招牌许可证"),
+    agency: B("City of Austin Development Services", "奥斯汀市开发服务局"), level: "city", where: "AUS", segments: [R, T], needs: { signage: true }, method: "portal", order: 80,
+    how: B("Any outdoor sign (wall, awning, projecting, freestanding, roof) needs a permit, applied for on the AB+C portal.", "任何户外招牌（墙面、雨篷、突出式、独立式、屋顶）均须在 AB+C 门户申请许可。"),
+    url: "https://abc.austintexas.gov", info: "https://www.austintexas.gov/development-services/sign-permits",
+    fee: null, feeNote: B("Set by the city's sign fee schedule.", "按市招牌收费标准计算。"), checked: "page", fields: [],
+  },
+  {
+    id: "aus-hazmat", form: "Hazardous Materials Storage Permit (AB+C)", title: B("Hazardous materials storage permit", "危险品储存许可证"),
+    agency: B("City of Austin Development Services", "奥斯汀市开发服务局"), level: "city", where: "AUS", segments: [T, W], needs: { hazmat: true }, method: "portal", order: 78,
+    how: B("Needed to store or use hazardous materials above ground (including large battery stock). Applied for on the AB+C portal.", "在地上储存或使用危险品（包括大量电池库存）时需要，在 AB+C 门户申请。"),
+    url: "https://abc.austintexas.gov", info: "https://www.austintexas.gov/development-services/small-business-permitting",
+    fee: null, checked: "page", fields: [],
   },
 
   /* -------------------------------------------- San Antonio -------------------------------------------- */

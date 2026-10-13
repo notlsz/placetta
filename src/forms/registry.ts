@@ -413,6 +413,21 @@ export const FORMS: OfficialForm[] = [
     url: "https://www.twc.texas.gov/services/register-tax", info: "https://www.twc.texas.gov/services/register-tax", takes: B("Account number issued instantly online.", "网上登记后即时获得账号。"), takesSource: "https://www.twc.texas.gov/services/register-tax (2026-10-09)", fee: 0, checked: "page", fields: [],
   },
 
+  {
+    id: "tx-food-manager", form: "Certified Food Manager certificate (DSHS-licensed exam)", title: B("Certified food manager", "注册食品经理"),
+    agency: B("Texas Department of State Health Services", "德州卫生服务部"), level: "state", where: "TX", segments: ["restaurant"], needs: { food: true }, method: "online", order: 40,
+    how: B("At least one manager passes an exam from a DSHS-licensed certified food manager program. Local health departments require a certified food manager on site whenever the place is open.", "至少一名经理通过德州卫生服务部认可的注册食品经理考试。当地卫生部门要求营业期间始终有一名注册食品经理在场。"),
+    url: "https://www.dshs.texas.gov/food-managers", info: "https://www.dshs.texas.gov/food-managers",
+    fee: null, feeNote: B("Set by the exam provider.", "由考试机构定价。"), renews: B("Every 5 years.", "每 5 年。"), checked: "page", fields: [],
+  },
+  {
+    id: "tx-food-handler", form: "Accredited food handler course (each food employee)", title: B("Food handler certificates for staff", "员工食品从业人员证书"),
+    agency: B("Texas Department of State Health Services", "德州卫生服务部"), level: "state", where: "TX", segments: ["restaurant"], needs: { food: true, employees: true }, method: "online", order: 42,
+    how: B("Every employee who works with unpackaged food, equipment or food-contact surfaces finishes an accredited food handler course within 30 days of hire. Certified food managers are exempt.", "凡接触未包装食品、设备或食品接触面的员工，须在入职 30 天内完成经认可的食品从业人员课程。注册食品经理可免。"),
+    url: "https://www.dshs.texas.gov/food-handlers", info: "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+    fee: null, feeNote: B("Set by each accredited course.", "由各认可课程定价。"), renews: B("Valid to the date on the card, or 2 years if none.", "有效期以证书所载为准；未载明的为 2 年。"), checked: "page", fields: [],
+  },
+
   /* -------------------------------- Houston -------------------------------- */
   {
     id: "hou-co", form: "Certificate of Occupancy (HPW Code 1106)", title: B("Certificate of Occupancy", "占用证"),

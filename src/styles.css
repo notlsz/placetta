@@ -1236,3 +1236,15 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
   .hq-me { display: none; }
   .gate-top .hq-home-r { gap: 8px; }
 }
+
+/* approval sheet: what's left before a filing can go */
+.ap-left { border: 1px solid color-mix(in oklab, #c2410c 30%, transparent); background: color-mix(in oklab, #c2410c 6%, var(--bg, #fff)); border-radius: 12px; padding: 12px 14px; }
+.ap-left h3 { color: #9a3412; margin: 0 0 6px; }
+.ap-left ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.ap-left small { color: var(--muted, #6b7280); font-size: 12.5px; margin-left: 2px; }
+
+/* lists inside an answer */
+.answer .prose-l { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.55; }
+.answer ol.prose-l { list-style: decimal; }
+.answer ul.prose-l { list-style: disc; }
+.answer .prose-l li::marker { color: var(--ink2, #6b7280); }

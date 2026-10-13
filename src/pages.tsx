@@ -3,7 +3,7 @@ import { ThinkingOrb } from "thinking-orbs";
 import { useApp } from "./ctx";
 import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
-import { FileCard, Footer, I, Pill, StatusChip, feeTotal } from "./ui";
+import { FileCard, Footer, I, Pill, StatusChip, feeText, feeTotal } from "./ui";
 import type { Key } from "./i18n";
 import { AgentBot, TaskBot, Working } from "./Bot";
 import { StoresStrip } from "./Stores";
@@ -43,7 +43,7 @@ export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
   const fee = a.kind === "pay" ? a.fee ?? 0 : app && a.kind === "file" ? feeTotal(app) : 0;
   const Icon = KIND_ICON[a.kind];
-  const sub = [a.agency && b(a.agency), (a.kind === "file" || a.kind === "pay") && (fee ? money(fee, a.kind === "file" ? app?.currency : undefined) : t("free"))].filter(Boolean).join(lang === "zh" ? "，" : ", ");
+  const sub = [a.agency && b(a.agency), (a.kind === "file" || a.kind === "pay") && (a.kind === "file" && app ? feeText(app, t) : fee ? money(fee) : t("free"))].filter(Boolean).join(lang === "zh" ? "，" : ", ");
   if (a.kind === "pay") return (
     <div className={"appr k-pay" + (compact ? " compact" : "")}>
       <span className={"appr-ico k-" + a.kind}><Icon /></span>
@@ -225,13 +225,12 @@ export function Applications() {
               <p className="tg-h">{t(("lv_" + l) as Key)}<span>{rows.length}</span></p>
               <div className="tray">
                 {rows.map(a => {
-                  const fee = feeTotal(a);
                   return (
                     <Working key={a.id} on={a.status === "draft"} size="line">
                     <button type="button" className={"tr row" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)} role="row">
                       <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small></span>
                       <span className="c-st"><StatusChip s={a.status} /></span>
-                      <span className="c-fee">{fee ? money(fee, a.currency) : t("free")}</span>
+                      <span className="c-fee">{feeText(a, t)}</span>
                       <span className="c-est">{b(a.est)}</span>
                       <span className="c-next">{a.critical && <em>{t("critical")}</em>}{a.next ? b(a.next) : ""}</span>
                     </button>

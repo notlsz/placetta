@@ -27,6 +27,9 @@ export function readiness(s: Store, w: Workspace): Readiness {
     const got = apps.reduce((t, a) => t + weight[a.status], 0);
     const score = apps.length ? Math.round((100 * got) / apps.length) : 0;
     const done = apps.filter(a => a.status === "approved").length;
+    // a store just added has nothing mapped yet: say that, not "0, ready to open"
+    if (!apps.length) return { score: 0, band: "progress", label: B("Permits not mapped yet", "尚未梳理许可"),
+      parts: [{ key: "apps", label: B("Licenses and permits", "执照与许可"), got: 0, max: 1, note: B("Ask Odelia to map this store's permits", "请 Odelia 梳理该门店的许可") }] };
     return {
       score, band: score >= 90 ? "ready" : "progress", label: B("Ready to open", "开业就绪度"),
       parts: [{ key: "apps", label: B("Licenses and permits", "执照与许可"), got, max: apps.length || 1, note: B(`${done} of ${apps.length} approved`, `已批准 ${done}/${apps.length}`) }],

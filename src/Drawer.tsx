@@ -5,9 +5,10 @@ import type { Application, CheckItem, Doc } from "./model";
 import { formById, METHOD } from "./forms/registry";
 import { saveFile } from "./files";
 import { fmtDay } from "./time";
-import { fmtStamp, money } from "./time";
-import { FileCard, I, LevelTag, Modal, Pill, Sample, Sheet, StatusChip, feeTotal } from "./ui";
+import { fmtStamp } from "./time";
+import { FileCard, I, LevelTag, Modal, Pill, Sample, Sheet, StatusChip, feeText, feeTotal } from "./ui";
 import { INK } from "./pages";
+import { filingBlockers } from "./core";
 import { Working } from "./Bot";
 
 /* ------------------------- application, opened ------------------------- */
@@ -232,8 +233,8 @@ function Fees({ a }: { a: Application }) {
   return (
     <div className="fees">
       <dl className="card feelist">
-        {a.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{f.amount ? money(f.amount, a.currency) : t("free")}</dd></div>)}
-        <div className="tot"><dt>{t("total")}</dt><dd>{total ? money(total, a.currency) : t("free")}</dd></div>
+        {a.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{feeText(a, t, f)}</dd></div>)}
+        <div className="tot"><dt>{t("total")}</dt><dd>{feeText(a, t)}</dd></div>
       </dl>
       {a.feeNote && <p className="note">{b(a.feeNote)}</p>}
       {total > 0 && <p className="note">{t("paidAfter")}</p>}
@@ -250,13 +251,12 @@ function Receipt({ a }: { a: Application }) {
   const { t, ws } = useApp();
   const d = a.receipt ? ws.docs.find(x => x.id === a.receipt) : undefined;
   if (!d) return <p className="quiet">{t("noReceipt")}</p>;
-  const total = feeTotal(a);
   return (
     <div className="receipt">
       <FileCard d={d} />
       <dl className="card kv">
         <div><dt>{t("au_time")}</dt><dd className="mono">{fmtStamp(d.at)}</dd></div>
-        <div><dt>{t("ap_fee")}</dt><dd>{total ? money(total, a.currency) : t("free")}</dd></div>
+        <div><dt>{t("ap_fee")}</dt><dd>{feeText(a, t)}</dd></div>
       </dl>
     </div>
   );
@@ -275,6 +275,8 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const data = a.kind === "send" || a.kind === "change" ? a.data ?? [] : app?.fields ?? [];
   const off = app?.official ? formById(app.official) : undefined;
   const needSig = !!cloud && a.kind === "file" && !!off?.sign && !!off.esign;
+  const left = app && a.kind === "file" ? filingBlockers(app) : { empty: [], missing: [] };
+  const blocked = left.empty.length + left.missing.length > 0;
   return (
     <Modal label={b(a.title)} onClose={onClose} wide>
       <header className="m-h">
@@ -284,6 +286,15 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body">
+        {blocked && (
+          <section className="ap-left" role="alert">
+            <h3>{lang === "zh" ? "提交前还需要" : "Needed before it can be filed"}</h3>
+            <ul>
+              {left.empty.map((l, i) => <li key={"f" + i}>{b(l)}</li>)}
+              {left.missing.map((l, i) => <li key={"d" + i}>{b(l)}<small>{lang === "zh" ? "文件" : " (document)"}</small></li>)}
+            </ul>
+          </section>
+        )}
         <section>
           <h3>{t("ap_does")}</h3>
           <ol className="does">{a.does.map((d, i) => <li key={i}>{b(d)}</li>)}</ol>
@@ -309,8 +320,8 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
           <section>
             <h3>{t("ap_fee")}</h3>
             <dl className="kv feelist">
-              {app.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{f.amount ? money(f.amount, app.currency) : t("free")}</dd></div>)}
-              <div className="tot"><dt>{t("total")}</dt><dd>{fee ? money(fee, app.currency) : t("free")}</dd></div>
+              {app.fees.map((f, i) => <div key={i}><dt>{b(f.label)}</dt><dd>{feeText(app, t, f)}</dd></div>)}
+              <div className="tot"><dt>{t("total")}</dt><dd>{feeText(app, t)}</dd></div>
             </dl>
             {fee > 0 && <p className="note">{cloud ? t("paidDirect") : t("paidAfter")}</p>}
           </section>
@@ -320,7 +331,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <p>{t("ap_note")} {cloud ? (a.kind === "file" ? t("ap_team") : "") : t("ap_sim")}</p>
         <div className="m-btns">
           {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
-          <Pill kind="ink" disabled={busy || (needSig && !sig)} onClick={() => { approve(a.id, sig ?? undefined); onClose(); }}>{b(a.action)}</Pill>
+          <Pill kind="ink" disabled={busy || blocked || (needSig && !sig)} onClick={() => { approve(a.id, sig ?? undefined); onClose(); }}>{b(a.action)}</Pill>
         </div>
       </footer>
     </Modal>

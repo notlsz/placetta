@@ -191,8 +191,8 @@ async function mapStore() {
   const apprCalls = callNamed(r, "request_filing_approval");
   const ssCall = apprCalls.find(c => c.input.application_id === ss4.id)!, fseCall = apprCalls.find(c => c.input.application_id === fse.id)!;
   ok(ssCall.ok, "the complete EIN application is put up for approval", ssCall.out);
-  ok(!fseCall.ok && /Not ready/.test(fseCall.out) && /Food Protection Certificate number/.test(fseCall.out) && /Lease/.test(fseCall.out), "the food permit is refused: names the empty field and the missing documents", fseCall.out);
-  ok(apprCalls.filter(c => !c.ok).some(c => /no form lines/.test(c.out)), "a form with no lines in the library is refused until its lines are added");
+  ok(/"approval_requested":false/.test(fseCall.out) && /Not ready/.test(fseCall.out) && /Food Protection Certificate number/.test(fseCall.out) && /Lease/.test(fseCall.out), "the food permit is refused: names the empty field and the missing documents", fseCall.out);
+  ok(apprCalls.filter(c => c.input.application_id !== ss4.id).every(c => !c.ok || /"approval_requested":false/.test(c.out)), "nothing incomplete is put up for approval (a form with no lines in the library gets the core lines, and stays unapproved until they're filled)");
   const files = w.approvals.filter(a => a.kind === "file");
   eq(files.map(a => a.app), [ss4.id], "exactly one filing approval, for the complete application");
   eq(ss4.status, "ready", "the application waiting for approval is marked ready");
@@ -492,7 +492,7 @@ async function chinese() {
   ok(/"business":"幸运叶茶饮有限公司"/.test(sys), "the workspace snapshot is in Chinese");
   ok((callNamed(r, "find_official_forms")[0].parsed?.forms as { title: string }[]).some(f => f.title === "餐饮服务场所许可证"), "find_official_forms answers in Chinese");
   const sign = r.w.apps.find(a => !a.official)!;
-  eq([sign.name.zh, sign.fields[0].from?.zh], ["招牌许可证", "来自资料"], "a researched application keeps the Chinese name and a Chinese source");
+  eq([sign.name.zh, sign.fields.find(f => f.label.zh === "招牌尺寸" || f.label.en === "招牌尺寸")?.from?.zh], ["招牌许可证", "来自资料"], "a researched application keeps the Chinese name and a Chinese source");
   ok(r.w.docs.some(d => d.name === "房东同意书.docx"), "a Chinese file name is kept");
   ok(/许可证/.test(textOf(r)), "the reply is in Chinese");
   ok(r.steps.some(s => /准备/.test(s.label.zh)), "steps carry Chinese labels");

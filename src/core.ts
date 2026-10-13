@@ -3,6 +3,7 @@ import type { Application, Approval, Audit, Bi, Change, CheckItem, Deadline, Doc
 import type { Lang } from "./i18n";
 import { nowIso } from "./time";
 import { B, same } from "./bi";
+import { countyOf } from "./counties";
 
 /* The agent's contract and the patches it makes to a workspace. No sample data here: this runs in the browser and,
    for background work, on the server. */
@@ -59,6 +60,21 @@ export const dropDeadline = (id: string): P => w => ({ ...w, deadlines: w.deadli
 export const dropNudge = (id: string): P => w => ({ ...w, nudges: w.nudges.filter(x => x.id !== id) });
 export const setFact = (f: Fact): P => w => ({ ...w, facts: w.facts.some(x => x.id === f.id) ? w.facts.map(x => (x.id === f.id ? f : x)) : [...w.facts, f] });
 
+/** What stops an application from being filed: fields still empty and documents still missing. Every filing path
+    (the agent's request, the approval sheet, the demo and the cloud) checks this, for every kind of business. */
+export function filingBlockers(a: Pick<Application, "fields" | "checklist">): { empty: Bi[]; missing: Bi[] } {
+  return { empty: a.fields.filter(f => !f.value.trim()).map(f => f.label), missing: a.checklist.filter(c => c.state === "missing").map(c => c.label) };
+}
+export const readyToFile = (a: Pick<Application, "fields" | "checklist">) => { const b = filingBlockers(a); return !b.empty.length && !b.missing.length; };
+/** One sentence naming what's left, for the person. */
+export function blockersSay(a: Pick<Application, "fields" | "checklist">): Bi {
+  const { empty, missing } = filingBlockers(a);
+  const list = (xs: Bi[], k: "en" | "zh") => xs.slice(0, 6).map(x => x[k]).join(k === "zh" ? "、" : ", ") + (xs.length > 6 ? (k === "zh" ? ` 等 ${xs.length} 项` : ` and ${xs.length - 6} more`) : "");
+  const en = [empty.length ? `still empty: ${list(empty, "en")}` : "", missing.length ? `documents still missing: ${list(missing, "en")}` : ""].filter(Boolean).join("; ");
+  const zh = [empty.length ? `尚未填写：${list(empty, "zh")}` : "", missing.length ? `尚缺文件：${list(missing, "zh")}` : ""].filter(Boolean).join("；");
+  return B(`Not ready to file yet. ${en.charAt(0).toUpperCase() + en.slice(1)}.`, `还不能提交。${zh}。`);
+}
+
 /** A saved state may be missing lists (older saves, a fresh workspace): fill them in. */
 export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
   return {
@@ -81,7 +97,7 @@ export const applyChange = (c: Change): P => w => {
     const address = [c.address, c.city, c.state.toUpperCase()].filter(Boolean).join(", ");
     const name = c.name ?? (c.address ? `${c.city}, ${c.address.split(",")[0].replace(/^\d+\s+/, "")}` : c.city);
     const stores = (w.stores ?? []).map(x => (x.id === c.store ? { ...x, name: same(name), address, plannedOpen: c.planned_open ?? x.plannedOpen, rules: nyc ? ["nyc_grades", "nyc_fww"] as Store["rules"] : [] } : x));
-    const added = w.locations.some(l => l.name.en.toLowerCase() === c.city.toLowerCase()) ? w.locations : [...w.locations, { id: c.city.toLowerCase().replace(/[^a-z0-9]+/g, "-"), name: same(c.city), county: same(c.state.toUpperCase()), state: "active" as const }];
+    const added = w.locations.some(l => l.name.en.toLowerCase() === c.city.toLowerCase()) ? w.locations : [...w.locations, { id: c.city.toLowerCase().replace(/[^a-z0-9]+/g, "-"), name: same(c.city), county: countyOf(c.city, c.state), state: "active" as const }];
     // a city no store is in any more drops off the list
     const locations = added.filter(l => stores.some(x => x.address.toLowerCase().includes(l.name.en.toLowerCase())) || !(w.stores ?? []).some(x => x.address.toLowerCase().includes(l.name.en.toLowerCase())));
     // the old place's local permits no longer apply: they wait for the agent to map the new place

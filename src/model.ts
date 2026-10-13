@@ -15,7 +15,7 @@ export type Status = "approved" | "review" | "filing" | "ready" | "needs" | "dra
 export type Actor = "agent" | "you" | "agency" | "team";
 
 export type Field = { id: string; label: Bi; value: string; from?: Bi; quote?: string };   // quote: the document's own words the value came from
-export type Fee = { label: Bi; amount: number };
+export type Fee = { label: Bi; amount: number; tbd?: boolean };   // tbd: the agency sets it (by size, risk or sales); amount is 0 or a floor
 /** ISO currency of an application's fees; USD when absent. */
 export type Currency = string;
 export type CheckItem = {
