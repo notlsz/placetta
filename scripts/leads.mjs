@@ -10,6 +10,11 @@
 // Writes leads/<date>.csv: one row per store, worst reason first, with the phone number and the line to open with.
 // Source: https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j
 
+// Calling rules (TCPA, FCC rules, NY and CA telemarketing law). Every call from this list is dialed by a person, by
+// hand: no autodialer, no prerecorded message, no AI voice. Call 8 AM to 9 PM in the business's own time zone. Check
+// numbers that may be cell phones or homes against the National Do Not Call Registry before calling, and put anyone
+// who asks not to be called on Placetta's own do-not-call list for good. Emails need Placetta's postal address and an
+// opt-out line (CAN-SPAM).
 import { mkdirSync, writeFileSync } from "node:fs";
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
@@ -85,5 +90,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const f = `leads/${new Date().toISOString().slice(0, 10)}.csv`;
   writeFileSync(f, csv(rows));
   const n = k => rows.filter(r => r.rank === k).length;
+  console.log("Dial by hand, 8 AM to 9 PM local, and skip anyone on the Do Not Call list.");
   console.log(`${rows.length} stores to call: ${n(1)} closed, ${n(2)} failed, ${n(3)} B range, ${n(4)} just opened. Saved ${f}`);
 }
