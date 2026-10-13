@@ -1,4 +1,4 @@
-/* Shared styles for Placetta's legal pages (privacy.html, terms.html). Single light look, matching the landing page. */
+/* Shared styles for Placetta's legal pages (terms, privacy, authorization, ai). Single light look, matching the landing page. */
 :root{
   color-scheme:light;
   --bg:#F4F5F7; --card:#EDEFF3; --line:#E5E8EE;
@@ -51,6 +51,9 @@ ul{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;
 li{position:relative;padding-left:36px;color:var(--ink2)}
 html[lang="zh-CN"] li{padding-left:50px}
 li b,p b{font-weight:500;color:var(--ink)}
+ul.dot li{padding-left:22px}
+ul.dot li::before{content:"";position:absolute;left:6px;top:.72em;width:5px;height:5px;border-radius:50%;background:var(--muted)}
+html[lang="zh-CN"] ul.dot li{padding-left:22px}
 .note{margin-top:16px;padding:14px 16px;border-radius:12px;background:var(--gs-ll);color:var(--gs-ink);font-size:15px}
 mark.ph{background:#FFF1CC;color:#7A5410;border-radius:4px;padding:0 4px;font-weight:500}
 .contact{margin-top:12px;display:flex;flex-direction:column;gap:6px;color:var(--ink2)}

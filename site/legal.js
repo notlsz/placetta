@@ -1,4 +1,5 @@
-/* Placetta legal pages: company details, language switch, placeholders.
+/* Placetta legal pages (terms, privacy, authorization, ai; their text comes from src/legal.ts via scripts/build-legal.mts):
+   company details, language switch, placeholders.
    Fill in CO once and every placeholder on both pages updates. Until a field is filled, it shows as a highlighted placeholder. */
 const CO = {
   name:    {en: "Placetta Inc.", zh: "Placetta Inc.（快哉）"},
@@ -15,8 +16,8 @@ const PH = {
   site:    ["[Website address]", "【网站地址】"]
 };
 const UI = {
-  en: {back: "Back to Home", brand: "Placetta", home: "Home", privacy: "Privacy Policy", terms: "Terms and Conditions", copy: "© 2026 Placetta"},
-  zh: {back: "返回首页", brand: "快哉", home: "首页", privacy: "隐私政策", terms: "服务条款", copy: "© 2026 快哉"}
+  en: {back: "Back to Home", brand: "Placetta", home: "Home", privacy: "Privacy Policy", terms: "Terms of Service", authorization: "Filing Authorization", ai: "How Placetta's AI works", copy: "© 2026 Placetta"},
+  zh: {back: "返回首页", brand: "快哉", home: "首页", privacy: "隐私政策", terms: "服务条款", authorization: "申报授权书", ai: "快哉的 AI 如何工作", copy: "© 2026 快哉"}
 };
 
 let lang = "en";
