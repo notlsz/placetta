@@ -80,7 +80,7 @@ Placetta's use and transfer to any other app of information received from Google
 - We don't use it for advertising, and we don't sell it.
 - People at Placetta don't read it, except with your permission, for security, or where the law requires.
 - We don't use it, or any other customer content, to train or improve AI models. The AI models that process it on your behalf are bound not to train on it.
-- Google data is stored in the United States with our hosting provider and deleted when you disconnect the integration or delete your account.
+- We store Google data in the United States with our hosting provider. Your Google access is deleted when you disconnect. Files and emails you choose to import become documents in your workspace, kept until you delete them or your account.
 
 ## Agency portal logins
 
@@ -279,7 +279,7 @@ Email: support@placetta.com
 - 我们不将其用于广告，也不出售。
 - 除非获得您的许可、出于安全需要或法律要求，快哉的人员不会查看这些数据。
 - 我们不使用这些数据或任何其他客户内容训练或改进 AI 模型。代您处理数据的 AI 模型也不得使用其进行训练。
-- Google 数据存储在美国的托管服务商处，并在您断开该集成或删除账户时删除。
+- 我们将 Google 数据存储在美国的托管服务商处。断开集成时，我们会删除对您 Google 账户的访问授权。您选择导入的文件和邮件会成为工作区中的文件，保留至您删除它们或删除账户为止。
 
 ## 机构网站登录信息
 
