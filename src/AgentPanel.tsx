@@ -7,7 +7,7 @@ import type { FeedItem, Turn } from "./feed";
 import type { Bi } from "./model";
 import { unlockAudio, type Speaker } from "./hooks";
 import { NeedRow, INK } from "./pages";
-import { AppArtifact, FileCard, I } from "./ui";
+import { AppArtifact, FileCard, I, Prose } from "./ui";
 import { AgentBot, Working } from "./Bot";
 
 /** The agent, beside the work: what it's doing now, every step with the site it used, and what each run produced. */
@@ -93,7 +93,7 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
       {live && m.draft && <p className="drafting" aria-live="polite">{m.draft}</p>}
       {r && (
         <div className="answer">
-          {r.text.map((p, i) => <p key={i}>{b(p)}</p>)}
+          {r.text.map((p, i) => <Prose key={i} text={b(p)} />)}
           {r.chain && <ol className="chain">{r.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
           {(r.apps?.length || r.files?.length) ? (
             <div className="made">

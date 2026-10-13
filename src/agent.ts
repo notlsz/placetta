@@ -1,6 +1,6 @@
 import type { OrbState } from "thinking-orbs";
 import { B, MATCH_FREMONT, MATCH_SJ, SRC, genericMatch, same, type Application, type Approval, type Bi, type Doc, type Fact, type Workspace } from "./model";
-import { inDays, nowIso } from "./time";
+import { inDays, money, nowIso } from "./time";
 
 /* ------------------------------------------------------------------ *
  * The contract between the workspace and whatever runs the agent.
@@ -16,7 +16,7 @@ import { inDays, nowIso } from "./time";
  * ------------------------------------------------------------------ */
 
 export * from "./core";
-import { setApp, setCheck, addCheck, setField, addApp, addDoc, audit, dropApproval, addApproval, addTask, dropTask, addDeadline, dropDeadline, dropNudge, setFact, type P, type Step, type Request, type Reply, type Context, type AgentBackend } from "./core";
+import { setApp, setCheck, addCheck, setField, addApp, addDoc, audit, dropApproval, addApproval, addTask, dropTask, addDeadline, dropDeadline, dropNudge, setFact, readyToFile, blockersSay, type P, type Step, type Request, type Reply, type Context, type AgentBackend } from "./core";
 let seq = 0;
 const all = (...fs: P[]): P => w => fs.reduce((acc, f) => f(acc), w);
 
@@ -302,28 +302,29 @@ function generic(id: string, ctx: Context): Plan {
   }
   const a = ctx.current.apps.find(x => x.id === ap.app);
   if (!a) return FALLBACK();
-  const fee = a.fees.reduce((s, f) => s + f.amount, 0);
+  const fee = a.fees.reduce((s, f) => s + f.amount, 0), m = money(fee, a.currency);
   const site = a.source.label || "";
   const portal = site ? B(`${site}`, `${site}`) : B("the agency's portal", "机构门户");
-  const rid = "d-r-" + a.id, name = a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1);
+  const titled = a.name.en.split(/\s+/).filter(w => /^[A-Z]/.test(w)).length > 1;   // "Texas Sales and Use Tax Permit" keeps its capitals
+  const rid = "d-r-" + a.id, name = titled ? a.name.en : a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1);
   const receipt = a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) + "-receipt.pdf";
   return {
     steps: [
       S("connecting", `Signing in to ${portal.en} with your saved account`, `使用您保存的账户登录 ${portal.zh}`, site || undefined),
       S("working", `Submitting the ${name}`, `提交${a.name.zh}`, site || undefined),
-      ...(fee ? [S("working", `Paying $${fee.toLocaleString("en-US")} with the card ending 4821`, `使用尾号 4821 的银行卡支付 $${fee.toLocaleString("en-US")}`)] : []),
+      ...(fee ? [S("working", `Paying ${m} with the card ending 4821`, `使用尾号 4821 的银行卡支付 ${m}`)] : []),
       S("weaving", "Saving the receipt to Documents", "将收据保存到文件"),
     ],
     updates: [all(
       dropApproval(id),
-      audit("you", B("Approved filing", "批准提交"), a.name, fee ? same(`$${fee.toLocaleString("en-US")}`) : B("No fee", "无需费用")),
+      audit("you", B("Approved filing", "批准提交"), a.name, fee ? same(m) : B("No fee", "无需费用")),
       audit("agent", B("Submitted application", "提交申请"), a.name, site ? same(site) : undefined),
-      ...(fee ? [audit("agent", B("Paid fee", "支付费用"), a.name, B(`$${fee.toLocaleString("en-US")}, card ending 4821`, `$${fee.toLocaleString("en-US")}，尾号 4821 的银行卡`))] : []),
+      ...(fee ? [audit("agent", B("Paid fee", "支付费用"), a.name, B(`${m}, card ending 4821`, `${m}，尾号 4821 的银行卡`))] : []),
       addDoc(doc(rid, receipt, 90_000, "agent", a.id, B("Receipt", "收据"))),
       setApp(a.id, { status: "review", receipt: rid, next: B("Filed just now. Placetta is watching for a decision", "刚刚提交，快哉正在跟进审批") }),
       addTask({ id: "r-" + a.id, state: "searching", label: B(`Watching for a decision on the ${name}`, `跟进${a.name.zh}的审批`), detail: B("Started just now", "刚刚开始") }),
     )],
-    reply: { text: [B(`Filed the ${name} with ${a.agency.en}${fee ? ` and paid the $${fee.toLocaleString("en-US")} fee` : ""}. The receipt is in Documents.`, `已向${a.agency.zh}提交${a.name.zh}${fee ? `并支付 $${fee.toLocaleString("en-US")} 费用` : ""}。收据在文件中。`)], files: [rid] },
+    reply: { text: [B(`Filed the ${name} with ${a.agency.en}${fee ? ` and paid the ${m} fee` : ""}. The receipt is in Documents.`, `已向${a.agency.zh}提交${a.name.zh}${fee ? `并支付 ${m} 费用` : ""}。收据在文件中。`)], files: [rid] },
   };
 }
 
@@ -436,6 +437,11 @@ function match(what: string, where: string): Plan {
 /* ---------------------------------- run ---------------------------------- */
 
 function plan(req: Request, ctx: Context): Plan {
+  if ("approve" in req) {
+    // nothing is filed with an empty field or a missing document, whatever the business or the form
+    const ap = ctx.current.approvals.find(a => a.id === req.approve), app = ap?.kind === "file" ? ctx.current.apps.find(x => x.id === ap.app) : undefined;
+    if (app && !readyToFile(app)) return { steps: [S("searching", "Checking the application is complete", "检查申请是否完整")], reply: { text: [blockersSay(app)], apps: [app.id] } };
+  }
   if ("approve" in req) return req.approve === "a-staff" ? send() : FILE[req.approve] ? file(req.approve, ctx) : generic(req.approve, ctx);
   if ("upload" in req) return upload(req.upload, ctx);
   if ("match" in req) return match(req.match.what, req.match.where);
