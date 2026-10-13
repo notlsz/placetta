@@ -9,6 +9,7 @@ This policy explains how Placetta Inc. ("Placetta", "we") handles information wh
 ## What we collect
 
 - Account information: your email address, your name if you sign in with Google or Microsoft (we receive only your basic profile), the workspaces you belong to and your role, and whether two-step sign-in is on.
+- Records of your acceptance of our Terms of Service, Privacy Policy and Filing Authorization: which version, when, and the IP address and browser you used.
 - Workspace information: details about your business, and about people in it such as owners and managers, that you give us so we can fill applications.
 - Documents you upload, and the applications and messages prepared in your workspace.
 - Your conversations with Odelia and your approvals, including your signature when you sign a form in the app.
@@ -91,7 +92,7 @@ Calls use an AI voice and are transcribed as they happen so Odelia can understan
 
 We use this information only to answer you, do what you ask, send the update texts and urgent calls you turned on, check that a caller is you, and keep a record of your consent.
 
-Your texts, call records and consent records are kept while your account exists and are deleted when you delete it. You can see recent texts and calls in Settings. Removing your number in Settings stops texts and calls to it and cancels any that are waiting.
+Your texts and call records are kept while your account exists and are deleted when you delete it. Consent records are kept for 5 years, even after you delete your account, so that we can show your consent if it is ever questioned. You can see recent texts and calls in Settings. Removing your number in Settings stops texts and calls to it and cancels any that are waiting.
 
 We do not sell or share mobile numbers or text consent with third parties for their marketing.
 
@@ -122,6 +123,7 @@ If you are in the People's Republic of China, or you give us personal informatio
 
 - Workspace information, documents and the audit trail are kept while the workspace exists. They are deleted when the workspace is deleted, including when its only owner deletes their account.
 - Account information, texts and call records are kept while your account exists, and are deleted when you delete it.
+- Records of your acceptance of our terms and policies are kept for 6 years after your account ends, and consent records for texts and calls for 5 years, even after you delete your account, as proof of the agreement and of your consent.
 - Plan requests from placetta.com are kept while we need them to follow up, or until you ask us to delete them.
 - We keep records the law requires us to keep, such as billing records, for as long as it requires.
 - Deleted information can remain in encrypted backups for a short time until those backups are replaced.
@@ -198,6 +200,7 @@ Email: support@placetta.com
 ## 我们收集哪些信息
 
 - 账户信息：您的邮箱地址；若使用 Google 或 Microsoft 登录，还包括您的姓名（我们只获取基本资料）；您所属的工作区和角色；以及是否开启了两步登录。
+- 您接受我们的《服务条款》、隐私政策和《申报授权书》的记录：接受的版本、时间，以及您使用的 IP 地址和浏览器。
 - 工作区信息：为填写申请，您向我们提供的企业信息，以及企业所有人、经理等相关人员的信息。
 - 您上传的文件，以及在您工作区中准备的申请和消息。
 - 您与 Odelia 的对话和您的批准记录，包括您在应用中签署表格时的签名。
@@ -280,7 +283,7 @@ Email: support@placetta.com
 
 我们使用这些信息，仅为回复您、办理您要求的事项、发送您开启的更新短信和紧急来电、核实来电者是您本人，以及保存您的同意记录。
 
-您的短信、通话记录和同意记录在您的账户存续期间保存，并在您删除账户时一并删除。您可以在“设置”中查看最近的短信和通话。在“设置”中移除号码后，我们将不再向该号码发短信或打电话，尚未发出的也会取消。
+您的短信和通话记录在您的账户存续期间保存，并在您删除账户时一并删除。同意记录保存 5 年，即使您删除账户也会保留，以便在您的同意受到质疑时予以证明。您可以在“设置”中查看最近的短信和通话。在“设置”中移除号码后，我们将不再向该号码发短信或打电话，尚未发出的也会取消。
 
 我们不会出于第三方营销目的，向第三方出售或共享手机号或短信同意。
 
@@ -311,6 +314,7 @@ Email: support@placetta.com
 
 - 工作区信息、文件和审计记录在工作区存续期间保存，并在工作区被删除时删除，包括其唯一所有者删除账户的情形。
 - 账户信息、短信和通话记录在您的账户存续期间保存，并在您删除账户时删除。
+- 您接受我们的条款和政策的记录在您的账户终止后保存 6 年，短信和电话的同意记录保存 5 年，即使您删除账户也会保留，用于证明协议和您的同意。
 - 在 placetta.com 提交的方案申请，在我们跟进所需期间保存，或保存至您要求删除为止。
 - 法律要求我们保留的记录（例如账单记录），按法律要求的期限保存。
 - 已删除的信息可能会在加密备份中短暂保留，直至这些备份被替换。

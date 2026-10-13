@@ -10,6 +10,8 @@ import { BUILTIN } from "../src/skills";
 import { inDays } from "../src/time";
 import { B, same } from "../src/bi";
 import type { Application, Workspace } from "../src/model";
+import { UPDATED } from "../src/legal.ts";
+import { readdirSync, readFileSync } from "node:fs";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -539,6 +541,14 @@ await errors();
 await limits();
 await chinese();
 promptConsistency();
+
+/* The version people accept in the app (accept_terms refuses any other) is the version of the legal text they read. */
+console.log("\n# Terms version");
+{
+  const defs = readdirSync("supabase/migrations").filter(f => f.endsWith(".sql")).sort()
+    .map(f => /function public\.current_terms_version\(\)[\s\S]*?select '([^']+)'/.exec(readFileSync(`supabase/migrations/${f}`, "utf8"))?.[1]).filter(Boolean);
+  eq(defs.at(-1), UPDATED, "public.current_terms_version() in the newest migration equals UPDATED in src/legal.ts");
+}
 
 console.log("\n# Every declared tool is exercised");
 const missed = declared.filter(n => !covered.has(n));

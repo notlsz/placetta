@@ -1,5 +1,5 @@
 import { B, same, type Approval, type Audit, type Doc, type Workspace } from "../model";
-import type { AgencyLogin, Billing, DocRow, Filing, Integration, Me, Role } from "./api";
+import type { AgencyLogin, Billing, DocRow, Filing, Integration, Me, Role, TermsStatus } from "./api";
 import type { HqRow } from "../hq";
 
 /** Everything a signed-in workspace starts with. */
@@ -18,6 +18,8 @@ export type CloudSession = {
   workspaces: { id: string; name: string }[];
   /** Franchisees that shared their stores with this account's email: the Headquarters view. */
   hq: HqRow[];
+  /** Whether this person accepted the current Terms and Privacy Policy (null: the server doesn't track it yet). */
+  terms: TermsStatus | null;
   notice?: string;
   /** An approval to open right away: Odelia's texts link to /app/?ws=...&approval=... */
   approval?: string;

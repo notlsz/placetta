@@ -328,10 +328,10 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         )}
       </div>
       <footer className="m-f">
-        <p>{t("ap_note")} {cloud ? (a.kind === "file" ? t("ap_team") : "") : t("ap_sim")}</p>
+        <p>{cloud?.termsHold && <span className="ap-hold" role="note">{lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page to approve this."} </span>}{t("ap_note")} {cloud ? (a.kind === "file" ? t("ap_team") : "") : t("ap_sim")}</p>
         <div className="m-btns">
           {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
-          <Pill kind="ink" disabled={busy || blocked || (needSig && !sig)} onClick={() => { approve(a.id, sig ?? undefined); onClose(); }}>{b(a.action)}</Pill>
+          <Pill kind="ink" disabled={busy || blocked || (needSig && !sig) || !!cloud?.termsHold} onClick={() => { approve(a.id, sig ?? undefined); onClose(); }}>{b(a.action)}</Pill>
         </div>
       </footer>
     </Modal>

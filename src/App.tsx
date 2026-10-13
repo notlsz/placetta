@@ -21,6 +21,7 @@ import { Settings } from "./Settings";
 import { Stores } from "./Stores";
 import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
+import { UPDATED } from "./legal";
 import { daysUntil, inDays, nowIso } from "./time";
 import { I, Modal } from "./ui";
 import * as api from "./cloud/api";
@@ -414,8 +415,25 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const hold = (id: string | null) => { try { if (id) localStorage.setItem(PENDING, id); else localStorage.removeItem(PENDING); } catch { /* storage blocked */ } pendingFiling.current = id; };
   const pendingFiling = useRef<string | null>((() => { try { return localStorage.getItem(PENDING); } catch { return null; } })());
 
+  /* Updated Terms: until this person accepts them (the band at the top), nothing new is approved. Reading stays open. */
+  const [terms, setTerms] = useState<api.TermsStatus | null>(cloud?.terms ?? null);
+  const termsHold = !!cloud && !!terms && !terms.accepted;
+  const termsRef = useRef(termsHold);
+  useEffect(() => { termsRef.current = termsHold; }, [termsHold]);
+  const acceptTerms = useCallback(async () => {
+    try {
+      const r = await api.acceptTerms(UPDATED, cloud?.wsId);
+      setTerms(r ?? { accepted: true, version: UPDATED, current: UPDATED });
+      say(lang === "zh" ? "已接受。感谢您。" : "Accepted. Thank you.");
+    } catch (e) {
+      const er = e as api.ApiError;
+      say(er.code === "terms_version" ? (lang === "zh" ? "条款刚刚又有更新。请刷新页面，阅读最新版本。" : "The Terms were just updated again. Reload to read the latest version.") : er.message);
+    }
+  }, [cloud, say, lang]);
+
   const approve = useCallback(async (id: string, sig?: Signed) => {
     if (held()) return;
+    if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
     const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
     const shown = `${S.approvedIt[lang]}: ${a.title[lang]}`;
     // every kind of filing: nothing goes out with an empty field or a missing document
@@ -550,7 +568,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const fail = (e: unknown) => say((e as api.ApiError).message ?? String(e));
     return {
       email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner,
-      wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces, hq: cloud.hq,
+      wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces, hq: cloud.hq, termsHold,
       openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
       checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
       portal: async () => { if (!ownerOk()) return; try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
@@ -576,7 +594,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       },
       switchTo: cloud.switchTo, newWorkspace: cloud.newWorkspace, signOut: cloud.signOut, reopen: cloud.reopen,
     };
-  }, [cloud, plan, billing, filings, integrations, logins, docs, say, lang, refresh, save, owner, ownerOk]);
+  }, [cloud, plan, billing, filings, integrations, logins, docs, say, lang, refresh, save, owner, ownerOk, termsHold]);
 
   const ctx: Ctx = useMemo(() => ({
     lang, t, b, setLang, ws: view_, busy, live: step, uploading,
@@ -717,6 +735,17 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
                 <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
               </div>
             </header>
+          )}
+          {termsHold && (
+            <section className="terms-band" role="region" aria-label={b(B("Updated Terms", "条款更新"))}>
+              <div>
+                <b>{terms?.version ? b(B("We've updated our Terms. Review and accept to keep filing.", "我们更新了条款。请审阅并接受，以便继续申报。")) : b(B("Review and accept our Terms to start filing.", "请审阅并接受我们的条款，以便开始申报。"))}</b>
+                <p>{b(B("Review the ", "请审阅"))}<button type="button" className="lnk" onClick={() => setLegal("terms")}>{b(B("Terms of Service", "《服务条款》"))}</button>{b(B(" and ", "和"))}<button type="button" className="lnk" onClick={() => setLegal("privacy")}>{b(B("Privacy Policy", "隐私政策"))}</button>{b(B(
+                  ". Clicking Accept means you agree to them for your business, including individual arbitration of disputes (you can opt out within 30 days). Until then you can read everything, but not approve filings or messages.",
+                  "。点击“接受”即表示您代表企业同意这些条款，包括以个别仲裁方式解决争议（可在 30 天内选择退出）。接受之前，您仍可查看所有内容，但不能批准申报或消息。"))}</p>
+              </div>
+              <div className="tb-act"><button type="button" className="sbtn ink" onClick={() => void acceptTerms()}>{b(B("Accept", "接受"))}</button></div>
+            </section>
           )}
           <main className={"content" + (view === "overview" ? " wash" : "")} ref={main}>{page}</main>
           {!panelOpen && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} /></div>}

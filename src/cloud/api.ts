@@ -235,6 +235,35 @@ export async function createWorkspace(name: string, state: Workspace): Promise<s
   if (error) throw fromPg(error);
   return data as string;
 }
+
+/* ------------------------------ terms acceptance (clickwrap) ------------------------------ */
+
+/** Which version of the Terms of Service and Privacy Policy this person last accepted, and the current one. */
+export type TermsStatus = { accepted: boolean; version: string | null; current: string };
+/** null before the terms migration is applied (nothing to ask yet). */
+export async function termsStatus(): Promise<TermsStatus | null> {
+  const { data, error } = await supabase().rpc("terms_status");
+  if (error) { if (error.code === "PGRST202") return null; throw fromPg(error); }
+  return data as TermsStatus;
+}
+/** Records that this person accepted `version` (the one they were shown) of the Terms and Privacy Policy. The server
+ *  refuses any version but the current one: "terms_version", with the current version as the message. */
+export async function acceptTerms(version: string, ws?: string): Promise<TermsStatus | null> {
+  const { data, error } = await supabase().rpc("accept_terms", { p_version: version, p_workspace: ws ?? null });
+  if (error) {
+    if (error.code === "PGRST202") return null;
+    if (/terms_version/.test(error.message ?? "")) throw err("terms_version", (error as { hint?: string }).hint ?? "");
+    throw fromPg(error);
+  }
+  return data as TermsStatus;
+}
+/** Sign-up asks for agreement before there's a session to record it with: kept here until the first sign-in. */
+const TERMS_AGREED = "placetta-terms-agreed";
+export const termsAgreed = {
+  set: (version: string) => { try { localStorage.setItem(TERMS_AGREED, version); } catch { /* storage blocked */ } },
+  take: () => { try { const v = localStorage.getItem(TERMS_AGREED); localStorage.removeItem(TERMS_AGREED); return v; } catch { return null; } },
+};
+
 /** What's saved: the workspace minus the audit trail (kept server side) and anything derived from filings. */
 import { stripState as strip } from "../core";
 export { strip };

@@ -8,6 +8,8 @@
  * Data is kept in this browser's storage when it's available.
  * ------------------------------------------------------------------ */
 
+import { UPDATED } from "../legal";
+
 export const PREVIEW_CODE = "123456";
 
 type Row = Record<string, unknown> & { id?: string | number };
@@ -164,6 +166,25 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
       });
       save(); return status();
     }
+    case "terms_status": case "accept_terms": {
+      // Clickwrap records, as in supabase/migrations/20261013060000_terms_acceptance.sql: only the current version is accepted.
+      const rows = t("terms_acceptances");
+      const status = () => {
+        const mine = rows.filter(r => r.user_id === c.sub);
+        const last = mine.filter(r => r.doc === "terms").sort((x, y) => String(y.accepted_at).localeCompare(String(x.accepted_at)) || Number(y.id) - Number(x.id))[0];
+        const has = (doc: string) => mine.some(r => r.doc === doc && r.version === UPDATED);
+        return json({ accepted: has("terms") && has("privacy"), version: (last?.version as string | undefined) ?? null, current: UPDATED });
+      };
+      if (fn === "terms_status") return status();
+      if (body.p_version !== UPDATED) return json({ code: "P0001", message: "terms_version", details: "These terms have been updated. Reload to read the current version.", hint: UPDATED }, 400);
+      const w = body.p_workspace == null ? null : String(body.p_workspace);
+      if (w && !roleIn(w, c.sub)) return pgErr("Not your workspace.", "42501", 403);
+      for (const doc of ["terms", "privacy"]) {
+        if (rows.some(r => r.user_id === c.sub && r.doc === doc && r.version === UPDATED && (r.workspace_id ?? null) === w)) continue;
+        rows.push({ id: rows.length + 1, user_id: c.sub, workspace_id: w, doc, version: UPDATED, accepted_at: now(), ip: null, user_agent: navigator.userAgent });
+      }
+      save(); return status();
+    }
     case "whoami": return json({ id: c.sub, email: userOf(c.sub).email, staff: isStaff(c), staff_email: staffEmail(c.sub), two_step: twoStepOn(c.sub), aal: c.aal });
     case "my_workspaces":
       if (!mfaOk(c)) return json([]);
@@ -183,6 +204,7 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
       const id = uuid(), name = String(body.p_name).slice(0, 120);
       t("workspaces").push({ id, name, state: body.p_state ?? {}, authorized_at: now(), created_at: now() });
       t("workspace_members").push({ workspace_id: id, user_id: c.sub, role: "owner", created_at: now() });
+      t("terms_acceptances").push({ id: t("terms_acceptances").length + 1, user_id: c.sub, workspace_id: id, doc: "authorization", version: UPDATED, accepted_at: now(), ip: null, user_agent: navigator.userAgent });
       t("billing").push({ workspace_id: id, entry_markets: 0, entry_paid_at: null, subscription_status: null, subscription_plan: null, current_period_end: null, comped: false, stripe_customer_id: null });
       audit(id, c.sub, "you", "Created the workspace and authorized Placetta to prepare and submit the filings you approve", "创建工作区，并授权快哉准备和提交您批准的申请", { en: name, zh: name });
       save(); return json(id);
