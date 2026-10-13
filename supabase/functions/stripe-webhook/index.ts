@@ -2,6 +2,7 @@
 //   checkout.session.completed (payment, plan=entry)  -> billing.entry_markets += markets
 //   customer.subscription.created / updated / deleted  -> billing.subscription_*
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { itemOf, webhookSecret } from "../_shared/stripe_catalog.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -33,7 +34,11 @@ async function log(ws: string, action: { en: string; zh: string }, plan: string)
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return reply(405, { error: "POST only" });
-  const secret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  // the env secret, else the one kept when Placetta made the endpoint itself (billing does that before the first checkout)
+  const secret = await webhookSecret((k) => Deno.env.get(k), {
+    get: async (key) => ((await admin.from("stripe_config").select("value").eq("key", key).maybeSingle()).data?.value as string | undefined) ?? undefined,
+    set: async () => {},
+  });
   if (!secret) return reply(503, { error: "Set STRIPE_WEBHOOK_SECRET." });
   const raw = await req.text();
   if (!(await verified(raw, req.headers.get("stripe-signature") ?? "", secret))) return reply(400, { error: "Bad signature." });
@@ -86,11 +91,13 @@ Deno.serve(async (req) => {
         const end = o.current_period_end ?? o.items?.data?.[0]?.current_period_end;
         const status = event.type === "customer.subscription.deleted" ? "canceled" : String(o.status);
         // the locations paid for, which size Odelia's monthly allowance
-        const locPrices = [Deno.env.get("STRIPE_PRICE_LOCATION"), Deno.env.get("STRIPE_PRICE_LOCATION_PRO")].filter(Boolean);
-        const items = (o.items?.data ?? []) as { price?: { id?: string }; quantity?: number }[];
-        const paid = status === "active" || status === "trialing" ? items.filter((i) => locPrices.includes(i.price?.id)).reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
-        // Pro (by its price, or the tier on the subscription) sizes a larger Odelia allowance
-        const pro = items.some((i) => i.price?.id && i.price.id === Deno.env.get("STRIPE_PRICE_LOCATION_PRO")) || o.metadata?.tier === "pro";
+        const env = (k: string) => Deno.env.get(k);
+        const items = (o.items?.data ?? []) as { price?: { id?: string; lookup_key?: string | null }; quantity?: number }[];
+        const located = items.filter((i) => ["essentials", "pro"].includes(itemOf(i.price, env) ?? ""));
+        const paid = status === "active" || status === "trialing" ? located.reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
+        // Pro sizes a larger Odelia allowance. The price decides (a move in the portal changes it); the tier set at
+        // checkout counts only when no location price is recognized.
+        const pro = located.length ? located.some((i) => itemOf(i.price, env) === "pro") : o.metadata?.tier === "pro";
         await admin.from("billing").update({
           stripe_customer_id: o.customer, subscription_id: o.id, subscription_status: status,
           subscription_plan: pro ? "pro" : o.metadata?.plan ?? null, current_period_end: end ? new Date(end * 1000).toISOString() : null,

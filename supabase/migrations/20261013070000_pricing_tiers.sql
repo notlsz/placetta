@@ -58,3 +58,13 @@ end $$;
 
 revoke execute on function public.ai_budget(uuid) from public, anon, authenticated;
 grant execute on function public.ai_budget(uuid) to service_role;
+
+-- Stripe settings Placetta makes for itself (the webhook's signing secret). Service role only: RLS on, no policies.
+create table if not exists public.stripe_config (
+  key text primary key,
+  value text not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.stripe_config enable row level security;
+revoke all on public.stripe_config from public, anon, authenticated;
+grant select, insert, update, delete on public.stripe_config to service_role;
