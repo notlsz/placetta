@@ -347,7 +347,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         // the allowance or a rate limit: say exactly why, and open the way to keep going
         const zh: Record<string, string> = {
           over_budget: "本期的 Odelia 额度已用完。购买加量包或升级方案即可继续；截止日期、提醒和已在办理的申报不受影响。",
-          trial_used: "Odelia 的免费体验额度已用完。选择方案即可继续。",
+          plan_required: "Odelia 需开通付费方案后使用。先选择方案：299 美元的开店计划可梳理一个市场的全部许可，并可全额抵扣。",
           entry_ended: "开店计划附带的 30 天 Odelia 服务已结束。升级为年度方案即可继续，开店计划费用可全额抵扣。",
           rate_limited: "一次请求太多了，请稍后再试。",
           paused: "Odelia 暂时暂停，请稍后再试。",
@@ -355,7 +355,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         };
         const msg = (err as { message?: string }).message ?? "";
         upd(() => ({ reply: { text: [B(msg, zh[code] ?? msg)] }, active: -1 }));
-        if (cloud && (code === "trial_used" || code === "entry_ended")) setPlans("start");
+        if (cloud && (code === "plan_required" || code === "entry_ended")) setPlans("start");
         else if (cloud && code === "over_budget") setLimitHit(true);
       }
       else if (code === "payment_required") { upd(() => ({ reply: { text: [B("Start with the entry plan and I'll map every license this business needs.", "先开通开店计划，我就为您梳理所需的全部许可。")] }, active: -1 })); setPlans("start"); }

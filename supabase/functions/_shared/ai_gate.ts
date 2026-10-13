@@ -10,7 +10,7 @@ const mins = (s?: number) => { const m = Math.max(1, Math.ceil((s ?? 60) / 60));
 export function refusal(code: string, retry?: number): { message: string; status: number } {
   switch (code) {
     case "over_budget": return { status: 402, message: "You've used this period's Odelia allowance. Add a pack or move up a plan to keep going. Deadlines, reminders and filings already in motion carry on." };
-    case "trial_used": return { status: 402, message: "Your free look at Odelia is used up. Pick a plan to keep going." };
+    case "plan_required": return { status: 402, message: "Odelia works on a paid plan. Pick a plan to start: the $299 entry plan maps every license for a market and is credited in full." };
     case "entry_ended": return { status: 402, message: "Your entry plan's 30 days with Odelia are over. Move to a yearly plan to keep going; your entry payment is credited." };
     case "rate_limited": return { status: 429, message: `That's a lot at once. Odelia can take more in about ${mins(retry)}.` };
     case "paused": return { status: 503, message: "Odelia is paused for a little while. Try again later." };

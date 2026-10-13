@@ -15,17 +15,14 @@ begin
     (wo, 'Opening', now(), x, x, '{"stores":[{"id":"s1","stage":"opening"},{"id":"s2","stage":"open"},{"id":"s3","stage":"opening"}]}');
   insert into public.workspace_members (workspace_id, user_id, role) values (w1, a, 'owner'), (w2, a, 'owner'), (wm, x, 'owner'), (we, x, 'owner'), (wo, x, 'owner');
 
-  -- Trial: $2 per person, across every workspace they make
+  -- No paid plan, no AI: not even a small trial, and a new workspace changes nothing
   g := public.ai_gate(w1, a, 'call', null);
-  res := res || jsonb_build_object('trial starts open', (g->>'ok')::boolean and g->'budget'->>'plan' = 'trial' and (g->'budget'->>'limit_usd')::numeric = 2);
-  perform public.ai_record((g->>'event')::bigint, 1.95, 'anthropic:claude-sonnet-5-5', 1000, 100);
-  g := public.ai_gate(w1, a, 'call', null);
-  res := res || jsonb_build_object('trial over 80% gets cheaper models', g->>'tier' = 'reduced');
-  perform public.ai_record((g->>'event')::bigint, 0.10, 'anthropic:claude-haiku-4-5', 1000, 100);
-  g := public.ai_gate(w1, a, 'call', null);
-  res := res || jsonb_build_object('trial used up stops', not (g->>'ok')::boolean and g->>'code' = 'trial_used');
-  g := public.ai_gate(w2, a, 'call', null);
-  res := res || jsonb_build_object('a new workspace does not reset the trial', g->>'code' = 'trial_used');
+  res := res || jsonb_build_object('no plan, no AI', not (g->>'ok')::boolean and g->>'code' = 'plan_required' and (g->'budget'->>'limit_usd')::numeric = 0);
+  g := public.ai_gate(w2, a, 'task', null);
+  res := res || jsonb_build_object('a second unpaid workspace is refused too', g->>'code' = 'plan_required');
+  res := res || jsonb_build_object('a refused workspace adds nothing to the log', (select count(*) from public.ai_events where workspace_id in (w1, w2)) = 0);
+  perform public.ai_add_credit(w1, 100);
+  res := res || jsonb_build_object('credit alone does not buy AI without a plan', public.ai_gate(w1, a, 'call', null)->>'code' = 'plan_required');
 
   -- Per location: $25 a location a month
   insert into public.billing (workspace_id, subscription_status, paid_locations) values (wm, 'active', 2);
@@ -69,7 +66,8 @@ begin
   res := res || jsonb_build_object('31st call in a minute waits', g->>'code' = 'rate_limited');
 
   -- The company-wide ceiling
-  g := public.ai_gate(we, x, 'task', 1);
+  insert into public.ai_events (workspace_id, user_id, kind, cost_usd) values (wo, x, 'call', 5);
+  g := public.ai_gate(wm, x, 'call', 1);
   res := res || jsonb_build_object('company ceiling pauses everyone', g->>'code' = 'paused');
 
   -- Who can call what
@@ -79,7 +77,7 @@ begin
   res := res || jsonb_build_object('members cannot call the gate', ok);
   begin perform public.ai_add_credit(w1, 1000); ok := false; exception when insufficient_privilege then ok := true; end;
   res := res || jsonb_build_object('members cannot give themselves credit', ok);
-  res := res || jsonb_build_object('members see their own usage', (public.ai_status(w1)->>'used_pct')::int = 100);
+  res := res || jsonb_build_object('members see their own status', public.ai_status(w1)->>'plan' = 'none');
   begin perform public.ai_status(wm); ok := false; exception when others then ok := true; end;
   res := res || jsonb_build_object('but not another workspace''s', ok);
   begin perform count(*) from public.ai_events; ok := false; exception when insufficient_privilege then ok := true; end;

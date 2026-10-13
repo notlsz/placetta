@@ -876,8 +876,8 @@ export function Settings() {
   const [ai, setAi] = useState<api.AiStatus | null>(null);
   useEffect(() => { if (cloud?.wsId) void api.aiStatus(cloud.wsId).then(setAi); }, [cloud?.wsId]);
   const aiSub = !ai ? undefined : lang === "zh"
-    ? `${ai.plan === "trial" ? "免费体验" : ai.plan === "entry" ? "开店计划 30 天额度" : ai.plan === "entry_ended" ? "开店计划额度已结束" : "本月额度"}：已用 ${ai.used_pct}%${ai.resets_at && ai.plan !== "entry_ended" ? `，${ai.plan === "entry" ? "截至" : "于"} ${fmtDay(ai.resets_at, lang, true)}${ai.plan === "entry" ? "" : " 重置"}` : ""}${ai.has_credit ? "，另有加量包额度" : ""}`
-    : `${ai.plan === "trial" ? "Free look" : ai.plan === "entry" ? "Entry plan's 30-day allowance" : ai.plan === "entry_ended" ? "Entry plan's allowance has ended" : "This month's allowance"}: ${ai.used_pct}% used${ai.resets_at && ai.plan !== "entry_ended" ? `, ${ai.plan === "entry" ? "until" : "resets"} ${fmtDay(ai.resets_at, lang, true)}` : ""}${ai.has_credit ? ", plus pack credit" : ""}`;
+    ? `${ai.plan === "none" ? "开通方案后可用" : ai.plan === "entry" ? "开店计划 30 天额度" : ai.plan === "entry_ended" ? "开店计划额度已结束" : "本月额度"}：已用 ${ai.used_pct}%${ai.resets_at && ai.plan !== "entry_ended" ? `，${ai.plan === "entry" ? "截至" : "于"} ${fmtDay(ai.resets_at, lang, true)}${ai.plan === "entry" ? "" : " 重置"}` : ""}${ai.has_credit ? "，另有加量包额度" : ""}`
+    : `${ai.plan === "none" ? "Starts with a plan" : ai.plan === "entry" ? "Entry plan's 30-day allowance" : ai.plan === "entry_ended" ? "Entry plan's allowance has ended" : "This month's allowance"}: ${ai.used_pct}% used${ai.resets_at && ai.plan !== "entry_ended" ? `, ${ai.plan === "entry" ? "until" : "resets"} ${fmtDay(ai.resets_at, lang, true)}` : ""}${ai.has_credit ? ", plus pack credit" : ""}`;
   const planName = !cloud ? B("Growth plan (sample)", "成长版（示例）")
     : bl?.free && !bl.subscription_status ? B("Early access, everything included", "抢先体验，全部功能开放")
     : cloud.plan === "monthly" ? ({ starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版") } as Record<string, Bi>)[bl?.subscription_plan ?? ""] ?? B(bl?.comped ? "Monthly plan (pilot)" : "Monthly plan", bl?.comped ? "月度方案（试点）" : "月度方案")
@@ -921,7 +921,7 @@ export function Settings() {
             rows={[
               { label: planName, sub: renew || (bl?.free && !bl.subscription_status ? b(B("Paid plans start later. Nothing is charged now.", "付费方案稍后推出，现在不收取任何费用。")) : cloud?.plan === "entry" ? b(B("Credited toward your first year on an annual plan", "可抵扣年度方案首年费用")) : undefined), icon: <I.card />,
                 right: cloud && !cloud.owner ? <em className="lock">{lang === "zh" ? "由所有者管理" : "Managed by owners"}</em> : cloud ? <>{cloud.plan !== "monthly" && <Btn guard kind="ink" onClick={() => cloud.openPlans(cloud.plan === "none" ? "start" : "file")}>{lang === "zh" ? "选择方案" : "Choose a plan"}</Btn>}{bl?.stripe_customer_id && <Btn guard onClick={() => void cloud.portal()}>{lang === "zh" ? "管理账单" : "Manage billing"}</Btn>}</> : undefined },
-              ...(ai ? [{ label: B("Odelia allowance", "Odelia 额度"), sub: aiSub, icon: <I.spark />,
+              ...(ai && ai.plan !== "none" ? [{ label: B("Odelia allowance", "Odelia 额度"), sub: aiSub, icon: <I.spark />,
                 right: <span className="aimeter" aria-label={`${ai.used_pct}%`}><i style={{ width: `${ai.used_pct}%` }} className={ai.used_pct >= 100 ? "full" : ai.used_pct >= 80 ? "near" : ""} /></span> },
                 ...(cloud?.owner && (ai.plan === "monthly" || ai.plan === "entry" || ai.plan === "comped") ? [{ label: B("Odelia packs", "Odelia 加量包"), sub: b(B("More allowance on top of your plan. It carries over until it's used.", "在方案之外增加额度，长期有效直到用完。")),
                   right: <Btn guard onClick={() => void cloud.buyPack()}>{lang === "zh" ? "购买加量包" : "Add a pack"}</Btn> }] : [])] : []),

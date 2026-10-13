@@ -230,7 +230,7 @@ export async function work(runId: string, token: string | null) {
     if (code === "cancelled" || ctl.signal.aborted) await admin.from("agent_runs").update({ steps, draft: null, state: null, updated_at: new Date().toISOString() }).eq("id", runId);
     else {
       console.error("run failed", runId, code, String((e as Error)?.message ?? e).slice(0, 200));
-      const { data: failed } = await admin.from("agent_runs").update({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "trial_used", "entry_ended", "paused", "task_limit"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running").select("id");
+      const { data: failed } = await admin.from("agent_runs").update({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running").select("id");
       // Someone who asked by text or on a call hears about it the same way.
       if (failed?.length) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
     }

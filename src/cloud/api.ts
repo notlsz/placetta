@@ -333,7 +333,7 @@ export async function startRun(ws: string, o: { prompt: string; history: { role:
   throw e;
 }
 /** Odelia's allowance and rate limits: the server's own words go to the person, with the way to keep going. */
-export const LIMITS = ["over_budget", "trial_used", "entry_ended", "rate_limited", "paused", "task_limit"];
+export const LIMITS = ["over_budget", "plan_required", "entry_ended", "rate_limited", "paused", "task_limit"];
 export async function pollRun(id: string): Promise<RunRow> {
   const { data, error } = await supabase().rpc("poll_agent_run", { p_id: id });
   if (error) throw fromPg(error);
@@ -465,7 +465,7 @@ export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { ac
 /** An Odelia pack: more AI allowance, carried over until it's used. */
 export const buyPack = (ws: string, packs = 1) => fn<{ url: string }>("billing", { action: "pack", workspace_id: ws, packs, return_url: location.origin + location.pathname });
 /** How much of this period's Odelia allowance is used. */
-export type AiStatus = { plan: "trial" | "entry" | "entry_ended" | "monthly" | "comped"; used_pct: number; resets_at: string | null; has_credit: boolean };
+export type AiStatus = { plan: "none" | "entry" | "entry_ended" | "monthly" | "comped"; used_pct: number; resets_at: string | null; has_credit: boolean };
 export async function aiStatus(ws: string): Promise<AiStatus | null> {
   if (PREVIEW) return null;
   const { data, error } = await supabase().rpc("ai_status", { ws });
