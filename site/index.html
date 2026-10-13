@@ -1018,7 +1018,7 @@ html[lang="zh-CN"] .flnote{font-style:normal;letter-spacing:1px}
 @media (prefers-reduced-motion:reduce){.flport .rg{animation:none;opacity:0}}
 
 /* ===== v80: a shorter page. One headline per section, one rhythm, nothing ever under the nav ===== */
-.sec{margin-top:128px;scroll-margin-top:104px}
+.sec{margin-top:104px;scroll-margin-top:104px}
 @media (max-width:1023px){.sec{margin-top:88px;scroll-margin-top:88px}}
 #sample,#backed{scroll-margin-top:104px}
 @media (max-width:1023px){#sample,#backed{scroll-margin-top:84px}}
@@ -1314,7 +1314,7 @@ html[lang="zh-CN"] .ctas .ctah{letter-spacing:0;line-height:1.2}
 .ox .av.ok,.av.ok.ox{background:var(--okbg);border-color:rgba(63,154,98,.15);color:var(--ok)}
 .ox .fc .fi,.fc.ox .fi{width:21px;height:21px;border-radius:5px;background:#fff;display:grid;place-items:center;box-shadow:inset 0 0 0 .4px rgba(15,27,51,.08)}
 .ox .fc .fl,.fc.ox .fl{display:flex;align-items:center;gap:5px}
-.ox .mt160,.mt160.ox{margin-top:160px}
+.ox .mt160,.mt160.ox{margin-top:120px}
 @media (max-width:1023px){.ox .mt160,.mt160.ox{margin-top:120px}}
 .ox .addc,.addc.ox{display:flex;flex-direction:column;align-items:center;height:420px;overflow:hidden;border-radius:16px;background:var(--card);padding-top:62px}
 @media (min-width:1024px){.ox .addc,.addc.ox{height:666px;padding-top:116px}}
@@ -1910,10 +1910,9 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .pmbar.good i{width:1.5%;min-width:8px;background:var(--gs)}
 .frcap{margin-top:14px;text-align:center;font-size:14px;color:var(--ink2)}
 /* industries: Alven's "does what property managers do" sticky list + grey panel */
-.insec{margin-top:160px}
-@media (min-width:1024px){.inscroll{height:270vh}.instick{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center}}
+.insec{margin-top:120px}
 .inrow{display:flex;flex-direction:column;gap:24px}
-@media (min-width:1024px){.inrow{flex-direction:row;justify-content:space-between;align-items:stretch;gap:40px;height:min(719px,calc(100vh - 120px))}}
+@media (min-width:1024px){.inrow{flex-direction:row;justify-content:space-between;align-items:stretch;gap:40px;height:800px}}
 .inl{display:flex;flex-direction:column;gap:24px}
 @media (min-width:1024px){.inl{width:303px;flex:none;justify-content:space-between;padding:8px 0}}
 .inl .t28{max-width:300px}
@@ -1942,7 +1941,7 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 @media (max-width:767px){.intoast{transform:none;margin-top:12px}.inb{font-size:16px;height:48px}}
 
 .pmath .pmh{font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-@media (min-width:1024px){.instick{padding-top:72px}.inrow{height:min(719px,calc(100vh - 150px))!important}}
+@media (min-width:1024px){.instick{padding-top:72px}.inrow{height:800px!important}}
 @media (min-width:1024px) and (max-height:860px){.insub{display:none}.inb{height:42px;font-size:16px}.inb svg{width:22px;height:22px}.inl .t28{font-size:24px}}
 /* industry scene: the sector's key permit behind its checklist */
 .inscene{position:relative;display:flex;align-items:center;justify-content:center;width:100%}
@@ -4394,7 +4393,7 @@ function renderInd(k){
   const sc = document.getElementById("inScroll"); if (!sc) return;
   const lg = () => matchMedia("(min-width:1024px)").matches;
   document.querySelector(".inlist").addEventListener("click", e => { const b = e.target.closest(".inb"); if (!b) return; const k = +b.dataset.k;
-    if (lg() && !RM){ inLock = Date.now() + 1200; const top = sc.getBoundingClientRect().top + scrollY, span = sc.offsetHeight - innerHeight; scrollTo({top: top + span * (k + .5) / IND.length, behavior: "smooth"}); }
+    if (lg() && !RM && sc.offsetHeight > innerHeight){ inLock = Date.now() + 1200; const top = sc.getBoundingClientRect().top + scrollY, span = sc.offsetHeight - innerHeight; scrollTo({top: top + span * (k + .5) / IND.length, behavior: "smooth"}); }
     renderInd(k); track("industry_select", {k}); });
   addEventListener("scroll", () => { if (!lg() || Date.now() < inLock) return; const r = sc.getBoundingClientRect(), span = sc.offsetHeight - innerHeight; if (r.top > 0 || -r.top > span) return;
     const k = Math.min(IND.length - 1, Math.floor(-r.top / span * IND.length)); if (k !== inK) renderInd(k); }, {passive: true});
