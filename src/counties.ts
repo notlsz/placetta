@@ -26,3 +26,22 @@ export function countyOf(city: string, state: string): { en: string; zh: string 
   if (st === "DC") return { en: "District of Columbia", zh: "哥伦比亚特区" };
   return hit ? { en: `${hit[0]}, ${st}`, zh: `${hit[1]}，${st}` } : { en: st, zh: st };
 }
+
+const STATE_NAMES: Record<string, string> = {
+  alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA", colorado: "CO", connecticut: "CT", delaware: "DE", florida: "FL", georgia: "GA",
+  hawaii: "HI", idaho: "ID", illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS", kentucky: "KY", louisiana: "LA", maine: "ME", maryland: "MD",
+  massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS", missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV", "new hampshire": "NH", "new jersey": "NJ",
+  "new mexico": "NM", "new york": "NY", "north carolina": "NC", "north dakota": "ND", ohio: "OH", oklahoma: "OK", oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC",
+  "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT", vermont: "VT", virginia: "VA", washington: "WA", "west virginia": "WV", wisconsin: "WI", wyoming: "WY",
+  "district of columbia": "DC", "washington dc": "DC", "washington, dc": "DC", "d.c.": "DC", dc: "DC",
+  加州: "CA", 加利福尼亚: "CA", 德州: "TX", 德克萨斯: "TX", 纽约州: "NY", 纽约: "NY", 佛罗里达: "FL", 华盛顿州: "WA", 伊利诺伊: "IL", 新泽西: "NJ", 马萨诸塞: "MA",
+};
+const CODES = new Set(Object.values(STATE_NAMES));
+/** "Texas", "tx", " TX ", "德州" → "TX"; "" when it isn't a US state. */
+export function stateCode(v: string): string {
+  const t = v.trim().replace(/\.$/, "");
+  if (/^[A-Za-z]{2}$/.test(t) && CODES.has(t.toUpperCase())) return t.toUpperCase();
+  return STATE_NAMES[t.toLowerCase().replace(/\s+/g, " ")] ?? STATE_NAMES[t] ?? "";
+}
+/** "  austin " → "Austin"; names already capitalized ("McAllen", "LaGrange") and non-Latin names stay as written. */
+export const cityName = (v: string) => { const t = v.trim().replace(/\s+/g, " "); return /[A-Z]/.test(t) || !/[a-z]/.test(t) ? t : t.replace(/(^|[\s-])([a-z])/g, (_, s: string, c: string) => s + c.toUpperCase()); };

@@ -1,6 +1,6 @@
 import type { OrbState } from "thinking-orbs";
 import {
-  addApp, addApproval, addDeadline, addDoc, audit, filingBlockers, setApp, setCheck, setFact,
+  addApp, addApproval, addDeadline, addDoc, audit, filingBlockers, isBlank, setApp, setCheck, setFact,
   type AgentBackend, type AgentEvent, type Reply, type Request, type Step,
 } from "./core";
 import { B, same, type Bi } from "./bi";
@@ -10,7 +10,8 @@ import { inDays, money, nowIso } from "./time";
 import { replyLanguage } from "./langs";
 import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills";
 import { docx } from "./files";
-import { countyOf } from "./counties";
+import { cityName, countyOf, stateCode as stateFromAny } from "./counties";
+import { COUNTRIES } from "./forms/world";
 import type { Lang } from "./i18n";
 import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
 
@@ -207,7 +208,7 @@ function snapshot(w: Workspace, lang: Lang) {
     applications: w.apps.map(a => ({
       id: a.id, name: b(a.name), official_form: a.official, agency: b(a.agency), level: a.level, status: a.status, next: a.next ? b(a.next) : undefined,
       fee: a.fees.reduce((s, f) => s + f.amount, 0), currency: a.currency ?? "USD", takes: b(a.est), sets_opening_date: a.critical || undefined,
-      empty_fields: a.fields.filter(f => !f.value).map(f => b(f.label)),
+      empty_fields: a.fields.filter(f => isBlank(f.value)).map(f => b(f.label)),
       missing_documents: a.checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: b(c.label) })),
     })),
     stores: (w.stores ?? []).map(st => ({ id: st.id, name: b(st.name), address: st.address, stage: st.stage, planned_open: st.plannedOpen, applications: st.apps })),
@@ -252,7 +253,7 @@ How you work:
 Rules:
 - You never file, submit, pay, sign or send anything yourself, and never say you did. Filings, payments and messages go out only after the person approves them in the app.${account ? `
 - After the person approves a filing, Placetta checks it against the agency's requirements, submits it by email, fax, certified mail or the agency's site (or hands it to the Placetta team when no automatic channel fits), and saves the confirmation. It asks the person only for a CAPTCHA, an identity check, a payment or a handwritten signature. Government fees are paid by the business directly to the agency. Never say a filing is submitted until the workspace shows it.` : ""}
-- Never invent the person's facts. If something is missing, leave it empty (or [in brackets] in a draft) and ask for it in one question at the end.
+- Never invent the person's facts. If something is missing, leave the field empty (never "TBD", "unknown" or a placeholder, which count as empty) and ask for it at the end; in a drafted document use [brackets].
 - Never invent a license or permit name, form number, agency, fee, processing time, rule or date. Take them from find_official_forms${research ? " or an official page you read and cite" : ""}; anything you couldn't confirm there, call an estimate to confirm with the agency, or leave out.
 - Never ask for a Social Security number, ITIN, or bank or card numbers in chat. The team collects those on the agency's own site.${research ? `
 - Research requirements, fees and processing times on official government websites with web_search and web_fetch: the agency's own pages (.gov, state, county and city sites). Portals that point to agencies (usa.gov, sba.gov) are fine for finding the right agency, but read and cite the agency's own page. Use the agency's root domain as the application's agency_url. If you can't confirm something on an official page, call it an estimate.` : `
@@ -291,9 +292,9 @@ const usedIds = (w: Workspace) => new Set<string>([
 const freshId = (w: Workspace, base: string) => { const used = usedIds(w); let id = base + "-" + seq++; while (used.has(id)) id = base + "-" + seq++; return id; };
 const US_STATES: Record<string, string> = { alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA", colorado: "CO", connecticut: "CT", delaware: "DE", "district of columbia": "DC", florida: "FL", georgia: "GA", hawaii: "HI", idaho: "ID", illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS", kentucky: "KY", louisiana: "LA", maine: "ME", maryland: "MD", massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS", missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV", "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY", "north carolina": "NC", "north dakota": "ND", ohio: "OH", oklahoma: "OK", oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC", "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT", vermont: "VT", virginia: "VA", washington: "WA", "west virginia": "WV", wisconsin: "WI", wyoming: "WY" };
 /** A two-letter US state code from "NY", "ny" or "New York"; "" when it isn't one. ("New York" used to become "NE".) */
-export const stateCode = (v: unknown) => { const s = str(v, 40); if (/^[A-Za-z]{2}$/.test(s) && Object.values(US_STATES).includes(s.toUpperCase())) return s.toUpperCase(); return US_STATES[s.toLowerCase().replace(/\./g, "")] ?? ""; };
+export const stateCode = (v: unknown) => { const s = str(v, 40); if (/^[A-Za-z]{2}$/.test(s) && Object.values(US_STATES).includes(s.toUpperCase())) return s.toUpperCase(); return US_STATES[s.toLowerCase().replace(/\./g, "")] ?? stateFromAny(s); };
 /** What still stands between an application and filing it. */
-const gaps = (a: Application) => ({ empty_fields: a.fields.filter(f => !f.value).map(f => f.label.en), missing_documents: a.checklist.filter(c => c.state === "missing").map(c => c.label.en) });
+const gaps = (a: Application) => ({ empty_fields: a.fields.filter(f => isBlank(f.value)).map(f => f.label.en), missing_documents: a.checklist.filter(c => c.state === "missing").map(c => c.label.en) });
 
 /** What a signed-in workspace adds to the agent's hands: the team's filings, the person's connected apps and stored files. */
 export type Services = {
@@ -371,19 +372,21 @@ function officialFields(off: OfficialForm, given: Field[]): Field[] {
 
 /** The lines every agency asks for, whatever the business or the form: used when the library doesn't list a form's
     own lines yet (or for an application with no form), filled from Context and the store it's for. */
-export function coreFields(w: Workspace, store?: Store): Field[] {
-  const fact = (re: RegExp) => w.facts.find(f => re.test(f.label.en) && f.value.en.trim());
+export function coreFields(w: Workspace, store?: Store, abroad = false): Field[] {
+  const fact = (re: RegExp) => w.facts.find(f => re.test(f.label.en) && !isBlank(f.value.en));
   const one = (w.stores ?? []).length <= 1;
   const row = (id: string, en: string, zh: string, f?: { value: Bi; source?: Bi } | string, from?: Bi): Field => {
     const value = typeof f === "string" ? f : f?.value.en ?? "";
     return { id, label: B(en, zh), value, from: value ? (typeof f === "string" ? from : f?.source) ?? B("From Context", "来自资料") : undefined };
   };
-  const owner = w.facts.find(f => /^owner|responsible|^contact name/i.test(f.label.en) && f.value.en.trim() && !/^you\b/i.test(f.value.en));
+  const owner = w.facts.find(f => /^owner|responsible|^contact name/i.test(f.label.en) && !isBlank(f.value.en) && !/^you\b/i.test(f.value.en));
   return [
     row("core-legal-name", "Legal business name", "法定企业名称", fact(/^legal (business )?name$|^company name$/i)),
     row("core-dba", "Name the store trades under (DBA)", "门店经营名称（DBA）", fact(/^(dba|trade name|brand)/i) ?? w.business.en, B("From Context", "来自资料")),
-    row("core-entity", "Entity type and state formed", "实体类型及注册州", fact(/^entity/i)),
-    row("core-ein", "Federal tax ID (EIN)", "联邦税号（EIN）", fact(/^ein$|tax id/i)),
+    row("core-entity", abroad ? "Entity type and where formed" : "Entity type and state formed", abroad ? "实体类型及注册地" : "实体类型及注册州", fact(/^entity/i)),
+    // abroad the US EIN isn't the number the agency wants
+    abroad ? row("core-local-tax", "Local tax or registration number (if issued)", "当地税号或登记号（如已取得）", fact(/local tax|registration number|uscc|统一社会信用代码|vat|trn/i))
+      : row("core-ein", "Federal tax ID (EIN)", "联邦税号（EIN）", fact(/^ein$|federal tax id/i)),
     row("core-owner", "Owner or responsible person", "负责人", owner),
     row("core-address", "Business location address", "经营地址", store?.address || (one ? fact(/storefront|^address|location/i) : undefined), store ? B("From Stores", "来自门店") : undefined),
     row("core-phone", "Business phone", "企业电话", fact(/phone/i)),
@@ -400,7 +403,7 @@ const SHARED: Record<string, [Bi, FactGroup]> = {
 /** Core fields with what the agent gave matched by label, then anything else it gave. */
 function withCore(core: Field[], given: Field[]): Field[] {
   const used = new Set<Field>();
-  const out = core.map(c => { const g = given.find(x => x.label.en.toLowerCase() === c.label.en.toLowerCase() || x.id === c.id); if (g) used.add(g); return g?.value ? { ...c, value: g.value, from: g.from } : c; });
+  const out = core.map(c => { const g = given.find(x => x.label.en.toLowerCase() === c.label.en.toLowerCase() || x.id === c.id); if (g) used.add(g); return g && !isBlank(g.value) ? { ...c, value: g.value, from: g.from } : c; });
   return [...out, ...given.filter(g => !used.has(g))];
 }
 
@@ -420,7 +423,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
   const hasAny = (kinds: string[]) => !!x.svc?.connected().some(k => kinds.includes(k));
   const FILED: Status[] = ["filing", "review", "approved"];
   const notFiled = (a: Application) => { if (FILED.includes(a.status)) throw new Error(`The ${a.name.en} is already ${a.status === "filing" ? "with Placetta's filing team" : a.status === "review" ? "filed and with the agency" : "approved"}; it can't be changed here.`); };
-  const findStore = (id: unknown) => { const st = (get().stores ?? []).find(s => s.id === str(id)); if (!st) throw new Error(`No store "${str(id)}". Use a store id from the workspace's stores.`); return st; };
+  const findStore = (id: unknown) => { const all = get().stores ?? [], st = all.find(s => s.id === str(id)); if (!st) throw new Error(`No store "${str(id)}". ${all.length ? `Stores: ${all.map(x => `"${x.id}" (${x.name.en})`).join(", ")}.` : "There are no stores yet: add_store first."}`); return st; };
   /** A change waiting for the person's confirmation already: asking twice puts two cards in front of them. */
   const pendingChange = (match: (c: Change) => boolean) => get().approvals.find(a => a.kind === "change" && a.change && match(a.change));
 
@@ -482,23 +485,26 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const target = str(i.store_id) ? findStore(i.store_id) : stores.length === 1 ? stores[0] : undefined;
         // the same filing for the same store is already here (a repeated call, or a run picked up again): don't add it twice
         const inStore = (id: string) => stores.some(s => (s.apps ?? []).includes(id));
+        // a filed one is the record; preparing the same form again (a renewal) makes a new one
         const twin = get().apps.find(a => (off ? a.official === off.id : !a.official && a.name.en.toLowerCase() === name.toLowerCase())
-          && (target ? (target.apps ?? []).includes(a.id) : !inStore(a.id)));
+          && !["filing", "review", "approved"].includes(a.status) && (target ? (target.apps ?? []).includes(a.id) : !inStore(a.id)));
         if (twin) { made.apps.add(twin.id); mark(); return { application_id: twin.id, status: twin.status, already_in_workspace: true, ...gaps(twin) }; }
         const level = off ? off.level : (LEVELS.includes(i.level as Level) ? i.level : "state") as Level;
         const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee ?? i.fee_usd) || 0);
         const currency = (off?.currency ?? (/^[A-Z]{3}$/.test(str(i.currency)) ? str(i.currency) : "USD"));
         const given = fieldList(i.fields, lang === "zh" ? "来自资料" : "From Context");
         const listed = !!off?.fields.length;
+        // abroad the agency wants the local tax number, not a US EIN
+        const abroad = currency !== "USD" || (!!target && COUNTRIES.some(c => c.code !== "US" && target.address.toLowerCase().endsWith(c.en.toLowerCase())));
         // a city or county permit is for one store; with several stores the agent says which
         const lvl = off ? off.level : (LEVELS.includes(i.level as Level) ? i.level as Level : "state");
         if (stores.length > 1 && !target && (lvl === "city" || lvl === "county")) throw new Error(`This business has ${stores.length} stores and a ${lvl} permit is for one of them. Pass store_id (one of ${stores.map(x => `"${x.id}" (${x.name.en})`).join(", ")}).`);
         // a form skill fills the lines that don't depend on the store from the last filing of the same form
         const known = off ? prefill(get(), off.id) : new Map();
-        const fields = (listed ? officialFields(off!, given) : withCore(coreFields(get(), target), given)).map(f => (!f.value && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
+        const fields = (listed ? officialFields(off!, given) : withCore(coreFields(get(), target, abroad), given)).map(f => (isBlank(f.value) && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
         const checklist = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
         // an official form whose lines aren't in the library yet stays with Placetta until its fields are filled
-        const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => !f.value) || (off && !fields.length) ? "draft" : "ready";
+        const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => isBlank(f.value)) || (off && !fields.length) ? "draft" : "ready";
         const id = freshId(get(), "x-" + slug(name));
         S("shaping", L(`Preparing the ${/^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name}`, `准备${name}`), domainOf(url) || undefined);
         const app: Application = off ? {
@@ -512,13 +518,13 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           est: str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认"),
           source: { label: domainOf(url), url }, form: str(i.form) ? same(str(i.form, 120)) : undefined, fields, checklist,
         };
-        apply(w => audit("agent", L("Prepared application", "准备申请"), app.name, same(`${fields.filter(f => f.value).length}/${fields.length}`))(addApp(app)(w)));
+        apply(w => audit("agent", L("Prepared application", "准备申请"), app.name, same(`${fields.filter(f => !isBlank(f.value)).length}/${fields.length}`))(addApp(app)(w)));
         // file it under its store: the one named, or the only one
         if (target) apply(w => ({ ...w, stores: (w.stores ?? []).map(x => (x.id === target.id ? { ...x, apps: [...new Set([...(x.apps ?? []), id])] } : x)) }));
         made.apps.add(id); touch(id); mark();
         return { application_id: id, status, ...(target ? { store_id: target.id, store: target.name.en } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
           fee: off?.fee ?? (off ? null : fee), fee_note: app.feeNote?.en,
-          empty_fields: fields.filter(f => !f.value).map(f => f.label.en), missing_documents: checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: c.label.en })), ...(known.size ? { filled_from_skill: known.size } : {}),
+          empty_fields: fields.filter(f => isBlank(f.value)).map(f => f.label.en), missing_documents: checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: c.label.en })), ...(known.size ? { filled_from_skill: known.size } : {}),
           ...(!listed ? { fields_note: off ? "The library doesn't list this form's own lines yet: these are the lines every agency asks. Read the official link and fill_fields with every other line the form asks for." : "Add every line the agency's form asks for with fill_fields." } : {}),
           ...(!off && !fee ? { fee_note_for_you: "No fee given. If the agency charges one, pass it: an estimate is shown as one." } : {}) };
       },
@@ -545,22 +551,22 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             if (k >= 0) fields[k] = { ...fields[k], value: f.value, from: f.from, quote: fields[k].value === f.value ? fields[k].quote : undefined };
             else { fields.push(f); added.push(raw); }
           }
-          return { ...x, fields, status: x.status === "draft" && fields.every(f => f.value) && !x.checklist.some(c => c.state === "missing") ? "ready" : x.status };
+          return { ...x, fields, status: x.status === "draft" && fields.every(f => !isBlank(f.value)) && !x.checklist.some(c => c.state === "missing") ? "ready" : x.status };
         }) }));
         apply(audit("agent", L("Filled fields", "填写字段"), a.name, same(incoming.map(f => f.label.en).join(", "))));
         // the lines that are the same for the whole business (owner, phone, email, EIN...) fill every open application and Context
         // matched by the core line's own label or id, whichever form the answer was typed into
         const coreLabel = new Map(coreFields(get()).filter(f => SHARED[f.id]).map(f => [f.label.en.toLowerCase(), f.id]));
-        const wide = incoming.map(g => ({ id: coreLabel.get(g.label.en.toLowerCase()) ?? (SHARED[g.label.en] ? g.label.en : ""), value: g.value, from: g.from })).filter(f => f.id && f.value);
+        const wide = incoming.map(g => ({ id: coreLabel.get(g.label.en.toLowerCase()) ?? (SHARED[g.label.en] ? g.label.en : ""), value: g.value, from: g.from })).filter(f => f.id && !isBlank(f.value));
         let also = 0;
         if (wide.length) apply(w => {
           const apps = w.apps.map(x => {
             if (["filing", "review", "approved"].includes(x.status)) return x;
             let hit = false;
-            const fields = x.fields.map(f => { const v = wide.find(y => y.id === f.id); if (v && !f.value) { hit = true; return { ...f, value: v.value, from: v.from }; } return f; });
+            const fields = x.fields.map(f => { const v = wide.find(y => y.id === f.id); if (v && isBlank(f.value)) { hit = true; return { ...f, value: v.value, from: v.from }; } return f; });
             if (!hit) return x;
             also++;
-            return { ...x, fields, status: x.status === "draft" && fields.every(f => f.value) && !x.checklist.some(c => c.state === "missing") ? "ready" as Status : x.status };
+            return { ...x, fields, status: x.status === "draft" && fields.every(f => !isBlank(f.value)) && !x.checklist.some(c => c.state === "missing") ? "ready" as Status : x.status };
           });
           let n: Workspace = { ...w, apps };
           for (const f of wide) { const [label, group] = SHARED[f.id]; const had = n.facts.find(x => x.label.en.toLowerCase() === label.en.toLowerCase()); n = setFact({ id: had?.id ?? "f-x-" + f.id, group: had?.group ?? group, label: had?.label ?? label, value: same(f.value), source: L("You told me", "您告诉我的") })(n); }
@@ -568,7 +574,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         });
         made.apps.add(a.id); touch(a.id); mark();
         const now = get().apps.find(x => x.id === a.id)!;
-        return { status: now.status, still_empty: now.fields.filter(f => !f.value).map(f => f.label.en), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
+        return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
           ...(also ? { also_filled_on: `${also} other open application${also === 1 ? "" : "s"}, and saved to Context` } : {}) };
       },
     },
@@ -597,7 +603,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const a = findApp(i.application_id); notFiled(a);
         const bl = filingBlockers(a);
         if (bl.empty.length || bl.missing.length) {
-          apply(setApp(a.id, { status: bl.missing.length ? "needs" : "draft" }));
+          // an approval asked for earlier, before a line was emptied, goes away
+          apply(w => setApp(a.id, { status: bl.missing.length ? "needs" : "draft" })({ ...w, approvals: w.approvals.filter(x => !(x.app === a.id && x.kind === "file")) }));
           return { approval_requested: false, why: "Not ready: nothing is filed with an empty field or a missing document.", empty_fields: bl.empty.map(x => x.en), missing_documents: bl.missing.map(x => x.en),
             do_next: "Fill what you can with fill_fields. Ask the person for the rest in one short list. Write letters with draft_document; ask them to upload the other documents. Then call this again." };
         }
@@ -720,32 +727,39 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "add_store",
-      description: "Add a store (location) to the workspace so Placetta tracks its licenses and, once open, its daily readiness.",
+      description: "Add a store (location) to the workspace so Placetta tracks its licenses and, once open, its daily readiness. If a store is already at that address, returns it instead of adding a second.",
       inputSchema: { type: "object", properties: {
         name: { type: "string", description: "Short name, e.g. 'Flushing, Main St'" }, address: { type: "string" },
-        city: { type: "string" }, state: { type: "string", description: "Two-letter state code" },
+        city: { type: "string" }, state: { type: "string", description: "US state: two-letter code or name. Leave out abroad" },
+        country: { type: "string", description: "Outside the US: the country, e.g. 'China', 'United Kingdom'" },
         stage: { type: "string", enum: ["opening", "open"] }, planned_open: { type: "string", description: "YYYY-MM-DD" },
-      }, required: ["name", "city", "state"] },
+      }, required: ["name", "city"] },
       execute(i) {
-        const name = str(i.name, 80), city = str(i.city, 60), st = stateCode(i.state);
-        if (!name || !city) throw new Error("name and city are required");
-        if (!st) throw new Error(`state must be a US state, as a two-letter code like NY (got "${str(i.state, 40)}")`);
-        if (str(i.planned_open) && !isDate(str(i.planned_open))) throw new Error("planned_open must be a real date as YYYY-MM-DD");
-        const address = [str(i.address, 120), city, st].filter(Boolean).join(", ");
-        // the same store already here (a repeated call, or a run picked up again)
-        const twin = (get().stores ?? []).find(s => s.address.toLowerCase() === address.toLowerCase() || (s.name.en.toLowerCase() === name.toLowerCase() && s.address.toLowerCase().includes(city.toLowerCase())));
+        const city = cityName(str(i.city, 60)), name = str(i.name, 80) || city;
+        if (!city) throw new Error("city is required");
+        const ctry = str(i.country, 60), land = ctry ? COUNTRIES.find(c => c.code === ctry.toUpperCase() || c.names.test(ctry)) : undefined;
+        if (ctry && !land && !/^(us|usa|united states)$/i.test(ctry)) throw new Error(`"${ctry}" isn't a country Placetta knows yet. Use its English name, e.g. 'China' or 'United Kingdom'.`);
+        const abroad = !!land && land.code !== "US";
+        const st = abroad ? "" : stateCode(i.state);
+        if (!abroad && !st) throw new Error(str(i.state) ? `"${str(i.state, 40)}" isn't a US state. Use its two-letter code like NY or its name, or pass country for a store abroad.` : "state is required for a US store (e.g. TX), or pass country for a store abroad.");
+        if (str(i.planned_open) && !isDate(str(i.planned_open))) throw new Error(`planned_open "${str(i.planned_open, 40)}" isn't a real date. Use YYYY-MM-DD.`);
+        const address = [str(i.address, 120), city, abroad ? land!.en : st].filter(Boolean).join(", ");
+        // the same store already here (a repeated call, a run picked up again, or "Ave" one time and "Avenue" the next)
+        const norm = (a: string) => a.toLowerCase().replace(/[^a-z0-9一-鿿]+/g, " ").replace(/\b(street|st|avenue|ave|road|rd|boulevard|blvd|suite|ste|unit)\b/g, m => m.slice(0, 2)).trim();
+        const twin = (get().stores ?? []).find(s => norm(s.address) === norm(address) || (s.name.en.toLowerCase() === name.toLowerCase() && s.address.toLowerCase().includes(city.toLowerCase())));
         if (twin) { mark(); return { store_id: twin.id, already_there: true }; }
         const nyc = st === "NY" && /^(new york|new york city|nyc|manhattan|brooklyn|queens|bronx|the bronx|staten island|flushing|astoria|long island city|elmhurst|jackson heights|sunset park)$/i.test(city);
         const id = freshId(get(), slug(name));
         S("connecting", L(`Adding ${name}`, `添加${name}`));
         const planned = str(i.planned_open) || undefined;
-        apply(w => audit("agent", L("Added a store", "添加门店"), same(name), same([str(i.address, 120), city, st].filter(Boolean).join(", ")))({
-          ...w, stores: [...(w.stores ?? []), { id, name: same(name), address: [str(i.address, 120), city, st].filter(Boolean).join(", "), stage: i.stage === "open" ? "open" : "opening", plannedOpen: planned,
+        const county = abroad ? { en: land!.en, zh: land!.zh } : countyOf(city, st);
+        apply(w => audit("agent", L("Added a store", "添加门店"), same(name), same(address))({
+          ...w, stores: [...(w.stores ?? []), { id, name: same(name), address, stage: i.stage === "open" ? "open" : "opening", plannedOpen: planned,
             rules: nyc ? ["nyc_grades", "nyc_fww"] : [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }],
-          locations: w.locations.some(l => l.name.en.toLowerCase() === city.toLowerCase()) ? w.locations : [...w.locations, { id: slug(city), name: same(city), county: countyOf(city, st), state: "active" }],
+          locations: w.locations.some(l => l.name.en.toLowerCase() === city.toLowerCase()) ? w.locations : [...w.locations, { id: slug(city), name: same(city), county, state: "active" }],
         }));
         mark();
-        return { store_id: id, county: countyOf(city, st).en, nyc_rules: nyc, next: "Map its permits: find_official_forms for this place, then prepare_application with this store_id for each city and county one." };
+        return { store_id: id, address, county: county.en, nyc_rules: nyc, ...(planned && planned < inDays(0) && i.stage !== "open" ? { note: "That opening date has passed. Ask whether it's open already or the date moved." } : {}), next: "Map its permits: find_official_forms for this place, then prepare_application with this store_id for each city and county one." };
       },
     },
     {
@@ -756,7 +770,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const st = findStore(i.store_id);
         if (str(i.planned_open) && !isDate(str(i.planned_open))) throw new Error("planned_open must be a real date as YYYY-MM-DD");
         const planned = str(i.planned_open) || undefined;
-        const city = str(i.city, 60), state = stateCode(i.state);
+        const city = cityName(str(i.city, 60)), state = stateCode(i.state);
         // a new street address or state without the city used to be dropped while the tool said it had changed
         if (!city && (str(i.address) || str(i.state))) throw new Error("To move a store, give the new city and state too (and the street address if known).");
         if (!city) {
@@ -792,7 +806,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const id = freshId(get(), "ap-chg"), change: Change = { op: "remove_store", store: st.id };
         S("composing", L(`Asking you to confirm removing ${st.name.en}`, `请您确认移除${st.name.zh}`));
         apply(w => audit("agent", L("Asked to confirm a change", "请求确认更改"), st.name, L("Remove", "移除"))(addApproval({ id, kind: "change", change, title: L(`Remove ${st.name.en}`, `移除${st.name.zh}`), action: B("Confirm removal", "确认移除"),
-          does: [L(`Remove ${st.name.en} (${st.address}) from Stores`, `从门店中移除${st.name.zh}（${st.address}）`)], data: str(i.reason) ? [{ id: "why", label: L("Why", "原因"), value: str(i.reason, 200) }] : [] })(w)));
+          does: [L(`Remove ${st.name.en} (${st.address}) from Stores`, `从门店中移除${st.name.zh}（${st.address}）`),
+            ...((st.apps ?? []).some(id => !["filing", "review", "approved"].includes(get().apps.find(a => a.id === id)?.status ?? "")) ? [L("Remove its applications that aren't filed yet, with their approvals and deadlines. Filed ones stay on record", "移除其尚未提交的申请及相关审批和截止日期，已提交的保留记录")] : [])], data: str(i.reason) ? [{ id: "why", label: L("Why", "原因"), value: str(i.reason, 200) }] : [] })(w)));
         made.approvals.push(id); mark();
         return { confirmation_requested: true, approval_id: id, note: "Nothing changes until the person confirms in the app." };
       },
@@ -908,7 +923,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       execute(i) {
         const all = get(), today = inDays(0), stores = all.stores ?? [];
         const q = str(i?.store_id).toLowerCase();
-        const pick = q ? stores.find(x => x.id.toLowerCase() === q) ?? stores.find(x => x.name.en.toLowerCase().includes(q) || x.address.toLowerCase().includes(q)) : undefined;
+        const hits = q ? stores.filter(x => x.id.toLowerCase() === q).concat(stores.filter(x => x.id.toLowerCase() !== q && (x.name.en.toLowerCase().includes(q) || x.address.toLowerCase().includes(q)))) : [];
+        if (q && hits.length > 1 && hits[0].id.toLowerCase() !== q) throw new Error(`"${str(i?.store_id)}" matches ${hits.length} stores: ${hits.map(x => `"${x.id}" (${x.name.en}, ${x.address})`).join(", ")}. Pass one store_id, or leave it out for all.`);
+        const pick = hits[0];
         if (q && !pick) throw new Error(`No store matches "${str(i?.store_id)}". Stores: ${stores.map(x => `"${x.id}" (${x.name.en})`).join(", ") || "none"}.`);
         const storeOf = (id: string) => stores.find(x => (x.apps ?? []).includes(id));
         // the business's own registrations (EIN, entity, state tax) belong to no single store
@@ -926,7 +943,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             days_since_update: f ? Math.floor((Date.now() - Date.parse(f.updated_at)) / 864e5) : undefined, team_note: f?.note ?? undefined,
             placetta_filing: f?.agent_state ? { state: f.agent_state, channel: f.channel ?? undefined, needs_you: f.agent_state === "needs_you", log: (f.agent_log ?? []).filter(e => e.kind !== "quiet").slice(-5).map(e => e[lang]) } : undefined,
             missing_documents: a.checklist.filter(c => c.state === "missing").map(c => c.label[lang]),
-            empty_fields: a.fields.filter(fl => !fl.value).map(fl => fl.label[lang]),
+            empty_fields: a.fields.filter(fl => isBlank(fl.value)).map(fl => fl.label[lang]),
             fee: a.fees.reduce((sum, fe) => sum + fe.amount, 0), fee_set_by_agency: a.fees.some(fe => fe.tbd) || undefined, currency: a.currency ?? "USD", takes: a.est[lang],
           };
         });
