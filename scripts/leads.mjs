@@ -16,6 +16,7 @@
 // who asks not to be called on Placetta's own do-not-call list for good. Emails need Placetta's postal address and an
 // opt-out line (CAN-SPAM).
 import { mkdirSync, writeFileSync } from "node:fs";
+import { loadSuppression, suppressionNote } from "./dnc.mjs";
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const DAYS = +arg("--days", 7);
@@ -58,7 +59,7 @@ function opener(name, w) {
   return `Hi, is this the owner of ${name}? Your inspection on ${w.date} scored ${w.score}. We find exactly what to fix before the reinspection and keep you current after, for $149 a month. Want the list?`;
 }
 
-export function build(rows, cuisines = CUISINES) {
+export function build(rows, cuisines = CUISINES, suppress = { has: () => false }) {
   const by = new Map();
   for (const r of rows) { if (!r.camis) continue; (by.get(r.camis) || by.set(r.camis, []).get(r.camis)).push(r); }
   const out = [];
@@ -66,6 +67,7 @@ export function build(rows, cuisines = CUISINES) {
     const r0 = rs[0];
     if (cuisines.length && !cuisines.some(c => (r0.cuisine_description || "").toLowerCase().includes(c))) continue;
     const w = reason(rs); if (!w) continue;
+    if (suppress.has(r0.phone)) continue;   // asked not to be called, or on the National Do Not Call Registry
     const name = title(r0.dba);
     out.push({
       rank: w.rank, trigger: w.trigger, name, phone: (r0.phone || "").replace(/^(\d{3})(\d{3})(\d{4})$/, "($1) $2-$3"),
@@ -73,23 +75,26 @@ export function build(rows, cuisines = CUISINES) {
       inspected: w.date, score: w.score, critical: w.crit,
       violation: (rs.find(r => r.critical_flag === "Critical") || r0).violation_description || "",
       opener: opener(name, w),
+      call_window: "Mon to Sat, 9 AM to 8 PM Eastern",   // inside the 8 AM to 9 PM legal window, with margin
     });
   }
   return out.sort((a, b) => a.rank - b.rank || b.score - a.score || (a.inspected < b.inspected ? 1 : -1));
 }
 
 const csv = rows => {
-  const cols = ["rank", "trigger", "name", "phone", "address", "cuisine", "inspected", "score", "critical", "violation", "opener"];
+  const cols = ["rank", "trigger", "name", "phone", "call_window", "address", "cuisine", "inspected", "score", "critical", "violation", "opener"];
   const esc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
   return [cols.join(","), ...rows.map(r => cols.map(c => esc(r[c])).join(","))].join("\n");
 };
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const rows = build(await fetchRows());
+  const dnc = loadSuppression();
+  const rows = build(await fetchRows(), CUISINES, dnc);
   mkdirSync("leads", { recursive: true });
   const f = `leads/${new Date().toISOString().slice(0, 10)}.csv`;
   writeFileSync(f, csv(rows));
   const n = k => rows.filter(r => r.rank === k).length;
-  console.log("Dial by hand, 8 AM to 9 PM local, and skip anyone on the Do Not Call list.");
+  console.log(suppressionNote(dnc));
+  console.log("Dial by hand: no autodialer, no recording, no AI voice. Say who you are and that you're calling for Placetta. Anyone who says stop goes on the list today: node scripts/dnc.mjs add <number>.");
   console.log(`${rows.length} stores to call: ${n(1)} closed, ${n(2)} failed, ${n(3)} B range, ${n(4)} just opened. Saved ${f}`);
 }

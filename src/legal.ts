@@ -1,6 +1,9 @@
 // Customer-facing legal pages, in English and Simplified Chinese.
-// Body markup: blank line between paragraphs, "## " for headings, "- " for bullets,
-// bare URLs and emails only. Keep the "## " headings parallel between the two languages.
+// Body markup: blank line between paragraphs, "## " for headings, "- " for bullets, **bold** inside a paragraph or bullet,
+// bare URLs and emails only. Keep the "## " headings and the **bold** spans parallel between the two languages.
+// The disclaimers, the limitation of liability and the arbitration, class and jury waivers are bold (and ALL CAPS in
+// English) so they are conspicuous. UPDATED is also the version people accept: keep it equal to
+// public.current_terms_version() in supabase/migrations (scripts/build-legal.mts checks).
 // The same text is published as Markdown in /legal and on the website (site/terms.html, privacy.html,
 // authorization.html, ai.html). After editing, run: node scripts/build-legal.mts
 
@@ -9,9 +12,13 @@ export type LegalDoc = { id: "terms" | "privacy" | "authorization" | "ai"; title
 /** The date of this version. Every document also says it takes effect on this date. */
 export const UPDATED = "2026-10-13";
 
-const TERMS_EN = `Effective date: ${UPDATED}. If your workspace was created before that date, these terms apply to you 30 days after we notify you of them by email or in the app. Until then, the previous version applies.
+const TERMS_EN = `Effective date: ${UPDATED}. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
 
-These terms are an agreement between you and Placetta Inc. ("Placetta", "we", "us"). They cover your use of placetta.com, the Placetta app, and texts and calls with Odelia, Placetta's AI agent (together, the "service"). By creating a workspace or using the service, you agree to them for the business you represent. "You" means that business and the people who use the service for it.
+These terms are an agreement between you and Placetta Inc. ("Placetta", "we", "us"). They cover your use of placetta.com, the Placetta app, and texts and calls with Odelia, Placetta's AI agent (together, the "service"). "You" means the business you represent and the people who use the service for it.
+
+You accept these terms, for the business you represent, by checking the box that says you agree to them and continuing, or by clicking a button that says you accept them. If you do not agree, do not use the service.
+
+**PLEASE READ THESE TERMS CAREFULLY. THEY REQUIRE YOU AND PLACETTA TO RESOLVE DISPUTES BY BINDING INDIVIDUAL ARBITRATION, AND THEY WAIVE CLASS ACTIONS AND JURY TRIALS (SEE "RESOLVING DISPUTES"). YOU CAN OPT OUT OF ARBITRATION WITHIN 30 DAYS. THEY ALSO DISCLAIM WARRANTIES AND LIMIT EACH SIDE'S LIABILITY (SEE "DISCLAIMERS" AND "LIMITATION OF LIABILITY").**
 
 ## Who can use Placetta
 
@@ -121,7 +128,7 @@ Placetta's fees are billed through Stripe.
 - Openings: $3,500 per new retail store and $6,500 per new restaurant or food store, paid once when the store is added while still opening. Openings that need a liquor license or a complex build-out are quoted before any work starts. Opening fees are not credited against a location plan.
 - Open-by-date guarantee: $2,500 per opening, optional. We agree an opening date with you in writing. If a permit Placetta files for you is the reason the store opens after that date, we refund that store's opening fee. It does not apply when the delay comes from the agency's own review time beyond its published times, from steps you or your landlord, contractors or professionals have to complete, from information you gave us that was incomplete or wrong, or from inspections, construction or permits we don't file. The guarantee fee itself is not refunded.
 - Headquarters (10 or more locations) and US entry for brands from outside the US are set out in an order form.
-- Custom plans may be set out in an order form. If an order form you accept conflicts with these terms, the order form controls for that plan.
+- Custom plans may be set out in an order form that both sides accept. "Order of precedence" under "General terms" explains which controls if they conflict.
 
 The location plan renews for another year at the end of each yearly term until you cancel. If its price will change at renewal, we will tell you at least 30 days before. You can cancel at any time in Settings, Billing. Cancellation takes effect at the end of the current billing period, and you keep the service until then.
 
@@ -186,21 +193,25 @@ We may suspend or close a workspace that breaks these terms or the law, or that 
 
 Applications already submitted to an agency stay with that agency. Placetta cannot recall them.
 
-The parts of these terms that by their nature should continue after your use ends will continue, including fees owed, disclaimers, limitation of liability, indemnity and disputes.
-
 ## Disclaimers
 
-To the extent the law allows, the service is provided "as is" and "as available". Placetta disclaims all implied warranties, including warranties of merchantability, fitness for a particular purpose and non-infringement. We do not promise that the service will be free of errors or interruptions, that the licenses we map are complete, or that any agency will approve an application.
+**TO THE EXTENT THE LAW ALLOWS, THE SERVICE, INCLUDING ODELIA'S OUTPUT, LICENSE MAPS, FILLED APPLICATIONS, REMINDERS AND FILINGS, IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTIES OF ANY KIND. PLACETTA DISCLAIMS ALL WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, INCLUDING THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT, AND ANY WARRANTIES ARISING FROM A COURSE OF DEALING OR USAGE OF TRADE.**
+
+**PLACETTA DOES NOT PROMISE THAT THE SERVICE WILL BE ACCURATE, COMPLETE, FREE OF ERRORS OR UNINTERRUPTED, THAT THE LICENSES WE MAP ARE COMPLETE, THAT EVERY DEADLINE WILL BE CAUGHT OR EVERY REMINDER WILL ARRIVE, OR THAT ANY AGENCY WILL APPROVE AN APPLICATION.**
+
+This section does not limit a commitment these terms make expressly, such as that Placetta never files, pays or sends anything without your approval.
 
 ## Limitation of liability
 
-To the extent the law allows:
+**TO THE EXTENT THE LAW ALLOWS:**
 
-- Placetta's total liability for all claims arising out of or relating to these terms or the service is limited to the fees you paid Placetta in the 12 months before the event that gave rise to the claim. Government fees and fees you paid others are not included.
-- Placetta is not liable for indirect, incidental, special, consequential, exemplary or punitive damages, or for lost profits, revenue, rent, data or goodwill, even if we were told they were possible.
-- Placetta is not liable for the decisions, actions or delays of any agency, for an application that is rejected or delayed, or for a license or permit that lapses, or for the fines, penalties, late fees, closures or delayed openings that result. Where the law does not allow this, those losses are subject to the limit above.
+- **EACH SIDE'S TOTAL LIABILITY FOR ALL CLAIMS ARISING OUT OF OR RELATING TO THESE TERMS OR THE SERVICE, TOGETHER, IS LIMITED TO THE GREATER OF (A) THE FEES YOU PAID PLACETTA FOR THE SERVICE IN THE 12 MONTHS BEFORE THE EVENT THAT GAVE RISE TO THE CLAIM, AND (B) US$100. GOVERNMENT FEES AND FEES YOU PAID OTHERS ARE NOT INCLUDED.**
+- **NEITHER SIDE IS LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, REVENUE, RENT, DATA OR GOODWILL, EVEN IF IT WAS TOLD THEY WERE POSSIBLE.**
+- **PLACETTA IS NOT LIABLE FOR THE DECISIONS, ACTIONS OR DELAYS OF ANY AGENCY, FOR AN APPLICATION THAT IS REJECTED OR DELAYED, OR FOR A LICENSE OR PERMIT THAT LAPSES, OR FOR THE FINES, PENALTIES, LATE FEES, CLOSURES OR DELAYED OPENINGS THAT RESULT. WHERE THE LAW DOES NOT ALLOW THIS, THOSE LOSSES ARE SUBJECT TO THE LIMIT ABOVE.**
 
-These limits apply to claims in contract, tort or any other legal theory, and even if a remedy fails of its essential purpose. They do not apply where the law forbids limiting liability, such as for fraud, gross negligence or willful misconduct.
+**THESE LIMITS APPLY TO CLAIMS IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR ANY OTHER LEGAL THEORY, AND EVEN IF A LIMITED REMEDY FAILS OF ITS ESSENTIAL PURPOSE.** They do not apply to your obligation to pay fees, to your indemnity obligations, or to your breach of "Placetta's service" or "Fair use of Odelia". They also do not limit liability that the law does not allow to be limited or excluded, such as liability for fraud, gross negligence, willful misconduct, or willful injury to a person or property.
+
+Placetta's fees reflect these limits. They are an essential part of the bargain between you and Placetta.
 
 ## Your indemnity
 
@@ -215,43 +226,80 @@ Placetta will tell you promptly about the claim, let you control its defense, an
 
 ## Governing law
 
-New York law governs these terms and any dispute between you and Placetta, without regard to its conflict of law rules. The Federal Arbitration Act governs the agreement to arbitrate below.
+New York law governs these terms and any dispute between you and Placetta, without regard to its conflict of law rules. The Federal Arbitration Act governs the agreement to arbitrate below. The United Nations Convention on Contracts for the International Sale of Goods does not apply.
 
 ## Resolving disputes
 
-Talk to us first. Before starting arbitration or a court case, the side with a claim must send the other a written notice describing the claim and the relief it wants. Send yours to support@placetta.com and to the mailing address below. We will send ours to the email address on your account. For 30 days after the notice is received, both sides will try in good faith to resolve the dispute informally.
+**PLEASE READ THIS SECTION CAREFULLY. IT REQUIRES YOU AND PLACETTA TO RESOLVE DISPUTES BY BINDING INDIVIDUAL ARBITRATION INSTEAD OF IN COURT, AND IT WAIVES CLASS ACTIONS AND JURY TRIALS. YOU CAN OPT OUT WITHIN 30 DAYS, AS EXPLAINED BELOW.**
 
-Binding arbitration. If the dispute is not resolved within those 30 days, either side may start arbitration. Any dispute arising out of or relating to these terms or the service will be resolved by binding arbitration administered by the American Arbitration Association under its Commercial Arbitration Rules, before one arbitrator. The arbitration is seated in New York County, New York, and hearings may be held by video if the arbitrator allows. Judgment on the award may be entered in any court with jurisdiction.
+Talk to us first. Before starting arbitration or a court case, the side with a claim must send the other a written notice describing the claim and the relief it wants. The notice must name the claimant and be signed by it or its lawyer. Send yours to support@placetta.com and to the mailing address below. We will send ours to the email address on your account. For 30 days after the notice is received, both sides will try in good faith to resolve the dispute informally, and any deadline to bring the claim is paused for those 30 days.
 
-Individual claims only. Claims may be brought only on an individual basis, not as a plaintiff or class member in any class, collective, consolidated or representative proceeding. The arbitrator may not combine the claims of more than one customer, or award relief to anyone other than the parties.
+Binding arbitration. If the dispute is not resolved within those 30 days, either side may start arbitration. Any dispute, claim or controversy arising out of or relating to these terms, the service or the relationship between you and Placetta, whether based on contract, tort, statute or any other theory (a "dispute"), will be resolved by binding arbitration administered by the American Arbitration Association ("AAA") under its Commercial Arbitration Rules and, where they apply, its Mass Arbitration Supplementary Rules, as in effect when the arbitration starts, before one arbitrator. The arbitration is seated in New York County, New York, and hearings may be held by video if the arbitrator allows. The arbitrator may award any individual relief a court could award, and will give a reasoned written decision. Judgment on the award may be entered in any court with jurisdiction.
 
-Jury waiver. You and Placetta each waive the right to a jury trial.
+Who decides arbitrability. The arbitrator decides all questions about the interpretation, scope, applicability, validity and enforceability of this agreement to arbitrate, including whether a dispute must be arbitrated. A court decides only whether this agreement to arbitrate was formed, whether the ban on class and representative proceedings below can be enforced, and the matters that "Exceptions" sends to court.
 
-Exceptions. Either side may bring an individual claim in small claims court if it qualifies. Either side may also ask the state or federal courts in New York County, New York for an injunction or other equitable relief to protect its intellectual property or confidential information. You and Placetta consent to those courts for those cases and for any claim that is not arbitrated.
+Costs. The AAA's rules decide who pays its filing, administration and arbitrator fees. If you show the arbitrator that those fees would be prohibitively expensive for you compared with a court case, Placetta will pay as much of them as the arbitrator finds necessary to prevent that. Each side pays its own lawyers, unless the arbitrator awards fees under the law or the AAA's rules.
 
-If the ban on class and representative proceedings is found unenforceable for a claim, that claim will be decided by those courts and not in arbitration, and the rest of this section still applies.
+**INDIVIDUAL CLAIMS ONLY. YOU AND PLACETTA MAY BRING CLAIMS AGAINST EACH OTHER ONLY ON AN INDIVIDUAL BASIS, NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY CLASS, COLLECTIVE, CONSOLIDATED OR REPRESENTATIVE PROCEEDING. THE ARBITRATOR MAY NOT CONSOLIDATE OR JOIN THE CLAIMS OF MORE THAN ONE CUSTOMER, MAY NOT PRESIDE OVER ANY FORM OF CLASS OR REPRESENTATIVE PROCEEDING, AND MAY AWARD RELIEF ONLY TO THE INDIVIDUAL PARTY SEEKING IT AND ONLY AS FAR AS NEEDED FOR THAT PARTY'S INDIVIDUAL CLAIM.**
+
+Mass arbitration. If 25 or more similar demands for arbitration involving Placetta or a related party are filed by, or with the help of, the same or coordinated lawyers or organizations, the AAA's Mass Arbitration Supplementary Rules apply, and the AAA's process arbitrator decides the procedural questions those rules give it. Unless that process arbitrator decides otherwise:
+
+- the demands are administered in batches of up to 50, with one merits arbitrator and one set of AAA fees for each batch
+- each claim in a batch is still decided on its own facts and law, and no decision in one claimant's case binds a claimant who was not a party to it
+- the batches proceed at the same time where the AAA can arrange it, and both sides will consider a global mediation in good faith
+- any deadline to bring a claim in a later batch is paused until that batch starts
+- each demand must meet the notice requirement in "Talk to us first"
+
+Opting out. You may opt out of this agreement to arbitrate within 30 days after you first accept a version of these terms that contains this opt-out. To opt out, email support@placetta.com from the email address on your account, with the subject "Arbitration opt-out", giving your name, your business's name and a clear statement that you opt out of arbitration. Opting out does not affect any other part of these terms or your use of the service. If you opt out, disputes will be decided by the courts named below. An opt-out you sent for an earlier version stays in effect.
+
+Exceptions. Either side may bring an individual claim in small claims court if it qualifies, as long as it stays there. Either side may also ask the state or federal courts in New York County, New York for an injunction or other equitable relief to protect its intellectual property or confidential information, or to stop misuse of the service. If a claim asks for public injunctive relief and the law that applies does not allow that relief to be waived or decided in arbitration, that request will be decided by those courts after the individual claims are arbitrated, and the court case will be paused until then.
+
+**JURY WAIVER. TO THE EXTENT THE LAW ALLOWS, YOU AND PLACETTA EACH WAIVE THE RIGHT TO A JURY TRIAL IN ANY DISPUTE THAT IS DECIDED IN COURT.**
+
+Courts. For any dispute that is not arbitrated, you and Placetta consent to the exclusive jurisdiction of the state and federal courts in New York County, New York.
+
+If the class waiver cannot be enforced. If a court decides, after any appeals, that the ban on class and representative proceedings cannot be enforced for a claim, that claim, and only that claim, will be severed and decided by those courts, not in arbitration, and will be paused until the individual claims are arbitrated. The arbitrator never has power to hear a class or representative proceeding. The rest of this section still applies.
+
+This section continues to apply after your use of the service ends.
 
 ## Changes to these terms
 
 We may update these terms. When we do, we will post the new version on placetta.com and in the app with a new date.
 
-- For a material change, we will tell you by email or in the app. It takes effect 30 days after that notice. If you keep using the service after that, you accept the new terms. If you do not agree, cancel before then.
+- For a material change, we will tell you by email or in the app at least 30 days before it takes effect, with a summary of what changed.
+- We will also ask you to review and accept the updated terms in the app. Until you accept them, you can still open and read your workspace, but you cannot approve anything new in the app, such as a filing or a message.
+- The updated terms apply to you from the day you accept them in the app, or from the effective date in our notice if you keep using the service after that date, whichever comes first.
+- If you do not agree, stop using the service and cancel before the effective date. If you cancel because of a material change that is adverse to you, tell us at support@placetta.com within 30 days after the change takes effect, and we will refund the fees you prepaid for the rest of your term.
 - Other changes, such as clarifications, updates for new features, or changes the law requires, take effect when we post them.
-- A change to "Resolving disputes" does not apply to a dispute that either side gave notice of before the change took effect.
+- A change to "Resolving disputes" does not apply to a dispute that arose, or that either side gave notice of, before the change took effect. Those disputes stay under the version in effect when they arose.
+
+## Electronic communications and signatures
+
+You agree to do business with Placetta electronically.
+
+- You consent to receive these terms, notices, disclosures, invoices and other communications from Placetta electronically, by email to the address on your account or in the app. They satisfy any legal requirement that they be in writing.
+- Checking a box or clicking a button to accept these terms, approving something in the app, and signing in the app are your electronic signature. Each has the same effect as your handwritten signature and is legally binding under the federal Electronic Signatures in Global and National Commerce Act (E-SIGN), New York's Electronic Signatures and Records Act, California's Uniform Electronic Transactions Act and similar laws.
+- Placetta keeps an electronic record of each acceptance, including the account, the version, the time and, where available, the IP address and browser. You agree that this record can be used as evidence of your acceptance.
+- You can read, download and print the current terms at any time on placetta.com or in the app. You can ask us for a copy of a version you accepted at support@placetta.com.
+- To use the service, you need a device with a current web browser and an email account you check. You can withdraw this consent by emailing support@placetta.com, but because Placetta is an online service, withdrawing it ends your use of the service. It does not affect anything done before.
 
 ## General terms
 
+- Order of precedence: If these documents conflict, they control in this order: (1) an order form both sides accept, but only for the plan it covers and only where it says expressly which part of these terms it changes; (2) the Filing Authorization, for the scope of Placetta's authority to file for you; (3) these terms, for everything else, including disclaimers, limitation of liability and resolving disputes; (4) the Privacy Policy.
 - Assignment: You may not transfer these terms without our written consent, except to a successor to all or most of your business that agrees to them. Placetta may transfer them to an affiliate, or in a merger, acquisition or sale of all or most of its business.
-- Entire agreement: These terms, the Filing Authorization, the Privacy Policy and any order form you accept are the entire agreement about the service. They replace earlier agreements and proposals about it. Terms in your purchase orders do not apply.
-- Severability: If a court or arbitrator finds part of these terms unenforceable, that part is enforced as far as the law allows, and the rest stays in effect.
+- Entire agreement: These terms, the Filing Authorization, the Privacy Policy and any order form both sides accept are the entire agreement about the service. They replace earlier agreements and proposals about it. Terms in your purchase orders do not apply. Except as described in "Changes to these terms", these terms can be changed only in a writing signed by both sides, which can be signed electronically.
+- Severability: If a court or arbitrator finds part of these terms unenforceable, that part is enforced as far as the law allows, and the rest stays in effect. "Resolving disputes" says what happens if the ban on class and representative proceedings cannot be enforced.
 - No waiver: If either side does not enforce a right, it does not give that right up.
 - Events beyond our control: Neither side is liable for a delay or failure caused by events beyond its reasonable control, such as agency system outages, changes to agency websites, portals or forms, changes in law or agency rules, government shutdowns, failures of carriers, the internet or our providers, natural disasters, epidemics, war or labor disputes. This does not excuse paying fees.
 - Independent contractors: Except for the limited authority in the Filing Authorization, neither side is the other's agent, partner, joint venturer or employee.
+- No third-party beneficiaries: These terms are for the benefit of you and Placetta only. No one else has rights under them, except the people "Your indemnity" protects.
+- Survival: These parts continue after your use of the service ends: fees owed, the feedback license in "Your content", "Placetta's service", "Disclaimers", "Limitation of liability", "Your indemnity", "Governing law", "Resolving disputes", "Electronic communications and signatures", "Notices", these general terms, and any other part that by its nature should continue.
+- Headings and interpretation: Headings are for convenience only and do not change the meaning of these terms. "Including" and "such as" mean "including without limitation". "Days" means calendar days. These terms will be read fairly, and not for or against either side because one side wrote them.
 - Language: These terms are in English and Chinese. If the two differ, the English version controls.
 
 ## Notices
 
-We send notices to the email address on your account or in the app. Notices to Placetta go to support@placetta.com. A dispute notice or other legal notice must also be sent by mail to the address below. An email notice is received when it is sent, unless the sender learns that it was not delivered.
+We send notices to the email address on your account or in the app. Keep that email address current. Notices to Placetta go to support@placetta.com. A dispute notice or other legal notice must also be sent by mail to the address below. An email notice is received when it is sent, unless the sender learns that it was not delivered. A notice in the app is received when it is posted.
 
 ## Contact
 
@@ -261,9 +309,13 @@ Email: support@placetta.com
 
 Website: placetta.com`;
 
-const TERMS_ZH = `生效日期：${UPDATED}。如您的工作区创建于该日期之前，本条款自我们通过邮件或应用内通知您之日起满 30 天后对您适用，此前继续适用上一版本。
+const TERMS_ZH = `生效日期：${UPDATED}。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
 
-本条款是您与 Placetta Inc.（中文名称“快哉”，下称“快哉”或“我们”）之间的协议，适用于您对 placetta.com、快哉应用，以及与快哉 AI 智能体 Odelia 之间的短信和通话（合称“本服务”）的使用。您创建工作区或使用本服务，即表示您代表所属企业同意本条款。“您”指该企业及代表该企业使用本服务的人员。
+本条款是您与 Placetta Inc.（中文名称“快哉”，下称“快哉”或“我们”）之间的协议，适用于您对 placetta.com、快哉应用，以及与快哉 AI 智能体 Odelia 之间的短信和通话（合称“本服务”）的使用。“您”指您所代表的企业及代表该企业使用本服务的人员。
+
+您勾选表示同意本条款的复选框并继续，或点击表示接受本条款的按钮，即代表您所代表的企业接受本条款。如您不同意，请勿使用本服务。
+
+**请仔细阅读本条款。本条款要求您与快哉通过具有约束力的个别仲裁解决争议，并放弃集体诉讼和陪审团审判（见“争议解决”）。您可以在 30 天内选择退出仲裁。本条款还排除了各项保证，并限制了双方的责任（见“免责声明”和“责任限制”）。**
 
 ## 谁可以使用
 
@@ -373,7 +425,7 @@ Odelia 是软件，不是真人。
 - 新店开业：每家零售新店 3,500 美元，每家餐厅或食品新店 6,500 美元，在门店尚未开业时加入即一次性收取。需要酒类执照或复杂装修的开业项目，在开始工作前单独报价。开业费用不抵扣门店套餐费用。
 - 按期开业保障：每个开业项目 2,500 美元，可选。我们会与您书面约定开业日期。如因快哉为您提交的许可导致门店晚于该日期开业，我们将退还该门店的开业费用。以下情况不适用：机构审核时间超出其公布时限；需由您或您的房东、承包商、专业人士完成的步骤；您提供的信息不完整或有误；检查、施工，或并非由我们提交的许可。保障费用本身不予退还。
 - 品牌总部（10 家及以上门店）以及海外品牌进入美国，以订单另行约定。
-- 定制方案可另以订单约定。如您接受的订单与本条款冲突，就该方案而言以订单为准。
+- 定制方案可另以双方接受的订单约定。如订单与本条款冲突，以何者为准，见“一般条款”中的“适用顺序”。
 
 门店套餐在每个年度期限结束时自动续订一年，直至您取消。如续订时价格有变，我们会至少提前 30 天告知您。您可以随时在“设置”的“账单”中取消。取消在当前计费周期结束时生效，在此之前您仍可使用本服务。
 
@@ -438,21 +490,25 @@ Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照
 
 已提交给机构的申请由该机构保存，快哉无法撤回。
 
-本条款中按其性质应在您停止使用后继续有效的部分继续有效，包括欠付的费用、免责声明、责任限制、赔偿和争议解决。
-
 ## 免责声明
 
-在法律允许的范围内，本服务按“现状”和“可用状态”提供。快哉不作任何默示保证，包括对适销性、特定用途适用性和不侵权的保证。我们不保证服务不会出错或中断，不保证我们梳理的执照清单完整，也不保证任何机构会批准申请。
+**在法律允许的范围内，本服务（包括 Odelia 生成的内容、执照清单、填好的申请、提醒和申报）按“现状”和“可用状态”提供，不附带任何形式的保证。快哉排除一切明示、默示或法定的保证，包括对适销性、特定用途适用性、所有权和不侵权的默示保证，以及因交易过程或行业惯例产生的任何保证。**
+
+**快哉不保证本服务准确、完整、不会出错或中断，不保证我们梳理的执照清单完整，不保证能发现每一个截止日期或每一条提醒都能送达，也不保证任何机构会批准申请。**
+
+本节不限制本条款明确作出的承诺，例如未经您批准，快哉绝不提交、付款或发送任何内容。
 
 ## 责任限制
 
-在法律允许的范围内：
+**在法律允许的范围内：**
 
-- 对于因本条款或本服务引起或与之相关的全部索赔，快哉的赔偿责任总额以引起索赔的事件发生前 12 个月内您向快哉支付的费用为限。政府规费和您支付给他人的费用不计算在内。
-- 对于间接、附带、特殊、后果性、惩戒性或惩罚性损失，以及利润、收入、租金、数据或商誉损失，即使我们已被告知可能发生，快哉也不承担责任。
-- 对于任何机构的决定、行为或延误，申请被驳回或延误，执照或许可失效，以及由此产生的罚款、罚金、滞纳金、停业或延迟开业，快哉不承担责任。法律不允许上述排除的，这些损失适用上述赔偿上限。
+- **对于因本条款或本服务引起或与之相关的全部索赔，任何一方的赔偿责任总额合计不超过以下两者中的较高者：（A）引起索赔的事件发生前 12 个月内您就本服务向快哉支付的费用；（B）100 美元。政府规费和您支付给他人的费用不计算在内。**
+- **对于间接、附带、特殊、后果性、惩戒性或惩罚性损失，以及利润、收入、租金、数据或商誉损失，即使一方已被告知可能发生，任何一方均不承担责任。**
+- **对于任何机构的决定、行为或延误，申请被驳回或延误，执照或许可失效，以及由此产生的罚款、罚金、滞纳金、停业或延迟开业，快哉不承担责任。法律不允许上述排除的，这些损失适用上述赔偿上限。**
 
-无论基于合同、侵权还是其他法律理论，即使某项救济未能实现其根本目的，上述限制均适用。法律禁止限制责任的情形（例如欺诈、重大过失或故意不当行为）不适用上述限制。
+**无论基于合同、侵权（包括过失）、严格责任还是其他法律理论，即使某项有限救济未能实现其根本目的，上述限制均适用。**上述限制不适用于您的付款义务、您的赔偿义务，以及您违反“快哉的服务”或“Odelia 的合理使用”的行为。法律不允许限制或排除的责任（例如欺诈、重大过失、故意不当行为，或故意伤害他人人身或财产的责任），也不受上述限制。
+
+快哉的收费已考虑上述限制。这些限制是您与快哉之间交易的重要基础。
 
 ## 您的赔偿责任
 
@@ -467,43 +523,80 @@ Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照
 
 ## 适用法律
 
-本条款以及您与快哉之间的任何争议，均受纽约州法律管辖，不适用其冲突法规则。下文的仲裁约定受美国《联邦仲裁法》管辖。
+本条款以及您与快哉之间的任何争议，均受纽约州法律管辖，不适用其冲突法规则。下文的仲裁约定受美国《联邦仲裁法》管辖。《联合国国际货物销售合同公约》不适用。
 
 ## 争议解决
 
-先与我们沟通。在启动仲裁或诉讼之前，提出索赔的一方须向另一方发出书面通知，说明索赔内容及所要求的救济。您的通知请发送至 support@placetta.com，并邮寄至下文地址。我们的通知将发送至您账户的邮箱。自通知送达之日起 30 天内，双方将本着诚意尝试非正式地解决争议。
+**请仔细阅读本节。本节要求您与快哉通过具有约束力的个别仲裁（而非诉讼）解决争议，并放弃集体诉讼和陪审团审判。您可以按下文说明在 30 天内选择退出。**
 
-具有约束力的仲裁。如争议在这 30 天内未能解决，任何一方均可启动仲裁。因本条款或本服务引起或与之相关的任何争议，均通过具有约束力的仲裁解决，由美国仲裁协会（AAA）依据其《商事仲裁规则》管理，由一名仲裁员审理。仲裁地为纽约州纽约县；经仲裁员同意，可以通过视频开庭。对仲裁裁决的判决可由任何有管辖权的法院作出。
+先与我们沟通。在启动仲裁或诉讼之前，提出索赔的一方须向另一方发出书面通知，说明索赔内容及所要求的救济。通知须写明索赔方，并由索赔方或其律师签署。您的通知请发送至 support@placetta.com，并邮寄至下文地址。我们的通知将发送至您账户的邮箱。自通知送达之日起 30 天内，双方将本着诚意尝试非正式地解决争议；在这 30 天内，提出该索赔的任何期限暂停计算。
 
-仅限个别索赔。索赔只能以个别方式提出，不得以原告或成员身份参与任何集体诉讼、集合诉讼、合并程序或代表人程序。仲裁员不得合并多个客户的索赔，也不得向当事人以外的任何人给予救济。
+具有约束力的仲裁。如争议在这 30 天内未能解决，任何一方均可启动仲裁。因本条款、本服务或您与快哉之间的关系引起或与之相关的任何争议、索赔或纠纷，无论基于合同、侵权、法规还是其他理论（下称“争议”），均通过具有约束力的仲裁解决，由美国仲裁协会（AAA）依据仲裁开始时有效的《商事仲裁规则》以及（在适用时）《大规模仲裁补充规则》管理，由一名仲裁员审理。仲裁地为纽约州纽约县；经仲裁员同意，可以通过视频开庭。仲裁员可以给予法院可给予的任何个别救济，并将作出附理由的书面裁决。对仲裁裁决的判决可由任何有管辖权的法院作出。
 
-放弃陪审团审判。您和快哉均放弃由陪审团审判的权利。
+由谁决定可仲裁性。有关本仲裁约定的解释、范围、适用、效力和可执行性的一切问题，包括某项争议是否必须仲裁，均由仲裁员决定。法院仅决定本仲裁约定是否成立、下文禁止集体和代表人程序的约定能否执行，以及“例外情形”交由法院处理的事项。
 
-例外情形。符合条件的个别索赔，任何一方均可向小额索赔法院提起。为保护其知识产权或保密信息，任何一方也可以向纽约州纽约县的州法院或联邦法院申请禁令或其他衡平救济。对于此类案件以及任何不通过仲裁解决的索赔，您和快哉同意由上述法院管辖。
+费用。AAA 的立案费、管理费和仲裁员报酬由谁承担，依 AAA 规则确定。如您向仲裁员证明，与诉讼相比，这些费用对您而言过高、难以承受，快哉将承担仲裁员认定为避免这种情况所必需的部分。各方自行承担律师费，但仲裁员依法律或 AAA 规则裁决的除外。
 
-如禁止集体和代表人程序的约定对某项索赔被认定为不可执行，该索赔将由上述法院审理，而不通过仲裁解决，本节其余内容仍然适用。
+**仅限个别索赔。您和快哉只能以个别方式向对方提出索赔，不得以原告或成员身份参与任何集体诉讼、集合诉讼、合并程序或代表人程序。仲裁员不得合并或并入多个客户的索赔，不得主持任何形式的集体或代表人程序，且只能向寻求救济的个别当事人、并仅在其个别索赔所需的范围内给予救济。**
+
+大规模仲裁。如由相同或相互协调的律师或组织提起或协助提起 25 件或以上涉及快哉或其关联方的类似仲裁申请，则适用 AAA《大规模仲裁补充规则》，并由 AAA 的程序仲裁员决定该规则交其决定的程序问题。除非该程序仲裁员另有决定：
+
+- 申请按每批最多 50 件分批管理，每批由一名实体仲裁员审理，并按一套 AAA 费用收费
+- 同一批次中的每项索赔仍根据其自身事实和法律裁决，任何一名索赔方案件中的裁决，均不约束未参与该案的索赔方
+- 在 AAA 能够安排的情况下，各批次同时进行，双方将本着诚意考虑整体调解
+- 后续批次中索赔的提出期限，在该批次开始前暂停计算
+- 每项申请均须满足“先与我们沟通”中的通知要求
+
+选择退出。您可以在首次接受包含本退出条款的本条款版本后 30 天内，选择退出本仲裁约定。退出方式为：用您账户的邮箱发邮件至 support@placetta.com，主题注明“Arbitration opt-out”（退出仲裁），并写明您的姓名、企业名称，以及您选择退出仲裁的明确声明。选择退出不影响本条款的其他内容，也不影响您使用本服务。选择退出后，争议将由下文所列法院裁决。您就上一版本发出的退出通知继续有效。
+
+例外情形。符合条件的个别索赔，任何一方均可向小额索赔法院提起，只要该索赔留在该法院审理。为保护其知识产权或保密信息，或为制止对本服务的滥用，任何一方也可以向纽约州纽约县的州法院或联邦法院申请禁令或其他衡平救济。如某项索赔请求公共禁令救济，而适用的法律不允许放弃该救济或不允许通过仲裁裁决该救济，该请求将在个别索赔仲裁完毕后由上述法院裁决，在此之前法院程序暂停。
+
+**放弃陪审团审判。在法律允许的范围内，对于由法院审理的任何争议，您和快哉均放弃由陪审团审判的权利。**
+
+法院。对于不通过仲裁解决的任何争议，您和快哉同意由纽约州纽约县的州法院和联邦法院专属管辖。
+
+集体程序禁止无法执行时。如法院（在用尽上诉程序后）认定，禁止集体和代表人程序的约定对某项索赔不能执行，则该索赔（且仅限该索赔）将被分离出来，由上述法院审理，而不通过仲裁解决，并在个别索赔仲裁完毕前暂停审理。仲裁员在任何情况下都无权审理集体或代表人程序。本节其余内容仍然适用。
+
+您停止使用本服务后，本节继续适用。
 
 ## 条款变更
 
 我们可能更新本条款。更新后，我们会在 placetta.com 和应用中发布新版本并标注新日期。
 
-- 对于重大变更，我们会通过邮件或应用内通知告知您，变更自通知之日起满 30 天后生效。此后您继续使用本服务，即表示您接受新条款。如您不同意，请在此之前取消。
+- 对于重大变更，我们会至少提前 30 天通过邮件或应用内通知告知您，并概述变更内容。
+- 我们还会请您在应用中审阅并接受更新后的条款。在您接受之前，您仍可打开和查看您的工作区，但不能在应用中批准任何新的事项，例如申报或消息。
+- 更新后的条款自您在应用中接受之日起对您适用；如您在通知所载生效日期之后继续使用本服务，则自该生效日期起适用，以两者中较早者为准。
+- 如您不同意，请在生效日期前停止使用本服务并取消套餐。如您因对您不利的重大变更而取消，请在变更生效后 30 天内发邮件至 support@placetta.com 告知我们，我们将退还您为剩余期限预付的费用。
 - 其他变更（例如文字澄清、为新功能所作的更新或法律要求的变更）自发布时生效。
-- 对“争议解决”一节的变更，不适用于在变更生效前任何一方已发出通知的争议。
+- 对“争议解决”一节的变更，不适用于在变更生效前已经产生、或任何一方已发出通知的争议。这些争议继续适用其产生时有效的版本。
+
+## 电子通讯与电子签名
+
+您同意以电子方式与快哉开展业务。
+
+- 您同意快哉以电子方式（发送至您账户的邮箱或在应用中）向您提供本条款、通知、披露、发票及其他通讯。这些电子通讯满足法律关于书面形式的任何要求。
+- 勾选复选框或点击按钮接受本条款、在应用中批准事项，以及在应用中签名，均构成您的电子签名，与您的亲笔签名具有同等效力，并依据美国联邦《全球和国内商务电子签名法》（E-SIGN）、纽约州《电子签名和记录法》、加利福尼亚州《统一电子交易法》及类似法律具有法律约束力。
+- 快哉会保存每次接受的电子记录，包括账户、版本、时间，以及（如可获得）IP 地址和浏览器信息。您同意该记录可作为您接受本条款的证据。
+- 您可以随时在 placetta.com 或应用中阅读、下载和打印现行条款。如需您接受过的某一版本的副本，可发邮件至 support@placetta.com 索取。
+- 使用本服务，您需要一台装有最新网页浏览器的设备，以及一个您会查看的邮箱。您可以发邮件至 support@placetta.com 撤回本同意；但由于快哉是在线服务，撤回同意即意味着您将停止使用本服务。撤回不影响此前已完成的事项。
 
 ## 一般条款
 
+- 适用顺序：如下列文件相互冲突，按以下顺序适用：（1）双方接受的订单，但仅限于其所涵盖的方案，且仅限于订单明确指出其所变更的本条款内容；（2）《申报授权书》，仅限于快哉代您申报的权限范围；（3）本条款，适用于其他一切事项，包括免责声明、责任限制和争议解决；（4）隐私政策。
 - 转让：未经我们书面同意，您不得转让本条款，但转让给承继您全部或大部分业务并同意本条款的继受方除外。快哉可以将本条款转让给其关联方，或在合并、收购或出售其全部或大部分业务时转让。
-- 完整协议：本条款、《申报授权书》、隐私政策以及您接受的任何订单，构成关于本服务的完整协议，取代此前关于本服务的协议和提案。您的采购订单中的条款不适用。
-- 可分割性：如法院或仲裁员认定本条款的某部分不可执行，该部分在法律允许的范围内执行，其余部分继续有效。
+- 完整协议：本条款、《申报授权书》、隐私政策以及双方接受的任何订单，构成关于本服务的完整协议，取代此前关于本服务的协议和提案。您的采购订单中的条款不适用。除按“条款变更”所述方式外，对本条款的修改须以书面形式作出并经双方签署（可以电子方式签署）。
+- 可分割性：如法院或仲裁员认定本条款的某部分不可执行，该部分在法律允许的范围内执行，其余部分继续有效。禁止集体和代表人程序的约定不能执行时如何处理，见“争议解决”一节。
 - 不弃权：任何一方未行使某项权利，不代表放弃该权利。
 - 不可控事件：因超出其合理控制范围的事件造成的延误或未能履行，任何一方均不承担责任，例如机构系统中断，机构网站、申报平台或表格变更，法律或机构规则变更，政府停摆，运营商、互联网或我们的服务提供方故障，自然灾害，疫情，战争或劳资纠纷。但这不免除付款义务。
 - 独立承包方：除《申报授权书》中的有限授权外，任何一方都不是另一方的代理人、合伙人、合营方或雇员。
+- 无第三方受益人：本条款仅为您和快哉的利益而订立。除“您的赔偿责任”所保护的人员外，任何其他人均不享有本条款下的权利。
+- 持续有效：您停止使用本服务后，以下内容继续有效：欠付的费用，“您的内容”中关于反馈的许可，“快哉的服务”，“免责声明”，“责任限制”，“您的赔偿责任”，“适用法律”，“争议解决”，“电子通讯与电子签名”，“通知”，本一般条款，以及按其性质应继续有效的其他内容。
+- 标题与解释：标题仅为方便阅读，不影响本条款的含义。“包括”和“例如”均指“包括但不限于”。“天”指自然日。本条款应公平解释，不因由某一方起草而作出对其有利或不利的解释。
 - 语言：本条款有中英文两个版本。如两者不一致，以英文版本为准。
 
 ## 通知
 
-我们会向您账户的邮箱或在应用中向您发送通知。给快哉的通知请发送至 support@placetta.com。争议通知或其他法律通知还须邮寄至下文地址。邮件通知自发送时视为送达，除非发送方得知其未能送达。
+我们会向您账户的邮箱或在应用中向您发送通知。请保持该邮箱地址为最新。给快哉的通知请发送至 support@placetta.com。争议通知或其他法律通知还须邮寄至下文地址。邮件通知自发送时视为送达，除非发送方得知其未能送达。应用内通知自发布时视为送达。
 
 ## 联系我们
 
@@ -520,6 +613,7 @@ This policy explains how Placetta Inc. ("Placetta", "we") handles information wh
 ## What we collect
 
 - Account information: your email address, your name if you sign in with Google or Microsoft (we receive only your basic profile), the workspaces you belong to and your role, and whether two-step sign-in is on.
+- Records of your acceptance of our Terms of Service, Privacy Policy and Filing Authorization: which version, when, and the IP address and browser you used.
 - Workspace information: details about your business, and about people in it such as owners and managers, that you give us so we can fill applications.
 - Documents you upload, and the applications and messages prepared in your workspace.
 - Your conversations with Odelia and your approvals, including your signature when you sign a form in the app.
@@ -602,7 +696,7 @@ Calls use an AI voice and are transcribed as they happen so Odelia can understan
 
 We use this information only to answer you, do what you ask, send the update texts and urgent calls you turned on, check that a caller is you, and keep a record of your consent.
 
-Your texts, call records and consent records are kept while your account exists and are deleted when you delete it. You can see recent texts and calls in Settings. Removing your number in Settings stops texts and calls to it and cancels any that are waiting.
+Your texts and call records are kept while your account exists and are deleted when you delete it. Consent records are kept for 5 years, even after you delete your account, so that we can show your consent if it is ever questioned. You can see recent texts and calls in Settings. Removing your number in Settings stops texts and calls to it and cancels any that are waiting.
 
 We do not sell or share mobile numbers or text consent with third parties for their marketing.
 
@@ -633,6 +727,7 @@ If you are in the People's Republic of China, or you give us personal informatio
 
 - Workspace information, documents and the audit trail are kept while the workspace exists. They are deleted when the workspace is deleted, including when its only owner deletes their account.
 - Account information, texts and call records are kept while your account exists, and are deleted when you delete it.
+- Records of your acceptance of our terms and policies are kept for 6 years after your account ends, and consent records for texts and calls for 5 years, even after you delete your account, as proof of the agreement and of your consent.
 - Plan requests from placetta.com are kept while we need them to follow up, or until you ask us to delete them.
 - We keep records the law requires us to keep, such as billing records, for as long as it requires.
 - Deleted information can remain in encrypted backups for a short time until those backups are replaced.
@@ -703,6 +798,7 @@ const PRIVACY_ZH = `生效日期：${UPDATED}。
 ## 我们收集哪些信息
 
 - 账户信息：您的邮箱地址；若使用 Google 或 Microsoft 登录，还包括您的姓名（我们只获取基本资料）；您所属的工作区和角色；以及是否开启了两步登录。
+- 您接受我们的《服务条款》、隐私政策和《申报授权书》的记录：接受的版本、时间，以及您使用的 IP 地址和浏览器。
 - 工作区信息：为填写申请，您向我们提供的企业信息，以及企业所有人、经理等相关人员的信息。
 - 您上传的文件，以及在您工作区中准备的申请和消息。
 - 您与 Odelia 的对话和您的批准记录，包括您在应用中签署表格时的签名。
@@ -785,7 +881,7 @@ const PRIVACY_ZH = `生效日期：${UPDATED}。
 
 我们使用这些信息，仅为回复您、办理您要求的事项、发送您开启的更新短信和紧急来电、核实来电者是您本人，以及保存您的同意记录。
 
-您的短信、通话记录和同意记录在您的账户存续期间保存，并在您删除账户时一并删除。您可以在“设置”中查看最近的短信和通话。在“设置”中移除号码后，我们将不再向该号码发短信或打电话，尚未发出的也会取消。
+您的短信和通话记录在您的账户存续期间保存，并在您删除账户时一并删除。同意记录保存 5 年，即使您删除账户也会保留，以便在您的同意受到质疑时予以证明。您可以在“设置”中查看最近的短信和通话。在“设置”中移除号码后，我们将不再向该号码发短信或打电话，尚未发出的也会取消。
 
 我们不会出于第三方营销目的，向第三方出售或共享手机号或短信同意。
 
@@ -816,6 +912,7 @@ const PRIVACY_ZH = `生效日期：${UPDATED}。
 
 - 工作区信息、文件和审计记录在工作区存续期间保存，并在工作区被删除时删除，包括其唯一所有者删除账户的情形。
 - 账户信息、短信和通话记录在您的账户存续期间保存，并在您删除账户时删除。
+- 您接受我们的条款和政策的记录在您的账户终止后保存 6 年，短信和电话的同意记录保存 5 年，即使您删除账户也会保留，用于证明协议和您的同意。
 - 在 placetta.com 提交的方案申请，在我们跟进所需期间保存，或保存至您要求删除为止。
 - 法律要求我们保留的记录（例如账单记录），按法律要求的期限保存。
 - 已删除的信息可能会在加密备份中短暂保留，直至这些备份被替换。

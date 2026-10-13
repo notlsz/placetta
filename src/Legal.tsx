@@ -5,15 +5,19 @@ import { fmtDay } from "./time";
 import { I, Modal } from "./ui";
 
 /** Links in legal text: bare URLs and emails become links, nothing else. */
-function linkify(s: string): ReactNode[] {
+function links(s: string): ReactNode[] {
   return s.split(/(https?:\/\/[^\s)]+|[\w.+-]+@[\w-]+\.[\w.]+)/g).map((part, i) => {
     if (/^https?:\/\//.test(part)) return <a key={i} href={part} target="_blank" rel="noreferrer">{part.replace(/^https?:\/\//, "")}</a>;
     if (/^[\w.+-]+@[\w-]+\.[\w.]+$/.test(part)) return <a key={i} href={`mailto:${part}`}>{part}</a>;
     return <Fragment key={i}>{part}</Fragment>;
   });
 }
+/** Inline markup: **text** is bold (the conspicuous clauses), then links. Same rule as scripts/build-legal.mts. */
+function linkify(s: string): ReactNode[] {
+  return s.split(/\*\*(.+?)\*\*/g).map((part, i) => (i % 2 ? <strong key={i}>{links(part)}</strong> : <Fragment key={i}>{links(part)}</Fragment>));
+}
 
-/** Renders the legal body markup: "## " headings, "- " bullets, blank lines between paragraphs. */
+/** Renders the legal body markup: "## " headings, "- " bullets, **bold**, blank lines between paragraphs. */
 export function LegalBody({ text }: { text: string }) {
   const blocks = text.trim().split(/\n\s*\n/);
   return (

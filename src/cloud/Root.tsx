@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import App from "../App";
 import { GateBot } from "../Bot";
 import { LegalBody } from "../Legal";
-import { LEGAL } from "../legal";
+import { LEGAL, UPDATED } from "../legal";
 import { Logo } from "../Logo";
 import { B, same, type Bi, type Store, type Workspace } from "../model";
 import type { Lang } from "../i18n";
@@ -67,6 +67,19 @@ const MicrosoftMark = () => (
 const HELP_URL = api.PREVIEW ? "https://placetta.vercel.app/help/#sign-in" : "/help/#sign-in";
 const openDoc = (id: string) => window.dispatchEvent(new CustomEvent("placetta:doc", { detail: id }));
 
+/** The clickwrap: an unchecked box that must be checked to go on, with links that open the documents right here.
+ *  Checking it is the assent (Berman v. Freedom Financial; Meyer v. Uber); the app records it with the version. */
+export function TermsCheck({ id, lang, checked, onChange, onDoc }: { id: string; lang: Lang; checked: boolean; onChange: (v: boolean) => void; onDoc: (doc: string) => void }) {
+  const L = (x: Bi) => x[lang];
+  const link = (doc: string, label: Bi) => <button type="button" className="lnk" onClick={e => { e.preventDefault(); e.stopPropagation(); onDoc(doc); }}>{L(label)}</button>;
+  return (
+    <div className={"terms-check" + (checked ? " on" : "")}>
+      <input id={id} type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} aria-labelledby={`${id}-text`} />
+      <span id={`${id}-text`}><label htmlFor={id}>{L(B("I agree to the ", "我同意"))}</label>{link("terms", B("Terms of Service", "《服务条款》"))}{L(B(" and ", "和"))}{link("privacy", B("Privacy Policy", "隐私政策"))}<label htmlFor={id}>{L(B(", including individual arbitration of disputes (you can opt out within 30 days).", "，包括以个别仲裁方式解决争议（可在 30 天内选择退出）。"))}</label></span>
+    </div>
+  );
+}
+
 /* Region: where the account and its data live. One region today; the others show as not available yet. */
 function RegionPick({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
@@ -119,6 +132,7 @@ function SignIn({ lang }: { lang: Lang }) {
   const [mode, setMode] = useState<"signin" | "create">("signin");
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
+  const [agree, setAgree] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(() => new URLSearchParams(location.search).get("error_description") ?? "");
@@ -141,7 +155,9 @@ function SignIn({ lang }: { lang: Lang }) {
     ? L(B("Too many emails were sent just now. Sign in with a password, or try again in an hour.", "刚刚发送的邮件太多。请用密码登录，或一小时后再试。"))
     : /invalid/i.test(e.message) ? L(B("We can't email this address yet. Sign in with a password instead.", "暂时无法向该邮箱发送邮件，请改用密码登录。")) : e.message;
   const submitPw = async () => {
+    if (mode === "create" && !agree) { setErr(L(B("Check the box to agree to the Terms of Service and Privacy Policy.", "请勾选同意《服务条款》和隐私政策。"))); return; }
     if (mode === "create" && pw.length < 8) { setErr(L(B("Use at least 8 characters.", "密码至少 8 位。"))); return; }
+    if (mode === "create") api.termsAgreed.set(UPDATED);
     if (!pw) { setErr(L(B("Enter your password.", "请输入密码。"))); return; }
     setBusy(true); setErr(""); setNoAccount(false);
     try {
@@ -260,7 +276,8 @@ function SignIn({ lang }: { lang: Lang }) {
             <input id="gate-pw" type={show ? "text" : "password"} autoComplete={mode === "create" ? "new-password" : "current-password"} value={pw} onChange={e => setPw(e.target.value)} placeholder={mode === "create" ? L(B("At least 8 characters", "至少 8 位")) : L(B("Password", "密码"))} autoFocus />
             <button type="button" className="pshow" onClick={() => setShow(v => !v)} aria-label={show ? L(B("Hide password", "隐藏密码")) : L(B("Show password", "显示密码"))}>{show ? L(B("Hide", "隐藏")) : L(B("Show", "显示"))}</button>
           </div>
-          <button type="submit" className="sbtn ink wide" disabled={busy}>{busy ? "…" : mode === "create" ? L(B("Create account", "创建账户")) : L(B("Sign in", "登录"))}</button>
+          {mode === "create" && <TermsCheck id="gate-agree" lang={lang} checked={agree} onChange={v => { setAgree(v); if (v) setErr(""); }} onDoc={openDoc} />}
+          <button type="submit" className="sbtn ink wide" disabled={busy || (mode === "create" && !agree)}>{busy ? "…" : mode === "create" ? L(B("Agree and create account", "同意并创建账户")) : L(B("Sign in", "登录"))}</button>
           {mode === "signin" && <p className="gate-alt"><button type="button" className="lnk" disabled={busy} onClick={() => void sendReset()}>{L(B("Forgot password?", "忘记密码？"))}</button></p>}
           {noAccount && mode === "signin" && <button type="button" className="sbtn line wide" onClick={() => { setMode("create"); setErr(""); setNoAccount(false); }}>{L(B("Create an account with this email", "用此邮箱创建账户"))}</button>}
           <p className="gate-alt">
@@ -284,7 +301,7 @@ function SignIn({ lang }: { lang: Lang }) {
       {err && <p className="gate-err" role="alert">{err}</p>}
       {(step === "email" || step === "password" || step === "phone") && (
         <div className="gate-legal">
-          <p>{L(B("By proceeding, you affirm your understanding and acceptance of our ", "继续即表示您已理解并接受我们的"))}<button type="button" className="lnk" onClick={() => openDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(", which sets out the rules and expectations governing your use of our services.", "，其中规定了您使用我们服务时适用的规则与要求。"))}</p>
+          {!(step === "password" && mode === "create") && <p>{L(B("Before you start, Placetta asks you to agree to its ", "开始使用前，快哉会请您同意"))}<button type="button" className="lnk" onClick={() => openDoc("terms")}>{L(B("Terms of Service", "《服务条款》"))}</button>{L(B(" and ", "和"))}<button type="button" className="lnk" onClick={() => openDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(" with a checkbox.", "（勾选同意）。"))}</p>}
           <a href={HELP_URL} target={api.PREVIEW ? "_blank" : undefined} rel="noopener">{L(B("Need help signing in?", "登录遇到问题？"))}</a>
         </div>
       )}
@@ -296,7 +313,9 @@ function SignIn({ lang }: { lang: Lang }) {
 }
 
 /* Onboarding in four quick answers: the name, what it sells (tap a chip), where (one "City, state" field with suggestions)
-   and when (tap a chip). Legal entity and street are optional and tucked away. Agreeing and creating is one click. */
+   and when (tap a chip). Legal entity and street are optional and tucked away. Then an unchecked "I agree" box for the
+   Terms and Privacy Policy (recorded with its version by accept_terms), and the Filing Authorization, granted by
+   creating the workspace (create_workspace records authorized_at), stated right beside it. */
 const SELLS: { en: string; zh: string }[] = [
   { en: "Milk tea", zh: "奶茶" }, { en: "Coffee", zh: "咖啡" }, { en: "Bakery and desserts", zh: "烘焙甜品" },
   { en: "Restaurant", zh: "餐厅" }, { en: "Grocery", zh: "超市" }, { en: "Retail", zh: "零售" },
@@ -327,6 +346,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   const [f, setF] = useState({ brand: hand?.brand ?? "", sell: hand?.sell ?? "", other: hand?.other ?? "", place: hand?.place ?? "", state: "", when: hand?.when ?? -1, entity: "", street: "", more: false });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [agree, setAgree] = useState(false);
   const [doc, setDoc] = useState<string | null>(null);
   const d = LEGAL.find(x => x.id === doc);
   const parsed = parsePlace(f.place);
@@ -338,6 +358,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
     if (!f.brand.trim()) { setErr(L(B("Add the business name.", "请填写企业名称。"))); return; }
     if (!what) { setErr(L(B("Pick what the store sells.", "请选择门店经营内容。"))); return; }
     if (!city || !state) { setErr(L(B("Add the city and state, like Flushing, NY.", "请填写城市和州，例如 Flushing, NY。"))); return; }
+    if (!agree) { setErr(L(B("Check the box to agree to the Terms of Service and Privacy Policy.", "请勾选同意《服务条款》和隐私政策。"))); return; }
     setBusy(true); setErr("");
     const st = STATES.find(s => s[0] === state)?.[1] ?? state, nyc = state === "NY" && NYC.test(city);
     const w = WHEN[f.when];
@@ -363,7 +384,13 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       stores: [store],
       meta: { city, region: st, what, entity: f.entity.trim() || undefined },
     });
-    try { const id = await api.createWorkspace(f.brand.trim(), ws); if (hand) consumeHandoff(); onCreated(id); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
+    try {
+      const id = await api.createWorkspace(f.brand.trim(), ws);
+      // the box they checked, recorded with the version they were shown (if it fails, the app asks again)
+      await api.acceptTerms(UPDATED, id).catch(() => null);
+      if (hand) consumeHandoff();
+      onCreated(id);
+    } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
   return (
     <div className="gate-card wide">
@@ -412,13 +439,13 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
           <button type="button" className="lnk more" onClick={() => setF({ ...f, more: true })}>{L(B("Add the legal entity or street address (optional)", "添加法律实体或街道地址（选填）"))}</button>
         )}
 
-        <p className="onb-legal">{L(B("By creating the workspace, you authorize Placetta to prepare applications for this business and to submit the ones you approve, as its authorized agent for that limited purpose. You confirm you have authority to act for the business and agree to the ", "创建工作区即表示您授权快哉为本企业准备申请，并作为该有限目的的授权代理人提交您批准的申请。您确认有权代表本企业行事，并同意"))}
-          <button type="button" className="lnk" onClick={() => setDoc("authorization")}>{L(B("Filing Authorization", "申报授权书"))}</button>{L(B(", ", "、"))}
-          <button type="button" className="lnk" onClick={() => setDoc("terms")}>{L(B("Terms", "服务条款"))}</button>{L(B(" and ", "和"))}
-          <button type="button" className="lnk" onClick={() => setDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(".", "。"))}</p>
+        <div className="onb-legal">
+          <TermsCheck id="onb-agree" lang={lang} checked={agree} onChange={v => { setAgree(v); if (v) setErr(""); }} onDoc={setDoc} />
+          <p>{L(B("Filing Authorization: by creating the workspace, you grant Placetta the ", "申报授权：创建工作区即表示您授予快哉"))}<button type="button" className="lnk" onClick={() => setDoc("authorization")}>{L(B("Filing Authorization", "《申报授权书》"))}</button>{L(B(". It authorizes Placetta to prepare applications for this business and to submit the ones you approve, as its authorized agent for that limited purpose. You confirm you have authority to act for the business.", "所述权限：授权快哉为本企业准备申请，并作为该有限目的的授权代理人提交您批准的申请。您确认有权代表本企业行事。"))}</p>
+        </div>
         <div className="onb-act">
           {onCancel && <button type="button" className="sbtn quiet" onClick={onCancel}>{L(B("Cancel", "取消"))}</button>}
-          <button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : L(B("Agree and create workspace", "同意并创建工作区"))}</button>
+          <button type="submit" className="sbtn ink" disabled={busy || !agree}>{busy ? "…" : L(B("Agree and create workspace", "同意并创建工作区"))}</button>
         </div>
       </form>
       {err && <p className="gate-err" role="alert">{err}</p>}
@@ -500,6 +527,9 @@ export function CloudRoot() {
       const two = await api.twoStepStatus();
       if (two.next === "aal2" && two.current !== "aal2" && two.factorId) { setPhase({ k: "twostep", factorId: two.factorId }); return; }
       const joined = await api.acceptInvites().catch(() => 0);
+      // Agreed at sign-up (the checkbox), before there was a session: record it now, if it's still the current version.
+      const agreed = api.termsAgreed.take();
+      if (agreed === UPDATED) await api.acceptTerms(agreed).catch(() => null);
       const me = await api.whoami();
       let rows = await api.myWorkspaces();
       // The Placetta team works from the filing queue; give them a workspace of their own to open it from.
@@ -519,12 +549,13 @@ export function CloudRoot() {
       if (params.get("billing") === "success") notice = lang === "zh" ? "付款成功。几秒后方案会自动生效。" : "Payment received. Your plan switches on in a few seconds.";
       if (params.get("billing") === "cancel") notice = lang === "zh" ? "已取消付款。" : "Checkout canceled.";
       if ([...params.keys()].length) history.replaceState(null, "", location.pathname + location.hash);
-      const [audit, billing, filings, docs, integrations, logins] = await Promise.all([
+      const [audit, billing, filings, docs, integrations, logins, terms] = await Promise.all([
         api.listAudit(row.id), api.getBilling(row.id), api.listFilings(row.id), api.listDocs(row.id), api.listIntegrations(row.id), api.listLogins(row.id),
+        api.termsStatus().catch(() => null),
       ]);
       setPhase({ k: "app", s: {
         me, role: row.role, wsId: row.id, initial: normalize(row.name, row.state), audit, billing, filings, docs, integrations, logins,
-        workspaces: rows.map(r => ({ id: r.id, name: r.name })), hq, notice, approval: row.id === params.get("ws") ? params.get("approval") ?? undefined : undefined,
+        workspaces: rows.map(r => ({ id: r.id, name: r.name })), hq, terms, notice, approval: row.id === params.get("ws") ? params.get("approval") ?? undefined : undefined,
         switchTo: id => void open(id),
         newWorkspace: () => setPhase({ k: "onboard", email: me.email, back: row.id }),
         signOut: everywhere => { void api.signOut(!!everywhere).then(() => setPhase({ k: "signin" })); },

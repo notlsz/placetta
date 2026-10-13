@@ -29,6 +29,7 @@
 // who asks not to be called on Placetta's own do-not-call list for good. Emails need Placetta's postal address and an
 // opt-out line (CAN-SPAM).
 import { mkdirSync, writeFileSync } from "node:fs";
+import { loadSuppression, suppressionNote } from "./dnc.mjs";
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const list = s => (s || "").split(",").map(x => x.trim()).filter(Boolean);
@@ -272,10 +273,14 @@ export const csv = rows => {
 if (import.meta.url === `file://${process.argv[1]}`) {
   let raw;
   try { raw = await fetchRows(); } catch (e) { console.error(e.message); process.exit(2); }
-  const rows = build(raw);
+  const dnc = loadSuppression();
+  const all = build(raw);
+  const rows = all.filter((r) => !dnc.has(`fei:${r.fei}`));   // firms that asked us to stop
   mkdirSync("leads", { recursive: true });
   const f = `leads/${new Date().toISOString().slice(0, 10)}-fda.csv`;
   writeFileSync(f, "\ufeff" + csv(rows));   // BOM so Excel opens the Chinese column as UTF-8
   const n = k => rows.filter(r => r.rank === k).length;
+  console.log(suppressionNote(dnc));
+  console.log("Emails: include Placetta's postal address and an opt-out line; record opt-outs with node scripts/dnc.mjs add <email or fei:number>.");
   console.log(`${rows.length} firms to call from ${raw.length} refused lines: ${n(1)} refused this week for a filing or label we fix, ${n(2)} other refusals this week, ${n(3)} earlier. Saved ${f}`);
 }

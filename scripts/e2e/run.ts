@@ -213,6 +213,16 @@ try {
     const r = await rpc("create_workspace", { p_name: "Golden Ox Noodle", p_state: seedState, p_authorized: true }, owner.jwt);
     check("owner creates the workspace through PostgREST", r.status === 200 && typeof r.data === "string", r);
     ws = r.data;
+    // the clickwrap: the owner accepts the current Terms through PostgREST, and the record keeps the version and browser
+    const st0 = await rpc("terms_status", {}, owner.jwt);
+    check("terms_status: a new account has not accepted the Terms", st0.status === 200 && st0.data?.accepted === false && typeof st0.data?.current === "string", st0);
+    const acc = await rpc("accept_terms", { p_version: st0.data?.current, p_workspace: ws }, owner.jwt);
+    const stale = await rpc("accept_terms", { p_version: "2000-01-01" }, owner.jwt);
+    const ta = await sql`select doc, version, user_agent from public.terms_acceptances where user_id = ${owner.id} order by doc`;
+    check("accept_terms records the Terms and Privacy Policy with the version and browser", acc.status === 200 && acc.data?.accepted === true
+      && ta.filter((x) => x.doc !== "authorization").length === 2 && ta.every((x) => x.version === st0.data?.current && !!x.user_agent), { acc, ta });
+    check("the Filing Authorization is recorded when the workspace is created", ta.some((x) => x.doc === "authorization"), ta);
+    check("a stale version is refused, naming the current one", stale.status >= 400 && /terms_version/.test(stale.data?.message ?? "") && stale.data?.hint === st0.data?.current, stale);
     // the entry plan, paid through Stripe Checkout
     const e = await stripePost({ id: "evt_entry", type: "checkout.session.completed", data: { object: { id: "cs_entry", object: "checkout.session", mode: "payment", payment_status: "paid", customer: "cus_goldenox", metadata: { workspace_id: ws, plan: "entry", markets: "1" } } } });
     const [b] = await sql`select entry_markets, stripe_customer_id from public.billing where workspace_id = ${ws}`;
