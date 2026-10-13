@@ -68,11 +68,12 @@ const LINES = {
 
 function greeting(lang: Lang, name: string | null, mode: "verified" | "code" | "outbound", business: string) {
   if (lang === "zh") {
-    const hi = `您好${name ? `，${name}` : ""}，我是快哉的 Odelia。`;
+    // Every call opens by saying Odelia is an AI and the call is transcribed (California's bot and recording rules, the FCC's AI-voice ruling).
+    const hi = `您好${name ? `，${name}` : ""}，我是快哉的 AI 助理 Odelia。本次通话会被转录，以便为您办理。`;
     return mode === "code" ? `${hi}为了保护您的账户，我刚把 4 位验证码发到了您账户上的手机号。请告诉我验证码。`
       : mode === "outbound" ? `${hi}我打电话是为了${business}的一件急事。现在方便说两句吗？` : `${hi}有什么可以帮您？`;
   }
-  const hi = `Hi${name ? ` ${name}` : ""}, it's Odelia from Placetta.`;
+  const hi = `Hi${name ? ` ${name}` : ""}, it's Odelia, Placetta's AI assistant. This call is transcribed so I can help.`;
   return mode === "code" ? `${hi} To keep your account safe, I just texted a 4-digit code to the phone number on your account. What's the code?`
     : mode === "outbound" ? `${hi} I'm calling about something urgent at ${business}. Is now a good time?` : `${hi} What can I do for you?`;
 }
