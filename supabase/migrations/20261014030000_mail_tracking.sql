@@ -52,7 +52,8 @@ begin
   perform cron.schedule('placetta-mail-watch', '*/10 * * * *', $job$
     select net.http_post(
       url := 'https://esquxzcfsylffuijvzec.supabase.co/functions/v1/integrations',
-      headers := jsonb_build_object('Content-Type', 'application/json', 'x-monitor-key', (select decrypted_secret from vault.decrypted_secrets where name = 'monitor_key' limit 1)),
+      -- integrations checks the caller's session at the gateway, so the cron sends the project's public anon key too
+      headers := jsonb_build_object('Content-Type', 'application/json', 'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzcXV4emNmc3lsZmZ1aWp2emVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5OTEzMzQsImV4cCI6MjEwNjU2NzMzNH0.iZqmAxn083ub4c4Kfcv57cfg8EydkmnvUb6Pzr2wIsY', 'x-monitor-key', (select decrypted_secret from vault.decrypted_secrets where name = 'monitor_key' limit 1)),
       body := '{"action":"mail_watch"}'::jsonb,
       timeout_milliseconds := 60000
     )
