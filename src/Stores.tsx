@@ -1,3 +1,4 @@
+import { inspectionsFor } from "./inspections/forStore";
 import { useEffect, useMemo, useState } from "react";
 import { openSettings } from "./Settings";
 import { useApp } from "./ctx";
@@ -119,6 +120,7 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
     ...x, logs: [...x.logs.filter(l => !(l.date === inDays(0) && l.kind === kind)), { date: inDays(0), kind, done: true, by: lang === "zh" ? "您" : "You", reading: value }],
   }), { action: B("Logged", "记录"), object: s.name, detail: B(kind === "temps" ? `Temperatures${value ? ": " + value : ""}` : kind === "cleaning" ? "Cleaning and sanitizing" : "Pest check", kind === "temps" ? `温度${value ? "：" + value : ""}` : kind === "cleaning" ? "清洁与消毒" : "虫害检查") });
   const covered = usLocations(ws) >= FWW_THRESHOLD;
+  const guide = inspectionsFor(s.address);
   const apps = ws.apps.filter(a => s.apps?.includes(a.id));
 
   return (
@@ -217,6 +219,43 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
             <div className="row"><dt>{b(B("Source", "来源"))}</dt><dd>{b(s.schedule.source)}</dd></div>
           </dl>
           <p className="note"><a href={FWW_SOURCE} target="_blank" rel="noreferrer">nyc.gov<I.ext /></a> {b(B("Connect Square and schedules are checked automatically.", "连接 Square 后，排班会自动检查。"))}</p>
+        </Section>
+      )}
+
+      {guide && (
+        <Section title={b(B(`Inspections in ${guide.name.en}`, `${guide.name.zh}的检查`))}
+          sub={b(B("Every inspection this store has to pass, how to book it, and the inspector's own list. Tick each item when it's in place; open items are what an inspector would cite.", "本店需要通过的每项检查、如何预约，以及检查员自己的清单。每项到位后打勾；未勾选的就是检查员会指出的问题。"))}>
+          {guide.inspections.map(ins => {
+            const done = ins.checklist.filter(c => s.ready?.[`${ins.id}:${c.id}`]).length;
+            return (
+              <details key={ins.id} className="insp" open={ins.stage === "opening" && s.stage === "opening" && done < ins.checklist.length}>
+                <summary>
+                  <span className="lr-tx"><b>{b(ins.name)}</b><small>{b(ins.agency)}{ins.stage === "routine" ? b(B(", after opening", "，开业后")) : ""}</small></span>
+                  <span className={"insp-n" + (done === ins.checklist.length ? " ok" : "")}>{done}/{ins.checklist.length}</span>
+                </summary>
+                <dl className="tray kv">
+                  <div className="row"><dt>{b(B("When", "时间"))}</dt><dd>{b(ins.when)}</dd></div>
+                  <div className="row"><dt>{b(B("How to book", "如何预约"))}</dt><dd>{b(ins.book)}{ins.lead && <small>{b(ins.lead)}</small>}{(ins.bookUrl || ins.phone) && <small>{ins.bookUrl && <a href={ins.bookUrl} target="_blank" rel="noreferrer">{b(B("Book it", "去预约"))}<I.ext /></a>}{ins.phone && <> {ins.phone}</>}</small>}</dd></div>
+                  {ins.fee !== undefined && <div className="row"><dt>{b(B("Fee", "费用"))}</dt><dd>{ins.fee === null ? b(B("Set by the agency", "由机构核定")) : `$${ins.fee.toLocaleString("en-US")}`}{ins.feeNote && <small>{b(ins.feeNote)}</small>}</dd></div>}
+                  {ins.scoring && <div className="row"><dt>{b(B("How it's scored", "评分方式"))}</dt><dd>{b(ins.scoring)}</dd></div>}
+                  {ins.failNext && <div className="row"><dt>{b(B("If it fails", "未通过时"))}</dt><dd>{b(ins.failNext)}</dd></div>}
+                </dl>
+                <ul className="tray insp-list">
+                  {ins.checklist.map(c => {
+                    const k = `${ins.id}:${c.id}`, on = !!s.ready?.[k];
+                    return (
+                      <li key={c.id} className={"row" + (on ? " done" : "")}>
+                        <label className="check"><input type="checkbox" checked={on} onChange={e => { const v = e.target.checked; updateStore(s.id, x => ({ ...x, ready: { ...x.ready, [k]: v } }), { action: v ? B("Ready for inspection", "检查项已到位") : B("Not ready for inspection", "检查项未到位"), object: s.name, detail: c.item }); }} />
+                          <span><b>{b(c.item)}</b>{c.why && <small>{b(c.why)}</small>}</span></label>
+                        {!on && <Pill sm disabled={busy} onClick={() => ask(b(B(`How do we get this ready for the ${ins.name.en} at ${s.name.en}: ${c.item.en}?`, `如何为${s.name.zh}的${ins.name.zh}准备好这一项：${c.item.zh}？`)))}>{b(B("How", "怎么做"))}</Pill>}
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className="note"><a href={ins.source} target="_blank" rel="noreferrer">{b(B("The agency's own page", "机构官方页面"))}<I.ext /></a> {b(B(`Read ${guide.read}.`, `${guide.read} 查阅。`))}</p>
+              </details>
+            );
+          })}
         </Section>
       )}
 

@@ -1470,3 +1470,17 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .spend-p tr.off td { color: var(--ink3); }
 .sg-note.warn { color: var(--warn, #b45309); margin-right: auto; }
 @media (max-width: 640px) { .spend-b, .spend-p { display: block; overflow-x: auto; } }
+
+/* A city's inspections on the store page: one fold per inspection, the inspector's own list to tick */
+.insp { border-radius: 12px; background: var(--card, var(--bg2)); margin: 8px 0; padding: 4px 12px; }
+.insp > summary { display: flex; align-items: center; gap: 10px; padding: 10px 0; cursor: pointer; list-style: none; }
+.insp > summary::-webkit-details-marker { display: none; }
+.insp > summary .lr-tx { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.insp > summary small { color: var(--ink3); font-size: 12.5px; }
+.insp-n { font-size: 12.5px; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.insp-n.ok { color: var(--ok, #15803d); }
+.insp dd small { display: block; color: var(--ink3); font-size: 12px; margin-top: 2px; }
+.insp-list .check { display: flex; align-items: flex-start; gap: 8px; flex: 1; }
+.insp-list .check span { display: flex; flex-direction: column; gap: 2px; }
+.insp-list .check small { color: var(--ink3); font-size: 12px; }
+.insp-list li.done b { color: var(--ink3); font-weight: 400; }

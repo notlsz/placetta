@@ -1,3 +1,4 @@
+import { inspectionsFor } from "./inspections/forStore";
 import { DEFAULT_POLICY, SPEND_CATEGORIES, decide, suggestBudgets, type Budget, type Purchase, type SpendCategory } from "./spend.ts";
 import { canFill } from "./forms/canFill";
 import type { OrbState } from "thinking-orbs";
@@ -1081,6 +1082,20 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         };
         mark();
         return { reviewed: rows.map(([name, o]) => ({ name, ...(o ?? { unreadable: true }) })), renewal_reminders_added: rows.filter(([, o]) => dated(o?.expires)).length };
+      },
+    },
+    {
+      name: "inspection_guide",
+      description: "The inspections a store has to pass in its city (health, building, fire, and the routine health inspection after opening), how to book each one, its fee and scoring, and the inspector's own checklist with what this store has ticked as ready. From the agencies' own pages. Use it to walk the person through passing, item by item, starting with what's still open.",
+      inputSchema: { type: "object", properties: { store_id: { type: "string" } }, required: ["store_id"] },
+      execute(i) {
+        const st = findStore(i.store_id);
+        const g = inspectionsFor(st.address);
+        mark();
+        if (!g) return { covered: false, why: `Placetta's inspection guides don't cover ${st.address} yet. Use the city's and county's own pages (search) and say where each item comes from.` };
+        return { city: g.name.en, read: g.read, inspections: g.inspections.map(ins => ({
+          id: ins.id, name: ins.name.en, agency: ins.agency.en, stage: ins.stage, when: ins.when.en, book: ins.book.en, book_url: ins.bookUrl, phone: ins.phone, fee: ins.fee, scoring: ins.scoring?.en, if_it_fails: ins.failNext?.en, source: ins.source,
+          still_open: ins.checklist.filter(c => !st.ready?.[`${ins.id}:${c.id}`]).map(c => c.item.en), ready: ins.checklist.filter(c => st.ready?.[`${ins.id}:${c.id}`]).length, of: ins.checklist.length })) };
       },
     },
     {

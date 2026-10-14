@@ -559,7 +559,7 @@ async function spending() {
         ["request_purchase", { category: "gov_fees", payee: "City of San José", amount: 5000, why: "Too much" }],
         ["request_purchase", { category: "supplies", payee: "City of San José", amount: 20, why: "Not allowed kind" }],
         ["request_purchase", { category: "gov_fees", payee: "City of San José", amount: 900, why: "Big one" }]),
-      () => ask(["set_budgets", {}]),
+      () => ask(["set_budgets", {}], ["inspection_guide", { store_id: "st1" }]),
       () => say("I've asked you to approve the sign permit fee and suggested a budget for the store."),
     ],
   });
@@ -573,6 +573,8 @@ async function spending() {
   const bud = w.approvals.find(a => a.change?.op === "set_budgets");
   ok(!!bud && bud.change?.op === "set_budgets" && bud.change.budgets[0].amount === 550, "set_budgets suggests the store's listed fees plus 15%, rounded up to $50, for confirmation");
   eq(w.spend?.policy.budgets.length, 1, "budgets change only when confirmed");
+  const ig = callNamed(r, "inspection_guide")[0];
+  ok(ig.ok && (ig.parsed?.covered === false || (Array.isArray(ig.parsed?.inspections) && ig.parsed.inspections.every((x: { still_open: unknown[]; source: string }) => Array.isArray(x.still_open) && /^https?:/.test(x.source)))), "inspection_guide returns the city's inspections with what's still open and the agency's page", ig.out?.slice(0, 200));
 }
 
 /* ------------------------------------------------------------------ run */

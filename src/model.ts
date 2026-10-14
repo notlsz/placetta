@@ -114,6 +114,7 @@ export type Store = {
   value: { closures: number; fines: number; caught: number };   // fines paid; problems caught before an inspector did
   apps?: string[];               // applications that belong to this store
   permits?: { name: Bi; expires: string }[];   // permits on file for an open store
+  ready?: Record<string, boolean>;               // the city's inspection checklists: "<inspection id>:<item id>" ticked when it's in place
 };
 
 export type Workspace = {
