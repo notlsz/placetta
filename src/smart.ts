@@ -59,11 +59,12 @@ const warn = (label: Bi, note: Bi): Check => ({ level: "warn", label, note });
 
 const RULES: Rule[] = [
   // "SSN, ITIN, or EIN of responsible party" takes either kind of number
+  // a number shown masked ("••-•••4471") is on file and kept out of view; it was checked when it was saved
   { test: /\b(ssn|social security|itin)\b/i, check: (v, c) =>
-      /^(\d{3}|\*{3}|x{3})-?(\d{2}|\*{2}|x{2})-?\d{4}$/i.test(v.trim()) || (/\b(f?ein|tin|tax id)\b/i.test(c.label) && /^\d{2}-?\d{7}$/.test(v.trim())) ? null
+      v.includes("•") ? null : /^(\d{3}|\*{3}|x{3})-?(\d{2}|\*{2}|x{2})-?\d{4}$/i.test(v.trim()) || (/\b(f?ein|tin|tax id)\b/i.test(c.label) && /^\d{2}-?\d{7}$/.test(v.trim())) ? null
       : err(B(c.label, c.label), B("A Social Security number or ITIN is 9 digits.", "社会安全号或 ITIN 为 9 位数字。")) },
   { test: /\b(ein|fein)\b|employer identification|federal (tax|employer) id/i, check: (v, c) =>
-      /^\d{2}-?\d{7}$/.test(v.trim()) ? null
+      v.includes("•") ? null : /^\d{2}-?\d{7}$/.test(v.trim()) ? null
       : /applied|pending|apply/i.test(v) ? warn(B(c.label, c.label), B("No EIN yet. Most agencies won't take the filing until it's issued.", "尚未取得 EIN。多数机构要等 EIN 下发后才受理。"))
       : err(B(c.label, c.label), B("An EIN is 9 digits, written 12-3456789.", "EIN 为 9 位数字，格式如 12-3456789。")) },
   { test: /e-?mail/i, check: (v, c) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim()) ? null : err(B(c.label, c.label), B("That isn't an email address.", "这不是有效的电子邮箱地址。")) },
@@ -166,7 +167,9 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
   if (a.kind === "send") {
     checked++;
     const body = fields.map(f => f.value).join("\n");
-    if (fields.length && !fields.some(f => /^(to|recipient|收件人)/i.test(f.label.en) && f.value.includes("@")) && fields.some(f => /^(to|recipient)/i.test(f.label.en)))
+    // an email needs an address; a text goes to the people named, from the numbers on file
+    const text = fields.some(f => /^from/i.test(f.label.en) && /\(?\d{3}\)?[\s.-]*[\d•]{3}[\s.-]*\d{4}/.test(f.value)) && !fields.some(f => /^subject/i.test(f.label.en));
+    if (!text && !fields.some(f => /^(to|recipient|收件人)/i.test(f.label.en) && f.value.includes("@")) && fields.some(f => /^(to|recipient)/i.test(f.label.en)))
       add(err(B("To", "收件人"), B("No email address to send it to.", "没有收件邮箱。")));
     if (/\b(guarantee[ds]?|promise[ds]?)\b.{0,40}\b(approv|permit|open)/i.test(body))
       add(warn(B("Message", "内容"), B("It promises an approval or a date. Agencies decide those; say \"expect\" instead.", "内容承诺了获批或日期。这些由机构决定，建议改为“预计”。")));

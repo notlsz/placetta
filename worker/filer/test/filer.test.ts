@@ -15,11 +15,13 @@ const filing = (): Filing => ({ id: "f1", workspace_id: "w", app_id: "llc", titl
   payload: { official: "test-llc", fields: VALUES.map(([l, v]) => ({ label: b(l), value: v })), attachments: [{ name: "articles.pdf", path: "w/articles.pdf" }] } });
 
 class Mem implements Store {
-  f = filing(); skills = new Map<string, Skill>(); tasks: string[] = []; docs: string[] = []; filed = 99; queuedOnPoll = false;
+  f = filing(); skills = new Map<string, Skill>(); tasks: string[] = []; docs: string[] = []; proofs: string[] = []; filed = 99; queuedOnPoll = false; stopAfter = 0; steps = 0;
   async claim() { return this.f.agent_state === "queued" ? { ...this.f, agent_state: "running" } : null; }
   async reload() { return this.f; }
   async step(_f: Filing, e: LogEntry | null, patch: Record<string, unknown> = {}) {
+    if (this.f.status === "canceled" && "submit_clicked_at" in patch) throw new Error("filing_stopped");
     if (e) this.f.agent_log = [...this.f.agent_log, e];
+    if (this.stopAfter && ++this.steps === this.stopAfter) this.f.status = "canceled";
     for (const [k, v] of Object.entries(patch)) if (!(k === "submit_clicked_at" && this.f.submit_clicked_at)) (this.f as unknown as Record<string, unknown>)[k] = v;
     return { ...this.f };
   }
@@ -30,6 +32,7 @@ class Mem implements Store {
   async selfFiled() { return this.filed; }
   async download() { return new TextEncoder().encode("%PDF-1.4 test"); }
   async saveDoc(_f: Filing, name: string) { this.docs.push(name); return `w/receipts/${name}`; }
+  async saveProof(_f: Filing, name: string) { this.proofs.push(name); return `w/proof/${name}`; }
   async teamTask(_f: Filing | null, kind: string) { this.tasks.push(kind); }
   async notify() {}
   async takeHeld() { return this.queuedOnPoll; }
@@ -127,4 +130,28 @@ test("dry run and two-key stop at the review page", async () => {
   assert.equal(r?.kind, "review");
   assert.ok(store.tasks.includes("review") && store.docs.includes("review-page.png"));
   assert.equal(p.submissions, 0);
+});
+
+test("shows each page with what was entered, sensitive numbers masked", async () => {
+  const p = await portal(), store = new Mem(), m = new Scripted();
+  await worker(store, m, p.url).run(store.f);
+  const pages = store.f.agent_log.filter((e) => e.kind === "page");
+  assert.ok(pages.length >= 2 && pages.every((e) => e.ref?.startsWith("w/proof/")), JSON.stringify(pages));
+  assert.equal(store.proofs.length, pages.length);
+  const fill = store.f.agent_log.find((e) => e.kind === "fill" && e.en === "Filled Legal name");
+  assert.equal(fill?.value, "Acme Noodles LLC");
+  const { shown } = await import("../src/run.ts");
+  assert.equal(shown("Federal EIN", "12-3456789"), "•••6789");
+  assert.equal(shown("SSN of owner", "123-45-6789"), "•••6789");
+  assert.equal(shown("Owner name", "Li Wei"), "Li Wei");
+});
+
+test("a stop before submit ends the run and nothing reaches the agency", async () => {
+  const p = await portal(), store = new Mem(), m = new Scripted();
+  store.stopAfter = 4;
+  const r = await worker(store, m, p.url).run(store.f);
+  assert.equal(r?.kind, "stopped");
+  assert.equal(p.submissions, 0);
+  assert.equal(store.f.submit_clicked_at, null);
+  assert.ok(!store.f.agent_log.some((e) => e.kind === "retry"), "a stopped run isn't retried");
 });

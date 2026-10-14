@@ -5,7 +5,7 @@ export const fmt = (s: string, v: Record<string, string | number>) => s.replace(
 
 /** Interface text. Agent replies and sample data carry their own two languages. */
 export const S = {
-  agentName: B("Placetta", "快哉"),
+  agentName: B("Odelia", "Odelia"),
   sampleWs: B("Sample workspace", "示例工作区"),
   collapseMenu: B("Collapse menu", "收起菜单"),
   expandMenu: B("Expand menu", "展开菜单"),

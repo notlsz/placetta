@@ -249,7 +249,7 @@ async function textBack(run: Run, text: string, approvals: string[]) {
   // Only ever to the number this person verified, and only while it's still theirs.
   if (!link?.verified_at || link.number !== normalizePhone(run.reply_to)) return;
   const origin = appOrigin(env);
-  const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : null) : "";
+  const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
   const segments = splitSms(text, { max: 3, lang: run.lang, more: appLink(origin, run.workspace_id), tail: approve ? `${SAY.approve[run.lang]} ${approve}` : undefined });
   await textUser(admin, env, { link, workspace_id: run.workspace_id, segments, kind: "reply", run_id: run.id });
 }
@@ -265,7 +265,7 @@ async function queueApprovalTexts(run: Run, title: { en: string; zh: string }, a
   const rows = (links ?? []).map((l) => ({
     user_id: l.user_id, workspace_id: run.workspace_id, kind: "text", urgent: false, dedupe: `approval:${run.id}`,
     body: l.lang === "zh" ? `${title.zh}。有 ${approvals.length} 项等待您批准。` : `${title.en}. ${approvals.length} item${approvals.length === 1 ? " is" : "s are"} waiting for your approval.`,
-    link: appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : null) || null,
+    link: appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") || null,
   }));
   if (rows.length) await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
 }

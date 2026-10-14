@@ -86,7 +86,7 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const botSize = Math.round(Math.min(150, Math.max(78, (typeof window === "undefined" ? 800 : window.innerHeight) * 0.19)));
 
   return (
-    <div className={"composer-wrap " + variant}>
+    <div className={"composer-wrap c-" + variant}>
       {dock && showLive && busy && live && (
         <p className="dock-live" aria-live="polite"><span>{b(live.label)}…</span>{live.tool && <em>{live.tool}</em>}</p>
       )}

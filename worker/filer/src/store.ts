@@ -15,6 +15,9 @@ export interface Store {
   selfFiled(official: string): Promise<number>;
   download(path: string): Promise<Uint8Array>;
   saveDoc(f: Filing, name: string, bytes: Uint8Array, mime: string): Promise<string | null>;
+  /** A screenshot of a page Placetta filled, for the customer's live view and replay: stored with the workspace's files,
+   *  readable by its members, not listed in Documents. */
+  saveProof(f: Filing, name: string, bytes: Uint8Array, mime: string): Promise<string | null>;
   teamTask(f: Filing | null, kind: string, title: string, detail?: unknown): Promise<void>;
   notify(f: Filing, title: { en: string; zh: string }, body: { en: string; zh: string }): Promise<void>;
 }
@@ -94,6 +97,11 @@ export class SupabaseStore implements Store {
     const { error } = await this.db.from("documents").insert({ workspace_id: f.workspace_id, app_id: f.app_id, filing_id: f.id, name, path, size: bytes.length, mime, source: "agent", uploaded_by: null });
     if (error) { await this.db.storage.from("documents").remove([path]); return null; }
     return path;
+  }
+  async saveProof(f: Filing, name: string, bytes: Uint8Array, mime: string) {
+    const path = `${f.workspace_id}/proof/${f.id}/${Date.now()}-${name.replace(/[^\w.-]+/g, "_")}`;
+    const up = await this.db.storage.from("documents").upload(path, bytes, { contentType: mime, upsert: false });
+    return up.error ? null : path;
   }
   async teamTask(f: Filing | null, kind: string, title: string, detail?: unknown) {
     await this.db.from("team_tasks").upsert({ kind, filing_id: f?.id ?? null, workspace_id: f?.workspace_id ?? null, title, detail: detail ?? null,

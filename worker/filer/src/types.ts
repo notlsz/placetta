@@ -1,7 +1,7 @@
 // Shapes shared by the portal worker.
 
 export type Bi = { en: string; zh: string };
-export type LogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string };
+export type LogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string; value?: string };   // value: what was entered, sensitive numbers masked
 
 export type Payload = {
   official?: string;
@@ -40,4 +40,5 @@ export type Result =
   | { kind: "submitted"; confirmation: string; summary: string; trace: TraceStep[]; seconds: number; replayed: boolean }
   | { kind: "needs_you"; reason: string; message: Bi; trace: TraceStep[] }
   | { kind: "handoff"; reason: string; message: Bi; trace: TraceStep[]; task?: "handoff" | "review" | "check_agency" }
-  | { kind: "review"; message: Bi; trace: TraceStep[] };
+  | { kind: "review"; message: Bi; trace: TraceStep[] }
+  | { kind: "stopped"; trace: TraceStep[] };

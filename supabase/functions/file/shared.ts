@@ -19,7 +19,7 @@ export function userClient(jwt: string): SupabaseClient {
 
 // ------------------------------------------------------------------ responses
 
-export type Code = "unauthorized" | "mfa_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error";
+export type Code = "unauthorized" | "mfa_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error" | "too_late";
 
 const STATUS: Record<Code, number> = {
   unauthorized: 401,
@@ -30,6 +30,7 @@ const STATUS: Record<Code, number> = {
   not_connected: 409,
   not_configured: 503,
   upstream_error: 502,
+  too_late: 409,
 };
 
 export class HttpError extends Error {

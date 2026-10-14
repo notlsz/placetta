@@ -18,10 +18,18 @@ export type Config = {
 
 const log = (en: string, zh: string, kind = "info", ref?: string) => ({ en, zh, kind, ...(ref ? { ref } : {}) });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const SECRET = /\b(ssn|social security|itin|e?in|fein|tax ?id|tin|account|routing|card|password)\b/i;
+/** What the customer's live view shows for a value: numbers that identify a person or an account keep only their last four. */
+export const shown = (label: string, value: string) => {
+  if (!SECRET.test(label)) return value.slice(0, 200);
+  const d = value.replace(/\D/g, "");
+  return d.length >= 4 ? "•••" + d.slice(-4) : "••••";
+};
+const STOPPED: Result = { kind: "stopped", trace: [] };
 const urlKey = (u: string) => { try { const x = new URL(u); return x.origin + x.pathname; } catch { return u; } };
 export const portalKey = (host: string, official: string) => `portal:${host}:${official}`;
 
-type Ctx = { f: Filing; host: string; login: Login | null; page: Page; session: Session; trace: TraceStep[]; t0: number; files: Map<string, string> };
+type Ctx = { f: Filing; host: string; login: Login | null; page: Page; session: Session; trace: TraceStep[]; t0: number; files: Map<string, string>; seen?: string; pages?: number };
 type Exec = { ok: true } | { ok: false; error: string } | { end: Result };
 
 export class Worker {
@@ -82,7 +90,9 @@ export class Worker {
 
   private async exec(ctx: Ctx, a: Act, valueOverride?: string): Promise<Exec> {
     const { page } = ctx;
+    if (ctx.f.status === "canceled") return { end: { ...STOPPED, trace: ctx.trace } };
     const st = await pageState(page);
+    await this.proof(ctx, st);
     const stop = mustStop(st);
     if (stop) return { end: await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh }) };
     const loc = locate(page, a.selector).first();
@@ -105,7 +115,7 @@ export class Worker {
       }
       await loc.fill(value);
       rec({ action: "fill", selector: a.selector, field: from.label });
-      ctx.f = await this.c.store.step(ctx.f, log(`Filled ${from.label}`, `已填写 ${from.label}`, "fill"));
+      ctx.f = await this.c.store.step(ctx.f, { ...log(`Filled ${from.label}`, `已填写 ${from.label}`, "fill"), value: shown(from.label, value) });
       return { ok: true };
     }
     if (a.action === "select") {
@@ -117,6 +127,7 @@ export class Worker {
       if (!match) return { ok: false, error: "No such option." };
       await loc.selectOption({ label: match.trim() });
       rec({ action: "select", selector: a.selector, field: from.label });
+      ctx.f = await this.c.store.step(ctx.f, { ...log(`Filled ${from.label}`, `已填写 ${from.label}`, "fill"), value: shown(from.label, match.trim()) });
       return { ok: true };
     }
     if (a.action === "check") {
@@ -145,6 +156,17 @@ export class Worker {
     if (!onPortal(page.url(), ctx.host)) return { end: { kind: "handoff", reason: "left_portal", trace: ctx.trace, message: { en: "The run left the agency's site.", zh: "运行离开了机构网站。" } } };
     ctx.f = await this.c.store.step(ctx.f, log(`Pressed ${text || a.selector.replace(/^\w+:/, "")}`, `点击 ${text || a.selector.replace(/^\w+:/, "")}`, "click"));
     return { ok: true };
+  }
+
+  /** Each new page of the agency's site, once: a screenshot for the customer's live view and replay. */
+  private async proof(ctx: Ctx, st: PageState) {
+    const key = urlKey(st.url) + "|" + headingOf(st);
+    if (key === ctx.seen || (ctx.pages ?? 0) >= 25) return;
+    ctx.seen = key; ctx.pages = (ctx.pages ?? 0) + 1;
+    const heading = headingOf(st) || ctx.host;
+    let path: string | null = null;
+    try { path = await this.c.store.saveProof(ctx.f, `page-${ctx.pages}.jpg`, await ctx.page.screenshot({ fullPage: true, type: "jpeg", quality: 60 }), "image/jpeg"); } catch { /* the page still gets its line */ }
+    ctx.f = await this.c.store.step(ctx.f, log(`On “${heading}”`, `在“${heading}”页面`, "page", path ?? undefined));
   }
 
   /** The final-submit guard: screenshot, compare with the payload, dry run and two-key, then write submit_clicked_at. */
@@ -193,6 +215,8 @@ export class Worker {
     const end = Date.now() + this.c.holdMs;
     while (Date.now() < end) {
       await sleep(this.c.pollMs);
+      const now = await this.c.store.reload(ctx.f.id).catch(() => ctx.f);
+      if (now.status === "canceled") { ctx.f = now; return { ...STOPPED, trace: ctx.trace }; }
       if (await this.takeBack(ctx.f.id)) {
         ctx.f = await this.c.store.reload(ctx.f.id);
         return { kind: "needs_you", reason: "resumed", message, trace: ctx.trace };   // marker: drive continues
@@ -229,6 +253,7 @@ export class Worker {
     const recent: string[] = [];
     for (let i = 0; i < this.c.maxSteps; i++) {
       if (Date.now() - ctx.t0 > this.c.maxMs) break;
+      if (ctx.f.status === "canceled") return { ...STOPPED, trace: ctx.trace };
       const st = await pageState(ctx.page);
       const stop = mustStop(st);
       if (stop) {
@@ -286,6 +311,8 @@ export class Worker {
       const g = await store.step(f, log(`Submitted on ${ctx?.host}. Confirmation ${res.confirmation}`, `已在 ${ctx?.host} 提交，确认号 ${res.confirmation}`, "submitted", res.confirmation),
         { status: "submitted", agent_state: "done", confirmation_number: res.confirmation, requirements_checked: true, handoff_url: null, ...(extra?.receipt ? { receipt_path: extra.receipt } : {}) });
       await store.notify(g, { en: `Submitted: ${f.title.en}`, zh: `已提交：${f.title.zh}` }, { en: `Confirmation ${res.confirmation}.`, zh: `确认号 ${res.confirmation}。` });
+    } else if (res.kind === "stopped") {
+      // the customer stopped it; the database already says so, and nothing was submitted
     } else if (res.kind === "needs_you") {
       // already recorded by handBack
     } else if (res.kind === "review") {
@@ -310,6 +337,7 @@ export class Worker {
   private async fail(f: Filing, e: unknown) {
     const msg = e instanceof Error ? e.message.slice(0, 200) : "error";
     const cur = await this.c.store.reload(f.id).catch(() => f);
+    if (cur.status === "canceled") return;   // stopped by the customer: nothing to retry
     if (cur.submit_clicked_at) {
       const g = await this.c.store.step(cur, log("The run stopped after pressing submit. The team checks with the agency.", "运行在点击提交后中断，团队会向机构核实。", "handoff", msg), { agent_state: "handoff", channel: "team" });
       await this.c.store.teamTask(g, "check_agency", "Run stopped after submit was pressed. Check the agency first.");

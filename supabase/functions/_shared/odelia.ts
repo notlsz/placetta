@@ -393,7 +393,8 @@ export const BLOCKED_BY_STOP = "40300";
 /* ------------------------------ links and words ------------------------------ */
 
 export const appOrigin = (env: Env) => ((env("APP_ORIGINS") ?? "").split(",")[0] ?? "").trim().replace(/\/+$/, "");
-/** The app, opened on a workspace, and on one approval when given (the app shows that approval's card). */
+/** The app, opened on a workspace, and on one approval when given (the app shows that approval's card), or on "ready":
+ *  everything waiting, in Odelia's panel, where whatever passed every check is approved with one tap. */
 export function appLink(origin: string, ws?: string | null, approval?: string | null): string {
   if (!origin) return "";
   const q = new URLSearchParams();

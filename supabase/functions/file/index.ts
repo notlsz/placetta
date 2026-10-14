@@ -5,6 +5,7 @@
 //   resume  "I've done my part, carry on" after a hand-back
 //   signed  { path } the hand-signed copy of a wet-signature form, uploaded to Documents: Placetta faxes it
 //   status  refresh a fax or letter that's on its way
+//   stop    the customer stops it before anything has left for the agency (refused once submit_clicked_at is set)
 //   team_approve, take_over   the Placetta team (two-step) in the two-key period, or taking a run over
 // POST { action: "sweep" } with x-monitor-key: the monitor's run (stuck runs, fax and mail status, stale destinations)
 // POST ?provider=telnyx: Telnyx fax webhooks, verified with TELNYX_PUBLIC_KEY.
@@ -456,6 +457,17 @@ async function takeOver(f: Filing, by: string) {
   return view(await step(f, log("The Placetta team took over this filing", "快哉团队已接手此申请", "take_over", by), { agent_state: "handoff", channel: "team" }));
 }
 
+/** Stop: one row lock in the database decides it against the submit, so nothing can leave after a stop. A portal run
+ *  holding a browser sees the stop at its next step and closes. */
+async function stop(f: Filing, by: string) {
+  const { data, error } = await admin.rpc("stop_agent_filing", { p_id: f.id, p_by: by });
+  if (error) {
+    if (/too_late/.test(error.message ?? "")) throw new HttpError("too_late", "It has already gone to the agency, so it can't be stopped. If something is wrong, tell us and the team contacts the agency.");
+    throw new Error(`stop failed: ${error.message?.slice(0, 200) ?? error.code}`);
+  }
+  return view(data as unknown as Filing);
+}
+
 // ------------------------------------------------------------------ webhooks and the monitor's sweep
 
 async function telnyxWebhook(req: Request) {
@@ -518,5 +530,6 @@ serve(async (req) => {
   if (action === "resume") return ok(await resume(f, user.email ?? user.id));
   if (action === "start") return ok(await start(f, req, user.email ?? user.id));
   if (action === "signed") return ok(await signed(f, String(body.path ?? "").slice(0, 500), user.email ?? user.id));
-  throw new HttpError("bad_request", "action must be start, resume, signed or status.");
+  if (action === "stop") return ok(await stop(f, user.email ?? user.id));
+  throw new HttpError("bad_request", "action must be start, resume, signed, stop or status.");
 });

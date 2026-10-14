@@ -7,7 +7,13 @@ import type { FeedItem, Turn } from "./feed";
 import type { Bi } from "./model";
 import { unlockAudio, type Speaker } from "./hooks";
 import { NeedRow, INK } from "./pages";
-import { AppArtifact, FileCard, I, Prose } from "./ui";
+import { AppArtifact, FileCard, I, Prose, feeTotal } from "./ui";
+import { preflight } from "./smart";
+import { readyToFile } from "./core";
+import { formById } from "./forms/registry";
+import { money, daysFromNow, fmtAgo } from "./time";
+import type { Approval, Workspace } from "./model";
+import { FilingLive } from "./FilingLive";
 import { AgentBot, Working } from "./Bot";
 
 /** The agent, beside the work: what it's doing now, every step with the site it used, and what each run produced. */
@@ -53,13 +59,19 @@ function Memory({ text }: { text: Bi }) {
 
 /** One run: a quiet log of the steps, then the answer and whatever it produced. */
 function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; onSay: (text: string) => void }) {
-  const { b, t, ws, busy, run, go } = useApp();
+  const { b, t, lang, ws, busy, run, go, cloud } = useApp();
   const [show, setShow] = useState(false);
   const live = !m.reply;
   const r = m.reply;
   const said = r ? r.text.map(b).join(" ") : "";
   const pending = (r?.approvals ?? []).filter(id => ws.approvals.some(a => a.id === id));
   const done = (r?.approvals ?? []).filter(id => !pending.includes(id) && ws.closed.some(a => a.id === id));
+  // filings that passed every check go out together from one card; anything flagged, unsigned or not a filing stays its own row
+  const group = pending.filter(id => batchable(ws, ws.approvals.find(a => a.id === id)!, !!cloud));
+  const rows = group.length > 1 ? pending.filter(id => !group.includes(id)) : pending;
+  const asking = pending.some(id => ws.approvals.find(a => a.id === id)?.kind !== "upload");
+  const covered = new Set([...pending, ...done].map(id => (ws.approvals.find(a => a.id === id) ?? ws.closed.find(a => a.id === id))?.app).filter(Boolean));
+  const filed = r?.filed ?? [];
   const cur = live ? m.steps[m.active] : undefined;
   const listen = said ? (
     <button type="button" className={"say" + (speaking === said ? " on" : "")} onClick={() => onSay(said)} aria-label={speaking === said ? t("stopListen") : t("listen")}>
@@ -68,10 +80,10 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
   ) : null;
   return (
     <div className="turn">
-      <div className={"work-hd" + (!live && pending.length ? " wait" : "")}>
+      <div className={"work-hd" + (!live && asking ? " wait" : "")}>
         {live && cur ? <ThinkingOrb state={cur.state} size={20} theme="light" color={INK} aria-label={b(cur.label)} />
-          : !live && pending.length ? <span className="wico"><I.pause /></span> : <span className="spark"><I.spark /></span>}
-        <span>{live ? t("working") : pending.length ? t("waitingYou") : m.ms ? t("workedFor", { s: Math.max(1, Math.round(m.ms / 1000)) }) : t("fromPlacetta")}</span>
+          : !live && asking ? <span className="wico"><I.pause /></span> : <span className="spark"><I.spark /></span>}
+        <span>{live ? t("working") : asking ? t("waitingYou") : m.ms ? t("workedFor", { s: Math.max(1, Math.round(m.ms / 1000)) }) : fmtAgo(m.at, lang)}</span>
         {!live && m.steps.length > 0 && <button type="button" className="steps-t" onClick={() => setShow(s => !s)} aria-expanded={show}>{t("stepsN", { n: m.steps.length })}<span className={show ? "up" : ""}><I.chev /></span></button>}
         {listen}
       </div>
@@ -95,10 +107,11 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
         <div className="answer">
           {r.text.map((p, i) => <Prose key={i} text={b(p)} />)}
           {r.chain && <ol className="chain">{r.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
-          {(r.apps?.length || r.files?.length) ? (
+          {filed.map(id => <FilingLive key={id} app={id} />)}
+          {(r.apps?.some(id => !covered.has(id) && !filed.includes(id)) || (r.files?.length && !filed.length)) ? (
             <div className="made">
-              {r.apps?.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <AppArtifact key={id} a={a} /> : null; })}
-              {r.files?.map(id => { const d = ws.docs.find(x => x.id === id); return d ? <FileCard key={id} d={d} compact /> : null; })}
+              {r.apps?.filter(id => !covered.has(id) && !filed.includes(id)).map(id => { const a = ws.apps.find(x => x.id === id); return a ? <AppArtifact key={id} a={a} /> : null; })}
+              {!filed.length && r.files?.map(id => { const d = ws.docs.find(x => x.id === id); return d ? <FileCard key={id} d={d} compact /> : null; })}
             </div>
           ) : null}
           {r.table && r.table.rows.length > 0 && (
@@ -110,7 +123,8 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
               </table></div>
             </figure>
           )}
-          {pending.map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
+          {group.length > 1 && <ApproveGroup ids={group} />}
+          {rows.map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
           {r.memory?.map((x, i) => <Memory key={i} text={x} />)}
           {r.skills?.map((x, i) => <p key={"s" + i} className="mem"><I.spark /><span><b>{t("learned")}</b>{b(x)}</span></p>)}
@@ -121,6 +135,58 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
           {r.next && <button type="button" className="pill primary sm" disabled={busy} onClick={() => run(r.next!.req, b(r.next!.label))}><span>{b(r.next.label)}</span><i aria-hidden="true"><I.arrow /></i></button>}
         </div>
       )}
+    </div>
+  );
+}
+
+/** A filing that can go out with others from one tap: complete, nothing the second look flags, no signature to draw. */
+function batchable(w: Workspace, a: Approval | undefined, account: boolean): boolean {
+  if (!a || a.kind !== "file") return false;
+  const app = w.apps.find(x => x.id === a.app);
+  if (!app || !readyToFile(app)) return false;
+  const off = app.official ? formById(app.official) : undefined;
+  if (account && off?.sign && off.esign) return false;
+  const pf = preflight(w, a, daysFromNow(0));
+  return !pf.errors.length && !pf.warnings.length;
+}
+
+/** Everything that's ready, approved with one tap. Each filing still named, with its agency, its fee and what was checked. */
+function ApproveGroup({ ids }: { ids: string[] }) {
+  const { b, lang, ws, busy, approveAll, openApproval, cloud } = useApp();
+  const [going, setGoing] = useState(false);
+  const zh = lang === "zh";
+  const list = ids.map(id => ws.approvals.find(a => a.id === id)!).filter(Boolean);
+  const apps = list.map(a => ws.apps.find(x => x.id === a.app));
+  const total = apps.reduce((n, a) => n + (a ? feeTotal(a) : 0), 0);
+  const tbd = apps.some(a => a?.fees.some(f => f.tbd));
+  const n = list.length;
+  const go = () => { setGoing(true); approveAll(ids); };
+  return (
+    <div className="agroup" role="group" aria-label={zh ? `${n} 项可以提交` : `${n} ready to file`}>
+      <div className="ag-h">
+        <b>{zh ? `${n} 项可以提交` : `${n} ready to file`}</b>
+        <span>{total ? (zh ? `机构费用共 ${money(total)}${tbd ? "起" : ""}` : `${money(total)}${tbd ? "+" : ""} in agency fees`) : (zh ? "均无费用" : "No fees")}</span>
+      </div>
+      <ul>
+        {list.map((a, i) => {
+          const app = apps[i], fee = app ? feeTotal(app) : 0, answers = app?.fields.filter(f => f.value).length ?? 0, docs = app?.checklist.filter(c => c.state === "done").length ?? 0;
+          return (
+            <li key={a.id}>
+              <span className="ag-ok" aria-hidden="true"><I.check /></span>
+              <span className="ag-tx">
+                <b>{b(a.title)}</b>
+                <small>{[a.agency && b(a.agency), fee ? money(fee, app?.currency) : (zh ? "无费用" : "No fee"),
+                  zh ? `已核对 ${answers} 项回答${docs ? `和 ${docs} 份文件` : ""}` : `${answers} answer${answers === 1 ? "" : "s"}${docs ? ` and ${docs} document${docs === 1 ? "" : "s"}` : ""} checked`].filter(Boolean).join(zh ? "，" : " · ")}</small>
+              </span>
+              <button type="button" className="ag-open" onClick={() => openApproval(a.id)}>{zh ? "查看" : "Review"}<I.chevR /></button>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="ag-f">
+        <small>{cloud ? (zh ? "点按之前不会提交任何内容。机构费用由您直接支付给机构。" : "Nothing goes out until you tap. Agency fees are paid to the agency.") : (zh ? "点按之前不会提交任何内容。" : "Nothing goes out until you tap.")}</small>
+        <button type="button" className="pill ink sm" disabled={busy || going} onClick={go}><I.check />{zh ? (n === 2 ? "两项都批准" : `全部批准 ${n} 项`) : n === 2 ? "Approve both" : `Approve all ${n}`}</button>
+      </div>
     </div>
   );
 }

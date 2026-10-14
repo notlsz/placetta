@@ -808,6 +808,13 @@ try {
     check("the delivery receipt is saved to Documents", !!fd?.receipt_path && gw.files.has(`documents/${fd.receipt_path}`) && (await sql`select count(*)::int n from public.documents where path = ${fd?.receipt_path ?? ""} and source = 'agent'`)[0].n === 1, fd);
     const resend = await call("file", { action: "start", workspace_id: ws, filing_id: fid }, { jwt: owner.jwt });
     check("a submitted filing is never sent again", resend.status === 200 && since(mark).filter((x) => x.path === "/v2/faxes").length === 1, resend);
+    const late = await call("file", { action: "stop", workspace_id: ws, filing_id: fid }, { jwt: owner.jwt });
+    check("a sent filing can't be stopped", late.status === 409 && late.data?.error?.code === "too_late" && (await sql`select status from public.filings where id = ${fid}`)[0].status === "submitted", late);
+    const halt = await call("file", { action: "stop", workspace_id: ws, filing_id: filing }, { jwt: owner.jwt });
+    const [hs] = await sql`select status, agent_state, agent_log->-1->>'kind' last from public.filings where id = ${filing}`;
+    check("one not yet sent stops: canceled, and the stop is in its log", halt.status === 200 && hs.status === "canceled" && hs.agent_state === "failed" && hs.last === "stopped", { halt: halt.data, hs });
+    const blocked = await sql`select public.filing_agent_step(${filing}::uuid, '{"en":"Pressed Submit","zh":"点击提交","kind":"submit"}'::jsonb, jsonb_build_object('submit_clicked_at', now())) ok`.then(() => false, (e) => /filing_stopped/.test(String(e?.message)));
+    check("and nothing can submit it after", blocked);
   });
 
   /* ---------------- g. headquarters ---------------- */

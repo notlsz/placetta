@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
+import { FilingLive } from "./FilingLive";
 import { useApp, type Signed, type Tab } from "./ctx";
 import type { Application, CheckItem, Doc } from "./model";
 import { formById, METHOD } from "./forms/registry";
@@ -92,7 +93,7 @@ function Progress({ a }: { a: Application }) {
       act: pay ? { l: zh ? "去付款" : "Pay the agency", go: () => openApproval(pay.id) } : undefined },
     { k: "agency", s: st === "approved" ? "done" : st === "review" ? "now" : "next",
       t: zh ? "机构审核" : "The agency reviews it",
-      d: f?.submitted_at ? [zh ? `${day(f.submitted_at)} 提交` : `Submitted ${day(f.submitted_at)}`, f.confirmation_number ? (zh ? `确认号 ${f.confirmation_number}` : `confirmation ${f.confirmation_number}`) : "", tbc ? "" : zh ? `通常需要：${b(a.est)}` : `usually takes ${b(a.est)}`].filter(Boolean).join(zh ? "，" : ", ") : tbc ? undefined : (zh ? `通常需要：${b(a.est)}` : `Usually takes ${b(a.est)}`) },
+      d: f?.submitted_at ? [zh ? `${day(f.submitted_at)} 提交` : `Submitted ${day(f.submitted_at)}`, f.confirmation_number ? (zh ? `确认号 ${f.confirmation_number}` : `confirmation ${f.confirmation_number}`) : "", tbc ? "" : zh ? `通常需要：${b(a.est).replace(/^通常(需要)?[：:]?/, "")}` : /^usually/i.test(b(a.est)) ? b(a.est).replace(/^U/, "u") : `usually takes ${b(a.est)}`].filter(Boolean).join(zh ? "，" : ", ") : tbc ? undefined : (zh ? `通常需要：${b(a.est).replace(/^通常(需要)?[：:]?/, "")}` : /^usually/i.test(b(a.est)) ? b(a.est) : `Usually takes ${b(a.est)}`) },
     { k: "done", s: st === "approved" ? "done" : "next", t: zh ? "批准并发证" : "Approved and issued",
       d: st === "approved" ? [f?.decided_at ? day(f.decided_at) : "", a.renews ? b(a.renews) : ""].filter(Boolean).join(zh ? "。" : ". ") : a.renews ? (zh ? `续期：${b(a.renews)}` : `Renewal: ${b(a.renews)}`) : undefined },
   ];
@@ -109,13 +110,7 @@ function Progress({ a }: { a: Application }) {
         ))}
       </ol>
       {f?.agent_state === "needs_you" && <FinishStep f={f} />}
-      {f?.agent_log && f.agent_log.length > 0 && (
-        <details className="pg-log" open={f.agent_state === "running" || f.agent_state === "queued"}>
-          <summary>{zh ? `快哉的操作记录（${f.agent_log.length}）` : `What Placetta did (${f.agent_log.length})`}</summary>
-          <ol>{f.agent_log.filter(e => e.kind !== "quiet").map((e, i) => <li key={i}><small>{e.at ? fmtStamp(e.at).slice(5, 16) : ""}</small> {zh ? e.zh : e.en}</li>)}</ol>
-          {f.receipt_path && <p><small>{zh ? "回执已保存在“文件”中。" : "The receipt is in Documents."}</small></p>}
-        </details>
-      )}
+      <FilingLive app={a.id} embedded />
       {f?.note && f.status !== "needs_info" && <p className="note">{zh ? "团队备注：" : "From the team: "}{f.note}</p>}
     </div>
   );

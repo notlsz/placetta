@@ -12,12 +12,14 @@ export type Step = { state: OrbState; label: Bi; tool?: string };
 export type Request =
   | { text: string }
   | { approve: string }
+  | { approveAll: string[] }
   | { upload: { app: string; item: string; files: { name: string; size: number }[] } }
   | { match: { what: string; where: string } };
 export type Reply = {
   text: Bi[];
   chain?: Bi[];
   approvals?: string[];
+  filed?: string[];         // applications this run filed: each shows live, step by step, with its proof
   apps?: string[];          // application previews to open
   files?: string[];         // documents
   memory?: Bi[];            // facts committed to memory

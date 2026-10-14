@@ -423,21 +423,35 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       if (!member) return fnErr("forbidden", "You are not a member of this workspace.", 403);
       const f = t("filings").find(x => x.id === body.filing_id && x.workspace_id === ws); if (!f) return fnErr("not_found", "No such filing.", 404);
       const view = () => json({ ok: true, filing: { id: f.id, status: f.status, channel: f.channel ?? null, agent_state: f.agent_state ?? null, agent_log: f.agent_log ?? [], handoff_url: null, confirmation_number: f.confirmation_number ?? null, submit_clicked_at: f.submit_clicked_at ?? null } });
+      if (body.action === "stop") {
+        if (f.submit_clicked_at || ["submitted", "accepted", "rejected"].includes(String(f.status))) return fnErr("too_late", "It has already gone to the agency, so it can't be stopped.", 409);
+        const shownSteps = ((f.preview_steps ?? []) as { at: string }[]).filter(x => x.at <= now());
+        Object.assign(f, { status: "canceled", agent_state: "failed", preview_steps: [], agent_log: [...shownSteps, { at: now(), en: "Stopped before anything was sent to the agency", zh: "已在发送给机构之前停止", kind: "stopped" }] });
+        save();
+        return view();
+      }
       if (body.action === "start" && !f.agent_state) {
         const at = (s: number) => new Date(Date.now() + s * 1000).toISOString();
-        Object.assign(f, { channel: "fax", agent_state: "running", status: "in_progress", requirements_checked: true, preview_steps: [
+        const fields = ((f.payload as { fields?: { label: { en: string; zh: string }; value: string }[] } | undefined)?.fields ?? []).filter(x => x.value).slice(0, 8);
+        const host = (() => { try { return new URL(String(f.portal_url ?? "")).hostname.replace(/^www\./, ""); } catch { return "agency.gov"; } })();
+        let t = 1;
+        Object.assign(f, { channel: "portal", agent_state: "running", status: "in_progress", requirements_checked: true, preview_steps: [
           { at: at(0), en: "Checked against the agency's requirements", zh: "已按机构要求核对", kind: "check" },
-          { at: at(2), en: "Faxing it to the agency (preview example)", zh: "正在传真至机构（预览示例）", kind: "submit" },
-          { at: at(5), en: "Faxed to the agency. Delivered. (preview example)", zh: "已传真至机构，已送达。（预览示例）", kind: "submitted" },
+          { at: at(t++), en: `Opening ${host} (preview example)`, zh: `打开 ${host}（预览示例）`, kind: "visit" },
+          { at: at(t++), en: "On “Application”", zh: "在“申请”页面", kind: "page" },
+          ...fields.map(x => ({ at: at(t++), en: `Filled ${x.label.en}`, zh: `已填写 ${x.label.zh}`, kind: "fill", value: /\b(ssn|itin|e?in|fein|tax id|account)\b/i.test(x.label.en) ? "•••" + x.value.replace(/\D/g, "").slice(-4) : x.value })),
+          { at: at(t++), en: "Checked the review page against what you approved. Submitting.", zh: "已核对页面与您批准的内容一致，正在提交。", kind: "submit" },
+          { at: at(t + 2), en: `Submitted on ${host}. Confirmation EXAMPLE-0001 (preview)`, zh: `已在 ${host} 提交，确认号 EXAMPLE-0001（预览）`, kind: "submitted" },
         ], agent_log: [] });
         save();
       }
       const steps = (f.preview_steps ?? []) as { at: string }[];
       if (steps.length) {
         f.agent_log = steps.filter(x => x.at <= now());
+        if ((f.agent_log as { kind: string }[]).some(x => x.kind === "submit") && !f.submit_clicked_at) f.submit_clicked_at = now();
         if ((f.agent_log as unknown[]).length === steps.length && f.status !== "submitted") {
-          Object.assign(f, { status: "submitted", agent_state: "done", confirmation_number: "EXAMPLE-0001 (preview)", submitted_at: now(), submit_clicked_at: now() });
-          audit(ws, c.sub, "agent", "Submitted by Placetta by fax (preview example)", "快哉已通过传真提交（预览示例）", f.title as { en: string; zh: string });
+          Object.assign(f, { status: "submitted", agent_state: "done", confirmation_number: "EXAMPLE-0001 (preview)", submitted_at: now(), submit_clicked_at: f.submit_clicked_at ?? now() });
+          audit(ws, c.sub, "agent", "Submitted by Placetta on the agency's site (preview example)", "快哉已在机构网站提交（预览示例）", f.title as { en: string; zh: string });
         }
         save();
       }

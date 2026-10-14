@@ -45,6 +45,10 @@ export type CloudCtx = {
   resumeFiling(filingId: string): Promise<void>;
   uploadSigned(filingId: string, appId: string, file: File): Promise<void>;
   cancelFiling(filingId: string): Promise<void>;
+  /** Stop a filing that's on its way, before anything reaches the agency; it comes back to you to approve again. */
+  stopFiling(filingId: string): Promise<void>;
+  /** A stored file (a screenshot of an agency page, the form as sent) as a URL this page can show. */
+  fileUrl(path: string): Promise<string | null>;
   exportData(): void;
   switchTo(id: string): void;
   newWorkspace(): void;
@@ -75,6 +79,8 @@ export type Ctx = {
   openApp(id: string, tab?: Tab, edit?: boolean): void;
   openApproval(id: string): void;
   approve(id: string, sig?: Signed): void | Promise<void>;
+  /** Several filings that passed every check, approved together from one tap. */
+  approveAll(ids: string[]): void;
   upload(app: string, item: string, files?: File[]): void;
   download(docId: string): void;
   downloadApp(appId: string): void;

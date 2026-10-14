@@ -52,7 +52,7 @@ export type Filing = {
 };
 export type FilingChannel = "email" | "fax" | "mail" | "portal" | "team";
 export type AgentState = "queued" | "running" | "needs_you" | "done" | "failed" | "handoff";
-export type AgentLogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string };
+export type AgentLogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string; value?: string };   // value: what was entered (sensitive numbers masked)
 export type FilingPayload = {
   form?: Bi; fields: { label: Bi; value: string; from?: Bi }[]; checklist: { label: Bi; state: string; doc?: string }[];
   attachments: { name: string; path: string }[]; does: Bi[]; source?: { label: string; url: string };
@@ -419,6 +419,8 @@ export const fileNow = (ws: string, filingId: string) => fn<FileView>("file", { 
 export const resumeFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "resume" });
 /** The hand-signed copy of a wet-signature form, already in Documents: Placetta faxes it. */
 export const signedCopy = (ws: string, filingId: string, path: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "signed", path });
+/** Stop a filing before anything has left for the agency. Refused once Placetta has pressed submit or sent it. */
+export const stopFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "stop" });
 export const filingStatus = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "status" });
 export const teamFiling = (ws: string, filingId: string, action: "team_approve" | "take_over") => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action });
 /** Upload the filled official form for a filing before it's approved, so its path can go in the frozen payload. */

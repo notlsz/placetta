@@ -267,7 +267,13 @@ ok(!html("<script>alert(1)</script>").includes("<script>"), "edge: a reply can't
   let w = SAMPLE;
   const go = async (req: Request) => { events.length = 0; await demoAgent.run(req, ctx(w), e => { events.push(e); if (e.type === "update") w = e.patch(w); }, new AbortController().signal).catch(() => undefined); return events.find(e => e.type === "reply") as Extract<AgentEvent, { type: "reply" }> | undefined; };
   const signed = await go({ approve: "a-sign" });
-  ok(w.apps.find(a => a.id === "sign")!.status === "review" && /Filed/.test(signed?.reply.text[0].en ?? ""), "edge: the demo's sign permit still files");
+  ok(w.apps.find(a => a.id === "sign")!.status === "review" && /Filing the sign permit/.test(signed?.reply.text[0].en ?? "") && signed?.reply.filed?.[0] === "sign", "edge: the demo's sign permit still files");
+  // everything that's ready, from one tap: one run, both filed, one answer, each on its own live card
+  w = SAMPLE;
+  await go({ text: "File everything that's ready" });
+  const both = await go({ approveAll: ["a-edd", "a-sign"] });
+  ok(["edd", "sign"].every(id => w.apps.find(a => a.id === id)!.status === "review") && !w.approvals.some(a => a.kind === "file" && ["a-edd", "a-sign"].includes(a.id))
+    && both?.reply.filed?.join() === "edd,sign" && /Filing both now, with \$410/.test(both?.reply.text[0].en ?? ""), "the demo files everything ready from one tap", both?.reply);
   w = SAMPLE;
   w = { ...w, apps: w.apps.map(a => (a.id === "sign" ? { ...a, fields: a.fields.map((f, i) => (i === 0 ? { ...f, value: "TBD" } : f)) } : a)) };
   const held = await go({ approve: "a-sign" });

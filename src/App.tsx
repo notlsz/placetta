@@ -16,7 +16,7 @@ import { applicationPdf, auditCsv, docBlob, downloads, saveFile } from "./files"
 import { applyAccent, saveTheme, unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo, Mark } from "./Logo";
-import { B, SAMPLE, same, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
+import { B, SAMPLE, same, type Approval, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
 import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, Overview, UpdatesPage } from "./pages";
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
@@ -160,9 +160,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const view_ = useMemo(() => (cloud ? withServer(ws, filings, docs) : ws), [cloud, ws, filings, docs]);
   /* A link from one of Odelia's texts opens that exact approval (approving still happens here, in the app). */
   const linked = useRef(cloud?.approval ?? null);
+  const readyLink = useRef(false);
   useEffect(() => {
     const id = linked.current; if (!id) return;
     linked.current = null;
+    if (id === "ready") { readyLink.current = true; return; }   // several waiting: the one-tap card, in the panel (below)
     if (view_.approvals.some(a => a.id === id)) { go("overview"); setModal(id); }
     else say(lang === "zh" ? "这项批准已经处理过了。" : "That approval is already taken care of.");
   }, [view_.approvals, go, say, lang]);
@@ -301,6 +303,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!panelRef.current) say(reply.text.map(x => x[lang]).join(" ").split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
   }, [lang, say]);
 
+  /* From a text about several approvals: everything waiting, in the panel, approvable with one tap. */
+  useEffect(() => {
+    if (!readyLink.current) return;
+    readyLink.current = false;
+    const ids = view_.approvals.map(a => a.id);
+    if (!ids.length) { say(lang === "zh" ? "这些批准已经处理过了。" : "Those approvals are already taken care of."); return; }
+    setPanelOpen(true);
+    pushTurn(null, { text: [B(`${ids.length} item${ids.length === 1 ? " is" : "s are"} waiting for you. Everything that passed every check can go with one tap.`, `有 ${ids.length} 项等您处理。通过全部核对的可以一键批准。`)], approvals: ids });
+  }, [view_.approvals, pushTurn, say, lang]);
+
   /* A task on the server: show its steps as they're saved, then take the workspace it left. */
   const follow = useCallback(async (id: string, onEvent: (e: AgentEvent) => void, signal: AbortSignal) => {
     if (!cloud) return;
@@ -424,7 +436,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   /* While a task runs on the server it owns the workspace; changes wait until it's done (or stopped). */
   const held = useCallback(() => {
     if (!serverRun.current) return false;
-    say(lang === "zh" ? "快哉正在处理工作区，完成后（或停止后）再修改。" : "Placetta is working on the workspace. Make changes when it's done, or stop it.");
+    say(lang === "zh" ? "Odelia 正在处理工作区，完成后（或停止后）再修改。" : "Odelia is working on the workspace. Make changes when she's done, or stop her.");
     return true;
   }, [say, lang]);
 
@@ -450,6 +462,52 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
   }, [cloud, say, lang]);
 
+  /* One approved filing to the server: the agency's own form filled (and signed when it takes a drawn signature), the
+     request frozen, and Placetta started on it. What to tell the person, or null when it couldn't go. */
+  const fileOne = useCallback(async (a: Approval, sig?: Signed): Promise<Bi | null> => {
+    if (!cloud) return null;
+    const w = wsRef.current;
+    const app = w.apps.find(x => x.id === a.app); if (!app) return null;
+    const appDocs = app.checklist.map(c => (c.doc ? w.docs.find(d => d.id === c.doc) : undefined));
+    try {
+      const off = app.official ? formById(app.official) : undefined;
+      let pdf_path: string | undefined, signature: api.FilingPayload["signature"];
+      if (off?.fill) {
+        const { fillOfficial, stampSignature } = await import("./forms/fill");
+        const blob = await fillOfficial(off.id, app.fields);
+        if (blob) {
+          let bytes: Uint8Array = new Uint8Array(await blob.arrayBuffer());
+          if (sig?.png && off.esign) {
+            const signed = await stampSignature(bytes, sig.png, off.id);
+            if (signed) { bytes = signed; signature = { name: sig.name, title: sig.title, signed_at: nowIso(), kind: sig.kind }; }
+          }
+          pdf_path = await api.uploadForm(cloud.wsId, app.id, `${off.form.split(" (")[0]}${signature ? " signed" : ""}.pdf`, new Blob([bytes as BlobPart], { type: "application/pdf" }));
+        }
+      }
+      const filing = await api.requestFiling(cloud.wsId, {
+        app_id: app.id, title: a.title, agency: app.agency, portal_url: app.source.url || undefined, fee_estimate: app.fees.reduce((s, f) => s + f.amount, 0),
+        payload: {
+          form: app.form, source: app.source, does: a.does, official: app.official, pdf_path, signature,
+          fields: app.fields.map(f => ({ id: f.id, label: f.label, value: f.value, from: f.from })),
+          checklist: app.checklist.map((c, i) => ({ label: c.label, state: c.state, doc: appDocs[i]?.path })),
+          attachments: appDocs.filter((d): d is Doc => !!d?.path).map(d => ({ name: d.name, path: d.path! })),
+        },
+      });
+      setWs(x => setApp(app.id, { status: "filing" })(dropApproval(a.id)(x)));
+      const v = await api.fileNow(cloud.wsId, filing.id).catch(() => null);
+      void refresh();
+      const st = v?.filing.agent_state, last = v?.filing.agent_log?.at(-1);
+      return st === "handoff" || !v
+        ? B(`Sent to the Placetta team. They check the ${app.name.en.toLowerCase()} against the agency's current requirements and submit it. If the agency charges a fee, you'll get its payment link here.`, `已交给快哉团队。他们会对照机构现行要求核对${app.name.zh}后提交。如需缴纳机构费用，付款链接会发到这里。`)
+        : st === "needs_you" && last ? B(`One step needs you first: ${last.en}`, `需要您先完成一步：${last.zh}`)
+        : B(`Filing it now: I checked the ${app.name.en.toLowerCase()} against the agency's requirements and I'm submitting it. Watch each step below.`, `正在提交：我已对照机构要求核对${app.name.zh}，正在提交。每一步都显示在下方。`);
+    } catch (e) {
+      const er = e as api.ApiError;
+      if (er.code === "plan_required") { hold(a.id); setPlans("file"); } else say(er.message);
+      return null;
+    }
+  }, [cloud, refresh, say]);   // eslint-disable-line react-hooks/exhaustive-deps
+
   const approve = useCallback(async (id: string, sig?: Signed) => {
     if (held()) return;
     if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
@@ -472,47 +530,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
     if (a.kind === "file") {
       if (plan !== "monthly") { hold(id); setPlans("file"); return; }
-      const app = w.apps.find(x => x.id === a.app); if (!app) return;
-      const appDocs = app.checklist.map(c => (c.doc ? w.docs.find(d => d.id === c.doc) : undefined));
-      try {
-        // The agency's own form, filled (and signed when the agency takes a drawn signature), saved before approval
-        // so its path is part of what the customer approves.
-        const off = app.official ? formById(app.official) : undefined;
-        let pdf_path: string | undefined, signature: api.FilingPayload["signature"];
-        if (off?.fill) {
-          const { fillOfficial, stampSignature } = await import("./forms/fill");
-          const blob = await fillOfficial(off.id, app.fields);
-          if (blob) {
-            let bytes: Uint8Array = new Uint8Array(await blob.arrayBuffer());
-            if (sig?.png && off.esign) {
-              const signed = await stampSignature(bytes, sig.png, off.id);
-              if (signed) { bytes = signed; signature = { name: sig.name, title: sig.title, signed_at: nowIso(), kind: sig.kind }; }
-            }
-            pdf_path = await api.uploadForm(cloud.wsId, app.id, `${off.form.split(" (")[0]}${signature ? " signed" : ""}.pdf`, new Blob([bytes as BlobPart], { type: "application/pdf" }));
-          }
-        }
-        const filing = await api.requestFiling(cloud.wsId, {
-          app_id: app.id, title: a.title, agency: app.agency, portal_url: app.source.url || undefined, fee_estimate: app.fees.reduce((s, f) => s + f.amount, 0),
-          payload: {
-            form: app.form, source: app.source, does: a.does, official: app.official, pdf_path, signature,
-            fields: app.fields.map(f => ({ id: f.id, label: f.label, value: f.value, from: f.from })),
-            checklist: app.checklist.map((c, i) => ({ label: c.label, state: c.state, doc: appDocs[i]?.path })),
-            attachments: appDocs.filter((d): d is Doc => !!d?.path).map(d => ({ name: d.name, path: d.path! })),
-          },
-        });
-        setWs(x => setApp(app.id, { status: "filing" })(dropApproval(id)(x)));
-        const v = await api.fileNow(cloud.wsId, filing.id).catch(() => null);
-        void refresh();
-        setPanelOpen(true);
-        const st = v?.filing.agent_state, last = v?.filing.agent_log?.at(-1);
-        pushTurn(shown, { text: [st === "handoff" || !v
-          ? B(`Sent to the Placetta team. They check the ${app.name.en.toLowerCase()} against the agency's current requirements and submit it. If the agency charges a fee, you'll get its payment link here.`, `已交给快哉团队。他们会对照机构现行要求核对${app.name.zh}后提交。如需缴纳机构费用，付款链接会发到这里。`)
-          : st === "needs_you" && last ? B(`One step needs you first: ${last.en}`, `需要您先完成一步：${last.zh}`)
-          : B(`Filing it now: Placetta checked the ${app.name.en.toLowerCase()} against the agency's requirements and is submitting it. Progress shows live on the application.`, `正在提交：快哉已对照机构要求核对${app.name.zh}，正在提交。进度会实时显示在申请中。`)] });
-      } catch (e) {
-        const er = e as api.ApiError;
-        if (er.code === "plan_required") { hold(id); setPlans("file"); } else say(er.message);
-      }
+      const line = await fileOne(a, sig);
+      if (line) { setPanelOpen(true); pushTurn(shown, { text: [line], filed: a.app ? [a.app] : undefined }); }
       return;
     }
     if (a.kind === "send") {
@@ -539,6 +558,28 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
     run({ approve: id }, shown);
   }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk, held]);
+  /* Everything ready, from one tap: the same checks as one at a time (complete, nothing the second look says is wrong),
+     filed in turn, and one answer that shows each filing live. */
+  const approveAll = useCallback(async (ids: string[]) => {
+    if (held()) return;
+    if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
+    const w = wsRef.current, today = daysFromNow(0);
+    const ok = ids.map(id => w.approvals.find(a => a.id === id)).filter((a): a is Approval => !!a && a.kind === "file").filter(a => {
+      const app = w.apps.find(x => x.id === a.app);
+      return !!app && readyToFile(app) && !preflight(w, a, today).errors.length;
+    });
+    if (!ok.length) return;
+    if (ok.length === 1) return approve(ok[0].id);
+    const shown = lang === "zh" ? `全部批准：${ok.map(a => a.title.zh).join("、")}` : `Approve all: ${ok.map(a => a.title.en).join(", ")}`;
+    if (!cloud) { run({ approveAll: ok.map(a => a.id) }, shown); return; }
+    if (!ownerOk()) return;
+    if (plan !== "monthly") { hold(ok[0].id); setPlans("file"); return; }
+    setPanelOpen(true);
+    const filed: string[] = [];
+    for (const a of ok) { if (await fileOne(a) && a.app) filed.push(a.app); }
+    if (filed.length) pushTurn(shown, { text: [B(`Approved ${filed.length === 2 ? "both" : `all ${filed.length}`}. I'm filing each one now; every step and what the agency sends back shows below, live.`, `已批准 ${filed.length} 项。我正在逐一提交，每一步和机构的回执都会实时显示在下方。`)], filed });
+  }, [held, cloud, say, lang, approve, run, ownerOk, plan, fileOne, pushTurn]);   // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     const id = pendingFiling.current;
     if (!cloud || plan !== "monthly" || !id) return;
@@ -610,6 +651,21 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         } catch (e) { fail(e); }
       },
       cancelFiling: async id => { if (!ownerOk()) return; try { await api.cancelFiling(id); await refresh(); } catch (e) { fail(e); } },
+      stopFiling: async id => {
+        const f = filings.find(x => x.id === id);
+        try {
+          await api.stopFiling(cloud.wsId, id);
+          // back to you, exactly as it was before you approved it
+          if (f) setWs(x => {
+            const back = [...x.closed].reverse().find(a => a.kind === "file" && a.app === f.app_id);
+            const w2 = setApp(f.app_id, { status: "ready", next: B("Stopped before it was sent. Approve again when you're ready", "已在发送前停止，准备好后可再次批准") })(x);
+            return back ? { ...w2, approvals: [back, ...w2.approvals.filter(a => a.id !== back.id)], closed: w2.closed.filter(a => a.id !== back.id) } : w2;
+          });
+          await refresh();
+          say(lang === "zh" ? "已停止，没有任何内容发给机构。" : "Stopped. Nothing reached the agency.");
+        } catch (e) { fail(e); }
+      },
+      fileUrl: async path => { try { return URL.createObjectURL(await api.downloadDoc(path)); } catch { return null; } },
       exportData: () => {
         const data = { exported: nowIso(), workspace: api.strip(wsRef.current), audit: wsRef.current.audit, filings, documents: docs.map(d => ({ name: d.name, size: d.size, created_at: d.created_at, source: d.source })) };
         void save(`placetta-data-${inDays(0)}.json`, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
@@ -633,6 +689,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : "check"), edit: !!edit }); },
     openApproval: id => setModal(id),
     approve: (id, sig) => void approve(id, sig),
+    approveAll: ids => void approveAll(ids),
     upload: (app, item, files) => void upload(app, item, files),
     download: async id => {
       const d = wsRef.current.docs.find(x => x.id === id); if (!d) return;
@@ -673,7 +730,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     openLegal: id => setLegal(id),
     cloud: cloudCtx,
     updates, readUpdates,
-  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, run, approve, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
+  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
 
   /* page */
   const page = {

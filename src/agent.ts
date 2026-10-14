@@ -250,13 +250,9 @@ function file(id: string, ctx: Context): Plan {
   const c = FILE[id];
   const a = ctx.current.apps.find(x => x.id === c.app)!;
   const rid = "d-r-" + c.app;
+  // the filing itself shows step by step on its own card (FilingLive); the run just starts it
   return {
-    steps: [
-      S("connecting", `Signing in to ${c.portal.en} with your saved account`, `使用您保存的账户登录${c.portal.zh}`, c.tool),
-      S("working", `Submitting the ${a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1)}`, `提交${a.name.zh}`, c.tool),
-      ...(c.fee ? [S("working", `Paying $${c.fee.toLocaleString("en-US")} with the card ending 4821`, `使用尾号 4821 的银行卡支付 $${c.fee.toLocaleString("en-US")}`)] : []),
-      S("weaving", "Saving the receipt to Documents", "将收据保存到文件"),
-    ],
+    steps: [S("connecting", `Starting on ${c.tool}`, `在 ${c.tool} 上开始`, c.tool)],
     updates: [all(
       dropApproval(id),
       audit("you", B("Approved filing", "批准提交"), a.name, c.fee ? B(`Fee $${c.fee.toLocaleString("en-US")}`, `费用 $${c.fee.toLocaleString("en-US")}`) : B("No fee", "无需费用")),
@@ -269,7 +265,30 @@ function file(id: string, ctx: Context): Plan {
       addDeadline({ id: "dl-r-" + c.app, date: inDays(c.days), kind: id === "a-soi" ? "renewal" : "estimate", app: c.app, title: c.est, agency: a.agency }),
       ...(c.also ?? []),
     )],
-    reply: { text: c.reply, files: [rid] },
+    reply: { text: [B(`Filing the ${a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1)} on ${c.tool} now. Each step shows below as it happens${c.fee ? `, including the $${c.fee.toLocaleString("en-US")} fee` : ""}, and I'll watch for the decision once it's in.`,
+      `正在 ${c.tool} 上提交${a.name.zh}。每一步都会实时显示在下方${c.fee ? `，包括 $${c.fee.toLocaleString("en-US")} 的费用` : ""}，提交后我会跟进审批结果。`)], files: [rid], filed: [c.app] },
+  };
+}
+
+/** Several approvals at once, from one tap: one run that files each in turn, and one answer. */
+function fileAll(ids: string[], ctx: Context): Plan {
+  const plans = ids.map(id => {
+    const ap = ctx.current.approvals.find(a => a.id === id), app = ap?.kind === "file" ? ctx.current.apps.find(x => x.id === ap.app) : undefined;
+    if (app && !readyToFile(app)) return null;
+    return id === "a-staff" ? send() : FILE[id] ? file(id, ctx) : generic(id, ctx);
+  }).filter((p): p is Plan => !!p);
+  if (!plans.length) return { steps: [S("searching", "Checking what's ready", "查看哪些已就绪")], reply: { text: [B("Nothing here is ready to file yet.", "目前没有可以提交的申请。")] } };
+  const fees = ids.reduce((n, id) => n + (FILE[id]?.fee ?? 0), 0);
+  const n = plans.length;
+  return {
+    steps: plans.flatMap(p => p.steps),
+    updates: plans.flatMap(p => p.updates ?? []),
+    reply: {
+      text: [n === 1 ? plans[0].reply.text[0] : B(`Filing ${n === 2 ? "both" : `all ${n}`} now${fees ? `, with $${fees.toLocaleString("en-US")} in agency fees` : ""}. Each step shows below as it happens, and I'll watch for the decisions.`,
+        `正在提交这 ${n} 项${fees ? `，机构费用共 $${fees.toLocaleString("en-US")}` : ""}。每一步都会实时显示在下方，提交后我会跟进审批结果。`)],
+      files: plans.flatMap(p => p.reply.files ?? []),
+      filed: plans.flatMap(p => p.reply.filed ?? []),
+    },
   };
 }
 
@@ -443,6 +462,7 @@ function plan(req: Request, ctx: Context): Plan {
     if (app && !readyToFile(app)) return { steps: [S("searching", "Checking the application is complete", "检查申请是否完整")], reply: { text: [blockersSay(app)], apps: [app.id] } };
   }
   if ("approve" in req) return req.approve === "a-staff" ? send() : FILE[req.approve] ? file(req.approve, ctx) : generic(req.approve, ctx);
+  if ("approveAll" in req) return fileAll(req.approveAll, ctx);
   if ("upload" in req) return upload(req.upload, ctx);
   if ("match" in req) return match(req.match.what, req.match.where);
   return SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx) ?? FALLBACK();
