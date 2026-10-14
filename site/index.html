@@ -1191,6 +1191,15 @@ html[lang="zh-CN"] .tsrs strong{letter-spacing:0}
 #case .cshd{align-items:center;margin-bottom:16px}
 
 /* pricing: three annual tiers, the $299 entry plan as the way in, one screen on a laptop */
+.cmp{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:8px}
+@media (min-width:900px){.cmp{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
+.cmpc{padding:26px 26px 22px;border-radius:20px;background:var(--card)}
+.cmpc.us{background:#fff;box-shadow:0 0 0 1.5px #4D73A3,0 10px 30px rgba(15,27,51,.06)}
+.cmpl{margin-bottom:16px;font-size:15px;font-weight:500;color:var(--ink)}
+.cmpc.us .cmpl{color:#1F3F6B}
+.cmpc ul{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.cmpc li{font-size:15px;line-height:1.4;color:var(--ink2)}
+.cmpc.us li{color:var(--ink)}
 .plans{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
 @media (min-width:900px){.plans{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
 @media (min-width:900px) and (max-width:1199px){#tiers{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -2714,6 +2723,17 @@ html[lang="zh-CN"] .exlab{font-family:var(--zhserif)}
 
 
 <!-- ======================= PRICING ======================= -->
+<section class="sec rv" data-rv="up" id="compare" aria-labelledby="cmpH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="cmpH" data-i18n="cmp.h">Three ways to open a store.</h2><p class="sub" data-i18n="cmp.sub">x</p></div>
+    <div class="cmp">
+      <div class="cmpc"><p class="cmpl" data-i18n="cmp.a">Doing it yourself</p><ul><li data-i18n="cmp.a.1"></li><li data-i18n="cmp.a.2"></li><li data-i18n="cmp.a.3"></li><li data-i18n="cmp.a.4"></li></ul></div>
+      <div class="cmpc"><p class="cmpl" data-i18n="cmp.b">A permit expediter</p><ul><li data-i18n="cmp.b.1"></li><li data-i18n="cmp.b.2"></li><li data-i18n="cmp.b.3"></li><li data-i18n="cmp.b.4"></li></ul></div>
+      <div class="cmpc us"><p class="cmpl" data-i18n="cmp.c">Placetta</p><ul><li data-i18n="cmp.c.1"></li><li data-i18n="cmp.c.2"></li><li data-i18n="cmp.c.3"></li><li data-i18n="cmp.c.4"></li></ul></div>
+    </div>
+  </div>
+</section>
+
 <section class="sec rv" data-rv="up" id="pricing" aria-labelledby="priceH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="priceH" data-i18n="price.h">One price per location.</h2><p class="sub" data-i18n="price.sub">$149 per location a month, billed yearly, or $299 on Pro for stores inspected often. Headquarters signs once, and each franchisee pays for its own stores.</p><p class="sub psub2" data-i18n="price.promise">Every license, permit and certificate a store can't open or sell without, mapped, filed with your approval and tracked for renewal.</p></div>
@@ -2891,7 +2911,7 @@ en:{
  "itl.m1":"14-page PDF",
  "q.siteph":"brand.com",
  "aria.map":"Map", "aria.restart":"Restart", "aria.pause":"Pause", "aria.play":"Play", "aria.brands":"Industries", "aria.lang":"Language", "aria.nav":"Primary", "aria.close":"Close", "aria.back":"Back",
- "price.h":"One price per location.",
+ "price.h":"One price per location.", "cmp.h":"Three ways to open a store.", "cmp.sub":"Every opening needs the same licenses. What changes is who finds them, who files them and who remembers to renew them.", "cmp.a":"Doing it yourself", "cmp.a.1":"Weeks on agency websites to work out what you need", "cmp.a.2":"One agency at a time, in whatever order you find them", "cmp.a.3":"Renewal dates kept in a spreadsheet, if anywhere", "cmp.a.4":"English only, and the rules change without notice", "cmp.b":"A permit expediter", "cmp.b.1":"Quoted per job, often per filing", "cmp.b.2":"Usually one city, so every new market means a new firm", "cmp.b.3":"The work often ends on opening day", "cmp.b.4":"Updates by phone and email", "cmp.c":"Placetta", "cmp.c.1":"Every license mapped in minutes, each one linked to the agency's own page", "cmp.c.2":"Federal to city, in the order agencies require, for every location", "cmp.c.3":"Renewals, inspections and rule changes tracked for as long as you're open", "cmp.c.4":"English or Chinese, and nothing is filed until you approve it",
  "brand":"Placetta",
  "cost.s1b":"3–6 months", "cost.s1s":"The typical permit phase for a new restaurant", "cost.s2b":"8 months instead of 2", "cost.s2s":"One Sacramento restaurant's wait, at an estimated cost of $1M", "cost.s3s":"New state and local laws passed every year", "cost.s3src":"Source: Gusto", "cost.cap":"in rent paid before your first sale, waiting on {m} months of permits",
  "calc.l":"Your monthly rent", "calc.r":"Rent paid with zero revenue", "calc.mo":"months", "calc.n":"Rent alone, before payroll, build-out and lost sales.",
@@ -2974,7 +2994,7 @@ zh:{
  "itl.m1":"14 页文件",
  "q.siteph":"品牌官网网址",
  "aria.map":"地图", "aria.restart":"重播", "aria.pause":"暂停", "aria.play":"播放", "aria.brands":"适用行业", "aria.lang":"语言", "aria.nav":"主导航", "aria.close":"关闭", "aria.back":"返回",
- "price.h":"每家门店，一个价格。",
+ "price.h":"每家门店，一个价格。", "cmp.h":"开一家店，三种方式。", "cmp.sub":"每次开店需要的执照都一样。不同的是：由谁来梳理、由谁来提交、由谁记得续期。", "cmp.a":"自己办理", "cmp.a.1":"花几周时间在各机构网站上摸索需要办什么", "cmp.a.2":"一个机构一个机构地办，顺序全凭摸索", "cmp.a.3":"续期日期记在表格里，甚至没人记", "cmp.a.4":"只有英文，规则变了也没人提醒", "cmp.b":"许可代办", "cmp.b.1":"按单报价，常常按每项申报收费", "cmp.b.2":"通常只做一个城市，每进一个新市场就要换一家", "cmp.b.3":"服务往往在开业当天结束", "cmp.b.4":"靠电话和邮件沟通进度", "cmp.c":"快哉", "cmp.c.1":"几分钟梳理出每一项执照，每项都附机构官方页面", "cmp.c.2":"从联邦到城市，按机构要求的顺序，覆盖每一家门店", "cmp.c.3":"开业之后持续跟踪续期、检查和规则变化", "cmp.c.4":"中英文均可，未经您批准不会提交任何申请",
  "brand":"快哉",
  "cost.s1b":"3–6 个月", "cost.s1s":"新餐厅常见的许可审批周期", "cost.s2b":"8 个月，而非 2 个月", "cost.s2s":"萨克拉门托一家餐厅的等待，预估损失约 100 万美元", "cost.s3s":"美国每年新通过的州和地方法律", "cost.s3src":"来源：Gusto", "cost.cap":"开业前白付的房租：许可审批拖了 {m} 个月",
  "calc.l":"您的月租金", "calc.r":"无收入期间支付的房租", "calc.mo":"个月", "calc.n":"仅计房租，不含人工、装修和销售损失。",
