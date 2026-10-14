@@ -1,0 +1,173 @@
+{
+ "form": "cbp-301",
+ "rev": "CBP Form 301 (04/24)",
+ "pdf": "cbp-301.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: bond_type 'Single transaction bond' or 'Continuous bond'. Single transaction: transaction (entry or ISF number), transaction_date, port (4 digits); continuous: effective_date. Dates any common shape, printed mm/dd/yyyy. limit_1 / limit_1a / limit_16: whole dollars for the one activity the bond covers; an answered limit ticks that activity's box. principal: name, legal description and state, physical address, one per line (printed as given in the principal box; line 1 also heads page 2). cbp_id: EIN with suffix (12-3456789-00) or CBP-assigned number. trade_names: one per line 'CBP number, complete name' (first nine shown on page 2). The surety's blocks, CBP-only boxes, the seal boxes, the execution date (the date of the last signature) and the Section III count are left for the broker or surety; the principal signs by hand or through the surety's e-bond.",
+ "boxes": {
+  "broker": [
+   {
+    "text": "topmostSubform[0].Page1[0].Broker[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].Broker[0]"
+   }
+  ],
+  "bond_type": [
+   {
+    "check": "topmostSubform[0].Page1[0].single[0]",
+    "if": "^single"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].continuous[0]",
+    "if": "^continuous"
+   }
+  ],
+  "transaction": [
+   {
+    "text": "topmostSubform[0].Page1[0].id100[0]"
+   }
+  ],
+  "transaction_date": [
+   {
+    "text": "topmostSubform[0].Page1[0].transactiondate[0]",
+    "pick": "date"
+   }
+  ],
+  "port": [
+   {
+    "text": "topmostSubform[0].Page1[0].PortCode[0]",
+    "pick": "digits",
+    "max": 4
+   }
+  ],
+  "effective_date": [
+   {
+    "text": "topmostSubform[0].Page1[0].Dateeffective[0]",
+    "pick": "date"
+   }
+  ],
+  "limit_1": [
+   {
+    "check": "topmostSubform[0].Page1[0].code1[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].LimitofLiability1[0]"
+   }
+  ],
+  "limit_1a": [
+   {
+    "check": "topmostSubform[0].Page1[0].code1a[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].LimitofLiability2[0]"
+   }
+  ],
+  "limit_16": [
+   {
+    "check": "topmostSubform[0].Page1[0].code16[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].LimitofLiability17[0]"
+   }
+  ],
+  "principal": [
+   {
+    "text": "topmostSubform[0].Page1[0].nameaddress[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].PrincipalName[0]",
+    "pick": "line1"
+   }
+  ],
+  "cbp_id": [
+   {
+    "text": "topmostSubform[0].Page1[0].CBPIdentificationNumber[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].CBPIdentificationNumber[0]"
+   }
+  ],
+  "trade_names": [
+   {
+    "text": "topmostSubform[0].Page2[0].cbp1[0]",
+    "pick": "line1|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename1[0]",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].cbp2[0]",
+    "pick": "line2|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename2[0]",
+    "pick": "line2|tail"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].cbp3[0]",
+    "pick": "line3|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename3[0]",
+    "pick": "line3|tail"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].cbp4[0]",
+    "pick": "line4|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename4[0]",
+    "pick": "line4|tail"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].cbp5[0]",
+    "pick": "line5|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename5[0]",
+    "pick": "line5|tail"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].cbp6[0]",
+    "pick": "line6|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename6[0]",
+    "pick": "line6|tail"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].cbp7[0]",
+    "pick": "line7|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename7[0]",
+    "pick": "line7|tail"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].cbp8[0]",
+    "pick": "line8|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename8[0]",
+    "pick": "line8|tail"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].cbp9[0]",
+    "pick": "line9|head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].completename9[0]",
+    "pick": "line9|tail"
+   }
+  ]
+ },
+ "sign": {
+  "page": 0,
+  "x": 258,
+  "y": 209,
+  "w": 190,
+  "h": 24
+ }
+}

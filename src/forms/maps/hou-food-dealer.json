@@ -1,0 +1,94 @@
+{
+  "form": "hou-food-dealer",
+  "rev": "Food Dealers Permit Application, 3 pages (no revision printed; PDF dated 2026-07-24)",
+  "pdf": "hou-food-dealer.pdf",
+  "checked": "2026-10-14",
+  "notes": "Flat, print-only form (no fillable boxes): answers are printed in the table cells and an X in the printed squares. Address answers 'street, City, TX ZIP' print whole in the address cell and the ZIP again in its Zip Code cell. Two-part answers are split at the first comma: 'business phone, alternate phone' and 'phone, email'. Page 3 risk assessment is filled from the risk_* answers; its Office Use block is left blank. The form has no signature or attestation line, so there is no sign spot.",
+  "boxes": {
+    "application_type": [
+      { "mark": { "page": 0, "x": 47.8, "y": 670.5, "size": 7 }, "if": "new|pre-?opening" },
+      { "mark": { "page": 0, "x": 221.8, "y": 670.5, "size": 7 }, "if": "change of owner" },
+      { "mark": { "page": 0, "x": 357.8, "y": 670.5, "size": 7 }, "if": "remodel" },
+      { "mark": { "page": 0, "x": 483.8, "y": 670.5, "size": 7 }, "if": "amendment" }
+    ],
+    "business_name_dba": [{ "at": { "page": 0, "x": 145, "y": 631, "w": 450 } }],
+    "business_address_zip": [
+      { "at": { "page": 0, "x": 127, "y": 616.8, "w": 350 } },
+      { "at": { "page": 0, "x": 533, "y": 616.8, "w": 62 }, "pick": "zip" }
+    ],
+    "mailing_address_zip": [
+      { "at": { "page": 0, "x": 122, "y": 602.9, "w": 355 } },
+      { "at": { "page": 0, "x": 533, "y": 602.9, "w": 62 }, "pick": "zip" }
+    ],
+    "business_phone_alt": [
+      { "at": { "page": 0, "x": 120, "y": 589, "w": 152 }, "pick": "head" },
+      { "at": { "page": 0, "x": 362, "y": 589, "w": 233 }, "pick": "tail" }
+    ],
+    "business_email": [{ "at": { "page": 0, "x": 74, "y": 575, "w": 372 } }],
+    "tax_id": [{ "at": { "page": 0, "x": 485, "y": 575, "w": 110 } }],
+    "hours_of_operation": [{ "at": { "page": 0, "x": 137, "y": 561.1, "w": 458 } }],
+    "business_type": [
+      { "mark": { "page": 0, "x": 204.3, "y": 548.3, "size": 6 }, "if": "restaurant" },
+      { "mark": { "page": 0, "x": 260.3, "y": 548.3, "size": 6 }, "if": "\\bbar\\b" },
+      { "mark": { "page": 0, "x": 284.3, "y": 548.3, "size": 6 }, "if": "bakery" },
+      { "mark": { "page": 0, "x": 322.3, "y": 548.3, "size": 6 }, "if": "child ?care" },
+      { "mark": { "page": 0, "x": 400.3, "y": 548.3, "size": 6 }, "if": "school" },
+      { "mark": { "page": 0, "x": 437.3, "y": 548.3, "size": 6 }, "if": "convenience" },
+      { "mark": { "page": 0, "x": 524.3, "y": 548.3, "size": 6 }, "if": "shared kitchen" },
+      { "mark": { "page": 0, "x": 204.3, "y": 535.5, "size": 6 }, "if": "bed ?(&|and) ?breakfast|\\bb ?& ?b\\b" },
+      { "mark": { "page": 0, "x": 280.3, "y": 535.5, "size": 6 }, "if": "boarding" },
+      { "mark": { "page": 0, "x": 354.3, "y": 535.5, "size": 6 }, "if": "church" },
+      { "mark": { "page": 0, "x": 393.3, "y": 535.5, "size": 6 }, "if": "concession" },
+      { "mark": { "page": 0, "x": 475.3, "y": 535.5, "size": 6 }, "if": "hospital" },
+      { "mark": { "page": 0, "x": 519.3, "y": 535.5, "size": 6 }, "if": "nursing" },
+      { "mark": { "page": 0, "x": 204.3, "y": 522.8, "size": 6 }, "if": "grocery" },
+      { "mark": { "page": 0, "x": 273.3, "y": 522.8, "size": 6 }, "if": "manufactur" },
+      { "mark": { "page": 0, "x": 351.3, "y": 522.8, "size": 6 }, "if": "warehouse" }
+    ],
+    "business_entity_owner": [{ "at": { "page": 0, "x": 153, "y": 494.5, "w": 442 } }],
+    "org_type": [
+      { "mark": { "page": 0, "x": 137.8, "y": 480.4, "size": 7 }, "if": "\\bllc\\b|limited liability" },
+      { "mark": { "page": 0, "x": 203.8, "y": 480.4, "size": 7 }, "if": "corporation|\\bcorp\\b|\\binc\\b" },
+      { "mark": { "page": 0, "x": 280.8, "y": 480.4, "size": 7 }, "if": "proprietor|sole" },
+      { "mark": { "page": 0, "x": 424.8, "y": 480.4, "size": 7 }, "if": "partnership" }
+    ],
+    "owner_contact_phone_email": [
+      { "at": { "page": 0, "x": 116, "y": 466.1, "w": 155 }, "pick": "head" },
+      { "at": { "page": 0, "x": 350, "y": 466.1, "w": 245 }, "pick": "tail" }
+    ],
+    "responsible_party": [{ "at": { "page": 0, "x": 170, "y": 452.2, "w": 246 } }],
+    "responsible_party_dob": [{ "at": { "page": 0, "x": 488, "y": 452.2, "w": 107 }, "pick": "date" }],
+    "responsible_party_phone_email": [
+      { "at": { "page": 0, "x": 116, "y": 438.2, "w": 155 }, "pick": "head" },
+      { "at": { "page": 0, "x": 350, "y": 438.2, "w": 245 }, "pick": "tail" }
+    ],
+    "responsible_party_mailing_address": [{ "at": { "page": 0, "x": 122, "y": 424.3, "w": 473 } }],
+    "responsible_party_drivers_license": [{ "at": { "page": 0, "x": 194, "y": 410.4, "w": 401 } }],
+    "permit_type": [
+      { "mark": { "page": 0, "x": 102.8, "y": 378.8, "size": 7 }, "if": "^high" },
+      { "mark": { "page": 0, "x": 142.8, "y": 378.8, "size": 7 }, "if": "^medium" },
+      { "mark": { "page": 0, "x": 210.8, "y": 378.8, "size": 7 }, "if": "^low" }
+    ],
+    "proposed_start_date": [{ "at": { "page": 0, "x": 258, "y": 346.8, "w": 336 }, "pick": "date" }],
+    "project_number": [{ "at": { "page": 0, "x": 258, "y": 332.9, "w": 336 } }],
+    "previous_owner": [{ "at": { "page": 0, "x": 122, "y": 306.8, "w": 90 } }],
+    "previous_account_number": [{ "at": { "page": 0, "x": 127, "y": 293.4, "w": 85 } }],
+    "risk_food_service_process": [
+      { "mark": { "page": 2, "x": 72.8, "y": 676.8, "size": 7 }, "if": "^low" },
+      { "mark": { "page": 2, "x": 72.8, "y": 572.7, "size": 7 }, "if": "^medium" },
+      { "mark": { "page": 2, "x": 72.8, "y": 531.1, "size": 7 }, "if": "^high" }
+    ],
+    "risk_highly_susceptible": [
+      { "mark": { "page": 2, "x": 72.8, "y": 459.6, "size": 7 }, "if": "^y" },
+      { "mark": { "page": 2, "x": 180.8, "y": 459.6, "size": 7 }, "if": "^n" }
+    ],
+    "risk_specialized_processing": [
+      { "mark": { "page": 2, "x": 72.8, "y": 388.6, "size": 7 }, "if": "^y" },
+      { "mark": { "page": 2, "x": 180.8, "y": 388.6, "size": 7 }, "if": "^n" }
+    ],
+    "risk_raw_undercooked": [
+      { "mark": { "page": 2, "x": 72.8, "y": 347.7, "size": 7 }, "if": "^y" },
+      { "mark": { "page": 2, "x": 180.8, "y": 347.7, "size": 7 }, "if": "^n" }
+    ]
+  }
+}
