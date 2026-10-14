@@ -198,14 +198,14 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
           </div>
         </div>
       )}
-      <div className="paper">
+      <div className={"paper" + (edit ? " editing" : "")}>
         <div className="paper-h"><span>{b(a.agency)}</span><b>{b(a.form ?? a.name)}</b>{!cloud && <Sample />}</div>
         <dl>
           {a.fields.map(f => (
             <div key={f.id} className={f.value ? "" : "empty"}>
               <dt>{b(f.label)}</dt>
               <dd>
-                {edit ? <input value={vals[f.id] ?? ""} onChange={e => setVals(v => ({ ...v, [f.id]: e.target.value }))} aria-label={b(f.label)} />
+                {edit ? <input value={vals[f.id] ?? ""} placeholder={t("empty")} onChange={e => setVals(v => ({ ...v, [f.id]: e.target.value }))} onKeyDown={e => { if (e.key === "Enter") save(); }} aria-label={b(f.label)} />
                   : <span>{f.value || t("empty")}</span>}
                 {f.from && !edit && <small>{b(f.from)}</small>}
                 {f.quote && !edit && <q className="cite">{f.quote}</q>}

@@ -307,7 +307,7 @@ export function Documents() {
     <div className="page">
       <PageHead title={t("nav_docs")} sub={t("docs_sub")}>
         {mode !== "demo" && ws.docs.some(d => d.by !== "agent") && <Pill kind="quiet" disabled={busy} onClick={() => ask(b(B("Review my documents: list each license, permit and certificate with its number and expiry, and set up renewal reminders.", "审阅我的文件：列出每项执照、许可和证书的编号与到期日，并设置续期提醒。")))}>{b(B("Review with Placetta", "让快哉审阅"))}</Pill>}
-        <Pill kind="ink" disabled={busy} onClick={() => input.current?.click()}>{t("upload")}</Pill>
+        <button type="button" className="pill ink" disabled={busy} onClick={() => input.current?.click()}><I.upload />{t("upload")}</button>
         <input ref={input} type="file" multiple hidden onChange={e => { const fs = Array.from(e.target.files ?? []); e.target.value = ""; if (fs.length) upload("", "", fs); }} />
       </PageHead>
       <div className="seg" role="group">

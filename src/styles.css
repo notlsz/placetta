@@ -175,6 +175,10 @@ html[lang="zh-CN"] .hero h1 { word-break: keep-all; max-width: 13em; letter-spac
 .pill.quiet.sm { padding: 0 12px; gap: 5px; }
 .pill.sm > i { width: 24px; height: 24px; }
 .pill:disabled { opacity: .45; }
+/* a dark or blue pill with no round arrow at the end (Upload, Save changes): even padding, a leading icon */
+.pill.ink:not(:has(> i)), .pill.primary:not(:has(> i)) { padding: 0 18px; gap: 7px; }
+.pill.ink.sm:not(:has(> i)), .pill.primary.sm:not(:has(> i)) { padding: 0 14px; gap: 6px; }
+.pill > svg { flex: none; width: 15px; height: 15px; }
 .icbtn { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: var(--ink2); transition: background .15s; }
 .icbtn:hover { background: var(--mist2); color: var(--ink); }
 
@@ -317,8 +321,13 @@ button.row:hover { background: rgba(var(--w), .9); }
 .fact dd { margin: 0; min-width: 0; font-size: 15px; }
 .fact-src { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--ink3); white-space: nowrap; }
 .fact-edit { display: flex; gap: 6px; align-items: center; }
-.fact-edit input, .paper input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border: 0; border-radius: 10px; outline: 0; background: var(--card); font-size: 14.5px; box-shadow: 0 0 0 1px rgba(var(--e), .1); }
-.fact-edit input:focus, .paper input:focus { box-shadow: 0 0 0 1.5px var(--blue), 0 0 0 4px rgba(115, 153, 198, .2); }
+.fact-edit input { flex: 1; min-width: 0; height: 36px; padding: 0 12px; border: 0; border-radius: 10px; outline: 0; background: var(--card); font-size: 14.5px; box-shadow: 0 0 0 1px rgba(var(--e), .1); }
+/* editing a form line: a plain text field, full width, not a squashed pill */
+.paper dd input { box-sizing: border-box; width: 100%; height: 38px; padding: 0 12px; border: 0; border-radius: 8px; outline: 0; background: var(--card); color: var(--ink); font-size: 14.5px; box-shadow: inset 0 0 0 1px var(--line), 0 1px 2px rgba(var(--e), .04); transition: box-shadow .15s; }
+.paper dd input::placeholder { color: var(--warm); opacity: .8; }
+.paper dd input:hover { box-shadow: inset 0 0 0 1px rgba(var(--e), .2); }
+.paper.editing dl > div { align-items: center; padding-top: 7px; padding-bottom: 7px; }
+.fact-edit input:focus, .paper dd input:focus { box-shadow: 0 0 0 1.5px var(--blue), 0 0 0 4px rgba(115, 153, 198, .2); }
 
 /* find licenses: one search pill, Muse-style */
 .matcher { display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr) 52px; align-items: center; padding: 8px 8px 8px 26px; border-radius: 999px; background: var(--card);
