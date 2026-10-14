@@ -782,7 +782,7 @@ ${APP ? `Filing queue: ${APP}/app/` : ""}`,
   }
   await admin.from("phone_consent_log").delete().lt("at", new Date(now - 5 * 365.25 * 864e5).toISOString());
   let watches = 0;
-  if (Deno.env.get("ANTHROPIC_API_KEY") && Deno.env.get("WEEKLY_CHECKS") !== "off") {
+  if ((Deno.env.get("ANTHROPIC_API_KEY") || Deno.env.get("GEMINI_API_KEY")) && Deno.env.get("WEEKLY_CHECKS") !== "off") {
     const { data: recent } = await admin.from("agent_runs").select("workspace_id").eq("kind", "watch").gt("created_at", new Date(now - 6 * 864e5).toISOString());
     for (const id of watchDue(all, started.getUTCDay(), new Set((recent ?? []).map((r2) => r2.workspace_id))).slice(0, MAX_WATCHES)) {
       const { data: plan } = await admin.rpc("plan_of", { ws: id });

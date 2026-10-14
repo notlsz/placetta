@@ -52,6 +52,7 @@ function routeFor(env, tier, fallbackModel) {
     const i = s.indexOf(":");
     return [s.slice(0, i), s.slice(i + 1)];
   }).filter(([p, m]) => m && (p === "anthropic" || p in OPENAI_STYLE));
+  if (!raw && !env("ANTHROPIC_API_KEY") && env("GEMINI_API_KEY")) list.push(["gemini", env("GEMINI_MODEL") ?? "gemini-flash-latest"]);
   if (!list.some(([p]) => p === "anthropic")) list.push(["anthropic", fallbackModel]);
   return list;
 }

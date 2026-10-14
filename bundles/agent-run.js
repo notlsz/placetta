@@ -59,6 +59,7 @@ function routeFor(env2, tier, fallbackModel) {
     const i = s.indexOf(":");
     return [s.slice(0, i), s.slice(i + 1)];
   }).filter(([p, m]) => m && (p === "anthropic" || p in OPENAI_STYLE));
+  if (!raw && !env2("ANTHROPIC_API_KEY") && env2("GEMINI_API_KEY")) list.push(["gemini", env2("GEMINI_MODEL") ?? "gemini-flash-latest"]);
   if (!list.some(([p]) => p === "anthropic")) list.push(["anthropic", fallbackModel]);
   return list;
 }
@@ -2131,7 +2132,7 @@ async function handle(req) {
     const may = await mayUseAgent(admin, ws2, uid);
     if (may === "not_member") return fail(403, "forbidden", "This isn't their workspace.");
     if (may === "no_plan") return fail(402, "payment_required", "Get the entry plan to start the agent.");
-    if (!env("ANTHROPIC_API_KEY")) return fail(503, "not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
+    if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
     const tg2 = await gate(admin, (k) => Deno.env.get(k), ws2, uid, "task");
     if (!tg2.ok) return fail(tg2.status, tg2.code, tg2.message);
     const prompt2 = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4e3) : "";
@@ -2169,7 +2170,7 @@ async function handle(req) {
     const { data: plan } = await admin.rpc("plan_of", { ws });
     if (plan === "none") return fail(402, "payment_required", "Get the entry plan to start the agent.");
   }
-  if (!env("ANTHROPIC_API_KEY")) return fail(503, "not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
+  if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
   const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4e3) : "";
   if (!prompt) return fail(400, "bad_request", "prompt is required.");
   const tg = await gate(admin, (k) => Deno.env.get(k), ws, user.id, "task");
