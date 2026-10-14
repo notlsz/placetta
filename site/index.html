@@ -2301,6 +2301,16 @@ html[lang="zh-CN"] .exlab{font-family:var(--zhserif)}
 .pmgrid .pmnote{grid-column:1/-1;margin:6px 4px 0;font-size:12.5px;line-height:1.45;color:var(--muted)}
 .xpl{display:inline-block;height:.72em;width:auto;margin-right:.28em;vertical-align:-.02em;opacity:.8}
 .tsmc{display:block;margin-top:2px;font-size:12px;color:var(--muted)}
+/* backed by: investors behind the brands we serve */
+.inv{padding:44px 0 4px}
+@media (min-width:1024px){.inv{padding:88px 0 24px}.invr{max-width:1288px;margin-inline:auto}}
+.invl{text-align:center;font-size:12px;line-height:1.4;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+html[lang="zh-CN"] .invl{letter-spacing:.2em}
+.invr{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:26px 40px;margin-top:22px}
+@media (min-width:1024px){.invr{gap:30px 44px;margin-top:28px}}
+.invr img{display:block;width:auto;height:calc(var(--h) * .85);opacity:.8;filter:saturate(0) brightness(.55);transition:opacity .2s,filter .2s}
+@media (min-width:1024px){.invr img{height:calc(var(--h) * 1.08)}}
+.invr img:hover{opacity:1;filter:none}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2416,6 +2426,13 @@ html[lang="zh-CN"] .exlab{font-family:var(--zhserif)}
 
 <!-- ======================= INDUSTRIES ======================= -->
 <!-- ======================= CUSTOMERS AND CASE STUDIES ======================= -->
+<section class="inv" id="backed" aria-labelledby="invL">
+  <div class="ctr">
+    <p class="invl" id="invL" data-i18n="inv.l">The brands we serve are backed by</p>
+    <div class="invr" id="invR"></div>
+  </div>
+</section>
+
 <section class="sec rv" data-rv="up" id="case" aria-labelledby="caseH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="caseH" data-i18n="proof.h">See the plan before you sign the lease.</h2><p class="sub" data-i18n="proof.sub">Example plans for businesses like yours, built from official sources. Each one cites the agencies and laws behind it.</p></div>
@@ -2484,6 +2501,67 @@ html[lang="zh-CN"] .exlab{font-family:var(--zhserif)}
           <div class="inpanel inart" aria-live="polite"><canvas id="inCv" aria-hidden="true"></canvas><img class="inphoto incover" id="inPhotoGm" src="media/industries/game-studios.jpg" alt="" loading="lazy" decoding="async" draggable="false"><img class="inphoto" id="inPhoto" hidden src="media/industries/tech-robot.png" alt="" loading="lazy" decoding="async" draggable="false"><div class="incap" id="inCap"><b id="inCapT"></b><p id="inCapP"></p></div></div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec rv" data-rv="up" id="teammate" aria-labelledby="tmH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="tmH" data-i18n="tm.h">Your newest teammate.</h2><p class="sub" data-i18n="tm.sub">Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.</p></div>
+    <div class="feat tmfeat">
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c1h">She joins your team</h3><p data-i18n="tm.c1p">Add Odelia like any other hire. She has a seat on your expansion team and a status you can see.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fhd"><b data-i18n="tm.team">US expansion team</b><span data-i18n="tm.sample">Sample team</span></div>
+            <div class="tmrow" data-st data-ms="320"><span class="av" data-i18n="tm.a1">Y</span><span class="nm"><b data-i18n="tm.r1">You</b><small data-i18n="tm.r1s">Head of US expansion</small></span></div>
+            <div class="tmrow" data-st data-ms="320"><span class="av" data-i18n="tm.a2">R</span><span class="nm"><b data-i18n="tm.r2">Real estate lead</b><small data-i18n="tm.r2s">Sites and leases</small></span></div>
+            <div class="tmrow" data-st data-ms="650"><span class="av" data-i18n="tm.a3">C</span><span class="nm"><b data-i18n="tm.r3">Construction manager</b><small data-i18n="tm.r3s">Build-out and inspections</small></span></div>
+            <div class="tmrow me" data-st data-ms="600"><span class="orb"></span><span class="nm"><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.r4s">Permits and licenses</small></span><span class="tmlive"><i></i><span data-i18n="tm.on">Online</span></span></div>
+            <div class="tmnow" data-st data-ms="700"><span data-i18n="tm.now">Working now: San José health permit packet</span><span class="tmdots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+          </div>
+          <div class="ftoast" data-st data-ms="800"><span class="orb"></span><span><b data-i18n="tm.t1">Odelia joined your team</b><small data-i18n="tm.t1s">US expansion, permits and licenses</small></span></div>
+        </div>
+      </article>
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c2h">She knows her job</h3><p data-i18n="tm.c2p">One role, owned end to end: every license, filed on time and renewed before it lapses.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="tmid" data-st data-ms="450"><span class="orb"></span><span class="nm"><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.v1">Permits and licenses manager</small></span><span class="tmlive"><i></i><span data-i18n="tm.on">Online</span></span></div>
+            <div class="fcrow" data-st data-ms="300"><span class="nm" data-i18n="tm.k2">Reports to</span><span class="dt" data-i18n="tm.v2">You</span></div>
+            <div class="fcrow" data-st data-ms="300"><span class="nm" data-i18n="tm.k3">Hours</span><span class="dt" data-i18n="tm.v3s">Always on</span></div>
+            <div class="fcrow" data-st data-ms="450"><span class="nm" data-i18n="tm.k4">Languages</span><span class="dt" data-i18n="tm.v4">English and Chinese</span></div>
+            <div class="tmapps" data-st data-ms="700"><small data-i18n="tm.k5">Works in</small><div><span><i style="background:#EA4335"></i>Gmail</span><span><i style="background:#0F6CBD"></i>Outlook</span><span><i style="background:#611F69"></i>Slack</span><span><i style="background:#4285F4"></i><em data-i18n="tm.gcal">Google Calendar</em></span><span><i style="background:#1FA463"></i><em data-i18n="tm.gdrive">Google Drive</em></span></div></div>
+          </div>
+          <div class="ftoast" data-st data-ms="800"><span class="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span><span><b data-i18n="tm.t2">Never files without your approval</b><small data-i18n="tm.t2s">You sign, pay agency fees and pass ID checks</small></span></div>
+        </div>
+      </article>
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c3h">She reports in</h3><p data-i18n="tm.c3p">Updates arrive where your team already talks: Slack, email and your calendar.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fhd"><b>#us-expansion</b><span data-i18n="tm.wks">Sample week</span></div>
+            <div class="tmmsg" data-st data-ms="650"><span class="orb"></span><div><small><b data-i18n="tm.r4">Odelia</b> <span data-i18n="tm.d2">Tue</span></small><p data-i18n="tm.m2">The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.</p></div></div>
+            <div class="tmmsg you" data-st data-ms="600"><span class="av" data-i18n="tm.a1">Y</span><div><small><b data-i18n="tm.r1">You</b> <span data-i18n="tm.d2">Tue</span></small><p data-i18n="tm.you">Approved. Go ahead.</p></div></div>
+            <div class="tmmsg" data-st data-ms="650"><span class="orb"></span><div><small><b data-i18n="tm.r4">Odelia</b> <span data-i18n="tm.d3">Wed</span></small><p data-i18n="tm.m3">Filed with Santa Clara County. The receipt is saved to your drive.</p></div></div>
+          </div>
+          <div class="ftoast" data-st data-ms="800"><span class="orb"></span><span><b data-i18n="tm.t3">Renewal drafted</b><small data-i18n="tm.t3s">Business tax certificate, 30 days before it lapses</small></span></div>
+        </div>
+      </article>
+    </div>
+    <a class="howtry" href="/app/" data-track="teammate_try"><span data-i18n="tm.cta">Put Odelia to work on your stores</span><span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<section class="sec rv" data-rv="up" id="cost" aria-labelledby="costH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="costH" data-i18n="cost.h">The cost of waiting.</h2><p class="sub" data-i18n="cost.sub">Every month a permit runs late is another month of rent with no revenue.</p></div>
+    <div class="drow">
+      <div class="dl cbig">
+        <div class="cbn"><b id="costBig">$120,000</b><span id="costCap" data-i18n="cost.cap">in rent paid before your first sale</span></div>
+        <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
+      </div>
+      <div class="dcard wcard" id="wcard"></div>
     </div>
   </div>
 </section>
@@ -2666,6 +2744,32 @@ html[lang="zh-CN"] .exlab{font-family:var(--zhserif)}
       <article class="jb"><b data-i18n="jb.4">Hiring paperwork</b><p data-i18n="jb.4p">Payroll accounts, labor posters and staff certificates.</p><span class="jbchip"><i class="a"></i><span data-i18n="jb.4c">2 food handler cards due</span></span></article>
       <article class="jb"><b data-i18n="jb.5">Rule monitor</b><p data-i18n="jb.5p">Watches every market and tells you what to do next.</p><span class="jbchip"><i class="g"></i><span data-i18n="jb.5c">13 changes tracked</span></span></article>
       <article class="jb jbt"><b data-i18n="jb.6">Your own job</b><p data-i18n="jb.6p">Show Odelia once how you handle something. She does it that way at every store.</p><span class="jbchip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="jb.6c">Saved to your playbook</span></span></article>
+    </div>
+  </div>
+</section>
+
+<section class="ox mt160 rv" data-rv="up" id="itl">
+  <div class="ctr">
+    <div class="irow">
+      <div class="il"><h2 class="t28" data-i18n="itl.h">Odelia asks before every filing, and remembers your answer</h2></div>
+      <div class="ir">
+        <div class="icard"><div class="icol">
+          <div class="ipop" style="width:100%"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.a1">Health permit packet for Santa Clara County is ready. Submit it?</p>
+            <div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></div><div><b data-i18n="itl.f1">Plan-check packet</b><small data-i18n="itl.m1">14-page PDF</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
+          <svg class="ipop" style="animation-delay:500ms" width="16" height="29" viewBox="0 0 16 29" aria-hidden="true"><path d="M8 0v29" stroke="#D3D9E3"/><circle cx="8" cy="14.5" r="7" fill="#3F9A62"/><path d="M5 14.6l2 2 4-4.2" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+          <div class="ipop" style="width:100%;animation-delay:1000ms"><div class="bub"><div><span class="av you" data-i18n="you.init">HP</span><div class="bc"><p data-i18n="itl.u1">Yes, submit it 👍</p></div></div></div></div>
+          <div class="ipop itlw" style="animation-delay:1500ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.a2">Submitted. I'll book the inspection when the county opens a slot.</p></div></div></div>
+            <div class="ichip" style="--sd:3040ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="itl.saved">Saved to your playbook</span></div></div>
+        </div></div>
+        <div class="icard"><div class="icol">
+          <div class="ipop" style="width:100%;animation-delay:250ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.b1">The sign permit needs your landlord's authorization. Send the request to them?</p>
+            <div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div><div><b data-i18n="itl.f2">Landlord letter</b><small data-i18n="itl.m2">1-page doc</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
+          <svg class="ipop" style="animation-delay:750ms" width="17" height="30" viewBox="0 0 17 30" aria-hidden="true"><path d="M8.5 0v30" stroke="#D3D9E3"/><circle cx="8.5" cy="15" r="7" fill="#D0574A"/><path d="M6 12.5l5 5M11 12.5l-5 5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <div class="ipop" style="width:100%;animation-delay:1250ms"><div class="bub"><div><span class="av you" data-i18n="you.init">HP</span><div class="bc"><p data-i18n="itl.u2">No, send landlord requests to me first. I'll forward them.</p></div></div></div></div>
+          <div class="ipop itlw" style="animation-delay:1750ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.b2">Got it. Landlord requests go to you first, at every location.</p></div></div></div>
+            <div class="ichip" style="--sd:3290ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="itl.saved">Saved to your playbook</span></div></div>
+        </div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -3205,7 +3309,14 @@ function applyStatic(){
 const phS = matchMedia("(max-width:639px)");
 function applyPh(){ document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPhS && phS.matches ? el.dataset.i18nPhS : el.dataset.i18nPh); }); }
 phS.addEventListener("change", applyPh);
-function applyAll(){ applyStatic(); if (typeof renderBk === "function") renderBk(); if (typeof renderOld === "function") renderOld(); renderApp(); renderCost(); renderPrice(); renderProof(); renderFaq(); renderTs(); if (typeof renderMon === "function") renderMon(); if (typeof renderBel === "function") renderBel(false); if (typeof renderStrip === "function") renderStrip(); if (typeof renderFlows === "function") renderFlows(); }
+const INV = [
+  {k:"berkshire", n:["Berkshire Hathaway","伯克希尔·哈撒韦"], h:17}, {k:"hongshan", n:["HongShan","红杉中国"], h:38}, {k:"a16z", n:["Andreessen Horowitz","安德森·霍洛维茨"], h:28}, {k:"openai", n:["OpenAI","OpenAI"], h:28},
+  {k:"nvidia", n:["NVIDIA","英伟达"], h:24}, {k:"foundersfund", n:["Founders Fund","创始人基金"], h:54},
+  {k:"greylock", n:["Greylock","格雷洛克"], h:26}, {k:"yc", n:["Y Combinator","Y Combinator 创业加速器"], h:32}, {k:"softbank", n:["SoftBank","软银"], h:22},
+  {k:"sequoia", n:["Sequoia","红杉资本"], h:16}, {k:"hillhouse", n:["Hillhouse Investment","高瓴投资"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}, {k:"azureworld", n:["AzureWorld","湛蓝领域"], h:38}
+];
+function renderInv(){ const i = L(); document.getElementById("invR").innerHTML = INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${esc(v.n[i])}" style="--h:${v.h}px" loading="lazy" decoding="async">`).join(""); }
+function applyAll(){ applyStatic(); if (typeof renderBk === "function") renderBk(); if (typeof renderOld === "function") renderOld(); renderApp(); renderCost(); renderPrice(); renderProof(); renderFaq(); renderTs(); if (typeof renderMon === "function") renderMon(); if (typeof renderBel === "function") renderBel(false); if (typeof renderStrip === "function") renderStrip(); if (typeof renderFlows === "function") renderFlows(); if (typeof renderInv === "function") renderInv(); }
 function setLang(l){ if (l === lang) return; lang = l; try { localStorage.setItem("placetta-lang", l); } catch(e){} track("language_switch", {to: l}); applyAll(); if (typeof renderMap === "function") renderMap(); if (!document.getElementById("modal").hidden) renderStep(); if (typeof updateResume === "function") updateResume(); }
 document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { setLang(b.dataset.lang); document.getElementById("lMenu").hidden = true; document.getElementById("lBtn").setAttribute("aria-expanded","false"); }));
 document.getElementById("lBtn").addEventListener("click", e => { const m = document.getElementById("lMenu"); m.hidden = !m.hidden; e.currentTarget.setAttribute("aria-expanded", String(!m.hidden)); });
