@@ -1,6 +1,8 @@
 // Stripe tells us when someone pays. Signature checked by hand (HMAC-SHA256), each event applied once.
 //   checkout.session.completed (payment, plan=entry)  -> billing.entry_markets += markets
 //   customer.subscription.created / updated / deleted  -> billing.subscription_*
+//   issuing_authorization.request    -> approve only the one approved purchase a single-use card was made for, up to its amount
+//   issuing_transaction.created      -> that purchase is paid; its card is closed
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { itemOf, webhookSecret } from "../_shared/stripe_catalog.ts";
 
@@ -44,12 +46,36 @@ Deno.serve(async (req) => {
   if (!(await verified(raw, req.headers.get("stripe-signature") ?? "", secret))) return reply(400, { error: "Bad signature." });
 
   const event = JSON.parse(raw) as { id: string; type: string; data: { object: Record<string, any> } };
+  // A card payment asks, in real time, whether to go through: only for its own approved purchase, within its amount.
+  if (event.type === "issuing_authorization.request") {
+    const a = event.data.object;
+    const purchase = a.card?.metadata?.purchase_id as string | undefined;
+    let approved = false;
+    if (purchase) {
+      const { data: p } = await admin.from("purchases").select("status, method, card_id, amount_cents").eq("id", purchase).maybeSingle();
+      const amount = Number(a.pending_request?.amount ?? a.amount ?? 0);
+      const expires = Date.parse(a.card?.metadata?.expires ?? "");
+      approved = !!p && p.status === "approved" && p.method === "card" && p.card_id === a.card?.id && amount > 0 && amount <= p.amount_cents && (!expires || Date.now() < expires);
+    }
+    return new Response(JSON.stringify({ approved }), { status: 200, headers: { "Content-Type": "application/json", "Stripe-Version": "2025-03-31.basil" } });
+  }
   const { error: dup } = await admin.from("stripe_events").insert({ id: event.id, type: event.type });
   if (dup) return reply(200, { received: true, duplicate: true });   // already applied
 
   try {
     const o = event.data.object;
-    if (event.type === "checkout.session.completed") {
+    if (event.type === "issuing_transaction.created") {
+      const card = typeof o.card === "string" ? o.card : o.card?.id;
+      const { data: row } = await admin.from("purchases").select("id, workspace_id, payee, amount_cents, app_id, card_id, status").eq("card_id", card).maybeSingle();
+      if (row && row.status === "approved") {
+        await admin.from("purchases").update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", row.id);
+        const key = Deno.env.get("STRIPE_SECRET_KEY");
+        if (key) await fetch(`https://api.stripe.com/v1/issuing/cards/${row.card_id}`, { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/x-www-form-urlencoded", "Stripe-Version": "2025-03-31.basil" }, body: "status=canceled" }).catch(() => {});
+        const amt = `$${(row.amount_cents / 100).toLocaleString("en-US")}`;
+        await admin.from("updates").upsert({ workspace_id: row.workspace_id, kind: "purchase", title: { en: `Paid ${row.payee} ${amt}`, zh: `已向 ${row.payee} 支付 ${amt}` }, app_id: row.app_id, dedupe: `purchase:${row.id}:paid` }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
+        await admin.from("audit_log").insert({ workspace_id: row.workspace_id, actor: "agent", actor_id: null, action: { en: "Paid", zh: "已支付" }, object: { en: `${amt} to ${row.payee}`, zh: `向 ${row.payee} 支付 ${amt}` } });
+      }
+    } else if (event.type === "checkout.session.completed") {
       const ws = o.metadata?.workspace_id as string | undefined;
       if (ws) {
         const { data: b } = await admin.from("billing").select("entry_markets, stripe_customer_id").eq("workspace_id", ws).maybeSingle();

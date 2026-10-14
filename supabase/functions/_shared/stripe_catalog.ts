@@ -17,6 +17,8 @@ export const CATALOG: Record<Item, Def> = {
 };
 
 export const WEBHOOK_EVENTS = ["checkout.session.completed", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"];
+/** With card payments on (STRIPE_ISSUING=on), the single-use cards' authorizations and payments come here too. */
+export const ISSUING_EVENTS = ["issuing_authorization.request", "issuing_transaction.created"];
 const VERSION = "2025-03-31.basil";
 
 type Env = (k: string) => string | undefined;
@@ -103,7 +105,7 @@ export async function ensureWebhook(env: Env, store: Store, url: string, f: Fetc
   if (ours.some((e) => e.metadata?.placetta !== "1")) return "manual";
   for (const e of ours) await s.del(`webhook_endpoints/${e.id}`);
   const p: Record<string, string> = { url, "metadata[placetta]": "1", api_version: VERSION, description: "Placetta billing" };
-  WEBHOOK_EVENTS.forEach((ev, i) => (p[`enabled_events[${i}]`] = ev));
+  [...WEBHOOK_EVENTS, ...(env("STRIPE_ISSUING") === "on" ? ISSUING_EVENTS : [])].forEach((ev, i) => (p[`enabled_events[${i}]`] = ev));
   const made = await s.post("webhook_endpoints", p, `placetta-webhook-${url}-${ours.map((e) => e.id).join(",")}`);
   if (!made?.secret) throw new Error("Stripe made the webhook without a signing secret.");
   await store.set("webhook_secret", made.secret);
