@@ -109,7 +109,7 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Restaurants in Los Angeles](https://placetta.com/guides/los-angeles/restaurant.html): 9 filings
 - [Retail stores in Los Angeles](https://placetta.com/guides/los-angeles/retail-store.html): 7 filings
 - [Importers and online sellers in Los Angeles](https://placetta.com/guides/los-angeles/importer-ecommerce.html): 11 filings
-- [Restaurants in Houston](https://placetta.com/guides/houston/restaurant.html): 10 filings
+- [Restaurants in Houston](https://placetta.com/guides/houston/restaurant.html): 12 filings
 - [Retail stores in Houston](https://placetta.com/guides/houston/retail-store.html): 8 filings
 - [Importers and online sellers in Houston](https://placetta.com/guides/houston/importer-ecommerce.html): 9 filings
 - [Restaurants in Beijing](https://placetta.com/guides/beijing/restaurant.html): 6 filings
@@ -216,12 +216,12 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Restaurants in Miami](https://placetta.com/guides/miami/restaurant.html): 5 filings
 - [Retail stores in Miami](https://placetta.com/guides/miami/retail-store.html): 4 filings
 - [Importers and online sellers in Miami](https://placetta.com/guides/miami/importer-ecommerce.html): 8 filings
-- [Restaurants in Dallas](https://placetta.com/guides/dallas/restaurant.html): 13 filings
-- [Retail stores in Dallas](https://placetta.com/guides/dallas/retail-store.html): 9 filings
-- [Importers and online sellers in Dallas](https://placetta.com/guides/dallas/importer-ecommerce.html): 10 filings
-- [Restaurants in Austin](https://placetta.com/guides/austin/restaurant.html): 7 filings
-- [Retail stores in Austin](https://placetta.com/guides/austin/retail-store.html): 7 filings
-- [Importers and online sellers in Austin](https://placetta.com/guides/austin/importer-ecommerce.html): 10 filings
+- [Restaurants in Dallas](https://placetta.com/guides/dallas/restaurant.html): 14 filings
+- [Retail stores in Dallas](https://placetta.com/guides/dallas/retail-store.html): 8 filings
+- [Importers and online sellers in Dallas](https://placetta.com/guides/dallas/importer-ecommerce.html): 9 filings
+- [Restaurants in Austin](https://placetta.com/guides/austin/restaurant.html): 14 filings
+- [Retail stores in Austin](https://placetta.com/guides/austin/retail-store.html): 8 filings
+- [Importers and online sellers in Austin](https://placetta.com/guides/austin/importer-ecommerce.html): 9 filings
 - [Restaurants in Washington, DC](https://placetta.com/guides/washington-dc/restaurant.html): 4 filings
 - [Retail stores in Washington, DC](https://placetta.com/guides/washington-dc/retail-store.html): 3 filings
 - [Importers and online sellers in Washington, DC](https://placetta.com/guides/washington-dc/importer-ecommerce.html): 7 filings
@@ -234,7 +234,7 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Restaurants in Las Vegas](https://placetta.com/guides/las-vegas/restaurant.html): 4 filings
 - [Retail stores in Las Vegas](https://placetta.com/guides/las-vegas/retail-store.html): 3 filings
 - [Importers and online sellers in Las Vegas](https://placetta.com/guides/las-vegas/importer-ecommerce.html): 7 filings
-- [Restaurants in San Antonio](https://placetta.com/guides/san-antonio/restaurant.html): 8 filings
+- [Restaurants in San Antonio](https://placetta.com/guides/san-antonio/restaurant.html): 10 filings
 - [Retail stores in San Antonio](https://placetta.com/guides/san-antonio/retail-store.html): 7 filings
 - [Importers and online sellers in San Antonio](https://placetta.com/guides/san-antonio/importer-ecommerce.html): 9 filings
 - [Restaurants in Tampa](https://placetta.com/guides/tampa/restaurant.html): 6 filings
@@ -249,7 +249,7 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Restaurants in Orlando](https://placetta.com/guides/orlando/restaurant.html): 6 filings
 - [Retail stores in Orlando](https://placetta.com/guides/orlando/retail-store.html): 5 filings
 - [Importers and online sellers in Orlando](https://placetta.com/guides/orlando/importer-ecommerce.html): 9 filings
-- [Restaurants in Fort Worth](https://placetta.com/guides/fort-worth/restaurant.html): 9 filings
+- [Restaurants in Fort Worth](https://placetta.com/guides/fort-worth/restaurant.html): 11 filings
 - [Retail stores in Fort Worth](https://placetta.com/guides/fort-worth/retail-store.html): 7 filings
 - [Importers and online sellers in Fort Worth](https://placetta.com/guides/fort-worth/importer-ecommerce.html): 9 filings
 - [Restaurants in Phoenix](https://placetta.com/guides/phoenix/restaurant.html): 6 filings

@@ -5,7 +5,38 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/app/:path((?!assets/).*)", "destination": "/app/index.html" }
+    {
+      "source": "/app/:path((?!assets/).*)",
+      "destination": "/app/index.html"
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/customers",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/pricing",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/faq",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/backers",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/sample-plan",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/help/:path+",
+      "destination": "/help/index.html"
+    }
   ],
   "redirects": [
     {

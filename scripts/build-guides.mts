@@ -109,9 +109,9 @@ const sponsors = (l: L) => `<aside class="sponsors" aria-label="${l === "zh" ? "
 }).join("")}</aside>`;
 
 type Ctx = { place?: Place; biz?: Biz };
-function page(o: { l: L; path: string; alt: string; title: string; desc: string; crumbs: [string, string][]; body: string; ld: unknown[]; kind: string; ctx?: Ctx }) {
+function page(o: { l: L; path: string; alt: string; title: string; desc: string; crumbs: ([string, string] | [string, string, string])[]; body: string; ld: unknown[]; kind: string; ctx?: Ctx }) {
   const url = ORIGIN + o.path, altUrl = ORIGIN + o.alt, l = o.l;
-  const crumbs = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: o.crumbs.map(([name, path], i) => ({ "@type": "ListItem", position: i + 1, name, item: ORIGIN + path })) };
+  const crumbs = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: o.crumbs.filter((c, i) => !c[2] || i === o.crumbs.length - 1).map(([name, path], i) => ({ "@type": "ListItem", position: i + 1, name, item: ORIGIN + path })) };
   const cityName = o.ctx?.place?.name[l];
   return `<!doctype html>
 <html lang="${l === "zh" ? "zh-CN" : "en"}">
@@ -141,24 +141,24 @@ ${[crumbs, ...o.ld].map(x => `<script type="application/ld+json">${JSON.stringif
 <script src="/guides/guides.js" defer></script>
 </head>
 <body class="pg-${o.kind}">
-<a class="skip" href="#main">${l === "zh" ? "跳到正文" : "Skip to content"}</a>
+<a class="skip" role="link" tabindex="0" data-to="main">${l === "zh" ? "跳到正文" : "Skip to content"}</a>
 <header class="top"><div class="wrap">
   <a class="brand" href="/" aria-label="Placetta">${BRAND}</a>
   <nav class="topnav" aria-label="${l === "zh" ? "指南" : "Guides"}">
-    <a href="${base(l)}/#cities">${UI.cities[l]}</a>
-    <a href="${base(l)}/#answers">${UI.answers[l]}</a>
-    <a href="${base(l)}/#forms">${UI.forms[l]}</a>
+    <a href="${base(l)}/" data-to="cities">${UI.cities[l]}</a>
+    <a href="${base(l)}/" data-to="answers">${UI.answers[l]}</a>
+    <a href="${base(l)}/" data-to="forms">${UI.forms[l]}</a>
   </nav>
   <a class="lang" href="${o.alt}" hreflang="${l === "zh" ? "en" : "zh-CN"}">${UI.other[l]}</a>
-  <a class="btn" href="#get-plan" data-track="nav_cta">${UI.plan[l]}</a>
+  <a class="btn" role="link" tabindex="0" data-to="get-plan" data-track="nav_cta">${UI.plan[l]}</a>
 </div></header>
 <main id="main">
-<nav class="crumbs wrap" aria-label="Breadcrumb"><ol>${o.crumbs.map(([n, p], i) => (i < o.crumbs.length - 1 ? `<li><a href="${p}">${esc(n)}</a></li>` : `<li aria-current="page">${esc(n)}</li>`)).join("")}</ol></nav>
+<nav class="crumbs wrap" aria-label="Breadcrumb"><ol>${o.crumbs.map(([n, p, to], i) => (i < o.crumbs.length - 1 ? `<li><a href="${p}"${to ? ` data-to="${to}"` : ""}>${esc(n)}</a></li>` : `<li aria-current="page">${esc(n)}</li>`)).join("")}</ol></nav>
 ${o.body}
 <section class="wrap helpful" data-helpful hidden><p>${l === "zh" ? "这一页对您有帮助吗？" : "Was this page helpful?"}</p><button type="button" class="hbtn">${l === "zh" ? "有帮助" : "Yes, it helped"}</button><span class="hcount" aria-live="polite"></span></section>
 ${convert(l, o.ctx ?? {})}
 </main>
-<a class="dock" href="#get-plan" data-track="dock_cta">${esc(cityName ? (l === "zh" ? `获取${cityName}的开店方案` : `Get my plan for ${cityName}`) : UI.plan[l])}</a>
+<a class="dock" role="link" tabindex="0" data-to="get-plan" data-track="dock_cta">${esc(cityName ? (l === "zh" ? `获取${cityName}的开店方案` : `Get my plan for ${cityName}`) : UI.plan[l])}</a>
 <footer class="foot"><div class="wrap">
   ${sponsors(l)}
   <a class="brand" href="/" aria-label="Placetta">${BRAND}</a>
@@ -227,8 +227,8 @@ const rail = (forms: OfficialForm[], l: L, extra = "") => {
   const c = costOf(forms);
   return `<aside class="rail"><div class="rail-in">
 <p class="rail-h">${UI.onPage[l]}</p>
-<ol>${forms.map((f, i) => `<li><a href="#s${i + 1}">${esc(t(f.title, l))}</a></li>`).join("")}</ol>
-<div class="sum"><p>${l === "zh" ? "固定政府规费" : "Fixed government fees"}</p><b>${c.total || !c.varies.length ? money(c.total, c.cur) : (l === "zh" ? "视业务而定" : "Varies")}</b><small>${l === "zh" ? `另有 ${c.varies.length} 项视业务而定，${c.free.length} 项免费` : `${c.varies.length} more depend on the business; ${c.free.length} are free`}</small><a class="btn" href="#get-plan" data-track="rail_cta">${UI.plan[l]}</a></div>
+<ol>${forms.map((f, i) => `<li><a role="link" tabindex="0" data-to="s${i + 1}">${esc(t(f.title, l))}</a></li>`).join("")}</ol>
+<div class="sum"><p>${l === "zh" ? "固定政府规费" : "Fixed government fees"}</p><b>${c.total || !c.varies.length ? money(c.total, c.cur) : (l === "zh" ? "视业务而定" : "Varies")}</b><small>${l === "zh" ? `另有 ${c.varies.length} 项视业务而定，${c.free.length} 项免费` : `${c.varies.length} more depend on the business; ${c.free.length} are free`}</small><a class="btn" role="link" tabindex="0" data-to="get-plan" data-track="rail_cta">${UI.plan[l]}</a></div>
 ${extra}
 </div></aside>`;
 };
@@ -299,7 +299,7 @@ ${qs.length ? `<section class="more"><h2>${l === "zh" ? "常见问题" : "Questi
 <p class="fine">${l === "zh" ? "各机构要求可能变化，提交前请以机构官网为准。" : "Agency requirements change. Check each agency's page before you file."}</p>
 </div>${rail(g.forms, l)}</div>`;
     const ld = { "@context": "https://schema.org", "@type": "HowTo", name: title, description: desc, inLanguage: l === "zh" ? "zh-CN" : "en", dateModified: TODAY, publisher: { "@type": "Organization", name: "Placetta", url: ORIGIN },
-      step: g.forms.map((f, i) => ({ "@type": "HowToStep", position: i + 1, name: t(f.title, l), text: t(f.how, l), url: ORIGIN + guidePath(g, l) + `#s${i + 1}` })) };
+      step: g.forms.map((f, i) => ({ "@type": "HowToStep", position: i + 1, name: t(f.title, l), text: t(f.how, l), url: ORIGIN + guidePath(g, l) })) };
     write(guidePath(g, l), page({ l, path: guidePath(g, l), alt: guidePath(g, o), title, desc, body, ld: [ld], kind: "guide", ctx: { place: g.place, biz: g.biz },
       crumbs: [[UI.guides[l], base(l) + "/"], [city, cityPath(g.place, l)], [g.biz.plural[l], guidePath(g, l)]] }));
     urls.push({ path: guidePath(g, l), alt: guidePath(g, o), pri: 0.8 });
@@ -363,12 +363,12 @@ ${f.attach?.length ? `<section><h2>${l === "zh" ? "需要附上" : "What to atta
 <section><h2>${l === "zh" ? "官方链接" : "Official links"}</h2><ul class="links"><li><a href="${esc(f.url)}" rel="noopener">${l === "zh" ? "办理入口" : "Where it's filed"}</a></li>${f.info !== f.url ? `<li><a href="${esc(f.info)}" rel="noopener">${l === "zh" ? "机构说明页" : "The agency's page about it"}</a></li>` : ""}${f.pdf && f.pdf !== f.url ? `<li><a href="${esc(f.pdf)}" rel="noopener">${l === "zh" ? "官方 PDF" : "The official PDF"}</a></li>` : ""}</ul><p class="fine">${sourceNote(f, l)}</p></section>
 ${qs.length ? `<section class="more"><h2>${l === "zh" ? "常见问题" : "Questions people ask"}</h2><ul class="qlist">${qs.map(a => `<li><a href="${answerPath(a.slug, l)}">${esc(a.q[l])}</a></li>`).join("")}</ul></section>` : ""}
 </div>
-${users.length ? `<aside class="rail"><div class="rail-in"><p class="rail-h">${l === "zh" ? "哪些企业需要" : "Who files it"}</p><ul>${users.slice(0, 14).map(u => `<li><a href="${guidePath(u, l)}">${esc(guideLabel(u, l))}</a></li>`).join("")}</ul><div class="sum"><p>${f.fill ? (l === "zh" ? `快哉会逐行填好 ${f.form}` : `Placetta fills ${f.form} line by line`) : (l === "zh" ? "快哉帮您准备并跟进" : "Placetta prepares and tracks it")}</p><a class="btn" href="#get-plan" data-track="rail_cta">${UI.plan[l]}</a></div></div></aside>` : ""}
+${users.length ? `<aside class="rail"><div class="rail-in"><p class="rail-h">${l === "zh" ? "哪些企业需要" : "Who files it"}</p><ul>${users.slice(0, 14).map(u => `<li><a href="${guidePath(u, l)}">${esc(guideLabel(u, l))}</a></li>`).join("")}</ul><div class="sum"><p>${f.fill ? (l === "zh" ? `快哉会逐行填好 ${f.form}` : `Placetta fills ${f.form} line by line`) : (l === "zh" ? "快哉帮您准备并跟进" : "Placetta prepares and tracks it")}</p><a class="btn" role="link" tabindex="0" data-to="get-plan" data-track="rail_cta">${UI.plan[l]}</a></div></div></aside>` : ""}
 </div>`;
     const ld = { "@context": "https://schema.org", "@type": "HowTo", name: title, description: desc, inLanguage: l === "zh" ? "zh-CN" : "en", dateModified: TODAY,
       step: [{ "@type": "HowToStep", text: t(f.how, l) }, ...(f.fields.length ? [{ "@type": "HowToStep", text: (l === "zh" ? "填写：" : "Fill in: ") + f.fields.map(x => t(x.label, l)).join(l === "zh" ? "；" : "; ") }] : []), { "@type": "HowToStep", text: (l === "zh" ? "提交至：" : "File at: ") + f.url }] };
     write(formPath(f, l), page({ l, path: formPath(f, l), alt: formPath(f, o), title, desc, body, ld: [ld], kind: "form",
-      crumbs: [[UI.guides[l], base(l) + "/"], [UI.forms[l], `${base(l)}/#forms`], [f.form, formPath(f, l)]] }));
+      crumbs: [[UI.guides[l], base(l) + "/"], [UI.forms[l], `${base(l)}/`, "forms"], [f.form, formPath(f, l)]] }));
     urls.push({ path: formPath(f, l), alt: formPath(f, o), pri: 0.6 });
   }
 
@@ -403,7 +403,7 @@ ${rel.length ? `<section class="more"><h2>${l === "zh" ? "完整指南" : "Full 
 </div>`;
     const ld = { "@context": "https://schema.org", "@type": "FAQPage", inLanguage: l === "zh" ? "zh-CN" : "en", mainEntity: [{ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: clean(short) } }] };
     write(answerPath(a.slug, l), page({ l, path: answerPath(a.slug, l), alt: answerPath(a.slug, o), title: q, desc: clean(short).slice(0, 155), body, ld: [ld], kind: "answer", ctx: { place },
-      crumbs: [[UI.guides[l], base(l) + "/"], [UI.answers[l], `${base(l)}/#answers`], [q, answerPath(a.slug, l)]] }));
+      crumbs: [[UI.guides[l], base(l) + "/"], [UI.answers[l], `${base(l)}/`, "answers"], [q, answerPath(a.slug, l)]] }));
     urls.push({ path: answerPath(a.slug, l), alt: answerPath(a.slug, o), pri: 0.8 });
   }
 

@@ -648,6 +648,7 @@ https://placetta.com/guides/los-angeles/renewals.html
 https://placetta.com/guides/houston/permit-costs.html
 https://placetta.com/guides/houston/how-long-permits-take.html
 https://placetta.com/guides/houston/foreign-company.html
+https://placetta.com/guides/houston/hiring-employees.html
 https://placetta.com/guides/houston/build-out-and-occupancy.html
 https://placetta.com/guides/houston/importing-goods.html
 https://placetta.com/guides/houston/renewals.html
@@ -734,12 +735,15 @@ https://placetta.com/guides/miami/renewals.html
 https://placetta.com/guides/dallas/permit-costs.html
 https://placetta.com/guides/dallas/how-long-permits-take.html
 https://placetta.com/guides/dallas/foreign-company.html
+https://placetta.com/guides/dallas/hiring-employees.html
 https://placetta.com/guides/dallas/build-out-and-occupancy.html
 https://placetta.com/guides/dallas/importing-goods.html
 https://placetta.com/guides/dallas/renewals.html
 https://placetta.com/guides/austin/permit-costs.html
 https://placetta.com/guides/austin/how-long-permits-take.html
 https://placetta.com/guides/austin/foreign-company.html
+https://placetta.com/guides/austin/hiring-employees.html
+https://placetta.com/guides/austin/build-out-and-occupancy.html
 https://placetta.com/guides/austin/importing-goods.html
 https://placetta.com/guides/austin/renewals.html
 https://placetta.com/guides/washington-dc/permit-costs.html
@@ -765,6 +769,7 @@ https://placetta.com/guides/las-vegas/renewals.html
 https://placetta.com/guides/san-antonio/permit-costs.html
 https://placetta.com/guides/san-antonio/how-long-permits-take.html
 https://placetta.com/guides/san-antonio/foreign-company.html
+https://placetta.com/guides/san-antonio/hiring-employees.html
 https://placetta.com/guides/san-antonio/importing-goods.html
 https://placetta.com/guides/san-antonio/renewals.html
 https://placetta.com/guides/tampa/permit-costs.html
@@ -791,6 +796,7 @@ https://placetta.com/guides/orlando/renewals.html
 https://placetta.com/guides/fort-worth/permit-costs.html
 https://placetta.com/guides/fort-worth/how-long-permits-take.html
 https://placetta.com/guides/fort-worth/foreign-company.html
+https://placetta.com/guides/fort-worth/hiring-employees.html
 https://placetta.com/guides/fort-worth/build-out-and-occupancy.html
 https://placetta.com/guides/fort-worth/importing-goods.html
 https://placetta.com/guides/fort-worth/renewals.html
@@ -899,6 +905,8 @@ https://placetta.com/guides/forms/tx-503.html
 https://placetta.com/guides/forms/tx-ap201.html
 https://placetta.com/guides/forms/tx-franchise.html
 https://placetta.com/guides/forms/tx-twc.html
+https://placetta.com/guides/forms/tx-food-manager.html
+https://placetta.com/guides/forms/tx-food-handler.html
 https://placetta.com/guides/forms/hou-co.html
 https://placetta.com/guides/forms/hou-sign.html
 https://placetta.com/guides/forms/hou-plan-review.html
@@ -1003,8 +1011,6 @@ https://placetta.com/guides/forms/fl-sunbiz.html
 https://placetta.com/guides/forms/fl-dor.html
 https://placetta.com/guides/forms/fl-dbpr.html
 https://placetta.com/guides/forms/mia-btr.html
-https://placetta.com/guides/forms/dal-co.html
-https://placetta.com/guides/forms/aus-co.html
 https://placetta.com/guides/forms/dc-dlcp.html
 https://placetta.com/guides/forms/dc-otr.html
 https://placetta.com/guides/forms/dc-food.html
@@ -1040,6 +1046,13 @@ https://placetta.com/guides/forms/dal-plan-review.html
 https://placetta.com/guides/forms/dal-food-permit.html
 https://placetta.com/guides/forms/dal-sign.html
 https://placetta.com/guides/forms/dal-fire-hood.html
+https://placetta.com/guides/forms/aus-co.html
+https://placetta.com/guides/forms/aus-building.html
+https://placetta.com/guides/forms/aus-food-plan-review.html
+https://placetta.com/guides/forms/aus-food-preopening.html
+https://placetta.com/guides/forms/aus-food-permit.html
+https://placetta.com/guides/forms/aus-sign.html
+https://placetta.com/guides/forms/aus-hazmat.html
 https://placetta.com/guides/forms/sat-co.html
 https://placetta.com/guides/forms/sat-food.html
 https://placetta.com/guides/forms/hc-business-tax.html
@@ -1745,6 +1758,7 @@ https://placetta.com/guides/zh/los-angeles/renewals.html
 https://placetta.com/guides/zh/houston/permit-costs.html
 https://placetta.com/guides/zh/houston/how-long-permits-take.html
 https://placetta.com/guides/zh/houston/foreign-company.html
+https://placetta.com/guides/zh/houston/hiring-employees.html
 https://placetta.com/guides/zh/houston/build-out-and-occupancy.html
 https://placetta.com/guides/zh/houston/importing-goods.html
 https://placetta.com/guides/zh/houston/renewals.html
@@ -1831,12 +1845,15 @@ https://placetta.com/guides/zh/miami/renewals.html
 https://placetta.com/guides/zh/dallas/permit-costs.html
 https://placetta.com/guides/zh/dallas/how-long-permits-take.html
 https://placetta.com/guides/zh/dallas/foreign-company.html
+https://placetta.com/guides/zh/dallas/hiring-employees.html
 https://placetta.com/guides/zh/dallas/build-out-and-occupancy.html
 https://placetta.com/guides/zh/dallas/importing-goods.html
 https://placetta.com/guides/zh/dallas/renewals.html
 https://placetta.com/guides/zh/austin/permit-costs.html
 https://placetta.com/guides/zh/austin/how-long-permits-take.html
 https://placetta.com/guides/zh/austin/foreign-company.html
+https://placetta.com/guides/zh/austin/hiring-employees.html
+https://placetta.com/guides/zh/austin/build-out-and-occupancy.html
 https://placetta.com/guides/zh/austin/importing-goods.html
 https://placetta.com/guides/zh/austin/renewals.html
 https://placetta.com/guides/zh/washington-dc/permit-costs.html
@@ -1862,6 +1879,7 @@ https://placetta.com/guides/zh/las-vegas/renewals.html
 https://placetta.com/guides/zh/san-antonio/permit-costs.html
 https://placetta.com/guides/zh/san-antonio/how-long-permits-take.html
 https://placetta.com/guides/zh/san-antonio/foreign-company.html
+https://placetta.com/guides/zh/san-antonio/hiring-employees.html
 https://placetta.com/guides/zh/san-antonio/importing-goods.html
 https://placetta.com/guides/zh/san-antonio/renewals.html
 https://placetta.com/guides/zh/tampa/permit-costs.html
@@ -1888,6 +1906,7 @@ https://placetta.com/guides/zh/orlando/renewals.html
 https://placetta.com/guides/zh/fort-worth/permit-costs.html
 https://placetta.com/guides/zh/fort-worth/how-long-permits-take.html
 https://placetta.com/guides/zh/fort-worth/foreign-company.html
+https://placetta.com/guides/zh/fort-worth/hiring-employees.html
 https://placetta.com/guides/zh/fort-worth/build-out-and-occupancy.html
 https://placetta.com/guides/zh/fort-worth/importing-goods.html
 https://placetta.com/guides/zh/fort-worth/renewals.html
@@ -1996,6 +2015,8 @@ https://placetta.com/guides/zh/forms/tx-503.html
 https://placetta.com/guides/zh/forms/tx-ap201.html
 https://placetta.com/guides/zh/forms/tx-franchise.html
 https://placetta.com/guides/zh/forms/tx-twc.html
+https://placetta.com/guides/zh/forms/tx-food-manager.html
+https://placetta.com/guides/zh/forms/tx-food-handler.html
 https://placetta.com/guides/zh/forms/hou-co.html
 https://placetta.com/guides/zh/forms/hou-sign.html
 https://placetta.com/guides/zh/forms/hou-plan-review.html
@@ -2100,8 +2121,6 @@ https://placetta.com/guides/zh/forms/fl-sunbiz.html
 https://placetta.com/guides/zh/forms/fl-dor.html
 https://placetta.com/guides/zh/forms/fl-dbpr.html
 https://placetta.com/guides/zh/forms/mia-btr.html
-https://placetta.com/guides/zh/forms/dal-co.html
-https://placetta.com/guides/zh/forms/aus-co.html
 https://placetta.com/guides/zh/forms/dc-dlcp.html
 https://placetta.com/guides/zh/forms/dc-otr.html
 https://placetta.com/guides/zh/forms/dc-food.html
@@ -2137,6 +2156,13 @@ https://placetta.com/guides/zh/forms/dal-plan-review.html
 https://placetta.com/guides/zh/forms/dal-food-permit.html
 https://placetta.com/guides/zh/forms/dal-sign.html
 https://placetta.com/guides/zh/forms/dal-fire-hood.html
+https://placetta.com/guides/zh/forms/aus-co.html
+https://placetta.com/guides/zh/forms/aus-building.html
+https://placetta.com/guides/zh/forms/aus-food-plan-review.html
+https://placetta.com/guides/zh/forms/aus-food-preopening.html
+https://placetta.com/guides/zh/forms/aus-food-permit.html
+https://placetta.com/guides/zh/forms/aus-sign.html
+https://placetta.com/guides/zh/forms/aus-hazmat.html
 https://placetta.com/guides/zh/forms/sat-co.html
 https://placetta.com/guides/zh/forms/sat-food.html
 https://placetta.com/guides/zh/forms/hc-business-tax.html

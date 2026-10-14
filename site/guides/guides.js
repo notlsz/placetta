@@ -6,6 +6,15 @@
   window.dataLayer = window.dataLayer || [];
   const track = (event, data) => window.dataLayer.push(Object.assign({ event, page: location.pathname, ts: Date.now() }, data || {}));
 
+  /* in-page links without a #: [data-to] scrolls to that part of the page; from another page, a hub link opens the
+     hub and lands on its section; a page reached by an old #link drops the # from the address bar */
+  const goTo = id => { const el = document.getElementById(id); if (!el) return false; el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    if (id === "main") { el.setAttribute("tabindex", "-1"); el.focus({ preventScroll: true }); } return true; };
+  const follow = a => { const id = a.dataset.to; if (goTo(id)) return; const href = a.getAttribute("href"); if (href) { try { sessionStorage.setItem("guides-to", id); } catch (e) {} location.href = href; } };
+  document.addEventListener("click", e => { const a = e.target.closest("[data-to]"); if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return; e.preventDefault(); follow(a); });
+  document.addEventListener("keydown", e => { if (e.key !== "Enter" && e.key !== " ") return; const a = e.target.closest && e.target.closest("[data-to]:not([href])"); if (!a) return; e.preventDefault(); follow(a); });
+  try { const id = sessionStorage.getItem("guides-to") || location.hash.slice(1); sessionStorage.removeItem("guides-to"); if (location.hash) history.replaceState(null, "", location.pathname + location.search); if (id) addEventListener("load", () => setTimeout(() => goTo(id), 50), { once: true }); } catch (e) {}
+
   /* hub: search across cities, answers and forms */
   const q = document.getElementById("q"), count = document.getElementById("count");
   if (q) {
