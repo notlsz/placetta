@@ -3601,7 +3601,7 @@ const PICO = {"a": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentCol
 const SCHIP = {
   f: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>',
   a: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3F9A62" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>',
-  r: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="1.8"><path d="M12 3l7 3v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/></svg>'
+  r: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 12.5-8 8a2.12 2.12 0 0 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m8 8 6-6"/><path d="m9 7 8 8"/><path d="m21 11-8-8"/></svg>'
 };
 function caseUI(D, ids, o){
   const st = {c: 0, m: 0}, $ = k => document.getElementById(ids[k]), nm = x => Array.isArray(x) ? x[L()] : x, lead = o.lead;
@@ -4700,6 +4700,7 @@ function renderXp(){
   for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => { ims[k] = im; mkTile(k);
     if (++loaded === XPN && !run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
   const size = () => {
+    if (W && cv.clientWidth === W) return;   // its height follows its width only: a phone's toolbar moving changes nothing here
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth;
     cell = W < 640 ? 9 : W < 1024 ? 13 : 18; cols = Math.floor(W / cell); rows = Math.round(cols * 0.34); H = rows * cell;
     const tp = Math.round(cell * dpr) - Math.max(1, Math.round(dpr)); if (tp !== TP) { TP = tp; ims.forEach((_, k) => mkTile(k)); }
@@ -4986,11 +4987,12 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     return out;
   }
   const ease = u => u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
-  function go(k){
+  // a change of sector morphs the tiles already on screen into the new picture; nothing restarts from empty
+  function go(k, instant){
     if (!cols) return;
     const want = k === 3 ? Math.max(3, Math.round(baseCell * .3)) : k === 2 ? Math.max(4, Math.round(baseCell * .6)) : baseCell;
-    if (want !== cell) { cell = want; cols = Math.floor(W / cell); rows = Math.floor(H / cell); tiles = []; }
-    const T = cells(k); cur = k; tA = performance.now();
+    if (want !== cell) { const f = cell / want; tiles.forEach(x => { x.c *= f; x.r *= f; x.tc *= f; x.tr *= f; }); cell = want; cols = Math.floor(W / cell); rows = Math.floor(H / cell); }
+    const T = cells(k); cur = k; tA = instant ? -1e9 : performance.now();
     T.sort((a, b) => a.c - b.c || a.r - b.r);
     const live = tiles.filter(x => x.out === 0).sort((a, b) => a.tc - b.tc || a.tr - b.tr), next = [];
     T.forEach((d, i) => {
@@ -4999,12 +5001,17 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
     });
     tiles = next; kick();
   }
+  // only a real change in the picture's size redraws it (a phone's toolbar sliding in and out on a tap is not one),
+  // and then it is redrawn in place, without the opening animation again
   function size(){
-    dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
+    const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+    if (w === W && h === H) return;
+    const first = !W;
+    dpr = Math.min(2, devicePixelRatio || 1); W = w; H = h;
     baseCell = W < 640 ? 7 : W < 900 ? 8 : 10; cell = cur === 3 ? Math.max(3, Math.round(baseCell * .3)) : cur === 2 ? Math.max(4, Math.round(baseCell * .6)) : baseCell; cols = Math.floor(W / cell); rows = Math.floor(H / cell);
     cv.width = W * dpr; cv.height = H * dpr;
     sc = Math.min(cols / 1000, rows / 420) * .84; ox = (cols - 1000 * sc) / 2; oy = (rows - 420 * sc) / 2 - rows * .06;
-    if (cur >= 0 && !PHOTO[cur]) { const k = cur; tiles = []; go(k); }
+    if (cur >= 0 && !PHOTO[cur]) go(cur, !first);
   }
   const COL = [[115, 153, 198], [10, 20, 38], [214, 228, 242], [92, 104, 126], [64, 205, 255], [172, 188, 208], [38, 60, 96]];
   // the palette as a ramp, dim navy blue to body blue to near white: photo-traced sectors (the robot, the tiger) are shaded along it
