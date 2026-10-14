@@ -2311,6 +2311,31 @@ html[lang="zh-CN"] .invl{letter-spacing:.2em}
 .invr img{display:block;width:auto;height:calc(var(--h) * .85);opacity:.8;filter:saturate(0) brightness(.55);transition:opacity .2s,filter .2s}
 @media (min-width:1024px){.invr img{height:calc(var(--h) * 1.08)}}
 .invr img:hover{opacity:1;filter:none}
+
+/* plan steps: a numbered timeline (step, kind, the step that sets the date, the detail) */
+.belrows.st2{display:block;gap:0;padding:6px 4px;background:#fff;border-radius:20px;box-shadow:0 18px 44px rgba(15,27,51,.10),0 1px 2px rgba(15,27,51,.04);overflow:hidden}
+.belrows.st2 li{position:relative;display:grid;grid-template-columns:26px minmax(0,1fr);gap:14px;padding:14px 18px 14px 16px;background:none;border-radius:0;box-shadow:none}
+.belrows.st2 li+li{border-top:1px solid #F1F3F6}
+.belrows.st2 li::before{content:"";position:absolute;left:28.5px;top:0;bottom:0;width:1px;background:#E6EAF0}
+.belrows.st2 li:first-child::before{top:26px}.belrows.st2 li:last-child::before{bottom:calc(100% - 26px)}
+.belrows.st2 .sn{position:relative;z-index:1;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px #CBD5E3;color:#3B5F8E;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.belrows.st2 li.crit .sn{background:#0F1B33;box-shadow:none;color:#fff}
+.belrows.st2 .sb{min-width:0;padding-top:3px}
+.belrows.st2 .sh2{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.belrows.st2 .sh2 b{display:block;font-size:14px;font-weight:600;letter-spacing:-.1px;line-height:1.35;color:var(--ink)}
+.belrows.st2 .sk{flex:none;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8A93A3}
+.belrows.st2 .sk.y-f{color:#4F78A8}.belrows.st2 .sk.y-a{color:#2E7149}.belrows.st2 .sk.y-r{color:#8A93A3}
+html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
+.belrows.st2 .sc{display:inline-block;margin-top:6px;padding:2px 8px;border-radius:6px;background:#FDF1E7;color:#A0521D;font-size:11.5px;font-weight:600}
+.belrows.st2 p{margin-top:5px;font-size:13px;line-height:1.5;color:#5B6578}
+@media (max-width:639px){.belrows.st2 li{padding:12px 14px 12px 12px;gap:12px}.belrows.st2 li::before{left:24.5px}}
+.xpl.xfav{width:.78em;height:.78em;margin-right:.32em;vertical-align:-.06em;border-radius:4px;opacity:1;object-fit:contain}
+#bkG.fold li:nth-child(n+7){display:none}
+@media (max-width:639px){#bkG.fold li:nth-child(n+5){display:none}}
+.bkmore{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:9px 16px;border:0;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(15,27,51,.08),inset 0 0 0 1px rgba(15,27,51,.06);font:inherit;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer}
+.bkmore:hover{box-shadow:0 2px 8px rgba(15,27,51,.10),inset 0 0 0 1px rgba(15,27,51,.08)}
+.bkmore i{width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translate(-1px,-2px);transition:transform .2s}
+.bkmore[aria-expanded="true"] i{transform:rotate(225deg) translate(-1px,-1px)}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2851,7 +2876,8 @@ html[lang="zh-CN"] .invl{letter-spacing:.2em}
 <section class="mt160 rv" data-rv="up" id="backers" aria-labelledby="bkH">
   <div class="ctr">
     <p class="t28 bkh" id="bkH" data-i18n="bk.h">Backed by operators who built at</p>
-    <ul class="bkg bkt" id="bkG"></ul>
+    <ul class="bkg bkt fold" id="bkG"></ul>
+    <button type="button" class="bkmore" id="bkMore" aria-controls="bkG" aria-expanded="false"><span data-i18n="bk.more">Show all</span><i aria-hidden="true"></i></button>
     <p class="bknote" data-i18n="bk.note">Investors invested personally. Their former and current employers are not affiliated with Placetta and do not endorse it.</p>
   </div>
 </section>
@@ -3150,7 +3176,7 @@ en:{
  "f3.h":"Kept current after you open", "f3.p":"Renewal dates, inspections and rule changes, tracked for every location.", "f3.r1":"Health permit", "f3.r1d":"Due in 30 days", "f3.r2":"Business tax certificate", "f3.r2d":"Renews Jan 2027", "f3.r3":"Fire inspection", "f3.r3d":"Due Jun 2027", "f3.r4":"New city rule on menu labels", "f3.r4d":"Action needed", "f3.t":"Health permit renewal filed", "f3.ts":"Santa Clara County DEH, just now",
  "feat.note":"Product screens show sample data.",
  "mon.h2":"Rules change after you open.<br>We tell you what to do.",
- "proof.h":"See the plan before you sign the lease.", "wak.crit":"Sets the opening date", "bk.h":"Backed by operators who built at", "bk.hero":"Backed by operators from top AI, tech and finance companies", "sec.h":"Security", "sec.link":"Read our privacy policy", "sec.1":"Agency logins encrypted in a vault", "sec.2":"Every use of a login is logged", "sec.3":"A full audit trail of every action", "sec.4":"Nothing filed, paid or sent without your approval", "sec.5":"Payments run through Stripe, and we never see full card numbers", "sec.6":"Your content is never sold or used to train AI models", "proof.sub":"Example plans for businesses like yours, built from official sources. Each one cites the agencies and laws behind it.",
+ "proof.h":"See the plan before you sign the lease.", "wak.crit":"Sets the opening date", "bk.h":"Backed by operators who built at", "bk.more":"Show all {n}", "bk.less":"Show fewer", "bk.hero":"Backed by operators from top AI, tech and finance companies", "sec.h":"Security", "sec.link":"Read our privacy policy", "sec.1":"Agency logins encrypted in a vault", "sec.2":"Every use of a login is logged", "sec.3":"A full audit trail of every action", "sec.4":"Nothing filed, paid or sent without your approval", "sec.5":"Payments run through Stripe, and we never see full card numbers", "sec.6":"Your content is never sold or used to train AI models", "proof.sub":"Example plans for businesses like yours, built from official sources. Each one cites the agencies and laws behind it.",
  "price.promise":"Every license, permit and certificate a store can't open or sell without, mapped, filed with your approval and tracked for renewal.", "price.sub":"$149 per location a month on Essentials, or $299 on Pro for stores inspected often, billed yearly. Each franchisee pays for its own stores.",
  "faq.sub":"Something else? Email <a href=\"mailto:support@placetta.com\">support@placetta.com</a>."
 },
@@ -3233,7 +3259,7 @@ zh:{
  "f3.h":"开业之后，持续合规", "f3.p":"所有门店的续期日期、检查和规则变化，全部跟踪。", "f3.r1":"卫生许可", "f3.r1d":"30 天后到期", "f3.r2":"营业税证书", "f3.r2d":"2027年1月续期", "f3.r3":"消防年检", "f3.r3d":"2027年6月到期", "f3.r4":"市里新规：菜单标签", "f3.r4d":"需要处理", "f3.t":"卫生许可续期已提交", "f3.ts":"圣克拉拉县环境卫生局，刚刚",
  "feat.note":"产品界面中的数据均为示例。",
  "mon.h2":"开店之后，规则仍在变化。<br>我们告诉您该怎么做。",
- "proof.h":"签租约之前，先看清开店计划。", "wak.crit":"决定开业时间", "bk.h":"我们的投资人曾任职于", "bk.hero":"投资人来自顶尖的人工智能、科技与金融公司", "sec.h":"数据安全", "sec.link":"阅读隐私政策", "sec.1":"政府网站登录信息加密存放于保险库", "sec.2":"每次使用登录信息都有记录", "sec.3":"每一步操作都有完整审计记录", "sec.4":"未经您批准，不提交、不付款、不发送", "sec.5":"付款由 Stripe 处理，我们看不到完整卡号", "sec.6":"您的内容绝不出售，也不用于训练 AI 模型", "proof.sub":"为与您类似的企业制作的示例方案，均依据官方资料整理，并注明所依据的机构与法规。",
+ "proof.h":"签租约之前，先看清开店计划。", "wak.crit":"决定开业时间", "bk.h":"我们的投资人曾任职于", "bk.more":"查看全部 {n} 家", "bk.less":"收起", "bk.hero":"投资人来自顶尖的人工智能、科技与金融公司", "sec.h":"数据安全", "sec.link":"阅读隐私政策", "sec.1":"政府网站登录信息加密存放于保险库", "sec.2":"每次使用登录信息都有记录", "sec.3":"每一步操作都有完整审计记录", "sec.4":"未经您批准，不提交、不付款、不发送", "sec.5":"付款由 Stripe 处理，我们看不到完整卡号", "sec.6":"您的内容绝不出售，也不用于训练 AI 模型", "proof.sub":"为与您类似的企业制作的示例方案，均依据官方资料整理，并注明所依据的机构与法规。",
  "price.promise":"门店开业和营业离不开的每一项执照、许可和证书：逐项梳理，经您批准后提交，并跟踪续期。", "price.sub":"基础版每家门店每月 149 美元，经常接受检查的门店可选专业版，每月 299 美元，均按年计费。每位加盟商为自己的门店付费。",
  "faq.sub":"还有其他问题？请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"
 }};
@@ -3565,7 +3591,9 @@ function caseUI(D, ids, o){
     $("st").innerHTML = c.st.map(x => `<div><strong>${x[i]}</strong><span>${x[2 + i]}</span></div>`).join("");
     $("win").textContent = c.win[i];
     $("mtabs").innerHTML = c.mk.map((x, k) => `<button type="button" role="tab" data-bel="${k}" aria-selected="${k === st.m}" aria-controls="${ids.rows}" tabindex="${k === st.m ? 0 : -1}">${x.n[i]}</button>`).join("");
-    rows.innerHTML = m.r.map((r, k) => `<li><span class="ico y-${r.y}" aria-hidden="true">${PICO[r.y]}</span><div><b>${r.t[i]}${r.c ? `<em>${t(r.c)}</em>` : ""}</b><p>${r.d[i]}</p></div><span class="ty y-${r.y}">${t("bel.y" + r.y)}</span></li>`).join("");
+    // a numbered timeline: the step, its kind, the one that sets the date flagged, the detail beneath
+    rows.classList.add("st2");
+    rows.innerHTML = m.r.map((r, k) => `<li class="y-${r.y}${r.c ? " crit" : ""}"><span class="sn" aria-hidden="true">${k + 1}</span><div class="sb"><div class="sh2"><b>${r.t[i]}</b><span class="sk y-${r.y}">${t("bel.y" + r.y)}</span></div>${r.c ? `<span class="sc">${t(r.c)}</span>` : ""}<p>${r.d[i]}</p></div></li>`).join("");
     $("src").innerHTML = (c.pre ? t(c.pre) : o.pre ? t(o.pre) : "") + t(m.src.length > 1 ? "bel.srcs" : "bel.src") + m.src.map(x => `<a href="${x[0]}" target="_blank" rel="noopener">${x[1 + i]} ↗</a>`).join(i ? "、" : ", ");
     if (anim === "rows" && !RM){ rows.classList.remove("sw"); void rows.offsetWidth; rows.classList.add("sw"); }
     if (anim === "case" && !RM){ const b = $("body"); b.classList.remove("sw"); void b.offsetWidth; b.classList.add("sw"); }
@@ -3930,13 +3958,17 @@ const BRANDS = ["Tiger Sugar","Chatime","Miniso","Hertz","Planet Fitness","The U
 // Logo files supplied by the user; brands without a file show their name until one is added.
 const LOGOS = {"Hertz": "logos/hertz.png", "Planet Fitness": {src: "logos/planet-fitness.png", big: true}, "The UPS Store": "logos/ups-store.png", "Ligne Roset": {src: "logos/ligne-roset.png", tall: true}, "Natuzzi": {src: "logos/natuzzi.png", mid: true}, "BoConcept": "logos/boconcept.png", "Oppein Home": "logos/oppein.png", "Gautier": "logos/gautier.png", "Calligaris": "logos/calligaris.png", "Schmidt": "logos/schmidt.png", "KUKA Home": {src: "logos/kuka.png", tall: true}, "Quanu": {src: "logos/quanu.png", mq: true}, "QM Qumei": {src: "logos/qumei.png", tall: true}, "Roche Bobois": {src: "logos/roche-bobois.png", big: true}, "Crunch Fitness": {src: "logos/crunch-fitness.png", big: true}, "Gold's Gym": {src: "logos/golds-gym.png", big: true, label: ["Gold's Gym","Gold's Gym"]}, "Starbucks": {src: "logos/starbucks.png", tall: true}, "Chick-fil-A": {src: "logos/chick-fil-a.png", tall: true}, "Costa Coffee": {src: "logos/costa-coffee.png", tall: true}, "Luckin Coffee": "logos/luckin-coffee.png", "Chagee": "logos/chagee.png", "Mixue": "logos/mixue.png", "Auntea Jenny": "logos/auntea-jenny.png", "Guming": "logos/guming.png", "Chili's": "logos/chilis.png", "Wallace": {src: "logos/wallace.png", tall: true}, "Happy Lamb Hot Pot": {src: "logos/happy-lamb.png", tall: true, label: ["Happy Lamb","快乐小羊"]}, "Gyu-Kaku": {src: "logos/gyu-kaku.png", tall: true}, "KFC": {src: "logos/kfc.png", tall: true}, "McDonald's": "logos/mcdonalds.png", "Domino's": "logos/dominos.png", "Paris Baguette": {src: "logos/paris-baguette.png", thin: true}, "Tim Hortons": "logos/tim-hortons.png", "7-Eleven": {src: "logos/7-eleven.png", tall: true}, "Tastien": "logos/tastien.png", "Tous les Jours": {src: "logos/tous-les-jours.png", mid: true}, "bb.q Chicken": "logos/bbq-chicken.png", "Bafang Yunji": {src: "logos/bafang.png", tall: true}, "Zhengxin Chicken": {src: "logos/zhengxin.png", tall: true}, "Juewei": "logos/juewei.png", "Naisnow": {src: "logos/naisnow.png", tall: true}, "Pizza Hut": {src: "logos/pizza-hut.png", tall: true}, "Five Guys": "logos/five-guys.png", "Yi Dian Dian": "logos/yi-dian-dian.png", "Wingstop": "logos/wingstop.png", "Wendy's": {src: "logos/wendys.png", tall: true}, "Popeyes": {src: "logos/popeyes.png", tall: true}, "Burger King": {src: "logos/burger-king.png", tall: true}, "Subway": {src: "logos/subway.png", mid: true}, "Yogurtland": "logos/yogurtland.png", "Dunkin'": {src: "logos/dunkin.png", mid: true}, "Dutch Bros Coffee": "logos/dutch-bros.png", "Tiger Sugar": {src: "logos/tiger-sugar.png", tall: true}, "Chatime": "logos/chatime.png", "Miniso": {src: "logos/miniso.png", tall: true}, "Gong Cha": {src: "logos/gong-cha.png", tall: true}, "Jollibee": {src: "logos/jollibee.png", tall: true}, "Pollo Campero": "logos/pollo-campero.png", "Molly Tea": "logos/molly-tea.png", "Zhangliang Malatang": "logos/zhangliang.png", "Yang's Braised Chicken Rice": "logos/yang-mingyu.png", "Meiyijia": "logos/meiyijia.png", "Lawson": {src: "logos/lawson.png", mid: true}, "FamilyMart": {src: "logos/familymart.png", mid: true}, "Cotti Coffee": {src: "logos/cotti.png", mid: true}, "Yang Guofu Malatang": "logos/yang-guofu.png", "Kuafu Fried Skewers": "logos/kuafu.png", "LINLEE": "logos/linlee.png", "Zhu Guang Yu Hot Pot": "logos/zhu-guangyu.png", "Yonny": "logos/yonny.png", "Tantanxiang": {src: "logos/tantanxiang.png", tall: true}};
 /* backers: operators who invested in Placetta, shown with their company's mark; a missing file falls back to the name */
-const BK = [["openai","OpenAI","OpenAI","png"],["anthropic","Anthropic","Anthropic"],["spacex","SpaceX","SpaceX"],["tesla","Tesla","特斯拉"],["amazon","Amazon","亚马逊"],["deepmind","Google DeepMind","Google DeepMind"],["deepseek","DeepSeek","深度求索"],["janestreet","Jane Street","Jane Street"],["apollo","Apollo","阿波罗"],["renaissance","Renaissance Technologies","文艺复兴科技","png"],["cursor","Cursor","Cursor"],["nvidia","NVIDIA","英伟达"],["google","Google","谷歌"],["baidu","Baidu","百度"],["tencent","Tencent","腾讯"],["bytedance","ByteDance","字节跳动"],["alibaba","Alibaba","阿里巴巴"],["huawei","Huawei","华为"],["goldmansachs","Goldman Sachs","高盛"],["merrilllynch","Merrill Lynch","美林"],["deutschebank","Deutsche Bank","德意志银行"],["blackstone","Blackstone","黑石"],["binance","Binance","币安"],["coinbase","Coinbase","Coinbase"]];
+const BK = [["openai","OpenAI","OpenAI","png"],["anthropic","Anthropic","Anthropic"],["spacex","SpaceX","SpaceX"],["tesla","Tesla","特斯拉"],["amazon","Amazon","亚马逊"],["deepmind","Google DeepMind","Google DeepMind"],["deepseek","DeepSeek","深度求索"],["janestreet","Jane Street","Jane Street"],["apollo","Apollo","阿波罗"],["renaissance","RenTec","文艺复兴科技"],["cursor","Cursor","Cursor"],["nvidia","NVIDIA","英伟达"],["google","Google","谷歌"],["baidu","Baidu","百度"],["tencent","Tencent","腾讯"],["bytedance","ByteDance","字节跳动"],["alibaba","Alibaba","阿里巴巴"],["huawei","Huawei","华为"],["goldmansachs","Goldman Sachs","高盛"],["merrilllynch","Merrill Lynch","美林"],["deutschebank","Deutsche Bank","德意志银行"],["blackstone","Blackstone","黑石"],["binance","Binance","币安"],["coinbase","Coinbase","Coinbase"]];
 const BK_WORD = new Set(["goldmansachs","coinbase"]);
-const BK_WIDE = {janestreet: 30, apollo: 17, renaissance: 18, merrilllynch: 30, blackstone: 26};   // full wordmark files: drawn at their own shape, the name label hidden   // marks that are themselves the wordmark: shown large, the name label hidden
-const BK_FILES = new Set(["openai","anthropic","spacex","tesla","amazon","deepmind","deepseek","cursor","nvidia","google","baidu","tencent","bytedance","alibaba","huawei","goldmansachs","deutschebank","binance","coinbase","janestreet","apollo","renaissance","merrilllynch","blackstone"]);
+const BK_WIDE = {janestreet: 30, apollo: 17, merrilllynch: 30, blackstone: 26};   // full wordmark files: drawn at their own shape, the name label hidden   // marks that are themselves the wordmark: shown large, the name label hidden
+const BK_FILES = new Set(["openai","anthropic","spacex","tesla","amazon","deepmind","deepseek","cursor","nvidia","google","baidu","tencent","bytedance","alibaba","huawei","goldmansachs","deutschebank","binance","coinbase","janestreet","apollo","merrilllynch","blackstone"]);
+// the wall starts folded to one row; "Show all" opens it
+document.addEventListener("click", e => { const b = e.target.closest("#bkMore"); if (!b) return; const g = document.getElementById("bkG"), open = g.classList.toggle("fold") === false;
+  b.setAttribute("aria-expanded", open); b.querySelector("span").textContent = open ? t("bk.less") : t("bk.more").replace("{n}", BK.length); track("backers_toggle", {open}); });
 // PROOF.backersLogos off: employers as plain text, no marks, no brand colours, and no company named in the hero
 function renderBk(){ const hb = document.getElementById("hBk"), lg = PROOF.backersLogos; if (hb) hb.innerHTML = (lg ? `<span class="hbkm" aria-hidden="true">${BK.filter(b => BK_FILES.has(b[0])).slice(0, 5).map(([k, , , ext]) => `<img src="logos/backers/${k}.${ext || "svg"}" alt="" decoding="async" draggable="false">`).join("")}</span>` : "") + `<span>${esc(t("bk.hero"))}</span>`;
   const el = document.getElementById("bkG"); if (!el) return; const i = L(); el.classList.toggle("bkt", !lg);
+  const mb = document.getElementById("bkMore"); if (mb) mb.querySelector("span").textContent = el.classList.contains("fold") ? t("bk.more").replace("{n}", BK.length) : t("bk.less");
   if (!lg) { el.innerHTML = BK.map(([, en, zh]) => `<li><span>${esc(i ? zh : en)}</span></li>`).join(""); return; }
   el.innerHTML = BK.map(([k, en, zh, ext]) => `<li${BK_FILES.has(k) ? (BK_WIDE[k] ? ' class="wl"' : BK_WORD.has(k) ? ' class="wm"' : "") : ' class="nm"'}>${BK_FILES.has(k) ? `<img src="logos/backers/${k}.${ext || "svg"}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false"${BK_WIDE[k] ? ` style="--h:${BK_WIDE[k]}px"` : ""}>` : ""}<span>${esc(i ? zh : en)}</span></li>`).join(""); }
 // PROOF.customerNames off: the strip names the industries Odelia is built for, as plain text, and no brand
@@ -4605,7 +4637,9 @@ function xpResolve(el, on){
 // portrait swaps in the company tapestry: slot -> advisor photo index (photos past the tapestry slots are otherwise unused there)
 const XPSWAP = {15: 52};   // Tesla
 // PROOF.expertLogos on: a small mark beside the companies we hold a file for; off: names only
-const XPL = {"OpenAI": "openai.png", "Google": "google.svg", "Amazon": "amazon.svg", "Huawei": "huawei.svg", "NVIDIA": "nvidia.svg", "Tesla": "tesla.svg", "Jane Street": "janestreet.svg", "Renaissance Technologies": "renaissance.png", "Goldman Sachs": "goldmansachs.svg", "Blackstone": "blackstone.svg"};
+// Government and academia, AI and technology: each name with its small square icon (logos/fav). Every other row: names only.
+const XPL = {"U.S. FDA": "fda.svg", "Harvard University": "harvard.svg", "MIT": "mit.svg", "University of Pennsylvania": "penn.svg", "Princeton University": "princeton.svg", "Stanford University": "stanford.svg",
+  "OpenAI": "openai.png", "Google": "google.svg", "Amazon": "amazon.svg", "Huawei": "huawei.svg", "TikTok": "tiktok.svg", "NVIDIA": "nvidia.svg", "Tesla": "tesla.svg", "TSMC": "tsmc.svg"};
 function renderXp(){
   const i = L(), art = document.getElementById("xpArt"); if (!art) return;
   // spread the portraits across the rows in proportion to the names, one after every name or so
@@ -4613,7 +4647,7 @@ function renderXp(){
   art.innerHTML = XPG.map((g, r) => {
     const names = g[1], share = r === XPG.length - 1 ? XPN - used : Math.round(XPN * names.length / total); used += share;
     const slots = new Set(Array.from({length: share}, (_, j) => Math.floor((j + .5) * names.length / share)));
-    const parts = names.map((x, j) => `<span class="xpn">${PROOF.expertLogos && XPL[x[0]] ? `<img class="xpl" src="logos/backers/${XPL[x[0]]}" alt="" aria-hidden="true">` : ""}${x[i]}</span>` + (slots.has(j) && k < XPN ? `<span class="xpf" data-k="${XPSWAP[k] ?? k}" data-slot="${k++}" aria-hidden="true"><canvas width="128" height="128"></canvas></span>` : j < names.length - 1 ? `<span class="xps" aria-hidden="true">/</span>` : ""));
+    const parts = names.map((x, j) => `<span class="xpn">${PROOF.expertLogos && XPL[x[0]] ? `<img class="xpl xfav" src="logos/fav/${XPL[x[0]]}" alt="" aria-hidden="true">` : ""}${x[i]}</span>` + (slots.has(j) && k < XPN ? `<span class="xpf" data-k="${XPSWAP[k] ?? k}" data-slot="${k++}" aria-hidden="true"><canvas width="128" height="128"></canvas></span>` : j < names.length - 1 ? `<span class="xps" aria-hidden="true">/</span>` : ""));
     return `<div class="xprow"><p class="xpcat">${g[0][i]}</p><p class="xpflow">${parts.join("")}</p></div>`;
   }).join("");
   art.querySelectorAll(".xpf").forEach(el => xpDraw(el.firstChild, +el.dataset.k, 128));
