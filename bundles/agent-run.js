@@ -42,10 +42,10 @@ var require_npm_fflate_0_8 = __commonJS({
   }
 });
 
-// supabase/functions/agent-run/index.ts
+// placetta-agent/supabase/functions/agent-run/index.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
 
-// supabase/functions/_shared/llm.ts
+// placetta-agent/supabase/functions/_shared/llm.ts
 var OPENAI_STYLE = {
   openai: { url: "https://api.openai.com/v1/chat/completions", key: "OPENAI_API_KEY" },
   deepseek: { url: "https://api.deepseek.com/chat/completions", key: "DEEPSEEK_API_KEY" },
@@ -202,7 +202,7 @@ async function callModel(env2, call, fallbackModel, research, f = fetch) {
   return last;
 }
 
-// supabase/functions/_shared/ai_cost.ts
+// placetta-agent/supabase/functions/_shared/ai_cost.ts
 var PRICES = [
   [/fable/, { in: 10, out: 50 }],
   [/opus-5-5/, { in: 4, out: 20 }],
@@ -228,7 +228,7 @@ function costOf(model2, u) {
   return Math.round(usd * 1e6) / 1e6;
 }
 
-// supabase/functions/_shared/ai_gate.ts
+// placetta-agent/supabase/functions/_shared/ai_gate.ts
 var mins = (s) => {
   const m = Math.max(1, Math.ceil((s ?? 60) / 60));
   return m >= 90 ? `${Math.round(m / 60)} hours` : `${m} minute${m === 1 ? "" : "s"}`;
@@ -271,7 +271,7 @@ async function record(admin2, event, model2, usage) {
   return cost;
 }
 
-// supabase/functions/_shared/odelia.ts
+// placetta-agent/supabase/functions/_shared/odelia.ts
 function normalizePhone(input) {
   if (typeof input !== "string") return null;
   const s = input.trim();
@@ -396,7 +396,7 @@ var SAY = {
   missed: { en: "Odelia from Placetta tried to call you about this:", zh: "\u5FEB\u54C9\u7684 Odelia \u521A\u624D\u81F4\u7535\u60A8\uFF0C\u4E8B\u7531\u5982\u4E0B\uFF1A" }
 };
 
-// supabase/functions/_shared/odelia_db.ts
+// placetta-agent/supabase/functions/_shared/odelia_db.ts
 var LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at";
 async function linkOf(admin2, userId) {
   const { data } = await admin2.from("phone_links").select(LINK_COLS).eq("user_id", userId).maybeSingle();
@@ -429,7 +429,7 @@ async function mayUseAgent(admin2, ws, userId) {
   return plan === "none" ? "no_plan" : "ok";
 }
 
-// supabase/functions/agent-run/agent.js
+// placetta-agent/supabase/functions/agent-run/agent.js
 var e = (t, n) => ({ en: t, zh: n });
 var F = (t) => ({ en: t, zh: t });
 var xt = Date.now();
@@ -1608,7 +1608,7 @@ async function Ni(t) {
   return { reply: { text: [F(y)], apps: [...a.apps].slice(0, 3), approvals: a.approvals, memory: a.memory, skills: a.skills.length ? a.skills : void 0, matches: a.matches, files: a.files.length ? a.files.slice(0, 6) : void 0, table: a.table, sources: D.length ? D : void 0 } };
 }
 
-// supabase/functions/agent-run/selftest.ts
+// placetta-agent/supabase/functions/agent-run/selftest.ts
 var same = (s) => ({ en: s, zh: s });
 var FILED = ["filing", "review", "approved"];
 var complete = (a) => a.fields.length > 0 && a.fields.every((f) => f.value) && !a.checklist.some((c) => c.state === "missing");
@@ -1794,7 +1794,7 @@ async function selftest(env2, o = {}) {
   }
 }
 
-// supabase/functions/agent-run/index.ts
+// placetta-agent/supabase/functions/agent-run/index.ts
 var SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 var admin = (0, import_supabase_js_2.createClient)(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false, autoRefreshToken: false } });
 var env = (k, d2 = "") => Deno.env.get(k) ?? d2;
@@ -2027,7 +2027,7 @@ async function textBack(run, text, approvals) {
   const link = await linkOf(admin, run.created_by);
   if (!link?.verified_at || link.number !== normalizePhone(run.reply_to)) return;
   const origin = appOrigin(env);
-  const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : null) : "";
+  const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
   const segments = splitSms(text, { max: 3, lang: run.lang, more: appLink(origin, run.workspace_id), tail: approve ? `${SAY.approve[run.lang]} ${approve}` : void 0 });
   await textUser(admin, env, { link, workspace_id: run.workspace_id, segments, kind: "reply", run_id: run.id });
 }
@@ -2045,7 +2045,7 @@ async function queueApprovalTexts(run, title, approvals) {
     urgent: false,
     dedupe: `approval:${run.id}`,
     body: l.lang === "zh" ? `${title.zh}\u3002\u6709 ${approvals.length} \u9879\u7B49\u5F85\u60A8\u6279\u51C6\u3002` : `${title.en}. ${approvals.length} item${approvals.length === 1 ? " is" : "s are"} waiting for your approval.`,
-    link: appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : null) || null
+    link: appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") || null
   }));
   if (rows.length) await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
 }

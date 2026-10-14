@@ -42,10 +42,10 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// supabase/functions/file/index.ts
+// placetta-agent/supabase/functions/file/index.ts
 var import_npm_pdf_lib_1_17 = __toESM(require_npm_pdf_lib_1_17(), 1);
 
-// supabase/functions/file/shared.ts
+// placetta-agent/supabase/functions/file/shared.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
 var SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 var SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -60,7 +60,8 @@ var STATUS = {
   not_found: 404,
   not_connected: 409,
   not_configured: 503,
-  upstream_error: 502
+  upstream_error: 502,
+  too_late: 409
 };
 var HttpError = class extends Error {
   constructor(code, message) {
@@ -166,7 +167,7 @@ function b64urlDecode(s) {
 var utf8 = (s) => new TextEncoder().encode(s);
 var STATE_TTL_MS = 10 * 60 * 1e3;
 
-// supabase/functions/file/destinations.ts
+// placetta-agent/supabase/functions/file/destinations.ts
 var DEST = {
   "irs-ss4": {
     // Foreign applicants: the IRS lists 855-215-1627 for faxes sent from within the US (Placetta's fax number is
@@ -236,6 +237,8 @@ var DEST = {
   },
   "tx-304": {
     mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    portal: "direct.sos.state.tx.us",
+    // SOSDirect: "Payments for web filings may be made by credit card or client account" (help-corp-filing-304)
     signature: "drawn",
     checked: "2026-10-13",
     source: "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml"
@@ -274,14 +277,83 @@ var DEST = {
   "sj-building-ti": { portal: "sjpermits.org", signature: "drawn", checked: "2026-10-13", source: "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement" },
   "sj-sign": { portal: "sjpermits.org", signature: "drawn", checked: "2026-10-13", source: "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits" },
   "aus-building": { portal: "abc.austintexas.gov", signature: "typed", checked: "2026-10-13", source: "https://www.austintexas.gov/development-services/commercial-plan-review" },
-  "la-ladbs": { portal: "eplanla.lacity.org", signature: "typed", checked: "2026-10-13", source: "https://dbs.lacity.gov/" }
+  "la-ladbs": { portal: "eplanla.lacity.org", signature: "typed", checked: "2026-10-13", source: "https://dbs.lacity.gov/" },
+  // ---- Read from the agencies' own pages on 2026-10-13 (federal, California, Los Angeles, New York). ----
+  "irs-5472": {
+    // Foreign-owned U.S. DEs: "Fax ... to 855-887-7737" (300 DPI or higher) or mail; "you cannot file Form 5472 electronically."
+    fax: { us: "+18558877737", foreign: "+18558877737" },
+    faxQuality: "very_high",
+    mail: { name: "Internal Revenue Service", line1: "1973 Rulon White Blvd", line2: "M/S 6112 Attn: PIN Unit", city: "Ogden", state: "UT", zip: "84201" },
+    signature: "wet",
+    // signed with the pro forma Form 1120
+    checked: "2026-10-13",
+    source: "https://www.irs.gov/zh-hant/instructions/i5472"
+  },
+  "irs-w7": {
+    // Mailed with original or certified identity documents, so the person or the team always sends it.
+    mail: { name: "Internal Revenue Service, Austin Service Center", line1: "ITIN Operation", line2: "P.O. Box 149342", city: "Austin", state: "TX", zip: "78714-9342" },
+    signature: "wet",
+    checked: "2026-10-13",
+    source: "https://irs.gov/tin/itin/how-to-apply-for-an-itin"
+  },
+  "fincen-boir": {
+    // "Go to boiefiling.fincen.gov"; no account; an hCaptcha before submitting, which the worker hands to the person.
+    // Since March 21, 2025 only companies formed under a foreign country's law and registered in a US state file.
+    portal: "boiefiling.fincen.gov",
+    noLogin: true,
+    signature: "none",
+    checked: "2026-10-13",
+    source: "https://boiefiling.fincen.gov/resources/BOIR_E-File_Online_Step-by-Step_Instructions.pdf"
+  },
+  "ca-cdtfa": {
+    // "Register Online" links to onlineservices.cdtfa.ca.gov; "There is no charge for a seller's permit."
+    portal: "onlineservices.cdtfa.ca.gov",
+    signature: "none",
+    checked: "2026-10-13",
+    source: "https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm"
+  },
+  "ca-edd-de1": {
+    // e-Services for Business, eddservices.edd.ca.gov: "Register, close, or re-open an employer payroll tax account."
+    portal: "eddservices.edd.ca.gov",
+    signature: "none",
+    checked: "2026-10-13",
+    source: "https://edd.ca.gov/e-services-for-business/"
+  },
+  "la-btrc": {
+    // "The fastest way to register is online": latax.lacity.org/businessregapp
+    portal: "latax.lacity.org",
+    signature: "none",
+    checked: "2026-10-13",
+    source: "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc"
+  },
+  "ny-dtf-17": {
+    // "register with the Tax Department through New York Business Express"; needs a NY.gov Business account
+    portal: "www.businessexpress.ny.gov",
+    signature: "none",
+    checked: "2026-10-13",
+    source: "https://tax.ny.gov/bus/st/register.htm"
+  },
+  "ny-dos-1336": {
+    // "$200 ... forwarded to the New York Department of State, Division of Corporations"; a fee, so the team sends it
+    mail: { name: "New York Department of State, Division of Corporations", line1: "One Commerce Plaza, 99 Washington Avenue", city: "Albany", state: "NY", zip: "12231" },
+    signature: "wet",
+    checked: "2026-10-13",
+    source: "https://dos.ny.gov/limited-liability-company-articles-organization"
+  },
+  "fda-ffr": {
+    // FDA Industry Systems at www.access.fda.gov, "created to facilitate making submissions to FDA, including registrations"
+    portal: "www.access.fda.gov",
+    signature: "none",
+    checked: "2026-10-13",
+    source: "https://www.fda.gov/food/registration-food-facilities"
+  }
 };
 function staleDestinations(today, days = 90, dest = DEST) {
   const now = Date.parse(today + "T00:00:00Z");
   return Object.entries(dest).filter(([, d]) => now - Date.parse(d.checked + "T00:00:00Z") > days * 864e5).map(([id, d]) => ({ id, checked: d.checked, source: d.source }));
 }
 
-// supabase/functions/file/logic.ts
+// placetta-agent/supabase/functions/file/logic.ts
 function envFrom(get) {
   const list = (k) => (get(k) ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
   const two = Number(get("FILER_TWO_KEY") ?? "10");
@@ -335,10 +407,12 @@ function check(f, d, ctx) {
   }
   return out;
 }
+var feeDue = (f) => Number(f.fee_estimate ?? 0) > 0;
 function pick(f, d, env2, facts2) {
   if (!d) return "team";
   const on = (c) => env2.channels.includes(c);
-  if (d.portal && facts2.hasLogin && env2.portalWorker && on("portal")) return "portal";
+  if (d.portal && (facts2.hasLogin || d.noLogin) && env2.portalWorker && on("portal")) return "portal";
+  if (feeDue(f)) return "team";
   if (d.signature === "wet") return signedCopy(f) && canFaxSigned(d, env2) ? "fax" : "team";
   if (d.email && facts2.mailConnected && on("email")) return "email";
   if (d.fax && env2.fax && on("fax")) return "fax";
@@ -373,9 +447,9 @@ function emailFor(f) {
   };
 }
 
-// supabase/functions/file/index.ts
+// placetta-agent/supabase/functions/file/index.ts
 var env = () => envFrom((k) => Deno.env.get(k));
-var COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path";
+var COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate";
 var log = (en, zh, kind = "info", ref) => ({ en, zh, kind, ...ref ? { ref } : {} });
 async function loadFiling(ws, id) {
   const { data, error } = await admin.from("filings").select(COLS).eq("id", id).eq("workspace_id", ws).maybeSingle();
@@ -570,7 +644,7 @@ async function sendFax(f, d, retry = false) {
   const res = await fetch(`${TELNYX}/faxes`, {
     method: "POST",
     headers: { Authorization: `Bearer ${Deno.env.get("TELNYX_API_KEY")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ connection_id: Deno.env.get("TELNYX_FAX_CONNECTION_ID"), from: Deno.env.get("TELNYX_FAX_FROM"), to, media_url, quality: "high", monochrome: true }),
+    body: JSON.stringify({ connection_id: Deno.env.get("TELNYX_FAX_CONNECTION_ID"), from: Deno.env.get("TELNYX_FAX_FROM"), to, media_url, quality: d.faxQuality ?? "high", monochrome: true }),
     signal: AbortSignal.timeout(3e4)
   }).catch((e) => {
     console.error("telnyx:", describe(e));
@@ -847,6 +921,14 @@ async function teamApprove(f, by) {
 async function takeOver(f, by) {
   return view(await step(f, log("The Placetta team took over this filing", "\u5FEB\u54C9\u56E2\u961F\u5DF2\u63A5\u624B\u6B64\u7533\u8BF7", "take_over", by), { agent_state: "handoff", channel: "team" }));
 }
+async function stop(f, by) {
+  const { data, error } = await admin.rpc("stop_agent_filing", { p_id: f.id, p_by: by });
+  if (error) {
+    if (/too_late/.test(error.message ?? "")) throw new HttpError("too_late", "It has already gone to the agency, so it can't be stopped. If something is wrong, tell us and the team contacts the agency.");
+    throw new Error(`stop failed: ${error.message?.slice(0, 200) ?? error.code}`);
+  }
+  return view(data);
+}
 async function telnyxWebhook(req) {
   const pub = Deno.env.get("TELNYX_PUBLIC_KEY") ?? "";
   const sig = req.headers.get("telnyx-signature-ed25519") ?? "", ts = req.headers.get("telnyx-timestamp") ?? "";
@@ -907,5 +989,6 @@ serve(async (req) => {
   if (action === "resume") return ok(await resume(f, user.email ?? user.id));
   if (action === "start") return ok(await start(f, req, user.email ?? user.id));
   if (action === "signed") return ok(await signed(f, String(body.path ?? "").slice(0, 500), user.email ?? user.id));
-  throw new HttpError("bad_request", "action must be start, resume, signed or status.");
+  if (action === "stop") return ok(await stop(f, user.email ?? user.id));
+  throw new HttpError("bad_request", "action must be start, resume, signed, stop or status.");
 });
