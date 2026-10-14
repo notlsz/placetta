@@ -42,10 +42,10 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// placetta-agent/supabase/functions/file/index.ts
+// supabase/functions/file/index.ts
 var import_npm_pdf_lib_1_17 = __toESM(require_npm_pdf_lib_1_17(), 1);
 
-// placetta-agent/supabase/functions/file/shared.ts
+// supabase/functions/file/shared.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
 var SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 var SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -167,7 +167,7 @@ function b64urlDecode(s) {
 var utf8 = (s) => new TextEncoder().encode(s);
 var STATE_TTL_MS = 10 * 60 * 1e3;
 
-// placetta-agent/supabase/functions/file/destinations.ts
+// supabase/functions/file/destinations.ts
 var DEST = {
   "irs-ss4": {
     // Foreign applicants: the IRS lists 855-215-1627 for faxes sent from within the US (Placetta's fax number is
@@ -353,7 +353,7 @@ function staleDestinations(today, days = 90, dest = DEST) {
   return Object.entries(dest).filter(([, d]) => now - Date.parse(d.checked + "T00:00:00Z") > days * 864e5).map(([id, d]) => ({ id, checked: d.checked, source: d.source }));
 }
 
-// placetta-agent/supabase/functions/file/logic.ts
+// supabase/functions/file/logic.ts
 function envFrom(get) {
   const list = (k) => (get(k) ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
   const two = Number(get("FILER_TWO_KEY") ?? "10");
@@ -447,7 +447,7 @@ function emailFor(f) {
   };
 }
 
-// placetta-agent/supabase/functions/file/index.ts
+// supabase/functions/file/index.ts
 var env = () => envFrom((k) => Deno.env.get(k));
 var COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate";
 var log = (en, zh, kind = "info", ref) => ({ en, zh, kind, ...ref ? { ref } : {} });

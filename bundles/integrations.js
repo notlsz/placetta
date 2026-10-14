@@ -35,7 +35,7 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/integrations/shared.ts
+// supabase/functions/integrations/shared.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
 var SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 var SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -225,7 +225,7 @@ function allowedReturn(ret, origins) {
   }
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/integrations/providers.ts
+// supabase/functions/integrations/providers.ts
 var KINDS = ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"];
 var isKind = (v) => typeof v === "string" && KINDS.includes(v);
 var PROVIDER = {
@@ -587,7 +587,7 @@ async function revoke(row) {
   }
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/integrations/index.ts
+// supabase/functions/integrations/index.ts
 var GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me";
 var GRAPH = "https://graph.microsoft.com/v1.0";
 var DRIVE = "https://www.googleapis.com/drive/v3";
@@ -873,7 +873,7 @@ function gmailMime(to, subject, content, files) {
 async function sendFrom(ws, kindParamValue, to, subject, content, files) {
   const kind = await pickKind(ws, kindParamValue, ["gmail", "outlook_mail"], "Connect Gmail or Outlook in Settings.");
   const conn = await Conn.open(ws, kind);
-  let id = "";
+  let id = "", thread = "";
   if (kind === "gmail") {
     const r = await conn.callJson(`${GMAIL}/messages/send`, {
       method: "POST",
@@ -881,6 +881,7 @@ async function sendFrom(ws, kindParamValue, to, subject, content, files) {
       body: JSON.stringify({ raw: b64urlEncode(utf8(gmailMime(to, subject, content, files))) })
     });
     id = r.id ?? "";
+    thread = r.threadId ?? "";
   } else {
     const size = files.reduce((n, f) => n + f.bytes.length, 0);
     if (size > GRAPH_INLINE_BYTES) throw new HttpError("bad_request", "Outlook takes at most about 3 MB of attachments in one message. Send it by fax or mail instead.");
@@ -898,8 +899,9 @@ async function sendFrom(ws, kindParamValue, to, subject, content, files) {
     if (!draft.id) throw new HttpError("upstream_error", "Outlook didn't create the message. Try again.");
     await conn.callJson(`${GRAPH}/me/messages/${enc(draft.id)}/send`, { method: "POST" });
     id = draft.id;
+    thread = draft.conversationId ?? "";
   }
-  return { kind, id, account: conn.row.account ?? "" };
+  return { kind, id, thread, account: conn.row.account ?? "" };
 }
 function mailInput(body) {
   const to = recipients(body.to);
@@ -908,11 +910,27 @@ function mailInput(body) {
   if (body.body.length > 5e4) throw new HttpError("bad_request", "body is too long (at most 50000 characters).");
   return { to, subject, content: body.body.replace(/\r\n?/g, "\n") };
 }
+async function track(ws, sent, to, subject, extra = {}) {
+  if (!sent.id || !sent.thread) return;
+  const { error } = await admin.from("mail_threads").insert({
+    workspace_id: ws,
+    kind: sent.kind,
+    account: sent.account || null,
+    message_id: sent.id,
+    thread_id: sent.thread,
+    to_addrs: to.join(", ").slice(0, 500),
+    subject: subject.slice(0, 300),
+    ...extra
+  });
+  if (error) console.error("mail_threads insert:", error.code ?? "");
+}
 var mailSend = async (c) => {
   if (c.body.approved !== true) throw new HttpError("bad_request", "The customer must approve this message before it is sent.");
   const { to, subject, content } = mailInput(c.body);
   const files = await loadAttachments(c.ws, c.body.attachments);
-  const { kind, account } = await sendFrom(c.ws, c.body.kind, to, subject, content, files);
+  const sent = await sendFrom(c.ws, c.body.kind, to, subject, content, files);
+  const { kind, account } = sent;
+  await track(c.ws, sent, to, subject, { sent_by: c.user.id, app_id: optText(c.body.app_id, "app_id", 80) ?? void 0 });
   const list = to.join(", ");
   const via = account ? ` (${account})` : "";
   await audit({
@@ -921,7 +939,7 @@ var mailSend = async (c) => {
     object: same(subject),
     detail: { en: `Via ${NAMES[kind].en}${via}${files.length ? `, ${files.length} attached` : ""}`, zh: `\u901A\u8FC7 ${NAMES[kind].zh}${via}${files.length ? `\uFF0C\u9644\u4EF6 ${files.length} \u4E2A` : ""}` }
   });
-  return ok({ kind });
+  return ok({ kind, tracking: !!sent.thread });
 };
 async function filerMailSend(body) {
   const ws = uuidParam(body.workspace_id, "workspace_id");
@@ -935,7 +953,101 @@ async function filerMailSend(body) {
   const approved = new Set([p.pdf_path, ...Array.isArray(p.attachments) ? p.attachments.map((a) => a?.path) : []].filter((x) => typeof x === "string"));
   const { to, subject, content } = mailInput(body);
   const files = await loadAttachments(ws, body.attachments, approved);
-  return ok(await sendFrom(ws, body.kind, to, subject, content, files));
+  const sent = await sendFrom(ws, body.kind, to, subject, content, files);
+  const { data: row } = await admin.from("filings").select("app_id").eq("id", filingId).maybeSingle();
+  await track(ws, sent, to, subject, { filing_id: filingId, app_id: row?.app_id ?? void 0 });
+  return ok(sent);
+}
+var addrOf = (s) => (s.match(/<([^>]+)>/)?.[1] ?? s).trim().toLowerCase();
+var nameOf = (s) => s.replace(/<[^>]+>/, "").replace(/"/g, "").trim() || addrOf(s);
+async function gmailReplies(conn, t) {
+  const r = await conn.callJson(`${GMAIL}/threads/${enc(t.thread_id)}?format=metadata&metadataHeaders=From&metadataHeaders=Date`);
+  const me = (t.account ?? "").toLowerCase(), sent = Date.parse(t.sent_at);
+  return (r.messages ?? []).flatMap((m) => {
+    const from = header(m.payload?.headers, "From"), at = Number(m.internalDate ?? 0);
+    if (m.id === t.message_id || !at || at <= sent || me && addrOf(from) === me) return [];
+    return [{ from, at: new Date(at).toISOString(), snippet: decodeEntities(m.snippet ?? "").slice(0, 280) }];
+  });
+}
+async function graphReplies(conn, t) {
+  const filter = `conversationId eq '${t.thread_id.replace(/'/g, "''")}'`;
+  const r = await conn.callJson(
+    `${GRAPH}/me/messages?$filter=${enc(filter)}&$select=id,from,receivedDateTime,bodyPreview,isDraft&$top=25`
+  );
+  const me = (t.account ?? "").toLowerCase(), sent = Date.parse(t.sent_at);
+  return (r.value ?? []).flatMap((m) => {
+    const from = graphAddr(m.from), at = Date.parse(m.receivedDateTime ?? "");
+    if (m.isDraft || m.id === t.message_id || !at || at <= sent || me && addrOf(from) === me) return [];
+    return [{ from, at: new Date(at).toISOString(), snippet: (m.bodyPreview ?? "").slice(0, 280) }];
+  });
+}
+async function mailWatch() {
+  const now = (/* @__PURE__ */ new Date()).toISOString();
+  await admin.from("mail_threads").update({ closed_at: now }).is("closed_at", null).lt("sent_at", new Date(Date.now() - 30 * 864e5).toISOString()).eq("replies", 0);
+  const { data, error } = await admin.from("mail_threads").select("id, workspace_id, kind, account, message_id, thread_id, subject, to_addrs, app_id, sent_at, replies, last_reply_at").is("closed_at", null).order("checked_at", { ascending: true, nullsFirst: true }).limit(80);
+  if (error) throw new Error(`mail_threads: ${error.code ?? ""}`);
+  const conns = /* @__PURE__ */ new Map();
+  let checked = 0, replied = 0;
+  for (const t of data ?? []) {
+    const key = `${t.workspace_id}:${t.kind}`;
+    if (!conns.has(key)) conns.set(key, await Conn.open(t.workspace_id, t.kind).catch(() => null));
+    const conn = conns.get(key);
+    if (!conn) {
+      await admin.from("mail_threads").update({ checked_at: now, closed_at: now }).eq("id", t.id);
+      continue;
+    }
+    let found = [];
+    try {
+      found = t.kind === "gmail" ? await gmailReplies(conn, t) : await graphReplies(conn, t);
+      checked++;
+    } catch (e) {
+      console.error("mail_watch", t.kind, e instanceof Error ? e.message.slice(0, 160) : e);
+    }
+    const fresh = found.filter((r) => !t.last_reply_at || r.at > t.last_reply_at).sort((a, b) => a.at.localeCompare(b.at));
+    if (!fresh.length) {
+      await admin.from("mail_threads").update({ checked_at: now }).eq("id", t.id);
+      continue;
+    }
+    const last = fresh[fresh.length - 1], who = nameOf(last.from);
+    await admin.from("mail_threads").update({ checked_at: now, replies: t.replies + fresh.length, last_reply_at: last.at, last_reply_from: last.from.slice(0, 300), last_reply_snippet: last.snippet }).eq("id", t.id);
+    await notifyReply(t, who, last);
+    replied++;
+  }
+  return ok({ checked, replied });
+}
+async function notifyReply(t, who, r) {
+  const dedupe = `mail:${t.id}:${r.at}`;
+  const title = { en: `${who} replied: ${t.subject}`.slice(0, 200), zh: `${who} \u56DE\u590D\u4E86\uFF1A${t.subject}`.slice(0, 200) };
+  const { data: made, error } = await admin.from("updates").upsert({
+    workspace_id: t.workspace_id,
+    kind: "mail",
+    title,
+    body: same(r.snippet || "(no text)"),
+    app_id: t.app_id,
+    dedupe
+  }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true }).select("id");
+  if (error) {
+    console.error("updates insert:", error.code ?? "");
+    return;
+  }
+  if (!made?.length) return;
+  await audit({ workspace_id: t.workspace_id, actor: "agent", actor_id: null, action: { en: "Got a reply", zh: "\u6536\u5230\u56DE\u590D" }, object: same(t.subject), detail: same(who) });
+  const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", t.workspace_id).eq("role", "owner");
+  const ids = (owners ?? []).map((o) => o.user_id);
+  if (!ids.length) return;
+  const { data: links } = await admin.from("phone_links").select("user_id, lang").in("user_id", ids).eq("texts_on", true).not("verified_at", "is", null).is("opted_out_at", null);
+  const rows = (links ?? []).map((l) => ({
+    user_id: l.user_id,
+    workspace_id: t.workspace_id,
+    kind: "text",
+    urgent: false,
+    link: null,
+    dedupe: `${dedupe}`.slice(0, 300),
+    body: l.lang === "zh" ? `${who} \u56DE\u590D\u4E86\u201C${t.subject}\u201D\uFF1A${r.snippet.slice(0, 120)}\u3002\u56DE\u590D\u6211\u201C\u8BFB\u4E00\u4E0B\u201D\uFF0C\u6211\u6765\u544A\u8BC9\u60A8\u4E0B\u4E00\u6B65\u3002` : `${who} replied to "${t.subject}": ${r.snippet.slice(0, 120)}. Text me "read it" and I'll tell you what to do next.`
+  }));
+  if (!rows.length) return;
+  const { error: oe } = await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
+  if (oe) console.error("odelia_outbox:", oe.code ?? "");
 }
 async function fromFiler(req) {
   const got = req.headers.get("x-filer-secret");
@@ -1334,6 +1446,14 @@ var ACTIONS = {
 };
 var OWNER_ONLY = /* @__PURE__ */ new Set([connect, disconnect, mailSend, slackPost]);
 serve(async (req) => {
+  const mk = req.headers.get("x-monitor-key");
+  if (mk) {
+    const { data: good } = await admin.rpc("monitor_key_ok", { p_key: mk });
+    if (good !== true) throw new HttpError("unauthorized", "Wrong monitor key.");
+    const body2 = await readBody(req);
+    if (body2.action !== "mail_watch") throw new HttpError("bad_request", "The monitor may only watch mail.");
+    return await mailWatch();
+  }
   if (await fromFiler(req)) {
     const body2 = await readBody(req);
     if (body2.action !== "mail_send") throw new HttpError("bad_request", "The filer may only send mail.");
