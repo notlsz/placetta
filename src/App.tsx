@@ -298,6 +298,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     // the preview's "connected" apps are stand-ins with no mailbox or drive behind them
     connected: () => (api.PREVIEW ? [] : integrationsRef.current.filter(i => i.status === "connected").map(i => i.kind)),
     integration: (action, body) => api.integration(cloud.wsId, action, body),
+    spend: async (action, body) => { const r = await api.spend<never>(cloud.wsId, action, body); void api.spendGet(cloud.wsId).then(sp => { if (sp) setPurchases(sp.purchases); }); return r; },
     saveFile: async (file, appId) => { const row = await api.uploadDoc(cloud.wsId, file, appId); paths.current.set(file.name, row.path); void refreshRef.current(); return { path: row.path }; },
     readFile: path => api.downloadDoc(path),
     me: cloud.me.id,
@@ -522,8 +523,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
   }, [cloud, refresh, say]);   // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* A purchase Odelia asked to make: approving it checks the Spending rules again and pays it (a single-use card, or the
-     agency's own page). The server decides in an account; outside one, the same rules run here and nothing is paid. */
+  /* A purchase Odelia asked to make: approving it checks the Spending rules again; then a person pays it on the payee's
+     own page and taps "I've paid it". The server decides in an account; outside one, the same rules run here. */
   const approvePurchase = async (a: Approval) => {
     const zh = lang === "zh", money = (n: number) => `$${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
     if (cloud) {
@@ -538,9 +539,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           const q = r.purchase;
           say(r.waiting ? (zh ? "已批准。金额超过双人审批线，还需另一位所有者批准。" : "Approved. It's over the two-person amount, so another owner approves it too.")
             : q.status === "blocked" ? (zh ? `未购买：${(r.reasons ?? q.reasons ?? []).map(x => x.zh).join("；")}` : `Not bought: ${(r.reasons ?? q.reasons ?? []).map(x => x.en).join("; ")}`)
-            : q.status === "failed" ? (zh ? "您登记的银行卡被拒，未进行购买。" : "Your card on file was declined, so nothing was bought.")
-            : q.method === "card" ? (zh ? `已批准。Odelia 正用尾号 ${q.card?.last4} 的一次性卡付款，金额锁定为 ${money(q.amount)}，付款后卡即作废。` : `Approved. Odelia is paying with a single-use card ending ${q.card?.last4}, locked to ${money(q.amount)} and closed after this payment.`)
-            : (zh ? "已批准。请在机构页面付款，然后告诉 Odelia 已付款。" : "Approved. Pay it on the agency's page, then tell Odelia it's paid."));
+            : (zh ? "已批准。请在对方页面付款，然后点“我已付款”，Odelia 会记录下来。" : "Approved. Pay it on their page, then tap \"I've paid it\" so Odelia records it."));
           if (q.method === "link" && q.payeeUrl && q.status === "approved") window.open(q.payeeUrl, "_blank", "noopener,noreferrer");
         }
         const sp = await api.spendGet(cloud.wsId); if (sp) setPurchases(sp.purchases);

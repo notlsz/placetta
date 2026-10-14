@@ -11,6 +11,7 @@ import type { MemoryFile, MemoryKind, Skill, SkillSource } from "./model";
 import { allSkills, dropSkill, putSkill, toggleSkill } from "./skills";
 import { LANGUAGES, readSpeak, saveSpeak, speakOf, uiLangOf } from "./langs";
 import * as api from "./cloud/api";
+import { DEFAULT_POLICY, SPEND_CATEGORIES, policyProblems, spentIn, suggestBudgets, type Budget, type Purchase, type SpendCategory, type SpendPolicy } from "./spend.ts";
 import type { IntegrationKind } from "./cloud/api";
 import type { HqLink } from "./hq";
 import { TwoStepSetup } from "./cloud/TwoStep";
@@ -837,7 +838,7 @@ const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "team", label: B("Team", "团队"), items: ["team", "hq"] },
   { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "phone", "approvals", "memory", "skills"] },
   { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
-  { id: "billing", label: B("Billing", "账单"), items: ["billing"] },
+  { id: "billing", label: B("Billing", "账单"), items: ["billing", "spending"] },
   { id: "security", label: B("Security", "安全"), items: ["security", "pin"] },
   { id: "privacy", label: B("Privacy and data", "隐私与数据"), items: ["data"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
@@ -951,8 +952,9 @@ export function Settings() {
           </Group>
 
           {show("phone") && <PhoneGroup />}
-          <Group id="approvals" hidden={!show("approvals")} title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never files, pays or sends without your approval, and that can't be turned off.", "快哉会自行准备材料，但未经您批准绝不提交、付款或发送，此项无法关闭。")}
+          <Group id="approvals" hidden={!show("approvals")} title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never files, buys, pays or sends without your approval, and that can't be turned off.", "快哉会自行准备材料，但未经您批准绝不提交、购买、付款或发送，此项无法关闭。")}
             rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you", "代您发送的每一条消息")].map(l => ({ label: l, icon: <I.lock />, right: <em className="lock">{t("alwaysOn")}</em> }))} />
+          {show("spending") && <SpendingGroup />}
           {show("memory") && <MemoryGroup />}
           {show("skills") && <SkillsGroup />}
 
@@ -999,5 +1001,140 @@ export function Settings() {
       {prompt && <PinPrompt title={prompt.title} action={prompt.action} onClose={() => setPrompt(null)} onDone={st => { setPinSt(st); setNow(new Date().toISOString()); const then = prompt.then; setPrompt(null); if (then) setTimeout(then, 0); }} />}
     </div>
     </PinLock.Provider>
+  );
+}
+
+/* ---------------------------------- spending ---------------------------------- */
+
+const SPEND_STATUS: Record<Purchase["status"], Bi> = {
+  asked: B("Waiting for approval", "等待批准"), approved: B("Approved, to pay", "已批准，待付款"), paid: B("Paid", "已付款"),
+  declined: B("Declined", "已拒绝"), blocked: B("Outside the rules", "超出规则"), failed: B("Failed", "失败"), canceled: B("Canceled", "已取消"),
+};
+const usd = (n: number) => `$${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+
+/** What Odelia may ask to buy, from whom, how much, the budgets, and every purchase. Owners change it; nothing is ever
+ *  paid without an owner's approval, and the payment is made on the payee's own page. */
+function SpendingGroup() {
+  const { lang, ws, editWs, say, cloud } = useApp();
+  const zh = lang === "zh", tx = (b: Bi) => b[lang];
+  const [server, setServer] = useState<api.SpendState | null>(null);
+  const [loaded, setLoaded] = useState(!cloud);
+  const [draft, setDraft] = useState<SpendPolicy | null>(null);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { if (cloud) void api.spendGet(cloud.wsId).then(s => { setServer(s); setLoaded(true); }); }, [cloud]);
+  const saved = cloud ? server?.policy ?? DEFAULT_POLICY : ws.spend?.policy ?? DEFAULT_POLICY;
+  const policy = draft ?? saved;
+  const purchases = cloud ? server?.purchases ?? [] : ws.spend?.purchases ?? [];
+  const canEdit = !cloud || cloud.owner;
+  const set = (p: Partial<SpendPolicy>) => setDraft({ ...policy, ...p });
+  const problems = policyProblems(policy);
+  const dirty = !!draft && JSON.stringify(draft) !== JSON.stringify(saved);
+  const save = async () => {
+    if (problems.length) { say(problems.map(tx).join(" ")); return; }
+    setSaving(true);
+    try {
+      if (cloud) { await api.spend(cloud.wsId, "set_policy", { policy }); setServer(await api.spendGet(cloud.wsId)); }
+      else editWs(w => ({ ...w, spend: { purchases: w.spend?.purchases ?? [], policy } }));
+      setDraft(null); say(zh ? "已保存。" : "Saved.");
+    } catch (e) { say((e as api.ApiError).message); }
+    setSaving(false);
+  };
+  const act = async (p: Purchase, action: "decline" | "cancel") => {
+    if (!cloud) { editWs(w => ({ ...w, spend: w.spend && { ...w.spend, purchases: w.spend.purchases.map(x => x.id === p.id ? { ...x, status: action === "decline" ? "declined" as const : "canceled" as const } : x) }, approvals: w.approvals.filter(a => a.purchase !== p.id) })); return; }
+    try { await (action === "decline" ? api.spend(cloud.wsId, "decide", { id: p.id, approve: false }) : api.spend(cloud.wsId, "cancel", { id: p.id })); setServer(await api.spendGet(cloud.wsId)); }
+    catch (e) { say((e as api.ApiError).message); }
+  };
+  const suggest = () => {
+    const s = suggestBudgets((ws.stores ?? []).map(st => ({ id: st.id, name: st.name, apps: ws.apps.filter(a => st.apps?.includes(a.id)) })));
+    if (!s.length) { say(zh ? "门店的申请还没有列出机构费用，暂时无法建议预算。" : "No store's applications list agency fees yet, so there's nothing to base a budget on."); return; }
+    set({ budgets: [...policy.budgets.filter(b => !s.some(x => x.store && x.store === b.store && x.period === "opening")), ...s] });
+  };
+  const spent = (b: Budget) => spentIn(b, purchases);
+  const num = (v: string) => Math.max(0, Math.round(Number(v.replace(/[^\d.]/g, "")) || 0));
+  if (!loaded) return <Group id="spending" title={B("Spending", "支出")} note={B("Loading…", "加载中…")} />;
+  return (
+    <Group id="spending" title={B("Spending", "支出")} note={B("What Odelia may ask to buy for the business, from whom, how much, and from which budget. Every purchase waits for an owner's approval (two owners above the two-person amount); you then pay it on the payee's own page and Odelia records it with its receipt. Placetta never holds or moves your money.", "Odelia 可为企业申请购买什么、向谁购买、金额上限以及使用哪项预算。每笔购买都需所有者批准（超过双人审批金额需两位所有者）；批准后您在对方页面付款，Odelia 记录付款及收据。快哉从不持有或转移您的资金。")}>
+      <ul className="sg-list">
+        <li className="sg-row"><span className="sg-tx"><b>{zh ? "允许 Odelia 申请购买" : "Let Odelia ask to buy things"}</b><small>{zh ? "关闭后，她不会提出任何购买。" : "Off: she never asks to buy anything."}</small></span>
+          <span className="sg-r">{canEdit ? <Toggle on={policy.on} set={v => set({ on: v })} label={zh ? "允许申请购买" : "Allow purchase requests"} /> : <em>{policy.on ? (zh ? "开" : "On") : (zh ? "关" : "Off")}</em>}</span></li>
+      </ul>
+      <div className="sg-sub">
+        <h3>{zh ? "可以购买的类别" : "What she may ask to buy"}</h3>
+        <div className="spend-cats">{SPEND_CATEGORIES.map(c => (
+          <label key={c.id} className="check"><input type="checkbox" disabled={!canEdit} checked={policy.allowed.includes(c.id)} onChange={e => set({ allowed: e.target.checked ? [...policy.allowed, c.id] : policy.allowed.filter(x => x !== c.id) })} /><span><b>{tx(c.label)}</b><small>{tx(c.hint)}</small></span></label>
+        ))}</div>
+      </div>
+      <div className="sg-sub">
+        <h3>{zh ? "收款方" : "Who may be paid"}</h3>
+        <div className="spend-payees">
+          {([["government", B("Government agencies only", "仅限政府机构")], ["listed", B("Agencies, plus the payees listed below", "政府机构及下列收款方")], ["any", B("Anyone, except the blocked list", "任何收款方（禁止名单除外）")]] as [SpendPolicy["payees"], Bi][]).map(([k, l]) => (
+            <label key={k} className="check"><input type="radio" name="spend-payees" disabled={!canEdit} checked={policy.payees === k} onChange={() => set({ payees: k })} /><span>{tx(l)}</span></label>
+          ))}
+        </div>
+        <label className="spend-field">{zh ? "允许的收款方（名称或网址，每行一个）" : "Allowed payees (name or web address, one per line)"}<textarea rows={2} disabled={!canEdit} value={policy.listed.join("\n")} onChange={e => set({ listed: e.target.value.split("\n").map(s => s.trim()).filter(Boolean) })} placeholder="usps.com" /></label>
+        <label className="spend-field">{zh ? "禁止的收款方（每行一个）" : "Never pay (one per line)"}<textarea rows={2} disabled={!canEdit} value={policy.blocked.join("\n")} onChange={e => set({ blocked: e.target.value.split("\n").map(s => s.trim()).filter(Boolean) })} /></label>
+      </div>
+      <div className="sg-sub spend-limits">
+        <h3>{zh ? "金额上限" : "Limits"}</h3>
+        <label className="spend-field">{zh ? "单笔最高（美元）" : "Most for one purchase (USD)"}<input inputMode="decimal" disabled={!canEdit} value={policy.perPurchase} onChange={e => set({ perPurchase: num(e.target.value) })} /></label>
+        <label className="spend-field">{zh ? "超过此金额需两位所有者批准（美元）" : "Two owners approve above (USD)"}<input inputMode="decimal" disabled={!canEdit} value={policy.secondOver ?? ""} placeholder={zh ? "不需要" : "Never"} onChange={e => set({ secondOver: e.target.value.trim() ? num(e.target.value) : undefined })} /></label>
+      </div>
+      <div className="sg-sub">
+        <h3>{zh ? "预算" : "Budgets"}</h3>
+        <p className="sg-note">{zh ? "购买会计入它所属的每一项预算；任何一项超支都会被拒绝。" : "A purchase counts against every budget it falls under; going over any one of them refuses it."}</p>
+        {policy.budgets.length > 0 && (
+          <table className="memt spend-b">
+            <thead><tr><th>{zh ? "适用范围" : "For"}</th><th>{zh ? "类别" : "Kind"}</th><th>{zh ? "周期" : "Period"}</th><th>{zh ? "金额" : "Amount"}</th><th>{zh ? "已用" : "Used"}</th><th><span className="sr">{zh ? "删除" : "Remove"}</span></th></tr></thead>
+            <tbody>{policy.budgets.map((bg, n) => {
+              const upd = (p: Partial<Budget>) => set({ budgets: policy.budgets.map((x, m) => (m === n ? { ...x, ...p } : x)) });
+              return (
+                <tr key={bg.id}>
+                  <td><select disabled={!canEdit} value={bg.store ?? ""} onChange={e => upd({ store: e.target.value || undefined })} aria-label={zh ? "适用范围" : "For"}>
+                    <option value="">{zh ? "整个企业" : "Whole business"}</option>{(ws.stores ?? []).map(s => <option key={s.id} value={s.id}>{tx(s.name)}</option>)}</select></td>
+                  <td><select disabled={!canEdit} value={bg.category ?? ""} onChange={e => upd({ category: (e.target.value || undefined) as SpendCategory | undefined })} aria-label={zh ? "类别" : "Kind"}>
+                    <option value="">{zh ? "全部" : "Everything"}</option>{SPEND_CATEGORIES.map(c => <option key={c.id} value={c.id}>{tx(c.label)}</option>)}</select></td>
+                  <td><select disabled={!canEdit} value={bg.period} onChange={e => upd({ period: e.target.value as Budget["period"] })} aria-label={zh ? "周期" : "Period"}>
+                    <option value="month">{zh ? "每月" : "Each month"}</option><option value="opening">{zh ? "至开业" : "Until it opens"}</option><option value="total">{zh ? "总计" : "In total"}</option></select></td>
+                  <td><input inputMode="decimal" disabled={!canEdit} value={bg.amount} onChange={e => upd({ amount: num(e.target.value) })} aria-label={zh ? "金额" : "Amount"} /></td>
+                  <td className="when">{usd(spent(bg))}{bg.by === "agent" && <small>{zh ? "，Odelia 建议" : ", suggested by Odelia"}</small>}</td>
+                  <td className="acts">{canEdit && <button type="button" className="sbtn quiet" aria-label={zh ? "删除预算" : "Remove budget"} onClick={() => set({ budgets: policy.budgets.filter((_, m) => m !== n) })}><I.x /></button>}</td>
+                </tr>
+              );
+            })}</tbody>
+          </table>
+        )}
+        {canEdit && <div className="sg-form-act">
+          <button type="button" className="sbtn" onClick={() => set({ budgets: [...policy.budgets, { id: `b-${Date.now().toString(36)}`, period: "month", amount: 500, by: "you" }] })}>{zh ? "添加预算" : "Add a budget"}</button>
+          <button type="button" className="sbtn" onClick={suggest}>{zh ? "让 Odelia 按开店计划建议" : "Let Odelia suggest from the opening plan"}</button>
+        </div>}
+      </div>
+      {canEdit && (dirty || problems.length > 0) && (
+        <div className="sg-form-act">
+          {problems.length > 0 && <p className="sg-note warn">{problems.map(tx).join(" ")}</p>}
+          <button type="button" className="sbtn" onClick={() => setDraft(null)} disabled={!dirty}>{zh ? "放弃更改" : "Discard"}</button>
+          <button type="button" className="sbtn ink" onClick={() => void save()} disabled={saving || !dirty || problems.length > 0}>{saving ? "…" : zh ? "保存" : "Save"}</button>
+        </div>
+      )}
+      {!canEdit && <p className="sg-note">{zh ? "只有所有者可以修改支出规则。" : "Only an owner can change the spending rules."}</p>}
+      <div className="sg-sub">
+        <h3>{zh ? "购买记录" : "Purchases"}</h3>
+        {!purchases.length ? <p className="sg-note">{zh ? "还没有购买。Odelia 申请的每一笔都会列在这里，包括被规则拦下的。" : "None yet. Every purchase Odelia asks for shows here, including any the rules stopped."}</p> : (
+          <table className="memt spend-p">
+            <thead><tr><th>{zh ? "日期" : "Date"}</th><th>{zh ? "收款方" : "Payee"}</th><th>{zh ? "用途" : "For"}</th><th>{zh ? "金额" : "Amount"}</th><th>{zh ? "状态" : "Status"}</th><th><span className="sr">{zh ? "操作" : "Actions"}</span></th></tr></thead>
+            <tbody>{purchases.map(p => (
+              <tr key={p.id} className={p.status === "blocked" || p.status === "declined" || p.status === "canceled" ? "off" : ""}>
+                <td className="when">{fmtDay(p.at, lang, true)}</td>
+                <td>{p.payeeUrl ? <a href={p.payeeUrl} target="_blank" rel="noopener noreferrer">{p.payee}</a> : p.payee}</td>
+                <td>{tx(p.why)}{p.status === "blocked" && p.reasons?.length ? <small>{p.reasons.map(tx).join(" ")}</small> : null}</td>
+                <td>{usd(p.amount)}</td>
+                <td>{tx(SPEND_STATUS[p.status])}</td>
+                <td className="acts">{canEdit && p.status === "asked" && <button type="button" className="sbtn quiet" onClick={() => void act(p, "decline")}>{zh ? "拒绝" : "Decline"}</button>}
+                  {canEdit && p.status === "approved" && <button type="button" className="sbtn quiet" onClick={() => void act(p, "cancel")}>{zh ? "取消" : "Cancel"}</button>}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        )}
+      </div>
+    </Group>
   );
 }

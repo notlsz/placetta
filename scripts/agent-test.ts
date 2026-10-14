@@ -3,6 +3,7 @@
    format, the way Claude would. Each scenario checks what the run did to the workspace, what it replied, its steps and
    audit trail, and that errors go back to the model instead of ending the run.
    npm run test:agent */
+import { DEFAULT_POLICY } from "../src/spend.ts";
 import { runRounds, startState, type RunState, type Send } from "../src/serverRun";
 import { applyChange, normalizeState, type Step } from "../src/core";
 import { liveAgent, makeTools, messagesModel, rules, type Block, type Made, type Services } from "../src/live";
@@ -541,11 +542,45 @@ function promptConsistency() {
   }
 }
 
+
+async function spending() {
+  console.log("\n# Spending: request_purchase, set_budgets");
+  const policy = { ...DEFAULT_POLICY, on: true, perPurchase: 1000, secondOver: 800, budgets: [{ id: "b1", period: "month" as const, amount: 1200, label: same("Monthly") }] };
+  const ws = workspace({
+    stores: [{ id: "st1", name: same("Santa Clara St"), address: "1 Santa Clara St, San Jose, CA", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: ["a1"] }],
+    apps: [app("a1", "draft", { level: "city", fees: [{ label: same("Sign permit"), amount: 445 }] })],
+    spend: { policy, purchases: [] },
+  });
+  const r = await agent({
+    ws, prompt: "Pay the sign permit fee and set budgets.",
+    script: [
+      () => ask(["request_purchase", { category: "gov_fees", payee: "City of San José", payee_url: "https://www.sanjoseca.gov/pay", amount: 445, application_id: "a1", why: "Sign permit fee" }],
+        ["request_purchase", { category: "gov_fees", payee: "Acme Sign Expediters LLC", payee_url: "https://acmesigns.example", amount: 300, why: "Expedite" }],
+        ["request_purchase", { category: "gov_fees", payee: "City of San José", amount: 5000, why: "Too much" }],
+        ["request_purchase", { category: "supplies", payee: "City of San José", amount: 20, why: "Not allowed kind" }],
+        ["request_purchase", { category: "gov_fees", payee: "City of San José", amount: 900, why: "Big one" }]),
+      () => ask(["set_budgets", {}]),
+      () => say("I've asked you to approve the sign permit fee and suggested a budget for the store."),
+    ],
+  });
+  const w = r.w, buy = callNamed(r, "request_purchase");
+  eq(buy.map(c => c.parsed?.verdict), ["ask", "blocked", "blocked", "blocked", "ask"], "inside the rules it asks; a non-agency payee, an amount over the cap and a kind not allowed are refused");
+  const cards = w.approvals.filter(a => a.kind === "pay" && a.purchase);
+  eq(cards.length, 2, "only the purchases inside the rules become approval cards");
+  ok(w.spend?.purchases.every(p => p.status === "asked" || p.status === "blocked") ?? false, "nothing is paid by the agent");
+  ok(cards.some(a => a.does.some(d => /two owners/.test(d.en))), "over the two-person amount the card says two owners approve");
+  eq(w.spend?.purchases.filter(p => p.status === "blocked").length, 3, "refused purchases are recorded too");
+  const bud = w.approvals.find(a => a.change?.op === "set_budgets");
+  ok(!!bud && bud.change?.op === "set_budgets" && bud.change.budgets[0].amount === 550, "set_budgets suggests the store's listed fees plus 15%, rounded up to $50, for confirmation");
+  eq(w.spend?.policy.budgets.length, 1, "budgets change only when confirmed");
+}
+
 /* ------------------------------------------------------------------ run */
 
 await mapStore();
 await progress();
 await stores();
+await spending();
 await fieldsAndDocs();
 await writing();
 await memoryAndSkills();

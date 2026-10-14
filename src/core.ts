@@ -45,7 +45,7 @@ export interface AgentBackend {
 
 export type P = (w: Workspace) => Workspace;
 let seq = 0;
-const uid = (p: string) => `${p}-${Date.now().toString(36)}-${seq++}`;
+export const uid = (p: string) => `${p}-${Date.now().toString(36)}-${seq++}`;
 
 export const setApp = (id: string, a: Partial<Application>): P => w => ({ ...w, apps: w.apps.map(x => (x.id === id ? { ...x, ...a } : x)) });
 export const setCheck = (app: string, item: string, c: Partial<CheckItem>): P => w => ({ ...w, apps: w.apps.map(x => (x.id === app ? { ...x, checklist: x.checklist.map(i => (i.id === item ? { ...i, ...c } : i)) } : x)) });
@@ -87,7 +87,7 @@ export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
   return {
     business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
-    facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto,
+    facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto, spend: s.spend,
   };
 }
 /** What's saved: everything but the audit trail (that has its own table) and payment cards (made from the filings). */

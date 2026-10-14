@@ -47,7 +47,7 @@ export function purchaseApprovals(purchases: Purchase[]): Approval[] {
   return purchases.filter(p => p.status === "asked" || (p.status === "approved" && p.method === "link")).map(p => p.status === "asked" ? {
     id: "buy-" + p.id, kind: "pay" as const, purchase: p.id, app: p.app, fee: p.amount, url: p.payeeUrl,
     title: B(`Buy: ${money$(p.amount)} to ${p.payee}`, `购买：向 ${p.payee} 支付 ${money$(p.amount)}`), agency: same(p.payee),
-    does: [p.why, ...(p.reasons ?? []), B("Approving lets Odelia pay it within your Spending rules. Every purchase is in Settings, Spending.", "批准后 Odelia 将在您的支出规则内付款。每笔购买都记录在“设置 > 支出”中。")],
+    does: [p.why, ...(p.reasons ?? []), B("After you approve, you pay it on their own page and tap \"I've paid it\". Every purchase is in Settings, Spending.", "批准后，请在对方页面付款并点“我已付款”。每笔购买都记录在“设置 > 支出”中。")],
     action: B("Approve purchase", "批准购买"),
   } : {
     id: "buy-" + p.id, kind: "pay" as const, purchase: p.id, app: p.app, fee: p.amount, url: p.payeeUrl,

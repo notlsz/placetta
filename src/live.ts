@@ -1,8 +1,10 @@
+import { DEFAULT_POLICY, SPEND_CATEGORIES, decide, suggestBudgets, type Budget, type Purchase, type SpendCategory } from "./spend.ts";
 import { canFill } from "./forms/canFill";
 import type { OrbState } from "thinking-orbs";
 import {
   addApp, addApproval, addDeadline, addDoc, audit, filingBlockers, isBlank, setApp, setCheck, setFact,
   type AgentBackend, type AgentEvent, type Reply, type Request, type Step,
+  uid,
 } from "./core";
 import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
@@ -312,6 +314,8 @@ export type Services = {
   readFile(path: string): Promise<Blob>;
   /** The signed-in person's user id: their memory and past chats live under it. */
   me?: string;
+  /** Spending: the server checks each purchase request against the workspace's rules and budgets; an owner approves it. */
+  spend?<T>(action: string, body: Record<string, unknown>): Promise<T>;
   /** Low-risk settings the agent may change for the person. Returns what it was set to. */
   setting?(key: string, value: string): string;
 };
@@ -1077,6 +1081,66 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         };
         mark();
         return { reviewed: rows.map(([name, o]) => ({ name, ...(o ?? { unreadable: true }) })), renewal_reminders_added: rows.filter(([, o]) => dated(o?.expires)).length };
+      },
+    },
+    {
+      name: "request_purchase",
+      description: "Ask an owner to approve a purchase for the business: an agency or inspection fee, certified mail, a food safety course, a registered agent. It is checked against the person's Spending rules (what may be bought, from whom, the most per purchase, the budgets). Inside the rules it becomes an approval card; outside them it is refused and you get the reason. You never pay anything: after approval, a person pays on the payee's own page. Never split a purchase to fit a limit. Use the payee's own payment page as payee_url.",
+      inputSchema: { type: "object", properties: {
+        category: { type: "string", enum: SPEND_CATEGORIES.map(c => c.id) },
+        payee: { type: "string", description: "Who gets paid, as they name themselves (e.g. 'City of San José Department of Finance')" },
+        payee_url: { type: "string", description: "The payee's own https payment page" },
+        amount: { type: "number", description: "USD, the exact amount the payee states" },
+        application_id: { type: "string" }, store_id: { type: "string" },
+        why: { type: "string", description: "What it's for, one line, e.g. 'Sign permit fee for the Santa Clara St store'" },
+      }, required: ["category", "payee", "amount", "why"] },
+      async execute(i) {
+        const amount = Math.round(Number(i.amount) * 100) / 100, payee = str(i.payee, 160), why = str(i.why, 300);
+        const category = String(i.category) as SpendCategory;
+        if (!SPEND_CATEGORIES.some(c => c.id === category)) throw new Error("Unknown category.");
+        if (!(amount > 0) || !payee || !why) throw new Error("payee, a positive amount and why are required.");
+        const url = str(i.payee_url, 400); if (url && !/^https:\/\//i.test(url)) throw new Error("payee_url must be an https address.");
+        const app = i.application_id ? findApp(i.application_id).id : undefined, store = i.store_id ? findStore(i.store_id).id : undefined;
+        S("composing", L(`Checking a ${money(amount)} purchase against your Spending rules`, `对照您的支出规则核对一笔 ${money(amount)} 的购买`));
+        if (x.svc?.spend) {
+          const r = await x.svc.spend<{ verdict: string; reasons: Bi[]; purchase: Purchase }>("propose", { purchase: { category, payee, payee_url: url || undefined, amount, app, store, why: same(why), by: "agent" } });
+          mark();
+          return { verdict: r.verdict, reasons: r.reasons.map(x => x.en), next: r.verdict === "ask" ? "An approval card is waiting for an owner. Tell the person in one line." : "Refused by the Spending rules. Tell the person why and that an owner can change them in Settings, Spending. Never try to get around it." };
+        }
+        const sp = get().spend ?? { policy: DEFAULT_POLICY, purchases: [] };
+        const d = decide({ category, payee, payeeUrl: url || undefined, amount, store }, sp.policy, sp.purchases);
+        const p: Purchase = { id: uid("buy"), at: new Date().toISOString(), category, payee, payeeUrl: url || undefined, amount, store, app, why: same(why), status: d.verdict === "blocked" ? "blocked" : "asked", by: "agent", reasons: d.reasons };
+        const ap: Approval | null = d.verdict === "blocked" ? null : { id: "buy-" + p.id, kind: "pay", purchase: p.id, app, fee: amount, url: url || undefined, agency: same(payee),
+          title: L(`Buy: ${money(amount)} to ${payee}`, `购买：向 ${payee} 支付 ${money(amount)}`), action: B("Approve purchase", "批准购买"),
+          does: [same(why), ...d.reasons, L("After you approve, you pay it on their own page and tap \"I've paid it\".", "批准后，请在对方页面付款并点“我已付款”。")] };
+        apply(w => { const cur = w.spend ?? { policy: DEFAULT_POLICY, purchases: [] }; const nw = audit("agent", d.verdict === "blocked" ? L("Stopped a purchase outside the rules", "拦截了一笔超出规则的购买") : L("Asked to buy", "申请购买"), L(`${money(amount)} to ${payee}`, `向 ${payee} 支付 ${money(amount)}`))({ ...w, spend: { ...cur, purchases: [p, ...cur.purchases] } }); return ap ? addApproval(ap)(nw) : nw; });
+        if (ap) made.approvals.push(ap.id);
+        mark();
+        return { verdict: d.verdict, reasons: d.reasons.map(x => x.en), next: d.verdict === "blocked" ? "Refused by the Spending rules. Tell the person why; an owner can change them in Settings, Spending." : "An approval card is waiting. Tell the person in one line." };
+      },
+    },
+    {
+      name: "set_budgets",
+      description: "Propose budgets for purchases: one per store for its opening (from the agency fees its applications list, plus a margin), and optionally monthly or per-kind budgets. An owner confirms before they take effect and can change them any time in Settings, Spending.",
+      inputSchema: { type: "object", properties: {
+        budgets: { type: "array", items: { type: "object", properties: {
+          store_id: { type: "string" }, category: { type: "string", enum: SPEND_CATEGORIES.map(c => c.id) }, period: { type: "string", enum: ["month", "opening", "total"] }, amount: { type: "number" }, label: { type: "string" },
+        }, required: ["period", "amount"] }, description: "Leave out to use Placetta's suggestion: each store's listed agency fees plus 15%, rounded up to $50" },
+      } },
+      execute(i) {
+        const w = get();
+        const given: Budget[] = arr(i.budgets).map((b, n) => { const o = b as Record<string, unknown>; const store = o.store_id ? findStore(o.store_id).id : undefined;
+          return { id: `b-${n}-${uid("x")}`, store, category: SPEND_CATEGORIES.some(c => c.id === o.category) ? o.category as SpendCategory : undefined, period: (["month", "opening", "total"].includes(String(o.period)) ? o.period : "month") as Budget["period"], amount: Math.round(Number(o.amount)), by: "agent" as const, label: o.label ? same(str(o.label, 80)) : undefined }; }).filter(b => b.amount > 0);
+        const budgets = given.length ? given : suggestBudgets((w.stores ?? []).map(s => ({ id: s.id, name: s.name, apps: w.apps.filter(a => s.apps?.includes(a.id)) })));
+        if (!budgets.length) return { proposed: false, why: "No store lists agency fees yet, so there's nothing to base a budget on. Ask the person what they want to allow, or map the stores' applications first." };
+        const total = budgets.reduce((t, b) => t + b.amount, 0);
+        const id = freshId(w, "ap-budget");
+        apply(addApproval({ id, kind: "change", change: { op: "set_budgets", budgets }, action: B("Set these budgets", "设置这些预算"),
+          title: L(`Set ${budgets.length} budget${budgets.length > 1 ? "s" : ""} (${money(total)} in all)`, `设置 ${budgets.length} 项预算（共 ${money(total)}）`),
+          does: budgets.map(b => { const st = b.store ? w.stores?.find(s => s.id === b.store)?.name : undefined; const per = { month: L("a month", "每月"), opening: L("until it opens", "至开业"), total: L("in total", "总计") }[b.period];
+            return L(`${b.label?.en ?? st?.en ?? "Whole business"}: ${money(b.amount)} ${per.en}`, `${b.label?.zh ?? st?.zh ?? "整个企业"}：${per.zh} ${money(b.amount)}`); }) }));
+        made.approvals.push(id); mark();
+        return { proposed: true, approval_id: id, budgets: budgets.map(b => ({ store: b.store, period: b.period, amount: b.amount })) };
       },
     },
     ...(x.svc ? accountTools() : []),

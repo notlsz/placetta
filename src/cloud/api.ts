@@ -541,7 +541,7 @@ export async function listIntegrations(ws: string): Promise<Integration[]> {
 export const integration = <T>(ws: string, action: string, body: Record<string, unknown> = {}) => fn<T>("integrations", { workspace_id: ws, action, ...body });
 
 /* ------------------------------ spending: what Odelia may buy, and every purchase ------------------------------ */
-export type SpendState = { policy: import("../spend.ts").SpendPolicy; cards: boolean; purchases: import("../spend.ts").Purchase[] };
+export type SpendState = { policy: import("../spend.ts").SpendPolicy; purchases: import("../spend.ts").Purchase[] };
 export const spend = <T>(ws: string, action: string, body: Record<string, unknown> = {}) => fn<T>("spend", { workspace_id: ws, action, ...body });
 export const spendGet = (ws: string) => (PREVIEW ? Promise.resolve(null) : spend<SpendState>(ws, "get").catch(() => null));
 export const connectUrl = (ws: string, kind: IntegrationKind) => integration<{ url: string }>(ws, "connect", { kind, return_to: appHome() });

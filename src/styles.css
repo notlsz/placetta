@@ -1453,3 +1453,20 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .fl-evs > li.fl-more-li { display: block; padding: 2px 0 4px 28px; }
 .fl-evs > li.fl-more-li::before { display: none; }
 .fl-more { margin: 0; }
+
+/* Spending: what Odelia may ask to buy, the budgets and the purchases */
+.spend-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px 16px; }
+.spend-cats .check, .spend-payees .check { display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; color: var(--ink2); }
+.spend-cats .check span { display: flex; flex-direction: column; gap: 2px; }
+.spend-cats .check small { color: var(--ink3); font-size: 12px; }
+.spend-payees { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.spend-field { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink3); margin-top: 8px; }
+.spend-field input, .spend-field textarea, .spend-b select, .spend-b input { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; min-width: 0; }
+.spend-field textarea { resize: vertical; }
+.spend-limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; }
+.spend-limits h3 { grid-column: 1 / -1; }
+.spend-b input { width: 90px; }
+.spend-b td small, .spend-p td small { display: block; color: var(--ink3); font-size: 12px; margin-top: 2px; }
+.spend-p tr.off td { color: var(--ink3); }
+.sg-note.warn { color: var(--warn, #b45309); margin-right: auto; }
+@media (max-width: 640px) { .spend-b, .spend-p { display: block; overflow-x: auto; } }

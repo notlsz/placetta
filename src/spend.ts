@@ -1,9 +1,10 @@
 import { B, type Bi } from "./bi.ts";
 
-/* Odelia's spending: what she may buy for an organization, from whom, how much, and from which budget. The same rules
-   run in the app (to show what would happen) and on the server (supabase/functions/spend), which is the one that
-   decides: a purchase outside the boundaries is never made, and a card Placetta issues for a purchase is locked to
-   that purchase's amount, payee type and day, so even a wrong click can't spend more. */
+/* Odelia's spending: what she may ask to buy for an organization, from whom, how much, and from which budget. The same
+   rules run in the app (to show what would happen) and on the server (supabase/functions/spend), which is the one that
+   decides. A purchase outside the boundaries is refused and recorded; one inside them waits for an owner to approve it
+   (two owners above the two-person amount). Nothing is ever paid without that approval, and the payment itself is
+   made on the payee's own page. */
 
 export type SpendCategory = "gov_fees" | "filing_services" | "mail" | "training" | "background" | "inspections" | "supplies" | "signage";
 
@@ -32,7 +33,6 @@ export type SpendPolicy = {
   on: boolean;                    // Odelia may buy at all
   allowed: SpendCategory[];       // what she may buy
   perPurchase: number;            // never more than this in one purchase
-  autoUnder: number;              // at or under this, inside every budget, from an allowed payee: she buys without asking (0: always ask)
   secondOver?: number;            // above this, a second person approves too
   payees: "government" | "listed" | "any";   // government: only agencies; listed: agencies plus the payees below
   listed: string[];               // payees allowed by name or web address
@@ -41,7 +41,7 @@ export type SpendPolicy = {
 };
 
 export const DEFAULT_POLICY: SpendPolicy = {
-  on: false, allowed: ["gov_fees", "inspections"], perPurchase: 1000, autoUnder: 0, secondOver: 2500,
+  on: false, allowed: ["gov_fees", "inspections"], perPurchase: 1000, secondOver: 2500,
   payees: "government", listed: [], blocked: [], budgets: [],
 };
 
@@ -59,8 +59,7 @@ export type Purchase = {
   status: PurchaseStatus;
   by: "agent" | "you";
   approvals?: { who: string; at: string }[];
-  method?: "card" | "charge" | "link";   // card: a single-use card for this purchase; charge: Placetta buys it and bills you; link: you pay the agency's link
-  card?: { last4: string; expires: string };
+  method?: "link";                // paid by a person in the workspace on the payee's own page
   receipt?: string;               // the stored receipt's path
   reasons?: Bi[];                 // why it was blocked or needs approval
 };
@@ -89,16 +88,16 @@ export function spentIn(b: Budget, purchases: Purchase[], now = new Date().toISO
 }
 
 export type Decision = {
-  verdict: "auto" | "ask" | "blocked";
-  reasons: Bi[];                  // blocked: why not; ask: why it needs a person
-  approvers: number;              // how many people must approve (0 for auto)
+  verdict: "ask" | "blocked";
+  reasons: Bi[];                  // blocked: why not; ask: anything the approver should know
+  approvers: number;              // how many owners must approve
   budgets: { budget: Budget; left: number }[];   // every budget this purchase counts against, with what's left after it
 };
 
 const money = (n: number) => `$${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
 /** The rules, in order: on, allowed kind, allowed payee, amount cap, every budget it falls under. Inside all of them it
- *  is bought without asking only when it's at or under the no-ask amount; otherwise it waits for approval. */
+ *  waits for an owner's approval (two owners above the two-person amount); outside any of them it is refused. */
 export function decide(p: Pick<Purchase, "category" | "payee" | "payeeUrl" | "amount" | "store">, policy: SpendPolicy, purchases: Purchase[], now = new Date().toISOString()): Decision {
   const no: Bi[] = [], ask: Bi[] = [];
   if (!policy.on) no.push(B("Purchases by Odelia are turned off in Spending settings.", "已在支出设置中关闭 Odelia 代为购买。"));
@@ -118,18 +117,17 @@ export function decide(p: Pick<Purchase, "category" | "payee" | "payeeUrl" | "am
     no.push(B(`Over ${name.en}: ${money(budget.amount - spentIn(budget, purchases, now))} left of ${money(budget.amount)}.`, `超出“${name.zh}”：${money(budget.amount)} 中仅剩 ${money(budget.amount - spentIn(budget, purchases, now))}。`));
   }
   if (no.length) return { verdict: "blocked", reasons: no, approvers: 0, budgets };
-  if (!policy.autoUnder || p.amount > policy.autoUnder) ask.push(policy.autoUnder ? B(`Over ${money(policy.autoUnder)}, so a person approves it.`, `超过 ${money(policy.autoUnder)}，需人工批准。`) : B("Every purchase is approved by a person first.", "每笔购买都需先经人工批准。"));
   if (!hits.length) ask.push(B("No budget covers it yet.", "尚无覆盖它的预算。"));
+  for (const { budget, left } of budgets) ask.push(B(`${budget.label?.en ?? "Budget"}: ${money(Math.max(0, left))} left after this.`, `${budget.label?.zh ?? "预算"}：此笔之后剩余 ${money(Math.max(0, left))}。`));
   const second = policy.secondOver != null && p.amount > policy.secondOver;
-  if (second) ask.push(B(`Over ${money(policy.secondOver!)}, so two people approve it.`, `超过 ${money(policy.secondOver!)}，需两人批准。`));
-  return ask.length ? { verdict: "ask", reasons: ask, approvers: second ? 2 : 1, budgets } : { verdict: "auto", reasons: [], approvers: 0, budgets };
+  if (second) ask.push(B(`Over ${money(policy.secondOver!)}, so two owners approve it.`, `超过 ${money(policy.secondOver!)}，需两位所有者批准。`));
+  return { verdict: "ask", reasons: ask, approvers: second ? 2 : 1, budgets };
 }
 
 /** Checks a policy someone is saving: numbers sane, budgets positive. Returns what's wrong, empty when fine. */
 export function policyProblems(p: SpendPolicy): Bi[] {
   const out: Bi[] = [];
   if (!(p.perPurchase > 0)) out.push(B("Set a limit for one purchase.", "请设置单笔上限。"));
-  if (p.autoUnder < 0 || p.autoUnder > p.perPurchase) out.push(B("The no-ask amount has to be between $0 and the one-purchase limit.", "免审批金额须在 $0 与单笔上限之间。"));
   if (p.secondOver != null && p.secondOver < 0) out.push(B("The two-person amount can't be negative.", "双人审批金额不能为负。"));
   for (const b of p.budgets) if (!(b.amount > 0)) out.push(B("Every budget needs an amount above $0.", "每项预算金额都须大于 $0。"));
   if (p.allowed.some(c => !SPEND_CATEGORIES.some(x => x.id === c))) out.push(B("Unknown kind of purchase in the allowed list.", "可购买范围中有未知类别。"));
