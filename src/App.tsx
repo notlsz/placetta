@@ -90,6 +90,7 @@ const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
   payment: B(`Help me pay this agency fee: ${u.title.en}`, `帮我支付这笔机构费用：${u.title.zh}`),
   filing: B(`What's the status and the next step: ${u.title.en}`, `进展和下一步是什么：${u.title.zh}`),
   team: B(`Tell me more: ${u.title.en}`, `详细说说：${u.title.zh}`),
+  mail: B(`Read this reply and tell me what to do next: ${u.title.en}`, `读一下这封回复，告诉我下一步怎么做：${u.title.zh}`),
 })[u.kind];
 
 const PLAN_LABEL: Record<string, Bi> = {
@@ -215,7 +216,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       if (all) { const [i, l] = await Promise.all([api.listIntegrations(cloud.wsId), api.listLogins(cloud.wsId)]); setIntegrations(i); setLogins(l); }
     } catch { /* offline: try again next tick */ }
   }, [cloud]);
-  useEffect(() => { if (cloud) void api.listUpdates(cloud.wsId).then(setServerUpdates, () => undefined); }, [cloud]);
+  useEffect(() => {
+    if (!cloud) return;
+    const load = () => { if (document.visibilityState === "visible") void api.listUpdates(cloud.wsId).then(setServerUpdates, () => undefined); };
+    load();
+    // replies to sent email land within minutes, so the inbox refreshes while the app is open
+    const t = window.setInterval(load, 120_000);
+    return () => window.clearInterval(t);
+  }, [cloud]);
   /* the Updates inbox: the monitor's updates in an account (worked out locally until its first run), the sample's otherwise */
   const updates = useMemo<UpdateItem[]>(() => {
     const base = cloud && serverUpdates.length
@@ -542,9 +550,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       try {
         if (mail && email) {
           const emails = to.split(/[,;\s]+/).filter(x => /\S+@\S+\.\S+/.test(x));
-          await api.integration(cloud.wsId, "mail_send", { kind: mail.kind, to: emails.length > 1 ? emails : email, subject, body, approved: true });
+          await api.integration(cloud.wsId, "mail_send", { kind: mail.kind, to: emails.length > 1 ? emails : email, subject, body, approved: true, ...(a.app ? { app_id: a.app } : {}) });
           setWs(x => audit("you", B("Approved and sent", "批准并发送"), a.title, same(email))(dropApproval(id)(x)));
-          say(lang === "zh" ? `已从 ${mail.account ?? "您的邮箱"} 发出。` : `Sent from ${mail.account ?? "your mailbox"}.`);
+          say(lang === "zh" ? `已从 ${mail.account ?? "您的邮箱"} 发出。对方回复时，Odelia 会第一时间告诉您。` : `Sent from ${mail.account ?? "your mailbox"}. Odelia tells you as soon as they reply.`);
         } else {
           await navigator.clipboard?.writeText(body).catch(() => undefined);
           const tel = to.replace(/[^\d+]/g, "");

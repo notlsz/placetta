@@ -158,6 +158,12 @@ html[lang="zh-CN"] .hero h1 { word-break: keep-all; max-width: 13em; letter-spac
 .more:hover { color: var(--ink); }
 .quiet { margin: 0; color: var(--ink2); font-size: 14.5px; }
 .note { margin: 14px 4px 0; font-size: 12.5px; color: var(--ink3); max-width: 80ch; }
+.linkbtn { padding: 0; font: inherit; color: var(--blue-ink); text-decoration: underline; text-underline-offset: 2px; }
+.sendf { display: flex; flex-direction: column; gap: 12px; }
+.sendf-row { display: flex; flex-direction: column; gap: 6px; }
+.sendf-row > span { font-size: 12.5px; color: var(--ink3); }
+.sendf-row input, .sendf-row textarea { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(var(--e), .12); background: var(--card); color: var(--ink); font: inherit; font-size: 14.5px; line-height: 1.5; resize: vertical; }
+.sendf-row input:focus, .sendf-row textarea:focus { outline: 2px solid var(--blue); outline-offset: 1px; border-color: transparent; }
 .stack { display: flex; flex-direction: column; gap: 10px; }
 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 24px; }
 

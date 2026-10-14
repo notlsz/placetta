@@ -391,7 +391,7 @@ export async function loadWorkspace(ws: string): Promise<{ name: string; state: 
 
 /* ------------------------------ updates ------------------------------ */
 
-export type UpdateRow = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team"; title: Bi; body: Bi | null; app_id: string | null; created_at: string; read_at: string | null };
+export type UpdateRow = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail"; title: Bi; body: Bi | null; app_id: string | null; created_at: string; read_at: string | null };
 export async function listUpdates(ws: string): Promise<UpdateRow[]> {
   const { data, error } = await supabase().from("updates").select("id, kind, title, body, app_id, created_at, read_at").eq("workspace_id", ws).order("created_at", { ascending: false }).limit(60);
   if (error) throw fromPg(error);

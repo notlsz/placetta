@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { FilingLive } from "./FilingLive";
 import { useApp, type Signed, type Tab } from "./ctx";
-import type { Application, CheckItem, Doc } from "./model";
+import type { Application, Approval, CheckItem, Doc } from "./model";
+import { openSettings } from "./Settings";
 import { formById, METHOD } from "./forms/registry";
 import { saveFile } from "./files";
 import { fmtDay } from "./time";
@@ -261,7 +262,7 @@ function Receipt({ a }: { a: Application }) {
 /* ------------------------------- approval ------------------------------- */
 
 export function ApproveModal({ id, onClose }: { id: string; onClose: () => void }) {
-  const { b, t, lang, ws, approve, openApp, busy, cloud } = useApp();
+  const { b, t, lang, ws, approve, openApp, busy, cloud, go } = useApp();
   const a = ws.approvals.find(x => x.id === id);
   const [sig, setSig] = useState<Signed | null>(null);
   if (!a) return null;
@@ -310,8 +311,16 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
           <ol className="does">{a.does.map((d, i) => <li key={i}>{b(d)}</li>)}</ol>
         </section>
         <section>
-          <h3>{a.kind === "send" ? t("ap_msg") : t("ap_data")}</h3>
-          <dl className="kv data">{data.map(f => <div key={f.id}><dt>{b(f.label)}</dt><dd>{f.value || t("empty")}</dd></div>)}</dl>
+          <h3>{a.kind === "send" ? (zh ? "发送内容（可直接修改）" : "What will be sent (edit it here)") : t("ap_data")}</h3>
+          {a.kind === "send"
+            ? <SendFields a={a} />
+            : <dl className="kv data">{data.map(f => <div key={f.id}><dt>{b(f.label)}</dt><dd>{f.value || t("empty")}</dd></div>)}</dl>}
+          {a.kind === "send" && cloud && (() => {
+            const mail = cloud.integrations.find(i => (i.kind === "gmail" || i.kind === "outlook_mail") && i.status === "connected");
+            return mail
+              ? <p className="note">{zh ? `批准后从 ${mail.account ?? (mail.kind === "gmail" ? "Gmail" : "Outlook")} 发出。对方回复时，Odelia 会第一时间告诉您。` : `Approving sends it from ${mail.account ?? (mail.kind === "gmail" ? "your Gmail" : "your Outlook")}. Odelia tells you as soon as they reply.`}</p>
+              : <p className="note">{zh ? "连接 Gmail 或 Outlook 后，批准即可直接发送并跟踪回复。" : "Connect Gmail or Outlook and approving sends it for you and tracks the reply."} <button type="button" className="linkbtn" onClick={() => { onClose(); openSettings(go, "integrations"); }}>{zh ? "去连接" : "Connect now"}</button></p>;
+          })()}
         </section>
         {atts.length > 0 && (
           <section>
@@ -345,6 +354,27 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         </div>
       </footer>
     </Modal>
+  );
+}
+
+/** An email or text waiting for approval: every line editable in place, the checks above re-run as you type. */
+function SendFields({ a }: { a: Approval }) {
+  const { b, lang, editWs } = useApp();
+  const set = (id: string, value: string) => editWs(w => ({ ...w, approvals: w.approvals.map(x => (x.id === a.id ? { ...x, data: (x.data ?? []).map(f => (f.id === id ? { ...f, value } : f)) } : x)) }));
+  return (
+    <div className="sendf">
+      {(a.data ?? []).map(f => {
+        const long = f.id === "msg" || /message|内容|body/i.test(f.label.en) || f.value.length > 120;
+        return (
+          <label key={f.id} className="sendf-row">
+            <span>{b(f.label)}</span>
+            {long
+              ? <textarea value={f.value} rows={Math.min(16, Math.max(6, f.value.split("\n").length + 1))} onChange={e => set(f.id, e.target.value)} placeholder={lang === "zh" ? "在此填写" : "Write it here"} />
+              : <input value={f.value} inputMode={f.id === "to" ? "email" : undefined} autoComplete="off" spellCheck={f.id !== "to"} onChange={e => set(f.id, e.target.value)} placeholder={f.id === "to" ? "name@example.com" : ""} />}
+          </label>
+        );
+      })}
+    </div>
   );
 }
 

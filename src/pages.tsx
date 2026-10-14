@@ -374,6 +374,7 @@ export function UpdatesPage() {
   const KIND: Record<string, { label: { en: string; zh: string }; Icon: () => React.ReactElement }> = {
     deadline: { label: B("Deadline", "截止日期"), Icon: I.deadlines }, renewal: { label: B("Renewal", "续期"), Icon: I.deadlines },
     filing: { label: B("Filing", "申报"), Icon: I.apps }, payment: { label: B("Payment", "付款"), Icon: I.card }, team: { label: B("Team", "团队"), Icon: I.user },
+    mail: { label: B("Reply", "回复"), Icon: I.message },
   };
   return (
     <div className="page">

@@ -383,14 +383,14 @@ export function gmailMime(to: string[], subject: string, content: string, files:
 async function sendFrom(ws: string, kindParamValue: unknown, to: string[], subject: string, content: string, files: Attachment[]) {
   const kind = await pickKind(ws, kindParamValue, ["gmail", "outlook_mail"], "Connect Gmail or Outlook in Settings.");
   const conn = await Conn.open(ws, kind);
-  let id = "";
+  let id = "", thread = "";
   if (kind === "gmail") {
-    const r = await conn.callJson<{ id?: string }>(`${GMAIL}/messages/send`, {
+    const r = await conn.callJson<{ id?: string; threadId?: string }>(`${GMAIL}/messages/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ raw: b64urlEncode(utf8(gmailMime(to, subject, content, files))) }),
     });
-    id = r.id ?? "";
+    id = r.id ?? ""; thread = r.threadId ?? "";
   } else {
     const size = files.reduce((n, f) => n + f.bytes.length, 0);
     if (size > GRAPH_INLINE_BYTES) throw new HttpError("bad_request", "Outlook takes at most about 3 MB of attachments in one message. Send it by fax or mail instead.");
@@ -401,14 +401,14 @@ async function sendFrom(ws: string, kindParamValue: unknown, to: string[], subje
       attachments: files.map((f) => ({ "@odata.type": "#microsoft.graph.fileAttachment", name: f.name, contentType: f.mime, contentBytes: plainB64(f.bytes) })),
     };
     // A draft first, so the message has an id to record, then send it.
-    const draft = await conn.callJson<{ id?: string }>(`${GRAPH}/me/messages`, {
+    const draft = await conn.callJson<{ id?: string; conversationId?: string }>(`${GRAPH}/me/messages`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(message),
     });
     if (!draft.id) throw new HttpError("upstream_error", "Outlook didn't create the message. Try again.");
     await conn.callJson(`${GRAPH}/me/messages/${enc(draft.id)}/send`, { method: "POST" });
-    id = draft.id;
+    id = draft.id; thread = draft.conversationId ?? "";
   }
-  return { kind, id, account: conn.row.account ?? "" };
+  return { kind, id, thread, account: conn.row.account ?? "" };
 }
 
 function mailInput(body: Record<string, unknown>) {
@@ -419,11 +419,23 @@ function mailInput(body: Record<string, unknown>) {
   return { to, subject, content: body.body.replace(/\r\n?/g, "\n") };
 }
 
+/** Remember a sent message so mail_watch can tell the person when someone replies. Never fails the send. */
+async function track(ws: string, sent: { kind: Kind; id: string; thread: string; account: string }, to: string[], subject: string, extra: { sent_by?: string; filing_id?: string; app_id?: string } = {}) {
+  if (!sent.id || !sent.thread) return;
+  const { error } = await admin.from("mail_threads").insert({
+    workspace_id: ws, kind: sent.kind, account: sent.account || null, message_id: sent.id, thread_id: sent.thread,
+    to_addrs: to.join(", ").slice(0, 500), subject: subject.slice(0, 300), ...extra,
+  });
+  if (error) console.error("mail_threads insert:", error.code ?? "");
+}
+
 const mailSend: Action = async (c) => {
   if (c.body.approved !== true) throw new HttpError("bad_request", "The customer must approve this message before it is sent.");
   const { to, subject, content } = mailInput(c.body);
   const files = await loadAttachments(c.ws, c.body.attachments);
-  const { kind, account } = await sendFrom(c.ws, c.body.kind, to, subject, content, files);
+  const sent = await sendFrom(c.ws, c.body.kind, to, subject, content, files);
+  const { kind, account } = sent;
+  await track(c.ws, sent, to, subject, { sent_by: c.user.id, app_id: optText(c.body.app_id, "app_id", 80) ?? undefined });
 
   const list = to.join(", ");
   const via = account ? ` (${account})` : "";
@@ -433,7 +445,7 @@ const mailSend: Action = async (c) => {
     object: same(subject),
     detail: { en: `Via ${NAMES[kind].en}${via}${files.length ? `, ${files.length} attached` : ""}`, zh: `通过 ${NAMES[kind].zh}${via}${files.length ? `，附件 ${files.length} 个` : ""}` },
   });
-  return ok({ kind });
+  return ok({ kind, tracking: !!sent.thread });
 };
 
 /** The file function's server-to-server path: sends one running email filing, only its approved files. */
@@ -450,7 +462,93 @@ async function filerMailSend(body: Record<string, unknown>): Promise<Response> {
   const approved = new Set<string>([p.pdf_path, ...(Array.isArray(p.attachments) ? p.attachments.map((a: { path?: string }) => a?.path) : [])].filter((x): x is string => typeof x === "string"));
   const { to, subject, content } = mailInput(body);
   const files = await loadAttachments(ws, body.attachments, approved);
-  return ok(await sendFrom(ws, body.kind, to, subject, content, files));
+  const sent = await sendFrom(ws, body.kind, to, subject, content, files);
+  const { data: row } = await admin.from("filings").select("app_id").eq("id", filingId).maybeSingle();
+  await track(ws, sent, to, subject, { filing_id: filingId, app_id: (row?.app_id as string | undefined) ?? undefined });
+  return ok(sent);
+}
+
+/* ------------------------------------------------------------------ replies to what Placetta sent */
+
+type Reply = { from: string; at: string; snippet: string };
+const addrOf = (s: string) => (s.match(/<([^>]+)>/)?.[1] ?? s).trim().toLowerCase();
+const nameOf = (s: string) => (s.replace(/<[^>]+>/, "").replace(/"/g, "").trim() || addrOf(s));
+
+async function gmailReplies(conn: Conn, t: ThreadRow): Promise<Reply[]> {
+  const r = await conn.callJson<{ messages?: GMessage[] }>(`${GMAIL}/threads/${enc(t.thread_id)}?format=metadata&metadataHeaders=From&metadataHeaders=Date`);
+  const me = (t.account ?? "").toLowerCase(), sent = Date.parse(t.sent_at);
+  return (r.messages ?? []).flatMap((m) => {
+    const from = header(m.payload?.headers, "From"), at = Number(m.internalDate ?? 0);
+    if (m.id === t.message_id || !at || at <= sent || (me && addrOf(from) === me)) return [];
+    return [{ from, at: new Date(at).toISOString(), snippet: decodeEntities(m.snippet ?? "").slice(0, 280) }];
+  });
+}
+
+async function graphReplies(conn: Conn, t: ThreadRow): Promise<Reply[]> {
+  const filter = `conversationId eq '${t.thread_id.replace(/'/g, "''")}'`;
+  const r = await conn.callJson<{ value?: { id: string; from?: GraphAddress; receivedDateTime?: string; bodyPreview?: string; isDraft?: boolean }[] }>(
+    `${GRAPH}/me/messages?$filter=${enc(filter)}&$select=id,from,receivedDateTime,bodyPreview,isDraft&$top=25`);
+  const me = (t.account ?? "").toLowerCase(), sent = Date.parse(t.sent_at);
+  return (r.value ?? []).flatMap((m) => {
+    const from = graphAddr(m.from), at = Date.parse(m.receivedDateTime ?? "");
+    if (m.isDraft || m.id === t.message_id || !at || at <= sent || (me && addrOf(from) === me)) return [];
+    return [{ from, at: new Date(at).toISOString(), snippet: (m.bodyPreview ?? "").slice(0, 280) }];
+  });
+}
+
+type ThreadRow = { id: string; workspace_id: string; kind: Kind; account: string | null; message_id: string; thread_id: string; subject: string; to_addrs: string; app_id: string | null; sent_at: string; replies: number; last_reply_at: string | null };
+
+/** The monitor key's job, every 10 minutes: look for replies to what Placetta sent, tell the person, stop after 30 days. */
+async function mailWatch(): Promise<Response> {
+  const now = new Date().toISOString();
+  await admin.from("mail_threads").update({ closed_at: now }).is("closed_at", null).lt("sent_at", new Date(Date.now() - 30 * 864e5).toISOString()).eq("replies", 0);
+  const { data, error } = await admin.from("mail_threads")
+    .select("id, workspace_id, kind, account, message_id, thread_id, subject, to_addrs, app_id, sent_at, replies, last_reply_at")
+    .is("closed_at", null).order("checked_at", { ascending: true, nullsFirst: true }).limit(80);
+  if (error) throw new Error(`mail_threads: ${error.code ?? ""}`);
+  const conns = new Map<string, Conn | null>();
+  let checked = 0, replied = 0;
+  for (const t of (data ?? []) as ThreadRow[]) {
+    const key = `${t.workspace_id}:${t.kind}`;
+    if (!conns.has(key)) conns.set(key, await Conn.open(t.workspace_id, t.kind).catch(() => null));
+    const conn = conns.get(key);
+    if (!conn) { await admin.from("mail_threads").update({ checked_at: now, closed_at: now }).eq("id", t.id); continue; }   // the mailbox was disconnected
+    let found: Reply[] = [];
+    try { found = t.kind === "gmail" ? await gmailReplies(conn, t) : await graphReplies(conn, t); checked++; }
+    catch (e) { console.error("mail_watch", t.kind, e instanceof Error ? e.message.slice(0, 160) : e); }
+    const fresh = found.filter((r) => !t.last_reply_at || r.at > t.last_reply_at).sort((a, b) => a.at.localeCompare(b.at));
+    if (!fresh.length) { await admin.from("mail_threads").update({ checked_at: now }).eq("id", t.id); continue; }
+    const last = fresh[fresh.length - 1], who = nameOf(last.from);
+    await admin.from("mail_threads").update({ checked_at: now, replies: t.replies + fresh.length, last_reply_at: last.at, last_reply_from: last.from.slice(0, 300), last_reply_snippet: last.snippet }).eq("id", t.id);
+    await notifyReply(t, who, last);
+    replied++;
+  }
+  return ok({ checked, replied });
+}
+
+/** A reply: an Update in the app, a line in the audit trail, and a text to owners who linked a phone. */
+async function notifyReply(t: ThreadRow, who: string, r: Reply) {
+  const dedupe = `mail:${t.id}:${r.at}`;
+  const title = { en: `${who} replied: ${t.subject}`.slice(0, 200), zh: `${who} 回复了：${t.subject}`.slice(0, 200) };
+  const { data: made, error } = await admin.from("updates").upsert({
+    workspace_id: t.workspace_id, kind: "mail", title, body: same(r.snippet || "(no text)"), app_id: t.app_id, dedupe,
+  }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true }).select("id");
+  if (error) { console.error("updates insert:", error.code ?? ""); return; }
+  if (!made?.length) return;   // already told
+  await audit({ workspace_id: t.workspace_id, actor: "agent", actor_id: null, action: { en: "Got a reply", zh: "收到回复" }, object: same(t.subject), detail: same(who) });
+  const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", t.workspace_id).eq("role", "owner");
+  const ids = (owners ?? []).map((o) => o.user_id as string);
+  if (!ids.length) return;
+  const { data: links } = await admin.from("phone_links").select("user_id, lang").in("user_id", ids).eq("texts_on", true).not("verified_at", "is", null).is("opted_out_at", null);
+  const rows = (links ?? []).map((l) => ({
+    user_id: l.user_id, workspace_id: t.workspace_id, kind: "text", urgent: false, link: null, dedupe: `${dedupe}`.slice(0, 300),
+    body: l.lang === "zh"
+      ? `${who} 回复了“${t.subject}”：${r.snippet.slice(0, 120)}。回复我“读一下”，我来告诉您下一步。`
+      : `${who} replied to "${t.subject}": ${r.snippet.slice(0, 120)}. Text me "read it" and I'll tell you what to do next.`,
+  }));
+  if (!rows.length) return;
+  const { error: oe } = await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
+  if (oe) console.error("odelia_outbox:", oe.code ?? "");
 }
 
 /** True when the request carries the file function's shared secret. */
@@ -921,6 +1019,14 @@ const ACTIONS: Record<string, Action> = {
 const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost]);
 
 serve(async (req) => {
+  const mk = req.headers.get("x-monitor-key");
+  if (mk) {
+    const { data: good } = await admin.rpc("monitor_key_ok", { p_key: mk });
+    if (good !== true) throw new HttpError("unauthorized", "Wrong monitor key.");
+    const body = await readBody(req);
+    if (body.action !== "mail_watch") throw new HttpError("bad_request", "The monitor may only watch mail.");
+    return await mailWatch();
+  }
   if (await fromFiler(req)) {
     const body = await readBody(req);
     if (body.action !== "mail_send") throw new HttpError("bad_request", "The filer may only send mail.");
