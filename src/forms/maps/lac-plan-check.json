@@ -1,0 +1,145 @@
+{
+  "form": "lac-plan-check",
+  "rev": "Rev 11/2025",
+  "pdf": "lac-plan-check.pdf",
+  "checked": "2026-10-14",
+  "notes": "site: 'Business name/DBA, street, City, CA ZIP' (name first). Addresses: 'street, City, CA ZIP'. Yes/no answers: Yes or No. scope: one of the four Section 1 lines; for a fire rebuild add the fire's name after a comma. square_footage: one printed Section 3 line (restaurant/caterer or food market, regular fee), which ticks the NEW/REMODEL FACILITY box and the size line and writes that line's fee as the Total Amount Due; expedited fees, supermarkets and other facility types are ticked by hand. php_number, remodel_operation, remodel_scope: remodels only (N/A otherwise). Signature and its date are left for the signer.",
+  "boxes": {
+    "request_date": [
+      { "text": "Date of Request", "pick": "date" }
+    ],
+    "contact": [
+      { "text": "NAME" }
+    ],
+    "contact_title": [
+      { "text": "TITLE" }
+    ],
+    "contact_phone": [
+      { "text": "PHONE" }
+    ],
+    "contact_email": [
+      { "text": "EMAIL" }
+    ],
+    "site": [
+      { "text": "BUSINESS NAME/DBA", "pick": "head" },
+      { "text": "ADDRESS", "pick": "tail" }
+    ],
+    "facility_phone": [
+      { "text": "PHONE_2" }
+    ],
+    "facility_email": [
+      { "text": "EMAIL_2" }
+    ],
+    "owner": [
+      { "text": "BUSINESS OWNERCORPORATION NAME" }
+    ],
+    "owner_phone": [
+      { "text": "PHONE_3" }
+    ],
+    "owner_address": [
+      { "text": "ADDRESS_2" }
+    ],
+    "owner_email": [
+      { "text": "EMAIL_3" }
+    ],
+    "scope": [
+      { "check": "Review of NEW construction", "if": "\\bnew construction\\b|^new\\b|新建" },
+      { "check": "Review of REMODELING", "if": "\\bremodel|改建|装修" },
+      { "check": "Existing Food Facility", "if": "new owner|^existing|新业主|易主" },
+      { "check": "Review of Fire Rebuild Plans", "if": "\\bfire\\b|火灾" },
+      { "text": "Indicate name of fire", "pick": "tail", "if": "\\bfire\\b|火灾" }
+    ],
+    "built_before_2004": [
+      { "check": "Building Constructed prior to 1/1/24", "if": "^(y|yes|true|是)" }
+    ],
+    "prepackaged_only": [
+      { "check": "Prepackaged Foods Only", "if": "^(y|yes|true|是)" }
+    ],
+    "reusable_tableware": [
+      { "check": "Facility has Re-usable Tableware", "if": "^(y|yes|true|是)" }
+    ],
+    "common_restroom": [
+      { "check": "Facility has a common-use restroom", "if": "^(y|yes|true|是)" }
+    ],
+    "common_janitorial": [
+      { "check": "Facility has a common-use janitorial facility", "if": "^(y|yes|true|是)" }
+    ],
+    "php_number": [
+      { "check": "You have a valid PHP", "if": "^(?!(n/?a|none|no|not applicable|无|否)\\.?$)" },
+      { "text": "PHP/License #", "if": "^(?!(n/?a|none|no|not applicable|无|否)\\.?$)" }
+    ],
+    "remodel_operation": [
+      { "check": "Facility will remain open during remodeling", "if": "\\bopen\\b|营业|开放" },
+      { "check": "Facility will remain closed during remodeling", "if": "\\bclosed?\\b|停业|关闭" }
+    ],
+    "remodel_scope": [
+      { "check": "Describe the scope of the remodeling", "if": "^(?!(n/?a|none|no|not applicable|无|否)\\.?$)" },
+      { "text": "You have a valid Public Health PermitLicense Public Health PermitLicense  The Facility will remain open during remodeling Provide operational letter indicating the measures to be taken so the remodel will not impact current operations The Facility will remain closed during remodeling Describe the scope of the remodeling to approved plans in the space below", "if": "^(?!(n/?a|none|no|not applicable|无|否)\\.?$)" }
+    ],
+    "square_footage": [
+      { "check": "New facility1", "if": "^restaurant\\b.*\\bnew\\b.*\\b500 sq" },
+      { "check": "NewChkBox1", "if": "^restaurant\\b.*\\bnew\\b.*\\b500 sq" },
+      { "text": "TotalAmountDue", "value": "$1,044.00", "if": "^restaurant\\b.*\\bnew\\b.*\\b500 sq" },
+      { "check": "New facility1", "if": "^restaurant\\b.*\\bnew\\b.*\\b501 " },
+      { "check": "NewChkBox2", "if": "^restaurant\\b.*\\bnew\\b.*\\b501 " },
+      { "text": "TotalAmountDue", "value": "$1,530.00", "if": "^restaurant\\b.*\\bnew\\b.*\\b501 " },
+      { "check": "Remodel Facility1", "if": "^restaurant\\b.*\\bremodel\\b.*\\b501 " },
+      { "check": "NewChkBox2", "if": "^restaurant\\b.*\\bremodel\\b.*\\b501 " },
+      { "text": "TotalAmountDue", "value": "$1,530.00", "if": "^restaurant\\b.*\\bremodel\\b.*\\b501 " },
+      { "check": "New facility1", "if": "^restaurant\\b.*\\bnew\\b.*\\b2,?000 " },
+      { "check": "NewChkBox3", "if": "^restaurant\\b.*\\bnew\\b.*\\b2,?000 " },
+      { "text": "TotalAmountDue", "value": "$1,865.00", "if": "^restaurant\\b.*\\bnew\\b.*\\b2,?000 " },
+      { "check": "Remodel Facility1", "if": "^restaurant\\b.*\\bremodel\\b.*\\b2,?000 " },
+      { "check": "NewChkBox3", "if": "^restaurant\\b.*\\bremodel\\b.*\\b2,?000 " },
+      { "text": "TotalAmountDue", "value": "$1,865.00", "if": "^restaurant\\b.*\\bremodel\\b.*\\b2,?000 " },
+      { "check": "New facility1", "if": "^restaurant\\b.*\\bnew\\b.*\\b4,?000 " },
+      { "check": "NewChkBox4", "if": "^restaurant\\b.*\\bnew\\b.*\\b4,?000 " },
+      { "text": "TotalAmountDue", "value": "$2,276.00", "if": "^restaurant\\b.*\\bnew\\b.*\\b4,?000 " },
+      { "check": "Remodel Facility1", "if": "^restaurant\\b.*\\bremodel\\b.*\\b4,?000 " },
+      { "check": "NewChkBox4", "if": "^restaurant\\b.*\\bremodel\\b.*\\b4,?000 " },
+      { "text": "TotalAmountDue", "value": "$2,276.00", "if": "^restaurant\\b.*\\bremodel\\b.*\\b4,?000 " },
+      { "check": "New facility1", "if": "^restaurant\\b.*\\bnew\\b.*\\b10,?000 " },
+      { "check": "NewChkBox5", "if": "^restaurant\\b.*\\bnew\\b.*\\b10,?000 " },
+      { "text": "TotalAmountDue", "value": "$2,723.00", "if": "^restaurant\\b.*\\bnew\\b.*\\b10,?000 " },
+      { "check": "Remodel Facility1", "if": "^restaurant\\b.*\\bremodel\\b.*\\b10,?000 " },
+      { "check": "NewChkBox5", "if": "^restaurant\\b.*\\bremodel\\b.*\\b10,?000 " },
+      { "text": "TotalAmountDue", "value": "$2,723.00", "if": "^restaurant\\b.*\\bremodel\\b.*\\b10,?000 " },
+      { "check": "Remodel Facility1", "if": "^restaurant\\b.*\\bremodel\\b.*\\b300 sq" },
+      { "check": "NewChkBox6", "if": "^restaurant\\b.*\\bremodel\\b.*\\b300 sq" },
+      { "text": "TotalAmountDue", "value": "$315.00", "if": "^restaurant\\b.*\\bremodel\\b.*\\b300 sq" },
+      { "check": "Remodel Facility1", "if": "^restaurant\\b.*\\bremodel\\b.*\\b301 - 500\\b" },
+      { "check": "NewChkBox7", "if": "^restaurant\\b.*\\bremodel\\b.*\\b301 - 500\\b" },
+      { "text": "TotalAmountDue", "value": "$1,044.00", "if": "^restaurant\\b.*\\bremodel\\b.*\\b301 - 500\\b" },
+      { "check": "New facility5", "if": "^(food )?market\\b.*\\bnew\\b.*\\b25 " },
+      { "check": "NewChkBox26", "if": "^(food )?market\\b.*\\bnew\\b.*\\b25 " },
+      { "text": "TotalAmountDue", "value": "$858.00", "if": "^(food )?market\\b.*\\bnew\\b.*\\b25 " },
+      { "check": "New facility5", "if": "^(food )?market\\b.*\\bnew\\b.*\\b51 " },
+      { "check": "NewChkBox27", "if": "^(food )?market\\b.*\\bnew\\b.*\\b51 " },
+      { "text": "TotalAmountDue", "value": "$1,119.00", "if": "^(food )?market\\b.*\\bnew\\b.*\\b51 " },
+      { "check": "New facility5", "if": "^(food )?market\\b.*\\bnew\\b.*\\b2,?000 " },
+      { "check": "NewChkBox28", "if": "^(food )?market\\b.*\\bnew\\b.*\\b2,?000 " },
+      { "text": "TotalAmountDue", "value": "$1,232.00", "if": "^(food )?market\\b.*\\bnew\\b.*\\b2,?000 " },
+      { "check": "Remodel Facility5", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b2,?000 " },
+      { "check": "NewChkBox28", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b2,?000 " },
+      { "text": "TotalAmountDue", "value": "$1,232.00", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b2,?000 " },
+      { "check": "Remodel Facility5", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b300 sq" },
+      { "check": "NewChkBox29", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b300 sq" },
+      { "text": "TotalAmountDue", "value": "$315.00", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b300 sq" },
+      { "check": "Remodel Facility5", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b301 " },
+      { "check": "NewChkBox30", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b301 " },
+      { "text": "TotalAmountDue", "value": "$1,119.00", "if": "^(food )?market\\b.*\\bremodel\\b.*\\b301 " }
+    ]
+  },
+  "sign": {
+    "page": 2,
+    "x": 88,
+    "y": 105,
+    "w": 220,
+    "h": 20,
+    "date": {
+      "x": 414,
+      "y": 106,
+      "size": 9
+    }
+  }
+}

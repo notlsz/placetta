@@ -1,5 +1,7 @@
 import type { Field } from "../model";
 import { formById } from "./registry";
+import { MAPS } from "./maps";
+import { pdfLibWriter, writeAnswers, type FormMap } from "./boxes";
 
 /* Fills the official PDF itself: the agency's own form, downloaded from the agency (federal forms are public domain),
    with each answer written into the form's own field for that line. Nothing private goes in: SSNs, ITINs and passport
@@ -69,9 +71,34 @@ export const BY_HAND = /^(by hand|written by hand|(the )?signer (writes|fills)( 
 /** The values by form field id: the application's fields carry the form's field ids. */
 export const valuesOf = (fields: Field[]) => Object.fromEntries(fields.filter(f => f.value && !BY_HAND.test(f.value.trim())).map(f => [f.id, f.value]));
 
+/** Placetta writes the answers into this form's own PDF (the agency's file, never a Placetta copy). */
+export const fillable = (formId: string) => !!formById(formId)?.fill || !!MAPS[formId];
+
+/** Where the app keeps the agencies' PDFs: /app/forms/ in the app, ./forms/ next to the one-file preview. */
+const FORMS_BASE = import.meta.env?.MODE === "single" ? "forms/" : `${import.meta.env?.BASE_URL ?? "/"}forms/`;
+
+/** Fills an agency PDF from its box map. Pure: the bytes in, the filled bytes out (the checks run this same code). */
+export async function fillMapped(bytes: Uint8Array, map: FormMap, fields: Field[]): Promise<{ pdf: Uint8Array; filled: Set<string> }> {
+  const { PDFDocument } = await import("pdf-lib");
+  const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+  const form = doc.getForm();
+  const filled = writeAnswers(map, valuesOf(fields), pdfLibWriter(form));
+  // XFA forms (the IRS's and Arizona's) would show their own empty copy in Acrobat; drop it so the filled boxes show.
+  try { form.deleteXFA(); } catch { /* no XFA */ }
+  try { form.updateFieldAppearances(); } catch { /* a box with an odd font keeps its own look */ }
+  return { pdf: await doc.save(), filled };
+}
+
 /** The agency's own PDF with the answers written in. Returns null when Placetta can't fill this form itself. */
 export async function fillOfficial(formId: string, fields: Field[]): Promise<Blob | null> {
   const form = formById(formId);
+  const map = MAPS[formId];
+  if (!form?.fill && map) {
+    const res = await fetch(FORMS_BASE + map.pdf);
+    if (!res.ok) throw new Error(`The official ${form?.form ?? formId} PDF didn't load (${res.status}).`);
+    const { pdf } = await fillMapped(new Uint8Array(await res.arrayBuffer()), map, fields);
+    return new Blob([pdf as BlobPart], { type: "application/pdf" });
+  }
   if (!form?.fill) return null;
   const [{ PDFDocument }, dataUrl] = await Promise.all([import("pdf-lib"), PDFS[form.fill]()]);
   const bin = atob(dataUrl.slice(dataUrl.indexOf(",") + 1));
@@ -91,7 +118,7 @@ export async function fillOfficial(formId: string, fields: Field[]): Promise<Blo
 /** Draw a signature image (PNG) on the form's signature line with today's date in its date box. One filing, one
     signature: callers never keep the image for another form. Returns the signed PDF, or null when the form has no spot. */
 export async function stampSignature(pdfBytes: Uint8Array, png: Uint8Array, formId: string, today = new Date()): Promise<Uint8Array | null> {
-  const spot = formById(formId)?.sign;
+  const spot = formById(formId)?.sign ?? MAPS[formId]?.sign;
   if (!spot) return null;
   const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
   const doc = await PDFDocument.load(pdfBytes);

@@ -1,0 +1,64 @@
+{
+  "form": "tx-205",
+  "rev": "Form 205 (Texas SOS, as downloaded 2026-10-14)",
+  "pdf": "tx-205.pdf",
+  "checked": "2026-10-14",
+  "notes": "Answers: agent is an organization's name, or a person's full name (a person is told apart by 'individual' or no company word). governing_persons: one person or company per line, 'Name, street, city, ST ZIP'. organizer: 'Name, street, city, ST ZIP'. Signature and date are left for the organizer.",
+  "boxes": {
+    "name": [{ "text": "The name of the entity is:" }],
+    "agent": [
+      { "check": "registered", "if": "\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|services|agents?|registered|lp|llp|pllc)\\b" },
+      { "text": "Initial registered agent is an organization by the name of:", "if": "\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|services|agents?|registered|lp|llp|pllc)\\b" },
+      { "check": "registered2", "if": "^(?!.*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|services|agents?|registered|lp|llp|pllc)\\b)" },
+      { "text": "First name of initial registered agent:", "pick": "first", "if": "^(?!.*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|services|agents?|registered|lp|llp|pllc)\\b)" },
+      { "text": "Middle initial of initial registered agent:", "pick": "mi", "if": "^(?!.*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|services|agents?|registered|lp|llp|pllc)\\b)" },
+      { "text": "Last name of initial registered agent:", "pick": "last", "if": "^(?!.*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|services|agents?|registered|lp|llp|pllc)\\b)" }
+    ],
+    "agent_address": [
+      { "text": "Street address of registered agent:", "pick": "street" },
+      { "text": "City of registered agent:", "pick": "city" },
+      { "text": "Zip code of registered agent:", "pick": "zip" }
+    ],
+    "management": [
+      { "check": "company", "if": "^has managers|manager-managed|managers$" },
+      { "check": "company2", "if": "members" }
+    ],
+    "governing_persons": [
+      { "text": "Organization Name:", "pick": "line1|head", "if": "^[^\\n;]*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|limited|holdings|group|lp|llp)\\b" },
+      { "text": "First Name of Governing Person:", "pick": "line1|head|first", "if": "^(?![^\\n;]*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|limited|holdings|group|lp|llp)\\b)" },
+      { "text": "Middle Initial  of Governing Person:", "pick": "line1|head|mi", "if": "^(?![^\\n;]*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|limited|holdings|group|lp|llp)\\b)" },
+      { "text": "Last Name of Governing Person:", "pick": "line1|head|last", "if": "^(?![^\\n;]*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|limited|holdings|group|lp|llp)\\b)" },
+      { "text": "Street or Mailing Address:", "pick": "line1|tail|street" },
+      { "text": "City:", "pick": "line1|tail|city" },
+      { "text": "state:", "pick": "line1|tail|state" },
+      { "text": "Zip Code:", "pick": "line1|tail|zip" },
+      { "text": "Organization Name 2:", "pick": "line2|head", "if": "[\\n;][^\\n;]*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|limited|holdings|group|lp|llp)\\b" },
+      { "text": "First Name of Governing Person 2:", "pick": "line2|head|first", "if": "[\\n;](?![^\\n;]*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|limited|holdings|group|lp|llp)\\b)" },
+      { "text": "Middle Initial of Governing Person 2:", "pick": "line2|head|mi", "if": "[\\n;](?![^\\n;]*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|limited|holdings|group|lp|llp)\\b)" },
+      { "text": "Last Name of Governing Person 2:", "pick": "line2|head|last", "if": "[\\n;](?![^\\n;]*\\b(inc|llc|l\\.l\\.c|corp|corporation|company|co\\.|ltd|limited|holdings|group|lp|llp)\\b)" },
+      { "text": "Street or Mailing Address 2:", "pick": "line2|tail|street" },
+      { "text": "city 2:", "pick": "line2|tail|city" },
+      { "text": "state 2:", "pick": "line2|tail|state" },
+      { "text": "Zip Code 2:", "pick": "line2|tail|zip" }
+    ],
+    "mailing": [
+      { "text": "Initial Mailing Address", "pick": "street" },
+      { "text": "City of Initial Mailing Address", "pick": "city" },
+      { "text": "State of Initial Mailing Address", "pick": "state" },
+      { "text": "Zip Code of Initial Mailing Address", "pick": "zip" }
+    ],
+    "organizer": [
+      { "text": "The name and address of the organizer:", "pick": "head" },
+      { "text": "Street or Mailing Address of the organizer:", "pick": "tail|street" },
+      { "text": "City of the organizer:", "pick": "tail|city" },
+      { "text": "State of the organizer:", "pick": "tail|state" },
+      { "text": "Zip Code of the organizer:", "pick": "tail|zip" },
+      { "text": "Printed or typed name of organizer:", "pick": "head" }
+    ],
+    "effectiveness": [
+      { "check": "document", "if": "^when filed" },
+      { "check": "document2", "if": "^later date" },
+      { "check": "document3", "if": "^future event" }
+    ]
+  }
+}

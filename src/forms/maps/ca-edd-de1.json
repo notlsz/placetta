@@ -1,0 +1,152 @@
+{
+  "form": "ca-edd-de1",
+  "rev": "DE 1 Rev. 79 (3-16) (INTERNET)",
+  "pdf": "ca-edd-de1.pdf",
+  "checked": "2026-10-14",
+  "notes": "Answers: owner_info and officer_member_info take one person per line (or ';'), 'Name, Title, SSN or Foreign, CA driver license' (SSNs are never written; 'Foreign' is). physical_location and mailing_address: 'street[, unit], city, ST ZIP' on the first line and the phone on the next line (or after ';'); only the first location fits, and the street goes whole into the Street Name box (Street # stays blank, there is no pick for 'all but the first word'). mailing_address 'Same as above' ticks that box. contact_person: 'Name, phone, email, relation, address'; declarant: 'Name, title, phone' (the signature and its date are left for the signer). 'Update Employer Account Information' ticks a box only when the answer names what changes (address, DBA, personal name, or officer/partner/member); industry 'Other (Specify): text' writes the text.",
+  "boxes": {
+    "request_type": [
+      { "radio": "I WANT TO", "value": "Register for a New Employer Account Number (Go to Item B.)", "if": "^register" },
+      { "radio": "I WANT TO", "value": "Request Account for CalJOBS SM (Service mark) (Go to Item B.)", "if": "^request account|caljobs" },
+      { "radio": "I WANT TO", "value": "Update Employer Account Information - Address (O, P)", "if": "^update\\b.*\\baddress" },
+      { "radio": "I WANT TO", "value": "Update Employer Account Information - Doing Business As (D B A) (J)", "if": "^update\\b.*\\b(dba|d b a|doing business)" },
+      { "radio": "I WANT TO", "value": "Update Employer Account Information - Personal Name Change (G)", "if": "^update\\b.*\\b(personal name|name change)" },
+      { "radio": "I WANT TO", "value": "Update Employer Account Information - Add/Change/Delete Officer/Partner/Member (H)", "if": "^update\\b.*\\b(officer|partner|member)" },
+      { "radio": "I WANT TO", "value": "Report a Purchase of Business (Provide the Seller's Employer Account Number at the top of Item A.)", "if": "^report a purchase" },
+      { "radio": "I WANT TO", "value": "Report a Sale of Business (Provide the business' Employer Account Number at the top of Item A. Complete Item P.)", "if": "^report a sale" },
+      { "radio": "I WANT TO", "value": "Reopen a Previously Closed Account (Provide the previous Employer Account Number at the top of Item A then go to Item B.)", "if": "^reopen" },
+      { "radio": "I WANT TO", "value": "Close Employer Account (Provide the Employer Account Number at the top of Item A.)", "if": "^close" },
+      { "radio": "I WANT TO", "value": "Report a Change in Status: Business Ownership, Entity Type, or Name", "if": "^report a change" }
+    ],
+    "employer_type": [
+      { "radio": "EMPLOYER TYPE", "value": "COMMERCIAL", "if": "^commercial" },
+      { "radio": "EMPLOYER TYPE", "value": "PACIFIC MARITIME", "if": "^pacific" },
+      { "radio": "EMPLOYER TYPE", "value": "FISHING BOAT", "if": "^fishing" }
+    ],
+    "taxpayer_type": [
+      { "radio": "TAXPAYER TYPE", "value": "Individual Owner (D, E1, F, G, J, K, L, O-T)", "if": "^individual" },
+      { "radio": "TAXPAYER TYPE", "value": "Limited Partnership (D, F, H-T)", "if": "^(limited partnership|lp\\b)" },
+      { "radio": "TAXPAYER TYPE", "value": "Joint Venture (D, F, H, I, K, L, O-T)", "if": "^joint" },
+      { "radio": "TAXPAYER TYPE", "value": "Co-Ownership (D, E2, F, G, J, K, L, O-T)", "if": "^co-?\\s?ownership" },
+      { "radio": "TAXPAYER TYPE", "value": "Association (D, F, H-T)", "if": "^association" },
+      { "radio": "TAXPAYER TYPE", "value": "Receivership (D, F, H, K, L, O-T)", "if": "^receivership" },
+      { "radio": "TAXPAYER TYPE", "value": "General Partnership (D, E3, F, H, J, K, L, O-T)", "if": "^general partnership" },
+      { "radio": "TAXPAYER TYPE", "value": "Limited Liability Company (LLC) (D, F, H-T)", "if": "^(limited liability company|llc\\b)" },
+      { "radio": "TAXPAYER TYPE", "value": "Estate Administration (D, F, H, I, K, L, O-T)", "if": "^estate" },
+      { "radio": "TAXPAYER TYPE", "value": "Corporation (D, F, H-T)", "if": "^corporation" },
+      { "radio": "TAXPAYER TYPE", "value": "Limited Liability Partnership (LLP) (D, F, H-T)", "if": "^(limited liability partnership|llp\\b)" },
+      { "radio": "TAXPAYER TYPE", "value": "Trusteeship (D, F, H, I, K, L, O-T)", "if": "^trustee" }
+    ],
+    "first_payroll_date": [
+      { "text": "11.1 date", "pick": "mm" },
+      { "text": "11.2 date", "pick": "dd" },
+      { "text": "11.3 date", "pick": "yyyy" }
+    ],
+    "e1_individual_family": [
+      { "radio": "INDIVIDUAL OWNER - Do you only employ your spouse, parent(s), or minor child(ren) (under 18)? If yes, you are not subject to Unemployment Insurance (UI) and State Disability Insurance (SDI) but may be subject to Personal Income Tax (PIT)", "value": "Yes", "if": "^(y|yes|是)" },
+      { "radio": "INDIVIDUAL OWNER - Do you only employ your spouse, parent(s), or minor child(ren) (under 18)? If yes, you are not subject to Unemployment Insurance (UI) and State Disability Insurance (SDI) but may be subject to Personal Income Tax (PIT)", "value": "No", "if": "^(n|no|否)" }
+    ],
+    "e2_coowner_children": [
+      { "radio": "CO-OWNERSHIP - Do you only employ your minor child(ren) (under 18)? If yes, you are not subject to UI and SDI but may be subject to PIT", "value": "Yes", "if": "^(y|yes|是)" },
+      { "radio": "CO-OWNERSHIP - Do you only employ your minor child(ren) (under 18)? If yes, you are not subject to UI and SDI but may be subject to PIT", "value": "No", "if": "^(n|no|否)" }
+    ],
+    "e3_partnership_parents": [
+      { "radio": "PARTNERSHIP: Do you only employ your parent(s)? If yes, you are not subject to UI and SDI but may be subject to PIT", "value": "Yes", "if": "^(y|yes|是)" },
+      { "radio": "PARTNERSHIP: Do you only employ your parent(s)? If yes, you are not subject to UI and SDI but may be subject to PIT", "value": "No", "if": "^(n|no|否)" }
+    ],
+    "employees_in_ca": [
+      { "radio": "LOCATION OF EMPLOYEE SERVICES - Do you have employees working in California?", "value": "Yes", "if": "^(y|yes|是)" },
+      { "radio": "LOCATION OF EMPLOYEE SERVICES - Do you have employees working in California?", "value": "No", "if": "^(n|no|否)" }
+    ],
+    "employees_residing_ca_outside": [
+      { "radio": "LOCATION OF EMPLOYEE SERVICES - Do you have employees residing in California that are working outside of California?", "value": "Yes", "if": "^(y|yes|是)" },
+      { "radio": "LOCATION OF EMPLOYEE SERVICES - Do you have employees residing in California that are working outside of California?", "value": "No", "if": "^(n|no|否)" }
+    ],
+    "owner_info": [
+      { "text": "15.1 Name", "pick": "line1|head" },
+      { "text": "15.2 Title", "pick": "line1|tail|head" },
+      { "text": "15.3 SSN", "pick": "line1|tail|tail|head" },
+      { "text": "15.4 CDL", "pick": "line1|tail|tail|tail|head" },
+      { "text": "16.1 Name", "pick": "line2|head" },
+      { "text": "16.2 Title", "pick": "line2|tail|head" },
+      { "text": "16.3 SSN", "pick": "line2|tail|tail|head" },
+      { "text": "16.4 CDL", "pick": "line2|tail|tail|tail|head" }
+    ],
+    "officer_member_info": [
+      { "text": "17.1 Name", "pick": "line1|head" },
+      { "text": "17.2 Title", "pick": "line1|tail|head" },
+      { "text": "17.3 SSN", "pick": "line1|tail|tail|head" },
+      { "text": "17.4 CDL", "pick": "line1|tail|tail|tail|head" },
+      { "text": "18.1 Name", "pick": "line2|head" },
+      { "text": "18.2 Title", "pick": "line2|tail|head" },
+      { "text": "18.3 SSN", "pick": "line2|tail|tail|head" },
+      { "text": "18.4 CDL", "pick": "line2|tail|tail|tail|head" },
+      { "text": "19.1 Name", "pick": "line3|head" },
+      { "text": "19.2 Title", "pick": "line3|tail|head" },
+      { "text": "19.3 SSN", "pick": "line3|tail|tail|head" },
+      { "text": "19.4 CDL", "pick": "line3|tail|tail|tail|head" },
+      { "text": "20.1 Name", "pick": "line4|head" },
+      { "text": "20.2 Title", "pick": "line4|tail|head" },
+      { "text": "20.3 SSN", "pick": "line4|tail|tail|head" },
+      { "text": "20.4 CDL", "pick": "line4|tail|tail|tail|head" }
+    ],
+    "legal_name": [{ "text": "20.1 Legal Name" }],
+    "dba": [{ "text": "21.1 DBA" }],
+    "fein": [{ "text": "22.1 FEIN" }],
+    "ownership_began": [
+      { "text": "22.2 date", "pick": "mm" },
+      { "text": "22.3 date", "pick": "dd" },
+      { "text": "22.4 date", "pick": "yyyy" }
+    ],
+    "state_of_incorporation": [{ "text": "23.1 State" }],
+    "sos_entity_number": [{ "text": "23.2 State Entity Number", "max": 12 }],
+    "physical_location": [
+      { "text": "24.2 Street Name", "pick": "line1|street|head" },
+      { "text": "24.3 Unit #", "pick": "line1|street|tail" },
+      { "text": "25.1 City", "pick": "line1|city" },
+      { "text": "25.2 State", "pick": "line1|state" },
+      { "text": "25.3 ZIP", "pick": "line1|zip" },
+      { "text": "25.4 Country", "value": "USA", "if": "^[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])" },
+      { "text": "25.5 Business Phone", "pick": "line2", "if": "^[^\\n;]*[\\n;][\\s;]*\\+?[\\d(][\\d\\s().-]{6,}\\s*($|[\\n;])" }
+    ],
+    "mailing_address": [
+      { "check": "Same as above", "if": "^same" },
+      { "text": "26.2 Street Name", "pick": "line1|street|head", "if": "^(?!same)" },
+      { "text": "26.3 Unit #", "pick": "line1|street|tail", "if": "^(?!same)" },
+      { "text": "27.1 City", "pick": "line1|city", "if": "^(?!same)" },
+      { "text": "27.2 State", "pick": "line1|state", "if": "^(?!same)" },
+      { "text": "27.3 ZIP", "pick": "line1|zip", "if": "^(?!same)" },
+      { "text": "27.4 Country", "value": "USA", "if": "^(?!same)[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])" },
+      { "text": "27.5 Phone", "pick": "line2", "if": "^[^\\n;]*[\\n;][\\s;]*\\+?[\\d(][\\d\\s().-]{6,}\\s*($|[\\n;])" }
+    ],
+    "email": [
+      { "check": "28.0 email", "if": "\\ballow e-?mail contact\\b" },
+      { "text": "28.1 email" }
+    ],
+    "products_services": [{ "text": "29.1 product-services" }],
+    "industry": [
+      { "radio": "INDUSTRY ACTIVITY - Select your business industry", "value": "Services", "if": "^services\\b" },
+      { "radio": "INDUSTRY ACTIVITY - Select your business industry", "value": "Retail", "if": "^retail" },
+      { "radio": "INDUSTRY ACTIVITY - Select your business industry", "value": "Wholesale", "if": "^wholesale" },
+      { "radio": "INDUSTRY ACTIVITY - Select your business industry", "value": "Manufacturing", "if": "^manufactur" },
+      { "radio": "INDUSTRY ACTIVITY - Select your business industry", "value": "Temporary Services", "if": "^temporary" },
+      { "radio": "INDUSTRY ACTIVITY - Select your business industry", "value": "Leasing Employer", "if": "^leasing" },
+      { "radio": "INDUSTRY ACTIVITY - Select your business industry", "value": "Professional Employer Organization", "if": "^(professional employer|peo\\b)" },
+      { "radio": "INDUSTRY ACTIVITY - Select your business industry", "value": "Other", "if": "^other" },
+      { "text": "29.2 Other", "pick": "tail", "if": "^other" }
+    ],
+    "contact_person": [
+      { "text": "30.1 Name", "pick": "head" },
+      { "text": "30.2 Phone", "pick": "tail|head", "if": "^[^,]*,\\s*\\+?[\\d(]" },
+      { "text": "30.3 E-mail", "pick": "tail|tail|head", "if": "^[^,]*,[^,]*,\\s*[^,\\s]+@" },
+      { "text": "31.1 Relation", "pick": "tail|tail|tail|head", "if": "^[^,]*,\\s*\\+?[\\d(][^,]*,\\s*[^,\\s]+@[^,]*,\\s*[^,]" },
+      { "text": "31.2 Address", "pick": "tail|tail|tail|tail", "if": "^[^,]*,\\s*\\+?[\\d(][^,]*,\\s*[^,\\s]+@[^,]*,[^,]*,\\s*[^,]" }
+    ],
+    "declarant": [
+      { "text": "33.1 Name", "pick": "head" },
+      { "text": "33.2 Title", "pick": "tail|head" },
+      { "text": "33.3 phone", "pick": "tail|tail|head", "if": "^[^,]*,[^,]*,\\s*\\+?[\\d(]" }
+    ]
+  },
+  "sign": { "page": 1, "x": 160, "y": 100, "w": 310, "h": 18, "date": { "x": 478, "y": 103, "size": 9 } }
+}

@@ -1,3 +1,4 @@
+import type { Budget, Purchase, SpendPolicy } from "./spend.ts";
 import type { OrbState } from "thinking-orbs";
 import { ago, inDays } from "./time";
 
@@ -68,16 +69,18 @@ export type Approval = {
   url?: string;             // pay: the agency's payment link
   fee?: number;             // pay: the amount the agency asks for
   filing?: string;          // pay: the filing it belongs to
+  purchase?: string;        // pay: the purchase Odelia asked to make (Spending), approved here
   change?: Change;          // change: what the agent will change once you confirm
 };
 /** A change to something that already exists, which the agent only makes after you confirm it. */
 export type Change =
   | { op: "move_store"; store: string; name?: string; address?: string; city: string; state: string; planned_open?: string }
   | { op: "remove_store"; store: string }
-  | { op: "remove_app"; app: string };
+  | { op: "remove_app"; app: string }
+  | { op: "set_budgets"; budgets: Budget[] };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
-export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
+export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
 
 export type Audit = { id: string; at: string; actor: Actor; who?: Bi; action: Bi; object: Bi; detail?: Bi };
 export type FactGroup = "business" | "location" | "operations" | "rules";
@@ -133,6 +136,7 @@ export type Workspace = {
   chats?: Record<string, ChatLine[]>;      // each person's past chats with the agent, by user id, for "search past chats"
   skills?: Skill[];                        // how Placetta gets things done here: learned as it works, or written by you
   skillsAuto?: boolean;                    // let Placetta create skills as it works (on unless turned off)
+  spend?: { policy: SpendPolicy; purchases: Purchase[] };   // what Odelia may buy (outside an account; an account keeps it on the server)
 };
 /** A skill: instructions Placetta follows for one kind of job. "auto" ones it wrote itself from a job it finished;
  *  "form" skills also carry where each line of an official form came from, so the next filing of it fills itself. */

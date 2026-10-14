@@ -9,6 +9,7 @@ import { AgentBot } from "./Bot";
 import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { AppCtx, type CloudCtx, type Ctx, type Signed, type Tab, type View } from "./ctx";
 import { formById } from "./forms/registry";
+import { canFill } from "./forms/canFill";
 import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
 import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, serverModel, type Model, type Services, type Turn as Msg } from "./live";
@@ -28,6 +29,7 @@ import { daysFromNow, daysUntil, inDays, nowIso } from "./time";
 import { preflight } from "./smart";
 import { I, Modal } from "./ui";
 import * as api from "./cloud/api";
+import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
 import { Queue, QueueLocked } from "./cloud/Ops";
@@ -92,6 +94,7 @@ const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
   filing: B(`What's the status and the next step: ${u.title.en}`, `进展和下一步是什么：${u.title.zh}`),
   team: B(`Tell me more: ${u.title.en}`, `详细说说：${u.title.zh}`),
   mail: B(`Read this reply and tell me what to do next: ${u.title.en}`, `读一下这封回复，告诉我下一步怎么做：${u.title.zh}`),
+  purchase: B(`What's this purchase and what happens next: ${u.title.en}`, `这笔购买是什么，接下来怎么办：${u.title.zh}`),
 })[u.kind];
 
 const PLAN_LABEL: Record<string, Bi> = {
@@ -154,12 +157,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [ws, setWs] = useState<Workspace>(() => (cloud ? { ...cloud.initial, audit: cloud.audit } : SAMPLE_WS));
   const [billing, setBilling] = useState(cloud?.billing ?? null);
   const [filings, setFilings] = useState(cloud?.filings ?? []);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [docs, setDocs] = useState(cloud?.docs ?? []);
   const [integrations, setIntegrations] = useState(cloud?.integrations ?? []);
   const [logins, setLogins] = useState(cloud?.logins ?? []);
   const [serverUpdates, setServerUpdates] = useState<api.UpdateRow[]>([]);
   const [readLocal, setReadLocal] = useState<Set<string>>(() => new Set());
-  const view_ = useMemo(() => (cloud ? withServer(ws, filings, docs) : ws), [cloud, ws, filings, docs]);
+  const view_ = useMemo(() => (cloud ? withServer(ws, filings, docs, purchases) : ws), [cloud, ws, filings, docs, purchases]);
   /* A link from one of Odelia's texts opens that exact approval (approving still happens here, in the app). */
   const linked = useRef(cloud?.approval ?? null);
   const readyLink = useRef(false);
@@ -213,6 +217,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     try {
       const [f, d, bl, au, up] = await Promise.all([api.listFilings(cloud.wsId), api.listDocs(cloud.wsId), api.getBilling(cloud.wsId), api.listAudit(cloud.wsId), api.listUpdates(cloud.wsId).catch(() => null)]);
       setFilings(f); setDocs(d); setBilling(bl); if (up) setServerUpdates(up);
+      void api.spendGet(cloud.wsId).then(sp => { if (sp) setPurchases(sp.purchases); });
       setWs(w => { const server = new Set(au.map(a => a.id)); au.forEach(a => synced.current.add(a.id)); return { ...w, audit: [...w.audit.filter(a => !server.has(a.id) && !synced.current.has(a.id)), ...au] }; });
       if (all) { const [i, l] = await Promise.all([api.listIntegrations(cloud.wsId), api.listLogins(cloud.wsId)]); setIntegrations(i); setLogins(l); }
     } catch { /* offline: try again next tick */ }
@@ -481,7 +486,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     try {
       const off = app.official ? formById(app.official) : undefined;
       let pdf_path: string | undefined, signature: api.FilingPayload["signature"];
-      if (off?.fill) {
+      if (off && canFill(off)) {
         const { fillOfficial, stampSignature } = await import("./forms/fill");
         const blob = await fillOfficial(off.id, app.fields);
         if (blob) {
@@ -517,6 +522,47 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
   }, [cloud, refresh, say]);   // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* A purchase Odelia asked to make: approving it checks the Spending rules again and pays it (a single-use card, or the
+     agency's own page). The server decides in an account; outside one, the same rules run here and nothing is paid. */
+  const approvePurchase = async (a: Approval) => {
+    const zh = lang === "zh", money = (n: number) => `$${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+    if (cloud) {
+      if (!ownerOk()) return;
+      const p = purchases.find(x => x.id === a.purchase);
+      try {
+        if (p?.status === "approved") {
+          await api.spend(cloud.wsId, "paid", { id: p.id });
+          say(zh ? "已记录为已付款。" : "Recorded as paid.");
+        } else {
+          const r = await api.spend<{ purchase: Purchase; waiting?: number; reasons?: Bi[] }>(cloud.wsId, "decide", { id: a.purchase, approve: true });
+          const q = r.purchase;
+          say(r.waiting ? (zh ? "已批准。金额超过双人审批线，还需另一位所有者批准。" : "Approved. It's over the two-person amount, so another owner approves it too.")
+            : q.status === "blocked" ? (zh ? `未购买：${(r.reasons ?? q.reasons ?? []).map(x => x.zh).join("；")}` : `Not bought: ${(r.reasons ?? q.reasons ?? []).map(x => x.en).join("; ")}`)
+            : q.status === "failed" ? (zh ? "您登记的银行卡被拒，未进行购买。" : "Your card on file was declined, so nothing was bought.")
+            : q.method === "card" ? (zh ? `已批准。Odelia 正用尾号 ${q.card?.last4} 的一次性卡付款，金额锁定为 ${money(q.amount)}，付款后卡即作废。` : `Approved. Odelia is paying with a single-use card ending ${q.card?.last4}, locked to ${money(q.amount)} and closed after this payment.`)
+            : (zh ? "已批准。请在机构页面付款，然后告诉 Odelia 已付款。" : "Approved. Pay it on the agency's page, then tell Odelia it's paid."));
+          if (q.method === "link" && q.payeeUrl && q.status === "approved") window.open(q.payeeUrl, "_blank", "noopener,noreferrer");
+        }
+        const sp = await api.spendGet(cloud.wsId); if (sp) setPurchases(sp.purchases);
+      } catch (e) { say((e as api.ApiError).message); }
+      return;
+    }
+    // outside an account: the rules run here; nothing is charged, the agency's page is where it's paid
+    const sp = wsRef.current.spend, p = sp?.purchases.find(x => x.id === a.purchase);
+    if (!sp || !p) return;
+    if (p.status === "approved") {
+      setWs(w => audit("you", B("Paid", "已支付"), a.title)(dropApproval(a.id)({ ...w, spend: { ...sp, purchases: sp.purchases.map(x => x.id === p.id ? { ...x, status: "paid" as const } : x) } })));
+      say(zh ? "已记录为已付款。" : "Recorded as paid.");
+      return;
+    }
+    const d = decide(p, sp.policy, sp.purchases.filter(x => x.id !== p.id));
+    if (d.verdict === "blocked") { say(zh ? `未购买：${d.reasons.map(x => x.zh).join("；")}` : `Not bought: ${d.reasons.map(x => x.en).join("; ")}`); return; }
+    const done: Purchase = { ...p, status: "approved", method: "link", approvals: [...(p.approvals ?? []), { who: "you", at: new Date().toISOString() }] };
+    setWs(w => audit("you", B("Approved a purchase", "批准购买"), a.title)({ ...w, spend: { ...sp, purchases: sp.purchases.map(x => x.id === p.id ? done : x) },
+      approvals: w.approvals.map(x => x.id === a.id ? { ...x, title: B(`Pay ${p.payee} ${money(p.amount)}`, `向 ${p.payee} 支付 ${money(p.amount)}`), action: B("I've paid it", "我已付款"), does: [p.why, B("Approved. Pay it on the agency's own page, then tap the button so Odelia records it.", "已批准。请在机构自己的页面付款，然后点按钮，Odelia 会记录下来。")] } : x) }));
+    if (p.payeeUrl) window.open(p.payeeUrl, "_blank", "noopener,noreferrer");
+    say(zh ? "已批准。请在机构页面付款，然后点“我已付款”。" : "Approved. Pay it on the agency's page, then tap \"I've paid it\".");
+  };
   const approve = useCallback(async (id: string, sig?: Signed) => {
     if (held()) return;
     if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
@@ -528,12 +574,23 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     // and nothing goes out with a line the second look says is wrong (an EIN that isn't one, an expired date)
     const pf = a.kind === "file" || a.kind === "send" ? preflight(w, a, daysFromNow(0)) : null;
     if (pf?.errors.length) { say(lang === "zh" ? `还不能提交：${pf.errors.map(e => `${e.label.zh}（${e.note.zh}）`).join("；")}` : `Not yet: ${pf.errors.map(e => `${e.label.en} (${e.note.en})`).join("; ")}`); return; }
+    if (a.kind === "change" && a.change?.op === "set_budgets" && cloud) {
+      if (!ownerOk()) return;
+      try {
+        const cur = await api.spendGet(cloud.wsId);
+        await api.spend(cloud.wsId, "set_policy", { policy: { ...(cur?.policy ?? DEFAULT_POLICY), budgets: a.change.budgets } });
+        setWs(x => audit("you", B("Set budgets", "设置预算"), a.title)(dropApproval(id)(x)));
+        say(lang === "zh" ? "预算已设置。可在“设置 > 支出”中修改。" : "Budgets set. Change them any time in Settings, Spending.");
+      } catch (e) { say((e as api.ApiError).message); }
+      return;
+    }
     if (a.kind === "change" && a.change) {
       const c = a.change;
       setWs(x => audit("you", B("Confirmed a change", "确认更改"), a.title)(dropApproval(id)(applyChange(c)(x))));
       say(lang === "zh" ? "已更改。" : "Done. It's changed.");
       return;
     }
+    if (a.kind === "pay" && a.purchase) { await approvePurchase(a); return; }
     if (!cloud) { run({ approve: id }, shown); return; }
     if (!ownerOk()) return;
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }

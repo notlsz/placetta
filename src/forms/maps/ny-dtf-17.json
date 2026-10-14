@@ -1,0 +1,70 @@
+{
+  "form": "ny-dtf-17",
+  "rev": "DTF-17-ATT (1/24)",
+  "pdf": "ny-dtf-17.pdf",
+  "checked": "2026-10-14",
+  "notes": "This PDF is only the DTF-17-ATT Schedule of Business Locations (the DTF-17 itself is filed online), so it has boxes for the legal name, DBA, start date, the locations and the signer's name and title; status, ein, mailing, email, entity, locations, activities, naics, bulk_sale, home, bank, franchise, parent, alcohol and tobacco have no box on it. physical: one location per line (or ';'), 'street, city, ST ZIP'; lines 1-9 fill location rows 1-9 on page 1 (dba and begin go on the first row only). responsible: one person per line, 'Name, Title, SSN or ITIN, address'; the first person's name and title go in the signature block, the SSN/ITIN, signature and date are left for the signer.",
+  "boxes": {
+    "legal_name": [
+      {"text": "legal name", "max": 60}
+    ],
+    "dba": [
+      {"text": "dba.0"}
+    ],
+    "physical": [
+      {"text": "street address.0", "pick": "line1|street"},
+      {"text": "city.0", "pick": "line1|city"},
+      {"text": "state or province.0", "pick": "line1|state"},
+      {"text": "zip.0", "pick": "line1|zip"},
+      {"text": "country.0", "value": "USA", "if": "^[\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"},
+      {"text": "street address.1", "pick": "line2|street"},
+      {"text": "city.1", "pick": "line2|city"},
+      {"text": "state or province.1", "pick": "line2|state"},
+      {"text": "zip.1", "pick": "line2|zip"},
+      {"text": "country.1", "value": "USA", "if": "^[\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"},
+      {"text": "street address.2", "pick": "line3|street"},
+      {"text": "city.2", "pick": "line3|city"},
+      {"text": "state or province.2", "pick": "line3|state"},
+      {"text": "zip.2", "pick": "line3|zip"},
+      {"text": "country.2", "value": "USA", "if": "^[\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"},
+      {"text": "street address.3", "pick": "line4|street"},
+      {"text": "city.3", "pick": "line4|city"},
+      {"text": "state or province.3", "pick": "line4|state"},
+      {"text": "zip.3", "pick": "line4|zip"},
+      {"text": "country.3", "value": "USA", "if": "^[\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"},
+      {"text": "street address.4", "pick": "line5|street"},
+      {"text": "city.4", "pick": "line5|city"},
+      {"text": "state or province.4", "pick": "line5|state"},
+      {"text": "zip.4", "pick": "line5|zip"},
+      {"text": "country.4", "value": "USA", "if": "^[\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"},
+      {"text": "street address.5", "pick": "line6|street"},
+      {"text": "city.5", "pick": "line6|city"},
+      {"text": "state or province.5", "pick": "line6|state"},
+      {"text": "zip.5", "pick": "line6|zip"},
+      {"text": "country.5", "value": "USA", "if": "^[\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"},
+      {"text": "street address.6", "pick": "line7|street"},
+      {"text": "city.6", "pick": "line7|city"},
+      {"text": "state or province.6", "pick": "line7|state"},
+      {"text": "zip.6", "pick": "line7|zip"},
+      {"text": "country.6", "value": "USA", "if": "^[\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"},
+      {"text": "street address.7", "pick": "line8|street"},
+      {"text": "city.7", "pick": "line8|city"},
+      {"text": "state or province.7", "pick": "line8|state"},
+      {"text": "zip.7", "pick": "line8|zip"},
+      {"text": "country.7", "value": "USA", "if": "^[\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"},
+      {"text": "street address.8", "pick": "line9|street"},
+      {"text": "city.8", "pick": "line9|city"},
+      {"text": "state or province.8", "pick": "line9|state"},
+      {"text": "zip.8", "pick": "line9|zip"},
+      {"text": "country.8", "value": "USA", "if": "^[\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;\\s][^\\n;]*[\\n;][\\s;]*[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"}
+    ],
+    "begin": [
+      {"text": "start date.0", "pick": "date"}
+    ],
+    "responsible": [
+      {"text": "name to sign", "pick": "line1|head"},
+      {"text": "title", "pick": "line1|tail|head"}
+    ]
+  },
+  "sign": {"page": 1, "x": 62, "y": 144, "w": 188, "h": 14, "date": {"x": 482, "y": 165, "size": 9}}
+}

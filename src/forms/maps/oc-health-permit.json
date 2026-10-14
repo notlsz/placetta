@@ -1,0 +1,116 @@
+{
+  "form": "oc-health-permit",
+  "rev": "F272-9.251 (2/23)",
+  "pdf": "oc-health-permit.pdf",
+  "checked": "2026-10-14",
+  "notes": "Dates: YYYY-MM-DD or MM/DD/YYYY. Addresses: 'street, suite, City, CA ZIP'. days: 'Daily', a list ('Mon, Tue, Wed') or a range ('Tue-Sun'). open_time/close_time: one time each (e.g. '11:00 AM'); '24 hours' ticks 24 Hrs. The owner's address must differ from the business address and cannot be a P.O. box. drivers_license only for a sole proprietorship or partnership (N/A otherwise). The form asks every field re-entered, never 'same as above'. Signature and its date are left for the signer.",
+  "boxes": {
+    "application_type": [
+      { "check": "New Facilityrequires plan submittal", "if": "^(new|新)" },
+      { "check": "Change ofOwnership", "if": "^(change|所有权|变更)|ownership" },
+      { "check": "Update Information Only", "if": "^(update|更新)" }
+    ],
+    "business_name": [
+      { "text": "Name ofBusiness DBA" }
+    ],
+    "business_phone": [
+      { "text": "Business Phone" }
+    ],
+    "business_address": [
+      { "text": "Business Address include streetdirections andsuite number ifapplicable", "pick": "street" },
+      { "text": "City", "pick": "city" },
+      { "text": "Zip", "pick": "zip" }
+    ],
+    "business_email": [
+      { "text": "Business EMail" }
+    ],
+    "seating_capacity": [
+      { "text": "SeatingBedCapacityLicensedHealthcare" }
+    ],
+    "square_footage": [
+      { "text": "Square Footage" }
+    ],
+    "days": [
+      { "check": "T", "if": "daily|every ?day|7 days|seven days|每天|每日|weekdays?|工作日|\\b(m(o|on)?)\\b|\\bmon|(周|星期|礼拜)一|\\b(mon)[a-z]*\\.?\\s*(-|–|to|through|thru|至|到)\\s*(mon|tue|wed|thu|fri|sat|sun)|(周|星期|礼拜)(一)\\s*(-|–|to|through|thru|至|到)\\s*(周|星期|礼拜)?(一|二|三|四|五|六|[日天])" },
+      { "check": "W", "if": "daily|every ?day|7 days|seven days|每天|每日|weekdays?|工作日|\\b(t(u|ue|ues)?)\\b|\\btue|(周|星期|礼拜)二|\\b(mon|tue)[a-z]*\\.?\\s*(-|–|to|through|thru|至|到)\\s*(tue|wed|thu|fri|sat|sun)|(周|星期|礼拜)(一|二)\\s*(-|–|to|through|thru|至|到)\\s*(周|星期|礼拜)?(二|三|四|五|六|[日天])" },
+      { "check": "Th", "if": "daily|every ?day|7 days|seven days|每天|每日|weekdays?|工作日|\\b(we?d?)\\b|\\bwed|(周|星期|礼拜)三|\\b(mon|tue|wed)[a-z]*\\.?\\s*(-|–|to|through|thru|至|到)\\s*(wed|thu|fri|sat|sun)|(周|星期|礼拜)(一|二|三)\\s*(-|–|to|through|thru|至|到)\\s*(周|星期|礼拜)?(三|四|五|六|[日天])" },
+      { "check": "F", "if": "daily|every ?day|7 days|seven days|每天|每日|weekdays?|工作日|\\b(th(u|ur|urs)?)\\b|\\bthu|(周|星期|礼拜)四|\\b(mon|tue|wed|thu)[a-z]*\\.?\\s*(-|–|to|through|thru|至|到)\\s*(thu|fri|sat|sun)|(周|星期|礼拜)(一|二|三|四)\\s*(-|–|to|through|thru|至|到)\\s*(周|星期|礼拜)?(四|五|六|[日天])" },
+      { "check": "Sa", "if": "daily|every ?day|7 days|seven days|每天|每日|weekdays?|工作日|\\b(fr?i?)\\b|\\bfri|(周|星期|礼拜)五|\\b(mon|tue|wed|thu|fri)[a-z]*\\.?\\s*(-|–|to|through|thru|至|到)\\s*(fri|sat|sun)|(周|星期|礼拜)(一|二|三|四|五)\\s*(-|–|to|through|thru|至|到)\\s*(周|星期|礼拜)?(五|六|[日天])" },
+      { "check": "Su", "if": "daily|every ?day|7 days|seven days|每天|每日|weekends?|周末|\\b(sa(t)?)\\b|\\bsat|(周|星期|礼拜)六|\\b(mon|tue|wed|thu|fri|sat)[a-z]*\\.?\\s*(-|–|to|through|thru|至|到)\\s*(sat|sun)|(周|星期|礼拜)(一|二|三|四|五|六)\\s*(-|–|to|through|thru|至|到)\\s*(周|星期|礼拜)?(六|[日天])" },
+      { "check": "undefined", "if": "daily|every ?day|7 days|seven days|每天|每日|weekends?|周末|\\b(su(n)?)\\b|\\bsun|(周|星期|礼拜)[日天]|\\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\\.?\\s*(-|–|to|through|thru|至|到)\\s*(sun)|(周|星期|礼拜)(一|二|三|四|五|六|[日天])\\s*(-|–|to|through|thru|至|到)\\s*(周|星期|礼拜)?([日天])" }
+    ],
+    "open_time": [
+      { "check": "24 Hrs", "if": "24 ?h|24/7|around the clock|24 小时|全天" },
+      { "text": "Hours ofOperation", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))" }
+    ],
+    "close_time": [
+      { "check": "24 Hrs", "if": "24 ?h|24/7|around the clock|24 小时|全天" },
+      { "text": "to", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))" }
+    ],
+    "first_operation_date": [
+      { "text": "FirstDate of Operation", "pick": "date" }
+    ],
+    "ownership_type": [
+      { "check": "IndividualSole Proprietorship", "if": "^(individual|sole|个人|独资)" },
+      { "check": "Partnership", "if": "^(general )?partnership|^普通合伙|^合伙$" },
+      { "check": "LP", "if": "^(lp|limited partnership|有限合伙)$" },
+      { "check": "LLP", "if": "^(llp|limited liability partnership|有限责任合伙)$" },
+      { "check": "Corporation", "if": "^(corp|corporation|inc|股份有限公司|公司$)" },
+      { "check": "LLC", "if": "^(llc|l\\.l\\.c|limited liability company|有限责任公司)" }
+    ],
+    "owner": [
+      { "text": "Business Owner" }
+    ],
+    "owner_phone": [
+      { "text": "Owner Phone" }
+    ],
+    "owner_address": [
+      { "text": "Owners Address mustbe differentthan Business Address andcannotbe a PO Box", "pick": "street" },
+      { "text": "City_2", "pick": "city" },
+      { "text": "State", "pick": "state" },
+      { "text": "Zip_2", "pick": "zip" }
+    ],
+    "drivers_license": [
+      { "text": "Drivers License NumbersifSole Proprietorshipor PartnershipattachcopyofID" }
+    ],
+    "owner_email": [
+      { "text": "Owner EMail" }
+    ],
+    "emergency_contact": [
+      { "text": "EmergencyContact" }
+    ],
+    "emergency_phone": [
+      { "text": "EmergencyPhone" }
+    ],
+    "billing_contact": [
+      { "text": "BillingContactName" }
+    ],
+    "billing_phone": [
+      { "text": "BillingContactPhone" }
+    ],
+    "billing_address": [
+      { "text": "BillingMailingAddress include streetdirections andsuite number ifapplicable", "pick": "street" },
+      { "text": "City_3", "pick": "city" },
+      { "text": "State_2", "pick": "state" },
+      { "text": "Zip_3", "pick": "zip" }
+    ],
+    "print_name": [
+      { "text": "PrintName" }
+    ],
+    "signer_title": [
+      { "text": "Title" }
+    ]
+  },
+  "sign": {
+    "page": 0,
+    "x": 60,
+    "y": 203,
+    "w": 310,
+    "h": 13,
+    "date": {
+      "x": 382,
+      "y": 205,
+      "size": 9
+    }
+  }
+}

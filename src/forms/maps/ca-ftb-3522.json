@@ -1,0 +1,26 @@
+{
+  "form": "ca-ftb-3522",
+  "rev": "2026 Form 3522 LLC Tax Voucher (footer 'FTB 3522 2025')",
+  "pdf": "ca-ftb-3522.pdf",
+  "checked": "2026-10-14",
+  "notes": "tax_year: 'Calendar year 2026' leaves the fiscal-year dates blank (as the voucher asks); a fiscal year is 'mm/dd/yyyy - mm/dd/yyyy' (or 'mm/dd/yyyy, mm/dd/yyyy'). telephone: a 10-digit U.S. number, written as digits. amount: whole dollars ('800' or '$800'); the voucher prints the '.00'. The voucher has no signature line.",
+  "boxes": {
+    "tax_year": [
+      { "text": "3522_1001", "pick": "head|date", "if": "^(?!.*calendar)\\s*(\\d{1,2}/\\d{1,2}/\\d{4}|\\d{4}-\\d{1,2}-\\d{1,2})" },
+      { "text": "3522_1002", "pick": "tail|date", "if": "^(?!.*calendar)\\s*(\\d{1,2}/\\d{1,2}/\\d{4}|\\d{4}-\\d{1,2}-\\d{1,2})\\s*(,|\\s-\\s|:)\\s*(\\d{1,2}/\\d{1,2}/\\d{4}|\\d{4}-\\d{1,2}-\\d{1,2})" }
+    ],
+    "llc_name": [{ "text": "3522_1003" }],
+    "sos_file_number": [{ "text": "3522_1004" }],
+    "dba": [{ "text": "3522_1005", "if": "^(?!(none|n/?a|无|-+)$)" }],
+    "fein": [{ "text": "3522_1006" }],
+    "address": [{ "text": "3522_1007" }],
+    "city": [{ "text": "3522_1008" }],
+    "state": [{ "text": "3522_1009", "upper": true, "max": 2 }],
+    "zip": [{ "text": "3522_1010" }],
+    "telephone": [{ "text": "3522_1011", "pick": "digits", "if": "^[^\\d]*(\\d[^\\d]*){10}$" }],
+    "amount": [
+      { "text": "3522_1012", "pick": "digits", "if": "^\\$?\\s*[\\d,]+\\s*(usd|dollars)?$" },
+      { "text": "3522_1012", "value": "800", "if": "^\\$?\\s*800\\.0*\\s*(usd|dollars)?$" }
+    ]
+  }
+}

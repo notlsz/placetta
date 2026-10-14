@@ -1,0 +1,177 @@
+{
+ "form": "sf-formula-retail",
+ "rev": "V. 08.17.2020 (San Francisco Planning Department)",
+ "pdf": "sf-formula-retail.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: project_address is written whole on one line ('street, San Francisco, CA ZIP'). std_* are Yes or No (Yes ticks the YES column, No the NO column). std_total is 'YES count, NO count' (e.g. '3, 5'): the first number goes under YES, the second under NO. affiant_date fills the Date line, so the signature spot carries no date stamp. planning_record_number has no box: the header 'Planning Application Record Number' cell is printed, not fillable (Planning assigns it). The signature and the Applicant's Affidavit declarations (a to e, under penalty of perjury) are left for the signer; the Planning Department Use Only block is never filled.",
+ "boxes": {
+  "project_address": [
+   {
+    "text": "PROJ Address 3"
+   }
+  ],
+  "block_lot": [
+   {
+    "text": "PROJ Block and Lot 5"
+   }
+  ],
+  "proposed_use": [
+   {
+    "text": "P.O. Name 4"
+   }
+  ],
+  "proposed_business_name": [
+   {
+    "text": "P.O. Name 5"
+   }
+  ],
+  "business_description": [
+   {
+    "text": "P.O. Address 3"
+   }
+  ],
+  "building_permit_application_no": [
+   {
+    "text": "P.O. Email 7"
+   }
+  ],
+  "conditional_use_case_no": [
+   {
+    "text": "P.O. Email 6"
+   }
+  ],
+  "locations_worldwide": [
+   {
+    "text": "GLU PARK (PR) 7"
+   }
+  ],
+  "locations_sf": [
+   {
+    "text": "GLU EX PARK (EX) 8"
+   }
+  ],
+  "std_array_of_merchandise": [
+   {
+    "check": "RES SH 5",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "RES SH 21",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "std_trademark": [
+   {
+    "check": "RES SH 6",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "RES SH 20",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "std_servicemark": [
+   {
+    "check": "RES SH 8",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "RES SH 19",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "std_decor": [
+   {
+    "check": "RES SH 9",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "RES SH 18",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "std_color_scheme": [
+   {
+    "check": "RES SH 10",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "RES SH 17",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "std_facade": [
+   {
+    "check": "RES SH 11",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "RES SH 16",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "std_uniform_apparel": [
+   {
+    "check": "RES SH 12",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "RES SH 15",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "std_signage": [
+   {
+    "check": "RES SH 13",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "RES SH 14",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "std_total": [
+   {
+    "text": "NON RES OTHER TEXT 8",
+    "pick": "head|digits"
+   },
+   {
+    "text": "NON RES OTHER TEXT 9",
+    "pick": "tail|digits"
+   }
+  ],
+  "affiant_name": [
+   {
+    "text": "NAME (AFF) 1"
+   }
+  ],
+  "affiant_date": [
+   {
+    "text": "Date",
+    "pick": "date"
+   }
+  ],
+  "relationship_to_project": [
+   {
+    "text": "RELAT (AFF) 1"
+   }
+  ],
+  "affiant_phone": [
+   {
+    "text": "PHONE (AFF) 1"
+   }
+  ],
+  "affiant_email": [
+   {
+    "text": "EMAIL (AFF) 1"
+   }
+  ]
+ },
+ "sign": {
+  "page": 3,
+  "x": 40,
+  "y": 500,
+  "w": 280,
+  "h": 22
+ }
+}

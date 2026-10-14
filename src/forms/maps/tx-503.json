@@ -1,0 +1,169 @@
+{
+ "form": "tx-503",
+ "rev": "Form 503 (Revised 09/26)",
+ "pdf": "tx-503.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: entity_type is one of the options; 'Other: <type>' (or any type not printed) ticks Other and writes the type. principal_office: 'street, city, ST ZIP' (a US address also gets country USA; a foreign address goes whole on the street line). duration: '10 years', 'A number of years: 5' (or '5 years'), or 'Until a date: 12/31/2034'. counties: 'All counties', 'All except those listed: Harris, Travis' or 'Only those listed: Harris, Travis'; a short list goes on the line beside the box, a long one on the full-width line under it. signer has no box: Form 503 prints no name line, only the signature; the date box gets the signing date when the form is signed. Signature left for the signer.",
+ "boxes": {
+  "assumed_name": [
+   {
+    "text": "1. The assumed name under which the business or professional service is, or is to be, conducted or rendered is:"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "2.  The legal name of the entity filing the assumed name is:"
+   }
+  ],
+  "entity_type": [
+   {
+    "check": "for-profit-corporation",
+    "if": "^(for-profit corporation|for profit corporation|corporation|corp\\.?|inc\\.?)$"
+   },
+   {
+    "check": "limited-liability-company",
+    "if": "^(limited liability company|llc|l\\.l\\.c\\.?)$"
+   },
+   {
+    "check": "nonprofit-corporation",
+    "if": "^non-?profit corporation"
+   },
+   {
+    "check": "limited-partnership",
+    "if": "^(limited partnership|lp)$"
+   },
+   {
+    "check": "professional-corporation",
+    "if": "^professional corporation"
+   },
+   {
+    "check": "limited-liability-partnership",
+    "if": "^(limited liability partnership|llp)$"
+   },
+   {
+    "check": "professional-association",
+    "if": "^professional association"
+   },
+   {
+    "check": "cooperative-association",
+    "if": "^cooperative association"
+   },
+   {
+    "check": "other",
+    "if": "^(?!((for-profit corporation|for profit corporation|corporation|corp\\.?|inc\\.?)|(limited liability company|llc|l\\.l\\.c\\.?)|non-?profit corporation|(limited partnership|lp)|professional corporation|(limited liability partnership|llp)|professional association|cooperative association)$)"
+   },
+   {
+    "text": "Specify type of entity. For example foreign real estate investment trust state bank insurance company etc",
+    "pick": "tail",
+    "if": "^other\\b"
+   },
+   {
+    "text": "Specify type of entity. For example foreign real estate investment trust state bank insurance company etc",
+    "if": "^(?!other\\b)(?!((for-profit corporation|for profit corporation|corporation|corp\\.?|inc\\.?)|(limited liability company|llc|l\\.l\\.c\\.?)|non-?profit corporation|(limited partnership|lp)|professional corporation|(limited liability partnership|llp)|professional association|cooperative association)$)"
+   }
+  ],
+  "file_number": [
+   {
+    "text": "4.  The file number, if any, issued to the entity by the secretary of state is:"
+   }
+  ],
+  "jurisdiction": [
+   {
+    "text": "5.  The state, country, or other jurisdiction of formation of the entity is:"
+   }
+  ],
+  "principal_office": [
+   {
+    "text": "Street Address of the entity in its jurisdiction of formation is:",
+    "pick": "street"
+   },
+   {
+    "text": "City of the entity in its jurisdiction of formation is:",
+    "pick": "city"
+   },
+   {
+    "text": "State of the entity in its jurisdiction of formation is:",
+    "pick": "state"
+   },
+   {
+    "text": "Country of the entity in its jurisdiction of formation is:",
+    "value": "USA",
+    "if": ",\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?$"
+   },
+   {
+    "text": "Zip or Postal Code of the entity in its jurisdiction of formation is:",
+    "pick": "zip"
+   }
+  ],
+  "duration": [
+   {
+    "check": "period-1",
+    "if": "^(10|ten)\\s*(years?|yrs?|年)?$"
+   },
+   {
+    "check": "period-2",
+    "if": "^(a number of years|(?!10\\b)\\d{1,2}\\s*(years?|yrs?|年))"
+   },
+   {
+    "text": "Will be used for this many years from the date of filing with the Secretary of State (not to exceed 10 years)",
+    "pick": "digits",
+    "if": "^(a number of years\\D*\\d{1,2}\\D*$|(?!10\\b)\\d{1,2}\\s*(years?|yrs?|年)$)"
+   },
+   {
+    "check": "period-3",
+    "if": "^until"
+   },
+   {
+    "text": "The assumed name will be used until: (State,  month and year)",
+    "pick": "tail|date",
+    "if": "^until.*\\d"
+   }
+  ],
+  "counties": [
+   {
+    "check": "county-1",
+    "if": "^all counties$"
+   },
+   {
+    "check": "county-2",
+    "if": "^all (counties )?(except|with the exception)"
+   },
+   {
+    "text": "All counties with the exception of the following counties:",
+    "pick": "tail",
+    "if": "^all (counties )?(except|with the exception)[^:,]*[:,]\\s*.{1,30}$"
+   },
+   {
+    "text": "All counties with the exception of the following counties: (Continued)",
+    "pick": "tail",
+    "if": "^all (counties )?(except|with the exception)[^:,]*[:,]\\s*.{31,}$"
+   },
+   {
+    "check": "county-3",
+    "if": "^only"
+   },
+   {
+    "text": "Only the following counties:",
+    "pick": "tail",
+    "if": "^only[^:,]*[:,]\\s*.{1,55}$"
+   },
+   {
+    "text": "Only the following counties: (Continued)",
+    "pick": "tail",
+    "if": "^only[^:,]*[:,]\\s*.{56,}$"
+   }
+  ]
+ },
+ "sign": {
+  "page": 1,
+  "x": 292,
+  "y": 400,
+  "w": 262,
+  "h": 24,
+  "date": {
+   "x": 103,
+   "y": 455,
+   "size": 10
+  }
+ }
+}

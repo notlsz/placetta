@@ -1,0 +1,219 @@
+{
+  "form": "irs-5472",
+  "rev": "Form 5472 (Rev. December 2023)",
+  "pdf": "irs-5472.pdf",
+  "checked": "2026-10-14",
+  "notes": "name: 'Name, street, city, ST ZIP' (or the name, a semicolon, then the address). The three-part answers (4b, 8b IDs; 4c-4e, 8f-8g countries; 8c-8d activity and code) are split on semicolons or new lines, or on commas when there are none ('none' leaves an ID box blank). received/paid: one amount per category separated by semicolons, labelled ('Sales: 120000; Services: 30000; Total: 150000') or bare in the label's order (sales; rents; services; loans; interest; other); loans go on the ending-balance line (17b/31b), 'none' writes 0 on the total line, and 'estimate' ticks the estimates box. The Part III foreign/U.S. person box follows the 8g tax-residence country. Part V's description goes on an attached sheet; the map only ticks its box. The tax-year header, lines 1f-1i, 1k, 2, Parts VI-IX are left for the preparer.",
+  "boxes": {
+    "name": [
+      { "text": "topmostSubform[0].Page1[0].Line1a[0].f1_5[0]", "pick": "line1", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].Line1a[0].f1_6[0]", "pick": "line2|street", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].Line1a[0].f1_7[0]", "pick": "line2|citystatezip", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].Line1a[0].f1_7[0]", "pick": "line3", "if": "^[^;\\n]*[;\\n][^;\\n]*[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].Line1a[0].f1_5[0]", "pick": "head", "if": "^[^;\\n]*$" },
+      { "text": "topmostSubform[0].Page1[0].Line1a[0].f1_6[0]", "pick": "tail|street", "if": "^[^;\\n]*$" },
+      { "text": "topmostSubform[0].Page1[0].Line1a[0].f1_7[0]", "pick": "tail|citystatezip", "if": "^[^;\\n]*$" }
+    ],
+    "ein": [
+      { "text": "topmostSubform[0].Page1[0].f1_8[0]" }
+    ],
+    "assets": [
+      { "text": "topmostSubform[0].Page1[0].f1_9[0]", "pick": "digits", "if": "^\\$?\\s*[\\d,]+$" },
+      { "text": "topmostSubform[0].Page1[0].f1_9[0]", "if": "^(?!\\$?\\s*[\\d,]+$)" }
+    ],
+    "activity": [
+      { "text": "topmostSubform[0].Page1[0].f1_10[0]" }
+    ],
+    "activity_code": [
+      { "text": "topmostSubform[0].Page1[0].f1_11[0]" }
+    ],
+    "initial_year": [
+      { "check": "topmostSubform[0].Page1[0].Line1j_ReadOrder[0].c1_2[0]", "if": "^(y|yes|是)" }
+    ],
+    "country_inc": [
+      { "text": "topmostSubform[0].Page1[0].f1_16[0]" }
+    ],
+    "date_inc": [
+      { "text": "topmostSubform[0].Page1[0].f1_17[0]", "pick": "date" }
+    ],
+    "tax_residence": [
+      { "text": "topmostSubform[0].Page1[0].f1_18[0]" }
+    ],
+    "business_countries": [
+      { "text": "topmostSubform[0].Page1[0].f1_19[0]" }
+    ],
+    "de": [
+      { "check": "topmostSubform[0].Page1[0].c1_4[0]", "if": "^(y|yes|是)" }
+    ],
+    "shareholder": [
+      { "text": "topmostSubform[0].Page1[0].f1_20[0]" }
+    ],
+    "shareholder_ids": [
+      { "text": "topmostSubform[0].Page1[0].f1_21[0]", "pick": "line1", "if": "(?=[\\s\\S]*[;\\n])^(?:[^,;\\n]*[,;\\n]){0}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page1[0].f1_22[0]", "pick": "line2", "if": "(?=[\\s\\S]*[;\\n])^(?:[^,;\\n]*[,;\\n]){1}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page1[0].f1_23[0]", "pick": "line3", "if": "(?=[\\s\\S]*[;\\n])^(?:[^,;\\n]*[,;\\n]){2}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page1[0].f1_21[0]", "pick": "head", "if": "(?=[^;\\n]*$)^(?:[^,;\\n]*[,;\\n]){0}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page1[0].f1_22[0]", "pick": "tail|head", "if": "(?=[^;\\n]*$)^(?:[^,;\\n]*[,;\\n]){1}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page1[0].f1_23[0]", "pick": "tail|tail", "if": "(?=[^;\\n]*$)^(?:[^,;\\n]*[,;\\n]){2}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" }
+    ],
+    "shareholder_countries": [
+      { "text": "topmostSubform[0].Page1[0].f1_24[0]", "pick": "line1", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].f1_25[0]", "pick": "line2", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].f1_26[0]", "pick": "line3", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].f1_24[0]", "pick": "head", "if": "^[^;\\n]*$" },
+      { "text": "topmostSubform[0].Page1[0].f1_25[0]", "pick": "tail|head", "if": "^[^;\\n]*$" },
+      { "text": "topmostSubform[0].Page1[0].f1_26[0]", "pick": "tail|tail", "if": "^[^;\\n]*$" }
+    ],
+    "related": [
+      { "text": "topmostSubform[0].Page2[0].f2_1[0]" }
+    ],
+    "related_ids": [
+      { "text": "topmostSubform[0].Page2[0].f2_2[0]", "pick": "line1", "if": "(?=[\\s\\S]*[;\\n])^(?:[^,;\\n]*[,;\\n]){0}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page2[0].f2_3[0]", "pick": "line2", "if": "(?=[\\s\\S]*[;\\n])^(?:[^,;\\n]*[,;\\n]){1}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page2[0].f2_4[0]", "pick": "line3", "if": "(?=[\\s\\S]*[;\\n])^(?:[^,;\\n]*[,;\\n]){2}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page2[0].f2_2[0]", "pick": "head", "if": "(?=[^;\\n]*$)^(?:[^,;\\n]*[,;\\n]){0}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page2[0].f2_3[0]", "pick": "tail|head", "if": "(?=[^;\\n]*$)^(?:[^,;\\n]*[,;\\n]){1}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" },
+      { "text": "topmostSubform[0].Page2[0].f2_4[0]", "pick": "tail|tail", "if": "(?=[^;\\n]*$)^(?:[^,;\\n]*[,;\\n]){2}\\s*(?!(none|n/?a|无|-+)\\s*([,;\\n]|$))" }
+    ],
+    "related_activity": [
+      { "text": "topmostSubform[0].Page2[0].f2_5[0]", "pick": "line1", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page2[0].f2_6[0]", "pick": "line2|digits", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page2[0].f2_5[0]", "pick": "head", "if": "^[^;\\n]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_6[0]", "pick": "tail|digits", "if": "^[^;\\n]*$" }
+    ],
+    "relationship": [
+      { "check": "topmostSubform[0].Page2[0].c2_2[0]", "if": "related to reporting" },
+      { "check": "topmostSubform[0].Page2[0].c2_3[0]", "if": "related to 25%" },
+      { "check": "topmostSubform[0].Page2[0].c2_4[0]", "if": "(^|[,;\\n]\\s*)25% foreign shareholder" }
+    ],
+    "related_countries": [
+      { "text": "topmostSubform[0].Page2[0].f2_7[0]", "pick": "line1", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page2[0].f2_8[0]", "pick": "line2", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page2[0].f2_7[0]", "pick": "head", "if": "^[^;\\n]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_8[0]", "pick": "tail", "if": "^[^;\\n]*$" },
+      { "check": "topmostSubform[0].Page2[0].c2_1[0]", "if": "^(?![\\s\\S]*(^|[,;\\n])\\s*(the\\s+)?(united states( of america)?|u\\.?s\\.?a?\\.?|美国)\\s*$)" },
+      { "check": "topmostSubform[0].Page2[0].c2_1[1]", "if": "(^|[,;\\n])\\s*(the\\s+)?(united states( of america)?|u\\.?s\\.?a?\\.?|美国)\\s*$" }
+    ],
+    "received": [
+      { "text": "topmostSubform[0].Page2[0].f2_9[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(sale|sold|inventory|stock in trade|销售|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_9[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(sale|sold|inventory|stock in trade|销售|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_9[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(sale|sold|inventory|stock in trade|销售|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_9[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(sale|sold|inventory|stock in trade|销售|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_9[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(sale|sold|inventory|stock in trade|销售|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_9[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(sale|sold|inventory|stock in trade|销售|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_9[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(sale|sold|inventory|stock in trade|销售|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_13[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_13[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_13[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_13[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_13[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_13[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_13[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_16[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_16[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_16[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_16[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_16[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_16[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_16[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_19[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|borrow|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_19[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|borrow|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_19[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|borrow|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_19[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|borrow|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_19[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|borrow|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_19[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|borrow|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_19[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|borrow|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_20[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_20[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_20[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_20[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_20[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_20[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_20[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_23[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_23[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_23[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_23[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_23[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_23[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_23[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_24[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_24[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_24[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_24[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_24[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_24[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_24[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_9[0]", "pick": "line1", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_13[0]", "pick": "line2", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_16[0]", "pick": "line3", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_19[0]", "pick": "line4", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_20[0]", "pick": "line5", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_23[0]", "pick": "line6", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_24[0]", "value": "0", "if": "^(none|no|n/?a|nil|0|\\$?0(\\.00?)?|无|没有)\\.?$" },
+      { "check": "topmostSubform[0].Page2[0].PartIV[0].c2_5[0]", "if": "estimat|估" }
+    ],
+    "paid": [
+      { "text": "topmostSubform[0].Page2[0].f2_25[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(purchase|bought|inventory|stock in trade|采购|购买|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_25[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(purchase|bought|inventory|stock in trade|采购|购买|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_25[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(purchase|bought|inventory|stock in trade|采购|购买|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_25[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(purchase|bought|inventory|stock in trade|采购|购买|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_25[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(purchase|bought|inventory|stock in trade|采购|购买|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_25[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(purchase|bought|inventory|stock in trade|采购|购买|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_25[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(purchase|bought|inventory|stock in trade|采购|购买|存货)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_29[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_29[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_29[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_29[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_29[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_29[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_29[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(rent|租)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_32[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_32[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_32[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_32[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_32[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_32[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_32[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(service|服务)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_35[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|lent|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_35[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|lent|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_35[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|lent|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_35[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|lent|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_35[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|lent|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_35[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|lent|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_35[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}(?![^;\\n]*(interest|利息))[^;\\n]*(loan|lent|借)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_36[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_36[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_36[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_36[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_36[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_36[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_36[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(interest|利息)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_39[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_39[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_39[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_39[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_39[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_39[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_39[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(other|其他|其它)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_40[0]", "pick": "line1|tail", "if": "^(?:[^;\\n]*[;\\n]){0}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_40[0]", "pick": "line2|tail", "if": "^(?:[^;\\n]*[;\\n]){1}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_40[0]", "pick": "line3|tail", "if": "^(?:[^;\\n]*[;\\n]){2}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_40[0]", "pick": "line4|tail", "if": "^(?:[^;\\n]*[;\\n]){3}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_40[0]", "pick": "line5|tail", "if": "^(?:[^;\\n]*[;\\n]){4}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_40[0]", "pick": "line6|tail", "if": "^(?:[^;\\n]*[;\\n]){5}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_40[0]", "pick": "line7|tail", "if": "^(?:[^;\\n]*[;\\n]){6}[^;\\n]*(total|合计|总计)[^;\\n]*(:|\\s-\\s)" },
+      { "text": "topmostSubform[0].Page2[0].f2_25[0]", "pick": "line1", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_29[0]", "pick": "line2", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_32[0]", "pick": "line3", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_35[0]", "pick": "line4", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_36[0]", "pick": "line5", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_39[0]", "pick": "line6", "if": "^(?=[\\s\\S]*[;\\n])[^A-Za-z\\u4e00-\\u9fff]*$" },
+      { "text": "topmostSubform[0].Page2[0].f2_40[0]", "value": "0", "if": "^(none|no|n/?a|nil|0|\\$?0(\\.00?)?|无|没有)\\.?$" },
+      { "check": "topmostSubform[0].Page2[0].PartIV[0].c2_5[0]", "if": "estimat|估" }
+    ],
+    "de_transactions": [
+      { "check": "topmostSubform[0].Page2[0].PartV[0].c2_6[0]", "if": "^(?!(none|no|n/?a|nil|0|无|没有)\\.?$)" }
+    ]
+  }
+}

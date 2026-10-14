@@ -1,0 +1,160 @@
+{
+  "form": "lac-health-permit",
+  "rev": "Public Health Permit/License Application (12/3/25)",
+  "pdf": "lac-health-permit.pdf",
+  "checked": "2026-10-14",
+  "notes": "Dates: YYYY-MM-DD or MM/DD/YYYY. Addresses: 'street, suite, City, CA ZIP' (the suite goes in the Unit box). open_time/close_time: one time for every day (e.g. '11:00 AM'), or seven entries Mon to Sun separated by ';' or new lines with 'Closed' for a closed day; '24 hours' ticks 24 Hrs. owner2: 'Name, phone, email'. billing_address: an address, or 'Same as business address' to tick that box. business_type: a printed type, or any other text for Other. Signature and its date are left for the signer.",
+  "boxes": {
+    "application_date": [
+      { "text": "Date of Application", "pick": "date" }
+    ],
+    "first_operation_date": [
+      { "text": "First Date of Operation", "pick": "date" }
+    ],
+    "application_type": [
+      { "check": "New Business", "if": "^(new|新)" },
+      { "check": "Change of Ownership", "if": "^(change|所有权|变更)|ownership" }
+    ],
+    "business_type": [
+      { "check": "Animal Keeper", "if": "^Animal[- ]?Keeper\\b" },
+      { "check": "Boarding Home", "if": "^Boarding[- ]?Home\\b" },
+      { "check": "Body Art", "if": "^Body[- ]?Art\\b" },
+      { "check": "Cannabis", "if": "^Cannabis\\b" },
+      { "check": "Commercial Laundry", "if": "^Commercial[- ]?Laundry\\b" },
+      { "check": "Certified Farmers Market", "if": "^Certified[- ]?Farmers[- ]?Market\\b" },
+      { "check": "Condominiums", "if": "^Condominiums\\b" },
+      { "check": "Food Facility", "if": "^Food[- ]?Facility\\b|^(食品设施|餐饮|餐厅)" },
+      { "check": "Garment Manufacturing", "if": "^Garment[- ]?Manufacturing\\b" },
+      { "check": "Hotel or Motel", "if": "^Hotel[- ]?or[- ]?Motel\\b" },
+      { "check": "Interim Housing Facility", "if": "^Interim[- ]?Housing[- ]?Facility\\b" },
+      { "check": "Laundry Selfservice", "if": "^Laundry[- ]?Self[- ]?service\\b" },
+      { "check": "Massage Establishment", "if": "^Massage[- ]?Establishment\\b" },
+      { "check": "Mobile Food Facility", "if": "^Mobile[- ]?Food[- ]?Facility\\b|^(流动食品|餐车)" },
+      { "check": "Public Swimming Pool", "if": "^Public[- ]?Swimming[- ]?Pool\\b" },
+      { "check": "Residential HotelSingle Room Occupancy", "if": "^Residential[- ]?Hotel\\b" },
+      { "check": "Selfhauler Municipal Solid Waste", "if": "^Self[- ]?hauler\\b" },
+      { "check": "Sewage Pumper Truck", "if": "^Sewage[- ]?Pumper[- ]?Truck\\b" },
+      { "check": "Shared Kitchen Complex", "if": "^Shared[- ]?Kitchen[- ]?Complex\\b" },
+      { "check": "Solid Waste Facility", "if": "^Solid[- ]?Waste[- ]?Facility\\b" },
+      { "check": "Theater", "if": "^Theater\\b" },
+      { "check": "Toilet Rental Agency", "if": "^Toilet[- ]?Rental[- ]?Agency\\b" },
+      { "check": "Vending Machine", "if": "^Vending[- ]?Machine\\b" },
+      { "check": "Waste Collector", "if": "^Waste[- ]?Collector\\b" },
+      { "check": "Water Systems Public", "if": "^Water[- ]?Systems\\b" },
+      { "check": "Wiping Rag Facility", "if": "^Wiping[- ]?Rag[- ]?Facility\\b" },
+      { "check": "Othe", "if": "^(?!(Animal[- ]?Keeper\\b|Boarding[- ]?Home\\b|Body[- ]?Art\\b|Cannabis\\b|Commercial[- ]?Laundry\\b|Certified[- ]?Farmers[- ]?Market\\b|Condominiums\\b|Food[- ]?Facility\\b|(食品设施|餐饮|餐厅)|Garment[- ]?Manufacturing\\b|Hotel[- ]?or[- ]?Motel\\b|Interim[- ]?Housing[- ]?Facility\\b|Laundry[- ]?Self[- ]?service\\b|Massage[- ]?Establishment\\b|Mobile[- ]?Food[- ]?Facility\\b|(流动食品|餐车)|Public[- ]?Swimming[- ]?Pool\\b|Residential[- ]?Hotel\\b|Self[- ]?hauler\\b|Sewage[- ]?Pumper[- ]?Truck\\b|Shared[- ]?Kitchen[- ]?Complex\\b|Solid[- ]?Waste[- ]?Facility\\b|Theater\\b|Toilet[- ]?Rental[- ]?Agency\\b|Vending[- ]?Machine\\b|Waste[- ]?Collector\\b|Water[- ]?Systems\\b|Wiping[- ]?Rag[- ]?Facility\\b))" },
+      { "text": "r", "pick": "tail", "if": "^other\\b" },
+      { "text": "r", "if": "^(?!other\\b)(?!(Animal[- ]?Keeper\\b|Boarding[- ]?Home\\b|Body[- ]?Art\\b|Cannabis\\b|Commercial[- ]?Laundry\\b|Certified[- ]?Farmers[- ]?Market\\b|Condominiums\\b|Food[- ]?Facility\\b|(食品设施|餐饮|餐厅)|Garment[- ]?Manufacturing\\b|Hotel[- ]?or[- ]?Motel\\b|Interim[- ]?Housing[- ]?Facility\\b|Laundry[- ]?Self[- ]?service\\b|Massage[- ]?Establishment\\b|Mobile[- ]?Food[- ]?Facility\\b|(流动食品|餐车)|Public[- ]?Swimming[- ]?Pool\\b|Residential[- ]?Hotel\\b|Self[- ]?hauler\\b|Sewage[- ]?Pumper[- ]?Truck\\b|Shared[- ]?Kitchen[- ]?Complex\\b|Solid[- ]?Waste[- ]?Facility\\b|Theater\\b|Toilet[- ]?Rental[- ]?Agency\\b|Vending[- ]?Machine\\b|Waste[- ]?Collector\\b|Water[- ]?Systems\\b|Wiping[- ]?Rag[- ]?Facility\\b))" }
+    ],
+    "business_name": [
+      { "text": "LEGAL NAME OF BUSINESS DBA" }
+    ],
+    "business_address": [
+      { "text": "Business Street AddressRow1", "pick": "street|head" },
+      { "text": "UnitRow1", "pick": "street|tail" },
+      { "text": "CityRow1", "pick": "city" },
+      { "text": "ZipRow1", "pick": "zip" }
+    ],
+    "business_phone": [
+      { "text": "Text2" }
+    ],
+    "business_email": [
+      { "text": "Text3" }
+    ],
+    "website": [
+      { "text": "Text4" }
+    ],
+    "open_time": [
+      { "check": "24 Hrs", "if": "24 ?h|24/7|around the clock|24 小时|全天" },
+      { "text": "Open M", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "Open M", "pick": "line1", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "T", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "T", "pick": "line2", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "W", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "W", "pick": "line3", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "Th", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "Th", "pick": "line4", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "F", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "F", "pick": "line5", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "Sa", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "Sa", "pick": "line6", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "Su", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "Su", "pick": "line7", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" }
+    ],
+    "close_time": [
+      { "check": "24 Hrs", "if": "24 ?h|24/7|around the clock|24 小时|全天" },
+      { "text": "Closed M", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "Closed M", "pick": "line1", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "T_2", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "T_2", "pick": "line2", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "W_2", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "W_2", "pick": "line3", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "Th_2", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "Th_2", "pick": "line4", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "F_2", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "F_2", "pick": "line5", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "Sa_2", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "Sa_2", "pick": "line6", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" },
+      { "text": "Su_2", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*$" },
+      { "text": "Su_2", "pick": "line7", "if": "^(?![\\s\\S]*(24 ?h|24/7|around the clock|24 小时|全天))[^\\n;]*[\\n;]" }
+    ],
+    "ownership_type": [
+      { "check": "IndividualSole Proprietorship", "if": "^(individual|sole|个人|独资)" },
+      { "check": "Partnership", "if": "^(general )?partnership|^普通合伙|^合伙$" },
+      { "check": "LP", "if": "^(lp|limited partnership|有限合伙)$" },
+      { "check": "LLP", "if": "^(llp|limited liability partnership|有限责任合伙)$" },
+      { "check": "Corporation", "if": "^(corp|corporation|inc|股份有限公司|公司$)" },
+      { "check": "LLC", "if": "^(llc|l\\.l\\.c|limited liability company|有限责任公司)" }
+    ],
+    "owner1": [
+      { "text": "OWNER 1" }
+    ],
+    "owner1_phone": [
+      { "text": "PhoneOWNER 1" }
+    ],
+    "owner1_email": [
+      { "text": "EmailOWNER 1" }
+    ],
+    "owner2": [
+      { "text": "OWNER 2", "pick": "head" },
+      { "text": "PhoneOWNER 2", "pick": "tail|head" },
+      { "text": "EmailOWNER 2", "pick": "tail|tail" }
+    ],
+    "emergency_contact": [
+      { "text": "Emergency Contact" }
+    ],
+    "emergency_phone": [
+      { "text": "PhoneEmergency Contact" }
+    ],
+    "emergency_email": [
+      { "text": "EmailEmergency Contact" }
+    ],
+    "billing_address": [
+      { "check": "Use business address for billing", "if": "^(same|use (the )?business|与营业地址相同|同营业地址|同上)" },
+      { "check": "Send billing to address below", "if": "^(?!(same|use (the )?business|与营业地址相同|同营业地址|同上))" },
+      { "text": "Street AddressRow1", "pick": "street|head", "if": "^(?!(same|use (the )?business|与营业地址相同|同营业地址|同上))" },
+      { "text": "UnitRow1_2", "pick": "street|tail", "if": "^(?!(same|use (the )?business|与营业地址相同|同营业地址|同上))" },
+      { "text": "CityRow1_2", "pick": "city", "if": "^(?!(same|use (the )?business|与营业地址相同|同营业地址|同上))" },
+      { "text": "StateRow1", "pick": "state", "if": "^(?!(same|use (the )?business|与营业地址相同|同营业地址|同上))" },
+      { "text": "ZipRow1_2", "pick": "zip", "if": "^(?!(same|use (the )?business|与营业地址相同|同营业地址|同上))" }
+    ],
+    "print_name": [
+      { "text": "Print Name Title" }
+    ],
+    "signer_title": [
+      { "text": "Text1" }
+    ]
+  },
+  "sign": {
+    "page": 0,
+    "x": 122,
+    "y": 95,
+    "w": 215,
+    "h": 16,
+    "date": {
+      "x": 374,
+      "y": 98,
+      "size": 9
+    }
+  }
+}

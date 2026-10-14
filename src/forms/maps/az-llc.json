@@ -1,0 +1,136 @@
+{
+ "form": "az-llc",
+ "rev": "L010.007 Rev: 10/2020",
+ "pdf": "az-llc.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: addresses 'street, city, ST ZIP' (Address 1 takes the street with any suite; State AZ is printed for the agent's boxes). agent_mailing: an Arizona mailing address, or 'Same as street address' to tick 4.2's box. principal_same: Yes or No; principal_address goes in 5.2 whenever it is answered, so leave it blank (or 'Same') when 5.1 is Yes (a US address also gets country USA; a foreign address goes whole on Address 1). signer: the printed name, written as given. Signature, date and the optional Attention lines are left blank; the date is stamped when the form is signed. Radio values are the PDF's /Opt export values (14/15, True/False, 11/10), which pdf-lib selects by; the dump shows the widgets' on-states 0/1. The XFA layer is dropped by the filler so the filled boxes show.",
+ "boxes": {
+  "entity_type": [
+   {
+    "radio": "FormRoot[0].Page1[0].General[0].EntitySubtype[0]",
+    "value": "14",
+    "if": "^(limited liability company|llc|l\\.?l\\.?c\\.?)$"
+   },
+   {
+    "radio": "FormRoot[0].Page1[0].General[0].EntitySubtype[0]",
+    "value": "15",
+    "if": "^(professional|pllc|plc)"
+   }
+  ],
+  "name": [
+   {
+    "text": "FormRoot[0].Page1[0].General[0].NameOfEntity[0]"
+   }
+  ],
+  "professional_services": [
+   {
+    "text": "FormRoot[0].Page1[0].KPBInfo[0].ProfessionalServices[0]"
+   }
+  ],
+  "agent": [
+   {
+    "text": "FormRoot[0].Page1[0].StatutoryAgent_1[0].PhysicalAddress[0].ContactName_1[0]"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "FormRoot[0].Page1[0].StatutoryAgent_1[0].PhysicalAddress[0].AddressLine1_1[0]",
+    "pick": "street"
+   },
+   {
+    "text": "FormRoot[0].Page1[0].StatutoryAgent_1[0].PhysicalAddress[0].City_1[0]",
+    "pick": "city"
+   },
+   {
+    "text": "FormRoot[0].Page1[0].StatutoryAgent_1[0].PhysicalAddress[0].ZipCode_1[0]",
+    "pick": "zip"
+   }
+  ],
+  "agent_mailing": [
+   {
+    "check": "FormRoot[0].Page1[0].KPBInfo[0].IsSameAsStreetAddress[0]",
+    "if": "^(same|与.*相同|相同|同上)"
+   },
+   {
+    "text": "FormRoot[0].Page1[0].StatutoryAgent_1[0].MailingAddress[0].AddressLine1_2[0]",
+    "pick": "street",
+    "if": "^(?!(same|与.*相同|相同|同上))"
+   },
+   {
+    "text": "FormRoot[0].Page1[0].StatutoryAgent_1[0].MailingAddress[0].City_2[0]",
+    "pick": "city",
+    "if": "^(?!(same|与.*相同|相同|同上))"
+   },
+   {
+    "text": "FormRoot[0].Page1[0].StatutoryAgent_1[0].MailingAddress[0].ZipCode_2[0]",
+    "pick": "zip",
+    "if": "^(?!(same|与.*相同|相同|同上))"
+   }
+  ],
+  "principal_same": [
+   {
+    "radio": "FormRoot[0].Page1[0].KPBInfo[0].KPBIsSameAsSaa[0]",
+    "value": "True",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "FormRoot[0].Page1[0].KPBInfo[0].KPBIsSameAsSaa[0]",
+    "value": "False",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "principal_address": [
+   {
+    "text": "FormRoot[0].Page2[0].Signatures[0].SignatureAndAcceptance_2[0].AddressLine1_3[0]",
+    "pick": "street",
+    "if": "^(?!(same|与.*相同|相同|同上))"
+   },
+   {
+    "text": "FormRoot[0].Page2[0].Signatures[0].SignatureAndAcceptance_2[0].City_3[0]",
+    "pick": "city"
+   },
+   {
+    "text": "FormRoot[0].Page2[0].Signatures[0].SignatureAndAcceptance_2[0].IsState[0]",
+    "pick": "state"
+   },
+   {
+    "text": "FormRoot[0].Page2[0].Signatures[0].SignatureAndAcceptance_2[0].ZipCode_3[0]",
+    "pick": "zip"
+   },
+   {
+    "text": "FormRoot[0].Page2[0].Signatures[0].SignatureAndAcceptance_2[0].IsCountry[0]",
+    "value": "USA",
+    "if": ",\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?$"
+   }
+  ],
+  "management": [
+   {
+    "radio": "FormRoot[0].Page2[0].BusinessStructure[0]",
+    "value": "11",
+    "if": "^manager"
+   },
+   {
+    "radio": "FormRoot[0].Page2[0].BusinessStructure[0]",
+    "value": "10",
+    "if": "^member"
+   }
+  ],
+  "signer": [
+   {
+    "text": "FormRoot[0].Page2[0].Signatures[0].SignatureAndAcceptance_2[0].PrintedName[0]"
+   }
+  ]
+ },
+ "sign": {
+  "page": 1,
+  "x": 56,
+  "y": 218,
+  "w": 370,
+  "h": 24,
+  "date": {
+   "x": 452,
+   "y": 221,
+   "size": 10
+  }
+ }
+}

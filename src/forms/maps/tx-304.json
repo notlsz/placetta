@@ -1,0 +1,288 @@
+{
+ "form": "tx-304",
+ "rev": "Form 304 (Revised 09/26)",
+ "pdf": "tx-304.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: jurisdiction is 'Jurisdiction, date of formation' (e.g. 'Delaware, 03/12/2025'). fein is the EIN as printed '12-3456789' (nine bare digits look like an SSN and are never written), or 'not available' to tick the box. principal_office: 'street, city, ST ZIP' (a US address also gets country USA; a foreign address goes whole on the street line). agent: an organization's name, or a person's full name (told apart by a company word). agent_address: 'street, city, TX ZIP' (TX is printed). governing_persons: one per line, 'Name, street, city, ST ZIP', up to three on the form (more go on an addendum); a line whose name has a company word goes on Organization Name, otherwise First/M.I./Last. effectiveness: one of the options; 'Later date (within 90 days): 11/01/2026' or 'Future event: <event>' also fills the date or event box. signer: 'Name' or 'Name, date': only the printed name is written; the date box gets the signing date when the form is signed. Signature left for the signer; supplemental provisions box left blank.",
+ "boxes": {
+  "name": [
+   {
+    "text": "The entity is a foreign limited liability company.  The name of the entity is:"
+   }
+  ],
+  "name_alt": [
+   {
+    "text": "The name of the entity with the word or abbreviation that it elects to add for use in Texas is:"
+   }
+  ],
+  "assumed_name": [
+   {
+    "text": "The assumed name under which the entity will qualify and transact business in Texas is:"
+   }
+  ],
+  "fein": [
+   {
+    "text": "Its federal employer identification number is:",
+    "if": "\\d{2}-?\\d{7}"
+   },
+   {
+    "check": "Federal employer identification number information is not available at this time:",
+    "if": "^(?!.*\\d{2}-?\\d{7}).*(not|n/a|none|pending|apply|applied|暂无|没有|无|未)"
+   }
+  ],
+  "jurisdiction": [
+   {
+    "text": "It is organized under the laws of: (set forth state or foreign country):",
+    "pick": "head"
+   },
+   {
+    "text": "the date of its formation in that jurisdiction is:",
+    "pick": "tail|date"
+   }
+  ],
+  "purposes": [
+   {
+    "text": "The purpose or purposes of the limited liability company that it proposes to pursue in the transaction of business in Texas are set forth below"
+   }
+  ],
+  "tx_business_date": [
+   {
+    "text": "The date on which the foreign entity intends to transact business in Texas, or the date on which the: foreign entity first transacted business in Texas is:",
+    "pick": "date"
+   }
+  ],
+  "principal_office": [
+   {
+    "text": "The principal office address of the limited liability company is:",
+    "pick": "street"
+   },
+   {
+    "text": "The principal office city of the limited liability company is:",
+    "pick": "city"
+   },
+   {
+    "text": "The principal office state of the limited liability company is:",
+    "pick": "state"
+   },
+   {
+    "text": "The principal office country of the limited liability company is:",
+    "value": "USA",
+    "if": ",\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?$"
+   },
+   {
+    "text": "The principal office zip code of the limited liability company is:",
+    "pick": "zip"
+   }
+  ],
+  "agent": [
+   {
+    "check": "registered-agent",
+    "if": "\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|services|agents?|registered|lp|llp|pllc)\\b"
+   },
+   {
+    "text": "The registered agent is an organization by the name of:",
+    "if": "\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|services|agents?|registered|lp|llp|pllc)\\b"
+   },
+   {
+    "check": "registered-agent2",
+    "if": "^(?!.*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|services|agents?|registered|lp|llp|pllc)\\b)"
+   },
+   {
+    "text": "First name of the initial registered agent:",
+    "pick": "first",
+    "if": "^(?!.*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|services|agents?|registered|lp|llp|pllc)\\b)"
+   },
+   {
+    "text": "Middle intitial of the initial registered agent:",
+    "pick": "mi",
+    "if": "^(?!.*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|services|agents?|registered|lp|llp|pllc)\\b)"
+   },
+   {
+    "text": "Last name of the initial registered agent:",
+    "pick": "last",
+    "if": "^(?!.*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|services|agents?|registered|lp|llp|pllc)\\b)"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "The street address of the registered agent and the registered office address is:",
+    "pick": "street"
+   },
+   {
+    "text": "The city of the registered agent and the registered office address is:",
+    "pick": "city"
+   },
+   {
+    "text": "The zip code of the registered agent and the registered office address is:",
+    "pick": "zip"
+   }
+  ],
+  "governing_persons": [
+   {
+    "text": "Organization name:",
+    "pick": "line1|head",
+    "if": "^[^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b"
+   },
+   {
+    "text": "First name of governing person:",
+    "pick": "line1|head|first",
+    "if": "^(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Middle initial of governing person:",
+    "pick": "line1|head|mi",
+    "if": "^(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Last name of governing person:",
+    "pick": "line1|head|last",
+    "if": "^(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Street or mailing address of governing person or organization:",
+    "pick": "line1|tail|street"
+   },
+   {
+    "text": "City of governing person or organization:",
+    "pick": "line1|tail|city"
+   },
+   {
+    "text": "State of governing person or organization:",
+    "pick": "line1|tail|state"
+   },
+   {
+    "text": "Country of governing person or organization:",
+    "value": "USA",
+    "if": "^[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"
+   },
+   {
+    "text": "Zip code of governing person or organization:",
+    "pick": "line1|tail|zip"
+   },
+   {
+    "text": "Organization name 2:",
+    "pick": "line2|head",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b"
+   },
+   {
+    "text": "First name of governing person 2:",
+    "pick": "line2|head|first",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Middle initial of governing person 2:",
+    "pick": "line2|head|mi",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Last name of governing person 2:",
+    "pick": "line2|head|last",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Street or mailing address of governing person or organization 2:",
+    "pick": "line2|tail|street"
+   },
+   {
+    "text": "City of governing person or organization 2:",
+    "pick": "line2|tail|city"
+   },
+   {
+    "text": "State of governing person or organization 2:",
+    "pick": "line2|tail|state"
+   },
+   {
+    "text": "Country of governing person or organization 2:",
+    "value": "USA",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"
+   },
+   {
+    "text": "Zip code of governing person or organization 2:",
+    "pick": "line2|tail|zip"
+   },
+   {
+    "text": "Organization name 3:",
+    "pick": "line3|head",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b"
+   },
+   {
+    "text": "First name of governing person 3:",
+    "pick": "line3|head|first",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Middle initial of governing person 3:",
+    "pick": "line3|head|mi",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Last name of governing person 3:",
+    "pick": "line3|head|last",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])(?![^,\\n;]*\\b(inc|llc|l\\.l\\.c|lc|corp|corporation|company|co|ltd|limited|holdings|group|lp|llp|pllc|plc|gmbh|trust|partners|partnership)\\b)"
+   },
+   {
+    "text": "Street or mailing address of governing person or organization 3:",
+    "pick": "line3|tail|street"
+   },
+   {
+    "text": "City of governing person or organization 3:",
+    "pick": "line3|tail|city"
+   },
+   {
+    "text": "State of governing person or organization 3:",
+    "pick": "line3|tail|state"
+   },
+   {
+    "text": "Country of governing person or organization 3:",
+    "value": "USA",
+    "if": "^[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^\\n;]*[\\n;][\\s;]*(?=[^\\s;])[^\\n;]*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*($|[\\n;])"
+   },
+   {
+    "text": "Zip code of governing person or organization 3:",
+    "pick": "line3|tail|zip"
+   }
+  ],
+  "effectiveness": [
+   {
+    "check": "document1",
+    "if": "^when filed"
+   },
+   {
+    "check": "document2",
+    "if": "^later date"
+   },
+   {
+    "text": "The delayed effective date is:",
+    "pick": "tail|date",
+    "if": "^later date.*\\d"
+   },
+   {
+    "check": "document3",
+    "if": "^future event"
+   },
+   {
+    "text": "The following event or fact will cause the document to take effect in the manner described below:",
+    "pick": "tail",
+    "if": "^future event\\s*(\\(.*?\\))?\\s*[:,-]\\s*\\S"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Printed or typed name of authorized person:",
+    "pick": "head"
+   }
+  ]
+ },
+ "sign": {
+  "page": 2,
+  "x": 292,
+  "y": 248,
+  "w": 262,
+  "h": 24,
+  "date": {
+   "x": 104,
+   "y": 282,
+   "size": 10
+  }
+ }
+}

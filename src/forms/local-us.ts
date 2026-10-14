@@ -1,11 +1,13 @@
 // City and county steps for San José (Santa Clara County), San Francisco and Dallas, copied from the agencies' own
 // pages on 2026-10-10; Austin (Travis County) on 2026-10-12; San Antonio, Tampa, San Diego, Irvine, Orlando, Fort Worth and Phoenix (with Arizona) on 2026-10-12. Times and renewals appear only where the agency states them; fees are null where they vary.
-import { B } from "../bi";
-import type { OfficialForm } from "./registry";
+import { B, type Bi } from "../bi";
+import type { FormField, OfficialForm } from "./registry";
 
 const R = "restaurant" as const, T = "retail" as const, S = "seller" as const, W = "warehouse" as const;
 const SRC = (u: string) => `${u} (2026-10-10)`;
 const SRC12 = (u: string) => `${u} (2026-10-12)`;
+/** One printed line of a form, as Placetta asks it (same helper as registry.ts). */
+const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
 
 export const LOCAL_US: OfficialForm[] = [
   /* ------------------------------- San José and Santa Clara County ------------------------------- */
@@ -327,7 +329,34 @@ export const LOCAL_US: OfficialForm[] = [
     agency: B("Orange County Health Care Agency, Environmental Health", "橙县卫生保健局环境卫生处"), level: "county", where: "IRV", segments: [R], needs: { food: true }, method: "pdf_mail", order: 76,
     how: B("Every food facility that stores, prepares, packages, serves or vends food needs a valid health permit; book inspections 5 working days ahead.", "储存、加工、包装、供应或售卖食品的设施都须持有有效卫生许可证；检查须提前 5 个工作日预约。"),
     url: "https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf", info: "https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit",
-    fee: null, checked: "page", fields: [],
+    fee: null, checked: "page",
+    // the lines of form F272-9.251 (2/23), in printed order
+    fields: ([
+      ["application_type", "Type", "Type of application", "申请类型", ["New Facility (requires plan submittal)", "Change of Ownership", "Update Information Only"]],
+      ["business_name", "Name of Business (DBA)", "Business name (DBA)", "营业名称（DBA）"],
+      ["business_phone", "Business Phone", "Business phone", "营业电话"],
+      ["business_address", "Business Address, City, Zip", "Business address (with suite number)", "营业地址（含套房号）"],
+      ["business_email", "Business E-Mail", "Business email", "营业电子邮箱"],
+      ["seating_capacity", "Seating / Bed Capacity", "Seating capacity (N/A if no seats)", "座位数（无座位请填 N/A）"],
+      ["square_footage", "Square Footage", "Square footage", "面积（平方英尺）"],
+      ["days", "Days of Operation", "Days open (e.g. Daily, or Tue-Sun)", "营业日（如每天，或周二至周日）"],
+      ["open_time", "Hours of Operation", "Opening time (24 hours if always open)", "开门时间（全天营业填 24 hours）"],
+      ["close_time", "Hours of Operation: to", "Closing time", "打烊时间"],
+      ["first_operation_date", "First Date of Operation", "First date of operation", "首次营业日期"],
+      ["ownership_type", "Type of Ownership", "Type of ownership", "所有权类型", ["Individual/Sole Proprietorship", "Partnership", "LP", "LLP", "Corporation", "LLC"]],
+      ["owner", "Business Owner", "Business owner (the person, or the company for an LLC or corporation)", "业主（个人，或 LLC/公司名称）"],
+      ["owner_phone", "Owner Phone", "Owner phone", "业主电话"],
+      ["owner_address", "Owner's Address, City, State, Zip", "Owner's address (not the business address, no P.O. box)", "业主地址（不得与营业地址相同，不得为邮政信箱）"],
+      ["drivers_license", "Driver's License Number(s)", "Driver's license number(s) (sole proprietorship or partnership only; N/A otherwise)", "驾照号码（仅限个人独资或合伙；否则填 N/A）"],
+      ["owner_email", "Owner E-Mail", "Owner email", "业主电子邮箱"],
+      ["emergency_contact", "Emergency Contact", "Emergency contact name", "紧急联系人姓名"],
+      ["emergency_phone", "Emergency Phone", "Emergency contact phone", "紧急联系人电话"],
+      ["billing_contact", "Billing Contact Name", "Billing contact name", "账单联系人姓名"],
+      ["billing_phone", "Billing Contact Phone", "Billing contact phone", "账单联系人电话"],
+      ["billing_address", "Billing Mailing Address, City, State, Zip", "Billing mailing address", "账单邮寄地址"],
+      ["print_name", "Print Name", "Name of the person signing", "签署人姓名"],
+      ["signer_title", "Title", "Title of the person signing", "签署人职务"],
+    ] as [string, string, string, string, string[]?][]).map(([id, line, en, zh, options]) => ({ id, line, label: B(en, zh), ...(options ? { options } : {}) })),
   },
 
   /* -------------------------------------- Orlando and Orange County (FL) -------------------------------------- */
@@ -381,7 +410,19 @@ export const LOCAL_US: OfficialForm[] = [
     fee: null, feeNote: B("$50 under the Commission's fee schedule; online filing is listed at $85; expedited service costs more.", "依委员会收费表为 50 美元；在线提交标示为 85 美元；加急另收费。"),
     takes: B("Regular processing is typically 14 to 16 days.", "常规处理通常为 14 至 16 天。"), takesSource: SRC12("https://www.azcc.gov/faqs/BusinessServicesFAQs"),
     foreign: B("An LLC formed in another state or abroad files a Foreign Registration Statement (Form L025, $150) with a certificate of good standing dated within 60 days.", "在外州或境外成立的 LLC 须提交外地登记声明（L025 表，150 美元），并附 60 天内出具的存续证明。"),
-    checked: "page", fields: [],
+    checked: "page",
+    fields: [
+      F("entity_type", "1", "Entity type", "实体类型", ["Limited Liability Company", "Professional Limited Liability Company"]),
+      F("name", "2", "Entity name: the exact name of the LLC, containing \"Limited Liability Company\", \"LLC\" or \"L.C.\" (\"PLLC\" or \"PLC\" for a professional LLC)", "实体名称：LLC 的确切名称，须含 “Limited Liability Company”、“LLC” 或 “L.C.”（专业 LLC 须含 “PLLC” 或 “PLC”）"),
+      F("professional_services", "3", "Professional services the LLC will provide (professional LLC only, e.g. law firm, accounting, medical)", "该 LLC 将提供的专业服务（仅限专业 LLC，如律师事务所、会计、医疗）"),
+      F("agent", "4.1", "Statutory agent name (an Arizona resident or an Arizona-registered entity)", "法定代理人名称（亚利桑那州居民或在该州登记的实体）"),
+      F("agent_address", "4.1", "Statutory agent's physical or street address in Arizona (not a P.O. Box)", "法定代理人在亚利桑那州的实际街道地址（不可为邮政信箱）"),
+      F("agent_mailing", "4.2", "Statutory agent's mailing address in Arizona (can be a P.O. Box), or \"Same as street address\"", "法定代理人在亚利桑那州的邮寄地址（可为邮政信箱），或填写“与街道地址相同”"),
+      F("principal_same", "5.1", "Is the principal address the same as the statutory agent's street address?", "主要地址是否与法定代理人的街道地址相同？", ["Yes", "No"]),
+      F("principal_address", "5.2", "Principal address, if not the same", "主要地址（如不相同）"),
+      F("management", "6/7", "Management: manager-managed or member-managed (attach Form L040 or L041)", "管理方式：经理管理或成员管理（须附 L040 或 L041 表）", ["Manager-managed LLC", "Member-managed LLC"]),
+      F("signer", "Signature", "Printed name of the person signing", "签署人姓名（正楷）"),
+    ],
   },
   {
     id: "az-tpt", form: "Arizona Joint Tax Application (JT-1/UC-001)", title: B("Transaction privilege tax (TPT) license", "交易特许税（TPT）执照"),

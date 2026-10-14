@@ -1,0 +1,147 @@
+{
+  "form": "irs-w7",
+  "rev": "Form W-7 (Rev. December 2024)",
+  "pdf": "irs-w7.pdf",
+  "checked": "2026-10-14",
+  "notes": "Addresses: a U.S. address on one line ('street, city, ST ZIP') or two lines (street; city, state or province, country, postal code); a one-line foreign address splits after its first comma. birth_name and prev_name: 'First Middle Last'. Dates are written as MMDDYYYY into the form's date boxes. id_type 'Other: <document>' ticks Other and writes the document. Reason a also ticks box h. id_number (6d) and prev_number (6f ITIN/IRSN) are deliberately not mapped: the applicant writes them by hand; so are the SSN/ITIN after the d/e name, the signature and its date. The Acceptance Agent block is left for the agent.",
+  "boxes": {
+    "app_type": [
+      { "check": "topmostSubform[0].Page1[0].c1_1[0]", "if": "^(apply|new|新)" },
+      { "check": "topmostSubform[0].Page1[0].c1_1[1]", "if": "^(renew|续)" }
+    ],
+    "reason": [
+      { "check": "topmostSubform[0].Page1[0].c1_2[0]", "if": "^a(\\.|\\)|\\s|$)" },
+      { "check": "topmostSubform[0].Page1[0].c1_9[0]", "if": "^a(\\.|\\)|\\s|$)" },
+      { "check": "topmostSubform[0].Page1[0].c1_3[0]", "if": "^b(\\.|\\)|\\s|$)" },
+      { "check": "topmostSubform[0].Page1[0].c1_4[0]", "if": "^c(\\.|\\)|\\s|$)" },
+      { "check": "topmostSubform[0].Page1[0].c1_5[0]", "if": "^d(\\.|\\)|\\s|$)" },
+      { "check": "topmostSubform[0].Page1[0].c1_6[0]", "if": "^e(\\.|\\)|\\s|$)" },
+      { "check": "topmostSubform[0].Page1[0].c1_7[0]", "if": "^f(\\.|\\)|\\s|$)" },
+      { "check": "topmostSubform[0].Page1[0].c1_8[0]", "if": "^g(\\.|\\)|\\s|$)" },
+      { "check": "topmostSubform[0].Page1[0].c1_9[0]", "if": "^h(\\.|\\)|\\s|$)" }
+    ],
+    "relationship": [
+      { "text": "topmostSubform[0].Page1[0].f1_01[0]" }
+    ],
+    "us_person": [
+      { "text": "topmostSubform[0].Page1[0].f1_03[0]" }
+    ],
+    "other": [
+      { "check": "topmostSubform[0].Page1[0].c1_9[0]", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" },
+      { "text": "topmostSubform[0].Page1[0].f1_04[0]", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" }
+    ],
+    "treaty_country": [
+      { "text": "topmostSubform[0].Page1[0].f1_05[0]" }
+    ],
+    "treaty_article": [
+      { "text": "topmostSubform[0].Page1[0].f1_06[0]" }
+    ],
+    "first_name": [
+      { "text": "topmostSubform[0].Page1[0].f1_07[0]" }
+    ],
+    "middle_name": [
+      { "text": "topmostSubform[0].Page1[0].f1_08[0]", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" }
+    ],
+    "last_name": [
+      { "text": "topmostSubform[0].Page1[0].f1_09[0]" }
+    ],
+    "birth_name": [
+      { "text": "topmostSubform[0].Page1[0].f1_10[0]", "pick": "first", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" },
+      { "text": "topmostSubform[0].Page1[0].f1_11[0]", "pick": "middle", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" },
+      { "text": "topmostSubform[0].Page1[0].f1_12[0]", "pick": "last", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" }
+    ],
+    "mailing": [
+      { "text": "topmostSubform[0].Page1[0].f1_13[0]", "pick": "line1", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].f1_14[0]", "pick": "line2", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].f1_13[0]", "pick": "street", "if": "^[^;\\n]*,\\s*[A-Za-z]{2}\\.?\\s+\\d{5}(-\\d{4})?$" },
+      { "text": "topmostSubform[0].Page1[0].f1_14[0]", "pick": "citystatezip", "if": "^[^;\\n]*,\\s*[A-Za-z]{2}\\.?\\s+\\d{5}(-\\d{4})?$" },
+      { "text": "topmostSubform[0].Page1[0].f1_13[0]", "pick": "head", "if": "^(?![^;\\n]*,\\s*[A-Za-z]{2}\\.?\\s+\\d{5}(-\\d{4})?$)[^;\\n]*$" },
+      { "text": "topmostSubform[0].Page1[0].f1_14[0]", "pick": "tail", "if": "^(?![^;\\n]*,\\s*[A-Za-z]{2}\\.?\\s+\\d{5}(-\\d{4})?$)[^;\\n]*$" }
+    ],
+    "foreign_address": [
+      { "text": "topmostSubform[0].Page1[0].f1_15[0]", "pick": "line1", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].f1_16[0]", "pick": "line2", "if": "[;\\n]" },
+      { "text": "topmostSubform[0].Page1[0].f1_15[0]", "pick": "head", "if": "^[^;\\n]*$" },
+      { "text": "topmostSubform[0].Page1[0].f1_16[0]", "pick": "tail", "if": "^[^;\\n]*$" }
+    ],
+    "dob": [
+      { "text": "topmostSubform[0].Page1[0].Line4_ReadOrder[0].f1_17[0]", "pick": "date|digits" }
+    ],
+    "birth_country": [
+      { "text": "topmostSubform[0].Page1[0].f1_18[0]" }
+    ],
+    "birth_city": [
+      { "text": "topmostSubform[0].Page1[0].f1_19[0]" }
+    ],
+    "sex": [
+      { "check": "topmostSubform[0].Page1[0].c1_10[0]", "if": "^(m|male|男)" },
+      { "check": "topmostSubform[0].Page1[0].c1_10[1]", "if": "^(f|female|女)" }
+    ],
+    "citizenship": [
+      { "text": "topmostSubform[0].Page1[0].f1_20[0]" }
+    ],
+    "foreign_tin": [
+      { "text": "topmostSubform[0].Page1[0].f1_21[0]", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" }
+    ],
+    "visa": [
+      { "text": "topmostSubform[0].Page1[0].f1_22[0]", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" }
+    ],
+    "id_type": [
+      { "check": "topmostSubform[0].Page1[0].c1_11[0]", "if": "^(passport|护照)" },
+      { "check": "topmostSubform[0].Page1[0].c1_11[1]", "if": "^(driver|驾)" },
+      { "check": "topmostSubform[0].Page1[0].c1_11[2]", "if": "^uscis" },
+      { "check": "topmostSubform[0].Page1[0].c1_11[3]", "if": "^(other|其他)" },
+      { "text": "topmostSubform[0].Page1[0].f1_23[0]", "pick": "tail", "if": "^(other|其他)" }
+    ],
+    "id_issuer": [
+      { "text": "topmostSubform[0].Page1[0].Issued_ReadOrder[0].f1_24[0]" }
+    ],
+    "id_expiry": [
+      { "text": "topmostSubform[0].Page1[0].Issued_ReadOrder[0].f1_26[0]", "pick": "date|digits" }
+    ],
+    "us_entry": [
+      { "text": "topmostSubform[0].Page1[0].f1_27[0]", "pick": "date|digits" }
+    ],
+    "prev_itin": [
+      { "check": "topmostSubform[0].Page1[0].c1_12[0]", "if": "^(n|no|否|don)" },
+      { "check": "topmostSubform[0].Page1[0].c1_12[1]", "if": "^(y|yes|是)" }
+    ],
+    "prev_name": [
+      { "text": "topmostSubform[0].Page1[0].f1_34[0]", "pick": "first" },
+      { "text": "topmostSubform[0].Page1[0].f1_35[0]", "pick": "middle" },
+      { "text": "topmostSubform[0].Page1[0].f1_36[0]", "pick": "last" }
+    ],
+    "school": [
+      { "text": "topmostSubform[0].Page1[0].f1_37[0]" }
+    ],
+    "school_city": [
+      { "text": "topmostSubform[0].Page1[0].f1_38[0]" }
+    ],
+    "stay": [
+      { "text": "topmostSubform[0].Page1[0].f1_39[0]" }
+    ],
+    "phone": [
+      { "text": "topmostSubform[0].Page1[0].f1_40[0]" }
+    ],
+    "delegate": [
+      { "text": "topmostSubform[0].Page1[0].f1_41[0]", "if": "^(?!(none|no|n/?a|无|没有|-+)\\.?$)" }
+    ],
+    "delegate_rel": [
+      { "check": "topmostSubform[0].Page1[0].c1_13[0]", "if": "^(parent|父|母)" },
+      { "check": "topmostSubform[0].Page1[0].c1_13[1]", "if": "^(power|授权)" },
+      { "check": "topmostSubform[0].Page1[0].c1_13[2]", "if": "^(court|guardian|监护)" }
+    ]
+  },
+  "sign": {
+    "page": 0,
+    "x": 112,
+    "y": 121,
+    "w": 205,
+    "h": 18,
+    "date": {
+      "x": 345,
+      "y": 131,
+      "size": 8
+    }
+  }
+}

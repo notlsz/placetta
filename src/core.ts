@@ -1,3 +1,4 @@
+import { DEFAULT_POLICY } from "./spend.ts";
 import type { OrbState } from "thinking-orbs";
 import type { Application, Approval, Audit, Bi, Change, CheckItem, Deadline, Doc, Fact, LicenseHit, Store, Task, Workspace } from "./model";
 import type { Lang } from "./i18n";
@@ -119,6 +120,10 @@ export const applyChange = (c: Change): P => w => {
     const city = gone?.address.split(",").slice(-2, -1)[0]?.trim().toLowerCase();
     const locations = city && !stores.some(x => x.address.toLowerCase().includes(city)) ? w.locations.filter(l => l.name.en.toLowerCase() !== city) : w.locations;
     return { ...w, stores, locations, apps: w.apps.filter(a => !drop.has(a.id)), approvals: w.approvals.filter(a => !a.app || !drop.has(a.app)), deadlines: w.deadlines.filter(d => !d.app || !drop.has(d.app)) };
+  }
+  if (c.op === "set_budgets") {
+    const spend = w.spend ?? { policy: DEFAULT_POLICY, purchases: [] };
+    return { ...w, spend: { ...spend, policy: { ...spend.policy, budgets: c.budgets } } };
   }
   return { ...w, apps: w.apps.filter(a => a.id !== c.app), approvals: w.approvals.filter(a => a.app !== c.app) };
 };

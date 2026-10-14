@@ -25,3 +25,4 @@ dist-ssr
 site/beam.js
 leads/
 .claude/worktrees/
+bundles/

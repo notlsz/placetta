@@ -1,6 +1,7 @@
 import { B, same, type Approval, type Audit, type Doc, type Workspace } from "../model";
 import type { AgencyLogin, Billing, DocRow, Filing, Integration, Me, Role, TermsStatus } from "./api";
 import type { HqRow } from "../hq";
+import type { Purchase } from "../spend.ts";
 
 /** Everything a signed-in workspace starts with. */
 export type CloudSession = {
@@ -40,7 +41,23 @@ const money = (n: number) => "$" + n.toLocaleString("en-US", { maximumFractionDi
  * Filings set each application's status and next step, a fee the agency asks for becomes something to pay,
  * and stored files and receipts appear in Documents.
  */
-export function withServer(w: Workspace, filings: Filing[], docs: DocRow[]): Workspace {
+/** A purchase waiting on someone: approve it (asked), or pay it on the agency's page and say so (approved, by link). */
+export function purchaseApprovals(purchases: Purchase[]): Approval[] {
+  const money$ = (n: number) => `$${n.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+  return purchases.filter(p => p.status === "asked" || (p.status === "approved" && p.method === "link")).map(p => p.status === "asked" ? {
+    id: "buy-" + p.id, kind: "pay" as const, purchase: p.id, app: p.app, fee: p.amount, url: p.payeeUrl,
+    title: B(`Buy: ${money$(p.amount)} to ${p.payee}`, `购买：向 ${p.payee} 支付 ${money$(p.amount)}`), agency: same(p.payee),
+    does: [p.why, ...(p.reasons ?? []), B("Approving lets Odelia pay it within your Spending rules. Every purchase is in Settings, Spending.", "批准后 Odelia 将在您的支出规则内付款。每笔购买都记录在“设置 > 支出”中。")],
+    action: B("Approve purchase", "批准购买"),
+  } : {
+    id: "buy-" + p.id, kind: "pay" as const, purchase: p.id, app: p.app, fee: p.amount, url: p.payeeUrl,
+    title: B(`Pay ${p.payee} ${money$(p.amount)}`, `向 ${p.payee} 支付 ${money$(p.amount)}`), agency: same(p.payee),
+    does: [p.why, B("Approved. Pay it on the agency's own page, then tap the button so Odelia records it.", "已批准。请在机构自己的页面付款，然后点按钮，Odelia 会记录下来。")],
+    action: B("I've paid it", "我已付款"),
+  });
+}
+
+export function withServer(w: Workspace, filings: Filing[], docs: DocRow[], purchases: Purchase[] = []): Workspace {
   const latest = new Map<string, Filing>();
   for (const f of filings) if (f.status !== "canceled" && !latest.has(f.app_id)) latest.set(f.app_id, f);   // newest first
   const pay: Approval[] = [];
@@ -78,6 +95,6 @@ export function withServer(w: Workspace, filings: Filing[], docs: DocRow[]): Wor
   const filed = new Set([...latest.keys()]);
   return {
     ...w, apps, docs: allDocs,
-    approvals: [...pay, ...w.approvals.filter(a => !(a.kind === "file" && a.app && filed.has(a.app)) && a.kind !== "pay")],
+    approvals: [...purchaseApprovals(purchases), ...pay, ...w.approvals.filter(a => !(a.kind === "file" && a.app && filed.has(a.app)) && a.kind !== "pay")],
   };
 }
