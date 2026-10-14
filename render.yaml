@@ -1,0 +1,27 @@
+# Render Blueprint: the portal worker that files on agency websites (worker/filer).
+# Render, New, Blueprint, pick this repo. It asks for the two values marked sync: false and starts the worker.
+# Then set FILER_ENABLED=1 and FILER_CHANNELS (include "portal") in the Supabase Edge Function secrets so filings queue for it.
+services:
+  - type: worker
+    name: placetta-filer
+    runtime: docker
+    dockerfilePath: ./worker/filer/Dockerfile
+    dockerContext: .
+    plan: starter
+    region: oregon
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - worker/filer/**
+        - supabase/functions/file/destinations.ts
+    envVars:
+      - key: FILER_ENABLED
+        value: "1"
+      - key: FILER_TWO_KEY
+        value: "10"          # the first 10 portal filings wait for a person on the team to check the review page
+      - key: SUPABASE_URL
+        value: https://esquxzcfsylffuijvzec.supabase.co
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false          # Supabase, Project settings, API keys, service_role
+      - key: ANTHROPIC_API_KEY
+        sync: false          # console.anthropic.com, API keys

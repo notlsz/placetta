@@ -2,6 +2,23 @@
 
 Placetta runs on the Supabase project **Placetta** (`esquxzcfsylffuijvzec`). The database, security rules and server functions are built and tested; going live means bringing the project up to date, adding your keys, configuring sign-in and hosting the app. One command does nearly all of it.
 
+## Go live: the four things only the owner can do
+
+Everything else is built and deployed. These need your accounts, so no one else can do them for you.
+
+1. **Odelia's model key.** console.anthropic.com, API keys, create a key. Then Supabase, Edge Functions, Secrets
+   (https://supabase.com/dashboard/project/esquxzcfsylffuijvzec/functions/secrets): add `ANTHROPIC_API_KEY`. Odelia
+   answers on the web, by text and by phone as soon as it's saved. `npm run selftest` checks it.
+2. **Payments.** Stripe, Developers, API keys: copy the live secret key. Add it in the same Secrets page as
+   `STRIPE_SECRET_KEY`. Nothing else: the billing function makes every price (by lookup key) and the webhook (its
+   signing secret goes to `stripe_config`) the first time it runs. Then switch payments on:
+   `update public.app_settings set payments_on = true;` (until then everyone has early access, free).
+3. **The portal worker.** Render, New, Blueprint, this repo (`render.yaml`). Paste the service role key and the
+   Anthropic key when it asks. Then add `FILER_ENABLED=1` and `FILER_CHANNELS=email,fax,mail,portal` to the
+   Supabase secrets so filings queue for it.
+4. **Texts and calls.** Telnyx: buy a number and register the 10DLC brand and campaign (it needs your EIN and
+   takes a few days). Then follow "Text and call Odelia (Telnyx)" below.
+
 ## The fast way: one command
 
 Unzip `placetta-source.zip`, then in that folder:
