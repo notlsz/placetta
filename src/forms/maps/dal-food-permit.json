@@ -1,0 +1,89 @@
+{
+  "form": "dal-food-permit",
+  "rev": "CCS-FRM-424 Rev 5, Effective Date 04/10/2018",
+  "pdf": "dal-food-permit.pdf",
+  "checked": "2026-10-14",
+  "notes": "Flat, print-only form (no fillable boxes): answers are printed on the underscore lines and an X in the printed squares. 'Sub Permit for: <what>' and 'Other (Specify): <type>' print the part after the colon; an establishment type that matches no printed choice ticks Other and prints the whole answer. Ownership type: Sole Owner / Corporation / Partnership (List: <partners>); an LLC answered as 'LLC' ticks nothing (the form has no LLC box). Owner mailing address 'street, City, ST ZIP' fills Mailing Address (street and suite), City, State and Zip Code; the Suite blank is left empty. The signature line is left for the owner; the form has no signature date. Office-use line left blank.",
+  "boxes": {
+    "permit_requested_320_jefferson": [
+      { "mark": { "page": 0, "x": 38.2, "y": 592.5, "size": 9 }, "if": "remodel" },
+      { "mark": { "page": 0, "x": 38.2, "y": 560.6, "size": 9 }, "if": "finish.?out|new construction|new suite" },
+      { "mark": { "page": 0, "x": 38.2, "y": 540, "size": 9 }, "if": "pre-?inspection" }
+    ],
+    "permit_requested_7901_goforth": [
+      { "mark": { "page": 0, "x": 315.7, "y": 594.1, "size": 9 }, "if": "kiosk|self-service" },
+      { "mark": { "page": 0, "x": 315.7, "y": 572.1, "size": 9 }, "if": "change of owner" },
+      { "mark": { "page": 0, "x": 315.7, "y": 519.1, "size": 9 }, "if": "^sub.?permit" },
+      { "at": { "page": 0, "x": 398, "y": 519.5, "w": 172 }, "pick": "tail", "if": "^sub.?permit" }
+    ],
+    "prior_food_business_name": [{ "at": { "page": 0, "x": 425, "y": 557, "w": 150 } }],
+    "previous_owner_name": [{ "at": { "page": 0, "x": 401, "y": 539.6, "w": 172 } }],
+    "type_of_operation": [
+      { "mark": { "page": 0, "x": 38.2, "y": 482.6, "size": 9 }, "if": "retail" },
+      { "mark": { "page": 0, "x": 38.2, "y": 461.7, "size": 9 }, "if": "wholesale" }
+    ],
+    "type_of_food_establishment": [
+      { "mark": { "page": 0, "x": 183, "y": 483.7, "size": 9 }, "if": "restaurant" },
+      { "mark": { "page": 0, "x": 251, "y": 483.7, "size": 9 }, "if": "\\bbar\\b|tavern" },
+      { "mark": { "page": 0, "x": 319.5, "y": 483.7, "size": 9 }, "if": "grocery" },
+      { "mark": { "page": 0, "x": 377.5, "y": 483.7, "size": 9 }, "if": "bakery" },
+      { "mark": { "page": 0, "x": 431.5, "y": 483.7, "size": 9 }, "if": "^kiosk" },
+      { "mark": { "page": 0, "x": 475, "y": 483.7, "size": 9 }, "if": "fast food|\\bdeli\\b" },
+      { "mark": { "page": 0, "x": 183, "y": 462.9, "size": 9 }, "if": "warehouse" },
+      { "mark": { "page": 0, "x": 251, "y": 462.9, "size": 9 }, "if": "self-service" },
+      { "mark": { "page": 0, "x": 358, "y": 462.9, "size": 9 }, "if": "^other|^(?!.*(restaurant|\\bbar\\b|tavern|grocery|bakery|kiosk|fast food|\\bdeli\\b|warehouse|self-service))" },
+      { "at": { "page": 0, "x": 437, "y": 463.3, "w": 129 }, "pick": "tail", "if": "^other" },
+      { "at": { "page": 0, "x": 437, "y": 463.3, "w": 129 }, "if": "^(?!other)(?!.*(restaurant|\\bbar\\b|tavern|grocery|bakery|kiosk|fast food|\\bdeli\\b|warehouse|self-service))" }
+    ],
+    "job_contractor_name": [{ "at": { "page": 0, "x": 171, "y": 437, "w": 128 } }],
+    "job_contractor_address": [{ "at": { "page": 0, "x": 446, "y": 437, "w": 113 } }],
+    "job_business_phone": [{ "at": { "page": 0, "x": 109, "y": 416.2, "w": 73 } }],
+    "inspection_contact_person": [{ "at": { "page": 0, "x": 314, "y": 416.2, "w": 101 } }],
+    "local_phone": [{ "at": { "page": 0, "x": 473, "y": 416.2, "w": 85 } }],
+    "approx_job_cost": [{ "at": { "page": 0, "x": 160, "y": 395.5, "w": 112 } }],
+    "start_date": [{ "at": { "page": 0, "x": 322, "y": 395.5, "w": 73 }, "pick": "date" }],
+    "finish_date": [{ "at": { "page": 0, "x": 454, "y": 395.5, "w": 106 }, "pick": "date" }],
+    "total_square_feet": [{ "at": { "page": 0, "x": 116, "y": 374.8, "w": 78 } }],
+    "days_hours_operation": [{ "at": { "page": 0, "x": 307, "y": 374.8, "w": 251 } }],
+    "city_water": [
+      { "mark": { "page": 0, "x": 212.2, "y": 354.5, "size": 9 }, "if": "^y" },
+      { "mark": { "page": 0, "x": 243.7, "y": 354.5, "size": 9 }, "if": "^n" }
+    ],
+    "city_sewer": [
+      { "mark": { "page": 0, "x": 357, "y": 354.5, "size": 9 }, "if": "^y" },
+      { "mark": { "page": 0, "x": 388.2, "y": 354.5, "size": 9 }, "if": "^n" }
+    ],
+    "septic_tank": [
+      { "mark": { "page": 0, "x": 510.5, "y": 354.5, "size": 9 }, "if": "^y" },
+      { "mark": { "page": 0, "x": 544.7, "y": 354.5, "size": 9 }, "if": "^n" }
+    ],
+    "establishment_name": [{ "at": { "page": 0, "x": 143, "y": 316.6, "w": 428 } }],
+    "establishment_address": [{ "at": { "page": 0, "x": 153, "y": 295.9, "w": 195 }, "pick": "street" }],
+    "establishment_suite": [{ "at": { "page": 0, "x": 376, "y": 295.9, "w": 78 } }],
+    "establishment_zip": [{ "at": { "page": 0, "x": 500, "y": 295.9, "w": 73 } }],
+    "establishment_phone": [{ "at": { "page": 0, "x": 112, "y": 275.2, "w": 85 } }],
+    "registered_food_service_manager": [{ "at": { "page": 0, "x": 362, "y": 275.2, "w": 104 } }],
+    "food_manager_certificate_no": [{ "at": { "page": 0, "x": 527, "y": 275.2, "w": 45 } }],
+    "legal_owner": [{ "at": { "page": 0, "x": 385, "y": 220.2, "w": 178 } }],
+    "ownership_type": [
+      { "mark": { "page": 0, "x": 54.7, "y": 200.9, "size": 9 }, "if": "sole" },
+      { "mark": { "page": 0, "x": 153.2, "y": 200.9, "size": 9 }, "if": "corporation|\\bcorp\\b|\\binc\\b" },
+      { "mark": { "page": 0, "x": 253.7, "y": 200.9, "size": 9 }, "if": "partnership" },
+      { "at": { "page": 0, "x": 352, "y": 201.2, "w": 211 }, "pick": "tail", "if": "partnership" }
+    ],
+    "owner_mailing_address": [
+      { "at": { "page": 0, "x": 108, "y": 186.8, "w": 134 }, "pick": "street" },
+      { "at": { "page": 0, "x": 312, "y": 186.8, "w": 107 }, "pick": "city" },
+      { "at": { "page": 0, "x": 446, "y": 186.8, "w": 23 }, "pick": "state" },
+      { "at": { "page": 0, "x": 512, "y": 186.8, "w": 51 }, "pick": "zip" }
+    ],
+    "tx_sales_use_tax_permit_no": [{ "at": { "page": 0, "x": 240, "y": 166.1, "w": 323 } }],
+    "owner_bus_phone": [{ "at": { "page": 0, "x": 87, "y": 147.7, "w": 166 } }],
+    "owner_phone": [{ "at": { "page": 0, "x": 320, "y": 147.7, "w": 245 } }],
+    "signer_printed_name": [{ "at": { "page": 0, "x": 183, "y": 102.8, "w": 155 } }],
+    "signer_title": [{ "at": { "page": 0, "x": 61, "y": 80.4, "w": 134 } }],
+    "signer_drivers_license": [{ "at": { "page": 0, "x": 315, "y": 80.4, "w": 139 } }],
+    "signer_dob": [{ "at": { "page": 0, "x": 515, "y": 80.4, "w": 50 }, "pick": "date" }]
+  },
+  "sign": { "page": 0, "x": 387, "y": 102, "w": 180, "h": 18 }
+}

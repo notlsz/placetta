@@ -3,6 +3,9 @@ import type { FormMap } from "../boxes";
 import m_az_llc from "./az-llc.json";
 import m_ca_edd_de1 from "./ca-edd-de1.json";
 import m_ca_ftb_3522 from "./ca-ftb-3522.json";
+import m_cbp_301 from "./cbp-301.json";
+import m_dal_food_permit from "./dal-food-permit.json";
+import m_hou_food_dealer from "./hou-food-dealer.json";
 import m_irs_5472 from "./irs-5472.json";
 import m_irs_w7 from "./irs-w7.json";
 import m_lac_health_permit from "./lac-health-permit.json";
@@ -18,6 +21,9 @@ export const MAPS: Record<string, FormMap> = {
   "az-llc": m_az_llc as FormMap,
   "ca-edd-de1": m_ca_edd_de1 as FormMap,
   "ca-ftb-3522": m_ca_ftb_3522 as FormMap,
+  "cbp-301": m_cbp_301 as FormMap,
+  "dal-food-permit": m_dal_food_permit as FormMap,
+  "hou-food-dealer": m_hou_food_dealer as FormMap,
   "irs-5472": m_irs_5472 as FormMap,
   "irs-w7": m_irs_w7 as FormMap,
   "lac-health-permit": m_lac_health_permit as FormMap,

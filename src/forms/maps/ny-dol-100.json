@@ -1,0 +1,505 @@
+{
+ "form": "ny-dol-100",
+ "rev": "NYS 100 (09/18)",
+ "pdf": "ny-dol-100.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: dates any common shape (printed mmddyyyy in the boxes). fein '12-3456789'; phones '212-555-0134'. non_employees 'No' or 'Yes: services they perform'. ui_quarter: year first, '2026 Q3' (or an ISO date of the first $300 quarter, '2026-07-15'). acquired: 'No' or 'Yes: all|part, date, prior registration number, prior FEIN, prior legal name, prior address'. entity_change: 'No' or 'Yes: date, prior registration number, prior FEIN'. Addresses 'street, City, ST ZIP[, Country]' (county is left blank: the answers don't carry it). records_location and agent_address: one item per line or ';' - records: address; contact name; phone. agent: C/O name; address; phone; contact name. owners: one per line 'Name, Title, residence address and phone' (the SSN column is never written; the signer writes it). location_address: 'street, City, ST ZIP'. establishment: 'type of establishment, principal product or service, percent of revenue' (no commas inside each part). signer: 'Official position, phone, email'. The form's 'Group2' radio is one group shared by Part A line 2 (legal entity) and Part B line 4 (registering for UI yes/no), so only the legal entity is set; the UI Yes/No box is left for the signer to tick. The signature and its date are left for the signer.",
+ "boxes": {
+  "type": [
+   {
+    "radio": "check box",
+    "value": "Choice1",
+    "if": "^business"
+   },
+   {
+    "radio": "check box",
+    "value": "Choice2",
+    "if": "^household"
+   }
+  ],
+  "entity": [
+   {
+    "radio": "Group2",
+    "value": "Choice1",
+    "if": "^sole"
+   },
+   {
+    "radio": "Group2",
+    "value": "Partnership",
+    "if": "^partnership"
+   },
+   {
+    "radio": "Group2",
+    "value": "Corporation",
+    "if": "^corp"
+   },
+   {
+    "radio": "Group2",
+    "value": "Limited Liability Company",
+    "if": "^(llc|limited liability company)"
+   },
+   {
+    "radio": "Group2",
+    "value": "Limited Liability Partnership",
+    "if": "^(llp|limited liability partnership)"
+   },
+   {
+    "radio": "Group2",
+    "value": "Other",
+    "if": "^other"
+   },
+   {
+    "text": "please describe",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "fein": [
+   {
+    "text": "Federal Employer Identification Number"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Telephone number"
+   }
+  ],
+  "fax": [
+   {
+    "text": "Fax number"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "Legal name of business"
+   },
+   {
+    "text": "Legal Name"
+   }
+  ],
+  "trade_name": [
+   {
+    "text": "Trade name"
+   }
+  ],
+  "email": [
+   {
+    "text": "Business email"
+   }
+  ],
+  "website": [
+   {
+    "text": "Website"
+   }
+  ],
+  "first_ops": [
+   {
+    "text": "Part B  Liability Information",
+    "pick": "date|digits"
+   }
+  ],
+  "first_payroll": [
+   {
+    "text": "2 Enter the date of the first payroll you withheld for will withhold NYS Income Tax from your employees pay",
+    "pick": "date|digits"
+   }
+  ],
+  "non_employees": [
+   {
+    "radio": "3 Do persons work for you whom you do not consider to be employees",
+    "value": "Yes",
+    "if": "^yes"
+   },
+   {
+    "radio": "3 Do persons work for you whom you do not consider to be employees",
+    "value": "No",
+    "if": "^no"
+   },
+   {
+    "text": "If yes what services do they perform 1",
+    "pick": "tail",
+    "if": "^yes"
+   }
+  ],
+  "ui_quarter": [
+   {
+    "radio": "Group3",
+    "value": "Jan 1 - Mar 31 (1st)",
+    "if": "\\b(q1|1st|first)\\b|\\bjan|\\d{4}-0?[123]-"
+   },
+   {
+    "radio": "Group3",
+    "value": "Apr 1 - Jun 30 (2nd)",
+    "if": "\\b(q2|2nd|second)\\b|\\bapr|\\d{4}-0?[456]-"
+   },
+   {
+    "radio": "Group3",
+    "value": "Jul 1 - Sep 30 (3rd)",
+    "if": "\\b(q3|3rd|third)\\b|\\bjul|\\d{4}-0?[789]-"
+   },
+   {
+    "radio": "Group3",
+    "value": "Oct 1 - Dec 31 (4th)",
+    "if": "\\b(q4|4th|fourth)\\b|\\boct|\\d{4}-1[012]-"
+   },
+   {
+    "text": "Year",
+    "pick": "digits",
+    "max": 4,
+    "if": "^\\s*\\d{4}"
+   }
+  ],
+  "covered_employees": [
+   {
+    "text": "Total number of covered employees"
+   }
+  ],
+  "withholding_only": [
+   {
+    "radio": "Are you registering to remit withholding tax only",
+    "value": "Yes_2",
+    "if": "^yes"
+   },
+   {
+    "radio": "Are you registering to remit withholding tax only",
+    "value": "No_3",
+    "if": "^no"
+   }
+  ],
+  "acquired": [
+   {
+    "radio": "undefined_43",
+    "value": "Yes_3",
+    "if": "^yes"
+   },
+   {
+    "radio": "undefined_43",
+    "value": "No_4",
+    "if": "^no"
+   },
+   {
+    "radio": "Group4",
+    "value": "Choice1",
+    "if": "^yes\\W+all\\b"
+   },
+   {
+    "radio": "Group4",
+    "value": "Choice2",
+    "if": "^yes\\W+part\\b"
+   },
+   {
+    "text": "Have you acquired the business of another employer liable for New York State Unemployment Insurance",
+    "pick": "tail|tail|head|date|digits",
+    "if": "^yes"
+   },
+   {
+    "text": "Prior owner's Registration Number",
+    "pick": "tail|tail|tail|head|digits",
+    "if": "^yes"
+   },
+   {
+    "text": "Prior owners Federal Employer Identification Number",
+    "pick": "tail|tail|tail|tail|head|digits",
+    "if": "^yes"
+   },
+   {
+    "text": "Legal name of business_1",
+    "pick": "tail|tail|tail|tail|tail|head",
+    "if": "^yes"
+   },
+   {
+    "text": "Address",
+    "pick": "tail|tail|tail|tail|tail|tail",
+    "if": "^yes"
+   }
+  ],
+  "entity_change": [
+   {
+    "radio": "Have you changed legal entity?",
+    "value": "Yes_4",
+    "if": "^yes"
+   },
+   {
+    "radio": "Have you changed legal entity?",
+    "value": "No_4",
+    "if": "^no"
+   },
+   {
+    "text": "If yes date of legal entity change",
+    "pick": "tail|head|date|digits",
+    "if": "^yes"
+   },
+   {
+    "text": "Prior employer's Registration Number",
+    "pick": "tail|tail|head|digits",
+    "if": "^yes"
+   },
+   {
+    "text": "Prior employers FEIN",
+    "pick": "tail|tail|tail|head|digits",
+    "if": "^yes"
+   }
+  ],
+  "mailing_address": [
+   {
+    "text": "Mailing  Address Street or PO box",
+    "pick": "street"
+   },
+   {
+    "text": "Mailing Address City",
+    "pick": "city"
+   },
+   {
+    "text": "Mailing Address State",
+    "pick": "state"
+   },
+   {
+    "text": "Mailing Address Zip code",
+    "pick": "zip"
+   },
+   {
+    "text": "Mailing Address Country",
+    "pick": "country"
+   }
+  ],
+  "physical_address": [
+   {
+    "text": "Physical Address Street",
+    "pick": "street"
+   },
+   {
+    "text": "Physical Address City_2",
+    "pick": "city"
+   },
+   {
+    "text": "Physical Address State_2",
+    "pick": "state"
+   },
+   {
+    "text": "Physical Address Zip code_2",
+    "pick": "zip"
+   },
+   {
+    "text": "Physical Address Country_2",
+    "pick": "country"
+   }
+  ],
+  "records_location": [
+   {
+    "text": "Location of Books/Records Street_2",
+    "pick": "line1|street"
+   },
+   {
+    "text": "Location of Books/Records City_3",
+    "pick": "line1|city"
+   },
+   {
+    "text": "Location of Books/Records State_3",
+    "pick": "line1|state"
+   },
+   {
+    "text": "Location of Books/Records Zip code_3",
+    "pick": "line1|zip"
+   },
+   {
+    "text": "Location of Books/Records Country 1",
+    "pick": "line1|country"
+   },
+   {
+    "text": "Contact name for Location of Books/Records",
+    "pick": "line2"
+   },
+   {
+    "text": "Location of Books/Records Telephone number#0",
+    "pick": "line3"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "Agent Address care of",
+    "pick": "line1"
+   },
+   {
+    "text": "Agent Address Street or PO box_2",
+    "pick": "line2|street"
+   },
+   {
+    "text": "Agent Address City_4",
+    "pick": "line2|city"
+   },
+   {
+    "text": "Agent Address State_4",
+    "pick": "line2|state"
+   },
+   {
+    "text": "Zip code_4",
+    "pick": "line2|zip"
+   },
+   {
+    "text": "Agent Address Country 1_2",
+    "pick": "line2|country"
+   },
+   {
+    "text": "Agent Address Telephone number_2",
+    "pick": "line3|digits"
+   },
+   {
+    "text": "Agent Adress Contact name_2",
+    "pick": "line4"
+   }
+  ],
+  "owners": [
+   {
+    "text": "Name",
+    "pick": "line1|head"
+   },
+   {
+    "text": "Title1",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": "Residence Address and Phone Number1",
+    "pick": "line1|tail|tail"
+   },
+   {
+    "text": "Name2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "Title2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": "Residence Address and Phone Number2",
+    "pick": "line2|tail|tail"
+   },
+   {
+    "text": "Name3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "Title3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": "Residence Address and Phone Number3",
+    "pick": "line3|tail|tail"
+   },
+   {
+    "text": "Name4",
+    "pick": "line4|head"
+   },
+   {
+    "text": "Title4",
+    "pick": "line4|tail|head"
+   },
+   {
+    "text": "Residence Address and Phone Number4",
+    "pick": "line4|tail|tail"
+   },
+   {
+    "text": "Name5",
+    "pick": "line5|head"
+   },
+   {
+    "text": "Title5",
+    "pick": "line5|tail|head"
+   },
+   {
+    "text": "Residence Address and Phone Number5",
+    "pick": "line5|tail|tail"
+   }
+  ],
+  "locations": [
+   {
+    "text": "physical address and answer questions a through e below for each location Use a separate sheet of paper for each"
+   }
+  ],
+  "location_address": [
+   {
+    "text": "Location (number and street)",
+    "pick": "street"
+   },
+   {
+    "text": "City_6",
+    "pick": "city"
+   },
+   {
+    "text": "Zip code#1",
+    "pick": "zip"
+   }
+  ],
+  "location_employees": [
+   {
+    "text": "How many employees at this location?"
+   }
+  ],
+  "activity": [
+   {
+    "check": "Retail trade",
+    "if": "^retail"
+   },
+   {
+    "check": "Food service, drinking & accomodations",
+    "if": "^food"
+   },
+   {
+    "check": "Wholesale trade",
+    "if": "^wholesale"
+   },
+   {
+    "check": "Warehousing",
+    "if": "^warehous"
+   },
+   {
+    "check": "Other",
+    "if": "^other"
+   },
+   {
+    "text": "Other (Please specify)",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "establishment": [
+   {
+    "text": "Type of Establishment",
+    "pick": "head"
+   },
+   {
+    "text": "Principal Product Sold",
+    "pick": "tail|head"
+   },
+   {
+    "text": "Percent of Total Revenue",
+    "pick": "tail|tail"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Official Position",
+    "pick": "head"
+   },
+   {
+    "text": "Telephone number_6",
+    "pick": "tail|head|digits"
+   },
+   {
+    "text": "Email address",
+    "pick": "tail|tail"
+   }
+  ]
+ },
+ "sign": {
+  "page": 3,
+  "x": 52,
+  "y": 128,
+  "w": 290,
+  "h": 24,
+  "date": {
+   "x": 362,
+   "y": 130,
+   "size": 9
+  }
+ }
+}
