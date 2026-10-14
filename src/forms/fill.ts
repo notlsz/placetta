@@ -79,10 +79,11 @@ const FORMS_BASE = import.meta.env?.MODE === "single" ? "forms/" : `${import.met
 
 /** Fills an agency PDF from its box map. Pure: the bytes in, the filled bytes out (the checks run this same code). */
 export async function fillMapped(bytes: Uint8Array, map: FormMap, fields: Field[]): Promise<{ pdf: Uint8Array; filled: Set<string> }> {
-  const { PDFDocument } = await import("pdf-lib");
+  const { PDFDocument, StandardFonts } = await import("pdf-lib");
   const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const form = doc.getForm();
-  const filled = writeAnswers(map, valuesOf(fields), pdfLibWriter(form));
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const filled = writeAnswers(map, valuesOf(fields), pdfLibWriter(form, doc, font));
   // XFA forms (the IRS's and Arizona's) would show their own empty copy in Acrobat; drop it so the filled boxes show.
   try { form.deleteXFA(); } catch { /* no XFA */ }
   try { form.updateFieldAppearances(); } catch { /* a box with an odd font keeps its own look */ }

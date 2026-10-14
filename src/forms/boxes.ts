@@ -7,7 +7,12 @@ export type Box =
   | { text: string; pick?: string; max?: number; upper?: boolean; value?: string; if?: string }   // a text box (value: fixed text, written when `if` matches)
   | { check: string; if?: string }                                                                // a checkbox, ticked when the answer matches `if` (always when absent)
   | { radio: string; value: string; if?: string }                                                  // a radio group set to its export value
-  | { choice: string; if?: string; value?: string };                                              // a dropdown set to the answer (or `value`)
+  | { choice: string; if?: string; value?: string }                                               // a dropdown set to the answer (or `value`)
+  // Forms with no fillable boxes (a flat scan or print-only PDF): the answer is printed at a spot on the page, in PDF
+  // points from the bottom-left (page from 0). w: the line's width, so a long answer shrinks to fit; mark: an "X" in a
+  // printed checkbox, when the answer matches `if`.
+  | { at: { page: number; x: number; y: number; w?: number; size?: number }; pick?: string; max?: number; upper?: boolean; value?: string; if?: string }
+  | { mark: { page: number; x: number; y: number; size?: number }; if?: string };
 
 /** Part of an answer: "123 Main St, Suite 4, San Jose, CA 95112" splits into street, city, state, zip. Picks chain with
     "|", left to right: "line2|head" is the name on the answer's second line, "line2|tail|zip" that line's ZIP code.
@@ -26,7 +31,10 @@ export type FormMap = {
   notes?: string;
 };
 
+export type Spot = { page: number; x: number; y: number; w?: number; size?: number };
 export type Writer = {
+  /** Print text at a spot (flat forms). Optional: a Writer without it skips flat boxes. */
+  draw?: (at: Spot, v: string) => boolean;
   text: (name: string, v: string) => boolean;
   check: (name: string) => boolean;
   radio: (name: string, value: string) => boolean;
@@ -119,7 +127,13 @@ export function writeAnswers(map: FormMap, values: Record<string, string>, w: Wr
   const put = (b: Box, v: string, id?: string) => {
     if (!matches(v, b.if)) return;
     let ok = false;
-    if ("text" in b) {
+    if ("mark" in b) { ok = !!w.draw?.({ ...b.mark, size: b.mark.size ?? 10 }, "X"); }
+    else if ("at" in b) {
+      let s = b.value ?? pick(v, b.pick);
+      if (!s || (!b.value && SECRET.test(s))) return;
+      s = latin(s); if (b.upper) s = s.toUpperCase(); if (b.max) s = s.slice(0, b.max);
+      ok = !!w.draw?.(b.at, s);
+    } else if ("text" in b) {
       let s = b.value ?? pick(v, b.pick);
       if (!s || (!b.value && (SECRET.test(s) || (SECRET_BOX.test(b.text) && NINE.test(s.replace(/[- ]/g, "")))))) return;
       s = latin(s);
@@ -140,11 +154,20 @@ export function writeAnswers(map: FormMap, values: Record<string, string>, w: Wr
   return done;
 }
 
-/** pdf-lib's form as a Writer: a box this revision doesn't have is skipped, never an error. */
+/** pdf-lib's form as a Writer: a box this revision doesn't have is skipped, never an error. With the document and an
+ *  embedded font it also prints on flat forms. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function pdfLibWriter(form: any): Writer {
+export function pdfLibWriter(form: any, doc?: any, font?: any): Writer {
   const t = <T,>(f: () => T) => { try { return f(); } catch { return undefined; } };
   return {
+    draw: (at, v) => !!t(() => {
+      if (!doc || !font) return false;
+      const page = doc.getPages()[at.page]; if (!page) return false;
+      let size = at.size ?? 9;
+      if (at.w) while (size > 5.5 && font.widthOfTextAtSize(v, size) > at.w) size -= 0.5;
+      page.drawText(v, { x: at.x, y: at.y, size, font });
+      return true;
+    }),
     text: (n, v) => !!t(() => {
       const f = form.getTextField(n);
       const max = f.getMaxLength?.();

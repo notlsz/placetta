@@ -29,3 +29,26 @@ for p in doc:
         print(f"p{p.number} {k:6} {w.field_name!r}{extra} rect=({r.x0:.0f},{r.y0:.0f},{r.x1:.0f},{r.y1:.0f})")
         if tip: print(f"      tip: {tip}")
         print(f"      left: {l} | above: {a} | right: {rt}")
+
+# Flat forms (no fillable boxes): every printed line with its position in pdf-lib coordinates (origin bottom-left), and
+# the underscores/blank rules people write on, so a map can place each answer with {"at": {page, x, y, w}}.
+if not any(True for p in doc for _ in p.widgets()):
+    print("\n# no fillable boxes: printed lines (x0, y_baseline_from_bottom, x1) and blank rules")
+    for p in doc:
+        H = p.rect.height
+        for b in p.get_text("dict")["blocks"]:
+            for l in b.get("lines", []):
+                txt = "".join(s["text"] for s in l["spans"]).strip()
+                if not txt: continue
+                x0, y0, x1, y1 = l["bbox"]
+                print(f"p{p.number} ({x0:.0f},{H - y1 + 2:.0f},{x1:.0f}) {txt[:140]}")
+        for d in p.get_drawings():
+            for it in d["items"]:
+                if it[0] == "l":
+                    a, c = it[1], it[2]
+                    if abs(a.y - c.y) < 0.5 and abs(c.x - a.x) > 30:
+                        print(f"p{p.number} rule x={min(a.x, c.x):.0f}..{max(a.x, c.x):.0f} y={H - a.y:.0f}")
+                elif it[0] == "re":
+                    r = it[1]
+                    if 6 <= r.width <= 14 and 6 <= r.height <= 14:
+                        print(f"p{p.number} box x={r.x0:.0f} y={H - r.y1:.0f} (checkbox {r.width:.0f}x{r.height:.0f})")

@@ -4,7 +4,7 @@
 // answers.json: { "<field id>": "<value>" }; without it, every field gets a recognizable test value.
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 import type { FormMap } from "../src/forms/boxes.ts";
 import { pdfLibWriter, writeAnswers } from "../src/forms/boxes.ts";
 import { FORMS } from "../src/forms/registry.ts";
@@ -17,8 +17,8 @@ const values: Record<string, string> = answersPath ? JSON.parse(readFileSync(ans
 const doc = await PDFDocument.load(readFileSync(new URL(`../public/forms/${map.pdf}`, import.meta.url)), { ignoreEncryption: true });
 const pdfForm = doc.getForm();
 const missingBoxes: string[] = [];
-const w = pdfLibWriter(pdfForm);
-const logged = { text: (n: string, v: string) => w.text(n, v) || (missingBoxes.push(n), false), check: (n: string) => w.check(n) || (missingBoxes.push(n), false), radio: (n: string, v: string) => w.radio(n, v) || (missingBoxes.push(`${n}=${v}`), false), choice: (n: string, v: string) => w.choice(n, v) || (missingBoxes.push(`${n}=${v}`), false) };
+const w = pdfLibWriter(pdfForm, doc, await doc.embedFont(StandardFonts.Helvetica));
+const logged = { draw: w.draw, text: (n: string, v: string) => w.text(n, v) || (missingBoxes.push(n), false), check: (n: string) => w.check(n) || (missingBoxes.push(n), false), radio: (n: string, v: string) => w.radio(n, v) || (missingBoxes.push(`${n}=${v}`), false), choice: (n: string, v: string) => w.choice(n, v) || (missingBoxes.push(`${n}=${v}`), false) };
 const filled = writeAnswers(map, values, logged);
 try { pdfForm.deleteXFA(); } catch { /* none */ }
 try { pdfForm.updateFieldAppearances(); } catch (e) { console.log("appearance:", String(e).slice(0, 120)); }
