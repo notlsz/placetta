@@ -1203,7 +1203,7 @@ html[lang="zh-CN"] .tsrs strong{letter-spacing:0}
 .plans{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
 @media (min-width:900px){.plans{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
 @media (min-width:900px) and (max-width:1199px){#tiers{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (min-width:1200px){#tiers{gap:20px}}
+@media (min-width:1200px){#tiers{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}#tiers .plan{padding:28px 24px}}
 .plan{display:flex;flex-direction:column;min-width:0;padding:26px 24px;border-radius:20px;background:var(--card)}
 @media (min-width:1024px){.plan{padding:30px 32px}}
 .plan.pfeat{position:relative;background:#fff;box-shadow:0 0 0 1.5px var(--gs-d),0 1px 2px rgba(15,27,51,.04),0 28px 70px rgba(15,27,51,.12)}
@@ -2795,7 +2795,6 @@ html[lang="zh-CN"] .exlab{font-family:var(--zhserif)}
       </div>
     </div>
     <div class="plans" id="tiers"></div>
-    <p class="phq" data-i18n="price.hq">10 or more locations, or a brand entering the US from abroad? Headquarters plans start at $25,000 a year. <a href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">Book a demo</a></p>
     <p class="pfine" data-i18n="price.fine">Each plan includes a monthly Odelia allowance for its locations, twice as much on Pro; $49 packs add $25 more and carry over. Inspections and rush filings are quoted per step, importers per product line. Attorneys and customs brokers bill you directly. Government fees go directly to each agency.</p>
   </div>
 </section>
@@ -3165,6 +3164,7 @@ const TIERS = [
   {l:["Essentials","基础版"],v:["$149","149 美元"],u:["/location a month","/门店/月"],ps:["Billed yearly","按年计费"],cta:["Get my plan","获取我的计划"],tag:["For franchise chains","连锁加盟品牌"],n:["For every franchise or company-owned store.","适用于每家加盟店或直营店。"],f:[["Every license tracked, renewals filed before they lapse","跟踪每一项执照，到期前完成续期"],["Staff certificates and vendor proof for every store","每家门店的员工证书与供应商凭证"],["Odelia included, with a monthly allowance per location","包含 Odelia，每家门店每月都有额度"]]},
   {l:["Pro","专业版"],v:["$299","299 美元"],u:["/location a month","/门店/月"],ps:["Billed yearly","按年计费"],cta:["Get my plan","获取我的计划"],tag:["Inspection ready","随时迎检"],hl:1,n:["For restaurants, tea and food stores that get inspected often.","适用于经常接受检查的餐厅、茶饮和食品门店。"],f:[["Everything in Essentials","包含基础版全部功能"],["Daily logs and mock inspections, fixes tracked after each one","每日记录与模拟检查，每次检查后跟踪整改"],["Twice the Odelia allowance","双倍 Odelia 额度"]]},
   {l:["Openings","新店开业"],v:["$3,500","3,500 美元"],u:["/retail store","/家零售门店"],ps:["$6,500 for a restaurant or food store. Liquor and complex build-outs quoted.","餐厅或食品门店 6,500 美元。酒类执照和复杂装修另行报价。"],cta:["Get my plan","获取我的计划"],n:["For each new store, from lease to opening day.","每家新店，从签约到开业。"],f:[["Every permit mapped in order, filed for you","按顺序梳理每一项许可，并为您提交"],["Tracked to approval, in English or Chinese","跟踪至获批，中英文均可"],["Optional open-by-date guarantee, $2,500: if a permit we file is why you open late, the opening fee comes back. <a href=\"terms.html#plans-and-billing\">Terms apply</a>","可选按期开业保障 2,500 美元：如因我们提交的许可导致延期开业，退还开业费用。<a href=\"terms.html#plans-and-billing\">适用条款</a>"]]},
+  {l:["Headquarters","品牌总部"],v:["$25,000+","25,000 美元起"],u:["/year","/年"],ps:["For 10 or more locations, billed yearly","适用于 10 家及以上门店，按年计费"],cta:["Book a demo","预约演示"],mail:1,n:["For franchisors that require Odelia across the system, and brands entering the US.","适用于在体系内统一要求使用 Odelia 的品牌总部，以及进入美国市场的品牌。"],f:[["Every store's status in one view","一个视图查看每家门店状态"],["Required in your franchise agreement","写入加盟协议"],["US entry for overseas brands, quoted per brand","海外品牌进入美国，按品牌报价"]]},
 ];
 const FAQ = [
  [["How much does it cost?","费用是多少？"],["$149 per location a month on Essentials or $299 on Pro, billed yearly. Each new store opening is $3,500 for retail and $6,500 for a restaurant or food store, paid once; liquor licenses and complex build-outs are quoted. Exceptions handled by people are quoted per step. Government fees are paid at cost, by you directly to each agency. <a href=\"#pricing\">See pricing</a>","基础版每家门店每月 149 美元，专业版 299 美元，按年计费。每家新店开业一次性收费：零售 3,500 美元，餐厅或食品门店 6,500 美元；酒类执照和复杂装修另行报价。由专人处理的例外事项按步骤报价。政府规费按实际金额，由您直接支付给各机构。<a href=\"#pricing\">查看价格</a>"]],
