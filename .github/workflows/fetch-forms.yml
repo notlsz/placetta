@@ -1,8 +1,8 @@
 # Downloads the agencies' own PDFs listed in scripts/official-pdfs.txt (one "id url" per line) and keeps them as a run
-# artifact, so the forms library can read each form's fillable boxes and check a filled copy. Run by hand.
+# artifact and on the official-pdfs branch, so the forms library can read each form's fillable boxes and check a filled copy. Run by hand.
 name: Fetch official forms
 on: workflow_dispatch
-permissions: { contents: read }
+permissions: { contents: write }
 jobs:
   fetch:
     runs-on: ubuntu-latest
@@ -18,3 +18,10 @@ jobs:
           done < scripts/official-pdfs.txt
       - uses: actions/upload-artifact@v4
         with: { name: official-pdfs, path: out }
+      - name: Keep them on the official-pdfs branch
+        run: |
+          cd out
+          git init -q -b official-pdfs
+          git config user.name "placetta-bot"; git config user.email "bot@placetta.com"
+          git add -A && git commit -qm "Official PDFs as downloaded $(date -u +%F)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" official-pdfs
