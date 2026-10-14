@@ -8,7 +8,7 @@
 // franchisee that shared with it: totals, then one line per store at risk. hq_reports keeps it to once a week.
 // Once a week per workspace (on a weekday picked from its id, so the load spreads), it also starts the agent's
 // background check (agent-run, kind "watch"): each submitted application's status on the agency's own lookup page, and
-// new or changed rules for that business and city. That needs ANTHROPIC_API_KEY; WEEKLY_CHECKS=off turns it off.
+// new or changed rules for that business and city. That needs ANTHROPIC_API_KEY or GEMINI_API_KEY; WEEKLY_CHECKS=off turns it off.
 // Owners who linked a phone (Settings, Text and call Odelia) also hear about what matters most there: a call for
 // something urgent if they want calls, a text for what needs them this week. Those go into odelia_outbox, and
 // odelia-sms sends them outside their quiet hours, at most one call and three texts a day.
@@ -421,7 +421,7 @@ Deno.serve(async (req) => {
 
   // The weekly checks: agent-run takes each one in the background and reports back as an Update when something changed.
   let watches = 0;
-  if (Deno.env.get("ANTHROPIC_API_KEY") && Deno.env.get("WEEKLY_CHECKS") !== "off") {
+  if ((Deno.env.get("ANTHROPIC_API_KEY") || Deno.env.get("GEMINI_API_KEY")) && Deno.env.get("WEEKLY_CHECKS") !== "off") {
     const { data: recent } = await admin.from("agent_runs").select("workspace_id").eq("kind", "watch").gt("created_at", new Date(now - 6 * 864e5).toISOString());
     for (const id of watchDue(all, started.getUTCDay(), new Set((recent ?? []).map((r) => r.workspace_id as string))).slice(0, MAX_WATCHES)) {
       const { data: plan } = await admin.rpc("plan_of", { ws: id });

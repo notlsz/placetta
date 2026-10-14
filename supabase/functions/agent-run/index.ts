@@ -354,7 +354,7 @@ export async function handle(req: Request): Promise<Response> {
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", "This isn't their workspace.");
     if (may === "no_plan") return fail(402, "payment_required", "Get the entry plan to start the agent.");
-    if (!env("ANTHROPIC_API_KEY")) return fail(503, "not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
+    if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
     const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
     if (!tg.ok) return fail(tg.status, tg.code, tg.message);
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
@@ -389,7 +389,7 @@ export async function handle(req: Request): Promise<Response> {
     const { data: plan } = await admin.rpc("plan_of", { ws });
     if (plan === "none") return fail(402, "payment_required", "Get the entry plan to start the agent.");
   }
-  if (!env("ANTHROPIC_API_KEY")) return fail(503, "not_configured", "Set ANTHROPIC_API_KEY in the Edge Function secrets.");
+  if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
   const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
   if (!prompt) return fail(400, "bad_request", "prompt is required.");
   const tg = await gate(admin, (k) => Deno.env.get(k), ws, user.id, "task");

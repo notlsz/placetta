@@ -7,7 +7,7 @@
 //   AGENT_ROUTE           conversations
 //   AGENT_ROUTE_DEEP      deep lookups
 // e.g. AGENT_ROUTE_FAST = "deepseek:deepseek-chat,gemini:gemini-2.5-flash,anthropic:claude-haiku-4-5-20251001"
-// With no route set, everything goes to Anthropic exactly as before.
+// With no route set, everything goes to Anthropic exactly as before; with only GEMINI_API_KEY set, to Gemini's Flash.
 //
 // Keys: ANTHROPIC_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, GROQ_API_KEY.
 // Free models (an OpenRouter model ending in ":free", or anything on Groq's free tier) are skipped unless
@@ -32,6 +32,8 @@ export function routeFor(env: Env, tier: Tier, fallbackModel: string): [string, 
   const raw = env(tier === "fast" ? "AGENT_ROUTE_FAST" : tier === "deep" ? "AGENT_ROUTE_DEEP" : "AGENT_ROUTE") ?? env("AGENT_ROUTE") ?? "";
   const list = raw.split(",").map((s) => s.trim()).filter(Boolean).map((s) => { const i = s.indexOf(":"); return [s.slice(0, i), s.slice(i + 1)] as [string, string]; })
     .filter(([p, m]) => m && (p === "anthropic" || p in OPENAI_STYLE));
+  // No route set and only a Gemini key: Gemini's current Flash runs everything (GEMINI_MODEL picks another).
+  if (!raw && !env("ANTHROPIC_API_KEY") && env("GEMINI_API_KEY")) list.push(["gemini", env("GEMINI_MODEL") ?? "gemini-flash-latest"]);
   // Anthropic stays the safety net at the end of every route.
   if (!list.some(([p]) => p === "anthropic")) list.push(["anthropic", fallbackModel]);
   return list;

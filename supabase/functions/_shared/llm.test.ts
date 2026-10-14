@@ -1,5 +1,5 @@
 // Run: node --experimental-strip-types supabase/functions/_shared/llm.test.ts
-import { callModel, toOpenAI, fromOpenAI } from "./llm.ts";
+import { callModel, routeFor, toOpenAI, fromOpenAI } from "./llm.ts";
 let ok = 0, bad = 0; const check = (n: string, c: boolean) => { c ? ok++ : bad++; console.log((c ? "PASS " : "FAIL ") + n); };
 const calls: string[] = [];
 const mk = (plan: Record<string, () => Response>) => (async (url: string, init: any) => { calls.push(url); const h = Object.keys(plan).find(k => url.includes(k)); return h ? plan[h]() : new Response("nope", { status: 404 }); }) as any;
@@ -56,3 +56,13 @@ check("free never gets customer files", r.model === "anthropic:claude-haiku");
 r = await callModel(k => undefined, { payload, tier: "fast", research: false, beta: null }, "claude-haiku", null, mk({}));
 check("no keys -> 503", !r.ok && r.status === 503);
 console.log(`${ok} passed, ${bad} failed`);
+
+// only a Gemini key: everything goes to Gemini's current Flash (GEMINI_MODEL overrides)
+{
+  const only = (o: Record<string, string>) => (k: string) => o[k];
+  const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+  check("gemini only: Flash", same(routeFor(only({ GEMINI_API_KEY: "g" }), "standard", "claude-sonnet-5-5")[0], ["gemini", "gemini-flash-latest"]));
+  check("gemini only: GEMINI_MODEL", same(routeFor(only({ GEMINI_API_KEY: "g", GEMINI_MODEL: "gemini-2.5-flash" }), "fast", "claude-haiku-4-5")[0], ["gemini", "gemini-2.5-flash"]));
+  check("both keys: Anthropic as before", same(routeFor(only({ GEMINI_API_KEY: "g", ANTHROPIC_API_KEY: "a" }), "standard", "claude-sonnet-5-5"), [["anthropic", "claude-sonnet-5-5"]]));
+  check("a route set wins", same(routeFor(only({ GEMINI_API_KEY: "g", AGENT_ROUTE: "deepseek:deepseek-chat" }), "standard", "m")[0], ["deepseek", "deepseek-chat"]));
+}
