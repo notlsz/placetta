@@ -364,7 +364,7 @@ export const SAMPLE: Workspace = {
   approvals: [
     {
       id: "a-sign", kind: "file", app: "sign", title: B("File the sign permit", "提交招牌许可"), agency: SJ, action: B("Approve & file", "批准并提交"),
-      does: [B("Sign in to San Jose's permit portal with your saved account", "使用您保存的账户登录圣何塞许可证门户"), B("Submit the application below with its 3 attachments", "提交下方申请及 3 个附件"), B("Pay $410 with the card ending 4821", "使用尾号 4821 的银行卡支付 $410"), B("Save the receipt to Documents", "将收据保存到文件")],
+      does: [B("Sign in to San Jose's permit portal with your saved account", "使用您保存的账户登录圣何塞许可证门户"), B("Submit the application below with its 3 attachments", "提交下方申请及 3 个附件"), B("Send you the city's payment link for the $445 fee; you pay the city directly", "把市政府 $445 费用的付款链接发给您，由您直接支付给市政府"), B("Save the receipt to Documents", "将收据保存到文件")],
     },
     {
       id: "a-docs", kind: "upload", app: "plancheck", title: B("Add the floor plan and equipment list", "上传平面图和设备清单"), agency: B("Santa Clara County", "圣克拉拉县"), action: B("Add files", "添加文件"),
@@ -383,14 +383,14 @@ export const SAMPLE: Workspace = {
   audit: [
     { id: "x1", at: ago(12), actor: "agent", action: B("Checked status", "查看进度"), object: B("Business Tax Certificate", "营业税证书"), detail: B("sanjoseca.gov: still in review", "sanjoseca.gov：仍在审核中") },
     { id: "x2", at: ago(64), actor: "agent", action: B("Checked for rule changes", "检查法规变化"), object: B("San Jose and Santa Clara County", "圣何塞市与圣克拉拉县"), detail: B("1 change found: plan check worksheet (sample)", "发现 1 项变化：图纸审查计算表（示例）") },
-    { id: "x3", at: ago(180), actor: "agent", action: B("Asked for approval", "请求批准"), object: B("Sign permit", "招牌许可"), detail: B("Fee $410", "费用 $410") },
+    { id: "x3", at: ago(180), actor: "agent", action: B("Asked for approval", "请求批准"), object: B("Sign permit", "招牌许可"), detail: B("Fee $445", "费用 $445") },
     { id: "x4", at: ago(185), actor: "agent", action: B("Filled application", "填写申请"), object: B("Sign permit", "招牌许可"), detail: B("8 fields from storefront photos, lease and landlord letter", "根据门店照片、租约和房东函填写 8 项") },
     { id: "x5", at: ago(190), actor: "agent", action: B("Drew sign drawing", "绘制招牌图纸"), object: B("sign-drawing.pdf", "sign-drawing.pdf"), detail: B("From storefront photos", "根据门店照片") },
     { id: "x6", at: ago(1440 + 120), actor: "agency", who: B("CDTFA", "加州税费管理局"), action: B("Approved", "批准"), object: B("Seller's permit", "销售许可证") },
     { id: "x7", at: ago(2 * 1440 + 40), actor: "agent", action: B("Saved receipt", "保存收据"), object: B("business-tax-receipt.pdf", "business-tax-receipt.pdf") },
-    { id: "x8", at: ago(2 * 1440 + 41), actor: "agent", action: B("Paid fee", "支付费用"), object: B("Business Tax Certificate", "营业税证书"), detail: B("$243, card ending 4821", "$243，尾号 4821 的银行卡") },
+    { id: "x8", at: ago(2 * 1440 + 41), actor: "you", action: B("Paid the agency fee", "支付机构费用"), object: B("Business Tax Certificate", "营业税证书"), detail: B("On sanjoseca.gov, by the city's rate schedule plus the $4 state fee", "在 sanjoseca.gov 支付，按市税率表计算另加 4 美元州费用") },
     { id: "x9", at: ago(2 * 1440 + 42), actor: "agent", action: B("Submitted application", "提交申请"), object: B("Business Tax Certificate", "营业税证书"), detail: B("sanjoseca.gov", "sanjoseca.gov") },
-    { id: "x10", at: ago(2 * 1440 + 45), actor: "you", action: B("Approved filing", "批准提交"), object: B("Business Tax Certificate", "营业税证书"), detail: B("Fee $243", "费用 $243") },
+    { id: "x10", at: ago(2 * 1440 + 45), actor: "you", action: B("Approved filing", "批准提交"), object: B("Business Tax Certificate", "营业税证书"), detail: B("Fee set by the city's rate schedule", "费用按市税率表计算") },
     { id: "x11", at: ago(5 * 1440), actor: "you", action: B("Uploaded", "上传"), object: B("food-handler-card-b-kim.pdf", "food-handler-card-b-kim.pdf") },
     { id: "x12", at: ago(6 * 1440 - 30), actor: "agent", action: B("Committed to memory", "存入记忆"), object: B("Context", "资料"), detail: B("Floor area 1,150 sq ft, lease term 5 years", "面积 1,150 平方英尺，租期 5 年") },
     { id: "x13", at: ago(6 * 1440 - 31), actor: "agent", action: B("Extracted data", "提取信息"), object: B("lease-agreement.pdf", "lease-agreement.pdf"), detail: B("Address, term, floor area, landlord", "地址、租期、面积、房东") },

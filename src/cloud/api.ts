@@ -344,6 +344,17 @@ export async function listDocs(ws: string): Promise<DocRow[]> {
   if (error) throw fromPg(error);
   return (data ?? []) as DocRow[];
 }
+/** The agency's own PDF of an official form (only .gov hosts), passed through Placetta's server. */
+export async function officialForm(url: string): Promise<Blob> {
+  const { data, error } = await supabase().functions.invoke("forms", { body: { url } });
+  if (error || !data) {
+    let message = "Couldn't get the official form. Open it from the agency's page.";
+    try { const j = await (error as { context?: Response })?.context?.json(); if (j?.error?.message) message = j.error.message; } catch { /* not JSON */ }
+    throw err("download", message);
+  }
+  return data instanceof Blob ? data : new Blob([data as BlobPart], { type: "application/pdf" });
+}
+
 export async function downloadDoc(path: string): Promise<Blob> {
   const { data, error } = await supabase().storage.from("documents").download(path);
   if (error || !data) throw err("download", error?.message ?? "Couldn't download the file.");

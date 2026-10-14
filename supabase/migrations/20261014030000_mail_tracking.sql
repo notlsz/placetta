@@ -36,19 +36,9 @@ do $$ begin
   end if;
 end $$;
 
--- A reply is its own kind of update.
-do $$
-declare c text;
-begin
-  select con.conname into c from pg_constraint con
-   where con.conrelid = 'public.updates'::regclass and con.contype = 'c' and pg_get_constraintdef(con.oid) like '%kind%';
-  if c is not null and not exists (
-    select 1 from pg_constraint con where con.conname = c and pg_get_constraintdef(con.oid) like '%mail%'
-  ) then
-    execute format('alter table public.updates drop constraint %I', c);
-    alter table public.updates add constraint updates_kind_check check (kind in ('deadline', 'renewal', 'filing', 'payment', 'team', 'mail'));
-  end if;
-end $$;
+-- A reply is its own kind of update (every earlier kind kept, including agent runs).
+alter table public.updates drop constraint if exists updates_kind_check;
+alter table public.updates add constraint updates_kind_check check (kind in ('deadline', 'renewal', 'filing', 'payment', 'team', 'agent', 'mail'));
 
 -- Every 10 minutes, only while some thread is still open.
 do $$

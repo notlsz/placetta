@@ -6,10 +6,11 @@ import type { Application, Approval, CheckItem, Doc } from "./model";
 import { openSettings } from "./Settings";
 import { formById, METHOD } from "./forms/registry";
 import { saveFile } from "./files";
+import * as api from "./cloud/api";
 import { fmtDay } from "./time";
 import { daysFromNow, fmtStamp } from "./time";
 import { preflight } from "./smart";
-import { FileCard, I, LevelTag, Modal, Pill, Sample, Sheet, StatusChip, feeText, feeTotal } from "./ui";
+import { FileCard, I, LevelTag, Modal, Pill, Sheet, StatusChip, feeText, feeTotal } from "./ui";
 import { INK } from "./pages";
 import { filingBlockers } from "./core";
 import { Working } from "./Bot";
@@ -101,7 +102,7 @@ function Progress({ a }: { a: Application }) {
   const cur = steps.findIndex(s => s.s !== "done");
   return (
     <div className="pg">
-      <p className="pg-live"><i />{cloud ? (zh ? "实时更新：团队或机构有任何进展，这里会立即显示。" : "Live: every change from the team or the agency shows here as it happens.") : (zh ? "示例进度" : "Sample progress")}</p>
+      <p className="pg-live"><i />{cloud ? (zh ? "实时更新：团队或机构有任何进展，这里会立即显示。" : "Live: every change from the team or the agency shows here as it happens.") : (zh ? "进度：团队或机构有任何进展，这里会立即显示。" : "Progress: every change from the team or the agency shows here.")}</p>
       <ol className="pg-steps">
         {steps.map((s, i) => (
           <li key={s.k} className={"st-" + s.s + (i === cur ? " cur" : "")}>
@@ -122,7 +123,7 @@ function Checklist({ a }: { a: Application }) {
 }
 
 function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
-  const { b, t, ws, uploading, upload, busy, cloud } = useApp();
+  const { b, t, ws, uploading, upload, busy } = useApp();
   const input = useRef<HTMLInputElement>(null);
   const doc = c.doc ? ws.docs.find(d => d.id === c.doc) : undefined;
   const dep = c.dep ? ws.apps.find(x => x.id === c.dep) : undefined;
@@ -148,7 +149,6 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
         {c.state === "missing" && !c.dep && !reading && (
           <div className="ck-act">
             <button type="button" className="pill ink sm" disabled={busy} onClick={() => input.current?.click()}><I.upload />{t("upload")}</button>
-            {!cloud && <button type="button" className="pill quiet sm" disabled={busy} onClick={() => upload(a.id, c.id)}>{t("useSample")}</button>}
             <input ref={input} type="file" hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload(a.id, c.id, f); }} />
           </div>
         )}
@@ -180,6 +180,15 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
     } catch { say(lang === "zh" ? "无法生成官方表格，请稍后再试。" : "Couldn't make the official form. Try again."); }
     setMaking(false);
   };
+  // the agency's own blank PDF, for forms Placetta doesn't fill itself: through the server in the app, straight from the agency elsewhere
+  const blank = async () => {
+    if (!off?.pdf) return;
+    if (!cloud) { window.open(off.pdf, "_blank", "noopener,noreferrer"); return; }
+    setMaking(true);
+    try { const r = await saveFile(`${off.id}.pdf`, await api.officialForm(off.pdf)); if (r === "unavailable") say(t("t_noDl")); }
+    catch (e) { say((e as api.ApiError).message); window.open(off.pdf, "_blank", "noopener,noreferrer"); }
+    setMaking(false);
+  };
   return (
     <div className="formwrap">
       {off && (
@@ -189,13 +198,14 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
           {off.foreign && <p className="off-note">{b(off.foreign)}</p>}
           <div className="off-act">
             {off.fill && <button type="button" className="pill ink sm" disabled={making} onClick={() => void official()}><I.download />{making ? "…" : lang === "zh" ? "下载已填写的官方表格" : "Download the filled official form"}</button>}
+            {off.pdf && !off.fill && <button type="button" className="pill ink sm" disabled={making} onClick={() => void blank()}><I.download />{making ? "…" : lang === "zh" ? "下载官方表格" : "Download the official form"}</button>}
             <a className="pill quiet sm" href={off.pdf ?? off.url} target="_blank" rel="noopener noreferrer">{off.pdf ? (lang === "zh" ? "官方表格" : "Official form") : (lang === "zh" ? "机构办理入口" : "Agency filing page")}<I.ext /></a>
             {off.info !== (off.pdf ?? off.url) && <a className="pill quiet sm" href={off.info} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "机构说明" : "Agency page"}<I.ext /></a>}
           </div>
         </div>
       )}
       <div className={"paper" + (edit ? " editing" : "")}>
-        <div className="paper-h"><span>{b(a.agency)}</span><b>{b(a.form ?? a.name)}</b>{!cloud && <Sample />}</div>
+        <div className="paper-h"><span>{b(a.agency)}</span><b>{b(a.form ?? a.name)}</b></div>
         <dl>
           {a.fields.map(f => (
             <div key={f.id} className={f.value ? "" : "empty"}>
@@ -216,7 +226,7 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
           <button type="button" className="pill quiet" onClick={() => { setVals(Object.fromEntries(a.fields.map(f => [f.id, f.value]))); setEdit(false); }}>{t("cancel")}</button>
         </> : <>
           {canEdit && <button type="button" className="pill quiet" onClick={() => setEdit(true)}><I.pencil />{t("edit")}</button>}
-          <button type="button" className="pill quiet" onClick={() => downloadApp(a.id)}><I.download />{a.official ? (lang === "zh" ? "下载字段清单" : "Download the field sheet") : t("download") + " PDF"}</button>
+          <button type="button" className="pill quiet" onClick={() => downloadApp(a.id)}><I.download />{a.official ? (lang === "zh" ? "下载填写答案" : "Download your answers") : t("download") + " PDF"}</button>
         </>}
       </div>
       <p className="note">{a.official ? (lang === "zh" ? "这些是机构官方表格上的栏目，按表格顺序排列。快哉从不保存社会安全号、ITIN 或护照号，这些由签署人手写。" : "These are the lines on the agency's own form, in its order. Placetta never stores an SSN, ITIN or passport number; the signer writes those by hand.") : t("formFor")}</p>

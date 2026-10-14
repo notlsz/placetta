@@ -16,7 +16,8 @@ import { applicationPdf, auditCsv, docBlob, downloads, saveFile } from "./files"
 import { applyAccent, saveTheme, unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo, Mark } from "./Logo";
-import { B, SAMPLE, same, type Approval, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
+import { SAMPLE_WS } from "./sample";
+import { B, same, type Approval, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
 import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, Overview, UpdatesPage } from "./pages";
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
@@ -150,7 +151,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   useEffect(() => { if (cloud?.notice) say(cloud.notice); }, [cloud, say]);
 
   /* the workspace: the sample, or the account's saved one with the server's facts laid on top */
-  const [ws, setWs] = useState<Workspace>(() => (cloud ? { ...cloud.initial, audit: cloud.audit } : SAMPLE));
+  const [ws, setWs] = useState<Workspace>(() => (cloud ? { ...cloud.initial, audit: cloud.audit } : SAMPLE_WS));
   const [billing, setBilling] = useState(cloud?.billing ?? null);
   const [filings, setFilings] = useState(cloud?.filings ?? []);
   const [docs, setDocs] = useState(cloud?.docs ?? []);
@@ -706,7 +707,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       if (own && (d.by === "you" || d.by === "agent")) { void save(d.name, own); return; }
       const f = docBlob(d, wsRef.current); void save(f.name, f.blob);
     },
-    downloadApp: id => { const a = wsRef.current.apps.find(x => x.id === id); if (a) void save(a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-application.pdf", applicationPdf(a)); },
+    downloadApp: id => { const a = wsRef.current.apps.find(x => x.id === id); if (a) void save(a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-answers.pdf", applicationPdf(a)); },
     exportAudit: () => void save(`placetta-audit-trail-${inDays(0)}.csv`, auditCsv(wsRef.current.audit)),
     editFields: (app, values) => {
       if (held()) return;

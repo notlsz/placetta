@@ -40,13 +40,13 @@ function wrap(s: string, n: number) {
 }
 
 /** A one-page Letter PDF in Helvetica: a title, a subtitle, label/value rows and notes. ASCII text only. */
-export function pdf(title: string, sub: string, rows: [string, string][], notes: string[] = []): Blob {
+export function pdf(title: string, sub: string, rows: [string, string][], notes: string[] = [], mark = "SAMPLE - NOT AN OFFICIAL DOCUMENT"): Blob {
   const ops: string[] = [];
   const text = (x: number, y: number, size: number, bold: boolean, s: string, gray = 0) => ops.push(`BT ${gray} g /${bold ? "F2" : "F1"} ${size} Tf ${x} ${y} Td (${esc(s)}) Tj ET`);
   // header band
   ops.push("0.894 0.937 0.984 rg 0 742 612 50 re f");
   text(56, 760, 11, true, "PLACETTA", 0.25);
-  text(400, 760, 9, false, "SAMPLE - NOT AN OFFICIAL DOCUMENT", 0.4);
+  text(612 - 56 - mark.length * 4.6, 760, 9, false, mark, 0.4);
   let y = 700;
   text(56, y, 18, true, title); y -= 20;
   for (const l of wrap(sub, 90)) { text(56, y, 10, false, l, 0.4); y -= 14; }
@@ -87,9 +87,10 @@ const conf = (s: string) => { let h = 7; for (const c of s) h = (h * 31 + c.char
 const total = (a: Application) => a.fees.reduce((s, f) => s + f.amount, 0);
 
 export function applicationPdf(a: Application): Blob {
-  return pdf(a.name.en, `${a.form?.en ?? "Application"}. ${a.agency.en}. Filled by Placetta from your workspace.`,
+  return pdf(`Your answers: ${a.name.en}`, `For ${a.form?.en ?? "the application"}, ${a.agency.en}. Enter these on the agency's own form, line by line.`,
     a.fields.map(f => [f.label.en, f.value || "(not yet)"] as [string, string]),
-    [`Fee: ${total(a) ? money(total(a)) : "No fee"}. ${a.feeNote?.en ?? ""}`, `Source: ${a.source.url}`]);
+    [`Fee: ${a.fees.some(f => f.tbd) ? "set by the agency" : total(a) ? money(total(a)) : "No fee"}. ${a.feeNote?.en ?? ""}`, `File it on the agency's site: ${a.source.url}`],
+    "ANSWER SHEET - FILE ON THE AGENCY'S OWN FORM");
 }
 
 export function docBlob(d: Doc, w: Workspace): { name: string; blob: Blob } {
