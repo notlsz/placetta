@@ -1,0 +1,126 @@
+{
+  "form": "aus-food-permit",
+  "rev": "Revised: 10/01/2025",
+  "pdf": "aus-food-permit.pdf",
+  "checked": "2026-10-14",
+  "notes": "Flat, print-only form (no fillable boxes): answers are printed on the underscore lines and an X in the printed squares. Establishment type: a retail food choice by name; 'Other: <what>' ticks Other and prints the part after the colon; an answer matching no printed choice ticks retail Other and prints the whole answer; 'Food Product: Manufacturing / Food Warehouse / Other: <what>' ticks the Food Product row. Gross annual food sales ticks one of the three brackets; the fee printed under it is the agency's and is not written. responsible: 'Full Name, MM/DD/YYYY, street, City, ST ZIP', split into Last/First/Middle, Date of Birth and the mailing address line. owner_contact and responsible_contact: 'phone, email'. responsible_id: 'number, ST' (a 'By hand' answer is left blank). Page 3 Inspection Frequency Analysis questions 1-5 are ticked; its office-use Score and Initials stay blank. The office-use block, Print Name and the signature and its date are left for the applicant and the office.",
+  "boxes": {
+    "name": [
+      {"at": {"page": 0, "x": 117, "y": 592.3, "w": 266, "size": 9}}
+    ],
+    "employees": [
+      {"at": {"page": 0, "x": 467, "y": 592.3, "w": 63, "size": 9}}
+    ],
+    "address": [
+      {"at": {"page": 0, "x": 103, "y": 563.8, "w": 182, "size": 9}, "pick": "street"},
+      {"at": {"page": 0, "x": 292, "y": 563.8, "w": 128, "size": 9}, "pick": "city"},
+      {"at": {"page": 0, "x": 430, "y": 563.8, "w": 28, "size": 9}, "pick": "state"},
+      {"at": {"page": 0, "x": 492, "y": 563.8, "w": 40, "size": 9}, "pick": "zip"}
+    ],
+    "mailing": [
+      {"at": {"page": 0, "x": 103, "y": 535.5, "w": 182, "size": 9}, "pick": "street"},
+      {"at": {"page": 0, "x": 292, "y": 535.5, "w": 128, "size": 9}, "pick": "city"},
+      {"at": {"page": 0, "x": 430, "y": 535.5, "w": 28, "size": 9}, "pick": "state"},
+      {"at": {"page": 0, "x": 492, "y": 535.5, "w": 40, "size": 9}, "pick": "zip"}
+    ],
+    "hours": [
+      {"at": {"page": 0, "x": 56, "y": 507.1, "w": 94, "size": 9}}
+    ],
+    "water": [
+      {"mark": {"page": 0, "x": 260.1, "y": 505.0, "size": 8}, "if": "public|city|municipal"},
+      {"mark": {"page": 0, "x": 295.7, "y": 505.0, "size": 8}, "if": "private"},
+      {"mark": {"page": 0, "x": 260.1, "y": 495.6, "size": 8}, "if": "well"},
+      {"mark": {"page": 0, "x": 296.2, "y": 495.6, "size": 8}, "if": "\\bmud\\b|utility district"}
+    ],
+    "sewage": [
+      {"mark": {"page": 0, "x": 471.4, "y": 505.0, "size": 8}, "if": "public|city|municipal"},
+      {"mark": {"page": 0, "x": 507.0, "y": 505.0, "size": 8}, "if": "private|septic"},
+      {"mark": {"page": 0, "x": 471.4, "y": 495.6, "size": 8}, "if": "well"},
+      {"mark": {"page": 0, "x": 507.5, "y": 495.6, "size": 8}, "if": "\\bmud\\b|utility district"}
+    ],
+    "type": [
+      {"mark": {"page": 0, "x": 183.4, "y": 475.4, "size": 8}, "if": "^(?!food product)(?!other).*(bakery)"},
+      {"mark": {"page": 0, "x": 224.4, "y": 475.4, "size": 8}, "if": "^(?!food product)(?!other).*(\\bbar\\b)"},
+      {"mark": {"page": 0, "x": 252.9, "y": 475.4, "size": 8}, "if": "^(?!food product)(?!other).*(bed ?(&|and) ?breakfast|\\bb ?& ?b\\b)"},
+      {"mark": {"page": 0, "x": 326.8, "y": 475.4, "size": 8}, "if": "^(?!food product)(?!other).*(boarding)"},
+      {"mark": {"page": 0, "x": 398.5, "y": 475.4, "size": 8}, "if": "^(?!food product)(?!other).*(child ?care|day ?care)"},
+      {"mark": {"page": 0, "x": 452.2, "y": 475.4, "size": 8}, "if": "^(?!food product)(?!other).*(church)"},
+      {"mark": {"page": 0, "x": 183.7, "y": 460.9, "size": 8}, "if": "^(?!food product)(?!other).*(concession)"},
+      {"mark": {"page": 0, "x": 264.7, "y": 460.9, "size": 8}, "if": "^(?!food product)(?!other).*(convenience)"},
+      {"mark": {"page": 0, "x": 348.8, "y": 460.9, "size": 8}, "if": "^(?!food product)(?!other).*(hospital)"},
+      {"mark": {"page": 0, "x": 393.8, "y": 460.9, "size": 8}, "if": "^(?!food product)(?!other).*(nursing)"},
+      {"mark": {"page": 0, "x": 461.0, "y": 460.9, "size": 8}, "if": "^(?!food product)(?!other).*(restaurant|general food service)"},
+      {"mark": {"page": 0, "x": 183.4, "y": 445.7, "size": 8}, "if": "^(?!food product)(?!other).*(school)"},
+      {"mark": {"page": 0, "x": 224.1, "y": 445.7, "size": 8}, "if": "^(?!food product)(?!other).*(state facility)"},
+      {"mark": {"page": 0, "x": 285.8, "y": 445.7, "size": 8}, "if": "^(?!food product)(?!other).*(supermarket|grocery)"},
+      {"mark": {"page": 0, "x": 347.7, "y": 445.7, "size": 8}, "if": "^other"},
+      {"at": {"page": 0, "x": 380, "y": 447.9, "w": 92, "size": 9}, "pick": "tail", "if": "^other"},
+      {"mark": {"page": 0, "x": 347.7, "y": 445.7, "size": 8}, "if": "^(?!other)(?!.*(bakery|\\bbar\\b|bed ?(&|and) ?breakfast|\\bb ?& ?b\\b|boarding|child ?care|day ?care|church|concession|convenience|hospital|nursing|restaurant|general food service|school|state facility|supermarket|grocery|food product|manufactur|warehouse))"},
+      {"at": {"page": 0, "x": 380, "y": 447.9, "w": 92, "size": 9}, "if": "^(?!other)(?!.*(bakery|\\bbar\\b|bed ?(&|and) ?breakfast|\\bb ?& ?b\\b|boarding|child ?care|day ?care|church|concession|convenience|hospital|nursing|restaurant|general food service|school|state facility|supermarket|grocery|food product|manufactur|warehouse))"},
+      {"mark": {"page": 0, "x": 183.4, "y": 430.4, "size": 8}, "if": "manufactur"},
+      {"mark": {"page": 0, "x": 250.2, "y": 430.4, "size": 8}, "if": "warehouse"},
+      {"mark": {"page": 0, "x": 327.6, "y": 430.4, "size": 8}, "if": "^food product\\W+other"},
+      {"at": {"page": 0, "x": 365, "y": 432.6, "w": 127, "size": 9}, "pick": "tail|tail", "if": "^food product\\W+other"}
+    ],
+    "sales": [
+      {"mark": {"page": 0, "x": 260.9, "y": 399.3, "size": 10}, "if": "^\\$?0\\b"},
+      {"mark": {"page": 0, "x": 433.5, "y": 399.3, "size": 10}, "if": "^\\$?50\\b|^\\$?50,000"},
+      {"mark": {"page": 0, "x": 569.7, "y": 399.3, "size": 10}, "if": "^\\$?150|or more"}
+    ],
+    "business_entity": [
+      {"at": {"page": 0, "x": 126, "y": 334.3, "w": 212, "size": 9}}
+    ],
+    "org_type": [
+      {"mark": {"page": 0, "x": 66.4, "y": 306.4, "size": 8}, "if": "^(?!.*(llc|limited liability)).*(corp|\\binc\\b)"},
+      {"mark": {"page": 0, "x": 127.6, "y": 306.4, "size": 8}, "if": "llc|limited liability"},
+      {"mark": {"page": 0, "x": 159.6, "y": 306.4, "size": 8}, "if": "partner"},
+      {"mark": {"page": 0, "x": 219.6, "y": 306.4, "size": 8}, "if": "proprietor|sole"}
+    ],
+    "owner_contact": [
+      {"at": {"page": 0, "x": 92, "y": 288.2, "w": 73, "size": 9}, "pick": "head"},
+      {"at": {"page": 0, "x": 332, "y": 288.2, "w": 113, "size": 9}, "pick": "tail"}
+    ],
+    "responsible": [
+      {"at": {"page": 0, "x": 106, "y": 259.9, "w": 105, "size": 9}, "pick": "head|last"},
+      {"at": {"page": 0, "x": 216, "y": 259.9, "w": 98, "size": 9}, "pick": "head|first"},
+      {"at": {"page": 0, "x": 315, "y": 259.9, "w": 59, "size": 9}, "pick": "head|middle"},
+      {"at": {"page": 0, "x": 439, "y": 259.9, "w": 72, "size": 9}, "pick": "tail|head|date"},
+      {"at": {"page": 0, "x": 108, "y": 231.4, "w": 132, "size": 9}, "pick": "tail|tail|street"},
+      {"at": {"page": 0, "x": 243, "y": 231.4, "w": 140, "size": 9}, "pick": "tail|tail|city"},
+      {"at": {"page": 0, "x": 390, "y": 231.4, "w": 26, "size": 9}, "pick": "tail|tail|state"},
+      {"at": {"page": 0, "x": 458, "y": 231.4, "w": 72, "size": 9}, "pick": "tail|tail|zip"}
+    ],
+    "responsible_id": [
+      {"at": {"page": 0, "x": 104, "y": 203.0, "w": 67, "size": 9}, "pick": "head"},
+      {"at": {"page": 0, "x": 179, "y": 203.0, "w": 22, "size": 9}, "pick": "tail"}
+    ],
+    "responsible_contact": [
+      {"at": {"page": 0, "x": 258, "y": 203.0, "w": 73, "size": 9}, "pick": "head"},
+      {"at": {"page": 0, "x": 423, "y": 203.0, "w": 113, "size": 9}, "pick": "tail"}
+    ],
+    "ifa_hsp": [
+      {"mark": {"page": 2, "x": 48.7, "y": 621.7, "size": 10}, "if": "^y"},
+      {"mark": {"page": 2, "x": 120.7, "y": 621.7, "size": 10}, "if": "^n"}
+    ],
+    "ifa_special": [
+      {"mark": {"page": 2, "x": 48.8, "y": 571.0, "size": 10}, "if": "^y"},
+      {"mark": {"page": 2, "x": 120.8, "y": 571.0, "size": 10}, "if": "^n"}
+    ],
+    "ifa_raw": [
+      {"mark": {"page": 2, "x": 48.8, "y": 532.1, "size": 10}, "if": "^y"},
+      {"mark": {"page": 2, "x": 120.8, "y": 532.1, "size": 10}, "if": "^n"}
+    ],
+    "ifa_process": [
+      {"mark": {"page": 2, "x": 48.5, "y": 493.2, "size": 9}, "if": "process ?1\\b|no cooking"},
+      {"mark": {"page": 2, "x": 48.5, "y": 401.4, "size": 9}, "if": "process ?2\\b|same.?day"},
+      {"mark": {"page": 2, "x": 48.5, "y": 369.7, "size": 9}, "if": "process ?3\\b|full.?service"}
+    ],
+    "ifa_customers": [
+      {"mark": {"page": 2, "x": 48.7, "y": 307.1, "size": 10}, "if": "^0\\b(?!\\s*-)"},
+      {"mark": {"page": 2, "x": 134.3, "y": 307.1, "size": 10}, "if": "^1\\s*-\\s*150\\b"},
+      {"mark": {"page": 2, "x": 239.8, "y": 307.1, "size": 10}, "if": "^151"},
+      {"mark": {"page": 2, "x": 356.6, "y": 307.1, "size": 10}, "if": ">\\s*300|more than 300|over 300|300\\+"}
+    ]
+  },
+  "sign": {"page": 0, "x": 21, "y": 86, "w": 200, "h": 13, "date": {"x": 476, "y": 86, "size": 9}}
+}

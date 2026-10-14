@@ -3,7 +3,7 @@
  "rev": "NYS 100 (09/18)",
  "pdf": "ny-dol-100.pdf",
  "checked": "2026-10-14",
- "notes": "Answers: dates any common shape (printed mmddyyyy in the boxes). fein '12-3456789'; phones '212-555-0134'. non_employees 'No' or 'Yes: services they perform'. ui_quarter: year first, '2026 Q3' (or an ISO date of the first $300 quarter, '2026-07-15'). acquired: 'No' or 'Yes: all|part, date, prior registration number, prior FEIN, prior legal name, prior address'. entity_change: 'No' or 'Yes: date, prior registration number, prior FEIN'. Addresses 'street, City, ST ZIP[, Country]' (county is left blank: the answers don't carry it). records_location and agent_address: one item per line or ';' - records: address; contact name; phone. agent: C/O name; address; phone; contact name. owners: one per line 'Name, Title, residence address and phone' (the SSN column is never written; the signer writes it). location_address: 'street, City, ST ZIP'. establishment: 'type of establishment, principal product or service, percent of revenue' (no commas inside each part). signer: 'Official position, phone, email'. The form's 'Group2' radio is one group shared by Part A line 2 (legal entity) and Part B line 4 (registering for UI yes/no), so only the legal entity is set; the UI Yes/No box is left for the signer to tick. The signature and its date are left for the signer.",
+ "notes": "Answers: dates any common shape (printed mmddyyyy in the boxes). fein '12-3456789' and 10-digit US phones, printed digit by digit in the form's cells (an EIN starting with 9 is printed as given, dash included, since its bare digits look like an ITIN to the writer). non_employees 'No' or 'Yes: services they perform'. ui_quarter: year first, '2026 Q3' (or an ISO date of the first $300 quarter, '2026-07-15'). acquired: 'No' or 'Yes: all|part, date, prior registration number, prior FEIN, prior legal name, prior address'. entity_change: 'No' or 'Yes: date, prior registration number, prior FEIN'. Addresses 'street, City, ST ZIP[, Country]' (county is left blank: the answers don't carry it). records_location and agent_address: one item per line or ';' - records: address; contact name; phone as 212-555-0134. agent: C/O name; address; phone; contact name. owners: one per line 'Name, Title, residence address and phone' (the SSN column is never written; the signer writes it). location_address: 'street, City, ST ZIP'. establishment: 'type of establishment, principal product or service, percent of revenue' (no commas inside each part). signer: 'Official position, phone, email'. The form's 'Group2' radio is one group shared by Part A line 2 (legal entity) and Part B line 4 (registering for UI yes/no), so only the legal entity is set; the UI Yes/No box is left for the signer to tick. The signature and its date are left for the signer.",
  "boxes": {
   "type": [
    {
@@ -56,17 +56,25 @@
   ],
   "fein": [
    {
-    "text": "Federal Employer Identification Number"
+    "text": "Federal Employer Identification Number",
+    "pick": "digits",
+    "if": "^\\s*[0-8]"
+   },
+   {
+    "text": "Federal Employer Identification Number",
+    "if": "^\\s*9"
    }
   ],
   "phone": [
    {
-    "text": "Telephone number"
+    "text": "Telephone number",
+    "pick": "digits"
    }
   ],
   "fax": [
    {
-    "text": "Fax number"
+    "text": "Fax number",
+    "pick": "digits"
    }
   ],
   "legal_name": [

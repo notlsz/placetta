@@ -19,6 +19,9 @@ const pdfForm = doc.getForm();
 const missingBoxes: string[] = [];
 const w = pdfLibWriter(pdfForm, doc, await doc.embedFont(StandardFonts.Helvetica));
 const logged = { draw: w.draw, text: (n: string, v: string) => w.text(n, v) || (missingBoxes.push(n), false), check: (n: string) => w.check(n) || (missingBoxes.push(n), false), radio: (n: string, v: string) => w.radio(n, v) || (missingBoxes.push(`${n}=${v}`), false), choice: (n: string, v: string) => w.choice(n, v) || (missingBoxes.push(`${n}=${v}`), false) };
+// as in the app: an answer the signer writes by hand ("By hand") prints nothing
+const BY_HAND = /^(by hand|written by hand|(the )?signer (writes|fills)( it)?( in)? by hand|手写|由签署人手写|签署人手写)\.?$/i;
+for (const k of Object.keys(values)) if (BY_HAND.test(values[k].trim())) delete values[k];
 const filled = writeAnswers(map, values, logged);
 try { pdfForm.deleteXFA(); } catch { /* none */ }
 try { pdfForm.updateFieldAppearances(); } catch (e) { console.log("appearance:", String(e).slice(0, 120)); }

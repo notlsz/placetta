@@ -43,7 +43,7 @@ export type Writer = {
 
 // SSN or ITIN shapes are never written: the signer writes them by hand. Dashed ones anywhere; a bare 9-digit number only
 // into a box that is itself for an SSN or ITIN (a bare 9-digit EIN or state file number is fine elsewhere).
-const SECRET = /\b\d{3}-\d{2}-\d{4}\b|\b9\d{2}[- ]?[5-9]\d[- ]?\d{4}\b/;
+const SECRET = /\b\d{3}-\d{2}-\d{4}\b|\b9\d{2} [5-9]\d \d{4}\b/;   // a bare 9-digit EIN (e.g. 934567890) is not an ITIN
 const SECRET_BOX = /ssn|social.?sec|itin|taxpayer.?id/i;
 const NINE = /\b\d{9}\b/;
 const STATES = /^(A[KLRZ]|C[AOT]|D[CE]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY]|PR|GU|VI)$/i;

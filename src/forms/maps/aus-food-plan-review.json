@@ -1,0 +1,190 @@
+{
+  "form": "aus-food-plan-review",
+  "rev": "Revised: 10/01/2025",
+  "pdf": "aus-food-plan-review.pdf",
+  "checked": "2026-10-14",
+  "notes": "Flat, print-only form (no fillable boxes): answers are printed on the underscore lines and an X in the printed squares. Answers with several parts are comma-separated ('Name, email, phone'; 'start, open'; 'Provided, location, gallons') or semicolon-separated ('refrigerated; frozen; dry'; finishes 'floors; walls; ceilings'). Applicant name is split into the Last, First and Middle columns and also printed under 'Print Name'. Enterprise or service type 'Other: <what>' ticks Other and prints the part after the colon; an answer matching no printed choice ticks Other and prints the whole answer. Submission Date, the office-use block, the fee table and the signature and its date are left for the applicant and the office.",
+  "boxes": {
+    "name": [
+      {"at": {"page": 0, "x": 142, "y": 547.3, "w": 418, "size": 9}}
+    ],
+    "address": [
+      {"at": {"page": 0, "x": 128, "y": 526.4, "w": 165, "size": 9}, "pick": "street"},
+      {"at": {"page": 0, "x": 300, "y": 526.4, "w": 145, "size": 9}, "pick": "city"},
+      {"at": {"page": 0, "x": 455, "y": 526.4, "w": 26, "size": 9}, "pick": "state"},
+      {"at": {"page": 0, "x": 515, "y": 526.4, "w": 46, "size": 9}, "pick": "zip"}
+    ],
+    "enterprise_type": [
+      {"mark": {"page": 0, "x": 126.2, "y": 499.4, "size": 7.5}, "if": "(^|,\\s*)service\\b"},
+      {"mark": {"page": 0, "x": 184.7, "y": 499.4, "size": 7.5}, "if": "(^|,\\s*)retail\\b"},
+      {"mark": {"page": 0, "x": 234.3, "y": 499.4, "size": 7.5}, "if": "(^|,\\s*)warehouse\\b"},
+      {"mark": {"page": 0, "x": 306.3, "y": 499.4, "size": 7.5}, "if": "(^|,\\s*)institution"},
+      {"mark": {"page": 0, "x": 373.7, "y": 499.4, "size": 7.5}, "if": "(^|,\\s*)day ?care"},
+      {"mark": {"page": 0, "x": 441.2, "y": 499.4, "size": 7.5}, "if": "^other"},
+      {"at": {"page": 0, "x": 476, "y": 501.4, "w": 82, "size": 9}, "pick": "tail", "if": "^other"},
+      {"mark": {"page": 0, "x": 441.2, "y": 499.4, "size": 7.5}, "if": "^(?!other)(?!(.*,\\s*)?(service|retail|warehouse|institution|day ?care)\\b)"},
+      {"at": {"page": 0, "x": 476, "y": 501.4, "w": 82, "size": 9}, "if": "^(?!other)(?!(.*,\\s*)?(service|retail|warehouse|institution|day ?care)\\b)"}
+    ],
+    "service_type": [
+      {"mark": {"page": 0, "x": 126.2, "y": 481.5, "size": 7.5}, "if": "(^|,\\s*)cater"},
+      {"mark": {"page": 0, "x": 184.9, "y": 481.5, "size": 7.5}, "if": "(^|,\\s*)(seated|dine.?in|sit.?down)"},
+      {"mark": {"page": 0, "x": 234.2, "y": 481.5, "size": 7.5}, "if": "(^|,\\s*)(carry.?out|take.?out|to.?go)"},
+      {"mark": {"page": 0, "x": 306.2, "y": 481.5, "size": 7.5}, "if": "(^|,\\s*)mobile"},
+      {"mark": {"page": 0, "x": 441.2, "y": 481.5, "size": 7.5}, "if": "^other"},
+      {"at": {"page": 0, "x": 474, "y": 483.7, "w": 82, "size": 9}, "pick": "tail", "if": "^other"},
+      {"mark": {"page": 0, "x": 441.2, "y": 481.5, "size": 7.5}, "if": "^(?!other)(?!(.*,\\s*)?(cater(er|ing)?|seated|dine.?in|sit.?down|carry.?out|take.?out|to.?go|mobile)\\b)"},
+      {"at": {"page": 0, "x": 474, "y": 483.7, "w": 82, "size": 9}, "if": "^(?!other)(?!(.*,\\s*)?(cater(er|ing)?|seated|dine.?in|sit.?down|carry.?out|take.?out|to.?go|mobile)\\b)"}
+    ],
+    "meals": [
+      {"mark": {"page": 0, "x": 126.2, "y": 463.9, "size": 7.5}, "if": "breakfast"},
+      {"mark": {"page": 0, "x": 184.9, "y": 463.9, "size": 7.5}, "if": "lunch"},
+      {"mark": {"page": 0, "x": 234.2, "y": 463.9, "size": 7.5}, "if": "dinner"}
+    ],
+    "seating": [
+      {"at": {"page": 0, "x": 386, "y": 466.0, "w": 172, "size": 9}}
+    ],
+    "staff": [
+      {"at": {"page": 0, "x": 128, "y": 448.9, "w": 92, "size": 9}, "pick": "head"},
+      {"at": {"page": 0, "x": 300, "y": 448.9, "w": 92, "size": 9}, "pick": "tail"}
+    ],
+    "floors": [
+      {"at": {"page": 0, "x": 485, "y": 448.9, "w": 72, "size": 9}}
+    ],
+    "food_types": [
+      {"at": {"page": 0, "x": 128, "y": 423.9, "w": 432, "size": 9}}
+    ],
+    "owner": [
+      {"at": {"page": 0, "x": 153, "y": 372.6, "w": 408, "size": 9}, "pick": "head"},
+      {"at": {"page": 0, "x": 124, "y": 347.6, "w": 190, "size": 9}, "pick": "tail|head"},
+      {"at": {"page": 0, "x": 394, "y": 347.6, "w": 168, "size": 9}, "pick": "tail|tail"}
+    ],
+    "applicant": [
+      {"at": {"page": 0, "x": 124, "y": 296.4, "w": 125, "size": 9}, "pick": "head|last"},
+      {"at": {"page": 0, "x": 258, "y": 296.4, "w": 140, "size": 9}, "pick": "head|first"},
+      {"at": {"page": 0, "x": 402, "y": 296.4, "w": 158, "size": 9}, "pick": "head|middle"},
+      {"at": {"page": 0, "x": 124, "y": 271.4, "w": 185, "size": 9}, "pick": "tail|head"},
+      {"at": {"page": 0, "x": 394, "y": 271.4, "w": 168, "size": 9}, "pick": "tail|tail"},
+      {"at": {"page": 0, "x": 270, "y": 83.1, "w": 200, "size": 9}, "pick": "head"}
+    ],
+    "dates": [
+      {"at": {"page": 0, "x": 305, "y": 220.0, "w": 88, "size": 9}, "pick": "head|date"},
+      {"at": {"page": 0, "x": 488, "y": 220.0, "w": 72, "size": 9}, "pick": "tail|date"}
+    ],
+    "designer": [
+      {"at": {"page": 0, "x": 128, "y": 195.1, "w": 265, "size": 9}, "pick": "head"},
+      {"at": {"page": 0, "x": 488, "y": 195.1, "w": 72, "size": 9}, "pick": "tail"}
+    ],
+    "water": [
+      {"at": {"page": 0, "x": 128, "y": 170.7, "w": 92, "size": 9}}
+    ],
+    "wastewater": [
+      {"mark": {"page": 0, "x": 289.5, "y": 168.7, "size": 7.5}, "if": "municipal|sewer|city"},
+      {"mark": {"page": 0, "x": 369.2, "y": 168.7, "size": 7.5}, "if": "septic|private"}
+    ],
+    "grease_trap": [
+      {"mark": {"page": 0, "x": 126.2, "y": 142.8, "size": 7.5}, "if": "^(provided|yes)"},
+      {"mark": {"page": 0, "x": 180.2, "y": 142.8, "size": 7.5}, "if": "^(not|no)\\b"},
+      {"at": {"page": 0, "x": 297, "y": 144.9, "w": 93, "size": 9}, "pick": "tail|head", "if": "^(provided|yes)"},
+      {"at": {"page": 0, "x": 488, "y": 144.9, "w": 72, "size": 9}, "pick": "tail|tail", "if": "^(provided|yes)"}
+    ],
+    "review_type": [
+      {"mark": {"page": 0, "x": 126.2, "y": 123.2, "size": 7.5}, "if": "^new"},
+      {"mark": {"page": 0, "x": 180.2, "y": 123.2, "size": 7.5}, "if": "remodel"}
+    ],
+    "sqft_total": [
+      {"at": {"page": 0, "x": 294, "y": 125.2, "w": 43, "size": 9}}
+    ],
+    "sqft_remodel": [
+      {"at": {"page": 0, "x": 348, "y": 125.2, "w": 43, "size": 9}}
+    ],
+    "food_permit": [
+      {"at": {"page": 0, "x": 488, "y": 125.2, "w": 72, "size": 9}}
+    ],
+    "deliveries": [
+      {"at": {"page": 3, "x": 152, "y": 696.5, "w": 62, "size": 9}, "pick": "line1"},
+      {"at": {"page": 3, "x": 309, "y": 696.5, "w": 62, "size": 9}, "pick": "line2"},
+      {"at": {"page": 3, "x": 442, "y": 696.5, "w": 62, "size": 9}, "pick": "line3"}
+    ],
+    "storage": [
+      {"at": {"page": 3, "x": 173, "y": 661.1, "w": 51, "size": 9}, "pick": "line1"},
+      {"at": {"page": 3, "x": 173, "y": 625.8, "w": 51, "size": 9}, "pick": "line2"},
+      {"at": {"page": 3, "x": 173, "y": 607.5, "w": 51, "size": 9}, "pick": "line3"}
+    ],
+    "storage_units": [
+      {"at": {"page": 3, "x": 290, "y": 661.1, "w": 51, "size": 9}, "pick": "line1"},
+      {"at": {"page": 3, "x": 389, "y": 661.1, "w": 51, "size": 9}, "pick": "line2"},
+      {"at": {"page": 3, "x": 494, "y": 661.1, "w": 51, "size": 9}, "pick": "line3"},
+      {"at": {"page": 3, "x": 290, "y": 625.8, "w": 51, "size": 9}, "pick": "line4"},
+      {"at": {"page": 3, "x": 290, "y": 607.5, "w": 51, "size": 9}, "pick": "line5"}
+    ],
+    "raw_rte": [
+      {"mark": {"page": 3, "x": 488.9, "y": 553.4, "size": 6.5}, "if": "^y"},
+      {"mark": {"page": 3, "x": 517.7, "y": 553.4, "size": 6.5}, "if": "^n"},
+      {"at": {"page": 3, "x": 289, "y": 537.7, "w": 265, "size": 9}, "pick": "tail"}
+    ],
+    "dry_goods": [
+      {"at": {"page": 3, "x": 253, "y": 519.6, "w": 303, "size": 9}}
+    ],
+    "ice": [
+      {"mark": {"page": 3, "x": 182.8, "y": 499.8, "size": 6.5}, "if": "^y"},
+      {"mark": {"page": 3, "x": 211.4, "y": 499.8, "size": 6.5}, "if": "^n"}
+    ],
+    "hot_water": [
+      {"at": {"page": 3, "x": 243, "y": 484.0, "w": 313, "size": 9}}
+    ],
+    "mop_sink": [
+      {"at": {"page": 3, "x": 259, "y": 465.9, "w": 297, "size": 9}}
+    ],
+    "finishes": [
+      {"at": {"page": 4, "x": 167, "y": 652.8, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 652.8, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 652.8, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_bar": [
+      {"at": {"page": 4, "x": 167, "y": 613.8, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 613.8, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 613.8, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_food_storage": [
+      {"at": {"page": 4, "x": 167, "y": 574.9, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 574.9, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 574.9, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_other_storage": [
+      {"at": {"page": 4, "x": 167, "y": 535.9, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 535.9, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 535.9, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_toilets": [
+      {"at": {"page": 4, "x": 167, "y": 496.9, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 496.9, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 496.9, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_dressing": [
+      {"at": {"page": 4, "x": 167, "y": 458.0, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 458.0, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 458.0, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_garbage": [
+      {"at": {"page": 4, "x": 167, "y": 419.0, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 419.0, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 419.0, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_mop": [
+      {"at": {"page": 4, "x": 167, "y": 380.2, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 380.2, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 380.2, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_warewashing": [
+      {"at": {"page": 4, "x": 167, "y": 341.2, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 341.2, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 341.2, "w": 127, "size": 9}, "pick": "line3"}
+    ],
+    "finish_walkin": [
+      {"at": {"page": 4, "x": 167, "y": 302.3, "w": 136, "size": 9}, "pick": "line1"},
+      {"at": {"page": 4, "x": 311, "y": 302.3, "w": 140, "size": 9}, "pick": "line2"},
+      {"at": {"page": 4, "x": 459.5, "y": 302.3, "w": 127, "size": 9}, "pick": "line3"}
+    ]
+  },
+  "sign": {"page": 0, "x": 40, "y": 83, "w": 200, "h": 22, "date": {"x": 500, "y": 83, "size": 9}}
+}

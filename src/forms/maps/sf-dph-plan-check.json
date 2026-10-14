@@ -1,0 +1,201 @@
+{
+ "form": "sf-dph-plan-check",
+ "rev": "DPH Plan Review Application (no revision printed; sf.gov file of 2023-07)",
+ "pdf": "sf-dph-plan-check.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: business_address one line as it should print. plan_review_service one of its options ('Field Site Evaluation' and 'Office Preliminary Review' also select Consultation Only). food_facility_type one of its options; 'Other' with food_facility_type_other filled. food_prep_facility and prepackaged_only: 'Yes' selects that line (they are one radio pair, so answer only one). will_cook / will_cool / will_wash_thaw: Yes or No. The signature and the date beside it are left for the applicant (the date question has no box Placetta fills).",
+ "boxes": {
+  "business_address": [
+   {
+    "text": "Business Address"
+   }
+  ],
+  "business_name": [
+   {
+    "text": "Business Name"
+   }
+  ],
+  "building_permit_application_no": [
+   {
+    "text": "Building Permit Application #"
+   }
+  ],
+  "applicant_name": [
+   {
+    "text": "Applicant Name"
+   }
+  ],
+  "applicant_title": [
+   {
+    "text": "Applicant Title"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email Address"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Phone Number"
+   }
+  ],
+  "plan_review_service": [
+   {
+    "radio": "Plan Review Service Requested",
+    "value": "New Construction",
+    "if": "^new"
+   },
+   {
+    "radio": "Plan Review Service Requested",
+    "value": "Remodel",
+    "if": "^remodel"
+   },
+   {
+    "radio": "Plan Review Service Requested",
+    "value": "Consultation",
+    "if": "^(consultation|field|office)"
+   },
+   {
+    "radio": "Consultation",
+    "value": "Field",
+    "if": "^(consultation only\\W+)?field"
+   },
+   {
+    "radio": "Consultation",
+    "value": "Office",
+    "if": "^(consultation only\\W+)?office"
+   }
+  ],
+  "food_facility_type": [
+   {
+    "radio": "Food Facility Type",
+    "value": "Restaurant",
+    "if": "^restaurant"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Bar + Restaurant",
+    "if": "^bar\\s*(\\+|and|&)\\s*restaurant"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Bar Only",
+    "if": "^bar(\\s+only)?$"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Coffee/Tea",
+    "if": "^(coffee|tea)"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Deli",
+    "if": "^deli"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Market",
+    "if": "^market"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Commissary",
+    "if": "^commissary"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Micro Kitchen",
+    "if": "^(micro|employee cafeteria)"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Other",
+    "if": "^other"
+   }
+  ],
+  "food_facility_type_other": [
+   {
+    "text": "fill in the blank"
+   },
+   {
+    "radio": "Food Facility Type",
+    "value": "Other"
+   }
+  ],
+  "food_prep_facility": [
+   {
+    "radio": "Food Facility",
+    "value": "With Prep",
+    "if": "^(yes|y|true|x|selected|checked)\\b"
+   }
+  ],
+  "will_cook": [
+   {
+    "radio": "Food Prep",
+    "value": "Yes",
+    "if": "^yes"
+   },
+   {
+    "radio": "Food Prep",
+    "value": "No",
+    "if": "^no"
+   }
+  ],
+  "will_cool": [
+   {
+    "radio": "Cooling",
+    "value": "Yes",
+    "if": "^yes"
+   },
+   {
+    "radio": "Cooling",
+    "value": "No",
+    "if": "^no"
+   }
+  ],
+  "will_wash_thaw": [
+   {
+    "radio": "Prep Sink",
+    "value": "Yes",
+    "if": "^yes"
+   },
+   {
+    "radio": "Prep Sink",
+    "value": "No",
+    "if": "^no"
+   }
+  ],
+  "prepackaged_only": [
+   {
+    "radio": "Food Facility",
+    "value": "Prepackaged Only, No Prep",
+    "if": "^(yes|y|true|x|selected|checked)\\b"
+   }
+  ],
+  "non_food_facility_type": [
+   {
+    "radio": "Non-Food Facility",
+    "value": "Laundry",
+    "if": "^laundry"
+   },
+   {
+    "radio": "Non-Food Facility",
+    "value": "Pet Shop",
+    "if": "^pet"
+   }
+  ]
+ },
+ "sign": {
+  "page": 0,
+  "x": 192,
+  "y": 422,
+  "w": 110,
+  "h": 12,
+  "date": {
+   "x": 427,
+   "y": 424,
+   "size": 8
+  }
+ }
+}

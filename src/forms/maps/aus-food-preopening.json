@@ -1,0 +1,60 @@
+{
+  "form": "aus-food-preopening",
+  "rev": "Revised: 10/01/2025",
+  "pdf": "aus-food-preopening.pdf",
+  "checked": "2026-10-14",
+  "notes": "Flat, print-only form (no fillable boxes): answers are printed on the underscore lines and an X in the printed squares (each square follows its word). Establishment type: an answer naming none of Food Product, Charitable Feeding Organization or Food Vending Machine (a restaurant, tea shop or store) ticks Retail Food. water: 'potable water provider, wastewater disposal provider' (e.g. 'Austin Water, Austin Water'). onsite_contact: 'Full Name, phone, email'; the name is printed last name first on the contact line. The office-use block, the fee table, Print Name and the signature and its date are left for the applicant and the office.",
+  "boxes": {
+    "name": [
+      {"at": {"page": 0, "x": 142, "y": 573.6, "w": 415, "size": 9}}
+    ],
+    "address": [
+      {"at": {"page": 0, "x": 128, "y": 552.7, "w": 165, "size": 9}, "pick": "street"},
+      {"at": {"page": 0, "x": 300, "y": 552.7, "w": 145, "size": 9}, "pick": "city"},
+      {"at": {"page": 0, "x": 455, "y": 552.7, "w": 26, "size": 9}, "pick": "state"},
+      {"at": {"page": 0, "x": 515, "y": 552.7, "w": 46, "size": 9}, "pick": "zip"}
+    ],
+    "type": [
+      {"mark": {"page": 0, "x": 196.2, "y": 526.3, "size": 9}, "if": "retail|^(?!.*(food product|charitable|\\bcfo\\b|vending))"},
+      {"mark": {"page": 0, "x": 265.7, "y": 526.3, "size": 9}, "if": "food product"},
+      {"mark": {"page": 0, "x": 438.3, "y": 526.3, "size": 9}, "if": "charitable|\\bcfo\\b"},
+      {"mark": {"page": 0, "x": 544.0, "y": 526.3, "size": 9}, "if": "vending"}
+    ],
+    "opening": [
+      {"at": {"page": 0, "x": 115, "y": 507.7, "w": 135, "size": 9}, "pick": "date"}
+    ],
+    "previously_permitted": [
+      {"mark": {"page": 0, "x": 295.6, "y": 482.3, "size": 9}, "if": "^y"},
+      {"mark": {"page": 0, "x": 322.6, "y": 482.3, "size": 9}, "if": "^n"}
+    ],
+    "new_owner": [
+      {"mark": {"page": 0, "x": 472.7, "y": 482.3, "size": 9}, "if": "^y"},
+      {"mark": {"page": 0, "x": 497.2, "y": 482.3, "size": 9}, "if": "^n"}
+    ],
+    "remodel": [
+      {"mark": {"page": 0, "x": 148.6, "y": 459.9, "size": 9}, "if": "^y"},
+      {"mark": {"page": 0, "x": 173.1, "y": 459.9, "size": 9}, "if": "^n"}
+    ],
+    "new_construction": [
+      {"mark": {"page": 0, "x": 474.2, "y": 459.9, "size": 9}, "if": "^y"},
+      {"mark": {"page": 0, "x": 501.2, "y": 459.9, "size": 9}, "if": "^n"}
+    ],
+    "building_permit": [
+      {"at": {"page": 0, "x": 128, "y": 438.9, "w": 106, "size": 9}}
+    ],
+    "water": [
+      {"at": {"page": 0, "x": 315, "y": 438.9, "w": 80, "size": 9}, "pick": "head"},
+      {"at": {"page": 0, "x": 467, "y": 438.9, "w": 80, "size": 9}, "pick": "tail"}
+    ],
+    "food_types": [
+      {"at": {"page": 0, "x": 115, "y": 414.0, "w": 448, "size": 9}}
+    ],
+    "onsite_contact": [
+      {"at": {"page": 0, "x": 128, "y": 344.4, "w": 95, "size": 9}, "pick": "head|last"},
+      {"at": {"page": 0, "x": 228, "y": 344.4, "w": 142, "size": 9}, "pick": "head|first"},
+      {"at": {"page": 0, "x": 425, "y": 344.4, "w": 133, "size": 9}, "pick": "tail|head"},
+      {"at": {"page": 0, "x": 128, "y": 319.4, "w": 428, "size": 9}, "pick": "tail|tail"}
+    ]
+  },
+  "sign": {"page": 0, "x": 40, "y": 90, "w": 200, "h": 18, "date": {"x": 500, "y": 90, "size": 9}}
+}

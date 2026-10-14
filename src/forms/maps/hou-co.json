@@ -1,0 +1,94 @@
+{
+ "form": "hou-co",
+ "rev": "Form CE-1045-A (revised January 2026)",
+ "pdf": "hou-co.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: date is the application date at the top (any common shape, printed mm/dd/yyyy); business_address the street line (a full address prints its street only; the ZIP has its own question); apartment_buildings_units 'buildings, units' (blank for a shop or restaurant); applicant_home_city_state_zip 'City, ST ZIP'. The applicant's signature is left for the applicant; Project Number and Processed By are for the office.",
+ "boxes": {
+  "date": [
+   {
+    "text": "Date",
+    "pick": "date"
+   }
+  ],
+  "business_name_on_certificate": [
+   {
+    "text": "Business Name on Certificate"
+   }
+  ],
+  "business_address": [
+   {
+    "text": "Address of Business",
+    "pick": "street"
+   }
+  ],
+  "building_space_no": [
+   {
+    "text": "Building or Space No If Applicable"
+   }
+  ],
+  "zip_code": [
+   {
+    "text": "Zip Code"
+   }
+  ],
+  "total_floors": [
+   {
+    "text": "Total No of Floors"
+   }
+  ],
+  "apartment_buildings_units": [
+   {
+    "text": "Number of Apartment Buildings and Units",
+    "pick": "head"
+   },
+   {
+    "text": "undefined",
+    "pick": "tail"
+   }
+  ],
+  "cell_number": [
+   {
+    "text": "Cell Number"
+   }
+  ],
+  "usage_description": [
+   {
+    "text": "Description of Usage of the Building or Space"
+   }
+  ],
+  "total_square_feet": [
+   {
+    "text": "Total Square Feet"
+   }
+  ],
+  "applicant_full_name": [
+   {
+    "text": "Applicants Full Name"
+   }
+  ],
+  "applicant_home_address": [
+   {
+    "text": "Applicants Home Address",
+    "pick": "street"
+   }
+  ],
+  "applicant_home_city_state_zip": [
+   {
+    "text": "Applicants Home CityStateZip"
+   }
+  ],
+  "applicant_email": [
+   {
+    "text": "Applicants Email"
+   }
+  ]
+ },
+ "sign": {
+  "page": 0,
+  "x": 150,
+  "y": 465,
+  "w": 300,
+  "h": 16
+ }
+}

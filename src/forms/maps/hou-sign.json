@@ -1,0 +1,470 @@
+{
+ "form": "hou-sign",
+ "rev": "Form CE-1423 (revised February 2026)",
+ "pdf": "hou-sign.pdf",
+ "checked": "2026-10-14",
+ "notes": "Answers: permit_category one of its options. City/ST/ZIP answers 'City, ST ZIP'; office/sign/billing address answers the street line (a full address prints its street only). Per-sign answers take one line per sign, A to E in order, with no blank lines: sign_schedule_new_electrical 'New', 'Electrical' or 'New, Electrical'; sign_schedule_type the location code ('N3 Wall' prints N3); sign_schedule_dimensions \"width, height, max height\" each as feet and inches, e.g. 12' 0\", 3' 6\", 18' 0\" (both numbers always); sign_schedule_pn 'P.N., original P.N.'; sign_messages the message, prefixed 'Refurb:' to tick its Refurb box, and a sixth line prints on 'Other'. cms_ack_printed_name_phone 'Name, phone'. The affidavit's signatures are sworn before a notary and the notary's lines (affiant name, date, seal) stay blank, so no signature spot is set; Faces and Poles have no question and stay blank.",
+ "boxes": {
+  "permit_category": [
+   {
+    "check": "Category A",
+    "if": "^(category\\s+)?a\\b"
+   },
+   {
+    "check": "Category B",
+    "if": "^(category\\s+)?b\\b"
+   },
+   {
+    "check": "Category C",
+    "if": "^(category\\s+)?c\\b"
+   },
+   {
+    "check": "Category D",
+    "if": "^(category\\s+)?d\\b"
+   },
+   {
+    "check": "Category E",
+    "if": "^(category\\s+)?e\\b"
+   },
+   {
+    "check": "Changeable Message Sign",
+    "if": "changeable"
+   }
+  ],
+  "contractor_license": [
+   {
+    "text": "License"
+   }
+  ],
+  "applicant_emails": [
+   {
+    "text": "Emails"
+   }
+  ],
+  "office_phone": [
+   {
+    "text": "Office Phone"
+   }
+  ],
+  "applicant_company_name": [
+   {
+    "text": "Applicant Co Name"
+   }
+  ],
+  "contacts": [
+   {
+    "text": "Contacts"
+   }
+  ],
+  "office_address": [
+   {
+    "text": "Office Address",
+    "pick": "street"
+   }
+  ],
+  "office_city_st_zip": [
+   {
+    "text": "City ST ZIP"
+   }
+  ],
+  "cell_phones": [
+   {
+    "text": "Cell Phones"
+   }
+  ],
+  "advertising_business_name": [
+   {
+    "text": "Advertising Business Name"
+   }
+  ],
+  "sign_address": [
+   {
+    "text": "Sign Address",
+    "pick": "street"
+   }
+  ],
+  "sign_city_st_zip": [
+   {
+    "text": "City ST ZIP_2"
+   }
+  ],
+  "billing_address": [
+   {
+    "text": "Billing Address",
+    "pick": "street"
+   }
+  ],
+  "billing_city_st_zip": [
+   {
+    "text": "City ST ZIP_3"
+   }
+  ],
+  "billing_email": [
+   {
+    "text": "Billing Email"
+   }
+  ],
+  "billing_phone": [
+   {
+    "text": "Billing Phone"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "Owner Name"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "Owner Phone"
+   }
+  ],
+  "owner_cell": [
+   {
+    "text": "Owner Cell Ph"
+   }
+  ],
+  "sign_schedule_new_electrical": [
+   {
+    "check": "A-New",
+    "if": "^\\s*[^\\n;]*\\bnew\\b"
+   },
+   {
+    "check": "A-Electrical",
+    "if": "^\\s*[^\\n;]*\\belectrical\\b"
+   },
+   {
+    "check": "B-New",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){1}[^\\n;]*\\bnew\\b"
+   },
+   {
+    "check": "B-Electrical",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){1}[^\\n;]*\\belectrical\\b"
+   },
+   {
+    "check": "C-New",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){2}[^\\n;]*\\bnew\\b"
+   },
+   {
+    "check": "C-Electrical",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){2}[^\\n;]*\\belectrical\\b"
+   },
+   {
+    "check": "D-New",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){3}[^\\n;]*\\bnew\\b"
+   },
+   {
+    "check": "D-Electrical",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){3}[^\\n;]*\\belectrical\\b"
+   },
+   {
+    "check": "E-New",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){4}[^\\n;]*\\bnew\\b"
+   },
+   {
+    "check": "E-Electrical",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){4}[^\\n;]*\\belectrical\\b"
+   }
+  ],
+  "sign_schedule_type": [
+   {
+    "text": "A-Type",
+    "pick": "line1",
+    "max": 2,
+    "upper": true
+   },
+   {
+    "text": "B-Type",
+    "pick": "line2",
+    "max": 2,
+    "upper": true
+   },
+   {
+    "text": "C-Type",
+    "pick": "line3",
+    "max": 2,
+    "upper": true
+   },
+   {
+    "text": "D-Type",
+    "pick": "line4",
+    "max": 2,
+    "upper": true
+   },
+   {
+    "text": "E-Type",
+    "pick": "line5",
+    "max": 2,
+    "upper": true
+   }
+  ],
+  "sign_schedule_dimensions": [
+   {
+    "text": "A-Width Ft",
+    "pick": "line1|head|first|digits"
+   },
+   {
+    "text": "A-Width In",
+    "pick": "line1|head|last|digits"
+   },
+   {
+    "text": "A-Height Ft",
+    "pick": "line1|tail|head|first|digits"
+   },
+   {
+    "text": "A-Height In",
+    "pick": "line1|tail|head|last|digits"
+   },
+   {
+    "text": "A-Max Ht Ft",
+    "pick": "line1|tail|tail|head|first|digits"
+   },
+   {
+    "text": "A-Max Ht In",
+    "pick": "line1|tail|tail|head|last|digits"
+   },
+   {
+    "text": "B-Width Ft",
+    "pick": "line2|head|first|digits"
+   },
+   {
+    "text": "B-Width In",
+    "pick": "line2|head|last|digits"
+   },
+   {
+    "text": "B-Height Ft",
+    "pick": "line2|tail|head|first|digits"
+   },
+   {
+    "text": "B-Height In",
+    "pick": "line2|tail|head|last|digits"
+   },
+   {
+    "text": "B-Max Ht Ft",
+    "pick": "line2|tail|tail|head|first|digits"
+   },
+   {
+    "text": "B-Max Ht In",
+    "pick": "line2|tail|tail|head|last|digits"
+   },
+   {
+    "text": "C-Width Ft",
+    "pick": "line3|head|first|digits"
+   },
+   {
+    "text": "C-Width In",
+    "pick": "line3|head|last|digits"
+   },
+   {
+    "text": "C-Height Ft",
+    "pick": "line3|tail|head|first|digits"
+   },
+   {
+    "text": "C-Height In",
+    "pick": "line3|tail|head|last|digits"
+   },
+   {
+    "text": "C-Max Ht Ft",
+    "pick": "line3|tail|tail|head|first|digits"
+   },
+   {
+    "text": "C-Max Ht In",
+    "pick": "line3|tail|tail|head|last|digits"
+   },
+   {
+    "text": "D-Width Ft",
+    "pick": "line4|head|first|digits"
+   },
+   {
+    "text": "D-Width In",
+    "pick": "line4|head|last|digits"
+   },
+   {
+    "text": "D-Height Ft",
+    "pick": "line4|tail|head|first|digits"
+   },
+   {
+    "text": "D-Height In",
+    "pick": "line4|tail|head|last|digits"
+   },
+   {
+    "text": "D-Max Ht Ft",
+    "pick": "line4|tail|tail|head|first|digits"
+   },
+   {
+    "text": "D-Max Ht In",
+    "pick": "line4|tail|tail|head|last|digits"
+   },
+   {
+    "text": "E-Width Ft",
+    "pick": "line5|head|first|digits"
+   },
+   {
+    "text": "E-Width In",
+    "pick": "line5|head|last|digits"
+   },
+   {
+    "text": "E-Height Ft",
+    "pick": "line5|tail|head|first|digits"
+   },
+   {
+    "text": "E-Height In",
+    "pick": "line5|tail|head|last|digits"
+   },
+   {
+    "text": "E-Max Ht Ft",
+    "pick": "line5|tail|tail|head|first|digits"
+   },
+   {
+    "text": "E-Max Ht In",
+    "pick": "line5|tail|tail|head|last|digits"
+   }
+  ],
+  "sign_schedule_pn": [
+   {
+    "text": "A-PN",
+    "pick": "line1|head"
+   },
+   {
+    "text": "A-Original PN",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "B-PN",
+    "pick": "line2|head"
+   },
+   {
+    "text": "B-Original PN",
+    "pick": "line2|tail"
+   },
+   {
+    "text": "C-PN",
+    "pick": "line3|head"
+   },
+   {
+    "text": "C-Original PN",
+    "pick": "line3|tail"
+   },
+   {
+    "text": "D-PN",
+    "pick": "line4|head"
+   },
+   {
+    "text": "D-Original PN",
+    "pick": "line4|tail"
+   },
+   {
+    "text": "E-PN",
+    "pick": "line5|head"
+   },
+   {
+    "text": "E-Original PN",
+    "pick": "line5|tail"
+   }
+  ],
+  "sign_messages": [
+   {
+    "text": "A_2",
+    "pick": "line1",
+    "if": "^\\s*(?!refurb\\s*:)"
+   },
+   {
+    "text": "A_2",
+    "pick": "line1|tail",
+    "if": "^\\s*refurb\\s*:"
+   },
+   {
+    "check": "Check Box1",
+    "if": "^\\s*refurb\\s*:"
+   },
+   {
+    "text": "B_2",
+    "pick": "line2",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){1}(?!refurb\\s*:)"
+   },
+   {
+    "text": "B_2",
+    "pick": "line2|tail",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){1}refurb\\s*:"
+   },
+   {
+    "check": "Check Box2",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){1}refurb\\s*:"
+   },
+   {
+    "text": "C_2",
+    "pick": "line3",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){2}(?!refurb\\s*:)"
+   },
+   {
+    "text": "C_2",
+    "pick": "line3|tail",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){2}refurb\\s*:"
+   },
+   {
+    "check": "Check Box3",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){2}refurb\\s*:"
+   },
+   {
+    "text": "D_2",
+    "pick": "line4",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){3}(?!refurb\\s*:)"
+   },
+   {
+    "text": "D_2",
+    "pick": "line4|tail",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){3}refurb\\s*:"
+   },
+   {
+    "check": "Check Box4",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){3}refurb\\s*:"
+   },
+   {
+    "text": "E_2",
+    "pick": "line5",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){4}(?!refurb\\s*:)"
+   },
+   {
+    "text": "E_2",
+    "pick": "line5|tail",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){4}refurb\\s*:"
+   },
+   {
+    "check": "Check Box5",
+    "if": "^(?:[^\\n;]*[\\n;]\\s*){4}refurb\\s*:"
+   },
+   {
+    "text": "Other",
+    "pick": "line6"
+   }
+  ],
+  "lead_project": [
+   {
+    "text": "Lead Project"
+   },
+   {
+    "text": "Lead Project 2"
+   }
+  ],
+  "owner_manager_printed_name": [
+   {
+    "text": "Sign Owner/Location Manager Printed Name"
+   }
+  ],
+  "sign_company_rep_printed_name": [
+   {
+    "text": "Sign Co. Rep. Printed Name"
+   }
+  ],
+  "cms_ack_printed_name_phone": [
+   {
+    "text": "Printed Name",
+    "pick": "head"
+   },
+   {
+    "text": "Phone",
+    "pick": "tail"
+   }
+  ]
+ }
+}

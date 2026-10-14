@@ -1,0 +1,143 @@
+{
+ "form": "dal-co",
+ "rev": "Land Use Questionnaire (Rev. 8/4/2026)",
+ "pdf": "dal-co.pdf",
+ "checked": "2026-10-14",
+ "notes": "This PDF is the Land Use Questionnaire, the fillable part of the CO application; the DallasNow application questions (date, business name, street address, suite, owner/tenant, applicant, proposed use, square footage, and the YES/NO questions) have no box on it and are answered on DallasNow. Answers: luq_business_owner_dba 'Owner legal name, DBA name' (the owner name without commas; with no comma it all goes to Business Owner). luq_restaurant_use: any of Drive-Thru, Take-out only, Tables/Seating (several allowed). luq_alcohol_bar: 'Yes' only for an alcohol establishment/bar that has applied for its TABC permit, optionally 'Yes, cover charge yes|no'; 'No' leaves the bar line blank. luq_additional_services: the services, or No/None (left blank). luq_seating_type: Fixed, Non-fixed or Both. luq_storage_use: 'types: items and storage method', e.g. 'Inside: boxed tea on steel racks' (the types before the colon tick their boxes; the whole answer prints in the description box). luq_owner_printed_name is not printed: it completes the owner's acknowledgement ('I ___ am the business owner and ... acknowledge'), which the owner writes with the signature and date.",
+ "boxes": {
+  "luq_business_owner_dba": [
+   {
+    "text": "Business Owner",
+    "pick": "head"
+   },
+   {
+    "text": "DBA",
+    "pick": "tail"
+   }
+  ],
+  "luq_type_of_business": [
+   {
+    "text": "Type of business Please Specify"
+   }
+  ],
+  "luq_physical_address": [
+   {
+    "text": "Physical Addresssuite number"
+   }
+  ],
+  "luq_operations_description": [
+   {
+    "text": "Please describe in detail your daytoday business operations include business hours Required"
+   }
+  ],
+  "luq_restaurant_use": [
+   {
+    "check": "Restaurant Use"
+   },
+   {
+    "check": "DriveThru",
+    "if": "drive"
+   },
+   {
+    "check": "Takeout only",
+    "if": "take.?out"
+   },
+   {
+    "check": "TablesSeating",
+    "if": "tables|seating"
+   }
+  ],
+  "luq_alcohol_bar": [
+   {
+    "check": "Alcohol EstablishmentBar Have you applied for a TABC permit",
+    "if": "^yes"
+   },
+   {
+    "radio": "undefined_3",
+    "value": "Yes_3",
+    "if": "^yes"
+   },
+   {
+    "radio": "undefined_4",
+    "value": "Yes_4",
+    "if": "^yes.*cover\\W+(charge\\W+)?yes"
+   },
+   {
+    "radio": "undefined_4",
+    "value": "No_4",
+    "if": "^yes.*(cover\\W+(charge\\W+)?no|no cover)"
+   }
+  ],
+  "luq_additional_services": [
+   {
+    "check": "Are any additional services or occasional activities offered ex DJ Booth Live Music SpaPool",
+    "if": "^(?!\\s*(no|none|n/?a)\\b)"
+   },
+   {
+    "text": "Gaming Billiards Sports Court Day Care etc",
+    "if": "^(?!\\s*(no|none|n/?a)\\b)"
+   }
+  ],
+  "luq_seating_type": [
+   {
+    "check": "What type of seating is provided"
+   },
+   {
+    "check": "Fixed",
+    "if": "^fixed"
+   },
+   {
+    "check": "Nonfixed",
+    "if": "^non"
+   },
+   {
+    "check": "Both",
+    "if": "^both"
+   }
+  ],
+  "luq_storage_use": [
+   {
+    "check": "Storage Use"
+   },
+   {
+    "check": "Inside",
+    "if": "^[^:]*\\binside\\b"
+   },
+   {
+    "check": "Outside",
+    "if": "^[^:]*\\boutside\\b"
+   },
+   {
+    "check": "Tire",
+    "if": "^[^:]*\\btires?\\b"
+   },
+   {
+    "check": "MattressFurniture",
+    "if": "^[^:]*(mattress|furniture)"
+   },
+   {
+    "check": "FlammableHazardous",
+    "if": "^[^:]*(flammable|hazardous)"
+   },
+   {
+    "check": "Other",
+    "if": "^[^:]*\\bother\\b"
+   },
+   {
+    "text": "Please listdescribe all items stored and specify storage method ex racks pallet other"
+   }
+  ]
+ },
+ "sign": {
+  "page": 1,
+  "x": 175,
+  "y": 53,
+  "w": 180,
+  "h": 20,
+  "date": {
+   "x": 392,
+   "y": 56,
+   "size": 9
+  }
+ }
+}
