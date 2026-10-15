@@ -2562,7 +2562,7 @@ async function handle(req) {
   bg(work(run.id, jwt));
   return json(202, { id: run.id });
 }
-if (import.meta.main) Deno.serve(handle);
+if (true) Deno.serve(handle);
 export {
   handle,
   work

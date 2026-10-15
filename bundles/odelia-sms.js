@@ -35,10 +35,10 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/odelia-sms/index.ts
+// supabase/functions/odelia-sms/index.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/_shared/odelia.ts
+// supabase/functions/_shared/odelia.ts
 function normalizePhone(input) {
   if (typeof input !== "string") return null;
   const s = input.trim();
@@ -80,10 +80,11 @@ async function verifyTelnyx(raw, signature, timestamp, publicKey, nowSec = Date.
 var STOP = /* @__PURE__ */ new Set(["STOP", "STOPALL", "STOP ALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT", "OPTOUT", "OPT OUT", "REVOKE", "\u9000\u8BA2", "TD"]);
 var START = /* @__PURE__ */ new Set(["START", "UNSTOP", "SUBSCRIBE", "RESUME"]);
 var HELP = /* @__PURE__ */ new Set(["HELP", "INFO", "\u5E2E\u52A9"]);
+var OPT_OUT_PHRASE = /^(PLEASE )?(STOP|DON'?T|DO NOT|NO MORE) (TEXTING|TEXT|MESSAGING|CALLING|CALL|CONTACTING)( ME)?( ANYMORE| AGAIN)?( PLEASE)?$|^(REMOVE ME|TAKE ME OFF( YOUR LIST)?|LEAVE ME ALONE)$|^(不要再?(发短信|打电话|联系我)了?|别再?(发|打)了?)$/u;
 function keyword(text) {
   if (typeof text !== "string") return null;
   const k = text.trim().replace(/[\s.!?。！？]+$/u, "").replace(/\s+/g, " ").toUpperCase();
-  if (STOP.has(k)) return "stop";
+  if (STOP.has(k) || OPT_OUT_PHRASE.test(k)) return "stop";
   if (START.has(k)) return "start";
   if (HELP.has(k)) return "help";
   return null;
@@ -260,7 +261,7 @@ var SAY = {
   missed: { en: "Odelia from Placetta tried to call you about this:", zh: "\u5FEB\u54C9\u7684 Odelia \u521A\u624D\u81F4\u7535\u60A8\uFF0C\u4E8B\u7531\u5982\u4E0B\uFF1A" }
 };
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/_shared/odelia_db.ts
+// supabase/functions/_shared/odelia_db.ts
 var LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at";
 async function linkByNumber(admin2, number) {
   const { data } = await admin2.from("phone_links").select(LINK_COLS).eq("number", number).not("verified_at", "is", null).maybeSingle();
@@ -305,7 +306,7 @@ async function currentWorkspace(admin2, link) {
   return { ws: ws ?? all[0], all };
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/odelia-sms/index.ts
+// supabase/functions/odelia-sms/index.ts
 var SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 var admin = (0, import_supabase_js_2.createClient)(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
 var env = (k) => Deno.env.get(k);
