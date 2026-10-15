@@ -1,0 +1,436 @@
+{
+ "sj-building-ti": {
+  "en": "San José's standard plan review for a commercial tenant improvement takes about 10 working days for the first round and 5 working days for each recheck.",
+  "zh": "圣何塞对商业租户装修的标准图纸审查，首轮约需 10 个工作日，每次复审约 5 个工作日。",
+  "days": 14,
+  "source": "https://www.sanjoseca.gov/businesses/development-services-permit-center/building-permit-services/standard-plan-review-service/plan-review-time-frames",
+  "published": true
+ },
+ "sj-fire-systems": {
+  "en": "Fire Department review of fire protection system plans takes about 10 working days for the first round and 5 working days for each recheck on a commercial project.",
+  "zh": "消防局对商业项目消防系统图纸的审查，首轮约需 10 个工作日，每次复审约 5 个工作日。",
+  "days": 14,
+  "source": "https://www.sanjoseca.gov/businesses/development-services-permit-center/building-permit-services/standard-plan-review-service/plan-review-time-frames",
+  "published": true
+ },
+ "sj-building-final": {
+  "en": "San José doesn't publish a wait time for the final inspection; you request it on SJPermits.org, and it's approved only after every other inspection on the permit has passed.",
+  "zh": "圣何塞没有公布最终验收的等待时间；需在 SJPermits.org 上预约，且只有在许可证上的其他所有检查都通过后才会批准。",
+  "days": null,
+  "source": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success",
+  "published": false
+ },
+ "scc-health-permit": {
+  "en": "The county's plan review can take up to 20 business days, and the invoice for the operating permit is sent after the final inspection passes.",
+  "zh": "县卫生局的图纸审查最长可能需要 20 个工作日；最终检查通过后，县里会寄出营业许可证的缴费通知单。",
+  "days": 28,
+  "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
+  "published": true
+ },
+ "ca-ftb-3522": {
+  "en": "Paying the $800 LLC tax online through Web Pay is immediate; it's due by the 15th day of the 4th month of the LLC's tax year.",
+  "zh": "通过 Web Pay 在线缴纳 800 美元的 LLC 年税可即时完成；须在 LLC 纳税年度第 4 个月的第 15 天前缴纳。",
+  "days": 1,
+  "source": "https://www.ftb.ca.gov/forms/2026/2026-3522.pdf",
+  "published": true
+ },
+ "ca-prop65": {
+  "en": "Nothing is filed with or approved by OEHHA, so there's no processing time; the business decides whether a warning is needed and must have it in place itself.",
+  "zh": "无需向 OEHHA 提交或申请批准，因此没有办理时间；是否需要警示由企业自行判断并自行张贴。",
+  "days": null,
+  "source": "https://www.p65warnings.ca.gov/businesses/frequently-asked-questions-businesses",
+  "published": false
+ },
+ "sf-formula-retail": {
+  "en": "The affidavit itself isn't reviewed separately, but where neighborhood notification is required, neighbors get 30 days to respond, and districts that need Conditional Use go to a Planning Commission hearing.",
+  "zh": "宣誓书本身不单独审查；但如需邻里通知，邻居有 30 天时间回应；需要有条件使用许可的区域还须经规划委员会听证。",
+  "days": 30,
+  "source": "https://sfplanning.org/permit/chain-stores-businesses",
+  "published": true
+ },
+ "sf-dph-plan-check": {
+  "en": "DPH doesn't publish a plan review time, but asks you to contact your plan reviewer at least 2 weeks ahead to book the pre-final and final site inspections.",
+  "zh": "公共卫生局未公布图纸审查时间，但要求至少提前 2 周联系审图员预约预终检和终检现场检查。",
+  "days": 14,
+  "source": "https://www.sf.gov/plan-check-guide-building-and-remodeling-food-facility",
+  "published": true
+ },
+ "sf-dph-health-permit": {
+  "en": "Apply for the health permit at least 1 month before you open.",
+  "zh": "须在开业前至少 1 个月申请卫生许可证。",
+  "days": 30,
+  "source": "https://sf.gov/get-health-permit-open-restaurant-bar-or-other-retail-food-location",
+  "published": true
+ },
+ "sf-sign": {
+  "en": "DBI doesn't publish a review time for sign or awning permits; you apply online with construction drawings, and the sign must meet the zoning rules for your district.",
+  "zh": "建筑检查局未公布招牌或遮阳篷许可证的审查时间；需在线提交施工图申请，招牌还须符合所在区的分区规定。",
+  "days": null,
+  "source": "https://sf.gov/step-by-step/get-permit-install-sign-or-awning",
+  "published": false
+ },
+ "sf-fire-assembly": {
+  "en": "Fire permit applications must be submitted at least 5 working days before the activity or operation starts.",
+  "zh": "消防许可申请须在活动或经营开始前至少 5 个工作日提交。",
+  "days": 7,
+  "source": "https://sf-fire.org/media/1678/download",
+  "published": true
+ },
+ "lac-health-permit": {
+  "en": "Plan review is completed within 20 working days after payment (10 if you pay for expedited review); the inspector needs at least 3 working days' notice for the final inspection, and the permit is issued after the permit fee is paid.",
+  "zh": "图纸审查在付款后 20 个工作日内完成（付费加急为 10 个工作日）；最终检查须至少提前 3 个工作日预约，缴纳许可费后即发放许可证。",
+  "days": 28,
+  "source": "https://admin.publichealth.lacounty.gov/EH/inspection/construction-requirements-retail-food-facilities.htm",
+  "published": true
+ },
+ "irv-license": {
+  "en": "Irvine doesn't publish how long it takes to issue the license; the online application takes minutes, and new businesses must apply within 60 days of starting to avoid late fees.",
+  "zh": "尔湾市未公布营业执照的发放时间；在线申请只需几分钟，新企业须在开业后 60 天内申请，以免产生滞纳金。",
+  "days": null,
+  "source": "https://cityofirvine.gov/community-development/business-licensing",
+  "published": false
+ },
+ "oc-health-permit": {
+  "en": "Initial plan review usually takes 20 working days; inspections must be requested 5 working days ahead, and the health permit is issued once the final inspection passes.",
+  "zh": "首次图纸审查通常需要 20 个工作日；检查须提前 5 个工作日预约，最终检查通过后即发放卫生许可证。",
+  "days": 28,
+  "source": "https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit",
+  "published": true
+ },
+ "sdg-co": {
+  "en": "San Diego doesn't publish a delivery time for a commercial Certificate of Occupancy; it's issued once every inspection under the permit has final approval (only affordable housing and shelters get set deadlines).",
+  "zh": "圣地亚哥市未公布商业入住许可证的发放时间；许可证项下所有检查获最终批准后即签发（只有经济适用房和紧急庇护所有规定期限）。",
+  "days": null,
+  "source": "https://www.sandiego.gov/sites/default/files/2026-04/dsdib585.pdf",
+  "published": false
+ },
+ "sdc-health-permit": {
+  "en": "Plans are approved or rejected within 20 working days of receipt, and plan check staff issue the health permit when the facility passes its final inspection.",
+  "zh": "图纸在收到后 20 个工作日内予以批准或驳回；设施通过最终检查后，审图人员即发放卫生许可证。",
+  "days": 28,
+  "source": "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_newbusiness664.pdf",
+  "published": true
+ },
+ "nyc-co": {
+  "en": "DOB doesn't publish a processing time for a Certificate of Occupancy; staff review the request in DOB NOW: Build and issue the CO once every sign-off and requirement is in.",
+  "zh": "纽约市建筑局未公布入住许可证的办理时间；工作人员在 DOB NOW: Build 中审核申请，所有验收和要求齐全后即签发。",
+  "days": null,
+  "source": "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page",
+  "published": false
+ },
+ "ny-dol-100": {
+  "en": "The Department of Labor doesn't publish how long registration takes; it assigns each liable employer an eight-digit employer registration number after you register.",
+  "zh": "劳工部未公布登记所需时间；登记后会为每个负有缴纳义务的雇主分配一个八位数的雇主登记号。",
+  "days": null,
+  "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+  "published": false
+ },
+ "ny-wcb": {
+  "en": "The Board doesn't publish a processing time because coverage is bought from an insurer, but DB/PFL coverage must be in place within four weeks after a new employee's 30th day of work.",
+  "zh": "由于保险需向保险公司购买，委员会未公布办理时间；但残疾及带薪家事假保险须在新员工入职第 30 天后的四周内生效。",
+  "days": null,
+  "source": "https://www.wcb.ny.gov/content/main/coverage-requirements.jsp",
+  "published": false
+ },
+ "nyc-sign": {
+  "en": "DOB doesn't publish a review time for sign permits; the sign permit is filed in DOB NOW: Build, with a separate electrical permit if the sign is lit.",
+  "zh": "纽约市建筑局未公布招牌许可证的审查时间；招牌许可证在 DOB NOW: Build 中提交，带照明的招牌还需另办电气许可证。",
+  "days": null,
+  "source": "https://www.nyc.gov/site/buildings/property-or-business-owner/sign-permit.page",
+  "published": false
+ },
+ "tx-food-manager": {
+  "en": "DSHS doesn't issue the certificate itself; the accredited exam provider issues it as soon as you pass the exam.",
+  "zh": "州卫生服务部本身不发证；通过考试后，由认证考试机构当即发放证书。",
+  "days": 1,
+  "source": "https://www.dshs.texas.gov/food-managers",
+  "published": true
+ },
+ "tx-food-handler": {
+  "en": "Each food employee must complete an accredited food handler course within 30 days of being hired; the training provider issues the card.",
+  "zh": "每名食品从业员工须在入职后 30 天内完成经认证的食品处理培训课程，由培训机构发放证卡。",
+  "days": null,
+  "source": "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+  "published": true
+ },
+ "hou-co": {
+  "en": "Houston lists the Certificate of Occupancy's processing time as 15 minutes once the final inspection is approved; the certificate is emailed to you.",
+  "zh": "休斯顿公布的入住许可证办理时间为 15 分钟（在最终检查通过后）；证书将通过电子邮件发送。",
+  "days": 1,
+  "source": "https://www.houstonpermittingcenter.org/hpwcode1106",
+  "published": true
+ },
+ "tx-franchise": {
+  "en": "The Comptroller doesn't publish a processing time for the report; the annual franchise tax report is due May 15 (next business day if it falls on a weekend or holiday).",
+  "zh": "州审计长办公室未公布报告的处理时间；年度特许经营税报告须在 5 月 15 日前提交（如逢周末或假日则顺延至下一个工作日）。",
+  "days": null,
+  "source": "https://comptroller.texas.gov/taxes/franchise/",
+  "published": false
+ },
+ "dal-co": {
+  "en": "Dallas's goal is to review a CO application within 15 business days on average, though its CO page notes processing times differ based on demand.",
+  "zh": "达拉斯的目标是平均在 15 个工作日内审核入住许可证申请，但其页面也说明办理时间会因申请量而异。",
+  "days": 21,
+  "source": "https://dallascityhall.com/departments/pnv/Documents/AH%20Memos/PDDPerformanceSummaryFY-2025-26July2026.pdf",
+  "published": true
+ },
+ "dal-building": {
+  "en": "Dallas's goal for a commercial alteration/addition is an initial plan review within 15 business days and a resubmittal review within 7.",
+  "zh": "达拉斯对商业改建/扩建项目的目标是：首次图纸审查 15 个工作日内完成，重新提交后的审查 7 个工作日内完成。",
+  "days": 21,
+  "source": "https://dallascityhall.com/departments/pnv/Documents/AH%20Memos/PDDPerformanceSummaryFY-2025-26July2026.pdf",
+  "published": true
+ },
+ "dal-plan-review": {
+  "en": "Dallas's goal for the Health team's initial plan review is 15 business days.",
+  "zh": "达拉斯卫生审图组首次图纸审查的目标时间为 15 个工作日。",
+  "days": 21,
+  "source": "https://dallascityhall.com/departments/pnv/Documents/AH%20Memos/PDDPerformanceSummaryFY-2025-26July2026.pdf",
+  "published": true
+ },
+ "dal-food-permit": {
+  "en": "Consumer Health doesn't publish a processing time; after you apply, you schedule and coordinate the required health inspections with your permitting inspector.",
+  "zh": "消费者健康部门未公布办理时间；提交申请后，需自行与许可检查员预约并协调所需的卫生检查。",
+  "days": null,
+  "source": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+  "published": false
+ },
+ "dal-fire-hood": {
+  "en": "Dallas doesn't publish a review time for kitchen hood fire-extinguishing system permits; its published goals cover only fire alarm, sprinkler and flammable-liquid reviews.",
+  "zh": "达拉斯未公布厨房排烟罩灭火系统许可证的审查时间；其公布的目标只涵盖火警、喷淋和易燃液体审查。",
+  "days": null,
+  "source": "https://www.dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/fire_plan_review.aspx",
+  "published": false
+ },
+ "aus-building": {
+  "en": "Commercial plan review for a remodel up to 25,000 sq ft takes 10 business days; small projects, such as a finish-out under 10,000 sq ft, take 5 business days.",
+  "zh": "面积不超过 25,000 平方英尺的改建项目，商业图纸审查需 10 个工作日；小型项目（如 10,000 平方英尺以下的内部装修）需 5 个工作日。",
+  "days": 14,
+  "source": "https://www.austintexas.gov/development-services/commercial-plan-review",
+  "published": true
+ },
+ "aus-food-plan-review": {
+  "en": "Inside the City of Austin, the food plan review is submitted with the commercial building application, whose review takes 10 business days for a remodel up to 25,000 sq ft (5 for small projects).",
+  "zh": "在奥斯汀市辖区内，食品图纸审查随商业建筑申请一并提交；面积不超过 25,000 平方英尺的改建项目审查需 10 个工作日（小型项目 5 个工作日）。",
+  "days": 14,
+  "source": "https://www.austintexas.gov/development-services/commercial-plan-review",
+  "published": true
+ },
+ "aus-food-preopening": {
+  "en": "Austin Public Health doesn't publish how soon a pre-opening inspection happens; you apply once the space is built, and you must pass before the permit is issued.",
+  "zh": "奥斯汀公共卫生局未公布开业前检查的排期时间；场所建成后即可申请，通过检查后才会发放许可证。",
+  "days": null,
+  "source": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+  "published": false
+ },
+ "aus-food-permit": {
+  "en": "Austin Public Health doesn't publish a processing time; the operating permit is issued after the pre-opening inspection is approved.",
+  "zh": "奥斯汀公共卫生局未公布办理时间；开业前检查通过后即发放经营许可证。",
+  "days": null,
+  "source": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+  "published": false
+ },
+ "aus-sign": {
+  "en": "Austin doesn't publish a review time for sign permits; staff review the application once the review fee is paid and email you the decision.",
+  "zh": "奥斯汀未公布招牌许可证的审查时间；缴纳审查费后工作人员才开始审查，并通过电子邮件通知结果。",
+  "days": null,
+  "source": "https://www.austintexas.gov/development-services/sign-permits",
+  "published": false
+ },
+ "ftw-plan-review": {
+  "en": "Fort Worth Consumer Health doesn't publish a plan review time for food establishments.",
+  "zh": "沃思堡消费者健康部门未公布食品场所的图纸审查时间。",
+  "days": null,
+  "source": "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review",
+  "published": false
+ },
+ "ftw-co": {
+  "en": "The CO is emailed to the permit contact on the business day after final approval.",
+  "zh": "最终验收通过后的下一个工作日，入住许可证会通过电子邮件发送给许可证联系人。",
+  "days": 2,
+  "source": "https://www.fortworthtexas.gov/departments/development-services/permits/certificate-of-occupancy",
+  "published": true
+ },
+ "ftw-food-permit": {
+  "en": "Contact the inspector at least one week before your expected opening to schedule the inspection; the permit is issued once all requirements are met and fees are paid.",
+  "zh": "须在预计开业日期前至少一周联系检查员预约检查；满足所有要求并缴清费用后即发放许可证。",
+  "days": 7,
+  "source": "https://www.fortworthtexas.gov/files/assets/public/v/3/environmental-services/health/documents/envd-consumer-health-food-establishments-plan-review-brochure-2019.pdf",
+  "published": true
+ },
+ "sat-co": {
+  "en": "San Antonio doesn't publish a processing time for a Certificate of Occupancy; for new construction it's issued once all required inspections are complete.",
+  "zh": "圣安东尼奥未公布入住许可证的办理时间；新建项目在所有规定检查完成后签发。",
+  "days": null,
+  "source": "https://sa.gov/Directory/Departments/DSD/Constructing/Business-Commercial/Certificate-of-Occupancy",
+  "published": false
+ },
+ "sat-food": {
+  "en": "Metro Health doesn't publish a processing time; the license is issued only after all building, health and fire inspections are approved and recorded, and you must show a valid CofO to buy the permit.",
+  "zh": "大都会卫生局未公布办理时间；所有建筑、卫生和消防检查经批准并登记后才会发放执照，购买许可证时须出示有效的入住许可证。",
+  "days": null,
+  "source": "https://www.sa.gov/Directory/Departments/SAMHD/Licenses-Food-Permits/Food-Establishment-License",
+  "published": false
+ },
+ "mc-plan-review": {
+  "en": "Maricopa County recommends applying at least 6 to 8 weeks before construction starts; if you'll finish within 15 business days of submitting, you must pay for expedited review.",
+  "zh": "马里科帕县建议在施工开始前至少 6 至 8 周提交申请；如预计在提交后 15 个工作日内完工，则须付费申请加急审查。",
+  "days": 56,
+  "source": "https://wrr.maricopa.gov/DocumentCenter/View/5827/Construction-Guide-PDF",
+  "published": true
+ },
+ "phx-co": {
+  "en": "Phoenix issues the Certificate of Occupancy 24 hours after the final inspection and mails it to the owner.",
+  "zh": "凤凰城在最终检查后 24 小时内签发入住许可证，并邮寄给业主。",
+  "days": 1,
+  "source": "https://www.phoenix.gov/pddsite/Documents/TRT/dsd_trt_pdf_00576.pdf",
+  "published": true
+ },
+ "mc-food-permit": {
+  "en": "After you apply, expect an email with your permit number and payment instructions within 2 business days; the permit itself follows plan review, inspection and fee payment.",
+  "zh": "提交申请后，通常 2 个工作日内会收到含许可证编号和缴费说明的电子邮件；许可证本身还需经过图纸审查、检查和缴费后才会发放。",
+  "days": 3,
+  "source": "https://www.maricopa.gov/4996/New-Application-Guidance",
+  "published": true
+ },
+ "fl-dor": {
+  "en": "If you register online, you can return to the website to get your certificate number after three business days.",
+  "zh": "在线登记后，三个工作日后即可返回网站获取登记证号码。",
+  "days": 5,
+  "source": "https://floridarevenue.com/rules/pdf/DR-1N_0725.pdf",
+  "published": true
+ },
+ "tpa-business-tax": {
+  "en": "Tampa doesn't publish a processing time for a new business tax receipt; applications are made online or by appointment.",
+  "zh": "坦帕市未公布新营业税收据的办理时间；可在线申请或预约办理。",
+  "days": null,
+  "source": "https://www.tampa.gov/business-tax",
+  "published": false
+ },
+ "fl-dbpr": {
+  "en": "Most license applications are processed within a few business days (longer by mail); new licenses also need an opening inspection, which you should request several business days before opening.",
+  "zh": "大多数执照申请在几个工作日内处理完毕（邮寄申请更久）；新执照还需开业检查，应在开业前几个工作日预约。",
+  "days": null,
+  "source": "https://www2.myfloridalicense.com/hotels-restaurants/licensing/general/",
+  "published": true
+ },
+ "ocfl-business-tax": {
+  "en": "Orange County doesn't publish a processing time; Zoning must approve the business (and a CO is needed for new or altered space) before the Tax Collector issues the receipt.",
+  "zh": "奥兰治县未公布办理时间；须先获分区部门批准（新建或改建场所还需入住许可证），税务征收官才会发放营业税收据。",
+  "days": null,
+  "source": "https://ocfl.net/PermitsLicenses/Permits/BTR.aspx",
+  "published": false
+ },
+ "mia-btr": {
+  "en": "Business tax receipts are printed weekly and mailed within three business days after printing.",
+  "zh": "营业税收据每周打印一次，打印后三个工作日内寄出。",
+  "days": 12,
+  "source": "https://archive.miami.gov/finance/BusinessTax.html",
+  "published": true
+ },
+ "wa-bls": {
+  "en": "Online applications take about 10 business days to process; city or state endorsements can add another 2–3 weeks.",
+  "zh": "在线申请约需 10 个工作日处理；如涉及市级或州级附加许可，可能还需额外 2 至 3 周。",
+  "days": 35,
+  "source": "https://dor.wa.gov/businesslicense",
+  "published": true
+ },
+ "sea-food": {
+  "en": "An initial plan review can take up to 8–10 weeks at current volumes; book the pre-operational inspection at least 1 week before opening.",
+  "zh": "按目前的申请量，首次图纸审查可能需要 8 至 10 周；开业前检查须至少提前 1 周预约。",
+  "days": 70,
+  "source": "https://kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit",
+  "published": true
+ },
+ "il-tax": {
+  "en": "Registration through MyTax Illinois takes about one to two business days to process; paper applications take four to six weeks.",
+  "zh": "通过 MyTax Illinois 在线登记约需一至两个工作日处理；纸质申请需四至六周。",
+  "days": 3,
+  "source": "https://tax.illinois.gov/businesses/registration.html",
+  "published": true
+ },
+ "chi-license": {
+  "en": "Chicago doesn't publish a standard processing time; the license is issued after zoning approval, payment and any required inspections, then mailed to your business.",
+  "zh": "芝加哥未公布标准办理时间；执照须经分区审批、缴费及所需检查后签发，并邮寄到营业地址。",
+  "days": null,
+  "source": "https://chicago.gov/city/en/sites/chicago-business-licensing/home/license-application-requirements.html",
+  "published": false
+ },
+ "ma-tax": {
+  "en": "DOR doesn't publish how long registration takes; once approved, it mails a registration certificate for each location.",
+  "zh": "税务局未公布登记所需时间；批准后会为每个营业地点邮寄一份登记证。",
+  "days": null,
+  "source": "https://mass.gov/info-details/register-your-business-with-masstaxconnect",
+  "published": false
+ },
+ "bos-cert": {
+  "en": "The City Clerk issues a business certificate while you wait in person, or in 2–3 days by mail.",
+  "zh": "现场办理时市书记官处可当场发放营业证书，邮寄办理需 2 至 3 天。",
+  "days": 3,
+  "source": "https://www.boston.gov/node/16573276",
+  "published": true
+ },
+ "ga-tax": {
+  "en": "After registering online in the Georgia Tax Center, you should get your tax account number by email within 15 minutes.",
+  "zh": "通过 Georgia Tax Center 在线登记后，通常 15 分钟内即可通过电子邮件收到税号。",
+  "days": 1,
+  "source": "https://dor.georgia.gov/tax-registration",
+  "published": true
+ },
+ "atl-license": {
+  "en": "Atlanta doesn't publish how long a new business license takes; only the zoning review step is done the same day when you apply in person, and some applications need additional days.",
+  "zh": "亚特兰大未公布新营业执照的办理时间；仅分区审查一步在现场申请时可当天完成，部分申请需额外数日。",
+  "days": null,
+  "source": "https://www.atlantaga.gov/home/showpublisheddocument?id=49309",
+  "published": false
+ },
+ "pa-tax": {
+  "en": "The Department of Revenue doesn't publish how long myPATH registration takes to issue a sales tax license.",
+  "zh": "宾州税务局未公布通过 myPATH 登记后签发销售税执照所需的时间。",
+  "days": null,
+  "source": "https://www.pa.gov/services/revenue/register-my-business-for-taxes",
+  "published": false
+ },
+ "phl-cal": {
+  "en": "Applied for online through eCLIPSE, the Commercial Activity License is issued automatically; in person, it's issued while you wait.",
+  "zh": "通过 eCLIPSE 在线申请，商业活动执照会自动签发；现场办理则可当场取得。",
+  "days": 1,
+  "source": "https://www.phila.gov/services/permits-violations-licenses/get-a-license/business-licenses-permits-and-approvals/get-a-commercial-activity-license/",
+  "published": true
+ },
+ "lv-license": {
+  "en": "A license technician emails you within 5 business days of an online application, and the license is issued within 30 days of applying, often much sooner.",
+  "zh": "在线申请后，执照专员会在 5 个工作日内发邮件联系您；执照在申请后 30 天内签发，通常会快得多。",
+  "days": 30,
+  "source": "https://lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License",
+  "published": true
+ },
+ "lv-food": {
+  "en": "The Health District doesn't publish a plan review or permit time; applications go through the EH Portal and are processed in the order received.",
+  "zh": "卫生区未公布图纸审查或许可证的办理时间；申请须通过 EH Portal 提交，并按收件顺序处理。",
+  "days": null,
+  "source": "https://www.southernnevadahealthdistrict.org/permits-and-regulations/plan-review",
+  "published": false
+ },
+ "dc-dlcp": {
+  "en": "DLCP doesn't publish how long a Basic Business License takes; you need a processed FR-500 tax registration and a Clean Hands check before you can apply.",
+  "zh": "消费者保护与许可局未公布基本营业执照的办理时间；申请前须先完成 FR-500 税务登记并通过 Clean Hands 审查。",
+  "days": null,
+  "source": "https://dlcp.dc.gov/node/1618236",
+  "published": false
+ },
+ "dc-otr": {
+  "en": "The Office of Tax and Revenue may take up to 10 business days to process an FR-500 registration.",
+  "zh": "税收办公室处理 FR-500 登记最长可能需要 10 个工作日。",
+  "days": 14,
+  "source": "https://dlcp.dc.gov/node/1621001",
+  "published": true
+ },
+ "dc-food": {
+  "en": "DC Health doesn't publish a plan review or licensing time; plans go through ProjectDox with the building permit, and you need a passed pre-operational inspection before the license.",
+  "zh": "华盛顿特区卫生局未公布图纸审查或执照办理时间；图纸随建筑许可证通过 ProjectDox 提交，须通过开业前检查后才能取得执照。",
+  "days": null,
+  "source": "https://dchealth.dc.gov/sites/default/files/dc/sites/doh/publication/attachments/FS%28redtop%29%20-%20Plan%20review%202018%20v2.pdf",
+  "published": false
+ }
+}

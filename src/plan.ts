@@ -85,7 +85,7 @@ export function planStore(row: StoreRow, segment: Segment, stats: FormStat[], to
   const list = formsFor({ segment, where: row.address, needs: { food, employees: true, signage: true, buildout: true } });
   const forms: PlannedForm[] = list.map(form => {
     const st = stats.find(s => s.form === form.id && s.n >= 3);
-    const pub = publishedDays(form.takes);
+    const pub = form.takesDays !== undefined ? form.takesDays : publishedDays(form.takes);
     const days = st ? st.p90_days : pub;
     const fileBy = row.opening && days != null ? addDays(row.opening, -(days + BUFFER)) : null;
     return { form, days, daysFrom: st ? "placetta" : pub != null ? "agency" : null, fileBy, late: !!fileBy && fileBy < today, everyMonths: renewMonths(form.renews) };

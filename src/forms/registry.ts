@@ -1,3 +1,4 @@
+import TIMES from "./times.json";
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import { WORLD_FORMS, worldPlaces } from "./world";
@@ -36,6 +37,7 @@ export type OfficialForm = {
   currency?: string;
   feeNote?: Bi;
   takes?: Bi;
+  takesDays?: number | null;   // the days a file-by date counts back, when the time came from research (null: none)
   takesSource?: string;       // the agency page that states that time, and when we read it
   renews?: Bi;
   fields: FormField[];        // as printed on the form or asked by the portal
@@ -571,6 +573,13 @@ export const FORMS: OfficialForm[] = [
 ];
 
 FORMS.push(...WORLD_FORMS, ...LOCAL_US);
+
+/* Processing times for filings whose library entry had none, read from each agency's own page (research/times.json,
+   kept as src/forms/times.json). An agency that publishes no time says so in words, with no file-by date from it. */
+for (const f of FORMS) {
+  const t = (TIMES as Record<string, { en: string; zh: string; days: number | null; source: string }>)[f.id];
+  if (t && !f.takes) { f.takes = B(t.en, t.zh); f.takesDays = t.days; f.takesSource = t.source; }
+}
 // The line-by-line research (src/forms/lines.ts): each form's questions as the agency prints them, the attachments it
 // lists, and how it is submitted. It replaces a shorter list of lines, never a longer one.
 for (const f of FORMS) {
