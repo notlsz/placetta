@@ -48,9 +48,10 @@
   }));
 
   /* real counts: one view per visitor per day and one helpful vote per visitor, counted by page_hit() in Supabase.
-     The button shows on every page; views and votes show as soon as they can be read. */
+     The button shows on every page; the counts show only once they mean something (a page reading "1 view" looks
+     unread), so a guide shows its views from 500 and its helpful votes from 10. */
   const STATS = "https://esquxzcfsylffuijvzec.supabase.co/rest/v1/rpc/page_hit", SKEY = "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p";
-  const VIEWS_MIN = 1, HELPFUL_MIN = 1, path = location.pathname.toLowerCase();
+  const VIEWS_MIN = 500, HELPFUL_MIN = 10, path = location.pathname.toLowerCase();
   const get = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
   const set = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
   const hit = (view, helpful) => fetch(STATS, { method: "POST", headers: { apikey: SKEY, "Content-Type": "application/json" },

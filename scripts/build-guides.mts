@@ -343,7 +343,13 @@ ${steps(tp.forms, l)}
   /* a page per official form */
   for (const f of FORMS) {
     const name = t(f.title, l);
-    const title = l === "zh" ? `${f.form}：${name}办理指南` : `${f.form}: how to file the ${lower1(name)}`;
+    // "Food establishment approval: how to file the food establishment approval" says it twice: when the form's own name
+    // is the filing's name, the title names it once, with where it applies
+    const same = (() => { const w = (x: string) => new Set(x.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff ]/g, " ").split(/\s+/).filter(y => y.length > 2));
+      const a = w(f.form), b = w(name); if (!a.size || !b.size) return f.form === name; let n = 0; for (const x of a) if (b.has(x)) n++; return n / Math.min(a.size, b.size) >= 0.6; })();
+    const title = same
+      ? (l === "zh" ? `${name}办理指南（${where(f, l)}）` : `How to file the ${lower1(name)} (${where(f, l)})`)
+      : (l === "zh" ? `${f.form}：${name}办理指南` : `${f.form}: how to file the ${lower1(name)}`);
     const desc = l === "zh" ? `${t(f.agency, l)}的${name}：谁需要办、如何办理、费用、所需时间${f.fields.length ? "和表格逐行说明" : ""}。` : `${name} from ${t(f.agency, l)}: who files it, how, the fee and how long it takes${f.fields.length ? ", with each line of the form" : ""}.`;
     const users = usedBy.get(f.id) ?? [];
     const qs = ANSWERS.filter(a => a.forms.includes(f.id));
@@ -383,7 +389,8 @@ ${users.length ? `<aside class="rail"><div class="rail-in"><p class="rail-h">${l
   for (const a of ANSWERS) {
     let short = a.a[l], forms = a.forms.map(id => formById(id)!).filter(Boolean);
     const rel = (a.plan ?? []).map(x => findGuide(x.place, x.seg)).filter((x): x is Guide => !!x);
-    let place: Place | undefined = rel[0]?.place;
+    // the sign-up box names a city only when the answer is about one city; a state or federal question gets the generic box
+    let place: Place | undefined = rel.length && rel.every(g => g.place === rel[0].place) ? rel[0].place : undefined;
     if (a.cost) {
       const g = findGuide(a.cost.place, "restaurant")!; const c = costOf(g.forms); forms = g.forms; rel.unshift(g); place = g.place;
       short = l === "zh"

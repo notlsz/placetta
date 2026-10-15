@@ -1024,8 +1024,6 @@ https://placetta.com/guides/forms/nv-silverflume.html
 https://placetta.com/guides/forms/lv-license.html
 https://placetta.com/guides/forms/lv-food.html
 https://placetta.com/guides/forms/nj-formation.html
-https://placetta.com/guides/forms/sf-reg.html
-https://placetta.com/guides/forms/sj-btc.html
 https://placetta.com/guides/forms/sj-business-tax.html
 https://placetta.com/guides/forms/scc-plan-check.html
 https://placetta.com/guides/forms/sj-building-ti.html
@@ -2134,8 +2132,6 @@ https://placetta.com/guides/zh/forms/nv-silverflume.html
 https://placetta.com/guides/zh/forms/lv-license.html
 https://placetta.com/guides/zh/forms/lv-food.html
 https://placetta.com/guides/zh/forms/nj-formation.html
-https://placetta.com/guides/zh/forms/sf-reg.html
-https://placetta.com/guides/zh/forms/sj-btc.html
 https://placetta.com/guides/zh/forms/sj-business-tax.html
 https://placetta.com/guides/zh/forms/scc-plan-check.html
 https://placetta.com/guides/zh/forms/sj-building-ti.html

@@ -595,6 +595,15 @@ export function segmentOf(text: string): Segment {
 }
 
 const NYC = /\b(new york city|nyc|manhattan|brooklyn|queens|bronx|staten island|flushing|astoria|long island city|elmhurst|sunset park|chinatown, ny)\b|纽约市|法拉盛|曼哈顿|皇后区|布鲁克林/i;
+/** A New York City address: a borough or neighborhood by name, "New York, NY" (Manhattan's postal city), or a
+    New York ZIP code inside the five boroughs (100-104 Manhattan, Bronx and Staten Island; 111-114 and 116 Queens and
+    Brooklyn; 11004-11005 Glen Oaks and Floral Park, Queens). */
+const NYC_HOOD = /\b(jackson heights|forest hills|bayside|jamaica|corona|sunnyside|ridgewood|woodside|rego park|fresh meadows|whitestone|college point|williamsburg|bushwick|bensonhurst|bay ridge|park slope|greenpoint|harlem|tribeca|soho|chelsea|midtown|financial district|lower east side|upper (east|west) side)\b/;
+function inNYC(w: string, ny: boolean): boolean {
+  if (NYC.test(w) || /\bnew york,?\s*(ny|new york)\b/.test(w)) return true;
+  if (!ny) return false;
+  return /\b(10[0-4]\d\d|11[1-4]\d\d|116\d\d|1100[45])(-\d{4})?\b/.test(w) || NYC_HOOD.test(w);
+}
 /** Where it is: the jurisdictions whose forms apply, at home and abroad. */
 export function placesOf(where: string): Where[] {
   const w = where.toLowerCase();
@@ -602,8 +611,9 @@ export function placesOf(where: string): Where[] {
   const abroad = !!world.country && world.country.code !== "US";
   const out: Where[] = abroad ? [] : ["US"];
   if (!abroad) {
-    if (NYC.test(w) || /,\s*ny\b|new york|纽约/.test(w)) out.push("NY");
-    if (NYC.test(w)) out.push("NYC");
+    const ny = NYC.test(w) || /,\s*ny\b|new york|纽约/.test(w);
+    if (ny) out.push("NY");
+    if (inNYC(w, ny)) out.push("NYC");
     if (/,\s*ca\b|california|加州|los angeles|洛杉矶|san francisco|\bsf\b|旧金山|san jose|圣何塞|irvine|arcadia|alhambra|san gabriel/.test(w)) out.push("CA");
     if (/los angeles|洛杉矶|\bla\b/.test(w)) out.push("LA", "LAC");
     else if (/arcadia|alhambra|san gabriel|monterey park|rowland heights|pasadena|long beach|torrance|el monte/.test(w)) out.push("LAC");

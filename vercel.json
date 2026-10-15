@@ -43,6 +43,26 @@
       "source": "/app",
       "destination": "/app/",
       "permanent": true
+    },
+    {
+      "source": "/guides/forms/sj-btc.html",
+      "destination": "/guides/forms/sj-business-tax.html",
+      "permanent": true
+    },
+    {
+      "source": "/guides/zh/forms/sj-btc.html",
+      "destination": "/guides/zh/forms/sj-business-tax.html",
+      "permanent": true
+    },
+    {
+      "source": "/guides/forms/sf-reg.html",
+      "destination": "/guides/forms/sf-business-registration.html",
+      "permanent": true
+    },
+    {
+      "source": "/guides/zh/forms/sf-reg.html",
+      "destination": "/guides/zh/forms/sf-business-registration.html",
+      "permanent": true
     }
   ],
   "headers": [

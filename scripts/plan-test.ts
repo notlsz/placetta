@@ -35,3 +35,11 @@ eq(ny.forms.filter(f => f.days != null).length >= 4, true, "most NY forms now ha
 import { permitsOnOpening } from "../src/plan";
 const permits = permitsOnOpening({ name: "F", address: "136-20 Roosevelt Ave, Flushing, NY 11354" }, "tea", "2026-10-09");
 eq(permits.length > 0 && permits.every(p => p.expires > "2026-10-09" && p.name.en.includes("(estimated)")), true, "opening a store starts its renewals");
+// no filing twice in one plan, in any of the cities the library covers
+const titles = (address: string) => planStores([{ name: "x", address, opening: "2027-03-01" }], "restaurant", [], "2026-10-09")[0].forms.map(f => f.form.id);
+for (const a of ["1 N First St, San Jose, CA 95112", "1 Market St, San Francisco, CA", "1 Main St, Los Angeles, CA", "1 Main St, Houston, TX", "1 Main St, Flushing, NY 11354"]) {
+  const ids = titles(a); eq(ids.length === new Set(ids).size && !ids.includes("sj-btc") && !ids.includes("sf-reg"), true, `no duplicate filing in ${a.split(", ")[1]}`);
+}
+// Manhattan's postal city is "New York, NY": it gets New York City's filings
+eq(titles("123 Broadway, New York, NY 10006").some(id => id.startsWith("nyc-")), true, "a Manhattan address gets NYC filings");
+eq(titles("1 Main St, Albany, NY 12207").some(id => id.startsWith("nyc-")), false, "an Albany address doesn't");

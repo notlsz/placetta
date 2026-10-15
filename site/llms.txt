@@ -198,12 +198,12 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Retail stores in Doha](https://placetta.com/guides/doha/retail-store.html): 3 filings
 - [Restaurants in Istanbul](https://placetta.com/guides/istanbul/restaurant.html): 3 filings
 - [Retail stores in Istanbul](https://placetta.com/guides/istanbul/retail-store.html): 3 filings
-- [Restaurants in San Francisco](https://placetta.com/guides/san-francisco/restaurant.html): 13 filings
-- [Retail stores in San Francisco](https://placetta.com/guides/san-francisco/retail-store.html): 10 filings
-- [Importers and online sellers in San Francisco](https://placetta.com/guides/san-francisco/importer-ecommerce.html): 12 filings
-- [Restaurants in San Jose](https://placetta.com/guides/san-jose/restaurant.html): 13 filings
-- [Retail stores in San Jose](https://placetta.com/guides/san-jose/retail-store.html): 9 filings
-- [Importers and online sellers in San Jose](https://placetta.com/guides/san-jose/importer-ecommerce.html): 12 filings
+- [Restaurants in San Francisco](https://placetta.com/guides/san-francisco/restaurant.html): 12 filings
+- [Retail stores in San Francisco](https://placetta.com/guides/san-francisco/retail-store.html): 9 filings
+- [Importers and online sellers in San Francisco](https://placetta.com/guides/san-francisco/importer-ecommerce.html): 11 filings
+- [Restaurants in San Jose](https://placetta.com/guides/san-jose/restaurant.html): 12 filings
+- [Retail stores in San Jose](https://placetta.com/guides/san-jose/retail-store.html): 8 filings
+- [Importers and online sellers in San Jose](https://placetta.com/guides/san-jose/importer-ecommerce.html): 11 filings
 - [Restaurants in Chicago](https://placetta.com/guides/chicago/restaurant.html): 4 filings
 - [Retail stores in Chicago](https://placetta.com/guides/chicago/retail-store.html): 4 filings
 - [Importers and online sellers in Chicago](https://placetta.com/guides/chicago/importer-ecommerce.html): 8 filings
