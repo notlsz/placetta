@@ -1,6 +1,15 @@
 import { inspectionsFor } from "./inspections/forStore";
 import { DEFAULT_POLICY, SPEND_CATEGORIES, decide, suggestBudgets, type Budget, type Purchase, type SpendCategory } from "./spend.ts";
 import { canFill } from "./forms/canFill";
+import { addressProblems, checkAddress, formState, RULE_LABEL } from "./forms/addressCheck";
+import { ADDRESS_RULES } from "./forms/address-rules/index";
+import type { AddressCheck } from "./forms/addressCheck";
+
+/* An address the agency doesn't accept on a line, as a tool tells the model: what's wrong, what the agency accepts,
+   what to do without one, and the three sources that say so. */
+const addrOut = (form: string, field: string, value: string, c: AddressCheck) => ({ field, value, problem: c.problem?.en, rule: RULE_LABEL[c.rule.rule].en, agency_accepts: c.rule.what.en,
+  if_the_business_has_none: c.rule.ifNone.en, sources: c.rule.confirmations.map(x => x.url), form });
+const ADDR_NEXT = "Leave that line empty. Tell the person in plain words what the agency accepts there and what to do if the business has none (if_the_business_has_none), citing the sources, then fill the address they give.";
 import type { OrbState } from "thinking-orbs";
 import {
   addApp, addApproval, addDeadline, addDoc, audit, filingBlockers, isBlank, setApp, setCheck, setFact,
@@ -260,6 +269,7 @@ How you work:
 Rules:
 - You never file, submit, pay, sign or send anything yourself, and never say you did. Filings, payments and messages go out only after the person approves them in the app.${account ? `
 - After the person approves a filing, Placetta checks it against the agency's requirements, submits it by email, fax, certified mail or the agency's site (or hands it to the Placetta team when no automatic channel fits), and saves the confirmation. It asks the person only for a CAPTCHA, an identity check, a payment or a handwritten signature. Government fees are paid by the business directly to the agency. Never say a filing is submitted until the workspace shows it.` : ""}
+- Addresses on an official form: use the company's own address in the country it is applying in. Before filling an address line, read address_rules for that form: it says what the agency accepts on each line (a street address in the state, the store's own premises, any US address, or an address abroad), each confirmed by three official sources. When the business has no address of the kind a line needs (most often a street address in the state for a registered or statutory agent), never put its address abroad there: say what the agency accepts and what to do without such an address (address_rules says), cite the sources, and leave the line empty. fill_fields and request_filing_approval refuse an address that breaks the rule.
 - Never invent the person's facts. If something is missing, leave the field empty (never "TBD", "unknown" or a placeholder, which count as empty) and ask for it at the end; in a drafted document use [brackets].
 - Never invent a license or permit name, form number, agency, fee, processing time, rule or date. Take them from find_official_forms${research ? " or an official page you read and cite" : ""}; anything you couldn't confirm there, call an estimate to confirm with the agency, or leave out.
 - You are not a lawyer, and Placetta is not a law firm. Say what an agency, statute or rule requires and cite it; don't give legal opinions or tell them what they legally should do. For questions of legal judgment (lease terms, choosing or structuring an entity, contracts, disputes, immigration, liability, what a law means for their situation), say it's a question for a licensed attorney, offer to prepare a short list of questions for one, and keep helping with the filings. Never say Placetta's lawyers will handle something.
@@ -514,6 +524,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // a form skill fills the lines that don't depend on the store from the last filing of the same form
         const known = off ? prefill(get(), off.id) : new Map();
         const fields = (listed ? officialFields(off!, given) : withCore(coreFields(get(), target, abroad), given)).map(f => (isBlank(f.value) && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
+        const blocked = off ? addressProblems(off.id, Object.fromEntries(fields.filter(f => !isBlank(f.value)).map(f => [f.id, f.value]))) : [];
+        for (const p of blocked) { const k = fields.findIndex(f => f.id === p.field); if (k >= 0) fields[k] = { ...fields[k], value: "", from: undefined, quote: undefined }; }
         const checklist = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
         // an official form whose lines aren't in the library yet stays with Placetta until its fields are filled
         const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => isBlank(f.value)) || (off && !fields.length) ? "draft" : "ready";
@@ -536,6 +548,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         made.apps.add(id); touch(id); mark();
         return { application_id: id, status, ...(target ? { store_id: target.id, store: target.name.en } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
           fee: off?.fee ?? (off ? null : fee), fee_note: app.feeNote?.en,
+          ...(blocked.length ? { address_not_filled: blocked.map(p => addrOut(off!.id, p.field, p.value, p.check)), do_next: ADDR_NEXT } : {}),
           empty_fields: fields.filter(f => isBlank(f.value)).map(f => f.label.en), missing_documents: checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: c.label.en })), ...(known.size ? { filled_from_skill: known.size } : {}),
           ...(!listed ? { fields_note: off ? "The library doesn't list this form's own lines yet: these are the lines every agency asks. Read the official link and fill_fields with every other line the form asks for." : "Add every line the agency's form asks for with fill_fields." } : {}),
           ...(!off && !fee ? { fee_note_for_you: "No fee given. If the agency charges one, pass it: an estimate is shown as one." } : {}) };
@@ -547,9 +560,15 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       inputSchema: { type: "object", properties: { application_id: { type: "string" }, fields: { type: "array", items: { type: "object", properties: { label: { type: "string" }, value: { type: "string" }, source: { type: "string", description: "Where the value came from, e.g. 'You told me' or 'From lease.pdf'" } }, required: ["label", "value"] } } }, required: ["application_id", "fields"] },
       execute(i) {
         const a = findApp(i.application_id); notFiled(a);
-        const incoming = fieldList(i.fields, lang === "zh" ? "快哉填写" : "Filled by Placetta");
-        if (!incoming.length) throw new Error("fields must be a list of {label, value}");
+        const given = fieldList(i.fields, lang === "zh" ? "快哉填写" : "Filled by Placetta");
+        if (!given.length) throw new Error("fields must be a list of {label, value}");
         const off = a.official ? formById(a.official) : undefined;
+        // an address the agency doesn't accept on that line (an address abroad where it needs a Texas street address, a
+        // P.O. box where it needs the premises) stays off the form: Placetta says what the agency accepts instead
+        const lineOf = (f: Field) => { const raw = f.label.en.trim(), key = raw.toLowerCase().replace(/^line\s+/, ""); return off?.fields.find(o => o.id === key || o.label.en.toLowerCase() === key || o.label.zh === raw || o.line.toLowerCase() === key || `${o.line}: ${o.label.en}`.toLowerCase() === key)?.id ?? a.fields.find(y => y.label.en.toLowerCase() === raw.toLowerCase() || y.id === raw)?.id; };
+        const refused = off ? given.map(f => ({ f, id: lineOf(f) })).map(x => ({ ...x, c: x.id ? checkAddress(off.id, x.id, x.f.value) : null })).filter(x => x.c && !x.c.ok) : [];
+        const incoming = given.filter(f => !refused.some(x => x.f === f));
+        if (!incoming.length && refused.length) { mark(); return { filled: 0, address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT }; }
         const added: string[] = [];
         S("shaping", L(`Filling ${incoming.length} field${incoming.length === 1 ? "" : "s"} on the ${nm(a)}`, `填写${nm(a)}的 ${incoming.length} 项`), a.source.label || undefined);
         apply(w => ({ ...w, apps: w.apps.map(x => {
@@ -586,7 +605,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         });
         made.apps.add(a.id); touch(a.id); mark();
         const now = get().apps.find(x => x.id === a.id)!;
-        return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
+        return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
           ...(also ? { also_filled_on: `${also} other open application${also === 1 ? "" : "s"}, and saved to Context` } : {}) };
       },
     },
@@ -620,6 +639,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           return { approval_requested: false, why: "Not ready: nothing is filed with an empty field or a missing document.", empty_fields: bl.empty.map(x => x.en), missing_documents: bl.missing.map(x => x.en),
             do_next: "Fill what you can with fill_fields. Ask the person for the rest in one short list. Write letters with draft_document; ask them to upload the other documents. Then call this again." };
         }
+        const badAddr = a.official ? addressProblems(a.official, Object.fromEntries(a.fields.map(f => [f.id, f.value]))) : [];
+        if (badAddr.length) { mark(); return { approval_requested: false, why: "An address on this form isn't one the agency accepts on that line.", address_problems: badAddr.map(p => addrOut(a.official!, p.field, p.value, p.check)), do_next: ADDR_NEXT }; }
         const existing = get().approvals.find(x => x.app === a.id && x.kind === "file");
         if (existing) { made.approvals.push(existing.id); mark(); return { approval_id: existing.id, note: "Already waiting for approval" }; }
         const g = gaps(a);
@@ -1082,6 +1103,20 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         };
         mark();
         return { reviewed: rows.map(([name, o]) => ({ name, ...(o ?? { unreadable: true }) })), renewal_reminders_added: rows.filter(([, o]) => dated(o?.expires)).length };
+      },
+    },
+    {
+      name: "address_rules",
+      description: "What address each address line on an official form must hold (a street address in the state, the store's own premises, any US address, or an address abroad), each rule confirmed by at least three official sources (the form or its instructions, the agency's page, the statute). Read it before filling an address line, and to explain to the person what to do when the business has no address of that kind.",
+      inputSchema: { type: "object", properties: { official_form_id: { type: "string" } }, required: ["official_form_id"] },
+      execute(i) {
+        const id = str(i.official_form_id), off = formById(id);
+        if (!off) throw new Error(`No official form "${id}". Use an id from find_official_forms.`);
+        const r = ADDRESS_RULES[id];
+        mark();
+        if (!r) return { form: off.form, covered: false, note: "Placetta hasn't confirmed this form's address rules with three sources yet. Use the company's own address in the country it is applying in; for a registered or statutory agent, a street address in that state. Ask the agency when unsure." };
+        return { form: off.form, state: formState(id), read: r.read, lines: Object.entries(r.fields).map(([field, f]) => ({ field, label: off.fields.find(x => x.id === field)?.label.en ?? field, rule: f.rule, accepts: f.what.en, po_box: f.poBox, if_the_business_has_none: f.ifNone.en,
+          sources: f.confirmations.map(c => ({ url: c.url, says: c.quote, kind: c.kind })) })) };
       },
     },
     {

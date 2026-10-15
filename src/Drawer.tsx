@@ -1,3 +1,4 @@
+import { checkAddress, RULE_LABEL } from "./forms/addressCheck";
 import { canFill } from "./forms/canFill";
 import { useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
@@ -158,6 +159,25 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
   );
 }
 
+/* What the agency accepts on an address line, with the three official sources that say so, and what to do when the
+   address given isn't that kind (an address abroad where the agency needs a street address in the state). */
+function AddrRule({ form, field, value }: { form: string; field: string; value: string }) {
+  const { b, lang } = useApp();
+  const c = checkAddress(form, field, value);
+  if (!c) return null;
+  const n = c.rule.confirmations.length;
+  return (
+    <div className={"arule" + (c.ok ? "" : " bad")}>
+      {!c.ok && c.problem && <p className="awarn"><b>{b(c.problem)}</b> {b(c.rule.ifNone)}</p>}
+      <details>
+        <summary>{b(RULE_LABEL[c.rule.rule])}{c.rule.rule !== "unconfirmed" ? (lang === "zh" ? ` · ${n} 个官方来源确认` : ` · confirmed by ${n} official sources`) : ""}</summary>
+        <p>{b(c.rule.what)}</p>
+        <ul>{c.rule.confirmations.map((x, k) => <li key={k}><a href={x.url} target="_blank" rel="noopener noreferrer">{(() => { try { return new URL(x.url).hostname.replace(/^www\./, ""); } catch { return x.url; } })()}<I.ext /></a> <q>{x.quote}</q></li>)}</ul>
+      </details>
+    </div>
+  );
+}
+
 function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
   const { b, t, lang, say, editFields, downloadApp, cloud } = useApp();
   const [making, setMaking] = useState(false);
@@ -216,6 +236,7 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
                   : <span>{f.value || t("empty")}</span>}
                 {f.from && !edit && <small>{b(f.from)}</small>}
                 {f.quote && !edit && <q className="cite">{f.quote}</q>}
+                {a.official && <AddrRule form={a.official} field={f.id} value={edit ? vals[f.id] ?? "" : f.value} />}
               </dd>
             </div>
           ))}

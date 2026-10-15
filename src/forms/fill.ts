@@ -1,3 +1,4 @@
+import { addressProblems } from "./addressCheck";
 import type { Field } from "../model";
 import { formById } from "./registry";
 import { MAPS } from "./maps";
@@ -83,7 +84,10 @@ export async function fillMapped(bytes: Uint8Array, map: FormMap, fields: Field[
   const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const form = doc.getForm();
   const font = await doc.embedFont(StandardFonts.Helvetica);
-  const filled = writeAnswers(map, valuesOf(fields), pdfLibWriter(form, doc, font));
+  // an address the agency doesn't accept on its line never goes on the agency's form (the app and Odelia already say why)
+  const values = valuesOf(fields);
+  for (const p of addressProblems(map.form, values)) delete values[p.field];
+  const filled = writeAnswers(map, values, pdfLibWriter(form, doc, font));
   // XFA forms (the IRS's and Arizona's) would show their own empty copy in Acrobat; drop it so the filled boxes show.
   try { form.deleteXFA(); } catch { /* no XFA */ }
   try { form.updateFieldAppearances(); } catch { /* a box with an odd font keeps its own look */ }

@@ -12,6 +12,8 @@ import { inDays } from "../src/time";
 import { B, same } from "../src/bi";
 import type { Application, Workspace } from "../src/model";
 import { UPDATED } from "../src/legal.ts";
+import { ADDRESS_RULES } from "../src/forms/address-rules/index";
+import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
 import { readdirSync, readFileSync } from "node:fs";
 
 /* ------------------------------------------------------------------ checks */
@@ -577,12 +579,40 @@ async function spending() {
   ok(ig.ok && (ig.parsed?.covered === false || (Array.isArray(ig.parsed?.inspections) && ig.parsed.inspections.every((x: { still_open: unknown[]; source: string }) => Array.isArray(x.still_open) && /^https?:/.test(x.source)))), "inspection_guide returns the city's inspections with what's still open and the agency's page", ig.out?.slice(0, 200));
 }
 
+async function addresses() {
+  console.log("\n# Addresses: address_rules, and an address the agency doesn't accept stays off the form");
+  const ws = workspace({ stores: [{ id: "st1", name: same("Main St"), address: "1 Main St, Houston, TX 77002", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] });
+  const rule = ADDRESS_RULES["tx-205"]?.fields.agent_address;
+  const r = await agent({
+    ws, prompt: "Form our Texas LLC. Our address is 88 Century Ave, Pudong, Shanghai, China.",
+    script: [
+      () => ask(["address_rules", { official_form_id: "tx-205" }], ["prepare_application", { official_form_id: "tx-205", store_id: "st1" }]),
+      c => ask(["fill_fields", { application_id: c.out("prepare_application").application_id, fields: [{ label: "agent_address", value: "88 Century Ave, Pudong, Shanghai 200120, China", source: "You told me" }] }]),
+      c => ask(["request_filing_approval", { application_id: c.out("prepare_application").application_id }]),
+      () => say("Texas needs a registered agent with a street address in Texas; I left that line empty."),
+    ],
+  });
+  const ar = callNamed(r, "address_rules")[0];
+  ok(ar.ok && (ar.parsed?.covered === false || (Array.isArray(ar.parsed?.lines) && ar.parsed.lines.every((l: { rule: string; sources: unknown[] }) => l.rule === "unconfirmed" || l.sources.length >= 3))), "address_rules gives each line's rule, every confirmed rule with three or more sources", ar.out?.slice(0, 200));
+  const ff = callNamed(r, "fill_fields")[0];
+  if (rule && rule.rule !== "foreign_ok") {
+    ok(Array.isArray(ff.parsed?.address_not_filled) && ff.parsed.address_not_filled.length === 1, "an address abroad isn't written on a line that needs a Texas street address", ff.out?.slice(0, 200));
+    const a = r.w.apps.find(x => x.official === "tx-205");
+    ok(!!a && !a.fields.some(f => f.id === "agent_address" && /shanghai/i.test(f.value)), "the registered agent line stays empty");
+  } else ok(true, "tx-205 has no confirmed registered-agent rule yet (skipped)");
+  ok(checkAddress("tx-205", "agent_address", "") === null || checkAddress("tx-205", "agent_address", "")!.ok, "an empty address line is never a problem");
+  eq(placeOfAddress("700 Lavaca St, Austin, TX 78701").state, "TX", "a US address reads its state");
+  eq(placeOfAddress("88 Century Ave, Pudong, Shanghai 200120, China").country, "abroad", "an address in China reads as abroad");
+  eq(placeOfAddress("P.O. Box 12, Austin, TX 78701").poBox, true, "a P.O. box is recognized");
+}
+
 /* ------------------------------------------------------------------ run */
 
 await mapStore();
 await progress();
 await stores();
 await spending();
+await addresses();
 await fieldsAndDocs();
 await writing();
 await memoryAndSkills();

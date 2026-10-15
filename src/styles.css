@@ -1497,3 +1497,16 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .insp-list .check span { display: flex; flex-direction: column; gap: 2px; }
 .insp-list .check small { color: var(--ink3); font-size: 12px; }
 .insp-list li.done b { color: var(--ink3); font-weight: 400; }
+
+/* an address line's rule, under the line in the application tab */
+.arule { margin-top: 6px; font-size: 12.5px; line-height: 1.45; color: var(--ink2); }
+.arule summary { cursor: pointer; list-style: none; color: var(--ink2); }
+.arule summary::-webkit-details-marker { display: none; }
+.arule summary::before { content: "⌂"; margin-right: 6px; color: var(--muted); }
+.arule details[open] summary { color: var(--ink); }
+.arule details p { margin: 6px 0 4px; }
+.arule ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.arule li a { display: inline-flex; align-items: center; gap: 3px; color: var(--accent, #4D73A3); }
+.arule li q { color: var(--muted); }
+.arule .awarn { margin: 0 0 6px; padding: 8px 10px; border-radius: 10px; background: rgba(217, 147, 43, .1); color: var(--ink); }
+.arule .awarn b { font-weight: 500; }
