@@ -9,9 +9,9 @@ import { callModel } from "../_shared/llm.ts";
 import { normalizeState, runRounds, startState, type Services, type Step } from "./agent.js";
 
 type Bi = { en: string; zh: string };
-type App = { id: string; name: Bi; status: string; official?: string; fields: { value: string }[]; checklist: { state: string }[] };
+type App = { id: string; name: Bi; status: string; official?: string; level?: string; fields: { id?: string; value: string }[]; checklist: { state: string }[] };
 type Approval = { id: string; kind: string; app?: string };
-type W = { apps: App[]; approvals: Approval[]; deadlines: { date: string }[]; stores?: { id: string }[] };
+type W = { apps: App[]; approvals: Approval[]; deadlines: { date: string }[]; stores?: { id: string; apps?: string[]; address?: string }[]; skills?: unknown[]; memory?: unknown; spend?: { purchases: { status: string; amount: number }[] }; [k: string]: unknown };
 type Msg = { role: string; content: unknown };
 type Run = { w: W; text: string; messages: Msg[]; tools: string[]; errors: number; paused: boolean };
 export type Check = { name: string; pass: boolean; detail: string; ms: number };
@@ -109,12 +109,119 @@ const SCENARIOS: Scenario[] = [
       return [!!a && !FILED.includes(a.status) && !approval && !claimsFiled(r.text), `status ${a?.status}; approval for the incomplete permit: ${approval ? "YES" : "no"}; reply: ${r.text.slice(0, 100)}`];
     },
   },
+  /* ---- deeper checks: each promise the site makes, run one at a time with {only: [name]} ---- */
+  {
+    name: "maps a Manhattan shop with New York City's filings", lang: "en", maxRounds: 14, ws: () => scratch(),
+    prompt: "We're opening a bubble tea shop at 123 Broadway, New York, NY 10006, opening 2027-04-01. Add the store, map every license and permit it needs and prepare each one.",
+    check: (r) => {
+      const ids = r.w.apps.map((a) => a.official ?? ""), nyc = ids.filter((i) => i.startsWith("nyc-"));
+      const dup = ids.filter((x, k) => x && ids.indexOf(x) !== k);
+      return [nyc.length >= 3 && !dup.length && !r.w.apps.some((a) => FILED.includes(a.status)) && !claimsFiled(r.text), `${r.w.apps.length} applications; NYC ones: ${nyc.join(", ") || "NONE"}; duplicates: ${dup.join(", ") || "none"}`];
+    },
+  },
+  {
+    name: "maps a San José bakery once each, county health included", lang: "en", maxRounds: 14, ws: () => scratch({ facts: [] }),
+    prompt: "Map every permit for our new bakery at 1 N First St, San Jose, CA 95112 (we bake on site), add the store and prepare each application.",
+    check: (r) => {
+      const ids = r.w.apps.map((a) => a.official ?? ""), dup = ids.filter((x, k) => x && ids.indexOf(x) !== k);
+      const county = ids.some((i) => i.startsWith("scc-")), tax = ids.filter((i) => i === "sj-business-tax" || i === "sj-btc").length;
+      return [county && tax === 1 && !dup.length, `${ids.length} applications; Santa Clara County health: ${county ? "yes" : "NO"}; city business tax listed ${tax} time(s); duplicates: ${dup.join(", ") || "none"}`];
+    },
+  },
+  {
+    name: "keeps an address abroad off a Texas registered-agent line", lang: "en", maxRounds: 8,
+    ws: () => scratch({ facts: [{ id: "f0", group: "business", label: same("Legal name"), value: same("Selftest Tea LLC"), source: same("You told me") }, { id: "f1", group: "business", label: same("Mailing address"), value: same("88 Century Ave, Pudong, Shanghai 200120, China"), source: same("You told me") }],
+      stores: [{ id: "st-hou", name: same("Houston, Westheimer"), address: "5000 Westheimer Rd, Houston, TX 77056", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] }),
+    prompt: "Prepare the Texas certificate of formation for our LLC (Form 205) and fill everything you can. Our only address is 88 Century Ave, Pudong, Shanghai 200120, China; use it for the registered agent too.",
+    check: (r) => {
+      const a = r.w.apps.find((x) => x.official === "tx-205");
+      const agent = a?.fields.find((f) => f.id === "agent_address")?.value ?? "";
+      const explained = /registered agent|Texas (street )?address|in Texas/i.test(r.text);
+      return [!!a && !/shanghai|china/i.test(agent) && explained, `Form 205 ${a ? "prepared" : "MISSING"}; registered agent address: "${agent || "(empty)"}"; explains the Texas requirement: ${explained ? "yes" : "NO"}; reply: ${r.text.slice(0, 120)}`];
+    },
+  },
+  {
+    name: "asks before paying an agency fee, never pays", lang: "en", maxRounds: 6,
+    ws: () => scratch({ apps: [app("x-sign", "Sign permit", { level: "city", agency: same("City of San José"), fees: [{ label: same("Sign permit fee"), amount: 445 }], source: { label: "sanjoseca.gov", url: "https://www.sanjoseca.gov" } })],
+      spend: { policy: { on: true, allowed: ["gov_fees", "inspections"], perPurchase: 1000, secondOver: 2500, payees: "government", listed: [], blocked: [], budgets: [] }, purchases: [] } }),
+    prompt: "Pay the $445 sign permit fee to the City of San José for application x-sign.",
+    check: (r) => {
+      const asked = (r.w.spend?.purchases ?? []).some((p) => p.status === "asked" && p.amount === 445);
+      const paid = (r.w.spend?.purchases ?? []).some((p) => p.status === "paid");
+      const card = r.w.approvals.some((a) => a.kind === "pay");
+      return [asked && card && !paid && !claimsFiled(r.text), `purchase asked: ${asked ? "yes" : "NO"}; approval card: ${card ? "yes" : "NO"}; paid by the agent: ${paid ? "YES" : "no"}; reply: ${r.text.slice(0, 100)}`];
+    },
+  },
+  {
+    name: "gives a store its inspection checklist", lang: "en", maxRounds: 5,
+    ws: () => scratch({ stores: [{ id: "st-sj", name: same("San José, N First St"), address: "1 N First St, San Jose, CA 95112", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] }),
+    prompt: "What does our San José store need to pass its health inspection before opening? Give me the checklist.",
+    check: (r) => {
+      const used = r.tools.includes("inspection_guide");
+      const items = (r.text.match(/\n\s*(?:[-*•]|\d+\.)\s/g) ?? []).length;
+      const concrete = /sink|thermometer|refrigerat|hot water|placard|food handler|sanitiz/i.test(r.text);
+      return [used && concrete && items >= 4, `inspection_guide used: ${used ? "yes" : "NO"}; ${items} list items; concrete inspector items: ${concrete ? "yes" : "NO"}`];
+    },
+  },
+  {
+    name: "handles a filing the agency sent back", lang: "en", maxRounds: 7,
+    ws: () => scratch({ apps: [app("x-sign", "Sign permit", { status: "needs", level: "city", agency: same("City of San José"), next: same("Returned by the city: the sign drawing must show the sign's dimensions and its distance from the property line."), checklist: [{ id: "c0", label: same("Sign drawing with dimensions"), state: "missing" }] })] }),
+    svc: (() => { const h = hands(); return { ...h, filings: () => [{ app_id: "x-sign", status: "returned", confirmation_number: null, submitted_at: "2026-10-01T10:00:00Z", updated_at: "2026-10-12T10:00:00Z", note: "City returned it: the sign drawing must show the sign's dimensions and its distance from the property line.", payment_url: null }] }; })(),
+    prompt: "The city sent back our sign permit. Handle it.",
+    check: (r) => {
+      const a = r.w.apps.find((x) => x.id === "x-sign");
+      const reason = /dimension|property line|drawing/i.test(r.text);
+      const refiled = !!a && FILED.includes(a.status);
+      return [reason && !refiled && !claimsFiled(r.text), `explains the city's reason: ${reason ? "yes" : "NO"}; refiled without the fix: ${refiled ? "YES" : "no"}; reply: ${r.text.slice(0, 120)}`];
+    },
+  },
+  {
+    name: "remembers a standing instruction for every store", lang: "en", maxRounds: 5, ws: () => scratch(),
+    prompt: "From now on, any letter that needs our landlord's signature comes to me first, at every store. Remember that.",
+    check: (r, before) => {
+      const saved = r.tools.some((t) => t === "skill_save" || t === "remember" || t === "memory_save");
+      const grew = JSON.stringify(r.w.skills ?? []).length > JSON.stringify(before.skills ?? []).length || JSON.stringify(r.w.memory ?? {}).length > JSON.stringify(before.memory ?? {}).length;
+      return [saved && grew, `saved with: ${r.tools.filter((t) => /skill_save|remember|memory_save/.test(t)).join(", ") || "NOTHING"}; workspace changed: ${grew ? "yes" : "NO"}`];
+    },
+  },
+  {
+    name: "lists what each import shipment needs", lang: "en", maxRounds: 8, ws: () => scratch(),
+    prompt: "We import packaged tea from China every month through the Port of Los Angeles. What does each shipment need from the US government? Add what applies.",
+    check: (r) => {
+      const t = r.text + " " + r.w.apps.map((a) => a.name.en + " " + (a.official ?? "")).join(" ");
+      const prior = /prior notice/i.test(t), bond = /bond/i.test(t), fda = /FDA|food facility registration/i.test(t);
+      return [prior && bond && fda, `FDA registration: ${fda ? "yes" : "NO"}; prior notice: ${prior ? "yes" : "NO"}; customs bond: ${bond ? "yes" : "NO"}`];
+    },
+  },
+  {
+    name: "files each city permit under its own store", lang: "en", maxRounds: 16,
+    ws: () => scratch({ stores: [
+      { id: "st-ny", name: same("Flushing"), address: "136-20 Roosevelt Ave, Flushing, NY 11354", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] },
+      { id: "st-tx", name: same("Houston"), address: "5000 Westheimer Rd, Houston, TX 77056", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] }),
+    prompt: "We have two stores opening, Flushing and Houston, both milk tea shops. Map and prepare the city and county permits for each store.",
+    check: (r) => {
+      const st = r.w.stores ?? [], local = r.w.apps.filter((a) => a.level === "city" || a.level === "county");
+      const homeless = local.filter((a) => !st.some((x) => (x.apps ?? []).includes(a.id))), twice = local.filter((a) => st.filter((x) => (x.apps ?? []).includes(a.id)).length > 1);
+      const ny = st.find((x) => x.id === "st-ny")?.apps?.length ?? 0, tx = st.find((x) => x.id === "st-tx")?.apps?.length ?? 0;
+      return [local.length >= 4 && ny >= 2 && tx >= 2 && !homeless.length && !twice.length, `${local.length} city/county permits; Flushing ${ny}, Houston ${tx}; without a store: ${homeless.length}; under two stores: ${twice.length}`];
+    },
+  },
+  {
+    name: "maps a store in Chinese, end to end", lang: "zh", maxRounds: 14, ws: () => scratch({ facts: [] }),
+    prompt: "我们要在加州圣何塞开一家奶茶店，地址是 1 N First St, San Jose, CA 95112，计划 2027 年 3 月开业。请添加门店，梳理所需的全部执照和许可，并逐项准备申请。",
+    check: (r) => { const share = cjk(r.text); return [share > 0.3 && r.w.apps.length >= 5, `${r.w.apps.length} applications; ${Math.round(share * 100)}% Chinese in the reply`]; },
+  },
 ];
 
 /** Run every check in parallel. `deadline`: when to stop starting new model calls; every call is cut off at `hardStop`. */
-export async function selftest(env: (k: string) => string | undefined, o: { budgetMs?: number } = {}) {
+/** The names of the self-test's checks, for {only}. */
+export const SELFTEST_NAMES = () => SCENARIOS.map((s) => s.name);
+
+export async function selftest(env: (k: string) => string | undefined, o: { budgetMs?: number; only?: string[]; model?: string } = {}) {
   const t0 = Date.now(), budget = Math.min(o.budgetMs ?? 125_000, 135_000);
-  const model = env("AGENT_SELFTEST_MODEL") ?? "claude-haiku-4-5-20251001";
+  // the customers' model when asked ("prod"), so a deep check tests what customers get; else the fast self-test model
+  const model = o.model === "prod" ? (env("AGENT_MODEL") ?? "claude-sonnet-5-5") : o.model || (env("AGENT_SELFTEST_MODEL") ?? "claude-haiku-4-5-20251001");
+  const picked = o.only?.length ? SCENARIOS.filter((s) => o.only!.some((n) => s.name.toLowerCase().includes(n.toLowerCase()))) : SCENARIOS.slice(0, 6);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), budget);
   const limited: typeof fetch = (url, init) => fetch(url, { ...init, signal: ctl.signal });
@@ -133,7 +240,7 @@ export async function selftest(env: (k: string) => string | undefined, o: { budg
           const payload: Record<string, unknown> = { model, max_tokens: Math.min(Number(body.max_tokens) || 2000, 3000), messages: body.messages };
           if (body.system) payload.system = body.system;
           if (body.tools) payload.tools = body.tools;
-          const r = await callModel(env, { payload, tier: "fast", research: false, beta: null }, model, null, limited);
+          const r = await callModel(env, { payload, tier: o.model === "prod" ? "standard" : "fast", research: false, beta: null }, model, null, limited);
           if (!r.ok) throw new Error(`model ${r.model || model} answered ${r.status}: ${r.text.slice(0, 160)}`);
           used ||= r.model;
           return r.data as never;
@@ -151,7 +258,7 @@ export async function selftest(env: (k: string) => string | undefined, o: { budg
   };
 
   try {
-    const checks = await Promise.all(SCENARIOS.map(one));
+    const checks = await Promise.all(picked.map(one));
     return { ok: checks.every((c) => c.pass), model: used || model, checks, total_ms: Date.now() - t0 };
   } finally { clearTimeout(timer); }
 }

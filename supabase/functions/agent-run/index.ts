@@ -20,7 +20,7 @@ import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/od
 import { linkOf, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 // @ts-types="./agent.d.ts"
 import { normalizeState, runRounds, startState, stripState, type Reply, type RunState, type Services, type Step } from "./agent.js";
-import { selftest } from "./selftest.ts";
+import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
@@ -310,8 +310,16 @@ export async function handle(req: Request): Promise<Response> {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
     if (action === "selftest") {
       // short real-model runs on scratch workspaces held in memory: no workspace is read or written
+      // {probe: true}: which server secrets are set (names and yes/no only, never a value), and the checks there are
+      if (body.probe) {
+        const names = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY", "AGENT_MODEL", "AGENT_ROUTE",
+          "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ENTRY", "STRIPE_PRICE_LOCATION", "STRIPE_PRICE_LOCATION_PRO", "STRIPE_PRICE_OPENING", "STRIPE_PRICE_OPENING_FOOD", "STRIPE_PRICE_PACK", "STRIPE_PRICE_GUARANTEE",
+          "RESEND_API_KEY", "MAIL_FROM", "APP_ORIGINS", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "MS_CLIENT_ID", "MS_CLIENT_SECRET", "SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET", "QB_CLIENT_ID", "OAUTH_STATE_SECRET",
+          "TELNYX_API_KEY", "TELNYX_FAX_CONNECTION_ID", "TELNYX_MESSAGING_PROFILE_ID", "TELNYX_VOICE_CONNECTION_ID", "ODELIA_NUMBER", "LOB_API_KEY", "FILER_SECRET", "AZURE_SPEECH_KEY"];
+        return json(200, { secrets: Object.fromEntries(names.map((n) => [n, !!env(n)])), checks: SELFTEST_NAMES() });
+      }
       if (!MODEL_KEYS.some((k) => env(k))) return json(200, { ok: false, model: null, checks: [{ name: "a model key is set", pass: false, detail: "Add ANTHROPIC_API_KEY (or another model key) in the Edge Function secrets.", ms: 0 }], total_ms: 0 });
-      return json(200, await selftest((k) => Deno.env.get(k), { budgetMs: Number(body.budget_ms) || undefined }));
+      return json(200, await selftest((k) => Deno.env.get(k), { budgetMs: Number(body.budget_ms) || undefined, only: Array.isArray(body.only) ? body.only.map(String) : undefined, model: typeof body.model === "string" ? body.model : undefined }));
     }
     if (action === "continue") {
       const id = String(body.run_id ?? "");
