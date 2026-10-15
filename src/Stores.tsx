@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { openSettings } from "./Settings";
 import { useApp } from "./ctx";
 import { B, type Cert, type Store } from "./model";
+import { countyOf, stateCode, cityName } from "./counties";
 import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
 import { daysFromNow, daysUntil, fmtDay, fmtIn, inDays } from "./time";
 import { basisLine, openingLine, openingPath, type Evidence } from "./smart";
@@ -319,7 +320,16 @@ function BulkPlan({ onClose }: { onClose: () => void }) {
   const fees = plans.reduce((s, p) => s + p.fees, 0), forms = plans.reduce((s, p) => s + p.forms.length, 0), late = plans.filter(p => p.late).length;
   const add = () => {
     const { stores, deadlines } = toWorkspace(plans, ws.stores ?? []);
-    editWs(w => ({ ...w, stores: [...(w.stores ?? []), ...stores], deadlines: [...w.deadlines.filter(d => !deadlines.some(x => x.id === d.id)), ...deadlines] }));
+    // every new store's city joins the sidebar's locations, the same as a store added one at a time
+    const cities = plans.map(p => { const parts = p.row.address.split(",").map(x => x.trim()).filter(Boolean); const st = parts.length >= 2 ? stateCode(parts[parts.length - 1].replace(/\s*\d{5}(-\d{4})?$/, "")) : "";
+      const city = parts.length >= 2 ? cityName(parts[parts.length - 2]) : ""; return city && !/\d/.test(city) ? { city, st } : null; }).filter((x): x is { city: string; st: string } => !!x);
+    editWs(w => {
+      const locations = [...w.locations];
+      for (const { city, st } of cities) if (!locations.some(l => l.name.en.toLowerCase() === city.toLowerCase())) {
+        const c = countyOf(city, st); locations.push({ id: city.toLowerCase().replace(/[^a-z0-9]+/g, "-"), name: B(city, city), county: B(c.en, c.zh), state: "active" });
+      }
+      return { ...w, stores: [...(w.stores ?? []), ...stores], locations, deadlines: [...w.deadlines.filter(d => !deadlines.some(x => x.id === d.id)), ...deadlines] };
+    });
     if (cloud?.owner && cloud.plan === "monthly") void api.syncLocations(cloud.wsId).catch(() => undefined);
     say(zh ? `已添加 ${stores.length} 家门店和 ${deadlines.length} 个提交截止日期。` : `Added ${stores.length} store${stores.length === 1 ? "" : "s"} and ${deadlines.length} file-by date${deadlines.length === 1 ? "" : "s"}.`);
     onClose();

@@ -102,8 +102,8 @@ function RegionPick({ lang }: { lang: Lang }) {
   }, [open]);
   return (
     <div className="region">
-      <button type="button" className="region-btn" aria-haspopup="listbox" aria-expanded={open} aria-label={`${L(B("Region", "区域"))}: ${L(cur.label)}`} onClick={() => setOpen(o => !o)}>
-        <span className="rg-k">{L(B("Region", "区域"))}</span>
+      <button type="button" className="region-btn" aria-haspopup="listbox" aria-expanded={open} aria-label={`${L(B("Data stored in", "数据存储于"))}: ${L(cur.label)}`} onClick={() => setOpen(o => !o)}>
+        <span className="rg-k">{L(B("Data stored in", "数据存储于"))}</span>
         <b>{cur.code}</b>
         <svg className="rg-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       </button>
@@ -224,7 +224,6 @@ function SignIn({ lang }: { lang: Lang }) {
   return (
     <div className="gate-card">
       <div className="gate-bot"><GateBot /></div>
-      <RegionPick lang={lang} />
       <h1>{title}</h1>
       {sub && <p className="gate-sub">{sub}</p>}
       {step === "password" && (
@@ -302,7 +301,8 @@ function SignIn({ lang }: { lang: Lang }) {
       {err && <p className="gate-err" role="alert">{err}</p>}
       {(step === "email" || step === "password" || step === "phone") && (
         <div className="gate-legal">
-          {!(step === "password" && mode === "create") && <p>{L(B("Before you start, Placetta asks you to agree to its ", "开始使用前，快哉会请您同意"))}<button type="button" className="lnk" onClick={() => openDoc("terms")}>{L(B("Terms of Service", "《服务条款》"))}</button>{L(B(" and ", "和"))}<button type="button" className="lnk" onClick={() => openDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(" with a checkbox.", "（勾选同意）。"))}</p>}
+          {!(step === "password" && mode === "create") && <p>{L(B("New accounts agree to Placetta's ", "创建账户需同意快哉的"))}<button type="button" className="lnk" onClick={() => openDoc("terms")}>{L(B("Terms of Service", "《服务条款》"))}</button>{L(B(" and ", "和"))}<button type="button" className="lnk" onClick={() => openDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(".", "。"))}</p>}
+          <RegionPick lang={lang} />
           <a href={HELP_URL} target={api.PREVIEW ? "_blank" : undefined} rel="noopener">{L(B("Need help signing in?", "登录遇到问题？"))}</a>
         </div>
       )}

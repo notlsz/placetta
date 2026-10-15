@@ -351,6 +351,12 @@ button.row:hover { background: rgba(var(--w), .9); }
 .examples { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0 18px; }
 .examples button { padding: 6px 13px; border-radius: 99px; background: var(--mist2); color: var(--ink2); font-size: 13px; }
 .examples button:hover:not(:disabled) { background: var(--sky); color: var(--ink); }
+.fd-empty { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 760px; margin: 40px 0 0; padding: 0; list-style: none; }
+.fd-empty li { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 16px; background: var(--mist2); }
+.fd-empty span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--card); color: var(--ink2); font-size: 12px; font-variant-numeric: tabular-nums; }
+.fd-empty b { margin-top: 6px; font-weight: 500; font-size: 14.5px; color: var(--ink); }
+.fd-empty small { font-size: 13px; line-height: 1.45; color: var(--ink2); }
+@media (max-width: 720px) { .fd-empty { grid-template-columns: minmax(0, 1fr); margin-top: 28px; } }
 .matching { display: inline-flex; align-items: center; gap: 10px; margin-top: 30px; padding: 8px 18px 8px 10px; border-radius: 99px; background: var(--sky-wash); box-shadow: 0 0 0 1px #DCE6F2; font-size: 14px; color: var(--blue-deep); }
 .results { margin-top: 40px; }
 .results .tgroup { margin-top: 22px; }
@@ -871,6 +877,11 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .region-btn[aria-expanded="true"] .rg-chev { transform: rotate(180deg); }
 .region-btn:hover b, .region-btn:hover .rg-chev { color: var(--ink); }
 .region-menu { position: absolute; z-index: 20; top: calc(100% + 6px); right: -18px; min-width: 156px; margin: 0; padding: 10px 8px; list-style: none; border: 1px solid rgba(var(--e), .07); border-radius: 18px; background: var(--card); box-shadow: 0 14px 36px rgba(15, 27, 51, .13); text-align: left; }
+.gate-legal .region { margin: 6px 0 0; }
+.gate-legal .region-btn { height: 28px; font-size: 12.5px; gap: 6px; }
+.gate-legal .region-btn b { min-width: 0; }
+.gate-legal .region-btn .rg-chev { margin-left: 2px; }
+.gate-legal .region-menu { top: auto; bottom: calc(100% + 6px); right: auto; left: 50%; transform: translateX(-50%); }
 .region-menu button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 12px; border: 0; border-radius: 10px; background: none; font: inherit; font-size: 15px; color: var(--ink); cursor: pointer; }
 .region-menu .rg-globe { color: var(--ink2); flex: none; }
 .region-menu button:hover:not(:disabled) { background: var(--bg); }
@@ -1447,6 +1458,8 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 
 /* suggestions sit above the message box, on their own line */
 .panel .sugg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -14px 2px; padding: 0 14px 2px; gap: 6px; }
+/* the row scrolls sideways: a soft fade at the right edge says there is more, instead of a chip cut mid-word */
+.panel .sugg { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
 .panel .sugg::-webkit-scrollbar { display: none; }
 .panel .sugg button { flex: none; background: none; box-shadow: inset 0 0 0 1px rgba(var(--e), .12); color: var(--ink2); }
 .panel .sugg button:hover { background: var(--mist2); color: var(--ink); box-shadow: inset 0 0 0 1px rgba(var(--e), .18); }

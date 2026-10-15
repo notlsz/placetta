@@ -228,6 +228,7 @@ export const SAMPLE: Workspace = {
   goal: B("Open by March 2027", "2027 年 3 月开业"),
   locations: [
     { id: "sj", name: B("San Jose", "圣何塞"), county: B("Santa Clara County", "圣克拉拉县"), state: "active" },
+    { id: "flushing", name: B("Flushing", "法拉盛"), county: B("Queens County", "皇后县"), state: "active" },
   ],
   apps: [
     {

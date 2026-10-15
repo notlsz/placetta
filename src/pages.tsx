@@ -10,7 +10,7 @@ import { formById } from "./forms/registry";
 import type { Key } from "./i18n";
 import { AgentBot, TaskBot, Working } from "./Bot";
 import { StoresStrip } from "./Stores";
-import { B } from "./model";
+import { B, type Bi } from "./model";
 import { takeAutostart } from "./cloud/handoff";
 
 export const INK = "#4D73A3";
@@ -502,6 +502,16 @@ export function FindLicenses({ result, live }: { result: { what: string; where: 
         <button type="submit" className="m-go" disabled={busy} aria-label={t("fd_go")}><I.find /></button>
       </form>
       <div className="examples">{examples.map(([w, p]) => <button key={w + p} type="button" disabled={busy} onClick={() => go(w, p)}>{w}, {p}</button>)}</div>
+
+      {!result && !live && (
+        <ol className="fd-empty" aria-label={lang === "zh" ? "查询结果包括" : "What you get"}>
+          {([[B("Every license, city to federal", "每一项执照，从市级到联邦"), B("In the order the agencies need them, for that business at that address.", "按机构要求的顺序，针对该业务和地址。")],
+            [B("The fee and the usual wait", "费用与通常的等待时间"), B("Taken from each agency's own published fees and processing times.", "取自各机构公布的费用与办理时间。")],
+            [B("Where to file it", "在哪里提交"), B("A link to the agency's own page, and Odelia can add any of them to your applications.", "附机构官网链接，Odelia 可将任意一项加入您的申请。")]] as [Bi, Bi][]).map(([h, p], i) => (
+            <li key={i}><span>{i + 1}</span><b>{b(h)}</b><small>{b(p)}</small></li>
+          ))}
+        </ol>
+      )}
 
       {live && (
         <Working on size="line"><div className="matching" aria-live="polite">
