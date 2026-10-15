@@ -87,7 +87,7 @@ export const LOCAL_US: OfficialForm[] = [
     id: "sf-formula-retail", form: "Affidavit for Formula Retail Establishments", title: B("Formula retail (chain store) affidavit", "连锁零售经营声明书"),
     agency: B("San Francisco Planning Department", "旧金山规划局"), level: "city", where: "SF", segments: [R, T], method: "portal", order: 54,
     how: B("A chain with 11 or more other locations worldwide files this with the building permit. Many neighborhood districts then require a Conditional Use hearing, and a few ban chains.", "全球另有 11 家及以上门店的连锁品牌须随建筑许可提交此声明。许多社区商业区还需召开有条件使用听证会，少数街区禁止连锁店。"),
-    url: "https://sfplanning.org/resource/formula-retail-establishments", info: "https://sfplanning.org/permit/chain-stores-businesses",
+    pdf: "https://sfplanning.org/sites/default/files/forms/Formula_Retail_Affidavit.pdf", url: "https://sfplanning.org/resource/formula-retail-establishments", info: "https://sfplanning.org/permit/chain-stores-businesses",
     fee: null, checked: "page", fields: [],
   },
   {

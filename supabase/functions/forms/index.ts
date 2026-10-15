@@ -17,8 +17,10 @@ const fail = (status: number, code: string, message: string) =>
 const MAX = 15 * 1024 * 1024;
 
 /** Agencies whose own site isn't under .gov: SF Planning and Treasurer, Dallas City Hall, OC Health Care Agency and Tax
-    Collector, Houston Health and Permitting Center, LAFD. */
-const AGENCY_HOSTS = /(^|\.)(sfplanning\.org|sfgov\.org|sftreasurer\.org|dallascityhall\.com|ochealthinfo\.com|octaxcol\.com|houstonhealth\.org|houstonpermittingcenter\.org|lafd\.org)$/i;
+    Collector, Houston Health and Permitting Center, LAFD, and the City of Austin's document library (austin.widen.net). */
+const AGENCY_HOSTS = /(^|\.)(sfplanning\.org|sfgov\.org|sftreasurer\.org|dallascityhall\.com|ochealthinfo\.com|octaxcol\.com|houstonhealth\.org|houstonpermittingcenter\.org|lafd\.org|austin\.widen\.net)$/i;
+/** State agencies still on the old state.XX.us addresses (Texas Secretary of State: sos.state.tx.us). */
+const STATE_US = /(^|\.)state\.[a-z]{2}\.us$/i;
 
 /** A government host Placetta may fetch forms from: anything under .gov (irs.gov, cdtfa.ca.gov, nyc.gov, ...), plus the
     few agencies above. A plain http link to one of them is fetched over https. */
@@ -27,7 +29,9 @@ export function allowed(u: string): URL | null {
     const url = new URL(u);
     if (url.protocol === "http:") url.protocol = "https:";
     if (url.protocol !== "https:" || url.username || url.password || url.port) return null;
-    return /(^|\.)[a-z0-9-]+\.gov$/i.test(url.hostname) || AGENCY_HOSTS.test(url.hostname) ? url : null;
+    // Austin's library hands the file out from its CDN, under the city's own /austin/ folder
+    const austinCdn = url.hostname === "cf-store.widencdn.net" && url.pathname.startsWith("/austin/");
+    return /(^|\.)[a-z0-9-]+\.gov$/i.test(url.hostname) || AGENCY_HOSTS.test(url.hostname) || STATE_US.test(url.hostname) || austinCdn ? url : null;
   } catch { return null; }
 }
 

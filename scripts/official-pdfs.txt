@@ -4,3 +4,4 @@ aus-pre-a https://austin.widen.net/content/lzcrvwjzpn/pdf/Food-Pre-Opening-Revis
 aus-pre-b https://austin.widen.net/content/lzcrvwjzpn/original/Food-Pre-Opening-Revise.pdf?download=true
 aus-fp-a https://austin.widen.net/content/2smzwfvayk/pdf/10125FP-v2-Gross-Annual-Sales-(1).pdf
 aus-fp-b https://austin.widen.net/content/2smzwfvayk/original/10125FP-v2-Gross-Annual-Sales-(1).pdf?download=true
+ca-ftb-3522 https://www.ftb.ca.gov/forms/2026/2026-3522.pdf
