@@ -70,7 +70,9 @@ const FILL = { ss4, cbp5106 };
  *  It counts as filled, and nothing is printed in that box. */
 export const BY_HAND = /^(by hand|written by hand|(the )?signer (writes|fills)( it)?( in)? by hand|手写|由签署人手写|签署人手写)\.?$/i;
 /** The values by form field id: the application's fields carry the form's field ids. */
-export const valuesOf = (fields: Field[]) => Object.fromEntries(fields.filter(f => f.value && !BY_HAND.test(f.value.trim())).map(f => [f.id, f.value]));
+// a value shown masked ("••-•••4471") is never written: the form would get the dots' leftovers, not the number
+const MASKED = /[•●*]{2,}/;
+export const valuesOf = (fields: Field[]) => Object.fromEntries(fields.filter(f => f.value && !BY_HAND.test(f.value.trim()) && !MASKED.test(f.value)).map(f => [f.id, f.value]));
 
 /** Placetta writes the answers into this form's own PDF (the agency's file, never a Placetta copy). */
 export const fillable = (formId: string) => !!formById(formId)?.fill || !!MAPS[formId];

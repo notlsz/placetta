@@ -100,7 +100,7 @@ export function docBlob(d: Doc, w: Workspace): { name: string; blob: Blob } {
     const paid = total(app);
     return { name: d.name, blob: pdf(`Receipt: ${app.name.en}`, `${app.agency.en}. Submitted by Placetta for Moonleaf Tea LLC.`, [
       ["Confirmation", conf(d.id)], ["Submitted", fmtStamp(d.at)], ["Application", app.name.en], ["Agency", app.agency.en],
-      ["Amount paid", paid ? money(paid) : "No fee"], ["Paid with", paid ? "Card ending 4821" : "-"], ["Status", "Received, in review"],
+      ["Amount paid", paid ? money(paid) : "No fee"], ["Paid by", paid ? "You, on the agency's own payment page" : "-"], ["Status", "Received, in review"],
     ], ["Keep this receipt with your records. Placetta watches the agency for a decision."]) };
   }
   if (app && d.by === "agent") return { name: base + ".pdf", blob: applicationPdf(app) };

@@ -273,7 +273,7 @@ ok(!html("<script>alert(1)</script>").includes("<script>"), "edge: a reply can't
   await go({ text: "File everything that's ready" });
   const both = await go({ approveAll: ["a-edd", "a-sign"] });
   ok(["edd", "sign"].every(id => w.apps.find(a => a.id === id)!.status === "review") && !w.approvals.some(a => a.kind === "file" && ["a-edd", "a-sign"].includes(a.id))
-    && both?.reply.filed?.join() === "edd,sign" && /Filing both now, with \$410/.test(both?.reply.text[0].en ?? ""), "the demo files everything ready from one tap", both?.reply);
+    && both?.reply.filed?.join() === "edd,sign" && /Filing both now, with \$445/.test(both?.reply.text[0].en ?? ""), "the demo files everything ready from one tap", both?.reply);
   w = SAMPLE;
   w = { ...w, apps: w.apps.map(a => (a.id === "sign" ? { ...a, fields: a.fields.map((f, i) => (i === 0 ? { ...f, value: "TBD" } : f)) } : a)) };
   const held = await go({ approve: "a-sign" });

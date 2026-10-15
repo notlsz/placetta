@@ -30,7 +30,7 @@ const filing = (id: string, app: string, title: Bi, agency: Bi, portal: Bi, fee:
   does: [
     B(`Sign in to ${portal.en} with your saved account`, `使用您保存的账户登录${portal.zh}`),
     attachments ? B(`Submit the application below with ${attachments === 1 ? "its attachment" : `its ${attachments} attachments`}`, `提交下方申请及 ${attachments} 个附件`) : B("Submit the application below", "提交下方申请"),
-    ...(fee ? [B(`Pay $${fee.toLocaleString("en-US")} with the card ending 4821`, `使用尾号 4821 的银行卡支付 $${fee.toLocaleString("en-US")}`)] : []),
+    ...(fee ? [B(`Send you the agency's own payment link for its $${fee.toLocaleString("en-US")} fee: you pay the agency directly`, `向您发送机构官方的付款链接，$${fee.toLocaleString("en-US")} 费用由您直接支付给机构`)] : []),
     B("Save the receipt to Documents", "将收据保存到文件"),
   ],
 });
@@ -98,7 +98,7 @@ function fileReady(ctx: Context): Plan {
     )],
     reply: {
       text: [signOpen
-        ? B("Two applications are ready to file: the employer registration, which has no fee, and the sign permit, with a $410 fee. I never file without your OK, so both are waiting for your approval.", "有两项申请可以提交：雇主登记（无需费用）和招牌许可（费用 $410）。没有您的同意我不会提交，所以两项都在等您批准。")
+        ? B("Two applications are ready to file: the employer registration, which has no fee, and the sign permit, with a $445 fee. I never file without your OK, so both are waiting for your approval.", "有两项申请可以提交：雇主登记（无需费用）和招牌许可（费用 $410）。没有您的同意我不会提交，所以两项都在等您批准。")
         : B("The employer registration is ready to file, and it has no fee. I never file without your OK, so it's waiting for your approval.", "雇主登记可以提交了，无需费用。没有您的同意我不会提交，所以它在等您批准。")],
       apps: ["edd"],
       approvals: ["a-edd", ...pendingFilings(ctx.current)],
@@ -229,20 +229,20 @@ const FALLBACK = (): Plan => ({
 
 type FileCfg = { app: string; portal: Bi; tool: string; fee: number; receipt: string; est: Bi; days: number; next: Bi; watch: Bi; reply: Bi[]; also?: P[] };
 const FILE: Record<string, FileCfg> = {
-  "a-sign": { app: "sign", portal: PORTAL.sj, tool: "sanjoseca.gov", fee: 410, receipt: "sign-permit-receipt.pdf", est: B("Sign permit decision expected", "招牌许可预计出结果"), days: 18,
+  "a-sign": { app: "sign", portal: PORTAL.sj, tool: "sanjoseca.gov", fee: 445, receipt: "sign-permit-receipt.pdf", est: B("Sign permit decision expected", "招牌许可预计出结果"), days: 18,
     next: B("Filed just now. Decision in about 2 to 3 weeks", "刚刚提交，约 2 至 3 周出结果"), watch: B("Watching San Jose for the sign permit", "跟进圣何塞市招牌许可"),
-    reply: [B("Filed the sign permit with the City of San Jose and paid the $410 fee. The receipt is in Documents, and I'll watch for the decision.", "已向圣何塞市提交招牌许可并支付 $410 费用。收据在文件中，我会跟进审批结果。")] },
+    reply: [B("Filed the sign permit with the City of San Jose. The city's $445 fee is paid on its own page: the link is in Updates. The confirmation is in Documents, and I'll watch for the decision.", "已向圣何塞市提交招牌许可。市政府的 $445 费用在其官网支付，付款链接在更新中。回执在文件中，我会跟进审批结果。")] },
   "a-edd": { app: "edd", portal: PORTAL.edd, tool: "edd.ca.gov", fee: 0, receipt: "employer-registration-confirmation.pdf", est: B("Employer account number expected", "预计收到雇主账号"), days: 14,
     next: B("Filed just now. Account number in about 2 weeks", "刚刚提交，约 2 周内获得账号"), watch: B("Watching the EDD for your employer account number", "跟进加州就业发展局的雇主账号"),
     reply: [B("Filed your employer registration with the EDD. There was no fee. I'll watch for your employer account number, usually about two weeks.", "已向加州就业发展局提交雇主登记，无需费用。我会跟进您的雇主账号，通常约两周。")],
     also: [dropDeadline("dl-wages")] },
   "a-plan": { app: "plancheck", portal: PORTAL.scc, tool: "sccgov.org", fee: 1385, receipt: "plan-check-receipt.pdf", est: B("Plan check comments or approval expected", "预计收到图纸审查意见或批准"), days: 26,
     next: B("Filed just now. The county usually replies in 15 to 20 business days", "刚刚提交，县政府通常 15 至 20 个工作日内回复"), watch: B("Watching the county for plan check comments", "跟进县政府的图纸审查意见"),
-    reply: [B("Filed the plan check with Santa Clara County and paid the fee. If the county sends comments, I'll draft the changes and bring them to you.", "已向圣克拉拉县提交图纸审查并支付费用。如果县政府提出意见，我会起草修改并交给您确认。")],
+    reply: [B("Filed the plan check with Santa Clara County. The county invoices its review fee, and the payment link is in Updates. If the county sends comments, I'll draft the changes and bring them to you.", "已向圣克拉拉县提交图纸审查。县政府会开具审查费账单，付款链接在更新中。如果县政府提出意见，我会起草修改并交给您确认。")],
     also: [dropDeadline("dl-plan"), setApp("building", { next: B("Starts when the county approves the plans", "县政府批准图纸后开始") })] },
   "a-soi": { app: "soi", portal: PORTAL.sos, tool: "sos.ca.gov", fee: 20, receipt: "statement-of-information-receipt.pdf", est: B("Next Statement of Information due", "下次信息声明到期"), days: 730,
     next: B("Filed just now. Next one due in 2 years", "刚刚提交，下次在 2 年后"), watch: B("Confirming the Statement of Information was accepted", "确认信息声明已被受理"),
-    reply: [B("Filed your Statement of Information with the Secretary of State and paid the $20 fee. The next one is due in two years, and it's on your Deadlines.", "已向州务卿提交信息声明并支付 $20 费用。下一次在两年后到期，已列入您的截止日期。")],
+    reply: [B("Filed your Statement of Information with the Secretary of State. Its $20 fee is paid on the state's own page: the link is in Updates. The next one is due in two years, and it's on your Deadlines.", "已向州务卿提交信息声明。$20 费用在州政府官网支付，付款链接在更新中。下一次在两年后到期，已列入您的截止日期。")],
     also: [dropDeadline("dl-soi")] },
 };
 
@@ -257,7 +257,7 @@ function file(id: string, ctx: Context): Plan {
       dropApproval(id),
       audit("you", B("Approved filing", "批准提交"), a.name, c.fee ? B(`Fee $${c.fee.toLocaleString("en-US")}`, `费用 $${c.fee.toLocaleString("en-US")}`) : B("No fee", "无需费用")),
       audit("agent", B("Submitted application", "提交申请"), a.name, same(c.tool)),
-      ...(c.fee ? [audit("agent", B("Paid fee", "支付费用"), a.name, B(`$${c.fee.toLocaleString("en-US")}, card ending 4821`, `$${c.fee.toLocaleString("en-US")}，尾号 4821 的银行卡`))] : []),
+      ...(c.fee ? [audit("agent", B("Sent the payment link", "发送付款链接"), a.name, B(`$${c.fee.toLocaleString("en-US")}, paid by you to the agency`, `$${c.fee.toLocaleString("en-US")}，由您直接支付给机构`))] : []),
       addDoc(doc(rid, c.receipt, 86_000 + c.receipt.length * 977, "agent", c.app, B("Receipt", "收据"))),
       audit("agent", B("Saved receipt", "保存收据"), same(c.receipt)),
       setApp(c.app, { status: id === "a-soi" ? "approved" : "review", receipt: rid, next: c.next }),
@@ -331,19 +331,19 @@ function generic(id: string, ctx: Context): Plan {
     steps: [
       S("connecting", `Signing in to ${portal.en} with your saved account`, `使用您保存的账户登录 ${portal.zh}`, site || undefined),
       S("working", `Submitting the ${name}`, `提交${a.name.zh}`, site || undefined),
-      ...(fee ? [S("working", `Paying ${m} with the card ending 4821`, `使用尾号 4821 的银行卡支付 ${m}`)] : []),
+      ...(fee ? [S("working", `Sending you the agency's payment link for ${m}`, `向您发送机构的 ${m} 付款链接`)] : []),
       S("weaving", "Saving the receipt to Documents", "将收据保存到文件"),
     ],
     updates: [all(
       dropApproval(id),
       audit("you", B("Approved filing", "批准提交"), a.name, fee ? same(m) : B("No fee", "无需费用")),
       audit("agent", B("Submitted application", "提交申请"), a.name, site ? same(site) : undefined),
-      ...(fee ? [audit("agent", B("Paid fee", "支付费用"), a.name, B(`${m}, card ending 4821`, `${m}，尾号 4821 的银行卡`))] : []),
+      ...(fee ? [audit("agent", B("Sent the payment link", "发送付款链接"), a.name, B(`${m}, paid by you to the agency`, `${m}，由您直接支付给机构`))] : []),
       addDoc(doc(rid, receipt, 90_000, "agent", a.id, B("Receipt", "收据"))),
       setApp(a.id, { status: "review", receipt: rid, next: B("Filed just now. Placetta is watching for a decision", "刚刚提交，快哉正在跟进审批") }),
       addTask({ id: "r-" + a.id, state: "searching", label: B(`Watching for a decision on the ${name}`, `跟进${a.name.zh}的审批`), detail: B("Started just now", "刚刚开始") }),
     )],
-    reply: { text: [B(`Filed the ${name} with ${a.agency.en}${fee ? ` and paid the ${m} fee` : ""}. The receipt is in Documents.`, `已向${a.agency.zh}提交${a.name.zh}${fee ? `并支付 ${m} 费用` : ""}。收据在文件中。`)], files: [rid] },
+    reply: { text: [B(`Filed the ${name} with ${a.agency.en}.${fee ? ` Its ${m} fee is paid on the agency's own page: the link is in Updates.` : ""} The confirmation is in Documents.`, `已向${a.agency.zh}提交${a.name.zh}。${fee ? `${m} 费用在机构官网支付，付款链接在更新中。` : ""}回执在文件中。`)], files: [rid] },
   };
 }
 

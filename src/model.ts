@@ -434,7 +434,6 @@ export const SAMPLE: Workspace = {
     { id: "c-county", name: B("Santa Clara County Environmental Health", "圣克拉拉县环境卫生局"), level: "county", state: "connected", detail: B("Plan check and health permits", "图纸审查与卫生许可") },
     { id: "c-city", name: B("City of San Jose permits", "圣何塞市许可证服务"), level: "city", state: "connected", detail: B("Business tax, building and sign permits", "营业税、建筑与招牌许可") },
     { id: "c-fire", name: B("San Jose Fire Department", "圣何塞消防局"), level: "city", state: "missing", detail: B("Connect so Placetta can book the inspection", "连接后快哉即可预约检查") },
-    { id: "c-card", name: B("Card ending 4821", "尾号 4821 的银行卡"), level: "vault", state: "connected", detail: B("Pays fees only after you approve. Placetta never sees the number.", "仅在您批准后支付费用，快哉看不到卡号。") },
   ],
 };
 

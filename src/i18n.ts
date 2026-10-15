@@ -93,7 +93,7 @@ export const S = {
   save: B("Save changes", "保存修改"),
   cancel: B("Cancel", "取消"),
   total: B("Total", "合计"),
-  paidAfter: B("Paid with the card ending 4821, and only after you approve.", "使用尾号 4821 的银行卡支付，且仅在您批准后支付。"),
+  paidAfter: B("You pay the agency directly, through the payment link Placetta sends after you approve.", "您批准后，快哉发送付款链接，由您直接向机构付款。"),
   noReceipt: B("The receipt appears here once the application is filed.", "申请提交后，收据会显示在这里。"),
   download: B("Download", "下载"),
   open: B("Open", "打开"),

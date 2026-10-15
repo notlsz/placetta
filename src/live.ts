@@ -657,7 +657,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             L("If the agency asks for a CAPTCHA, an identity check, a payment or a handwritten signature, Placetta asks you to do that one step", "如机构要求验证码、身份验证、付款或手写签名，快哉会请您完成这一步"),
             ...(fee ? [L(`The agency's fee (about ${money(fee, a.currency)}) is paid by you directly to the agency, through the payment link we send`, `机构费用（约 ${money(fee, a.currency)}）由您通过我们发送的付款链接直接支付给机构`)] : []),
             L("The receipt and every status change appear here", "收据和每次状态变化都会显示在这里"),
-          ] : does.length ? does : [L(`Submit the application below to ${a.agency.en}`, `向${a.agency.zh}提交下方申请`), ...(fee ? [L(`Pay ${money(fee, a.currency)} with the card ending 4821`, `使用尾号 4821 的银行卡支付 ${money(fee, a.currency)}`)] : []), L("Save the receipt to Documents", "将收据保存到文件")],
+          ] : does.length ? does : [L(`Submit the application below to ${a.agency.en}`, `向${a.agency.zh}提交下方申请`), ...(fee ? [L(`Send you the agency's own payment link for its ${money(fee, a.currency)} fee: you pay the agency directly`, `向您发送机构官方付款链接，${money(fee, a.currency)} 费用由您直接支付给机构`)] : []), L("Save the receipt to Documents", "将收据保存到文件")],
         };
         // a second look at every line before the person sees it: what's wrong goes back to Odelia, not to them
         const pf = preflight(get(), ap, daysFromNow(0));
