@@ -14,6 +14,9 @@ for (const name of names) {
   await build({
     entryPoints: [`${root}${name}/index.ts`], bundle: true, format: "esm", platform: "neutral", target: "es2022",
     outfile: `bundles/${name}.js`, logLevel: "error", mainFields: ["module", "main"],
+    // the bundle is imported by a two-line index.ts, so it is never Deno's main module: a function that serves only
+    // "if (import.meta.main)" would boot and never answer. In the bundle it always is the function.
+    define: { "import.meta.main": "true" },
     plugins: [{
       name: "deps",
       setup(b) {
