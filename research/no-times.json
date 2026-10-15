@@ -1,0 +1,560 @@
+[
+ {
+  "id": "sj-building-ti",
+  "form": "310 Building Permit Application",
+  "title": "Building permit for a tenant improvement",
+  "agency": "City of San José Building Division",
+  "where": "SJ",
+  "info": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement",
+  "url": "https://www.sjpermits.org"
+ },
+ {
+  "id": "sj-fire-systems",
+  "form": "Fire Protection Systems permit",
+  "title": "Fire protection system permit",
+  "agency": "San José Fire Department, Bureau of Fire Prevention",
+  "where": "SJ",
+  "info": "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/development-services",
+  "url": "https://www.sjpermits.org"
+ },
+ {
+  "id": "sj-building-final",
+  "form": "Building final inspection",
+  "title": "Building final inspection",
+  "agency": "City of San José Building Division",
+  "where": "SJ",
+  "info": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success",
+  "url": "https://www.sjpermits.org"
+ },
+ {
+  "id": "scc-health-permit",
+  "form": "Permit Application & Certification Statement",
+  "title": "Health permit to operate a food facility",
+  "agency": "County of Santa Clara Department of Environmental Health",
+  "where": "SCC",
+  "info": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
+  "url": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and"
+ },
+ {
+  "id": "ca-ftb-3522",
+  "form": "FTB 3522",
+  "title": "LLC annual tax ($800)",
+  "agency": "California Franchise Tax Board",
+  "where": "CA",
+  "info": "https://www.ftb.ca.gov/file/business/types/limited-liability-company/index.html",
+  "url": "https://www.ftb.ca.gov/pay/"
+ },
+ {
+  "id": "ca-prop65",
+  "form": "Proposition 65 warnings (no filing)",
+  "title": "Proposition 65 warning labels",
+  "agency": "California Office of Environmental Health Hazard Assessment",
+  "where": "CA",
+  "info": "https://www.p65warnings.ca.gov/",
+  "url": "https://www.p65warnings.ca.gov/business-resources/frequently-asked-questions-businesses"
+ },
+ {
+  "id": "sf-formula-retail",
+  "form": "Affidavit for Formula Retail Establishments",
+  "title": "Formula retail (chain store) affidavit",
+  "agency": "San Francisco Planning Department",
+  "where": "SF",
+  "info": "https://sfplanning.org/permit/chain-stores-businesses",
+  "url": "https://sfplanning.org/resource/formula-retail-establishments"
+ },
+ {
+  "id": "sf-dph-plan-check",
+  "form": "DPH Plan Review Application",
+  "title": "Food facility plan check",
+  "agency": "San Francisco Department of Public Health",
+  "where": "SF",
+  "info": "https://sf.gov/guide-building-and-remodeling-food-facility",
+  "url": "https://sf.gov/sites/default/files/2023-07/PlanCheckApplication.pdf"
+ },
+ {
+  "id": "sf-dph-health-permit",
+  "form": "Health Permit to Operate",
+  "title": "Health permit to operate a food facility",
+  "agency": "San Francisco Department of Public Health",
+  "where": "SF",
+  "info": "https://www.sfdph.org/dph/EH/Food/Permits/default.asp",
+  "url": "https://sf.gov/get-health-permit-open-restaurant-bar-or-other-retail-food-location"
+ },
+ {
+  "id": "sf-sign",
+  "form": "Sign and awning permit (PermitSF)",
+  "title": "Sign and awning permit",
+  "agency": "San Francisco Department of Building Inspection",
+  "where": "SF",
+  "info": "https://sf.gov/step-by-step/get-permit-install-sign-or-awning",
+  "url": "https://sf.gov/step-by-step/get-permit-install-sign-or-awning"
+ },
+ {
+  "id": "sf-fire-assembly",
+  "form": "Operational Permit Application (Place of Assembly)",
+  "title": "Fire Department place of assembly permit",
+  "agency": "San Francisco Fire Department",
+  "where": "SF",
+  "info": "https://sf-fire.org/permits",
+  "url": "https://sf-fire.org/permits"
+ },
+ {
+  "id": "lac-health-permit",
+  "form": "Public Health Permit/License Application",
+  "title": "Public health permit (food facility)",
+  "agency": "Los Angeles County Department of Public Health, Environmental Health",
+  "where": "LAC",
+  "info": "http://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+  "url": "http://publichealth.lacounty.gov/eh/docs/permit/Public-Health-Permit-License-Application.pdf"
+ },
+ {
+  "id": "irv-license",
+  "form": "Business License application",
+  "title": "City of Irvine business license",
+  "agency": "City of Irvine Community Development, Business Licensing",
+  "where": "IRV",
+  "info": "https://cityofirvine.gov/community-development/business-licensing",
+  "url": "https://cityofirvine.gov/community-development/business-licensing"
+ },
+ {
+  "id": "oc-health-permit",
+  "form": "Food Facility Health Permit application",
+  "title": "Food facility health permit",
+  "agency": "Orange County Health Care Agency, Environmental Health",
+  "where": "IRV",
+  "info": "https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit",
+  "url": "https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf"
+ },
+ {
+  "id": "sdg-co",
+  "form": "Certificate of Occupancy (Information Bulletin 585)",
+  "title": "Certificate of Occupancy",
+  "agency": "City of San Diego Development Services",
+  "where": "SDG",
+  "info": "https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585",
+  "url": "https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585"
+ },
+ {
+  "id": "sdc-health-permit",
+  "form": "Public Health Permit (retail food facility)",
+  "title": "Public health permit (food facility)",
+  "agency": "County of San Diego Department of Environmental Health and Quality",
+  "where": "SDG",
+  "info": "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_newbusiness664.pdf",
+  "url": "https://www.sandiegocounty.gov/content/sdc/deh/fhd/food/food_faq.html"
+ },
+ {
+  "id": "nyc-co",
+  "form": "Certificate of Occupancy check",
+  "title": "Certificate of Occupancy for the use",
+  "agency": "NYC Department of Buildings",
+  "where": "NYC",
+  "info": "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page",
+  "url": "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page"
+ },
+ {
+  "id": "ny-dol-100",
+  "form": "NYS-100",
+  "title": "New employer registration for unemployment insurance and withholding",
+  "agency": "New York State Department of Labor",
+  "where": "NY",
+  "info": "https://dol.ny.gov/register-unemployment-insurance-0",
+  "url": "https://dol.ny.gov/register-unemployment-insurance-0"
+ },
+ {
+  "id": "ny-wcb",
+  "form": "Workers' compensation and disability (DBL/PFL) coverage",
+  "title": "Proof of workers' comp and disability/paid family leave insurance",
+  "agency": "New York State Workers' Compensation Board",
+  "where": "NY",
+  "info": "https://www.wcb.ny.gov/content/main/coverage-requirements.jsp",
+  "url": "https://www.wcb.ny.gov/content/main/coverage-requirements.jsp"
+ },
+ {
+  "id": "nyc-sign",
+  "form": "Sign permit (DOB NOW: Build)",
+  "title": "Sign permit",
+  "agency": "NYC Department of Buildings",
+  "where": "NYC",
+  "info": "https://www.nyc.gov/site/buildings/property-or-business-owner/sign-permit.page",
+  "url": "https://www.nyc.gov/site/buildings/property-or-business-owner/sign-permit.page"
+ },
+ {
+  "id": "tx-food-manager",
+  "form": "Certified Food Manager certificate (DSHS-licensed exam)",
+  "title": "Certified food manager",
+  "agency": "Texas Department of State Health Services",
+  "where": "TX",
+  "info": "https://www.dshs.texas.gov/food-managers",
+  "url": "https://www.dshs.texas.gov/food-managers"
+ },
+ {
+  "id": "tx-food-handler",
+  "form": "Accredited food handler course (each food employee)",
+  "title": "Food handler certificates for staff",
+  "agency": "Texas Department of State Health Services",
+  "where": "TX",
+  "info": "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+  "url": "https://www.dshs.texas.gov/food-handlers"
+ },
+ {
+  "id": "hou-co",
+  "form": "Certificate of Occupancy (HPW Code 1106)",
+  "title": "Certificate of Occupancy",
+  "agency": "City of Houston, Houston Permitting Center",
+  "where": "HOU",
+  "info": "https://www.houstonpermittingcenter.org/hpwcode1106",
+  "url": "https://www.houstonpermittingcenter.org/hpwcode1106"
+ },
+ {
+  "id": "tx-franchise",
+  "form": "Franchise Tax Report and Public Information Report (05-102)",
+  "title": "Franchise tax annual report",
+  "agency": "Texas Comptroller of Public Accounts",
+  "where": "TX",
+  "info": "https://comptroller.texas.gov/taxes/franchise/",
+  "url": "https://comptroller.texas.gov/taxes/franchise/"
+ },
+ {
+  "id": "dal-co",
+  "form": "Certificate of Occupancy Application and Land Use Questionnaire",
+  "title": "Certificate of Occupancy",
+  "agency": "City of Dallas Planning and Development",
+  "where": "DAL",
+  "info": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx",
+  "url": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx"
+ },
+ {
+  "id": "dal-building",
+  "form": "Commercial Alteration Addition Permit",
+  "title": "Building permit for tenant finish-out",
+  "agency": "City of Dallas Planning and Development",
+  "where": "DAL",
+  "info": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/pages/fees.aspx",
+  "url": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/pages/fees.aspx"
+ },
+ {
+  "id": "dal-plan-review",
+  "form": "Food establishment health plan review",
+  "title": "Food establishment plan review",
+  "agency": "City of Dallas Planning and Development, Health Plan Review",
+  "where": "DAL",
+  "info": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/Health-Inspections.aspx",
+  "url": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/Health-Inspections.aspx"
+ },
+ {
+  "id": "dal-food-permit",
+  "form": "Food Establishment Permit Application (CCS-FRM-424)",
+  "title": "Food establishment permit",
+  "agency": "City of Dallas Code Compliance, Consumer Health",
+  "where": "DAL",
+  "info": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+  "url": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx"
+ },
+ {
+  "id": "dal-fire-hood",
+  "form": "Commercial Cooking Fire-Extinguishing System permit",
+  "title": "Kitchen hood fire-extinguishing system permit",
+  "agency": "Dallas Fire-Rescue",
+  "where": "DAL",
+  "info": "https://dallascityhall.com/departments/fire-rescue/Pages/Prevention-and-Investigation-Bureau.aspx",
+  "url": "https://dallascityhall.com/departments/fire-rescue/Pages/Prevention-and-Investigation-Bureau.aspx"
+ },
+ {
+  "id": "aus-building",
+  "form": "Commercial Building Permit Web Form",
+  "title": "Building permit for a tenant finish-out",
+  "agency": "City of Austin Development Services",
+  "where": "AUS",
+  "info": "https://www.austintexas.gov/development-services/commercial-plan-review",
+  "url": "https://austintexas.jotform.com/austin-dsd/commercial-building-permit-web-form"
+ },
+ {
+  "id": "aus-food-plan-review",
+  "form": "Food Enterprise Plan Review Application",
+  "title": "Food establishment plan review",
+  "agency": "City of Austin Development Services, with Austin Public Health",
+  "where": "AUS",
+  "info": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+  "url": "https://www.austintexas.gov/health/programs/fixed-food-establishments"
+ },
+ {
+  "id": "aus-food-preopening",
+  "form": "Pre-Opening Inspection Application",
+  "title": "Pre-opening health inspection",
+  "agency": "Austin Public Health, Environmental Health Services",
+  "where": "AUS",
+  "info": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+  "url": "https://www.austintexas.gov/health/programs/fixed-food-establishments"
+ },
+ {
+  "id": "aus-food-permit",
+  "form": "Food Enterprise Operational Permit Application",
+  "title": "Food enterprise permit (fixed food establishment)",
+  "agency": "Austin Public Health, Environmental Health Services",
+  "where": "AUS",
+  "info": "https://www.austintexas.gov/health/permit-fee-schedule",
+  "url": "https://www.austintexas.gov/health/programs/fixed-food-establishments"
+ },
+ {
+  "id": "aus-sign",
+  "form": "Sign Permit (AB+C)",
+  "title": "Sign permit",
+  "agency": "City of Austin Development Services",
+  "where": "AUS",
+  "info": "https://www.austintexas.gov/development-services/sign-permits",
+  "url": "https://abc.austintexas.gov"
+ },
+ {
+  "id": "ftw-plan-review",
+  "form": "Food establishment plan review",
+  "title": "Food establishment plan review",
+  "agency": "City of Fort Worth Consumer Health",
+  "where": "FTW",
+  "info": "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review",
+  "url": "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review"
+ },
+ {
+  "id": "ftw-co",
+  "form": "Certificate of Occupancy",
+  "title": "Certificate of Occupancy",
+  "agency": "City of Fort Worth Development Services",
+  "where": "FTW",
+  "info": "https://www.fortworthtexas.gov/departments/development-services/permits/certificate-of-occupancy",
+  "url": "https://aca-prod.accela.com/CFW"
+ },
+ {
+  "id": "ftw-food-permit",
+  "form": "Food establishment permit",
+  "title": "Food establishment permit",
+  "agency": "City of Fort Worth Consumer Health",
+  "where": "FTW",
+  "info": "https://www.fortworthtexas.gov/files/assets/public/v/2/environmental-services/health/documents/fw-food-ordinance-chpt-16.pdf",
+  "url": "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review"
+ },
+ {
+  "id": "sat-co",
+  "form": "Application for Certificate of Occupancy",
+  "title": "Certificate of Occupancy",
+  "agency": "City of San Antonio Development Services",
+  "where": "SAT",
+  "info": "https://www.sanantonio.gov/DSD/Business/CofO",
+  "url": "https://www.sanantonio.gov/DSD/Business/CofO"
+ },
+ {
+  "id": "sat-food",
+  "form": "Food Establishment License",
+  "title": "Food establishment license",
+  "agency": "San Antonio Metropolitan Health District (Metro Health)",
+  "where": "SAT",
+  "info": "https://www.sanantonio.gov/Health/FoodLicensing",
+  "url": "https://www.sanantonio.gov/Health/FoodLicensing/FAQs"
+ },
+ {
+  "id": "mc-plan-review",
+  "form": "Plan Review Application (food establishment)",
+  "title": "Food establishment plan review",
+  "agency": "Maricopa County Environmental Services",
+  "where": "PHX",
+  "info": "https://www.maricopa.gov/3973/PermanentFixed-Businesses",
+  "url": "https://maricopacountyaz-energovweb.tylerhost.net/apps/selfservice#/home"
+ },
+ {
+  "id": "phx-co",
+  "form": "Construction Permit Plan Review Application and Certificate of Occupancy",
+  "title": "Building permit and Certificate of Occupancy",
+  "agency": "City of Phoenix Planning and Development",
+  "where": "PHX",
+  "info": "https://www.phoenix.gov/administration/departments/pdd/residential-building/resident-plan-reviews/certificate-of-occupancy.html",
+  "url": "https://www.phoenix.gov/administration/departments/pdd/commercial-multifamily-building/commercial-process-overview.html"
+ },
+ {
+  "id": "mc-food-permit",
+  "form": "Food Establishment Permit",
+  "title": "Food establishment permit",
+  "agency": "Maricopa County Environmental Services",
+  "where": "PHX",
+  "info": "https://www.maricopa.gov/4996/New-Application-Guidance",
+  "url": "https://maricopacountyaz-energovweb.tylerhost.net/apps/selfservice#/home"
+ },
+ {
+  "id": "fl-dor",
+  "form": "Form DR-1",
+  "title": "Sales tax registration",
+  "agency": "Florida Department of Revenue",
+  "where": "FL",
+  "info": "https://floridarevenue.com",
+  "url": "https://floridarevenue.com"
+ },
+ {
+  "id": "tpa-business-tax",
+  "form": "New Business Tax Receipt Application",
+  "title": "City of Tampa business tax receipt",
+  "agency": "City of Tampa Business Tax",
+  "where": "TPA",
+  "info": "https://www.tampa.gov/business-tax",
+  "url": "https://www.tampa.gov/service/new-business-tax-receipt-application"
+ },
+ {
+  "id": "fl-dbpr",
+  "form": "Food Service License",
+  "title": "Restaurant license",
+  "agency": "Florida DBPR, Division of Hotels and Restaurants",
+  "where": "FL",
+  "info": "https://www2.myfloridalicense.com",
+  "url": "https://www2.myfloridalicense.com"
+ },
+ {
+  "id": "ocfl-business-tax",
+  "form": "Local Business Tax Receipt",
+  "title": "Orange County (FL) local business tax receipt",
+  "agency": "Orange County Tax Collector",
+  "where": "ORL",
+  "info": "https://www.octaxcol.com/taxes/business-taxes/obtain-new-business-tax-receipt/",
+  "url": "https://county-taxes.net/fl-orange/btexpress"
+ },
+ {
+  "id": "mia-btr",
+  "form": "Business Tax Receipt",
+  "title": "Miami business tax receipt",
+  "agency": "City of Miami and Miami-Dade County Tax Collector",
+  "where": "MIA",
+  "info": "https://www.miami.gov",
+  "url": "https://www.miami.gov"
+ },
+ {
+  "id": "wa-bls",
+  "form": "Business License Application",
+  "title": "Washington business license (with city endorsement)",
+  "agency": "Washington Department of Revenue, Business Licensing Service",
+  "where": "WA",
+  "info": "https://dor.wa.gov",
+  "url": "https://dor.wa.gov"
+ },
+ {
+  "id": "sea-food",
+  "form": "Food Business Permit",
+  "title": "Food business permit",
+  "agency": "Public Health, Seattle and King County",
+  "where": "SEA",
+  "info": "https://kingcounty.gov",
+  "url": "https://kingcounty.gov"
+ },
+ {
+  "id": "il-tax",
+  "form": "MyTax Illinois registration (REG-1)",
+  "title": "Sales tax registration",
+  "agency": "Illinois Department of Revenue",
+  "where": "IL",
+  "info": "https://mytax.illinois.gov",
+  "url": "https://mytax.illinois.gov"
+ },
+ {
+  "id": "chi-license",
+  "form": "Business License",
+  "title": "Chicago business license",
+  "agency": "City of Chicago, Business Affairs and Consumer Protection",
+  "where": "CHI",
+  "info": "https://www.chicago.gov/city/en/depts/bacp.html",
+  "url": "https://www.chicago.gov/city/en/depts/bacp.html"
+ },
+ {
+  "id": "ma-tax",
+  "form": "MassTaxConnect registration",
+  "title": "Sales tax registration",
+  "agency": "Massachusetts Department of Revenue",
+  "where": "MA",
+  "info": "https://mtc.dor.state.ma.us",
+  "url": "https://mtc.dor.state.ma.us"
+ },
+ {
+  "id": "bos-cert",
+  "form": "Business Certificate",
+  "title": "Boston business certificate",
+  "agency": "City of Boston, City Clerk",
+  "where": "BOS",
+  "info": "https://www.boston.gov",
+  "url": "https://www.boston.gov"
+ },
+ {
+  "id": "ga-tax",
+  "form": "Georgia Tax Center registration",
+  "title": "Sales tax registration",
+  "agency": "Georgia Department of Revenue",
+  "where": "GA",
+  "info": "https://gtc.dor.ga.gov",
+  "url": "https://gtc.dor.ga.gov"
+ },
+ {
+  "id": "atl-license",
+  "form": "Business License",
+  "title": "Atlanta business license",
+  "agency": "City of Atlanta, Office of Revenue",
+  "where": "ATL",
+  "info": "https://www.atlantaga.gov",
+  "url": "https://www.atlantaga.gov"
+ },
+ {
+  "id": "pa-tax",
+  "form": "myPATH registration",
+  "title": "Sales tax license",
+  "agency": "Pennsylvania Department of Revenue",
+  "where": "PA",
+  "info": "https://mypath.pa.gov",
+  "url": "https://mypath.pa.gov"
+ },
+ {
+  "id": "phl-cal",
+  "form": "Commercial Activity License",
+  "title": "Commercial activity license",
+  "agency": "City of Philadelphia, Department of Licenses and Inspections",
+  "where": "PHL",
+  "info": "https://eclipse.phila.gov",
+  "url": "https://eclipse.phila.gov"
+ },
+ {
+  "id": "lv-license",
+  "form": "Business License",
+  "title": "Las Vegas business license",
+  "agency": "City of Las Vegas, Business Licensing",
+  "where": "LV",
+  "info": "https://www.lasvegasnevada.gov",
+  "url": "https://www.lasvegasnevada.gov"
+ },
+ {
+  "id": "lv-food",
+  "form": "Food Establishment Permit",
+  "title": "Food establishment permit",
+  "agency": "Southern Nevada Health District",
+  "where": "LV",
+  "info": "https://www.southernnevadahealthdistrict.org",
+  "url": "https://www.southernnevadahealthdistrict.org"
+ },
+ {
+  "id": "dc-dlcp",
+  "form": "Basic Business License",
+  "title": "Corporate registration and basic business license",
+  "agency": "DC Department of Licensing and Consumer Protection",
+  "where": "DC",
+  "info": "https://dlcp.dc.gov",
+  "url": "https://dlcp.dc.gov"
+ },
+ {
+  "id": "dc-otr",
+  "form": "Form FR-500",
+  "title": "Tax registration",
+  "agency": "DC Office of Tax and Revenue",
+  "where": "DC",
+  "info": "https://mytax.dc.gov",
+  "url": "https://mytax.dc.gov"
+ },
+ {
+  "id": "dc-food",
+  "form": "Food Establishment License",
+  "title": "Food establishment license",
+  "agency": "DC Health",
+  "where": "DC",
+  "info": "https://dchealth.dc.gov",
+  "url": "https://dchealth.dc.gov"
+ }
+]
