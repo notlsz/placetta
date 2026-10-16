@@ -25,6 +25,7 @@ const KIND: Record<string, Bi> = {
   review: B("Final check before sending", "发送前核对"),
   check_agency: B("Check it reached the agency", "核实机构是否收到"),
   destination_stale: B("Re-check where this form is sent", "重新核实提交地址"),
+  line_health: B("An iMessage line needs care", "iMessage 线路需要处理"),
 };
 
 function Copy({ text }: { text: string }) {

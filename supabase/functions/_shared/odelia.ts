@@ -193,7 +193,7 @@ export function splitSms(text: string, o: { max?: number; tail?: string; more?: 
 
 /* ------------------------------ quiet hours and limits ------------------------------ */
 
-export const LIMITS = { textsPerDay: 3, callsPerDay: 1, inboundPerHour: 30, strangerDays: 90, maxQueuedHours: 48 };
+export const LIMITS = { textsPerDay: 3, callsPerDay: 1, inboundPerHour: 30, strangerDays: 90, maxQueuedHours: 48, newChatsPerLine: 25 };
 
 export function validTz(tz: unknown): string {
   if (typeof tz === "string" && tz.length <= 64) {

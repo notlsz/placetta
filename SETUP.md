@@ -16,8 +16,10 @@ Everything else is built and deployed. These need your accounts, so no one else 
 3. **The portal worker.** Render, New, Blueprint, this repo (`render.yaml`). Paste the service role key and the
    Anthropic key when it asks. Then add `FILER_ENABLED=1` and `FILER_CHANNELS=email,fax,mail,portal` to the
    Supabase secrets so filings queue for it.
-4. **Texts and calls.** Telnyx: buy a number and register the 10DLC brand and campaign (it needs your EIN and
-   takes a few days). Then follow "Text and call Odelia (Telnyx)" below.
+4. **Texts and calls.** iMessage first: start Linq's trial (linqapp.com) and run `npm run launch`; texts work the
+   same day, no carrier registration. Telnyx for calls and as the SMS fallback: buy a number and register the 10DLC
+   brand and campaign (it needs your EIN and takes a few days). See "Odelia on iMessage (Linq)" and "Text and call
+   Odelia (Telnyx)" below.
 
 ## The fast way: one command
 
@@ -40,6 +42,7 @@ It asks for (typing is hidden, nothing is saved):
 | Resend API key and sender | resend.com: add your domain, create a key. Sign-in emails need it. |
 | Google and Microsoft sign-in (optional) | See "Sign in with Google or Microsoft" below |
 | Telnyx, for texting and calling Odelia (optional) | See "Text and call Odelia" below. It can create the AI Assistant for you. |
+| Linq, for Odelia on iMessage (optional) | See "Odelia on iMessage (Linq)" below. It subscribes the webhook and can forward calls for you. |
 | Your team's emails | Whoever works the filing queue |
 
 Then it:
@@ -149,6 +152,26 @@ In Telnyx (portal.telnyx.com):
 Then run the migration (`20261013000000_odelia_phone.sql`) and deploy `odelia-sms` and `odelia-voice` (the launcher does both). A pg_cron job sends the outbox every 10 minutes while anything is waiting.
 
 How it stays safe: Telnyx webhooks are checked against the public key and refused if older than five minutes. A number is linked to one person only, and linking needs the settings PIN when it's on. Texts start the agent as that person, with the same member and plan checks as the app, and answers only ever go to the verified number. A call whose caller ID isn't fully attested (STIR/SHAKEN "A") gets a 4-digit code texted to the number on file, and Odelia says nothing about the account until the caller says it.
+
+## Odelia on iMessage (Linq)
+
+Linq (linqapp.com) gives Odelia real iMessage lines, the provider Poke, Lindy and Instinct use. Messages go as blue bubbles to iPhones and fall back to RCS or SMS for Android, and none of it waits on 10DLC. Plans: free for up to 20 contacts (enough to test), Pro from $260 a month with a 7-day trial, zero data retention and SOC 2. Don't turn zero data retention on for Odelia's lines: Linq then leaves the words out of the webhook, and Odelia has nothing to read.
+
+1. Start the trial and add one or more iMessage lines in Linq's dashboard. Create an API key.
+2. `npm run launch` asks for the key, lists the lines, subscribes `odelia-sms` to `message.received` (Linq shows the signing secret once; it goes straight to `LINQ_WEBHOOK_SECRET`), sets `LINQ_API_KEY` and `LINQ_NUMBERS`, and can forward each line's calls to `ODELIA_NUMBER` (`LINQ_FORWARDS_CALLS=1`) so people save one number. By hand: webhook `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/odelia-sms?version=2026-02-03`, event `message.received`.
+3. Run the migration `20261016060000_odelia_imessage.sql` and deploy `odelia-sms`, `odelia-voice` and `agent-run`.
+
+With Linq set, every text goes by iMessage (codes, answers, updates); Telnyx keeps calls and is the fallback when no line can send. Settings shows each person their own line.
+
+How the lines stay healthy (Apple banned Lindy's self-run iMessage account after 10,000 messages in 12 hours, so these are its lessons):
+
+- People spread across lines (`LINQ_NUMBERS` can list several), and each keeps theirs, so it stays one conversation.
+- Odelia only opens a conversation with the verification code, at most 25 new ones a line a day; everything else is a reply or an update to someone who has already written.
+- Linq's line reputation is read every 10 minutes into `odelia_lines`. On CRITICAL, updates move to a healthy line (replies still go back on the line they wrote to); the team gets a `line_health` task when a line slips. A line Linq restricts (2027) is skipped for the next one at once.
+- `select * from odelia_line_traffic(7)` shows sent against received per line. Mostly-sent, rarely-answered is the pattern that gets a line flagged.
+- STOP: Linq blocks the person on every line; Odelia sends the one confirmation (`override_optout`) and nothing else until START.
+
+Webhooks are checked against the signing secret (Standard Webhooks, five minutes either way) and deduplicated on Linq's message id. Group chats, our own echoes, late recoveries and other lines on the account are ignored.
 
 ## Before the first paying customer
 

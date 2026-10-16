@@ -334,9 +334,10 @@ const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")
 const hourLabel = (v: string, zh: boolean) => { const [h, m] = v.split(":").map(Number); const d = new Date(2026, 0, 1, h || 0, m || 0); return d.toLocaleTimeString(zh ? "zh-CN" : "en-US", { hour: "numeric", minute: "2-digit" }); };
 
 /** A contact card for Odelia's number, so texts from her show up with her name. */
-function saveContact(number: string, zh: boolean) {
+function saveContact(number: string, zh: boolean, callNumber?: string | null) {
+  const tels = callNumber && callNumber !== number ? [`TEL;TYPE=CELL,TEXT:${number}`, `TEL;TYPE=VOICE:${callNumber}`] : [`TEL;TYPE=CELL,VOICE,TEXT:${number}`];
   const vcf = ["BEGIN:VCARD", "VERSION:3.0", "N:;Odelia;;;", zh ? "FN:Odelia（快哉）" : "FN:Odelia (Placetta)", zh ? "ORG:快哉" : "ORG:Placetta", zh ? "TITLE:AI 合规助理" : "TITLE:AI compliance agent",
-    `TEL;TYPE=CELL,VOICE,TEXT:${number}`, zh ? "NOTE:发短信或打电话问 Odelia 关于执照、许可和截止日期的问题。" : "NOTE:Text or call Odelia about your licenses, permits and deadlines.", "URL:https://placetta.com", "END:VCARD"].join("\r\n");
+    ...tels, zh ? "NOTE:发短信或打电话问 Odelia 关于执照、许可和截止日期的问题。" : "NOTE:Text or call Odelia about your licenses, permits and deadlines.", "URL:https://placetta.com", "END:VCARD"].join("\r\n");
   const url = URL.createObjectURL(new Blob([vcf + "\r\n"], { type: "text/vcard;charset=utf-8" }));
   const a = document.createElement("a");
   a.href = url; a.download = "Odelia.vcf"; document.body.appendChild(a); a.click(); a.remove();
@@ -372,8 +373,9 @@ function PhoneGroup() {
     code_locked: zh ? "错误次数太多。请重新发送验证码。" : "Too many wrong tries. Send a new code.",
     code_expired: zh ? "验证码已过期。请重新发送。" : "That code expired. Send a new one.",
     not_configured: zh ? "短信功能还没有设置好。" : "Texting isn't set up yet.",
-    opted_out: zh ? `这个号码曾回复 STOP 退订 Odelia 的短信。请先发送 START 到 ${line.display ?? ""}，再重新发送验证码。` : `This number texted STOP to Odelia. Text START to ${line.display ?? ""}, then send the code again.`,
+    opted_out: zh ? `这个号码曾回复 STOP 退订 Odelia 的短信。请先发送 START 到 ${link?.line ? prettyPhone(link.line) : line.display ?? ""}，再重新发送验证码。` : `This number texted STOP to Odelia. Text START to ${link?.line ? prettyPhone(link.line) : line.display ?? ""}, then send the code again.`,
     send_failed: zh ? "验证码没有发出。请检查号码后重试。" : "The code didn't go through. Check the number and try again.",
+    line_busy: zh ? "今天新关联的号码太多了。请明天再发送验证码。" : "Odelia has linked as many new phones as she safely can today. Send the code again tomorrow.",
   } as Record<string, string>)[code];
   const act = async (fn: () => Promise<api.PhoneStatus>, done?: string) => {
     setBusy(true); setMsg("");
@@ -409,21 +411,28 @@ function PhoneGroup() {
         note={B("Text or call Odelia like a coworker, and she texts you first when something needs you. Texting isn't set up yet. Check back soon, or email support@placetta.com.", "像和同事一样给 Odelia 发短信或打电话，有事需要您时她也会先发短信给您。短信功能还没有设置好。请稍后再来看看，或发邮件至 support@placetta.com。")} />
     );
   }
-  const number = line.number ?? "";
+  // Each person keeps their own iMessage line once one is assigned; everyone else sees the first.
+  const number = link?.line ?? line.number ?? "";
+  const display = number ? prettyPhone(number) : line.display ?? "";
+  // When the iMessage lines forward calls to Odelia's phone line, every line takes calls, so it's one number.
+  const forwards = !!line.imessage && !!line.call_number && line.call_number === line.number;
+  const callNumber = line.voice ? (forwards ? number : line.call_number ?? number) : null;
+  const callApart = !!callNumber && callNumber !== number;
   const verified = !!link?.verified;
   const codeStep = !!link && !verified && !adding && (link.code_pending || busy);
   const showForm = !verified && (adding || !link || (!link.code_pending && !busy));
   const lastErr = link && !verified && link.last_error ? errText(link.last_error) : "";
   const log = st?.log ?? [];
   const who = (r: api.PhoneLogRow) => r.channel === "voice" ? (zh ? "通话" : "Call")
-    : r.direction === "in" ? (zh ? "您发的短信" : "You texted") : (zh ? "Odelia 发的短信" : "Odelia texted");
+    : (r.direction === "in" ? (zh ? "您发的短信" : "You texted") : (zh ? "Odelia 发的短信" : "Odelia texted")) + (r.service === "iMessage" ? (zh ? "（iMessage）" : " (iMessage)") : "");
 
   const rows: Row[] = [
     { label: B("Odelia's number", "Odelia 的号码"), icon: <I.phone />,
-      sub: <>{line.display}{line.voice ? (zh ? "，可发短信或打电话" : ", for texts and calls") : (zh ? "，可发短信" : ", for texts")}</>,
-      right: <>{number && <a className="sbtn quiet" href={`sms:${number}`}>{zh ? "发短信" : "Text"}</a>}<Btn onClick={() => saveContact(number, zh)}><I.download />{zh ? "保存联系人" : "Save contact"}</Btn></> },
+      sub: <>{display}{line.imessage ? (zh ? "，可发 iMessage（安卓手机为短信）" : ", on iMessage (texts from Android)") : (zh ? "，可发短信" : ", for texts")}
+        {line.voice && (callApart ? <>{zh ? `；来电请拨 ${prettyPhone(callNumber!)}` : `. Calls: ${prettyPhone(callNumber!)}`}</> : (zh ? "，也可打电话" : ", and calls"))}</>,
+      right: <>{number && <a className="sbtn quiet" href={`sms:${number}`}>{zh ? "发短信" : "Text"}</a>}<Btn onClick={() => saveContact(number, zh, callNumber)}><I.download />{zh ? "保存联系人" : "Save contact"}</Btn></> },
     { label: B("Your phone", "您的手机"), icon: <I.user />,
-      sub: link ? <>{prettyPhone(link.number)}{verified ? (link.opted_out ? (zh ? `，已回复 STOP 退订短信。发送 START 到 ${line.display} 可重新开启。` : `, texts are off because it texted STOP. Text START to ${line.display} to turn them back on.`) : (zh ? "，已验证" : ", verified")) : (zh ? "，等待验证" : ", waiting for the code")}</> : (zh ? "未关联" : "Not linked"),
+      sub: link ? <>{prettyPhone(link.number)}{verified ? (link.opted_out ? (zh ? `，已回复 STOP 退订短信。发送 START 到 ${display} 可重新开启。` : `, texts are off because it texted STOP. Text START to ${display} to turn them back on.`) : (zh ? "，已验证" : ", verified")) : (zh ? "，等待验证" : ", waiting for the code")}</> : (zh ? "未关联" : "Not linked"),
       right: verified ? <Btn guard onClick={remove}>{zh ? "取消关联" : "Remove"}</Btn> : link ? <Btn onClick={() => void act(() => api.phoneRemove())}>{zh ? "取消" : "Cancel"}</Btn> : undefined },
     ...(verified ? [
       { label: B("Texts about important updates", "重要更新短信通知"), icon: <I.message />,
@@ -486,7 +495,7 @@ function PhoneGroup() {
                 </li>
               ))}
             </ul>
-          ) : <p className="sg-note">{zh ? `还没有记录。发短信到 ${line.display} 开始吧。` : `Nothing yet. Text ${line.display} to start.`}</p>}
+          ) : <p className="sg-note">{zh ? `还没有记录。发短信到 ${display} 开始吧。` : `Nothing yet. Text ${display} to start.`}</p>}
           {log.length > 8 && <div className="sg-act"><Btn onClick={() => setAll(v => !v)}>{all ? (zh ? "收起" : "Show less") : (zh ? "显示全部" : "Show all")}</Btn></div>}
         </div>
       )}

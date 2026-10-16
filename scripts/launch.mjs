@@ -211,6 +211,49 @@ async function setupTelnyx(secrets) {
   if (assistant) secrets.TELNYX_ASSISTANT_ID = assistant;
 }
 
+/* Odelia on iMessage (Linq, linqapp.com: the provider Poke, Lindy and Instinct use). Start the 7-day Pro trial or the
+   free tier (20 contacts), then paste the API key: this lists the account's lines, subscribes odelia-sms to incoming
+   messages (Linq shows the signing secret once, so it goes straight into the secrets), and can forward each line's
+   calls to Odelia's Telnyx number so people save one number for both. Texts then go by iMessage, falling back to RCS and
+   SMS for Android, without waiting on 10DLC; Telnyx stays for calls and as the fallback. */
+async function setupLinq(secrets) {
+  console.log(`\n${bold("Odelia on iMessage")} ${dim("(Linq. Leave blank to skip; texts then go by Telnyx SMS.)")}`);
+  const key = await ask("Linq API key: ", { hidden: true });
+  if (!key) return;
+  const linq = async (method, path, body) => {
+    const res = await fetch(`https://api.linqapp.com/api/partner${path}`, { method, headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(j?.error?.message ?? `HTTP ${res.status}`);
+    return j;
+  };
+  let lines = [];
+  try {
+    const j = await linq("GET", "/v3/phone_numbers");
+    lines = (j.phone_numbers ?? []).filter((p) => (p.line_type ?? "iMessage") === "iMessage").map((p) => ({ id: p.id, number: p.phone_number }));
+  } catch (e) { console.log(`  ${red("couldn't list lines")}  ${e.message}`); return; }
+  if (!lines.length) { console.log(`  ${red("no iMessage lines")}  Add one in Linq's dashboard, then run this again.`); return; }
+  console.log(`  lines: ${lines.map((l) => l.number).join(", ")}`);
+  const pick = (await ask(`Lines for Odelia, comma separated [all ${lines.length}]: `)).split(",").map((x) => x.replace(/[^\d+]/g, "")).filter(Boolean);
+  const use = pick.length ? lines.filter((l) => pick.some((p) => l.number.endsWith(p.replace(/^\+?1?/, "")))) : lines;
+  if (!use.length) { console.log(`  ${red("none of those are on the account")}`); return; }
+  try {
+    const sub = await linq("POST", "/v3/webhook-subscriptions", { target_url: `${SUPABASE_URL}/functions/v1/odelia-sms?version=2026-02-03`, subscribed_events: ["message.received"], phone_numbers: use.map((l) => l.number) });
+    if (!sub.signing_secret) throw new Error("no signing secret in the answer");
+    secrets.LINQ_WEBHOOK_SECRET = sub.signing_secret;
+    console.log(`  ${green("subscribed")}  odelia-sms to incoming messages (${sub.id})`);
+  } catch (e) { console.log(`  ${red("not subscribed")}  ${e.message}. Add a webhook for message.received in Linq and paste its secret below.`); const s = await ask("Webhook signing secret (whsec_...): ", { hidden: true }); if (!s) return; secrets.LINQ_WEBHOOK_SECRET = s; }
+  secrets.LINQ_API_KEY = key;
+  secrets.LINQ_NUMBERS = use.map((l) => l.number).join(",");
+  const voice = secrets.ODELIA_NUMBER;
+  if (voice && /^y/i.test(await ask(`Forward calls to these lines to Odelia's phone number ${voice}, so people save one number? [Y/n] `, { fallback: "y" }))) {
+    let all = true;
+    for (const l of use) {
+      try { await linq("PUT", `/v3/phone_numbers/${encodeURIComponent(l.id)}`, { forwarding_number: voice }); } catch (e) { all = false; console.log(`  ${red("not forwarded")}  ${l.number}: ${e.message}`); }
+    }
+    if (all) { secrets.LINQ_FORWARDS_CALLS = "1"; console.log(`  ${green("forwarding")}  calls to ${voice}`); }
+  }
+}
+
 function setSecrets(secrets) {
   const names = Object.keys(secrets);
   if (!names.length) return true;
@@ -263,6 +306,7 @@ async function main() {
   }
   const sk = await ask("Stripe secret key (sk_test_... to try it first, sk_live_... to charge): ", { hidden: true });
   await setupTelnyx(secrets);
+  await setupLinq(secrets);
 
   const auth = {};
   if (TOKEN) {

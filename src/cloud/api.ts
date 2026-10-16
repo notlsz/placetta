@@ -607,11 +607,14 @@ export async function filingStats(): Promise<import("../plan").FormStat[]> {
 export type PhoneLink = {
   number: string; verified: boolean; verified_at: string | null; texts_on: boolean; calls_on: boolean; quiet_start: string; quiet_end: string;
   tz: string; lang: "en" | "zh"; opted_out: boolean; last_error: string | null; code_pending: boolean;
+  /** The iMessage line this person texts Odelia on (each person keeps one, so it stays one conversation). */
+  line?: string | null;
 };
-export type PhoneLogRow = { id: number; direction: "in" | "out"; channel: "sms" | "voice"; kind: string; body: string; created_at: string };
+export type PhoneLogRow = { id: number; direction: "in" | "out"; channel: "sms" | "voice"; kind: string; body: string; service?: "iMessage" | "RCS" | "SMS" | null; created_at: string };
 export type PhoneStatus = { link: PhoneLink | null; log: PhoneLogRow[]; error?: string };
-/** Whether texting and calls are set up on the server, and Odelia's number. */
-export type OdeliaLine = { configured: boolean; voice: boolean; number: string | null; display: string | null };
+/** Whether texting and calls are set up on the server, and Odelia's number. With iMessage (Linq) the number is an
+ *  iMessage line that falls back to SMS for Android; calls may go to a different number (call_number). */
+export type OdeliaLine = { configured: boolean; imessage?: boolean; voice: boolean; number: string | null; display: string | null; call_number?: string | null; call_display?: string | null };
 const PHONE_CODES = ["pin_required", "phone_format", "phone_taken", "phone_rate_limited", "phone_none", "mfa_required", "time_format"];
 async function phoneRpc(name: string, args: Record<string, unknown> = {}): Promise<PhoneStatus> {
   const { data, error } = await supabase().rpc(name, args);

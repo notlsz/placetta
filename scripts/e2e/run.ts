@@ -480,6 +480,149 @@ try {
     check("a replayed message id is ignored", replay.status === 200 && replay.data?.duplicate === true && sms(mark).length === 0 && (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === 8, replay);
   });
 
+  /* ---------------- b2. iMessage (Linq) ---------------- */
+  await scenario("b2. iMessage", async () => {
+    // Linq turned on next to Telnyx: two iMessage lines, the webhook secret, the key
+    const L1 = "+14155550170", L2 = "+14155550171", STAFF_PHONE = "+16465550144";
+    const LINQ_ENV = { LINQ_API_KEY: "lq_e2e", LINQ_WEBHOOK_SECRET: "whsec_" + btoa("e2e-linq-signing-secret-0123456789"), LINQ_NUMBERS: `${L1},${L2}` };
+    for (const [k, v] of Object.entries(LINQ_ENV)) Deno.env.set(k, v);
+    stubs.linqState.lines = new Set([L1, L2]);
+    const { signLinq } = await import("../../supabase/functions/_shared/linq.ts");
+    const linqPost = async (data: Record<string, unknown>, o: { eventId?: string; badSecret?: boolean; type?: string } = {}) => {
+      const ev = { api_version: "v3", event_type: o.type ?? "message.received", event_id: o.eventId ?? crypto.randomUUID(), created_at: new Date().toISOString(), partner_id: "p_e2e", trace_id: "t", webhook_version: "2026-02-03", data };
+      const raw = JSON.stringify(ev), id = `msg_${ev.event_id}`, ts = String(Math.floor(Date.now() / 1000));
+      const sig = await signLinq(raw, id, ts, o.badSecret ? "whsec_" + btoa("not-the-secret-not-the-secret!!") : LINQ_ENV.LINQ_WEBHOOK_SECRET);
+      return await call("odelia-sms", null, { raw, headers: { "webhook-id": id, "webhook-timestamp": ts, "webhook-signature": sig } });
+    };
+    const msg = (from: string, to: string, text: string, id: string, extra: Record<string, unknown> = {}) => ({
+      id, direction: "inbound", service: "iMessage", sent_at: new Date().toISOString(), delivered_at: null, read_at: null,
+      sender_handle: { id: "h1", handle: from, service: "iMessage", joined_at: new Date().toISOString(), is_me: false },
+      chat: { id: `chat-${from}-${to}`, is_group: false, owner_handle: { id: "h0", handle: to, service: "iMessage", joined_at: new Date().toISOString(), is_me: true }, health_status: { status: "HEALTHY", doc_url: "" } },
+      parts: text ? [{ type: "text", value: text, reactions: null }] : [], ...extra,
+    });
+    const imsg = (m: number, to?: string) => since(m).filter((r) => r.service === "linq" && r.method === "POST" && /\/v3\/chats(\/[^/]+\/messages)?$/.test(r.path) && (!to || (r.body.to?.[0] ?? [...stubs.linqState.chats.values()].find((c) => r.path.includes(c.id))?.to) === to));
+    const words = (r: { body: any }) => String(r.body?.message?.parts?.[0]?.value ?? "");
+    const t0b = Date.now();
+    mark = recorded.length;
+
+    const line = await call("odelia-sms", { action: "line" });
+    check("the app is told texting is iMessage, on the first line", line.data?.configured === true && line.data?.imessage === true && line.data?.number === L1 && line.data?.call_number === ODELIA, line.data);
+
+    // the owner texts the second line: the answer comes back from that line, with the typing bubble while it works
+    const r1 = await linqPost(msg(OWNER_PHONE, L2, "What's due this month?", "im-1"));
+    check("a signed Linq message.received is accepted", r1.status === 200 && r1.data?.ok === true, r1);
+    await settle();
+    const [run] = await sql`select * from public.agent_runs where channel = 'sms' order by created_at desc limit 1`;
+    check("an iMessage starts a run as the owner", run && run.created_by === owner.id && run.reply_to === OWNER_PHONE && run.status === "done" && run.prompt === "What's due this month?", run);
+    const out1 = imsg(mark, OWNER_PHONE);
+    check("the answer goes back by iMessage, from the line they wrote to", out1.length === 1 && out1[0].body.from === L2 && /CO paperwork/.test(words(out1[0])) && markdownFree(words(out1[0])), out1.map((r) => [r.body.from, words(r)]));
+    const typing = since(mark).filter((r) => r.service === "linq" && r.path === `/api/partner/v3/chats/${encodeURIComponent(`chat-${OWNER_PHONE}-${L2}`)}/typing`);
+    check("the typing bubble showed in their conversation", typing.length === 1, since(mark).filter((r) => r.service === "linq").map((r) => r.path));
+    check("nothing went by Telnyx SMS", sms(mark).length === 0, sms(mark).map((r) => r.body.text));
+    const [pl] = await sql`select line from public.phone_links where user_id = ${owner.id}`;
+    check("the owner's line is remembered", pl?.line === L2, pl);
+    const logged = await sql`select direction, kind, line, service, provider_id from public.odelia_messages where run_id = ${run.id} order by id`;
+    check("both sides are logged with the line and iMessage", logged.length === 2 && logged.every((l) => l.line === L2 && l.service === "iMessage") && logged[0].provider_id === "linq:im-1", logged);
+
+    // the same message delivered twice (Linq delivers at least once), a forged one, and things Odelia never answers
+    mark = recorded.length;
+    const runs = async () => (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n;
+    const n0 = await runs();
+    const dup = await linqPost(msg(OWNER_PHONE, L2, "What's due this month?", "im-1"));
+    const forged = await linqPost(msg(OWNER_PHONE, L2, "What's due this month?", "im-forged"), { badSecret: true });
+    const echo = await linqPost({ ...msg(L2, OWNER_PHONE, "an echo of our own", "im-out"), direction: "outbound" });
+    const group = await linqPost(msg(OWNER_PHONE, L2, "group chat", "im-group", { chat: { id: "g1", is_group: true } }));
+    const late = await linqPost(msg(OWNER_PHONE, L2, "an old one", "im-late", { reconciled_at: new Date().toISOString() }));
+    const other = await linqPost(msg(OWNER_PHONE, "+14155550999", "to a line that isn't ours", "im-other"));
+    await settle();
+    check("a redelivered message is ignored", dup.status === 200 && dup.data?.duplicate === true, dup.data);
+    check("a bad Linq signature is rejected", forged.status === 401 && (await sql`select count(*)::int n from public.odelia_messages where provider_id = 'linq:im-forged'`)[0].n === 0, forged);
+    check("our own messages, group chats, late recoveries and other lines are ignored", echo.data?.skipped === "outbound" && group.data?.skipped === "group" && late.data?.skipped === "late" && other.data?.skipped === "other_line", [echo.data, group.data, late.data, other.data]);
+    check("none of those started a run or sent anything", (await runs()) === n0 && imsg(mark).length === 0);
+
+    // a photo by iMessage: Linq's presigned link is fetched without our key, saved to Documents, and read
+    mark = recorded.length;
+    await linqPost(msg(OWNER_PHONE, L2, "", "im-photo", { parts: [{ type: "media", id: "att1", filename: "IMG_0001.png", mime_type: "image/png", size_bytes: 68, url: "https://cdn.linqapp.com/media/att1.png?X-Amz-Signature=abc", reactions: null }] }));
+    await settle();
+    const media = since(mark).filter((r) => r.service === "linq" && r.path.startsWith("/media/"));
+    check("the photo is fetched from its presigned link, with no API key", media.length === 1 && !media[0].headers.authorization, media.map((r) => r.headers));
+    const outP = imsg(mark, OWNER_PHONE).map(words);
+    check("the photo is read and answered by iMessage", outP.length === 1 && /50123456/.test(outP[0]), outP);
+
+    // filing by iMessage: the approval's link goes in the existing conversation
+    mark = recorded.length;
+    await linqPost(msg(OWNER_PHONE, L2, "File the food service permit for me", "im-file"));
+    await settle();
+    const outF = imsg(mark, OWNER_PHONE).map(words);
+    check("the approval link is sent by iMessage", outF.length === 1 && outF[0].includes(`approval=ap-app-dohmh`), outF);
+
+    // STOP: Linq blocks the recipient itself; the one confirmation still goes, by override; then nothing until START
+    mark = recorded.length;
+    stubs.linqState.optedOut.add(OWNER_PHONE);
+    await linqPost(msg(OWNER_PHONE, L2, "STOP", "im-stop"));
+    await settle();
+    const stopOut = imsg(mark, OWNER_PHONE);
+    check("STOP over iMessage opts out and confirms once, past Linq's block", stopOut.length === 1 && stopOut[0].body.override_optout === true && /won't get more texts/.test(words(stopOut[0])) && !!(await sql`select opted_out_at from public.phone_links where user_id = ${owner.id}`)[0].opted_out_at, stopOut.map((r) => r.body));
+    stubs.linqState.optedOut.delete(OWNER_PHONE);
+    mark = recorded.length;
+    await linqPost(msg(OWNER_PHONE, L2, "START", "im-start"));
+    await settle();
+    check("START turns iMessage back on", imsg(mark, OWNER_PHONE).length === 1 && imsg(mark, OWNER_PHONE)[0].body.override_optout === undefined && (await sql`select opted_out_at from public.phone_links where user_id = ${owner.id}`)[0].opted_out_at === null);
+
+    // Linq restricts the owner's line: the answer goes from the other line instead, and that becomes theirs
+    mark = recorded.length;
+    stubs.linqState.restricted.add(L2);
+    await linqPost(msg(OWNER_PHONE, L2, "What's due this month?", "im-restricted"));
+    await settle();
+    const moved = imsg(mark, OWNER_PHONE);
+    check("a restricted line is skipped for the other one", moved.some((r) => r.body.from === L2) && moved.at(-1)?.body.from === L1 && moved.filter((r) => r.body.from === L1).length === 1, moved.map((r) => [r.body.from, words(r)]));
+    check("the owner moves to the working line", (await sql`select line from public.phone_links where user_id = ${owner.id}`)[0].line === L1);
+    stubs.linqState.restricted.delete(L2);
+
+    // a stranger texts a line: one explanation, by iMessage, from that line
+    mark = recorded.length;
+    await linqPost(msg("+16465550188", L1, "hi", "im-stranger"));
+    await settle();
+    const st = imsg(mark, "+16465550188");
+    check("a stranger gets one explanation by iMessage from the line they texted", st.length === 1 && st[0].body.from === L1 && /isn't linked to an account/.test(words(st[0])), st.map((r) => r.body));
+
+    // linking a phone by iMessage: the code opens the conversation from an assigned line
+    mark = recorded.length;
+    const start = await rpc("phone_link_start", { p_number: STAFF_PHONE, p_tz: "America/New_York", p_lang: "en" }, staff.jwt);
+    await deliverNet(); await settle();
+    const codeMsg = imsg(mark, STAFF_PHONE);
+    check("the verification code goes by iMessage, from one of the lines, idempotent", start.status === 200 && codeMsg.length === 1 && /code is \d{6}/.test(words(codeMsg[0])) && [L1, L2].includes(codeMsg[0].body.from) && /^code:/.test(codeMsg[0].body.message?.idempotency_key ?? ""), { start: start.status, codeMsg: codeMsg.map((r) => r.body) });
+    const [sl] = await sql`select line from public.phone_links where user_id = ${staff.id}`;
+    const [cl] = await sql`select line, service from public.odelia_messages where user_id = ${staff.id} and kind = 'code'`;
+    check("the line that sent the code is assigned and counted", sl?.line === codeMsg[0]?.body.from && cl?.line === sl?.line && cl?.service === "iMessage", { sl, cl });
+
+    // each line's reputation: Linq scores one CRITICAL; the team hears, and outbound pauses there
+    mark = recorded.length;
+    stubs.linqState.reputation.set(L1, "AT_RISK");
+    await call("odelia-sms", { action: "flush" }, { headers: MK });
+    stubs.linqState.reputation.set(L1, "CRITICAL");
+    const fl = await call("odelia-sms", { action: "flush" }, { headers: MK });
+    const lines = await sql`select number, reputation from public.odelia_lines order by number`;
+    check("flush records each line's reputation", fl.status === 200 && fl.data?.lines?.lines === 2 && fl.data?.lines?.critical === 1 && lines.find((l) => l.number === L1)?.reputation === "CRITICAL" && lines.find((l) => l.number === L2)?.reputation === "HEALTHY", { fl: fl.data, lines });
+    const tasks = await sql`select title, detail from public.team_tasks where kind = 'line_health' order by created_at`;
+    check("the team gets a task when a line slips (at risk, then critical)", tasks.length === 2 && /at risk/.test(tasks[0].title) && /critical/.test(tasks[1].title), tasks);
+    mark = recorded.length;
+    await sql`insert into public.odelia_outbox(user_id, workspace_id, kind, urgent, body, link, dedupe) values (${owner.id}, ${ws}, 'text', false, 'Placetta: your sign permit was approved.', null, 'e2e-linq-update')`;
+    const quiet = await sql`update public.phone_links set quiet_start = '00:00', quiet_end = '00:01', tz = 'UTC' where user_id = ${owner.id} returning user_id`;
+    await call("odelia-sms", { action: "flush" }, { headers: MK });
+    const upd = imsg(mark, OWNER_PHONE);
+    check("an update to someone on a CRITICAL line goes from a healthy line instead", quiet.length === 1 && upd.length === 1 && upd[0].body.from === L2 && /sign permit was approved/.test(words(upd[0])), upd.map((r) => [r.body.from, words(r)]));
+    const traffic = await sql`select * from public.odelia_line_traffic(7)`;
+    check("sent and received per line are there for the team", traffic.length === 2 && traffic.every((t) => Number(t.sent) > 0), traffic);
+
+    check("no Telnyx SMS the whole time Linq was on", since(0).filter((r) => r.service === "telnyx" && r.path === "/v2/messages" && r.at >= t0b).length === 0);
+
+    // Linq off again: everything after this is Telnyx, as before (and the update above doesn't count toward today's three)
+    await sql`delete from public.odelia_messages where user_id = ${owner.id} and kind = 'update'`;
+    for (const k of Object.keys(LINQ_ENV)) Deno.env.delete(k);
+    await sql`update public.phone_links set quiet_start = '21:00', quiet_end = '08:00', tz = 'America/New_York' where user_id = ${owner.id}`;
+  });
+
   /* ---------------- c. voice ---------------- */
   scripts.push({ name: "voice-task", match: (p) => p.includes("grease trap"), turns: [
     { tool: "check_progress", input: {}, delayMs: 300 },

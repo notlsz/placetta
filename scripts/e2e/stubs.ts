@@ -1,10 +1,10 @@
 // Stand-ins for the outside services the edge functions call: Anthropic (a scripted model, so the real agent loop and
-// the real tools run), Telnyx, Stripe and Resend. globalThis.fetch is patched in the function runtime so a request to
+// the real tools run), Telnyx, Linq (iMessage), Stripe and Resend. globalThis.fetch is patched in the function runtime so a request to
 // one of their hosts is answered here and recorded; anything else that isn't local is refused, so nothing leaves the
 // sandbox. Each stub checks requests the way the real API would (shapes, required fields, the documented rules the
 // functions rely on) and answers with realistic bodies.
 
-export type Rec = { service: "anthropic" | "telnyx" | "stripe" | "resend"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
+export type Rec = { service: "anthropic" | "telnyx" | "linq" | "stripe" | "resend"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
 export const recorded: Rec[] = [];
 export const blockedHosts: string[] = [];
 export const stubErrors: string[] = [];
@@ -48,6 +48,59 @@ function telnyx(req: Request, path: string, body: any): Response {
   const fax = /^\/v2\/faxes\/([^/]+)$/.exec(path);
   if (req.method === "GET" && fax) return json(200, { data: { id: fax[1], status: "delivered", page_count: 2 } });
   return json(404, { errors: [{ code: "10005", title: "Resource not found" }] });
+}
+
+/* ------------------------------ Linq (iMessage) ------------------------------ */
+
+/** Linq's API V3 as the functions use it: chats keyed on from + to, the first message of a new chat refused when it has
+ *  a link (1005), opted-out recipients refused (2024) unless override_optout, restricted lines refused (2027), typing,
+ *  line reputation, and presigned media (which must not get an API key). */
+export const linqState = {
+  lines: new Set<string>(), optedOut: new Set<string>(), restricted: new Set<string>(), android: new Set<string>(),
+  reputation: new Map<string, string>(), chats: new Map<string, { id: string; from: string; to: string; messages: number }>(), typing: [] as string[],
+};
+function linq(req: Request, path: string, body: any): Response {
+  const err = (status: number, code: number, message: string) => json(status, { success: false, error: { status, code, message, doc_url: `https://docs.linqapp.com/error/${code}` }, trace_id: rid("tr_") });
+  if (req.method === "GET" && path.startsWith("/media/")) {
+    if (req.headers.get("authorization")) return new Response("presigned URLs take no credentials", { status: 400 });
+    return new Response(MMS_PNG, { status: 200, headers: { "Content-Type": "image/png" } });
+  }
+  if (!/^Bearer \S+/.test(req.headers.get("authorization") ?? "")) return err(401, 1001, "Unauthorized");
+  const text = (m: any) => (Array.isArray(m?.parts) ? m.parts : []).filter((p: any) => p?.type === "text").map((p: any) => String(p.value ?? "")).join("\n");
+  const send = (from: string, to: string, msg: any, override: boolean) => {
+    if (!Array.isArray(msg?.parts) || !msg.parts.length || msg.parts.some((p: any) => p?.type === "text" && !String(p.value ?? "").trim())) return err(400, 1002, "message.parts is required");
+    if (linqState.restricted.has(from)) return err(403, 2027, "Sender number is restricted from sending due to its line reputation");
+    if (linqState.optedOut.has(to) && !override) return err(403, 2024, "Recipient asked you to stop messaging them");
+    return null;
+  };
+  if (req.method === "POST" && path === "/api/partner/v3/chats") {
+    const from = body?.from, to = body?.to;
+    if (!linqState.lines.has(from)) return err(403, 4008, "Sender not eligible");
+    if (!Array.isArray(to) || to.length !== 1 || !/^\+[1-9]\d{7,14}$/.test(to[0])) return err(400, 1005, "Invalid parameter value: to");
+    const bad = send(from, to[0], body.message, body.override_optout === true);
+    if (bad) return bad;
+    const key = `${from}|${to[0]}`;
+    let chat = linqState.chats.get(key);
+    if (!chat && /https?:\/\//.test(text(body.message))) return err(400, 1005, "The first message of a new chat cannot contain a link");
+    if (!chat) { chat = { id: crypto.randomUUID(), from, to: to[0], messages: 0 }; linqState.chats.set(key, chat); }
+    chat.messages++;
+    return json(201, { chat: { id: chat.id, display_name: null, is_group: false, service: linqState.android.has(to[0]) ? "SMS" : "iMessage", handles: [], health_status: { status: "HEALTHY", doc_url: "" }, message: { id: crypto.randomUUID(), created_at: new Date().toISOString(), delivery_status: "queued", is_read: false } } });
+  }
+  const m = /^\/api\/partner\/v3\/chats\/([^/]+)\/(messages|typing)$/.exec(path);
+  if (req.method === "POST" && m) {
+    const chat = [...linqState.chats.values()].find((c) => c.id === decodeURIComponent(m[1]));
+    if (!chat) return err(404, 3001, "Chat not found");
+    if (m[2] === "typing") { linqState.typing.push(chat.id); return new Response(null, { status: 204 }); }
+    const bad = send(chat.from, chat.to, body?.message, body?.override_optout === true);
+    if (bad) return bad;
+    chat.messages++;
+    return json(201, { chat_id: chat.id, message: { id: crypto.randomUUID(), created_at: new Date().toISOString(), delivery_status: "queued", is_read: false } });
+  }
+  if (req.method === "GET" && path === "/api/partner/v3/phone_numbers") {
+    return json(200, { phone_numbers: [...linqState.lines].map((n, i) => ({ id: `pn_${i}`, phone_number: n, forwarding_number: null, line_type: "iMessage",
+      reputation: { status: linqState.reputation.get(n) ?? "HEALTHY", doc_url: "https://docs.linqapp.com/channel/imessage/guides/phone-numbers/phone-reputation" } })) });
+  }
+  return err(404, 3000, "Not found");
 }
 
 /* ------------------------------ Stripe ------------------------------ */
@@ -269,7 +322,7 @@ async function anthropic(req: Request, path: string, body: any): Promise<Respons
 
 /* ------------------------------ the patched fetch ------------------------------ */
 
-const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.stripe.com": "stripe", "api.resend.com": "resend" };
+const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "api.stripe.com": "stripe", "api.resend.com": "resend" };
 
 export function patchFetch(local: (u: URL) => boolean) {
   const realFetch = globalThis.fetch.bind(globalThis);
@@ -281,7 +334,7 @@ export function patchFetch(local: (u: URL) => boolean) {
       const raw = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
       let body: any = raw;
       try { body = raw && (req.headers.get("content-type") ?? "").includes("json") ? JSON.parse(raw) : raw; } catch { /* left as text */ }
-      const res = service === "telnyx" ? telnyx(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
+      const res = service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
       recorded.push({ service, method: req.method, path: u.pathname + u.search, headers: Object.fromEntries(req.headers), body: service === "stripe" ? formObject(raw) : body, raw, status: res.status, at: Date.now() });
       return res;
     }
