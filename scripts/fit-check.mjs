@@ -12,6 +12,7 @@
      node scripts/fit-check.mjs --url http://localhost:4920/app/ --signin --out /tmp/fit-out-cloud
 
    Options: --widths 375,414,768,1024,1280  --height 800  --only <name substring>  --shots-all (screenshot every state)
+            --scrollbars (show classic scrollbars, which headless Chromium hides)
    Playwright: set PLAYWRIGHT to its index.mjs if `import("playwright")` can't find it.
 
    On each page it flags:
@@ -22,7 +23,28 @@
                sideways (a chip row, a tab strip, a table wrapper: see SIDEWAYS_OK)
      text      text that runs out of its own box without an ellipsis
    Findings go to <out>/findings.json, with a screenshot of each page that has any, the offenders outlined.
-   Exits 1 when anything is found. */
+   Exits 1 when anything is found.
+
+   --align: the same page states (at 375,414,768,1280,1440 unless --widths says otherwise), checked for alignment
+   instead of fit:
+     dialog    a modal, the tour card, the plans modal, ⌘K or a toast whose left and right gaps differ by more than
+               2px (and top and bottom, for the ones centered both ways). A toast is centered over the content
+               area, like the chatbar it sits above.
+     center    a child of a centering box (flex column with align-items center, grid with justify-items center, flex
+               row with justify-content center) or a line of text-align:center text, off its box's center by >2px
+     icon      an icon (an svg up to 28px, or the small box holding only it) in a row whose single line of text it
+               sits beside, off that line's center by more than 1.5px (to the first line when the row aligns to
+               the top)
+     column    a header, card or list in the main column (.page, its sections, the settings column) whose left
+               edge is off its column's by more than 1px, unless it's indented on purpose (data-indent)
+     dock      the chatbar not centered in the content area (the scrolling column, scrollbar excluded), or the
+               line above it not centered on it
+     overlap   in-flow siblings that overlap, an absolutely placed control over a sibling's text, or the chatbar
+               covering the end of the page when it's scrolled to the bottom
+     dropdown  a select or listbox trigger whose box doesn't match the shared field (.sel: height 34/38/46, radius
+               12px, the 1px ring, font size for its height, room on the right for the chevron, no native arrow),
+               or an open menu whose surface, items or position don't match the shared menu (.menu)
+   Pages with dropdowns are also checked in dark mode (-dark). */
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -31,8 +53,9 @@ const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf("--" + k); return i < 0 ? d : args[i + 1]; };
 const flag = k => args.includes("--" + k);
 const URL_ = opt("url", "http://localhost:4920/app/").replace(/\/?$/, "/");
-const OUT = opt("out", "fit-out");
-const WIDTHS = opt("widths", "375,414,768,1024,1280").split(",").map(Number);
+const ALIGN = flag("align");
+const OUT = opt("out", ALIGN ? "align-out" : "fit-out");
+const WIDTHS = opt("widths", ALIGN ? "375,414,768,1280,1440" : "375,414,768,1024,1280").split(",").map(Number);
 const HEIGHT = Number(opt("height", "800"));
 const ONLY = opt("only", "");
 const SIGNIN = flag("signin");
@@ -163,6 +186,325 @@ function check(SIDEWAYS_OK) {
   return { out, notes };
 }
 
+/* -------------------------------- what's checked with --align -------------------------------- */
+/* Boxes in the main column that start further in on purpose (none today: mark one with data-indent). */
+const INDENT_OK = "[data-indent]";
+
+function align(INDENT_OK) {
+  const W = window.innerWidth, H = window.innerHeight;
+  const out = [];
+  const CS = new Map(), SH = new Map();
+  const css = el => { let v = CS.get(el); if (!v) { v = getComputedStyle(el); CS.set(el, v); } return v; };
+  const R = el => el.getBoundingClientRect();
+  const sel = el => {
+    const part = e => e.tagName.toLowerCase() + (e.id ? "#" + e.id : "") + [...e.classList].slice(0, 3).map(c => "." + c).join("");
+    const p = []; for (let e = el; e && e !== document.body && p.length < 5; e = e.parentElement) p.unshift(part(e));
+    return p.join(" > ");
+  };
+  const label = el => (el.getAttribute("aria-label") || el.textContent || el.value || "").replace(/\s+/g, " ").trim().slice(0, 60);
+  const shown = el => { let v = SH.get(el); if (v === undefined) { v = shown_(el); SH.set(el, v); } return v; };
+  const shown_ = el => {
+    const cs = css(el);
+    if (cs.display === "none" || cs.visibility !== "visible") return false;
+    const r = R(el); if (r.width < 1 || r.height < 1) return false;
+    for (let a = el; a && a !== document.documentElement; a = a.parentElement) {
+      const s = a === el ? cs : css(a);
+      if (+s.opacity === 0 || (s.clip && s.clip !== "auto")) return false;
+      if (a.parentElement?.matches("details:not([open])") && !a.matches("summary")) return false;   // inside a closed fold
+    }
+    return true;
+  };
+  const onScreen = r => r.bottom > 0 && r.top < H && r.right > 0 && r.left < W;
+  const seen = new Set();
+  const mark = (el, kind, detail) => {
+    const k = kind + "|" + sel(el); if (seen.has(k)) return; seen.add(k);
+    el.setAttribute("data-al", out.length); out.push({ kind, sel: sel(el), text: label(el), detail });
+  };
+  const px = v => parseFloat(v) || 0;
+  /** The content box, scrollbars left out. */
+  const inner = el => {
+    const r = R(el), s = css(el);
+    const left = r.left + el.clientLeft + px(s.paddingLeft), top = r.top + el.clientTop + px(s.paddingTop);
+    const w = el.clientWidth || r.width, h = el.clientHeight || r.height;
+    return { left, top, right: r.left + el.clientLeft + w - px(s.paddingRight), bottom: r.top + el.clientTop + h - px(s.paddingBottom) };
+  };
+  const inFlow = el => { const p = css(el).position; return p !== "absolute" && p !== "fixed"; };
+  const kids = el => {
+    const k = [];
+    for (const c of el.children) {
+      if (c.matches("script, style, template")) continue;
+      if (css(c).display === "contents") k.push(...kids(c));
+      else if (shown(c)) k.push(c);
+    }
+    return k;
+  };
+  const f1 = n => Math.round(n * 10) / 10;
+  const all = [...document.body.querySelectorAll("*")].filter(el => !(el.closest("svg") && el.tagName.toLowerCase() !== "svg"));
+
+  /* The lines of text an element lays out itself (not in a block, flex or grid box inside it), each as its ink's left,
+     right, top and bottom. Atomic inline boxes (an icon in the line) count as ink. */
+  const lines = (box, deep) => {
+    const got = [];
+    const add = (r) => {
+      if (r.width <= 0 || r.height <= 0) return;
+      const l = got.find(g => Math.abs(g.top - r.top) < 3 || (r.top < g.bottom - 2 && r.bottom > g.top + 2));
+      if (l) { l.left = Math.min(l.left, r.left); l.right = Math.max(l.right, r.right); l.top = Math.min(l.top, r.top); l.bottom = Math.max(l.bottom, r.bottom); }
+      else got.push({ left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+    };
+    const walk = node => {
+      for (const n of node.childNodes) {
+        if (n.nodeType === 3) {
+          const d = n.data; if (!d.trim()) continue;
+          const rg = document.createRange();
+          for (let i = 0; i < d.length; i++) {
+            if (/\s/.test(d[i])) continue;
+            rg.setStart(n, i); rg.setEnd(n, i + 1);
+            for (const r of rg.getClientRects()) add(r);
+          }
+        } else if (n.nodeType === 1) {
+          const s = css(n);
+          if (s.display === "none" || !inFlow(n)) continue;
+          if ((deep || s.display === "inline") && n.tagName.toLowerCase() !== "svg" && n.tagName.toLowerCase() !== "img" && !(deep && /^inline-(block|flex|grid)$/.test(s.display) && !n.textContent.trim())) walk(n);
+          else if (/^inline/.test(s.display) || n.tagName.toLowerCase() === "svg" || n.tagName.toLowerCase() === "img") { if (s.display !== "contents") add(R(n)); }
+        }
+      }
+    };
+    walk(box);
+    return got;
+  };
+
+  /* ---------------- dialogs ---------------- */
+  const main = document.querySelector(".mainwrap");
+  for (const el of document.querySelectorAll(".modal, .tour, .cmdk, .toast, .scrim:not(.right) > .sheet")) {
+    if (!shown(el)) continue;
+    const r = R(el);
+    let host;
+    if (el.matches(".toast")) { const c = document.querySelector(".content"); host = c ? (() => { const b = R(c); return { left: b.left + c.clientLeft, right: b.left + c.clientLeft + c.clientWidth, top: 0, bottom: H }; })() : { left: 0, right: W, top: 0, bottom: H }; }
+    else { const b = R(el.parentElement); host = { left: b.left, right: b.right, top: b.top, bottom: b.bottom }; }
+    const gl = r.left - host.left, gr = host.right - r.right;
+    if (Math.abs(gl - gr) > 2) mark(el, "dialog", `left gap ${f1(gl)}, right gap ${f1(gr)}`);
+    if (el.matches(".modal, .tour, .scrim > .sheet")) {
+      const gt = r.top - host.top, gb = host.bottom - r.bottom;
+      if (Math.abs(gt - gb) > 2) mark(el, "dialog", `top gap ${f1(gt)}, bottom gap ${f1(gb)}`);
+    }
+  }
+
+  /* ---------------- centered boxes and text ---------------- */
+  for (const el of all) {
+    if (!shown(el) || el.matches("input, textarea, select, option, svg")) continue;
+    const s = css(el), d = s.display;
+    const r = R(el); if (!onScreen(r)) continue;
+    const flex = /flex/.test(d), grid = /grid/.test(d);
+    const col = flex && s.flexDirection.startsWith("column");
+    const centersKids = (col && s.alignItems === "center") || (grid && /center/.test(s.justifyItems));
+    const rowCenter = flex && !col && s.justifyContent === "center";
+    if (centersKids || rowCenter) {
+      const box = inner(el), mid = (box.left + box.right) / 2, bw = box.right - box.left;
+      const ks = kids(el).filter(inFlow);
+      if (centersKids) for (const k of ks) {
+        const ks_ = css(k);
+        const self = grid ? ks_.justifySelf : ks_.alignSelf;
+        if (!/^(auto|normal|center)$/.test(self)) continue;
+        if (grid && s.gridTemplateColumns.split(" ").length > 1) continue;
+        const kr = R(k); if (kr.width >= bw - 1) continue;
+        const off = (kr.left + kr.right) / 2 - mid;
+        if (Math.abs(off) > 2) mark(k, "center", `${f1(off)}px off the center of ${sel(el).split(" > ").pop()}`);
+      }
+      if (rowCenter && ks.length) {
+        const rows = [];
+        const items = ks.map(R);
+        for (const n of el.childNodes) if (n.nodeType === 3 && n.data.trim()) { const rg = document.createRange(); rg.selectNodeContents(n); items.push(...[...rg.getClientRects()].filter(x => x.width > 0)); }
+        for (const kr of items) { const row = rows.find(x => kr.top < x.bottom - 1 && kr.bottom > x.top + 1); if (row) { row.left = Math.min(row.left, kr.left); row.right = Math.max(row.right, kr.right); row.top = Math.min(row.top, kr.top); row.bottom = Math.max(row.bottom, kr.bottom); } else rows.push({ top: kr.top, bottom: kr.bottom, left: kr.left, right: kr.right }); }
+        for (const row of rows) { const off = (row.left + row.right) / 2 - mid; if (row.right - row.left < bw - 1 && Math.abs(off) > 2) mark(el, "center", `its row is ${f1(off)}px off center`); }
+      }
+    }
+    if (s.textAlign === "center" && !flex && !grid && d !== "inline" && !el.matches("button")) {
+      const box = inner(el), mid = (box.left + box.right) / 2;
+      for (const ln of lines(el)) {
+        const off = (ln.left + ln.right) / 2 - mid;
+        if (ln.right - ln.left < box.right - box.left - 1 && Math.abs(off) > 2) { mark(el, "center", `a line of its text is ${f1(off)}px off center`); break; }
+      }
+    }
+  }
+
+  /* ---------------- icons beside text ---------------- */
+  for (const svg of document.querySelectorAll("svg")) {
+    if (!shown(svg)) continue;
+    let ic = svg, r = R(svg);
+    if (r.width > 28 || r.height > 28 || !onScreen(r)) continue;
+    // the small box that holds only the icon (a tile, a round arrow, an icon button) stands for it
+    while (ic.parentElement && ic.parentElement !== document.body) {
+      const p = ic.parentElement, pr = R(p);
+      const hasText = [...p.childNodes].some(n => n.nodeType === 3 && n.data.trim());
+      if (hasText || kids(p).length !== 1 || pr.width > 44 || pr.height > 44 || !inFlow(ic)) break;
+      ic = p;
+    }
+    if (!inFlow(ic)) continue;
+    const row = ic.parentElement; if (!row) continue;
+    const rs = css(row);
+    { const g = css(ic); if (/grid/.test(rs.display) && g.gridRowEnd !== "auto" && g.gridRowEnd !== "span 1" && !(+g.gridRowEnd === +g.gridRowStart + 1)) continue; }
+    const rowish = (/flex/.test(rs.display) && rs.flexDirection.startsWith("row")) || /grid/.test(rs.display);
+    if (!rowish) continue;
+    const ir = R(ic), icy = (ir.top + ir.bottom) / 2;
+    // the text beside it: a text run of the row itself, or a sibling that holds text, nearest first
+    const cands = [];
+    for (const n of row.childNodes) {
+      if (n === ic) continue;
+      if (n.nodeType === 3 && n.data.trim()) { const rg = document.createRange(); rg.selectNodeContents(n); const rs_ = [...rg.getClientRects()].filter(x => x.width > 0); if (rs_.length) cands.push({ node: n, ls: lines({ childNodes: [n] }, true), box: rs_[0] }); }
+      else if (n.nodeType === 1 && shown(n) && inFlow(n) && n.textContent.trim() && !n.querySelector("input, textarea, select")) {
+        const ls = lines(n, true); if (!ls.length) continue;
+        cands.push({ node: n, ls, box: R(n) });
+      }
+    }
+    const overl = c => Math.min(c.box.bottom, ir.bottom) - Math.max(c.box.top, ir.top) >= Math.min(c.box.height, ir.height) * .5;
+    const near = cands.filter(overl).sort((a, b) => Math.min(Math.abs(a.box.left - ir.right), Math.abs(ir.left - a.box.right)) - Math.min(Math.abs(b.box.left - ir.right), Math.abs(ir.left - b.box.right)))[0];
+    if (!near) continue;
+    const ai = css(ic).alignSelf === "auto" ? rs.alignItems : css(ic).alignSelf;
+    const top = /start|baseline|normal|stretch/.test(ai);
+    if (near.ls.length > 1 && !top) continue;           // centered on a block of several lines: no single line to match
+    const ln = near.ls.sort((a, b) => a.top - b.top)[0];
+    if (near.ls.length > 1 && ir.height > (ln.bottom - ln.top) * 1.6) continue;   // a tile at the top of a block of lines
+    // the line box: a one-line element's own content box when it is one line tall, else the line's glyphs
+    let lc = (ln.top + ln.bottom) / 2;
+    if (near.node.nodeType === 1) {
+      let e = near.node;
+      if (near.ls.length > 1) {
+        const tw = document.createTreeWalker(near.node, NodeFilter.SHOW_TEXT, { acceptNode: n => n.data.trim() ? 1 : 2 });
+        const t = tw.nextNode(); e = t?.parentElement;
+        while (e && e !== near.node && css(e).display === "inline") e = e.parentElement;
+      }
+      if (e && lines(e, true).length === 1) {
+        const b = inner(e), lh = px(css(e).lineHeight);
+        if (lh && b.bottom - b.top <= lh + 1) lc = (b.top + b.bottom) / 2;
+      }
+    }
+    const off = icy - lc;
+    if (Math.abs(off) > 1.5) mark(ic, "icon", `${f1(off)}px ${off > 0 ? "below" : "above"} the center of "${(near.node.textContent || "").trim().slice(0, 30)}"`);
+  }
+
+  /* ---------------- the main column's left edge ---------------- */
+  for (const page of document.querySelectorAll(".page")) {
+    if (!shown(page)) continue;
+    const cols = [page, ...page.querySelectorAll(":scope > .sec, :scope > section, :scope > div > .sec, .set-col, .set-col > .sg")];
+    for (const c of cols) {
+      if (!shown(c)) continue;
+      const s = css(c);
+      if (/grid/.test(s.display) && s.gridTemplateColumns.split(" ").length > 1) continue;
+      if (/flex/.test(s.display) && !s.flexDirection.startsWith("column")) continue;
+      if (s.textAlign === "center" || s.alignItems === "center") continue;
+      const edge = inner(c).left, mid = (inner(c).left + inner(c).right) / 2;
+      for (const k of kids(c).filter(inFlow)) {
+        if (k.matches(INDENT_OK) || k.matches(".hero, .foot")) continue;
+        const kr = R(k);
+        if (Math.abs((kr.left + kr.right) / 2 - mid) <= 1 && kr.left > edge + 1) continue;   // centered on purpose
+        if (Math.abs(kr.left - edge) > 1) mark(k, "column", `left edge ${f1(kr.left - edge)}px off its column (${sel(c).split(" > ").pop()})`);
+      }
+    }
+  }
+
+  /* ---------------- the chatbar ---------------- */
+  const cw = document.querySelector(".dockbar .composer-wrap"), content = document.querySelector(".content");
+  if (cw && content && shown(cw)) {
+    const b = R(content), area = { left: b.left + content.clientLeft, right: b.left + content.clientLeft + content.clientWidth };
+    const r = R(cw), gl = r.left - area.left, gr = area.right - r.right;
+    if (Math.abs(gl - gr) > 2) mark(cw, "dock", `left gap ${f1(gl)}, right gap ${f1(gr)} in the content area`);
+    const comp = cw.querySelector(".composer, .c-edge") || cw;
+    const cm = (R(comp).left + R(comp).right) / 2;
+    for (const k of kids(cw)) { if (k === comp || k.contains(comp)) continue; const kr = R(k); const off = (kr.left + kr.right) / 2 - cm; if (Math.abs(off) > 2) mark(k, "dock", `${f1(off)}px off the chatbar's center`); }
+  }
+
+  /* ---------------- overlap ---------------- */
+  for (const el of all) {
+    if (!shown(el) || el.matches("svg")) continue;
+    const ks = kids(el); if (ks.length < 2) continue;
+    const flow = ks.filter(inFlow);
+    const boxes = flow.filter(k => css(k).display !== "inline" && css(k).position !== "sticky");
+    for (let i = 0; i < boxes.length; i++) {
+      const a = R(boxes[i]); if (!onScreen(a)) continue;
+      for (let j = i + 1; j < boxes.length; j++) {
+        const b = R(boxes[j]);
+        const ow = Math.min(a.right, b.right) - Math.max(a.left, b.left), oh = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+        if (ow > 1 && oh > 1) { mark(boxes[j], "overlap", `overlaps ${sel(boxes[i]).split(" > ").pop()} by ${f1(ow)}x${f1(oh)}`); break; }
+      }
+    }
+    // a control placed over a sibling's text
+    for (const a of ks.filter(k => css(k).position === "absolute")) {
+      if (css(a).pointerEvents === "none") continue;
+      const ar = R(a); if (!onScreen(ar)) continue;
+      for (const t of flow) {
+        let boxes;
+        if (t.matches("input, textarea")) { const b = inner(t); boxes = [b]; }
+        else boxes = lines(t).concat(...[...t.querySelectorAll("*")].filter(x => shown(x) && inFlow(x) && !/flex|grid|block/.test(css(x).display.replace("inline-", "x"))).map(lines));
+        const hit = boxes.find(b => Math.min(ar.right, b.right) - Math.max(ar.left, b.left) > 1 && Math.min(ar.bottom, b.bottom) - Math.max(ar.top, b.top) > 1);
+        if (hit) { mark(a, "overlap", `sits on the text of ${sel(t).split(" > ").pop()}`); break; }
+      }
+    }
+  }
+  // the chatbar over the end of the page, scrolled to the bottom
+  if (cw && content && shown(cw) && content.scrollHeight > content.clientHeight + 2) {
+    const was = content.scrollTop;
+    content.scrollTop = content.scrollHeight;
+    const top = Math.min(...kids(cw).map(k => R(k).top));
+    let last = null, lb = -1;
+    for (const e of content.querySelectorAll("*")) {
+      if (e.closest(".dockbar") || !shown(e) || !inFlow(e) || e.closest("svg")) continue;
+      const leaf = !e.children.length || [...e.childNodes].some(n => n.nodeType === 3 && n.data.trim()) || e.matches("img, canvas, input, textarea, select, button, .tray, .card, .store, .file, .sg, .pb, .job");
+      if (!leaf || (!e.textContent.trim() && !e.matches("img, canvas, input, textarea, select")) || e.matches(".page")) continue;
+      const b = R(e).bottom; if (b > lb) { lb = b; last = e; }
+    }
+    if (last && lb > top + 1) mark(last, "overlap", `the chatbar covers it at the end of the page: bottom ${f1(lb)}, chatbar top ${f1(top)}`);
+    content.scrollTop = was;
+  }
+
+  /* ---------------- dropdowns ---------------- */
+  const probe = st => { const d = document.createElement("div"); Object.assign(d.style, st, { position: "absolute", visibility: "hidden" }); document.body.appendChild(d); const v = getComputedStyle(d); const o = { boxShadow: v.boxShadow, background: v.backgroundColor }; d.remove(); return o; };
+  const RING = probe({ boxShadow: "0 0 0 1px rgba(var(--e), .1)" }).boxShadow;
+  const LIFT = probe({ boxShadow: "var(--lift)" }).boxShadow;
+  const CARD = probe({ backgroundColor: "var(--card)" }).background;
+  const MIST = probe({ backgroundColor: "var(--mist)" }).background;
+  const FONT = { 34: "13.5px", 38: "14px", 46: "15px" };
+  for (const el of document.querySelectorAll("select, [aria-haspopup=listbox]")) {
+    if (!shown(el)) continue;
+    const s = css(el), r = R(el), h = Math.round(r.height), bad = [];
+    if (!(h in FONT)) bad.push(`height ${f1(r.height)}`);
+    else if (s.fontSize !== FONT[h]) bad.push(`font ${s.fontSize} (want ${FONT[h]})`);
+    if (s.borderTopLeftRadius !== "12px") bad.push(`radius ${s.borderTopLeftRadius}`);
+    if (px(s.borderTopWidth) !== 0) bad.push(`border ${s.borderTopWidth} ${s.borderTopColor}`);
+    if (el !== document.activeElement && !el.matches(":hover") && s.boxShadow !== RING) bad.push(`ring ${s.boxShadow}`);
+    if (!el.disabled && s.backgroundColor !== CARD) bad.push(`background ${s.backgroundColor}`);
+    if (px(s.paddingRight) !== 34) bad.push(`padding-right ${s.paddingRight}`);
+    if (!/^url\("data:image\/svg/.test(s.backgroundImage)) bad.push("no shared chevron");
+    if (el.tagName === "SELECT" && s.appearance !== "none") bad.push(`appearance ${s.appearance}`);
+    if (bad.length) mark(el, "dropdown", bad.join(", "));
+  }
+  for (const m of document.querySelectorAll("[role=menu], [role=listbox]")) {
+    if (!shown(m) || m.closest(".cmdk, .modal")) continue;
+    const s = css(m), r = R(m), bad = [];
+    if (s.borderTopLeftRadius !== "16px") bad.push(`radius ${s.borderTopLeftRadius}`);
+    if (s.paddingTop !== "6px" || s.paddingLeft !== "6px") bad.push(`padding ${s.paddingTop} ${s.paddingLeft}`);
+    if (s.boxShadow !== LIFT) bad.push("shadow isn't the menu's");
+    if (r.left < 0 || r.top < 0 || r.right > W || r.bottom > H) bad.push(`off screen ${f1(r.left)},${f1(r.top)} ${f1(r.right)},${f1(r.bottom)}`);
+    const items = [...m.querySelectorAll("[role^=menuitem], [role=option]")].map(i => i.matches("li") && i.firstElementChild ? i.firstElementChild : i).filter(shown);
+    for (const i of items) { const ih = R(i).height; if (Math.round(ih) !== 38) { bad.push(`item height ${f1(ih)}`); break; } }
+    for (const i of items) { if (css(i).borderTopLeftRadius !== "10px") { bad.push(`item radius ${css(i).borderTopLeftRadius}`); break; } }
+    // every item's label starts at the same x, with or without an icon
+    const starts = items.map(i => { const t = document.createTreeWalker(i, NodeFilter.SHOW_TEXT, { acceptNode: n => n.data.trim() ? 1 : 2 }).nextNode(); if (!t) return null; const rg = document.createRange(); rg.setStart(t, t.data.search(/\S/)); rg.setEnd(t, t.data.search(/\S/) + 1); return rg.getBoundingClientRect().left; }).filter(x => x !== null);
+    if (starts.length > 1 && Math.max(...starts) - Math.min(...starts) > 1) bad.push(`item labels start at ${[...new Set(starts.map(Math.round))].join(", ")}`);
+    const pickd = m.querySelector("[aria-selected=true], [aria-checked=true], [aria-current=true]");
+    if (pickd && !pickd.querySelector("svg.menu-check")) bad.push("the picked item has no check");
+    if (bad.length) mark(m, "dropdown", bad.join(", "));
+  }
+  // the lists inside ⌘K and the language picker: the same items, the same highlight
+  for (const i of document.querySelectorAll(".cmdk-list [role=option].on, .langpick [role=option][aria-selected=true]")) {
+    if (!shown(i)) continue;
+    const s = css(i), bad = [];
+    if (s.borderTopLeftRadius !== "10px") bad.push(`radius ${s.borderTopLeftRadius}`);
+    if (s.backgroundColor !== MIST) bad.push(`highlight ${s.backgroundColor}`);
+    if (bad.length) mark(i, "dropdown", bad.join(", "));
+  }
+  return out;
+}
+
 /* -------------------------------- getting around -------------------------------- */
 const settle = p => p.waitForTimeout(450);
 const tourOff = async p => { const s = p.locator(".tour-skip"); if (await s.count() && await s.first().isVisible()) { await s.first().click(); await settle(p); } };
@@ -197,9 +539,18 @@ const PAGES = [["overview", ""], ["work", "work"], ["playbooks", "playbooks"], [
   ["documents", "documents"], ["deadlines", "deadlines"], ["audit", "activity"], ["context", "context"], ["find", "find"], ["headquarters", "headquarters"]];
 
 /** Every state checked: a name and how to get there. A state whose opener finds nothing to click is skipped. */
+const DARK = new Set(["settings-general", "settings-team", "settings-odelia", "settings-billing-budgets", "plans", "ws-menu", "settings-lark-bot"]);
 const STATES = [
   ...PAGES.map(([n, path]) => ({ name: n, go: p => open(p, path) })),
   ...SETTINGS.map(c => ({ name: "settings-" + c, go: p => open(p, "settings/" + c) })),
+  { name: "settings-lark-bot", go: async p => {
+    await open(p, "settings/connections");
+    const b = p.locator(".sg-row", { hasText: /Odelia in Lark/ }).getByRole("button", { name: "Set up" });
+    if (!(await b.count())) return false;
+    await b.first().click(); await settle(p);
+    return (await p.locator(".sg-bot select").count()) > 0;
+  } },
+  { name: "ws-menu", go: async p => { await open(p, ""); const w = p.locator("button.wsname:not(:disabled)"); if (!(await w.count())) return false; return viaMenu(p, "button.wsname"); } },
   { name: "settings-billing-budgets", go: async p => {
     await open(p, "settings/billing");
     await clickText(p, "Let Odelia suggest from the opening plan"); await clickText(p, "Add a budget");
@@ -244,7 +595,9 @@ const STATES = [
 
 /* -------------------------------- run -------------------------------- */
 mkdirSync(OUT, { recursive: true });
-const browser = await chromium.launch();
+// --scrollbars: classic scrollbars, as on Windows and Linux (headless hides them), to see the chatbar and toasts stay
+// centered over the column and not the column plus its scrollbar
+const browser = await chromium.launch(flag("scrollbars") ? { ignoreDefaultArgs: ["--hide-scrollbars"] } : {});
 // A plain static server (python3 -m http.server) has no fallback to index.html for /app/stores and the like: give
 // every page address under /app/ the app's index.html, as the real host does.
 const spa = ctx => ctx.route(u => u.href.startsWith(URL_), async route => {
@@ -262,17 +615,20 @@ if (SIGNIN) {
 
 const findings = [], scrolls = [];
 const summary = {};
+const byKind = {};
 async function record(p, W, name) {
-  await p.evaluate(() => document.querySelectorAll("[data-fit]").forEach(e => e.removeAttribute("data-fit")));
-  const { out: found, notes } = await p.evaluate(check, SIDEWAYS_OK);
+  const ATTR = ALIGN ? "data-al" : "data-fit";
+  await p.evaluate(a => document.querySelectorAll(`[${a}]`).forEach(e => e.removeAttribute(a)), ATTR);
+  const { out: found, notes } = ALIGN ? { out: await p.evaluate(align, INDENT_OK), notes: [] } : await p.evaluate(check, SIDEWAYS_OK);
+  for (const f of found) { const k = (byKind[f.kind] ??= {}); k[W] = (k[W] ?? 0) + 1; }
   for (const n of notes) scrolls.push({ page: name, width: W, ...n });
   summary[`${name}@${W}`] = found.length;
   for (const f of found) findings.push({ page: name, width: W, ...f });
   console.log(`${found.length ? "FAIL" : " ok "} ${String(W).padStart(4)} ${name}${found.length ? `: ${found.length}` : ""}`);
   for (const f of found) console.log(`       ${f.kind.padEnd(9)} ${f.sel}  "${f.text ?? ""}"  ${f.detail}`);
   if (found.length || SHOTS_ALL) {
-    await p.addStyleTag({ content: "[data-fit]{outline:2px solid #e0245e !important;outline-offset:-1px}" });
-    await p.evaluate(() => { const e = document.querySelector("[data-fit]"); if (e && e.tagName !== "HTML") e.scrollIntoView({ block: "center", inline: "nearest" }); });
+    await p.addStyleTag({ content: `[${ATTR}]{outline:2px solid #e0245e !important;outline-offset:-1px}` });
+    await p.evaluate(a => { const e = document.querySelector(`[${a}]`); if (e && e.tagName !== "HTML" && !e.closest(".toast, .tour, .modal, .cmdk, [role=menu], [role=listbox]")) e.scrollIntoView({ block: "center", inline: "nearest" }); }, ATTR);
     await p.screenshot({ path: join(OUT, `${W}-${name}.png`) });
   }
 }
@@ -284,6 +640,11 @@ async function gate(W) {
   const p = await ctx.newPage(); p.setDefaultTimeout(6000);
   const steps = [
     ["gate-email", async () => { await p.goto(URL_); await p.waitForTimeout(1200); return (await p.locator("#gate-email").count()) > 0; }],
+    ...(ALIGN ? [
+      ["gate-region", async () => { const r = p.locator(".region [aria-haspopup=listbox]"); if (!(await r.count())) return true; await r.first().click(); await settle(p); return true; }],
+      ["gate-phone", async () => { await p.keyboard.press("Escape"); await settle(p); const b = p.locator(".gate-phone"); if (!(await b.count())) return true; await b.click(); await settle(p); return true; }],
+      ["gate-email-again", async () => { const b = p.getByRole("button", { name: "Use email instead" }); if (await b.count()) { await b.click(); await settle(p); } return (await p.locator("#gate-email").count()) > 0; }],
+    ] : []),
     ["gate-password", async () => { await p.fill("#gate-email", `fit-${W}@example.com`); await p.click("button[type=submit]"); await p.waitForTimeout(700); return (await p.locator("#gate-pw").count()) > 0; }],
     ["gate-code", async () => { await p.getByText("Email me a code instead").click(); await p.waitForTimeout(700); return (await p.locator("#gate-code").count()) > 0; }],
     ["onboarding", async () => { await p.fill("#gate-code", "123456"); await p.click("button[type=submit]"); await p.waitForTimeout(2500); return (await p.locator("#onb-line").count()) > 0; }],
@@ -314,7 +675,9 @@ for (const W of WIDTHS) {
       const n = await tabs.count();
       for (let i = 1; i < n; i++) variants.push({ name: `${st.name}-tab${i + 1}`, tab: i });
     }
+    if (ALIGN && DARK.has(st.name)) variants.push({ name: st.name + "-dark", dark: true });
     for (const v of variants) {
+      if (v.dark) { await p.evaluate(() => { document.documentElement.dataset.theme = "dark"; }); await p.waitForTimeout(150); }
       if (v.tab !== undefined) { await p.locator("[role=dialog] [role=tab], .sheet [role=tab]").filter({ visible: true }).nth(v.tab).click().catch(() => {}); await settle(p); }
       await record(p, W, v.name);
     }
@@ -324,8 +687,13 @@ for (const W of WIDTHS) {
 await browser.close();
 
 const total = findings.length;
-writeFileSync(join(OUT, "findings.json"), JSON.stringify({ url: URL_, widths: WIDTHS, total, summary, findings, sidewaysStrips: scrolls }, null, 2));
+writeFileSync(join(OUT, "findings.json"), JSON.stringify({ url: URL_, widths: WIDTHS, total, summary, findings, byKind, sidewaysStrips: scrolls }, null, 2));
 const strips = [...new Set(scrolls.map(n => `${n.width} ${n.page}: ${n.sel.split(" > ").pop()}`))];
 if (strips.length) console.log(`\nStrips that scroll sideways on purpose (not counted):\n  ${strips.join("\n  ")}`);
+if (ALIGN) {
+  console.log("\nBy check and width:");
+  console.log("  " + "check".padEnd(10) + WIDTHS.map(w => String(w).padStart(6)).join("") + "   total");
+  for (const [k, v] of Object.entries(byKind)) console.log("  " + k.padEnd(10) + WIDTHS.map(w => String(v[w] ?? 0).padStart(6)).join("") + String(Object.values(v).reduce((a, b) => a + b, 0)).padStart(8));
+}
 console.log(`\n${total} offender${total === 1 ? "" : "s"} across ${Object.keys(summary).length} page states. Findings: ${join(OUT, "findings.json")}`);
 process.exit(total ? 1 : 0);

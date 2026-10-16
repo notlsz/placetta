@@ -32,7 +32,7 @@ import { LegalReader } from "./Legal";
 import { UPDATED } from "./legal";
 import { daysFromNow, daysUntil, inDays, nowIso } from "./time";
 import { preflight } from "./smart";
-import { I, Modal } from "./ui";
+import { I, Menu, Modal } from "./ui";
 import * as api from "./cloud/api";
 import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
@@ -137,12 +137,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [legal, setLegal] = useState<string | null>(null);
   const [plans, setPlans] = useState<null | "start" | "file">(null);
   const [limitHit, setLimitHit] = useState(false);
-  const [wsMenu, setWsMenu] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastT = useRef(0);
   const say = useCallback((s: string) => { setToast(s); clearTimeout(toastT.current); toastT.current = window.setTimeout(() => setToast(null), Math.max(2800, s.length * 55)); }, []);
   const main = useRef<HTMLElement>(null);
-  const go = useCallback((v: View) => { setView(v); setRoute(v); setNavOpen(false); setWsMenu(false); main.current?.scrollTo({ top: 0 }); }, []);
+  const go = useCallback((v: View) => { setView(v); setRoute(v); setNavOpen(false); main.current?.scrollTo({ top: 0 }); }, []);
   // Back and Forward move between pages; a Settings address also picks its category.
   useEffect(() => {
     const on = () => {
@@ -886,19 +885,19 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>
           : <button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button>}
       </div>
-      <div className="wsname-wrap">
-        <button type="button" className="wsname" onClick={() => cloud && setWsMenu(o => !o)} aria-haspopup={cloud ? "menu" : undefined} aria-expanded={cloud ? wsMenu : undefined} disabled={!cloud}>
-          <b>{b(view_.business)}</b><span>{wsSub}</span>{cloud && <I.chev />}
-        </button>
-        {cloud && wsMenu && (
-          <div className="wsmenu" role="menu">
-            {cloud.workspaces.map(x => <button key={x.id} type="button" role="menuitem" aria-current={x.id === cloud.wsId} onClick={() => { setWsMenu(false); if (x.id !== cloud.wsId) cloud.switchTo(x.id); }}>{x.name}{x.id === cloud.wsId && <I.check />}</button>)}
-            <button type="button" role="menuitem" onClick={() => { setWsMenu(false); cloud.newWorkspace(); }}><I.plus />{b(B("New business", "新建企业"))}</button>
-            <a role="menuitem" href="/"><I.globe />{b(B("Placetta website", "快哉官网"))}</a>
-            <button type="button" role="menuitem" onClick={() => { setWsMenu(false); cloud.signOut(); }}><I.logout />{b(B("Sign out", "退出登录"))}</button>
-          </div>
-        )}
-      </div>
+      {cloud ? (
+        <Menu className="wsname-wrap" buttonClass="wsname" label={b(B("Workspaces", "工作区"))} button={<><b>{b(view_.business)}</b><span>{wsSub}</span><I.chev /></>}
+          items={[
+            ...cloud.workspaces.map(x => ({ key: x.id, label: x.name, picked: x.id === cloud.wsId, onPick: () => { if (x.id !== cloud.wsId) cloud.switchTo(x.id); } })),
+            { key: "new", label: b(B("New business", "新建企业")), icon: <I.plus />, onPick: () => cloud.newWorkspace() },
+            { key: "site", label: b(B("Placetta website", "快哉官网")), icon: <I.globe />, href: "/" },
+            { key: "out", label: b(B("Sign out", "退出登录")), icon: <I.logout />, onPick: () => cloud.signOut() },
+          ]} />
+      ) : (
+        <div className="wsname-wrap">
+          <button type="button" className="wsname" disabled><b>{b(view_.business)}</b><span>{wsSub}</span></button>
+        </div>
+      )}
       <button type="button" className={"askb" + (panelOpen ? " on" : "")} onClick={() => { setPanelOpen(o => !o); setNavOpen(false); }} title={slim ? t("showPanel") : undefined}>
         <span className="ask-bot" aria-hidden="true"><AgentBot size={32} busy={busy} interactive={false} /></span>
         <span>{t("showPanel")}</span>
@@ -963,6 +962,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           )}
           <main className={"content" + (view === "overview" ? " wash" : "")} ref={main}>{page}</main>
           {!panelOpen && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} /></div>}
+          {toast && <div className="toast" role="status">{toast}</div>}
         </div>
         {panelOpen && <AgentPanel feed={feed} tts={tts} mode={dock ? "dock" : "sheet"} onHide={() => setPanelOpen(false)} asked={asked} />}
         {drawer && <AppDrawer id={drawer.id} tab={drawer.tab} edit={drawer.edit} onTab={tab => setDrawer(d => (d ? { ...d, tab, edit: false } : d))} onClose={() => setDrawer(null)} />}
@@ -983,7 +983,6 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         )}
         <CommandBar open={cmdk} setOpen={setCmdk} />
         <Walkthrough />
-        {toast && <div className="toast" role="status">{toast}</div>}
       </div>
     </AppCtx.Provider>
   );

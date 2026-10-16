@@ -4,7 +4,7 @@ import { useApp } from "./ctx";
 import { B, type Bi } from "./model";
 import { API_MODELS } from "./live";
 import { fmtAgo, fmtDay } from "./time";
-import { Footer, I, Modal } from "./ui";
+import { Footer, I, Modal, Select } from "./ui";
 import { ACCENTS, applyAccent, readAccent, useTheme, type Theme } from "./hooks";
 import { IMPORT_PROMPT, PREFS, PROFILE, importMemory } from "./memory";
 import type { MemoryFile, MemoryKind, Skill, SkillSource } from "./model";
@@ -207,7 +207,7 @@ function Integrations() {
                         ? [["bot_token", "Bot User OAuth Token (xoxb-...)", true], ["signing_secret", "Signing Secret", true]]
                         : [["app_id", "App ID (cli_...)", true], ["app_secret", "App Secret", true], ["verification_token", "Verification Token", true], ["encrypt_key", zh ? "Encrypt Key（可选）" : "Encrypt Key (optional)", false]]
                       ).map(([k, ph, req]) => <input key={k as string} type={/secret|token|key/.test(k as string) && k !== "app_id" ? "password" : "text"} required={!!req} value={bot.v[k as string] ?? ""} onChange={e => setBot({ ...bot, v: { ...bot.v, [k as string]: e.target.value.trim() } })} placeholder={ph as string} aria-label={ph as string} autoComplete="off" spellCheck={false} />)}
-                      {bot.kind === "lark_bot" && <select value={bot.v.domain ?? "feishu"} onChange={e => setBot({ ...bot, v: { ...bot.v, domain: e.target.value } })} aria-label={zh ? "版本" : "Edition"}><option value="feishu">{zh ? "飞书（中国）" : "Feishu (China)"}</option><option value="lark">{zh ? "Lark（国际版）" : "Lark (international)"}</option></select>}
+                      {bot.kind === "lark_bot" && <Select value={bot.v.domain ?? "feishu"} onChange={e => setBot({ ...bot, v: { ...bot.v, domain: e.target.value } })} aria-label={zh ? "版本" : "Edition"}><option value="feishu">{zh ? "飞书（中国）" : "Feishu (China)"}</option><option value="lark">{zh ? "Lark（国际版）" : "Lark (international)"}</option></Select>}
                       <button type="submit" className="sbtn ink" disabled={bot.busy}>{bot.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "连接" : "Connect")}</button>
                     </form>
                     <p className="sg-fine">{zh ? "她以连接者的身份工作，频道里的任何人都可以给她派活。任何申报、付款或发送仍需在快哉中批准。" : "She works as the person who connects her, and anyone in the channel can give her a job. Anything to file, pay or send still waits for approval in Placetta."}</p>
@@ -286,9 +286,9 @@ function Team() {
       right: m.you
         ? (m.role !== "owner" || owners > 1 ? <Btn onClick={() => { if (window.confirm(zh ? "确定离开这个工作区？" : "Leave this workspace?")) void act(async () => { await api.removeMember(wsId, m.user_id); cloud.switchTo(""); }); }}>{zh ? "离开" : "Leave"}</Btn> : undefined)
         : owner ? <>
-            <select className="sg-select" value={m.role} aria-label={zh ? "角色" : "Role"} onChange={e => { const v = e.target.value as api.Role; pin.guard(() => void act(() => api.setRole(wsId, m.user_id, v), zh ? "角色已更新" : "Role updated")); }}>
+            <Select sz="sm" value={m.role} aria-label={zh ? "角色" : "Role"} onChange={e => { const v = e.target.value as api.Role; pin.guard(() => void act(() => api.setRole(wsId, m.user_id, v), zh ? "角色已更新" : "Role updated")); }}>
               <option value="owner">{roleName("owner")}</option><option value="member">{roleName("member")}</option>
-            </select>
+            </Select>
             <Btn guard onClick={() => { if (window.confirm(zh ? `将 ${m.email} 移出工作区？` : `Remove ${m.email}?`)) void act(() => api.removeMember(wsId, m.user_id), zh ? "已移出" : "Removed"); }}>{zh ? "移出" : "Remove"}</Btn>
           </> : undefined,
     })),
@@ -309,9 +309,9 @@ function Team() {
       {owner && (
         <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void invite(); }}>
           <input type="email" autoComplete="off" placeholder={zh ? "同事的邮箱" : "Teammate's email"} value={f.email} onChange={e => setF({ ...f, email: e.target.value })} aria-label={zh ? "邮箱" : "Email"} />
-          <select className="sg-select" value={f.role} onChange={e => setF({ ...f, role: e.target.value as api.Role })} aria-label={zh ? "角色" : "Role"}>
+          <Select value={f.role} onChange={e => setF({ ...f, role: e.target.value as api.Role })} aria-label={zh ? "角色" : "Role"}>
             <option value="member">{roleName("member")}</option><option value="owner">{roleName("owner")}</option>
-          </select>
+          </Select>
           <button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : zh ? "邀请" : "Invite"}</button>
         </form>
       )}
@@ -527,13 +527,13 @@ function PhoneGroup() {
       { label: B("Quiet hours", "免打扰时段"), icon: <I.moon />,
         sub: zh ? `这段时间不发短信也不打电话，按${link!.tz === deviceTz() ? "这台设备的" : ` ${link!.tz} `}时间。您主动联系时，Odelia 随时回复。` : `No texts or calls from Odelia then, in ${link!.tz === deviceTz() ? "this device's time zone" : link!.tz}. She always answers when you reach out.`,
         right: <>
-          <select className="sg-select" value={link!.quiet_start} aria-label={zh ? "开始" : "From"} onChange={e => prefs({ quietStart: e.target.value, tz: deviceTz() })}>
+          <Select sz="sm" value={link!.quiet_start} aria-label={zh ? "开始" : "From"} onChange={e => prefs({ quietStart: e.target.value, tz: deviceTz() })}>
             {[...new Set([...HOURS, link!.quiet_start])].map(h => <option key={h} value={h}>{hourLabel(h, zh)}</option>)}
-          </select>
+          </Select>
           <span className="quiet">{zh ? "至" : "to"}</span>
-          <select className="sg-select" value={link!.quiet_end} aria-label={zh ? "结束" : "Until"} onChange={e => prefs({ quietEnd: e.target.value, tz: deviceTz() })}>
+          <Select sz="sm" value={link!.quiet_end} aria-label={zh ? "结束" : "Until"} onChange={e => prefs({ quietEnd: e.target.value, tz: deviceTz() })}>
             {[...new Set([...HOURS, link!.quiet_end])].map(h => <option key={h} value={h}>{hourLabel(h, zh)}</option>)}
-          </select>
+          </Select>
         </> },
     ] as Row[] : []),
   ];
@@ -1093,7 +1093,7 @@ export function Settings() {
             {mode === "demo" && !cloud && (
               <form className="sg-form keyform" onSubmit={e => { e.preventDefault(); if (key.trim()) { applyKey(key.trim(), id, remember); setKey(""); } }}>
                 <input type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} placeholder={`${t("key_label")}: sk-ant-...`} aria-label={t("key_label")} />
-                <select value={id} onChange={e => setId(e.target.value)} aria-label={t("key_model")}>{API_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</select>
+                <Select value={id} onChange={e => setId(e.target.value)} aria-label={t("key_model")}>{API_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</Select>
                 <label className="check"><input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} /><span>{t("key_remember")}</span></label>
                 <div className="sg-form-act"><button type="submit" className="sbtn ink" disabled={!key.trim()}>{t("key_use")}</button></div>
                 <p className="sg-note">{t("key_note")}</p>
@@ -1240,12 +1240,12 @@ function SpendingGroup() {
               const upd = (p: Partial<Budget>) => set({ budgets: policy.budgets.map((x, m) => (m === n ? { ...x, ...p } : x)) });
               return (
                 <tr key={bg.id}>
-                  <td data-label={zh ? "适用范围" : "For"}><select disabled={!canEdit} value={bg.store ?? ""} onChange={e => upd({ store: e.target.value || undefined })} aria-label={zh ? "适用范围" : "For"}>
-                    <option value="">{zh ? "整个企业" : "Whole business"}</option>{(ws.stores ?? []).map(s => <option key={s.id} value={s.id}>{tx(s.name)}</option>)}</select></td>
-                  <td data-label={zh ? "类别" : "Kind"}><select disabled={!canEdit} value={bg.category ?? ""} onChange={e => upd({ category: (e.target.value || undefined) as SpendCategory | undefined })} aria-label={zh ? "类别" : "Kind"}>
-                    <option value="">{zh ? "全部" : "Everything"}</option>{SPEND_CATEGORIES.map(c => <option key={c.id} value={c.id}>{tx(c.label)}</option>)}</select></td>
-                  <td data-label={zh ? "周期" : "Period"}><select disabled={!canEdit} value={bg.period} onChange={e => upd({ period: e.target.value as Budget["period"] })} aria-label={zh ? "周期" : "Period"}>
-                    <option value="month">{zh ? "每月" : "Each month"}</option><option value="opening">{zh ? "至开业" : "Until it opens"}</option><option value="total">{zh ? "总计" : "In total"}</option></select></td>
+                  <td data-label={zh ? "适用范围" : "For"}><Select sz="sm" disabled={!canEdit} value={bg.store ?? ""} onChange={e => upd({ store: e.target.value || undefined })} aria-label={zh ? "适用范围" : "For"}>
+                    <option value="">{zh ? "整个企业" : "Whole business"}</option>{(ws.stores ?? []).map(s => <option key={s.id} value={s.id}>{tx(s.name)}</option>)}</Select></td>
+                  <td data-label={zh ? "类别" : "Kind"}><Select sz="sm" disabled={!canEdit} value={bg.category ?? ""} onChange={e => upd({ category: (e.target.value || undefined) as SpendCategory | undefined })} aria-label={zh ? "类别" : "Kind"}>
+                    <option value="">{zh ? "全部" : "Everything"}</option>{SPEND_CATEGORIES.map(c => <option key={c.id} value={c.id}>{tx(c.label)}</option>)}</Select></td>
+                  <td data-label={zh ? "周期" : "Period"}><Select sz="sm" disabled={!canEdit} value={bg.period} onChange={e => upd({ period: e.target.value as Budget["period"] })} aria-label={zh ? "周期" : "Period"}>
+                    <option value="month">{zh ? "每月" : "Each month"}</option><option value="opening">{zh ? "至开业" : "Until it opens"}</option><option value="total">{zh ? "总计" : "In total"}</option></Select></td>
                   <td data-label={zh ? "金额" : "Amount"}><input inputMode="decimal" disabled={!canEdit} value={bg.amount} onChange={e => upd({ amount: num(e.target.value) })} aria-label={zh ? "金额" : "Amount"} /></td>
                   <td className="when" data-label={zh ? "已用" : "Used"}>{usd(spent(bg))}{bg.by === "agent" && <small>{zh ? "，Odelia 建议" : ", suggested by Odelia"}</small>}</td>
                   <td className="acts">{canEdit && <button type="button" className="sbtn quiet" aria-label={zh ? "删除预算" : "Remove budget"} onClick={() => set({ budgets: policy.budgets.filter((_, m) => m !== n) })}><I.x /></button>}</td>

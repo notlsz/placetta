@@ -4,7 +4,7 @@ import { GateBot } from "../Bot";
 import { LegalBody } from "../Legal";
 import { LEGAL, UPDATED } from "../legal";
 import { Logo } from "../Logo";
-import { I } from "../ui";
+import { I, Menu, Select } from "../ui";
 import { B, same, type Bi, type Store, type Workspace } from "../model";
 import type { Lang } from "../i18n";
 import * as api from "./api";
@@ -85,40 +85,18 @@ export function TermsCheck({ id, lang, checked, onChange, onDoc }: { id: string;
 /* Region: where the account and its data live. One region today; the others show as not available yet. */
 function RegionPick({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
-  const [open, setOpen] = useState(false);
-  const regions: { id: string; code: string; label: Bi; on: boolean }[] = [
+  const regions:{ id: string; code: string; label: Bi; on: boolean }[] = [
     { id: "us", code: "US", label: B("United States", "美国"), on: true },
     { id: "eu", code: "EU", label: B("Europe", "欧洲"), on: false },
     { id: "ap", code: "APAC", label: B("Asia Pacific", "亚太"), on: false },
     { id: "au", code: "AU", label: B("Australia", "澳大利亚"), on: false },
   ];
   const cur = regions.find(r => r.id === api.REGION.id) ?? regions[0];
-  const globe = <svg className="rg-globe" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.3 3 14.7 0 18M12 3c-3 3.3-3 14.7 0 18"/></svg>;
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest(".region")) setOpen(false); };
-    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("mousedown", close); document.addEventListener("keydown", esc);
-    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", esc); };
-  }, [open]);
   return (
     <div className="region">
-      <button type="button" className="region-btn" aria-haspopup="listbox" aria-expanded={open} aria-label={`${L(B("Data stored in", "数据存储于"))}: ${L(cur.label)}`} onClick={() => setOpen(o => !o)}>
-        <span className="rg-k">{L(B("Data stored in", "数据存储于"))}</span>
-        <b>{cur.code}</b>
-        <svg className="rg-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      {open && (
-        <ul className="region-menu" role="listbox" aria-label={L(B("Region", "区域"))}>
-          {regions.map(r => (
-            <li key={r.id} role="option" aria-selected={r.id === cur.id} aria-disabled={!r.on}>
-              <button type="button" disabled={!r.on} title={r.on ? L(r.label) : `${L(r.label)}: ${L(B("not available yet", "暂未开放"))}`} onClick={() => setOpen(false)}>
-                {globe}<span>{r.code}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <span className="rg-k" aria-hidden="true">{L(B("Data stored in", "数据存储于"))}</span>
+      <Menu kind="listbox" label={L(B("Region", "区域"))} buttonClass="sel sm" buttonLabel={`${L(B("Data stored in", "数据存储于"))}: ${L(cur.label)}`} button={cur.code}
+        items={regions.map(r => ({ key: r.id, label: r.code, icon: <I.globe />, picked: r.id === cur.id, disabled: !r.on, title: r.on ? L(r.label) : `${L(r.label)}: ${L(B("not available yet", "暂未开放"))}` }))} />
     </div>
   );
 }
@@ -250,9 +228,9 @@ function SignIn({ lang }: { lang: Lang }) {
         <form onSubmit={e => { e.preventDefault(); void sendPhone(); }}>
           <div className="phrow">
             <label className="sr" htmlFor="gate-cc">{L(B("Country code", "国家或地区代码"))}</label>
-            <select id="gate-cc" value={cc} onChange={e => setCc(e.target.value)}>
+            <Select sz="lg" id="gate-cc" value={cc} onChange={e => setCc(e.target.value)}>
               {[["+1", "US +1"], ["+86", "CN +86"], ["+852", "HK +852"], ["+886", "TW +886"], ["+65", "SG +65"], ["+44", "UK +44"], ["+81", "JP +81"], ["+82", "KR +82"], ["+61", "AU +61"], ["+971", "AE +971"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
+            </Select>
             <label className="sr" htmlFor="gate-phone">{L(B("Phone number", "手机号"))}</label>
             <input id="gate-phone" type="tel" inputMode="tel" autoComplete="tel-national" value={phone} onChange={e => setPhone(e.target.value.replace(/[^\d\s()-]/g, "").slice(0, 20))} placeholder={cc === "+86" ? "138 0013 8000" : "(212) 555 0123"} autoFocus />
           </div>
@@ -455,10 +433,10 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
           </label>
         )}
         {needState && (
-          <select id="onb-state" value={f.state} onChange={e => setF({ ...f, state: e.target.value })} aria-label={L(B("State", "州"))}>
+          <Select sz="lg" data-prompt id="onb-state" value={f.state} onChange={e => setF({ ...f, state: e.target.value })} aria-label={L(B("State", "州"))}>
             <option value="">{L(B("Which state?", "哪个州？"))}</option>
             {STATES.map(([c, n]) => <option key={c} value={c}>{n}</option>)}
-          </select>
+          </Select>
         )}
 
         {f.more ? (

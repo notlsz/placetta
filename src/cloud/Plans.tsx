@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import * as api from "./api";
 import { useApp } from "../ctx";
 import { B } from "../model";
-import { I, Modal, Pill } from "../ui";
+import { I, Modal, Pill, Select } from "../ui";
 
 /* The plans sheet: the entry plan to start the agent, and the annual plans for filing by the team.
    Prices match the landing page. Agency fees are always paid by the business to the agency. */
@@ -78,7 +78,7 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
             <p>{b(B("Every license for one market mapped, in order, with fees and timelines, and each application prepared. Credited in full if you start a yearly plan within 60 days.", "梳理一个市场所需的全部许可，按顺序列出费用与时间，并准备好每份申请。60 天内开通年度方案可全额抵扣。"))}</p>
             <div className="plan-act">
               <label className="mk">{b(B("Markets", "市场数"))}
-                <select aria-label={b(B("Markets", "市场数"))} value={markets} onChange={e => setMarkets(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(k => <option key={k} value={k}>{k}</option>)}</select>
+                <Select aria-label={b(B("Markets", "市场数"))} value={markets} onChange={e => setMarkets(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(k => <option key={k} value={k}>{k}</option>)}</Select>
               </label>
               <Pill disabled={!!busy} onClick={() => void go("entry")}>{busy === "entry" ? "…" : b(B(`Pay $${299 * markets}`, `支付 $${299 * markets}`))}</Pill>
             </div>
