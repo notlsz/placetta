@@ -609,14 +609,16 @@ export async function filingStats(): Promise<import("../plan").FormStat[]> {
 export type PhoneLink = {
   number: string; verified: boolean; verified_at: string | null; texts_on: boolean; calls_on: boolean; quiet_start: string; quiet_end: string;
   tz: string; lang: "en" | "zh"; opted_out: boolean; last_error: string | null; code_pending: boolean;
+  /** A code is waiting to be texted to Odelia from this number (linking by texting her first). */
+  text_in_pending?: boolean;
   /** The iMessage line this person texts Odelia on (each person keeps one, so it stays one conversation). */
   line?: string | null;
 };
 export type PhoneLogRow = { id: number; direction: "in" | "out"; channel: "sms" | "voice"; kind: string; body: string; service?: "iMessage" | "RCS" | "SMS" | null; created_at: string };
-export type PhoneStatus = { link: PhoneLink | null; log: PhoneLogRow[]; error?: string };
+export type PhoneStatus = { link: PhoneLink | null; log: PhoneLogRow[]; error?: string; text_code?: string; text_code_expires_at?: string };
 /** Whether texting and calls are set up on the server, and Odelia's number. With iMessage (Linq) the number is an
  *  iMessage line that falls back to SMS for Android; calls may go to a different number (call_number). */
-export type OdeliaLine = { configured: boolean; imessage?: boolean; voice: boolean; number: string | null; display: string | null; call_number?: string | null; call_display?: string | null };
+export type OdeliaLine = { configured: boolean; imessage?: boolean; sms?: boolean; voice: boolean; number: string | null; display: string | null; call_number?: string | null; call_display?: string | null };
 const PHONE_CODES = ["pin_required", "phone_format", "phone_taken", "phone_rate_limited", "phone_none", "mfa_required", "time_format"];
 async function phoneRpc(name: string, args: Record<string, unknown> = {}): Promise<PhoneStatus> {
   const { data, error } = await supabase().rpc(name, args);
@@ -626,11 +628,14 @@ async function phoneRpc(name: string, args: Record<string, unknown> = {}): Promi
     throw code ? err(code, error.message) : fromPg(error);
   }
   const d = data as PhoneStatus;
-  return { link: d?.link ?? null, log: Array.isArray(d?.log) ? d.log : [], error: d?.error };
+  return { link: d?.link ?? null, log: Array.isArray(d?.log) ? d.log : [], error: d?.error, text_code: d?.text_code, text_code_expires_at: d?.text_code_expires_at };
 }
 export const phoneStatus = () => phoneRpc("phone_status");
 /** Texts a 6-digit code to the number (the settings PIN must be unlocked when it's on). */
 export const phoneStart = (number: string, tz: string, lang: "en" | "zh") => phoneRpc("phone_link_start", { p_number: number, p_tz: tz, p_lang: lang });
+/** Link by texting Odelia: returns a 6-digit code for the person to text to her from that number (iMessage lines
+ *  answer people who wrote first). The code is only in this answer. */
+export const phoneTextIn = (number: string, tz: string, lang: "en" | "zh") => phoneRpc("phone_link_text_in", { p_number: number, p_tz: tz, p_lang: lang });
 /** A wrong code comes back as { error: "code_wrong" | "code_locked" | "code_expired" }, not a thrown error. */
 export const phoneConfirm = (code: string) => phoneRpc("phone_link_confirm", { p_code: code });
 export const phoneRemove = () => phoneRpc("phone_link_remove");

@@ -2,7 +2,7 @@
 // runs with the service role, so callers have already decided who the person is.
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { BLOCKED_BY_STOP, type Channel, type Env, type Lang, sendSms, smsReady } from "./odelia.ts";
-import { LINQ_LINE_RESTRICTED, LINQ_OPTED_OUT, linqLines, linqReady, linqSend, pickLine } from "./linq.ts";
+import { LINQ_LINE_RESTRICTED, LINQ_OPTED_OUT, LINQ_TEXT_FIRST, linqLines, linqReady, linqSend, pickLine } from "./linq.ts";
 
 export type Link = {
   user_id: string; number: string; verified_at: string | null; texts_on: boolean; calls_on: boolean; quiet_start: string; quiet_end: string;
@@ -59,6 +59,8 @@ export async function sendText(admin: SupabaseClient, env: Env, o: { to: string;
       const r = await linqSend(env, { from: line, to: o.to, text: o.text, key: o.key, courtesy: o.courtesy }, f);
       if (r.ok) return { ok: true, status: r.status, id: r.id ? `linq:${r.id}` : undefined, line, service: r.service ?? "iMessage", chat: r.chat };
       if (r.code === LINQ_OPTED_OUT) return { ok: false, status: r.status, code: BLOCKED_BY_STOP, detail: r.detail, line, service: "iMessage" };
+      // A free-tier line can only answer people who wrote first.
+      if (r.code === LINQ_TEXT_FIRST) return { ok: false, status: r.status, code: "text_first", detail: r.detail, line, service: "iMessage" };
       // That line is restricted or down: try the next one.
       if (r.code === LINQ_LINE_RESTRICTED || r.code === 4002 || r.code === 4008) { bad.add(line); continue; }
       return { ok: false, status: r.status, code: String(r.code ?? r.status), detail: r.detail, line, service: "iMessage" };

@@ -586,15 +586,49 @@ try {
     const st = imsg(mark, "+16465550188");
     check("a stranger gets one explanation by iMessage from the line they texted", st.length === 1 && st[0].body.from === L1 && /isn't linked to an account/.test(words(st[0])), st.map((r) => r.body));
 
-    // linking a phone by iMessage: the code opens the conversation from an assigned line
+    // linking a phone with both set up: a texted-out code goes by Telnyx SMS (registered, and it never opens an iMessage conversation)
     mark = recorded.length;
     const start = await rpc("phone_link_start", { p_number: STAFF_PHONE, p_tz: "America/New_York", p_lang: "en" }, staff.jwt);
     await deliverNet(); await settle();
-    const codeMsg = imsg(mark, STAFF_PHONE);
-    check("the verification code goes by iMessage, from one of the lines, idempotent", start.status === 200 && codeMsg.length === 1 && /code is \d{6}/.test(words(codeMsg[0])) && [L1, L2].includes(codeMsg[0].body.from) && /^code:/.test(codeMsg[0].body.message?.idempotency_key ?? ""), { start: start.status, codeMsg: codeMsg.map((r) => r.body) });
-    const [sl] = await sql`select line from public.phone_links where user_id = ${staff.id}`;
-    const [cl] = await sql`select line, service from public.odelia_messages where user_id = ${staff.id} and kind = 'code'`;
-    check("the line that sent the code is assigned and counted", sl?.line === codeMsg[0]?.body.from && cl?.line === sl?.line && cl?.service === "iMessage", { sl, cl });
+    check("a texted-out code goes by Telnyx SMS, not iMessage", start.status === 200 && sms(mark, STAFF_PHONE).length === 1 && imsg(mark, STAFF_PHONE).length === 0, { sms: sms(mark).map((r) => r.body.text), im: imsg(mark).map(words) });
+
+    // linking by texting Odelia (the iMessage way): Settings shows a code, they text it from that phone, it links
+    stubs.linqState.sandbox = true;   // Linq's free tier: a line only answers people who wrote first
+    mark = recorded.length;
+    const tin = await rpc("phone_link_text_in", { p_number: STAFF_PHONE, p_tz: "America/New_York", p_lang: "en" }, staff.jwt);
+    const tcode = String(tin.data?.text_code ?? "");
+    check("Settings gets a 6-digit code to text in, and nothing is texted out", tin.status === 200 && /^\d{6}$/.test(tcode) && tin.data?.link?.text_in_pending === true && tin.data?.link?.verified === false && since(mark).filter((r) => r.service === "telnyx" || r.service === "linq").length === 0, tin.data);
+    check("the code is kept only as a hash", !(await sql`select code_hash from public.phone_codes where user_id = ${staff.id} and purpose = 'link_in'`).some((r) => String(r.code_hash).includes(tcode)));
+    stubs.linqState.wroteIn.add(STAFF_PHONE);
+    const wrongCode = tcode === "000000" ? "111111" : "000000";
+    await linqPost(msg(STAFF_PHONE, L1, wrongCode, "im-link-wrong"));
+    await settle();
+    check("a wrong code is answered and doesn't link", /doesn't match/.test(words(imsg(mark, STAFF_PHONE).at(-1) ?? { body: {} })) && (await sql`select verified_at from public.phone_links where user_id = ${staff.id}`)[0].verified_at === null, imsg(mark, STAFF_PHONE).map(words));
+    mark = recorded.length;
+    await linqPost(msg(STAFF_PHONE, L1, `LINK ${tcode}`, "im-link-ok"));
+    await settle();
+    const [sl] = await sql`select verified_at, line from public.phone_links where user_id = ${staff.id}`;
+    const linkedMsg = imsg(mark, STAFF_PHONE);
+    check("texting the code links the phone, on the line they texted, and says so", !!sl?.verified_at && sl.line === L1 && linkedMsg.length === 1 && linkedMsg[0].body.from === L1 && /You're linked/.test(words(linkedMsg[0])), { sl, linkedMsg: linkedMsg.map((r) => [r.body.from, words(r)]) });
+    const consentS = await sql`select event from public.phone_consent_log where user_id = ${staff.id} order by id`;
+    check("linking by text records consent like the typed code", consentS.map((r) => r.event).join(",").startsWith("linked"), consentS);
+    const again = await linqPost(msg(STAFF_PHONE, L1, `LINK ${tcode}`, "im-link-again"));
+    await settle();
+    check("the code works once", again.status === 200 && (await sql`select count(*)::int n from public.phone_codes where user_id = ${staff.id} and purpose = 'link_in' and used_at is not null`)[0].n === 1);
+
+    // only Linq, on the free tier: a texted-out code can't go first, and Settings is told to have them text in
+    Deno.env.delete("TELNYX_MESSAGING_PROFILE_ID");
+    const OTHER = "+16465550155";
+    await sql`delete from public.phone_links where user_id = ${staff.id}`;
+    mark = recorded.length;
+    await rpc("phone_link_start", { p_number: OTHER, p_tz: "America/New_York", p_lang: "en" }, staff.jwt);
+    await deliverNet(); await settle();
+    const [ol] = await sql`select last_error, line from public.phone_links where user_id = ${staff.id}`;
+    check("on the free tier a code can't go out first; Settings is told to text in", ol?.last_error === "text_first" && sms(mark).length === 0, { ol, im: imsg(mark).map((r) => r.status) });
+    const lineInfo = await call("odelia-sms", { action: "line" });
+    check("the app is told codes can't be texted out", lineInfo.data?.sms === false && lineInfo.data?.imessage === true, lineInfo.data);
+    Deno.env.set("TELNYX_MESSAGING_PROFILE_ID", "mp_e2e");
+    stubs.linqState.sandbox = false;
 
     // each line's reputation: Linq scores one CRITICAL; the team hears, and outbound pauses there
     mark = recorded.length;
@@ -615,7 +649,8 @@ try {
     const traffic = await sql`select * from public.odelia_line_traffic(7)`;
     check("sent and received per line are there for the team", traffic.length === 2 && traffic.every((t) => Number(t.sent) > 0), traffic);
 
-    check("no Telnyx SMS the whole time Linq was on", since(0).filter((r) => r.service === "telnyx" && r.path === "/v2/messages" && r.at >= t0b).length === 0);
+    const viaTelnyx = since(0).filter((r) => r.service === "telnyx" && r.path === "/v2/messages" && r.at >= t0b);
+    check("with Linq on, only the texted-out code went by Telnyx SMS", viaTelnyx.length === 1 && /code is \d{6}/.test(viaTelnyx[0].body.text), viaTelnyx.map((r) => r.body.text));
 
     // Linq off again: everything after this is Telnyx, as before (and the update above doesn't count toward today's three)
     await sql`delete from public.odelia_messages where user_id = ${owner.id} and kind = 'update'`;

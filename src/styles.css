@@ -759,6 +759,8 @@ a.sbtn { color: var(--ink); }
 .sg-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; padding: 14px; border-radius: 16px; background: var(--mist); }
 .sg-form .check { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; font-size: 13.5px; }
 .sg-form .sg-note { grid-column: 1 / -1; margin: 0; }
+.sg-form.text-in .text-code { grid-column: 1 / -1; display: block; padding: 12px 14px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .1); font: 600 20px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; text-align: center; user-select: all; }
+.sg-form.text-in a.sbtn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .sg-form-act { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
 .sg-act { margin-top: 10px; }
 .sg-select { height: 34px; padding: 0 28px 0 12px; border: 0; border-radius: 999px; background: var(--mist2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23596372' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 11px center; font-size: 13.5px; color: var(--ink); appearance: none; }

@@ -421,4 +421,9 @@ export const SAY = {
   whichWs: { en: (names: string[]) => `Which one? ${names.join(", ")}. Text "switch to" and the name.`, zh: (names: string[]) => `切换到哪一个？${names.join("、")}。请回复“切换到”加名称。` },
   callSorry: { en: "Sorry I couldn't talk just now. Text me here and I'll help.", zh: "抱歉刚才没能接听。请直接发短信给我，我来帮您。" },
   missed: { en: "Odelia from Placetta tried to call you about this:", zh: "快哉的 Odelia 刚才致电您，事由如下：" },
+  linked: { en: "You're linked. Text me anything about your licenses, permits and deadlines, and I'll text you when something needs you. Reply STOP to opt out.", zh: "已关联。关于执照、许可和截止日期的任何问题都可以发短信给我，有事需要您时我也会发短信告诉您。回复 STOP 退订。" },
+  codeWrong: { en: "That code doesn't match. Text the code shown in Placetta, Settings.", zh: "验证码不对。请发送快哉“设置”中显示的验证码。" },
+  codeExpired: { en: "That code expired. Get a new one in Placetta, Settings.", zh: "验证码已过期。请在快哉的“设置”中获取新的验证码。" },
+  codeLocked: { en: "Too many wrong codes. Get a new one in Placetta, Settings.", zh: "错误次数太多。请在快哉的“设置”中获取新的验证码。" },
+  codeTaken: { en: "This number is already linked to another Placetta account.", zh: "这个号码已关联到另一个快哉账户。" },
 };

@@ -57,6 +57,8 @@ function telnyx(req: Request, path: string, body: any): Response {
  *  line reputation, and presigned media (which must not get an API key). */
 export const linqState = {
   lines: new Set<string>(), optedOut: new Set<string>(), restricted: new Set<string>(), android: new Set<string>(),
+  /** The free tier: a line can only text people who texted it first (2008). */
+  sandbox: false, wroteIn: new Set<string>(),
   reputation: new Map<string, string>(), chats: new Map<string, { id: string; from: string; to: string; messages: number }>(), typing: [] as string[],
 };
 function linq(req: Request, path: string, body: any): Response {
@@ -71,6 +73,7 @@ function linq(req: Request, path: string, body: any): Response {
     if (!Array.isArray(msg?.parts) || !msg.parts.length || msg.parts.some((p: any) => p?.type === "text" && !String(p.value ?? "").trim())) return err(400, 1002, "message.parts is required");
     if (linqState.restricted.has(from)) return err(403, 2027, "Sender number is restricted from sending due to its line reputation");
     if (linqState.optedOut.has(to) && !override) return err(403, 2024, "Recipient asked you to stop messaging them");
+    if (linqState.sandbox && !linqState.wroteIn.has(to)) return err(403, 2008, "This contact hasn't messaged your sandbox line yet");
     return null;
   };
   if (req.method === "POST" && path === "/api/partner/v3/chats") {

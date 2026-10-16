@@ -19,6 +19,8 @@ export const LINQ = "https://api.linqapp.com/api/partner";
 export const LINQ_OPTED_OUT = 2024;
 export const LINQ_LINE_RESTRICTED = 2027;
 export const LINQ_BAD_PARAM = 1005;
+/** Sandbox (free tier): the contact hasn't texted the line yet, so it can't text them. */
+export const LINQ_TEXT_FIRST = 2008;
 
 /** Odelia's iMessage lines, in order (LINQ_NUMBERS, comma separated). The first is the one the app shows. */
 export function linqLines(env: Env): string[] {

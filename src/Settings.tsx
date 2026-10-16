@@ -405,9 +405,18 @@ function PhoneGroup() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [all, setAll] = useState(false);
+  // Linking by texting Odelia: the code to text her, shown only in this session.
+  const [textIn, setTextIn] = useState<{ code: string; expires: string } | null>(null);
   const load = useCallback(async () => { try { setSt(await api.phoneStatus()); } catch { setSt({ link: null, log: [] }); } }, []);
   useEffect(() => { if (!cloud) return; void api.odeliaLine().then(setLine); void load(); }, [cloud, load]);
   const link = st?.link ?? null;
+  // While a code waits to be texted in, look every few seconds; it links the moment her line gets it.
+  useEffect(() => {
+    if (!textIn || link?.verified) return;
+    const t = setInterval(() => void load(), 3000);
+    return () => clearInterval(t);
+  }, [textIn, link?.verified, load]);
+  useEffect(() => { if (textIn && link?.verified) { setTextIn(null); say(zh ? "号码已关联。现在可以给 Odelia 发短信了。" : "Your phone is linked. Text Odelia anytime."); } }, [textIn, link?.verified, say, zh]);
   // Odelia answers texts and calls in the language you use here.
   useEffect(() => { if (link?.verified && link.lang !== lang) void api.phonePrefs({ lang }).then(setSt).catch(() => undefined); }, [link?.verified, link?.lang, lang]);
   if (!cloud || !line) return null;
@@ -423,6 +432,7 @@ function PhoneGroup() {
     not_configured: zh ? "短信功能还没有设置好。" : "Texting isn't set up yet.",
     opted_out: zh ? `这个号码曾回复 STOP 退订 Odelia 的短信。请先发送 START 到 ${link?.line ? prettyPhone(link.line) : line.display ?? ""}，再重新发送验证码。` : `This number texted STOP to Odelia. Text START to ${link?.line ? prettyPhone(link.line) : line.display ?? ""}, then send the code again.`,
     send_failed: zh ? "验证码没有发出。请检查号码后重试。" : "The code didn't go through. Check the number and try again.",
+    text_first: zh ? "Odelia 需要您先给她发消息。请把下面的验证码发送给她。" : "Odelia needs you to text her first. Text her the code below.",
     line_busy: zh ? "今天新关联的号码太多了。请明天再发送验证码。" : "Odelia has linked as many new phones as she safely can today. Send the code again tomorrow.",
   } as Record<string, string>)[code];
   const act = async (fn: () => Promise<api.PhoneStatus>, done?: string) => {
@@ -434,10 +444,18 @@ function PhoneGroup() {
     } catch (e) { const x = e as api.ApiError; setMsg(errText(x.code) ?? x.message); return null; }
     finally { setBusy(false); }
   };
-  const start = async () => {
-    if (pin.locked) { pin.guard(() => void start()); return; }
+  // On iMessage, linking starts with them texting Odelia (iMessage lines answer people who wrote first, and that keeps
+  // her lines healthy); a code texted out is the other way, when plain texts are set up.
+  const start = async (way: "in" | "out" = line?.imessage || !line?.sms ? "in" : "out") => {
+    if (pin.locked) { pin.guard(() => void start(way)); return; }
     const e164 = toE164(num || link?.number || "");
     if (!e164) { setMsg(errText("phone_format")); return; }
+    if (way === "in") {
+      const s = await act(() => api.phoneTextIn(e164, deviceTz(), lang));
+      if (s?.text_code) { setTextIn({ code: s.text_code, expires: s.text_code_expires_at ?? "" }); setAdding(false); setCode(""); setNum(""); }
+      return;
+    }
+    setTextIn(null);
     const s = await act(() => api.phoneStart(e164, deviceTz(), lang));
     if (s) { setAdding(false); setCode(""); setNum(""); setTimeout(() => void load(), 3000); }   // look again to show whether it went out
   };
@@ -467,9 +485,11 @@ function PhoneGroup() {
   const callNumber = line.voice ? (forwards ? number : line.call_number ?? number) : null;
   const callApart = !!callNumber && callNumber !== number;
   const verified = !!link?.verified;
-  const codeStep = !!link && !verified && !adding && (link.code_pending || busy);
-  const showForm = !verified && (adding || !link || (!link.code_pending && !busy));
+  const textStep = !!textIn && !!link && !verified && !adding;
+  const codeStep = !textStep && !!link && !verified && !adding && (link.code_pending || busy);
+  const showForm = !textStep && !verified && (adding || !link || (!link.code_pending && !busy));
   const lastErr = link && !verified && link.last_error ? errText(link.last_error) : "";
+  const textBody = textIn ? `LINK ${textIn.code}` : "";
   const log = st?.log ?? [];
   const who = (r: api.PhoneLogRow) => r.channel === "voice" ? (zh ? "通话" : "Call")
     : (r.direction === "in" ? (zh ? "您发的短信" : "You texted") : (zh ? "Odelia 发的短信" : "Odelia texted")) + (r.service === "iMessage" ? (zh ? "（iMessage）" : " (iMessage)") : "");
@@ -509,16 +529,29 @@ function PhoneGroup() {
       note={B("Text or call Odelia like a coworker. She answers from your workspace, starts work for you, and texts you first when something needs you. Odelia is an AI: her calls use an AI voice and are transcribed as they happen, and your texts and a record of each call are kept with your account. Filing, paying, sending and deleting still wait for your approval in the app.", "像和同事一样给 Odelia 发短信或打电话。她根据您的工作区回答问题、替您开始办理，有事需要您时会先发短信给您。Odelia 是 AI：通话使用 AI 语音并会实时转录，您的短信和每次通话的记录随您的账户保存。提交、付款、发送和删除仍需您在应用中批准。")}
       rows={rows}>
       {showForm && (
-        <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void start(); }}>
+        <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void start(link?.last_error === "text_first" ? "in" : undefined); }}>
           <input type="tel" inputMode="tel" autoComplete="tel" placeholder={link && !adding ? prettyPhone(link.number) : zh ? "您的手机号" : "Your mobile number"} value={num} onChange={e => setNum(e.target.value)} aria-label={zh ? "手机号" : "Mobile number"} />
           {link && <Btn onClick={() => { setAdding(false); setNum(""); setMsg(""); }}>{zh ? "取消" : "Cancel"}</Btn>}
-          <button type="submit" className={"sbtn ink" + (pin.locked ? " pinned" : "")} disabled={busy || (!num.trim() && !link)}>{pin.locked && <I.lock />}{busy ? "…" : zh ? "发送验证码" : "Send code"}</button>
-          <p className="sg-note">{zh
+          <button type="submit" className={"sbtn ink" + (pin.locked ? " pinned" : "")} disabled={busy || (!num.trim() && !link)}>{pin.locked && <I.lock />}{busy ? "…" : (line.imessage || !line.sms) ? (zh ? "获取验证码" : "Get a code") : zh ? "发送验证码" : "Send code"}</button>
+          <p className="sg-note">{(line.imessage || !line.sms) ? (zh
+            ? "您将用这个号码把一个 6 位验证码发给 Odelia。关联后，用这个号码发短信或打电话就能联系 Odelia。发送验证码即表示您同意快哉就您的工作区向这个号码发送短信和拨打电话，包括自动短信和使用 AI 语音的电话。短信频率不定，可能产生短信和流量费用。回复 STOP 退订，回复 HELP 获取帮助。同意不是购买任何服务的条件。"
+            : "You'll text a 6-digit code to Odelia from this number. Once linked, texts and calls from this number reach Odelia as you. By texting the code, you agree to texts and calls from Placetta at this number about your workspace, including automated texts and calls with an AI voice. Message frequency varies. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent isn't a condition of purchase.") : zh
             ? "我们会发送一个 6 位验证码。关联后，用这个号码发短信或打电话就能联系 Odelia。确认验证码即表示您同意快哉就您的工作区向这个号码发送短信和拨打电话，包括自动短信和使用 AI 语音的电话。短信频率不定，可能产生短信和流量费用。回复 STOP 退订，回复 HELP 获取帮助。同意不是购买任何服务的条件。"
             : "We'll text a 6-digit code. Once linked, texts and calls from this number reach Odelia as you. By confirming the code, you agree to texts and calls from Placetta at this number about your workspace, including automated texts and calls with an AI voice. Message frequency varies. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent isn't a condition of purchase."}{" "}
             <button type="button" className="linkish" onClick={() => openLegal("terms")}>{zh ? "服务条款" : "Terms"}</button>{zh ? "，" : ", "}
             <button type="button" className="linkish" onClick={() => openLegal("privacy")}>{zh ? "隐私政策" : "Privacy Policy"}</button></p>
         </form>
+      )}
+      {textStep && (
+        <div className="sg-form invite text-in">
+          <p className="sg-note">{zh ? <>请用 {prettyPhone(link!.number)} 把这条消息发给 Odelia（{display}）：</> : <>From {prettyPhone(link!.number)}, text this to Odelia at {display}:</>}</p>
+          <code className="text-code" aria-label={zh ? "要发送的验证码" : "Code to text"}>{textBody}</code>
+          <a className="sbtn ink" href={`sms:${number}?&body=${encodeURIComponent(textBody)}`}>{zh ? "现在发送" : "Text it now"}</a>
+          <Btn onClick={() => { void navigator.clipboard?.writeText(textBody); say(zh ? "已复制" : "Copied"); }}><I.copy />{zh ? "复制" : "Copy"}</Btn>
+          <p className="sg-note" aria-live="polite">{zh ? "收到后会自动关联，30 分钟内有效。" : "It links as soon as she gets it. The code works for 30 minutes."}{" "}
+            {line.sms && <button type="button" className="linkish" onClick={() => void start("out")}>{zh ? "改为接收短信验证码" : "Get a code by text instead"}</button>}{line.sms && (zh ? "，" : ", ")}
+            <button type="button" className="linkish" onClick={() => { setTextIn(null); setAdding(true); setNum(""); setMsg(""); }}>{zh ? "换一个号码" : "Use another number"}</button></p>
+        </div>
       )}
       {codeStep && (
         <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void confirm(); }}>

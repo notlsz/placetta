@@ -97,6 +97,20 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
     return;
   }
 
+  // Linking by texting Odelia: a text that is just the 6-digit code Settings shows, from the number being linked.
+  const linkCode = !link ? /^\s*(?:link|code|关联|關聯|验证码|驗證碼)?\s*[:：#]?\s*(\d{6})\s*$/i.exec(text) : null;
+  if (linkCode) {
+    const { data } = await admin.rpc("phone_link_inbound", { p_number: from, p_code: linkCode[1], p_line: via.line ?? null });
+    const r = (data ?? { result: "none" }) as { result: string; user_id?: string; lang?: Lang };
+    if (r.result !== "none") {
+      const l: Lang = r.lang === "zh" ? "zh" : r.lang === "en" ? "en" : lang;
+      if (r.user_id) await admin.from("odelia_messages").update({ user_id: r.user_id, body: lang === "zh" ? "发送了关联验证码" : "Texted the link code" }).eq("id", logId);
+      const say = r.result === "ok" ? SAY.linked[l] : r.result === "wrong" ? SAY.codeWrong[l] : r.result === "locked" ? SAY.codeLocked[l] : r.result === "taken" ? SAY.codeTaken[l] : SAY.codeExpired[l];
+      await textNumber(from, say, r.result === "ok" ? r.user_id ?? null : null, via);
+      return;
+    }
+  }
+
   // A number nobody verified: one explanation, then nothing.
   if (!link) {
     const { data: s } = await admin.from("odelia_strangers").select("replied_at, opted_out_at, messages").eq("number", from).maybeSingle();
@@ -284,14 +298,17 @@ async function sendCode(codeId: string) {
   if (!textingReady(env)) { await setError("not_configured"); return fail(503, "not_configured", "Texting isn't set up: set LINQ_API_KEY, LINQ_WEBHOOK_SECRET and LINQ_NUMBERS for iMessage, or TELNYX_API_KEY, TELNYX_PUBLIC_KEY, ODELIA_NUMBER and TELNYX_MESSAGING_PROFILE_ID for SMS."); }
   const lang: Lang = row.lang === "zh" ? "zh" : "en";
   // A code is the one text that can start a conversation, so it's what each line's daily cap of new ones counts.
+  // Codes go by Telnyx SMS when it's set up: a registered line, and it never opens an iMessage conversation (the pattern
+  // Apple flags). With only Linq, a paid line sends it; a free-tier line can't text first, and Settings then asks them
+  // to text a code to Odelia instead.
   let line: string | null = null;
-  if (linqReady(env)) {
+  if (linqReady(env) && !smsReady(env)) {
     const { data: l } = await admin.from("phone_links").select("line").eq("user_id", row.user_id).maybeSingle();
     line = await codeLine(row.number, (l?.line as string | null) ?? null);
     if (!line && !smsReady(env)) { await setError("line_busy"); return fail(503, "line_busy", "Every iMessage line has started as many new conversations as it safely can today."); }
   }
-  const r = await sendText(admin, env, { to: row.number, text: SAY.code[lang](code), line, smsOnly: linqReady(env) && !line, key: `code:${codeId}` });
-  if (!r.ok) { await setError(r.code === BLOCKED_BY_STOP ? "opted_out" : "send_failed"); return fail(502, "upstream_error", "Couldn't send the code."); }
+  const r = await sendText(admin, env, { to: row.number, text: SAY.code[lang](code), line, smsOnly: smsReady(env) || (linqReady(env) && !line), key: `code:${codeId}` });
+  if (!r.ok) { await setError(r.code === BLOCKED_BY_STOP ? "opted_out" : r.code === "text_first" ? "text_first" : "send_failed"); return fail(502, "upstream_error", "Couldn't send the code."); }
   await setError(null);
   if (r.line) await admin.from("phone_links").update({ line: r.line, updated_at: new Date().toISOString() }).eq("user_id", row.user_id);
   await logMessage(admin, { user_id: row.user_id, direction: "out", channel: "sms", kind: "code", body: lang === "zh" ? "已发送验证码" : "Sent a verification code", provider_id: r.id, line: r.line, service: r.service });
@@ -413,7 +430,8 @@ export async function handle(req: Request): Promise<Response> {
     const imessage = linqReady(env);
     const n = imessage ? linqLines(env)[0] : odeliaNumber(env);
     const callN = voiceReady(env) ? (imessage && env("LINQ_FORWARDS_CALLS") === "1" ? n : odeliaNumber(env)) : null;
-    return json(200, { configured: textingReady(env), imessage, voice: voiceReady(env), number: n, display: n ? prettyPhone(n) : null,
+    // sms: codes can be texted out (Telnyx); without it, linking is by texting a code to Odelia.
+    return json(200, { configured: textingReady(env), imessage, sms: smsReady(env), voice: voiceReady(env), number: n, display: n ? prettyPhone(n) : null,
       call_number: callN, call_display: callN ? prettyPhone(callN) : null });
   }
   if (!(await monitorKeyOk(req.headers.get("x-monitor-key")))) return fail(401, "unauthorized", "unauthorized");
