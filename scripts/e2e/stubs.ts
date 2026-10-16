@@ -4,7 +4,7 @@
 // sandbox. Each stub checks requests the way the real API would (shapes, required fields, the documented rules the
 // functions rely on) and answers with realistic bodies.
 
-export type Rec = { service: "anthropic" | "telnyx" | "linq" | "stripe" | "resend"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
+export type Rec = { service: "anthropic" | "telnyx" | "linq" | "whatsapp" | "stripe" | "resend"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
 export const recorded: Rec[] = [];
 export const blockedHosts: string[] = [];
 export const stubErrors: string[] = [];
@@ -104,6 +104,32 @@ function linq(req: Request, path: string, body: any): Response {
       reputation: { status: linqState.reputation.get(n) ?? "HEALTHY", doc_url: "https://docs.linqapp.com/channel/imessage/guides/phone-numbers/phone-reputation" } })) });
   }
   return err(404, 3000, "Not found");
+}
+
+/* ------------------------------ WhatsApp (Meta Cloud API) ------------------------------ */
+
+/** Meta's Graph API as the functions use it: free-form text only to people whose 24-hour window is open (131047
+ *  otherwise), the approved update template anytime, read + typing, and media behind the same token. */
+export const waState = { open: new Set<string>(), templates: new Set<string>(["odelia_update"]) };
+function whatsapp(req: Request, path: string, body: any): Response {
+  const err = (status: number, code: number, message: string) => json(status, { error: { message, type: "OAuthException", code, error_data: { messaging_product: "whatsapp", details: message }, fbtrace_id: rid("") } });
+  if (!/^Bearer \S+/.test(req.headers.get("authorization") ?? "")) return err(401, 190, "Invalid OAuth access token");
+  if (path.startsWith("/whatsapp_business/attachments")) return new Response(MMS_PNG, { status: 200, headers: { "Content-Type": "image/png" } });
+  const m = /^\/v[\d.]+\/([^/]+)(\/messages)?$/.exec(path);
+  if (!m) return err(404, 100, "Unknown path");
+  if (req.method === "GET" && !m[2]) return json(200, { url: `https://lookaside.fbsbx.com/whatsapp_business/attachments/?mid=${m[1]}`, mime_type: "image/png", sha256: "x", file_size: MMS_PNG.length, id: m[1], messaging_product: "whatsapp" });
+  if (req.method !== "POST" || !m[2] || body?.messaging_product !== "whatsapp") return err(400, 100, "Invalid parameter");
+  if (body.status === "read") return json(200, { success: true });
+  if (!/^\d{8,15}$/.test(String(body.to ?? ""))) return err(400, 131030, "Recipient phone number not in allowed list");
+  if (body.type === "text") {
+    if (!body.text?.body) return err(400, 100, "Param text['body'] is required");
+    if (!waState.open.has(body.to)) return err(400, 131047, "Re-engagement message: more than 24 hours have passed since the recipient last replied");
+  } else if (body.type === "template") {
+    if (!waState.templates.has(body.template?.name)) return err(404, 132001, "Template name does not exist in the translation");
+    const p = body.template?.components?.[0]?.parameters?.[0]?.text ?? "";
+    if (!p || /[\n\t]| {5,}/.test(p)) return err(400, 132018, "Param text cannot have new-line/tab characters or more than 4 consecutive spaces");
+  } else return err(400, 100, "Unsupported message type");
+  return json(200, { messaging_product: "whatsapp", contacts: [{ input: body.to, wa_id: body.to }], messages: [{ id: `wamid.${rid("")}` }] });
 }
 
 /* ------------------------------ Stripe ------------------------------ */
@@ -325,7 +351,7 @@ async function anthropic(req: Request, path: string, body: any): Promise<Respons
 
 /* ------------------------------ the patched fetch ------------------------------ */
 
-const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "api.stripe.com": "stripe", "api.resend.com": "resend" };
+const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "graph.facebook.com": "whatsapp", "lookaside.fbsbx.com": "whatsapp", "api.stripe.com": "stripe", "api.resend.com": "resend" };
 
 export function patchFetch(local: (u: URL) => boolean) {
   const realFetch = globalThis.fetch.bind(globalThis);
@@ -337,7 +363,7 @@ export function patchFetch(local: (u: URL) => boolean) {
       const raw = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
       let body: any = raw;
       try { body = raw && (req.headers.get("content-type") ?? "").includes("json") ? JSON.parse(raw) : raw; } catch { /* left as text */ }
-      const res = service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
+      const res = service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "whatsapp" ? whatsapp(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
       recorded.push({ service, method: req.method, path: u.pathname + u.search, headers: Object.fromEntries(req.headers), body: service === "stripe" ? formObject(raw) : body, raw, status: res.status, at: Date.now() });
       return res;
     }

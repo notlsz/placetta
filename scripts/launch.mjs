@@ -254,6 +254,41 @@ async function setupLinq(secrets) {
   }
 }
 
+/* Odelia on WhatsApp (Meta's Cloud API, direct: no reseller fee). In Meta's developer portal: an app with WhatsApp, a
+   business phone number and a permanent System User token with whatsapp_business_messaging and
+   whatsapp_business_management. This creates Odelia's update template (a utility template, "Placetta: {{1}}", in
+   English and Chinese; Meta reviews it within a day) and subscribes the app to the WhatsApp account; the webhook URL and
+   the verify token it prints go in the app's WhatsApp configuration. */
+async function setupWhatsApp(secrets) {
+  console.log(`\n${bold("Odelia on WhatsApp")} ${dim("(Meta Cloud API. Leave blank to skip.)")}`);
+  const token = await ask("WhatsApp System User access token: ", { hidden: true });
+  if (!token) return;
+  const phoneId = (await ask("Phone number ID (WhatsApp, API Setup): ")).trim();
+  const waba = (await ask("WhatsApp Business Account ID: ")).trim();
+  const appSecret = await ask("App secret (App settings, Basic), for webhook signatures: ", { hidden: true });
+  const number = (await ask("The WhatsApp number people message (+1...): ")).replace(/[^\d+]/g, "");
+  if (!phoneId || !appSecret) { console.log(`  ${red("skipped")}  the phone number ID and app secret are both needed`); return; }
+  const graph = async (method, path, body) => {
+    const res = await fetch(`https://graph.facebook.com/v25.0${path}`, { method, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(j?.error?.error_user_msg ?? j?.error?.message ?? `HTTP ${res.status}`);
+    return j;
+  };
+  Object.assign(secrets, { WHATSAPP_TOKEN: token, WHATSAPP_PHONE_NUMBER_ID: phoneId, WHATSAPP_APP_SECRET: appSecret, WHATSAPP_VERIFY_TOKEN: randomBytes(18).toString("hex"), WHATSAPP_TEMPLATE: "odelia_update" });
+  if (number) secrets.WHATSAPP_NUMBER = number.startsWith("+") ? number : `+${number}`;
+  if (waba) {
+    for (const [language, text, example] of [["en_US", "Placetta: {{1}}", "Your sign permit was approved. Open Placetta to see it."], ["zh_CN", "快哉：{{1}}", "您的招牌许可已获批准。打开快哉查看。"]]) {
+      try {
+        await graph("POST", `/${encodeURIComponent(waba)}/message_templates`, { name: "odelia_update", language, category: "UTILITY", components: [{ type: "BODY", text, example: { body_text: [[example]] } }] });
+        console.log(`  ${green("submitted")}  template odelia_update (${language}) for Meta's review`);
+      } catch (e) { console.log(`  ${dim("template")}  ${language}: ${e.message}`); }
+    }
+    try { await graph("POST", `/${encodeURIComponent(waba)}/subscribed_apps`); console.log(`  ${green("subscribed")}  the app to the WhatsApp account`); }
+    catch (e) { console.log(`  ${red("not subscribed")}  ${e.message}`); }
+  }
+  console.log(`  In the app's WhatsApp, Configuration: callback URL ${SUPABASE_URL}/functions/v1/odelia-sms, verify token ${secrets.WHATSAPP_VERIFY_TOKEN}, and subscribe to "messages".`);
+}
+
 function setSecrets(secrets) {
   const names = Object.keys(secrets);
   if (!names.length) return true;
@@ -307,6 +342,7 @@ async function main() {
   const sk = await ask("Stripe secret key (sk_test_... to try it first, sk_live_... to charge): ", { hidden: true });
   await setupTelnyx(secrets);
   await setupLinq(secrets);
+  await setupWhatsApp(secrets);
 
   const auth = {};
   if (TOKEN) {

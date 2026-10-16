@@ -2,13 +2,16 @@
 // runs with the service role, so callers have already decided who the person is.
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { BLOCKED_BY_STOP, type Channel, type Env, type Lang, sendSms, smsReady } from "./odelia.ts";
+import { WA_WINDOW_CLOSED, waTemplate, waTemplateReady, waText, waWindowOpen, whatsappReady } from "./whatsapp.ts";
 import { LINQ_LINE_RESTRICTED, LINQ_OPTED_OUT, LINQ_TEXT_FIRST, linqLines, linqReady, linqSend, pickLine } from "./linq.ts";
 
 export type Link = {
   user_id: string; number: string; verified_at: string | null; texts_on: boolean; calls_on: boolean; quiet_start: string; quiet_end: string;
   tz: string; lang: Lang; last_workspace_id: string | null; opted_out_at: string | null; line?: string | null;
+  /** The app they last texted Odelia on: "whatsapp", or null for iMessage and SMS. Answers go back there. */
+  via?: string | null; wa_last_in?: string | null;
 };
-export const LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at, line";
+export const LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at, line, via, wa_last_in";
 
 /** The person who verified this number, or null. */
 export async function linkByNumber(admin: SupabaseClient, number: string): Promise<Link | null> {
@@ -31,7 +34,7 @@ export async function logMessage(admin: SupabaseClient, row: { user_id: string |
 /* ------------------------------ which way a text goes ------------------------------ */
 
 /** Texting works when either Linq (iMessage, falling back to RCS and SMS) or Telnyx (SMS) is set up. */
-export const textingReady = (env: Env) => linqReady(env) || smsReady(env);
+export const textingReady = (env: Env) => linqReady(env) || smsReady(env) || whatsappReady(env);
 
 /** Lines Linq has scored CRITICAL: outbound pauses there (replies still go). Read from odelia_lines, kept a minute. */
 let critical: { at: number; set: Set<string> } | null = null;
@@ -50,7 +53,15 @@ export type Sent = { ok: boolean; status: number; code?: string; detail?: string
  * one conversation); a line Linq has restricted is skipped for another, and with no usable line it goes by Telnyx SMS
  * when that's set up. Opt-outs come back as BLOCKED_BY_STOP whichever way it went.
  */
-export async function sendText(admin: SupabaseClient, env: Env, o: { to: string; text: string; line?: string | null; reply?: boolean; courtesy?: boolean; key?: string; smsOnly?: boolean }, f: typeof fetch = fetch): Promise<Sent> {
+export async function sendText(admin: SupabaseClient, env: Env, o: { to: string; text: string; line?: string | null; reply?: boolean; courtesy?: boolean; key?: string; smsOnly?: boolean; whatsapp?: { open: boolean; lang: Lang } }, f: typeof fetch = fetch): Promise<Sent> {
+  // Someone who texts Odelia on WhatsApp hears back there: free-form inside their 24-hour window, the update template
+  // outside it. If WhatsApp can't take it, it goes by iMessage or SMS instead.
+  if (o.whatsapp && whatsappReady(env) && !o.smsOnly) {
+    let r = o.whatsapp.open ? await waText(env, o.to, o.text, f) : waTemplateReady(env) ? await waTemplate(env, o.to, o.text, o.whatsapp.lang, f) : null;
+    if (r && !r.ok && r.code === WA_WINDOW_CLOSED && o.whatsapp.open && waTemplateReady(env)) r = await waTemplate(env, o.to, o.text, o.whatsapp.lang, f);
+    if (r?.ok) return { ok: true, status: r.status, id: r.id ? `wa:${r.id}` : undefined, line: null, service: "WhatsApp" };
+    if (r) console.error("odelia whatsapp", r.status, r.code, r.detail);
+  }
   if (linqReady(env) && !o.smsOnly) {
     const lines = linqLines(env), bad = new Set(await criticalLines(admin));
     for (let tries = 0; tries < lines.length; tries++) {
@@ -67,6 +78,7 @@ export async function sendText(admin: SupabaseClient, env: Env, o: { to: string;
     }
     if (!smsReady(env)) return { ok: false, status: 503, code: "no_line", line: null, service: "iMessage" };
   }
+  if (!smsReady(env)) return { ok: false, status: 503, code: "not_configured", line: null, service: "SMS" };
   const r = await sendSms(env, o.to, o.text, f);
   return { ok: r.ok, status: r.status, code: r.code, detail: r.detail, id: r.id, line: null, service: "SMS" };
 }
@@ -80,8 +92,11 @@ export async function textUser(admin: SupabaseClient, env: Env, o: { link: Link;
   if (o.link.opted_out_at) return { ok: false, sent: 0, code: "opted_out" };
   const reply = ["reply", "ack", "system", "chat", "missed"].includes(o.kind);
   let sent = 0, line = o.link.line ?? null;
-  for (const text of o.segments) {
-    const r = await sendText(admin, env, { to: o.link.number, text, line, reply });
+  const whatsapp = o.link.via === "whatsapp" ? { open: waWindowOpen(o.link.wa_last_in), lang: o.link.lang } : undefined;
+  // WhatsApp has no SMS-sized parts, and each message counts against the month's free replies: one message.
+  const segments = whatsapp && whatsappReady(env) && o.segments.length > 1 ? [o.segments.join("\n\n")] : o.segments;
+  for (const text of segments) {
+    const r = await sendText(admin, env, { to: o.link.number, text, line, reply, whatsapp });
     if (!r.ok) {
       console.error("odelia text", r.status, r.code, r.detail);
       if (r.code === BLOCKED_BY_STOP) await admin.from("phone_links").update({ opted_out_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("user_id", o.link.user_id);

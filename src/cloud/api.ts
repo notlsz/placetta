@@ -618,7 +618,9 @@ export type PhoneLogRow = { id: number; direction: "in" | "out"; channel: "sms" 
 export type PhoneStatus = { link: PhoneLink | null; log: PhoneLogRow[]; error?: string; text_code?: string; text_code_expires_at?: string };
 /** Whether texting and calls are set up on the server, and Odelia's number. With iMessage (Linq) the number is an
  *  iMessage line that falls back to SMS for Android; calls may go to a different number (call_number). */
-export type OdeliaLine = { configured: boolean; imessage?: boolean; sms?: boolean; voice: boolean; number: string | null; display: string | null; call_number?: string | null; call_display?: string | null };
+export type OdeliaLine = { configured: boolean; imessage?: boolean; sms?: boolean; voice: boolean; number: string | null; display: string | null; call_number?: string | null; call_display?: string | null;
+  /** Odelia's WhatsApp number, when WhatsApp is set up. */
+  whatsapp?: string | null };
 const PHONE_CODES = ["pin_required", "phone_format", "phone_taken", "phone_rate_limited", "phone_none", "mfa_required", "time_format"];
 async function phoneRpc(name: string, args: Record<string, unknown> = {}): Promise<PhoneStatus> {
   const { data, error } = await supabase().rpc(name, args);

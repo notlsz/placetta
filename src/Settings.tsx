@@ -494,11 +494,15 @@ function PhoneGroup() {
   const who = (r: api.PhoneLogRow) => r.channel === "voice" ? (zh ? "通话" : "Call")
     : (r.direction === "in" ? (zh ? "您发的短信" : "You texted") : (zh ? "Odelia 发的短信" : "Odelia texted")) + (r.service === "iMessage" ? (zh ? "（iMessage）" : " (iMessage)") : "");
 
+  const wa = line.whatsapp ? line.whatsapp.replace(/^\+/, "") : "";
   const rows: Row[] = [
-    { label: B("Odelia's number", "Odelia 的号码"), icon: <I.phone />,
+    ...(number ? [{ label: B("Odelia's number", "Odelia 的号码"), icon: <I.phone />,
       sub: <>{display}{line.imessage ? (zh ? "，可发 iMessage（安卓手机为短信）" : ", on iMessage (texts from Android)") : (zh ? "，可发短信" : ", for texts")}
         {line.voice && (callApart ? <>{zh ? `；来电请拨 ${prettyPhone(callNumber!)}` : `. Calls: ${prettyPhone(callNumber!)}`}</> : (zh ? "，也可打电话" : ", and calls"))}</>,
-      right: <>{number && <a className="sbtn quiet" href={`sms:${number}`}>{zh ? "发短信" : "Text"}</a>}<Btn onClick={() => saveContact(number, zh, callNumber)}><I.download />{zh ? "保存联系人" : "Save contact"}</Btn></> },
+      right: <>{number && <a className="sbtn quiet" href={`sms:${number}`}>{zh ? "发短信" : "Text"}</a>}<Btn onClick={() => saveContact(number, zh, callNumber)}><I.download />{zh ? "保存联系人" : "Save contact"}</Btn></> }] as Row[] : []),
+    ...(wa ? [{ label: B("Odelia on WhatsApp", "Odelia 的 WhatsApp"), icon: <I.message />,
+      sub: <>{prettyPhone(line.whatsapp!)}{zh ? "，用已关联的号码发消息即可" : ", from your linked number"}</>,
+      right: <a className="sbtn quiet" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">{zh ? "打开 WhatsApp" : "Open WhatsApp"}</a> }] as Row[] : []),
     { label: B("Your phone", "您的手机"), icon: <I.user />,
       sub: link ? <>{prettyPhone(link.number)}{verified ? (link.opted_out ? (zh ? `，已回复 STOP 退订短信。发送 START 到 ${display} 可重新开启。` : `, texts are off because it texted STOP. Text START to ${display} to turn them back on.`) : (zh ? "，已验证" : ", verified")) : (zh ? "，等待验证" : ", waiting for the code")}</> : (zh ? "未关联" : "Not linked"),
       right: verified ? <Btn guard onClick={remove}>{zh ? "取消关联" : "Remove"}</Btn> : link ? <Btn onClick={() => void act(() => api.phoneRemove())}>{zh ? "取消" : "Cancel"}</Btn> : undefined },
@@ -544,9 +548,10 @@ function PhoneGroup() {
       )}
       {textStep && (
         <div className="sg-form invite text-in">
-          <p className="sg-note">{zh ? <>请用 {prettyPhone(link!.number)} 把这条消息发给 Odelia（{display}）：</> : <>From {prettyPhone(link!.number)}, text this to Odelia at {display}:</>}</p>
+          <p className="sg-note">{zh ? <>请用 {prettyPhone(link!.number)} 把这条消息发给 Odelia（{display || prettyPhone(line.whatsapp ?? "")}）：</> : <>From {prettyPhone(link!.number)}, text this to Odelia at {display || prettyPhone(line.whatsapp ?? "")}:</>}</p>
           <code className="text-code" aria-label={zh ? "要发送的验证码" : "Code to text"}>{textBody}</code>
-          <a className="sbtn ink" href={`sms:${number}?&body=${encodeURIComponent(textBody)}`}>{zh ? "现在发送" : "Text it now"}</a>
+          {number && <a className="sbtn ink" href={`sms:${number}?&body=${encodeURIComponent(textBody)}`}>{zh ? "现在发送" : "Text it now"}</a>}
+          {wa && <a className={"sbtn " + (number ? "quiet" : "ink")} href={`https://wa.me/${wa}?text=${encodeURIComponent(textBody)}`} target="_blank" rel="noreferrer">{zh ? "用 WhatsApp 发送" : "Send on WhatsApp"}</a>}
           <Btn onClick={() => { void navigator.clipboard?.writeText(textBody); say(zh ? "已复制" : "Copied"); }}><I.copy />{zh ? "复制" : "Copy"}</Btn>
           <p className="sg-note" aria-live="polite">{zh ? "收到后会自动关联，30 分钟内有效。" : "It links as soon as she gets it. The code works for 30 minutes."}{" "}
             {line.sms && <button type="button" className="linkish" onClick={() => void start("out")}>{zh ? "改为接收短信验证码" : "Get a code by text instead"}</button>}{line.sms && (zh ? "，" : ", ")}

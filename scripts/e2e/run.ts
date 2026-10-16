@@ -481,6 +481,9 @@ try {
   });
 
   /* ---------------- b2. iMessage (Linq) ---------------- */
+  // b2 and b3 replay the texting flows on iMessage and WhatsApp; their runs come off the owner's hourly allowance at the
+  // end, so the voice scenario after them starts from the same place it always has.
+  const [{ at: textingStart }] = await sql`select now() as at`;
   await scenario("b2. iMessage", async () => {
     // Linq turned on next to Telnyx: two iMessage lines, the webhook secret, the key
     const L1 = "+14155550170", L2 = "+14155550171", STAFF_PHONE = "+16465550144";
@@ -655,6 +658,96 @@ try {
     // Linq off again: everything after this is Telnyx, as before (and the update above doesn't count toward today's three)
     await sql`delete from public.odelia_messages where user_id = ${owner.id} and kind = 'update'`;
     for (const k of Object.keys(LINQ_ENV)) Deno.env.delete(k);
+    await sql`update public.phone_links set quiet_start = '21:00', quiet_end = '08:00', tz = 'America/New_York' where user_id = ${owner.id}`;
+  });
+
+  /* ---------------- b3. WhatsApp (Meta Cloud API) ---------------- */
+  await scenario("b3. WhatsApp", async () => {
+    const WA_ENV = { WHATSAPP_TOKEN: "EAAG_e2e", WHATSAPP_PHONE_NUMBER_ID: "109876543210", WHATSAPP_APP_SECRET: "wa-app-secret-e2e", WHATSAPP_VERIFY_TOKEN: "wa-verify-e2e", WHATSAPP_NUMBER: "+14155550190", WHATSAPP_TEMPLATE: "odelia_update" };
+    for (const [k, v] of Object.entries(WA_ENV)) Deno.env.set(k, v);
+    const { signWhatsApp } = await import("../../supabase/functions/_shared/whatsapp.ts");
+    const OWNER_WA = OWNER_PHONE.replace("+", "");
+    const waPost = async (messages: unknown[], o: { badSecret?: boolean; statuses?: unknown[] } = {}) => {
+      const ev = { object: "whatsapp_business_account", entry: [{ id: "waba_e2e", changes: [{ field: "messages", value: { messaging_product: "whatsapp", metadata: { display_phone_number: "14155550190", phone_number_id: WA_ENV.WHATSAPP_PHONE_NUMBER_ID }, contacts: [{ profile: { name: "Mei" }, wa_id: OWNER_WA }], ...(messages.length ? { messages } : {}), ...(o.statuses ? { statuses: o.statuses } : {}) } }] }] };
+      const raw = JSON.stringify(ev);
+      return await call("odelia-sms", null, { raw, headers: { "x-hub-signature-256": await signWhatsApp(raw, o.badSecret ? "not-the-secret" : WA_ENV.WHATSAPP_APP_SECRET) } });
+    };
+    const text = (from: string, body: string, id: string) => ({ from, id, timestamp: String(Math.floor(Date.now() / 1000)), type: "text", text: { body } });
+    const wa = (m: number, to?: string) => since(m).filter((r) => r.service === "whatsapp" && r.method === "POST" && r.body?.to && (!to || r.body.to === to) && r.status === 200);
+    const waBody = (r: { body: any }) => String(r.body?.text?.body ?? r.body?.template?.components?.[0]?.parameters?.[0]?.text ?? "");
+    mark = recorded.length;
+
+    // Meta's subscribe handshake
+    const hs = await fetch(`${GATEWAY}/functions/v1/odelia-sms?hub.mode=subscribe&hub.verify_token=wa-verify-e2e&hub.challenge=8675309`, { headers: { apikey: ANON_KEY } });
+    const hsBad = await fetch(`${GATEWAY}/functions/v1/odelia-sms?hub.mode=subscribe&hub.verify_token=wrong&hub.challenge=1`, { headers: { apikey: ANON_KEY } });
+    check("the webhook handshake echoes the challenge, and refuses a wrong verify token", hs.status === 200 && (await hs.text()) === "8675309" && hsBad.status === 403, [hs.status, hsBad.status]);
+    await hsBad.body?.cancel();
+    const line = await call("odelia-sms", { action: "line" });
+    check("the app is told Odelia's WhatsApp number", line.data?.whatsapp === "+14155550190", line.data);
+
+    // the owner writes on WhatsApp: answered there, in one message, with the typing indicator
+    stubs.waState.open.add(OWNER_WA);
+    const r1 = await waPost([text(OWNER_WA, "What's due this month?", "wamid.in1")]);
+    await settle();
+    const [run] = await sql`select * from public.agent_runs where channel = 'sms' order by created_at desc limit 1`;
+    check("a WhatsApp message starts a run as the owner", r1.status === 200 && run?.created_by === owner.id && run.prompt === "What's due this month?" && run.status === "done", { r1, run });
+    const out1 = wa(mark, OWNER_WA);
+    check("the answer goes back on WhatsApp, as one message", out1.length === 1 && out1[0].body.type === "text" && /CO paperwork/.test(waBody(out1[0])), out1.map(waBody));
+    check("the typing indicator showed (and their message was marked read)", since(mark).some((r) => r.service === "whatsapp" && r.body?.status === "read" && r.body?.message_id === "wamid.in1" && r.body?.typing_indicator?.type === "text"));
+    check("nothing went by SMS or iMessage", sms(mark).length === 0 && since(mark).filter((r) => r.service === "linq").length === 0);
+    const [pl] = await sql`select via, wa_last_in from public.phone_links where user_id = ${owner.id}`;
+    check("the owner is now on WhatsApp", pl?.via === "whatsapp" && !!pl.wa_last_in, pl);
+    const logged = await sql`select direction, service, provider_id from public.odelia_messages where run_id = ${run.id} order by id`;
+    check("both sides are logged as WhatsApp", logged.length === 2 && logged.every((l) => l.service === "WhatsApp") && logged[0].provider_id === "wa:wamid.in1", logged);
+
+    // retries, receipts and forgeries
+    mark = recorded.length;
+    const n0 = (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n;
+    await waPost([text(OWNER_WA, "What's due this month?", "wamid.in1")]);
+    await waPost([], { statuses: [{ id: "wamid.x", status: "delivered", recipient_id: OWNER_WA }] });
+    const forged = await waPost([text(OWNER_WA, "What's due this month?", "wamid.forged")], { badSecret: true });
+    await settle();
+    check("a retried message and delivery receipts are ignored; a forged one is refused", forged.status === 401 && (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === n0 && wa(mark).length === 0, forged);
+
+    // a photo on WhatsApp: fetched from Meta with the token, saved, read
+    mark = recorded.length;
+    await waPost([{ from: OWNER_WA, id: "wamid.photo", type: "image", image: { id: "media-e2e-1", mime_type: "image/png", sha256: "x" } }]);
+    await settle();
+    const dl = since(mark).filter((r) => r.service === "whatsapp" && r.method === "GET");
+    check("the photo is looked up and downloaded from Meta with the token", dl.length === 2 && dl.every((r) => /^Bearer /.test(r.headers.authorization ?? "")) && dl[1].path.startsWith("/whatsapp_business/attachments"), dl.map((r) => r.path));
+    check("the photo is read and answered on WhatsApp", wa(mark, OWNER_WA).length === 1 && /50123456/.test(waBody(wa(mark, OWNER_WA)[0])), wa(mark, OWNER_WA).map(waBody));
+
+    // past their 24 hours: an update goes as the approved template; and if Meta says the window shut, the template too
+    mark = recorded.length;
+    stubs.waState.open.delete(OWNER_WA);
+    await sql`update public.phone_links set wa_last_in = now() - interval '2 days', quiet_start = '00:00', quiet_end = '00:01', tz = 'UTC' where user_id = ${owner.id}`;
+    await sql`insert into public.odelia_outbox(user_id, workspace_id, kind, urgent, body, link, dedupe) values (${owner.id}, ${ws}, 'text', false, 'Placetta: your sign permit was approved.', null, 'e2e-wa-update')`;
+    await call("odelia-sms", { action: "flush" }, { headers: MK });
+    const upd = wa(mark, OWNER_WA);
+    check("an update outside the 24 hours goes as the utility template", upd.length === 1 && upd[0].body.type === "template" && upd[0].body.template?.name === "odelia_update" && /sign permit was approved/.test(waBody(upd[0])) && !/Placetta:/.test(waBody(upd[0])), upd.map((r) => r.body));
+    mark = recorded.length;
+    await sql`update public.phone_links set wa_last_in = now() - interval '1 hour' where user_id = ${owner.id}`;
+    await sql`insert into public.odelia_outbox(user_id, workspace_id, kind, urgent, body, link, dedupe) values (${owner.id}, ${ws}, 'text', false, 'Placetta: the health inspection is booked.', null, 'e2e-wa-update-2')`;
+    await call("odelia-sms", { action: "flush" }, { headers: MK });
+    const tries = since(mark).filter((r) => r.service === "whatsapp" && r.body?.to === OWNER_WA);
+    check("when Meta says the window shut (131047), the template goes instead", tries.length === 2 && tries[0].status === 400 && tries[1].status === 200 && tries[1].body.type === "template", tries.map((r) => [r.status, r.body.type]));
+
+    // back to iMessage or SMS: writing there moves the conversation back
+    mark = recorded.length;
+    await telnyxPost("odelia-sms", smsEvent(OWNER_PHONE, "What's due this month?", "msg-after-wa"));
+    await settle();
+    check("a text by SMS is answered by SMS, and WhatsApp is no longer where updates go", sms(mark, OWNER_PHONE).length === 1 && wa(mark).length === 0 && (await sql`select via from public.phone_links where user_id = ${owner.id}`)[0].via === null, { sms: sms(mark).map((r) => r.body.text), wa: wa(mark).map(waBody) });
+
+    // a stranger on WhatsApp: one explanation, there
+    mark = recorded.length;
+    stubs.waState.open.add("16465550177");
+    await waPost([text("16465550177", "hi, permits?", "wamid.stranger")]);
+    await settle();
+    check("a stranger on WhatsApp gets one explanation there", wa(mark, "16465550177").length === 1 && /isn't linked to an account/.test(waBody(wa(mark, "16465550177")[0])), wa(mark).map(waBody));
+
+    for (const k of Object.keys(WA_ENV)) Deno.env.delete(k);
+    await sql`delete from public.ai_events where user_id = ${owner.id} and kind = 'task' and at >= ${textingStart}`;
+    await sql`delete from public.odelia_messages where user_id = ${owner.id} and kind = 'update'`;
     await sql`update public.phone_links set quiet_start = '21:00', quiet_end = '08:00', tz = 'America/New_York' where user_id = ${owner.id}`;
   });
 

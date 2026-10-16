@@ -26,6 +26,7 @@ import {
   pickWorkspace, prettyPhone, randomCode, SAY, smsReady, splitSms, strangerMayGetReply, switchTarget, underDailyLimit, verifyTelnyx, voiceReady,
 } from "../_shared/odelia.ts";
 import { currentWorkspace, criticalLines, forgetCriticalLines, type Link, linkByNumber, linkOf, logMessage, sendText, textingReady, textUser } from "../_shared/odelia_db.ts";
+import { parseWhatsApp, subscribeChallenge, verifyWhatsApp, waMedia, waMediaHost, waTyping, whatsappNumber, whatsappReady, type WaEvent } from "../_shared/whatsapp.ts";
 import { hashLine, linqLineHealth, linqLines, linqReady, linqTyping, parseLinq, verifyLinq, type LinqEvent } from "../_shared/linq.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
@@ -56,7 +57,7 @@ const internal = async (fn: string, body: Record<string, unknown>) =>
 /** A text to a number with no verified link (keyword replies, the one explanation for strangers), logged without a
  *  person; back on the line they wrote to. `courtesy` is the one reply to STOP, which Linq would otherwise hold back. */
 async function textNumber(to: string, text: string, userId: string | null = null, via: Via = {}, courtesy = false) {
-  const r = await sendText(admin, env, { to, text, line: via.line, reply: true, courtesy });
+  const r = await sendText(admin, env, { to, text, line: via.line, reply: true, courtesy, whatsapp: waVia(via, /[㐀-鿿]/.test(text) ? "zh" : "en") });
   if (r.ok) await logMessage(admin, { user_id: userId, direction: "out", channel: "sms", kind: "system", body: userId ? text : "", provider_id: r.id, line: r.line, service: r.service });
   else console.error("odelia text", r.status, r.code, r.detail);
   return r.ok;
@@ -65,8 +66,10 @@ async function textNumber(to: string, text: string, userId: string | null = null
 /* ------------------------------ inbound texts ------------------------------ */
 
 type Inbound = { id?: string; from?: { phone_number?: string }; to?: { phone_number?: string }[]; text?: string; media?: unknown[]; autoresponse_type?: string | null };
-/** How a text came in: the iMessage line and conversation (Linq), or nothing (Telnyx). */
-type Via = { line?: string | null; chat?: string | null };
+/** How a text came in: the iMessage line and conversation (Linq), WhatsApp (and its message id, for the typing
+ *  indicator), or nothing (Telnyx SMS). */
+type Via = { line?: string | null; chat?: string | null; app?: "whatsapp"; msg?: string };
+const waVia = (via: Via, lang: Lang) => (via.app === "whatsapp" ? { open: true, lang } : undefined);
 
 async function inbound(p: Inbound, logId: number, via: Via = {}) {
   const now = new Date();
@@ -121,11 +124,13 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
   }
   // They texted STOP earlier: only START turns texts back on.
   if (link.opted_out_at) return;
-  // Answers go back on the line they wrote to, and so does everything after.
-  if (via.line && via.line !== link.line) {
-    await admin.from("phone_links").update({ line: via.line, updated_at: now.toISOString() }).eq("user_id", link.user_id);
-    link.line = via.line;
-  }
+  // Answers go back the way they wrote (the iMessage line, or WhatsApp), and so does everything after.
+  const app = via.app === "whatsapp" ? "whatsapp" : null;
+  const moved: Record<string, unknown> = {};
+  if (via.line && via.line !== link.line) moved.line = link.line = via.line;
+  if (app !== (link.via ?? null)) moved.via = link.via = app;
+  if (app) moved.wa_last_in = link.wa_last_in = now.toISOString();
+  if (Object.keys(moved).length) await admin.from("phone_links").update({ ...moved, updated_at: now.toISOString() }).eq("user_id", link.user_id);
 
   const since = new Date(now.getTime() - 3600e3).toISOString();
   const { count } = await admin.from("odelia_messages").select("id", { count: "exact", head: true }).eq("user_id", link.user_id).eq("direction", "in").eq("channel", "sms").gt("created_at", since);
@@ -148,7 +153,9 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
     return;
   }
   // Photos and PDFs they text (an inspection report, a permit, a lease page) go into Documents, and Odelia reads them.
-  const media = Array.isArray(p.media) ? (p.media as Media[]) : [];
+  let media = Array.isArray(p.media) ? (p.media as Media[]) : [];
+  // WhatsApp sends media ids; each becomes a download link good for 5 minutes.
+  if (via.app === "whatsapp") media = (await Promise.all(media.map((m) => (m.id ? waMedia(env, m.id) : null)))).filter((m): m is NonNullable<typeof m> => !!m);
   const saved = media.length ? await saveMedia(media, ws.id, link.user_id, lang) : [];
   const skipped = media.length - saved.length;
   if (!text && !saved.length) { if (media.length) await textUser(admin, env, { link, workspace_id: ws.id, segments: [SAY.picture[lang]], kind: "system" }); return; }
@@ -164,7 +171,7 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
   await startRun(link, ws.id, ask + note + lost, logId, via);
 }
 
-type Media = { url?: string; content_type?: string; size?: number };
+type Media = { url?: string; content_type?: string; size?: number; id?: string };
 const MEDIA_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "application/pdf": "pdf" };
 const MEDIA_MAX = 10 * 1024 * 1024;
 
@@ -181,8 +188,8 @@ async function saveMedia(media: Media[], ws: string, uid: string, lang: "en" | "
     try { const u = new URL(m.url); if (u.protocol !== "https:") continue; host = u.hostname; } catch { continue; }
     try {
       // Telnyx's own media links take the API key; any other host (Linq's are presigned) gets no credentials.
-      const key = env("TELNYX_API_KEY");
-      const res = await fetch(m.url, { headers: key && /(^|\.)telnyx\.com$/i.test(host) ? { Authorization: `Bearer ${key}` } : {} });
+      const key = env("TELNYX_API_KEY"), wa = env("WHATSAPP_TOKEN");
+      const res = await fetch(m.url, { headers: key && /(^|\.)telnyx\.com$/i.test(host) ? { Authorization: `Bearer ${key}` } : wa && waMediaHost(host) ? { Authorization: `Bearer ${wa}` } : {} });
       if (!res.ok) continue;
       const bytes = new Uint8Array(await res.arrayBuffer());
       if (!bytes.length || bytes.length > MEDIA_MAX) continue;
@@ -228,6 +235,7 @@ async function history(link: Link, ws: string, beforeId: number) {
 async function startRun(link: Link, ws: string, prompt: string, logId: number, via: Via = {}) {
   const lang = link.lang;
   if (via.chat) bg(linqTyping(env, via.chat));
+  if (via.msg) bg(waTyping(env, via.msg));
   const res = await internal("agent-run", { action: "start_as", user_id: link.user_id, workspace_id: ws, prompt, channel: "sms", reply_to: link.number, lang, history: await history(link, ws, logId) }).catch(() => null);
   if (!res || res.status !== 202) {
     const code = res?.status;
@@ -263,6 +271,24 @@ async function linqWebhook(req: Request) {
   if (logId === null) return json(200, { ok: true, duplicate: true });
   const p: Inbound = { id: m.id, from: { phone_number: m.from }, to: line ? [{ phone_number: line }] : [], text: m.text, media: m.media };
   bg(inbound(p, logId, { line, chat: m.chat }).catch((e) => console.error("inbound", String(e).slice(0, 200))));
+  return json(200, { ok: true });
+}
+
+/** WhatsApp (Meta's Cloud API): messages to Odelia's WhatsApp number. Delivery receipts are acknowledged and dropped. */
+async function whatsappWebhook(req: Request) {
+  const raw = await req.text();
+  if (!(await verifyWhatsApp(raw, req.headers.get("x-hub-signature-256") ?? "", env("WHATSAPP_APP_SECRET") ?? ""))) return fail(401, "unauthorized", "Bad webhook signature.");
+  let ev: WaEvent;
+  try { ev = JSON.parse(raw) ?? {}; } catch { return fail(400, "bad_request", "Send JSON."); }
+  const ours = env("WHATSAPP_PHONE_NUMBER_ID");
+  for (const m of parseWhatsApp(ev)) {
+    if (ours && m.phoneNumberId && m.phoneNumberId !== ours) continue;
+    const link = await linkByNumber(admin, m.from);
+    const logId = await logMessage(admin, { user_id: link?.user_id ?? null, direction: "in", channel: "sms", kind: "chat", body: link ? m.text.slice(0, 2000) : "", provider_id: m.id, service: "WhatsApp" });
+    if (logId === null) continue;   // Meta retries for up to 7 days
+    const p: Inbound = { id: m.id, from: { phone_number: m.from }, to: [], text: m.text, media: m.media.map((x) => ({ id: x.id, content_type: x.content_type })) };
+    bg(inbound(p, logId, { app: "whatsapp", msg: m.id }).catch((e) => console.error("inbound", String(e).slice(0, 200))));
+  }
   return json(200, { ok: true });
 }
 
@@ -418,9 +444,15 @@ export async function flush(now = new Date()) {
 
 export async function handle(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+  // Meta's subscribe handshake for the WhatsApp webhook.
+  if (req.method === "GET" && new URL(req.url).searchParams.has("hub.mode")) {
+    const c = subscribeChallenge(new URL(req.url), env("WHATSAPP_VERIFY_TOKEN") ?? "");
+    return c === null ? fail(403, "forbidden", "Wrong verify token.") : new Response(c, { status: 200, headers: { "Content-Type": "text/plain" } });
+  }
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   if (req.headers.get("telnyx-signature-ed25519")) return await webhook(req);
   if (req.headers.get("webhook-signature")) return await linqWebhook(req);
+  if (req.headers.get("x-hub-signature-256")) return await whatsappWebhook(req);
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   // Public: whether texting and calls are set up, and the number to save. No secrets.
@@ -432,7 +464,8 @@ export async function handle(req: Request): Promise<Response> {
     const callN = voiceReady(env) ? (imessage && env("LINQ_FORWARDS_CALLS") === "1" ? n : odeliaNumber(env)) : null;
     // sms: codes can be texted out (Telnyx); without it, linking is by texting a code to Odelia.
     return json(200, { configured: textingReady(env), imessage, sms: smsReady(env), voice: voiceReady(env), number: n, display: n ? prettyPhone(n) : null,
-      call_number: callN, call_display: callN ? prettyPhone(callN) : null });
+      call_number: callN, call_display: callN ? prettyPhone(callN) : null,
+      whatsapp: whatsappReady(env) ? whatsappNumber(env) : null });
   }
   if (!(await monitorKeyOk(req.headers.get("x-monitor-key")))) return fail(401, "unauthorized", "unauthorized");
   if (body.action === "send_code") return await sendCode(String(body.code_id ?? ""));

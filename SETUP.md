@@ -173,6 +173,28 @@ How the lines stay healthy (Apple banned Lindy's self-run iMessage account after
 
 Webhooks are checked against the signing secret (Standard Webhooks, five minutes either way) and deduplicated on Linq's message id. Group chats, our own echoes, late recoveries and other lines on the account are ignored.
 
+## Odelia on WhatsApp (Meta Cloud API)
+
+Owners who live on WhatsApp text Odelia there and hear back there. It's Meta's own Cloud API, with no reseller in between: since October 1, 2026 the first 1,000 replies a month per number are free, then about $0.0034 each in the US; updates outside the 24-hour window go out as one utility template at about $0.0034. Meta doesn't deliver marketing templates to US numbers at all, so Odelia's template is utility only: account notices, never promotion. Meta's January 2026 rule bars general-purpose AI assistants; Odelia is a business's own service for its own customers, which Meta says the rule doesn't touch. Keep her on compliance.
+
+1. Meta for Developers: create an app, add WhatsApp, add the business phone number, and make a System User with a permanent token (`whatsapp_business_messaging`, `whatsapp_business_management`).
+2. `npm run launch` asks for the token, phone number ID, WhatsApp Business Account ID, app secret and number; submits the `odelia_update` template in English and Chinese for review; subscribes the app; and prints the webhook to paste in the app's WhatsApp configuration: `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/odelia-sms`, with its verify token, field `messages`.
+3. Run `20261016080000_odelia_whatsapp.sql` and deploy `odelia-sms`, `odelia-voice` and `agent-run`.
+4. Business verification is optional to start (250 people a day outside the window until it's done).
+
+How it behaves: a linked phone that writes on WhatsApp is answered on WhatsApp, in one message, with the typing indicator; texting by iMessage or SMS again moves the conversation back. Photos and PDFs come in through Meta's media links. Webhooks are checked with the app secret (X-Hub-Signature-256) and deduplicated, since Meta retries for a week. Linking works the same way: the code from Settings, sent on WhatsApp.
+
+## Which provider for what (checked October 2026)
+
+| Channel | Use | Free way in | Why |
+| --- | --- | --- | --- |
+| iMessage | Linq, Pro from $260 a month | Linq Hobby, free for 20 contacts (they text first, which is how linking works) | What Poke, Lindy and Instinct run on; signed webhooks, SOC 2, line health. Sendblue ($100 a line) only answers people who wrote first and its webhooks aren't signed. |
+| Plain texts (SMS) | Telnyx, $0.004 a text | none for real traffic | Half Twilio's price; Twilio's API answers faster but at our volume the gap is about $10 a month. Codes go here. |
+| Calls | Telnyx AI Assistants, about $0.06 a minute | Telnyx's $25 trial credit | Cheapest managed option and the lowest measured caller-side latency; HIPAA on every plan. Mandarin calls use Soniox and Qwen3 voices (Deepgram Flux has no Chinese). |
+| WhatsApp | Meta Cloud API, direct | 1,000 replies a month per number | No reseller fee; Twilio adds $0.005 a message. |
+| WeChat | not built | none | Needs an overseas Service Account (about $99 a year, Tencent's verification), replies only within 48 hours and 5 messages, and AI content rules. |
+| Telegram | not built | free | Blocked in mainland China and rare among these owners. |
+
 ## Before the first paying customer
 
 - A lawyer reviews Terms, Privacy, Filing Authorization and the AI disclosure (`legal/`), and the rules for permit expediters in each city you file in (NYC Buildings, for example, requires a registered filing representative).
