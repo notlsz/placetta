@@ -25,6 +25,7 @@ import { Stores } from "./Stores";
 import { WorkPage } from "./Work";
 import { PlaybooksPage } from "./Playbooks";
 import { CommandBar, useCommandKey } from "./CommandBar";
+import { Walkthrough } from "./Walkthrough";
 import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
 import { UPDATED } from "./legal";
@@ -976,6 +977,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           </Modal>
         )}
         <CommandBar open={cmdk} setOpen={setCmdk} />
+        <Walkthrough />
         {toast && <div className="toast" role="status">{toast}</div>}
       </div>
     </AppCtx.Provider>

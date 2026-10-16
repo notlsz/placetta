@@ -15,6 +15,7 @@ import { DEFAULT_POLICY, SPEND_CATEGORIES, policyProblems, spentIn, suggestBudge
 import type { IntegrationKind } from "./cloud/api";
 import type { HqLink } from "./hq";
 import { TwoStepSetup } from "./cloud/TwoStep";
+import { replayTour } from "./Walkthrough";
 import gmailLogo from "./assets/integrations/gmail.png";
 import outlookLogo from "./assets/integrations/outlook.svg";
 import gcalLogo from "./assets/integrations/calendar.png";
@@ -1130,6 +1131,7 @@ export function Settings() {
           </Group>
 
           <Group id="help" hidden={!show("help")} title={B("Help", "帮助")} rows={[
+            { label: B("Take the tour", "查看导览"), sub: b(B("Three cards: how Odelia works, in one minute", "三张卡片，一分钟了解 Odelia")), icon: <I.spark />, right: <Btn onClick={() => replayTour()}>{lang === "zh" ? "开始" : "Start"}</Btn> },
             { label: B("Help Center", "帮助中心"), sub: b(B("Guides for every part of Placetta", "快哉各项功能的使用指南")), icon: <I.help />, right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.vercel.app/help/" : "/help/"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
             { label: B("Email support", "邮件支持"), sub: "support@placetta.com", icon: <I.help />, right: <a className="sbtn quiet" href="mailto:support@placetta.com">{lang === "zh" ? "写邮件" : "Email"}</a> },
             { label: B("Report a problem", "报告问题"), icon: <I.bell />, right: <a className="sbtn quiet" href="mailto:support@placetta.com?subject=Problem%20report">{lang === "zh" ? "报告" : "Report"}</a> },
