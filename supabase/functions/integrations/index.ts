@@ -1,5 +1,6 @@
 // integrations: connect and use the customer's mail, calendar, files, books and Slack.
-// POST {workspace_id, action, ...}. Members of the workspace; owners only to connect, disconnect or send mail.
+// POST {workspace_id, action, ...}. Members of the workspace; owners only to connect, disconnect or send mail. Reading
+// a connected mailbox, drive or books: owners, or the member who connected that account.
 import type { User } from "npm:@supabase/supabase-js@2";
 import {
   admin,
@@ -44,8 +45,18 @@ import {
 } from "./providers.ts";
 import { HOOK_KINDS, HOOK_NAMES, hookHello, hookUrl, isHookKind, postHook, type HookKind } from "../_shared/channels.ts";
 import { type LarkBot, larkWorks, slackManifest, slackWho } from "../_shared/bots.ts";
+import { mayRead, READ_REFUSED } from "./access.ts";
 
-type Ctx = { user: User; jwt: string; ws: string; body: Record<string, unknown> };
+/** access: the caller's role in the workspace ("owner" or "member"), or "" for finish, which checks it itself. */
+type Ctx = { user: User; jwt: string; ws: string; body: Record<string, unknown>; access: string };
+
+/** Open a connected account to read what it holds: an owner, or the member who connected it. */
+async function openToRead(c: Ctx, kind: Kind): Promise<Conn> {
+  const row = await findIntegration(c.ws, kind);
+  if (!row) throw new HttpError("not_connected", `Connect ${NAMES[kind].en} in Settings.`, `请在设置中连接${NAMES[kind].zh}。`);
+  if (!mayRead(c.access, row, c.user.id)) throw new HttpError("forbidden", READ_REFUSED.en, READ_REFUSED.zh);
+  return await Conn.fromRow(row);
+}
 type Action = (c: Ctx) => Promise<Response>;
 
 const GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me";
@@ -215,8 +226,11 @@ async function graphSearch(c: Conn, days: number, query: string | null): Promise
 const mailSearch: Action = async (c) => {
   const days = intParam(c.body.days, "days", 1, 365, 60);
   const query = optText(c.body.query, "query", 200);
-  const rows = await listIntegrations(c.ws, ["gmail", "outlook_mail"]);
-  if (!rows.length) throw new HttpError("not_connected", "Connect Gmail or Outlook in Settings.");
+  const connected = await listIntegrations(c.ws, ["gmail", "outlook_mail"]);
+  if (!connected.length) throw new HttpError("not_connected", "Connect Gmail or Outlook in Settings.", "请在设置中连接 Gmail 或 Outlook。");
+  // Only the mailboxes this caller may read: all of them for an owner, a member's own for a member.
+  const rows = connected.filter((r) => mayRead(c.access, r, c.user.id));
+  if (!rows.length) throw new HttpError("forbidden", READ_REFUSED.en, READ_REFUSED.zh);
   const results = await Promise.allSettled(
     rows.map(async (row) => {
       const conn = await Conn.fromRow(row);
@@ -239,7 +253,7 @@ const TEXT_LIMIT = 20000;
 const mailRead: Action = async (c) => {
   const kind = kindParam(c.body.kind, ["gmail", "outlook_mail"]);
   const id = idParam(c.body.id, "id");
-  const conn = await Conn.open(c.ws, kind);
+  const conn = await openToRead(c, kind);
 
   if (kind === "gmail") {
     const m = await conn.callJson<GMessage>(`${GMAIL}/messages/${enc(id)}?format=full`);
@@ -465,6 +479,12 @@ async function filerMailSend(body: Record<string, unknown>): Promise<Response> {
   const approved = new Set<string>([p.pdf_path, ...(Array.isArray(p.attachments) ? p.attachments.map((a: { path?: string }) => a?.path) : [])].filter((x): x is string => typeof x === "string"));
   const { to, subject, content } = mailInput(body);
   const files = await loadAttachments(ws, body.attachments, approved);
+  // At most one email per filing, even if the file function were to ask twice: claim the filing's provider_ref while
+  // it is still empty (the file function replaces the marker with the message id once this answers).
+  const { data: claimed, error: claimError } = await admin.from("filings").update({ provider_ref: "email:sending" })
+    .eq("id", filingId).eq("workspace_id", ws).is("provider_ref", null).select("id");
+  if (claimError) throw new Error(`filing claim failed: ${claimError.code ?? ""}`);
+  if (!claimed?.length) throw new HttpError("too_late", "This filing's email was already sent.", "这份申请的邮件已经发出。");
   const sent = await sendFrom(ws, body.kind, to, subject, content, files);
   const { data: row } = await admin.from("filings").select("app_id").eq("id", filingId).maybeSingle();
   await track(ws, sent, to, subject, { filing_id: filingId, app_id: (row?.app_id as string | undefined) ?? undefined });
@@ -627,7 +647,7 @@ type FileOut = { id: string; name: string; size: number | null; modified: string
 const filesSearch: Action = async (c) => {
   const kind = kindParam(c.body.kind, ["gdrive", "dropbox"]);
   const query = text(c.body.query, "query", 1, 200);
-  const conn = await Conn.open(c.ws, kind);
+  const conn = await openToRead(c, kind);
   let files: FileOut[];
   if (kind === "gdrive") {
     const esc = query.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
@@ -729,7 +749,7 @@ const filesImport: Action = async (c) => {
   const kind = kindParam(c.body.kind, ["gdrive", "dropbox"]);
   const fileId = idParam(c.body.file_id, "file_id", 300);
   const app = await findApp(c.ws, optText(c.body.app_id, "app_id", 100));
-  const conn = await Conn.open(c.ws, kind);
+  const conn = await openToRead(c, kind);
 
   let name: string;
   let mime: string;
@@ -817,7 +837,7 @@ function totalIncome(rows: QbRow[] | undefined, depth = 0): number | null {
 
 const booksIncome: Action = async (c) => {
   const year = intParam(c.body.year, "year", 2000, new Date().getUTCFullYear() + 1);
-  const conn = await Conn.open(c.ws, "quickbooks");
+  const conn = await openToRead(c, "quickbooks");
   const realm = typeof conn.row.meta?.realm_id === "string" ? conn.row.meta.realm_id : "";
   if (!/^\d+$/.test(realm)) throw new HttpError("not_connected", "Reconnect QuickBooks in Settings.");
   const base = conn.row.meta?.env === "production"
@@ -1113,7 +1133,8 @@ serve(async (req) => {
   const ws = uuidParam(body.workspace_id, "workspace_id");
   const action = typeof body.action === "string" && Object.hasOwn(ACTIONS, body.action) ? ACTIONS[body.action] : null;
   if (!action) throw new HttpError("bad_request", `Unknown action. Use one of: ${Object.keys(ACTIONS).join(", ")}.`);
-  // finish checks access itself, after claiming the pending row, so a mismatch also discards it.
-  if (action !== finish) await requireAccess(ws, user, jwt, OWNER_ONLY.has(action) ? "owner" : "member");
-  return await action({ user, jwt, ws, body });
+  // finish checks access itself, after claiming the pending row, so a mismatch also discards it. The actions that read
+  // a connected account (mail, files, books) let a member through only to what they connected (openToRead).
+  const access = action === finish ? "" : await requireAccess(ws, user, jwt, OWNER_ONLY.has(action) ? "owner" : "member");
+  return await action({ user, jwt, ws, body, access });
 });

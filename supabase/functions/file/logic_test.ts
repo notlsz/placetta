@@ -1,7 +1,10 @@
 // deno test supabase/functions/file/logic_test.ts
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
-import { canFaxSigned, check, emailFor, envFrom, faxFile, faxTo, type Filing, isForeign, killSwitchOn, mailTo, pick, signedCopy, teamApproved } from "./logic.ts";
+import {
+  askedToResubmit, canFaxSigned, check, emailFor, envFrom, faxFailures, faxFile, faxTo, type Filing, isForeign, killSwitchOn, mailOutcome, mailTo, pick,
+  refusalOf, signedCopy, teamApproved,
+} from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
 const b = (s: string) => ({ en: s, zh: s });
@@ -110,4 +113,36 @@ Deno.test("a filing with an agency fee never goes by email, fax or mail; a porta
 Deno.test("a portal that files without an account runs with no saved login", () => {
   assertEquals(pick(filing(), dest({ portal: "x.gov", noLogin: true }), ENV, { hasLogin: false, mailConnected: false }), "portal");
   assertEquals(pick(filing(), dest({ portal: "x.gov" }), ENV, { hasLogin: false, mailConnected: false }), "fax");
+});
+
+Deno.test("the daily cap on faxes and letters defaults to 10 and reads FILER_DAILY_CAP", () => {
+  assertEquals(envFrom(() => undefined).dailyCap, 10);
+  assertEquals(envFrom((k) => (k === "FILER_DAILY_CAP" ? "3" : undefined)).dailyCap, 3);
+  assertEquals(envFrom((k) => (k === "FILER_DAILY_CAP" ? "0" : undefined)).dailyCap, 0);
+  assertEquals(envFrom((k) => (k === "FILER_DAILY_CAP" ? "lots" : undefined)).dailyCap, 10);
+  assertEquals(envFrom((k) => (k === "FILER_DAILY_CAP" ? "" : undefined)).dailyCap, 10);
+});
+Deno.test("the database's refusals are told apart from other errors", () => {
+  assertEquals(refusalOf("filing_changed: the filing moved on (agent_state)"), "changed");
+  assertEquals(refusalOf("already_submitted: this filing was already sent"), "already");
+  assertEquals(refusalOf("filing_stopped: the customer stopped this filing"), "stopped");
+  assertEquals(refusalOf("daily_cap: 10 faxes and letters in the last 24 hours"), "cap");
+  assertEquals(refusalOf("connection reset"), null);
+  assertEquals(refusalOf(undefined), null);
+});
+Deno.test("an email that may have left is never treated as not sent", () => {
+  assertEquals(mailOutcome(200), "sent");
+  assertEquals(mailOutcome(null), "unknown");            // a timeout
+  assertEquals(mailOutcome(500), "unknown");
+  assertEquals(mailOutcome(502), "unknown");
+  assertEquals(mailOutcome(504), "unknown");
+  assertEquals(mailOutcome(409), "unknown");             // integrations says this filing's email was already claimed
+  assertEquals(mailOutcome(400), "refused");
+  assertEquals(mailOutcome(403), "refused");
+});
+Deno.test("fax failures and resubmission are read from the log", () => {
+  const two = filing({}, { agent_log: [{ en: "", zh: "", kind: "fax_failed" }, { en: "", zh: "", kind: "fax_queued" }, { en: "", zh: "", kind: "fax_failed" }] });
+  assertEquals(faxFailures(two), 2);
+  assert(!askedToResubmit(two));
+  assert(askedToResubmit(filing({}, { agent_log: [{ en: "", zh: "", kind: "resubmit" }] })));
 });

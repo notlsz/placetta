@@ -753,7 +753,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       }
       window.location.href = url;
     };
-    const fail = (e: unknown) => say((e as api.ApiError).message ?? String(e));
+    const fail = (e: unknown) => { const x = e as api.ApiError; say((lang === "zh" && x?.message_zh) || x?.message || String(e)); };
     return {
       email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner,
       wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces, hq: cloud.hq, termsHold,
@@ -771,7 +771,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       removeLogin: async id => { if (!ownerOk()) return; try { await api.removeLogin(cloud.wsId, id); setLogins(await api.listLogins(cloud.wsId)); } catch (e) { fail(e); } },
       feedUrl: async rotate => (await api.integration<{ url: string }>(cloud.wsId, "feed_url", { rotate: !!rotate })).url,
       markPaid: async id => { if (!ownerOk()) return; try { await api.markPaid(id); await refresh(); say(lang === "zh" ? "已告知团队，他们会继续提交。" : "Thanks. The team will finish the submission."); } catch (e) { fail(e); } },
-      resumeFiling: async id => { try { await api.resumeFiling(cloud.wsId, id); await refresh(); say(lang === "zh" ? "好的，快哉继续办理。" : "Thanks. Placetta carries on."); } catch (e) { fail(e); } },
+      resumeFiling: async (id, resubmit) => { try { await api.resumeFiling(cloud.wsId, id, !!resubmit); await refresh(); say(lang === "zh" ? "好的，快哉继续办理。" : "Thanks. Placetta carries on."); } catch (e) { fail(e); } },
       uploadSigned: async (id, appId, file) => {
         try {
           const row = await api.uploadDoc(cloud.wsId, file, appId);

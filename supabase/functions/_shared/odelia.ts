@@ -35,6 +35,32 @@ export function normalizePhone(input: unknown): string | null {
   return "+" + d;
 }
 
+/** Island nations and territories that share +1 with the US and Canada but are billed as international (and are the
+    usual SMS pumping targets). US territories stay in. The database has the same list (phone_nanp_foreign). */
+const NANP_FOREIGN = new Set(["242", "246", "264", "268", "284", "345", "441", "473", "649", "658", "664", "721", "758", "767",
+  "784", "809", "829", "849", "868", "869", "876"]);
+
+/** The country codes Odelia texts codes to: ODELIA_SMS_COUNTRIES (comma separated, like "1,86,44"), else US and Canada
+    (1) and China (86). */
+export function smsCountries(env: Env): string[] {
+  const list = (env("ODELIA_SMS_COUNTRIES") ?? "").split(",").map((s) => s.trim().replace(/^\+/, "")).filter((s) => /^[1-9]\d{0,2}$/.test(s));
+  return list.length ? list : ["1", "86"];
+}
+
+/** Whether a code may be texted to this E.164 number: +1 only for the US and Canada (not the islands that share +1),
+    +86 only for mainland China mobiles, and any other listed country code as given. Same rule as phone_sms_allowed. */
+export function smsCountryAllowed(e164: string, countries: string[]): boolean {
+  if (!/^\+[1-9]\d{7,14}$/.test(e164)) return false;
+  if (e164.startsWith("+1")) return countries.includes("1") && /^\+1[2-9]\d{2}[2-9]\d{6}$/.test(e164) && !NANP_FOREIGN.has(e164.slice(2, 5));
+  if (e164.startsWith("+86")) return countries.includes("86") && /^\+861[3-9]\d{9}$/.test(e164);
+  return countries.some((c) => c !== "1" && c !== "86" && e164.startsWith(`+${c}`));
+}
+
+/** The carrier vouches the caller owns this number: STIR/SHAKEN attestation "A" that Telnyx validated. A missing
+    shaken_stir_validated counts as not validated. */
+export const callerAttested = (p: { shaken_stir_attestation?: string; shaken_stir_validated?: boolean }): boolean =>
+  p.shaken_stir_attestation === "A" && p.shaken_stir_validated === true;
+
 /** +14155550134 as +1 (415) 555-0134; other countries as given. */
 export function prettyPhone(e164: string): string {
   const m = /^\+1(\d{3})(\d{3})(\d{4})$/.exec(e164);

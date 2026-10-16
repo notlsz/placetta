@@ -292,9 +292,10 @@ export type IntegrationRow = {
   error: string | null;
   secret_id: string | null;
   meta: Record<string, unknown>;
+  connected_by: string | null;   // who connected the account: a member may read only what they connected themselves
 };
 
-const ROW_COLUMNS = "id, workspace_id, kind, account, scopes, status, error, secret_id, meta";
+const ROW_COLUMNS = "id, workspace_id, kind, account, scopes, status, error, secret_id, meta, connected_by";
 
 export async function findIntegration(ws: string, kind: Kind): Promise<IntegrationRow | null> {
   const { data, error } = await admin.from("integrations").select(ROW_COLUMNS).eq("workspace_id", ws).eq("kind", kind).maybeSingle();

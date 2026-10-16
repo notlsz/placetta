@@ -264,6 +264,36 @@ Deno.test("app links and sending", async () => {
   assertEquals([blocked.ok, blocked.code], [false, "40300"]);
 });
 
+Deno.test("codes are texted only to the US, Canada and mainland China mobiles by default", async () => {
+  const { smsCountries, smsCountryAllowed } = await import("./odelia.ts");
+  const dflt = smsCountries(() => undefined);
+  assertEquals(dflt, ["1", "86"]);
+  assert(smsCountryAllowed("+14155550134", dflt));          // San Francisco
+  assert(smsCountryAllowed("+16045550134", dflt));          // Vancouver
+  assert(smsCountryAllowed("+17875550134", dflt));          // Puerto Rico, a US territory
+  assert(!smsCountryAllowed("+18765550134", dflt));         // Jamaica shares +1 but is international
+  assert(!smsCountryAllowed("+12425550134", dflt));         // the Bahamas
+  assert(!smsCountryAllowed("+18095550134", dflt));         // the Dominican Republic
+  assert(smsCountryAllowed("+8613812345678", dflt));        // a China mobile
+  assert(!smsCountryAllowed("+861012345678", dflt));        // a Beijing landline
+  assert(!smsCountryAllowed("+447700900123", dflt));        // the UK
+  assert(!smsCountryAllowed("+881612345678", dflt));        // a satellite phone
+  assert(!smsCountryAllowed("not a number", dflt));
+  const wider = smsCountries((k) => (k === "ODELIA_SMS_COUNTRIES" ? "+1, 86, 44, junk" : undefined));
+  assertEquals(wider, ["1", "86", "44"]);
+  assert(smsCountryAllowed("+447700900123", wider));
+  assert(!smsCountryAllowed("+8613812345678", smsCountries((k) => (k === "ODELIA_SMS_COUNTRIES" ? "1" : undefined))));
+});
+
+Deno.test("a caller is attested only with STIR/SHAKEN A that was validated", async () => {
+  const { callerAttested } = await import("./odelia.ts");
+  assert(callerAttested({ shaken_stir_attestation: "A", shaken_stir_validated: true }));
+  assert(!callerAttested({ shaken_stir_attestation: "A" }));                       // no validation result: not validated
+  assert(!callerAttested({ shaken_stir_attestation: "A", shaken_stir_validated: false }));
+  assert(!callerAttested({ shaken_stir_attestation: "B", shaken_stir_validated: true }));
+  assert(!callerAttested({}));
+});
+
 Deno.test("plain-language opt-outs count as STOP (FCC any reasonable means)", async () => {
   const { keyword } = await import("./odelia.ts");
   for (const t of ["Stop texting me", "please stop calling me", "Don't text me anymore", "remove me", "不要再发短信了", "STOP"]) if (keyword(t) !== "stop") throw new Error(`not an opt-out: ${t}`);

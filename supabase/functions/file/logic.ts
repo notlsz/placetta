@@ -31,6 +31,7 @@ export type Env = {
   portalWorker: boolean;     // FILER_ENABLED=1
   dryRun: boolean;           // FILER_DRY_RUN=1
   twoKey: number;            // FILER_TWO_KEY: the team reviews each agency's first N filings (default 10)
+  dailyCap: number;          // FILER_DAILY_CAP: faxes and letters one workspace self-files in 24 hours (default 10)
   fax: boolean;              // TELNYX_API_KEY, TELNYX_FAX_CONNECTION_ID and TELNYX_FAX_FROM set
   mail: boolean;             // LOB_API_KEY and LOB_FROM set
 };
@@ -38,12 +39,14 @@ export type Env = {
 export function envFrom(get: (k: string) => string | undefined): Env {
   const list = (k: string) => (get(k) ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
   const two = Number(get("FILER_TWO_KEY") ?? "10");
+  const cap = Number(get("FILER_DAILY_CAP") ?? "10");
   return {
     agencies: list("FILER_AGENCIES"),
     channels: list("FILER_CHANNELS").filter((c): c is Channel => ["email", "fax", "mail", "portal"].includes(c)),
     portalWorker: get("FILER_ENABLED") === "1",
     dryRun: get("FILER_DRY_RUN") === "1",
     twoKey: Number.isFinite(two) && two >= 0 ? Math.floor(two) : 10,
+    dailyCap: get("FILER_DAILY_CAP")?.trim() && Number.isFinite(cap) && cap >= 0 ? Math.floor(cap) : 10,
     fax: !!(get("TELNYX_API_KEY") && get("TELNYX_FAX_CONNECTION_ID") && get("TELNYX_FAX_FROM")),
     mail: !!(get("LOB_API_KEY") && get("LOB_FROM")),
   };
@@ -165,3 +168,32 @@ export const CHANNEL_SAID: Record<Exclude<Channel, "team">, Bi> = {
   mail: { en: "by certified mail", zh: "通过挂号信" },
   portal: { en: "on the agency's site", zh: "在机构网站上" },
 };
+
+/** Why the database refused a step or a claim, from its exception text: someone else already acted on the filing
+    (changed), it was already sent (already), the customer stopped it (stopped), or the workspace is at its daily cap
+    of faxes and letters (cap). Null for any other error. */
+export type Refusal = "changed" | "already" | "stopped" | "cap";
+export function refusalOf(message: string | null | undefined): Refusal | null {
+  const m = message ?? "";
+  if (/\bfiling_changed\b/.test(m)) return "changed";
+  if (/\balready_submitted\b/.test(m)) return "already";
+  if (/\bfiling_stopped\b/.test(m)) return "stopped";
+  if (/\bdaily_cap\b/.test(m)) return "cap";
+  return null;
+}
+
+/** What an answer from integrations' mail_send means. A 2xx: sent. A 4xx: refused before sending (bad input, not
+    connected, too large), so not sent. No answer (a timeout), a 5xx, or a 409 (this filing's email was already
+    claimed): unknown, because a message may have left. */
+export function mailOutcome(status: number | null): "sent" | "refused" | "unknown" {
+  if (status === null || status >= 500 || status === 409) return "unknown";
+  if (status >= 200 && status < 300) return "sent";
+  return status >= 400 ? "refused" : "unknown";
+}
+
+/** How many times this filing's fax has failed, from its log. */
+export const faxFailures = (f: Pick<Filing, "agent_log">): number => f.agent_log.filter((e) => e.kind === "fax_failed").length;
+
+/** The hand-back that asks the person whether to send a duplicate again; resume with resubmit then sends it. */
+export const DUPLICATE_REF = "duplicate";
+export const askedToResubmit = (f: Pick<Filing, "agent_log">): boolean => f.agent_log.some((e) => e.kind === "resubmit");

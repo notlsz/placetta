@@ -21,8 +21,8 @@ import {
 } from "./shared.ts";
 import { DEST, staleDestinations, type Dest } from "./destinations.ts";
 import {
-  canFaxSigned, check, emailFor, envFrom, faxFile, faxTo, type Filing, isForeign, killSwitchOn, type LogEntry, mailTo, pick, signedCopy,
-  teamApproved,
+  askedToResubmit, canFaxSigned, check, DUPLICATE_REF, emailFor, envFrom, faxFailures, faxFile, faxTo, type Filing, isForeign, killSwitchOn,
+  type LogEntry, mailOutcome, mailTo, pick, type Refusal, refusalOf, signedCopy, teamApproved,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
@@ -34,14 +34,27 @@ const log = (en: string, zh: string, kind = "info", ref?: string): LogEntry => (
 async function loadFiling(ws: string, id: string): Promise<Filing> {
   const { data, error } = await admin.from("filings").select(COLS).eq("id", id).eq("workspace_id", ws).maybeSingle();
   if (error) throw new Error(`filing lookup failed: ${error.code ?? ""}`);
-  if (!data) throw new HttpError("not_found", "No such filing in this workspace.");
+  if (!data) throw new HttpError("not_found", "No such filing in this workspace.", "此工作区中没有这份申请。");
   return data as unknown as Filing;
 }
 
-/** Append to the log, patch the agent columns, and write the audit row (actor agent), in one statement. */
+/** The database refused a step or a claim because the filing moved on (another call acted first, it was already sent,
+    it was stopped) or the workspace is at its daily cap. Callers answer with the filing as it is now. */
+class Refused extends Error {
+  constructor(readonly why: Refusal) {
+    super(`refused: ${why}`);
+  }
+}
+
+/** Append to the log, patch the agent columns, and write the audit row (actor agent), in one statement. The patch may
+    carry expect_agent_state / expect_provider_ref: the step then runs only if the row still has those values. */
 async function step(f: Filing, entry: LogEntry | null, patch: Record<string, unknown> = {}, auditIt = true): Promise<Filing> {
   const { data, error } = await admin.rpc("filing_agent_step", { p_id: f.id, p_entry: entry, p_patch: patch, p_audit: auditIt });
-  if (error) throw new Error(`filing step failed: ${error.message?.slice(0, 200) ?? error.code}`);
+  if (error) {
+    const why = refusalOf(error.message);
+    if (why) throw new Refused(why);
+    throw new Error(`filing step failed: ${error.message?.slice(0, 200) ?? error.code}`);
+  }
   return data as unknown as Filing;
 }
 
@@ -157,11 +170,33 @@ async function receiptPdf(lines: string[]): Promise<Uint8Array> {
 
 // ------------------------------------------------------------------ channels
 
-/** Write submit_clicked_at before anything leaves. A filing that already has it is never sent again. */
+/** Claim the filing for sending, right before anything leaves: one conditional UPDATE in the database writes
+    submit_clicked_at only if nobody has, so of any number of concurrent callers exactly one gets past this line. The
+    same claim enforces the workspace's daily cap on faxes and letters. Throws Refused otherwise. */
 async function markSubmit(f: Filing, en: string, zh: string): Promise<Filing> {
-  if (f.submit_clicked_at) throw new HttpError("forbidden", "This filing was already sent. Placetta checks with the agency instead of sending it again.");
-  return await step(f, log(en, zh, "submit"), { submit_clicked_at: new Date().toISOString() });
+  if (f.submit_clicked_at) throw new Refused("already");
+  const { data, error } = await admin.rpc("filing_claim_submit", { p_id: f.id, p_entry: log(en, zh, "submit"), p_cap: env().dailyCap });
+  if (error) {
+    const why = refusalOf(error.message);
+    if (why) throw new Refused(why);
+    throw new Error(`filing claim failed: ${error.message?.slice(0, 200) ?? error.code}`);
+  }
+  return data as unknown as Filing;
 }
+
+/** markSubmit, except that a workspace at its daily cap hands the filing to the team instead of sending it. */
+async function claimOrTeam(f: Filing, en: string, zh: string): Promise<Filing | ReturnType<typeof view>> {
+  try {
+    return await markSubmit(f, en, zh);
+  } catch (e) {
+    if (!(e instanceof Refused) || e.why !== "cap") throw e;
+    const n = env().dailyCap;
+    return await toTeam(f,
+      `Placetta has sent ${n} filings by fax or mail for this business in the last 24 hours, the most it sends on its own in a day. The Placetta team sends this one.`,
+      `过去 24 小时内，快哉已为该商家通过传真或邮寄自动提交了 ${n} 份申请，已达每日上限。这一份由快哉团队提交。`, "review");
+  }
+}
+const isView = (x: Filing | ReturnType<typeof view>): x is ReturnType<typeof view> => "filing" in x;
 
 /** The two-key period and dry runs: stop before sending, the team reviews. */
 async function holdForTeam(f: Filing, d: Dest): Promise<ReturnType<typeof view> | null> {
@@ -183,27 +218,35 @@ async function sendEmail(f: Filing, d: Dest) {
   const secret = Deno.env.get("FILER_SECRET") ?? "";
   if (secret.length < 32) return await toTeam(f, "Email filing isn't set up yet (FILER_SECRET).", "邮件提交尚未配置。");
   const { subject, body } = emailFor(f);
-  const g = await markSubmit(f, `Emailing it to ${d.email}`, `正在发送邮件至 ${d.email}`);
+  const claimed = await claimOrTeam(f, `Emailing it to ${d.email}`, `正在发送邮件至 ${d.email}`);
+  if (isView(claimed)) return claimed;
+  const g = claimed;
   const files = [f.payload.pdf_path, ...(f.payload.attachments ?? []).map((a) => a.path)].filter(Boolean).slice(0, 5).map((path) => ({ path }));
-  let res: Response;
+  let res: Response | null = null;
   try {
     res = await fetch(`${SUPABASE_URL}/functions/v1/integrations`, {
       method: "POST",
-      // The gateway checks a JWT on integrations: the service role's passes it; x-filer-secret is what integrations checks.
-      headers: { "Content-Type": "application/json", "x-filer-secret": secret, Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""}` },
+      // The gateway wants a JWT on integrations: the anon key's passes it and grants nothing. x-filer-secret is what
+      // integrations itself checks.
+      headers: { "Content-Type": "application/json", "x-filer-secret": secret, Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY") ?? ""}` },
       body: JSON.stringify({ action: "mail_send", workspace_id: f.workspace_id, filing_id: f.id, to: [d.email], subject, body, attachments: files }),
       signal: AbortSignal.timeout(60000),
     });
   } catch (e) {
     console.error("filer mail_send:", describe(e));
-    await teamTask(g, "check_agency", "Email send timed out. Check the customer's Sent folder before sending again.");
-    return await toTeam(g, "The email didn't confirm. The team is checking whether it went.", "邮件未确认送出，团队正在核实。", "check_agency");
   }
-  const out = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const msg = String(out?.error?.message ?? `error ${res.status}`).slice(0, 200);
+  const out = res ? await res.json().catch(() => ({})) : {};
+  const outcome = mailOutcome(res?.status ?? null);
+  if (outcome === "unknown") {
+    // No answer, or the server failed partway: the email may have left. The team checks; nothing is sent again.
+    console.error("filer mail_send unknown:", res?.status ?? "timeout");
+    await teamTask(g, "check_agency", "The email send didn't confirm (timeout or server error). Check the customer's Sent folder before sending again.");
+    return await toTeam(g, "The email didn't confirm. The team is checking whether it went before anything is sent again.", "邮件未确认送出。团队会先核实是否已发出，再决定是否重发。", "check_agency");
+  }
+  if (outcome === "refused") {
+    const msg = String(out?.error?.message ?? `error ${res?.status}`).slice(0, 200);
     // A refusal before sending (bad input, not connected, too large) is safe to hand to the team as not sent.
-    return await toTeam(g, `The email wasn't sent: ${msg}`, `邮件未发送：${msg}`);
+    return await toTeam(g, `The email wasn't sent: ${msg}`, `邮件未发送：${String(out?.error?.message_zh ?? msg).slice(0, 200)}`);
   }
   const from = String(out.account ?? "");
   const h = await step(g, log(`Emailed the ${f.payload.form?.en ?? "form"} to ${d.email}${from ? ` from ${from}` : ""}`, `已从 ${from || "您的邮箱"} 将${f.payload.form?.zh ?? "表格"}发送至 ${d.email}`, "submitted", String(out.id ?? "")),
@@ -217,7 +260,12 @@ async function sendFax(f: Filing, d: Dest, retry = false) {
   if (!retry) { const held = await holdForTeam(f, d); if (held) return held; }
   const to = faxTo(d, f.payload);
   if (!to) return await toTeam(f, "There's no fax number for this applicant.", "没有适用于该申请人的传真号码。");
-  const g = retry ? f : await markSubmit(f, `Faxing it to ${to}${isForeign(f.payload) ? " (international applicants)" : ""}`, `正在传真至 ${to}`);
+  let g = f;
+  if (!retry) {
+    const claimed = await claimOrTeam(f, `Faxing it to ${to}${isForeign(f.payload) ? " (international applicants)" : ""}`, `正在传真至 ${to}`);
+    if (isView(claimed)) return claimed;
+    g = claimed;
+  }
   const media_url = await signedUrl(faxFile(f)!);
   const res = await fetch(`${TELNYX}/faxes`, {
     method: "POST",
@@ -234,23 +282,29 @@ async function sendFax(f: Filing, d: Dest, retry = false) {
   return view(await step(g, log("Fax queued with the fax service", "传真已进入发送队列", "fax_queued", id), { provider_ref: id, agent_state: "running", channel: "fax" }));
 }
 
-/** Apply a fax status from the API or a webhook. */
+/** Apply a fax status from the API or a webhook. The webhook, the monitor's sweep and a member's "status" can all see
+    the same result at once: each change compares-and-sets on the fax id it read, so only the first caller records a
+    delivery or a failure, and only that one resends. */
 async function applyFax(f: Filing, status: string, info: { pages?: number; reason?: string } = {}) {
-  if (f.agent_state !== "running" || f.channel !== "fax") return view(f);
+  if (f.agent_state !== "running" || f.channel !== "fax" || !f.provider_ref) return view(f);
+  const ref = f.provider_ref;
+  const same = { expect_agent_state: "running", expect_provider_ref: ref };
   if (status === "delivered") {
     const d = DEST[f.payload.official ?? ""];
     const to = d ? faxTo(d, f.payload) : "";
-    const now = new Date().toISOString();
-    const pdf = await receiptPdf(["Fax delivery confirmation", `Form: ${f.payload.form?.en ?? f.payload.official}`, `To: ${to}`, `Fax id: ${f.provider_ref}`,
-      ...(info.pages ? [`Pages: ${info.pages}`] : []), `Delivered: ${now}`, "Sent by Placetta on the applicant's behalf."]);
-    const path = await saveReceipt(f, "fax-confirmation.pdf", pdf, "application/pdf");
-    return view(await step(f, log(`Faxed to the agency at ${to}. Delivered.`, `已传真至机构 ${to}，已送达。`, "submitted", f.provider_ref ?? undefined),
-      { status: "submitted", agent_state: "done", requirements_checked: true, ...(path ? { receipt_path: path } : {}) }));
+    const g = await step(f, log(`Faxed to the agency at ${to}. Delivered.`, `已传真至机构 ${to}，已送达。`, "submitted", ref),
+      { ...same, status: "submitted", agent_state: "done", requirements_checked: true });
+    const pdf = await receiptPdf(["Fax delivery confirmation", `Form: ${f.payload.form?.en ?? f.payload.official}`, `To: ${to}`, `Fax id: ${ref}`,
+      ...(info.pages ? [`Pages: ${info.pages}`] : []), `Delivered: ${new Date().toISOString()}`, "Sent by Placetta on the applicant's behalf."]);
+    const path = await saveReceipt(g, "fax-confirmation.pdf", pdf, "application/pdf");
+    return view(path ? await step(g, null, { receipt_path: path }, false) : g);
   }
   if (status === "failed") {
-    const fails = f.agent_log.filter((e) => e.kind === "fax_failed").length + 1;
-    const g = await step(f, log(`The fax didn't go through${info.reason ? ` (${info.reason})` : ""}`, `传真未送达${info.reason ? `（${info.reason}）` : ""}`, "fax_failed"));
-    if (fails <= 2) return await sendFax(g, DEST[f.payload.official ?? ""]!, true);
+    // Claim this failure by clearing the fax id it belongs to; a second caller with the same id is refused here.
+    const g = await step(f, log(`The fax didn't go through${info.reason ? ` (${info.reason})` : ""}`, `传真未送达${info.reason ? `（${info.reason}）` : ""}`, "fax_failed", ref),
+      { ...same, provider_ref: null });
+    // Counted from the row the database just returned, not from what this caller read earlier.
+    if (faxFailures(g) < 3) return await sendFax(g, DEST[f.payload.official ?? ""]!, true);
     return await toTeam(g, "The fax failed 3 times. The team will send it.", "传真 3 次未送达，团队会处理。");
   }
   return view(f);
@@ -279,7 +333,9 @@ async function sendMail(f: Filing, d: Dest) {
   let from: Record<string, string>;
   try { from = JSON.parse(Deno.env.get("LOB_FROM") ?? ""); } catch { return await toTeam(f, "Certified mail isn't set up yet (return address).", "挂号信尚未配置寄件地址。"); }
   if (!to) return await toTeam(f, "There's no mailing address for this form.", "该表格没有邮寄地址。");
-  const g = await markSubmit(f, `Mailing it by certified mail to ${to.name}, ${to.city}`, `正在以挂号信寄往 ${to.name}，${to.city}`);
+  const claimed = await claimOrTeam(f, `Mailing it by certified mail to ${to.name}, ${to.city}`, `正在以挂号信寄往 ${to.name}，${to.city}`);
+  if (isView(claimed)) return claimed;
+  const g = claimed;
   const file = await signedUrl(f.payload.pdf_path!);
   const res = await fetch(`${LOB}/letters`, {
     method: "POST",
@@ -335,15 +391,37 @@ async function refreshMail(f: Filing) {
 
 // ------------------------------------------------------------------ the actions
 
-async function start(f: Filing, req: Request, by: string) {
+/** An earlier filing of the same form with the same answers in the last 30 days, if any. */
+async function duplicateOf(f: Filing): Promise<{ id: string; approved_at: string } | null> {
+  const { data, error } = await admin.rpc("filing_duplicate_of", { p_id: f.id, p_days: 30 });
+  if (error) throw new Error(`duplicate check failed: ${error.code ?? ""}`);
+  return (data as { id: string; approved_at: string } | null) ?? null;
+}
+
+async function start(f: Filing, req: Request, by: string, resubmit = false) {
   if (f.agent_state) return view(f);                                 // already started: idempotent
-  if (["canceled", "accepted", "rejected", "submitted"].includes(f.status)) throw new HttpError("bad_request", "This filing is already finished.");
+  if (["canceled", "accepted", "rejected", "submitted"].includes(f.status)) throw new HttpError("bad_request", "This filing is already finished.", "这份申请已经办完。");
+  // Claim the run: of two calls racing to start the same filing, only one moves it out of "not started".
+  f = await step(f, null, { expect_agent_state: null, agent_state: "running" }, false);
   const e = env();
   // Who approved and signed, from where: the e-signature record.
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim().slice(0, 64);
   const ua = (req.headers.get("user-agent") ?? "").slice(0, 200);
   const s = f.payload.signature;
   if (s && !f.agent_log.some((x) => x.kind === "signature")) f = await step(f, log(`Signed by ${s.name}${s.title ? `, ${s.title}` : ""} at ${s.signed_at}${ip ? ` from ${ip}` : ""}`, `由 ${s.name}${s.title ? `（${s.title}）` : ""} 于 ${s.signed_at} 签署${ip ? `，IP ${ip}` : ""}`, "signature", `${by} ${ua}`.trim()));
+  if (resubmit && !askedToResubmit(f)) f = await step(f, log("You asked Placetta to send it again", "您要求快哉再次提交", "resubmit", by));
+
+  // The same form with the same answers again: not sent unless the person says it's a resubmission.
+  if (!askedToResubmit(f)) {
+    const dup = await duplicateOf(f);
+    if (dup) {
+      const day = String(dup.approved_at).slice(0, 10);
+      return view(await step(f, log(
+        `You already approved this form with the same answers on ${day}. Placetta doesn't send the same filing twice. If the agency asked for it again, tap "Send it again".`,
+        `您已于 ${day} 批准过答案完全相同的这份表格。快哉不会重复提交同一份申请。如果机构要求重新提交，请点击“再次提交”。`,
+        "needs_you", DUPLICATE_REF), { agent_state: "needs_you", handoff_url: null }));
+    }
+  }
 
   if (!killSwitchOn(f, e)) return await toTeam(f, "Self-filing isn't on for this agency yet. The Placetta team submits it.", "该机构尚未开通自动提交，由快哉团队提交。");
   const d = DEST[f.payload.official ?? ""];
@@ -379,19 +457,29 @@ async function start(f: Filing, req: Request, by: string) {
   }
 }
 
-async function resume(f: Filing, by: string) {
+async function resume(f: Filing, by: string, resubmit = false) {
   if (f.agent_state !== "needs_you") return view(f);
+  // Every change below compares-and-sets on needs_you, so two taps on "carry on" act once.
+  const was = { expect_agent_state: "needs_you" };
   const last = [...f.agent_log].reverse().find((e) => ["needs_you", "wet_signature", "need_person"].includes(e.kind));
+  if (last?.kind === "needs_you" && last.ref === DUPLICATE_REF) {
+    if (!resubmit) {
+      throw new HttpError("bad_request", "This is the same as a filing you already approved. Tap \"Send it again\" if the agency asked for it again.",
+        "这与您已批准过的申请完全相同。如果机构要求重新提交，请点击“再次提交”。");
+    }
+    const g = await step(f, log("You asked Placetta to send it again", "您要求快哉再次提交", "resubmit", by), { ...was, agent_state: null, handoff_url: null });
+    return await startAgain(g);
+  }
   if (last?.kind === "wet_signature") {
-    const g = await step(f, log("You signed and sent it yourself. The Placetta team confirms it reached the agency.", "您已亲自签署并发出，快哉团队会确认机构已收到。", "you_sent"), { agent_state: "handoff", channel: "team" });
+    const g = await step(f, log("You signed and sent it yourself. The Placetta team confirms it reached the agency.", "您已亲自签署并发出，快哉团队会确认机构已收到。", "you_sent"), { ...was, agent_state: "handoff", channel: "team" });
     await teamTask(g, "review", "Customer says they signed and sent the form themselves. Confirm with the agency and record the submission.");
     return view(g);
   }
   if (f.channel === "portal") {
-    return view(await step(f, log("You finished your step. Placetta carries on.", "您已完成这一步，快哉继续办理。", "resume", by), { agent_state: "queued", handoff_url: null }));
+    return view(await step(f, log("You finished your step. Placetta carries on.", "您已完成这一步，快哉继续办理。", "resume", by), { ...was, agent_state: "queued", handoff_url: null }));
   }
   // A check that failed earlier: run the checks again from the start.
-  const g = await step(f, log("Checking it again", "重新核对", "resume", by), { agent_state: null, handoff_url: null }, false);
+  const g = await step(f, log("Checking it again", "重新核对", "resume", by), { ...was, agent_state: null, handoff_url: null }, false);
   return await startAgain(g);
 }
 const startAgain = (f: Filing) => start(f, new Request("https://local"), "resume");
@@ -427,7 +515,7 @@ async function signed(f: Filing, path: string, by: string) {
     faxPath = saved;
   }
   const g = await step(f, log("You signed it by hand and uploaded it. Placetta faxes it to the agency.", "您已手写签名并上传，快哉将传真给机构。", "signed_copy", faxPath),
-    { agent_state: null, handoff_url: null });
+    { expect_agent_state: "needs_you", agent_state: null, handoff_url: null });
   console.log("signed copy uploaded by", by.slice(0, 120));
   return await startAgain(g);
 }
@@ -442,7 +530,8 @@ async function teamApprove(f: Filing, by: string) {
   const waiting = f.agent_log.at(-1)?.kind === "review_wait" || f.agent_log.some((e) => e.kind === "review_wait" || e.kind === "review_page");
   if (f.agent_state !== "handoff" || !waiting) throw new HttpError("bad_request", "This filing isn't waiting for the team's review.");
   if (env().dryRun) throw new HttpError("bad_request", "Dry run is on: nothing is sent. Turn FILER_DRY_RUN off first.");
-  const g = await step(f, log("The Placetta team checked it. Sending now.", "快哉团队已核对，现在发送。", "two_key_ok", by), { agent_state: "running" });
+  // Compare-and-set on handoff: two approvals (or an approval racing a take-over) send at most once.
+  const g = await step(f, log("The Placetta team checked it. Sending now.", "快哉团队已核对，现在发送。", "two_key_ok", by), { expect_agent_state: "handoff", agent_state: "running" });
   const d = DEST[f.payload.official ?? ""];
   switch (g.channel) {
     case "email": return await sendEmail(g, d!);
@@ -483,24 +572,63 @@ async function telnyxWebhook(req: Request) {
   const type = String(ev.event_type ?? ""), p = ev.payload ?? {};
   const id = String(p.fax_id ?? p.id ?? "");
   if (!id || !/^fax\.(delivered|failed)$/.test(type)) return ok({});
-  const { data } = await admin.from("filings").select(COLS).eq("provider_ref", id).eq("channel", "fax").maybeSingle();
-  if (!data) return ok({});
-  await applyFax(data as unknown as Filing, type.slice(4), { pages: p.page_count, reason: p.failure_reason });
+  // Each event once: Telnyx redelivers until it gets a 2xx, and a redelivery must not resend a failed fax.
+  const eventId = String(ev.id ?? "").slice(0, 200);
+  if (eventId) {
+    const { error } = await admin.from("webhook_events").insert({ provider: "telnyx", id: eventId });
+    if (error?.code === "23505") return ok({ duplicate: true });
+    if (error) throw new Error(`webhook event insert failed: ${error.code ?? ""}`);
+  }
+  try {
+    const { data } = await admin.from("filings").select(COLS).eq("provider_ref", id).eq("channel", "fax").maybeSingle();
+    if (data) await applyFax(data as unknown as Filing, type.slice(4), { pages: p.page_count, reason: p.failure_reason });
+  } catch (e) {
+    if (e instanceof Refused) return ok({});      // the sweep or a status check got there first
+    // Forget the event so Telnyx's retry is applied.
+    if (eventId) await admin.from("webhook_events").delete().eq("provider", "telnyx").eq("id", eventId);
+    throw e;
+  }
   return ok({});
+}
+
+/** Runs that stopped partway (the function was killed between steps): a start that never picked a channel, a fax
+    whose failure was recorded but not resent, an email or letter that never confirmed. Nothing is sent again; the team
+    checks with the agency when anything may have left. */
+async function lostRuns(): Promise<number> {
+  const before = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  const { data, error } = await admin.from("filings").select(COLS).eq("agent_state", "running").lt("updated_at", before)
+    .or("channel.is.null,channel.eq.email,channel.eq.mail,and(channel.eq.fax,provider_ref.is.null)").limit(50);
+  if (error) { console.error("lost runs:", error.code ?? ""); return 0; }
+  let n = 0;
+  for (const r of (data ?? []) as unknown as Filing[]) {
+    const sent = !!r.submit_clicked_at;
+    try {
+      const g = await step(r, sent
+        ? log("Placetta lost track of this filing after it may have been sent. The team is checking with the agency before anything is sent again.", "快哉在可能已发出后中断，团队会先向机构核实，再决定是否重发。", "handoff")
+        : log("Placetta stopped before sending this filing. The Placetta team takes it from here.", "快哉在发送前中断，由快哉团队接手。", "handoff"),
+        { expect_agent_state: "running", expect_provider_ref: r.provider_ref, agent_state: "handoff", channel: "team" });
+      await teamTask(g, sent ? "check_agency" : "handoff", sent ? "A run stopped after the send was recorded. Check the agency (and the Sent folder) before sending again." : "A run stopped before sending. Send it or start it again.");
+      n++;
+    } catch (e) {
+      if (!(e instanceof Refused)) console.error("lost run:", describe(e));
+    }
+  }
+  return n;
 }
 
 async function sweep() {
   const { data: n } = await admin.rpc("requeue_stuck_filings");
+  const lost = await lostRuns();
   const { data: rows } = await admin.from("filings").select(COLS).in("channel", ["fax", "mail"])
     .or("agent_state.eq.running,and(channel.eq.mail,receipt_path.is.null,status.eq.submitted)").limit(100);
   for (const r of rows ?? []) {
-    try { await refreshStatus(r as unknown as Filing); } catch (e) { console.error("sweep status:", describe(e)); }
+    try { await refreshStatus(r as unknown as Filing); } catch (e) { if (!(e instanceof Refused)) console.error("sweep status:", describe(e)); }
   }
   for (const s of staleDestinations(new Date().toISOString().slice(0, 10))) {
     await admin.from("team_tasks").upsert({ kind: "destination_stale", title: `Re-check ${s.id} destinations (last checked ${s.checked}) on ${s.source}`, dedupe: `stale:${s.id}:${s.checked}` },
       { onConflict: "dedupe", ignoreDuplicates: true });
   }
-  return { requeued: n ?? 0, refreshed: rows?.length ?? 0 };
+  return { requeued: n ?? 0, lost, refreshed: rows?.length ?? 0 };
 }
 
 // ------------------------------------------------------------------ router
@@ -518,18 +646,36 @@ serve(async (req) => {
   const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
   const ws = uuidParam(body.workspace_id, "workspace_id");
+  const filingId = uuidParam(body.filing_id, "filing_id");
   const action = String(body.action ?? "");
+  const by = user.email ?? user.id;
+  // A refusal from the database means another call already acted on this filing: answer with it as it is now.
+  const settled = async (run: () => Promise<ReturnType<typeof view>>) => {
+    try {
+      return ok(await run());
+    } catch (e) {
+      if (e instanceof Refused) return ok(view(await loadFiling(ws, filingId)));
+      throw e;
+    }
+  };
   if (action === "team_approve" || action === "take_over") {
-    if (!(await isStaff(user)) || aalOf(jwt) !== "aal2") throw new HttpError("forbidden", "Placetta team, with two-step sign-in, only.");
-    const f = await loadFiling(ws, uuidParam(body.filing_id, "filing_id"));
-    return ok(action === "team_approve" ? await teamApprove(f, user.email ?? user.id) : await takeOver(f, user.email ?? user.id));
+    if (!(await isStaff(user)) || aalOf(jwt) !== "aal2") throw new HttpError("forbidden", "Placetta team, with two-step sign-in, only.", "仅限开启两步验证的快哉团队成员。");
+    const f = await loadFiling(ws, filingId);
+    return await settled(() => action === "team_approve" ? teamApprove(f, by) : takeOver(f, by));
   }
-  await requireAccess(ws, user, jwt, "member");
-  const f = await loadFiling(ws, uuidParam(body.filing_id, "filing_id"));
-  if (action === "status") return ok(await refreshStatus(f));
-  if (action === "resume") return ok(await resume(f, user.email ?? user.id));
-  if (action === "start") return ok(await start(f, req, user.email ?? user.id));
-  if (action === "signed") return ok(await signed(f, String(body.path ?? "").slice(0, 500), user.email ?? user.id));
-  if (action === "stop") return ok(await stop(f, user.email ?? user.id));
-  throw new HttpError("bad_request", "action must be start, resume, signed, stop or status.");
+  if (!["start", "resume", "signed", "stop", "status"].includes(action)) {
+    throw new HttpError("bad_request", "action must be start, resume, signed, stop or status.");
+  }
+  // Sending, carrying on, and stopping are an owner's, as in the database (only owners approve or cancel filings);
+  // any member can check on one.
+  await requireAccess(ws, user, jwt, action === "status" ? "member" : "owner");
+  const f = await loadFiling(ws, filingId);
+  const resubmit = body.resubmit === true;
+  return await settled(() => {
+    if (action === "status") return refreshStatus(f);
+    if (action === "resume") return resume(f, by, resubmit);
+    if (action === "start") return start(f, req, by, resubmit);
+    if (action === "signed") return signed(f, String(body.path ?? "").slice(0, 500), by);
+    return stop(f, by);
+  });
 });
