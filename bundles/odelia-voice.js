@@ -294,8 +294,84 @@ var SAY = {
   missed: { en: "Odelia from Placetta tried to call you about this:", zh: "\u5FEB\u54C9\u7684 Odelia \u521A\u624D\u81F4\u7535\u60A8\uFF0C\u4E8B\u7531\u5982\u4E0B\uFF1A" }
 };
 
+// supabase/functions/_shared/linq.ts
+var LINQ = "https://api.linqapp.com/api/partner";
+var LINQ_OPTED_OUT = 2024;
+var LINQ_LINE_RESTRICTED = 2027;
+var LINQ_BAD_PARAM = 1005;
+function linqLines(env2) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const raw of (env2("LINQ_NUMBERS") ?? "").split(",")) {
+    const n = normalizePhone(raw.trim());
+    if (n) seen.add(n);
+  }
+  return [...seen];
+}
+var linqReady = (env2) => !!(env2("LINQ_API_KEY") && env2("LINQ_WEBHOOK_SECRET") && linqLines(env2).length);
+var enc = new TextEncoder();
+async function call(env2, method, path, body, f) {
+  const res = await f(`${LINQ}${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${env2("LINQ_API_KEY")}`, "Content-Type": "application/json", Accept: "application/json" },
+    body: body === void 0 ? void 0 : JSON.stringify(body),
+    signal: AbortSignal.timeout(15e3)
+  });
+  return { status: res.status, j: await res.json().catch(() => ({})) };
+}
+var errOf = (status, j) => {
+  const e = j.error ?? {};
+  return { ok: false, status, code: typeof e.code === "number" ? e.code : void 0, detail: String(e.message ?? "").slice(0, 200) };
+};
+var URLS = /https?:\/\/\S+/g;
+var hasUrl = (s) => /https?:\/\/\S+/.test(s);
+async function linqSend(env2, o, f = fetch) {
+  if (!env2("LINQ_API_KEY")) return { ok: false, status: 503, detail: "not_configured" };
+  const send = async (text, key) => {
+    const { status, j } = await call(env2, "POST", "/v3/chats", {
+      from: o.from,
+      to: [o.to],
+      message: { parts: [{ type: "text", value: text }], ...key ? { idempotency_key: key } : {} },
+      ...o.courtesy ? { override_optout: true } : {}
+    }, f);
+    if (status >= 200 && status < 300) {
+      const chat = j.chat ?? {};
+      return { ok: true, status, id: chat.message?.id, chat: chat.id, service: chat.service };
+    }
+    return errOf(status, j);
+  };
+  try {
+    const r = await send(o.text, o.key);
+    if (r.ok || r.code !== LINQ_BAD_PARAM || !hasUrl(o.text)) return r;
+    const links = o.text.match(URLS) ?? [];
+    const words = o.text.replace(URLS, "").replace(/[ \t]+\n/g, "\n").replace(/\s*[:：]\s*$/, "").replace(/[ \t]{2,}/g, " ").trim();
+    const first = await send(words || "Odelia from Placetta.", o.key ? `${o.key}:w` : void 0);
+    if (!first.ok || !first.chat) return first;
+    const { status, j } = await call(env2, "POST", `/v3/chats/${encodeURIComponent(first.chat)}/messages`, {
+      message: { parts: [{ type: "text", value: links.join("\n") }], ...o.key ? { idempotency_key: `${o.key}:l` } : {} }
+    }, f);
+    if (status >= 200 && status < 300) return { ...first, id: String((j.message ?? {}).id ?? first.id) };
+    return { ...errOf(status, j), id: first.id, chat: first.chat };
+  } catch (e) {
+    return { ok: false, status: 502, detail: String(e).slice(0, 200) };
+  }
+}
+function hashLine(lines, number) {
+  if (!lines.length) return null;
+  let h = 2166136261;
+  for (const c of number) {
+    h ^= c.charCodeAt(0);
+    h = Math.imul(h, 16777619);
+  }
+  return lines[(h >>> 0) % lines.length];
+}
+function pickLine(lines, o) {
+  const usable = lines.filter((l) => !o.critical?.has(l));
+  if (o.stored && lines.includes(o.stored) && (o.reply || !o.critical?.has(o.stored))) return o.stored;
+  return hashLine(usable, o.number);
+}
+
 // supabase/functions/_shared/odelia_db.ts
-var LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at";
+var LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at, line";
 async function linkByNumber(admin2, number) {
   const { data } = await admin2.from("phone_links").select(LINK_COLS).eq("number", number).not("verified_at", "is", null).maybeSingle();
   return data ?? null;
@@ -305,22 +381,54 @@ async function linkOf(admin2, userId) {
   return data ?? null;
 }
 async function logMessage(admin2, row) {
-  const { data, error } = await admin2.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2e3), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null }).select("id").maybeSingle();
+  const { data, error } = await admin2.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2e3), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null, line: row.line ?? null, service: row.service ?? null }).select("id").maybeSingle();
   if (error && error.code !== "23505") console.error("odelia log", error.code);
   return error ? null : data?.id ?? null;
 }
+var critical = null;
+async function criticalLines(admin2) {
+  if (critical && Date.now() - critical.at < 6e4) return critical.set;
+  const { data } = await admin2.from("odelia_lines").select("number").eq("reputation", "CRITICAL");
+  critical = { at: Date.now(), set: new Set((data ?? []).map((r) => String(r.number))) };
+  return critical.set;
+}
+async function sendText(admin2, env2, o, f = fetch) {
+  if (linqReady(env2) && !o.smsOnly) {
+    const lines = linqLines(env2), bad = new Set(await criticalLines(admin2));
+    for (let tries = 0; tries < lines.length; tries++) {
+      const line = pickLine(lines, { stored: tries ? null : o.line, number: o.to, critical: bad, reply: o.reply });
+      if (!line) break;
+      const r2 = await linqSend(env2, { from: line, to: o.to, text: o.text, key: o.key, courtesy: o.courtesy }, f);
+      if (r2.ok) return { ok: true, status: r2.status, id: r2.id ? `linq:${r2.id}` : void 0, line, service: r2.service ?? "iMessage", chat: r2.chat };
+      if (r2.code === LINQ_OPTED_OUT) return { ok: false, status: r2.status, code: BLOCKED_BY_STOP, detail: r2.detail, line, service: "iMessage" };
+      if (r2.code === LINQ_LINE_RESTRICTED || r2.code === 4002 || r2.code === 4008) {
+        bad.add(line);
+        continue;
+      }
+      return { ok: false, status: r2.status, code: String(r2.code ?? r2.status), detail: r2.detail, line, service: "iMessage" };
+    }
+    if (!smsReady(env2)) return { ok: false, status: 503, code: "no_line", line: null, service: "iMessage" };
+  }
+  const r = await sendSms(env2, o.to, o.text, f);
+  return { ok: r.ok, status: r.status, code: r.code, detail: r.detail, id: r.id, line: null, service: "SMS" };
+}
 async function textUser(admin2, env2, o) {
   if (o.link.opted_out_at) return { ok: false, sent: 0, code: "opted_out" };
-  let sent = 0;
+  const reply = ["reply", "ack", "system", "chat", "missed"].includes(o.kind);
+  let sent = 0, line = o.link.line ?? null;
   for (const text of o.segments) {
-    const r = await sendSms(env2, o.link.number, text);
+    const r = await sendText(admin2, env2, { to: o.link.number, text, line, reply });
     if (!r.ok) {
       console.error("odelia text", r.status, r.code, r.detail);
       if (r.code === BLOCKED_BY_STOP) await admin2.from("phone_links").update({ opted_out_at: (/* @__PURE__ */ new Date()).toISOString(), updated_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("user_id", o.link.user_id);
       return { ok: false, sent, code: r.code };
     }
     sent++;
-    await logMessage(admin2, { user_id: o.link.user_id, workspace_id: o.workspace_id, direction: "out", channel: "sms", kind: o.kind, body: o.logBody ?? text, provider_id: r.id, run_id: o.run_id });
+    if (r.line && r.line !== line) {
+      line = r.line;
+      await admin2.from("phone_links").update({ line, updated_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("user_id", o.link.user_id);
+    }
+    await logMessage(admin2, { user_id: o.link.user_id, workspace_id: o.workspace_id, direction: "out", channel: "sms", kind: o.kind, body: o.logBody ?? text, provider_id: r.id, run_id: o.run_id, line: r.line, service: r.service });
   }
   return { ok: true, sent };
 }
@@ -494,11 +602,11 @@ async function incoming(p) {
     await cmd(ccid, "answer", { client_state: clientState({ k: "sorry", l: lang, t: 1 }), command_id: `answer2-${ccid}`.slice(0, 120) });
   }
 }
-async function textInstead(call) {
-  if (!call.user_id || !call.outbox_id) return;
-  const [{ data: o }, link] = await Promise.all([admin.from("odelia_outbox").select("body, link, workspace_id").eq("id", call.outbox_id).maybeSingle(), linkOf(admin, call.user_id)]);
+async function textInstead(call2) {
+  if (!call2.user_id || !call2.outbox_id) return;
+  const [{ data: o }, link] = await Promise.all([admin.from("odelia_outbox").select("body, link, workspace_id").eq("id", call2.outbox_id).maybeSingle(), linkOf(admin, call2.user_id)]);
   if (!o || !link?.verified_at || !link.texts_on) return;
-  const already = await admin.from("odelia_messages").select("id", { count: "exact", head: true }).eq("user_id", call.user_id).eq("kind", "missed").eq("channel", "sms").gt("created_at", call.answered_at ?? new Date(Date.now() - 36e5).toISOString());
+  const already = await admin.from("odelia_messages").select("id", { count: "exact", head: true }).eq("user_id", call2.user_id).eq("kind", "missed").eq("channel", "sms").gt("created_at", call2.answered_at ?? new Date(Date.now() - 36e5).toISOString());
   if (already.count) return;
   const text = `${SAY.missed[link.lang]} ${o.body}`;
   await textUser(admin, env, { link, workspace_id: o.workspace_id, segments: splitSms(text, { max: 1, lang: link.lang, tail: o.link || appLink(appOrigin(env), o.workspace_id) || void 0 }), kind: "missed" });
@@ -526,72 +634,72 @@ async function event(type, p) {
     return;
   }
   if (type === "call.machine.detection.ended") {
-    const call = await callOf(ccid);
-    if (!call || call.direction !== "out" || !call.user_id || !call.workspace_id) return;
+    const call2 = await callOf(ccid);
+    if (!call2 || call2.direction !== "out" || !call2.user_id || !call2.workspace_id) return;
     if (p.result === "machine") {
       await cmd(ccid, "hangup", {});
-      await textInstead(call);
+      await textInstead(call2);
       return;
     }
     const [{ data: o }, { data: w }] = await Promise.all([
-      admin.from("odelia_outbox").select("body").eq("id", call.outbox_id ?? "").maybeSingle(),
-      admin.from("workspaces").select("id, name").eq("id", call.workspace_id).maybeSingle()
+      admin.from("odelia_outbox").select("body").eq("id", call2.outbox_id ?? "").maybeSingle(),
+      admin.from("workspaces").select("id, name").eq("id", call2.workspace_id).maybeSingle()
     ]);
     if (!w) {
       await cmd(ccid, "hangup", {});
       return;
     }
-    const assistant = await assistantFor({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: true, outbound: String(o?.body ?? "") });
-    const r = await cmd(ccid, "ai_assistant_start", { assistant, client_state: clientState({ k: "talk", l: call.lang }) });
+    const assistant = await assistantFor({ ccid, lang: call2.lang, name: await firstName(call2.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: true, outbound: String(o?.body ?? "") });
+    const r = await cmd(ccid, "ai_assistant_start", { assistant, client_state: clientState({ k: "talk", l: call2.lang }) });
     if (!r.ok) {
       console.error("assistant start", r.status, r.code, r.detail);
-      await sayAndHangUp(ccid, call.lang, LINES.sorry[call.lang]);
-      await textInstead(call);
+      await sayAndHangUp(ccid, call2.lang, LINES.sorry[call2.lang]);
+      await textInstead(call2);
     }
     return;
   }
   if (type === "call.conversation.ended") {
-    const call = await callOf(ccid);
-    if (call && !call.ended_at) await sayAndHangUp(ccid, call.lang, /error|fail/i.test(String(p.reason ?? "")) ? LINES.sorry[call.lang] : LINES.idle[call.lang]);
+    const call2 = await callOf(ccid);
+    if (call2 && !call2.ended_at) await sayAndHangUp(ccid, call2.lang, /error|fail/i.test(String(p.reason ?? "")) ? LINES.sorry[call2.lang] : LINES.idle[call2.lang]);
     return;
   }
   if (type === "call.hangup") {
-    const call = await callOf(ccid);
-    if (!call || call.ended_at) return;
+    const call2 = await callOf(ccid);
+    if (!call2 || call2.ended_at) return;
     const now = /* @__PURE__ */ new Date();
     await admin.from("odelia_calls").update({ ended_at: now.toISOString() }).eq("call_control_id", ccid);
-    if (!call.user_id) return;
-    const mins = call.answered_at ? Math.max(1, Math.round((now.getTime() - Date.parse(call.answered_at)) / 6e4)) : 0;
-    const body = call.direction === "out" && !mins ? call.lang === "zh" ? "Odelia \u6765\u7535\uFF0C\u672A\u63A5\u901A" : "Odelia called, no answer" : call.lang === "zh" ? `${call.direction === "in" ? "\u60A8\u6765\u7535" : "Odelia \u6765\u7535"}\uFF0C${mins} \u5206\u949F` : `${call.direction === "in" ? "You called" : "Odelia called"}, ${mins} min`;
-    await logMessage(admin, { user_id: call.user_id, workspace_id: call.workspace_id, direction: call.direction, channel: "voice", kind: "call", body, provider_id: `call:${ccid}` });
-    if (call.direction === "out" && !mins) await textInstead(call);
+    if (!call2.user_id) return;
+    const mins = call2.answered_at ? Math.max(1, Math.round((now.getTime() - Date.parse(call2.answered_at)) / 6e4)) : 0;
+    const body = call2.direction === "out" && !mins ? call2.lang === "zh" ? "Odelia \u6765\u7535\uFF0C\u672A\u63A5\u901A" : "Odelia called, no answer" : call2.lang === "zh" ? `${call2.direction === "in" ? "\u60A8\u6765\u7535" : "Odelia \u6765\u7535"}\uFF0C${mins} \u5206\u949F` : `${call2.direction === "in" ? "You called" : "Odelia called"}, ${mins} min`;
+    await logMessage(admin, { user_id: call2.user_id, workspace_id: call2.workspace_id, direction: call2.direction, channel: "voice", kind: "call", body, provider_id: `call:${ccid}` });
+    if (call2.direction === "out" && !mins) await textInstead(call2);
   }
 }
-async function runTool(name, call, body) {
+async function runTool(name, call2, body) {
   const notVerified = { ok: false, result: "The caller isn't verified yet. Ask for the 4-digit code and call verify_code first." };
   if (name === "verify_code") {
-    if (call.verified_at) return { ok: true, result: "Already verified." };
-    if (call.code_tries >= MAX_CODE_TRIES || !call.user_id) return { ok: false, tries_left: 0, result: "No tries left. Apologize, suggest the Placetta app or texting this number, say goodbye and hang up." };
+    if (call2.verified_at) return { ok: true, result: "Already verified." };
+    if (call2.code_tries >= MAX_CODE_TRIES || !call2.user_id) return { ok: false, tries_left: 0, result: "No tries left. Apologize, suggest the Placetta app or texting this number, say goodbye and hang up." };
     const code = spokenDigits(body.code);
-    const { data: res } = await admin.rpc("phone_code_check", { p_user: call.user_id, p_purpose: "call", p_code: code, p_number: call.number });
-    const tries = call.code_tries + 1;
+    const { data: res } = await admin.rpc("phone_code_check", { p_user: call2.user_id, p_purpose: "call", p_code: code, p_number: call2.number });
+    const tries = call2.code_tries + 1;
     if (res === "ok") {
-      await admin.from("odelia_calls").update({ verified_at: (/* @__PURE__ */ new Date()).toISOString(), code_tries: tries }).eq("call_control_id", call.call_control_id);
-      return { ok: true, result: "Verified. You can discuss the account now. Ask how you can help.", workspace: call.workspace_id ? await briefFor(call.workspace_id, call.lang) : "" };
+      await admin.from("odelia_calls").update({ verified_at: (/* @__PURE__ */ new Date()).toISOString(), code_tries: tries }).eq("call_control_id", call2.call_control_id);
+      return { ok: true, result: "Verified. You can discuss the account now. Ask how you can help.", workspace: call2.workspace_id ? await briefFor(call2.workspace_id, call2.lang) : "" };
     }
-    await admin.from("odelia_calls").update({ code_tries: tries }).eq("call_control_id", call.call_control_id);
+    await admin.from("odelia_calls").update({ code_tries: tries }).eq("call_control_id", call2.call_control_id);
     const left = res === "locked" || res === "expired" ? 0 : Math.max(0, MAX_CODE_TRIES - tries);
     return { ok: false, tries_left: left, result: left ? "That code doesn't match. Ask them to say it again, digit by digit." : "No tries left. Apologize, suggest the Placetta app or texting this number, say goodbye and hang up." };
   }
-  if (!call.verified_at || !call.user_id || !call.workspace_id) return notVerified;
-  if (name === "workspace_details") return { ok: true, workspace: await briefFor(call.workspace_id, call.lang) };
+  if (!call2.verified_at || !call2.user_id || !call2.workspace_id) return notVerified;
+  if (name === "workspace_details") return { ok: true, workspace: await briefFor(call2.workspace_id, call2.lang) };
   if (name === "start_task") {
     const request = String(body.request ?? "").trim().slice(0, 2e3);
     if (!request) return { ok: false, result: "Ask what they want done." };
     const res = await fetch(`${SUPABASE_URL}/functions/v1/agent-run`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-monitor-key": await monitorKey() },
-      body: JSON.stringify({ action: "start_as", user_id: call.user_id, workspace_id: call.workspace_id, prompt: request, channel: "voice", reply_to: call.number, lang: call.lang }),
+      body: JSON.stringify({ action: "start_as", user_id: call2.user_id, workspace_id: call2.workspace_id, prompt: request, channel: "voice", reply_to: call2.number, lang: call2.lang }),
       signal: AbortSignal.timeout(8e3)
     }).catch(() => null);
     if (res?.status === 202) return { ok: true, result: "Started. Tell them you're on it and will text them when it's done." };
@@ -600,14 +708,14 @@ async function runTool(name, call, body) {
     return { ok: false, result: "Couldn't start it. Apologize and suggest texting the request instead." };
   }
   if (name === "send_text") {
-    if (call.texts >= MAX_CALL_TEXTS) return { ok: false, result: "You've already texted them several times on this call. Tell them it's in their texts." };
-    const link = await linkOf(admin, call.user_id);
-    if (!link?.verified_at || link.number !== call.number) return { ok: false, result: "Their number isn't linked anymore." };
+    if (call2.texts >= MAX_CALL_TEXTS) return { ok: false, result: "You've already texted them several times on this call. Tell them it's in their texts." };
+    const link = await linkOf(admin, call2.user_id);
+    if (!link?.verified_at || link.number !== call2.number) return { ok: false, result: "Their number isn't linked anymore." };
     const message = String(body.message ?? "").trim().slice(0, 600);
     if (!message) return { ok: false, result: "Nothing to send." };
-    const tail = body.app_link === true ? appLink(appOrigin(env), call.workspace_id) : "";
-    const r = await textUser(admin, env, { link, workspace_id: call.workspace_id, segments: splitSms(message, { max: 2, lang: call.lang, tail: tail || void 0 }), kind: "reply" });
-    await admin.from("odelia_calls").update({ texts: call.texts + 1 }).eq("call_control_id", call.call_control_id);
+    const tail = body.app_link === true ? appLink(appOrigin(env), call2.workspace_id) : "";
+    const r = await textUser(admin, env, { link, workspace_id: call2.workspace_id, segments: splitSms(message, { max: 2, lang: call2.lang, tail: tail || void 0 }), kind: "reply" });
+    await admin.from("odelia_calls").update({ texts: call2.texts + 1 }).eq("call_control_id", call2.call_control_id);
     return r.ok ? { ok: true, result: "Texted." } : { ok: false, result: r.code === "opted_out" ? "They turned off texts from you (STOP). They can text START to turn them back on." : "The text didn't go through. Apologize." };
   }
   return { ok: false, result: "Unknown tool." };
@@ -615,13 +723,13 @@ async function runTool(name, call, body) {
 async function tool(req, name) {
   const ccid = await verifyCallToken(await monitorKey(), req.headers.get("x-odelia-call") ?? "");
   if (!ccid) return fail(401, "unauthorized", "unauthorized");
-  const call = await callOf(ccid);
-  if (!call || call.ended_at) return json(200, { ok: false, result: "The call has ended." });
-  if (call.tool_calls >= MAX_TOOL_CALLS) return json(200, { ok: false, result: "That's a lot on one call. Offer to text them instead." });
-  await admin.from("odelia_calls").update({ tool_calls: call.tool_calls + 1 }).eq("call_control_id", ccid);
+  const call2 = await callOf(ccid);
+  if (!call2 || call2.ended_at) return json(200, { ok: false, result: "The call has ended." });
+  if (call2.tool_calls >= MAX_TOOL_CALLS) return json(200, { ok: false, result: "That's a lot on one call. Offer to text them instead." });
+  await admin.from("odelia_calls").update({ tool_calls: call2.tool_calls + 1 }).eq("call_control_id", ccid);
   const body = await req.json().catch(() => ({}));
   try {
-    return json(200, await runTool(name, call, body));
+    return json(200, await runTool(name, call2, body));
   } catch (e) {
     console.error("tool", name, String(e).slice(0, 200));
     return json(200, { ok: false, result: "Something went wrong. Apologize briefly and offer to text instead." });

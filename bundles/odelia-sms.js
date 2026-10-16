@@ -59,8 +59,8 @@ function prettyPhone(e164) {
   return m ? `+1 (${m[1]}) ${m[2]}-${m[3]}` : e164;
 }
 function b64bytes(s) {
-  const b64 = s.trim().replace(/-/g, "+").replace(/_/g, "/").replace(/=+$/, "");
-  const bin = atob(b64 + "===".slice((b64.length + 3) % 4));
+  const b642 = s.trim().replace(/-/g, "+").replace(/_/g, "/").replace(/=+$/, "");
+  const bin = atob(b642 + "===".slice((b642.length + 3) % 4));
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
@@ -162,7 +162,7 @@ function splitSms(text, o = {}) {
   kept[max - 1] = (last ? last.replace(/[\s,;:，；：]+$/, "") + "\u2026 " : "") + end;
   return kept.map((s) => s.trim()).filter(Boolean);
 }
-var LIMITS = { textsPerDay: 3, callsPerDay: 1, inboundPerHour: 30, strangerDays: 90, maxQueuedHours: 48 };
+var LIMITS = { textsPerDay: 3, callsPerDay: 1, inboundPerHour: 30, strangerDays: 90, maxQueuedHours: 48, newChatsPerLine: 25 };
 function validTz(tz) {
   if (typeof tz === "string" && tz.length <= 64) {
     try {
@@ -261,8 +261,150 @@ var SAY = {
   missed: { en: "Odelia from Placetta tried to call you about this:", zh: "\u5FEB\u54C9\u7684 Odelia \u521A\u624D\u81F4\u7535\u60A8\uFF0C\u4E8B\u7531\u5982\u4E0B\uFF1A" }
 };
 
+// supabase/functions/_shared/linq.ts
+var LINQ = "https://api.linqapp.com/api/partner";
+var LINQ_OPTED_OUT = 2024;
+var LINQ_LINE_RESTRICTED = 2027;
+var LINQ_BAD_PARAM = 1005;
+function linqLines(env2) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const raw of (env2("LINQ_NUMBERS") ?? "").split(",")) {
+    const n = normalizePhone(raw.trim());
+    if (n) seen.add(n);
+  }
+  return [...seen];
+}
+var linqReady = (env2) => !!(env2("LINQ_API_KEY") && env2("LINQ_WEBHOOK_SECRET") && linqLines(env2).length);
+var enc = new TextEncoder();
+function b64(bytes) {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s);
+}
+function unb64(s) {
+  try {
+    const bin = atob(s);
+    return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  } catch {
+    return null;
+  }
+}
+function sameString(a, b) {
+  if (a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+async function verifyLinq(raw, headers, secret, nowSec = Date.now() / 1e3, toleranceSec = 300) {
+  const ts = Number(headers.timestamp);
+  if (!secret || !headers.id || !headers.signature || !Number.isFinite(ts) || Math.abs(nowSec - ts) > toleranceSec) return false;
+  const key = unb64(secret.startsWith("whsec_") ? secret.slice(6) : secret);
+  if (!key || !key.length) return false;
+  const k = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const want = b64(new Uint8Array(await crypto.subtle.sign("HMAC", k, enc.encode(`${headers.id}.${headers.timestamp}.${raw}`))));
+  return headers.signature.split(" ").some((s) => {
+    const [v, sig] = s.split(",");
+    return v === "v1" && !!sig && sameString(sig, want);
+  });
+}
+function parseLinq(ev) {
+  if (ev.event_type !== "message.received") return { skip: "not_a_message" };
+  const d = ev.data ?? {};
+  if (d.direction === "outbound" || d.is_from_me === true || d.sender_handle?.is_me) return { skip: "outbound" };
+  if (d.chat?.is_group) return { skip: "group" };
+  if (d.reconciled_at) return { skip: "late" };
+  const from = normalizePhone(d.sender_handle?.handle ?? d.from ?? "");
+  const id = String(d.id ?? d.message?.id ?? ev.event_id ?? "");
+  if (!from || !id) return { skip: "no_sender" };
+  const parts = Array.isArray(d.parts) ? d.parts : Array.isArray(d.message?.parts) ? d.message.parts : [];
+  if (!parts.length && d.zero_retention) return { skip: "empty_zero_retention" };
+  const text = parts.filter((p) => p.type === "text" && typeof p.value === "string").map((p) => p.value.trim()).filter(Boolean).join("\n").slice(0, 1600);
+  const media = parts.filter((p) => p.type === "media" && typeof p.url === "string").map((p) => ({ url: p.url, content_type: String(p.mime_type ?? ""), size: Number(p.size_bytes ?? 0) }));
+  const service = d.service === "SMS" || d.service === "RCS" ? d.service : "iMessage";
+  return { id: `linq:${id}`, from, to: normalizePhone(d.chat?.owner_handle?.handle ?? d.recipient_phone ?? ""), text, chat: d.chat?.id ?? d.chat_id ?? null, service, media };
+}
+async function call(env2, method, path, body, f) {
+  const res = await f(`${LINQ}${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${env2("LINQ_API_KEY")}`, "Content-Type": "application/json", Accept: "application/json" },
+    body: body === void 0 ? void 0 : JSON.stringify(body),
+    signal: AbortSignal.timeout(15e3)
+  });
+  return { status: res.status, j: await res.json().catch(() => ({})) };
+}
+var errOf = (status, j) => {
+  const e = j.error ?? {};
+  return { ok: false, status, code: typeof e.code === "number" ? e.code : void 0, detail: String(e.message ?? "").slice(0, 200) };
+};
+var URLS = /https?:\/\/\S+/g;
+var hasUrl = (s) => /https?:\/\/\S+/.test(s);
+async function linqSend(env2, o, f = fetch) {
+  if (!env2("LINQ_API_KEY")) return { ok: false, status: 503, detail: "not_configured" };
+  const send = async (text, key) => {
+    const { status, j } = await call(env2, "POST", "/v3/chats", {
+      from: o.from,
+      to: [o.to],
+      message: { parts: [{ type: "text", value: text }], ...key ? { idempotency_key: key } : {} },
+      ...o.courtesy ? { override_optout: true } : {}
+    }, f);
+    if (status >= 200 && status < 300) {
+      const chat = j.chat ?? {};
+      return { ok: true, status, id: chat.message?.id, chat: chat.id, service: chat.service };
+    }
+    return errOf(status, j);
+  };
+  try {
+    const r = await send(o.text, o.key);
+    if (r.ok || r.code !== LINQ_BAD_PARAM || !hasUrl(o.text)) return r;
+    const links = o.text.match(URLS) ?? [];
+    const words = o.text.replace(URLS, "").replace(/[ \t]+\n/g, "\n").replace(/\s*[:：]\s*$/, "").replace(/[ \t]{2,}/g, " ").trim();
+    const first = await send(words || "Odelia from Placetta.", o.key ? `${o.key}:w` : void 0);
+    if (!first.ok || !first.chat) return first;
+    const { status, j } = await call(env2, "POST", `/v3/chats/${encodeURIComponent(first.chat)}/messages`, {
+      message: { parts: [{ type: "text", value: links.join("\n") }], ...o.key ? { idempotency_key: `${o.key}:l` } : {} }
+    }, f);
+    if (status >= 200 && status < 300) return { ...first, id: String((j.message ?? {}).id ?? first.id) };
+    return { ...errOf(status, j), id: first.id, chat: first.chat };
+  } catch (e) {
+    return { ok: false, status: 502, detail: String(e).slice(0, 200) };
+  }
+}
+async function linqTyping(env2, chat, f = fetch) {
+  if (!env2("LINQ_API_KEY") || !chat) return false;
+  try {
+    return (await call(env2, "POST", `/v3/chats/${encodeURIComponent(chat)}/typing`, void 0, f)).status < 300;
+  } catch {
+    return false;
+  }
+}
+async function linqLineHealth(env2, f = fetch) {
+  if (!env2("LINQ_API_KEY")) return null;
+  try {
+    const { status, j } = await call(env2, "GET", "/v3/phone_numbers", void 0, f);
+    if (status >= 300) return null;
+    const ours = new Set(linqLines(env2));
+    return (j.phone_numbers ?? []).map((p) => ({ number: normalizePhone(p.phone_number ?? "") ?? "", reputation: ["AT_RISK", "CRITICAL"].includes(String(p.reputation?.status)) ? p.reputation.status : "HEALTHY", doc_url: p.reputation?.doc_url })).filter((p) => ours.has(p.number));
+  } catch {
+    return null;
+  }
+}
+function hashLine(lines, number) {
+  if (!lines.length) return null;
+  let h = 2166136261;
+  for (const c of number) {
+    h ^= c.charCodeAt(0);
+    h = Math.imul(h, 16777619);
+  }
+  return lines[(h >>> 0) % lines.length];
+}
+function pickLine(lines, o) {
+  const usable = lines.filter((l) => !o.critical?.has(l));
+  if (o.stored && lines.includes(o.stored) && (o.reply || !o.critical?.has(o.stored))) return o.stored;
+  return hashLine(usable, o.number);
+}
+
 // supabase/functions/_shared/odelia_db.ts
-var LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at";
+var LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at, line";
 async function linkByNumber(admin2, number) {
   const { data } = await admin2.from("phone_links").select(LINK_COLS).eq("number", number).not("verified_at", "is", null).maybeSingle();
   return data ?? null;
@@ -272,22 +414,58 @@ async function linkOf(admin2, userId) {
   return data ?? null;
 }
 async function logMessage(admin2, row) {
-  const { data, error } = await admin2.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2e3), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null }).select("id").maybeSingle();
+  const { data, error } = await admin2.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2e3), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null, line: row.line ?? null, service: row.service ?? null }).select("id").maybeSingle();
   if (error && error.code !== "23505") console.error("odelia log", error.code);
   return error ? null : data?.id ?? null;
 }
+var textingReady = (env2) => linqReady(env2) || smsReady(env2);
+var critical = null;
+var forgetCriticalLines = () => {
+  critical = null;
+};
+async function criticalLines(admin2) {
+  if (critical && Date.now() - critical.at < 6e4) return critical.set;
+  const { data } = await admin2.from("odelia_lines").select("number").eq("reputation", "CRITICAL");
+  critical = { at: Date.now(), set: new Set((data ?? []).map((r) => String(r.number))) };
+  return critical.set;
+}
+async function sendText(admin2, env2, o, f = fetch) {
+  if (linqReady(env2) && !o.smsOnly) {
+    const lines = linqLines(env2), bad = new Set(await criticalLines(admin2));
+    for (let tries = 0; tries < lines.length; tries++) {
+      const line = pickLine(lines, { stored: tries ? null : o.line, number: o.to, critical: bad, reply: o.reply });
+      if (!line) break;
+      const r2 = await linqSend(env2, { from: line, to: o.to, text: o.text, key: o.key, courtesy: o.courtesy }, f);
+      if (r2.ok) return { ok: true, status: r2.status, id: r2.id ? `linq:${r2.id}` : void 0, line, service: r2.service ?? "iMessage", chat: r2.chat };
+      if (r2.code === LINQ_OPTED_OUT) return { ok: false, status: r2.status, code: BLOCKED_BY_STOP, detail: r2.detail, line, service: "iMessage" };
+      if (r2.code === LINQ_LINE_RESTRICTED || r2.code === 4002 || r2.code === 4008) {
+        bad.add(line);
+        continue;
+      }
+      return { ok: false, status: r2.status, code: String(r2.code ?? r2.status), detail: r2.detail, line, service: "iMessage" };
+    }
+    if (!smsReady(env2)) return { ok: false, status: 503, code: "no_line", line: null, service: "iMessage" };
+  }
+  const r = await sendSms(env2, o.to, o.text, f);
+  return { ok: r.ok, status: r.status, code: r.code, detail: r.detail, id: r.id, line: null, service: "SMS" };
+}
 async function textUser(admin2, env2, o) {
   if (o.link.opted_out_at) return { ok: false, sent: 0, code: "opted_out" };
-  let sent = 0;
+  const reply = ["reply", "ack", "system", "chat", "missed"].includes(o.kind);
+  let sent = 0, line = o.link.line ?? null;
   for (const text of o.segments) {
-    const r = await sendSms(env2, o.link.number, text);
+    const r = await sendText(admin2, env2, { to: o.link.number, text, line, reply });
     if (!r.ok) {
       console.error("odelia text", r.status, r.code, r.detail);
       if (r.code === BLOCKED_BY_STOP) await admin2.from("phone_links").update({ opted_out_at: (/* @__PURE__ */ new Date()).toISOString(), updated_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("user_id", o.link.user_id);
       return { ok: false, sent, code: r.code };
     }
     sent++;
-    await logMessage(admin2, { user_id: o.link.user_id, workspace_id: o.workspace_id, direction: "out", channel: "sms", kind: o.kind, body: o.logBody ?? text, provider_id: r.id, run_id: o.run_id });
+    if (r.line && r.line !== line) {
+      line = r.line;
+      await admin2.from("phone_links").update({ line, updated_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("user_id", o.link.user_id);
+    }
+    await logMessage(admin2, { user_id: o.link.user_id, workspace_id: o.workspace_id, direction: "out", channel: "sms", kind: o.kind, body: o.logBody ?? text, provider_id: r.id, run_id: o.run_id, line: r.line, service: r.service });
   }
   return { ok: true, sent };
 }
@@ -335,13 +513,13 @@ async function monitorKey() {
   return selfKey;
 }
 var internal = async (fn, body) => fetch(`${SUPABASE_URL}/functions/v1/${fn}`, { method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": await monitorKey() }, body: JSON.stringify(body), signal: AbortSignal.timeout(2e4) });
-async function textNumber(to, text, userId = null) {
-  const r = await sendSms(env, to, text);
-  if (r.ok) await logMessage(admin, { user_id: userId, direction: "out", channel: "sms", kind: "system", body: userId ? text : "", provider_id: r.id });
+async function textNumber(to, text, userId = null, via = {}, courtesy = false) {
+  const r = await sendText(admin, env, { to, text, line: via.line, reply: true, courtesy });
+  if (r.ok) await logMessage(admin, { user_id: userId, direction: "out", channel: "sms", kind: "system", body: userId ? text : "", provider_id: r.id, line: r.line, service: r.service });
   else console.error("odelia text", r.status, r.code, r.detail);
   return r.ok;
 }
-async function inbound(p, logId) {
+async function inbound(p, logId, via = {}) {
   const now = /* @__PURE__ */ new Date();
   const from = normalizePhone(p.from?.phone_number);
   const text = String(p.text ?? "").trim().slice(0, 1600);
@@ -354,27 +532,31 @@ async function inbound(p, logId) {
       await admin.from("phone_links").update({ opted_out_at: now.toISOString(), updated_at: now.toISOString() }).eq("user_id", link.user_id);
       await admin.from("odelia_outbox").update({ dropped_at: now.toISOString(), note: "opted_out" }).eq("user_id", link.user_id).is("sent_at", null).is("dropped_at", null);
     } else await admin.from("odelia_strangers").upsert({ number: from, opted_out_at: now.toISOString(), last_at: now.toISOString() }, { onConflict: "number" });
-    if (!telnyxAnswered) await textNumber(from, KEYWORD_REPLY.stop[lang], link?.user_id ?? null);
+    if (!telnyxAnswered) await textNumber(from, KEYWORD_REPLY.stop[lang], link?.user_id ?? null, via, true);
     return;
   }
   if (kw === "start") {
     if (link) await admin.from("phone_links").update({ opted_out_at: null, updated_at: now.toISOString() }).eq("user_id", link.user_id);
     else await admin.from("odelia_strangers").update({ opted_out_at: null }).eq("number", from);
-    if (!telnyxAnswered) await textNumber(from, KEYWORD_REPLY.start[lang], link?.user_id ?? null);
+    if (!telnyxAnswered) await textNumber(from, KEYWORD_REPLY.start[lang], link?.user_id ?? null, via);
     return;
   }
   if (kw === "help") {
-    if (!telnyxAnswered) await textNumber(from, KEYWORD_REPLY.help[lang], link?.user_id ?? null);
+    if (!telnyxAnswered) await textNumber(from, KEYWORD_REPLY.help[lang], link?.user_id ?? null, via);
     return;
   }
   if (!link) {
     const { data: s } = await admin.from("odelia_strangers").select("replied_at, opted_out_at, messages").eq("number", from).maybeSingle();
     const reply = !s?.opted_out_at && strangerMayGetReply(s?.replied_at, now);
     await admin.from("odelia_strangers").upsert({ number: from, last_at: now.toISOString(), messages: Number(s?.messages ?? 0) + 1, ...reply ? { replied_at: now.toISOString() } : {} }, { onConflict: "number" });
-    if (reply) await textNumber(from, SAY.stranger[lang]);
+    if (reply) await textNumber(from, SAY.stranger[lang], null, via);
     return;
   }
   if (link.opted_out_at) return;
+  if (via.line && via.line !== link.line) {
+    await admin.from("phone_links").update({ line: via.line, updated_at: now.toISOString() }).eq("user_id", link.user_id);
+    link.line = via.line;
+  }
   const since = new Date(now.getTime() - 36e5).toISOString();
   const { count } = await admin.from("odelia_messages").select("id", { count: "exact", head: true }).eq("user_id", link.user_id).eq("direction", "in").eq("channel", "sms").gt("created_at", since);
   if (inboundFlood((count ?? 1) - 1)) {
@@ -416,7 +598,7 @@ async function inbound(p, logId) {
 (${skipped} other attachment${skipped === 1 ? "" : "s"} couldn't be opened; only photos and PDFs work by text.)` : "";
   const ask = text || (lang === "zh" ? "\u6211\u53D1\u4E86\u4E00\u4E2A\u6587\u4EF6\u7ED9\u4F60\u3002" : "I sent you a file.");
   if (!text) await admin.from("odelia_messages").update({ body: ask }).eq("id", logId);
-  await startRun(link, ws.id, ask + note + lost, logId);
+  await startRun(link, ws.id, ask + note + lost, logId, via);
 }
 var MEDIA_TYPES = { "image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "application/pdf": "pdf" };
 var MEDIA_MAX = 10 * 1024 * 1024;
@@ -479,8 +661,9 @@ async function history(link, ws, beforeId) {
   while (turns[0]?.role === "assistant") turns.shift();
   return turns;
 }
-async function startRun(link, ws, prompt, logId) {
+async function startRun(link, ws, prompt, logId, via = {}) {
   const lang = link.lang;
+  if (via.chat) bg(linqTyping(env, via.chat));
   const res = await internal("agent-run", { action: "start_as", user_id: link.user_id, workspace_id: ws, prompt, channel: "sms", reply_to: link.number, lang, history: await history(link, ws, logId) }).catch(() => null);
   if (!res || res.status !== 202) {
     const code = res?.status;
@@ -494,6 +677,29 @@ async function startRun(link, ws, prompt, logId) {
   if (run?.status !== "running") return;
   const { count } = await admin.from("odelia_messages").select("id", { count: "exact", head: true }).eq("run_id", id).eq("direction", "out");
   if (!count) await textUser(admin, env, { link, workspace_id: ws, segments: [SAY.ack[lang]], kind: "ack", run_id: id });
+}
+async function linqWebhook(req) {
+  const raw = await req.text();
+  const h = (k) => req.headers.get(k) ?? "";
+  const ok = await verifyLinq(raw, { id: h("webhook-id"), timestamp: h("webhook-timestamp"), signature: h("webhook-signature") }, env("LINQ_WEBHOOK_SECRET") ?? "");
+  if (!ok) return fail(401, "unauthorized", "Bad webhook signature.");
+  let ev;
+  try {
+    ev = JSON.parse(raw) ?? {};
+  } catch {
+    return fail(400, "bad_request", "Send JSON.");
+  }
+  const m = parseLinq(ev);
+  if ("skip" in m) return json(200, { ok: true, skipped: m.skip });
+  const lines = linqLines(env);
+  if (m.to && lines.length && !lines.includes(m.to)) return json(200, { ok: true, skipped: "other_line" });
+  const line = m.to ?? lines[0] ?? null;
+  const link = await linkByNumber(admin, m.from);
+  const logId = await logMessage(admin, { user_id: link?.user_id ?? null, direction: "in", channel: "sms", kind: "chat", body: link ? m.text.slice(0, 2e3) : "", provider_id: m.id, line, service: m.service });
+  if (logId === null) return json(200, { ok: true, duplicate: true });
+  const p = { id: m.id, from: { phone_number: m.from }, to: line ? [{ phone_number: line }] : [], text: m.text, media: m.media };
+  bg(inbound(p, logId, { line, chat: m.chat }).catch((e) => console.error("inbound", String(e).slice(0, 200))));
+  return json(200, { ok: true });
 }
 async function webhook(req) {
   const raw = await req.text();
@@ -523,19 +729,65 @@ async function sendCode(codeId) {
   if (error || !c) return fail(404, "not_found", "That code request is gone.");
   const row = c;
   const setError = (e) => admin.from("phone_links").update({ last_error: e, updated_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("user_id", row.user_id);
-  if (!smsReady(env)) {
+  if (!textingReady(env)) {
     await setError("not_configured");
-    return fail(503, "not_configured", "Texting isn't set up: set TELNYX_API_KEY, TELNYX_PUBLIC_KEY, ODELIA_NUMBER and TELNYX_MESSAGING_PROFILE_ID.");
+    return fail(503, "not_configured", "Texting isn't set up: set LINQ_API_KEY, LINQ_WEBHOOK_SECRET and LINQ_NUMBERS for iMessage, or TELNYX_API_KEY, TELNYX_PUBLIC_KEY, ODELIA_NUMBER and TELNYX_MESSAGING_PROFILE_ID for SMS.");
   }
   const lang = row.lang === "zh" ? "zh" : "en";
-  const r = await sendSms(env, row.number, SAY.code[lang](code));
+  let line = null;
+  if (linqReady(env)) {
+    const { data: l } = await admin.from("phone_links").select("line").eq("user_id", row.user_id).maybeSingle();
+    line = await codeLine(row.number, l?.line ?? null);
+    if (!line && !smsReady(env)) {
+      await setError("line_busy");
+      return fail(503, "line_busy", "Every iMessage line has started as many new conversations as it safely can today.");
+    }
+  }
+  const r = await sendText(admin, env, { to: row.number, text: SAY.code[lang](code), line, smsOnly: linqReady(env) && !line, key: `code:${codeId}` });
   if (!r.ok) {
     await setError(r.code === BLOCKED_BY_STOP ? "opted_out" : "send_failed");
     return fail(502, "upstream_error", "Couldn't send the code.");
   }
   await setError(null);
-  await logMessage(admin, { user_id: row.user_id, direction: "out", channel: "sms", kind: "code", body: lang === "zh" ? "\u5DF2\u53D1\u9001\u9A8C\u8BC1\u7801" : "Sent a verification code", provider_id: r.id });
+  if (r.line) await admin.from("phone_links").update({ line: r.line, updated_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("user_id", row.user_id);
+  await logMessage(admin, { user_id: row.user_id, direction: "out", channel: "sms", kind: "code", body: lang === "zh" ? "\u5DF2\u53D1\u9001\u9A8C\u8BC1\u7801" : "Sent a verification code", provider_id: r.id, line: r.line, service: r.service });
   return json(200, { ok: true });
+}
+async function codeLine(number, stored) {
+  const bad = await criticalLines(admin);
+  const lines = linqLines(env).filter((l) => !bad.has(l));
+  if (!lines.length) return null;
+  const day = /* @__PURE__ */ new Date();
+  day.setUTCHours(0, 0, 0, 0);
+  const { data } = await admin.from("odelia_messages").select("line").eq("direction", "out").eq("kind", "code").in("line", lines).gte("created_at", day.toISOString());
+  const used = /* @__PURE__ */ new Map();
+  for (const r of data ?? []) used.set(String(r.line), (used.get(String(r.line)) ?? 0) + 1);
+  const open = (l) => (used.get(l) ?? 0) < LIMITS.newChatsPerLine;
+  const first = stored && lines.includes(stored) ? stored : hashLine(lines, number);
+  if (first && open(first)) return first;
+  return lines.filter(open).sort((a, b) => (used.get(a) ?? 0) - (used.get(b) ?? 0))[0] ?? null;
+}
+async function lineHealth(now = /* @__PURE__ */ new Date()) {
+  const health = await linqLineHealth(env);
+  if (!health) return { lines: 0 };
+  const { data: old } = await admin.from("odelia_lines").select("number, reputation");
+  const before = new Map((old ?? []).map((r) => [String(r.number), String(r.reputation)]));
+  for (const h of health) {
+    const was = before.get(h.number);
+    await admin.from("odelia_lines").upsert({ number: h.number, reputation: h.reputation, doc_url: h.doc_url ?? null, checked_at: now.toISOString(), ...was !== h.reputation ? { changed_at: now.toISOString() } : {} }, { onConflict: "number" });
+    if (was !== h.reputation && h.reputation !== "HEALTHY") {
+      await admin.from("team_tasks").upsert({
+        kind: "line_health",
+        filing_id: null,
+        workspace_id: null,
+        title: `iMessage line ${prettyPhone(h.number)} is ${h.reputation === "CRITICAL" ? "critical: outbound paused on it" : "at risk: slow its sending"}`,
+        detail: { number: h.number, reputation: h.reputation, was: was ?? null, doc_url: h.doc_url ?? null },
+        dedupe: `line_health:${h.number}:${h.reputation}:${now.toISOString().slice(0, 10)}`
+      }, { onConflict: "dedupe", ignoreDuplicates: true });
+    }
+  }
+  forgetCriticalLines();
+  return { lines: health.length, critical: health.filter((h) => h.reputation === "CRITICAL").length };
 }
 var expireOld = (now) => admin.from("odelia_outbox").update({ dropped_at: now.toISOString(), note: "expired" }).is("sent_at", null).is("dropped_at", null).lt("created_at", new Date(now.getTime() - LIMITS.maxQueuedHours * 36e5).toISOString());
 async function flush(now = /* @__PURE__ */ new Date()) {
@@ -558,14 +810,14 @@ async function flush(now = /* @__PURE__ */ new Date()) {
       return count ?? 0;
     };
     let rest = items;
-    const call = items.find((i) => i.kind === "call" && i.urgent);
-    if (call && link.calls_on && voiceReady(env) && underDailyLimit("call", await sentToday("voice"))) {
+    const call2 = items.find((i) => i.kind === "call" && i.urgent);
+    if (call2 && link.calls_on && voiceReady(env) && underDailyLimit("call", await sentToday("voice"))) {
       const { count: live } = await admin.from("odelia_calls").select("call_control_id", { count: "exact", head: true }).eq("user_id", uid).is("ended_at", null).gt("created_at", new Date(now.getTime() - 15 * 6e4).toISOString());
       if (!live) {
-        const res = await internal("odelia-voice", { action: "dial", outbox_id: call.id }).catch(() => null);
+        const res = await internal("odelia-voice", { action: "dial", outbox_id: call2.id }).catch(() => null);
         if (res?.ok) {
           calls++;
-          rest = items.filter((i) => i.id !== call.id);
+          rest = items.filter((i) => i.id !== call2.id);
         }
       }
     }
@@ -598,6 +850,7 @@ async function handle(req) {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   if (req.headers.get("telnyx-signature-ed25519")) return await webhook(req);
+  if (req.headers.get("webhook-signature")) return await linqWebhook(req);
   let body;
   try {
     body = await req.json();
@@ -605,22 +858,37 @@ async function handle(req) {
     return fail(400, "bad_request", "Send JSON.");
   }
   if (body.action === "line") {
-    const n = odeliaNumber(env);
-    return json(200, { configured: smsReady(env), voice: voiceReady(env), number: n, display: n ? prettyPhone(n) : null });
+    const imessage = linqReady(env);
+    const n = imessage ? linqLines(env)[0] : odeliaNumber(env);
+    const callN = voiceReady(env) ? imessage && env("LINQ_FORWARDS_CALLS") === "1" ? n : odeliaNumber(env) : null;
+    return json(200, {
+      configured: textingReady(env),
+      imessage,
+      voice: voiceReady(env),
+      number: n,
+      display: n ? prettyPhone(n) : null,
+      call_number: callN,
+      call_display: callN ? prettyPhone(callN) : null
+    });
   }
   if (!await monitorKeyOk(req.headers.get("x-monitor-key"))) return fail(401, "unauthorized", "unauthorized");
   if (body.action === "send_code") return await sendCode(String(body.code_id ?? ""));
   if (body.action === "flush") {
-    if (!smsReady(env)) {
+    if (!textingReady(env)) {
       await expireOld(/* @__PURE__ */ new Date());
       return fail(503, "not_configured", "Texting isn't set up.");
     }
-    return json(200, { ok: true, ...await flush() });
+    const lines = linqReady(env) ? await lineHealth().catch((e) => {
+      console.error("line health", String(e).slice(0, 160));
+      return null;
+    }) : null;
+    return json(200, { ok: true, ...await flush(), ...lines ? { lines } : {} });
   }
   return fail(400, "bad_request", "Unknown action.");
 }
 if (true) Deno.serve(handle);
 export {
   flush,
-  handle
+  handle,
+  lineHealth
 };
