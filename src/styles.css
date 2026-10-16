@@ -1496,7 +1496,15 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .insp-list .check { display: flex; align-items: flex-start; gap: 8px; flex: 1; }
 .insp-list .check span { display: flex; flex-direction: column; gap: 2px; }
 .insp-list .check small { color: var(--ink3); font-size: 12px; }
-.insp-list li.done b { color: var(--ink3); font-weight: 400; }
+.insp-list li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; }
+.insp-list .ci { font-weight: 400; color: var(--ink); line-height: 1.5; }
+.insp-list li.done .ci { color: var(--ink3); }
+.insp-list li > .pill { flex: none; margin-top: -4px; }
+/* "How" waits on the next item to do; the others show it on hover or keyboard focus. Touch screens show it on each. */
+@media (hover: hover) {
+  .insp-list li:not(.next) > .pill { opacity: 0; transition: opacity .15s; }
+  .insp-list li:hover > .pill, .insp-list li:focus-within > .pill { opacity: 1; }
+}
 
 /* an address line's rule, under the line in the application tab */
 .arule { margin-top: 6px; font-size: 12.5px; line-height: 1.45; color: var(--ink2); }

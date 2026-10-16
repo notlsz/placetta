@@ -226,10 +226,16 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
       {guide && (
         <Section title={b(B(`Inspections in ${guide.name.en}`, `${guide.name.zh}的检查`))}
           sub={b(B("Every inspection this store has to pass, how to book it, and the inspector's own list. Tick each item when it's in place; open items are what an inspector would cite.", "本店需要通过的每项检查、如何预约，以及检查员自己的清单。每项到位后打勾；未勾选的就是检查员会指出的问题。"))}>
-          {guide.inspections.map(ins => {
+          {(() => {
+            // only the next inspection due starts open: the first one not fully ready, among those before opening while the
+            // store is opening and the routine ones once it's open
+            const ready = (i: typeof guide.inspections[number]) => i.checklist.every(c => s.ready?.[`${i.id}:${c.id}`]);
+            const next = guide.inspections.find(i => i.stage === (s.stage === "opening" ? "opening" : "routine") && !ready(i))?.id;
+            return guide.inspections.map(ins => {
             const done = ins.checklist.filter(c => s.ready?.[`${ins.id}:${c.id}`]).length;
+            const first = ins.checklist.find(c => !s.ready?.[`${ins.id}:${c.id}`])?.id;
             return (
-              <details key={ins.id} className="insp" open={ins.stage === "opening" && s.stage === "opening" && done < ins.checklist.length}>
+              <details key={ins.id} className="insp" open={ins.id === next}>
                 <summary>
                   <span className="lr-tx"><b>{b(ins.name)}</b><small>{b(ins.agency)}{ins.stage === "routine" ? b(B(", after opening", "，开业后")) : ""}</small></span>
                   <span className={"insp-n" + (done === ins.checklist.length ? " ok" : "")}>{done}/{ins.checklist.length}</span>
@@ -245,10 +251,10 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
                   {ins.checklist.map(c => {
                     const k = `${ins.id}:${c.id}`, on = !!s.ready?.[k];
                     return (
-                      <li key={c.id} className={"row" + (on ? " done" : "")}>
+                      <li key={c.id} className={"row" + (on ? " done" : "") + (c.id === first ? " next" : "")}>
                         <label className="check"><input type="checkbox" checked={on} onChange={e => { const v = e.target.checked; updateStore(s.id, x => ({ ...x, ready: { ...x.ready, [k]: v } }), { action: v ? B("Ready for inspection", "检查项已到位") : B("Not ready for inspection", "检查项未到位"), object: s.name, detail: c.item }); }} />
-                          <span><b>{b(c.item)}</b>{c.why && <small>{b(c.why)}</small>}</span></label>
-                        {!on && <Pill sm disabled={busy} onClick={() => ask(b(B(`How do we get this ready for the ${ins.name.en} at ${s.name.en}: ${c.item.en}?`, `如何为${s.name.zh}的${ins.name.zh}准备好这一项：${c.item.zh}？`)))}>{b(B("How", "怎么做"))}</Pill>}
+                          <span><span className="ci">{b(c.item)}</span>{c.why && <small>{b(c.why)}</small>}</span></label>
+                        {!on && <Pill sm kind="quiet" disabled={busy} onClick={() => ask(b(B(`How do we get this ready for the ${ins.name.en} at ${s.name.en}: ${c.item.en}?`, `如何为${s.name.zh}的${ins.name.zh}准备好这一项：${c.item.zh}？`)))}>{b(B("How", "怎么做"))}</Pill>}
                       </li>
                     );
                   })}
@@ -256,7 +262,7 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
                 <p className="note"><a href={ins.source} target="_blank" rel="noreferrer">{b(B("The agency's own page", "机构官方页面"))}<I.ext /></a> {b(B(`Read ${guide.read}.`, `${guide.read} 查阅。`))}</p>
               </details>
             );
-          })}
+          }); })()}
         </Section>
       )}
 
