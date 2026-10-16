@@ -1230,7 +1230,7 @@ function SpendingGroup() {
         <label className="spend-field">{zh ? "单笔最高（美元）" : "Most for one purchase (USD)"}<input inputMode="decimal" disabled={!canEdit} value={policy.perPurchase} onChange={e => set({ perPurchase: num(e.target.value) })} /></label>
         <label className="spend-field">{zh ? "超过此金额需两位所有者批准（美元）" : "Two owners approve above (USD)"}<input inputMode="decimal" disabled={!canEdit} value={policy.secondOver ?? ""} placeholder={zh ? "不需要" : "Never"} onChange={e => set({ secondOver: e.target.value.trim() ? num(e.target.value) : undefined })} /></label>
       </div>
-      <div className="sg-sub">
+      <div className="sg-sub spend-bud">
         <h3>{zh ? "预算" : "Budgets"}</h3>
         <p className="sg-note">{zh ? "购买会计入它所属的每一项预算；任何一项超支都会被拒绝。" : "A purchase counts against every budget it falls under; going over any one of them refuses it."}</p>
         {policy.budgets.length > 0 && (
@@ -1240,14 +1240,14 @@ function SpendingGroup() {
               const upd = (p: Partial<Budget>) => set({ budgets: policy.budgets.map((x, m) => (m === n ? { ...x, ...p } : x)) });
               return (
                 <tr key={bg.id}>
-                  <td><select disabled={!canEdit} value={bg.store ?? ""} onChange={e => upd({ store: e.target.value || undefined })} aria-label={zh ? "适用范围" : "For"}>
+                  <td data-label={zh ? "适用范围" : "For"}><select disabled={!canEdit} value={bg.store ?? ""} onChange={e => upd({ store: e.target.value || undefined })} aria-label={zh ? "适用范围" : "For"}>
                     <option value="">{zh ? "整个企业" : "Whole business"}</option>{(ws.stores ?? []).map(s => <option key={s.id} value={s.id}>{tx(s.name)}</option>)}</select></td>
-                  <td><select disabled={!canEdit} value={bg.category ?? ""} onChange={e => upd({ category: (e.target.value || undefined) as SpendCategory | undefined })} aria-label={zh ? "类别" : "Kind"}>
+                  <td data-label={zh ? "类别" : "Kind"}><select disabled={!canEdit} value={bg.category ?? ""} onChange={e => upd({ category: (e.target.value || undefined) as SpendCategory | undefined })} aria-label={zh ? "类别" : "Kind"}>
                     <option value="">{zh ? "全部" : "Everything"}</option>{SPEND_CATEGORIES.map(c => <option key={c.id} value={c.id}>{tx(c.label)}</option>)}</select></td>
-                  <td><select disabled={!canEdit} value={bg.period} onChange={e => upd({ period: e.target.value as Budget["period"] })} aria-label={zh ? "周期" : "Period"}>
+                  <td data-label={zh ? "周期" : "Period"}><select disabled={!canEdit} value={bg.period} onChange={e => upd({ period: e.target.value as Budget["period"] })} aria-label={zh ? "周期" : "Period"}>
                     <option value="month">{zh ? "每月" : "Each month"}</option><option value="opening">{zh ? "至开业" : "Until it opens"}</option><option value="total">{zh ? "总计" : "In total"}</option></select></td>
-                  <td><input inputMode="decimal" disabled={!canEdit} value={bg.amount} onChange={e => upd({ amount: num(e.target.value) })} aria-label={zh ? "金额" : "Amount"} /></td>
-                  <td className="when">{usd(spent(bg))}{bg.by === "agent" && <small>{zh ? "，Odelia 建议" : ", suggested by Odelia"}</small>}</td>
+                  <td data-label={zh ? "金额" : "Amount"}><input inputMode="decimal" disabled={!canEdit} value={bg.amount} onChange={e => upd({ amount: num(e.target.value) })} aria-label={zh ? "金额" : "Amount"} /></td>
+                  <td className="when" data-label={zh ? "已用" : "Used"}>{usd(spent(bg))}{bg.by === "agent" && <small>{zh ? "，Odelia 建议" : ", suggested by Odelia"}</small>}</td>
                   <td className="acts">{canEdit && <button type="button" className="sbtn quiet" aria-label={zh ? "删除预算" : "Remove budget"} onClick={() => set({ budgets: policy.budgets.filter((_, m) => m !== n) })}><I.x /></button>}</td>
                 </tr>
               );
@@ -1267,18 +1267,18 @@ function SpendingGroup() {
         </div>
       )}
       {!canEdit && <p className="sg-note">{zh ? "只有所有者可以修改支出规则。" : "Only an owner can change the spending rules."}</p>}
-      <div className="sg-sub">
+      <div className="sg-sub spend-bud">
         <h3>{zh ? "购买记录" : "Purchases"}</h3>
         {!purchases.length ? <p className="sg-note">{zh ? "还没有购买。Odelia 申请的每一笔都会列在这里，包括被规则拦下的。" : "None yet. Every purchase Odelia asks for shows here, including any the rules stopped."}</p> : (
           <table className="memt spend-p">
             <thead><tr><th>{zh ? "日期" : "Date"}</th><th>{zh ? "收款方" : "Payee"}</th><th>{zh ? "用途" : "For"}</th><th>{zh ? "金额" : "Amount"}</th><th>{zh ? "状态" : "Status"}</th><th><span className="sr">{zh ? "操作" : "Actions"}</span></th></tr></thead>
             <tbody>{purchases.map(p => (
               <tr key={p.id} className={p.status === "blocked" || p.status === "declined" || p.status === "canceled" ? "off" : ""}>
-                <td className="when">{fmtDay(p.at, lang, true)}</td>
-                <td>{p.payeeUrl ? <a href={p.payeeUrl} target="_blank" rel="noopener noreferrer">{p.payee}</a> : p.payee}</td>
-                <td>{tx(p.why)}{p.status === "blocked" && p.reasons?.length ? <small>{p.reasons.map(tx).join(" ")}</small> : null}</td>
-                <td>{usd(p.amount)}</td>
-                <td>{tx(SPEND_STATUS[p.status])}</td>
+                <td className="when" data-label={zh ? "日期" : "Date"}>{fmtDay(p.at, lang, true)}</td>
+                <td data-label={zh ? "收款方" : "Payee"}>{p.payeeUrl ? <a href={p.payeeUrl} target="_blank" rel="noopener noreferrer">{p.payee}</a> : p.payee}</td>
+                <td data-label={zh ? "用途" : "For"}>{tx(p.why)}{p.status === "blocked" && p.reasons?.length ? <small>{p.reasons.map(tx).join(" ")}</small> : null}</td>
+                <td data-label={zh ? "金额" : "Amount"}>{usd(p.amount)}</td>
+                <td data-label={zh ? "状态" : "Status"}>{tx(SPEND_STATUS[p.status])}</td>
                 <td className="acts">{canEdit && p.status === "asked" && <button type="button" className="sbtn quiet" onClick={() => void act(p, "decline")}>{zh ? "拒绝" : "Decline"}</button>}
                   {canEdit && p.status === "approved" && <button type="button" className="sbtn quiet" onClick={() => void act(p, "cancel")}>{zh ? "取消" : "Cancel"}</button>}</td>
               </tr>
