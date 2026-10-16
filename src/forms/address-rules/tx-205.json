@@ -21,15 +21,15 @@
       ]
     },
     "governing_persons": {
-      "rule": "foreign_ok",
+      "rule": "unconfirmed",
       "poBox": "allowed",
       "what": {
-        "en": "Article 3: the name and address of each initial manager or member. Any street or mailing address works, including one outside the US (the form has a country box). The filing is public.",
-        "zh": "第3条：每位初始经理或成员的姓名和地址。街道或邮寄地址均可，包括美国境外地址（表格设有国家栏）。该文件会公开。"
+        "en": "Article 3: the name and address of each initial manager or member; an address is always required and a street or mailing address is accepted. No in-state address is required, and the form has a country box, but only the form itself signals that an address abroad is accepted. The filing is public.",
+        "zh": "第3条：每位初始经理或成员的姓名和地址；地址必填，街道或邮寄地址均可。不要求德州地址，表格也设有国家栏，但只有表格本身表明可填境外地址。该文件会公开。"
       },
       "ifNone": {
-        "en": "Use each person's own business or home address, wherever it is; a business address keeps a home address off the public record.",
-        "zh": "填写每个人自己的办公或住宅地址，不限所在地；用办公地址可避免住址被公开。"
+        "en": "Use each person's own business address (it keeps a home address off the public record). For someone with only an address abroad, Placetta asks the Texas Secretary of State before writing it in the form's country box.",
+        "zh": "填写每个人自己的办公地址（可避免住址被公开）。若某人只有境外地址，Placetta 会先向德州州务卿办公室确认，再填入表格的国家栏。"
       },
       "confirmations": [
         { "url": "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", "kind": "form", "quote": "Street or Mailing Address City State Country Zip Code" },
@@ -38,15 +38,15 @@
       ]
     },
     "mailing": {
-      "rule": "foreign_ok",
+      "rule": "unconfirmed",
       "poBox": "allowed",
       "what": {
-        "en": "Initial mailing address: where the Comptroller sends franchise-tax mail. A street address or a P.O. box; the form has a country box, so an address abroad can be given.",
-        "zh": "初始邮寄地址：州审计长寄送特许经营税信件的地址。可用街道地址或邮政信箱；表格设有国家栏，可填境外地址。"
+        "en": "Initial mailing address: where the Comptroller sends franchise-tax mail. A street address or a P.O. box, not required to be in Texas. The PDF has a country box, but no written source says an address abroad is accepted.",
+        "zh": "初始邮寄地址：州审计长寄送特许经营税信件的地址。可用街道地址或邮政信箱，不要求在德州。PDF 设有国家栏，但没有书面资料说明接受境外地址。"
       },
       "ifNone": {
-        "en": "Use any address where the company reliably gets mail: a US P.O. box or the office abroad.",
-        "zh": "填写公司能稳定收信的任何地址：美国邮政信箱或境外办公地址均可。"
+        "en": "Use a US address where the company reliably gets mail (a P.O. box is fine). If it has only an address abroad, Placetta asks the Comptroller or Secretary of State first.",
+        "zh": "填写公司能稳定收信的美国地址（可用邮政信箱）。若只有境外地址，Placetta 会先向州审计长或州务卿办公室确认。"
       },
       "confirmations": [
         { "url": "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", "kind": "form", "quote": "(Provide the mailing address to which state franchise tax correspondence should be sent.)" },
@@ -71,5 +71,5 @@
       ]
     }
   },
-  "notes": "Form 205 (Revised 09/26), the Secretary of State's Form 205 instructions page, and Tex. Bus. Orgs. Code 5.201, 3.005(a)(6) and 3.010. Statutes were read from the Legislature's file server (tcss.legis.texas.gov), which serves the statutes.capitol.texas.gov pages. The governing-person and initial-mailing blocks have country boxes in the PDF (fields 'country', 'Country of Initial Mailing Address'); the map fills street, city, state and ZIP only, so a foreign address needs the country box filled too. The organizer block has no country box, hence unconfirmed."
+  "notes": "Form 205 (Revised 09/26), the Secretary of State's Form 205 instructions page, and Tex. Bus. Orgs. Code 5.201, 3.005(a)(6) and 3.010. Statutes were read from the Legislature's file server (tcss.legis.texas.gov), which serves the statutes.capitol.texas.gov pages. A line is marked foreign_ok only when at least two sources say a non-local or foreign address is accepted. The governing-person and initial-mailing blocks have country boxes in the PDF (fields 'country', 'Country of Initial Mailing Address'), but the instructions and statute only require 'an address', so both stay unconfirmed; none requires a Texas address. The map fills street, city, state and ZIP only, not the country box. The organizer block has no country box."
 }

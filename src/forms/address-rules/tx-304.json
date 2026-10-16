@@ -37,15 +37,15 @@
       ]
     },
     "governing_persons": {
-      "rule": "foreign_ok",
+      "rule": "unconfirmed",
       "poBox": "allowed",
       "what": {
-        "en": "Item 11: the name and address of each governing person (manager or member). Any street or mailing address, including a P.O. box or one abroad (the form has a country box). The filing is public.",
-        "zh": "第11项：每位管理人（经理或成员）的姓名和地址。街道或邮寄地址均可，包括邮政信箱或境外地址（表格设有国家栏）。该文件会公开。"
+        "en": "Item 11: the name and address of each governing person (manager or member); a street, business or P.O. box address is accepted and no Texas address is required. The form has a country box, but only the form itself signals that an address abroad is accepted. The filing is public.",
+        "zh": "第11项：每位管理人（经理或成员）的姓名和地址；可用街道、办公或邮政信箱地址，不要求德州地址。表格设有国家栏，但只有表格本身表明可填境外地址。该文件会公开。"
       },
       "ifNone": {
-        "en": "Use each person's own business address, wherever it is; the Secretary of State suggests a business or P.O. box address over a home address for privacy.",
-        "zh": "填写每个人自己的办公地址，不限所在地；为保护隐私，州务卿建议用办公地址或邮政信箱，而不是住址。"
+        "en": "Use each person's own business address; the Secretary of State suggests a business or P.O. box address over a home address for privacy. For someone with only an address abroad, Placetta asks the Secretary of State before writing it in the country box.",
+        "zh": "填写每个人自己的办公地址；为保护隐私，州务卿建议用办公地址或邮政信箱而不是住址。若某人只有境外地址，Placetta 会先向州务卿办公室确认，再填入国家栏。"
       },
       "confirmations": [
         { "url": "https://www.sos.state.tx.us/corp/forms/304_boc.pdf", "kind": "form", "quote": "Organization Name Street or Mailing Address City State Country Zip Code" },
@@ -54,5 +54,5 @@
       ]
     }
   },
-  "notes": "Form 304 (Revised 09/26), the Secretary of State's Form 304 instructions page, and Tex. Bus. Orgs. Code 9.004(b)(8)-(10) and 5.201. In Texas law 'foreign entity' means formed outside Texas; the form's 'state or foreign country' line and country boxes show a non-US LLC registers on the same form."
+  "notes": "Form 304 (Revised 09/26), the Secretary of State's Form 304 instructions page, and Tex. Bus. Orgs. Code 9.004(b)(8)-(10) and 5.201. In Texas law 'foreign entity' means formed outside Texas; the form's 'state or foreign country' line and country boxes show a non-US LLC registers on the same form. A line is marked foreign_ok only when at least two sources say a non-local or foreign address is accepted: the principal office qualifies (form, instructions and statute all describe the foreign entity's own office), the governing persons do not (only the form's country box)."
 }
