@@ -27,6 +27,8 @@ const PRICES: [RegExp, Price][] = [
   [/gemini-3\.1-flash-lite/, { in: 0.25, out: 1.5 }],
   [/gemini-3\.5-flash-lite/, { in: 0.3, out: 2.5 }],
   [/gemini-3\.5-flash/, { in: 1.5, out: 9 }],
+  [/gemini-3\.8-flash/, { in: 0.375, out: 1.875 }],
+  [/gpt-oss-120b/, { in: 0.35, out: 0.75 }],   // Cerebras list price; Groq and OpenRouter are lower (0.15 / 0.60)
   [/gemini-3\.[67]-flash/, { in: 0.75, out: 3.75 }],
   [/gemini-3-flash|gemini-flash-latest/, { in: 0.5, out: 3 }],
   [/gemini-3\.1-pro/, { in: 2, out: 12, longAt: 200_000, long: { in: 4, out: 18 } }],

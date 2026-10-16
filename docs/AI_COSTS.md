@@ -11,16 +11,20 @@ migration `20261016160000_ai_routing_margin.sql` (saver mode, alerts, throttles,
 
 ## The roles and their routes
 
-| Role | What it does | Default route, cheapest first | Where it is used |
+Synced with Belluh: Gemini first (3.8 Flash for the work, 2.5 Flash when 3.8 is unavailable), Anthropic as the
+top-of-the-line seat and safety net, and the same three open-model backups (gpt-oss-120b on Groq, Cerebras, OpenRouter),
+each used only when its key is set and only after Gemini and Anthropic can't answer.
+
+| Role | What it does | Default route | Where it is used |
 | --- | --- | --- | --- |
-| `plan` | the main agentic loop: planning, tools, the final answer | Claude Sonnet 5.5, then Gemini 2.5 Pro when Anthropic is down | every run from the app or email (`agent-run`), the browser's loop (`agent`) |
-| `review` | the independent checker that grades a job against its done list | Gemini 2.5 Pro, then Sonnet 5.5 | the checker in `src/serverRun.ts` (a different vendor from the doer by default, so no model grades its own work) |
-| `extract` | reading uploads, pulling fields, classifying | Gemini 2.5 Flash-Lite, Flash, then Claude Haiku 4.5 | `review_documents`, reading an upload into an application, the browser's file reads |
-| `translate` | rendering text that is already decided into English or Chinese | Flash-Lite, Flash, Haiku | reserved: replies are written bilingual by the main loop today, so nothing routes here yet |
-| `draft` | routine documents and messages from a template | Flash, then Haiku | the lesson distiller (`learnFromRun`, `learnFromAgencies`); the main loop while in saver mode |
-| `short` | one-liners for texts, calls and chat bots, status chases | Flash-Lite, Flash, Haiku | runs that came by SMS, a call, Slack or Lark |
-| `watch` | the monitor's weekly rule scan and routine checks | Flash-Lite, Flash, Haiku | runs the monitor starts (`kind = watch`: the weekly check, routines, renewals, chases) |
-| `deep` | web research | Claude Opus 5.5 | a run started with the deep switch |
+| `plan` | the main agentic loop: planning, tools, the final answer | Gemini 3.8 Flash, 2.5 Flash, Claude Sonnet 5.5, then the backups | every run from the app or email (`agent-run`), the browser's loop (`agent`) |
+| `review` | the independent checker that grades a job against its done list | Sonnet 5.5, Gemini 2.5 Pro, 2.5 Flash, backups | the checker in `src/serverRun.ts` (a different model from the doer, so no model grades its own work) |
+| `extract` | reading uploads, pulling fields, classifying | Gemini 2.5 Flash-Lite, Flash, Claude Haiku 4.5, backups | `review_documents`, reading an upload into an application, the browser's file reads |
+| `translate` | rendering text that is already decided into English or Chinese | Flash-Lite, Flash, Haiku, backups | reserved: replies are written bilingual by the main loop today |
+| `draft` | routine documents and messages | Gemini 3.8 Flash, 2.5 Flash, Haiku, backups | the lesson distiller; the main loop in saver mode |
+| `short` | one-liners for texts, calls and chat bots | Gemini 3.8 Flash, 2.5 Flash, Haiku, backups | runs that came by SMS, a call, Slack or Lark |
+| `watch` | the monitor's weekly rule scan and routine checks | Flash-Lite, Flash, Haiku, backups | runs the monitor starts |
+| `deep` | web research | Claude Opus 5.5, Gemini 2.5 Pro, 3.8 Flash | a run started with the deep switch |
 
 Rules that bend the table:
 
@@ -31,8 +35,8 @@ Rules that bend the table:
 - PDFs only go to vendors that read them (Anthropic, Gemini, OpenRouter). Free models never see customer files.
 - Vendors: Anthropic and OpenAI always. Gemini only with `GEMINI_PAID=1` (Google's free tier may use prompts to
   improve its products; the paid tier doesn't). Without it a Gemini key goes unused and every cheap role falls to
-  Haiku. DeepSeek only with `ALLOW_DEEPSEEK=1`, OpenRouter with `ALLOW_OPENROUTER=1`, Groq with `ALLOW_GROQ=1`, and
-  none of those three ever gets a file. The vendor that answered is written on every event (`ai_events.provider`),
+  Haiku. DeepSeek only with `ALLOW_DEEPSEEK=1`. The gpt-oss backups (Groq, Cerebras, OpenRouter) are on when their key
+  is set, and never get a file. The vendor that answered is written on every event (`ai_events.provider`),
   which is how the subprocessor list is proven.
 - Gemini reads PDFs through its OpenAI-compatible endpoint as a `file` part. That path is untested against Google;
   a rejected request falls through to Anthropic, which is the same cost as before.

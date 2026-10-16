@@ -17,7 +17,8 @@
 // AGENT_ROUTE_FAST is extract, AGENT_ROUTE is plan, AGENT_ROUTE_DEEP is deep. Anthropic is added at the end of any route
 // that leaves it out. AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST name the Anthropic models (Sonnet, Opus, Haiku).
 //
-// Keys: ANTHROPIC_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, GROQ_API_KEY.
+// Keys: GEMINI_API_KEY (the main one), ANTHROPIC_API_KEY, GROQ_API_KEY, CEREBRAS_API_KEY, OPENROUTER_API_KEY,
+// OPENAI_API_KEY, DEEPSEEK_API_KEY.
 // Which vendors may see what is decided by vendorOk (data-use guardrails):
 //   Anthropic and OpenAI       always (both contractually don't train on API traffic)
 //   Gemini                     everything only with GEMINI_PAID=1 (Google's free tier may use prompts to improve its
@@ -26,7 +27,7 @@
 //                              customer's in it). Today every call carries the workspace, so without GEMINI_PAID a
 //                              Gemini key goes unused.
 //   DeepSeek                   PRC-hosted: only with ALLOW_DEEPSEEK=1, and never files
-//   OpenRouter, Groq           only with ALLOW_OPENROUTER=1 / ALLOW_GROQ=1, and never files
+//   Groq, Cerebras, OpenRouter the gpt-oss-120b backups: on when their key is set, last in every route, never files
 // Free models (an OpenRouter model ending in ":free", or anything on Groq's free tier) are skipped unless
 // AGENT_ALLOW_FREE=1, and are never sent customer files, because free tiers may keep or train on prompts.
 // PDFs (document blocks) only go to models that read them: Anthropic, Gemini, OpenRouter.
@@ -60,30 +61,37 @@ const OPENAI_STYLE: Record<string, { url: string; key: string }> = {
   gemini: { url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", key: "GEMINI_API_KEY" },
   openrouter: { url: "https://openrouter.ai/api/v1/chat/completions", key: "OPENROUTER_API_KEY" },
   groq: { url: "https://api.groq.com/openai/v1/chat/completions", key: "GROQ_API_KEY" },
+  cerebras: { url: "https://api.cerebras.ai/v1/chat/completions", key: "CEREBRAS_API_KEY" },
 };
 export const PROVIDERS = ["anthropic", ...Object.keys(OPENAI_STYLE)];
 
 /** The Anthropic models by size. The repo's defaults; AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST change them. */
 export const ANTHROPIC_MODELS = { plan: "claude-sonnet-5-5", deep: "claude-opus-5-5", fast: "claude-haiku-4-5-20251001" };
-const GEMINI = { lite: "gemini-2.5-flash-lite", flash: "gemini-2.5-flash", pro: "gemini-2.5-pro" };
+const GEMINI = { lite: "gemini-2.5-flash-lite", flash: "gemini-2.5-flash", next: "gemini-3.8-flash", pro: "gemini-2.5-pro" };
+/** The open-model backups, the same as Belluh's: gpt-oss-120b on Groq, then Cerebras, then OpenRouter. Each is used only
+ *  when its key is set, only after Gemini and Anthropic can't answer, and never with a customer's files. */
+const BACKUPS: [string, string][] = [["groq", "openai/gpt-oss-120b"], ["cerebras", "gpt-oss-120b"], ["openrouter", "openai/gpt-oss-120b"]];
 
 /**
  * The default route of each role, cheapest first, as [provider, model]. "anthropic:*" stands for the Anthropic model
  * that fits the role (Haiku for the cheap roles, Sonnet for plan and review, Opus for deep), so AGENT_MODEL still
  * picks the exact one. A provider without a key is skipped at call time.
  */
-const CHEAP: [string, string][] = [["gemini", GEMINI.lite], ["gemini", GEMINI.flash], ["anthropic", "*"]];
+// Gemini first, as on Belluh: 3.8 Flash for the work, 2.5 Flash when 3.8 is unavailable, Flash-Lite for the cheap reads.
+// Anthropic is the top-of-the-line seat (the reviewer when there's a key, deep research) and the safety net; the open
+// gpt-oss backups come last.
+const CHEAP: [string, string][] = [["gemini", GEMINI.lite], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS];
 export const DEFAULT_ROUTES: Record<Role, [string, string][]> = {
   extract: CHEAP,
   translate: CHEAP,
-  short: CHEAP,
+  short: [["gemini", GEMINI.next], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS],
   watch: CHEAP,
-  draft: [["gemini", GEMINI.flash], ["anthropic", "*"]],
-  // the main loop: Sonnet, with Gemini's Pro behind it for when Anthropic is down
-  plan: [["anthropic", "*"], ["gemini", GEMINI.pro]],
-  // the checker: a different vendor from the doer, so the work isn't graded by the model that did it
-  review: [["gemini", GEMINI.pro], ["anthropic", "*"]],
-  deep: [["anthropic", "*"]],
+  draft: [["gemini", GEMINI.next], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS],
+  // the main loop: Gemini 3.8 Flash, then 2.5 Flash, then Sonnet when there's an Anthropic key, then the backups
+  plan: [["gemini", GEMINI.next], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS],
+  // the checker: a different model from the doer, so the work isn't graded by the model that did it
+  review: [["anthropic", "*"], ["gemini", GEMINI.pro], ["gemini", GEMINI.flash], ...BACKUPS],
+  deep: [["anthropic", "*"], ["gemini", GEMINI.pro], ["gemini", GEMINI.next]],
 };
 
 /** The Anthropic model a role falls back to. fallbackModel is what the caller already decided (AGENT_MODEL or AGENT_MODEL_DEEP). */
@@ -110,7 +118,7 @@ export function routeFor(env: Env, roleOrTier: Role | Tier, fallbackModel: strin
   return list;
 }
 
-const isFree = (p: string, m: string) => p === "groq" || /:free$/.test(m);
+const isFree = (_p: string, m: string) => /:free$/.test(m);
 const hasFiles = (messages: Block[]) => messages.some((m) => Array.isArray(m.content) && (m.content as Block[]).some((b) => b.type === "image" || b.type === "document"));
 const hasDocs = (messages: Block[]) => messages.some((m) => Array.isArray(m.content) && (m.content as Block[]).some((b) => b.type === "document"));
 
@@ -126,8 +134,8 @@ export function vendorOk(env: Env, provider: string, o: { hasFiles: boolean; rol
     case "anthropic": case "openai": return true;
     case "gemini": return env("GEMINI_PAID") === "1" || (!o.hasFiles && o.role === "watch" && o.publicOnly === true);
     case "deepseek": return env("ALLOW_DEEPSEEK") === "1" && !o.hasFiles;
-    case "openrouter": return env("ALLOW_OPENROUTER") === "1" && !o.hasFiles;
-    case "groq": return env("ALLOW_GROQ") === "1" && !o.hasFiles;
+    // the open-model backups: on when their key is set (paid API tiers don't train on traffic), never with files
+    case "openrouter": case "groq": case "cerebras": return !o.hasFiles;
     default: return false;
   }
 }
