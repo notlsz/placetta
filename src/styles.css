@@ -1930,3 +1930,7 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 :root[data-theme="dark"] .tabbar { background: rgba(14, 17, 22, .9); }
 :root[data-theme="dark"] .plan-card, :root[data-theme="dark"] .hm-needs .job.compact { background: linear-gradient(180deg, #1B212B 0%, #161B23 100%); box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); }
 :root[data-theme="dark"] .dockbar .sugg.dock-chips button { background: var(--card); box-shadow: 0 0 0 1px rgba(255, 255, 255, .09); }
+
+/* The sidebar's footer (Settings, language) stays in view when the More group makes the list taller than the window:
+   the list scrolls under it and the footer sits at the bottom on the sidebar's own background. */
+.side > .side-bot { position: sticky; bottom: -14px; margin-bottom: -14px; padding-bottom: 14px; background: var(--side); z-index: 1; }
