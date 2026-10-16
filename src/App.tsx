@@ -317,7 +317,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   useEffect(() => {
     if (cloud && !api.PREVIEW) {
       const m = wsRef.current.meta, loc = m?.city ? { city: m.city, region: m.region } : undefined;
-      setModel(serverModel((body, d) => api.agentCall(cloud.wsId, body, { deep: d, location: loc }) as never));
+      setModel(serverModel((body, d, role) => api.agentCall(cloud.wsId, body, { deep: d, location: loc, role }) as never));
       return;
     }
     let on = true;

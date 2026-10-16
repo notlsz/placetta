@@ -112,8 +112,11 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `ODELIA_SMS_COUNTRIES` | Optional. Country codes Odelia texts verification codes to, comma separated. Default `1,86` (US, Canada, mainland China mobiles). To add one, also add it to `app_settings.phone_countries`. |
 | `OAUTH_STATE_SECRET` | Any long random string. |
 | `AGENT_DAILY_CALLS`, `TTS_DAILY_CHARS` | Optional caps per workspace a day. Defaults 400 and 20,000. |
-| `AGENT_MODEL`, `AGENT_MODEL_DEEP` | Optional. Defaults `claude-sonnet-5-5` and `claude-opus-5-5`. |
-| `AGENT_MODEL_PHONE` | Optional. The model for texts and calls; defaults to `AGENT_MODEL`. Set a faster one (e.g. `claude-haiku-4-5-20251001`) if text replies feel slow. |
+| `AGENT_MODEL`, `AGENT_MODEL_DEEP`, `AGENT_MODEL_FAST` | Optional. The Anthropic models by size: defaults `claude-sonnet-5-5`, `claude-opus-5-5` and `claude-haiku-4-5-20251001`. |
+| `GEMINI_API_KEY`, `GEMINI_PAID` | Optional. A Gemini key runs the cheap roles (reading uploads, the checker, texts, the weekly scan) on Gemini 2.5 Flash-Lite, Flash and Pro, but only with `GEMINI_PAID=1`: Google's free tier may use prompts to improve its products, the paid tier doesn't. Without it the key goes unused. See docs/AI_COSTS.md. |
+| `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`, `GROQ_API_KEY` | Optional, more vendors for the routes. DeepSeek (PRC-hosted), OpenRouter and Groq also need `ALLOW_DEEPSEEK=1`, `ALLOW_OPENROUTER=1` or `ALLOW_GROQ=1`, and never see customer files. |
+| `AGENT_ROUTE_PLAN`, `AGENT_ROUTE_REVIEW`, `AGENT_ROUTE_EXTRACT`, `AGENT_ROUTE_TRANSLATE`, `AGENT_ROUTE_DRAFT`, `AGENT_ROUTE_SHORT`, `AGENT_ROUTE_WATCH`, `AGENT_ROUTE_DEEP` | Optional. A role's models, cheapest first, as `provider:model` separated by commas (e.g. `gemini:gemini-2.5-flash-lite,anthropic:claude-haiku-4-5-20251001`). The old `AGENT_ROUTE_FAST`, `AGENT_ROUTE` and `AGENT_ROUTE_DEEP` still mean extract, plan and deep. |
+| `AI_DAILY_LIMIT_USD`, `AI_WS_DAILY_LIMIT_USD`, `AI_TASK_LIMIT_USD` | Optional. The company's AI spend per day before everyone pauses (default $100), one workspace's spend per day before it runs in saver mode for the rest of the day (default $10), and one task's ceiling (default $1.50). |
 | `TELNYX_API_KEY`, `TELNYX_PUBLIC_KEY` | Telnyx API key, and the public key that signs its webhooks. Already used for fax; also texting and calling Odelia. |
 | `ODELIA_NUMBER` | Odelia's number in Telnyx, E.164 (`+14155550134`). |
 | `TELNYX_MESSAGING_PROFILE_ID` | The messaging profile the number is on. Without it (and the three above), Settings says texting isn't set up yet. |

@@ -2,7 +2,7 @@ import { same, type Bi } from "./bi";
 import type { Reply, Step } from "./core";
 import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
-import { clean, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Services, type Source, type Turn } from "./live";
+import { clean, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
 import { settleJobs, type Job } from "./jobs";
 import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, parseVerdict, proofLine } from "./harness";
 
@@ -14,7 +14,9 @@ import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, h
  * fresh instance. The person can close the app; the work carries on.
  * ------------------------------------------------------------------ */
 
-export type Send = (body: Record<string, unknown>, deep: boolean) => Promise<{ content: Block[]; stop_reason: string }>;
+/** One model call. role says what the call is for (src/live.ts Role), so the server can pick the cheapest model that
+ *  does that job well: the main loop's role (plan, short or watch), review for the checker, extract for reading files. */
+export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role) => Promise<{ content: Block[]; stop_reason: string }>;
 /** Everything needed to pick a run up again. */
 export type RunState = {
   messages: { role: string; content: unknown }[];
@@ -149,12 +151,15 @@ export async function runRounds(o: {
   research?: boolean;
   /** Most model calls in one run (default 16). */
   maxRounds?: number;
+  /** The main loop's role: plan (default), short for a text, call or chat bot, watch for the monitor's background checks. */
+  role?: Role;
 }): Promise<{ reply: Reply } | { paused: RunState }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
   const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt };
   const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
-  const model = messagesModel("server", (body, _signal, deep) => o.send(body, deep));
+  const mainRole: Role = o.role ?? "plan";
+  const model = messagesModel("server", (body, _signal, deep, role) => o.send(body, deep, role ?? mainRole));
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
   const from = { channel: o.channel, plainSms: st.plainSms === true };
   const apply = (p: Patch) => o.apply(guardPatch(from, p));
@@ -178,7 +183,7 @@ export async function runRounds(o: {
       if (Date.now() > o.until) return { paused: save() };
       if (st.rounds === 0) o.step({ state: "searching", label: { en: "Reading your workspace", zh: "读取您的工作区" } });
       st.rounds++; st.seatRounds = (st.seatRounds ?? 0) + 1;
-      const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep);
+      const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep, mainRole);
       last = data.content;
       for (const c of data.content) for (const ci of c.citations ?? []) if (ci.url && !sources.has(ci.url)) sources.set(ci.url, { url: ci.url, title: ci.title || ci.url });
       st.sources = [...sources.values()];
@@ -234,7 +239,8 @@ export async function runRounds(o: {
     for (const j of due) {
       let verdict: { ok: boolean; why: string }[];
       try {
-        const data = await o.send({ system: CHECKER_SYSTEM, messages: [{ role: "user", content: [{ type: "text", text: checkerPrompt(j, evidence(o.ws(), j, reply)) }] }], max_tokens: 1500 }, false);
+        // the review role: by default a different vendor from the one that did the work, so no model grades itself
+        const data = await o.send({ system: CHECKER_SYSTEM, messages: [{ role: "user", content: [{ type: "text", text: checkerPrompt(j, evidence(o.ws(), j, reply)) }] }], max_tokens: 1500 }, false, "review");
         verdict = parseVerdict(data.content.filter(c => c.type === "text").map(c => c.text).join(""), j.done!.length);
       } catch { continue; }   // the checker couldn't run: the job keeps the agent's word, and no proof line claims a check
       apply(applyVerdict(j.id, verdict, { final, lang: o.lang }));

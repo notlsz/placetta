@@ -12,12 +12,16 @@
 // Owners who linked a phone (Settings, Text and call Odelia) also hear about what matters most there: a call for
 // something urgent if they want calls, a text for what needs them this week. Those go into odelia_outbox, and
 // odelia-sms sends them outside their quiet hours, at most one call and three texts a day.
+// Odelia's bill: owners get an Update at 50% and 80% of the month's allowance (ai_allowance_alerts), and a workspace
+// that spends more than AI_WS_DAILY_LIMIT_USD in a day (default $10), or more than 5x the median workspace that day,
+// goes into saver mode until midnight UTC with a task for the team (ai_throttle_sweep).
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 import { HOOK_KINDS, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { normalizeState, openingLine, openingPath, overdue, publishedDays, runsOn, type Routine } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
+import { wsDailyLimit } from "../_shared/ai_gate.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -30,7 +34,7 @@ const MAX_WATCHES = Number(Deno.env.get("WEEKLY_CHECKS_PER_DAY") ?? "40");
 
 type Bi = { en: string; zh: string };
 type Deadline = { id: string; date: string; kind: "due" | "renewal" | "estimate" | "milestone"; title: Bi; app?: string };
-type Update = { workspace_id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team"; title: Bi; body?: Bi; app_id?: string | null; dedupe: string };
+type Update = { workspace_id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "agent"; title: Bi; body?: Bi; app_id?: string | null; dedupe: string };
 type Filing = { id: string; workspace_id: string; app_id: string; title: Bi; status: string; agent_state?: string | null; updated_at: string; approved_at: string | null; payment_url: string | null; customer_paid_at: string | null; fee_paid: number | null; confirmation_number: string | null; assigned_to: string | null; note: string | null };
 
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
@@ -344,6 +348,31 @@ Deno.serve(async (req) => {
     created.push(...list.filter((u) => got.has(u.dedupe)));
   }
 
+  // Odelia's allowance: at 50% and 80% the owner hears how much is left and that saver mode starts at 60%. The database
+  // writes the Update (once per threshold per period) and hands back what it wrote, so it goes out like the others.
+  let aiAlerts = 0;
+  {
+    const { data: rows, error } = await admin.rpc("ai_allowance_alerts");
+    if (error) { if (error.code !== "PGRST202") console.error("ai_allowance_alerts", error.code); }
+    else {
+      for (const a of (rows ?? []) as { workspace_id: string; threshold: number; used_pct: number; left_usd: number; period_end: string; dedupe: string }[]) {
+        const { data: u } = await admin.from("updates").select("workspace_id, kind, title, body, app_id, dedupe").eq("workspace_id", a.workspace_id).eq("dedupe", a.dedupe).maybeSingle();
+        if (u) { created.push(u as Update); aiAlerts++; }
+      }
+    }
+  }
+  // Odelia's spend today: a workspace far above the others, or over its daily limit, runs in saver mode for the rest of
+  // the day, and the team gets a task to look at it. The company's daily ceiling (AI_DAILY_LIMIT_USD) stays as it is.
+  let throttled = 0;
+  {
+    const limit = wsDailyLimit((k) => Deno.env.get(k));
+    // the scheduled sweep (pg_cron, every 15 minutes) reads the limit from app_settings: keep it equal to the secret
+    if (Deno.env.get("AI_WS_DAILY_LIMIT_USD")) await admin.from("app_settings").update({ ai_ws_daily_limit_usd: limit }).eq("id", true).then(({ error }) => { if (error && error.code !== "42703") console.error("ai_ws_daily_limit_usd", error.code); });
+    const { data: rows, error } = await admin.rpc("ai_throttle_sweep", { p_ws_daily_limit: limit });
+    if (error) { if (error.code !== "PGRST202") console.error("ai_throttle_sweep", error.code); }
+    else for (const t of (rows ?? []) as { workspace_id: string; spent_usd: number; reason: string }[]) { throttled++; console.error("AI throttle", t.workspace_id, t.reason, `$${t.spent_usd}`); }
+  }
+
   // Phones: urgent items become a call (or a text), important ones a text, for owners who linked a phone.
   let phoned = 0;
   const notices = created.map((u) => ({ u, level: urgency(u, criticalApps(all.find((w) => w.id === u.workspace_id)?.state)) })).filter((x) => x.level);
@@ -518,5 +547,5 @@ Deno.serve(async (req) => {
   if (!sweep) console.error("self-filing sweep did not run");
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs });
+  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, ai_alerts: aiAlerts, ai_throttled: throttled });
 });

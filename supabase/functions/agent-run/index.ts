@@ -24,8 +24,8 @@
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { callModel } from "../_shared/llm.ts";
-import { gate, record } from "../_shared/ai_gate.ts";
+import { callModel, type Role } from "../_shared/llm.ts";
+import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/mail.ts";
@@ -46,8 +46,12 @@ const env = (k: string, d = "") => Deno.env.get(k) ?? d;
 /** One task's ceiling: a task that costs more than this stops and says so, so a loop can't eat a month's budget. */
 const TASK_LIMIT_USD = Number(env("AI_TASK_LIMIT_USD", "1.5"));
 const MODEL = env("AGENT_MODEL", "claude-sonnet-5-5"), MODEL_DEEP = env("AGENT_MODEL_DEEP", "claude-opus-5-5");
-/** The model for texts and calls, where a fast answer matters most. Same as AGENT_MODEL unless set (e.g. a faster model). */
-const MODEL_PHONE = env("AGENT_MODEL_PHONE", "") || MODEL;
+/** The most a request body may hold. Messages are text; files go through Documents (storage), never inline. */
+const BODY_MAX = 400_000;
+/** The same request again within this window (a double tap, a retry, a script) gets the earlier run, not a second bill. */
+const REPEAT_MS = 10 * 60_000;
+/** In saver mode (past 60% of the allowance, or throttled for the day) answers are capped at this many tokens. */
+const SAVER_MAX_TOKENS = 2000;
 /** Work per instance before saving and handing over (the free plan stops an instance at 150 s). */
 const CHUNK_MS = Number(env("AGENT_CHUNK_SECONDS", "70")) * 1000;
 const STALE_MS = 3 * 60_000, MAX_ATTEMPTS = 8;
@@ -109,36 +113,71 @@ const runsTable: RunsTable<Run> = {
 /* ------------------------------ the model ------------------------------ */
 
 
-/** One model call: the company key, research on official sites, the daily limit and usage, as in the agent function. */
-async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, phone = false, who: { uid: string | null; spent: number } = { uid: null, spent: 0 }) {
-  const standard = phone ? MODEL_PHONE : MODEL;
+/** One task's tally across its model calls: who asked, what it has cost, and whether saver mode was on (and why). */
+type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttle"; renews?: string | null };
+
+/**
+ * One model call: the company keys, the role's route (../_shared/llm.ts), research on official sites, the gate and the
+ * price. In saver mode (the workspace is past 60% of its allowance, or throttled for the day) the main loop runs on the
+ * draft route instead of plan, research is off and answers are shorter; at 100% the gate stops the call.
+ */
+async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, role: Role = "plan", who: Who = { uid: null, spent: 0 }) {
   if (signal.aborted) throw err("cancelled", "Stopped");
   if (!MODEL_KEYS.some((k) => env(k)))
     throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
   if (who.spent >= TASK_LIMIT_USD) throw err("task_limit", "This task grew too large for one go, so I stopped here. Ask for the next part on its own.");
-  // budget, rate limits and the company's ceiling; past 80% of the budget, no deep model
+  // budget, rate limits and the company's ceiling
   const g = await gate(admin, (k) => Deno.env.get(k), ws, who.uid, "call");
   if (!g.ok) throw err(g.code, g.message);
-  if (g.tier === "reduced") deep = false;
   // Odelia has about 31 tools in a signed-in workspace; a cap of 24 silently dropped email, calendar, drive and QuickBooks.
   const pageTools = (Array.isArray(body.tools) ? (body.tools as Block[]) : []).filter((t) => t && typeof t.name === "string" && !("type" in t)).slice(0, MAX_TOOLS);
-  const research = pageTools.length > 0 || deep;
+  let maxTokens = Math.min(Math.max(Number(body.max_tokens) || 2000, 256), 4000);
+  if (deep && role === "plan") role = "deep";
+  let research = pageTools.length > 0 || role === "deep";
+  if (g.tier === "reduced") {
+    who.reduced = g.reason ?? "allowance"; who.renews = g.period_end;
+    if (role === "deep" || role === "plan") role = "draft";
+    research = false;
+    maxTokens = Math.min(maxTokens, SAVER_MAX_TOKENS);
+  }
   const userLocation = location?.city ? { type: "approximate", city: String(location.city).slice(0, 80), region: String(location.region ?? "").slice(0, 80) || undefined, country: "US" } : undefined;
   const search = { type: "web_search_20250305", name: "web_search", max_uses: 5, ...(userLocation ? { user_location: userLocation } : {}) };
   const fetchTool = { type: "web_fetch_20250910", name: "web_fetch", max_uses: 4, citations: { enabled: true }, max_content_tokens: 24000 };
-  const payload: Record<string, unknown> = { model: deep ? MODEL_DEEP : standard, max_tokens: Math.min(Math.max(Number(body.max_tokens) || 2000, 256), 4000), messages: body.messages };
+  const anthropicModel = role === "deep" ? MODEL_DEEP : MODEL;
+  const payload: Record<string, unknown> = { model: anthropicModel, max_tokens: maxTokens, messages: body.messages };
   if (typeof body.system === "string" && body.system) payload.system = body.system.slice(0, 80000);
+  // The instructions were written with research on; in saver mode the model is told it's off, so it doesn't reach for web_search.
+  if (g.tier === "reduced" && pageTools.length && typeof payload.system === "string") payload.system += "\n\nWeb research (web_search, web_fetch) is off for now. Work from the workspace and your other tools, keep the answer short, and say plainly when something would need checking on the agency's own site.";
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
   if (tools.length) payload.tools = tools;
-  const out = await callModel((k) => Deno.env.get(k), { payload, tier: deep ? "deep" : "standard", research, beta: research ? FETCH_BETA : null }, deep ? MODEL_DEEP : standard,
+  const out = await callModel((k) => Deno.env.get(k), { payload, role, research, beta: research ? FETCH_BETA : null }, anthropicModel,
     research ? { search, fetch: fetchTool, pageTools } : null);
   if (!out.ok) {
     console.error("models", out.model, out.status, out.text.slice(0, 300));
     throw out.status === 429 || out.status === 529 ? err("rate_limited", "The agent is busy. Try again in a moment.") : err(out.status === 401 || out.status === 503 ? "not_configured" : "upstream_error", "Couldn't reach the agent's model. Try again.");
   }
   const data = out.data as { content: Block[]; stop_reason: string; usage?: Record<string, never> };
-  who.spent += await record(admin, g.event, out.model, data.usage);
+  who.spent += await record(admin, g.event, out.model, data.usage, role);
   return data as { content: never[]; stop_reason: string };
+}
+
+/** The main loop's role for a run: watch for the monitor's background checks, short for a text, a call or a chat bot, plan otherwise. */
+const roleOfRun = (run: Run): Role => run.kind === "watch" ? "watch" : run.channel === "sms" || run.channel === "voice" || run.channel === "slack" || run.channel === "lark" ? "short" : "plan";
+
+/** A key for "the same request again": the prompt and the conversation it came with. */
+async function repeatKey(prompt: string, history: unknown): Promise<string> {
+  const bytes = new TextEncoder().encode(prompt + "\n" + JSON.stringify(history ?? []));
+  return [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+/**
+ * The run to hand back instead of starting another: the same key in this workspace within REPEAT_MS, still running
+ * (any channel) or done (the app, which shows its reply). A text or a call is answered by the run that finishes, so a
+ * repeat there only joins a run still going.
+ */
+async function repeated(ws: string, key: string, channel: string): Promise<string | null> {
+  const { data } = await admin.from("agent_runs").select("id, status").eq("workspace_id", ws).eq("dedupe", key).gt("created_at", new Date(Date.now() - REPEAT_MS).toISOString())
+    .in("status", channel === "app" ? ["running", "done"] : ["running"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  return data?.id ?? null;
 }
 
 /* ------------------------------ the account's hands ------------------------------ */
@@ -197,7 +236,8 @@ const sharesLearning = (w: Workspace) => (w as { shareLearning?: boolean }).shar
 async function distill(ws: string, w: Workspace, evidence: unknown, keys: string[], who: { uid: string | null; spent: number }) {
   if (!keys.length) return { confirm: 0, contradict: 0, added: 0 };
   const existing = (await lessonsFor(keys, ["live", "candidate"])).slice(0, 40);
-  const data = await model(ws, { system: DISTILL_SYSTEM, messages: [{ role: "user", content: distillPrompt(evidence, existing, keys) }], max_tokens: 1400 }, false, undefined, new AbortController().signal, true, who) as unknown as { content: Block[] };
+  // the draft route: short bilingual lessons from evidence, no tools, no research
+  const data = await model(ws, { system: DISTILL_SYSTEM, messages: [{ role: "user", content: distillPrompt(evidence, existing, keys) }], max_tokens: 1400 }, false, undefined, new AbortController().signal, "draft", who) as unknown as { content: Block[] };
   const text = data.content.filter((c) => c.type === "text").map((c) => String(c.text ?? "")).join("");
   const d = parseDistill(text, { keys, existing: existing.map((l) => l.id), w });
   for (const id of d.confirm) await admin.rpc("lesson_vote", { p_lesson: id, p_ws: ws, p_vote: 1 });
@@ -350,7 +390,8 @@ export async function work(runId: string, token: string | null, ticket: string |
     const svc = await servicesFor(ws, run, token);
     const state = run.state ?? startState([], run.prompt);
     // The task's spend so far, from every earlier chunk: the ceiling is for the whole task.
-    const who = { uid: run.created_by, spent: Number(state.spent) || 0 };
+    const who: Who = { uid: run.created_by, spent: Number(state.spent) || 0 };
+    const mainRole = roleOfRun(run);
     // The network: the run starts from what other businesses' jobs taught Odelia about these places, agencies and forms.
     if (state.network === undefined) {
       const ls = rank(await lessonsFor(lessonKeys(cur)).catch(() => [] as Lesson[])).slice(0, 14);
@@ -369,12 +410,13 @@ export async function work(runId: string, token: string | null, ticket: string |
         if (!(await lease.write({ state: st, steps, draft, updated_at: new Date().toISOString() })) && lease.lost) throw lostLease();
       },
       draft: (t) => { draft = t; flush(); },
-      send: async (body, deep) => {
-        try { return await model(ws, body, deep, location, ctl.signal, run.channel === "sms" || run.channel === "voice", who) as never; }
+      send: async (body, deep, role) => {
+        try { return await model(ws, body, deep, location, ctl.signal, role ?? mainRole, who) as never; }
         finally { state.spent = who.spent; }
       },
       // Every channel, so a request from outside the app gets the remote rules (src/serverRun.ts).
       channel: run.channel ?? "app",
+      role: mainRole,
     });
     clearTimeout(flushT);   // the last write below carries the steps; a late flush would bring the draft back
     await save();
@@ -382,6 +424,10 @@ export async function work(runId: string, token: string | null, ticket: string |
       const next = await lease.release({ state: { ...out.paused, spent: who.spent }, steps, draft, updated_at: new Date().toISOString() });
       if (next) await handOver(runId, token, next);
       return;
+    }
+    // Saver mode is said once per period, at the end of the reply, in the person's language.
+    if (who.reduced && run.kind === "task" && await saverNoticeDue(admin, ws).catch(() => false)) {
+      out.reply.text = [...out.reply.text, { en: saverLine("en", who.renews ?? null, who.reduced), zh: saverLine("zh", who.renews ?? null, who.reduced) }];
     }
     await finish(run, out.reply, steps, lease);
     bg(learnFromRun(run, cur, state, out.reply));
@@ -511,8 +557,14 @@ async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease) {
 export async function handle(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
+  // Messages are text and short; files go through Documents. Anything bigger is not a conversation.
+  if (Number(req.headers.get("content-length") ?? 0) > BODY_MAX) return fail(413, "bad_request", "That request is too large. Upload files to Documents instead of pasting them.");
   let body: Record<string, unknown>;
-  try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
+  try {
+    const raw = await req.text();
+    if (raw.length > BODY_MAX) return fail(413, "bad_request", "That request is too large. Upload files to Documents instead of pasting them.");
+    body = JSON.parse(raw);
+  } catch { return fail(400, "bad_request", "Send JSON."); }
   const action = String(body.action ?? "start");
 
   if (action === "continue" || action === "watchdog" || action === "watch" || action === "selftest" || action === "learn") {
@@ -523,6 +575,8 @@ export async function handle(req: Request): Promise<Response> {
       // {probe: true}: which server secrets are set (names and yes/no only, never a value), and the checks there are
       if (body.probe) {
         const names = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY", "AGENT_MODEL", "AGENT_ROUTE",
+          "GEMINI_PAID", "ALLOW_DEEPSEEK", "ALLOW_OPENROUTER", "ALLOW_GROQ", "AGENT_ROUTE_PLAN", "AGENT_ROUTE_REVIEW", "AGENT_ROUTE_EXTRACT", "AGENT_ROUTE_TRANSLATE", "AGENT_ROUTE_DRAFT", "AGENT_ROUTE_SHORT", "AGENT_ROUTE_WATCH", "AGENT_ROUTE_DEEP",
+          "AI_DAILY_LIMIT_USD", "AI_WS_DAILY_LIMIT_USD", "AI_TASK_LIMIT_USD",
           "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ENTRY", "STRIPE_PRICE_LOCATION", "STRIPE_PRICE_LOCATION_PRO", "STRIPE_PRICE_OPENING", "STRIPE_PRICE_OPENING_FOOD", "STRIPE_PRICE_PACK", "STRIPE_PRICE_GUARANTEE",
           "RESEND_API_KEY", "MAIL_FROM", "APP_ORIGINS", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "MS_CLIENT_ID", "MS_CLIENT_SECRET", "SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET", "QB_CLIENT_ID", "OAUTH_STATE_SECRET",
           "TELNYX_API_KEY", "TELNYX_FAX_CONNECTION_ID", "TELNYX_MESSAGING_PROFILE_ID", "TELNYX_VOICE_CONNECTION_ID", "ODELIA_NUMBER", "LOB_API_KEY", "FILER_SECRET", "AZURE_SPEECH_KEY"];
@@ -586,10 +640,13 @@ export async function handle(req: Request): Promise<Response> {
     if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
+    const key = await repeatKey(prompt, []);
+    const again = await repeated(ws, key, channel);
+    if (again) return json(202, { id: again, repeated: true });
     const ticket = stamp();
     const { data: run, error } = await admin.from("agent_runs").insert({
       workspace_id: ws, created_by: uid, kind: "task", prompt, lang: zh ? "zh" : "en", deep: false,
-      state: startState([], prompt), channel, chat_to: to, heartbeat_at: ticket,
+      state: startState([], prompt), channel, chat_to: to, heartbeat_at: ticket, dedupe: key,
     }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
     bg(work(run.id, null, ticket));
@@ -627,10 +684,13 @@ export async function handle(req: Request): Promise<Response> {
     // A text by plain SMS (whose sender is easy to forge) only reads and drafts. odelia-sms says which it was; when it
     // doesn't say, a text counts as plain SMS.
     const plainSms = channel === "sms" && body.plain_sms !== false;
+    const key = await repeatKey(prompt, history);
+    const again = await repeated(ws, key, channel);
+    if (again) return json(202, { id: again, repeated: true });
     const ticket = stamp();
     const { data: run, error } = await admin.from("agent_runs").insert({
       workspace_id: ws, created_by: uid, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: false,
-      state: { ...startState(history, prompt), ...(plainSms ? { plainSms: true } : {}) }, channel, reply_to: replyTo, heartbeat_at: ticket,
+      state: { ...startState(history, prompt), ...(plainSms ? { plainSms: true } : {}) }, channel, reply_to: replyTo, heartbeat_at: ticket, dedupe: key,
     }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
     await admin.from("phone_links").update({ last_workspace_id: ws }).eq("user_id", uid);
@@ -663,10 +723,14 @@ export async function handle(req: Request): Promise<Response> {
   if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
   const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-12)
     .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 4000) }));
+  // the same request again within ten minutes: the earlier run, whose reply the app shows
+  const key = await repeatKey(prompt, history);
+  const again = await repeated(ws, key, "app");
+  if (again) return json(202, { id: again, repeated: true });
   const ticket = stamp();
   const { data: run, error } = await admin.from("agent_runs").insert({
     workspace_id: ws, created_by: user.id, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: body.deep === true,
-    state: startState(history, prompt), seen_at: new Date().toISOString(), heartbeat_at: ticket,
+    state: startState(history, prompt), seen_at: new Date().toISOString(), heartbeat_at: ticket, dedupe: key,
   }).select("id").single();
   if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
   bg(work(run.id, jwt, ticket));
