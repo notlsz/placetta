@@ -2382,6 +2382,161 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 @media (max-width:639px){.belrows.st3 li.sbub{padding:12px 13px}.belrows.st3 li.scn{padding-left:21px}}
 .disc .fmade,.fmade{display:flex!important;align-items:center;gap:8px;margin-top:14px!important;font-size:12.5px!important;line-height:1.4!important;color:var(--muted)}
 .fmade .ffr{width:18px;height:12px;border-radius:2px;box-shadow:0 0 0 .5px rgba(15,27,51,.18)}
+
+/* ===== landing pass at Alven's level: hero buttons, onboarding, before and after, memory, trust, pricing, channels ===== */
+/* hero: one primary and one secondary button */
+.hcta{display:flex;flex-wrap:wrap;gap:10px}
+.hbtn{padding:12px 18px;font-size:15px;line-height:18px;letter-spacing:-.2px;border-radius:10px}
+.b-glass{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.34);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.b-glass:hover{background:rgba(255,255,255,.22)}
+button.howtry{border:0;background:none;padding:0;font:inherit;font-size:15px;font-weight:500;color:var(--gs-ink);cursor:pointer}
+.fdemo{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:15px;font-weight:500;color:var(--ink);text-decoration:none}
+.fdemo:hover{text-decoration:underline;text-underline-offset:3px}
+.ctas .stwrap.light{margin-inline:auto}
+
+/* zero-setup onboarding: the sign-up line on the left, her first plan on the right */
+.obstage{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:center;justify-items:stretch;padding:16px 12px;border-radius:20px;overflow:hidden;background:radial-gradient(55% 60% at 8% 0%,rgba(255,238,218,.85),transparent 62%),radial-gradient(60% 70% at 100% 100%,rgba(115,153,198,.45),transparent 66%),linear-gradient(180deg,#F1F5FA,#DCE6F2)}
+@media (min-width:640px){.obstage{padding:32px}}
+@media (min-width:960px){.obstage{grid-template-columns:minmax(0,400px) minmax(0,480px);justify-content:center;gap:40px;padding:64px 40px}}
+.obcard{min-width:0;background:#fff;border-radius:16px;padding:18px 16px;box-shadow:0 24px 50px rgba(15,27,51,.13),0 1px 2px rgba(15,27,51,.05)}
+@media (min-width:640px){.obcard{padding:22px 24px}}
+.obhd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid #F0F2F5}
+.obhd b{font-size:13px;font-weight:600;letter-spacing:-.1px;color:var(--ink)}
+.obhd span{font-size:12px;color:var(--muted);white-space:nowrap}
+.obq{font-size:16px;font-weight:500;line-height:1.3;letter-spacing:-.2px;color:var(--ink)}
+.obfield{display:flex;align-items:center;min-height:48px;margin-top:10px;padding:0 14px;border-radius:12px;border:1.5px solid var(--gs);box-shadow:0 0 0 4px rgba(115,153,198,.16);font-size:16px;line-height:1.2;color:var(--ink);overflow:hidden;white-space:nowrap}
+.obcaret{flex:none;width:1.5px;height:20px;margin-left:1px;background:var(--ink);animation:obblink 1s steps(1) infinite}
+@keyframes obblink{50%{opacity:0}}
+.obhint{display:block;margin-top:8px;font-size:12px;color:var(--muted)}
+.obrow{display:flex;align-items:center;gap:12px;margin-top:14px}
+.obbtn{flex:none;display:inline-flex;align-items:center;padding:10px 16px;border-radius:8px;background:var(--ink);color:#fff;font-size:14px;line-height:16px}
+.obbtn.press{animation:fpress .55s ease}
+.obrow small{min-width:0;font-size:12px;line-height:1.35;color:var(--muted)}
+.obread{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:16px;padding-top:14px;border-top:1px solid #F0F2F5;font-size:12px;color:var(--muted)}
+.obchip{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:var(--gs-ll);color:var(--gs-ink);font-size:12.5px;font-weight:500;line-height:1.2}
+.obph{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.obph .orb{width:34px;height:34px}
+.obph>div{flex:1;min-width:0}
+.obph b{display:block;font-size:14px;font-weight:600;color:var(--ink);line-height:1.25}
+.obph small{display:block;font-size:12px;color:var(--muted)}
+.obstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:6px}
+.obstats div{padding:10px 12px;border-radius:12px;background:#F4F6FA}
+.obstats b{display:block;font-family:var(--serif);font-weight:300;font-size:30px;line-height:1;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.obstats span{display:block;margin-top:4px;font-size:11.5px;line-height:1.3;color:var(--ink2)}
+.oblist{list-style:none;margin:0;padding:0}
+.oblist li{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:2px;align-items:center;padding:9px 0;border-top:1px solid #F0F2F5}
+.oblist li:first-child{border-top:0}
+.oblist b{font-size:13px;font-weight:500;line-height:1.3;color:var(--ink)}
+.oblist small{grid-column:1;font-size:11.5px;line-height:1.35;color:var(--muted)}
+.oblist .pill{grid-column:2;grid-row:1/span 2}
+.obmore{padding:9px 0 2px;border-top:1px solid #F0F2F5;font-size:12px;color:var(--gs-ink)}
+.obft{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--okbg);color:#2F6B40}
+.obft svg{flex:none}
+.obft b{display:block;font-size:12.5px;font-weight:500;line-height:1.3;color:var(--ink)}
+.obft small{display:block;font-size:11.5px;line-height:1.3;color:var(--ink2)}
+.obstage [data-ob]{opacity:0;transform:translateY(8px) scale(.98);transition:opacity .4s ease,transform .5s cubic-bezier(.2,.9,.3,1.2)}
+.obstage [data-ob].on{opacity:1;transform:none}
+.obstage.obdone .obcaret{animation:none;opacity:0}
+@media (prefers-reduced-motion:reduce){.obstage [data-ob]{opacity:1;transform:none;transition:none}.obcaret{animation:none;opacity:0}}
+html[lang="zh-CN"] .obq{letter-spacing:0}
+
+/* before and after: four people you hire and chase, then the store owner with Odelia */
+#diff .bgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 8px}
+@media (min-width:640px){#diff .bgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}}
+#diff .per{width:100%;max-width:124px}
+#diff .tag{width:100%;max-width:none}
+@media (max-width:639px){#diff .tag{height:38px;font-size:11px}#diff .pain{font-size:10.5px}#diff .per svg.sil{width:24px;height:72px}#diff .aft .with{font-size:11px}#diff .aft .orb{width:34px;height:34px}#diff .aft .orbw{height:72px}#diff .bal p{font-size:12px}}
+#diff .aft .per{flex:0 0 auto;width:112px}
+@media (min-width:1024px){#diff .aft .per{width:124px}}
+#diff .bag{gap:16px}
+@media (min-width:1024px){#diff .bag{gap:24px}}
+
+/* memory demo: you correct her, then she applies it */
+#itl .ilsub{font-size:16px;line-height:1.5;color:var(--ink2);max-width:320px;text-wrap:pretty}
+#itl .ilnote{font-size:12.5px;line-height:1.45;color:var(--muted);max-width:300px}
+@media (min-width:1280px){#itl .ilnote{margin-top:auto}}
+#itl .icard{flex-direction:column;align-items:stretch;justify-content:flex-start;height:auto;padding:20px 16px 22px}
+@media (min-width:1024px){#itl .icard{padding:28px 24px 30px}}
+#itl .mstep{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;font-size:13.5px;font-weight:500;color:var(--ink2)}
+#itl .mstep b{font-family:var(--serif);font-weight:300;font-size:28px;line-height:1;color:var(--ink)}
+#itl .icol{zoom:1;max-width:360px;width:100%;margin:0 auto;gap:8px}
+#itl .bub p{font-size:13px;line-height:1.42;max-width:none}
+#itl .bub.mine{background:#F7F9FC}
+#itl .av.you{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--gs-ll);color:var(--gs-ink);font-size:10.5px;font-weight:600}
+#itl .bfile{width:auto;max-width:100%;gap:12px}
+#itl .bfile b{font-size:11px}
+#itl .bfile small{font-size:10px}
+#itl .mci{display:flex;justify-content:center;width:100%}
+#itl .ichip{font-size:12.5px;color:var(--gs-ink)}
+#itl .ichip.used{color:#2F6B40}
+@media (prefers-reduced-motion:reduce){#itl .ipop{animation:none!important;opacity:1!important}#itl .ichip::after{animation:none!important}}
+
+/* trust: badges for what is true, each with one line on what it means */
+#cn .tbwrap{flex-direction:column;gap:12px}
+#cn .tbgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;width:100%;margin:0;padding:0;list-style:none}
+@media (min-width:640px){#cn .tbgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+@media (min-width:1024px){#cn .tbgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#cn .tb{display:flex;flex-direction:column;gap:14px;min-width:0;padding:22px 20px;border-radius:16px;background:#fff;border:1px solid #ebebeb}
+#cn .tb svg,#cn .tbsoc svg{flex:none;width:34px;height:34px;color:var(--gs-ink)}
+#cn .tb b,#cn .tbsoc b{display:block;font-size:15px;font-weight:500;line-height:1.3;letter-spacing:-.15px;color:var(--ink)}
+#cn .tb span,#cn .tbsoc span{display:block;margin-top:6px;font-size:13.5px;line-height:1.45;color:var(--ink2)}
+@media (max-width:639px){#cn .tb{flex-direction:row;align-items:flex-start;padding:16px 18px}#cn .tb svg{width:30px;height:30px}}
+#cn .tbsoc{display:flex;align-items:center;gap:14px;width:100%;padding:16px 20px;border-radius:16px;background:#fff;border:1px dashed #C9D3E1}
+html[lang="zh-CN"] #cn .tb b{letter-spacing:0}
+#cn .cntrust .il{gap:16px}
+
+/* pricing: one number and one button, everything else behind More plans */
+#pricing .prrow{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+@media (min-width:1024px){#pricing .prrow{grid-template-columns:minmax(0,1fr) minmax(0,600px);gap:48px;align-items:start}#pricing .prl{margin-bottom:0;padding-top:24px}}
+.prcard{min-width:0;border-radius:20px;background:#fff;padding:26px 22px;box-shadow:0 0 0 1px #ebebeb,0 28px 70px rgba(15,27,51,.07)}
+@media (min-width:1024px){.prcard{padding:40px 44px}}
+.prv{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px}
+.prv b{font-family:var(--serif);font-weight:300;font-size:76px;line-height:.95;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+@media (min-width:1024px){.prv b{font-size:104px}}
+html[lang="zh-CN"] .prv b{font-family:var(--serif);letter-spacing:-.02em}
+.prv span{font-size:17px;line-height:1.3;color:var(--ink2)}
+.prps{margin-top:12px;font-size:14px;font-weight:500;color:var(--gs-ink)}
+.prbtn{display:flex;width:100%;margin-top:24px;padding:14px 18px;font-size:15px;line-height:18px;border-radius:10px}
+.princ{margin-top:28px;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+html[lang="zh-CN"] .princ{letter-spacing:.2em}
+.prlist{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:640px){.prlist{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px}}
+.prlist li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.4;color:var(--ink)}
+.prlist svg{flex:none;margin-top:2px;color:var(--ok)}
+.prmore{margin-top:28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.prmore summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 2px;cursor:pointer;list-style:none}
+.prmore summary::-webkit-details-marker{display:none}
+.prmore summary>span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prmore summary b{font-size:18px;font-weight:500;letter-spacing:-.2px;color:var(--ink)}
+.prmore summary small{font-size:14px;line-height:1.4;color:var(--muted)}
+.prmore summary svg{flex:none;color:var(--ink2);transition:transform .3s}
+.prmore[open] summary svg{transform:rotate(180deg)}
+.prmore summary:focus-visible{outline:2px solid var(--gs-d);outline-offset:2px;border-radius:8px}
+.prmb{padding:4px 0 28px}
+.prmb .pmath{margin-top:40px}
+
+/* work together: the ticker, then every channel listed plainly with its icon */
+#together .wtc{height:auto!important}
+#together .wtc>svg{inset:-3%;height:106%}
+#together .wti{position:relative;inset:auto;flex-direction:column;gap:36px;padding:64px 20px 56px}
+@media (min-width:1024px){#together .wti{gap:48px;padding:132px 40px 120px}}
+#together .chbox{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:760px}
+#together .chl{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 26px;margin:0;padding:0;list-style:none}
+#together .chl li{display:inline-flex;align-items:center;gap:8px;font-size:15px;line-height:1.2;color:#fff;white-space:nowrap}
+#together .chl svg{flex:none;width:18px;height:18px;color:#fff;opacity:.85}
+#together .chn{max-width:520px;text-align:center;font-size:14px;line-height:1.5;color:rgba(255,255,255,.74);text-wrap:pretty}
+#together .chwc{display:flex;flex-direction:column;align-items:center;gap:12px}
+#together .chadd{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:0;border-radius:10px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);color:#fff;font-size:14px;line-height:16px}
+#together .chadd:hover{background:rgba(255,255,255,.2)}
+#together .chadd svg{width:16px;height:16px}
+#together .chqr{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border-radius:14px;background:#fff}
+#together .chqr img{display:block;width:132px;height:132px}
+#together .chqr p{font-size:12px;color:var(--ink2)}
+@media (max-width:1023px){#together .qr{display:none}}
+@media (max-width:1023px){.ox #together .wti,#together .wti{padding-bottom:56px}}
+
+/* centring: the phone swipe rows bleed evenly to both edges */
+@media (max-width:767px){#cn .cnc-row{width:auto}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2442,13 +2597,9 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       <div class="hstack">
         <h1 data-i18n="hero.h1">Meet Odelia,<br><em>the compliance agent for brands entering the&nbsp;US.</em></h1>
         <p class="hsub" data-i18n="hero.sub">Odelia maps every permit and registration your US launch needs, files each one with your approval in the order agencies require, and keeps them current, in English or Chinese.</p>
-        <div class="stwrap">
-          <form class="starter" data-src="hero" novalidate>
-            <label class="sr" for="st-hero" data-i18n="st.label">Where are you opening?</label>
-            <input id="st-hero" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
-            <button type="submit" class="btn b-white" data-i18n="st.btn">Get my plan</button>
-          </form>
-          <p class="stalt"><a href="/app/" data-track="hero_try_agent"><span data-i18n="hero.try">Put Odelia to work</span><i aria-hidden="true">→</i></a><a href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo"><span data-i18n="hero.demo">Book a demo</span><i aria-hidden="true">→</i></a></p>
+        <div class="hcta">
+          <button type="button" class="btn b-white hbtn" data-open="hero" data-i18n="cta.plan">Get my plan</button>
+          <a class="btn b-glass hbtn" href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo" data-i18n="hero.demo">Book a demo</a>
         </div>
         <a class="hbk" href="/backers" data-sec="backers" id="hBk"></a>
       </div>
@@ -2528,7 +2679,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="belt" id="caseT"></p>
         <p class="belp" id="caseP"></p>
         <div class="belst" id="caseSt"></div>
-        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="case" data-i18n="bel.btn">Plan my next markets</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
+        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="case" data-i18n="cta.plan">Get my plan</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
       </div>
       <div class="csr">
         <div class="belstage">
@@ -2548,7 +2699,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="belt" id="teaT"></p>
         <p class="belp" id="teaP"></p>
         <div class="belst" id="teaSt"></div>
-        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="tea" data-i18n="tea.btn">Plan my US opening</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
+        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="tea" data-i18n="cta.plan">Get my plan</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
       </div>
       <div class="csr">
         <div class="belstage">
@@ -2623,7 +2774,67 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         </div>
       </article>
     </div>
-    <a class="howtry" href="/app/" data-track="teammate_try"><span data-i18n="tm.cta">Put Odelia to work on your stores</span><span aria-hidden="true">→</span></a>
+    <button type="button" class="howtry" data-open="teammate"><span data-i18n="cta.plan">Get my plan</span><span aria-hidden="true">→</span></button>
+  </div>
+</section>
+
+<!-- ======================= BEFORE / AFTER: the team you'd hire, or Odelia ======================= -->
+<section class="ox mt160 rv" data-rv="up" id="diff" aria-labelledby="diffH">
+  <div class="ctr">
+    <div class="drow">
+      <div class="dl">
+        <h2 class="t28" id="diffH" data-i18n="diff.h">The difference Odelia makes</h2>
+        <div>
+          <div class="ds"><b data-i18n="diff.2b">4 → 1</b><span data-i18n="diff.2s">People to hire and chase, down to one agent you approve</span></div>
+          <div class="ds"><b data-i18n="diff.1b">Minutes</b><span data-i18n="diff.1s">From one line to a full entry plan</span></div>
+        </div>
+      </div>
+      <div class="dcard">
+        <div class="bag"><div class="bal"><p data-i18n="diff.before">Before</p></div><div class="bgrid" id="before" role="list" aria-label="Before" data-i18n-aria="diff.before"></div></div>
+        <div class="bag"><div class="bal"><p data-i18n="diff.after">After</p></div>
+          <div class="aft" role="list" aria-label="After" data-i18n-aria="diff.after">
+            <div class="per" role="listitem"><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag" data-i18n="diff.team">Store owner</div></div>
+            <p class="with" data-i18n="diff.with">with</p>
+            <div class="per" role="listitem"><div class="orbw"><span class="orb"></span></div><div class="tag" data-i18n="tm.r4">Odelia</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><g id="sil" fill="#D3D9E3"><circle cx="15" cy="9" r="8.6"/><path d="M5.5 21.5h19a5.5 5.5 0 0 1 5.5 5.5v21.5a4.5 4.5 0 0 1-4.5 4.5h-1.6L22 87.2a2.2 2.2 0 0 1-2.2 2.1h-9.6A2.2 2.2 0 0 1 8 87.2L6.1 53H4.5A4.5 4.5 0 0 1 0 48.5V27a5.5 5.5 0 0 1 5.5-5.5z"/></g></defs></svg>
+</section>
+
+<!-- ======================= ZERO SETUP: sign-up is one line, then her first plan ======================= -->
+<section class="sec rv" data-rv="up" id="onboard" aria-labelledby="obH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="obH" data-i18n="ob.h">Just tell Odelia what you're opening.</h2><p class="sub" data-i18n="ob.sub">Sign-up is one line, in English or Chinese. She works out what and where, asks only what's missing, and starts your plan.</p></div>
+    <div class="obstage" id="obStage" role="img" aria-label="Sample sign-up: one line typed, then Odelia's first plan" data-i18n-aria="ob.aria">
+      <div class="obcard obin" aria-hidden="true">
+        <div class="obhd"><b data-i18n="brand">Placetta</b><span data-i18n="ob.app">Create your workspace</span></div>
+        <p class="obq" data-i18n="ob.q">What are you opening, and where?</p>
+        <div class="obfield"><span id="obType">Milk tea shop in Flushing, NY</span><i class="obcaret"></i></div>
+        <small class="obhint" data-i18n="ob.hint">English or Chinese</small>
+        <div class="obrow"><span class="obbtn" id="obGo" data-i18n="ob.go">Start</span><small data-i18n="ob.opt">Name, opening date and address can wait.</small></div>
+        <div class="obread" data-ob="250"><span data-i18n="ob.read">Odelia read</span><span class="obchip" data-i18n="ob.c1">Milk tea shop</span><span class="obchip" data-i18n="ob.c2">Flushing, Queens, NY</span></div>
+      </div>
+      <div class="obcard obplan" aria-hidden="true" data-ob="500">
+        <div class="obph"><span class="orb"></span><div><b data-i18n="tm.r4">Odelia</b><small data-i18n="ob.pt">Your first plan</small></div><span class="atag" data-i18n="app.sample">Sample plan</span></div>
+        <div class="obstats">
+          <div data-ob="250"><b>9</b><span data-i18n="ob.s1">licenses found</span></div>
+          <div data-ob="200"><b>2</b><span data-i18n="ob.s2">forms filled</span></div>
+          <div data-ob="200"><b>2</b><span data-i18n="ob.s3">deadlines set</span></div>
+        </div>
+        <ol class="oblist">
+          <li data-ob="380"><b data-i18n="ob.r1">Food service establishment permit</b><small data-i18n="ob.r1a">NYC Health Department</small><span class="pill p-o" data-i18n="ob.r1s">Form filled</span></li>
+          <li data-ob="380"><b data-i18n="ob.r2">Certificate of Authority, sales tax</b><small data-i18n="ob.r2a">NY State Tax Department. Due 20 days before your first sale</small><span class="pill p-o" data-i18n="ob.r2s">Form filled</span></li>
+          <li data-ob="380"><b data-i18n="ob.r3">Food protection certificate</b><small data-i18n="ob.r3a">A certified supervisor on every shift</small><span class="pill p-r" data-i18n="ob.r3s">Before opening</span></li>
+          <li data-ob="380"><b data-i18n="ob.r4">Sign permit</b><small data-i18n="ob.r4a">NYC Buildings</small><span class="pill p-q" data-i18n="ob.r4s">Queued</span></li>
+        </ol>
+        <p class="obmore" data-ob="300" data-i18n="ob.more">5 more in your plan</p>
+        <div class="obft" data-ob="600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span><b data-i18n="ob.ft">Ready for your review</b><small data-i18n="ob.fts">Nothing is filed until you approve it.</small></span></div>
+      </div>
+    </div>
+    <p class="fnote" data-i18n="ob.note">Sample run with sample data.</p>
   </div>
 </section>
 
@@ -2644,7 +2855,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 <!-- ======================= HOW IT WORKS: map, approve and file, keep current ======================= -->
 <section class="sec" id="how" aria-labelledby="howH">
   <div class="ctr">
-    <div class="sh"><h2 class="h2" id="howH" data-i18n="how.h">Mapped by Odelia. Filed by Odelia.</h2><p class="sub" data-i18n="how.sub">Odelia, Placetta's AI agent, finds every license, permit and registration your business needs and prepares each application. You approve, and it's filed, tracked and renewed.</p><a class="howtry" href="/app/" data-track="how_try_agent"><span data-i18n="how.try">Try it on your store</span><span aria-hidden="true">→</span></a></div>
+    <div class="sh"><h2 class="h2" id="howH" data-i18n="how.h">Mapped by Odelia. Filed by Odelia.</h2><p class="sub" data-i18n="how.sub">Odelia, Placetta's AI agent, finds every license, permit and registration your business needs and prepares each application. You approve, and it's filed, tracked and renewed.</p><button type="button" class="howtry" data-open="how"><span data-i18n="cta.plan">Get my plan</span><span aria-hidden="true">→</span></button></div>
     <div class="feat">
       <article class="fcard">
         <div class="fct"><h3 data-i18n="f1.h">Every license, mapped</h3><p data-i18n="f1.p">Federal to city, in the order they run, with timelines and estimated agency fees.</p></div>
@@ -2786,7 +2997,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <h2 class="h2" id="monH" data-i18n="mon.h2">Rules change after you open.<br>We tell you what to do.</h2>
         <p class="sub" data-i18n="mon.body3">Every rule change in your markets, with what it means for your stores and what to do next.</p>
       </div>
-      <div class="mncta"><button type="button" class="btn b-ink" id="trAlert" data-i18n="mon.alert">Get alerts for my markets</button><small><span data-i18n="mon.price">Included in every monthly plan</span><button type="button" class="mnsa" id="mnSampleB" data-i18n="mon.sample">See a sample alert</button></small></div>
+      <div class="mncta"><button type="button" class="btn b-ink" id="trAlert" data-i18n="cta.plan">Get my plan</button><small><span data-i18n="mon.price">Rule alerts are included in every monthly plan</span><button type="button" class="mnsa" id="mnSampleB" data-i18n="mon.sample">See a sample alert</button></small></div>
     </div>
     <div class="mnstage">
       <div class="mnwrap">
@@ -2807,26 +3018,28 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 
 
 
-<section class="ox mt160 rv" data-rv="up" id="itl">
+<section class="ox mt160 rv" data-rv="up" id="itl" aria-labelledby="itlH">
   <div class="ctr">
     <div class="irow">
-      <div class="il"><h2 class="t28" data-i18n="itl.h">Odelia asks before every filing, and remembers your answer</h2></div>
+      <div class="il">
+        <h2 class="t28" id="itlH" data-i18n="mem.h">Odelia learns from each note</h2>
+        <p class="ilsub" data-i18n="mem.sub">Correct her once, and she does it that way at every store from then on.</p>
+        <p class="ilnote" data-i18n="mem.note">Example conversation in the product, not a customer quote.</p>
+      </div>
       <div class="ir">
-        <div class="icard"><div class="icol">
-          <div class="ipop" style="width:100%"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.a1">Health permit packet for Santa Clara County is ready. Submit it?</p>
-            <div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></div><div><b data-i18n="itl.f1">Plan-check packet</b><small data-i18n="itl.m1">14-page PDF</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
-          <svg class="ipop" style="animation-delay:500ms" width="16" height="29" viewBox="0 0 16 29" aria-hidden="true"><path d="M8 0v29" stroke="#D3D9E3"/><circle cx="8" cy="14.5" r="7" fill="#3F9A62"/><path d="M5 14.6l2 2 4-4.2" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
-          <div class="ipop" style="width:100%;animation-delay:1000ms"><div class="bub"><div><span class="av you" data-i18n="you.init">HP</span><div class="bc"><p data-i18n="itl.u1">Yes, submit it 👍</p></div></div></div></div>
-          <div class="ipop itlw" style="animation-delay:1500ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.a2">Submitted. I'll book the inspection when the county opens a slot.</p></div></div></div>
-            <div class="ichip" style="--sd:3040ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="itl.saved">Saved to your playbook</span></div></div>
+        <div class="icard"><p class="mstep"><b>1</b><span data-i18n="mem.k1">You correct her</span></p><div class="icol">
+          <div class="ipop" style="width:100%;animation-delay:0ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="mem.a1">Fire permit renewal is ready. Send it to the fire department?</p><div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></div><div><b data-i18n="mem.f1">Fire permit renewal</b><small data-i18n="mem.m1">3-page PDF</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
+          <div class="ipop mci" style="animation-delay:500ms"><svg class="mconn" width="16" height="34" viewBox="0 0 16 34" aria-hidden="true"><path d="M8 0v9M8 25v9" stroke="#D3D9E3"/><path d="M4.6 13.6l6.8 6.8M11.4 13.6l-6.8 6.8" stroke="#D0574A" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <div class="ipop" style="width:100%;animation-delay:1000ms"><div class="bub mine"><div><span class="av you" data-i18n="mem.you">You</span><div class="bc"><p data-i18n="mem.u1">Ask our landlord to sign first, he's on the lease.</p></div></div></div></div>
+          <div class="ipop itlw" style="animation-delay:1500ms"><div style="width:100%"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="mem.a2">Got it, landlord signs anything tied to the lease.</p></div></div></div></div>
+            <div class="ichip" style="--sd:3040ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="mem.saved">Committed to memory</span></div></div>
         </div></div>
-        <div class="icard"><div class="icol">
-          <div class="ipop" style="width:100%;animation-delay:250ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.b1">The sign permit needs your landlord's authorization. Send the request to them?</p>
-            <div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div><div><b data-i18n="itl.f2">Landlord letter</b><small data-i18n="itl.m2">1-page doc</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
-          <svg class="ipop" style="animation-delay:750ms" width="17" height="30" viewBox="0 0 17 30" aria-hidden="true"><path d="M8.5 0v30" stroke="#D3D9E3"/><circle cx="8.5" cy="15" r="7" fill="#D0574A"/><path d="M6 12.5l5 5M11 12.5l-5 5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <div class="ipop" style="width:100%;animation-delay:1250ms"><div class="bub"><div><span class="av you" data-i18n="you.init">HP</span><div class="bc"><p data-i18n="itl.u2">No, send landlord requests to me first. I'll forward them.</p></div></div></div></div>
-          <div class="ipop itlw" style="animation-delay:1750ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.b2">Got it. Landlord requests go to you first, at every location.</p></div></div></div>
-            <div class="ichip" style="--sd:3290ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="itl.saved">Saved to your playbook</span></div></div>
+        <div class="icard"><p class="mstep"><b>2</b><span data-i18n="mem.k2">Next time, she applies it</span></p><div class="icol">
+          <div class="ipop" style="width:100%;animation-delay:250ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="mem.b1">The sign permit is tied to your lease, so it went to your landlord first. He signed this morning. Send it to the city?</p><div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></div><div><b data-i18n="mem.f2">Sign permit application</b><small data-i18n="mem.m2">2-page PDF, signed</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
+          <div class="ipop mci" style="animation-delay:750ms"><svg class="mconn" width="16" height="34" viewBox="0 0 16 34" aria-hidden="true"><path d="M8 0v9M8 25v9" stroke="#D3D9E3"/><path d="M3.6 17.2l3 3 5.8-6.4" fill="none" stroke="#3F9A62" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ipop" style="width:100%;animation-delay:1250ms"><div class="bub mine"><div><span class="av you" data-i18n="mem.you">You</span><div class="bc"><p data-i18n="mem.u2">Yes, send it.</p></div></div></div></div>
+          <div class="ipop itlw" style="animation-delay:1750ms"><div style="width:100%"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="mem.b2">Sent to the city. Your landlord has a copy.</p></div></div></div></div>
+            <div class="ichip used" style="--sd:3290ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5A8 8 0 0 0 6.3 6.3L4 8.5M4 4v4.5h4.5M4 12.5a8 8 0 0 0 13.7 5.2L20 15.5M20 20v-4.5h-4.5"/></svg><span data-i18n="mem.used">Applied from memory</span></div></div>
         </div></div>
       </div>
     </div>
@@ -2867,16 +3080,20 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       </div>
     </div>
     <div class="irow cntrust">
-      <div class="il"><h2 class="t28" data-i18n="trust.h">Built for trust</h2></div>
-      <div class="ir tiles cntiles">
-        <div class="tile"><p data-i18n="trust.1">Independent licensed attorneys</p><p class="tsub" data-i18n="trust.1s">When a filing legally needs a lawyer, we introduce an independent licensed attorney you engage directly.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 9v38M19 47h18M11 16h34M28 9v7"/><path d="M11 16 5 30a6 6 0 0 0 12 0zM45 16l-6 14a6 6 0 0 0 12 0z"/></svg></div></div>
-        <div class="tile"><p data-i18n="trust.2">Local permit expediters</p><p class="tsub" data-i18n="trust.2s">In-person filings, pick-ups and inspections, handled in the city where you open.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 49S14 36.5 14 25a14 14 0 0 1 28 0c0 11.5-14 24-14 24z"/><path d="M22 25l4.5 4.5L34 22"/></svg></div></div>
-        <div class="tile"><p data-i18n="trust.ap">Your approval, every time</p><p class="tsub" data-i18n="trust.3s">Nothing is filed until you approve it, and every value shows the source it came from.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="8" width="32" height="40" rx="4"/><path d="M20 18h16M20 25h16M20 32h8"/><path d="m29 39 4 4 8-9"/></svg></div></div>
+      <div class="il"><h2 class="t28" id="tbH" data-i18n="tb.h">Built for trust</h2><a class="seclink" href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a></div>
+      <div class="ir tbwrap">
+        <div class="tbsoc" id="tbSoc" hidden><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><path d="M16 11v4.6l3 1.8"/></svg><div><b data-i18n="tb.soc2">SOC 2 Type II audit: in progress</b><span data-i18n="tb.soc2s"></span></div></div>
+        <ul class="tbgrid" aria-labelledby="tbH">
+          <li class="tb"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><path d="m11.8 15.4 3 3 5.6-6.2"/></svg><div><b data-i18n="tb.1">Nothing filed, paid or sent without your approval</b><span data-i18n="tb.1s">Odelia prepares each step. It goes out only when you tap Approve.</span></div></li>
+          <li class="tb"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><path d="M15 17a2.8 2.8 0 0 0 4 0l1.6-1.6a2.8 2.8 0 0 0-4-4l-.6.6M17 13.4a2.8 2.8 0 0 0-4 0l-1.6 1.6a2.8 2.8 0 0 0 4 4l.6-.6"/></svg><div><b data-i18n="tb.2">Every value shows its source</b><span data-i18n="tb.2s">Each field links to the document or official page it came from.</span></div></li>
+          <li class="tb"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><path d="M12 11.2h8M12 14.8h8M12 18.4h4.6"/></svg><div><b data-i18n="tb.3">Tamper-proof audit trail</b><span data-i18n="tb.3s">Every action is logged, and the log can only be added to, never edited or deleted.</span></div></li>
+          <li class="tb"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><circle cx="13.4" cy="15" r="2.5"/><path d="M15.9 15H21M19.4 15v2.1"/></svg><div><b data-i18n="tb.4">Agency logins in an encrypted vault</b><span data-i18n="tb.4s">Odelia signs in only with your OK, and every use of a login is logged.</span></div></li>
+          <li class="tb"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><rect x="10.6" y="11.2" width="10.8" height="7.8" rx="1.2"/><path d="m11 11.8 5 3.8 5-3.8"/></svg><div><b data-i18n="tb.5">Email instructions verified by DKIM</b><span data-i18n="tb.5s">She acts on an email only when the sender's domain signature checks out, since a From line can be forged.</span></div></li>
+          <li class="tb"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><rect x="11.6" y="11.4" width="8.8" height="7.4" rx="1.3"/><path d="M14 9.6v1.8M18 9.6v1.8M14 18.8v1.8M18 18.8v1.8M10.2 21.2 21.8 9.8"/></svg><div><b data-i18n="tb.6">Your data is never used to train AI</b><span data-i18n="tb.6s">Your documents and messages are never sold or used to train AI models.</span></div></li>
+          <li class="tb"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><path d="M16 10v10.4M13 20.4h6M11.2 12.2h9.6M11.2 12.2l-1.7 4.1a1.8 1.8 0 0 0 3.4 0zM20.8 12.2l-1.7 4.1a1.8 1.8 0 0 0 3.4 0z"/></svg><div><b data-i18n="tb.7">Independent licensed attorneys</b><span data-i18n="tb.7s">When a filing legally needs a lawyer, we introduce one you engage directly.</span></div></li>
+          <li class="tb"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5 6 7.2v7.6c0 6.4 4.2 11.6 10 13.7 5.8-2.1 10-7.3 10-13.7V7.2z"/><path d="M16 21.2s-4.2-3.6-4.2-7a4.2 4.2 0 0 1 8.4 0c0 3.4-4.2 7-4.2 7z"/><path d="M16 14.4h.01"/></svg><div><b data-i18n="tb.8">Local permit expediters</b><span data-i18n="tb.8s">In-person filings, pick-ups and inspections, handled in the city where you open.</span></div></li>
+        </ul>
       </div>
-    </div>
-    <div class="irow cnsec">
-      <div class="il"><h2 class="t28" data-i18n="sec.h">Security</h2><a class="seclink" href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a></div>
-      <div class="ir"><ul class="secl"><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.1">Agency logins encrypted in a vault</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.2">Every use of a login is logged</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.3">A full audit trail of every action</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.4">Nothing filed, paid or sent without your approval</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.5">Payments run through Stripe, and we never see full card numbers</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.6">Your content is never sold or used to train AI models</span></li></ul></div>
     </div>
   </div>
 </section>
@@ -2946,8 +3163,29 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 
 <section class="sec rv" data-rv="up" id="pricing" aria-labelledby="priceH">
   <div class="ctr">
-    <div class="sh"><h2 class="h2" id="priceH" data-i18n="price.h">One price per location.</h2><p class="sub" data-i18n="price.sub">$149 per location a month, billed yearly, or $299 on Pro for stores inspected often. Headquarters signs once, and each franchisee pays for its own stores.</p><p class="sub psub2" data-i18n="price.promise">Every license, permit and certificate a store can't open or sell without, mapped, filed with your approval and tracked for renewal.</p></div>
-    <div class="pmath">
+    <div class="prrow">
+      <div class="sh prl"><h2 class="h2" id="priceH" data-i18n="price.h">Simple pricing.</h2><p class="sub" data-i18n="price.sub">One price for every store. Headquarters signs once, and each franchisee pays for its own stores.</p></div>
+      <div class="prcard">
+        <p class="prv"><b id="prV">$149</b><span data-i18n="price.lu">per location a month</span></p>
+        <p class="prps" id="prPs">Billed yearly</p>
+        <button type="button" class="btn b-ink prbtn" data-open="pricing" data-i18n="cta.plan">Get my plan</button>
+        <p class="princ" data-i18n="price.inc">Included</p>
+        <ul class="prlist">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i1">Every license and permit mapped, filed with your approval and tracked</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i2">Renewals filed before they lapse</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i3">Staff certificates and vendor proof for every store</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i4">Rule-change alerts for your markets</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i5">Odelia included, with a monthly allowance per location</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i6">English and Chinese, for your whole team</span></li>
+        </ul>
+      </div>
+    </div>
+    <details class="prmore" id="prMore">
+      <summary><span><b data-i18n="price.more">More plans</b><small data-i18n="price.moresub">A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <div class="prmb">
+        <div class="plans" id="tiers"></div>
+        <p class="pfine" data-i18n="price.fine">Every plan includes Odelia, with a monthly allowance per location, twice as much on Pro. Extra allowance comes in $49 packs that carry over. Government fees go straight to each agency, and attorneys and customs brokers bill you directly.</p>
+        <div class="pmath">
       <div class="pmhd"><h3 class="t28" data-i18n="price.m.h">The math on waiting</h3><p class="pmsub" data-i18n="price.m.sub">One month of waiting costs more than a restaurant opening and a full year with Odelia.</p></div>
       <div class="pmgrid">
         <div class="pmc"><p class="pml"><i class="pmx" aria-hidden="true">×</i><span data-i18n="price.m.bad">Without Odelia</span></p>
@@ -2959,8 +3197,8 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="pmnote" data-i18n="price.m.note">Illustrative calculation, not a quote or a promise. Your rent, timeline and agency fees will differ.</p>
       </div>
     </div>
-    <div class="plans" id="tiers"></div>
-    <p class="pfine" data-i18n="price.fine">Each plan includes a monthly Odelia allowance for its locations, twice as much on Pro; $49 packs add $25 more and carry over. Inspections and rush filings are quoted per step, importers per product line. Attorneys and customs brokers bill you directly. Government fees go directly to each agency.</p>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -2973,7 +3211,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 </section>
 
 <!-- ======================= WORK TOGETHER ======================= -->
-<section class="ox mt160 rv" data-rv="tilt">
+<section class="ox mt160 rv" data-rv="tilt" id="together" aria-labelledby="wtH">
   <div class="ctr">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="gMin" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/></pattern><pattern id="gMaj" width="120" height="120" patternUnits="userSpaceOnUse"><path d="M120 0H0V120" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="1"/></pattern><g id="fp" fill="none" stroke="currentColor" stroke-width="1.3">
       <rect x="840" y="150" width="560" height="620"/><rect x="848" y="158" width="544" height="604"/>
@@ -3004,9 +3242,14 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       </svg>
       <div class="wti">
         <div class="wtw">
-          <p class="t28 l" data-i18n="wt.l">Work together</p>
+          <p class="t28 l" id="wtH" data-i18n="wt.l">Work together</p>
           <div class="rot"><div class="rotl" id="rotl"></div></div>
           <p class="t28 r" data-i18n="wt.r">from day one</p>
+        </div>
+        <div class="chbox">
+          <ul class="chl" aria-label="Channels" data-i18n-aria="ch.aria"><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.wechat">WeChat</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg><span data-i18n="ch.slack">Slack</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg><span data-i18n="ch.lark">Lark / 飞书</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5z"/><path fill="currentColor" stroke="none" d="M9.3 7.9c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z"/></svg><span data-i18n="ch.wa">WhatsApp</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg><span data-i18n="ch.im">iMessage</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span data-i18n="ch.mail">Email</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg><span data-i18n="ch.tel">Phone</span></li></ul>
+          <p class="chn" data-i18n="ch.note">Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.</p>
+          <div class="chwc" id="chWc" hidden><button type="button" class="chadd" id="chAdd" aria-expanded="false" aria-controls="chQr"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.add">Add us on WeChat</span></button><div class="chqr" id="chQr" hidden><img id="chQrImg" alt="" width="132" height="132"><p data-i18n="ch.qr">Scan with WeChat to add Placetta</p></div></div>
         </div>
       </div>
       <a class="qr" id="wtQr" href="/?src=qr"><img class="qrimg" id="wtQrImg" src="media/placetta-qr.svg" alt="QR code for placetta" width="64" height="64" decoding="async" draggable="false"><p id="wtQrT" data-i18n="wt.qr">Scan to open Placetta on your phone</p></a>
@@ -3024,7 +3267,8 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <input id="st-final" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
         <button type="submit" class="btn b-ink" data-i18n="st.btn">Get my plan</button>
       </form>
-      <p class="stnote"><span data-i18n="st.note">$299 per market, credited in full to any yearly plan.</span> <a href="/sample-plan" data-sec="sample" data-i18n="hero.sample">See a sample plan</a></p>
+      <p class="stnote"><span data-i18n="st.note">$299 one-time per market, credited toward your first year if you start a plan within 60 days.</span></p>
+      <a class="fdemo" href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="final_demo"><span data-i18n="hero.demo">Book a demo</span><span aria-hidden="true">→</span></a>
     </div>
     <div class="fqr" id="fqr" hidden><img id="fqrImg" alt="" width="88" height="88"><p data-i18n="fqr.t">Prefer WeChat? Scan to add Placetta.</p></div>
   </div>
@@ -3100,7 +3344,8 @@ const PROOF = {
   chagee: true,         // CHAGEE's quote and "5 months saved". Evidence: CHAGEE's written permission, and the filing and approval dates that show the 5 months
   stanford: true,       // Stefan's quote, "9 filings" and "approved in 4 months". Evidence: his signed release and the approval records
   wakimasu: true,       // Wakimasu named as a case study with its logo. Evidence: Wakimasu's written permission and the engagement on file
-  monthsSooner: true    // "Open months sooner" and "Brands open sooner". Evidence: before and after timelines from real openings, enough to show it is typical
+  monthsSooner: true,   // "Open months sooner" and "Brands open sooner". Evidence: before and after timelines from real openings, enough to show it is typical
+  soc2InProgress: false // "SOC 2 Type II audit: in progress" above the trust badges. Evidence: a signed engagement letter with the audit firm and the audit window's dates. Placetta holds no SOC 2, ISO or GDPR certification: never show one as a badge
 };
 // counted from the agency list on this page (AGG), so the number is true by construction
 function agCount(){ try { return AGG.reduce((a, g) => a + g[1].length, 0); } catch(e){ return 0; } }
@@ -3274,6 +3519,9 @@ zh:{
  "price.promise":"门店开业和营业离不开的每一项执照、许可和证书：逐项梳理，经您批准后提交，并跟踪续期。", "price.sub":"基础版每家门店每月 149 美元，经常接受检查的门店可选专业版，每月 299 美元，均按年计费。每位加盟商为自己的门店付费。",
  "faq.sub":"还有其他问题？请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"
 }};
+/* landing pass: one CTA label everywhere, and the copy for the onboarding, before and after, memory, trust, pricing and channel sections */
+Object.assign(T.en, {"cta.plan": "Get my plan", "st.btn": "Get my plan", "mbar.b": "Get my plan", "bel.btn": "Get my plan", "tea.btn": "Get my plan", "tm.cta": "Get my plan", "how.try": "Get my plan", "hero.try": "Get my plan", "cta.free": "Get my plan", "mon.alert": "Get my plan", "mon.plan": "Get my plan for {m}", "map.go": "Get my plan for {m}", "hero.demo": "Book a demo", "mon.price": "Rule alerts are included in every monthly plan", "hero.sub": "Odelia finds every permit your US launch needs, files each one with your approval, and keeps them current, in English or Chinese.", "st.note": "$299 one-time per market, credited toward your first year if you start a plan within 60 days.", "diff.h": "The difference Odelia makes", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "Minutes", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "ob.h": "Just tell Odelia what you're opening.", "ob.sub": "Sign-up is one line, in English or Chinese. She works out what and where, asks only what's missing, and starts your plan.", "ob.app": "Create your workspace", "ob.q": "What are you opening, and where?", "ob.hint": "English or Chinese", "ob.go": "Start", "ob.opt": "Name, opening date and address can wait.", "ob.read": "Odelia read", "ob.c1": "Milk tea shop", "ob.c2": "Flushing, Queens, NY", "ob.pt": "Your first plan", "ob.s1": "licenses found", "ob.s2": "forms filled", "ob.s3": "deadlines set", "ob.r1": "Food service establishment permit", "ob.r1a": "NYC Health Department", "ob.r1s": "Form filled", "ob.r2": "Certificate of Authority, sales tax", "ob.r2a": "NY State Tax Department. Due 20 days before your first sale", "ob.r2s": "Form filled", "ob.r3": "Food protection certificate", "ob.r3a": "A certified supervisor on every shift", "ob.r3s": "Before opening", "ob.r4": "Sign permit", "ob.r4a": "NYC Buildings", "ob.r4s": "Queued", "ob.more": "5 more in your plan", "ob.ft": "Ready for your review", "ob.fts": "Nothing is filed until you approve it.", "ob.note": "Sample run with sample data.", "ob.aria": "Sample sign-up: one line typed, then Odelia's first plan", "mem.h": "Odelia learns from each note", "mem.sub": "Correct her once, and she does it that way at every store from then on.", "mem.note": "Example conversation in the product, not a customer quote.", "mem.k1": "You correct her", "mem.k2": "Next time, she applies it", "mem.you": "You", "mem.a1": "Fire permit renewal is ready. Send it to the fire department?", "mem.f1": "Fire permit renewal", "mem.m1": "3-page PDF", "mem.u1": "Ask our landlord to sign first, he's on the lease.", "mem.a2": "Got it, landlord signs anything tied to the lease.", "mem.saved": "Committed to memory", "mem.b1": "The sign permit is tied to your lease, so it went to your landlord first. He signed this morning. Send it to the city?", "mem.f2": "Sign permit application", "mem.m2": "2-page PDF, signed", "mem.u2": "Yes, send it.", "mem.b2": "Sent to the city. Your landlord has a copy.", "mem.used": "Applied from memory", "pt.s4s": "Tell her once that your landlord signs anything tied to the lease, and she does it that way at every store.", "tb.h": "Built for trust", "tb.1": "Nothing filed, paid or sent without your approval", "tb.1s": "Odelia prepares each step. It goes out only when you tap Approve.", "tb.2": "Every value shows its source", "tb.2s": "Each field links to the document or official page it came from.", "tb.3": "Tamper-proof audit trail", "tb.3s": "Every action is logged, and the log can only be added to, never edited or deleted.", "tb.4": "Agency logins in an encrypted vault", "tb.4s": "Odelia signs in only with your OK, and every use of a login is logged.", "tb.5": "Email instructions verified by DKIM", "tb.5s": "She acts on an email only when the sender's domain signature checks out, since a From line can be forged.", "tb.6": "Your data is never used to train AI", "tb.6s": "Your documents and messages are never sold or used to train AI models.", "tb.7": "Independent licensed attorneys", "tb.7s": "When a filing legally needs a lawyer, we introduce one you engage directly.", "tb.8": "Local permit expediters", "tb.8s": "In-person filings, pick-ups and inspections, handled in the city where you open.", "price.h": "Simple pricing.", "price.sub": "One price for every store. Headquarters signs once, and each franchisee pays for its own stores.", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "price.e.l": "Entry plan", "price.e.v": "$299", "price.e.u": "/market, one time", "price.e.ps": "Credited toward your first year if you start a plan within 60 days", "price.e.n": "Every license, permit and registration one market needs, in order, with timelines and estimated fees.", "price.e.f1": "Ready in minutes", "price.e.f2": "Every requirement linked to its official source", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta"});
+Object.assign(T.zh, {"cta.plan": "获取我的计划", "st.btn": "获取我的计划", "mbar.b": "获取我的计划", "bel.btn": "获取我的计划", "tea.btn": "获取我的计划", "tm.cta": "获取我的计划", "how.try": "获取我的计划", "hero.try": "获取我的计划", "cta.free": "获取我的计划", "mon.alert": "获取我的计划", "mon.plan": "获取我的计划：{m}", "map.go": "获取我的计划：{m}", "hero.demo": "预约演示", "mon.price": "所有月度方案均含规则变化提醒", "hero.sub": "Odelia 找出您在美国开业所需的每一项许可，经您确认后逐项申报，并持续更新。中英文均可。", "diff.h": "Odelia 带来的改变", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "几分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "ob.h": "一句话告诉 Odelia，您要开什么店。", "ob.sub": "注册只需一句话，中文英文都行。她会弄清是什么店、开在哪里，只问缺少的信息，然后开始为您做计划。", "ob.app": "创建您的工作区", "ob.q": "您要开什么店？开在哪里？", "ob.hint": "中文或英文均可", "ob.go": "开始", "ob.opt": "店名、开业日期和地址都可以稍后再填。", "ob.read": "Odelia 识别为", "ob.c1": "奶茶店", "ob.c2": "纽约皇后区法拉盛", "ob.pt": "您的第一份计划", "ob.s1": "项许可", "ob.s2": "份表格已填好", "ob.s3": "个截止日期", "ob.r1": "食品服务场所许可", "ob.r1a": "纽约市卫生局", "ob.r1s": "表格已填好", "ob.r2": "销售税授权证书", "ob.r2a": "纽约州税务局，须在首笔销售 20 天前办妥", "ob.r2s": "表格已填好", "ob.r3": "食品安全管理证书", "ob.r3a": "每个班次须有一名持证主管", "ob.r3s": "开业前完成", "ob.r4": "招牌许可", "ob.r4a": "纽约市建筑局", "ob.r4s": "排队中", "ob.more": "计划中还有 5 项", "ob.ft": "已可供您审阅", "ob.fts": "未经您批准，不会提交任何申请。", "ob.note": "示例演示，数据均为示例。", "ob.aria": "注册示例：输入一句话，Odelia 随即生成第一份计划", "mem.h": "Odelia 从每一次反馈中学习", "mem.sub": "纠正她一次，此后每家门店她都照此办理。", "mem.note": "产品中的示例对话，并非客户原话。", "mem.k1": "您纠正她", "mem.k2": "下一次，她照做", "mem.you": "您", "mem.a1": "消防许可续期材料已准备好。现在发给消防局吗？", "mem.f1": "消防许可续期", "mem.m1": "3 页 PDF", "mem.u1": "先请房东签字，租约上有他的名字。", "mem.a2": "明白。凡是和租约有关的文件，都先请房东签字。", "mem.saved": "已存入记忆", "mem.b1": "招牌许可和租约有关，所以我先发给了房东，他今早已签字。现在提交给市政府吗？", "mem.f2": "招牌许可申请", "mem.m2": "2 页 PDF，已签字", "mem.u2": "好的，提交吧。", "mem.b2": "已提交给市政府，并抄送房东一份。", "mem.used": "按记忆执行", "pt.s4s": "告诉她一次：凡与租约有关的文件都先请房东签字，她会在每家门店都照此执行。", "tb.h": "值得信赖", "tb.1": "未经您批准，不提交、不付款、不发送", "tb.1s": "每一步由 Odelia 准备，您点“批准”后才会发出。", "tb.2": "每个数值都标明出处", "tb.2s": "每个字段都链接到它所依据的文件或官方页面。", "tb.3": "防篡改的审计记录", "tb.3s": "每一步操作都有记录，记录只能追加，不能修改或删除。", "tb.4": "政府网站登录信息加密存放", "tb.4s": "Odelia 只在您同意后登录，每次使用登录信息都有记录。", "tb.5": "邮件指令经 DKIM 验证", "tb.5s": "发件人域名签名验证通过后，她才会按邮件执行，因为发件人地址可以伪造。", "tb.6": "您的数据绝不用于训练 AI", "tb.6s": "您的文件和消息绝不出售，也不用于训练 AI 模型。", "tb.7": "独立执业的持牌律师", "tb.7s": "依法需要律师的申报，我们为您介绍律师，由您直接聘请。", "tb.8": "本地许可代办", "tb.8s": "现场递交、取件和检查，由开店所在城市的代办团队完成。", "price.h": "简单的价格。", "price.sub": "每家门店一个价格。总部签约一次，每位加盟商为自己的门店付费。", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "price.e.l": "开店计划", "price.e.v": "299 美元", "price.e.u": "/市场，一次性", "price.e.ps": "60 天内开通方案，可抵扣首年费用", "price.e.n": "一个市场所需的每一项执照、许可和登记，按顺序列出，附时间表和预估规费。", "price.e.f1": "几分钟即可生成", "price.e.f2": "每项要求均附官方来源", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -3283,8 +3531,8 @@ const CLAIMS = {
   en:{"map.fs":"containers of customer goods we help bring into new markets every year"},
   zh:{"map.fs":"个货柜：每年我们协助客户运入新市场的货物"}},
  monthsSooner: {
-  en:{"hero.sub":"Odelia maps every permit and registration your US launch needs, files each one with your approval, and keeps them current. Open months sooner, in English or Chinese.", "proof.h":"Brands open sooner with Placetta."},
-  zh:{"hero.sub":"Odelia 梳理您在美国开业所需的每一项许可与登记，经您确认后逐项申报，并持续更新。提前数月开业，中英文均可。", "proof.h":"品牌借助快哉，更早开业。"}},
+  en:{"hero.sub":"Odelia finds every permit your US launch needs, files each one with your approval, and keeps them current. Open months sooner, in English or Chinese.", "proof.h":"Brands open sooner with Placetta."},
+  zh:{"hero.sub":"Odelia 找出您在美国开业所需的每一项许可，经您确认后逐项申报，并持续更新。提前数月开业，中英文均可。", "proof.h":"品牌借助快哉，更早开业。"}},
  backersLogos: {
   en:{"bk.h":"Backed by operators from", "bk.hero":"Backed by operators from OpenAI, Anthropic, SpaceX and 21 more"},
   zh:{"bk.h":"我们的投资人来自", "bk.hero":"投资人来自 OpenAI、Anthropic、SpaceX 等 24 家公司"}},
@@ -3297,6 +3545,9 @@ const CLAIMS = {
  chagee: {
   en:{"pf.n4":"5 months", "pf.s4":"saved in approval time for CHAGEE", "price.q":"“Placetta saves us months in approval time.”", "price.qr":"Owner, CHAGEE. 5 months saved"},
   zh:{"pf.n4":"5 个月", "pf.s4":"为霸王茶姬节省的审批时间", "price.q":"“快哉为我们节省了数月的审批时间。”", "price.qr":"霸王茶姬店主，节省 5 个月"}},
+ soc2InProgress: {
+  en:{"tb.soc2":"SOC 2 Type II audit: in progress", "tb.soc2s":"An independent auditor is reviewing our security controls. Ask us for the status."},
+  zh:{"tb.soc2":"SOC 2 Type II 审计：进行中", "tb.soc2s":"独立审计机构正在审查我们的安全控制，欢迎向我们了解进度。"}},
  stanford: {
   en:{"pf.n5":"4 months", "pf.s5":"to approve all 9 of Stefan's permits and filings"},
   zh:{"pf.n5":"4 个月", "pf.s5":"Stefan 的 9 项许可与申报全部获批"}}
@@ -3655,7 +3906,12 @@ function renderProof(){
 }
 
 /* ============ pricing, faq ============ */
-function renderPrice(){ const i = L(); document.getElementById("tiers").innerHTML = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}${p.hl ? `<small>${t("price.risk")}</small>` : ""}</div></div>`).join(""); }
+function renderPrice(){ const i = L();
+  // the one number up front is Essentials, read from TIERS so it can never drift from the plan cards
+  const lead = TIERS[0], pv = document.getElementById("prV"), pps = document.getElementById("prPs");
+  if (pv) pv.textContent = lead.v[i]; if (pps) pps.textContent = lead.ps[i];
+  const ENTRY = {l:[T.en["price.e.l"], T.zh["price.e.l"]], v:[T.en["price.e.v"], T.zh["price.e.v"]], u:[T.en["price.e.u"], T.zh["price.e.u"]], ps:[T.en["price.e.ps"], T.zh["price.e.ps"]], cta:lead.cta, n:[T.en["price.e.n"], T.zh["price.e.n"]], f:[[T.en["price.e.f1"], T.zh["price.e.f1"]], [T.en["price.e.f2"], T.zh["price.e.f2"]]]};
+  document.getElementById("tiers").innerHTML = [ENTRY].concat(TIERS.slice(1).map(p => Object.assign({}, p, {hl: 0}))).map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}${p.hl ? `<small>${t("price.risk")}</small>` : ""}</div></div>`).join(""); }
 let fOpen = 0;
 function renderFaq(){
   const i = L();
@@ -3783,6 +4039,7 @@ function renderStep(){
 }
 function refreshNext(){ const b = document.querySelector("#qBody [data-next]"); if (b) b.disabled = !valid[qStep](); }
 function go(n){
+  clearTimeout(autoT);
   if (n > qStep) track("form_step_complete", {step: qStep + 1, source});
   qStep = n; errShown = false; save(); renderStep();
   track("form_step_view", {step: Math.min(qStep + 1, 5), source});
@@ -3798,7 +4055,9 @@ document.getElementById("qBody").addEventListener("click", e => {
     if (k === "hq"){ renderStep(); if (v === "other") { const o = document.getElementById("q-hqo"); if (o) o.focus(); return; } }
     refreshNext();
     clearTimeout(autoT);
-    if (valid[qStep]() && !(qStep === 1 && Q.hq === "other")) autoT = setTimeout(() => go(qStep + 1), 280);
+    // auto-advance only from the step the chip was on: a quick tap on Next must not advance twice and skip the contact step
+    const from = qStep;
+    if (valid[qStep]() && !(qStep === 1 && Q.hq === "other")) autoT = setTimeout(() => { if (qStep === from) go(from + 1); }, 280);
     return;
   }
   if (e.target.closest("[data-next]")){ if (valid[qStep]()) go(qStep + 1); return; }
@@ -3829,15 +4088,18 @@ document.getElementById("qBody").addEventListener("keydown", e => {
 const LEADS = {url: "https://esquxzcfsylffuijvzec.supabase.co", key: "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p", table: "plan_requests"};
 const OUTBOX = "placetta-outbox";
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+const marketLabelEn = () => { const m = MARKETS.find(x => x[0] === Q.market); return m ? m[0] : String(Q.market || "").trim(); };
+// one row per plan request: trimmed and length-capped to match the table, and the page URL without its query string
 function leadRow(){
   const qs = new URLSearchParams(location.search), utm = {};
   qs.forEach((v, k) => { if (k.startsWith("utm_")) utm[k] = v.slice(0, 200); });
-  const wc = Q.contact === "wechat";
-  return {client_id: uuid(), source, page_lang: lang, preferred_language: Q.plang || null, market: Q.market || null, industry: Q.industry || null,
-    hq: Q.hq === "other" ? (Q.hqOther || "other") : (Q.hq || null), opening: Q.opening || null, locations: Q.locations || null,
-    contact_method: Q.contact || null, email: wc ? null : (Q.email || null), wechat: wc ? (Q.wechat || null) : null,
-    company: Q.company || null, website: Q.website || null, answers: Object.assign({}, Q), utm,
-    page_url: location.href.slice(0, 500), referrer: document.referrer.slice(0, 500) || null, user_agent: navigator.userAgent.slice(0, 300)};
+  const wc = Q.contact === "wechat", s = (v, n) => String(v == null ? "" : v).trim().slice(0, n) || null;
+  return {client_id: uuid(), source: typeof source === "string" ? source : "unknown", page_lang: lang, preferred_language: Q.plang || lang,
+    market: s(marketLabelEn(), 300), industry: Q.industry || null,
+    hq: Q.hq === "other" ? s(Q.hqOther || "other", 100) : (Q.hq || null), opening: Q.opening || null, locations: Q.locations || null,
+    contact_method: wc ? "wechat" : "email", email: wc ? null : s(Q.email, 320), wechat: wc ? s(Q.wechat, 100) : null,
+    company: s(Q.company, 300), website: s(Q.website, 500), answers: Object.assign({}, Q), utm,
+    page_url: (location.origin + location.pathname).slice(0, 500), referrer: document.referrer.slice(0, 500) || null, user_agent: navigator.userAgent.slice(0, 300)};
 }
 function postLead(row){
   if (!LEADS.url || !LEADS.key) return Promise.resolve(false);
@@ -3865,30 +4127,9 @@ function submit(){
   track("plan_request_submitted", {source, audience: audienceOf(source), preferred_language: Q.plang, contact_method: Q.contact, industry: Q.industry, hq: Q.hq === "other" ? (Q.hqOther || "other") : Q.hq, market: Q.market, opening: Q.opening, locations: Q.locations, has_company: !!Q.company});
   sendLead(leadRow());
   submitted = true;
-  sendLead(source);
-  if (Q.contact !== "wechat") try { localStorage.setItem("placetta-handoff", JSON.stringify({v: 1, at: Date.now(), email: Q.email.trim(), company: Q.company.trim(), market: marketLabelEn(), industry: Q.industry, opening: Q.opening, plang: Q.plang || lang})); } catch(e){}
+  if (Q.contact !== "wechat") try { localStorage.setItem("placetta-handoff", JSON.stringify({v: 1, at: Date.now(), email: String(Q.email || "").trim(), company: String(Q.company || "").trim(), market: marketLabelEn(), industry: Q.industry, opening: Q.opening, plang: Q.plang || lang})); } catch(e){}
   try { localStorage.setItem("placetta-sent", "1"); localStorage.removeItem("placetta-draft"); } catch(e){}
   qStep = 4; renderStep(); updateResume();
-}
-
-/* Plan requests are kept in Placetta's database (public.plan_requests: anyone can add one, nobody can read them back
-   except the team in Supabase). The publishable key is meant for the browser. */
-const SUPA = "https://esquxzcfsylffuijvzec.supabase.co", SUPA_KEY = "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p";
-const marketLabelEn = () => { const m = MARKETS.find(x => x[0] === Q.market); return m ? m[0] : Q.market.trim(); };
-function sendLead(src){
-  const p = new URLSearchParams(location.search), utm = {};
-  ["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(k => { if (p.get(k)) utm[k] = p.get(k).slice(0, 200); });
-  const w = Q.contact === "wechat";
-  const row = {
-    client_id: crypto.randomUUID(),
-    source: src, page_lang: lang, preferred_language: Q.plang || lang, market: marketLabelEn().slice(0, 300), industry: Q.industry, hq: Q.hq === "other" ? (Q.hqOther || "other").slice(0, 100) : Q.hq,
-    opening: Q.opening, locations: Q.locations, contact_method: w ? "wechat" : "email", email: w ? null : Q.email.trim().slice(0, 320), wechat: w ? Q.wechat.trim().slice(0, 100) : null,
-    company: Q.company.trim().slice(0, 300) || null, website: Q.website.trim().slice(0, 500) || null, answers: Q, utm,
-    page_url: (location.origin + location.pathname).slice(0, 500), referrer: document.referrer.slice(0, 500) || null, user_agent: navigator.userAgent.slice(0, 300),
-  };
-  fetch(SUPA + "/rest/v1/plan_requests", { method: "POST", keepalive: true, headers: { apikey: SUPA_KEY, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(row) })
-    .then(r => track(r.ok ? "plan_request_saved" : "plan_request_save_failed", {status: r.status}))
-    .catch(() => track("plan_request_save_failed", {status: 0}));
 }
 
 /* the Beam rides the sheet's border when Get my plan is clicked in the hero; its bundle loads once, ahead of time when idle */
@@ -4535,11 +4776,17 @@ tsNext();
 
 /* ============ WeChat QR: set WECHAT_QR to the image path and it appears in the final call to action and the form ============ */
 const WECHAT_QR = "";
-if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getElementById("fqr").hidden = false; const q = document.getElementById("wtQrImg"); if (q){ q.src = WECHAT_QR; document.getElementById("wtQrT").setAttribute("data-i18n", "fqr.t"); document.getElementById("wtQrT").textContent = t("fqr.t"); } }
+if (WECHAT_QR){
+  document.getElementById("fqrImg").src = WECHAT_QR; document.getElementById("fqr").hidden = false;
+  // work together: "Add us on WeChat" shows only with a real code behind it, and opens the code in place
+  const wc = document.getElementById("chWc"), add = document.getElementById("chAdd"), box = document.getElementById("chQr");
+  if (wc && add && box){ document.getElementById("chQrImg").src = WECHAT_QR; wc.hidden = false;
+    add.addEventListener("click", () => { box.hidden = !box.hidden; add.setAttribute("aria-expanded", String(!box.hidden)); track("wechat_qr_open", {open: !box.hidden}); }); }
+}
 
 /* ============ boot ============ */
 /* ============ restored sections (from the earlier site) ============ */
-const BEFORE = [["City business license office","市营业执照办公室","On hold","电话排队中"],["County health department","县卫生部门","Form sent back","表格被退回"],["Fire marshal","消防部门","Inspection pending","等待检查"],["Building department","建筑部门","Plans resubmitted","图纸重新提交"],["State tax agency","州税务机构","Separate login","另一个账户"],["Permit consultant","许可顾问","Billed hourly","按小时计费"]];
+const BEFORE = [["Permit expediter","许可代办","On hold","电话排队中"],["Lawyer","律师","Billed hourly","按小时计费"],["Operations manager","运营经理","Form sent back","表格被退回"],["Bookkeeper","会计","Renewal overdue","续期逾期"]];
 
 
 const DASHROWS = [
@@ -4570,7 +4817,7 @@ function renderDash(){
 }
 
 
-function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map(b => `<div class="per"><span class="pain">${b[2 + i]}</span><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div></div>`).join(""); }
+function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map(b => `<div class="per" role="listitem"><span class="pain">${b[2 + i]}</span><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div></div>`).join(""); }
 
 
 const isLg = () => innerWidth >= 1024;
@@ -4629,18 +4876,24 @@ function renderInd(k){
 function fitTable(){ document.querySelectorAll(".abox").forEach(box => { if (isLg()) { box.style.removeProperty("--ts"); return; } box.style.setProperty("--ts", (box.clientWidth / 600).toFixed(4)); }); }
 
 const CH = [
- {ic:"wechat",t:["WeChat with Placetta","微信联系快哉"]},
- {ic:"email",t:["email to Placetta","邮件联系快哉"]},
- {ic:"phone",t:["call with Placetta","电话联系快哉"]},
- {ic:"chat",t:["chat with Placetta","在线咨询快哉"]},
- {ic:"dash",t:["your dashboard","登录您的看板"]}
+ {ic:"wechat",t:["WeChat with our team","微信联系我们的团队"]},
+ {ic:"slack",t:["Slack with Odelia","在 Slack 与 Odelia 协作"]},
+ {ic:"lark",t:["Lark with Odelia","在飞书与 Odelia 协作"]},
+ {ic:"wa",t:["WhatsApp with Odelia","WhatsApp 联系 Odelia"]},
+ {ic:"im",t:["iMessage with Odelia","iMessage 联系 Odelia"]},
+ {ic:"email",t:["email to Odelia","给 Odelia 发邮件"]},
+ {ic:"phone",t:["call Odelia any time","随时致电 Odelia"]}
 ];
 const CHIC = {
  wechat:'<span class="ci" style="background:#2AAE67"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg></span>',
  email:'<span class="ci" style="background:#fff"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="2.2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>',
  phone:'<span class="ci" style="background:#34B36A"><svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg></span>',
  chat:'<span class="ci" style="background:#3B82F6"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 4c5 0 9 3.1 9 7s-4 7-9 7c-1 0-2-.1-2.9-.4L4 20l1.4-3.6C4 15 3 13.1 3 11c0-3.9 4-7 9-7z"/></svg></span>',
- dash:'<span class="ci orb"></span>'
+ dash:'<span class="ci orb"></span>',
+ slack:'<span class="ci" style="background:#4A154B"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg></span>',
+ lark:'<span class="ci" style="background:#3370FF"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg></span>',
+ wa:'<span class="ci" style="background:#25D366"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5zm-2.7 4.4c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z" fill-rule="evenodd"/></svg></span>',
+ im:'<span class="ci" style="background:#34C759"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg></span>'
 };
 let rIdx = 0;
 function renderRot(){
@@ -5148,7 +5401,35 @@ function runCount(el){
 const cntIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ runCount(e.target); cntIO.unobserve(e.target); } }), {threshold:.6});
 function bindCounters(){ document.querySelectorAll(".ox .cnt").forEach(el => { if (!cntDone.has(el)) cntIO.observe(el); }); }
 
-function renderOld(){ document.querySelectorAll(".ox .cnt").forEach(el => { el.textContent = (+el.dataset.to).toLocaleString("en-US"); }); renderBefore(); renderRot(); renderAddRow(false); renderFrRow(false); renderInd(); renderDash(); renderXp(); renderAg(false); }
+function renderOld(){ document.querySelectorAll(".ox .cnt").forEach(el => { el.textContent = (+el.dataset.to).toLocaleString("en-US"); }); renderBefore(); renderRot(); renderAddRow(false); renderFrRow(false); renderInd(); renderDash(); renderXp(); renderAg(false); renderNew(); }
+function renderNew(){
+  const soc = document.getElementById("tbSoc"); if (soc) soc.hidden = !PROOF.soc2InProgress;
+  if (window.obLang) window.obLang();
+}
+/* zero-setup onboarding: the one-line sign-up types itself (in the page's language, then the other one), Start is
+   pressed, and Odelia's first plan fills in. Plays while on screen; reduced motion shows the finished state. */
+(function onboard(){
+  const st = document.getElementById("obStage"); if (!st) return;
+  const typ = document.getElementById("obType"), go = document.getElementById("obGo"), steps = [...st.querySelectorAll("[data-ob]")];
+  const PH = {en: "Milk tea shop in Flushing, NY", zh: "奶茶店，纽约法拉盛"};
+  let seen = false, running = false, loop = 0, timers = [];
+  const at = (ms, f) => timers.push(setTimeout(f, ms));
+  const done = () => { timers.forEach(clearTimeout); timers = []; typ.textContent = PH[lang]; steps.forEach(x => x.classList.add("on")); st.classList.add("obdone"); };
+  function run(){
+    timers.forEach(clearTimeout); timers = []; running = true; st.classList.remove("obdone");
+    const chars = [...(loop++ % 2 ? PH[lang === "zh" ? "en" : "zh"] : PH[lang])];
+    steps.forEach(x => x.classList.remove("on")); typ.textContent = "";
+    let k = 0, tt = 600;
+    chars.forEach(() => { tt += chars.length > 12 ? 55 : 120; at(tt, () => { typ.textContent = chars.slice(0, ++k).join(""); }); });
+    tt += 500; at(tt, () => { go.classList.remove("press"); void go.offsetWidth; go.classList.add("press"); });
+    tt += 300; steps.forEach(x => { tt += +x.dataset.ob || 300; at(tt, () => x.classList.add("on")); });
+    at(tt + 5200, () => { if (seen) run(); else { running = false; st.classList.add("obdone"); } });
+  }
+  window.obLang = () => { if (RM || !running) done(); else { loop = 0; run(); } };
+  if (RM) { done(); return; }
+  done();   // a finished plan until it scrolls into view, so it never sits empty
+  new IntersectionObserver(es => { const was = seen; seen = es.some(e => e.isIntersecting); if (seen && !was && !running) run(); }, {threshold: .35}).observe(st);
+})();
 if (document.getElementById("itl")) new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) document.getElementById("itl").classList.add("itl-on"); }), {threshold:.25}).observe(document.getElementById("itl"));
 new IntersectionObserver(es => es.forEach(e => {
   if (e.isIntersecting && !aRunning && !RM){ aRunning = true; addCycle(); }
