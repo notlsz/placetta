@@ -76,8 +76,8 @@ function fileReady(ctx: Context): Plan {
     return {
       steps: [S("searching", "Checking which applications are complete", "查看哪些申请已经完成")],
       reply: ids.length
-        ? { text: [B("Everything that's complete is waiting for your approval. Nothing gets filed until you approve it.", "所有已完成的申请都在等待您批准。您批准之前，任何申请都不会提交。")], approvals: ids }
-        : { text: [B("Nothing else is complete yet. The plan check is next: it needs your floor plan and equipment list.", "目前没有其他已完成的申请。下一项是图纸审查，需要您的平面图和设备清单。")], approvals: ["a-docs"] },
+        ? { text: [B("Everything complete is waiting for your approval. Nothing files without it.", "已完成的申请都在等您批准，未经批准不会提交。")], approvals: ids }
+        : { text: [B("Nothing else is complete. Next is the plan check: it needs your floor plan and equipment list.", "暂无其他已完成的申请。下一项是图纸审查，需要平面图和设备清单。")], approvals: ["a-docs"] },
     };
   }
   const signOpen = ctx.current.approvals.some(a => a.id === "a-sign");
@@ -98,8 +98,8 @@ function fileReady(ctx: Context): Plan {
     )],
     reply: {
       text: [signOpen
-        ? B("Two applications are ready to file: the employer registration, which has no fee, and the sign permit, with a $445 fee. I never file without your OK, so both are waiting for your approval.", "有两项申请可以提交：雇主登记（无需费用）和招牌许可（费用 $410）。没有您的同意我不会提交，所以两项都在等您批准。")
-        : B("The employer registration is ready to file, and it has no fee. I never file without your OK, so it's waiting for your approval.", "雇主登记可以提交了，无需费用。没有您的同意我不会提交，所以它在等您批准。")],
+        ? B("Two are ready to file: the employer registration (no fee) and the sign permit ($445). Both are waiting for your approval.", "两项可以提交：雇主登记（免费）和招牌许可（$445）。都在等您批准。")
+        : B("The employer registration is ready to file, no fee. It's waiting for your approval.", "雇主登记可以提交，无需费用，正等您批准。")],
       apps: ["edd"],
       approvals: ["a-edd", ...pendingFilings(ctx.current)],
     },
@@ -116,7 +116,7 @@ function blocking(): Plan {
     reply: {
       text: [
         B("One chain sets your opening date. Everything else can run alongside it.", "开业日期由一条链决定，其余事项都可以同步推进。"),
-        B("The city won't issue the build-out permit for a food facility until the county approves your plans, and the plan check is waiting on two documents from you.", "在县政府批准您的图纸之前，市政府不会签发食品设施的装修许可，而图纸审查正在等您提供两份文件。"),
+        B("The city won't issue the build-out permit until the county approves your plans, and the plan check needs two documents from you.", "县政府批准图纸前，市政府不会签发装修许可；图纸审查还差您两份文件。"),
       ],
       chain: [B("Plan check", "图纸审查"), B("Building permit", "建筑许可"), B("Build-out", "装修施工"), B("Fire and health inspections", "消防与卫生检查"), B("Permit to operate", "经营许可")],
       approvals: ["a-docs"],
@@ -139,8 +139,8 @@ function fremont(): Plan {
     )],
     reply: {
       text: [
-        B("Fremont is in Alameda County, so the health filings move to Alameda County Environmental Health. Your EIN and EDD account carry over, and the state wants a seller's permit for each location, which I can add under your existing account.", "弗里蒙特属于阿拉米达县，因此卫生相关申请改由阿拉米达县环境卫生局受理。您的 EIN 和就业发展局账户可以沿用；州政府要求每个门店单独办理销售许可证，我可以在您现有的账户下添加。"),
-        B("Send me the address when you have it and I'll start preparing the filings.", "有了地址就发给我，我会开始准备申请材料。"),
+        B("Fremont is in Alameda County, so health filings go to Alameda County Environmental Health. Your EIN and EDD account carry over. The state wants a seller's permit per location; I'll add it under your account.", "弗里蒙特属阿拉米达县，卫生申请改由该县环境卫生局受理。EIN 和就业发展局账户沿用。州政府要求每个门店单独办销售许可证，我会在您现有账户下添加。"),
+        B("Send the address when you have it and I'll start the filings.", "有了地址发给我，我就开始准备申请。"),
       ],
       memory: [B("Second shop planned in Fremont", "计划在弗里蒙特开第二家店")],
       next: { label: B("See the Fremont licenses", "查看弗里蒙特所需许可证"), req: { match: { what: "Milk tea shop", where: "Fremont, CA" } } },
@@ -171,7 +171,7 @@ function prepareSoi(ctx: Context): Plan {
       w => ({ ...w, deadlines: w.deadlines.map(d => (d.id === "dl-soi" ? { ...d, app: "soi", ask: B("Review", "查看"), prompt: undefined } : d)) }),
     )],
     reply: {
-      text: [B("Your Statement of Information is drafted from what I already know. It's a $20 filing with the Secretary of State, due in 21 days. Check it over and approve when you're ready.", "已根据现有资料起草好您的信息声明。这是向州务卿提交的申报，费用 $20，21 天后到期。请核对，准备好后批准即可。")],
+      text: [B("Drafted your Statement of Information: $20 to the Secretary of State, due in 21 days. Check it and approve.", "已起草信息声明：向州务卿申报，费用 $20，21 天后到期。请核对后批准。")],
       apps: ["soi"],
       approvals: ["a-soi"],
     },
@@ -192,7 +192,7 @@ function ruleChange(ctx: Context): Plan {
       audit("agent", B("Added checklist item", "新增清单项"), B("Food facility plan check", "食品设施图纸审查"), B("Grease interceptor worksheet (sample notice)", "隔油池计算表（示例通知）")),
     )],
     reply: {
-      text: [B("The county now asks for a grease interceptor worksheet with food facility plan checks. It applies to you, so I added it to your plan check checklist and started it. I'll finish it once your equipment list is in.", "县政府现在要求食品设施图纸审查附上隔油池计算表。这适用于您，所以我已把它加入图纸审查清单并开始填写，设备清单到位后我会完成。")],
+      text: [B("The county now wants a grease interceptor worksheet with food plan checks. I added it to your checklist and started it; I'll finish once your equipment list is in.", "县政府现要求食品图纸审查附隔油池计算表。我已加入清单并开始填写，设备清单到位后完成。")],
       apps: ["plancheck"],
     },
   };
@@ -220,8 +220,8 @@ const SCRIPTS: { match: RegExp; plan: (ctx: Context) => Plan }[] = [
 const FALLBACK = (): Plan => ({
   steps: [S("searching", "Looking up the rules that apply", "查找适用的法规"), S("composing", "Writing a reply", "撰写回复")],
   reply: { text: [
-    B("I can take that on. Tell me the city and what the location will do, for example serve food, store goods or sell retail.", "这件事我可以接手。请告诉我城市名称，以及门店的用途，例如餐饮、仓储或零售。"),
-    B("I'll list every license from the city up to the national level, prepare each one and bring it to you to approve before anything is filed.", "我会列出从市级到国家的每一张许可证，逐一准备好，并在提交前交给您批准。"),
+    B("On it. Which city, and will it serve food, store goods or sell retail?", "交给我。在哪个城市？做餐饮、仓储还是零售？"),
+    B("I'll list every license from city to federal, prepare each one and bring it to you before anything is filed.", "我会列出从市级到联邦的每张许可证，逐一准备，提交前交给您批准。"),
   ] },
 });
 
@@ -265,8 +265,8 @@ function file(id: string, ctx: Context): Plan {
       addDeadline({ id: "dl-r-" + c.app, date: inDays(c.days), kind: id === "a-soi" ? "renewal" : "estimate", app: c.app, title: c.est, agency: a.agency }),
       ...(c.also ?? []),
     )],
-    reply: { text: [B(`Filing the ${a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1)} on ${c.tool} now. Each step shows below as it happens${c.fee ? `, including the $${c.fee.toLocaleString("en-US")} fee` : ""}, and I'll watch for the decision once it's in.`,
-      `正在 ${c.tool} 上提交${a.name.zh}。每一步都会实时显示在下方${c.fee ? `，包括 $${c.fee.toLocaleString("en-US")} 的费用` : ""}，提交后我会跟进审批结果。`)], files: [rid], filed: [c.app] },
+    reply: { text: [B(`Filing the ${a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1)} on ${c.tool} now. Each step shows below, and I'll watch for the decision.`,
+      `正在 ${c.tool} 上提交${a.name.zh}。每一步都显示在下方，我会跟进审批结果。`)], files: [rid], filed: [c.app] },
   };
 }
 

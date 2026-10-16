@@ -210,6 +210,15 @@ const SCENARIOS: Scenario[] = [
     name: "maps a store in Chinese, end to end", lang: "zh", maxRounds: 14, ws: () => scratch({ facts: [] }),
     prompt: "我们要在加州圣何塞开一家奶茶店，地址是 1 N First St, San Jose, CA 95112，计划 2027 年 3 月开业。请添加门店，梳理所需的全部执照和许可，并逐项准备申请。",
     check: (r) => { const share = cjk(r.text); return [share > 0.3 && r.w.apps.length >= 5, `${r.w.apps.length} applications; ${Math.round(share * 100)}% Chinese in the reply`]; },
+  },  {
+    name: "answers sharp and short", lang: "en", maxRounds: 4,
+    ws: () => scratch({ apps: [app("x-fse", "Food Service Establishment Permit", { status: "needs", checklist: [{ id: "c0", label: same("Lease"), state: "missing" }] }), app("x-crt", "Commercial Rent Tax registration", { status: "review" })] }),
+    prompt: "Where are we on the Flushing store's permits?",
+    check: (r) => {
+      const words = r.text.trim().split(/\s+/).filter(Boolean).length;
+      const fluff = /great question|happy to help|i'd be happy|let me know if|feel free|hope this helps|certainly!|absolutely!|\u2014|\*\*|^#/im.exec(r.text);
+      return [words > 0 && words <= 70 && !fluff, `${words} words${fluff ? `; filler or formatting: "${fluff[0]}"` : ""}: ${r.text.slice(0, 120)}`];
+    },
   },
 ];
 
