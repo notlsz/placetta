@@ -183,7 +183,7 @@ export { SRC };
 const NAME = "Moonleaf Tea LLC";
 const ADDR = "North First Street, San Jose, CA (sample)";
 const F = (id: string, en: string, zh: string, value: string, from?: Bi): Field => ({ id, label: B(en, zh), value, from });
-const fromCtx = B("From Context", "来自资料");
+const fromCtx = B("From your business facts", "来自企业资料");
 const fromLease = B("From your lease", "来自租约");
 const fromPhotos = B("From storefront photos", "来自门店照片");
 const fromYou = B("You told me", "您告诉我的");
@@ -405,7 +405,7 @@ export const SAMPLE: Workspace = {
     { id: "x9", at: ago(2 * 1440 + 42), actor: "agent", action: B("Submitted application", "提交申请"), object: B("Business Tax Certificate", "营业税证书"), detail: B("sanjoseca.gov", "sanjoseca.gov") },
     { id: "x10", at: ago(2 * 1440 + 45), actor: "you", action: B("Approved filing", "批准提交"), object: B("Business Tax Certificate", "营业税证书"), detail: B("Fee set by the city's rate schedule", "费用按市税率表计算") },
     { id: "x11", at: ago(5 * 1440), actor: "you", action: B("Uploaded", "上传"), object: B("food-handler-card-b-kim.pdf", "food-handler-card-b-kim.pdf") },
-    { id: "x12", at: ago(6 * 1440 - 30), actor: "agent", action: B("Committed to memory", "存入记忆"), object: B("Context", "资料"), detail: B("Floor area 1,150 sq ft, lease term 5 years", "面积 1,150 平方英尺，租期 5 年") },
+    { id: "x12", at: ago(6 * 1440 - 30), actor: "agent", action: B("Committed to memory", "存入记忆"), object: B("Business facts", "企业资料"), detail: B("Floor area 1,150 sq ft, lease term 5 years", "面积 1,150 平方英尺，租期 5 年") },
     { id: "x13", at: ago(6 * 1440 - 31), actor: "agent", action: B("Extracted data", "提取信息"), object: B("lease-agreement.pdf", "lease-agreement.pdf"), detail: B("Address, term, floor area, landlord", "地址、租期、面积、房东") },
     { id: "x14", at: ago(7 * 1440), actor: "agency", who: B("IRS", "美国国税局"), action: B("Issued", "签发"), object: B("Employer Identification Number", "雇主识别号码") },
     { id: "x15", at: ago(7 * 1440 + 5), actor: "you", action: B("Approved filing", "批准提交"), object: B("Employer Identification Number", "雇主识别号码") },

@@ -192,9 +192,13 @@ async function signIn(p) {
   }
 }
 
-const SETTINGS = ["general", "team", "odelia", "connections", "billing", "security", "privacy", "help"];
-const PAGES = [["overview", ""], ["work", "work"], ["playbooks", "playbooks"], ["updates", "updates"], ["stores", "stores"], ["applications", "applications"],
-  ["documents", "documents"], ["deadlines", "deadlines"], ["audit", "activity"], ["context", "context"], ["find", "find"], ["headquarters", "headquarters"]];
+/* Four places plus Settings (src/route.ts): Home, Permits with its tabs, Stores, Odelia with its tabs. The old
+   addresses (/work, /applications, /context and the rest) are checked too: each opens its new home. */
+const SETTINGS = ["general", "facts", "team", "odelia", "connections", "billing", "security", "privacy", "activity", "help"];
+const PAGES = [["home", ""], ["permits", "permits"], ["permits-filed", "permits/filed"], ["permits-documents", "permits/documents"], ["permits-deadlines", "permits/deadlines"],
+  ["find", "permits/find"], ["stores", "stores"], ["odelia-chat", "odelia"], ["odelia-work", "odelia/work"], ["odelia-playbooks", "odelia/playbooks"], ["odelia-updates", "odelia/updates"],
+  ["headquarters", "headquarters"],
+  ["old-work", "work"], ["old-applications", "applications"], ["old-documents", "documents"], ["old-deadlines", "deadlines"], ["old-activity", "activity"], ["old-context", "context"], ["old-find", "find"]];
 
 /** Every state checked: a name and how to get there. A state whose opener finds nothing to click is skipped. */
 const STATES = [
@@ -206,18 +210,20 @@ const STATES = [
     await p.locator(".spend-b").first().scrollIntoViewIfNeeded().catch(() => {});
     return true;
   } },
-  { name: "find-results", go: async p => { await open(p, "find"); if (!(await clickText(p, "Milk tea shop, San Jose, CA"))) return false; await p.locator(".hit").first().waitFor({ timeout: 20000 }).catch(() => {}); await p.waitForTimeout(800); return true; } },
+  { name: "find-results", go: async p => { await open(p, "permits/find"); if (!(await clickText(p, "Milk tea shop, San Jose, CA"))) return false; await p.locator(".hit").first().waitFor({ timeout: 20000 }).catch(() => {}); await p.waitForTimeout(800); return true; } },
   { name: "nav-menu", go: async p => { await open(p, ""); return click(p, ".mbar button[aria-label=Menu]"); } },
-  { name: "odelia-chat", go: async p => { await open(p, ""); return viaMenu(p, ".askb"); } },
+  // the chat beside the work: ask from the dock on Home, the panel opens (docked on a desktop, a sheet on a phone)
+  { name: "odelia-panel", go: async p => { await open(p, "stores"); const box = p.locator(".dockbar textarea").filter({ visible: true }).first(); if (!(await box.count())) return false; await box.fill("What's due this week?"); await box.press("Enter"); await p.waitForTimeout(1500); return true; } },
   { name: "odelia-chat-typed", go: async p => {
-    await open(p, ""); if (!(await viaMenu(p, ".askb"))) return false;
+    await open(p, "odelia");
     const box = p.locator(".panel textarea").filter({ visible: true }).first();
     if (await box.count()) { await box.fill("What do I need for https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/permit-center-applications-and-forms"); await box.press("Enter"); await p.waitForTimeout(2500); }
     return true;
   } },
   { name: "cmdk", go: async p => { await open(p, ""); if (await viaMenu(p, ".cmdk-open")) return true; await p.keyboard.press("Control+k"); await settle(p); return true; } },
   { name: "cmdk-typed", go: async p => { await open(p, ""); if (!(await viaMenu(p, ".cmdk-open"))) { await p.keyboard.press("Control+k"); await settle(p); } await p.keyboard.type("food facility plan check permit"); await settle(p); return true; } },
-  { name: "approval-drawer", go: async p => { await open(p, ""); return clickText(p, "Review"); } },
+  { name: "approval-drawer", go: async p => { await open(p, ""); return clickText(p, "Approve"); } },
+  { name: "tabbar-odelia", go: async p => { await open(p, ""); return click(p, ".tabbar a:last-child"); } },
   { name: "plans", go: async p => {
     await open(p, "");
     for (const t of [/^Get your entry plan/, /^See plans/, /^Change plan/, /^Compare plans/]) if (await clickText(p, t)) return true;
@@ -225,13 +231,13 @@ const STATES = [
     for (const t of [/^(See|View|Compare|Change|Choose a) plans?$/i, /^Upgrade/]) if (await clickText(p, t)) return true;
     return false;
   } },
-  { name: "playbooks-open", go: async p => { await open(p, "playbooks"); return click(p, ".pb-tog"); } },
-  { name: "work-open", go: async p => { await open(p, "work"); const a = await click(p, ".hz-tog"); const b = await click(p, ".sec-h.tog"); return a || b; } },
+  { name: "playbooks-open", go: async p => { await open(p, "odelia/playbooks"); return click(p, ".pb-tog"); } },
+  { name: "work-open", go: async p => { await open(p, "odelia/work"); const a = await click(p, ".hz-tog"); const b = await click(p, ".sec-h.tog"); return a || b; } },
   { name: "store-detail", go: async p => { await open(p, "stores"); return click(p, "button.store"); } },
   { name: "store-detail-2", go: async p => { await open(p, "stores"); const l = p.locator("button.store").filter({ visible: true }); if (await l.count() < 2) return false; await l.nth(1).click(); await settle(p); return true; } },
   { name: "stores-plan-many", go: async p => { await open(p, "stores"); return clickText(p, "Plan many stores"); } },
-  { name: "app-drawer", tabs: true, go: async p => { await open(p, "applications"); return click(p, ".apps-t .tr.row, button.row.arow"); } },
-  { name: "app-drawer-crit", tabs: true, go: async p => { await open(p, "applications"); return click(p, ".apps-t .tr.row.crit, button.row.arow.crit"); } },
+  { name: "app-drawer", tabs: true, go: async p => { await open(p, "permits"); return click(p, ".apps-t .tr.row, button.row.arow"); } },
+  { name: "app-drawer-crit", tabs: true, go: async p => { await open(p, "permits"); return click(p, ".apps-t .tr.row.crit, button.row.arow.crit"); } },
   ...[0, 1, 2].map(step => ({ name: "tour" + (step ? "-step" + (step + 1) : ""), go: async p => {
     await p.evaluate(() => { try { for (const k of Object.keys(localStorage)) if (/tour/i.test(k)) localStorage.removeItem(k); } catch { /* blocked */ } });
     await p.goto(URL_); await p.waitForTimeout(1200);

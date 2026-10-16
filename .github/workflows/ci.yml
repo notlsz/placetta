@@ -21,6 +21,8 @@ jobs:
       - run: npm ci
       - name: Types
         run: npx tsc -b
+      - name: Plain words in the interface
+        run: node scripts/plain-words.mjs
       - run: npm run test:agent
       - run: npm run test:plan
       - run: npm run test:smart

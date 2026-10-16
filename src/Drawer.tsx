@@ -170,7 +170,7 @@ function AddrRule({ form, field, value }: { form: string; field: string; value: 
     <div className={"arule" + (c.ok ? "" : " bad")}>
       {!c.ok && c.problem && <p className="awarn"><b>{b(c.problem)}</b> {b(c.rule.ifNone)}</p>}
       <details>
-        <summary>{b(RULE_LABEL[c.rule.rule])}{c.rule.rule !== "unconfirmed" ? (lang === "zh" ? ` · ${n} 个官方来源确认` : ` · confirmed by ${n} official sources`) : ""}</summary>
+        <summary>{b(RULE_LABEL[c.rule.rule])}{c.rule.rule !== "unconfirmed" ? (lang === "zh" ? `，${n} 个官方来源确认` : `, confirmed by ${n} official sources`) : ""}</summary>
         <p>{b(c.rule.what)}</p>
         <ul>{c.rule.confirmations.map((x, k) => <li key={k}><a href={x.url} target="_blank" rel="noopener noreferrer">{(() => { try { return new URL(x.url).hostname.replace(/^www\./, ""); } catch { return x.url; } })()}<I.ext /></a> <q>{x.quote}</q></li>)}</ul>
       </details>

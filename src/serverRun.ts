@@ -207,7 +207,7 @@ export async function runRounds(o: {
         apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === job.id ? { ...j, seat } : j)) }));
         st.messages = [{ role: "user", content: harnessBrief(o.ws(), { ...job, seat }, st.request ?? "", o.lang) }];
         st.seatRounds = 0; st.handing = false;
-        o.step({ state: "shaping", label: { en: `A fresh agent picked up the job (seat ${seat})`, zh: `新的代理接手了这项工作（第 ${seat} 棒）` } });
+        o.step({ state: "shaping", label: { en: `A fresh shift picked up the job (shift ${seat})`, zh: `新一班接手了这项工作（第 ${seat} 班）` } });
         await o.round?.(save());
         continue;
       }
@@ -228,7 +228,7 @@ export async function runRounds(o: {
     const reply = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
     const due = (o.ws().jobs ?? []).filter(j => j.updated >= st.started! && j.done?.length && (j.status === "done" || (j.status === "running" && j.steps.every(x => x.done))) && (!j.checked || j.checked.at < j.updated || recheck.has(j.id)));
     if (!due.length) break;
-    o.step({ state: "weaving", label: { en: "A separate checker is reviewing the work", zh: "独立检查正在核对工作" } });
+    o.step({ state: "weaving", label: { en: "A separate reviewer is checking the work", zh: "独立检查正在核对工作" } });
     const final = (st.checks ?? 0) >= MAX_CHECKS || st.rounds >= max * MAX_SEATS - 1;
     const sendBack: string[] = [];
     for (const j of due) {
@@ -251,7 +251,7 @@ export async function runRounds(o: {
     st.messages.push({ role: "user", content: `${sendBack.join("\n\n")}\n\nFix what you can now with your tools, update the plan (set_plan), and say plainly what still needs the person. Your earlier answer won't be sent; write the answer again.` });
     made.lastToolAt = st.text.length;   // the answer they get is the one after the fixes
     finished = false;
-    o.step({ state: "shaping", label: { en: "The checker sent work back; finishing it", zh: "检查发现未完成项，继续完成" } });
+    o.step({ state: "shaping", label: { en: "The reviewer sent work back; finishing it", zh: "检查发现未完成项，继续完成" } });
     continue work;
   }
 

@@ -82,7 +82,7 @@ export function parseVerdict(text: string, n: number): { ok: boolean; why: strin
     const j = JSON.parse(m ? m[0] : text) as { items?: unknown };
     if (Array.isArray(j.items)) items = j.items as typeof items;
   } catch { /* unreadable: everything stays unchecked */ }
-  return Array.from({ length: n }, (_, i) => ({ ok: items[i]?.ok === true, why: String(items[i]?.why ?? "The checker couldn't confirm this.").slice(0, 300) }));
+  return Array.from({ length: n }, (_, i) => ({ ok: items[i]?.ok === true, why: String(items[i]?.why ?? "The reviewer couldn't confirm this.").slice(0, 300) }));
 }
 
 /** The verdict written onto the job. Passed: done, and checked. Not: back to running (or waiting for the person). */

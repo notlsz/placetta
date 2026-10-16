@@ -42,7 +42,7 @@ function Card({ s }: { s: Skill }) {
           <pre>{s.body}</pre>
           {s.done?.length ? <><h3>{zh ? "完成标准" : "Done means"}</h3><ul>{s.done.map((d, i) => <li key={i}>{d}</li>)}</ul></> : null}
           {files.length ? <><h3>{zh ? "工具箱" : "Toolbox"}</h3><p className="pb-files">{files.map(f => <span key={f.id}>{f.name}</span>)}</p></> : null}
-          <button type="button" className="lnk" onClick={() => go("settings")}>{zh ? "在设置中编辑" : "Edit in Settings"}</button>
+          <button type="button" className="lnk" onClick={() => go("settings", "skills")}>{zh ? "在设置中编辑" : "Edit in Settings"}</button>
         </div>
       )}
     </li>
@@ -127,13 +127,8 @@ export function PlaybooksPage() {
   const yours = all.filter(s => s.source !== "placetta").filter(match), ours = all.filter(s => s.source === "placetta").filter(match);
   const forms = allSkills(ws).filter(s => s.kind === "form").length;
   return (
-    <div className="page playbooks">
-      <header className="ph">
-        <div className="ph-tx">
-          <h1>{zh ? "手册" : "Playbooks"}</h1>
-          <p>{zh ? "Odelia 做每类工作的方法：步骤、怎样算完成（由独立检查核对），以及她会重复使用的文件。运行一本，或回答她几个问题，教她一项新工作。" : "How Odelia runs each kind of job: the steps, what done means (a separate reviewer holds her to it), and the files she reuses. Run one, or teach her a new job by answering a few questions."}</p>
-        </div>
-      </header>
+    <div className="playbooks tabbed">
+      <p className="tab-lede">{zh ? "Odelia 做每类工作的方法：步骤、怎样算完成（由独立检查核对），以及她会重复使用的文件。运行一本，或回答她几个问题，教她一项新工作。" : "How Odelia runs each kind of job: the steps, what done means (a separate reviewer holds her to it), and the files she reuses. Run one, or teach her a new job by answering a few questions."}</p>
       <section className="pb-teach">
         <div><b>{zh ? "教 Odelia 一项工作" : "Teach Odelia a job"}</b><p>{zh ? "她会问您几个问题，直到不需要您也能完成，再把您的回答写成手册。" : "She asks you questions until she could run it without you, then turns your answers into a playbook."}</p></div>
         <button type="button" className="sbtn ink" onClick={() => ask(b(TEACH))}><I.spark />{zh ? "开始" : "Start"}</button>

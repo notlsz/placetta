@@ -13,7 +13,8 @@ import { toolbox } from "./harness";
 const today = () => new Date().toISOString().slice(0, 10);
 
 /** One job's plan: the steps in order, the next one marked, done ones ticked. */
-export function PlanCard({ job, compact }: { job: Job; compact?: boolean }) {
+/** actions: show the one button that moves the job now even on a compact card (Home, Needs you). */
+export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolean; actions?: boolean }) {
   const { b, lang, ws, openApp } = useApp();
   const p = progress(job), next = job.steps.findIndex(s => !s.done);
   const zh = lang === "zh";
@@ -34,7 +35,7 @@ export function PlanCard({ job, compact }: { job: Job; compact?: boolean }) {
         ))}
       </ol>
       {job.status === "waiting" && job.waiting && <p className="job-need"><b>{zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
-      {!compact && <JobActions job={job} />}
+      {(!compact || actions) && <JobActions job={job} />}
       <Harness job={job} compact={compact} />
       {!compact && job.apps?.length ? (
         <p className="job-apps">{job.apps.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <button key={id} type="button" className="lnk" onClick={() => openApp(id)}>{b(a.name)}</button> : null; })}</p>
@@ -45,7 +46,7 @@ export function PlanCard({ job, compact }: { job: Job; compact?: boolean }) {
 
 /** The one thing that moves this job forward now: your upload, your approval, or Odelia carrying on. Nothing here
  *  ticks a step by hand; steps tick when the workspace shows the work (src/jobs.ts, reconcile). */
-function JobActions({ job }: { job: Job }) {
+export function JobActions({ job }: { job: Job }) {
   const { lang, ws, busy, ask, upload, openApproval, editWs, cloud } = useApp();
   const zh = lang === "zh";
   const pick = useRef<HTMLInputElement>(null);
@@ -80,8 +81,8 @@ function JobActions({ job }: { job: Job }) {
   );
 }
 
-/** The job's harness: what finished looks like and the checker's verdict on each, the playbook it follows, the files
- *  in its toolbox, and the handoffs between agents. */
+/** How she checks her work: what finished looks like and the reviewer's verdict on each, the playbook it follows,
+ *  the files in its toolbox, and the notes left between shifts. */
 function Harness({ job, compact }: { job: Job; compact?: boolean }) {
   const { b, lang, ws } = useApp();
   const [open, setOpen] = useState(false);
@@ -96,7 +97,7 @@ function Harness({ job, compact }: { job: Job; compact?: boolean }) {
   return (
     <div className="hz">
       {proof && <p className={"hz-proof" + (c ? (c.passed === c.of ? " ok" : " short") : "")}>{!c || c.passed === c.of ? <I.check /> : null}<span>{proof}{c ? <small>{zh ? `，${fmtAgo(c.at, lang)}` : `, ${fmtAgo(c.at, lang)}`}</small> : null}</span></p>}
-      <button type="button" className="lnk hz-tog" onClick={() => setOpen(v => !v)} aria-expanded={open}>{open ? (zh ? "收起" : "Hide") : (zh ? "查看完成标准、手册和交接" : "What done means, playbook and handoffs")}</button>
+      <button type="button" className="lnk hz-tog" onClick={() => setOpen(v => !v)} aria-expanded={open}>{open ? (zh ? "收起" : "Hide") : (zh ? "她如何检查自己的工作" : "How she checks her work")}</button>
       {open && (
         <div className="hz-body">
           {job.done?.length ? (
@@ -111,8 +112,8 @@ function Harness({ job, compact }: { job: Job; compact?: boolean }) {
           {pb && <section><h3>{zh ? "手册" : "Playbook"}</h3><p>{b(pb.name)}{pb.interviewed ? <small>{zh ? "根据您的回答编写" : "Written from your answers"}</small> : null}</p></section>}
           {files.length ? <section><h3>{zh ? "工具箱" : "Toolbox"}</h3><p className="hz-files">{files.map(f => <span key={f.id}>{f.name}</span>)}</p></section> : null}
           {hand.length ? (
-            <section><h3>{zh ? "交接" : "Handoffs"}</h3>
-              <ol className="hz-hand">{hand.map((h, i) => <li key={i}><b>{zh ? `第 ${h.seat} 棒交给第 ${h.seat + 1} 棒` : `Seat ${h.seat} to seat ${h.seat + 1}`}</b><small>{fmtAgo(h.at, lang)}</small><p>{h.note}</p></li>)}</ol>
+            <section><h3>{zh ? "班次之间的备注" : "Notes between shifts"}</h3>
+              <ol className="hz-hand">{hand.map((h, i) => <li key={i}><b>{zh ? `第 ${h.seat} 班交给第 ${h.seat + 1} 班` : `Shift ${h.seat} to shift ${h.seat + 1}`}</b><small>{fmtAgo(h.at, lang)}</small><p>{h.note}</p></li>)}</ol>
             </section>) : null}
         </div>
       )}
@@ -142,6 +143,7 @@ const STARTERS = [
   B("Every Monday, check each filing that's with an agency and tell me only what changed.", "每周一检查在审的每项申请，只告诉我有变化的。"),
 ];
 
+/** The Work tab of Odelia's page (App renders the page shell and the tab strip). */
 export function WorkPage() {
   const { b, lang, ws, busy, live, ask, queued, unqueue } = useApp();
   const [showDone, setShowDone] = useState(false);
@@ -151,13 +153,8 @@ export function WorkPage() {
   const done = jobs.filter(j => j.status === "done" || j.status === "stopped");
   const empty = !jobs.length && !routines.length && !queued.length && !busy;
   return (
-    <div className="page work">
-      <header className="ph">
-        <div className="ph-tx">
-          <h1>{zh ? "工作" : "Work"}</h1>
-          <p>{zh ? "Odelia 手上的每项工作：她的计划、进度，以及需要您提供什么。她可同时处理三项，更多的会排队接着做。" : "Every job Odelia is on: her plan, where it stands, and what she needs from you. She works on up to three at once; more wait their turn."}</p>
-        </div>
-      </header>
+    <div className="work tabbed">
+      <p className="tab-lede">{zh ? "Odelia 手上的每项工作：她的计划、进度，以及需要您提供什么。她可同时处理三项，更多的会排队接着做。" : "Every job Odelia is on: her plan, where it stands, and what she needs from you. She works on up to three at once; more wait their turn."}</p>
 
       {busy && live && <p className="work-now"><I.spark /><span>{zh ? "正在做：" : "Working now: "}{b(live.label)}…</span></p>}
 

@@ -6,7 +6,11 @@ import type { Bi, Store, UpdateItem, Workspace } from "./model";
 import type { HqRow } from "./hq";
 import type { AgencyLogin, Billing, Filing, Integration, IntegrationKind, Plan } from "./cloud/api";
 
-export type View = "overview" | "work" | "playbooks" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue" | "hq";
+/** The four places (Home, Permits, Stores, Odelia), Settings, and the pages reached from them: Find licenses (a button
+ *  on Permits), the staff filing queue and Headquarters. Permits and Odelia carry their tabs in the address (route.ts). */
+export type View = "overview" | "permits" | "stores" | "odelia" | "find" | "settings" | "queue" | "hq";
+export type PermitsTab = "todo" | "filed" | "documents" | "deadlines";
+export type OdeliaTab = "chat" | "work" | "playbooks" | "updates";
 export type Tab = "progress" | "check" | "form" | "fees" | "receipt";
 
 /** What a signed-in account adds: billing, integrations, saved logins, the filing queue and data controls. */
@@ -82,7 +86,10 @@ export type Ctx = {
   applyKey(key: string, model: string, remember: boolean): void;
   dropKey(): void;
   uploading: { app: string; item: string } | null;
-  go(v: View): void;
+  /** Open a page, and one of its tabs (Permits: todo, filed, documents, deadlines; Odelia: chat, work, playbooks, updates). */
+  go(v: View, sub?: string): void;
+  /** The tab open on the current page, from its address. */
+  sub?: string;
   ask(text: string, voice?: boolean): void;
   /** What you gave Odelia while she was busy: she takes them in order. */
   queued: { id: string; text: string }[];

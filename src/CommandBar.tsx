@@ -8,11 +8,16 @@ import { I } from "./ui";
 
 type Hit = { id: string; group: string; label: string; sub?: string; run: () => void };
 
-const PAGES: { v: View; en: string; zh: string }[] = [
-  { v: "overview", en: "Overview", zh: "概览" }, { v: "work", en: "Work", zh: "工作" }, { v: "playbooks", en: "Playbooks", zh: "手册" },
-  { v: "updates", en: "Updates", zh: "动态" }, { v: "stores", en: "Stores", zh: "门店" }, { v: "apps", en: "Applications", zh: "申请" },
-  { v: "docs", en: "Documents", zh: "文件" }, { v: "deadlines", en: "Deadlines", zh: "截止日期" }, { v: "audit", en: "Audit trail", zh: "审计记录" },
-  { v: "context", en: "Context", zh: "资料" }, { v: "find", en: "Find licenses", zh: "查找许可" }, { v: "settings", en: "Settings", zh: "设置" },
+/* Every place in the app, old names included so "applications" or "audit" still finds the page. */
+const PAGES: { v: View; sub?: string; en: string; zh: string; also?: string }[] = [
+  { v: "overview", en: "Home", zh: "首页", also: "overview 概览" },
+  { v: "permits", en: "Permits", zh: "许可", also: "applications 申请 to do" }, { v: "permits", sub: "filed", en: "Permits: Filed", zh: "许可：已提交" },
+  { v: "permits", sub: "documents", en: "Documents", zh: "文件" }, { v: "permits", sub: "deadlines", en: "Deadlines", zh: "截止日期" },
+  { v: "find", en: "Find licenses", zh: "查找许可" }, { v: "stores", en: "Stores", zh: "门店" },
+  { v: "odelia", en: "Odelia: Chat", zh: "Odelia：对话", also: "ask chat" }, { v: "odelia", sub: "work", en: "Work", zh: "工作" },
+  { v: "odelia", sub: "playbooks", en: "Playbooks", zh: "手册" }, { v: "odelia", sub: "updates", en: "Updates", zh: "动态", also: "inbox" },
+  { v: "settings", en: "Settings", zh: "设置" }, { v: "settings", sub: "activity", en: "Settings: Activity", zh: "设置：活动记录", also: "audit trail 审计记录 history" },
+  { v: "settings", sub: "facts", en: "Settings: Business facts", zh: "设置：企业资料", also: "context 资料" },
 ];
 
 export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
@@ -37,13 +42,13 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
     const sentence = q.trim().split(/\s+/).length >= 3 || /[\u3400-\u9fff]{4,}/.test(q);
     if (askHit && sentence) out.push(askHit);
     const take = <T,>(list: T[], n: number, f: (x: T) => Hit | null) => { let k = 0; for (const x of list) { if (k >= n) break; const h = f(x); if (h) { out.push(h); k++; } } };
-    take(ws.apps, 6, a => has(a.name.en, a.name.zh, a.agency.en, a.agency.zh) ? { id: "a-" + a.id, group: g("Applications", "申请"), label: b(a.name), sub: b(a.agency), run: close(() => openApp(a.id)) } : null);
+    take(ws.apps, 6, a => has(a.name.en, a.name.zh, a.agency.en, a.agency.zh) ? { id: "a-" + a.id, group: g("Permits", "许可"), label: b(a.name), sub: b(a.agency), run: close(() => openApp(a.id)) } : null);
     take(ws.stores ?? [], 4, st => has(st.name.en, st.name.zh, st.address) ? { id: "s-" + st.id, group: g("Stores", "门店"), label: b(st.name), sub: st.address, run: close(() => go("stores")) } : null);
-    take(ws.jobs ?? [], 4, j => has(j.title.en, j.title.zh) ? { id: "j-" + j.id, group: g("Work", "工作"), label: b(j.title), sub: j.status === "waiting" ? g("Needs you", "需要您") : j.status === "done" ? g("Done", "已完成") : g("In progress", "进行中"), run: close(() => go("work")) } : null);
+    take(ws.jobs ?? [], 4, j => has(j.title.en, j.title.zh) ? { id: "j-" + j.id, group: g("Work", "工作"), label: b(j.title), sub: j.status === "waiting" ? g("Needs you", "需要您") : j.status === "done" ? g("Done", "已完成") : g("In progress", "进行中"), run: close(() => go("odelia", "work")) } : null);
     take(allSkills(ws).filter(x => x.on && x.kind !== "form"), 4, p => has(p.name.en, p.name.zh, p.description.en) ? { id: "p-" + p.id, group: g("Playbooks", "手册"), label: b(p.name), sub: g("Run it", "运行"), run: close(() => ask(zh ? `按手册“${p.name.zh}”（${p.id}）来做。` : `Run the playbook "${p.name.en}" (${p.id}).`)) } : null);
-    take([...ws.deadlines].sort((a, b) => a.date.localeCompare(b.date)), 4, d => has(d.title.en, d.title.zh) ? { id: "d-" + d.id, group: g("Deadlines", "截止日期"), label: b(d.title), sub: d.date, run: close(() => go("deadlines")) } : null);
-    take(ws.docs, 4, d => has(d.name) && s ? { id: "f-" + d.id, group: g("Documents", "文件"), label: d.name, run: close(() => go("docs")) } : null);
-    take(PAGES, s ? 4 : 12, p => has(p.en, p.zh) ? { id: "v-" + p.v, group: g("Go to", "前往"), label: zh ? p.zh : p.en, run: close(() => go(p.v)) } : null);
+    take([...ws.deadlines].sort((a, b) => a.date.localeCompare(b.date)), 4, d => has(d.title.en, d.title.zh) ? { id: "d-" + d.id, group: g("Deadlines", "截止日期"), label: b(d.title), sub: d.date, run: close(() => go("permits", "deadlines")) } : null);
+    take(ws.docs, 4, d => has(d.name) && s ? { id: "f-" + d.id, group: g("Documents", "文件"), label: d.name, run: close(() => go("permits", "documents")) } : null);
+    take(PAGES, s ? 4 : 14, p => has(p.en, p.zh, p.also) ? { id: "v-" + p.v + (p.sub ? "-" + p.sub : ""), group: g("Go to", "前往"), label: zh ? p.zh : p.en, run: close(() => go(p.v, p.sub)) } : null);
     if (askHit && !sentence) out.push(askHit);
     return out;
   }, [q, ws, zh, b, ask, go, openApp, setOpen]);
@@ -56,7 +61,7 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
       <div className="cmdk" role="dialog" aria-modal="true" aria-label={zh ? "搜索或提问" : "Search or ask"}>
         <div className="cmdk-in">
           <I.find />
-          <input ref={input} autoFocus value={q} onChange={e => { setQ(e.target.value); setAt(0); }} placeholder={zh ? "搜索门店、申请、文件……或直接交给 Odelia" : "Search stores, applications, documents… or hand Odelia a job"}
+          <input ref={input} autoFocus value={q} onChange={e => { setQ(e.target.value); setAt(0); }} placeholder={zh ? "搜索门店、许可、文件……或直接交给 Odelia" : "Search stores, permits, documents… or hand Odelia a job"}
             role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-activedescendant={hits[at] ? "cmdk-" + hits[at].id : undefined}
             onKeyDown={e => {
               if (e.key === "ArrowDown") { e.preventDefault(); setAt(i => Math.min(hits.length - 1, i + 1)); }

@@ -876,7 +876,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         if (note.length < 20) throw new Error("Write the whole note: what's done, what's next, open questions, files to reuse.");
         const seat = j.seat ?? 1;
         apply(w => ({ ...w, jobs: (w.jobs ?? []).map(x => (x.id === j.id ? { ...x, handoffs: [...(x.handoffs ?? []), { at: new Date().toISOString(), seat, note }].slice(-10), updated: new Date().toISOString() } : x)) }));
-        S("shaping", L("Writing the handoff for the next agent", "为下一位代理写交接说明"));
+        S("shaping", L("Writing notes for the next shift", "为下一班写备注"));
         mark();
         return { ok: true, job_id: j.id, seat };
       },

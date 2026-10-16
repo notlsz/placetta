@@ -7,8 +7,8 @@ import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
 import { AgentBot } from "./Bot";
 import { reconcile } from "./jobs";
-import { hrefOf, plainClick, readRoute, setRoute } from "./route";
-import { AppCtx, type CloudCtx, type Ctx, type Signed, type Tab, type View } from "./ctx";
+import { TABS, hrefOf, plainClick, readRoute, setRoute } from "./route";
+import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type Signed, type Tab, type View } from "./ctx";
 import { formById } from "./forms/registry";
 import { canFill } from "./forms/canFill";
 import { ApproveModal, AppDrawer } from "./Drawer";
@@ -20,7 +20,7 @@ import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo, Mark } from "./Logo";
 import { SAMPLE_WS } from "./sample";
 import { B, same, type Approval, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
-import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, Overview, UpdatesPage } from "./pages";
+import { FindLicenses, Overview, PageHead, Permits, Tabs, UpdatesPage } from "./pages";
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
 import { WorkPage } from "./Work";
@@ -49,18 +49,16 @@ const readLang = (): Lang => {
   return navigator.language?.toLowerCase().startsWith("zh") ? "zh" : "en";
 };
 
+/* Four places, like the agents people already know how to use: Home (what needs me, what Odelia is doing, what's next),
+   Permits (everything you file, with its documents and dates), Stores, and Odelia (the chat, her work, her playbooks and
+   the updates inbox). Settings keeps the rest. Everything that used to be its own page still opens from one of these. */
 const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
   { v: "overview", k: "nav_overview", Icon: I.overview },
-  { v: "work", k: "nav_work", Icon: I.queue },
-  { v: "playbooks", k: "nav_playbooks", Icon: I.book },
-  { v: "updates", k: "nav_updates", Icon: I.bell },
+  { v: "permits", k: "nav_apps", Icon: I.apps },
   { v: "stores", k: "nav_stores", Icon: I.store },
-  { v: "apps", k: "nav_apps", Icon: I.apps },
-  { v: "docs", k: "nav_docs", Icon: I.docs },
-  { v: "deadlines", k: "nav_deadlines", Icon: I.deadlines },
-  { v: "audit", k: "nav_audit", Icon: I.audit },
-  { v: "context", k: "nav_context", Icon: I.context },
+  { v: "odelia", k: "nav_odelia", Icon: I.spark },
 ];
+const PERMITS_TABS = TABS.permits as readonly PermitsTab[], ODELIA_TABS = TABS.odelia as readonly OdeliaTab[];
 
 /** Updates worked out from the workspace itself: due dates in the next two weeks, overdue ones and renewals in the next
  *  60 days, the same rules the server's daily monitor follows. Used for the sample, and before the monitor's first run. */
@@ -130,8 +128,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   // the side menu folds down to icons on wider screens; remembered per browser
   const [slimPref, setSlimPref] = useState(() => readFlag("placetta-side-slim"));
   useEffect(() => writeFlag("placetta-side-slim", slimPref), [slimPref]);
-  const dock = wide && panelOpen;
   const [view, setView] = useState<View>(() => readRoute().view);
+  // the tab open on Permits or Odelia (and the category asked of Settings), from the address
+  const [sub, setSub] = useState<string | undefined>(() => readRoute().sub);
+  // Odelia's chat as a page of its own: the panel isn't shown beside or over it, the page is the panel
+  const chatPage = view === "odelia" && (sub ?? "chat") === "chat";
+  const dock = wide && panelOpen && !chatPage;
   const [drawer, setDrawer] = useState<{ id: string; tab: Tab; edit: boolean } | null>(null);
   const [modal, setModal] = useState<string | null>(null);
   const [legal, setLegal] = useState<string | null>(null);
@@ -142,24 +144,30 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const toastT = useRef(0);
   const say = useCallback((s: string) => { setToast(s); clearTimeout(toastT.current); toastT.current = window.setTimeout(() => setToast(null), Math.max(2800, s.length * 55)); }, []);
   const main = useRef<HTMLElement>(null);
-  const go = useCallback((v: View) => { setView(v); setRoute(v); setNavOpen(false); setWsMenu(false); main.current?.scrollTo({ top: 0 }); }, []);
-  // Back and Forward move between pages; a Settings address also picks its category.
+  const go = useCallback((v: View, s?: string) => {
+    setView(v); setSub(s); setRoute(v, s); setNavOpen(false); setWsMenu(false); main.current?.scrollTo({ top: 0 });
+    // Settings keeps its own category state; tell it which one was asked for (by the ⌘K bar, a link, a page that moved there)
+    if (v === "settings" && s) window.dispatchEvent(new CustomEvent("placetta:settings", { detail: s }));
+  }, []);
+  // Back and Forward move between pages and tabs; a Settings address also picks its category.
   useEffect(() => {
     const on = () => {
-      const r = readRoute(); setView(r.view); setNavOpen(false); main.current?.scrollTo({ top: 0 });
+      const r = readRoute(); setView(r.view); setSub(r.sub); setNavOpen(false); main.current?.scrollTo({ top: 0 });
       if (r.view === "settings" && r.sub) window.dispatchEvent(new CustomEvent("placetta:settings", { detail: r.sub }));
     };
     addEventListener("popstate", on);
     return () => removeEventListener("popstate", on);
   }, []);
-  // An address for a page this account can't open (the team queue, headquarters) goes to the overview.
+  // An old address (/work, /applications, /context and the rest) opens its new home, and the bar shows the new address.
+  useEffect(() => { const r = readRoute(); if (r.legacy) { setRoute(r.view, r.sub, true); if (r.view === "settings" && r.sub) window.dispatchEvent(new CustomEvent("placetta:settings", { detail: r.sub })); } }, []);
+  // An address for a page this account can't open (the team queue, headquarters) goes home.
   const canQueue = !!(cloud?.me.staff || cloud?.me.staff_email), canHq = !!cloud?.hq.length;
   useEffect(() => {
-    if ((view === "queue" && !canQueue) || (view === "hq" && !canHq)) { setView("overview"); setRoute("overview", undefined, true); }
-    else if (view !== "settings") setRoute(view, undefined, true);
-  }, [view, canQueue, canHq]);
+    if ((view === "queue" && !canQueue) || (view === "hq" && !canHq)) { setView("overview"); setSub(undefined); setRoute("overview", undefined, true); }
+    else if (view !== "settings") setRoute(view, sub, true);
+  }, [view, sub, canQueue, canHq]);
   /** A sidebar link: a real address (open in a new tab, copy, bookmark), handled in place on a plain click. */
-  const navLink = (v: View) => ({ href: hrefOf(v), onClick: (e: React.MouseEvent) => { if (!plainClick(e)) return; e.preventDefault(); go(v); } });
+  const navLink = (v: View, s?: string) => ({ href: hrefOf(v, s), onClick: (e: React.MouseEvent) => { if (!plainClick(e)) return; e.preventDefault(); go(v, s); } });
   useEffect(() => { if (cloud?.notice) say(cloud.notice); }, [cloud, say]);
 
   /* the workspace: the sample, or the account's saved one with the server's facts laid on top */
@@ -371,7 +379,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     setFeed(f => [...f, ...(shown ? [{ id: nid(), kind: "user" as const, text: shown }] : []), { id: aid, kind: "turn", at: nowIso(), steps: [], active: 0 }]);
     if ("text" in req) setAsked(a => [...a, req.text]);
     if ("upload" in req) setUploading({ app: req.upload.app, item: req.upload.item });
-    if ("match" in req) { setMatching(true); setView("find"); }
+    if ("match" in req) { setMatching(true); setView("find"); setSub(undefined); }
     const upd = (f: (m: Turn) => Partial<Turn>) => setFeed(ms => ms.map(m => (m.id === aid && m.kind === "turn" ? { ...m, ...f(m) } : m)));
     let said = "";
     const ctl = new AbortController(); abort.current = ctl;
@@ -817,7 +825,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       try { if (remember) { localStorage.setItem(KEY, key); localStorage.setItem(KEY_MODEL, id); } else { localStorage.removeItem(KEY); localStorage.removeItem(KEY_MODEL); } } catch { /* storage blocked */ }
     },
     dropKey: () => { setModel(null); setApiName(""); try { localStorage.removeItem(KEY); localStorage.removeItem(KEY_MODEL); } catch { /* storage blocked */ } },
-    go,
+    go, sub,
     ask, queued, unqueue,
     run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
     openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : "check"), edit: !!edit }); },
@@ -849,7 +857,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       if (held()) return;
       const f = wsRef.current.facts.find(x => x.id === id); if (!f) return;
       const text = B(`${f.label.en}: ${value}`, `${f.label.zh}：${value}`);
-      setWs(w => audit("agent", B("Committed to memory", "存入记忆"), B("Context", "资料"), text)(audit("you", B("Edited fact", "修改资料"), f.label, same(value))(setFact({ ...f, value: same(value), source: B("You edited", "您修改的") })(w))));
+      setWs(w => audit("agent", B("Committed to memory", "存入记忆"), B("Business facts", "企业资料"), text)(audit("you", B("Edited fact", "修改资料"), f.label, same(value))(setFact({ ...f, value: same(value), source: B("You edited", "您修改的") })(w))));
       setFeed(fd => [...fd, { id: nid(), kind: "memory", text }]);
       say(`${t("committed")}: ${text[lang]}`);
     },
@@ -864,18 +872,41 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     openLegal: id => setLegal(id),
     cloud: cloudCtx,
     updates, readUpdates,
-  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, queued, unqueue, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
+  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, sub, ask, queued, unqueue, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
 
   /* page */
+  const unread = updates.filter(u => !u.read).length;
+  const waitingJobs = (view_.jobs ?? []).filter(j => j.status === "waiting").length + queued.length;
+  const permitsTab: PermitsTab = PERMITS_TABS.includes(sub as PermitsTab) ? (sub as PermitsTab) : "todo";
+  const odeliaTab: OdeliaTab = ODELIA_TABS.includes(sub as OdeliaTab) ? (sub as OdeliaTab) : "chat";
+  const odelia = (
+    <div className={"page odelia" + (odeliaTab === "chat" ? " chat" : "")}>
+      {odeliaTab !== "chat" && <PageHead title={t("nav_odelia")} />}
+      <Tabs view="odelia" current={odeliaTab} tabs={[
+        { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_work"), count: waitingJobs },
+        { id: "playbooks", label: t("nav_playbooks") }, { id: "updates", label: t("nav_updates"), count: unread },
+      ]} />
+      {odeliaTab === "chat" && <AgentPanel feed={feed} tts={tts} mode="page" asked={asked} />}
+      {odeliaTab === "work" && <WorkPage />}
+      {odeliaTab === "playbooks" && <PlaybooksPage />}
+      {odeliaTab === "updates" && <UpdatesPage />}
+    </div>
+  );
   const page = {
-    overview: <Overview />, work: <WorkPage />, playbooks: <PlaybooksPage />, updates: <UpdatesPage />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
+    overview: <Overview />, permits: <Permits tab={permitsTab} />, stores: <Stores />, odelia,
     find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
     queue: cloud?.me.staff ? <Queue /> : cloud?.me.staff_email ? <QueueLocked /> : <Overview />,
     hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : <Overview />,
   }[view];
-  const soon = view_.deadlines.filter(d => { const n = daysUntil(d.date); return n >= 0 && n <= 30; }).length;
-  const badge: Partial<Record<View, number>> = { work: (view_.jobs ?? []).filter(j => j.status === "waiting").length + queued.length, overview: view_.approvals.length, updates: updates.filter(u => !u.read).length, deadlines: soon };
+  const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, odelia: waitingJobs };
   const wsSub = cloud ? (billing?.free && !billing.subscription_status ? b(B("Early access", "抢先体验")) : plan === "monthly" ? b(PLAN_LABEL[billing?.subscription_plan ?? ""] ?? B("Monthly plan", "月度方案")) : plan === "entry" ? b(B("Entry plan", "开店计划")) : b(B("No plan yet", "尚未开通"))) : t("sampleWs");
+  const current = (v: View) => view === v || (v === "permits" && view === "find");
+  /* The bell: unread updates, always in reach (the sidebar's top on a desktop, the top bar on a phone). */
+  const bell = (
+    <a {...navLink("odelia", "updates")} className="bellb" aria-label={unread ? (lang === "zh" ? `${unread} 条新动态` : `${unread} new update${unread === 1 ? "" : "s"}`) : t("nav_updates")} title={t("nav_updates")}>
+      <I.bell />{unread > 0 && <em>{unread}</em>}
+    </a>
+  );
 
   const slim = slimPref && !phone;
   const side = (
@@ -884,7 +915,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}>{slim ? <Mark size={22} /> : <Logo lang={lang} height={17} />}</button>
         {phone
           ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>
-          : <button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button>}
+          : <span className="side-tools">{!slim && bell}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
       </div>
       <div className="wsname-wrap">
         <button type="button" className="wsname" onClick={() => cloud && setWsMenu(o => !o)} aria-haspopup={cloud ? "menu" : undefined} aria-expanded={cloud ? wsMenu : undefined} disabled={!cloud}>
@@ -899,19 +930,18 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           </div>
         )}
       </div>
-      <button type="button" className={"askb" + (panelOpen ? " on" : "")} onClick={() => { setPanelOpen(o => !o); setNavOpen(false); }} title={slim ? t("showPanel") : undefined}>
-        <span className="ask-bot" aria-hidden="true"><AgentBot size={32} busy={busy} interactive={false} /></span>
-        <span>{t("showPanel")}</span>
-        {view_.approvals.length > 0 && <em>{view_.approvals.length}</em>}
-      </button>
-      <ul className="nav">
-        {NAV.map(n => (
-          <li key={n.v}><a {...navLink(n.v)} aria-current={view === n.v ? "page" : undefined} title={slim ? t(n.k) : undefined}><n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}</a></li>
-        ))}
-      </ul>
+      {!phone && (
+        <ul className="nav">
+          {NAV.map(n => (
+            <li key={n.v}><a {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined} title={slim ? t(n.k) : undefined}>
+              {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={22} busy={busy} interactive={false} /></span> : <n.Icon />}
+              <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
+            </a></li>
+          ))}
+        </ul>
+      )}
       <ul className="nav">
         <li><button type="button" className="cmdk-open" onClick={() => setCmdk(true)} title={lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job"}><I.find /><span>{lang === "zh" ? "搜索" : "Search"}</span><kbd>{/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd></button></li>
-        <li><a {...navLink("find")} aria-current={view === "find" ? "page" : undefined} title={slim ? t("nav_find") : undefined}><I.find /><span>{t("nav_find")}</span></a></li>
         {!!cloud?.hq.length && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
         {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
       </ul>
@@ -942,12 +972,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         <div className="mainwrap">
           {phone && (
             <header className="mbar">
-              <button type="button" className="icbtn" onClick={() => setNavOpen(true)} aria-label="Menu"><I.menu /></button>
+              <button type="button" className="icbtn" onClick={() => setNavOpen(true)} aria-label="Menu" title={t("nav_more")}><I.menu /></button>
               <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={16} /></button>
-              <div className="lang" role="group" aria-label={t("langSwitch")}>
-                <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
-                <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
-              </div>
+              <span className="mbar-r">
+                {bell}
+                <a {...navLink("settings")} className="icbtn" aria-label={t("nav_settings")} aria-current={view === "settings" ? "page" : undefined}><I.settings /></a>
+              </span>
             </header>
           )}
           {termsHold && (
@@ -961,10 +991,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
               <div className="tb-act"><button type="button" className="sbtn ink" onClick={() => void acceptTerms()}>{b(B("Accept", "接受"))}</button></div>
             </section>
           )}
-          <main className={"content" + (view === "overview" ? " wash" : "")} ref={main}>{page}</main>
-          {!panelOpen && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} /></div>}
+          <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{page}</main>
+          {!panelOpen && !chatPage && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} /></div>}
+          {phone && (
+            <nav className="tabbar" aria-label={t("nav_more")}>
+              {NAV.map(n => (
+                <a key={n.v} {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined}>
+                  {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={24} busy={busy} interactive={false} /></span> : <n.Icon />}
+                  <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
+                </a>
+              ))}
+            </nav>
+          )}
         </div>
-        {panelOpen && <AgentPanel feed={feed} tts={tts} mode={dock ? "dock" : "sheet"} onHide={() => setPanelOpen(false)} asked={asked} />}
+        {panelOpen && !chatPage && <AgentPanel feed={feed} tts={tts} mode={dock ? "dock" : "sheet"} onHide={() => setPanelOpen(false)} asked={asked} />}
         {drawer && <AppDrawer id={drawer.id} tab={drawer.tab} edit={drawer.edit} onTab={tab => setDrawer(d => (d ? { ...d, tab, edit: false } : d))} onClose={() => setDrawer(null)} />}
         {modal && <ApproveModal id={modal} onClose={() => setModal(null)} />}
         {legal && <LegalReader id={legal} onClose={() => setLegal(null)} />}

@@ -215,8 +215,8 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
       <header className="fl-h">
         <span className="fl-dot" aria-hidden="true" />
         <span className="fl-t">
-          <b aria-live="polite">{b(head[state])}<em>{b(CHAN[run.channel] ?? CHAN.team)}{run.host && run.channel === "portal" ? ` · ${run.host}` : ""}</em></b>
-          {!embedded && <small>{b(run.app.name)} · {b(run.app.agency)}</small>}
+          <b aria-live="polite">{b(head[state])}<em>{b(CHAN[run.channel] ?? CHAN.team)}{run.host && run.channel === "portal" ? `, ${run.host}` : ""}</em></b>
+          {!embedded && <small>{b(run.app.name)}, {b(run.app.agency)}</small>}
         </span>
         {run.sample && <span className="tag">{zh ? "示例" : "Sample"}</span>}
         {canStop && <button type="button" className="pill quiet sm fl-stop" disabled={stopping || busy} onClick={() => { setStopping(true); void cloud!.stopFiling(f!.id).finally(() => setStopping(false)); }}><I.stopSq />{zh ? "停止" : "Stop"}</button>}
@@ -264,7 +264,7 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
         {run.receipt && !run.sample && cloud && <button type="button" className="pill quiet sm" onClick={() => void cloud.fileUrl(run.receipt!).then(u => u && window.open(u, "_blank", "noopener"))}>{zh ? "机构回执" : "Agency receipt"}</button>}
         {run.receipt && run.sample && <button type="button" className="pill quiet sm" onClick={() => download(run.receipt!)}>{zh ? "机构回执" : "Agency receipt"}</button>}
         {run.pdf && cloud && <button type="button" className="pill quiet sm" onClick={() => void cloud.fileUrl(run.pdf!).then(u => u && window.open(u, "_blank", "noopener"))}>{zh ? "发送的表格" : "The form as sent"}</button>}
-        <small>{[refused ? (zh ? `拒绝了 ${refused} 个未经批准的值` : `${refused} unapproved value${refused === 1 ? "" : "s"} refused`) : "", run.confirmation && state === "done" ? (zh ? `确认号 ${run.confirmation}` : `Confirmation ${run.confirmation}`) : "", tookTx].filter(Boolean).join(" · ")}</small>
+        <small>{[refused ? (zh ? `拒绝了 ${refused} 个未经批准的值` : `${refused} unapproved value${refused === 1 ? "" : "s"} refused`) : "", run.confirmation && state === "done" ? (zh ? `确认号 ${run.confirmation}` : `Confirmation ${run.confirmation}`) : "", tookTx].filter(Boolean).join(zh ? "，" : ", ")}</small>
       </footer>
 
       {open !== null && <Replay run={run} start={open} onClose={() => setOpen(null)} />}
@@ -332,7 +332,7 @@ function Replay({ run, start, onClose }: { run: Run; start: number; onClose: () 
       <div className="rp">
         <header className="rp-h">
           <b>{b(run.app.name)}</b>
-          <span>{b(run.app.agency)}{run.sample ? (zh ? " · 示例" : " · Sample") : ""}</span>
+          <span>{b(run.app.agency)}{run.sample ? (zh ? "，示例" : ", sample") : ""}</span>
           <button type="button" className="icbtn" onClick={onClose} aria-label={zh ? "关闭" : "Close"}><I.x /></button>
         </header>
         <div className="rp-stage">{frame ? <Shot frame={frame} host={run.host} hi={e.frame === fi ? e.row : undefined} /> : <span className="shot blank"><b>{b(e.text)}</b></span>}</div>

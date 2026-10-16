@@ -567,7 +567,7 @@ async function harness() {
   const j4 = (r4.w.jobs ?? [])[0];
   eq([j4?.seat, j4?.handoffs?.length, j4?.status, j4?.checked?.passed], [2, 1, "done", 1], "the job went to seat 2 with one handoff, and finished there (checked)");
   if (j4?.handoffs?.length) covered.add("hand_off");   // its call lives in seat 1's conversation, which the fresh seat no longer carries
-  ok(r4.steps.some(s => /fresh agent picked up the job \(seat 2\)/.test(s.label.en)), "the person sees the handoff in the steps");
+  ok(r4.steps.some(s => /fresh shift picked up the job \(shift 2\)/.test(s.label.en)), "the person sees the change of shift in the steps");
 }
 let r4wJob: string | undefined;
 const r4w = () => r4wJob;

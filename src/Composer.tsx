@@ -3,7 +3,7 @@ import { speakTag } from "./langs";
 import { VoiceBeam, useMicrophone } from "voice-glow";
 import { useApp } from "./ctx";
 import { unlockAudio, useNarrow, useSimulatedVoice, useSpeechToText, type Speaker } from "./hooks";
-import { LIVE_SUGGESTIONS, SUGGESTIONS } from "./model";
+import { B, LIVE_SUGGESTIONS, SUGGESTIONS, type Bi } from "./model";
 import { I } from "./ui";
 import { suggestions } from "./smart";
 import { daysFromNow } from "./time";
@@ -54,7 +54,12 @@ const micAllowedHere = () => {
  * agent's voice when it reads a reply. "dock" floats at the bottom of the workspace (Muse); "panel" sits in the agent panel.
  * Voice mode lives here too, so there is only ever one microphone session.
  */
-export function Composer({ variant, tts, asked, showLive = true }: { variant: "dock" | "panel"; tts: Speaker; asked: string[]; showLive?: boolean }) {
+/** The first three things to try, for a workspace with little in it yet. The workspace's own suggestions come first
+ *  when it has any (src/smart.ts); "Upload my lease" opens the file picker instead of asking. */
+const STARTERS = [B("Map my permits", "梳理我的许可"), B("What's due this week", "本周有什么到期"), B("Upload my lease", "上传我的租约")];
+const isUploadChip = (s: Bi) => s.en === STARTERS[2].en;
+
+export function Composer({ variant, tts, asked, showLive = true, starters = false }: { variant: "dock" | "panel"; tts: Speaker; asked: string[]; showLive?: boolean; starters?: boolean }) {
   const { t, b, lang, busy, live, ask, upload, stop, mode, ws } = useApp();
   const [draft, setDraft] = useState("");
 
@@ -70,6 +75,18 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   // the sample's scripted demo answers its own suggestions; a live agent gets tasks it does end to end
   // a live agent's come from the workspace as it is now: a store slipping, filings waiting, a permit about to lapse
   const open = useMemo(() => (mode === "demo" ? SUGGESTIONS : suggestions(ws, daysFromNow(0), LIVE_SUGGESTIONS)).filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked, mode, ws]);
+  // the dock's starter chips: an empty or nearly empty workspace gets three, the workspace's own first, no two alike
+  const nearlyEmpty = ws.apps.length < 3 && !ws.approvals.length;
+  const chips = useMemo(() => {
+    if (!starters || !nearlyEmpty) return [] as Bi[];
+    const out: Bi[] = [];
+    for (const s of suggestions(ws, daysFromNow(0), STARTERS)) {
+      if (asked.some(q => near(q, s.en) || near(q, s.zh)) || out.some(x => near(x.en, s.en) || near(s.en, x.en))) continue;
+      out.push(s);
+      if (out.length === 3) break;
+    }
+    return out;
+  }, [starters, nearlyEmpty, ws, asked]);
   const narrow = useNarrow(560);
 
   const endVoice = useCallback((send: boolean, text?: string) => {
@@ -115,6 +132,9 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
       )}
       {!dock && open.length > 0 && !busy && (
         <div className="sugg">{open.map(s => <button key={s.en} type="button" onClick={() => ask(b(s))}>{b(s)}</button>)}</div>
+      )}
+      {dock && chips.length > 0 && !busy && (
+        <div className="sugg starters">{chips.map(s => <button key={s.en} type="button" onClick={() => (isUploadChip(s) ? attach.current?.click() : ask(b(s)))}>{isUploadChip(s) ? <I.upload /> : null}{b(s)}</button>)}</div>
       )}
       <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={dock ? 0.16 : 0.1} scale={dock ? 1.1 : 0.9} borderRadius={RADIUS[variant]}>
         <BorderBeam className="c-edge" size="md" theme="light" colorVariant="ice" borderRadius={RADIUS[variant]} staticColors brightness={1} saturation={1} strength={0.85} css={EDGE_CSS}>

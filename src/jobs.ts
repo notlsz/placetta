@@ -89,7 +89,7 @@ export function settleJobs<W extends { jobs?: Job[] }>(since: string): (w: W) =>
     if (!(w.jobs ?? []).some(j => j.status === "running" && j.updated >= since)) return w;
     return { ...w, jobs: (w.jobs ?? []).map(j => j.status !== "running" || j.updated < since ? j
       // every step done, but the checker found the done list short: it waits, saying what's missing
-      : j.steps.every(x => x.done) && j.checked && j.checked.passed < j.checked.of ? { ...j, status: "waiting" as const, waiting: j.waiting ?? B("The checker found parts not done yet.", "检查发现仍有未完成的部分。") }
+      : j.steps.every(x => x.done) && j.checked && j.checked.passed < j.checked.of ? { ...j, status: "waiting" as const, waiting: j.waiting ?? B("The reviewer found parts not done yet.", "检查发现仍有未完成的部分。") }
       : j.steps.every(x => x.done) ? { ...j, status: "done" as const }
       : { ...j, status: "waiting" as const, waiting: j.waiting ?? B("Odelia stopped here. Ask her to carry on.", "Odelia 停在这一步。请让她继续。") }) };
   };

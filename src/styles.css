@@ -1771,3 +1771,127 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .tour h2 { margin: 6px 0 8px; font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
 .tour-t { margin: 0 auto; max-width: 360px; font-size: 15px; line-height: 1.55; color: var(--ink2); }
 .tour-act { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
+
+/* ============================================================================================================
+   Four places: Home, Permits, Stores, Odelia (nav4). The sidebar's four items, the phone's bottom tab bar and bell,
+   page tabs, Odelia's chat as a page, the Home sections, and the two pages that moved into Settings.
+   ============================================================================================================ */
+/* sidebar: four items, Odelia's orb as her icon, the bell beside the collapse button */
+.side-tools { display: flex; align-items: center; gap: 2px; }
+.nav-bot { display: grid; place-items: center; flex: none; width: 22px; height: 22px; }
+.nav :is(button, a) > span.nav-bot { flex: none; display: grid; margin: -1px 0; }
+.tabbar a > span.nav-bot { display: grid; }
+/* Home: the hero a little lower-key, so what needs you is on the first screen */
+.page.home .hero-bot { width: 104px; height: 104px; margin-bottom: 10px; }
+.page.home .hero h1 { font-size: 40px; }
+.page.home .hero + .sec { margin-top: 36px; }
+.page.home .sec { margin-top: 36px; }
+.bellb { position: relative; display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 10px; color: var(--ink2); text-decoration: none; transition: background .15s, color .15s; }
+.bellb:hover { background: rgba(var(--e), .05); color: var(--ink); }
+.bellb svg { width: 20px; height: 20px; }
+.bellb em { position: absolute; top: 3px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px; background: var(--warm); color: #fff; font: 600 10.5px/16px var(--sans); font-style: normal; text-align: center; font-variant-numeric: tabular-nums; box-shadow: 0 0 0 2px var(--side); }
+.mbar .bellb em { box-shadow: 0 0 0 2px var(--bg); }
+.mbar-r { display: flex; align-items: center; gap: 2px; }
+.mbar .icbtn[aria-current="page"] { color: var(--ink); }
+.mbar .icbtn:hover { background: none; color: var(--ink); }
+
+/* the phone's bottom tab bar */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: rgba(var(--w), .92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 -1px 0 var(--line); }
+.tabbar a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 52px; border-radius: 14px; font-size: 11.5px; font-weight: 500; color: var(--ink3); text-decoration: none; transition: color .15s, background .15s; }
+.tabbar a svg { width: 22px; height: 22px; }
+.tabbar a > span:not(.nav-bot) { line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabbar a .nav-bot { width: 24px; height: 24px; }
+.tabbar a[aria-current="page"] { color: var(--blue-ink); }
+.tabbar a[aria-current="page"] > span:not(.nav-bot) { color: var(--ink); }
+.tabbar a em { position: absolute; top: 3px; left: calc(50% + 6px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px; background: var(--warm); color: #fff; font: 600 10.5px/16px var(--sans); font-style: normal; text-align: center; font-variant-numeric: tabular-nums; }
+.phone .dockbar { bottom: calc(72px + env(safe-area-inset-bottom)); }
+.phone .dockbar::before { bottom: -12px; height: 70px; }
+.phone .content.chatpage { padding-bottom: 0; }
+.phone .toast { bottom: calc(140px + env(safe-area-inset-bottom)); }
+@media (max-width: 859px) {
+  .page, .page.home { padding-bottom: 196px; }
+  .page.settings { padding-bottom: 150px; }
+}
+
+/* a page's tabs: one pill row under the title, each a real address */
+.ptabs { display: flex; gap: 2px; width: max-content; max-width: 100%; padding: 4px; margin: 0 0 24px; border-radius: 20px; background: var(--mist2); overflow-x: auto; scrollbar-width: none; }
+.ptabs::-webkit-scrollbar { display: none; }
+.ptabs a { display: inline-flex; align-items: center; gap: 6px; padding: 7px 15px; border-radius: 999px; font-size: 13.5px; font-weight: 500; color: var(--ink2); white-space: nowrap; text-decoration: none; transition: background .2s, color .2s; }
+.ptabs a:hover { color: var(--ink); }
+.ptabs a[aria-selected="true"] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 2px rgba(var(--e), .08), 0 0 0 .5px rgba(var(--e), .04); }
+.ptabs a span { font-size: 11.5px; font-weight: 500; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.ph + .ptabs { margin-top: -6px; }
+.tab-lede { margin: 0 0 22px; max-width: 64ch; font-size: 15px; line-height: 1.55; color: var(--ink2); }
+.tab-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+.tab-bar .seg { margin: 0; }
+.tab-act { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab-empty { padding: 28px 20px; border-radius: 16px; background: var(--mist); text-align: center; }
+.tabbed .sec:first-child, .tabbed > .tab-lede + .sec { margin-top: 0; }
+.tabbed .ph { display: none; }
+.page.permits .ph { padding-bottom: 24px; }
+.c-prev { display: block; color: var(--blue-ink) !important; }
+
+/* Odelia's chat as a page: the panel fills the page, the page's own composer is its only one */
+.content.chatpage { overflow: hidden; display: flex; flex-direction: column; }
+.page.odelia.chat { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; max-width: 860px; padding: 18px 24px 16px; }
+.page.odelia.chat .ptabs { margin-bottom: 12px; flex: none; }
+.panel.full { flex: 1; min-height: 0; animation: none; }
+.panel.full .pn-h { padding: 14px 16px 8px 18px; }
+.panel.full .feed { padding: 8px 22px 14px; }
+@media (max-width: 859px) {
+  .page.odelia.chat { padding: 8px 8px calc(64px + env(safe-area-inset-bottom)); }
+  .page.odelia.chat .ptabs { margin: 0 0 8px 4px; }
+  .panel.full { border-radius: 20px; }
+}
+.page.odelia .ph { padding-bottom: 18px; }
+
+/* Home: what needs you first, then what Odelia is on, then the plan, the dates and the news */
+.hm-needs .job.compact { margin: 0; background: var(--card); box-shadow: var(--frost); border-radius: 18px; }
+.hm-work .job.compact { margin: 0 0 8px; }
+.hm-work .runs { margin-top: 0; }
+.rt-line { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: center; }
+.rt-ico { display: grid; place-items: center; width: 26px; height: 26px; color: var(--ink3); }
+.rt-ico svg { width: 18px; height: 18px; }
+.rt-line .lnk { font-size: 14px; color: var(--ink); text-align: left; }
+.rt-line .lnk:hover { color: var(--blue-ink); }
+.plan-card { padding: 18px 20px 16px; border-radius: 22px; background: var(--card); box-shadow: var(--frost); }
+.plan-sum { margin: 0; font-size: 15.5px; font-weight: 500; letter-spacing: -.01em; line-height: 1.4; }
+.plan-open { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; font-size: 14px; color: var(--ink2); }
+.plan-open svg { width: 16px; height: 16px; color: var(--blue-ink); flex: none; }
+.plan-h { margin: 16px 0 6px; font-size: 12.5px; font-weight: 500; color: var(--ink3); }
+.plan-next { list-style: none; margin: 0; padding: 6px; border-radius: 16px; background: var(--mist); display: flex; flex-direction: column; gap: 2px; }
+.plan-next li { display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: center; gap: 4px; }
+.plan-next .plan-n { font-size: 13px; font-weight: 500; color: var(--ink3); text-align: center; font-variant-numeric: tabular-nums; }
+.plan-next .beam-wrap, .plan-next .arow { min-width: 0; }
+.plan-next .arow { width: 100%; }
+.plan-note { display: flex; align-items: flex-start; gap: 8px; margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink2); }
+.plan-note svg { flex: none; margin-top: 3px; color: var(--blue-ink); }
+.plan-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.plan-act .pill.quiet.sm svg { width: 14px; height: 14px; }
+
+/* the dock's starter chips, for a workspace with little in it yet */
+.dockbar .sugg.starters { justify-content: center; margin: 0 0 8px; }
+.dockbar .sugg.starters button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 13.5px; color: var(--ink); background: var(--card); box-shadow: 0 1px 2px rgba(var(--e), .06), 0 0 0 1px rgba(var(--e), .07), 0 10px 24px -16px rgba(45, 75, 120, .35); }
+.dockbar .sugg.starters button:hover { background: var(--sky-wash); }
+.dockbar .sugg.starters button svg { width: 14px; height: 14px; color: var(--blue-ink); }
+
+/* Activity and Business facts, as pages inside Settings */
+.sg.embed { padding: 22px 24px 20px; }
+.embed-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.embed-h h2 { margin: 0 0 4px; font-size: 17px; }
+.embed-h p { margin: 0; max-width: 64ch; font-size: 13.5px; line-height: 1.5; color: var(--ink3); }
+.embed-h .pill { flex: none; }
+.sg.embed .sec { margin-top: 22px; }
+.sg.embed .sec:first-of-type { margin-top: 0; }
+.sg.embed .seg { margin-bottom: 14px; }
+.sg.embed .audit-t .tr { grid-template-columns: 136px 96px minmax(0, 1fr) minmax(0, 1fr); row-gap: 4px; }
+.sg.embed .audit-t .c-det { grid-column: 3 / -1; margin-top: -6px; font-size: 13px; }
+.sg.embed .audit-t .tr.th span:nth-child(5) { display: none; }
+@media (max-width: 859px) {
+  .embed-h { flex-direction: column; }
+  .sg.embed .audit-t .tr { grid-template-columns: minmax(0, 1fr); }
+  .sg.embed .audit-t .c-det { grid-column: 1; margin-top: 0; }
+}
+:root[data-theme="dark"] .tabbar { background: rgba(14, 17, 22, .9); }
+:root[data-theme="dark"] .plan-card, :root[data-theme="dark"] .hm-needs .job.compact { background: linear-gradient(180deg, #1B212B 0%, #161B23 100%); box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); }
+:root[data-theme="dark"] .dockbar .sugg.starters button { background: var(--card); box-shadow: 0 0 0 1px rgba(255, 255, 255, .09); }

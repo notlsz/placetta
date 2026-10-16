@@ -17,9 +17,10 @@ import { LiveBot, Working } from "./Bot";
 import { taskVerb } from "./tasks";
 import { PlanCard } from "./Work";
 
-/** The agent, beside the work: what it's doing now, every step with the site it used, and what each run produced. */
+/** The agent, beside the work (dock), over it on a phone (sheet), or as her own page (page: Odelia, Chat): what it's
+ *  doing now, every step with the site it used, and what each run produced. */
 export function AgentPanel({ feed, tts, mode, onHide, asked }: {
-  feed: FeedItem[]; tts: Speaker; mode: "dock" | "sheet"; onHide: () => void; asked: string[];
+  feed: FeedItem[]; tts: Speaker; mode: "dock" | "sheet" | "page"; onHide?: () => void; asked: string[];
 }) {
   const { t, b, lang, ws, busy, live } = useApp();
 
@@ -32,14 +33,14 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
   const say = useCallback((text: string) => { unlockAudio(); if (tts.speaking === text) tts.stop(); else tts.speak(text, speakTag(lang)); }, [tts, lang]);
 
   return (
-    <aside className={"panel " + mode} aria-label={t("agentName")}>
+    <aside className={"panel " + (mode === "page" ? "full" : mode)} aria-label={t("agentName")}>
       <header className="pn-h">
         <span className="pn-bot"><LiveBot size={44} busy={busy} task={busy && live ? live.state : undefined} label={t("agentName")} interactive /></span>
         <span className="pn-t">
           <b>{t("agentName")}</b>
           <small aria-live="polite">{busy && live ? <><em className="pn-verb">{b(taskVerb(live.state))}…</em>{b(live.label)}</> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
         </span>
-        <button type="button" className="icbtn" onClick={onHide} aria-label={t("hidePanel")} title={t("hidePanel")}><I.x /></button>
+        {onHide && <button type="button" className="icbtn" onClick={onHide} aria-label={t("hidePanel")} title={t("hidePanel")}><I.x /></button>}
       </header>
 
       <div className="feed" ref={scroller}>
@@ -182,7 +183,7 @@ function ApproveGroup({ ids }: { ids: string[] }) {
               <span className="ag-tx">
                 <b>{b(a.title)}</b>
                 <small>{[a.agency && b(a.agency), fee ? money(fee, app?.currency) : (zh ? "无费用" : "No fee"),
-                  zh ? `已核对 ${answers} 项回答${docs ? `和 ${docs} 份文件` : ""}` : `${answers} answer${answers === 1 ? "" : "s"}${docs ? ` and ${docs} document${docs === 1 ? "" : "s"}` : ""} checked`].filter(Boolean).join(zh ? "，" : " · ")}</small>
+                  zh ? `已核对 ${answers} 项回答${docs ? `和 ${docs} 份文件` : ""}` : `${answers} answer${answers === 1 ? "" : "s"}${docs ? ` and ${docs} document${docs === 1 ? "" : "s"}` : ""} checked`].filter(Boolean).join(zh ? "，" : ", ")}</small>
               </span>
               <button type="button" className="ag-open" onClick={() => openApproval(a.id)}>{zh ? "查看" : "Review"}<I.chevR /></button>
             </li>

@@ -21,7 +21,7 @@ import { setApp, setCheck, addCheck, setField, addApp, addDoc, audit, dropApprov
 let seq = 0;
 const all = (...fs: P[]): P => w => fs.reduce((acc, f) => f(acc), w);
 
-const remember = (text: Bi): P => audit("agent", B("Committed to memory", "存入记忆"), B("Context", "资料"), text);
+const remember = (text: Bi): P => audit("agent", B("Committed to memory", "存入记忆"), B("Business facts", "企业资料"), text);
 
 /* --------------------------- prepared approvals --------------------------- */
 
@@ -41,14 +41,14 @@ export const A_SOI = filing("a-soi", "soi", B("File the Statement of Information
 
 const SOI_APP: Application = {
   id: "soi", name: B("LLC Statement of Information", "有限责任公司信息声明"), agency: B("California Secretary of State", "加州州务卿"), level: "state", status: "ready",
-  next: B("Drafted from Context. Due in 21 days", "已根据资料起草，21 天后到期"), fees: [{ label: B("Filing fee", "申报费"), amount: 20 }], est: B("Filed online the same day", "网上当天提交"),
+  next: B("Drafted from your business facts. Due in 21 days", "已根据企业资料起草，21 天后到期"), fees: [{ label: B("Filing fee", "申报费"), amount: 20 }], est: B("Filed online the same day", "网上当天提交"),
   source: SRC.sos, form: B("Form LLC-12 on bizfile Online", "bizfile 在线服务 LLC-12 表"), renews: B("Every 2 years", "每 2 年"),
   fields: [
-    { id: "name", label: B("Entity name", "实体名称"), value: "Moonleaf Tea LLC", from: B("From Context", "来自资料") },
+    { id: "name", label: B("Entity name", "实体名称"), value: "Moonleaf Tea LLC", from: B("From your business facts", "来自企业资料") },
     { id: "office", label: B("Principal office", "主要办公地址"), value: "North First Street, San Jose, CA (sample)", from: B("From your lease", "来自租约") },
-    { id: "mgmt", label: B("Managed by", "管理方式"), value: "Sole member", from: B("From Context", "来自资料") },
+    { id: "mgmt", label: B("Managed by", "管理方式"), value: "Sole member", from: B("From your business facts", "来自企业资料") },
     { id: "agent", label: B("Agent for service of process", "法律文书送达代理人"), value: "The member (you)", from: B("You told me", "您告诉我的") },
-    { id: "biz", label: B("Type of business", "业务类型"), value: "Beverage shop", from: B("From Context", "来自资料") },
+    { id: "biz", label: B("Type of business", "业务类型"), value: "Beverage shop", from: B("From your business facts", "来自企业资料") },
   ],
   checklist: [
     { id: "art", label: B("Articles of organization", "组织章程"), state: "done", doc: "d-art" },
@@ -93,7 +93,7 @@ function fileReady(ctx: Context): Plan {
       setCheck("edd", "form", { state: "done", doc: "d-edd", note: B("Filled by Placetta", "快哉已填写") }),
       addDoc(doc("d-edd", "employer-registration.pdf", 164_000, "agent", "edd", B("Prepared", "已准备"))),
       dropTask("r-edd"),
-      audit("agent", B("Filled application", "填写申请"), B("Employer payroll tax registration", "雇主工资税登记"), B("6 fields from Context", "根据资料填写 6 项")),
+      audit("agent", B("Filled application", "填写申请"), B("Employer payroll tax registration", "雇主工资税登记"), B("6 fields from your business facts", "根据企业资料填写 6 项")),
       addApproval(A_EDD),
       audit("agent", B("Asked for approval", "请求批准"), B("Employer payroll tax registration", "雇主工资税登记"), B("No fee", "无需费用")),
     )],
@@ -158,14 +158,14 @@ function prepareSoi(ctx: Context): Plan {
   }
   return {
     steps: [
-      S("weaving", "Reading your LLC details from Context", "从资料中读取公司信息"),
+      S("weaving", "Reading your LLC details from your business facts", "从企业资料中读取公司信息"),
       S("shaping", "Filling Form LLC-12 on bizfile Online", "在 bizfile 在线服务上填写 LLC-12 表", "sos.ca.gov"),
       S("solving", "Checking it against your articles of organization", "对照组织章程核对"),
     ],
     updates: [all(
       addApp(SOI_APP),
       addDoc(doc("d-soi", "statement-of-information-llc-12.pdf", 118_000, "agent", "soi", B("Prepared", "已准备"))),
-      audit("agent", B("Filled application", "填写申请"), B("LLC Statement of Information", "有限责任公司信息声明"), B("5 fields from Context", "根据资料填写 5 项")),
+      audit("agent", B("Filled application", "填写申请"), B("LLC Statement of Information", "有限责任公司信息声明"), B("5 fields from your business facts", "根据企业资料填写 5 项")),
       addApproval(A_SOI),
       audit("agent", B("Asked for approval", "请求批准"), B("LLC Statement of Information", "有限责任公司信息声明"), B("Fee $20", "费用 $20")),
       dropNudge("n-soi"),
