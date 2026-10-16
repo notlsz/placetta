@@ -365,6 +365,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   const run = useCallback(async (req: Request, shown: string | null, voice = false, resumeId?: string) => {
     if (busyRef.current) return;
+    // The moment of value: the plan is already on screen (src/plan/preview.ts); anything that needs the model waits for a plan.
+    if (cloud && plan === "none" && !("approve" in req || "approveAll" in req)) { setPlans("start"); return; }
     busyRef.current = true; setBusy(true);
     unlockAudio(); tts.stop();
     const aid = nid(), t0 = performance.now();
@@ -427,7 +429,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if ((voice || voiceOn) && said) tts.speak(said, speakTag(lang));
     else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
-  }, [lang, tts, say, t, deep, cloud, voiceOn, services, follow]);
+  }, [lang, tts, say, t, deep, cloud, plan, voiceOn, services, follow]);
 
   /* Back in the app: follow a task still running on the server, or show one that finished while it was closed. */
   const resumed = useRef(false);
@@ -446,6 +448,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [queued, setQueued] = useState<{ id: string; text: string }[]>([]);
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
+    if (cloud && plan === "none") { setPlans("start"); return; }
     setPanelOpen(true);
     if (busyRef.current) {
       // In an account she starts it now, beside the job she's on (up to three at once); otherwise it waits its turn.
@@ -453,7 +456,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       setQueued(l => [...l, { id: String(nid()), text: q }]); say(lang === "zh" ? "已排队，当前任务完成后开始。" : "Queued. Odelia starts it when she finishes the current job."); return;
     }
     run({ text: q }, q, voice);
-  }, [run, say, lang, cloud]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [run, say, lang, cloud, plan]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /* A job started while another runs: it works on the server on its own and shows in the chat and in Work as it goes. */
   const [, setSideJobs] = useState(0);
@@ -820,7 +823,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     go,
     ask, queued, unqueue,
     run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
-    openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : "check"), edit: !!edit }); },
+    openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : a?.preview ? "fees" : "check"), edit: !!edit }); },
     openApproval: id => setModal(id),
     approve: (id, sig) => void approve(id, sig),
     approveAll: ids => void approveAll(ids),

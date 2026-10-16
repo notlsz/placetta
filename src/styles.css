@@ -1771,3 +1771,12 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .tour h2 { margin: 6px 0 8px; font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
 .tour-t { margin: 0 auto; max-width: 360px; font-size: 15px; line-height: 1.55; color: var(--ink2); }
 .tour-act { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
+
+/* ================================================================================================================
+   First-run preview plan (src/plan/preview.ts): the rows a new workspace starts with, read in the application sheet.
+   Kept apart from the layout rules above. */
+.sh-plain { margin: 0 0 10px; font-size: 15.5px; line-height: 1.5; color: var(--ink); }
+.sh-pv { display: flex; align-items: flex-start; gap: 8px; margin: 10px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
+.sh-pv svg { flex: none; margin-top: 3px; color: var(--blue-ink); }
+.sh-f.sh-f-pv > span { color: var(--ink2); }
+/* ================================================================================================================ */

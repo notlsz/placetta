@@ -4,6 +4,7 @@ import type { Level } from "../model";
 import { WORLD_FORMS, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
 import { LINES } from "./lines";
+import { PLAIN } from "./plain";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -49,6 +50,7 @@ export type OfficialForm = {
   checked: "form" | "page" | "known";
   lines?: { status: "mapped" | "page_only"; read: string; seen: string; sources: string[]; submit: { email?: string; fax?: string; portal?: string; signature: string; source: string } };   // the line-by-line research   // known: from Placetta's library of official sites; re-read before filing
   order: number;              // where it falls in an opening: lower first
+  plain?: Bi;                 // what this is, in one line a person would say to an owner (src/forms/plain.ts)
 };
 
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
@@ -591,6 +593,8 @@ for (const f of FORMS) {
   if (l.status === "mapped") f.checked = "form";
   f.lines = { status: l.status, read: l.read, seen: l.seen, sources: l.sources, submit: { email: l.submit.email, fax: l.submit.fax, portal: l.submit.portal, signature: l.submit.signature, source: l.submit.source } };
 }
+// What each form is, the way a person would say it (src/forms/plain.ts): shown on the instant plan a new workspace starts with.
+for (const f of FORMS) { const p = PLAIN[f.id]; if (p && !f.plain) f.plain = p; }
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 
