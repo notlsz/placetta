@@ -1,0 +1,153 @@
+{
+  "where": "DAL",
+  "name": { "en": "Dallas", "zh": "达拉斯" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Building inspections and Certificate of Occupancy", "zh": "建筑检查及入住证" },
+      "agency": { "en": "City of Dallas Planning & Development (Building Inspection)", "zh": "达拉斯市规划与发展局（建筑检查科）" },
+      "when": { "en": "A new CO is needed for a first use, a change of use, a change of tenant, or a change in floor area. After the application is approved and paid, the space is ready for inspections; when all inspections pass, the CO (or TCO) is released.", "zh": "首次使用、用途变更、更换租户或面积变化都需要新的入住证（CO）。申请获批并付费后即可安排检查；所有检查通过后签发 CO（或临时 CO）。" },
+      "book": { "en": "Apply for the CO with the Land Use Questionnaire in DallasNow. Schedule inspections in DallasNow or through the IVR at 214-670-5313. Plumbing final and mechanical final must be requested together for the same day.", "zh": "在 DallasNow 提交入住证申请及土地用途问卷。在 DallasNow 或拨打自动语音系统 214-670-5313 预约检查。管道最终验收和机械最终验收须同日一起预约。" },
+      "bookUrl": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/inspections.aspx",
+      "phone": "214-670-5313",
+      "feeNote": { "en": "Dallas fee table: CO validation inspection $113; temporary CO $500; partial CO $104; duplicate CO or DBA record change $30.", "zh": "达拉斯收费表：CO 核验检查 113 美元；临时 CO 500 美元；部分 CO 104 美元；补发 CO 或仅改商号 30 美元。" },
+      "failNext": { "en": "The CO is not released until all inspections pass; correct the items and request the inspection again in DallasNow.", "zh": "所有检查通过前不会签发 CO；整改后在 DallasNow 重新预约检查。" },
+      "checklist": [
+        { "id": "application", "item": { "en": "CO application and Land Use Questionnaire submitted in DallasNow and fee paid", "zh": "已在 DallasNow 提交入住证申请和土地用途问卷并付费" } },
+        { "id": "change-of-use-plans", "item": { "en": "For a change of use: dimensioned site plan, floor key plan, tenant floor plan with rooms labeled, and a parking analysis", "zh": "用途变更时：提交标注尺寸的总平面图、楼层索引图、标明房间用途的租户平面图及停车分析" } },
+        { "id": "assembly-plan", "item": { "en": "Restaurants of 750 sq ft or more: floor plan with square footage, occupant load factors, seating and standing areas, every exit and its door and panic hardware", "zh": "750 平方英尺以上餐厅：平面图须标明面积、人数荷载系数、座位和站立区、所有出口及门和逃生推杆五金" } },
+        { "id": "food-plans", "item": { "en": "Food or beverage use: scaled plans of equipment, plumbing fixtures and floor drains, plus floor, wall and ceiling finish schedules and menu", "zh": "餐饮用途：按比例绘制的设备、卫生洁具和地漏图，以及地面、墙面、天花板饰面表和菜单" } },
+        { "id": "building-permit", "item": { "en": "Building permit on record for the tenant space; any trade permits the CO review requires obtained and finaled", "zh": "租户空间有建筑许可记录；CO 审查要求的各专业许可已取得并完成验收" } },
+        { "id": "trade-finals", "item": { "en": "Plumbing final and mechanical final passed", "zh": "管道最终验收和机械最终验收已通过" } },
+        { "id": "alcohol", "item": { "en": "Alcohol Measurement Certification application, if you sell alcohol", "zh": "如售酒，已提交酒类距离测量认证申请" } }
+      ],
+      "source": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx",
+      "sources": [
+        "https://dallascityhall.com/departments/pnv/Documents/AH%20Memos/CERT%20OF%20OCCUPANCY%20CHECKLIST-25-001.pdf",
+        "https://dallascityhall.com/departments/pnv/Documents/COFAQ_May2026.pdf",
+        "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/inspections.aspx"
+      ]
+    },
+    {
+      "id": "fire-acceptance",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire acceptance tests (kitchen hood suppression, fire alarm, sprinklers)", "zh": "消防验收测试（厨房排烟罩灭火、火灾报警、喷淋）" },
+      "agency": { "en": "Dallas Fire-Rescue, Inspection & Life Safety Education Division (new construction)", "zh": "达拉斯消防救援局检查与生命安全教育处（新建工程）" },
+      "when": { "en": "During the building permit, after the systems are installed and pre-tested, before the CO.", "zh": "建筑许可期间，系统安装并完成预测试后、取得入住证之前。" },
+      "book": { "en": "Fire and fire sprinkler inspections are part of permit inspections scheduled in DallasNow. DFR requires documented pre-testing: give the completed Pre-Test Certification form to the inspector or the acceptance test will not start.", "zh": "消防及喷淋检查属于在 DallasNow 预约的许可检查。DFR 要求提供预测试记录：须将填好的预测试认证表交给检查员，否则不进行验收测试。" },
+      "bookUrl": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/inspections.aspx",
+      "phone": "214-670-4319",
+      "lead": { "en": "To cancel or reschedule, notify the assigned inspector by 4:00 p.m. the day before.", "zh": "如需取消或改期，须在前一天下午 4 点前通知指派的检查员。" },
+      "failNext": { "en": "A failed test must be rescheduled; DFR's pre-test letter (2009) says a failed test may carry a $500 retest fee.", "zh": "测试不合格须重新预约；DFR 的预测试通知（2009 年）称不合格可能收取 500 美元重测费。" },
+      "checklist": [
+        { "id": "pretest-form", "item": { "en": "Completed Pre-Test Certification form and accurate approved plans on site", "zh": "现场备有填好的预测试认证表和准确的批准图纸" } },
+        { "id": "hood-shutoff", "item": { "en": "Hood suppression actuation automatically shuts off fuel or electric power to the cooking equipment", "zh": "排烟罩灭火系统启动后自动切断烹饪设备的燃料或电源" } },
+        { "id": "hood-devices", "item": { "en": "Operation and placement of all hood initiation devices pre-tested; puff test done", "zh": "排烟罩所有启动装置的功能和位置已预测试；已做吹气测试" } },
+        { "id": "manual-pull", "item": { "en": "Manual pull in the path of egress, 10 to 20 feet from the cooking equipment, 4.5 to 5 feet above the floor", "zh": "手动拉启装置位于疏散路线上，距烹饪设备 10 至 20 英尺，离地 4.5 至 5 英尺" } },
+        { "id": "k-extinguisher", "item": { "en": "One Class K extinguisher within 30 feet of the hood", "zh": "排烟罩 30 英尺内配一个 K 类灭火器" }, "why": { "en": "DFC 906.4.3", "zh": "达拉斯消防规范 906.4.3" } },
+        { "id": "alarm-pretest", "item": { "en": "Fire alarm pre-tested: initiating, notification and tamper devices, water-flow timing, audibility, strobe coverage and supervision", "zh": "火灾报警已预测试：触发、通知和防拆装置，水流报警时间，声响、闪灯覆盖及监控" } },
+        { "id": "sprinkler-pretest", "item": { "en": "Sprinkler piping pressure-tested at 200 psi, hanger spacing and head coverage verified; piping left uncovered until green-tagged", "zh": "喷淋管道已做 200 psi 压力测试，吊架间距和喷头覆盖已核实；在贴绿签前管道保持外露" } },
+        { "id": "extinguishers", "item": { "en": "One 2A:10B:C extinguisher per 3,000 sq ft, no more than 75 feet travel apart, mounted 4 inches to 5 feet off the floor", "zh": "每 3,000 平方英尺配一个 2A:10B:C 灭火器，间隔步行距离不超过 75 英尺，安装高度离地 4 英寸至 5 英尺" }, "why": { "en": "DFC 906", "zh": "达拉斯消防规范 906" } }
+      ],
+      "source": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/DCH%20documents/pdf/pretest_certification_letter.pdf",
+      "sources": [
+        "https://dallascityhall.com/departments/fire-rescue/Fire%20Code%20Information%20Sheets/Public%20Assembly%20Occupancy.pdf",
+        "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/inspections.aspx"
+      ]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Consumer Health pre-opening inspection", "zh": "消费者健康处开业前检查" },
+      "agency": { "en": "City of Dallas Consumer Health Division (Code Compliance)", "zh": "达拉斯市消费者健康处（规范执法局）" },
+      "when": { "en": "After you apply for the Food Establishment Permit and plans are approved, before you operate. All defects must be corrected before the health permit is approved.", "zh": "提交食品场所许可申请且图纸获批后、营业前。所有缺陷须整改完毕才会批准卫生许可。" },
+      "book": { "en": "After applying, schedule and coordinate all required health inspections with your permitting inspector. For new construction, change of ownership, remodels or a change of use, contact Planning & Development at 214-670-4127.", "zh": "提交申请后，与负责你许可的检查员预约并协调所有卫生检查。新建、所有权变更、改造或用途变更请联系规划与发展局 214-670-4127。" },
+      "bookUrl": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+      "phone": "214-670-8083",
+      "feeNote": { "en": "Permit application $121; annual permit by risk and size: $141–$155 (risk 1), $283–$308 (risk 2), $468–$513 (risk 3). An optional pre-inspection site evaluation is available for a fee.", "zh": "许可申请费 121 美元；年度许可按风险和面积：风险 1 级 141–155 美元，2 级 283–308 美元，3 级 468–513 美元。另有收费的开业前现场评估可选。" },
+      "failNext": { "en": "The inspector notes every item to correct; the permit is approved only after all defects are fixed.", "zh": "检查员会列出所有需整改项；全部整改后才批准许可。" },
+      "checklist": [
+        { "id": "food-manager", "item": { "en": "A valid certified food service manager in place at permit approval", "zh": "批准许可时须有有效的认证食品服务经理" }, "why": { "en": "Dallas City Code Ch. 17", "zh": "达拉斯市法规第 17 章" } },
+        { "id": "doors", "item": { "en": "All exterior doors and service windows self-closing and tight fitting; openings insect- and rodent-proof", "zh": "所有外门和服务窗自闭且严密；开口防虫防鼠" } },
+        { "id": "finishes", "item": { "en": "Floors sealed concrete, terrazzo or tile sloped to drains; walls FRP, sealed concrete or tile, light colored; no dark ceilings in prep", "zh": "地面为密封混凝土、水磨石或瓷砖并坡向地漏；墙面为 FRP、密封混凝土或瓷砖且浅色；加工区天花板不得为深色" } },
+        { "id": "handsinks", "item": { "en": "Hand sinks within 25 unobstructed feet of each food and dishwashing area (a door counts as an obstruction); hot and cold water through a mixing valve", "zh": "每个食品区和洗碗区 25 英尺无阻挡范围内有洗手池（门算阻挡）；冷热水经混水阀供应" } },
+        { "id": "three-comp", "item": { "en": "Stainless three-compartment sink with drain boards, large enough to submerge the largest equipment (or an NSF dish machine)", "zh": "不锈钢三格水槽带沥水板，能完全浸没最大的设备（或 NSF 认证洗碗机）" } },
+        { "id": "mop-sink", "item": { "en": "Utility/mop sink at least 16\" x 16\" x 14\" deep, or a curbed cleaning facility", "zh": "拖把池至少 16×16 英寸、深 14 英寸，或设围堰清洗区" } },
+        { "id": "air-gap", "item": { "en": "Ice machine and food equipment drained through a 1-inch air gap; hoses fitted with backflow devices", "zh": "制冰机和食品设备排水留 1 英寸空气隔断；软管装防回流装置" } },
+        { "id": "nsf", "item": { "en": "All equipment NSF approved; no home-style equipment; mounted on 6-inch legs, casters or sealed to the floor", "zh": "所有设备经 NSF 认证；不得使用家用设备；设备装 6 英寸支脚、脚轮或与地面密封" } },
+        { "id": "thermometers", "item": { "en": "A working, numerically scaled thermometer in every cold and hot holding unit", "zh": "每台冷藏和保温设备都有正常工作的数字刻度温度计" } },
+        { "id": "lighting", "item": { "en": "Lights shielded over food and utensils; 50 foot-candles where staff work with food", "zh": "食品和器具上方灯具有防护罩；员工处理食品处照度达 50 尺烛光" } },
+        { "id": "no-exposed-lines", "item": { "en": "No utility lines on the floor or exposed in food service areas", "zh": "食品服务区内地面无管线、无外露管线" } },
+        { "id": "water-heater", "item": { "en": "Water heater sized for 120°F+ at dish and hand sinks and kept out of food prep areas (or enclosed)", "zh": "热水器能为洗碗和洗手池提供 120°F 以上热水，且不设在加工区内（或加封闭隔间）" } },
+        { "id": "restrooms", "item": { "en": "Restrooms with self-closing doors, mechanical ventilation, light-colored washable surfaces (FRP to 4 feet) and 100°F+ tempered water", "zh": "洗手间装自闭门和机械通风，表面浅色可清洗（FRP 至 4 英尺高），提供 100°F 以上温水" } }
+      ],
+      "source": "https://dallascityhall.com/departments/codecompliance/consumer-health/DCH%20Documents/pdf/Consumer%20Health/Guidelines%20for%20Fixed%20Food%20Establishments.pdf",
+      "sources": [
+        "https://dallascityhall.com/departments/codecompliance/consumer-health/DCH%20Documents/pdf/Consumer%20Health/CCS-FRM-433%20Plans%20Permitting%20Site%20Evaluation%20and%20Contacts.pdf",
+        "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx"
+      ]
+    },
+    {
+      "id": "fire-routine",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "Dallas Fire-Rescue fire inspection (public assembly occupancy)", "zh": "达拉斯消防救援局消防检查（公共集会场所）" },
+      "agency": { "en": "Dallas Fire-Rescue, Inspection & Life Safety Education Division", "zh": "达拉斯消防救援局检查与生命安全教育处" },
+      "when": { "en": "After opening. Restaurants and other public assembly occupancies are inspected against the Dallas Fire Code; a valid CO is required.", "zh": "开业后。餐厅等公共集会场所按达拉斯消防规范接受检查；须持有有效入住证。" },
+      "book": { "en": "Contact the DFR Inspection & Life Safety Education Division main office.", "zh": "联系 DFR 检查与生命安全教育处总办公室。" },
+      "phone": "214-670-4319",
+      "fee": 0,
+      "feeNote": { "en": "The initial inspection is free. Reinspections: $171 for the first, $200 for the second, $255 for each after.", "zh": "首次检查免费。复检：第一次 171 美元，第二次 200 美元，之后每次 255 美元。" },
+      "failNext": { "en": "You get a list of corrections and a reinspection, billed at $171, then $200, then $255 each.", "zh": "会收到整改清单并安排复检，依次收费 171 美元、200 美元，之后每次 255 美元。" },
+      "checklist": [
+        { "id": "co", "item": { "en": "Valid Certificate of Occupancy", "zh": "有效的入住证" }, "why": { "en": "DFC 115.1", "zh": "达拉斯消防规范 115.1" } },
+        { "id": "exits", "item": { "en": "Exit doors unlocked and unblocked; panic hardware and outward swing where the occupant load is 50+; illuminated exit signs", "zh": "出口门不上锁、无阻挡；人数 50 以上时装逃生推杆并向外开；出口指示灯常亮" }, "why": { "en": "DFC 1010, 1013", "zh": "达拉斯消防规范 1010、1013" } },
+        { "id": "occupant-load", "item": { "en": "Occupant load posted near the main exit and staff keep count", "zh": "主出口附近张贴人数荷载，员工随时清点人数" }, "why": { "en": "DFC 1004.9", "zh": "达拉斯消防规范 1004.9" } },
+        { "id": "hood-6mo", "item": { "en": "Hood suppression serviced at least every 6 months and after activation; stove and hoods free of grease", "zh": "排烟罩灭火系统至少每 6 个月及每次启动后维护；炉灶和排烟罩无油污" }, "why": { "en": "DFC 904.13.5.2, 606.3.3.2", "zh": "达拉斯消防规范 904.13.5.2、606.3.3.2" } },
+        { "id": "extinguishers", "item": { "en": "Extinguishers inspected annually by licensed individuals and recharged after use; Class K within 30 feet of the hood", "zh": "灭火器每年由持证人员检查，使用后重新充装；排烟罩 30 英尺内有 K 类灭火器" }, "why": { "en": "DFC 901.6, 906.4.3", "zh": "达拉斯消防规范 901.6、906.4.3" } },
+        { "id": "alarm-sprinkler", "item": { "en": "Fire alarm and sprinklers tested at least annually with records kept; call DFR at 214-670-4319 if either goes out of service", "zh": "火灾报警和喷淋至少每年测试并留存记录；任一系统停用时须致电 DFR 214-670-4319" }, "why": { "en": "DFC 901.6, 907.8.4", "zh": "达拉斯消防规范 901.6、907.8.4" } },
+        { "id": "storage-clearance", "item": { "en": "Storage at least 18 inches below sprinkler deflectors (2 feet below the ceiling if unsprinklered)", "zh": "储物距喷淋头溅水盘至少 18 英寸（无喷淋时距天花板 2 英尺）" }, "why": { "en": "DFC 315.3.1", "zh": "达拉斯消防规范 315.3.1" } },
+        { "id": "electrical", "item": { "en": "No extension cords as permanent wiring; power strips plugged directly into wall outlets; cover plates on all panels and boxes", "zh": "不得用延长线代替永久布线；排插直接插墙上插座；所有配电箱和接线盒有盖板" }, "why": { "en": "DFC 603.5, 603.6", "zh": "达拉斯消防规范 603.5、603.6" } },
+        { "id": "co2", "item": { "en": "CO2 beverage cylinders secured upright and permitted", "zh": "饮料用二氧化碳钢瓶直立固定并已办理许可" }, "why": { "en": "DFC 5303.5.3, 105.5", "zh": "达拉斯消防规范 5303.5.3、105.5" } },
+        { "id": "open-flame", "item": { "en": "Open flames and candles permitted by the Fire Marshal; decorations flame-retardant", "zh": "明火和蜡烛经消防局长许可；装饰物阻燃" }, "why": { "en": "DFC 105.5.36, 807.2", "zh": "达拉斯消防规范 105.5.36、807.2" } },
+        { "id": "address", "item": { "en": "Address numbers at least 6 inches tall, contrasting with the background", "zh": "门牌号至少 6 英寸高，与背景形成对比" }, "why": { "en": "DFC 505.1", "zh": "达拉斯消防规范 505.1" } }
+      ],
+      "source": "https://dallascityhall.com/departments/fire-rescue/Fire%20Code%20Information%20Sheets/Public%20Assembly%20Occupancy.pdf"
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food establishment inspection (scored)", "zh": "常规食品场所检查（计分）" },
+      "agency": { "en": "City of Dallas Consumer Health Division", "zh": "达拉斯市消费者健康处" },
+      "when": { "en": "Unannounced, on a risk-based schedule: high risk (restaurants, fast food) twice a year, medium risk (e.g. coffee shops with limited menus) once a year, low risk every other year.", "zh": "不预先通知，按风险分级安排：高风险（餐厅、快餐）每年两次，中风险（如菜单简单的咖啡店）每年一次，低风险每两年一次。" },
+      "book": { "en": "Not booked; inspectors arrive unannounced.", "zh": "无需预约，检查员不预先通知上门。" },
+      "phone": "214-670-8083",
+      "scoring": { "en": "Scored out of 100 based on critical and non-critical violations. 100–80 meets standards; 79–70 needs a follow-up within 30 days; 69–60 within 10 days; 59 and below within 24 hours. Scores are published on the City's Open Data Portal, and you must give a copy of your latest report to any customer who asks.", "zh": "满分 100，按严重和非严重违规扣分。100–80 分达标；79–70 分须在 30 天内复查；69–60 分 10 天内复查；59 分及以下 24 小时内复查。分数公布在市政府开放数据平台；顾客索要时须提供最近一次检查报告复印件。" },
+      "failNext": { "en": "A score below 80 brings a $191 re-inspection fee. The scores page says 59 or below means closure until a re-inspection.", "zh": "得分低于 80 分须付 191 美元复检费。评分页面称 59 分及以下将停业，直至复检通过。" },
+      "checklist": [
+        { "id": "food-manager", "item": { "en": "Certified food service manager on staff", "zh": "有认证食品服务经理在职" }, "why": { "en": "Dallas City Code Ch. 17", "zh": "达拉斯市法规第 17 章" } },
+        { "id": "thermometers", "item": { "en": "Working thermometers in every cold and hot holding unit; units holding required temperatures", "zh": "每台冷藏和保温设备温度计正常，设备保持规定温度" } },
+        { "id": "off-floor", "item": { "en": "Food and paper goods stored at least 6 inches off the floor", "zh": "食品和纸制品离地至少 6 英寸存放" } },
+        { "id": "toxics", "item": { "en": "Pesticides, cleaners and other poisonous substances in separate, labeled cabinets", "zh": "杀虫剂、清洁剂等有毒物品存放在单独并有标识的柜子里" } },
+        { "id": "handsinks", "item": { "en": "Hand sinks accessible, unobstructed and supplied with hot and cold water", "zh": "洗手池可随时使用、无阻挡，冷热水供应正常" } },
+        { "id": "doors", "item": { "en": "Exterior doors self-closing and tight fitting; no gaps", "zh": "外门自闭且严密，无缝隙" } },
+        { "id": "garbage", "item": { "en": "Garbage containers covered; dumpster drain plugs in place", "zh": "垃圾桶加盖；垃圾箱排水塞到位" } },
+        { "id": "air-gap", "item": { "en": "Ice machine drain air gap intact; spray hoses with backflow devices", "zh": "制冰机排水空气隔断完好；喷水软管装防回流装置" } },
+        { "id": "report-copy", "item": { "en": "Latest inspection report on hand for customers who ask", "zh": "备有最近一次检查报告，供顾客索阅" }, "why": { "en": "Dallas City Code Sec. 17-10.2(b)", "zh": "达拉斯市法规第 17-10.2(b) 条" } }
+      ],
+      "source": "https://dallascityhall.com/departments/codecompliance/Pages/FoodSafety.aspx",
+      "sources": [
+        "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/restaurant_food_scores.aspx",
+        "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+        "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/Letter%20for%20Inspection%20Program%202018-8.10.18.pdf",
+        "https://dallascityhall.com/departments/codecompliance/consumer-health/DCH%20Documents/pdf/Consumer%20Health/Guidelines%20for%20Fixed%20Food%20Establishments.pdf"
+      ]
+    }
+  ]
+}
