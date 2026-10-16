@@ -1,0 +1,142 @@
+{
+  "form": "dal-food-permit",
+  "read": "2026-10-15",
+  "fields": {
+    "establishment_address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the food establishment itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box. The suite and ZIP code have their own blanks.",
+        "zh": "填写食品经营场所本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。单元号和邮编另有专栏。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/CCS-FRM-424%20Food%20Establishment%20Applcation.pdf",
+          "quote": "FOOD ESTABLISHMENT INFORMATION Name of Establishment",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/Consumer%20Health%20Division%20Change%20Request%20Form.pdf",
+          "quote": "Original permits will be hand delivered to the facility by the area inspector.",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+          "quote": "Food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments.",
+          "kind": "agency_page"
+        }
+      ]
+    },
+    "establishment_suite": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The suite or unit number of the food establishment itself.",
+        "zh": "食品经营场所本身的单元号。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/CCS-FRM-424%20Food%20Establishment%20Applcation.pdf",
+          "quote": "FOOD ESTABLISHMENT INFORMATION Name of Establishment",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/Consumer%20Health%20Division%20Change%20Request%20Form.pdf",
+          "quote": "Original permits will be hand delivered to the facility by the area inspector.",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+          "quote": "Food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments.",
+          "kind": "agency_page"
+        }
+      ]
+    },
+    "establishment_zip": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The ZIP code of the food establishment itself.",
+        "zh": "食品经营场所本身的邮编。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/CCS-FRM-424%20Food%20Establishment%20Applcation.pdf",
+          "quote": "FOOD ESTABLISHMENT INFORMATION Name of Establishment",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/Consumer%20Health%20Division%20Change%20Request%20Form.pdf",
+          "quote": "Original permits will be hand delivered to the facility by the area inspector.",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+          "quote": "Food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments.",
+          "kind": "agency_page"
+        }
+      ]
+    },
+    "owner_mailing_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "The legal owner's mailing address (owner as named on the Texas Sales and Use Tax Permit); the division's change form treats it as the billing address. The sources do not say whether an address outside the US is accepted.",
+        "zh": "法定业主（与德州销售与使用税许可证上的名称一致）的邮寄地址；该处的变更表把它当作账单地址。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use a US address where mail is reliably picked up (the store once leased, or a US office or agent). Placetta asks the agency before using an address abroad.",
+        "zh": "请使用能可靠收件的美国地址（租下门店后的门店地址，或美国办公室、代理人地址）。如需使用境外地址，Placetta 会先向该机构确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/CCS-FRM-424%20Food%20Establishment%20Applcation.pdf",
+          "quote": "Owner is responsible for notifying the Consumer Health Division in writing of any changes.",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/Consumer%20Health%20Division%20Change%20Request%20Form.pdf",
+          "quote": "Mailing Address Change",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+          "quote": "For a mailing address change - Free",
+          "kind": "agency_page"
+        }
+      ]
+    },
+    "job_contractor_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "The business address of the contractor doing the build-out, not the owner's. The sources do not say whether an address outside the US is accepted.",
+        "zh": "负责装修施工的承包商的营业地址，而非业主地址。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use the contractor's own business address; a US contractor will have one. Placetta asks the division before entering an address abroad.",
+        "zh": "请填写承包商自己的营业地址，美国承包商都有此地址。如需填写境外地址，Placetta 会先向该处确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://dallascityhall.com/departments/codecompliance/legacy-website/ApplyforaPermit/Documents/CCS-FRM-424%20Food%20Establishment%20Applcation.pdf",
+          "quote": "Job Contractor Business Name________________________Job Contractor Business Address",
+          "kind": "form"
+        }
+      ]
+    }
+  },
+  "notes": "Dallas Chapter 17 could not be read in usable form (the city's posted ordinance is a strikethrough scan and American Legal blocks downloads), so the third establishment source is the division's own Change Request Form. Owner mailing and contractor addresses are unconfirmed."
+}

@@ -1,0 +1,36 @@
+{
+  "form": "sf-formula-retail",
+  "read": "2026-10-15",
+  "fields": {
+    "project_address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the San Francisco storefront the affidavit is filed for itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box. The block/lot number has its own box.",
+        "zh": "填写声明书所针对的旧金山门店本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。地块编号（Block/Lot）另有专栏。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://sfplanning.org/sites/default/files/forms/Formula_Retail_Affidavit.pdf",
+          "quote": "1. Location and Classification Project Address:",
+          "kind": "form"
+        },
+        {
+          "url": "https://sfplanning.org/permit/chain-stores-businesses",
+          "quote": "additional controls and regulations will apply depending on the zoning district where the proposed business will be located.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://sfplanning.org/resource/formula-retail-establishments",
+          "quote": "This affidavit for Formula Retail must accompany any Permit Application for any Alterations, New Construction, Commercial Tenant Improvements, Change of Use or Signage",
+          "kind": "agency_page"
+        }
+      ]
+    }
+  },
+  "notes": "Block/Lot is a parcel number, not an address line, and is not ruled here."
+}

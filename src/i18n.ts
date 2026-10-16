@@ -189,7 +189,7 @@ export const S = {
   connect: B("Connect", "连接"),
 
   foot_data: B("Data handling", "数据处理"),
-  foot_text: B("Nothing is filed, paid or sent without your approval, and every action is logged in the audit trail, which you can export. Cards stay in your vault; Placetta never sees the number. Placetta isn't a law firm: requirements come from each agency's published rules.", "未经您批准，不会提交、付款或发送任何内容；每项操作都会记入可导出的审计记录。银行卡保存在您的保险库中，快哉看不到卡号。快哉不是律师事务所：各项要求来自机构公开发布的规定。"),
+  foot_text: B("Nothing is filed, paid or sent without your approval, and every action is logged in the audit trail, which you can export. You pay agency fees directly to each agency, and plan payments run through Stripe, so Placetta never sees a card number. Placetta isn't a law firm: requirements come from each agency's published rules.", "未经您批准，不会提交、付款或发送任何内容；每项操作都会记入可导出的审计记录。机构费用由您直接支付给各机构，方案费用通过 Stripe 支付，快哉看不到任何卡号。快哉不是律师事务所：各项要求来自机构公开发布的规定。"),
   foot_sample: B("This is a sample workspace with made-up data. Nothing you enter leaves this page.", "这是使用虚构数据的示例工作区，您输入的任何内容都不会离开此页面。"),
 
   listening: B("Listening", "正在听"),

@@ -1,0 +1,36 @@
+{
+  "form": "aus-food-preopening",
+  "read": "2026-10-15",
+  "fields": {
+    "address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the establishment to be inspected itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box.",
+        "zh": "填写待检查的经营场所本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://austin.widen.net/content/lzcrvwjzpn/original/Food-Pre-Opening-Revise.pdf?download=true",
+          "quote": "Is this brand-new construction with no previous food permit?",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+          "quote": "After the plans are approved, the location is built, and it is ready for inspection, submit a Pre-Opening Inspection Application and Operational Permit Application.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/tx/austin/codes/code_of_ordinances?nodeId=TIT10PUHESESA_CH10-3FOFOHA_ART3PE_S10-3-63PEAP",
+          "quote": "the health authority shall inspect the proposed food enterprise to determine whether it complies with this chapter.",
+          "kind": "statute"
+        }
+      ]
+    }
+  },
+  "notes": "Only address line on the form is the establishment's Physical Address. Austin City Code text read through Municode's content service."
+}

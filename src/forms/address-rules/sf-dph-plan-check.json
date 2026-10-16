@@ -1,0 +1,36 @@
+{
+  "form": "sf-dph-plan-check",
+  "read": "2026-10-15",
+  "fields": {
+    "business_address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the food facility being built or remodeled itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box.",
+        "zh": "填写正在新建或改建的食品设施本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://sf.gov/sites/default/files/2023-07/PlanCheckApplication.pdf",
+          "quote": "BUSINESS INFORMATION Business Address",
+          "kind": "form"
+        },
+        {
+          "url": "https://sf.gov/guide-building-and-remodeling-food-facility",
+          "quote": "Write on the memo line: \"DPH Plan Check Fee for [insert project address].\"",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://sf.gov/sites/default/files/2023-08/ConstructGuide.pdf",
+          "quote": "Before constructing, enlarging, altering or converting any building for use as a food facility, two (2) sets of detailed plans",
+          "kind": "instructions"
+        }
+      ]
+    }
+  },
+  "notes": "Only address line is the facility's Business Address. California Health and Safety Code pages (leginfo, CDPH) could not be opened from this session; the SF construction guide restates the plan-submittal rule."
+}

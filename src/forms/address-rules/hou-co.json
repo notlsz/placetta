@@ -1,0 +1,157 @@
+{
+  "form": "hou-co",
+  "read": "2026-10-15",
+  "fields": {
+    "business_address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the building or lease space applying for the certificate itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box. Street line only; the space number and ZIP have their own lines.",
+        "zh": "填写申请占用证的建筑或租赁空间本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。此处只填街道部分，单元号和邮编另有专栏。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6851/download",
+          "quote": "Physical address of the location that is applying for the certificate",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hpwcode1106",
+          "quote": "A Certificate of Occupancy must be obtained before a commercial building or an individual lease space within a commercial building may be occupied",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/2231/download",
+          "quote": "If your business relocates to another address, you will need to apply for a CO for that location.",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/1261/download",
+          "quote": "2. The address of the structure.",
+          "kind": "statute"
+        }
+      ]
+    },
+    "building_space_no": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The building or suite number of the space applying for the certificate, if it has one.",
+        "zh": "申请占用证的空间的楼号或单元号（如有）。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6851/download",
+          "quote": "Physical address of the location that is applying for the certificate",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hpwcode1106",
+          "quote": "A Certificate of Occupancy must be obtained before a commercial building or an individual lease space within a commercial building may be occupied",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/2231/download",
+          "quote": "If your business relocates to another address, you will need to apply for a CO for that location.",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/1261/download",
+          "quote": "2. The address of the structure.",
+          "kind": "statute"
+        }
+      ]
+    },
+    "zip_code": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The ZIP code of the business location (the form's own example labels it 'Business zip').",
+        "zh": "营业地点的邮编（表格示例标注为“Business zip”）。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6851/download",
+          "quote": "Physical address of the location that is applying for the certificate",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hpwcode1106",
+          "quote": "A Certificate of Occupancy must be obtained before a commercial building or an individual lease space within a commercial building may be occupied",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/2231/download",
+          "quote": "If your business relocates to another address, you will need to apply for a CO for that location.",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/1261/download",
+          "quote": "2. The address of the structure.",
+          "kind": "statute"
+        }
+      ]
+    },
+    "applicant_home_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "The home street address of the person signing the application (the authorized agent). The sources do not say whether an address outside the US is accepted.",
+        "zh": "签署申请的人（授权代理人）的住址街道部分。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Give the signer's actual residential or business address. If it is abroad, Placetta asks the agency first whether a foreign address is accepted on this line.",
+        "zh": "请填写签署人真实的住址或办公地址。如该地址在境外，Placetta 会先向该机构确认此栏是否接受境外地址。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6851/download",
+          "quote": "Applicant's Home Address _Address of person signing the application_",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/941/download",
+          "quote": "Applicant's Home Address: Applicant's Home City/State/Zip:",
+          "kind": "form"
+        }
+      ]
+    },
+    "applicant_home_city_state_zip": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "City, state and ZIP of the signer's home address. The line has no country field. The sources do not say whether an address outside the US is accepted.",
+        "zh": "签署人住址的城市、州和邮编。此栏没有国家一项。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Give the signer's actual residential or business address. If it is abroad, Placetta asks the agency first whether a foreign address is accepted on this line.",
+        "zh": "请填写签署人真实的住址或办公地址。如该地址在境外，Placetta 会先向该机构确认此栏是否接受境外地址。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6851/download",
+          "quote": "Applicant's Home Address _Address of person signing the application_",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/941/download",
+          "quote": "Applicant's Home Address: Applicant's Home City/State/Zip:",
+          "kind": "form"
+        }
+      ]
+    }
+  },
+  "notes": "Premises lines confirmed by the form's own example sheet, the permit page, the CO handout and the Houston amendments to the IBC (111.2). The applicant's home address is only described as the signer's address; no source addresses foreign addresses."
+}

@@ -1,0 +1,84 @@
+{
+  "form": "hou-food-dealer",
+  "read": "2026-10-15",
+  "fields": {
+    "business_address_zip": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the food establishment itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box.",
+        "zh": "填写食品经营场所本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonhealth.org/media/14901/download",
+          "quote": "permits are not transferable from one address to another",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hhd1003",
+          "quote": "Permit must be kept on premises in public view.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/tx/houston/codes/code_of_ordinances?nodeId=COOR_CH20FODR_ARTIIFOESGE_DIV2PEMEET_S20-36FODEPE",
+          "quote": "A food dealer's permit shall only be valid for the location specified thereon and may not be transferred from place to place.",
+          "kind": "statute"
+        }
+      ]
+    },
+    "mailing_address_zip": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "Where the Health Department mails the permit and renewal invoices. The ordinance asks for a 'post office address', i.e. a mailing address. The sources do not say whether an address outside the US is accepted. Whether a P.O. box is accepted is not stated outright.",
+        "zh": "卫生局邮寄许可证和续期账单的地址。条例要求提供“post office address”，即邮寄地址。现有官方资料未说明是否接受美国境外地址。是否接受邮政信箱未明确说明。"
+      },
+      "ifNone": {
+        "en": "Use a US address where mail is reliably picked up (the store once leased, or a US office or agent). Placetta asks the agency before using an address abroad.",
+        "zh": "请使用能可靠收件的美国地址（租下门店后的门店地址，或美国办公室、代理人地址）。如需使用境外地址，Placetta 会先向该机构确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonhealth.org/media/14901/download",
+          "quote": "the department will mail a renewal notice to the mailing address listed on the application.",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hhd1003",
+          "quote": "Once payment is received, the permit will be mailed to the address on file.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/tx/houston/codes/code_of_ordinances?nodeId=COOR_CH20FODR_ARTIIFOESGE_DIV2PEMEET_S20-36FODEPE",
+          "quote": "The application shall include at least the applicant's full legal name and post office address",
+          "kind": "statute"
+        }
+      ]
+    },
+    "responsible_party_mailing_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "The mailing address of the Responsible Party, the individual who assumes legal responsibility for compliance (only if different from the owner). The sources do not say whether an address outside the US is accepted.",
+        "zh": "责任人（对合规承担法律责任的个人，仅在与业主不同时填写）的邮寄地址。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Give the signer's actual residential or business address. If it is abroad, Placetta asks the agency first whether a foreign address is accepted on this line.",
+        "zh": "请填写签署人真实的住址或办公地址。如该地址在境外，Placetta 会先向该机构确认此栏是否接受境外地址。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonhealth.org/media/14901/download",
+          "quote": "The individuals(s) also assume legal responsibility in all cases of non- compliance.",
+          "kind": "form"
+        }
+      ]
+    }
+  },
+  "notes": "City Code 20-36 read through Municode's content service. Mailing and Responsible Party addresses are unconfirmed."
+}

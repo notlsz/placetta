@@ -1,0 +1,89 @@
+{
+  "form": "aus-food-permit",
+  "read": "2026-10-15",
+  "fields": {
+    "address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the food establishment being permitted itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box.",
+        "zh": "填写申请许可的食品经营场所本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://austin.widen.net/content/2smzwfvayk/original/10125FP-v2-Gross-Annual-Sales-(1).pdf?download=true",
+          "quote": "Food Establishment: The physical location in which food is prepared or served.",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+          "quote": "After the plans are approved, the location is built, and it is ready for inspection, submit a Pre-Opening Inspection Application and Operational Permit Application.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/tx/austin/codes/code_of_ordinances?nodeId=TIT10PUHESESA_CH10-3FOFOHA_ART3PE_S10-3-63PEAP",
+          "quote": "the location and type of the proposed food enterprise;",
+          "kind": "statute"
+        }
+      ]
+    },
+    "mailing": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "Where Austin Public Health mails the permit and the yearly renewal notice; it may differ from the store. The sources do not say whether an address outside the US is accepted. Nothing on the form or page rules a P.O. box in or out.",
+        "zh": "奥斯汀公共卫生局邮寄许可证和年度续期通知的地址，可与门店地址不同。现有官方资料未说明是否接受美国境外地址。表格和网页也未说明能否使用邮政信箱。"
+      },
+      "ifNone": {
+        "en": "Use a US address where mail is reliably picked up (the store once leased, or a US office or agent). Placetta asks the agency before using an address abroad.",
+        "zh": "请使用能可靠收件的美国地址（租下门店后的门店地址，或美国办公室、代理人地址）。如需使用境外地址，Placetta 会先向该机构确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://austin.widen.net/content/2smzwfvayk/original/10125FP-v2-Gross-Annual-Sales-(1).pdf?download=true",
+          "quote": "Use the mailing address space to specify the address where you would like to receive Permits and Renewal Notifications.",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+          "quote": "the department will mail a renewal notice to the mailing address listed on the application.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/tx/austin/codes/code_of_ordinances?nodeId=TIT10PUHESESA_CH10-3FOFOHA_ART1GEPR_S10-3-4SENO",
+          "quote": "registered or certified mail, return receipt requested, to the last known address of the permit holder.",
+          "kind": "statute"
+        }
+      ]
+    },
+    "responsible": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "The mailing address of the Responsible Party, the person who answers legally for code compliance, printed with the name as on a government photo ID. The sources do not say whether an address outside the US is accepted.",
+        "zh": "责任人（对守法经营承担法律责任的个人）的邮寄地址，姓名须与政府签发的带照片证件一致。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Give the signer's actual residential or business address. If it is abroad, Placetta asks the agency first whether a foreign address is accepted on this line.",
+        "zh": "请填写签署人真实的住址或办公地址。如该地址在境外，Placetta 会先向该机构确认此栏是否接受境外地址。"
+      },
+      "confirmations": [
+        {
+          "url": "https://austin.widen.net/content/2smzwfvayk/original/10125FP-v2-Gross-Annual-Sales-(1).pdf?download=true",
+          "quote": "Responsible Party: Any individual(s) who ensures the food establishment operations/practices are in accordance with all food codes and ordinances.",
+          "kind": "form"
+        },
+        {
+          "url": "https://library.municode.com/tx/austin/codes/code_of_ordinances?nodeId=TIT10PUHESESA_CH10-3FOFOHA_ART3PE_S10-3-63PEAP",
+          "quote": "the name and address of each applicant;",
+          "kind": "statute"
+        }
+      ]
+    }
+  },
+  "notes": "Physical Address is the establishment. Mailing (permits and renewals) and the Responsible Party's mailing address are unconfirmed: the form, the program page and City Code ch. 10-3 never say whether a P.O. box or an address abroad is accepted. Austin City Code text was read through Municode's content service for the cited section."
+}

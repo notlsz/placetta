@@ -1,0 +1,41 @@
+{
+  "form": "dal-co",
+  "read": "2026-10-15",
+  "fields": {
+    "luq_physical_address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the building or lease space the Certificate of Occupancy covers itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box.",
+        "zh": "填写占用许可证所涵盖的建筑或租赁空间本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/DCH%20documents/LandUseQuestionnaire26-007.pdf",
+          "quote": "Physical Address/suite number",
+          "kind": "form"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx",
+          "quote": "shall not use or change the use of a building, a portion of a building, or land without obtaining a Certificate of Occupancy",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://dallascityhall.com/departments/pnv/Documents/COFAQ_May2026.pdf",
+          "quote": "A change of use is any proposed change to the use of a property or an intensification of an existing use",
+          "kind": "faq"
+        },
+        {
+          "url": "https://codelibrary.amlegal.com/codes/dallas/latest/dallas_tx/0-0-0-74552",
+          "quote": "a person shall not use or occupy or change the use or occupancy of a building, a portion of a building, or land",
+          "kind": "statute"
+        }
+      ]
+    }
+  },
+  "notes": "The Land Use Questionnaire's only address is the occupied space. Dallas Development Code 51A-1.104 was read through the fetch tool (American Legal blocks direct downloads). The DallasNow application's own owner/applicant addresses have no box on this PDF and are not ruled here."
+}

@@ -1,0 +1,151 @@
+{
+  "form": "hou-sign",
+  "read": "2026-10-15",
+  "fields": {
+    "sign_address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the premises where the sign is erected (the store) itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box. Street line only.",
+        "zh": "填写招牌安装所在的经营场所（即门店）本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。此处只填街道部分。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6006/download",
+          "quote": "the sign is being erected and or maintained at the above location with the permission of the owner",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hpwcode1112",
+          "quote": "Sign permits are completely and entirely non-transferrable (ex: location to location, sign to sign, wall to wall).",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://houstonpermittingcenter.org/building-code-enforcement/sign-administration",
+          "quote": "The proposed location is wholly contained on private property",
+          "kind": "agency_page"
+        }
+      ]
+    },
+    "sign_city_st_zip": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "City, state and ZIP of the premises where the sign is erected.",
+        "zh": "招牌安装所在场所的城市、州和邮编。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6006/download",
+          "quote": "the sign is being erected and or maintained at the above location with the permission of the owner",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hpwcode1112",
+          "quote": "Sign permits are completely and entirely non-transferrable (ex: location to location, sign to sign, wall to wall).",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://houstonpermittingcenter.org/building-code-enforcement/sign-administration",
+          "quote": "The proposed location is wholly contained on private property",
+          "kind": "agency_page"
+        }
+      ]
+    },
+    "billing_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "Where the city mails the yearly sign operating permit invoice; the sign owner must keep it current. The sources do not say whether an address outside the US is accepted.",
+        "zh": "市政府邮寄年度招牌运营许可账单的地址，招牌所有人须保持其更新。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use a US address where mail is reliably picked up (the store once leased, or a US office or agent). Placetta asks the agency before using an address abroad.",
+        "zh": "请使用能可靠收件的美国地址（租下门店后的门店地址，或美国办公室、代理人地址）。如需使用境外地址，Placetta 会先向该机构确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6006/download",
+          "quote": "Billing Address: Billing Email:",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hpwcode1112",
+          "quote": "Thirty (30) days prior to the renewal date, an invoice will be mailed to the billing address listed on the application.",
+          "kind": "agency_page"
+        }
+      ]
+    },
+    "billing_city_st_zip": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "City, state and ZIP of the billing address. The line has no country field. The sources do not say whether an address outside the US is accepted.",
+        "zh": "账单地址的城市、州和邮编。此栏没有国家一项。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use a US address where mail is reliably picked up (the store once leased, or a US office or agent). Placetta asks the agency before using an address abroad.",
+        "zh": "请使用能可靠收件的美国地址（租下门店后的门店地址，或美国办公室、代理人地址）。如需使用境外地址，Placetta 会先向该机构确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6006/download",
+          "quote": "Billing Address: Billing Email:",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.houstonpermittingcenter.org/hpwcode1112",
+          "quote": "Thirty (30) days prior to the renewal date, an invoice will be mailed to the billing address listed on the application.",
+          "kind": "agency_page"
+        }
+      ]
+    },
+    "office_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "The office address of the applicant company (normally the sign contractor). The sources do not say whether an address outside the US is accepted.",
+        "zh": "申请公司（通常为招牌承包商）的办公地址。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use the sign company's own US office address; a Houston-licensed sign contractor will have one. Placetta asks Sign Administration before entering an address abroad.",
+        "zh": "请填写招牌公司自己的美国办公地址，持有休斯顿执照的招牌承包商都有此地址。如需填写境外地址，Placetta 会先向招牌管理处确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6006/download",
+          "quote": "Applicant Co. Name: License: Contact(s): Email(s): Office Address: Office Phone:",
+          "kind": "form"
+        }
+      ]
+    },
+    "office_city_st_zip": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "City, state and ZIP of the applicant company's office. The line has no country field. The sources do not say whether an address outside the US is accepted.",
+        "zh": "申请公司办公地址的城市、州和邮编。此栏没有国家一项。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use the sign company's own US office address; a Houston-licensed sign contractor will have one. Placetta asks Sign Administration before entering an address abroad.",
+        "zh": "请填写招牌公司自己的美国办公地址，持有休斯顿执照的招牌承包商都有此地址。如需填写境外地址，Placetta 会先向招牌管理处确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://www.houstonpermittingcenter.org/media/6006/download",
+          "quote": "Applicant Co. Name: License: Contact(s): Email(s): Office Address: Office Phone:",
+          "kind": "form"
+        }
+      ]
+    }
+  },
+  "notes": "The Houston Sign Code itself was not found as an opened document; premises lines rest on the form affidavit and two Sign Administration pages. Office (applicant company) and billing lines are unconfirmed."
+}

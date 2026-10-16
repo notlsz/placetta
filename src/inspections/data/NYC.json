@@ -1,0 +1,190 @@
+{
+  "where": "NYC",
+  "name": { "en": "New York City", "zh": "纽约市" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "DOB final inspection and Certificate of Occupancy (or Letter of No Objection)", "zh": "建筑局（DOB）最终验收及入住证（或无异议函）" },
+      "agency": { "en": "NYC Department of Buildings (DOB)", "zh": "纽约市建筑局（DOB）" },
+      "when": { "en": "After construction and all trade sign-offs, before anyone occupies the space. A CO is needed for a new building or a change in use, egress or occupancy; minor alterations get a Letter of Completion; pre-1938 buildings with no CO can use a Letter of No Objection.", "zh": "施工及各专业验收完成后、正式使用前。新建筑或用途、疏散、占用类型变更需要入住证（CO）；小型改造发完工函；1938年前建成且没有CO的建筑可申请无异议函（LNO）。" },
+      "book": { "en": "Your applicant of record requests the inspection (for a CO job, \"Construction Inspection Sign Off Prior to Occupancy\") in DOB NOW: Inspections, then submits the Certificate of Occupancy Request in DOB NOW: Build. An LNO is requested from the DOB borough office with the LNO/LOV application.", "zh": "由备案申请人在 DOB NOW: Inspections 预约验收（CO 项目选“入住前施工验收签核”），再在 DOB NOW: Build 提交入住证申请。无异议函需用 LNO/LOV 申请表向所在区的 DOB 办公室申请。" },
+      "bookUrl": "https://www.nyc.gov/site/buildings/industry/dob-now-inspection.page",
+      "lead": { "en": "DOB says LNO requests take about three weeks.", "zh": "DOB 表示无异议函申请约需三周。" },
+      "feeNote": { "en": "No fee published for the final inspection itself. A Letter of No Objection costs $130 for commercial buildings.", "zh": "最终验收本身未公布收费。商业建筑的无异议函费用为 130 美元。" },
+      "failNext": { "en": "Outstanding objections are listed on the job in DOB NOW and must be resolved before the sign-off can proceed. No CO or LNO is issued while any application or violation is open.", "zh": "未解决的问题会在 DOB NOW 的项目中列出，必须处理完毕才能签核。只要有未结的申请或违规，就不会签发 CO 或 LNO。" },
+      "checklist": [
+        { "id": "construction-signoff", "item": { "en": "Final construction inspection signed off", "zh": "最终施工验收已签核" } },
+        { "id": "plumbing-signoff", "item": { "en": "Final plumbing inspection signed off", "zh": "最终管道验收已签核" } },
+        { "id": "electrical-signoff", "item": { "en": "Final electrical inspection signed off", "zh": "最终电气验收已签核" } },
+        { "id": "special-inspections", "item": { "en": "All required special inspection reports submitted by the special inspection agency", "zh": "所有要求的专项检查报告已由专项检查机构提交" } },
+        { "id": "as-built", "item": { "en": "As-built drawings submitted for non-substantive changes; substantive changes filed as a PAA", "zh": "非实质性变更已提交竣工图；实质性变更已提交修改申请（PAA）" } },
+        { "id": "no-open", "item": { "en": "No open applications and no open violations on the property", "zh": "该物业没有未结的申请和违规记录" } },
+        { "id": "pw3", "item": { "en": "Owner's Cost Affidavit (PW3) filed", "zh": "已提交业主成本声明（PW3）" } },
+        { "id": "schedule-a", "item": { "en": "Schedule of Occupancy approved in DOB NOW: Build", "zh": "DOB NOW: Build 中的占用明细表（Schedule of Occupancy）已获批准" } },
+        { "id": "lno-same-use", "item": { "en": "For an LNO: the restaurant or store is in the same Use Group and Occupancy Group as the legal use, with occupant load and egress substantially unchanged", "zh": "申请 LNO 时：餐厅或店铺与合法用途属于同一用途组和占用组，人数荷载和疏散基本不变" }, "why": { "en": "A change of Use or Occupancy Group needs an ALT-1 and a new CO (AC 28-118.3.4)", "zh": "改变用途组或占用组需提交 ALT-1 并申请新的 CO（AC 28-118.3.4）" } }
+      ],
+      "source": "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page",
+      "sources": [
+        "https://www.nyc.gov/site/buildings/dob/project-requirements-project-sign-off-and-completion.page",
+        "https://www.nyc.gov/assets/buildings/pdf/dobnow_insp_guide_cons_insp_signoff_request.pdf",
+        "https://www.nyc.gov/assets/buildings/pdf/lno_lov_form.pdf"
+      ]
+    },
+    {
+      "id": "fire-hood",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "FDNY Rangehood Unit preliminary inspection and suppression acceptance test", "zh": "消防局（FDNY）排烟罩组首次检查及灭火系统验收测试" },
+      "agency": { "en": "FDNY Bureau of Fire Prevention, Rangehood Unit", "zh": "纽约市消防局防火处排烟罩组" },
+      "when": { "en": "After the hood, exhaust and fire-extinguishing system are installed under DOB approval, before you cook. Passing leads to the annual FDNY commercial cooking permit.", "zh": "排烟罩、排风系统和灭火系统经 DOB 批准安装完成后、开火营业前。通过后 FDNY 会签发年度商用烹饪系统许可。" },
+      "book": { "en": "Request the inspection or test on the FDNY Business website (NYC.ID account required). Cancellations and reschedules also go through FDNY Business.", "zh": "在 FDNY Business 网站预约检查或测试（需要 NYC.ID 账户）。取消和改期也在该网站办理。" },
+      "bookUrl": "https://fires.fdnycloud.org/CitizenAccess/",
+      "phone": "311",
+      "fee": null,
+      "feeNote": { "en": "Acceptance test $285 (mechanical only) or $580 (mechanical and electrical); plan review $210; document management $165; permit $70 per system.", "zh": "验收测试 285 美元（仅机械）或 580 美元（机械加电气）；图纸审查 210 美元；文件管理费 165 美元；许可费每套系统 70 美元。" },
+      "failNext": { "en": "No permit is issued until the system complies with the approved plans; you must correct the defects and request another test.", "zh": "系统符合批准图纸之前不会发许可，需整改后重新预约测试。" },
+      "checklist": [
+        { "id": "matches-plans", "item": { "en": "Exhaust and fire-extinguishing system match the approved plans, code and manufacturer's specifications", "zh": "排风和灭火系统与批准图纸、规范及厂家说明一致" } },
+        { "id": "installer", "item": { "en": "Fire-extinguishing system installed by a DOB-licensed Class A or C master fire suppression piping contractor", "zh": "灭火系统由 DOB 持牌的 A 类或 C 类消防管道总承包商安装" } },
+        { "id": "auto-shutoff", "item": { "en": "System activates automatically and shuts off gas or power to the cooking appliances; a manual pull device is installed", "zh": "系统能自动启动并切断烹饪设备的燃气或电源；装有手动拉启装置" } },
+        { "id": "nozzles", "item": { "en": "Nozzles have their caps and point over the designated cooking equipment", "zh": "喷头带有防护帽，并对准指定的烹饪设备" } },
+        { "id": "baffle-filters", "item": { "en": "Canopy hood fitted with baffle-type grease filters", "zh": "罩式排烟罩装有挡板式油脂过滤网" } },
+        { "id": "k-extinguisher", "item": { "en": "At least one Class K portable extinguisher within 30 feet of the cooking equipment", "zh": "烹饪设备 30 英尺内至少有一个 K 类手提灭火器" } },
+        { "id": "placard", "item": { "en": "Placard posted: \"the fire extinguishing system must be activated prior to using a portable fire extinguisher\", with manual-operation instructions under glass or laminated near the pull station", "zh": "张贴“使用手提灭火器前必须先启动灭火系统”标识，手动操作说明需加玻璃或塑封，贴在手动拉启装置附近" } },
+        { "id": "duct-schematic", "item": { "en": "Duct schematic and cleaning and operating instructions posted", "zh": "张贴风管示意图及清洁、操作说明" } },
+        { "id": "service-tag", "item": { "en": "Valid service tag from the master fire suppression piping contractor on the system", "zh": "系统上挂有消防管道总承包商出具的有效检修标签" } },
+        { "id": "staff-trained", "item": { "en": "Kitchen staff trained to activate the system manually and use the extinguishers; training records kept", "zh": "厨房员工已接受手动启动系统和使用灭火器的培训，并保存培训记录" } }
+      ],
+      "source": "https://www.nyc.gov/assets/fdny/downloads/pdf/business/restaurant-fire-safety-guide.pdf",
+      "sources": [
+        "https://www.nyc.gov/assets/fdny/downloads/pdf/business/Support/fire-safety-in-commercial-cooking-locations-english.pdf"
+      ]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "DOHMH pre-permit (pre-operating) inspection", "zh": "卫生局（DOHMH）发证前（开业前）检查" },
+      "agency": { "en": "NYC Department of Health and Mental Hygiene (DOHMH), Bureau of Food Safety and Community Sanitation", "zh": "纽约市卫生和心理卫生局（DOHMH）食品安全与社区卫生处" },
+      "when": { "en": "After you apply for the Food Service Establishment permit. You may operate 22 days after applying even without it; to open sooner, request a pre-operating inspection. Otherwise the inspector visits unannounced after you open.", "zh": "提交餐饮服务场所许可申请之后。即使未检查，申请满 22 天后也可营业；想更早开业可预约开业前检查。否则检查员会在开业后不预先通知上门。" },
+      "book": { "en": "Call 212-676-1600 to schedule a pre-operating inspection.", "zh": "致电 212-676-1600 预约开业前检查。" },
+      "bookUrl": "https://a816-hlst.nyc.gov/CitizenAccess/",
+      "phone": "212-676-1600",
+      "feeNote": { "en": "No separate fee is published for this inspection. The Food Service Establishment permit is $280 a year for most restaurants (plus $25 if you make frozen desserts).", "zh": "该检查未公布单独收费。大多数餐厅的餐饮服务场所许可费为每年 280 美元（制作冷冻甜品另加 25 美元）。" },
+      "scoring": { "en": "Not graded: inspections of new restaurants not yet open to the public are scored but get no letter grade.", "zh": "不评等级：尚未对公众开放的新餐厅的检查只计分，不发字母等级。" },
+      "failNext": { "en": "The inspector gives you a list of things to fix and you must schedule another inspection. If you pass, the permit is mailed to you.", "zh": "检查员会给出整改清单，须重新预约检查。通过后许可证会邮寄给你。" },
+      "checklist": [
+        { "id": "fpc-supervisor", "item": { "en": "A supervisor holding a Food Protection Certificate is on duty whenever food is received or prepared or the restaurant is open", "zh": "接收或加工食品及营业期间，都有持食品保护证书（FPC）的主管在岗" } },
+        { "id": "hot-cold-holding", "item": { "en": "Hot and cold holding equipment works; thermometers available to check food temperatures", "zh": "冷热保温设备正常运转；备有温度计检测食品温度" } },
+        { "id": "seal-openings", "item": { "en": "Cracks, crevices and holes in walls, cabinets and doors sealed against rodents, cockroaches and flies", "zh": "墙面、柜体和门上的裂缝、缝隙和孔洞已封堵，防鼠、防蟑螂、防蝇" } },
+        { "id": "door-sweeps", "item": { "en": "Rodent-proof door sweeps on outside doors", "zh": "外门装有防鼠门底刷" } },
+        { "id": "pest-containers", "item": { "en": "Food and garbage stored in pest-proof containers", "zh": "食品和垃圾存放在防虫鼠的容器中" } },
+        { "id": "pest-contract", "item": { "en": "Contract with a pest control professional licensed to work in restaurants", "zh": "已与持牌、可服务餐厅的虫害防治公司签约" } },
+        { "id": "surfaces", "item": { "en": "Food-contact and non-food surfaces smooth and cleanable; deeply grooved cutting boards and chipped surfaces replaced", "zh": "食品接触面和非接触面平滑易清洁；深划痕砧板和破损表面已更换" } },
+        { "id": "backflow", "item": { "en": "Plumbing fitted with approved backflow devices (valves, anti-siphon pieces, vacuum breakers)", "zh": "管道装有合格的防回流装置（阀门、防虹吸件、真空破坏器）" } },
+        { "id": "grease-trap", "item": { "en": "Grease traps clean and maintained", "zh": "隔油池清洁并保养良好" } },
+        { "id": "hood-clean", "item": { "en": "Range hoods clean and grease-free", "zh": "排烟罩清洁、无油污" } }
+      ],
+      "source": "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit",
+      "sources": [
+        "https://www.nyc.gov/assets/doh/downloads/pdf/rii/common-violations.pdf",
+        "https://www.nyc.gov/assets/doh/downloads/pdf/rii/restaurant-grading-faq.pdf"
+      ]
+    },
+    {
+      "id": "fire-assembly",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "FDNY Place of Assembly inspection (75+ occupants)", "zh": "FDNY 集会场所检查（75 人以上）" },
+      "agency": { "en": "FDNY Bureau of Fire Prevention, Public Assembly Unit (after DOB issues the PA Certificate of Operation)", "zh": "纽约市消防局防火处公共集会组（在 DOB 签发集会场所运营证之后）" },
+      "when": { "en": "Only if 75 or more people (staff included) can gather indoors, or 200 or more outdoors. DOB does the initial inspection for the PA Certificate of Operation; an FDNY inspector then visits within a few months for the first annual inspection and issues the Place of Assembly Permit, renewed yearly.", "zh": "仅适用于室内可容纳 75 人以上（含员工）或室外 200 人以上的场所。集会场所运营证的首次检查由 DOB 负责；之后数月内 FDNY 检查员会进行首次年检并签发集会场所许可，每年续期。" },
+      "book": { "en": "Apply for the PA Certificate of Operation in DOB NOW: Build. The FDNY Public Assembly Unit then schedules the annual inspection; questions go to FDNY Business by 311 or FDNY.BusinessSupport@FDNY.nyc.gov.", "zh": "先在 DOB NOW: Build 申请集会场所运营证，之后由 FDNY 公共集会组安排年检；咨询可拨 311 或发邮件至 FDNY.BusinessSupport@FDNY.nyc.gov。" },
+      "bookUrl": "https://www.nyc.gov/site/buildings/property-or-business-owner/place-of-assembly-certificate-of-operation.page",
+      "phone": "311",
+      "fee": null,
+      "feeNote": { "en": "The annual inspection fee is on a sliding scale by occupancy; re-inspections are billed at $210 an hour.", "zh": "年检费按可容纳人数分级收取；复查按每小时 210 美元计费。" },
+      "failNext": { "en": "Violations are issued and FDNY re-inspects at $210 an hour; the permit is renewed based on the annual inspection results.", "zh": "会开出违规通知，FDNY 复查按每小时 210 美元收费；许可是否续期取决于年检结果。" },
+      "checklist": [
+        { "id": "plans-on-site", "item": { "en": "Approved DOB plans and the PA Certificate of Operation on site; actual layout matches the plans", "zh": "现场备有 DOB 批准图纸和集会场所运营证，实际布局与图纸一致" } },
+        { "id": "postings", "item": { "en": "Capacity sign, permits and Certificate of Occupancy posted", "zh": "张贴最大容纳人数标识、各项许可和入住证" } },
+        { "id": "occupancy", "item": { "en": "Number of people never exceeds the posted capacity", "zh": "现场人数从不超过张贴的容量" } },
+        { "id": "exits", "item": { "en": "Exits unblocked, unlocked and marked; aisles and hallways clear", "zh": "出口畅通、未上锁且有标识；过道和走廊无阻挡" } },
+        { "id": "lighting", "item": { "en": "Emergency lighting and exit signs in working order", "zh": "应急照明和出口指示灯正常工作" } },
+        { "id": "no-storage", "item": { "en": "No combustible material or waste stored in corridors", "zh": "走廊内不存放可燃物或可燃垃圾" } },
+        { "id": "systems", "item": { "en": "Smoke and fire alarms, sprinklers, standpipes and extinguishers in working order with current inspection and testing", "zh": "烟雾和火灾报警、喷淋、竖管及灭火器运转正常，检测在有效期内" } },
+        { "id": "flameproof", "item": { "en": "Flame-proofing affidavit for curtains, upholstery and similar materials, confirmed by a C-15 holder", "zh": "备有窗帘、软包等材料的阻燃宣誓书，由 C-15 持证人确认" } },
+        { "id": "cof", "item": { "en": "Required Certificates of Fitness on site (F-03/F-04 for PA personnel where required; S-12/S-15 or S-95/F-53 if there are sprinklers or a fire alarm panel)", "zh": "现场有要求的资格证书（需要时的 F-03/F-04 集会场所人员证；有喷淋或报警主机时的 S-12/S-15 或 S-95/F-53）" } },
+        { "id": "drill-log", "item": { "en": "Drill logbook kept on the premises for at least three years", "zh": "演练记录簿在店内保存至少三年" } }
+      ],
+      "source": "https://www.nyc.gov/assets/fdny/downloads/pdf/business/restaurant-fire-safety-guide.pdf",
+      "sources": [
+        "https://www.nyc.gov/site/buildings/property-or-business-owner/place-of-assembly-certificate-of-operation.page",
+        "https://www.nyc.gov/site/fdny/business/all-certifications/per-assemblyoccupancy2.page"
+      ]
+    },
+    {
+      "id": "fire-hood-annual",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "FDNY annual cooking exhaust and suppression re-inspection", "zh": "FDNY 年度排烟及灭火系统复检" },
+      "agency": { "en": "FDNY Bureau of Fire Prevention, Rangehood Unit", "zh": "纽约市消防局防火处排烟罩组" },
+      "when": { "en": "Every year, to renew the commercial cooking system permit.", "zh": "每年一次，用于续期商用烹饪系统许可。" },
+      "book": { "en": "FDNY conducts the re-inspection annually; manage the permit and any requests on FDNY Business.", "zh": "由 FDNY 每年进行复检；许可及相关申请在 FDNY Business 办理。" },
+      "bookUrl": "https://fires.fdnycloud.org/CitizenAccess/",
+      "phone": "311",
+      "fee": 70,
+      "feeNote": { "en": "Annual FDNY permit, $70 per system.", "zh": "FDNY 年度许可，每套系统 70 美元。" },
+      "failNext": { "en": "Violations are issued; most common failures are unposted permit or sticker, a system different from the permitted installation, and excessive grease.", "zh": "会开出违规通知；最常见的不合格原因是未张贴许可或贴纸、系统与许可安装不一致、油脂积聚过多。" },
+      "checklist": [
+        { "id": "permit-posted", "item": { "en": "FDNY commercial cooking permit posted", "zh": "张贴 FDNY 商用烹饪许可" } },
+        { "id": "decal", "item": { "en": "Unexpired FDNY-approved hood cleaning company decal on the hood", "zh": "排烟罩上贴有未过期的 FDNY 认可清洁公司贴纸" } },
+        { "id": "duct-cleaning", "item": { "en": "Exhaust system cleaned by an FDNY-approved company at least every 3 months; receipt and time-stamped before/after photos kept", "zh": "排风系统至少每 3 个月由 FDNY 认可公司清洁一次；保留收据和带时间戳的前后对比照片" } },
+        { "id": "filters", "item": { "en": "Grease filters inspected daily, cleaned at least monthly, grease under 1/8 inch; filter cleaning records kept", "zh": "油脂过滤网每日检查、至少每月清洗，积油厚度不超过 1/8 英寸；保留清洗记录" } },
+        { "id": "suppression-6mo", "item": { "en": "Suppression system inspected, tested and serviced by a licensed master fire suppression piping contractor at least every 6 months; valid tag and written report", "zh": "灭火系统至少每 6 个月由持牌消防管道总承包商检查、测试和维护；有有效标签和书面报告" } },
+        { "id": "extinguishers", "item": { "en": "Portable extinguishers checked monthly (tag dated and initialed) and serviced yearly by an FDNY-approved company", "zh": "手提灭火器每月检查（标签注明日期并签名），每年由 FDNY 认可公司维护" } },
+        { "id": "no-alterations", "item": { "en": "No unapproved changes to the cooking line since the permitted installation", "zh": "自许可安装以来，烹饪线没有未经批准的改动" } },
+        { "id": "training-6mo", "item": { "en": "Staff retrained on manual activation of the suppression system at least every 6 months", "zh": "至少每 6 个月对员工重新培训手动启动灭火系统" } }
+      ],
+      "source": "https://www.nyc.gov/assets/fdny/downloads/pdf/business/restaurant-fire-safety-guide.pdf",
+      "sources": [
+        "https://www.nyc.gov/assets/fdny/downloads/pdf/business/Support/fire-safety-in-commercial-cooking-locations-english.pdf"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "DOHMH graded sanitary inspection (initial and re-inspection)", "zh": "DOHMH 卫生评级检查（首检及复检）" },
+      "agency": { "en": "NYC Department of Health and Mental Hygiene (DOHMH)", "zh": "纽约市卫生和心理卫生局（DOHMH）" },
+      "when": { "en": "Unannounced, at least once a year. If the initial inspection scores 14 or more, an unannounced re-inspection follows, typically within a month. Next cycle: 11–13 months after an A, 5–7 months if the initial scored 14–27, 3–5 months if 28+.", "zh": "不预先通知，每年至少一次。首检得分 14 分及以上，通常一个月内会不预先通知复检。下一轮：拿到 A 后 11–13 个月；首检 14–27 分则 5–7 个月；28 分以上则 3–5 个月。" },
+      "book": { "en": "Not booked; the Health Department arrives unannounced. You can request an ungraded consultative inspection (call 212-676-1600 or check Question 10 on the permit application).", "zh": "无需预约，卫生局不预先通知上门。可申请不评级的咨询性检查（致电 212-676-1600，或在许可申请表第 10 题勾选）。" },
+      "phone": "212-676-1600",
+      "feeNote": { "en": "No inspection fee. Optional consultative inspections cost $100 (before your first grade) or $400 (after). No fines for violations on an inspection that results in an A.", "zh": "检查本身不收费。可选的咨询性检查费用为 100 美元（首次评级前）或 400 美元（评级后）。得 A 的检查不对违规罚款。" },
+      "scoring": { "en": "Points per violation; lower is better. 0–13 = A, 14–27 = B, 28+ = C. An A on the initial inspection is posted at once; otherwise the re-inspection is graded. Post the grade (or Grade Pending) card on a front window, door or outside wall within 5 feet of the entrance, 4–6 feet off the ground.", "zh": "按违规扣分，分数越低越好。0–13 分为 A，14–27 分为 B，28 分以上为 C。首检得 A 立即张贴；否则以复检结果评级。等级卡（或“评级待定”卡）须贴在前窗、门或外墙上，距入口 5 英尺以内、离地 4–6 英尺。" },
+      "failNext": { "en": "A B or C on re-inspection gets a grade card and a Grade Pending card; you may post either until your OATH hearing. Very poor re-inspections lead to monthly monitoring inspections until the score is under 28. A public health hazard not fixed on the spot can close the restaurant. Not posting the card: fines up to $1,000.", "zh": "复检得 B 或 C 会拿到等级卡和“评级待定”卡，在 OATH 听证前可任选其一张贴。复检很差会每月监控检查，直到低于 28 分。当场无法纠正的公共卫生危害可导致停业。不张贴等级卡最高罚款 1,000 美元。" },
+      "checklist": [
+        { "id": "temps", "item": { "en": "Hot and cold food held at the right temperatures; thermometers used to monitor stored food", "zh": "热食和冷食保持在规定温度；用温度计监测储存食品温度" } },
+        { "id": "time-control", "item": { "en": "Food held out of temperature control is labeled with removal temperature, removal time and discard time (4 hours; 6 hours for cold food with tracking)", "zh": "脱离温控的食品贴有取出时温度、取出时间和丢弃时间标签（4 小时；冷食加温度跟踪可 6 小时）" }, "why": { "en": "Health Code Article 81 time-as-a-public-health-control rule", "zh": "《卫生法典》第 81 条“以时间作为公共卫生控制”规定" } },
+        { "id": "covered-separated", "item": { "en": "Food covered until served; raw items such as poultry separated from ready-to-eat food", "zh": "食品上桌前加盖；生禽等生食与即食食品分开" } },
+        { "id": "sanitize", "item": { "en": "Food-prep surfaces cleaned and sanitized after each use; no caked-on food", "zh": "食品加工台面每次使用后清洁消毒；无结块残渣" } },
+        { "id": "fpc", "item": { "en": "Food Protection Certificate holder supervising whenever the restaurant prepares food or is open", "zh": "加工食品或营业期间有食品保护证书持有人监督" } },
+        { "id": "pests", "item": { "en": "No evidence of mice, rats, roaches or flies; openings sealed and door sweeps intact", "zh": "无老鼠、蟑螂或苍蝇迹象；缝隙已封堵，门底刷完好" } },
+        { "id": "plumbing", "item": { "en": "Plumbing fixtures working, with backflow devices in place", "zh": "管道设施运转正常，防回流装置齐全" } },
+        { "id": "grease", "item": { "en": "Grease and food particles cleaned from equipment and the floor beneath; range hoods grease-free", "zh": "设备及其下方地面无油污和食物残渣；排烟罩无油污" } },
+        { "id": "grade-card", "item": { "en": "Current grade card (the original, not a copy) posted in the required spot", "zh": "当前等级卡（须为原件，不能是复印件）张贴在规定位置" } }
+      ],
+      "source": "https://www.nyc.gov/assets/doh/downloads/pdf/rii/restaurant-grading-faq.pdf",
+      "sources": [
+        "https://home4.nyc.gov/assets/doh/downloads/pdf/rii/inspection-cycle-overview.pdf",
+        "https://www.nyc.gov/assets/doh/downloads/pdf/rii/rii-grade-posting-faq.pdf",
+        "https://www.nyc.gov/assets/doh/downloads/pdf/rii/common-violations.pdf",
+        "https://www.nyc.gov/assets/doh/downloads/pdf/rii/article81-factsheet.pdf",
+        "https://www.nyc.gov/assets/doh/downloads/pdf/permit/consultative-inspections.pdf",
+        "https://www.nyc.gov/site/doh/business/food-operators/letter-grading-for-restaurants.page"
+      ]
+    }
+  ]
+}

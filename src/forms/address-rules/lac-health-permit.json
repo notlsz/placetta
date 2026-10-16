@@ -1,0 +1,65 @@
+{
+  "form": "lac-health-permit",
+  "read": "2026-10-15",
+  "fields": {
+    "business_address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the food facility itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box. Suite goes in the Unit box.",
+        "zh": "填写食品设施本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。单元号填入 Unit 栏。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://admin.publichealth.lacounty.gov/eh/docs/permit/Public-Health-Permit-License-Application.pdf",
+          "quote": "A permit/license is only valid for the person, location, type of activity and time period indicated.",
+          "kind": "form"
+        },
+        {
+          "url": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+          "quote": "Contact the District Office closest to your restaurant to obtain a Public Health Permit.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/ca/los_angeles_county/codes/code_of_ordinances?nodeId=TIT8COPRBUWARE_DIV1PUHELI_CH8.04PUHELI_PT2GELIRE_8.04.790PUHELIPERA",
+          "quote": "A Public Health Permit shall be valid only for the person, location, and type of activity approved at the time of issuance",
+          "kind": "statute"
+        },
+        {
+          "url": "https://library.municode.com/ca/los_angeles_county/codes/code_of_ordinances?nodeId=TIT8COPRBUWARE_DIV1PUHELI_CH8.04PUHELI_PT2GELIRE_8.04.730PUHELIPEON",
+          "quote": "the location for which it is issued",
+          "kind": "statute"
+        }
+      ]
+    },
+    "billing_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "Where the county sends permit invoices; tick 'Use business address for billing' or give another address. Changes must be reported in writing. The sources do not say whether an address outside the US is accepted.",
+        "zh": "县政府寄送许可账单的地址；可勾选“Use business address for billing”，或另填地址。地址变更须书面报告。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use a US address where mail is reliably picked up (the store once leased, or a US office or agent). Placetta asks the agency before using an address abroad.",
+        "zh": "请使用能可靠收件的美国地址（租下门店后的门店地址，或美国办公室、代理人地址）。如需使用境外地址，Placetta 会先向该机构确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://admin.publichealth.lacounty.gov/eh/docs/permit/Public-Health-Permit-License-Application.pdf",
+          "quote": "Indicate if the billing address is the same as the business address. If not, provide the desired billing address.",
+          "kind": "instructions"
+        },
+        {
+          "url": "https://library.municode.com/ca/los_angeles_county/codes/code_of_ordinances?nodeId=TIT8COPRBUWARE_DIV1PUHELI_CH8.04PUHELI_PT2GELIRE_8.04.817PUHELIPEEPRE",
+          "quote": "Change of mailing address;",
+          "kind": "statute"
+        }
+      ]
+    }
+  },
+  "notes": "LA County pages were opened on admin.publichealth.lacounty.gov (the same DPH server as publichealth.lacounty.gov, which only serves plain http that the session cannot reach). County Code 8.04 read through Municode's content service. The form has no owner address line."
+}

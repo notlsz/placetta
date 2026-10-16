@@ -1,0 +1,60 @@
+{
+  "form": "lac-plan-check",
+  "read": "2026-10-15",
+  "fields": {
+    "site": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the food facility the plans are for itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box. Business name/DBA first, then the address.",
+        "zh": "填写图纸所对应的食品设施本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。先填商号/DBA，再填地址。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://admin.publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf",
+          "quote": "FOOD FACILITY INFORMATION BUSINESS NAME/DBA:",
+          "kind": "form"
+        },
+        {
+          "url": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+          "quote": "Contact your local planning/building department for permission to construct a restaurant at your chosen location",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://admin.publichealth.lacounty.gov/eh/inspection/retail-plan-check.htm",
+          "quote": "Los Angeles County Environmental Health does not provide services in the cities of Long Beach",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/ca/los_angeles_county/codes/code_of_ordinances?nodeId=TIT8COPRBUWARE_DIV1PUHELI_CH8.04PUHELI_PT2GELIRE_8.04.635PLCHRECEBUCL",
+          "quote": "Every person proposing to construct, remodel or change the Public Health License or Permit classification of any business",
+          "kind": "statute"
+        }
+      ]
+    },
+    "owner_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "The address of the business owner or corporation. The sources do not say whether an address outside the US is accepted.",
+        "zh": "企业业主或公司的地址。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use a US address where mail is reliably picked up (the store once leased, or a US office or agent). Placetta asks the agency before using an address abroad.",
+        "zh": "请使用能可靠收件的美国地址（租下门店后的门店地址，或美国办公室、代理人地址）。如需使用境外地址，Placetta 会先向该机构确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://admin.publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf",
+          "quote": "BUSINESS OWNER BUSINESS OWNER/CORPORATION NAME: PHONE #: ADDRESS: EMAIL:",
+          "kind": "form"
+        }
+      ]
+    }
+  },
+  "notes": "LA County pages opened on admin.publichealth.lacounty.gov (see lac-health-permit). Owner address is unconfirmed: only the form shows it."
+}

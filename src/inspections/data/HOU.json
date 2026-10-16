@@ -1,0 +1,177 @@
+{
+  "where": "HOU",
+  "name": { "en": "Houston", "zh": "休斯顿" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Building final inspection and Certificate of Occupancy", "zh": "建筑最终验收及入住证" },
+      "agency": { "en": "Houston Permitting Center, Building Code Enforcement (Houston Public Works)", "zh": "休斯顿许可中心建筑规范执法处（休斯顿公共工程局）" },
+      "when": { "en": "After the plumbing, electrical and mechanical finals pass and all revisions and deferred submittals are approved. Then request the Certificate of Occupancy; remodels usually get a Certificate of Compliance.", "zh": "管道、电气、机械的最终验收通过，所有修改和延期提交项获批之后。随后申请入住证；改造项目通常发放合规证书。" },
+      "book": { "en": "Schedule online with your project number and scheduling PIN, or through the IVR at 713-222-9922. Trade inspections must be scheduled by the licensed contractor. For a reinspection after corrections, call 832-394-8840.", "zh": "用项目编号和预约 PIN 在线预约，或拨打自动语音系统 713-222-9922。各专业检查须由持牌承包商预约。整改后复检请致电 832-394-8840。" },
+      "bookUrl": "https://www.houstonpermittingcenter.org/hpwcode1150",
+      "phone": "713-222-9922",
+      "failNext": { "en": "Make the corrections and call 832-394-8840 to schedule a reinspection.", "zh": "完成整改后致电 832-394-8840 预约复检。" },
+      "checklist": [
+        { "id": "permit-plans", "item": { "en": "Permit and approved plans on site for the inspector", "zh": "现场备有许可证和批准图纸供检查员查看" } },
+        { "id": "trade-finals", "item": { "en": "Plumbing gas/final, electrical meter loop/final and mechanical finals passed", "zh": "管道燃气/最终、电气表箱/最终、机械最终验收均已通过" } },
+        { "id": "revisions", "item": { "en": "All plan revisions approved before the final", "zh": "所有图纸修改在最终验收前已获批准" } },
+        { "id": "deferred", "item": { "en": "All deferred submittal items completed", "zh": "所有延期提交项已完成" } },
+        { "id": "life-safety", "item": { "en": "Entire project complete with all life-safety and grading items installed and working", "zh": "整个项目完工，所有生命安全及场地坡度项目已安装并正常运行" } }
+      ],
+      "source": "https://www.houstonpermittingcenter.org/sites/g/files/nwywnm431/files/2025-10/Commercial%20Permitting%20101%20_BuildExpo%202025_06_04_2025_0.pdf",
+      "sources": [
+        "https://www.houstonpermittingcenter.org/hpwcode1150"
+      ]
+    },
+    {
+      "id": "building-occupancy",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Occupancy compliance inspection (CO for an existing space)", "zh": "占用合规检查（现有空间的入住证）" },
+      "agency": { "en": "Houston Permitting Center, Occupancy Inspections", "zh": "休斯顿许可中心占用检查科" },
+      "when": { "en": "When you take over an existing commercial space without construction, or change its use, square footage or occupant load. The space must already have power and be set up for business.", "zh": "接手无需施工的现有商业空间，或变更用途、面积、人数荷载时。空间须已通电并布置好营业所需。" },
+      "book": { "en": "Email the completed Application for Occupancy Compliance Inspection (Form CE-1045A) as a PDF to Occupancy.Inspections@houstontx.gov. You receive a payment link; pay within 5 calendar days and the inspection date is emailed to you. A reinspection or final is scheduled by emailing the assigned permit technician.", "zh": "将填好的占用合规检查申请表（CE-1045A）以 PDF 发送至 Occupancy.Inspections@houstontx.gov。收到付款链接后须在 5 个日历日内付款，之后会通过邮件告知检查日期。复检或最终检查需发邮件给指定的许可技术员预约。" },
+      "bookUrl": "https://www.houstonpermittingcenter.org/hpwcode1106",
+      "phone": "832-394-8880",
+      "fee": null,
+      "feeNote": { "en": "$94.00 to $537.12 depending on the space. If no one is there to meet the inspector, a $112.64 re-inspection fee applies.", "zh": "按空间情况收费 94.00 至 537.12 美元。检查时无人陪同，需另付 112.64 美元复检费。" },
+      "failNext": { "en": "Correct the items and schedule a re-inspection through the assigned permit technician. Once approved, email cocc.print@houstontx.gov for the certificate; post the original in a clearly visible place.", "zh": "整改后通过指定的许可技术员预约复检。获批后发邮件至 cocc.print@houstontx.gov 索取证书，并将原件张贴在明显位置。" },
+      "checklist": [
+        { "id": "power-setup", "item": { "en": "Space has power and is set up for the proposed use on the inspection date (inventory not required)", "zh": "检查当天空间已通电，并按拟定用途布置好（无需备货）" } },
+        { "id": "job-card", "item": { "en": "Job card/receipt on the premises", "zh": "现场备有工作卡/收据" } },
+        { "id": "ladder", "item": { "en": "Approved ladder of adequate height available", "zh": "备有足够高度的合格梯子" } },
+        { "id": "access", "item": { "en": "Access to every area, including the attic, above the ceiling and the roof equipment", "zh": "可进入所有区域，包括阁楼、吊顶上方和屋顶设备" } },
+        { "id": "no-permits", "item": { "en": "No active or inactive permits from other sections on the address", "zh": "该地址没有其他部门未结的有效或失效许可" } },
+        { "id": "lease-sqft", "item": { "en": "Total square footage and, for tenants, a copy of the lease submitted with the application", "zh": "申请时已提交总面积；租户还需附租约复印件" } }
+      ],
+      "source": "https://www.houstonpermittingcenter.org/hpwcode1106",
+      "sources": [
+        "https://www.houstonpermittingcenter.org/media/2231/download",
+        "https://www.houstonpermittingcenter.org/media/6036/download"
+      ]
+    },
+    {
+      "id": "fire-opening",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire Marshal inspection and permits for a new business", "zh": "新商户消防局长检查及消防许可" },
+      "agency": { "en": "Houston Fire Department, Fire Marshal's Office (Life Safety Bureau)", "zh": "休斯顿消防局消防局长办公室（生命安全处）" },
+      "when": { "en": "Before opening. Sprinkler, fire alarm and suppression drawings are reviewed in the building permit; a fire prevention inspector determines which Fire Department permits your business needs (e.g. Places of Assembly, Open Flames and Candles, LP-Gas, fire alarm).", "zh": "开业前。喷淋、火灾报警和灭火系统图纸在建筑许可阶段审查；消防检查员会确定你的店需要哪些消防许可（如集会场所、明火和蜡烛、液化石油气、火灾报警）。" },
+      "book": { "en": "New businesses may apply for a safety inspection by calling 713-535-7897. Fire permits are issued by the HFD Fire Permits Office at the Houston Permitting Center (832-394-8811).", "zh": "新商户可致电 713-535-7897 申请安全检查。消防许可由休斯顿许可中心的消防许可办公室签发（832-394-8811）。" },
+      "bookUrl": "https://www.houstonpermittingcenter.org/fire-permits-office",
+      "phone": "713-535-7897",
+      "checklist": [
+        { "id": "hood-tag", "item": { "en": "Kitchen hood suppression system meets UL 300 and carries a current service tag from a state-licensed company", "zh": "厨房排烟罩灭火系统符合 UL 300 标准，并挂有州持牌公司的有效检修标签" }, "why": { "en": "HFD LSB Standard 02, 2.9.1", "zh": "HFD 生命安全处第 02 号标准 2.9.1" } },
+        { "id": "k-extinguisher", "item": { "en": "Class K extinguisher for the cooking area, inspected and tagged within the last year", "zh": "烹饪区配有 K 类灭火器，一年内检查并挂签" }, "why": { "en": "HFD LSB Standard 02, 2.9.2", "zh": "HFD 生命安全处第 02 号标准 2.9.2" } },
+        { "id": "extinguishers", "item": { "en": "Portable extinguishers installed and service tagged annually by a licensed company", "zh": "手提灭火器已安装，并由持牌公司每年检查挂签" }, "why": { "en": "HFD LSB Standard 02, 2.8", "zh": "HFD 生命安全处第 02 号标准 2.8" } },
+        { "id": "no-red-tag", "item": { "en": "No red tag (impairment) on any extinguisher or fixed system; no yellow tag on the hood system", "zh": "灭火器和固定系统均无红色故障标签；排烟罩系统无黄色标签" }, "why": { "en": "HFD LSB Standard 02, 2.3.2", "zh": "HFD 生命安全处第 02 号标准 2.3.2" } },
+        { "id": "alarm-tag", "item": { "en": "Fire alarm tested and tagged at the main panel by a licensed fire alarm company (if installed)", "zh": "如装有火灾报警系统，已由持牌报警公司测试并在主机挂签" }, "why": { "en": "HFD LSB Standard 02, 2.4.1", "zh": "HFD 生命安全处第 02 号标准 2.4.1" } },
+        { "id": "emergency-lighting", "item": { "en": "Exit signs and emergency lighting tested and working", "zh": "出口指示灯和应急照明已测试且正常" }, "why": { "en": "HFD LSB Standard 02, 2.4.2", "zh": "HFD 生命安全处第 02 号标准 2.4.2" } },
+        { "id": "capacity-sign", "item": { "en": "Rooms with an occupant load of 50+ used for assembly have a maximum-capacity sign by the main exit, 1-inch letters, 48–60 inches above the floor", "zh": "人数荷载 50 人以上的集会用房间在主出口旁张贴最大容量标识，字高 1 英寸，离地 48–60 英寸" }, "why": { "en": "Houston Fire Code 1003.2.2.5", "zh": "休斯顿消防规范 1003.2.2.5" } },
+        { "id": "permits", "item": { "en": "Required HFD permits obtained (e.g. Places of Assembly, Open Flames and Candles, LP-Gas, fire alarm)", "zh": "已取得所需的 HFD 许可（如集会场所、明火和蜡烛、液化石油气、火灾报警）" } }
+      ],
+      "source": "https://www.houstontx.gov/fire/HFMO/faqs.html",
+      "sources": [
+        "https://www.houstontx.gov/fire/business/standard2.pdf",
+        "https://www.houstontx.gov/fire/business/capacitysigns.pdf",
+        "https://houstontx.gov/fire/formsandpermits/index.html",
+        "https://www.houstonpermittingcenter.org/fire-marshal-office"
+      ]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Health Department pre-opening (pre-operational) inspection", "zh": "卫生局开业前检查" },
+      "agency": { "en": "Houston Health Department, Consumer Health Services", "zh": "休斯顿卫生局消费者健康服务处" },
+      "when": { "en": "After construction follows the plans approved by Health Plan Review, before you operate. Passing produces the invoice for your Food Dealer's Permit; pay it before opening. Change-of-ownership takeovers also need this inspection.", "zh": "按卫生图纸审查批准的图纸施工完毕后、营业前。通过后会开出食品经营许可（Food Dealer's Permit）发票，须在开业前付清。接手现有餐饮店（所有权变更）也需要此检查。" },
+      "book": { "en": "Call the Consumer Health Services Permit Office at 832-393-5100 (7:30 a.m.–4:00 p.m.). Give the name, phone and email of the certified food manager who will be on site; the assigned inspector contacts you before the appointment.", "zh": "致电消费者健康服务许可办公室 832-393-5100（上午 7:30–下午 4:00）。提供将在现场的认证食品经理的姓名、电话和邮箱；指派的检查员会在预约前联系你。" },
+      "bookUrl": "https://www.houstonhealth.org/services/permits/food-permits/opening-food-establishment",
+      "phone": "832-393-5100",
+      "lead": { "en": "Book at least 14 business days in advance.", "zh": "至少提前 14 个工作日预约。" },
+      "feeNote": { "en": "A fee is charged for each pre-opening inspection (amount not stated on the page). The fee table lists a $150 general inspection fee and a $200 required reinspection; the Food Dealer's Permit is $258, $515 or $773 by risk level.", "zh": "每次开业前检查都收费（页面未写明金额）。收费表列有一般检查费 150 美元、强制复检费 200 美元；食品经营许可按风险等级为 258、515 或 773 美元。" },
+      "failNext": { "en": "All violations are documented; after corrections a re-inspection must pass before you operate. Operating without the permit or changing ownership without pre-opening approval can bring enforcement.", "zh": "所有违规都会记录在案；整改后须复检通过才能营业。无证营业或未经开业前批准变更所有权，可能受到执法处罚。" },
+      "checklist": [
+        { "id": "plans-on-site", "item": { "en": "Approved, stamped plans on site and construction matches them", "zh": "现场备有盖章批准的图纸，施工与图纸一致" } },
+        { "id": "cfm-present", "item": { "en": "Certified food manager on site for the inspection", "zh": "检查时认证食品经理在场" } },
+        { "id": "handsinks", "item": { "en": "Hand sinks within 20 feet of prep, dispensing and dishwashing areas with no door in between; water at least 100°F; faucets run 20+ seconds", "zh": "洗手池距加工、出餐和洗碗区不超过 20 英尺且中间无门；水温至少 100°F；水龙头可连续出水 20 秒以上" }, "why": { "en": "HHD plan review checklist, item 4", "zh": "HHD 图纸审查清单第 4 项" } },
+        { "id": "three-comp", "item": { "en": "Three-compartment sink, each compartment at least 15\" x 15\" x 12\" deep, with drain boards", "zh": "三格水槽，每格至少 15×15 英寸、深 12 英寸，并配沥水板" }, "why": { "en": "HHD plan review checklist, item 3", "zh": "HHD 图纸审查清单第 3 项" } },
+        { "id": "backflow", "item": { "en": "Backflow prevention on the water system and any hose; equipment drains not directly connected to sewer", "zh": "供水系统及软管装有防回流装置；设备排水不直接接入污水管" }, "why": { "en": "HHD plan review checklist, item 2", "zh": "HHD 图纸审查清单第 2 项" } },
+        { "id": "interceptor", "item": { "en": "Grease interceptor installed outside with a sample well for the health officer", "zh": "室外装有隔油池，并设有供卫生官员取样的取样井" }, "why": { "en": "Houston Code Sec. 47-513", "zh": "休斯顿法规第 47-513 条" } },
+        { "id": "floors-walls", "item": { "en": "Floors sealed and smooth with coved wall junctures; prep-area walls and ceilings smooth and light colored (40%+ LRV); FRP or equal 4 feet up behind sinks", "zh": "地面密封平整、墙地交接处做圆角；加工区墙面和天花板平滑、浅色（反射率 40% 以上）；水槽后 4 英尺高做 FRP 等防水饰面" }, "why": { "en": "HHD plan review checklist, items 5–6", "zh": "HHD 图纸审查清单第 5–6 项" } },
+        { "id": "no-exposed", "item": { "en": "No exposed studs, utility lines, pipes or water heaters on walls and ceilings in prep areas", "zh": "加工区墙面和天花板无外露龙骨、管线或热水器" }, "why": { "en": "HHD plan review checklist, item 6", "zh": "HHD 图纸审查清单第 6 项" } },
+        { "id": "lighting", "item": { "en": "50 foot-candles at work surfaces, 20 at self-service and handwashing areas, 10 in walk-ins and dry storage; lights shielded over food", "zh": "操作台面 50 尺烛光，自助区和洗手区 20 尺烛光，冷库和干货区 10 尺烛光；食品上方灯具有防护罩" }, "why": { "en": "HHD plan review checklist, item 8", "zh": "HHD 图纸审查清单第 8 项" } },
+        { "id": "pests", "item": { "en": "Outer openings sealed; self-closing tight-fitting doors; 16-mesh screens or air curtains", "zh": "外部开口已封堵；门自闭且严密；装 16 目纱网或风幕" }, "why": { "en": "HHD plan review checklist, item 9", "zh": "HHD 图纸审查清单第 9 项" } },
+        { "id": "hoods", "item": { "en": "Ventilation hoods with removable filters over cooking equipment and hot-water dish machines", "zh": "烹饪设备和热水洗碗机上方装有带可拆滤网的排风罩" }, "why": { "en": "HHD plan review checklist, item 10", "zh": "HHD 图纸审查清单第 10 项" } },
+        { "id": "mop-sink", "item": { "en": "At least one utility sink or curbed cleaning facility with floor drain", "zh": "至少有一个拖把池或带地漏的围堰清洗区" }, "why": { "en": "HHD plan review checklist, item 11", "zh": "HHD 图纸审查清单第 11 项" } },
+        { "id": "toilets", "item": { "en": "Employee toilets enclosed with self-closing doors, not opening into food areas; customers reach restrooms without passing through the kitchen", "zh": "员工厕所封闭并装自闭门，不直通食品区；顾客去洗手间无需经过厨房" }, "why": { "en": "HHD plan review checklist, items 7 and 16", "zh": "HHD 图纸审查清单第 7、16 项" } },
+        { "id": "haccp", "item": { "en": "Any required HACCP plan or variance (e.g. sous vide, ROP, curing, time as a control) approved before the inspection", "zh": "需要的 HACCP 计划或豁免（如低温慢煮、减氧包装、腌制、以时间为控制）已在检查前获批" }, "why": { "en": "HHD plan review checklist, item 18", "zh": "HHD 图纸审查清单第 18 项" } }
+      ],
+      "source": "https://www.houstonhealth.org/services/permits/food-permits/opening-food-establishment",
+      "sources": [
+        "https://www.houstonhealth.org/media/36/download",
+        "https://www.houstonhealth.org/media/12526/download"
+      ]
+    },
+    {
+      "id": "fire-routine",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "Fire Marshal fire prevention inspection", "zh": "消防局长防火检查" },
+      "agency": { "en": "Houston Fire Department, Fire Marshal's Office (Life Safety Bureau, General Occupancy team)", "zh": "休斯顿消防局消防局长办公室（生命安全处综合场所组）" },
+      "when": { "en": "After opening; the Fire Marshal's Office inspects commercial businesses for fire code compliance.", "zh": "开业后；消防局长办公室会检查商业场所是否符合消防规范。" },
+      "book": { "en": "Inspections are scheduled through the Fire Prevention Office at 832-394-6900.", "zh": "检查通过防火办公室安排，电话 832-394-6900。" },
+      "phone": "832-394-6900",
+      "checklist": [
+        { "id": "hood-6mo", "item": { "en": "Hood suppression inspected and service tagged at least every 6 months and after any discharge", "zh": "排烟罩灭火系统至少每 6 个月及每次喷放后检查并挂签" }, "why": { "en": "HFD LSB Standard 02, 2.9.1", "zh": "HFD 生命安全处第 02 号标准 2.9.1" } },
+        { "id": "hood-clean", "item": { "en": "Hoods, ducts and exhaust fans cleaned as often as needed to prevent grease buildup", "zh": "排烟罩、风管和排风扇按需清洁，防止油脂积聚" }, "why": { "en": "HFD LSB Standard 02, 2.9.1", "zh": "HFD 生命安全处第 02 号标准 2.9.1" } },
+        { "id": "extinguishers", "item": { "en": "All extinguishers, including Class K, tagged within the past year", "zh": "所有灭火器（包括 K 类）一年内挂签" }, "why": { "en": "HFD LSB Standard 02, 2.8.2 and 2.9.2", "zh": "HFD 生命安全处第 02 号标准 2.8.2 和 2.9.2" } },
+        { "id": "alarm-annual", "item": { "en": "Fire alarm tested and tagged at least annually", "zh": "火灾报警系统至少每年测试并挂签" }, "why": { "en": "HFD LSB Standard 02, 2.4.1", "zh": "HFD 生命安全处第 02 号标准 2.4.1" } },
+        { "id": "emergency-lighting", "item": { "en": "Emergency lighting tested annually by a licensed electrician; battery units inspected quarterly with written records", "zh": "应急照明每年由持牌电工测试；电池单元每季度检查并留书面记录" }, "why": { "en": "HFD LSB Standard 02, 2.4.2", "zh": "HFD 生命安全处第 02 号标准 2.4.2" } },
+        { "id": "capacity", "item": { "en": "Occupancy capacity signs posted and legible in assembly rooms of 50+", "zh": "50 人以上集会房间的容量标识张贴且清晰" }, "why": { "en": "Houston Fire Code 1003.2.2.5", "zh": "休斯顿消防规范 1003.2.2.5" } },
+        { "id": "sterno", "item": { "en": "Sterno-type warmers used only in approved holders on noncombustible surfaces, never unattended, with a 2A-10BC extinguisher within 25 feet", "zh": "固体酒精类保温炉仅用于合格支架、放在不燃表面上，不得无人看管，25 英尺内备 2A-10BC 灭火器" }, "why": { "en": "Houston Fire Code 308.3 (HFD Sterno guidance)", "zh": "休斯顿消防规范 308.3（HFD 固体燃料使用指引）" } },
+        { "id": "red-tags", "item": { "en": "Any red-tagged equipment repaired and re-tagged by a licensed company", "zh": "挂有红色标签的设备已由持牌公司修复并重新挂签" }, "why": { "en": "HFD LSB Standard 02, 2.3.2.1", "zh": "HFD 生命安全处第 02 号标准 2.3.2.1" } }
+      ],
+      "source": "https://www.houstontx.gov/fire/HFMO/faqs.html",
+      "sources": [
+        "https://www.houstontx.gov/fire/business/standard2.pdf",
+        "https://www.houstontx.gov/fire/business/capacitysigns.pdf",
+        "https://www.houstontx.gov/fire/business/Sterno%20Device%20Use.pdf",
+        "https://www.houstontx.gov/fire/HFMO/inspectionteams.html"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food safety inspection", "zh": "常规食品安全检查" },
+      "agency": { "en": "Houston Health Department, Consumer Health Services (Retail Food Inspection)", "zh": "休斯顿卫生局消费者健康服务处（零售食品检查科）" },
+      "when": { "en": "Unannounced. HHD says food service establishments are inspected at least twice a year, more often based on risk, violations and complaints.", "zh": "不预先通知。卫生局表示餐饮场所每年至少检查两次，并根据风险、违规和投诉增加次数。" },
+      "book": { "en": "Not booked; inspectors arrive unannounced.", "zh": "无需预约，检查员不预先通知上门。" },
+      "phone": "832-393-5100",
+      "scoring": { "en": "No letter grade or score. Since September 1, 2025, violations are cited under the FDA Food Code and Texas Food Establishment Rules as Priority, Priority Foundation or Core. Reports are posted online.", "zh": "不评字母等级也不打分。自 2025 年 9 月 1 日起，违规按 FDA 食品法典和德州食品场所规则分为“优先”“优先基础”“核心”三类。检查报告在网上公开。" },
+      "failNext": { "en": "Some violations are corrected on site, others need a follow-up inspection, and some can close the establishment until fixed. A required reinspection costs $200.", "zh": "部分违规可当场纠正，部分需要复查，部分可导致停业直至整改。强制复检费 200 美元。" },
+      "checklist": [
+        { "id": "permit-posted", "item": { "en": "Valid Food Dealer's Permit posted where customers can see it", "zh": "有效的食品经营许可张贴在顾客可见处" } },
+        { "id": "temps", "item": { "en": "Correct temperatures when cooking, holding, serving, storing and reheating", "zh": "烹饪、保温、出餐、储存和复热时温度正确" } },
+        { "id": "approved-source", "item": { "en": "Food from approved suppliers, protected from contamination", "zh": "食品来自合格供应商并防止污染" } },
+        { "id": "hygiene", "item": { "en": "Employee hygiene and handwashing; hand sinks stocked and accessible", "zh": "员工个人卫生和洗手到位；洗手池用品齐全且可随时使用" } },
+        { "id": "sanitize", "item": { "en": "Equipment and utensils cleaned and sanitized", "zh": "设备和器具已清洁消毒" } },
+        { "id": "pests", "item": { "en": "No insects or rodents", "zh": "无虫害和鼠害" } },
+        { "id": "toxics", "item": { "en": "Toxic materials stored and labeled away from food", "zh": "有毒物品远离食品存放并贴标签" } },
+        { "id": "facility", "item": { "en": "Floors, walls and ceilings maintained; adequate lighting and ventilation", "zh": "地面、墙面和天花板维护良好；照明和通风充足" } },
+        { "id": "water-waste", "item": { "en": "Safe water supply, sewage disposal and garbage handling", "zh": "供水安全，污水和垃圾处理得当" } }
+      ],
+      "source": "https://www.houstonhealth.org/services/permits/food-permits",
+      "sources": [
+        "https://www.houstonhealth.org/news/news-releases/houston-health-department-highlights-september-food-safety-month",
+        "https://www.houstonhealth.org/news/news-releases/food-inspection-reports-online",
+        "https://www.houstonhealth.org/media/12491/download",
+        "https://www.houstonhealth.org/media/12526/download"
+      ]
+    }
+  ]
+}

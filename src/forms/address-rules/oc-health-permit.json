@@ -1,0 +1,84 @@
+{
+  "form": "oc-health-permit",
+  "read": "2026-10-15",
+  "fields": {
+    "business_address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the food facility itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box. Include street directions and suite.",
+        "zh": "填写食品设施本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。须写明街道方位和单元号。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf",
+          "quote": "A permit is only valid for the person, location, type of food sales, or distribution activity",
+          "kind": "form"
+        },
+        {
+          "url": "https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit",
+          "quote": "communicate with the health inspector assigned to the proposed food facility location.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/ca/orange_county/codes/code_of_ordinances?nodeId=TIT4HESAANRE_DIV4FOSA_ART2FOHABU_S4-4-15PERECOTE",
+          "quote": "A permit shall be valid only for the person, location, type of food sales, or distribution activity approved",
+          "kind": "statute"
+        }
+      ]
+    },
+    "owner_address": {
+      "rule": "unconfirmed",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The owner's own address. The form requires it to differ from the business address and not be a P.O. box; re-enter it in full. The sources do not say whether an address outside the US is accepted.",
+        "zh": "业主本人的地址。表格要求它不得与营业地址相同，也不得为邮政信箱；须完整填写。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Give the signer's actual residential or business address. If it is abroad, Placetta asks the agency first whether a foreign address is accepted on this line.",
+        "zh": "请填写签署人真实的住址或办公地址。如该地址在境外，Placetta 会先向该机构确认此栏是否接受境外地址。"
+      },
+      "confirmations": [
+        {
+          "url": "https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf",
+          "quote": "Owner's Address (must be different than Business Address and cannot be a P.O. Box)",
+          "kind": "form"
+        },
+        {
+          "url": "https://library.municode.com/ca/orange_county/codes/code_of_ordinances?nodeId=TIT4HESAANRE_DIV4FOSA_ART2FOHABU_S4-4-15PERECOTE",
+          "quote": "written application which shall state the name and address of the applicant",
+          "kind": "statute"
+        }
+      ]
+    },
+    "billing_address": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "Where the county mails health permit invoices, with street directions and suite. Re-enter it even if it matches another line. The sources do not say whether an address outside the US is accepted.",
+        "zh": "县政府邮寄卫生许可账单的地址，须写明街道方位和单元号。即使与其他栏相同也须重新填写。现有官方资料未说明是否接受美国境外地址。"
+      },
+      "ifNone": {
+        "en": "Use a US address where mail is reliably picked up (the store once leased, or a US office or agent). Placetta asks the agency before using an address abroad.",
+        "zh": "请使用能可靠收件的美国地址（租下门店后的门店地址，或美国办公室、代理人地址）。如需使用境外地址，Placetta 会先向该机构确认。"
+      },
+      "confirmations": [
+        {
+          "url": "https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf",
+          "quote": "Billing Mailing Address (include street directions and suite number, if applicable)",
+          "kind": "form"
+        },
+        {
+          "url": "https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf",
+          "quote": "such as the Billing Mailing Address, reenter that information",
+          "kind": "instructions"
+        }
+      ]
+    }
+  },
+  "notes": "OC Codified Ordinances 4-4-15 read through Municode's content service. The form itself says the owner's address cannot be a P.O. box and must differ from the business address, but only one source says so, so the rule stays unconfirmed with poBox not_allowed."
+}

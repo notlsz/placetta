@@ -1,0 +1,36 @@
+{
+  "form": "aus-food-plan-review",
+  "read": "2026-10-15",
+  "fields": {
+    "address": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The street address of the food establishment the plans are for itself, with suite or unit. Not a mailing, head-office or overseas address, and not a P.O. box.",
+        "zh": "填写图纸所对应的食品经营场所本身的街道地址（含门牌号/单元号）。不能填写邮寄地址、总部地址、海外地址或邮政信箱。"
+      },
+      "ifNone": {
+        "en": "This line names the US location being permitted, so there is no substitute: secure the lease or site first, then file with that address.",
+        "zh": "此栏填写的是申请许可的美国经营地点本身，没有替代方案：请先签订租约或确定场地，再用该地址申请。"
+      },
+      "confirmations": [
+        {
+          "url": "https://austin.widen.net/content/dwggogoqte/original/10125PR.pdf?download=true",
+          "quote": "Site Plan Location of Building including location of any outside equipment including dumpsters, well, septic",
+          "kind": "form"
+        },
+        {
+          "url": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+          "quote": "A Food Enterprise Plan Review ensures your facility meets state and local health and safety regulations.",
+          "kind": "agency_page"
+        },
+        {
+          "url": "https://library.municode.com/tx/austin/codes/code_of_ordinances?nodeId=TIT10PUHESESA_CH10-3FOFOHA_ART8BUPLAP_S10-3-181BUPLAP",
+          "quote": "A person may not construct or remodel a food enterprise unless the health authority has approved the building plan.",
+          "kind": "statute"
+        }
+      ]
+    }
+  },
+  "notes": "Only address line on the form is the establishment's Physical Address. Austin City Code text read through Municode's content service."
+}
