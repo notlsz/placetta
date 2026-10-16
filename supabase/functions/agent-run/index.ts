@@ -20,7 +20,7 @@ import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/od
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/mail.ts";
 // @ts-types="./agent.d.ts"
-import { normalizeState, runRounds, startState, stripState, type Reply, type RunState, type Services, type Step } from "./agent.js";
+import { agencyKey, DISTILL_SYSTEM, distillPrompt, filingEvidence, type Lesson, lessonKeys, lessonsBrief, normalizeState, parseDistill, rank, runEvidence, runRounds, startState, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
 
@@ -138,6 +138,7 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
       if (error) { await admin.storage.from("documents").remove([path]); throw new Error("Couldn't record the file."); }
       return { path };
     },
+    network: (keys: string[]) => lessonsFor(keys),
     async readFile(path: string) {
       if (!path.startsWith(ws + "/")) throw new Error("That file belongs to another workspace.");
       const { data, error } = await admin.storage.from("documents").download(path);
@@ -145,6 +146,80 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
       return data;
     },
   };
+}
+
+/* ------------------------------ the network ------------------------------ */
+// Every business makes Odelia better for every other one (src/learning.ts). After a run: its jobs' first independent
+// checks go on the learning curve, the lessons it started from earn a win or a loss, and a distiller turns what it
+// found into anonymized lessons (or confirms and contradicts existing ones). Agency decisions on filings are learned
+// from too, every 15 minutes. A workspace that turns sharing off still reads lessons but never adds to them.
+
+type LessonRow = { id: string; kind: Lesson["kind"]; key: string; text_en: string; text_zh: string; source_url: string | null; businesses: number; confirms: number; contradicts: number; wins: number; losses: number };
+const LESSON_COLS = "id, kind, key, text_en, text_zh, source_url, businesses, confirms, contradicts, wins, losses";
+const toLesson = (r: LessonRow): Lesson => ({ id: r.id, kind: r.kind, key: r.key, text: { en: r.text_en, zh: r.text_zh }, source_url: r.source_url, businesses: r.businesses, confirms: r.confirms, contradicts: r.contradicts, wins: r.wins, losses: r.losses });
+async function lessonsFor(keys: string[], status: string[] = ["live"]): Promise<Lesson[]> {
+  if (!keys.length) return [];
+  const { data } = await admin.from("odelia_lessons").select(LESSON_COLS).in("key", keys.slice(0, 80)).in("status", status).order("updated_at", { ascending: false }).limit(80);
+  return ((data ?? []) as LessonRow[]).map(toLesson);
+}
+const sharesLearning = (w: Workspace) => (w as { shareLearning?: boolean }).shareLearning !== false;
+
+/** Ask the distiller about one piece of evidence and record its answer as votes and new lessons. */
+async function distill(ws: string, w: Workspace, evidence: unknown, keys: string[], who: { uid: string | null; spent: number }) {
+  if (!keys.length) return { confirm: 0, contradict: 0, added: 0 };
+  const existing = (await lessonsFor(keys, ["live", "candidate"])).slice(0, 40);
+  const data = await model(ws, { system: DISTILL_SYSTEM, messages: [{ role: "user", content: distillPrompt(evidence, existing, keys) }], max_tokens: 1400 }, false, undefined, new AbortController().signal, true, who) as unknown as { content: Block[] };
+  const text = data.content.filter((c) => c.type === "text").map((c) => String(c.text ?? "")).join("");
+  const d = parseDistill(text, { keys, existing: existing.map((l) => l.id), w });
+  for (const id of d.confirm) await admin.rpc("lesson_vote", { p_lesson: id, p_ws: ws, p_vote: 1 });
+  for (const id of d.contradict) await admin.rpc("lesson_vote", { p_lesson: id, p_ws: ws, p_vote: -1 });
+  for (const n of d.fresh) await admin.rpc("lesson_add", { p_ws: ws, p_kind: n.kind, p_key: n.key, p_en: n.text.en, p_zh: n.text.zh, p_url: n.source_url ?? null, p_official: n.official });
+  return { confirm: d.confirm.length, contradict: d.contradict.length, added: d.fresh.length };
+}
+
+export async function learnFromRun(run: Run, w: Workspace, st: RunState, reply: Reply) {
+  try {
+    const checks = (st.firstChecks ?? []) as { job: string; passed: number; of: number }[];
+    const used = (st.lessons ?? []) as string[];
+    if (checks.length) {
+      await admin.from("odelia_job_checks").upsert(checks.map((c) => ({ workspace_id: run.workspace_id, run_id: run.id, job_id: c.job, passed: c.passed, of: c.of, lessons: used.length })), { onConflict: "workspace_id,job_id", ignoreDuplicates: true });
+      if (used.length) await admin.rpc("lesson_outcome", { p_ids: used, p_ok: checks.every((c) => c.passed === c.of) });
+    }
+    if (!sharesLearning(w)) return;
+    const ev = runEvidence(w, { started: String(st.started ?? run.heartbeat_at), reply: reply.text.map((t) => t.en).join("\n"), sources: (st.sources ?? []) as { url: string; title?: string }[], asked: String(st.request ?? run.prompt) });
+    if (!worthLearning(ev)) return;
+    await distill(run.workspace_id, w, ev, lessonKeys(w), { uid: run.created_by, spent: 0 });
+  } catch (e) { console.error("learn from run", run.id, String((e as Error)?.message ?? e).slice(0, 160)); }
+}
+
+/** Agency decisions waiting in the queue: a returned filing teaches what trips people up; an approval credits the
+ *  live lessons for that form and agency, which were right. */
+export async function learnFromAgencies() {
+  const { data: rows } = await admin.from("learning_queue").select("id, workspace_id, filing_id, status").is("done_at", null).order("at").limit(10);
+  let learned = 0;
+  for (const q of rows ?? []) {
+    const { data: claimed } = await admin.from("learning_queue").update({ done_at: new Date().toISOString() }).eq("id", q.id).is("done_at", null).select("id");
+    if (!claimed?.length) continue;   // another instance has it
+    try {
+      const { data: f } = await admin.from("filings").select("title, agency, status, note, submitted_at, decided_at, payload").eq("id", q.filing_id).maybeSingle();
+      const { data: row } = await admin.from("workspaces").select("name, state").eq("id", q.workspace_id).maybeSingle();
+      if (!f || !row) continue;
+      const w = normalizeState(row.name, row.state ?? {});
+      const form = (f.payload as { official?: string } | null)?.official;
+      const agency = (f.agency as { en?: string } | null)?.en;
+      const keys = [form ? "form:" + form : "", agency ? agencyKey(agency) : "", ...lessonKeys(w).filter((k) => k.startsWith("place:"))].filter(Boolean);
+      if (q.status === "accepted") {
+        const right = (await lessonsFor(keys.filter((k) => !k.startsWith("place:")))).map((l) => l.id);
+        if (right.length) await admin.rpc("lesson_outcome", { p_ids: right, p_ok: true });
+        continue;
+      }
+      if (!sharesLearning(w)) continue;
+      const days = f.submitted_at && f.decided_at ? Math.round((Date.parse(f.decided_at) - Date.parse(f.submitted_at)) / 86_400_000) : null;
+      await distill(q.workspace_id, w, filingEvidence({ title: f.title, agency: f.agency, status: f.status, note: f.note, days, form }), keys, { uid: null, spent: 0 });
+      learned++;
+    } catch (e) { console.error("learn from agency", q.id, String((e as Error)?.message ?? e).slice(0, 160)); }
+  }
+  return { ok: true, seen: (rows ?? []).length, learned };
 }
 
 /* ------------------------------ a run ------------------------------ */
@@ -231,6 +306,13 @@ export async function work(runId: string, token: string | null) {
     const svc = await servicesFor(ws, run, token);
     const who = { uid: run.created_by, spent: 0 };
     const state = run.state ?? startState([], run.prompt);
+    // The network: the run starts from what other businesses' jobs taught Odelia about these places, agencies and forms.
+    if (state.network === undefined) {
+      const ls = rank(await lessonsFor(lessonKeys(cur)).catch(() => [] as Lesson[])).slice(0, 14);
+      state.lessons = ls.map((l) => l.id);
+      state.network = lessonsBrief(ls, run.lang);
+      if (ls.length) { steps.push({ state: "searching", label: { en: `Starting from ${ls.length} lesson${ls.length === 1 ? "" : "s"} other businesses taught me`, zh: `参考其他商家积累的 ${ls.length} 条经验` } }); flush(); }
+    }
     const location = cur.meta?.city ? { city: cur.meta.city, region: cur.meta.region } : undefined;
     const out = await runRounds({
       state, ws: () => cur, lang: run.lang, deep: run.deep, account: true, svc, signal: ctl.signal, until,
@@ -249,6 +331,7 @@ export async function work(runId: string, token: string | null) {
       return;
     }
     await finish(run, out.reply, steps);
+    bg(learnFromRun(run, cur, state, out.reply));
   } catch (e) {
     await commit().catch(() => undefined);
     const code = (e as { code?: string }).code;
@@ -374,8 +457,9 @@ export async function handle(req: Request): Promise<Response> {
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   const action = String(body.action ?? "start");
 
-  if (action === "continue" || action === "watchdog" || action === "watch" || action === "selftest") {
+  if (action === "continue" || action === "watchdog" || action === "watch" || action === "selftest" || action === "learn") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
+    if (action === "learn") return json(200, await learnFromAgencies());
     if (action === "selftest") {
       // short real-model runs on scratch workspaces held in memory: no workspace is read or written
       // {probe: true}: which server secrets are set (names and yes/no only, never a value), and the checks there are

@@ -1657,7 +1657,27 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .pb-body ul { margin: 0; padding: 0; list-style: none; line-height: 1.55; display: flex; flex-direction: column; gap: 3px; }
 .pb-files { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 10px; }
 .pb-forms { margin-top: 18px; }
-@media (max-width: 640px) { .pb-teach { flex-direction: column; align-items: stretch; } .cmdk-back { padding-top: 8vh; } }
+/* The network on Playbooks */
+.nl { margin-top: 26px; }
+.nl-sample { font-style: normal; }
+.nl-top { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px 28px; padding: 18px 20px; border-radius: 18px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .07); }
+.nl-stat { flex: 1 1 280px; display: flex; flex-direction: column; gap: 4px; }
+.nl-stat b { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
+.nl-stat span { color: var(--ink2); font-size: 14px; line-height: 1.5; }
+.nl-curve { width: 150px; height: 48px; flex: none; }
+.nl-curve rect { fill: var(--blue-ink); opacity: .35; }
+.nl-curve rect:last-child { opacity: 1; }
+.nl-size { flex-basis: 100%; margin: 0; color: var(--ink3); font-size: 12.5px; }
+.nl-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nl-list li { padding: 13px 16px; border-radius: 14px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .07); }
+.nl-list p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.nl-list small { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; color: var(--ink3); font-size: 12.5px; }
+.nl-list a { color: var(--blue-ink); text-decoration: none; }
+.nl-forms { margin-top: 14px; }
+.nl-forms h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--ink3); text-transform: uppercase; }
+.nl-forms p { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 4px; font-size: 14px; }
+.nl-forms span { color: var(--ink2); }
+@media (max-width: 640px) { .pb-teach { flex-direction: column; align-items: stretch; } .cmdk-back { padding-top: 8vh; } .nl-curve { width: 100%; } }
 /* Onboarding in one line */
 .onb input.onb-line { height: 58px; font-size: 18px; padding: 0 18px; border-radius: 16px; }
 .onb .chips.ex { margin-top: -8px; }

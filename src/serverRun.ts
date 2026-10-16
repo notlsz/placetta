@@ -28,6 +28,9 @@ export type RunState = {
   /** The harness (src/harness.ts): what was asked, rounds in this seat, whether this seat is handing off, and how many
    *  times the checker has sent the work back. */
   request?: string; seatRounds?: number; handing?: boolean; checks?: number;
+  /** The network (src/learning.ts): the lessons this run started from (fixed for the whole run, so a resumed chunk
+   *  reads the same), and each job's first independent check, which is the number the network moves. */
+  lessons?: string[]; network?: string; firstChecks?: { job: string; passed: number; of: number }[];
 };
 
 const MAX_ROUNDS = 16;
@@ -80,7 +83,7 @@ export async function runRounds(o: {
   const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
   const model = messagesModel("server", (body, _signal, deep) => o.send(body, deep));
   const tools = makeTools(o.ws, o.apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal });
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + channelHint(o.channel);
+  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel);
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
@@ -156,6 +159,7 @@ export async function runRounds(o: {
         verdict = parseVerdict(data.content.filter(c => c.type === "text").map(c => c.text).join(""), j.done!.length);
       } catch { continue; }   // the checker couldn't run: the job keeps the agent's word, and no proof line claims a check
       o.apply(applyVerdict(j.id, verdict, { final, lang: o.lang }));
+      if (!(st.firstChecks ??= []).some(c => c.job === j.id)) st.firstChecks.push({ job: j.id, passed: verdict.filter(v => v.ok).length, of: verdict.length });
       if (!checkedNow.includes(j.id)) checkedNow.push(j.id);
       recheck.delete(j.id);
       const missing = j.done!.filter((_, k) => !verdict[k].ok).map((d, k) => `- ${d.text.en}: ${verdict.filter(v => !v.ok)[k]?.why ?? ""}`);

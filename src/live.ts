@@ -24,6 +24,7 @@ import { cadence, nextRun, settleJobs, type Job, type Routine } from "./jobs";
 import { basisLine, openingLine, openingPath, preflight } from "./smart";
 import { cityOf as recordsCity, cityRecords } from "./opendata";
 import { replyLanguage } from "./langs";
+import { agencyKey, placeKey, type Lesson } from "./learning";
 import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills";
 import { docx } from "./files";
 import { cityName, countyOf, stateCode as stateFromAny } from "./counties";
@@ -342,6 +343,8 @@ export type Services = {
   me?: string;
   /** Spending: the server checks each purchase request against the workspace's rules and budgets; an owner approves it. */
   spend?<T>(action: string, body: Record<string, unknown>): Promise<T>;
+  /** The network: live lessons other businesses' jobs taught Odelia, for these keys (src/learning.ts). */
+  network?(keys: string[]): Promise<Lesson[]>;
   /** Low-risk settings the agent may change for the person. Returns what it was set to. */
   setting?(key: string, value: string): string;
 };
@@ -743,6 +746,22 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         return { ok: true, ...(existing ? { replaced: `${existing.label.en}: ${existing.value.en}` } : {}) };
       },
     },
+    ...(x.svc?.network ? [{
+      name: "network_lessons",
+      description: "What Placetta has learned from other businesses about a city, an agency or an official form: requirements, quirks, what gets filings sent back, how long approval takes. Anonymized, and each lesson earned its place through real jobs. Call it before researching or filing in a place, agency or form that isn't in the lessons at the top. Confirm on the official source before relying on one.",
+      inputSchema: { type: "object" as const, properties: {
+        city: { type: "string" }, region: { type: "string", description: "State or province code, e.g. CA" },
+        agency: { type: "string", description: "The agency's name" }, form: { type: "string", description: "An official_form_id" },
+      } },
+      async execute(i: Record<string, unknown>) {
+        const keys = [i.city ? placeKey(str(i.city, 80), str(i.region, 40) || undefined) : "", i.city && !i.region ? placeKey(str(i.city, 80)) : "", i.agency ? agencyKey(str(i.agency, 160)) : "", i.form ? "form:" + str(i.form, 80) : ""].filter(Boolean);
+        if (!keys.length) throw new Error("Give a city, an agency or a form.");
+        S("searching", L("Checking what other businesses learned", "查看其他商家积累的经验"));
+        const found = await x.svc!.network!(keys);
+        mark();
+        return found.length ? { lessons: found.slice(0, 12).map(l => ({ id: l.id, about: l.key, lesson: l.text[lang] || l.text.en, source: l.source_url ?? undefined, businesses: l.businesses })) } : { lessons: [], note: "Nothing learned here yet. You're the first: research it on the official sites." };
+      },
+    }] : []),
     {
       name: "skill_read",
       description: "Read a skill's full instructions before doing that kind of job. Skills are listed under Skills; follow the one that fits.",

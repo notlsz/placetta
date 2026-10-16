@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { networkView } from "./cloud/api";
+import { demoNetwork, lessonKeys, rank, type NetworkView } from "./learning";
 import { useApp } from "./ctx";
 import { B } from "./bi";
 import { allSkills } from "./skills";
@@ -47,6 +49,75 @@ function Card({ s }: { s: Skill }) {
   );
 }
 
+const pct = (x: number) => Math.round(x * 100) + "%";
+const host = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
+const SMALL = new Set(["of", "and", "the", "for", "de", "on"]);
+/** "place:san-jose-ca" reads "San Jose, CA"; "agency:california-department-of-tax-and-fee-administration" reads as a name. */
+const placeOf = (key: string) => {
+  const ws = key.replace(/^[a-z]+:/, "").split("-").filter(Boolean);
+  const state = key.startsWith("place:") && ws.length > 1 && ws[ws.length - 1].length === 2 ? ws.pop()!.toUpperCase() : "";
+  const name = ws.map((w, i) => (i && SMALL.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1))).join(" ");
+  return state ? `${name}, ${state}` : name;
+};
+
+/** The network: what every business's jobs taught Odelia, for this business's places, agencies and forms, and the
+ *  proof it's working (how often a job passes its independent check the first time, week by week). */
+function Network() {
+  const { b, lang, ws, cloud } = useApp();
+  const zh = lang === "zh";
+  const [view, setView] = useState<NetworkView | null>(cloud ? null : demoNetwork());
+  const keys = lessonKeys(ws).join("|");
+  useEffect(() => {
+    if (!cloud) { setView(demoNetwork()); return; }
+    let live = true;
+    networkView(cloud.wsId, keys ? keys.split("|") : []).then(v => { if (live) setView(v); }).catch(() => { if (live) setView({ lessons: [], curve: [], businesses: 0, live: 0, forms: [] }); });
+    return () => { live = false; };
+  }, [cloud?.wsId, keys]);
+  if (!view) return null;
+  const curve = view.curve.filter(c => c.jobs > 0);
+  const now = curve[curve.length - 1], then = curve[0];
+  const lessons = rank(view.lessons).slice(0, 8);
+  const max = Math.max(...curve.map(c => c.first_try), 0.01);
+  return (
+    <section className="sec nl">
+      <div className="sec-h"><h2>{zh ? "全网学习" : "Learning across Placetta"}{!cloud ? <em className="nl-sample">{zh ? "示例数据" : "Sample data"}</em> : null}</h2></div>
+      <div className="nl-top">
+        <div className="nl-stat">
+          {now ? <><b>{pct(now.first_try)}</b><span>{zh ? "的工作第一次就通过独立检查" : "of jobs pass the independent check the first time"}{then && then !== now ? (zh ? `，${curve.length} 周前为 ${pct(then.first_try)}` : `, up from ${pct(then.first_try)} ${curve.length} weeks ago`) : ""}</span></>
+            : <><b>{zh ? "每项工作都在教她" : "Every job teaches her"}</b><span>{zh ? "Odelia 完成的每项工作、每个机构的批复，都会变成匿名经验，让下一家商家一次做对。" : "Every job Odelia finishes and every agency decision becomes an anonymized lesson, so the next business gets it right the first time."}</span></>}
+        </div>
+        {curve.length > 1 && (
+          <svg className="nl-curve" viewBox={`0 0 ${curve.length * 14} 48`} role="img" aria-label={zh ? "每周首次通过率" : "First-try pass rate by week"}>
+            {curve.map((c, i) => <rect key={c.week} x={i * 14 + 2} y={48 - (c.first_try / max) * 44} width="10" height={(c.first_try / max) * 44} rx="2"><title>{`${c.week}: ${pct(c.first_try)} of ${c.jobs}`}</title></rect>)}
+          </svg>
+        )}
+        {view.businesses > 0 && <p className="nl-size">{zh ? `${view.businesses} 家商家，${view.live} 条已验证经验` : `${view.businesses} businesses, ${view.live} verified lessons`}</p>}
+      </div>
+      {lessons.length ? (
+        <ul className="nl-list">
+          {lessons.map(l => (
+            <li key={l.id}>
+              <p>{b(l.text)}</p>
+              <small>
+                <span>{placeOf(l.key)}</span>
+                <span>{zh ? `${l.businesses} 家商家确认` : `Confirmed by ${l.businesses} ${l.businesses === 1 ? "business" : "businesses"}`}</span>
+                {l.wins ? <span>{zh ? `${l.wins} 次工作中验证有效` : `Held up in ${l.wins} jobs`}</span> : null}
+                {l.source_url ? <a href={l.source_url} target="_blank" rel="noreferrer">{host(l.source_url)}</a> : null}
+              </small>
+            </li>
+          ))}
+        </ul>
+      ) : <p className="quiet">{zh ? "您所在城市和机构的经验，在第二家商家确认后会出现在这里。" : "Lessons for your cities and agencies show up here once a second business confirms them."}</p>}
+      {view.forms.length ? (
+        <div className="nl-forms">
+          <h3>{zh ? "机构实际用时" : "How long agencies actually take"}</h3>
+          {view.forms.map(f => <p key={f.form}><b>{f.form}</b><span>{f.median_days != null ? (zh ? `中位 ${f.median_days} 天` : `${f.median_days} days median`) : ""}{f.approved_rate != null ? (zh ? `，批准率 ${pct(f.approved_rate)}` : `, ${pct(f.approved_rate)} approved`) : ""}{zh ? `，${f.businesses} 家商家` : `, across ${f.businesses} businesses`}</span></p>)}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export function PlaybooksPage() {
   const { b, lang, ws, ask } = useApp();
   const [q, setQ] = useState("");
@@ -67,6 +138,7 @@ export function PlaybooksPage() {
         <div><b>{zh ? "教 Odelia 一项工作" : "Teach Odelia a job"}</b><p>{zh ? "她会问您几个问题，直到不需要您也能完成，再把您的回答写成手册。" : "She asks you questions until she could run it without you, then turns your answers into a playbook."}</p></div>
         <button type="button" className="sbtn ink" onClick={() => ask(b(TEACH))}><I.spark />{zh ? "开始" : "Start"}</button>
       </section>
+      <Network />
       <div className="pb-bar"><input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={zh ? "搜索手册" : "Search playbooks"} aria-label={zh ? "搜索手册" : "Search playbooks"} /></div>
       <section className="sec">
         <div className="sec-h"><h2>{zh ? "您的手册" : "Yours"}{yours.length ? <em>{yours.length}</em> : null}</h2></div>

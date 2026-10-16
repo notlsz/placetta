@@ -137,6 +137,7 @@ export type Workspace = {
   memories?: Record<string, MemoryBook>;   // each person's memory, by user id
   chats?: Record<string, ChatLine[]>;      // each person's past chats with the agent, by user id, for "search past chats"
   skills?: Skill[];                        // how Placetta gets things done here: learned as it works, or written by you
+  shareLearning?: boolean;                 // add what this business's jobs teach to the network, anonymized (on unless turned off)
   skillsAuto?: boolean;                    // let Placetta create skills as it works (on unless turned off)
   spend?: { policy: SpendPolicy; purchases: Purchase[] };   // what Odelia may buy (outside an account; an account keeps it on the server)
   jobs?: Job[];                            // Odelia's jobs, each with the plan she keeps current (Work)

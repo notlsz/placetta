@@ -647,3 +647,12 @@ export const phonePrefs = (p: { texts?: boolean; calls?: boolean; quietStart?: s
   phoneRpc("phone_prefs", { p_texts: p.texts ?? null, p_calls: p.calls ?? null, p_quiet_start: p.quietStart ?? null, p_quiet_end: p.quietEnd ?? null, p_tz: p.tz ?? null, p_lang: p.lang ?? null });
 export const odeliaLine = (): Promise<OdeliaLine> =>
   fn<OdeliaLine>("odelia-sms", { action: "line" }).catch(() => ({ configured: false, voice: false, number: null, display: null }));
+
+/** The network for this workspace: live lessons for its places, agencies and forms, the network's size, the weekly
+ *  first-try pass rate and agency timings (src/learning.ts). */
+export async function networkView(ws: string, keys: string[]): Promise<import("../learning").NetworkView> {
+  const { data, error } = await supabase().rpc("network_view", { p_ws: ws, p_keys: keys });
+  if (error) throw fromPg(error);
+  const d = (data ?? {}) as Partial<import("../learning").NetworkView>;
+  return { lessons: d.lessons ?? [], curve: d.curve ?? [], businesses: d.businesses ?? 0, live: d.live ?? 0, forms: d.forms ?? [] };
+}
