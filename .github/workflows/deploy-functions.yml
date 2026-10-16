@@ -22,7 +22,8 @@ jobs:
         run: if [ -n "$SUPABASE_ACCESS_TOKEN" ]; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "::warning::Add SUPABASE_ACCESS_TOKEN to the repository secrets to deploy functions."; fi
       - uses: actions/checkout@v4
         if: steps.tok.outputs.ok
-        with: { ref: "${{ github.event.workflow_run.head_sha || github.sha }}" }
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         if: steps.tok.outputs.ok
         with: { node-version: 22, cache: npm }
