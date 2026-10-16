@@ -37,7 +37,7 @@ export const S = {
 
   ov_title: B("Here's where your {n} permits stand.", "您的 {n} 项许可，进展如下。"),
   ov_title1: B("Here's where your permit stands.", "您的许可，进展如下。"),
-  ov_sub: B("{biz} in {place}. {goal}.", "{biz}，{place}。{goal}。"),
+  ov_in: B("{biz} in {place}", "{biz}，{place}"),
   ov_state: B("{a} approved, {r} with the agencies, {n} waiting on you.", "{a} 项已批准，{r} 项在机构审核中，{n} 项等您处理。"),
   ov_done: B("{d} of {n} filed or approved", "已提交或批准 {d}/{n}"),
   foot_short: B("Nothing is filed, paid or sent without your approval, and every action is in Activity.", "未经您批准，不会提交、付款或发送任何内容；每项操作都记录在活动记录中。"),
@@ -48,6 +48,7 @@ export const S = {
   hm_open: B("Opening around {d}", "预计 {d} 前后开业"),
   hm_next: B("Next up", "接下来"),
   hm_preview: B("Mapped from Placetta's registry. Odelia verifies each one when you start.", "来自快哉的许可库。您开始后，Odelia 会逐项核实。"),
+  prevTag: B("From the registry, not verified yet", "来自许可库，待核实"),
   hm_seeAll: B("See all", "查看全部"),
   hm_updates: B("Recent updates", "最新动态"),
   hm_routines1: B("1 routine, next {d}", "1 项例行任务，下次 {d}"),

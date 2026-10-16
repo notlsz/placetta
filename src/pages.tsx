@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { useApp, type PermitsTab, type View } from "./ctx";
-import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status, Workspace } from "./model";
+import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
 import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
 import { openingPath, preflight } from "./smart";
@@ -24,11 +24,9 @@ const byPriority = (a: Application, b: Application) => ORDER.indexOf(a.status) -
 /** Permits that are done with you for now: with the agency, with the team, or issued. */
 const FILED: Status[] = ["review", "filing", "approved"];
 
-/* A permit the instant plan mapped from Placetta's registry at signup (another part of the app adds these): shown with a
-   note until Odelia verifies it. Read loosely so a plan without the field still renders. */
-const isPreview = (a: Application) => (a as Application & { preview?: boolean }).preview === true;
-type FirstPlan = { projectedOpen?: string; landing?: string; preview?: boolean } | undefined;
-const firstPlanOf = (w: Workspace): FirstPlan => (w as Workspace & { firstPlan?: FirstPlan }).firstPlan;
+/* A permit the instant plan listed from Placetta's registry at sign-up (src/plan/preview.ts): shown with a note until
+   Odelia verifies it with the agency. */
+const isPreview = (a: Application) => a.preview === true;
 
 /* ------------------------------ shared bits ------------------------------ */
 
@@ -228,11 +226,16 @@ export function Overview() {
   const working = running.length > 0 || ws.running.length > 0 || queued.length > 0 || routines.length > 0 || (busy && !!live);
 
   /* 3. The opening plan: the count, where it stands, when it lands, and the next permits in order */
-  const fp = firstPlanOf(ws);
+  const fp = ws.firstPlan;
   const previews = ws.apps.filter(isPreview).length;
-  const landing = fp?.projectedOpen ?? fp?.landing
+  const landing = fp?.projectedOpen
     ?? (ws.stores ?? []).filter(s => s.stage === "opening").map(s => openingPath(s, ws, today).landing).filter((d): d is string => !!d).sort().at(-1) ?? null;
   const nextUp = [...ws.apps].filter(a => a.status !== "approved").sort(byPriority).slice(0, 3);
+
+  /* the line under the title: the business, its place (unless the name already says it) and the goal, whichever exist */
+  const biz = b(ws.business), place = ws.locations[0] ? b(ws.locations[0].name) : "", goal = b(ws.goal);
+  const ctxParts = [place && !biz.includes(place) ? t("ov_in", { biz, place }) : biz, goal].filter(Boolean);
+  const ctxLine = ctxParts.length ? ctxParts.join(zh ? "。" : ". ") + (zh ? "。" : ".") : "";
 
   /* 4 and 5. Coming up, and the latest updates */
   const soon = [...ws.deadlines].filter(d => daysUntil(d.date) >= 0).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 5);
@@ -248,7 +251,7 @@ export function Overview() {
           <span className="bar"><i style={{ width: `${((approved + agency) / n) * 100}%` }} /></span>
           <span className="pl">{t("ov_done", { d: approved + agency, n })}</span>
         </div>
-        {ws.locations[0] && <p className="ctx">{t("ov_sub", { biz: b(ws.business), place: b(ws.locations[0].name), goal: b(ws.goal) })}</p>}
+        {ctxLine && <p className="ctx">{ctxLine}</p>}
         <LiveLine />
       </header>
 
@@ -297,7 +300,7 @@ export function Overview() {
               </ol>
             </>
           )}
-          {(previews > 0 || fp?.preview) && <p className="plan-note"><I.spark />{t("hm_preview")}</p>}
+          {previews > 0 && <p className="plan-note"><I.spark />{t("hm_preview")}</p>}
           <div className="plan-act">
             <button type="button" className="pill quiet sm" onClick={() => go("permits")}>{t("viewAll")}<I.chevR /></button>
             <button type="button" className="pill quiet sm" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
@@ -383,6 +386,7 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
   if (!list.length) return <p className="quiet tab-empty">{empty}</p>;
   return (
     <>
+      {list.some(isPreview) && <p className="prev-note"><I.spark />{t("hm_preview")}</p>}
       <div className="table apps-t" role="table">
         <div className="tr th" role="row"><span>{t("th_app")}</span><span>{t("th_status")}</span><span>{t("th_fee")}</span><span>{t("th_takes")}</span><span>{t("th_next")}</span></div>
         {LEVELS.map(l => {
@@ -396,7 +400,7 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
                   return (
                     <Working key={a.id} on={a.status === "draft"} size="line">
                     <button type="button" className={"tr row" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)} role="row">
-                      <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("hm_preview")}</small>}</span>
+                      <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}</span>
                       <span className="c-st"><StatusChip s={a.status} /></span>
                       <span className="c-fee">{feeText(a, t)}</span>
                       <span className="c-est">{b(a.est)}</span>

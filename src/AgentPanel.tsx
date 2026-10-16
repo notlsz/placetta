@@ -44,6 +44,12 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
       </header>
 
       <div className="feed" ref={scroller}>
+        {mode === "page" && !feed.length && (
+          <div className="feed-empty">
+            <b>{lang === "zh" ? "有什么需要我做的？" : "What can I do for you?"}</b>
+            <p>{lang === "zh" ? "比如：梳理我的许可、本周有什么到期、上传我的租约。您说，我来做；提交、付款和发送都先经您批准。" : "Try: map my permits, what's due this week, or upload your lease. You say it, I do it; nothing is filed, paid or sent without your approval."}</p>
+          </div>
+        )}
         {feed.map(m => m.kind === "user" ? <div key={m.id} className="you"><p>{m.text}</p></div>
           : m.kind === "memory" ? <Memory key={m.id} text={m.text} />
             : <TurnView key={m.id} m={m} last={m === last} speaking={tts.speaking} onSay={say} />)}

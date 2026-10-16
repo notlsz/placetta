@@ -20,11 +20,18 @@ import { Working } from "./Bot";
 /* ------------------------- application, opened ------------------------- */
 
 export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: Tab; edit: boolean; onTab: (t: Tab) => void; onClose: () => void }) {
-  const { b, t, ws, openApproval, busy } = useApp();
+  const { b, t, lang, ws, openApproval, busy, cloud, ask } = useApp();
   const a = ws.apps.find(x => x.id === id);
   if (!a) return null;
   const appr = ws.approvals.find(x => x.app === id && x.kind !== "upload");
   const done = a.checklist.filter(c => c.state !== "missing").length;
+  const zh = lang === "zh";
+  // A row from the instant plan (src/plan/preview.ts): readable in full; the paid moment is asking Odelia to fill and file it.
+  const fillAndFile = () => {
+    if (cloud && cloud.plan === "none") { cloud.openPlans("start"); return; }
+    onClose();
+    ask(zh ? `核实${a.name.zh}（${a.agency.zh}）的现行要求，用已有资料填好，并告诉我还需要我提供什么。` : `Verify the ${a.name.en} with ${a.agency.en}, fill it from what you know, and tell me what you still need from me.`);
+  };
   const tabs: { k: Tab; l: string; n?: string }[] = [
     { k: "progress", l: t("tab_progress") },
     { k: "check", l: t("tab_check"), n: `${done}/${a.checklist.length}` },
@@ -40,11 +47,13 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
           <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
         </div>
         <h2>{b(a.name)}</h2>
+        {a.plain && <p className="sh-plain">{b(a.plain)}</p>}
         <p className="sh-ag">
           <span>{b(a.agency)}</span>
-          <a href={a.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{a.source.label}<I.ext /></a>
+          {a.source.url && <a href={a.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{a.source.label}<I.ext /></a>}
         </p>
         {a.next && <p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
+        {a.preview && <p className="sh-pv"><I.spark />{zh ? "来自快哉的登记库。开始计划后，Odelia 会向机构核实、填好表格并提交。" : "From Placetta's registry. When you start the plan, Odelia verifies it with the agency, fills it and files it."}</p>}
         <nav className="seg tabs" role="tablist">
           {tabs.map(x => <button key={x.k} type="button" role="tab" aria-selected={tab === x.k} onClick={() => onTab(x.k)}>{x.l}{x.n && <span>{x.n}</span>}</button>)}
         </nav>
@@ -56,12 +65,17 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
         {tab === "fees" && <Fees a={a} />}
         {tab === "receipt" && <Receipt a={a} />}
       </div>
-      {appr && (
+      {appr ? (
         <footer className="sh-f">
           <span><I.pause />{t("waitingYou")}</span>
           <Pill kind="ink" disabled={busy} onClick={() => openApproval(appr.id)}>{t("review")}</Pill>
         </footer>
-      )}
+      ) : a.preview && !["filing", "review", "approved"].includes(a.status) ? (
+        <footer className="sh-f sh-f-pv">
+          <span>{zh ? "填写和提交由 Odelia 完成，每一步都经您批准。" : "Odelia fills and files it. Every step waits for your approval."}</span>
+          <Pill kind="ink" disabled={busy} onClick={fillAndFile}>{zh ? "填写并提交" : "Fill and file"}</Pill>
+        </footer>
+      ) : null}
     </Sheet>
   );
 }
@@ -84,7 +98,9 @@ function Progress({ a }: { a: Application }) {
   const off = a.official ? formById(a.official) : undefined;
   const tbc = /^(to be confirmed|待确认)$/i.test(b(a.est));
   const steps: { k: string; s: StepState; t: string; d?: string; act?: { l: string; go: () => void } }[] = [
-    { k: "prep", s: "done", t: zh ? "快哉准备了申请" : "Placetta prepared the application", d: [off ? off.form : "", day(prepAt)].filter(Boolean).join(zh ? "，" : ", ") },
+    a.preview
+      ? { k: "prep", s: "done", t: zh ? "快哉的登记库列出了这一项" : "Listed from Placetta's registry", d: [off ? off.form : "", zh ? "开始计划后 Odelia 向机构核实并填写" : "Odelia verifies it with the agency and fills it when the plan starts"].filter(Boolean).join(zh ? "，" : ", ") }
+      : { k: "prep", s: "done", t: zh ? "快哉准备了申请" : "Placetta prepared the application", d: [off ? off.form : "", day(prepAt)].filter(Boolean).join(zh ? "，" : ", ") },
     { k: "you", s: past(["ready", "filing", "review", "approved"]) || (!missing && !empty) ? "done" : "now",
       t: zh ? "资料与文件" : "Answers and documents",
       d: past(["ready", "filing", "review", "approved"]) || (!missing && !empty) ? (zh ? "已齐全" : "Complete") : [missing ? (zh ? `还差 ${missing} 份文件` : `${missing} document${missing === 1 ? "" : "s"} still needed`) : "", empty ? (zh ? `${empty} 项信息待填` : `${empty} answer${empty === 1 ? "" : "s"} still needed`) : ""].filter(Boolean).join(zh ? "，" : ", ") },
@@ -121,6 +137,8 @@ function Progress({ a }: { a: Application }) {
 }
 
 function Checklist({ a }: { a: Application }) {
+  const { lang } = useApp();
+  if (!a.checklist.length) return <p className="quiet">{lang === "zh" ? "这一项不需要附加文件。" : "Nothing to attach for this one."}</p>;
   return <ul className="checklist">{a.checklist.map(c => <CheckRow key={c.id} a={a} c={c} />)}</ul>;
 }
 
@@ -218,8 +236,8 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
           <p>{lang === "zh" ? `${off.agency.zh}。${METHOD[off.method].zh}。${off.how.zh}` : `${off.agency.en}. ${METHOD[off.method].en}. ${off.how.en}`}</p>
           {off.foreign && <p className="off-note">{b(off.foreign)}</p>}
           <div className="off-act">
-            {canFill(off) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void official()}><I.download />{making ? "…" : lang === "zh" ? "下载已填写的官方表格" : "Download the filled official form"}</button>}
-            {off.pdf && !canFill(off) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void blank()}><I.download />{making ? "…" : lang === "zh" ? "下载官方表格" : "Download the official form"}</button>}
+            {canFill(off) && a.fields.some(f => f.value) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void official()}><I.download />{making ? "…" : lang === "zh" ? "下载已填写的官方表格" : "Download the filled official form"}</button>}
+            {off.pdf && !(canFill(off) && a.fields.some(f => f.value)) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void blank()}><I.download />{making ? "…" : lang === "zh" ? "下载官方表格" : "Download the official form"}</button>}
             <a className="pill quiet sm" href={off.pdf ?? off.url} target="_blank" rel="noopener noreferrer">{off.pdf ? (lang === "zh" ? "官方表格" : "Official form") : (lang === "zh" ? "机构办理入口" : "Agency filing page")}<I.ext /></a>
             {off.info !== (off.pdf ?? off.url) && <a className="pill quiet sm" href={off.info} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "机构说明" : "Agency page"}<I.ext /></a>}
           </div>

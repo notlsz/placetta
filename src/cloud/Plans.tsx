@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import * as api from "./api";
 import { useApp } from "../ctx";
 import { B } from "../model";
-import { I, Modal, Pill } from "../ui";
+import { I, Modal, Pill, Select } from "../ui";
 
 /* The plans sheet: the entry plan to start the agent, and the annual plans for filing by the team.
    Prices match the landing page. Agency fees are always paid by the business to the agency. */
@@ -36,6 +36,16 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
     setBusy("");
   };
   const showEntry = cloud.plan === "none";
+  // The plan is already on screen (the instant plan from sign-up, src/plan/preview.ts): say what they have, then what starting adds.
+  const pv = ws.apps.filter(a => a.preview).length;
+  const ready = reason === "start" && showEntry && ws.firstPlan && pv > 0
+    ? { place: zh ? ws.firstPlan.whereZh ?? ws.firstPlan.where : ws.firstPlan.where.replace(/,\s*[A-Z]{2}$/, ""), n: pv } : null;
+  const title = reason === "file" ? b(B("Filing is part of the yearly plan.", "申报包含在年度方案中。"))
+    : ready ? (zh ? `您的计划已就绪：${ready.place}的 ${ready.n} 项许可。` : `Your plan is ready: ${ready.n} permits for ${ready.place}.`)
+    : b(B("Open on time. Stay open. No fines.", "按时开业，持续营业，零罚款。"));
+  const sub = reason === "file" ? b(B("Your approval is saved. Start the plan and Odelia takes it from here.", "您的确认已保存。开通方案后，由 Odelia 接手。"))
+    : ready ? (zh ? "开通开店计划，Odelia 会向每个机构核实、填好每一份表格，并在您批准后提交。" : "Start the entry plan and Odelia verifies each one with its agency, fills every form and files them with your approval.")
+    : b(B("Billed per location, yearly. Odelia does the work; our team files and answers to the agencies.", "按门店、按年计费。Odelia 负责工作，我们的团队负责申报并与机构对接。"));
   const tier = (key: "essentials" | "pro", price: api.LocationPrice | null | undefined, name: [string, string], tag: [string, string], items: [string, string][]) => (
     <section className={"plan perloc" + (key === "pro" ? " hl" : "")}>
       <div className="plan-h"><b>{zh ? name[1] : name[0]}</b><em>{zh ? tag[1] : tag[0]}</em></div>
@@ -51,8 +61,8 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
     <Modal label={b(B("Plans", "方案"))} onClose={onClose} wide>
       <header className="m-h">
         <span className="m-eyebrow"><I.card />{b(B("Plans", "方案"))}</span>
-        <h2>{reason === "file" ? b(B("Filing is part of the yearly plan.", "申报包含在年度方案中。")) : b(B("Open on time. Stay open. No fines.", "按时开业，持续营业，零罚款。"))}</h2>
-        <p>{reason === "file" ? b(B("Your approval is saved. Start the plan and Odelia takes it from here.", "您的确认已保存。开通方案后，由 Odelia 接手。")) : b(B("Billed per location, yearly. Odelia does the work; our team files and answers to the agencies.", "按门店、按年计费。Odelia 负责工作，我们的团队负责申报并与机构对接。"))}</p>
+        <h2>{title}</h2>
+        <p>{sub}</p>
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body plans">
@@ -75,10 +85,12 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
         {showEntry && (
           <section className="plan entry">
             <div className="plan-h"><b>{b(B("Not ready for a yearly plan? The entry plan", "还没准备好年度方案？先开通开店计划"))}</b><span className="price">$299<small>{b(B(" per market, one time", " 每个市场，一次性"))}</small></span></div>
-            <p>{b(B("Every license for one market mapped, in order, with fees and timelines, and each application prepared. Credited in full if you start a yearly plan within 60 days.", "梳理一个市场所需的全部许可，按顺序列出费用与时间，并准备好每份申请。60 天内开通年度方案可全额抵扣。"))}</p>
+            <p>{ready
+              ? (zh ? `${ready.place}的 ${ready.n} 项许可逐一向机构核实，每份表格由 Odelia 填好，等您批准。60 天内开通年度方案可全额抵扣。` : `Your ${ready.n} permits for ${ready.place}, each verified with its agency and every form filled by Odelia, ready for your approval. Credited in full if you start a yearly plan within 60 days.`)
+              : b(B("Every license for one market mapped, in order, with fees and timelines, and each application prepared. Credited in full if you start a yearly plan within 60 days.", "梳理一个市场所需的全部许可，按顺序列出费用与时间，并准备好每份申请。60 天内开通年度方案可全额抵扣。"))}</p>
             <div className="plan-act">
               <label className="mk">{b(B("Markets", "市场数"))}
-                <select aria-label={b(B("Markets", "市场数"))} value={markets} onChange={e => setMarkets(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(k => <option key={k} value={k}>{k}</option>)}</select>
+                <Select aria-label={b(B("Markets", "市场数"))} value={markets} onChange={e => setMarkets(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(k => <option key={k} value={k}>{k}</option>)}</Select>
               </label>
               <Pill disabled={!!busy} onClick={() => void go("entry")}>{busy === "entry" ? "…" : b(B(`Pay $${299 * markets}`, `支付 $${299 * markets}`))}</Pill>
             </div>

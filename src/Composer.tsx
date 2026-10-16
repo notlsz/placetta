@@ -76,7 +76,8 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
   // a live agent's come from the workspace as it is now: a store slipping, filings waiting, a permit about to lapse
   const open = useMemo(() => (mode === "demo" ? SUGGESTIONS : suggestions(ws, daysFromNow(0), LIVE_SUGGESTIONS)).filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked, mode, ws]);
   // the dock's starter chips: an empty or nearly empty workspace gets three, the workspace's own first, no two alike
-  const nearlyEmpty = ws.apps.length < 3 && !ws.approvals.length;
+  // nothing verified or uploaded yet: a brand-new workspace, or one whose permits are still the registry's instant plan
+  const nearlyEmpty = !ws.approvals.length && !ws.docs.length && (ws.apps.length < 3 || ws.apps.every(a => a.preview));
   const chips = useMemo(() => {
     if (!starters || !nearlyEmpty) return [] as Bi[];
     const out: Bi[] = [];
@@ -134,7 +135,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
         <div className="sugg">{open.map(s => <button key={s.en} type="button" onClick={() => ask(b(s))}>{b(s)}</button>)}</div>
       )}
       {dock && chips.length > 0 && !busy && (
-        <div className="sugg starters">{chips.map(s => <button key={s.en} type="button" onClick={() => (isUploadChip(s) ? attach.current?.click() : ask(b(s)))}>{isUploadChip(s) ? <I.upload /> : null}{b(s)}</button>)}</div>
+        <div className="sugg dock-chips">{chips.map(s => <button key={s.en} type="button" onClick={() => (isUploadChip(s) ? attach.current?.click() : ask(b(s)))}>{isUploadChip(s) ? <I.upload /> : null}{b(s)}</button>)}</div>
       )}
       <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={dock ? 0.16 : 0.1} scale={dock ? 1.1 : 0.9} borderRadius={RADIUS[variant]}>
         <BorderBeam className="c-edge" size="md" theme="light" colorVariant="ice" borderRadius={RADIUS[variant]} staticColors brightness={1} saturation={1} strength={0.85} css={EDGE_CSS}>

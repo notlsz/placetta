@@ -17,7 +17,7 @@ import {
   uid,
 } from "./core";
 import { B, same, type Bi } from "./bi";
-import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
+import type { Application, Approval, Change, CheckItem, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { daysFromNow, money, nowIso } from "./time";
 import { cadence, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
@@ -222,8 +222,10 @@ function snapshot(w: Workspace, lang: Lang) {
   return {
     business: b(w.business), goal: b(w.goal), today: daysFromNow(0),
     locations: w.locations.map(l => `${b(l.name)} (${b(l.county)})`),
+    // preview: listed from Placetta's registry at sign-up, before anyone verified it with the agency (src/plan/preview.ts)
+    ...(w.firstPlan ? { first_plan: { at: w.firstPlan.at.slice(0, 10), what: w.firstPlan.what, where: w.firstPlan.where, preview_applications: w.apps.filter(a => a.preview).length, opening: w.firstPlan.opening } } : {}),
     applications: w.apps.map(a => ({
-      id: a.id, name: b(a.name), official_form: a.official, agency: b(a.agency), level: a.level, status: a.status, next: a.next ? b(a.next) : undefined,
+      id: a.id, name: b(a.name), official_form: a.official, agency: b(a.agency), level: a.level, status: a.status, next: a.next ? b(a.next) : undefined, preview: a.preview || undefined,
       fee: a.fees.reduce((s, f) => s + f.amount, 0), currency: a.currency ?? "USD", takes: b(a.est), sets_opening_date: a.critical || undefined,
       empty_fields: a.fields.filter(f => isBlank(f.value)).map(f => b(f.label)),
       missing_documents: a.checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: b(c.label) })),
@@ -267,7 +269,8 @@ How you work:
 - Refuse anything that breaks the law or deceives an agency (faking a document, a signature or an inspection record, hiding something from an inspector, dodging a required license), even if asked.${tools ? `
 - Use the agencies' real forms, never a template. find_official_forms returns the official form for each filing (form number, agency, how it's filed, official link, fee and the form's own fields by line). When a form is there, prepare_application with its official_form_id and fill its fields with the form's own labels. Only when the library has nothing for a filing, ${research ? "research the agency's official page and name the exact form or online service it uses" : "name the form only if you are sure of it and say it's to be confirmed with the agency"}.
 - Chain the tools. To map a business or a new store: ${can("add_store") ? "add_store first if it isn't in Stores yet, then " : ""}find_official_forms for its business and place, then prepare_application once for each license it needs (with the store_id when there's more than one store), fill each from the workspace facts, memory and documents, add_deadline for the dates that matter (the opening date, each filing's file-by date, renewals), then request_filing_approval for each one that's complete. request_filing_approval refuses an incomplete application and says what's missing: that's expected, not a failure. For progress or "what's next": check_progress first${mail ? ", then search_email for recent mail from the agencies and read_email what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${drives ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
-${can("set_plan") ? `- Work like an engineer on a ticket. For any job of three or more steps (mapping a store, a renewal, getting ready for an inspection, answering an agency's request), set_plan first, then work the plan in order and set_plan again as each step finishes. One plan per job: when a job in the workspace's jobs is still open, pick it up with its job_id instead of starting another. Blocked on something only someone else can give? Finish every other step first, then set the job to waiting and say exactly what you need and from whom.
+${w.apps.some(a => a.preview) ? `- Applications marked preview (${w.apps.filter(a => a.preview).length} of them) were listed from Placetta's registry the moment the workspace was created, before anyone checked them against the agency: the right agency and form as the library knows them, with the lines empty. They are the plan the person already sees, so refine them, never re-map: keep their ids. prepare_application with the same official_form_id (or the same name) returns that application instead of adding a second one and fills it; fill_fields and update_application work on it directly. For each: verify it against the agency's current page or form (find_official_forms, or the official link), fill its fields and checklist from the facts, memory and documents, correct the fee or time when the agency says otherwise, add what the registry missed with prepare_application, remove what doesn't apply with remove_application, and clear the preview mark (filling it or preparing it does; update_application verified true does when nothing else changed). Say "verified" only after you checked the agency's own page.
+` : ""}${can("set_plan") ? `- Work like an engineer on a ticket. For any job of three or more steps (mapping a store, a renewal, getting ready for an inspection, answering an agency's request), set_plan first, then work the plan in order and set_plan again as each step finishes. One plan per job: when a job in the workspace's jobs is still open, pick it up with its job_id instead of starting another. Blocked on something only someone else can give? Finish every other step first, then set the job to waiting and say exactly what you need and from whom.
 - Do the whole job, not only the forms: chase what a filing needs from other people (the landlord's authorization letter, the contractor's license, the architect's stamped plans) with draft_message, get a store ready for each inspection, write status reports for the owner or headquarters with draft_document, compare cities by the permits, fees and time to open, and keep staff certificates and renewals current.${can("schedule_routine") ? " When they want something done on a schedule ('every Monday', 'each month', 'until it's approved'), schedule_routine it." : ""}
 ` : ""}- Act, don't advise. When the person asks for something, do every step you can yourself, start to end, in this turn: ${research ? "research the requirement (start from usa.gov or sba.gov if it helps you find the agency, then read and cite the agency's own page), " : ""}find the official form, prepare the application, fill every line of the form from the workspace facts, memory and their documents, draft any letter it needs, add the deadlines and put the filing up for approval. When they only ask what they'd need somewhere, without asking you to start, ${can("show_licenses") ? "list it with show_licenses" : "answer"} instead of adding applications. Never stop at an explanation when you could have done the step.
 - When you're blocked on something only the person knows, finish everything else first, then ask for all of it in one short question at the end. Never ask more than one question in a reply.
@@ -526,11 +529,14 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const target = str(i.store_id) ? findStore(i.store_id) : stores.length === 1 ? stores[0] : undefined;
         // the same filing for the same store is already here (a repeated call, or a run picked up again): don't add it twice
         const inStore = (id: string) => stores.some(s => (s.apps ?? []).includes(id));
-        // a filed one is the record; preparing the same form again (a renewal) makes a new one
-        const twin = get().apps.find(a => (off ? a.official === off.id : !a.official && a.name.en.toLowerCase() === name.toLowerCase())
-          && !["filing", "review", "approved"].includes(a.status) && (target ? (target.apps ?? []).includes(a.id) : !inStore(a.id)));
-        if (twin) { made.apps.add(twin.id); mark(); return { application_id: twin.id, status: twin.status, already_in_workspace: true, ...gaps(twin) }; }
         const level = off ? off.level : (LEVELS.includes(i.level as Level) ? i.level : "state") as Level;
+        // a row from the instant plan (preview) without an official form is the same filing when it says the same thing
+        const words = (s: string) => new Set(s.toLowerCase().replace(/[^a-z0-9一-鿿 ]/g, " ").split(/\s+/).filter(x => x.length > 3 && !/^(permit|license|licence|registration|application|certificate|state|city|county)$/.test(x)));
+        const sameThing = (a: Application) => { const x = words(a.name.en), y = words(name); return [...y].filter(t => x.has(t)).length >= Math.min(2, y.size) || (a.level === level && a.agency.en.toLowerCase() === agency.toLowerCase()); };
+        // a filed one is the record; preparing the same form again (a renewal) makes a new one
+        const twin = get().apps.find(a => (off ? a.official === off.id : !a.official && (a.name.en.toLowerCase() === name.toLowerCase() || (a.preview && sameThing(a))))
+          && !["filing", "review", "approved"].includes(a.status) && (target ? (target.apps ?? []).includes(a.id) : !inStore(a.id)));
+        if (twin && !twin.preview) { made.apps.add(twin.id); mark(); return { application_id: twin.id, status: twin.status, already_in_workspace: true, ...gaps(twin) }; }
         const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee ?? i.fee_usd) || 0);
         const currency = (off?.currency ?? (/^[A-Z]{3}$/.test(str(i.currency)) ? str(i.currency) : "USD"));
         const given = fieldList(i.fields, lang === "zh" ? "来自资料" : "From Context");
@@ -545,27 +551,34 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const fields = (listed ? officialFields(off!, given) : withCore(coreFields(get(), target, abroad), given)).map(f => (isBlank(f.value) && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
         const blocked = off ? addressProblems(off.id, Object.fromEntries(fields.filter(f => !isBlank(f.value)).map(f => [f.id, f.value]))) : [];
         for (const p of blocked) { const k = fields.findIndex(f => f.id === p.field); if (k >= 0) fields[k] = { ...fields[k], value: "", from: undefined, quote: undefined }; }
-        const checklist = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
+        let checklist: CheckItem[] = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
+        if (twin) {
+          // the instant plan's row, refined in place: what it waits on and what's already in stay; answers typed into it stay
+          const keep = twin.checklist.filter(c => c.dep || c.state === "done");
+          checklist = [...keep, ...checklist.filter(c => !keep.some(k => k.label.en.toLowerCase() === c.label.en.toLowerCase()))].map((c, k) => (c.dep ? c : { ...c, id: "c" + k }));
+          for (let k = 0; k < fields.length; k++) { const was = twin.fields.find(x => x.id === fields[k].id); if (isBlank(fields[k].value) && was && !isBlank(was.value)) fields[k] = was; }
+        }
         // an official form whose lines aren't in the library yet stays with Placetta until its fields are filled
         const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => isBlank(f.value)) || (off && !fields.length) ? "draft" : "ready";
-        const id = freshId(get(), "x-" + slug(name));
-        S("shaping", L(`Preparing the ${/^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name}`, `准备${name}`), domainOf(url) || undefined);
+        const id = twin ? twin.id : freshId(get(), "x-" + slug(name));
+        S("shaping", L(`${twin ? "Verifying" : "Preparing"} the ${/^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name}`, `${twin ? "核实" : "准备"}${name}`), domainOf(url) || undefined);
         const app: Application = off ? {
           id, name: off.title, agency: off.agency, level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, official: off.id, ...(currency !== "USD" ? { currency } : {}),
           fees: [{ label: L("Government fee", "政府规费"), amount: fee, ...(off.fee == null ? { tbd: true } : {}) }], feeNote: off.feeNote ?? (off.fee == null ? L("Set by the agency's fee schedule. The filing team confirms it before you pay.", "按机构收费标准计算，团队会在您付款前确认。") : L("The agency's published fee. The filing team confirms it before you pay.", "机构公布的费用，团队会在您付款前确认。")),
           est: off.takes ?? (str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认")), renews: off.renews,
           source: { label: domainOf(off.info), url: off.info }, form: same(off.form), fields, checklist,
         } : {
-          id, name: same(name), agency: same(agency), level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, ...(currency !== "USD" ? { currency } : {}),
+          // a preview row keeps its bilingual name; the agency, fee, time and link come from what Odelia verified
+          id, name: twin ? twin.name : same(name), agency: same(agency), level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, ...(currency !== "USD" ? { currency } : {}),
           fees: [{ label: L("Estimated fee", "预估费用"), amount: fee }], feeNote: L("Estimate from Placetta. Confirm with the agency before paying.", "快哉的估算，付款前请向机构确认。"),
           est: str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认"),
           source: { label: domainOf(url), url }, form: str(i.form) ? same(str(i.form, 120)) : undefined, fields, checklist,
         };
-        apply(w => audit("agent", L("Prepared application", "准备申请"), app.name, same(`${fields.filter(f => !isBlank(f.value)).length}/${fields.length}`))(addApp(app)(w)));
+        apply(w => audit("agent", twin ? L("Verified application", "核实申请") : L("Prepared application", "准备申请"), app.name, same(`${fields.filter(f => !isBlank(f.value)).length}/${fields.length}`))(twin ? setApp(id, { ...app, preview: false })(w) : addApp(app)(w)));
         // file it under its store: the one named, or the only one
         if (target) apply(w => ({ ...w, stores: (w.stores ?? []).map(x => (x.id === target.id ? { ...x, apps: [...new Set([...(x.apps ?? []), id])] } : x)) }));
         made.apps.add(id); touch(id); mark();
-        return { application_id: id, status, ...(target ? { store_id: target.id, store: target.name.en } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
+        return { application_id: id, status, ...(twin ? { refined_preview: true, note: "This was a preview row from the instant plan; it's the same application, now verified and filled, not a new one." } : {}), ...(target ? { store_id: target.id, store: target.name.en } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
           fee: off?.fee ?? (off ? null : fee), fee_note: app.feeNote?.en,
           ...(blocked.length ? { address_not_filled: blocked.map(p => addrOut(off!.id, p.field, p.value, p.check)), do_next: ADDR_NEXT } : {}),
           empty_fields: fields.filter(f => isBlank(f.value)).map(f => f.label.en), missing_documents: checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: c.label.en })), ...(known.size ? { filled_from_skill: known.size } : {}),
@@ -601,7 +614,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             if (k >= 0) fields[k] = { ...fields[k], value: f.value, from: f.from, quote: fields[k].value === f.value ? fields[k].quote : undefined };
             else { fields.push(f); added.push(raw); }
           }
-          return { ...x, fields, status: x.status === "draft" && fields.every(f => !isBlank(f.value)) && !x.checklist.some(c => c.state === "missing") ? "ready" : x.status };
+          // a preview row from the instant plan becomes Odelia's own once she fills it (todo: not started, to draft: being prepared)
+          const status: Status = x.preview && x.status === "todo" ? "draft" : x.status;
+          return { ...x, fields, preview: false, status: status === "draft" && fields.every(f => !isBlank(f.value)) && !x.checklist.some(c => c.state === "missing") ? "ready" : status };
         }) }));
         apply(audit("agent", L("Filled fields", "填写字段"), a.name, same(incoming.map(f => f.label.en).join(", "))));
         // the lines that are the same for the whole business (owner, phone, email, EIN...) fill every open application and Context
@@ -630,19 +645,21 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "update_application",
-      description: "Change an application's status or next step. Statuses you can set: draft (Placetta is preparing it), needs (waiting on a document or answer from the person), waiting (blocked by another filing or someone else), todo (not started). An application becomes ready only through request_filing_approval. Nothing already filed or with the filing team can be changed.",
-      inputSchema: { type: "object", properties: { application_id: { type: "string" }, status: { type: "string", enum: ["draft", "needs", "waiting", "todo"] }, next_step: { type: "string", description: "The one next step, in a short sentence" } }, required: ["application_id"] },
+      description: "Change an application's status or next step, or mark a preview application (from the instant plan) verified once you checked it against the agency's own page and nothing needed changing. Statuses you can set: draft (Placetta is preparing it), needs (waiting on a document or answer from the person), waiting (blocked by another filing or someone else), todo (not started). An application becomes ready only through request_filing_approval. Nothing already filed or with the filing team can be changed.",
+      inputSchema: { type: "object", properties: { application_id: { type: "string" }, status: { type: "string", enum: ["draft", "needs", "waiting", "todo"] }, next_step: { type: "string", description: "The one next step, in a short sentence" },
+        verified: { type: "boolean", description: "True once you checked a preview application against the agency's current page or form: clears its preview mark. Only after you read the agency's own page." } }, required: ["application_id"] },
       execute(i) {
         const a = findApp(i.application_id); notFiled(a);
-        const want = str(i.status);
+        const want = str(i.status), verified = i.verified === true;
         if (want === "ready") throw new Error("Use request_filing_approval to put a complete application up for the person's approval; that marks it ready.");
         if (want && !["draft", "needs", "waiting", "todo"].includes(want)) throw new Error(`status must be one of draft, needs, waiting, todo (not "${want}"). Only the filing team and the agency mark filings.`);
-        if (!want && !str(i.next_step)) throw new Error("Give a status or a next_step to change.");
+        if (!want && !str(i.next_step) && !verified) throw new Error("Give a status, a next_step or verified to change.");
+        if (verified && !a.preview) throw new Error(`The ${a.name.en} isn't a preview application; there's no preview mark to clear.`);
         const status = (want || a.status) as Status;
-        S("working", L(`Updating the ${nm(a)}`, `更新${nm(a)}`));
-        apply(w => audit("agent", L("Updated an application", "更新申请"), a.name, same(status))(setApp(a.id, { status, next: str(i.next_step) ? same(str(i.next_step, 200)) : a.next })(w)));
+        S("working", L(`${verified && !want ? "Verifying" : "Updating"} the ${nm(a)}`, `${verified && !want ? "核实" : "更新"}${nm(a)}`));
+        apply(w => audit("agent", verified ? L("Verified application", "核实申请") : L("Updated an application", "更新申请"), a.name, same(status))(setApp(a.id, { status, next: str(i.next_step) ? same(str(i.next_step, 200)) : a.next, ...(verified ? { preview: false } : {}) })(w)));
         made.apps.add(a.id); mark();
-        return { ok: true, status };
+        return { ok: true, status, ...(verified ? { preview: false } : {}) };
       },
     },
     {
@@ -1158,7 +1175,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const apps = w.apps.map(a => {
           const f = latest.get(a.id);
           return {
-            id: a.id, name: a.name[lang], store: storeOf(a.id)?.name[lang] ?? (stores.length > 1 ? "whole business" : undefined), agency: a.agency[lang], status: a.status, waiting_on: on(a.status), next: a.next?.[lang],
+            id: a.id, name: a.name[lang], store: storeOf(a.id)?.name[lang] ?? (stores.length > 1 ? "whole business" : undefined), agency: a.agency[lang], status: a.status, waiting_on: on(a.status), next: a.next?.[lang], preview: a.preview || undefined,
             confirmation: f?.confirmation_number ?? undefined, submitted: f?.submitted_at?.slice(0, 10), last_update: f?.updated_at?.slice(0, 10),
             days_since_update: f ? Math.floor((Date.now() - Date.parse(f.updated_at)) / 864e5) : undefined, team_note: f?.note ?? undefined,
             placetta_filing: f?.agent_state ? { state: f.agent_state, channel: f.channel ?? undefined, needs_you: f.agent_state === "needs_you", log: (f.agent_log ?? []).filter(e => e.kind !== "quiet").slice(-5).map(e => e[lang]) } : undefined,

@@ -32,7 +32,7 @@ import { LegalReader } from "./Legal";
 import { UPDATED } from "./legal";
 import { daysFromNow, daysUntil, inDays, nowIso } from "./time";
 import { preflight } from "./smart";
-import { I, Modal } from "./ui";
+import { I, Menu, Modal } from "./ui";
 import * as api from "./cloud/api";
 import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
@@ -139,13 +139,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [legal, setLegal] = useState<string | null>(null);
   const [plans, setPlans] = useState<null | "start" | "file">(null);
   const [limitHit, setLimitHit] = useState(false);
-  const [wsMenu, setWsMenu] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const toastT = useRef(0);
   const say = useCallback((s: string) => { setToast(s); clearTimeout(toastT.current); toastT.current = window.setTimeout(() => setToast(null), Math.max(2800, s.length * 55)); }, []);
   const main = useRef<HTMLElement>(null);
   const go = useCallback((v: View, s?: string) => {
-    setView(v); setSub(s); setRoute(v, s); setNavOpen(false); setWsMenu(false); main.current?.scrollTo({ top: 0 });
+    setView(v); setSub(s); setRoute(v, s); setNavOpen(false); main.current?.scrollTo({ top: 0 });
     // Settings keeps its own category state; tell it which one was asked for (by the ⌘K bar, a link, a page that moved there)
     if (v === "settings" && s) window.dispatchEvent(new CustomEvent("placetta:settings", { detail: s }));
   }, []);
@@ -373,6 +372,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   const run = useCallback(async (req: Request, shown: string | null, voice = false, resumeId?: string) => {
     if (busyRef.current) return;
+    // The moment of value: the plan is already on screen (src/plan/preview.ts); anything that needs the model waits for a plan.
+    if (cloud && plan === "none" && !("approve" in req || "approveAll" in req)) { setPlans("start"); return; }
     busyRef.current = true; setBusy(true);
     unlockAudio(); tts.stop();
     const aid = nid(), t0 = performance.now();
@@ -435,7 +436,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if ((voice || voiceOn) && said) tts.speak(said, speakTag(lang));
     else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
-  }, [lang, tts, say, t, deep, cloud, voiceOn, services, follow]);
+  }, [lang, tts, say, t, deep, cloud, plan, voiceOn, services, follow]);
 
   /* Back in the app: follow a task still running on the server, or show one that finished while it was closed. */
   const resumed = useRef(false);
@@ -454,6 +455,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [queued, setQueued] = useState<{ id: string; text: string }[]>([]);
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
+    if (cloud && plan === "none") { setPlans("start"); return; }
     setPanelOpen(true);
     if (busyRef.current) {
       // In an account she starts it now, beside the job she's on (up to three at once); otherwise it waits its turn.
@@ -461,7 +463,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       setQueued(l => [...l, { id: String(nid()), text: q }]); say(lang === "zh" ? "已排队，当前任务完成后开始。" : "Queued. Odelia starts it when she finishes the current job."); return;
     }
     run({ text: q }, q, voice);
-  }, [run, say, lang, cloud]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [run, say, lang, cloud, plan]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /* A job started while another runs: it works on the server on its own and shows in the chat and in Work as it goes. */
   const [, setSideJobs] = useState(0);
@@ -828,7 +830,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     go, sub,
     ask, queued, unqueue,
     run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
-    openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : "check"), edit: !!edit }); },
+    openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : a?.preview ? "fees" : "check"), edit: !!edit }); },
     openApproval: id => setModal(id),
     approve: (id, sig) => void approve(id, sig),
     approveAll: ids => void approveAll(ids),
@@ -917,19 +919,19 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>
           : <span className="side-tools">{!slim && bell}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
       </div>
-      <div className="wsname-wrap">
-        <button type="button" className="wsname" onClick={() => cloud && setWsMenu(o => !o)} aria-haspopup={cloud ? "menu" : undefined} aria-expanded={cloud ? wsMenu : undefined} disabled={!cloud}>
-          <b>{b(view_.business)}</b><span>{wsSub}</span>{cloud && <I.chev />}
-        </button>
-        {cloud && wsMenu && (
-          <div className="wsmenu" role="menu">
-            {cloud.workspaces.map(x => <button key={x.id} type="button" role="menuitem" aria-current={x.id === cloud.wsId} onClick={() => { setWsMenu(false); if (x.id !== cloud.wsId) cloud.switchTo(x.id); }}>{x.name}{x.id === cloud.wsId && <I.check />}</button>)}
-            <button type="button" role="menuitem" onClick={() => { setWsMenu(false); cloud.newWorkspace(); }}><I.plus />{b(B("New business", "新建企业"))}</button>
-            <a role="menuitem" href="/"><I.globe />{b(B("Placetta website", "快哉官网"))}</a>
-            <button type="button" role="menuitem" onClick={() => { setWsMenu(false); cloud.signOut(); }}><I.logout />{b(B("Sign out", "退出登录"))}</button>
-          </div>
-        )}
-      </div>
+      {cloud ? (
+        <Menu className="wsname-wrap" buttonClass="wsname" label={b(B("Workspaces", "工作区"))} button={<><b>{b(view_.business)}</b><span>{wsSub}</span><I.chev /></>}
+          items={[
+            ...cloud.workspaces.map(x => ({ key: x.id, label: x.name, picked: x.id === cloud.wsId, onPick: () => { if (x.id !== cloud.wsId) cloud.switchTo(x.id); } })),
+            { key: "new", label: b(B("New business", "新建企业")), icon: <I.plus />, onPick: () => cloud.newWorkspace() },
+            { key: "site", label: b(B("Placetta website", "快哉官网")), icon: <I.globe />, href: "/" },
+            { key: "out", label: b(B("Sign out", "退出登录")), icon: <I.logout />, onPick: () => cloud.signOut() },
+          ]} />
+      ) : (
+        <div className="wsname-wrap">
+          <button type="button" className="wsname" disabled><b>{b(view_.business)}</b><span>{wsSub}</span></button>
+        </div>
+      )}
       {!phone && (
         <ul className="nav">
           {NAV.map(n => (
@@ -993,6 +995,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           )}
           <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{page}</main>
           {!panelOpen && !chatPage && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} /></div>}
+          {toast && <div className="toast" role="status">{toast}</div>}
           {phone && (
             <nav className="tabbar" aria-label={t("nav_more")}>
               {NAV.map(n => (
@@ -1023,7 +1026,6 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         )}
         <CommandBar open={cmdk} setOpen={setCmdk} />
         <Walkthrough />
-        {toast && <div className="toast" role="status">{toast}</div>}
       </div>
     </AppCtx.Provider>
   );

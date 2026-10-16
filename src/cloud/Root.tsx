@@ -4,7 +4,7 @@ import { GateBot } from "../Bot";
 import { LegalBody } from "../Legal";
 import { LEGAL, UPDATED } from "../legal";
 import { Logo } from "../Logo";
-import { I } from "../ui";
+import { I, Menu, Select } from "../ui";
 import { B, same, type Bi, type Store, type Workspace } from "../model";
 import type { Lang } from "../i18n";
 import * as api from "./api";
@@ -14,6 +14,8 @@ import { TwoStepCode } from "./TwoStep";
 import { HqHome } from "../Headquarters";
 import { applyTheme, readTheme } from "../hooks";
 import type { HqRow } from "../hq";
+import { previewPlan } from "../plan/preview";
+import { nowIso } from "../time";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
    Invites to a teammate's workspace are accepted on sign-in. New businesses start with onboarding (and the filing
@@ -85,40 +87,18 @@ export function TermsCheck({ id, lang, checked, onChange, onDoc }: { id: string;
 /* Region: where the account and its data live. One region today; the others show as not available yet. */
 function RegionPick({ lang }: { lang: Lang }) {
   const L = (x: Bi) => x[lang];
-  const [open, setOpen] = useState(false);
-  const regions: { id: string; code: string; label: Bi; on: boolean }[] = [
+  const regions:{ id: string; code: string; label: Bi; on: boolean }[] = [
     { id: "us", code: "US", label: B("United States", "美国"), on: true },
     { id: "eu", code: "EU", label: B("Europe", "欧洲"), on: false },
     { id: "ap", code: "APAC", label: B("Asia Pacific", "亚太"), on: false },
     { id: "au", code: "AU", label: B("Australia", "澳大利亚"), on: false },
   ];
   const cur = regions.find(r => r.id === api.REGION.id) ?? regions[0];
-  const globe = <svg className="rg-globe" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.3 3 14.7 0 18M12 3c-3 3.3-3 14.7 0 18"/></svg>;
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest(".region")) setOpen(false); };
-    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("mousedown", close); document.addEventListener("keydown", esc);
-    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", esc); };
-  }, [open]);
   return (
     <div className="region">
-      <button type="button" className="region-btn" aria-haspopup="listbox" aria-expanded={open} aria-label={`${L(B("Data stored in", "数据存储于"))}: ${L(cur.label)}`} onClick={() => setOpen(o => !o)}>
-        <span className="rg-k">{L(B("Data stored in", "数据存储于"))}</span>
-        <b>{cur.code}</b>
-        <svg className="rg-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      {open && (
-        <ul className="region-menu" role="listbox" aria-label={L(B("Region", "区域"))}>
-          {regions.map(r => (
-            <li key={r.id} role="option" aria-selected={r.id === cur.id} aria-disabled={!r.on}>
-              <button type="button" disabled={!r.on} title={r.on ? L(r.label) : `${L(r.label)}: ${L(B("not available yet", "暂未开放"))}`} onClick={() => setOpen(false)}>
-                {globe}<span>{r.code}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <span className="rg-k" aria-hidden="true">{L(B("Data stored in", "数据存储于"))}</span>
+      <Menu kind="listbox" label={L(B("Region", "区域"))} buttonClass="sel sm" buttonLabel={`${L(B("Data stored in", "数据存储于"))}: ${L(cur.label)}`} button={cur.code}
+        items={regions.map(r => ({ key: r.id, label: r.code, icon: <I.globe />, picked: r.id === cur.id, disabled: !r.on, title: r.on ? L(r.label) : `${L(r.label)}: ${L(B("not available yet", "暂未开放"))}` }))} />
     </div>
   );
 }
@@ -250,9 +230,9 @@ function SignIn({ lang }: { lang: Lang }) {
         <form onSubmit={e => { e.preventDefault(); void sendPhone(); }}>
           <div className="phrow">
             <label className="sr" htmlFor="gate-cc">{L(B("Country code", "国家或地区代码"))}</label>
-            <select id="gate-cc" value={cc} onChange={e => setCc(e.target.value)}>
+            <Select sz="lg" id="gate-cc" value={cc} onChange={e => setCc(e.target.value)}>
               {[["+1", "US +1"], ["+86", "CN +86"], ["+852", "HK +852"], ["+886", "TW +886"], ["+65", "SG +65"], ["+44", "UK +44"], ["+81", "JP +81"], ["+82", "KR +82"], ["+61", "AU +61"], ["+971", "AE +971"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
+            </Select>
             <label className="sr" htmlFor="gate-phone">{L(B("Phone number", "手机号"))}</label>
             <input id="gate-phone" type="tel" inputMode="tel" autoComplete="tel-national" value={phone} onChange={e => setPhone(e.target.value.replace(/[^\d\s()-]/g, "").slice(0, 20))} placeholder={cc === "+86" ? "138 0013 8000" : "(212) 555 0123"} autoFocus />
           </div>
@@ -343,11 +323,11 @@ function parsePlace(v: string): { city: string; state: string } | null {
 
 /* One line instead of a form: "Milk tea shop in Flushing, NY" or "奶茶店，法拉盛". What it sells and the city are read
    from the words; anything missing is asked right there, one field at a time. */
-const ZH_CITIES: [RegExp, string][] = [[/法拉盛/, "Flushing, NY"], [/布鲁克林/, "Brooklyn, NY"], [/曼哈顿/, "Manhattan, NY"], [/皇后区/, "Queens, NY"], [/纽约/, "New York, NY"],
-  [/圣何塞|圣荷西/, "San Jose, CA"], [/旧金山|三藩市/, "San Francisco, CA"], [/洛杉矶/, "Los Angeles, CA"], [/尔湾/, "Irvine, CA"], [/圣地亚哥/, "San Diego, CA"], [/阿卡迪亚/, "Arcadia, CA"],
-  [/圣盖博/, "San Gabriel, CA"], [/库比蒂诺/, "Cupertino, CA"], [/弗里蒙特|佛利蒙/, "Fremont, CA"], [/奥克兰/, "Oakland, CA"], [/休斯顿/, "Houston, TX"], [/达拉斯/, "Dallas, TX"], [/奥斯汀/, "Austin, TX"],
-  [/圣安东尼奥/, "San Antonio, TX"], [/沃斯堡/, "Fort Worth, TX"], [/西雅图/, "Seattle, WA"], [/波士顿/, "Boston, MA"], [/芝加哥/, "Chicago, IL"], [/凤凰城/, "Phoenix, AZ"], [/拉斯维加斯/, "Las Vegas, NV"],
-  [/费城/, "Philadelphia, PA"], [/亚特兰大/, "Atlanta, GA"], [/迈阿密/, "Miami, FL"], [/波特兰/, "Portland, OR"], [/丹佛/, "Denver, CO"]];
+const ZH_CITIES: [RegExp, string, string][] = [[/法拉盛/, "Flushing, NY", "纽约法拉盛"], [/布鲁克林/, "Brooklyn, NY", "纽约布鲁克林"], [/曼哈顿/, "Manhattan, NY", "纽约曼哈顿"], [/皇后区/, "Queens, NY", "纽约皇后区"], [/纽约/, "New York, NY", "纽约"],
+  [/圣何塞|圣荷西/, "San Jose, CA", "加州圣何塞"], [/旧金山|三藩市/, "San Francisco, CA", "旧金山"], [/洛杉矶/, "Los Angeles, CA", "洛杉矶"], [/尔湾/, "Irvine, CA", "加州尔湾"], [/圣地亚哥/, "San Diego, CA", "圣地亚哥"], [/阿卡迪亚/, "Arcadia, CA", "加州阿卡迪亚"],
+  [/圣盖博/, "San Gabriel, CA", "加州圣盖博"], [/库比蒂诺/, "Cupertino, CA", "加州库比蒂诺"], [/弗里蒙特|佛利蒙/, "Fremont, CA", "加州弗里蒙特"], [/奥克兰/, "Oakland, CA", "加州奥克兰"], [/休斯顿/, "Houston, TX", "休斯顿"], [/达拉斯/, "Dallas, TX", "达拉斯"], [/奥斯汀/, "Austin, TX", "奥斯汀"],
+  [/圣安东尼奥/, "San Antonio, TX", "圣安东尼奥"], [/沃斯堡/, "Fort Worth, TX", "沃斯堡"], [/西雅图/, "Seattle, WA", "西雅图"], [/波士顿/, "Boston, MA", "波士顿"], [/芝加哥/, "Chicago, IL", "芝加哥"], [/凤凰城/, "Phoenix, AZ", "凤凰城"], [/拉斯维加斯/, "Las Vegas, NV", "拉斯维加斯"],
+  [/费城/, "Philadelphia, PA", "费城"], [/亚特兰大/, "Atlanta, GA", "亚特兰大"], [/迈阿密/, "Miami, FL", "迈阿密"], [/波特兰/, "Portland, OR", "波特兰"], [/丹佛/, "Denver, CO", "丹佛"]];
 const KINDS: [RegExp, string][] = [[/milk ?tea|bubble tea|boba|tea shop|奶茶|茶饮|珍珠/i, "Milk tea"], [/coffee|caf[eé]|咖啡/i, "Coffee"], [/bakery|bake|dessert|cake|烘焙|甜品|面包|蛋糕/i, "Bakery and desserts"],
   [/restaurant|hot ?pot|noodle|dumpling|bbq|kitchen|餐厅|火锅|面馆|饭店|饺子|烧烤|餐馆/i, "Restaurant"], [/grocery|supermarket|market|超市|生鲜/i, "Grocery"], [/import|e-?commerce|online|amazon|进口|电商|跨境/i, "Importer or online seller"],
   [/warehouse|3pl|fulfil|仓库|物流/i, "Warehouse or 3PL"], [/retail|boutique|store|shop|零售|门店|商店/i, "Retail"]];
@@ -403,9 +383,18 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       id: slug(city), name: same(f.street.trim() ? `${city}, ${f.street.trim()}` : city), address: [f.street.trim(), city, state].filter(Boolean).join(", "),
       stage: open ? "open" : "opening", plannedOpen: monthIso ? monthIso + "-15" : undefined, rules: nyc ? ["nyc_grades", "nyc_fww"] : [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [],
     };
+    // The instant plan, from Placetta's registry and before any model call: every permit for this kind of business in
+    // this place, in order, with fees and times, so the first screen already shows the work. Odelia verifies each one
+    // against the agency when the plan starts; the rows stay, marked preview until then.
+    const place = `${city}, ${state}`;
+    const first = previewPlan(what, place, store.plannedOpen, { entity: f.entity.trim(), storeId: store.id });
+    store.apps = first.apps.map(a => a.id);
+    if (!open && first.projectedOpen) store.projectedOpen = first.projectedOpen;
     const ws: Workspace = normalize(brand, {
       business: same(brand), goal: month ? B(`Open by ${monthEn}`, `${monthZh}开业`) : same(""),
       locations: [{ id: slug(city), name: same(city), county: same(st), state: "active" }],
+      apps: first.apps, deadlines: first.deadlines,
+      firstPlan: { at: nowIso(), what, where: place, whereZh: ZH_CITIES.find(([, en]) => en === place)?.[2], apps: first.apps.length, opening: store.plannedOpen, projectedOpen: first.projectedOpen ?? undefined },
       facts: [
         ...(f.entity.trim() ? [{ id: "f-entity", group: "business" as const, label: B("Legal entity", "法律实体"), value: same(f.entity.trim()), source: B("You told me", "您告诉我的") }] : []),
         { id: "f-sell", group: "operations", label: B("What you sell", "销售内容"), value: same(what), source: B("You told me", "您告诉我的") },
@@ -427,7 +416,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   return (
     <div className="gate-card wide">
       <h1>{L(B("What are you opening, and where?", "您要开什么店？开在哪里？"))}</h1>
-      <p className="gate-sub">{L(B("One line is enough. Odelia finds every license and permit, fills the forms and tells you what's next.", "一句话就够。Odelia 会找出全部执照和许可，填好表格，并告诉您下一步。"))}</p>
+      <p className="gate-sub">{L(B("One line is enough. Your plan appears right away: every license and permit, in order, with fees and timelines. Odelia then fills the forms and files them with your approval.", "一句话就够。计划立刻出现：全部执照和许可，按顺序列出费用与时间。之后 Odelia 填好表格，经您批准后提交。"))}</p>
       <form className="onb" onSubmit={e => { e.preventDefault(); void create(); }}>
         <label className="q">
           <span className="sr">{L(B("What and where", "开什么店、在哪里"))}</span>
@@ -455,10 +444,10 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
           </label>
         )}
         {needState && (
-          <select id="onb-state" value={f.state} onChange={e => setF({ ...f, state: e.target.value })} aria-label={L(B("State", "州"))}>
+          <Select sz="lg" data-prompt id="onb-state" value={f.state} onChange={e => setF({ ...f, state: e.target.value })} aria-label={L(B("State", "州"))}>
             <option value="">{L(B("Which state?", "哪个州？"))}</option>
             {STATES.map(([c, n]) => <option key={c} value={c}>{n}</option>)}
-          </select>
+          </Select>
         )}
 
         {f.more ? (

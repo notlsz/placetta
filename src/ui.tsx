@@ -1,4 +1,5 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type SelectHTMLAttributes } from "react";
+import type React from "react";
 import type { Application, Doc, Level, Status } from "./model";
 import { useApp } from "./ctx";
 import { bytes, fmtAgo, money } from "./time";
@@ -173,6 +174,73 @@ export function Footer({ full }: { full?: boolean }) {
       {full ? <p><b>{t("foot_data")}</b>{t("foot_text")}</p> : <p>{t("foot_short")}</p>}
       {!cloud && <p>{t("foot_sample")}</p>}
     </footer>
+  );
+}
+
+/** Every dropdown field: the shared box (.sel) with one chevron, at the height of the text fields beside it.
+    sz "sm" sits in a row of 34px buttons, "lg" beside the 46px fields of sign-in and onboarding. */
+export function Select({ sz, className, ...p }: SelectHTMLAttributes<HTMLSelectElement> & { sz?: "sm" | "lg" }) {
+  return <select {...p} className={"sel" + (sz ? " " + sz : "") + (className ? " " + className : "")} />;
+}
+
+export type MenuItem = { key: string; label: ReactNode; icon?: ReactNode; picked?: boolean; disabled?: boolean; title?: string; href?: string; onPick?: () => void };
+/** A button that opens a list: the shared menu surface (.menu), arrow keys, Home and End to move, Esc or a click outside
+    to close. It opens below and flips up when there's no room, and never runs off the side of the screen. "listbox"
+    is a choice of one (the picked item has a check); "menu" is a set of actions. */
+export function Menu({ kind = "menu", label, button, buttonClass, buttonLabel, items, className, disabled }: {
+  kind?: "menu" | "listbox"; label: string; button: ReactNode; buttonClass?: string; buttonLabel?: string; items: MenuItem[]; className?: string; disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [place, setPlace] = useState<{ up: boolean; dx: number }>({ up: false, dx: 0 });
+  const wrap = useRef<HTMLDivElement>(null), btn = useRef<HTMLButtonElement>(null), list = useRef<HTMLDivElement>(null);
+  const opts = () => [...(list.current?.querySelectorAll<HTMLElement>("[data-mi]:not([aria-disabled=true])") ?? [])];
+  const icons = items.some(it => it.icon);
+  const close = (refocus = true) => { setOpen(false); if (refocus) btn.current?.focus(); };
+  useLayoutEffect(() => {
+    if (!open || !list.current || !wrap.current) return;
+    const w = wrap.current.getBoundingClientRect(), m = list.current.getBoundingClientRect();
+    const below = window.innerHeight - w.bottom, above = w.top;
+    const up = below < m.height + 12 && above > below;
+    const left = m.left - place.dx, dx = left < 8 ? 8 - left : left + m.width > window.innerWidth - 8 ? window.innerWidth - 8 - m.width - left : 0;
+    if (up !== place.up || Math.round(dx) !== Math.round(place.dx)) setPlace({ up, dx });
+    (opts().find(o => o.getAttribute("aria-selected") === "true" || o.getAttribute("aria-checked") === "true") ?? opts()[0])?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+  useEffect(() => {
+    if (!open) return;
+    const out = (e: MouseEvent) => { if (!wrap.current?.contains(e.target as Node)) close(false); };
+    document.addEventListener("mousedown", out);
+    return () => document.removeEventListener("mousedown", out);
+  }, [open]);
+  const keys = (e: React.KeyboardEvent) => {
+    const o = opts(), i = o.indexOf(document.activeElement as HTMLElement);
+    const go = (n: number) => { e.preventDefault(); o[(n + o.length) % o.length]?.focus(); };
+    if (e.key === "ArrowDown") go(i + 1);
+    else if (e.key === "ArrowUp") go(i < 0 ? o.length - 1 : i - 1);
+    else if (e.key === "Home") go(0);
+    else if (e.key === "End") go(o.length - 1);
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); }
+    else if (e.key === "Tab") close(false);
+  };
+  return (
+    <div ref={wrap} className={"menu-wrap" + (className ? " " + className : "")}>
+      <button ref={btn} type="button" className={buttonClass} aria-haspopup={kind} aria-expanded={open} aria-label={buttonLabel} disabled={disabled}
+        onClick={() => setOpen(o => !o)} onKeyDown={e => { if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !open) { e.preventDefault(); setOpen(true); } }}>{button}</button>
+      {open && (
+        <div ref={list} className={"menu" + (place.up ? " up" : "")} style={place.dx ? { translate: `${place.dx}px 0` } : undefined} role={kind} aria-label={label} onKeyDown={keys}>
+          {items.map(it => {
+            const a = {
+              key: it.key, "data-mi": "", role: kind === "listbox" ? "option" : it.picked !== undefined ? "menuitemradio" : "menuitem", tabIndex: -1, title: it.title, "aria-disabled": it.disabled || undefined,
+              ...(kind === "listbox" ? { "aria-selected": !!it.picked } : it.picked !== undefined ? { "aria-checked": it.picked } : {}),
+            };
+            const body = <>{it.icon ?? (icons && <span className="menu-i" aria-hidden="true" />)}<span className="menu-l">{it.label}</span>{it.picked && <svg className="menu-check" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}</>;
+            return it.href
+              ? <a {...a} href={it.href}>{body}</a>
+              : <button {...a} type="button" onClick={() => { if (it.disabled) return; close(); it.onPick?.(); }}>{body}</button>;
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
