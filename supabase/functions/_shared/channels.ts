@@ -79,13 +79,14 @@ export async function postHook(kind: HookKind, url: string, text: string, secret
     try { j = JSON.parse(raw); } catch { /* not JSON */ }
     const code = kind === "lark" ? (j.code ?? j.StatusCode) : j.errcode;
     if (res.ok && code === 0) return { ok: true };
-    const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status);
+    const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status).split(/, hint:|, from ip:/)[0];   // never show our server's address
     // Lark 19001 bad link; WeCom 93000 invalid key; DingTalk 300001/310000 bad token or signature
     const gone = kind === "lark" ? [19001, 19002].includes(Number(code)) : kind === "wecom" ? Number(code) === 93000 : [300001, 300005].includes(Number(code));
     return { ok: false, gone, why: `${code ?? res.status}: ${msg}`.slice(0, 160) };
   }
   if (res.ok) return { ok: true };
-  return { ok: false, gone: [400, 403, 404, 410].includes(res.status), why: `${res.status}: ${raw.slice(0, 120)}` };
+  // Teams answers 401 WorkflowNotFound for a deleted workflow
+  return { ok: false, gone: [400, 403, 404, 410].includes(res.status) || (kind === "teams" && res.status === 401), why: `${res.status}: ${raw.slice(0, 120)}` };
 }
 
 /** The welcome post that proves the link works before it's saved. */

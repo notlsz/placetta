@@ -24,6 +24,10 @@ import squareLogo from "./assets/integrations/square.svg";
 import toastLogo from "./assets/integrations/toast.svg";
 import qbLogo from "./assets/integrations/quickbooks.svg";
 import slackLogo from "./assets/integrations/slack.png";
+import larkLogo from "./assets/integrations/lark.svg";
+import wecomLogo from "./assets/integrations/wecom.svg";
+import dingtalkLogo from "./assets/integrations/dingtalk.svg";
+import teamsLogo from "./assets/integrations/teams.svg";
 
 
 /* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
@@ -91,14 +95,14 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
   ] },
   { group: B("Team chat", "团队群聊"), items: [
     { kind: "slack", name: "Slack", why: CHAT_WHY, logo: slackLogo, hook: true },
-    { kind: "lark", name: "Lark (Feishu)", zh: "飞书", why: CHAT_WHY, hook: true },
-    { kind: "wecom", name: "WeCom", zh: "企业微信", why: CHAT_WHY, hook: true },
-    { kind: "dingtalk", name: "DingTalk", zh: "钉钉", why: CHAT_WHY, hook: true },
-    { kind: "teams", name: "Microsoft Teams", why: CHAT_WHY, hook: true },
+    { kind: "lark", name: "Lark (Feishu)", zh: "飞书", why: CHAT_WHY, hook: true, logo: larkLogo },
+    { kind: "wecom", name: "WeCom", zh: "企业微信", why: CHAT_WHY, hook: true, logo: wecomLogo },
+    { kind: "dingtalk", name: "DingTalk", zh: "钉钉", why: CHAT_WHY, hook: true, logo: dingtalkLogo },
+    { kind: "teams", name: "Microsoft Teams", why: CHAT_WHY, hook: true, logo: teamsLogo },
   ] },
   { group: B("Give Odelia jobs from chat", "在聊天中给 Odelia 派活"), items: [
     { kind: "slack_bot", name: "Odelia in Slack", zh: "Slack 中的 Odelia", why: B("Mention @Odelia in a channel or message her: she does the job and answers in the thread", "在频道里 @Odelia 或私信她：她完成工作并在话题中回复"), logo: slackLogo, bot: true },
-    { kind: "lark_bot", name: "Odelia in Lark (Feishu)", zh: "飞书中的 Odelia", why: B("@Odelia in a group or message her: she does the job and replies there", "在群里 @Odelia 或私信她：她完成工作并直接回复"), bot: true },
+    { kind: "lark_bot", name: "Odelia in Lark (Feishu)", zh: "飞书中的 Odelia", why: B("@Odelia in a group or message her: she does the job and replies there", "在群里 @Odelia 或私信她：她完成工作并直接回复"), logo: larkLogo, bot: true },
   ] },
   { group: B("Documents", "文件"), items: [
     { kind: "gdrive", name: "Google Drive", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: gdriveLogo },

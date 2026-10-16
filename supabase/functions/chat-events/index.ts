@@ -5,7 +5,8 @@
 // each event is taken once. The job runs as the owner who connected the bot, and anything to file, pay or send still
 // waits for an approval in the app.
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { type Bot, type ChatTo, chatReply, type LarkBot, larkDecrypt, larkSigned, larkText, type SlackBot, slackSigned, slackText } from "../_shared/bots.ts";
+import { type Bot, type ChatTo, chatReply, type LarkBot, larkDecrypt, larkSigned, larkText, larkWorks, type SlackBot, slackSigned, slackText, slackWho } from "../_shared/bots.ts";
+import { HOOK_KINDS, postHook } from "../_shared/channels.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -103,6 +104,23 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const body = await req.text();
   if (body.length > 200_000) return json({ error: "too large" }, 413);
+  // ?probe=1 with the monitor key: each provider's real answer to a well-formed link or credentials it doesn't know, so a
+  // change on their side shows up here before a customer finds it (nothing is posted anywhere)
+  if (url.searchParams.get("probe")) {
+    const { data: good } = await admin.rpc("monitor_key_ok", { p_key: req.headers.get("x-monitor-key") ?? "" });
+    if (good !== true) return json({ error: "unauthorized" }, 401);
+    const fake: Record<string, string> = {
+      slack: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+      lark: "https://open.feishu.cn/open-apis/bot/v2/hook/00000000-0000-0000-0000-000000000000",
+      wecom: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=00000000-0000-0000-0000-000000000000",
+      dingtalk: "https://oapi.dingtalk.com/robot/send?access_token=0000000000000000000000000000000000000000000000000000000000000000",
+      teams: "https://prod-00.westus.logic.azure.com/workflows/00000000000000000000000000000000/triggers/manual/paths/invoke?api-version=2016-06-01&sig=x",
+    };
+    const hooks = await Promise.all(HOOK_KINDS.map(async (k) => [k, await postHook(k, fake[k], "Placetta probe")] as const));
+    const slackBot = await slackWho("xoxb-0000000000-0000000000000-000000000000000000000000");
+    const larkBot = await larkWorks({ kind: "lark_bot", app_id: "cli_00000000000000", app_secret: "x".repeat(32), verification_token: "x", domain: "feishu" });
+    return json({ hooks: Object.fromEntries(hooks), slack_bot_accepts_fake: !!slackBot, lark_bot_accepts_fake: larkBot });
+  }
   const s = url.searchParams.get("slack"), l = url.searchParams.get("lark");
   try {
     if (s && UUID.test(s)) return await slack(req, s, body);
