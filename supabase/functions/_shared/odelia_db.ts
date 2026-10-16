@@ -25,8 +25,8 @@ export async function linkOf(admin: SupabaseClient, userId: string): Promise<Lin
 
 export type Kind = "chat" | "ack" | "reply" | "code" | "update" | "urgent" | "system" | "call" | "missed";
 /** Log one text or call. Returns the row's id, or null when it's already logged (Telnyx retried a webhook) or failed. */
-export async function logMessage(admin: SupabaseClient, row: { user_id: string | null; workspace_id?: string | null; direction: "in" | "out"; channel: Channel; kind: Kind; body: string; provider_id?: string | null; run_id?: string | null; line?: string | null; service?: string | null }): Promise<number | null> {
-  const { data, error } = await admin.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2000), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null, line: row.line ?? null, service: row.service ?? null }).select("id").maybeSingle();
+export async function logMessage(admin: SupabaseClient, row: { user_id: string | null; workspace_id?: string | null; direction: "in" | "out"; channel: Channel | "email"; kind: Kind; body: string; provider_id?: string | null; run_id?: string | null; line?: string | null; service?: string | null; subject?: string | null }): Promise<number | null> {
+  const { data, error } = await admin.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2000), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null, line: row.line ?? null, service: row.service ?? null, ...(row.subject != null ? { subject: row.subject.slice(0, 300) } : {}) }).select("id").maybeSingle();
   if (error && error.code !== "23505") console.error("odelia log", error.code);
   return error ? null : (data?.id as number | undefined) ?? null;
 }
@@ -140,4 +140,35 @@ export async function mayUseAgent(admin: SupabaseClient, ws: string, userId: str
   if (error || (access !== "owner" && access !== "member")) return "not_member";
   const { data: plan } = await admin.rpc("plan_of", { ws });
   return plan === "none" ? "no_plan" : "ok";
+}
+
+/* ------------------------------ files people send ------------------------------ */
+
+export const DOC_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "application/pdf": "pdf" };
+export const DOC_MAX = 10 * 1024 * 1024;
+
+/** Stores photos and PDFs someone sent Odelia (by text, WhatsApp or email) in the workspace's Documents: storage, the
+ *  documents table, and the workspace's own list the agent reads from. Returns what was saved. */
+export async function storeDocs(admin: SupabaseClient, ws: string, uid: string, files: { name: string; mime: string; bytes: Uint8Array }[], o: { folder: string; tag: { en: string; zh: string } }) {
+  const out: { name: string; path: string; size: number; mime: string }[] = [];
+  for (const f of files.slice(0, 5)) {
+    if (!DOC_TYPES[f.mime] || !f.bytes.length || f.bytes.length > DOC_MAX) continue;
+    try {
+      const path = `${ws}/${o.folder}/${crypto.randomUUID()}/${f.name.replace(/\s+/g, "-").replace(/[^\w.\-\u3400-\u9fff]+/g, "_").slice(0, 120)}`;
+      const up = await admin.storage.from("documents").upload(path, new Blob([f.bytes as BlobPart], { type: f.mime }), { contentType: f.mime, upsert: false });
+      if (up.error) continue;
+      const { error } = await admin.from("documents").insert({ workspace_id: ws, name: f.name, path, size: f.bytes.length, mime: f.mime, source: "customer", uploaded_by: uid });
+      if (error) { await admin.storage.from("documents").remove([path]); continue; }
+      out.push({ name: f.name, path, size: f.bytes.length, mime: f.mime });
+    } catch (e) { console.error("store doc", String(e).slice(0, 160)); }
+  }
+  if (out.length) {
+    const { data } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
+    const state = (data?.state ?? {}) as { docs?: unknown[] };
+    const docs = Array.isArray(state.docs) ? state.docs : [];
+    const at = new Date().toISOString();
+    const added = out.map((f) => ({ id: "d-" + crypto.randomUUID().slice(0, 8), name: f.name, kind: f.mime === "application/pdf" ? "pdf" : "jpg", size: f.size, by: "you", at, tag: o.tag, path: f.path }));
+    await admin.from("workspaces").update({ state: { ...state, docs: [...added, ...docs] } }).eq("id", ws);
+  }
+  return out;
 }

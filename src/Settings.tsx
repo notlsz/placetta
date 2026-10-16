@@ -492,6 +492,7 @@ function PhoneGroup() {
   const textBody = textIn ? `LINK ${textIn.code}` : "";
   const log = st?.log ?? [];
   const who = (r: api.PhoneLogRow) => r.channel === "voice" ? (zh ? "通话" : "Call")
+    : r.channel === "email" ? (r.direction === "in" ? (zh ? "您发的邮件" : "You emailed") : (zh ? "Odelia 回复的邮件" : "Odelia emailed"))
     : (r.direction === "in" ? (zh ? "您发的短信" : "You texted") : (zh ? "Odelia 发的短信" : "Odelia texted")) + (r.service === "iMessage" ? (zh ? "（iMessage）" : " (iMessage)") : "");
 
   const wa = line.whatsapp ? line.whatsapp.replace(/^\+/, "") : "";
@@ -500,6 +501,9 @@ function PhoneGroup() {
       sub: <>{display}{line.imessage ? (zh ? "，可发 iMessage（安卓手机为短信）" : ", on iMessage (texts from Android)") : (zh ? "，可发短信" : ", for texts")}
         {line.voice && (callApart ? <>{zh ? `；来电请拨 ${prettyPhone(callNumber!)}` : `. Calls: ${prettyPhone(callNumber!)}`}</> : (zh ? "，也可打电话" : ", and calls"))}</>,
       right: <>{number && <a className="sbtn quiet" href={`sms:${number}`}>{zh ? "发短信" : "Text"}</a>}<Btn onClick={() => saveContact(number, zh, callNumber)}><I.download />{zh ? "保存联系人" : "Save contact"}</Btn></> }] as Row[] : []),
+    ...(line.email ? [{ label: B("Email Odelia", "给 Odelia 发邮件"), icon: <I.message />,
+      sub: <>{line.email}{zh ? "。用您登录快哉的邮箱写信或转发机构来信，附件会存入“文件”。" : ". Write or forward an agency's letter from the address you sign in with; attachments go into Documents."}</>,
+      right: <a className="sbtn quiet" href={`mailto:${line.email}`}>{zh ? "写邮件" : "Write"}</a> }] as Row[] : []),
     ...(wa ? [{ label: B("Odelia on WhatsApp", "Odelia 的 WhatsApp"), icon: <I.message />,
       sub: <>{prettyPhone(line.whatsapp!)}{zh ? "，用已关联的号码发消息即可" : ", from your linked number"}</>,
       right: <a className="sbtn quiet" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">{zh ? "打开 WhatsApp" : "Open WhatsApp"}</a> }] as Row[] : []),

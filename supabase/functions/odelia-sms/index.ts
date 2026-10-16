@@ -25,7 +25,8 @@ import {
   appLink, appOrigin, BLOCKED_BY_STOP, inboundFlood, inQuietHours, KEYWORD_REPLY, keyword, type Lang, localMinutes, LIMITS, normalizePhone, odeliaNumber,
   pickWorkspace, prettyPhone, randomCode, SAY, smsReady, splitSms, strangerMayGetReply, switchTarget, underDailyLimit, verifyTelnyx, voiceReady,
 } from "../_shared/odelia.ts";
-import { currentWorkspace, criticalLines, forgetCriticalLines, type Link, linkByNumber, linkOf, logMessage, sendText, textingReady, textUser } from "../_shared/odelia_db.ts";
+import { currentWorkspace, criticalLines, DOC_MAX, DOC_TYPES, forgetCriticalLines, storeDocs, type Link, linkByNumber, linkOf, logMessage, sendText, textingReady, textUser } from "../_shared/odelia_db.ts";
+import { mailReady, odeliaEmail } from "../_shared/mail.ts";
 import { parseWhatsApp, subscribeChallenge, verifyWhatsApp, waMedia, waMediaHost, waTyping, whatsappNumber, whatsappReady, type WaEvent } from "../_shared/whatsapp.ts";
 import { hashLine, linqLineHealth, linqLines, linqReady, linqTyping, parseLinq, verifyLinq, type LinqEvent } from "../_shared/linq.ts";
 
@@ -172,46 +173,27 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
 }
 
 type Media = { url?: string; content_type?: string; size?: number; id?: string };
-const MEDIA_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "application/pdf": "pdf" };
-const MEDIA_MAX = 10 * 1024 * 1024;
 
-/** Downloads up to 5 photos or PDFs from the text, stores each in the workspace's Documents (storage, the documents table
- *  and the workspace's own list), and returns what was saved. Anything else, or anything too big, is skipped. */
+/** Downloads up to 5 photos or PDFs from the text and stores each in the workspace's Documents (storeDocs). Anything
+ *  else, or anything too big, is skipped. */
 async function saveMedia(media: Media[], ws: string, uid: string, lang: "en" | "zh") {
-  const out: { name: string; path: string; size: number; mime: string }[] = [];
-  const stamp = new Date().toISOString().slice(0, 10);
-  for (const [i, m] of media.slice(0, 5).entries()) {
+  const files: { mime: string; bytes: Uint8Array }[] = [];
+  for (const m of media.slice(0, 5)) {
     const mime = String(m.content_type ?? "").toLowerCase().split(";")[0].trim();
-    const ext = MEDIA_TYPES[mime];
-    if (!ext || !m.url || (m.size ?? 0) > MEDIA_MAX) continue;
+    if (!DOC_TYPES[mime] || !m.url || (m.size ?? 0) > DOC_MAX) continue;
     let host = "";
     try { const u = new URL(m.url); if (u.protocol !== "https:") continue; host = u.hostname; } catch { continue; }
     try {
-      // Telnyx's own media links take the API key; any other host (Linq's are presigned) gets no credentials.
+      // Telnyx's and Meta's media links take their own keys; any other host (Linq's are presigned) gets no credentials.
       const key = env("TELNYX_API_KEY"), wa = env("WHATSAPP_TOKEN");
       const res = await fetch(m.url, { headers: key && /(^|\.)telnyx\.com$/i.test(host) ? { Authorization: `Bearer ${key}` } : wa && waMediaHost(host) ? { Authorization: `Bearer ${wa}` } : {} });
       if (!res.ok) continue;
       const bytes = new Uint8Array(await res.arrayBuffer());
-      if (!bytes.length || bytes.length > MEDIA_MAX) continue;
-      const name = `${lang === "zh" ? "短信" : "Text"} ${stamp} ${i + 1}.${ext}`;
-      const path = `${ws}/sms/${crypto.randomUUID()}/${name.replace(/\s+/g, "-")}`;
-      const up = await admin.storage.from("documents").upload(path, new Blob([bytes], { type: mime }), { contentType: mime, upsert: false });
-      if (up.error) continue;
-      const { error } = await admin.from("documents").insert({ workspace_id: ws, name, path, size: bytes.length, mime, source: "customer", uploaded_by: uid });
-      if (error) { await admin.storage.from("documents").remove([path]); continue; }
-      out.push({ name, path, size: bytes.length, mime });
+      if (bytes.length && bytes.length <= DOC_MAX) files.push({ mime, bytes });
     } catch (e) { console.error("media", String(e).slice(0, 160)); }
   }
-  if (out.length) {
-    // The workspace's own list of documents is what the agent reads from.
-    const { data } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
-    const state = (data?.state ?? {}) as { docs?: unknown[] };
-    const docs = Array.isArray(state.docs) ? state.docs : [];
-    const at = new Date().toISOString();
-    const added = out.map((f) => ({ id: "d-" + crypto.randomUUID().slice(0, 8), name: f.name, kind: f.mime === "application/pdf" ? "pdf" : "jpg", size: f.size, by: "you", at, tag: { en: "Texted", zh: "短信发送" }, path: f.path }));
-    await admin.from("workspaces").update({ state: { ...state, docs: [...added, ...docs] } }).eq("id", ws);
-  }
-  return out;
+  const stamp = new Date().toISOString().slice(0, 10);
+  return await storeDocs(admin, ws, uid, files.map((f, i) => ({ ...f, name: `${lang === "zh" ? "短信" : "Text"} ${stamp} ${i + 1}.${DOC_TYPES[f.mime]}` })), { folder: "sms", tag: { en: "Texted", zh: "短信发送" } });
 }
 
 /** The recent text conversation in this workspace (the last 12 hours), as turns for the agent. */
@@ -465,7 +447,7 @@ export async function handle(req: Request): Promise<Response> {
     // sms: codes can be texted out (Telnyx); without it, linking is by texting a code to Odelia.
     return json(200, { configured: textingReady(env), imessage, sms: smsReady(env), voice: voiceReady(env), number: n, display: n ? prettyPhone(n) : null,
       call_number: callN, call_display: callN ? prettyPhone(callN) : null,
-      whatsapp: whatsappReady(env) ? whatsappNumber(env) : null });
+      whatsapp: whatsappReady(env) ? whatsappNumber(env) : null, email: mailReady(env) ? odeliaEmail(env) : null });
   }
   if (!(await monitorKeyOk(req.headers.get("x-monitor-key")))) return fail(401, "unauthorized", "unauthorized");
   if (body.action === "send_code") return await sendCode(String(body.code_id ?? ""));

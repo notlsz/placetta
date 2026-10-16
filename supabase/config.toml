@@ -27,5 +27,8 @@ verify_jwt = false
 [functions.odelia-sms]
 verify_jwt = false
 
+[functions.odelia-mail]
+verify_jwt = false
+
 [functions.odelia-voice]
 verify_jwt = false

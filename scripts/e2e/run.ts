@@ -137,7 +137,7 @@ out("Placetta end-to-end test");
 try {
   stack = await startStack((s) => out(`  ${s}`));
   const sql = stack.sql;
-  await gw.loadFunctions(["agent-run", "odelia-sms", "odelia-voice", "billing", "stripe-webhook", "file", "team", "monitor", "integrations", "logins", "oauth-callback", "calendar-feed", "tts", "agent"]);
+  await gw.loadFunctions(["agent-run", "odelia-sms", "odelia-mail", "odelia-voice", "billing", "stripe-webhook", "file", "team", "monitor", "integrations", "logins", "oauth-callback", "calendar-feed", "tts", "agent"]);
   gateway = gw.startGateway(sql, stack.restPort);
   out(`  gateway on ${GATEWAY} with ${gw.handlers.size} functions`);
   const monitorKey = String((await sql`select decrypted_secret from vault.decrypted_secrets where name = 'monitor_key'`)[0].decrypted_secret);
@@ -749,6 +749,91 @@ try {
     await sql`delete from public.ai_events where user_id = ${owner.id} and kind = 'task' and at >= ${textingStart}`;
     await sql`delete from public.odelia_messages where user_id = ${owner.id} and kind = 'update'`;
     await sql`update public.phone_links set quiet_start = '21:00', quiet_end = '08:00', tz = 'America/New_York' where user_id = ${owner.id}`;
+  });
+
+  /* ---------------- b4. email (Postmark, then Resend) ---------------- */
+  scripts.push({ name: "mail-notice", match: (p) => /emailed 1 attachment, now saved in Documents: notice\.pdf/.test(p) && /Notice of violation/.test(p), turns: [
+    { text: "That's a notice from the health department about the hand-wash sink. Fix it and book the re-inspection within 30 days. I added the deadline." },
+  ] });
+  scripts.push({ name: "mail-lease", match: (p) => p.startsWith("Subject: Question again") && /emailed 1 attachment, now saved in Documents: lease\.pdf/.test(p), turns: [
+    { text: "Due this month: the CO paperwork by " + day(5) + ". I saved your lease in Documents." },
+  ] });
+  await scenario("b4. email", async () => {
+    const ME = "odelia@placetta.test";
+    const PM_ENV = { ODELIA_EMAIL: ME, POSTMARK_INBOUND_AUTH: "odelia:pm-inbound-pass", POSTMARK_SERVER_TOKEN: "pm_e2e" };
+    for (const [k, v] of Object.entries(PM_ENV)) Deno.env.set(k, v);
+    const DMARC = { Name: "Authentication-Results", Value: "mx.postmarkapp.com; dkim=pass header.d=goldenox.example; spf=pass smtp.mailfrom=goldenox.example; dmarc=pass header.from=goldenox.example" };
+    const pmPost = (m: Record<string, unknown>, o: { auth?: string } = {}) => call("odelia-mail", null, { raw: JSON.stringify(m), headers: { authorization: o.auth ?? "Basic " + btoa(PM_ENV.POSTMARK_INBOUND_AUTH) } });
+    const mail = (id: string, from: string, subject: string, text: string, extra: Record<string, unknown> = {}, headers: { Name: string; Value: string }[] = [DMARC]) => ({
+      FromName: "Mei Chen", MessageStream: "inbound", From: from, FromFull: { Email: from, Name: "Mei Chen", MailboxHash: "" }, To: ME, ToFull: [{ Email: ME, Name: "", MailboxHash: "" }], Cc: "", CcFull: [],
+      OriginalRecipient: ME, Subject: subject, MessageID: crypto.randomUUID(), ReplyTo: "", MailboxHash: "", Date: new Date().toUTCString(), TextBody: text, HtmlBody: "", StrippedTextReply: "", Tag: "",
+      Headers: [{ Name: "Message-ID", Value: `<${id}@goldenox.example>` }, ...headers], Attachments: [], ...extra });
+    const runs = async () => (await sql`select count(*)::int n from public.agent_runs where channel = 'email'`)[0].n;
+    stubs.postmarkState.sent.length = 0;
+
+    // a question by email: answered by email, in the same thread, with the app link
+    const r1 = await pmPost(mail("q1", owner.email, "Question", "What's due this month?"));
+    await settle();
+    const [run] = await sql`select * from public.agent_runs where channel = 'email' order by created_at desc limit 1`;
+    check("an email from the owner's sign-in address starts a run as them", r1.status === 200 && run?.created_by === owner.id && run.reply_to === owner.email && run.status === "done" && run.prompt === "Subject: Question\n\nWhat's due this month?", { r1, run });
+    const sent1 = stubs.postmarkState.sent.at(-1);
+    check("the answer is emailed back through Postmark, threaded under theirs", stubs.postmarkState.sent.length === 1 && sent1.To === owner.email && sent1.Subject === "Re: Question" && /CO paperwork/.test(sent1.TextBody) && !/\*\*/.test(sent1.TextBody)
+      && sent1.Headers.some((h: { Name: string; Value: string }) => h.Name === "In-Reply-To" && h.Value === "<q1@goldenox.example>") && /Open Placetta: https:\/\/app\.placetta\.test\/app\/\?ws=/.test(sent1.TextBody), sent1);
+    const logged = await sql`select direction, channel, kind, subject from public.odelia_messages where run_id = ${run.id} order by id`;
+    check("both sides are logged as email", logged.length === 2 && logged.every((l) => l.channel === "email") && logged[0].subject === "Question", logged);
+
+    // a forwarded letter with a PDF: kept whole, the PDF saved to Documents, and read
+    const before = stubs.postmarkState.sent.length;
+    await pmPost(mail("fwd1", owner.email, "Fwd: Notice of violation", "Can you look at this?\n\n---------- Forwarded message ---------\nFrom: DOHMH\n\nYour establishment was cited.", {
+      StrippedTextReply: "Can you look at this?", Attachments: [{ Name: "notice.pdf", Content: "JVBERi0xLjQKJSDi48/T", ContentType: "application/pdf", ContentLength: 14, ContentID: "" }] }));
+    await settle();
+    const [doc] = await sql`select name, mime, uploaded_by from public.documents where workspace_id = ${ws} and path like ${ws + "/email/%"}`;
+    check("an emailed PDF is saved to Documents as the owner's", doc?.name === "notice.pdf" && doc.mime === "application/pdf" && doc.uploaded_by === owner.id, doc);
+    const [frun] = await sql`select prompt, status from public.agent_runs where channel = 'email' order by created_at desc limit 1`;
+    check("the forwarded letter is kept whole for Odelia", /forwarded you an email \(subject: Fwd: Notice of violation\)/.test(frun?.prompt ?? "") && /Your establishment was cited/.test(frun.prompt) && frun.status === "done", frun);
+    check("her reading of it is emailed back", stubs.postmarkState.sent.length === before + 1 && /hand-wash sink/.test(stubs.postmarkState.sent.at(-1).TextBody), stubs.postmarkState.sent.slice(before).map((m: { TextBody: string }) => m.TextBody));
+
+    // the From line alone isn't trusted; strangers, auto-replies, retries and forgeries get nothing
+    const n0 = await runs(), s0 = stubs.postmarkState.sent.length;
+    await pmPost(mail("spoof1", owner.email, "Pay this", "Approve everything", {}, [{ Name: "Authentication-Results", Value: "mx; spf=pass smtp.mailfrom=evil.example; dkim=none; dmarc=fail header.from=goldenox.example" }]));
+    await pmPost(mail("spoof2", owner.email, "Pay this", "Approve everything", {}, []));
+    await pmPost(mail("stranger1", "someone@else.example", "hi", "permits?"));
+    await pmPost(mail("ooo1", owner.email, "Out of office", "I'm away", {}, [DMARC, { Name: "Auto-Submitted", Value: "auto-replied" }]));
+    await pmPost(mail("q1", owner.email, "Question", "What's due this month?"));
+    const forged = await pmPost(mail("q2", owner.email, "Question", "What's due this month?"), { auth: "Basic " + btoa("odelia:wrong") });
+    await settle();
+    const notes = stubs.postmarkState.sent.slice(s0);
+    check("mail that isn't provably from the owner gets one note a day, and nothing is done", (await runs()) === n0 && notes.length === 1 && notes[0].To === owner.email && /couldn't confirm it really came from your address/.test(notes[0].TextBody), notes.map((m: { To: string; TextBody: string }) => [m.To, m.TextBody]));
+    check("strangers, auto-replies and a redelivered message get nothing; a bad webhook password is refused", forged.status === 401 && !notes.some((m: { To: string }) => m.To === "someone@else.example")
+      && (await sql`select count(*)::int n from public.odelia_messages where channel = 'email' and user_id is null and body <> ''`)[0].n === 0, forged);
+
+    // the free way in: Resend's signed webhook, the mail read from its API, the reply sent through Resend
+    for (const k of ["POSTMARK_INBOUND_AUTH", "POSTMARK_SERVER_TOKEN"]) Deno.env.delete(k);
+    const RS_SECRET = "whsec_" + btoa("e2e-resend-webhook-secret-012345");
+    Deno.env.set("RESEND_WEBHOOK_SECRET", RS_SECRET);
+    stubs.resendState.inbox.set("em_e2e_1", {
+      email: { id: "em_e2e_1", from: `Mei Chen <${owner.email}>`, to: [ME], received_for: [ME], created_at: new Date().toISOString(), subject: "Question again", bcc: null, cc: null, reply_to: null,
+        html: null, text: "What's due this month?\n\nOn Mon, Odelia wrote:\n> earlier", headers: { "message-id": "<rs1@goldenox.example>", "authentication-results": DMARC.Value }, message_id: "<rs1@goldenox.example>",
+        attachments: [{ id: "att1", filename: "lease.pdf", size: 14, content_type: "application/pdf", content_id: null, content_disposition: "attachment" }] },
+      files: [{ id: "att1", filename: "lease.pdf", size: 14, content_type: "application/pdf", content_disposition: "attachment", download_url: "https://files.resend.test/files/att1?sig=x", expires_at: new Date(Date.now() + 3600e3).toISOString() }],
+    });
+    const { signLinq } = await import("../../supabase/functions/_shared/linq.ts");
+    const rsRaw = JSON.stringify({ type: "email.received", created_at: new Date().toISOString(), data: { email_id: "em_e2e_1", created_at: new Date().toISOString(), from: owner.email, to: [ME], bcc: [], cc: [], received_for: [ME], message_id: "<rs1@goldenox.example>", subject: "Question again", attachments: [] } });
+    const rsId = "msg_" + crypto.randomUUID(), rsTs = String(Math.floor(Date.now() / 1000));
+    mark = recorded.length;
+    const sentBefore = stubs.resendState.sent.length;
+    const rs = await call("odelia-mail", null, { raw: rsRaw, headers: { "webhook-id": rsId, "webhook-timestamp": rsTs, "webhook-signature": await signLinq(rsRaw, rsId, rsTs, RS_SECRET) } });
+    const rsBad = await call("odelia-mail", null, { raw: rsRaw, headers: { "webhook-id": rsId, "webhook-timestamp": rsTs, "webhook-signature": await signLinq(rsRaw, rsId, rsTs, "whsec_" + btoa("not-the-secret-not-the-secret!!")) } });
+    await settle();
+    const dl = since(mark).filter((r) => r.service === "resend" && r.path.startsWith("/files/"));
+    check("Resend: a signed webhook is read through the API, its attachment fetched without a key", rs.status === 200 && rsBad.status === 401 && dl.length === 1 && !dl[0].headers.authorization && (await sql`select count(*)::int n from public.documents where name = 'lease.pdf'`)[0].n === 1, { rs, rsBad: rsBad.status, dl: dl.map((r) => r.headers) });
+    const rsSent = stubs.resendState.sent.slice(sentBefore).filter((m: { to: string[] }) => m.to?.[0] === owner.email);
+    check("the reply goes through Resend, threaded, quoting none of their thread back", rsSent.length === 1 && rsSent[0].subject === "Re: Question again" && rsSent[0].headers?.["In-Reply-To"] === "<rs1@goldenox.example>" && rsSent[0].from === `Odelia (Placetta) <${ME}>`, rsSent);
+    const [rrun] = await sql`select prompt from public.agent_runs where channel = 'email' order by created_at desc limit 1`;
+    check("only their new words reach Odelia, not the quoted thread", rrun && !/earlier/.test(rrun.prompt) && /What's due this month\?/.test(rrun.prompt), rrun);
+
+    for (const k of ["ODELIA_EMAIL", "RESEND_WEBHOOK_SECRET"]) Deno.env.delete(k);
+    await sql`delete from public.ai_events where user_id = ${owner.id} and kind = 'task' and at >= ${textingStart}`;
   });
 
   /* ---------------- c. voice ---------------- */

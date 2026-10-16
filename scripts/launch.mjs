@@ -289,6 +289,37 @@ async function setupWhatsApp(secrets) {
   console.log(`  In the app's WhatsApp, Configuration: callback URL ${SUPABASE_URL}/functions/v1/odelia-sms, verify token ${secrets.WHATSAPP_VERIFY_TOKEN}, and subscribe to "messages".`);
 }
 
+/* Email Odelia. Postmark is the better inbound (it strips the quoted reply; Pro is $16.50 a month for 10,000, inbound
+   included); Resend is free (3,000 a month counting both ways) and already sends sign-in mail. This points the chosen
+   one's inbound webhook at odelia-mail: Postmark with a random user:password in the URL, Resend with a signed webhook. */
+async function setupMail(secrets, resendKey) {
+  console.log(`\n${bold("Email Odelia")} ${dim("(Postmark or Resend. Leave blank to skip.)")}`);
+  const address = (await ask("Odelia's address, on a domain whose mail (MX) points at the provider (e.g. odelia@placetta.com): ")).trim().toLowerCase();
+  if (!address) return;
+  secrets.ODELIA_EMAIL = address;
+  const pm = await ask("Postmark server token (blank to use Resend, the free way): ", { hidden: true });
+  if (pm) {
+    const auth = `odelia:${randomBytes(18).toString("hex")}`;
+    const hook = SUPABASE_URL.replace("https://", `https://${auth}@`) + "/functions/v1/odelia-mail";
+    try {
+      const res = await fetch("https://api.postmarkapp.com/server", { method: "PUT", headers: { "X-Postmark-Server-Token": pm, "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ InboundHookUrl: hook }) });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.Message ?? `HTTP ${res.status}`);
+      Object.assign(secrets, { POSTMARK_SERVER_TOKEN: pm, POSTMARK_INBOUND_AUTH: auth });
+      console.log(`  ${green("inbound")}  Postmark posts mail to odelia-mail. Point ${address.split("@")[1]}'s MX at inbound.postmarkapp.com (priority 10).`);
+    } catch (e) { console.log(`  ${red("not set")}  Postmark: ${e.message}`); }
+    return;
+  }
+  const key = resendKey || await ask("Resend API key (re_...): ", { hidden: true });
+  if (!key) return;
+  try {
+    const res = await fetch("https://api.resend.com/webhooks", { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify({ endpoint: `${SUPABASE_URL}/functions/v1/odelia-mail`, events: ["email.received"] }) });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.signing_secret) throw new Error(j?.message ?? `HTTP ${res.status}`);
+    Object.assign(secrets, { RESEND_API_KEY: key, RESEND_WEBHOOK_SECRET: j.signing_secret });
+    console.log(`  ${green("inbound")}  Resend signs and posts mail to odelia-mail. Turn on receiving for ${address.split("@")[1]} in Resend (Domains) and add its MX record.`);
+  } catch (e) { console.log(`  ${red("not set")}  Resend: ${e.message}`); }
+}
+
 function setSecrets(secrets) {
   const names = Object.keys(secrets);
   if (!names.length) return true;
@@ -355,6 +386,7 @@ async function main() {
     const mid = await ask("Microsoft (Entra ID) application ID: ");
     if (mid) auth.microsoft = { id: mid, secret: await ask("Microsoft client secret: ", { hidden: true }) };
   }
+  await setupMail(secrets, auth.resend);
   const staff = (await ask("Your team's emails for the filing queue, comma separated (blank to skip): ")).toLowerCase();
 
   if (TOKEN) {

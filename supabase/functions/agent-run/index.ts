@@ -17,7 +17,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { callModel } from "../_shared/llm.ts";
 import { gate, record } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
-import { linkOf, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
+import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
+import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/mail.ts";
 // @ts-types="./agent.d.ts"
 import { normalizeState, runRounds, startState, stripState, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
@@ -26,7 +27,7 @@ import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
 type Block = Record<string, unknown>;
-type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark"; reply_to?: string | null; chat_to?: ChatTo | null };
+type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark" | "email"; reply_to?: string | null; chat_to?: ChatTo | null };
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -257,11 +258,29 @@ export async function work(runId: string, token: string | null) {
       const { data: failed } = await admin.from("agent_runs").update({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running").select("id");
       // Someone who asked by text or on a call hears about it the same way.
       if (failed?.length) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
+      if (failed?.length && run.channel === "email") await mailBack(run, SAY.failed[run.lang], []).catch((x) => console.error("mail back", String(x).slice(0, 120)));
       if (failed?.length && (run.channel === "slack" || run.channel === "lark")) await chatBack(run, SAY.failed[run.lang], []).catch(() => undefined);
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
   }
+}
+
+/** The answer to someone who emailed Odelia: by email, in their thread, only to the address they sign in with, with
+ *  the link to the approval waiting in the app. Nothing is approved by email. */
+async function mailBack(run: Run, text: string, approvals: string[]) {
+  if (run.channel !== "email" || !run.reply_to || !run.created_by) return;
+  const { data: u } = await admin.auth.admin.getUserById(run.created_by);
+  const to = String(u?.user?.email ?? "").toLowerCase();
+  if (!to || to !== run.reply_to.toLowerCase()) return;
+  const { data: asked } = await admin.from("odelia_messages").select("provider_id, subject").eq("run_id", run.id).eq("channel", "email").eq("direction", "in").maybeSingle();
+  const origin = appOrigin(env);
+  const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
+  const footer = approve ? `${SAY.approve[run.lang]} ${approve}` : `${SAY.open[run.lang]} ${appLink(origin, run.workspace_id)}`;
+  const body = mailBody(text || SAY.ack[run.lang], origin ? footer : undefined);
+  const r = await sendOdeliaMail(env, { to, subject: replySubject(String(asked?.subject ?? "")), text: body.text, html: body.html, inReplyTo: String(asked?.provider_id ?? "").replace(/^mail:/, "") || undefined });
+  if (r.ok) await logMessage(admin, { user_id: run.created_by, workspace_id: run.workspace_id, direction: "out", channel: "email", kind: "reply", body: body.text, provider_id: r.id ? `mail:${r.id}` : null, run_id: run.id });
+  else console.error("odelia mail", r.status, r.detail);
 }
 
 /** The answer to a job asked in Slack or Lark, in the same thread. Approvals stay in the app: the reply links to them. */
@@ -316,6 +335,11 @@ async function finish(run: Run, reply: Reply, steps: Step[]) {
   // Asked by text or on a call: the answer goes back by text, which is where they're watching.
   if (run.channel === "sms" || run.channel === "voice") {
     await textBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim() || SAY.ack[run.lang], reply.approvals ?? []).catch((e) => console.error("text back", String(e).slice(0, 120)));
+    return;
+  }
+  // Asked by email: the answer goes back by email, in their thread.
+  if (run.channel === "email") {
+    await mailBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim(), reply.approvals ?? []).catch((e) => console.error("mail back", String(e).slice(0, 120)));
     return;
   }
   // Asked in Slack or Lark: the answer goes back to the same thread, with the link to anything waiting for approval.
@@ -423,16 +447,23 @@ export async function handle(req: Request): Promise<Response> {
     return json(202, { id: run.id });
   }
 
-  // start_as: someone texted or called Odelia from their verified number (odelia-sms and odelia-voice, with the monitor key)
+  // start_as: someone texted or called Odelia from their verified number (odelia-sms and odelia-voice), or emailed her
+  // from the address they sign in with (odelia-mail), with the monitor key
   if (action === "start_as") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
     const uid = String(body.user_id ?? ""), ws = String(body.workspace_id ?? "");
-    const channel = body.channel === "voice" ? "voice" : body.channel === "sms" ? "sms" : null;
-    const replyTo = normalizePhone(body.reply_to);
+    const channel = body.channel === "voice" ? "voice" : body.channel === "sms" ? "sms" : body.channel === "email" ? "email" : null;
+    const replyTo = channel === "email" ? String(body.reply_to ?? "").trim().toLowerCase() : normalizePhone(body.reply_to);
     if (!UUID.test(uid) || !UUID.test(ws) || !channel || !replyTo) return fail(400, "bad_request", "user_id, workspace_id, channel and reply_to are required.");
-    // The number must still be this person's verified number, and they must still be a member with a plan.
-    const link = await linkOf(admin, uid);
-    if (!link?.verified_at || link.number !== replyTo) return fail(403, "forbidden", "That number isn't linked to this person.");
+    // The number must still be this person's verified number (or the address their account signs in with), and they
+    // must still be a member with a plan.
+    if (channel === "email") {
+      const { data: u } = await admin.auth.admin.getUserById(uid);
+      if (String(u?.user?.email ?? "").toLowerCase() !== replyTo) return fail(403, "forbidden", "That isn't this person's address.");
+    } else {
+      const link = await linkOf(admin, uid);
+      if (!link?.verified_at || link.number !== replyTo) return fail(403, "forbidden", "That number isn't linked to this person.");
+    }
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", "This isn't their workspace.");
     if (may === "no_plan") return fail(402, "payment_required", "Get the entry plan to start the agent.");

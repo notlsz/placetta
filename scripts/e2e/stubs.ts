@@ -4,7 +4,7 @@
 // sandbox. Each stub checks requests the way the real API would (shapes, required fields, the documented rules the
 // functions rely on) and answers with realistic bodies.
 
-export type Rec = { service: "anthropic" | "telnyx" | "linq" | "whatsapp" | "stripe" | "resend"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
+export type Rec = { service: "anthropic" | "telnyx" | "linq" | "whatsapp" | "postmark" | "stripe" | "resend"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
 export const recorded: Rec[] = [];
 export const blockedHosts: string[] = [];
 export const stubErrors: string[] = [];
@@ -241,16 +241,36 @@ function stripe(req: Request, path: string, raw: string): Response {
 
 /* ------------------------------ Resend ------------------------------ */
 
-export const resendState = { fail: false };
+export const resendState = { fail: false, sent: [] as any[], inbox: new Map<string, { email: Record<string, unknown>; files: Record<string, unknown>[] }>() };
 function resend(req: Request, path: string, body: any): Response {
+  // An attachment's download URL is presigned: it takes no key.
+  if (req.method === "GET" && path.startsWith("/files/")) return req.headers.get("authorization") ? new Response("no credentials on presigned links", { status: 400 }) : new Response(Uint8Array.from(atob("JVBERi0xLjQKJSDi48/T"), (c) => c.charCodeAt(0)), { status: 200, headers: { "Content-Type": "application/pdf" } });
   if (!/^Bearer re_/.test(req.headers.get("authorization") ?? "")) return json(401, { name: "missing_api_key", message: "Missing API key" });
+  // Inbound mail (receiving): the stored message and its attachments, as Resend's API returns them.
+  const rcv = /^\/emails\/receiving\/([^/]+)(\/attachments)?$/.exec(path);
+  if (req.method === "GET" && rcv) {
+    const m = resendState.inbox.get(decodeURIComponent(rcv[1]));
+    if (!m) return json(404, { name: "not_found", message: "Email not found" });
+    return rcv[2] ? json(200, { object: "list", has_more: false, data: m.files }) : json(200, { object: "email", ...m.email });
+  }
   if (req.method !== "POST" || path !== "/emails") return json(404, { name: "not_found", message: "Not found" });
   if (resendState.fail) return json(500, { name: "application_error", message: "Down" });
   const to = Array.isArray(body?.to) ? body.to : typeof body?.to === "string" ? [body.to] : [];
   if (!body?.from || !to.length || !body?.subject || !(body?.text || body?.html)) return json(422, { name: "validation_error", message: "from, to, subject and text or html are required" });
   if (to.length > 50) return json(422, { name: "validation_error", message: "Too many recipients" });
   if (to.some((t: string) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(t))) return json(422, { name: "validation_error", message: "Invalid `to` field." });
+  resendState.sent.push(body);
   return json(200, { id: crypto.randomUUID() });
+}
+
+/** Postmark's send API: the server token, From on a confirmed sender, a body. */
+export const postmarkState = { sent: [] as any[] };
+function postmark(req: Request, path: string, body: any): Response {
+  if (!req.headers.get("x-postmark-server-token")) return json(401, { ErrorCode: 10, Message: "No Account or Server API tokens were supplied in the HTTP headers." });
+  if (req.method !== "POST" || path !== "/email") return json(404, { ErrorCode: 404, Message: "Not found" });
+  if (!body?.From || !body?.To || !(body?.TextBody || body?.HtmlBody)) return json(422, { ErrorCode: 300, Message: "Invalid email request" });
+  postmarkState.sent.push(body);
+  return json(200, { To: body.To, SubmittedAt: new Date().toISOString(), MessageID: crypto.randomUUID(), ErrorCode: 0, Message: "OK" });
 }
 
 /* ------------------------------ Anthropic: a scripted model ------------------------------ */
@@ -351,7 +371,7 @@ async function anthropic(req: Request, path: string, body: any): Promise<Respons
 
 /* ------------------------------ the patched fetch ------------------------------ */
 
-const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "graph.facebook.com": "whatsapp", "lookaside.fbsbx.com": "whatsapp", "api.stripe.com": "stripe", "api.resend.com": "resend" };
+const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "graph.facebook.com": "whatsapp", "lookaside.fbsbx.com": "whatsapp", "api.postmarkapp.com": "postmark", "files.resend.test": "resend", "api.stripe.com": "stripe", "api.resend.com": "resend" };
 
 export function patchFetch(local: (u: URL) => boolean) {
   const realFetch = globalThis.fetch.bind(globalThis);
@@ -363,7 +383,7 @@ export function patchFetch(local: (u: URL) => boolean) {
       const raw = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
       let body: any = raw;
       try { body = raw && (req.headers.get("content-type") ?? "").includes("json") ? JSON.parse(raw) : raw; } catch { /* left as text */ }
-      const res = service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "whatsapp" ? whatsapp(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
+      const res = service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "whatsapp" ? whatsapp(req, u.pathname, body) : service === "postmark" ? postmark(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
       recorded.push({ service, method: req.method, path: u.pathname + u.search, headers: Object.fromEntries(req.headers), body: service === "stripe" ? formObject(raw) : body, raw, status: res.status, at: Date.now() });
       return res;
     }

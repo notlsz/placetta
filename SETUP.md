@@ -179,10 +179,20 @@ Owners who live on WhatsApp text Odelia there and hear back there. It's Meta's o
 
 1. Meta for Developers: create an app, add WhatsApp, add the business phone number, and make a System User with a permanent token (`whatsapp_business_messaging`, `whatsapp_business_management`).
 2. `npm run launch` asks for the token, phone number ID, WhatsApp Business Account ID, app secret and number; submits the `odelia_update` template in English and Chinese for review; subscribes the app; and prints the webhook to paste in the app's WhatsApp configuration: `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/odelia-sms`, with its verify token, field `messages`.
-3. Run `20261016080000_odelia_whatsapp.sql` and deploy `odelia-sms`, `odelia-voice` and `agent-run`.
+3. Run `20261016090000_odelia_whatsapp.sql` and deploy `odelia-sms`, `odelia-voice` and `agent-run`.
 4. Business verification is optional to start (250 people a day outside the window until it's done).
 
 How it behaves: a linked phone that writes on WhatsApp is answered on WhatsApp, in one message, with the typing indicator; texting by iMessage or SMS again moves the conversation back. Photos and PDFs come in through Meta's media links. Webhooks are checked with the app secret (X-Hub-Signature-256) and deduplicated, since Meta retries for a week. Linking works the same way: the code from Settings, sent on WhatsApp.
+
+## Email Odelia (Postmark or Resend)
+
+Owners write to Odelia, or forward an agency's letter, from the address they sign in with; she answers in the same thread and saves attached photos and PDFs in Documents. Postmark is the better way in ($16.50 a month on Pro for 10,000 emails, inbound included, and it strips the quoted reply). Resend is the free one (3,000 a month, counting both ways) and already sends sign-in mail. Both feed `odelia-mail`; replies go out through Postmark when its token is set, else Resend.
+
+1. Pick the address (for example `odelia@placetta.com`) on a domain whose MX points at the provider: `inbound.postmarkapp.com` for Postmark, or turn on receiving for the domain in Resend.
+2. `npm run launch` sets `ODELIA_EMAIL`, then either points Postmark's inbound webhook at `odelia-mail` with a random password in the URL (`POSTMARK_SERVER_TOKEN`, `POSTMARK_INBOUND_AUTH`), or creates Resend's signed `email.received` webhook (`RESEND_WEBHOOK_SECRET`).
+3. Run `20261016100000_odelia_email.sql` and deploy `odelia-mail` and `agent-run`.
+
+Email's From line can be forged, so Odelia acts only on mail the receiving server vouches for: DMARC pass, or DKIM signed by the sender's own domain (Gmail, Outlook and Google Workspace all sign). Anything else gets one note a day saying why, and nothing is done. Mail from addresses with no account gets nothing back, and auto-replies, bounces and lists are dropped.
 
 ## Which provider for what (checked October 2026)
 
@@ -192,6 +202,7 @@ How it behaves: a linked phone that writes on WhatsApp is answered on WhatsApp, 
 | Plain texts (SMS) | Telnyx, $0.004 a text | none for real traffic | Half Twilio's price; Twilio's API answers faster but at our volume the gap is about $10 a month. Codes go here. |
 | Calls | Telnyx AI Assistants, about $0.06 a minute | Telnyx's $25 trial credit | Cheapest managed option and the lowest measured caller-side latency; HIPAA on every plan. Mandarin calls use Soniox and Qwen3 voices (Deepgram Flux has no Chinese). |
 | WhatsApp | Meta Cloud API, direct | 1,000 replies a month per number | No reseller fee; Twilio adds $0.005 a message. |
+| Email | Postmark Pro, $16.50 a month | Resend, 3,000 a month | Postmark parses replies cleanly and includes inbound; Resend is free and already sends sign-in mail. Both are wired. |
 | WeChat | not built | none | Needs an overseas Service Account (about $99 a year, Tencent's verification), replies only within 48 hours and 5 messages, and AI content rules. |
 | Telegram | not built | free | Blocked in mainland China and rare among these owners. |
 
