@@ -3,6 +3,7 @@ import type { Reply, Step } from "./core";
 import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
 import { clean, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Services, type Source, type Turn } from "./live";
+import { settleJobs } from "./jobs";
 
 /* ------------------------------------------------------------------ *
  * The agent's tool loop as the server runs it: the same tools and
@@ -16,6 +17,8 @@ export type Send = (body: Record<string, unknown>, deep: boolean) => Promise<{ c
 /** Everything needed to pick a run up again. */
 export type RunState = {
   messages: { role: string; content: unknown }[];
+  /** When the run began, so its jobs are settled at the end even across invocations. */
+  started?: string;
   rounds: number;
   text: string;
   lastToolAt: number;
@@ -68,6 +71,7 @@ export async function runRounds(o: {
   maxRounds?: number;
 }): Promise<{ reply: Reply } | { paused: RunState }> {
   const st = o.state;
+  st.started ??= new Date().toISOString();
   const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt };
   const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
   const model = messagesModel("server", (body, _signal, deep) => o.send(body, deep));
@@ -106,6 +110,7 @@ export async function runRounds(o: {
   // out of rounds with tool results the model never saw: say the work isn't finished, never "Done."
   if (!finished) { const more = outOfSteps(o.lang); st.text += (st.text ? "\n\n" : "") + more; made.lastToolAt = Math.min(made.lastToolAt, st.text.length - more.length); }
 
+  o.apply(settleJobs(st.started));
   const final = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim()) || (o.lang === "zh" ? "完成了。" : "Done.");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
   return { reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,

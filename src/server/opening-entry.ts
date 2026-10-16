@@ -2,3 +2,5 @@
 // Built by `npm run build:agent` into supabase/functions/_shared/opening.js.
 export { openingLine, openingPath } from "../smart";
 export { normalizeState } from "../core";
+export { publishedDays } from "../plan";
+export { runsOn, overdue } from "../jobs";

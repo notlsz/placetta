@@ -15,6 +15,7 @@ import { money, daysFromNow, fmtAgo } from "./time";
 import type { Approval, Workspace } from "./model";
 import { FilingLive } from "./FilingLive";
 import { AgentBot, Working } from "./Bot";
+import { PlanCard } from "./Work";
 
 /** The agent, beside the work: what it's doing now, every step with the site it used, and what each run produced. */
 export function AgentPanel({ feed, tts, mode, onHide, asked }: {
@@ -44,7 +45,7 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
       <div className="feed" ref={scroller}>
         {feed.map(m => m.kind === "user" ? <div key={m.id} className="you"><p>{m.text}</p></div>
           : m.kind === "memory" ? <Memory key={m.id} text={m.text} />
-            : <TurnView key={m.id} m={m} speaking={tts.speaking} onSay={say} />)}
+            : <TurnView key={m.id} m={m} last={m === last} speaking={tts.speaking} onSay={say} />)}
       </div>
 
       <div className="pn-dock"><Composer variant="panel" tts={tts} asked={asked} /></div>
@@ -58,7 +59,7 @@ function Memory({ text }: { text: Bi }) {
 }
 
 /** One run: a quiet log of the steps, then the answer and whatever it produced. */
-function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; onSay: (text: string) => void }) {
+function TurnView({ m, last, speaking, onSay }: { m: Turn; last: boolean; speaking: string | null; onSay: (text: string) => void }) {
   const { b, t, lang, ws, busy, run, go, cloud } = useApp();
   const [show, setShow] = useState(false);
   const live = !m.reply;
@@ -73,6 +74,8 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
   const covered = new Set([...pending, ...done].map(id => (ws.approvals.find(a => a.id === id) ?? ws.closed.find(a => a.id === id))?.app).filter(Boolean));
   const filed = r?.filed ?? [];
   const cur = live ? m.steps[m.active] : undefined;
+  // the plan this run kept: the job it last updated
+  const plan = !last ? undefined : (ws.jobs ?? []).filter(j => j.updated >= m.at).sort((x, y) => y.updated.localeCompare(x.updated))[0];
   const listen = said ? (
     <button type="button" className={"say" + (speaking === said ? " on" : "")} onClick={() => onSay(said)} aria-label={speaking === said ? t("stopListen") : t("listen")}>
       {speaking === said ? <I.stopSq /> : <I.speaker />}<span>{speaking === said ? t("stopListen") : t("listen")}</span>
@@ -102,6 +105,7 @@ function TurnView({ m, speaking, onSay }: { m: Turn; speaking: string | null; on
         </ol>
         </Working>
       )}
+      {plan && <PlanCard job={plan} compact />}
       {live && m.draft && <p className="drafting" aria-live="polite">{m.draft}</p>}
       {r && (
         <div className="answer">

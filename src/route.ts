@@ -8,7 +8,7 @@ const BASE = import.meta.env.BASE_URL;
 export const routed = BASE.startsWith("/");
 
 const SLUG: Record<View, string> = {
-  overview: "", updates: "updates", stores: "stores", apps: "applications", docs: "documents", deadlines: "deadlines",
+  overview: "", work: "work", updates: "updates", stores: "stores", apps: "applications", docs: "documents", deadlines: "deadlines",
   audit: "activity", context: "context", find: "find", settings: "settings", queue: "queue", hq: "headquarters",
 };
 

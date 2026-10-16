@@ -25,7 +25,7 @@ import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
 type Block = Record<string, unknown>;
-type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice"; reply_to?: string | null };
+type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice"; reply_to?: string | null };
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -151,6 +151,13 @@ const short = (s: string, n = 90) => (s.length > n ? s.slice(0, n - 1).trimEnd()
 const WATCH = {
   en: (what: string, where: string) => `Weekly check, in the background. 1) For each application that has been submitted or approved, look up its current status on the agency's own public lookup or records page (search the agency's site with the business name, license number or confirmation number) and compare it with the workspace. 2) Search official government sources for new or changed requirements, fees, inspections or deadlines in the last month that affect a ${what || "business like this one"} in ${where || "its city"}. Add a deadline for any new due date. Report only what changed, each with its source. If nothing changed, reply exactly: No changes.`,
   zh: (what: string, where: string) => `每周后台检查。1）对每项已提交或已批准的申请，在该机构官方的公开查询或记录页面（用企业名称、执照号或确认号在机构网站搜索）查看当前状态，并与工作区对比。2）在政府官方来源中查找近一个月内影响${where || "所在城市"}${what || "此类企业"}的新增或变更的要求、费用、检查或截止日期。如有新的截止日期，请添加。只报告变化，并注明来源。如果没有变化，请只回复：No changes。`,
+};
+
+/** A job Odelia does in the background on a schedule: a routine the business set up, a renewal coming due, or a filing
+    past the agency's usual time. Nobody is watching, so she works the whole plan and reports only what matters. */
+const ROUTINE = {
+  en: (job: string) => `Scheduled job, in the background; nobody is watching. ${job} Work it start to end with your tools (set_plan if it takes three or more steps). Never file, pay or send anything: put it up for approval. Finish with what you did, what changed and anything that needs the owner, each with its source. If there was nothing to do and nothing changed, reply exactly: No changes.`,
+  zh: (job: string) => `后台定时任务，无人在线。${job} 请用工具从头到尾完成（三步以上先 set_plan）。不要提交、付款或发送任何内容，一律提交审批。最后说明做了什么、有何变化、哪些需要负责人处理，并注明来源。如果无事可做也无变化，请只回复：No changes。`,
 };
 
 async function sendMail(to: string[], subject: string, text: string) {
@@ -283,8 +290,8 @@ async function finish(run: Run, reply: Reply, steps: Step[]) {
   // Someone watching in the app already sees it; otherwise it becomes an Update and an email.
   const { data: seen } = await admin.from("agent_runs").select("seen_at").eq("id", run.id).maybeSingle();
   if (run.kind === "task" && seen?.seen_at && Date.now() - Date.parse(seen.seen_at) < 20_000) return;
-  const title = run.kind === "watch"
-    ? { en: "Weekly check: something changed", zh: "每周检查：有变化" }
+  const title = run.title ? run.title
+    : run.kind === "watch" ? { en: "Weekly check: something changed", zh: "每周检查：有变化" }
     : { en: `Placetta finished: ${short(run.prompt)}`, zh: `快哉已完成：${short(run.prompt)}` };
   const zh = reply.text.map((t) => t.zh).join(" ").trim();
   await admin.from("updates").upsert({ workspace_id: run.workspace_id, kind: "agent", title, body: { en: short(said, 600), zh: short(zh, 600) }, dedupe: `run:${run.id}` }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
@@ -342,8 +349,12 @@ export async function handle(req: Request): Promise<Response> {
     const meta = ((w?.state ?? {}) as { meta?: { city?: string; region?: string; what?: string } }).meta ?? {};
     const lang = body.lang === "zh" ? "zh" : "en";
     const where = [meta.city, meta.region].filter(Boolean).join(", ");
-    const prompt = WATCH[lang](meta.what ?? "", where);
-    const { data: run, error } = await admin.from("agent_runs").insert({ workspace_id: ws, kind: "watch", prompt, lang, state: startState([], prompt) }).select("id").single();
+    // a routine, a renewal or a chase brings its own job and title; the weekly check is the default
+    const job = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 2000) : "";
+    const t = body.title as { en?: unknown; zh?: unknown } | undefined;
+    const title = job && t && typeof t.en === "string" ? { en: t.en.slice(0, 120), zh: (typeof t.zh === "string" ? t.zh : t.en).slice(0, 120) } : null;
+    const prompt = job ? ROUTINE[lang](job) : WATCH[lang](meta.what ?? "", where);
+    const { data: run, error } = await admin.from("agent_runs").insert({ workspace_id: ws, kind: "watch", prompt, lang, state: startState([], prompt), ...(title ? { title } : {}) }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the check.");
     bg(work(run.id, null));
     return json(202, { id: run.id });

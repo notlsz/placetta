@@ -211,6 +211,23 @@ const SCENARIOS: Scenario[] = [
     prompt: "我们要在加州圣何塞开一家奶茶店，地址是 1 N First St, San Jose, CA 95112，计划 2027 年 3 月开业。请添加门店，梳理所需的全部执照和许可，并逐项准备申请。",
     check: (r) => { const share = cjk(r.text); return [share > 0.3 && r.w.apps.length >= 5, `${r.w.apps.length} applications; ${Math.round(share * 100)}% Chinese in the reply`]; },
   },  {
+    name: "keeps a plan for a long job", lang: "en", maxRounds: 12, ws: () => scratch(),
+    prompt: "We're opening a bubble tea shop at 136-20 Roosevelt Ave, Flushing, NY 11354 in March 2027. Take it from here: add the store, map every permit, prepare each one and set the deadlines.",
+    check: (r) => {
+      const jobs = ((r.w as unknown as { jobs?: { steps: { done: boolean }[]; status: string }[] }).jobs ?? []);
+      const j = jobs[0];
+      return [!!j && j.steps.length >= 3 && j.steps.some((x) => x.done), j ? `${jobs.length} job(s); ${j.steps.filter((x) => x.done).length} of ${j.steps.length} steps done, ${j.status}` : "no plan was kept"];
+    },
+  },
+  {
+    name: "schedules a routine", lang: "en", maxRounds: 4, ws: () => scratch(),
+    prompt: "Every Monday, check the status of each filing that's with an agency and tell me only what changed.",
+    check: (r) => {
+      const rs = ((r.w as unknown as { routines?: { every: string; day?: number }[] }).routines ?? []);
+      return [rs.length === 1 && rs[0].every === "weekly" && rs[0].day === 1, rs.length ? `${rs.length} routine(s): ${rs.map((x) => `${x.every} day ${x.day}`).join(", ")}` : "no routine scheduled"];
+    },
+  },
+  {
     name: "answers sharp and short", lang: "en", maxRounds: 4,
     ws: () => scratch({ apps: [app("x-fse", "Food Service Establishment Permit", { status: "needs", checklist: [{ id: "c0", label: same("Lease"), state: "missing" }] }), app("x-crt", "Commercial Rent Tax registration", { status: "review" })] }),
     prompt: "Where are we on the Flushing store's permits?",

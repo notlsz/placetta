@@ -1526,3 +1526,53 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .sg-hook input { flex: 1 1 320px; min-width: 0; height: 38px; border-radius: 10px; border: 1px solid var(--line, rgba(0,0,0,.12)); background: var(--bg, #fff); padding: 0 12px; font: inherit; font-size: 13.5px; color: var(--ink); }
 .sg-hook input[type=password] { flex-basis: 200px; }
 @media (max-width: 640px) { .sg-hook { padding-left: 14px; } }
+
+/* Work: each job Odelia is on, with the plan she keeps current */
+.job { border-radius: 18px; background: var(--mist); padding: 16px 18px 14px; margin: 0 0 10px; }
+.job.compact { margin: 10px 0 4px; padding: 12px 14px 10px; background: var(--card2); box-shadow: 0 0 0 1px var(--line); }
+.job > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.job-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.job-t b { font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
+.job.compact .job-t b { font-size: 14px; }
+.job-t small { font-size: 12.5px; color: var(--ink3); }
+.job-s { flex: none; font-style: normal; font-size: 12px; font-weight: 500; padding: 2px 10px; border-radius: 99px; background: var(--sky-wash); color: var(--blue-ink); }
+.job-s.waiting { background: var(--warm-soft); color: var(--warm); }
+.job-s.done { background: var(--mist2); color: var(--ink2); }
+.job-s.stopped { background: var(--mist2); color: var(--ink3); }
+.job-bar { display: block; height: 3px; border-radius: 3px; background: var(--mist2); margin: 12px 0 8px; overflow: hidden; }
+.job-bar i { display: block; height: 100%; background: var(--blue-ink); border-radius: 3px; transition: width .4s ease; }
+.job.done .job-bar i { background: var(--ink3); }
+.job-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.job-steps li { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; font-size: 14px; color: var(--ink2); line-height: 1.45; }
+.job.compact .job-steps li { font-size: 13px; padding: 3px 0; }
+.job-steps .tick { flex: none; width: 16px; height: 16px; margin-top: 2px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px var(--ink3); display: grid; place-items: center; color: var(--blue-ink); }
+.job-steps .tick svg { width: 13px; height: 13px; }
+.job-steps li.done { color: var(--ink3); }
+.job-steps li.done .tick { box-shadow: none; }
+.job-steps li.now { color: var(--ink); font-weight: 500; }
+.job-steps li.now .tick { box-shadow: inset 0 0 0 1.5px var(--blue-ink); }
+.job-need { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--warm-soft); color: var(--ink); font-size: 13.5px; line-height: 1.5; }
+.job-need b { font-weight: 600; color: var(--warm); }
+.job-apps { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 0; font-size: 13px; }
+.work-now { display: flex; align-items: center; gap: 8px; margin: 18px 0 0; color: var(--blue-ink); font-size: 14px; }
+.work-now svg { width: 16px; height: 16px; }
+.q-list .row { display: flex; align-items: center; gap: 12px; }
+.q-list .q-n { flex: none; width: 18px; color: var(--ink3); font-size: 13px; font-variant-numeric: tabular-nums; }
+.q-list .lr-tx { flex: 1; min-width: 0; }
+.q-list .lr-tx b { font-weight: 400; font-size: 14px; }
+.rt-row { display: flex; align-items: center; gap: 12px; }
+.rt-row .lr-tx { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rt-row .lr-tx b { font-weight: 500; font-size: 14.5px; }
+.rt-row .lr-tx small { font-size: 12.5px; color: var(--ink3); }
+.rt-act { display: flex; gap: 14px; font-size: 13px; }
+.lnk.quiet { color: var(--ink3); }
+.starters { display: flex; flex-direction: column; gap: 8px; }
+.starter { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; text-align: left; padding: 14px 16px; border: 0; border-radius: 14px; background: var(--mist); color: var(--ink); font: inherit; font-size: 14.5px; cursor: pointer; }
+.starter:hover { background: var(--hover-mist); }
+.starter svg { flex: none; width: 16px; height: 16px; color: var(--ink3); }
+.sec-h.tog { width: 100%; background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; align-items: center; }
+.sec-h.tog > span { color: var(--ink3); display: inline-flex; transition: transform .2s; }
+.sec-h.tog > span.up { transform: rotate(180deg); }
+.work .lnk, .job .lnk { display: inline; padding: 0; border: 0; background: none; font: inherit; color: var(--blue-ink); cursor: pointer; }
+.work .lnk:hover, .job .lnk:hover { text-decoration: underline; text-underline-offset: 2px; }
+.work .lnk.quiet { color: var(--ink3); }

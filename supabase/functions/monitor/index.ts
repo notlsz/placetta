@@ -16,7 +16,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 import { HOOK_KINDS, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
 // @deno-types="../_shared/opening.d.ts"
-import { normalizeState, openingLine, openingPath } from "../_shared/opening.js";
+import { normalizeState, openingLine, openingPath, overdue, publishedDays, runsOn, type Routine } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -459,6 +459,58 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Odelia's own jobs, in the background: routines that run today, renewals 60 days out (she prepares the renewal and
+  // puts it up for approval), and filings past the agency's usual time (she checks and drafts a status inquiry).
+  let jobs = 0;
+  if ((Deno.env.get("ANTHROPIC_API_KEY") || Deno.env.get("GEMINI_API_KEY")) && Deno.env.get("ODELIA_JOBS") !== "off") {
+    let left = Math.max(0, Number(Deno.env.get("ODELIA_JOBS_PER_DAY") ?? "60") || 0);
+    const plans = new Map<string, string>();
+    const planOf = async (ws: string) => { if (!plans.has(ws)) { const { data } = await admin.rpc("plan_of", { ws }); plans.set(ws, String(data ?? "none")); } return plans.get(ws)!; };
+    const start = async (ws: string, prompt: string, title: Bi): Promise<string | null> => {
+      if (left <= 0 || (await planOf(ws)) === "none") return null;
+      const { data: last } = await admin.from("agent_runs").select("lang").eq("workspace_id", ws).eq("kind", "task").order("created_at", { ascending: false }).limit(1);
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/agent-run`, {
+        method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": req.headers.get("x-monitor-key") ?? "" },
+        body: JSON.stringify({ action: "watch", workspace_id: ws, lang: last?.[0]?.lang === "zh" ? "zh" : "en", prompt, title }),
+      }).catch(() => null);
+      if (!res?.ok) { console.error("odelia job", ws, res?.status ?? "unreachable"); return null; }
+      left--; jobs++;
+      return ((await res.json().catch(() => ({}))) as { id?: string }).id ?? null;
+    };
+    // routines: each one claims its day first, so two runs of the monitor never start it twice
+    for (const [ws, st] of states) {
+      for (const r of (((st ?? {}) as { routines?: Routine[] }).routines ?? [])) {
+        if (!r || typeof r.id !== "string" || typeof r.prompt !== "string" || !runsOn(r, today)) continue;
+        const { data: claim } = await admin.from("routine_runs").upsert({ workspace_id: ws, routine_id: r.id, day: today }, { onConflict: "workspace_id,routine_id,day", ignoreDuplicates: true }).select("routine_id");
+        if (!claim?.length) continue;
+        const id = await start(ws, r.prompt, bi(r.title));
+        if (id) await admin.from("routine_runs").update({ run_id: id }).eq("workspace_id", ws).eq("routine_id", r.id).eq("day", today);
+        else await admin.from("routine_runs").delete().eq("workspace_id", ws).eq("routine_id", r.id).eq("day", today);
+      }
+    }
+    // renewals that just reached 60 days out (each update is new only once)
+    for (const u of created.filter((x) => x.kind === "renewal" && /:60$/.test(x.dedupe))) {
+      const what = u.title.en.replace(/: expires in \d+ days$/, "").replace(/ expires in \d+ days$/, "");
+      await start(u.workspace_id, `Start the renewal of ${what} (${u.body?.en ?? ""}). Find the agency's renewal form or online renewal, prepare the application${u.app_id ? ` (application ${u.app_id})` : ""}, fill it from the workspace, add the renewal's due date to Deadlines and put it up for approval once it's complete. If it renews automatically or needs nothing from the business, say so in one sentence.`,
+        { en: `Renewal started: ${what}`, zh: `已开始续办：${what}` });
+    }
+    // filings with the agency well past its published processing time: one check every two weeks
+    for (const f of ((filings ?? []) as (Filing & { submitted_at?: string | null })[]).filter((x) => x.status === "submitted")) {
+      const app = ((((states.get(f.workspace_id) ?? {}) as { apps?: { id: string; est?: Bi; name?: Bi; agency?: Bi }[] }).apps) ?? []).find((a) => a.id === f.app_id);
+      const od = overdue(f.submitted_at, app ? publishedDays(app.est) : null, today);
+      if (!od) continue;
+      const name = bi(app?.name ?? f.title), agency = bi(app?.agency ?? "the agency");
+      const dedupe = `chase:${f.id}:${Math.floor(od.waited / 14)}`;
+      const { data: fresh } = await admin.from("updates").upsert({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe,
+        title: { en: `${name.en}: past the agency's usual time`, zh: `${name.zh}：已超过机构通常的办理时间` },
+        body: { en: `With ${agency.en} for ${od.waited} days; it usually takes about ${od.usual}. Odelia is checking on it.`, zh: `已提交${agency.zh} ${od.waited} 天，通常约 ${od.usual} 天。Odelia 正在跟进。` } },
+        { onConflict: "workspace_id,dedupe", ignoreDuplicates: true }).select("dedupe");
+      if (!fresh?.length) continue;
+      await start(f.workspace_id, `The ${name.en} went to ${agency.en} on ${String(f.submitted_at).slice(0, 10)}, ${od.waited} days ago${f.confirmation_number ? ` (confirmation ${f.confirmation_number})` : ""}; the agency usually takes about ${od.usual} days. Check its status on the agency's own lookup page. If there's still no decision, draft a short, polite status inquiry to the agency with draft_message for the owner to approve, and add a deadline to check again in 7 days.`,
+        { en: `Checked on: ${name.en}`, zh: `已跟进：${name.zh}` });
+    }
+  }
+
   // Self-filing: requeue stuck runs, refresh faxes and letters on their way, flag destinations older than 90 days.
   const sweep = await fetch(`${SUPABASE_URL}/functions/v1/file`, {
     method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": req.headers.get("x-monitor-key") ?? "" }, body: "{}",
@@ -466,5 +518,5 @@ Deno.serve(async (req) => {
   if (!sweep) console.error("self-filing sweep did not run");
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats });
+  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs });
 });

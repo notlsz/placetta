@@ -1,4 +1,5 @@
 import type { Budget, Purchase, SpendPolicy } from "./spend.ts";
+import type { Job, Routine } from "./jobs";
 import type { OrbState } from "thinking-orbs";
 import { ago, inDays } from "./time";
 
@@ -138,6 +139,8 @@ export type Workspace = {
   skills?: Skill[];                        // how Placetta gets things done here: learned as it works, or written by you
   skillsAuto?: boolean;                    // let Placetta create skills as it works (on unless turned off)
   spend?: { policy: SpendPolicy; purchases: Purchase[] };   // what Odelia may buy (outside an account; an account keeps it on the server)
+  jobs?: Job[];                            // Odelia's jobs, each with the plan she keeps current (Work)
+  routines?: Routine[];                    // jobs she repeats on a schedule
 };
 /** A skill: instructions Placetta follows for one kind of job. "auto" ones it wrote itself from a job it finished;
  *  "form" skills also carry where each line of an official form came from, so the next filing of it fills itself. */
@@ -426,6 +429,36 @@ export const SAMPLE: Workspace = {
     { id: "r-edd", state: "shaping", label: B("Finishing the employer registration", "完成雇主登记"), detail: B("Ready today", "今天可完成") },
   ],
   stores: SAMPLE_STORES,
+  jobs: [
+    { id: "job-plan", title: B("File the plan check with Santa Clara County", "向圣克拉拉县提交图纸审查"), status: "waiting", apps: ["plancheck"], started: ago(60 * 26), updated: ago(60 * 3),
+      steps: [
+        { title: B("Find the county's plan check form", "找到县政府的图纸审查表"), done: true },
+        { title: B("Fill it from your business facts", "根据企业信息填写"), done: true },
+        { title: B("Write the menu and operations narrative", "撰写菜单与运营说明"), done: true },
+        { title: B("Get the floor plan and equipment list", "取得平面图和设备清单"), done: false },
+        { title: B("Put it up for your approval with the $1,385 fee", "连同 $1,385 费用提交给您批准"), done: false },
+      ],
+      waiting: B("Your floor plan and equipment list. Upload them on the plan check, or ask your contractor to email them.", "您的平面图和设备清单。可在图纸审查中上传，或请承包商通过邮件发送。") },
+    { id: "job-cards", title: B("Get San Jose's staff their food handler cards", "为圣何塞门店员工办理食品从业人员卡"), status: "running", started: ago(45), updated: ago(6),
+      steps: [
+        { title: B("Check which staff still need a card", "核对还缺证的员工"), done: true },
+        { title: B("Write the text with the approved course link", "写好附有认可课程链接的短信"), done: true },
+        { title: B("Send it once you approve", "您批准后发送"), done: false },
+        { title: B("Add each card to the store as it comes in", "收到后逐张加入门店"), done: false },
+      ] },
+    { id: "job-map", title: B("Map every permit for the San Jose store", "梳理圣何塞门店的全部许可"), status: "done", started: ago(60 * 24 * 9), updated: ago(60 * 24 * 9 - 7),
+      steps: [
+        { title: B("Add the store", "添加门店"), done: true },
+        { title: B("Find the official forms for San José and Santa Clara County", "找到圣何塞市和圣克拉拉县的官方表格"), done: true },
+        { title: B("Prepare 10 applications", "准备 10 项申请"), done: true },
+        { title: B("Fill each from your business facts", "根据企业信息逐项填写"), done: true },
+        { title: B("Add the opening deadlines", "添加开业相关截止日期"), done: true },
+      ] },
+  ],
+  routines: [
+    { id: "rt-filings", title: B("Check every filing that's with an agency", "检查在审的每项申请"), prompt: "Check the status of every application that's with an agency on that agency's own lookup page. Say only what changed; if nothing did, reply exactly: No changes.", every: "weekly", day: 1, from: inDays(-30), last: inDays(-4), created: ago(60 * 24 * 30) },
+    { id: "rt-certs", title: B("Staff certificates at Flushing", "法拉盛门店员工证书"), prompt: "Check every staff certificate at the Flushing store and draft a reminder text for each one that expires in the next 60 days.", every: "monthly", day: 1, from: inDays(-30), last: inDays(-15), created: ago(60 * 24 * 30) },
+  ],
   connections: [
     { id: "c-irs", name: B("IRS", "美国国税局"), level: "federal", state: "connected", detail: B("EIN on file", "EIN 已存档") },
     { id: "c-cdtfa", name: B("CDTFA online services", "加州税费管理局在线服务"), level: "state", state: "connected", detail: B("Seller's permit account", "销售许可证账户") },

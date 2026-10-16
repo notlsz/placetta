@@ -6,7 +6,7 @@ import type { Bi, Store, UpdateItem, Workspace } from "./model";
 import type { HqRow } from "./hq";
 import type { AgencyLogin, Billing, Filing, Integration, IntegrationKind, Plan } from "./cloud/api";
 
-export type View = "overview" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue" | "hq";
+export type View = "overview" | "work" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue" | "hq";
 export type Tab = "progress" | "check" | "form" | "fees" | "receipt";
 
 /** What a signed-in account adds: billing, integrations, saved logins, the filing queue and data controls. */
@@ -79,6 +79,9 @@ export type Ctx = {
   uploading: { app: string; item: string } | null;
   go(v: View): void;
   ask(text: string, voice?: boolean): void;
+  /** What you gave Odelia while she was busy: she takes them in order. */
+  queued: { id: string; text: string }[];
+  unqueue(id: string): void;
   run(req: Request, shown: string | null): void;
   openApp(id: string, tab?: Tab, edit?: boolean): void;
   openApproval(id: string): void;

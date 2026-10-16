@@ -22,6 +22,7 @@ import { B, same, type Approval, type Bi, type Doc, type LicenseHit, type Update
 import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicenses, Overview, UpdatesPage } from "./pages";
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
+import { WorkPage } from "./Work";
 import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
 import { UPDATED } from "./legal";
@@ -46,6 +47,7 @@ const readLang = (): Lang => {
 
 const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
   { v: "overview", k: "nav_overview", Icon: I.overview },
+  { v: "work", k: "nav_work", Icon: I.queue },
   { v: "updates", k: "nav_updates", Icon: I.bell },
   { v: "stores", k: "nav_stores", Icon: I.store },
   { v: "apps", k: "nav_apps", Icon: I.apps },
@@ -433,11 +435,21 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }, () => undefined);
   }, [cloud, run, pushTurn]);
 
+  /* Asked while she's busy: it waits its turn, like a ticket in a queue, and starts when the current job ends. */
+  const [queued, setQueued] = useState<{ id: string; text: string }[]>([]);
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
     setPanelOpen(true);
+    if (busyRef.current) { setQueued(l => [...l, { id: String(nid()), text: q }]); say(lang === "zh" ? "已排队，当前任务完成后开始。" : "Queued. Odelia starts it when she finishes the current job."); return; }
     run({ text: q }, q, voice);
-  }, [run]);
+  }, [run, say, lang]);
+  const unqueue = useCallback((id: string) => setQueued(l => l.filter(x => x.id !== id)), []);
+  useEffect(() => {
+    if (busy || !queued.length) return;
+    const [next, ...rest] = queued;
+    setQueued(rest);
+    run({ text: next.text }, next.text);
+  }, [busy, queued, run]);
 
   /* Owners approve, pay, connect accounts and manage billing; members do the day-to-day work. The database enforces it too. */
   const owner = !cloud || cloud.role === "owner";
@@ -751,7 +763,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     },
     dropKey: () => { setModel(null); setApiName(""); try { localStorage.removeItem(KEY); localStorage.removeItem(KEY_MODEL); } catch { /* storage blocked */ } },
     go,
-    ask,
+    ask, queued, unqueue,
     run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
     openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : "check"), edit: !!edit }); },
     openApproval: id => setModal(id),
@@ -797,17 +809,17 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     openLegal: id => setLegal(id),
     cloud: cloudCtx,
     updates, readUpdates,
-  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
+  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, ask, queued, unqueue, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
 
   /* page */
   const page = {
-    overview: <Overview />, updates: <UpdatesPage />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
+    overview: <Overview />, work: <WorkPage />, updates: <UpdatesPage />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
     find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
     queue: cloud?.me.staff ? <Queue /> : cloud?.me.staff_email ? <QueueLocked /> : <Overview />,
     hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : <Overview />,
   }[view];
   const soon = view_.deadlines.filter(d => { const n = daysUntil(d.date); return n >= 0 && n <= 30; }).length;
-  const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, updates: updates.filter(u => !u.read).length, deadlines: soon };
+  const badge: Partial<Record<View, number>> = { work: (view_.jobs ?? []).filter(j => j.status === "waiting").length + queued.length, overview: view_.approvals.length, updates: updates.filter(u => !u.read).length, deadlines: soon };
   const wsSub = cloud ? (billing?.free && !billing.subscription_status ? b(B("Early access", "抢先体验")) : plan === "monthly" ? b(PLAN_LABEL[billing?.subscription_plan ?? ""] ?? B("Monthly plan", "月度方案")) : plan === "entry" ? b(B("Entry plan", "开店计划")) : b(B("No plan yet", "尚未开通"))) : t("sampleWs");
 
   const slim = slimPref && !phone;

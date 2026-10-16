@@ -422,6 +422,32 @@ async function memoryAndSkills() {
   ok((r.reply?.memory as unknown[]).length >= 2 && (r.reply?.skills as unknown[]).length === 1, "the reply lists what was remembered and learned");
 }
 
+async function work() {
+  console.log("\n# set_plan, schedule_routine, cancel_routine");
+  const r = await agent({
+    ws: workspace(), prompt: "Get the Flushing store ready for its health inspection, and check the permit every Monday.",
+    script: [
+      () => ask(["set_plan", { title: "Get Flushing ready for the health inspection", steps: [{ title: "Read the inspector's checklist" }, { title: "Ask the landlord for the grease trap record" }, { title: "Book the inspection" }] }], ["set_plan", { title: "x", steps: [] }]),
+      () => ask(["set_plan", { title: "Get Flushing ready for the health inspection", steps: [{ title: "Read the inspector's checklist", done: true }, { title: "Ask the landlord for the grease trap record" }, { title: "Book the inspection" }], status: "waiting", waiting_on: "The grease trap service record from the landlord" }], ["set_plan", { job_id: "nope", title: "x", steps: [{ title: "y" }] }]),
+      () => ask(["schedule_routine", { title: "Check the health permit", instructions: "Check the permit's status on the agency's lookup page and say only what changed.", every: "weekly", day: 1 }], ["schedule_routine", { title: "Bad", instructions: "x", every: "weekly", day: 9 }], ["schedule_routine", { title: "Daily digest", instructions: "Summarize what changed today.", every: "daily" }]),
+      c => ask(["cancel_routine", { routine_id: c.outs("schedule_routine")[1].routine_id }], ["cancel_routine", { routine_id: "nope" }]),
+      () => say("Planned 3 steps; waiting on the landlord's grease trap record. The permit check runs every Monday."),
+    ],
+  });
+  const jobs = r.w.jobs ?? [];
+  eq(jobs.length, 1, "set_plan keeps one job per plan (the second call updates it)");
+  eq([jobs[0]?.status, jobs[0]?.steps.filter(x => x.done).length, jobs[0]?.waiting?.en], ["waiting", 1, "The grease trap service record from the landlord"], "the job shows its progress and what it waits on");
+  ok(!callNamed(r, "set_plan")[1].ok && !callNamed(r, "set_plan")[3].ok, "a plan with no steps, or an unknown job, is an error");
+  ok(!callNamed(r, "schedule_routine")[1].ok, "a weekly routine on day 9 is refused");
+  eq((r.w.routines ?? []).map(x => x.title.en), ["Check the health permit"], "schedule_routine saves routines and cancel_routine removes one");
+  ok(!callNamed(r, "cancel_routine")[1].ok, "cancelling an unknown routine is an error");
+  const { runsOn, nextRun, cadence } = await import("../src/jobs");
+  const mon = { id: "r", title: same("x"), prompt: "x", every: "weekly" as const, day: 1, from: "2026-10-01", created: "" };
+  eq([runsOn(mon, "2026-10-19"), runsOn(mon, "2026-10-20"), nextRun(mon, "2026-10-16"), cadence(mon).en], [true, false, "2026-10-19", "Every Monday"], "a weekly routine runs on its weekday");
+  const eom = { ...mon, every: "monthly" as const, day: 31 };
+  eq([runsOn(eom, "2027-02-28"), nextRun(eom, "2027-02-01")], [true, "2027-02-28"], "a monthly routine on the 31st runs on the last day of a short month");
+}
+
 async function settings() {
   console.log("\n# change_setting, edit_workspace, show_licenses");
   const acct = account();
@@ -617,6 +643,7 @@ await fieldsAndDocs();
 await writing();
 await memoryAndSkills();
 await settings();
+await work();
 await errors();
 await limits();
 await chinese();

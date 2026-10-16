@@ -20,6 +20,7 @@ import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { daysFromNow, money, nowIso } from "./time";
+import { cadence, nextRun, settleJobs, type Job, type Routine } from "./jobs";
 import { basisLine, openingLine, openingPath, preflight } from "./smart";
 import { cityOf as recordsCity, cityRecords } from "./opendata";
 import { replyLanguage } from "./langs";
@@ -234,6 +235,9 @@ function snapshot(w: Workspace, lang: Lang) {
     facts: w.facts.map(f => `${b(f.label)}: ${b(f.value)}`),
     documents: w.docs.slice(0, 30).map(d => (d.app ? `${d.name} (application ${d.app})` : d.name)),
     running: w.running.map(r => b(r.label)),
+    // jobs not yet done, with their plans, so set_plan can pick one up again; and the routines
+    jobs: (w.jobs ?? []).filter(j => j.status === "running" || j.status === "waiting").slice(0, 8).map(j => ({ id: j.id, title: b(j.title), status: j.status, steps: j.steps.map(x => `${x.done ? "[x]" : "[ ]"} ${b(x.title)}`), ...(j.waiting ? { waiting_on: b(j.waiting) } : {}) })),
+    routines: (w.routines ?? []).map(r => ({ id: r.id, title: b(r.title), when: b(cadence(r)), paused: r.paused || undefined, next: nextRun(r, daysFromNow(0)) })),
   };
 }
 
@@ -262,7 +266,9 @@ How you work:
 - Refuse anything that breaks the law or deceives an agency (faking a document, a signature or an inspection record, hiding something from an inspector, dodging a required license), even if asked.${tools ? `
 - Use the agencies' real forms, never a template. find_official_forms returns the official form for each filing (form number, agency, how it's filed, official link, fee and the form's own fields by line). When a form is there, prepare_application with its official_form_id and fill its fields with the form's own labels. Only when the library has nothing for a filing, ${research ? "research the agency's official page and name the exact form or online service it uses" : "name the form only if you are sure of it and say it's to be confirmed with the agency"}.
 - Chain the tools. To map a business or a new store: ${can("add_store") ? "add_store first if it isn't in Stores yet, then " : ""}find_official_forms for its business and place, then prepare_application once for each license it needs (with the store_id when there's more than one store), fill each from the workspace facts, memory and documents, add_deadline for the dates that matter (the opening date, each filing's file-by date, renewals), then request_filing_approval for each one that's complete. request_filing_approval refuses an incomplete application and says what's missing: that's expected, not a failure. For progress or "what's next": check_progress first${mail ? ", then search_email for recent mail from the agencies and read_email what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${drives ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
-- Act, don't advise. When the person asks for something, do every step you can yourself, start to end, in this turn: ${research ? "research the requirement (start from usa.gov or sba.gov if it helps you find the agency, then read and cite the agency's own page), " : ""}find the official form, prepare the application, fill every line of the form from the workspace facts, memory and their documents, draft any letter it needs, add the deadlines and put the filing up for approval. When they only ask what they'd need somewhere, without asking you to start, ${can("show_licenses") ? "list it with show_licenses" : "answer"} instead of adding applications. Never stop at an explanation when you could have done the step.
+${can("set_plan") ? `- Work like an engineer on a ticket. For any job of three or more steps (mapping a store, a renewal, getting ready for an inspection, answering an agency's request), set_plan first, then work the plan in order and set_plan again as each step finishes. One plan per job: when a job in the workspace's jobs is still open, pick it up with its job_id instead of starting another. Blocked on something only someone else can give? Finish every other step first, then set the job to waiting and say exactly what you need and from whom.
+- Do the whole job, not only the forms: chase what a filing needs from other people (the landlord's authorization letter, the contractor's license, the architect's stamped plans) with draft_message, get a store ready for each inspection, write status reports for the owner or headquarters with draft_document, compare cities by the permits, fees and time to open, and keep staff certificates and renewals current.${can("schedule_routine") ? " When they want something done on a schedule ('every Monday', 'each month', 'until it's approved'), schedule_routine it." : ""}
+` : ""}- Act, don't advise. When the person asks for something, do every step you can yourself, start to end, in this turn: ${research ? "research the requirement (start from usa.gov or sba.gov if it helps you find the agency, then read and cite the agency's own page), " : ""}find the official form, prepare the application, fill every line of the form from the workspace facts, memory and their documents, draft any letter it needs, add the deadlines and put the filing up for approval. When they only ask what they'd need somewhere, without asking you to start, ${can("show_licenses") ? "list it with show_licenses" : "answer"} instead of adding applications. Never stop at an explanation when you could have done the step.
 - When you're blocked on something only the person knows, finish everything else first, then ask for all of it in one short question at the end. Never ask more than one question in a reply.
 - If a tool returns an error, read it, fix the call (a real id from the workspace, a YYYY-MM-DD date, the missing argument) and try once more; if it still fails, say in one sentence what didn't work. Never claim a step worked when its tool returned an error.
 - You can change anything in the workspace the person can: add stores (add_store shows it in Stores right away), rename the business (edit_workspace), save business facts (remember), edit deadlines (edit_deadline) and applications (fill_fields, update_application)${can("change_setting") ? ", and change everyday settings (language, theme, accent color, reading replies aloud) with change_setting" : ""}. Changing something that already exists in a way they may not want, like moving a store to a different city or removing a store or an application, goes through update_store, remove_store or remove_application: that puts a confirmation in front of them and nothing changes until they confirm. Say you've asked them to confirm; never say it's done before they do. After a store moves, map the new city's permits. Remove a deadline only when they ask or it clearly no longer applies.
@@ -443,6 +449,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
   // "the business tax registration" mid-sentence; Title Case names ("Food Service Establishment Permit") and acronyms stay as they are
   const nm = (a: Application) => { const n = a.name[lang]; const titled = n.split(/\s+/).filter(w => /^[A-Z]/.test(w)).length > 1; return lang === "en" && /^[A-Z][a-z]/.test(n) && !titled ? n.charAt(0).toLowerCase() + n.slice(1) : n; };
   const mark = () => { made.lastToolAt = textLen(); };
+  const job = { current: "" };   // the job this run's set_plan calls keep updating
   const fieldList = (v: unknown, fromDefault: string): Field[] => arr(v).map((f, i) => {
     const o = f as Record<string, unknown>; const label = str(o.label, 160);   // official lines can be long; a cut label would never match its line
     return { id: slug(label) || "f" + i, label: same(label), value: str(o.value, 200), from: str(o.source, 80) ? same(str(o.source, 80)) : same(fromDefault) };
@@ -767,6 +774,84 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         apply(putSkill({ ...(str(i.id) ? { id: str(i.id) } : {}), ...(key ? { key } : {}), kind, source: "auto", name: same(name), description: same(desc), body }));
         made.skills.push(same(name)); mark();
         return { saved: true, skill_id: (get().skills ?? []).find(s => s.name.en === name)?.id };
+      },
+    },
+    {
+      name: "set_plan",
+      description: "Show the plan for a job of three or more steps, the way an engineer would: the steps in order, each marked done as you finish it. The person watches it in Work and beside the chat. Call it first with every step not done, then again with the same job_id each time a step finishes, the plan changes, or you're blocked (status waiting, and waiting_on says exactly what and from whom). When the last step is done, mark them all done.",
+      inputSchema: { type: "object" as const, properties: {
+        job_id: { type: "string", description: "The job to update; leave out to start one" },
+        title: { type: "string", description: "Short, e.g. 'Map the Flushing store'" },
+        steps: { type: "array", items: { type: "object", properties: { title: { type: "string" }, done: { type: "boolean" } }, required: ["title"] }, description: "Every step, in order" },
+        status: { type: "string", enum: ["running", "waiting", "done", "stopped"] },
+        waiting_on: { type: "string", description: "With status waiting: what you need, and from whom" },
+        application_ids: { type: "array", items: { type: "string" } },
+      }, required: ["title", "steps"] },
+      execute(i: Record<string, unknown>) {
+        const title = str(i.title, 100);
+        const steps = arr(i.steps).map(x => ({ title: same(str((x as { title?: unknown }).title, 140)), done: (x as { done?: unknown }).done === true })).filter(x => x.title.en).slice(0, 15);
+        if (!title || !steps.length) throw new Error("title and at least one step are required");
+        const now = new Date().toISOString();
+        const jobs = get().jobs ?? [];
+        const id0 = str(i.job_id) || job.current;
+        const old = id0 ? jobs.find(j => j.id === id0) : undefined;
+        if (str(i.job_id) && !old) throw new Error(`No job "${str(i.job_id)}". Leave job_id out to start a new one.`);
+        const allDone = steps.every(x => x.done);
+        const status = (["running", "waiting", "done", "stopped"].includes(str(i.status)) ? str(i.status) : allDone ? "done" : "running") as Job["status"];
+        const waiting = status === "waiting" && str(i.waiting_on) ? same(str(i.waiting_on, 240)) : undefined;
+        const apps = arr(i.application_ids).map(x => str(x)).filter(x => get().apps.some(a => a.id === x));
+        const id = old?.id ?? freshId(get(), "job");
+        const next: Job = { id, title: same(title), status, steps, ...(waiting ? { waiting } : {}), started: old?.started ?? now, updated: now, ...(apps.length || old?.apps ? { apps: apps.length ? apps : old?.apps } : {}), ...(old?.routine ? { routine: old.routine } : {}) };
+        job.current = id;
+        const n = steps.filter(x => x.done).length;
+        S(status === "done" ? "working" : "shaping", old ? L(`Plan: ${n} of ${steps.length} done`, `计划：已完成 ${n}/${steps.length}`) : L(`Planned ${steps.length} steps: ${title}`, `已规划 ${steps.length} 步：${title}`));
+        // the newest first; done jobs beyond the last 20 drop off
+        apply(w => { const rest = (w.jobs ?? []).filter(j => j.id !== id); const done = rest.filter(j => j.status === "done" || j.status === "stopped").slice(0, 20); return { ...w, jobs: [next, ...rest.filter(j => j.status !== "done" && j.status !== "stopped"), ...done] }; });
+        mark();
+        return { job_id: id, done: n, of: steps.length, status };
+      },
+    },
+    {
+      name: "schedule_routine",
+      description: "Repeat a job on a schedule when the person asks for something recurring ('every Monday check...', 'each month...'). Each time it comes due, Placetta runs your instructions in the background and tells them what changed. Write instructions another run can follow alone. Changing a routine: pass its routine_id.",
+      inputSchema: { type: "object" as const, properties: {
+        routine_id: { type: "string" }, title: { type: "string", description: "Short, e.g. 'Check the health permit's status'" },
+        instructions: { type: "string", description: "What to do each time, complete on its own" },
+        every: { type: "string", enum: ["daily", "weekly", "monthly"] },
+        day: { type: "integer", description: "weekly: 0 Sunday to 6 Saturday; monthly: 1 to 31" },
+        start: { type: "string", description: "YYYY-MM-DD, the first day it may run (default today)" },
+      }, required: ["title", "instructions", "every"] },
+      execute(i: Record<string, unknown>) {
+        const title = str(i.title, 100), prompt = str(i.instructions, 1500);
+        const every = (["daily", "weekly", "monthly"].includes(str(i.every)) ? str(i.every) : "") as Routine["every"];
+        if (!title || !prompt || !every) throw new Error("title, instructions and every (daily, weekly or monthly) are required");
+        const day = typeof i.day === "number" && Number.isInteger(i.day) ? i.day : undefined;
+        if (day !== undefined && (every === "weekly" ? day < 0 || day > 6 : every === "monthly" ? day < 1 || day > 31 : true)) throw new Error(every === "daily" ? "A daily routine takes no day." : `day must be ${every === "weekly" ? "0 (Sunday) to 6 (Saturday)" : "1 to 31"}`);
+        const from = str(i.start) || daysFromNow(0);
+        if (!isDate(from)) throw new Error("start must be YYYY-MM-DD");
+        const list = get().routines ?? [];
+        if (str(i.routine_id) && !list.some(r => r.id === str(i.routine_id))) throw new Error(`No routine "${str(i.routine_id)}".`);
+        if (!str(i.routine_id) && list.length >= 20) throw new Error("This workspace already has 20 routines. Change or cancel one first.");
+        const id = str(i.routine_id) || freshId(get(), "rt");
+        const r: Routine = { id, title: same(title), prompt, every, ...(day !== undefined ? { day } : {}), from, created: list.find(x => x.id === id)?.created ?? new Date().toISOString() };
+        S("connecting", L(`Scheduling: ${title}`, `安排例行任务：${title}`));
+        apply(w => audit("agent", L("Scheduled a routine", "安排例行任务"), same(title), cadence(r))({ ...w, routines: [...(w.routines ?? []).filter(x => x.id !== id), r] }));
+        mark();
+        return { routine_id: id, cadence: cadence(r)[lang], next: nextRun(r, daysFromNow(0)) };
+      },
+    },
+    {
+      name: "cancel_routine",
+      description: "Stop a routine the person no longer wants, or pause it (pause: true) to resume later.",
+      inputSchema: { type: "object" as const, properties: { routine_id: { type: "string" }, pause: { type: "boolean" } }, required: ["routine_id"] },
+      execute(i: Record<string, unknown>) {
+        const r = (get().routines ?? []).find(x => x.id === str(i.routine_id));
+        if (!r) throw new Error(`No routine "${str(i.routine_id)}". Use an id from routines.`);
+        const pause = i.pause === true;
+        S("connecting", L(`${pause ? "Pausing" : "Stopping"}: ${r.title.en}`, `${pause ? "暂停" : "停止"}：${r.title.zh}`));
+        apply(w => audit("agent", pause ? L("Paused a routine", "暂停例行任务") : L("Stopped a routine", "停止例行任务"), r.title)({ ...w, routines: pause ? (w.routines ?? []).map(x => (x.id === r.id ? { ...x, paused: true } : x)) : (w.routines ?? []).filter(x => x.id !== r.id) }));
+        mark();
+        return { ok: true };
       },
     },
     {
@@ -1386,6 +1471,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
       if ("text" in req) {
         let streamed = "";
         const made: Made = { apps: new Set(), approvals: [], memory: [], skills: [], files: [], lastToolAt: 0 };
+        const runStart = new Date().toISOString();
         step({ state: "searching", label: B("Reading your workspace", "读取您的工作区") });
         const tools = model.tools ? makeTools(() => ws, apply, step, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal }) : undefined;
         const research = model.kind === "server";
@@ -1400,6 +1486,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         const final = clean(text.slice(made.lastToolAt).trim() || text.trim());
         // cite agency pages first; keep at most four
         const cited = [...sources.filter(x => official(x.url)), ...sources.filter(x => !official(x.url))].slice(0, 4);
+        apply(settleJobs(runStart));
         onEvent({ type: "reply", reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
           files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } });
         return;

@@ -79,7 +79,8 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   const ta = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { const el = ta.current; if (!el) return; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 128) + "px"; }, [draft]);
   const attach = useRef<HTMLInputElement>(null);
-  const send = () => { const q = draft.trim(); if (q && !busy) { setDraft(""); ask(q); } };
+  // while she's busy, what you send waits its turn (Work, Up next)
+  const send = () => { const q = draft.trim(); if (q) { setDraft(""); ask(q); } };
   const level = useCallback(() => Math.max(sim.level(), tts.level()), [sim, tts]);
   const dock = variant === "dock";
   // voice mode fits any height: the bot shrinks on short screens (an embedded preview can be under 500px tall)
@@ -102,7 +103,7 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
           <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={narrow ? t("askPhShort") : t("askPh")} onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
           <button type="button" className="ic mic" aria-label={t("talk")} title={t("talk")} onClick={startVoice} disabled={busy}><I.mic /></button>
-          {busy
+          {busy && !draft.trim()
             ? <button type="button" className="sendb stop" onClick={stop} aria-label={t("stop")} title={t("stop")}><I.stopSq /></button>
             : <button type="submit" className="sendb" disabled={!draft.trim()} aria-label={t("send")}><I.send /></button>}
         </form>
