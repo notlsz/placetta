@@ -4,7 +4,7 @@
 // sandbox. Each stub checks requests the way the real API would (shapes, required fields, the documented rules the
 // functions rely on) and answers with realistic bodies.
 
-export type Rec = { service: "anthropic" | "telnyx" | "linq" | "whatsapp" | "postmark" | "stripe" | "resend"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
+export type Rec = { service: "anthropic" | "telnyx" | "linq" | "whatsapp" | "postmark" | "stripe" | "resend" | "dns"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
 export const recorded: Rec[] = [];
 export const blockedHosts: string[] = [];
 export const stubErrors: string[] = [];
@@ -371,7 +371,18 @@ async function anthropic(req: Request, path: string, body: any): Promise<Respons
 
 /* ------------------------------ the patched fetch ------------------------------ */
 
-const HOSTS: Record<string, Rec["service"]> = { "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "graph.facebook.com": "whatsapp", "lookaside.fbsbx.com": "whatsapp", "api.postmarkapp.com": "postmark", "files.resend.test": "resend", "api.stripe.com": "stripe", "api.resend.com": "resend" };
+/** DNS over HTTPS (Cloudflare's and Google's JSON API): the TXT records odelia-mail looks up to check DKIM signatures. */
+export const dnsState = { txt: new Map<string, string>() };
+function dns(_req: Request, u: URL): Response {
+  const name = (u.searchParams.get("name") ?? "").toLowerCase().replace(/\.$/, "");
+  const rec = u.searchParams.get("type") === "TXT" ? dnsState.txt.get(name) : undefined;
+  if (rec === undefined) return json(200, { Status: 3, Answer: [] });
+  // long records come back as several quoted strings, as real resolvers send them
+  const data = (rec.match(/.{1,200}/g) ?? [""]).map((s) => `"${s}"`).join(" ");
+  return json(200, { Status: 0, Answer: [{ name, type: 16, TTL: 300, data }] });
+}
+
+const HOSTS: Record<string, Rec["service"]> = { "cloudflare-dns.com": "dns", "dns.google": "dns", "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "graph.facebook.com": "whatsapp", "lookaside.fbsbx.com": "whatsapp", "api.postmarkapp.com": "postmark", "files.resend.test": "resend", "api.stripe.com": "stripe", "api.resend.com": "resend" };
 
 export function patchFetch(local: (u: URL) => boolean) {
   const realFetch = globalThis.fetch.bind(globalThis);
@@ -383,7 +394,7 @@ export function patchFetch(local: (u: URL) => boolean) {
       const raw = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
       let body: any = raw;
       try { body = raw && (req.headers.get("content-type") ?? "").includes("json") ? JSON.parse(raw) : raw; } catch { /* left as text */ }
-      const res = service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "whatsapp" ? whatsapp(req, u.pathname, body) : service === "postmark" ? postmark(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
+      const res = service === "dns" ? dns(req, u) : service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "whatsapp" ? whatsapp(req, u.pathname, body) : service === "postmark" ? postmark(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
       recorded.push({ service, method: req.method, path: u.pathname + u.search, headers: Object.fromEntries(req.headers), body: service === "stripe" ? formObject(raw) : body, raw, status: res.status, at: Date.now() });
       return res;
     }

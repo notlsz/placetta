@@ -5,8 +5,9 @@
 // POST, Authorization: Basic (Postmark inbound webhook, POSTMARK_INBOUND_AUTH)      the best way in
 // POST, signed (Standard Webhooks, RESEND_WEBHOOK_SECRET), {type: "email.received"} the free way in (Resend)
 //
-// Only mail from a Placetta account's own address, and only when the receiving server vouches for it (DMARC pass, or
-// DKIM signed by that domain): a From line alone can be forged. Unknown senders get nothing back (no backscatter);
+// Only mail from a Placetta account's own address, and only when the receiving provider vouches for it (Resend's own
+// DMARC or aligned DKIM result, or for Postmark a DKIM signature by that domain that we verify on the raw message;
+// see mail.ts): a From line, and any header the sender writes, can be forged. Unknown senders get nothing back (no backscatter);
 // unverified mail from a real account gets one note a day saying why. Auto-replies, bounces and lists are dropped.
 // Nothing is filed, paid, sent or deleted by email: the answer links to the approval in the app.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -32,8 +33,8 @@ const internal = async (fn: string, body: Record<string, unknown>) =>
 
 const MAIL_SAY = {
   unverified: {
-    en: "I got your email, but I couldn't confirm it really came from your address (your mail provider didn't sign it), so I haven't acted on it. Ask me in Placetta, or by text, instead.",
-    zh: "我收到了您的邮件，但无法确认它确实来自您的邮箱（您的邮件服务没有为它签名），所以没有处理。请在快哉中或通过短信问我。",
+    en: "I got an email from your address, but I couldn't verify that you really sent it, so I haven't acted on it. Ask me in Placetta, or by text, instead.",
+    zh: "我收到了一封来自您邮箱的邮件，但无法验证它确实是您本人发出的，所以没有处理。请在快哉中或通过短信问我。",
   },
   files: { en: "Emailed", zh: "邮件发送" },
 };
@@ -58,13 +59,20 @@ export async function received(m: InMail) {
   if (!m.to.includes(me) || automated(m)) return { ok: true, skipped: "not_for_odelia" };
   const { data: uid } = await admin.rpc("user_by_email", { p_email: m.from });
   const user = typeof uid === "string" ? uid : null;
-  const logId = await logMessage(admin, { user_id: user, direction: "in", channel: "email", kind: "chat", body: user ? m.text.slice(0, 2000) : "", provider_id: m.id, subject: user ? m.subject : null });
+  // Logged first (keyed on the Message-ID, so a redelivery is a no-op), but without its words until the sender checks out:
+  // a forged mail's text never shows up as something the account holder said.
+  const logId = await logMessage(admin, { user_id: user, direction: "in", channel: "email", kind: "chat", body: "", provider_id: m.id, subject: null });
   if (logId === null) return { ok: true, duplicate: true };
   if (!user) return { ok: true, skipped: "unknown_sender" };   // no backscatter to strangers or spoofed addresses
 
   const { data: pl } = await admin.from("phone_links").select("lang, last_workspace_id").eq("user_id", user).maybeSingle();
   const lang: Lang = pl?.lang === "zh" || (!pl && /[㐀-鿿]/.test(m.subject + m.text)) ? "zh" : "en";
-  if (!senderVerified(m.headers, m.from)) {
+  const verdict = await senderVerified(m);
+  if (!verdict.ok) {
+    // Fail closed: no run starts as this person. A missing raw message means Postmark's RawEmailEnabled is off, which
+    // stops every email, so it's logged loudly for whoever runs Placetta.
+    if (verdict.why === "postmark_raw_missing") console.error("odelia mail: Postmark isn't sending RawEmail; turn on RawEmailEnabled for the inbound server");
+    else console.warn("odelia mail unverified", verdict.why);
     // One note a day, claimed before it's sent so two such mails at once can't both send one.
     const day = new Date().toISOString().slice(0, 10);
     const noteId = await logMessage(admin, { user_id: user, direction: "out", channel: "email", kind: "system", body: MAIL_SAY.unverified[lang], provider_id: `mail-unverified:${user}:${day}` });
@@ -75,6 +83,7 @@ export async function received(m: InMail) {
     }
     return { ok: true, skipped: "unverified" };
   }
+  await admin.from("odelia_messages").update({ body: m.text.slice(0, 2000), subject: m.subject || null }).eq("id", logId);
 
   const link = { user_id: user, last_workspace_id: (pl?.last_workspace_id as string | null) ?? null } as Link;
   const { ws } = await currentWorkspace(admin, link);

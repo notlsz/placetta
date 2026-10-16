@@ -4,13 +4,23 @@
 // anything the person changed meanwhile), the audit trail, and the run's conversation. A run that nears the time limit
 // is saved and picked up again by a fresh instance; a watchdog resumes runs whose instance died.
 //
+// One instance works a run at a time. heartbeat_at is the run's lease: whoever works the run sets it to a value only
+// it knows and every write it makes is conditional on that value still being there, so a duplicated "continue" or the
+// watchdog can't work the same run alongside it, and a worker that lost its lease stops without a word. A hand-over
+// passes the new value along as a ticket; the watchdog takes only runs whose holder went quiet for STALE_MS.
+//
 // POST {action: "start", workspace_id, prompt, history?, lang?, deep?}         a member (Supabase session)
-// POST {action: "continue", run_id, token?} | {action: "watchdog"} | {action: "watch", workspace_id}   the server itself (monitor key)
+// POST {action: "continue", run_id, token?, ticket?} | {action: "watchdog"} | {action: "watch", workspace_id}   the server itself (monitor key)
 // POST {action: "selftest"}   the monitor key: short real-model runs on in-memory scratch workspaces (selftest.ts);
 //                             returns {ok, model, checks: [{name, pass, detail, ms}], total_ms} in under 140 s
-// POST {action: "start_as", user_id, workspace_id, prompt, channel: "sms"|"voice", reply_to, history?, lang?}
-//      odelia-sms and odelia-voice (monitor key), for a person who texted or called from their verified number. The
-//      same member and plan checks as "start"; the answer is texted to reply_to when the run finishes.
+// POST {action: "start_as", user_id, workspace_id, prompt, channel: "sms"|"voice"|"email", reply_to, plain_sms?, history?, lang?}
+//      odelia-sms, odelia-voice and odelia-mail (monitor key), for a person who texted or called from their verified
+//      number, or emailed from their sign-in address. The same member and plan checks as "start"; the answer goes back
+//      the same way when the run finishes. A run from plain SMS only reads and drafts (src/serverRun.ts).
+// POST {action: "start_chat", user_id, workspace_id, prompt, channel: "slack"|"lark", chat_to, lang?}
+//      chat-events (monitor key), for the Placetta teammate who asked in the business's Slack or Lark.
+// Every run from outside the app carries its channel, and can't remove deadlines, set up routines, save memory or
+// skills, or change stores; anything it prepares still needs an approval in the app.
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -23,6 +33,7 @@ import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/m
 import { agencyKey, DISTILL_SYSTEM, distillPrompt, filingEvidence, type Lesson, lessonKeys, lessonsBrief, normalizeState, parseDistill, rank, runEvidence, runRounds, startState, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
+import { claim, type Lease, type RunsTable, saveOnto, stamp } from "./lease.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
@@ -40,6 +51,10 @@ const MODEL_PHONE = env("AGENT_MODEL_PHONE", "") || MODEL;
 /** Work per instance before saving and handing over (the free plan stops an instance at 150 s). */
 const CHUNK_MS = Number(env("AGENT_CHUNK_SECONDS", "70")) * 1000;
 const STALE_MS = 3 * 60_000, MAX_ATTEMPTS = 8;
+/** How often a working instance renews its lease even when it has nothing else to save (a long model call). */
+const RENEW_MS = 30_000;
+/** Tries to save the agent's changes onto a workspace that others keep changing, before the save fails. */
+const SAVE_TRIES = 8;
 const FETCH_BETA = "web-fetch-2025-09-10";
 const MAX_TOOLS = 48;
 const MODEL_KEYS = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY"];
@@ -69,13 +84,27 @@ async function monitorKey() {
   if (!selfKey) { const { data } = await admin.rpc("monitor_key"); selfKey = typeof data === "string" ? data : ""; }
   return selfKey;
 }
-/** Hand the run to a fresh instance. */
-async function handOver(runId: string, token: string | null) {
+/** Hand the run to a fresh instance, with the ticket (the lease value) the outgoing instance left on it. */
+async function handOver(runId: string, token: string | null, ticket: string | null) {
   await fetch(`${SUPABASE_URL}/functions/v1/agent-run`, {
     method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": await monitorKey() },
-    body: JSON.stringify({ action: "continue", run_id: runId, ...(token ? { token } : {}) }),
+    body: JSON.stringify({ action: "continue", run_id: runId, ...(token ? { token } : {}), ...(ticket ? { ticket } : {}) }),
   }).catch((e) => console.error("hand over", String(e).slice(0, 120)));
 }
+
+/** agent_runs for the lease (lease.ts): reads, and updates that only apply while their conditions hold. */
+const runsTable: RunsTable<Run> = {
+  async read(id) { const { data } = await admin.from("agent_runs").select("*").eq("id", id).maybeSingle(); return data as Run | null; },
+  async update(id, fields, where) {
+    let q = admin.from("agent_runs").update(fields).eq("id", id);
+    if (where.heartbeat_at) q = q.eq("heartbeat_at", where.heartbeat_at);
+    if (where.heartbeat_before) q = q.lt("heartbeat_at", where.heartbeat_before);
+    if (where.status) q = q.eq("status", where.status);
+    const { data, error } = await q.select("id");
+    if (error) { console.error("run update", id, error.code); return null; }
+    return data?.length ?? 0;
+  },
+};
 
 /* ------------------------------ the model ------------------------------ */
 
@@ -253,59 +282,75 @@ async function atCapacity(ws: string) {
   return (count ?? 0) >= PARALLEL;
 }
 
-/** Work on a run until it's done, stopped, or time to hand over. */
-export async function work(runId: string, token: string | null) {
-  const { data: run } = await admin.from("agent_runs").select("*").eq("id", runId).maybeSingle() as { data: Run | null };
-  if (!run || run.status !== "running") return;
+/** Work on a run until it's done, stopped, or time to hand over. Only with the run's lease (lease.ts): a run someone
+ *  else holds, or one already finished, is left alone. */
+export async function work(runId: string, token: string | null, ticket: string | null = null) {
+  const claimed = await claim(runsTable, runId, ticket, STALE_MS);
+  if (!claimed) return;
+  const { run, lease } = claimed;
   const ws = run.workspace_id;
-  await admin.from("agent_runs").update({ attempts: run.attempts + 1, heartbeat_at: new Date().toISOString() }).eq("id", runId);
   const until = Date.now() + CHUNK_MS;
+  const lostLease = () => err("lease_lost", "Another instance took the run over.");
 
   const { data: row } = await admin.from("workspaces").select("name, state").eq("id", ws).maybeSingle();
-  if (!row) { await admin.from("agent_runs").update({ status: "failed", error: "The workspace is gone." }).eq("id", runId); return; }
+  if (!row) { await lease.write({ status: "failed", error: "The workspace is gone." }, { running: true }); return; }
   let cur: Workspace = normalizeState(row.name, row.state ?? {});
   const pending: Patch[] = [];
   const steps: Step[] = Array.isArray(run.steps) ? [...run.steps] : [];
   let draft: string | null = null, flushT: ReturnType<typeof setTimeout> | undefined, flushing: PromiseLike<unknown> = Promise.resolve();
   const flush = (now = false) => {
-    const go = () => { flushing = admin.from("agent_runs").update({ steps, draft, heartbeat_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", runId).then((r) => r); };
+    const go = () => { flushing = lease.write({ steps, draft, updated_at: new Date().toISOString() }); };
     clearTimeout(flushT);
     if (now) go(); else flushT = setTimeout(go, 600);
   };
   // Save the agent's changes onto the newest saved state (the person may have changed things meanwhile), and log them.
   // One save at a time; each takes the patches made so far.
   let chain: Promise<void> = Promise.resolve();
+  let saveError: Error | null = null;
   const commit = () => (chain = chain.then(async () => {
+    if (saveError) return;
+    // Changes from an instance that lost the run would repeat the other one's work.
+    if (lease.lost) throw lostLease();
     const batch = pending.splice(0);
     if (!batch.length) return;
     // Several jobs can run at once: each saves its own changes onto the newest state, and only if nobody saved in
-    // between (updated_at unchanged); otherwise it reads again and re-applies them.
-    for (let tries = 0; ; tries++) {
-      const { data: fresh } = await admin.from("workspaces").select("name, state, updated_at").eq("id", ws).maybeSingle();
-      let w = normalizeState(fresh?.name ?? row.name, fresh?.state ?? {});
-      for (const p of batch) w = p(w);
-      const audit = w.audit.filter((a) => a.actor === "agent" || a.actor === "you").map((a) => ({ workspace_id: ws, client_id: a.id, actor: a.actor, actor_id: run.created_by, action: a.action, object: a.object, detail: a.detail ?? null }));
-      if (audit.length) await admin.from("audit_log").upsert(audit, { onConflict: "workspace_id,client_id", ignoreDuplicates: true });
-      let q = admin.from("workspaces").update({ state: stripState(w), updated_at: new Date().toISOString() }).eq("id", ws);
-      if (fresh?.updated_at && tries < 5) q = q.eq("updated_at", fresh.updated_at);
-      const { data: saved, error } = await q.select("id");
-      if (error) { pending.unshift(...batch); throw new Error("save failed: " + error.code); }
-      if (saved?.length) { cur = { ...w, audit: cur.audit }; break; }   // and this job now sees what the others did
-      await new Promise((r) => setTimeout(r, 120 + Math.random() * 300));
-    }
-  }).catch((e) => console.error("commit", runId, String(e).slice(0, 160))));
+    // between (updated_at unchanged); otherwise it reads again and re-applies them. It never writes over someone
+    // else's save: after SAVE_TRIES the save fails, and so does the run.
+    const w = await saveOnto<Workspace>({
+      tries: SAVE_TRIES,
+      async read() {
+        const { data: fresh, error } = await admin.from("workspaces").select("name, state, updated_at").eq("id", ws).maybeSingle();
+        if (error) throw err("save_failed", "Couldn't read the workspace: " + error.code);
+        return fresh?.updated_at ? { w: normalizeState(fresh.name ?? row.name, fresh.state ?? {}), version: String(fresh.updated_at) } : null;
+      },
+      async write(w, version) {
+        const { data: saved, error } = await admin.from("workspaces").update({ state: stripState(w), updated_at: new Date().toISOString() }).eq("id", ws).eq("updated_at", version).select("id");
+        if (error) throw err("save_failed", "save failed: " + error.code);
+        return !!saved?.length;
+      },
+    }, (w) => batch.reduce((acc, p) => p(acc), w));
+    // The audit trail only for changes that were saved.
+    const audit = w.audit.filter((a) => a.actor === "agent" || a.actor === "you").map((a) => ({ workspace_id: ws, client_id: a.id, actor: a.actor, actor_id: run.created_by, action: a.action, object: a.object, detail: a.detail ?? null }));
+    if (audit.length) await admin.from("audit_log").upsert(audit, { onConflict: "workspace_id,client_id", ignoreDuplicates: true });
+    cur = { ...w, audit: cur.audit };   // and this job now sees what the others did
+  }).catch((e) => { saveError = e as Error; console.error("commit", runId, String(e).slice(0, 160)); }));
+  /** Saves what's pending, and stops the run if it couldn't be saved. */
+  const save = async () => { await commit(); if (saveError) throw saveError; };
 
-  // stop when the person says so
+  // Stop when the person says so, or when another instance has the run; renew the lease through long model calls.
   const ctl = new AbortController();
+  let renewed = Date.now();
   const watchStop = setInterval(async () => {
     const { data } = await admin.from("agent_runs").select("status").eq("id", runId).maybeSingle();
-    if (data?.status !== "running") ctl.abort();
+    if (data?.status !== "running" || lease.lost) { ctl.abort(); return; }
+    if (Date.now() - renewed > RENEW_MS) { renewed = Date.now(); await lease.write({}); if (lease.lost) ctl.abort(); }
   }, 3000);
 
   try {
     const svc = await servicesFor(ws, run, token);
-    const who = { uid: run.created_by, spent: 0 };
     const state = run.state ?? startState([], run.prompt);
+    // The task's spend so far, from every earlier chunk: the ceiling is for the whole task.
+    const who = { uid: run.created_by, spent: Number(state.spent) || 0 };
     // The network: the run starts from what other businesses' jobs taught Odelia about these places, agencies and forms.
     if (state.network === undefined) {
       const ls = rank(await lessonsFor(lessonKeys(cur)).catch(() => [] as Lesson[])).slice(0, 14);
@@ -318,31 +363,42 @@ export async function work(runId: string, token: string | null) {
       state, ws: () => cur, lang: run.lang, deep: run.deep, account: true, svc, signal: ctl.signal, until,
       apply: (p) => { cur = p(cur); pending.push(p); },
       step: (s) => { steps.push(s); flush(); },
-      // after each round: save the work and where the conversation is, so a fresh instance can carry on
-      round: async (st) => { await commit(); await admin.from("agent_runs").update({ state: st, steps, draft, heartbeat_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running"); },
+      // after each round: save the work and where the conversation is (with what it has cost), so a fresh instance can carry on
+      round: async (st) => {
+        await save();
+        if (!(await lease.write({ state: st, steps, draft, updated_at: new Date().toISOString() })) && lease.lost) throw lostLease();
+      },
       draft: (t) => { draft = t; flush(); },
-      send: (body, deep) => model(ws, body, deep, location, ctl.signal, run.channel === "sms" || run.channel === "voice", who) as never,
-      channel: run.channel === "sms" || run.channel === "voice" ? run.channel : undefined,
+      send: async (body, deep) => {
+        try { return await model(ws, body, deep, location, ctl.signal, run.channel === "sms" || run.channel === "voice", who) as never; }
+        finally { state.spent = who.spent; }
+      },
+      // Every channel, so a request from outside the app gets the remote rules (src/serverRun.ts).
+      channel: run.channel ?? "app",
     });
-    await commit();
+    clearTimeout(flushT);   // the last write below carries the steps; a late flush would bring the draft back
+    await save();
     if ("paused" in out) {
-      await admin.from("agent_runs").update({ state: out.paused, steps, draft, heartbeat_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running");
-      await handOver(runId, token);
+      const next = await lease.release({ state: { ...out.paused, spent: who.spent }, steps, draft, updated_at: new Date().toISOString() });
+      if (next) await handOver(runId, token, next);
       return;
     }
-    await finish(run, out.reply, steps);
+    await finish(run, out.reply, steps, lease);
     bg(learnFromRun(run, cur, state, out.reply));
   } catch (e) {
+    clearTimeout(flushT);
+    // An instance that lost the run says and saves nothing: the one holding it does.
+    if (lease.lost) return;
     await commit().catch(() => undefined);
     const code = (e as { code?: string }).code;
-    if (code === "cancelled" || ctl.signal.aborted) await admin.from("agent_runs").update({ steps, draft: null, state: null, updated_at: new Date().toISOString() }).eq("id", runId);
+    if (code === "cancelled" || ctl.signal.aborted) await lease.write({ steps, draft: null, state: null, updated_at: new Date().toISOString() });
     else {
       console.error("run failed", runId, code, String((e as Error)?.message ?? e).slice(0, 200));
-      const { data: failed } = await admin.from("agent_runs").update({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running").select("id");
+      const failed = await lease.write({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }, { running: true });
       // Someone who asked by text or on a call hears about it the same way.
-      if (failed?.length) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
-      if (failed?.length && run.channel === "email") await mailBack(run, SAY.failed[run.lang], []).catch((x) => console.error("mail back", String(x).slice(0, 120)));
-      if (failed?.length && (run.channel === "slack" || run.channel === "lark")) await chatBack(run, SAY.failed[run.lang], []).catch(() => undefined);
+      if (failed) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
+      if (failed && run.channel === "email") await mailBack(run, SAY.failed[run.lang], []).catch((x) => console.error("mail back", String(x).slice(0, 120)));
+      if (failed && (run.channel === "slack" || run.channel === "lark")) await chatBack(run, SAY.failed[run.lang], []).catch(() => undefined);
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
@@ -411,9 +467,11 @@ async function queueApprovalTexts(run: Run, title: { en: string; zh: string }, a
   if (rows.length) await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
 }
 
-async function finish(run: Run, reply: Reply, steps: Step[]) {
+async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease) {
   const now = new Date().toISOString();
-  await admin.from("agent_runs").update({ status: "done", reply, steps, draft: null, state: null, updated_at: now }).eq("id", run.id).eq("status", "running");
+  // The answer goes out only from the instance that marked the run done: not when it was stopped meanwhile, and not
+  // from a second instance that lost the run, so nobody gets it twice.
+  if (!(await lease.write({ status: "done", reply, steps, draft: null, state: null, updated_at: now }, { running: true }))) return;
   const said = reply.text.map((t) => t.en).join(" ").trim();
   // Asked by text or on a call: the answer goes back by text, which is where they're watching.
   if (run.channel === "sms" || run.channel === "voice") {
@@ -476,14 +534,17 @@ export async function handle(req: Request): Promise<Response> {
     if (action === "continue") {
       const id = String(body.run_id ?? "");
       if (!UUID.test(id)) return fail(400, "bad_request", "run_id is required.");
-      bg(work(id, typeof body.token === "string" ? body.token : null));
+      // The ticket from a hand-over; a duplicated continue with the same ticket finds the run already taken.
+      bg(work(id, typeof body.token === "string" ? body.token : null, typeof body.ticket === "string" ? body.ticket.slice(0, 64) : null));
       return json(202, { ok: true });
     }
     if (action === "watchdog") {
-      const { data: stale } = await admin.from("agent_runs").select("id, attempts").eq("status", "running").lt("heartbeat_at", new Date(Date.now() - STALE_MS).toISOString()).limit(20);
+      const cutoff = new Date(Date.now() - STALE_MS).toISOString();
+      const { data: stale } = await admin.from("agent_runs").select("id, attempts, heartbeat_at").eq("status", "running").lt("heartbeat_at", cutoff).limit(20);
       for (const r of stale ?? []) {
-        if (r.attempts >= MAX_ATTEMPTS) await admin.from("agent_runs").update({ status: "failed", error: "The agent stopped responding. Try again." }).eq("id", r.id);
-        else await handOver(r.id, null);
+        // Only if it's still the same quiet run: an instance may have taken it up since the list was read.
+        if (r.attempts >= MAX_ATTEMPTS) await admin.from("agent_runs").update({ status: "failed", error: "The agent stopped responding. Try again." }).eq("id", r.id).eq("status", "running").eq("heartbeat_at", r.heartbeat_at);
+        else await handOver(r.id, null, null);   // no ticket: it's taken only while its holder is still quiet
       }
       return json(200, { ok: true, resumed: (stale ?? []).length });
     }
@@ -499,35 +560,39 @@ export async function handle(req: Request): Promise<Response> {
     const t = body.title as { en?: unknown; zh?: unknown } | undefined;
     const title = job && t && typeof t.en === "string" ? { en: t.en.slice(0, 120), zh: (typeof t.zh === "string" ? t.zh : t.en).slice(0, 120) } : null;
     const prompt = job ? ROUTINE[lang](job) : WATCH[lang](meta.what ?? "", where);
-    const { data: run, error } = await admin.from("agent_runs").insert({ workspace_id: ws, kind: "watch", prompt, lang, state: startState([], prompt), ...(title ? { title } : {}) }).select("id").single();
+    // A new run carries a ticket (its first lease value), so only the instance started here takes it.
+    const ticket = stamp();
+    const { data: run, error } = await admin.from("agent_runs").insert({ workspace_id: ws, kind: "watch", prompt, lang, state: startState([], prompt), heartbeat_at: ticket, ...(title ? { title } : {}) }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the check.");
-    bg(work(run.id, null));
+    bg(work(run.id, null, ticket));
     return json(202, { id: run.id });
   }
 
-  // start_chat: someone asked Odelia in the business's own Slack or Lark (chat-events, with the monitor key). The job runs as
-  // the owner who connected the bot; the answer goes back to the same thread.
+  // start_chat: a Placetta teammate asked Odelia in the business's own Slack or Lark (chat-events, with the monitor key,
+  // which has matched the sender to this member). The job runs as them; the answer goes back to the same thread.
   if (action === "start_chat") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
     const uid = String(body.user_id ?? ""), ws = String(body.workspace_id ?? "");
     const channel = body.channel === "slack" ? "slack" : body.channel === "lark" ? "lark" : null;
     const to = body.chat_to as ChatTo | undefined;
+    const zh = body.lang === "zh";
     if (!UUID.test(uid) || !UUID.test(ws) || !channel || !to || to.kind !== channel) return fail(400, "bad_request", "user_id, workspace_id, channel and chat_to are required.");
     const may = await mayUseAgent(admin, ws, uid);
-    if (may === "not_member") return fail(403, "forbidden", "The person who connected this bot is no longer in the workspace. Connect it again in Settings.");
-    if (may === "no_plan") return fail(402, "payment_required", "Odelia starts with the entry plan. Choose a plan in Placetta.");
-    if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", "Odelia isn't switched on for this account yet. Placetta's team has been told.");
+    if (may === "not_member") return fail(403, "forbidden", zh ? "您不是这个快哉工作区的成员。负责人可以在快哉中邀请您。" : "You're not a member of this Placetta workspace. The owner can invite you in Placetta.");
+    if (may === "no_plan") return fail(402, "payment_required", zh ? "Odelia 需要先开通入门套餐。请在快哉中选择套餐。" : "Odelia starts with the entry plan. Choose a plan in Placetta.");
+    if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", zh ? "此账户的 Odelia 尚未开通，快哉团队已收到通知。" : "Odelia isn't switched on for this account yet. Placetta's team has been told.");
     const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
     if (!tg.ok) return fail(tg.status, tg.code, tg.message);
     if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
+    const ticket = stamp();
     const { data: run, error } = await admin.from("agent_runs").insert({
-      workspace_id: ws, created_by: uid, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: false,
-      state: startState([], prompt), channel, chat_to: to,
+      workspace_id: ws, created_by: uid, kind: "task", prompt, lang: zh ? "zh" : "en", deep: false,
+      state: startState([], prompt), channel, chat_to: to, heartbeat_at: ticket,
     }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
-    bg(work(run.id, null));
+    bg(work(run.id, null, ticket));
     return json(202, { id: run.id });
   }
 
@@ -559,14 +624,18 @@ export async function handle(req: Request): Promise<Response> {
     if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-8)
       .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 2000) }));
+    // A text by plain SMS (whose sender is easy to forge) only reads and drafts. odelia-sms says which it was; when it
+    // doesn't say, a text counts as plain SMS.
+    const plainSms = channel === "sms" && body.plain_sms !== false;
+    const ticket = stamp();
     const { data: run, error } = await admin.from("agent_runs").insert({
       workspace_id: ws, created_by: uid, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: false,
-      state: startState(history, prompt), channel, reply_to: replyTo,
+      state: { ...startState(history, prompt), ...(plainSms ? { plainSms: true } : {}) }, channel, reply_to: replyTo, heartbeat_at: ticket,
     }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
     await admin.from("phone_links").update({ last_workspace_id: ws }).eq("user_id", uid);
     // No session token: connected apps (mail, drives) act as the person and stay with runs started in the app.
-    bg(work(run.id, null));
+    bg(work(run.id, null, ticket));
     return json(202, { id: run.id });
   }
 
@@ -594,12 +663,13 @@ export async function handle(req: Request): Promise<Response> {
   if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
   const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-12)
     .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 4000) }));
+  const ticket = stamp();
   const { data: run, error } = await admin.from("agent_runs").insert({
     workspace_id: ws, created_by: user.id, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: body.deep === true,
-    state: startState(history, prompt), seen_at: new Date().toISOString(),
+    state: startState(history, prompt), seen_at: new Date().toISOString(), heartbeat_at: ticket,
   }).select("id").single();
   if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
-  bg(work(run.id, jwt));
+  bg(work(run.id, jwt, ticket));
   return json(202, { id: run.id });
 }
 

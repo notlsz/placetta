@@ -4,19 +4,27 @@
 //   Postmark (best: $16.50 a month for 10,000 on Pro, inbound included, and it strips the quoted reply for us)
 //     POST, Authorization: Basic (the user:pass in the inbound webhook URL, POSTMARK_INBOUND_AUTH)
 //     {MessageID, FromFull: {Email, Name}, To, Subject, TextBody, StrippedTextReply, Headers: [{Name, Value}],
-//      Attachments: [{Name, Content (base64), ContentType, ContentLength}]}
+//      Attachments: [{Name, Content (base64), ContentType, ContentLength}], RawEmail (with RawEmailEnabled on)}
 //   Resend (free: 3,000 a month counting both ways; RESEND_API_KEY already sends sign-in mail)
 //     POST, Standard Webhooks (RESEND_WEBHOOK_SECRET), {type: "email.received", data: {email_id, from, to, subject}}
-//     then GET /emails/receiving/{id} for text and headers, GET /emails/receiving/{id}/attachments for download URLs
+//     then GET /emails/receiving/{id} for text, headers and authentication ({spf, dkim, dmarc}, set by Resend's own
+//     receiving server), and GET /emails/receiving/{id}/attachments for download URLs
 //
-// Email's From line can be forged, so Odelia acts only on mail the receiving server says passed DMARC, or DKIM signed
-// by the sender's own domain; anything else gets a note telling them so, and nothing more.
+// Email's From line can be forged, and so can any header the sender writes: Authentication-Results, ARC, X-Spam-Tests.
+// So Odelia trusts only what the receiving provider itself establishes. Resend: its authentication field says DMARC
+// passed, or DKIM passed for the From domain. Postmark: it gives no authentication result the sender can't also write
+// (its spam headers are skipped on some mail, and then a forged one would stand alone), so we verify the DKIM signature
+// on the raw message ourselves (dkim.ts). Anything else is unverified: no run starts, and the owner gets a note.
 import { verifyLinq as verifyStandardWebhook } from "./linq.ts";
+import { dohTxt, type TxtLookup, verifyDkim } from "./dkim.ts";
 
 export { verifyStandardWebhook };
 export type Env = (k: string) => string | undefined;
 export type InFile = { name: string; mime: string; bytes?: Uint8Array; url?: string; size: number };
-export type InMail = { id: string; from: string; name: string; to: string[]; subject: string; text: string; headers: Record<string, string[]>; files: InFile[] };
+/** What the receiving provider gives us to check the sender with: Postmark's raw message (null when RawEmailEnabled is
+ *  off), or Resend's own authentication results (null on mail received before Resend added them). */
+export type MailAuth = { provider: "postmark"; raw: string | null } | { provider: "resend"; result: { spf?: string; dkim?: string; dmarc?: string } | null };
+export type InMail = { id: string; from: string; name: string; to: string[]; subject: string; text: string; headers: Record<string, string[]>; files: InFile[]; auth: MailAuth };
 
 export const odeliaEmail = (env: Env) => (env("ODELIA_EMAIL") || "").trim().toLowerCase();
 export const mailInReady = (env: Env) => !!odeliaEmail(env) && !!(env("POSTMARK_INBOUND_AUTH") || (env("RESEND_WEBHOOK_SECRET") && env("RESEND_API_KEY")));
@@ -39,22 +47,31 @@ function headerMap(list: { Name?: string; Value?: string; name?: string; value?:
 
 /* ------------------------------ who really sent it ------------------------------ */
 
-const domainOf = (addr: string) => addr.split("@")[1] ?? "";
-const alignedTo = (d: string, from: string) => { const a = lower(d), b = domainOf(from); return !!a && !!b && (a === b || b.endsWith("." + a) || a.endsWith("." + b)); };
-
+export type Verdict = { ok: boolean; why: string };
 /**
- * Whether the receiving server vouches that this mail is from `from`'s domain: DMARC pass in Authentication-Results, or
- * DKIM pass signed by the From domain (or its parent), or Postmark's spam tests saying DKIM is valid for the author's
- * domain. SPF alone isn't enough: it checks the envelope sender, not the From line people see.
+ * Whether the receiving provider vouches that this mail is from `m.from`. Resend: its own DMARC pass, or its DKIM pass
+ * (which it reports only when the signing domain matches the From domain). Postmark: a DKIM signature on the raw
+ * message that we verify ourselves, by the From domain or a parent of it. Headers in the message are never trusted,
+ * because the sender writes them; ARC is ignored. SPF alone isn't enough: it checks the envelope sender, not the From
+ * line people see. Anything we can't confirm is a no.
  */
-export function senderVerified(headers: Record<string, string[]>, from: string): boolean {
-  for (const ar of [...(headers["authentication-results"] ?? []), ...(headers["arc-authentication-results"] ?? [])]) {
-    const v = ar.toLowerCase();
-    const dmarc = /dmarc=pass\b[^;]*header\.from=([^\s;]+)/.exec(v);
-    if (dmarc ? alignedTo(dmarc[1], from) : /dmarc=pass\b/.test(v) && !/header\.from=/.test(v)) return true;
-    for (const m of v.matchAll(/dkim=pass\b[^;]*?header\.(?:d|i)=@?([^\s;]+)/g)) if (alignedTo(m[1].replace(/^.*@/, ""), from)) return true;
+export async function senderVerified(m: Pick<InMail, "from" | "auth">, o: { txt?: TxtLookup; now?: number } = {}): Promise<Verdict> {
+  if (!m.from || !m.auth) return { ok: false, why: "no_auth" };
+  if (m.auth.provider === "resend") {
+    const r = m.auth.result;
+    if (!r) return { ok: false, why: "resend_no_auth" };
+    if (lower(r.dmarc) === "pass") return { ok: true, why: "resend_dmarc_pass" };
+    if (lower(r.dkim) === "pass") return { ok: true, why: "resend_dkim_pass" };
+    return { ok: false, why: "resend_not_passed" };
   }
-  return (headers["x-spam-tests"] ?? []).some((t) => /\bDKIM_VALID_AU\b/i.test(t));
+  if (m.auth.provider === "postmark") {
+    if (!m.auth.raw) return { ok: false, why: "postmark_raw_missing" };
+    try {
+      const r = await verifyDkim(m.auth.raw, m.from, { txt: o.txt ?? dohTxt, now: o.now });
+      return { ok: r.ok, why: r.ok ? "postmark_dkim_pass" : "postmark_" + r.why };
+    } catch (e) { return { ok: false, why: "postmark_error:" + String(e).slice(0, 80) }; }
+  }
+  return { ok: false, why: "unknown_provider" };
 }
 
 /* ------------------------------ the two ways in ------------------------------ */
@@ -68,7 +85,8 @@ export function postmarkAuthOk(authorization: string, expected: string): boolean
   return d === 0;
 }
 type Postmark = { MessageID?: string; FromFull?: { Email?: string; Name?: string }; From?: string; FromName?: string; To?: string; ToFull?: { Email?: string }[]; OriginalRecipient?: string;
-  Subject?: string; TextBody?: string; HtmlBody?: string; StrippedTextReply?: string; Headers?: { Name: string; Value: string }[]; Attachments?: { Name?: string; Content?: string; ContentType?: string; ContentLength?: number }[] };
+  Subject?: string; TextBody?: string; HtmlBody?: string; StrippedTextReply?: string; Headers?: { Name: string; Value: string }[]; Attachments?: { Name?: string; Content?: string; ContentType?: string; ContentLength?: number }[];
+  RawEmail?: string };
 export function parsePostmark(p: Postmark): InMail | null {
   const from = addressOf(p.FromFull?.Email ?? p.From);
   const headers = headerMap(p.Headers ?? []);
@@ -83,7 +101,8 @@ export function parsePostmark(p: Postmark): InMail | null {
     try { bytes = Uint8Array.from(atob(String(a.Content ?? "")), (c) => c.charCodeAt(0)); } catch { bytes = undefined; }
     return { name: String(a.Name ?? "attachment"), mime: lower(a.ContentType).split(";")[0], bytes, size: Number(a.ContentLength ?? bytes?.length ?? 0) };
   });
-  return { id: `mail:${id}`, from, name: String(p.FromFull?.Name ?? p.FromName ?? ""), to: [...new Set(to)], subject: String(p.Subject ?? "").slice(0, 300), text: text.trim().slice(0, 6000), headers, files };
+  return { id: `mail:${id}`, from, name: String(p.FromFull?.Name ?? p.FromName ?? ""), to: [...new Set(to)], subject: String(p.Subject ?? "").slice(0, 300), text: text.trim().slice(0, 6000), headers, files,
+    auth: { provider: "postmark", raw: typeof p.RawEmail === "string" && p.RawEmail ? p.RawEmail : null } };
 }
 
 const RESEND = "https://api.resend.com";
@@ -96,7 +115,8 @@ export async function fetchResend(env: Env, ev: { type?: string; data?: { email_
     if (!res.ok) throw new Error(`resend ${res.status}`);
     return await res.json();
   };
-  const m = await get(`/emails/receiving/${id}`) as { id: string; from: string; to?: string[]; received_for?: string[]; subject?: string; text?: string | null; html?: string | null; headers?: Record<string, string> | null; message_id?: string; attachments?: unknown[] };
+  const m = await get(`/emails/receiving/${id}`) as { id: string; from: string; to?: string[]; received_for?: string[]; subject?: string; text?: string | null; html?: string | null; headers?: Record<string, string> | null; message_id?: string; attachments?: unknown[];
+    authentication?: { spf?: string; dkim?: string; dmarc?: string } | null };
   const files: InFile[] = [];
   if (m.attachments?.length) {
     const list = await get(`/emails/receiving/${id}/attachments`) as { data?: { filename?: string; content_type?: string; size?: number; download_url?: string; content_disposition?: string }[] };
@@ -107,6 +127,7 @@ export async function fetchResend(env: Env, ev: { type?: string; data?: { email_
     id: `mail:${String(m.message_id ?? headers["message-id"]?.[0] ?? m.id).trim()}`, from: addressOf(m.from), name: /^\s*"?([^"<]+?)"?\s*</.exec(String(m.from ?? ""))?.[1] ?? "",
     to: [...new Set([...(m.to ?? []), ...(m.received_for ?? [])].map(addressOf).filter(Boolean))], subject: String(m.subject ?? "").slice(0, 300),
     text: (isForward(m.subject) ? (m.text || htmlToText(m.html ?? "")) : stripQuoted(m.text || htmlToText(m.html ?? ""))).trim().slice(0, 6000), headers, files,
+    auth: { provider: "resend", result: m.authentication && typeof m.authentication === "object" ? m.authentication : null },
   };
 }
 

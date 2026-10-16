@@ -31,24 +31,97 @@ export type RunState = {
   /** The network (src/learning.ts): the lessons this run started from (fixed for the whole run, so a resumed chunk
    *  reads the same), and each job's first independent check, which is the number the network moves. */
   lessons?: string[]; network?: string; firstChecks?: { job: string; passed: number; of: number }[];
+  /** The request came by plain SMS (Telnyx, or a Linq line falling back to SMS), whose sender is easy to forge: the run
+   *  may only read and draft. Set by the server when the run starts; nothing the model says changes it. */
+  plainSms?: boolean;
+  /** What the whole task has cost so far in US dollars, across every chunk a fresh instance picked up. */
+  spent?: number;
 };
 
 const MAX_ROUNDS = 16;
 
-/** Where the person asked: the app, a text message, or a phone call (answered by text when it's done). */
-export type Channel = "app" | "sms" | "voice";
-/** From a text or a call nothing is deleted outright (removing a store or an application already waits for a confirmation in the app). */
-export function phoneRefuses(channel: Channel | undefined, tool: string, input: Record<string, unknown>): boolean {
-  return (channel === "sms" || channel === "voice") && tool === "edit_deadline" && !!input.remove;
+/** Where the person asked: the app, a text message, a phone call, an email, or the business's Slack or Lark. */
+export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark";
+/** Anything but the app. Its words may not be the person's own (a forwarded letter, a chat message, a forged text), and
+ *  nobody is there to see what the agent does, so it can read, research, draft and put things up for approval, and
+ *  nothing it does is final until someone approves it in the app. */
+export const isRemote = (channel: Channel | undefined) => !!channel && channel !== "app";
+
+/** Never from a remote channel: removing deadlines, setting up or stopping routines, saving memory or skills
+ *  (playbooks), and changing or removing stores. */
+const REMOTE_NEVER: Record<string, string> = {
+  schedule_routine: "Routines can't be set up",
+  cancel_routine: "Routines can't be stopped or paused",
+  memory_save: "Nothing is saved to memory",
+  skill_save: "Skills and playbooks can't be saved",
+  update_store: "Stores can't be changed",
+  remove_store: "Stores can't be removed",
+};
+/** Plain SMS only reads and drafts: these tools, and no other. */
+const PLAIN_SMS_MAY = new Set([
+  "find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "show_licenses", "city_records", "check_progress",
+  "address_rules", "inspection_guide", "search_email", "read_email", "find_files", "get_income", "review_documents",
+  "draft_message", "send_email", "draft_document",
+]);
+/** Tools plain SMS may use whose side effects don't stick there (guardPatch drops them): what the model must know so
+ *  it doesn't say otherwise. */
+const PLAIN_SMS_PARTIAL: Record<string, string> = {
+  review_documents: "From a plain text message the renewal reminders above weren't saved, so don't say you added any; they can add them in the Placetta app.",
+  draft_document: "From a plain text message the document is saved in Documents but not attached to an application or a job.",
+};
+/** The note a tool's result gets for this channel, if any. */
+export function channelNote(o: { channel?: Channel; plainSms?: boolean }, tool: string): string | null {
+  return isRemote(o.channel) && o.plainSms ? PLAIN_SMS_PARTIAL[tool] ?? null : null;
 }
-/** How to write for a phone: short plain texts, one question at a time, and nothing that needs the app done by text. */
-export function channelHint(channel: Channel | undefined): string {
-  if (channel !== "sms" && channel !== "voice") return "";
+const via = (channel: Channel | undefined) => (channel === "sms" ? "a text" : channel === "voice" ? "a call" : channel === "email" ? "an email" : channel === "slack" ? "Slack" : "Lark");
+
+/** Why a tool can't run for a request from this channel (the tool result the model sees), or null when it can. */
+export function channelRefuses(o: { channel?: Channel; plainSms?: boolean }, tool: string, input: Record<string, unknown>): string | null {
+  if (!isRemote(o.channel)) return null;
+  if (o.plainSms && !PLAIN_SMS_MAY.has(tool))
+    return "Error: This request came by plain SMS, which can be forged, so from it you can only look things up and draft for approval. Nothing in the workspace changes. Tell them to make this change in the Placetta app.";
+  if (REMOTE_NEVER[tool]) return `Error: ${REMOTE_NEVER[tool]} from ${via(o.channel)}. Tell them to do it in the Placetta app.`;
+  if (tool === "edit_deadline" && input.remove === true) return `Error: Deadlines can't be removed from ${via(o.channel)}. Tell them to remove it in the Placetta app.`;
+  return null;
+}
+
+type Patch = (w: Workspace) => Workspace;
+/**
+ * The same rules on the workspace itself, whichever tool made the change (form skills learned while filing, a playbook's
+ * toolbox growing, a removal folded into another change): a remote run leaves memory, skills, routines, existing
+ * stores and existing deadlines as they were. Plain SMS changes nothing but its drafts: approvals, documents and the
+ * audit trail.
+ */
+export function guardPatch(o: { channel?: Channel; plainSms?: boolean }, p: Patch): Patch {
+  if (!isRemote(o.channel)) return p;
+  if (o.plainSms) return w => { const n = p(w); return { ...w, approvals: n.approvals, docs: n.docs, audit: n.audit }; };
+  return w => {
+    const n = p(w);
+    const deadlines = [...n.deadlines, ...w.deadlines.filter(d => !n.deadlines.some(x => x.id === d.id))];
+    const kept = (w.stores ?? []).filter(s => !(n.stores ?? []).some(x => x.id === s.id));
+    const stores = n.stores || w.stores ? [...(n.stores ?? []).map(s => {
+      const old = (w.stores ?? []).find(x => x.id === s.id);
+      return old ? { ...s, name: old.name, address: old.address, plannedOpen: old.plannedOpen, stage: old.stage } : s;
+    }), ...kept] : undefined;
+    return { ...n, deadlines, ...(stores ? { stores } : {}), memories: w.memories, skills: w.skills, routines: w.routines };
+  };
+}
+
+/** How to write for where they asked, and what can't be done from there. */
+export function channelHint(channel: Channel | undefined, plainSms = false): string {
+  if (!isRemote(channel)) return "";
+  const limits = plainSms
+    ? `\n- This came by plain SMS, which can be forged. From it you can only look things up, answer, and draft (draft_message, send_email, draft_document) for approval in the app. Nothing else in the workspace changes; for anything more, tell them to use the Placetta app.`
+    : `\n- From ${via(channel)} you can read, research, prepare applications, draft, and put things up for approval. You can't remove deadlines, set up or stop routines, save memory or skills, or change or remove stores: tell them to do those in the Placetta app.`;
+  if (channel !== "sms" && channel !== "voice") return `
+
+This request came by ${via(channel)}, not in the app, and your answer goes back there.${limits}
+- Never file, pay or send anything yourself, and never ask them to approve by replying. Put it up for approval with your tools: Placetta links them to that approval in the app. Say so in one short sentence.`;
   return `
 
 This conversation is by phone, not in the app: ${channel === "sms" ? "they texted you" : "they asked on a call with you"}, and your reply goes to them as a text message.
 - Write one to three short plain sentences, 300 characters at most. Lead with the answer. No markdown, no lists, no headings, no links (Placetta adds the links). Ask at most one question, at the end.
-- Never file, pay, send an email or delete anything from a text, and never ask them to approve by replying. Prepare everything as usual and put it up for approval with your tools: Placetta texts them a link to that exact approval in the app. Say so in one short sentence.
+- Never file, pay, send an email or delete anything from a text, and never ask them to approve by replying. Prepare everything as usual and put it up for approval with your tools: Placetta texts them a link to that exact approval in the app. Say so in one short sentence.${limits}
 - Speed matters on a phone. When the workspace summary above already answers the question (what's due, what's next, how a store or application stands), answer straight from it without calling tools. Use tools only to change something or to look up what the summary doesn't have.
 - Never ask for Social Security, ITIN, bank or card numbers by text.`;
 }
@@ -82,8 +155,11 @@ export async function runRounds(o: {
   const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt };
   const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
   const model = messagesModel("server", (body, _signal, deep) => o.send(body, deep));
-  const tools = makeTools(o.ws, o.apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal });
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel);
+  // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
+  const from = { channel: o.channel, plainSms: st.plainSms === true };
+  const apply = (p: Patch) => o.apply(guardPatch(from, p));
+  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal });
+  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms);
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
@@ -114,18 +190,21 @@ export async function runRounds(o: {
       st.messages.push({ role: "assistant", content: data.content });
       const results: Record<string, unknown>[] = [];
       for (const u of uses) {
-        if (phoneRefuses(o.channel, String(u.name ?? ""), (u.input ?? {}) as Record<string, unknown>)) {
-          results.push({ type: "tool_result", tool_use_id: String(u.id ?? ""), content: "Error: Nothing is deleted from a text or a call. Tell them to remove it in the app.", is_error: true });
+        const refused = channelRefuses(from, String(u.name ?? ""), (u.input ?? {}) as Record<string, unknown>);
+        if (refused) {
+          results.push({ type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true });
           continue;
         }
-        results.push(await runTool(tools, u) as unknown as Record<string, unknown>);
+        const r = await runTool(tools, u);
+        const note = r.is_error ? null : channelNote(from, String(u.name ?? ""));
+        results.push((note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>);
       }
       // The harness: a seat that has handed off gives the job to a fresh agent with a clean context (no compaction);
       // one that's nearly out of room is told to write its handoff first.
       const job = activeJob();
       if (job && st.handing) {
         const seat = (job.seat ?? 1) + 1;
-        o.apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === job.id ? { ...j, seat } : j)) }));
+        apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === job.id ? { ...j, seat } : j)) }));
         st.messages = [{ role: "user", content: harnessBrief(o.ws(), { ...job, seat }, st.request ?? "", o.lang) }];
         st.seatRounds = 0; st.handing = false;
         o.step({ state: "shaping", label: { en: `A fresh agent picked up the job (seat ${seat})`, zh: `新的代理接手了这项工作（第 ${seat} 棒）` } });
@@ -158,7 +237,7 @@ export async function runRounds(o: {
         const data = await o.send({ system: CHECKER_SYSTEM, messages: [{ role: "user", content: [{ type: "text", text: checkerPrompt(j, evidence(o.ws(), j, reply)) }] }], max_tokens: 1500 }, false);
         verdict = parseVerdict(data.content.filter(c => c.type === "text").map(c => c.text).join(""), j.done!.length);
       } catch { continue; }   // the checker couldn't run: the job keeps the agent's word, and no proof line claims a check
-      o.apply(applyVerdict(j.id, verdict, { final, lang: o.lang }));
+      apply(applyVerdict(j.id, verdict, { final, lang: o.lang }));
       if (!(st.firstChecks ??= []).some(c => c.job === j.id)) st.firstChecks.push({ job: j.id, passed: verdict.filter(v => v.ok).length, of: verdict.length });
       if (!checkedNow.includes(j.id)) checkedNow.push(j.id);
       recheck.delete(j.id);
@@ -176,7 +255,7 @@ export async function runRounds(o: {
     continue work;
   }
 
-  o.apply(settleJobs(st.started));
+  apply(settleJobs(st.started));
   const proof = checkedNow.map(id => (o.ws().jobs ?? []).find(j => j.id === id)).filter((j): j is Job => !!j).map(j => proofLine(j, o.lang)).filter(Boolean).join(" ");
   const final = [clean(st.text.slice(made.lastToolAt).trim() || st.text.trim()) || (o.lang === "zh" ? "完成了。" : "Done."), proof].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);

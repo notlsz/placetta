@@ -67,10 +67,13 @@ async function textNumber(to: string, text: string, userId: string | null = null
 /* ------------------------------ inbound texts ------------------------------ */
 
 type Inbound = { id?: string; from?: { phone_number?: string }; to?: { phone_number?: string }[]; text?: string; media?: unknown[]; autoresponse_type?: string | null };
-/** How a text came in: the iMessage line and conversation (Linq), WhatsApp (and its message id, for the typing
- *  indicator), or nothing (Telnyx SMS). */
-type Via = { line?: string | null; chat?: string | null; app?: "whatsapp"; msg?: string };
+/** How a text came in: the iMessage line and conversation (Linq, with the service it actually used: iMessage, RCS or
+ *  SMS), WhatsApp (and its message id, for the typing indicator), or nothing (Telnyx SMS). */
+type Via = { line?: string | null; chat?: string | null; app?: "whatsapp"; msg?: string; service?: string };
 const waVia = (via: Via, lang: Lang) => (via.app === "whatsapp" ? { open: true, lang } : undefined);
+/** Plain SMS: Telnyx, or a Linq line that fell back to SMS. Its sender is the easiest to forge, so a run started from
+ *  it only reads and drafts. Anything not known to be iMessage, RCS or WhatsApp counts as plain SMS. */
+export const plainSms = (via: Via) => via.app !== "whatsapp" && !(via.line && (via.service === "iMessage" || via.service === "RCS"));
 
 async function inbound(p: Inbound, logId: number, via: Via = {}) {
   const now = new Date();
@@ -218,7 +221,7 @@ async function startRun(link: Link, ws: string, prompt: string, logId: number, v
   const lang = link.lang;
   if (via.chat) bg(linqTyping(env, via.chat));
   if (via.msg) bg(waTyping(env, via.msg));
-  const res = await internal("agent-run", { action: "start_as", user_id: link.user_id, workspace_id: ws, prompt, channel: "sms", reply_to: link.number, lang, history: await history(link, ws, logId) }).catch(() => null);
+  const res = await internal("agent-run", { action: "start_as", user_id: link.user_id, workspace_id: ws, prompt, channel: "sms", plain_sms: plainSms(via), reply_to: link.number, lang, history: await history(link, ws, logId) }).catch(() => null);
   if (!res || res.status !== 202) {
     const code = res?.status;
     await textUser(admin, env, { link, workspace_id: ws, kind: "system", segments: [code === 409 ? SAY.busy[lang] : code === 402 ? SAY.noPlan[lang] : code === 403 ? SAY.noWorkspace[lang] : SAY.failed[lang]] });
@@ -252,7 +255,7 @@ async function linqWebhook(req: Request) {
   const logId = await logMessage(admin, { user_id: link?.user_id ?? null, direction: "in", channel: "sms", kind: "chat", body: link ? m.text.slice(0, 2000) : "", provider_id: m.id, line, service: m.service });
   if (logId === null) return json(200, { ok: true, duplicate: true });
   const p: Inbound = { id: m.id, from: { phone_number: m.from }, to: line ? [{ phone_number: line }] : [], text: m.text, media: m.media };
-  bg(inbound(p, logId, { line, chat: m.chat }).catch((e) => console.error("inbound", String(e).slice(0, 200))));
+  bg(inbound(p, logId, { line, chat: m.chat, service: m.service }).catch((e) => console.error("inbound", String(e).slice(0, 200))));
   return json(200, { ok: true });
 }
 
