@@ -24,7 +24,8 @@
     "test:fda": "node --test scripts/fda-leads.test.mjs",
     "test:e2e": "deno run -A --no-check --no-lock --node-modules-dir=none scripts/e2e/run.ts",
     "test:dnc": "node --test scripts/dnc.test.mjs",
-    "dnc": "node scripts/dnc.mjs"
+    "dnc": "node scripts/dnc.mjs",
+    "test:channels": "tsx scripts/channels-test.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

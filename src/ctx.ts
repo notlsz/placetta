@@ -38,6 +38,10 @@ export type CloudCtx = {
   buyPack(): Promise<void>;
   connect(kind: IntegrationKind): Promise<void>;
   disconnect(kind: IntegrationKind): Promise<void>;
+  /** Link a team chat by its webhook link; true once the test message went through. */
+  connectHook(kind: import("./cloud/api").HookKind, url: string, secret?: string): Promise<boolean>;
+  /** Which sign-in connections are open on this server. */
+  availability(): Promise<import("./cloud/api").Availability>;
   saveLogin(l: { id?: string; agency: string; url?: string; username: string; password?: string; note?: string }): Promise<void>;
   removeLogin(id: string): Promise<void>;
   feedUrl(rotate?: boolean): Promise<string>;

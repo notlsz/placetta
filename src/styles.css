@@ -1518,3 +1518,11 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .arule li q { color: var(--muted); }
 .arule .awarn { margin: 0 0 6px; padding: 8px 10px; border-radius: 10px; background: rgba(217, 147, 43, .1); color: var(--ink); }
 .arule .awarn b { font-weight: 500; }
+
+/* Linking a team chat: the help line, the group's webhook link, and connect-and-test */
+.sg-hook { list-style: none; padding: 4px 14px 14px 62px; }
+.sg-hook p { margin: 0 0 10px; font-size: 13px; color: var(--ink2); line-height: 1.5; }
+.sg-hook form { display: flex; flex-wrap: wrap; gap: 8px; }
+.sg-hook input { flex: 1 1 320px; min-width: 0; height: 38px; border-radius: 10px; border: 1px solid var(--line, rgba(0,0,0,.12)); background: var(--bg, #fff); padding: 0 12px; font: inherit; font-size: 13.5px; color: var(--ink); }
+.sg-hook input[type=password] { flex-basis: 200px; }
+@media (max-width: 640px) { .sg-hook { padding-left: 14px; } }

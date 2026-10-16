@@ -64,9 +64,21 @@ const Btn = ({ children, onClick, kind = "quiet", disabled, guard }: { children:
   return <button type="button" className={"sbtn " + kind + (locked ? " pinned" : "")} onClick={() => (guard ? pin.guard(onClick) : onClick())} disabled={disabled}>{locked && <I.lock />}{children}</button>;
 };
 
-const Tile = ({ logo, wide }: { logo?: string; wide?: boolean }) => <span className={"tile logo" + (wide ? " wide" : "")} aria-hidden="true">{logo ? <img src={logo} alt="" /> : <I.deadlines />}</span>;
+const Tile = ({ logo, wide, chat }: { logo?: string; wide?: boolean; chat?: boolean }) => <span className={"tile logo" + (wide ? " wide" : "")} aria-hidden="true">{logo ? <img src={logo} alt="" /> : chat ? <I.message /> : <I.deadlines />}</span>;
 
-const INTEGRATIONS: { group: Bi; items: { kind: IntegrationKind | "feed" | "square" | "toast"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean }[] }[] = [
+type HookKind = api.HookKind;
+const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
+  slack: { how: B("In Slack, add the Incoming Webhooks app to the channel and copy its webhook URL.", "在 Slack 中为频道添加 Incoming Webhooks 应用，复制其 Webhook URL。"), ph: "https://hooks.slack.com/services/..." },
+  lark: { how: B("In the Lark group: Settings, Bots, Add bot, Custom bot. Copy its webhook address. If you turn on signature checks, paste the secret too.", "在飞书群中：设置 → 群机器人 → 添加机器人 → 自定义机器人，复制 webhook 地址。如开启签名校验，请一并填写密钥。"), ph: "https://open.feishu.cn/open-apis/bot/v2/hook/..." },
+  wecom: { how: B("In the WeCom group chat: the top-right menu, Add group robot, New. Copy its webhook address.", "在企业微信群聊中：右上角菜单 → 添加群机器人 → 新创建，复制 webhook 地址。"), ph: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..." },
+  teams: { how: B("In the Teams channel: More options, Workflows, then the template that posts to a channel when a webhook request is received. Copy the URL it gives you.", "在 Teams 频道中：更多选项 → 工作流，选择“收到 webhook 请求时发布到频道”模板，复制生成的 URL。"), ph: "https://...logic.azure.com/workflows/..." },
+};
+/** Which provider's app keys a sign-in connection needs. */
+const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks" };
+
+type Item = { kind: IntegrationKind | "feed" | "square" | "toast"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean; hook?: boolean };
+const CHAT_WHY = B("Deadlines, renewals and filing updates in your team's group", "截止日期、续期和申报进展推送到团队群");
+const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
   { group: B("Email", "邮件"), items: [
     { kind: "gmail", name: "Gmail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), logo: gmailLogo },
     { kind: "outlook_mail", name: "Outlook Mail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), logo: outlookLogo },
@@ -74,7 +86,13 @@ const INTEGRATIONS: { group: Bi; items: { kind: IntegrationKind | "feed" | "squa
   { group: B("Calendar", "日历"), items: [
     { kind: "gcal", name: "Google Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), logo: gcalLogo },
     { kind: "outlook_cal", name: "Outlook Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), logo: outlookLogo },
-    { kind: "feed", name: "Calendar feed", zh: "日历订阅", why: B("Any calendar app: subscribe with a private link", "任何日历应用：用私密链接订阅"),  },
+    { kind: "feed", name: "Calendar feed", zh: "日历订阅", why: B("Any calendar app, Google and Outlook included: subscribe with a private link", "任何日历应用（含 Google 和 Outlook）：用私密链接订阅"),  },
+  ] },
+  { group: B("Team chat", "团队群聊"), items: [
+    { kind: "slack", name: "Slack", why: CHAT_WHY, logo: slackLogo, hook: true },
+    { kind: "lark", name: "Lark (Feishu)", zh: "飞书", why: CHAT_WHY, hook: true },
+    { kind: "wecom", name: "WeCom", zh: "企业微信", why: CHAT_WHY, hook: true },
+    { kind: "teams", name: "Microsoft Teams", why: CHAT_WHY, hook: true },
   ] },
   { group: B("Documents", "文件"), items: [
     { kind: "gdrive", name: "Google Drive", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: gdriveLogo },
@@ -85,17 +103,25 @@ const INTEGRATIONS: { group: Bi; items: { kind: IntegrationKind | "feed" | "squa
     { kind: "toast", name: "Toast", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), logo: toastLogo, wide: true },
     { kind: "quickbooks", name: "QuickBooks", why: B("Gross receipts for business tax and renewals", "营业总额用于营业税和续期"), logo: qbLogo },
   ] },
-  { group: B("Team", "团队"), items: [
-    { kind: "slack", name: "Slack", why: B("Filing updates in your team's channel", "申报进展推送到团队频道"), logo: slackLogo },
-  ] },
 ];
 
 function Integrations() {
   const { b, lang, cloud, say } = useApp();
   const [feed, setFeed] = useState("");
+  const [avail, setAvail] = useState<api.Availability | null>(null);
+  const [form, setForm] = useState<{ kind: HookKind; url: string; secret: string; busy?: boolean } | null>(null);
+  useEffect(() => { if (cloud) void cloud.availability().then(setAvail); }, [cloud?.wsId]);   // eslint-disable-line react-hooks/exhaustive-deps
   const conn = (k: string) => cloud?.integrations.find(i => i.kind === k);
-  const demo = () => say(lang === "zh" ? "登录您的快哉账户后即可连接。" : "Sign in to your Placetta account to connect.");
+  const zh = lang === "zh";
+  const demo = () => say(zh ? "登录您的快哉账户后即可连接。" : "Sign in to your Placetta account to connect.");
   const request = (name: string) => { window.location.href = `mailto:support@placetta.com?subject=${encodeURIComponent(`Connect ${name}`)}&body=${encodeURIComponent(`Please connect ${name} for our workspace.`)}`; };
+  const openForm = (kind: HookKind) => setForm(f => (f?.kind === kind ? null : { kind, url: "", secret: "" }));
+  const submit = async () => {
+    if (!form || !cloud) return;
+    setForm({ ...form, busy: true });
+    const ok = await cloud.connectHook(form.kind, form.url.trim(), form.secret.trim());
+    setForm(ok ? null : { ...form, busy: false });
+  };
   return (
     <Group id="integrations" title={B("Integrations", "集成")} note={B("Only what gets you licensed and keeps you compliant. Placetta reads what a task needs and nothing else; disconnect any time.", "只连接拿证和保持合规所需的服务。快哉只读取任务所需的内容，可随时断开。")}>
       {INTEGRATIONS.map(g => (
@@ -104,20 +130,37 @@ function Integrations() {
           <ul className="sg-list">
             {g.items.map(it => {
               const c = it.kind === "feed" || it.kind === "square" || it.kind === "toast" ? undefined : conn(it.kind);
+              const provider = PROVIDER_OF[it.kind as IntegrationKind];
+              // Slack signs in when its app keys are set; otherwise, like the other chats, it takes the channel's link
+              const viaLink = it.hook && !(it.kind === "slack" && avail?.slack);
+              const soon = !!cloud && !!avail && !!provider && !avail[provider];
               let right: ReactNode;
-              if (it.kind === "feed") right = cloud ? <Btn guard onClick={async () => { try { const u = await cloud.feedUrl(); setFeed(u); await navigator.clipboard?.writeText(u).catch(() => undefined); say(lang === "zh" ? "订阅链接已复制" : "Link copied"); } catch (e) { say((e as { message: string }).message); } }}>{lang === "zh" ? "复制链接" : "Copy link"}</Btn> : <Btn onClick={demo}>{lang === "zh" ? "复制链接" : "Copy link"}</Btn>;
-              else if (it.kind === "square" || it.kind === "toast") right = <Btn onClick={() => request(it.name)}>{lang === "zh" ? "申请接入" : "Request"}</Btn>;
-              else if (cloud && !cloud.owner) right = c ? undefined : <em className="lock">{lang === "zh" ? "由所有者连接" : "Owners connect"}</em>;
-              else if (c) right = <Btn guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{lang === "zh" ? "断开" : "Disconnect"}</Btn>;
-              else right = <Btn guard kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{lang === "zh" ? "连接" : "Connect"}</Btn>;
-              const status = c ? (c.status === "error" ? <em className="bad">{lang === "zh" ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><i />{c.account ?? (lang === "zh" ? "已连接" : "Connected")}</em>) : null;
-              return (
+              if (it.kind === "feed") right = cloud ? <Btn guard onClick={async () => { try { const u = await cloud.feedUrl(); setFeed(u); await navigator.clipboard?.writeText(u).catch(() => undefined); say(zh ? "订阅链接已复制" : "Link copied"); } catch (e) { say((e as { message: string }).message); } }}>{zh ? "复制链接" : "Copy link"}</Btn> : <Btn onClick={demo}>{zh ? "复制链接" : "Copy link"}</Btn>;
+              else if (it.kind === "square" || it.kind === "toast") right = <Btn onClick={() => request(it.name)}>{zh ? "申请接入" : "Request"}</Btn>;
+              else if (cloud && !cloud.owner) right = c ? undefined : <em className="lock">{zh ? "由所有者连接" : "Owners connect"}</em>;
+              else if (c) right = <Btn guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{zh ? "断开" : "Disconnect"}</Btn>;
+              else if (soon) right = <em className="lock">{zh ? "即将开放" : "Opens soon"}</em>;
+              else if (viaLink) right = <Btn guard kind="line" onClick={() => (cloud ? openForm(it.kind as HookKind) : demo())}>{form?.kind === it.kind ? (zh ? "取消" : "Cancel") : (zh ? "连接" : "Connect")}</Btn>;
+              else right = <Btn guard kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
+              const status = c ? (c.status === "error" ? <em className="bad">{zh ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><i />{c.account ?? (zh ? "已连接" : "Connected")}</em>) : null;
+              const why = soon && (it.kind === "gcal" || it.kind === "outlook_cal") ? B(`${it.why.en}. Until it opens, subscribe with the calendar feed below.`, `${it.why.zh}。开放前，可用下方的日历订阅。`) : it.why;
+              return [
                 <li key={it.kind} className="sg-row">
-                  <Tile logo={it.logo} wide={it.wide} />
-                  <span className="sg-tx"><b>{lang === "zh" && it.zh ? it.zh : it.name}</b><small>{b(it.why)}{it.kind === "toast" ? (lang === "zh" ? "。需 Toast 合作伙伴审批。" : ". Needs Toast partner approval.") : ""}</small>{status}</span>
+                  <Tile logo={it.logo} wide={it.wide} chat={it.hook} />
+                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}{it.kind === "toast" ? (zh ? "。需 Toast 合作伙伴审批。" : ". Needs Toast partner approval.") : ""}</small>{status}</span>
                   <span className="sg-r">{right}</span>
-                </li>
-              );
+                </li>,
+                form?.kind === it.kind && !c ? (
+                  <li key={it.kind + "-form"} className="sg-hook">
+                    <p>{b(HOOK_HELP[form.kind].how)}</p>
+                    <form onSubmit={e => { e.preventDefault(); void submit(); }}>
+                      <input type="url" required autoFocus value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder={HOOK_HELP[form.kind].ph} aria-label={zh ? "Webhook 链接" : "Webhook link"} spellCheck={false} autoComplete="off" />
+                      {form.kind === "lark" && <input type="password" value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder={zh ? "签名密钥（可选）" : "Signing secret (optional)"} aria-label={zh ? "签名密钥" : "Signing secret"} autoComplete="off" />}
+                      <button type="submit" className="sbtn ink" disabled={form.busy || !form.url.trim()}>{form.busy ? (zh ? "正在发送测试消息…" : "Sending a test message...") : (zh ? "连接并发送测试" : "Connect and test")}</button>
+                    </form>
+                  </li>
+                ) : null,
+              ];
             })}
           </ul>
         </div>

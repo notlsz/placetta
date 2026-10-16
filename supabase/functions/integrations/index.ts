@@ -40,7 +40,9 @@ import {
   PROVIDER,
   qbApiBase,
   revoke,
+  writeBundle,
 } from "./providers.ts";
+import { HOOK_KINDS, HOOK_NAMES, hookHello, hookUrl, isHookKind, postHook, type HookKind } from "../_shared/channels.ts";
 
 type Ctx = { user: User; jwt: string; ws: string; body: Record<string, unknown> };
 type Action = (c: Ctx) => Promise<Response>;
@@ -834,30 +836,57 @@ const booksIncome: Action = async (c) => {
 const slackPost: Action = async (c) => {
   const msg = text(c.body.text, "text", 1, 4000);
   const conn = await Conn.open(c.ws, "slack");
-  const hook = conn.bundle.webhook_url;
-  if (!hook || !hook.startsWith("https://hooks.slack.com/")) {
-    await conn.markError("The Slack channel link is missing. Reconnect in Settings.");
-    throw new HttpError("not_connected", "Reconnect Slack in Settings.");
-  }
-  let res: Response;
-  try {
-    res = await fetch(hook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: msg.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") }),
-      signal: AbortSignal.timeout(15000),
-    });
-  } catch {
-    throw new HttpError("upstream_error", "Slack did not respond. Try again.");
-  }
-  const reply = (await res.text()).slice(0, 80);
-  if (res.ok) return ok();
-  console.error(`slack webhook ${res.status}:`, reply);
-  if ([403, 404, 410].includes(res.status)) {
+  const hook = conn.bundle.webhook_url ?? "";
+  const r = await postHook("slack", hook, msg);
+  if (r.ok) return ok();
+  console.error("slack post:", r.why);
+  if (r.gone) {
     await conn.markError("The Slack channel is no longer available. Reconnect in Settings.");
     throw new HttpError("not_connected", "Reconnect Slack in Settings.");
   }
-  throw new HttpError("upstream_error", `Slack returned an error (${res.status}). Try again.`);
+  throw new HttpError("upstream_error", "Slack did not answer. Try again.");
+};
+
+// ------------------------------------------------------------------ team chat: a pasted incoming-webhook link
+
+/** Save a group's webhook link for Slack, Lark, WeCom or Microsoft Teams, after a welcome post proves it works. */
+const hookConnect: Action = async (c) => {
+  const kind = c.body.kind;
+  if (!isHookKind(kind)) throw new HttpError("bad_request", `kind must be one of: ${HOOK_KINDS.join(", ")}.`);
+  const url = hookUrl(kind, text(c.body.url, "url", 10, 600));
+  if (!url) throw new HttpError("bad_request", `That isn't a ${HOOK_NAMES[kind].en} webhook link. Copy the whole link the bot or workflow gives you.`);
+  const secret = optText(c.body.secret, "secret", 200) ?? undefined;
+  const lang = c.body.lang === "zh" ? "zh" : "en";
+  const { data: w } = await admin.from("workspaces").select("name").eq("id", c.ws).maybeSingle();
+  const business = typeof w?.name === "string" ? w.name : "";
+  const r = await postHook(kind, url.href, hookHello(business, lang), secret);
+  if (!r.ok) {
+    console.error(`${kind} hook test:`, r.why);
+    throw new HttpError("bad_request", lang === "zh"
+      ? `${HOOK_NAMES[kind].zh}没有接受测试消息（${r.why}）。请检查链接${kind === "lark" ? "，以及机器人的签名或关键词设置" : ""}。`
+      : `${HOOK_NAMES[kind].en} didn't accept the test message (${r.why}). Check the link${kind === "lark" ? " and the bot's signature or keyword setting" : ""}.`);
+  }
+  const old = await findIntegration(c.ws, kind as Kind);
+  if (old) { if (kind === "slack" && old.meta?.via !== "link") await revoke(old); await dropSecret(old.secret_id); await admin.from("integrations").delete().eq("id", old.id); }
+  const secretId = await writeBundle({ access_token: "", refresh_token: null, expires_at: null, token_type: "webhook", webhook_url: url.href, secret }, `integration:${kind}`, null);
+  const account = lang === "zh" ? `${HOOK_NAMES[kind].zh}群` : `${HOOK_NAMES[kind].en} channel`;
+  const { error } = await admin.from("integrations").insert({ workspace_id: c.ws, kind, account, scopes: "webhook", status: "connected", secret_id: secretId, meta: { via: "link", lang }, connected_by: c.user.id });
+  if (error) { await dropSecret(secretId); throw new Error(`integration insert failed: ${error.code ?? ""}`); }
+  await audit({ ...you(c), action: { en: `Connected ${HOOK_NAMES[kind].en}`, zh: `已连接${HOOK_NAMES[kind].zh}` }, object: HOOK_NAMES[kind] });
+  return ok({ kind, account });
+};
+
+/** Which sign-in connections this server can offer now (each needs its provider's app keys). */
+const available: Action = async () => {
+  const has = (...v: string[]) => v.every((n) => !!Deno.env.get(n));
+  const oauth = has("OAUTH_STATE_SECRET") && appOrigins().length > 0;
+  return ok({
+    google: oauth && has("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"),
+    microsoft: oauth && has("MS_CLIENT_ID", "MS_CLIENT_SECRET"),
+    dropbox: oauth && has("DROPBOX_APP_KEY", "DROPBOX_APP_SECRET"),
+    quickbooks: oauth && has("QB_CLIENT_ID", "QB_CLIENT_SECRET"),
+    slack: oauth && has("SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET"),
+  });
 };
 
 // ------------------------------------------------------------------ connect, disconnect, feed
@@ -963,17 +992,18 @@ const finish: Action = async (c) => {
 };
 
 const disconnect: Action = async (c) => {
-  const kind = kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"]);
+  const kind = (isHookKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"])) as Kind;
+  const name = isHookKind(kind) ? HOOK_NAMES[kind as HookKind] : NAMES[kind];
   const row = await findIntegration(c.ws, kind);
-  if (!row) throw new HttpError("not_found", `${NAMES[kind].en} is not connected.`);
-  await revoke(row);
+  if (!row) throw new HttpError("not_found", `${name.en} is not connected.`);
+  if (row.meta?.via !== "link") await revoke(row);
   const { error } = await admin.from("integrations").delete().eq("id", row.id);
   if (error) throw new Error(`integration delete failed: ${error.code ?? ""}`);
   await dropSecret(row.secret_id);
   await audit({
     ...you(c),
-    action: { en: `Disconnected ${NAMES[kind].en}`, zh: `已断开 ${NAMES[kind].zh}` },
-    object: NAMES[kind],
+    action: { en: `Disconnected ${name.en}`, zh: `已断开 ${name.zh}` },
+    object: name,
     detail: row.account ? same(row.account) : null,
   });
   return ok();
@@ -1012,11 +1042,13 @@ const ACTIONS: Record<string, Action> = {
   files_import: filesImport,
   books_income: booksIncome,
   slack_post: slackPost,
+  hook_connect: hookConnect,
+  available,
   feed_url: feedUrl,
 };
 
 /** What only an owner can do: connect or disconnect an account, and send mail or Slack posts as the business. */
-const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost]);
+const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect]);
 
 serve(async (req) => {
   const mk = req.headers.get("x-monitor-key");

@@ -408,7 +408,16 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
     }
     case "integrations": {
       if (!member) return fnErr("forbidden", "You are not a member of this workspace.", 403);
-      if (body.action === "connect" || body.action === "disconnect") { const no = needOwner(); if (no) return no; }
+      if (body.action === "connect" || body.action === "disconnect" || body.action === "hook_connect") { const no = needOwner(); if (no) return no; }
+      if (body.action === "available") return json({ ok: true, google: true, microsoft: true, dropbox: true, quickbooks: true, slack: false });
+      if (body.action === "hook_connect") {
+        const names: Record<string, [string, string]> = { slack: ["Slack channel", "Slack 群"], lark: ["Lark channel", "飞书群"], wecom: ["WeCom channel", "企业微信群"], teams: ["Microsoft Teams channel", "Microsoft Teams 群"] };
+        if (!names[String(body.kind)] || !/^https:\/\//.test(String(body.url ?? ""))) return fnErr("bad_request", "That isn't a webhook link.", 400);
+        const rows = t("integrations").filter(i => !(i.workspace_id === ws && i.kind === body.kind));
+        const account = names[String(body.kind)][body.lang === "zh" ? 1 : 0];
+        rows.push({ id: uuid(), workspace_id: ws, kind: body.kind, account, status: "connected", error: null, meta: { via: "link" }, connected_at: now(), last_used_at: null });
+        db.tables.integrations = rows; save(); return json({ ok: true, kind: body.kind, account });
+      }
       if (body.action === "connect") {
         const rows = t("integrations").filter(i => !(i.workspace_id === ws && i.kind === body.kind));
         rows.push({ id: uuid(), workspace_id: ws, kind: body.kind, account: userOf(c.sub).email, status: "connected", error: null, meta: {}, connected_at: now(), last_used_at: null });

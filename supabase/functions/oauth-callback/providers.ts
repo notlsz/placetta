@@ -121,6 +121,8 @@ export type Bundle = {
   expires_at: number | null; // epoch ms
   token_type: string | null;
   webhook_url?: string;
+  /** A team chat link's signing secret (Lark custom bots with signature checks on). */
+  secret?: string;
 };
 
 export type Exchanged = { bundle: Bundle; account: string | null; scopes: string; meta: Record<string, unknown> };

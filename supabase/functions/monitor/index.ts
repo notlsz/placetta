@@ -14,6 +14,7 @@
 // odelia-sms sends them outside their quiet hours, at most one call and three texts a day.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
+import { HOOK_KINDS, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { normalizeState, openingLine, openingPath } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
@@ -372,6 +373,28 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Team chats: each workspace's new updates as one message in every Slack, Lark, WeCom or Teams group it linked.
+  let chats = 0;
+  if (created.length) {
+    const fresh = new Map<string, Update[]>();
+    for (const u of created) fresh.set(u.workspace_id, [...(fresh.get(u.workspace_id) ?? []), u]);
+    const { data: hooks } = await admin.from("integrations").select("id, workspace_id, kind, secret_id, meta").in("workspace_id", [...fresh.keys()]).in("kind", [...HOOK_KINDS]).eq("status", "connected");
+    for (const h of hooks ?? []) {
+      const { data: raw } = await admin.rpc("vault_get", { p_id: h.secret_id });
+      let link = "", secret: string | undefined;
+      try { const b = JSON.parse(String(raw ?? "")); link = b.webhook_url ?? ""; secret = b.secret || undefined; } catch { /* no saved link */ }
+      if (!link) continue;   // a Slack sign-in without a channel link
+      const lang = (h.meta as { lang?: string } | null)?.lang === "zh" ? "zh" : "en";
+      const items = fresh.get(h.workspace_id as string) ?? [];
+      const r = await postHook(h.kind as HookKind, link, hookDigest(names.get(h.workspace_id as string) ?? "", items, lang, appLink(APP, h.workspace_id as string)), secret);
+      if (r.ok) { chats++; await admin.from("integrations").update({ last_used_at: new Date().toISOString() }).eq("id", h.id); }
+      else {
+        console.error("team chat", h.kind, r.why);
+        if (r.gone) await admin.from("integrations").update({ status: "error", error: "The group's link stopped working. Connect it again in Settings." }).eq("id", h.id);
+      }
+    }
+  }
+
   let emailed = 0, team = 0;
   if (RESEND && FROM) {
     const fresh = new Map<string, Update[]>();
@@ -443,5 +466,5 @@ Deno.serve(async (req) => {
   if (!sweep) console.error("self-filing sweep did not run");
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned });
+  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats });
 });
