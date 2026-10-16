@@ -6,7 +6,7 @@ export type Reply = { text: Bi[]; approvals?: string[]; apps?: string[]; files?:
 export type Audit = { id: string; at: string; actor: "you" | "agent" | "agency" | "team" | "placetta"; action: Bi; object: Bi; detail?: Bi };
 export type Workspace = { audit: Audit[]; meta?: { city?: string; region?: string; what?: string; entity?: string }; [k: string]: unknown };
 export type Turn = { role: "user" | "assistant"; content: string };
-export type RunState = { messages: { role: string; content: unknown }[]; rounds: number; [k: string]: unknown };
+export type RunState = { messages: { role: string; content: unknown }[]; rounds: number; plainSms?: boolean; spent?: number; [k: string]: unknown };
 export type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] };
 export type Send = (body: Record<string, unknown>, deep: boolean) => Promise<{ content: Block[]; stop_reason: string }>;
 export type Services = {
@@ -29,8 +29,8 @@ export declare function runRounds(o: {
   research?: boolean; maxRounds?: number;
   channel?: Channel;
 }): Promise<{ reply: Reply } | { paused: RunState }>;
-export type Channel = "app" | "sms" | "voice";
-export declare function channelHint(channel: Channel | undefined): string;
+export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark";
+export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;
 
 // The network (src/learning.ts)
 export type Lesson = { id: string; kind: "place" | "agency" | "form" | "pitfall"; key: string; text: Bi; source_url?: string | null; businesses: number; confirms: number; contradicts: number; wins: number; losses: number };

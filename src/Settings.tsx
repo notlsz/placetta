@@ -102,8 +102,8 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "teams", name: "Microsoft Teams", why: CHAT_WHY, hook: true, logo: teamsLogo },
   ] },
   { group: B("Give Odelia jobs from chat", "在聊天中给 Odelia 派活"), items: [
-    { kind: "slack_bot", name: "Odelia in Slack", zh: "Slack 中的 Odelia", why: B("Mention @Odelia in a channel or message her: she does the job and answers in the thread", "在频道里 @Odelia 或私信她：她完成工作并在话题中回复"), logo: slackLogo, bot: true },
-    { kind: "lark_bot", name: "Odelia in Lark (Feishu)", zh: "飞书中的 Odelia", why: B("@Odelia in a group or message her: she does the job and replies there", "在群里 @Odelia 或私信她：她完成工作并直接回复"), logo: larkLogo, bot: true },
+    { kind: "slack_bot", name: "Odelia in Slack", zh: "Slack 中的 Odelia", why: B("Mention @Odelia in a channel or message her: she does the job as the teammate who asked and answers in the thread. Only Placetta teammates (same email) can give her jobs", "在频道里 @Odelia 或私信她：她以提问的团队成员身份完成工作并在话题中回复。只有快哉团队成员（邮箱相同）可以给她派任务"), logo: slackLogo, bot: true },
+    { kind: "lark_bot", name: "Odelia in Lark (Feishu)", zh: "飞书中的 Odelia", why: B("@Odelia in a group or message her: she does the job as the teammate who asked and replies there. Only Placetta teammates (same email) can give her jobs", "在群里 @Odelia 或私信她：她以提问的团队成员身份完成工作并直接回复。只有快哉团队成员（邮箱相同）可以给她派任务"), logo: larkLogo, bot: true },
   ] },
   { group: B("Documents", "文件"), items: [
     { kind: "gdrive", name: "Google Drive", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: gdriveLogo },
@@ -197,7 +197,7 @@ function Integrations() {
                     ) : (
                       <ol>
                         <li>{zh ? "在飞书开放平台（open.feishu.cn）创建企业自建应用，添加“机器人”能力。" : "In the Lark developer console (open.larksuite.com, or open.feishu.cn in China), create a custom app and add the Bot feature."}</li>
-                        <li>{zh ? "权限：开通 im:message（读取与发送消息）和 im:message.group_at_msg。事件订阅：添加 im.message.receive_v1，请求地址填：" : "Permissions: add im:message (read and send messages) and im:message.group_at_msg. Events: add im.message.receive_v1 and set the request URL to:"}</li>
+                        <li>{zh ? "权限：开通 im:message（读取与发送消息）、im:message.group_at_msg，以及 contact:user.email:readonly（读取成员邮箱，Odelia 据此确认提问的是哪位快哉团队成员），并把通讯录权限范围设为全部成员。事件订阅：添加 im.message.receive_v1，请求地址填：" : "Permissions: add im:message (read and send messages), im:message.group_at_msg, and contact:user.email:readonly (members' emails, so Odelia knows which Placetta teammate is asking), and set the contact range to all members. Events: add im.message.receive_v1 and set the request URL to:"}</li>
                         {bot.setup?.events_url ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.events_url)}>{zh ? "复制" : "Copy"}</button>{bot.setup.events_url}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
                         <li>{zh ? "发布应用版本。然后填入凭证页的 App ID、App Secret，以及事件页的 Verification Token（如开启加密，再填 Encrypt Key）：" : "Publish a version of the app. Then paste the App ID and App Secret (Credentials) and the Verification Token, plus the Encrypt Key if it's on (Events and callbacks):"}</li>
                       </ol>

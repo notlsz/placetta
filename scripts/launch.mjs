@@ -302,7 +302,9 @@ async function setupMail(secrets, resendKey) {
     const auth = `odelia:${randomBytes(18).toString("hex")}`;
     const hook = SUPABASE_URL.replace("https://", `https://${auth}@`) + "/functions/v1/odelia-mail";
     try {
-      const res = await fetch("https://api.postmarkapp.com/server", { method: "PUT", headers: { "X-Postmark-Server-Token": pm, "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ InboundHookUrl: hook }) });
+      const res = await fetch("https://api.postmarkapp.com/server", { method: "PUT", headers: { "X-Postmark-Server-Token": pm, "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ InboundHookUrl: hook, RawEmailEnabled: true }) });
+      // RawEmailEnabled sends the raw message with each inbound mail: odelia-mail checks its DKIM signature itself and
+      // acts on nothing without it.
       if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.Message ?? `HTTP ${res.status}`);
       Object.assign(secrets, { POSTMARK_SERVER_TOKEN: pm, POSTMARK_INBOUND_AUTH: auth });
       console.log(`  ${green("inbound")}  Postmark posts mail to odelia-mail. Point ${address.split("@")[1]}'s MX at inbound.postmarkapp.com (priority 10).`);

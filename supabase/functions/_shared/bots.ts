@@ -13,12 +13,65 @@ const enc = new TextEncoder();
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 const b64bytes = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 /** Constant-time comparison of two strings. */
-function same(a: string, b: string) {
+export function same(a: string, b: string) {
+  a = String(a ?? ""); b = String(b ?? "");
   if (a.length !== b.length) return false;
   let d = 0;
   for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return d === 0;
 }
+
+/* ------------------------------------------------------------------ who's asking */
+// Anyone in the business's Slack or Lark can message the bot, but only Placetta teammates may give Odelia jobs, and a
+// job runs as the teammate who asked. The chat's user is matched to a Placetta account by email: Slack's users.info
+// (users:read, users:read.email) or Lark's contact API (contact:user.email:readonly). Guests, people from another
+// company in a shared channel, and anyone whose email can't be read are turned away politely.
+
+/** Who sent a chat message: their email when they're a full member of the bot's own workspace, else why not. */
+export type ChatSender = { ok: true; email: string } | { ok: false; why: "outsider" | "guest" | "unknown" | "setup" };
+
+/** A Slack sender: a full member (not a guest, not a bot) of the bot's own Slack team, with a readable email. */
+export async function slackSender(bot: SlackBot, ev: { user?: string; user_team?: string; team?: string }, homeTeam: string | undefined, f: typeof fetch = fetch): Promise<ChatSender> {
+  if (!ev.user || !homeTeam) return { ok: false, why: "unknown" };
+  // Slack Connect: someone from another company in a shared channel
+  if ((ev.user_team ?? ev.team ?? homeTeam) !== homeTeam) return { ok: false, why: "outsider" };
+  const res = await f(`https://slack.com/api/users.info?user=${encodeURIComponent(ev.user)}`, { headers: { Authorization: `Bearer ${bot.bot_token}` }, signal: AbortSignal.timeout(10000) }).catch(() => null);
+  if (!res) return { ok: false, why: "unknown" };
+  const j = await res.json().catch(() => ({})) as { ok?: boolean; error?: string; user?: { team_id?: string; deleted?: boolean; is_bot?: boolean; is_restricted?: boolean; is_ultra_restricted?: boolean; is_stranger?: boolean; profile?: { email?: string } } };
+  if (!j.ok || !j.user) return { ok: false, why: j.error === "missing_scope" || j.error === "not_allowed_token_type" ? "setup" : "unknown" };
+  const u = j.user;
+  if (u.is_stranger || (u.team_id && u.team_id !== homeTeam)) return { ok: false, why: "outsider" };
+  if (u.is_restricted || u.is_ultra_restricted) return { ok: false, why: "guest" };
+  if (u.deleted || u.is_bot) return { ok: false, why: "unknown" };
+  const email = String(u.profile?.email ?? "").trim().toLowerCase();
+  if (!email) {
+    // Without users:read.email Slack leaves the email out; Slack lists the token's scopes in X-OAuth-Scopes.
+    const scopes = res.headers.get("x-oauth-scopes");
+    return { ok: false, why: scopes !== null && !scopes.split(",").map((s) => s.trim()).includes("users:read.email") ? "setup" : "unknown" };
+  }
+  return { ok: true, email };
+}
+
+/** A Lark sender: a user (not an app) of the bot's own tenant, with a readable email. */
+export async function larkSender(bot: LarkBot, sender: { sender_type?: string; tenant_key?: string; sender_id?: { open_id?: string } } | undefined, homeTenant: string | undefined, f: typeof fetch = fetch): Promise<ChatSender> {
+  const openId = sender?.sender_id?.open_id;
+  if (!sender || sender.sender_type !== "user" || !openId) return { ok: false, why: "unknown" };
+  // someone from another company (an external contact in the chat)
+  if (!homeTenant || !sender.tenant_key || sender.tenant_key !== homeTenant) return { ok: false, why: "outsider" };
+  const tok = await larkToken(bot, f);
+  if (!tok) return { ok: false, why: "setup" };
+  const res = await f(`${larkBase(bot.domain)}/open-apis/contact/v3/users/${encodeURIComponent(openId)}?user_id_type=open_id`, { headers: { Authorization: `Bearer ${tok}` }, signal: AbortSignal.timeout(10000) }).catch(() => null);
+  const j = (res ? await res.json().catch(() => ({})) : {}) as { code?: number; data?: { user?: { email?: string; is_tenant_manager?: boolean; status?: { is_resigned?: boolean; is_frozen?: boolean } } } };
+  // a missing permission or a user outside the app's contact range both come back as an error code
+  if (j.code !== 0 || !j.data?.user) return { ok: false, why: res ? "setup" : "unknown" };
+  if (j.data.user.status?.is_resigned || j.data.user.status?.is_frozen) return { ok: false, why: "unknown" };
+  const email = String(j.data.user.email ?? "").trim().toLowerCase();
+  return email ? { ok: true, email } : { ok: false, why: "setup" };
+}
+
+/** What Odelia says to someone she can't take a job from, in both languages since we don't know theirs. */
+export const NOT_TEAMMATE = "Sorry, only Placetta teammates can give Odelia jobs. The workspace owner can invite you to Placetta.\n抱歉，只有快哉团队成员可以给 Odelia 派任务。工作区负责人可以邀请您加入快哉。";
+export const NEEDS_EMAIL_SCOPE = "I can't tell who's asking yet. The Placetta owner needs to let this bot read members' emails (Slack: users:read and users:read.email; Lark: contact:user.email:readonly, with the contact range covering your team), then reinstall it.\n我还无法确认是谁在提问。快哉负责人需要为这个机器人开通读取成员邮箱的权限（Slack：users:read 和 users:read.email；飞书：contact:user.email:readonly，并让通讯录权限范围包含团队成员），然后重新安装。";
 
 /* ------------------------------------------------------------------ Slack */
 
@@ -74,8 +127,29 @@ export function larkText(content: string): string {
   try { return String((JSON.parse(content) as { text?: string }).text ?? "").replace(/@_user_\d+/g, "").replace(/\s+/g, " ").trim(); } catch { return ""; }
 }
 
-async function larkToken(bot: LarkBot): Promise<string | null> {
-  const res = await fetch(`${larkBase(bot.domain)}/open-apis/auth/v3/tenant_access_token/internal`, {
+/**
+ * Opens a Lark event request, or null when it isn't genuine. With an Encrypt Key set, the body must be encrypted and
+ * signed; only Lark's URL check, which it sends unsigned, may come without a signature. The verification token inside
+ * must match, compared in constant time.
+ */
+export async function larkOpen(bot: LarkBot, h: { ts: string | null; nonce: string | null; sig: string | null }, body: string): Promise<Record<string, unknown> | null> {
+  let e: Record<string, unknown>;
+  try { e = JSON.parse(body) as Record<string, unknown>; } catch { return null; }
+  if (bot.encrypt_key) {
+    if (typeof e.encrypt !== "string") return null;
+    const signed = !!h.sig;
+    if (signed && !(await larkSigned(bot.encrypt_key, h.ts, h.nonce, h.sig, body))) return null;
+    try { e = JSON.parse(await larkDecrypt(bot.encrypt_key, e.encrypt)) as Record<string, unknown>; } catch { return null; }
+    if (!signed && e.type !== "url_verification") return null;
+  } else if (typeof e.encrypt === "string") return null;
+  const header = (e.header ?? {}) as { token?: string };
+  const token = String(e.token ?? header.token ?? "");
+  if (!bot.verification_token || !same(token, bot.verification_token)) return null;
+  return e;
+}
+
+async function larkToken(bot: LarkBot, f: typeof fetch = fetch): Promise<string | null> {
+  const res = await f(`${larkBase(bot.domain)}/open-apis/auth/v3/tenant_access_token/internal`, {
     method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" }, body: JSON.stringify({ app_id: bot.app_id, app_secret: bot.app_secret }), signal: AbortSignal.timeout(10000),
   }).catch(() => null);
   const j = (res ? await res.json().catch(() => ({})) : {}) as { code?: number; tenant_access_token?: string };
@@ -109,7 +183,8 @@ export function slackManifest(eventsUrl: string) {
   return {
     display_information: { name: "Odelia", description: "Placetta's compliance agent: licenses, permits, filings and deadlines.", background_color: "#4d73a3" },
     features: { bot_user: { display_name: "Odelia", always_online: true }, app_home: { messages_tab_enabled: true, messages_tab_read_only_enabled: false } },
-    oauth_config: { scopes: { bot: ["app_mentions:read", "chat:write", "im:history", "im:read", "im:write"] } },
+    // users:read and users:read.email: who's asking, so the job runs as that Placetta teammate (and nobody else's runs)
+    oauth_config: { scopes: { bot: ["app_mentions:read", "chat:write", "im:history", "im:read", "im:write", "users:read", "users:read.email"] } },
     settings: { event_subscriptions: { request_url: eventsUrl, bot_events: ["app_mention", "message.im"] }, org_deploy_enabled: false, socket_mode_enabled: false, token_rotation_enabled: false },
   };
 }

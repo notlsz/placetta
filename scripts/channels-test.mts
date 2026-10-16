@@ -1,6 +1,6 @@
 // Team chat links: only each app's own webhook address is accepted, and the daily message stays short.
 import { hookDigest, hookUrl, postHook } from "../supabase/functions/_shared/channels.ts";
-import { larkDecrypt, larkSigned, larkText, slackSigned, slackText } from "../supabase/functions/_shared/bots.ts";
+import { type LarkBot, larkDecrypt, larkOpen, larkSender, larkSigned, larkText, same, type SlackBot, slackManifest, slackSender, slackSigned, slackText } from "../supabase/functions/_shared/bots.ts";
 let bad = 0;
 const eq = (got: unknown, want: unknown, what: string) => { const ok = JSON.stringify(got) === JSON.stringify(want); if (!ok) bad++; console.log(`${ok ? "ok  " : "FAIL"} ${what}${ok ? "" : `: got ${JSON.stringify(got)}`}`); };
 const yes = (k: Parameters<typeof hookUrl>[0], u: string) => !!hookUrl(k, u);
@@ -45,5 +45,76 @@ eq((await postHook("lark", "https://example.com/x", "hi")).ok, false, "never pos
   const lsig = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(lts + nonce + ek + lb)))].map(x => x.toString(16).padStart(2, "0")).join("");
   eq([await larkSigned(ek, lts, nonce, lsig, lb), await larkSigned(ek, lts, nonce, lsig, lb + "x")], [true, false], "Lark's signature checks out, and a changed body doesn't");
   eq(larkText('{"text":"@_user_1 帮我办理法拉盛门店的许可"}'), "帮我办理法拉盛门店的许可", "the @ comes off a Lark message");
+
+  // Lark requests: with an Encrypt Key, encrypted and signed (only the URL check may come unsigned); the token always
+  const bot: LarkBot = { kind: "lark_bot", app_id: "cli_x", app_secret: "s", verification_token: "vt-123", encrypt_key: ek, domain: "feishu" };
+  const seal = async (o: unknown) => {
+    const v = crypto.getRandomValues(new Uint8Array(16));
+    const c = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-CBC", iv: v }, k, new TextEncoder().encode(JSON.stringify(o))));
+    const body = JSON.stringify({ encrypt: btoa(String.fromCharCode(...v, ...c)) });
+    const sig = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(lts + nonce + ek + body)))].map(x => x.toString(16).padStart(2, "0")).join("");
+    return { body, sig };
+  };
+  const event = { schema: "2.0", header: { event_id: "e1", event_type: "im.message.receive_v1", token: "vt-123", tenant_key: "t1" }, event: {} };
+  const signedEv = await seal(event);
+  eq(!!(await larkOpen(bot, { ts: lts, nonce, sig: signedEv.sig }, signedEv.body)), true, "Lark: an encrypted, signed event opens");
+  eq(await larkOpen(bot, { ts: lts, nonce, sig: null }, signedEv.body), null, "Lark: with an Encrypt Key, an unsigned event is refused");
+  eq(await larkOpen(bot, { ts: lts, nonce, sig: "0".repeat(64) }, signedEv.body), null, "Lark: a bad signature is refused");
+  eq(await larkOpen(bot, { ts: lts, nonce, sig: null }, JSON.stringify(event)), null, "Lark: with an Encrypt Key, a plain body is refused");
+  const check = await seal({ type: "url_verification", challenge: "ch", token: "vt-123" });
+  eq((await larkOpen(bot, { ts: null, nonce: null, sig: null }, check.body))?.challenge, "ch", "Lark: the URL check may come unsigned");
+  const wrongTok = await seal({ ...event, header: { ...event.header, token: "vt-124" } });
+  eq(await larkOpen(bot, { ts: lts, nonce, sig: wrongTok.sig }, wrongTok.body), null, "Lark: a wrong verification token is refused");
+  const plainBot: LarkBot = { ...bot, encrypt_key: undefined };
+  eq(!!(await larkOpen(plainBot, { ts: null, nonce: null, sig: null }, JSON.stringify(event))), true, "Lark without an Encrypt Key: the token is enough");
+  eq(await larkOpen(plainBot, { ts: null, nonce: null, sig: null }, JSON.stringify({ ...event, header: { ...event.header, token: "vt-12" } })), null, "Lark without an Encrypt Key: a wrong token is refused");
+  eq(await larkOpen(plainBot, { ts: lts, nonce, sig: signedEv.sig }, signedEv.body), null, "Lark: an encrypted body for a bot with no Encrypt Key is refused");
+  eq([same("abc", "abc"), same("abc", "abd"), same("abc", "ab"), same("", "")], [true, false, false, true], "constant-time comparison");
+}
+
+// Who's asking in Slack: a full member of the bot's own team, with an email; guests, Slack Connect and the rest are refused
+{
+  const slackBot: SlackBot = { kind: "slack_bot", bot_token: "xoxb-1", signing_secret: "s" };
+  const calls: string[] = [];
+  const reply = (body: unknown, scopes = "app_mentions:read,chat:write,users:read,users:read.email") => (async (url: string) => {
+    calls.push(String(url));
+    return new Response(JSON.stringify(body), { status: 200, headers: { "Content-Type": "application/json", "x-oauth-scopes": scopes } });
+  }) as unknown as typeof fetch;
+  const user = (u: Record<string, unknown>) => ({ ok: true, user: { id: "U1", team_id: "T1", profile: { email: "Mei@GoldenOx.com" }, ...u } });
+  eq(await slackSender(slackBot, { user: "U1", team: "T1" }, "T1", reply(user({}))), { ok: true, email: "mei@goldenox.com" }, "Slack: a member's email");
+  eq(calls[0], "https://slack.com/api/users.info?user=U1", "Slack: asks users.info about the sender");
+  eq(await slackSender(slackBot, { user: "U1" }, "T1", reply(user({ is_restricted: true }))), { ok: false, why: "guest" }, "Slack: a multi-channel guest is refused");
+  eq(await slackSender(slackBot, { user: "U1" }, "T1", reply(user({ is_ultra_restricted: true }))), { ok: false, why: "guest" }, "Slack: a single-channel guest is refused");
+  calls.length = 0;
+  eq(await slackSender(slackBot, { user: "U9", user_team: "T9", team: "T9" }, "T1", reply(user({}))), { ok: false, why: "outsider" }, "Slack Connect: someone from another company is refused");
+  eq(calls.length, 0, "Slack Connect: without even looking them up");
+  eq(await slackSender(slackBot, { user: "U9" }, "T1", reply(user({ team_id: "T9" }))), { ok: false, why: "outsider" }, "Slack: a user of another team is refused");
+  eq(await slackSender(slackBot, { user: "U9" }, "T1", reply(user({ is_stranger: true }))), { ok: false, why: "outsider" }, "Slack: a stranger is refused");
+  eq(await slackSender(slackBot, { user: "U1" }, "T1", reply(user({ is_bot: true }))), { ok: false, why: "unknown" }, "Slack: a bot is refused");
+  eq(await slackSender(slackBot, { user: "U1" }, "T1", reply({ ok: false, error: "missing_scope" })), { ok: false, why: "setup" }, "Slack: without users:read the owner is told what to add");
+  eq(await slackSender(slackBot, { user: "U1" }, "T1", reply(user({ profile: {} }), "chat:write,users:read")), { ok: false, why: "setup" }, "Slack: without users:read.email too");
+  eq(await slackSender(slackBot, { user: "U1" }, "T1", reply(user({ profile: {} }))), { ok: false, why: "unknown" }, "Slack: no email, no job");
+  eq(await slackSender(slackBot, { user: "U1" }, undefined, reply(user({}))), { ok: false, why: "unknown" }, "Slack: an event without its team is refused");
+  const scopes = slackManifest("https://x.test/functions/v1/chat-events?slack=1").oauth_config.scopes.bot;
+  eq(["users:read", "users:read.email"].every(s => scopes.includes(s)), true, "the Slack manifest asks for users:read and users:read.email");
+}
+
+// Who's asking in Lark: a user of the bot's own tenant, with an email from the contact API
+{
+  const larkBot: LarkBot = { kind: "lark_bot", app_id: "cli_x", app_secret: "s", verification_token: "vt", domain: "lark" };
+  const seen: string[] = [];
+  const api = (contact: unknown, token: unknown = { code: 0, tenant_access_token: "t-1" }) => (async (url: string, init?: RequestInit) => {
+    seen.push(String(url) + " " + new Headers(init?.headers).get("authorization"));
+    return new Response(JSON.stringify(/tenant_access_token/.test(String(url)) ? token : contact), { status: 200, headers: { "Content-Type": "application/json" } });
+  }) as unknown as typeof fetch;
+  const sender = { sender_type: "user", tenant_key: "tk1", sender_id: { open_id: "ou_1" } };
+  eq(await larkSender(larkBot, sender, "tk1", api({ code: 0, data: { user: { email: "Mei@GoldenOx.com" } } })), { ok: true, email: "mei@goldenox.com" }, "Lark: a member's email");
+  eq(seen[1], "https://open.larksuite.com/open-apis/contact/v3/users/ou_1?user_id_type=open_id Bearer t-1", "Lark: asks the contact API with the tenant token");
+  eq(await larkSender(larkBot, { ...sender, tenant_key: "tk2" }, "tk1", api({ code: 0, data: { user: { email: "x@y.z" } } })), { ok: false, why: "outsider" }, "Lark: someone from another company is refused");
+  eq(await larkSender(larkBot, { ...sender, sender_type: "app" }, "tk1", api({})), { ok: false, why: "unknown" }, "Lark: an app is refused");
+  eq(await larkSender(larkBot, sender, "tk1", api({ code: 99991672, msg: "Access denied" })), { ok: false, why: "setup" }, "Lark: without contact:user.email:readonly the owner is told what to add");
+  eq(await larkSender(larkBot, sender, "tk1", api({ code: 0, data: { user: { email: "" } } })), { ok: false, why: "setup" }, "Lark: no email, no job");
+  eq(await larkSender(larkBot, sender, "tk1", api({}, { code: 10003 })), { ok: false, why: "setup" }, "Lark: bad app credentials");
+  eq(await larkSender(larkBot, sender, "tk1", api({ code: 0, data: { user: { email: "a@b.c", status: { is_resigned: true } } } })), { ok: false, why: "unknown" }, "Lark: someone who left is refused");
 }
 if (bad) { console.log(`${bad} failed`); process.exit(1); } else console.log("all passed");

@@ -196,7 +196,7 @@ Owners write to Odelia, or forward an agency's letter, from the address they sig
 2. `npm run launch` sets `ODELIA_EMAIL`, then either points Postmark's inbound webhook at `odelia-mail` with a random password in the URL (`POSTMARK_SERVER_TOKEN`, `POSTMARK_INBOUND_AUTH`), or creates Resend's signed `email.received` webhook (`RESEND_WEBHOOK_SECRET`).
 3. Run `20261016100000_odelia_email.sql` and deploy `odelia-mail` and `agent-run`.
 
-Email's From line can be forged, so Odelia acts only on mail the receiving server vouches for: DMARC pass, or DKIM signed by the sender's own domain (Gmail, Outlook and Google Workspace all sign). Anything else gets one note a day saying why, and nothing is done. Mail from addresses with no account gets nothing back, and auto-replies, bounces and lists are dropped.
+Email's From line can be forged, and so can any header the sender writes (Authentication-Results, ARC, X-Spam-Tests), so Odelia trusts only what the receiving provider itself establishes. With Resend, that's the `authentication` result Resend's own servers attach (DMARC pass, or DKIM pass for the From domain). With Postmark, `odelia-mail` verifies the DKIM signature on the raw message itself, so the inbound server must have **Include raw email content in JSON payload** on (`RawEmailEnabled`, which `npm run launch` sets); without it every email is treated as unverified. A signature counts only from the From address's own domain or a parent of it (Gmail, Outlook and Google Workspace with DKIM set up all qualify). Anything else gets one note a day saying it couldn't be verified, and nothing is done. Mail from addresses with no account gets nothing back, and auto-replies, bounces and lists are dropped.
 
 ## Which provider for what (checked October 2026)
 
