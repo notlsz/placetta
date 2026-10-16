@@ -2,14 +2,17 @@
 # Odelia's server copy is rebuilt from src first, so the server never runs an older agent than the app.
 # Needs one repository secret: SUPABASE_ACCESS_TOKEN (supabase.com/dashboard/account/tokens). Without it, this skips.
 name: Deploy server functions
+# Only after CI passes on main: a change that fails its checks never reaches the server.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
-    paths: ["supabase/functions/**", "src/**", "scripts/build-agent.mjs"]
   workflow_dispatch:
 concurrency: { group: deploy-functions, cancel-in-progress: false }
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -19,6 +22,7 @@ jobs:
         run: if [ -n "$SUPABASE_ACCESS_TOKEN" ]; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "::warning::Add SUPABASE_ACCESS_TOKEN to the repository secrets to deploy functions."; fi
       - uses: actions/checkout@v4
         if: steps.tok.outputs.ok
+        with: { ref: "${{ github.event.workflow_run.head_sha || github.sha }}" }
       - uses: actions/setup-node@v4
         if: steps.tok.outputs.ok
         with: { node-version: 22, cache: npm }
