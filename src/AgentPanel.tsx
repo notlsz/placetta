@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { speakTag } from "./langs";
-import { ThinkingOrb } from "thinking-orbs";
 import { Composer } from "./Composer";
 import { useApp } from "./ctx";
 import type { FeedItem, Turn } from "./feed";
 import type { Bi } from "./model";
 import { unlockAudio, type Speaker } from "./hooks";
-import { NeedRow, INK } from "./pages";
+import { NeedRow } from "./pages";
 import { AppArtifact, FileCard, I, Prose, feeTotal } from "./ui";
 import { preflight } from "./smart";
 import { readyToFile } from "./core";
@@ -14,7 +13,8 @@ import { formById } from "./forms/registry";
 import { money, daysFromNow, fmtAgo } from "./time";
 import type { Approval, Workspace } from "./model";
 import { FilingLive } from "./FilingLive";
-import { AgentBot, Working } from "./Bot";
+import { LiveBot, Working } from "./Bot";
+import { taskVerb } from "./tasks";
 import { PlanCard } from "./Work";
 
 /** The agent, beside the work: what it's doing now, every step with the site it used, and what each run produced. */
@@ -34,10 +34,10 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
   return (
     <aside className={"panel " + mode} aria-label={t("agentName")}>
       <header className="pn-h">
-        <span className="pn-bot"><AgentBot size={44} busy={busy} label={t("agentName")} /></span>
+        <span className="pn-bot"><LiveBot size={44} busy={busy} task={busy && live ? live.state : undefined} label={t("agentName")} interactive /></span>
         <span className="pn-t">
           <b>{t("agentName")}</b>
-          <small aria-live="polite">{busy && live ? b(live.label) + "…" : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
+          <small aria-live="polite">{busy && live ? <><em className="pn-verb">{b(taskVerb(live.state))}…</em>{b(live.label)}</> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
         </span>
         <button type="button" className="icbtn" onClick={onHide} aria-label={t("hidePanel")} title={t("hidePanel")}><I.x /></button>
       </header>
@@ -84,9 +84,11 @@ function TurnView({ m, last, speaking, onSay }: { m: Turn; last: boolean; speaki
   return (
     <div className="turn">
       <div className={"work-hd" + (!live && asking ? " wait" : "")}>
-        {live && cur ? <ThinkingOrb state={cur.state} size={20} theme="light" color={INK} aria-label={b(cur.label)} />
+        {live && cur ? <LiveBot task={cur.state} size={26} label={b(cur.label)} solo />
           : !live && asking ? <span className="wico"><I.pause /></span> : <span className="spark"><I.spark /></span>}
-        <span>{live ? t("working") : asking ? t("waitingYou") : m.ms ? t("workedFor", { s: Math.max(1, Math.round(m.ms / 1000)) }) : fmtAgo(m.at, lang)}</span>
+        {live && cur
+          ? <span className="wh-now" aria-live="polite"><b>{b(taskVerb(cur.state))}…</b><small>{b(cur.label)}</small></span>
+          : <span>{live ? t("working") : asking ? t("waitingYou") : m.ms ? t("workedFor", { s: Math.max(1, Math.round(m.ms / 1000)) }) : fmtAgo(m.at, lang)}</span>}
         {!live && m.steps.length > 0 && <button type="button" className="steps-t" onClick={() => setShow(s => !s)} aria-expanded={show}>{t("stepsN", { n: m.steps.length })}<span className={show ? "up" : ""}><I.chev /></span></button>}
         {listen}
       </div>
