@@ -15,7 +15,7 @@
     "guides": "npx tsx scripts/build-guides.mts",
     "legal": "node scripts/build-legal.mts",
     "beam": "esbuild src/site/beam.tsx --bundle --minify --format=iife --jsx=automatic --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=site/beam.js --log-level=warning",
-    "test:plan": "esbuild scripts/plan-test.ts --bundle --platform=node --format=esm --outfile=.plan-test.mjs '--external:*.pdf?inline' --log-level=error && node .plan-test.mjs; rm -f .plan-test.mjs",
+    "test:plan": "esbuild scripts/plan-test.ts --bundle --platform=node --format=esm --outfile=.plan-test.mjs '--external:*.pdf?inline' --log-level=error && node .plan-test.mjs; s=$?; rm -f .plan-test.mjs; exit $s",
     "test:agent": "esbuild scripts/agent-test.ts --bundle --platform=node --format=esm --outfile=.agent-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .agent-test.mjs; s=$?; rm -f .agent-test.mjs; exit $s",
     "test:smart": "esbuild scripts/smart-test.ts --bundle --platform=node --format=esm --outfile=.smart-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .smart-test.mjs; s=$?; rm -f .smart-test.mjs; exit $s",
     "test:flow": "esbuild scripts/agent-flow-test.ts --bundle --platform=node --format=esm --outfile=.agent-flow-test.mjs '--external:*.pdf?inline' --packages=external --jsx=automatic --log-level=error && node .agent-flow-test.mjs; s=$?; rm -f .agent-flow-test.mjs; exit $s",
@@ -25,7 +25,7 @@
     "test:e2e": "deno run -A --no-check --no-lock --node-modules-dir=none scripts/e2e/run.ts",
     "test:dnc": "node --test scripts/dnc.test.mjs",
     "dnc": "node scripts/dnc.mjs",
-    "test:channels": "tsx scripts/channels-test.mts"
+    "test:channels": "esbuild scripts/channels-test.mts --bundle --platform=node --format=esm --outfile=.channels-test.mjs --log-level=error && node .channels-test.mjs; s=$?; rm -f .channels-test.mjs; exit $s"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
