@@ -109,13 +109,13 @@ export async function runRounds(o: {
       const uses = data.content.filter(c => c.type === "tool_use");
       if (!uses.length || data.stop_reason !== "tool_use") { finished = true; break; }
       st.messages.push({ role: "assistant", content: data.content });
-      const results: Block[] = [];
+      const results: Record<string, unknown>[] = [];
       for (const u of uses) {
         if (phoneRefuses(o.channel, String(u.name ?? ""), (u.input ?? {}) as Record<string, unknown>)) {
           results.push({ type: "tool_result", tool_use_id: String(u.id ?? ""), content: "Error: Nothing is deleted from a text or a call. Tell them to remove it in the app.", is_error: true });
           continue;
         }
-        results.push(await runTool(tools, u) as Block);
+        results.push(await runTool(tools, u) as unknown as Record<string, unknown>);
       }
       // The harness: a seat that has handed off gives the job to a fresh agent with a clean context (no compaction);
       // one that's nearly out of room is told to write its handoff first.
