@@ -233,6 +233,68 @@ async function mapStore() {
   ok(!/web_search/.test(sys), "with research off, the prompt doesn't send the model to web_search");
 }
 
+async function previewRefine() {
+  console.log("\n# The instant plan (src/plan/preview.ts): preview rows keep their ids when Odelia refines them");
+  const { previewPlan } = await import("../src/plan/preview");
+  const first = previewPlan("Milk tea shop", "Flushing, NY", "2027-03-01", { today: "2026-10-16" });
+  const store = { id: "flushing", name: same("Flushing"), address: "Flushing, NY", stage: "opening" as const, plannedOpen: "2027-03-01", rules: ["nyc_grades" as const], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: first.apps.map(a => a.id) };
+  const ws = workspace({ apps: first.apps, deadlines: first.deadlines, stores: [store], firstPlan: { at: "2026-10-16T00:00:00Z", what: "Milk tea shop", where: "Flushing, NY", apps: first.apps.length, opening: "2027-03-01" } });
+  const fse = first.apps.find(a => a.official === "nyc-fse")!, ss4 = first.apps.find(a => a.official === "irs-ss4")!, fpc = first.apps.find(a => a.official === "nyc-fpc")!, sign = first.apps.find(a => a.official === "nyc-sign")!;
+  ok(first.apps.length >= 9 && first.apps.every(a => a.preview && a.status === "todo" && a.plain && a.source.url), `the registry lists ${first.apps.length} permits for a Flushing milk tea shop before any model call, each marked preview with a plain line and a source`);
+  ok(first.apps[0].official === "ny-dos-1336" && first.apps[1].official === "irs-ss4" && ss4.checklist.some(c => c.dep === first.apps[0].id), "the company comes first and the EIN waits on it");
+  ok(first.deadlines.some(d => d.kind === "milestone" && d.date === "2027-03-01") && first.deadlines.some(d => d.app === fse.id && d.kind === "due") && !!first.projectedOpen, "the opening date gives file-by deadlines and a projected opening");
+  ok(fse.fields.length === 5 && fse.fields.every(f => !f.value) && fse.fields[1].id === "addr", "an official form's own lines come empty, with their line ids");
+  const r = await agent({
+    ws, svc: account().svc, prompt: "Start the plan: verify every permit and fill what you can.",
+    script: [
+      () => ask(["find_official_forms", { business: "milk tea shop", place: "Flushing, NY" }]),
+      () => ask(
+        ["prepare_application", { official_form_id: "nyc-fse", store_id: "flushing", fields: [{ label: "Premises address", value: "136-20 Roosevelt Ave, Flushing, NY 11354" }] }],
+        ["fill_fields", { application_id: ss4.id, fields: [{ label: "1", value: "Lucky Leaf Tea LLC" }] }],
+        ["update_application", { application_id: fpc.id, verified: true }],
+        ["update_application", { application_id: fpc.id, verified: true }],
+        ["remove_application", { application_id: sign.id, reason: "No exterior sign planned" }],
+        ["prepare_application", { name: "Sidewalk cafe license", agency: "NYC Department of Consumer and Worker Protection", level: "city", agency_url: "https://www.nyc.gov/dcwp", store_id: "flushing" }],
+      ),
+      () => say("Verified the food service permit and filled the address; the EIN application has its legal name. I removed the sign permit pending your confirmation and added the sidewalk cafe license."),
+    ],
+  });
+  const w = r.w, prep = callNamed(r, "prepare_application");
+  eq(prep[0].parsed?.application_id, fse.id, "prepare_application with the same official form returns the preview row's id, not a new one");
+  ok(prep[0].parsed?.refined_preview === true, "and says it refined a preview row");
+  const fse2 = w.apps.find(a => a.id === fse.id)!;
+  ok(fse2.preview === false && fse2.status !== "todo" && fse2.fields.find(f => f.id === "addr")?.value === "136-20 Roosevelt Ave, Flushing, NY 11354" && fse2.plain, "the row keeps its id and plain line, loses the preview mark and gains the filled line", { status: fse2.status, preview: fse2.preview });
+  eq(w.apps.filter(a => a.official === "nyc-fse").length, 1, "no second copy of the food service permit");
+  const ss42 = w.apps.find(a => a.id === ss4.id)!;
+  ok(ss42.preview === false && ss42.status === "draft" && ss42.fields.find(f => f.id === "l1")?.value === "Lucky Leaf Tea LLC", "fill_fields on a preview row fills the official line, clears the mark and moves it from not started to preparing", { status: ss42.status, preview: ss42.preview });
+  const ua = callNamed(r, "update_application");
+  ok(ua[0].ok && w.apps.find(a => a.id === fpc.id)?.preview === false, "update_application verified clears the mark");
+  ok(!ua[1].ok && /isn't a preview/.test(ua[1].out), "verifying it again is an error: nothing to clear");
+  ok(w.approvals.some(a => a.change?.op === "remove_app" && a.change.app === sign.id) && w.apps.some(a => a.id === sign.id), "remove_application asks the person to confirm removing a preview row, and removes nothing yet");
+  ok(prep[1].ok && !prep[1].parsed?.refined_preview && w.apps.length === first.apps.length + 1, "a permit the registry missed is added as a new application");
+  ok(w.stores?.[0].apps?.length === first.apps.length + 1, "and filed under the store with the preview rows");
+  ok(w.audit.some(a => a.action.en === "Verified application"), "the audit trail says verified, not prepared, for a refined preview row");
+  const sys = String(r.bodies[0].system);
+  ok(/marked preview \(\d+ of them\)/.test(sys) && /keep their ids/.test(sys) && /"preview":true/.test(sys) && /"first_plan"/.test(sys), "the prompt explains preview rows and the snapshot marks them and the first plan");
+
+  // a generic row (a place the registry doesn't cover locally) is the same filing when Odelia names it the agency's way
+  const plano = previewPlan("Milk tea shop", "Plano, TX", undefined, { today: "2026-10-16" });
+  const gen = plano.apps.find(a => a.id === "pv-g-food-permit")!;
+  ok(gen && plano.generic >= 2 && plano.apps.some(a => a.official === "tx-ap201"), `Plano gets the Texas forms plus ${plano.generic} generic local rows`);
+  const r2 = await agent({
+    ws: workspace({ apps: plano.apps, stores: [{ ...store, id: "plano", address: "Plano, TX", apps: plano.apps.map(a => a.id) }] }), prompt: "Verify the Plano permits.",
+    script: [
+      () => ask(["prepare_application", { name: "Collin County food establishment permit", agency: "Collin County Health Care Services", level: "county", agency_url: "https://www.collincountytx.gov", fee: 350, store_id: "plano" }]),
+      () => say("Verified the county food permit."),
+    ],
+  });
+  const p2 = callNamed(r2, "prepare_application")[0];
+  eq(p2.parsed?.application_id, gen.id, "a generic preview row is refined in place when the agency's own name says the same thing");
+  const gen2 = r2.w.apps.find(a => a.id === gen.id)!;
+  ok(gen2.preview === false && gen2.agency.en === "Collin County Health Care Services" && gen2.fees[0].amount === 350 && gen2.checklist.some(c => c.dep), "it takes the agency's name and fee, and keeps what it waits on");
+  eq(r2.w.apps.length, plano.apps.length, "no second copy");
+}
+
 async function progress() {
   console.log("\n# What's next: check_progress, search_email, read_email");
   const { svc } = account({ filings: [{ app_id: "a-filed", status: "submitted", confirmation_number: "PA-2291", submitted_at: "2026-10-01T10:00:00Z", updated_at: "2026-10-05T10:00:00Z", note: null, payment_url: null }] });
@@ -759,6 +821,7 @@ async function addresses() {
 /* ------------------------------------------------------------------ run */
 
 await mapStore();
+await previewRefine();
 async function network() {
   console.log("\n# the network: every business makes Odelia smarter for the next");
   const w = workspace({ stores: [{ id: "s1", name: same("Flushing, Main St"), address: "136-20 Roosevelt Ave, Flushing, NY 11354", stage: "opening" }] as Workspace["stores"], apps: [app("a1", "draft")] });

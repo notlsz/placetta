@@ -1787,3 +1787,12 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .menu .menu-l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .menu > [aria-selected="true"], .menu > [aria-checked="true"] { font-weight: 500; }
 .menu > * > svg.menu-check { width: 14px; height: 14px; color: var(--blue-ink); }
+
+/* ================================================================================================================
+   First-run preview plan (src/plan/preview.ts): the rows a new workspace starts with, read in the application sheet.
+   Kept apart from the layout rules above. */
+.sh-plain { margin: 0 0 10px; font-size: 15.5px; line-height: 1.5; color: var(--ink); }
+.sh-pv { display: flex; align-items: flex-start; gap: 8px; margin: 10px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
+.sh-pv svg { flex: none; margin-top: 3px; color: var(--blue-ink); }
+.sh-f.sh-f-pv > span { color: var(--ink2); }
+/* ================================================================================================================ */

@@ -49,6 +49,8 @@ export type Application = {
   receipt?: string;          // document id
   renews?: Bi;
   official?: string;         // the official form in the library (src/forms/registry.ts) this application is
+  plain?: Bi;                // what this is, in one line a person would say (from the registry's plain field)
+  preview?: boolean;         // listed from Placetta's registry at sign-up (src/plan/preview.ts), before Odelia verified it with the agency
 };
 
 export type DocKind = "pdf" | "xlsx" | "jpg" | "docx" | "csv" | "zip";
@@ -142,7 +144,10 @@ export type Workspace = {
   spend?: { policy: SpendPolicy; purchases: Purchase[] };   // what Odelia may buy (outside an account; an account keeps it on the server)
   jobs?: Job[];                            // Odelia's jobs, each with the plan she keeps current (Work)
   routines?: Routine[];                    // jobs she repeats on a schedule
+  firstPlan?: FirstPlan;                   // the instant plan written at sign-up from the registry, before any model call
 };
+/** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed. */
+export type FirstPlan = { at: string; what: string; where: string; whereZh?: string; apps: number; opening?: string; projectedOpen?: string };
 /** A skill: instructions Placetta follows for one kind of job. "auto" ones it wrote itself from a job it finished;
  *  "form" skills also carry where each line of an official form came from, so the next filing of it fills itself. */
 export type SkillSource = "placetta" | "auto" | "you";
