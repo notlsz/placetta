@@ -1,0 +1,211 @@
+{
+  "where": "FTW",
+  "name": { "en": "Fort Worth (Tarrant County)", "zh": "沃斯堡（塔兰特县）" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Final inspections and Certificate of Occupancy", "zh": "终验与入住许可证（CO）" },
+      "agency": { "en": "City of Fort Worth Development Services Department", "zh": "沃斯堡市开发服务局" },
+      "when": {
+        "en": "After the work on your permit is done. Every business with a physical location needs a CO, and Consumer Health won't issue the health permit without it. The CO is emailed the business day after the last final is approved.",
+        "zh": "许可证范围内的工程完工后进行。每个有实体店面的商户都需要入住许可证，没有它，消费者健康处不会发放卫生许可证。最后一项终验通过后的下一个工作日，入住许可证会通过邮件发出。"
+      },
+      "book": {
+        "en": "Schedule in Accela Citizen Access or call 817-392-2222. Same use as before: apply for an “Occupancy Existing Ordinance” permit. Different use: “Occupancy Change of Use.” Remodeling: a Commercial Remodel permit plus a CO permit.",
+        "zh": "在 Accela Citizen Access 平台预约，或致电 817-392-2222。用途与原来相同：申请“Occupancy Existing Ordinance”许可；用途改变：申请“Occupancy Change of Use”；如需装修：申请商业装修许可外加入住许可证。"
+      },
+      "bookUrl": "https://aca-prod.accela.com/CFW",
+      "phone": "817-392-2222",
+      "lead": {
+        "en": "Inspections can be scheduled as early as the next business day after the permit application is approved.",
+        "zh": "许可申请获批后，最早可预约下一个工作日检查。"
+      },
+      "feeNote": {
+        "en": "Fiscal year 2027 fee ordinance (effective October 1, 2026): Change of Occupancy permit $94.50; ordinance inspection $66.15 per inspector; Temporary or Limited Certificate of Occupancy $397.",
+        "zh": "2027 财年收费条例（2026 年 10 月 1 日起生效）：用途变更许可 94.50 美元；法规检查每位检查员 66.15 美元；临时或限制性入住许可证 397 美元。"
+      },
+      "failNext": {
+        "en": "The inspector leaves a written list of what must be fixed. Each reinspection costs $66.15 under the FY2027 fee ordinance.",
+        "zh": "检查员会在现场留下书面整改清单。按 2027 财年收费条例，每次复检 66.15 美元。"
+      },
+      "checklist": [
+        { "id": "right-permit", "item": { "en": "You applied for the right permit: Occupancy Existing Ordinance (same use), Occupancy Change of Use, or a Commercial Remodel permit plus a CO.", "zh": "已申请正确的许可类型：Occupancy Existing Ordinance（用途不变）、Occupancy Change of Use（用途改变），或商业装修许可加入住许可证。" } },
+        { "id": "existing-use-proof", "item": { "en": "For the same use, you have proof of the existing use: a CO dated after July 2001, old permits, or tax or business records from the last 5 years.", "zh": "用途不变时，备有原用途证明：2001 年 7 月之后签发的入住许可证、旧许可证，或近 5 年的税务或经营记录。" } },
+        { "id": "four-trades", "item": { "en": "Building, electrical, mechanical and plumbing inspections are all approved; fire and health inspections may also be required.", "zh": "建筑、电气、机械和给排水检查全部通过；还可能需要消防和卫生检查。" } },
+        { "id": "permit-card", "item": { "en": "The permit card is displayed in plain sight for each inspector to sign.", "zh": "许可证卡张贴在显眼处，供每位检查员签字。" } },
+        { "id": "unlocked", "item": { "en": "The space stays unlocked and accessible until every inspector has come, since they arrive separately.", "zh": "各检查员分别到场，在全部检查完成前须保持店面开锁、可进入。" } },
+        { "id": "roof-access", "item": { "en": "A ladder or roof access is provided for rooftop HVAC, refrigeration and venting equipment.", "zh": "为屋顶空调、制冷和排风设备提供梯子或上屋顶通道。" } },
+        { "id": "food-utilities", "item": { "en": "For a food business, the Backflow (817-392-8375), Grease Trap (817-392-8305) and Health (817-392-7255) offices have been contacted about their requirements.", "zh": "餐饮商户已联系防回流（817-392-8375）、隔油池（817-392-8305）和卫生（817-392-7255）部门了解各自要求。" } }
+      ],
+      "source": "https://www.fortworthtexas.gov/departments/development-services/permits/certificate-of-occupancy",
+      "sources": [
+        "https://www.fortworthtexas.gov/files/assets/public/v/4/development-services/documents/resources-applications-forms-videos/s/2025-certificate-of-occupancy-guide-for-restaurants-new-brand.pdf",
+        "https://www.fortworthtexas.gov/files/assets/public/development-services/documents/inspection-information-sheet-ordianance.pdf",
+        "https://www.fortworthtexas.gov/files/assets/public/v/11/development-services/documents/resources-applications-forms-videos/f/fee-schedule-oct-2026.pdf"
+      ]
+    },
+    {
+      "id": "fire-final",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire system technical inspections", "zh": "消防系统技术检查" },
+      "agency": { "en": "Fort Worth Fire Department, Bureau of Fire Prevention", "zh": "沃斯堡消防局 防火处" },
+      "when": {
+        "en": "During construction, once each permitted system (sprinklers, fire alarm, kitchen hood extinguishing) is installed and pre-tested, and before the CO.",
+        "zh": "施工期间，在每项获许可的系统（喷淋、火警、厨房排烟罩灭火）安装并自测完成后、取得入住许可证前进行。"
+      },
+      "book": {
+        "en": "Call with your permit number and address ready. Fire sprinkler and underground: 817-392-6846. Fire alarm, access control and extinguishing systems (including kitchen hoods): 817-392-6844. Only the permit applicant or their company may call.",
+        "zh": "备好许可证号和地址后致电预约。喷淋及地下管网：817-392-6846；火警、门禁及灭火系统（含厨房排烟罩）：817-392-6844。只有许可申请人或其公司可以预约。"
+      },
+      "phone": "817-392-6844",
+      "failNext": {
+        "en": "Reinspections caused by not being ready or by Fire Code violations are charged a 4-hour minimum, $440. Inspections beyond those normally covered by the permit are $110 per hour (1-hour minimum).",
+        "zh": "因未准备就绪或违反消防法规导致的复检，按最少 4 小时收费 440 美元。超出许可证通常所含次数的检查每小时 110 美元（最少 1 小时）。"
+      },
+      "checklist": [
+        { "id": "permitted", "item": { "en": "Each system is permitted through Accela (Fire → Create an Application; kitchen hood extinguishing systems go under “Other System”).", "zh": "每项系统已通过 Accela 取得许可（Fire → Create an Application；厨房排烟罩灭火系统选“Other System”）。" } },
+        { "id": "pretested", "item": { "en": "The contractor has pre-tested the system before calling for inspection.", "zh": "承包商在预约检查前已完成系统自测。" } },
+        { "id": "who-calls", "item": { "en": "The permit holder's company, not the general contractor, calls for the inspection.", "zh": "由持证承包商公司而非总包商预约检查。" } },
+        { "id": "address", "item": { "en": "Address numbers are visible and legible from the street.", "zh": "门牌号从街上清晰可见。" } },
+        { "id": "fire-lane", "item": { "en": "Any fire lane is unobstructed with striping visible on both sides, and hydrants and fire department connections are clear.", "zh": "消防车道畅通，两侧标线清晰，消防栓和消防水泵接合器无遮挡。" } },
+        { "id": "extinguishers", "item": { "en": "Portable extinguishers are in place (generally one 2A:10B:C per 3,000 sq ft, 75 feet maximum travel), plus a Class K wet chemical extinguisher within 30 feet of the hood.", "zh": "配有手提灭火器（一般每 3,000 平方英尺一具 2A:10B:C，最远行走距离 75 英尺），排烟罩 30 英尺内另配一具 K 类湿式化学灭火器。" } },
+        { "id": "exits", "item": { "en": "Exits are clear and unlocked from the inside, and exit signs and emergency lights work.", "zh": "出口畅通且从内侧无需钥匙即可打开，出口标志和应急照明正常。" } }
+      ],
+      "source": "https://www.fortworthtexas.gov/files/assets/public/v/1/qanda-for-bfp.pdf",
+      "sources": ["https://fortworthtexas.gov/files/assets/public/v/1/fire-safety-checklist-for-voluntary-self-inspections.pdf"]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Pre-operational and permit inspections", "zh": "开业前检查与许可证检查" },
+      "agency": { "en": "City of Fort Worth Environmental Services Department, Consumer Health Division", "zh": "沃斯堡市环境服务局 消费者健康处" },
+      "when": {
+        "en": "A pre-operational inspection before construction is finished, then a permit inspection right after you receive the CO. The health permit must issue before any food preparation.",
+        "zh": "施工完成前先做开业前检查，取得入住许可证后立即做许可证检查。必须在开始任何食品加工前取得卫生许可证。"
+      },
+      "book": {
+        "en": "Call the Consumer Health plan reviewer at (817) 392-7255 for both inspections.",
+        "zh": "两次检查都请致电消费者健康处审图员 (817) 392-7255 预约。"
+      },
+      "phone": "(817) 392-7255",
+      "lead": {
+        "en": "Book the pre-operational inspection at least seven days before construction is completed.",
+        "zh": "开业前检查须在施工完成前至少七天预约。"
+      },
+      "fee": null,
+      "feeNote": {
+        "en": "Plan review is set by square footage, $175–$525 under the FY2027 fee ordinance (effective October 1, 2026). The annual food establishment permit is $385 plus $5 per employee (up to 100), per Consumer Health's fee list. All fees must be paid before the permit issues.",
+        "zh": "图纸审查费按面积收取，2027 财年收费条例（2026 年 10 月 1 日起生效）规定为 175–525 美元。按消费者健康处收费表，餐饮场所年度许可证 385 美元，另加每名员工 5 美元（上限 100 人）。所有费用须在许可证签发前缴清。"
+      },
+      "failNext": {
+        "en": "No health permit, and no operating, until the requirements are met and all fees are paid. Changes made to the approved plans without the reviewer's OK can block the permit.",
+        "zh": "未满足要求并缴清全部费用前，不发卫生许可证，也不得营业。未经审图员同意擅自修改批准图纸，可能导致许可证无法签发。"
+      },
+      "checklist": [
+        { "id": "co", "item": { "en": "A Certificate of Occupancy from Development Services is in hand.", "zh": "已取得开发服务局签发的入住许可证。" } },
+        { "id": "handsinks", "item": { "en": "Hand sinks are within 15 feet of every food prep and dishwashing area, with 100°F hot and cold water through a mixing valve.", "zh": "所有备餐和洗碗区域 15 英尺内设有洗手池，经混水阀供应 100°F 热水和冷水。" } },
+        { "id": "three-comp", "item": { "en": "A stainless three-compartment sink with 110°F hot water and drainboards is big enough to submerge the largest piece of equipment.", "zh": "不锈钢三格水槽供应 110°F 热水、配有沥水板，大小足以浸没最大的器具。" } },
+        { "id": "prep-mop", "item": { "en": "A food prep sink is installed if you process fruits and vegetables, and a utility sink has 100°F hot water.", "zh": "如需处理果蔬，已安装备餐水槽；拖把池供应 100°F 热水。" } },
+        { "id": "backflow", "item": { "en": "Approved backflow devices are on soda machines and other connected equipment.", "zh": "汽水机等接水设备装有经批准的防回流装置。" } },
+        { "id": "thermometers", "item": { "en": "Refrigerators, freezers and hot-holding units have accurate, visible thermometers, and stem thermometers are available.", "zh": "冷藏、冷冻和热保温设备配有准确、醒目的温度计，并备有探针温度计。" } },
+        { "id": "test-strips", "item": { "en": "Test strips for your sanitizer are on hand.", "zh": "备有与所用消毒剂匹配的测试试纸。" } },
+        { "id": "shelving", "item": { "en": "Refrigerated storage uses stainless or other non-corrosive metal shelving, not wood.", "zh": "冷藏区使用不锈钢或其他耐腐蚀金属货架，不用木质货架。" } },
+        { "id": "restrooms", "item": { "en": "Toilet rooms are fully enclosed with tight self-closing doors, vented to the outside, with a covered bin in the women's room.", "zh": "卫生间全封闭，装有严密的自闭门和对外排风，女卫生间设有带盖垃圾桶。" } },
+        { "id": "health-policy", "item": { "en": "There is a written employee health policy and a vomit and diarrhea clean-up procedure, with a body fluid clean-up kit on hand.", "zh": "备有书面员工健康制度和呕吐物、腹泻物清理程序，并配有体液清理包。" } },
+        { "id": "certs", "item": { "en": "Every employee gets a Food Handler certificate within 7 days of starting work, and at least one on-duty manager holds Food Manager Certification.", "zh": "所有员工入职 7 天内取得食品从业人员证书，至少一名在岗经理持有食品经理认证。" } }
+      ],
+      "source": "https://www.fortworthtexas.gov/files/assets/public/v/4/environmental-services/health/documents/envd-consumer-health-food-plan-review-2025-ada.pdf",
+      "sources": [
+        "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review",
+        "https://www.fortworthtexas.gov/files/assets/public/v/11/development-services/documents/resources-applications-forms-videos/f/fee-schedule-oct-2026.pdf"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food inspection and demerit score", "zh": "例行食品检查与扣分评分" },
+      "agency": { "en": "City of Fort Worth Environmental Services Department, Consumer Health Division", "zh": "沃斯堡市环境服务局 消费者健康处" },
+      "when": {
+        "en": "Unannounced, after you open. Every food establishment within the city limits is inspected.",
+        "zh": "开业后不定期突击检查。市辖区内所有餐饮场所都会受检。"
+      },
+      "book": {
+        "en": "You don't book routine inspections. Consumer Health: 817-392-7255, Consumerhealth@fortworthtexas.gov.",
+        "zh": "例行检查无需预约。消费者健康处电话 817-392-7255，邮箱 Consumerhealth@fortworthtexas.gov。"
+      },
+      "phone": "817-392-7255",
+      "scoring": {
+        "en": "Violations are recorded as demerits: Priority 3, Priority Foundation 2, Core 1. There is no failing score, but above 30 demerits state law requires immediate correction of critical violations and correction of all others within 48 hours. Results are posted online.",
+        "zh": "违规按扣分记录：优先违规 3 分，优先基础违规 2 分，基本违规 1 分。没有不及格线，但扣分超过 30 分时，州法要求立即纠正关键违规，其余违规须在 48 小时内整改。检查结果在网上公布。"
+      },
+      "failNext": {
+        "en": "Over 30 demerits triggers the 48-hour correction rule. No hot or cold water, sewage backup, or loss of power or water closes the facility; a site visit after a closure is $200.",
+        "zh": "扣分超过 30 分须在 48 小时内整改。无冷热水、污水倒灌、停电或停水时须停业；停业后的复查每次 200 美元。"
+      },
+      "checklist": [
+        { "id": "handlers", "item": { "en": "Every employee has a current City of Fort Worth Food Handler card (valid two years).", "zh": "所有员工持有有效的沃斯堡市食品从业人员卡（有效期两年）。" } },
+        { "id": "manager", "item": { "en": "Managers hold a valid Food Manager card.", "zh": "经理持有有效的食品经理证。" } },
+        { "id": "no-home-food", "item": { "en": "No home-cooked or home-canned food.", "zh": "不使用家庭自制或家庭罐装食品。" } },
+        { "id": "temps", "item": { "en": "TCS food is kept out of the 41–135°F danger zone: cold at 41°F or below, hot at 135°F or above.", "zh": "控温食品不处于 41–135°F 危险温度区：冷藏 41°F 或以下，热保温 135°F 或以上。" } },
+        { "id": "cooking", "item": { "en": "Minimum internal cooking temperatures are met: poultry 165°F, ground meat 155°F, pork, fish and beef roasts or steaks 145°F.", "zh": "达到最低中心烹饪温度：禽肉 165°F，绞肉 155°F，猪肉、鱼类及整块牛肉或牛排 145°F。" } },
+        { "id": "no-reuse", "item": { "en": "Previously served food is never reused.", "zh": "已供应过的食品绝不重复使用。" } },
+        { "id": "sick-staff", "item": { "en": "No one with diarrhea, vomiting, fever with sore throat, or an exposed cut works with food.", "zh": "有腹泻、呕吐、发烧伴喉咙痛或伤口外露的员工不得接触食品。" } },
+        { "id": "storage", "item": { "en": "Raw meat and eggs are on the bottom shelf, food is covered and at least 6 inches off the floor, and stock is rotated first in, first out.", "zh": "生肉和鸡蛋放在最下层，食品加盖并离地至少 6 英寸，库存先进先出。" } },
+        { "id": "three-comp", "item": { "en": "Utensils are washed, rinsed and sanitized in the three-compartment sink, then air-dried.", "zh": "餐具在三格水槽中洗涤、冲洗、消毒后自然晾干。" } },
+        { "id": "handwash", "item": { "en": "Hand-washing sinks are adequate, accessible and working at all times.", "zh": "洗手设施数量充足、方便使用且随时可用。" } },
+        { "id": "pests-chem", "item": { "en": "No insects or rodents, and toxic items are labeled and stored away from food.", "zh": "无虫鼠，有毒物品贴有标签并远离食品存放。" } }
+      ],
+      "source": "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/food-business/food-inspections",
+      "sources": [
+        "https://www.fortworthtexas.gov/files/assets/public/v/4/environmental-services/health/documents/envd-consumer-health-food-safety-guide-brochure-eng-2019-ada.pdf",
+        "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review"
+      ]
+    },
+    {
+      "id": "fire-routine",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "Annual commercial fire inspection", "zh": "年度商业消防检查" },
+      "agency": { "en": "Fort Worth Fire Department, Bureau of Fire Prevention (with local fire station crews)", "zh": "沃斯堡消防局 防火处（与辖区消防站人员共同执行）" },
+      "when": {
+        "en": "After you open. The department's goal is to inspect every business in the city each year; smaller businesses are inspected by crews from the local fire station.",
+        "zh": "开业之后。消防局的目标是每年检查全市所有商户；规模较小的商户由辖区消防站人员检查。"
+      },
+      "book": {
+        "en": "The fire department schedules it. Questions: fireinspections@fortworthtexas.gov or 817-392-6840.",
+        "zh": "由消防局安排。如有疑问请发邮件至 fireinspections@fortworthtexas.gov 或致电 817-392-6840。"
+      },
+      "phone": "817-392-6840",
+      "failNext": {
+        "en": "Correct the violations by the reinspection. Yellow or red tags on fire protection systems are handled through firetagAHJ@fortworthtexas.gov.",
+        "zh": "须在复检前整改完毕。消防系统上的黄色或红色标签问题，请联系 firetagAHJ@fortworthtexas.gov 处理。"
+      },
+      "checklist": [
+        { "id": "co-posted", "item": { "en": "A current Certificate of Occupancy is posted near the front entrance.", "zh": "有效的入住许可证张贴在正门附近。" } },
+        { "id": "address-lane", "item": { "en": "Address numbers are visible from the street, and any fire lane is clear with legible striping.", "zh": "门牌号从街上可见，消防车道畅通且标线清晰。" } },
+        { "id": "exits", "item": { "en": "Exits, hallways and corridors are free of storage, and exit doors are unlocked from the egress side.", "zh": "出口、走廊和通道无堆放物品，出口门从疏散一侧无需钥匙即可打开。" } },
+        { "id": "exit-lights", "item": { "en": "Exit signs and emergency lighting are tested and bulbs replaced as needed.", "zh": "出口标志和应急照明经过测试，灯泡按需更换。" } },
+        { "id": "storage-height", "item": { "en": "Storage is orderly and at least 18 inches below sprinkler heads (2 feet below the ceiling without sprinklers).", "zh": "物品堆放整齐，距喷淋头至少 18 英寸（无喷淋时距天花板至少 2 英尺）。" } },
+        { "id": "cords", "item": { "en": "Extension cords aren't used as permanent wiring, and no multi-plug adapters other than power or surge strips.", "zh": "不用延长线代替固定布线，除电源插排或防雷插排外不用多头转换插头。" } },
+        { "id": "panels", "item": { "en": "There is 3 feet of clear space in front of electrical panels and around heating equipment, and no combustible storage in equipment rooms.", "zh": "配电盘前和供暖设备周围留有 3 英尺净空，设备间内不存放可燃物。" } },
+        { "id": "junction", "item": { "en": "No open junction boxes or exposed wiring connections.", "zh": "没有敞开的接线盒或裸露的接线。" } },
+        { "id": "extinguishers", "item": { "en": "Extinguishers are serviced and tagged every year by a state-licensed contractor.", "zh": "灭火器每年由州持证承包商维护并挂牌。" } },
+        { "id": "hood", "item": { "en": "The kitchen hood extinguishing system was tagged by a state-licensed contractor in the last six months, the hood is free of grease build-up, and a Class K extinguisher is within 30 feet.", "zh": "厨房排烟罩灭火系统在过去六个月内由州持证承包商检查挂牌，排烟罩无油垢堆积，30 英尺内配有 K 类灭火器。" } },
+        { "id": "alarm-sprinkler", "item": { "en": "Fire alarm and sprinkler systems, if installed, carry a current blue ITM tag, and sprinkler control valves are supervised open.", "zh": "如装有火警和喷淋系统，均挂有有效的蓝色年检标签，喷淋控制阀处于受监控的开启状态。" } },
+        { "id": "fire-walls", "item": { "en": "Fire walls and fire doors are intact, with no unprotected penetrations and no missing ceiling tiles.", "zh": "防火墙和防火门完好，没有未封堵的穿孔，吊顶板没有缺失。" } },
+        { "id": "plan", "item": { "en": "There is an emergency response and escape plan that staff practice.", "zh": "备有应急与疏散预案，并组织员工演练。" } }
+      ],
+      "source": "https://fortworthtexas.gov/files/assets/public/v/1/fire-safety-checklist-for-voluntary-self-inspections.pdf",
+      "sources": [
+        "https://fortworthtexas.gov/departments/fire/bureau-commercial-inspection",
+        "https://www.fortworthtexas.gov/files/assets/public/v/1/qanda-for-bfp.pdf"
+      ]
+    }
+  ]
+}

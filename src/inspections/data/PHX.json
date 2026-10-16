@@ -1,0 +1,195 @@
+{
+  "where": "PHX",
+  "name": { "en": "Phoenix (Maricopa County)", "zh": "凤凰城（马里科帕县）" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Building finals and Certificate of Occupancy", "zh": "建筑终验与入住许可证（CofO）" },
+      "agency": { "en": "City of Phoenix Planning and Development Department, Inspections Division", "zh": "凤凰城规划与发展局 检查处" },
+      "when": {
+        "en": "When the project is complete, including off-site (right-of-way) and on-site improvements. Maricopa County's health final needs this Final or Certificate of Occupancy first.",
+        "zh": "工程全部完工时进行，包括场外（公共道路范围）和场内的配套工程。马里科帕县的卫生终验需要先取得这项终验或入住许可证。"
+      },
+      "book": {
+        "en": "Request by phone on the Automated Inspection Request System (AIRS) at 602-495-0800, online in the Online Permitting System using the key number printed on your permit receipt, or with an agent at 602-262-7811 (8 a.m.–5 p.m.).",
+        "zh": "可拨打自动检查预约系统（AIRS）602-495-0800，或在网上许可系统中用许可证收据上的 key number 预约，也可在早 8 点至下午 5 点致电 602-262-7811 由客服预约。"
+      },
+      "bookUrl": "https://apps-secure.phoenix.gov/PDD/inspections",
+      "phone": "602-495-0800",
+      "lead": {
+        "en": "Requests made before 9 p.m. are scheduled for the next business day.",
+        "zh": "晚上 9 点前提交的预约排在下一个工作日。"
+      },
+      "failNext": {
+        "en": "The contractor gets a red tag listing what must be fixed; after fixing it, call for a reinspection.",
+        "zh": "承包商会收到列明问题的红色标签；整改后再预约复检。"
+      },
+      "checklist": [
+        { "id": "trade-finals", "item": { "en": "Structural (199), plumbing (298), mechanical (299) and electrical (399) finals have all passed.", "zh": "结构（199）、给排水（298）、机械（299）和电气（399）终验全部通过。" } },
+        { "id": "kitchen-exhaust", "item": { "en": "Kitchen exhaust (254) and backflow prevention (236) inspections have passed where the plans include them.", "zh": "图纸中包含的厨房排风（254）和防回流（236）检查已通过。" } },
+        { "id": "fire-final", "item": { "en": "The fire final (999) has passed; it is required for the Certificate of Occupancy.", "zh": "消防终验（999）已通过，这是取得入住许可证的前提。" } },
+        { "id": "site-final", "item": { "en": "Off-site and on-site improvements are complete, and the site final (899) has passed if the project has site work.", "zh": "场外和场内配套工程已完工；如有场地工程，场地终验（899）已通过。" } },
+        { "id": "plans", "item": { "en": "The approved plans are on site; the inspector checks the work against them and city codes.", "zh": "批准图纸放在现场，检查员据此及市政法规核查。" } },
+        { "id": "co-or-tag", "item": { "en": "When every required inspection passes, a Certificate of Occupancy is generated automatically if the project needs one; otherwise you get a green tag.", "zh": "所有必检项目通过后，需要入住许可证的项目会自动生成；不需要的项目则发放绿色合格标签。" } }
+      ],
+      "source": "https://www.phoenix.gov/administration/departments/pdd/commercial-multifamily-building/commercial-inspections.html",
+      "sources": ["https://phoenix.gov/administration/departments/pdd/residential-building/resident-plan-reviews/certificate-of-occupancy.html"]
+    },
+    {
+      "id": "fire-final",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire inspections for new construction and fire final", "zh": "新建工程消防检查与消防终验" },
+      "agency": { "en": "City of Phoenix Planning and Development Department, fire inspections under the Phoenix Fire Code", "zh": "凤凰城规划与发展局（依据凤凰城消防法规执行消防检查）" },
+      "when": {
+        "en": "Alongside the building inspections. The final fire inspection (999) comes after every life safety component is complete and is required for the Certificate of Occupancy.",
+        "zh": "与建筑检查同步进行。消防终验（999）在所有生命安全设施完工后进行，是取得入住许可证的前提。"
+      },
+      "book": {
+        "en": "Call the area fire inspector listed on your fire permit. If the permit has no contact, call the Planning and Development line at 602-262-7811.",
+        "zh": "直接致电消防许可证上列明的片区消防检查员。若许可证上没有联系方式，请拨打规划与发展局电话 602-262-7811。"
+      },
+      "phone": "602-262-7811",
+      "lead": {
+        "en": "At least 48 hours' notice; the contractor must be on site.",
+        "zh": "须至少提前 48 小时预约，承包商须在场。"
+      },
+      "checklist": [
+        { "id": "hood", "item": { "en": "Automatic hood system (918) for the commercial kitchen is inspected.", "zh": "商用厨房的自动排烟罩灭火系统（918）已检查。" } },
+        { "id": "sprinkler-test", "item": { "en": "Sprinkler systems have passed the mandatory 200 psi pressure test (921).", "zh": "喷淋系统已通过强制性 200 磅压力测试（921）。" } },
+        { "id": "sprinkler-final", "item": { "en": "Sprinkler final (923) is done after the mandatory testing and engineering reports.", "zh": "喷淋终验（923）在强制测试和工程报告完成后进行。" } },
+        { "id": "dialer", "item": { "en": "The control panel and alarm monitoring (dialer, 927) are inspected.", "zh": "控制面板及报警监控（拨号器，927）已检查。" } },
+        { "id": "alarm-final", "item": { "en": "Alarm final (933): notification to the alarm devices, and audible and visual indicators, all work.", "zh": "火警终验（933）：各报警装置联动正常，声光报警均有效。" } },
+        { "id": "access-control", "item": { "en": "Magnetic locks or delayed egress, if installed, pass access control final (971).", "zh": "如装有电磁锁或延时疏散装置，已通过门禁终验（971）。" } },
+        { "id": "final-999", "item": { "en": "Final fire inspection (999) is passed after all life and safety components are built.", "zh": "所有生命安全设施完工后，通过消防终验（999）。" } }
+      ],
+      "source": "https://www.phoenix.gov/administration/departments/pdd/tools-resources/inspections/types-of-inspections/fire-new-construction-inspections.html",
+      "sources": ["https://www.phoenix.gov/content/dam/phoenix/pddsite/documents/trt/external/dsd_trt_pdf_00780.pdf"]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Plan review final construction inspection and operating permit", "zh": "图纸审查施工终验与经营许可证" },
+      "agency": { "en": "Maricopa County Environmental Services Department, Plan Review and Construction Program", "zh": "马里科帕县环境服务局 图纸审查与施工项目组" },
+      "when": {
+        "en": "Three inspections: plumbing at about 20% (rough plumbing), equipment at 50–75%, and the final at 100% with the city's Final or Certificate of Occupancy. Water, sewer and permanent power must be on for the final. After it passes, pay the annual operating permit fee, then open.",
+        "zh": "共三次检查：约 20% 时检查给排水粗装，50%–75% 时检查设备安装，100% 完工并取得市政终验或入住许可证后进行终验。终验时必须已通自来水、污水管和永久电源。终验通过后缴纳年度经营许可费即可开业。"
+      },
+      "book": {
+        "en": "Request inspections in Maricopa County's Permit Center, which handles reviews, inspections and invoice payments. The Plan Review and Construction Program is at 602-506-6824, ENVPlanreview@maricopa.gov.",
+        "zh": "在马里科帕县 Permit Center 平台预约检查（该平台办理审图、检查和缴费）。图纸审查与施工项目组电话 602-506-6824，邮箱 ENVPlanreview@maricopa.gov。"
+      },
+      "bookUrl": "https://www.maricopa.gov/6003/Maricopa-Countys-Permit-Center",
+      "phone": "602-506-6824",
+      "lead": {
+        "en": "Apply for plan review 6–8 weeks before construction starts. If completion is within 15 business days of submitting plans, an expedited review and its fees are required.",
+        "zh": "开工前 6–8 周申请图纸审查。如提交图纸后 15 个工作日内就要完工，须申请加急审查并缴纳加急费。"
+      },
+      "feeNote": {
+        "en": "Plan review application fees are paid in the Permit Center when you apply; the annual operating permit fee is paid after the final, before the permit issues.",
+        "zh": "图纸审查申请费在 Permit Center 提交申请时缴纳；年度经营许可费在终验通过后、许可证签发前缴纳。"
+      },
+      "failNext": {
+        "en": "No permit is approved while required items are missing, a CDC risk factor can't be corrected on the spot, there is live pest activity, exterior openings lack barriers, a needed variance or HACCP plan isn't approved, or construction is incomplete.",
+        "zh": "如缺少规定项目、存在无法当场纠正的 CDC 风险因素、有活体虫害、外部开口缺少防护、所需的豁免或 HACCP 计划未获批准，或施工未完成，均不予批准许可证。"
+      },
+      "checklist": [
+        { "id": "menu", "item": { "en": "Final menus are submitted, with consumer advisories where needed.", "zh": "已提交最终菜单，并在需要时注明消费者提示。" } },
+        { "id": "utilities", "item": { "en": "Approved water, sewer, electric and gas service is on and working.", "zh": "经批准的自来水、污水、电力和燃气均已接通并正常使用。" } },
+        { "id": "water-heater", "item": { "en": "A properly sized water heater meets peak demand, and hot and cold (or tempered) water is under pressure at every sink and fixture.", "zh": "热水器容量足以满足用水高峰，所有水槽和用水设施均有压力冷热水（或调温水）。" } },
+        { "id": "handwash", "item": { "en": "There are enough accessible hand-wash stations, each with soap and paper towels.", "zh": "洗手台数量充足、方便使用，均配有洗手液和擦手纸。" } },
+        { "id": "backflow", "item": { "en": "Backflow devices are installed, tested and certified, with a separate water line for chemical systems at the mop sink.", "zh": "防回流装置已安装、测试并取得合格证明，拖把池处的化学品系统使用独立水管。" } },
+        { "id": "equipment", "item": { "en": "All equipment is NSF or commercial grade, installed and fully working, including cold holding, warewashing, prep and mop sinks.", "zh": "所有设备为 NSF 认证或商用级，已安装并完全可用，包括冷藏、洗碗、备餐水槽和拖把池。" } },
+        { "id": "finishes", "item": { "en": "Finishes are substantially complete, gaps and penetrations are sealed, and countertops are an approved solid surface.", "zh": "装饰基本完成，缝隙和穿孔均已封堵，台面为经批准的实心材料。" } },
+        { "id": "conditions-letter", "item": { "en": "Every stipulation in the “Notification of Construction Authorization with Conditions” letter is addressed.", "zh": "《附条件施工授权通知》中的各项要求均已落实。" } },
+        { "id": "city-final", "item": { "en": "You have the city's Final Inspection or Certificate of Occupancy, or the fire department's green tag, where required.", "zh": "已取得市政终验或入住许可证，或在需要时取得消防部门绿色标签。" } },
+        { "id": "pests-openings", "item": { "en": "No pest activity, and exterior openings are protected with air curtains, screens or self-closing doors.", "zh": "无虫害，对外开口装有风幕机、纱窗或自闭门等防护。" } },
+        { "id": "cfpm", "item": { "en": "At least one Certified Food Protection Manager is on staff to be on site during operating hours, if you serve open TCS food.", "zh": "如供应需控温控时的散装食品，至少有一名持证食品安全经理在营业时间在岗。" } }
+      ],
+      "source": "https://www.maricopa.gov/DocumentCenter/View/5798/Responsibilities-to-Qualify-for-a-Permit-PDF",
+      "sources": [
+        "https://www.maricopa.gov/DocumentCenter/View/5827/Construction-Guide-PDF",
+        "https://www.maricopa.gov/6003/Maricopa-Countys-Permit-Center"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food inspection and voluntary grade card", "zh": "例行食品检查与自愿评级卡" },
+      "agency": { "en": "Maricopa County Environmental Services Department, Environmental Health", "zh": "马里科帕县环境服务局 环境卫生处" },
+      "when": {
+        "en": "Unannounced, after you open. The first operational inspection by your district inspector comes soon after the permit issues.",
+        "zh": "开业后不定期突击检查。许可证签发后不久，片区卫生检查员会进行首次营业检查。"
+      },
+      "book": {
+        "en": "You don't book routine inspections. At each inspection the person in charge decides whether to take part in the grading system.",
+        "zh": "例行检查无需预约。每次检查前，现场负责人可决定是否参加评级。"
+      },
+      "scoring": {
+        "en": "Grading is voluntary and decided before each inspection; non-participants show “Not Participating.” Grades count Priority (P) and Priority Foundation (Pf) violations: A = 0 P and 0 Pf; B = 0 P with 1–4 Pf, or 1 P with 0–2 Pf; C = 0 P with 5 Pf, 1 P with 3–4 Pf, or 2 P with 0–2 Pf; more than that is D. Any legal action or permit suspension means D. Cutting Edge Program partners get A+ when they earn an A.",
+        "zh": "评级为自愿参加，每次检查前决定；不参加的显示“Not Participating”。等级按优先违规（P）和优先基础违规（Pf）数量判定：A 为 0 项 P 且 0 项 Pf；B 为 0 项 P 加 1–4 项 Pf，或 1 项 P 加 0–2 项 Pf；C 为 0 项 P 加 5 项 Pf、1 项 P 加 3–4 项 Pf，或 2 项 P 加 0–2 项 Pf；超出则为 D。凡涉及法律行动或暂停许可证一律为 D。“Cutting Edge”项目合作商户获得 A 时记为 A+。"
+      },
+      "failNext": {
+        "en": "Each violation comes with a correction deadline and repeats are flagged. A pattern of non-compliance can lead to County legal action or permit suspension.",
+        "zh": "每项违规都有整改期限，重复违规会被标注。持续不合规可能导致县政府采取法律行动或暂停许可证。"
+      },
+      "checklist": [
+        { "id": "cfpm", "item": { "en": "The person in charge is a Certified Food Protection Manager, on site during all hours of operation, with the certificate visible or accessible.", "zh": "现场负责人为持证食品安全经理，营业期间始终在岗，证书张贴或可随时出示。" }, "why": { "en": "Food Code 2-102.12(A)", "zh": "食品法典 2-102.12(A)" } },
+        { "id": "food-handlers", "item": { "en": "Every food-handling employee has a Food Handler's Certificate kept at the establishment.", "zh": "所有接触食品的员工持有食品从业人员证书，并存放在店内。" } },
+        { "id": "handwashing", "item": { "en": "Employees wash hands when required (a Priority item).", "zh": "员工在规定情形下洗手（优先项）。" } },
+        { "id": "handsink-stock", "item": { "en": "Hand sinks have soap and paper towels (a Priority Foundation item).", "zh": "洗手池备有洗手液和擦手纸（优先基础项）。" } },
+        { "id": "handwash-sign", "item": { "en": "A sign reminds employees to wash their hands.", "zh": "张贴提醒员工洗手的标识。" } },
+        { "id": "cold-hold", "item": { "en": "Refrigerated TCS food is held at or below 41°F and frozen food at 0°F.", "zh": "需冷藏的控温食品保持在 41°F 或以下，冷冻食品保持在 0°F。" } },
+        { "id": "hot-hold", "item": { "en": "Cooked food that needs to be held hot stays above 135°F.", "zh": "需热保温的熟食保持在 135°F 以上。" } },
+        { "id": "risk-factors", "item": { "en": "Food comes from approved sources, is cooked adequately, and equipment isn't contaminated.", "zh": "食品来源经批准，烹饪充分，设备未受污染。" } },
+        { "id": "sealed-equipment", "item": { "en": "Equipment fixed to walls is sealed at the joint so it can be cleaned and doesn't harbor pests.", "zh": "固定在墙上的设备与墙面接缝已密封，便于清洁、不藏虫。" }, "why": { "en": "Food Code 4-402.11", "zh": "食品法典 4-402.11" } },
+        { "id": "no-pests", "item": { "en": "No roaches, rodents or other vermin, and outer openings are protected.", "zh": "无蟑螂、老鼠等虫害，对外开口有防护。" } }
+      ],
+      "source": "https://www.maricopa.gov/DocumentCenter/View/5861/Grade-Card-Guidance-Document-PDF",
+      "sources": [
+        "https://envapp.maricopa.gov/Inspection/FD-89592/INSP-047978-2024",
+        "https://www.maricopa.gov/5114/Food-Restaurants",
+        "https://www.maricopa.gov/DocumentCenter/View/5827/Construction-Guide-PDF"
+      ]
+    },
+    {
+      "id": "fire-routine",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "Fire system inspection, testing and maintenance (ITM)", "zh": "消防系统检查、测试与维护（ITM）" },
+      "agency": { "en": "City of Phoenix Fire Department, Fire Prevention Section", "zh": "凤凰城消防局 防火科" },
+      "when": {
+        "en": "After you open, on a fixed cycle. Licensed contractors inspect your systems and file the reports in The Compliance Engine; Fire Prevention follows up on deficiencies and also does general fire inspections.",
+        "zh": "开业后按固定周期进行。由持证承包商检查消防系统并将报告上传至 The Compliance Engine 平台；防火科跟进问题，并另行开展一般消防检查。"
+      },
+      "book": {
+        "en": "Hire a licensed third-party contractor for the system inspections. Fire Prevention: 602-262-6771, PFD.Prevention@phoenix.gov; ITM questions to PFD.ITM@phoenix.gov.",
+        "zh": "系统检查须聘请持证第三方承包商。防火科电话 602-262-6771，邮箱 PFD.Prevention@phoenix.gov；ITM 相关问题发送至 PFD.ITM@phoenix.gov。"
+      },
+      "phone": "602-262-6771",
+      "failNext": {
+        "en": "An assigned fire inspector contacts the responsible party and sets compliance deadlines. Repairs to deficient systems need a Fire Inspection, Testing and Maintenance (FITM) permit from the Fire Department, or a Planning and Development permit if told to.",
+        "zh": "指派的消防检查员会联系责任人并设定整改期限。修复有缺陷的系统须向消防局申领 FITM 许可，或按指示向规划与发展局申领许可。"
+      },
+      "checklist": [
+        { "id": "hood-weekly", "item": { "en": "Staff check the hood suppression system weekly: caps in place, system pressure normal.", "zh": "员工每周目视检查排烟罩灭火系统：喷嘴盖齐全、系统压力正常。" }, "why": { "en": "IFC Table 609.3.3.1", "zh": "国际消防法规 表 609.3.3.1" } },
+        { "id": "hood-semiannual", "item": { "en": "A contractor inspects the hood suppression system every 6 months and tests it every year.", "zh": "承包商每 6 个月检查一次排烟罩灭火系统，每年测试一次。" }, "why": { "en": "IFC Table 609.3.3.1", "zh": "国际消防法规 表 609.3.3.1" } },
+        { "id": "hood-cleaning", "item": { "en": "The hood is cleaned on a schedule set by use: every 6 months typical, every 3 months for heavy use.", "zh": "排烟罩按使用频率清洗：一般每 6 个月一次，高强度使用每 3 个月一次。" }, "why": { "en": "IFC Table 609.3.3.1", "zh": "国际消防法规 表 609.3.3.1" } },
+        { "id": "sprinkler-visual", "item": { "en": "Sprinklers get a quarterly visual check (gauges, leaks, damage), which staff can do.", "zh": "喷淋系统每季度目视检查一次（压力表、渗漏、损坏），可由员工完成。" }, "why": { "en": "NFPA 25", "zh": "NFPA 25" } },
+        { "id": "sprinkler-annual", "item": { "en": "A contractor does the full annual NFPA 25 sprinkler inspection, and the 5-year internal inspection when due.", "zh": "承包商每年按 NFPA 25 全面检查喷淋系统，到期时进行五年内部检查。" }, "why": { "en": "Phoenix Fire Code 901.6; NFPA 25", "zh": "凤凰城消防法规 901.6；NFPA 25" } },
+        { "id": "alarm", "item": { "en": "Staff check the fire alarm panel weekly for troubles, and a contractor tests every device each year.", "zh": "员工每周检查火警面板有无故障，承包商每年测试所有设备。" }, "why": { "en": "NFPA 72 14.3.1", "zh": "NFPA 72 14.3.1" } },
+        { "id": "reports-filed", "item": { "en": "Third-party inspection reports are submitted into The Compliance Engine.", "zh": "第三方检查报告已上传至 The Compliance Engine 平台。" } }
+      ],
+      "source": "https://www.phoenix.gov/administration/departments/fire/safety-prevention/inspection-testing-maintenance.html",
+      "sources": [
+        "https://www.phoenix.gov/content/dam/phoenix/firesite/documents/fire%20protection%20system%20inspection%20frequency%20guide.pdf",
+        "https://www.phoenix.gov/administration/departments/fire/safety-prevention.html"
+      ]
+    }
+  ]
+}

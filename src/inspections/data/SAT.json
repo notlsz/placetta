@@ -1,0 +1,182 @@
+{
+  "where": "SAT",
+  "name": { "en": "San Antonio (Bexar County)", "zh": "圣安东尼奥（贝克萨尔县）" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Final inspections and Certificate of Occupancy", "zh": "终验与入住许可证（CofO）" },
+      "agency": { "en": "City of San Antonio Development Services Department", "zh": "圣安东尼奥市开发服务局" },
+      "when": {
+        "en": "At the end of construction, once every required inspection has passed. For a change of use with no construction, Development Services schedules the inspectors after you apply. A Temporary Certificate of Occupancy can come earlier for moving in furniture and equipment or for staff training.",
+        "zh": "施工结束、所有必检项目通过后进行。如只改变用途而不施工，提交申请后由开发服务局安排检查员。搬入家具设备或员工培训可先申请临时入住许可证。"
+      },
+      "book": {
+        "en": "Schedule online in the BuildSA portal, or call 210-207-1111 (a $3 per-inspection scheduling fee applies by phone).",
+        "zh": "在 BuildSA 平台网上预约，或致电 210-207-1111（电话预约每次收取 3 美元预约费）。"
+      },
+      "bookUrl": "https://www.sa.gov/Directory/Departments/DSD/BuildSA/Portal",
+      "phone": "210-207-1111",
+      "lead": {
+        "en": "Requests placed before midnight are scheduled for the next day.",
+        "zh": "午夜前提交的预约排在第二天。"
+      },
+      "feeNote": {
+        "en": "A commercial Temporary Certificate of Occupancy costs $575 to issue (fee schedule adopted October 1, 2026). Re-inspection fees apply only to failed inspections; a “partial passed” result carries none.",
+        "zh": "商业临时入住许可证签发费 575 美元（2026 年 10 月 1 日起实施的收费标准）。只有检查不合格才收复检费；“部分通过”不收费。"
+      },
+      "failNext": {
+        "en": "A failed inspection carries a re-inspection fee. If you disagree with the result, contact that inspector's supervisor.",
+        "zh": "检查不合格须缴纳复检费。如对结果有异议，可联系该检查员的主管。"
+      },
+      "checklist": [
+        { "id": "occupancy-class", "item": { "en": "The occupancy classification is shown on the plans and the application.", "zh": "图纸和申请表上注明了占用类别。" } },
+        { "id": "occupant-load", "item": { "en": "The occupant load is calculated from the occupancy classification and the measured floor plan of each space.", "zh": "已根据占用类别和各空间实测平面计算出额定人数。" } },
+        { "id": "construction-type", "item": { "en": "The building construction type is identified.", "zh": "已注明建筑结构类型。" } },
+        { "id": "owner", "item": { "en": "The business name and business owner are identified.", "zh": "已注明商户名称和经营者。" } },
+        { "id": "permits", "item": { "en": "All needed permits are secured, including any fire system permits.", "zh": "所需许可已全部办妥，包括消防系统许可。" } },
+        { "id": "all-inspections", "item": { "en": "Building, electrical, mechanical, plumbing, gas, sewer, fire, traffic and health approvals, and any special inspections, are all passed (signs may follow the CofO).", "zh": "建筑、电气、机械、给排水、燃气、污水、消防、交通和卫生审批以及特殊检查全部通过（招牌可在取得入住许可证后再办）。" } },
+        { "id": "fees-paid", "item": { "en": "All outstanding permit, plan review and re-inspection fees are paid.", "zh": "已缴清所有许可费、审图费和复检费。" } },
+        { "id": "verify-before-open", "item": { "en": "The contractor has confirmed that every required inspection passed before the business starts operating.", "zh": "承包商在开业前已确认所有必检项目均已通过。" } }
+      ],
+      "source": "https://www.sa.gov/Directory/Departments/DSD/Constructing/Business-Commercial/Certificate-of-Occupancy",
+      "sources": [
+        "https://docsonline.sanantonio.gov/FileUploads/dsd/IB126.pdf",
+        "https://docsonline.sanantonio.gov/FileUploads/dsd/TCOandCofOPhases.pdf",
+        "https://www.sa.gov/Directory/Departments/DSD/Constructing/Business-Commercial/Inspections"
+      ]
+    },
+    {
+      "id": "fire-final",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire systems and fire final / Certificate of Occupancy inspection", "zh": "消防系统检查与消防终验（入住许可证检查）" },
+      "agency": { "en": "San Antonio Fire Department (SAFD), Fire Prevention Division", "zh": "圣安东尼奥消防局（SAFD）防火处" },
+      "when": {
+        "en": "Before the Certificate of Occupancy. Fire Prevention recommends a CofO to Development Services only after every life safety system and the fire final pass.",
+        "zh": "在取得入住许可证之前。所有生命安全系统和消防终验通过后，防火处才会向开发服务局建议签发入住许可证。"
+      },
+      "book": {
+        "en": "Schedule online with SAFD's Inspection Scheduler, or email the Fire Systems Inspection Request Form to fireinspections@sanantonio.gov.",
+        "zh": "通过 SAFD 网上检查预约系统预约，或将《消防系统检查申请表》发送至 fireinspections@sanantonio.gov。"
+      },
+      "bookUrl": "https://webapp9.sanantonio.gov/MSIS/Default.aspx",
+      "phone": "210-207-8410",
+      "lead": {
+        "en": "Fire systems inspections are done between 7 a.m. and 1 p.m.",
+        "zh": "消防系统检查在早 7 点至下午 1 点之间进行。"
+      },
+      "feeNote": {
+        "en": "Inspection fees are paid from your escrow account, online, or at the cashier, as chosen on the request form.",
+        "zh": "检查费可按申请表上的选择，从托管账户扣除、网上支付或到收银处缴纳。"
+      },
+      "checklist": [
+        { "id": "life-safety", "item": { "en": "Fire alarm, sprinkler system, underground fire line and hydrants (where required) are inspected and approved.", "zh": "火警、喷淋系统、地下消防管网及消防栓（如需要）已检查并获批。" } },
+        { "id": "hood", "item": { "en": "The fixed extinguishing system over the cooking line has passed its inspection.", "zh": "灶台上方的固定式灭火系统已通过检查。" } },
+        { "id": "exits", "item": { "en": "Fire final: required exits, exit lights, emergency lighting and the exit discharge area are in place.", "zh": "消防终验：规定的出口、出口指示灯、应急照明及出口外疏散区域均已到位。" } },
+        { "id": "extinguishers", "item": { "en": "The required fire extinguishers are installed.", "zh": "已安装规定的灭火器。" } },
+        { "id": "knox", "item": { "en": "Knox boxes and locks are installed where required for fire department access.", "zh": "需要时已安装供消防人员进入的 Knox 钥匙箱和锁具。" } },
+        { "id": "fire-lane", "item": { "en": "The fire lane and its signs are in place where required.", "zh": "需要时消防车道及标识已设置完成。" } },
+        { "id": "monitoring", "item": { "en": "Sprinkler tamper and flow devices are tested and send a verified signal to the monitored fire alarm panel.", "zh": "喷淋阀门监控和水流装置已测试，信号能传到受监控的火警面板并经确认。" } },
+        { "id": "fire-watch", "item": { "en": "A fire watch is in place if the space is occupied before the fire alarm system is approved.", "zh": "如在火警系统获批前就已使用场地，须安排消防值守。" } }
+      ],
+      "source": "https://www.sa.gov/Directory/Departments/SAFD/Permits-Inspections/Types",
+      "sources": [
+        "https://www.sa.gov/files/assets/main/v/1/safd/documents/certificate-of-occupancy.pdf",
+        "https://www.sa.gov/files/assets/main/v/2/safd/documents/fire-inspection-request-2025.pdf"
+      ]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Certificate of Occupancy health inspection and food permit", "zh": "入住许可证卫生检查与食品经营许可" },
+      "agency": { "en": "San Antonio Metropolitan Health District (Metro Health), Food and Environmental Health Services", "zh": "圣安东尼奥大都会卫生区（Metro Health）食品与环境卫生服务处" },
+      "when": {
+        "en": "As one of the Certificate of Occupancy inspections. Health approval is needed from the furniture-and-training Temporary CofO stage on. With a valid CofO, buy the food establishment permit at the One Stop before opening.",
+        "zh": "作为入住许可证检查的一部分进行。从“家具设备加员工培训”阶段的临时入住许可证起就需要卫生批准。取得有效入住许可证后，到 One Stop 中心购买食品经营许可后方可开业。"
+      },
+      "book": {
+        "en": "Development Services schedules the CofO inspections, including Metro Health's, after you apply. You can request a Pre-Certificate of Occupancy consultation inspection. Food permits: 210-207-0135, Cliff Morton Development and Business Services Center, 1901 S. Alamo St.",
+        "zh": "提交入住许可证申请后，由开发服务局安排包括 Metro Health 在内的各项检查。可另行申请入住前咨询检查。食品许可咨询：210-207-0135，地址 1901 S. Alamo St. Cliff Morton 开发与商务服务中心。"
+      },
+      "phone": "210-207-0135",
+      "feeNote": {
+        "en": "Optional Pre-CofO consultation inspection: $139. The annual food establishment permit depends on gross food sales: $310 (under $50,000), $618 ($50,000–$149,999), $928 ($150,000 or more). Shops selling only prepackaged, non-TCS food no longer need a food permit.",
+        "zh": "可选的入住前咨询检查 139 美元。年度食品经营许可费按食品年销售额收取：310 美元（5 万美元以下）、618 美元（5 万–149,999 美元）、928 美元（15 万美元及以上）。只销售预包装、无需控温食品的店铺已不需要食品许可。"
+      },
+      "failNext": {
+        "en": "Fix the items and get re-inspected; each inspection beyond the normal schedule is $150.",
+        "zh": "整改后申请复检；超出正常安排的每次检查收费 150 美元。"
+      },
+      "checklist": [
+        { "id": "water", "item": { "en": "Water is from an approved source, under pressure and of sufficient capacity.", "zh": "水源经批准，有压力且水量充足。" } },
+        { "id": "surfaces", "item": { "en": "Ceilings, walls, floors and baseboards are smooth, easily cleanable, non-absorbent and in good repair, and all holes are sealed.", "zh": "天花板、墙面、地面和踢脚线平整、易清洁、不吸水且完好，所有孔洞均已封堵。" } },
+        { "id": "openings", "item": { "en": "All outer openings are tight-fitting and self-closing.", "zh": "所有对外开口严密且能自动关闭。" } },
+        { "id": "lighting", "item": { "en": "Food prep areas have at least 50 foot-candles, and lights over kitchen, warewashing and storage areas are shielded or shatterproof.", "zh": "备餐区照度至少 50 英尺烛光，厨房、洗碗和储藏区的灯具有防护罩或防爆。" } },
+        { "id": "restrooms", "item": { "en": "Restrooms have self-closing doors, mechanical ventilation, and hot (100°F minimum) and cold water under pressure, with a covered bin in the women's room.", "zh": "卫生间装有自闭门和机械通风，有压力冷热水（热水至少 100°F），女卫生间设有带盖垃圾桶。" } },
+        { "id": "dumpster", "item": { "en": "Dumpsters or compactors sit on concrete or machine-laid asphalt.", "zh": "垃圾箱或压缩机放置在混凝土或机铺沥青地面上。" } },
+        { "id": "wood-debris", "item": { "en": "All raw wood is sealed, and the premises are free of debris and pest harborage.", "zh": "所有原木已做封闭处理，场地无杂物、无虫鼠藏身处。" } },
+        { "id": "smoking-signs", "item": { "en": "Smoking ordinance signs are posted at every entrance.", "zh": "每个入口都张贴了禁烟条例标识。" } },
+        { "id": "holding-units", "item": { "en": "Cold-holding units keep 41°F or below, hot-holding units 135°F or above, and freezers keep food frozen hard.", "zh": "冷藏设备保持 41°F 或以下，热保温设备 135°F 或以上，冷冻设备能把食品冻硬。" } },
+        { "id": "air-gaps", "item": { "en": "Approved air gaps separate equipment drains, such as ice machines, from the sewer.", "zh": "制冰机等设备排水与污水系统之间设有经批准的空气隔断。" } },
+        { "id": "handsinks", "item": { "en": "Hand sinks near prep areas have hot (100°F minimum) and cold water; metering faucets run at least 15 seconds per push.", "zh": "备餐区附近的洗手池有冷热水（热水至少 100°F）；延时龙头每按一次至少出水 15 秒。" } },
+        { "id": "three-comp", "item": { "en": "A three-compartment sink has 110°F hot and cold water and drainboards on both sides.", "zh": "三格水槽有 110°F 热水和冷水，两侧配有沥水板。" } },
+        { "id": "mop-sink", "item": { "en": "A mop sink or curbed cleaning area has 100°F hot and cold water.", "zh": "拖把池或带挡边的清洁区有 100°F 热水和冷水。" } },
+        { "id": "ventilation", "item": { "en": "Ventilation is enough to prevent excess heat, steam, condensation, vapors and odors.", "zh": "通风足以防止过热、蒸汽、冷凝水、油烟和异味。" } },
+        { "id": "toxics", "item": { "en": "Toxic items are stored apart from food, equipment and supplies.", "zh": "有毒物品与食品、设备和用品分开存放。" } }
+      ],
+      "source": "https://www.sa.gov/files/assets/main/v/2/samhd/documents/certificate-of-occupancy-health-inspection-checklist.pdf",
+      "sources": [
+        "https://www.sa.gov/Directory/Departments/SAMHD/Licenses-Food-Permits/Food-Establishment-License",
+        "https://docsonline.sanantonio.gov/FileUploads/dsd/TCOandCofOPhases.pdf"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food inspection and score", "zh": "例行食品检查与评分" },
+      "agency": { "en": "San Antonio Metropolitan Health District (Metro Health), Food and Environmental Health Services", "zh": "圣安东尼奥大都会卫生区（Metro Health）食品与环境卫生服务处" },
+      "when": {
+        "en": "Unannounced, after you open. Metro Health inspects all food establishments under the local health code and state rules.",
+        "zh": "开业后不定期突击检查。Metro Health 依据本地卫生法规和州规定检查所有餐饮场所。"
+      },
+      "book": {
+        "en": "You don't book routine inspections. Questions: Metro Health Food and Environmental Division, (210) 207-0135.",
+        "zh": "例行检查无需预约。如有疑问请联系 Metro Health 食品与环境处 (210) 207-0135。"
+      },
+      "phone": "(210) 207-0135",
+      "scoring": {
+        "en": "Scores start at 100 and lose 3, 2 or 1 demerits per violation depending on its category. Scores are published on Metro Health's inspection search site and in weekly reports.",
+        "zh": "评分从 100 分起，按违规类别每项扣 3、2 或 1 分。分数公布在 Metro Health 的检查查询网站和每周报告中。"
+      },
+      "failNext": {
+        "en": "Each inspection beyond the normal schedule is $150. Widespread temperature failures, vermin, sewage backup, no hot and cold water, no power, or no clean prep surfaces can close the facility; reinstating a suspended permit is $103.",
+        "zh": "超出正常安排的每次检查收费 150 美元。大面积温度不达标、虫鼠、污水倒灌、无冷热水、停电或没有干净的备餐台面，都可能导致停业；恢复被暂停的许可证收费 103 美元。"
+      },
+      "checklist": [
+        { "id": "handsinks", "item": { "en": "Hand sinks are accessible, stocked with soap and paper towels, and have hot and cold running water.", "zh": "洗手池方便使用，备有洗手液和擦手纸，有冷热自来水。" } },
+        { "id": "handwashing", "item": { "en": "Employees wash hands throughout the day and before putting on gloves for ready-to-eat food.", "zh": "员工全天勤洗手，戴手套处理即食食品前先洗手。" } },
+        { "id": "sick-staff", "item": { "en": "No one works after vomiting or diarrhea, and no one eats, drinks or smokes in the kitchen.", "zh": "有呕吐或腹泻的员工不得上岗，厨房内不得吃喝或吸烟。" } },
+        { "id": "holding", "item": { "en": "Cold potentially hazardous food is at 41°F or below, hot at 135°F or above.", "zh": "冷藏的潜在危害食品保持在 41°F 或以下，热保温保持在 135°F 或以上。" } },
+        { "id": "cooling", "item": { "en": "Hot food cools from 135°F to 70°F within 2 hours, then to 41°F within 4 more hours.", "zh": "热食在 2 小时内从 135°F 降至 70°F，再在 4 小时内降至 41°F。" } },
+        { "id": "cooking", "item": { "en": "Final cooking temperatures are held for 15 seconds: eggs and pork 145°F, ground beef 155°F, poultry 165°F; leftovers are reheated to 165°F within 2 hours.", "zh": "最终烹饪温度保持 15 秒：鸡蛋和猪肉 145°F，牛绞肉 155°F，禽肉 165°F；剩菜在 2 小时内复热至 165°F。" } },
+        { "id": "thermometers", "item": { "en": "Calibrated stem thermometers are used to check internal food temperatures.", "zh": "使用经校准的探针温度计测量食品中心温度。" } },
+        { "id": "sources", "item": { "en": "Food comes from approved sources, never a private home; dented cans are set apart.", "zh": "食品来自经批准的来源，不使用家庭自制食品；凹陷罐头单独隔离。" } },
+        { "id": "separation", "item": { "en": "Raw meat is stored below or away from produce and ready-to-eat food, and served food is never re-served.", "zh": "生肉存放在果蔬和即食食品下方或远离处，已上桌的食品不再重复供应。" } },
+        { "id": "date-marking", "item": { "en": "Cold potentially hazardous food not used within 24 hours is date-marked, and use-by dates are watched.", "zh": "24 小时内用不完的冷藏潜在危害食品标注日期，并留意保质期限。" } },
+        { "id": "warewash", "item": { "en": "Dishes are washed, rinsed, soaked at least 30 seconds in sanitizer (chlorine 50–100 ppm, quat per label, or a 180°F hot-water rinse), and air-dried.", "zh": "餐具经洗涤、冲洗后在消毒液中浸泡至少 30 秒（氯 50–100 ppm、季铵盐按标签，或 180°F 热水冲洗），再自然晾干。" } },
+        { "id": "rags-chemicals", "item": { "en": "Cleaning rags are kept in sanitizer buckets, and toxic chemicals are properly stored and used.", "zh": "抹布放在消毒液桶中，有毒化学品妥善存放和使用。" } }
+      ],
+      "source": "https://www.sa.gov/files/assets/main/v/1/samhd/documents/how-to-pass-inspection.pdf",
+      "sources": [
+        "https://sanantonio-tx.healthinspections.us/san%20antonio/estab.cfm?licenseID=1817282&inspectionID=4320290",
+        "https://www.sa.gov/Directory/Departments/SAMHD/Licenses-Food-Permits/Food-Establishment-License",
+        "https://www.sa.gov/Directory/Departments/SAMHD/Reports-Statistics/Food-Establishment-Inspections"
+      ]
+    }
+  ]
+}
