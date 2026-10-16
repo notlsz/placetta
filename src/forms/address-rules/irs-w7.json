@@ -1,0 +1,42 @@
+{
+  "form": "irs-w7",
+  "read": "2026-10-15",
+  "fields": {
+    "mailing": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Line 2: the full address where the IRS returns the original documents and mails the ITIN decision. A US or foreign address both work. A USPS P.O. box is accepted, but not a private mailbox (PMB), and not a P.O. box or c/o address when line 3 holds only a country name.",
+        "zh": "第2行：IRS 寄回原件并寄送 ITIN 结果的完整地址。美国或境外地址均可。可用美国邮政（USPS）的邮政信箱，但不能用私营信箱（PMB）；如果第3行只填了国家名，第2行也不能用邮政信箱或“转交”（c/o）地址。"
+      },
+      "ifNone": {
+        "en": "Use the applicant's home address abroad; it may be the same address as line 3. Don't use a private mailbox or mail-forwarding service.",
+        "zh": "填写申请人在境外的住址即可，可与第3行相同。不要使用私营信箱或代收转寄服务。"
+      },
+      "confirmations": [
+        { "url": "https://www.irs.gov/pub/irs-pdf/fw7.pdf", "kind": "form", "quote": "City or town, state or province, and country. Include ZIP code or postal code where appropriate." },
+        { "url": "https://www.irs.gov/pub/irs-pdf/iw7.pdf", "kind": "instructions", "quote": "complete foreign (non-U.S.) address in the country where you permanently or normally reside, even if it’s the same as the address on line 2" },
+        { "url": "https://www.irs.gov/pub/irs-pdf/iw7.pdf", "kind": "instructions", "quote": "Don’t use a post office box owned and operated by a private firm or company." },
+        { "url": "https://www.irs.gov/pub/irs-pdf/p1915.pdf", "kind": "agency_page", "quote": "If the foreign address is the same as the address on line 2, re-enter the address on line 3." }
+      ]
+    },
+    "foreign_address": {
+      "rule": "foreign_ok",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Line 3: the applicant's full street address outside the US, in the country where they permanently or normally live. No P.O. box and no c/o address. Someone who has moved to the US may write only the country, unless they chose reason b.",
+        "zh": "第3行：申请人在美国境外、长期或通常居住国家的完整街道地址。不得填写邮政信箱或“转交”（c/o）地址。已移居美国者可只填国家名，但选择理由 b 的除外。"
+      },
+      "ifNone": {
+        "en": "Every applicant fills this in with the street address of their permanent home abroad. If they have relocated to the US, enter only the country where they last lived; reason b still needs the full address of that last foreign home.",
+        "zh": "每位申请人都要填写其境外长期住所的街道地址。若已移居美国，只填最后居住的国家；选择理由 b 的仍须填写最后一处境外住所的完整地址。"
+      },
+      "confirmations": [
+        { "url": "https://www.irs.gov/pub/irs-pdf/fw7.pdf", "kind": "form", "quote": "Street address, apartment number, or rural route number. Don’t use a P.O. box number." },
+        { "url": "https://www.irs.gov/pub/irs-pdf/iw7.pdf", "kind": "instructions", "quote": "enter the complete foreign (non-U.S.) address for your most recent residence in the country where you permanently or normally resided" },
+        { "url": "https://www.irs.gov/pub/irs-pdf/p1915.pdf", "kind": "agency_page", "quote": "Do not enter a post office box or an “in care of” (c/o) address on this line." }
+      ]
+    }
+  },
+  "notes": "Form W-7 (Rev. December 2024), its instructions (Rev. December 2024) and Publication 1915 (Rev. 12-2025). Both lines are the individual applicant's addresses, not a company's. Line 2 accepts any mailing address; line 3 must be a non-US street address."
+}

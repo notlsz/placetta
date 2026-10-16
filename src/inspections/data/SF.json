@@ -1,0 +1,169 @@
+{
+  "where": "SF",
+  "name": { "en": "San Francisco", "zh": "旧金山" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Building final inspection (DBI)", "zh": "建筑终验（建筑检查局）" },
+      "agency": { "en": "San Francisco Department of Building Inspection (DBI)", "zh": "旧金山建筑检查局（DBI）" },
+      "when": { "en": "When all work on the building permit is complete, after the pre-final. DBI issues the Certificate of Final Completion and Occupancy only after the final and all required clearances.", "zh": "建筑许可证上的工程全部完成、预终验通过之后。终验及所有必需的审批完成后，DBI 才签发《最终竣工及入住证明》。" },
+      "book": { "en": "Permits starting with letters (BLDG, ELEC, PLMB): book in the PermitSF portal; the inspector calls you the morning of the inspection. Permits starting with numbers: contractors book online; everyone else calls the Voice Inspection Scheduling System at 628-652-3401 (24/7) with code 106 for the final or 142 for the pre-final. For free help coordinating finals before opening, email the Small Business Inspections Ambassadors at dbi.bizambassador@sfgov.org.", "zh": "以字母开头的许可证（BLDG、ELEC、PLMB）：在 PermitSF 门户预约，检查当天早上检查员会来电。以数字开头的许可证：承包商在线预约；其他人拨打语音预约系统 628-652-3401（全天24小时），终验代码106，预终验代码142。开业前如需协调终验，可发邮件给小企业检查大使 dbi.bizambassador@sfgov.org，免费协助。" },
+      "bookUrl": "https://sanfranciscoca.portal.opengov.com/dashboard",
+      "phone": "628-652-3401",
+      "lead": { "en": "PermitSF: book by 3:00pm the day before. Cancel by 8:30am the day before for morning slots or 12:30pm for afternoon slots. Ask the ambassadors a few weeks before you plan to open; they reply within 48 hours.", "zh": "PermitSF：最晚前一天下午3点前预约。取消上午时段须在前一天上午8:30前，下午时段须在前一天中午12:30前。计划开业前几周联系检查大使，48小时内会回复。" },
+      "feeNote": { "en": "The final is covered by your permit fees. A re-inspection or additional inspection costs $259 per half hour; off-hours inspections are $555 per hour with a 2- or 4-hour minimum; a Temporary Certificate of Occupancy is $822 (DBI Table 1A-G, effective July 12, 2026).", "zh": "终验费用已包含在许可证费用中。复检或加检每半小时 $259；非工作时间检查每小时 $555，最少2或4小时；临时入住证 $822（DBI 收费表 1A-G，2026年7月12日起生效）。" },
+      "failNext": { "en": "Fix the corrections and book again; each re-inspection is billed at $259 per half hour.", "zh": "按要求整改后重新预约；每次复检按每半小时 $259 收费。" },
+      "checklist": [
+        { "id": "pre-final", "item": { "en": "Pre-final inspection (code 142) has passed before you book the final (code 106).", "zh": "预约终验（代码106）前，预终验（代码142）已通过。" } },
+        { "id": "trade-finals", "item": { "en": "Plumbing and mechanical finals (codes 400 and 401) and the electrical complete inspection (code 301) have passed on their own permits.", "zh": "管道和机械终验（代码400、401）以及电气完工检查（代码301）已在各自许可证上通过。" } },
+        { "id": "address", "item": { "en": "Site address is posted in numerals at least 4 inches tall in a contrasting color, visible to approaching emergency vehicles.", "zh": "门牌号用至少4英寸高、颜色对比明显的数字张贴，驶来的应急车辆能看清。" }, "why": { "en": "SFBC 107.10; AB-035", "zh": "《旧金山建筑法规》107.10；行政公告 AB-035" } },
+        { "id": "special-inspections", "item": { "en": "All structural special inspections are complete and the final compliance letter has been emailed to dbi.specialinspections@sfgov.org.", "zh": "所有结构专项检查已完成，最终合规函已发送至 dbi.specialinspections@sfgov.org。" }, "why": { "en": "SFBC/CBC Chapter 17", "zh": "《旧金山/加州建筑法规》第17章" } },
+        { "id": "title-24", "item": { "en": "Title-24 energy certificates (installation, acceptance, verification) are done and the final compliance affidavit has been emailed to dbi.energyinspections@sfgov.org; allow 10 business days for review.", "zh": "Title-24 能源证书（安装、验收、核验）已完成，最终合规声明已发送至 dbi.energyinspections@sfgov.org；审核需预留10个工作日。" }, "why": { "en": "DBI Information Sheet M-06: no Certificate of Final Completion until these items clear", "zh": "DBI 信息表 M-06：这些项目未审核通过前不发最终竣工证明" } },
+        { "id": "accessibility", "item": { "en": "Disabled access requirements comply with the San Francisco and California Building Codes.", "zh": "无障碍设施符合旧金山及加州建筑法规。" } },
+        { "id": "impact-fees", "item": { "en": "Development impact fees are paid and other special requirements (such as street trees) are cleared; check with your district inspector.", "zh": "开发影响费已缴清，其他特殊要求（如行道树）已办结；可向辖区检查员确认。" } },
+        { "id": "agency-signoffs", "item": { "en": "Other divisions and agencies with work on the job have signed off: Plumbing, Electrical, Fire Department, Public Health, and Public Works where applicable.", "zh": "涉及本工程的其他部门已签字：管道、电气、消防局、公共卫生局，以及适用时的公共工程局。" } },
+        { "id": "permit-valid", "item": { "en": "The building permit is still valid.", "zh": "建筑许可证仍在有效期内。" } }
+      ],
+      "source": "https://www.sf.gov/schedule-and-pay-your-inspection",
+      "sources": [
+        "https://www.sf.gov/how-to-schedule-inspections-in-the-permitsf-portal",
+        "https://www.sf.gov/information/inspection-codes-voice-inspection-scheduling-system",
+        "https://www.sf.gov/sites/default/files/2022-08/IS%20M-06.pdf",
+        "https://api.sf.gov/documents/9595/Temporary_Certificate_of_Occupancy_Process_Handout.pdf",
+        "https://media.api.sf.gov/documents/Table_1A-G_-_Inspection_Survey_and_Reports_2026.pdf",
+        "https://sf.gov/get-help-final-inspections-open-your-business"
+      ]
+    },
+    {
+      "id": "fire-clearance",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire clearance (referral) inspection", "zh": "消防许可检查（转介检查）" },
+      "agency": { "en": "San Francisco Fire Department, Bureau of Fire Prevention", "zh": "旧金山消防局 防火处" },
+      "when": { "en": "Before opening, when Public Health (or another City agency) refers your permit application to the Fire Department for a fire clearance. Referrals more than 90 days old are cancelled unless you notify SFFD.", "zh": "开业前，公共卫生局（或其他市政部门）将您的许可申请转介消防局做消防审批时进行。转介超过90天未处理且未通知消防局的，将被取消。" },
+      "book": { "en": "Pay the fee first (check payable to San Francisco Fire Department, Bureau of Fire Prevention – Referral, 698 Second Street, Room 109; or by card over the phone), then call 415-558-3300 and ask for the district inspector assigned to your address.", "zh": "先缴费（支票抬头 San Francisco Fire Department, Bureau of Fire Prevention – Referral，寄送或递交至 698 Second Street, Room 109；也可电话刷卡），然后致电 415-558-3300，找负责您地址的辖区检查员预约。" },
+      "phone": "415-558-3300",
+      "fee": 156,
+      "feeNote": { "en": "$156 per hour, paid before scheduling (Ordinance 39-26, effective September 1, 2026). Additional inspections are $156 per hour.", "zh": "每小时 $156，须在预约前付清（第39-26号条例，2026年9月1日起生效）。额外检查每小时 $156。" },
+      "failNext": { "en": "Fix the items and pay for another inspection at $156 per hour.", "zh": "整改后再次付费预约检查，每小时 $156。" },
+      "checklist": [
+        { "id": "address", "item": { "en": "Property address posted and visible from the street, numerals at least 4 inches on a contrasting background.", "zh": "门牌号张贴在街上可见处，数字至少4英寸高、背景颜色对比明显。" } },
+        { "id": "exit-doors", "item": { "en": "Exit doors open from the inside without a key, special knowledge or effort. If the main door has key-locking hardware, post a durable sign on or next to it: \"THIS DOOR MUST REMAIN UNLOCKED WHEN THE BUILDING IS OCCUPIED.\"", "zh": "出口门从内侧无需钥匙、特殊知识或费力即可打开。主门若装钥匙锁，须在门上或旁边张贴耐久标识：\"THIS DOOR MUST REMAIN UNLOCKED WHEN THE BUILDING IS OCCUPIED\"（有人时此门须保持不上锁）。" } },
+        { "id": "exits-clear", "item": { "en": "Exits and access to exits are clear of obstructions; panic hardware on exit doors if over 49 occupants.", "zh": "出口及通往出口的通道无障碍物；人数超过49人的场所，出口门须装推杠门锁。" } },
+        { "id": "exit-signs", "item": { "en": "All illuminated exit signs work (burned-out bulbs replaced) and emergency lighting gives at least 1 foot-candle at the walking surface.", "zh": "所有发光出口指示牌工作正常（烧坏的灯泡已更换），应急照明在地面提供至少1英尺烛光。" } },
+        { "id": "occupant-load", "item": { "en": "Maximum occupant load sign posted near the main exit if the space holds more than 49 people.", "zh": "可容纳超过49人的场所，在主出口附近张贴最大容纳人数标牌。" } },
+        { "id": "extinguishers", "item": { "en": "Fire extinguishers installed, serviced every year with a current State Fire Marshal service tag, mounted along the exit path; at least one 2A-10BC per 3,000 square feet.", "zh": "灭火器已安装，每年检修并挂有有效的州消防局长检修标签，沿疏散路线固定安装；每3,000平方英尺至少一具 2A-10BC。" } },
+        { "id": "class-k", "item": { "en": "A Class K extinguisher with a current State Fire Marshal tag in the cooking area where oils or fats are used, within 30 feet of travel.", "zh": "使用油脂烹饪的区域配一具挂有有效州消防局长标签的 K 类灭火器，行走距离不超过30英尺。" } },
+        { "id": "hood-suppression", "item": { "en": "Hood and duct fire suppression system serviced every 6 months with a current State Fire Marshal service tag attached.", "zh": "排烟罩及风管灭火系统每6个月检修一次，并挂有有效的州消防局长检修标签。" } },
+        { "id": "hood-clean", "item": { "en": "Hoods, filters and exhaust flues are clean, with inspection and cleaning tags posted where they can be seen.", "zh": "排烟罩、滤网和排烟道清洁，检查和清洗标签张贴在显眼处。" } },
+        { "id": "storage", "item": { "en": "No storage in boiler, mechanical or electrical rooms or in the exit path; storage kept 18 inches below sprinkler heads (24 inches below the ceiling without sprinklers); flammable liquids in fire-rated cabinets.", "zh": "锅炉房、机房、电气间及疏散通道内不堆放物品；堆放物距喷淋头至少18英寸（无喷淋时距天花板至少24英寸）；易燃液体存放在防火柜中。" } },
+        { "id": "electrical", "item": { "en": "Extension cords not used as permanent wiring, no daisy-chained cords, and 3 feet of clearance around electrical panels and gas water heaters.", "zh": "不用延长线代替固定布线，不得串接延长线；配电盘和燃气热水器周围保持3英尺净空。" } },
+        { "id": "systems-proof", "item": { "en": "Where installed, proof of the 5-year sprinkler and standpipe service and of fire alarm testing and maintenance, with current tags visible.", "zh": "如装有喷淋、立管或火灾报警系统，需出示喷淋/立管五年期检修及报警系统测试维护证明，并有可见的有效标签。" } },
+        { "id": "pipe-casings", "item": { "en": "Existing ground-floor pipe casing holes are not covered.", "zh": "一楼现有的管道套管孔未被遮盖。" } },
+        { "id": "permits-posted", "item": { "en": "Current annual business tax certificate and any operational fire permits (for example, CO2 for beverage dispensing or open-flame candles) posted where the inspector can see them.", "zh": "有效的年度营业税证书及所需的消防运营许可证（如饮料用二氧化碳、明火蜡烛）张贴在检查员可见处。" } }
+      ],
+      "source": "https://sf-fire.org/media/4152",
+      "sources": [
+        "https://sf-fire.org/services/inspections",
+        "https://media.api.sf.gov/documents/SFFD_2.10.23_Inspection_Checklist.pdf",
+        "https://media.api.sf.gov/documents/SFFD20Restaurant20Checklist_0_q3zKVMs.pdf"
+      ]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Health final construction inspection (plan check)", "zh": "卫生部门施工终验（图纸审核）" },
+      "agency": { "en": "San Francisco Department of Public Health, Environmental Health Branch", "zh": "旧金山公共卫生局 环境卫生处" },
+      "when": { "en": "After all City agencies approve your plans: a preliminary inspection at about 80% complete (plumbing, walls, floor and ceiling finishes in place), then the final at 100% with all corrections done. Passing it is not approval to open; the district inspector must still approve your Health Permit to Operate.", "zh": "所有市政部门批准图纸后：完成约80%时（管道、墙面、地面和天花板饰面到位）做初步检查，100%完工且整改完毕后做终验。终验通过不等于可以开业，仍须辖区卫生检查员批准营业卫生许可证。" },
+      "book": { "en": "Contact your DPH plan reviewer (DPH-OTCPlanCheck@sfdph.org) to set up the site inspections. Food Safety program: 415-252-3800.", "zh": "联系您的公共卫生局审图员（DPH-OTCPlanCheck@sfdph.org）安排现场检查。食品安全项目电话：415-252-3800。" },
+      "phone": "415-252-3800",
+      "lead": { "en": "At least 2 weeks' notice for the final (1–2 weeks for the preliminary).", "zh": "终验至少提前2周通知（初步检查提前1到2周）。" },
+      "fee": null,
+      "feeNote": { "en": "The plan check fee is set by project size: $2,207 for new or remodeled restaurants, coffee, deli, tea and ice cream shops (Category 3); $1,241 for prepackaged food facilities and bars (Category 2); $828 for small projects (Category 1); $276 per hour beyond that (rates effective July 1, 2026).", "zh": "图纸审核费按项目规模收取：新建或改建餐厅、咖啡店、熟食店、茶饮店和冰淇淋店 $2,207（第3类）；预包装食品店和酒吧 $1,241（第2类）；小型项目 $828（第1类）；超出部分每小时 $276（2026年7月1日起费率）。" },
+      "checklist": [
+        { "id": "floors", "item": { "en": "Floors in prep, storage, warewash, janitorial and toilet areas are smooth and nonabsorbent (quarry tile, commercial sheet vinyl or seamless epoxy), coved with a 3/8-inch radius up at least 4 inches; no topset rubber base outside customer areas.", "zh": "加工、储藏、洗碗、清洁和卫生间区域地面光滑不吸水（缸砖、商用卷材乙烯基或无缝环氧），墙角做3/8英寸半径圆角并上翻至少4英寸；顾客区以外不得用外贴式橡胶踢脚。" } },
+        { "id": "walls-ceilings", "item": { "en": "Walls and ceilings are smooth and washable (gloss or semi-gloss enamel or epoxy on gypsum board); pipes, conduits and ducts concealed above the finished ceiling; no exposed sewer lines over food or drink areas.", "zh": "墙面和天花板光滑可清洗（石膏板刷光面或半光面瓷漆或环氧漆）；管道、线管和风管隐藏在吊顶之上；食品饮品区上方不得有外露污水管。" } },
+        { "id": "cookline", "item": { "en": "Stainless steel or ceramic tile behind the cookline from the floor base up to the bottom of the hood.", "zh": "炉灶线后墙从踢脚到排烟罩底部铺不锈钢或瓷砖。" } },
+        { "id": "dishwash-walls", "item": { "en": "Dishwashing area walls finished in FRP, stainless steel or ceramic tile to 8 feet above the floor.", "zh": "洗碗区墙面用玻璃钢板、不锈钢或瓷砖铺至离地8英尺。" } },
+        { "id": "hot-water", "item": { "en": "Hot water reaches at least 120°F measured at the faucet.", "zh": "水龙头处测得热水至少 120°F。" } },
+        { "id": "floor-sinks", "item": { "en": "Steam tables, ice machines, prep sinks and display cases drain through an air gap into an open floor sink that is accessible for cleaning and not a trip hazard.", "zh": "蒸汽保温台、制冰机、备菜池和展示柜经空气隔断排入敞口地漏水槽，地漏便于清洁且不绊脚。" } },
+        { "id": "sneeze-guards", "item": { "en": "Unpackaged food on display and prep surfaces next to customer areas are protected by approved sneeze guards.", "zh": "展示的未包装食品以及靠近顾客区的操作台都装有合格的防喷嚏挡板。" } },
+        { "id": "dry-storage", "item": { "en": "Dry storage of at least 96 linear feet of shelving, 18 inches deep and three tiers high, lowest shelf at least 6 inches off the floor.", "zh": "干货储存至少96延英尺货架，深18英寸、至少三层，最低层离地至少6英寸。" } },
+        { "id": "trash-area", "item": { "en": "Trash, compost and recycling storage area is built to food-facility finish standards if inside, or of nonabsorbent, sloped-to-drain material if outside.", "zh": "垃圾、堆肥和回收桶存放区若在室内须达到食品设施饰面标准，若在室外须为不吸水材料并坡向排水口。" } },
+        { "id": "pass-through", "item": { "en": "Any pass-through window opening is no larger than 216 square inches (432 with an air curtain), self-closing, at least 18 inches from the next one.", "zh": "外卖窗口每个开口不超过216平方英寸（装风幕可至432），可自动关闭，开口间距至少18英寸。" } },
+        { "id": "noise", "item": { "en": "New mechanical, ventilation and refrigeration equipment is no more than 8 decibels above ambient at the property line; safe access for the DPH noise measurement is arranged no later than 2 weeks before the final.", "zh": "新装机械、通风和制冷设备在产权边界处不高于环境噪音8分贝；最晚在终验前2周为公共卫生局安排安全的噪音测量通道。" } },
+        { "id": "ladders", "item": { "en": "Safe ladders and climbing equipment are on site for the plan check inspector.", "zh": "现场为审图检查员备好安全的梯子和攀爬设备。" } }
+      ],
+      "source": "https://sf.gov/sites/default/files/2023-08/ConstructGuide.pdf",
+      "sources": [
+        "https://www.sf.gov/plan-check-guide-building-and-remodeling-food-facility",
+        "https://www.sf.gov/information--building-permits-business",
+        "https://media.api.sf.gov/documents/FY27_Environmental_Health_Fees_9-1-26.pdf"
+      ]
+    },
+    {
+      "id": "health-permit",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Health Permit to Operate inspection", "zh": "营业卫生许可证检查" },
+      "agency": { "en": "San Francisco Department of Public Health, Environmental Health Branch", "zh": "旧金山公共卫生局 环境卫生处" },
+      "when": { "en": "After the three plan check inspections are approved, before you open. The district health inspector does an application inspection to approve your Health Permit to Operate.", "zh": "三次图纸审核检查均通过后、开业之前。辖区卫生检查员会进行申请检查，批准您的营业卫生许可证。" },
+      "book": { "en": "Apply for the Health Permit to Operate; the district inspector then inspects. Questions: Food Safety program, 415-252-3800 or EnvHealth.DPH@sfdph.org.", "zh": "申请营业卫生许可证后，由辖区检查员上门检查。咨询：食品安全项目 415-252-3800 或 EnvHealth.DPH@sfdph.org。" },
+      "phone": "415-252-3800",
+      "fee": 470,
+      "feeNote": { "en": "Permit to Operate application fee, including the initial inspection (effective July 1, 2026). Re-inspections are $276 per hour, or $138 per half hour.", "zh": "营业许可申请费，含首次检查（2026年7月1日起）。复检每小时 $276，或每半小时 $138。" },
+      "failNext": { "en": "Re-inspection is billed at $138 per half hour.", "zh": "复检按每半小时 $138 收费。" },
+      "checklist": [
+        { "id": "clean", "item": { "en": "The facility is clean and sanitary.", "zh": "店内清洁卫生。" } },
+        { "id": "equipment", "item": { "en": "All equipment is fully operational.", "zh": "所有设备都能正常运行。" } },
+        { "id": "supplies", "item": { "en": "Sanitary supplies are in place: soap and paper towels at every hand sink.", "zh": "卫生用品到位：每个洗手池都备有皂液和擦手纸。" } },
+        { "id": "water", "item": { "en": "Hot water of at least 120°F and cold water, adequate, pressurized and potable.", "zh": "供应至少 120°F 的热水和冷水，水量充足、有压力且可饮用。" } },
+        { "id": "sanitizer", "item": { "en": "Sanitizer is provided at the 3-compartment sink or in the dishwasher's final rinse.", "zh": "三格水槽备有消毒剂，或洗碗机最后冲洗环节含消毒。" } },
+        { "id": "sewage", "item": { "en": "All liquid waste drains to a working sewage system and the toilets work.", "zh": "所有废水排入正常运作的污水系统，卫生间可用。" } },
+        { "id": "pests", "item": { "en": "No rodents, roaches, flies or other vermin.", "zh": "无老鼠、蟑螂、苍蝇或其他害虫。" } }
+      ],
+      "source": "https://www.sf.gov/information--building-permits-business",
+      "sources": [
+        "https://media.api.sf.gov/documents/FY27_Environmental_Health_Fees_9-1-26.pdf",
+        "https://www.sf.gov/information/common-violations-food-inspections"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food inspection", "zh": "例行食品卫生检查" },
+      "agency": { "en": "San Francisco Department of Public Health, Environmental Health Branch", "zh": "旧金山公共卫生局 环境卫生处" },
+      "when": { "en": "After you open: on a routine basis, at other unscheduled times, and after complaints.", "zh": "开业后：定期例行检查，也会不定期或因投诉而检查。" },
+      "book": { "en": "You don't book it. Results are posted in the public database at inspections.myhealthdepartment.com/san-francisco, updated weekly.", "zh": "无需预约。结果公布在 inspections.myhealthdepartment.com/san-francisco 公开数据库，每周更新。" },
+      "phone": "415-252-3800",
+      "scoring": { "en": "Placard posted where the public can see it. Green (pass): 0–1 major violation, any major corrected during the inspection. Yellow (conditional pass): 2 or more major violations, corrected during the inspection. Red (closed): health hazards or major violations that can't be fixed right away.", "zh": "标牌须张贴在公众可见处。绿色（通过）：重大违规0到1项，且当场改正。黄色（有条件通过）：2项或以上重大违规，均当场改正。红色（停业）：存在无法立即改正的健康隐患或重大违规。" },
+      "failNext": { "en": "Yellow: DPH re-inspects and issues a new placard based on the result. Red: the facility stays closed until the unsafe conditions are corrected. Re-inspections are billed at $138 per half hour.", "zh": "黄色：公共卫生局会复检并根据结果换发新标牌。红色：须将不安全状况改正后才能重新营业。复检按每半小时 $138 收费。" },
+      "checklist": [
+        { "id": "sick-workers", "item": { "en": "Staff with a communicable illness stay home; anyone with cuts or rashes wears gloves.", "zh": "患传染性疾病的员工不上班；手上有伤口或皮疹的员工戴手套。" } },
+        { "id": "handwashing", "item": { "en": "Employees wash hands when starting work, switching tasks (including raw to ready-to-eat), before handling utensils, after the restroom and after touching their face or body.", "zh": "员工在上岗时、切换工作时（包括从生食到即食）、接触器具前、如厕后以及触摸脸部或身体后都要洗手。" } },
+        { "id": "holding", "item": { "en": "Food is held at the temperature that keeps that item safe.", "zh": "食品保存在能确保其安全的温度。" } },
+        { "id": "time-control", "item": { "en": "If you use time as a public health control, staff know and follow the time limits.", "zh": "如采用\"时间控制\"作为公共卫生措施，员工须了解并遵守时限规定。" } },
+        { "id": "cooling", "item": { "en": "Potentially hazardous food cools from 135°F to 70°F within 2 hours, then to 41°F within 4 more hours, using shallow pans, smaller portions, ice baths or rapid-cooling equipment.", "zh": "易腐危险食品2小时内从 135°F 降到 70°F，再在4小时内降到 41°F；可用浅盘、分小份、冰浴或速冷设备。" } },
+        { "id": "cooking", "item": { "en": "Cook to required temperatures: 145°F for eggs and single pieces of meat, 155°F for ground meat, 165°F for poultry and stuffed foods.", "zh": "烹饪达到规定温度：蛋类和整块肉 145°F，绞肉 155°F，禽肉及带馅食品 165°F。" } },
+        { "id": "reheating", "item": { "en": "Food reheated for hot holding, or served after being cooked and cooled, reaches 165°F.", "zh": "重新加热用于热保存、或冷却后再出餐的食品须达到 165°F。" } },
+        { "id": "adulterated", "item": { "en": "Any food mixed with something that could harm people is thrown out.", "zh": "混入可能致害物质的食品一律丢弃。" } },
+        { "id": "sanitizing", "item": { "en": "Food-contact surfaces and utensils are cleaned and sanitized regularly; sanitizer is in the 3-compartment sink or the dishwasher's final rinse.", "zh": "食品接触面和器具定期清洗消毒；三格水槽或洗碗机最后冲洗中含消毒剂。" } },
+        { "id": "approved-sources", "item": { "en": "All food comes from safe, approved sources.", "zh": "所有食品来自安全、合规的来源。" } },
+        { "id": "water", "item": { "en": "Hot (at least 120°F) and cold water available; the supply is adequate, protected, pressurized and potable.", "zh": "有热水（至少 120°F）和冷水；供水充足、受保护、有压力且可饮用。" } },
+        { "id": "sewage", "item": { "en": "No sewage backup, no overflowing or clogged grease trap, and working toilets.", "zh": "无污水倒灌，隔油池不溢不堵，卫生间可用。" } },
+        { "id": "pests", "item": { "en": "No rodents, roaches, flies or other vermin.", "zh": "无老鼠、蟑螂、苍蝇或其他害虫。" } }
+      ],
+      "source": "https://www.sf.gov/information/common-violations-food-inspections",
+      "sources": [
+        "https://www.sf.gov/information--restaurant-health-inspection-posters-and-what-they-mean",
+        "https://www.sf.gov/get-restaurant-health-inspection-results",
+        "https://media.api.sf.gov/documents/FY27_Environmental_Health_Fees_9-1-26.pdf"
+      ]
+    }
+  ]
+}

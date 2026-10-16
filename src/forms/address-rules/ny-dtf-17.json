@@ -1,0 +1,24 @@
+{
+  "form": "ny-dtf-17",
+  "read": "2026-10-15",
+  "fields": {
+    "physical": {
+      "rule": "local_premises",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Each location where taxable sales will be made: its actual street address, not a P.O. box. A Certificate of Authority is issued for each location and must be displayed there.",
+        "zh": "每个将进行应税销售的地点的实际街道地址，不得用邮政信箱。每个地点会单独发一张销售税授权证书，须在该处张贴。"
+      },
+      "ifNone": {
+        "en": "Use the store's own street address from the lease, and don't start selling there before its Certificate of Authority arrives. Only a show vendor or cart with no fixed place uses an owner's home address.",
+        "zh": "填写租约上门店自己的街道地址；收到该地点的授权证书前不得开始销售。只有没有固定场所的展会摊贩或流动推车才可填业主住址。"
+      },
+      "confirmations": [
+        { "url": "https://www.tax.ny.gov/pdf/current_forms/st/dtf17i.pdf", "kind": "instructions", "quote": "Line 5 – Physical address – Enter the actual street address of your business. Do not enter a PO box number." },
+        { "url": "https://www.tax.ny.gov/pdf/current_forms/st/dtf17att_fill_in.pdf", "kind": "form", "quote": "Do not begin business at the new location until you receive your sales tax Certificate of Authority for that location." },
+        { "url": "https://www.tax.ny.gov/pdf/publications/sales/pub750.pdf", "kind": "agency_page", "quote": "If you have more than one place of business, you must display a Certificate of Authority at each place of business." }
+      ]
+    }
+  },
+  "notes": "DTF-17-ATT (1/24), DTF-17-I (2/24) and Publication 750. The schedule has no box for the mailing address or the responsible person's address (it prints only their name and title), so neither is covered here; the DTF-17 itself is filed online."
+}

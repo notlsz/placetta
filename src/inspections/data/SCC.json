@@ -1,0 +1,77 @@
+{
+  "where": "SCC",
+  "name": { "en": "Santa Clara County", "zh": "圣克拉拉县" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Food facility final inspection (plan review)", "zh": "食品设施终验（图纸审核）" },
+      "agency": { "en": "County of Santa Clara Department of Environmental Health, Consumer Protection Division", "zh": "圣克拉拉县环境卫生局 消费者保护处" },
+      "when": { "en": "Third of three plan review site visits: preliminary (framing and plumbing), pre-final (finishes such as flooring and walls), then final (construction complete, all equipment operational). You can't open until it passes; the permit to operate is issued after it. No food on site unless your plan review inspector allows it at the pre-final.", "zh": "图纸审核三次现场检查中的最后一次：初检（框架和管道）、预终验（地面、墙面等饰面）、终验（施工完成、所有设备可运行）。终验通过前不得开业；通过后才签发营业许可证。除非审图检查员在预终验时批准，否则现场不得存放食品。" },
+      "book": { "en": "Pay all plan review fees in full, then call 408-918-3400 or email the plan check team (dehplancheck@deh.sccgov.org).", "zh": "先付清全部图纸审核费用，再致电 408-918-3400 或发邮件给审图组（dehplancheck@deh.sccgov.org）预约。" },
+      "phone": "408-918-3400",
+      "lead": { "en": "As far ahead of your planned opening as possible; the County gives no set number of days.", "zh": "尽量在计划开业日之前提早预约；县政府未规定具体天数。" },
+      "fee": null,
+      "feeNote": { "en": "The plan check fee is due with your plan submittal. The operating permit fee depends on your permit category and is invoiced after the final; pay through the County's make-a-payment page.", "zh": "图纸审核费在递交图纸时缴纳。营业许可费按许可类别而定，终验后寄发账单，可通过县政府的在线缴费页面支付。" },
+      "checklist": [
+        { "id": "fees-paid", "item": { "en": "All plan review fees are paid in full before you book the final.", "zh": "预约终验前已付清全部图纸审核费用。" } },
+        { "id": "complete-operational", "item": { "en": "Construction is complete and every piece of equipment is installed as approved and running.", "zh": "施工全部完成，所有设备均按批准图纸安装并可正常运行。" } },
+        { "id": "plans-on-site", "item": { "en": "A copy of the approved drawings is on the job site.", "zh": "工地现场备有一份已批准的图纸。" } },
+        { "id": "handsinks", "item": { "en": "A handwash sink in every food prep and warewashing area with warm water for at least 15 seconds through a mixing faucet, and soap and single-use towels in enclosed dispensers (no bulb-style soap dispensers).", "zh": "每个食品加工区和洗碗区都有洗手池，经混水龙头可持续出温水至少15秒；皂液和一次性纸巾装在封闭式分配器中（不得使用挤压球式皂液器）。" } },
+        { "id": "splashguard", "item": { "en": "A 6-inch splashguard between the handwash sink and warewashing or prep sinks unless they are 24 inches or more apart.", "zh": "洗手池与洗碗池或备菜池之间设6英寸挡水板，除非两者相距24英寸以上。" } },
+        { "id": "three-comp", "item": { "en": "Stainless steel three-compartment sink with two integral drainboards (compartments about 18 x 18 x 12 inches), draining indirectly to a floor sink. A dishwasher doesn't replace it.", "zh": "不锈钢三格水槽，带两块一体式沥水板（每格约 18×18×12 英寸），间接排水至地漏水槽。洗碗机不能替代三格水槽。" } },
+        { "id": "prep-sink", "item": { "en": "Food prep sink at least 18 x 18 x 12 inches with an 18 x 18 inch drainboard or adjacent table, hot and cold water, and an indirect drain to a floor sink.", "zh": "备菜池至少 18×18×12 英寸，配 18×18 英寸沥水板或相邻工作台，有冷热水，并间接排水至地漏水槽。" } },
+        { "id": "mop-sink", "item": { "en": "Curbed janitorial sink with hot and cold water and backflow prevention, finished in tile or epoxy with an integral cove base (no plastic or fiberglass laundry tubs).", "zh": "带挡边的拖把池，有冷热水和防回流装置，表面为瓷砖或环氧树脂并带一体式圆角踢脚（不得用塑料或玻璃钢洗衣盆）。" } },
+        { "id": "floor-sinks", "item": { "en": "Floor sinks receiving condensate and equipment waste have a 1-inch air gap, are accessible and visible (not inside cabinets) and within 15 feet of the equipment.", "zh": "接收冷凝水和设备废水的地漏水槽留有1英寸空气隔断，便于检查、外露可见（不得藏在柜内），且距设备不超过15英尺。" } },
+        { "id": "hot-water", "item": { "en": "Hot water of at least 120°F and cold water under pressure from an approved potable supply.", "zh": "由合格饮用水源供应至少 120°F 的热水和有压冷水。" } },
+        { "id": "floors", "item": { "en": "Floors are smooth, durable and nonabsorbent (quarry tile, commercial sheet vinyl or seamless epoxy), coved at the wall with a 3/8-inch minimum radius running at least 4 inches up walls and toe-kicks.", "zh": "地面光滑耐用、不吸水（缸砖、商用卷材乙烯基或无缝环氧地坪），墙角做最小3/8英寸半径的圆角，沿墙面和踢脚上翻至少4英寸。" } },
+        { "id": "walls", "item": { "en": "Walls and ceilings are smooth and washable; FRP, stainless steel or ceramic tile at least 4 feet high behind sinks and dishwashers, extending 18 inches to each side; no exposed pipes or ducts above food areas.", "zh": "墙面和天花板光滑可清洗；水槽和洗碗机后方用玻璃钢板、不锈钢或瓷砖做至少4英尺高的护墙，两侧各延伸18英寸；食品区上方不得有外露管道或风管。" } },
+        { "id": "lighting", "item": { "en": "Shatter-resistant light covers; at least 20 foot-candles in prep and dishwashing areas, 10 in storage, refrigeration and toilet rooms, and 50 where staff use knives or slicers.", "zh": "灯具装防碎罩；加工区和洗碗区照度至少20英尺烛光，储藏区、冷藏区和卫生间至少10英尺烛光，员工使用刀具或切片机的台面至少50英尺烛光。" } },
+        { "id": "toilets", "item": { "en": "Toilet rooms have self-closing, tight-fitting doors, a mixing-faucet hand sink with enclosed soap and towel dispensers, a permanent tissue dispenser and venting to the outside; patrons don't pass through food areas to reach them.", "zh": "卫生间门自动闭合且严密，洗手池为混水龙头并配封闭式皂液和纸巾分配器，有固定卫生纸架，并向室外排风；顾客去卫生间无需穿过食品区。" } },
+        { "id": "permit-app", "item": { "en": "Permit to operate application is completed and handed in at or before the final.", "zh": "营业许可申请表已填好，并在终验时或之前递交。" } }
+      ],
+      "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
+      "sources": [
+        "https://files.santaclaracounty.gov/exjcpb1761/migrated/PC_Requirements%20v07-2023.pdf?VersionId=aw6lyYn3XMFEY.0UF4n7J5jumLgAThzP"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food inspection", "zh": "例行食品卫生检查" },
+      "agency": { "en": "County of Santa Clara Department of Environmental Health, Consumer Protection Division", "zh": "圣克拉拉县环境卫生局 消费者保护处" },
+      "when": { "en": "After you open. Results are posted with a colored placard at your door and online (SCCDineOut) with a score out of 100.", "zh": "开业之后进行。结果以彩色标牌张贴在门口，并在网上（SCCDineOut）公布百分制分数。" },
+      "book": { "en": "You don't book it; a DEH inspector comes to you. Questions: 408-918-3400.", "zh": "无需预约，环境卫生局检查员会上门检查。咨询电话：408-918-3400。" },
+      "phone": "408-918-3400",
+      "scoring": { "en": "Green placard (pass): no more than one major violation. Yellow (conditional pass): two or more major violations, all corrected during the inspection. Red (fail): the facility is closed. Online, points come off 100: 8 per major violation, 3 per moderate, 2 per minor (good retail practice). The placard must stay clearly visible to people entering; removing, covering or moving it can bring a reinspection or compliance conference.", "zh": "绿色标牌（通过）：重大违规不超过一项。黄色（有条件通过）：两项或以上重大违规，且均在检查中当场改正。红色（不通过）：店铺被勒令关闭。网上分数从100分扣减：重大违规每项扣8分，中等扣3分，轻微（良好零售规范）扣2分。标牌须让进店者清楚看到；擅自取下、遮挡或挪动可能导致复查或合规会谈。" },
+      "failNext": { "en": "Major violations must be fixed on the spot or the County closes you; a red placard stays up until they are corrected and DEH reinspects (it aims to come within three business days of your call). One reinspection is free; each one after that is billed hourly (one-hour minimum) at the Board-approved rate.", "zh": "重大违规须当场改正，否则县政府会勒令停业；红色标牌在问题改正并经复查前一直张贴（接到通知后争取在三个工作日内复查）。第一次复查免费，之后每次按县议会核定费率按小时收费（至少一小时）。" },
+      "checklist": [
+        { "id": "certification", "item": { "en": "A food safety manager certificate and food handler cards are on site.", "zh": "现场备有食品安全经理证书和员工食品从业卡。" }, "why": { "en": "K01; County reports allow 60 days to get the manager certificate and 30 days from hire for handler cards", "zh": "K01；县检查报告给出的期限是60天内取得经理证书、员工入职30天内取得从业卡" } },
+        { "id": "handwash", "item": { "en": "Every handwash station, including restrooms, is stocked with soap and paper towels, working and accessible.", "zh": "所有洗手站（包括卫生间）都备有皂液和擦手纸，运行正常且无遮挡。" }, "why": { "en": "K06 major (8 points); H&SC 113953, 113953.1, 113953.2, 114067(f)", "zh": "K06 重大违规（扣8分）；《健康与安全法》113953、113953.1、113953.2、114067(f)" } },
+        { "id": "holding-temps", "item": { "en": "Potentially hazardous foods held at 41°F or below, or 135°F or above.", "zh": "易腐危险食品保存在 41°F 以下或 135°F 以上。" }, "why": { "en": "K07; H&SC 113996, 113998, 114037, 114343(a)", "zh": "K07；《健康与安全法》113996、113998、114037、114343(a)" } },
+        { "id": "sanitized", "item": { "en": "Food-contact surfaces are clean and sanitized; warewash sinks are set up and sanitizer test strips are on hand.", "zh": "食品接触面清洁并已消毒；洗碗池已备好，现场有消毒剂试纸。" }, "why": { "en": "Report item K14, K34", "zh": "检查报告 K14、K34 项" } },
+        { "id": "approved-source", "item": { "en": "All food comes from approved sources.", "zh": "所有食品来自合规来源。" }, "why": { "en": "Report item K15", "zh": "检查报告 K15 项" } },
+        { "id": "water", "item": { "en": "Hot and cold water available.", "zh": "冷热水供应正常。" }, "why": { "en": "Report item K21", "zh": "检查报告 K21 项" } },
+        { "id": "sewage", "item": { "en": "Sewage and wastewater are properly disposed of.", "zh": "污水和废水排放正常。" }, "why": { "en": "Report item K22", "zh": "检查报告 K22 项" } },
+        { "id": "pests", "item": { "en": "No rodents, insects, birds or animals.", "zh": "无老鼠、昆虫、鸟类或动物。" }, "why": { "en": "Report item K23", "zh": "检查报告 K23 项" } },
+        { "id": "consumer-advisory", "item": { "en": "If you serve raw or undercooked animal foods, the menu carries a consumer advisory.", "zh": "如供应生的或未熟透的动物性食品，菜单上须有消费者提示。" }, "why": { "en": "K19; H&SC 114012, 114093", "zh": "K19；《健康与安全法》114012、114093" } },
+        { "id": "toxics", "item": { "en": "Toxic substances are labeled, stored and used properly.", "zh": "有毒物品标识清楚，储存和使用得当。" }, "why": { "en": "Report item K29", "zh": "检查报告 K29 项" } },
+        { "id": "thermometers", "item": { "en": "Thermometers are provided and accurate.", "zh": "配备温度计且读数准确。" }, "why": { "en": "Report item K39", "zh": "检查报告 K39 项" } },
+        { "id": "toilets", "item": { "en": "Toilet facilities are properly built, supplied and clean.", "zh": "卫生间建造合规、用品齐全且清洁。" }, "why": { "en": "Report item K43", "zh": "检查报告 K43 项" } },
+        { "id": "surfaces", "item": { "en": "Floors, walls and ceilings are intact, smooth and clean; no missing or absorbent ceiling panels over food areas.", "zh": "地面、墙面、天花板完好、光滑、清洁；食品区上方不得缺失吊顶板或使用吸水板材。" }, "why": { "en": "K45; H&SC 114143(d), 114266, 114268, 114268.1, 114271, 114272", "zh": "K45；《健康与安全法》114143(d)、114266、114268、114268.1、114271、114272" } },
+        { "id": "plan-review", "item": { "en": "No new or changed equipment since your last approval without plan review.", "zh": "上次批准后新增或更换的设备都已经过图纸审核。" }, "why": { "en": "K48; H&SC 114380", "zh": "K48；《健康与安全法》114380" } },
+        { "id": "postings", "item": { "en": "Signs posted, last inspection report available, permit available and placard properly displayed.", "zh": "规定标识已张贴，上次检查报告可供查阅，许可证在场，标牌正确展示。" }, "why": { "en": "Report item K47, K49, K58", "zh": "检查报告 K47、K49、K58 项" } }
+      ],
+      "source": "https://stgencep.sccgov.org/sccdineout/INSPECTIONREPORT_DAA0S8KUC.pdf",
+      "sources": [
+        "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-facility-placarding-and-scoring-program",
+        "https://sccgov.iqm2.com/Citizens/Detail_LegiFile.aspx?CssClass=&Frame=SplitView&ID=70249&MediaPosition=8299.728&MeetingID=5000&amp=&amp=&amp=&amp=",
+        "https://d5.santaclaracounty.gov/node/3991",
+        "https://stgencep.sccgov.org/sccdineout/INSPECTIONREPORT_DAKBUWQD4.pdf"
+      ]
+    }
+  ]
+}

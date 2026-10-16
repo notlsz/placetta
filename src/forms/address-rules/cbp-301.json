@@ -1,0 +1,25 @@
+{
+  "form": "cbp-301",
+  "read": "2026-10-15",
+  "fields": {
+    "principal": {
+      "rule": "foreign_ok",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "The bond principal's full legal name, legal form, state of incorporation and a physical address (no P.O. box), meaning its principal place of business. A nonresident (foreign) corporation can be the principal.",
+        "zh": "担保书主体（被担保人）的法定全称、法律形式、注册州，以及实际地址（不可用邮政信箱），即其主要营业地地址。非居民（外国）公司可以作为被担保人。"
+      },
+      "ifNone": {
+        "en": "A company without a US office gives the street address of its head office abroad. A nonresident corporation must also have a resident agent for service of process in the state of the port of entry. Since Executive Order 14411 (June 2026), foreign importers of record face added limits on continuous bonds, so confirm the bond type with the broker or surety.",
+        "zh": "没有美国办公地点的公司填写境外总部的街道地址。非居民公司还须在入境口岸所在州指定可接收法律文书的常驻代理人。2026年6月第14411号行政令发布后，外国进口商使用连续担保受到额外限制，请与报关行或担保公司确认担保类型。"
+      },
+      "confirmations": [
+        { "url": "https://www.cbp.gov/sites/default/files/2024-05/cbp_form_301.pdf", "kind": "instructions", "quote": "a physical address (not a P.O. Box), and the state of incorporation, if applicable." },
+        { "url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-01/title-19.xml?part=113", "kind": "regulation", "quote": "In the case of a corporate principal or surety, its legal designation and the address of its principal place of business must appear." },
+        { "url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-01/title-19.xml?part=141&section=141.18", "kind": "regulation", "quote": "Files a bond on CBP Form 301, containing the bond conditions set forth in § 113.62 of this chapter" },
+        { "url": "https://www.whitehouse.gov/presidential-actions/2026/06/strengthening-customs-enforcement/", "kind": "agency_page", "quote": "a foreign IOR: (1) may not rely on a continuous bond to meet the bond requirements for entry, except as permitted by CBP" }
+      ]
+    }
+  },
+  "notes": "CBP Form 301 (04/24) instructions page, 19 CFR 113.21 (part 113), 19 CFR 141.18 ('Entry by nonresident corporation': a nonresident corporation needs a resident agent in the port's state and files a Form 301 bond) and Executive Order 14411 of June 3, 2026 (White House page; listed as agency_page for lack of a closer kind). cbp.gov blocks automated reads; the Form 301 PDF was opened through the web fetcher, and the quote matches the repo's public/forms/cbp-301.pdf. No source requires a US address for the principal; the EO tells DHS to tighten rules for foreign IORs (continuous bonds only when CBP permits, CTPAT broker), so recheck after CBP issues its implementing rules. The 'Mailing Address Requested by the Surety' box has no map answer and is not covered."
+}

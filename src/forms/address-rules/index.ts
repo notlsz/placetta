@@ -3,30 +3,54 @@ import type { FormAddressRules } from "../addressRules";
 import r_aus_food_permit from "./aus-food-permit.json";
 import r_aus_food_plan_review from "./aus-food-plan-review.json";
 import r_aus_food_preopening from "./aus-food-preopening.json";
+import r_az_llc from "./az-llc.json";
+import r_ca_edd_de1 from "./ca-edd-de1.json";
+import r_ca_ftb_3522 from "./ca-ftb-3522.json";
+import r_cbp_301 from "./cbp-301.json";
 import r_dal_co from "./dal-co.json";
 import r_dal_food_permit from "./dal-food-permit.json";
 import r_hou_co from "./hou-co.json";
 import r_hou_food_dealer from "./hou-food-dealer.json";
 import r_hou_sign from "./hou-sign.json";
+import r_irs_5472 from "./irs-5472.json";
+import r_irs_ss4 from "./irs-ss4.json";
+import r_irs_w7 from "./irs-w7.json";
 import r_lac_health_permit from "./lac-health-permit.json";
 import r_lac_plan_check from "./lac-plan-check.json";
+import r_ny_dol_100 from "./ny-dol-100.json";
+import r_ny_dtf_17 from "./ny-dtf-17.json";
 import r_oc_health_permit from "./oc-health-permit.json";
 import r_sf_dph_plan_check from "./sf-dph-plan-check.json";
 import r_sf_formula_retail from "./sf-formula-retail.json";
+import r_tx_205 from "./tx-205.json";
+import r_tx_304 from "./tx-304.json";
+import r_tx_503 from "./tx-503.json";
 
 /** What each address line on a form must hold, by form id and answer id, each rule confirmed by three official sources. */
 export const ADDRESS_RULES: Record<string, FormAddressRules> = {
   "aus-food-permit": r_aus_food_permit as FormAddressRules,
   "aus-food-plan-review": r_aus_food_plan_review as FormAddressRules,
   "aus-food-preopening": r_aus_food_preopening as FormAddressRules,
+  "az-llc": r_az_llc as FormAddressRules,
+  "ca-edd-de1": r_ca_edd_de1 as FormAddressRules,
+  "ca-ftb-3522": r_ca_ftb_3522 as FormAddressRules,
+  "cbp-301": r_cbp_301 as FormAddressRules,
   "dal-co": r_dal_co as FormAddressRules,
   "dal-food-permit": r_dal_food_permit as FormAddressRules,
   "hou-co": r_hou_co as FormAddressRules,
   "hou-food-dealer": r_hou_food_dealer as FormAddressRules,
   "hou-sign": r_hou_sign as FormAddressRules,
+  "irs-5472": r_irs_5472 as FormAddressRules,
+  "irs-ss4": r_irs_ss4 as FormAddressRules,
+  "irs-w7": r_irs_w7 as FormAddressRules,
   "lac-health-permit": r_lac_health_permit as FormAddressRules,
   "lac-plan-check": r_lac_plan_check as FormAddressRules,
+  "ny-dol-100": r_ny_dol_100 as FormAddressRules,
+  "ny-dtf-17": r_ny_dtf_17 as FormAddressRules,
   "oc-health-permit": r_oc_health_permit as FormAddressRules,
   "sf-dph-plan-check": r_sf_dph_plan_check as FormAddressRules,
   "sf-formula-retail": r_sf_formula_retail as FormAddressRules,
+  "tx-205": r_tx_205 as FormAddressRules,
+  "tx-304": r_tx_304 as FormAddressRules,
+  "tx-503": r_tx_503 as FormAddressRules,
 };

@@ -1,0 +1,74 @@
+{
+  "where": "LA",
+  "name": { "en": "Los Angeles", "zh": "洛杉矶" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Building final inspection and Certificate of Occupancy", "zh": "建筑终验与入住证" },
+      "agency": { "en": "Los Angeles Department of Building and Safety (LADBS)", "zh": "洛杉矶建筑与安全局（LADBS）" },
+      "when": { "en": "When all permitted work is complete and each earlier inspection has been approved in order. After the final, LADBS issues the Certificate of Occupancy. The building final must also come before the LAFD fire/life safety test.", "zh": "许可范围内的工程全部完工、此前各项检查均已依次通过之后。终验通过后 LADBS 签发入住证（Certificate of Occupancy）。建筑终验还必须在洛杉矶消防局（LAFD）的消防/生命安全测试之前完成。" },
+      "book": { "en": "Request it online through LADBS Online Services, or call 311 (213-473-3231 from outside Los Angeles). For help hitting an opening date, LADBS's free Restaurant & Small Business Express Program assigns a case manager who can help schedule finals and get the Certificate of Occupancy: 213-202-9963 (Mon–Fri, 7:30am–4:30pm).", "zh": "通过 LADBS 在线服务申请，或拨打 311（洛杉矶以外拨 213-473-3231）。如需赶开业日期，可申请 LADBS 免费的\"餐厅与小企业快速通道\"，由专案经理协助安排终验和取得入住证：213-202-9963（周一至周五 早7:30至下午4:30）。" },
+      "bookUrl": "https://www.ladbsservices2.lacity.org/OnlineServices/?service=rfi",
+      "phone": "213-473-3231",
+      "feeNote": { "en": "The final is covered by your permit fees, which pay for a limited number of inspections. If an inspection can't be done because of customer error, you pay an Extra Inspection Trip fee online. A Temporary Certificate of Occupancy costs $453 to issue.", "zh": "终验费用含在许可证费用中，但许可证费只涵盖有限次数的检查。因申请方原因无法完成检查的，须在网上缴纳\"额外检查出行费\"。临时入住证签发费为 $453。" },
+      "failNext": { "en": "The inspector writes a Correction Notice; fix every item and schedule a re-inspection. LADBS won't sign off or issue the Certificate of Occupancy until all deficiencies are corrected; a Temporary Certificate of Occupancy can allow occupancy while listed corrections are finished. A re-inspection fee may be charged if the work isn't complete, records or plans aren't available, or there's no access.", "zh": "检查员会开具《整改通知》；全部整改后再预约复检。所有问题改正前，LADBS 不会签字或签发入住证；临时入住证可在完成清单所列整改期间允许入住。如工程未完工、记录或图纸不在现场或无法进入，可能收取复检费。" },
+      "checklist": [
+        { "id": "visible", "item": { "en": "All work being inspected is visible.", "zh": "待检查的所有工程均外露可见。" } },
+        { "id": "permit-copy", "item": { "en": "A copy of the permit is on site.", "zh": "现场备有许可证副本。" } },
+        { "id": "approved-plans", "item": { "en": "Approved plans are on site if plan review was required.", "zh": "如曾要求审图，现场备有已批准的图纸。" } },
+        { "id": "building-card", "item": { "en": "The Building Card issued with the building permit is on site.", "zh": "随建筑许可证签发的建筑检查卡（Building Card）在现场。" } },
+        { "id": "equipment", "item": { "en": "Any equipment the inspector needs, such as a ladder, is on site.", "zh": "现场备有检查所需的工具，如梯子。" } },
+        { "id": "prior-inspections", "item": { "en": "Each earlier inspection on the permit was approved before work went past it.", "zh": "许可证上的前序检查都已通过，之后才继续施工。" } },
+        { "id": "corrections", "item": { "en": "Every item on earlier LADBS Correction Notices is corrected before you call for the final.", "zh": "申请终验前，LADBS 以往《整改通知》上的所有项目均已改正。" } },
+        { "id": "other-signoffs", "item": { "en": "Where the code requires it, the Fire Department and disabled access inspectors also do a final and sign the inspection record.", "zh": "法规有要求时，消防局和无障碍设施检查员也须完成终验并在检查记录上签字。" } }
+      ],
+      "source": "https://dbs.lacity.gov/services/inspection",
+      "sources": [
+        "https://dbs.lacity.gov/node/2337",
+        "https://dbs.lacity.gov/node/2367",
+        "https://dbs.lacity.gov/node/2791",
+        "https://dbs.lacity.gov/services/core-services/inspection/inspection-special-assistance/restaurant-small-business-express-program",
+        "https://projectdeliverymanual.engineering.lacity.gov/chapter-22-construction-completion/222-sign-department-building-and-safety",
+        "https://dbs.lacity.gov/sites/default/files/efs/forms/inspection/fire-life-safety-pre-test-sheet-in-form-06.pdf"
+      ]
+    },
+    {
+      "id": "fire-final",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire/life safety final inspection", "zh": "消防与生命安全终验" },
+      "agency": { "en": "Los Angeles Fire Department, Fire Development Services", "zh": "洛杉矶消防局 消防开发服务处" },
+      "when": { "en": "After LAFD approves your plans and after the LADBS building final; for a fire alarm, the LADBS electrical inspector must also final the alarm wiring before the LAFD test.", "zh": "洛杉矶消防局批准图纸、且 LADBS 建筑终验通过之后；如有火灾报警系统，还须在 LAFD 测试前由 LADBS 电气检查员完成报警线路终验。" },
+      "book": { "en": "Request it online in the Fire Inspection Management System (FIMS) at inspect.lafd.org using the 9-character Transaction ID and street name from your Fire Development Services application. Pick a preferred date, then pay; the request isn't scheduled until it's paid. An FDS inspector then contacts you to schedule.", "zh": "在消防检查管理系统（FIMS，inspect.lafd.org）在线申请，输入消防开发服务申请单上的9位交易编号和街道名称。选择希望的日期后付款；未付款不会排期。随后消防开发服务处的检查员会联系您确定时间。" },
+      "bookUrl": "https://inspect.lafd.org/",
+      "phone": "213-482-6900",
+      "fee": null,
+      "feeNote": { "en": "The plan check fee covers up to two hours of the first field inspection; the first 2 hours of your first regular inspection request aren't charged, and later requests are. Inspector time is $379 per hour; off-hours inspections are $505 per hour with a $1,262 prepayment (effective January 5, 2026).", "zh": "图纸审核费包含首次现场检查最多两小时；首次常规检查申请的前2小时不收费，之后的申请均收费。检查员费率每小时 $379；非工作时间检查每小时 $505，须预付 $1,262（2026年1月5日起生效）。" },
+      "failNext": { "en": "Book and pay for another inspection request. A re-inspection fee may be charged if the work isn't complete, records or plans aren't available, or there's no access.", "zh": "须重新申请并付费预约检查。如工程未完工、记录或图纸不在现场或无法进入，可能收取复检费。" },
+      "checklist": [
+        { "id": "building-final", "item": { "en": "LADBS building final inspection is done before you schedule the fire/life safety test.", "zh": "预约消防/生命安全测试前，LADBS 建筑终验已完成。" } },
+        { "id": "alarm-wiring", "item": { "en": "The LADBS electrical inspector has finaled the fire alarm wiring.", "zh": "LADBS 电气检查员已对火灾报警线路完成终验。" } },
+        { "id": "pre-test-sheet", "item": { "en": "The Fire Life Safety Pre-Test Sheet (LADBS IN.Form.06) is filled out on both sides, each item initialed and dated by the responsible installer (N/A where it doesn't apply). FIMS won't accept a fire alarm request without it.", "zh": "《消防生命安全预测试表》（LADBS IN.Form.06）正反两面填写完整，每项由负责安装方签名缩写并注明日期（不适用的填 N/A）。没有此表，FIMS 不接受火灾报警检查申请。" } },
+        { "id": "records", "item": { "en": "Inspection records and approved plans are available when the inspector asks.", "zh": "检查员要求时能出示检查记录和已批准的图纸。" } },
+        { "id": "devices", "item": { "en": "Every initiating device is pre-tested and the total number of life safety devices to be tested is listed.", "zh": "所有触发装置已预先测试，并列明待测生命安全装置的总数。" } },
+        { "id": "notification", "item": { "en": "Voice or fire tone is 15 dBA above ambient, and strobe locations and candela meet NFPA 72 and ADA.", "zh": "广播或火警音比环境噪音高15分贝，频闪灯位置和亮度符合 NFPA 72 和 ADA。" } },
+        { "id": "exit-emergency-lights", "item": { "en": "Exit signs and emergency lighting are tested, and the exit path is verified.", "zh": "出口指示牌和应急照明已测试，疏散路线已核实。" } },
+        { "id": "rated-construction", "item": { "en": "Fire-rated construction and fire-rated penetrations are complete.", "zh": "防火构造和防火封堵已完成。" } },
+        { "id": "fire-doors", "item": { "en": "Fire doors are installed per NFPA 80 with labeled rated hardware, and door drop and latching work.", "zh": "防火门按 NFPA 80 安装，五金件有防火等级标签，门能自动闭合并锁扣到位。" } },
+        { "id": "hvac", "item": { "en": "A/C shutdown and fire damper operation work as designed.", "zh": "空调联动关闭和防火阀动作符合设计。" } },
+        { "id": "door-locking", "item": { "en": "Any electric door locking is set up per LAFD requirements.", "zh": "电控门锁按 LAFD 要求设置。" } },
+        { "id": "evac-signs", "item": { "en": "Evacuation signage is posted.", "zh": "疏散标识已张贴。" } }
+      ],
+      "source": "https://dbs.lacity.gov/sites/default/files/efs/forms/inspection/fire-life-safety-pre-test-sheet-in-form-06.pdf",
+      "sources": [
+        "https://lafd.org/fire-prevention/fire-development-services",
+        "https://inspect.lafd.org/Content/AttachedFiles/FIMS_Help.pdf",
+        "https://lafd.org/fire-prevention/fire-development-services/division-15-fee-schedule",
+        "https://www.lafd.org/fire-prevention/fire-development-services/off-hours-inspection-fees"
+      ]
+    }
+  ]
+}

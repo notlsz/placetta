@@ -1,0 +1,59 @@
+{
+  "form": "ca-edd-de1",
+  "read": "2026-10-15",
+  "fields": {
+    "physical_location": {
+      "rule": "in_state_street",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Item O: the California street address where the business is physically conducted, with its phone number. No P.O. box or private mailbox. Attach a list if there are several California locations.",
+        "zh": "第O项：在加州实际开展业务的街道地址及电话。不得用邮政信箱或私人信箱。如在加州有多处地点，另附清单。"
+      },
+      "ifNone": {
+        "en": "Use the California store or worksite address. If the company has no California site yet (for example only remote staff), ask EDD what to enter; never use a mailbox or registered-agent address.",
+        "zh": "填写加州门店或工作场所地址。若公司在加州尚无任何场所（例如只有远程员工），请先咨询 EDD；切勿使用信箱或注册代理人地址。"
+      },
+      "confirmations": [
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf", "kind": "form", "quote": "(PO Box or Private Mail Box will not be accepted.)" },
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1i.pdf", "kind": "instructions", "quote": "Enter the California street address (PO Box or Private Mail Box will not be accepted) and phone number where the business is physically conducted." },
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1np.pdf", "kind": "instructions", "quote": "Enter the California street address (PO Box or Private Mail Box will not be accepted) and phone number where the business is physically conducted." },
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1gs.pdf", "kind": "instructions", "quote": "Enter the California street address (PO Box or Private Mail Box will not be accepted) and phone number where the business is physically conducted." }
+      ]
+    },
+    "mailing_address": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Item P: where EDD sends mail and forms. A P.O. box or private mailbox is fine, and the form has State/Province and Country boxes, so an address abroad is accepted. Tick 'Same as above' if it is the physical address.",
+        "zh": "第P项：EDD 寄送信件和表格的地址。可用邮政信箱或私人信箱；表格设有“州/省”和“国家”栏，可填境外地址。如与实际地址相同，勾选“Same as above”。"
+      },
+      "ifNone": {
+        "en": "Use whichever address is read promptly: the California location, a US P.O. box or the head office abroad.",
+        "zh": "填写能及时查收信件的地址：加州门店、美国邮政信箱或境外总部均可。"
+      },
+      "confirmations": [
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf", "kind": "form", "quote": "MAILING ADDRESS (PO Box or Private Mail Box is acceptable.)" },
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf", "kind": "form", "quote": "Unit Number (If applicable) ZIP Code Country" },
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1i.pdf", "kind": "instructions", "quote": "Enter the mailing address where the EDD correspondence and forms should be sent (PO Box or Private Mail Box is acceptable)." },
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1np.pdf", "kind": "form", "quote": "O. MAILING ADDRESS (PO Box or Private Mail Box is acceptable.) Street Number Street Name City State/Province" },
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1gs.pdf", "kind": "form", "quote": "M. MAILING ADDRESS (PO Box or Private Mail Box is acceptable.) Street Number Street Name City State/Province" }
+      ]
+    },
+    "contact_person": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "Item S: name, phone, email, relation and address of the person who keeps the EDD account up to date; an outside accountant or agent also files a Power of Attorney (DE 48). No source says where that address must be.",
+        "zh": "第S项：负责维护 EDD 账户信息的联系人的姓名、电话、邮箱、关系和地址；外部会计师或代理人还须提交授权书（DE 48）。没有资料说明该地址须在何处。"
+      },
+      "ifNone": {
+        "en": "Use the contact person's own business address in the US; if they only have one abroad, Placetta asks EDD first.",
+        "zh": "填写联系人在美国的办公地址；若其只有境外地址，Placetta 会先向 EDD 确认。"
+      },
+      "confirmations": [
+        { "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1i.pdf", "kind": "instructions", "quote": "Enter the name, daytime phone number, e-mail address, relation, and address of the person authorized by the ownership to provide the EDD with information" }
+      ]
+    }
+  },
+  "notes": "DE 1 Rev. 79 (3-16), its instructions DE 1I, and the parallel EDD forms DE 1NP (nonprofit) and DE 1GS (governmental), whose instructions repeat the same address rules. DE 1 prints a Country box on both item O and item P, but the instructions limit item O to a California street address. owner_info carries no address (name, title, SSN, license only). The EDD registration web page lists 'physical business address and mailing address' but redirects automated reads, so it is not cited."
+}

@@ -1,0 +1,95 @@
+{
+  "where": "SJ",
+  "name": { "en": "San José", "zh": "圣何塞" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Building final inspection", "zh": "建筑终验" },
+      "agency": { "en": "City of San José Building Division (Planning, Building and Code Enforcement)", "zh": "圣何塞市建筑处（规划、建筑与法规执行局）" },
+      "when": { "en": "Last inspection on your building permit, once every other inspection on the permit card is approved and the space is finished and ready to occupy. When it passes, the permit on SJPermits.org changes from \"Under Inspection\" to \"Finaled\".", "zh": "建筑许可证上的最后一项检查：许可证卡上其他检查全部通过、店面完工可入驻后进行。通过后，SJPermits.org 上的许可证状态会从\"Under Inspection\"变为\"Finaled\"。" },
+      "book": { "en": "Book on SJPermits.org with \"Schedule an Inspection\", or call 408-535-3555 (Mon–Fri, 7am–4pm) and choose the scheduling option. On the day, the inspector calls between 7 and 8am (possibly from a blocked number) and gives a 2-hour arrival window that can start as early as 8am.", "zh": "在 SJPermits.org 点击\"Schedule an Inspection\"预约，或致电 408-535-3555（周一至周五 早7点至下午4点）选择预约选项。检查当天早上7点到8点之间检查员会来电（可能显示隐藏号码），并给出最早从8点开始的2小时到场时段。" },
+      "bookUrl": "https://www.sjpermits.org",
+      "phone": "408-535-3555",
+      "feeNote": { "en": "Missed inspections are not refunded. If you need more inspection time, buy it by calling 408-535-3555 (\"make a payment\") or through the purchase link on SJPermits.org; additional fees are non-refundable.", "zh": "错过的检查不退费。如需更多检查时间，可致电 408-535-3555 选择\"make a payment\"，或在 SJPermits.org 的购买链接中加购；加购费用不予退还。" },
+      "failNext": { "en": "Fix what the inspector flags and request the final again on SJPermits.org; if the permit's inspection time runs out, buy more (non-refundable).", "zh": "按检查员指出的问题整改后，在 SJPermits.org 重新申请终验；若许可证内的检查时间用完，需另行购买（不退费）。" },
+      "checklist": [
+        { "id": "permit-card", "item": { "en": "Permit Card and any earlier inspection notices are on site for the inspector (keep the card on site for the whole project).", "zh": "许可证卡及之前的检查通知都放在现场供检查员查看（整个工程期间许可证卡须留在现场）。" } },
+        { "id": "documents", "item": { "en": "City-approved stamped plans, any pre-inspection reports (such as a HERS test report), and manufacturer listings and installation instructions are on hand.", "zh": "备好市政府盖章批准的图纸、相关预检报告（如 HERS 测试报告）以及设备制造商的认证清单和安装说明。" } },
+        { "id": "prior-approved", "item": { "en": "Every other inspection on the permit is already approved.", "zh": "许可证上的其他所有检查均已通过。" } },
+        { "id": "complete", "item": { "en": "The building is finished and ready for occupancy or use: complete, clean and safe, with finish grading done.", "zh": "建筑已完工、可投入使用：完整、整洁、安全，场地平整已完成。" } },
+        { "id": "utilities", "item": { "en": "Utilities are on, fixtures and fans work, appliances function, and there are no plumbing leaks.", "zh": "水电燃气已接通，灯具洁具和风扇运转正常，电器设备可用，管道无渗漏。" } },
+        { "id": "alarms", "item": { "en": "Smoke and carbon monoxide alarms are installed and working.", "zh": "烟雾报警器和一氧化碳报警器已安装且工作正常。" } },
+        { "id": "access", "item": { "en": "The inspector can reach the roof, attic, crawl spaces, electrical panel and furnace; an OSHA-compliant ladder is on site (inspectors don't bring one).", "zh": "检查员能到达屋顶、阁楼、地下检修空间、配电盘和暖炉；现场备有符合 OSHA 标准的梯子（检查员不带梯子）。" } },
+        { "id": "on-site", "item": { "en": "Someone answers the morning call and is on site from the start of the 2-hour window; plan for at least 30 minutes.", "zh": "有人接听早上的来电，并在2小时时段开始时就在现场；预留至少30分钟。" } }
+      ],
+      "source": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success",
+      "sources": [
+        "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections",
+        "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement"
+      ]
+    },
+    {
+      "id": "fire-final",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire final inspection (fire protection systems)", "zh": "消防终验（消防系统）" },
+      "agency": { "en": "San José Fire Department, Bureau of Fire Prevention", "zh": "圣何塞消防局 防火处" },
+      "when": { "en": "After the Fire Marshal approves your plans and the sprinkler, fire alarm or extinguishing system (such as a kitchen hood system) is installed. The system can't be used until the final approves it.", "zh": "消防局长（Fire Marshal）批准图纸、且喷淋、火灾报警或灭火系统（如厨房排烟罩灭火系统）安装完成之后。终验通过前该系统不得投入使用。" },
+      "book": { "en": "Fire system permits start online at SJPermits.org. Book each inspection by calling 408-535-3555.", "zh": "消防系统许可证在 SJPermits.org 在线申请。每次检查致电 408-535-3555 预约。" },
+      "bookUrl": "https://www.sjpermits.org",
+      "phone": "408-535-3555",
+      "lead": { "en": "At least one business day's notice. Cancel at least two business days ahead or the inspection may be charged.", "zh": "至少提前一个工作日预约。取消须提前至少两个工作日，否则可能照常收费。" },
+      "feeNote": { "en": "Permit fees are due with the application, and all fees from the permit are the installing contractor's responsibility. Permits expire after 180 days of inactivity.", "zh": "许可证费用须随申请一并缴纳，该许可证产生的所有费用由安装承包商承担。许可证连续180天无进展即失效。" },
+      "checklist": [
+        { "id": "plans-approved", "item": { "en": "Plans were approved by the Fire Marshal before installation, and the permit is still active.", "zh": "安装前图纸已获消防局长批准，且许可证仍有效。" } },
+        { "id": "staged-tests", "item": { "en": "Earlier stages are signed off: flush, rough/visual and hydrostatic test.", "zh": "前期各阶段已签字通过：冲洗、粗验/目视检查、水压试验。" } },
+        { "id": "drain-alarm", "item": { "en": "Main drain static and residual readings and time to alarm are ready to record.", "zh": "已准备好记录主排水静压与余压读数以及报警响应时间。" } },
+        { "id": "csfm-listed", "item": { "en": "Every fire alarm and fire detection component is California State Fire Marshal listed.", "zh": "所有火灾报警与探测部件均列入加州消防局长（CSFM）认证清单。" } },
+        { "id": "ul-fm", "item": { "en": "Fire extinguishing system components are UL or FM listed.", "zh": "灭火系统部件均经 UL 或 FM 认证。" } },
+        { "id": "component-table", "item": { "en": "Installed devices match the permit's component table (device, manufacturer, model, State Fire Marshal listing number, quantity).", "zh": "现场安装的设备与许可证上的部件表一致（设备、制造商、型号、州消防局长认证编号、数量）。" } },
+        { "id": "fitter-card", "item": { "en": "For water-based systems, the installer can show a current Sprinkler Fitter Card in the field.", "zh": "水基系统的安装人员能在现场出示有效的喷淋安装工证（Sprinkler Fitter Card）。" } },
+        { "id": "life-safety", "item": { "en": "Life safety features the inspector checks are in place: exits, panic hardware and fire extinguishers.", "zh": "检查员会核查的生命安全设施已到位：安全出口、推杠门锁（panic hardware）和灭火器。" } }
+      ],
+      "source": "https://www.sanjoseca.gov/home/showpublisheddocument/74829/639120343527370000",
+      "sources": [
+        "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits",
+        "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/development-services",
+        "https://sanjoseca.gov/home/showpublisheddocument/103519/638260492316730000"
+      ]
+    },
+    {
+      "id": "fire-annual",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "Annual fire inspection", "zh": "年度消防检查" },
+      "agency": { "en": "San José Fire Department, Bureau of Fire Prevention", "zh": "圣何塞消防局 防火处" },
+      "when": { "en": "Every year after you open, for public assembly spaces, businesses that use or store hazardous materials and other state-mandated occupancies. The inspector walks the property with you or your representative.", "zh": "开业后每年一次，适用于公众集会场所、使用或储存危险物品的商家以及其他州法规定的场所。检查员会与您或您的代表一同巡查。" },
+      "book": { "en": "SJFD assigns an inspector who contacts you before scheduling. To request a fire clearance inspection or an occupancy load sign (fewer than 49 persons), call 408-535-7750 or email sjfd.bfpsolutions@sanjoseca.gov.", "zh": "消防局会指派检查员，并在安排前联系您。如需申请消防许可检查或人数上限标牌（少于49人），请致电 408-535-7750 或发邮件至 sjfd.bfpsolutions@sanjoseca.gov。" },
+      "phone": "408-535-7750",
+      "failNext": { "en": "Violations go on a written Notice of Violation with a repair period based on severity. Life safety hazards must be fixed immediately; uncorrected or serious violations can lead to enforcement against the business or property owner.", "zh": "违规项会写入《违规通知》（Notice of Violation），并按严重程度给予整改期限。生命安全隐患须立即整改；逾期未改或严重违规可能导致对商家或业主的执法处理。" },
+      "checklist": [
+        { "id": "ext-service", "item": { "en": "Fire extinguishers are serviced every year and after every use.", "zh": "灭火器每年及每次使用后都经过检修。" } },
+        { "id": "ext-spacing", "item": { "en": "At least a 2A:10BC extinguisher within every 75 feet of travel.", "zh": "每75英尺行走距离内至少配备一具 2A:10BC 灭火器。" } },
+        { "id": "cover-plates", "item": { "en": "Cover plates on all electrical boxes and outlets.", "zh": "所有电气接线盒和插座都装有盖板。" } },
+        { "id": "wiring", "item": { "en": "No zip wiring or exposed Romex wiring.", "zh": "没有拉链线（zip wiring）或外露的 Romex 电线。" } },
+        { "id": "extension-cords", "item": { "en": "No extension cords or multi-plug adapters without circuit breakers.", "zh": "不使用无断路保护的延长线或多孔插座转换器。" } },
+        { "id": "sprinkler-test", "item": { "en": "Sprinkler system has its five-year service test.", "zh": "喷淋系统已完成五年期检测。" } },
+        { "id": "exits-clear", "item": { "en": "Exits and exit passageways are clear and unobstructed.", "zh": "安全出口和疏散通道畅通无阻。" } },
+        { "id": "exit-light", "item": { "en": "Exit illumination is on whenever the building is occupied, and every exit door is identified.", "zh": "建筑有人时出口照明保持开启，所有出口门都有标识。" } },
+        { "id": "storage-clearance", "item": { "en": "Storage is at least 2 feet from the ceiling and 18 inches from sprinkler heads; nothing stored under exit stairways.", "zh": "堆放物距天花板至少2英尺、距喷淋头至少18英寸；疏散楼梯下不得存放物品。" } },
+        { "id": "panel-clearance", "item": { "en": "3 feet of clearance in front of the electrical panel.", "zh": "配电盘前保持3英尺净空。" } },
+        { "id": "mech-rooms", "item": { "en": "Mechanical and electrical rooms are kept clear of combustible storage.", "zh": "机电房内不存放可燃物。" } },
+        { "id": "cylinders", "item": { "en": "Compressed gas cylinders (such as CO2 for drinks) are secured with a noncombustible strap.", "zh": "压缩气瓶（如饮品用二氧化碳瓶）用不可燃绑带固定。" } },
+        { "id": "propane-ext", "item": { "en": "At least a 40-BC extinguisher within 30 feet of any liquid propane tank.", "zh": "液化丙烷罐30英尺范围内至少配备一具 40-BC 灭火器。" } },
+        { "id": "address", "item": { "en": "Building address is visible from the street.", "zh": "建筑门牌号从街上清晰可见。" } }
+      ],
+      "source": "https://sanjoseca.gov/home/showpublisheddocument/8960/636646863252570000",
+      "sources": [
+        "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/operational-annual-permits"
+      ]
+    }
+  ]
+}

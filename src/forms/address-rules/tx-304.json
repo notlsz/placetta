@@ -1,0 +1,58 @@
+{
+  "form": "tx-304",
+  "read": "2026-10-15",
+  "fields": {
+    "principal_office": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Item 8: the foreign LLC's principal office, wherever it is, abroad included (the form has country and postal-code boxes). A street or mailing address is accepted.",
+        "zh": "第8项：外州（外国）LLC 的主要办事处地址，不限所在地，境外亦可（表格设有国家和邮编栏）。可填街道地址或邮寄地址。"
+      },
+      "ifNone": {
+        "en": "Give the head office address as it is, including one in China or elsewhere abroad.",
+        "zh": "如实填写总部地址，在中国或其他境外地区均可。"
+      },
+      "confirmations": [
+        { "url": "https://www.sos.state.tx.us/corp/forms/304_boc.pdf", "kind": "form", "quote": "It is organized under the laws of: (set forth state or foreign country)" },
+        { "url": "https://www.sos.state.tx.us/corp/instructions/304.shtml", "kind": "instructions", "quote": "Provide the street or mailing address of the principal office of the foreign entity." },
+        { "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.9.htm", "kind": "statute", "quote": "(8) the address of the principal office of the foreign filing entity;" }
+      ]
+    },
+    "agent_address": {
+      "rule": "in_state_street",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Item 9C: the registered office, a Texas street address where the registered agent can be served in person during business hours. Not a P.O. box, mailbox service or answering service.",
+        "zh": "第9C项：注册办事处，须为德州街道地址，营业时间内可当面向注册代理人送达法律文书。不得为邮政信箱、信箱代收服务或电话应答服务。"
+      },
+      "ifNone": {
+        "en": "Hire a Texas registered agent (a Texas resident or a company authorized in Texas) and use its office address.",
+        "zh": "聘请德州注册代理人（德州居民个人或获准在德州经营的公司），填写其办公地址。"
+      },
+      "confirmations": [
+        { "url": "https://www.sos.state.tx.us/corp/forms/304_boc.pdf", "kind": "form", "quote": "9C. The business address of the registered agent and the registered office address is:" },
+        { "url": "https://www.sos.state.tx.us/corp/instructions/304.shtml", "kind": "instructions", "quote": "The registered office address must be located at a street address where service of process may be personally served on the entity’s registered agent" },
+        { "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.5.htm", "kind": "statute", "quote": "Each filing entity and each foreign filing entity shall designate and continuously maintain in this state:" }
+      ]
+    },
+    "governing_persons": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Item 11: the name and address of each governing person (manager or member). Any street or mailing address, including a P.O. box or one abroad (the form has a country box). The filing is public.",
+        "zh": "第11项：每位管理人（经理或成员）的姓名和地址。街道或邮寄地址均可，包括邮政信箱或境外地址（表格设有国家栏）。该文件会公开。"
+      },
+      "ifNone": {
+        "en": "Use each person's own business address, wherever it is; the Secretary of State suggests a business or P.O. box address over a home address for privacy.",
+        "zh": "填写每个人自己的办公地址，不限所在地；为保护隐私，州务卿建议用办公地址或邮政信箱，而不是住址。"
+      },
+      "confirmations": [
+        { "url": "https://www.sos.state.tx.us/corp/forms/304_boc.pdf", "kind": "form", "quote": "Organization Name Street or Mailing Address City State Country Zip Code" },
+        { "url": "https://www.sos.state.tx.us/corp/instructions/304.shtml", "kind": "instructions", "quote": "use a business or post office box address rather than a residence address if privacy concerns are an issue." },
+        { "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.9.htm", "kind": "statute", "quote": "(10) the name and address of each of the entity's governing persons; and" }
+      ]
+    }
+  },
+  "notes": "Form 304 (Revised 09/26), the Secretary of State's Form 304 instructions page, and Tex. Bus. Orgs. Code 9.004(b)(8)-(10) and 5.201. In Texas law 'foreign entity' means formed outside Texas; the form's 'state or foreign country' line and country boxes show a non-US LLC registers on the same form."
+}

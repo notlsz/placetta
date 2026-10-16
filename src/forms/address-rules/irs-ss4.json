@@ -1,0 +1,43 @@
+{
+  "form": "irs-ss4",
+  "read": "2026-10-15",
+  "fields": {
+    "mailing_address": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Lines 4a-4b: where the IRS sends the entity's mail; it is generally used on all its tax returns. A P.O. box is fine. A foreign address is accepted: city, province or state, postal code and the country name written out in full.",
+        "zh": "第4a-4b行：IRS 寄送该实体信件的地址，之后报税一般也沿用此地址。可用邮政信箱。可填境外地址：城市、省或州、邮编，以及国家全称（不可缩写）。"
+      },
+      "ifNone": {
+        "en": "Use the address where the company actually receives mail, in the US or abroad. A company whose principal place of business is outside the US cannot apply online; it applies by phone, fax or mail.",
+        "zh": "填写公司实际收信的地址，美国境内或境外均可。主要营业地在美国境外的公司不能在线申请，需通过电话、传真或邮寄申请。"
+      },
+      "confirmations": [
+        { "url": "https://www.irs.gov/pub/irs-pdf/fss4.pdf", "kind": "form", "quote": "Mailing address (room, apt., suite no. and street, or P.O. box)" },
+        { "url": "https://www.irs.gov/pub/irs-pdf/fss4.pdf", "kind": "form", "quote": "City, state, and ZIP code (if foreign, see instructions)" },
+        { "url": "https://www.irs.gov/pub/irs-pdf/iss4.pdf", "kind": "instructions", "quote": "If the entity’s mailing address is outside the United States or its territories, you must enter the city, province or state, postal code" },
+        { "url": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number", "kind": "agency_page", "quote": "Your principal place of business is outside the U.S. If so, apply by phone, fax or mail." }
+      ]
+    },
+    "street_address": {
+      "rule": "foreign_ok",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Lines 5a-5b: the entity's physical address, only if it differs from the mailing address. No P.O. box. A street address abroad is accepted, with the country written out.",
+        "zh": "第5a-5b行：实体的实际所在地址，仅在与邮寄地址不同时填写。不得填邮政信箱。可填境外街道地址，国家须写全称。"
+      },
+      "ifNone": {
+        "en": "Leave it blank when the mailing address is already the physical address; otherwise give the street address of the office abroad.",
+        "zh": "若邮寄地址就是实际地址，此处留空；否则填写境外办公地点的街道地址。"
+      },
+      "confirmations": [
+        { "url": "https://www.irs.gov/pub/irs-pdf/fss4.pdf", "kind": "form", "quote": "Street address (if different) (Don’t enter a P.O. box.)" },
+        { "url": "https://www.irs.gov/pub/irs-pdf/iss4.pdf", "kind": "instructions", "quote": "Provide the entity’s physical address only if different from its mailing address shown on lines 4a–4b. Don’t enter a P.O. box number here." },
+        { "url": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number", "kind": "agency_page", "quote": "Your principal place of business is outside the U.S. If so, apply by phone, fax or mail." },
+        { "url": "https://www.irs.gov/pub/irs-pdf/p1635.pdf", "kind": "agency_page", "quote": "Enter the location address only if it is different from Lines 4a-b mailing address. Do not enter a PO Box here." }
+      ]
+    }
+  },
+  "notes": "Form SS-4 (Rev. December 2025) and its instructions (Rev. 12-2025), the IRS 'Get an employer identification number' page and Publication 1635 (Rev. 2-2014). There is no form map for SS-4 yet; field ids follow the task: mailing_address = lines 4a-4b, street_address = lines 5a-5b. The repo's src/forms/pdf/irs-fss4.pdf may be an older revision."
+}

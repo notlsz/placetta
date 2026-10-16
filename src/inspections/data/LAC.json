@@ -1,0 +1,79 @@
+{
+  "where": "LAC",
+  "name": { "en": "Los Angeles County", "zh": "洛杉矶县" },
+  "read": "2026-10-15",
+  "notes": "LA County DPH Environmental Health permits and inspects retail food facilities countywide, including the City of Los Angeles, except Long Beach, Pasadena and Vernon (which run their own health departments). Letter grades apply in unincorporated areas and cities that adopted Ordinance 97-0071; Avalon, Bradbury, Hidden Hills, La Habra Heights, San Marino, Sierra Madre and Signal Hill have not.",
+  "inspections": [
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Food facility final construction inspection (plan check)", "zh": "食品设施施工终验（图纸审核）" },
+      "agency": { "en": "Los Angeles County Department of Public Health, Environmental Health – Plan Check Program", "zh": "洛杉矶县公共卫生局 环境卫生处 图纸审核项目" },
+      "when": { "en": "After construction is finished and you have final field approvals from Building & Safety and every other agency involved. Passing it gets you the public health permit you need to open.", "zh": "施工完成、并已取得建筑安全部门及其他相关部门的现场终验批准之后。通过后即可取得开业所需的公共卫生许可证。" },
+      "book": { "en": "Schedule the final with the Environmental Health plan check office that approved your plans. When you request it, the plan checker gives you the permit application; complete it and hand it over with the required documents at the final.", "zh": "向批准您图纸的环境卫生审图办公室预约终验。申请终验时审图员会给您许可证申请表；填好后连同所需文件在终验时交给审图员。" },
+      "bookUrl": "https://admin.publichealth.lacounty.gov/eh/about/plan-check-program.htm",
+      "fee": null,
+      "feeNote": { "en": "Plan check fees are set by size: restaurants $1,044 (0–500 sq ft), $1,530 (501–1,999), $1,865 (2,000–3,999), $2,276 (4,000–9,999), $2,723 (10,000+); food markets $858–$1,903; expedited review costs more. The annual restaurant permit runs $319–$1,438 by seats and risk (FY 2026-27). Don't pay a permit fee until Public Health invoices you.", "zh": "图纸审核费按面积收取：餐厅 $1,044（0–500平方英尺）、$1,530（501–1,999）、$1,865（2,000–3,999）、$2,276（4,000–9,999）、$2,723（10,000以上）；食品零售店 $858–$1,903；加急审核另收更高费用。餐厅年度许可费按座位数和风险等级为 $319–$1,438（2026-27财年）。收到公共卫生局账单前不要缴许可费。" },
+      "checklist": [
+        { "id": "other-approvals", "item": { "en": "Final field approvals from Building & Safety and other agencies are in hand.", "zh": "已取得建筑安全部门及其他部门的现场终验批准。" } },
+        { "id": "plans-on-site", "item": { "en": "A copy of the approved plans stays on the job site until the final is complete.", "zh": "终验完成前，已批准的图纸副本一直留在工地。" } },
+        { "id": "equipment", "item": { "en": "Equipment and fixtures are installed as shown on the approved plans, and food equipment is ANSI-certified.", "zh": "设备和设施按批准图纸安装，食品设备经 ANSI 认证。" } },
+        { "id": "handsinks", "item": { "en": "Hand sinks give warm water (at least 100°F) for 15 seconds through a combination or premixing faucet, with soap and single-use towels in dispensers; automatic faucets preset to 100–108°F.", "zh": "洗手池通过混水龙头提供至少 100°F 的温水并持续15秒，皂液和一次性纸巾装在分配器中；感应龙头预设 100–108°F。" } },
+        { "id": "three-comp", "item": { "en": "Three-compartment warewashing sink with two integral drainboards, compartments at least 16 x 20 or 18 x 18 inches and 12 inches deep, hot and cold water to each, and an 8-inch integral backsplash if against a wall.", "zh": "三格洗碗池带两块一体式沥水板，每格至少 16×20 或 18×18 英寸、深12英寸，每格有冷热水；靠墙安装时须有8英寸高一体式挡水板。" } },
+        { "id": "prep-sink", "item": { "en": "Separate food prep sink in the prep area, at least 18 x 18 x 12 inches with a drainboard, draining through an air gap into a floor sink.", "zh": "加工区设独立备菜池，至少 18×18×12 英寸并带沥水板，经空气隔断排入地漏水槽。" } },
+        { "id": "janitorial", "item": { "en": "Janitorial sink with hot and cold water and a backflow device, at least 30 inches from other equipment or behind an 18-inch partition.", "zh": "拖把池有冷热水和防回流装置，与其他设备相距至少30英寸，或用18英寸高的隔板隔开。" } },
+        { "id": "hot-water", "item": { "en": "Hot water at least 120°F at the faucet from the facility's own dedicated commercial water heater; a recirculation pump if fixtures are more than 60 feet away. Insta-hot units don't count.", "zh": "由本店专用的商用热水器供应，水龙头处热水至少 120°F；用水点距热水器超过60英尺须装循环泵。即热式小型热水器（Insta-hot）不算数。" } },
+        { "id": "floors", "item": { "en": "Floors are smooth, durable and nonabsorbent (quarry tile, troweled epoxy, commercial sheet vinyl), coved 3/8 inch up at least 4 inches; no painted floors, VCT or vinyl topset base.", "zh": "地面光滑耐用、不吸水（缸砖、抹涂环氧、商用卷材乙烯基），墙角做3/8英寸圆角并上翻至少4英寸；不得用涂漆地面、VCT 地砖或外贴式乙烯基踢脚。" } },
+        { "id": "walls-ceilings", "item": { "en": "Walls and ceilings are smooth, nonabsorbent and washable (enamel or epoxy paint, FRP, stainless steel, tile); acoustical ceiling tile only 6 feet or more above the floor.", "zh": "墙面和天花板光滑、不吸水、可清洗（瓷漆或环氧漆、玻璃钢板、不锈钢、瓷砖）；吸音吊顶板须安装在离地6英尺以上。" } },
+        { "id": "lighting", "item": { "en": "Light levels of 10 foot-candles in walk-ins and dry storage, 20 at hand sinks, warewashing and toilet rooms, 50 where staff work with food or knives; shatter-resistant bulbs over open food.", "zh": "照度：步入式冷库和干货区10英尺烛光，洗手、洗碗区和卫生间20英尺烛光，员工处理食品或使用刀具处50英尺烛光；裸露食品上方灯泡须防碎。" } },
+        { "id": "toilets", "item": { "en": "Employee toilet rooms have well-fitted self-closing doors, toilet tissue in a permanent dispenser and venting to the outside.", "zh": "员工卫生间门严密且能自动闭合，卫生纸装在固定纸架上，并向室外排风。" } },
+        { "id": "doors", "item": { "en": "Exterior doors are self-closing, tight-fitting and vermin-proof with gaps no more than 1/4 inch; delivery doors have an air curtain unless you sell only prepackaged food.", "zh": "外门能自动闭合、严密防虫鼠，门缝不超过1/4英寸；送货门须装风幕（只卖预包装食品的除外）。" } },
+        { "id": "refrigeration", "item": { "en": "Each refrigeration unit has an accurate, readily visible thermometer; walk-in shelving is non-corrodible and at least 6 inches off the floor.", "zh": "每台冷藏设备都有准确、显眼的温度计；步入式冷库货架耐腐蚀且离地至少6英寸。" } },
+        { "id": "air-balance", "item": { "en": "If asked, a third-party air balance report for the exhaust hood and make-up air is ready before final clearance.", "zh": "如被要求，终验放行前须备好第三方出具的排烟罩与补风系统风量平衡报告。" } }
+      ],
+      "source": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+      "sources": [
+        "https://admin.publichealth.lacounty.gov/eh/about/permit.htm",
+        "https://admin.publichealth.lacounty.gov/eh/about/plan-check-program.htm",
+        "https://admin.publichealth.lacounty.gov/eh/docs/permit/public-health-financial-management-fee-schedule.pdf"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine retail food inspection", "zh": "例行零售食品检查" },
+      "agency": { "en": "Los Angeles County Department of Public Health, Environmental Health", "zh": "洛杉矶县公共卫生局 环境卫生处" },
+      "when": { "en": "Unannounced, after you open, at a frequency set by your risk category: high risk (full-service restaurants) 3 times a year; moderate risk (limited-menu restaurants, fast food, quick service, markets with a deli or bakery) twice; low risk (prepackaged food, ice cream stores, bars without kitchens) once.", "zh": "开业后不预先通知地进行，频率按风险等级而定：高风险（全服务餐厅）每年3次；中风险（有限菜单餐厅、快餐、快速服务店、带熟食或烘焙的超市）每年2次；低风险（预包装食品、冰淇淋店、无厨房酒吧）每年1次。" },
+      "book": { "en": "You don't book it. If you're unhappy with a grade, you can request an Owner Initiated Inspection within 3 business days, pay within 10 calendar days, and it happens within 10 days of payment; allowed once every 12 months, and its grade replaces the earlier one. Questions: 888-700-9995.", "zh": "无需预约。如对评级不满，可在3个工作日内申请\"业主申请检查\"（OII），10个日历日内缴费，缴费后10天内进行；每12个月限一次，新评级取代原评级。咨询电话：888-700-9995。" },
+      "phone": "888-700-9995",
+      "feeNote": { "en": "Routine inspections come with your annual permit. A billable re-inspection is $145; an Owner Initiated Inspection is $330, $391 or $440 for low, moderate or high-risk restaurants (FY 2026-27). After-hours re-inspections after a suspension are billed at the overtime rate.", "zh": "例行检查费用已含在年度许可费中。收费复检每次 $145；业主申请检查（OII）按低、中、高风险餐厅分别为 $330、$391、$440（2026-27财年）。停业整改后的非工作时间复检按加班费率收费。" },
+      "scoring": { "en": "Every inspection starts at 100. Major critical risk factor violations cost 4 points, minor ones 2, good retail practice violations 1; two or more majors cost 3 more, and a permit suspension adds 7. Grade card: A 90–100, B 80–89, C 70–79; 69 or below gets a score card instead. Post it where patrons can clearly see it until the next routine inspection, along with a notice that the latest report is available on request.", "zh": "每次检查从100分起扣：重大关键风险违规每项扣4分，轻微关键风险扣2分，良好零售规范违规扣1分；两项以上重大违规再扣3分，吊销许可再扣7分。评级卡：A 90–100分，B 80–89分，C 70–79分；69分及以下发分数卡而非字母评级。评级卡须张贴在顾客清楚可见处直至下次例行检查，并张贴可应要求查阅最新检查报告的告示。" },
+      "failNext": { "en": "Major critical violations must be corrected before the inspector leaves, with a re-inspection within 14 days; if not corrected, the permit is suspended and the facility closed. A score below 70 also suspends the permit, and two scores below 70 within 12 months can bring closure and legal action. The second re-inspection and any after it are charged when violations aren't fixed by the compliance date.", "zh": "重大关键违规须在检查员离开前改正，并在14天内复检；未改正则吊销许可、勒令停业。得分低于70分也会被吊销许可；12个月内两次低于70分可能被关闭并承担法律责任。违规未在期限内改正的，从第二次复检起开始收费。" },
+      "checklist": [
+        { "id": "certification", "item": { "en": "At least one employee holds a valid Certified Food Protection Manager certificate, and food employees have valid food handler cards.", "zh": "至少一名员工持有有效的认证食品保护经理证书，食品从业员工都持有有效的食品从业卡。" }, "why": { "en": "FOIR item 2", "zh": "检查报告第2项" } },
+        { "id": "handwashing", "item": { "en": "Employees wash hands with soap and 100°F water for at least 10 seconds before work, after the restroom, after handling raw animal products, and before putting on gloves.", "zh": "员工上岗前、如厕后、接触生的动物性食品后以及戴手套前，用皂液和 100°F 温水洗手至少10秒。" }, "why": { "en": "FOIR item 6", "zh": "检查报告第6项" } },
+        { "id": "hand-sinks", "item": { "en": "Hand sinks are used only for handwashing, stocked with soap and single-use towels in dispensers, clean and not blocked.", "zh": "洗手池只用于洗手，配有皂液和一次性纸巾分配器，干净且无遮挡。" }, "why": { "en": "FOIR item 7", "zh": "检查报告第7项" } },
+        { "id": "holding", "item": { "en": "Potentially hazardous food held at 135°F or above, or 41°F or below, and received at proper temperatures.", "zh": "易腐危险食品保存在 135°F 以上或 41°F 以下，收货时温度合规。" }, "why": { "en": "FOIR item 8", "zh": "检查报告第8项" } },
+        { "id": "time-control", "item": { "en": "Food held under time as a public health control is time-marked and discarded within 4 hours, with complete written procedures on site.", "zh": "以\"时间控制\"保存的食品标注时间、4小时内丢弃，现场有完整的书面程序。" }, "why": { "en": "FOIR item 9", "zh": "检查报告第9项" } },
+        { "id": "cooling", "item": { "en": "Cooked food cools from 135°F to 70°F within 2 hours and to 41°F within 4 more hours, using approved methods.", "zh": "熟食用核准方法在2小时内从 135°F 降到 70°F，再在4小时内降到 41°F。" }, "why": { "en": "FOIR item 10", "zh": "检查报告第10项" } },
+        { "id": "cooking", "item": { "en": "Cook for at least 15 seconds to: 145°F for fish, single pieces of meat and shell eggs for immediate service; 155°F for ground meat and sausages; 165°F for poultry and stuffed foods.", "zh": "烹饪至以下温度并保持至少15秒：鱼、整块肉、即食带壳蛋 145°F；绞肉和香肠 155°F；禽肉和带馅食品 165°F。" }, "why": { "en": "FOIR item 11", "zh": "检查报告第11项" } },
+        { "id": "reheating", "item": { "en": "Food reheated for hot holding reaches 165°F within 2 hours.", "zh": "用于热保存的复热食品在2小时内达到 165°F。" }, "why": { "en": "FOIR item 12", "zh": "检查报告第12项" } },
+        { "id": "sanitizing", "item": { "en": "Equipment and utensils are washed, rinsed and sanitized at the approved sanitizer concentration; multi-use utensils cleaned at least every 4 hours.", "zh": "设备和器具经清洗、冲洗并用核准浓度的消毒剂消毒；多次使用的器具至少每4小时清洗一次。" }, "why": { "en": "FOIR item 15", "zh": "检查报告第15项" } },
+        { "id": "approved-source", "item": { "en": "Food comes from licensed, regulated sources, with invoices on site.", "zh": "食品来自持证、受监管的来源，现场保留进货发票。" }, "why": { "en": "FOIR item 16", "zh": "检查报告第16项" } },
+        { "id": "water", "item": { "en": "Every sink except hand sinks has 120°F hot water and cold water under pressure; hand sinks have 100–108°F warm water.", "zh": "除洗手池外，所有水槽都有 120°F 热水和有压冷水；洗手池有 100–108°F 温水。" }, "why": { "en": "FOIR item 22", "zh": "检查报告第22项" } },
+        { "id": "sewage", "item": { "en": "Floor drains and floor sinks work without backups; the grease trap or interceptor is clean and working.", "zh": "地漏和地漏水槽排水正常、无倒灌；隔油池或隔油器清洁且运作正常。" }, "why": { "en": "FOIR item 23", "zh": "检查报告第23项" } },
+        { "id": "pests", "item": { "en": "No flies, cockroaches, ants or rodents; no live animals except service animals.", "zh": "无苍蝇、蟑螂、蚂蚁或老鼠；除服务犬外无活体动物。" }, "why": { "en": "FOIR item 24", "zh": "检查报告第24项" } },
+        { "id": "person-in-charge", "item": { "en": "A person in charge is present during operating hours; staff wear clean clothing and hair restraints.", "zh": "营业时间有负责人在场；员工穿着干净并佩戴发网或帽子。" }, "why": { "en": "FOIR items 25–26", "zh": "检查报告第25–26项" } },
+        { "id": "postings", "item": { "en": "Grade card and required signs are posted, the latest inspection report is available on request, and the public health permit is valid and available.", "zh": "评级卡和规定标识已张贴，最新检查报告可应要求查阅，公共卫生许可证有效且在场。" }, "why": { "en": "FOIR items 47–48", "zh": "检查报告第47–48项" } }
+      ],
+      "source": "https://admin.publichealth.lacounty.gov/eh/docs/inspection/retail-food-inspection-guide.pdf",
+      "sources": [
+        "https://admin.publichealth.lacounty.gov/eh/inspection/grading-posting-requirements-retail-food-facilities.htm",
+        "https://publichealth.lacounty.gov/eh/inspection/restaurant-retail-food-inspection.htm",
+        "https://admin.publichealth.lacounty.gov/eh/docs/permit/public-health-financial-management-fee-schedule.pdf"
+      ]
+    }
+  ]
+}

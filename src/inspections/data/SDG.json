@@ -1,0 +1,230 @@
+{
+  "where": "SDG",
+  "name": { "en": "San Diego (San Diego County)", "zh": "圣地亚哥（圣地亚哥县）" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Building final and Certificate of Occupancy", "zh": "建筑终验与入住许可证（CO）" },
+      "agency": { "en": "City of San Diego Development Services Department, Inspection Services", "zh": "圣地亚哥市开发服务局 检查服务处" },
+      "when": {
+        "en": "After every trade inspection on the permit has passed. The County health final asks for your final or temporary Certificate of Occupancy first, so this comes before it.",
+        "zh": "许可证上所有工种检查通过之后。县卫生终验要求先出示正式或临时入住许可证，所以这一项排在卫生终验前面。"
+      },
+      "book": {
+        "en": "Schedule online in the DSD portal (sandiego.gov/DSDportal) with your permit or approval number, or on the 24/7 automated line 858-581-7111. To book with staff, call 858-581-7111 and press 0, 7 a.m.–3 p.m. on weekdays.",
+        "zh": "凭许可证号或审批号在开发服务局网上平台（sandiego.gov/DSDportal）预约，或拨打 24 小时自动预约专线 858-581-7111。如需人工预约，工作日早 7 点至下午 3 点拨打 858-581-7111 后按 0。"
+      },
+      "bookUrl": "https://www.sandiego.gov/DSDportal",
+      "phone": "858-581-7111",
+      "lead": {
+        "en": "Requests made by 10 p.m. are scheduled for the next business day. For a two-hour arrival window, call your assigned inspector by 8 a.m. on the day.",
+        "zh": "晚上 10 点前提交的预约排在下一个工作日。如需两小时到达时段，当天早上 8 点前致电指派的检查员。"
+      },
+      "feeNote": {
+        "en": "Inspection fees are part of the permit fees (Information Bulletins 501, 506 and 103). A Temporary Certificate of Occupancy or a reissued certificate is $293.20 each.",
+        "zh": "检查费含在许可证费用里（见信息公告 501、506、103）。临时入住许可证或补发入住许可证每份 293.20 美元。"
+      },
+      "failNext": {
+        "en": "You get a Correction Notice (DS-13); fix the work and keep it accessible until it passes. A re-inspection fee may be charged for incomplete work, uncorrected items, concealed work, no access, or a missing record card or plans, and no further inspections happen until it is paid. You can ask a supervisor for a second opinion.",
+        "zh": "检查员会开具整改通知（DS-13），整改完成前相关部位须保持可查验。若工程未完成、未按要求整改、未经检查就封闭、现场无法进入，或检查记录卡、批准图纸不在现场，可能收取复检费，缴清前不再安排检查。对结果有异议可申请主管复核。"
+      },
+      "checklist": [
+        { "id": "adult-on-site", "item": { "en": "An adult (18 or older) is on site to let the inspector in.", "zh": "现场有一名年满 18 岁的成年人为检查员开门。" } },
+        { "id": "plans-on-site", "item": { "en": "The approved plans are on site for the inspector.", "zh": "批准图纸放在现场供检查员查阅。" } },
+        { "id": "record-card", "item": { "en": "The Inspection Record Card (DS-1798) is on site so the inspector can sign off.", "zh": "检查记录卡（DS-1798）放在现场，供检查员签字确认。" } },
+        { "id": "panels-open", "item": { "en": "Electrical panels and junction boxes are open and accessible; inspectors will not open them.", "zh": "配电盘和接线盒已打开且便于查看，检查员不会自行拆开。" } },
+        { "id": "circuit-card", "item": { "en": "A completed Electrical Circuit Card (DS-1779) and the manufacturers' installation instructions are available.", "zh": "已填好的电路卡（DS-1779）和各设备的厂家安装说明可供查阅。" } },
+        { "id": "special-reports", "item": { "en": "Final summary special inspection reports, if your plans call for special inspections, have been emailed to DSD-Sp-Insp-Reports@sandiego.gov.", "zh": "如图纸要求特殊检查，其最终汇总报告已发送至 DSD-Sp-Insp-Reports@sandiego.gov。" } },
+        { "id": "safe-access", "item": { "en": "Areas to be inspected are lit, with a safe path of travel; an OSHA-approved ladder is set up if roof or attic access is needed.", "zh": "待检区域照明充足、通道安全；如需上屋顶或进吊顶，已按职业安全规范架好合格梯子。" } },
+        { "id": "co-trigger", "item": { "en": "If the build-out occupies a shell or changes the occupancy classification, every inspection on every associated permit is approved, so the Certificate of Occupancy can issue.", "zh": "若装修是首次进驻毛坯空间或改变了占用类别，所有关联许可证上的检查均已通过，入住许可证方可签发。" }, "why": { "en": "SDMC §129.0114; Information Bulletin 585", "zh": "圣地亚哥市政法规 §129.0114；信息公告 585" } }
+      ],
+      "source": "https://www.sandiego.gov/development-services/forms-publications/information-bulletins/120",
+      "sources": ["https://www.sandiego.gov/sites/default/files/2026-04/dsdib585.pdf"]
+    },
+    {
+      "id": "fire-final",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "Fire permit finals (kitchen hood, sprinklers, alarm)", "zh": "消防许可终验（厨房排烟罩灭火、喷淋、火警）" },
+      "agency": { "en": "City of San Diego Development Services Department (fire permits, enforcing the San Diego Fire Code with San Diego Fire-Rescue)", "zh": "圣地亚哥市开发服务局（消防许可，与圣地亚哥消防救援局共同执行消防法规）" },
+      "when": {
+        "en": "During construction, alongside the building inspections, and before the building final. Every kitchen hood suppression system, sprinkler change and fire alarm change needs its own fire permit and inspection.",
+        "zh": "施工期间与建筑检查同步进行，须在建筑终验之前完成。厨房排烟罩灭火系统、喷淋改动和火警系统改动都需要单独的消防许可和检查。"
+      },
+      "book": {
+        "en": "Book it the same way as the building inspections: in the DSD portal or on 858-581-7111, using the fire permit number.",
+        "zh": "预约方式与建筑检查相同：凭消防许可证号在开发服务局网上平台或拨打 858-581-7111 预约。"
+      },
+      "bookUrl": "https://www.sandiego.gov/DSDportal",
+      "phone": "858-581-7111",
+      "feeNote": {
+        "en": "Fire permit fees follow Information Bulletin 506. A monitored fire alarm also needs a separate San Diego Fire-Rescue alarm permit, $19 for 24 months.",
+        "zh": "消防许可费按信息公告 506 收取。有监控的火警系统还需另向圣地亚哥消防救援局申请火警许可，24 个月 19 美元。"
+      },
+      "failNext": {
+        "en": "Correct and re-request. San Diego Fire-Rescue's new-construction reinspection fee is $327 (two-hour minimum).",
+        "zh": "整改后重新预约。圣地亚哥消防救援局新建工程复检费为 327 美元（最少按两小时计）。"
+      },
+      "checklist": [
+        { "id": "hood-permit", "item": { "en": "The kitchen hood fire suppression system was installed under a DSD fire permit and passed its inspection.", "zh": "厨房排烟罩灭火系统已凭开发服务局消防许可安装并通过检查。" } },
+        { "id": "sprinkler-final", "item": { "en": "Any sprinklers added or moved have passed a Fire Sprinkler Final, however few heads changed.", "zh": "凡增加或移动了喷淋头，无论数量多少，都已通过喷淋终验。" }, "why": { "en": "Information Bulletin 139", "zh": "信息公告 139" } },
+        { "id": "alarm-permit", "item": { "en": "Fire alarm work is permitted and inspected, and the monitored alarm has its Fire-Rescue alarm permit.", "zh": "火警系统改动已获许可并通过检查，有监控的火警系统已办理消防救援局火警许可。" } },
+        { "id": "address", "item": { "en": "Address numbers are visible from the street.", "zh": "门牌号从街上清晰可见。" }, "why": { "en": "CFC 505.1", "zh": "加州消防法规 505.1" } },
+        { "id": "extinguisher", "item": { "en": "A 2A:10BC extinguisher is within 75 feet of travel, mounted with its top no more than 5 feet above the floor, with a current State Fire Marshal tag.", "zh": "75 英尺行走距离内配有 2A:10BC 灭火器，顶部离地不超过 5 英尺，挂有有效的州消防局年检标签。" }, "why": { "en": "CFC 906", "zh": "加州消防法规 906" } },
+        { "id": "exit-signs", "item": { "en": "Exit signs are illuminated, visible from any direction of travel, and have backup power.", "zh": "出口标志有照明、从各疏散方向都看得见，并配有备用电源。" }, "why": { "en": "CFC 1013", "zh": "加州消防法规 1013" } },
+        { "id": "exit-doors", "item": { "en": "Exit doors open without a key or special knowledge, unlatch in one motion, and have no surface or flush bolts.", "zh": "出口门无需钥匙或特殊操作即可打开，一个动作即可开锁，且无明插销或暗插销。" }, "why": { "en": "CFC 1010.1.9", "zh": "加州消防法规 1010.1.9" } },
+        { "id": "knox", "item": { "en": "A Knox box is installed where access to the building is restricted.", "zh": "如建筑出入受限，已安装消防钥匙箱（Knox Box）。" }, "why": { "en": "CFC 506.1", "zh": "加州消防法规 506.1" } }
+      ],
+      "source": "https://www.sandiego.gov/development-services/permits/fire-permit",
+      "sources": [
+        "https://www.sandiego.gov/sites/default/files/dsdib139.pdf",
+        "https://www.sandiego.gov/fire/permits-fees",
+        "https://www.sandiego.gov/sites/default/files/bfmschecklist20171031.pdf",
+        "https://www.sandiego.gov/sites/default/files/crrfeeschedule.pdf"
+      ]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Food Facility Plan Check final inspection", "zh": "食品设施图纸审查终验" },
+      "agency": { "en": "County of San Diego Department of Environmental Health and Quality (DEHQ), Food Plan Check", "zh": "圣地亚哥县环境卫生与质量局（DEHQ）食品图纸审查组" },
+      "when": {
+        "en": "At 100% construction, after a required mid-construction inspection at 50–80% and after the city's final or temporary Certificate of Occupancy and fire approval. Apply for the health permit before scheduling it. Once it passes, the facility may operate.",
+        "zh": "施工 100% 完成时进行；此前须在 50%–80% 时通过一次施工中期检查，并已取得市政府的正式或临时入住许可证及消防批准。预约前先申请卫生许可证。终验通过后即可营业。"
+      },
+      "book": {
+        "en": "Call the plan checker named on your plan approval letter, or the Plan Check scheduling line at (858) 505-6660, to check the current lead time and book.",
+        "zh": "致电图纸批准函上注明的审图员，或拨打图纸审查预约专线 (858) 505-6660，了解当前排期并预约。"
+      },
+      "phone": "(858) 505-6660",
+      "lead": {
+        "en": "Lead times vary; call early and book against the current lead time so your opening date doesn't slip.",
+        "zh": "排期不固定，请尽早致电，按当前排期预约，以免耽误开业日期。"
+      },
+      "fee": null,
+      "feeNote": {
+        "en": "The plan check fee covers review and inspections and is set by size: $1,534 (0–1,999 sq ft), $1,931 (2,000–5,999), $3,153 (6,000–9,999), $3,407 (10,000+). An expedited inspection is $588 (two-hour minimum). The annual health permit is separate (for example, $842 for a restaurant with 1–10 employees). Fee schedule effective July 10, 2026.",
+        "zh": "图纸审查费含审图和检查，按面积收取：1,534 美元（0–1,999 平方英尺）、1,931 美元（2,000–5,999）、3,153 美元（6,000–9,999）、3,407 美元（10,000 以上）。加急检查 588 美元（最少按两小时计）。年度卫生许可证另计（例如 1–10 名员工的餐厅为 842 美元）。收费标准自 2026 年 7 月 10 日起生效。"
+      },
+      "failNext": {
+        "en": "Anything on the checklist that isn't done can block final approval or force you to reschedule the final inspection.",
+        "zh": "清单上任何一项未完成，都可能导致终验不予通过或需要重新预约。"
+      },
+      "checklist": [
+        { "id": "built-to-plan", "item": { "en": "All construction matches the DEHQ-approved plans.", "zh": "所有施工与环境卫生与质量局批准的图纸一致。" } },
+        { "id": "co-fire", "item": { "en": "You have a final or temporary Certificate of Occupancy from the building authority and fire department approval, if required.", "zh": "已取得建筑主管部门的正式或临时入住许可证，以及（如需要）消防部门的批准。" } },
+        { "id": "stamped-plans", "item": { "en": "A set of DEHQ-stamped approved plans is on site.", "zh": "现场备有一套盖有环境卫生与质量局印章的批准图纸。" } },
+        { "id": "equipment-runs", "item": { "en": "All approved equipment is in place, switches on and works properly.", "zh": "所有批准的设备均已就位，能开机并正常运转。" } },
+        { "id": "cold-holding", "item": { "en": "Refrigerators hold 41°F or below with a working thermometer; freezers are at freezing temperatures.", "zh": "冷藏设备温度在 41°F 或以下且配有有效温度计；冷冻设备保持冷冻温度。" } },
+        { "id": "hot-water", "item": { "en": "120°F hot water at every sink, and 100°F–108°F warm water at every hand sink.", "zh": "所有水槽有 120°F 热水，所有洗手池有 100°F–108°F 温水。" } },
+        { "id": "handsinks-stocked", "item": { "en": "Every hand sink has soap and paper towels in dispensers.", "zh": "每个洗手池都配有分配器装的洗手液和擦手纸。" } },
+        { "id": "warewash-stocked", "item": { "en": "The warewashing sink has detergent, sanitizer and a way to test sanitizer strength.", "zh": "洗碗槽备有洗涤剂、消毒剂和消毒液浓度测试工具。" } },
+        { "id": "backflow", "item": { "en": "Backflow devices are installed between the water supply and equipment, with certifications for testable devices.", "zh": "供水与设备之间已安装防回流装置，可测试型装置备有合格证明。" } },
+        { "id": "pic-cert", "item": { "en": "The person in charge holds a valid Food Safety Certification.", "zh": "现场负责人持有有效的食品安全认证。" } },
+        { "id": "food-handlers", "item": { "en": "Every employee has a San Diego County Food Handler card, or passed an in-house test within 10 days of hire.", "zh": "所有员工持有圣地亚哥县食品从业人员卡，或在入职 10 天内通过了店内考核。" } },
+        { "id": "clean", "item": { "en": "The facility is clean and free of vermin.", "zh": "店内整洁，无虫鼠。" } }
+      ],
+      "source": "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/foodfacilitychecklist_pc.pdf",
+      "sources": [
+        "https://www.sandiegocounty.gov/content/sdc/deh/fhd/food/foodplancheck.html",
+        "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/foodflowchart_pc.pdf",
+        "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_feeschedule.pdf"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food inspection and A/B/C grade card", "zh": "例行食品检查与 A/B/C 等级卡" },
+      "agency": { "en": "County of San Diego Department of Environmental Health and Quality (DEHQ), Food and Housing Division", "zh": "圣地亚哥县环境卫生与质量局（DEHQ）食品与住房处" },
+      "when": {
+        "en": "Unannounced, after you open, at a frequency set by the facility's risk. Kept up for as long as you operate.",
+        "zh": "开业后不定期突击检查，频率按店铺风险等级确定，营业期间持续进行。"
+      },
+      "book": {
+        "en": "You don't book routine inspections. After a B or C you can pay the unscheduled inspection fee and request a re-grade inspection.",
+        "zh": "例行检查无需预约。拿到 B 或 C 后，可缴纳非例行检查费并申请重新评级检查。"
+      },
+      "fee": null,
+      "feeNote": {
+        "en": "There is no charge per routine visit; it is covered by the annual health permit, which is set by facility type and staff size (for example $842 for a restaurant with 1–10 employees, $587 for a low-risk facility, $255 for a prepackaged retail market).",
+        "zh": "例行检查不单独收费，含在年度卫生许可证费中；许可证费按店铺类型和员工人数确定（例如 1–10 名员工的餐厅 842 美元，低风险设施 587 美元，预包装零售店 255 美元）。"
+      },
+      "scoring": {
+        "en": "Points are subtracted from 100: 4 for a major risk factor, 2 for a minor one, 1 for a good retail practice. A is 90–100, B is 80–89, and C is 79 or below, a failing grade. The grade card must be posted near the public entrance during all hours of operation.",
+        "zh": "从 100 分中扣分：重大风险因素扣 4 分，次要风险因素扣 2 分，良好零售规范扣 1 分。90–100 分为 A，80–89 分为 B，79 分及以下为 C（不合格）。营业期间等级卡必须张贴在顾客入口附近。"
+      },
+      "failNext": {
+        "en": "A B or C comes with an Official Notice of Violation and correction deadlines, and you must earn an A within 30 days or face further enforcement. A re-grade needs the unscheduled inspection fee paid first (billed at the $197 hourly rate). An imminent hazard such as a sewage backup, no hot water, vermin or a long power outage closes the facility until DEHQ authorizes reopening in writing.",
+        "zh": "得到 B 或 C 会同时收到正式违规通知及整改期限，须在 30 天内重新拿到 A，否则将面临进一步执法。申请重新评级须先缴纳非例行检查费（按每小时 197 美元计）。若出现污水倒灌、无热水、虫鼠或长时间停电等紧急危害，店铺将被勒令停业，须经环境卫生与质量局书面批准方可重新营业。"
+      },
+      "checklist": [
+        { "id": "approved-source", "item": { "en": "Food comes from approved, licensed sources and is free of contamination and spoilage.", "zh": "食品来自经批准的持证来源，无污染、无变质。" } },
+        { "id": "temps", "item": { "en": "Potentially hazardous foods are held below 41°F or above 135°F.", "zh": "潜在危害食品保存在 41°F 以下或 135°F 以上。" } },
+        { "id": "thermometers", "item": { "en": "Each refrigerator has a thermometer accurate to ±2°F, and a metal probe thermometer is on hand and used.", "zh": "每台冷藏设备配有精度 ±2°F 的温度计，并备有金属探针温度计且实际使用。" } },
+        { "id": "thawing", "item": { "en": "Food is thawed only in the refrigerator, under cold running water, in the microwave, or as part of cooking.", "zh": "食品只在冷藏柜内、流动冷水下、微波炉中或烹饪过程中解冻。" } },
+        { "id": "storage", "item": { "en": "Food is stored at least 6 inches off the floor, covered, labeled, and with raw kept apart from cooked.", "zh": "食品离地至少 6 英寸存放，加盖并贴标签，生熟分开。" } },
+        { "id": "handlers", "item": { "en": "Everyone handling unpackaged food or utensils has a Food Handler card, with records on hand.", "zh": "所有接触散装食品或餐具的员工持有食品从业人员卡，记录随时可查。" } },
+        { "id": "handwash", "item": { "en": "Staff wash hands with soap and warm water for at least 20 seconds before work, after the restroom and between tasks.", "zh": "员工上班前、如厕后及换工序时用洗手液和温水洗手至少 20 秒。" } },
+        { "id": "sick-staff", "item": { "en": "No one with open sores or illness handles food; hair is restrained and outer garments are clean.", "zh": "有伤口或生病的员工不接触食品；员工束好头发，外衣干净。" } },
+        { "id": "warewash", "item": { "en": "Utensils are washed, rinsed and sanitized in a three-compartment sink or an approved dish machine, with test strips on hand.", "zh": "餐具在三格水槽或认证洗碗机中洗涤、冲洗、消毒，并备有测试试纸。" } },
+        { "id": "handsinks", "item": { "en": "Hand sinks work, have soap and towel dispensers filled, and have handwashing signs posted.", "zh": "洗手池可正常使用，洗手液和擦手纸分配器装满，并张贴洗手标识。" } },
+        { "id": "plumbing", "item": { "en": "All sinks have hot and cold water under pressure and drain properly; backflow devices are in good repair.", "zh": "所有水槽有压力冷热水且排水通畅；防回流装置完好。" } },
+        { "id": "pests", "item": { "en": "No insects or rodents; outside doors are self-closing and air curtains work.", "zh": "无虫鼠；外门能自动关闭，风幕机运转正常。" } },
+        { "id": "chemicals", "item": { "en": "Cleaning chemicals are labeled and stored away from food.", "zh": "清洁化学品贴有标签，与食品分开存放。" } },
+        { "id": "postings", "item": { "en": "The health permit and grade card are posted, along with no-smoking and choking first-aid signs.", "zh": "卫生许可证和等级卡已张贴，并张贴禁烟及噎食急救标识。" } }
+      ],
+      "source": "https://www.sandiegocounty.gov/content/sdc/deh/fhd/ffis/intro.html",
+      "sources": [
+        "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_opguide.pdf",
+        "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_feeschedule.pdf"
+      ]
+    },
+    {
+      "id": "fire-routine",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "Fire and life safety inspection", "zh": "消防与生命安全检查" },
+      "agency": { "en": "San Diego Fire-Rescue Department, Community Risk Reduction Division", "zh": "圣地亚哥消防救援局 社区风险降低处" },
+      "when": {
+        "en": "After you open. Places where more than 49 people gather (most sit-down restaurants of that size) are inspected every year; other businesses are inspected on Fire-Rescue's schedule or after a complaint.",
+        "zh": "开业之后。可容纳 49 人以上的场所（多数这一规模的堂食餐厅）每年检查一次；其他商户按消防救援局安排或在接到投诉后检查。"
+      },
+      "book": {
+        "en": "Fire-Rescue schedules it; you don't book it. For questions, call the regional advisor at 619-533-4388.",
+        "zh": "由消防救援局安排，无需预约。如有疑问，请拨打区域顾问电话 619-533-4388。"
+      },
+      "phone": "619-533-4388",
+      "fee": null,
+      "feeNote": {
+        "en": "Billed by floor area (FY2026 schedule): $299 up to 5,000 sq ft, $374 for 5,001–10,000, $448 for 10,001–12,000, $598 for 12,001–50,000. The invoice comes by mail after the inspection.",
+        "zh": "按面积收费（2026 财年标准）：5,000 平方英尺以内 299 美元，5,001–10,000 为 374 美元，10,001–12,000 为 448 美元，12,001–50,000 为 598 美元。检查后账单会邮寄给您。"
+      },
+      "failNext": {
+        "en": "Correct by the reinspection. Non-compliance penalties start at the third visit: $300, then $600 at the fourth, and $1,200 at the fifth and later visits.",
+        "zh": "须在复检前整改完毕。从第三次上门起收取违规罚款：第三次 300 美元，第四次 600 美元，第五次及以后每次 1,200 美元。"
+      },
+      "checklist": [
+        { "id": "exits-clear", "item": { "en": "Exit paths are free of obstructions and storage; exit doors open without a key.", "zh": "疏散通道无障碍、无堆放物品；出口门无需钥匙即可打开。" }, "why": { "en": "CFC 1003.6, 1010.1.9", "zh": "加州消防法规 1003.6、1010.1.9" } },
+        { "id": "exit-lights", "item": { "en": "Exit signs and emergency lighting work and have backup power.", "zh": "出口标志和应急照明工作正常，并有备用电源。" }, "why": { "en": "CFC 1008.2, 1013", "zh": "加州消防法规 1008.2、1013" } },
+        { "id": "extinguishers", "item": { "en": "Extinguishers (minimum 2A:10BC) are mounted, within 75 feet of travel, and carry a current annual State Fire Marshal tag.", "zh": "灭火器（至少 2A:10BC）已挂墙安装，行走距离不超过 75 英尺，并有当年州消防局年检标签。" }, "why": { "en": "CFC 906", "zh": "加州消防法规 906" } },
+        { "id": "storage-clearance", "item": { "en": "Storage stays at least 18 inches below sprinkler heads (2 feet below the ceiling if unsprinklered) and out of electrical and mechanical rooms.", "zh": "堆放物品距喷淋头至少 18 英寸（无喷淋时距天花板至少 2 英尺），且不放在配电间和机房内。" }, "why": { "en": "CFC 315.3", "zh": "加州消防法规 315.3" } },
+        { "id": "cords", "item": { "en": "Extension cords are not used in place of permanent wiring or run through walls or ceilings.", "zh": "不用延长线代替固定布线，也不穿墙或穿天花板。" }, "why": { "en": "CFC 605.5", "zh": "加州消防法规 605.5" } },
+        { "id": "panel-clearance", "item": { "en": "There is a clear space 36 inches deep and 78 inches high in front of electrical panels, and breakers are labeled.", "zh": "配电盘前留有 36 英寸深、78 英寸高的净空，断路器均有标识。" }, "why": { "en": "CFC 605.3", "zh": "加州消防法规 605.3" } },
+        { "id": "sprinkler-heads", "item": { "en": "Sprinkler heads aren't painted, corroded or obstructed, and the riser carries a current 5-year certification tag.", "zh": "喷淋头未被涂漆、未锈蚀、无遮挡，立管挂有有效的五年检测标签。" }, "why": { "en": "CFC 901.6", "zh": "加州消防法规 901.6" } },
+        { "id": "alarm-panel", "item": { "en": "The fire alarm panel shows normal (green) and its inspection, testing and maintenance records are kept on site.", "zh": "火警控制面板显示正常（绿灯），检查、测试和维护记录存放在现场。" }, "why": { "en": "CFC 901.6", "zh": "加州消防法规 901.6" } },
+        { "id": "dumpsters", "item": { "en": "Dumpsters over 1.5 cubic yards sit at least 5 feet from combustible walls, openings and eaves.", "zh": "容量超过 1.5 立方码的垃圾箱距可燃墙面、门窗洞口和屋檐至少 5 英尺。" }, "why": { "en": "CFC 304.3.3", "zh": "加州消防法规 304.3.3" } },
+        { "id": "address-knox", "item": { "en": "Address numbers are visible from the street, and the Knox box keys are current.", "zh": "门牌号从街上可见，消防钥匙箱内的钥匙为最新。" }, "why": { "en": "CFC 505.1, 506.2", "zh": "加州消防法规 505.1、506.2" } }
+      ],
+      "source": "https://www.sandiego.gov/fire/community-risk-reduction/inspection-services",
+      "sources": [
+        "https://www.sandiego.gov/sites/default/files/bfmschecklist20171031.pdf",
+        "https://www.sandiego.gov/sites/default/files/crrfeeschedule.pdf"
+      ]
+    }
+  ]
+}

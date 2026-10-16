@@ -1,0 +1,110 @@
+{
+  "form": "ny-dol-100",
+  "read": "2026-10-15",
+  "fields": {
+    "mailing_address": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Part D line 1: the business's own mailing address, where withholding-tax and UI mail goes. Street or P.O. box; the form has a country box. Not the agent's or tax preparer's address.",
+        "zh": "D部分第1行：企业自己的邮寄地址，预扣税和失业保险信件寄往此处。可用街道地址或邮政信箱；表格设有国家栏。不得填代理人或报税代理的地址。"
+      },
+      "ifNone": {
+        "en": "Use the New York location or the head office abroad. To send UI mail to an accountant instead, fill line 4 (agent address).",
+        "zh": "填写纽约门店或境外总部地址。若想让失业保险信件寄给会计师，请另填第4行（代理人地址）。"
+      },
+      "confirmations": [
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "form", "quote": "Street or PO box: State: City: Zip code: Country: County:" },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "instructions", "quote": "Do not enter your agent’s or paid preparer’s address" },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100N.pdf", "kind": "form", "quote": "Mailing Address: This is your business mailing address where your Withholding Tax (WT) and Unemployment Insurance (UI) mail will be delivered." },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100G.pdf", "kind": "form", "quote": "11a. Mailing Address: This is your business mailing address where your Withholding Tax (WT) and Unemployment Insurance (UI) mail will be delivered." }
+      ]
+    },
+    "physical_address": {
+      "rule": "foreign_ok",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Part D line 2: the actual physical location of the business (the primary one if there are several), if different from the mailing address. No P.O. box. The form has a country box.",
+        "zh": "D部分第2行：企业的实际所在地（有多处时填主要地点），与邮寄地址不同时填写。不得用邮政信箱。表格设有国家栏。"
+      },
+      "ifNone": {
+        "en": "Use the New York store's street address once it has one; until then, the street address of the head office abroad.",
+        "zh": "纽约门店确定后填其街道地址；在此之前，填境外总部的街道地址。"
+      },
+      "confirmations": [
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "instructions", "quote": "Line 2 - Physical Address: This is the ACTUAL physical location of your business. Do not list a PO box." },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "form", "quote": "Street: City: State: Zip code: Country: County:" },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100N.pdf", "kind": "form", "quote": "Physical Address: This is the physical location of your business, if different from the mailing address in 9a." },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100G.pdf", "kind": "form", "quote": "11b. Physical Address: This is the physical location of your business, if different from the mailing address in 11a." }
+      ]
+    },
+    "records_location": {
+      "rule": "foreign_ok",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Part D line 3: the physical place where the books and records are kept and can be reviewed, with a contact name and phone. It may be the mailing or physical address; the form has a country box.",
+        "zh": "D部分第3行：账簿和记录实际存放、可供查阅的地点，并附联系人姓名和电话。可与邮寄地址或实际地址相同；表格设有国家栏。"
+      },
+      "ifNone": {
+        "en": "Use wherever the payroll records actually are: the New York store, the accountant's office or the head office abroad.",
+        "zh": "填写工资记录实际存放的地点：纽约门店、会计师事务所或境外总部均可。"
+      },
+      "confirmations": [
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "instructions", "quote": "Line 3 - Location of Books/Records Address: This is the physical location where your books and records can be reviewed." },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "form", "quote": "C/O (if applicable): Street: State: City: Country: County:" },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100N.pdf", "kind": "form", "quote": "Location of Books/Records: This is the physical location where your Books and Records are maintained." },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100G.pdf", "kind": "form", "quote": "11c. Location of Books/Records: This is the physical location where your Books and Records are maintained." }
+      ]
+    },
+    "agent_address": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Part D line 4 (optional): the agent's (c/o) address, only if all UI mail should go there. Street or P.O. box; the form has a country box.",
+        "zh": "D部分第4行（选填）：代理人（转交）地址，仅在希望所有失业保险信件寄到该处时填写。可用街道地址或邮政信箱；表格设有国家栏。"
+      },
+      "ifNone": {
+        "en": "Leave it blank if there is no agent; UI mail then goes to the mailing address.",
+        "zh": "没有代理人就留空，失业保险信件会寄到邮寄地址。"
+      },
+      "confirmations": [
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "form", "quote": "C/O: Street or PO box: City: State: Country: County:" },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100N.pdf", "kind": "form", "quote": "Agent Address (C/O): Complete this if your UI mail should be sent to an address other than your business address." },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100G.pdf", "kind": "form", "quote": "11d. Agent Address (C/O): Complete this if your UI mail should be sent to an address other than your business address." }
+      ]
+    },
+    "owners": {
+      "rule": "unconfirmed",
+      "poBox": "unknown",
+      "what": {
+        "en": "Part E line 1: each owner, partner, member or officer's name, title, home address and phone, whether or not they work in New York. Only two official sources describe it and neither says whether a home address abroad is accepted.",
+        "zh": "E部分第1行：每位业主、合伙人、成员或高管的姓名、职务、住址和电话，无论其是否在纽约工作。仅有两份官方资料提到此项，均未说明是否接受境外住址。"
+      },
+      "ifNone": {
+        "en": "Enter each person's real home address; for someone who lives abroad, Placetta asks NY DOL before filing.",
+        "zh": "填写每个人真实的住址；对居住在境外的人，Placetta 会在提交前先向纽约州劳工部确认。"
+      },
+      "confirmations": [
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "instructions", "quote": "Enter the name, Social Security Number, title, home address and phone number for each of the following legal entities" },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100N.pdf", "kind": "form", "quote": "List the names, Social Security Account numbers, titles and home addresses of officers." }
+      ]
+    },
+    "location_address": {
+      "rule": "unconfirmed",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Part F line 2a: the street address of each location where the company operates in New York State, with county and ZIP (likely the store itself). Only two official sources were found.",
+        "zh": "F部分第2a行：公司在纽约州经营的每个地点的街道地址，含县和邮编（通常就是门店本身）。目前只找到两份官方资料。"
+      },
+      "ifNone": {
+        "en": "Use the New York store's street address from the lease.",
+        "zh": "填写租约上纽约门店的街道地址。"
+      },
+      "confirmations": [
+        { "url": "https://forms.labor.ny.gov/UI/NYS100.pdf", "kind": "form", "quote": "Enter the number of physical locations at which your company operates in New York State:" },
+        { "url": "https://forms.labor.ny.gov/UI/NYS100N.pdf", "kind": "form", "quote": "For each of your programs and locations in New York State, answer 12a and 12b below." }
+      ]
+    }
+  },
+  "notes": "Read the current NYS 100 (03/26), NYS 100N (12/25) and NYS 100G (12/25) from forms.labor.ny.gov; the repo's map is built on NYS 100 (09/18), so check the newer layout. dol.ny.gov and nysenate.gov block automated reads, so no DOL web page or Labor Law text is cited. Only NYS 100 prints country boxes; 100N and 100G set no location limit. For records, 12 NYCRR 472.2(c) reportedly lets records be kept outside New York if produced in the state on request, but only an unofficial copy was reachable, so it is not cited. 'locations' is the count of locations, not an address, and the 'acquired' answer's prior-owner address is not covered."
+}

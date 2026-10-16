@@ -1,0 +1,75 @@
+{
+  "form": "tx-205",
+  "read": "2026-10-15",
+  "fields": {
+    "agent_address": {
+      "rule": "in_state_street",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Article 2C: the registered office, a Texas street address where the registered agent can be served in person during business hours. Not a P.O. box, mailbox service or answering service. It need not be the LLC's place of business.",
+        "zh": "第2条C项：注册办事处，须为德州街道地址，营业时间内可当面向注册代理人送达法律文书。不得为邮政信箱、信箱代收服务或电话应答服务。不必是 LLC 的营业地点。"
+      },
+      "ifNone": {
+        "en": "Hire a Texas registered agent (a Texas resident or a company authorized in Texas, never the LLC itself) and use its office address.",
+        "zh": "聘请德州注册代理人（德州居民个人或获准在德州经营的公司，不能是本 LLC 自己），填写其办公地址。"
+      },
+      "confirmations": [
+        { "url": "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", "kind": "form", "quote": "C. The business address of the registered agent and the registered office address is:" },
+        { "url": "https://www.sos.state.tx.us/corp/instructions/205.shtml", "kind": "instructions", "quote": "The registered office address must be located at a street address where service of process may be personally served on the entity’s registered agent" },
+        { "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.5.htm", "kind": "statute", "quote": "Each filing entity and each foreign filing entity shall designate and continuously maintain in this state:" },
+        { "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.5.htm", "kind": "statute", "quote": "may not be solely a mailbox service or a telephone answering service." }
+      ]
+    },
+    "governing_persons": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Article 3: the name and address of each initial manager or member. Any street or mailing address works, including one outside the US (the form has a country box). The filing is public.",
+        "zh": "第3条：每位初始经理或成员的姓名和地址。街道或邮寄地址均可，包括美国境外地址（表格设有国家栏）。该文件会公开。"
+      },
+      "ifNone": {
+        "en": "Use each person's own business or home address, wherever it is; a business address keeps a home address off the public record.",
+        "zh": "填写每个人自己的办公或住宅地址，不限所在地；用办公地址可避免住址被公开。"
+      },
+      "confirmations": [
+        { "url": "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", "kind": "form", "quote": "Street or Mailing Address City State Country Zip Code" },
+        { "url": "https://www.sos.state.tx.us/corp/instructions/205.shtml", "kind": "instructions", "quote": "An address is always required for each governing person." },
+        { "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.3.htm", "kind": "statute", "quote": "if the limited liability company initially has managers, the name and address of each initial manager of the limited liability company" }
+      ]
+    },
+    "mailing": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Initial mailing address: where the Comptroller sends franchise-tax mail. A street address or a P.O. box; the form has a country box, so an address abroad can be given.",
+        "zh": "初始邮寄地址：州审计长寄送特许经营税信件的地址。可用街道地址或邮政信箱；表格设有国家栏，可填境外地址。"
+      },
+      "ifNone": {
+        "en": "Use any address where the company reliably gets mail: a US P.O. box or the office abroad.",
+        "zh": "填写公司能稳定收信的任何地址：美国邮政信箱或境外办公地址均可。"
+      },
+      "confirmations": [
+        { "url": "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", "kind": "form", "quote": "(Provide the mailing address to which state franchise tax correspondence should be sent.)" },
+        { "url": "https://www.sos.state.tx.us/corp/instructions/205.shtml", "kind": "instructions", "quote": "The initial mailing address may be a post office box or street address." },
+        { "url": "https://tcss.legis.texas.gov/resources/BO/htm/BO.3.htm", "kind": "statute", "quote": "(6) the initial mailing address of the filing entity;" }
+      ]
+    },
+    "organizer": {
+      "rule": "unconfirmed",
+      "poBox": "allowed",
+      "what": {
+        "en": "Organizer: the name and address of the person forming the LLC. There is no residency requirement, but the organizer's address has only street-or-mailing, city, state and ZIP boxes and no country box, and no source says whether a foreign address is accepted.",
+        "zh": "组建人：成立 LLC 者的姓名和地址。没有居住地要求，但组建人地址栏只有“街道或邮寄地址、城市、州、邮编”，没有国家栏，也没有资料说明是否接受境外地址。"
+      },
+      "ifNone": {
+        "en": "Use the organizer's own US business address if there is one; if the organizer only has an address abroad, Placetta asks the Texas Secretary of State before writing it.",
+        "zh": "若组建人有美国办公地址就用它；若只有境外地址，Placetta 会先向德州州务卿办公室确认再填写。"
+      },
+      "confirmations": [
+        { "url": "https://www.sos.state.tx.us/corp/instructions/205.shtml", "kind": "instructions", "quote": "There are no residency requirements for an organizer." },
+        { "url": "https://www.sos.state.tx.us/corp/forms/205_boc.pdf", "kind": "form", "quote": "The name and address of the organizer:" }
+      ]
+    }
+  },
+  "notes": "Form 205 (Revised 09/26), the Secretary of State's Form 205 instructions page, and Tex. Bus. Orgs. Code 5.201, 3.005(a)(6) and 3.010. Statutes were read from the Legislature's file server (tcss.legis.texas.gov), which serves the statutes.capitol.texas.gov pages. The governing-person and initial-mailing blocks have country boxes in the PDF (fields 'country', 'Country of Initial Mailing Address'); the map fills street, city, state and ZIP only, so a foreign address needs the country box filled too. The organizer block has no country box, hence unconfirmed."
+}

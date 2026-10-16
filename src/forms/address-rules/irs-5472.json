@@ -1,0 +1,60 @@
+{
+  "form": "irs-5472",
+  "read": "2026-10-15",
+  "fields": {
+    "name": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Line 1a: the reporting corporation's own address, including the suite or unit. A P.O. box only if the post office doesn't deliver to the street address. A foreign address is accepted (city, province or state, country, postal code). Don't use the registered agent's address.",
+        "zh": "第1a行：申报公司自己的地址，含套房或单元号。只有邮局不投递到街道地址时才可用邮政信箱。可填境外地址（城市、省或州、国家、邮编）。不要填注册代理人的地址。"
+      },
+      "ifNone": {
+        "en": "A foreign-owned US LLC with no US office uses the address where it actually receives mail, which can be the owner's office abroad, never the registered agent's address. Use the same address as on the pro forma Form 1120.",
+        "zh": "没有美国办公地点的外资美国 LLC，填写实际收信的地址，可以是境外股东的办公地址，但不能是注册代理人地址。须与附随的 1120 表（形式申报）上的地址一致。"
+      },
+      "confirmations": [
+        { "url": "https://www.irs.gov/pub/irs-pdf/f5472.pdf", "kind": "form", "quote": "City or town, state, and ZIP code (If a foreign address, see instructions.)" },
+        { "url": "https://www.irs.gov/pub/irs-pdf/i5472.pdf", "kind": "instructions", "quote": "Foreign address. Enter the information in the following order: city, province or state, and country." },
+        { "url": "https://www.irs.gov/pub/irs-pdf/i1120.pdf", "kind": "instructions", "quote": "If the corporation has a foreign address, include the city or town, state or province, country, and foreign postal code." },
+        { "url": "https://www.irs.gov/pub/irs-pdf/i1120.pdf", "kind": "instructions", "quote": "Do not use the address of the registered agent for the state in which the corporation is incorporated." },
+        { "url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-01/title-26.xml?part=1&section=1.6038A-2", "kind": "regulation", "quote": "Its name, address (including mailing code), and U.S. taxpayer identification number" }
+      ]
+    },
+    "shareholder": {
+      "rule": "foreign_ok",
+      "poBox": "unknown",
+      "what": {
+        "en": "Line 4a: name and address of the direct 25% foreign shareholder; for a foreign-owned US LLC, the foreign owner. Their own address abroad is expected.",
+        "zh": "第4a行：直接持股25%及以上的外国股东的名称和地址；外资美国 LLC 填其境外股东本人。应填写其在境外的实际地址。"
+      },
+      "ifNone": {
+        "en": "Use the owner's own home or office address in the country where they live or are based.",
+        "zh": "填写股东在其居住国或所在国的住址或办公地址。"
+      },
+      "confirmations": [
+        { "url": "https://www.irs.gov/pub/irs-pdf/f5472.pdf", "kind": "form", "quote": "4a Name and address of direct 25% foreign shareholder" },
+        { "url": "https://www.irs.gov/pub/irs-pdf/i5472.pdf", "kind": "instructions", "quote": "For a foreign-owned U.S. DE, report the information for the foreign owner on the lines provided for the 25% foreign shareholder." },
+        { "url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-01/title-26.xml?part=1&section=1.6038A-2", "kind": "regulation", "quote": "The name, address, and U.S. taxpayer identification number, if applicable, of all its direct and indirect foreign shareholders" }
+      ]
+    },
+    "related": {
+      "rule": "foreign_ok",
+      "poBox": "unknown",
+      "what": {
+        "en": "Line 8a: name and address of the related party the company dealt with (often the foreign owner or parent). It may be domestic or foreign, so a foreign address is fine.",
+        "zh": "第8a行：与公司发生交易的关联方（通常是境外股东或母公司）的名称和地址。关联方可在美国境内或境外，境外地址可以。"
+      },
+      "ifNone": {
+        "en": "Use the related party's own address where it is based.",
+        "zh": "填写关联方所在地的实际地址。"
+      },
+      "confirmations": [
+        { "url": "https://www.irs.gov/pub/irs-pdf/f5472.pdf", "kind": "form", "quote": "Check applicable box: Is the related party a foreign person or U.S. person?" },
+        { "url": "https://www.irs.gov/pub/irs-pdf/i5472.pdf", "kind": "instructions", "quote": "Report in Part III information about the related party (domestic or foreign) with which the reporting corporation had reportable transactions during the tax year." },
+        { "url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-01/title-26.xml?part=1&section=1.6038A-2", "kind": "regulation", "quote": "about each related party, whether foreign or domestic" }
+      ]
+    }
+  },
+  "notes": "Form 5472 (Rev. December 2023), its instructions (Rev. 12-2024), the Form 1120 instructions (the pro forma 1120 a foreign-owned US LLC files with Form 5472) and 26 CFR 1.6038A-2(b). The map's 'name' answer carries line 1a's name and address together. The eCFR web page blocks automated reads, so the regulation was read through eCFR's official versioner API."
+}

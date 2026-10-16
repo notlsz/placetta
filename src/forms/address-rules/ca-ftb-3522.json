@@ -1,0 +1,25 @@
+{
+  "form": "ca-ftb-3522",
+  "read": "2026-10-15",
+  "fields": {
+    "address": {
+      "rule": "unconfirmed",
+      "poBox": "allowed",
+      "what": {
+        "en": "The LLC's address, with suite, room, P.O. box or PMB number (write 'PMB' and then the number). The voucher has only city, state and ZIP boxes. FTB's Form 568 accepts a foreign address, but no source says whether or how to write one on this voucher.",
+        "zh": "LLC 的地址，可含套房、房间、邮政信箱或 PMB 编号（先写“PMB”再写号码）。该缴款单只有城市、州和邮编栏。FTB 的 568 表接受境外地址，但没有资料说明本缴款单能否、如何填写境外地址。"
+      },
+      "ifNone": {
+        "en": "Use a US mailing address if the LLC has one (a P.O. box or PMB is fine). Otherwise Placetta asks FTB before writing an address abroad, or the fee is paid online, in which case the voucher is not mailed at all.",
+        "zh": "若 LLC 有美国邮寄地址（邮政信箱或 PMB 均可）就用它；否则 Placetta 会先向 FTB 确认再填境外地址，或改为在线缴费，那样就不必邮寄这张缴款单。"
+      },
+      "confirmations": [
+        { "url": "https://www.ftb.ca.gov/forms/2026/2026-3522.pdf", "kind": "form", "quote": "Address (suite, room, PO box, or PMB no.)" },
+        { "url": "https://www.ftb.ca.gov/forms/2026/2026-3522.pdf", "kind": "instructions", "quote": "If no payment is due or paid electronically, do not mail this voucher." },
+        { "url": "https://www.ftb.ca.gov/forms/2025/2025-568-booklet.pdf", "kind": "instructions", "quote": "If the limited liability company has a foreign address, follow the country’s practice for entering the city, county, province, state, country, and postal code" },
+        { "url": "https://www.ftb.ca.gov/forms/2026/2026-3536.pdf", "kind": "instructions", "quote": "Include the PMB in the address field. Write “PMB” first, then the box number." }
+      ]
+    }
+  },
+  "notes": "2026 Form 3522 (instructions on the same PDF), the 2025 Form 568 booklet and the 2026 Form 3536 voucher. All agree a P.O. box or PMB is fine and none limits the address to California. The voucher's own boxes (city, state, ZIP, no country) point to a US address while the 568 booklet accepts a foreign one, so the location rule is left unconfirmed. Only 'address' carries the rule; city, state and zip are its parts."
+}

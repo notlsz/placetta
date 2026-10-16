@@ -43,3 +43,7 @@ for (const a of ["1 N First St, San Jose, CA 95112", "1 Market St, San Francisco
 // Manhattan's postal city is "New York, NY": it gets New York City's filings
 eq(titles("123 Broadway, New York, NY 10006").some(id => id.startsWith("nyc-")), true, "a Manhattan address gets NYC filings");
 eq(titles("1 Main St, Albany, NY 12207").some(id => id.startsWith("nyc-")), false, "an Albany address doesn't");
+// Pasadena and Long Beach have their own health departments: no LA County food permit there
+eq(titles("1 Colorado Blvd, Pasadena, CA 91101").some(id => id.startsWith("lac-")), false, "Pasadena doesn't get LA County's food permits");
+eq(titles("1 Pine Ave, Long Beach, CA 90802").some(id => id.startsWith("lac-")), false, "Long Beach doesn't either");
+eq(titles("1 Main St, Alhambra, CA 91801").some(id => id.startsWith("lac-")), true, "Alhambra does");

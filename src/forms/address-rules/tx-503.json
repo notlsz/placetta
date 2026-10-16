@@ -1,0 +1,24 @@
+{
+  "form": "tx-503",
+  "read": "2026-10-15",
+  "fields": {
+    "principal_office": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Item 6: the street or mailing address of the entity's principal office, in Texas or anywhere else, abroad included (the form has country and postal-code boxes).",
+        "zh": "第6项：实体主要办事处的街道或邮寄地址，可在德州或其他任何地方，包括境外（表格设有国家和邮编栏）。"
+      },
+      "ifNone": {
+        "en": "Give the head office address as it is, including one abroad; it should match the principal office on the company's Texas registration.",
+        "zh": "如实填写总部地址，境外亦可；应与公司在德州登记的主要办事处地址一致。"
+      },
+      "confirmations": [
+        { "url": "https://www.sos.state.tx.us/corp/forms/503_boc.pdf", "kind": "form", "quote": "6. The entity’s principal office address is: Street or Mailing Address City State Country Postal or Zip Code" },
+        { "url": "https://www.sos.state.tx.us/corp/instructions/503.shtml", "kind": "instructions", "quote": "Provide the street or mailing address of entity’s principal office." },
+        { "url": "https://tcss.legis.texas.gov/resources/BC/htm/BC.71.htm", "kind": "statute", "quote": "the street or mailing address of the registrant's principal office in this state or outside this state, as applicable" }
+      ]
+    }
+  },
+  "notes": "Form 503 (Revised 09/26), the Secretary of State's Form 503 instructions page and Tex. Bus. & Com. Code 71.102(6). Form 503 has no registered-office line."
+}

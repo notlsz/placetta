@@ -1,0 +1,214 @@
+{
+  "where": "IRV",
+  "name": { "en": "Irvine (Orange County)", "zh": "尔湾（橙县）" },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": { "en": "Building final and Certificate of Occupancy", "zh": "建筑终验与入住许可证（CO）" },
+      "agency": { "en": "City of Irvine Community Development, Building and Safety Division (Inspection Services)", "zh": "尔湾市社区发展局 建筑与安全处（检查服务科）" },
+      "when": {
+        "en": "After all work under the building permit is done and every other inspection on it has passed. A Certificate of Occupancy issues automatically when all finals pass, for new buildings and for tenant improvements that change the use.",
+        "zh": "建筑许可范围内的工程全部完工、其他各项检查都通过之后。新建建筑及改变用途的租户装修，在所有终验通过后会自动签发入住许可证。"
+      },
+      "book": {
+        "en": "Schedule in the City's Online Inspection Request System (permits.cityofirvine.org), on the automated phone line 949-724-6501, or by SelecTXT: text “S”, your permit number, the inspection code and the date (or NEXT) to 833-812-8099.",
+        "zh": "通过市政府网上检查预约系统（permits.cityofirvine.org）、自动电话预约专线 949-724-6501，或 SelecTXT 短信预约：发送“S + 许可证号 + 检查代码 + 日期（或 NEXT）”至 833-812-8099。"
+      },
+      "bookUrl": "http://permits.cityofirvine.org/",
+      "phone": "949-724-6501",
+      "lead": {
+        "en": "Request by 4:00 p.m. on the working day before the inspection you want.",
+        "zh": "须在希望检查日期的前一个工作日下午 4 点前预约。"
+      },
+      "failNext": {
+        "en": "The inspector writes a correction notice citing the code section, plan sheet or detail. Each notice stays in effect until signed off; keep all of them on site. A Temporary Certificate of Occupancy is discretionary and needs an application.",
+        "zh": "检查员会开具整改通知，注明所依据的条文、图纸页或节点。每份通知在签字销项前持续有效，须全部保存在现场。临时入住许可证属酌情批准，需另行申请。"
+      },
+      "checklist": [
+        { "id": "record-card", "item": { "en": "The Inspection Record Card (building card) is on site; only the inspector signs it.", "zh": "检查记录卡（建筑卡）放在现场，只有检查员可以签字。" } },
+        { "id": "corrections-file", "item": { "en": "Every correction notice is kept in a file on site that the inspector can reach.", "zh": "所有整改通知存放在现场检查员可随时取阅的文件夹内。" } },
+        { "id": "job-address", "item": { "en": "The job address is posted for City and emergency staff.", "zh": "现场张贴工程地址，供市政和应急人员识别。" } },
+        { "id": "ocfa-first", "item": { "en": "OCFA has inspected and approved the fire and life safety features, and the OCFA job card and approved plans are on site.", "zh": "橙县消防局（OCFA）已检查并批准消防与生命安全设施，OCFA 工作卡和批准图纸放在现场。" } },
+        { "id": "accessibility", "item": { "en": "Accessibility features are built to the approved plan dimensions; the code no longer allows minor variations outside the required ranges.", "zh": "无障碍设施按批准图纸尺寸施工；规范已不再允许超出规定范围的细小偏差。" } },
+        { "id": "planning-conditions", "item": { "en": "Planning conditions that must be met before occupancy (often reproduced on the plans) are done.", "zh": "规划批文中要求入住前完成的条件（通常也印在图纸上）均已落实。" } },
+        { "id": "binder", "item": { "en": "The permits and certifications binder is ready for the inspector to take at close-out.", "zh": "许可证与各类证明文件夹已整理好，供检查员在结项时收走。" } },
+        { "id": "co-request", "item": { "en": "After the final, the property owner on the permit asks for the Certificate of Occupancy by emailing cdac@cityofirvine.org.", "zh": "终验通过后，由许可证上登记的业主发邮件至 cdac@cityofirvine.org 申请入住许可证。" } }
+      ],
+      "source": "https://cityofirvine.gov/node/2176",
+      "sources": [
+        "https://cityofirvine.gov/node/54711",
+        "https://cityofirvine.gov/node/2096",
+        "https://cityofirvine.gov/sites/default/files/legacy-documents/civica-29694-pre-con-checklist-nonresidential-03-2020-.pdf",
+        "https://cityofirvine.gov/sites/default/files/legacy-documents/civica-18950-reqd-inspections.pdf"
+      ]
+    },
+    {
+      "id": "fire-final",
+      "kind": "fire",
+      "stage": "opening",
+      "name": { "en": "OCFA construction inspections and fire final", "zh": "OCFA 施工消防检查与消防终验" },
+      "agency": { "en": "Orange County Fire Authority (OCFA), Planning and Development Services", "zh": "橙县消防局（OCFA）规划与开发服务科" },
+      "when": {
+        "en": "During construction and before the City's building final. Every OCFA-reviewed plan (kitchen hood extinguishing, sprinklers, fire alarm, architectural) triggers its own field inspections, and all must pass before use or occupancy.",
+        "zh": "施工期间、尔湾市建筑终验之前进行。经 OCFA 审图的每一类图纸（厨房排烟罩灭火、喷淋、火警、建筑消防）都有各自的现场检查，全部通过后方可使用或入住。"
+      },
+      "book": {
+        "en": "Call OCFA Inspection Scheduling at (714) 573-6150 or email scheduling@ocfa.org with the OCFA service request number, the building or suite, and the scope. Pay any reinspection fees before you call.",
+        "zh": "致电 OCFA 检查预约室 (714) 573-6150 或发邮件至 scheduling@ocfa.org，提供 OCFA 服务申请编号、楼栋或单元号及检查范围。如有复检费，须先缴清再预约。"
+      },
+      "phone": "(714) 573-6150",
+      "lead": {
+        "en": "3 to 6 working days; inspections are scheduled by morning or afternoon. Cancel by 1 p.m. on the OCFA business day (Monday–Thursday) before, or a fee applies.",
+        "zh": "排期为 3 至 6 个工作日，按上午或下午安排。如需取消，须在前一个 OCFA 工作日（周一至周四）下午 1 点前通知，否则收费。"
+      },
+      "feeNote": {
+        "en": "Most plan review fees include a set number of inspections for a typical project (for example PR335, hood and duct extinguishing system). Extra inspections are billed hourly and can be bought ahead or as needed.",
+        "zh": "多数审图费已包含一般项目所需的固定检查次数（例如 PR335 排烟罩及风管灭火系统）。额外检查按小时计费，可预先成批购买或按需购买。"
+      },
+      "failNext": {
+        "en": "A reinspection fee may be charged and must be paid in the OCFA Public Services Portal before the next inspection can be scheduled.",
+        "zh": "可能收取复检费，须先在 OCFA 公共服务平台缴清，才能预约下一次检查。"
+      },
+      "checklist": [
+        { "id": "contractor-plans", "item": { "en": "The contractor responsible for the work is on site with a full-size hard copy of the OCFA-stamped approved plan.", "zh": "负责该项工程的承包商在场，并携带一份盖有 OCFA 印章的标准尺寸纸质批准图纸。" } },
+        { "id": "hood", "item": { "en": "The kitchen hood and duct extinguishing system is installed as approved and ready to inspect.", "zh": "厨房排烟罩及风管灭火系统已按批准方案安装，可供检查。" } },
+        { "id": "sprinkler-final", "item": { "en": "Sprinkler final: head placement and type, no obstructions to discharge, identification signs, bell, and available pressure all match the plan.", "zh": "喷淋终验：喷头位置与型号、喷洒无遮挡、标识牌、警铃和系统水压均与图纸一致。" } },
+        { "id": "alarm-devices", "item": { "en": "Fire alarm device test: devices match the plans in type, wiring method and location, and they and the panel function.", "zh": "火警设备测试：设备型号、布线方式和位置与图纸一致，设备及控制面板功能正常。" } },
+        { "id": "alarm-battery", "item": { "en": "Battery test (two visits over 24 hours) and final alarm inspection: zone descriptions, floor diagrams and operating instructions are in place.", "zh": "电池测试（24 小时内分两次进行）及火警终验：分区说明、楼层示意图和操作说明均已就位。" } },
+        { "id": "arch-final", "item": { "en": "Architectural final: egress features, fire separation walls, seating layout, building address, fire extinguishers and required signs.", "zh": "建筑消防终验：疏散设施、防火分隔墙、座位布置、建筑门牌、灭火器及必需标识。" } },
+        { "id": "fire-lane", "item": { "en": "Fire lane signs and curb markings are in place before final occupancy approval.", "zh": "消防车道标识和路缘标线在最终入住批准前完成。" } }
+      ],
+      "source": "https://ocfa.org/about-us/departments/community-risk-reduction/planning-development-services/",
+      "sources": ["https://storageocfaprod001.blob.core.windows.net/blobocfaprod01/2025/03/OCFA-Inspection-Sequence.pdf"]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": { "en": "Plan Check final construction inspection and health permit", "zh": "图纸审查施工终验与卫生许可证" },
+      "agency": { "en": "Orange County Health Care Agency, Environmental Health Division, Plan Check", "zh": "橙县卫生保健局 环境卫生处 图纸审查组" },
+      "when": {
+        "en": "A preliminary inspection at about 75–80% (plumbing, rough ventilation and equipment in), then the final at 100% including finish work. A final construction approval plus the city and fire approvals are needed to get the health permit and open.",
+        "zh": "约 75%–80% 完工时（管道、通风粗装和设备已就位）先做一次初验，100% 完工（含装饰收尾）后做终验。须取得施工终验批准及市政、消防批准，才能领取卫生许可证并开业。"
+      },
+      "book": {
+        "en": "Call the plan checker named on your approved plans. General line: plancheck@ochca.com, (714) 433-6074.",
+        "zh": "联系批准图纸上注明的审图员。总机：plancheck@ochca.com，(714) 433-6074。"
+      },
+      "phone": "(714) 433-6074",
+      "lead": {
+        "en": "Call at least two working days ahead, but plan for longer: it can take 2–3 weeks to get a preliminary or final inspection.",
+        "zh": "至少提前两个工作日预约，但请预留更多时间：初验或终验的排期可能需要 2–3 周。"
+      },
+      "fee": null,
+      "feeNote": {
+        "en": "The plan check fee is set by square footage and scope and covers review plus up to two preliminary inspections and one final; more inspections are billed hourly. The annual health permit fee is separate and set by type and size.",
+        "zh": "图纸审查费按面积和工程范围收取，含审图及最多两次初验和一次终验；超出部分按小时计费。年度卫生许可证费另计，按类型和规模确定。"
+      },
+      "failNext": {
+        "en": "Fix the items and call for another inspection; inspections beyond the two preliminaries and one final are billed at the hourly rate.",
+        "zh": "整改后再次预约检查；超过两次初验和一次终验的检查按小时收费。"
+      },
+      "checklist": [
+        { "id": "complete", "item": { "en": "Construction is 100% complete, including all finish work.", "zh": "施工 100% 完成，包括全部装饰收尾。" } },
+        { "id": "approved-plans", "item": { "en": "A copy of the Health Care Agency's approved plans is on site, in addition to the city's set.", "zh": "现场除市政批准图纸外，还备有一份卫生保健局批准的图纸。" } },
+        { "id": "permit-app", "item": { "en": "The health permit application, ownership documents and payment were submitted before the final.", "zh": "终验前已提交卫生许可证申请、产权或经营权文件并缴费。" } },
+        { "id": "job-card", "item": { "en": "City and fire approvals are in hand, and a copy of the job card goes to Plan Check to release the health permit.", "zh": "已取得市政和消防批准，并将工作卡复印件交给图纸审查组以发放卫生许可证。" } },
+        { "id": "refrigeration", "item": { "en": "Commercial (NSF/ANSI) refrigeration holds 41°F or below, with an accurate, readily visible thermometer.", "zh": "商用（NSF/ANSI 认证）冷藏设备保持 41°F 或以下，并配有准确、醒目的温度计。" } },
+        { "id": "hot-water", "item": { "en": "The water heater supplies at least 120°F to every sink and cleanup fixture.", "zh": "热水器能为所有水槽和清洁设施持续供应至少 120°F 的热水。" } },
+        { "id": "handsinks", "item": { "en": "Hand sinks deliver at least 100°F through a mixing valve, with soap and towels in single-service dispensers.", "zh": "洗手池经混水阀供应至少 100°F 的温水，并配有一次性分配器装的洗手液和擦手纸。" } },
+        { "id": "floors", "item": { "en": "Floors are smooth and impervious, coved at least 4 inches up the wall with a 3/8-inch radius.", "zh": "地面平整、不渗水，墙角做至少 4 英寸高、半径 3/8 英寸的弧形踢脚。" } },
+        { "id": "floor-sinks", "item": { "en": "Condensate and indirect waste lines end at least 1 inch above an accessible floor sink; no floor sinks inside walk-ins.", "zh": "冷凝水和间接排水管终止于可检修地漏上方至少 1 英寸处；步入式冷库内不得设地漏。" } },
+        { "id": "mop-sink", "item": { "en": "A janitorial (mop) sink with hot and cold running water is installed.", "zh": "已安装配有冷热水的拖把池。" } },
+        { "id": "restrooms", "item": { "en": "Restrooms have self-closing doors, ventilation and toilet tissue in a fixed dispenser.", "zh": "卫生间装有自闭门和通风设施，厕纸放在固定纸架中。" } },
+        { "id": "shelving-light", "item": { "en": "The lowest storage shelf is at least 6 inches off the floor, and storage and toilet rooms have at least 10 foot-candles of light.", "zh": "储物架最底层离地至少 6 英寸，储藏间和卫生间照度至少 10 英尺烛光。" } }
+      ],
+      "source": "https://ochealthinfo.com/services-programs/environmental-health/plan-check",
+      "sources": [
+        "https://ochealthinfo.com/sites/hca/files/import/data/files/78562.pdf",
+        "https://www.ochealthinfo.com/sites/hca/files/import/data/files/14086.pdf"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": { "en": "Routine food inspection and notification seal", "zh": "例行食品检查与检查结果标识" },
+      "agency": { "en": "Orange County Health Care Agency, Environmental Health Division, Food Protection Program", "zh": "橙县卫生保健局 环境卫生处 食品保护项目" },
+      "when": {
+        "en": "Unannounced, after you open, at a frequency set by a risk assessment of your food, preparation and public risk.",
+        "zh": "开业后不定期突击检查，频率根据食品种类、加工方式和公共风险评估确定。"
+      },
+      "book": {
+        "en": "You don't book routine inspections. Questions about a report go to your inspector or Environmental Health at (714) 433-6000.",
+        "zh": "例行检查无需预约。对检查报告有疑问，请联系您的检查员或环境卫生处 (714) 433-6000。"
+      },
+      "phone": "(714) 433-6000",
+      "fee": null,
+      "feeNote": {
+        "en": "Routine visits are covered by the annual health permit, whose fee is set by the type and size of the business. After-hours inspections (before 8 a.m. or after 5 p.m.) may be billed at an overtime rate.",
+        "zh": "例行检查费含在年度卫生许可证费中，许可证费按商户类型和规模确定。下班时间（早 8 点前或晚 5 点后）的检查可能按加班费率收费。"
+      },
+      "scoring": {
+        "en": "A seal is posted near the front entrance after each inspection. PASS: no more than two major critical risk factor violations, all corrected on site, and no pattern of repeats. REINSPECTION DUE – PASS: three or more major violations, or repeat violations. CLOSED: the permit is suspended for an imminent health hazard.",
+        "zh": "每次检查后在正门附近张贴标识。PASS（合格）：重大关键风险违规不超过两项且当场改正，无重复违规。REINSPECTION DUE – PASS（待复检）：重大违规三项及以上，或有重复违规。CLOSED（停业）：因紧急健康危害暂停许可证。"
+      },
+      "failNext": {
+        "en": "A reinspection is set within about two weeks; passing it swaps the seal back to PASS. Not complying by then can bring a second reinspection or a Notice of Violation hearing, with extra fees. A CLOSED seal stays until an inspector authorizes reopening; reopening after hours costs extra.",
+        "zh": "约两周内安排复检，通过后标识换回 PASS。到期仍未整改，可能进行二次复检或召开违规听证，并产生额外费用。CLOSED 标识须待检查员批准后才能撤下；非工作时间申请复业需额外付费。"
+      },
+      "checklist": [
+        { "id": "cfpm", "item": { "en": "Someone on staff holds a valid Certified Food Protection Manager certificate (required within 60 days of opening or a manager leaving).", "zh": "有一名员工持有有效的食品安全经理证书（开业或原持证人离职后 60 天内须取得）。" }, "why": { "en": "Cal. Health & Safety Code §113947.1", "zh": "加州健康与安全法典 §113947.1" } },
+        { "id": "food-handler", "item": { "en": "Every employee preparing or serving unpackaged food has a valid food handler card within 30 days of hire; cards last three years.", "zh": "所有加工或供应散装食品的员工在入职 30 天内取得有效的食品从业人员卡，有效期三年。" }, "why": { "en": "Cal. Health & Safety Code §113948", "zh": "加州健康与安全法典 §113948" } },
+        { "id": "holding", "item": { "en": "Potentially hazardous foods are held at 41°F or below or 135°F or above; 42–134°F is the danger zone.", "zh": "潜在危害食品保持在 41°F 或以下、135°F 或以上；42–134°F 为危险温度区。" } },
+        { "id": "cooling", "item": { "en": "Cooked foods cool from 135°F to 70°F within 2 hours and to 41°F within 6 hours in total.", "zh": "熟食在 2 小时内从 135°F 降至 70°F，总共 6 小时内降至 41°F。" } },
+        { "id": "reheat", "item": { "en": "Commercially processed ready-to-eat foods are reheated to 135°F or above within 2 hours before hot holding.", "zh": "商业加工的即食食品在热保温前 2 小时内复热至 135°F 或以上。" } },
+        { "id": "handsink-temp", "item": { "en": "Hand sinks run 100–108°F; utensil, prep and janitorial sinks have at least 120°F hot water.", "zh": "洗手池水温 100–108°F；餐具、备餐和拖把池有至少 120°F 的热水。" } },
+        { "id": "sanitizer", "item": { "en": "Sanitizer is tested with strips and is at an effective level, not above 200 ppm chlorine or 400 ppm quaternary ammonia.", "zh": "用试纸检测消毒液，浓度有效，且氯不超过 200 ppm、季铵盐不超过 400 ppm。" } },
+        { "id": "wiping-cloths", "item": { "en": "Wiping cloths are kept in sanitizer between uses.", "zh": "抹布在两次使用之间浸泡在消毒液中。" } },
+        { "id": "thermometers", "item": { "en": "Hot and cold holding units have a thermometer.", "zh": "冷、热保温设备都配有温度计。" } },
+        { "id": "no-closure", "item": { "en": "No vermin, sewage backup, loss of water or power, or unusable restrooms, which are grounds for closure.", "zh": "无虫鼠、污水倒灌、停水停电或卫生间无法使用等情况，这些都会导致停业。" } }
+      ],
+      "source": "https://ochealthinfo.com/sites/hca/files/2021-03/Retail_Food_Facility_Inspection_Marking_Guide_REV_08-23-17.pdf",
+      "sources": ["https://ochealthinfo.com/sites/hca/files/import/data/files/27709.pdf"]
+    },
+    {
+      "id": "fire-routine",
+      "kind": "fire",
+      "stage": "routine",
+      "name": { "en": "Periodic fire safety inspection", "zh": "定期消防安全检查" },
+      "agency": { "en": "Orange County Fire Authority (OCFA), Prevention Field Services", "zh": "橙县消防局（OCFA）预防现场服务科" },
+      "when": {
+        "en": "After you open. Restaurants and other businesses with commercial kitchens, and assembly spaces of 50 or more, are on OCFA's inspection list; firefighters do most of these inspections.",
+        "zh": "开业之后。设有商用厨房的餐厅等商户以及 50 人以上的集会场所都在 OCFA 检查名单内，多数由消防员执行。"
+      },
+      "book": {
+        "en": "OCFA schedules it; you don't book it. Questions go to the OCFA regional office for your area; fire code operating permits are applied for in the Public Services Portal.",
+        "zh": "由 OCFA 安排，无需预约。有疑问请联系所在区域的 OCFA 办公室；消防经营许可在公共服务平台申请。"
+      },
+      "bookUrl": "https://publicservices.ocfa.org/",
+      "fee": 86,
+      "feeNote": {
+        "en": "Base fee M150, $86 (2026–27 schedule effective September 1, 2026). A restaurant or other assembly space for 50 or more needs an assembly operating permit: $702 to issue for under 300 occupants, $475 to reissue.",
+        "zh": "基本费 M150 为 86 美元（2026–27 收费标准，2026 年 9 月 1 日起生效）。容纳 50 人以上的餐厅等集会场所需办理集会经营许可：300 人以下首次签发 702 美元，续发 475 美元。"
+      },
+      "failNext": {
+        "en": "If more than two trips are needed to complete the inspection or confirm corrections, each extra trip adds an M150 fee and may add J200 hourly reinspection fees. Ignoring orders brings penalties of $250, $500, then $1,000.",
+        "zh": "如完成检查或确认整改需要上门超过两次，每多一次加收 M150 费用，并可能加收按小时计的 J200 复检费。不执行整改令将依次罚款 250、500、1,000 美元。"
+      },
+      "checklist": [
+        { "id": "extinguishers", "item": { "en": "Fire extinguishers are present and not expired.", "zh": "灭火器齐全且在有效期内。" } },
+        { "id": "exit-paths", "item": { "en": "Exit paths are not blocked.", "zh": "疏散通道畅通无阻。" } },
+        { "id": "locks", "item": { "en": "No slide bolts, or deadbolts that don't release with the main handle, on exit doors.", "zh": "出口门上没有插销，也没有不能随主把手一起打开的暗锁。" } },
+        { "id": "systems", "item": { "en": "The fire sprinkler and fire alarm systems work.", "zh": "喷淋系统和火警系统运转正常。" } },
+        { "id": "occupant-load", "item": { "en": "Occupant load signs are posted in rooms used for assembly by 50 or more people.", "zh": "可容纳 50 人以上的集会空间张贴了额定人数标识。" } },
+        { "id": "exit-lights", "item": { "en": "Required exit signs and emergency lights are in place and not burned out.", "zh": "规定的出口标志和应急照明齐全且灯泡完好。" } }
+      ],
+      "source": "https://ocfa.org/about-us/departments/community-risk-reduction/prevention-field-services/",
+      "sources": ["https://storageocfaprod001.blob.core.windows.net/blobocfaprod01/2026/10/OCFA-Fee-Schedule-Prevention-Field-Services-2026-27.pdf"]
+    }
+  ]
+}

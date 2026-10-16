@@ -1,0 +1,62 @@
+{
+  "form": "az-llc",
+  "read": "2026-10-15",
+  "fields": {
+    "agent_address": {
+      "rule": "in_state_street",
+      "poBox": "not_allowed",
+      "what": {
+        "en": "Item 4.1: the statutory agent's physical street address in Arizona, not a P.O. box. The agent must be an Arizona resident or an entity authorized to do business in Arizona.",
+        "zh": "第4.1项：法定代理人在亚利桑那州的实际街道地址，不可用邮政信箱。代理人须为亚利桑那州居民，或获准在该州经营的实体。"
+      },
+      "ifNone": {
+        "en": "Hire a commercial statutory agent in Arizona and use its street address. The agent must also sign the Statutory Agent Acceptance (form M002), filed with the articles.",
+        "zh": "在亚利桑那州聘请商业法定代理人，填写其街道地址。代理人还须签署法定代理人接受书（M002 表），与章程一并提交。"
+      },
+      "confirmations": [
+        { "url": "https://azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf", "kind": "form", "quote": "physical or street address (not a P.O. Box) in Arizona of the statutory agent" },
+        { "url": "https://azcc.gov/docs/default-source/corps-files/instructions/l010i-instructions-articles-of-organization.pdf", "kind": "instructions", "quote": "must have a permanent, full-time physical or street address in the State of Arizona" },
+        { "url": "https://www.azleg.gov/ars/29/03201.htm", "kind": "statute", "quote": "The name and street and mailing addresses in this state of the company's statutory agent." },
+        { "url": "https://www.azleg.gov/ars/29/03115.htm", "kind": "statute", "quote": "must have a place of business or residence in this state" },
+        { "url": "https://azcc.gov/corporations/faqs", "kind": "faq", "quote": "A statutory agent is a person or business that has a physical address in Arizona." }
+      ]
+    },
+    "agent_mailing": {
+      "rule": "in_state_street",
+      "poBox": "allowed",
+      "what": {
+        "en": "Item 4.2: the statutory agent's mailing address, which must be in Arizona; a P.O. box or personal mailbox is fine. Commission notices go here. Tick the box if it is the same as the street address.",
+        "zh": "第4.2项：法定代理人的邮寄地址，必须在亚利桑那州；可用邮政信箱或私人信箱。州公司委员会的通知寄到此处。如与街道地址相同，勾选对应方框。"
+      },
+      "ifNone": {
+        "en": "Use the commercial statutory agent's Arizona mailing address, or tick 'same as street address'.",
+        "zh": "填写所聘商业法定代理人在亚利桑那州的邮寄地址，或勾选“与街道地址相同”。"
+      },
+      "confirmations": [
+        { "url": "https://azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf", "kind": "form", "quote": "4.2 REQUIRED – mailing address in Arizona" },
+        { "url": "https://www.azcc.gov/docs/default-source/corps-files/forms/l020-statement-of-change-address-agent.pdf", "kind": "form", "quote": "mailing address in Arizona of the existing statutory agent (can be a P.O. Box):" },
+        { "url": "https://azcc.gov/docs/default-source/corps-files/instructions/l010i-instructions-articles-of-organization.pdf", "kind": "instructions", "quote": "separate mailing address, which can be a P.O. Box or a personal mail box." },
+        { "url": "https://www.azleg.gov/ars/29/03201.htm", "kind": "statute", "quote": "The name and street and mailing addresses in this state of the company's statutory agent." }
+      ]
+    },
+    "principal_address": {
+      "rule": "foreign_ok",
+      "poBox": "allowed",
+      "what": {
+        "en": "Item 5: the LLC's principal address. It need not be in Arizona and may be anywhere, abroad included (5.2 has a country box); a P.O. box is allowed. Answer Yes in 5.1 if it is the statutory agent's street address. It is public online.",
+        "zh": "第5项：LLC 的主要地址。不必在亚利桑那州，可在任何地方，包括境外（5.2 设有国家栏）；可用邮政信箱。如与法定代理人街道地址相同，5.1 选“是”。该地址会在网上公开。"
+      },
+      "ifNone": {
+        "en": "Use the company's head office address, including one abroad, or the statutory agent's street address if the agent allows it.",
+        "zh": "填写公司总部地址（境外亦可），或在代理人同意的情况下使用其街道地址。"
+      },
+      "confirmations": [
+        { "url": "https://azcc.gov/docs/default-source/corps-files/instructions/l010i-instructions-articles-of-organization.pdf", "kind": "instructions", "quote": "is not required to be an Arizona address and it can be the same as the statutory agent’s street address." },
+        { "url": "https://azcc.gov/corporations/faqs", "kind": "faq", "quote": "If you have an LLC, the statutes allow your Principal Address to be anywhere." },
+        { "url": "https://www.azleg.gov/ars/29/03201.htm", "kind": "statute", "quote": "The principal address, which may be the same as the mailing address of the company's statutory agent." },
+        { "url": "https://azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf", "kind": "form", "quote": "City Country State or Province" }
+      ]
+    }
+  },
+  "notes": "Form L010 (Rev 10/2020), instructions L010i (Rev. 7/2021), form L020 (Rev 6/2020), the ACC Business Services FAQs and A.R.S. 29-3115 and 29-3201. The rule list has no 'in-state, any address' value, so agent_mailing uses in_state_street with poBox 'allowed': it must be an Arizona address but a P.O. box is fine. L010i says the in-Arizona mailing requirement applies when the agent is an individual, while the form and A.R.S. 29-3201(B)(3) require an Arizona mailing address for every agent; follow the stricter form. The FAQ also suggests a P.O. Box for an internet business's principal address."
+}
