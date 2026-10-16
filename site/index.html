@@ -2537,6 +2537,24 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
 
 /* centring: the phone swipe rows bleed evenly to both edges */
 @media (max-width:767px){#cn .cnc-row{width:auto}}
+
+/* problem first: each public figure carries its source as a small link */
+.srcl{display:block;margin-top:2px;font-size:12px;line-height:1.4;color:var(--muted)}
+.srcl a{color:var(--ink2);text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(91,99,120,.35)}
+.srcl a:hover{color:var(--ink)}
+.wsrc a{color:inherit;text-underline-offset:2px}
+#cost .dl{gap:28px}
+#cost .cbn{padding-bottom:4px}
+#cost .ds span{font-size:16px;line-height:1.4;color:var(--ink2);max-width:300px}
+#cost .ds{border-bottom:0;padding-bottom:0}
+#pricing .prl .srcl{margin-top:-2px}
+/* hero: what the first step takes, under the two buttons */
+.hnote{margin-top:-6px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.74);text-shadow:0 1px 8px rgba(0,0,0,.3)}
+@media (min-width:1024px){.hnote{margin-top:-12px}}
+/* channels: one heading over the ticker */
+#together .wtw.wtq{flex-direction:column;justify-content:center;align-items:center;gap:10px}
+#together .wtq .wth{flex:none;color:#fff;text-align:center;max-width:760px;text-wrap:balance}
+#together .wtq .rot{width:300px}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2595,186 +2613,17 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
         <p data-i18n="hero.badge">Every requirement linked to its official source</p>
       </div>
       <div class="hstack">
-        <h1 data-i18n="hero.h1">Meet Odelia,<br><em>the compliance agent for brands entering the&nbsp;US.</em></h1>
-        <p class="hsub" data-i18n="hero.sub">Odelia maps every permit and registration your US launch needs, files each one with your approval in the order agencies require, and keeps them current, in English or Chinese.</p>
+        <h1 data-i18n="hero.h1">Your store is built.<br><em>Your permits aren't.</em></h1>
+        <p class="hsub" data-i18n="hero.sub">Every month without them is rent on an empty store. Odelia ends the forms sent back, the missed renewals and the hourly bills, in English or Chinese.</p>
         <div class="hcta">
           <button type="button" class="btn b-white hbtn" data-open="hero" data-i18n="cta.plan">Get my plan</button>
           <a class="btn b-glass hbtn" href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo" data-i18n="hero.demo">Book a demo</a>
         </div>
+        <p class="hnote" data-i18n="hero.note">Four quick questions, about a minute. Nothing is filed or paid without your approval.</p>
         <a class="hbk" href="/backers" data-sec="backers" id="hBk"></a>
       </div>
     </div>
     <div class="hbot"><p data-i18n="brands.l">Built for</p><div class="mq" aria-label="Industries" data-i18n-aria="aria.brands"><div class="mqt" id="mqt"></div></div></div>
-  </div>
-</section>
-
-<!-- ======================= PRODUCT DEMO ======================= -->
-<section class="vdemo" aria-label="Product demo">
-  <div class="ctr">
-    <div class="sample" id="sample">
-    <div class="vcard" id="vcard">
-      <img class="vph" src="media/hero-poster.jpg" alt="" aria-hidden="true" decoding="async">
-      <div class="astage">
-      <div class="app" role="img" aria-label="Sample entry plan" data-i18n-aria="aria.app">
-        <div class="atop">
-          <span class="alogo hplogo" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#ts-qhav"/></svg></span>
-          <div class="aid"><b><span data-i18n="demo.brand">Qinghuan Tea House</span><span class="atag" data-i18n="app.sample">Sample plan</span></b><small data-i18n="app.loc">Tianxin Village, Wuyi Mountains → first US store in San José, CA</small></div>
-        </div>
-        <div class="atabs"><span class="tb on" data-i18n="app.t1">Entry plan</span><span class="tb" data-i18n="app.t2">Filings</span><span class="tb" data-i18n="app.t3">Documents</span><span class="tb" data-i18n="app.t4">Renewals</span></div>
-        <div class="abody">
-          <div class="alist">
-            <div class="ahead"><b data-i18n="app.reqs">Requirements</b><em id="appCount">3 / 8</em></div>
-            <div class="aprog"><i id="appProg"></i></div>
-            <div id="appRows"></div>
-          </div>
-          <div class="aside">
-            <div class="proj"><small data-i18n="app.proj">Projected opening</small><strong data-i18n="app.date">Mar 2027</strong><em data-i18n="app.est">Estimate, not a guarantee</em></div>
-            <div class="gantt" id="gantt"></div>
-            <div class="risk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#24406F" stroke-width="2" aria-hidden="true"><path d="M12 3 2 21h20L12 3zM12 10v5M12 18v.5"/></svg><span data-i18n="app.risk">Risk check: review state rules on foreign-owned leases before you sign.</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="vfl vfl1" id="vToast" aria-hidden="true" hidden><span class="orb"></span><div><b id="vToastT"></b><small id="vToastS"></small></div><span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span></div>
-      </div>
-      <div class="vctl">
-        <button type="button" id="vRestart" aria-label="Restart" data-i18n-aria="aria.restart"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5"/></svg></button>
-        <button type="button" id="vPlay" aria-label="Pause" data-i18n-aria="aria.pause"><svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor" id="vIcon"><rect x="1" y="1" width="3.6" height="12" rx="1"/><rect x="8.4" y="1" width="3.6" height="12" rx="1"/></svg></button>
-      </div>
-      <div class="vprog"><i id="vBar"></i></div>
-    </div>
-    </div>
-  </div>
-</section>
-
-<!-- ======================= INDUSTRIES ======================= -->
-<!-- ======================= CUSTOMERS AND CASE STUDIES ======================= -->
-<section class="inv" id="backed" aria-labelledby="invL">
-  <div class="ctr">
-    <p class="invl" id="invL" data-i18n="inv.l">The brands we serve are backed by</p>
-    <div class="invr" id="invR"></div>
-  </div>
-</section>
-
-<section class="sec rv" data-rv="up" id="case" aria-labelledby="caseH">
-  <div class="ctr">
-    <div class="sh"><h2 class="h2" id="caseH" data-i18n="proof.h">See the plan before you sign the lease.</h2><p class="sub" data-i18n="proof.sub">Example plans for businesses like yours, built from official sources. Each one cites the agencies and laws behind it.</p></div>
-    <div class="pfrow" id="pfRow" role="list" aria-label="At a glance" data-i18n-aria="aria.proof">
-      <div role="listitem"><b>73</b><span>government agencies we handle, across 8 regions</span></div>
-      <div role="listitem"><b>50</b><span>US states covered, plus 170+ countries</span></div>
-      <div role="listitem"><b>2</b><span>languages for every plan and dashboard: English and Chinese</span></div>
-      <div role="listitem"><b>0</b><span>filings sent without your approval</span></div>
-    </div>
-    <div class="tssec" id="tsSec">
-      <h3 class="tsh3" id="tsH" data-i18n="ts.h">Don't just take our word for it.</h3>
-      <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
-      <div class="tsgrid" id="tsGrid" role="tabpanel" tabindex="0"></div>
-    </div>
-    <div class="cshd">
-      <h3 class="h3" data-i18n="bel.cases">Example plans</h3>
-      <div class="tstabs cstabs" role="tablist" id="caseTabs" aria-label="Case studies" data-i18n-aria="bel.cases"></div>
-    </div>
-    <div class="cscard" id="caseCard">
-      <div class="csl" id="caseBody" role="tabpanel">
-        <div class="belid"><span id="caseLogo"></span><span class="beltag" data-i18n="bel.tag">Case study</span></div>
-        <p class="belt" id="caseT"></p>
-        <p class="belp" id="caseP"></p>
-        <div class="belst" id="caseSt"></div>
-        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="case" data-i18n="cta.plan">Get my plan</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
-      </div>
-      <div class="csr">
-        <div class="belstage">
-          <div class="belwin">
-            <div class="belwh"><b id="caseWin"></b><div class="beltabs" role="tablist" id="belTabs" aria-label="Markets" data-i18n-aria="bel.tabs"></div></div>
-            <ol class="belrows" id="belRows" role="tabpanel"></ol>
-          </div>
-        </div>
-        <p class="belsrc" id="belSrc"></p>
-      </div>
-    </div>
-    <div class="cscard teacard" id="teaCard">
-      <div class="beltabs casetabs teatabs" role="tablist" id="teaTabs" aria-label="Tea houses" data-i18n-aria="tea.tabs"></div>
-      <div class="csl" id="teaBody" role="tabpanel">
-        <div class="belid"><span id="teaLogo"></span><span class="beltag" data-i18n="bel.ex">Example plan</span></div>
-        <p class="csnm" id="teaNm"></p>
-        <p class="belt" id="teaT"></p>
-        <p class="belp" id="teaP"></p>
-        <div class="belst" id="teaSt"></div>
-        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="tea" data-i18n="cta.plan">Get my plan</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
-      </div>
-      <div class="csr">
-        <div class="belstage">
-          <div class="belwin">
-            <div class="belwh"><b id="teaWin"></b><div class="beltabs" role="tablist" id="teaMk" aria-label="Steps" data-i18n-aria="tea.mk"></div></div>
-            <ol class="belrows" id="teaRows" role="tabpanel"></ol>
-          </div>
-        </div>
-        <p class="belsrc" id="teaSrc"></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="insec" id="industries" aria-labelledby="inH">
-  <div class="inscroll" id="inScroll">
-    <div class="instick">
-      <div class="ctr">
-        <div class="inrow">
-          <div class="inl">
-            <div><h2 class="t28" id="inH" data-i18n="in.h">Built for every brand entering the US.</h2><p class="insub" data-i18n="in.sub">x</p></div>
-            <div class="inlist" role="group"><button type="button" class="inb on" data-k="0" aria-pressed="true"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3h9l-.6 6.2a3.9 3.9 0 0 1-7.8 0zM12 13.2V21M8.5 21h7"/></svg><span data-i18n="in.r">x</span></button><button type="button" class="inb" data-k="1" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5 5 4h14l1.5 5.5M4 9.5h16v.5a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0A2.7 2.7 0 0 1 4 10zM5 12.5V20h14v-7.5M10 20v-4.5h4V20"/></svg><span data-i18n="in.s">x</span></button><button type="button" class="inb" data-k="2" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16.5V20M9.5 9l-2 1.5 2 1.5M14.5 9l2 1.5-2 1.5"/></svg><span data-i18n="in.tk">x</span></button><button type="button" class="inb" data-k="3" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.4 5.4l-.8 4a2.6 2.6 0 0 1-4.6 1L14.5 16h-5L8 17.9a2.6 2.6 0 0 1-4.6-1l-.8-4A4.5 4.5 0 0 1 7 7.5zM7 10.5v3M5.5 12h3M15.5 11.5h.01M17.5 13.5h.01"/></svg><span data-i18n="in.gm">x</span></button><button type="button" class="inb" data-k="4" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/></svg><span data-i18n="in.c">x</span></button><button type="button" class="inb" data-k="5" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V10l5 3V10l5 3V10l5 3V5h3v15zM7 17h2M12 17h2M17 17h1"/></svg><span data-i18n="in.mf">x</span></button><button type="button" class="inb" data-k="6" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v4H9zM8 7h8l1 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V10zM10 14h4"/></svg><span data-i18n="in.bt">x</span></button><button type="button" class="inb" data-k="7" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.9c0 5.6-7.5 10-7.5 10zM12 11v5M9.5 13.5h5"/></svg><span data-i18n="in.hc">x</span></button><button type="button" class="inb" data-k="8" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-4.5h10L19 11v5M3.5 16h17v2.5h-17zM7 18.5V20M17 18.5V20M7.5 13h1M15.5 13h1M5 11h14"/></svg><span data-i18n="in.av">x</span></button><button type="button" class="inb" data-k="9" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V9l9-5 9 5v11M7 20v-7h10v7M7 16h10"/></svg><span data-i18n="in.w">x</span></button><button type="button" class="inb" data-k="10" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3zM5 18v2M19 18v2"/></svg><span data-i18n="in.f">x</span></button></div>
-          </div>
-          <div class="inpanel inart" aria-live="polite"><canvas id="inCv" aria-hidden="true"></canvas><img class="inphoto incover" id="inPhotoGm" src="media/industries/game-studios.jpg" alt="" loading="lazy" decoding="async" draggable="false"><img class="inphoto" id="inPhoto" hidden src="media/industries/tech-robot.png" alt="" loading="lazy" decoding="async" draggable="false"><div class="incap" id="inCap"><b id="inCapT"></b><p id="inCapP"></p></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec rv" data-rv="up" id="teammate" aria-labelledby="tmH">
-  <div class="ctr">
-    <div class="sh"><h2 class="h2" id="tmH" data-i18n="tm.h">Your newest teammate.</h2><p class="sub" data-i18n="tm.sub">Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.</p></div>
-    <div class="feat tmfeat">
-      <article class="fcard">
-        <div class="fct"><h3 data-i18n="tm.c1h">She joins your team</h3><p data-i18n="tm.c1p">Add Odelia like any other hire. She has a seat on your expansion team and a status you can see.</p></div>
-        <div class="fcv">
-          <div class="fui">
-            <div class="fhd"><b data-i18n="tm.team">US expansion team</b><span data-i18n="tm.sample">Sample team</span></div>
-            <div class="tmrow" data-st data-ms="320"><span class="av" data-i18n="tm.a1">Y</span><span class="nm"><b data-i18n="tm.r1">You</b><small data-i18n="tm.r1s">Head of US expansion</small></span></div>
-            <div class="tmrow" data-st data-ms="320"><span class="av" data-i18n="tm.a2">R</span><span class="nm"><b data-i18n="tm.r2">Real estate lead</b><small data-i18n="tm.r2s">Sites and leases</small></span></div>
-            <div class="tmrow" data-st data-ms="650"><span class="av" data-i18n="tm.a3">C</span><span class="nm"><b data-i18n="tm.r3">Construction manager</b><small data-i18n="tm.r3s">Build-out and inspections</small></span></div>
-            <div class="tmrow me" data-st data-ms="600"><span class="orb"></span><span class="nm"><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.r4s">Permits and licenses</small></span><span class="tmlive"><i></i><span data-i18n="tm.on">Online</span></span></div>
-            <div class="tmnow" data-st data-ms="700"><span data-i18n="tm.now">Working now: San José health permit packet</span><span class="tmdots" aria-hidden="true"><i></i><i></i><i></i></span></div>
-          </div>
-          <div class="ftoast" data-st data-ms="800"><span class="orb"></span><span><b data-i18n="tm.t1">Odelia joined your team</b><small data-i18n="tm.t1s">US expansion, permits and licenses</small></span></div>
-        </div>
-      </article>
-      <article class="fcard">
-        <div class="fct"><h3 data-i18n="tm.c2h">She knows her job</h3><p data-i18n="tm.c2p">One role, owned end to end: every license, filed on time and renewed before it lapses.</p></div>
-        <div class="fcv">
-          <div class="fui">
-            <div class="tmid" data-st data-ms="450"><span class="orb"></span><span class="nm"><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.v1">Permits and licenses manager</small></span><span class="tmlive"><i></i><span data-i18n="tm.on">Online</span></span></div>
-            <div class="fcrow" data-st data-ms="300"><span class="nm" data-i18n="tm.k2">Reports to</span><span class="dt" data-i18n="tm.v2">You</span></div>
-            <div class="fcrow" data-st data-ms="300"><span class="nm" data-i18n="tm.k3">Hours</span><span class="dt" data-i18n="tm.v3s">Always on</span></div>
-            <div class="fcrow" data-st data-ms="450"><span class="nm" data-i18n="tm.k4">Languages</span><span class="dt" data-i18n="tm.v4">English and Chinese</span></div>
-            <div class="tmapps" data-st data-ms="700"><small data-i18n="tm.k5">Works in</small><div><span><i style="background:#EA4335"></i>Gmail</span><span><i style="background:#0F6CBD"></i>Outlook</span><span><i style="background:#611F69"></i>Slack</span><span><i style="background:#4285F4"></i><em data-i18n="tm.gcal">Google Calendar</em></span><span><i style="background:#1FA463"></i><em data-i18n="tm.gdrive">Google Drive</em></span></div></div>
-          </div>
-          <div class="ftoast" data-st data-ms="800"><span class="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span><span><b data-i18n="tm.t2">Never files without your approval</b><small data-i18n="tm.t2s">You sign, pay agency fees and pass ID checks</small></span></div>
-        </div>
-      </article>
-      <article class="fcard">
-        <div class="fct"><h3 data-i18n="tm.c3h">She reports in</h3><p data-i18n="tm.c3p">Updates arrive where your team already talks: Slack, email and your calendar.</p></div>
-        <div class="fcv">
-          <div class="fui">
-            <div class="fhd"><b>#us-expansion</b><span data-i18n="tm.wks">Sample week</span></div>
-            <div class="tmmsg" data-st data-ms="650"><span class="orb"></span><div><small><b data-i18n="tm.r4">Odelia</b> <span data-i18n="tm.d2">Tue</span></small><p data-i18n="tm.m2">The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.</p></div></div>
-            <div class="tmmsg you" data-st data-ms="600"><span class="av" data-i18n="tm.a1">Y</span><div><small><b data-i18n="tm.r1">You</b> <span data-i18n="tm.d2">Tue</span></small><p data-i18n="tm.you">Approved. Go ahead.</p></div></div>
-            <div class="tmmsg" data-st data-ms="650"><span class="orb"></span><div><small><b data-i18n="tm.r4">Odelia</b> <span data-i18n="tm.d3">Wed</span></small><p data-i18n="tm.m3">Filed with Santa Clara County. The receipt is saved to your drive.</p></div></div>
-          </div>
-          <div class="ftoast" data-st data-ms="800"><span class="orb"></span><span><b data-i18n="tm.t3">Renewal drafted</b><small data-i18n="tm.t3s">Business tax certificate, 30 days before it lapses</small></span></div>
-        </div>
-      </article>
-    </div>
-    <button type="button" class="howtry" data-open="teammate"><span data-i18n="cta.plan">Get my plan</span><span aria-hidden="true">→</span></button>
   </div>
 </section>
 
@@ -2802,6 +2651,145 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
     </div>
   </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><g id="sil" fill="#D3D9E3"><circle cx="15" cy="9" r="8.6"/><path d="M5.5 21.5h19a5.5 5.5 0 0 1 5.5 5.5v21.5a4.5 4.5 0 0 1-4.5 4.5h-1.6L22 87.2a2.2 2.2 0 0 1-2.2 2.1h-9.6A2.2 2.2 0 0 1 8 87.2L6.1 53H4.5A4.5 4.5 0 0 1 0 48.5V27a5.5 5.5 0 0 1 5.5-5.5z"/></g></defs></svg>
+</section>
+
+<section class="sec rv" data-rv="up" id="cost" aria-labelledby="costH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="costH" data-i18n="cost.h">The cost of waiting.</h2><p class="sub" data-i18n="cost.sub">Every month a permit runs late is another month of rent with no revenue.</p></div>
+    <div class="drow">
+      <div class="dl cbig">
+        <div class="cbn"><b data-i18n="cost.p1b">$10,000</b><span data-i18n="cost.p1s">The most New York State can fine a store for selling without a sales tax certificate: up to $500 the first day and $200 every day after.</span><small class="srcl" data-i18n="cost.p1src">Source: <a href="https://www.tax.ny.gov/pubs_and_bulls/tg_bulletins/st/how_to_register_for_nys_sales_tax.htm" target="_blank" rel="noopener">NY State Tax Department</a></small></div>
+        <div class="ds"><b data-i18n="cost.p2b">Every year</b><span data-i18n="cost.p2s">NYC food service permits expire a year after you apply, and Health Department inspectors arrive unannounced at least once a year.</span><small class="srcl" data-i18n="cost.p2src">Sources: <a href="https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit" target="_blank" rel="noopener">NYC Business</a>, <a href="https://www.nyc.gov/site/doh/services/restaurant-grades.page" target="_blank" rel="noopener">NYC Health</a></small></div>
+      </div>
+      <div class="dcard wcard" id="wcard"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= AGENCIES A PLAN COVERS (names set in type; no agency seals or logos) ======================= -->
+<section class="mt160 rv" data-rv="up" id="agencies" aria-labelledby="agH">
+  <div class="ctr">
+    <div class="agrow">
+      <div class="agleft">
+        <h2 class="t28" id="agH" data-i18n="agy.h">Where we work, and every agency we handle</h2>
+        <div class="aglist" id="agTabs" role="tablist" aria-labelledby="agH"></div>
+      </div>
+      <div class="agright" id="agRight">
+    <div class="mpcard agmap" id="agMap">
+      <div class="mptabs agmtabs" role="tablist" aria-label="Map" data-i18n-aria="aria.map"><button type="button" role="tab" data-mv="us" aria-selected="true" data-i18n="map.us">United States</button><button type="button" role="tab" data-mv="world" aria-selected="false" data-i18n="map.world">Worldwide</button><button type="button" role="tab" data-mv="freight" aria-selected="false" data-i18n="map.fr">Freight</button></div>
+      <div class="mpstats">
+        <div><b id="mpN1">50</b><span id="mpS1" data-i18n="map.s1">US states covered</span></div>
+        <div class="mpx"><b>170+</b><span data-i18n="map.s2">countries covered</span></div>
+        <div class="mpx"><b id="mpN3">73</b><span id="mpS3">government agencies we handle, across 8 regions</span></div>
+      </div>
+      <div class="mpwrap" id="mpwrap">
+        <svg id="mpsvg" role="img" aria-labelledby="mpdesc"><desc id="mpdesc" data-i18n="map.desc">Map of markets where Placetta handles compliance</desc></svg>
+        <div class="mptip" id="mptip" hidden></div>
+        <button type="button" class="mpzo" id="mpzo" hidden><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4"/></svg><span data-i18n="map.all">Full map</span></button>
+      </div>
+      <div class="mpfl" id="mpfl" hidden><svg id="flsvg" viewBox="0 25 960 404" role="img" aria-labelledby="fldesc"><desc id="fldesc" data-i18n="fl.desc">Map of the shipping lanes our customers' containers travel between Asia, the Americas, Europe, the Middle East, Africa and Australia</desc></svg><ul class="flkey" id="flKey"></ul></div>
+      <div class="mpfoot" id="mpfoot">
+        <div class="mpleg" id="mpleg"></div>
+        <div class="mpsel">
+          <div class="mpdd" id="mpdd">
+            <span class="sr" id="mppickL" data-i18n="map.pick">Choose a market</span>
+            <button type="button" class="mpddb" id="mppick" aria-haspopup="listbox" aria-expanded="false" aria-controls="mpddl" aria-labelledby="mppickL mpddv"><svg class="pin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11A6.5 6.5 0 0 1 18.5 10c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><i class="sw" id="mpddsw" hidden></i><span class="v ph" id="mpddv">Choose a state</span><svg class="chv" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="mpddp" id="mpddp" hidden>
+              <div class="mpdds"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="mpddq" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="mpddl" aria-autocomplete="list"></div>
+              <ul class="mpddl" id="mpddl" role="listbox" aria-labelledby="mppickL"></ul>
+            </div>
+          </div>
+          <p id="mpinfo" data-i18n="map.prompt">Pick a state or country to start a plan there.</p>
+          <button type="button" class="btn b-ink" id="mpgo" hidden></button>
+        </div>
+      </div>
+    </div>
+        <div class="agcard" id="agCard">
+          <div class="agwin" id="agWin" role="tabpanel" aria-live="polite"></div>
+          <ul class="agkey" id="agKey"><li><em class="agt agt-f" data-i18n="agy.tf">We file</em><span data-i18n="agy.kf">Placetta's agents prepare and submit it</span></li><li><em class="agt agt-p" data-i18n="agy.tp">With partners</em><span data-i18n="agy.kp">Agents prepare it, a licensed broker, lawyer or lab files it</span></li><li><em class="agt agt-m" data-i18n="agy.tm">We monitor</em><span data-i18n="agy.km">Agents track the rules and flag every change</span></li></ul>
+        </div>
+      </div>
+    </div>
+    <p class="agnote" data-i18n="agy.note">Placetta is not affiliated with or endorsed by any government agency.</p>
+  </div>
+</section>
+
+<section class="insec" id="industries" aria-labelledby="inH">
+  <div class="inscroll" id="inScroll">
+    <div class="instick">
+      <div class="ctr">
+        <div class="inrow">
+          <div class="inl">
+            <div><h2 class="t28" id="inH" data-i18n="in.h">Built for every brand entering the US.</h2><p class="insub" data-i18n="in.sub">x</p></div>
+            <div class="inlist" role="group"><button type="button" class="inb on" data-k="0" aria-pressed="true"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3h9l-.6 6.2a3.9 3.9 0 0 1-7.8 0zM12 13.2V21M8.5 21h7"/></svg><span data-i18n="in.r">x</span></button><button type="button" class="inb" data-k="1" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5 5 4h14l1.5 5.5M4 9.5h16v.5a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0A2.7 2.7 0 0 1 4 10zM5 12.5V20h14v-7.5M10 20v-4.5h4V20"/></svg><span data-i18n="in.s">x</span></button><button type="button" class="inb" data-k="2" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16.5V20M9.5 9l-2 1.5 2 1.5M14.5 9l2 1.5-2 1.5"/></svg><span data-i18n="in.tk">x</span></button><button type="button" class="inb" data-k="3" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.4 5.4l-.8 4a2.6 2.6 0 0 1-4.6 1L14.5 16h-5L8 17.9a2.6 2.6 0 0 1-4.6-1l-.8-4A4.5 4.5 0 0 1 7 7.5zM7 10.5v3M5.5 12h3M15.5 11.5h.01M17.5 13.5h.01"/></svg><span data-i18n="in.gm">x</span></button><button type="button" class="inb" data-k="4" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/></svg><span data-i18n="in.c">x</span></button><button type="button" class="inb" data-k="5" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V10l5 3V10l5 3V10l5 3V5h3v15zM7 17h2M12 17h2M17 17h1"/></svg><span data-i18n="in.mf">x</span></button><button type="button" class="inb" data-k="6" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v4H9zM8 7h8l1 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V10zM10 14h4"/></svg><span data-i18n="in.bt">x</span></button><button type="button" class="inb" data-k="7" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.9c0 5.6-7.5 10-7.5 10zM12 11v5M9.5 13.5h5"/></svg><span data-i18n="in.hc">x</span></button><button type="button" class="inb" data-k="8" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-4.5h10L19 11v5M3.5 16h17v2.5h-17zM7 18.5V20M17 18.5V20M7.5 13h1M15.5 13h1M5 11h14"/></svg><span data-i18n="in.av">x</span></button><button type="button" class="inb" data-k="9" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V9l9-5 9 5v11M7 20v-7h10v7M7 16h10"/></svg><span data-i18n="in.w">x</span></button><button type="button" class="inb" data-k="10" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3zM5 18v2M19 18v2"/></svg><span data-i18n="in.f">x</span></button></div>
+          </div>
+          <div class="inpanel inart" aria-live="polite"><canvas id="inCv" aria-hidden="true"></canvas><img class="inphoto incover" id="inPhotoGm" src="media/industries/game-studios.jpg" alt="" loading="lazy" decoding="async" draggable="false"><img class="inphoto" id="inPhoto" hidden src="media/industries/tech-robot.png" alt="" loading="lazy" decoding="async" draggable="false"><div class="incap" id="inCap"><b id="inCapT"></b><p id="inCapP"></p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= WORKS WHERE YOU WORK: Odelia in a permit portal ======================= -->
+<section class="sec rv" data-rv="up" id="portal" aria-labelledby="ptH">
+  <div class="ctr">
+    <div class="ptrow">
+      <div class="ptl">
+        <h2 class="t28" id="ptH" data-i18n="pt.h">Odelia works in the portals you dread.</h2>
+        <p class="ptsub" data-i18n="pt.sub">City permit sites, county health portals, state tax accounts, customs systems. She signs in once with your OK, then does the clicking.</p>
+        <ol class="ptsteps" id="ptSteps">
+          <li data-s="0"><b data-i18n="pt.s1">Signs in with your approval</b><span data-i18n="pt.s1s">One tap from you. Your password never leaves your vault.</span></li>
+          <li data-s="1"><b data-i18n="pt.s2">Fills every field from your documents</b><span data-i18n="pt.s2s">Lease, LLC filing and floor plan, each value linked to where it came from.</span></li>
+          <li data-s="2"><b data-i18n="pt.s3">Submits, saves the receipt, follows up</b><span data-i18n="pt.s3s">Nothing is submitted until you say so.</span></li>
+          <li data-s="3"><b data-i18n="pt.s4">Remembers your answer</b><span data-i18n="pt.s4s">Tell her once that landlord letters go to you first, and she does it that way at every store.</span></li>
+        </ol>
+      </div>
+      <div class="ptpanel" aria-hidden="true">
+        <div class="ptwin" id="ptWin">
+          <div class="ptbar"><i></i><i></i><i></i><span class="ptaddr"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-i18n="pt.url">City permit portal</span></span></div>
+          <div class="ptbody">
+            <p class="ptform" data-i18n="pt.form">Food facility plan check application</p>
+            <div class="ptsign"><span class="orb"></span><span data-i18n="pt.sign">Odelia signed in with your approval</span></div>
+            <div class="ptf" data-f="0"><small data-i18n="pt.f1">Business name</small><span class="ptv" data-v="Qinghuan Tea House LLC"></span></div>
+            <div class="ptf" data-f="1"><small data-i18n="pt.f2">Site address</small><span class="ptv" data-v="1 Market St, San José, CA"></span></div>
+            <div class="ptf" data-f="2"><small data-i18n="pt.f3">Seats</small><span class="ptv" data-v="42"></span></div>
+            <div class="ptf ptup" data-f="3"><small data-i18n="pt.f4">Floor plan</small><span class="ptfile"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>floor-plan.pdf</span></div>
+            <div class="ptact"><span class="ptbtn" id="ptBtn" data-i18n="pt.submit">Submit application</span></div>
+          </div>
+          <span class="ptcur" id="ptCur"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M1 1l11 6.2-5 .9 2.6 5.4-2 1-2.6-5.4L1 13z" fill="#0F1B33" stroke="#fff" stroke-width="1"/></svg><em>Odelia</em></span>
+        </div>
+        <div class="ftoast pttoast" id="ptToast"><span class="orb"></span><span><b data-i18n="pt.t">Submitted. Receipt saved.</b><small data-i18n="pt.ts">I'll follow up with the county on Thursday.</small></span></div>
+      </div>
+    </div>
+    <p class="fnote" data-i18n="pt.note">Sample run with sample data.</p>
+  </div>
+</section>
+
+<!-- ======================= LIVE POLICY + INDUSTRY MONITOR ======================= -->
+<section class="sec rv" data-rv="up" id="monitor" aria-labelledby="monH">
+  <div class="ctr">
+    <div class="mnhd">
+      <div>
+        <h2 class="h2" id="monH" data-i18n="mon.h2">Rules change after you open.<br>We tell you what to do.</h2>
+        <p class="sub" data-i18n="mon.body3">About 15,000 new laws pass every year across every level of government. Odelia reads the ones that touch your markets and tells you what to do next.</p><small class="srcl" data-i18n="mon.src">Source: <a href="https://gusto.com/company-news/gusto-mosey-acquisition" target="_blank" rel="noopener">Gusto</a></small>
+      </div>
+      <div class="mncta"><button type="button" class="btn b-ink" id="trAlert" data-i18n="cta.plan">Get my plan</button><small><span data-i18n="mon.price">Rule alerts are included in every monthly plan</span><button type="button" class="mnsa" id="mnSampleB" data-i18n="mon.sample">See a sample alert</button></small></div>
+    </div>
+    <div class="mnstage">
+      <div class="mnwrap">
+        <div class="mnkpi" id="mnKpi"></div>
+        <div class="mngrid">
+          <div class="mnhero" id="mnDet" aria-live="polite"></div>
+          <div class="mnside">
+            <div class="mnsc"><div class="mnch"><b data-i18n="mon.dl">Upcoming deadlines</b><span data-i18n="mon.dl6">Next 6 months</span></div><div class="mndl" id="mnDl"></div></div>
+            <div class="mnsc mnsc2"><div class="mnch"><div class="mnmk" id="mnMk"><button type="button" class="mnmkb" id="mnMkB" aria-haspopup="listbox" aria-expanded="false" aria-controls="mnMkP"><b id="mnLsH"></b><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="mnmkp" id="mnMkP" role="listbox" hidden></div></div><span id="mnCnt"></span></div><div class="mnls" id="mnList" role="listbox" aria-labelledby="mnLsH"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="trnote" data-i18n="mon.note">Summaries for information only, not legal advice. Each item links to its source.</p>
+  </div>
+  <div class="mnpv" id="mnPv" hidden><div class="mnpvc" role="dialog" aria-modal="true" aria-labelledby="mnPvT"><button type="button" class="mnpvx" id="mnPvX" aria-label="Close" data-i18n-aria="aria.close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div id="mnPvB"></div></div></div>
 </section>
 
 <!-- ======================= ZERO SETUP: sign-up is one line, then her first plan ======================= -->
@@ -2838,15 +2826,41 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
   </div>
 </section>
 
-<section class="sec rv" data-rv="up" id="cost" aria-labelledby="costH">
+<!-- ======================= PRODUCT DEMO ======================= -->
+<section class="vdemo sec" id="plan" aria-labelledby="planH">
   <div class="ctr">
-    <div class="sh"><h2 class="h2" id="costH" data-i18n="cost.h">The cost of waiting.</h2><p class="sub" data-i18n="cost.sub">Every month a permit runs late is another month of rent with no revenue.</p></div>
-    <div class="drow">
-      <div class="dl cbig">
-        <div class="cbn"><b data-i18n="cost.big">3–6 mo</b><span data-i18n="cost.bigs">The typical permit phase for a new restaurant. Every month late is another month of rent with no sales.</span></div>
-        <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
+    <div class="sh"><h2 class="h2" id="planH" data-i18n="plan.h">Know every permit before you sign the lease.</h2><p class="sub" data-i18n="plan.sub">Odelia lays out every requirement in the order agencies require, with timelines and estimated fees.</p></div>
+    <div class="sample" id="sample">
+    <div class="vcard" id="vcard">
+      <img class="vph" src="media/hero-poster.jpg" alt="" aria-hidden="true" decoding="async">
+      <div class="astage">
+      <div class="app" role="img" aria-label="Sample entry plan" data-i18n-aria="aria.app">
+        <div class="atop">
+          <span class="alogo hplogo" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#ts-qhav"/></svg></span>
+          <div class="aid"><b><span data-i18n="demo.brand">Qinghuan Tea House</span><span class="atag" data-i18n="app.sample">Sample plan</span></b><small data-i18n="app.loc">Tianxin Village, Wuyi Mountains → first US store in San José, CA</small></div>
+        </div>
+        <div class="atabs"><span class="tb on" data-i18n="app.t1">Entry plan</span><span class="tb" data-i18n="app.t2">Filings</span><span class="tb" data-i18n="app.t3">Documents</span><span class="tb" data-i18n="app.t4">Renewals</span></div>
+        <div class="abody">
+          <div class="alist">
+            <div class="ahead"><b data-i18n="app.reqs">Requirements</b><em id="appCount">3 / 8</em></div>
+            <div class="aprog"><i id="appProg"></i></div>
+            <div id="appRows"></div>
+          </div>
+          <div class="aside">
+            <div class="proj"><small data-i18n="app.proj">Projected opening</small><strong data-i18n="app.date">Mar 2027</strong><em data-i18n="app.est">Estimate, not a guarantee</em></div>
+            <div class="gantt" id="gantt"></div>
+            <div class="risk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#24406F" stroke-width="2" aria-hidden="true"><path d="M12 3 2 21h20L12 3zM12 10v5M12 18v.5"/></svg><span data-i18n="app.risk">Risk check: review state rules on foreign-owned leases before you sign.</span></div>
+          </div>
+        </div>
       </div>
-      <div class="dcard wcard" id="wcard"></div>
+      <div class="vfl vfl1" id="vToast" aria-hidden="true" hidden><span class="orb"></span><div><b id="vToastT"></b><small id="vToastS"></small></div><span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span></div>
+      </div>
+      <div class="vctl">
+        <button type="button" id="vRestart" aria-label="Restart" data-i18n-aria="aria.restart"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5"/></svg></button>
+        <button type="button" id="vPlay" aria-label="Pause" data-i18n-aria="aria.pause"><svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor" id="vIcon"><rect x="1" y="1" width="3.6" height="12" rx="1"/><rect x="8.4" y="1" width="3.6" height="12" rx="1"/></svg></button>
+      </div>
+      <div class="vprog"><i id="vBar"></i></div>
+    </div>
     </div>
   </div>
 </section>
@@ -2906,114 +2920,52 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
   </div>
 </section>
 
-<!-- ======================= WORKS WHERE YOU WORK: Odelia in a permit portal ======================= -->
-<section class="sec rv" data-rv="up" id="portal" aria-labelledby="ptH">
+<section class="sec rv" data-rv="up" id="teammate" aria-labelledby="tmH">
   <div class="ctr">
-    <div class="ptrow">
-      <div class="ptl">
-        <h2 class="t28" id="ptH" data-i18n="pt.h">Odelia works in the portals you dread.</h2>
-        <p class="ptsub" data-i18n="pt.sub">City permit sites, county health portals, state tax accounts, customs systems. She signs in once with your OK, then does the clicking.</p>
-        <ol class="ptsteps" id="ptSteps">
-          <li data-s="0"><b data-i18n="pt.s1">Signs in with your approval</b><span data-i18n="pt.s1s">One tap from you. Your password never leaves your vault.</span></li>
-          <li data-s="1"><b data-i18n="pt.s2">Fills every field from your documents</b><span data-i18n="pt.s2s">Lease, LLC filing and floor plan, each value linked to where it came from.</span></li>
-          <li data-s="2"><b data-i18n="pt.s3">Submits, saves the receipt, follows up</b><span data-i18n="pt.s3s">Nothing is submitted until you say so.</span></li>
-          <li data-s="3"><b data-i18n="pt.s4">Remembers your answer</b><span data-i18n="pt.s4s">Tell her once that landlord letters go to you first, and she does it that way at every store.</span></li>
-        </ol>
-      </div>
-      <div class="ptpanel" aria-hidden="true">
-        <div class="ptwin" id="ptWin">
-          <div class="ptbar"><i></i><i></i><i></i><span class="ptaddr"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-i18n="pt.url">City permit portal</span></span></div>
-          <div class="ptbody">
-            <p class="ptform" data-i18n="pt.form">Food facility plan check application</p>
-            <div class="ptsign"><span class="orb"></span><span data-i18n="pt.sign">Odelia signed in with your approval</span></div>
-            <div class="ptf" data-f="0"><small data-i18n="pt.f1">Business name</small><span class="ptv" data-v="Qinghuan Tea House LLC"></span></div>
-            <div class="ptf" data-f="1"><small data-i18n="pt.f2">Site address</small><span class="ptv" data-v="1 Market St, San José, CA"></span></div>
-            <div class="ptf" data-f="2"><small data-i18n="pt.f3">Seats</small><span class="ptv" data-v="42"></span></div>
-            <div class="ptf ptup" data-f="3"><small data-i18n="pt.f4">Floor plan</small><span class="ptfile"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>floor-plan.pdf</span></div>
-            <div class="ptact"><span class="ptbtn" id="ptBtn" data-i18n="pt.submit">Submit application</span></div>
+    <div class="sh"><h2 class="h2" id="tmH" data-i18n="tm.h">Your newest teammate.</h2><p class="sub" data-i18n="tm.sub">Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.</p></div>
+    <div class="feat tmfeat">
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c1h">She joins your team</h3><p data-i18n="tm.c1p">Add Odelia like any other hire. She has a seat on your expansion team and a status you can see.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fhd"><b data-i18n="tm.team">US expansion team</b><span data-i18n="tm.sample">Sample team</span></div>
+            <div class="tmrow" data-st data-ms="320"><span class="av" data-i18n="tm.a1">Y</span><span class="nm"><b data-i18n="tm.r1">You</b><small data-i18n="tm.r1s">Head of US expansion</small></span></div>
+            <div class="tmrow" data-st data-ms="320"><span class="av" data-i18n="tm.a2">R</span><span class="nm"><b data-i18n="tm.r2">Real estate lead</b><small data-i18n="tm.r2s">Sites and leases</small></span></div>
+            <div class="tmrow" data-st data-ms="650"><span class="av" data-i18n="tm.a3">C</span><span class="nm"><b data-i18n="tm.r3">Construction manager</b><small data-i18n="tm.r3s">Build-out and inspections</small></span></div>
+            <div class="tmrow me" data-st data-ms="600"><span class="orb"></span><span class="nm"><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.r4s">Permits and licenses</small></span><span class="tmlive"><i></i><span data-i18n="tm.on">Online</span></span></div>
+            <div class="tmnow" data-st data-ms="700"><span data-i18n="tm.now">Working now: San José health permit packet</span><span class="tmdots" aria-hidden="true"><i></i><i></i><i></i></span></div>
           </div>
-          <span class="ptcur" id="ptCur"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M1 1l11 6.2-5 .9 2.6 5.4-2 1-2.6-5.4L1 13z" fill="#0F1B33" stroke="#fff" stroke-width="1"/></svg><em>Odelia</em></span>
+          <div class="ftoast" data-st data-ms="800"><span class="orb"></span><span><b data-i18n="tm.t1">Odelia joined your team</b><small data-i18n="tm.t1s">US expansion, permits and licenses</small></span></div>
         </div>
-        <div class="ftoast pttoast" id="ptToast"><span class="orb"></span><span><b data-i18n="pt.t">Submitted. Receipt saved.</b><small data-i18n="pt.ts">I'll follow up with the county on Thursday.</small></span></div>
-      </div>
-    </div>
-    <p class="fnote" data-i18n="pt.note">Sample run with sample data.</p>
-  </div>
-</section>
-
-<!-- ======================= AGENCIES A PLAN COVERS (names set in type; no agency seals or logos) ======================= -->
-<section class="mt160 rv" data-rv="up" id="agencies" aria-labelledby="agH">
-  <div class="ctr">
-    <div class="agrow">
-      <div class="agleft">
-        <h2 class="t28" id="agH" data-i18n="agy.h">Where we work, and every agency we handle</h2>
-        <div class="aglist" id="agTabs" role="tablist" aria-labelledby="agH"></div>
-      </div>
-      <div class="agright" id="agRight">
-    <div class="mpcard agmap" id="agMap">
-      <div class="mptabs agmtabs" role="tablist" aria-label="Map" data-i18n-aria="aria.map"><button type="button" role="tab" data-mv="us" aria-selected="true" data-i18n="map.us">United States</button><button type="button" role="tab" data-mv="world" aria-selected="false" data-i18n="map.world">Worldwide</button><button type="button" role="tab" data-mv="freight" aria-selected="false" data-i18n="map.fr">Freight</button></div>
-      <div class="mpstats">
-        <div><b id="mpN1">50</b><span id="mpS1" data-i18n="map.s1">US states covered</span></div>
-        <div class="mpx"><b>170+</b><span data-i18n="map.s2">countries covered</span></div>
-        <div class="mpx"><b id="mpN3">73</b><span id="mpS3">government agencies we handle, across 8 regions</span></div>
-      </div>
-      <div class="mpwrap" id="mpwrap">
-        <svg id="mpsvg" role="img" aria-labelledby="mpdesc"><desc id="mpdesc" data-i18n="map.desc">Map of markets where Placetta handles compliance</desc></svg>
-        <div class="mptip" id="mptip" hidden></div>
-        <button type="button" class="mpzo" id="mpzo" hidden><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4"/></svg><span data-i18n="map.all">Full map</span></button>
-      </div>
-      <div class="mpfl" id="mpfl" hidden><svg id="flsvg" viewBox="0 25 960 404" role="img" aria-labelledby="fldesc"><desc id="fldesc" data-i18n="fl.desc">Map of the shipping lanes our customers' containers travel between Asia, the Americas, Europe, the Middle East, Africa and Australia</desc></svg><ul class="flkey" id="flKey"></ul></div>
-      <div class="mpfoot" id="mpfoot">
-        <div class="mpleg" id="mpleg"></div>
-        <div class="mpsel">
-          <div class="mpdd" id="mpdd">
-            <span class="sr" id="mppickL" data-i18n="map.pick">Choose a market</span>
-            <button type="button" class="mpddb" id="mppick" aria-haspopup="listbox" aria-expanded="false" aria-controls="mpddl" aria-labelledby="mppickL mpddv"><svg class="pin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11A6.5 6.5 0 0 1 18.5 10c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><i class="sw" id="mpddsw" hidden></i><span class="v ph" id="mpddv">Choose a state</span><svg class="chv" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-            <div class="mpddp" id="mpddp" hidden>
-              <div class="mpdds"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="mpddq" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="mpddl" aria-autocomplete="list"></div>
-              <ul class="mpddl" id="mpddl" role="listbox" aria-labelledby="mppickL"></ul>
-            </div>
+      </article>
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c2h">She knows her job</h3><p data-i18n="tm.c2p">One role, owned end to end: every license, filed on time and renewed before it lapses.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="tmid" data-st data-ms="450"><span class="orb"></span><span class="nm"><b data-i18n="tm.r4">Odelia</b><small data-i18n="tm.v1">Permits and licenses manager</small></span><span class="tmlive"><i></i><span data-i18n="tm.on">Online</span></span></div>
+            <div class="fcrow" data-st data-ms="300"><span class="nm" data-i18n="tm.k2">Reports to</span><span class="dt" data-i18n="tm.v2">You</span></div>
+            <div class="fcrow" data-st data-ms="300"><span class="nm" data-i18n="tm.k3">Hours</span><span class="dt" data-i18n="tm.v3s">Always on</span></div>
+            <div class="fcrow" data-st data-ms="450"><span class="nm" data-i18n="tm.k4">Languages</span><span class="dt" data-i18n="tm.v4">English and Chinese</span></div>
+            <div class="tmapps" data-st data-ms="700"><small data-i18n="tm.k5">Works in</small><div><span><i style="background:#EA4335"></i>Gmail</span><span><i style="background:#0F6CBD"></i>Outlook</span><span><i style="background:#611F69"></i>Slack</span><span><i style="background:#4285F4"></i><em data-i18n="tm.gcal">Google Calendar</em></span><span><i style="background:#1FA463"></i><em data-i18n="tm.gdrive">Google Drive</em></span></div></div>
           </div>
-          <p id="mpinfo" data-i18n="map.prompt">Pick a state or country to start a plan there.</p>
-          <button type="button" class="btn b-ink" id="mpgo" hidden></button>
+          <div class="ftoast" data-st data-ms="800"><span class="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span><span><b data-i18n="tm.t2">Never files without your approval</b><small data-i18n="tm.t2s">You sign, pay agency fees and pass ID checks</small></span></div>
         </div>
-      </div>
-    </div>
-        <div class="agcard" id="agCard">
-          <div class="agwin" id="agWin" role="tabpanel" aria-live="polite"></div>
-          <ul class="agkey" id="agKey"><li><em class="agt agt-f" data-i18n="agy.tf">We file</em><span data-i18n="agy.kf">Placetta's agents prepare and submit it</span></li><li><em class="agt agt-p" data-i18n="agy.tp">With partners</em><span data-i18n="agy.kp">Agents prepare it, a licensed broker, lawyer or lab files it</span></li><li><em class="agt agt-m" data-i18n="agy.tm">We monitor</em><span data-i18n="agy.km">Agents track the rules and flag every change</span></li></ul>
-        </div>
-      </div>
-    </div>
-    <p class="agnote" data-i18n="agy.note">Placetta is not affiliated with or endorsed by any government agency.</p>
-  </div>
-</section>
-
-<!-- ======================= LIVE POLICY + INDUSTRY MONITOR ======================= -->
-<section class="sec rv" data-rv="up" id="monitor" aria-labelledby="monH">
-  <div class="ctr">
-    <div class="mnhd">
-      <div>
-        <h2 class="h2" id="monH" data-i18n="mon.h2">Rules change after you open.<br>We tell you what to do.</h2>
-        <p class="sub" data-i18n="mon.body3">Every rule change in your markets, with what it means for your stores and what to do next.</p>
-      </div>
-      <div class="mncta"><button type="button" class="btn b-ink" id="trAlert" data-i18n="cta.plan">Get my plan</button><small><span data-i18n="mon.price">Rule alerts are included in every monthly plan</span><button type="button" class="mnsa" id="mnSampleB" data-i18n="mon.sample">See a sample alert</button></small></div>
-    </div>
-    <div class="mnstage">
-      <div class="mnwrap">
-        <div class="mnkpi" id="mnKpi"></div>
-        <div class="mngrid">
-          <div class="mnhero" id="mnDet" aria-live="polite"></div>
-          <div class="mnside">
-            <div class="mnsc"><div class="mnch"><b data-i18n="mon.dl">Upcoming deadlines</b><span data-i18n="mon.dl6">Next 6 months</span></div><div class="mndl" id="mnDl"></div></div>
-            <div class="mnsc mnsc2"><div class="mnch"><div class="mnmk" id="mnMk"><button type="button" class="mnmkb" id="mnMkB" aria-haspopup="listbox" aria-expanded="false" aria-controls="mnMkP"><b id="mnLsH"></b><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="mnmkp" id="mnMkP" role="listbox" hidden></div></div><span id="mnCnt"></span></div><div class="mnls" id="mnList" role="listbox" aria-labelledby="mnLsH"></div></div>
+      </article>
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="tm.c3h">She reports in</h3><p data-i18n="tm.c3p">Updates arrive where your team already talks: Slack, email and your calendar.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fhd"><b>#us-expansion</b><span data-i18n="tm.wks">Sample week</span></div>
+            <div class="tmmsg" data-st data-ms="650"><span class="orb"></span><div><small><b data-i18n="tm.r4">Odelia</b> <span data-i18n="tm.d2">Tue</span></small><p data-i18n="tm.m2">The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.</p></div></div>
+            <div class="tmmsg you" data-st data-ms="600"><span class="av" data-i18n="tm.a1">Y</span><div><small><b data-i18n="tm.r1">You</b> <span data-i18n="tm.d2">Tue</span></small><p data-i18n="tm.you">Approved. Go ahead.</p></div></div>
+            <div class="tmmsg" data-st data-ms="650"><span class="orb"></span><div><small><b data-i18n="tm.r4">Odelia</b> <span data-i18n="tm.d3">Wed</span></small><p data-i18n="tm.m3">Filed with Santa Clara County. The receipt is saved to your drive.</p></div></div>
           </div>
+          <div class="ftoast" data-st data-ms="800"><span class="orb"></span><span><b data-i18n="tm.t3">Renewal drafted</b><small data-i18n="tm.t3s">Business tax certificate, 30 days before it lapses</small></span></div>
         </div>
-      </div>
+      </article>
     </div>
-    <p class="trnote" data-i18n="mon.note">Summaries for information only, not legal advice. Each item links to its source.</p>
+    <button type="button" class="howtry" data-open="teammate"><span data-i18n="cta.plan">Get my plan</span><span aria-hidden="true">→</span></button>
   </div>
-  <div class="mnpv" id="mnPv" hidden><div class="mnpvc" role="dialog" aria-modal="true" aria-labelledby="mnPvT"><button type="button" class="mnpvx" id="mnPvX" aria-label="Close" data-i18n-aria="aria.close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div id="mnPvB"></div></div></div>
 </section>
 
 
@@ -3098,24 +3050,49 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
   </div>
 </section>
 
-<!-- ======================= BACKED BY OPERATORS ======================= -->
-<section class="mt160 rv" data-rv="up" id="backers" aria-labelledby="bkH">
+<!-- ======================= WORK TOGETHER ======================= -->
+<section class="ox mt160 rv" data-rv="tilt" id="together" aria-labelledby="wtH">
   <div class="ctr">
-    <p class="t28 bkh" id="bkH" data-i18n="bk.h">Backed by operators who built at</p>
-    <ul class="bkg bkt fold" id="bkG"></ul>
-    <button type="button" class="bkmore" id="bkMore" aria-controls="bkG" aria-expanded="false"><span data-i18n="bk.more">Show all</span><i aria-hidden="true"></i></button>
-    <p class="bknote" data-i18n="bk.note">Investors invested personally. Their former and current employers are not affiliated with Placetta and do not endorse it.</p>
-  </div>
-</section>
-
-<!-- ======================= EXPERTS ======================= -->
-<section class="mt160 rv" data-rv="up" id="experts" aria-labelledby="xpH">
-  <div class="ctr">
-    <p class="t28 xph" id="xpH" data-i18n="xp.h">Our experts previously worked at:</p>
-    <div class="xpwall" aria-hidden="true"><canvas id="xpWall"></canvas></div>
-    <div class="xpart" id="xpArt" aria-label="Where our experts worked before, with their portraits" data-i18n-aria="xp.ppl"></div>
-    <button type="button" class="xpmore" id="xpMore" aria-expanded="false" aria-controls="xpArt">Show all</button>
-    <p class="bknote" data-i18n="xp.note">Our advisors previously worked at these organizations. The organizations are not affiliated with Placetta and do not endorse it.</p>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="gMin" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/></pattern><pattern id="gMaj" width="120" height="120" patternUnits="userSpaceOnUse"><path d="M120 0H0V120" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="1"/></pattern><g id="fp" fill="none" stroke="currentColor" stroke-width="1.3">
+      <rect x="840" y="150" width="560" height="620"/><rect x="848" y="158" width="544" height="604"/>
+      <path d="M848 762H940M1010 762H1392" stroke-width="3"/>
+      <path d="M940 762A70 70 0 0 1 1010 692M1010 762V692"/>
+      <path d="M1060 762v-8M1120 762v-8M1180 762v-8M1240 762v-8M1300 762v-8"/>
+      <rect x="880" y="192" width="270" height="58"/><rect x="880" y="250" width="58" height="190"/>
+      <circle cx="960" cy="222" r="6"/><circle cx="1000" cy="222" r="6"/><circle cx="1040" cy="222" r="6"/><rect x="1080" y="206" width="52" height="30"/>
+      <path d="M1190 158V330M1190 380V440H1392"/><path d="M1190 380A50 50 0 0 0 1240 330"/>
+      <rect x="1220" y="186" width="150" height="48"/><path d="M1270 186v48M1320 186v48"/><rect x="1220" y="270" width="72" height="140"/><path d="M1220 305h72M1220 340h72M1220 375h72"/>
+      <rect x="1262" y="580" width="130" height="182"/><path d="M1262 640A44 44 0 0 1 1306 596"/><ellipse cx="1350" cy="720" rx="14" ry="20"/><rect x="1310" y="600" width="60" height="26" rx="4"/>
+      <circle cx="990" cy="520" r="26"/><circle cx="1090" cy="520" r="26"/><circle cx="990" cy="640" r="26"/><circle cx="1090" cy="640" r="26"/><circle cx="1190" cy="560" r="26"/>
+      <path d="M990 484v-8M990 556v8M954 520h-8M1026 520h8M1090 484v-8M1090 556v8M1054 520h-8M1126 520h8M990 604v-8M990 676v8M1090 604v-8M1090 676v8M1190 524v-8M1190 596v8"/>
+      <path d="M840 812H1400M840 802v20M1400 802v20M1452 150V770M1442 150h20M1442 770h20" stroke-width="1"/>
+      <path d="M1470 96l8 22-8-6-8 6z" stroke-width="1"/>
+      <g fill="currentColor" stroke="none" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="13" letter-spacing="1">
+        <text x="1092" y="836">42'-0"</text><text x="1462" y="466">48'-0"</text><text x="1466" y="90" data-i18n="bp.n">N</text>
+        <text x="888" y="184" data-i18n="bp.bar">TEA BAR, SERVICE COUNTER</text><text x="1222" y="176" data-i18n="bp.prep">PREP, 3-COMP SINK</text>
+        <text x="950" y="470" data-i18n="bp.seat">SEATING, OCC. LOAD 34</text><text x="1268" y="572" data-i18n="bp.rr">RR, ADA</text><text x="944" y="792" data-i18n="bp.entry">ENTRY, EXIT</text>
+        <text x="840" y="128" data-i18n="bp.title">A-101, TENANT IMPROVEMENT, HOLLOW PINE TEA CO.</text>
+      </g></defs></svg>
+    <div class="wtc">
+      <svg viewBox="700 60 900 820" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <rect x="0" y="0" width="1600" height="1000" fill="#7399C6"/>
+        <rect x="0" y="0" width="1600" height="1000" fill="url(#gMaj)"/>
+        <use href="#fp" style="color:rgba(255,255,255,.5)"/>
+        <rect x="0" y="0" width="1600" height="1000" fill="rgba(15,27,51,.74)"/>
+      </svg>
+      <div class="wti">
+        <div class="wtw wtq">
+          <h2 class="t28 wth" id="wtH" data-i18n="wt.h">Answer from the app your team already uses</h2>
+          <div class="rot"><div class="rotl" id="rotl"></div></div>
+        </div>
+        <div class="chbox">
+          <ul class="chl" aria-label="Channels" data-i18n-aria="ch.aria"><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.wechat">WeChat</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg><span data-i18n="ch.slack">Slack</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg><span data-i18n="ch.lark">Lark / 飞书</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5z"/><path fill="currentColor" stroke="none" d="M9.3 7.9c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z"/></svg><span data-i18n="ch.wa">WhatsApp</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg><span data-i18n="ch.im">iMessage</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span data-i18n="ch.mail">Email</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg><span data-i18n="ch.tel">Phone</span></li></ul>
+          <p class="chn" data-i18n="ch.note">Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.</p>
+          <div class="chwc" id="chWc" hidden><button type="button" class="chadd" id="chAdd" aria-expanded="false" aria-controls="chQr"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.add">Add us on WeChat</span></button><div class="chqr" id="chQr" hidden><img id="chQrImg" alt="" width="132" height="132"><p data-i18n="ch.qr">Scan with WeChat to add Placetta</p></div></div>
+        </div>
+      </div>
+      <a class="qr" id="wtQr" href="/?src=qr"><img class="qrimg" id="wtQrImg" src="media/placetta-qr.svg" alt="QR code for placetta" width="64" height="64" decoding="async" draggable="false"><p id="wtQrT" data-i18n="wt.qr">Scan to open Placetta on your phone</p></a>
+    </div>
   </div>
 </section>
 
@@ -3149,6 +3126,95 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
   </div>
 </section>
 
+<!-- ======================= INDUSTRIES ======================= -->
+<!-- ======================= CUSTOMERS AND CASE STUDIES ======================= -->
+<section class="inv" id="backed" aria-labelledby="invL">
+  <div class="ctr">
+    <p class="invl" id="invL" data-i18n="inv.l">The brands we serve are backed by</p>
+    <div class="invr" id="invR"></div>
+  </div>
+</section>
+
+<section class="sec rv" data-rv="up" id="case" aria-labelledby="caseH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="caseH" data-i18n="proof.h">See the plan before you sign the lease.</h2><p class="sub" data-i18n="proof.sub">Example plans for businesses like yours, built from official sources. Each one cites the agencies and laws behind it.</p></div>
+    <div class="pfrow" id="pfRow" role="list" aria-label="At a glance" data-i18n-aria="aria.proof">
+      <div role="listitem"><b>73</b><span>government agencies we handle, across 8 regions</span></div>
+      <div role="listitem"><b>50</b><span>US states covered, plus 170+ countries</span></div>
+      <div role="listitem"><b>2</b><span>languages for every plan and dashboard: English and Chinese</span></div>
+      <div role="listitem"><b>0</b><span>filings sent without your approval</span></div>
+    </div>
+    <div class="tssec" id="tsSec">
+      <h3 class="tsh3" id="tsH" data-i18n="ts.h">Don't just take our word for it.</h3>
+      <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
+      <div class="tsgrid" id="tsGrid" role="tabpanel" tabindex="0"></div>
+    </div>
+    <div class="cshd">
+      <h3 class="h3" data-i18n="bel.cases">Example plans</h3>
+      <div class="tstabs cstabs" role="tablist" id="caseTabs" aria-label="Case studies" data-i18n-aria="bel.cases"></div>
+    </div>
+    <div class="cscard" id="caseCard">
+      <div class="csl" id="caseBody" role="tabpanel">
+        <div class="belid"><span id="caseLogo"></span><span class="beltag" data-i18n="bel.tag">Case study</span></div>
+        <p class="belt" id="caseT"></p>
+        <p class="belp" id="caseP"></p>
+        <div class="belst" id="caseSt"></div>
+        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="case" data-i18n="cta.plan">Get my plan</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
+      </div>
+      <div class="csr">
+        <div class="belstage">
+          <div class="belwin">
+            <div class="belwh"><b id="caseWin"></b><div class="beltabs" role="tablist" id="belTabs" aria-label="Markets" data-i18n-aria="bel.tabs"></div></div>
+            <ol class="belrows" id="belRows" role="tabpanel"></ol>
+          </div>
+        </div>
+        <p class="belsrc" id="belSrc"></p>
+      </div>
+    </div>
+    <div class="cscard teacard" id="teaCard">
+      <div class="beltabs casetabs teatabs" role="tablist" id="teaTabs" aria-label="Tea houses" data-i18n-aria="tea.tabs"></div>
+      <div class="csl" id="teaBody" role="tabpanel">
+        <div class="belid"><span id="teaLogo"></span><span class="beltag" data-i18n="bel.ex">Example plan</span></div>
+        <p class="csnm" id="teaNm"></p>
+        <p class="belt" id="teaT"></p>
+        <p class="belp" id="teaP"></p>
+        <div class="belst" id="teaSt"></div>
+        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="tea" data-i18n="cta.plan">Get my plan</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
+      </div>
+      <div class="csr">
+        <div class="belstage">
+          <div class="belwin">
+            <div class="belwh"><b id="teaWin"></b><div class="beltabs" role="tablist" id="teaMk" aria-label="Steps" data-i18n-aria="tea.mk"></div></div>
+            <ol class="belrows" id="teaRows" role="tabpanel"></ol>
+          </div>
+        </div>
+        <p class="belsrc" id="teaSrc"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= BACKED BY OPERATORS ======================= -->
+<section class="mt160 rv" data-rv="up" id="backers" aria-labelledby="bkH">
+  <div class="ctr">
+    <p class="t28 bkh" id="bkH" data-i18n="bk.h">Backed by operators who built at</p>
+    <ul class="bkg bkt fold" id="bkG"></ul>
+    <button type="button" class="bkmore" id="bkMore" aria-controls="bkG" aria-expanded="false"><span data-i18n="bk.more">Show all</span><i aria-hidden="true"></i></button>
+    <p class="bknote" data-i18n="bk.note">Investors invested personally. Their former and current employers are not affiliated with Placetta and do not endorse it.</p>
+  </div>
+</section>
+
+<!-- ======================= EXPERTS ======================= -->
+<section class="mt160 rv" data-rv="up" id="experts" aria-labelledby="xpH">
+  <div class="ctr">
+    <p class="t28 xph" id="xpH" data-i18n="xp.h">Our experts previously worked at:</p>
+    <div class="xpwall" aria-hidden="true"><canvas id="xpWall"></canvas></div>
+    <div class="xpart" id="xpArt" aria-label="Where our experts worked before, with their portraits" data-i18n-aria="xp.ppl"></div>
+    <button type="button" class="xpmore" id="xpMore" aria-expanded="false" aria-controls="xpArt">Show all</button>
+    <p class="bknote" data-i18n="xp.note">Our advisors previously worked at these organizations. The organizations are not affiliated with Placetta and do not endorse it.</p>
+  </div>
+</section>
+
 <!-- ======================= PRICING ======================= -->
 <section class="sec rv" data-rv="up" id="compare" aria-labelledby="cmpH">
   <div class="ctr">
@@ -3164,7 +3230,7 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
 <section class="sec rv" data-rv="up" id="pricing" aria-labelledby="priceH">
   <div class="ctr">
     <div class="prrow">
-      <div class="sh prl"><h2 class="h2" id="priceH" data-i18n="price.h">Simple pricing.</h2><p class="sub" data-i18n="price.sub">One price for every store. Headquarters signs once, and each franchisee pays for its own stores.</p></div>
+      <div class="sh prl"><h2 class="h2" id="priceH" data-i18n="price.h">Simple pricing.</h2><p class="sub" data-i18n="price.sub">Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.</p><small class="srcl" data-i18n="price.src">Source: <a href="https://www.permitflow.com/blog/nyc-permit-expediter" target="_blank" rel="noopener">PermitFlow, NYC permit expediter costs</a></small></div>
       <div class="prcard">
         <p class="prv"><b id="prV">$149</b><span data-i18n="price.lu">per location a month</span></p>
         <p class="prps" id="prPs">Billed yearly</p>
@@ -3185,18 +3251,6 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
       <div class="prmb">
         <div class="plans" id="tiers"></div>
         <p class="pfine" data-i18n="price.fine">Every plan includes Odelia, with a monthly allowance per location, twice as much on Pro. Extra allowance comes in $49 packs that carry over. Government fees go straight to each agency, and attorneys and customs brokers bill you directly.</p>
-        <div class="pmath">
-      <div class="pmhd"><h3 class="t28" data-i18n="price.m.h">The math on waiting</h3><p class="pmsub" data-i18n="price.m.sub">One month of waiting costs more than a restaurant opening and a full year with Odelia.</p></div>
-      <div class="pmgrid">
-        <div class="pmc"><p class="pml"><i class="pmx" aria-hidden="true">×</i><span data-i18n="price.m.bad">Without Odelia</span></p>
-          <div class="pms pmain"><b data-i18n="price.an.v">$15,000<small class="pmper">a month</small></b><i class="pmbar bad" aria-hidden="true"><i></i></i><span data-i18n="price.m.s1">Rent with no sales, for every month a permit runs late. The example store waited 8 months.</span></div>
-        </div>
-        <div class="pmc us"><p class="pml"><span class="orb" aria-hidden="true"></span><span data-i18n="price.m.good">With Odelia</span></p>
-          <div class="pms pmain"><b data-i18n="price.an.v2">$8,288</b><i class="pmbar good" aria-hidden="true"><i></i></i><span data-i18n="price.m.s2">A restaurant opening filed and tracked to approval ($6,500), plus its first year on Essentials ($1,788).</span></div>
-        </div>
-        <p class="pmnote" data-i18n="price.m.note">Illustrative calculation, not a quote or a promise. Your rent, timeline and agency fees will differ.</p>
-      </div>
-    </div>
       </div>
     </details>
   </div>
@@ -3210,57 +3264,10 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
   </div>
 </section>
 
-<!-- ======================= WORK TOGETHER ======================= -->
-<section class="ox mt160 rv" data-rv="tilt" id="together" aria-labelledby="wtH">
-  <div class="ctr">
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="gMin" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/></pattern><pattern id="gMaj" width="120" height="120" patternUnits="userSpaceOnUse"><path d="M120 0H0V120" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="1"/></pattern><g id="fp" fill="none" stroke="currentColor" stroke-width="1.3">
-      <rect x="840" y="150" width="560" height="620"/><rect x="848" y="158" width="544" height="604"/>
-      <path d="M848 762H940M1010 762H1392" stroke-width="3"/>
-      <path d="M940 762A70 70 0 0 1 1010 692M1010 762V692"/>
-      <path d="M1060 762v-8M1120 762v-8M1180 762v-8M1240 762v-8M1300 762v-8"/>
-      <rect x="880" y="192" width="270" height="58"/><rect x="880" y="250" width="58" height="190"/>
-      <circle cx="960" cy="222" r="6"/><circle cx="1000" cy="222" r="6"/><circle cx="1040" cy="222" r="6"/><rect x="1080" y="206" width="52" height="30"/>
-      <path d="M1190 158V330M1190 380V440H1392"/><path d="M1190 380A50 50 0 0 0 1240 330"/>
-      <rect x="1220" y="186" width="150" height="48"/><path d="M1270 186v48M1320 186v48"/><rect x="1220" y="270" width="72" height="140"/><path d="M1220 305h72M1220 340h72M1220 375h72"/>
-      <rect x="1262" y="580" width="130" height="182"/><path d="M1262 640A44 44 0 0 1 1306 596"/><ellipse cx="1350" cy="720" rx="14" ry="20"/><rect x="1310" y="600" width="60" height="26" rx="4"/>
-      <circle cx="990" cy="520" r="26"/><circle cx="1090" cy="520" r="26"/><circle cx="990" cy="640" r="26"/><circle cx="1090" cy="640" r="26"/><circle cx="1190" cy="560" r="26"/>
-      <path d="M990 484v-8M990 556v8M954 520h-8M1026 520h8M1090 484v-8M1090 556v8M1054 520h-8M1126 520h8M990 604v-8M990 676v8M1090 604v-8M1090 676v8M1190 524v-8M1190 596v8"/>
-      <path d="M840 812H1400M840 802v20M1400 802v20M1452 150V770M1442 150h20M1442 770h20" stroke-width="1"/>
-      <path d="M1470 96l8 22-8-6-8 6z" stroke-width="1"/>
-      <g fill="currentColor" stroke="none" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="13" letter-spacing="1">
-        <text x="1092" y="836">42'-0"</text><text x="1462" y="466">48'-0"</text><text x="1466" y="90" data-i18n="bp.n">N</text>
-        <text x="888" y="184" data-i18n="bp.bar">TEA BAR, SERVICE COUNTER</text><text x="1222" y="176" data-i18n="bp.prep">PREP, 3-COMP SINK</text>
-        <text x="950" y="470" data-i18n="bp.seat">SEATING, OCC. LOAD 34</text><text x="1268" y="572" data-i18n="bp.rr">RR, ADA</text><text x="944" y="792" data-i18n="bp.entry">ENTRY, EXIT</text>
-        <text x="840" y="128" data-i18n="bp.title">A-101, TENANT IMPROVEMENT, HOLLOW PINE TEA CO.</text>
-      </g></defs></svg>
-    <div class="wtc">
-      <svg viewBox="700 60 900 820" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <rect x="0" y="0" width="1600" height="1000" fill="#7399C6"/>
-        <rect x="0" y="0" width="1600" height="1000" fill="url(#gMaj)"/>
-        <use href="#fp" style="color:rgba(255,255,255,.5)"/>
-        <rect x="0" y="0" width="1600" height="1000" fill="rgba(15,27,51,.74)"/>
-      </svg>
-      <div class="wti">
-        <div class="wtw">
-          <p class="t28 l" id="wtH" data-i18n="wt.l">Work together</p>
-          <div class="rot"><div class="rotl" id="rotl"></div></div>
-          <p class="t28 r" data-i18n="wt.r">from day one</p>
-        </div>
-        <div class="chbox">
-          <ul class="chl" aria-label="Channels" data-i18n-aria="ch.aria"><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.wechat">WeChat</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg><span data-i18n="ch.slack">Slack</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg><span data-i18n="ch.lark">Lark / 飞书</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5z"/><path fill="currentColor" stroke="none" d="M9.3 7.9c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z"/></svg><span data-i18n="ch.wa">WhatsApp</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg><span data-i18n="ch.im">iMessage</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span data-i18n="ch.mail">Email</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg><span data-i18n="ch.tel">Phone</span></li></ul>
-          <p class="chn" data-i18n="ch.note">Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.</p>
-          <div class="chwc" id="chWc" hidden><button type="button" class="chadd" id="chAdd" aria-expanded="false" aria-controls="chQr"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.add">Add us on WeChat</span></button><div class="chqr" id="chQr" hidden><img id="chQrImg" alt="" width="132" height="132"><p data-i18n="ch.qr">Scan with WeChat to add Placetta</p></div></div>
-        </div>
-      </div>
-      <a class="qr" id="wtQr" href="/?src=qr"><img class="qrimg" id="wtQrImg" src="media/placetta-qr.svg" alt="QR code for placetta" width="64" height="64" decoding="async" draggable="false"><p id="wtQrT" data-i18n="wt.qr">Scan to open Placetta on your phone</p></a>
-    </div>
-  </div>
-</section>
-
 <!-- ======================= FINAL CTA ======================= -->
 <section class="ctas rv" data-rv="up" aria-labelledby="finalH">
   <div>
-    <h2 class="ctah" id="finalH" data-i18n="final.h">Stay ahead of your competitors.<br>Hire Odelia.</h2>
+    <h2 class="ctah" id="finalH" data-i18n="final.h">Stop paying rent on an empty store.<br>Hire Odelia.</h2>
     <div class="stwrap light">
       <form class="starter" data-src="final" novalidate>
         <label class="sr" for="st-final" data-i18n="st.label">Where are you opening?</label>
@@ -3522,6 +3529,13 @@ zh:{
 /* landing pass: one CTA label everywhere, and the copy for the onboarding, before and after, memory, trust, pricing and channel sections */
 Object.assign(T.en, {"cta.plan": "Get my plan", "st.btn": "Get my plan", "mbar.b": "Get my plan", "bel.btn": "Get my plan", "tea.btn": "Get my plan", "tm.cta": "Get my plan", "how.try": "Get my plan", "hero.try": "Get my plan", "cta.free": "Get my plan", "mon.alert": "Get my plan", "mon.plan": "Get my plan for {m}", "map.go": "Get my plan for {m}", "hero.demo": "Book a demo", "mon.price": "Rule alerts are included in every monthly plan", "hero.sub": "Odelia finds every permit your US launch needs, files each one with your approval, and keeps them current, in English or Chinese.", "st.note": "$299 one-time per market, credited toward your first year if you start a plan within 60 days.", "diff.h": "The difference Odelia makes", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "Minutes", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "ob.h": "Just tell Odelia what you're opening.", "ob.sub": "Sign-up is one line, in English or Chinese. She works out what and where, asks only what's missing, and starts your plan.", "ob.app": "Create your workspace", "ob.q": "What are you opening, and where?", "ob.hint": "English or Chinese", "ob.go": "Start", "ob.opt": "Name, opening date and address can wait.", "ob.read": "Odelia read", "ob.c1": "Milk tea shop", "ob.c2": "Flushing, Queens, NY", "ob.pt": "Your first plan", "ob.s1": "licenses found", "ob.s2": "forms filled", "ob.s3": "deadlines set", "ob.r1": "Food service establishment permit", "ob.r1a": "NYC Health Department", "ob.r1s": "Form filled", "ob.r2": "Certificate of Authority, sales tax", "ob.r2a": "NY State Tax Department. Due 20 days before your first sale", "ob.r2s": "Form filled", "ob.r3": "Food protection certificate", "ob.r3a": "A certified supervisor on every shift", "ob.r3s": "Before opening", "ob.r4": "Sign permit", "ob.r4a": "NYC Buildings", "ob.r4s": "Queued", "ob.more": "5 more in your plan", "ob.ft": "Ready for your review", "ob.fts": "Nothing is filed until you approve it.", "ob.note": "Sample run with sample data.", "ob.aria": "Sample sign-up: one line typed, then Odelia's first plan", "mem.h": "Odelia learns from each note", "mem.sub": "Correct her once, and she does it that way at every store from then on.", "mem.note": "Example conversation in the product, not a customer quote.", "mem.k1": "You correct her", "mem.k2": "Next time, she applies it", "mem.you": "You", "mem.a1": "Fire permit renewal is ready. Send it to the fire department?", "mem.f1": "Fire permit renewal", "mem.m1": "3-page PDF", "mem.u1": "Ask our landlord to sign first, he's on the lease.", "mem.a2": "Got it, landlord signs anything tied to the lease.", "mem.saved": "Committed to memory", "mem.b1": "The sign permit is tied to your lease, so it went to your landlord first. He signed this morning. Send it to the city?", "mem.f2": "Sign permit application", "mem.m2": "2-page PDF, signed", "mem.u2": "Yes, send it.", "mem.b2": "Sent to the city. Your landlord has a copy.", "mem.used": "Applied from memory", "pt.s4s": "Tell her once that your landlord signs anything tied to the lease, and she does it that way at every store.", "tb.h": "Built for trust", "tb.1": "Nothing filed, paid or sent without your approval", "tb.1s": "Odelia prepares each step. It goes out only when you tap Approve.", "tb.2": "Every value shows its source", "tb.2s": "Each field links to the document or official page it came from.", "tb.3": "Tamper-proof audit trail", "tb.3s": "Every action is logged, and the log can only be added to, never edited or deleted.", "tb.4": "Agency logins in an encrypted vault", "tb.4s": "Odelia signs in only with your OK, and every use of a login is logged.", "tb.5": "Email instructions verified by DKIM", "tb.5s": "She acts on an email only when the sender's domain signature checks out, since a From line can be forged.", "tb.6": "Your data is never used to train AI", "tb.6s": "Your documents and messages are never sold or used to train AI models.", "tb.7": "Independent licensed attorneys", "tb.7s": "When a filing legally needs a lawyer, we introduce one you engage directly.", "tb.8": "Local permit expediters", "tb.8s": "In-person filings, pick-ups and inspections, handled in the city where you open.", "price.h": "Simple pricing.", "price.sub": "One price for every store. Headquarters signs once, and each franchisee pays for its own stores.", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "price.e.l": "Entry plan", "price.e.v": "$299", "price.e.u": "/market, one time", "price.e.ps": "Credited toward your first year if you start a plan within 60 days", "price.e.n": "Every license, permit and registration one market needs, in order, with timelines and estimated fees.", "price.e.f1": "Ready in minutes", "price.e.f2": "Every requirement linked to its official source", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta"});
 Object.assign(T.zh, {"cta.plan": "获取我的计划", "st.btn": "获取我的计划", "mbar.b": "获取我的计划", "bel.btn": "获取我的计划", "tea.btn": "获取我的计划", "tm.cta": "获取我的计划", "how.try": "获取我的计划", "hero.try": "获取我的计划", "cta.free": "获取我的计划", "mon.alert": "获取我的计划", "mon.plan": "获取我的计划：{m}", "map.go": "获取我的计划：{m}", "hero.demo": "预约演示", "mon.price": "所有月度方案均含规则变化提醒", "hero.sub": "Odelia 找出您在美国开业所需的每一项许可，经您确认后逐项申报，并持续更新。中英文均可。", "diff.h": "Odelia 带来的改变", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "几分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "ob.h": "一句话告诉 Odelia，您要开什么店。", "ob.sub": "注册只需一句话，中文英文都行。她会弄清是什么店、开在哪里，只问缺少的信息，然后开始为您做计划。", "ob.app": "创建您的工作区", "ob.q": "您要开什么店？开在哪里？", "ob.hint": "中文或英文均可", "ob.go": "开始", "ob.opt": "店名、开业日期和地址都可以稍后再填。", "ob.read": "Odelia 识别为", "ob.c1": "奶茶店", "ob.c2": "纽约皇后区法拉盛", "ob.pt": "您的第一份计划", "ob.s1": "项许可", "ob.s2": "份表格已填好", "ob.s3": "个截止日期", "ob.r1": "食品服务场所许可", "ob.r1a": "纽约市卫生局", "ob.r1s": "表格已填好", "ob.r2": "销售税授权证书", "ob.r2a": "纽约州税务局，须在首笔销售 20 天前办妥", "ob.r2s": "表格已填好", "ob.r3": "食品安全管理证书", "ob.r3a": "每个班次须有一名持证主管", "ob.r3s": "开业前完成", "ob.r4": "招牌许可", "ob.r4a": "纽约市建筑局", "ob.r4s": "排队中", "ob.more": "计划中还有 5 项", "ob.ft": "已可供您审阅", "ob.fts": "未经您批准，不会提交任何申请。", "ob.note": "示例演示，数据均为示例。", "ob.aria": "注册示例：输入一句话，Odelia 随即生成第一份计划", "mem.h": "Odelia 从每一次反馈中学习", "mem.sub": "纠正她一次，此后每家门店她都照此办理。", "mem.note": "产品中的示例对话，并非客户原话。", "mem.k1": "您纠正她", "mem.k2": "下一次，她照做", "mem.you": "您", "mem.a1": "消防许可续期材料已准备好。现在发给消防局吗？", "mem.f1": "消防许可续期", "mem.m1": "3 页 PDF", "mem.u1": "先请房东签字，租约上有他的名字。", "mem.a2": "明白。凡是和租约有关的文件，都先请房东签字。", "mem.saved": "已存入记忆", "mem.b1": "招牌许可和租约有关，所以我先发给了房东，他今早已签字。现在提交给市政府吗？", "mem.f2": "招牌许可申请", "mem.m2": "2 页 PDF，已签字", "mem.u2": "好的，提交吧。", "mem.b2": "已提交给市政府，并抄送房东一份。", "mem.used": "按记忆执行", "pt.s4s": "告诉她一次：凡与租约有关的文件都先请房东签字，她会在每家门店都照此执行。", "tb.h": "值得信赖", "tb.1": "未经您批准，不提交、不付款、不发送", "tb.1s": "每一步由 Odelia 准备，您点“批准”后才会发出。", "tb.2": "每个数值都标明出处", "tb.2s": "每个字段都链接到它所依据的文件或官方页面。", "tb.3": "防篡改的审计记录", "tb.3s": "每一步操作都有记录，记录只能追加，不能修改或删除。", "tb.4": "政府网站登录信息加密存放", "tb.4s": "Odelia 只在您同意后登录，每次使用登录信息都有记录。", "tb.5": "邮件指令经 DKIM 验证", "tb.5s": "发件人域名签名验证通过后，她才会按邮件执行，因为发件人地址可以伪造。", "tb.6": "您的数据绝不用于训练 AI", "tb.6s": "您的文件和消息绝不出售，也不用于训练 AI 模型。", "tb.7": "独立执业的持牌律师", "tb.7s": "依法需要律师的申报，我们为您介绍律师，由您直接聘请。", "tb.8": "本地许可代办", "tb.8s": "现场递交、取件和检查，由开店所在城市的代办团队完成。", "price.h": "简单的价格。", "price.sub": "每家门店一个价格。总部签约一次，每位加盟商为自己的门店付费。", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "price.e.l": "开店计划", "price.e.v": "299 美元", "price.e.u": "/市场，一次性", "price.e.ps": "60 天内开通方案，可抵扣首年费用", "price.e.n": "一个市场所需的每一项执照、许可和登记，按顺序列出，附时间表和预估规费。", "price.e.f1": "几分钟即可生成", "price.e.f2": "每项要求均附官方来源", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉"});
+/* problem first: every heading leads with the pain, Odelia arrives as the way out. Every figure about the problem links its public source */
+Object.assign(T.en, {"hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.sub": "Every month without them is rent on an empty store. Odelia ends the forms sent back, the missed renewals and the hourly bills, in English or Chinese.", "diff.h": "Four people on the clock, and still no permit", "cost.h": "Every month late is rent on an empty store.", "cost.sub": "What the wait costs, from public records and reporting.", "cost.p1b": "$10,000", "cost.p1s": "The most New York State can fine a store for selling without a sales tax certificate: up to $500 the first day and $200 every day after.", "cost.p1src": "Source: <a href=\"https://www.tax.ny.gov/pubs_and_bulls/tg_bulletins/st/how_to_register_for_nys_sales_tax.htm\" target=\"_blank\" rel=\"noopener\">NY State Tax Department</a>", "cost.p2b": "Every year", "cost.p2s": "NYC food service permits expire a year after you apply, and Health Department inspectors arrive unannounced at least once a year.", "cost.p2src": "Sources: <a href=\"https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit\" target=\"_blank\" rel=\"noopener\">NYC Business</a>, <a href=\"https://www.nyc.gov/site/doh/services/restaurant-grades.page\" target=\"_blank\" rel=\"noopener\">NYC Health</a>", "cost.s3s": "New laws passed every year, across every level of government", "cost.s3src": "Source: <a href=\"https://gusto.com/company-news/gusto-mosey-acquisition\" target=\"_blank\" rel=\"noopener\">Gusto</a>", "calc.l": "Your monthly rent, set it yourself", "agy.h": "City, county and state: each agency has its own forms", "in.h": "Every kind of store has its own permits.", "pt.h": "Forms in a second language, sent back for one wrong field.", "ob.h": "Skip the forms. Just tell Odelia what you're opening.", "plan.h": "Know every permit before you sign the lease.", "plan.sub": "Odelia lays out every requirement in the order agencies require, with timelines and estimated fees.", "how.h": "No permit missed. No renewal lapsed.", "tm.h": "A teammate who already knows every agency.", "mem.h": "Stop explaining the same thing twice", "cn.h": "Your team in Shenzhen sees what New York sees.", "tb.h": "Nothing goes out without you", "wt.h": "Answer from the app your team already uses", "fr.h3": "Every franchisee's permits,<br>without chasing each one", "price.h": "Less than three hours of an expediter.", "price.sub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "final.h": "Stop paying rent on an empty store.<br>Hire Odelia."});
+Object.assign(T.zh, {"hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.sub": "执照晚一个月，空店的房租就多付一个月。Odelia 帮您告别被退回的表格、错过的续期和按小时计费的账单，中英文均可。", "diff.h": "请了四个人，执照还是没下来", "cost.h": "晚一个月开业，空店房租就多付一个月。", "cost.sub": "等待的代价，来自公开资料与新闻报道。", "cost.p1b": "10,000 美元", "cost.p1s": "无销售税授权证书即开始销售，纽约州最高可罚款 10,000 美元：首日最高 500 美元，此后每天最高 200 美元。", "cost.p1src": "来源：<a href=\"https://www.tax.ny.gov/pubs_and_bulls/tg_bulletins/st/how_to_register_for_nys_sales_tax.htm\" target=\"_blank\" rel=\"noopener\">纽约州税务局</a>", "cost.p2b": "每年", "cost.p2s": "纽约市食品服务许可自申请起一年后到期，卫生局每年至少进行一次不预先通知的检查。", "cost.p2src": "来源：<a href=\"https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit\" target=\"_blank\" rel=\"noopener\">纽约市商业服务</a>、<a href=\"https://www.nyc.gov/site/doh/services/restaurant-grades.page\" target=\"_blank\" rel=\"noopener\">纽约市卫生局</a>", "cost.s3s": "美国各级政府每年新通过的法律", "cost.s3src": "来源：<a href=\"https://gusto.com/company-news/gusto-mosey-acquisition\" target=\"_blank\" rel=\"noopener\">Gusto</a>", "calc.l": "您的月租金（可自行调整）", "agy.h": "市、县、州，每个机构都有自己的一套表格", "in.h": "每一种店，都有自己的一套许可。", "pt.h": "表格用的是第二语言，一个字段填错就被退回。", "ob.h": "不用填表，一句话告诉 Odelia 您要开什么店。", "plan.h": "签租约之前，就知道要办哪些许可。", "plan.sub": "Odelia 按各机构要求的顺序列出每一项要求，附时间表和预估规费。", "how.h": "不漏一项许可，不误一次续期。", "tm.h": "一位熟悉每个机构的新同事。", "mem.h": "同样的事，不用说第二遍", "cn.h": "深圳团队看到的，就是纽约团队看到的。", "tb.h": "没有您点头，什么都不会发出", "wt.h": "在团队常用的应用里直接回复", "fr.h3": "每家加盟店的执照，<br>不用一家家去追", "price.h": "不到代办三小时的费用。", "price.sub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "final.h": "别再为空店付房租。<br>让 Odelia 加入您的团队。"});
+Object.assign(T.en, {"mon.body3": "About 15,000 new laws pass every year across every level of government. Odelia reads the ones that touch your markets and tells you what to do next.", "mon.src": "Source: <a href=\"https://gusto.com/company-news/gusto-mosey-acquisition\" target=\"_blank\" rel=\"noopener\">Gusto</a>"});
+Object.assign(T.zh, {"mon.body3": "美国各级政府每年新通过约 15,000 部法律。Odelia 读完与您所在市场有关的部分，并告诉您下一步该做什么。", "mon.src": "来源：<a href=\"https://gusto.com/company-news/gusto-mosey-acquisition\" target=\"_blank\" rel=\"noopener\">Gusto</a>"});
+Object.assign(T.en, {"hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
+Object.assign(T.zh, {"hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -3531,8 +3545,8 @@ const CLAIMS = {
   en:{"map.fs":"containers of customer goods we help bring into new markets every year"},
   zh:{"map.fs":"个货柜：每年我们协助客户运入新市场的货物"}},
  monthsSooner: {
-  en:{"hero.sub":"Odelia finds every permit your US launch needs, files each one with your approval, and keeps them current. Open months sooner, in English or Chinese.", "proof.h":"Brands open sooner with Placetta."},
-  zh:{"hero.sub":"Odelia 找出您在美国开业所需的每一项许可，经您确认后逐项申报，并持续更新。提前数月开业，中英文均可。", "proof.h":"品牌借助快哉，更早开业。"}},
+  en:{"hero.sub":"Every month without them is rent on an empty store. Odelia ends the forms sent back, the missed renewals and the hourly bills, so you open months sooner.", "proof.h":"Brands open sooner with Placetta."},
+  zh:{"hero.sub":"执照晚一个月，空店的房租就多付一个月。Odelia 帮您告别被退回的表格、错过的续期和按小时计费的账单，让您提前数月开业。", "proof.h":"品牌借助快哉，更早开业。"}},
  backersLogos: {
   en:{"bk.h":"Backed by operators from", "bk.hero":"Backed by operators from OpenAI, Anthropic, SpaceX and 21 more"},
   zh:{"bk.h":"我们的投资人来自", "bk.hero":"投资人来自 OpenAI、Anthropic、SpaceX 等 24 家公司"}},
@@ -3567,15 +3581,9 @@ const PLAN = [
  {n:["Certificate of occupancy","使用许可证"],a:["After final inspection","最终验收后签发"],l:"city",s:13.6,d:16,w:[13,16],blk:true}
 ];
 const STORIES = [
- {k:["Sacramento restaurant","萨克拉门托餐厅"],big:["8 mo","8 个月"],sub:["planned: 2 months","原计划：2 个月"],
-  q:["Expected to open in 2 months. It waited 8, spent $100,000 on permits, and estimates the delay cost about $1M in revenue.","原计划 2 个月开业，实际等了 8 个月，许可花费 10 万美元，延误估计造成约 100 万美元营收损失。"],
-  src:["San Francisco Chronicle","《旧金山纪事报》"],mo:[8,8],cells:i=> i===1?"r p": i<8?"r": i===8?"o":"",leg:["r","p","o"]},
- {k:["Chinese tea chain, first US store","中国茶饮品牌，美国首店"],big:["7 mo","7 个月"],sub:["to open the first US store","美国首店开业耗时"],
-  q:["A Chinese tea chain needed 7 months to open its first store in the US.","一家中国茶饮品牌在美国开出第一家门店，用了 7 个月。"],
-  src:["Reuters via Malay Mail","路透社（经《马来邮报》转载）"],mo:[7,7],cells:i=> i<7?"r": i===7?"o":"",leg:["r","o"]},
- {k:["Typical new restaurant","典型的新餐厅"],big:["3–6 mo","3–6 个月"],sub:["permit phase alone","仅许可审批阶段"],
-  q:["The permit phase alone typically takes 3 to 6 months, before a single customer walks in.","仅许可审批阶段通常就需要 3 到 6 个月，期间没有一位顾客上门。"],
-  src:["DoorDash Merchants","DoorDash 商家平台"],mo:[3,6],cells:i=> i<3?"r": i<6?"m":"",leg:["r","m"]}
+ {k:["Chinese tea brand, first US store","中国茶饮品牌，美国首店"],big:["7 mo","7 个月"],sub:["to open its first US store","开出美国首店耗时"],
+  q:["“It took seven months to open the store, which was quite painful,” said Amanda Wang, co-founder of Ningji Lemon Tea. In China she opens a store within 20 days of signing a contract. Not a Placetta customer.","“开这家店花了七个月，非常痛苦。”柠季联合创始人 Amanda Wang 说（译文）。在中国，她签约后 20 天内就能开店。非快哉客户。"],
+  src:["<a href=\"https://www.malaymail.com/news/money/2025/12/18/spill-the-tea-america-chinese-brands-are-coming-to-take-on-coffee-culture/202409\" target=\"_blank\" rel=\"noopener\">Reuters, via Malay Mail, Dec 18, 2025</a>","<a href=\"https://www.malaymail.com/news/money/2025/12/18/spill-the-tea-america-chinese-brands-are-coming-to-take-on-coffee-culture/202409\" target=\"_blank\" rel=\"noopener\">路透社，经《马来邮报》转载，2025 年 12 月 18 日</a>"],mo:[7,7],cells:i=> i<7?"r": i===7?"o":"",leg:["r","o"]}
 ];
 const TIERS = [
   {l:["Essentials","基础版"],v:["$149","149 美元"],u:["/location a month","/门店/月"],ps:["Billed yearly","按年计费"],cta:["Get my plan","获取我的计划"],tag:["For franchise chains","连锁加盟品牌"],n:["For every franchise or company-owned store.","适用于每家加盟店或直营店。"],f:[["Every license tracked, renewals filed before they lapse","跟踪每一项执照，到期前完成续期"],["Staff certificates and vendor proof for every store","每家门店的员工证书与供应商凭证"],["Odelia included, with a monthly allowance per location","包含 Odelia，每家门店每月都有额度"]]},
@@ -3689,7 +3697,7 @@ function renderCost(){
   const i = L(), s = STORIES[sIdx];
   const cells = Array.from({length:12},(_,m) => `<i class="${s.cells(m)}" style="animation-delay:${m*45}ms"></i>`).join("");
   document.getElementById("wcard").innerHTML = `
-    <div class="wtabs" role="tablist">${STORIES.map((x,k) => `<button type="button" role="tab" aria-selected="${k===sIdx}" data-s="${k}">${x.k[i]}</button>`).join("")}</div>
+    ${STORIES.length < 2 ? "" : `<div class="wtabs" role="tablist">${STORIES.map((x,k) => `<button type="button" role="tab" aria-selected="${k===sIdx}" data-s="${k}">${x.k[i]}</button>`).join("")}</div>`}
     <div class="whead"><div><div class="wbig">${s.big[i]}</div><div class="wsub">${s.sub[i]}</div></div><p class="wq">${s.q[i]}</p></div>
     <div><div class="wgrid" aria-hidden="true">${cells}</div><div class="waxis">${Array.from({length:12},(_,m)=>`<span>${m+1}</span>`).join("")}</div>
       <div class="wleg">${s.leg.map(x => `<span><i style="${LEGSTYLE[x]}"></i>${t("leg."+x)}</span>`).join("")}<span style="margin-left:auto;color:var(--muted)">${t("months")} →</span></div></div>
