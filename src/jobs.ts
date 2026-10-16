@@ -3,9 +3,16 @@ import { B, type Bi } from "./bi";
 /* Odelia's work, run like an engineer's: each job she takes on has a plan she keeps current (Work, in the app), and
    routines are jobs the business asked her to repeat on a schedule. The monitor starts due routines each morning. */
 
-export type JobStep = { title: Bi; done: boolean };
+/** What proves a step (or a done item) from the workspace itself, so nobody has to say it's done:
+ *  - app + items: those checklist items on the application have their documents
+ *  - approval: the approval has been put up (waiting, or already decided)
+ *  - closed: the person approved it and it went out
+ *  - status: the application has reached one of these statuses
+ *  Every condition given has to hold. */
+export type StepCheck = { app?: string; items?: string[]; approval?: string; closed?: string; status?: string[] };
+export type JobStep = { title: Bi; done: boolean; check?: StepCheck };
 /** One line of what finished looks like, with the checker's verdict once it has looked. */
-export type DoneItem = { text: Bi; ok?: boolean; why?: Bi };
+export type DoneItem = { text: Bi; ok?: boolean; why?: Bi; check?: StepCheck };
 /** What a seat did and what's next, written when an agent hands the job to a fresh one. */
 export type Handoff = { at: string; seat: number; note: string };
 export type JobStatus = "running" | "waiting" | "done" | "stopped";
@@ -87,3 +94,89 @@ export function settleJobs<W extends { jobs?: Job[] }>(since: string): (w: W) =>
       : { ...j, status: "waiting" as const, waiting: j.waiting ?? B("Odelia stopped here. Ask her to carry on.", "Odelia 停在这一步。请让她继续。") }) };
   };
 }
+
+/* ---- The proof loop: steps and done items with a check are ticked from the workspace, never by say-so ---- */
+
+type Checklist = { id: string; label: Bi; state: string; dep?: string };
+type AppLike = { id: string; name: Bi; status: string; checklist: Checklist[] };
+type ApprovalLike = { id: string; title: Bi };
+/** The parts of a workspace the proof loop reads. */
+export type Evidence = { jobs?: Job[]; apps: AppLike[]; approvals: ApprovalLike[]; closed: ApprovalLike[] };
+
+/** The checklist items a check still needs documents for. */
+function missing(w: Evidence, c: StepCheck): Checklist[] {
+  if (!c.app || !c.items?.length) return [];
+  const app = w.apps.find(a => a.id === c.app);
+  return (app?.checklist ?? []).filter(x => c.items!.includes(x.id) && x.state === "missing");
+}
+
+/** Whether the workspace shows this check as met. */
+export function met(w: Evidence, c: StepCheck): boolean {
+  if (missing(w, c).length) return false;
+  if (c.approval && !w.approvals.some(a => a.id === c.approval) && !w.closed.some(a => a.id === c.approval)) return false;
+  if (c.closed && !w.closed.some(a => a.id === c.closed)) return false;
+  if (c.status?.length) { const app = w.apps.find(a => a.id === c.app); if (!app || !c.status.includes(app.status)) return false; }
+  return true;
+}
+
+/** What has to happen next on a job, and who does it. */
+export type NextAction =
+  | { who: "you"; kind: "upload"; app: string; appName: Bi; items: { id: string; label: Bi }[] }
+  | { who: "you"; kind: "approve"; id: string; title: Bi }
+  | { who: "odelia"; step: Bi }
+  | null;
+
+export function nextAction(w: Evidence, job: Job): NextAction {
+  if (job.status === "done" || job.status === "stopped") return null;
+  const s = job.steps.find(x => !x.done);
+  if (!s) return null;
+  const c = s.check;
+  if (c) {
+    const need = missing(w, c);
+    if (need.length) { const app = w.apps.find(a => a.id === c.app)!; return { who: "you", kind: "upload", app: app.id, appName: app.name, items: need.map(x => ({ id: x.id, label: x.label })) }; }
+    if (c.closed) { const a = w.approvals.find(x => x.id === c.closed); if (a) return { who: "you", kind: "approve", id: a.id, title: a.title }; }
+  }
+  return { who: "odelia", step: s.title };
+}
+
+const sameJob = (a: Job, b: Job) => JSON.stringify(a) === JSON.stringify(b);
+const andList = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+
+/** Brings each open job in line with the workspace: ticks the steps and done items the evidence proves, records the
+ *  check, says what it waits on, and finishes the job only when every step is done and every done item is proven.
+ *  Returns the same object when nothing changed, so it is safe to run after every edit. */
+export function reconcile<W extends Evidence>(w: W, now = new Date().toISOString()): W {
+  const jobs = w.jobs ?? [];
+  if (!jobs.some(j => j.status !== "done" && j.status !== "stopped" && (j.steps.some(s => s.check) || j.done?.some(d => d.check)))) return w;
+  let changed = false;
+  const next = jobs.map(j => {
+    if (j.status === "done" || j.status === "stopped") return j;
+    if (!j.steps.some(s => s.check) && !j.done?.some(d => d.check)) return j;
+    // a step with a check is done when its evidence is there; steps without one keep what the agent set
+    const steps = j.steps.map(s => (s.check ? { ...s, done: met(w, s.check) } : s));
+    const done = j.done?.map(d => (d.check ? { ...d, ok: met(w, d.check) } : d));
+    let n: Job = { ...j, steps, ...(done ? { done } : {}) };
+    const act = nextAction(w, n);
+    const proven = (done ?? []).every(d => d.ok === true);
+    if (steps.every(s => s.done) && proven) n = { ...n, status: "done", waiting: undefined };
+    else if (act?.who === "you") n = { ...n, status: "waiting", waiting: act.kind === "upload"
+      ? B(`${andList(act.items.map(i => i.label.en))} for the ${act.appName.en.toLowerCase()}.`, `${act.appName.zh}：${act.items.map(i => i.label.zh).join("、")}。`)
+      : B(`Your approval: ${act.title.en}.`, `需要您批准：${act.title.zh}。`) };
+    else if (j.status === "waiting" && act?.who === "odelia" && steps.some((s, i) => s.done !== j.steps[i].done)) n = { ...n, status: "running", waiting: undefined };
+    if (done?.some(d => d.check)) {
+      const passed = (done ?? []).filter(d => d.ok === true).length;
+      if (!j.checked || j.checked.passed !== passed || j.checked.of !== done!.length) n = { ...n, checked: { at: now, passed, of: done!.length } };
+    }
+    if (sameJob(n, j)) return j;
+    changed = true;
+    // "updated" moves only when the work moved: a step, a done item or the status
+    const moved = n.status !== j.status || n.steps.some((s, i) => s.done !== j.steps[i]?.done) || (n.done ?? []).some((d, i) => d.ok !== j.done?.[i]?.ok);
+    return moved ? { ...n, updated: now } : n;
+  });
+  return changed ? { ...w, jobs: next } : w;
+}
+
+/** What Odelia is asked when someone tells her to carry on with a job. */
+export const continuePrompt = (j: Job, lang: "en" | "zh") => lang === "zh"
+  ? `继续这项工作，直到完成：“${j.title.zh}”（job ${j.id}）。按计划做下一步，做完后对照完成标准逐项核对。`
+  : `Carry on with the job "${j.title.en}" (job ${j.id}) until it's done. Do the next step in its plan, then check the work against its done list.`;

@@ -12,6 +12,8 @@ import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrub
 import { inDays } from "../src/time";
 import { B, same } from "../src/bi";
 import type { Application, Workspace } from "../src/model";
+import { nextAction, reconcile } from "../src/jobs";
+import { SAMPLE_WS } from "../src/sample";
 import { UPDATED } from "../src/legal.ts";
 import { ADDRESS_RULES } from "../src/forms/address-rules/index";
 import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
@@ -423,6 +425,40 @@ async function memoryAndSkills() {
   ok((r.reply?.memory as unknown[]).length >= 2 && (r.reply?.skills as unknown[]).length === 1, "the reply lists what was remembered and learned");
 }
 
+function proofLoop() {
+  console.log("\n# the proof loop: jobs tick from evidence, not say-so");
+  const base = SAMPLE_WS;
+  const r0 = reconcile(base);
+  const plan0 = r0.jobs!.find(j => j.id === "job-plan")!, cards0 = r0.jobs!.find(j => j.id === "job-cards")!;
+  ok(plan0.status === "waiting" && /Floor plan/.test(plan0.waiting!.en), "plan check waits on the floor plan and equipment list", plan0.waiting);
+  ok(nextAction(r0, cards0)?.who === "you" && (nextAction(r0, cards0) as { kind: string }).kind === "approve", "food handler job asks for the text's approval first");
+  ok(reconcile(r0) === r0, "running it again changes nothing");
+  // the documents arrive and the filing is put up: steps 4 and 5 tick, the job waits on the approval
+  const up = (w: typeof base, ids: string[]) => ({ ...w, apps: w.apps.map(a => a.id !== "plancheck" && a.id !== "handler" ? a : { ...a, checklist: a.checklist.map(c => ids.includes(c.id) ? { ...c, state: "done" } : c) }) });
+  const aPlan = { ...base.approvals[0], id: "a-plan", app: "plancheck" };
+  const r1 = reconcile({ ...up(r0, ["fp", "eq"]), approvals: [...r0.approvals, aPlan] });
+  const plan1 = r1.jobs!.find(j => j.id === "job-plan")!;
+  ok(plan1.steps[3].done && plan1.steps[4].done && !plan1.steps[5].done, "documents in and approval up tick steps 4 and 5 only");
+  ok(plan1.status === "waiting" && /approval/i.test(plan1.waiting!.en), "then it waits on the approval", plan1.waiting);
+  ok(plan1.checked?.passed === 3 && plan1.checked.of === 4, "the check counts 3 of 4 proven", plan1.checked);
+  // approved: done, and every done item proven
+  const r2 = reconcile({ ...r1, approvals: r1.approvals.filter(a => a.id !== "a-plan"), closed: [...r1.closed, aPlan] });
+  const plan2 = r2.jobs!.find(j => j.id === "job-plan")!;
+  ok(plan2.status === "done" && plan2.checked?.passed === 4, "approved and filed: done, 4 of 4 proven", plan2);
+  // food handler cards: approval sent, then cards trickle in; done only at six of six
+  const sent = reconcile({ ...r0, approvals: r0.approvals.filter(a => a.id !== "a-staff"), closed: [...r0.closed, ...r0.approvals.filter(a => a.id === "a-staff")] });
+  const c1 = sent.jobs!.find(j => j.id === "job-cards")!;
+  ok(c1.steps[2].done && c1.status === "waiting" && /C\. Ortiz/.test(c1.waiting!.en), "text sent: waits on the four missing cards", c1.waiting);
+  const some = reconcile(up(sent, ["s3", "s4", "s5"]));
+  ok(some.jobs!.find(j => j.id === "job-cards")!.status === "waiting", "five of six isn't done");
+  const all6 = reconcile(up(some, ["s6"]));
+  const c3 = all6.jobs!.find(j => j.id === "job-cards")!;
+  ok(c3.status === "done" && c3.checked?.passed === 2, "six of six: done and proven", c3);
+  // a job without checks is left to the agent
+  const free = { ...base, jobs: [{ id: "j", title: B("x", "x"), status: "running" as const, steps: [{ title: B("a", "a"), done: false }], started: "", updated: "" }] };
+  ok(reconcile(free) === free, "a job with no checks is untouched");
+}
+
 async function work() {
   console.log("\n# set_plan, schedule_routine, cancel_routine");
   const r = await agent({
@@ -782,6 +818,7 @@ await writing();
 await memoryAndSkills();
 await settings();
 await work();
+proofLoop();
 await harness();
 await network();
 await errors();

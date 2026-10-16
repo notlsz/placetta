@@ -1,4 +1,5 @@
 import type { OrbState } from "thinking-orbs";
+import { nextAction, progress, reconcile } from "./jobs";
 import { B, MATCH_FREMONT, MATCH_SJ, SRC, genericMatch, same, type Application, type Approval, type Bi, type Doc, type Fact, type Workspace } from "./model";
 import { inDays, money, nowIso } from "./time";
 
@@ -208,6 +209,22 @@ function staff(ctx: Context): Plan {
   };
 }
 
+/** Carry on with a job: check the work against its done list, then say exactly what moves it next. */
+function carryOn(ctx: Context, text: string): Plan {
+  const id = /\(job ([^)]+)\)/.exec(text)?.[1];
+  const w = reconcile(ctx.current), job = (w.jobs ?? []).find(j => j.id === id);
+  const steps = [S("weaving", "Picking up the plan", "接手计划"), S("solving", "Checking the work against what done means", "对照完成标准核对")];
+  if (!job) return { steps, reply: { text: [B("I couldn't find that job. It may have been removed.", "找不到这项工作，可能已被删除。")] } };
+  const p = progress(job), act = nextAction(w, job), c = job.checked;
+  const proof = c ? B(` The check: ${c.passed} of ${c.of} done.`, `核对：${c.of} 项中完成 ${c.passed} 项。`) : B("", "");
+  const head = B(`${job.title.en}: ${p.done} of ${p.all} steps done.${proof.en}`, `${job.title.zh}：已完成 ${p.done}/${p.all} 步。${proof.zh}`);
+  const next = !act ? B("It's done and checked.", "已完成并核对。")
+    : act.who === "you" && act.kind === "upload" ? B(`Next I need ${act.items.map(i => i.label.en).join(", ")} for the ${act.appName.en.toLowerCase()}. Upload them on the job in Work and I'll take it from there.`, `下一步需要${act.appName.zh}的${act.items.map(i => i.label.zh).join("、")}。在“工作”页的这项工作上上传，我就接着办。`)
+    : act.who === "you" ? B(`Next is your approval: ${act.title.en}. Nothing goes out until you approve.`, `下一步需要您批准：${act.title.zh}。您批准前不会发出任何内容。`)
+    : B(`Next: ${act.step.en}.`, `下一步：${act.step.zh}。`);
+  return { steps, updates: [() => w], reply: { text: [B(`${head.en} ${next.en}`, `${head.zh}${next.zh}`)], apps: job.apps } };
+}
+
 /** Teach Odelia a job: she interviews the owner first, then writes the playbook from the answers. */
 const interview = (): Plan => ({
   steps: [S("searching", "Checking your playbooks", "查看您的手册"), S("composing", "Writing my questions", "整理问题")],
@@ -231,6 +248,7 @@ const runPlaybook = (ctx: Context, text: string): Plan => {
 };
 
 const SCRIPTS: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
+  { match: /^carry on with the job|^继续这项工作/i, plan: carryOn },
   { match: /^interview me|teach (odelia|you) a job|就一项我想交给你|教 ?odelia/i, plan: interview },
   { match: /^run the playbook|^按手册/i, plan: runPlaybook },
   { match: /statement|biennial|llc-12|信息声明|申报/i, plan: prepareSoi },

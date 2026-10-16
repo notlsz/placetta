@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useApp } from "./ctx";
 import { B } from "./bi";
 import { fmtAgo, fmtDay } from "./time";
 import { I } from "./ui";
-import { cadence, nextRun, progress, type Job, type Routine } from "./jobs";
+import { cadence, continuePrompt, nextAction, nextRun, progress, type Job, type Routine } from "./jobs";
+import { PREVIEW } from "./cloud/api";
 import { toolbox } from "./harness";
 
 /* Work: everything Odelia is on, run like an engineer's tickets. Each job shows her plan and where it stands; what
@@ -33,11 +34,49 @@ export function PlanCard({ job, compact }: { job: Job; compact?: boolean }) {
         ))}
       </ol>
       {job.status === "waiting" && job.waiting && <p className="job-need"><b>{zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
+      {!compact && <JobActions job={job} />}
       <Harness job={job} compact={compact} />
       {!compact && job.apps?.length ? (
         <p className="job-apps">{job.apps.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <button key={id} type="button" className="lnk" onClick={() => openApp(id)}>{b(a.name)}</button> : null; })}</p>
       ) : null}
     </section>
+  );
+}
+
+/** The one thing that moves this job forward now: your upload, your approval, or Odelia carrying on. Nothing here
+ *  ticks a step by hand; steps tick when the workspace shows the work (src/jobs.ts, reconcile). */
+function JobActions({ job }: { job: Job }) {
+  const { lang, ws, busy, ask, upload, openApproval, editWs, cloud } = useApp();
+  const zh = lang === "zh";
+  const pick = useRef<HTMLInputElement>(null);
+  const [item, setItem] = useState<{ app: string; id: string } | null>(null);
+  const act = nextAction(ws, job);
+  if (!act) return null;
+  const stop = () => editWs(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === job.id ? { ...j, status: "stopped" as const, updated: new Date().toISOString() } : j)) }));
+  const sample = !cloud || PREVIEW;
+  return (
+    <div className="job-act">
+      {act.who === "you" && act.kind === "upload" && (
+        <>
+          <input ref={pick} type="file" hidden multiple onChange={e => { const f = [...(e.target.files ?? [])]; if (item && f.length) upload(item.app, item.id, f); e.target.value = ""; }} />
+          {act.items.slice(0, 3).map(i => (
+            <button key={i.id} type="button" className="sbtn ink" disabled={busy} onClick={() => { setItem({ app: act.app, id: i.id }); pick.current?.click(); }}>
+              <I.upload />{zh ? `上传${i.label.zh}` : `Upload ${/^[A-Z][a-z]/.test(i.label.en) ? i.label.en.charAt(0).toLowerCase() + i.label.en.slice(1) : i.label.en}`}
+            </button>
+          ))}
+          {sample && <button type="button" className="sbtn line" disabled={busy} onClick={() => upload(act.app, act.items[0].id)}>{zh ? "用示例文件" : "Use a sample file"}</button>}
+        </>
+      )}
+      {act.who === "you" && act.kind === "approve" && (
+        <button type="button" className="sbtn ink" onClick={() => openApproval(act.id)}><I.check />{zh ? "查看并批准" : "Review and approve"}</button>
+      )}
+      {act.who === "odelia" && (
+        <button type="button" className="sbtn ink" disabled={busy} onClick={() => ask(continuePrompt(job, lang))}>
+          <I.spark />{busy ? (zh ? "Odelia 正在工作" : "Odelia is working") : zh ? "让 Odelia 继续" : "Have Odelia carry on"}
+        </button>
+      )}
+      <button type="button" className="lnk quiet" onClick={stop}>{zh ? "停止这项工作" : "Stop this job"}</button>
+    </div>
   );
 }
 
@@ -82,13 +121,14 @@ function Harness({ job, compact }: { job: Job; compact?: boolean }) {
 }
 
 function RoutineRow({ r }: { r: Routine }) {
-  const { b, lang, editWs } = useApp();
+  const { b, lang, editWs, ask, busy } = useApp();
   const zh = lang === "zh", n = nextRun(r, today());
   const set = (f: (x: Routine) => Routine | null) => editWs(w => ({ ...w, routines: (w.routines ?? []).flatMap(x => (x.id === r.id ? (f(x) ? [f(x)!] : []) : [x])) }));
   return (
     <li className="row rt-row">
       <span className="lr-tx"><b>{b(r.title)}</b><small>{b(cadence(r))}{r.paused ? (zh ? "，已暂停" : ", paused") : n ? (zh ? `，下次 ${fmtDay(n, lang)}` : `, next ${fmtDay(n, lang)}`) : ""}{r.last ? (zh ? `，上次 ${fmtDay(r.last, lang)}` : `, last ${fmtDay(r.last, lang)}`) : ""}</small></span>
       <span className="rt-act">
+        <button type="button" className="lnk" disabled={busy} onClick={() => { set(x => ({ ...x, last: today() })); ask(r.prompt); }}>{zh ? "立即运行" : "Run now"}</button>
         <button type="button" className="lnk" onClick={() => set(x => ({ ...x, paused: !x.paused }))}>{r.paused ? (zh ? "恢复" : "Resume") : zh ? "暂停" : "Pause"}</button>
         <button type="button" className="lnk quiet" onClick={() => set(() => null)}>{zh ? "删除" : "Remove"}</button>
       </span>

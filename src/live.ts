@@ -20,7 +20,7 @@ import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { daysFromNow, money, nowIso } from "./time";
-import { cadence, nextRun, settleJobs, type Job, type Routine } from "./jobs";
+import { cadence, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
 import { basisLine, openingLine, openingPath, preflight } from "./smart";
 import { cityOf as recordsCity, cityRecords } from "./opendata";
 import { replyLanguage } from "./langs";
@@ -813,7 +813,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       inputSchema: { type: "object" as const, properties: {
         job_id: { type: "string", description: "The job to update; leave out to start one" },
         title: { type: "string", description: "Short, e.g. 'Map the Flushing store'" },
-        steps: { type: "array", items: { type: "object", properties: { title: { type: "string" }, done: { type: "boolean" } }, required: ["title"] }, description: "Every step, in order" },
+        steps: { type: "array", items: { type: "object", properties: { title: { type: "string" }, done: { type: "boolean" },
+          proof: { type: "object", description: "When the workspace itself can prove the step, say how, and Placetta ticks it from the evidence instead of your say-so: documents arriving on an application's checklist, an approval put up, or an approval the person gave", properties: {
+            application_id: { type: "string" }, checklist_ids: { type: "array", items: { type: "string" } }, approval_id: { type: "string", description: "Done once this approval is put up" }, approved_id: { type: "string", description: "Done once the person approves this" } } } }, required: ["title"] }, description: "Every step, in order" },
         status: { type: "string", enum: ["running", "waiting", "done", "stopped"] },
         waiting_on: { type: "string", description: "With status waiting: what you need, and from whom" },
         application_ids: { type: "array", items: { type: "string" } },
@@ -822,7 +824,16 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       }, required: ["title", "steps"] },
       execute(i: Record<string, unknown>) {
         const title = str(i.title, 100);
-        const steps = arr(i.steps).map(x => ({ title: same(str((x as { title?: unknown }).title, 140)), done: (x as { done?: unknown }).done === true })).filter(x => x.title.en).slice(0, 15);
+        // a step's proof is kept only when it names things that exist, so the evidence check can't be pointed at nothing
+        const proofOf = (raw: unknown): StepCheck | undefined => {
+          if (!raw || typeof raw !== "object") return undefined;
+          const r = raw as Record<string, unknown>, w = get(), app = w.apps.find(a => a.id === str(r.application_id));
+          const items = app ? arr(r.checklist_ids).map(x => str(x)).filter(x => app.checklist.some(c => c.id === x)) : [];
+          const known = (id: string) => !!id && (w.approvals.some(a => a.id === id) || w.closed.some(a => a.id === id));
+          const c: StepCheck = { ...(app && items.length ? { app: app.id, items } : {}), ...(known(str(r.approval_id)) ? { approval: str(r.approval_id) } : {}), ...(known(str(r.approved_id)) ? { closed: str(r.approved_id) } : {}) };
+          return Object.keys(c).length ? c : undefined;
+        };
+        const steps = arr(i.steps).map(x => { const check = proofOf((x as { proof?: unknown }).proof); return { title: same(str((x as { title?: unknown }).title, 140)), done: (x as { done?: unknown }).done === true, ...(check ? { check } : {}) }; }).filter(x => x.title.en).slice(0, 15);
         if (!title || !steps.length) throw new Error("title and at least one step are required");
         const now = new Date().toISOString();
         const jobs = get().jobs ?? [];

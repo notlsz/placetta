@@ -1555,6 +1555,11 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .job-steps li.now .tick { box-shadow: inset 0 0 0 1.5px var(--blue-ink); }
 .job-need { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--warm-soft); color: var(--ink); font-size: 13.5px; line-height: 1.5; }
 .job-need b { font-weight: 600; color: var(--warm); }
+.job-act { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.job-act .sbtn { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; white-space: normal; text-align: left; }
+.job-act .sbtn svg { flex: none; }
+.job-act .lnk { margin-left: auto; font-size: 13px; }
+@media (max-width: 520px) { .job-act .lnk { margin-left: 0; } }
 .job-apps { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 0; font-size: 13px; }
 .hz { margin: 12px 0 0; }
 .hz-proof { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13.5px; color: var(--ink2); }
