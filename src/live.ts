@@ -274,7 +274,9 @@ ${can("set_plan") ? `- Work like an engineer on a ticket. For any job of three o
 - You can change anything in the workspace the person can: add stores (add_store shows it in Stores right away), rename the business (edit_workspace), save business facts (remember), edit deadlines (edit_deadline) and applications (fill_fields, update_application)${can("change_setting") ? ", and change everyday settings (language, theme, accent color, reading replies aloud) with change_setting" : ""}. Changing something that already exists in a way they may not want, like moving a store to a different city or removing a store or an application, goes through update_store, remove_store or remove_application: that puts a confirmation in front of them and nothing changes until they confirm. Say you've asked them to confirm; never say it's done before they do. After a store moves, map the new city's permits. Remove a deadline only when they ask or it clearly no longer applies.
 - Never touch these yourself, even if asked; point to Settings instead: their password, settings PIN, two-step sign-in, team members and roles, billing, agency logins, integrations, and deleting the account or its data.${ms && can("memory_save") ? `
 - Memory: what you know about the person is below under Memory. Use it when it changes the answer; don't recite it.${ms.generate ? " When they tell you something durable about themselves, their preferences or their work, save it with memory_save (one short fact per call)." : " Saving new memories is off: only memory_save when they explicitly ask you to remember something."}${ms.sensitive ? "" : " Never save health, religion, politics, finances or other sensitive details."}${ms.searchChats ? " search_past_chats finds what they said in earlier chats when they refer to it." : ""}` : ""}
-- Skills: before a job, if one of the Skills below fits, skill_read it and follow it; a form skill fills the lines it knows by itself. After you work out something that will come up again (a city's local permits the library didn't have, an agency's quirks, a way this business works), skill_save it${w.skillsAuto === false ? " only if they ask (creating skills automatically is off)" : ""}. That's how you get faster each time.
+- Skills are playbooks: before a job, if one of the Skills below fits, skill_read it and follow it; a form skill fills the lines it knows by itself, and a playbook's toolbox has the files made for that job before, so start from them instead of rebuilding. After you work out something that will come up again (a city's local permits the library didn't have, an agency's quirks, a way this business works), skill_save it with its done list and files${w.skillsAuto === false ? " only if they ask (creating skills automatically is off)" : ""}. That's how you get faster each time.
+- When they hand you a job this business will repeat (their opening checklist, how they renew a license, how they prepare for an inspection, how they report to headquarters) and no playbook fits, interview them before doing it: ask what you need to run it without them next time (how they do it now, who's involved and how to reach them, which files and templates they use, where things go wrong, and what done looks like). Ask it as up to five short numbered questions in one reply. When they answer, skill_save the playbook (from_interview true, with its steps, done list and files), then do the job from it.
+- Every job has a harness that any agent can pick up: set_plan holds its steps, its done list, its playbook and its toolbox. Keep it current; another agent may finish what you start. Never call a job done in your reply until its steps are done: a separate checker verifies the done list against the workspace and sends back anything missing.
 - Only filing, paying and sending need the person. request_filing_approval, draft_message${can("send_email") ? " and send_email" : ""} put those in front of them to approve. Everything else (preparing, filling, drafting documents, adding deadlines${cal ? ", calendar events" : ""}${drives ? ", importing files" : ""}, remembering facts) you just do.` : ""}${apps.length ? `
 - Connected apps: ${apps.join(", ")}.` : ""}${account && missing.length ? `
 - Not connected: ${missing.join(", ")}. If a task needs one, say so in one sentence and point to Settings, Integrations.` : ""}
@@ -751,16 +753,22 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         S("weaving", L(`Using the skill: ${sk.name.en}`, `使用技能：${sk.name.zh}`));
         apply(w => (w.skills ?? []).some(x => x.id === sk.id) ? { ...w, skills: (w.skills ?? []).map(x => (x.id === sk.id ? { ...x, uses: x.uses + 1 } : x)) } : w);
         mark();
-        return { name: sk.name[lang], instructions: sk.body, ...(sk.fills ? { lines_and_sources: sk.fills } : {}) };
+        const tools = (sk.files ?? []).map(id => get().docs.find(d => d.id === id || d.name === id)).filter(Boolean).map(d => ({ id: d!.id, name: d!.name }));
+        return { name: sk.name[lang], instructions: sk.body, ...(sk.fills ? { lines_and_sources: sk.fills } : {}),
+          ...(sk.done?.length ? { done_means: sk.done, note: "Use these as the job's done list in set_plan (add any this job needs). A separate checker verifies each before the job counts as done." } : {}),
+          ...(tools.length ? { toolbox: tools, reuse: "These files were made for this kind of job before. Start from them (read, adapt) instead of writing from scratch." } : {}) };
       },
     },
     {
       name: "skill_save",
-      description: "Save what you just worked out as a skill, so next time it's one step: the local permits you researched for a city the library doesn't cover (kind place), or a way of working this business repeats (kind workflow). Write it as numbered steps another agent could follow, with the official links. Never put personal data, ID numbers or passwords in a skill. Updating an existing skill: pass its id.",
+      description: "Save a playbook (skill) so the next agent can run this kind of job without anyone explaining it: the local permits you researched for a city the library doesn't cover (kind place), or a way of working this business repeats (kind workflow), including one you just interviewed the owner about. Write it as numbered steps another agent could follow, with the official links; give it a done list (what finished looks like, each checkable in the workspace) and the files it uses (its toolbox). Never put personal data, ID numbers or passwords in a skill. Updating an existing skill: pass its id.",
       inputSchema: { type: "object" as const, properties: {
         id: { type: "string", description: "To update an existing skill" }, kind: { type: "string", enum: ["place", "workflow"] },
         name: { type: "string", description: "Short, starts with a verb, e.g. 'Open a milk tea shop in Xiamen'" }, description: { type: "string", description: "One sentence: what it does and when to use it" },
         steps: { type: "string", description: "The instructions, numbered" }, city: { type: "string", description: "For a place skill: the city" },
+        done: { type: "array", items: { type: "string" }, description: "What finished looks like for this kind of job, 2 to 8 items, each something the workspace can show (e.g. 'Every line of the DOHMH application is filled', 'The landlord letter is in Documents')" },
+        files: { type: "array", items: { type: "string" }, description: "Document ids or names this job uses or made: its toolbox" },
+        from_interview: { type: "boolean", description: "Written from the owner's answers about how they do it" },
       }, required: ["kind", "name", "description", "steps"] },
       execute(i: Record<string, unknown>) {
         if (get().skillsAuto === false && !str(i.id)) return { saved: false, why: "Creating skills automatically is off in Settings, Skills." };
@@ -771,14 +779,18 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const kind = str(i.kind) === "place" ? "place" : "workflow";
         const key = kind === "place" && str(i.city) ? "place:" + str(i.city, 60).toLowerCase() : undefined;
         S("weaving", L(`Learning a skill: ${name}`, `学习技能：${name}`));
-        apply(putSkill({ ...(str(i.id) ? { id: str(i.id) } : {}), ...(key ? { key } : {}), kind, source: "auto", name: same(name), description: same(desc), body }));
+        const done = arr(i.done).map(x => str(x, 200)).filter(Boolean).slice(0, 8);
+        const files = arr(i.files).map(x => str(x, 120)).map(x => get().docs.find(d => d.id === x || d.name === x)?.id).filter((x): x is string => !!x).slice(0, 20);
+        const old = str(i.id) ? (get().skills ?? []).find(s => s.id === str(i.id)) : undefined;
+        apply(putSkill({ ...(str(i.id) ? { id: str(i.id) } : {}), ...(key ? { key } : {}), kind, source: "auto", name: same(name), description: same(desc), body,
+          ...(done.length ? { done } : {}), ...(files.length || old?.files ? { files: [...new Set([...(old?.files ?? []), ...files])] } : {}), ...(i.from_interview === true || old?.interviewed ? { interviewed: true } : {}) }));
         made.skills.push(same(name)); mark();
         return { saved: true, skill_id: (get().skills ?? []).find(s => s.name.en === name)?.id };
       },
     },
     {
       name: "set_plan",
-      description: "Show the plan for a job of three or more steps, the way an engineer would: the steps in order, each marked done as you finish it. The person watches it in Work and beside the chat. Call it first with every step not done, then again with the same job_id each time a step finishes, the plan changes, or you're blocked (status waiting, and waiting_on says exactly what and from whom). When the last step is done, mark them all done.",
+      description: "Put the job's harness on: the plan for a job of three or more steps, the way an engineer would, plus what finished looks like. The person watches it in Work and beside the chat; any agent that picks the job up later works from it. Call it first with every step not done and the done list (from the playbook's done_means when one fits, plus anything this job needs), then again with the same job_id each time a step finishes, the plan changes, or you're blocked (status waiting, and waiting_on says exactly what and from whom). When the last step is done, mark them all done: a separate checker then verifies each done item against the workspace before the job counts as done, and sends back anything missing.",
       inputSchema: { type: "object" as const, properties: {
         job_id: { type: "string", description: "The job to update; leave out to start one" },
         title: { type: "string", description: "Short, e.g. 'Map the Flushing store'" },
@@ -786,6 +798,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         status: { type: "string", enum: ["running", "waiting", "done", "stopped"] },
         waiting_on: { type: "string", description: "With status waiting: what you need, and from whom" },
         application_ids: { type: "array", items: { type: "string" } },
+        done: { type: "array", items: { type: "string" }, description: "What finished looks like: 2 to 8 items, each something the workspace or the reply can show. Required when starting a job." },
+        playbook_id: { type: "string", description: "The skill this job follows, when one fits" },
       }, required: ["title", "steps"] },
       execute(i: Record<string, unknown>) {
         const title = str(i.title, 100);
@@ -801,14 +815,40 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const waiting = status === "waiting" && str(i.waiting_on) ? same(str(i.waiting_on, 240)) : undefined;
         const apps = arr(i.application_ids).map(x => str(x)).filter(x => get().apps.some(a => a.id === x));
         const id = old?.id ?? freshId(get(), "job");
-        const next: Job = { id, title: same(title), status, steps, ...(waiting ? { waiting } : {}), started: old?.started ?? now, updated: now, ...(apps.length || old?.apps ? { apps: apps.length ? apps : old?.apps } : {}), ...(old?.routine ? { routine: old.routine } : {}) };
+        // The harness: the done list (kept with any verdicts when the items don't change), the playbook, the toolbox.
+        const doneTexts = arr(i.done).map(x => str(x, 200)).filter(Boolean).slice(0, 8);
+        const pbId = str(i.playbook_id) && activeSkills(get()).some(s => s.id === str(i.playbook_id)) ? str(i.playbook_id) : old?.playbook;
+        const pb = pbId ? activeSkills(get()).find(s => s.id === pbId) : undefined;
+        const doneList = doneTexts.length ? doneTexts.map(t => old?.done?.find(d => d.text.en === t) ?? { text: same(t) })
+          : old?.done ?? (pb?.done?.length ? pb.done.map(t => ({ text: same(t) })) : undefined);
+        if (!old && !doneList?.length && steps.length >= 3) throw new Error("Give the job its done list: 2 to 8 things that will be true when it's finished, each something the workspace can show. A separate checker verifies them before the job counts as done.");
+        const changed = !old || JSON.stringify(old.steps) !== JSON.stringify(steps) || JSON.stringify(old.done?.map(d => d.text.en)) !== JSON.stringify(doneList?.map(d => d.text.en));
+        const next: Job = { id, title: same(title), status, steps, ...(waiting ? { waiting } : {}), started: old?.started ?? now, updated: now, ...(apps.length || old?.apps ? { apps: apps.length ? apps : old?.apps } : {}), ...(old?.routine ? { routine: old.routine } : {}),
+          ...(pbId ? { playbook: pbId } : {}), ...(doneList?.length ? { done: doneList } : {}), ...(old?.checked && !changed ? { checked: old.checked } : {}),
+          ...(old?.files ? { files: old.files } : {}), ...(old?.handoffs ? { handoffs: old.handoffs } : {}), seat: old?.seat ?? 1 };
         job.current = id;
         const n = steps.filter(x => x.done).length;
         S(status === "done" ? "working" : "shaping", old ? L(`Plan: ${n} of ${steps.length} done`, `计划：已完成 ${n}/${steps.length}`) : L(`Planned ${steps.length} steps: ${title}`, `已规划 ${steps.length} 步：${title}`));
         // the newest first; done jobs beyond the last 20 drop off
         apply(w => { const rest = (w.jobs ?? []).filter(j => j.id !== id); const done = rest.filter(j => j.status === "done" || j.status === "stopped").slice(0, 20); return { ...w, jobs: [next, ...rest.filter(j => j.status !== "done" && j.status !== "stopped"), ...done] }; });
         mark();
-        return { job_id: id, done: n, of: steps.length, status };
+        return { job_id: id, done: n, of: steps.length, status, ...(next.done?.length ? { done_list: next.done.length } : {}) };
+      },
+    },
+    {
+      name: "hand_off",
+      description: "Write the job's handoff note, for the fresh agent who takes it over when you run out of room (Placetta tells you when). Say what's done (with names and ids), what's next and exactly how, open questions, and which files to reuse. Plain and complete: the next agent sees only the job's harness and this note, not your conversation.",
+      inputSchema: { type: "object" as const, properties: { job_id: { type: "string" }, note: { type: "string", description: "What's done, what's next, open questions, files to reuse" } }, required: ["note"] },
+      execute(i: Record<string, unknown>) {
+        const id = str(i.job_id) || job.current, note = str(i.note, 3000);
+        const j = (get().jobs ?? []).find(x => x.id === id);
+        if (!j) throw new Error(id ? `No job "${id}".` : "There's no job to hand off: set_plan first.");
+        if (note.length < 20) throw new Error("Write the whole note: what's done, what's next, open questions, files to reuse.");
+        const seat = j.seat ?? 1;
+        apply(w => ({ ...w, jobs: (w.jobs ?? []).map(x => (x.id === j.id ? { ...x, handoffs: [...(x.handoffs ?? []), { at: new Date().toISOString(), seat, note }].slice(-10), updated: new Date().toISOString() } : x)) }));
+        S("shaping", L("Writing the handoff for the next agent", "为下一位代理写交接说明"));
+        mark();
+        return { ok: true, job_id: j.id, seat };
       },
     },
     {
@@ -1145,8 +1185,13 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           if (app && item) n = setCheck(app.id, item.id, { state: "done", doc: id })(n);
           return audit("agent", B("Drafted a document", "起草文件"), same(name), app?.name)(n);
         });
-        made.files.push(id); if (app) made.apps.add(app.id); mark();
-        return { document: name, saved_to: "Documents", attached_to: item ? item.label[lang] : undefined };
+        made.files.push(id); if (app) made.apps.add(app.id);
+        // Into the toolbox: the job it was made for, and that job's playbook, so the next one reuses it.
+        const j = job.current ? (get().jobs ?? []).find(x => x.id === job.current) : undefined;
+        if (j) apply(w => ({ ...w, jobs: (w.jobs ?? []).map(x => (x.id === j.id ? { ...x, files: [...new Set([...(x.files ?? []), id])] } : x)),
+          skills: j.playbook ? (w.skills ?? []).map(s => (s.id === j.playbook ? { ...s, files: [...new Set([...(s.files ?? []), id])] } : s)) : w.skills }));
+        mark();
+        return { document: name, saved_to: "Documents", attached_to: item ? item.label[lang] : undefined, ...(j ? { toolbox: j.title.en } : {}) };
       },
     },
     {

@@ -151,6 +151,9 @@ export type Skill = {
   key?: string;                            // form:<official form id> or place:<city code>
   fills?: { line: string; from: string }[]; // form skills: each line and where its value came from (never the value)
   uses: number; created: string; updated: string; lastSteps?: number; firstSteps?: number;
+  done?: string[];                          // what finished looks like for this kind of job (each job starts from it)
+  files?: string[];                         // its toolbox: documents it made, reused instead of rebuilt
+  interviewed?: boolean;                    // written from the owner's own answers about how they do it
 };
 export type MemoryKind = "you" | "topic" | "area";
 export type MemoryFile = { id: string; kind: MemoryKind; name: string; summary: string; lines: string[]; updated: string; sensitive?: boolean };
@@ -438,7 +441,15 @@ export const SAMPLE: Workspace = {
         { title: B("Get the floor plan and equipment list", "取得平面图和设备清单"), done: false },
         { title: B("Put it up for your approval with the $1,385 fee", "连同 $1,385 费用提交给您批准"), done: false },
       ],
-      waiting: B("Your floor plan and equipment list. Upload them on the plan check, or ask your contractor to email them.", "您的平面图和设备清单。可在图纸审查中上传，或请承包商通过邮件发送。") },
+      waiting: B("Your floor plan and equipment list. Upload them on the plan check, or ask your contractor to email them.", "您的平面图和设备清单。可在图纸审查中上传，或请承包商通过邮件发送。"),
+      done: [
+        { text: B("Every line of the county's plan check form is filled", "县政府图纸审查表每一行都已填写"), ok: true, why: B("All 18 lines have a value", "18 行均已填写") },
+        { text: B("The menu and operations narrative is in Documents", "菜单与运营说明已存入文件"), ok: true, why: B("menu.pdf and finish-schedule.xlsx are attached", "已附 menu.pdf 与 finish-schedule.xlsx") },
+        { text: B("The floor plan and equipment list are attached", "已附平面图和设备清单"), ok: false, why: B("Neither is in Documents yet", "文件中还没有这两份") },
+        { text: B("The filing is waiting for your approval with the $1,385 fee", "申请连同 $1,385 费用等待您批准"), ok: false, why: B("Not put up for approval yet", "尚未提交批准") },
+      ],
+      checked: { at: ago(60 * 3), passed: 2, of: 4 }, files: ["d-finish", "d-menu"], seat: 2,
+      handoffs: [{ at: ago(60 * 20), seat: 1, note: "Filled all 18 lines of the county form from the business facts and wrote the operations narrative (finish-schedule.xlsx). Next: the floor plan and equipment list from the owner or the contractor, then put it up for approval with the $1,385 fee. Reuse menu.pdf; don't redraw the narrative." }] },
     { id: "job-cards", title: B("Get San Jose's staff their food handler cards", "为圣何塞门店员工办理食品从业人员卡"), status: "running", started: ago(45), updated: ago(6),
       steps: [
         { title: B("Check which staff still need a card", "核对还缺证的员工"), done: true },
@@ -453,7 +464,13 @@ export const SAMPLE: Workspace = {
         { title: B("Prepare 10 applications", "准备 10 项申请"), done: true },
         { title: B("Fill each from your business facts", "根据企业信息逐项填写"), done: true },
         { title: B("Add the opening deadlines", "添加开业相关截止日期"), done: true },
-      ] },
+      ],
+      done: [
+        { text: B("The store has every permit it needs listed", "门店所需许可已全部列出"), ok: true, why: B("10 applications on the store", "门店上有 10 项申请") },
+        { text: B("Each application is filled from the business facts", "每项申请都已根据企业信息填写"), ok: true, why: B("No empty lines left that the facts answer", "企业信息能回答的行均已填写") },
+        { text: B("Every opening deadline is on the calendar", "所有开业截止日期都已加入日历"), ok: true, why: B("6 deadlines added", "已添加 6 个截止日期") },
+      ],
+      checked: { at: ago(60 * 24 * 9 - 8), passed: 3, of: 3 } },
   ],
   routines: [
     { id: "rt-filings", title: B("Check every filing that's with an agency", "检查在审的每项申请"), prompt: "Check the status of every application that's with an agency on that agency's own lookup page. Say only what changed; if nothing did, reply exactly: No changes.", every: "weekly", day: 1, from: inDays(-30), last: inDays(-4), created: ago(60 * 24 * 30) },

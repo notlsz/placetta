@@ -214,9 +214,10 @@ const SCENARIOS: Scenario[] = [
     name: "keeps a plan for a long job", lang: "en", maxRounds: 12, ws: () => scratch(),
     prompt: "We're opening a bubble tea shop at 136-20 Roosevelt Ave, Flushing, NY 11354 in March 2027. Take it from here: add the store, map every permit, prepare each one and set the deadlines.",
     check: (r) => {
-      const jobs = ((r.w as unknown as { jobs?: { steps: { done: boolean }[]; status: string }[] }).jobs ?? []);
+      const jobs = ((r.w as unknown as { jobs?: { steps: { done: boolean }[]; status: string; done?: unknown[]; checked?: { passed: number; of: number } }[] }).jobs ?? []);
       const j = jobs[0];
-      return [!!j && j.steps.length >= 3 && j.steps.some((x) => x.done), j ? `${jobs.length} job(s); ${j.steps.filter((x) => x.done).length} of ${j.steps.length} steps done, ${j.status}` : "no plan was kept"];
+      // the job wears its harness: a done list a separate checker can verify
+      return [!!j && j.steps.length >= 3 && j.steps.some((x) => x.done) && (j.done?.length ?? 0) >= 2, j ? `${jobs.length} job(s); ${j.steps.filter((x) => x.done).length} of ${j.steps.length} steps done, ${j.status}; done list ${j.done?.length ?? 0}${j.checked ? `, checked ${j.checked.passed} of ${j.checked.of}` : ""}` : "no plan was kept"];
     },
   },
   {

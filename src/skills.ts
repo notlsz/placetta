@@ -82,7 +82,7 @@ export const activeSkills = (w: Workspace) => allSkills(w).filter(s => s.on);
 
 /** The index the agent sees: one line a skill, like Claude's skill list. */
 export function skillIndex(w: Workspace): string {
-  return activeSkills(w).map(s => `- ${s.id}: ${s.name.en}. ${s.description.en}${s.uses ? ` (used ${s.uses}x)` : ""}`).join("\n");
+  return activeSkills(w).map(s => `- ${s.id}: ${s.name.en}. ${s.description.en}${s.uses ? ` (used ${s.uses}x)` : ""}${s.done?.length ? `, ${s.done.length} done checks` : ""}${s.files?.length ? `, ${s.files.length} files in its toolbox` : ""}${s.interviewed ? ", from the owner's own answers" : ""}`).join("\n");
 }
 
 export const skillFor = (w: Workspace, key: string) => (w.skills ?? []).find(s => s.key === key && s.on);

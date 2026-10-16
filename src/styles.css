@@ -1556,6 +1556,29 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .job-need { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--warm-soft); color: var(--ink); font-size: 13.5px; line-height: 1.5; }
 .job-need b { font-weight: 600; color: var(--warm); }
 .job-apps { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 0; font-size: 13px; }
+.hz { margin: 12px 0 0; }
+.hz-proof { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13.5px; color: var(--ink2); }
+.hz-proof svg { width: 15px; height: 15px; flex: none; color: var(--ink3); }
+.hz-proof.ok svg { color: var(--blue-ink); }
+.hz-proof.short { color: var(--warm); }
+.hz-proof.short svg { color: var(--warm); }
+.hz-proof small { color: var(--ink3); font-size: 12.5px; }
+.hz-tog { font-size: 13px; }
+.hz-body { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; padding: 14px; border-radius: 14px; background: var(--mist); }
+.hz-body h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--ink3); text-transform: uppercase; }
+.hz-body p { margin: 0; font-size: 13.5px; color: var(--ink2); line-height: 1.5; }
+.hz-body small { display: block; color: var(--ink3); font-size: 12.5px; margin-top: 2px; }
+.hz-done { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.hz-done li { display: flex; gap: 10px; font-size: 13.5px; color: var(--ink2); line-height: 1.45; }
+.hz-done .mark { flex: none; width: 16px; height: 16px; margin-top: 2px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px var(--ink3); display: grid; place-items: center; }
+.hz-done .mark svg { width: 12px; height: 12px; }
+.hz-done li.ok .mark { box-shadow: none; color: var(--blue-ink); }
+.hz-done li.no .mark { box-shadow: inset 0 0 0 1.5px var(--warm); color: var(--warm); }
+.hz-files { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.hz-hand { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.hz-hand li b { font-size: 13px; font-weight: 600; color: var(--ink); }
+.hz-hand li small { display: inline; margin-left: 8px; }
+.hz-hand li p { margin-top: 3px; white-space: pre-wrap; }
 .work-now { display: flex; align-items: center; gap: 8px; margin: 18px 0 0; color: var(--blue-ink); font-size: 14px; }
 .work-now svg { width: 16px; height: 16px; }
 .q-list .row { display: flex; align-items: center; gap: 12px; }

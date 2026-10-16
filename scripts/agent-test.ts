@@ -427,7 +427,7 @@ async function work() {
   const r = await agent({
     ws: workspace(), prompt: "Get the Flushing store ready for its health inspection, and check the permit every Monday.",
     script: [
-      () => ask(["set_plan", { title: "Get Flushing ready for the health inspection", steps: [{ title: "Read the inspector's checklist" }, { title: "Ask the landlord for the grease trap record" }, { title: "Book the inspection" }] }], ["set_plan", { title: "x", steps: [] }]),
+      () => ask(["set_plan", { title: "Get Flushing ready for the health inspection", steps: [{ title: "Read the inspector's checklist" }, { title: "Ask the landlord for the grease trap record" }, { title: "Book the inspection" }], done: ["The inspection is booked", "The grease trap record is in Documents"] }], ["set_plan", { title: "x", steps: [] }]),
       () => ask(["set_plan", { title: "Get Flushing ready for the health inspection", steps: [{ title: "Read the inspector's checklist", done: true }, { title: "Ask the landlord for the grease trap record" }, { title: "Book the inspection" }], status: "waiting", waiting_on: "The grease trap service record from the landlord" }], ["set_plan", { job_id: "nope", title: "x", steps: [{ title: "y" }] }]),
       () => ask(["schedule_routine", { title: "Check the health permit", instructions: "Check the permit's status on the agency's lookup page and say only what changed.", every: "weekly", day: 1 }], ["schedule_routine", { title: "Bad", instructions: "x", every: "weekly", day: 9 }], ["schedule_routine", { title: "Daily digest", instructions: "Summarize what changed today.", every: "daily" }]),
       c => ask(["cancel_routine", { routine_id: c.outs("schedule_routine")[1].routine_id }], ["cancel_routine", { routine_id: "nope" }]),
@@ -447,6 +447,93 @@ async function work() {
   const eom = { ...mon, every: "monthly" as const, day: 31 };
   eq([runsOn(eom, "2027-02-28"), nextRun(eom, "2027-02-01")], [true, "2027-02-28"], "a monthly routine on the 31st runs on the last day of a short month");
 }
+
+async function harness() {
+  console.log("\n# the job harness: playbook, toolbox, done list, handoffs, the checker");
+  // 1. a job needs its done list; a playbook's done list and toolbox carry into the job; drafts join the toolbox
+  const pbw = workspace({ skills: [{ id: "landlord-letters", name: same("Get the landlord's consent letter"), description: same("For any filing that needs the landlord's sign-off"), body: "1. Draft the request. 2. Send it for approval.", source: "auto", on: true, kind: "workflow", uses: 0, created: "", updated: "",
+    done: ["The consent request letter is in Documents", "A message to the landlord is waiting for approval"], interviewed: true }] });
+  const r1 = await agent({
+    ws: pbw, prompt: "Get the landlord's consent for the sign permit.",
+    script: [
+      () => ask(["set_plan", { title: "Landlord consent", steps: [{ title: "Read the playbook" }, { title: "Draft the letter" }, { title: "Send it for approval" }] }], ["skill_read", { id: "landlord-letters" }]),
+      () => ask(["set_plan", { title: "Landlord consent", steps: [{ title: "Read the playbook" }, { title: "Draft the letter" }, { title: "Send it for approval" }], playbook_id: "landlord-letters" }]),
+      () => ask(["draft_document", { title: "Landlord consent request", content: "Dear landlord,\n\nWe ask for your written consent to install a sign at 136-20 Roosevelt Ave.\n\nThank you." }]),
+      () => ask(["skill_save", { id: "landlord-letters", kind: "workflow", name: "Get the landlord's consent letter", description: "For any filing that needs the landlord's sign-off", steps: "1. Start from the letter in the toolbox. 2. Send it for approval.", files: ["landlord-consent-request.docx"] }]),
+      () => say("I drafted the consent request; it's in Documents."),
+    ],
+    json: () => ({}),
+  });
+  ok(callNamed(r1, "set_plan")[0].ok === false && /done list/.test(callNamed(r1, "set_plan")[0].out), "a new job of three steps without a done list is refused, with why");
+  const j1 = (r1.w.jobs ?? [])[0];
+  eq(j1?.done?.map(d => d.text.en), ["The consent request letter is in Documents", "A message to the landlord is waiting for approval"], "the playbook's done list becomes the job's");
+  ok(j1?.playbook === "landlord-letters" && j1?.files?.length === 1, "the job wears its playbook, and the draft is in its toolbox");
+  const read = callNamed(r1, "skill_read")[0].parsed as { done_means?: string[] };
+  ok(read?.done_means?.length === 2, "skill_read hands over the playbook's done list");
+  const sk = r1.w.skills?.find(s => s.id === "landlord-letters");
+  ok(sk?.files?.length === 1 && sk.interviewed === true, "the draft joins the playbook's toolbox too, and an interviewed playbook stays marked");
+
+  // 2. the checker: passes what the workspace shows, sends back what it doesn't, and the agent fixes it
+  let checks = 0;
+  const verdicts = [
+    { items: [{ ok: true, why: "booked.pdf is in Documents" }, { ok: false, why: "No grease trap record in Documents" }] },
+    { items: [{ ok: true, why: "booked" }, { ok: true, why: "grease-trap-record.docx is in Documents" }] },
+  ];
+  const r2 = await agent({
+    ws: workspace(), prompt: "Get Flushing ready for its inspection.",
+    script: [
+      () => ask(["set_plan", { title: "Inspection ready", steps: [{ title: "Book it" }, { title: "Get the grease trap record" }, { title: "Check the list" }], done: ["The inspection is booked", "The grease trap record is in Documents"] }]),
+      () => ask(["set_plan", { title: "Inspection ready", steps: [{ title: "Book it", done: true }, { title: "Get the grease trap record", done: true }, { title: "Check the list", done: true }] }]),
+      () => say("All done: booked, and the record is in."),
+      c => { const back = String((c.body.messages as { content: unknown }[]).at(-1)?.content); ok(/The checker found:[\s\S]*grease trap record/.test(back) && /Your earlier answer won't be sent/.test(back), "what the checker found goes back to the agent, item by item", back.slice(0, 300)); return ask(["draft_document", { title: "Grease trap record", content: "Service record from the landlord for the grease trap, last pumped in September." }]); },
+      () => say("The grease trap record is now in Documents; everything on the list is done."),
+    ],
+    json: t => (/You are checking this job/.test(t) ? verdicts[checks++] : {}),
+  });
+  const j2 = (r2.w.jobs ?? [])[0];
+  eq([checks, j2?.status, j2?.checked?.passed, j2?.checked?.of], [2, "done", 2, 2], "the checker sent it back once, then passed it: the job is done and checked");
+  ok(/Checked by a separate reviewer: all 2 done\./.test(textOf(r2)) && !/All done: booked/.test(textOf(r2)), "the reply carries the proof, and only the answer after the fixes", textOf(r2));
+  const checkerCall = r2.bodies.find(b => !b.tools && /You are checking this job/.test(JSON.stringify(b.messages)));
+  const cm = JSON.stringify(checkerCall?.messages ?? "");
+  ok(checkerCall && /did not see its work/.test(String(checkerCall.system)) && (checkerCall.messages as unknown[]).length === 1 && !cm.includes("tool_use") && /\\"applications\\"/.test(cm), "the checker gets one fresh message with the workspace as evidence, never the agent's conversation", cm.slice(0, 300));
+
+  // 3. never passed after the retries: the job waits, saying exactly what isn't done
+  const r3 = await agent({
+    ws: workspace(), prompt: "Renew the sign permit.",
+    script: [
+      () => ask(["set_plan", { title: "Renew the sign permit", steps: [{ title: "Fill the renewal", done: true }, { title: "Send it", done: true }], done: ["The renewal application is waiting for approval"] }]),
+      () => say("Renewed."), () => say("Done, really."), () => say("It's done."),
+    ],
+    json: t => (/You are checking this job/.test(t) ? { items: [{ ok: false, why: "No renewal approval is waiting" }] } : {}),
+  });
+  const j3 = (r3.w.jobs ?? [])[0];
+  eq([j3?.status, j3?.checked?.passed, j3?.checked?.of], ["waiting", 0, 1], "after the checker's last try the job waits instead of claiming done");
+  ok(/Not done yet: The renewal application is waiting for approval/.test(j3?.waiting?.en ?? "") && /Checked by a separate reviewer: 0 of 1 done\. Not yet: The renewal application/.test(textOf(r3)), "the person sees what isn't done", { waiting: j3?.waiting, text: textOf(r3) });
+
+  // 4. a seat runs out of room: it writes the handoff, and a fresh agent takes the job from its harness alone
+  const steps = (n: number) => [{ title: "Map the permits", done: n > 0 }, { title: "Prepare each", done: n > 1 }, { title: "Set deadlines", done: n > 2 }];
+  const r4 = await agent({
+    ws: workspace(), prompt: "Map every permit the Houston store needs and prepare each.", maxRounds: 3,
+    script: [
+      () => ask(["set_plan", { title: "Houston permits", steps: steps(0), done: ["Every permit has an application"] }]),
+      () => ask(["set_plan", { title: "Houston permits", steps: steps(1) }]),
+      c => { ok(/out of room in this conversation\. Call hand_off now/.test(JSON.stringify(c.body.messages)), "a seat nearly out of room is told to hand off"); return ask(["hand_off", { note: "Mapped the permits (food, sign, CO). Next: prepare each application from the city's pages; reuse nothing yet." }]); },
+      c => {
+        const msgs = c.body.messages as { role: string; content: unknown }[];
+        ok(msgs.length === 1 && /taking over a job/.test(String(msgs[0].content)) && /Seat 1: Mapped the permits/.test(String(msgs[0].content)) && /\[x\] Map the permits/.test(String(msgs[0].content)) && /Every permit has an application/.test(String(msgs[0].content)), "the fresh seat starts clean with only the harness: request, plan, done list and the handoff note", String(msgs[0].content).slice(0, 400));
+        return ask(["set_plan", { job_id: c.calls.length ? "x" : (r4w() ?? ""), title: "Houston permits", steps: steps(3) }]);
+      },
+      () => say("Prepared each permit and set the deadlines."),
+    ],
+    json: t => (/You are checking this job/.test(t) ? { items: [{ ok: true, why: "3 applications exist" }] } : {}),
+  });
+  const j4 = (r4.w.jobs ?? [])[0];
+  eq([j4?.seat, j4?.handoffs?.length, j4?.status, j4?.checked?.passed], [2, 1, "done", 1], "the job went to seat 2 with one handoff, and finished there (checked)");
+  if (j4?.handoffs?.length) covered.add("hand_off");   // its call lives in seat 1's conversation, which the fresh seat no longer carries
+  ok(r4.steps.some(s => /fresh agent picked up the job \(seat 2\)/.test(s.label.en)), "the person sees the handoff in the steps");
+}
+let r4wJob: string | undefined;
+const r4w = () => r4wJob;
 
 async function settings() {
   console.log("\n# change_setting, edit_workspace, show_licenses");
@@ -644,6 +731,7 @@ await writing();
 await memoryAndSkills();
 await settings();
 await work();
+await harness();
 await errors();
 await limits();
 await chinese();

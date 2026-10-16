@@ -4,6 +4,10 @@ import { B, type Bi } from "./bi";
    routines are jobs the business asked her to repeat on a schedule. The monitor starts due routines each morning. */
 
 export type JobStep = { title: Bi; done: boolean };
+/** One line of what finished looks like, with the checker's verdict once it has looked. */
+export type DoneItem = { text: Bi; ok?: boolean; why?: Bi };
+/** What a seat did and what's next, written when an agent hands the job to a fresh one. */
+export type Handoff = { at: string; seat: number; note: string };
 export type JobStatus = "running" | "waiting" | "done" | "stopped";
 export type Job = {
   id: string; title: Bi; status: JobStatus; steps: JobStep[];
@@ -11,6 +15,13 @@ export type Job = {
   started: string; updated: string;   // ISO times
   apps?: string[];            // the applications this job is about
   routine?: string;           // started by this routine
+  // The harness: everything any agent needs to put this job on and work it (src/harness.ts).
+  playbook?: string;          // the skill it follows
+  done?: DoneItem[];          // what finished looks like; a separate checker verifies each before it's done
+  checked?: { at: string; passed: number; of: number };
+  files?: string[];           // its toolbox: documents made for it
+  handoffs?: Handoff[];       // seat to seat
+  seat?: number;              // which agent has it now (1 for the first)
 };
 export type Every = "daily" | "weekly" | "monthly";
 export type Routine = {
@@ -70,6 +81,8 @@ export function settleJobs<W extends { jobs?: Job[] }>(since: string): (w: W) =>
   return w => {
     if (!(w.jobs ?? []).some(j => j.status === "running" && j.updated >= since)) return w;
     return { ...w, jobs: (w.jobs ?? []).map(j => j.status !== "running" || j.updated < since ? j
+      // every step done, but the checker found the done list short: it waits, saying what's missing
+      : j.steps.every(x => x.done) && j.checked && j.checked.passed < j.checked.of ? { ...j, status: "waiting" as const, waiting: j.waiting ?? B("The checker found parts not done yet.", "检查发现仍有未完成的部分。") }
       : j.steps.every(x => x.done) ? { ...j, status: "done" as const }
       : { ...j, status: "waiting" as const, waiting: j.waiting ?? B("Odelia stopped here. Ask her to carry on.", "Odelia 停在这一步。请让她继续。") }) };
   };

@@ -4,6 +4,7 @@ import { B } from "./bi";
 import { fmtAgo, fmtDay } from "./time";
 import { I } from "./ui";
 import { cadence, nextRun, progress, type Job, type Routine } from "./jobs";
+import { toolbox } from "./harness";
 
 /* Work: everything Odelia is on, run like an engineer's tickets. Each job shows her plan and where it stands; what
    she needs from you comes first; what you gave her while she was busy waits in order; routines repeat on schedule. */
@@ -32,10 +33,50 @@ export function PlanCard({ job, compact }: { job: Job; compact?: boolean }) {
         ))}
       </ol>
       {job.status === "waiting" && job.waiting && <p className="job-need"><b>{zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
+      {!compact && <Harness job={job} />}
       {!compact && job.apps?.length ? (
         <p className="job-apps">{job.apps.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <button key={id} type="button" className="lnk" onClick={() => openApp(id)}>{b(a.name)}</button> : null; })}</p>
       ) : null}
     </section>
+  );
+}
+
+/** The job's harness: what finished looks like and the checker's verdict on each, the playbook it follows, the files
+ *  in its toolbox, and the handoffs between agents. */
+function Harness({ job }: { job: Job }) {
+  const { b, lang, ws } = useApp();
+  const [open, setOpen] = useState(false);
+  const zh = lang === "zh";
+  const pb = job.playbook ? (ws.skills ?? []).find(s => s.id === job.playbook) : undefined;
+  const files = toolbox(ws, job), hand = job.handoffs ?? [];
+  if (!job.done?.length && !pb && !files.length && !hand.length) return null;
+  const c = job.checked;
+  const proof = c ? (c.passed === c.of ? (zh ? `独立检查：${c.of} 项全部完成` : `Checked by a separate reviewer: all ${c.of} done`) : (zh ? `独立检查：${c.of} 项中完成 ${c.passed} 项` : `Checked by a separate reviewer: ${c.passed} of ${c.of} done`))
+    : job.done?.length ? (zh ? `完成标准 ${job.done.length} 项，完成后由独立检查核对` : `${job.done.length} things define done; a separate reviewer checks them at the end`) : "";
+  return (
+    <div className="hz">
+      {proof && <p className={"hz-proof" + (c ? (c.passed === c.of ? " ok" : " short") : "")}>{!c || c.passed === c.of ? <I.check /> : null}<span>{proof}{c ? <small>{zh ? `，${fmtAgo(c.at, lang)}` : `, ${fmtAgo(c.at, lang)}`}</small> : null}</span></p>}
+      <button type="button" className="lnk hz-tog" onClick={() => setOpen(v => !v)} aria-expanded={open}>{open ? (zh ? "收起" : "Hide") : (zh ? "查看完成标准、手册和交接" : "What done means, playbook and handoffs")}</button>
+      {open && (
+        <div className="hz-body">
+          {job.done?.length ? (
+            <section><h3>{zh ? "完成标准" : "Done means"}</h3>
+              <ul className="hz-done">{job.done.map((d, i) => (
+                <li key={i} className={d.ok === true ? "ok" : d.ok === false ? "no" : ""}>
+                  <span className="mark" aria-label={d.ok === true ? (zh ? "已核对" : "Checked") : d.ok === false ? (zh ? "未完成" : "Not yet") : (zh ? "未检查" : "Not checked yet")}>{d.ok === true ? <I.check /> : d.ok === false ? <I.x /> : null}</span>
+                  <span>{b(d.text)}{d.why && (d.why.en || d.why.zh) ? <small>{b(d.why)}</small> : null}</span>
+                </li>))}
+              </ul>
+            </section>) : null}
+          {pb && <section><h3>{zh ? "手册" : "Playbook"}</h3><p>{b(pb.name)}{pb.interviewed ? <small>{zh ? "根据您的回答编写" : "Written from your answers"}</small> : null}</p></section>}
+          {files.length ? <section><h3>{zh ? "工具箱" : "Toolbox"}</h3><p className="hz-files">{files.map(f => <span key={f.id}>{f.name}</span>)}</p></section> : null}
+          {hand.length ? (
+            <section><h3>{zh ? "交接" : "Handoffs"}</h3>
+              <ol className="hz-hand">{hand.map((h, i) => <li key={i}><b>{zh ? `第 ${h.seat} 棒交给第 ${h.seat + 1} 棒` : `Seat ${h.seat} to seat ${h.seat + 1}`}</b><small>{fmtAgo(h.at, lang)}</small><p>{h.note}</p></li>)}</ol>
+            </section>) : null}
+        </div>
+      )}
+    </div>
   );
 }
 
