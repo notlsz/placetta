@@ -202,12 +202,12 @@ async function postHook(kind, url, text, secret) {
     }
     const code = kind === "lark" ? j.code ?? j.StatusCode : j.errcode;
     if (res.ok && code === 0) return { ok: true };
-    const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status);
+    const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status).split(/, hint:|, from ip:/)[0];
     const gone = kind === "lark" ? [19001, 19002].includes(Number(code)) : kind === "wecom" ? Number(code) === 93e3 : [300001, 300005].includes(Number(code));
     return { ok: false, gone, why: `${code ?? res.status}: ${msg}`.slice(0, 160) };
   }
   if (res.ok) return { ok: true };
-  return { ok: false, gone: [400, 403, 404, 410].includes(res.status), why: `${res.status}: ${raw.slice(0, 120)}` };
+  return { ok: false, gone: [400, 403, 404, 410].includes(res.status) || kind === "teams" && res.status === 401, why: `${res.status}: ${raw.slice(0, 120)}` };
 }
 
 // supabase/functions/chat-events/index.ts

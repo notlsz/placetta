@@ -679,12 +679,12 @@ async function postHook(kind, url, text2, secret) {
     }
     const code = kind === "lark" ? j.code ?? j.StatusCode : j.errcode;
     if (res.ok && code === 0) return { ok: true };
-    const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status);
+    const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status).split(/, hint:|, from ip:/)[0];
     const gone = kind === "lark" ? [19001, 19002].includes(Number(code)) : kind === "wecom" ? Number(code) === 93e3 : [300001, 300005].includes(Number(code));
     return { ok: false, gone, why: `${code ?? res.status}: ${msg}`.slice(0, 160) };
   }
   if (res.ok) return { ok: true };
-  return { ok: false, gone: [400, 403, 404, 410].includes(res.status), why: `${res.status}: ${raw.slice(0, 120)}` };
+  return { ok: false, gone: [400, 403, 404, 410].includes(res.status) || kind === "teams" && res.status === 401, why: `${res.status}: ${raw.slice(0, 120)}` };
 }
 var hookHello = (business, lang) => lang === "zh" ? `\u5FEB\u54C9\u5DF2\u8FDE\u63A5${business ? `\uFF08${business}\uFF09` : ""}\u3002\u622A\u6B62\u65E5\u671F\u3001\u7EED\u671F\u63D0\u9192\u548C\u7533\u62A5\u8FDB\u5C55\u4F1A\u53D1\u5230\u8FD9\u91CC\u3002` : `Placetta is connected${business ? ` for ${business}` : ""}. Deadlines, renewals and filing updates will post here.`;
 
