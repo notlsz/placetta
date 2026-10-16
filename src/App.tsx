@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { applyChange, blockersSay, readyToFile } from "./core";
@@ -58,6 +58,20 @@ const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
   { v: "stores", k: "nav_stores", Icon: I.store },
   { v: "odelia", k: "nav_odelia", Icon: I.spark },
 ];
+/* The pages that moved under tabs, for anyone who knew them as entries of their own: a folded "More" group below the
+   four places (it opens when you're on one of them, and remembers open or closed per browser), and the same list in
+   the phone menu. Each links to the page's new address and lights up there. */
+const MORE: { id: string; v: View; sub?: string; k: Key; Icon: () => React.ReactElement }[] = [
+  { id: "work", v: "odelia", sub: "work", k: "nav_work", Icon: I.queue },
+  { id: "playbooks", v: "odelia", sub: "playbooks", k: "nav_playbooks", Icon: I.book },
+  { id: "updates", v: "odelia", sub: "updates", k: "nav_updates", Icon: I.bell },
+  { id: "documents", v: "permits", sub: "documents", k: "nav_docs", Icon: I.docs },
+  { id: "deadlines", v: "permits", sub: "deadlines", k: "nav_deadlines", Icon: I.deadlines },
+  { id: "find", v: "find", k: "nav_find", Icon: I.find },
+  { id: "activity", v: "settings", sub: "activity", k: "nav_audit", Icon: I.audit },
+  { id: "facts", v: "settings", sub: "facts", k: "nav_context", Icon: I.context },
+];
+const atMore = (m: (typeof MORE)[number], view: View, sub?: string) => view === m.v && (!m.sub || sub === m.sub);
 const PERMITS_TABS = TABS.permits as readonly PermitsTab[], ODELIA_TABS = TABS.odelia as readonly OdeliaTab[];
 
 /** Updates worked out from the workspace itself: due dates in the next two weeks, overdue ones and renewals in the next
@@ -131,6 +145,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [view, setView] = useState<View>(() => readRoute().view);
   // the tab open on Permits or Odelia (and the category asked of Settings), from the address
   const [sub, setSub] = useState<string | undefined>(() => readRoute().sub);
+  // Settings keeps its own category and tells us which one is showing, so the More group lights the right row
+  useLayoutEffect(() => {
+    const on = (e: Event) => setSub((e as CustomEvent<string>).detail);
+    addEventListener("placetta:settings-at", on);
+    return () => removeEventListener("placetta:settings-at", on);
+  }, []);
+  // the More group below the four places: remembered per browser, and open whenever you're on one of its pages
+  const [moreOpen, setMoreOpen] = useState(() => readFlag("placetta-side-more"));
+  useEffect(() => writeFlag("placetta-side-more", moreOpen), [moreOpen]);
+  useEffect(() => { if (MORE.some(m => atMore(m, view, sub))) setMoreOpen(true); }, [view, sub]);
   // Odelia's chat as a page of its own: the panel isn't shown beside or over it, the page is the panel
   const chatPage = view === "odelia" && (sub ?? "chat") === "chat";
   const dock = wide && panelOpen && !chatPage;
@@ -911,6 +935,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   );
 
   const slim = slimPref && !phone;
+  // the pages that moved under tabs, with the counts the old Work and Updates entries carried
+  const moreBadge: Record<string, number> = { work: waitingJobs, updates: unread };
+  const moreRows = MORE.map(m => (
+    <li key={m.id}><a {...navLink(m.v, m.sub)} aria-current={atMore(m, view, sub) ? "page" : undefined} title={slim ? t(m.k) : undefined}>
+      <m.Icon /><span>{t(m.k)}</span>{moreBadge[m.id] ? <em>{moreBadge[m.id]}</em> : null}
+    </a></li>
+  ));
   const side = (
     <nav className={"side" + (navOpen ? " open" : "")} aria-label="Workspace">
       <div className="side-top">
@@ -940,6 +971,10 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
               <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
             </a></li>
           ))}
+          <li><button type="button" className="moreb" onClick={() => setMoreOpen(v => !v)} aria-expanded={moreOpen} title={slim ? t("nav_more") : undefined}>
+            <span className="more-chev" aria-hidden="true"><I.chevR /></span><span>{t("nav_more")}</span>
+          </button></li>
+          {moreOpen && moreRows}
         </ul>
       )}
       <ul className="nav">
@@ -947,6 +982,10 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         {!!cloud?.hq.length && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
         {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
       </ul>
+      {phone && <>
+        <p className="nav-h">{t("nav_more")}</p>
+        <ul className="nav">{moreRows}</ul>
+      </>}
       {view_.locations.length > 0 && <p className="nav-h">{t("locations")}</p>}
       <ul className="nav locs">
         {view_.locations.map(l => (

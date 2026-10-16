@@ -563,6 +563,11 @@ const STATES = [
   } },
   { name: "find-results", go: async p => { await open(p, "permits/find"); if (!(await clickText(p, "Milk tea shop, San Jose, CA"))) return false; await p.locator(".hit").first().waitFor({ timeout: 20000 }).catch(() => {}); await p.waitForTimeout(800); return true; } },
   { name: "nav-menu", go: async p => { await open(p, ""); return click(p, ".mbar button[aria-label=Menu]"); } },
+  // the sidebar's More group opened by hand on Home (it opens by itself on the pages it lists); the phone menu lists them outright
+  { name: "nav-more", go: async p => {
+    await p.evaluate(() => { try { localStorage.removeItem("placetta-side-more"); } catch { /* blocked */ } }).catch(() => {});
+    await open(p, ""); return click(p, ".moreb[aria-expanded=false]");
+  } },
   // the chat beside the work: ask from the dock on Home, the panel opens (docked on a desktop, a sheet on a phone)
   { name: "odelia-panel", go: async p => { await open(p, "stores"); const box = p.locator(".dockbar textarea").filter({ visible: true }).first(); if (!(await box.count())) return false; await box.fill("What's due this week?"); await box.press("Enter"); await p.waitForTimeout(1500); return true; } },
   { name: "odelia-chat-typed", go: async p => {

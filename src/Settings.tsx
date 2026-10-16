@@ -1043,6 +1043,8 @@ export function Settings() {
   const [cat, setCatRaw] = useState<string>(() => catOf(takeSettingsTarget() ?? "") ?? catOf(readRoute().sub ?? "") ?? readCat() ?? "general");
   const setCat = (c: string, step = false) => { setCatRaw(c); setRoute("settings", c, !step); try { localStorage.setItem("placetta-settings-cat", c); } catch { /* storage off */ } };
   useEffect(() => { setRoute("settings", cat, true); }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+  // the category showing, for the sidebar (its More group lights Activity and Business facts)
+  useEffect(() => { window.dispatchEvent(new CustomEvent("placetta:settings-at", { detail: cat })); }, [cat]);
   useEffect(() => {
     const on = (e: Event) => { const k = (e as CustomEvent<string>).detail; const c = catOf(k); if (c) { setCat(c); setTimeout(() => document.getElementById("set-" + k)?.scrollIntoView({ block: "start" }), 60); } };
     window.addEventListener("placetta:settings", on);
