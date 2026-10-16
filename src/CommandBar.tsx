@@ -1,0 +1,95 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useApp, type View } from "./ctx";
+import { allSkills } from "./skills";
+import { I } from "./ui";
+
+/* ⌘K (Ctrl+K): jump to anything in the workspace, or hand Odelia a job, from anywhere, without the mouse. Type to
+   filter stores, applications, deadlines, documents, jobs, playbooks and pages; Enter on anything else asks Odelia. */
+
+type Hit = { id: string; group: string; label: string; sub?: string; run: () => void };
+
+const PAGES: { v: View; en: string; zh: string }[] = [
+  { v: "overview", en: "Overview", zh: "概览" }, { v: "work", en: "Work", zh: "工作" }, { v: "playbooks", en: "Playbooks", zh: "手册" },
+  { v: "updates", en: "Updates", zh: "动态" }, { v: "stores", en: "Stores", zh: "门店" }, { v: "apps", en: "Applications", zh: "申请" },
+  { v: "docs", en: "Documents", zh: "文件" }, { v: "deadlines", en: "Deadlines", zh: "截止日期" }, { v: "audit", en: "Audit trail", zh: "审计记录" },
+  { v: "context", en: "Context", zh: "资料" }, { v: "find", en: "Find licenses", zh: "查找许可" }, { v: "settings", en: "Settings", zh: "设置" },
+];
+
+export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
+  const { b, lang, ws, go, ask, openApp } = useApp();
+  const [q, setQ] = useState("");
+  const [at, setAt] = useState(0);
+  const input = useRef<HTMLInputElement>(null);
+  const zh = lang === "zh";
+
+  useEffect(() => { if (open) { setQ(""); setAt(0); setTimeout(() => input.current?.focus(), 0); } }, [open]);
+
+  const hits = useMemo<Hit[]>(() => {
+    const s = q.trim().toLowerCase();
+    // every word typed appears somewhere in the item ("renew sign" finds the sign permit's renewal)
+    const words = s.split(/\s+/).filter(w => w.length > 1 && !["the", "a", "an", "my", "our", "for", "of", "to", "and", "please"].includes(w));
+    const has = (...xs: (string | undefined)[]) => { if (!s) return true; const hay = xs.map(x => (x ?? "").toLowerCase()).join(" "); return hay.includes(s) || (words.length > 0 && words.filter(w => hay.includes(w)).length >= Math.max(1, Math.ceil(words.length * 0.6))); };
+    const close = (f: () => void) => () => { setOpen(false); f(); };
+    const g = (en: string, zhs: string) => (zh ? zhs : en);
+    const out: Hit[] = [];
+    const askHit: Hit | null = s ? { id: "ask", group: g("Ask Odelia", "问 Odelia"), label: q.trim(), sub: g("Hand her this as a job", "交给她去做"), run: close(() => ask(q.trim())) } : null;
+    // A sentence is a job for Odelia; a word or two is more likely a search, so the matches come first.
+    const sentence = q.trim().split(/\s+/).length >= 3 || /[\u3400-\u9fff]{4,}/.test(q);
+    if (askHit && sentence) out.push(askHit);
+    const take = <T,>(list: T[], n: number, f: (x: T) => Hit | null) => { let k = 0; for (const x of list) { if (k >= n) break; const h = f(x); if (h) { out.push(h); k++; } } };
+    take(ws.apps, 6, a => has(a.name.en, a.name.zh, a.agency.en, a.agency.zh) ? { id: "a-" + a.id, group: g("Applications", "申请"), label: b(a.name), sub: b(a.agency), run: close(() => openApp(a.id)) } : null);
+    take(ws.stores ?? [], 4, st => has(st.name.en, st.name.zh, st.address) ? { id: "s-" + st.id, group: g("Stores", "门店"), label: b(st.name), sub: st.address, run: close(() => go("stores")) } : null);
+    take(ws.jobs ?? [], 4, j => has(j.title.en, j.title.zh) ? { id: "j-" + j.id, group: g("Work", "工作"), label: b(j.title), sub: j.status === "waiting" ? g("Needs you", "需要您") : j.status === "done" ? g("Done", "已完成") : g("In progress", "进行中"), run: close(() => go("work")) } : null);
+    take(allSkills(ws).filter(x => x.on && x.kind !== "form"), 4, p => has(p.name.en, p.name.zh, p.description.en) ? { id: "p-" + p.id, group: g("Playbooks", "手册"), label: b(p.name), sub: g("Run it", "运行"), run: close(() => ask(zh ? `按手册“${p.name.zh}”（${p.id}）来做。` : `Run the playbook "${p.name.en}" (${p.id}).`)) } : null);
+    take([...ws.deadlines].sort((a, b) => a.date.localeCompare(b.date)), 4, d => has(d.title.en, d.title.zh) ? { id: "d-" + d.id, group: g("Deadlines", "截止日期"), label: b(d.title), sub: d.date, run: close(() => go("deadlines")) } : null);
+    take(ws.docs, 4, d => has(d.name) && s ? { id: "f-" + d.id, group: g("Documents", "文件"), label: d.name, run: close(() => go("docs")) } : null);
+    take(PAGES, s ? 4 : 12, p => has(p.en, p.zh) ? { id: "v-" + p.v, group: g("Go to", "前往"), label: zh ? p.zh : p.en, run: close(() => go(p.v)) } : null);
+    if (askHit && !sentence) out.push(askHit);
+    return out;
+  }, [q, ws, zh, b, ask, go, openApp, setOpen]);
+
+  if (!open) return null;
+  const pick = (i: number) => hits[i]?.run();
+  let last = "";
+  return (
+    <div className="cmdk-back" onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false); }}>
+      <div className="cmdk" role="dialog" aria-modal="true" aria-label={zh ? "搜索或提问" : "Search or ask"}>
+        <div className="cmdk-in">
+          <I.find />
+          <input ref={input} autoFocus value={q} onChange={e => { setQ(e.target.value); setAt(0); }} placeholder={zh ? "搜索门店、申请、文件……或直接交给 Odelia" : "Search stores, applications, documents… or hand Odelia a job"}
+            role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-activedescendant={hits[at] ? "cmdk-" + hits[at].id : undefined}
+            onKeyDown={e => {
+              if (e.key === "ArrowDown") { e.preventDefault(); setAt(i => Math.min(hits.length - 1, i + 1)); }
+              else if (e.key === "ArrowUp") { e.preventDefault(); setAt(i => Math.max(0, i - 1)); }
+              else if (e.key === "Enter") { e.preventDefault(); pick(at); }
+              else if (e.key === "Escape") { e.preventDefault(); setOpen(false); }
+            }} />
+          <kbd>esc</kbd>
+        </div>
+        <ul id="cmdk-list" className="cmdk-list" role="listbox">
+          {hits.map((h, i) => {
+            const head = h.group !== last ? h.group : null; last = h.group;
+            return (
+              <li key={h.id} role="presentation">
+                {head && <span className="cmdk-g">{head}</span>}
+                <button type="button" id={"cmdk-" + h.id} role="option" aria-selected={i === at} className={i === at ? "on" : ""} onMouseEnter={() => setAt(i)} onClick={() => pick(i)}>
+                  {h.id === "ask" ? <I.spark /> : null}<b>{h.label}</b>{h.sub ? <small>{h.sub}</small> : null}{i === at ? <I.arrow /> : null}
+                </button>
+              </li>
+            );
+          })}
+          {!hits.length && <li className="cmdk-none">{zh ? "没有结果" : "Nothing found"}</li>}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/** ⌘K or Ctrl+K anywhere opens it (not while typing in a field, except the composer, where it still works). */
+export function useCommandKey(setOpen: (f: (v: boolean) => boolean) => void) {
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setOpen(v => !v); } };
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, [setOpen]);
+}

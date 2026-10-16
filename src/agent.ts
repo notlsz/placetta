@@ -208,7 +208,31 @@ function staff(ctx: Context): Plan {
   };
 }
 
-const SCRIPTS: { match: RegExp; plan: (ctx: Context) => Plan }[] = [
+/** Teach Odelia a job: she interviews the owner first, then writes the playbook from the answers. */
+const interview = (): Plan => ({
+  steps: [S("searching", "Checking your playbooks", "查看您的手册"), S("composing", "Writing my questions", "整理问题")],
+  reply: { text: [
+    B("Happy to take it over. So I can run it without you next time:\n\n1. Which job is it, and how often does it come up?\n2. How do you do it today, step by step?\n3. Who's involved (landlord, contractor, staff, an agency), and how do I reach them?\n4. Which files or templates do you use?\n5. What does done look like, and where does it usually go wrong?\n\nAnswer in any order. I'll write the playbook from your answers, with its done list, and you'll see it in Playbooks.",
+      "很乐意接手。为了下次不用您也能完成：\n\n1. 是哪项工作？多久做一次？\n2. 您现在是怎么做的，分几步？\n3. 涉及哪些人（房东、承包商、员工、机构），怎么联系？\n4. 用到哪些文件或模板？\n5. 怎样算完成？通常在哪里出问题？\n\n按任意顺序回答即可。我会根据您的回答写成手册并附上完成标准，您可以在“手册”中查看。"),
+  ] },
+});
+/** Run a playbook: the plan, its done list, and the work starts. */
+const runPlaybook = (ctx: Context, text: string): Plan => {
+  const m = /\(([a-z0-9-]+)\)|（([a-z0-9-]+)）/.exec(text);
+  const id = m?.[1] ?? m?.[2] ?? "";
+  const sk = [...(ctx.current.skills ?? [])].find(x => x.id === id);
+  const quoted = /"([^"]+)"|“([^”]+)”/.exec(text);
+  const said = quoted?.[1] ?? quoted?.[2];
+  const name = sk?.name ?? (said ? B(said, said) : B("that playbook", "这本手册"));
+  return {
+    steps: [S("weaving", `Using the playbook: ${name.en}`, `使用手册：${name.zh}`), S("shaping", "Planning the job and what done means", "规划工作和完成标准")],
+    reply: { text: [B(`Started "${name.en}". The plan and what done means are in Work; a separate reviewer checks every item before I call it done.`, `已开始“${name.zh}”。计划和完成标准在“工作”中；每一项都会由独立检查核对后，我才会说完成。`)] },
+  };
+};
+
+const SCRIPTS: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
+  { match: /^interview me|teach (odelia|you) a job|就一项我想交给你|教 ?odelia/i, plan: interview },
+  { match: /^run the playbook|^按手册/i, plan: runPlaybook },
   { match: /statement|biennial|llc-12|信息声明|申报/i, plan: prepareSoi },
   { match: /changed|county plan check|rule|notice|变化|规定|通知/i, plan: ruleChange },
   { match: /staff|handler|remind|员工|提醒|从业/i, plan: staff },
@@ -465,7 +489,7 @@ function plan(req: Request, ctx: Context): Plan {
   if ("approveAll" in req) return fileAll(req.approveAll, ctx);
   if ("upload" in req) return upload(req.upload, ctx);
   if ("match" in req) return match(req.match.what, req.match.where);
-  return SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx) ?? FALLBACK();
+  return SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx, req.text) ?? FALLBACK();
 }
 
 /** Scripted stand-in for the real agent, so the product can be designed and tested end to end. */

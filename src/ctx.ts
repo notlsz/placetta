@@ -6,7 +6,7 @@ import type { Bi, Store, UpdateItem, Workspace } from "./model";
 import type { HqRow } from "./hq";
 import type { AgencyLogin, Billing, Filing, Integration, IntegrationKind, Plan } from "./cloud/api";
 
-export type View = "overview" | "work" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue" | "hq";
+export type View = "overview" | "work" | "playbooks" | "updates" | "stores" | "apps" | "docs" | "deadlines" | "audit" | "context" | "find" | "settings" | "queue" | "hq";
 export type Tab = "progress" | "check" | "form" | "fees" | "receipt";
 
 /** What a signed-in account adds: billing, integrations, saved logins, the filing queue and data controls. */

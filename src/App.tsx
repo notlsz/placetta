@@ -23,6 +23,8 @@ import { AuditTrail, Applications, ContextPage, Deadlines, Documents, FindLicens
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
 import { WorkPage } from "./Work";
+import { PlaybooksPage } from "./Playbooks";
+import { CommandBar, useCommandKey } from "./CommandBar";
 import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
 import { UPDATED } from "./legal";
@@ -48,6 +50,7 @@ const readLang = (): Lang => {
 const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
   { v: "overview", k: "nav_overview", Icon: I.overview },
   { v: "work", k: "nav_work", Icon: I.queue },
+  { v: "playbooks", k: "nav_playbooks", Icon: I.book },
   { v: "updates", k: "nav_updates", Icon: I.bell },
   { v: "stores", k: "nav_stores", Icon: I.store },
   { v: "apps", k: "nav_apps", Icon: I.apps },
@@ -120,6 +123,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const panelRef = useRef(false);
   useEffect(() => { panelRef.current = panelOpen; }, [panelOpen]);
   const [navOpen, setNavOpen] = useState(false);
+  const [cmdk, setCmdk] = useState(false);
+  useCommandKey(setCmdk);
   // the side menu folds down to icons on wider screens; remembered per browser
   const [slimPref, setSlimPref] = useState(() => readFlag("placetta-side-slim"));
   useEffect(() => writeFlag("placetta-side-slim", slimPref), [slimPref]);
@@ -857,7 +862,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   /* page */
   const page = {
-    overview: <Overview />, work: <WorkPage />, updates: <UpdatesPage />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
+    overview: <Overview />, work: <WorkPage />, playbooks: <PlaybooksPage />, updates: <UpdatesPage />, stores: <Stores />, apps: <Applications />, docs: <Documents />, deadlines: <Deadlines />, audit: <AuditTrail />, context: <ContextPage />,
     find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
     queue: cloud?.me.staff ? <Queue /> : cloud?.me.staff_email ? <QueueLocked /> : <Overview />,
     hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : <Overview />,
@@ -899,6 +904,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         ))}
       </ul>
       <ul className="nav">
+        <li><button type="button" className="cmdk-open" onClick={() => setCmdk(true)} title={lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job"}><I.find /><span>{lang === "zh" ? "搜索" : "Search"}</span><kbd>{/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd></button></li>
         <li><a {...navLink("find")} aria-current={view === "find" ? "page" : undefined} title={slim ? t("nav_find") : undefined}><I.find /><span>{t("nav_find")}</span></a></li>
         {!!cloud?.hq.length && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
         {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
@@ -969,6 +975,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
             </div></footer>
           </Modal>
         )}
+        <CommandBar open={cmdk} setOpen={setCmdk} />
         {toast && <div className="toast" role="status">{toast}</div>}
       </div>
     </AppCtx.Provider>

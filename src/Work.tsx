@@ -33,7 +33,7 @@ export function PlanCard({ job, compact }: { job: Job; compact?: boolean }) {
         ))}
       </ol>
       {job.status === "waiting" && job.waiting && <p className="job-need"><b>{zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
-      {!compact && <Harness job={job} />}
+      <Harness job={job} compact={compact} />
       {!compact && job.apps?.length ? (
         <p className="job-apps">{job.apps.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <button key={id} type="button" className="lnk" onClick={() => openApp(id)}>{b(a.name)}</button> : null; })}</p>
       ) : null}
@@ -43,7 +43,7 @@ export function PlanCard({ job, compact }: { job: Job; compact?: boolean }) {
 
 /** The job's harness: what finished looks like and the checker's verdict on each, the playbook it follows, the files
  *  in its toolbox, and the handoffs between agents. */
-function Harness({ job }: { job: Job }) {
+function Harness({ job, compact }: { job: Job; compact?: boolean }) {
   const { b, lang, ws } = useApp();
   const [open, setOpen] = useState(false);
   const zh = lang === "zh";
@@ -53,6 +53,7 @@ function Harness({ job }: { job: Job }) {
   const c = job.checked;
   const proof = c ? (c.passed === c.of ? (zh ? `独立检查：${c.of} 项全部完成` : `Checked by a separate reviewer: all ${c.of} done`) : (zh ? `独立检查：${c.of} 项中完成 ${c.passed} 项` : `Checked by a separate reviewer: ${c.passed} of ${c.of} done`))
     : job.done?.length ? (zh ? `完成标准 ${job.done.length} 项，完成后由独立检查核对` : `${job.done.length} things define done; a separate reviewer checks them at the end`) : "";
+  if (compact) return c ? <div className="hz"><p className={"hz-proof" + (c.passed === c.of ? " ok" : " short")}>{c.passed === c.of ? <I.check /> : null}<span>{proof}</span></p></div> : null;
   return (
     <div className="hz">
       {proof && <p className={"hz-proof" + (c ? (c.passed === c.of ? " ok" : " short") : "")}>{!c || c.passed === c.of ? <I.check /> : null}<span>{proof}{c ? <small>{zh ? `，${fmtAgo(c.at, lang)}` : `, ${fmtAgo(c.at, lang)}`}</small> : null}</span></p>}
