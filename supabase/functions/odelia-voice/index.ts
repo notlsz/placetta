@@ -29,9 +29,12 @@ const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY
 const env = (k: string) => Deno.env.get(k);
 const SELF = `${SUPABASE_URL}/functions/v1/odelia-voice`;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// One-line goodbyes said without the assistant (Call Control speak).
 const VOICE: Record<Lang, string> = { en: env("ODELIA_VOICE_EN") ?? "AWS.Polly.Joanna-Neural", zh: env("ODELIA_VOICE_ZH") ?? "AWS.Polly.Zhiyu-Neural" };
+// The assistant's own voice: Telnyx's Qwen3 TTS speaks Mandarin natively and is inside the $0.05 a minute.
+const ASSISTANT_VOICE: Record<Lang, string> = { en: env("ODELIA_ASSISTANT_VOICE_EN") ?? VOICE.en, zh: env("ODELIA_ASSISTANT_VOICE_ZH") ?? "Telnyx.Qwen3TTS.Delta" };
 const SPEAK_LANG: Record<Lang, string> = { en: "en-US", zh: "cmn-CN" };
-const STT_MODEL = env("ODELIA_STT_MODEL") ?? "deepgram/nova-3";
+const STT_MODEL = env("ODELIA_STT_MODEL");
 const MAX_TOOL_CALLS = 40, MAX_CODE_TRIES = 3, MAX_CALL_TEXTS = 3;
 
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
@@ -139,10 +142,25 @@ async function assistantFor(o: { ccid: string; lang: Lang; name: string | null; 
     ...(model ? { model } : {}),
     instructions: instructions({ lang: o.lang, name: o.name, business: o.ws.name, verified: o.verified, brief, outbound: o.outbound, today: new Date().toISOString().slice(0, 10) }),
     greeting: greeting(o.lang, o.name, o.outbound ? "outbound" : o.verified ? "verified" : "code", o.ws.name),
-    voice_settings: { voice: VOICE[o.lang] },
-    transcription: { model: STT_MODEL, language: o.lang },
+    voice_settings: { voice: ASSISTANT_VOICE[o.lang] },
+    transcription: transcriptionFor(o.lang, o.ws.name),
     tools,
   };
+}
+
+/**
+ * Speech recognition for one call. Owners mix the two languages ("我的 health permit 什么时候到期"), so Mandarin calls use
+ * Soniox pinned to Chinese and English, which handles both in one sentence; English calls use Deepgram Nova-3. Each
+ * falls back to the other mid-call if its provider fails. Deepgram Flux, Telnyx's turn-taking default, has no Chinese.
+ * The business's name and the words of the trade are boosted so they come through spelled right.
+ */
+export function transcriptionFor(lang: Lang, business: string) {
+  const terms = [business, "Placetta", "Odelia", "permit", "license", "health inspection", "certificate of occupancy", "EIN", "DBA", "sales tax", "sign permit", "food handler"]
+    .map((t) => t.replace(/[,{}]/g, " ").trim()).filter(Boolean).join(",").slice(0, 900);
+  const soniox = { model: "soniox/stt-rt-v5", settings: { language_hints: lang === "zh" ? ["zh", "en"] : ["en", "zh"], context: terms, enable_endpoint_detection: true, max_endpoint_delay_ms: 1000 } };
+  const nova = { model: "deepgram/nova-3", language: lang, settings: { keyterm: terms } };
+  if (STT_MODEL) return { model: STT_MODEL, language: lang };
+  return lang === "zh" ? { ...soniox, fallback_models: [nova] } : { ...nova, fallback_models: [soniox] };
 }
 
 /** Say one line without the assistant, then hang up (client_state "bye" makes call.speak.ended hang up). */
