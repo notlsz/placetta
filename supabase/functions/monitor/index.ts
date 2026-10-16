@@ -47,6 +47,12 @@ const when = (n: number, en: string, zh: string): Bi => {
   const e = n <= 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`, z = n <= 0 ? "今天" : n === 1 ? "明天" : `${n} 天后`;
   return { en: en ? `${en} ${e}` : e, zh: z + zh };
 };
+/** The permit a renewal update is about, from its title: "Renew the sign permit: expires in 45 days" is "sign permit",
+ *  "Food Service Establishment Permit expires: expires in 40 days" is "Food Service Establishment Permit". */
+export const permitOf = (title: string) => title
+  .replace(/[:：]\s*expires (in \d+ days|today|tomorrow)$/, "").replace(/ expires (in \d+ days|today|tomorrow)$/, "")
+  .replace(/[:：]\s*(\d+ 天后|今天|明天)到期$/, "").replace(/(\d+ 天后|今天|明天)到期$/, "")
+  .replace(/^renew(al of)?\s+(the\s+)?/i, "").replace(/^续办/, "").replace(/\s+(expires|renewal)$/i, "").replace(/(到期|续办)$/, "").trim() || title;
 /** The first threshold a date has crossed, so each one makes one update: 14, 7, 3, 1 and 0 days out. */
 const bucket = (n: number, steps: number[]) => steps.find((s) => n <= s);
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -519,9 +525,13 @@ Deno.serve(async (req) => {
     }
     // renewals that just reached 60 days out (each update is new only once)
     for (const u of created.filter((x) => x.kind === "renewal" && /:60$/.test(x.dedupe))) {
-      const what = u.title.en.replace(/: expires in \d+ days$/, "").replace(/ expires in \d+ days$/, "");
-      await start(u.workspace_id, `Start the renewal of ${what} (${u.body?.en ?? ""}). Find the agency's renewal form or online renewal, prepare the application${u.app_id ? ` (application ${u.app_id})` : ""}, fill it from the workspace, add the renewal's due date to Deadlines and put it up for approval once it's complete. If it renews automatically or needs nothing from the business, say so in one sentence.`,
-        { en: `Renewal started: ${what}`, zh: `已开始续办：${what}` });
+      // The permit's own name: a reminder titled "Renew the sign permit" or "Food Service Establishment Permit expires"
+      // used to make "Start the renewal of Renew the sign permit (... Ask Placetta to start the renewal.)", which read
+      // to the model like two requests. Now: "Start the renewal: sign permit, expiring 2026-11-30."
+      const what = permitOf(u.title.en), whatZh = permitOf(u.title.zh);
+      const expires = /\d{4}-\d{2}-\d{2}/.exec(u.body?.en ?? "")?.[0];
+      await start(u.workspace_id, `Start the renewal: ${what}${expires ? `, expiring ${expires}` : ""}. Find the agency's renewal form or online renewal, prepare the application${u.app_id ? ` (application ${u.app_id})` : ""}, fill it from the workspace, add the renewal's due date to Deadlines and put it up for approval once it's complete. If it renews automatically or needs nothing from the business, say so in one sentence.`,
+        { en: `Renewal started: ${what}`, zh: `已开始续办：${whatZh}` });
     }
     // filings with the agency well past its published processing time: one check every two weeks
     for (const f of ((filings ?? []) as (Filing & { submitted_at?: string | null })[]).filter((x) => x.status === "submitted")) {

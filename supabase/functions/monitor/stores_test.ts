@@ -1,6 +1,15 @@
 // deno test supabase/functions/monitor/stores_test.ts
+import "./test_env.ts";
 import { deepStrictEqual as eq, ok } from "node:assert";
-import { storeUpdates, weekAhead } from "./index.ts";
+import { permitOf, storeUpdates, weekAhead } from "./index.ts";
+
+Deno.test("a renewal job names the permit, not the reminder's wording", () => {
+  eq(permitOf("Renew the sign permit: expires in 45 days"), "sign permit");
+  eq(permitOf("Food Service Establishment Permit expires: expires in 40 days"), "Food Service Establishment Permit");
+  eq(permitOf("Flushing: Sign permit expires in 52 days"), "Flushing: Sign permit");
+  eq(permitOf("Renew the sign permit：45 天后到期"), "sign permit");
+  eq(permitOf("法拉盛：招牌许可45 天后到期"), "法拉盛：招牌许可");
+});
 
 const stores = [{ id: "st-1", name: { en: "Flushing", zh: "法拉盛" }, stage: "open", permits: [
   { name: { en: "Food service permit", zh: "餐饮许可" }, expires: "2026-10-23" },

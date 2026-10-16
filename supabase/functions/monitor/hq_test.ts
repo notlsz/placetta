@@ -1,4 +1,5 @@
 // deno test supabase/functions/monitor/hq_test.ts
+import "./test_env.ts";
 import { ok } from "node:assert";
 import { hqReport, type HqWeekly } from "./index.ts";
 

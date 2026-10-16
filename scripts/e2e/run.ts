@@ -957,6 +957,12 @@ try {
       { text: "The food service permit is complete and waiting for your approval." },
     ] },
     { name: "weekly-watch", match: (p) => p.startsWith("Weekly check"), turns: [{ text: "No changes." }] },
+    // The monitor's renewal jobs: a renewal reminder that just reached 60 days out starts a background job. Odelia
+    // checks where things stand and says what's next; from a background job nothing is filed, paid or sent.
+    { name: "renewal-job", match: (p) => p.startsWith("Scheduled job") && p.includes("Start the renewal:"), turns: [
+      { tool: "check_progress", input: {} },
+      { text: "The renewal opens 30 days before it expires; I'll prepare it then. Nothing needs you yet." },
+    ] },
   );
   await scenario("d. proactive texts", async () => {
     const localNow = (tz: string) => { const p = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date()); return Number(p.find((x) => x.type === "hour")!.value) * 60 + Number(p.find((x) => x.type === "minute")!.value); };
@@ -984,6 +990,11 @@ try {
     await settle();
     check("the monitor runs", mon.status === 200 && mon.data?.ok === true, mon);
     check("the monitor's self-filing sweep reaches the file function", mon.data?.self_filing !== null, mon.data);
+    // the two renewal reminders 31 to 60 days out ("Renew the sign permit" from a., the permit read in b.) start one job each
+    const renewals = await sql`select title, status, prompt, kind from public.agent_runs where kind = 'watch' and title->>'en' like 'Renewal started:%' order by created_at`;
+    check("the monitor starts one background renewal job per renewal 60 days out, and each finishes", renewals.length === 2 && renewals.every((x) => x.status === "done") && Number(mon.data?.odelia_jobs) >= 2, { renewals, jobs: mon.data?.odelia_jobs });
+    check("each renewal job names the permit plainly, with its date", renewals.some((x) => /^Scheduled job[\s\S]*Start the renewal: sign permit, expiring \d{4}-\d{2}-\d{2}\./.test(x.prompt) && x.title?.en === "Renewal started: sign permit")
+      && renewals.some((x) => /Start the renewal: Food Service Establishment Permit, expiring/.test(x.prompt)) && renewals.every((x) => !/Ask Placetta|Renew the/.test(x.prompt)), renewals.map((x) => [x.title?.en, String(x.prompt).slice(0, 140)]));
     const due = await sql`select dedupe from public.odelia_outbox where user_id = ${owner.id} and dedupe like 'update:%'`;
     check("only what matters reaches the phone (the CO due in 5 days)", due.length === 1 && due[0].dedupe.includes("deadline:dl-co"), due);
     const texts = sms(mark, OWNER_PHONE);
