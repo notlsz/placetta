@@ -67,8 +67,8 @@ var CORS_HEADERS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS"
 };
-function json(body, status = 200, extra = {}) {
-  return new Response(JSON.stringify(body), {
+function json(body2, status = 200, extra = {}) {
+  return new Response(JSON.stringify(body2), {
     status,
     headers: { ...CORS_HEADERS, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...extra }
   });
@@ -93,14 +93,14 @@ function describe(e) {
 }
 async function readBody(req) {
   if (req.method !== "POST") throw new HttpError("bad_request", "Use POST.");
-  let body;
+  let body2;
   try {
-    body = await req.json();
+    body2 = await req.json();
   } catch {
     throw new HttpError("bad_request", "Send a JSON body.");
   }
-  if (!body || typeof body !== "object" || Array.isArray(body)) throw new HttpError("bad_request", "Send a JSON object.");
-  return body;
+  if (!body2 || typeof body2 !== "object" || Array.isArray(body2)) throw new HttpError("bad_request", "Send a JSON object.");
+  return body2;
 }
 var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function isUuid(v) {
@@ -338,18 +338,18 @@ async function tokenRequest(p, params) {
     console.error(`${p} token endpoint unreachable:`, describe(e));
     throw new HttpError("upstream_error", `${PROVIDER_NAME[p]} did not respond. Try again.`);
   }
-  let body = {};
+  let body2 = {};
   try {
-    body = await res.json();
+    body2 = await res.json();
   } catch {
-    body = {};
+    body2 = {};
   }
-  const status = p === "slack" && body.ok === false ? 400 : res.status;
-  if (status >= 400) console.error(`${p} token endpoint ${status}:`, String(body.error ?? "").slice(0, 80));
-  return { status, body };
+  const status = p === "slack" && body2.ok === false ? 400 : res.status;
+  if (status >= 400) console.error(`${p} token endpoint ${status}:`, String(body2.error ?? "").slice(0, 80));
+  return { status, body: body2 };
 }
-function expiresAt(body) {
-  const s = num(body.expires_in);
+function expiresAt(body2) {
+  const s = num(body2.expires_in);
   return s ? Date.now() + s * 1e3 : null;
 }
 var RefreshRejected = class extends Error {
@@ -509,9 +509,9 @@ var Conn = class _Conn {
   async upstream(res) {
     let code = "";
     try {
-      const body = await res.json();
-      const err = body.error;
-      code = typeof err === "string" ? err : String(body.error_summary ?? err?.status ?? err?.code ?? "");
+      const body2 = await res.json();
+      const err = body2.error;
+      code = typeof err === "string" ? err : String(body2.error_summary ?? err?.status ?? err?.code ?? "");
     } catch {
     }
     console.error(`${this.kind} upstream ${res.status}:`, code.slice(0, 80));
@@ -586,6 +586,92 @@ async function revoke(row) {
     console.error(`${row.kind} revoke skipped:`, describe(e));
   }
 }
+
+// supabase/functions/_shared/channels.ts
+var HOOK_KINDS = ["slack", "lark", "wecom", "teams"];
+var isHookKind = (v) => typeof v === "string" && HOOK_KINDS.includes(v);
+var HOOK_NAMES = {
+  slack: { en: "Slack", zh: "Slack" },
+  lark: { en: "Lark", zh: "\u98DE\u4E66" },
+  wecom: { en: "WeCom", zh: "\u4F01\u4E1A\u5FAE\u4FE1" },
+  teams: { en: "Microsoft Teams", zh: "Microsoft Teams" }
+};
+function hookUrl(kind, raw) {
+  let u;
+  try {
+    u = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  if (u.protocol !== "https:" || u.username || u.password || u.port) return null;
+  const h = u.hostname.toLowerCase(), p = u.pathname;
+  switch (kind) {
+    case "slack":
+      return h === "hooks.slack.com" && /^\/(services|triggers)\/[\w/-]+$/.test(p) ? u : null;
+    case "lark":
+      return (h === "open.feishu.cn" || h === "open.larksuite.com") && /^\/open-apis\/bot\/v2\/hook\/[\w-]+$/.test(p) ? u : null;
+    case "wecom":
+      return h === "qyapi.weixin.qq.com" && p === "/cgi-bin/webhook/send" && /^[\w-]{10,}$/.test(u.searchParams.get("key") ?? "") ? u : null;
+    case "teams":
+      return /(\.logic\.azure\.com|\.powerplatform\.com|\.webhook\.office\.com)$/.test(h) ? u : null;
+  }
+}
+async function larkSign(secret, ts) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(`${ts}
+${secret}`), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new Uint8Array(0)));
+  return btoa(String.fromCharCode(...sig));
+}
+async function body(kind, text2, secret) {
+  switch (kind) {
+    case "slack":
+      return { text: text2.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") };
+    case "lark": {
+      const b = { msg_type: "text", content: { text: text2 } };
+      if (secret) {
+        const ts = Math.floor(Date.now() / 1e3);
+        b.timestamp = String(ts);
+        b.sign = await larkSign(secret, ts);
+      }
+      return b;
+    }
+    case "wecom":
+      return { msgtype: "text", text: { content: text2 } };
+    case "teams":
+      return { type: "message", attachments: [{ contentType: "application/vnd.microsoft.card.adaptive", content: {
+        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+        type: "AdaptiveCard",
+        version: "1.4",
+        body: text2.split("\n").filter(Boolean).map((line, i) => ({ type: "TextBlock", text: line, wrap: true, weight: i === 0 ? "Bolder" : "Default" }))
+      } }] };
+  }
+}
+async function postHook(kind, url, text2, secret) {
+  const u = hookUrl(kind, url);
+  if (!u) return { ok: false, gone: true, why: "not a webhook link" };
+  let res;
+  try {
+    res = await fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(await body(kind, text2.slice(0, 3800), secret)), signal: AbortSignal.timeout(15e3) });
+  } catch {
+    return { ok: false, gone: false, why: "no answer" };
+  }
+  const raw = (await res.text()).slice(0, 400);
+  if (kind === "lark" || kind === "wecom") {
+    let j = {};
+    try {
+      j = JSON.parse(raw);
+    } catch {
+    }
+    const code = kind === "lark" ? j.code ?? j.StatusCode : j.errcode;
+    if (res.ok && code === 0) return { ok: true };
+    const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status);
+    const gone = kind === "lark" ? [19001, 19002].includes(Number(code)) : Number(code) === 93e3;
+    return { ok: false, gone, why: `${code ?? res.status}: ${msg}`.slice(0, 160) };
+  }
+  if (res.ok) return { ok: true };
+  return { ok: false, gone: [400, 403, 404, 410].includes(res.status), why: `${res.status}: ${raw.slice(0, 120)}` };
+}
+var hookHello = (business, lang) => lang === "zh" ? `\u5FEB\u54C9\u5DF2\u8FDE\u63A5${business ? `\uFF08${business}\uFF09` : ""}\u3002\u622A\u6B62\u65E5\u671F\u3001\u7EED\u671F\u63D0\u9192\u548C\u7533\u62A5\u8FDB\u5C55\u4F1A\u53D1\u5230\u8FD9\u91CC\u3002` : `Placetta is connected${business ? ` for ${business}` : ""}. Deadlines, renewals and filing updates will post here.`;
 
 // supabase/functions/integrations/index.ts
 var GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me";
@@ -765,13 +851,13 @@ var mailRead = async (c) => {
     };
     walk(m2.payload);
     const h = m2.payload?.headers;
-    const body2 = plain !== null ? tidy(plain) : html !== null ? htmlToText(html) : decodeEntities(m2.snippet ?? "");
+    const body3 = plain !== null ? tidy(plain) : html !== null ? htmlToText(html) : decodeEntities(m2.snippet ?? "");
     return ok({
       from: header(h, "From"),
       to: header(h, "To"),
       subject: header(h, "Subject"),
       date: isoDate(m2.internalDate) || isoDate(header(h, "Date")),
-      text: body2.slice(0, TEXT_LIMIT),
+      text: body3.slice(0, TEXT_LIMIT),
       attachments: attachments2
     });
   }
@@ -779,7 +865,7 @@ var mailRead = async (c) => {
     headers: { Prefer: 'outlook.body-content-type="text"' }
   });
   const content = m.body?.content ?? "";
-  const body = (m.body?.contentType ?? "").toLowerCase() === "html" ? htmlToText(content) : tidy(content);
+  const body2 = (m.body?.contentType ?? "").toLowerCase() === "html" ? htmlToText(content) : tidy(content);
   let attachments = [];
   if (m.hasAttachments) {
     const a = await conn.callJson(
@@ -792,7 +878,7 @@ var mailRead = async (c) => {
     to: (m.toRecipients ?? []).map(graphAddr).filter(Boolean).join(", "),
     subject: m.subject ?? "",
     date: isoDate(m.receivedDateTime),
-    text: body.slice(0, TEXT_LIMIT),
+    text: body2.slice(0, TEXT_LIMIT),
     attachments
   });
 };
@@ -903,12 +989,12 @@ async function sendFrom(ws, kindParamValue, to, subject, content, files) {
   }
   return { kind, id, thread, account: conn.row.account ?? "" };
 }
-function mailInput(body) {
-  const to = recipients(body.to);
-  const subject = text(body.subject, "subject", 1, 300).replace(/[\r\n]+/g, " ");
-  if (typeof body.body !== "string" || !body.body.trim()) throw new HttpError("bad_request", "body is required.");
-  if (body.body.length > 5e4) throw new HttpError("bad_request", "body is too long (at most 50000 characters).");
-  return { to, subject, content: body.body.replace(/\r\n?/g, "\n") };
+function mailInput(body2) {
+  const to = recipients(body2.to);
+  const subject = text(body2.subject, "subject", 1, 300).replace(/[\r\n]+/g, " ");
+  if (typeof body2.body !== "string" || !body2.body.trim()) throw new HttpError("bad_request", "body is required.");
+  if (body2.body.length > 5e4) throw new HttpError("bad_request", "body is too long (at most 50000 characters).");
+  return { to, subject, content: body2.body.replace(/\r\n?/g, "\n") };
 }
 async function track(ws, sent, to, subject, extra = {}) {
   if (!sent.id || !sent.thread) return;
@@ -941,9 +1027,9 @@ var mailSend = async (c) => {
   });
   return ok({ kind, tracking: !!sent.thread });
 };
-async function filerMailSend(body) {
-  const ws = uuidParam(body.workspace_id, "workspace_id");
-  const filingId = uuidParam(body.filing_id, "filing_id");
+async function filerMailSend(body2) {
+  const ws = uuidParam(body2.workspace_id, "workspace_id");
+  const filingId = uuidParam(body2.filing_id, "filing_id");
   const { data: f, error } = await admin.from("filings").select("id, workspace_id, payload, agent_state, channel, submit_clicked_at").eq("id", filingId).eq("workspace_id", ws).maybeSingle();
   if (error) throw new Error(`filing lookup failed: ${error.code ?? ""}`);
   if (!f) throw new HttpError("not_found", "No such filing.");
@@ -951,9 +1037,9 @@ async function filerMailSend(body) {
   if (!f.submit_clicked_at) throw new HttpError("forbidden", "Record the send before sending.");
   const p = f.payload ?? {};
   const approved = new Set([p.pdf_path, ...Array.isArray(p.attachments) ? p.attachments.map((a) => a?.path) : []].filter((x) => typeof x === "string"));
-  const { to, subject, content } = mailInput(body);
-  const files = await loadAttachments(ws, body.attachments, approved);
-  const sent = await sendFrom(ws, body.kind, to, subject, content, files);
+  const { to, subject, content } = mailInput(body2);
+  const files = await loadAttachments(ws, body2.attachments, approved);
+  const sent = await sendFrom(ws, body2.kind, to, subject, content, files);
   const { data: row } = await admin.from("filings").select("app_id").eq("id", filingId).maybeSingle();
   await track(ws, sent, to, subject, { filing_id: filingId, app_id: row?.app_id ?? void 0 });
   return ok(sent);
@@ -1299,30 +1385,56 @@ var booksIncome = async (c) => {
 var slackPost = async (c) => {
   const msg = text(c.body.text, "text", 1, 4e3);
   const conn = await Conn.open(c.ws, "slack");
-  const hook = conn.bundle.webhook_url;
-  if (!hook || !hook.startsWith("https://hooks.slack.com/")) {
-    await conn.markError("The Slack channel link is missing. Reconnect in Settings.");
-    throw new HttpError("not_connected", "Reconnect Slack in Settings.");
-  }
-  let res;
-  try {
-    res = await fetch(hook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: msg.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") }),
-      signal: AbortSignal.timeout(15e3)
-    });
-  } catch {
-    throw new HttpError("upstream_error", "Slack did not respond. Try again.");
-  }
-  const reply = (await res.text()).slice(0, 80);
-  if (res.ok) return ok();
-  console.error(`slack webhook ${res.status}:`, reply);
-  if ([403, 404, 410].includes(res.status)) {
+  const hook = conn.bundle.webhook_url ?? "";
+  const r = await postHook("slack", hook, msg);
+  if (r.ok) return ok();
+  console.error("slack post:", r.why);
+  if (r.gone) {
     await conn.markError("The Slack channel is no longer available. Reconnect in Settings.");
     throw new HttpError("not_connected", "Reconnect Slack in Settings.");
   }
-  throw new HttpError("upstream_error", `Slack returned an error (${res.status}). Try again.`);
+  throw new HttpError("upstream_error", "Slack did not answer. Try again.");
+};
+var hookConnect = async (c) => {
+  const kind = c.body.kind;
+  if (!isHookKind(kind)) throw new HttpError("bad_request", `kind must be one of: ${HOOK_KINDS.join(", ")}.`);
+  const url = hookUrl(kind, text(c.body.url, "url", 10, 600));
+  if (!url) throw new HttpError("bad_request", `That isn't a ${HOOK_NAMES[kind].en} webhook link. Copy the whole link the bot or workflow gives you.`);
+  const secret = optText(c.body.secret, "secret", 200) ?? void 0;
+  const lang = c.body.lang === "zh" ? "zh" : "en";
+  const { data: w } = await admin.from("workspaces").select("name").eq("id", c.ws).maybeSingle();
+  const business = typeof w?.name === "string" ? w.name : "";
+  const r = await postHook(kind, url.href, hookHello(business, lang), secret);
+  if (!r.ok) {
+    console.error(`${kind} hook test:`, r.why);
+    throw new HttpError("bad_request", lang === "zh" ? `${HOOK_NAMES[kind].zh}\u6CA1\u6709\u63A5\u53D7\u6D4B\u8BD5\u6D88\u606F\uFF08${r.why}\uFF09\u3002\u8BF7\u68C0\u67E5\u94FE\u63A5${kind === "lark" ? "\uFF0C\u4EE5\u53CA\u673A\u5668\u4EBA\u7684\u7B7E\u540D\u6216\u5173\u952E\u8BCD\u8BBE\u7F6E" : ""}\u3002` : `${HOOK_NAMES[kind].en} didn't accept the test message (${r.why}). Check the link${kind === "lark" ? " and the bot's signature or keyword setting" : ""}.`);
+  }
+  const old = await findIntegration(c.ws, kind);
+  if (old) {
+    if (kind === "slack" && old.meta?.via !== "link") await revoke(old);
+    await dropSecret(old.secret_id);
+    await admin.from("integrations").delete().eq("id", old.id);
+  }
+  const secretId = await writeBundle({ access_token: "", refresh_token: null, expires_at: null, token_type: "webhook", webhook_url: url.href, secret }, `integration:${kind}`, null);
+  const account = lang === "zh" ? `${HOOK_NAMES[kind].zh}\u7FA4` : `${HOOK_NAMES[kind].en} channel`;
+  const { error } = await admin.from("integrations").insert({ workspace_id: c.ws, kind, account, scopes: "webhook", status: "connected", secret_id: secretId, meta: { via: "link", lang }, connected_by: c.user.id });
+  if (error) {
+    await dropSecret(secretId);
+    throw new Error(`integration insert failed: ${error.code ?? ""}`);
+  }
+  await audit({ ...you(c), action: { en: `Connected ${HOOK_NAMES[kind].en}`, zh: `\u5DF2\u8FDE\u63A5${HOOK_NAMES[kind].zh}` }, object: HOOK_NAMES[kind] });
+  return ok({ kind, account });
+};
+var available = async () => {
+  const has = (...v) => v.every((n) => !!Deno.env.get(n));
+  const oauth = has("OAUTH_STATE_SECRET") && appOrigins().length > 0;
+  return ok({
+    google: oauth && has("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"),
+    microsoft: oauth && has("MS_CLIENT_ID", "MS_CLIENT_SECRET"),
+    dropbox: oauth && has("DROPBOX_APP_KEY", "DROPBOX_APP_SECRET"),
+    quickbooks: oauth && has("QB_CLIENT_ID", "QB_CLIENT_SECRET"),
+    slack: oauth && has("SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET")
+  });
 };
 var connect = async (c) => {
   const kind = kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"]);
@@ -1397,17 +1509,18 @@ var finish = async (c) => {
   return ok({ kind, account: p.account });
 };
 var disconnect = async (c) => {
-  const kind = kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"]);
+  const kind = isHookKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"]);
+  const name = isHookKind(kind) ? HOOK_NAMES[kind] : NAMES[kind];
   const row = await findIntegration(c.ws, kind);
-  if (!row) throw new HttpError("not_found", `${NAMES[kind].en} is not connected.`);
-  await revoke(row);
+  if (!row) throw new HttpError("not_found", `${name.en} is not connected.`);
+  if (row.meta?.via !== "link") await revoke(row);
   const { error } = await admin.from("integrations").delete().eq("id", row.id);
   if (error) throw new Error(`integration delete failed: ${error.code ?? ""}`);
   await dropSecret(row.secret_id);
   await audit({
     ...you(c),
-    action: { en: `Disconnected ${NAMES[kind].en}`, zh: `\u5DF2\u65AD\u5F00 ${NAMES[kind].zh}` },
-    object: NAMES[kind],
+    action: { en: `Disconnected ${name.en}`, zh: `\u5DF2\u65AD\u5F00 ${name.zh}` },
+    object: name,
     detail: row.account ? same(row.account) : null
   });
   return ok();
@@ -1442,30 +1555,32 @@ var ACTIONS = {
   files_import: filesImport,
   books_income: booksIncome,
   slack_post: slackPost,
+  hook_connect: hookConnect,
+  available,
   feed_url: feedUrl
 };
-var OWNER_ONLY = /* @__PURE__ */ new Set([connect, disconnect, mailSend, slackPost]);
+var OWNER_ONLY = /* @__PURE__ */ new Set([connect, disconnect, mailSend, slackPost, hookConnect]);
 serve(async (req) => {
   const mk = req.headers.get("x-monitor-key");
   if (mk) {
     const { data: good } = await admin.rpc("monitor_key_ok", { p_key: mk });
     if (good !== true) throw new HttpError("unauthorized", "Wrong monitor key.");
-    const body2 = await readBody(req);
-    if (body2.action !== "mail_watch") throw new HttpError("bad_request", "The monitor may only watch mail.");
+    const body3 = await readBody(req);
+    if (body3.action !== "mail_watch") throw new HttpError("bad_request", "The monitor may only watch mail.");
     return await mailWatch();
   }
   if (await fromFiler(req)) {
-    const body2 = await readBody(req);
-    if (body2.action !== "mail_send") throw new HttpError("bad_request", "The filer may only send mail.");
-    return await filerMailSend(body2);
+    const body3 = await readBody(req);
+    if (body3.action !== "mail_send") throw new HttpError("bad_request", "The filer may only send mail.");
+    return await filerMailSend(body3);
   }
   const { user, jwt } = await requireUser(req);
-  const body = await readBody(req);
-  const ws = uuidParam(body.workspace_id, "workspace_id");
-  const action = typeof body.action === "string" && Object.hasOwn(ACTIONS, body.action) ? ACTIONS[body.action] : null;
+  const body2 = await readBody(req);
+  const ws = uuidParam(body2.workspace_id, "workspace_id");
+  const action = typeof body2.action === "string" && Object.hasOwn(ACTIONS, body2.action) ? ACTIONS[body2.action] : null;
   if (!action) throw new HttpError("bad_request", `Unknown action. Use one of: ${Object.keys(ACTIONS).join(", ")}.`);
   if (action !== finish) await requireAccess(ws, user, jwt, OWNER_ONLY.has(action) ? "owner" : "member");
-  return await action({ user, jwt, ws, body });
+  return await action({ user, jwt, ws, body: body2 });
 });
 export {
   gmailMime

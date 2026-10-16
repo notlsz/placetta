@@ -35,7 +35,7 @@ var require_supabase_js_2 = __commonJS({
   }
 });
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/oauth-callback/shared.ts
+// supabase/functions/oauth-callback/shared.ts
 var import_supabase_js_2 = __toESM(require_supabase_js_2(), 1);
 var SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 var SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -148,7 +148,7 @@ function withParam(url, key, value) {
   return u.toString();
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/oauth-callback/providers.ts
+// supabase/functions/oauth-callback/providers.ts
 var KINDS = ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"];
 var isKind = (v) => typeof v === "string" && KINDS.includes(v);
 var PROVIDER = {
@@ -335,7 +335,7 @@ async function dropSecret(secretId) {
   if (error) console.error("vault drop failed:", error.code ?? "");
 }
 
-// ../../../../../../home/claude/placetta-agent/supabase/functions/oauth-callback/index.ts
+// supabase/functions/oauth-callback/index.ts
 var RESULT_PARAMS = ["connected", "connect_error", "connect_finish", "kind"];
 function redirect(to) {
   return new Response(null, {
