@@ -535,7 +535,7 @@ export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { ac
 /** An Odelia pack: more AI allowance, carried over until it's used. */
 export const buyPack = (ws: string, packs = 1) => fn<{ url: string }>("billing", { action: "pack", workspace_id: ws, packs, return_url: appHome() });
 /** How much of this period's Odelia allowance is used. */
-export type AiStatus = { plan: "none" | "entry" | "entry_ended" | "monthly" | "comped"; used_pct: number; resets_at: string | null; has_credit: boolean };
+export type AiStatus = { plan: "none" | "entry" | "entry_ended" | "monthly" | "comped"; used_pct: number; resets_at: string | null; has_credit: boolean; /** saver mode is on (past 60% of the allowance, or throttled for the day) */ saver?: boolean; saver_at_pct?: number };
 export async function aiStatus(ws: string): Promise<AiStatus | null> {
   if (PREVIEW) return null;
   const { data, error } = await supabase().rpc("ai_status", { ws });
@@ -543,9 +543,10 @@ export async function aiStatus(ws: string): Promise<AiStatus | null> {
   return data as AiStatus;
 }
 
-/** The agent's model call through the server (company key, research tools, plan and usage checks). */
-export const agentCall = (ws: string, request: Record<string, unknown>, o: { deep?: boolean; research?: boolean; location?: { city: string; region?: string } } = {}) =>
-  fn<{ content: { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] }[]; stop_reason: string }>("agent", { workspace_id: ws, request, ...o });
+/** The agent's model call through the server (company keys, the role's route, research tools, plan and usage checks).
+ *  saver and renews_at come back when the workspace is in saver mode (past 60% of its allowance). */
+export const agentCall = (ws: string, request: Record<string, unknown>, o: { deep?: boolean; research?: boolean; role?: string; location?: { city: string; region?: string } } = {}) =>
+  fn<{ content: { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] }[]; stop_reason: string; saver?: boolean; renews_at?: string | null }>("agent", { workspace_id: ws, request, ...o });
 
 export async function ttsAudio(ws: string, text: string, lang: string): Promise<ArrayBuffer | null> {
   const s = await getSession(); if (!s) return null;
@@ -594,6 +595,14 @@ export async function teamTasks(): Promise<TeamTask[]> {
   const { data, error } = await supabase().rpc("team_tasks_open");
   if (error) return [];   // before the migration, or not staff: show nothing rather than fail the queue
   return (data ?? []) as TeamTask[];
+}
+/** What Odelia's models cost the company this month against plan revenue (public.ai_margin_company). Staff only. */
+export type AiMarginRow = { workspace_id: string; name: string | null; ai_cost_usd: number; revenue_usd: number; allowance_usd: number; cost_pct: number | null; calls: number; top_roles: { role: string; cost_usd: number; calls: number }[] };
+export type AiMargin = { month: string; ai_cost_usd: number; mrr_usd: number; cost_pct: number | null; gross_margin_pct: number | null; workspaces_using_ai: number; calls: number; top: AiMarginRow[]; by_role: { role: string; cost_usd: number; calls: number }[]; by_vendor: { provider: string; cost_usd: number; calls: number }[] };
+export async function aiMarginCompany(month?: string): Promise<AiMargin | null> {
+  const { data, error } = await supabase().rpc("ai_margin_company", month ? { p_month: month } : {});
+  if (error) return null;   // before the migration, or not staff
+  return data as AiMargin;
 }
 export async function finishTeamTask(id: string) {
   const { error } = await supabase().rpc("finish_team_task", { p_id: id });

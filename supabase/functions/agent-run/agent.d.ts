@@ -8,7 +8,9 @@ export type Workspace = { audit: Audit[]; meta?: { city?: string; region?: strin
 export type Turn = { role: "user" | "assistant"; content: string };
 export type RunState = { messages: { role: string; content: unknown }[]; rounds: number; plainSms?: boolean; spent?: number; [k: string]: unknown };
 export type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] };
-export type Send = (body: Record<string, unknown>, deep: boolean) => Promise<{ content: Block[]; stop_reason: string }>;
+/** What a model call is for; the server routes each role to its own model (../_shared/llm.ts). */
+export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
+export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role) => Promise<{ content: Block[]; stop_reason: string }>;
 export type Services = {
   filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[] }[];
   connected(): string[];
@@ -28,6 +30,8 @@ export declare function runRounds(o: {
   round?: (state: RunState) => Promise<void>;
   research?: boolean; maxRounds?: number;
   channel?: Channel;
+  /** The main loop's role: plan (default), short for a text, call or chat bot, watch for background checks. */
+  role?: Role;
 }): Promise<{ reply: Reply } | { paused: RunState }>;
 export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark";
 export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;

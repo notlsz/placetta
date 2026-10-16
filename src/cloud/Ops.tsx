@@ -26,7 +26,46 @@ const KIND: Record<string, Bi> = {
   check_agency: B("Check it reached the agency", "核实机构是否收到"),
   destination_stale: B("Re-check where this form is sent", "重新核实提交地址"),
   line_health: B("An iMessage line needs care", "iMessage 线路需要处理"),
+  ai_spend: B("Unusual AI spend, in saver mode today", "AI 用量异常，今日为节省模式"),
 };
+
+/** What Odelia's models cost this month against what the plans pay, with the ten workspaces that cost the most. */
+function AiMarginCard() {
+  const { lang } = useApp();
+  const zh = lang === "zh";
+  const [m, setM] = useState<api.AiMargin | null | undefined>(undefined);
+  useEffect(() => { void api.aiMarginCompany().then(setM); }, []);
+  if (!m) return null;
+  const usd = (n: number) => `$${Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const pct = (n: number | null) => (n == null ? "-" : `${n}%`);
+  return (
+    <section className="sec">
+      <div className="sec-h"><h2>{zh ? "AI 成本" : "AI cost this month"}</h2></div>
+      <div className="q-margin">
+        <p className="q-margin-line">{zh
+          ? `本月 AI 成本 ${usd(m.ai_cost_usd)}，方案收入 ${usd(m.mrr_usd)}（占 ${pct(m.cost_pct)}），AI 毛利率 ${pct(m.gross_margin_pct)}`
+          : `AI cost this month: ${usd(m.ai_cost_usd)} of ${usd(m.mrr_usd)} revenue (${pct(m.cost_pct)}), gross margin on AI ${pct(m.gross_margin_pct)}`}</p>
+        <p className="note">{zh
+          ? `${m.workspaces_using_ai} 个工作区使用了 AI，共 ${m.calls} 次调用。${m.by_vendor.map(v => `${v.provider} ${usd(v.cost_usd)}`).join("，")}`
+          : `${m.workspaces_using_ai} workspace${m.workspaces_using_ai === 1 ? "" : "s"} used AI, ${m.calls} call${m.calls === 1 ? "" : "s"}. ${m.by_vendor.map(v => `${v.provider} ${usd(v.cost_usd)}`).join(", ")}`}</p>
+        {m.top.length > 0 && (
+          <table className="q-margin-t">
+            <thead><tr><th>{zh ? "工作区" : "Workspace"}</th><th>{zh ? "AI 成本" : "AI cost"}</th><th>{zh ? "收入" : "Revenue"}</th><th>{zh ? "占比" : "Share"}</th><th>{zh ? "主要用途" : "Mostly"}</th></tr></thead>
+            <tbody>{m.top.map(r => (
+              <tr key={r.workspace_id}>
+                <td>{r.name ?? r.workspace_id.slice(0, 8)}</td>
+                <td>{usd(r.ai_cost_usd)}</td>
+                <td>{usd(r.revenue_usd)}</td>
+                <td>{pct(r.cost_pct)}</td>
+                <td>{r.top_roles.slice(0, 2).map(x => x.role).join(", ") || "-"}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        )}
+      </div>
+    </section>
+  );
+}
 
 function Copy({ text }: { text: string }) {
   const { say, lang } = useApp();
@@ -165,6 +204,7 @@ export function Queue() {
       <header className="ph"><div className="ph-tx"><h1>{lang === "zh" ? "申报队列" : "Filing queue"}</h1><p>{lang === "zh" ? "客户批准的每一份申请。核对要求、提交、发送付款链接、上传收据。" : "Every application a customer approved. Check the requirements, submit, send the payment link, upload the receipt."}</p></div></header>
       <div className="q-grid">
         <div className="q-list">
+          <AiMarginCard />
           {tasks.length > 0 && (
             <section className="sec">
               <div className="sec-h"><h2>{lang === "zh" ? "团队待办" : "Team tasks"}<em>{tasks.length}</em></h2></div>

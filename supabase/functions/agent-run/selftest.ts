@@ -263,11 +263,12 @@ export async function selftest(env: (k: string) => string | undefined, o: { budg
       const out = await runRounds({
         state, ws: () => cur as never, apply: (p) => { cur = p(cur as never) as unknown as W; }, step: (_: Step) => undefined,
         lang: s.lang, deep: false, account: true, svc: s.svc ?? hands(), signal: ctl.signal, until: t0 + budget - Math.min(20_000, budget / 4), research: false, maxRounds: s.maxRounds,
-        send: async (body) => {
+        send: async (body, _deep, role) => {
           const payload: Record<string, unknown> = { model, max_tokens: Math.min(Number(body.max_tokens) || 2000, 3000), messages: body.messages };
           if (body.system) payload.system = body.system;
           if (body.tools) payload.tools = body.tools;
-          const r = await callModel(env, { payload, tier: o.model === "prod" ? "standard" : "fast", research: false, beta: null }, model, null, limited);
+          // "prod" runs the real plan route (and the checker's review route); anything else runs on the extract route, the cheap one
+          const r = await callModel(env, { payload, role: o.model === "prod" ? role ?? "plan" : "extract", research: false, beta: null }, model, null, limited);
           if (!r.ok) throw new Error(`model ${r.model || model} answered ${r.status}: ${r.text.slice(0, 160)}`);
           used ||= r.model;
           return r.data as never;

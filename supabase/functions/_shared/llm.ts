@@ -1,21 +1,55 @@
 // One door to many models. The app and both agent functions speak Anthropic's Messages format; this module sends
-// each request to the first model in a route that has a key, translating to and from the OpenAI chat format for
+// each request to the first model in its route that has a key, translating to and from the OpenAI chat format for
 // DeepSeek, Gemini, OpenAI, OpenRouter and Groq, and falls through to the next model when one is busy or down.
 //
-// Routes are set with Edge Function secrets, as comma-separated "provider:model" lists, cheapest first:
-//   AGENT_ROUTE_FAST      reading uploads and other extraction (no web research)
-//   AGENT_ROUTE           conversations
-//   AGENT_ROUTE_DEEP      deep lookups
-// e.g. AGENT_ROUTE_FAST = "deepseek:deepseek-chat,gemini:gemini-2.5-flash,anthropic:claude-haiku-4-5-20251001"
-// With no route set, everything goes to Anthropic exactly as before; with only GEMINI_API_KEY set, to Gemini's Flash.
+// Every call has a role, and each role has a route: the cheapest model that is good enough for that work first, a
+// better one behind it, and Anthropic as the safety net. The roles:
+//   plan        the main agentic loop: planning, tool use, the final answer
+//   review      the independent checker (a different vendor from the doer, so a model isn't grading itself)
+//   extract     reading uploads, pulling fields, classifying
+//   translate   rendering text that is already decided into English or Chinese
+//   draft       routine documents and messages from a template
+//   short       one-liners for texts, calls and chat bots, status chases
+//   watch       the monitor's weekly rule scan and routine checks
+//   deep        web research
+// The default routes are in DEFAULT_ROUTES below. A secret AGENT_ROUTE_<ROLE> (AGENT_ROUTE_EXTRACT, AGENT_ROUTE_PLAN...)
+// replaces a role's route, as a comma-separated "provider:model" list, cheapest first; the three old names still work:
+// AGENT_ROUTE_FAST is extract, AGENT_ROUTE is plan, AGENT_ROUTE_DEEP is deep. Anthropic is added at the end of any route
+// that leaves it out. AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST name the Anthropic models (Sonnet, Opus, Haiku).
 //
 // Keys: ANTHROPIC_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, GROQ_API_KEY.
+// Which vendors may see what is decided by vendorOk (data-use guardrails):
+//   Anthropic and OpenAI       always (both contractually don't train on API traffic)
+//   Gemini                     everything only with GEMINI_PAID=1 (Google's free tier may use prompts to improve its
+//                              products; the paid tier doesn't). Without it, Gemini gets no customer files and no
+//                              conversations, only calls marked publicOnly (a scan of public pages with nothing of the
+//                              customer's in it). Today every call carries the workspace, so without GEMINI_PAID a
+//                              Gemini key goes unused.
+//   DeepSeek                   PRC-hosted: only with ALLOW_DEEPSEEK=1, and never files
+//   OpenRouter, Groq           only with ALLOW_OPENROUTER=1 / ALLOW_GROQ=1, and never files
 // Free models (an OpenRouter model ending in ":free", or anything on Groq's free tier) are skipped unless
 // AGENT_ALLOW_FREE=1, and are never sent customer files, because free tiers may keep or train on prompts.
+// PDFs (document blocks) only go to models that read them: Anthropic, Gemini, OpenRouter.
 
 type Block = Record<string, unknown>;
+export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
+export const ROLES: Role[] = ["plan", "review", "extract", "translate", "draft", "short", "watch", "deep"];
+/** The old three-way split, kept so older call sites keep working: fast is extract, standard is plan, deep is deep. */
 export type Tier = "fast" | "standard" | "deep";
-export type Call = { payload: Record<string, unknown>; tier: Tier; research: boolean; beta: string | null };
+export type Call = {
+  payload: Record<string, unknown>;
+  /** What this call is for; picks the route. */
+  role?: Role;
+  /** The old name for the same thing (fast, standard, deep); role wins when both are given. */
+  tier?: Tier;
+  /** The payload carries Anthropic's web tools (search and fetch). Only Anthropic runs them. */
+  research: boolean;
+  beta: string | null;
+  /** Where the customer is, for vendor rules that depend on it (none yet; US by default). */
+  region?: string;
+  /** Nothing of the customer's in the call (a scan of public pages): the one thing an unpaid Gemini tier may see. */
+  publicOnly?: boolean;
+};
 export type Result = { ok: boolean; status: number; data?: Record<string, unknown>; text: string; model: string };
 type Env = (k: string) => string | undefined;
 type Fetch = typeof fetch;
@@ -27,21 +61,76 @@ const OPENAI_STYLE: Record<string, { url: string; key: string }> = {
   openrouter: { url: "https://openrouter.ai/api/v1/chat/completions", key: "OPENROUTER_API_KEY" },
   groq: { url: "https://api.groq.com/openai/v1/chat/completions", key: "GROQ_API_KEY" },
 };
+export const PROVIDERS = ["anthropic", ...Object.keys(OPENAI_STYLE)];
 
-export function routeFor(env: Env, tier: Tier, fallbackModel: string): [string, string][] {
-  const raw = env(tier === "fast" ? "AGENT_ROUTE_FAST" : tier === "deep" ? "AGENT_ROUTE_DEEP" : "AGENT_ROUTE") ?? env("AGENT_ROUTE") ?? "";
-  const list = raw.split(",").map((s) => s.trim()).filter(Boolean).map((s) => { const i = s.indexOf(":"); return [s.slice(0, i), s.slice(i + 1)] as [string, string]; })
-    .filter(([p, m]) => m && (p === "anthropic" || p in OPENAI_STYLE));
-  // No route set and only a Gemini key: Gemini's current Flash runs everything (GEMINI_MODEL picks another).
-  if (!raw && !env("ANTHROPIC_API_KEY") && env("GEMINI_API_KEY")) list.push(["gemini", env("GEMINI_MODEL") ?? "gemini-flash-latest"]);
+/** The Anthropic models by size. The repo's defaults; AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST change them. */
+export const ANTHROPIC_MODELS = { plan: "claude-sonnet-5-5", deep: "claude-opus-5-5", fast: "claude-haiku-4-5-20251001" };
+const GEMINI = { lite: "gemini-2.5-flash-lite", flash: "gemini-2.5-flash", pro: "gemini-2.5-pro" };
+
+/**
+ * The default route of each role, cheapest first, as [provider, model]. "anthropic:*" stands for the Anthropic model
+ * that fits the role (Haiku for the cheap roles, Sonnet for plan and review, Opus for deep), so AGENT_MODEL still
+ * picks the exact one. A provider without a key is skipped at call time.
+ */
+const CHEAP: [string, string][] = [["gemini", GEMINI.lite], ["gemini", GEMINI.flash], ["anthropic", "*"]];
+export const DEFAULT_ROUTES: Record<Role, [string, string][]> = {
+  extract: CHEAP,
+  translate: CHEAP,
+  short: CHEAP,
+  watch: CHEAP,
+  draft: [["gemini", GEMINI.flash], ["anthropic", "*"]],
+  // the main loop: Sonnet, with Gemini's Pro behind it for when Anthropic is down
+  plan: [["anthropic", "*"], ["gemini", GEMINI.pro]],
+  // the checker: a different vendor from the doer, so the work isn't graded by the model that did it
+  review: [["gemini", GEMINI.pro], ["anthropic", "*"]],
+  deep: [["anthropic", "*"]],
+};
+
+/** The Anthropic model a role falls back to. fallbackModel is what the caller already decided (AGENT_MODEL or AGENT_MODEL_DEEP). */
+export function anthropicFor(env: Env, role: Role, fallbackModel: string): string {
+  if (role === "plan" || role === "review" || role === "deep") return fallbackModel;
+  return env("AGENT_MODEL_FAST") || ANTHROPIC_MODELS.fast;
+}
+
+export const roleOfTier = (tier: Tier | undefined): Role => (tier === "fast" ? "extract" : tier === "deep" ? "deep" : "plan");
+const ALIAS: Partial<Record<Role, string>> = { extract: "AGENT_ROUTE_FAST", plan: "AGENT_ROUTE", deep: "AGENT_ROUTE_DEEP" };
+
+const parseRoute = (raw: string) => raw.split(",").map((s) => s.trim()).filter(Boolean)
+  .map((s) => { const i = s.indexOf(":"); return [s.slice(0, i), s.slice(i + 1)] as [string, string]; })
+  .filter(([p, m]) => m && (p === "anthropic" || p in OPENAI_STYLE));
+
+/** The route for a role: its secret if set (or the old name), else the default. Anthropic is always on it. */
+export function routeFor(env: Env, roleOrTier: Role | Tier, fallbackModel: string): [string, string][] {
+  const role: Role = (ROLES as string[]).includes(roleOrTier) ? roleOrTier as Role : roleOfTier(roleOrTier as Tier);
+  const raw = env(`AGENT_ROUTE_${role.toUpperCase()}`) ?? (ALIAS[role] ? env(ALIAS[role]!) : undefined) ?? "";
+  const anth = anthropicFor(env, role, fallbackModel);
+  const list = raw ? parseRoute(raw) : DEFAULT_ROUTES[role].map(([p, m]) => [p, p === "anthropic" && m === "*" ? anth : m] as [string, string]);
   // Anthropic stays the safety net at the end of every route.
-  if (!list.some(([p]) => p === "anthropic")) list.push(["anthropic", fallbackModel]);
+  if (!list.some(([p]) => p === "anthropic")) list.push(["anthropic", anth]);
   return list;
 }
 
 const isFree = (p: string, m: string) => p === "groq" || /:free$/.test(m);
 const hasFiles = (messages: Block[]) => messages.some((m) => Array.isArray(m.content) && (m.content as Block[]).some((b) => b.type === "image" || b.type === "document"));
 const hasDocs = (messages: Block[]) => messages.some((m) => Array.isArray(m.content) && (m.content as Block[]).some((b) => b.type === "document"));
+
+/**
+ * Data-use guardrails: may this vendor see this call? Anthropic and OpenAI always. Gemini everything only on the paid
+ * tier (GEMINI_PAID=1); otherwise no files and no conversations, only a watch scan marked publicOnly (nothing of the
+ * customer's in it). DeepSeek only when ALLOW_DEEPSEEK=1, OpenRouter and Groq only when allowed too, and none of those
+ * three ever gets a customer's files. region is kept for rules that depend on where the customer is; today every
+ * customer is treated the same.
+ */
+export function vendorOk(env: Env, provider: string, o: { hasFiles: boolean; role?: Role; region?: string; publicOnly?: boolean }): boolean {
+  switch (provider) {
+    case "anthropic": case "openai": return true;
+    case "gemini": return env("GEMINI_PAID") === "1" || (!o.hasFiles && o.role === "watch" && o.publicOnly === true);
+    case "deepseek": return env("ALLOW_DEEPSEEK") === "1" && !o.hasFiles;
+    case "openrouter": return env("ALLOW_OPENROUTER") === "1" && !o.hasFiles;
+    case "groq": return env("ALLOW_GROQ") === "1" && !o.hasFiles;
+    default: return false;
+  }
+}
 
 /* ---------- Anthropic Messages -> OpenAI chat ---------- */
 export function toOpenAI(payload: Record<string, unknown>, model: string): Record<string, unknown> {
@@ -67,6 +156,10 @@ export function toOpenAI(payload: Record<string, unknown>, model: string): Recor
       else if (b.type === "image") {
         const src = b.source as Block;
         if (src?.type === "base64") parts.push({ type: "image_url", image_url: { url: `data:${src.media_type};base64,${src.data}` } });
+      } else if (b.type === "document") {
+        // a PDF, for the vendors that read them through the OpenAI format (Gemini, OpenRouter)
+        const src = b.source as Block;
+        if (src?.type === "base64") parts.push({ type: "file", file: { filename: "document.pdf", file_data: `data:${src.media_type ?? "application/pdf"};base64,${src.data}` } });
       }
     }
     if (parts.length) out.push({ role: "user", content: parts.length === 1 && parts[0].type === "text" ? parts[0].text : parts });
@@ -135,18 +228,28 @@ async function viaAnthropic(f: Fetch, key: string, call: Call, model: string, re
   return { res, text };
 }
 
-/**
- * Sends the call down its route. Returns the first answer in Anthropic's format, or the last failure.
- * research: the server tools to use when the model is Anthropic; other models answer without web research,
- * so a research call tries Anthropic first.
- */
-export async function callModel(env: Env, call: Call, fallbackModel: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null, f: Fetch = fetch): Promise<Result> {
-  let route = routeFor(env, call.tier, fallbackModel);
+/** Roles whose work needs the web: when such a call carries research tools, Anthropic (the only vendor that runs them) goes first. */
+const RESEARCH_FIRST = new Set<Role>(["plan", "deep", "watch"]);
+
+/** The models a call may go to, in order, after every rule: the role's route, keys, free models, files, vendors, research. */
+export function candidates(env: Env, call: Call, fallbackModel: string): [string, string][] {
+  const role = call.role ?? roleOfTier(call.tier);
+  let route = routeFor(env, role, fallbackModel);
   const msgs = (call.payload.messages as Block[]) ?? [];
   const files = hasFiles(msgs), docs = hasDocs(msgs), allowFree = env("AGENT_ALLOW_FREE") === "1";
   route = route.filter(([p, m]) => !isFree(p, m) || (allowFree && !files));
   if (docs) route = route.filter(([p]) => p === "anthropic" || p === "gemini" || p === "openrouter");   // PDFs need a model that reads them
-  if (call.research) route = [...route.filter(([p]) => p === "anthropic"), ...route.filter(([p]) => p !== "anthropic")];
+  route = route.filter(([p]) => vendorOk(env, p, { hasFiles: files, role, region: call.region, publicOnly: call.publicOnly }));
+  if (call.research && RESEARCH_FIRST.has(role)) route = [...route.filter(([p]) => p === "anthropic"), ...route.filter(([p]) => p !== "anthropic")];
+  return route;
+}
+
+/**
+ * Sends the call down its route. Returns the first answer in Anthropic's format, or the last failure.
+ * research: the server tools to use when the model is Anthropic; other models answer without web research.
+ */
+export async function callModel(env: Env, call: Call, fallbackModel: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null, f: Fetch = fetch): Promise<Result> {
+  const route = candidates(env, call, fallbackModel);
   let last: Result = { ok: false, status: 503, text: "No model has a key. Add one in the Edge Function secrets.", model: "" };
   for (const [p, model] of route) {
     try {
@@ -172,3 +275,6 @@ export async function callModel(env: Env, call: Call, fallbackModel: string, res
   }
   return last;
 }
+
+/** "provider" from a Result's model ("gemini:gemini-2.5-flash" -> "gemini"). */
+export const providerOf = (model: string) => (model.includes(":") ? model.slice(0, model.indexOf(":")) : model ? "anthropic" : "");

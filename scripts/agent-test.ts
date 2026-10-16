@@ -6,7 +6,7 @@
 import { DEFAULT_POLICY } from "../src/spend.ts";
 import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, type Channel, type RunState, type Send } from "../src/serverRun";
 import { applyChange, normalizeState, type Step } from "../src/core";
-import { liveAgent, makeTools, messagesModel, rules, type Block, type Made, type Services } from "../src/live";
+import { DOCS_PER_RUN, liveAgent, makeTools, messagesModel, pdfPages, rules, type Block, type Made, type Role, type Services } from "../src/live";
 import { BUILTIN } from "../src/skills";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
 import { inDays } from "../src/time";
@@ -79,14 +79,14 @@ const ctxOf = (body: Record<string, unknown>): Ctx => {
 const covered = new Set<string>();
 let declared: string[] = [];
 
-type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; steps: Step[]; calls: Call[]; bodies: Record<string, unknown>[]; state: RunState };
+type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; steps: Step[]; calls: Call[]; bodies: Record<string, unknown>[]; roles: (Role | undefined)[]; state: RunState };
 /** One request through runRounds, the code agent-run runs. */
-async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; svc?: Services; account?: boolean; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel }): Promise<Run> {
+async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; svc?: Services; account?: boolean; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; role?: Role }): Promise<Run> {
   let w = o.ws, i = 0;
-  const steps: Step[] = [], bodies: Record<string, unknown>[] = [];
+  const steps: Step[] = [], bodies: Record<string, unknown>[] = [], roles: (Role | undefined)[] = [];
   const state = o.state ?? startState([], o.prompt ?? "");
-  const send: Send = async (body) => {
-    bodies.push(body);
+  const send: Send = async (body, _deep, role) => {
+    bodies.push(body); roles.push(role);
     if (o.delay) await new Promise(r => setTimeout(r, o.delay));
     if (!body.tools) {   // a model.json call: reading a document
       const msgs = body.messages as { content: { type: string; text?: string }[] }[];
@@ -99,10 +99,10 @@ async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; sc
     return turn(ctxOf(body));
   };
   const out = await runRounds({ state, ws: () => w, apply: p => { w = p(w); }, step: s => { steps.push(s); }, send, lang: o.lang ?? "en", deep: false, account: o.account ?? true,
-    svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel });
+    svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, role: o.role });
   const calls = callsOf(state.messages);
   for (const c of calls) if (c.ok) covered.add(c.name);
-  return { w, steps, calls, bodies, state, ...("reply" in out ? { reply: out.reply as unknown as Record<string, unknown> } : { paused: out.paused }) };
+  return { w, steps, calls, bodies, roles, state, ...("reply" in out ? { reply: out.reply as unknown as Record<string, unknown> } : { paused: out.paused }) };
 }
 const textOf = (r: Run) => ((r.reply?.text as { en: string }[]) ?? []).map(t => t.en).join(" ");
 const callNamed = (r: Run, n: string) => r.calls.filter(c => c.name === n);
@@ -705,6 +705,44 @@ async function limits() {
   eq(textOf(second), "Prepared the EIN application and added the opening date.", "the reply is the final text");
 }
 
+async function roles() {
+  console.log("\n# Roles: every model call says what it is for, so the server can route it to the right model");
+  const { svc } = account();
+  // the main loop is plan; a text or a chat bot is short; the checker is review; reading a document is extract
+  const doc = fileOf("permit.txt", "Permit No. 1. Expiration Date: 2027-01-31");
+  const docs = Array.from({ length: 12 }, (_, i) => ({ id: `d${i}`, name: i === 0 ? "permit.txt" : `doc${i}.txt`, kind: "pdf" as const, size: 10, by: "you" as const, at: "2026-10-01T00:00:00Z", tag: same("Uploaded") }));
+  const files = new Map(docs.map(d => [d.name, d.name === "permit.txt" ? doc : fileOf(d.name, "A letter with nothing to extract.")]));
+  const r = await agent({
+    ws: workspace({ docs }), svc, files, prompt: "Review my documents, then check the job.",
+    json: t => (/You are checking this job/.test(t) ? { items: [{ ok: true, why: "the renewal reminder is in Deadlines" }] }
+      : { document_type: "Permit", number: "1", expires: "2027-01-31", quotes: { number: "Permit No. 1", expires: "Expiration Date: 2027-01-31" } }),
+    script: [
+      () => ask(["review_documents", {}], ["review_documents", {}], ["review_documents", {}]),
+      () => ask(["set_plan", { title: "Review", steps: [{ title: "Read", done: true }, { title: "List", done: true }, { title: "Remind", done: true }], done: ["A renewal reminder exists for permit.txt"] }]),
+      () => say("Reviewed your documents."),
+    ],
+  });
+  const review = callNamed(r, "review_documents");
+  eq(review.map(c => c.ok), [true, true, false], `review_documents reads at most ${DOCS_PER_RUN} documents a run: 8, then 2, then refuses`);
+  ok(/already read 10 documents/.test(review[2].out), "and says why", review[2].out);
+  eq((review[0].parsed as { reviewed: unknown[] }).reviewed.length + (review[1].parsed as { reviewed: unknown[] }).reviewed.length, DOCS_PER_RUN, `${DOCS_PER_RUN} documents were read in all`);
+  const mainRoles = r.bodies.map((b, i) => [b, r.roles[i]] as const).filter(([b]) => !!b.tools).map(([, role]) => role);
+  ok(mainRoles.length > 0 && mainRoles.every(x => x === "plan"), "the main loop's calls carry role plan", mainRoles);
+  const extractRoles = r.bodies.map((b, i) => [b, r.roles[i]] as const).filter(([b]) => !b.tools && !/You are checking this job/.test(JSON.stringify(b.messages))).map(([, role]) => role);
+  eq([...new Set(extractRoles)], ["extract"], `the ${extractRoles.length} document reads carry role extract`);
+  const checkerRoles = r.bodies.map((b, i) => [b, r.roles[i]] as const).filter(([b]) => /You are checking this job/.test(JSON.stringify(b.messages))).map(([, role]) => role);
+  eq([...new Set(checkerRoles)], ["review"], "the checker's call carries role review");
+
+  const sms = await agent({ ws: workspace(), prompt: "What's due?", channel: "sms", role: "short", script: [() => say("Nothing is due this week.")] });
+  eq(sms.roles, ["short"], "a run from a text carries role short");
+  const watch = await agent({ ws: workspace(), prompt: "Weekly check", role: "watch", script: [() => say("No changes.")] });
+  eq(watch.roles, ["watch"], "a background check carries role watch");
+
+  // the page counter behind the 50-page cap
+  const pdf = (pages: number) => new Blob(["%PDF-1.4\n1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n2 0 obj << /Type /Pages /Count " + pages + " >> endobj\n" + Array.from({ length: pages }, (_, i) => `${i + 3} 0 obj << /Type /Page /Parent 2 0 R >> endobj`).join("\n") + "\n%%EOF"], { type: "application/pdf" });
+  eq([await pdfPages(pdf(3)), await pdfPages(pdf(51))], [3, 51], "pdfPages counts page objects, not the page tree");
+}
+
 async function chinese() {
   console.log("\n# Chinese: lang zh");
   const { svc } = account();
@@ -956,6 +994,7 @@ await harness();
 await network();
 await errors();
 await limits();
+await roles();
 await chinese();
 promptConsistency();
 
