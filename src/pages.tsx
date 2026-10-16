@@ -9,6 +9,7 @@ import { readyToFile } from "./core";
 import { formById } from "./forms/registry";
 import type { Key } from "./i18n";
 import { AgentBot, TaskBot, Working } from "./Bot";
+import { taskVerb } from "./tasks";
 import { StoresStrip } from "./Stores";
 import { B, type Bi } from "./model";
 import { takeAutostart } from "./cloud/handoff";
@@ -128,7 +129,7 @@ function AppRow({ a }: { a: Application }) {
 function LiveLine() {
   const { b, lang, ws, busy, live } = useApp();
   const last = ws.audit.find(a => a.actor === "agent");
-  if (busy && live) return <Working on size="line"><p className="liveline on" aria-live="polite"><ThinkingOrb state={live.state} size={20} theme="light" color={INK} aria-hidden="true" /><span>{b(live.label)}…</span>{live.tool && <em className="site">{live.tool}</em>}</p></Working>;
+  if (busy && live) return <Working on size="line"><p className="liveline on" aria-live="polite"><ThinkingOrb state={live.state} size={20} theme="light" color={INK} aria-hidden="true" /><b className="ll-verb">{b(taskVerb(live.state))}…</b><span>{b(live.label)}</span>{live.tool && <em className="site">{live.tool}</em>}</p></Working>;
   if (!last) return null;
   return <p className="liveline"><span className="ll-dot" aria-hidden="true" /><span>{b(last.action)}: {b(last.object)}</span><em>{fmtAgo(last.at, lang)}</em></p>;
 }

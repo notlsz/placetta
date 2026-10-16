@@ -144,6 +144,8 @@ html[lang="zh-CN"] .hero h1 { word-break: keep-all; max-width: 13em; letter-spac
 .liveline { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; margin: 22px 0 0; padding: 6px 16px 6px 10px; border-radius: 999px; background: rgba(var(--w), .8); box-shadow: 0 0 0 1px rgba(var(--e), .05); font-size: 13px; color: var(--ink2); }
 .liveline > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .liveline em { font-style: normal; color: var(--ink3); white-space: nowrap; }
+.liveline .ll-verb { font-weight: 600; white-space: nowrap; margin-right: -2px; }
+.liveline .ll-verb + span { font-size: 12.5px; }
 .liveline.on { background: var(--sky-wash); color: var(--blue-deep); box-shadow: 0 0 0 1px #DCE6F2; }
 .liveline em.site, .dock-live em { color: var(--blue-ink); }
 .ll-dot { flex: none; width: 7px; height: 7px; margin: 0 2px 0 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 3px var(--sky); }
@@ -396,7 +398,8 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .dockbar > * { position: relative; }
 .composer-wrap { display: flex; flex-direction: column; gap: 8px; }
 .dock-live { align-self: center; display: inline-flex; align-items: center; gap: 8px; max-width: 100%; margin: 0; padding: 6px 14px; border-radius: 99px; background: rgba(var(--w), .92); box-shadow: 0 0 0 1px rgba(var(--e), .05), 0 6px 18px -10px rgba(45, 75, 120, .35); font-size: 13px; color: var(--ink2); }
-.dock-live span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dock-live b { font-weight: 600; color: var(--ink); white-space: nowrap; }
+.dock-live span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
 .dock-live em { font-style: normal; white-space: nowrap; }
 .beam { border-radius: 999px; }
 .composer { display: flex; align-items: flex-end; gap: 4px; padding: 6px; border-radius: 999px; background: var(--card);
@@ -404,6 +407,16 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .composer textarea { flex: 1; min-width: 0; border: 0; outline: 0; resize: none; background: none; font-size: 16px; line-height: 1.45; padding: 10px 6px; max-height: 128px; }
 .composer textarea::placeholder { color: var(--ink3); }
 .c-bot { width: 44px; height: 44px; }
+/* The edge beam's frame clips to the pill (overflow: hidden), so the pill's hairline and lift move onto the frame, where
+   nothing clips them. Same shadow, same box: the chatbar keeps its size and look. */
+.c-edge { border-radius: 999px; box-shadow: 0 0 0 1px rgba(var(--e), .06), 0 22px 46px -20px rgba(45, 75, 120, .4), 0 2px 6px rgba(var(--e), .04); }
+.c-edge > .composer { box-shadow: none; }
+/* Odelia dressed for the step she's on, with the step's orb as her tool */
+.livebot { position: relative; display: inline-grid; place-items: center; flex: none; }
+.lb-bot { display: grid; place-items: center; }
+.lb-tool { position: absolute; right: -9px; bottom: -6px; pointer-events: none; }
+.livebot.beside { display: inline-flex; align-items: center; gap: 2px; }
+.livebot.beside .lb-tool { position: static; }
 .ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--ink2); transition: background .15s, color .15s; }
 .ic:hover:not(:disabled) { background: var(--mist2); color: var(--ink); }
 .ic.mic { color: var(--blue-ink); }
@@ -443,12 +456,16 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .pn-t { flex: 1; display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
 .pn-t b { font-weight: 600; font-size: 15.5px; }
 .pn-t small { font-size: 13px; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pn-t small .pn-verb { font-style: normal; font-weight: 500; color: var(--blue-deep); margin-right: 6px; }
 .feed { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 20px 14px; display: flex; flex-direction: column; gap: 28px; scrollbar-width: thin; }
 .you { align-self: flex-end; max-width: 86%; padding: 9px 15px; border-radius: 20px; background: var(--mist2); }
 .you p { margin: 0; font-size: 14.5px; }
 .turn { display: flex; flex-direction: column; gap: 10px; }
 .work-hd { display: flex; align-items: center; gap: 8px; min-height: 22px; font-size: 13px; color: var(--ink2); }
 .work-hd.wait { color: var(--warm); }
+.wh-now { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; }
+.wh-now b { font-weight: 600; font-size: 13.5px; color: var(--ink); white-space: nowrap; }
+.wh-now small { min-width: 0; font-size: 12.5px; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wico { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--warm-soft); color: var(--warm); }
 .spark { display: grid; place-items: center; width: 20px; height: 20px; color: var(--blue); }
 .steps-t { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; font-size: 12.5px; color: var(--ink3); }

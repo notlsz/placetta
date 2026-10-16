@@ -7,10 +7,32 @@ import { LIVE_SUGGESTIONS, SUGGESTIONS } from "./model";
 import { I } from "./ui";
 import { suggestions } from "./smart";
 import { daysFromNow } from "./time";
-import { AgentBot } from "./Bot";
+import { BorderBeam } from "border-beam";
+import { AgentBot, LiveBot } from "./Bot";
+import { taskVerb } from "./tasks";
 
 const BEAM = ["#7399C6", "#9DB8DA", "#5F88BA", "#B9CFE8", "#8FAED3", "#C9D8EC", "#A7BFE0"];
 const BAND = { core: "#FFFFFF", above: "#8FAED3", mid: "#C9D8EC", below: "#B9CFE8" };
+/* The pill's own corners: 999 for the floating dock, 24 in the agent panel (styles.css .composer, .panel .composer).
+   Passed to both beams so neither has to guess from its first child. */
+const RADIUS = { dock: 999, panel: 24 };
+/* A soft beam that always rides the pill's edge, in Placetta's blue. On a light page border-beam draws its stroke and bloom
+   as a grey sweep with its palette ("ice", a cyan) tinted over it, so the stroke and bloom are redrawn here in the BEAM
+   blues, and the inner glow keeps ice turned 20° and about half as saturated, which lands it at hue 208, between #A4C8E1 and #7399C6. */
+const EDGE_CSS = `
+[data-beam="{id}"][data-active]::after, [data-beam="{id}"][data-fading]::after {
+  background: conic-gradient(from var(--beam-angle-{id}), transparent 0%, transparent 52%, rgba(185, 207, 232, .35) 57%, rgba(143, 174, 211, .75) 62%,
+    #5F88BA 66.5%, #7399C6 69%, rgba(157, 184, 218, .6) 73%, rgba(201, 216, 236, .2) 77%, transparent 80%, transparent 100%);
+  opacity: calc(var(--beam-opacity-{id}) * var(--beam-strength, 1));
+}
+[data-beam="{id}"][data-active]::before, [data-beam="{id}"][data-fading]::before {
+  filter: hue-rotate(20deg) saturate(.55);
+  box-shadow: inset 0 0 6px 1px rgba(115, 153, 198, .22);
+}
+[data-beam="{id}"] [data-beam-bloom] {
+  background: conic-gradient(from var(--beam-angle-{id}), transparent 0%, transparent 58%, rgba(143, 174, 211, .25) 64%, rgba(115, 153, 198, .9) 69.5%,
+    rgba(143, 174, 211, .25) 75%, transparent 82%);
+}`;
 
 /** Close enough to count as the same question: most of the suggestion's words are already in something asked. */
 const STOP = new Set(["the", "a", "an", "our", "my", "we", "is", "are", "to", "of", "for", "from", "what", "whats", "what's", "do", "does", "can", "you", "me", "and", "in", "on"]);
@@ -89,14 +111,15 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
   return (
     <div className={"composer-wrap c-" + variant}>
       {dock && showLive && busy && live && (
-        <p className="dock-live" aria-live="polite"><span>{b(live.label)}…</span>{live.tool && <em>{live.tool}</em>}</p>
+        <p className="dock-live" aria-live="polite"><b>{b(taskVerb(live.state))}…</b><span>{b(live.label)}</span>{live.tool && <em>{live.tool}</em>}</p>
       )}
       {!dock && open.length > 0 && !busy && (
         <div className="sugg">{open.map(s => <button key={s.en} type="button" onClick={() => ask(b(s))}>{b(s)}</button>)}</div>
       )}
-      <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={dock ? 0.16 : 0.1} scale={dock ? 1.1 : 0.9}>
+      <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={dock ? 0.16 : 0.1} scale={dock ? 1.1 : 0.9} borderRadius={RADIUS[variant]}>
+        <BorderBeam className="c-edge" size="md" theme="light" colorVariant="ice" borderRadius={RADIUS[variant]} staticColors brightness={1} saturation={1} strength={0.85} css={EDGE_CSS}>
         <form className="composer" onSubmit={e => { e.preventDefault(); send(); }}>
-          {dock && <span className="c-bot" aria-hidden="true"><AgentBot size={34} busy={busy} interactive={false} /></span>}
+          {dock && <span className="c-bot" aria-hidden="true"><LiveBot size={34} busy={busy} task={busy && live ? live.state : undefined} /></span>}
           {!dock && <button type="button" className="ic" aria-label={t("attach")} title={t("attach")} onClick={() => attach.current?.click()} disabled={busy}><I.plus /></button>}
           <input ref={attach} type="file" multiple hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload("", "", f); }} />
           <label htmlFor={"ask-" + variant} className="sr">{t("askPh")}</label>
@@ -107,6 +130,7 @@ export function Composer({ variant, tts, asked, showLive = true }: { variant: "d
             ? <button type="button" className="sendb stop" onClick={stop} aria-label={t("stop")} title={t("stop")}><I.stopSq /></button>
             : <button type="submit" className="sendb" disabled={!draft.trim()} aria-label={t("send")}><I.send /></button>}
         </form>
+        </BorderBeam>
       </VoiceBeam>
       {note && !listening && <p className="c-note">{t(note)}</p>}
 

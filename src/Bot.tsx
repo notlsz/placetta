@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { BotAvatar, type BotAvatarType } from "bot-avatars";
 import { BorderBeam } from "border-beam";
+import { ThinkingOrb, type OrbState } from "thinking-orbs";
+import { TASKS } from "./tasks";
 import cloudPng from "./assets/agent-cloud.png";
 
 /* Placetta's agent as a small plush character: a soft pastel-blue cloud with blushed cheeks with a smile (bot-avatars).
@@ -17,11 +19,15 @@ const BLUES = [CLOUD];   // the shader turns lighter tints grey, so every job bo
 /* bot-avatars holds every plush bot back (opacity 0) until all of them have baked, up to 4 s on slow devices.
    The first frames are already good, so show each one straight away. */
 const SOFT = { shading: "fabric" as const, saturation: 2.3, brightness: 1.6, ink: INK, style: { opacity: 1, transition: "none" } };
+/** The orbs' ink: Placetta's blue (INK in pages.tsx). */
+const ORB_INK = "#4D73A3";
 
-export function AgentBot({ size, busy, label = "Odelia", interactive = true }: { size: number; busy?: boolean; label?: string; interactive?: boolean }) {
+export function AgentBot({ size, busy, label = "Odelia", interactive = true, task }: { size: number; busy?: boolean; label?: string; interactive?: boolean; task?: OrbState }) {
+  const k = task ? TASKS[task] : undefined;
+  // thinking is the one quiet task: it stays put and breathes slowly instead of hopping
   return (
-    <BotAvatar type="cloud" face="mouth" color={CLOUD} size={size} state={busy ? "working" : "default"} interactive={interactive}
-      turn={size < 40 ? 0.5 : 1} jumpEvery={size < 40 ? 0 : 9} aria-label={label} {...SOFT} />
+    <BotAvatar type="cloud" face="mouth" color={CLOUD} size={size} state={busy && !k?.still ? "working" : "default"} interactive={interactive}
+      turn={size < 40 ? 0.5 : 1} jumpEvery={size < 40 ? 0 : 9} speed={k?.still ? 0.6 : 1} accessoryColor={INK} {...k?.gear} aria-label={label} {...SOFT} />
   );
 }
 
@@ -47,4 +53,23 @@ const touch = typeof window !== "undefined" && (window.matchMedia?.("(pointer: c
 export function GateBot({ busy }: { busy?: boolean }) {
   if (!touch) return <AgentBot size={84} busy={busy} />;
   return <img className={"gate-cloud" + (busy ? " busy" : "")} src={cloudPng} width={84} height={72} alt="Placetta" draggable={false} />;
+}
+
+/**
+ * Odelia at work: the cloud dressed for the step it is on (headphones to listen, glasses to search, a beret to write),
+ * with that step's orb beside it as its tool. Touch screens keep what they had, so a phone never draws an extra canvas
+ * per frame: `solo` spots show just the orb, the rest the plain cloud.
+ */
+export function LiveBot({ task, busy = !!task, size, label, solo, interactive = false }: { task?: OrbState; busy?: boolean; size: number; label?: string; solo?: boolean; interactive?: boolean }) {
+  if (touch) {
+    if (solo) return task ? <ThinkingOrb state={task} size={20} theme="light" color={ORB_INK} aria-hidden="true" /> : null;
+    return <AgentBot size={size} busy={busy} label={label} interactive={interactive} />;
+  }
+  // `solo` sits in a line of text, so the orb goes beside the cloud; elsewhere it rests against the cloud's lower corner
+  return (
+    <span className={"livebot" + (solo ? " beside" : "")}>
+      <span className="lb-bot" style={{ width: size, height: size }}><AgentBot size={size} busy={busy} task={task} label={label} interactive={interactive} /></span>
+      {task && <ThinkingOrb className="lb-tool" state={task} size={20} theme="light" color={ORB_INK} speed={TASKS[task].still ? 0.7 : 1} dotSize={1.3} aria-hidden="true" />}
+    </span>
+  );
 }
