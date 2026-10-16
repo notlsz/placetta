@@ -37,8 +37,9 @@ export const supabase = () => (sb ??= createClient(URL_, KEY, {
   global: { fetch: net },
 }));
 
-export type ApiError = { code: string; message: string };
-const err = (code: string, message: string): ApiError => ({ code, message });
+/** message is English; message_zh, when the server sent one, is the same in Chinese. */
+export type ApiError = { code: string; message: string; message_zh?: string };
+const err = (code: string, message: string, message_zh?: string): ApiError => ({ code, message, ...(message_zh ? { message_zh } : {}) });
 const fromPg = (e: { message?: string; code?: string } | null): ApiError => err(e?.code ?? "db_error", (e?.message ?? "Something went wrong.").replace(/^.*?:\s/, ""));
 
 export type FilingStatus = "requested" | "in_progress" | "needs_info" | "submitted" | "accepted" | "rejected" | "canceled";
@@ -365,9 +366,12 @@ export async function listDocs(ws: string): Promise<DocRow[]> {
 export async function officialForm(url: string): Promise<Blob> {
   const { data, error } = await supabase().functions.invoke("forms", { body: { url } });
   if (error || !data) {
-    let message = "Couldn't get the official form. Open it from the agency's page.";
-    try { const j = await (error as { context?: Response })?.context?.json(); if (j?.error?.message) message = j.error.message; } catch { /* not JSON */ }
-    throw err("download", message);
+    let message = "Couldn't get the official form. Open it from the agency's page.", zh = "无法获取官方表格。请从机构页面打开。";
+    try {
+      const j = await (error as { context?: Response })?.context?.json();
+      if (j?.error?.message) { message = j.error.message; zh = typeof j.error.message_zh === "string" ? j.error.message_zh : zh; }
+    } catch { /* not JSON */ }
+    throw err("download", message, zh);
   }
   return data instanceof Blob ? data : new Blob([data as BlobPart], { type: "application/pdf" });
 }
@@ -444,7 +448,9 @@ export async function getBilling(ws: string): Promise<Billing | null> {
 /* Self-filing: the file function checks an approved filing and submits it by email, fax, mail or the agency's site. */
 type FileView = { filing: Pick<Filing, "id" | "status" | "channel" | "agent_state" | "agent_log" | "handoff_url" | "confirmation_number" | "submit_clicked_at"> };
 export const fileNow = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "start" });
-export const resumeFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "resume" });
+/** Carry on after a hand-back. resubmit: the person confirmed sending again a filing the same as one they already sent. */
+export const resumeFiling = (ws: string, filingId: string, resubmit = false) =>
+  fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "resume", ...(resubmit ? { resubmit: true } : {}) });
 /** The hand-signed copy of a wet-signature form, already in Documents: Placetta faxes it. */
 export const signedCopy = (ws: string, filingId: string, path: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "signed", path });
 /** Stop a filing before anything has left for the agency. Refused once Placetta has pressed submit or sent it. */
@@ -465,9 +471,9 @@ async function fn<T>(name: string, body: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase().functions.invoke(name, { body });
   if (error) {
     const ctx = (error as { context?: Response }).context;
-    let e: ApiError = err("upstream_error", "Couldn't reach Placetta. Try again.");
-    try { const j = await ctx?.json(); if (j?.error?.code) e = err(j.error.code, j.error.message); } catch { /* not JSON */ }
-    if (ctx?.status === 402 && !LIMITS.includes(e.code)) e = err("payment_required", e.message);
+    let e: ApiError = err("upstream_error", "Couldn't reach Placetta. Try again.", "无法连接快哉，请重试。");
+    try { const j = await ctx?.json(); if (j?.error?.code) e = err(j.error.code, j.error.message, typeof j.error.message_zh === "string" ? j.error.message_zh : undefined); } catch { /* not JSON */ }
+    if (ctx?.status === 402 && !LIMITS.includes(e.code)) e = err("payment_required", e.message, e.message_zh);
     throw e;
   }
   return data as T;
@@ -634,7 +640,7 @@ export type OdeliaLine = { configured: boolean; imessage?: boolean; sms?: boolea
   whatsapp?: string | null;
   /** Odelia's email address, when email is set up: write or forward to it from the address you sign in with. */
   email?: string | null };
-const PHONE_CODES = ["pin_required", "phone_format", "phone_taken", "phone_rate_limited", "phone_none", "mfa_required", "time_format"];
+const PHONE_CODES = ["pin_required", "phone_format", "phone_country", "phone_taken", "phone_rate_limited", "phone_busy", "phone_none", "mfa_required", "time_format"];
 async function phoneRpc(name: string, args: Record<string, unknown> = {}): Promise<PhoneStatus> {
   const { data, error } = await supabase().rpc(name, args);
   if (error) {

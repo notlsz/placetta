@@ -19,7 +19,7 @@
 // when it helps, a text.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
-  appLink, appOrigin, clientState, type Lang, normalizePhone, odeliaNumber, randomCode, readClientState, SAY, signCallToken, splitSms, spokenDigits, telnyx,
+  appLink, appOrigin, callerAttested, clientState, type Lang, normalizePhone, odeliaNumber, randomCode, readClientState, SAY, signCallToken, splitSms, spokenDigits, telnyx,
   verifyCallToken, verifyTelnyx, voiceReady, workspaceBrief,
 } from "../_shared/odelia.ts";
 import { currentWorkspace, type Link, linkByNumber, linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
@@ -185,13 +185,16 @@ async function incoming(p: CallPayload) {
   const { ws } = await currentWorkspace(admin, link);
   if (!ws || (await mayUseAgent(admin, ws.id, link.user_id)) !== "ok") { await answerThen("noaccess"); return; }
 
-  // STIR/SHAKEN "A": the carrier vouches the caller owns this number. Anything less: a code texted to the number on file.
-  const verified = p.shaken_stir_attestation === "A" && p.shaken_stir_validated !== false;
+  // STIR/SHAKEN "A", validated: the carrier vouches the caller owns this number. Anything less (including no
+  // validation result at all): a code texted to the number on file. The database caps wrong tries and codes per number
+  // per hour across calls (phone_code_issue, phone_code_check), so calling again doesn't buy more guesses.
+  const verified = callerAttested(p);
   await admin.from("odelia_calls").upsert({ call_control_id: ccid, user_id: link.user_id, workspace_id: ws.id, direction: "in", number: from, attestation: p.shaken_stir_attestation ?? null, verified_at: verified ? new Date().toISOString() : null, lang }, { onConflict: "call_control_id" });
   await admin.from("phone_links").update({ last_workspace_id: ws.id }).eq("user_id", link.user_id);
   if (!verified) {
     const code = randomCode(4);
     const { error } = await admin.rpc("phone_code_issue", { p_user: link.user_id, p_purpose: "call", p_number: from, p_code: code, p_minutes: 10 });
+    if (error) console.error("call code refused:", /phone_rate_limited|phone_busy/.exec(error.message ?? "")?.[0] ?? error.code);
     const sent = !error && (await textUser(admin, env, { link, workspace_id: ws.id, segments: [SAY.callCode[lang](code)], kind: "code", logBody: lang === "zh" ? "已发送通话验证码" : "Sent a call code" })).ok;
     if (!sent) { await answerThen("unverifiable"); return; }
   }

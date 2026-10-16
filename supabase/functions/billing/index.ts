@@ -13,6 +13,7 @@
 // Scale is quoted by the team, so it has no checkout. Actions: prices (any member), checkout, portal, sync_locations (owners).
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { ensureWebhook, priceId, type Item } from "../_shared/stripe_catalog.ts";
+import { openingCounts, returnOrigins, safeReturn, type Store, storesFrom, STRIPE_FAILED } from "./logic.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -21,7 +22,7 @@ const CORS = {
 };
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
-const fail = (status: number, code: string, message: string) => json(status, { error: { code, message } });
+const fail = (status: number, code: string, message: string, zh?: string) => json(status, { error: { code, message, ...(zh ? { message_zh: zh } : {}) } });
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -50,16 +51,6 @@ async function accessFor(ws: string, user: { id: string; email?: string; email_c
 }
 
 
-// The app's own addresses, plus its Vercel address (which keeps working when a custom domain isn't connected).
-const origins = () => [...(Deno.env.get("APP_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean), "https://placetta.vercel.app"];
-function safeReturn(url: unknown): string | null {
-  try {
-    const u = new URL(String(url));
-    const ok = origins().some((o) => { try { return new URL(o).origin === u.origin; } catch { return false; } }) || u.hostname === "localhost";
-    return ok ? `${u.origin}${u.pathname}` : null;
-  } catch { return null; }
-}
-
 /** Every request names the API version it's written for, so it doesn't change with the account's default. Since
     2025-03-31.basil an invoice item takes pricing[price], not price (a newer account rejects price outright). */
 const STRIPE_VERSION = "2025-03-31.basil";
@@ -72,14 +63,14 @@ async function stripe(path: string, params: Record<string, string>) {
     body: new URLSearchParams(params),
   });
   const data = await res.json();
-  if (!res.ok) { console.error("stripe", path, res.status, data?.error?.message); throw new Error(data?.error?.message ?? "Stripe error"); }
+  if (!res.ok) { console.error("stripe", path, res.status, data?.error?.message); throw new Error("Stripe refused the request"); }
   return data;
 }
 
 async function stripeGet(path: string) {
   const res = await fetch(`https://api.stripe.com/v1/${path}`, { headers: { Authorization: `Bearer ${Deno.env.get("STRIPE_SECRET_KEY")}`, "Stripe-Version": STRIPE_VERSION } });
   const data = await res.json();
-  if (!res.ok) throw new Error(data?.error?.message ?? "Stripe error");
+  if (!res.ok) { console.error("stripe GET", path.split("/")[0], res.status, data?.error?.message); throw new Error("Stripe refused the request"); }
   return data;
 }
 
@@ -95,30 +86,23 @@ async function locationPrices() {
   return { location, pro, opening, opening_food, guarantee, pack, entry };
 }
 
-type Kind = "retail" | "food" | "complex";
-const FOOD = /tea|coffee|caf[eé]|restaurant|food|kitchen|bakery|hot ?pot|noodle|dessert|ice cream|boba|bubble|juice|bar\b|grill|pizza|sushi|dumpling|奶茶|茶|咖啡|餐|火锅|面|甜品|烘焙|食/i;
 /**
- * The workspace's stores (open and opening), from its saved state. Only a store whose stage is "opening" owes the opening
- * fee: retail or food (from the store's own kind, else what the business sells), and complex ones are quoted by the team.
+ * The workspace's stores (open and opening), as billing knows them: from store_billing, which a database trigger keeps
+ * from the workspace's stores and which members can't write. A store first seen opening stays opening there until its
+ * opening fee is charged, and an unpaid opening store can't drop to a cheaper kind, so editing the workspace can't
+ * lower a bill. Only a store still opening owes the opening fee: retail or food, and complex ones are quoted by the team.
  */
-async function stores(ws: string): Promise<{ id: string; name: string; opening: boolean; kind: Kind }[]> {
-  const { data } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
-  const st = data?.state as { stores?: { id?: unknown; name?: { en?: string }; stage?: unknown; kind?: unknown }[]; business?: { en?: string }; facts?: { label?: { en?: string }; value?: { en?: string } }[] } | null;
-  const sells = [st?.business?.en ?? "", ...(st?.facts ?? []).filter((f) => /what you sell|business type|cuisine|menu/i.test(f.label?.en ?? "")).map((f) => f.value?.en ?? "")].join(" ");
-  const fallback: Kind = FOOD.test(sells) ? "food" : "retail";
-  const list = st?.stores;
-  return Array.isArray(list)
-    ? list.filter((s) => typeof s?.id === "string").slice(0, 2000).map((s) => ({ id: s.id as string, name: String(s.name?.en ?? s.id), opening: s.stage === "opening",
-        kind: (s.kind === "retail" || s.kind === "food" || s.kind === "complex" ? s.kind : fallback) as Kind }))
-    : [];
+async function stores(ws: string): Promise<Store[]> {
+  const { data, error } = await admin.from("store_billing").select("store_id, name, kind, opening").eq("workspace_id", ws).is("removed_at", null).limit(2000);
+  if (error) throw new Error(`store lookup failed: ${error.code ?? ""}`);
+  return storesFrom(data ?? []);
 }
 const env = (k: string) => Deno.env.get(k);
 /** A price id from the catalog: its secret, else found or made in Stripe by lookup key. */
 const price = (i: Item) => priceId(i, env);
 /** Line items for the openings: one per kind, plus the guarantee when asked for. Complex stores are left to a quote. */
-async function openingItems(list: { opening: boolean; kind: Kind }[], guarantee: boolean): Promise<[string, number][]> {
-  const n = (k: Kind) => list.filter((s) => s.opening && s.kind === k).length;
-  const retail = n("retail"), food = n("food");
+async function openingItems(list: Pick<Store, "opening" | "kind">[], guarantee: boolean): Promise<[string, number][]> {
+  const { retail, food } = openingCounts(list);
   const items: [string, number][] = [];
   if (retail) items.push([(await price("retail"))!, retail]);
   if (food) items.push([(await price("food"))!, food]);
@@ -138,7 +122,7 @@ async function webhookReady(): Promise<Response | null> {
   return null;
 }
 /** A complex opening (liquor, major build-out) goes to the team for a quote, once per store. */
-async function askForQuote(ws: string, list: { id: string; name: string; opening: boolean; kind: Kind }[]) {
+async function askForQuote(ws: string, list: Store[]) {
   const rows = list.filter((s) => s.opening && s.kind === "complex").map((s) => ({ kind: "quote", workspace_id: ws, title: `Quote the opening for ${s.name}`, detail: { store_id: s.id }, dedupe: `quote:${ws}:${s.id}` }));
   if (rows.length) await admin.from("team_tasks").upsert(rows, { onConflict: "dedupe", ignoreDuplicates: true });
   return rows.length;
@@ -176,11 +160,14 @@ Deno.serve(async (req) => {
   if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
   if (body.action === "prices") {
     if (access !== "owner" && access !== "member") return fail(403, "forbidden", "This isn't your workspace.");
-    try { return json(200, { ok: true, ...(await locationPrices()) }); } catch (e) { return fail(502, "upstream_error", (e as Error).message.slice(0, 200)); }
+    try { return json(200, { ok: true, ...(await locationPrices()) }); } catch (e) {
+      console.error("prices:", (e as Error).message.slice(0, 200));
+      return fail(502, "upstream_error", STRIPE_FAILED.en, STRIPE_FAILED.zh);
+    }
   }
   if (access === "member") return fail(403, "forbidden", "Only an owner can change the plan or billing.");
   if (access !== "owner") return fail(403, "forbidden", "This isn't your workspace.");
-  const back = safeReturn(body.return_url);
+  const back = safeReturn(body.return_url, returnOrigins((k) => Deno.env.get(k)));
   if (!back) return fail(400, "bad_request", "Unknown return address. Add the app's origin to APP_ORIGINS.");
 
   const { data: bill } = await admin.from("billing").select("stripe_customer_id, subscription_id, charged_store_ids, entry_markets, entry_paid_at, entry_credited_at").eq("workspace_id", ws).maybeSingle();
@@ -305,7 +292,9 @@ Deno.serve(async (req) => {
       return json(200, { ok: true, url: s.url });
     }
   } catch (e) {
-    return fail(502, "upstream_error", (e as Error).message.slice(0, 200));
+    // Stripe's own words (and anything else that went wrong) go to the log, not to the person.
+    console.error("billing:", String(body.action ?? ""), (e as Error).message.slice(0, 200));
+    return fail(502, "upstream_error", STRIPE_FAILED.en, STRIPE_FAILED.zh);
   }
   return fail(400, "bad_request", "Unknown action.");
 });

@@ -201,7 +201,8 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
   const took = t0 && t1 && state === "done" ? Math.max(1, Math.round((new Date(t1).getTime() - new Date(t0).getTime()) / 1000)) : 0;
   const tookTx = took ? (took < 90 ? (zh ? `用时 ${took} 秒` : `Took ${took}s`) : (zh ? `用时 ${Math.round(took / 60)} 分钟` : `Took ${Math.round(took / 60)} min`)) : "";
   const f = run.filing;
-  const canStop = !!cloud && !!f && !f.submit_clicked_at && ["queued", "running", "needs_you"].includes(f.agent_state ?? "") && !["submitted", "accepted", "rejected", "canceled"].includes(f.status);
+  // Stopping is an owner's (the file function refuses it from members), so members don't see the button.
+  const canStop = !!cloud?.owner && !!f && !f.submit_clicked_at && ["queued", "running", "needs_you"].includes(f.agent_state ?? "") && !["submitted", "accepted", "rejected", "canceled"].includes(f.status);
   const refused = run.events.filter(e => e.kind === "refused").length;
   const head: Record<State, Bi> = {
     queued: B("Starting", "即将开始"), running: B("Filing now", "正在提交"), needs_you: B("Needs you for one step", "需要您完成一步"),

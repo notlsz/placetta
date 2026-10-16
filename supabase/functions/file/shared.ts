@@ -1,6 +1,6 @@
 // Shared helpers for the Placetta edge functions.
 // The MCP deploy only uploads files inside a function's own folder, so this file is copied into
-// integrations/, oauth-callback/, logins/, team/ and file/. Keep the copies identical.
+// integrations/, oauth-callback/, logins/, team/, spend/, file/ and forms/. Keep the copies identical.
 import { createClient, type SupabaseClient, type User } from "npm:@supabase/supabase-js@2";
 
 export const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
@@ -19,7 +19,9 @@ export function userClient(jwt: string): SupabaseClient {
 
 // ------------------------------------------------------------------ responses
 
-export type Code = "unauthorized" | "mfa_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error" | "too_late";
+export type Code =
+  | "unauthorized" | "mfa_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error"
+  | "too_late" | "rate_limited" | "too_large";
 
 const STATUS: Record<Code, number> = {
   unauthorized: 401,
@@ -31,10 +33,13 @@ const STATUS: Record<Code, number> = {
   not_configured: 503,
   upstream_error: 502,
   too_late: 409,
+  rate_limited: 429,
+  too_large: 413,
 };
 
+/** An error the person sees. message is English; zh, when given, is the same in Chinese (sent as message_zh). */
 export class HttpError extends Error {
-  constructor(readonly code: Code, message: string) {
+  constructor(readonly code: Code, message: string, readonly zh?: string) {
     super(message);
   }
 }
@@ -54,7 +59,8 @@ export function json(body: unknown, status = 200, extra: Record<string, string> 
 
 export const ok = (data: Record<string, unknown> = {}): Response => json({ ok: true, ...data });
 
-export const errorResponse = (code: Code, message: string): Response => json({ error: { code, message } }, STATUS[code]);
+export const errorResponse = (code: Code, message: string, zh?: string): Response =>
+  json({ error: { code, message, ...(zh ? { message_zh: zh } : {}) } }, STATUS[code]);
 
 /** Deno.serve with CORS preflight and the error envelope. */
 export function serve(handler: (req: Request) => Promise<Response>): void {
@@ -63,7 +69,7 @@ export function serve(handler: (req: Request) => Promise<Response>): void {
     try {
       return await handler(req);
     } catch (e) {
-      if (e instanceof HttpError) return errorResponse(e.code, e.message);
+      if (e instanceof HttpError) return errorResponse(e.code, e.message, e.zh);
       console.error("unhandled:", describe(e));
       return json({ error: { code: "internal", message: "Something went wrong. Try again." } }, 500);
     }

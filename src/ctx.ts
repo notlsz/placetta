@@ -50,7 +50,8 @@ export type CloudCtx = {
   removeLogin(id: string): Promise<void>;
   feedUrl(rotate?: boolean): Promise<string>;
   markPaid(filingId: string): Promise<void>;
-  resumeFiling(filingId: string): Promise<void>;
+  /** resubmit: send again a filing the same as one already sent (the person tapped "Send it again"). */
+  resumeFiling(filingId: string, resubmit?: boolean): Promise<void>;
   uploadSigned(filingId: string, appId: string, file: File): Promise<void>;
   cancelFiling(filingId: string): Promise<void>;
   /** Stop a filing that's on its way, before anything reaches the agency; it comes back to you to approve again. */

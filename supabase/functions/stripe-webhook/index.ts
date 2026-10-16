@@ -1,6 +1,7 @@
 // Stripe tells us when someone pays. Signature checked by hand (HMAC-SHA256), each event applied once.
-//   checkout.session.completed (payment, plan=entry)  -> billing.entry_markets += markets
-//   customer.subscription.created / updated / deleted  -> billing.subscription_*
+//   checkout.session.completed (payment, plan=entry)  -> billing.entry_markets += markets (added in SQL, atomically)
+//   customer.subscription.created / updated / deleted  -> billing.subscription_*, unless an event created later was
+//                                                        already applied (Stripe doesn't deliver in order)
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { itemOf, webhookSecret } from "../_shared/stripe_catalog.ts";
 
@@ -43,22 +44,20 @@ Deno.serve(async (req) => {
   const raw = await req.text();
   if (!(await verified(raw, req.headers.get("stripe-signature") ?? "", secret))) return reply(400, { error: "Bad signature." });
 
-  const event = JSON.parse(raw) as { id: string; type: string; data: { object: Record<string, any> } };
+  const event = JSON.parse(raw) as { id: string; type: string; created?: number; data: { object: Record<string, any> } };
   const { error: dup } = await admin.from("stripe_events").insert({ id: event.id, type: event.type });
-  if (dup) return reply(200, { received: true, duplicate: true });   // already applied
+  // Only a unique violation means "already applied"; any other failure is ours, and Stripe should retry.
+  if (dup?.code === "23505") return reply(200, { received: true, duplicate: true });
+  if (dup) { console.error("webhook event insert", dup.code); return reply(500, { error: "Try again." }); }
 
   try {
     const o = event.data.object;
     if (event.type === "checkout.session.completed") {
       const ws = o.metadata?.workspace_id as string | undefined;
       if (ws) {
-        const { data: b } = await admin.from("billing").select("entry_markets, stripe_customer_id").eq("workspace_id", ws).maybeSingle();
-        const patch: Record<string, unknown> = {};
-        if (o.customer && !b?.stripe_customer_id) patch.stripe_customer_id = o.customer;
+        let markets = 0;
         if (o.mode === "payment" && o.metadata?.plan === "entry" && o.payment_status === "paid") {
-          patch.entry_markets = (b?.entry_markets ?? 0) + Math.max(1, Number(o.metadata?.markets) || 1);
-          patch.entry_paid_at = new Date().toISOString();
-          await log(ws, { en: "Paid", zh: "已付款" }, "entry");
+          markets = Math.max(1, Math.min(20, Number(o.metadata?.markets) || 1));
         }
         if (o.mode === "payment" && o.metadata?.kind === "pack" && o.payment_status === "paid") {
           // the credit was set by the billing function when it made this checkout
@@ -69,21 +68,16 @@ Deno.serve(async (req) => {
             await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: null, action: { en: "Added an Odelia pack", zh: "购买 Odelia 加量包" }, object: { en: `$${usd} of Odelia allowance`, zh: `$${usd} Odelia 额度` } });
           }
         }
-        if (o.mode === "subscription" && o.metadata?.plan === "locations") {
-          // The stores this checkout billed for are counted; later stores are charged by billing's sync_locations.
-          // (Older checkouts without the list fall back to the stores in the workspace now.)
-          const { data: bc } = await admin.from("billing").select("checkout_store_ids").eq("workspace_id", ws).maybeSingle();
-          const listed = bc?.checkout_store_ids as string[] | null | undefined;
-          if (Array.isArray(listed)) patch.charged_store_ids = listed;
-          else {
-            const { data: w } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
-            const stores = (w?.state as { stores?: { id?: unknown }[] } | null)?.stores;
-            patch.charged_store_ids = Array.isArray(stores) ? stores.map((x) => x?.id).filter((x): x is string => typeof x === "string") : [];
-          }
-          // The entry plans were credited in this checkout, so they are never credited again.
-          if (Number(o.metadata?.entry_credit) > 0) patch.entry_credited_at = new Date().toISOString();
-        }
-        if (Object.keys(patch).length) await admin.from("billing").update(patch).eq("workspace_id", ws);
+        // One statement in the database: the customer (kept if already set), entry markets added to what's there, the
+        // stores this checkout billed for (later stores are charged by billing's sync_locations; an older checkout
+        // without the list counts the stores billing knows), and the entry credit, which is never given twice.
+        const locations = o.mode === "subscription" && o.metadata?.plan === "locations";
+        const { error } = await admin.rpc("billing_checkout_completed", {
+          p_ws: ws, p_customer: typeof o.customer === "string" ? o.customer : null, p_add_markets: markets,
+          p_locations: locations, p_entry_credited: locations && Number(o.metadata?.entry_credit) > 0,
+        });
+        if (error) throw new Error(error.message);
+        if (markets) await log(ws, { en: "Paid", zh: "已付款" }, "entry");
       }
     } else if (event.type.startsWith("customer.subscription.")) {
       const ws = o.metadata?.workspace_id as string | undefined;
@@ -98,13 +92,15 @@ Deno.serve(async (req) => {
         // Pro sizes a larger Odelia allowance. The price decides (a move in the portal changes it); the tier set at
         // checkout counts only when no location price is recognized.
         const pro = located.length ? located.some((i) => itemOf(i.price, env) === "pro") : o.metadata?.tier === "pro";
-        await admin.from("billing").update({
-          stripe_customer_id: o.customer, subscription_id: o.id, subscription_status: status,
-          subscription_plan: pro ? "pro" : o.metadata?.plan ?? null, current_period_end: end ? new Date(end * 1000).toISOString() : null,
-          paid_locations: paid,
-        }).eq("workspace_id", ws);
-        if (event.type === "customer.subscription.created") await log(ws, { en: "Started", zh: "开通" }, o.metadata?.plan ?? "starter");
-        if (event.type === "customer.subscription.deleted") await log(ws, { en: "Ended", zh: "已结束" }, o.metadata?.plan ?? "starter");
+        // Applied only if no event created later has been applied already: a late "updated" can't undo a "deleted".
+        const createdAt = new Date((Number(event.created) || Math.floor(Date.now() / 1000)) * 1000).toISOString();
+        const { data: applied, error } = await admin.rpc("billing_subscription_apply", {
+          p_ws: ws, p_event_at: createdAt, p_customer: o.customer, p_subscription: o.id, p_status: status,
+          p_plan: pro ? "pro" : o.metadata?.plan ?? null, p_period_end: end ? new Date(end * 1000).toISOString() : null, p_paid_locations: paid,
+        });
+        if (error) throw new Error(error.message);
+        if (applied === true && event.type === "customer.subscription.created") await log(ws, { en: "Started", zh: "开通" }, o.metadata?.plan ?? "starter");
+        if (applied === true && event.type === "customer.subscription.deleted") await log(ws, { en: "Ended", zh: "已结束" }, o.metadata?.plan ?? "starter");
       }
     }
   } catch (e) {

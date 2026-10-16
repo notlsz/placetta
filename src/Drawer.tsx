@@ -420,18 +420,25 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
   const zh = lang === "zh";
   const ask = [...(f.agent_log ?? [])].reverse().find(e => ["need_person", "needs_you", "wet_signature"].includes(e.kind));
   const upload = ask?.kind === "wet_signature" && ask.ref === "upload";
+  // The same form with the same answers as one already sent: going on means sending it again, so the button says so.
+  const duplicate = ask?.kind === "needs_you" && ask.ref === "duplicate";
   return (
     <div className="finish-step" role="status">
       <b>{zh ? "完成这一步" : "Finish this step"}</b>
       <p>{ask ? (zh ? ask.zh : ask.en) : zh ? "快哉需要您完成一步。" : "Placetta needs you for one step."}</p>
       <div className="m-btns">
         {f.handoff_url && <a className="pill quiet sm" href={f.handoff_url} target="_blank" rel="noopener noreferrer">{zh ? "打开" : "Open"}<I.ext /></a>}
-        {upload
+        {!cloud?.owner
+          // Carrying on, uploading the signed copy and sending again are an owner's; the file function refuses members.
+          ? <span className="note">{zh ? "需要工作区所有者完成这一步。" : "An owner of this workspace finishes this step."}</span>
+          : upload
           ? <label className={`pill ink sm${busy ? " off" : ""}`}>
               {zh ? "上传签名件" : "Upload the signed copy"}
               <input type="file" accept="application/pdf,image/jpeg,image/png" hidden disabled={busy}
                 onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void cloud?.uploadSigned(f.id, f.app_id, file); }} />
             </label>
+          : duplicate
+          ? <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id, true)}>{zh ? "再次提交" : "Send it again"}</button>
           : <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id)}>{zh ? "我已完成，继续" : "I've done it, carry on"}</button>}
       </div>
     </div>

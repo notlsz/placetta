@@ -23,7 +23,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
   appLink, appOrigin, BLOCKED_BY_STOP, inboundFlood, inQuietHours, KEYWORD_REPLY, keyword, type Lang, localMinutes, LIMITS, normalizePhone, odeliaNumber,
-  pickWorkspace, prettyPhone, randomCode, SAY, smsReady, splitSms, strangerMayGetReply, switchTarget, underDailyLimit, verifyTelnyx, voiceReady,
+  pickWorkspace, prettyPhone, randomCode, SAY, smsCountries, smsCountryAllowed, smsReady, splitSms, strangerMayGetReply, switchTarget, underDailyLimit,
+  verifyTelnyx, voiceReady,
 } from "../_shared/odelia.ts";
 import { currentWorkspace, criticalLines, DOC_MAX, DOC_TYPES, forgetCriticalLines, storeDocs, type Link, linkByNumber, linkOf, logMessage, sendText, textingReady, textUser } from "../_shared/odelia_db.ts";
 import { mailReady, odeliaEmail } from "../_shared/mail.ts";
@@ -304,6 +305,9 @@ async function sendCode(codeId: string) {
   const row = c as { user_id: string; number: string; lang: Lang | null };
   const setError = (e: string | null) => admin.from("phone_links").update({ last_error: e, updated_at: new Date().toISOString() }).eq("user_id", row.user_id);
   if (!textingReady(env)) { await setError("not_configured"); return fail(503, "not_configured", "Texting isn't set up: set LINQ_API_KEY, LINQ_WEBHOOK_SECRET and LINQ_NUMBERS for iMessage, or TELNYX_API_KEY, TELNYX_PUBLIC_KEY, ODELIA_NUMBER and TELNYX_MESSAGING_PROFILE_ID for SMS."); }
+  // The last check before a code costs money: only the countries Placetta texts (ODELIA_SMS_COUNTRIES, else US, Canada
+  // and China). phone_link_start checks app_settings.phone_countries first; this one holds even if that list is wider.
+  if (!smsCountryAllowed(row.number, smsCountries(env))) { await setError("phone_country"); return fail(403, "phone_country", "Placetta doesn't text codes to numbers in that country."); }
   const lang: Lang = row.lang === "zh" ? "zh" : "en";
   // A code is the one text that can start a conversation, so it's what each line's daily cap of new ones counts.
   // Codes go by Telnyx SMS when it's set up: a registered line, and it never opens an iMessage conversation (the pattern
