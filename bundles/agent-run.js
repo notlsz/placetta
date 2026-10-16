@@ -152,9 +152,9 @@ function withCache(payload) {
   }
   return out;
 }
-async function viaAnthropic(f, key, call, model2, research) {
-  const payload = withCache({ ...call.payload, model: model2 });
-  let { res, text } = await anthropic(f, key, payload, call.beta);
+async function viaAnthropic(f, key, call2, model2, research) {
+  const payload = withCache({ ...call2.payload, model: model2 });
+  let { res, text } = await anthropic(f, key, payload, call2.beta);
   if (research && res.status === 400 && /web_fetch|beta/i.test(text)) {
     payload.tools = withCache({ tools: [...research.pageTools, research.search] }).tools;
     ({ res, text } = await anthropic(f, key, payload, null));
@@ -165,26 +165,26 @@ async function viaAnthropic(f, key, call, model2, research) {
   }
   return { res, text };
 }
-async function callModel(env2, call, fallbackModel, research, f = fetch) {
-  let route = routeFor(env2, call.tier, fallbackModel);
-  const msgs = call.payload.messages ?? [];
+async function callModel(env2, call2, fallbackModel, research, f = fetch) {
+  let route = routeFor(env2, call2.tier, fallbackModel);
+  const msgs = call2.payload.messages ?? [];
   const files = hasFiles(msgs), docs = hasDocs(msgs), allowFree = env2("AGENT_ALLOW_FREE") === "1";
   route = route.filter(([p2, m2]) => !isFree(p2, m2) || allowFree && !files);
   if (docs) route = route.filter(([p2]) => p2 === "anthropic" || p2 === "gemini" || p2 === "openrouter");
-  if (call.research) route = [...route.filter(([p2]) => p2 === "anthropic"), ...route.filter(([p2]) => p2 !== "anthropic")];
+  if (call2.research) route = [...route.filter(([p2]) => p2 === "anthropic"), ...route.filter(([p2]) => p2 !== "anthropic")];
   let last = { ok: false, status: 503, text: "No model has a key. Add one in the Edge Function secrets.", model: "" };
   for (const [p2, model2] of route) {
     try {
       if (p2 === "anthropic") {
         const key = env2("ANTHROPIC_API_KEY");
         if (!key) continue;
-        const { res, text } = await viaAnthropic(f, key, call, model2, research);
+        const { res, text } = await viaAnthropic(f, key, call2, model2, research);
         if (res.ok) return { ok: true, status: 200, data: JSON.parse(text), text, model: `${p2}:${model2}` };
         last = { ok: false, status: res.status, text, model: `${p2}:${model2}` };
       } else {
         const cfg = OPENAI_STYLE[p2], key = env2(cfg.key);
         if (!key) continue;
-        const body = toOpenAI({ ...call.payload, tools: research ? research.pageTools : call.payload.tools }, model2);
+        const body = toOpenAI({ ...call2.payload, tools: research ? research.pageTools : call2.payload.tools }, model2);
         const res = await f(cfg.url, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(body) });
         const text = await res.text();
         if (res.ok) {
@@ -396,29 +396,137 @@ var SAY = {
   missed: { en: "Odelia from Placetta tried to call you about this:", zh: "\u5FEB\u54C9\u7684 Odelia \u521A\u624D\u81F4\u7535\u60A8\uFF0C\u4E8B\u7531\u5982\u4E0B\uFF1A" }
 };
 
+// supabase/functions/_shared/linq.ts
+var LINQ = "https://api.linqapp.com/api/partner";
+var LINQ_OPTED_OUT = 2024;
+var LINQ_LINE_RESTRICTED = 2027;
+var LINQ_BAD_PARAM = 1005;
+function linqLines(env2) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const raw of (env2("LINQ_NUMBERS") ?? "").split(",")) {
+    const n = normalizePhone(raw.trim());
+    if (n) seen.add(n);
+  }
+  return [...seen];
+}
+var linqReady = (env2) => !!(env2("LINQ_API_KEY") && env2("LINQ_WEBHOOK_SECRET") && linqLines(env2).length);
+var enc = new TextEncoder();
+async function call(env2, method, path, body, f) {
+  const res = await f(`${LINQ}${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${env2("LINQ_API_KEY")}`, "Content-Type": "application/json", Accept: "application/json" },
+    body: body === void 0 ? void 0 : JSON.stringify(body),
+    signal: AbortSignal.timeout(15e3)
+  });
+  return { status: res.status, j: await res.json().catch(() => ({})) };
+}
+var errOf = (status, j) => {
+  const e2 = j.error ?? {};
+  return { ok: false, status, code: typeof e2.code === "number" ? e2.code : void 0, detail: String(e2.message ?? "").slice(0, 200) };
+};
+var URLS = /https?:\/\/\S+/g;
+var hasUrl = (s) => /https?:\/\/\S+/.test(s);
+async function linqSend(env2, o, f = fetch) {
+  if (!env2("LINQ_API_KEY")) return { ok: false, status: 503, detail: "not_configured" };
+  const send = async (text, key) => {
+    const { status, j } = await call(env2, "POST", "/v3/chats", {
+      from: o.from,
+      to: [o.to],
+      message: { parts: [{ type: "text", value: text }], ...key ? { idempotency_key: key } : {} },
+      ...o.courtesy ? { override_optout: true } : {}
+    }, f);
+    if (status >= 200 && status < 300) {
+      const chat = j.chat ?? {};
+      return { ok: true, status, id: chat.message?.id, chat: chat.id, service: chat.service };
+    }
+    return errOf(status, j);
+  };
+  try {
+    const r = await send(o.text, o.key);
+    if (r.ok || r.code !== LINQ_BAD_PARAM || !hasUrl(o.text)) return r;
+    const links = o.text.match(URLS) ?? [];
+    const words = o.text.replace(URLS, "").replace(/[ \t]+\n/g, "\n").replace(/\s*[:：]\s*$/, "").replace(/[ \t]{2,}/g, " ").trim();
+    const first = await send(words || "Odelia from Placetta.", o.key ? `${o.key}:w` : void 0);
+    if (!first.ok || !first.chat) return first;
+    const { status, j } = await call(env2, "POST", `/v3/chats/${encodeURIComponent(first.chat)}/messages`, {
+      message: { parts: [{ type: "text", value: links.join("\n") }], ...o.key ? { idempotency_key: `${o.key}:l` } : {} }
+    }, f);
+    if (status >= 200 && status < 300) return { ...first, id: String((j.message ?? {}).id ?? first.id) };
+    return { ...errOf(status, j), id: first.id, chat: first.chat };
+  } catch (e2) {
+    return { ok: false, status: 502, detail: String(e2).slice(0, 200) };
+  }
+}
+function hashLine(lines, number) {
+  if (!lines.length) return null;
+  let h = 2166136261;
+  for (const c of number) {
+    h ^= c.charCodeAt(0);
+    h = Math.imul(h, 16777619);
+  }
+  return lines[(h >>> 0) % lines.length];
+}
+function pickLine(lines, o) {
+  const usable = lines.filter((l) => !o.critical?.has(l));
+  if (o.stored && lines.includes(o.stored) && (o.reply || !o.critical?.has(o.stored))) return o.stored;
+  return hashLine(usable, o.number);
+}
+
 // supabase/functions/_shared/odelia_db.ts
-var LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at";
+var LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at, line";
 async function linkOf(admin2, userId) {
   const { data } = await admin2.from("phone_links").select(LINK_COLS).eq("user_id", userId).maybeSingle();
   return data ?? null;
 }
 async function logMessage(admin2, row) {
-  const { data, error } = await admin2.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2e3), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null }).select("id").maybeSingle();
+  const { data, error } = await admin2.from("odelia_messages").insert({ ...row, body: row.body.slice(0, 2e3), workspace_id: row.workspace_id ?? null, provider_id: row.provider_id ?? null, run_id: row.run_id ?? null, line: row.line ?? null, service: row.service ?? null }).select("id").maybeSingle();
   if (error && error.code !== "23505") console.error("odelia log", error.code);
   return error ? null : data?.id ?? null;
 }
+var critical = null;
+async function criticalLines(admin2) {
+  if (critical && Date.now() - critical.at < 6e4) return critical.set;
+  const { data } = await admin2.from("odelia_lines").select("number").eq("reputation", "CRITICAL");
+  critical = { at: Date.now(), set: new Set((data ?? []).map((r) => String(r.number))) };
+  return critical.set;
+}
+async function sendText(admin2, env2, o, f = fetch) {
+  if (linqReady(env2) && !o.smsOnly) {
+    const lines = linqLines(env2), bad = new Set(await criticalLines(admin2));
+    for (let tries = 0; tries < lines.length; tries++) {
+      const line = pickLine(lines, { stored: tries ? null : o.line, number: o.to, critical: bad, reply: o.reply });
+      if (!line) break;
+      const r2 = await linqSend(env2, { from: line, to: o.to, text: o.text, key: o.key, courtesy: o.courtesy }, f);
+      if (r2.ok) return { ok: true, status: r2.status, id: r2.id ? `linq:${r2.id}` : void 0, line, service: r2.service ?? "iMessage", chat: r2.chat };
+      if (r2.code === LINQ_OPTED_OUT) return { ok: false, status: r2.status, code: BLOCKED_BY_STOP, detail: r2.detail, line, service: "iMessage" };
+      if (r2.code === LINQ_LINE_RESTRICTED || r2.code === 4002 || r2.code === 4008) {
+        bad.add(line);
+        continue;
+      }
+      return { ok: false, status: r2.status, code: String(r2.code ?? r2.status), detail: r2.detail, line, service: "iMessage" };
+    }
+    if (!smsReady(env2)) return { ok: false, status: 503, code: "no_line", line: null, service: "iMessage" };
+  }
+  const r = await sendSms(env2, o.to, o.text, f);
+  return { ok: r.ok, status: r.status, code: r.code, detail: r.detail, id: r.id, line: null, service: "SMS" };
+}
 async function textUser(admin2, env2, o) {
   if (o.link.opted_out_at) return { ok: false, sent: 0, code: "opted_out" };
-  let sent = 0;
+  const reply = ["reply", "ack", "system", "chat", "missed"].includes(o.kind);
+  let sent = 0, line = o.link.line ?? null;
   for (const text of o.segments) {
-    const r = await sendSms(env2, o.link.number, text);
+    const r = await sendText(admin2, env2, { to: o.link.number, text, line, reply });
     if (!r.ok) {
       console.error("odelia text", r.status, r.code, r.detail);
       if (r.code === BLOCKED_BY_STOP) await admin2.from("phone_links").update({ opted_out_at: (/* @__PURE__ */ new Date()).toISOString(), updated_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("user_id", o.link.user_id);
       return { ok: false, sent, code: r.code };
     }
     sent++;
-    await logMessage(admin2, { user_id: o.link.user_id, workspace_id: o.workspace_id, direction: "out", channel: "sms", kind: o.kind, body: o.logBody ?? text, provider_id: r.id, run_id: o.run_id });
+    if (r.line && r.line !== line) {
+      line = r.line;
+      await admin2.from("phone_links").update({ line, updated_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("user_id", o.link.user_id);
+    }
+    await logMessage(admin2, { user_id: o.link.user_id, workspace_id: o.workspace_id, direction: "out", channel: "sms", kind: o.kind, body: o.logBody ?? text, provider_id: r.id, run_id: o.run_id, line: r.line, service: r.service });
   }
   return { ok: true, sent };
 }
@@ -2275,7 +2383,7 @@ async function selftest(env2, o = {}) {
 }
 
 // supabase/functions/_shared/bots.ts
-var enc = new TextEncoder();
+var enc2 = new TextEncoder();
 async function slackPost(bot, to2, text) {
   const res = await fetch("https://slack.com/api/chat.postMessage", {
     method: "POST",
