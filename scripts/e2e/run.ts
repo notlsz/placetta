@@ -1216,8 +1216,10 @@ try {
     const n = async (q: Promise<{ n: number }[]>) => (await q)[0].n;
     check("the auth user is gone (hard delete)", await n(sql`select count(*)::int n from auth.users where id = ${owner.id}`) === 0);
     check("the workspace and everything in it is gone", await n(sql`select ((select count(*) from public.workspaces where id = ${ws}) + (select count(*) from public.filings where workspace_id = ${ws}) + (select count(*) from public.team_tasks where workspace_id = ${ws})
-      + (select count(*) from public.audit_log where workspace_id = ${ws}) + (select count(*) from public.billing where workspace_id = ${ws}) + (select count(*) from public.agent_runs where workspace_id = ${ws})
+      + (select count(*) from public.billing where workspace_id = ${ws}) + (select count(*) from public.agent_runs where workspace_id = ${ws})
       + (select count(*) from public.hq_links where workspace_id = ${ws}) + (select count(*) from public.updates where workspace_id = ${ws}) + (select count(*) from public.workspace_members where workspace_id = ${ws}))::int as n`) === 0);
+    // The audit trail is append-only and outlives its workspace (migration 20261016114500_security_hardening).
+    check("the audit trail survives", await n(sql`select count(*)::int n from public.audit_log where workspace_id = ${ws}`) > 0);
     check("the phone link, texts, calls and outbox are gone", await n(sql`select ((select count(*) from public.phone_links where user_id = ${owner.id}) + (select count(*) from public.odelia_messages where user_id = ${owner.id})
       + (select count(*) from public.odelia_outbox where user_id = ${owner.id}) + (select count(*) from public.odelia_calls where user_id = ${owner.id}) + (select count(*) from public.phone_codes where user_id = ${owner.id}))::int as n`) === 0);
     check("stored files are removed", ![...gw.files.keys()].some((k) => k.startsWith(`documents/${ws}/`)), [...gw.files.keys()]);

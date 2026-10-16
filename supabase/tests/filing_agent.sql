@@ -120,13 +120,14 @@ begin
     exists (select 1 from public.audit_log where workspace_id = w and action->>'en' = 'Submitted by Placetta by fax'),
     'finish time recorded', (select agent_finished_at is not null from public.filings where id = f3));
 
-  -- Skills: shared ones are readable by members, keys are unique per scope.
+  -- Skills: shared ones are the team's until published as global (20261016114500), keys are unique per scope.
   insert into public.agent_skills (workspace_id, key, name, body) values (null, 'portal:bizfile.sos.ca.gov:ca-llc1', 'LLC-1 on bizfile', '{"steps":[]}');
+  insert into public.agent_skills (workspace_id, key, name, body, published) values (null, 'portal:irs.gov:ss4', 'SS-4', '{"steps":[]}', true);
   begin insert into public.agent_skills (workspace_id, key, name) values (null, 'portal:bizfile.sos.ca.gov:ca-llc1', 'dup'); ok := false; exception when unique_violation then ok := true; end;
   res := res || jsonb_build_object('one shared skill per key', ok);
   execute 'set local role authenticated';
   perform set_config('request.jwt.claims', json_build_object('sub', m, 'role', 'authenticated', 'aal', 'aal1')::text, true);
-  res := res || jsonb_build_object('members read shared skills', (select count(*) from public.agent_skills) = 1,
+  res := res || jsonb_build_object('members read only published shared skills', (select array_agg(key) from public.agent_skills) = array['portal:irs.gov:ss4'],
     'members cannot see team tasks', (select count(*) from public.team_tasks) = 0);
   begin update public.filings set agent_state = 'queued' where id = f; ok := (select agent_state from public.filings where id = f) <> 'queued'; exception when others then ok := true; end;
   res := res || jsonb_build_object('members cannot change filings', ok);

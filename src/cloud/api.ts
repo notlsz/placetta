@@ -292,8 +292,10 @@ export async function listAudit(ws: string): Promise<Audit[]> {
     action: r.action, object: r.object, detail: r.detail ?? undefined,
   })) as Audit[];
 }
+/* The database accepts only the member's own actions from the app (actor "you"); the agent's entries are written by
+   the server. Sending an "agent" row would fail the whole batch. */
 export async function logAudit(ws: string, uid: string, entries: Audit[]) {
-  const rows = entries.filter(a => a.actor === "you" || a.actor === "agent").map(a => ({
+  const rows = entries.filter(a => a.actor === "you").map(a => ({
     workspace_id: ws, client_id: a.id, actor: a.actor, actor_id: uid, action: a.action, object: a.object, detail: a.detail ?? null,
   }));
   if (!rows.length) return;
@@ -344,6 +346,15 @@ export async function uploadDoc(ws: string, file: File, appId?: string): Promise
   const { data, error } = await supabase().from("documents").insert({ workspace_id: ws, app_id: appId ?? null, name: file.name.slice(0, 200), path, size: file.size, mime: file.type || null, source: "customer" }).select("*").single();
   if (error) throw fromPg(error);
   return data as DocRow;
+}
+/** Owners: delete a document, the stored file (through the Storage API, so the object itself goes) and then its row.
+    The database refuses both while an open filing still uses the file. */
+export async function deleteDoc(doc: Pick<DocRow, "id" | "path">) {
+  const rm = await supabase().storage.from("documents").remove([doc.path]);
+  if (rm.error) throw err("delete", rm.error.message);
+  if (!rm.data?.length) throw err("forbidden", "Only an owner can delete this file, and not while a filing uses it.");
+  const { error } = await supabase().from("documents").delete().eq("id", doc.id);
+  if (error) throw fromPg(error);
 }
 export async function listDocs(ws: string): Promise<DocRow[]> {
   const { data, error } = await supabase().from("documents").select("*").eq("workspace_id", ws).order("created_at", { ascending: false });
