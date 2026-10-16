@@ -3,7 +3,7 @@
 # Usage: PGHOST=... PGPORT=... PGUSER=postgres scripts/test-db.sh      (needs psql and a local Postgres 15+)
 set -euo pipefail
 cd "$(dirname "$0")/.."
-DB=placetta_test
+DB=${TEST_DB:-placetta_test}   # TEST_DB lets parallel runs on one cluster use separate databases
 psql -q -c "drop database if exists $DB" -c "create database $DB"
 psql -q -d $DB -v ON_ERROR_STOP=1 -f supabase/tests/supabase_stubs.sql
 for f in $(ls supabase/migrations/*.sql | sort); do
