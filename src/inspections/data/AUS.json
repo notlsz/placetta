@@ -1,0 +1,685 @@
+{
+  "where": "AUS",
+  "name": {
+    "en": "Austin (Travis County)",
+    "zh": "奥斯汀（特拉维斯县）"
+  },
+  "read": "2026-10-15",
+  "inspections": [
+    {
+      "id": "building-final",
+      "kind": "building",
+      "stage": "opening",
+      "name": {
+        "en": "Commercial building final inspection (112 Final) and Certificate of Occupancy",
+        "zh": "商业建筑最终验收（112 Final）及入住证"
+      },
+      "agency": {
+        "en": "City of Austin Development Services Department, Building Inspections",
+        "zh": "奥斯汀市开发服务局建筑检查科"
+      },
+      "when": {
+        "en": "Last, after plumbing, electrical, mechanical, one-time (landscape, environmental, driveway) and fire inspections all pass. The CO is issued on a successful final for new construction or significant renovation.",
+        "zh": "最后一步，在管道、电气、机械、一次性检查（景观、环境、车道等）和消防检查全部通过之后。新建或大规模改造在最终验收通过后签发入住证。"
+      },
+      "book": {
+        "en": "Schedule in the Austin Build + Connect (AB+C) Portal under My Inspections (your account must be linked to the active, paid permit), or by phone through the IVR with your IVR PIN, 10-digit permit number and 3-digit inspection code.",
+        "zh": "在 Austin Build + Connect（AB+C）门户的“My Inspections”预约（账户须关联已生效且已付费的许可），或用 IVR PIN、10 位许可编号和 3 位检查代码通过自动语音系统电话预约。"
+      },
+      "bookUrl": "https://www.austintexas.gov/development-services/schedule-building-inspection",
+      "phone": "311",
+      "lead": {
+        "en": "Usually performed 24 hours after scheduling; workload can push it to the next business day or 48 hours.",
+        "zh": "通常在预约后 24 小时内检查；工作量大时可能推迟到下一个工作日或 48 小时后。"
+      },
+      "failNext": {
+        "en": "Correct every deficiency, then schedule a re-inspection; failed or partial inspections reappear in AB+C for rescheduling.",
+        "zh": "整改所有问题后预约复检；不合格或部分通过的检查会重新出现在 AB+C 中供再次预约。"
+      },
+      "checklist": [
+        {
+          "id": "address",
+          "item": {
+            "en": "Job address posted in a visible location",
+            "zh": "工地地址张贴在明显位置"
+          },
+          "why": {
+            "en": "IBC(F) 502.1",
+            "zh": "国际建筑规范 IBC(F) 502.1"
+          }
+        },
+        {
+          "id": "plans",
+          "item": {
+            "en": "Approved plans (paper or electronic) on site",
+            "zh": "现场备有批准图纸（纸质或电子）"
+          },
+          "why": {
+            "en": "IBC 107.3.1",
+            "zh": "国际建筑规范 IBC 107.3.1"
+          }
+        },
+        {
+          "id": "prereqs",
+          "item": {
+            "en": "All plumbing, electrical, mechanical, one-time and fire inspections passed before scheduling",
+            "zh": "预约前所有管道、电气、机械、一次性检查及消防检查均已通过"
+          }
+        },
+        {
+          "id": "special-letters",
+          "item": {
+            "en": "All special inspection letters (engineer, third party) uploaded before scheduling",
+            "zh": "预约前已上传所有专项检查函（工程师、第三方）"
+          }
+        },
+        {
+          "id": "exits",
+          "item": {
+            "en": "Required exits and exit access doors in place; door capacity sufficient for the occupant load",
+            "zh": "所需出口和出口通道门均已到位；门的通行能力满足人数荷载"
+          },
+          "why": {
+            "en": "IBC 1007, 1010.1.1",
+            "zh": "国际建筑规范 IBC 1007、1010.1.1"
+          }
+        },
+        {
+          "id": "unlocked-sign",
+          "item": {
+            "en": "Sign at each exit door: THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED, 1-inch letters",
+            "zh": "每个出口门张贴“本空间有人时此门须保持不上锁”标识，字高 1 英寸"
+          },
+          "why": {
+            "en": "IBC 1010.2.4",
+            "zh": "国际建筑规范 IBC 1010.2.4"
+          }
+        },
+        {
+          "id": "panic-hardware",
+          "item": {
+            "en": "Group A spaces with 50+ occupants: doors have no latch or lock other than panic or fire exit hardware",
+            "zh": "50 人以上的 A 类（集会）空间：门除逃生推杆外不得有插销或门锁"
+          },
+          "why": {
+            "en": "IBC 1010.2.8",
+            "zh": "国际建筑规范 IBC 1010.2.8"
+          }
+        },
+        {
+          "id": "restroom-floors",
+          "item": {
+            "en": "Restroom and shower floors smooth, hard and nonabsorbent, carried up the wall at the junction",
+            "zh": "卫生间和淋浴间地面光滑、坚硬、不吸水，并在墙地交接处向上延伸"
+          },
+          "why": {
+            "en": "IBC 1210.2.1",
+            "zh": "国际建筑规范 IBC 1210.2.1"
+          }
+        },
+        {
+          "id": "work-complete",
+          "item": {
+            "en": "All work finished at the time of the final",
+            "zh": "最终验收时所有工程已完工"
+          }
+        },
+        {
+          "id": "nothing-moved-in",
+          "item": {
+            "en": "Nothing moved in before the CO or TCO except items permanently affixed and shown on the approved plans",
+            "zh": "取得 CO 或临时 CO 之前，除批准图纸上标明的固定设施外，不得搬入任何物品"
+          }
+        }
+      ],
+      "source": "https://austin.widen.net/view/pdf/brwkyot9ct/COM_BuildingFinalInspectionChecklist.pdf",
+      "sources": [
+        "https://www.austintexas.gov/development-services/building-inspections",
+        "https://www.austintexas.gov/development-services/schedule-building-inspection",
+        "https://www.austintexas.gov/development-services/certificate-occupancy"
+      ]
+    },
+    {
+      "id": "fire-final",
+      "kind": "fire",
+      "stage": "opening",
+      "name": {
+        "en": "AFD Fire Final (inspection 609), with TCO Stocking and TCO Occupancy",
+        "zh": "AFD 消防最终验收（609 号检查），含临时入住证（备货/入住）检查"
+      },
+      "agency": {
+        "en": "Austin Fire Department, Fire Marshal's Office",
+        "zh": "奥斯汀消防局消防局长办公室"
+      },
+      "when": {
+        "en": "After all MEP inspections pass and before the 112 Building Final. Kitchen hood suppression must be approved before TCO Stocking.",
+        "zh": "所有机电管道检查通过后、112 建筑最终验收之前。厨房排烟罩灭火系统须在临时备货检查前获批。"
+      },
+      "book": {
+        "en": "Call the AFD scheduling office at 512-974-0153, option 3 (8 a.m.–1 p.m. weekdays; leave a voicemail with your permit number), or submit the online Inspection Scheduling Request Intake Form. Fees are paid in advance through the AB+C portal.",
+        "zh": "致电 AFD 预约办公室 512-974-0153 转 3（工作日上午 8 点至下午 1 点；请留言并说明许可编号），或提交在线检查预约申请表。费用须提前在 AB+C 门户支付。"
+      },
+      "bookUrl": "https://fs25.formsite.com/AustinFire/IRIntakeV2/index.html",
+      "phone": "512-974-0153",
+      "failNext": {
+        "en": "TCO inspections count as Fire Final inspections; any later Fire Final inspection is charged a re-inspection fee. TCO and Fire Final are held until The Compliance Engine records are current.",
+        "zh": "临时入住证检查即算作消防最终验收；之后再做的消防最终验收需付复检费。在 The Compliance Engine 记录更新前，临时入住证和消防最终验收都会暂缓。"
+      },
+      "checklist": [
+        {
+          "id": "hood-approved",
+          "item": {
+            "en": "Type I hood suppression inspected and approved, Class K extinguisher installed, report uploaded",
+            "zh": "I 类排烟罩灭火系统已检查批准，已配 K 类灭火器并上传报告"
+          }
+        },
+        {
+          "id": "tce",
+          "item": {
+            "en": "Acceptance test reports for new fire protection systems (hood suppression, sprinklers, alarm) uploaded to The Compliance Engine and accepted by AFD",
+            "zh": "新消防系统（排烟罩灭火、喷淋、报警）的验收测试报告已上传至 The Compliance Engine 并被 AFD 接受"
+          }
+        },
+        {
+          "id": "extinguishers",
+          "item": {
+            "en": "Fire extinguishers installed (ABC, dry chemical and/or Class K as appropriate)",
+            "zh": "已安装灭火器（按需配 ABC、干粉和/或 K 类）"
+          }
+        },
+        {
+          "id": "address-suite",
+          "item": {
+            "en": "Building address and suite number installed",
+            "zh": "已安装建筑地址和单元号"
+          }
+        },
+        {
+          "id": "sprinkler-alarm",
+          "item": {
+            "en": "Sprinkler and alarm systems complete, tested, tagged and in service",
+            "zh": "喷淋和报警系统完工、测试、挂签并投入使用"
+          }
+        },
+        {
+          "id": "egress",
+          "item": {
+            "en": "Emergency lighting and exit signs installed and approved; egress paths clear; panic hardware where required",
+            "zh": "应急照明和出口指示已安装并获批；疏散通道畅通；需要处装逃生推杆"
+          }
+        },
+        {
+          "id": "mep-closed",
+          "item": {
+            "en": "All MEP permits closed and construction complete, space clean and tenant ready",
+            "zh": "所有机电管道许可已结案，施工完毕，空间清洁可交付使用"
+          }
+        },
+        {
+          "id": "knox",
+          "item": {
+            "en": "Knox box installed where required, 4–6 feet above ground near the main fire access",
+            "zh": "需要时在主要消防入口附近离地 4–6 英尺处安装 Knox 钥匙箱"
+          }
+        },
+        {
+          "id": "labels",
+          "item": {
+            "en": "Fire alarm panel, gas meters, electrical shutoffs and riser room labeled",
+            "zh": "火灾报警主机、燃气表、电源总闸和喷淋立管间均有标识"
+          }
+        },
+        {
+          "id": "co2",
+          "item": {
+            "en": "CO2 detection for beverage systems tested and approved, where applicable",
+            "zh": "如有饮料二氧化碳系统，其泄漏检测已测试并获批"
+          }
+        },
+        {
+          "id": "shell-final",
+          "item": {
+            "en": "For a tenant finish-out, the shell building already has its Fire Final",
+            "zh": "租户装修项目：所在毛坯楼已取得消防最终验收"
+          }
+        }
+      ],
+      "source": "https://austin.widen.net/view/pdf/msuprvuj00/AFDConstructionExpectations.pdf",
+      "sources": [
+        "https://www.austintexas.gov/fire/fire-inspections",
+        "https://www.austintexas.gov/development-services/building-inspections"
+      ]
+    },
+    {
+      "id": "health-preopening",
+      "kind": "health",
+      "stage": "opening",
+      "name": {
+        "en": "Austin Public Health pre-opening inspection",
+        "zh": "奥斯汀公共卫生局开业前检查"
+      },
+      "agency": {
+        "en": "Austin Public Health, Environmental Health Services Division",
+        "zh": "奥斯汀公共卫生局环境卫生服务处"
+      },
+      "when": {
+        "en": "Required for new construction, remodels and changes of ownership, before the Certificate of Occupancy and operating permit. You must pass before the permit is issued and you can operate.",
+        "zh": "新建、改造和所有权变更均须进行，在入住证和经营许可之前。通过后才会发许可、才能营业。"
+      },
+      "book": {
+        "en": "Submit the Pre-Opening Inspection Application (with your Operational Permit application) online in the My Health Department portal, by email to EHSD.Service@austintexas.gov, in person at 1520 Rutherford Ln, Bldg. 1, Ste 205, or by mail. Fees are paid before the inspection; an inspector then contacts you to schedule.",
+        "zh": "通过 My Health Department 门户在线提交开业前检查申请（连同经营许可申请），或发邮件至 EHSD.Service@austintexas.gov、到 1520 Rutherford Ln 1 号楼 205 室递交，或邮寄。检查前须付费，之后检查员会联系你约时间。"
+      },
+      "bookUrl": "https://myhealthdepartment.com/aph",
+      "phone": "512-978-0300",
+      "lead": {
+        "en": "APH recommends applying about a month before your planned opening; an inspector contacts you within three business days of a complete application.",
+        "zh": "卫生局建议在计划开业前约一个月申请；材料齐全后检查员会在三个工作日内联系你。"
+      },
+      "fee": 178,
+      "feeNote": {
+        "en": "$178 per inspection in the City of Austin and contracted cities (none in unincorporated Travis County); $173 extra outside normal hours.",
+        "zh": "奥斯汀市及签约城市每次 178 美元（特拉维斯县非建制区免费）；非工作时间另加 173 美元。"
+      },
+      "failNext": {
+        "en": "You must bring the facility up to code before the operating permit is approved; the $178 pre-opening fee is charged per inspection. Operating without approval can bring legal charges.",
+        "zh": "须整改达标后才批准经营许可；178 美元的开业前检查费按次收取。未经批准营业可能被起诉。"
+      },
+      "checklist": [
+        {
+          "id": "plans-followed",
+          "item": {
+            "en": "Built or remodeled according to the approved plans, all equipment installed and working",
+            "zh": "按批准图纸建造或改造，所有设备已安装并能正常使用"
+          }
+        },
+        {
+          "id": "refrigeration",
+          "item": {
+            "en": "All refrigeration holds food at or below 41°F",
+            "zh": "所有冷藏设备能将食品保持在 41°F 或以下"
+          }
+        },
+        {
+          "id": "handsinks",
+          "item": {
+            "en": "Hand sinks at prep, dispensing, warewashing and ice wait stations with 100°F hot and cold water, soap, paper towels and a handwashing sign",
+            "zh": "加工、出餐、洗碗及取冰服务台设有洗手池，提供 100°F 热水和冷水、洗手液、纸巾并张贴洗手标识"
+          }
+        },
+        {
+          "id": "splashguard",
+          "item": {
+            "en": "12-inch splash guard or 18 inches of separation between a hand sink and food, ice or clean surfaces",
+            "zh": "洗手池与食品、冰或洁净台面之间设 12 英寸挡水板或相隔 18 英寸"
+          }
+        },
+        {
+          "id": "warewash",
+          "item": {
+            "en": "Dish machine dispenses chemical sanitizer or a 180°F final rinse, with test strips; or a 3-compartment sink with two drain boards",
+            "zh": "洗碗机投放化学消毒剂或末次冲洗达 180°F，并备试纸；或使用带两个沥水板的三格水槽"
+          }
+        },
+        {
+          "id": "air-gaps",
+          "item": {
+            "en": "Food prep sinks, ware sinks, ice bins and ice machines drained through an air gap; hose bibs have backflow preventers",
+            "zh": "食品加工池、洗碗池、冰柜和制冰机经空气隔断排水；带螺纹的水龙头装防回流器"
+          }
+        },
+        {
+          "id": "mop-sink",
+          "item": {
+            "en": "Service, mop or curbed floor sink with a mop drying rack",
+            "zh": "设有拖把池或围堰地面水槽，并配拖把晾干架"
+          }
+        },
+        {
+          "id": "ceilings",
+          "item": {
+            "en": "Smooth, cleanable ceilings over food, ice, warewashing, bars and restrooms; no open rafters or exposed ducts or pipes",
+            "zh": "食品、冰、洗碗区、吧台和洗手间上方天花板平滑易清洁；无外露椽子、风管或管道"
+          }
+        },
+        {
+          "id": "walls-floors",
+          "item": {
+            "en": "Wall/floor junctures caulked with no more than a 1/32-inch gap; baseboards installed; raw brick or concrete sealed",
+            "zh": "墙地交接处打胶，缝隙不超过 1/32 英寸；装踢脚线；裸砖或混凝土已密封"
+          }
+        },
+        {
+          "id": "outer-openings",
+          "item": {
+            "en": "Exterior doors self-closing and tight; window and door screens at least 1/16-inch mesh; exhaust fans screened or self-closing louvers",
+            "zh": "外门自闭且严密；门窗纱网至少 1/16 英寸网眼；排风扇装纱网或自闭百叶"
+          }
+        },
+        {
+          "id": "dumpster",
+          "item": {
+            "en": "Dumpster and grease barrel on a concrete or asphalt pad, with tight lids and drain plugs",
+            "zh": "垃圾箱和废油桶放在混凝土或沥青地坪上，盖子严密、排水塞到位"
+          }
+        },
+        {
+          "id": "lighting",
+          "item": {
+            "en": "50 foot-candles where staff prepare food, 20 at self-service and produce areas",
+            "zh": "员工加工食品处 50 尺烛光，自助区和生鲜区 20 尺烛光"
+          }
+        },
+        {
+          "id": "restrooms",
+          "item": {
+            "en": "Restrooms with 100°F hand sink, mechanical ventilation and self-closing doors, not opening into the kitchen",
+            "zh": "洗手间有 100°F 洗手池、机械通风和自闭门，且不直通厨房"
+          }
+        },
+        {
+          "id": "cfm",
+          "item": {
+            "en": "City of Austin Certified Food Manager certificate posted",
+            "zh": "张贴奥斯汀市认证食品经理证书"
+          }
+        }
+      ],
+      "source": "https://www.austintexas.gov/health/fixed-food-establishments",
+      "sources": [
+        "https://austin.widen.net/view/pdf/vsiaz1fnph/8.305A1_Starting_a_Food_Business_6-18-19-25.pdf",
+        "https://austin.widen.net/view/pdf/lzcrvwjzpn/Food-Pre-Opening-Revise.pdf"
+      ]
+    },
+    {
+      "id": "fire-routine",
+      "kind": "fire",
+      "stage": "routine",
+      "name": {
+        "en": "AFD maintenance (annual) fire inspection",
+        "zh": "AFD 维护性（年度）消防检查"
+      },
+      "agency": {
+        "en": "Austin Fire Department, Fire Marshal's Office",
+        "zh": "奥斯汀消防局消防局长办公室"
+      },
+      "when": {
+        "en": "After opening; many commercial and retail spaces receive regular fire and life-safety inspections, and fire protection systems need annual third-party inspections (hoods every six months).",
+        "zh": "开业后；许多商业和零售场所会定期接受消防和生命安全检查，消防系统须每年由第三方检查（排烟罩每半年一次）。"
+      },
+      "book": {
+        "en": "AFD schedules maintenance inspections; see AFD's Types of Inspections page. Contractors upload system inspection and deficiency reports to The Compliance Engine.",
+        "zh": "维护检查由 AFD 安排，详见 AFD“检查类型”页面。系统检查及缺陷报告由承包商上传至 The Compliance Engine。"
+      },
+      "bookUrl": "https://www.austintexas.gov/department/types-inspections",
+      "checklist": [
+        {
+          "id": "address",
+          "item": {
+            "en": "Approved address posted and visible from the street",
+            "zh": "批准的地址已张贴且从街上可见"
+          },
+          "why": {
+            "en": "IFC 505",
+            "zh": "国际消防规范 IFC 505"
+          }
+        },
+        {
+          "id": "access",
+          "item": {
+            "en": "Fire lanes marked; hydrants and fire department access unobstructed",
+            "zh": "消防车道有标线；消火栓和消防通道无阻挡"
+          },
+          "why": {
+            "en": "IFC 503.3, 503.4, 507.5.4",
+            "zh": "国际消防规范 IFC 503.3、503.4、507.5.4"
+          }
+        },
+        {
+          "id": "extinguishers",
+          "item": {
+            "en": "Right size, type and number of extinguishers, mounted and serviced within the past 12 months",
+            "zh": "灭火器规格、类型、数量正确，已安装并在过去 12 个月内维护"
+          },
+          "why": {
+            "en": "IFC 906",
+            "zh": "国际消防规范 IFC 906"
+          }
+        },
+        {
+          "id": "egress",
+          "item": {
+            "en": "Exits not blocked or locked; no storage in the means of egress",
+            "zh": "出口不得阻挡或上锁；疏散通道不放杂物"
+          },
+          "why": {
+            "en": "IFC 1030.2, 1030.3",
+            "zh": "国际消防规范 IFC 1030.2、1030.3"
+          }
+        },
+        {
+          "id": "exit-lights",
+          "item": {
+            "en": "Exit signs illuminated and emergency lighting working",
+            "zh": "出口指示灯常亮，应急照明正常"
+          },
+          "why": {
+            "en": "IFC 1013, 1008.3",
+            "zh": "国际消防规范 IFC 1013、1008.3"
+          }
+        },
+        {
+          "id": "electrical",
+          "item": {
+            "en": "Clearance around electrical panels; no extension cords as permanent wiring or piggybacked",
+            "zh": "配电箱周围留足空间；不得用延长线代替永久布线或串接"
+          },
+          "why": {
+            "en": "IFC 603.4, 603.6",
+            "zh": "国际消防规范 IFC 603.4、603.6"
+          }
+        },
+        {
+          "id": "rags",
+          "item": {
+            "en": "Combustible waste and soiled rags in approved metal containers",
+            "zh": "可燃垃圾和油污抹布放在合格的金属容器中"
+          },
+          "why": {
+            "en": "IFC 304.3",
+            "zh": "国际消防规范 IFC 304.3"
+          }
+        },
+        {
+          "id": "cylinders",
+          "item": {
+            "en": "Compressed gas cylinders stored and used properly",
+            "zh": "压缩气瓶存放和使用规范"
+          },
+          "why": {
+            "en": "IFC 5303.5",
+            "zh": "国际消防规范 IFC 5303.5"
+          }
+        },
+        {
+          "id": "occupant-load",
+          "item": {
+            "en": "Occupant load card posted near the main entrance of assembly spaces and not exceeded",
+            "zh": "集会场所主入口附近张贴人数荷载卡，且不超员"
+          },
+          "why": {
+            "en": "IFC 1004.3",
+            "zh": "国际消防规范 IFC 1004.3"
+          }
+        },
+        {
+          "id": "decorations",
+          "item": {
+            "en": "Drapes, curtains and decorations treated for fire resistance",
+            "zh": "帷幔、窗帘和装饰物经阻燃处理"
+          },
+          "why": {
+            "en": "IFC 807",
+            "zh": "国际消防规范 IFC 807"
+          }
+        },
+        {
+          "id": "hood-6mo",
+          "item": {
+            "en": "Range hood suppression serviced semi-annually by a licensed fire protection company; reports in The Compliance Engine",
+            "zh": "排烟罩灭火系统每半年由持牌消防公司维护；报告已录入 The Compliance Engine"
+          },
+          "why": {
+            "en": "AFD Fire Protection Criterion Manual 3.2.10",
+            "zh": "AFD 消防标准手册 3.2.10"
+          }
+        },
+        {
+          "id": "systems",
+          "item": {
+            "en": "Fire alarm and sprinklers tested on schedule by state-licensed companies and kept in working order",
+            "zh": "火灾报警和喷淋按期由州持牌公司测试并保持正常"
+          },
+          "why": {
+            "en": "IFC 901.2; AFD Fire Protection Criterion Manual 3.2.10",
+            "zh": "IFC 901.2；AFD 消防标准手册 3.2.10"
+          }
+        }
+      ],
+      "source": "https://austin.widen.net/view/pdf/1zqtf1jjnd/Maintenance-Inspection-Considerations.pdf",
+      "sources": [
+        "https://www.austintexas.gov/department/types-inspections",
+        "https://austin.widen.net/view/pdf/msuprvuj00/AFDConstructionExpectations.pdf"
+      ]
+    },
+    {
+      "id": "health-routine",
+      "kind": "health",
+      "stage": "routine",
+      "name": {
+        "en": "Routine food establishment inspection (scored)",
+        "zh": "常规食品场所检查（计分）"
+      },
+      "agency": {
+        "en": "Austin Public Health, Environmental Health Services Division",
+        "zh": "奥斯汀公共卫生局环境卫生服务处"
+      },
+      "when": {
+        "en": "Unannounced, after you open.",
+        "zh": "开业后，不预先通知。"
+      },
+      "book": {
+        "en": "Not booked; Environmental Health Officers arrive unannounced.",
+        "zh": "无需预约，环境卫生官员不预先通知上门。"
+      },
+      "phone": "512-978-0300",
+      "scoring": {
+        "en": "Scored on APH's 56-item Retail Food Establishment Inspection Report under the Texas Food Establishment Rules and City Code; scores from the last three years are published on the City's open data portal. Post your permit in the front window or on the outside front wall within 5 feet of the door.",
+        "zh": "按德州食品场所规则和市法规，用卫生局 56 项零售食品场所检查表打分；近三年的分数公布在市政府开放数据平台。经营许可须张贴在前窗或门外前墙上，距门 5 英尺以内。"
+      },
+      "failNext": {
+        "en": "Below 70: re-inspection fee ($134) and a scored follow-up in 10 days. A second sub-70 within 36 months adds a criminal complaint; a third suspends the permit and closes you; a fourth starts revocation. Below 50 on any inspection: immediate 48-hour closure.",
+        "zh": "低于 70 分：收复检费（134 美元），10 天后计分复查。36 个月内第二次低于 70 分将被提起刑事控告；第三次暂停许可并停业；第四次启动吊销程序。任何一次低于 50 分：立即停业 48 小时。"
+      },
+      "checklist": [
+        {
+          "id": "pic",
+          "item": {
+            "en": "Person in charge present, knowledgeable and performing duties; permit posted",
+            "zh": "负责人在场、熟悉规定并履行职责；张贴经营许可"
+          }
+        },
+        {
+          "id": "cfm-handlers",
+          "item": {
+            "en": "Certified Food Manager certificate presented; all food employees completed food handler training within 60 days of hire",
+            "zh": "能出示认证食品经理证书；所有食品从业员工在入职 60 天内完成食品处理员培训"
+          }
+        },
+        {
+          "id": "employee-health",
+          "item": {
+            "en": "Employee illness reporting, exclusion rules and a vomiting/diarrhea clean-up procedure in place",
+            "zh": "有员工疾病报告、禁止上岗规定以及呕吐/腹泻清理程序"
+          }
+        },
+        {
+          "id": "handwashing",
+          "item": {
+            "en": "Hands washed properly; no bare-hand contact with ready-to-eat food; hand sinks supplied and accessible",
+            "zh": "正确洗手；不徒手接触即食食品；洗手池用品齐全且可随时使用"
+          }
+        },
+        {
+          "id": "cooking-temps",
+          "item": {
+            "en": "Proper cooking, reheating, cooling, hot holding and cold holding temperatures",
+            "zh": "烹饪、复热、冷却、热保温和冷保存温度正确"
+          }
+        },
+        {
+          "id": "date-marking",
+          "item": {
+            "en": "Ready-to-eat TCS food date-marked and discarded on time; time-as-control procedures and records if used",
+            "zh": "即食的需温控食品标注日期并按时丢弃；如采用以时间为控制，须有程序和记录"
+          }
+        },
+        {
+          "id": "source",
+          "item": {
+            "en": "Food from approved sources, received at proper temperature, in good condition",
+            "zh": "食品来源合格，接收时温度正确、状态良好"
+          }
+        },
+        {
+          "id": "contamination",
+          "item": {
+            "en": "Food separated and protected; food-contact surfaces cleaned and sanitized",
+            "zh": "食品分开存放并加以保护；食品接触面清洁消毒"
+          }
+        },
+        {
+          "id": "toxics",
+          "item": {
+            "en": "Toxic substances identified, stored and used properly",
+            "zh": "有毒物品标识、存放和使用规范"
+          }
+        },
+        {
+          "id": "thermometers",
+          "item": {
+            "en": "Accurate thermometers provided",
+            "zh": "配备准确的温度计"
+          }
+        },
+        {
+          "id": "pests",
+          "item": {
+            "en": "No insects, rodents or animals",
+            "zh": "无昆虫、鼠类或动物"
+          }
+        },
+        {
+          "id": "warewashing",
+          "item": {
+            "en": "Warewashing facilities installed, maintained and used, with test strips",
+            "zh": "洗碗设施安装、维护和使用得当，并备有试纸"
+          }
+        },
+        {
+          "id": "plumbing",
+          "item": {
+            "en": "Hot and cold water at adequate pressure; proper backflow devices; sewage properly disposed",
+            "zh": "冷热水压力充足；防回流装置合格；污水处理得当"
+          }
+        }
+      ],
+      "source": "https://austin.widen.net/view/pdf/cg625fcamf/APH-56-Item-Retail-Food-Establishment-Inspection-Report-Form-05.31.2024.25.pdf",
+      "sources": [
+        "https://www.austintexas.gov/health/fixed-food-establishments",
+        "https://austin.widen.net/view/pdf/vsiaz1fnph/8.305A1_Starting_a_Food_Business_6-18-19-25.pdf",
+        "https://catalog.data.gov/dataset/food-establishment-inspection-scores"
+      ]
+    }
+  ]
+}
