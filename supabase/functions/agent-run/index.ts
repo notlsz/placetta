@@ -21,11 +21,12 @@ import { linkOf, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 // @ts-types="./agent.d.ts"
 import { normalizeState, runRounds, startState, stripState, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
+import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
 type Block = Record<string, unknown>;
-type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice"; reply_to?: string | null };
+type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark"; reply_to?: string | null; chat_to?: ChatTo | null };
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -168,6 +169,14 @@ async function sendMail(to: string[], subject: string, text: string) {
   return res.ok;
 }
 
+/** How many jobs Odelia works on at once in one workspace. */
+const PARALLEL = Math.max(1, Math.min(8, Number(env("ODELIA_PARALLEL") || "3") || 3));
+const BUSY_MSG = `Odelia is already on ${PARALLEL} jobs here. This one starts when one of them finishes.`;
+async function atCapacity(ws: string) {
+  const { count } = await admin.from("agent_runs").select("id", { count: "exact", head: true }).eq("workspace_id", ws).eq("kind", "task").eq("status", "running").gt("heartbeat_at", new Date(Date.now() - STALE_MS).toISOString());
+  return (count ?? 0) >= PARALLEL;
+}
+
 /** Work on a run until it's done, stopped, or time to hand over. */
 export async function work(runId: string, token: string | null) {
   const { data: run } = await admin.from("agent_runs").select("*").eq("id", runId).maybeSingle() as { data: Run | null };
@@ -193,13 +202,21 @@ export async function work(runId: string, token: string | null) {
   const commit = () => (chain = chain.then(async () => {
     const batch = pending.splice(0);
     if (!batch.length) return;
-    const { data: fresh } = await admin.from("workspaces").select("name, state").eq("id", ws).maybeSingle();
-    let w = normalizeState(fresh?.name ?? row.name, fresh?.state ?? {});
-    for (const p of batch) w = p(w);
-    const audit = w.audit.filter((a) => a.actor === "agent" || a.actor === "you").map((a) => ({ workspace_id: ws, client_id: a.id, actor: a.actor, actor_id: run.created_by, action: a.action, object: a.object, detail: a.detail ?? null }));
-    if (audit.length) await admin.from("audit_log").upsert(audit, { onConflict: "workspace_id,client_id", ignoreDuplicates: true });
-    const { error } = await admin.from("workspaces").update({ state: stripState(w) }).eq("id", ws);
-    if (error) { pending.unshift(...batch); throw new Error("save failed: " + error.code); }
+    // Several jobs can run at once: each saves its own changes onto the newest state, and only if nobody saved in
+    // between (updated_at unchanged); otherwise it reads again and re-applies them.
+    for (let tries = 0; ; tries++) {
+      const { data: fresh } = await admin.from("workspaces").select("name, state, updated_at").eq("id", ws).maybeSingle();
+      let w = normalizeState(fresh?.name ?? row.name, fresh?.state ?? {});
+      for (const p of batch) w = p(w);
+      const audit = w.audit.filter((a) => a.actor === "agent" || a.actor === "you").map((a) => ({ workspace_id: ws, client_id: a.id, actor: a.actor, actor_id: run.created_by, action: a.action, object: a.object, detail: a.detail ?? null }));
+      if (audit.length) await admin.from("audit_log").upsert(audit, { onConflict: "workspace_id,client_id", ignoreDuplicates: true });
+      let q = admin.from("workspaces").update({ state: stripState(w), updated_at: new Date().toISOString() }).eq("id", ws);
+      if (fresh?.updated_at && tries < 5) q = q.eq("updated_at", fresh.updated_at);
+      const { data: saved, error } = await q.select("id");
+      if (error) { pending.unshift(...batch); throw new Error("save failed: " + error.code); }
+      if (saved?.length) { cur = { ...w, audit: cur.audit }; break; }   // and this job now sees what the others did
+      await new Promise((r) => setTimeout(r, 120 + Math.random() * 300));
+    }
   }).catch((e) => console.error("commit", runId, String(e).slice(0, 160))));
 
   // stop when the person says so
@@ -240,10 +257,25 @@ export async function work(runId: string, token: string | null) {
       const { data: failed } = await admin.from("agent_runs").update({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }).eq("id", runId).eq("status", "running").select("id");
       // Someone who asked by text or on a call hears about it the same way.
       if (failed?.length) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
+      if (failed?.length && (run.channel === "slack" || run.channel === "lark")) await chatBack(run, SAY.failed[run.lang], []).catch(() => undefined);
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
   }
+}
+
+/** The answer to a job asked in Slack or Lark, in the same thread. Approvals stay in the app: the reply links to them. */
+async function chatBack(run: Run, text: string, approvals: string[]) {
+  if (!run.chat_to) return;
+  const kind = run.chat_to.kind === "slack" ? "slack_bot" : "lark_bot";
+  const { data: row } = await admin.from("integrations").select("secret_id, status").eq("workspace_id", run.workspace_id).eq("kind", kind).maybeSingle();
+  if (!row?.secret_id || row.status !== "connected") return;
+  const { data: raw } = await admin.rpc("vault_get", { p_id: row.secret_id });
+  let bot: Bot; try { bot = { ...JSON.parse(String(raw ?? "")), kind } as Bot; } catch { return; }
+  const origin = appOrigin(env);
+  const link = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
+  const more = link ? (run.lang === "zh" ? `\n\n等您批准：${link}` : `\n\nWaiting for your approval: ${link}`) : "";
+  await chatReply(bot, run.chat_to, (text || (run.lang === "zh" ? "完成了。" : "Done.")) + more);
 }
 
 /**
@@ -284,6 +316,11 @@ async function finish(run: Run, reply: Reply, steps: Step[]) {
   // Asked by text or on a call: the answer goes back by text, which is where they're watching.
   if (run.channel === "sms" || run.channel === "voice") {
     await textBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim() || SAY.ack[run.lang], reply.approvals ?? []).catch((e) => console.error("text back", String(e).slice(0, 120)));
+    return;
+  }
+  // Asked in Slack or Lark: the answer goes back to the same thread, with the link to anything waiting for approval.
+  if (run.channel === "slack" || run.channel === "lark") {
+    await chatBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim(), reply.approvals ?? []).catch((e) => console.error("chat back", String(e).slice(0, 120)));
     return;
   }
   if (run.kind === "watch" && /^no changes\.?$/i.test(said)) return;
@@ -360,6 +397,32 @@ export async function handle(req: Request): Promise<Response> {
     return json(202, { id: run.id });
   }
 
+  // start_chat: someone asked Odelia in the business's own Slack or Lark (chat-events, with the monitor key). The job runs as
+  // the owner who connected the bot; the answer goes back to the same thread.
+  if (action === "start_chat") {
+    if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
+    const uid = String(body.user_id ?? ""), ws = String(body.workspace_id ?? "");
+    const channel = body.channel === "slack" ? "slack" : body.channel === "lark" ? "lark" : null;
+    const to = body.chat_to as ChatTo | undefined;
+    if (!UUID.test(uid) || !UUID.test(ws) || !channel || !to || to.kind !== channel) return fail(400, "bad_request", "user_id, workspace_id, channel and chat_to are required.");
+    const may = await mayUseAgent(admin, ws, uid);
+    if (may === "not_member") return fail(403, "forbidden", "The person who connected this bot is no longer in the workspace. Connect it again in Settings.");
+    if (may === "no_plan") return fail(402, "payment_required", "Odelia starts with the entry plan. Choose a plan in Placetta.");
+    if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", "Odelia isn't switched on for this account yet. Placetta's team has been told.");
+    const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
+    if (!tg.ok) return fail(tg.status, tg.code, tg.message);
+    if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
+    const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
+    if (!prompt) return fail(400, "bad_request", "prompt is required.");
+    const { data: run, error } = await admin.from("agent_runs").insert({
+      workspace_id: ws, created_by: uid, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: false,
+      state: startState([], prompt), channel, chat_to: to,
+    }).select("id").single();
+    if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
+    bg(work(run.id, null));
+    return json(202, { id: run.id });
+  }
+
   // start_as: someone texted or called Odelia from their verified number (odelia-sms and odelia-voice, with the monitor key)
   if (action === "start_as") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
@@ -378,8 +441,7 @@ export async function handle(req: Request): Promise<Response> {
     if (!tg.ok) return fail(tg.status, tg.code, tg.message);
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
-    const { data: busy } = await admin.from("agent_runs").select("id").eq("workspace_id", ws).eq("kind", "task").eq("status", "running").gt("heartbeat_at", new Date(Date.now() - STALE_MS).toISOString()).limit(1);
-    if (busy?.length) return fail(409, "busy", "Placetta is still working on the last task.");
+    if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-8)
       .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 2000) }));
     const { data: run, error } = await admin.from("agent_runs").insert({
@@ -413,9 +475,8 @@ export async function handle(req: Request): Promise<Response> {
   if (!prompt) return fail(400, "bad_request", "prompt is required.");
   const tg = await gate(admin, (k) => Deno.env.get(k), ws, user.id, "task");
   if (!tg.ok) return fail(tg.status, tg.code, tg.message);
-  // one task at a time per workspace
-  const { data: busy } = await admin.from("agent_runs").select("id").eq("workspace_id", ws).eq("kind", "task").eq("status", "running").gt("heartbeat_at", new Date(Date.now() - STALE_MS).toISOString()).limit(1);
-  if (busy?.length) return fail(409, "busy", "Placetta is still working on the last task.");
+  // several jobs at once, up to ODELIA_PARALLEL per workspace (3 by default)
+  if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
   const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-12)
     .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 4000) }));
   const { data: run, error } = await admin.from("agent_runs").insert({

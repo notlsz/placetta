@@ -440,9 +440,51 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
     setPanelOpen(true);
-    if (busyRef.current) { setQueued(l => [...l, { id: String(nid()), text: q }]); say(lang === "zh" ? "已排队，当前任务完成后开始。" : "Queued. Odelia starts it when she finishes the current job."); return; }
+    if (busyRef.current) {
+      // In an account she starts it now, beside the job she's on (up to three at once); otherwise it waits its turn.
+      if (cloud && !api.PREVIEW && modelRef.current) { void alongsideRef.current(q); return; }
+      setQueued(l => [...l, { id: String(nid()), text: q }]); say(lang === "zh" ? "已排队，当前任务完成后开始。" : "Queued. Odelia starts it when she finishes the current job."); return;
+    }
     run({ text: q }, q, voice);
-  }, [run, say, lang]);
+  }, [run, say, lang, cloud]);   // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* A job started while another runs: it works on the server on its own and shows in the chat and in Work as it goes. */
+  const [, setSideJobs] = useState(0);
+  const alongside = async (q: string) => {
+    if (!cloud) return;
+    let id: string | null = null;
+    try { id = await api.startRun(cloud.wsId, { prompt: q, history: history.current.slice(-12), lang, deep }); }
+    catch (e) {
+      if ((e as api.ApiError).code === "busy") { setQueued(l => [...l, { id: String(nid()), text: q }]); say((e as api.ApiError).message); return; }
+      say((e as api.ApiError).message ?? String(e)); return;
+    }
+    if (!id) return;
+    const tid = nid();
+    setFeed(f => [...f, { id: nid(), kind: "user" as const, text: q }, { id: tid, kind: "turn", at: nowIso(), steps: [], active: 0 }]);
+    setSideJobs(n => n + 1);
+    const upd = (f: (m: Turn) => Partial<Turn>) => setFeed(ms => ms.map(m => (m.id === tid && m.kind === "turn" ? { ...m, ...f(m) } : m)));
+    const t0 = performance.now();
+    try {
+      let shown = 0, r: api.RunRow;
+      for (;;) {
+        r = await api.pollRun(id);
+        if (r.steps.length > shown) { const add = r.steps.slice(shown); shown = r.steps.length; upd(m => ({ steps: [...m.steps, ...add], active: shown - 1 })); }
+        if (r.draft) upd(() => ({ draft: r.draft ?? undefined }));
+        if (r.status !== "running") break;
+        await new Promise(res => setTimeout(res, 1500));
+      }
+      const row = await api.loadWorkspace(cloud.wsId);
+      const next = normalize(row.name, row.state);
+      lastSaved.current = JSON.stringify(api.strip(next));
+      setWs(w => ({ ...next, audit: w.audit }));
+      void refresh(true);
+      upd(() => ({ reply: r.status === "done" && r.reply ? r.reply : { text: [same(r.error ?? (lang === "zh" ? "已停止。" : "Stopped."))] }, active: -1, ms: performance.now() - t0, draft: undefined }));
+    } catch { upd(() => ({ reply: { text: [B("I lost track of that job. It's still in Work.", "我暂时跟丢了这项工作，它仍在“工作”页中。")] }, active: -1 })); }
+    finally { setSideJobs(n => n - 1); }
+  };
+  const alongsideRef = useRef(alongside);
+  alongsideRef.current = alongside;
+
   const unqueue = useCallback((id: string) => setQueued(l => l.filter(x => x.id !== id)), []);
   useEffect(() => {
     if (busy || !queued.length) return;
@@ -715,6 +757,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       buyPack: async () => { if (!ownerOk()) return; try { goTo((await api.buyPack(cloud.wsId)).url); } catch (e) { if ((e as api.ApiError).code === "plan_required") setPlans("start"); else fail(e); } },
       connect: async kind => { if (!ownerOk()) return; try { goTo((await api.connectUrl(cloud.wsId, kind)).url); } catch (e) { if ((e as api.ApiError).code === "not_configured") say(lang === "zh" ? "这个连接即将开放。在此之前，可把机构来信转发到 support@placetta.com，团队会帮您添加。" : "This connection opens soon. Until then, forward agency emails to support@placetta.com and the team adds them for you."); else fail(e); } },
       connectHook: async (kind, url, secret) => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "hook_connect", { kind, url, secret: secret || undefined, lang }); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接，测试消息已发到群里。" : "Connected. A test message is in the group."); return true; } catch (e) { fail(e); return false; } },
+      botSetup: async kind => { try { return await api.integration<{ events_url: string; manifest?: string }>(cloud.wsId, "bot_setup", { kind }); } catch (e) { fail(e); return null; } },
+      connectBot: async (kind, creds) => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "bot_connect", { kind, ...creds }); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接。在频道里 @Odelia 或私信她即可派活。" : "Connected. Mention @Odelia in a channel or message her directly to give her a job."); return true; } catch (e) { fail(e); return false; } },
       availability: async () => { try { return await api.integration<api.Availability>(cloud.wsId, "available"); } catch { return { google: false, microsoft: false, dropbox: false, quickbooks: false, slack: false }; } },
       disconnect: async kind => { if (!ownerOk()) return; try { await api.integration(cloud.wsId, "disconnect", { kind }); setIntegrations(await api.listIntegrations(cloud.wsId)); } catch (e) { fail(e); } },
       saveLogin: async l => { if (!ownerOk()) return; try { await api.saveLogin(cloud.wsId, l); setLogins(await api.listLogins(cloud.wsId)); say(lang === "zh" ? "登录信息已加密保存。" : "Saved and encrypted."); } catch (e) { fail(e); } },

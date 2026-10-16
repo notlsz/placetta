@@ -1576,3 +1576,9 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .work .lnk, .job .lnk { display: inline; padding: 0; border: 0; background: none; font: inherit; color: var(--blue-ink); cursor: pointer; }
 .work .lnk:hover, .job .lnk:hover { text-decoration: underline; text-underline-offset: 2px; }
 .work .lnk.quiet { color: var(--ink3); }
+
+.sg-bot ol { margin: 0 0 10px; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--ink2); line-height: 1.5; }
+.sg-code { position: relative; margin: 2px 0 4px; padding: 10px 12px; border-radius: 10px; background: var(--mist); font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); white-space: pre-wrap; word-break: break-all; max-height: 180px; overflow: auto; list-style: none; }
+.sg-code .lnk { position: sticky; float: right; top: 0; display: inline; padding: 0 0 0 10px; border: 0; background: none; font: 12px var(--sans); color: var(--blue-ink); cursor: pointer; }
+.sg-bot select { height: 38px; border-radius: 10px; border: 1px solid var(--line, rgba(0,0,0,.12)); background: var(--bg, #fff); padding: 0 10px; font: inherit; font-size: 13.5px; color: var(--ink); }
+.sg-fine { margin: 10px 0 0 !important; font-size: 12px !important; color: var(--ink3) !important; }

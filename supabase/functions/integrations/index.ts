@@ -43,6 +43,7 @@ import {
   writeBundle,
 } from "./providers.ts";
 import { HOOK_KINDS, HOOK_NAMES, hookHello, hookUrl, isHookKind, postHook, type HookKind } from "../_shared/channels.ts";
+import { type LarkBot, larkWorks, slackManifest, slackWho } from "../_shared/bots.ts";
 
 type Ctx = { user: User; jwt: string; ws: string; body: Record<string, unknown> };
 type Action = (c: Ctx) => Promise<Response>;
@@ -876,6 +877,47 @@ const hookConnect: Action = async (c) => {
   return ok({ kind, account });
 };
 
+// ------------------------------------------------------------------ talk to Odelia: the business's own Slack or Lark bot
+
+const BOT_NAMES = { slack_bot: { en: "Odelia in Slack", zh: "Slack 中的 Odelia" }, lark_bot: { en: "Odelia in Lark", zh: "飞书中的 Odelia" } } as const;
+type BotKind = keyof typeof BOT_NAMES;
+const isBotKind = (v: unknown): v is BotKind => v === "slack_bot" || v === "lark_bot";
+const eventsUrl = (ws: string, kind: BotKind) => `${SUPABASE_URL}/functions/v1/chat-events?${kind === "slack_bot" ? "slack" : "lark"}=${ws}`;
+
+/** What to set up before connecting: the bot's event address, and for Slack the app manifest to paste. */
+const botSetup: Action = async (c) => {
+  const kind = c.body.kind;
+  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot or lark_bot.");
+  return ok({ events_url: eventsUrl(c.ws, kind), ...(kind === "slack_bot" ? { manifest: JSON.stringify(slackManifest(eventsUrl(c.ws, kind)), null, 2) } : {}) });
+};
+
+/** Save the business's own bot after checking its credentials work. */
+const botConnect: Action = async (c) => {
+  const kind = c.body.kind;
+  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot or lark_bot.");
+  let bundle: Record<string, unknown>, account: string;
+  if (kind === "slack_bot") {
+    const bot_token = text(c.body.bot_token, "bot_token", 20, 200), signing_secret = text(c.body.signing_secret, "signing_secret", 16, 100);
+    if (!/^xoxb-/.test(bot_token)) throw new HttpError("bad_request", "That isn't a bot token. Copy the Bot User OAuth Token, which starts with xoxb-.");
+    const who = await slackWho(bot_token);
+    if (!who) throw new HttpError("bad_request", "Slack didn't accept that bot token. Install the app to your workspace first, then copy its Bot User OAuth Token.");
+    bundle = { bot_token, signing_secret }; account = `${who.team} (@${who.bot})`;
+  } else {
+    const bot: LarkBot = { kind, app_id: text(c.body.app_id, "app_id", 6, 80), app_secret: text(c.body.app_secret, "app_secret", 10, 120),
+      verification_token: text(c.body.verification_token, "verification_token", 6, 120), encrypt_key: optText(c.body.encrypt_key, "encrypt_key", 120) ?? undefined,
+      domain: c.body.domain === "lark" ? "lark" : "feishu" };
+    if (!(await larkWorks(bot))) throw new HttpError("bad_request", "Lark didn't accept that App ID and App Secret. Copy them from the app's Credentials page.");
+    const { kind: _k, ...rest } = bot; void _k; bundle = rest; account = bot.domain === "lark" ? "Lark" : "飞书";
+  }
+  const old = await findIntegration(c.ws, kind as unknown as Kind);
+  if (old) { await dropSecret(old.secret_id); await admin.from("integrations").delete().eq("id", old.id); }
+  const secretId = await writeBundle({ access_token: "", refresh_token: null, expires_at: null, token_type: "bot", ...bundle } as never, `integration:${kind}`, null);
+  const { error } = await admin.from("integrations").insert({ workspace_id: c.ws, kind, account, scopes: "bot", status: "connected", secret_id: secretId, meta: { via: "bot" }, connected_by: c.user.id });
+  if (error) { await dropSecret(secretId); throw new Error(`integration insert failed: ${error.code ?? ""}`); }
+  await audit({ ...you(c), action: { en: `Connected ${BOT_NAMES[kind].en}`, zh: `已连接${BOT_NAMES[kind].zh}` }, object: BOT_NAMES[kind], detail: same(account) });
+  return ok({ kind, account, events_url: eventsUrl(c.ws, kind) });
+};
+
 /** Which sign-in connections this server can offer now (each needs its provider's app keys). */
 const available: Action = async () => {
   const has = (...v: string[]) => v.every((n) => !!Deno.env.get(n));
@@ -992,11 +1034,11 @@ const finish: Action = async (c) => {
 };
 
 const disconnect: Action = async (c) => {
-  const kind = (isHookKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"])) as Kind;
-  const name = isHookKind(kind) ? HOOK_NAMES[kind as HookKind] : NAMES[kind];
+  const kind = (isHookKind(c.body.kind) || isBotKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"])) as Kind;
+  const name = isBotKind(kind) ? BOT_NAMES[kind as BotKind] : isHookKind(kind) ? HOOK_NAMES[kind as HookKind] : NAMES[kind];
   const row = await findIntegration(c.ws, kind);
   if (!row) throw new HttpError("not_found", `${name.en} is not connected.`);
-  if (row.meta?.via !== "link") await revoke(row);
+  if (row.meta?.via !== "link" && row.meta?.via !== "bot") await revoke(row);
   const { error } = await admin.from("integrations").delete().eq("id", row.id);
   if (error) throw new Error(`integration delete failed: ${error.code ?? ""}`);
   await dropSecret(row.secret_id);
@@ -1043,12 +1085,14 @@ const ACTIONS: Record<string, Action> = {
   books_income: booksIncome,
   slack_post: slackPost,
   hook_connect: hookConnect,
+  bot_setup: botSetup,
+  bot_connect: botConnect,
   available,
   feed_url: feedUrl,
 };
 
 /** What only an owner can do: connect or disconnect an account, and send mail or Slack posts as the business. */
-const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect]);
+const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect]);
 
 serve(async (req) => {
   const mk = req.headers.get("x-monitor-key");

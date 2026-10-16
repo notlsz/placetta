@@ -71,9 +71,11 @@ export const planOf = (b: Billing | null): Plan =>
   !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.entry_markets > 0 ? "entry" : "none";
 export type DocRow = { id: string; workspace_id: string; app_id: string | null; filing_id: string | null; name: string; path: string; size: number; mime: string | null; source: string; created_at: string };
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
-export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "teams";
+export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot";
 /** Team chats linked by pasting a group's incoming-webhook link. */
-export type HookKind = "slack" | "lark" | "wecom" | "teams";
+export type HookKind = "slack" | "lark" | "wecom" | "dingtalk" | "teams";
+/** The business's own Slack or Lark bot: talk to Odelia there. */
+export type BotKind = "slack_bot" | "lark_bot";
 /** Which sign-in connections the server can offer now. */
 export type Availability = { google: boolean; microsoft: boolean; dropbox: boolean; quickbooks: boolean; slack: boolean };
 export type AgencyLogin = { id: string; agency: string; url: string | null; username: string; note: string | null; created_at: string; last_opened_at: string | null };

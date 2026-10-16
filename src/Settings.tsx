@@ -71,12 +71,13 @@ const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
   slack: { how: B("In Slack, add the Incoming Webhooks app to the channel and copy its webhook URL.", "在 Slack 中为频道添加 Incoming Webhooks 应用，复制其 Webhook URL。"), ph: "https://hooks.slack.com/services/..." },
   lark: { how: B("In the Lark group: Settings, Bots, Add bot, Custom bot. Copy its webhook address. If you turn on signature checks, paste the secret too.", "在飞书群中：设置 → 群机器人 → 添加机器人 → 自定义机器人，复制 webhook 地址。如开启签名校验，请一并填写密钥。"), ph: "https://open.feishu.cn/open-apis/bot/v2/hook/..." },
   wecom: { how: B("In the WeCom group chat: the top-right menu, Add group robot, New. Copy its webhook address.", "在企业微信群聊中：右上角菜单 → 添加群机器人 → 新创建，复制 webhook 地址。"), ph: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..." },
+  dingtalk: { how: B("In the DingTalk group: Group settings, Bots, Add robot, Custom. Copy its webhook address. If you choose signing as its security setting, paste the secret (SEC...) too.", "在钉钉群中：群设置 → 机器人 → 添加机器人 → 自定义，复制 Webhook 地址。如安全设置选择“加签”，请一并填写密钥（SEC 开头）。"), ph: "https://oapi.dingtalk.com/robot/send?access_token=..." },
   teams: { how: B("In the Teams channel: More options, Workflows, then the template that posts to a channel when a webhook request is received. Copy the URL it gives you.", "在 Teams 频道中：更多选项 → 工作流，选择“收到 webhook 请求时发布到频道”模板，复制生成的 URL。"), ph: "https://...logic.azure.com/workflows/..." },
 };
 /** Which provider's app keys a sign-in connection needs. */
 const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks" };
 
-type Item = { kind: IntegrationKind | "feed" | "square" | "toast"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean; hook?: boolean };
+type Item = { kind: IntegrationKind | "feed" | "square" | "toast"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean; hook?: boolean; bot?: boolean };
 const CHAT_WHY = B("Deadlines, renewals and filing updates in your team's group", "截止日期、续期和申报进展推送到团队群");
 const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
   { group: B("Email", "邮件"), items: [
@@ -92,7 +93,12 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "slack", name: "Slack", why: CHAT_WHY, logo: slackLogo, hook: true },
     { kind: "lark", name: "Lark (Feishu)", zh: "飞书", why: CHAT_WHY, hook: true },
     { kind: "wecom", name: "WeCom", zh: "企业微信", why: CHAT_WHY, hook: true },
+    { kind: "dingtalk", name: "DingTalk", zh: "钉钉", why: CHAT_WHY, hook: true },
     { kind: "teams", name: "Microsoft Teams", why: CHAT_WHY, hook: true },
+  ] },
+  { group: B("Give Odelia jobs from chat", "在聊天中给 Odelia 派活"), items: [
+    { kind: "slack_bot", name: "Odelia in Slack", zh: "Slack 中的 Odelia", why: B("Mention @Odelia in a channel or message her: she does the job and answers in the thread", "在频道里 @Odelia 或私信她：她完成工作并在话题中回复"), logo: slackLogo, bot: true },
+    { kind: "lark_bot", name: "Odelia in Lark (Feishu)", zh: "飞书中的 Odelia", why: B("@Odelia in a group or message her: she does the job and replies there", "在群里 @Odelia 或私信她：她完成工作并直接回复"), bot: true },
   ] },
   { group: B("Documents", "文件"), items: [
     { kind: "gdrive", name: "Google Drive", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: gdriveLogo },
@@ -110,6 +116,20 @@ function Integrations() {
   const [feed, setFeed] = useState("");
   const [avail, setAvail] = useState<api.Availability | null>(null);
   const [form, setForm] = useState<{ kind: HookKind; url: string; secret: string; busy?: boolean } | null>(null);
+  const [bot, setBot] = useState<{ kind: api.BotKind; setup: { events_url: string; manifest?: string } | null; v: Record<string, string>; busy?: boolean } | null>(null);
+  const openBot = async (kind: api.BotKind) => {
+    if (bot?.kind === kind) { setBot(null); return; }
+    setForm(null); setBot({ kind, setup: null, v: kind === "lark_bot" ? { domain: zh ? "feishu" : "lark" } : {} });
+    const setup = cloud ? await cloud.botSetup(kind) : null;
+    setBot(b => (b?.kind === kind ? { ...b, setup } : b));
+  };
+  const submitBot = async () => {
+    if (!bot || !cloud) return;
+    setBot({ ...bot, busy: true });
+    const ok = await cloud.connectBot(bot.kind, bot.v);
+    setBot(ok ? null : { ...bot, busy: false });
+  };
+  const copy = (t: string) => { void navigator.clipboard?.writeText(t).then(() => say(zh ? "已复制" : "Copied"), () => undefined); };
   useEffect(() => { if (cloud) void cloud.availability().then(setAvail); }, [cloud?.wsId]);   // eslint-disable-line react-hooks/exhaustive-deps
   const conn = (k: string) => cloud?.integrations.find(i => i.kind === k);
   const zh = lang === "zh";
@@ -140,13 +160,14 @@ function Integrations() {
               else if (cloud && !cloud.owner) right = c ? undefined : <em className="lock">{zh ? "由所有者连接" : "Owners connect"}</em>;
               else if (c) right = <Btn guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{zh ? "断开" : "Disconnect"}</Btn>;
               else if (soon) right = <em className="lock">{zh ? "即将开放" : "Opens soon"}</em>;
+              else if (it.bot) right = <Btn guard kind="line" onClick={() => (cloud ? void openBot(it.kind as api.BotKind) : demo())}>{bot?.kind === it.kind ? (zh ? "取消" : "Cancel") : (zh ? "设置" : "Set up")}</Btn>;
               else if (viaLink) right = <Btn guard kind="line" onClick={() => (cloud ? openForm(it.kind as HookKind) : demo())}>{form?.kind === it.kind ? (zh ? "取消" : "Cancel") : (zh ? "连接" : "Connect")}</Btn>;
               else right = <Btn guard kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
               const status = c ? (c.status === "error" ? <em className="bad">{zh ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><i />{c.account ?? (zh ? "已连接" : "Connected")}</em>) : null;
               const why = soon && (it.kind === "gcal" || it.kind === "outlook_cal") ? B(`${it.why.en}. Until it opens, subscribe with the calendar feed below.`, `${it.why.zh}。开放前，可用下方的日历订阅。`) : it.why;
               return [
                 <li key={it.kind} className="sg-row">
-                  <Tile logo={it.logo} wide={it.wide} chat={it.hook} />
+                  <Tile logo={it.logo} wide={it.wide} chat={it.hook || it.bot} />
                   <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}{it.kind === "toast" ? (zh ? "。需 Toast 合作伙伴审批。" : ". Needs Toast partner approval.") : ""}</small>{status}</span>
                   <span className="sg-r">{right}</span>
                 </li>,
@@ -158,6 +179,33 @@ function Integrations() {
                       {form.kind === "lark" && <input type="password" value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder={zh ? "签名密钥（可选）" : "Signing secret (optional)"} aria-label={zh ? "签名密钥" : "Signing secret"} autoComplete="off" />}
                       <button type="submit" className="sbtn ink" disabled={form.busy || !form.url.trim()}>{form.busy ? (zh ? "正在发送测试消息…" : "Sending a test message...") : (zh ? "连接并发送测试" : "Connect and test")}</button>
                     </form>
+                  </li>
+                ) : null,
+                bot?.kind === it.kind && !c ? (
+                  <li key={it.kind + "-bot"} className="sg-hook sg-bot">
+                    {bot.kind === "slack_bot" ? (
+                      <ol>
+                        <li>{zh ? "在 api.slack.com/apps 选择 Create New App → From a manifest，选好工作区，粘贴下面的清单：" : "At api.slack.com/apps choose Create New App, From a manifest, pick your workspace and paste this:"}</li>
+                        {bot.setup?.manifest ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.manifest!)}>{zh ? "复制" : "Copy"}</button>{bot.setup.manifest}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
+                        <li>{zh ? "点 Install to Workspace。然后复制 OAuth & Permissions 里的 Bot User OAuth Token（xoxb- 开头），以及 Basic Information 里的 Signing Secret：" : "Click Install to Workspace. Then copy the Bot User OAuth Token (starts with xoxb-) from OAuth & Permissions, and the Signing Secret from Basic Information:"}</li>
+                      </ol>
+                    ) : (
+                      <ol>
+                        <li>{zh ? "在飞书开放平台（open.feishu.cn）创建企业自建应用，添加“机器人”能力。" : "In the Lark developer console (open.larksuite.com, or open.feishu.cn in China), create a custom app and add the Bot feature."}</li>
+                        <li>{zh ? "权限：开通 im:message（读取与发送消息）和 im:message.group_at_msg。事件订阅：添加 im.message.receive_v1，请求地址填：" : "Permissions: add im:message (read and send messages) and im:message.group_at_msg. Events: add im.message.receive_v1 and set the request URL to:"}</li>
+                        {bot.setup?.events_url ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.events_url)}>{zh ? "复制" : "Copy"}</button>{bot.setup.events_url}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
+                        <li>{zh ? "发布应用版本。然后填入凭证页的 App ID、App Secret，以及事件页的 Verification Token（如开启加密，再填 Encrypt Key）：" : "Publish a version of the app. Then paste the App ID and App Secret (Credentials) and the Verification Token, plus the Encrypt Key if it's on (Events and callbacks):"}</li>
+                      </ol>
+                    )}
+                    <form onSubmit={e => { e.preventDefault(); void submitBot(); }}>
+                      {(bot.kind === "slack_bot"
+                        ? [["bot_token", "Bot User OAuth Token (xoxb-...)", true], ["signing_secret", "Signing Secret", true]]
+                        : [["app_id", "App ID (cli_...)", true], ["app_secret", "App Secret", true], ["verification_token", "Verification Token", true], ["encrypt_key", zh ? "Encrypt Key（可选）" : "Encrypt Key (optional)", false]]
+                      ).map(([k, ph, req]) => <input key={k as string} type={/secret|token|key/.test(k as string) && k !== "app_id" ? "password" : "text"} required={!!req} value={bot.v[k as string] ?? ""} onChange={e => setBot({ ...bot, v: { ...bot.v, [k as string]: e.target.value.trim() } })} placeholder={ph as string} aria-label={ph as string} autoComplete="off" spellCheck={false} />)}
+                      {bot.kind === "lark_bot" && <select value={bot.v.domain ?? "feishu"} onChange={e => setBot({ ...bot, v: { ...bot.v, domain: e.target.value } })} aria-label={zh ? "版本" : "Edition"}><option value="feishu">{zh ? "飞书（中国）" : "Feishu (China)"}</option><option value="lark">{zh ? "Lark（国际版）" : "Lark (international)"}</option></select>}
+                      <button type="submit" className="sbtn ink" disabled={bot.busy}>{bot.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "连接" : "Connect")}</button>
+                    </form>
+                    <p className="sg-fine">{zh ? "她以连接者的身份工作，频道里的任何人都可以给她派活。任何申报、付款或发送仍需在快哉中批准。" : "She works as the person who connects her, and anyone in the channel can give her a job. Anything to file, pay or send still waits for approval in Placetta."}</p>
                   </li>
                 ) : null,
               ];

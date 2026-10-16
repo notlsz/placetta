@@ -40,6 +40,10 @@ export type CloudCtx = {
   disconnect(kind: IntegrationKind): Promise<void>;
   /** Link a team chat by its webhook link; true once the test message went through. */
   connectHook(kind: import("./cloud/api").HookKind, url: string, secret?: string): Promise<boolean>;
+  /** The bot's event address (and Slack's app manifest) to set up before connecting it. */
+  botSetup(kind: import("./cloud/api").BotKind): Promise<{ events_url: string; manifest?: string } | null>;
+  /** Connect the business's own Slack or Lark bot; true once its credentials work. */
+  connectBot(kind: import("./cloud/api").BotKind, creds: Record<string, string>): Promise<boolean>;
   /** Which sign-in connections are open on this server. */
   availability(): Promise<import("./cloud/api").Availability>;
   saveLogin(l: { id?: string; agency: string; url?: string; username: string; password?: string; note?: string }): Promise<void>;

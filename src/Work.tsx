@@ -73,7 +73,7 @@ export function WorkPage() {
       <header className="ph">
         <div className="ph-tx">
           <h1>{zh ? "工作" : "Work"}</h1>
-          <p>{zh ? "Odelia 手上的每项工作：她的计划、进度，以及需要您提供什么。她忙时交给她的事会按顺序接着做。" : "Every job Odelia is on: her plan, where it stands, and what she needs from you. Hand her more while she's busy and she takes them in order."}</p>
+          <p>{zh ? "Odelia 手上的每项工作：她的计划、进度，以及需要您提供什么。她可同时处理三项，更多的会排队接着做。" : "Every job Odelia is on: her plan, where it stands, and what she needs from you. She works on up to three at once; more wait their turn."}</p>
         </div>
       </header>
 
