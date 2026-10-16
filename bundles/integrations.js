@@ -588,12 +588,13 @@ async function revoke(row) {
 }
 
 // supabase/functions/_shared/channels.ts
-var HOOK_KINDS = ["slack", "lark", "wecom", "teams"];
+var HOOK_KINDS = ["slack", "lark", "wecom", "dingtalk", "teams"];
 var isHookKind = (v) => typeof v === "string" && HOOK_KINDS.includes(v);
 var HOOK_NAMES = {
   slack: { en: "Slack", zh: "Slack" },
   lark: { en: "Lark", zh: "\u98DE\u4E66" },
   wecom: { en: "WeCom", zh: "\u4F01\u4E1A\u5FAE\u4FE1" },
+  dingtalk: { en: "DingTalk", zh: "\u9489\u9489" },
   teams: { en: "Microsoft Teams", zh: "Microsoft Teams" }
 };
 function hookUrl(kind, raw) {
@@ -612,9 +613,17 @@ function hookUrl(kind, raw) {
       return (h === "open.feishu.cn" || h === "open.larksuite.com") && /^\/open-apis\/bot\/v2\/hook\/[\w-]+$/.test(p) ? u : null;
     case "wecom":
       return h === "qyapi.weixin.qq.com" && p === "/cgi-bin/webhook/send" && /^[\w-]{10,}$/.test(u.searchParams.get("key") ?? "") ? u : null;
+    case "dingtalk":
+      return h === "oapi.dingtalk.com" && p === "/robot/send" && /^[\w-]{20,}$/.test(u.searchParams.get("access_token") ?? "") ? u : null;
     case "teams":
       return /(\.logic\.azure\.com|\.powerplatform\.com|\.webhook\.office\.com)$/.test(h) ? u : null;
   }
+}
+async function dingSign(secret, ts) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${ts}
+${secret}`)));
+  return btoa(String.fromCharCode(...sig));
 }
 async function larkSign(secret, ts) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(`${ts}
@@ -636,6 +645,7 @@ async function body(kind, text2, secret) {
       return b;
     }
     case "wecom":
+    case "dingtalk":
       return { msgtype: "text", text: { content: text2 } };
     case "teams":
       return { type: "message", attachments: [{ contentType: "application/vnd.microsoft.card.adaptive", content: {
@@ -649,6 +659,11 @@ async function body(kind, text2, secret) {
 async function postHook(kind, url, text2, secret) {
   const u = hookUrl(kind, url);
   if (!u) return { ok: false, gone: true, why: "not a webhook link" };
+  if (kind === "dingtalk" && secret) {
+    const ts = Date.now();
+    u.searchParams.set("timestamp", String(ts));
+    u.searchParams.set("sign", await dingSign(secret, ts));
+  }
   let res;
   try {
     res = await fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(await body(kind, text2.slice(0, 3800), secret)), signal: AbortSignal.timeout(15e3) });
@@ -656,7 +671,7 @@ async function postHook(kind, url, text2, secret) {
     return { ok: false, gone: false, why: "no answer" };
   }
   const raw = (await res.text()).slice(0, 400);
-  if (kind === "lark" || kind === "wecom") {
+  if (kind === "lark" || kind === "wecom" || kind === "dingtalk") {
     let j = {};
     try {
       j = JSON.parse(raw);
@@ -665,7 +680,7 @@ async function postHook(kind, url, text2, secret) {
     const code = kind === "lark" ? j.code ?? j.StatusCode : j.errcode;
     if (res.ok && code === 0) return { ok: true };
     const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status);
-    const gone = kind === "lark" ? [19001, 19002].includes(Number(code)) : Number(code) === 93e3;
+    const gone = kind === "lark" ? [19001, 19002].includes(Number(code)) : kind === "wecom" ? Number(code) === 93e3 : [300001, 300005].includes(Number(code));
     return { ok: false, gone, why: `${code ?? res.status}: ${msg}`.slice(0, 160) };
   }
   if (res.ok) return { ok: true };
@@ -673,12 +688,40 @@ async function postHook(kind, url, text2, secret) {
 }
 var hookHello = (business, lang) => lang === "zh" ? `\u5FEB\u54C9\u5DF2\u8FDE\u63A5${business ? `\uFF08${business}\uFF09` : ""}\u3002\u622A\u6B62\u65E5\u671F\u3001\u7EED\u671F\u63D0\u9192\u548C\u7533\u62A5\u8FDB\u5C55\u4F1A\u53D1\u5230\u8FD9\u91CC\u3002` : `Placetta is connected${business ? ` for ${business}` : ""}. Deadlines, renewals and filing updates will post here.`;
 
+// supabase/functions/_shared/bots.ts
+var enc = new TextEncoder();
+async function slackWho(token) {
+  const res = await fetch("https://slack.com/api/auth.test", { method: "POST", headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(1e4) }).catch(() => null);
+  const j = res ? await res.json().catch(() => ({})) : {};
+  return j.ok ? { team: j.team ?? "Slack", bot: j.user ?? "odelia" } : null;
+}
+var larkBase = (d) => d === "lark" ? "https://open.larksuite.com" : "https://open.feishu.cn";
+async function larkToken(bot) {
+  const res = await fetch(`${larkBase(bot.domain)}/open-apis/auth/v3/tenant_access_token/internal`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify({ app_id: bot.app_id, app_secret: bot.app_secret }),
+    signal: AbortSignal.timeout(1e4)
+  }).catch(() => null);
+  const j = res ? await res.json().catch(() => ({})) : {};
+  return j.code === 0 && j.tenant_access_token ? j.tenant_access_token : null;
+}
+var larkWorks = async (bot) => !!await larkToken(bot);
+function slackManifest(eventsUrl2) {
+  return {
+    display_information: { name: "Odelia", description: "Placetta's compliance agent: licenses, permits, filings and deadlines.", background_color: "#4d73a3" },
+    features: { bot_user: { display_name: "Odelia", always_online: true }, app_home: { messages_tab_enabled: true, messages_tab_read_only_enabled: false } },
+    oauth_config: { scopes: { bot: ["app_mentions:read", "chat:write", "im:history", "im:read", "im:write"] } },
+    settings: { event_subscriptions: { request_url: eventsUrl2, bot_events: ["app_mention", "message.im"] }, org_deploy_enabled: false, socket_mode_enabled: false, token_rotation_enabled: false }
+  };
+}
+
 // supabase/functions/integrations/index.ts
 var GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me";
 var GRAPH = "https://graph.microsoft.com/v1.0";
 var DRIVE = "https://www.googleapis.com/drive/v3";
 var MAX_IMPORT = 25 * 1024 * 1024;
-var enc = encodeURIComponent;
+var enc2 = encodeURIComponent;
 var you = (c) => ({ workspace_id: c.ws, actor: "you", actor_id: c.user.id });
 function kindParam(v, allowed) {
   if (!isKind(v) || !allowed.includes(v)) throw new HttpError("bad_request", `kind must be one of: ${allowed.join(", ")}.`);
@@ -769,7 +812,7 @@ async function gmailSearch(c, days, query) {
   const list = await c.callJson(`${GMAIL}/messages?${new URLSearchParams({ q, maxResults: "25" })}`);
   const got = await Promise.allSettled(
     (list.messages ?? []).slice(0, 25).map(
-      (m) => c.callJson(`${GMAIL}/messages/${enc(m.id)}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`)
+      (m) => c.callJson(`${GMAIL}/messages/${enc2(m.id)}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`)
     )
   );
   return got.flatMap((r) => {
@@ -793,7 +836,7 @@ var graphAddr = (a) => {
 };
 async function graphSearch(c, days, query) {
   const term = (query ?? GRAPH_DEFAULT).replace(/["\\]/g, " ").trim();
-  const url = `${GRAPH}/me/messages?$search=${enc(`"${term}"`)}&$top=25&$select=id,from,subject,receivedDateTime,bodyPreview`;
+  const url = `${GRAPH}/me/messages?$search=${enc2(`"${term}"`)}&$top=25&$select=id,from,subject,receivedDateTime,bodyPreview`;
   const res = await c.callJson(url);
   const since = Date.now() - days * 864e5;
   return (res.value ?? []).filter((m) => !m.receivedDateTime || Date.parse(m.receivedDateTime) >= since).map((m) => ({
@@ -832,7 +875,7 @@ var mailRead = async (c) => {
   const id = idParam(c.body.id, "id");
   const conn = await Conn.open(c.ws, kind);
   if (kind === "gmail") {
-    const m2 = await conn.callJson(`${GMAIL}/messages/${enc(id)}?format=full`);
+    const m2 = await conn.callJson(`${GMAIL}/messages/${enc2(id)}?format=full`);
     let plain = null;
     let html = null;
     const attachments2 = [];
@@ -861,7 +904,7 @@ var mailRead = async (c) => {
       attachments: attachments2
     });
   }
-  const m = await conn.callJson(`${GRAPH}/me/messages/${enc(id)}?$select=from,toRecipients,subject,receivedDateTime,body,hasAttachments`, {
+  const m = await conn.callJson(`${GRAPH}/me/messages/${enc2(id)}?$select=from,toRecipients,subject,receivedDateTime,body,hasAttachments`, {
     headers: { Prefer: 'outlook.body-content-type="text"' }
   });
   const content = m.body?.content ?? "";
@@ -869,7 +912,7 @@ var mailRead = async (c) => {
   let attachments = [];
   if (m.hasAttachments) {
     const a = await conn.callJson(
-      `${GRAPH}/me/messages/${enc(id)}/attachments?$select=id,name,size,contentType,isInline`
+      `${GRAPH}/me/messages/${enc2(id)}/attachments?$select=id,name,size,contentType,isInline`
     );
     attachments = (a.value ?? []).filter((x) => !x.isInline).map((x) => ({ id: x.id, name: x.name ?? "attachment", size: x.size ?? 0, mime: x.contentType ?? "application/octet-stream" }));
   }
@@ -983,7 +1026,7 @@ async function sendFrom(ws, kindParamValue, to, subject, content, files) {
       body: JSON.stringify(message)
     });
     if (!draft.id) throw new HttpError("upstream_error", "Outlook didn't create the message. Try again.");
-    await conn.callJson(`${GRAPH}/me/messages/${enc(draft.id)}/send`, { method: "POST" });
+    await conn.callJson(`${GRAPH}/me/messages/${enc2(draft.id)}/send`, { method: "POST" });
     id = draft.id;
     thread = draft.conversationId ?? "";
   }
@@ -1047,7 +1090,7 @@ async function filerMailSend(body2) {
 var addrOf = (s) => (s.match(/<([^>]+)>/)?.[1] ?? s).trim().toLowerCase();
 var nameOf = (s) => s.replace(/<[^>]+>/, "").replace(/"/g, "").trim() || addrOf(s);
 async function gmailReplies(conn, t) {
-  const r = await conn.callJson(`${GMAIL}/threads/${enc(t.thread_id)}?format=metadata&metadataHeaders=From&metadataHeaders=Date`);
+  const r = await conn.callJson(`${GMAIL}/threads/${enc2(t.thread_id)}?format=metadata&metadataHeaders=From&metadataHeaders=Date`);
   const me = (t.account ?? "").toLowerCase(), sent = Date.parse(t.sent_at);
   return (r.messages ?? []).flatMap((m) => {
     const from = header(m.payload?.headers, "From"), at = Number(m.internalDate ?? 0);
@@ -1058,7 +1101,7 @@ async function gmailReplies(conn, t) {
 async function graphReplies(conn, t) {
   const filter = `conversationId eq '${t.thread_id.replace(/'/g, "''")}'`;
   const r = await conn.callJson(
-    `${GRAPH}/me/messages?$filter=${enc(filter)}&$select=id,from,receivedDateTime,bodyPreview,isDraft&$top=25`
+    `${GRAPH}/me/messages?$filter=${enc2(filter)}&$select=id,from,receivedDateTime,bodyPreview,isDraft&$top=25`
   );
   const me = (t.account ?? "").toLowerCase(), sent = Date.parse(t.sent_at);
   return (r.value ?? []).flatMap((m) => {
@@ -1303,17 +1346,17 @@ var filesImport = async (c) => {
   let bytes;
   if (kind === "gdrive") {
     const meta = await conn.callJson(
-      `${DRIVE}/files/${enc(fileId)}?fields=id,name,mimeType,size&supportsAllDrives=true`
+      `${DRIVE}/files/${enc2(fileId)}?fields=id,name,mimeType,size&supportsAllDrives=true`
     );
     let url;
     if (meta.mimeType.startsWith("application/vnd.google-apps.")) {
       if (!GOOGLE_EXPORTABLE.has(meta.mimeType)) throw new HttpError("bad_request", "This file type can't be imported.");
-      url = `${DRIVE}/files/${enc(fileId)}/export?mimeType=application%2Fpdf`;
+      url = `${DRIVE}/files/${enc2(fileId)}/export?mimeType=application%2Fpdf`;
       name = /\.pdf$/i.test(meta.name) ? meta.name : `${meta.name}.pdf`;
       mime = "application/pdf";
     } else {
       if (Number(meta.size ?? "0") > MAX_IMPORT) throw TOO_BIG();
-      url = `${DRIVE}/files/${enc(fileId)}?alt=media&supportsAllDrives=true`;
+      url = `${DRIVE}/files/${enc2(fileId)}?alt=media&supportsAllDrives=true`;
       name = meta.name;
       mime = meta.mimeType || mimeOf(meta.name);
     }
@@ -1425,6 +1468,54 @@ var hookConnect = async (c) => {
   await audit({ ...you(c), action: { en: `Connected ${HOOK_NAMES[kind].en}`, zh: `\u5DF2\u8FDE\u63A5${HOOK_NAMES[kind].zh}` }, object: HOOK_NAMES[kind] });
   return ok({ kind, account });
 };
+var BOT_NAMES = { slack_bot: { en: "Odelia in Slack", zh: "Slack \u4E2D\u7684 Odelia" }, lark_bot: { en: "Odelia in Lark", zh: "\u98DE\u4E66\u4E2D\u7684 Odelia" } };
+var isBotKind = (v) => v === "slack_bot" || v === "lark_bot";
+var eventsUrl = (ws, kind) => `${SUPABASE_URL}/functions/v1/chat-events?${kind === "slack_bot" ? "slack" : "lark"}=${ws}`;
+var botSetup = async (c) => {
+  const kind = c.body.kind;
+  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot or lark_bot.");
+  return ok({ events_url: eventsUrl(c.ws, kind), ...kind === "slack_bot" ? { manifest: JSON.stringify(slackManifest(eventsUrl(c.ws, kind)), null, 2) } : {} });
+};
+var botConnect = async (c) => {
+  const kind = c.body.kind;
+  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot or lark_bot.");
+  let bundle, account;
+  if (kind === "slack_bot") {
+    const bot_token = text(c.body.bot_token, "bot_token", 20, 200), signing_secret = text(c.body.signing_secret, "signing_secret", 16, 100);
+    if (!/^xoxb-/.test(bot_token)) throw new HttpError("bad_request", "That isn't a bot token. Copy the Bot User OAuth Token, which starts with xoxb-.");
+    const who = await slackWho(bot_token);
+    if (!who) throw new HttpError("bad_request", "Slack didn't accept that bot token. Install the app to your workspace first, then copy its Bot User OAuth Token.");
+    bundle = { bot_token, signing_secret };
+    account = `${who.team} (@${who.bot})`;
+  } else {
+    const bot = {
+      kind,
+      app_id: text(c.body.app_id, "app_id", 6, 80),
+      app_secret: text(c.body.app_secret, "app_secret", 10, 120),
+      verification_token: text(c.body.verification_token, "verification_token", 6, 120),
+      encrypt_key: optText(c.body.encrypt_key, "encrypt_key", 120) ?? void 0,
+      domain: c.body.domain === "lark" ? "lark" : "feishu"
+    };
+    if (!await larkWorks(bot)) throw new HttpError("bad_request", "Lark didn't accept that App ID and App Secret. Copy them from the app's Credentials page.");
+    const { kind: _k, ...rest } = bot;
+    void _k;
+    bundle = rest;
+    account = bot.domain === "lark" ? "Lark" : "\u98DE\u4E66";
+  }
+  const old = await findIntegration(c.ws, kind);
+  if (old) {
+    await dropSecret(old.secret_id);
+    await admin.from("integrations").delete().eq("id", old.id);
+  }
+  const secretId = await writeBundle({ access_token: "", refresh_token: null, expires_at: null, token_type: "bot", ...bundle }, `integration:${kind}`, null);
+  const { error } = await admin.from("integrations").insert({ workspace_id: c.ws, kind, account, scopes: "bot", status: "connected", secret_id: secretId, meta: { via: "bot" }, connected_by: c.user.id });
+  if (error) {
+    await dropSecret(secretId);
+    throw new Error(`integration insert failed: ${error.code ?? ""}`);
+  }
+  await audit({ ...you(c), action: { en: `Connected ${BOT_NAMES[kind].en}`, zh: `\u5DF2\u8FDE\u63A5${BOT_NAMES[kind].zh}` }, object: BOT_NAMES[kind], detail: same(account) });
+  return ok({ kind, account, events_url: eventsUrl(c.ws, kind) });
+};
 var available = async () => {
   const has = (...v) => v.every((n) => !!Deno.env.get(n));
   const oauth = has("OAUTH_STATE_SECRET") && appOrigins().length > 0;
@@ -1509,11 +1600,11 @@ var finish = async (c) => {
   return ok({ kind, account: p.account });
 };
 var disconnect = async (c) => {
-  const kind = isHookKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"]);
-  const name = isHookKind(kind) ? HOOK_NAMES[kind] : NAMES[kind];
+  const kind = isHookKind(c.body.kind) || isBotKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"]);
+  const name = isBotKind(kind) ? BOT_NAMES[kind] : isHookKind(kind) ? HOOK_NAMES[kind] : NAMES[kind];
   const row = await findIntegration(c.ws, kind);
   if (!row) throw new HttpError("not_found", `${name.en} is not connected.`);
-  if (row.meta?.via !== "link") await revoke(row);
+  if (row.meta?.via !== "link" && row.meta?.via !== "bot") await revoke(row);
   const { error } = await admin.from("integrations").delete().eq("id", row.id);
   if (error) throw new Error(`integration delete failed: ${error.code ?? ""}`);
   await dropSecret(row.secret_id);
@@ -1541,7 +1632,7 @@ var feedUrl = async (c) => {
       object: { en: "Calendar feed", zh: "\u65E5\u5386\u8BA2\u9605" }
     });
   }
-  return ok({ url: `${SUPABASE_URL}/functions/v1/calendar-feed?t=${enc(data)}` });
+  return ok({ url: `${SUPABASE_URL}/functions/v1/calendar-feed?t=${enc2(data)}` });
 };
 var ACTIONS = {
   connect,
@@ -1556,10 +1647,12 @@ var ACTIONS = {
   books_income: booksIncome,
   slack_post: slackPost,
   hook_connect: hookConnect,
+  bot_setup: botSetup,
+  bot_connect: botConnect,
   available,
   feed_url: feedUrl
 };
-var OWNER_ONLY = /* @__PURE__ */ new Set([connect, disconnect, mailSend, slackPost, hookConnect]);
+var OWNER_ONLY = /* @__PURE__ */ new Set([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect]);
 serve(async (req) => {
   const mk = req.headers.get("x-monitor-key");
   if (mk) {
