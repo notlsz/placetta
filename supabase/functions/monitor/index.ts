@@ -22,6 +22,8 @@ import { HOOK_KINDS, hookDigest, postHook, type HookKind } from "../_shared/chan
 import { normalizeState, openingLine, openingPath, overdue, publishedDays, runsOn, type Routine } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
+// any vendor that may take a conversation (a Gemini key without GEMINI_PAID may not), not just Anthropic or Gemini
+import { canConverse } from "../_shared/llm.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -479,7 +481,7 @@ Deno.serve(async (req) => {
 
   // The weekly checks: agent-run takes each one in the background and reports back as an Update when something changed.
   let watches = 0;
-  if ((Deno.env.get("ANTHROPIC_API_KEY") || Deno.env.get("GEMINI_API_KEY")) && Deno.env.get("WEEKLY_CHECKS") !== "off") {
+  if (canConverse((k) => Deno.env.get(k)) && Deno.env.get("WEEKLY_CHECKS") !== "off") {
     const { data: recent } = await admin.from("agent_runs").select("workspace_id").eq("kind", "watch").gt("created_at", new Date(now - 6 * 864e5).toISOString());
     for (const id of watchDue(all, started.getUTCDay(), new Set((recent ?? []).map((r) => r.workspace_id as string))).slice(0, MAX_WATCHES)) {
       const { data: plan } = await admin.rpc("plan_of", { ws: id });
@@ -497,7 +499,7 @@ Deno.serve(async (req) => {
   // Odelia's own jobs, in the background: routines that run today, renewals 60 days out (she prepares the renewal and
   // puts it up for approval), and filings past the agency's usual time (she checks and drafts a status inquiry).
   let jobs = 0;
-  if ((Deno.env.get("ANTHROPIC_API_KEY") || Deno.env.get("GEMINI_API_KEY")) && Deno.env.get("ODELIA_JOBS") !== "off") {
+  if (canConverse((k) => Deno.env.get(k)) && Deno.env.get("ODELIA_JOBS") !== "off") {
     let left = Math.max(0, Number(Deno.env.get("ODELIA_JOBS_PER_DAY") ?? "60") || 0);
     const plans = new Map<string, string>();
     const planOf = async (ws: string) => { if (!plans.has(ws)) { const { data } = await admin.rpc("plan_of", { ws }); plans.set(ws, String(data ?? "none")); } return plans.get(ws)!; };

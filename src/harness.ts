@@ -105,6 +105,15 @@ export function applyVerdict(jobId: string, verdict: { ok: boolean; why: string 
   });
 }
 
+/** A reply that says the work is done ("All done.", "完成了"). */
+export const saysDone = (text: string) => /\b(all|everything)( is| was|'s)? (done|finished|complete|set)\b|\b(it'?s|that'?s|job is|work is|is now) (all )?(done|finished|complete)\b|^\s*(done|finished|complete|all set)\b|(全部|都|已经|已)完成|搞定/i.test(text);
+/** One line for a job this run left open when the reply says it's done: the steps it still has, so the reply can't
+ *  claim more than the plan shows. */
+export function openLine(job: Job, lang: "en" | "zh"): string {
+  const left = job.steps.filter(s => !s.done).map(s => s.title[lang] || s.title.en), n = job.steps.length, d = n - left.length;
+  return lang === "zh" ? `尚未完成：${job.title.zh || job.title.en}，已完成 ${d}/${n} 步。仍未完成：${left.join("；")}。`
+    : `Not finished yet: ${job.title.en}, ${d} of ${n} steps done. Still open: ${left.join("; ")}.`;
+}
 /** One line for the reply, so the person sees the proof, not just a claim. */
 export function proofLine(job: Job, lang: "en" | "zh"): string {
   const c = job.checked;

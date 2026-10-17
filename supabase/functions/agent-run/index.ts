@@ -24,7 +24,8 @@
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { callModel, type Role } from "../_shared/llm.ts";
+import { callModel, canConverse, type Role } from "../_shared/llm.ts";
+import { overTaskLimit, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tooLarge } from "./limits.ts";
 import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
@@ -43,13 +44,10 @@ type Run = { id: string; workspace_id: string; created_by: string | null; kind: 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
 const env = (k: string, d = "") => Deno.env.get(k) ?? d;
-/** One task's ceiling: a task that costs more than this stops and says so, so a loop can't eat a month's budget. */
-const TASK_LIMIT_USD = Number(env("AI_TASK_LIMIT_USD", "1.5"));
+/** One task's ceiling: a task that costs more than this stops and says so, so a loop can't eat a month's budget.
+ *  (limits.ts: a broken AI_TASK_LIMIT_USD used to make it NaN, which switched the cap off.) */
+const TASK_LIMIT_USD = taskLimit((k) => Deno.env.get(k));
 const MODEL = env("AGENT_MODEL", "claude-sonnet-5-5"), MODEL_DEEP = env("AGENT_MODEL_DEEP", "claude-opus-5-5");
-/** The most a request body may hold. Messages are text; files go through Documents (storage), never inline. */
-const BODY_MAX = 400_000;
-/** The same request again within this window (a double tap, a retry, a script) gets the earlier run, not a second bill. */
-const REPEAT_MS = 10 * 60_000;
 /** In saver mode (past 60% of the allowance, or throttled for the day) answers are capped at this many tokens. */
 const SAVER_MAX_TOKENS = 2000;
 /** Work per instance before saving and handing over (the free plan stops an instance at 150 s). */
@@ -61,7 +59,10 @@ const RENEW_MS = 30_000;
 const SAVE_TRIES = 8;
 const FETCH_BETA = "web-fetch-2025-09-10";
 const MAX_TOOLS = 48;
-const MODEL_KEYS = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY"];
+/** Some vendor with a key may take a customer's conversation (../_shared/llm.ts). The old list of key names left out
+ *  Cerebras, and counted a Gemini key without GEMINI_PAID, which may never see a conversation, so runs started and
+ *  every call failed. */
+const configured = () => canConverse((k) => Deno.env.get(k));
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
@@ -123,9 +124,9 @@ type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttl
  */
 async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, role: Role = "plan", who: Who = { uid: null, spent: 0 }) {
   if (signal.aborted) throw err("cancelled", "Stopped");
-  if (!MODEL_KEYS.some((k) => env(k)))
+  if (!configured())
     throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
-  if (who.spent >= TASK_LIMIT_USD) throw err("task_limit", "This task grew too large for one go, so I stopped here. Ask for the next part on its own.");
+  if (overTaskLimit(who.spent, TASK_LIMIT_USD)) throw err("task_limit", "This task grew too large for one go, so I stopped here. Ask for the next part on its own.");
   // budget, rate limits and the company's ceiling
   const g = await gate(admin, (k) => Deno.env.get(k), ws, who.uid, "call");
   if (!g.ok) throw err(g.code, g.message);
@@ -164,11 +165,6 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
 /** The main loop's role for a run: watch for the monitor's background checks, short for a text, a call or a chat bot, plan otherwise. */
 const roleOfRun = (run: Run): Role => run.kind === "watch" ? "watch" : run.channel === "sms" || run.channel === "voice" || run.channel === "slack" || run.channel === "lark" ? "short" : "plan";
 
-/** A key for "the same request again": the prompt and the conversation it came with. */
-async function repeatKey(prompt: string, history: unknown): Promise<string> {
-  const bytes = new TextEncoder().encode(prompt + "\n" + JSON.stringify(history ?? []));
-  return [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 /**
  * The run to hand back instead of starting another: the same key in this workspace within REPEAT_MS, still running
  * (any channel) or done (the app, which shows its reply). A text or a call is answered by the run that finishes, so a
@@ -176,7 +172,7 @@ async function repeatKey(prompt: string, history: unknown): Promise<string> {
  */
 async function repeated(ws: string, key: string, channel: string): Promise<string | null> {
   const { data } = await admin.from("agent_runs").select("id, status").eq("workspace_id", ws).eq("dedupe", key).gt("created_at", new Date(Date.now() - REPEAT_MS).toISOString())
-    .in("status", channel === "app" ? ["running", "done"] : ["running"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    .in("status", repeatStatuses(channel)).order("created_at", { ascending: false }).limit(1).maybeSingle();
   return data?.id ?? null;
 }
 
@@ -558,11 +554,11 @@ export async function handle(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   // Messages are text and short; files go through Documents. Anything bigger is not a conversation.
-  if (Number(req.headers.get("content-length") ?? 0) > BODY_MAX) return fail(413, "bad_request", "That request is too large. Upload files to Documents instead of pasting them.");
+  if (tooLarge(req.headers.get("content-length"))) return fail(413, "bad_request", "That request is too large. Upload files to Documents instead of pasting them.");
   let body: Record<string, unknown>;
   try {
     const raw = await req.text();
-    if (raw.length > BODY_MAX) return fail(413, "bad_request", "That request is too large. Upload files to Documents instead of pasting them.");
+    if (tooLarge(null, raw)) return fail(413, "bad_request", "That request is too large. Upload files to Documents instead of pasting them.");
     body = JSON.parse(raw);
   } catch { return fail(400, "bad_request", "Send JSON."); }
   const action = String(body.action ?? "start");
@@ -574,7 +570,7 @@ export async function handle(req: Request): Promise<Response> {
       // short real-model runs on scratch workspaces held in memory: no workspace is read or written
       // {probe: true}: which server secrets are set (names and yes/no only, never a value), and the checks there are
       if (body.probe) {
-        const names = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY", "AGENT_MODEL", "AGENT_ROUTE",
+        const names = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY", "CEREBRAS_API_KEY", "AGENT_MODEL", "AGENT_ROUTE",
           "GEMINI_PAID", "ALLOW_DEEPSEEK", "ALLOW_OPENROUTER", "ALLOW_GROQ", "AGENT_ROUTE_PLAN", "AGENT_ROUTE_REVIEW", "AGENT_ROUTE_EXTRACT", "AGENT_ROUTE_TRANSLATE", "AGENT_ROUTE_DRAFT", "AGENT_ROUTE_SHORT", "AGENT_ROUTE_WATCH", "AGENT_ROUTE_DEEP",
           "AI_DAILY_LIMIT_USD", "AI_WS_DAILY_LIMIT_USD", "AI_TASK_LIMIT_USD",
           "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ENTRY", "STRIPE_PRICE_LOCATION", "STRIPE_PRICE_LOCATION_PRO", "STRIPE_PRICE_OPENING", "STRIPE_PRICE_OPENING_FOOD", "STRIPE_PRICE_PACK", "STRIPE_PRICE_GUARANTEE",
@@ -582,7 +578,7 @@ export async function handle(req: Request): Promise<Response> {
           "TELNYX_API_KEY", "TELNYX_FAX_CONNECTION_ID", "TELNYX_MESSAGING_PROFILE_ID", "TELNYX_VOICE_CONNECTION_ID", "ODELIA_NUMBER", "LOB_API_KEY", "FILER_SECRET", "AZURE_SPEECH_KEY"];
         return json(200, { secrets: Object.fromEntries(names.map((n) => [n, !!env(n)])), checks: SELFTEST_NAMES() });
       }
-      if (!MODEL_KEYS.some((k) => env(k))) return json(200, { ok: false, model: null, checks: [{ name: "a model key is set", pass: false, detail: "Add ANTHROPIC_API_KEY (or another model key) in the Edge Function secrets.", ms: 0 }], total_ms: 0 });
+      if (!configured()) return json(200, { ok: false, model: null, checks: [{ name: "a model key is set", pass: false, detail: "Add ANTHROPIC_API_KEY (or another model key) in the Edge Function secrets.", ms: 0 }], total_ms: 0 });
       return json(200, await selftest((k) => Deno.env.get(k), { budgetMs: Number(body.budget_ms) || undefined, only: Array.isArray(body.only) ? body.only.map(String) : undefined, model: typeof body.model === "string" ? body.model : undefined }));
     }
     if (action === "continue") {
@@ -634,15 +630,16 @@ export async function handle(req: Request): Promise<Response> {
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", zh ? "您不是这个快哉工作区的成员。负责人可以在快哉中邀请您。" : "You're not a member of this Placetta workspace. The owner can invite you in Placetta.");
     if (may === "no_plan") return fail(402, "payment_required", zh ? "Odelia 需要先开通入门套餐。请在快哉中选择套餐。" : "Odelia starts with the entry plan. Choose a plan in Placetta.");
-    if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", zh ? "此账户的 Odelia 尚未开通，快哉团队已收到通知。" : "Odelia isn't switched on for this account yet. Placetta's team has been told.");
-    const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
-    if (!tg.ok) return fail(tg.status, tg.code, tg.message);
-    if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
+    if (!configured()) return fail(503, "not_configured", zh ? "此账户的 Odelia 尚未开通，快哉团队已收到通知。" : "Odelia isn't switched on for this account yet. Placetta's team has been told.");
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
+    // a repeat joins the run still going, before the gate and the capacity check (see "start")
     const key = await repeatKey(prompt, []);
     const again = await repeated(ws, key, channel);
     if (again) return json(202, { id: again, repeated: true });
+    const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
+    if (!tg.ok) return fail(tg.status, tg.code, tg.message);
+    if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const ticket = stamp();
     const { data: run, error } = await admin.from("agent_runs").insert({
       workspace_id: ws, created_by: uid, kind: "task", prompt, lang: zh ? "zh" : "en", deep: false,
@@ -673,20 +670,21 @@ export async function handle(req: Request): Promise<Response> {
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", "This isn't their workspace.");
     if (may === "no_plan") return fail(402, "payment_required", "Get the entry plan to start the agent.");
-    if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
-    const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
-    if (!tg.ok) return fail(tg.status, tg.code, tg.message);
+    if (!configured()) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
-    if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-8)
       .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 2000) }));
     // A text by plain SMS (whose sender is easy to forge) only reads and drafts. odelia-sms says which it was; when it
     // doesn't say, a text counts as plain SMS.
     const plainSms = channel === "sms" && body.plain_sms !== false;
+    // a repeat joins the run still going, before the gate and the capacity check (see "start")
     const key = await repeatKey(prompt, history);
     const again = await repeated(ws, key, channel);
     if (again) return json(202, { id: again, repeated: true });
+    const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
+    if (!tg.ok) return fail(tg.status, tg.code, tg.message);
+    if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const ticket = stamp();
     const { data: run, error } = await admin.from("agent_runs").insert({
       workspace_id: ws, created_by: uid, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: false,
@@ -714,19 +712,20 @@ export async function handle(req: Request): Promise<Response> {
     const { data: plan } = await admin.rpc("plan_of", { ws });
     if (plan === "none") return fail(402, "payment_required", "Get the entry plan to start the agent.");
   }
-  if (!MODEL_KEYS.some((k) => env(k))) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
+  if (!configured()) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
   const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
   if (!prompt) return fail(400, "bad_request", "prompt is required.");
+  const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-12)
+    .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 4000) }));
+  // the same request again within ten minutes: the earlier run, whose reply the app shows. Checked before the gate and
+  // the capacity check, so a double tap neither counts as another task nor gets "busy" for the run it already started.
+  const key = await repeatKey(prompt, history);
+  const again = await repeated(ws, key, "app");
+  if (again) return json(202, { id: again, repeated: true });
   const tg = await gate(admin, (k) => Deno.env.get(k), ws, user.id, "task");
   if (!tg.ok) return fail(tg.status, tg.code, tg.message);
   // several jobs at once, up to ODELIA_PARALLEL per workspace (3 by default)
   if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
-  const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-12)
-    .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 4000) }));
-  // the same request again within ten minutes: the earlier run, whose reply the app shows
-  const key = await repeatKey(prompt, history);
-  const again = await repeated(ws, key, "app");
-  if (again) return json(202, { id: again, repeated: true });
   const ticket = stamp();
   const { data: run, error } = await admin.from("agent_runs").insert({
     workspace_id: ws, created_by: user.id, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: body.deep === true,

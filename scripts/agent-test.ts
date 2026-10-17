@@ -22,9 +22,10 @@ import { readdirSync, readFileSync } from "node:fs";
 /* ------------------------------------------------------------------ checks */
 
 
-/** What a person would really put on lines with a format (the check before approval refuses a name in a phone line). */
+/** What a person would really put on lines with a format (the check before approval refuses a name in a phone line).
+ *  An SSN line gets "By hand", as Odelia is told to fill it: Placetta never keeps the number (src/guard.ts). */
 const real = (label: string): string | undefined =>
-  /\b(ssn|social security|itin)\b/i.test(label) ? "123-45-6789"
+  /\b(ssn|social security|itin)\b/i.test(label) ? "By hand"
   : /\b(ein|fein)\b|employer identification/i.test(label) ? "12-3456789"
   : /e-?mail/i.test(label) ? "mei@luckyleaf.com"
   : /phone|telephone|mobile|\bcell\b|\bfax\b/i.test(label) ? "718-555-0100"

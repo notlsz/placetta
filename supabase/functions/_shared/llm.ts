@@ -64,6 +64,11 @@ const OPENAI_STYLE: Record<string, { url: string; key: string }> = {
   cerebras: { url: "https://api.cerebras.ai/v1/chat/completions", key: "CEREBRAS_API_KEY" },
 };
 export const PROVIDERS = ["anthropic", ...Object.keys(OPENAI_STYLE)];
+/** Each vendor's key, by provider. */
+export const PROVIDER_KEYS: Record<string, string> = { anthropic: "ANTHROPIC_API_KEY", ...Object.fromEntries(Object.entries(OPENAI_STYLE).map(([p, c]) => [p, c.key])) };
+/** Whether any vendor with a key may take a customer's conversation (vendorOk below): what decides if Odelia can run at
+ *  all. A Gemini key without GEMINI_PAID doesn't count, since no conversation may go to Google's free tier. */
+export const canConverse = (env: Env) => Object.entries(PROVIDER_KEYS).some(([p, k]) => !!env(k) && vendorOk(env, p, { hasFiles: false, role: "plan" }));
 
 /** The Anthropic models by size. The repo's defaults; AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST change them. */
 export const ANTHROPIC_MODELS = { plan: "claude-sonnet-5-5", deep: "claude-opus-5-5", fast: "claude-haiku-4-5-20251001" };

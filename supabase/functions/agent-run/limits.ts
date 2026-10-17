@@ -1,0 +1,28 @@
+// What one request to agent-run may hold and cost, as plain functions with no database, so the extreme test
+// (scripts/extreme-test.ts) checks the same code the server runs. index.ts uses every one of these.
+
+/** The most a request body may hold. Messages are text; files go through Documents (storage), never inline. */
+export const BODY_MAX = 400_000;
+/** A request over BODY_MAX, by the size it says it is or by what arrived. */
+export const tooLarge = (contentLength: string | null, raw?: string) => Number(contentLength ?? 0) > BODY_MAX || (raw !== undefined && raw.length > BODY_MAX);
+
+/** The same request again within this window (a double tap, a retry, a script) gets the earlier run, not a second bill. */
+export const REPEAT_MS = 10 * 60_000;
+/** A key for "the same request again": the prompt and the conversation it came with. */
+export async function repeatKey(prompt: string, history: unknown): Promise<string> {
+  const bytes = new TextEncoder().encode(prompt + "\n" + JSON.stringify(history ?? []));
+  return [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+/** Which earlier runs count: in the app one still running or done (the app shows its reply); from a text, a call or a
+ *  chat only one still running, since the run that finishes is what answers them. */
+export const repeatStatuses = (channel: string) => (channel === "app" ? ["running", "done"] : ["running"]);
+
+/** One task's ceiling in US dollars, across every chunk a fresh instance picks up. AI_TASK_LIMIT_USD changes it; a
+ *  missing, zero, negative or unreadable value keeps the default, so a typo in a secret can't switch the cap off. */
+export const TASK_LIMIT_DEFAULT = 1.5;
+export function taskLimit(env: (k: string) => string | undefined): number {
+  const n = Number(env("AI_TASK_LIMIT_USD"));
+  return Number.isFinite(n) && n > 0 ? n : TASK_LIMIT_DEFAULT;
+}
+/** A task that has already cost its limit stops before the next model call, whichever instance holds it. */
+export const overTaskLimit = (spent: number, limit: number) => spent >= limit;

@@ -316,6 +316,32 @@ try {
     await sql`delete from public.ai_events where workspace_id = ${ws} and kind = 'task' and at > now() - interval '5 minutes'`;
   });
 
+  /* ---------------- a3. what one request may hold and cost ---------------- */
+  scripts.push({ name: "repeat", match: (p) => p.includes("Is the CO paperwork in?"), turns: [{ text: "Not yet: it needs stamped floor plans.", delayMs: 300 }] });
+  await scenario("a3. limits on one request", async () => {
+    // the 400 KB body cap
+    const big = await call("agent-run", { action: "start", workspace_id: ws, prompt: "x".repeat(420_000), lang: "en" }, { jwt: owner.jwt });
+    check("a request over 400 KB is refused (413) before anything runs", big.status === 413 && big.data?.error?.code === "bad_request", { status: big.status, data: big.data });
+    // a double tap: the second start gets the first run, without counting as another task
+    const [t0] = await sql`select count(*)::int n from public.ai_events where workspace_id = ${ws} and kind = 'task'`;
+    const first = await call("agent-run", { action: "start", workspace_id: ws, prompt: "Is the CO paperwork in?", lang: "en" }, { jwt: owner.jwt });
+    const again = await call("agent-run", { action: "start", workspace_id: ws, prompt: "Is the CO paperwork in?", lang: "en" }, { jwt: owner.jwt });
+    await settle();
+    const [t1] = await sql`select count(*)::int n from public.ai_events where workspace_id = ${ws} and kind = 'task'`;
+    check("the same request again within 10 minutes returns the earlier run", first.status === 202 && again.status === 202 && again.data?.id === first.data?.id && again.data?.repeated === true, { first: first.data, again: again.data });
+    const [runs] = await sql`select count(*)::int n from public.agent_runs where workspace_id = ${ws} and prompt = 'Is the CO paperwork in?'`;
+    check("one run, one set of model calls, one task counted", runs.n === 1 && modelCalls.filter((c) => c.script === "repeat").length === 1 && t1.n - t0.n === 1, { runs: runs.n, calls: modelCalls.filter((c) => c.script === "repeat").length, tasks: t1.n - t0.n });
+    // the per-task cost cap across chunks: a run that has already cost more than its limit, picked up by a fresh instance
+    const ticket = new Date().toISOString().replace(/Z$/, "123Z");
+    const state = { messages: [{ role: "user", content: "Map every permit for three more cities" }], request: "Map every permit for three more cities", rounds: 9, text: "", lastToolAt: 0, sources: [], made: { apps: [], approvals: [], memory: [], files: [] }, spent: 5 };
+    const [run] = await sql`insert into public.agent_runs (workspace_id, created_by, kind, prompt, lang, state, heartbeat_at) values (${ws}, ${owner.id}, 'task', 'Map every permit for three more cities', 'en', ${sql.json(state)}, (${ticket}::text)::timestamptz) returning id`;   // as text: the microseconds are the ticket
+    const before = modelCalls.length;
+    const cont = await call("agent-run", { action: "continue", run_id: run.id, ticket }, { headers: MK });
+    await settle();
+    const [after] = await sql`select status, error, attempts, heartbeat_at::text as hb from public.agent_runs where id = ${run.id}`;
+    check("a resumed task that already cost its limit stops before another model call", cont.status === 202 && after?.status === "failed" && /too large for one go/.test(after?.error ?? "") && modelCalls.length === before, { cont: cont.status, after, ticket, calls: modelCalls.length - before });
+  });
+
   /* ---------------- b. SMS ---------------- */
   scripts.push(
     { name: "sms-status", match: (p) => p.endsWith("What's due this month?"), turns: [

@@ -3,6 +3,7 @@ import type { Field } from "../model";
 import { formById } from "./registry";
 import { MAPS } from "./maps";
 import { pdfLibWriter, writeAnswers, type FormMap } from "./boxes";
+import { BY_HAND } from "../guard";
 
 /* Fills the official PDF itself: the agency's own form, downloaded from the agency (federal forms are public domain),
    with each answer written into the form's own field for that line. Nothing private goes in: SSNs, ITINs and passport
@@ -66,9 +67,9 @@ const PDFS: Record<string, () => Promise<string>> = {
 };
 const FILL = { ss4, cbp5106 };
 
-/** "By hand": the line is answered, and the signer writes it on the printed copy (an SSN, an ITIN, a passport number).
- *  It counts as filled, and nothing is printed in that box. */
-export const BY_HAND = /^(by hand|written by hand|(the )?signer (writes|fills)( it)?( in)? by hand|手写|由签署人手写|签署人手写)\.?$/i;
+/** "By hand": the line is answered, and the signer writes it on the printed copy (src/guard.ts, where the check before
+ *  approval reads it too). It counts as filled, and nothing is printed in that box. */
+export { BY_HAND };
 /** The values by form field id: the application's fields carry the form's field ids. */
 // a value shown masked ("••-•••4471") is never written: the form would get the dots' leftovers, not the number
 const MASKED = /[•●*]{2,}/;

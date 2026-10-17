@@ -24,6 +24,9 @@ jobs:
       - name: Plain words in the interface
         run: node scripts/plain-words.mjs
       - run: npm run test:agent
+      # the agent loop against a scripted model that misbehaves on purpose: approvals, made-up ids, planted
+      # instructions, SSNs, remote channels, limits, racing runs, Chinese, every tool, model failover
+      - run: npm run test:extreme
       - run: npm run test:plan
       - run: npm run test:smart
       - run: npm run test:flow

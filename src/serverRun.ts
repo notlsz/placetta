@@ -2,9 +2,10 @@ import { same, type Bi } from "./bi";
 import type { Reply, Step } from "./core";
 import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
-import { clean, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
+import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
+import { B } from "./bi";
 import { settleJobs, type Job } from "./jobs";
-import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, parseVerdict, proofLine } from "./harness";
+import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone } from "./harness";
 
 /* ------------------------------------------------------------------ *
  * The agent's tool loop as the server runs it: the same tools and
@@ -172,6 +173,7 @@ export async function runRounds(o: {
   // The job this run is working: the newest one it touched that's still open.
   const activeJob = (): Job | undefined => (o.ws().jobs ?? []).filter(j => j.updated >= st.started! && j.status === "running").sort((a, b) => b.updated.localeCompare(a.updated))[0];
   const checkedNow: string[] = [];
+  const unchecked: string[] = [];      // jobs the checker couldn't look at: they stay open, never done on the agent's word
   const recheck = new Set<string>();   // sent back by the checker: checked again after the fixes
   let last: Block[] = [];
 
@@ -242,7 +244,13 @@ export async function runRounds(o: {
         // the review role: by default a different vendor from the one that did the work, so no model grades itself
         const data = await o.send({ system: CHECKER_SYSTEM, messages: [{ role: "user", content: [{ type: "text", text: checkerPrompt(j, evidence(o.ws(), j, reply)) }] }], max_tokens: 1500 }, false, "review");
         verdict = parseVerdict(data.content.filter(c => c.type === "text").map(c => c.text).join(""), j.done!.length);
-      } catch { continue; }   // the checker couldn't run: the job keeps the agent's word, and no proof line claims a check
+      } catch {
+        // The checker couldn't run (its model was down). The job used to keep the agent's word and count as done with
+        // nothing checked; now it waits, saying so, until a check can run.
+        apply(w => ({ ...w, jobs: (w.jobs ?? []).map(x => (x.id === j.id && (x.status === "done" || x.status === "running") ? { ...x, status: "waiting" as const, waiting: B("A separate reviewer couldn't check this yet. Ask Odelia to check it again.", "独立检查暂时无法核对这项工作。请让 Odelia 再检查一次。"), updated: new Date().toISOString() } : x)) }));
+        if (!unchecked.includes(j.id)) unchecked.push(j.id);
+        continue;
+      }
       apply(applyVerdict(j.id, verdict, { final, lang: o.lang }));
       if (!(st.firstChecks ??= []).some(c => c.job === j.id)) st.firstChecks.push({ job: j.id, passed: verdict.filter(v => v.ok).length, of: verdict.length });
       if (!checkedNow.includes(j.id)) checkedNow.push(j.id);
@@ -262,8 +270,12 @@ export async function runRounds(o: {
   }
 
   apply(settleJobs(st.started));
-  const proof = checkedNow.map(id => (o.ws().jobs ?? []).find(j => j.id === id)).filter((j): j is Job => !!j).map(j => proofLine(j, o.lang)).filter(Boolean).join(" ");
-  const final = [clean(st.text.slice(made.lastToolAt).trim() || st.text.trim()) || (o.lang === "zh" ? "完成了。" : "Done."), proof].filter(Boolean).join("\n\n");
+  // a reply that says "done" while a job it worked is still open gets that job's open steps, so it can't claim more
+  const said = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
+  const open = saysDone(said) || !said ?(o.ws().jobs ?? []).filter(j => j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(s => !s.done) && !checkedNow.includes(j.id)).slice(0, 2) : [];
+  const proof = [...open.map(j => openLine(j, o.lang)),...checkedNow.map(id => (o.ws().jobs ?? []).find(j => j.id === id)).filter((j): j is Job => !!j).map(j => proofLine(j, o.lang)),
+    ...unchecked.filter(id => !checkedNow.includes(id)).slice(0, 1).map(() => (o.lang === "zh" ? "独立检查暂时无法核对，所以这项工作仍未完成。" : "A separate reviewer couldn't check the work yet, so the job stays open."))].filter(Boolean).join(" ");
+  const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), proof].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
   return { reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
     files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } };

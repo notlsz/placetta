@@ -10,6 +10,7 @@ import { filingBlockers, isBlank } from "./core";
 import { formById, placesOf, segmentOf } from "./forms/registry";
 import type { Application, Approval, Field, Status, Store, Workspace } from "./model";
 import { publishedDays, type FormStat } from "./plan";
+import { BY_HAND, carriesIdentifier, emailsIn, governmentAddress, SECRET_NOTE, secretNumber } from "./guard";
 
 /* ------------------------------------------------------------------ preflight */
 
@@ -108,6 +109,7 @@ const PLACEHOLDER = /\[[^\]]{1,40}\]|\{[^}]{1,40}\}|<[^>]{1,40}>|\bTBD\b|\bXXX+\
 /** A second look at everything an approval would send, before the person approves it. */
 export function preflight(w: Workspace, a: Approval, today: string): Preflight {
   const app = a.app ? w.apps.find(x => x.id === a.app) : undefined;
+  const offForm = app?.official ? formById(app.official) : undefined;
   const fields: Field[] = a.kind === "send" || a.kind === "change" ? a.data ?? [] : app?.fields ?? [];
   const errors: Check[] = [], warnings: Check[] = [];
   let checked = 0;
@@ -119,6 +121,15 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
     checked++;
     if (isBlank(v)) continue;   // empty lines are filingBlockers' job, shown above the checks
     if (/^(n\/?a|none|not applicable|无|不适用)$/i.test(v.trim())) continue;   // a real answer: there isn't one
+    // a Social Security number or ITIN, on any line or in a message: Placetta never keeps or sends one (src/guard.ts)
+    if (secretNumber(f.label.en, v)) { add(err(f.label, SECRET_NOTE), f.id); continue; }
+    // "By hand" answers a line the signer writes on the signed copy (SS-4 line 7b, as Odelia is told to fill it). The
+    // format check used to read it as a malformed SSN and refuse every such filing.
+    if (BY_HAND.test(v.trim())) continue;
+    // one of the line's own printed choices, or a yes/no answer to a question: SS-4 line 18 ("...ever applied for and
+    // received an EIN?") answered "No" used to be read as a malformed EIN
+    const choices = offForm?.fields.find(x => x.id === f.id)?.options;
+    if (choices?.some(c => c.toLowerCase() === v.trim().toLowerCase()) || (/\?\s*$/.test(label) && /^(yes|no|y|n|是|否)$/i.test(v.trim()))) continue;
     if (PLACEHOLDER.test(v)) { add(err(f.label, B("Still has a placeholder in it.", "仍包含占位文字。")), f.id); continue; }
     for (const r of RULES) {
       if (!r.test.test(label) || r.skip?.test(label)) continue;
@@ -173,6 +184,10 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
       add(err(B("To", "收件人"), B("No email address to send it to.", "没有收件邮箱。")));
     if (/\b(guarantee[ds]?|promise[ds]?)\b.{0,40}\b(approv|permit|open)/i.test(body))
       add(warn(B("Message", "内容"), B("It promises an approval or a date. Agencies decide those; say \"expect\" instead.", "内容承诺了获批或日期。这些由机构决定，建议改为“预计”。")));
+    // the business's tax ID or bank details going to an address that isn't a government agency's
+    const to = fields.filter(f => /^(to|recipient|收件人)/i.test(f.label.en)).flatMap(f => emailsIn(f.value));
+    if (carriesIdentifier(body) && to.length && !to.every(governmentAddress))
+      add(warn(B("Message", "内容"), B(`It sends a tax ID or bank details to ${to.filter(t => !governmentAddress(t)).join(", ")}, which isn't a government agency. Make sure you know who asked for it.`, `内容将税号或银行信息发送至 ${to.filter(t => !governmentAddress(t)).join("、")}，这不是政府机构的地址。请确认是谁要求的。`)));
   }
   return { checked, errors, warnings };
 }

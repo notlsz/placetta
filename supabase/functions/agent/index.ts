@@ -6,7 +6,7 @@
 // chatbot. A workspace past 60% of its allowance runs in saver mode (cheaper models, no research, shorter answers);
 // past 100% it stops.
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { callModel, ROLES, type Role } from "../_shared/llm.ts";
+import { callModel, canConverse, ROLES, type Role } from "../_shared/llm.ts";
 import { gate, record } from "../_shared/ai_gate.ts";
 
 const CORS = {
@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   const env = (k: string) => Deno.env.get(k);
-  const KEYS = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "GROQ_API_KEY"];
-  if (!KEYS.some((k) => env(k))) return fail(503, "not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
+  // some vendor with a key may take the conversation (a Gemini key without GEMINI_PAID may not; Cerebras counts)
+  if (!canConverse(env)) return fail(503, "not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
   if (Number(req.headers.get("content-length") ?? 0) > BODY_MAX) return fail(413, "bad_request", "That request is too large.");
 
   const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");

@@ -11,10 +11,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readiness } from "../src/stores.ts";
 import { B, SAMPLE, same, type Workspace } from "../src/model";
 
-/** A believable answer for a form line, so the check before approval sees real-looking values (it refuses "test value" as a phone). */
+/** A believable answer for a form line, so the check before approval sees real-looking values (it refuses "test value" as a phone).
+ *  An SSN line gets "By hand": Placetta never keeps the number, the signer writes it (src/guard.ts). */
 const plausible = (label: string) =>
-  /\b(ein|fein)\b|employer identification/i.test(label) ? "12-3456789"
-  : /\b(ssn|social security|itin)\b/i.test(label) ? "123-45-6789"
+  /\b(ssn|social security|itin)\b/i.test(label) ? "By hand"
+  : /\b(ein|fein)\b|employer identification/i.test(label) ? "12-3456789"
   : /e-?mail/i.test(label) ? "owner@moonleaf.com"
   : /phone|telephone|mobile|\bcell\b|\bfax\b/i.test(label) ? "512-555-0100"
   : /\bzip\b|postal code/i.test(label) ? "78701"
