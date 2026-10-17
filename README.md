@@ -22,7 +22,7 @@ Two builds come from this repo:
 - **Find licenses**: say what the business does and where; get the licenses it needs, with fees, timelines and links to each agency.
 - **Stores**: an inspection-readiness score per store (permits 35, daily logs 25, staff certificates 20, schedules 10, mock inspection 10), the NYC letter grade, today's food-safety logs, certificates with expiry reminders, NYC Fair Workweek schedule checks (chains with 30 or more locations nationally post 14 days ahead) and a mock inspection with how to fix each miss. Stores still opening are scored on their license progress.
 - **Filing queue** (team only): every filing a customer approved, grouped New, Working, Waiting on the customer, With the agency and Done. Saved agency logins (each reveal is logged), the approved fields with copy buttons, attachments, the requirements check, the payment link, the confirmation number and the receipt upload.
-- **Settings**: account, plan and billing, integrations (Gmail, Outlook, Google and Outlook calendars, a calendar feed, Google Drive, Dropbox, QuickBooks, Slack; Square and Toast on request), the agency-login vault, approvals, agent and voice, language, data controls, help and legal.
+- **Settings**: account, plan and billing, integrations (Gmail, Outlook, Google and Outlook calendars, a calendar feed, Google Drive, Dropbox, QuickBooks, Square and Toast for sales and staff, team chats, and Odelia in Slack, Lark and the business's own WeChat Official Account), the agency-login vault, approvals, agent and voice, language, data controls, help and legal.
 
 ### The approval rule
 

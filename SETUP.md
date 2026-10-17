@@ -143,8 +143,23 @@ Every provider uses one redirect address: `https://esquxzcfsylffuijvzec.supabase
 | Dropbox | `DROPBOX_APP_KEY`, `DROPBOX_APP_SECRET` | Enable `files.metadata.read` and `files.content.read`. |
 | QuickBooks | `QB_CLIENT_ID`, `QB_CLIENT_SECRET`, `QB_ENV=production` | Intuit app review before production keys. |
 | Slack | `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET` | Incoming webhook only. |
+| Square | `SQUARE_CLIENT_ID`, `SQUARE_CLIENT_SECRET` (`SQUARE_ENV=sandbox` to test, `SQUARE_VERSION` to pin another API version) | Developer Console (developer.squareup.com/apps), your app, OAuth: set the Redirect URL to the address above, then copy the Application ID and Application secret. Placetta asks for `MERCHANT_PROFILE_READ PAYMENTS_READ ORDERS_READ EMPLOYEES_READ TIMECARDS_READ`, read only, and renews each seller's token weekly as Square asks. |
+| Toast | `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`, `TOAST_API_HOST` (the production hostname Toast gives you; `https://ws-api.toasttab.com` by default) | Partner integration: Toast's integration partnership process (doc.toasttab.com, Developer guide, Integration partnership process). Once Toast approves Placetta, its integrations team issues the partner client ID and secret and the hostnames. Ask for the scopes `orders:read`, `labor:read`, `labor.employees:read`, `restaurants:read` and the partners API. No redirect: an owner adds Placetta in Toast Web (Integrations) and types the code Settings shows them as the Location ID, which is how Placetta knows those locations are theirs. |
 
-The calendar feed needs nothing. Square and Toast show as "Request" until a partner integration exists.
+The calendar feed needs nothing. Square and Toast show "Opens soon" until their keys are set. Owners connect them; only owners can read sales and staff through Odelia (`get_sales`, `get_staff`), and only from the app.
+
+## Odelia in WeChat (a business's own Official Account)
+
+Chinese store owners live in WeChat. A business points its own WeChat service account at Placetta, each teammate links their WeChat once, and then they message the account like a coworker: Odelia does the job as them and answers in the chat. Nothing for Placetta to set up beyond deploying; each business does this in Settings, Integrations, Odelia in WeChat, which walks them through it:
+
+1. **Account**: a WeChat service account (服务号) verified under the company (微信认证). Customer service messages, which carry Odelia's answers, are for verified accounts only. Use one just for the team: once a server address is on, the auto-replies and menu set in WeChat's console stop.
+2. **Keys**: WeChat developer platform (developers.weixin.qq.com), My business, Service account, Development keys: the AppID and AppSecret go into Settings with a Token and EncodingAESKey (Settings suggests both). Placetta checks them by asking WeChat for a token.
+3. **Message push** (消息与事件推送): server address `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/chat-events/wechat/<workspace id>` (Settings shows it), the same Token and EncodingAESKey, safe mode (安全模式), XML. Submit after connecting in Placetta: WeChat checks the address immediately.
+4. **Teammates**: each one taps Link my WeChat in Settings and sends the 6-digit code to the account (30 minutes; 5 tries an hour per follower).
+
+Server addresses: WeChat only gives an API token to calls from addresses on the account's API IP whitelist when the whitelist is on, and otherwise may ask the account's admin to allow a new address (error 89503, a WeChat message the admin taps). Supabase functions don't call from fixed addresses, so either keep the whitelist off and allow Placetta when WeChat asks, or run a relay on fixed addresses and set `WECHAT_API_BASE` (the relay's URL, in place of `https://api.weixin.qq.com`) and `WECHAT_EGRESS_IPS` (its addresses, which Settings then tells owners to whitelist). The token is shared through the vault, so WeChat sees about one token request every two hours per account.
+
+`chat-events` must be deployed with JWT verification off (it's in `supabase/config.toml`): WeChat, Slack and Lark call it without a Supabase session, and it checks each one's own signature. Run the migration `20261017120000_wechat_pos.sql` and deploy `chat-events`, `agent-run`, `integrations` and `oauth-callback`.
 
 ## Text and call Odelia (Telnyx)
 

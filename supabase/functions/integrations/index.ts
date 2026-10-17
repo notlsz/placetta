@@ -1,6 +1,8 @@
-// integrations: connect and use the customer's mail, calendar, files, books and Slack.
-// POST {workspace_id, action, ...}. Members of the workspace; owners only to connect, disconnect or send mail. Reading
-// a connected mailbox, drive or books: owners, or the member who connected that account.
+// integrations: connect and use the customer's mail, calendar, files, books, point of sale (Square, Toast) and team
+// chats (Slack, Lark, WeChat).
+// POST {workspace_id, action, ...}. Members of the workspace; owners only to connect, disconnect, send mail or read sales
+// and staff. Reading a connected mailbox, drive or books: owners, or the member who connected that account. Each member
+// links their own WeChat (wechat_link).
 import type { User } from "npm:@supabase/supabase-js@2";
 import {
   admin,
@@ -41,10 +43,16 @@ import {
   PROVIDER,
   qbApiBase,
   revoke,
+  SQUARE_VERSION,
+  squareBase,
+  toastBase,
   writeBundle,
 } from "./providers.ts";
 import { HOOK_KINDS, HOOK_NAMES, hookHello, hookUrl, isHookKind, postHook, type HookKind } from "../_shared/channels.ts";
 import { type LarkBot, larkWorks, slackManifest, slackWho } from "../_shared/bots.ts";
+import { type WechatBot, wxCredsWork, wxKeyBytes, wxNewSecrets, type WxTokenProblem } from "../_shared/wechat.ts";
+import { wechatBundle } from "../_shared/wechat_db.ts";
+import { type Call, lastFullMonth, monthsBetween, PosError, type SavedToken, squareSales, squareStaff, type ToastCtx, toastMatches, toastPlace, type ToastPlace, toastSales, toastStaff, toastTokens } from "./pos.ts";
 import { mayRead, READ_REFUSED } from "./access.ts";
 
 /** access: the caller's role in the workspace ("owner" or "member"), or "" for finish, which checks it itself. */
@@ -897,31 +905,79 @@ const hookConnect: Action = async (c) => {
   return ok({ kind, account });
 };
 
-// ------------------------------------------------------------------ talk to Odelia: the business's own Slack or Lark bot
+// ------------------------------------------------------------------ talk to Odelia: the business's own Slack or Lark bot, or WeChat account
 
-const BOT_NAMES = { slack_bot: { en: "Odelia in Slack", zh: "Slack 中的 Odelia" }, lark_bot: { en: "Odelia in Lark", zh: "飞书中的 Odelia" } } as const;
+const BOT_NAMES = {
+  slack_bot: { en: "Odelia in Slack", zh: "Slack 中的 Odelia" },
+  lark_bot: { en: "Odelia in Lark", zh: "飞书中的 Odelia" },
+  wechat_bot: { en: "Odelia in WeChat", zh: "微信中的 Odelia" },
+} as const;
 type BotKind = keyof typeof BOT_NAMES;
-const isBotKind = (v: unknown): v is BotKind => v === "slack_bot" || v === "lark_bot";
-const eventsUrl = (ws: string, kind: BotKind) => `${SUPABASE_URL}/functions/v1/chat-events?${kind === "slack_bot" ? "slack" : "lark"}=${ws}`;
+const isBotKind = (v: unknown): v is BotKind => v === "slack_bot" || v === "lark_bot" || v === "wechat_bot";
+/** Where the bot's events go. WeChat's server address is a path, so WeChat's own query string can't collide with ours. */
+const eventsUrl = (ws: string, kind: BotKind) =>
+  kind === "wechat_bot" ? `${SUPABASE_URL}/functions/v1/chat-events/wechat/${ws}` : `${SUPABASE_URL}/functions/v1/chat-events?${kind === "slack_bot" ? "slack" : "lark"}=${ws}`;
+/** The addresses Placetta calls WeChat from, when they're fixed (WECHAT_EGRESS_IPS, with WECHAT_API_BASE pointing at a
+ *  relay on those addresses): what the account's API IP whitelist needs. Empty when calls go straight to WeChat. */
+const egressIps = () => (Deno.env.get("WECHAT_EGRESS_IPS") ?? "").split(/[\s,]+/).filter((ip) => /^[0-9a-fA-F.:]{3,45}$/.test(ip)).slice(0, 10);
 
-/** What to set up before connecting: the bot's event address, and for Slack the app manifest to paste. */
+/** What to set up before connecting: the bot's event address, for Slack the app manifest to paste, and for WeChat a
+ *  fresh Token and EncodingAESKey to use (or replace with the account's own) and any addresses to whitelist. */
 const botSetup: Action = async (c) => {
   const kind = c.body.kind;
-  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot or lark_bot.");
-  return ok({ events_url: eventsUrl(c.ws, kind), ...(kind === "slack_bot" ? { manifest: JSON.stringify(slackManifest(eventsUrl(c.ws, kind)), null, 2) } : {}) });
+  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot, lark_bot or wechat_bot.");
+  return ok({
+    events_url: eventsUrl(c.ws, kind),
+    ...(kind === "slack_bot" ? { manifest: JSON.stringify(slackManifest(eventsUrl(c.ws, kind)), null, 2) } : {}),
+    ...(kind === "wechat_bot" ? { ...wxNewSecrets(), ips: egressIps() } : {}),
+  });
+};
+
+/** What to tell an owner when WeChat won't give their account a token (https://developers.weixin.qq.com/doc/service/guide/dev/api/). */
+const WX_PROBLEM: Record<WxTokenProblem, L10n> = {
+  credentials: {
+    en: "WeChat didn't accept that AppID and AppSecret. Copy both from the WeChat developer platform (My business, Service account, Development keys). The AppSecret shows once, when it's reset.",
+    zh: "微信不接受这个 AppID 和 AppSecret。请从微信开发者平台复制（我的业务 → 服务号 → 开发密钥）。AppSecret 只在重置时显示一次。",
+  },
+  ip: {
+    en: "This account's API IP whitelist is on and Placetta's server isn't on it. Turn the whitelist off (My business, Service account, Development keys, API IP whitelist), or add the addresses shown above, then connect again.",
+    zh: "该账号开启了 API IP 白名单，快哉的服务器不在其中。请关闭白名单（我的业务 → 服务号 → 开发密钥 → API IP 白名单），或添加上面显示的地址，然后重新连接。",
+  },
+  confirm: {
+    en: "WeChat sent this account's admin a message asking to allow Placetta's server. Allow it in WeChat, then press Connect again.",
+    zh: "微信已向该账号的管理员发消息，请求允许快哉的服务器调用接口。请在微信中允许，然后再点“连接”。",
+  },
+  refused: {
+    en: "This account's admin turned Placetta's server away. Wait an hour, connect again, and allow it when WeChat asks.",
+    zh: "该账号的管理员拒绝了快哉的服务器。请一小时后重新连接，并在微信询问时允许。",
+  },
+  unreachable: { en: "WeChat didn't answer. Try again in a minute.", zh: "微信没有响应，请一分钟后再试。" },
 };
 
 /** Save the business's own bot after checking its credentials work. */
 const botConnect: Action = async (c) => {
   const kind = c.body.kind;
-  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot or lark_bot.");
+  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot, lark_bot or wechat_bot.");
   let bundle: Record<string, unknown>, account: string;
+  const meta: Record<string, unknown> = { via: "bot" };
   if (kind === "slack_bot") {
     const bot_token = text(c.body.bot_token, "bot_token", 20, 200), signing_secret = text(c.body.signing_secret, "signing_secret", 16, 100);
     if (!/^xoxb-/.test(bot_token)) throw new HttpError("bad_request", "That isn't a bot token. Copy the Bot User OAuth Token, which starts with xoxb-.");
     const who = await slackWho(bot_token);
     if (!who) throw new HttpError("bad_request", "Slack didn't accept that bot token. Install the app to your workspace first, then copy its Bot User OAuth Token.");
     bundle = { bot_token, signing_secret }; account = `${who.team} (@${who.bot})`;
+  } else if (kind === "wechat_bot") {
+    // a verified service account's AppID (wx and 16 letters or digits), AppSecret, the Token for signatures and, for
+    // safe mode, the EncodingAESKey, all as set under Message push in the WeChat developer platform
+    const app_id = text(c.body.app_id, "app_id", 18, 18), app_secret = text(c.body.app_secret, "app_secret", 16, 64), token = text(c.body.token, "token", 3, 32);
+    const aes_key = optText(c.body.aes_key, "aes_key", 43) ?? undefined;
+    if (!/^wx[0-9A-Za-z]{16}$/.test(app_id)) throw new HttpError("bad_request", "That isn't an AppID. It starts with wx: copy it from the WeChat developer platform (My business, Service account).", "这不是 AppID。AppID 以 wx 开头，请从微信开发者平台复制（我的业务 → 服务号）。");
+    if (!/^[A-Za-z0-9]{3,32}$/.test(token)) throw new HttpError("bad_request", "The Token is 3 to 32 letters and digits, the same as under Message push in WeChat.", "Token 为 3 到 32 位字母和数字，需与微信“消息推送”中填写的一致。");
+    if (aes_key && !wxKeyBytes(aes_key)) throw new HttpError("bad_request", "The EncodingAESKey is 43 letters and digits, the same as under Message push in WeChat.", "EncodingAESKey 为 43 位字母和数字，需与微信“消息推送”中填写的一致。");
+    const r = await wxCredsWork(app_id, app_secret);
+    if (!r.ok) throw new HttpError("bad_request", WX_PROBLEM[r.problem].en, WX_PROBLEM[r.problem].zh);
+    const bot: WechatBot = { kind, app_id, app_secret, token, ...(aes_key ? { aes_key } : {}), access_token: r.token, expires_at: r.expires_at };
+    bundle = wechatBundle(bot); account = app_id; meta.app_id = app_id; meta.safe_mode = !!aes_key;
   } else {
     const bot: LarkBot = { kind, app_id: text(c.body.app_id, "app_id", 6, 80), app_secret: text(c.body.app_secret, "app_secret", 10, 120),
       verification_token: text(c.body.verification_token, "verification_token", 6, 120), encrypt_key: optText(c.body.encrypt_key, "encrypt_key", 120) ?? undefined,
@@ -932,10 +988,199 @@ const botConnect: Action = async (c) => {
   const old = await findIntegration(c.ws, kind as unknown as Kind);
   if (old) { await dropSecret(old.secret_id); await admin.from("integrations").delete().eq("id", old.id); }
   const secretId = await writeBundle({ access_token: "", refresh_token: null, expires_at: null, token_type: "bot", ...bundle } as never, `integration:${kind}`, null);
-  const { error } = await admin.from("integrations").insert({ workspace_id: c.ws, kind, account, scopes: "bot", status: "connected", secret_id: secretId, meta: { via: "bot" }, connected_by: c.user.id });
+  const { error } = await admin.from("integrations").insert({ workspace_id: c.ws, kind, account, scopes: "bot", status: "connected", secret_id: secretId, meta, connected_by: c.user.id });
   if (error) { await dropSecret(secretId); throw new Error(`integration insert failed: ${error.code ?? ""}`); }
   await audit({ ...you(c), action: { en: `Connected ${BOT_NAMES[kind].en}`, zh: `已连接${BOT_NAMES[kind].zh}` }, object: BOT_NAMES[kind], detail: same(account) });
   return ok({ kind, account, events_url: eventsUrl(c.ws, kind) });
+};
+
+/* A teammate's own WeChat: the code to send the workspace's WeChat account (it links their WeChat to them), whether
+   they're linked, and unlinking. Any member, for themselves only; a new code needs the settings PIN when it's on, like
+   linking a phone. */
+
+const wechatRow = async (ws: string) => {
+  const row = await findIntegration(ws, "wechat_bot" as unknown as Kind);
+  return row && row.status === "connected" ? row : null;
+};
+
+const wechatLink: Action = async (c) => {
+  const row = await wechatRow(c.ws);
+  if (!row) throw new HttpError("not_connected", "An owner needs to connect the WeChat Official Account first.", "需要所有者先连接微信公众号。");
+  const { data: pinOk } = await userClient(c.jwt).rpc("pin_ok");
+  if (pinOk === false) throw new HttpError("forbidden", "Unlock settings with your PIN first.", "请先用设置 PIN 解锁。");
+  const { data, error } = await admin.rpc("wechat_link_start", { p_ws: c.ws, p_uid: c.user.id });
+  if (error) {
+    if (/rate_limited/.test(error.message ?? "")) throw new HttpError("rate_limited", "That's 5 codes this hour. Try again later.", "本小时已获取 5 次验证码，请稍后再试。");
+    throw new Error(`wechat link failed: ${error.code ?? ""}`);
+  }
+  const d = data as { code: string; expires_at: string };
+  return ok({ code: d.code, expires_at: d.expires_at, account: row.account });
+};
+
+const wechatLinkStatus: Action = async (c) => {
+  const row = await wechatRow(c.ws);
+  const { data } = await admin.from("wechat_links").select("appid, linked_at, code_expires_at").eq("workspace_id", c.ws).eq("user_id", c.user.id).maybeSingle();
+  const linked = !!row && !!data?.linked_at && data.appid === row.meta?.app_id;
+  return ok({ connected: !!row, linked, linked_at: linked ? data!.linked_at : null, waiting: !!data?.code_expires_at && Date.parse(data.code_expires_at) > Date.now() });
+};
+
+const wechatUnlink: Action = async (c) => {
+  const { error } = await admin.from("wechat_links").delete().eq("workspace_id", c.ws).eq("user_id", c.user.id);
+  if (error) throw new Error(`wechat unlink failed: ${error.code ?? ""}`);
+  await audit({ ...you(c), action: { en: "Unlinked their WeChat", zh: "取消关联了微信" }, object: BOT_NAMES.wechat_bot });
+  return ok({ linked: false });
+};
+
+// ------------------------------------------------------------------ sales and staff: Square and Toast
+
+const POS: Kind[] = ["square", "toast"];
+
+/** A point-of-sale problem as the person sees it. */
+function posFail(e: unknown): never {
+  if (e instanceof PosError) throw new HttpError(e.status === 404 ? "not_found" : e.status === 429 ? "rate_limited" : "upstream_error", e.message, e.zh);
+  throw e;
+}
+
+function monthParam(v: unknown, label: string): string | null {
+  if (v === undefined || v === null || v === "") return null;
+  if (typeof v !== "string" || !/^\d{4}-(0[1-9]|1[0-2])$/.test(v)) throw new HttpError("bad_request", `${label} must be YYYY-MM.`);
+  return v;
+}
+/** The months asked for: from_month to to_month, at most 3, none still to come; the last full month by default. */
+function monthsOf(body: Record<string, unknown>): string[] {
+  const to = monthParam(body.to_month, "to_month") ?? monthParam(body.from_month, "from_month") ?? lastFullMonth();
+  const from = monthParam(body.from_month, "from_month") ?? to;
+  if (from > to) throw new HttpError("bad_request", "from_month must come before to_month.");
+  if (to > new Date().toISOString().slice(0, 7)) throw new HttpError("bad_request", "Months still to come have no sales yet.");
+  const months = monthsBetween(from, to);
+  if (months.length > 3) throw new HttpError("bad_request", "Ask for at most 3 months at a time.");
+  return months;
+}
+/** The dates asked for: from to to, at most 28 days; the last 14 days by default. */
+function rangeOf(body: Record<string, unknown>): { from: string; to: string } {
+  const today = new Date().toISOString().slice(0, 10);
+  const to = body.to ? dateParam(body.to, "to") : today;
+  const from = body.from ? dateParam(body.from, "from") : new Date(Date.parse(to + "T00:00:00Z") - 13 * 86_400_000).toISOString().slice(0, 10);
+  if (from > to) throw new HttpError("bad_request", "from must come before to.");
+  if ((Date.parse(to) - Date.parse(from)) / 86_400_000 > 27) throw new HttpError("bad_request", "Ask for at most 28 days at a time.");
+  return { from, to };
+}
+
+/** Square calls go through the connection, which adds the token and renews it; the connection's own environment wins. */
+const squareCall = (conn: Conn): Call => (url, init) => conn.call(url, init ?? {}, 30000);
+const squareBaseOf = (conn: Conn) => conn.row.meta?.env === "sandbox" ? "https://connect.squareupsandbox.com" : conn.row.meta?.env === "production" ? "https://connect.squareup.com" : squareBase();
+
+/** Toast's partner token, shared by every instance through the vault (server_tokens), one login at a time per instance. */
+let toastCtxCache: ToastCtx | null = null;
+function toastCtx(): ToastCtx {
+  const { id, secret } = creds("toast");
+  if (toastCtxCache) return toastCtxCache;
+  const base = toastBase();
+  const load = async (): Promise<SavedToken | null> => {
+    const { data } = await admin.from("server_tokens").select("secret_id, expires_at, fetched_at").eq("name", "toast").maybeSingle();
+    if (!data) return null;
+    const { data: raw } = await admin.rpc("vault_get", { p_id: data.secret_id });
+    return typeof raw === "string" && raw ? { token: raw, exp: Date.parse(data.expires_at), fetched_at: Date.parse(data.fetched_at) } : null;
+  };
+  const store = async (t: SavedToken) => {
+    const { data } = await admin.from("server_tokens").select("secret_id").eq("name", "toast").maybeSingle();
+    const { data: sid, error } = await admin.rpc("vault_put", { p_secret: t.token, p_name: "server:toast", ...(data?.secret_id ? { p_id: data.secret_id } : {}) });
+    if (error || typeof sid !== "string") { console.error("toast token save", error?.code ?? ""); return; }
+    await admin.from("server_tokens").upsert({ name: "toast", secret_id: sid, expires_at: new Date(t.exp).toISOString(), fetched_at: new Date(t.fetched_at).toISOString() });
+  };
+  toastCtxCache = { f: fetch, base, token: toastTokens({ f: fetch, base, clientId: id, clientSecret: secret, load, store }) };
+  return toastCtxCache;
+}
+
+const CODE_LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32, none that read alike (no I, O, 0 or 1)
+/** The workspace's code for Toast, made the first time it's asked for. */
+async function toastCode(ws: string): Promise<string> {
+  for (let i = 0; i < 5; i++) {
+    const { data } = await admin.from("pos_link_codes").select("toast_code").eq("workspace_id", ws).maybeSingle();
+    if (data?.toast_code) return data.toast_code as string;
+    const code = "PLACETTA-" + [...crypto.getRandomValues(new Uint8Array(8))].map((b) => CODE_LETTERS[b % 32]).join("");
+    const { error } = await admin.from("pos_link_codes").insert({ workspace_id: ws, toast_code: code });
+    if (!error) return code;
+    if (error.code !== "23505") throw new Error(`toast code failed: ${error.code ?? ""}`);
+  }
+  throw new Error("toast code failed");
+}
+
+/** What an owner types into Toast so Placetta can find their locations. */
+const toastSetup: Action = async (c) => {
+  creds("toast");
+  return ok({ code: await toastCode(c.ws) });
+};
+
+/** Connect Toast: the locations that added Placetta in Toast and carry this workspace's code. */
+const toastConnect: Action = async (c) => {
+  creds("toast");
+  const code = await toastCode(c.ws);
+  const ctx = toastCtx();
+  let found: ToastPlace[] = [];
+  try { found = await toastMatches(ctx, code); } catch (e) { posFail(e); }
+  if (!found.length) {
+    throw new HttpError("not_found",
+      `Placetta can't see a Toast location with your code yet. In Toast Web: Integrations, Browse & purchase integrations, add Placetta. Then Configure integrations, the gear next to Placetta, and type ${code} as the Location ID for each location. Check again after that.`,
+      `快哉还看不到带有您验证码的 Toast 门店。请在 Toast Web 中：集成 → Browse & purchase integrations，添加快哉；再到 Configure integrations，点快哉旁边的齿轮，为每家门店在 Location ID 中填写 ${code}。完成后再检查一次。`);
+  }
+  const places = await Promise.all(found.slice(0, 25).map((p) => toastPlace(ctx, p)));
+  const names = places.map((p) => [p.name, p.location].filter(Boolean).join(" "));
+  const account = names.slice(0, 3).join(", ") + (names.length > 3 ? ` +${names.length - 3}` : "");
+  const old = await findIntegration(c.ws, "toast");
+  if (old) { await dropSecret(old.secret_id); await admin.from("integrations").delete().eq("id", old.id); }
+  const { error } = await admin.from("integrations").insert({ workspace_id: c.ws, kind: "toast", account, scopes: "partner", status: "connected", secret_id: null, meta: { via: "toast_partner", restaurants: places }, connected_by: c.user.id });
+  if (error) throw new Error(`integration insert failed: ${error.code ?? ""}`);
+  await audit({ ...you(c), action: { en: "Connected Toast", zh: "已连接 Toast" }, object: NAMES.toast, detail: same(account) });
+  return ok({ kind: "toast", account, locations: places.length });
+};
+
+/** The Toast locations saved with the connection, or the one asked for. */
+async function toastPlaces(ws: string, only: string | null) {
+  const row = await findIntegration(ws, "toast");
+  if (!row) throw new HttpError("not_connected", "Connect Toast in Settings.", "请在设置中连接 Toast。");
+  let places = (Array.isArray(row.meta?.restaurants) ? row.meta.restaurants as ToastPlace[] : []).filter((p) => p && /^[0-9a-f-]{36}$/i.test(String(p.guid)));
+  if (only) {
+    const k = only.toLowerCase();
+    places = places.filter((p) => p.guid === only || [p.name, p.location, p.address].some((v) => String(v ?? "").toLowerCase().includes(k)));
+  }
+  if (!places.length) {
+    throw new HttpError("not_found", only ? `No Toast location matches "${only}".` : "Toast has no locations connected. Connect Toast again in Settings.",
+      only ? `没有与“${only}”匹配的 Toast 门店。` : "Toast 没有已连接的门店。请在设置中重新连接 Toast。");
+  }
+  return { row, places };
+}
+
+/** Monthly sales by location from Square or Toast, for sales-tax returns and fees that scale with sales. Owners only. */
+const posSales: Action = async (c) => {
+  const kind = await pickKind(c.ws, c.body.source, POS, "Connect Square or Toast in Settings.");
+  const months = monthsOf(c.body), location = optText(c.body.location, "location", 120);
+  const deadline = Date.now() + 50_000;
+  try {
+    if (kind === "square") {
+      const conn = await openToRead(c, "square");
+      const out = await squareSales(squareCall(conn), squareBaseOf(conn), SQUARE_VERSION(), months, { location, deadline });
+      return ok({ source: "Square", account: conn.row.account, months, ...out });
+    }
+    const { row, places } = await toastPlaces(c.ws, location);
+    const out = await toastSales(toastCtx(), places, months, { deadline });
+    return ok({ source: "Toast", account: row.account, months, ...out });
+  } catch (e) { posFail(e); }
+};
+
+/** The team from Square or Toast: who works, their schedules and the hours they worked with breaks, up to 28 days.
+ *  Owners only: it's people's names, hours and emails. */
+const posStaff: Action = async (c) => {
+  const kind = await pickKind(c.ws, c.body.source, POS, "Connect Square or Toast in Settings.");
+  const { from, to } = rangeOf(c.body), location = optText(c.body.location, "location", 120);
+  try {
+    if (kind === "square") {
+      const conn = await openToRead(c, "square");
+      return ok({ source: "Square", account: conn.row.account, from, to, ...(await squareStaff(squareCall(conn), squareBaseOf(conn), SQUARE_VERSION(), from, to, { location, deadline: Date.now() + 50_000 })) });
+    }
+    const { row, places } = await toastPlaces(c.ws, location);
+    return ok({ source: "Toast", account: row.account, from, to, ...(await toastStaff(toastCtx(), places, from, to)) });
+  } catch (e) { posFail(e); }
 };
 
 /** Which sign-in connections this server can offer now (each needs its provider's app keys). */
@@ -948,13 +1193,16 @@ const available: Action = async () => {
     dropbox: oauth && has("DROPBOX_APP_KEY", "DROPBOX_APP_SECRET"),
     quickbooks: oauth && has("QB_CLIENT_ID", "QB_CLIENT_SECRET"),
     slack: oauth && has("SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET"),
+    square: oauth && has("SQUARE_CLIENT_ID", "SQUARE_CLIENT_SECRET"),
+    // Toast has no redirect: Placetta's partner credentials are enough
+    toast: has("TOAST_CLIENT_ID", "TOAST_CLIENT_SECRET"),
   });
 };
 
 // ------------------------------------------------------------------ connect, disconnect, feed
 
 const connect: Action = async (c) => {
-  const kind = kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"]);
+  const kind = kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square"]);
   creds(PROVIDER[kind]);
   const origins = appOrigins();
   if (!origins.length) throw new HttpError("not_configured", "OAuth is not configured. Set APP_ORIGINS.");
@@ -1054,7 +1302,7 @@ const finish: Action = async (c) => {
 };
 
 const disconnect: Action = async (c) => {
-  const kind = (isHookKind(c.body.kind) || isBotKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"])) as Kind;
+  const kind = (isHookKind(c.body.kind) || isBotKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square", "toast"])) as Kind;
   const name = isBotKind(kind) ? BOT_NAMES[kind as BotKind] : isHookKind(kind) ? HOOK_NAMES[kind as HookKind] : NAMES[kind];
   const row = await findIntegration(c.ws, kind);
   if (!row) throw new HttpError("not_found", `${name.en} is not connected.`);
@@ -1062,6 +1310,8 @@ const disconnect: Action = async (c) => {
   const { error } = await admin.from("integrations").delete().eq("id", row.id);
   if (error) throw new Error(`integration delete failed: ${error.code ?? ""}`);
   await dropSecret(row.secret_id);
+  // the teammates' WeChat links go with the account (a new account means new OpenIDs anyway)
+  if ((kind as string) === "wechat_bot") await admin.from("wechat_links").delete().eq("workspace_id", c.ws);
   await audit({
     ...you(c),
     action: { en: `Disconnected ${name.en}`, zh: `已断开 ${name.zh}` },
@@ -1107,12 +1357,20 @@ const ACTIONS: Record<string, Action> = {
   hook_connect: hookConnect,
   bot_setup: botSetup,
   bot_connect: botConnect,
+  wechat_link: wechatLink,
+  wechat_link_status: wechatLinkStatus,
+  wechat_unlink: wechatUnlink,
+  toast_setup: toastSetup,
+  toast_connect: toastConnect,
+  pos_sales: posSales,
+  pos_staff: posStaff,
   available,
   feed_url: feedUrl,
 };
 
-/** What only an owner can do: connect or disconnect an account, and send mail or Slack posts as the business. */
-const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect]);
+/** What only an owner can do: connect or disconnect an account, send mail or Slack posts as the business, and read
+ *  sales and staff from Square or Toast. */
+const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff]);
 
 serve(async (req) => {
   const mk = req.headers.get("x-monitor-key");

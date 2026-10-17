@@ -2,11 +2,13 @@
 // Copied into integrations/ and oauth-callback/. Keep the copies identical.
 import { admin, describe, HttpError, type L10n, SUPABASE_URL } from "./shared.ts";
 
-export const KINDS = ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack"] as const;
+export const KINDS = ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square", "toast"] as const;
 export type Kind = (typeof KINDS)[number];
 export const isKind = (v: unknown): v is Kind => typeof v === "string" && (KINDS as readonly string[]).includes(v);
 
-export type Provider = "google" | "microsoft" | "dropbox" | "quickbooks" | "slack";
+/** square signs in with OAuth like the rest. toast never does: Toast gives Placetta one set of partner credentials for
+ *  every restaurant that adds Placetta in Toast, so it has no redirect and no per-workspace token (see pos.ts). */
+export type Provider = "google" | "microsoft" | "dropbox" | "quickbooks" | "slack" | "square" | "toast";
 
 export const PROVIDER: Record<Kind, Provider> = {
   gmail: "google",
@@ -17,6 +19,8 @@ export const PROVIDER: Record<Kind, Provider> = {
   dropbox: "dropbox",
   quickbooks: "quickbooks",
   slack: "slack",
+  square: "square",
+  toast: "toast",
 };
 
 export const NAMES: Record<Kind, L10n> = {
@@ -28,9 +32,13 @@ export const NAMES: Record<Kind, L10n> = {
   dropbox: { en: "Dropbox", zh: "Dropbox" },
   quickbooks: { en: "QuickBooks", zh: "QuickBooks" },
   slack: { en: "Slack", zh: "Slack" },
+  square: { en: "Square", zh: "Square" },
+  toast: { en: "Toast", zh: "Toast" },
 };
 
-/** Requested scopes. Dropbox uses the scopes enabled in its app console. */
+/** Requested scopes. Dropbox uses the scopes enabled in its app console; Toast's are set on Placetta's partner
+ *  credentials by Toast. Square: read the business, payments and orders (sales), the team and its timecards and
+ *  schedules (https://developer.squareup.com/docs/oauth-api/square-permissions). */
 export const SCOPES: Record<Kind, string> = {
   gmail: "openid email https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send",
   gcal: "openid email https://www.googleapis.com/auth/calendar.events",
@@ -40,6 +48,8 @@ export const SCOPES: Record<Kind, string> = {
   dropbox: "",
   quickbooks: "com.intuit.quickbooks.accounting",
   slack: "incoming-webhook",
+  square: "MERCHANT_PROFILE_READ PAYMENTS_READ ORDERS_READ EMPLOYEES_READ TIMECARDS_READ",
+  toast: "",
 };
 
 export const REDIRECT_URI = `${SUPABASE_URL}/functions/v1/oauth-callback`;
@@ -50,6 +60,8 @@ const ENV: Record<Provider, [string, string]> = {
   dropbox: ["DROPBOX_APP_KEY", "DROPBOX_APP_SECRET"],
   quickbooks: ["QB_CLIENT_ID", "QB_CLIENT_SECRET"],
   slack: ["SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET"],
+  square: ["SQUARE_CLIENT_ID", "SQUARE_CLIENT_SECRET"],
+  toast: ["TOAST_CLIENT_ID", "TOAST_CLIENT_SECRET"],
 };
 
 const PROVIDER_NAME: Record<Provider, string> = {
@@ -58,7 +70,19 @@ const PROVIDER_NAME: Record<Provider, string> = {
   dropbox: "Dropbox",
   quickbooks: "QuickBooks",
   slack: "Slack",
+  square: "Square",
+  toast: "Toast",
 };
+
+/** Square's production site, or its Sandbox with SQUARE_ENV=sandbox (https://developer.squareup.com/docs/oauth-api/overview). */
+export const squareBase = (): string => (Deno.env.get("SQUARE_ENV") === "sandbox" ? "https://connect.squareupsandbox.com" : "https://connect.squareup.com");
+/** The Square API version every call is pinned to (the newest when this was written; SQUARE_VERSION overrides it). */
+export const SQUARE_VERSION = (): string => Deno.env.get("SQUARE_VERSION") || "2026-09-16";
+/** Toast's API host. Toast hands each partner its sandbox and production hostnames; TOAST_API_HOST sets it. */
+export const toastBase = (): string => (Deno.env.get("TOAST_API_HOST") || "https://ws-api.toasttab.com").replace(/\/+$/, "");
+/** How long before a token expires it's renewed: Square asks partners to renew its 30-day tokens every 7 days or less
+ *  (https://developer.squareup.com/docs/oauth-api/receive-and-manage-tokens), so at 23 days left; others at a minute. */
+const RENEW_AHEAD: Partial<Record<Provider, number>> = { square: 23 * 86_400_000 };
 
 export function creds(p: Provider): { id: string; secret: string } {
   const [idVar, secretVar] = ENV[p];
@@ -79,10 +103,13 @@ const TOKEN_URL: Record<Provider, () => string> = {
   dropbox: () => "https://api.dropboxapi.com/oauth2/token",
   quickbooks: () => "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer",
   slack: () => "https://slack.com/api/oauth.v2.access",
+  square: () => `${squareBase()}/oauth2/token`,
+  toast: () => `${toastBase()}/authentication/v1/authentication/login`,
 };
 
 export function authorizeUrl(kind: Kind, state: string): string {
   const p = PROVIDER[kind];
+  if (p === "toast") throw new HttpError("bad_request", "Toast connects with a code in Settings, not a sign-in.");
   const { id } = creds(p);
   const q = new URLSearchParams({ client_id: id, redirect_uri: REDIRECT_URI, state });
   switch (p) {
@@ -109,6 +136,14 @@ export function authorizeUrl(kind: Kind, state: string): string {
     case "slack":
       q.set("scope", SCOPES[kind]);
       return `https://slack.com/oauth/v2/authorize?${q}`;
+    case "square":
+      // the code flow: Square sends the seller back to the redirect URL registered in its Developer Console, and
+      // session=false makes a seller with several Square accounts sign in to the right one
+      // (https://developer.squareup.com/docs/oauth-api/create-urls-for-square-authorization)
+      q.delete("redirect_uri");
+      q.set("scope", SCOPES[kind]);
+      q.set("session", "false");
+      return `${squareBase()}/oauth2/authorize?${q}`;
   }
 }
 
@@ -133,17 +168,27 @@ const str = (v: unknown): string | null => (typeof v === "string" && v ? v : nul
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : typeof v === "string" && v && Number.isFinite(Number(v)) ? Number(v) : null);
 
 async function tokenRequest(p: Provider, params: Record<string, string>): Promise<TokenReply> {
+  if (p === "toast") throw new HttpError("bad_request", "Toast has no sign-in to exchange.");
   const { id, secret } = creds(p);
   const headers: Record<string, string> = { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" };
-  const form = new URLSearchParams(params);
-  if (p === "quickbooks") headers.Authorization = `Basic ${btoa(`${id}:${secret}`)}`;
-  else {
-    form.set("client_id", id);
-    form.set("client_secret", secret);
+  let payload: string | URLSearchParams;
+  if (p === "square") {
+    // Square's ObtainToken takes JSON (https://developer.squareup.com/reference/square/o-auth-api/obtain-token)
+    headers["Content-Type"] = "application/json";
+    headers["Square-Version"] = SQUARE_VERSION();
+    payload = JSON.stringify({ client_id: id, client_secret: secret, ...params });
+  } else {
+    const form = new URLSearchParams(params);
+    if (p === "quickbooks") headers.Authorization = `Basic ${btoa(`${id}:${secret}`)}`;
+    else {
+      form.set("client_id", id);
+      form.set("client_secret", secret);
+    }
+    payload = form;
   }
   let res: Response;
   try {
-    res = await fetch(TOKEN_URL[p](), { method: "POST", headers, body: form, signal: AbortSignal.timeout(15000) });
+    res = await fetch(TOKEN_URL[p](), { method: "POST", headers, body: payload, signal: AbortSignal.timeout(15000) });
   } catch (e) {
     console.error(`${p} token endpoint unreachable:`, describe(e));
     throw new HttpError("upstream_error", `${PROVIDER_NAME[p]} did not respond. Try again.`);
@@ -156,13 +201,16 @@ async function tokenRequest(p: Provider, params: Record<string, string>): Promis
   }
   // Slack answers 200 with ok:false on failure.
   const status = p === "slack" && body.ok === false ? 400 : res.status;
-  if (status >= 400) console.error(`${p} token endpoint ${status}:`, String(body.error ?? "").slice(0, 80));
+  if (status >= 400) console.error(`${p} token endpoint ${status}:`, String(body.error ?? (body.errors as { code?: string }[] | undefined)?.[0]?.code ?? "").slice(0, 80));
   return { status, body };
 }
 
+/** When the new access token expires: expires_in seconds from now, or Square's expires_at timestamp. */
 function expiresAt(body: Record<string, unknown>): number | null {
   const s = num(body.expires_in);
-  return s ? Date.now() + s * 1000 : null;
+  if (s) return Date.now() + s * 1000;
+  const at = typeof body.expires_at === "string" ? Date.parse(body.expires_at) : NaN;
+  return Number.isFinite(at) ? at : null;
 }
 
 function jwtEmail(idToken: unknown): string | null {
@@ -196,6 +244,7 @@ export async function exchangeCode(kind: Kind, code: string, realmId: string | n
   const p = PROVIDER[kind];
   const params: Record<string, string> = { grant_type: "authorization_code", code, redirect_uri: REDIRECT_URI };
   if (p === "microsoft") params.scope = SCOPES[kind];
+  if (p === "square") delete params.redirect_uri;   // the code flow's ObtainToken takes the code alone
   if (p === "quickbooks" && !(realmId && /^\d{1,32}$/.test(realmId))) throw new HttpError("bad_request", "missing_realm");
 
   const t = await tokenRequest(p, params);
@@ -255,6 +304,16 @@ export async function exchangeCode(kind: Kind, code: string, realmId: string | n
       scopes = str(t.body.scope) ?? SCOPES.slack;
       break;
     }
+    case "square": {
+      // the seller's business name (RetrieveMerchant, "me" for the token's own merchant)
+      meta.merchant_id = str(t.body.merchant_id);
+      meta.env = Deno.env.get("SQUARE_ENV") === "sandbox" ? "sandbox" : "production";
+      const me = await getJson(`${squareBase()}/v2/merchants/me`, { headers: { ...auth, "Square-Version": SQUARE_VERSION() } });
+      account = str((me?.merchant as Record<string, unknown> | undefined)?.business_name);
+      break;
+    }
+    case "toast":
+      throw new HttpError("bad_request", "Toast has no sign-in to exchange.");
   }
   return { bundle, account, scopes, meta };
 }
@@ -379,10 +438,11 @@ export class Conn {
 
   private refreshing: Promise<string> | null = null;
 
-  /** A usable access token, refreshed when it expires within 60 seconds (or when forced). */
+  /** A usable access token, refreshed when it expires within 60 seconds (Square: within 23 days, so it's renewed weekly),
+   *  or when forced. A renewal ahead of time that fails for a reason other than a refusal keeps the token still valid. */
   async token(force = false): Promise<string> {
-    const exp = this.b.expires_at;
-    if (!force && (!exp || exp - Date.now() > 60_000)) return this.b.access_token;
+    const exp = this.b.expires_at, ahead = RENEW_AHEAD[PROVIDER[this.kind]] ?? 60_000;
+    if (!force && (!exp || exp - Date.now() > ahead)) return this.b.access_token;
     if (!this.b.refresh_token) {
       if (!force && exp && exp > Date.now()) return this.b.access_token;
       await this.markError("The sign-in expired. Reconnect in Settings.");
@@ -390,7 +450,15 @@ export class Conn {
     }
     // One refresh at a time: parallel calls share it (some providers rotate refresh tokens).
     if (!this.refreshing) this.refreshing = this.refresh().finally(() => (this.refreshing = null));
-    return await this.refreshing;
+    try {
+      return await this.refreshing;
+    } catch (e) {
+      if (!force && !(e instanceof HttpError && e.code === "not_connected") && exp && exp - Date.now() > 60_000) {
+        console.error(`${this.kind} early renewal failed:`, describe(e));
+        return this.b.access_token;
+      }
+      throw e;
+    }
   }
 
   private async refresh(): Promise<string> {
@@ -450,7 +518,9 @@ export class Conn {
     try {
       const body = (await res.json()) as Record<string, unknown>;
       const err = body.error as Record<string, unknown> | string | undefined;
-      code = typeof err === "string" ? err : String(body.error_summary ?? err?.status ?? err?.code ?? "");
+      // Square lists its errors: {errors: [{category, code, detail}]}
+      const listed = Array.isArray(body.errors) ? (body.errors[0] as Record<string, unknown> | undefined)?.code : undefined;
+      code = typeof err === "string" ? err : String(body.error_summary ?? err?.status ?? err?.code ?? listed ?? "");
     } catch {
       /* not JSON */
     }
@@ -478,6 +548,10 @@ async function grantShared(row: IntegrationRow): Promise<boolean> {
     const team = typeof row.meta?.team_id === "string" ? row.meta.team_id : null;
     if (!team) return true;
     q = q.eq("meta->>team_id", team);
+  } else if (p === "square") {
+    const merchant = typeof row.meta?.merchant_id === "string" ? row.meta.merchant_id : null;
+    if (!merchant) return true;
+    q = q.eq("meta->>merchant_id", merchant);
   } else {
     if (!row.account) return true;
     q = q.eq("account", row.account);
@@ -487,11 +561,12 @@ async function grantShared(row: IntegrationRow): Promise<boolean> {
   return (data?.length ?? 0) > 0;
 }
 
-/** Best-effort revoke. Never throws. Microsoft has no per-token revoke endpoint, so it is skipped. */
+/** Best-effort revoke. Never throws. Microsoft has no per-token revoke endpoint, so it is skipped; Toast access is the
+ *  restaurant's to remove (Toast Web, My integrations), since Placetta's partner credentials serve every restaurant. */
 export async function revoke(row: IntegrationRow): Promise<void> {
   try {
     const p = PROVIDER[row.kind];
-    if (p === "microsoft") return;
+    if (p === "microsoft" || p === "toast") return;
     const b = await readBundle(row.secret_id);
     if (!b) return;
     if (await grantShared(row)) return;
@@ -525,6 +600,17 @@ export async function revoke(row: IntegrationRow): Promise<void> {
       case "slack":
         res = await fetch("https://slack.com/api/auth.revoke", { method: "POST", headers: { Authorization: `Bearer ${b.access_token}` }, signal });
         break;
+      case "square": {
+        // RevokeToken: the whole authorization for this seller (https://developer.squareup.com/docs/oauth-api/refresh-revoke-limit-scope)
+        const { id, secret } = creds("square");
+        res = await fetch(`${squareBase()}/oauth2/revoke`, {
+          method: "POST",
+          headers: { Authorization: `Client ${secret}`, "Content-Type": "application/json", "Square-Version": SQUARE_VERSION() },
+          body: JSON.stringify({ client_id: id, access_token: b.access_token }),
+          signal,
+        });
+        break;
+      }
     }
     if (res && !res.ok) console.error(`${row.kind} revoke ${res.status}`);
     await res?.body?.cancel();

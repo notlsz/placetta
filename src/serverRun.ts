@@ -43,8 +43,9 @@ export type RunState = {
 
 const MAX_ROUNDS = 16;
 
-/** Where the person asked: the app, a text message, a phone call, an email, or the business's Slack or Lark. */
-export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark";
+/** Where the person asked: the app, a text message, a phone call, an email, or the business's Slack, Lark or WeChat
+ *  Official Account. */
+export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";
 /** Anything but the app. Its words may not be the person's own (a forwarded letter, a chat message, a forged text), and
  *  nobody is there to see what the agent does, so it can read, research, draft and put things up for approval, and
  *  nothing it does is final until someone approves it in the app. */
@@ -76,7 +77,7 @@ const PLAIN_SMS_PARTIAL: Record<string, string> = {
 export function channelNote(o: { channel?: Channel; plainSms?: boolean }, tool: string): string | null {
   return isRemote(o.channel) && o.plainSms ? PLAIN_SMS_PARTIAL[tool] ?? null : null;
 }
-const via = (channel: Channel | undefined) => (channel === "sms" ? "a text" : channel === "voice" ? "a call" : channel === "email" ? "an email" : channel === "slack" ? "Slack" : "Lark");
+const via = (channel: Channel | undefined) => (channel === "sms" ? "a text" : channel === "voice" ? "a call" : channel === "email" ? "an email" : channel === "slack" ? "Slack" : channel === "wechat" ? "WeChat" : "Lark");
 
 /** Why a tool can't run for a request from this channel (the tool result the model sees), or null when it can. */
 export function channelRefuses(o: { channel?: Channel; plainSms?: boolean }, tool: string, input: Record<string, unknown>): string | null {
@@ -130,7 +131,8 @@ export function channelHint(channel: Channel | undefined, plainSms = false): str
   if (channel !== "sms" && channel !== "voice") return `
 
 This request came by ${via(channel)}, not in the app, and your answer goes back there.${limits}
-- Never file, pay or send anything yourself, and never ask them to approve by replying. Put it up for approval with your tools: Placetta links them to that approval in the app. Say so in one short sentence.`;
+- Never file, pay or send anything yourself, and never ask them to approve by replying. Put it up for approval with your tools: Placetta links them to that approval in the app. Say so in one short sentence.${channel === "wechat" ? `
+- WeChat shows plain text only, on a phone: no markdown, short paragraphs, the answer first. Placetta adds the link.` : ""}`;
   return `
 
 This conversation is by phone, not in the app: ${channel === "sms" ? "they texted you" : "they asked on a call with you"}, and your reply goes to them as a text message.

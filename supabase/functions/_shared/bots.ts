@@ -1,13 +1,17 @@
-// Talk to Odelia from Slack or Lark (Feishu). The business creates its own bot in its own Slack or Lark (a few clicks,
-// no app review), pastes the bot's credentials into Placetta, and points the bot's events at chat-events. Mention the
-// bot in a channel, or message it directly, and Odelia takes the job and answers in the same thread. The credentials
-// live in the vault; only the server reads them.
+// Talk to Odelia from Slack, Lark (Feishu) or WeChat. The business creates its own bot in its own Slack or Lark (a few
+// clicks, no app review), or points its own WeChat Official Account at Placetta, pastes the credentials into Placetta,
+// and points the events at chat-events. Mention the bot in a channel, or message it directly, and Odelia takes the job
+// and answers in the same thread (in WeChat, the same chat). The credentials live in the vault; only the server reads
+// them. WeChat's side of it is in wechat.ts.
+import { type WechatBot, wxSendText } from "./wechat.ts";
+export type { WechatBot } from "./wechat.ts";
 
 export type SlackBot = { kind: "slack_bot"; bot_token: string; signing_secret: string };
 export type LarkBot = { kind: "lark_bot"; app_id: string; app_secret: string; verification_token: string; encrypt_key?: string; domain: "feishu" | "lark" };
-export type Bot = SlackBot | LarkBot;
-/** Where an answer goes back: the Slack channel and thread, or the Lark message to reply to. */
-export type ChatTo = { kind: "slack"; channel: string; thread_ts: string } | { kind: "lark"; message_id: string };
+export type Bot = SlackBot | LarkBot | WechatBot;
+/** Where an answer goes back: the Slack channel and thread, the Lark message to reply to, or the WeChat follower (by
+ *  their OpenID for this account). */
+export type ChatTo = { kind: "slack"; channel: string; thread_ts: string } | { kind: "lark"; message_id: string } | { kind: "wechat"; openid: string };
 
 const enc = new TextEncoder();
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
@@ -170,10 +174,16 @@ export async function larkReply(bot: LarkBot, messageId: string, text: string): 
   return j.code === 0;
 }
 
-/** Answer in the chat a job came from. */
-export async function chatReply(bot: Bot, to: ChatTo, text: string): Promise<boolean> {
-  if (bot.kind === "slack_bot" && to.kind === "slack") return await slackPost(bot, { channel: to.channel, thread_ts: to.thread_ts }, text);
-  if (bot.kind === "lark_bot" && to.kind === "lark") return await larkReply(bot, to.message_id, text);
+/** Answer in the chat a job came from. tail (the link to an approval) ends the answer; WeChat keeps it whole when a long
+ *  answer is cut. save: where a WeChat account's fresh API token goes (the vault), so every instance shares it. */
+export async function chatReply(bot: Bot, to: ChatTo, text: string, o: { tail?: string; save?: (bot: WechatBot) => Promise<void> } = {}): Promise<boolean> {
+  if (bot.kind === "slack_bot" && to.kind === "slack") return await slackPost(bot, { channel: to.channel, thread_ts: to.thread_ts }, text + (o.tail ?? ""));
+  if (bot.kind === "lark_bot" && to.kind === "lark") return await larkReply(bot, to.message_id, text + (o.tail ?? ""));
+  if (bot.kind === "wechat_bot" && to.kind === "wechat") {
+    const r = await wxSendText(bot, to.openid, text, { tail: o.tail, save: o.save });
+    if (!r.ok) console.error("wechat send", r.errcode ?? r.problem);
+    return r.ok;
+  }
   return false;
 }
 

@@ -1,6 +1,7 @@
 // Team chat links: only each app's own webhook address is accepted, and the daily message stays short.
 import { hookDigest, hookUrl, postHook } from "../supabase/functions/_shared/channels.ts";
-import { type LarkBot, larkDecrypt, larkOpen, larkSender, larkSigned, larkText, same, type SlackBot, slackManifest, slackSender, slackSigned, slackText } from "../supabase/functions/_shared/bots.ts";
+import { chatReply, type LarkBot, larkDecrypt, larkOpen, larkSender, larkSigned, larkText, same, type SlackBot, slackManifest, slackSender, slackSigned, slackText, type WechatBot } from "../supabase/functions/_shared/bots.ts";
+import { wxDecrypt, wxEncrypt, wxForget, wxSign } from "../supabase/functions/_shared/wechat.ts";
 let bad = 0;
 const eq = (got: unknown, want: unknown, what: string) => { const ok = JSON.stringify(got) === JSON.stringify(want); if (!ok) bad++; console.log(`${ok ? "ok  " : "FAIL"} ${what}${ok ? "" : `: got ${JSON.stringify(got)}`}`); };
 const yes = (k: Parameters<typeof hookUrl>[0], u: string) => !!hookUrl(k, u);
@@ -116,5 +117,30 @@ eq((await postHook("lark", "https://example.com/x", "hi")).ok, false, "never pos
   eq(await larkSender(larkBot, sender, "tk1", api({ code: 0, data: { user: { email: "" } } })), { ok: false, why: "setup" }, "Lark: no email, no job");
   eq(await larkSender(larkBot, sender, "tk1", api({}, { code: 10003 })), { ok: false, why: "setup" }, "Lark: bad app credentials");
   eq(await larkSender(larkBot, sender, "tk1", api({ code: 0, data: { user: { email: "a@b.c", status: { is_resigned: true } } } })), { ok: false, why: "unknown" }, "Lark: someone who left is refused");
+}
+// WeChat: WeChat's own documented vectors (https://developers.weixin.qq.com/doc/service/guide/dev/push/encryption.html),
+// here under Node too, and an answer going back through the customer service API
+{
+  const KEY = "A".repeat(43), APPID = "wxba5fad812f8e6fb9";
+  eq(await wxSign("AAAAA", "1714037059", "486452656"), "899cf89e464efb63f54ddac96b0a0a235f53aa78", "WeChat: the documented URL-check signature");
+  const sealed = await wxEncrypt(KEY, '{"demo_resp":"good luck"}', APPID, new TextEncoder().encode("707722b803182950"));
+  eq(sealed, "ELGduP2YcVatjqIS+eZbp80MNLoAUWvzzyJxgGzxZO/5sAvd070Bs6qrLARC9nVHm48Y4hyRbtzve1L32tmxSQ==", "WeChat: the documented safe-mode seal");
+  eq(await wxSign("AAAAA", "1713424427", "415670741", sealed), "1b9339964ed2e271e7c7b6ff2b0ef902fc94dea1", "WeChat: the documented reply signature");
+  eq(await wxDecrypt(KEY, sealed, APPID), '{"demo_resp":"good luck"}', "WeChat: it opens again");
+  eq(await wxDecrypt(KEY, sealed, "wx0000000000000000"), null, "WeChat: not for another account");
+  const wx: WechatBot = { kind: "wechat_bot", app_id: "wx00000000000000a1", app_secret: "s", token: "t" };
+  const calls: [string, { text?: { content?: string }; touser?: string; aimsgcontext?: unknown } | null][] = [];
+  const real = globalThis.fetch;
+  globalThis.fetch = (async (url: string, init?: RequestInit) => {
+    calls.push([String(url), init?.body ? JSON.parse(String(init.body)) : null]);
+    return new Response(JSON.stringify(String(url).includes("stable_token") ? { access_token: "T", expires_in: 7200 } : { errcode: 0, errmsg: "ok" }), { status: 200 });
+  }) as unknown as typeof fetch;
+  wxForget(wx.app_id);
+  const sent = await chatReply(wx, { kind: "wechat", openid: "oMei000000000000" }, "Your health permit renews by Nov 3.", { tail: "\n\nWaiting for your approval: https://placetta.com/app/?ws=1" });
+  const slackish = await chatReply(wx, { kind: "slack", channel: "C1", thread_ts: "1" }, "x");
+  globalThis.fetch = real;
+  eq([sent, calls.map(c => c[0].replace(/access_token=\w+/, "access_token=…"))], [true, ["https://api.weixin.qq.com/cgi-bin/stable_token", "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=…"]], "WeChat: a token, then the answer by customer service message");
+  eq([calls[1][1]?.touser, calls[1][1]?.text?.content, calls[1][1]?.aimsgcontext], ["oMei000000000000", "Your health permit renews by Nov 3.\n\nWaiting for your approval: https://placetta.com/app/?ws=1", { is_ai_msg: 1 }], "WeChat: to the follower who asked, link and all, marked as written by AI");
+  eq(slackish, false, "a WeChat account never answers in a Slack thread");
 }
 if (bad) { console.log(`${bad} failed`); process.exit(1); } else console.log("all passed");

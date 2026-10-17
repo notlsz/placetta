@@ -101,7 +101,7 @@ export function stripState(w: Workspace): Partial<Workspace> {
 /** How a request reached Odelia from outside the app, as a person would say it: "by email", "通过邮件". */
 export function viaWords(via: string): Bi {
   return via === "email" ? B("by email", "通过邮件") : via === "sms" ? B("by text message", "通过短信") : via === "voice" ? B("on a phone call", "通过电话")
-    : via === "slack" ? B("in Slack", "通过 Slack") : via === "lark" ? B("in Lark", "通过飞书") : B("from outside the app", "从应用外");
+    : via === "slack" ? B("in Slack", "通过 Slack") : via === "lark" ? B("in Lark", "通过飞书") : via === "wechat" ? B("in WeChat", "通过微信") : B("from outside the app", "从应用外");
 }
 /** What a confirmed change did, for the audit trail: a business fact or the name, from what to what, and who asked how.
  *  Nothing for the other changes (their title already says it). */

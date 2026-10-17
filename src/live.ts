@@ -257,7 +257,7 @@ export function rules(w: Workspace, lang: Lang, account: boolean, research: bool
   const can = (n: string) => tools && (!extra.names || extra.names.includes(n));
   const has = (k: string[]) => connected.some(c => k.includes(c));
   const apps = connected.map(c => APP_NAMES[c]).filter(Boolean);
-  const missing = [["Email (Gmail or Outlook)", MAIL], ["a calendar", CAL], ["Google Drive or Dropbox", DRIVES], ["QuickBooks", ["quickbooks"]]].filter(([, k]) => !has(k as string[])).map(([n]) => n);
+  const missing = [["Email (Gmail or Outlook)", MAIL], ["a calendar", CAL], ["Google Drive or Dropbox", DRIVES], ["QuickBooks", ["quickbooks"]], ["Square or Toast (sales and staff)", POS]].filter(([, k]) => !has(k as string[])).map(([n]) => n);
   const mail = has(MAIL) && can("search_email"), drives = has(DRIVES) && can("find_files"), cal = has(CAL) && can("add_calendar_event");
   return `You are Odelia, the AI compliance agent at Placetta (快哉). Introduce yourself as Odelia when it's natural, and if anyone asks, say plainly that you are an AI, not a person. You get business licenses, permits and registrations done for the business you work for, and keep them current. You work inside its Placetta workspace (JSON below). Today is ${daysFromNow(0)}.
 
@@ -342,7 +342,7 @@ const gaps = (a: Application) => ({ empty_fields: a.fields.filter(f => isBlank(f
 /** What a signed-in workspace adds to the agent's hands: the team's filings, the person's connected apps and stored files. */
 export type Services = {
   filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[] }[];
-  /** Connected integration kinds: gmail, outlook_mail, gcal, outlook_cal, gdrive, dropbox, quickbooks, slack. */
+  /** Connected integration kinds: gmail, outlook_mail, gcal, outlook_cal, gdrive, dropbox, quickbooks, slack, square, toast. */
   connected(): string[];
   integration<T>(action: string, body: Record<string, unknown>): Promise<T>;
   /** Store a file in Documents (and the account); returns its storage path. */
@@ -362,8 +362,8 @@ export type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; skill
  *  lark) and who sent it. Then a business fact or the business's name only changes once an owner confirms it in the app. */
 export type X = { model: Model; files: Map<string, File>; svc?: Services; signal: AbortSignal; asked?: { via: string; sender?: string } };
 
-const MAIL = ["gmail", "outlook_mail"], CAL = ["gcal", "outlook_cal"], DRIVES = ["gdrive", "dropbox"];
-const APP_NAMES: Record<string, string> = { gmail: "Gmail", outlook_mail: "Outlook mail", gcal: "Google Calendar", outlook_cal: "Outlook Calendar", gdrive: "Google Drive", dropbox: "Dropbox", quickbooks: "QuickBooks", slack: "Slack" };
+const MAIL = ["gmail", "outlook_mail"], CAL = ["gcal", "outlook_cal"], DRIVES = ["gdrive", "dropbox"], POS = ["square", "toast"];
+const APP_NAMES: Record<string, string> = { gmail: "Gmail", outlook_mail: "Outlook mail", gcal: "Google Calendar", outlook_cal: "Outlook Calendar", gdrive: "Google Drive", dropbox: "Dropbox", quickbooks: "QuickBooks", slack: "Slack", square: "Square", toast: "Toast" };
 
 async function docxText(b: Blob) {
   const { unzipSync, strFromU8 } = await import("fflate");
@@ -1649,6 +1649,40 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           need(["quickbooks"], "QuickBooks");
           S("searching", L("Reading income from QuickBooks", "从 QuickBooks 读取收入"), "quickbooks");
           const r = await svc.integration<{ year: number; total_income: number; currency: string | null }>("books_income", { year });
+          mark();
+          return r;
+        },
+      },
+      {
+        name: "get_sales",
+        description: "Monthly sales by location from the business's Square or Toast: orders, gross and net sales, discounts, tax collected, tips, service charges and refunds. Use it for sales-tax returns, gross-receipts taxes, and permits or renewals whose fee scales with sales (Boston's and Atlanta's food permits among them). Up to 3 months at a time (YYYY-MM); the last full month by default. Owners only. Say the figures come from the point of sale and should be checked against its own sales report before filing.",
+        inputSchema: { type: "object", properties: {
+          from_month: { type: "string", description: "YYYY-MM" }, to_month: { type: "string", description: "YYYY-MM, at most 3 months after from_month" },
+          location: { type: "string", description: "Optional: one location, by a word of its name or address" }, source: { type: "string", enum: POS },
+        } },
+        async execute(i) {
+          need(POS, "Square or Toast");
+          const month = (v: unknown) => { const m = str(v, 7); if (m && !/^\d{4}-(0[1-9]|1[0-2])$/.test(m)) throw new Error(`months must be YYYY-MM (got "${m}")`); return m || undefined; };
+          const source = POS.includes(str(i.source)) ? str(i.source) : svc.connected().find(k => POS.includes(k));
+          S("searching", L(`Reading sales from ${APP_NAMES[source ?? "square"]}`, `从 ${APP_NAMES[source ?? "square"]} 读取销售额`), source);
+          const r = await svc.integration<{ source: string; months: string[]; rows: Record<string, unknown>[]; complete: boolean; how: string }>("pos_sales", { from_month: month(i.from_month), to_month: month(i.to_month), location: str(i.location, 120) || undefined, source });
+          mark();
+          return { source: r.source, months: r.months, rows: r.rows.slice(0, 60), complete: r.complete, how: r.how, ...(r.complete ? {} : { note: "Partial: the point of sale was slow. Ask for fewer months or one location for the rest." }) };
+        },
+      },
+      {
+        name: "get_staff",
+        description: "The team from the business's Square or Toast for a date range up to 28 days: who works (name, email, jobs, locations), their published schedules, and the hours they actually worked with breaks (paid, unpaid, missed) and overtime, with totals by person and week. Use it for food handler cards and certificates, minors' hours, overtime and meal-break rules. It's people's personal data: use only what the compliance task needs and never paste it anywhere else. Owners only.",
+        inputSchema: { type: "object", properties: {
+          from: { type: "string", description: "YYYY-MM-DD (default 13 days before to)" }, to: { type: "string", description: "YYYY-MM-DD (default today)" },
+          location: { type: "string", description: "Optional: one location, by a word of its name or address" }, source: { type: "string", enum: POS },
+        } },
+        async execute(i) {
+          need(POS, "Square or Toast");
+          const day = (v: unknown, k: string) => { const d = str(v, 10); if (d && !isDate(d)) throw new Error(`${k} must be a real date as YYYY-MM-DD (got "${d}")`); return d || undefined; };
+          const source = POS.includes(str(i.source)) ? str(i.source) : svc.connected().find(k => POS.includes(k));
+          S("searching", L(`Reading the team's schedules from ${APP_NAMES[source ?? "square"]}`, `从 ${APP_NAMES[source ?? "square"]} 读取团队排班`), source);
+          const r = await svc.integration<Record<string, unknown>>("pos_staff", { from: day(i.from, "from"), to: day(i.to, "to"), location: str(i.location, 120) || undefined, source });
           mark();
           return r;
         },

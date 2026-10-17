@@ -32,3 +32,8 @@ verify_jwt = false
 
 [functions.odelia-voice]
 verify_jwt = false
+
+# Odelia in a business's own Slack, Lark and WeChat: their servers call it with no Supabase session, and it checks each
+# one's own signature (and WeChat's safe-mode seal).
+[functions.chat-events]
+verify_jwt = false

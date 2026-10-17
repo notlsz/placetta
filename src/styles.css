@@ -1656,6 +1656,9 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .sg-code { position: relative; margin: 2px 0 4px; padding: 10px 12px; border-radius: 10px; background: var(--mist); font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); white-space: pre-wrap; word-break: break-all; max-height: 180px; overflow: auto; list-style: none; }
 .sg-code .lnk { position: sticky; float: right; top: 0; display: inline; padding: 0 0 0 10px; border: 0; background: none; font: 12px var(--sans); color: var(--blue-ink); cursor: pointer; }
 .sg-fine { margin: 10px 0 0 !important; font-size: 12px !important; color: var(--ink3) !important; }
+/* a code to send or type somewhere else: Link my WeChat, the Toast code */
+.sg-hook .text-code { display: block; margin: 0 0 10px; padding: 12px 14px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .1); font: 600 20px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; text-align: center; user-select: all; word-break: break-all; }
+.sg-hook p .sbtn { margin-left: 6px; vertical-align: middle; }
 
 
 /* ⌘K: search or ask */

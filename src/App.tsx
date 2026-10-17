@@ -804,9 +804,19 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       buyPack: async () => { if (!ownerOk()) return; try { goTo((await api.buyPack(cloud.wsId)).url); } catch (e) { if ((e as api.ApiError).code === "plan_required") setPlans("start"); else fail(e); } },
       connect: async kind => { if (!ownerOk()) return; try { goTo((await api.connectUrl(cloud.wsId, kind)).url); } catch (e) { if ((e as api.ApiError).code === "not_configured") say(lang === "zh" ? "这个连接即将开放。在此之前，可把机构来信转发到 support@placetta.com，团队会帮您添加。" : "This connection opens soon. Until then, forward agency emails to support@placetta.com and the team adds them for you."); else fail(e); } },
       connectHook: async (kind, url, secret) => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "hook_connect", { kind, url, secret: secret || undefined, lang }); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接，测试消息已发到群里。" : "Connected. A test message is in the group."); return true; } catch (e) { fail(e); return false; } },
-      botSetup: async kind => { try { return await api.integration<{ events_url: string; manifest?: string }>(cloud.wsId, "bot_setup", { kind }); } catch (e) { fail(e); return null; } },
-      connectBot: async (kind, creds) => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "bot_connect", { kind, ...creds }); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接。在频道里 @Odelia 或私信她即可派活。" : "Connected. Mention @Odelia in a channel or message her directly to give her a job."); return true; } catch (e) { fail(e); return false; } },
-      availability: async () => { try { return await api.integration<api.Availability>(cloud.wsId, "available"); } catch { return { google: false, microsoft: false, dropbox: false, quickbooks: false, slack: false }; } },
+      botSetup: async kind => { try { return await api.integration<api.BotSetup>(cloud.wsId, "bot_setup", { kind }); } catch (e) { fail(e); return null; } },
+      connectBot: async (kind, creds) => {
+        if (!ownerOk()) return false;
+        try {
+          await api.integration(cloud.wsId, "bot_connect", { kind, ...creds }); setIntegrations(await api.listIntegrations(cloud.wsId));
+          say(kind === "wechat_bot"
+            ? (lang === "zh" ? "已连接。现在到微信“消息推送”中填写服务器地址、Token 和 EncodingAESKey 并提交，然后每位同事在下方关联自己的微信。" : "Connected. Now save the server address, Token and EncodingAESKey under Message push in WeChat, then each teammate links their WeChat below.")
+            : (lang === "zh" ? "已连接。在频道里 @Odelia 或私信她即可派活。" : "Connected. Mention @Odelia in a channel or message her directly to give her a job."));
+          return true;
+        } catch (e) { fail(e); return false; }
+      },
+      connectToast: async () => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "toast_connect"); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接 Toast。Odelia 现在可以读取销售额和排班。" : "Toast is connected. Odelia can read sales and schedules now."); return true; } catch (e) { fail(e); return false; } },
+      availability: async () => { try { return await api.integration<api.Availability>(cloud.wsId, "available"); } catch { return { google: false, microsoft: false, dropbox: false, quickbooks: false, slack: false, square: false, toast: false }; } },
       disconnect: async kind => { if (!ownerOk()) return; try { await api.integration(cloud.wsId, "disconnect", { kind }); setIntegrations(await api.listIntegrations(cloud.wsId)); } catch (e) { fail(e); } },
       saveLogin: async l => { if (!ownerOk()) return; try { await api.saveLogin(cloud.wsId, l); setLogins(await api.listLogins(cloud.wsId)); say(lang === "zh" ? "登录信息已加密保存。" : "Saved and encrypted."); } catch (e) { fail(e); } },
       removeLogin: async id => { if (!ownerOk()) return; try { await api.removeLogin(cloud.wsId, id); setLogins(await api.listLogins(cloud.wsId)); } catch (e) { fail(e); } },

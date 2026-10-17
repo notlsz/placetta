@@ -1,16 +1,23 @@
-// chat-events: what a business's own Slack or Lark bot hears. POST ?slack=<workspace id> or ?lark=<workspace id>, set as
-// the bot's event address when it's connected in Settings, Integrations. Each request is checked against that bot's own
-// secret (Slack's signing secret; Lark's verification token, and with an Encrypt Key on, its signature, which every
-// request but Lark's URL check must carry). A mention in a channel, or a direct message, becomes a job for Odelia; she
-// answers in the same thread. Slack and Lark both retry, so each event is taken once, by its event id.
+// chat-events: what a business's own Slack or Lark bot, or its own WeChat Official Account, hears. POST ?slack=<workspace
+// id> or ?lark=<workspace id>, set as the bot's event address when it's connected in Settings, Integrations; WeChat
+// uses /chat-events/wechat/<workspace id> as its server address (GET for the URL check WeChat sends when the address is
+// saved, POST for messages). Each request is checked against that bot's own secret (Slack's signing secret; Lark's
+// verification token, and with an Encrypt Key on, its signature, which every request but Lark's URL check must carry;
+// WeChat's Token, and in safe mode the msg_signature and the AES seal for that AppID). A mention in a channel, or a
+// direct message, becomes a job for Odelia; she answers in the same thread, or in WeChat the same chat. Slack, Lark and
+// WeChat all retry, so each event is taken once, by its event id (WeChat's MsgId).
 //
 // The job runs as the teammate who asked, never as whoever connected the bot: the sender is looked up in Slack
 // (users.info) or Lark (the contact API), matched by email to a Placetta account, and must be a member of this
-// workspace. Guests, people from another company in a shared channel, and anyone else get a polite note in both
-// languages and no run. Anything to file, pay or send still waits for an approval in the app.
+// workspace. WeChat doesn't share emails, so a teammate links their WeChat once by sending the account the 6-digit
+// code Settings shows them (wechat_links). Guests, people from another company in a shared channel, followers who
+// haven't linked, and anyone else get a polite note in both languages and no run. Anything to file, pay or send still
+// waits for an approval in the app.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type Bot, type ChatSender, type ChatTo, chatReply, type LarkBot, larkOpen, larkSender, larkText, larkWorks, NEEDS_EMAIL_SCOPE, NOT_TEAMMATE, type SlackBot, slackSender, slackSigned, slackText, slackWho } from "../_shared/bots.ts";
 import { HOOK_KINDS, postHook } from "../_shared/channels.ts";
+import { type WechatBot, wxCredsWork, wxHandle, wxUrlCheck } from "../_shared/wechat.ts";
+import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -52,6 +59,19 @@ const later = (p: Promise<unknown>) => { const rt = (globalThis as any).EdgeRunt
 
 const zh = (t: string) => /[一-鿿]/.test(t);
 
+/** Hands the job to Odelia as this member (agent-run, with the monitor key): null once it started (or joined the same
+ *  request still running), else what to tell them, in their language. */
+async function startChat(ws: string, uid: string, to: ChatTo, prompt: string, lang: "en" | "zh"): Promise<string | null> {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/agent-run`, {
+    method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": await monitorKey() },
+    body: JSON.stringify({ action: "start_chat", workspace_id: ws, user_id: uid, channel: to.kind, chat_to: to, prompt: prompt.slice(0, 4000), lang }),
+    signal: AbortSignal.timeout(20000),
+  }).catch(() => null);
+  if (res?.status === 202) return null;
+  const j = res ? await res.json().catch(() => ({})) as { error?: { message?: string } } : {};
+  return j.error?.message ?? (lang === "zh" ? "暂时无法开始，请稍后再试。" : "I couldn't start that just now. Try again in a moment.");
+}
+
 /** Works out who asked and, for a teammate, hands the job to Odelia as them; anyone else gets a note and no run. */
 async function takeJob(ws: string, bot: Bot, to: ChatTo, prompt: string, who: () => Promise<ChatSender>) {
   const sender = await who().catch(() => ({ ok: false, why: "unknown" }) as ChatSender);
@@ -61,16 +81,8 @@ async function takeJob(ws: string, bot: Bot, to: ChatTo, prompt: string, who: ()
     await chatReply(bot, to, !sender.ok && sender.why === "setup" ? NEEDS_EMAIL_SCOPE : NOT_TEAMMATE);
     return;
   }
-  const lang = zh(prompt) ? "zh" : "en";
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/agent-run`, {
-    method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": await monitorKey() },
-    body: JSON.stringify({ action: "start_chat", workspace_id: ws, user_id: uid, channel: to.kind, chat_to: to, prompt: prompt.slice(0, 4000), lang }),
-    signal: AbortSignal.timeout(20000),
-  }).catch(() => null);
-  if (res?.status === 202) return;
-  const j = res ? await res.json().catch(() => ({})) as { error?: { message?: string } } : {};
-  const why = j.error?.message ?? (lang === "zh" ? "暂时无法开始，请稍后再试。" : "I couldn't start that just now. Try again in a moment.");
-  await chatReply(bot, to, why);
+  const why = await startChat(ws, uid, to, prompt, zh(prompt) ? "zh" : "en");
+  if (why) await chatReply(bot, to, why);
 }
 
 async function slack(req: Request, ws: string, body: string) {
@@ -109,9 +121,59 @@ async function lark(req: Request, ws: string, body: string) {
   return json({});
 }
 
+/* ------------------------------------------------------------------ WeChat */
+
+/** The workspace a WeChat request is for: /chat-events/wechat/<id> (the address Settings gives), or ?wechat=<id>. */
+function wechatWs(url: URL): string | null {
+  const id = /\/wechat\/([0-9a-f-]{36})\/?$/i.exec(url.pathname)?.[1] ?? url.searchParams.get("wechat");
+  return id && UUID.test(id) ? id.toLowerCase() : null;
+}
+const plain = (text: string, status = 200) => new Response(text, { status, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+
+/** WeChat's URL check, sent when the server address is saved in its console: echostr back when it's signed with this
+ *  account's Token. */
+async function wechatCheck(url: URL, ws: string) {
+  const acct = await wechatAccount(admin, ws);
+  const echo = acct ? await wxUrlCheck(acct.bot.token, url.searchParams) : null;
+  return echo === null ? plain("", 401) : plain(echo);
+}
+
+/** Starts a WeChat member's job in the background; a refusal (no plan, too many jobs) goes back to them in WeChat. */
+async function wechatJob(ws: string, bot: WechatBot, save: (b: WechatBot) => Promise<void>, uid: string, openid: string, prompt: string, lang: "en" | "zh") {
+  const to: ChatTo = { kind: "wechat", openid };
+  const why = await startChat(ws, uid, to, prompt, lang);
+  if (why) await chatReply(bot, to, why, { save });
+}
+
+/** A message pushed to the workspace's WeChat account (wxHandle in wechat.ts has the steps), with the database and the
+ *  agent behind it. */
+async function wechat(url: URL, ws: string, body: string) {
+  const acct = await wechatAccount(admin, ws);
+  if (!acct) return plain("", 401);
+  const { bot, save } = acct;
+  const r = await wxHandle(bot, url.searchParams, body, {
+    firstTime,
+    claim: async (openid, code) => {
+      const { data, error } = await admin.rpc("wechat_link_claim", { p_ws: ws, p_appid: bot.app_id, p_openid: openid, p_code: code });
+      if (error) console.error("wechat link", error.code ?? "");
+      return (data as { result?: string } | null)?.result;
+    },
+    sender: (openid) => wechatSender(admin, ws, bot.app_id, openid),
+    // the job starts after the answer has gone back (WeChat waits 5 seconds); its answer comes as a customer service message
+    start: (uid, openid, text, lang) => later(wechatJob(ws, bot, save, uid, openid, text, lang)),
+    notTeammate: NOT_TEAMMATE,
+  });
+  return new Response(r.body, { status: r.status, headers: { "Content-Type": r.type } });
+}
+
 Deno.serve(async (req) => {
-  if (req.method !== "POST") return json({ error: "Use POST." }, 405);
   const url = new URL(req.url);
+  if (req.method === "GET") {
+    const ws = wechatWs(url);
+    if (!ws) return json({ error: "Use POST." }, 405);
+    try { return await wechatCheck(url, ws); } catch (e) { console.error("wechat check", String((e as Error)?.message ?? e).slice(0, 160)); return plain("", 400); }
+  }
+  if (req.method !== "POST") return json({ error: "Use POST." }, 405);
   const body = await req.text();
   if (body.length > 200_000) return json({ error: "too large" }, 413);
   // ?probe=1 with the monitor key: each provider's real answer to a well-formed link or credentials it doesn't know, so a
@@ -129,12 +191,15 @@ Deno.serve(async (req) => {
     const hooks = await Promise.all(HOOK_KINDS.map(async (k) => [k, await postHook(k, fake[k], "Placetta probe")] as const));
     const slackBot = await slackWho("xoxb-0000000000-0000000000000-000000000000000000000000");
     const larkBot = await larkWorks({ kind: "lark_bot", app_id: "cli_00000000000000", app_secret: "x".repeat(32), verification_token: "x", domain: "feishu" });
-    return json({ hooks: Object.fromEntries(hooks), slack_bot_accepts_fake: !!slackBot, lark_bot_accepts_fake: larkBot });
+    // WeChat should call made-up credentials wrong ("credentials"); "ip" or "confirm" means its address rules changed
+    const wx = await wxCredsWork("wx0000000000000000", "0".repeat(32));
+    return json({ hooks: Object.fromEntries(hooks), slack_bot_accepts_fake: !!slackBot, lark_bot_accepts_fake: larkBot, wechat_accepts_fake: wx.ok, wechat_says: wx.ok ? null : wx.problem });
   }
-  const s = url.searchParams.get("slack"), l = url.searchParams.get("lark");
+  const s = url.searchParams.get("slack"), l = url.searchParams.get("lark"), wx = wechatWs(url);
   try {
     if (s && UUID.test(s)) return await slack(req, s, body);
     if (l && UUID.test(l)) return await lark(req, l, body);
+    if (wx) return await wechat(url, wx, body);
   } catch (e) { console.error("chat event", String((e as Error)?.message ?? e).slice(0, 160)); return json({ error: "bad request" }, 400); }
   return json({ error: "not found" }, 404);
 });
