@@ -44,8 +44,11 @@ function Picture({ i, zh }: { i: number; zh: boolean }) {
 }
 
 export function Walkthrough() {
-  const { lang, ask } = useApp();
-  const [open, setOpen] = useState(() => !tourSeen() && !/[?&]notour\b/.test(location.search));
+  const { lang, ask, ws } = useApp();
+  // An application filled at sign-up and waiting for approval (src/plan/prefill.ts) is the tour's last card for real:
+  // the tour waits, so the first tap is Approve. It opens on a later visit, or from Help.
+  const firstWin = !!ws.firstPlan?.win && ws.approvals.some(a => a.app === ws.firstPlan?.win);
+  const [open, setOpen] = useState(() => !tourSeen() && !/[?&]notour\b/.test(location.search) && !firstWin);
   const [i, setI] = useState(0);
   const zh = lang === "zh";
   useEffect(() => { const on = () => { setI(0); setOpen(true); }; window.addEventListener("placetta-tour", on); return () => window.removeEventListener("placetta-tour", on); }, []);

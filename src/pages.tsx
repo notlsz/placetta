@@ -5,7 +5,8 @@ import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status 
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
 import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
 import { openingPath, preflight } from "./smart";
-import { readyToFile } from "./core";
+import { audit, readyToFile } from "./core";
+import { firstPlanClock, secondsSay } from "./plan/prefill";
 import { formById } from "./forms/registry";
 import type { Key } from "./i18n";
 import { AgentBot, TaskBot, Working } from "./Bot";
@@ -196,11 +197,38 @@ function Welcome() {
   );
 }
 
+/** The line under the plan: "Mapped 10 permits and filled 1 application in 2 seconds", or the lines filled when no
+ *  application was ready to put up at sign-up. */
+function firstLine(n: number, ms: number, won: boolean, lines: number): Bi {
+  const s = secondsSay(ms), p = `${n} permit${n === 1 ? "" : "s"}`, took = `用时${/^\d/.test(s.zh) ? " " : ""}${s.zh}`;
+  if (won) return B(`Mapped ${p} and filled 1 application in ${s.en}`, `${took}：梳理了 ${n} 项许可，填好 1 份申请`);
+  if (lines) return B(`Mapped ${p} and filled ${lines} form line${lines === 1 ? "" : "s"} in ${s.en}`, `${took}：梳理了 ${n} 项许可，填好 ${lines} 栏表格`);
+  return B(`Mapped ${p} in ${s.en}`, `${took}：梳理了 ${n} 项许可`);
+}
+
 /** Home answers three questions at a glance, in this order: what needs me, what is Odelia doing, what's next. A section
  *  shows only when it has something to say. */
 export function Overview() {
-  const { t, b, ws, lang, go, ask, busy, live, updates, queued } = useApp();
+  const { t, b, ws, lang, go, ask, busy, live, updates, queued, editWs } = useApp();
   const n = ws.apps.length;
+  /* Time to plan: from the signup press (src/cloud/Root.tsx) to this plan on screen, recorded once in the workspace,
+     with one line in the audit trail, and the first win's approval request logged the way Odelia's is. */
+  useEffect(() => {
+    if (!ws.firstPlan || ws.firstPlan.ms != null) return;
+    const frame = requestAnimationFrame(() => {
+      const ms = firstPlanClock.take();
+      if (ms == null) return;
+      editWs(w => {
+        const fp = w.firstPlan;
+        if (!fp || fp.ms != null) return w;
+        const s = secondsSay(ms), win = fp.win ? w.apps.find(a => a.id === fp.win && w.approvals.some(x => x.app === a.id)) : undefined;
+        const planned = audit("agent", B("Mapped the opening plan", "梳理开店计划"), w.business,
+          B(`${fp.apps} permits from Placetta's registry and ${fp.filled ?? 0} form lines from your signup, in ${s.en}`, `用时${/^\d/.test(s.zh) ? " " : ""}${s.zh}：从快哉许可库梳理 ${fp.apps} 项许可，根据注册信息填写 ${fp.filled ?? 0} 栏`))({ ...w, firstPlan: { ...fp, ms } });
+        return win ? audit("agent", B("Asked for approval", "请求批准"), win.name, B("Filled from your signup. No fee", "根据注册信息填写，无需费用"))(planned) : planned;
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);   // once, when Home first shows the plan // eslint-disable-line react-hooks/exhaustive-deps
   if (!n) return <Welcome />;
   const c = (s: Status[]) => ws.apps.filter(a => s.includes(a.status)).length;
   const approved = c(["approved"]), agency = c(["review", "filing"]), you = c(["ready", "needs"]);
@@ -306,6 +334,7 @@ export function Overview() {
             <button type="button" className="pill quiet sm" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
           </div>
         </div>
+        {fp?.ms != null && previews > 0 && <p className="plan-time" data-indent><I.check />{b(firstLine(fp.apps, fp.ms, !!fp.win && ws.apps.some(a => a.id === fp.win), fp.filled ?? 0))}</p>}
       </section>
 
       {(ws.stores ?? []).length > 0 && (

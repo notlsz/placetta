@@ -15,6 +15,7 @@ import { HqHome } from "../Headquarters";
 import { applyTheme, readTheme } from "../hooks";
 import type { HqRow } from "../hq";
 import { previewPlan } from "../plan/preview";
+import { FROM_SIGNUP, firstPlanClock, parseAddress, prefill } from "../plan/prefill";
 import { nowIso } from "../time";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
@@ -363,14 +364,38 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   const parsed = parsePlace(placeNow);
   const needState = !!placeNow.trim() && !parsed && !placeNow.includes(",");
   const what = sellNow === "other" ? otherNow.trim() : f.sell ? SELLS.find(x => x.en === sellNow)?.[lang === "zh" ? "zh" : "en"] ?? "" : own && own.length <= 60 ? own : SELLS.find(x => x.en === sellNow)?.[lang === "zh" ? "zh" : "en"] ?? "";
-  const create = async () => {
+  // The second screen: three optional answers that let Placetta fill a real application before the plan appears.
+  const [step, setStep] = useState<"line" | "more">("line");
+  const [more, setMore] = useState({ legal: "", notFormed: false, owner: "", address: "" });
+  /** What the first screen settled (the city and state), or why it can't go on yet. */
+  const settle = () => {
     const city = parsed?.city ?? placeNow.replace(/,.*$/, "").trim();
     const state = parsed?.state ?? f.state;
-    if (!what) { setErr(L(B("Say what you're opening, like \"milk tea shop\".", "请说明开什么店，例如“奶茶店”。"))); return; }
-    if (!city || !state) { setErr(L(B("Add the city and state, like Flushing, NY.", "请填写城市和州，例如 Flushing, NY。"))); return; }
+    if (!what) { setErr(L(B("Say what you're opening, like \"milk tea shop\".", "请说明开什么店，例如“奶茶店”。"))); return null; }
+    if (!city || !state) { setErr(L(B("Add the city and state, like Flushing, NY.", "请填写城市和州，例如 Flushing, NY。"))); return null; }
+    if (!agree) { setErr(L(B("Check the box to agree to the Terms of Service and Privacy Policy.", "请勾选同意《服务条款》和隐私政策。"))); return null; }
+    return { city, state };
+  };
+  // Start on the first screen goes to the three questions, with anything already typed in the details box carried over
+  const toMore = () => {
+    if (!settle()) return;
+    setErr("");
+    setMore(m => ({ ...m, legal: m.legal || f.entity.trim(), address: m.address || f.street.trim() }));
+    setStep("more");
+  };
+  const create = async (skip = false) => {
+    const at = settle();
+    if (!at) return;
+    const { city, state } = at;
+    // the time to plan runs from this press to the plan on Home (src/pages.tsx reads it)
+    firstPlanClock.start();
     // no name yet is fine: one is made from the line, and it can be renamed any time
     const brand = f.brand.trim() || (lang === "zh" ? `${city}${what}` : `${what} in ${city}`);
-    if (!agree) { setErr(L(B("Check the box to agree to the Terms of Service and Privacy Policy.", "请勾选同意《服务条款》和隐私政策。"))); return; }
+    // the three answers (a skip keeps only what the first screen's details box already had)
+    const notFormed = !skip && more.notFormed;
+    const legal = notFormed ? "" : (skip ? "" : more.legal.trim()) || f.entity.trim();
+    const owner = skip ? "" : more.owner.trim();
+    const addressText = (skip ? "" : more.address.trim()) || f.street.trim();
     setBusy(true); setErr("");
     const st = STATES.find(s => s[0] === state)?.[1] ?? state, nyc = state === "NY" && NYC.test(city);
     const w = WHEN[whenNow];
@@ -379,31 +404,38 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
     const monthEn = month ? month.toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "";
     const monthZh = month ? `${month.getFullYear()} 年 ${month.getMonth() + 1} 月` : "";
     const open = w?.months === 0;
+    const place = `${city}, ${state}`;
+    // the store's street and ZIP, read from the address (a street with no number, or one in Chinese characters, isn't one)
+    const addr = parseAddress(addressText, place);
+    const street = addr?.street ?? "";
     const store: Store = {
-      id: slug(city), name: same(f.street.trim() ? `${city}, ${f.street.trim()}` : city), address: [f.street.trim(), city, state].filter(Boolean).join(", "),
+      id: slug(city), name: same(street ? `${city}, ${street}` : city), address: street ? `${street}, ${city}, ${state}${addr?.zip ? " " + addr.zip : ""}` : [addressText, city, state].filter(Boolean).join(", "),
       stage: open ? "open" : "opening", plannedOpen: monthIso ? monthIso + "-15" : undefined, rules: nyc ? ["nyc_grades", "nyc_fww"] : [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [],
     };
     // The instant plan, from Placetta's registry and before any model call: every permit for this kind of business in
     // this place, in order, with fees and times, so the first screen already shows the work. Odelia verifies each one
     // against the agency when the plan starts; the rows stay, marked preview until then.
-    const place = `${city}, ${state}`;
-    const first = previewPlan(what, place, store.plannedOpen, { entity: f.entity.trim(), storeId: store.id });
-    store.apps = first.apps.map(a => a.id);
+    const first = previewPlan(what, place, store.plannedOpen, { entity: legal, storeId: store.id });
+    // Then every line the answers settle, on every form, and the first win put up for approval (src/plan/prefill.ts).
+    const filled = prefill(first.apps, { what, where: place, legal, owner, address: addressText, brand: f.brand.trim(), open });
+    store.apps = filled.apps.map(a => a.id);
     if (!open && first.projectedOpen) store.projectedOpen = first.projectedOpen;
     const ws: Workspace = normalize(brand, {
       business: same(brand), goal: month ? B(`Open by ${monthEn}`, `${monthZh}开业`) : same(""),
       locations: [{ id: slug(city), name: same(city), county: same(st), state: "active" }],
-      apps: first.apps, deadlines: first.deadlines,
-      firstPlan: { at: nowIso(), what, where: place, whereZh: ZH_CITIES.find(([, en]) => en === place)?.[2], apps: first.apps.length, opening: store.plannedOpen, projectedOpen: first.projectedOpen ?? undefined },
+      apps: filled.apps, deadlines: first.deadlines, approvals: filled.approvals,
+      firstPlan: { at: nowIso(), what, where: place, whereZh: ZH_CITIES.find(([, en]) => en === place)?.[2], apps: first.apps.length, opening: store.plannedOpen, projectedOpen: first.projectedOpen ?? undefined, filled: filled.filled, win: filled.win?.app },
       facts: [
-        ...(f.entity.trim() ? [{ id: "f-entity", group: "business" as const, label: B("Legal entity", "法律实体"), value: same(f.entity.trim()), source: B("You told me", "您告诉我的") }] : []),
+        ...(legal ? [{ id: "f-name", group: "business" as const, label: B("Legal name", "法定名称"), value: same(legal), source: FROM_SIGNUP }] : []),
+        ...(notFormed ? [{ id: "f-formed", group: "business" as const, label: B("Company formed", "公司是否已成立"), value: B("Not yet", "尚未成立"), source: FROM_SIGNUP }] : []),
+        ...(owner ? [{ id: "f-owner", group: "business" as const, label: B("Owner", "所有人"), value: same(owner), source: FROM_SIGNUP }] : []),
         { id: "f-sell", group: "operations", label: B("What you sell", "销售内容"), value: same(what), source: B("You told me", "您告诉我的") },
-        { id: "f-addr", group: "location", label: B("Storefront", "门店"), value: same(store.address), source: B("You told me", "您告诉我的") },
+        { id: "f-addr", group: "location", label: B("Storefront", "门店"), value: same(store.address), source: street ? FROM_SIGNUP : B("You told me", "您告诉我的") },
         ...(month ? [{ id: "f-open", group: "location" as const, label: B("Target opening", "目标开业"), value: B(monthEn, monthZh), source: B("You told me", "您告诉我的") }] : []),
         { id: "f-appr", group: "rules", label: B("Needs your approval", "需要您批准"), value: B("Every filing, payment and message", "每一次提交、付款和消息"), source: B("Always on", "始终开启"), locked: true },
       ],
       stores: [store],
-      meta: { city, region: st, what, entity: f.entity.trim() || undefined },
+      meta: { city, region: st, what, entity: legal || undefined },
     });
     try {
       const id = await api.createWorkspace(brand, ws);
@@ -413,11 +445,47 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       onCreated(id);
     } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
+  if (step === "more") {
+    const ex = parsed ?? { city: placeNow.replace(/,.*$/, "").trim() || "Flushing", state: f.state || "NY" };
+    return (
+      <div className="gate-card wide">
+        <h1>{L(B("Three answers fill your first application.", "回答三个问题，第一份申请就填好了。"))}</h1>
+        <p className="gate-sub">{L(B("Each one is optional. Skip any you don't have yet; Odelia asks when she needs it.", "都是选填。还没有的可以跳过，Odelia 需要时会再问您。"))}</p>
+        <form className="onb" onSubmit={e => { e.preventDefault(); void create(); }}>
+          <div className="q">
+            <span id="onb-legal-t">{L(B("Legal business name", "企业法定名称"))}</span>
+            <div className="onb-pair">
+              <input id="onb-legal" aria-labelledby="onb-legal-t" value={more.notFormed ? "" : more.legal} disabled={more.notFormed} onChange={e => setMore({ ...more, legal: e.target.value })} placeholder="Lucky Leaf Tea LLC" autoComplete="organization" autoFocus />
+              <button type="button" role="checkbox" aria-checked={more.notFormed} className="chip" onClick={() => setMore({ ...more, notFormed: !more.notFormed })}>{L(B("Not formed yet", "还没注册公司"))}</button>
+            </div>
+            <small className="onb-hint">{L(B("Exactly as the state has it, with LLC or Inc.", "与州政府登记的完全一致，包括 LLC 或 Inc."))}</small>
+          </div>
+          <label className="q">
+            <span>{L(B("Owner's full name", "所有人全名"))}</span>
+            <input id="onb-owner" value={more.owner} onChange={e => setMore({ ...more, owner: e.target.value })} placeholder="Mei Chen" autoComplete="name" />
+            <small className="onb-hint">{L(B("As on your ID, in English letters.", "与证件一致，请用英文或拼音。"))}</small>
+          </label>
+          <label className="q">
+            <span>{L(B("Store address", "门店地址"))}</span>
+            <input id="onb-address" value={more.address} onChange={e => setMore({ ...more, address: e.target.value })} placeholder={`38 Main St, ${ex.city}, ${ex.state}`} autoComplete="street-address" />
+            <small className="onb-hint">{L(B("Street, city, state and ZIP code.", "街道、城市、州和邮编，请用英文。"))}</small>
+          </label>
+          <div className="onb-act onb-act3">
+            <button type="button" className="sbtn quiet" disabled={busy} onClick={() => { setErr(""); setStep("line"); }}>{L(B("Back", "返回"))}</button>
+            <button type="button" className="sbtn line" disabled={busy} onClick={() => void create(true)}>{L(B("Skip", "跳过"))}</button>
+            <button type="submit" className="sbtn ink big" disabled={busy}>{busy ? "…" : L(B("Fill my application", "填好申请"))}</button>
+          </div>
+        </form>
+        {err && <p className="gate-err" role="alert">{err}</p>}
+        <p className="onb-who">{L(B(`Signed in as ${email}`, `已登录 ${email}`))}</p>
+      </div>
+    );
+  }
   return (
     <div className="gate-card wide">
       <h1>{L(B("What are you opening, and where?", "您要开什么店？开在哪里？"))}</h1>
       <p className="gate-sub">{L(B("One line is enough. Your plan appears right away: every license and permit, in order, with fees and timelines. Odelia then fills the forms and files them with your approval.", "一句话就够。计划立刻出现：全部执照和许可，按顺序列出费用与时间。之后 Odelia 填好表格，经您批准后提交。"))}</p>
-      <form className="onb" onSubmit={e => { e.preventDefault(); void create(); }}>
+      <form className="onb" onSubmit={e => { e.preventDefault(); toMore(); }}>
         <label className="q">
           <span className="sr">{L(B("What and where", "开什么店、在哪里"))}</span>
           <input id="onb-line" className="onb-line" value={line} onChange={e => { setLine(e.target.value); setErr(""); }} placeholder={L(B("Milk tea shop in Flushing, NY", "奶茶店，纽约法拉盛"))} autoFocus autoComplete="off" />

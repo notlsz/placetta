@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import * as api from "./api";
 import { useApp } from "../ctx";
 import { B } from "../model";
+import { filledName } from "../plan/prefill";
 import { I, Modal, Pill, Select } from "../ui";
 
 /* The plans sheet: the entry plan to start the agent, and the annual plans for filing by the team.
@@ -12,7 +13,8 @@ type Prices = api.PlanPrices;
 const FOOD = /tea|coffee|caf[eé]|restaurant|food|kitchen|bakery|hot ?pot|noodle|dessert|ice cream|boba|bubble|juice|bar\b|grill|pizza|sushi|dumpling|奶茶|茶|咖啡|餐|火锅|面|甜品|烘焙|食/i;
 const usd = (x: api.LocationPrice | null | undefined, monthly = false) => !x ? "" : "$" + (monthly && x.interval === "year" ? Math.round(x.amount / 12) : x.amount).toLocaleString("en-US", { maximumFractionDigits: 0 });
 
-export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: () => void }) {
+/** filing: the approval that met the plan wall (held until a plan is on), so the sheet names the form that's waiting. */
+export function Plans({ reason, filing, onClose }: { reason: "start" | "file"; filing?: string; onClose: () => void }) {
   const { b, t, lang, cloud, ws } = useApp();
   const zh = lang === "zh";
   const [markets, setMarkets] = useState(1);
@@ -40,11 +42,17 @@ export function Plans({ reason, onClose }: { reason: "start" | "file"; onClose: 
   const pv = ws.apps.filter(a => a.preview).length;
   const ready = reason === "start" && showEntry && ws.firstPlan && pv > 0
     ? { place: zh ? ws.firstPlan.whereZh ?? ws.firstPlan.where : ws.firstPlan.where.replace(/,\s*[A-Z]{2}$/, ""), n: pv } : null;
+  // the form that's filled and waiting: the one just approved, or the one filled at sign-up (src/plan/prefill.ts)
+  const heldApp = (() => { const a = filing ? ws.approvals.find(x => x.id === filing) : undefined; return a?.app ? ws.apps.find(x => x.id === a.app) : undefined; })();
+  const winApp = ws.firstPlan?.win ? ws.apps.find(a => a.id === ws.firstPlan!.win && a.status === "ready") : undefined;
+  const heldName = heldApp ? filledName(heldApp) : null, winName = winApp ? filledName(winApp) : null;
   const title = reason === "file" ? b(B("Filing is part of the yearly plan.", "申报包含在年度方案中。"))
     : ready ? (zh ? `您的计划已就绪：${ready.place}的 ${ready.n} 项许可。` : `Your plan is ready: ${ready.n} permits for ${ready.place}.`)
     : b(B("Open on time. Stay open. No fines.", "按时开业，持续营业，零罚款。"));
-  const sub = reason === "file" ? b(B("Your approval is saved. Start the plan and Odelia takes it from here.", "您的确认已保存。开通方案后，由 Odelia 接手。"))
-    : ready ? (zh ? "开通开店计划，Odelia 会向每个机构核实、填好每一份表格，并在您批准后提交。" : "Start the entry plan and Odelia verifies each one with its agency, fills every form and files them with your approval.")
+  const sub = reason === "file" ? (heldName
+      ? (zh ? `您的${heldName.zh}已填好，批准已保存。开通年度方案后，快哉团队即提交。` : `Your ${heldName.en} is filled and your approval is saved. Start the yearly plan and Placetta's team files it.`)
+      : b(B("Your approval is saved. Start the plan and Odelia takes it from here.", "您的确认已保存。开通方案后，由 Odelia 接手。")))
+    : ready ? (zh ? `开通开店计划，Odelia 会向每个机构核实、填好每一份表格，并在您批准后提交。${winName ? `您的${winName.zh}已经填好，等您批准。` : ""}` : `Start the entry plan and Odelia verifies each one with its agency, fills every form and files them with your approval.${winName ? ` Your ${winName.en} is already filled and waiting for your approval.` : ""}`)
     : b(B("Billed per location, yearly. Odelia does the work; our team files and answers to the agencies.", "按门店、按年计费。Odelia 负责工作，我们的团队负责申报并与机构对接。"));
   const tier = (key: "essentials" | "pro", price: api.LocationPrice | null | undefined, name: [string, string], tag: [string, string], items: [string, string][]) => (
     <section className={"plan perloc" + (key === "pro" ? " hl" : "")}>

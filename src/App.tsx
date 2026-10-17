@@ -1062,7 +1062,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         {drawer && <AppDrawer id={drawer.id} tab={drawer.tab} edit={drawer.edit} onTab={tab => setDrawer(d => (d ? { ...d, tab, edit: false } : d))} onClose={() => setDrawer(null)} />}
         {modal && <ApproveModal id={modal} onClose={() => setModal(null)} />}
         {legal && <LegalReader id={legal} onClose={() => setLegal(null)} />}
-        {plans && cloudCtx && <Plans reason={plans} onClose={() => setPlans(null)} />}
+        {plans && cloudCtx && <Plans reason={plans} filing={plans === "file" ? pendingFiling.current ?? undefined : undefined} onClose={() => setPlans(null)} />}
         {limitHit && cloudCtx && (
           <Modal label={lang === "zh" ? "Odelia 额度" : "Odelia allowance"} onClose={() => setLimitHit(false)}>
             <header className="m-h"><h2>{lang === "zh" ? "本期的 Odelia 额度已用完" : "This period's Odelia allowance is used"}</h2>

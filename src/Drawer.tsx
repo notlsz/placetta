@@ -15,6 +15,7 @@ import { preflight } from "./smart";
 import { FileCard, I, LevelTag, Modal, Pill, Sheet, StatusChip, feeText, feeTotal } from "./ui";
 import { INK } from "./pages";
 import { filingBlockers } from "./core";
+import { BY_HAND } from "./guard";
 import { Working } from "./Bot";
 
 /* ------------------------- application, opened ------------------------- */
@@ -53,7 +54,10 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
           {a.source.url && <a href={a.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{a.source.label}<I.ext /></a>}
         </p>
         {a.next && <p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
-        {a.preview && <p className="sh-pv"><I.spark />{zh ? "来自快哉的登记库。开始计划后，Odelia 会向机构核实、填好表格并提交。" : "From Placetta's registry. When you start the plan, Odelia verifies it with the agency, fills it and files it."}</p>}
+        {a.preview && <p className="sh-pv"><I.spark />{a.status === "ready"
+          // filled at sign-up (src/plan/prefill.ts) on the registry's own copy of the agency's form
+          ? (zh ? "用快哉登记库里的机构官方表格，根据您的注册信息填好。提交前，快哉会对照机构现行要求逐项核对。" : "Filled from your signup on the agency's own form, from Placetta's registry. Placetta checks it against the agency's current requirements before filing.")
+          : (zh ? "来自快哉的登记库。开始计划后，Odelia 会向机构核实、填好表格并提交。" : "From Placetta's registry. When you start the plan, Odelia verifies it with the agency, fills it and files it.")}</p>}
         <nav className="seg tabs" role="tablist">
           {tabs.map(x => <button key={x.k} type="button" role="tab" aria-selected={tab === x.k} onClick={() => onTab(x.k)}>{x.l}{x.n && <span>{x.n}</span>}</button>)}
         </nav>
@@ -98,7 +102,9 @@ function Progress({ a }: { a: Application }) {
   const off = a.official ? formById(a.official) : undefined;
   const tbc = /^(to be confirmed|待确认)$/i.test(b(a.est));
   const steps: { k: string; s: StepState; t: string; d?: string; act?: { l: string; go: () => void } }[] = [
-    a.preview
+    a.preview && st === "ready"
+      ? { k: "prep", s: "done", t: zh ? "根据您的注册信息填好" : "Filled from your signup", d: [off ? off.form : "", zh ? "来自快哉的登记库" : "from Placetta's registry"].filter(Boolean).join(zh ? "，" : ", ") }
+      : a.preview
       ? { k: "prep", s: "done", t: zh ? "快哉的登记库列出了这一项" : "Listed from Placetta's registry", d: [off ? off.form : "", zh ? "开始计划后 Odelia 向机构核实并填写" : "Odelia verifies it with the agency and fills it when the plan starts"].filter(Boolean).join(zh ? "，" : ", ") }
       : { k: "prep", s: "done", t: zh ? "快哉准备了申请" : "Placetta prepared the application", d: [off ? off.form : "", day(prepAt)].filter(Boolean).join(zh ? "，" : ", ") },
     { k: "you", s: past(["ready", "filing", "review", "approved"]) || (!missing && !empty) ? "done" : "now",
@@ -364,7 +370,18 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
           <h3>{a.kind === "send" ? (zh ? "发送内容（可直接修改）" : "What will be sent (edit it here)") : t("ap_data")}</h3>
           {a.kind === "send"
             ? <SendFields a={a} />
-            : <dl className="kv data">{data.map(f => <div key={f.id}><dt>{b(f.label)}</dt><dd>{f.value || t("empty")}</dd></div>)}</dl>}
+            : <dl className="kv data">{data.filter(f => !(a.kind === "file" && BY_HAND.test(f.value.trim()))).map(f => <div key={f.id}><dt>{b(f.label)}</dt><dd>{f.value || t("empty")}</dd></div>)}</dl>}
+          {/* the lines the signer writes on the signed copy (an SSN, and on a form filled at sign-up whatever only the
+              owner knows): listed together, so what Placetta sends and what you write are plain to see */}
+          {a.kind === "file" && (() => {
+            const hand = data.filter(f => BY_HAND.test(f.value.trim()));
+            return hand.length > 0 && (
+              <div className="ap-hand">
+                <p>{zh ? `签字时由您手写的 ${hand.length} 栏` : hand.length === 1 ? "The line you write by hand when you sign" : `The ${hand.length} lines you write by hand when you sign`}</p>
+                <ul>{hand.map(f => <li key={f.id}>{b(f.label)}</li>)}</ul>
+              </div>
+            );
+          })()}
           {a.kind === "send" && cloud && (() => {
             const mail = cloud.integrations.find(i => (i.kind === "gmail" || i.kind === "outlook_mail") && i.status === "connected");
             return mail
