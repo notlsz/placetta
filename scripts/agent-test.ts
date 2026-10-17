@@ -237,6 +237,7 @@ async function mapStore() {
 async function previewRefine() {
   console.log("\n# The instant plan (src/plan/preview.ts): preview rows keep their ids when Odelia refines them");
   const { previewPlan } = await import("../src/plan/preview");
+  const { formsFor, placesOf } = await import("../src/forms/registry");
   const first = previewPlan("Milk tea shop", "Flushing, NY", "2027-03-01", { today: "2026-10-16" });
   const store = { id: "flushing", name: same("Flushing"), address: "Flushing, NY", stage: "opening" as const, plannedOpen: "2027-03-01", rules: ["nyc_grades" as const], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: first.apps.map(a => a.id) };
   const ws = workspace({ apps: first.apps, deadlines: first.deadlines, stores: [store], firstPlan: { at: "2026-10-16T00:00:00Z", what: "Milk tea shop", where: "Flushing, NY", apps: first.apps.length, opening: "2027-03-01" } });
@@ -278,14 +279,15 @@ async function previewRefine() {
   const sys = String(r.bodies[0].system);
   ok(/marked preview \(\d+ of them\)/.test(sys) && /keep their ids/.test(sys) && /"preview":true/.test(sys) && /"first_plan"/.test(sys), "the prompt explains preview rows and the snapshot marks them and the first plan");
 
-  // a generic row (a place the registry doesn't cover locally) is the same filing when Odelia names it the agency's way
-  const plano = previewPlan("Milk tea shop", "Plano, TX", undefined, { today: "2026-10-16" });
-  const gen = plano.apps.find(a => a.id === "pv-g-food-permit")!;
-  ok(gen && plano.generic >= 2 && plano.apps.some(a => a.official === "tx-ap201"), `Plano gets the Texas forms plus ${plano.generic} generic local rows`);
+  // a generic row (a place the registry doesn't cover locally) is the same filing when Odelia names it the agency's way.
+  // McKinney stands in for an uncovered city since Plano has its own library steps (2026-10-17).
+  const mck = previewPlan("Milk tea shop", "McKinney, TX", undefined, { today: "2026-10-16" });
+  const gen = mck.apps.find(a => a.id === "pv-g-food-permit")!;
+  ok(gen && mck.generic >= 2 && mck.apps.some(a => a.official === "tx-ap201"), `McKinney gets the Texas forms plus ${mck.generic} generic local rows`);
   const r2 = await agent({
-    ws: workspace({ apps: plano.apps, stores: [{ ...store, id: "plano", address: "Plano, TX", apps: plano.apps.map(a => a.id) }] }), prompt: "Verify the Plano permits.",
+    ws: workspace({ apps: mck.apps, stores: [{ ...store, id: "mckinney", address: "McKinney, TX", apps: mck.apps.map(a => a.id) }] }), prompt: "Verify the McKinney permits.",
     script: [
-      () => ask(["prepare_application", { name: "Collin County food establishment permit", agency: "Collin County Health Care Services", level: "county", agency_url: "https://www.collincountytx.gov", fee: 350, store_id: "plano" }]),
+      () => ask(["prepare_application", { name: "Collin County food establishment permit", agency: "Collin County Health Care Services", level: "county", agency_url: "https://www.collincountytx.gov", fee: 350, store_id: "mckinney" }]),
       () => say("Verified the county food permit."),
     ],
   });
@@ -293,7 +295,7 @@ async function previewRefine() {
   eq(p2.parsed?.application_id, gen.id, "a generic preview row is refined in place when the agency's own name says the same thing");
   const gen2 = r2.w.apps.find(a => a.id === gen.id)!;
   ok(gen2.preview === false && gen2.agency.en === "Collin County Health Care Services" && gen2.fees[0].amount === 350 && gen2.checklist.some(c => c.dep), "it takes the agency's name and fee, and keeps what it waits on");
-  eq(r2.w.apps.length, plano.apps.length, "no second copy");
+  eq(r2.w.apps.length, mck.apps.length, "no second copy");
 
   // Boston and Atlanta: the city's own food permit, plan review and business license come from the library, in order
   const bos = previewPlan("Milk tea shop", "Boston, MA", "2027-04-01", { today: "2026-10-16" });
@@ -313,6 +315,65 @@ async function previewRefine() {
   ok(aAt("fulton-plan-review") < aAt("fulton-food-permit") && aRow("fulton-food-permit").checklist.some(c => c.dep === aRow("fulton-plan-review").id) && aRow("fulton-food-permit").critical
     && /DeKalb/.test(aRow("fulton-food-permit").plain?.en ?? "") && aRow("atl-license").checklist.some(c => c.dep === aRow("irs-ss4").id) && aRow("atl-license").source.url.includes("atlantaga.gov"),
     "the county permit waits on its plan review and says DeKalb's board applies there; the city license waits on the EIN, sourced from atlantaga.gov");
+
+  // The metros added 2026-10-17. For a milk tea shop, a restaurant and a bakery, each gets its own food permit and its
+  // business license from the library, never the generic rows, with plan review ahead of the food permit. Where the
+  // city has no separate business license, the row that stands in for it is checked: Chicago's, DC's, Edison's and
+  // Minneapolis's food licenses are their business licenses, Plano and Jersey City register a business through the
+  // certificate of occupancy, and Columbus through its food service license.
+  const METROS: { where: string; food: string; license: string; plan?: string; also?: string[] }[] = [
+    { where: "Oakland, CA", food: "ac-health-permit", license: "oak-business-tax", plan: "ac-plan-check", also: ["oak-zoning", "ca-food-manager"] },
+    { where: "Sacramento, CA", food: "sacc-health-permit", license: "sac-bot", plan: "sacc-plan-review", also: ["ca-food-manager"] },
+    { where: "Seattle, WA", food: "sea-food", license: "sea-business-license", plan: "kc-plan-review", also: ["wa-bls", "wa-food-worker"] },
+    { where: "Portland, OR", food: "mult-food-license", license: "pdx-tax", plan: "mult-plan-review", also: ["or-payroll"] },
+    { where: "Las Vegas, NV", food: "lv-food", license: "lv-license", plan: "snhd-plan-review", also: ["cc-business-license", "nv-tax", "nv-esd", "snhd-food-handler"] },
+    { where: "Plano, TX", food: "pla-food-permit", license: "pla-co", plan: "pla-plan-review", also: ["tx-ap201", "tx-food-manager"] },
+    { where: "Chicago, IL", food: "chi-license", license: "chi-license", plan: "chi-plan-review", also: ["il-tax", "il-ides", "chi-sanitation"] },
+    { where: "Philadelphia, PA", food: "phl-food-license", license: "phl-cal", plan: "phl-plan-review", also: ["phl-tax-account", "phl-food-safety", "pa-tax"] },
+    { where: "Washington, DC", food: "dc-food", license: "dc-food", plan: "dc-plan-review", also: ["dc-otr", "dc-does", "dc-co", "dc-food-manager"] },
+    { where: "Arlington, VA", food: "arl-food-license", license: "arl-bpol", plan: "arl-plan-review", also: ["va-tax", "va-vec", "va-food-manager"] },
+    { where: "Fairfax, VA", food: "ffx-food-permit", license: "ffx-bpol", plan: "ffx-plan-review", also: ["ffx-nonrup", "va-food-manager"] },
+    { where: "Edison, NJ", food: "edi-food-license", license: "edi-food-license", plan: "edi-plan-review", also: ["nj-reg"] },
+    { where: "Jersey City, NJ", food: "jc-food-license", license: "jc-co", also: ["nj-reg"] },
+    { where: "Miami, FL", food: "fl-dbpr", license: "mia-btr", plan: "fl-dbpr-plan", also: ["mia-cu", "mdc-btr", "fl-dor", "fl-food-manager"] },
+    { where: "Denver, CO", food: "den-food-license", license: "den-tax", plan: "den-plan-review", also: ["den-zoning", "co-tax"] },
+    { where: "Minneapolis, MN", food: "mpls-food-license", license: "mpls-food-license", plan: "mpls-plan-review", also: ["mn-tax", "mn-ui", "mn-cfpm"] },
+    { where: "Columbus, OH", food: "cmh-food-license", license: "cmh-food-license", plan: "cmh-plan-review", also: ["oh-vendor", "oh-ui", "oh-pic"] },
+  ];
+  const GENERIC = ["pv-g-food-permit", "pv-g-local-license", "pv-g-plan-review", "pv-g-employer"];
+  for (const m of METROS) {
+    const plans = ["Milk tea shop", "Restaurant", "Bakery"].map(kind => ({ kind, p: previewPlan(kind, m.where, "2027-04-01", { today: "2026-10-17" }) }));
+    const bad = plans.flatMap(({ kind, p }) => {
+      const at = (id: string) => p.apps.findIndex(a => a.official === id), row = (id: string) => p.apps[at(id)];
+      const want = [m.food, m.license, ...(m.plan ? [m.plan] : []), ...(m.also ?? [])];
+      const out: string[] = [];
+      for (const id of want) if (at(id) < 0) out.push(`${kind}: no ${id}`);
+      for (const id of GENERIC) if (p.apps.some(a => a.id === id)) out.push(`${kind}: generic ${id}`);
+      if (!p.local || p.generic !== 0) out.push(`${kind}: local ${p.local}, ${p.generic} generic rows`);
+      const food = at(m.food) >= 0 ? row(m.food) : undefined;
+      if (food && (!food.critical || !/\.(gov|us|org|com)\//.test(food.source.url + "/") || /sba\.gov|fda\.gov/.test(food.source.url))) out.push(`${kind}: ${m.food} not critical or not sourced from the agency`);
+      if (food && m.plan && at(m.plan) >= 0 && !(at(m.plan) < at(m.food) && food.checklist.some(c => c.dep === row(m.plan!).id))) out.push(`${kind}: ${m.food} doesn't follow ${m.plan}`);
+      return out;
+    });
+    const sets = plans.map(({ p }) => p.apps.map(a => a.official).join(","));
+    ok(!bad.length && new Set(sets).size === 1,
+      `${m.where}: a milk tea shop, restaurant and bakery each get ${m.food} and ${m.license} from the library${m.plan ? `, after ${m.plan}` : ""} (${plans[0].p.apps.length} rows, none generic)`, bad);
+  }
+  // what the agencies' own pages say comes first
+  const deps = (where: string, id: string) => { const p = previewPlan("Restaurant", where, "2027-04-01", { today: "2026-10-17" }); const r = p.apps.find(a => a.official === id)!; return r.checklist.filter(c => c.dep).map(c => p.apps.find(a => a.id === c.dep)?.official); };
+  ok(deps("Oakland, CA", "oak-business-tax").includes("oak-zoning") && deps("Seattle, WA", "sea-business-license").includes("wa-bls")
+    && deps("Philadelphia, PA", "phl-food-license").includes("phl-cal") && deps("Philadelphia, PA", "phl-cal").includes("phl-tax-account")
+    && ["dc-co", "dc-otr", "dc-food-manager", "dc-plan-review"].every(d => deps("Washington, DC", "dc-food").includes(d))
+    && ["mia-cu", "fl-dbpr"].every(d => deps("Miami, FL", "mia-btr").includes(d)) && deps("Denver, CO", "den-food-license").includes("den-zoning")
+    && ["nv-silverflume", "nv-tax"].every(d => deps("Las Vegas, NV", "lv-license").includes(d)) && deps("Chicago, IL", "chi-license").includes("chi-sanitation"),
+    "the steps wait where the agency says: Oakland's zoning clearance, Seattle's state UBI, Philadelphia's tax account and CAL, DC's occupancy and Clean Hands, Miami's CU, Denver's zoning, Nevada's state license");
+  // a name another city or a street shares doesn't pull in these metros' steps
+  ok(!placesOf("Arlington, TX").includes("ARL") && !placesOf("Portland, ME").includes("PDX") && !placesOf("Columbus, GA").includes("CMH")
+    && !placesOf("123 Fairfax Ave, Los Angeles, CA").includes("FFX") && !placesOf("100 Plano Rd, Richardson, TX").includes("PLA") && placesOf("Alexandria, VA").includes("VA") && !placesOf("Alexandria, VA").includes("EG"),
+    "Arlington TX, Portland ME, Columbus GA, Fairfax Ave and Plano Rd stay out; Alexandria, VA is in Virginia, not Egypt");
+  // Israel's country code is also Illinois's: Tel Aviv gets none of Illinois's or Chicago's forms
+  const tlv = formsFor({ segment: "restaurant", where: "Tel Aviv", needs: { food: true, employees: true, buildout: true, newEntity: true } });
+  ok(!tlv.some(f => f.where === "IL" || f.where === "CHI"), "Tel Aviv doesn't pick up Illinois's forms", tlv.map(f => f.id));
 }
 
 async function progress() {

@@ -137,8 +137,20 @@ export const CITIES: City[] = [
   c("ORL", "US", "Orlando", "奥兰多", ["orlando", "奥兰多"], true, "FL"),
   c("FTW", "US", "Fort Worth", "沃斯堡", ["fort worth", "沃斯堡", "沃思堡"], true, "TX"),
   c("PHX", "US", "Phoenix", "凤凰城", ["phoenix", "凤凰城", "菲尼克斯"], true, "AZ"),
-  ...([["Denver", "丹佛", "CO"], ["Portland", "波特兰", "OR"], ["Minneapolis", "明尼阿波利斯", "MN"],
-    ["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
+  // added 2026-10-17 with their own sourced steps in local-us.ts. A name that is also another US city's or a common
+  // street's (Fairfax Ave in Los Angeles, Plano Rd in Dallas, Oakland Ave) matches only with its state.
+  c("OAK", "US", "Oakland", "奥克兰", ["oakland, ca", "oakland, california", "oakland ca", "加州奥克兰", "奥克兰"], true, "CA"),
+  c("SAC", "US", "Sacramento", "萨克拉门托", ["sacramento", "萨克拉门托", "沙加缅度"], true, "CA"),
+  c("PDX", "US", "Portland", "波特兰", ["portland, or", "portland, oregon", "portland or", "俄勒冈州波特兰", "波特兰"], true, "OR"),
+  c("PLA", "US", "Plano", "普莱诺", ["plano, tx", "plano, texas", "plano tx", "普莱诺"], true, "TX"),
+  c("ARL", "US", "Arlington", "阿灵顿", ["arlington, va", "arlington, virginia", "arlington va", "arlington county", "阿灵顿"], true, "VA"),
+  c("FFX", "US", "Fairfax County", "费尔法克斯县", ["fairfax, va", "fairfax, virginia", "fairfax va", "fairfax county", "annandale, va", "chantilly, va", "centreville, va", "tysons", "mclean, va", "费尔法克斯"], true, "VA"),
+  c("EDI", "US", "Edison", "爱迪生", ["edison, nj", "edison, new jersey", "edison nj", "爱迪生市"], true, "NJ"),
+  c("JC", "US", "Jersey City", "泽西市", ["jersey city", "泽西市"], true, "NJ"),
+  c("DEN", "US", "Denver", "丹佛", ["denver", "丹佛"], true, "CO"),
+  c("MSP", "US", "Minneapolis", "明尼阿波利斯", ["minneapolis", "明尼阿波利斯"], true, "MN"),
+  c("CMH", "US", "Columbus", "哥伦布", ["columbus, oh", "columbus, ohio", "columbus oh", "俄亥俄州哥伦布", "哥伦布"], true, "OH"),
+  ...([["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
     .map(([en, zh, st]) => c("US-" + en.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6), "US", en, zh, [en.toLowerCase(), zh], false, st)),
 ];
 
@@ -154,6 +166,12 @@ export const STATES: { code: string; en: string; zh: string; names: RegExp }[] =
   { code: "NV", en: "Nevada", zh: "内华达州", names: /nevada|,\s*nv\b|内华达/i },
   { code: "AZ", en: "Arizona", zh: "亚利桑那州", names: /arizona|,\s*az\b|亚利桑那/i },
   { code: "NJ", en: "New Jersey", zh: "新泽西州", names: /new jersey|,\s*nj\b|新泽西/i },
+  { code: "VA", en: "Virginia", zh: "弗吉尼亚州", names: /(?<!west )virginia|,\s*va\b|弗吉尼亚/i },
+  { code: "CO", en: "Colorado", zh: "科罗拉多州", names: /colorado|,\s*co\.?\s*(\d{5}(-\d{4})?\s*)?$|科罗拉多/i },
+  { code: "MN", en: "Minnesota", zh: "明尼苏达州", names: /minnesota|,\s*mn\b|明尼苏达/i },
+  { code: "OH", en: "Ohio", zh: "俄亥俄州", names: /\bohio\b|,\s*oh\b|俄亥俄/i },
+  // ", or" and ", co" are ordinary words too, so only at the end of the address (or before the ZIP)
+  { code: "OR", en: "Oregon", zh: "俄勒冈州", names: /oregon|,\s*or\.?\s*(\d{5}(-\d{4})?\s*)?$|俄勒冈/i },
 ];
 
 /* ------------------------------------------------------------------ the steps */
@@ -424,34 +442,25 @@ export const WORLD_FORMS: OfficialForm[] = [
 
   /* ------------------------------- US tier 1 states and cities ------------------------------- */
   // Boston's and Atlanta's city and county steps (and the Massachusetts and Georgia food manager rules) are full,
-  // sourced entries in local-us.ts
+  // sourced entries in local-us.ts, as are (since 2026-10-17) the state tax and the city and county food steps for
+  // Illinois and Chicago, Washington and Seattle, Florida and Miami, DC, Pennsylvania and Philadelphia, and Nevada and
+  // Las Vegas. The company formations below stay here.
   ...([
     ["il-sos", "IL", "state", 20, 150, "Articles of Organization (Form LLC-5.5)", "LLC formation", "LLC 设立", "Illinois Secretary of State", "伊利诺伊州州务卿", "https://www.ilsos.gov", "Form the LLC online, or register a company formed in another state to do business in Illinois.", "在线设立 LLC，或为外州公司办理在伊利诺伊州经营的登记。", true],
-    ["il-tax", "IL", "state", 30, 0, "MyTax Illinois registration (REG-1)", "Sales tax registration", "销售税登记", "Illinois Department of Revenue", "伊利诺伊州税务局", "https://mytax.illinois.gov", "Register for sales and withholding tax before the first sale.", "首次销售前登记销售税和预扣税。", false],
-    ["chi-license", "CHI", "city", 58, null, "Business License", "Chicago business license", "芝加哥营业执照", "City of Chicago, Business Affairs and Consumer Protection", "芝加哥市商业事务与消费者保护局", "https://www.chicago.gov/city/en/depts/bacp.html", "Most shops and restaurants need a city business license; food businesses also pass a health inspection.", "多数门店和餐厅须取得市营业执照，食品企业还须通过卫生检查。", false],
-    ["wa-bls", "WA", "state", 22, null, "Business License Application", "Washington business license (with city endorsement)", "华盛顿州营业执照（含城市背书）", "Washington Department of Revenue, Business Licensing Service", "华盛顿州税务局营业执照服务处", "https://dor.wa.gov", "One application covers the state license, tax registration and the Seattle city endorsement.", "一份申请即可办理州执照、税务登记和西雅图市背书。", false],
     ["wa-sos", "WA", "state", 20, null, "Certificate of Formation", "LLC formation", "LLC 设立", "Washington Secretary of State, Corporations", "华盛顿州州务卿公司处", "https://ccfs.sos.wa.gov", "Form the company or register a foreign company online.", "在线设立公司或办理外州公司登记。", true],
-    ["sea-food", "SEA", "county", 70, null, "Food Business Permit", "Food business permit", "食品经营许可证", "Public Health, Seattle and King County", "西雅图与金县公共卫生局", "https://kingcounty.gov", "Plan review for new or remodeled kitchens, then the annual food business permit.", "新建或改建厨房先做图纸审查，再申请年度食品经营许可证。", false],
     ["ma-sos", "MA", "state", 20, 500, "Certificate of Organization", "LLC formation", "LLC 设立", "Secretary of the Commonwealth, Corporations Division", "马萨诸塞州州务卿公司处", "https://www.sec.state.ma.us", "Form the LLC or register a foreign company online.", "在线设立 LLC 或办理外州公司登记。", true],
     ["ma-tax", "MA", "state", 30, 0, "MassTaxConnect registration", "Sales tax registration", "销售税登记", "Massachusetts Department of Revenue", "马萨诸塞州税务局", "https://mtc.dor.state.ma.us", "Register for sales tax and withholding before trading.", "开业前登记销售税和预扣税。", false],
     ["fl-sunbiz", "FL", "state", 20, 125, "Articles of Organization", "LLC formation", "LLC 设立", "Florida Division of Corporations (Sunbiz)", "佛罗里达州公司处（Sunbiz）", "https://dos.fl.gov/sunbiz/", "Form the LLC or register a foreign company online.", "在线设立 LLC 或办理外州公司登记。", true],
-    ["fl-dor", "FL", "state", 30, 0, "Form DR-1", "Sales tax registration", "销售税登记", "Florida Department of Revenue", "佛罗里达州税务局", "https://floridarevenue.com", "Register for sales and use tax before the first sale.", "首次销售前登记销售与使用税。", false],
-    ["fl-dbpr", "FL", "state", 70, null, "Food Service License", "Restaurant license", "餐饮许可证", "Florida DBPR, Division of Hotels and Restaurants", "佛罗里达州商业与职业管理部酒店餐饮处", "https://www2.myfloridalicense.com", "Restaurants get the state food service license after plan review and inspection.", "餐厅经图纸审查和检查后取得州餐饮许可证。", false],
-    ["mia-btr", "MIA", "city", 58, null, "Business Tax Receipt", "Miami business tax receipt", "迈阿密营业税收据", "City of Miami and Miami-Dade County Tax Collector", "迈阿密市与迈阿密戴德县税务征收处", "https://www.miami.gov", "Get the certificate of use, then the city and county business tax receipts.", "先取得使用证，再办理市和县的营业税收据。", false],
     ["dc-dlcp", "DC", "city", 20, null, "Basic Business License", "Corporate registration and basic business license", "公司登记与基本营业执照", "DC Department of Licensing and Consumer Protection", "华盛顿特区许可与消费者保护局", "https://dlcp.dc.gov", "Register the company, then get the basic business license for the activity.", "先登记公司，再按经营范围申请基本营业执照。", false],
-    ["dc-otr", "DC", "city", 30, 0, "Form FR-500", "Tax registration", "税务登记", "DC Office of Tax and Revenue", "华盛顿特区税务局", "https://mytax.dc.gov", "Register for sales and withholding tax on MyTax.DC.gov.", "在 MyTax.DC.gov 登记销售税和预扣税。", false],
-    ["dc-food", "DC", "city", 70, null, "Food Establishment License", "Food establishment license", "食品场所执照", "DC Health", "华盛顿特区卫生局", "https://dchealth.dc.gov", "Food businesses pass plan review and a pre-opening inspection.", "食品企业须通过图纸审查和开业前检查。", false],
     ["ga-sos", "GA", "state", 20, null, "Articles of Organization (eCorp)", "LLC formation", "LLC 设立", "Georgia Secretary of State, Corporations", "佐治亚州州务卿公司处", "https://ecorp.sos.ga.gov", "Form the LLC or register a foreign company online.", "在线设立 LLC 或办理外州公司登记。", true],
     ["ga-tax", "GA", "state", 30, 0, "Georgia Tax Center registration", "Sales tax registration", "销售税登记", "Georgia Department of Revenue", "佐治亚州税务局", "https://gtc.dor.ga.gov", "Register for sales and withholding tax online.", "在线登记销售税和预扣税。", false],
     ["pa-dos", "PA", "state", 20, 125, "Certificate of Organization", "LLC formation", "LLC 设立", "Pennsylvania Department of State", "宾夕法尼亚州州务厅", "https://file.dos.pa.gov", "Form the LLC or register a foreign company online.", "在线设立 LLC 或办理外州公司登记。", true],
-    ["pa-tax", "PA", "state", 30, 0, "myPATH registration", "Sales tax license", "销售税许可证", "Pennsylvania Department of Revenue", "宾夕法尼亚州税务局", "https://mypath.pa.gov", "Register for the sales tax license and employer withholding.", "登记销售税许可证和雇主预扣税。", false],
-    ["phl-cal", "PHL", "city", 58, 0, "Commercial Activity License", "Commercial activity license", "商业活动许可证", "City of Philadelphia, Department of Licenses and Inspections", "费城许可与检查局", "https://eclipse.phila.gov", "Every business in Philadelphia gets the free commercial activity license online; food businesses also get a health license.", "费城所有企业须在线申请免费的商业活动许可证，食品企业另需卫生许可。", false],
     ["nv-silverflume", "NV", "state", 20, null, "Articles of Organization and State Business License", "LLC formation and state business license", "LLC 设立与州营业执照", "Nevada Secretary of State (SilverFlume)", "内华达州州务卿（SilverFlume）", "https://www.nvsilverflume.gov", "Form the company and get the state business license together online.", "在线同时设立公司并取得州营业执照。", true],
-    ["lv-license", "LV", "city", 58, null, "Business License", "Las Vegas business license", "拉斯维加斯营业执照", "City of Las Vegas, Business Licensing", "拉斯维加斯市营业执照处", "https://www.lasvegasnevada.gov", "Get the city or Clark County business license, depending on where the store is.", "视门店位置申请拉斯维加斯市或克拉克县营业执照。", false],
-    ["lv-food", "LV", "county", 70, null, "Food Establishment Permit", "Food establishment permit", "食品场所许可证", "Southern Nevada Health District", "南内华达卫生区", "https://www.southernnevadahealthdistrict.org", "Plan review, then the health permit before opening.", "先做图纸审查，开业前取得卫生许可证。", false],
     ["nj-formation", "NJ", "state", 20, null, "Public Records Filing for New Business Entity", "Business formation and tax registration", "企业设立与税务登记", "NJ Division of Revenue and Enterprise Services", "新泽西州税收与企业服务处", "https://www.nj.gov/treasury/revenue/", "Form or register the company, then register for state taxes.", "设立或登记公司后登记州税务。", true],
   ] as const).map(([id, where, level, order, fee, form, ten, tzh, aen, azh, url, hen, hzh, formation]) => W({ id, where, level: level as Level, method: "online", order, fee, cur: "USD",
     ...(formation ? { needs: { newEntity: true } } : {}), ...(/food|dbpr/.test(id) ? { segs: ["restaurant"] as Segment[], needs: { food: true } } : {}),
+    // a DC restaurant's basic business license is the Food Services license (dc-food in local-us.ts)
+    ...(id === "dc-dlcp" ? { segs: ["retail", "seller", "warehouse"] as Segment[] } : {}),
     form, title: [ten, tzh], agency: [aen, azh], how: [hen, hzh], url,
     ...(formation ? { foreign: ["A company formed in another state or abroad registers as a foreign entity instead.", "在外州或境外成立的公司改为办理外地公司登记。"] as T } : {}) })),
 ];
@@ -464,7 +473,9 @@ const has = (text: string, alias: string) => /[a-z]/.test(alias) ? new RegExp(`(
 /** The countries, states and cities in a place, as the codes the steps use. known: a city with its own local steps. */
 export function worldPlaces(where: string): Place {
   const w = where.toLowerCase();
-  const city = CITIES.find(x => x.aliases.some(a => has(w, a.toLowerCase())));
+  // an address that names a US state is in the US, so a city abroad that shares its name (Alexandria, VA) doesn't match
+  const usState = STATES.some(s => s.names.test(where));
+  const city = CITIES.find(x => (!usState || x.country === "US") && x.aliases.some(a => has(w, a.toLowerCase())));
   const country = COUNTRIES.find(x => x.code === city?.country) ?? COUNTRIES.find(x => x.code !== "US" && x.names.test(w));
   const codes: string[] = [];
   if (country) codes.push(country.code);

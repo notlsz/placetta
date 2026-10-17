@@ -124,8 +124,10 @@ const SRC_EU = { label: "europa.eu", url: "https://europa.eu/youreurope/business
 const EU = new Set(["FR", "DE", "ES", "IT", "NL", "IE", "BE", "PT", "AT", "SE", "DK", "FI", "PL", "CZ", "HU", "GR"]);
 
 /** The registry forms that register the business for state sales tax, and those that also register it as an employer. */
-const TAX_FORMS = new Set(["ny-dtf-17", "ca-cdtfa", "tx-ap201", "az-tpt", "il-tax", "ma-tax", "fl-dor", "dc-otr", "ga-tax", "pa-tax", "wa-bls", "nj-formation"]);
-const EMPLOYER_FORMS = new Set(["ny-dol-100", "ca-edd-de1", "tx-twc", "az-tpt", "wa-bls", "nj-formation"]);
+const TAX_FORMS = new Set(["ny-dtf-17", "ca-cdtfa", "tx-ap201", "az-tpt", "il-tax", "ma-tax", "fl-dor", "dc-otr", "ga-tax", "pa-tax", "wa-bls", "nj-formation",
+  "nj-reg", "nv-tax", "va-tax", "co-tax", "mn-tax", "oh-vendor"]);
+const EMPLOYER_FORMS = new Set(["ny-dol-100", "ca-edd-de1", "tx-twc", "az-tpt", "wa-bls", "nj-formation",
+  "nj-reg", "pa-tax", "fl-dor", "co-tax", "il-ides", "nv-esd", "dc-does", "va-vec", "mn-ui", "oh-ui", "or-payroll"]);
 
 type Role = "entity" | "ein" | "tax" | "employer" | "plan" | "food" | "license" | "building" | "publication" | "other";
 /** What a form does in an opening, so the rows can be chained in order. */
