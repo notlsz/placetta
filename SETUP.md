@@ -97,13 +97,15 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 
 | Secret | What it is |
 | --- | --- |
-| `ANTHROPIC_API_KEY` | Runs the agent. |
+| `GEMINI_API_KEY` | Runs the agent (Gemini 3.8 Flash first). Set `GEMINI_PAID=1` once billing is on for its Google project; without it Gemini gets no customer conversations or files. |
+| `ANTHROPIC_API_KEY` | The reviewer, deep research and the safety net behind Gemini. |
 | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | The voice. Free tier F0 covers 500,000 characters a month. |
 | `STRIPE_SECRET_KEY` | Stripe secret key. |
 | `STRIPE_PRICE_ENTRY` | One-time price, $299. Quantity is the number of markets. |
-| `STRIPE_PRICE_STARTER` | Recurring yearly, $9,000 ($750 a month billed annually). |
-| `STRIPE_PRICE_GROWTH` | Recurring yearly, $24,000 ($2,000 a month billed annually). |
-| `STRIPE_PRICE_EXTRA_LOCATION` | Optional. Recurring yearly, $1,200 ($100 a month). |
+| `STRIPE_PRICE_LOCATION` | Optional. Essentials, per location, recurring yearly: $1,788 ($149 a month). Without it the price is found by its lookup key `placetta_essentials_year` (see `_shared/stripe_catalog.ts`). |
+| `STRIPE_PRICE_LOCATION_PRO` | Optional. Pro, per location, recurring yearly: $3,588 ($299 a month). Lookup key `placetta_pro_year`. |
+| `STRIPE_PRICE_OPENING`, `STRIPE_PRICE_OPENING_FOOD` | Optional. One-time store opening: $3,500 retail, $6,500 restaurant or food. |
+| `STRIPE_PRICE_GUARANTEE`, `STRIPE_PRICE_PACK` | Optional. Open-by-date guarantee $2,500 a store; Odelia pack $49. |
 | `STRIPE_WEBHOOK_SECRET` | From the webhook: `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/stripe-webhook`, events `checkout.session.completed` and `customer.subscription.created/updated/deleted`. |
 | `APP_ORIGINS` | Your app address. Checkout, invites and integrations only return there. |
 | `DEV_ORIGINS` | Optional, development only. Origins such as `http://localhost:5173` that Stripe checkout may return to. Without it, localhost is refused. |
