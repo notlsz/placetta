@@ -30,6 +30,8 @@ export declare function runRounds(o: {
   round?: (state: RunState) => Promise<void>;
   research?: boolean; maxRounds?: number;
   channel?: Channel;
+  /** Who asked from outside the app (their number or address), shown on a change card for a business fact. */
+  sender?: string;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for background checks. */
   role?: Role;
 }): Promise<{ reply: Reply } | { paused: RunState }>;

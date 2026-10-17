@@ -20,7 +20,8 @@
 // POST {action: "start_chat", user_id, workspace_id, prompt, channel: "slack"|"lark", chat_to, lang?}
 //      chat-events (monitor key), for the Placetta teammate who asked in the business's Slack or Lark.
 // Every run from outside the app carries its channel, and can't remove deadlines, set up routines, save memory or
-// skills, or change stores; anything it prepares still needs an approval in the app.
+// skills, or change stores; a business fact or the business's name goes up as a change card (with who asked) for an
+// owner to confirm; anything it prepares still needs an approval in the app.
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -179,6 +180,16 @@ async function repeated(ws: string, key: string, channel: string): Promise<strin
 /* ------------------------------ the account's hands ------------------------------ */
 
 const safeName = (n: string) => n.replace(/[^\w.\-一-鿿]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120) || "document";
+
+/** Who asked from outside the app, as a change card shows it: the number they texted or called from, the address they
+ *  emailed from, or for Slack and Lark the member's sign-in email (chat-events matched the sender to them). Nothing for
+ *  the app and background checks. */
+async function senderOf(run: Run): Promise<string | undefined> {
+  if (!run.channel || run.channel === "app") return undefined;
+  if (run.reply_to) return run.reply_to;
+  if (!run.created_by) return undefined;
+  try { return (await admin.auth.admin.getUserById(run.created_by)).data?.user?.email ?? undefined; } catch { return undefined; }
+}
 
 async function servicesFor(ws: string, run: Run, token: string | null): Promise<Services> {
   const { data: filings } = await admin.from("filings").select("app_id, status, confirmation_number, submitted_at, updated_at, note, payment_url, agent_state, channel, agent_log").eq("workspace_id", ws).order("approved_at", { ascending: false });
@@ -412,6 +423,8 @@ export async function work(runId: string, token: string | null, ticket: string |
       },
       // Every channel, so a request from outside the app gets the remote rules (src/serverRun.ts).
       channel: run.channel ?? "app",
+      // and who asked from there, for the change card a business fact or a new name goes up on
+      sender: await senderOf(run),
       role: mainRole,
     });
     clearTimeout(flushT);   // the last write below carries the steps; a late flush would bring the draft back

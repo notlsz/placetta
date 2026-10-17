@@ -92,8 +92,9 @@ type Patch = (w: Workspace) => Workspace;
 /**
  * The same rules on the workspace itself, whichever tool made the change (form skills learned while filing, a playbook's
  * toolbox growing, a removal folded into another change): a remote run leaves memory, skills, routines, existing
- * stores and existing deadlines as they were. Plain SMS changes nothing but its drafts: approvals, documents and the
- * audit trail.
+ * stores and existing deadlines as they were, and the business's own facts and name too (its Context facts, name, goal
+ * and the entity and city it was set up with): those change only through a change card an owner confirms in the app.
+ * Plain SMS changes nothing but its drafts: approvals, documents and the audit trail.
  */
 export function guardPatch(o: { channel?: Channel; plainSms?: boolean }, p: Patch): Patch {
   if (!isRemote(o.channel)) return p;
@@ -106,8 +107,17 @@ export function guardPatch(o: { channel?: Channel; plainSms?: boolean }, p: Patc
       const old = (w.stores ?? []).find(x => x.id === s.id);
       return old ? { ...s, name: old.name, address: old.address, plannedOpen: old.plannedOpen, stage: old.stage } : s;
     }), ...kept] : undefined;
-    return { ...n, deadlines, ...(stores ? { stores } : {}), memories: w.memories, skills: w.skills, routines: w.routines };
+    return { ...n, deadlines, ...(stores ? { stores } : {}), memories: w.memories, skills: w.skills, routines: w.routines,
+      business: w.business, goal: w.goal, facts: w.facts, meta: w.meta };
   };
+}
+
+/** The change cards for a business fact or the business's name that this run put up: what the reply must say is
+ *  waiting for an owner, not saved. */
+const factCards = (w: Workspace, ids: string[]) => ids.map(id => w.approvals.find(a => a.id === id)).filter(a => a?.change?.op === "set_fact" || a?.change?.op === "rename_business");
+/** The line a reply gets when it put a business fact up for an owner's approval but doesn't say so. */
+export function waitingLine(lang: Lang): string {
+  return lang === "zh" ? "企业资料的更改正在等待所有者在快哉应用中确认，确认前不会保存。" : "The change to the business facts is waiting for an owner to confirm it in the Placetta app. Nothing is saved until then.";
 }
 
 /** How to write for where they asked, and what can't be done from there. */
@@ -115,7 +125,8 @@ export function channelHint(channel: Channel | undefined, plainSms = false): str
   if (!isRemote(channel)) return "";
   const limits = plainSms
     ? `\n- This came by plain SMS, which can be forged. From it you can only look things up, answer, and draft (draft_message, send_email, draft_document) for approval in the app. Nothing else in the workspace changes; for anything more, tell them to use the Placetta app.`
-    : `\n- From ${via(channel)} you can read, research, prepare applications, draft, and put things up for approval. You can't remove deadlines, set up or stop routines, save memory or skills, or change or remove stores: tell them to do those in the Placetta app.`;
+    : `\n- From ${via(channel)} you can read, research, prepare applications, draft, and put things up for approval. You can't remove deadlines, set up or stop routines, save memory or skills, or change or remove stores: tell them to do those in the Placetta app.
+- A business fact (remember) or the business's name (edit_workspace) doesn't change from here: the tool puts the change up for an owner to confirm in the app. Say plainly that it's waiting for their approval; never say it's saved.`;
   if (channel !== "sms" && channel !== "voice") return `
 
 This request came by ${via(channel)}, not in the app, and your answer goes back there.${limits}
@@ -146,6 +157,9 @@ export async function runRounds(o: {
   send: Send; lang: Lang; deep: boolean; account: boolean; svc?: Services; files?: Map<string, File>; signal: AbortSignal; until: number;
   /** Where the person asked (a text or a call changes how Odelia writes). */
   channel?: Channel;
+  /** Who asked from outside the app: the number or address they wrote from (or, from Slack or Lark, the member's
+   *  sign-in email). Shown on a change card so the owner sees where a change came from. */
+  sender?: string;
   /** After each round's tools have run: the moment to save. */
   round?: (state: RunState) => Promise<void>;
   /** The model can search and read official sites (web_search, web_fetch). On unless the caller turns it off. */
@@ -164,7 +178,8 @@ export async function runRounds(o: {
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
   const from = { channel: o.channel, plainSms: st.plainSms === true };
   const apply = (p: Patch) => o.apply(guardPatch(from, p));
-  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal });
+  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal,
+    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}) });
   const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms);
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
@@ -275,7 +290,9 @@ export async function runRounds(o: {
   const open = saysDone(said) || !said ?(o.ws().jobs ?? []).filter(j => j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(s => !s.done) && !checkedNow.includes(j.id)).slice(0, 2) : [];
   const proof = [...open.map(j => openLine(j, o.lang)),...checkedNow.map(id => (o.ws().jobs ?? []).find(j => j.id === id)).filter((j): j is Job => !!j).map(j => proofLine(j, o.lang)),
     ...unchecked.filter(id => !checkedNow.includes(id)).slice(0, 1).map(() => (o.lang === "zh" ? "独立检查暂时无法核对，所以这项工作仍未完成。" : "A separate reviewer couldn't check the work yet, so the job stays open."))].filter(Boolean).join(" ");
-  const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), proof].filter(Boolean).join("\n\n");
+  // a business fact put up for an owner's approval: the reply says it's waiting, even when the model didn't
+  const waits = factCards(o.ws(), made.approvals).length > 0 && !/approv|confirm|批准|确认/i.test(said) ? waitingLine(o.lang) : "";
+  const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, proof].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
   return { reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
     files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } };

@@ -80,7 +80,13 @@ export type Change =
   | { op: "move_store"; store: string; name?: string; address?: string; city: string; state: string; planned_open?: string }
   | { op: "remove_store"; store: string }
   | { op: "remove_app"; app: string }
-  | { op: "set_budgets"; budgets: Budget[] };
+  | { op: "set_budgets"; budgets: Budget[] }
+  /** A business fact (legal name, EIN, address, owners) asked for from outside the app: an owner confirms it in the app
+   *  before it fills any form. was: the value it had when asked. via: the channel it came by (email, sms, voice, slack,
+   *  lark). from: who sent it (their number or address). */
+  | { op: "set_fact"; label: Bi; value: string; group: FactGroup; was?: string; via: string; from?: string }
+  /** A new name for the business (or a new goal) asked for from outside the app, confirmed the same way. */
+  | { op: "rename_business"; name?: string; goal?: string; was: Bi; wasGoal?: Bi; via: string; from?: string };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
 export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
