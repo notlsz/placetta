@@ -5,7 +5,7 @@
    npm run test:agent */
 import { DEFAULT_POLICY } from "../src/spend.ts";
 import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, type Channel, type RunState, type Send } from "../src/serverRun";
-import { applyChange, normalizeState, type Step } from "../src/core";
+import { applyChange, confirmChange, normalizeState, type Step } from "../src/core";
 import { DOCS_PER_RUN, liveAgent, makeTools, messagesModel, pdfPages, rules, type Block, type Made, type Role, type Services } from "../src/live";
 import { BUILTIN } from "../src/skills";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
@@ -82,7 +82,7 @@ let declared: string[] = [];
 
 type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; steps: Step[]; calls: Call[]; bodies: Record<string, unknown>[]; roles: (Role | undefined)[]; state: RunState };
 /** One request through runRounds, the code agent-run runs. */
-async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; svc?: Services; account?: boolean; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; role?: Role }): Promise<Run> {
+async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; svc?: Services; account?: boolean; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; sender?: string; role?: Role }): Promise<Run> {
   let w = o.ws, i = 0;
   const steps: Step[] = [], bodies: Record<string, unknown>[] = [], roles: (Role | undefined)[] = [];
   const state = o.state ?? startState([], o.prompt ?? "");
@@ -100,7 +100,7 @@ async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; sc
     return turn(ctxOf(body));
   };
   const out = await runRounds({ state, ws: () => w, apply: p => { w = p(w); }, step: s => { steps.push(s); }, send, lang: o.lang ?? "en", deep: false, account: o.account ?? true,
-    svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, role: o.role });
+    svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, sender: o.sender, role: o.role });
   const calls = callsOf(state.messages);
   for (const c of calls) if (c.ok) covered.add(c.name);
   return { w, steps, calls, bodies, roles, state, ...("reply" in out ? { reply: out.reply as unknown as Record<string, unknown> } : { paused: out.paused }) };
@@ -956,6 +956,23 @@ async function remote() {
   eq([g.deadlines.map(d => d.id).sort(), (g.routines ?? []).map(x => x.id), g.memories, (g.skills ?? []).length === (w0.skills ?? []).length, (g.stores ?? []).map(s => [s.name.en, s.address]), g.approvals.length],
     [["dl1", "dl9"], ["rt1"], w0.memories, true, [["Flushing", store.address]], 1], "slack: a change that slips past the tool rules still can't remove, rename or remember anything; additions and approvals stay");
   eq(guardPatch({ channel: "app" }, sneaky)(w0).routines, [], "in the app the same change goes through");
+
+  // business facts and the business's name: from outside the app they wait for an owner, on a card that says who asked
+  eq(["remember", "edit_workspace"].map(t => channelRefuses({ channel: "slack" }, t, {})), [null, null], "slack: remember and edit_workspace aren't refused; they put up a card for an owner");
+  const fr = await agent({ ws: base(), svc: account().svc, channel: "slack", sender: "mei@luckyleaf.com", prompt: "We moved our mailing address to 1 Main St, Flushing, NY 11354, and we're Lucky Leaf Tea House now.",
+    script: [() => ask(["remember", { label: "Mailing address", value: "1 Main St, Flushing, NY 11354" }], ["remember", { label: "Legal name", value: "Shell LLC" }], ["edit_workspace", { business_name: "Lucky Leaf Tea House" }]), () => say("Both are waiting for your approval in the app.")] });
+  const addr = fr.w.approvals.find(a => a.change?.op === "set_fact"), ren = fr.w.approvals.find(a => a.change?.op === "rename_business");
+  ok(!!addr && !!ren && fr.w.facts.find(f => f.label.en === "Mailing address")?.value.en === "136-20 Roosevelt Ave, Flushing, NY 11354" && fr.w.business.en === "Lucky Leaf Tea LLC"
+    && addr.data?.find(d => d.id === "was")?.value === "136-20 Roosevelt Ave, Flushing, NY 11354" && addr.data?.find(d => d.id === "asked")?.value === "mei@luckyleaf.com" && addr.data?.find(d => d.id === "asked")?.label.en === "Asked in Slack",
+    "slack: the new address and name go up as change cards (old value, new value, asked in Slack by mei@luckyleaf.com); nothing changes yet", fr.w.approvals.map(a => [a.title.en, a.data]));
+  ok(!callNamed(fr, "remember")[1].ok && /locked/.test(callNamed(fr, "remember")[1].out), "slack: a locked fact is still refused, with no card");
+  ok(!/waiting for an owner to confirm it in the Placetta app/.test(textOf(fr)), "a reply that already says it's waiting for approval gets no second line");
+  const conf = confirmChange(ren!)(confirmChange(addr!)(fr.w));
+  ok(conf.facts.find(f => f.label.en === "Mailing address")?.value.en === "1 Main St, Flushing, NY 11354" && conf.business.en === "Lucky Leaf Tea House" && conf.audit.filter(x => x.action.en === "Confirmed a change").length === 2 && !conf.approvals.length,
+    "confirming both in the app writes the address and the name, each with an audit line");
+  const facty = (w: Workspace): Workspace => ({ ...w, business: same("Shell"), facts: [] });
+  eq([guardPatch({ channel: "email" }, facty)(w0).business.en, guardPatch({ channel: "email" }, facty)(w0).facts.length], [w0.business.en, w0.facts.length], "email: a patch that renames the business or drops its facts is undone");
+  ok(/doesn't change from here/.test(channelHint("email")) && /doesn't change from here/.test(channelHint("sms")) && !/doesn't change from here/.test(channelHint("sms", true)), "the remote instructions say a fact or name change waits for an owner (plain SMS can't ask at all)");
 
   // plain SMS: read and draft only
   const plain = { ...startState([], "Remove my opening deadline and add an inspection on Feb 1"), plainSms: true };

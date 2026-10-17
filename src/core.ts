@@ -98,8 +98,38 @@ export function stripState(w: Workspace): Partial<Workspace> {
   return { ...rest, approvals: w.approvals.filter(a => a.kind !== "pay") };
 }
 
-/** Make a change you confirmed: move a store to a new place, remove a store, or remove an application. */
+/** How a request reached Odelia from outside the app, as a person would say it: "by email", "通过邮件". */
+export function viaWords(via: string): Bi {
+  return via === "email" ? B("by email", "通过邮件") : via === "sms" ? B("by text message", "通过短信") : via === "voice" ? B("on a phone call", "通过电话")
+    : via === "slack" ? B("in Slack", "通过 Slack") : via === "lark" ? B("in Lark", "通过飞书") : B("from outside the app", "从应用外");
+}
+/** What a confirmed change did, for the audit trail: a business fact or the name, from what to what, and who asked how.
+ *  Nothing for the other changes (their title already says it). */
+export function changeDetail(c: Change): Bi | undefined {
+  if (c.op !== "set_fact" && c.op !== "rename_business") return undefined;
+  const v = viaWords(c.via), who = c.from ? ` from ${c.from}` : "", whoZh = c.from ? `（${c.from}）` : "";
+  if (c.op === "set_fact") return B(`${c.label.en}: "${c.was ?? ""}" → "${c.value}". Asked ${v.en}${who}`, `${c.label.zh}：“${c.was ?? ""}” → “${c.value}”。${v.zh}${whoZh}提出`);
+  const en = [c.name && `Name: "${c.was.en}" → "${c.name}"`, c.goal && `Goal: "${c.wasGoal?.en ?? ""}" → "${c.goal}"`].filter(Boolean).join(". ");
+  const zh = [c.name && `名称：“${c.was.zh}” → “${c.name}”`, c.goal && `目标：“${c.wasGoal?.zh ?? ""}” → “${c.goal}”`].filter(Boolean).join("。");
+  return B(`${en}. Asked ${v.en}${who}`, `${zh}。${v.zh}${whoZh}提出`);
+}
+
+/** An owner confirming a change card in the app: the change made, the card closed, and an audit line saying what
+ *  changed (for a business fact or the name: from what to what, and who asked how). */
+export const confirmChange = (a: Approval): P => w => (a.change ? audit("you", B("Confirmed a change", "确认更改"), a.title, changeDetail(a.change))(dropApproval(a.id)(applyChange(a.change)(w))) : w);
+
+/** Make a change you confirmed: move a store to a new place, remove a store or an application, set budgets, or save a
+ *  business fact or a new name that was asked for from outside the app. */
 export const applyChange = (c: Change): P => w => {
+  if (c.op === "set_fact") {
+    // matched by its label again now, in case the fact was added or renamed while the card waited
+    const had = w.facts.find(f => f.label.en.toLowerCase() === c.label.en.toLowerCase() || f.label.zh === c.label.zh);
+    if (had?.locked) return w;   // a locked rule ("needs your approval") never changes this way
+    const v = viaWords(c.via);
+    return setFact({ id: had?.id ?? uid("f-x"), group: had?.group ?? c.group, label: had?.label ?? c.label, value: same(c.value),
+      source: B(`Asked ${v.en}, confirmed in the app`, `${v.zh}提出，已在应用中确认`) })(w);
+  }
+  if (c.op === "rename_business") return { ...w, business: c.name ? same(c.name) : w.business, goal: c.goal ? same(c.goal) : w.goal };
   if (c.op === "move_store") {
     const nyc = c.state.toUpperCase() === "NY" && /^(new york|nyc|manhattan|brooklyn|queens|bronx|the bronx|staten island|flushing|astoria|long island city)$/i.test(c.city);
     const address = [c.address, c.city, c.state.toUpperCase()].filter(Boolean).join(", ");

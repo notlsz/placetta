@@ -14,7 +14,7 @@ import type { OrbState } from "thinking-orbs";
 import {
   addApp, addApproval, addDeadline, addDoc, audit, filingBlockers, isBlank, setApp, setCheck, setFact,
   type AgentBackend, type AgentEvent, type Reply, type Request, type Step,
-  uid,
+  uid, viaWords,
 } from "./core";
 import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, CheckItem, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
@@ -358,7 +358,9 @@ export type Services = {
   setting?(key: string, value: string): string;
 };
 export type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; skills: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"]; lastToolAt: number };
-export type X = { model: Model; files: Map<string, File>; svc?: Services; signal: AbortSignal };
+/** asked: set when the request came from outside the app (src/serverRun.ts): the channel (email, sms, voice, slack,
+ *  lark) and who sent it. Then a business fact or the business's name only changes once an owner confirms it in the app. */
+export type X = { model: Model; files: Map<string, File>; svc?: Services; signal: AbortSignal; asked?: { via: string; sender?: string } };
 
 const MAIL = ["gmail", "outlook_mail"], CAL = ["gcal", "outlook_cal"], DRIVES = ["gdrive", "dropbox"];
 const APP_NAMES: Record<string, string> = { gmail: "Gmail", outlook_mail: "Outlook mail", gcal: "Google Calendar", outlook_cal: "Outlook Calendar", gdrive: "Google Drive", dropbox: "Dropbox", quickbooks: "QuickBooks", slack: "Slack" };
@@ -507,6 +509,28 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
   const findStore = (id: unknown) => { const all = get().stores ?? [], st = all.find(s => s.id === str(id)); if (!st) throw new Error(`No store "${str(id)}". ${all.length ? `Stores: ${all.map(x => `"${x.id}" (${x.name.en})`).join(", ")}.` : "There are no stores yet: add_store first."}`); return st; };
   /** A change waiting for the person's confirmation already: asking twice puts two cards in front of them. */
   const pendingChange = (match: (c: Change) => boolean) => get().approvals.find(a => a.kind === "change" && a.change && match(a.change));
+  /** A business fact or the business's name, asked for from outside the app: a forwarded or forged message could
+   *  otherwise change what fills every form. It goes up as a change card (old value, new value, who asked and how) that
+   *  an owner confirms in the app with one tap (src/App.tsx, applyChange in src/core.ts); nothing changes before then. */
+  const proposeChange = (change: Change, title: Bi, does: Bi[], data: Field[], same_: (c: Change) => boolean) => {
+    const asked = x.asked!, v = viaWords(asked.via);
+    const tell = `This came ${v.en}, not in the Placetta app, so nothing changed yet: the change is waiting for an owner to confirm it in the app. Say so plainly in your reply; never say it's saved or updated.`;
+    const twin = pendingChange(same_);
+    if (twin) { made.approvals.push(twin.id); mark(); return { waiting_for_owner_approval: true, approval_id: twin.id, changed_now: false, note: "The same change is already waiting for an owner to confirm it. " + tell }; }
+    const id = freshId(get(), "ap-chg");
+    const who = L(`Asked ${v.en}`, `${v.zh}提出`);
+    S("composing", L("Asking an owner to confirm a change to the business facts", "请所有者确认企业资料的更改"));
+    apply(w => audit("agent", L("Asked to confirm a change", "请求确认更改"), title, L(`Asked ${v.en}${asked.sender ? ` from ${asked.sender}` : ""}`, `${v.zh}${asked.sender ? `（${asked.sender}）` : ""}提出`))(addApproval({
+      id, kind: "change", change, title, action: L("Confirm the change", "确认更改"),
+      does: [...does, L(`This was asked ${v.en}${asked.sender ? ` from ${asked.sender}` : ""}, not in the app. Confirm it only if you know the request is real and the new value is right.`,
+        `这是${v.zh}${asked.sender ? `（${asked.sender}）` : ""}提出的，不是在应用中提出的。只有确认请求属实、新内容正确时才批准。`)],
+      data: [...data, { id: "asked", label: who, value: asked.sender ?? "" }],
+    })(w)));
+    made.approvals.push(id); mark();
+    return { waiting_for_owner_approval: true, approval_id: id, changed_now: false, note: tell };
+  };
+  /** "Legal name" reads "legal name" mid-sentence; "EIN" stays as it is. */
+  const lower = (s: string) => (/^[A-Z][a-z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 
   return [
     {
@@ -685,13 +709,16 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             return { ...x, fields, status: x.status === "draft" && fields.every(f => !isBlank(f.value)) && !x.checklist.some(c => c.state === "missing") ? "ready" as Status : x.status };
           });
           let n: Workspace = { ...w, apps };
-          for (const f of wide) { const [label, group] = SHARED[f.id]; const had = n.facts.find(x => x.label.en.toLowerCase() === label.en.toLowerCase()); n = setFact({ id: had?.id ?? "f-x-" + f.id, group: had?.group ?? group, label: had?.label ?? label, value: same(f.value), source: L("You told me", "您告诉我的") })(n); }
+          // from outside the app Context isn't changed here (guardPatch in src/serverRun.ts holds that line too): a
+          // business fact saves only through remember, which asks an owner to confirm it
+          if (!x.asked) for (const f of wide) { const [label, group] = SHARED[f.id]; const had = n.facts.find(x => x.label.en.toLowerCase() === label.en.toLowerCase()); n = setFact({ id: had?.id ?? "f-x-" + f.id, group: had?.group ?? group, label: had?.label ?? label, value: same(f.value), source: L("You told me", "您告诉我的") })(n); }
           return n;
         });
         made.apps.add(a.id); touch(a.id); mark();
         const now = get().apps.find(x => x.id === a.id)!;
         return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...kept, ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
-          ...(also ? { also_filled_on: `${also} other open application${also === 1 ? "" : "s"}, and saved to Context` } : {}) };
+          ...(also ? { also_filled_on: `${also} other open application${also === 1 ? "" : "s"}${x.asked ? "" : ", and saved to Context"}` } : {}),
+          ...(x.asked && wide.length ? { not_saved_to_context: `This came from outside the app, so Context (the business facts) didn't change. To keep ${wide.map(f => SHARED[f.id][0].en).join(", ")} there, use remember: it asks an owner to confirm in the app.` } : {}) };
       },
     },
     {
@@ -801,7 +828,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "remember",
-      description: "Save a fact about the business that the person told you or a document states (legal name, address, owners, hours, square footage) to the workspace facts (Context in the app), so every application fills from it. A label that's already there gets the new value. Facts about the person themselves go to memory_save when it's available.",
+      description: "Save a fact about the business that the person told you or a document states (legal name, address, owners, hours, square footage) to the workspace facts (Context in the app), so every application fills from it. A label that's already there gets the new value. When the request came from outside the app (a text, call, email or chat), it instead asks an owner to confirm the change in the app. Facts about the person themselves go to memory_save when it's available.",
       inputSchema: { type: "object", properties: { label: { type: "string" }, value: { type: "string" }, group: { type: "string", enum: ["business", "location", "operations"] } }, required: ["label", "value"] },
       execute(i) {
         const label = str(i.label, 80), value = str(i.value, 200);
@@ -810,6 +837,18 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const group = (["business", "location", "operations"].includes(String(i.group)) ? i.group : "operations") as FactGroup;
         const existing = get().facts.find(f => f.label.en.toLowerCase() === label.toLowerCase() || f.label.zh === label);
         if (existing?.locked && existing.value.en !== value) throw new Error(`"${existing.label.en}" is locked at "${existing.value.en}". Only the person can change it, in Context.`);
+        // from outside the app a business fact never saves directly: an owner confirms it in the app first
+        if (x.asked) {
+          if (existing && existing.value.en === value) { mark(); return { ok: true, unchanged: true, note: "That's already the value on file; nothing to change." }; }
+          const lab = existing?.label ?? same(label), was = existing?.value.en;
+          const change: Change = { op: "set_fact", label: lab, value, group: existing?.group ?? group, ...(was ? { was } : {}), via: x.asked.via, ...(x.asked.sender ? { from: x.asked.sender } : {}) };
+          return proposeChange(change,
+            existing ? L(`Change the business's ${lower(lab.en)}`, `更改企业的${lab.zh}`) : L(`Add the business's ${lower(lab.en)}`, `添加企业的${lab.zh}`),
+            [existing ? L(`Change ${lower(lab.en)} in Context from "${was}" to "${value}"`, `将资料中的${lab.zh}从“${was}”改为“${value}”`) : L(`Add ${lower(lab.en)} "${value}" to Context`, `在资料中添加${lab.zh}“${value}”`),
+              L("Every application fills from it after that", "之后每份申请都按它填写")],
+            [{ id: "was", label: L("Now", "当前"), value: was ?? "" }, { id: "new", label: L("Change to", "改为"), value }],
+            c => c.op === "set_fact" && c.label.en.toLowerCase() === lab.en.toLowerCase() && c.value === value);
+        }
         S("weaving", L(`Committing to memory: ${label}`, `存入记忆：${label}`));
         const text = same(`${label}: ${value}`);
         apply(w => audit("agent", L("Committed to memory", "存入记忆"), L("Context", "资料"), text)(setFact({ id: existing?.id ?? freshId(w, "f-x"), group: existing?.group ?? group, label: existing?.label ?? same(label), value: same(value), source: L("You told me", "您告诉我的") })(w)));
@@ -1114,11 +1153,24 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "edit_workspace",
-      description: "Rename the business or change its goal.",
+      description: "Rename the business or change its goal. When the request came from outside the app (a text, call, email or chat), it asks an owner to confirm in the app instead.",
       inputSchema: { type: "object", properties: { business_name: { type: "string" }, goal: { type: "string" } } },
       execute(i) {
         const name = str(i.business_name, 80), goal = str(i.goal, 200);
         if (!name && !goal) throw new Error("business_name or goal is required");
+        // from outside the app the business's name (and goal) only change once an owner confirms it in the app
+        if (x.asked) {
+          const w = get(), newName = name && name !== w.business.en ? name : "", newGoal = goal && goal !== w.goal.en ? goal : "";
+          if (!newName && !newGoal) { mark(); return { ok: true, unchanged: true, note: "That's already what the workspace says; nothing to change." }; }
+          const change: Change = { op: "rename_business", ...(newName ? { name: newName } : {}), ...(newGoal ? { goal: newGoal, wasGoal: w.goal } : {}), was: w.business, via: x.asked.via, ...(x.asked.sender ? { from: x.asked.sender } : {}) };
+          return proposeChange(change,
+            newName ? L(`Rename the business to ${newName}`, `将企业更名为 ${newName}`) : L("Change the business's goal", "更改企业目标"),
+            [...(newName ? [L(`Change the business's name from "${w.business.en}" to "${newName}"`, `将企业名称从“${w.business.zh}”改为“${newName}”`)] : []),
+              ...(newGoal ? [L(`Change its goal from "${w.goal.en}" to "${newGoal}"`, `将企业目标从“${w.goal.zh}”改为“${newGoal}”`)] : [])],
+            [...(newName ? [{ id: "was", label: L("Name now", "当前名称"), value: w.business.en }, { id: "new", label: L("New name", "新名称"), value: newName }] : []),
+              ...(newGoal ? [{ id: "was-goal", label: L("Goal now", "当前目标"), value: w.goal.en }, { id: "new-goal", label: L("New goal", "新目标"), value: newGoal }] : [])],
+            c => c.op === "rename_business" && (c.name ?? "") === newName && (c.goal ?? "") === newGoal);
+        }
         S("weaving", L("Updating the workspace", "更新工作区"));
         apply(w => audit("agent", L("Updated the workspace", "更新工作区"), name ? same(name) : w.business)({ ...w, business: name ? same(name) : w.business, goal: goal ? same(goal) : w.goal }));
         mark(); return { ok: true };

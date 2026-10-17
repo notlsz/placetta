@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
-import { applyChange, blockersSay, readyToFile } from "./core";
+import { blockersSay, confirmChange, readyToFile } from "./core";
 import { emptyBook } from "./memory";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
@@ -684,7 +684,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
     if (a.kind === "change" && a.change) {
       const c = a.change;
-      setWs(x => audit("you", B("Confirmed a change", "确认更改"), a.title)(dropApproval(id)(applyChange(c)(x))));
+      // a business fact or the business's name, asked for from outside the app: only an owner saves it
+      if ((c.op === "set_fact" || c.op === "rename_business") && cloud && !ownerOk()) return;
+      setWs(confirmChange(a));
       say(lang === "zh" ? "已更改。" : "Done. It's changed.");
       return;
     }

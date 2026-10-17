@@ -54,7 +54,7 @@ const when = (n: number, en: string, zh: string): Bi => {
 export const permitOf = (title: string) => title
   .replace(/[:：]\s*expires (in \d+ days|today|tomorrow)$/, "").replace(/ expires (in \d+ days|today|tomorrow)$/, "")
   .replace(/[:：]\s*(\d+ 天后|今天|明天)到期$/, "").replace(/(\d+ 天后|今天|明天)到期$/, "")
-  .replace(/^renew(al of)?\s+(the\s+)?/i, "").replace(/^续办/, "").replace(/\s+(expires|renewal)$/i, "").replace(/(到期|续办)$/, "").trim() || title;
+  .replace(/^renew(al of)?\s+(the\s+)?/i, "").replace(/^续办/, "").replace(/\s+(expires|renewal)$/i, "").replace(/(到期|续办|续期)$/, "").trim() || title;
 /** The first threshold a date has crossed, so each one makes one update: 14, 7, 3, 1 and 0 days out. */
 const bucket = (n: number, steps: number[]) => steps.find((s) => n <= s);
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -106,6 +106,118 @@ export function storeUpdates(ws: string, stores: unknown, today: string): Update
     }
   }
   return out;
+}
+
+/* ------------------------------ renewal jobs ------------------------------ */
+
+/** A renewal job starts this many days before a permit expires; inside URGENT_DAYS it's urgent. */
+export const RENEW_AHEAD = 60, URGENT_DAYS = 30;
+/** How long after it expired a lapsed permit still gets a renewal job. Older than that the record is likely out of date
+ *  (the business renewed it and never updated Placetta), and telling them to stop operating would be wrong. */
+export const LAPSED_DAYS = 90;
+/** One renewal job: the permit (its application id when it has one, so a permit and its renewal reminder are one job,
+ *  else the reminder or the store and permit name), the expiry it's about, how urgent, and what the owner hears. */
+export type RenewalJob = { permit: string; expires: string; days: number; urgency: "normal" | "urgent" | "lapsed"; app_id: string | null; what: Bi; title: Bi; prompt: string; update: Update | null };
+const addDays = (d: string, n: number) => day(new Date(Date.parse(d + "T00:00:00Z") + n * 864e5));
+const inDaysText = (n: number) => (n === 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`);
+
+/**
+ * Every permit that should have a renewal job today: renewal reminders (Deadlines) and each store's permits, expiring
+ * within RENEW_AHEAD days or lapsed within LAPSED_DAYS. One per permit: the soonest expiry still in play, and a lapsed
+ * one only if no later expiry is on record (a later one means it was renewed). Within 60 days the job is normal, within
+ * 30 urgent, and past its date lapsed, each worded for that. Urgent and lapsed ones also leave the owner an Update.
+ */
+export function renewalJobs(ws: string, state: unknown, today: string): RenewalJob[] {
+  const st = (state && typeof state === "object" ? state : {}) as { deadlines?: unknown; stores?: unknown; apps?: unknown };
+  const apps = (Array.isArray(st.apps) ? st.apps : []) as { id?: unknown; name?: unknown }[];
+  const seen: { permit: string; expires: string; app: string | null; what: Bi }[] = [];
+  for (const raw of Array.isArray(st.deadlines) ? st.deadlines : []) {
+    const d = raw as Deadline;
+    if (!d || d.kind !== "renewal" || typeof d.id !== "string" || !isDate(d.date)) continue;
+    // "Renew the sign permit" is about the "sign permit" (permitOf), so the job names the permit, not the reminder
+    const t = bi(d.title);
+    seen.push({ permit: d.app ? `app:${d.app}` : `deadline:${d.id}`, expires: d.date, app: d.app ?? null, what: { en: permitOf(t.en), zh: permitOf(t.zh) } });
+  }
+  for (const raw of Array.isArray(st.stores) ? st.stores : []) {
+    const s = raw as StoreRow & { apps?: unknown };
+    if (typeof s?.id !== "string") continue;
+    const store = bi(s.name), own = Array.isArray(s.apps) ? s.apps : [];
+    for (const p of Array.isArray(s.permits) ? (s.permits as StorePermit[]) : []) {
+      if (!p || !isDate(p.expires)) continue;
+      const name = bi(p.name), key = name.en.trim().toLowerCase();
+      if (!key) continue;
+      // the store's own application for the same permit: one job for the permit and its renewal reminder, not two
+      const app = apps.find((a) => typeof a?.id === "string" && own.includes(a.id) && bi(a.name).en.trim().toLowerCase() === key);
+      seen.push({ permit: app ? `app:${app.id}` : `store:${s.id}:${key}`, expires: p.expires, app: app ? String(app.id) : null, what: { en: `${name.en} at ${store.en}`, zh: `${store.zh}的${name.zh}` } });
+    }
+  }
+  const out: RenewalJob[] = [];
+  for (const permit of new Set(seen.map((x) => x.permit))) {
+    const all = seen.filter((x) => x.permit === permit);
+    const latest = all.reduce((m, x) => (x.expires > m ? x.expires : m), "");
+    const pick = all.filter((x) => { const n = daysUntil(today, x.expires); return n <= RENEW_AHEAD && n >= -LAPSED_DAYS && (n >= 0 || x.expires === latest); })
+      .sort((a, b) => a.expires.localeCompare(b.expires))[0];
+    if (!pick) continue;
+    const n = daysUntil(today, pick.expires), urgency = n < 0 ? "lapsed" : n <= URGENT_DAYS ? "urgent" : "normal";
+    const w = pick.what, D = pick.expires, app = pick.app ? ` (application ${pick.app})` : "";
+    const auto = " If it renews automatically or needs nothing from the business, say so in one sentence.";
+    const prompt = urgency === "normal"
+      ? `Start the renewal: ${w.en}, expiring ${D}. Find the agency's renewal form or online renewal, prepare the application${app}, fill it from the workspace, add the renewal's due date to Deadlines and put it up for approval once it's complete.${auto}`
+      : urgency === "urgent"
+      ? `Start the renewal: ${w.en}, expiring ${D}, ${inDaysText(n)}. This is urgent: do it today. Find the agency's renewal form or online renewal, prepare the application${app}, fill it from the workspace and put it up for approval as soon as it's complete. Tell the owner plainly that it expires ${inDaysText(n)} and what they still need to do; if the agency charges a late fee or needs an inspection first, say so.${auto}`
+      : `Start the renewal: ${w.en}, which expired on ${D}, ${-n} day${n === -1 ? "" : "s"} ago. It has lapsed. First check whether it was already renewed (a newer permit in Documents, or the agency's own lookup page); if it was, say so and add the new expiry to Deadlines. If not, find the agency's renewal or reinstatement process, prepare it${app}, fill it from the workspace and put it up for approval now. Tell the owner plainly: if the law requires this permit for what they do, stop that activity until it's renewed, and file the renewal or reinstatement now; to know what applies to them, check with the agency. Give no other legal advice.`;
+    const title: Bi = urgency === "normal" ? { en: `Renewal started: ${w.en}`, zh: `已开始续办：${w.zh}` }
+      : urgency === "urgent" ? { en: `Urgent renewal started: ${w.en}`, zh: `已开始紧急续办：${w.zh}` }
+      : { en: `Lapsed permit, renewal started: ${w.en}`, zh: `许可已过期，已开始续办：${w.zh}` };
+    const soon = when(n, "expires", "到期");
+    const update: Update | null = urgency === "normal" ? null : { workspace_id: ws, kind: "renewal", app_id: pick.app, dedupe: `renewal-job:${permit}:${D}`,
+      ...(urgency === "urgent"
+        ? { title: { en: `Urgent: ${w.en} ${soon.en}`, zh: `紧急：${w.zh}${soon.zh}` },
+            body: { en: `It expires ${D}. Odelia started the renewal and puts it up for your approval as soon as it's ready. Approve it soon so it doesn't lapse.`, zh: `${D} 到期。Odelia 已开始续办，准备好后会立即请您批准。请尽快批准，以免过期。` } }
+        : { title: { en: `Lapsed: ${w.en}. Odelia started the renewal`, zh: `已过期：${w.zh}。Odelia 已开始续办` },
+            body: { en: `It expired ${D}. If the law requires this permit for what you do, stop that activity until it's renewed, and file the renewal or reinstatement now. Check with the agency for what applies to you. If you already renewed it, add the new permit in Documents.`,
+              zh: `已于 ${D} 过期。如果法律要求持有这项许可才能从事相关经营，请在续办完成前暂停该项经营，并立即提交续办或恢复申请。具体要求请向主管机构确认。如果您已经续办，请把新的许可证添加到“文件”中。` } }) };
+    out.push({ permit, expires: D, days: n, urgency, app_id: pick.app, what: w, title, prompt, update });
+  }
+  return out;
+}
+
+/** What starting renewal jobs needs from the database and agent-run, kept apart so the rules can be tested. A claim is a
+ *  routine_runs row: routine_id "renewal:<permit>", day = the expiry date it's for. */
+export type RenewalIO = {
+  /** A renewal job is already open for this permit: a claim on an expiry still in play (on or after `since`). */
+  open(ws: string, key: string, since: string): Promise<boolean>;
+  /** Claim this permit and expiry; false when it's already claimed (another run of the monitor got there first). */
+  claim(ws: string, key: string, expires: string): Promise<boolean>;
+  release(ws: string, key: string, expires: string): Promise<void>;
+  started(ws: string, key: string, expires: string, run: string): Promise<void>;
+  /** Start the background job (agent-run); the run's id, or null when it couldn't start (no plan, the day's cap, down). */
+  start(ws: string, prompt: string, title: Bi): Promise<string | null>;
+  update(u: Update): Promise<void>;
+};
+export const renewalKey = (permit: string) => `renewal:${permit}`.slice(0, 200);
+/** At most this many renewal jobs start for one workspace in one run, most urgent first; the rest start on the next
+ *  days. Many at once (the first day this runs, a business with a dozen permits) would trip the workspace's per-minute
+ *  model limit and fail, and a job that started is never started again for the same expiry. */
+export const RENEWALS_PER_RUN = 2;
+
+/** Start the renewal jobs a workspace needs, most urgent first: never two for the same permit and expiry (the claim),
+ *  none while one for the same permit is still open, and a claim that couldn't start is let go so tomorrow tries again.
+ *  Returns how many started. */
+export async function startRenewals(ws: string, jobs: RenewalJob[], today: string, io: RenewalIO, max = RENEWALS_PER_RUN): Promise<number> {
+  let n = 0;
+  for (const j of [...jobs].sort((a, b) => a.days - b.days)) {
+    if (n >= max) break;
+    const key = renewalKey(j.permit);
+    if (await io.open(ws, key, addDays(today, -LAPSED_DAYS))) continue;
+    if (!(await io.claim(ws, key, j.expires))) continue;
+    const run = await io.start(ws, j.prompt, j.title);
+    if (!run) { await io.release(ws, key, j.expires); continue; }
+    await io.started(ws, key, j.expires, run);
+    if (j.update) await io.update(j.update);
+    n++;
+  }
+  return n;
 }
 
 /**
@@ -496,8 +608,9 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Odelia's own jobs, in the background: routines that run today, renewals 60 days out (she prepares the renewal and
-  // puts it up for approval), and filings past the agency's usual time (she checks and drafts a status inquiry).
+  // Odelia's own jobs, in the background: routines that run today, renewals 60 days out or closer and lapsed ones (she
+  // prepares the renewal and puts it up for approval), and filings past the agency's usual time (she checks and drafts a
+  // status inquiry).
   let jobs = 0;
   if (canConverse((k) => Deno.env.get(k)) && Deno.env.get("ODELIA_JOBS") !== "off") {
     let left = Math.max(0, Number(Deno.env.get("ODELIA_JOBS_PER_DAY") ?? "60") || 0);
@@ -525,15 +638,24 @@ Deno.serve(async (req) => {
         else await admin.from("routine_runs").delete().eq("workspace_id", ws).eq("routine_id", r.id).eq("day", today);
       }
     }
-    // renewals that just reached 60 days out (each update is new only once)
-    for (const u of created.filter((x) => x.kind === "renewal" && /:60$/.test(x.dedupe))) {
-      // The permit's own name: a reminder titled "Renew the sign permit" or "Food Service Establishment Permit expires"
-      // used to make "Start the renewal of Renew the sign permit (... Ask Placetta to start the renewal.)", which read
-      // to the model like two requests. Now: "Start the renewal: sign permit, expiring 2026-11-30."
-      const what = permitOf(u.title.en), whatZh = permitOf(u.title.zh);
-      const expires = /\d{4}-\d{2}-\d{2}/.exec(u.body?.en ?? "")?.[0];
-      await start(u.workspace_id, `Start the renewal: ${what}${expires ? `, expiring ${expires}` : ""}. Find the agency's renewal form or online renewal, prepare the application${u.app_id ? ` (application ${u.app_id})` : ""}, fill it from the workspace, add the renewal's due date to Deadlines and put it up for approval once it's complete. If it renews automatically or needs nothing from the business, say so in one sentence.`,
-        { en: `Renewal started: ${what}`, zh: `已开始续办：${whatZh}` });
+    // Renewals: every permit expiring within 60 days, or lapsed, that has no open renewal job gets one, worded by how
+    // close it is (renewalJobs). It used to start only from the update for a renewal first seen 31 to 60 days out, so
+    // one first seen inside 30 days, or already lapsed, never got a job. Each job claims its permit and expiry in
+    // routine_runs (only the server reads it): two runs of the monitor never start the same one twice, and a claim for
+    // the same permit whose expiry is still in play counts as an open job. Claims are kept 180 days, longer than an
+    // expiry stays in play (60 days ahead to 90 behind), so an old claim never lets a finished job start again.
+    const io: RenewalIO = {
+      open: async (ws, key, since) => { const { data } = await admin.from("routine_runs").select("day").eq("workspace_id", ws).eq("routine_id", key).gte("day", since).limit(1); return !!data?.length; },
+      claim: async (ws, key, expires) => { const { data } = await admin.from("routine_runs").upsert({ workspace_id: ws, routine_id: key, day: expires }, { onConflict: "workspace_id,routine_id,day", ignoreDuplicates: true }).select("routine_id"); return !!data?.length; },
+      release: async (ws, key, expires) => { await admin.from("routine_runs").delete().eq("workspace_id", ws).eq("routine_id", key).eq("day", expires); },
+      started: async (ws, key, expires, run) => { await admin.from("routine_runs").update({ run_id: run }).eq("workspace_id", ws).eq("routine_id", key).eq("day", expires); },
+      start,
+      // urgent and lapsed: the owner's Update, once per permit and expiry
+      update: async (u) => { const { error } = await admin.from("updates").upsert({ ...u, app_id: u.app_id ?? null, body: u.body ?? null }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true }); if (error) console.error("renewal update", u.workspace_id, error.code); },
+    };
+    for (const [ws, st] of states) {
+      const due = renewalJobs(ws, st, today);
+      if (due.length && (await planOf(ws)) !== "none") await startRenewals(ws, due, today, io);
     }
     // filings with the agency well past its published processing time: one check every two weeks
     for (const f of ((filings ?? []) as (Filing & { submitted_at?: string | null })[]).filter((x) => x.status === "submitted")) {

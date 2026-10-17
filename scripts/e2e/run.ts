@@ -372,6 +372,11 @@ try {
       { text: JSON.stringify({ document_type: "Food Service Establishment Permit", number: "50123456", issuer: "NYC Department of Health and Mental Hygiene", holder: "Lotus Tea", issued: "", expires: day(40), quotes: { number: "Permit No. 50123456", issuer: "NYC Department of Health and Mental Hygiene", holder: "Lotus Tea", expires: "Expires " + day(40) } }) },
     ] },
     { name: "sms-model-down", match: (p) => p.includes("anything new from the city"), turns: [{ error: 529 }] },
+    // a model that saves a business fact from a text and then says it did: the tool puts up a card instead
+    { name: "sms-ein", match: (p) => p.includes("Our EIN is now 98-7654321"), turns: [
+      { tool: "remember", input: { label: "EIN", value: "98-7654321", group: "business" } },
+      { text: "Saved your new EIN." },
+    ] },
     { name: "sms-remove-store", match: (p) => p.includes("Remove the Roosevelt Ave store"), turns: [
       { tool: "remove_store", input: { store_id: "st-roosevelt", reason: "Lease fell through" } },
       { text: "I can't change stores from a text. You can remove it in the app." },
@@ -589,6 +594,21 @@ try {
     await settle();
     const outF = imsg(mark, OWNER_PHONE).map(words);
     check("the approval link is sent by iMessage", outF.length === 1 && outF[0].includes(`approval=ap-app-dohmh`), outF);
+
+    // a business fact by iMessage (a forwarded or forged message could change every form): not saved, but put up as a
+    // change card that says who asked and how, linked in the answer, which says plainly it's waiting for an owner
+    mark = recorded.length;
+    const [{ at: einAt }] = await sql`select now() as at`;
+    await linqPost(msg(OWNER_PHONE, L2, "Our EIN is now 98-7654321, update it", "im-ein"));
+    await settle();
+    // this extra task doesn't count toward the owner's hourly limit the WhatsApp texts below are paced against
+    await sql`delete from public.ai_events where user_id = ${owner.id} and kind = 'task' and at >= ${einAt}`;
+    const einState = await wsState() as unknown as { facts: { label: { en: string }; value: { en: string } }[]; approvals: { id: string; kind: string; change?: { op: string; value?: string }; data?: { id: string; label: { en: string }; value: string }[] }[] };
+    const einCard = einState.approvals.find((a) => a.kind === "change" && a.change?.op === "set_fact" && a.change.value === "98-7654321");
+    check("an EIN sent by iMessage isn't saved; it waits on a change card from the owner's number", !einState.facts.some((f) => f.value.en === "98-7654321") && einCard?.data?.find((d) => d.id === "asked")?.value === OWNER_PHONE
+      && einCard?.data?.find((d) => d.id === "asked")?.label.en === "Asked by text message", { facts: einState.facts, card: einCard });
+    const outE = imsg(mark, OWNER_PHONE).map(words).join(" ");
+    check("the answer says it's waiting for an owner and links the card", /waiting for an owner to confirm it in the Placetta app/.test(outE) && !!einCard && outE.includes(`approval=${einCard.id}`), outE);
 
     // STOP: Linq blocks the recipient itself; the one confirmation still goes, by override; then nothing until START
     mark = recorded.length;
@@ -983,7 +1003,7 @@ try {
       { text: "The food service permit is complete and waiting for your approval." },
     ] },
     { name: "weekly-watch", match: (p) => p.startsWith("Weekly check"), turns: [{ text: "No changes." }] },
-    // The monitor's renewal jobs: a renewal reminder that just reached 60 days out starts a background job. Odelia
+    // The monitor's renewal jobs: a permit expiring within 60 days, or lapsed, starts a background job. Odelia
     // checks where things stand and says what's next; from a background job nothing is filed, paid or sent.
     { name: "renewal-job", match: (p) => p.startsWith("Scheduled job") && p.includes("Start the renewal:"), turns: [
       { tool: "check_progress", input: {} },
@@ -1016,11 +1036,17 @@ try {
     await settle();
     check("the monitor runs", mon.status === 200 && mon.data?.ok === true, mon);
     check("the monitor's self-filing sweep reaches the file function", mon.data?.self_filing !== null, mon.data);
-    // the two renewal reminders 31 to 60 days out ("Renew the sign permit" from a., the permit read in b.) start one job each
-    const renewals = await sql`select title, status, prompt, kind from public.agent_runs where kind = 'watch' and title->>'en' like 'Renewal started:%' order by created_at`;
-    check("the monitor starts one background renewal job per renewal 60 days out, and each finishes", renewals.length === 2 && renewals.every((x) => x.status === "done") && Number(mon.data?.odelia_jobs) >= 2, { renewals, jobs: mon.data?.odelia_jobs });
-    check("each renewal job names the permit plainly, with its date", renewals.some((x) => /^Scheduled job[\s\S]*Start the renewal: sign permit, expiring \d{4}-\d{2}-\d{2}\./.test(x.prompt) && x.title?.en === "Renewal started: sign permit")
-      && renewals.some((x) => /Start the renewal: Food Service Establishment Permit, expiring/.test(x.prompt)) && renewals.every((x) => !/Ask Placetta|Renew the/.test(x.prompt)), renewals.map((x) => [x.title?.en, String(x.prompt).slice(0, 140)]));
+    // One job per permit expiring within 60 days: the sign permit 20 days out (its reminder, the store's own record of it
+    // and the 45-day reminder from a. are one permit; inside 30 days it used to get no job at all, now an urgent one) and
+    // the permit read in b., 40 days out.
+    const renewals = await sql`select title, status, prompt, kind from public.agent_runs where kind = 'watch' and title->>'en' ilike '%renewal started:%' order by created_at`;
+    check("the monitor starts one background renewal job per permit expiring within 60 days, and each finishes", renewals.length === 2 && renewals.every((x) => x.status === "done") && Number(mon.data?.odelia_jobs) >= 2, { renewals, jobs: mon.data?.odelia_jobs });
+    check("each renewal job names the permit plainly, with its date and how urgent it is",
+      renewals.some((x) => /^Scheduled job[\s\S]*Start the renewal: Sign permit, expiring \d{4}-\d{2}-\d{2}, in \d+ days\. This is urgent: do it today\./.test(x.prompt) && x.title?.en === "Urgent renewal started: Sign permit")
+      && renewals.some((x) => /Start the renewal: Food Service Establishment Permit, expiring \d{4}-\d{2}-\d{2}\. Find/.test(x.prompt) && /^Renewal started: /.test(x.title?.en)) && renewals.every((x) => !/Ask Placetta|Renew the/.test(x.prompt)), renewals.map((x) => [x.title?.en, String(x.prompt).slice(0, 160)]));
+    const [urgentUpd] = await sql`select title, body, kind from public.updates where workspace_id = ${ws} and dedupe like 'renewal-job:app:app-sign:%'`;
+    check("the urgent renewal leaves the owner an Update, in English and Chinese", urgentUpd?.kind === "renewal" && /^Urgent: Sign permit expires in \d+ days$/.test(urgentUpd.title.en) && /紧急/.test(urgentUpd.title.zh) && /approval/.test(urgentUpd.body.en) && /批准/.test(urgentUpd.body.zh), urgentUpd);
+    check("the normal one leaves no extra Update", (await sql`select count(*)::int n from public.updates where workspace_id = ${ws} and dedupe like 'renewal-job:%'`)[0].n === 1);
     const due = await sql`select dedupe from public.odelia_outbox where user_id = ${owner.id} and dedupe like 'update:%'`;
     check("only what matters reaches the phone (the CO due in 5 days)", due.length === 1 && due[0].dedupe.includes("deadline:dl-co"), due);
     const texts = sms(mark, OWNER_PHONE);
@@ -1047,12 +1073,23 @@ try {
     // something urgent (a permit lapsed) and the owner takes calls: Odelia calls
     check("the owner turns calls on", (await rpc("phone_prefs", { p_calls: true }, owner.jwt)).data?.link?.calls_on === true);
     await saveState((s) => ({ ...s, stores: s.stores.map((x) => (x.id === "st-main" ? { ...x, permits: [...(x.permits ?? []), { name: same("Place of assembly permit"), expires: day(-3) }] } : x)) }));
+    // The monitor runs once a day; here its second run comes seconds after the first one's jobs, so the minute's model
+    // calls are let go, as a day would, or the lapsed permit's job would meet the workspace's per-minute limit.
+    await sql`delete from public.ai_events where workspace_id = ${ws} and kind = 'call' and at > now() - interval '2 minutes'`;
     mark = recorded.length;
     const mon2 = await call("monitor", {}, { headers: MK });
     await settle();
     const dial = since(mark).find((x) => x.service === "telnyx" && x.path === "/v2/calls");
     check("a lapsed permit is urgent: the monitor's sweep dials the owner", mon2.data?.phone_notices === 1 && dial?.body?.to === OWNER_PHONE && dial?.body?.from === ODELIA && dial?.body?.connection_id === "conn_e2e" && dial?.body?.answering_machine_detection === "detect" && dial?.body?.webhook_url === `${GATEWAY}/functions/v1/odelia-voice`, { mon2: mon2.data, dial: dial?.body });
     check("no text for it (the call is the notice), and the daily texts stay at 3", sms(mark).length === 0, sms(mark).map((x) => x.body.text));
+    // the lapsed permit gets a renewal job too (it used to get none), and the permits that already have one get no second
+    const lapsedJob = await sql`select status, prompt from public.agent_runs where kind = 'watch' and title->>'en' = 'Lapsed permit, renewal started: Place of assembly permit at Flushing, Main St'`;
+    check("a lapsed permit gets one renewal job, telling the owner to stop that activity if the law requires it and to file now", lapsedJob.length === 1 && lapsedJob[0].status === "done"
+      && /Start the renewal: Place of assembly permit at Flushing, Main St, which expired on \d{4}-\d{2}-\d{2}, \d+ days? ago\. It has lapsed\./.test(lapsedJob[0].prompt) && /stop that activity until it's renewed/.test(lapsedJob[0].prompt) && /check with the agency/.test(lapsedJob[0].prompt), lapsedJob);
+    const [lapsedUpd] = await sql`select title, body from public.updates where workspace_id = ${ws} and dedupe like 'renewal-job:store:st-main:place of assembly permit:%'`;
+    check("and an Update for the owner, in English and Chinese", /^Lapsed: Place of assembly permit at Flushing, Main St\. Odelia started the renewal$/.test(lapsedUpd?.title?.en ?? "") && /stop that activity/.test(lapsedUpd.body.en) && /Check with the agency/.test(lapsedUpd.body.en) && /暂停/.test(lapsedUpd.body.zh), lapsedUpd);
+    check("the monitor's second run starts no second job for the sign permit or the food permit", (await sql`select count(*)::int n from public.agent_runs where kind = 'watch' and title->>'en' ilike '%renewal started:%'`)[0].n === 3
+      && (await sql`select count(*)::int n from public.routine_runs where workspace_id = ${ws} and routine_id like 'renewal:%' and run_id is not null`)[0].n === 3);
     const [oc] = await sql`select call_control_id, direction, verified_at, outbox_id from public.odelia_calls where direction = 'out'`;
     check("the outbound call is recorded", oc && oc.verified_at && oc.outbox_id, oc);
     const ccid = String(oc?.call_control_id ?? "");
