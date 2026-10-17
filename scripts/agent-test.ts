@@ -294,6 +294,25 @@ async function previewRefine() {
   const gen2 = r2.w.apps.find(a => a.id === gen.id)!;
   ok(gen2.preview === false && gen2.agency.en === "Collin County Health Care Services" && gen2.fees[0].amount === 350 && gen2.checklist.some(c => c.dep), "it takes the agency's name and fee, and keeps what it waits on");
   eq(r2.w.apps.length, plano.apps.length, "no second copy");
+
+  // Boston and Atlanta: the city's own food permit, plan review and business license come from the library, in order
+  const bos = previewPlan("Milk tea shop", "Boston, MA", "2027-04-01", { today: "2026-10-16" });
+  const bAt = (id: string) => bos.apps.findIndex(a => a.official === id), bRow = (id: string) => bos.apps[bAt(id)];
+  ok(["bos-food-permit", "bos-cert", "bos-cv", "bos-plan-review", "ma-food-manager", "ma-allergen"].every(id => bAt(id) >= 0) && !bos.apps.some(a => a.id === "pv-g-food-permit"),
+    `a Boston milk tea shop gets ISD's food service permit, the business certificate, the victualler license and plan review from the library (${bos.apps.length} rows), not the generic food row`, bos.apps.map(a => a.id));
+  ok(bAt("bos-plan-review") < bAt("bos-cv") && bAt("bos-cv") < bAt("bos-food-permit")
+    && bRow("bos-food-permit").checklist.some(c => c.dep === bRow("bos-cv").id) && bRow("bos-food-permit").checklist.some(c => c.dep === bRow("bos-plan-review").id)
+    && bRow("bos-food-permit").checklist.some(c => c.dep === bRow("ma-food-manager").id) && bRow("bos-cv").checklist.some(c => c.dep === bRow("bos-plan-review").id),
+    "plan review, then the victualler license, then the food permit, which waits on both and on the food manager", bos.apps.map(a => [a.id, a.checklist.filter(c => c.dep).map(c => c.dep)]));
+  ok(bRow("bos-food-permit").critical && bRow("bos-food-permit").source.url.startsWith("https://www.boston.gov/") && bRow("bos-cert").fees[0].amount === 65 && bRow("bos-cert").checklist.some(c => c.dep === bRow("irs-ss4").id),
+    "the food permit is on the critical path with boston.gov as its source; the business certificate carries its $65 fee and waits on the EIN");
+  const atl = previewPlan("Restaurant", "Atlanta, GA", "2027-04-01", { today: "2026-10-16" });
+  const aAt = (id: string) => atl.apps.findIndex(a => a.official === id), aRow = (id: string) => atl.apps[aAt(id)];
+  ok(["fulton-food-permit", "fulton-plan-review", "atl-license", "ga-food-manager"].every(id => aAt(id) >= 0) && !atl.apps.some(a => a.id === "pv-g-food-permit"),
+    `an Atlanta restaurant gets Fulton County's food service permit and plan review and the city business license (${atl.apps.length} rows), not the generic food row`, atl.apps.map(a => a.id));
+  ok(aAt("fulton-plan-review") < aAt("fulton-food-permit") && aRow("fulton-food-permit").checklist.some(c => c.dep === aRow("fulton-plan-review").id) && aRow("fulton-food-permit").critical
+    && /DeKalb/.test(aRow("fulton-food-permit").plain?.en ?? "") && aRow("atl-license").checklist.some(c => c.dep === aRow("irs-ss4").id) && aRow("atl-license").source.url.includes("atlantaga.gov"),
+    "the county permit waits on its plan review and says DeKalb's board applies there; the city license waits on the EIN, sourced from atlantaga.gov");
 }
 
 async function progress() {

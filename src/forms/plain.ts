@@ -3,8 +3,8 @@ import { B, type Bi } from "../bi";
 /* What each official form is, said the way a person explains it to an owner: one line, English and Chinese, keyed by
    the form's id in the library. Shown on the instant plan a new workspace starts with (src/plan/preview.ts), where the
    person reads each permit before anything is filled or filed. Covers every form the preview can list for a food
-   business in New York, California, Texas and Arizona, and the federal step. Forms without a line here fall back to
-   the library's "how" line. Applied in src/forms/registry.ts. */
+   business in New York, California, Texas, Arizona, Boston and Atlanta, and the federal step. Forms without a line
+   here fall back to the library's "how" line. Applied in src/forms/registry.ts. */
 
 export const PLAIN: Record<string, Bi> = {
   /* federal */
@@ -113,4 +113,22 @@ export const PLAIN: Record<string, Bi> = {
   "phx-co": B("The city's permit for your build-out, which ends in the certificate that lets you occupy the space.", "市政府的装修施工许可，完工后生成允许您使用该场所的占用证。"),
   "mc-plan-review": B("The county reviews your kitchen plans before you build. Apply 6 to 8 weeks ahead.", "县政府在施工前审查厨房图纸。建议提前 6 至 8 周申请。"),
   "mc-food-permit": B("The permit that lets a food place open in Maricopa County, after the final inspection.", "马里科帕县餐饮场所开业必须的许可证，最终检查后发放。"),
+
+  /* Massachusetts and Boston */
+  "ma-sos": B("Forms your Massachusetts LLC. Skip it if the company already exists.", "在马萨诸塞州成立您的 LLC。公司已成立的可跳过。"),
+  "ma-tax": B("Lets you charge sales tax in Massachusetts and registers you to withhold tax from wages.", "让您可以在马萨诸塞州收取销售税，并登记工资预扣税。"),
+  "ma-food-manager": B("At least one manager passes a food safety exam. Boston wants the certificate with your permit application.", "至少一名经理通过食品安全考试。波士顿在许可申请时要看这份证书。"),
+  "ma-allergen": B("A short food allergy course for the person in charge. Someone with it has to be on site whenever you are open.", "现场负责人要上的食物过敏原短课。营业时间内必须有持证人在店。"),
+  "bos-cert": B("Registers the name on your sign with the City Clerk when it differs from the company's legal name. Done in person, often while you wait.", "店名与公司法定名称不同时，向市书记官处登记这个经营名称。现场办理，常可当场取证。"),
+  "bos-plan-review": B("The city's health inspectors review your kitchen plans in person before you build.", "市卫生检查员在施工前当面审查厨房图纸。"),
+  "bos-cv": B("Boston's license to sell food made to order. A new address goes to a public hearing, so start early.", "波士顿销售现做食品的执照。新地址需要开公开听证会，要尽早开始。"),
+  "bos-food-permit": B("The permit that lets a food place open in Boston. Issued after the victualler license and the opening inspection, renewed every year.", "波士顿餐饮场所开业必须的许可证。取得普通餐饮执照并通过开业检查后发放，每年续期。"),
+
+  /* Georgia, Atlanta and Fulton County */
+  "ga-sos": B("Forms your Georgia LLC. Skip it if the company already exists.", "在佐治亚州成立您的 LLC。公司已成立的可跳过。"),
+  "ga-tax": B("Lets you charge sales tax in Georgia and registers you to withhold tax from wages. The number usually comes by email within minutes.", "让您可以在佐治亚州收取销售税，并登记工资预扣税。税号通常几分钟内通过电子邮件发出。"),
+  "ga-food-manager": B("One manager passes a food safety exam. A new place has 60 days from its permit to have one.", "一名经理通过食品安全考试。新场所自取得许可证起有 60 天时间配备。"),
+  "atl-license": B("Atlanta's business license, which is really a yearly tax. The city checks the zoning as part of it.", "亚特兰大的营业执照，本质是每年缴纳的营业税。市政府会在办理时一并核查分区。"),
+  "fulton-plan-review": B("The county health department reviews your kitchen plans before you build. In DeKalb County it's DeKalb's.", "县卫生部门在施工前审查厨房图纸。位于迪卡尔布县的由该县办理。"),
+  "fulton-food-permit": B("The permit that lets a food place open, issued after the county's pre-opening inspection. In DeKalb County it's DeKalb's.", "餐饮场所开业必须的许可证，通过县政府开业前检查后发放。位于迪卡尔布县的由该县签发。"),
 };

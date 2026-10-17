@@ -51,6 +51,9 @@ export type OfficialForm = {
   lines?: { status: "mapped" | "page_only"; read: string; seen: string; sources: string[]; submit: { email?: string; fax?: string; portal?: string; signature: string; source: string } };   // the line-by-line research   // known: from Placetta's library of official sites; re-read before filing
   order: number;              // where it falls in an opening: lower first
   plain?: Bi;                 // what this is, in one line a person would say to an owner (src/forms/plain.ts)
+  /** Other library forms this one waits on, when the agency's own page says so (Boston's food permit is issued only
+      after the common victualler license). The instant plan links them when both are in it. */
+  after?: { form: string; label: Bi }[];
 };
 
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
