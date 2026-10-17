@@ -215,6 +215,8 @@ async function noApprovalNoAction() {
   ok(/I filed the permit/.test(textOf(r)) && /haven't filed, paid or sent anything/.test(textOf(r)), "a reply that claims a filing gets a plain correction", textOf(r));
   ok(!claimsAction("I've put the filing up for your approval.") && !claimsAction("I sent it to you for approval.") && claimsAction("I've submitted your application to the city.") && claimsAction("我已经提交了申请。") && !claimsAction("我已提交审批。"),
     "the correction fires on a claim, not on putting something up for approval");
+  ok(!claimsAction("We filed your EIN application on Oct 1 (confirmation 4471).") && !claimsAction("我们已提交，等待机构回复。") && !claimsAction("等您批准后，我提交给机构。") && claimsAction("我提交了申请。"),
+    "nor on Placetta's team filing after an approval (\"we filed\"), or a step still to come");
 }
 
 /* ================================================================== 2. made-up ids */

@@ -1,7 +1,7 @@
 {
   "summary": {
     "mode": "dry",
-    "date": "2026-10-17T00:19:40.968Z",
+    "date": "2026-10-17T00:27:05.645Z",
     "scenarios": 44,
     "skipped_over_budget": 0,
     "passed": 44,
@@ -240,7 +240,7 @@
       "toolCalls": 16,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 43,
+      "ms": 37,
       "models": {
         "dry:scripted": 5
       },
@@ -365,7 +365,7 @@
       "toolCalls": 17,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 41,
+      "ms": 35,
       "models": {
         "dry:scripted": 5
       },
@@ -491,7 +491,7 @@
       "toolCalls": 17,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 42,
+      "ms": 36,
       "models": {
         "dry:scripted": 5
       },
@@ -617,7 +617,7 @@
       "toolCalls": 22,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 49,
+      "ms": 40,
       "models": {
         "dry:scripted": 5
       },
@@ -748,7 +748,7 @@
       "toolCalls": 12,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 34,
+      "ms": 29,
       "models": {
         "dry:scripted": 5
       },
@@ -869,7 +869,7 @@
       "toolCalls": 10,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 30,
+      "ms": 27,
       "models": {
         "dry:scripted": 5
       },
@@ -988,7 +988,7 @@
       "toolCalls": 10,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 30,
+      "ms": 27,
       "models": {
         "dry:scripted": 5
       },
@@ -1107,7 +1107,7 @@
       "toolCalls": 12,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 34,
+      "ms": 30,
       "models": {
         "dry:scripted": 5
       },
@@ -1228,7 +1228,7 @@
       "toolCalls": 10,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 28,
+      "ms": 20,
       "models": {
         "dry:scripted": 5
       },
@@ -1347,7 +1347,7 @@
       "toolCalls": 10,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 28,
+      "ms": 20,
       "models": {
         "dry:scripted": 5
       },
@@ -1466,7 +1466,7 @@
       "toolCalls": 16,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 44,
+      "ms": 30,
       "models": {
         "dry:scripted": 5
       },
@@ -1591,7 +1591,7 @@
       "toolCalls": 17,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 47,
+      "ms": 32,
       "models": {
         "dry:scripted": 5
       },
@@ -1717,7 +1717,7 @@
       "toolCalls": 17,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 56,
+      "ms": 40,
       "models": {
         "dry:scripted": 5
       },
@@ -1843,7 +1843,7 @@
       "toolCalls": 22,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 80,
+      "ms": 60,
       "models": {
         "dry:scripted": 5
       },
@@ -1974,7 +1974,7 @@
       "toolCalls": 10,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 27,
+      "ms": 19,
       "models": {
         "dry:scripted": 5
       },
@@ -2077,7 +2077,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 49,
+      "ms": 37,
       "models": {
         "dry:scripted": 6
       },
@@ -2171,7 +2171,7 @@
       "toolCalls": 3,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 38,
+      "ms": 30,
       "models": {
         "dry:scripted": 6
       },
@@ -2267,7 +2267,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 8,
+      "ms": 6,
       "models": {
         "dry:scripted": 3
       },
@@ -2361,7 +2361,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 16,
+      "ms": 9,
       "models": {
         "dry:scripted": 2
       },
@@ -2455,7 +2455,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 10,
+      "ms": 9,
       "models": {
         "dry:scripted": 2
       },
@@ -2545,7 +2545,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 12,
+      "ms": 9,
       "models": {
         "dry:scripted": 2
       },
@@ -2639,7 +2639,7 @@
       "toolCalls": 0,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 4,
+      "ms": 2,
       "models": {
         "dry:scripted": 1
       },
@@ -2727,7 +2727,7 @@
       "toolCalls": 2,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 18,
+      "ms": 16,
       "models": {
         "dry:scripted": 3
       },
@@ -2818,7 +2818,7 @@
       "toolCalls": 3,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 18,
+      "ms": 17,
       "models": {
         "dry:scripted": 3
       },
@@ -2914,7 +2914,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 19,
+      "ms": 17,
       "models": {
         "dry:scripted": 3
       },
@@ -3000,7 +3000,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 7,
+      "ms": 6,
       "models": {
         "dry:scripted": 2
       },
@@ -3086,7 +3086,7 @@
       "toolCalls": 2,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 12,
+      "ms": 10,
       "models": {
         "dry:scripted": 2
       },
@@ -3189,7 +3189,7 @@
       "toolCalls": 20,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 52,
+      "ms": 42,
       "models": {
         "dry:scripted": 5
       },
@@ -3298,7 +3298,7 @@
       "toolCalls": 2,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 35,
+      "ms": 29,
       "models": {
         "dry:scripted": 3
       },
@@ -3389,7 +3389,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 17,
+      "ms": 13,
       "models": {
         "dry:scripted": 2
       },
@@ -3479,7 +3479,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 22,
+      "ms": 17,
       "models": {
         "dry:scripted": 2
       },
@@ -3573,7 +3573,7 @@
       "toolCalls": 0,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 14,
+      "ms": 10,
       "models": {
         "dry:scripted": 1
       },
@@ -3665,7 +3665,7 @@
       "toolCalls": 0,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 13,
+      "ms": 10,
       "models": {
         "dry:scripted": 1
       },
@@ -3757,7 +3757,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 17,
+      "ms": 13,
       "models": {
         "dry:scripted": 2
       },
@@ -3847,7 +3847,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 12,
+      "ms": 10,
       "models": {
         "dry:scripted": 2
       },
@@ -3949,7 +3949,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 21,
+      "ms": 17,
       "models": {
         "dry:scripted": 3
       },
@@ -4043,7 +4043,7 @@
       "toolCalls": 2,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 19,
+      "ms": 16,
       "models": {
         "dry:scripted": 3
       },
@@ -4330,7 +4330,7 @@
       "toolCalls": 13,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 22,
+      "ms": 17,
       "models": {
         "dry:scripted": 7
       },
@@ -4448,7 +4448,7 @@
       "toolCalls": 25,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 23,
+      "ms": 18,
       "models": {
         "dry:scripted": 7
       },
@@ -4566,7 +4566,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 10,
+      "ms": 7,
       "models": {
         "dry:scripted": 2
       },
@@ -4656,7 +4656,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 9,
+      "ms": 7,
       "models": {
         "dry:scripted": 2
       },
@@ -4746,7 +4746,7 @@
       "toolCalls": 1,
       "toolErrors": 0,
       "usd": 0,
-      "ms": 8,
+      "ms": 6,
       "models": {
         "dry:scripted": 2
       },

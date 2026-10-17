@@ -59,9 +59,10 @@ export const governmentAddress = (email: string) => /\.(gov|mil|us)$/i.test(emai
 /** A business identifier or private number in a message: an EIN, an SSN shape, or bank details. */
 export const carriesIdentifier = (text: string) => /\b\d{2}-\d{7}\b|\b\d{3}-\d{2}-\d{4}\b|\b(routing|account) (number|no\.?)\b|\biban\b|银行账号/i.test(String(text ?? ""));
 
-/** A reply in which Odelia says she filed, submitted, paid or sent something herself. Putting it up for approval is
- *  not a claim ("I've sent it for your approval"). */
-const CLAIM_EN = /\b(I|we)\s*(?:'ve|’ve| have| just| already|'ve just|’ve just| have just| have already)?\s+(filed|submitted|paid|sent|e-?mailed|faxed|mailed)\b(?![^.\n]{0,60}\b(for (your|the owner's|an owner's) (approval|review|ok)|to you\b|for you to (approve|review)|once you approve|when you approve|after you approve))/i;
-const CLAIM_ZH = /我(们)?(已经|已|刚刚|刚)(为您)?(提交|申报|递交|缴费|付款|支付|发送|发出|寄出)(?![^。\n]{0,20}(审批|批准|确认))/;
+/** A reply in which Odelia says she filed, submitted, paid or sent something herself ("I", never "we": Placetta's
+ *  filing team really does file after an approval, and "we filed it on Oct 1" can be true). Putting something up for
+ *  approval is not a claim ("I've sent it for your approval"). */
+const CLAIM_EN = /\bI\s*(?:'ve|’ve| have| just| already|'ve just|’ve just| have just| have already)?\s+(filed|submitted|paid|sent|e-?mailed|faxed|mailed)\b(?![^.\n]{0,60}\b(for (your|the owner's|an owner's) (approval|review|ok)|to you\b|for you to (approve|review)|once you approve|when you approve|after you approve))/;
+const CLAIM_ZH = /我(?!们)(?:(?:已经|已|刚刚|刚)(?:为您)?(?:提交|申报|递交|缴费|付款|支付|发送|发出|寄出)|(?:为您)?(?:提交|申报|递交|缴费|付款|支付|发送|发出|寄出)了)(?![^。\n]{0,20}(审批|批准|确认))/;
 export function claimsAction(text: string): boolean { return CLAIM_EN.test(text) || CLAIM_ZH.test(text); }
 export const HONEST: Bi = B("To be clear: I haven't filed, paid or sent anything. What needs that is waiting for your approval in the app.", "说明一下：我没有提交、付款或发送任何内容。需要这些操作的事项都在应用里等待您批准。");
