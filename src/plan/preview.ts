@@ -139,9 +139,10 @@ function roleOf(f: OfficialForm | null, a: Application): Role {
   if (/plan (check|review)/.test(k)) return "plan";
   if (/building permit|tenant improvement|finish-out|build-out/.test(k)) return "building";
   // the permit that lets a food place open: a food form (or one only restaurants file) that issues a permit or licence,
-  // not a course, a plan review, a sign or the building. Chicago's business licence is its food licence.
+  // not a course, a plan review, a sign or the building. Chicago's business licence is its food licence. Boston's common
+  // victualler licence comes before the health permit, so it isn't the permit itself.
   const foodForm = f ? !!f.needs?.food || f.id === "chi-license" || (f.level !== "federal" && f.segments.includes("restaurant") && !f.segments.includes("seller") && !f.segments.includes("warehouse")) : /food/.test(a.id);
-  if (foodForm && /permit|licen|approval|dealer|food business registration/.test(k) && !/manager|handler|protection certificate|pre-opening|plan|\bsign|occupancy|publication|building|fire|hazard|insurance|assembly|formula|premises/.test(k)) return "food";
+  if (foodForm && /permit|licen|approval|dealer|food business registration/.test(k) && !/manager|handler|protection certificate|pre-opening|plan|\bsign|occupancy|publication|building|fire|hazard|insurance|assembly|formula|premises|victualler/.test(k)) return "food";
   if (/business (tax|license|licence|registration|certificate)|certificate of use|commercial activity/.test(k) && a.level === "city") return "license";
   return "other";
 }
@@ -250,13 +251,16 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     if (acr) return B(acr, acr + " ");
     return B(a.name.en.replace(/^Application for (Registration as an? |)/, "").replace(/\s*\(.*\)$/, ""), a.name.zh.replace(/（.*）$/, "").replace(/申请$/, ""));
   };
-  const dep = (a: Application, on: Role, label: Bi) => { const d = byRole.get(on); if (d && d.id !== a.id && !a.checklist.some(c => c.dep === d.id)) { const s = short(d); a.checklist = [{ id: "dep-" + on, label, state: "missing", dep: d.id }, ...a.checklist]; a.next = B(`After the ${s.en}`, `${s.zh}之后`); } };
+  const link = (a: Application, d: Application | undefined, key: string, label: Bi) => { if (d && d.id !== a.id && !a.checklist.some(c => c.dep === d.id)) { const s = short(d); a.checklist = [{ id: "dep-" + key, label, state: "missing", dep: d.id }, ...a.checklist]; a.next = B(`After the ${s.en}`, `${s.zh}之后`); } };
+  const dep = (a: Application, on: Role, label: Bi) => link(a, byRole.get(on), on, label);
   for (const r of rows) {
     const role = roleOf(r.f, r.a);
     if (role === "ein") dep(r.a, "entity", B("Company formed", "公司已成立"));
     if (role === "publication") dep(r.a, "entity", B("Articles filed", "组织章程已提交"));
     if (role === "tax" || role === "employer" || role === "license") dep(r.a, "ein", B("EIN issued", "EIN 已签发"));
     if (role === "building" || role === "food") dep(r.a, "plan", B("Approved plan review", "已批准的图纸审查"));
+    // what the agency's own page says this step waits on, when that step is in the plan too
+    for (const w of r.f?.after ?? []) link(r.a, apps.find(x => x.official === w.form), w.form, w.label);
     if (role === (food ? "food" : "license") || role === "plan") r.a.critical = true;
   }
 

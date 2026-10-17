@@ -1,11 +1,13 @@
 // City and county steps for San José (Santa Clara County), San Francisco and Dallas, copied from the agencies' own
-// pages on 2026-10-10; Austin (Travis County) on 2026-10-12; San Antonio, Tampa, San Diego, Irvine, Orlando, Fort Worth and Phoenix (with Arizona) on 2026-10-12. Times and renewals appear only where the agency states them; fees are null where they vary.
+// pages on 2026-10-10; Austin (Travis County) on 2026-10-12; San Antonio, Tampa, San Diego, Irvine, Orlando, Fort Worth and Phoenix (with Arizona) on 2026-10-12;
+// Boston (with Massachusetts) and Atlanta (with Fulton County and Georgia) on 2026-10-17. Times and renewals appear only where the agency states them; fees are null where they vary.
 import { B, type Bi } from "../bi";
 import type { FormField, OfficialForm } from "./registry";
 
 const R = "restaurant" as const, T = "retail" as const, S = "seller" as const, W = "warehouse" as const;
 const SRC = (u: string) => `${u} (2026-10-10)`;
 const SRC12 = (u: string) => `${u} (2026-10-12)`;
+const SRC17 = (u: string) => `${u} (2026-10-17)`;
 /** One printed line of a form, as Placetta asks it (same helper as registry.ts). */
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
 
@@ -524,5 +526,133 @@ export const LOCAL_US: OfficialForm[] = [
     url: "https://maricopacountyaz-energovweb.tylerhost.net/apps/selfservice#/home", info: "https://www.maricopa.gov/4996/New-Application-Guidance",
     fee: null, feeNote: B("$373 to $411 a year depending on the class.", "按类别每年 373 至 411 美元。"),
     renews: B("Every year from the issue date.", "自签发之日起每年续期。"), checked: "page", fields: [],
+  },
+
+  /* ------------------------------------------- Massachusetts and Boston ------------------------------------------- */
+  // The state's food manager and allergen rules apply in every Massachusetts town; Boston's own steps follow.
+  {
+    id: "ma-food-manager", form: "Certified Food Protection Manager certificate (accredited exam)", title: B("Certified food protection manager", "注册食品保护经理"),
+    agency: B("Massachusetts Department of Public Health, Food Protection Program", "马萨诸塞州公共卫生局食品保护项目"), level: "state", where: "MA", segments: [R, T], needs: { food: true }, method: "online", order: 40,
+    how: B("At least one manager on staff passes a food protection manager exam from a nationally accredited provider that Massachusetts accepts; a backup person in charge covers when they're away. Boston asks for the certificate with the food service permit application.", "至少一名在职经理通过马萨诸塞州认可的全国认证机构的食品保护经理考试；该经理不在时由一名后备负责人顶班。波士顿在申请食品服务许可时要求提交该证书。"),
+    url: "https://www.mass.gov/doc/massachusetts-food-protection-manager-certification-exam-and-trainer-directory-1/download",
+    info: "https://www.mass.gov/doc/massachusetts-food-protection-manager-certification-exam-and-trainer-directory-1/download",
+    fee: null, feeNote: B("Set by the exam provider. Boston charges no fee for it.", "由考试机构定价，波士顿市政府不收费。"),
+    renews: B("Every 5 years.", "每 5 年。"), checked: "page", fields: [],
+  },
+  {
+    id: "ma-allergen", form: "Allergen awareness training certificate (105 CMR 590.011(C))", title: B("Allergen awareness certificate", "食物过敏原知识证书"),
+    agency: B("Massachusetts Department of Public Health, Food Protection Program", "马萨诸塞州公共卫生局食品保护项目"), level: "state", where: "MA", segments: [R], needs: { food: true }, method: "online", order: 41,
+    how: B("The person in charge, who must be on site whenever the place is open, and the backup who covers for them take an allergen awareness course and train the staff. Places that cook, prepare or serve food to eat right away need it; Boston asks for the certificate before the opening inspection.", "营业期间必须在场的现场负责人及其后备人员须完成食物过敏原知识课程，并培训员工。烹饪、加工或供应即食食品的场所都需要；波士顿在开业检查前要求出示该证书。"),
+    url: "https://www.mass.gov/lists/food-allergen-awareness-guidance", info: "https://www.mass.gov/info-details/food-allergen-awareness-faqs",
+    fee: null, feeNote: B("Set by the course provider; Boston says usually under $25.", "由课程机构定价；波士顿称通常低于 25 美元。"),
+    renews: B("Every 5 years.", "每 5 年。"), checked: "page", fields: [],
+  },
+  {
+    id: "bos-cert", form: "Business Certificate (City Clerk)", title: B("Boston business certificate (DBA)", "波士顿营业证明（DBA）"),
+    agency: B("City of Boston, City Clerk", "波士顿市书记官办公室"), level: "city", where: "BOS", segments: [R, T, S, W], method: "in_person", order: 56,
+    how: B("Needed when the business trades under a name other than its legal name. Bring the notarized form, the signed lease and photo ID to City Hall, Room 601 (the clerk notarizes free), or mail them with a check; there is no online filing. An LLC or corporation registers with the Secretary of the Commonwealth first.", "企业以法定名称以外的名称经营时须办理。携带经公证的表格、已签署的租约和带照片证件到市政厅 601 室办理（书记官处免费公证），或连同支票邮寄；不能在线提交。LLC 或公司须先在马萨诸塞州州务卿处登记。"),
+    url: "https://www.boston.gov/sites/default/files/file/2025/03/2025-New-Business-Certificate-Form_0.pdf", pdf: "https://www.boston.gov/sites/default/files/file/2025/03/2025-New-Business-Certificate-Form_0.pdf",
+    info: "https://www.boston.gov/departments/city-clerk/how-apply-business-certificate",
+    fee: 65, feeNote: B("$65, plus $35 if the owner doesn't live in Massachusetts.", "65 美元；业主不住在马萨诸塞州的另加 35 美元。"),
+    takes: B("Issued while you wait in person; 2 to 3 business days by mail.", "现场办理可当场取证；邮寄需 2 至 3 个工作日。"),
+    takesSource: SRC17("https://www.boston.gov/departments/city-clerk/how-apply-business-certificate"),
+    renews: B("Every 4 years from the first registration; the clerk mails a renewal letter.", "自首次登记起每 4 年续期一次，书记官处会寄送续期通知。"), checked: "page", fields: [],
+    attach: [B("Signed lease, or a notarized letter from the landlord", "已签署的租约，或房东经公证的证明信"), B("Government photo ID", "政府签发的带照片证件")],
+  },
+  {
+    id: "bos-plan-review", form: "Food Establishment Plan Review worksheet", title: B("Food establishment plan review", "食品经营场所图纸审查"),
+    agency: B("City of Boston Inspectional Services, Health Division", "波士顿市检查服务局卫生处"), level: "city", where: "BOS", segments: [R, T], needs: { food: true, buildout: true }, method: "in_person", order: 60,
+    how: B("Needed to build a new place, renovate, change the layout, or add equipment or processes the menu calls for. Book the in-person review with ISD Health (617-635-5326, ISDHealth@boston.gov) and bring the worksheet, two scaled floor plans, NSF or UL equipment specs and the menu; then take the stamped plans to ISD's Building Division for the building permits.", "新建场所、装修、改变布局，或因菜单需要增加设备或特殊工艺时须办理。向检查服务局卫生处预约现场审查（617-635-5326，ISDHealth@boston.gov），携带审查表、两套按比例绘制的平面图、NSF 或 UL 认证设备规格和菜单；之后将盖章图纸送检查服务局建筑处办理建筑许可。"),
+    url: "https://www.boston.gov/sites/default/files/file/2021/05/FSPLAN%20REVIEW%20fillable%205%2013%20FINAL.pdf", pdf: "https://www.boston.gov/sites/default/files/file/2021/05/FSPLAN%20REVIEW%20fillable%205%2013%20FINAL.pdf",
+    info: "https://www.boston.gov/permitting/permits/food-service-permit",
+    fee: null, feeNote: B("ISD confirms the plan review fee at the appointment.", "图纸审查费在预约审查时由检查服务局确认。"), checked: "page", fields: [],
+    attach: [B("Plan review worksheet", "图纸审查表"), B("Two copies of the floor plan, drawn to scale", "两份按比例绘制的平面图"), B("Equipment specifications (NSF, UL or equivalent)", "设备规格（NSF、UL 或同等认证）"), B("Menu", "菜单")],
+  },
+  {
+    id: "bos-cv", form: "Application for Common Victualler (Without Alcohol) License", title: B("Common Victualler License", "普通餐饮执照（Common Victualler）"),
+    agency: B("City of Boston Licensing Board", "波士顿市执照委员会"), level: "city", where: "BOS", segments: [R], needs: { food: true }, method: "online", order: 72,
+    how: B("Needed to sell food made to order at a fixed place, seated or takeout. File on the Licensing Board's online form with the lease, a floor plan, each owner's personal information form and the wage theft form, once the Certificate of Occupancy is in hand. A new address, or hours outside 6 a.m. to 11 p.m., goes to a public hearing after the neighborhood process. ISD issues the food service permit only after this license.", "在固定场所销售现做食品（堂食或外带）须办理。取得占用证后，通过执照委员会的在线表格提交租约、平面图、每位业主的个人信息表和防止拖欠工资表。新地址或营业时间超出早 6 点至晚 11 点的，须在社区沟通程序后参加公开听证。检查服务局须在取得本执照后才签发食品服务许可。"),
+    url: "https://docs.google.com/forms/d/e/1FAIpQLScp721MuqsSIAPeryi7VN7cdMEH4cXgnY2MAze5iM3LSrDCcw/viewform?usp=sf_link",
+    pdf: "https://www.boston.gov/sites/default/files/file/2023/10/Common%20Victualler%20(CV)%20No%20Alcohol%20Application%2011.2023.pdf",
+    info: "https://www.boston.gov/departments/licensing-board/how-get-common-victualler-license",
+    fee: null, feeNote: B("$100 plus $1 a seat; with no seats, $100 plus a $110 takeout fee. The application also lists a $170 legal notice fee paid to the Boston Herald. Pay only when Licensing Board staff ask.", "100 美元，另按每个座位 1 美元；无座位的为 100 美元另加 110 美元外带费。申请表另列有 170 美元的法律公告费，直接付给《波士顿先驱报》。须待执照委员会工作人员通知后再付款。"),
+    takes: B("About 2 to 3 weeks; when a public hearing is needed, several weeks from filing to the hearing.", "约 2 至 3 周；需要公开听证的，从提交到听证需数周。"),
+    takesSource: SRC17("https://www.boston.gov/departments/licensing-board/how-get-common-victualler-license"),
+    renews: B("Every year, for the calendar year: renew online by October 31; a late renewal pays double.", "每年续期，按自然年有效：10 月 31 日前在线续期，逾期须缴双倍费用。"), checked: "page", fields: [],
+    // the application asks for the company's Business Entity Summary from the Corporations Division, and for stamped
+    // plans approved by ISD when the space is built out or renovated
+    after: [
+      { form: "ma-sos", label: B("Company registered with the Secretary of the Commonwealth", "公司已在马萨诸塞州州务卿处登记") },
+      { form: "bos-plan-review", label: B("Approved plan review", "已批准的图纸审查") },
+    ],
+    attach: [B("Signed lease, agreement to lease or deed", "已签署的租约、租赁协议或产权契据"), B("Floor plan with capacity, seating, exits, kitchen and storage", "平面图（标明容纳人数、座位、出口、厨房和储藏区）"), B("Personal information form for each owner, officer and manager", "每位业主、高管和经理的个人信息表"), B("Wage theft prevention form", "防止拖欠工资表"), B("Business Entity Summary from the Massachusetts Corporations Division (not for a sole proprietor)", "马萨诸塞州公司处出具的企业实体摘要（个人独资企业除外）")],
+  },
+  {
+    id: "bos-food-permit", form: "Food Establishment Permit Application", title: B("Food service permit", "食品服务许可证"),
+    agency: B("City of Boston Inspectional Services, Health Division", "波士顿市检查服务局卫生处"), level: "city", where: "BOS", segments: [R, T], needs: { food: true }, method: "pdf_mail", order: 76,
+    how: B("Email the application (with its workers' comp affidavit), the EIN and the food protection manager certificate to ISDHealth@boston.gov, or bring them to 1010 Massachusetts Ave, 4th floor. Before the opening inspection, which you book a few days ahead, have the allergen certificate, Certificate of Occupancy, Common Victualler License and paid fees ready.", "将申请表（含工伤保险宣誓书）、EIN 和食品保护经理证书电邮至 ISDHealth@boston.gov，或送至马萨诸塞大道 1010 号 4 楼。开业检查须提前几天预约，检查前须备好过敏原证书、占用证、普通餐饮执照并缴清费用。"),
+    url: "https://www.boston.gov/sites/default/files/file/2026/07/%28English%29%20Food%20Establishment%20Permit%20Application%20updated-combined.pdf",
+    pdf: "https://www.boston.gov/sites/default/files/file/2026/07/%28English%29%20Food%20Establishment%20Permit%20Application%20updated-combined.pdf",
+    info: "https://www.boston.gov/permitting/permits/food-service-permit",
+    fee: null, feeNote: B("$200 minimum the first year for a sit-down restaurant, $100 for a retail food store under 2,500 sq ft, plus $30 each for milk or frozen desserts. From the second year a restaurant that also does takeout pays by its prior-year gross sales, up to $1,200.", "堂食餐厅首年最低 200 美元，2,500 平方英尺以下的零售食品店 100 美元；供应牛奶或冷冻甜品各加 30 美元。从第二年起，兼做外带的餐厅按上一年总销售额缴费，最高 1,200 美元。"),
+    takes: B("1 to 2 business days when the space isn't changing; after a build-out, the inspection is usually done within 1 business day of proof of every other approval.", "场所不变动时 1 至 2 个工作日；装修后，提交全部其他审批证明后通常 1 个工作日内完成检查。"),
+    takesSource: SRC17("https://www.boston.gov/permitting/permits/food-service-permit"),
+    renews: B("Every year: the permit runs January 1 to December 31, and the renewal bill comes around the second week of November.", "每年续期：许可有效期为 1 月 1 日至 12 月 31 日，续期账单约在 11 月第二周寄出。"), checked: "page", fields: [],
+    // the page lists both certificates with the application and requires the victualler license before the permit
+    after: [
+      { form: "ma-food-manager", label: B("A manager passed the food protection exam", "已有经理通过食品保护考试") },
+      { form: "ma-allergen", label: B("The person in charge finished allergen training", "现场负责人已完成过敏原培训") },
+      { form: "bos-cv", label: B("Common Victualler License issued", "普通餐饮执照已签发") },
+    ],
+    attach: [B("Workers' compensation insurance affidavit", "工伤保险宣誓书"), B("Federal Tax ID (EIN)", "联邦税号（EIN）"), B("Food protection manager certificate", "食品保护经理证书"), B("Allergen awareness certificate", "食物过敏原知识证书"), B("Certificate of Occupancy", "占用证"), B("Common Victualler License", "普通餐饮执照")],
+  },
+
+  /* ------------------------------------------- Georgia, Atlanta and Fulton County ------------------------------------------- */
+  // Georgia's county boards of health issue food service permits under the state's rules (Chapter 511-6-1). Most of
+  // Atlanta is in Fulton County; the eastern part is in DeKalb County, whose board of health issues them there.
+  {
+    id: "ga-food-manager", form: "Certified Food Safety Manager (Rule 511-6-1-.03)", title: B("Certified food safety manager", "注册食品安全经理"),
+    agency: B("Georgia Department of Public Health, Environmental Health", "佐治亚州公共卫生局环境卫生处"), level: "state", where: "GA", segments: [R], needs: { food: true }, method: "online", order: 40,
+    how: B("At least one employee with supervisory and management duties passes an accredited food safety manager exam, and is designated to this one place only. A new food service establishment has 60 days from its permit to employ one, and tells the county within 30 days if it loses its manager.", "至少一名负有监督和管理职责的员工通过经认证的食品安全经理考试，且只能指定在本场所任职。新食品服务场所自取得许可证起 60 天内须聘有一名注册经理；失去注册经理时须在 30 天内通知县卫生部门。"),
+    url: "https://dph.georgia.gov/node/146", info: "https://dph.georgia.gov/document/document/envhealthfoodfoodservice-rulespdf/download",
+    fee: null, feeNote: B("Set by the exam provider.", "由考试机构定价。"), renews: B("Renewed as the exam's certifying body requires.", "按考试认证机构的要求续期。"), checked: "page", fields: [],
+  },
+  {
+    id: "atl-license", form: "Business Occupational Tax Certificate (business license)", title: B("Atlanta business license", "亚特兰大营业执照"),
+    agency: B("City of Atlanta, Department of Finance, Office of Revenue", "亚特兰大市财政局税收办公室"), level: "city", where: "ATL", segments: [R, T, S, W], method: "portal", order: 58,
+    how: B("Every business location inside city limits registers. Apply on the city's ATLBiz portal with a government photo ID, the articles of incorporation, notarized SAVE and E-Verify affidavits and the EIN; the city runs the zoning review itself, and some kinds of business also upload a regulatory permit.", "市界内每个营业地点都须登记。通过市政府 ATLBiz 门户申请，提交政府签发的带照片证件、公司章程、经公证的 SAVE 和 E-Verify 宣誓书及 EIN；分区审查由市政府内部完成，部分行业还须上传相应的监管许可。"),
+    url: "https://atlbiz.atlantaga.gov/_/", info: "https://atlantaga.gov/government/departments/finance/office-of-revenue/frequently-asked-questions",
+    // fees from the FAQ page; the 2026 administrative fee and the renewal dates from the Office of Revenue's
+    // December 2025 newsletter (https://www.atlantaga.gov/home/showpublisheddocument/67212/639009773913530000)
+    fee: null, feeNote: B("A $50 zoning review fee at submission and the administrative fee, which rises from $75 to $191 in 2026, plus an occupation tax set by gross receipts, employees and business class.", "提交时缴纳 50 美元分区审查费及行政费（2026 年由 75 美元调至 191 美元），另按营业总额、员工人数和业务类别缴纳营业税。"),
+    takes: B("Atlanta doesn't publish how long a new license takes; the zoning review is done inside the city as part of the application.", "亚特兰大未公布新执照的办理时间；分区审查由市政府在申请流程中内部完成。"), takesDays: null,
+    takesSource: SRC17("https://atlantaga.gov/government/departments/finance/office-of-revenue/frequently-asked-questions"),
+    renews: B("Every year: the certificate expires December 31; renew on ATLBiz from January 1 to February 15 ($500 late filing fee) and pay by April 1.", "每年续期：证书于 12 月 31 日到期；1 月 1 日至 2 月 15 日在 ATLBiz 续期（逾期申报罚 500 美元），4 月 1 日前缴款。"), checked: "page", fields: [],
+    attach: [B("Government photo ID", "政府签发的带照片证件"), B("Articles of incorporation, if incorporated", "公司章程（如为公司）"), B("Notarized SAVE affidavit", "经公证的 SAVE 宣誓书"), B("Notarized E-Verify affidavit", "经公证的 E-Verify 宣誓书")],
+  },
+  {
+    id: "fulton-plan-review", form: "Application for Permit to Construct a Food Service Establishment (AS-5.7.19)", title: B("Food service plan review", "餐饮服务场所图纸审查"),
+    agency: B("Fulton County Board of Health, Environmental Health Services", "富尔顿县卫生委员会环境卫生服务处"), level: "county", where: "ATL", segments: [R], needs: { food: true, buildout: true }, method: "pdf_mail", order: 60,
+    how: B("Before building or extensively remodeling, mail or bring the application, scaled plans, equipment specifications and the fee to the Environmental Health district office nearest the restaurant. An Atlanta address in DeKalb County applies to the DeKalb County Board of Health instead.", "新建或大规模改建前，将申请表、按比例绘制的图纸、设备规格和费用邮寄或送至离餐厅最近的环境卫生区办公室。位于迪卡尔布县的亚特兰大地址须改向迪卡尔布县卫生委员会申请。"),
+    url: "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Food-Service-Application.pdf",
+    pdf: "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Food-Service-Application.pdf",
+    info: "https://fultoncountyga.gov/Inside-Fulton-County/Fulton-County-Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection",
+    // fees from the Board of Health's schedule effective April 1, 2022
+    // (https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/ENV-FEES-as-approved-by-BOC-March-2022.pdf)
+    fee: null, feeNote: B("$450, $600 or $750 for a new place by risk type; $350 or $200 to review a major or minor change to an existing one (fee schedule effective April 1, 2022).", "新场所按风险类别为 450、600 或 750 美元；既有场所的较大或较小改动审查为 350 或 200 美元（2022 年 4 月 1 日起生效的收费表）。"),
+    takes: B("The county doesn't publish a review time; Georgia's food service rules ask for plans at least 14 business days before construction starts.", "县政府未公布审查时间；佐治亚州食品服务法规要求至少在开工前 14 个工作日提交图纸。"),
+    takesSource: SRC17("https://dph.georgia.gov/document/document/envhealthfoodfoodservice-rulespdf/download"), checked: "page", fields: [],
+    attach: [B("Plans drawn to scale", "按比例绘制的图纸"), B("Equipment specifications", "设备规格"), B("Menu", "菜单")],
+  },
+  {
+    id: "fulton-food-permit", form: "Food Service Permit (Georgia Rule 511-6-1-.02)", title: B("Food service permit", "餐饮服务许可证"),
+    agency: B("Fulton County Board of Health, Environmental Health Services", "富尔顿县卫生委员会环境卫生服务处"), level: "county", where: "ATL", segments: [R], needs: { food: true }, method: "pdf_mail", order: 76,
+    how: B("Issued by the county once the application and fee are in, the plans are approved and the place passes its pre-opening inspection; apply by mail or in person at the district office nearest the restaurant. An Atlanta address in DeKalb County gets its permit from the DeKalb County Board of Health instead.", "申请表和费用齐全、图纸获批并通过开业前检查后由县政府签发；可邮寄或到离餐厅最近的区办公室现场申请。位于迪卡尔布县的亚特兰大地址须改由迪卡尔布县卫生委员会签发许可。"),
+    url: "https://fultoncountyga.gov/Inside-Fulton-County/Fulton-County-Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection",
+    info: "https://fultoncountyga.gov/Inside-Fulton-County/Fulton-County-Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection",
+    fee: null, feeNote: B("$450, $600 or $750 a year by risk type, plus $100 to $150 for each extra bar or satellite kitchen (fee schedule effective April 1, 2022).", "按风险类别每年 450、600 或 750 美元，每增加一个吧台或附属厨房另加 100 至 150 美元（2022 年 4 月 1 日起生效的收费表）。"),
+    takes: B("Georgia's food service rules ask for the permit application at least 10 business days before opening.", "佐治亚州食品服务法规要求至少在开业前 10 个工作日提交许可申请。"),
+    takesSource: SRC17("https://dph.georgia.gov/document/document/envhealthfoodfoodservice-rulespdf/download"),
+    renews: B("An inspection fee every year; the permit ends when the owner, location or type of operation changes.", "每年缴纳检查费；业主、地点或经营类型变更时许可证即失效。"), checked: "page", fields: [],
   },
 ];
