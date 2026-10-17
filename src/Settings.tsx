@@ -30,6 +30,7 @@ import larkLogo from "./assets/integrations/lark.svg";
 import wecomLogo from "./assets/integrations/wecom.svg";
 import dingtalkLogo from "./assets/integrations/dingtalk.svg";
 import teamsLogo from "./assets/integrations/teams.svg";
+import wechatLogo from "./assets/integrations/wechat.svg";
 
 
 /* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
@@ -81,9 +82,10 @@ const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
   teams: { how: B("In the Teams channel: More options, Workflows, then the template that posts to a channel when a webhook request is received. Copy the URL it gives you.", "在 Teams 频道中：更多选项 → 工作流，选择“收到 webhook 请求时发布到频道”模板，复制生成的 URL。"), ph: "https://...logic.azure.com/workflows/..." },
 };
 /** Which provider's app keys a sign-in connection needs. */
-const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks" };
+const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks", square: "square", toast: "toast" };
+const POS_WHY = B("Monthly sales for sales tax and permit fees, the team's schedules and hours for labor-law and food handler checks", "月度销售额用于销售税和许可费，团队排班和工时用于劳动法和食品从业人员证检查");
 
-type Item = { kind: IntegrationKind | "feed" | "square" | "toast"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean; hook?: boolean; bot?: boolean };
+type Item = { kind: IntegrationKind | "feed"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean; hook?: boolean; bot?: boolean };
 const CHAT_WHY = B("Deadlines, renewals and filing updates in your team's group", "截止日期、续期和申报进展推送到团队群");
 const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
   { group: B("Email", "邮件"), items: [
@@ -103,6 +105,7 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "teams", name: "Microsoft Teams", why: CHAT_WHY, hook: true, logo: teamsLogo },
   ] },
   { group: B("Give Odelia jobs from chat", "在聊天中给 Odelia 派活"), items: [
+    { kind: "wechat_bot", name: "Odelia in WeChat", zh: "微信中的 Odelia", why: B("Teammates message your WeChat Official Account: she does the job as the teammate who asked and answers in the chat. Each teammate links their WeChat once with a code", "同事给您的微信公众号发消息：她以提问的同事身份完成工作，并在聊天中回复。每位同事用验证码关联一次自己的微信"), logo: wechatLogo, bot: true },
     { kind: "slack_bot", name: "Odelia in Slack", zh: "Slack 中的 Odelia", why: B("Mention @Odelia in a channel or message her: she does the job as the teammate who asked and answers in the thread. Only Placetta teammates (same email) can give her jobs", "在频道里 @Odelia 或私信她：她以提问的团队成员身份完成工作并在话题中回复。只有快哉团队成员（邮箱相同）可以给她派任务"), logo: slackLogo, bot: true },
     { kind: "lark_bot", name: "Odelia in Lark (Feishu)", zh: "飞书中的 Odelia", why: B("@Odelia in a group or message her: she does the job as the teammate who asked and replies there. Only Placetta teammates (same email) can give her jobs", "在群里 @Odelia 或私信她：她以提问的团队成员身份完成工作并直接回复。只有快哉团队成员（邮箱相同）可以给她派任务"), logo: larkLogo, bot: true },
   ] },
@@ -111,36 +114,110 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "dropbox", name: "Dropbox", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: dropboxLogo },
   ] },
   { group: B("Sales, payroll and accounting", "销售、薪资与财务"), items: [
-    { kind: "square", name: "Square", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), logo: squareLogo },
-    { kind: "toast", name: "Toast", why: B("Sales for sales tax, schedules for labor-law checks", "销售额用于销售税，排班用于劳动法检查"), logo: toastLogo, wide: true },
+    { kind: "square", name: "Square", why: POS_WHY, logo: squareLogo },
+    { kind: "toast", name: "Toast", why: POS_WHY, logo: toastLogo, wide: true },
     { kind: "quickbooks", name: "QuickBooks", why: B("Gross receipts for business tax and renewals", "营业总额用于营业税和续期"), logo: qbLogo },
   ] },
 ];
+
+/** A copyable block: the label to copy, then the text. */
+const CodeBlock = ({ text, copy, zh }: { text: string; copy: (t: string) => void; zh: boolean }) =>
+  <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(text)}>{zh ? "复制" : "Copy"}</button>{text}</pre>;
+
+/** Each teammate's own WeChat: a code to send to the workspace's WeChat Official Account, which links their WeChat to
+ *  them so Odelia works as them there. Any member, for themselves; the settings PIN when it's on, like linking a phone. */
+function WechatLink({ account }: { account: string | null }) {
+  const { lang, cloud, say } = useApp();
+  const zh = lang === "zh";
+  const pin = usePin();
+  const wsId = cloud?.wsId ?? "";
+  const [st, setSt] = useState<api.WechatLink | null>(null);
+  const [code, setCode] = useState<{ code: string; expires_at: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(async () => { if (!wsId) return; try { setSt(await api.wechatLinkStatus(wsId)); } catch { setSt(null); } }, [wsId]);
+  useEffect(() => { void load(); }, [load]);
+  // while a code waits to be sent, look every few seconds: it links the moment the account gets it
+  useEffect(() => {
+    if (!code || st?.linked) return;
+    const t = setInterval(() => void load(), 3000);
+    return () => clearInterval(t);
+  }, [code, st?.linked, load]);
+  useEffect(() => { if (code && st?.linked) { setCode(null); say(zh ? "微信已关联。现在可以在微信里给 Odelia 派活了。" : "Your WeChat is linked. Message Odelia there anytime."); } }, [code, st?.linked, say, zh]);
+  const getCode = async () => {
+    if (pin.locked) { pin.guard(() => void getCode()); return; }
+    setBusy(true);
+    try { const r = await api.wechatLinkCode(wsId); setCode({ code: r.code, expires_at: r.expires_at }); }
+    catch (e) { const x = e as api.ApiError; say((zh && x.message_zh) || x.message); }
+    setBusy(false);
+  };
+  const unlink = () => {
+    if (!window.confirm(zh ? "取消关联您的微信？之后在微信里发的消息不会再交给 Odelia。" : "Unlink your WeChat? Messages from it stop reaching Odelia.")) return;
+    pin.guard(() => void api.wechatUnlink(wsId).then(() => { setCode(null); return load(); }, e => say((e as api.ApiError).message)));
+  };
+  if (!st?.connected) return null;
+  return (
+    <li className="sg-hook sg-bot">
+      {st.linked ? (
+        <p>{zh ? `您的微信已关联${st.linked_at ? `（${fmtDay(st.linked_at, lang, true)} 起）` : ""}。给${account ? ` ${account} ` : "公众号"}发消息即可以您的身份给 Odelia 派活。` : `Your WeChat is linked${st.linked_at ? ` since ${fmtDay(st.linked_at, lang, true)}` : ""}. Message the account${account ? ` ${account}` : ""} to give Odelia jobs as you.`}{" "}
+          <button type="button" className="linkish" onClick={unlink}>{zh ? "取消关联" : "Unlink"}</button></p>
+      ) : code ? (
+        <>
+          <p>{zh ? "用您自己的微信，把这 6 位验证码发给公众号：" : "From your own WeChat, send this 6-digit code to the account:"}</p>
+          <code className="text-code" aria-label={zh ? "要发送的验证码" : "Code to send"}>{code.code}</code>
+          <p className="sg-note" aria-live="polite">{zh ? "收到后会自动关联，30 分钟内有效。" : "It links as soon as the account gets it. The code works for 30 minutes."}{" "}
+            <button type="button" className="linkish" onClick={() => void getCode()}>{zh ? "换一个验证码" : "Get a new code"}</button></p>
+        </>
+      ) : (
+        <p>{zh ? "每位同事关联一次自己的微信，Odelia 才能确认是谁在提问。" : "Each teammate links their own WeChat once, so Odelia knows who is asking."}{" "}
+          <button type="button" className={"sbtn line" + (pin.locked ? " pinned" : "")} disabled={busy} onClick={() => void getCode()}>{pin.locked && <I.lock />}{busy ? "…" : zh ? "关联我的微信" : "Link my WeChat"}</button></p>
+      )}
+      {cloud?.owner && <>
+        <p className="sg-fine">{zh ? "微信“消息与事件推送”的服务器地址：" : "The server address for WeChat's Message push:"}</p>
+        <CodeBlock text={api.wechatServerUrl(wsId)} copy={(t) => { void navigator.clipboard?.writeText(t).then(() => say(zh ? "已复制" : "Copied"), () => undefined); }} zh={zh} />
+      </>}
+    </li>
+  );
+}
 
 function Integrations() {
   const { b, lang, cloud, say } = useApp();
   const [feed, setFeed] = useState("");
   const [avail, setAvail] = useState<api.Availability | null>(null);
   const [form, setForm] = useState<{ kind: HookKind; url: string; secret: string; busy?: boolean } | null>(null);
-  const [bot, setBot] = useState<{ kind: api.BotKind; setup: { events_url: string; manifest?: string } | null; v: Record<string, string>; busy?: boolean } | null>(null);
+  // done: WeChat is connected and the form stays to show what goes into WeChat's console (the Token and key aren't shown again)
+  const [bot, setBot] = useState<{ kind: api.BotKind; setup: api.BotSetup | null; v: Record<string, string>; busy?: boolean; done?: boolean } | null>(null);
+  const [toast, setToast] = useState<{ code: string | null; busy?: boolean } | null>(null);
   const openBot = async (kind: api.BotKind) => {
     if (bot?.kind === kind) { setBot(null); return; }
-    setForm(null); setBot({ kind, setup: null, v: kind === "lark_bot" ? { domain: zh ? "feishu" : "lark" } : {} });
+    setForm(null); setToast(null); setBot({ kind, setup: null, v: kind === "lark_bot" ? { domain: zh ? "feishu" : "lark" } : {} });
     const setup = cloud ? await cloud.botSetup(kind) : null;
-    setBot(b => (b?.kind === kind ? { ...b, setup } : b));
+    // WeChat: start from a fresh Token and EncodingAESKey (anything typed already stays)
+    setBot(b => (b?.kind === kind ? { ...b, setup, v: kind === "wechat_bot" ? { token: setup?.token ?? "", aes_key: setup?.aes_key ?? "", ...b.v } : b.v } : b));
   };
   const submitBot = async () => {
     if (!bot || !cloud) return;
     setBot({ ...bot, busy: true });
     const ok = await cloud.connectBot(bot.kind, bot.v);
-    setBot(ok ? null : { ...bot, busy: false });
+    setBot(ok ? (bot.kind === "wechat_bot" ? { ...bot, busy: false, done: true } : null) : { ...bot, busy: false });
+  };
+  // Toast: the code to type into Toast, then a check that finds the locations carrying it
+  const openToast = async () => {
+    if (toast) { setToast(null); return; }
+    setForm(null); setBot(null); setToast({ code: null });
+    try { const r = await api.toastCode(cloud!.wsId); setToast(t => (t ? { ...t, code: r.code } : t)); }
+    catch (e) { const x = e as api.ApiError; say((zh && x.message_zh) || x.message); setToast(null); }
+  };
+  const checkToast = async () => {
+    if (!toast || !cloud) return;
+    setToast({ ...toast, busy: true });
+    const ok = await cloud.connectToast();
+    setToast(ok ? null : { ...toast, busy: false });
   };
   const copy = (t: string) => { void navigator.clipboard?.writeText(t).then(() => say(zh ? "已复制" : "Copied"), () => undefined); };
   useEffect(() => { if (cloud) void cloud.availability().then(setAvail); }, [cloud?.wsId]);   // eslint-disable-line react-hooks/exhaustive-deps
   const conn = (k: string) => cloud?.integrations.find(i => i.kind === k);
   const zh = lang === "zh";
   const demo = () => say(zh ? "登录您的快哉账户后即可连接。" : "Sign in to your Placetta account to connect.");
-  const request = (name: string) => { window.location.href = `mailto:support@placetta.com?subject=${encodeURIComponent(`Connect ${name}`)}&body=${encodeURIComponent(`Please connect ${name} for our workspace.`)}`; };
   const openForm = (kind: HookKind) => setForm(f => (f?.kind === kind ? null : { kind, url: "", secret: "" }));
   const submit = async () => {
     if (!form || !cloud) return;
@@ -155,17 +232,17 @@ function Integrations() {
           <h3>{b(g.group)}</h3>
           <ul className="sg-list">
             {g.items.map(it => {
-              const c = it.kind === "feed" || it.kind === "square" || it.kind === "toast" ? undefined : conn(it.kind);
+              const c = it.kind === "feed" ? undefined : conn(it.kind);
               const provider = PROVIDER_OF[it.kind as IntegrationKind];
               // Slack signs in when its app keys are set; otherwise, like the other chats, it takes the channel's link
               const viaLink = it.hook && !(it.kind === "slack" && avail?.slack);
               const soon = !!cloud && !!avail && !!provider && !avail[provider];
               let right: ReactNode;
               if (it.kind === "feed") right = cloud ? <Btn guard onClick={async () => { try { const u = await cloud.feedUrl(); setFeed(u); await navigator.clipboard?.writeText(u).catch(() => undefined); say(zh ? "订阅链接已复制" : "Link copied"); } catch (e) { say((e as { message: string }).message); } }}>{zh ? "复制链接" : "Copy link"}</Btn> : <Btn onClick={demo}>{zh ? "复制链接" : "Copy link"}</Btn>;
-              else if (it.kind === "square" || it.kind === "toast") right = <Btn onClick={() => request(it.name)}>{zh ? "申请接入" : "Request"}</Btn>;
               else if (cloud && !cloud.owner) right = c ? undefined : <em className="lock">{zh ? "由所有者连接" : "Owners connect"}</em>;
               else if (c) right = <Btn guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{zh ? "断开" : "Disconnect"}</Btn>;
               else if (soon) right = <em className="lock">{zh ? "即将开放" : "Opens soon"}</em>;
+              else if (it.kind === "toast") right = <Btn guard kind="line" onClick={() => (cloud ? void openToast() : demo())}>{toast ? (zh ? "取消" : "Cancel") : (zh ? "连接" : "Connect")}</Btn>;
               else if (it.bot) right = <Btn guard kind="line" onClick={() => (cloud ? void openBot(it.kind as api.BotKind) : demo())}>{bot?.kind === it.kind ? (zh ? "取消" : "Cancel") : (zh ? "设置" : "Set up")}</Btn>;
               else if (viaLink) right = <Btn guard kind="line" onClick={() => (cloud ? openForm(it.kind as HookKind) : demo())}>{form?.kind === it.kind ? (zh ? "取消" : "Cancel") : (zh ? "连接" : "Connect")}</Btn>;
               else right = <Btn guard kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
@@ -174,9 +251,24 @@ function Integrations() {
               return [
                 <li key={it.kind} className="sg-row">
                   <Tile logo={it.logo} wide={it.wide} chat={it.hook || it.bot} />
-                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}{it.kind === "toast" ? (zh ? "。需 Toast 合作伙伴审批。" : ". Needs Toast partner approval.") : ""}</small>{status}</span>
+                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}</small>{status}</span>
                   <span className="sg-r">{right}</span>
                 </li>,
+                it.kind === "wechat_bot" && c && c.status === "connected" && cloud ? <WechatLink key="wechat-link" account={c.account} /> : null,
+                it.kind === "toast" && toast && !c ? (
+                  <li key="toast-form" className="sg-hook sg-bot">
+                    <ol>
+                      <li>{zh ? "在 Toast Web 中：Integrations → Browse & purchase integrations，找到快哉（Placetta），添加到您的门店。" : "In Toast Web: Integrations, Browse & purchase integrations. Find Placetta and add it to your locations."}</li>
+                      <li>{zh ? "再到 Configure integrations，点快哉旁边的齿轮，为每家门店在 Location ID 中填写这个代码，然后 Apply：" : "Then Configure integrations, the gear next to Placetta, and type this code as the Location ID for each location, then Apply:"}</li>
+                    </ol>
+                    {toast.code ? <code className="text-code" aria-label={zh ? "您的 Toast 代码" : "Your Toast code"}>{toast.code}</code> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
+                    <form onSubmit={e => { e.preventDefault(); void checkToast(); }}>
+                      {toast.code && <button type="button" className="sbtn quiet" onClick={() => copy(toast.code!)}><I.copy />{zh ? "复制代码" : "Copy code"}</button>}
+                      <button type="submit" className="sbtn ink" disabled={toast.busy || !toast.code}>{toast.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "检查并连接" : "Check and connect")}</button>
+                    </form>
+                    <p className="sg-fine">{zh ? "只有能管理门店 Toast 集成的人才能填写这个代码，所以快哉只会读取您自己的门店。Toast 可能需要最多 15 分钟才会向快哉开放新门店。快哉只读取销售额、员工和排班，不会更改 Toast 中的任何内容。" : "Only someone who manages your Toast integrations can enter this code, so Placetta reads only your own locations. Toast can take up to 15 minutes to open a new location to Placetta. Placetta reads sales, staff and schedules, and changes nothing in Toast."}</p>
+                  </li>
+                ) : null,
                 form?.kind === it.kind && !c ? (
                   <li key={it.kind + "-form"} className="sg-hook">
                     <p>{b(HOOK_HELP[form.kind].how)}</p>
@@ -187,13 +279,33 @@ function Integrations() {
                     </form>
                   </li>
                 ) : null,
-                bot?.kind === it.kind && !c ? (
+                bot?.kind === "wechat_bot" && it.kind === "wechat_bot" && bot.done ? (
+                  <li key="wechat-done" className="sg-hook sg-bot">
+                    <p>{zh ? "已连接。最后一步，在微信开发者平台：我的业务 → 服务号 → 消息与事件推送，填写下面三项，加密方式选“安全模式”，数据格式选 XML，然后提交：" : "Connected. Last step, in the WeChat developer platform: My business, Service account, Message push (消息与事件推送). Fill in these three, choose safe mode (安全模式) and XML, and submit:"}</p>
+                    <p className="sg-note">{zh ? "服务器地址（URL）" : "Server address (URL)"}</p>
+                    <CodeBlock text={api.wechatServerUrl(cloud?.wsId ?? "")} copy={copy} zh={zh} />
+                    <p className="sg-note">Token</p>
+                    <CodeBlock text={bot.v.token ?? ""} copy={copy} zh={zh} />
+                    {bot.v.aes_key && <><p className="sg-note">EncodingAESKey</p><CodeBlock text={bot.v.aes_key} copy={copy} zh={zh} /></>}
+                    <form onSubmit={e => { e.preventDefault(); setBot(null); }}><button type="submit" className="sbtn ink">{zh ? "已在微信中提交" : "Submitted in WeChat"}</button></form>
+                  </li>
+                ) : null,
+                bot?.kind === it.kind && !c && !bot.done ? (
                   <li key={it.kind + "-bot"} className="sg-hook sg-bot">
                     {bot.kind === "slack_bot" ? (
                       <ol>
                         <li>{zh ? "在 api.slack.com/apps 选择 Create New App → From a manifest，选好工作区，粘贴下面的清单：" : "At api.slack.com/apps choose Create New App, From a manifest, pick your workspace and paste this:"}</li>
                         {bot.setup?.manifest ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.manifest!)}>{zh ? "复制" : "Copy"}</button>{bot.setup.manifest}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
                         <li>{zh ? "点 Install to Workspace。然后复制 OAuth & Permissions 里的 Bot User OAuth Token（xoxb- 开头），以及 Basic Information 里的 Signing Secret：" : "Click Install to Workspace. Then copy the Bot User OAuth Token (starts with xoxb-) from OAuth & Permissions, and the Signing Secret from Basic Information:"}</li>
+                      </ol>
+                    ) : bot.kind === "wechat_bot" ? (
+                      <ol>
+                        <li>{zh ? "需要一个以公司主体完成微信认证的服务号。建议专门给团队用一个：开启服务器配置后，在微信后台设置的自动回复和菜单会失效。" : "You need a WeChat service account verified under your company (认证服务号). Use one just for your team: once its server address is on, the auto-replies and menu set in WeChat's console stop."}</li>
+                        <li>{zh ? "在微信开发者平台（developers.weixin.qq.com）：我的业务 → 服务号 → 开发密钥，复制 AppID 和 AppSecret。" : "In the WeChat developer platform (developers.weixin.qq.com): My business, Service account, Development keys. Copy the AppID and the AppSecret."}</li>
+                        <li>{bot.setup?.ips?.length
+                          ? (zh ? `在同一页的 API IP 白名单中添加：${bot.setup.ips.join("、")}` : `Under API IP whitelist on the same page, add: ${bot.setup.ips.join(", ")}`)
+                          : (zh ? "API IP 白名单保持关闭。如果微信给账号管理员发消息，询问是否允许快哉的服务器，请选择允许。" : "Keep the API IP whitelist off. If WeChat messages the account's admin asking to allow Placetta's server, allow it.")}</li>
+                        <li>{zh ? "把 AppID 和 AppSecret 填在下面，连同这个 Token 和 EncodingAESKey（也可换成账号已在用的），点“连接”：" : "Paste the AppID and AppSecret below, with this Token and EncodingAESKey (or the ones the account already uses), and connect:"}</li>
                       </ol>
                     ) : (
                       <ol>
@@ -205,13 +317,19 @@ function Integrations() {
                     )}
                     <form onSubmit={e => { e.preventDefault(); void submitBot(); }}>
                       {(bot.kind === "slack_bot"
-                        ? [["bot_token", "Bot User OAuth Token (xoxb-...)", true], ["signing_secret", "Signing Secret", true]]
-                        : [["app_id", "App ID (cli_...)", true], ["app_secret", "App Secret", true], ["verification_token", "Verification Token", true], ["encrypt_key", zh ? "Encrypt Key（可选）" : "Encrypt Key (optional)", false]]
-                      ).map(([k, ph, req]) => <input key={k as string} type={/secret|token|key/.test(k as string) && k !== "app_id" ? "password" : "text"} required={!!req} value={bot.v[k as string] ?? ""} onChange={e => setBot({ ...bot, v: { ...bot.v, [k as string]: e.target.value.trim() } })} placeholder={ph as string} aria-label={ph as string} autoComplete="off" spellCheck={false} />)}
+                        ? [["bot_token", "Bot User OAuth Token (xoxb-...)", true, "password"], ["signing_secret", "Signing Secret", true, "password"]]
+                        : bot.kind === "wechat_bot"
+                        // the Token and EncodingAESKey stay visible: they're typed into WeChat's console too
+                        ? [["app_id", "AppID (wx...)", true, "text"], ["app_secret", "AppSecret", true, "password"], ["token", "Token", true, "text"], ["aes_key", zh ? "EncodingAESKey（安全模式）" : "EncodingAESKey (safe mode)", false, "text"]]
+                        : [["app_id", "App ID (cli_...)", true, "text"], ["app_secret", "App Secret", true, "password"], ["verification_token", "Verification Token", true, "password"], ["encrypt_key", zh ? "Encrypt Key（可选）" : "Encrypt Key (optional)", false, "password"]]
+                      ).map(([k, ph, req, type]) => <input key={k as string} type={type as string} required={!!req} value={bot.v[k as string] ?? ""} onChange={e => setBot({ ...bot, v: { ...bot.v, [k as string]: e.target.value.trim() } })} placeholder={ph as string} aria-label={ph as string} autoComplete="off" spellCheck={false} />)}
                       {bot.kind === "lark_bot" && <Select value={bot.v.domain ?? "feishu"} onChange={e => setBot({ ...bot, v: { ...bot.v, domain: e.target.value } })} aria-label={zh ? "版本" : "Edition"}><option value="feishu">{zh ? "飞书（中国）" : "Feishu (China)"}</option><option value="lark">{zh ? "Lark（国际版）" : "Lark (international)"}</option></Select>}
                       <button type="submit" className="sbtn ink" disabled={bot.busy}>{bot.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "连接" : "Connect")}</button>
                     </form>
-                    <p className="sg-fine">{zh ? "她以连接者的身份工作，频道里的任何人都可以给她派活。任何申报、付款或发送仍需在快哉中批准。" : "She works as the person who connects her, and anyone in the channel can give her a job. Anything to file, pay or send still waits for approval in Placetta."}</p>
+                    {bot.kind === "wechat_bot" ? <>
+                      <p className="sg-fine">{zh ? "连接后，再把服务器地址、Token 和 EncodingAESKey 填进微信的“消息与事件推送”（下一步会显示）。微信提交时会立即检查这个地址，所以要先在这里连接。" : "After connecting, the server address, Token and EncodingAESKey go into WeChat's Message push (the next step shows them). WeChat checks the address the moment it's submitted, so connect here first."}</p>
+                      <p className="sg-fine">{zh ? "只有关联了微信的快哉团队成员可以给她派任务，她以对方的身份工作。任何申报、付款或发送仍需在快哉中批准。" : "Only Placetta teammates who linked their WeChat can give her jobs, and she works as them. Anything to file, pay or send still waits for approval in Placetta."}</p>
+                    </> : <p className="sg-fine">{zh ? "她以连接者的身份工作，频道里的任何人都可以给她派活。任何申报、付款或发送仍需在快哉中批准。" : "She works as the person who connects her, and anyone in the channel can give her a job. Anything to file, pay or send still waits for approval in Placetta."}</p>}
                   </li>
                 ) : null,
               ];

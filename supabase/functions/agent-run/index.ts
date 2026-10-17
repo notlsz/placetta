@@ -17,8 +17,9 @@
 //      odelia-sms, odelia-voice and odelia-mail (monitor key), for a person who texted or called from their verified
 //      number, or emailed from their sign-in address. The same member and plan checks as "start"; the answer goes back
 //      the same way when the run finishes. A run from plain SMS only reads and drafts (src/serverRun.ts).
-// POST {action: "start_chat", user_id, workspace_id, prompt, channel: "slack"|"lark", chat_to, lang?}
-//      chat-events (monitor key), for the Placetta teammate who asked in the business's Slack or Lark.
+// POST {action: "start_chat", user_id, workspace_id, prompt, channel: "slack"|"lark"|"wechat", chat_to, lang?}
+//      chat-events (monitor key), for the Placetta teammate who asked in the business's Slack or Lark, or who linked
+//      their WeChat to the business's WeChat Official Account.
 // Every run from outside the app carries its channel, and can't remove deadlines, set up routines, save memory or
 // skills, or change stores; a business fact or the business's name goes up as a change card (with who asked) for an
 // owner to confirm; anything it prepares still needs an approval in the app.
@@ -35,12 +36,15 @@ import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/m
 import { agencyKey, DISTILL_SYSTEM, distillPrompt, filingEvidence, type Lesson, lessonKeys, lessonsBrief, normalizeState, parseDistill, rank, runEvidence, runRounds, startState, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
+import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
 import { claim, type Lease, type RunsTable, saveOnto, stamp } from "./lease.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
 type Block = Record<string, unknown>;
-type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark" | "email"; reply_to?: string | null; chat_to?: ChatTo | null };
+type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark" | "wechat" | "email"; reply_to?: string | null; chat_to?: ChatTo | null };
+/** The channels a chat bot answers in: Slack, Lark and WeChat. */
+const CHATS = new Set(["slack", "lark", "wechat"]);
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -164,7 +168,7 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
 }
 
 /** The main loop's role for a run: watch for the monitor's background checks, short for a text, a call or a chat bot, plan otherwise. */
-const roleOfRun = (run: Run): Role => run.kind === "watch" ? "watch" : run.channel === "sms" || run.channel === "voice" || run.channel === "slack" || run.channel === "lark" ? "short" : "plan";
+const roleOfRun = (run: Run): Role => run.kind === "watch" ? "watch" : run.channel === "sms" || run.channel === "voice" || CHATS.has(run.channel ?? "") ? "short" : "plan";
 
 /**
  * The run to hand back instead of starting another: the same key in this workspace within REPEAT_MS, still running
@@ -182,7 +186,8 @@ async function repeated(ws: string, key: string, channel: string): Promise<strin
 const safeName = (n: string) => n.replace(/[^\w.\-一-鿿]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120) || "document";
 
 /** Who asked from outside the app, as a change card shows it: the number they texted or called from, the address they
- *  emailed from, or for Slack and Lark the member's sign-in email (chat-events matched the sender to them). Nothing for
+ *  emailed from, or for Slack, Lark and WeChat the member's sign-in email (chat-events matched the sender to them: by
+ *  email in Slack and Lark, by the WeChat they linked with a code). Nothing for
  *  the app and background checks. */
 async function senderOf(run: Run): Promise<string | undefined> {
   if (!run.channel || run.channel === "app") return undefined;
@@ -453,7 +458,7 @@ export async function work(runId: string, token: string | null, ticket: string |
       // Someone who asked by text or on a call hears about it the same way.
       if (failed) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
       if (failed && run.channel === "email") await mailBack(run, SAY.failed[run.lang], []).catch((x) => console.error("mail back", String(x).slice(0, 120)));
-      if (failed && (run.channel === "slack" || run.channel === "lark")) await chatBack(run, SAY.failed[run.lang], []).catch(() => undefined);
+      if (failed && CHATS.has(run.channel ?? "")) await chatBack(run, SAY.failed[run.lang], []).catch(() => undefined);
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
@@ -477,18 +482,29 @@ async function mailBack(run: Run, text: string, approvals: string[]) {
   else console.error("odelia mail", r.status, r.detail);
 }
 
-/** The answer to a job asked in Slack or Lark, in the same thread. Approvals stay in the app: the reply links to them. */
+/** The answer to a job asked in Slack, Lark or WeChat, in the same thread (in WeChat, the same chat). Approvals stay in
+ *  the app: the reply links to them. */
 async function chatBack(run: Run, text: string, approvals: string[]) {
   if (!run.chat_to) return;
+  const origin = appOrigin(env);
+  const link = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
+  const more = link ? (run.lang === "zh" ? `\n\n等您批准：${link}` : `\n\nWaiting for your approval: ${link}`) : "";
+  const said = text || (run.lang === "zh" ? "完成了。" : "Done.");
+  if (run.chat_to.kind === "wechat") {
+    const acct = await wechatAccount(admin, run.workspace_id);
+    if (!acct) return;
+    // only to the WeChat still linked to the member who asked, while they're still a member
+    const who = await wechatSender(admin, run.workspace_id, acct.bot.app_id, run.chat_to.openid);
+    if (!who?.member || who.user_id !== run.created_by) return;
+    await chatReply(acct.bot, run.chat_to, said, { tail: more, save: acct.save });
+    return;
+  }
   const kind = run.chat_to.kind === "slack" ? "slack_bot" : "lark_bot";
   const { data: row } = await admin.from("integrations").select("secret_id, status").eq("workspace_id", run.workspace_id).eq("kind", kind).maybeSingle();
   if (!row?.secret_id || row.status !== "connected") return;
   const { data: raw } = await admin.rpc("vault_get", { p_id: row.secret_id });
   let bot: Bot; try { bot = { ...JSON.parse(String(raw ?? "")), kind } as Bot; } catch { return; }
-  const origin = appOrigin(env);
-  const link = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
-  const more = link ? (run.lang === "zh" ? `\n\n等您批准：${link}` : `\n\nWaiting for your approval: ${link}`) : "";
-  await chatReply(bot, run.chat_to, (text || (run.lang === "zh" ? "完成了。" : "Done.")) + more);
+  await chatReply(bot, run.chat_to, said, { tail: more });
 }
 
 /**
@@ -538,8 +554,9 @@ async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease) {
     await mailBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim(), reply.approvals ?? []).catch((e) => console.error("mail back", String(e).slice(0, 120)));
     return;
   }
-  // Asked in Slack or Lark: the answer goes back to the same thread, with the link to anything waiting for approval.
-  if (run.channel === "slack" || run.channel === "lark") {
+  // Asked in Slack, Lark or WeChat: the answer goes back to the same thread or chat, with the link to anything waiting
+  // for approval.
+  if (CHATS.has(run.channel ?? "")) {
     await chatBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim(), reply.approvals ?? []).catch((e) => console.error("chat back", String(e).slice(0, 120)));
     return;
   }
@@ -588,6 +605,7 @@ export async function handle(req: Request): Promise<Response> {
           "AI_DAILY_LIMIT_USD", "AI_WS_DAILY_LIMIT_USD", "AI_TASK_LIMIT_USD",
           "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ENTRY", "STRIPE_PRICE_LOCATION", "STRIPE_PRICE_LOCATION_PRO", "STRIPE_PRICE_OPENING", "STRIPE_PRICE_OPENING_FOOD", "STRIPE_PRICE_PACK", "STRIPE_PRICE_GUARANTEE",
           "RESEND_API_KEY", "MAIL_FROM", "APP_ORIGINS", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "MS_CLIENT_ID", "MS_CLIENT_SECRET", "SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET", "QB_CLIENT_ID", "OAUTH_STATE_SECRET",
+          "SQUARE_CLIENT_ID", "SQUARE_CLIENT_SECRET", "TOAST_CLIENT_ID", "TOAST_CLIENT_SECRET", "WECHAT_API_BASE",
           "TELNYX_API_KEY", "TELNYX_FAX_CONNECTION_ID", "TELNYX_MESSAGING_PROFILE_ID", "TELNYX_VOICE_CONNECTION_ID", "ODELIA_NUMBER", "LOB_API_KEY", "FILER_SECRET", "AZURE_SPEECH_KEY"];
         return json(200, { secrets: Object.fromEntries(names.map((n) => [n, !!env(n)])), checks: SELFTEST_NAMES() });
       }
@@ -631,15 +649,17 @@ export async function handle(req: Request): Promise<Response> {
     return json(202, { id: run.id });
   }
 
-  // start_chat: a Placetta teammate asked Odelia in the business's own Slack or Lark (chat-events, with the monitor key,
-  // which has matched the sender to this member). The job runs as them; the answer goes back to the same thread.
+  // start_chat: a Placetta teammate asked Odelia in the business's own Slack, Lark or WeChat (chat-events, with the
+  // monitor key, which has matched the sender to this member). The job runs as them; the answer goes back to the same
+  // thread or chat.
   if (action === "start_chat") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
     const uid = String(body.user_id ?? ""), ws = String(body.workspace_id ?? "");
-    const channel = body.channel === "slack" ? "slack" : body.channel === "lark" ? "lark" : null;
+    const channel = body.channel === "slack" ? "slack" : body.channel === "lark" ? "lark" : body.channel === "wechat" ? "wechat" : null;
     const to = body.chat_to as ChatTo | undefined;
     const zh = body.lang === "zh";
     if (!UUID.test(uid) || !UUID.test(ws) || !channel || !to || to.kind !== channel) return fail(400, "bad_request", "user_id, workspace_id, channel and chat_to are required.");
+    if (to.kind === "wechat" && !/^[A-Za-z0-9_-]{6,64}$/.test(String(to.openid ?? ""))) return fail(400, "bad_request", "chat_to.openid is required.");
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", zh ? "您不是这个快哉工作区的成员。负责人可以在快哉中邀请您。" : "You're not a member of this Placetta workspace. The owner can invite you in Placetta.");
     if (may === "no_plan") return fail(402, "payment_required", zh ? "Odelia 需要先开通入门套餐。请在快哉中选择套餐。" : "Odelia starts with the entry plan. Choose a plan in Placetta.");

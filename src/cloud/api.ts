@@ -72,13 +72,18 @@ export const planOf = (b: Billing | null): Plan =>
   !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.entry_markets > 0 ? "entry" : "none";
 export type DocRow = { id: string; workspace_id: string; app_id: string | null; filing_id: string | null; name: string; path: string; size: number; mime: string | null; source: string; created_at: string };
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
-export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot";
+export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast";
 /** Team chats linked by pasting a group's incoming-webhook link. */
 export type HookKind = "slack" | "lark" | "wecom" | "dingtalk" | "teams";
-/** The business's own Slack or Lark bot: talk to Odelia there. */
-export type BotKind = "slack_bot" | "lark_bot";
+/** The business's own Slack or Lark bot, or its own WeChat Official Account: talk to Odelia there. */
+export type BotKind = "slack_bot" | "lark_bot" | "wechat_bot";
+/** What to set up before connecting a bot: its event address, Slack's manifest, and for WeChat a Token and
+ *  EncodingAESKey to use and any server addresses to whitelist. */
+export type BotSetup = { events_url: string; manifest?: string; token?: string; aes_key?: string; ips?: string[] };
 /** Which sign-in connections the server can offer now. */
-export type Availability = { google: boolean; microsoft: boolean; dropbox: boolean; quickbooks: boolean; slack: boolean };
+export type Availability = { google: boolean; microsoft: boolean; dropbox: boolean; quickbooks: boolean; slack: boolean; square: boolean; toast: boolean };
+/** A member's own WeChat link to the workspace's WeChat Official Account. */
+export type WechatLink = { connected: boolean; linked: boolean; linked_at: string | null; waiting: boolean };
 export type AgencyLogin = { id: string; agency: string; url: string | null; username: string; note: string | null; created_at: string; last_opened_at: string | null };
 export type Role = "owner" | "member";
 export type WorkspaceRow = { id: string; name: string; state: Partial<Workspace>; authorized_at: string | null; created_at: string; role: Role };
@@ -563,6 +568,14 @@ export async function listIntegrations(ws: string): Promise<Integration[]> {
   return (data ?? []) as Integration[];
 }
 export const integration = <T>(ws: string, action: string, body: Record<string, unknown> = {}) => fn<T>("integrations", { workspace_id: ws, action, ...body });
+/** The server address WeChat's Message push points at for this workspace (chat-events checks every request). */
+export const wechatServerUrl = (ws: string) => `${URL_.replace(/\/+$/, "")}/functions/v1/chat-events/wechat/${ws}`;
+/** Link my WeChat: whether I'm linked, a code to send the workspace's WeChat account, or unlink. */
+export const wechatLinkStatus = (ws: string) => integration<WechatLink>(ws, "wechat_link_status");
+export const wechatLinkCode = (ws: string) => integration<{ code: string; expires_at: string; account: string | null }>(ws, "wechat_link");
+export const wechatUnlink = (ws: string) => integration<{ linked: false }>(ws, "wechat_unlink");
+/** The code an owner types into Toast so Placetta finds their locations. */
+export const toastCode = (ws: string) => integration<{ code: string }>(ws, "toast_setup");
 
 /* ------------------------------ spending: what Odelia may buy, and every purchase ------------------------------ */
 export type SpendState = { policy: import("../spend.ts").SpendPolicy; purchases: import("../spend.ts").Purchase[] };

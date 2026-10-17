@@ -35,7 +35,7 @@ export declare function runRounds(o: {
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for background checks. */
   role?: Role;
 }): Promise<{ reply: Reply } | { paused: RunState }>;
-export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark";
+export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";
 export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;
 
 // The network (src/learning.ts)

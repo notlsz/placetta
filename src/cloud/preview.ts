@@ -409,14 +409,22 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
     case "integrations": {
       if (!member) return fnErr("forbidden", "You are not a member of this workspace.", 403);
       if (body.action === "connect" || body.action === "disconnect" || body.action === "hook_connect") { const no = needOwner(); if (no) return no; }
-      if (body.action === "bot_setup") { const u = `https://example.supabase.co/functions/v1/chat-events?${body.kind === "slack_bot" ? "slack" : "lark"}=${ws}`; return json({ ok: true, events_url: u, ...(body.kind === "slack_bot" ? { manifest: JSON.stringify({ display_information: { name: "Odelia" }, settings: { event_subscriptions: { request_url: u } } }, null, 2) } : {}) }); }
+      if (body.action === "bot_setup") {
+        if (body.kind === "wechat_bot") return json({ ok: true, events_url: `https://example.supabase.co/functions/v1/chat-events/wechat/${ws}`, token: "PreviewToken0000000000000000000000".slice(0, 32), aes_key: "PreviewEncodingAESKey000000000000000000000".padEnd(43, "0").slice(0, 43), ips: [] });
+        const u = `https://example.supabase.co/functions/v1/chat-events?${body.kind === "slack_bot" ? "slack" : "lark"}=${ws}`; return json({ ok: true, events_url: u, ...(body.kind === "slack_bot" ? { manifest: JSON.stringify({ display_information: { name: "Odelia" }, settings: { event_subscriptions: { request_url: u } } }, null, 2) } : {}) });
+      }
       if (body.action === "bot_connect") {
         const no = needOwner(); if (no) return no;
         const rows = t("integrations").filter(i => !(i.workspace_id === ws && i.kind === body.kind));
-        rows.push({ id: uuid(), workspace_id: ws, kind: body.kind, account: body.kind === "slack_bot" ? "Moonleaf Tea (@odelia)" : "飞书", status: "connected", error: null, meta: { via: "bot" }, connected_at: now(), last_used_at: null });
+        rows.push({ id: uuid(), workspace_id: ws, kind: body.kind, account: body.kind === "slack_bot" ? "Moonleaf Tea (@odelia)" : body.kind === "wechat_bot" ? String(body.app_id ?? "wx0000000000000000") : "飞书", status: "connected", error: null, meta: { via: "bot", ...(body.kind === "wechat_bot" ? { app_id: body.app_id } : {}) }, connected_at: now(), last_used_at: null });
         db.tables.integrations = rows; save(); return json({ ok: true });
       }
-      if (body.action === "available") return json({ ok: true, google: true, microsoft: true, dropbox: true, quickbooks: true, slack: false });
+      // linking a WeChat: the preview shows a code; there's no WeChat account on the other end to send it to
+      if (body.action === "wechat_link_status") return json({ ok: true, connected: t("integrations").some(i => i.workspace_id === ws && i.kind === "wechat_bot"), linked: false, linked_at: null, waiting: false });
+      if (body.action === "wechat_link") return json({ ok: true, code: "246810", expires_at: new Date(Date.now() + 30 * 60_000).toISOString(), account: null });
+      if (body.action === "wechat_unlink") return json({ ok: true, linked: false });
+      if (body.action === "toast_setup" || body.action === "toast_connect") { const no = needOwner(); if (no) return no; return body.action === "toast_setup" ? json({ ok: true, code: "PLACETTA-PREVIEW2" }) : json({ error: { code: "not_configured", message: "Toast connects on the live app.", message_zh: "Toast 需在正式版应用中连接。" } }, 409); }
+      if (body.action === "available") return json({ ok: true, google: true, microsoft: true, dropbox: true, quickbooks: true, slack: false, square: false, toast: false });
       if (body.action === "hook_connect") {
         const names: Record<string, [string, string]> = { slack: ["Slack channel", "Slack 群"], lark: ["Lark channel", "飞书群"], wecom: ["WeCom channel", "企业微信群"], dingtalk: ["DingTalk channel", "钉钉群"], teams: ["Microsoft Teams channel", "Microsoft Teams 群"] };
         if (!names[String(body.kind)] || !/^https:\/\//.test(String(body.url ?? ""))) return fnErr("bad_request", "That isn't a webhook link.", 400);
