@@ -651,10 +651,14 @@ export function placeInfo(where: string) {
   return { country: p.country?.code ?? (us ? "US" : undefined), city: p.city, local: p.known || usLocal, currency: p.country?.currency ?? "USD" };
 }
 
+/** A form of a US jurisdiction (priced in dollars) at a place abroad: Israel's country code is also Illinois's, so
+    Tel Aviv must not pick up Illinois's forms. */
+const usFormAbroad = (f: OfficialForm, places: Where[]) => !places.includes("US") && (!f.currency || f.currency === "USD");
+
 /** The forms an opening needs, in the order they're filed. */
 export function formsFor(o: { segment: Segment; where: string; needs?: Needs }): OfficialForm[] {
   const places = placesOf(o.where), have = o.needs ?? {};
-  return FORMS.filter(f => places.includes(f.where) && f.segments.includes(o.segment)
+  return FORMS.filter(f => places.includes(f.where) && !usFormAbroad(f, places) && f.segments.includes(o.segment)
     && Object.keys(f.needs ?? {}).every(k => have[k as keyof Needs]))
     .sort((a, b) => a.order - b.order);
 }
@@ -663,7 +667,7 @@ export function formsFor(o: { segment: Segment; where: string; needs?: Needs }):
 export function searchForms(q: { text?: string; where?: string; segment?: Segment }): OfficialForm[] {
   const places = q.where ? placesOf(q.where) : null;
   const words = (q.text ?? "").toLowerCase().split(/\s+/).filter(w => w.length > 1);
-  return FORMS.filter(f => (!places || places.includes(f.where)) && (!q.segment || f.segments.includes(q.segment))
+  return FORMS.filter(f => (!places || (places.includes(f.where) && !usFormAbroad(f, places))) && (!q.segment || f.segments.includes(q.segment))
     && words.every(w => `${f.form} ${f.title.en} ${f.title.zh} ${f.agency.en} ${f.agency.zh} ${f.id}`.toLowerCase().includes(w)))
     .sort((a, b) => a.order - b.order);
 }
