@@ -210,7 +210,7 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Restaurants in Seattle](https://placetta.com/guides/seattle/restaurant.html): 4 filings
 - [Retail stores in Seattle](https://placetta.com/guides/seattle/retail-store.html): 3 filings
 - [Importers and online sellers in Seattle](https://placetta.com/guides/seattle/importer-ecommerce.html): 7 filings
-- [Restaurants in Boston](https://placetta.com/guides/boston/restaurant.html): 4 filings
+- [Restaurants in Boston](https://placetta.com/guides/boston/restaurant.html): 9 filings
 - [Retail stores in Boston](https://placetta.com/guides/boston/retail-store.html): 4 filings
 - [Importers and online sellers in Boston](https://placetta.com/guides/boston/importer-ecommerce.html): 8 filings
 - [Restaurants in Miami](https://placetta.com/guides/miami/restaurant.html): 5 filings
@@ -225,7 +225,7 @@ Every guide lists the filings in the order they are made, with the agency, how e
 - [Restaurants in Washington, DC](https://placetta.com/guides/washington-dc/restaurant.html): 4 filings
 - [Retail stores in Washington, DC](https://placetta.com/guides/washington-dc/retail-store.html): 3 filings
 - [Importers and online sellers in Washington, DC](https://placetta.com/guides/washington-dc/importer-ecommerce.html): 7 filings
-- [Restaurants in Atlanta](https://placetta.com/guides/atlanta/restaurant.html): 4 filings
+- [Restaurants in Atlanta](https://placetta.com/guides/atlanta/restaurant.html): 7 filings
 - [Retail stores in Atlanta](https://placetta.com/guides/atlanta/retail-store.html): 4 filings
 - [Importers and online sellers in Atlanta](https://placetta.com/guides/atlanta/importer-ecommerce.html): 8 filings
 - [Restaurants in Philadelphia](https://placetta.com/guides/philadelphia/restaurant.html): 4 filings

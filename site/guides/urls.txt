@@ -1006,7 +1006,6 @@ https://placetta.com/guides/forms/wa-sos.html
 https://placetta.com/guides/forms/sea-food.html
 https://placetta.com/guides/forms/ma-sos.html
 https://placetta.com/guides/forms/ma-tax.html
-https://placetta.com/guides/forms/bos-cert.html
 https://placetta.com/guides/forms/fl-sunbiz.html
 https://placetta.com/guides/forms/fl-dor.html
 https://placetta.com/guides/forms/fl-dbpr.html
@@ -1016,7 +1015,6 @@ https://placetta.com/guides/forms/dc-otr.html
 https://placetta.com/guides/forms/dc-food.html
 https://placetta.com/guides/forms/ga-sos.html
 https://placetta.com/guides/forms/ga-tax.html
-https://placetta.com/guides/forms/atl-license.html
 https://placetta.com/guides/forms/pa-dos.html
 https://placetta.com/guides/forms/pa-tax.html
 https://placetta.com/guides/forms/phl-cal.html
@@ -1072,6 +1070,16 @@ https://placetta.com/guides/forms/az-tpt.html
 https://placetta.com/guides/forms/phx-co.html
 https://placetta.com/guides/forms/mc-plan-review.html
 https://placetta.com/guides/forms/mc-food-permit.html
+https://placetta.com/guides/forms/ma-food-manager.html
+https://placetta.com/guides/forms/ma-allergen.html
+https://placetta.com/guides/forms/bos-cert.html
+https://placetta.com/guides/forms/bos-plan-review.html
+https://placetta.com/guides/forms/bos-cv.html
+https://placetta.com/guides/forms/bos-food-permit.html
+https://placetta.com/guides/forms/ga-food-manager.html
+https://placetta.com/guides/forms/atl-license.html
+https://placetta.com/guides/forms/fulton-plan-review.html
+https://placetta.com/guides/forms/fulton-food-permit.html
 https://placetta.com/guides/answers/get-an-ein-without-an-ssn.html
 https://placetta.com/guides/answers/how-long-does-an-ein-take.html
 https://placetta.com/guides/answers/form-5472-foreign-owned-llc.html
@@ -2114,7 +2122,6 @@ https://placetta.com/guides/zh/forms/wa-sos.html
 https://placetta.com/guides/zh/forms/sea-food.html
 https://placetta.com/guides/zh/forms/ma-sos.html
 https://placetta.com/guides/zh/forms/ma-tax.html
-https://placetta.com/guides/zh/forms/bos-cert.html
 https://placetta.com/guides/zh/forms/fl-sunbiz.html
 https://placetta.com/guides/zh/forms/fl-dor.html
 https://placetta.com/guides/zh/forms/fl-dbpr.html
@@ -2124,7 +2131,6 @@ https://placetta.com/guides/zh/forms/dc-otr.html
 https://placetta.com/guides/zh/forms/dc-food.html
 https://placetta.com/guides/zh/forms/ga-sos.html
 https://placetta.com/guides/zh/forms/ga-tax.html
-https://placetta.com/guides/zh/forms/atl-license.html
 https://placetta.com/guides/zh/forms/pa-dos.html
 https://placetta.com/guides/zh/forms/pa-tax.html
 https://placetta.com/guides/zh/forms/phl-cal.html
@@ -2180,6 +2186,16 @@ https://placetta.com/guides/zh/forms/az-tpt.html
 https://placetta.com/guides/zh/forms/phx-co.html
 https://placetta.com/guides/zh/forms/mc-plan-review.html
 https://placetta.com/guides/zh/forms/mc-food-permit.html
+https://placetta.com/guides/zh/forms/ma-food-manager.html
+https://placetta.com/guides/zh/forms/ma-allergen.html
+https://placetta.com/guides/zh/forms/bos-cert.html
+https://placetta.com/guides/zh/forms/bos-plan-review.html
+https://placetta.com/guides/zh/forms/bos-cv.html
+https://placetta.com/guides/zh/forms/bos-food-permit.html
+https://placetta.com/guides/zh/forms/ga-food-manager.html
+https://placetta.com/guides/zh/forms/atl-license.html
+https://placetta.com/guides/zh/forms/fulton-plan-review.html
+https://placetta.com/guides/zh/forms/fulton-food-permit.html
 https://placetta.com/guides/zh/answers/get-an-ein-without-an-ssn.html
 https://placetta.com/guides/zh/answers/how-long-does-an-ein-take.html
 https://placetta.com/guides/zh/answers/form-5472-foreign-owned-llc.html
