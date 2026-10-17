@@ -2,6 +2,7 @@
 //   legal/<id>.md                         Markdown copies (English, then Chinese)
 //   site/terms.html, privacy.html,        the website's pages, in the shell of site/terms.html
 //   authorization.html, ai.html
+//   site/trust.html                       only its shell (head, header, footer); its text is written by hand
 // It also checks that the English and Chinese headings and **bold** spans line up, that every ** is closed, that no em or
 // en dash slipped in, and that the version people accept in the app (public.current_terms_version() in the newest
 // migration that defines it) is UPDATED.
@@ -85,4 +86,14 @@ ${bodyHtml(d.body[l])}
   writeFileSync(`site/${p.file}`, page);
 }
 
-console.log(`legal: ${LEGAL.length} documents, updated ${LEGAL[0].updated}, written to legal/*.md and site/*.html`);
+// The trust page (site/trust.html) is written by hand, but wears the same shell: its <main> is kept, and the head,
+// header and footer around it are refreshed from site/terms.html so its links stay in step with the legal pages.
+const trustSrc = readFileSync("site/trust.html", "utf8");
+const ta = trustSrc.indexOf('<main class="lw">'), tb = trustSrc.indexOf("</main>");
+if (ta < 0 || tb < 0) { console.error("site/trust.html: no <main class=\"lw\"> ... </main> to keep"); process.exit(1); }
+writeFileSync("site/trust.html", head
+  .replace(/<title>[^<]*<\/title>/, "<title>Trust and security | Placetta</title>")
+  .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc("How Placetta protects your business's data, which companies process it, and what isn't finished yet.")}">`)
+  + trustSrc.slice(ta, tb + "</main>".length) + tail);
+
+console.log(`legal: ${LEGAL.length} documents, updated ${LEGAL[0].updated}, written to legal/*.md and site/*.html (and the trust page's shell)`);

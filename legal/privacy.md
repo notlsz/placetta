@@ -43,22 +43,43 @@ We do not sell personal information. We do not use it for advertising. We do not
 
 ## Who processes it
 
-Only the following process your information, and only to run the service:
+These companies process your information for us, only to run the service. The list is taken from our code. A company marked "when used" or "if you connect it" receives nothing until that feature is on or you connect it. Our trust page lists the same companies, with more detail: https://placetta.com/trust
 
-- Supabase stores your workspace, documents, texts and audit log, and runs sign-in, in its US East region.
+- Supabase stores your workspace, documents, texts and audit trail, and runs sign-in and our server functions, in its US East region.
 - Vercel hosts placetta.com and the app.
-- Anthropic processes content with its Claude models so Odelia can do her work. Where we configure it, some of that work goes instead to models from OpenAI, Google (Gemini), DeepSeek, OpenRouter or Groq.
-- Microsoft Azure Speech turns Odelia's replies into speech when the app speaks them.
-- Telnyx carries texts and calls with Odelia, runs her voice and the transcription of calls through the speech services it uses, and sends the applications we file by fax.
+- Google Fonts serves the typefaces on placetta.com and in the app. It sees your IP address and browser, nothing else.
 - Stripe processes payments.
-- Resend delivers the emails we send, such as deadline reminders, filing updates and headquarters summaries.
-- Lob prints and mails the applications we file by mail.
-- Google and Microsoft, when you sign in with them or connect their services.
+- Resend sends our emails, such as sign-in links, deadline reminders, filing updates and headquarters summaries, and can receive email sent to Odelia.
+- Anthropic processes content with its Claude models: Odelia's work when no other model is set up or can answer, the review of finished work, web research, and filing on agency websites.
+- Google (Gemini), when used, processes content with Gemini models for Odelia's work, only on Google's paid tier.
+- Groq, when used, runs a backup open model. It never receives your files.
+- Cerebras, when used, runs a backup open model. It never receives your files.
+- OpenRouter, when used, runs a backup open model. It never receives your files.
+- OpenAI models can be switched on, and are off by default.
+- DeepSeek models can be switched on, and are off by default. DeepSeek never receives your files.
+- Telnyx, when used, carries texts and calls with Odelia, runs her voice, speech recognition and AI model on calls, and sends the applications we file by fax.
+- Linq, when used, carries texts with Odelia over iMessage, with RCS and SMS as fallback.
+- Meta, when used, carries messages with Odelia on WhatsApp.
+- Postmark, when used in place of Resend, sends and receives email for Odelia.
+- Lob, when used, prints and mails the applications we file by mail.
+- Microsoft Azure Speech, when used, turns Odelia's replies into speech for the app to read aloud.
+- Render, when used, runs the software that files on agency websites, in the US.
+- Browserbase, when used, provides the web browser that software can use.
+- Google, if you connect it: sign-in with Google, Gmail, Google Calendar and Google Drive.
+- Microsoft, if you connect it: sign-in with Microsoft, Outlook Mail, Outlook Calendar and Microsoft Teams.
+- Dropbox, if you connect it: importing documents.
+- Intuit (QuickBooks), if you connect it: reading gross receipts for tax registrations.
+- Slack, if you connect it: status updates, and asking Odelia in Slack.
+- Lark (Feishu), if you connect it: status updates, and asking Odelia in Lark.
+- WeCom, if you connect it: status updates to a group you choose.
+- DingTalk, if you connect it: status updates to a group you choose.
+
+Beyond these companies:
+
 - Placetta checks and submits the applications you approve, by email, fax, certified mail or the agency's website, with our filing team as backup.
 - Government agencies receive the applications you approve.
 - Independent professionals you engage, such as attorneys and customs brokers, receive what they need, with your approval.
 - A headquarters an owner shares with sees the store status described below.
-- The services you connect, as described below.
 
 We may also disclose information when the law requires it, to protect the rights and safety of people or of Placetta, or to a successor in a merger, acquisition or sale of Placetta's business, which must keep honoring this policy.
 
@@ -70,7 +91,7 @@ Integrations are optional. You decide which ones to connect, and we use each onl
 - Google Calendar and Outlook Calendar: add deadlines to your calendar.
 - Google Drive and Dropbox: import documents.
 - QuickBooks: read gross receipts for tax registrations.
-- Slack: post status updates.
+- Slack, Lark, WeCom, DingTalk and Microsoft Teams: post status updates to a group you choose. In Slack and Lark, your team can also ask Odelia for help.
 
 You can disconnect any integration at any time in Settings.
 
@@ -134,7 +155,7 @@ If you are in the People's Republic of China, or you give us personal informatio
 - Records of your acceptance of our terms and policies are kept for 6 years after your account ends, and consent records for texts and calls for 5 years, even after you delete your account, as proof of the agreement and of your consent.
 - Plan requests from placetta.com are kept while we need them to follow up, or until you ask us to delete them.
 - We keep records the law requires us to keep, such as billing records, for as long as it requires.
-- Deleted information can remain in encrypted backups for a short time until those backups are replaced.
+- We don't keep database backups yet. When we start, this policy will say how long deleted information can remain in them.
 
 Applications already submitted to an agency are held by that agency under its own rules.
 
@@ -242,22 +263,43 @@ Email: support@placetta.com
 
 ## 谁会处理这些信息
 
-只有以下各方会处理您的信息，且仅为运行本服务：
+以下公司代我们处理您的信息，且仅为运行本服务。这份名单取自我们的代码。标注“按需使用”或“您连接后”的公司，在该功能开启或您连接之前不会收到任何内容。我们的信任与安全页面列出了同样的公司，并有更多说明：https://placetta.com/trust
 
-- Supabase：在其美国东部区域存储您的工作区、文件、短信和审计记录，并提供登录服务。
+- Supabase：在其美国东部区域存储您的工作区、文件、短信和审计记录，并提供登录服务和我们的服务器功能。
 - Vercel：托管 placetta.com 和快哉应用。
-- Anthropic：通过其 Claude 模型处理内容，使 Odelia 能够完成工作。在我们配置的情况下，部分工作改由 OpenAI、Google（Gemini）、DeepSeek、OpenRouter 或 Groq 的模型处理。
-- Microsoft Azure Speech：应用朗读回复时，将 Odelia 的回复转换为语音。
-- Telnyx：传送您与 Odelia 之间的短信和通话，通过其使用的语音服务提供 Odelia 的语音和通话转录，并以传真方式发送我们提交的申请。
+- Google Fonts：为 placetta.com 和快哉应用提供字体。它只能看到您的 IP 地址和浏览器信息。
 - Stripe：处理付款。
-- Resend：发送我们发出的邮件，例如截止日期提醒、申报进展和总部摘要。
-- Lob：打印并邮寄我们以邮寄方式提交的申请。
-- Google 和 Microsoft：在您使用其账户登录或连接其服务时。
+- Resend：发送我们发出的邮件，例如登录链接、截止日期提醒、申报进展和总部摘要，也可以接收发给 Odelia 的邮件。
+- Anthropic：通过其 Claude 模型处理内容：在没有设置其他模型或其他模型无法回答时承担 Odelia 的工作，复核已完成的工作，进行网络调研，以及在机构网站上代为申报。
+- Google（Gemini）（按需使用）：通过 Gemini 模型处理 Odelia 的工作，仅限 Google 付费层级。
+- Groq（按需使用）：运行备用开源模型，从不接收您的文件。
+- Cerebras（按需使用）：运行备用开源模型，从不接收您的文件。
+- OpenRouter（按需使用）：运行备用开源模型，从不接收您的文件。
+- OpenAI：其模型可以开启，默认关闭。
+- DeepSeek：其模型可以开启，默认关闭。DeepSeek 从不接收您的文件。
+- Telnyx（按需使用）：传送您与 Odelia 之间的短信和通话，运行通话中 Odelia 的语音、语音识别和 AI 模型，并以传真方式发送我们提交的申请。
+- Linq（按需使用）：通过 iMessage 传送您与 Odelia 之间的消息，必要时改用 RCS 或短信。
+- Meta（按需使用）：在 WhatsApp 上传送您与 Odelia 之间的消息。
+- Postmark（在我们用它代替 Resend 时）：为 Odelia 收发邮件。
+- Lob（按需使用）：打印并邮寄我们以邮寄方式提交的申请。
+- Microsoft Azure Speech（按需使用）：将 Odelia 的回复转换为语音，供应用朗读。
+- Render（按需使用）：在美国运行在机构网站上代为申报的软件。
+- Browserbase（按需使用）：为该软件提供可用的网页浏览器。
+- Google（您连接后）：使用 Google 登录、Gmail、Google Calendar 和 Google Drive。
+- Microsoft（您连接后）：使用 Microsoft 登录、Outlook 邮件、Outlook 日历和 Microsoft Teams。
+- Dropbox（您连接后）：导入文件。
+- Intuit（QuickBooks）（您连接后）：读取营业总收入，用于税务登记。
+- Slack（您连接后）：进度更新，以及在 Slack 中向 Odelia 提问。
+- 飞书（Lark）（您连接后）：进度更新，以及在飞书中向 Odelia 提问。
+- 企业微信（您连接后）：向您选择的群发送进度更新。
+- 钉钉（您连接后）：向您选择的群发送进度更新。
+
+除上述公司外：
+
 - 快哉：核对并提交您批准的申请，方式包括邮件、传真、挂号信或机构网站，并由我们的申报团队作为后备。
 - 政府机构：接收您批准的申请。
 - 您聘请的独立专业人士（例如律师和报关行）：经您批准，接收其所需的信息。
 - 所有者与之共享的总部：查看下文所述的门店状态。
-- 您连接的服务：详见下文“集成”。
 
 在法律要求时，为保护他人或快哉的权利和安全，或在快哉发生合并、收购或业务出售时向继受方，我们也可能披露信息；继受方须继续遵守本政策。
 
@@ -269,7 +311,7 @@ Email: support@placetta.com
 - Google Calendar 和 Outlook Calendar：把截止日期添加到日历。
 - Google Drive 和 Dropbox：导入文件。
 - QuickBooks：读取营业总收入，用于税务登记。
-- Slack：发布进度更新。
+- Slack、飞书、企业微信、钉钉和 Microsoft Teams：向您选择的群发布进度更新。在 Slack 和飞书中，您的团队还可以向 Odelia 寻求帮助。
 
 您可以随时在“设置”中断开任何一项集成。
 
@@ -333,7 +375,7 @@ Email: support@placetta.com
 - 您接受我们的条款和政策的记录在您的账户终止后保存 6 年，短信和电话的同意记录保存 5 年，即使您删除账户也会保留，用于证明协议和您的同意。
 - 在 placetta.com 提交的方案申请，在我们跟进所需期间保存，或保存至您要求删除为止。
 - 法律要求我们保留的记录（例如账单记录），按法律要求的期限保存。
-- 已删除的信息可能会在加密备份中短暂保留，直至这些备份被替换。
+- 我们目前尚未保留数据库备份。开始备份后，我们会在本政策中说明已删除的信息可能在备份中保留多久。
 
 已提交给机构的申请，由该机构按其自身规定保存。
 

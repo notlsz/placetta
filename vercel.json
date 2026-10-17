@@ -36,6 +36,10 @@
     {
       "source": "/help/:path+",
       "destination": "/help/index.html"
+    },
+    {
+      "source": "/trust",
+      "destination": "/trust.html"
     }
   ],
   "redirects": [

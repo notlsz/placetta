@@ -1,4 +1,4 @@
-/* Shared styles for Placetta's legal pages (terms, privacy, authorization, ai). Single light look, matching the landing page. */
+/* Shared styles for Placetta's legal pages (terms, privacy, authorization, ai) and the trust page. Single light look, matching the landing page. */
 :root{
   color-scheme:light;
   --bg:#F4F5F7; --card:#EDEFF3; --line:#E5E8EE;
@@ -72,6 +72,33 @@ li>.lm{position:absolute;left:0;top:0;color:var(--ink);font-variant-numeric:tabu
 h2.n+h3.n{margin-top:18px}
 h3.n+p,h3.n+ul{margin-top:8px}
 @media (max-width:479px){p.n.n3>.cn{font-size:14px;top:.1em}}
+
+/* trust page (site/trust.html): status tags, the section list, subprocessors, numbered steps */
+.tag{display:inline-block;margin-right:8px;padding:1px 7px;border-radius:6px;font-size:12px;font-weight:500;line-height:18px;letter-spacing:0;white-space:nowrap;vertical-align:1px}
+h2 .tag,h3 .tag{margin:0 0 0 6px;vertical-align:2px}
+.t-on{background:var(--gs-ll);color:var(--gs-ink)}
+.t-roll{background:#FFF1CC;color:#7A5410}
+.t-prog{background:var(--card);color:var(--ink2)}
+.trust .legend{margin-top:24px;padding:14px 16px;border-radius:12px;background:var(--card)}
+.trust .legend p{margin:0;font-size:14px;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline}
+.trust .legend p+p{margin-top:6px}
+.trust .legend .tag{margin:0;min-width:84px;text-align:center}
+.toc{margin-top:20px;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.toc a{color:var(--gs-ink);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.trust [data-anchor]{scroll-margin-top:76px}
+.trust h3+p{margin-top:8px}
+.sp{margin-top:8px;border-bottom:1px solid var(--line)}
+.sp-row{display:grid;gap:2px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+@media (min-width:640px){.sp-row{grid-template-columns:240px 1fr;gap:20px}}
+.sp-h{display:flex;flex-wrap:wrap;align-items:center;align-content:flex-start;gap:4px 8px;min-height:1.65em}
+.sp-h b{font-weight:500;color:var(--ink)}
+.sp-h .tag{margin:0}
+.sp-row p{margin:0}
+ol.steps{margin:12px 0 0;padding:0;list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:8px}
+ol.steps li,html[lang="zh-CN"] ol.steps li{counter-increment:step;padding-left:28px}
+ol.steps li::before{content:counter(step) ".";position:absolute;left:0;top:0;color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+.trust a{color:var(--gs-ink)}
 
 /* footer */
 .lf{padding:28px 0 40px;font-size:13px;color:var(--muted)}

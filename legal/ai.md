@@ -39,7 +39,7 @@ AI output can be wrong. Review every application and message before you approve 
 
 ## Models and your data
 
-- Odelia runs on Claude models from Anthropic. Where we configure it, some work runs on models from OpenAI, Google (Gemini), DeepSeek, OpenRouter or Groq instead.
+- Odelia runs on Claude models from Anthropic and, when our paid Google account is on, Gemini models from Google. If those can't answer, a backup open model on Groq, Cerebras or OpenRouter answers, without your files. Models from OpenAI and DeepSeek can be switched on, and are off by default. Every company that processes your information is listed at https://placetta.com/trust
 - Spoken replies in the app are generated with Microsoft Azure text to speech.
 - On calls, Odelia's voice and speech recognition run through Telnyx.
 - We do not use your content to train AI models.
@@ -95,7 +95,7 @@ AI 生成的内容可能有误。批准前，请审核每一份申请和每一�
 
 ## 模型与您的数据
 
-- Odelia 基于 Anthropic 的 Claude 模型运行。在我们配置的情况下，部分工作改由 OpenAI、Google（Gemini）、DeepSeek、OpenRouter 或 Groq 的模型处理。
+- Odelia 基于 Anthropic 的 Claude 模型运行；我们的 Google 付费账户开启时，也使用 Google 的 Gemini 模型。如果它们无法回答，会改由 Groq、Cerebras 或 OpenRouter 上的备用开源模型回答，且不会收到您的文件。OpenAI 和 DeepSeek 的模型可以开启，默认关闭。处理您信息的每一家公司都列在 https://placetta.com/trust
 - 应用中的语音回复由 Microsoft Azure 文字转语音服务生成。
 - 通话中，Odelia 的语音和语音识别通过 Telnyx 提供。
 - 我们不会用您的内容训练 AI 模型。

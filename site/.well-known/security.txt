@@ -1,0 +1,6 @@
+# Placetta's security contact (RFC 9116). How to report, and what's in scope: https://placetta.com/trust#report
+Contact: mailto:security@placetta.com
+Expires: 2027-10-16T23:59:59.000Z
+Preferred-Languages: en, zh
+Canonical: https://placetta.com/.well-known/security.txt
+Policy: https://placetta.com/trust#report
