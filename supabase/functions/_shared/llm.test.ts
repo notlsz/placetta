@@ -119,3 +119,12 @@ r = await callModel(k => undefined, { payload, role: "extract", research: false,
 check("no keys -> 503", !r.ok && r.status === 503);
 console.log(`${ok} passed, ${bad} failed`);
 if (bad) throw new Error(`${bad} failed`);
+
+// OpenRouter calls ask for hosts that don't keep or train on prompts
+{
+  let sent: any = null;
+  const f = (async (url: string, init: any) => { if (url.includes("openrouter")) sent = JSON.parse(init.body); return new Response(JSON.stringify({ id: "x", choices: [{ message: { content: "ok" }, finish_reason: "stop" }], usage: { prompt_tokens: 1, completion_tokens: 1 } }), { status: 200 }); }) as any;
+  await callModel(k => ({ OPENROUTER_API_KEY: "o", AGENT_ROUTE_PLAN: "openrouter:openai/gpt-oss-120b" } as Record<string, string>)[k], { payload, role: "plan", research: false, beta: null }, "x", null, f);
+  check("OpenRouter: data_collection deny", sent?.provider?.data_collection === "deny");
+  if (bad) throw new Error(`${bad} failed`);
+}

@@ -274,6 +274,8 @@ export async function callModel(env: Env, call: Call, fallbackModel: string, res
       } else {
         const cfg = OPENAI_STYLE[p], key = env(cfg.key); if (!key) continue;
         const body = toOpenAI({ ...call.payload, tools: research ? research.pageTools : call.payload.tools }, model);
+        // OpenRouter routes to many hosts: only those that don't keep or train on prompts may serve our calls.
+        if (p === "openrouter") (body as Record<string, unknown>).provider = { data_collection: "deny" };
         const res = await f(cfg.url, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(body) });
         const text = await res.text();
         if (res.ok) { const data = fromOpenAI(JSON.parse(text), `${p}:${model}`); return { ok: true, status: 200, data, text, model: `${p}:${model}` }; }

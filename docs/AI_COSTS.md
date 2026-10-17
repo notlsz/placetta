@@ -147,4 +147,5 @@ against plan revenue from `billing`, so this page is the forecast and that card 
 
 Names only; values live in the Edge Function secrets. `GEMINI_API_KEY` with `GEMINI_PAID=1` to turn the cheap routes
 on. `AI_WS_DAILY_LIMIT_USD` to move the per-workspace daily throttle off $10. `AGENT_ROUTE_<ROLE>` to change any
-route. `ALLOW_DEEPSEEK`, `ALLOW_OPENROUTER`, `ALLOW_GROQ` only after reading those vendors' data terms.
+route. `ALLOW_DEEPSEEK` only after reading DeepSeek's data terms. The gpt-oss backups switch on with their key alone;
+OpenRouter calls carry `data_collection: "deny"`, so only hosts that don't keep or train on prompts serve them.
