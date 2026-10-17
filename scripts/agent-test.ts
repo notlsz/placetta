@@ -315,6 +315,97 @@ async function previewRefine() {
     "the county permit waits on its plan review and says DeKalb's board applies there; the city license waits on the EIN, sourced from atlantaga.gov");
 }
 
+/* The first win (src/plan/prefill.ts): the three optional answers at sign-up fill the plan's official forms with no
+   model, and one application with no fee and no document goes up for approval the way Odelia puts one up. */
+async function firstWin() {
+  console.log("\n# The first win: the signup answers fill the plan, and one application waits for approval");
+  const { previewPlan } = await import("../src/plan/preview");
+  const { prefill, parseAddress, kindOf, secondsSay, firstPlanClock, filledName, FROM_SIGNUP, FROM_SIGNER } = await import("../src/plan/prefill");
+  const { preflight } = await import("../src/smart");
+  const { readyToFile, isBlank } = await import("../src/core");
+  const { formById } = await import("../src/forms/registry");
+  const { BY_HAND } = await import("../src/guard");
+  const TODAY = "2026-10-17";
+  const SSN_OR_EIN_LINE = /\b(ssn|social security|itin|f?ein)\b|employer identification|tax id/i;
+  const NUMBER = /\b\d{3}-\d{2}-\d{4}\b|\b\d{2}-\d{7}\b/;
+  const CITIES: [string, string, string, string, string][] = [
+    ["Milk tea shop", "Flushing, NY", "Lucky Leaf Tea LLC", "Mei Chen", "136-20 Roosevelt Ave, Flushing, NY 11354"],
+    ["Hot pot restaurant", "Irvine, CA", "Golden Pot Inc.", "David Wang", "2700 Alton Pkwy, Irvine, CA 92606"],
+    ["Bakery", "Houston, TX", "Sunrise Bakery LLC", "Ana Lopez", "9600 Bellaire Blvd, Houston, TX 77036"],
+    ["Milk tea shop", "Boston, MA", "Harbor Tea LLC", "Kevin Li", "88 Harrison Ave, Boston, MA 02111"],
+    ["Restaurant", "Atlanta, GA", "Peach Noodle LLC", "Grace Kim", "5150 Buford Hwy NE, Atlanta, GA 30340"],
+  ];
+  const label = (a: Application, id: string) => (a.official ? formById(a.official)?.fields.find(f => f.id === id)?.label.en : undefined) ?? "";
+  for (const [what, where, legal, owner, address] of CITIES) {
+    const plan = previewPlan(what, where, "2027-04-01", { entity: legal, today: TODAY });
+    const p = prefill(plan.apps, { what, where, legal, owner, address, today: TODAY });
+    const win = p.apps.find(a => a.id === p.win?.app);
+    const ap = p.approvals[0];
+    ok(!!win && win.status === "ready" && readyToFile(win) && ap?.kind === "file" && ap.app === win.id && ap.id === "ap-" + win.id && /^File the /.test(ap.title.en) && ap.does.length >= 4 && ap.action.en === "Approve & file",
+      `${where}: one application is ready with its approval card (${win?.official}: ${p.win?.filled} lines from the signup, ${p.win?.byHand} by hand)`, { win: p.win, ap: ap?.title });
+    if (!win || !ap) continue;
+    const w = workspace({ apps: p.apps, approvals: p.approvals, stores: [{ id: "s", name: same(where), address: `${address}`, stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: p.apps.map(a => a.id) }],
+      facts: [{ id: "f-name", group: "business", label: B("Legal name", "法定名称"), value: same(legal), source: FROM_SIGNUP }] });
+    const pf = preflight(w, ap, TODAY);
+    ok(!pf.errors.length && win.fees.every(f => !f.amount && !f.tbd) && !win.checklist.some(c => c.state === "missing"), `${where}: the check before approval passes, with no fee and no document`, pf.errors);
+    const secrets = p.apps.flatMap(a => a.fields.filter(f => SSN_OR_EIN_LINE.test(label(a, f.id)) && !/\?\s*$/.test(label(a, f.id)) && !isBlank(f.value) && !BY_HAND.test(f.value)).map(f => `${a.id}:${f.id}=${f.value}`));
+    ok(!secrets.length && !p.apps.some(a => a.fields.some(f => NUMBER.test(f.value))), `${where}: no SSN, ITIN or EIN is filled anywhere (a line that asks for one is empty or "By hand")`, secrets);
+    const unsourced = p.apps.flatMap(a => a.fields.filter(f => !isBlank(f.value) && !(f.from === FROM_SIGNUP || (f.from === FROM_SIGNER && BY_HAND.test(f.value)))).map(f => `${a.id}:${f.id}`));
+    ok(!unsourced.length && p.filled > 0 && p.filled === p.apps.reduce((s, a) => s + a.fields.filter(f => f.from === FROM_SIGNUP).length, 0), `${where}: every filled value is sourced "From your signup" (${p.filled} lines), and only the signer's lines say "By hand"`, unsourced);
+    ok(p.apps.filter(a => a.id !== win.id).every(a => a.status === "todo" && a.preview), `${where}: every other application stays a preview, not started`);
+    ok(win.fields.find(f => f.id === "l1")?.value === legal && win.fields.find(f => f.id === "l7a")?.value === owner && win.fields.find(f => f.id === "l7b")?.value === "By hand", `${where}: the legal name and the owner are on the form; line 7b is "By hand"`);
+  }
+
+  // the lines themselves, on Flushing's forms
+  const fl = previewPlan("Milk tea shop", "Flushing, NY", undefined, { entity: "Lucky Leaf Tea LLC", today: TODAY });
+  const fp = prefill(fl.apps, { what: "Milk tea shop", where: "Flushing, NY", legal: "Lucky Leaf Tea LLC", owner: "Mei Chen", address: "136-20 Roosevelt Ave, Flushing, NY 11354", brand: "Lucky Leaf", today: TODAY });
+  const v = (form: string, id: string) => fp.apps.find(a => a.official === form)?.fields.find(f => f.id === id)?.value;
+  eq([v("irs-ss4", "l2"), v("irs-ss4", "l4a"), v("irs-ss4", "l4b"), v("irs-ss4", "l6"), v("irs-ss4", "l8a"), v("irs-ss4", "l16"), v("irs-ss4", "sign")],
+    ["Lucky Leaf", "136-20 Roosevelt Ave", "Flushing, NY 11354", "Queens County, NY", "Yes", "Accommodation & food service", "Mei Chen, Owner"], "SS-4: trade name, mailing address, county, LLC, principal activity and signer, each from the signup");
+  eq([v("ny-dtf-17", "legal_name"), v("ny-dtf-17", "dba"), v("ny-dtf-17", "physical"), v("ny-dtf-17", "naics"), v("ny-dtf-17", "locations"), v("ny-dtf-17", "status"), v("ny-dtf-17", "ein"), v("ny-dtf-17", "email")],
+    ["Lucky Leaf Tea LLC", "Lucky Leaf", "136-20 Roosevelt Ave, Flushing, NY 11354", "722515 Snack and Nonalcoholic Beverage Bars", "No", "New business", "", ""], "DTF-17: names, address, the NAICS category for a tea shop, one location; the EIN and email nobody gave stay empty");
+  eq([v("nyc-fse", "seats"), v("nyc-fse", "fpc"), v("ny-dol-100", "locations"), v("ny-dol-100", "phone")], ["", "", "1", ""], "seating, certificate numbers and phones stay empty; one store is one location");
+  const hou = previewPlan("Bakery", "Houston, TX", undefined, { entity: "Sunrise Bakery LLC", today: TODAY });
+  const hp = prefill(hou.apps, { what: "Bakery", where: "Houston, TX", legal: "Sunrise Bakery LLC", owner: "Ana Lopez", address: "9600 Bellaire Blvd, Houston, TX 77036", today: TODAY });
+  const hv = (form: string, id: string) => hp.apps.find(a => a.official === form)?.fields.find(f => f.id === id)?.value;
+  eq([hv("hou-co", "date"), hv("hou-co", "zip_code"), hv("hou-co", "applicant_home_address"), hv("hou-food-dealer", "business_type"), hv("hou-food-dealer", "responsible_party_mailing_address"), hv("tx-ap201", "naics"), hv("tx-ap201", "owner_ssn")],
+    ["10/17/2026", "77036", "", "Bakery", "", "311811", ""], "Houston: today's date on the date of application, the ZIP, the bakery category; the owner's home and the SSN stay empty");
+  ok(hp.apps.find(a => a.official === "hou-sign")?.fields.filter(f => /city_st_zip/.test(f.id)).map(f => f.value).join("|") === "||", "a sign company's office and the billing city are never filled with the store's");
+
+  // Chinese words in the line: the forms get English
+  const zh = prefill(previewPlan("奶茶店", "Flushing, NY", undefined, { entity: "Lucky Leaf Tea LLC", today: TODAY }).apps, { what: "奶茶店", where: "Flushing, NY", legal: "Lucky Leaf Tea LLC", owner: "Mei Chen", address: "136-20 Roosevelt Ave, Flushing, NY 11354", today: TODAY });
+  ok(!!zh.win && !zh.apps.some(a => a.fields.some(f => /[一-鿿]/.test(f.value))) && zh.apps.find(a => a.official === "irs-ss4")?.fields.find(f => f.id === "l10")?.value === "Milk tea shop",
+    "奶茶店，纽约法拉盛: the same first win, in English on the IRS's form");
+  const cjkOwner = prefill(fl.apps, { what: "Milk tea shop", where: "Flushing, NY", legal: "Lucky Leaf Tea LLC", owner: "陈美", address: "136-20 Roosevelt Ave, Flushing, NY 11354", today: TODAY });
+  ok(!cjkOwner.apps.some(a => a.fields.some(f => f.value.includes("陈美"))), "an owner's name in Chinese characters is never written on a US agency's form");
+  // skipped, or not formed yet: nothing is guessed and nothing goes up for approval
+  const skip = prefill(previewPlan("Milk tea shop", "Flushing, NY", undefined, { today: TODAY }).apps, { what: "Milk tea shop", where: "Flushing, NY", today: TODAY });
+  ok(!skip.win && !skip.approvals.length && skip.apps.every(a => a.status === "todo") && !skip.apps.some(a => a.fields.some(f => f.id === "l1" && f.value)), `skipping the three answers puts nothing up for approval (${skip.filled} lines from the one line only)`);
+  const unformed = previewPlan("Milk tea shop", "Flushing, NY", undefined, { today: TODAY });
+  const up = prefill(unformed.apps, { what: "Milk tea shop", where: "Flushing, NY", owner: "Mei Chen", address: "136-20 Roosevelt Ave, Flushing, NY 11354", today: TODAY });
+  const dos = up.apps.find(a => a.official === "ny-dos-1336")!;
+  ok(!up.win && dos.fields.find(f => f.id === "name")?.value === "" && dos.fields.find(f => f.id === "county")?.value === "Queens County" && dos.fields.find(f => f.id === "organizer")?.value === "Mei Chen",
+    "not formed yet: the EIN waits on the company, so no first win; the articles get the county and the organizer, never a made-up LLC name");
+  const noZip = prefill(fl.apps, { what: "Milk tea shop", where: "Flushing, NY", legal: "Lucky Leaf Tea LLC", owner: "Mei Chen", address: "136-20 Roosevelt Ave", today: TODAY });
+  ok(noZip.apps.find(a => a.official === "irs-ss4")?.fields.find(f => f.id === "l4b")?.value !== "Flushing, NY" && noZip.apps.find(a => a.official === "irs-ss4")?.fields.find(f => f.id === "l4a")?.value === "136-20 Roosevelt Ave", "a line that asks for the ZIP isn't filled without one");
+
+  // the approval card is the agent's: asking Odelia for it again finds the same card
+  const w = workspace({ apps: fp.apps, approvals: fp.approvals, stores: [{ id: "flushing", name: same("Flushing"), address: "136-20 Roosevelt Ave, Flushing, NY 11354", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: fp.apps.map(a => a.id) }] });
+  const r = await agent({ ws: w, svc: account().svc, prompt: "File the EIN application.", script: [() => ask(["request_filing_approval", { application_id: fp.win!.app }]), () => say("It's waiting for your approval.")] });
+  const rfa = callNamed(r, "request_filing_approval")[0];
+  ok(rfa.ok && rfa.parsed?.approval_id === "ap-" + fp.win!.app && /Already waiting/.test(String(rfa.parsed?.note)) && r.w.approvals.length === 1, "Odelia's request_filing_approval finds the sign-up card already waiting: the same id, no second card", rfa.out);
+
+  // the pieces
+  eq([parseAddress("136-20 Roosevelt Ave Flushing, NY 11354", "Flushing, NY"), parseAddress("Flushing, NY", "Flushing, NY")?.street, parseAddress("法拉盛缅街 1 号", "Flushing, NY")],
+    [{ street: "136-20 Roosevelt Ave", city: "Flushing", state: "NY", zip: "11354" }, undefined, null], "an address is read into street, city, state and ZIP; a place alone has no street; Chinese characters aren't read");
+  eq([kindOf("奶茶店").naics?.[0], kindOf("Hot pot restaurant").activity, kindOf("Bakery and desserts").naics?.[0], kindOf("Boutique").naics], ["722515", "Hot pot restaurant", "311811", undefined], "the kind of business gives its NAICS category, and their own words when they wrote in English");
+  eq([secondsSay(640).en, secondsSay(1420).en, secondsSay(2000).zh], ["under a second", "1.4 seconds", "2 秒"], "time to plan reads as a person would say it");
+  firstPlanClock.start();
+  const ms = firstPlanClock.take();
+  ok(ms !== null && ms >= 1 && ms < 1000 && firstPlanClock.take() === null, "the clock runs from the signup press and is read once");
+  eq(filledName(fp.apps.find(a => a.id === fp.win!.app)!), B("EIN application (Form SS-4)", "雇主识别号（EIN）申请（Form SS-4）"), "the plans sheet names the filled form the way a person knows it");
+}
+
 async function progress() {
   console.log("\n# What's next: check_progress, search_email, read_email");
   const { svc } = account({ filings: [{ app_id: "a-filed", status: "submitted", confirmation_number: "PA-2291", submitted_at: "2026-10-01T10:00:00Z", updated_at: "2026-10-05T10:00:00Z", note: null, payment_url: null }] });
@@ -880,6 +971,7 @@ async function addresses() {
 
 await mapStore();
 await previewRefine();
+await firstWin();
 async function network() {
   console.log("\n# the network: every business makes Odelia smarter for the next");
   const w = workspace({ stores: [{ id: "s1", name: same("Flushing, Main St"), address: "136-20 Roosevelt Ave, Flushing, NY 11354", stage: "opening" }] as Workspace["stores"], apps: [app("a1", "draft")] });

@@ -152,8 +152,10 @@ export type Workspace = {
   routines?: Routine[];                    // jobs she repeats on a schedule
   firstPlan?: FirstPlan;                   // the instant plan written at sign-up from the registry, before any model call
 };
-/** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed. */
-export type FirstPlan = { at: string; what: string; where: string; whereZh?: string; apps: number; opening?: string; projectedOpen?: string };
+/** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
+ *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval
+ *  at sign-up, if one was; ms: from the signup press to the plan on Home, recorded once by Home. */
+export type FirstPlan = { at: string; what: string; where: string; whereZh?: string; apps: number; opening?: string; projectedOpen?: string; filled?: number; win?: string; ms?: number };
 /** A skill: instructions Placetta follows for one kind of job. "auto" ones it wrote itself from a job it finished;
  *  "form" skills also carry where each line of an official form came from, so the next filing of it fills itself. */
 export type SkillSource = "placetta" | "auto" | "you";

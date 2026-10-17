@@ -530,7 +530,13 @@ async function signIn(p) {
   }
   if (await p.locator("#onb-line").count()) {
     await p.fill("#onb-line", "Milk tea shop in San Jose, CA"); await p.locator("#onb-agree").check();
-    await p.click("button[type=submit]"); await p.waitForTimeout(3500);
+    await p.click("button[type=submit]"); await p.waitForTimeout(700);
+    // the second screen: the three optional answers that fill the first application (src/plan/prefill.ts)
+    if (await p.locator("#onb-legal").count()) {
+      await p.fill("#onb-legal", "Lucky Leaf Tea LLC"); await p.fill("#onb-owner", "Mei Chen"); await p.fill("#onb-address", "1 N First St, San Jose, CA 95113");
+      await p.click("button[type=submit]");
+    }
+    await p.waitForTimeout(3500);
   }
 }
 
@@ -660,6 +666,7 @@ async function gate(W) {
     ["gate-code", async () => { await p.getByText("Email me a code instead").click(); await p.waitForTimeout(700); return (await p.locator("#gate-code").count()) > 0; }],
     ["onboarding", async () => { await p.fill("#gate-code", "123456"); await p.click("button[type=submit]"); await p.waitForTimeout(2500); return (await p.locator("#onb-line").count()) > 0; }],
     ["onboarding-filled", async () => { await p.fill("#onb-line", "Bubble tea and hot pot restaurant with a retail counter in Rowland Heights, Los Angeles County, CA"); await p.waitForTimeout(600); const more = p.getByRole("button", { name: /Add a name/ }); if (await more.count()) { await more.first().click(); await settle(p); } return true; }],
+    ["onboarding-answers", async () => { if (await p.locator("#onb-place").count()) await p.fill("#onb-place", "Rowland Heights, CA"); await p.locator("#onb-agree").check(); await p.click("form.onb button[type=submit]"); await p.waitForTimeout(600); if (!(await p.locator("#onb-legal").count())) return false; await p.fill("#onb-legal", "Lucky Leaf Tea LLC"); await p.fill("#onb-owner", "Mei Chen"); await p.fill("#onb-address", "18800 Colima Rd, Rowland Heights, CA 91748"); await settle(p); return true; }],
   ];
   for (const [name, go] of steps) {
     if (ONLY && !name.includes(ONLY)) { if (!(await go().catch(() => false))) break; continue; }

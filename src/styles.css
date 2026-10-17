@@ -601,6 +601,10 @@ q.cite { display: block; margin-top: 3px; font-size: 11.5px; line-height: 1.35; 
 .does li { display: flex; gap: 12px; font-size: 14.5px; line-height: 1.45; }
 .does li::before { counter-increment: d; content: counter(d); flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--sky); color: var(--blue-ink); font-size: 11.5px; font-weight: 600; }
 .kv.data, .m-body .feelist { padding: 6px; border-radius: 18px; background: var(--mist); }
+/* in an approval: the lines the signer writes on the signed copy, listed under the ones Placetta fills */
+.ap-hand { margin-top: 10px; padding: 12px 16px 14px; border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(var(--e), .08); }
+.ap-hand p { margin: 0 0 8px; font-size: 13px; font-weight: 500; color: var(--ink); }
+.ap-hand ul { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.45; color: var(--ink2); }
 .kv.data > div { grid-template-columns: 172px minmax(0, 1fr); border-radius: 12px; }
 .kv.data dd { font-size: 14.5px; }
 .m-body .files { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
@@ -1739,6 +1743,13 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .onb .more-box > label { display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 500; }
 .sbtn.big { height: 48px; padding: 0 30px; font-size: 16px; }
 .onb-who { margin: 14px 0 0; font-size: 12.5px; color: var(--ink3); text-align: center; }
+/* the second screen: three optional answers, each with a quiet hint under it */
+.onb .q .onb-hint { margin-top: -2px; font-size: 12.5px; font-weight: 400; line-height: 1.4; color: var(--ink3); }
+.onb-pair { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.onb-pair input { flex: 1 1 auto; min-width: 0; }
+.onb-pair .chip { flex: none; height: 46px; white-space: nowrap; }
+.onb input:disabled { opacity: .55; }
+@media (max-width: 480px) { .onb-pair { flex-direction: column; align-items: stretch; } .onb-pair .chip { height: 40px; align-self: flex-start; } .onb-act3 { flex-wrap: wrap; } .onb-act3 .sbtn { padding: 0 16px; } .onb-act3 .sbtn.big { flex: 1 0 auto; padding: 0 20px; } }
 
 /* The first-minute tour: three cards, one idea each */
 .tour-scrim { z-index: 80; }
@@ -1909,6 +1920,9 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .plan-note svg { flex: none; margin-top: 3px; color: var(--blue-ink); }
 .plan-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .plan-act .pill.quiet.sm svg { width: 14px; height: 14px; }
+/* under the plan card: how long the first plan took */
+.plan-time { display: flex; align-items: flex-start; gap: 6px; margin: 10px 0 0; padding: 0 20px; font-size: 12.5px; line-height: 1.4; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.plan-time svg { flex: none; width: 13px; height: 13px; margin-top: 2px; color: var(--blue-ink); }
 
 /* the dock's starter chips, for a workspace with little in it yet */
 .dockbar .sugg.dock-chips { justify-content: center; margin: 0 0 8px; }
