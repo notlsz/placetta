@@ -7,3 +7,8 @@ export { agencyKey, DISTILL_SYSTEM, distillPrompt, filingEvidence, lessonKeys, r
 export { chipsOf, keepRecall, recallFrom } from "../recall";
 // What Odelia did this month (src/monthly.ts): the same definitions the database uses, for the end-to-end test to compare
 export { monthMetrics } from "../monthly";
+// The agencies' own forms (src/forms/): the fill, the read-back and the versions, the same code the app runs, for the
+// server's tests and for the filled form a reply hands back
+export { appPdf, fillForm, pdfFile, type Filled, type LoadPdf } from "../forms/fill";
+export { readBack } from "../forms/readback";
+export { answersHash, fillAndRead, latestVersion, refreshForms } from "../forms/versions";

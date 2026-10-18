@@ -24,6 +24,8 @@ export type CloudSession = {
   notice?: string;
   /** An approval to open right away: Odelia's texts link to /app/?ws=...&approval=... */
   approval?: string;
+  /** A filled form to open right away: a reply by text or chat links to /app/?ws=...&f=<token> (src/forms/versions.ts). */
+  form?: string;
   switchTo(id: string): void;
   newWorkspace(): void;
   signOut(everywhere?: boolean): void;
