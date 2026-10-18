@@ -1234,6 +1234,8 @@ flow("site-home", ["site"], async w => {
   await p.keyboard.press("Escape"); await p.locator("#mClose").click().catch(() => {}); await p.waitForTimeout(400);
   // "I already have stores": the free check, then its plan request
   await p.goto(w.base); await p.waitForTimeout(800);
+  // (the landing page as restored to its Oct 15 version has no store check; the app's own check is walked in Stores)
+  if (!(await p.locator("a[href='#check']").count())) { console.log(`  note ${tag(w.combo)} site-home: the landing page has no store check link; skipped`); return; }
   if (!(await w.tap(p.locator("a[href='#check']").filter({ visible: true }).first(), { what: "Already open? Check your stores free" }))) return;
   await p.locator(".pc-sheet").waitFor({ timeout: 6000 }).catch(() => {});
   await w.look("store check");
