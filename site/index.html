@@ -1100,6 +1100,25 @@ html[lang="zh-CN"] .fct h3{letter-spacing:0}
 .fcard .ftoast[data-st].on{transform:none}
 .fcard .fbtn[data-fx="press"].on{animation:fpress .55s ease}
 @keyframes fpress{0%{transform:none}35%{transform:scale(.9);box-shadow:0 0 0 6px rgba(15,27,51,.12)}100%{transform:none;box-shadow:0 0 0 0 rgba(15,27,51,0)}}
+/* how it works (Oct 18): plan rows and a renewal month, in the plan demo's language */
+.hwplan{display:flex;flex-direction:column}
+.hwr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid #F0F2F5}
+.hwr:first-child{border-top:0}
+.hwr .nm{display:flex;flex-direction:column;min-width:0}
+.hwr .nm b{font-size:12.5px;font-weight:500;line-height:1.3;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hwr .nm small{font-size:11px;line-height:1.3;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hwd{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.hwd em{font:10.5px var(--mono);font-style:normal;color:#8A93A3;white-space:nowrap}
+.hws{font-size:11px;font-weight:500;color:#5B6578;white-space:nowrap}
+.hws.d{color:#2E7149}.hws.r{color:#93651E}.hws.b{color:#B3473A}
+.hwmore{padding-top:7px;border-top:1px solid #F0F2F5;font-size:11.5px;color:var(--muted)}
+.hwcal{margin:0 0 8px}
+.hwmo{font-size:11.5px;font-weight:500;color:var(--ink2);margin-bottom:6px}
+.hwg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center}
+.hwg i{font-style:normal;font-size:10px;line-height:16px;color:var(--faint)}
+.hwg span{font-size:10.5px;line-height:19px;border-radius:5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.hwg span.a{background:#FBF3E4;color:#93651E;font-weight:600}
+.hwg span.b{background:#E8EFF8;color:#3B5F8E;font-weight:600}
 .fprog{height:3px;border-radius:2px;background:#EBEEF3;margin:-2px 0 10px;overflow:hidden}
 .fprog i{display:block;height:100%;width:0;border-radius:2px;background:#3F9A62;transition:width .35s ease}
 @media (prefers-reduced-motion:reduce){.fcard [data-st]:not([data-fx]){opacity:1;transform:none}}
@@ -2731,16 +2750,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
           <div class="fui">
             <div class="fhd"><b data-i18n="lm.plan">Entry plan</b><span data-i18n="hw.wals">San José, CA</span></div>
             <div class="fprog"><i></i></div>
-            <ul class="fchips">
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5.5L12 3l8 2.5V21M9 21v-4h6v4M8 8.5h2M14 8.5h2M8 12.5h2M14 12.5h2M2.5 21h19"/></svg><span data-i18n="cat.entity">Entity formation</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="3" width="15" height="18" rx="2"/><path d="M8 7.5h8M8 11.5h8M8 15.5h4.5"/></svg><span data-i18n="cat.license">Business licenses and tax</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 4.5V3h6v1.5M9 13l2 2 4-4.5"/></svg><span data-i18n="cat.health">Health permits</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.8 3.6 5 5.2 5 10a5 5 0 0 1-10 0c0-2.4 1.4-3.6 2.4-5 .5 1.4 1.4 2.2 2.4 2.4C11.2 8 11.5 5.2 12 3z"/></svg><span data-i18n="cat.fire">Fire and building permits</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="9" rx="1.5"/><path d="M8 13v8M16 13v8M7 8.5h10"/></svg><span data-i18n="cat.sign">Sign permits</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3h9l-.6 6.2a3.9 3.9 0 0 1-7.8 0zM12 13.2V21M8.5 21h7"/></svg><span data-i18n="cat.liquor">Liquor licenses</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5l6-3 6 3 6-3v14l-6 3-6-3-6 3z"/><path d="M9 3.5v14M15 6.5v14"/></svg><span data-i18n="cat.zoning">Zoning and occupancy</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5A8 8 0 0 0 6.3 6.3L4 8.5M4 4v4.5h4.5M4 12.5a8 8 0 0 0 13.7 5.2L20 15.5M20 20v-4.5h-4.5"/></svg><span data-i18n="cat.renew">Renewals and regulatory changes</span></li>
-            </ul>
+            <div class="hwplan" id="hwPlan" role="list"></div>
           </div>
           <div class="ftoast" data-st data-ms="700"><span class="orb"></span><span><b data-i18n="f1.t">Entry plan ready</b><small data-i18n="f1.ts">8 requirements, in order, with estimated fees</small></span></div>
         </div>
@@ -2761,6 +2771,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <div class="fcv">
           <div class="fui">
             <div class="fhd"><b data-i18n="lm.wallet">Renewal calendar</b><span data-i18n="hw.wals">San José, CA</span></div>
+            <div class="hwcal" id="hwCal" aria-hidden="true"></div>
             <div class="fcrow" data-st data-ms="450"><i class="dot a"></i><span class="nm" data-i18n="f3.r1">Health permit</span><span class="pill p-r" data-i18n="f3.r1d">Due in 30 days</span></div>
             <div class="fcrow" data-st data-ms="450"><i class="dot"></i><span class="nm" data-i18n="f3.r2">Business tax certificate</span><span class="dt" data-i18n="f3.r2d">Renews Jan 2027</span></div>
             <div class="fcrow" data-st data-ms="450"><i class="dot"></i><span class="nm" data-i18n="f3.r3">Fire inspection</span><span class="dt" data-i18n="f3.r3d">Due Jun 2027</span></div>
@@ -3357,8 +3368,8 @@ zh:{
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* Oct 18 section pass: new strings for the sections changed that day */
-Object.assign(T.en, {"ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
-Object.assign(T.zh, {"ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
+Object.assign(T.en, {"hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -3484,9 +3495,17 @@ function renderApp(){
   document.getElementById("appRows").innerHTML = PLAN.map((r,k) => `<div class="arow" id="ar${k}"><span class="ast" id="as${k}"></span><div style="min-width:0"><div class="n">${r.n[i]}</div><div class="a">${r.a[i]}<span class="adt">${wkDates(r.w)}</span></div></div><span class="aw">${i ? "第" + r.w[0] + "–" + r.w[1] + "周" : "W" + r.w[0] + "–" + r.w[1]}</span><span class="asx" id="ap${k}"></span></div>`).join("");
   vFloat = "";
   document.getElementById("gantt").innerHTML = PLAN.map((r,k) => `<div class="gl"><i id="gb${k}" style="left:${(r.w[0]-1)/16*100}%;width:${(r.w[1]-r.w[0]+1)/16*100}%"></i></div>`).join("") + `<div class="gaxis">${[1,5,9,13].map(n => `<span>${i ? "第" + n + "周" : "W" + n}</span>`).join("")}</div><span class="today" id="today"></span>`;
-  paintApp();
+  paintApp(); renderHow();
 }
 const GC = {q:"#E2E7EE",r:"#E9C47F",d:"#7399C6",b:"#E8B4AA"};
+/* how it works (Oct 18): card 1 shows the sample plan's first rows with their dates and status; card 3 a month of renewals */
+function renderHow(){
+  const i = L(), pl = document.getElementById("hwPlan"), cal = document.getElementById("hwCal");
+  if (pl) pl.innerHTML = PLAN.slice(0, 5).map(r => { const s = status(r, 6); return `<div class="hwr" role="listitem"><span class="nm"><b>${r.n[i]}</b><small>${r.a[i]}</small></span><span class="hwd"><em>${wkDates(r.w)}</em><span class="hws ${s}">${t("st." + s)}</span></span></div>`; }).join("") + `<p class="hwmore">${t("hw.more")}</p>`;
+  if (cal){ // January 2027 starts on a Friday; the health permit is due the 14th, the business tax certificate renews the 31st
+    const wd = i ? ["日","一","二","三","四","五","六"] : ["S","M","T","W","T","F","S"], mk = {14: "a", 31: "b"};
+    cal.innerHTML = `<p class="hwmo">${t("hw.mo")}</p><div class="hwg">${wd.map(d => `<i>${d}</i>`).join("")}${Array.from({length: 5}, () => "<span></span>").join("")}${Array.from({length: 31}, (_, k) => `<span${mk[k + 1] ? ` class="${mk[k + 1]}"` : ""}>${k + 1}</span>`).join("")}</div>`; }
+}
 function paintApp(){
   let done = 0;
   const ask = t("app.ask"), it = vt + INTRO, el = document.getElementById("appAsk");
@@ -5265,9 +5284,12 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
   document.querySelectorAll(".fcard").forEach(card => {
     const steps = [...card.querySelectorAll("[data-st]")], bar = card.querySelector(".fprog i"), chips = card.querySelectorAll(".fchips li").length;
     if (!steps.length) return;
-    const show = n => { steps.forEach((el, k) => el.classList.toggle("on", k < n)); if (bar) bar.style.width = Math.min(100, 100 * Math.min(n, chips) / chips) + "%"; };
+    const show = n => { steps.forEach((el, k) => el.classList.toggle("on", k < n)); if (bar && chips) bar.style.width = Math.min(100, 100 * Math.min(n, chips) / chips) + "%"; };
+    if (bar && !chips) bar.style.width = "37.5%";   // how it works: 3 of the plan's 8 requirements approved
     if (RM) { show(steps.length); return; }
     let k = 0, seen = false, t = 0;
+    // how it works: never a blank panel; everything but the toast and the button press is drawn before it scrolls in
+    if (card.closest("#how")) { const first = steps.findIndex(el => el.classList.contains("ftoast") || el.dataset.fx); k = first < 0 ? steps.length : first; show(k); }
     const tick = () => {
       if (!seen) { t = setTimeout(tick, 400); return; }
       if (k < steps.length) { k++; show(k); t = setTimeout(tick, Number(steps[Math.min(k, steps.length - 1)].dataset.ms) || 600); }
