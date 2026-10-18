@@ -1,6 +1,7 @@
 # Deploys every Supabase server function when they (or Odelia's code in src/) change on main.
 # Odelia's server copy is rebuilt from src first, so the server never runs an older agent than the app.
-# Needs one repository secret: SUPABASE_ACCESS_TOKEN (supabase.com/dashboard/account/tokens). Without it, this skips.
+# Updates the live database first (scripts/apply-migrations.mjs), then deploys. Needs one repository secret:
+# SUPABASE_ACCESS_TOKEN (supabase.com/dashboard/account/tokens). Without it, this skips.
 name: Deploy server functions
 # Only after CI passes on main: a change that fails its checks never reaches the server.
 on:
@@ -29,6 +30,9 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
         if: steps.tok.outputs.ok
+      - name: Update the database first (migrations the live project hasn't run)
+        if: steps.tok.outputs.ok
+        run: node scripts/apply-migrations.mjs
       - name: Rebuild Odelia's server copy
         if: steps.tok.outputs.ok
         run: npm run build:agent
