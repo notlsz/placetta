@@ -1,0 +1,275 @@
+{
+ "form": "bos-site",
+ "rev": "Site Cleanliness Application (Inspectional Services, 4/2/26)",
+ "pdf": "bos-site.pdf",
+ "url": "https://www.boston.gov/sites/default/files/file/2026/04/ISD%20site%20cleanliness%20Application%20Fillable%20%204%202%2026_4.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: addresses are 'street, city, ST ZIP'. The receptacle location may list several places (Front, Rear, Left, Right, Other, Inside storage, Curbside pickup); each one named gets an X in its box. 'Other: text' ticks Other Use and writes the explanation. DPW approval 'Yes' is for a dumpster on a public way, which also needs the Public Works license. Left for the applicant: the signature, and the city's own approval block. Sent by mail or in person to Inspectional Services with the $50 check, a maintenance plan and schedule, and the waste disposal contract.",
+ "lines": [
+  {
+   "id": "business_name",
+   "line": "Business",
+   "en": "Business name",
+   "zh": "企业名称"
+  },
+  {
+   "id": "business_phone",
+   "line": "Business",
+   "en": "Business phone",
+   "zh": "企业电话"
+  },
+  {
+   "id": "business_address",
+   "line": "Business",
+   "en": "Business address in Boston: street, city, MA ZIP",
+   "zh": "波士顿营业地址：街道、城市、MA 邮编"
+  },
+  {
+   "id": "email",
+   "line": "Business",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "owner_name",
+   "line": "Owner",
+   "en": "Owner name",
+   "zh": "所有者姓名"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Owner",
+   "en": "Owner phone",
+   "zh": "所有者电话"
+  },
+  {
+   "id": "owner_address",
+   "line": "Owner",
+   "en": "Owner address: street, city, ST ZIP",
+   "zh": "所有者地址：街道、城市、州、邮编"
+  },
+  {
+   "id": "property_type",
+   "line": "Property",
+   "en": "Type of property or lot",
+   "zh": "物业或地块类型",
+   "options": [
+    "Food/Beverage",
+    "Other Commercial Use",
+    "Auto Sale or Repair",
+    "Residential Use",
+    "Other: explain"
+   ]
+  },
+  {
+   "id": "receptacle",
+   "line": "Property",
+   "en": "Where the trash receptacle is (one or more: Front, Rear, Left, Right, Other, Inside storage, Curbside pickup)",
+   "zh": "垃圾容器位置（可多选：前、后、左、右、其他、室内存放、路边收取）"
+  },
+  {
+   "id": "dpw_approval",
+   "line": "Property",
+   "en": "Is the dumpster on a public way with Public Works approval?",
+   "zh": "垃圾箱是否位于公共道路并已获公共工程局批准？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "disposal_company",
+   "line": "Disposal",
+   "en": "Name of the disposal company",
+   "zh": "垃圾处理公司名称"
+  },
+  {
+   "id": "disposal_phone",
+   "line": "Disposal",
+   "en": "Disposal company's phone",
+   "zh": "垃圾处理公司电话"
+  },
+  {
+   "id": "disposal_address",
+   "line": "Disposal",
+   "en": "Disposal company's address: street, city, ST ZIP",
+   "zh": "垃圾处理公司地址：街道、城市、州、邮编"
+  },
+  {
+   "id": "cleaner",
+   "line": "Cleaning",
+   "en": "Person responsible for cleaning",
+   "zh": "负责清洁的人员"
+  }
+ ],
+ "boxes": {
+  "business_name": [
+   {
+    "text": "Business Name"
+   }
+  ],
+  "business_phone": [
+   {
+    "text": "Phone Number"
+   }
+  ],
+  "business_address": [
+   {
+    "text": "Business Address",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "Zip Code",
+    "pick": "zip"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email Address"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "Owner Name"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "Phone Number_2"
+   }
+  ],
+  "owner_address": [
+   {
+    "text": "Owner Address",
+    "pick": "street"
+   },
+   {
+    "text": "City_2",
+    "pick": "city"
+   },
+   {
+    "text": "State_2",
+    "pick": "state"
+   },
+   {
+    "text": "Zip Code_2",
+    "pick": "zip"
+   }
+  ],
+  "property_type": [
+   {
+    "check": "FoodBeverage",
+    "if": "^food"
+   },
+   {
+    "check": "Other Commercial Use",
+    "if": "^other commercial"
+   },
+   {
+    "check": "Auto Sale or Repair",
+    "if": "^auto"
+   },
+   {
+    "check": "Residential Use",
+    "if": "^residential"
+   },
+   {
+    "check": "Other Use if other please explain",
+    "if": "^other:"
+   },
+   {
+    "text": "undefined_2",
+    "pick": "tail",
+    "if": "^other:"
+   }
+  ],
+  "receptacle": [
+   {
+    "text": "Front",
+    "value": "X",
+    "if": "front"
+   },
+   {
+    "text": "Rear",
+    "value": "X",
+    "if": "rear"
+   },
+   {
+    "text": "Left",
+    "value": "X",
+    "if": "left"
+   },
+   {
+    "text": "Right",
+    "value": "X",
+    "if": "right"
+   },
+   {
+    "text": "Other",
+    "value": "X",
+    "if": "other"
+   },
+   {
+    "text": "Inside Storage",
+    "value": "X",
+    "if": "inside"
+   },
+   {
+    "text": "Curbside Pickup",
+    "value": "X",
+    "if": "curbside"
+   }
+  ],
+  "dpw_approval": [
+   {
+    "check": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "NO",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "disposal_company": [
+   {
+    "text": "Name of Disposal Company"
+   }
+  ],
+  "disposal_phone": [
+   {
+    "text": "Phone"
+   }
+  ],
+  "disposal_address": [
+   {
+    "text": "Address",
+    "pick": "street"
+   },
+   {
+    "text": "City_3",
+    "pick": "city"
+   },
+   {
+    "text": "State_3",
+    "pick": "state"
+   },
+   {
+    "text": "Zip Code_3",
+    "pick": "zip"
+   }
+  ],
+  "cleaner": [
+   {
+    "text": "Person Responsible for Cleaning"
+   }
+  ]
+ }
+}

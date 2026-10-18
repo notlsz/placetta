@@ -1229,6 +1229,91 @@ export const DEST: Record<string, Dest> = {
     signature: "wet", payment: "invoice", onBehalf: "unstated",
     checked: "2026-10-18", source: "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023",
   },
+  // ---- The registry's accuracy additions, read from the agencies' own pages on 2026-10-18. ----
+  "ttb-dealer": {
+    // TTB 5630.5d: "Please sign and date this registration and mail it to: Alcohol and Tobacco Tax and Trade Bureau, 550
+    // Main Street, Suite 8002, Cincinnati, OH 45202-5215." (or register in Permits Online). No fee is stated.
+    mail: { name: "Alcohol and Tobacco Tax and Trade Bureau", line1: "550 Main Street, Suite 8002", city: "Cincinnati", state: "OH", zip: "45202-5215" },
+    signature: "wet", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.ttb.gov/system/files/images/pdfs/forms/f56305d.pdf",
+    also: ["https://www.ttb.gov/nrc/retail-beverage-alcohol-dealers"],
+  },
+  "ny-sla-rw": {
+    // "From there you will find the Application Wizard" on New York Business Express; the coversheet gives the fee.
+    portal: "www.businessexpress.ny.gov",
+    signature: "typed", payment: "with_filing", onBehalf: "unstated",
+    attach: ["Proof of the 30-day community board notice"],
+    checked: "2026-10-18", source: "https://sla.ny.gov/restaurant-license-quick-reference-0",
+    also: ["https://sla.ny.gov/community-board-faqs"],
+  },
+  "co-sos": {
+    // "File a form to create a new record" (coloradosos.gov/biz/FileDoc.do).
+    portal: "www.coloradosos.gov", portalUrl: "https://www.coloradosos.gov/biz/FileDoc.do",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.sos.state.co.us/pubs/business/fileAForm.html",
+  },
+  "co-ui": {
+    // CDLE: "Create an Employer User Account" in MyUI Employer+ (myui.clouduim.cdle.state.co.us), then "New Employer
+    // Registration"; the Summary's acknowledgment and Submit finish it.
+    portal: "myui.clouduim.cdle.state.co.us", portalUrl: "https://myui.clouduim.cdle.state.co.us/Employer/Core/Login.aspx",
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://cdle.colorado.gov/employers/myui-employer/resources/how-to-register-a-new-ui-employer-account-in-myui-employer",
+  },
+  "bos-site": {
+    // "by mail or in person": Inspectional Services, 1010 Massachusetts Avenue, 5th Floor; "$50", check or money order
+    // "made payable to the City of Boston". The fee goes with it, so the team sends it.
+    mail: { name: "City of Boston Inspectional Services", line1: "1010 Massachusetts Avenue, 5th Floor", city: "Boston", state: "MA", zip: "02118" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    attach: ["Maintenance plan and schedule", "Solid waste proposal with the waste disposal contract (a current invoice if it is over a year old)", "Public Works license, if the dumpster is on a public way"],
+    checked: "2026-10-18", source: "https://www.boston.gov/departments/inspectional-services/how-apply-site-cleanliness-license",
+  },
+  "ca-cdph-pfr": {
+    // "Non-courier delivery: California Department of Public Health - Food and Drug Branch, P.O. Box 997435, MS 7602,
+    // Sacramento, CA 95899", with the application and check. The fee goes with it, so the team sends it.
+    mail: { name: "California Department of Public Health, Food and Drug Branch", line1: "P.O. Box 997435, MS 7602", city: "Sacramento", state: "CA", zip: "95899" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcessedFoodRegistration.aspx",
+    also: ["https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcedureObtainingProcessedFoodRegistration.aspx"],
+  },
+  "sea-building": {
+    // "The Seattle Services Portal, at services.seattle.gov. You will need to create an account"; fees are paid online
+    // once the application is complete.
+    portal: "services.seattle.gov",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.seattle.gov/construction-and-inspections/permits/how-do-you-get-a-permit",
+  },
+  "chi-limited": {
+    // "To apply for a business license, you may APPLY ONLINE" (ChicagoBusinessDirect.org, as BACP's pages name it) "or
+    // visit the Chicago Small Business Center"; $250 for 2 years.
+    portal: "chicagobusinessdirect.org", portalUrl: "https://chicagobusinessdirect.org/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://chicago.gov/city/en/sites/chicago-business-licensing/home/business-licensing.html",
+    also: ["https://www.chicago.gov/city/en/depts/bacp/supp_info/retailfoodestablishment0.html"],
+  },
+  "ca-abc": {
+    owner: {
+      why: "ABC takes a new license application at the district office for the premises, where each applicant signs before an ABC employee and shows state ID (or signs ABC-211-SIG before a notary); the page names no mail or online route.",
+      url: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+    },
+    signature: "wet", payment: "in_person",
+    checked: "2026-10-18", source: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  },
+  "ca-food-handler": {
+    owner: {
+      why: "Each employee who handles food earns their own California Food Handler Card from an accredited course and exam within 30 days of hire; the card is the employee's.",
+      url: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113948",
+    },
+    signature: "none", payment: "in_person",
+    checked: "2026-10-18", source: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113948",
+  },
+  "snhd-cfsm": {
+    owner: {
+      why: "The Health District's application asks for \"A person in charge that is a Certified Food Safety Manager\" with a copy of the certificate attached: that person passes the exam themselves.",
+      url: "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+    },
+    signature: "none", payment: "in_person",
+    checked: "2026-10-18", source: "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+  },
   "lac-business-license": {
     // "If your business activity is one that the County licenses, you must apply" ("Restaurant", "Food Establishment"):
     // the page's Apply link opens the county's EnerGov self-service application assistant.
@@ -1340,6 +1425,13 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   // so the team picks the center; none takes an online submission.
   "irs-8832": { why: "Mailed to Kansas City or Ogden by the entity's state (Ogden for a foreign country); no fax or online route.", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832", checked: "2026-10-18" },
   "irs-2553": { why: "Faxed or mailed to Kansas City (855-887-7734) or Ogden (855-214-7520) by the corporation's state.", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-2553", checked: "2026-10-18" },
+  "nyc-dob-alt": { why: "\"Most kitchen and bathroom renovations require an ALT2 permit application, which must be filed by a PE or RA\": the design professional files it.", source: "https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page", checked: "2026-10-18" },
+  "nyc-cb-notice": { why: "The notice goes to the community board for the address 30 days before the SLA filing, but the SLA's page doesn't say how it is delivered, and each board has its own address.", source: "https://sla.ny.gov/community-board-faqs", checked: "2026-10-18" },
+  "la-alcohol-cup": { why: "\"Visit the Development Services Center to apply for a Conditional Use Permit\"; it needs a public hearing and usually 4 to 5 months.", source: "https://business.lacity.gov/sites/g/files/wph1606/files/2021-02/Restaurant_Bar%20Checklist_0.pdf", checked: "2026-10-18" },
+  "hou-buildout": { why: "Filed in iPermits, whose address the page doesn't print, with plans uploaded on the city's emailed invitation; trade inspections are \"scheduled by the appropriate registered licensed contractor\".", source: "https://www.houstonpermittingcenter.org/hpwcode1148", checked: "2026-10-18" },
+  "bos-building": { why: "\"The permit applicant must be the contractor performing the work\"; \"Only the licensed contractor can apply.\"", source: "https://www.boston.gov/boston-permitting/permits/long-form-permits", checked: "2026-10-18" },
+  "bos-co": { why: "The process is \"managed almost entirely by your licensed general contractor\" after every building permit inspection passes.", source: "https://www.boston.gov/departments/fire-prevention/certificate-occupancy", checked: "2026-10-18" },
+  "phl-building": { why: "The city's page names no application route for the building permit: \"Call 311 and ask to speak to an L&I Building Unit representative.\"", source: "https://business.phila.gov/?p=1402", checked: "2026-10-18" },
   "moco-plan-review": { why: "Montgomery County's plans are reviewed by the Department of Permitting Services with the restaurant interior alteration permit, filed by the design professional; Environmental Health reviews them there.", source: "https://www.montgomerycountymd.gov/department-health-human-services/about-us/licensure-regulatory-services/environmental-health-unit/food-service-facility-license", checked: "2026-10-18" },
   "smc-plan-check": { why: "San Mateo County's plan check page didn't load past its navigation for us, so the plan submission route (MyEHS or paper) wasn't confirmed.", source: "https://www.smchealth.org/food-facility-plan-check-process", checked: "2026-10-18" },
   "gln-brc": { why: "Applied for in the city's GlendalePermits portal, whose address the city's page doesn't print.", source: "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate", checked: "2026-10-18" },
