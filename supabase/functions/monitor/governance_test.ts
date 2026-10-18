@@ -29,7 +29,7 @@ Deno.test("numbers not measured yet say so instead of showing zero", () => {
 });
 
 Deno.test("durations", () => {
-  assertEquals([dur(null), dur(3.24), dur(41), dur(90), dur(190), dur(600)], ["-", "3.2s", "41s", "1m 30s", "3m 10s", "10m"]);
+  assertEquals([dur(null), dur(3.24), dur(41), dur(90), dur(190), dur(600), dur(75), dur(359.6)], ["-", "3.2s", "41s", "1m 30s", "3m 10s", "10m", "1m 15s", "6m"]);
 });
 
 Deno.test("Monday's run: claimed once, emailed to staff, posted as an Update", async () => {

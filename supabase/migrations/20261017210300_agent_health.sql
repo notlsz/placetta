@@ -58,17 +58,21 @@ language sql stable set search_path = '' as $$
 $$;
 revoke execute on function public.agent_run_cost(uuid, timestamptz, timestamptz) from public, anon, authenticated;
 
--- Everything the Agent health page and the weekly summary show, for the last p_days days (UTC). Server and staff only.
+-- Everything the Agent health page and the weekly summary show, for the last p_days days. Days are New York days, the
+-- team's business days (the same clock as the review SLA), so a run at 9pm Eastern counts on that day. Server and staff only.
 create or replace function public.agent_health_data(p_days int default 14) returns jsonb
 language plpgsql stable security definer set search_path = '' as $$
-declare n int := least(greatest(coalesce(p_days, 14), 1), 60); since date := current_date - (least(greatest(coalesce(p_days, 14), 1), 60) - 1);
+declare n int := least(greatest(coalesce(p_days, 14), 1), 60);
+  today date := (now() at time zone 'America/New_York')::date;
+  since date := today - (n - 1);
+  start timestamptz := since::timestamp at time zone 'America/New_York';
 begin
   return (
-    with days as (select generate_series(since, current_date, interval '1 day')::date as d),
+    with days as (select generate_series(since, today, interval '1 day')::date as d),
     runs as (
       select r.id, r.workspace_id, r.created_at, r.status, r.kind, r.channel, r.title, r.prompt, r.tool_calls, r.tool_errors, r.first_text_at as first_reply_at,
              public.agent_run_end(r) as done_at
-        from public.agent_runs r where r.created_at >= since
+        from public.agent_runs r where r.created_at >= start
     ),
     timed as (
       select r.*, extract(epoch from r.first_reply_at - r.created_at) as reply_s, extract(epoch from r.done_at - r.created_at) as done_s from runs r
@@ -81,17 +85,17 @@ begin
         percentile_cont(0.95) within group (order by t.reply_s) filter (where t.reply_s is not null) as reply_p95,
         percentile_cont(0.5) within group (order by t.done_s) filter (where t.done_s is not null and t.status = 'done') as done_p50,
         percentile_cont(0.95) within group (order by t.done_s) filter (where t.done_s is not null and t.status = 'done') as done_p95
-      from days d left join timed t on t.created_at::date = d.d group by d.d
+      from days d left join timed t on (t.created_at at time zone 'America/New_York')::date = d.d group by d.d
     ),
     check_days as (
-      select at::date as d, count(*) as checked, count(*) filter (where passed = of) as first_try from public.odelia_job_checks where at >= since group by 1
+      select (at at time zone 'America/New_York')::date as d, count(*) as checked, count(*) filter (where passed = of) as first_try from public.odelia_job_checks where at >= start group by 1
     ),
     ai_days as (
-      select at::date as d, coalesce(sum(cost_usd), 0) as cost, count(*) filter (where kind = 'call') as calls,
+      select (at at time zone 'America/New_York')::date as d, coalesce(sum(cost_usd), 0) as cost, count(*) filter (where kind = 'call') as calls,
         count(*) filter (where kind = 'call' and saver) as saver_calls, count(*) filter (where kind = 'call' and saver is not null) as saver_known
-      from public.ai_events where at >= since group by 1
+      from public.ai_events where at >= start group by 1
     ),
-    thr_days as (select at::date as d, count(*) as throttles from public.ai_throttles where at >= since group by 1),
+    thr_days as (select (at at time zone 'America/New_York')::date as d, count(*) as throttles from public.ai_throttles where at >= start group by 1),
     joined as (
       select r.d, r.runs, r.done, r.failed, r.tool_calls, r.tool_errors, r.reply_p50, r.reply_p95, r.done_p50, r.done_p95,
         coalesce(c.checked, 0) as checked, coalesce(c.first_try, 0) as first_try,
@@ -135,7 +139,7 @@ begin
           'throttles', (select sum(throttles) from joined)) from whole w),
       'by_vendor', (select coalesce(jsonb_agg(jsonb_build_object('provider', v.provider, 'model', v.model, 'calls', v.calls, 'cost_usd', round(v.cost, 4)) order by v.cost desc), '[]'::jsonb)
         from (select coalesce(provider, 'unknown') as provider, coalesce(model, 'unknown') as model, count(*) as calls, sum(cost_usd) as cost
-                from public.ai_events where at >= since and kind = 'call' group by 1, 2) v),
+                from public.ai_events where at >= start and kind = 'call' group by 1, 2) v),
       'slowest', (select coalesce(jsonb_agg(x.o order by x.s desc), '[]'::jsonb) from (
         select p.done_s as s, jsonb_build_object('id', p.id, 'business', p.business, 'kind', p.kind, 'channel', p.channel, 'status', p.status,
           'title', coalesce(p.title->>'en', left(p.prompt, 80)), 'created_at', p.created_at, 'reply_s', round(p.reply_s::numeric, 1), 'done_s', round(p.done_s::numeric, 1),

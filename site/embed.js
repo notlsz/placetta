@@ -20,7 +20,7 @@
       fees: "{f} in published government fees", varies: "{v} set by the agency", more: "and {n} more", start: "Start with Placetta", with: "Shared by {p}",
       note: "Odelia, Placetta's compliance agent, confirms each one with the agency before anything is filed.", free: "Fee varies", none: "No fee", err: "Add the city and state, like Flushing, NY.", fail: "Couldn't get the plan just now. Try again in a minute.", lang: "中文" },
     zh: { h: "要在新市场开店？获取您的许可计划", s: "全部执照和许可，按顺序列出，附政府规费。数据来自快哉的官方表格登记库。",
-      kind: "开什么店", city: "城市和州", ph: "Flushing, NY", go: "查看计划", busy: "规划中…", n: "{c}共需 {n} 项许可，已按顺序排好",
+      kind: "开什么店", city: "城市和州", ph: "Flushing, NY", go: "查看计划", busy: "规划中…", n: "{c} 共需 {n} 项许可，已按顺序排好",
       fees: "已公布的政府规费 {f}", varies: "{v} 项由机构核定", more: "另有 {n} 项", start: "开始使用快哉", with: "{p} 推荐",
       note: "快哉的合规助手 Odelia 会在提交前向机构逐项核实。", free: "费用视情况而定", none: "免费", err: "请填写城市和州，例如 Flushing, NY。", fail: "暂时无法获取计划，请稍后再试。", lang: "EN" }
   };

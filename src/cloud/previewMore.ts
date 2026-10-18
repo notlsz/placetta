@@ -207,7 +207,7 @@ export async function moreRpc(fn: string, body: Record<string, unknown>, c: Clai
     case "governance_reports_list": { const no = staff(); if (no) return no; return k.json(k.t("governance_reports")); }
     case "incidents_list": {
       const no = staff(); if (no) return no;
-      const s = k.t("incident_log"); if (!s.length) { s.push({ id: "since", since: k.now().slice(0, 10) }); k.save(); }
+      const s = k.t("incident_log"); if (!s.length) { s.push({ id: "since", since: new Date(k.now()).toLocaleDateString("en-CA") }); k.save(); }
       return k.json({ since: s[0].since, incidents: k.t("incidents").map((i): Row => ({ ...i, by: i.created_by ? k.email(String(i.created_by)) : null })).sort((a, b) => String(b.happened_at).localeCompare(String(a.happened_at))) });
     }
     case "incident_add": {
@@ -237,15 +237,20 @@ export function moreRest(table: string, req: Request, c: Claims, k: PreviewKit):
     .map(r => Object.fromEntries(cols.map(x => [x, r[x] ?? null]))) : []);
 }
 
+/** The New York day a moment falls on: Agent health counts the team's business days, like agent_health_data. */
+const nyDay = (at: unknown) => new Date(String(at)).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
 /** Agent health from the preview's own runs and AI events, the way agent_health_data adds them up. */
 function health(k: PreviewKit, days: number) {
-  const since = new Date(Date.now() - (days - 1) * DAY).toISOString().slice(0, 10);
+  const today = nyDay(new Date().toISOString());
+  const dayList = Array.from({ length: days }, (_, i) => new Date(Date.parse(today + "T12:00:00Z") - (days - 1 - i) * DAY).toISOString().slice(0, 10));
+  const since = dayList[0];
   type Run = Row & { done: string | null; reply_s: number | null; done_s: number | null };
-  const runs = k.t("agent_runs").filter(r => String(r.created_at).slice(0, 10) >= since).map((r): Run => {
+  const runs = k.t("agent_runs").filter(r => nyDay(r.created_at) >= since).map((r): Run => {
     const done = (r.done_at ?? (r.status !== "running" ? r.updated_at : null)) as string | null, t0 = Date.parse(String(r.created_at));
     return { ...r, done, reply_s: r.first_text_at ? (Date.parse(String(r.first_text_at)) - t0) / 1000 : null, done_s: done ? (Date.parse(done) - t0) / 1000 : null };
   });
-  const ev = k.t("ai_events").filter(e => String(e.at).slice(0, 10) >= since), checks = k.t("odelia_job_checks").filter(x => String(x.at).slice(0, 10) >= since), thr = k.t("ai_throttles").filter(x => String(x.at).slice(0, 10) >= since);
+  const ev = k.t("ai_events").filter(e => nyDay(e.at) >= since), checks = k.t("odelia_job_checks").filter(x => nyDay(x.at) >= since), thr = k.t("ai_throttles").filter(x => nyDay(x.at) >= since);
   const costOf = (r: (typeof runs)[number]) => ev.filter(e => e.workspace_id === r.workspace_id && String(e.at) >= String(r.created_at) && Date.parse(String(e.at)) <= Date.parse(r.done ?? String(r.created_at)) + 5000).reduce((s, e) => s + Number(e.cost_usd), 0);
   const sum = (rs: typeof runs, es: Row[], cs: Row[], ts: Row[]) => {
     const calls = rs.reduce((s, r) => s + Number(r.tool_calls ?? 0), 0), errs = rs.reduce((s, r) => s + Number(r.tool_errors ?? 0), 0), cost = es.reduce((s, e) => s + Number(e.cost_usd), 0);
@@ -256,8 +261,7 @@ function health(k: PreviewKit, days: number) {
       done_p50_s: pctl(rs.flatMap(r => (r.done_s == null || r.status !== "done" ? [] : [r.done_s])), .5), done_p95_s: pctl(rs.flatMap(r => (r.done_s == null || r.status !== "done" ? [] : [r.done_s])), .95),
       ai_cost_usd: r4(cost), cost_per_run_usd: rs.length ? r4(cost / rs.length) : null, saver_pct: known.length ? r1(100 * saver.length / known.length) : null, throttles: ts.length };
   };
-  const dayList = Array.from({ length: days }, (_, i) => new Date(Date.parse(since + "T12:00:00Z") + i * DAY).toISOString().slice(0, 10));
-  const on = <T extends Row>(xs: T[], d: string, key: string) => xs.filter(x => String(x[key]).slice(0, 10) === d);
+  const on = <T extends Row>(xs: T[], d: string, key: string) => xs.filter(x => nyDay(x[key]) === d);
   const pick = (r: (typeof runs)[number]) => ({ id: r.id, business: k.t("workspaces").find(w => w.id === r.workspace_id)?.name ?? null, kind: r.kind ?? "task", channel: r.channel ?? "app", status: r.status,
     title: (r.title as { en?: string } | null)?.en ?? String(r.prompt ?? "").slice(0, 80), created_at: r.created_at, reply_s: r.reply_s == null ? null : r1(r.reply_s), done_s: r.done_s == null ? null : r1(r.done_s), cost_usd: r4(costOf(r)), tool_calls: r.tool_calls ?? null, tool_errors: r.tool_errors ?? null });
   const vendors = new Map<string, { provider: string; model: string; calls: number; cost_usd: number }>();

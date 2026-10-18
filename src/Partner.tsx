@@ -33,9 +33,10 @@ const SAMPLE: { me: pa.PartnerMe; dash: pa.PartnerDashboard; refs: pa.ReferralLi
     code: "BAYB2345", share_pct: 10, share_months: 12, created_at: "2026-08-02T16:00:00Z", approved_at: "2026-08-04T17:30:00Z" };
   return {
     me,
-    dash: { partner: me, referred: 4, sharing: 3, earned_usd: 179.4, paid_usd: 59.8, owed_usd: 59.8,
-      months: [{ month: "2026-10-01", paying: 3, share_usd: 59.8, closed: false }, { month: "2026-09-01", paying: 3, share_usd: 59.8, closed: true }, { month: "2026-08-01", paying: 2, share_usd: 59.8, closed: true }],
-      payouts: [{ amount_usd: 59.8, paid_on: "2026-09-05", reference: "ACH 1029" }] },
+    // 10% of $149 a location: four locations in September and October, two in August; August paid in September
+    dash: { partner: me, referred: 4, sharing: 3, earned_usd: 149, paid_usd: 29.8, owed_usd: 59.6,
+      months: [{ month: "2026-10-01", paying: 3, share_usd: 59.6, closed: false }, { month: "2026-09-01", paying: 3, share_usd: 59.6, closed: true }, { month: "2026-08-01", paying: 2, share_usd: 29.8, closed: true }],
+      payouts: [{ amount_usd: 29.8, paid_on: "2026-09-05", reference: "ACH 1029" }] },
     refs: [
       { id: "r1", attributed_at: "2026-08-11T10:00:00Z", business_name: "Lucky Leaf Tea", stage: "opening", permits_done: 5, permits_total: 9, opening_date: "2027-01-15", progress_at: "2026-10-16T22:10:00Z" },
       { id: "r2", attributed_at: "2026-08-20T10:00:00Z", business_name: "Golden Ox Hot Pot", stage: "opening", permits_done: 2, permits_total: 11, opening_date: "2027-03-01", progress_at: "2026-10-15T18:40:00Z" },

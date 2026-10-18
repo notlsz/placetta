@@ -36,7 +36,7 @@
 .pc-tot dt{order:2;font-size:12.5px;color:#5B6470}
 .pc-tot .w dd{color:#A86F14}
 .pc-find{display:grid;grid-template-columns:118px minmax(0,1fr);gap:12px;padding:10px 12px;border-radius:12px;background:#fff}
-.pc-tag{justify-self:start;padding:2px 9px;border-radius:999px;background:#ECF0F5;color:#5B6470;font-size:12px;font-weight:500;white-space:nowrap}
+.pc-tag{justify-self:start;align-self:start;padding:2px 9px;border-radius:999px;background:#ECF0F5;color:#5B6470;font-size:12px;font-weight:500;white-space:nowrap}
 .pc-find.k-lapsed .pc-tag,.pc-find.k-gap .pc-tag{background:#FBF3E3;color:#A86F14}
 .pc-ok{margin:0;font-size:13.5px;color:#5B6470}
 .pc-note{margin:14px 0 0;font-size:12.5px;color:#98A0AB}

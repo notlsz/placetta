@@ -19,8 +19,9 @@ function sampleReviews(w: Workspace): ReviewRow[] {
   const filed = w.apps.filter(a => ["review", "approved", "filing"].includes(a.status) && a.receipt);
   const first = filed[0];
   if (!first) return [];
-  const sent = w.audit.find(x => x.object.en === first.name.en && /^Submitted/.test(x.action.en))?.at ?? new Date(Date.now() - 2 * 864e5).toISOString();
-  return [{ app_id: first.id, kind: "two_key", status: "done", reviewer_name: "Mei", reviewed_at: new Date(new Date(sent).getTime() - 45 * 60e3).toISOString(), outcome: null, comment: null, requested_at: null, due_at: null }];
+  // the same end time the sample filing's replay uses (src/FilingLive.tsx), so the review lands just before it was sent
+  const sent = w.audit.find(x => x.object.en === first.name.en && /^Submitted/.test(x.action.en))?.at ?? w.docs.find(d => d.id === first.receipt)?.at ?? new Date().toISOString();
+  return [{ app_id: first.id, kind: "two_key", status: "done", reviewer_name: "Mei", reviewed_at: new Date(new Date(sent).getTime() - 10 * 60e3).toISOString(), outcome: null, comment: null, requested_at: null, due_at: null }];
 }
 
 /** This workspace's reviews, loaded once and shared by every card on the page. */

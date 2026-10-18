@@ -23,8 +23,9 @@ const pctZh = (n: number | null | undefined) => (n == null ? "尚未统计" : `$
 export function dur(s: number | null | undefined): string {
   if (s == null) return "-";
   if (s < 10) return `${Number(s).toFixed(1)}s`;
-  if (s < 90) return `${Math.round(s)}s`;
-  const m = Math.floor(s / 60), r = Math.round(s % 60);
+  const t = Math.round(s);   // whole seconds first, so 359.6 reads 6m, not 5m 60s
+  if (t < 60) return `${t}s`;
+  const m = Math.floor(t / 60), r = t % 60;
   return r ? `${m}m ${r}s` : `${m}m`;
 }
 

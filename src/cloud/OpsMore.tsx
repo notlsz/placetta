@@ -30,16 +30,27 @@ export function OpsTabs({ tab }: { tab: OpsTab }) {
   );
 }
 
-const usd = (n: number | null | undefined, d = 2) => (n == null ? "-" : "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: Math.max(d, 4) }));
+/** Dollars: cents for totals; four places for the small per-run and per-call amounts. */
+const usd = (n: number | null | undefined, d = 2) => (n == null ? "-" : "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }));
+const usdRun = (n: number | null | undefined) => usd(n, n != null && Math.abs(n) < 1 ? 4 : 2);
 const pct = (n: number | null | undefined) => (n == null ? "-" : `${n}%`);
 /** Seconds as people say them: 3.2s, 41s, 3m 10s. */
 export function dur(s: number | null | undefined): string {
   if (s == null) return "-";
   if (s < 10) return `${Number(s).toFixed(1)}s`;
-  if (s < 90) return `${Math.round(s)}s`;
-  const m = Math.floor(s / 60), r = Math.round(s % 60);
+  const t = Math.round(s);   // whole seconds first, so 359.6 reads 6m, not 5m 60s
+  if (t < 60) return `${t}s`;
+  const m = Math.floor(t / 60), r = t % 60;
   return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : r ? `${m}m ${r}s` : `${m}m`;
 }
+/** A run's kind, channel and status, and an AI call's role, in words. */
+const WORDS: Record<string, Bi> = {
+  task: B("Task", "任务"), watch: B("Weekly check", "每周检查"), app: B("In the app", "应用内"), sms: B("By text", "短信"), voice: B("By phone", "电话"), email: B("By email", "邮件"),
+  slack: B("Slack", "Slack"), lark: B("Lark", "飞书"), wechat: B("WeChat", "微信"), done: B("Done", "完成"), failed: B("Failed", "失败"), stopped: B("Stopped", "已停止"), running: B("Running", "运行中"),
+  plan: B("Planning", "规划"), review: B("Checking", "核对"), extract: B("Reading a document", "读取文件"), translate: B("Translating", "翻译"), draft: B("Drafting", "起草"),
+  short: B("Short reply", "简短回复"), deep: B("Deep research", "深入研究"), call: B("Call", "调用"),
+};
+const word = (k: string | null | undefined, zh: boolean) => (k ? (WORDS[k] ? WORDS[k][zh ? "zh" : "en"] : k) : "");
 const stamp = (iso: string, zh: boolean) => new Date(iso).toLocaleString(zh ? "zh-CN" : "en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 /** The page around each tab: its own title and the tab strip. */
@@ -140,28 +151,32 @@ function Replay({ id, onClose }: { id: string; onClose: () => void }) {
   const s = (iso: string | null) => (iso && r ? (new Date(iso).getTime() - new Date(r.created_at).getTime()) / 1000 : null);
   return (
     <Modal label={zh ? "运行回放" : "Run replay"} onClose={onClose} wide>
-      <div className="rp">
+      <header className="m-h rr-h">
+        <span className="m-eyebrow"><I.play />{r?.business || (zh ? "运行回放" : "Run replay")}</span>
+        {r && <h2>{r.title ? b(r.title) : r.prompt.slice(0, 120)}</h2>}
+        {r && <p>{[word(r.kind, zh), word(r.channel, zh), word(r.status, zh), stamp(r.created_at, zh)].filter(Boolean).join(zh ? "，" : ", ")}</p>}
+        <button type="button" className="icbtn close" onClick={onClose} aria-label={zh ? "关闭" : "Close"}><I.x /></button>
+      </header>
+      <div className="m-body rr">
         {err && <p className="pt-warn">{err}</p>}
         {!r ? !err && <p className="quiet">{zh ? "加载中…" : "Loading…"}</p> : (<>
-          <header className="rp-h"><span className="m-eyebrow">{r.business}</span><h2>{r.title ? b(r.title) : r.prompt.slice(0, 120)}</h2>
-            <p>{[r.kind, r.channel, r.status, stamp(r.created_at, zh)].filter(Boolean).join(zh ? "，" : ", ")}</p></header>
-          <dl className="rp-kv">
+          <dl className="rr-kv">
             <div><dt>{zh ? "首次回复" : "First reply"}</dt><dd>{dur(s(r.first_reply_at))}</dd></div>
             <div><dt>{zh ? "完成" : "Done"}</dt><dd>{dur(s(r.done_at))}</dd></div>
             <div><dt>{zh ? "工具" : "Tools"}</dt><dd>{r.tool_calls == null ? "-" : zh ? `${r.tool_calls} 次，${r.tool_errors ?? 0} 次出错` : `${r.tool_calls}, ${r.tool_errors ?? 0} errors`}</dd></div>
             <div><dt>{zh ? "AI 成本（估算）" : "AI cost (estimate)"}</dt><dd>{usd(r.cost_usd, 4)}</dd></div>
           </dl>
           <h3>{zh ? "要求" : "What was asked"}</h3>
-          <p className="rp-prompt">{r.prompt}</p>
+          <p className="rr-prompt">{r.prompt}</p>
           <h3>{zh ? "步骤" : "Steps, in order"}</h3>
-          <ol className="rp-steps">{r.steps.map((x, i) => <li key={i}>{b(x.label)}{x.tool ? <code>{x.tool}</code> : null}</li>)}</ol>
+          <ol className="rr-steps">{r.steps.map((x, i) => <li key={i}>{b(x.label)}{x.tool ? <code>{x.tool}</code> : null}</li>)}</ol>
           <h3>{zh ? "AI 调用" : "AI calls while it ran"}</h3>
           {r.calls.length ? (
             <div className="tscroll"><table className="ah-t"><thead><tr><th>{zh ? "时间" : "At"}</th><th>{zh ? "用途" : "Role"}</th><th>{zh ? "服务商" : "Vendor"}</th><th>{zh ? "模型" : "Model"}</th><th>{zh ? "成本" : "Cost"}</th><th>{zh ? "节省模式" : "Saver"}</th></tr></thead>
-              <tbody>{r.calls.map((c, i) => <tr key={i}><td>+{dur(s(c.at))}</td><td>{c.role ?? c.kind}</td><td>{c.provider ?? "-"}</td><td>{c.model ?? "-"}</td><td>{usd(c.cost_usd, 4)}</td><td>{c.saver == null ? "-" : c.saver ? (zh ? "是" : "yes") : (zh ? "否" : "no")}</td></tr>)}</tbody></table></div>
+              <tbody>{r.calls.map((c, i) => <tr key={i}><td>+{dur(s(c.at))}</td><td>{word(c.role ?? c.kind, zh)}</td><td>{c.provider ?? "-"}</td><td>{c.model ?? "-"}</td><td>{usd(c.cost_usd, 4)}</td><td>{c.saver == null ? "-" : c.saver ? (zh ? "是" : "yes") : (zh ? "否" : "no")}</td></tr>)}</tbody></table></div>
           ) : <p className="quiet">{zh ? "这段时间没有 AI 调用记录。" : "No AI calls recorded in that window."}</p>}
-          {r.checks.length > 0 && <><h3>{zh ? "独立核对" : "Independent checks of its jobs"}</h3><ul className="rp-checks">{r.checks.map(c => <li key={c.job_id}>{c.job_id}: {c.passed} / {c.of}{c.passed === c.of ? (zh ? "，首次通过" : ", passed first time") : ""}</li>)}</ul></>}
-          {r.reply && <><h3>{zh ? "回复" : "The reply"}</h3><div className="rp-reply">{r.reply.map((t, i) => <p key={i}>{b(t)}</p>)}</div></>}
+          {r.checks.length > 0 && <><h3>{zh ? "独立核对" : "Independent checks of its jobs"}</h3><ul className="rr-checks">{r.checks.map(c => <li key={c.job_id}>{c.job_id}: {c.passed} / {c.of}{c.passed === c.of ? (zh ? "，首次通过" : ", passed first time") : ""}</li>)}</ul></>}
+          {r.reply && <><h3>{zh ? "回复" : "The reply"}</h3><div className="rr-reply">{r.reply.map((t, i) => <p key={i}>{b(t)}</p>)}</div></>}
           {r.error && <p className="pt-warn">{r.error}</p>}
           <p className="note">{zh ? "成本按该工作区在运行期间的 AI 调用估算；同一工作区同时运行的任务会被计入。" : "Cost counts the workspace's AI calls while the run was going, so a run sharing its workspace with another at the same moment includes both."}</p>
         </>)}
@@ -177,7 +192,7 @@ function RunRows({ rows, onOpen }: { rows: ops.HealthRun[]; onOpen: (id: string)
   return (
     <div className="tray">{rows.map(r => (
       <div key={r.id} className="row ah-run">
-        <span className="arow-n"><b title={r.title ?? ""}>{r.title || r.kind}</b><small>{[r.business, r.channel, r.status, stamp(r.created_at, zh)].filter(Boolean).join(zh ? "，" : ", ")}</small></span>
+        <span className="arow-n"><b title={r.title ?? ""}>{r.title || word(r.kind, zh)}</b><small>{[r.business, word(r.channel, zh), word(r.status, zh), stamp(r.created_at, zh)].filter(Boolean).join(zh ? "，" : ", ")}</small></span>
         <span className="ah-run-n"><b>{dur(r.done_s)}</b><small>{usd(r.cost_usd, 4)}</small></span>
         <a className="sbtn quiet" href={`/app/queue/health?run=${r.id}`} onClick={e => { if (e.button === 0 && !e.metaKey && !e.ctrlKey) { e.preventDefault(); onOpen(r.id); } }}><I.play />{zh ? "回放" : "Replay"}</a>
       </div>
@@ -205,7 +220,7 @@ function AgentHealth() {
           <div><dt>{zh ? "运行" : "Runs"}</dt><dd>{t!.runs}</dd><small>{donePct == null ? "-" : zh ? `${donePct}% 完成，${t!.failed} 次失败` : `${donePct}% done, ${t!.failed} failed`}</small></div>
           <div><dt>{zh ? "首次通过率" : "First-try pass rate"}</dt><dd>{pct(t!.first_try_pct)}</dd><small>{t!.checked ? (zh ? `${t!.checked} 项任务经独立核对` : `${t!.checked} jobs checked independently`) : (zh ? "暂无核对" : "No checks yet")}</small></div>
           <div className={(t!.tool_error_pct ?? 0) > 5 ? "warn" : ""}><dt>{zh ? "工具出错率" : "Tool error rate"}</dt><dd>{pct(t!.tool_error_pct)}</dd><small>{zh ? `${t!.tool_calls} 次调用` : `${t!.tool_calls} tool calls`}</small></div>
-          <div><dt>{zh ? "每次运行 AI 成本" : "AI cost per run"}</dt><dd>{usd(t!.cost_per_run_usd, 2)}</dd><small>{zh ? `共 ${usd(t!.ai_cost_usd)}` : `${usd(t!.ai_cost_usd)} in all`}</small></div>
+          <div><dt>{zh ? "每次运行 AI 成本" : "AI cost per run"}</dt><dd>{usdRun(t!.cost_per_run_usd)}</dd><small>{zh ? `共 ${usd(t!.ai_cost_usd)}` : `${usd(t!.ai_cost_usd)} in all`}</small></div>
           <div><dt>{zh ? "首次回复" : "Time to first reply"}</dt><dd>{dur(t!.reply_p50_s)}</dd><small>{zh ? `中位数，95 分位 ${dur(t!.reply_p95_s)}` : `median, 95th percentile ${dur(t!.reply_p95_s)}`}</small></div>
           <div><dt>{zh ? "完成用时" : "Time to done"}</dt><dd>{dur(t!.done_p50_s)}</dd><small>{zh ? `中位数，95 分位 ${dur(t!.done_p95_s)}` : `median, 95th percentile ${dur(t!.done_p95_s)}`}</small></div>
           <div><dt>{zh ? "节省模式" : "Saver mode"}</dt><dd>{pct(t!.saver_pct)}</dd><small>{zh ? "的 AI 调用" : "of AI calls"}</small></div>
@@ -218,7 +233,7 @@ function AgentHealth() {
             <thead><tr><th>{zh ? "日期" : "Day"}</th><th>{zh ? "运行" : "Runs"}</th><th>{zh ? "失败" : "Failed"}</th><th>{zh ? "首次通过" : "First try"}</th><th>{zh ? "工具出错" : "Tool errors"}</th><th>{zh ? "首次回复" : "First reply"}</th><th>{zh ? "完成" : "Done"}</th><th>{zh ? "每次成本" : "Cost a run"}</th><th>{zh ? "节省模式" : "Saver"}</th><th>{zh ? "限流" : "Throttles"}</th></tr></thead>
             <tbody>{[...h.by_day].reverse().map(d => (
               <tr key={d.day}><td>{fmtDay(d.day, lang)}</td><td>{d.runs}</td><td>{d.failed}</td><td>{pct(d.first_try_pct)}</td><td>{pct(d.tool_error_pct)}</td>
-                <td>{dur(d.reply_p50_s)}<small> / {dur(d.reply_p95_s)}</small></td><td>{dur(d.done_p50_s)}<small> / {dur(d.done_p95_s)}</small></td><td>{usd(d.cost_per_run_usd, 2)}</td><td>{pct(d.saver_pct)}</td><td>{d.throttles}</td></tr>
+                <td>{dur(d.reply_p50_s)}<small> / {dur(d.reply_p95_s)}</small></td><td>{dur(d.done_p50_s)}<small> / {dur(d.done_p95_s)}</small></td><td>{usdRun(d.cost_per_run_usd)}</td><td>{pct(d.saver_pct)}</td><td>{d.throttles}</td></tr>
             ))}</tbody>
           </table></div>
           <p className="note">{zh ? "时间为中位数 / 95 分位。" : "Times are median / 95th percentile."} {ms?.first_reply ? (zh ? `首次回复自 ${fmtDay(ms.first_reply, lang, true)} 起统计；` : `First replies measured since ${fmtDay(ms.first_reply, lang, true)}; `) : (zh ? "首次回复尚未统计；" : "First replies not measured yet; ")}{ms?.tools ? (zh ? `工具自 ${fmtDay(ms.tools, lang, true)} 起；` : `tools since ${fmtDay(ms.tools, lang, true)}; `) : ""}{ms?.saver ? (zh ? `节省模式自 ${fmtDay(ms.saver, lang, true)} 起。` : `saver mode since ${fmtDay(ms.saver, lang, true)}.`) : ""}</p>
@@ -233,7 +248,8 @@ function AgentHealth() {
         </section>
 
         <section className="sec"><div className="sec-h"><h2>{zh ? "最慢的 10 次运行" : "The 10 slowest runs"}</h2></div><RunRows rows={h.slowest} onOpen={setRun} /></section>
-        <section className="sec"><div className="sec-h"><h2>{zh ? "最贵的 10 次运行" : "The 10 most expensive runs"}</h2></div><RunRows rows={h.costliest} onOpen={setRun} /></section>
+        <section className="sec"><div className="sec-h"><h2>{zh ? "最贵的 10 次运行" : "The 10 most expensive runs"}</h2></div><RunRows rows={h.costliest} onOpen={setRun} />
+          <p className="note">{zh ? "单次运行的成本，按运行期间该工作区的 AI 调用计算；同一工作区同时进行的运行会共享这些调用。" : "A run's cost counts its workspace's AI calls while it ran, so runs at the same moment in one workspace share them."}</p></section>
 
         <section className="sec">
           <div className="sec-h"><h2>{zh ? "每周摘要" : "Weekly summaries"}</h2></div>
@@ -348,7 +364,7 @@ function Incidents() {
         <div className="sec-h"><h2>{zh ? "记录" : "The log"}{log?.incidents.length ? <em className="pt-n">{log.incidents.length}</em> : null}</h2></div>
         {!log ? <p className="quiet">{zh ? "加载中…" : "Loading…"}</p> : log.incidents.length === 0 ? <div className="empty"><p>{zh ? "暂无事件。" : "Nothing logged yet."}</p></div> : (
           <div className="in-list">{log.incidents.map(i => (
-            <article key={i.id} className="in">
+            <article key={i.id} className="inc">
               <header><span><b>{i.title}</b><small>{[stamp(i.happened_at, zh), i.by ?? ""].filter(Boolean).join(zh ? "，" : ", ")}</small></span>
                 <button type="button" className={"pt-tag" + (i.public ? "" : " muted")} onClick={() => void save(i, !i.public)} title={zh ? "切换是否公开" : "Switch public or not"}>{i.public ? (zh ? "公开" : "Public") : (zh ? "仅团队" : "Team only")}</button></header>
               <p><b>{zh ? "影响：" : "Impact: "}</b>{i.impact}</p>
