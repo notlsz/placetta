@@ -62,6 +62,7 @@ export type FilingPayload = {
   attachments: { name: string; path: string }[]; does: Bi[]; source?: { label: string; url: string };
   official?: string; pdf_path?: string;                          // the official form id and the filled (signed) PDF
   signature?: { name: string; title?: string; signed_at: string; kind: "typed" | "drawn" };
+  version?: number; answers_hash?: string;                       // the filled form's version it files, and its answers' fingerprint
 };
 export type QueueRow = Filing & { business: string; approver_email: string | null; assignee_email: string | null; assigned_to: string | null };
 export type Billing = {
@@ -390,6 +391,14 @@ export async function downloadDoc(path: string): Promise<Blob> {
   const { data, error } = await supabase().storage.from("documents").download(path);
   if (error || !data) throw err("download", error?.message ?? "Couldn't download the file.");
   return data;
+}
+/** A filled form's short link from a text or chat (supabase/migrations/20261018090000_form_links.sql): for a member of
+ *  its workspace, which application and version it shows; expired once its week is up. */
+export async function openFormLink(token: string): Promise<{ app_id: string; version: number; path: string | null; name: string; expired: boolean }> {
+  const { data, error } = await supabase().rpc("open_form_link", { p_token: token });
+  const row = Array.isArray(data) ? data[0] : data;
+  if (error || !row) throw err("not_found", "That link is gone, or it isn't for this workspace.", "这个链接已失效，或不属于这个工作区。");
+  return row as { app_id: string; version: number; path: string | null; name: string; expired: boolean };
 }
 
 /* ------------------------------ agent runs ------------------------------ */

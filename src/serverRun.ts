@@ -1,5 +1,7 @@
 import { same, type Bi } from "./bi";
-import type { Reply, Step } from "./core";
+import type { FilledNote, Reply, Step } from "./core";
+import { loaderWith } from "./forms/fill";
+import { answersHash, refreshForms, type FilledCopy } from "./forms/versions";
 import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
 import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runAll, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
@@ -7,7 +9,7 @@ import { B } from "./bi";
 import { MAIN_BOT, proven, reconcile, settleJobs, type Job } from "./jobs";
 import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy, usedInBlocks } from "./sources";
 import { MCP_PREFIX } from "./mcp";
-import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone, storeName, storeRules } from "./harness";
+import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, formFailures, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone, storeName, storeRules } from "./harness";
 import { approvalMoments, checkMoment, linkRun, MAX_MOMENTS, replyMoment, scrubStep, toolMoment } from "./replay";
 import { controlsBrief, jobsDone, runMode, withControls, type ControlCtx, type RunMode } from "./autonomy";
 import { applyHeld, goPlan, ownerCommand } from "./held";
@@ -67,6 +69,9 @@ export type RunState = {
   toolCalls?: number; toolErrors?: number;
   /** Undo (src/rewind.ts): what this run changed so far, and what left Placetta during it, carried across chunks. */
   undo?: UndoRec[]; outside?: Bi[];
+  /** The agencies' forms (src/forms/versions.ts): each application's answers when the run began (their fingerprints),
+   *  and the filled copies this run kept, which go back with the reply. */
+  forms?: Record<string, string>; filled?: FilledNote[];
 };
 
 const MAX_ROUNDS = 16;
@@ -246,6 +251,8 @@ export async function runRounds(o: {
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
+  // each application's answers as the run found them: the ones it changes get their form filled again at the end
+  st.forms ??= Object.fromEntries(o.ws().apps.map(a => [a.id, answersHash(a)]));
   const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt,
     job: st.made.job ?? o.child?.job, split: st.made.split };
   /* Owner controls (src/autonomy.ts): this run's mode (Ask me first, Usual, Plan first) and Undo's record of what it
@@ -292,9 +299,26 @@ export async function runRounds(o: {
   // a store's bot has its own key (several start in the same moment), so its held changes and its undo are its own
   const runKey = "r" + Date.parse(st.started).toString(36) + (o.child ? "-" + o.child.job : "");
   const ctl: ControlCtx = { get: o.ws, apply, mode: childMode(runMode(o.ws(), st.request ?? ""), o.child), remote: isRemote(o.channel), run: runKey, made, mark: () => { made.lastToolAt = st.text.length; }, notify: o.notify, outside: x => outside.push(x) };
-  const tools = withControls(makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request,
+  // The agencies' own forms (src/forms/versions.ts): the PDFs come through the server's own way (the site's /app/forms/)
+  // and the copies filled to check a form before approval are kept, so the run doesn't fill the same answers twice.
+  const forms = { load: loaderWith(o.svc?.formPdf), cache: new Map<string, FilledCopy>() };
+  const tools = withControls(makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request, forms,
     ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) }), ctl);
   if (isRemote(o.channel)) from.mcpReads = new Set(tools.map(t => t.name).filter(n => n.startsWith(MCP_PREFIX)));
+  /* The agency's forms, once the work is done: every application whose answers this run changed (by any tool) is filled
+     again, one new version each, kept in Documents and handed back with the reply; a card for answers that changed is
+     taken back and a fresh one put up. Plain SMS changes nothing, so it fills nothing. */
+  const fillForms = async () => {
+    if (from.plainSms) return;
+    const ids = o.ws().apps.filter(a => answersHash(a) !== st.forms?.[a.id] || made.apps.has(a.id)).map(a => a.id);
+    if (!ids.length) return;
+    const r = await refreshForms({ get: o.ws, apply, load: forms.load, cache: forms.cache, ids, keep: o.svc ? (file, a) => o.svc!.saveFile(file, a.id) : undefined });
+    if (!r.notes.length) return;
+    st.filled = [...(st.filled ?? []).filter(x => !r.notes.some(y => y.app === x.app)), ...r.notes];
+    // a card this run put up and then took back isn't shown; the fresh one is
+    made.approvals = [...made.approvals.filter(id => !r.withdrawn.includes(id)), ...r.cards.filter(id => !made.approvals.includes(id))];
+    step({ state: "shaping", label: B(`Filled the agency's form: ${r.notes.map(n => `${n.form}, version ${n.version}`).join("; ")}`, `已填写机构表格：${r.notes.map(n => `${n.form}，第 ${n.version} 版`).join("；")}`) });
+  };
   /** The run's undo point, once its work is done (src/rewind.ts). */
   const keepUndo = () => { if (!rec.size()) return undefined; const id = "undo-" + runKey; o.apply(addUndo({ id, at: st.started!, title: undoTitle(st.request ?? ""), recs: rec.recs(), ...(outside.length ? { outside } : {}) })); return id; };
   /* An owner's approval, carried out here (src/held.ts): agent-run lets only an owner start these, and only from the app.
@@ -436,7 +460,8 @@ export async function runRounds(o: {
 
     // The proof: before a job counts as done, a separate checker, which never saw the work, verifies its done list
     // against the workspace and the reply. What fails goes back to the agent (up to MAX_CHECKS times); after that the
-    // job waits, saying plainly what isn't done.
+    // job waits, saying plainly what isn't done. The forms are filled first, so the reviewer sees each one's read-back.
+    await fillForms();
     const reply = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
     // (a split job whose stores are all proven waits on its summary: it's due once this run has it in hand)
     const due = (o.ws().jobs ?? []).filter(j => own(j) && j.updated >= st.started! && j.done?.length && (j.status === "done" || ((j.status === "running" || (j.status === "waiting" && !!j.children?.length)) && j.steps.every(x => x.done))) && (!j.checked || j.checked.at < j.updated || recheck.has(j.id) || (!!j.children?.length && !(j.done ?? []).every(d => d.ok === true))));
@@ -450,6 +475,9 @@ export async function runRounds(o: {
         // the review role: by default a different vendor from the one that did the work, so no model grades itself
         const data = await o.send({ system: CHECKER_SYSTEM, messages: [{ role: "user", content: [{ type: "text", text: checkerPrompt(j, evidence(o.ws(), j, reply)) }] }], max_tokens: 1500 }, false, "review");
         verdict = parseVerdict(data.content.filter(c => c.type === "text").map(c => c.text).join(""), j.done!.length);
+        // a job whose filled form doesn't match its answers isn't done, whatever the reviewer read into the evidence
+        const bad = formFailures(o.ws(), j, [...made.apps]);
+        if (bad.length) verdict = verdict.map(v => (v.ok ? { ok: false, why: `The filled ${bad[0]}` } : v));
       } catch {
         // The checker couldn't run (its model was down). The job used to keep the agent's word and count as done with
         // nothing checked; now it waits, saying so, until a check can run.
@@ -477,6 +505,7 @@ export async function runRounds(o: {
     continue work;
   }
 
+  await fillForms();   // a run that ran out of steps still hands back the forms it changed
   apply(settleJobs(st.started, { child: o.child?.job }));
   // a split job ticks from its stores as they're checked
   if ((o.ws().jobs ?? []).some(j => j.children?.length && j.updated >= st.started!)) apply(w => reconcile(w));
@@ -492,7 +521,9 @@ export async function runRounds(o: {
     ...unchecked.filter(id => !checkedNow.includes(id)).slice(0, 1).map(() => (o.lang === "zh" ? "独立检查暂时无法核对，所以这项工作仍未完成。" : "A separate reviewer couldn't check the work yet, so the job stays open."))].filter(Boolean).join(" ");
   // a business fact put up for an owner's approval: the reply says it's waiting, even when the model didn't
   const waits = factCards(o.ws(), made.approvals).length > 0 && !/approv|confirm|批准|确认/i.test(said) ? waitingLine(o.lang) : "";
-  const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, proof].filter(Boolean).join("\n\n");
+  // a form that didn't come out right is said in the reply, whatever the model wrote: it isn't ready to file
+  const formLine = (st.filled ?? []).filter(n => !n.ok && n.problem).map(n => (o.lang === "zh" ? `${n.form}还不能提交。${n.problem!.zh}` : `The ${n.form} isn't ready to file. ${n.problem!.en}`)).join(" ");
+  const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, formLine, proof].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
 
   /* ---- Sources: from what this run's tools read, never from the model's words (src/sources.ts) ---- */
@@ -503,5 +534,7 @@ export async function runRounds(o: {
 
   step(replyMoment(line ? `${final}\n\n${line}` : final));
   return { reply: { text: [same(line ? `${final}\n\n${line}` : final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
-    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined, ...(undoId ? { undo: undoId } : {}) } };
+    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined, ...(undoId ? { undo: undoId } : {}),
+    // the filled forms go back with the answer: a card in the app, an attachment by email, a short link by text or chat
+    ...(st.filled?.length ? { forms: st.filled } : {}) } };
 }
