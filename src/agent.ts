@@ -89,6 +89,11 @@ function fileReady(ctx: Context): Plan {
       S("solving", "Checking every answer against the EDD's requirements", "对照加州就业发展局的要求逐项核对", "edd.ca.gov"),
     ],
     updates: [all(
+      // the last three lines of the DE 1, from the business facts: the app fills the agency's form again (version 2)
+      // and the reply ends with it (src/forms/versions.ts)
+      setField("edd", "email", "owner@moonleaf.example", B("From your business facts", "来自企业资料")),
+      setField("edd", "contact_person", "Mei Lin, (408) 555-0142, owner@moonleaf.example, Owner", B("From your business facts", "来自企业资料")),
+      setField("edd", "declarant", "Mei Lin, Managing Member, (408) 555-0142", B("From your business facts", "来自企业资料")),
       setApp("edd", { status: "ready", next: B("Ready to file. Waiting for your approval", "可以提交，等待您批准") }),
       setCheck("edd", "form", { state: "done", doc: "d-edd", note: B("Filled by Placetta", "快哉已填写") }),
       addDoc(doc("d-edd", "employer-registration.pdf", 164_000, "agent", "edd", B("Prepared", "已准备"))),

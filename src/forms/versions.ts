@@ -138,8 +138,9 @@ export function keepVersion(appId: string, v: FormVersion, o: { name: string; fr
       n = setApp(appId, { status: a.status === "ready" ? "draft" : a.status, next: B(`Not ready. ${p.en}`, `尚未就绪。${p.zh}`) })(n);
     } else {
       for (const c of cards) {
-        // the card is for these exact answers (or it was put up before versions were kept, with these answers on it)
-        if (c.hash === v.hash || (!c.hash && v.n === 1)) { n = { ...n, approvals: n.approvals.map(x => (x.id === c.id ? { ...x, hash: v.hash, version: v.n } : x)) }; continue; }
+        // the card is for these exact answers; or it carries no fingerprint (put up before versions were kept, or by the
+        // sample's script) and went up after the last version, so with these answers on it
+        if (c.hash === v.hash || (!c.hash && (v.n === 1 || (c.at ?? "") >= (a.versions?.at(-1)?.at ?? "")))) { n = { ...n, approvals: n.approvals.map(x => (x.id === c.id ? { ...x, hash: v.hash, version: v.n } : x)) }; continue; }
         n = withdraw(n, c, CHANGED_SINCE, o.fresh);
         const now = n.apps.find(x => x.id === appId)!;
         const card: Approval = { ...c, id: o.fresh, hash: v.hash, version: v.n, at: undefined, withdrawn: undefined };
@@ -230,19 +231,23 @@ export const fieldsOf = (answers: Record<string, string>): Field[] => Object.ent
 
 /* ------------------------------ the preview's highlights ------------------------------ */
 
-/** A copy of a filled form with the given lines marked (a soft yellow box around each), for the preview only. The
- *  copy that's filed or downloaded is never marked. */
-export async function highlighted(pdf: Uint8Array, formId: string, answers: Record<string, string>, ids: string[]): Promise<Uint8Array> {
-  if (!ids.length) return pdf;
+/** Where a marked line sits on the form: its page, and its box in PDF points from the page's bottom-left corner. */
+export type Mark = { page: number; x: number; y: number; w: number; h: number };
+/** A copy of a filled form with the given lines marked (a soft yellow box around each), for the preview only, and where
+ *  each mark is (the sheet shows a close-up of them). The copy that's filed or downloaded is never marked. */
+export async function highlighted(pdf: Uint8Array, formId: string, answers: Record<string, string>, ids: string[]): Promise<{ pdf: Uint8Array; marks: Mark[] }> {
+  if (!ids.length) return { pdf, marks: [] };
   const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
   const doc = await PDFDocument.load(pdf, { ignoreEncryption: true });
   const form = doc.getForm(), pages = doc.getPages();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const values = { ...answers };
   for (const p of addressProblems(formId, values)) delete values[p.field];
-  const want = new Set(ids);
-  const mark = (page: (typeof pages)[number], x: number, y: number, width: number, height: number) =>
+  const want = new Set(ids), marks: Mark[] = [];
+  const mark = (page: (typeof pages)[number], x: number, y: number, width: number, height: number) => {
     page.drawRectangle({ x: x - 2, y: y - 2, width: width + 4, height: height + 4, color: rgb(1, 0.86, 0.3), opacity: 0.38, borderColor: rgb(0.85, 0.5, 0.05), borderWidth: 1.2, borderOpacity: 0.9 });
+    marks.push({ page: pages.indexOf(page), x: x - 2, y: y - 2, w: width + 4, h: height + 4 });
+  };
   for (const wr of linesOf(formId, values)) {
     if (!wr.id || !want.has(wr.id)) continue;
     try {
@@ -267,7 +272,7 @@ export async function highlighted(pdf: Uint8Array, formId: string, answers: Reco
       }
     } catch { /* a box this copy doesn't have */ }
   }
-  return await doc.save();
+  return { pdf: await doc.save(), marks };
 }
 
 /* ------------------------------ for the person's own typing ------------------------------ */

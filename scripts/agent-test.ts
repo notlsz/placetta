@@ -36,7 +36,9 @@ import { commandsFor, expandCommand, matchCommands } from "../src/commands";
 import { dropApproval, setField } from "../src/core";
 import { HONEST } from "../src/guard";
 import { formById } from "../src/forms/registry";
-import { answersHash, fileable, needsForm, refreshForms } from "../src/forms/versions";
+import { answersHash, fileable, highlighted, needsForm, refreshForms } from "../src/forms/versions";
+import { answersPdf } from "../src/forms/summary";
+import { fillForm } from "../src/forms/fill";
 import { evidence, formFailures } from "../src/harness";
 import type { FilledNote } from "../src/core";
 import type { Bi } from "../src/bi";
@@ -1981,6 +1983,19 @@ async function filledForms() {
   const out = await refreshForms({ get: () => mine, apply: p => { mine = p(mine); }, load: formPdf });
   ok(out.notes[0]?.version === 3 && mine.apps[0].versions?.at(-1)?.why?.en === "You edited it" && mine.apps[0].versions?.at(-1)?.changed.map(c => c.id).join() === "l17", "the person's own edit makes version 3, saying they edited it", out.notes);
   ok(out.withdrawn.length === 1 && out.cards.length === 1 && !needsForm(mine.apps[0]), "and the card for version 2 is taken back for a fresh one; nothing left to fill", out);
+
+  // the preview's marks: on the changed line's own box, page 1; the filed copy is the unmarked one
+  const v3 = mine.apps[0].versions!.at(-1)!;
+  const plain = (await fillForm("irs-ss4", mine.apps[0].fields, formPdf))!.pdf;
+  const hl = await highlighted(plain, "irs-ss4", v3.answers, ["l17"]);
+  ok(hl.marks.length === 1 && hl.marks[0].page === 0 && hl.marks[0].w > 100 && hl.pdf.length > plain.length, "the preview marks line 17's box on page 1, on a copy (the kept PDF has no marks)", hl.marks);
+
+  // a filing taken only online: the answers as a plain page, titled for what it is, nothing like the agency's form
+  const online = { ...ss4App(), id: "web", official: undefined, agency: B("Texas Comptroller", "得州审计署"), name: B("Sales tax permit", "销售税许可") };
+  const page = await answersPdf(online, "2026-10-18");
+  const { PDFDocument } = await import("pdf-lib");
+  const doc = await PDFDocument.load(page);
+  ok(doc.getTitle() === "Answers for Texas Comptroller's online application" && doc.getForm().getFields().length === 0 && doc.getPageCount() >= 1, "the online answers page is titled \"Answers for Texas Comptroller's online application\", with no form boxes", doc.getTitle());
 }
 
 /* ================================================================== what Odelia did this month (src/monthly.ts) */
