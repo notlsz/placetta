@@ -2493,6 +2493,7 @@ html[lang="zh-CN"] .bkg.bkt span{font-family:var(--zhserif);font-weight:400}
 .bknote{margin-top:24px;font-size:12.5px;line-height:1.45;color:var(--muted);max-width:720px}
 .exlab{font-family:var(--serif);font-size:21px;line-height:1.2;letter-spacing:-.01em;color:var(--ink)}
 html[lang="zh-CN"] .exlab{font-family:var(--zhserif)}
+.pmgrid .pmcalc{grid-column:1/-1;margin-top:4px;border-radius:16px;padding:18px 24px}
 .pmgrid .pmnote{grid-column:1/-1;margin:6px 4px 0;font-size:12.5px;line-height:1.45;color:var(--muted)}
 .xpl{display:inline-block;height:.72em;width:auto;margin-right:.28em;vertical-align:-.02em;opacity:.8}
 .tsmc{display:block;margin-top:2px;font-size:12px;color:var(--muted)}
@@ -2863,10 +2864,10 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 
 <section class="sec rv" data-rv="up" id="cost" aria-labelledby="costH">
   <div class="ctr">
-    <div class="sh"><h2 class="h2" id="costH" data-i18n="cost.h">The cost of waiting.</h2><p class="sub" data-i18n="cost.sub">Every month a permit runs late is another month of rent with no revenue.</p></div>
+    <div class="sh"><h2 class="h2" id="costH" data-i18n="cost.h">Permits set your opening date.</h2><p class="sub" data-i18n="cost.sub">One permit running late moves the whole opening, and the rules keep changing while you wait.</p></div>
     <div class="drow">
       <div class="dl cbig">
-        <div class="cbn"><b data-i18n="cost.big">3–6 mo</b><span data-i18n="cost.bigs">The typical permit phase for a new restaurant. Every month late is another month of rent with no sales.</span></div>
+        <div class="cbn"><b data-i18n="cost.big">3–6 mo</b><span data-i18n="cost.bigs">The typical permit phase for a new restaurant. One late approval holds up every step that depends on it.</span></div>
         <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
       </div>
       <div class="dcard wcard" id="wcard"></div>
@@ -3207,6 +3208,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <div class="pmc us"><p class="pml"><span class="orb" aria-hidden="true"></span><span data-i18n="price.m.good">With Odelia</span></p>
           <div class="pms pmain"><b data-i18n="price.an.v2">$8,288</b><i class="pmbar good" aria-hidden="true"><i></i></i><span data-i18n="price.m.s2">A restaurant opening filed and tracked to approval ($6,500), plus its first year on Essentials ($1,788).</span></div>
         </div>
+        <div class="wcalc white pmcalc" id="pmCalc"></div>
         <p class="pmnote" data-i18n="price.m.note">Illustrative calculation, not a quote or a promise. Your rent, timeline and agency fees will differ.</p>
       </div>
     </div>
@@ -3378,7 +3380,7 @@ en:{
  "hero.sample":"See a sample plan","hero.try":"Put Odelia to work","hero.demo":"Book a demo","how.try":"Try it on your store","aria.proof":"At a glance","pf.s3":"US states covered, plus 170+ countries", "foot.disc2":"Placetta is not affiliated with any government agency. Product screens and example plans use sample data. Customer results describe their own openings; your timeline depends on your city, your build-out and each agency.", "price.m.note":"Illustrative calculation, not a quote or a promise. Your rent, timeline and agency fees will differ.", "xp.note":"Our advisors previously worked at these organizations. The organizations are not affiliated with Placetta and do not endorse it.", "bk.note":"Investors invested personally. Their former and current employers are not affiliated with Placetta and do not endorse it.", "pf.appr":"filings sent without your approval", "pf.lang":"languages for every plan and dashboard: English and Chinese", "pf.ag":"government agencies we handle, across {r} regions","ag.h":"Watch Odelia work.","ag.p":"She reads your documents, checks each agency's own site, fills the forms and drafts the letters. Every value shows the words it came from, and nothing is filed until you approve.","aria.ag":"Sample agent run","ag.tag":"Sample run","ag.l1":"Read your lease and LLC filing","ag.l2":"Checked Santa Clara County and City of San José requirements","ag.l2s":"Sources: sccgov.org, sanjoseca.gov","ag.l3":"Found 8 requirements, in order, with estimated fees","ag.l4":"Filled the health permit plan check from your lease","ag.l4q":"Tenant: Qinghuan Tea House LLC","ag.l5":"Drafted the landlord consent letter","ag.l5s":"landlord-consent.docx, saved to Documents","ag.l6":"Waiting for your approval before anything is filed",
  "app.proj":"Projected opening", "app.date":"Mar 2027", "app.est":"Estimate, not a guarantee", "app.risk":"Risk check: review state rules on foreign-owned leases before you sign.", "app.week":"Week", "app.done":"approved",
  "st.q":"Queued", "st.r":"In review", "st.d":"Approved", "st.b":"Blocked",
- "cost.h":"The cost of waiting.", "cost.big":"3–6 mo", "cost.bigs":"The typical permit phase for a new restaurant. Every month late is another month of rent with no sales.",
+ "cost.h":"Permits set your opening date.", "cost.big":"3–6 mo", "cost.bigs":"The typical permit phase for a new restaurant. One late approval holds up every step that depends on it.",
  "src":"Source",
  "months":"Month",
  "leg.r":"Month of rent, no revenue", "leg.p":"Planned opening", "leg.o":"Opened", "leg.m":"Typical range",
@@ -3439,7 +3441,7 @@ en:{
  "done.btn":"Back to the page",
  "nav.cases":"Examples",
  "st.phs":"City or state",
- "cost.sub":"Every month a permit runs late is another month of rent with no revenue.",
+ "cost.sub":"One permit running late moves the whole opening, and the rules keep changing while you wait.",
  "how.sub":"Odelia, Placetta's AI agent, finds every license, permit and registration your business needs and prepares each application. You approve, and it's filed, tracked and renewed.",
  "app.sample":"Sample plan",
  "f1.h":"Every license, mapped", "f1.p":"Federal to city, in the order they run, with timelines and estimated agency fees.", "f1.t":"Entry plan ready", "f1.ts":"8 requirements, in order, with estimated fees",
@@ -3461,7 +3463,7 @@ zh:{
  "hero.sample":"查看示例计划","hero.try":"让 Odelia 开始工作","hero.demo":"预约演示","how.try":"用您的门店试一试","aria.proof":"概览","pf.s3":"个美国州全覆盖，另有 170 多个国家和地区", "foot.disc2":"快哉与任何政府机构均无关联。产品界面与示例计划使用示例数据。客户成果描述的是其各自门店的开业经历；您的时间线取决于所在城市、装修工程和各机构的审批。", "price.m.note":"示意计算，并非报价或承诺。您的房租、时间和政府规费会有所不同。", "xp.note":"我们的顾问曾任职于上述机构。这些机构与快哉无关联，也不为快哉背书。", "bk.note":"投资人均以个人身份投资。其曾任职或现任职的公司与快哉无关联，也不为快哉背书。", "pf.appr":"份未经您批准而提交的申请", "pf.lang":"种语言：每份计划和看板都有中文和英文", "pf.ag":"个政府机构由我们办理，覆盖 {r} 个地区","ag.h":"看 Odelia 如何工作。","ag.p":"她读取您的文件，查询各政府机构的官方网站，填写表格并起草信函。每一项数据都标明出处原文，未经您确认不会提交任何申请。","aria.ag":"智能代理运行示例","ag.tag":"运行示例","ag.l1":"已读取您的租约和 LLC 注册文件","ag.l2":"已核对圣克拉拉县和圣何塞市的要求","ag.l2s":"来源：sccgov.org、sanjoseca.gov","ag.l3":"找到 8 项要求，已排序并附预估费用","ag.l4":"已根据租约填写卫生许可图纸审查申请","ag.l4q":"租户：Qinghuan Tea House LLC","ag.l5":"已起草房东同意函","ag.l5s":"landlord-consent.docx，已保存到文件","ag.l6":"等待您的确认，确认前不会提交任何申请",
  "app.proj":"预计开业", "app.date":"2027年3月", "app.est":"预估时间，非承诺", "app.risk":"风险检查：签约前请复核该州对外资企业租赁的规定。", "app.week":"第", "app.done":"已批准",
  "st.q":"排队中", "st.r":"审核中", "st.d":"已批准", "st.b":"受阻",
- "cost.h":"等待的代价。", "cost.big":"3–6 个月", "cost.bigs":"新餐厅常见的许可审批周期。每晚一个月，就多付一个月没有营业收入的房租。",
+ "cost.h":"开业日期，由许可决定。", "cost.big":"3–6 个月", "cost.bigs":"新餐厅常见的许可审批周期。一项审批晚了，依赖它的每一步都得跟着等。",
  "src":"来源",
  "months":"月份",
  "leg.r":"付房租、无收入的月份", "leg.p":"原计划开业", "leg.o":"开业", "leg.m":"常见区间",
@@ -3522,7 +3524,7 @@ zh:{
  "done.btn":"返回页面",
  "nav.cases":"示例方案",
  "st.phs":"城市或州",
- "cost.sub":"许可每晚一个月获批，就要多付一个月没有收入的房租。",
+ "cost.sub":"一张许可晚了，整个开业都得推迟；而在您等待的时候，规则还在变。",
  "how.sub":"快哉的智能代理 Odelia 找出您的业务所需的每一项执照、许可和登记，并准备每一份申请。您确认后，即完成提交、跟踪和续期。",
  "app.sample":"示例计划",
  "f1.h":"每一项执照，一一列清", "f1.p":"从联邦到市级，按办理顺序列出，附时间表和预估的政府规费。", "f1.t":"开店计划已就绪", "f1.ts":"8 项要求，按顺序排列，附预估费用",
@@ -3731,12 +3733,12 @@ function renderCost(){
     <div class="whead"><div><div class="wbig">${s.big[i]}</div><div class="wsub">${s.sub[i]}</div></div><p class="wq">${s.q[i]}</p></div>
     <div><div class="wgrid" aria-hidden="true">${cells}</div><div class="waxis">${Array.from({length:12},(_,m)=>`<span>${m+1}</span>`).join("")}</div>
       <div class="wleg">${s.leg.map(x => `<span><i style="${LEGSTYLE[x]}"></i>${t("leg."+x)}</span>`).join("")}<span style="margin-left:auto;color:var(--muted)">${t("months")} →</span></div></div>
-    <div class="wcalc white">
-      <label for="rent">${t("calc.l")}</label><output id="rentOut" for="rent"></output>
-      <input type="range" id="rent" min="3000" max="80000" step="1000" value="${rent}">
-      <div class="wres"><span id="rentLbl"></span><b id="rentRes"></b><small>${t("calc.n")}</small></div>
-    </div>
     <p class="wsrc">${t("src")}${i ? "：" : ": "}${s.src[i]}</p>`;
+  // the rent calculator lives in pricing, under the math on waiting; the months follow the story picked above
+  const pc = document.getElementById("pmCalc");
+  if (pc) pc.innerHTML = `<label for="rent">${t("calc.l")}</label><output id="rentOut" for="rent"></output>
+      <input type="range" id="rent" min="3000" max="80000" step="1000" value="${rent}">
+      <div class="wres"><span id="rentLbl"></span><b id="rentRes"></b><small>${t("calc.n")}</small></div>`;
   document.querySelectorAll("[data-s]").forEach(b => b.addEventListener("click", () => setStoryIdx(+b.dataset.s)));
   document.getElementById("rent").addEventListener("input", e => { rent = +e.target.value; paintCalc(); });
   document.getElementById("rent").addEventListener("change", () => track("rent_calculator", {rent}));
