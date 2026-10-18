@@ -235,6 +235,11 @@ export type WxDeps = {
   start: (uid: string, openid: string, text: string, lang: "en" | "zh") => void;
   /** what someone who isn't a teammate any more is told, in both languages */
   notTeammate: string;
+  /** Placetta's own public account only: a follower who isn't linked here gets text to start (text_start.ts), and this
+   *  is the one reply (null: say nothing). Other accounts leave it out and such followers get WX_SAY.unknown. */
+  stranger?: (openid: string, text: string) => Promise<string | null>;
+  /** what following the account says, when it isn't WX_SAY.welcome (Placetta's public account invites the one line) */
+  welcome?: string;
 };
 export type WxAnswer = { status: number; type: string; body: string };
 
@@ -253,7 +258,7 @@ export async function wxHandle(bot: Pick<WechatBot, "app_id" | "token" | "aes_ke
   // each message once, by its MsgId; an event (which has none) by who and when
   const id = m.MsgId ? `wechat:${bot.app_id}:${m.MsgId}` : `wechat:${bot.app_id}:${openid}:${m.CreateTime ?? ""}:${m.Event ?? ""}`;
   if (!(await deps.firstTime(id))) return plain("success");
-  if (m.MsgType === "event") return m.Event === "subscribe" ? await say(WX_SAY.welcome) : plain("success");
+  if (m.MsgType === "event") return m.Event === "subscribe" ? await say(deps.welcome ?? WX_SAY.welcome) : plain("success");
   const text = wxWords(m);
   if (!text) return await say(WX_SAY.textOnly);
   // a code from Settings links this WeChat to the member who asked for it
@@ -263,6 +268,11 @@ export async function wxHandle(bot: Pick<WechatBot, "app_id" | "token" | "aes_ke
     return await say(r === "ok" ? WX_SAY.linked : r === "locked" ? WX_SAY.locked : WX_SAY.wrongCode);
   }
   const who = await deps.sender(openid);
+  if (!who && deps.stranger) {
+    // Placetta's public account: the plan for "奶茶店，纽约法拉盛" right here, within WeChat's 5 seconds
+    const reply = await deps.stranger(openid, text).catch(() => null);
+    return reply ? await say(reply) : plain("success");
+  }
   if (!who) return await say(WX_SAY.unknown);
   if (!who.member) return await say(deps.notTeammate);
   const lang = /[一-鿿]/.test(text) ? "zh" : "en";
@@ -280,6 +290,8 @@ export const WX_SAY = {
   wrongCode: "That code didn't match. Get a new one in Placetta (Settings, Integrations) and send it here within 30 minutes.\n验证码不对。请在快哉中获取新的验证码（设置 → 集成），并在 30 分钟内发到这里。",
   locked: "Too many tries. Wait an hour, then get a new code in Placetta.\n尝试次数过多。请一小时后在快哉中获取新的验证码。",
   textOnly: "I can read text here. Send your question as a text message.\n我在这里只能读文字，请用文字发送您的问题。",
+  /** following Placetta's own public account: one line gets the plan */
+  startWelcome: "Thanks for following Placetta. I'm Odelia. Tell me what you're opening and where, like \"Milk tea shop in Flushing, NY\", and I'll send back every permit you need, in order, with fees.\n感谢关注快哉。我是 Odelia。告诉我您要开什么店、开在哪里，例如“奶茶店，纽约法拉盛”，我会把需要的全部许可按顺序连同费用发给您。",
   ack: { en: "On it. I'll answer here when it's done.", zh: "收到，正在处理，完成后在这里回复您。" },
 };
 
