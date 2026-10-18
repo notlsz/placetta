@@ -37,3 +37,8 @@ verify_jwt = false
 # one's own signature (and WeChat's safe-mode seal).
 [functions.chat-events]
 verify_jwt = false
+
+# The partner API and the embedded plan box: partners' servers call it with an API key, and the box on a partner's
+# own site calls it with no session at all. It checks the key itself (only its SHA-256 is stored) and rate-limits both.
+[functions.partner-api]
+verify_jwt = false

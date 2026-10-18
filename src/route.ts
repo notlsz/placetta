@@ -12,7 +12,7 @@ const BASE = import.meta.env.BASE_URL;
 export const routed = BASE.startsWith("/");
 
 const SLUG: Record<View, string> = {
-  overview: "", permits: "permits", stores: "stores", odelia: "odelia", find: "permits/find", settings: "settings", queue: "queue", hq: "headquarters",
+  overview: "", permits: "permits", stores: "stores", odelia: "odelia", find: "permits/find", settings: "settings", queue: "queue", hq: "headquarters", partner: "partner",
 };
 
 /** The tabs a page has, by the word in its address. The first is the page's own address. */

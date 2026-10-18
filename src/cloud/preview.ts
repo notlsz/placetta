@@ -9,6 +9,7 @@
  * ------------------------------------------------------------------ */
 
 import { UPDATED } from "../legal";
+import { moreRest, moreRpc, type PreviewKit } from "./previewMore";
 
 export const PREVIEW_CODE = "123456";
 
@@ -70,6 +71,8 @@ function audit(ws: string, uid: string | null, actor: string, en: string, zh: st
 const json = (body: unknown, status = 200) => new Response(body === undefined ? null : JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 const pgErr = (message: string, code = "P0001", status = 400) => json({ code, message, details: null, hint: null }, status);
 const fnErr = (code: string, message: string, status = 400) => json({ error: { code, message } }, status);
+/** What the stand-ins for partners, specialist reviews, Agent health and the incident log use (./previewMore.ts). */
+const kit = (): PreviewKit => ({ t, save, json, pgErr, now, uuid, email: (id: string) => userOf(id)?.email ?? "", isStaff, isOwner, isMember, audit });
 
 function filterRows(rows: Row[], q: URLSearchParams) {
   let out = rows;
@@ -295,7 +298,7 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
         return w ? [{ workspace_id: w.id, name: w.name, brand: l.brand ?? null, stores: hqSummary((w.state ?? {}) as Row) }] : [];
       }));
     }
-    default: return pgErr(`Not in the preview: ${fn}`, "PGRST202", 404);
+    default: return (await moreRpc(fn, body, c, kit())) ?? pgErr(`Not in the preview: ${fn}`, "PGRST202", 404);
   }
 }
 
@@ -331,6 +334,7 @@ function hqSummary(st: Row) {
 async function rest(req: Request, url: URL, c: { sub: string; aal: string } | null): Promise<Response> {
   if (!c) return pgErr("Sign in first.", "42501", 401);
   const table = url.pathname.split("/")[3];
+  const more = moreRest(table, req, c, kit()); if (more) return more;
   const rows = t(table);
   const single = (req.headers.get("accept") ?? "").includes("vnd.pgrst.object");
   const visible = (r: Row) => table === "workspaces" ? canSee(r.id, c) : canSee(r.workspace_id, c);
