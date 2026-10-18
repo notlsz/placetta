@@ -47,6 +47,10 @@ jobs:
         with: { deno-version: v2.x }
       - name: Type-check every server function
         run: for f in supabase/functions/*/index.ts; do deno check "$f" || exit 1; done
+      # the functions' own tests (every *_test.ts and *.test.ts): among them the MCP client against a fake MCP server and
+      # sign-in server (address guard, sessions, streams, limits, PKCE), and who may connect, use and approve apps
+      - name: Server function tests
+        run: deno test -A supabase/functions
   database:
     runs-on: ubuntu-latest
     services:

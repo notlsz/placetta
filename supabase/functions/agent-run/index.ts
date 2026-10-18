@@ -200,10 +200,33 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
   const { data: filings } = await admin.from("filings").select("app_id, status, confirmation_number, submitted_at, updated_at, note, payment_url, agent_state, channel, agent_log").eq("workspace_id", ws).order("approved_at", { ascending: false });
   // Connected apps act as the person, so they need the person's session: runs the monitor starts don't touch them.
   const { data: ints } = token ? await admin.from("integrations").select("kind, status").eq("workspace_id", ws) : { data: [] as { kind: string; status: string }[] };
+  // A request that came by text, call, email or chat has no session, but may read from the apps connected through their
+  // own MCP servers, as the member who asked: the integrations function checks it with the monitor key, offers only the
+  // tools that read, and refuses plain SMS (integrations/mcp.ts mcpRemote).
+  const remote = !token && !!run.created_by && !!run.channel && run.channel !== "app";
+  const viaMonitor = async <T>(body: Record<string, unknown>): Promise<T> => {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/integrations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env("SUPABASE_ANON_KEY")}`, apikey: env("SUPABASE_ANON_KEY"), "x-monitor-key": await monitorKey() },
+      body: JSON.stringify({ ...body, workspace_id: ws, user_id: run.created_by, channel: run.channel, plain_sms: run.state?.plainSms === true }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out?.error?.message ?? `That didn't work (${res.status}).`);
+    return out as T;
+  };
   return {
     filings: () => (filings ?? []) as ReturnType<Services["filings"]>,
     connected: () => (ints ?? []).filter((i) => i.status === "connected").map((i) => i.kind),
+    async mcpTools() {
+      type Listed = { tools: Record<string, unknown>[] };
+      if (!token) return remote ? (await viaMonitor<Listed>({ action: "mcp_tools" })).tools : [];
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/integrations`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: env("SUPABASE_ANON_KEY") }, body: JSON.stringify({ workspace_id: ws, action: "mcp_tools" }) });
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(out?.error?.message ?? `That didn't work (${res.status}).`);
+      return (out as Listed).tools ?? [];
+    },
     async integration<T>(action: string, body: Record<string, unknown>) {
+      if (!token && remote && action === "mcp_call") return await viaMonitor<T>({ ...body, action });
       if (!token) throw new Error("Connected apps aren't available to background checks.");
       const res = await fetch(`${SUPABASE_URL}/functions/v1/integrations`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: env("SUPABASE_ANON_KEY") }, body: JSON.stringify({ workspace_id: ws, action, ...body }) });
       const out = await res.json().catch(() => ({}));

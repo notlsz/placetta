@@ -1,5 +1,5 @@
-// integrations: connect and use the customer's mail, calendar, files, books, point of sale (Square, Toast) and team
-// chats (Slack, Lark, WeChat).
+// integrations: connect and use the customer's mail, calendar, files, books, point of sale (Square, Toast), team
+// chats (Slack, Lark, WeChat) and any app's own MCP server (mcp.ts).
 // POST {workspace_id, action, ...}. Members of the workspace; owners only to connect, disconnect, send mail or read sales
 // and staff. Reading a connected mailbox, drive or books: owners, or the member who connected that account. Each member
 // links their own WeChat (wechat_link).
@@ -54,6 +54,8 @@ import { type WechatBot, wxCredsWork, wxKeyBytes, wxNewSecrets, type WxTokenProb
 import { wechatBundle } from "../_shared/wechat_db.ts";
 import { type Call, lastFullMonth, monthsBetween, PosError, type SavedToken, squareSales, squareStaff, type ToastCtx, toastMatches, toastPlace, type ToastPlace, toastSales, toastStaff, toastTokens } from "./pos.ts";
 import { mayRead, READ_REFUSED } from "./access.ts";
+import { MCP_ACTIONS, mcpFinish, mcpRemote } from "./mcp.ts";
+import { MCP_OWNER_ACTIONS } from "./mcp_rules.ts";
 
 /** access: the caller's role in the workspace ("owner" or "member"), or "" for finish, which checks it itself. */
 type Ctx = { user: User; jwt: string; ws: string; body: Record<string, unknown>; access: string };
@@ -1263,10 +1265,12 @@ const finish: Action = async (c) => {
     await dropSecret(p.secret_id);
     throw e;
   }
-  if (p.user_id !== c.user.id || p.workspace_id !== c.ws || !member || !isKind(p.kind)) {
+  if (p.user_id !== c.user.id || p.workspace_id !== c.ws || !member || !(isKind(p.kind) || p.kind === "mcp")) {
     await dropSecret(p.secret_id);
     throw new HttpError("forbidden", "This connection was started by someone else. Connect again from Settings.");
   }
+  // an app's own MCP server, signed in through oauth-callback: it becomes a connected server (mcp.ts)
+  if (p.kind === "mcp") return await mcpFinish(c, p);
 
   const kind = p.kind;
   const existing = await findIntegration(c.ws, kind);
@@ -1366,11 +1370,14 @@ const ACTIONS: Record<string, Action> = {
   pos_staff: posStaff,
   available,
   feed_url: feedUrl,
+  ...MCP_ACTIONS,
 };
 
 /** What only an owner can do: connect or disconnect an account, send mail or Slack posts as the business, and read
  *  sales and staff from Square or Toast. */
-const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff]);
+const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff,
+  // and for an app's own MCP server: connecting, refreshing, switching tools, disconnecting, approving and declining
+  ...MCP_OWNER_ACTIONS.map((a) => MCP_ACTIONS[a])]);
 
 serve(async (req) => {
   const mk = req.headers.get("x-monitor-key");
@@ -1378,6 +1385,8 @@ serve(async (req) => {
     const { data: good } = await admin.rpc("monitor_key_ok", { p_key: mk });
     if (good !== true) throw new HttpError("unauthorized", "Wrong monitor key.");
     const body = await readBody(req);
+    // agent-run, for a request that came by text, call, email or chat: reads from connected apps (mcp.ts mcpRemote)
+    if (body.action === "mcp_tools" || body.action === "mcp_call") return await mcpRemote(body);
     if (body.action !== "mail_watch") throw new HttpError("bad_request", "The monitor may only watch mail.");
     return await mailWatch();
   }
