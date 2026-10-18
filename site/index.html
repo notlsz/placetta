@@ -922,6 +922,20 @@ html[lang="zh-CN"] .qh{letter-spacing:0}
 #vcard .arow{grid-template-columns:20px minmax(0,1fr) auto;padding:8px 10px;margin:0 -10px;border-radius:12px}
 #vcard .arow.cur{background:#F5F7FA}
 #vcard .aw{display:none!important}
+/* Oct 18: the typed line and dated rows */
+#vcard .aask{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:7px 7px 7px 14px;border:1px solid #E6EAF0;border-radius:12px;background:#FAFBFC;font-size:13.5px;line-height:1.35;color:var(--ink);min-height:40px}
+#vcard .aaskt{flex:1;min-width:0}
+#vcard .acar{display:inline-block;width:1.5px;height:1.05em;margin-left:1px;vertical-align:-2px;background:var(--ink);opacity:0}
+#vcard .aaskt.typing .acar{opacity:1}
+@media (prefers-reduced-motion:no-preference){#vcard .aaskt.typing .acar{animation:acar 1s steps(1) infinite}}
+@keyframes acar{50%{opacity:0}}
+#vcard .asend{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--ink);color:#fff}
+#vcard .arow .a .adt{margin-left:10px;font:11px var(--mono);color:#8A93A3;font-variant-numeric:tabular-nums}
+#vcard .arow,#vcard .gl i{transition:opacity .35s ease,transform .35s ease,background-color .4s}
+#vcard .arow.pre{opacity:0;transform:translateY(6px)}
+#vcard .gl i.pre{opacity:0}
+@media (prefers-reduced-motion:reduce){#vcard .arow,#vcard .gl i{transition:none}}
+@media (max-width:639px){#vcard .aask{font-size:12.5px;margin-bottom:12px}#vcard .arow .a .adt{display:block;margin:1px 0 0}}
 #vcard .asx{padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:#F1F2F5;color:#5B6578}
 #vcard .asx.d{background:#E8F3EC;color:#2E7149}
 #vcard .asx.r{background:#FBF3E4;color:#93651E}
@@ -2509,6 +2523,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <div class="atabs"><span class="tb on" data-i18n="app.t1">Entry plan</span><span class="tb" data-i18n="app.t2">Filings</span><span class="tb" data-i18n="app.t3">Documents</span><span class="tb" data-i18n="app.t4">Renewals</span></div>
         <div class="abody">
           <div class="alist">
+            <div class="aask" aria-hidden="true"><span class="aaskt"><span id="appAsk"></span><i class="acar"></i></span><span class="asend"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></span></div>
             <div class="ahead"><b data-i18n="app.reqs">Requirements</b><em id="appCount">3 / 8</em></div>
             <div class="aprog"><i id="appProg"></i></div>
             <div id="appRows"></div>
@@ -3311,6 +3326,9 @@ zh:{
 /* hero and before and after, from the Oct 17 redesign */
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
+/* Oct 18 section pass: new strings for the sections changed that day */
+Object.assign(T.en, {"app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -3422,11 +3440,18 @@ document.getElementById("lBtn").addEventListener("click", e => { const m = docum
 
 /* ============ video-style sample plan ============ */
 const DUR = 18; let vt = 6, vPlaying = !RM, vVisible = false, vLast = 0;
+/* the intro runs on negative time: the line types itself (-INTRO to -INTRO+TYPE), then the rows land one by one with their dates */
+const INTRO = 4.4, TYPE = 2, vSeen = {v: false};
+const W0 = Date.UTC(2026, 10, 16); // week 1 of the sample plan starts Mon Nov 16, 2026, so week 16 ends in Mar 2027
+function wkDates(w){ const a = new Date(W0 + (w[0] - 1) * 6048e5), b = new Date(W0 + (w[1] * 7 - 1) * 864e5), zh = lang === "zh";
+  if (zh) return `${a.getUTCMonth() + 1}月${a.getUTCDate()}日–${b.getUTCMonth() !== a.getUTCMonth() ? (b.getUTCMonth() + 1) + "月" : ""}${b.getUTCDate()}日`;
+  const m = d => d.toLocaleString("en-US", {month: "short", timeZone: "UTC"});
+  return `${m(a)} ${a.getUTCDate()}–${b.getUTCMonth() !== a.getUTCMonth() ? m(b) + " " : ""}${b.getUTCDate()}`; }
 function status(r, tt){ if (tt >= r.d) return "d"; if (r.blk) return "b"; return tt >= r.s ? "r" : "q"; }
 let vFloat = "";
 function renderApp(){
   const i = L();
-  document.getElementById("appRows").innerHTML = PLAN.map((r,k) => `<div class="arow" id="ar${k}"><span class="ast" id="as${k}"></span><div style="min-width:0"><div class="n">${r.n[i]}</div><div class="a">${r.a[i]}</div></div><span class="aw">${i ? "第" + r.w[0] + "–" + r.w[1] + "周" : "W" + r.w[0] + "–" + r.w[1]}</span><span class="asx" id="ap${k}"></span></div>`).join("");
+  document.getElementById("appRows").innerHTML = PLAN.map((r,k) => `<div class="arow" id="ar${k}"><span class="ast" id="as${k}"></span><div style="min-width:0"><div class="n">${r.n[i]}</div><div class="a">${r.a[i]}<span class="adt">${wkDates(r.w)}</span></div></div><span class="aw">${i ? "第" + r.w[0] + "–" + r.w[1] + "周" : "W" + r.w[0] + "–" + r.w[1]}</span><span class="asx" id="ap${k}"></span></div>`).join("");
   vFloat = "";
   document.getElementById("gantt").innerHTML = PLAN.map((r,k) => `<div class="gl"><i id="gb${k}" style="left:${(r.w[0]-1)/16*100}%;width:${(r.w[1]-r.w[0]+1)/16*100}%"></i></div>`).join("") + `<div class="gaxis">${[1,5,9,13].map(n => `<span>${i ? "第" + n + "周" : "W" + n}</span>`).join("")}</div><span class="today" id="today"></span>`;
   paintApp();
@@ -3434,6 +3459,12 @@ function renderApp(){
 const GC = {q:"#E2E7EE",r:"#E9C47F",d:"#7399C6",b:"#E8B4AA"};
 function paintApp(){
   let done = 0;
+  const ask = t("app.ask"), it = vt + INTRO, el = document.getElementById("appAsk");
+  if (el){ const n = vt >= 0 || vt < -INTRO ? ask.length : Math.min(ask.length, Math.round(ask.length * it / TYPE));
+    if (el.textContent.length !== n || el.textContent !== ask.slice(0, n)) el.textContent = ask.slice(0, n);
+    el.parentNode.classList.toggle("typing", vt < 0 && it < TYPE + .4); }
+  PLAN.forEach((r,k) => { const on = vt >= 0 || vt + INTRO >= TYPE + .3 + k * .22; const row = document.getElementById("ar"+k), g = document.getElementById("gb"+k);
+    if (row) row.classList.toggle("pre", !on); if (g) g.classList.toggle("pre", !on); });
   PLAN.forEach((r,k) => { const s = status(r, vt); if (s === "d") done++;
     const p = document.getElementById("ap"+k); if (!p) return; if (p.dataset.s !== s){ p.dataset.s = s; p.className = "asx "+s; p.textContent = t("st."+s); document.getElementById("as"+k).className = "ast "+s; }
     const g = document.getElementById("gb"+k); if (g) g.style.background = GC[s]; });
@@ -3452,19 +3483,19 @@ function paintApp(){
       document.getElementById("vToastS").textContent = t("app.toastS").replace("{a}", PLAN[last].a[i]);
       ts.hidden = false; if (changed && !RM){ ts.classList.remove("pop"); void ts.offsetWidth; ts.classList.add("pop"); } }
   }
-  const wk = 1 + 15 * Math.min(vt, DUR) / DUR; const td = document.getElementById("today");
+  const wk = 1 + 15 * Math.max(0, Math.min(vt, DUR)) / DUR; const td = document.getElementById("today");
   if (td){ td.style.left = ((wk - .5) / 16 * 100) + "%"; td.dataset.l = lang === "zh" ? `第 ${Math.floor(wk)} 周` : `${t("app.week")} ${Math.floor(wk)}`; }
-  document.getElementById("vBar").style.width = (Math.min(vt, DUR) / DUR * 100) + "%";
+  document.getElementById("vBar").style.width = ((Math.min(vt, DUR) + INTRO) / (DUR + INTRO) * 100) + "%";
 }
 function vLoop(ts){
-  if (vPlaying && vVisible){ if (vLast) { vt += (ts - vLast) / 1000; if (vt > DUR + 2.5) vt = 0; } vLast = ts; paintApp(); } else vLast = 0;
+  if (vPlaying && vVisible){ if (vLast) { vt += (ts - vLast) / 1000; if (vt > DUR + 2.5) vt = -INTRO; } vLast = ts; paintApp(); } else vLast = 0;
   requestAnimationFrame(vLoop);
 }
 function setPlay(p){ vPlaying = p; const ic = document.getElementById("vIcon"), b = document.getElementById("vPlay");
   ic.innerHTML = p ? '<rect x="1" y="1" width="3.6" height="12" rx="1"/><rect x="8.4" y="1" width="3.6" height="12" rx="1"/>' : '<path d="M2 1.2v11.6a.8.8 0 0 0 1.2.7l9-5.8a.8.8 0 0 0 0-1.4l-9-5.8A.8.8 0 0 0 2 1.2z"/>';
   b.setAttribute("aria-label", t(p ? "aria.pause" : "aria.play")); }
 document.getElementById("vPlay").addEventListener("click", () => setPlay(!vPlaying));
-document.getElementById("vRestart").addEventListener("click", () => { vt = 0; setPlay(true); paintApp(); });
+document.getElementById("vRestart").addEventListener("click", () => { vt = -INTRO; setPlay(true); paintApp(); });
 
 /* ============ cost of waiting: month visual + rent calculator ============ */
 let sIdx = 0, rent = 15000;
@@ -3718,10 +3749,11 @@ const io = new IntersectionObserver(es => es.forEach(e => {
   e.target.classList.remove("pre"); io.unobserve(e.target);
 }), {threshold:0, rootMargin:"0px 0px -4% 0px"});
 document.querySelectorAll(".rv").forEach(el => { if (!RM && el.getBoundingClientRect().top > innerHeight) { el.classList.add("pre"); io.observe(el); } });
-new IntersectionObserver(es => es.forEach(e => { vVisible = e.isIntersecting; })).observe(document.getElementById("vcard"));
+// the finished plan is the still frame; the first time it scrolls into view (motion allowed) it plays from the typed line
+new IntersectionObserver(es => es.forEach(e => { vVisible = e.isIntersecting; if (vVisible && !vSeen.v){ vSeen.v = true; if (vPlaying){ vt = -INTRO; paintApp(); } } })).observe(document.getElementById("vcard"));
 
 /* ============ sample-plan links ============ */
-document.addEventListener("click", e => { if (e.target.closest('a[data-sec="sample"]')) { track("sample_plan_click", {}); vt = 0; setPlay(true); } });
+document.addEventListener("click", e => { if (e.target.closest('a[data-sec="sample"]')) { track("sample_plan_click", {}); vt = -INTRO; setPlay(true); } });
 
 /* ============ plan request: 4 quick steps ============ */
 const MARKETS = [["Los Angeles, CA","加州洛杉矶"],["New York, NY","纽约"],["San Francisco Bay Area","旧金山湾区"],["Houston, TX","得州休斯顿"],["Seattle, WA","华盛顿州西雅图"],["Several markets","多个市场"]];
