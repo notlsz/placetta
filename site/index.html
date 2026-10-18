@@ -1826,6 +1826,17 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 #monitor .mnhero .mnttl{font-size:26px;line-height:1.25;letter-spacing:-.5px}
 #monitor .mncd b{font-size:56px}
 .mnrisk{margin-top:16px;font-size:15px;line-height:1.5;color:var(--ink2)}
+/* Oct 18: the store an alert hits and what's at stake (sample) */
+.mnst{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px;margin-top:14px;padding:12px 14px;border:1px solid #EDF0F4;border-radius:12px}
+.mnst>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mnst small{font-size:11.5px;color:var(--muted)}
+.mnst b{font-size:14px;font-weight:500;line-height:1.3;color:var(--ink)}
+.mnst .mnusd{font-size:20px;font-weight:500;letter-spacing:-.3px;color:#B3473A;font-variant-numeric:tabular-nums}
+.mnst span{font-size:12px;line-height:1.35;color:var(--ink2)}
+.mnsm{position:absolute;top:8px;right:10px;font-style:normal;font-size:10.5px;color:var(--faint)}
+.mnr .m .mnusd{color:#B3473A;font-variant-numeric:tabular-nums}
+.mnst .mnusd.up,.mnr .m .mnusd.up{color:#2E7149}
+@media (max-width:639px){.mnst{grid-template-columns:1fr;gap:10px}}
 .mnrisk b{margin-right:8px;font-weight:600;color:var(--hi)}
 .mnrisk.k-cost b{color:#9A5B00}.mnrisk.k-time b{color:var(--hi)}
 #monitor .mnhero .mndo{margin-top:28px;padding:22px 22px;background:var(--gs-ll);box-shadow:none}
@@ -3388,8 +3399,8 @@ zh:{
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* Oct 18 section pass: new strings for the sections changed that day */
-Object.assign(T.en, {"pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
-Object.assign(T.zh, {"pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
+Object.assign(T.en, {"mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -4492,6 +4503,28 @@ function monFeatured(){
 const TICK_IC = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const NEXT_IC = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 let monAll = false;
+/* Oct 18: each alert names the store it hits and what's at stake. SAMPLE data, shown with a "Sample" tag: the stores are
+   the page's own examples (Qinghuan in San José, the franchisees in Irvine and Houston) or sample stores, and the dollar
+   figures are illustrations built from the page's own numbers ($15,000 a month rent, 12 staff), not quotes or results.
+   Keyed by each change's English short title in MON. */
+const MON_STORE = {
+ "FDA 2026 Food Code": [["Qinghuan Tea House, San José, CA", "清欢茶舍，加州圣何塞"], "$1,500", ["a failed inspection: re-inspection fee and a day closed", "检查不合格：复检费加停业一天"]],
+ "Greece pay transparency law": [["Sample store, Athens", "示例门店，雅典"], "$6,000", ["back pay review for 9 staff", "9 名员工的薪酬追溯核查"]],
+ "US–China tariff cut and truce": [["Qinghuan Tea House, San José, CA", "清欢茶舍，加州圣何塞"], "$3,200", ["lower duty on a $32,000 container of tableware that lands before Jan 10", "1 月 10 日前到港的一柜 32,000 美元餐具，关税更低"], "save"],
+ "California minimum wage to $17.40": [["Franchisee, Irvine CA", "加盟商，加州尔湾"], "$12,480 a year", ["12 staff, 50 cents more an hour, 2,080 hours each", "12 名员工，每小时多 0.5 美元，每人 2,080 小时"]],
+ "Malaysia imported food rules": [["Sample store, Kuala Lumpur", "示例门店，吉隆坡"], "$9,000", ["one container held at the border without supplier certificates", "缺少供应商证书，一柜货物在口岸被扣"]],
+ "EU packaging rules now apply": [["Sample store, Paris", "示例门店，巴黎"], "$4,800", ["takeaway cups, wrappers and containers to replace", "需要更换的外带杯、包装纸和餐盒"]],
+ "Korea adds four allergens": [["Sample store, Seoul", "示例门店，首尔"], "$2,500", ["menu boards and labels to reprint", "需要重印的菜单和标签"]],
+ "Mixue opens in Mexico and Brazil": [["Planned store, Mexico City", "筹备中的门店，墨西哥城"], "$15,000 a month", ["rent while its permits are pending", "许可未下来期间的房租"]],
+ "12,000 new US franchise units": [["Franchisee, Houston TX", "加盟商，得州休斯顿"], "$15,000 a month", ["rent on each new unit that opens late", "每家新店延迟开业期间的房租"]],
+ "Vietnam food safety decree": [["Sample store, Ho Chi Minh City", "示例门店，胡志明市"], "$7,500", ["3 products off the shelf for about 15 working days each", "3 款产品各下架约 15 个工作日"]],
+ "Mexico tariffs up to 50%": [["Planned store, Mexico City", "筹备中的门店，墨西哥城"], "$16,000", ["up to 50% duty on a $32,000 container from China", "从中国运来的 32,000 美元货柜，最高 50% 关税"]],
+ "Texas and Florida lease limits": [["Franchisee, Houston TX", "加盟商，得州休斯顿"], "$15,000 a month", ["rent on a lease that may not hold", "可能无效的租约所付的房租"]],
+ "Indonesia halal deadline": [["Sample store, Jakarta", "示例门店，雅加达"], "$11,000", ["unlabeled stock pulled from shelves", "未贴标的库存被下架"]]
+};
+const monSt = x => MON_STORE[x.t[0]];
+function monStore(x, i){ const v = monSt(x); if (!v) return "";
+  return `<div class="mnst"><div><small>${t("mon.st")}</small><b>${v[0][i]}</b></div><div><small>${t(v[3] ? "mon.save" : "mon.usd")}</small><b class="mnusd${v[3] ? " up" : ""}">${v[1].replace(" a month", i ? "/月" : " a month").replace(" a year", i ? "/年" : " a year")}</b><span>${v[2][i]}</span></div><em class="mnsm">${t("mon.smp")}</em></div>`; }
 function renderMon(center){
   const i = L();
   if (monSel < 0 || monSel >= MON.length){ monSel = monFeatured(); center = true; }
@@ -4508,7 +4541,7 @@ function renderMon(center){
   const fresh = x => x.d.length === 10 && monDays(x.d) >= -7;
   const order = MON.map((x, k) => k).filter(k => keep(MON[k])).sort((a, b) => (fresh(MON[b]) - fresh(MON[a])) || rank[MON[a].lv] - rank[MON[b].lv] || (MON[a].d < MON[b].d ? 1 : -1));
   const MNTOP = 2, shown = monAll ? order : order.slice(0, MNTOP).concat(order.slice(MNTOP).filter(k => k === monSel));
-  list.innerHTML = shown.map(k => [MON[k], k]).map(([x, k]) => `<button type="button" class="mnr${k === monSel ? " on" : ""}" role="option" aria-selected="${k === monSel}" data-ti="${k}"><span class="t">${x.t[i]}</span><span class="pill ${monPill(x.lv)}">${t("mon.i." + x.lv)}</span><span class="m"><b>${monCode(x.mk)}</b>${monDate(x.d)}${fresh(x) ? `<i class="mnnew">${t("mon.new")}</i>` : ""}</span></button>`).join("") + (order.length > MNTOP ? `<button type="button" class="mnmore" id="mnMore" aria-expanded="${monAll}">${monAll ? t("agy.less") : t("mon.all").replace("{n}", order.length)}</button>` : "");
+  list.innerHTML = shown.map(k => [MON[k], k]).map(([x, k]) => `<button type="button" class="mnr${k === monSel ? " on" : ""}" role="option" aria-selected="${k === monSel}" data-ti="${k}"><span class="t">${x.t[i]}</span><span class="pill ${monPill(x.lv)}">${t("mon.i." + x.lv)}</span><span class="m"><b>${monCode(x.mk)}</b>${monDate(x.d)}${monSt(x) ? `<span class="mnusd${monSt(x)[3] ? " up" : ""}">${monSt(x)[1].replace(/ a (month|year)/, "")}</span>` : ""}${fresh(x) ? `<i class="mnnew">${t("mon.new")}</i>` : ""}</span></button>`).join("") + (order.length > MNTOP ? `<button type="button" class="mnmore" id="mnMore" aria-expanded="${monAll}">${monAll ? t("agy.less") : t("mon.all").replace("{n}", order.length)}</button>` : "");
   if (center){ const on = list.querySelector(".on"); if (on){ const top = on.offsetTop - list.offsetTop; if (top < list.scrollTop || top + on.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = Math.max(0, top - 8); } }
   renderMonDetail(MON[monSel]);
   const dls = MON_DL.map(x => ({x, n: monDays(x.d)})).filter(o => o.n >= 0 && keep(o.x)).slice(0, 3);
@@ -4529,7 +4562,7 @@ function renderMonDetail(x){
   document.getElementById("mnDet").innerHTML = `<div class="mndt">
       <p class="mncatch"><span class="orb"></span><b>${t("mon.catch")}</b><span>${monLead(x, dd)}</span></p>
       <div class="mntop2"><div><div class="mnmeta"><span class="pill ${monPill(x.lv)}">${t("mon.lv." + x.lv)}</span><span class="mkn">${w.n[i]}</span><span>${monDate(x.d)}</span></div><p class="mnttl">${x.h[i]}</p></div>${due !== undefined && dd ? `<div class="mncd ${monCls(due)}"><b>${due}</b><span>${t(due === 1 ? "mon.day1" : "mon.dayn")}</span><small>${monDate(dd.d)}</small></div>` : ""}</div>
-      <p class="mnrisk k-${kind}"><b>${t("mon.imp." + kind)}</b>${x.imp ? x.imp[1][i] : x.m[i]}</p>
+      <p class="mnrisk k-${kind}"><b>${t("mon.imp." + kind)}</b>${x.imp ? x.imp[1][i] : x.m[i]}</p>${monStore(x, i)}
       <div class="mndo"><span class="ic">${NEXT_IC}</span><div><b>${t("mon.l.next")}</b><p>${x.act[i]}</p></div></div>
       <p class="mndone">${t("mon.done")} ${[t("mon.dn1"), t("mon.dn2"), dd ? t("mon.dn3") : t("mon.dn4")].map(s => `<span class="it">${TICK_IC}${s}</span>`).join("")}</p>
     </div>
@@ -4557,6 +4590,7 @@ function openSample(){
     <div class="mnmb">
       <div><p class="lb">${w.n[i]}${i ? "，" : ", "}${t("mon.f." + x.c)}</p><p class="tx" style="color:var(--ink);font-weight:500">${x.h[i]}</p></div>
       ${due !== undefined && dd ? `<div class="mndue"><span>${due === 0 ? t("mon.duet") : t(due === 1 ? "mon.due1" : "mon.due").replace("{n}", due)}</span><small>${monDate(dd.d)}</small></div>` : ""}
+      ${monStore(x, i)}
       <div><p class="lb">${t("mon.l.next")}</p><p class="tx" style="color:var(--ink)">${x.act[i]}</p></div>
       <div><p class="lb">${t("mon.l.means")}</p><p class="tx">${x.m[i]}</p></div>
       <div class="ft"><a href="${x.u}" target="_blank" rel="noopener">${t("src")}${i ? "：" : ": "}${x.s[i]} ↗</a><button type="button" class="btn b-ink" data-plan="${x.mk}">${t("mon.plan").replace("{m}", w.n[i])}</button></div>
