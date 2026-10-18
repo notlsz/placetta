@@ -1,0 +1,294 @@
+{
+ "form": "sf-fire-assembly",
+ "rev": "SFFD Bureau of Fire Prevention Permit Application (BFP Form 1010, Revised 7/3/2024)",
+ "pdf": "sf-fire-assembly.pdf",
+ "url": "https://sf-fire.org/media/3681/download?inline",
+ "checked": "2026-10-18",
+ "notes": "San Francisco Fire Department's operational permit application, here for a place of assembly. The other-information lines take the maximum approved occupant load and anything else the permit needs. Addresses are split into street, city, state and ZIP. The contractor block on page 2 is for work done by a licensed contractor. The office-use sections, the applicant's signature and the dates are left for the applicant and the department.",
+ "lines": [
+  {
+   "id": "description",
+   "line": "Permit description",
+   "en": "Permit description",
+   "zh": "许可说明",
+   "hint": {
+    "en": "e.g. \"Place of assembly: tea shop dining room\".",
+    "zh": "如 \"Place of assembly: tea shop dining room\"。"
+   }
+  },
+  {
+   "id": "other_info",
+   "line": "Other information",
+   "en": "Other information: for a place of assembly, the maximum approved occupant load (up to two lines)",
+   "zh": "其他信息：集会场所填写核定最大容纳人数（最多两行）"
+  },
+  {
+   "id": "permit_address",
+   "line": "Applicant",
+   "en": "Permit address",
+   "zh": "许可地址"
+  },
+  {
+   "id": "business_name",
+   "line": "Applicant",
+   "en": "Applicant's business name (dba)",
+   "zh": "申请人企业名称（dba）"
+  },
+  {
+   "id": "business_phone",
+   "line": "Applicant",
+   "en": "Business telephone",
+   "zh": "企业电话"
+  },
+  {
+   "id": "permit_holder",
+   "line": "Applicant",
+   "en": "Permit holder",
+   "zh": "许可持有人"
+  },
+  {
+   "id": "sf_account",
+   "line": "Applicant",
+   "en": "SF business account number",
+   "zh": "旧金山企业账户号"
+  },
+  {
+   "id": "contact",
+   "line": "Applicant",
+   "en": "Applicant's contact or agent",
+   "zh": "申请人联系人或代理人"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Applicant",
+   "en": "Contact's telephone",
+   "zh": "联系人电话"
+  },
+  {
+   "id": "billing_address",
+   "line": "Applicant",
+   "en": "Applicant's billing address",
+   "zh": "申请人账单地址"
+  },
+  {
+   "id": "fax",
+   "line": "Applicant",
+   "en": "Fax",
+   "zh": "传真"
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Printed name of the applicant or agent",
+   "zh": "申请人或代理人正楷姓名"
+  },
+  {
+   "id": "contractor",
+   "line": "Page 2",
+   "en": "Contractor, if any: \"name, phone\"",
+   "zh": "承包商（如有）：\"名称, 电话\""
+  },
+  {
+   "id": "contractor_address",
+   "line": "Page 2",
+   "en": "Contractor address",
+   "zh": "承包商地址"
+  },
+  {
+   "id": "contractor_license",
+   "line": "Page 2",
+   "en": "Contractor's license: \"class, number, expiration\"",
+   "zh": "承包商执照：\"类别, 号码, 到期日\""
+  },
+  {
+   "id": "workers_comp",
+   "line": "Page 2",
+   "en": "Workers' compensation: \"Certified copy furnished\", \"On file with DBI\" or \"No employees\" (with the policy, \"..., policy number, insurer\")",
+   "zh": "工伤保险：\"Certified copy furnished\"、\"On file with DBI\" 或 \"No employees\"（有保单时加 \"..., 保单号, 保险公司\"）",
+   "options": [
+    "Certified copy furnished",
+    "On file with DBI",
+    "No employees"
+   ]
+  },
+  {
+   "id": "declaration_name",
+   "line": "Page 2",
+   "en": "Workers' compensation declaration: applicant's name",
+   "zh": "工伤保险声明：申请人姓名"
+  }
+ ],
+ "blank": {
+  "sf_account": "^(none|no|n/?a)\\.?$",
+  "fax": "^(none|no|n/?a)\\.?$",
+  "contractor": "^(none|no|n/?a)\\.?$",
+  "contractor_address": "^(none|no|n/?a)\\.?$",
+  "contractor_license": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "description": [
+   {
+    "text": "Permit Description"
+   }
+  ],
+  "other_info": [
+   {
+    "text": "PERMIT DESCRIPTION OTHER INFORMATION Please provide the applicable information for LPgas tankscontainers number weightgallons flammablecombustible liquid tankscontainers content number gallons location batteries type gallons location compressed gas tankscontainers content number volume places of assembly maximum approved occupant load tentsmembranes number dimensions occupant load site plan floor plan eventsspecial places of assembly  dateRow1",
+    "pick": "line1"
+   },
+   {
+    "text": "PERMIT DESCRIPTION OTHER INFORMATION Please provide the applicable information for LPgas tankscontainers number weightgallons flammablecombustible liquid tankscontainers content number gallons location batteries type gallons location compressed gas tankscontainers content number volume places of assembly maximum approved occupant load tentsmembranes number dimensions occupant load site plan floor plan eventsspecial places of assembly  dateRow2",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "permit_address": [
+   {
+    "text": "PERMIT ADDRESS"
+   }
+  ],
+  "business_name": [
+   {
+    "text": "APPLICANTS BUSINESS NAME dba"
+   }
+  ],
+  "business_phone": [
+   {
+    "text": "TELEPHONE"
+   }
+  ],
+  "permit_holder": [
+   {
+    "text": "PERMIT HOLDER"
+   }
+  ],
+  "sf_account": [
+   {
+    "text": "SF BUSINESS ACCOUNT NO",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contact": [
+   {
+    "text": "APPLICANTS CONTACTAGENT"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "TELEPHONE_2"
+   }
+  ],
+  "billing_address": [
+   {
+    "text": "APPLICANTS BILLING ADDRESS",
+    "pick": "street"
+   },
+   {
+    "text": "CITY",
+    "pick": "city"
+   },
+   {
+    "text": "STATE",
+    "pick": "state"
+   },
+   {
+    "text": "ZIP CODE",
+    "pick": "zip"
+   }
+  ],
+  "fax": [
+   {
+    "text": "FAX",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Print name of Applicant or Agent circle one"
+   }
+  ],
+  "contractor": [
+   {
+    "text": "CONTRACTOR NAME",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Contractor Phone",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_address": [
+   {
+    "text": "ADDRESS",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CITY_2",
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Contractor State",
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ZIP",
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_license": [
+   {
+    "text": "Licensed Class",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "License No",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Expiration",
+    "pick": "tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "workers_comp": [
+   {
+    "text": "undefined_3",
+    "value": "X",
+    "if": "^certified|furnished"
+   },
+   {
+    "text": "undefined_4",
+    "value": "X",
+    "if": "^on file|dbi"
+   },
+   {
+    "text": "undefined_5",
+    "value": "X",
+    "if": "^no employees|exempt"
+   },
+   {
+    "text": "Policy No",
+    "pick": "tail|head",
+    "if": "^(certified|furnished|on file|dbi)[^,]*,"
+   },
+   {
+    "text": "Contractor Company",
+    "pick": "tail|tail",
+    "if": "^(certified|furnished|on file|dbi)[^,]*,"
+   }
+  ],
+  "declaration_name": [
+   {
+    "text": "Applicant"
+   }
+  ]
+ }
+}

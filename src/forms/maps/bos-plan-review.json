@@ -1,0 +1,226 @@
+{
+ "form": "bos-plan-review",
+ "rev": "Food Establishment Plan Review worksheet (fillable, 5/13)",
+ "pdf": "bos-plan-review.pdf",
+ "url": "https://www.boston.gov/sites/default/files/file/2021/05/FSPLAN%20REVIEW%20fillable%205%2013%20FINAL.pdf",
+ "checked": "2026-10-18",
+ "notes": "Boston Inspectional Services' food establishment plan review worksheet. The establishment and owner block on page 1 is filled from the answers; new_or_remodeled writes an X on its line. Meals: 'breakfast, lunch, dinner' estimated counts. The construction checklist (finishes, sinks, refrigeration, cooking and hot-holding equipment, ventilation, refuse) is answered from the stamped plans by the designer or contractor and is left for them, as are the signature and the department's review block.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "Header",
+   "en": "Name of establishment",
+   "zh": "场所名称"
+  },
+  {
+   "id": "address",
+   "line": "Header",
+   "en": "Address of establishment",
+   "zh": "场所地址"
+  },
+  {
+   "id": "type",
+   "line": "Header",
+   "en": "Type of establishment",
+   "zh": "场所类型"
+  },
+  {
+   "id": "owner",
+   "line": "Header",
+   "en": "Business owner",
+   "zh": "企业所有人"
+  },
+  {
+   "id": "owner_home",
+   "line": "Header",
+   "en": "Owner's home address",
+   "zh": "所有人住址"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Header",
+   "en": "Owner's phone",
+   "zh": "所有人电话"
+  },
+  {
+   "id": "new_or_remodeled",
+   "line": "Header",
+   "en": "New or remodeled establishment",
+   "zh": "新建还是改建",
+   "options": [
+    "New",
+    "Remodeled"
+   ]
+  },
+  {
+   "id": "seating",
+   "line": "Header",
+   "en": "Seating capacity",
+   "zh": "座位容量"
+  },
+  {
+   "id": "meals_per_day",
+   "line": "Header",
+   "en": "Estimated meals per day",
+   "zh": "预计每日餐数"
+  },
+  {
+   "id": "takeout",
+   "line": "Header",
+   "en": "Estimated take-out meals per day",
+   "zh": "预计每日外带餐数"
+  },
+  {
+   "id": "meals",
+   "line": "Header",
+   "en": "Estimated breakfast, lunch and dinner counts",
+   "zh": "预计早餐、午餐和晚餐份数",
+   "hint": {
+    "en": "Three numbers: \"0, 120, 80\".",
+    "zh": "三个数字：\"0, 120, 80\"。"
+   }
+  },
+  {
+   "id": "hours",
+   "line": "Header",
+   "en": "Days and hours of operation",
+   "zh": "营业日与营业时间"
+  },
+  {
+   "id": "construction_start",
+   "line": "Header",
+   "en": "Construction start date",
+   "zh": "施工开始日期"
+  },
+  {
+   "id": "opening_date",
+   "line": "Header",
+   "en": "Business opening date",
+   "zh": "开业日期"
+  },
+  {
+   "id": "food_manager",
+   "line": "Certified food manager",
+   "en": "Certified food manager: name",
+   "zh": "注册食品经理：姓名"
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Applicant: printed name and title",
+   "zh": "申请人：正楷姓名与职务"
+  },
+  {
+   "id": "construction_checklist",
+   "line": "Pages 1-3",
+   "en": "Construction checklist: finishes, sinks, refrigeration, cooking and hot-holding equipment, ventilation, refuse",
+   "zh": "施工核对表：装修材料、水槽、冷藏、烹饪与保温设备、通风、垃圾处理"
+  }
+ ],
+ "unmapped": {
+  "construction_checklist": "Answered from the stamped plans by the designer or contractor, line by line on the printed worksheet."
+ },
+ "boxes": {
+  "name": [
+   {
+    "text": "NAME OF ESTABLISHMENT"
+   }
+  ],
+  "address": [
+   {
+    "text": "ADDRESS"
+   }
+  ],
+  "type": [
+   {
+    "text": "TYPE OF ESTABLISHMENT"
+   }
+  ],
+  "owner": [
+   {
+    "text": "BUSINESS OWNER"
+   }
+  ],
+  "owner_home": [
+   {
+    "text": "HOME ADDRESS"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "TEL NO"
+   }
+  ],
+  "new_or_remodeled": [
+   {
+    "text": "NEW",
+    "value": "X",
+    "if": "^new"
+   },
+   {
+    "text": "REMODELED",
+    "value": "X",
+    "if": "^remodel"
+   }
+  ],
+  "seating": [
+   {
+    "text": "SEATING CAPACITY",
+    "pick": "digits"
+   }
+  ],
+  "meals_per_day": [
+   {
+    "text": "EST MEALS",
+    "pick": "digits"
+   }
+  ],
+  "takeout": [
+   {
+    "text": "TAKE OUT",
+    "pick": "digits"
+   }
+  ],
+  "meals": [
+   {
+    "text": "BREAKFAST",
+    "pick": "head|digits"
+   },
+   {
+    "text": "LUNCH",
+    "pick": "tail|head|digits"
+   },
+   {
+    "text": "DINNER",
+    "pick": "tail|tail|digits"
+   }
+  ],
+  "hours": [
+   {
+    "text": "DAYS  HOURS OF OPERATION"
+   }
+  ],
+  "construction_start": [
+   {
+    "text": "CONSTRUCTION START DATE",
+    "pick": "date"
+   }
+  ],
+  "opening_date": [
+   {
+    "text": "BUSINESS OPENING DATE",
+    "pick": "date"
+   }
+  ],
+  "food_manager": [
+   {
+    "text": "NAME"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Print Name"
+   }
+  ]
+ }
+}

@@ -1,0 +1,274 @@
+{
+ "form": "sac-bot",
+ "rev": "Business Operations Tax Application (Form BOT1, 12/12/2019)",
+ "pdf": "sac-bot.pdf",
+ "url": "https://www.cityofsacramento.gov/content/dam/portal/finance/Revenue/BUSINESS-TAX-app_Revised-12-2019-FILLABLE.pdf",
+ "checked": "2026-10-18",
+ "notes": "City of Sacramento's business operations tax application. The government ID box takes an EIN or an SSN, so it is left for the applicant to write, as are the owners' Social Security and driver's license numbers. Classification: the kind, then the amount it asks for. The signature, its date and the city staff section are left for the applicant and the city.",
+ "lines": [
+  {
+   "id": "business_name",
+   "line": "Section One",
+   "en": "Business name",
+   "zh": "企业名称"
+  },
+  {
+   "id": "start_date",
+   "line": "Section One",
+   "en": "Starting date",
+   "zh": "开业日期"
+  },
+  {
+   "id": "phone",
+   "line": "Section One",
+   "en": "Phone",
+   "zh": "电话"
+  },
+  {
+   "id": "phone2",
+   "line": "Section One",
+   "en": "Secondary phone",
+   "zh": "备用电话"
+  },
+  {
+   "id": "email",
+   "line": "Section One",
+   "en": "Email",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "business_address",
+   "line": "Section One",
+   "en": "Business address",
+   "zh": "营业地址"
+  },
+  {
+   "id": "home_address",
+   "line": "Section One",
+   "en": "Is this a home address?",
+   "zh": "是否为住宅地址？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "gov_id",
+   "line": "Section One",
+   "en": "Government-issued ID (FEIN, SSN, SEIN or other)",
+   "zh": "政府签发的识别号（FEIN、SSN、SEIN 或其他）"
+  },
+  {
+   "id": "employees",
+   "line": "Section One",
+   "en": "Number of employees",
+   "zh": "员工人数"
+  },
+  {
+   "id": "ownership",
+   "line": "Section One",
+   "en": "Ownership type",
+   "zh": "所有权类型",
+   "options": [
+    "Sole",
+    "Corporation",
+    "Partnership",
+    "LLC"
+   ]
+  },
+  {
+   "id": "description",
+   "line": "Section One",
+   "en": "Business description",
+   "zh": "业务说明"
+  },
+  {
+   "id": "classification",
+   "line": "Section Two",
+   "en": "Classification and its amount: \"Gross Receipts, estimated receipts\", \"Gross Payroll, estimated payroll\", \"Professional, years licensed\" or \"Residential Rental, number of units\"",
+   "zh": "分类及数额：\"Gross Receipts, 预计收入\"、\"Gross Payroll, 预计工资总额\"、\"Professional, 执照年数\" 或 \"Residential Rental, 出租单元数\"",
+   "options": [
+    "Gross Receipts / Commercial Rental",
+    "Gross Payroll (Administrative Headquarters)",
+    "Professional",
+    "Residential Rental"
+   ]
+  },
+  {
+   "id": "mailing",
+   "line": "Section Three",
+   "en": "Corporate or mailing address",
+   "zh": "公司或邮寄地址"
+  },
+  {
+   "id": "owners",
+   "line": "Section Four",
+   "en": "Owners or corporate officers: one per line, \"name, relationship to the company\"",
+   "zh": "所有人或公司高管：每行一位，\"姓名, 与公司关系\""
+  },
+  {
+   "id": "owner_ssn",
+   "line": "Section Four",
+   "en": "Owners' Social Security numbers",
+   "zh": "所有人社会安全号码"
+  },
+  {
+   "id": "owner_license",
+   "line": "Section Four",
+   "en": "Owners' driver's license numbers and expiration dates",
+   "zh": "所有人驾照号码与到期日"
+  }
+ ],
+ "unmapped": {
+  "gov_id": "This one box takes either an EIN or a Social Security number, and Placetta never writes a number into a box meant for an SSN; the applicant writes the EIN there by hand.",
+  "owner_ssn": "Placetta never writes Social Security numbers; each owner writes theirs by hand.",
+  "owner_license": "Placetta doesn't keep owners' driver's license numbers; each owner writes theirs by hand."
+ },
+ "blank": {
+  "phone2": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "business_name": [
+   {
+    "text": "BUSINESS NAME"
+   }
+  ],
+  "start_date": [
+   {
+    "text": "STARTING DATE",
+    "pick": "date"
+   }
+  ],
+  "phone": [
+   {
+    "text": "PHONE"
+   }
+  ],
+  "phone2": [
+   {
+    "text": "SECONDARY PHONE",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "email": [
+   {
+    "text": "EMAIL"
+   }
+  ],
+  "business_address": [
+   {
+    "text": "BUSNIESS ADDRESS"
+   }
+  ],
+  "home_address": [
+   {
+    "radio": "IS THIS A HOME ADDRESS",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "IS THIS A HOME ADDRESS",
+    "value": "No_2",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "employees": [
+   {
+    "text": "NO OF EMPLOYEES",
+    "pick": "digits"
+   }
+  ],
+  "ownership": [
+   {
+    "check": "Sole",
+    "if": "^sole"
+   },
+   {
+    "check": "Corporation",
+    "if": "^corp"
+   },
+   {
+    "check": "Partnership",
+    "if": "^partner"
+   },
+   {
+    "check": "LLC",
+    "if": "^(llc|limited liability)"
+   }
+  ],
+  "description": [
+   {
+    "text": "BUSINESS DESCRIPTION"
+   }
+  ],
+  "classification": [
+   {
+    "check": "Gross Receipts",
+    "if": "^gross receipts|^commercial"
+   },
+   {
+    "text": "Estimated Gross ReceiptsRent",
+    "pick": "tail|digits",
+    "if": "^gross receipts|^commercial"
+   },
+   {
+    "check": "Gross Payroll",
+    "if": "^gross payroll"
+   },
+   {
+    "text": "Estimated Gross Payroll",
+    "pick": "tail|digits",
+    "if": "^gross payroll"
+   },
+   {
+    "check": "undefined",
+    "if": "^professional"
+   },
+   {
+    "text": "Years Licensed",
+    "pick": "tail|digits",
+    "if": "^professional"
+   },
+   {
+    "check": "Residential Rental",
+    "if": "^residential"
+   },
+   {
+    "text": "Number of Rental Units",
+    "pick": "tail|digits",
+    "if": "^residential"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "CORPORATEMAILING ADDRESS"
+   }
+  ],
+  "owners": [
+   {
+    "text": "OWNER OR CORPORATE OFFICER NAME",
+    "pick": "line1|head"
+   },
+   {
+    "text": "RELATIONSHIP TO THE COMPANY",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "OWNER OR CORPORATE OFFICER NAME_2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "RELATIONSHIP TO THE COMPANY_2",
+    "pick": "line2|tail"
+   },
+   {
+    "text": "OWNER OR CORPORATE OFFICER NAME_3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "RELATIONSHIP TO THE COMPANY_3",
+    "pick": "line3|tail"
+   }
+  ]
+ }
+}

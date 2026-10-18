@@ -1,0 +1,2171 @@
+{
+ "form": "phl-plan-review",
+ "rev": "Plan Review Application Form for Stationary Food Establishments (Updated April 2025)",
+ "pdf": "phl-plan-review.pdf",
+ "url": "https://phila.gov/media/20250423122123/Plan-Review-for-Stationary-Food-Businesses-2025-fillable.pdf",
+ "checked": "2026-10-18",
+ "notes": "Philadelphia Office of Food Protection's plan review application for stationary food establishments (pages 31 to 36 of the packet), with Schedule A (finishes) and Schedule B (equipment). Lists that say 'check all that apply' take every item that applies, by name. In this PDF the 'food safety certified individual' question shares its radio group with the category of application, and 'outside dumpster' shares one with 'tobacco is sold', so the first of each pair is answered by hand. The menu is attached; the signature and its date are left for the applicant.",
+ "lines": [
+  {
+   "id": "est_name",
+   "line": "A1",
+   "en": "Establishment name (the store sign name)",
+   "zh": "场所名称（店招名称）"
+  },
+  {
+   "id": "address",
+   "line": "A2",
+   "en": "Street address, ZIP",
+   "zh": "街道地址与邮编"
+  },
+  {
+   "id": "phone",
+   "line": "A3",
+   "en": "Establishment phone",
+   "zh": "场所电话"
+  },
+  {
+   "id": "email",
+   "line": "A4",
+   "en": "Email",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "website",
+   "line": "A4",
+   "en": "Website",
+   "zh": "网站"
+  },
+  {
+   "id": "square_feet",
+   "line": "A5",
+   "en": "Establishment square footage",
+   "zh": "场所面积（平方英尺）"
+  },
+  {
+   "id": "occupancy",
+   "line": "A5",
+   "en": "Establishment occupancy, if known",
+   "zh": "场所容纳人数（如已知）"
+  },
+  {
+   "id": "hours",
+   "line": "A6",
+   "en": "Hours of operation: \"Mon-Thurs; Fri-Sat; Sun; days closed\"",
+   "zh": "营业时间：\"周一至周四; 周五至周六; 周日; 休息日\"",
+   "hint": {
+    "en": "Four parts separated by semicolons, e.g. \"10am-9pm; 10am-10pm; 11am-8pm; None\".",
+    "zh": "四部分以分号分隔，如 \"10am-9pm; 10am-10pm; 11am-8pm; None\"。"
+   }
+  },
+  {
+   "id": "employees",
+   "line": "A7",
+   "en": "Anticipated total number of employees working per shift",
+   "zh": "预计每班员工总数"
+  },
+  {
+   "id": "licensee",
+   "line": "Licensee",
+   "en": "Licensee: \"company name, company president\"",
+   "zh": "持照人：\"公司名称, 公司负责人\""
+  },
+  {
+   "id": "licensee_mailing",
+   "line": "Licensee",
+   "en": "Licensee mailing address, if different from the establishment",
+   "zh": "持照人邮寄地址（如与场所不同）"
+  },
+  {
+   "id": "licensee_phone",
+   "line": "Licensee",
+   "en": "Licensee phone",
+   "zh": "持照人电话"
+  },
+  {
+   "id": "licensee_email",
+   "line": "Licensee",
+   "en": "Licensee email",
+   "zh": "持照人电子邮箱"
+  },
+  {
+   "id": "contact",
+   "line": "Plan review contact",
+   "en": "Plan review contact person (receives all correspondence)",
+   "zh": "图纸审核联系人（接收所有往来函件）"
+  },
+  {
+   "id": "contact_role",
+   "line": "Plan review contact",
+   "en": "Contact's role",
+   "zh": "联系人身份",
+   "options": [
+    "Owner",
+    "Expeditor",
+    "Designer",
+    "Contractor",
+    "Manager",
+    "Other"
+   ],
+   "hint": {
+    "en": "One of the options, or \"Other: \" and the role.",
+    "zh": "选一项，或 \"Other: \" 加身份。"
+   }
+  },
+  {
+   "id": "contact_phone",
+   "line": "Plan review contact",
+   "en": "Contact phone",
+   "zh": "联系人电话"
+  },
+  {
+   "id": "contact_email",
+   "line": "Plan review contact",
+   "en": "Contact email",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "cal_number",
+   "line": "Licensee",
+   "en": "Philadelphia Commercial Activity / Business Privilege License number",
+   "zh": "费城商业活动/营业特许执照号"
+  },
+  {
+   "id": "category",
+   "line": "B",
+   "en": "Category of application, with the work start and completion dates: \"category, start, completion\"",
+   "zh": "申请类别及施工开始与完成日期：\"类别, 开始, 完成\"",
+   "options": [
+    "New Construction",
+    "Conversion",
+    "Modification"
+   ],
+   "hint": {
+    "en": "e.g. \"Conversion, 11/02/2026, 01/15/2027\".",
+    "zh": "如 \"Conversion, 11/02/2026, 01/15/2027\"。"
+   }
+  },
+  {
+   "id": "modifications",
+   "line": "B",
+   "en": "For a modification: items that apply",
+   "zh": "改建：适用项目",
+   "options": [
+    "Installation of equipment",
+    "Installation of surface finishes",
+    "Installation of custom millwork, cabinetry or plastic laminated surfaces",
+    "Replacement or relocation of permanently installed equipment",
+    "Expansion of food facility",
+    "Addition of customer dining or eat-in service",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each that applies, \"Other: \" and what it is, or \"None\".",
+    "zh": "逐项写明，或 \"Other: \" 加说明，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "scope",
+   "line": "C",
+   "en": "Scope of operation: a brief description of the work (up to four lines)",
+   "zh": "经营范围：工程简要说明（最多四行）"
+  },
+  {
+   "id": "establishment_type",
+   "line": "D",
+   "en": "Establishment type (all that apply)",
+   "zh": "场所类型（可多选）",
+   "options": [
+    "Restaurant (with alcohol service), seats",
+    "Restaurant (no alcohol service), seats",
+    "Takeout Only",
+    "Caterer",
+    "Wholesale Warehouse/Processor",
+    "Grocery Market",
+    "Prepackaged Food Retail Sales",
+    "Prepackaged Food Retail Sales <15%",
+    "Institution, type, max for service",
+    "Other"
+   ],
+   "hint": {
+    "en": "A restaurant goes alone with its seats: \"Restaurant (no alcohol service), 24\". An institution: \"Institution, child care, 60\". Otherwise name each that applies, or \"Other: \" and the type.",
+    "zh": "餐厅单独填写并附座位数：\"Restaurant (no alcohol service), 24\"。机构：\"Institution, child care, 60\"。其他逐项写明，或 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "food_safety_certified",
+   "line": "E",
+   "en": "A food safety certified individual is present at all hours with a valid Philadelphia certificate",
+   "zh": "所有营业时间都有持费城有效食品安全证书的人员在场"
+  },
+  {
+   "id": "health_policy",
+   "line": "E",
+   "en": "There is a written employee health policy with restrictions and exclusions",
+   "zh": "有书面员工健康政策，含限制与排除规定",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "haccp",
+   "line": "E",
+   "en": "A written food safety plan (HACCP) is provided",
+   "zh": "提供书面食品安全计划（HACCP）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "raw_undercooked",
+   "line": "E",
+   "en": "Raw or undercooked food is served (consumer advisory required)",
+   "zh": "供应生的或未熟透的食品（需消费者提示）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "shellfish",
+   "line": "E",
+   "en": "Shellfish is handled (tags kept 90 days)",
+   "zh": "处理贝类（标签保存 90 天）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "raw_washed",
+   "line": "E",
+   "en": "Raw food items are washed (vegetable, fruit, meat, etc.)",
+   "zh": "清洗生食原料（蔬菜、水果、肉类等）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "remote_storage",
+   "line": "E",
+   "en": "Food is stored in a remote or auxiliary area",
+   "zh": "食品存放在远程或辅助区域",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "basement",
+   "line": "E",
+   "en": "A basement or sublevel is present",
+   "zh": "设有地下室或地下层",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "live_food",
+   "line": "E",
+   "en": "Live food is handled (\"Yes, what\" or \"No\")",
+   "zh": "处理活体食材（\"Yes, 种类\" 或 \"No\"）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "multiple_floors_food",
+   "line": "E",
+   "en": "Food is stored or prepared on multiple floors",
+   "zh": "在多个楼层储存或制备食品",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "multiple_floors_dining",
+   "line": "E",
+   "en": "A dining room or toilet room is on multiple floors",
+   "zh": "用餐区或洗手间分布在多个楼层",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "trans_fats",
+   "line": "E",
+   "en": "Foods with trans fats are served",
+   "zh": "供应含反式脂肪的食品",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "liquor_license",
+   "line": "E",
+   "en": "Has a PA liquor license",
+   "zh": "持有宾州酒类执照",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "fasd_sign",
+   "line": "E",
+   "en": "Has the FASD (Fetal Alcohol Spectrum Disorder) sign in place",
+   "zh": "已张贴胎儿酒精谱系障碍（FASD）警示",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "inside_trash",
+   "line": "E",
+   "en": "Has an inside storage room for trash",
+   "zh": "设有室内垃圾储存间",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "reusable_containers",
+   "line": "E",
+   "en": "Reusable containers from customers are accepted",
+   "zh": "接受顾客自带可重复使用容器",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "hot_food",
+   "line": "E",
+   "en": "Hot food is prepared",
+   "zh": "制备热食",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "advance_prep",
+   "line": "E",
+   "en": "Food is prepared in advance for later service",
+   "zh": "提前制备食品以供稍后供应",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "cook_cool_reheat",
+   "line": "E",
+   "en": "Food is cooked, cooled and reheated",
+   "zh": "食品经烹饪、冷却后再加热",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "customer_food",
+   "line": "E",
+   "en": "Food is handled by customers (buffets, hot dogs, microwave use, etc.)",
+   "zh": "顾客自行处理食品（自助餐、热狗、微波炉等）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "hot_beverage",
+   "line": "E",
+   "en": "A hot beverage is provided (coffee, tea, etc.)",
+   "zh": "提供热饮（咖啡、茶等）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "customer_beverage",
+   "line": "E",
+   "en": "Beverages are handled by customers (coffee, soda, ice, etc.)",
+   "zh": "顾客自行处理饮品（咖啡、汽水、冰等）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "outdoor",
+   "line": "E",
+   "en": "Outdoor food or beverage handling is provided",
+   "zh": "提供户外食品或饮品服务",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "delivery",
+   "line": "E",
+   "en": "Delivery service is provided",
+   "zh": "提供外送服务",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "hood",
+   "line": "E",
+   "en": "A hood for cooking exhaust is provided",
+   "zh": "配有烹饪排烟罩",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "oil_waste",
+   "line": "E",
+   "en": "Cooking oil waste is generated",
+   "zh": "产生废食用油",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "dish_machine",
+   "line": "E",
+   "en": "A dishwashing machine is provided (\"Yes, low\" or \"Yes, high\" temperature, or \"No\")",
+   "zh": "配有洗碗机（\"Yes, low\" 或 \"Yes, high\" 温度，或 \"No\"）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "menu_labeling",
+   "line": "E",
+   "en": "Menu labeling signs are in place",
+   "zh": "已张贴菜单营养标示",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "no_smoking",
+   "line": "E",
+   "en": "No smoking signs are in place",
+   "zh": "已张贴禁烟标志",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "grindable_waste",
+   "line": "E",
+   "en": "Grindable food waste is generated",
+   "zh": "产生可粉碎的食物垃圾",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "outside_dumpster",
+   "line": "E",
+   "en": "Has an outside dumpster or trash cans",
+   "zh": "设有室外垃圾箱"
+  },
+  {
+   "id": "tobacco",
+   "line": "E",
+   "en": "Tobacco is sold (attach the Philadelphia Tobacco Retailer Permit)",
+   "zh": "销售烟草（附费城烟草零售许可）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "G",
+   "en": "Applicant name (print)",
+   "zh": "申请人姓名（正楷）"
+  },
+  {
+   "id": "signer_title",
+   "line": "G",
+   "en": "Title",
+   "zh": "职务"
+  },
+  {
+   "id": "finish_kitchen",
+   "line": "Schedule A",
+   "en": "Finishes, Kitchen: cooking and food prep: \"floors, coved base, walls, ceiling, lighting and shielding\"",
+   "zh": "装修，厨房：烹饪与备餐：\"地面, 踢脚, 墙面, 天花, 照明与灯罩\""
+  },
+  {
+   "id": "finish_dry_storage",
+   "line": "Schedule A",
+   "en": "Finishes, Dry storage: \"floors, coved base, walls, ceiling, lighting and shielding\"",
+   "zh": "装修，干货储藏：\"地面, 踢脚, 墙面, 天花, 照明与灯罩\""
+  },
+  {
+   "id": "finish_warewashing",
+   "line": "Schedule A",
+   "en": "Finishes, Warewashing: \"floors, coved base, walls, ceiling, lighting and shielding\"",
+   "zh": "装修，洗碗区：\"地面, 踢脚, 墙面, 天花, 照明与灯罩\""
+  },
+  {
+   "id": "finish_serving",
+   "line": "Schedule A",
+   "en": "Finishes, Serving: \"floors, coved base, walls, ceiling, lighting and shielding\"",
+   "zh": "装修，出餐区：\"地面, 踢脚, 墙面, 天花, 照明与灯罩\""
+  },
+  {
+   "id": "finish_toilet",
+   "line": "Schedule A",
+   "en": "Finishes, Toilet room: \"floors, coved base, walls, ceiling, lighting and shielding\"",
+   "zh": "装修，洗手间：\"地面, 踢脚, 墙面, 天花, 照明与灯罩\""
+  },
+  {
+   "id": "finish_janitor",
+   "line": "Schedule A",
+   "en": "Finishes, Janitor closet: \"floors, coved base, walls, ceiling, lighting and shielding\"",
+   "zh": "装修，清洁间：\"地面, 踢脚, 墙面, 天花, 照明与灯罩\""
+  },
+  {
+   "id": "finish_dining",
+   "line": "Schedule A",
+   "en": "Finishes, Dining area: \"floors, coved base, walls, ceiling, lighting and shielding\"",
+   "zh": "装修，用餐区：\"地面, 踢脚, 墙面, 天花, 照明与灯罩\""
+  },
+  {
+   "id": "finish_other",
+   "line": "Schedule A",
+   "en": "Finishes, Other: \"floors, coved base, walls, ceiling, lighting and shielding\"",
+   "zh": "装修，其他：\"地面, 踢脚, 墙面, 天花, 照明与灯罩\""
+  },
+  {
+   "id": "refuse",
+   "line": "Schedule A",
+   "en": "Refuse and recyclables: collection frequency and collector",
+   "zh": "垃圾与可回收物：清运频率与清运公司"
+  },
+  {
+   "id": "equipment_1",
+   "line": "Schedule B",
+   "en": "Equipment schedule, items 1 to 9",
+   "zh": "设备清单，第 1 至 9 项",
+   "hint": {
+    "en": "One item per line: \"item no, description, manufacturer, model, method of installation\".",
+    "zh": "每行一项：\"编号, 设备说明, 制造商, 型号, 安装方式\"。"
+   }
+  },
+  {
+   "id": "equipment_2",
+   "line": "Schedule B",
+   "en": "Equipment schedule, items 10 to 18",
+   "zh": "设备清单，第 10 至 18 项",
+   "hint": {
+    "en": "One item per line: \"item no, description, manufacturer, model, method of installation\".",
+    "zh": "每行一项：\"编号, 设备说明, 制造商, 型号, 安装方式\"。"
+   }
+  },
+  {
+   "id": "equipment_3",
+   "line": "Schedule B",
+   "en": "Equipment schedule, items 19 to 25",
+   "zh": "设备清单，第 19 至 25 项",
+   "hint": {
+    "en": "One item per line: \"item no, description, manufacturer, model, method of installation\".",
+    "zh": "每行一项：\"编号, 设备说明, 制造商, 型号, 安装方式\"。"
+   }
+  }
+ ],
+ "unmapped": {
+  "food_safety_certified": "This PDF puts this yes/no in the same radio group as the category of application, so answering one clears the other; the applicant ticks it by hand.",
+  "outside_dumpster": "This PDF puts this yes/no in the same radio group as 'tobacco is sold', so answering one clears the other; the applicant ticks it by hand."
+ },
+ "blank": {
+  "website": "^(none|no|n/?a)\\.?$",
+  "occupancy": "^(none|no|n/?a)\\.?$",
+  "licensee_mailing": "^(none|no|n/?a|same)\\.?$",
+  "cal_number": "^(none|no|n/?a)\\.?$",
+  "modifications": "^(none|no|n/?a)\\.?$",
+  "finish_other": "^(none|no|n/?a)\\.?$",
+  "equipment_2": "^(none|no|n/?a)\\.?$",
+  "equipment_3": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "est_name": [
+   {
+    "text": "EstName"
+   }
+  ],
+  "address": [
+   {
+    "text": "2 Street Address Zip"
+   }
+  ],
+  "phone": [
+   {
+    "text": "3 Establishment Phone Number"
+   }
+  ],
+  "email": [
+   {
+    "text": "4 Email"
+   }
+  ],
+  "website": [
+   {
+    "text": "Website",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "square_feet": [
+   {
+    "text": "5 Establishment Square Footage",
+    "pick": "digits"
+   }
+  ],
+  "occupancy": [
+   {
+    "text": "Establishment Occupancy if known",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "hours": [
+   {
+    "text": "6 Hours of Operation MonThurs",
+    "pick": "line1"
+   },
+   {
+    "text": "FriSat",
+    "pick": "line2"
+   },
+   {
+    "text": "Sun",
+    "pick": "line3"
+   },
+   {
+    "text": "Closed",
+    "pick": "line4"
+   }
+  ],
+  "employees": [
+   {
+    "text": "7 Anticipated Total Number of Employees Working Per Shift",
+    "pick": "digits"
+   }
+  ],
+  "licensee": [
+   {
+    "text": "Name of Company",
+    "pick": "head"
+   },
+   {
+    "text": "Co President",
+    "pick": "tail"
+   }
+  ],
+  "licensee_mailing": [
+   {
+    "text": "Address if different from establishment address",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "text": "City State Zip 1",
+    "pick": "citystatezip",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   }
+  ],
+  "licensee_phone": [
+   {
+    "text": "Phone_2"
+   }
+  ],
+  "licensee_email": [
+   {
+    "text": "Email_2"
+   }
+  ],
+  "contact": [
+   {
+    "text": "Name"
+   }
+  ],
+  "contact_role": [
+   {
+    "check": "Check Box20",
+    "if": "^owner"
+   },
+   {
+    "check": "Check Box21",
+    "if": "^expedit"
+   },
+   {
+    "check": "Check Box22",
+    "if": "^design"
+   },
+   {
+    "check": "Check Box23",
+    "if": "^contract"
+   },
+   {
+    "check": "Check Box24",
+    "if": "^manag"
+   },
+   {
+    "check": "Check Box25",
+    "if": "^other"
+   },
+   {
+    "text": "Other",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Phone"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Email"
+   }
+  ],
+  "cal_number": [
+   {
+    "text": "Philadelphia Commercial Activity  Business Privilege License Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "category": [
+   {
+    "radio": "Group21",
+    "value": "Choice1",
+    "if": "^new"
+   },
+   {
+    "text": "Work Start Date",
+    "pick": "tail|head|date",
+    "if": "^new"
+   },
+   {
+    "text": "Work Completion Date",
+    "pick": "tail|tail|date",
+    "if": "^new"
+   },
+   {
+    "radio": "Group21",
+    "value": "Choice2",
+    "if": "^conversion"
+   },
+   {
+    "text": "Work Start Date_2",
+    "pick": "tail|head|date",
+    "if": "^conversion"
+   },
+   {
+    "text": "Work Completion Date_2",
+    "pick": "tail|tail|date",
+    "if": "^conversion"
+   },
+   {
+    "radio": "Group21",
+    "value": "Choice3",
+    "if": "^modification"
+   },
+   {
+    "text": "Work Start Date_3",
+    "pick": "tail|head|date",
+    "if": "^modification"
+   },
+   {
+    "text": "Work Completion Date_3",
+    "pick": "tail|tail|date",
+    "if": "^modification"
+   }
+  ],
+  "modifications": [
+   {
+    "check": "Check Box26",
+    "if": "(^|,)[^,]*(equipment)"
+   },
+   {
+    "check": "Check Box27",
+    "if": "(^|,)[^,]*(finish)"
+   },
+   {
+    "check": "Check Box28",
+    "if": "(^|,)[^,]*(millwork|cabinet|laminate)"
+   },
+   {
+    "check": "Check Box29",
+    "if": "(^|,)[^,]*(replace|relocat)"
+   },
+   {
+    "check": "Check Box30",
+    "if": "(^|,)[^,]*(expan)"
+   },
+   {
+    "check": "Check Box31",
+    "if": "(^|,)[^,]*(dining|eat.?in)"
+   },
+   {
+    "check": "Check Box32",
+    "if": "^other\\s*:"
+   },
+   {
+    "text": "Other_2",
+    "pick": "tail",
+    "if": "^other\\s*:"
+   }
+  ],
+  "scope": [
+   {
+    "text": "C Scope of Operation brief description of the work done 1",
+    "pick": "line1"
+   },
+   {
+    "text": "C Scope of Operation brief description of the work done 2",
+    "pick": "line2"
+   },
+   {
+    "text": "C Scope of Operation brief description of the work done 3",
+    "pick": "line3"
+   },
+   {
+    "text": "C Scope of Operation brief description of the work done 4",
+    "pick": "line4"
+   }
+  ],
+  "establishment_type": [
+   {
+    "check": "Check Box33",
+    "if": "with alcohol"
+   },
+   {
+    "text": "Restaurant with alcohol service  seats",
+    "pick": "tail|digits",
+    "if": "^restaurant.{0,20}with alcohol"
+   },
+   {
+    "check": "Check Box34",
+    "if": "no alcohol"
+   },
+   {
+    "text": "Restaurant no alcohol service  seats",
+    "pick": "tail|digits",
+    "if": "^restaurant.{0,20}no alcohol"
+   },
+   {
+    "check": "Check Box35",
+    "if": "(^|,)[^,]*(takeout)"
+   },
+   {
+    "check": "Check Box36",
+    "if": "(^|,)[^,]*(cater)"
+   },
+   {
+    "check": "Check Box37",
+    "if": "(^|,)[^,]*(wholesale|warehouse|processor)"
+   },
+   {
+    "check": "Check Box38",
+    "if": "(^|,)[^,]*(grocery)"
+   },
+   {
+    "check": "Check Box40",
+    "if": "(^|,)[^,]*(prepackaged(?!.*15))"
+   },
+   {
+    "check": "Check Box41",
+    "if": "(^|,)[^,]*(15)"
+   },
+   {
+    "check": "Check Box39",
+    "if": "^institution"
+   },
+   {
+    "text": "Specify",
+    "pick": "tail|head",
+    "if": "^institution"
+   },
+   {
+    "text": "Max  for Service",
+    "pick": "tail|tail|digits",
+    "if": "^institution"
+   },
+   {
+    "check": "Check Box42",
+    "if": "^other\\s*:"
+   },
+   {
+    "text": "Other specify",
+    "pick": "tail",
+    "if": "^other\\s*:"
+   }
+  ],
+  "health_policy": [
+   {
+    "radio": "Group22",
+    "value": "Choice6",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group22",
+    "value": "Choice7",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "haccp": [
+   {
+    "radio": "Group23",
+    "value": "Choice1",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group23",
+    "value": "Choice2",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "raw_undercooked": [
+   {
+    "radio": "Group24",
+    "value": "Choice3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group24",
+    "value": "Choice4",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "shellfish": [
+   {
+    "radio": "Group25",
+    "value": "Choice5",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group25",
+    "value": "Choice8",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "raw_washed": [
+   {
+    "radio": "Group26",
+    "value": "Choice9",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group26",
+    "value": "Choice10",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "remote_storage": [
+   {
+    "radio": "Group27",
+    "value": "Choice11",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group27",
+    "value": "Choice12",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "basement": [
+   {
+    "radio": "Group28",
+    "value": "Choice13",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group28",
+    "value": "Choice14",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "live_food": [
+   {
+    "radio": "Group29",
+    "value": "Choice15",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group29",
+    "value": "Choice16",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "text": "Specify_2",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "multiple_floors_food": [
+   {
+    "radio": "Group30",
+    "value": "Choice17",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group30",
+    "value": "Choice18",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "multiple_floors_dining": [
+   {
+    "radio": "Group31",
+    "value": "Choice19",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group31",
+    "value": "Choice20",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "trans_fats": [
+   {
+    "radio": "Group32",
+    "value": "Choice21",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group32",
+    "value": "Choice22",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "liquor_license": [
+   {
+    "radio": "Group33",
+    "value": "Choice23",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group33",
+    "value": "Choice24",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "fasd_sign": [
+   {
+    "radio": "Group34",
+    "value": "Choice25",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group34",
+    "value": "Choice26",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "inside_trash": [
+   {
+    "radio": "Group35",
+    "value": "Choice27",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group35",
+    "value": "Choice28",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "reusable_containers": [
+   {
+    "radio": "Group36",
+    "value": "Choice29",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group36",
+    "value": "Choice30",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "hot_food": [
+   {
+    "radio": "Group37",
+    "value": "Choice1",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group37",
+    "value": "Choice2",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "advance_prep": [
+   {
+    "radio": "Group38",
+    "value": "Choice3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group38",
+    "value": "Choice4",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "cook_cool_reheat": [
+   {
+    "radio": "Group39",
+    "value": "Choice5",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group39",
+    "value": "Choice6",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "customer_food": [
+   {
+    "radio": "Group40",
+    "value": "Choice7",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group40",
+    "value": "Choice8",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "hot_beverage": [
+   {
+    "radio": "Group41",
+    "value": "Choice1",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group41",
+    "value": "Choice2",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "customer_beverage": [
+   {
+    "radio": "Group42",
+    "value": "Choice3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group42",
+    "value": "Choice4",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "outdoor": [
+   {
+    "radio": "Group43",
+    "value": "Choice5",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group43",
+    "value": "Choice6",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "delivery": [
+   {
+    "radio": "Group44",
+    "value": "Choice9",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group44",
+    "value": "Choice10",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "hood": [
+   {
+    "radio": "Group45",
+    "value": "Choice11",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group45",
+    "value": "Choice12",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "oil_waste": [
+   {
+    "radio": "Group46",
+    "value": "Choice13",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group46",
+    "value": "Choice14",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "dish_machine": [
+   {
+    "radio": "Group47",
+    "value": "Choice15",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group47",
+    "value": "Choice16",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "text": "Specify_3",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "menu_labeling": [
+   {
+    "radio": "Group48",
+    "value": "Choice17",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group48",
+    "value": "Choice18",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "no_smoking": [
+   {
+    "radio": "Group49",
+    "value": "Choice19",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group49",
+    "value": "Choice20",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "grindable_waste": [
+   {
+    "radio": "Group50",
+    "value": "Choice21",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group50",
+    "value": "Choice22",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "tobacco": [
+   {
+    "radio": "Group51",
+    "value": "Choice25",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group51",
+    "value": "Choice26",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Applicant Name Print"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "Title"
+   }
+  ],
+  "finish_kitchen": [
+   {
+    "text": "FloorsKitchen Cooking Food Prep",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Coved BaseKitchen Cooking Food Prep",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "WallsKitchen Cooking Food Prep",
+    "pick": "tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CeilingKitchen Cooking Food Prep",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Lighting and ShieldingKitchen Cooking Food Prep",
+    "pick": "tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "finish_dry_storage": [
+   {
+    "text": "FloorsDry Storage",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Coved BaseDry Storage",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "WallsDry Storage",
+    "pick": "tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CeilingDry Storage",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Lighting and ShieldingDry Storage",
+    "pick": "tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "finish_warewashing": [
+   {
+    "text": "FloorsWarewashing",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Coved BaseWarewashing",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "WallsWarewashing",
+    "pick": "tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CeilingWarewashing",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Lighting and ShieldingWarewashing",
+    "pick": "tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "finish_serving": [
+   {
+    "text": "FloorsServing",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Coved BaseServing",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "WallsServing",
+    "pick": "tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CeilingServing",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Lighting and ShieldingServing",
+    "pick": "tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "finish_toilet": [
+   {
+    "text": "FloorsToilet Room",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Coved BaseToilet Room",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "WallsToilet Room",
+    "pick": "tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CeilingToilet Room",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Lighting and ShieldingToilet Room",
+    "pick": "tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "finish_janitor": [
+   {
+    "text": "FloorsJanitor Closet",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Coved BaseJanitor Closet",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "WallsJanitor Closet",
+    "pick": "tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CeilingJanitor Closet",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Lighting and ShieldingJanitor Closet",
+    "pick": "tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "finish_dining": [
+   {
+    "text": "FloorsDining Area",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Coved BaseDining Area",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "WallsDining Area",
+    "pick": "tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CeilingDining Area",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Lighting and ShieldingDining Area",
+    "pick": "tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "finish_other": [
+   {
+    "text": "FloorsOther",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Coved BaseOther",
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "WallsOther",
+    "pick": "tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CeilingOther",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Lighting and ShieldingOther",
+    "pick": "tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "refuse": [
+   {
+    "text": "handling information 1",
+    "pick": "line1"
+   },
+   {
+    "text": "handling information 2",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "equipment_1": [
+   {
+    "text": "Item NoRow1",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow1",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow1",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow1",
+    "pick": "line1|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow1",
+    "pick": "line1|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow2",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow2",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow2",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow2",
+    "pick": "line2|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow2",
+    "pick": "line2|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow3",
+    "pick": "line3|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow3",
+    "pick": "line3|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow3",
+    "pick": "line3|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow3",
+    "pick": "line3|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow3",
+    "pick": "line3|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow4",
+    "pick": "line4|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow4",
+    "pick": "line4|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow4",
+    "pick": "line4|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow4",
+    "pick": "line4|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow4",
+    "pick": "line4|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow5",
+    "pick": "line5|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow5",
+    "pick": "line5|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow5",
+    "pick": "line5|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow5",
+    "pick": "line5|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow5",
+    "pick": "line5|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow6",
+    "pick": "line6|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow6",
+    "pick": "line6|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow6",
+    "pick": "line6|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow6",
+    "pick": "line6|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow6",
+    "pick": "line6|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow7",
+    "pick": "line7|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow7",
+    "pick": "line7|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow7",
+    "pick": "line7|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow7",
+    "pick": "line7|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow7",
+    "pick": "line7|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow8",
+    "pick": "line8|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow8",
+    "pick": "line8|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow8",
+    "pick": "line8|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow8",
+    "pick": "line8|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow8",
+    "pick": "line8|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow9",
+    "pick": "line9|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow9",
+    "pick": "line9|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow9",
+    "pick": "line9|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow9",
+    "pick": "line9|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow9",
+    "pick": "line9|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "equipment_2": [
+   {
+    "text": "Item NoRow10",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow10",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow10",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow10",
+    "pick": "line1|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow10",
+    "pick": "line1|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow11",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow11",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow11",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow11",
+    "pick": "line2|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow11",
+    "pick": "line2|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow12",
+    "pick": "line3|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow12",
+    "pick": "line3|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow12",
+    "pick": "line3|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow12",
+    "pick": "line3|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow12",
+    "pick": "line3|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow13",
+    "pick": "line4|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow13",
+    "pick": "line4|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow13",
+    "pick": "line4|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow13",
+    "pick": "line4|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow13",
+    "pick": "line4|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow14",
+    "pick": "line5|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow14",
+    "pick": "line5|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow14",
+    "pick": "line5|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow14",
+    "pick": "line5|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow14",
+    "pick": "line5|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow15",
+    "pick": "line6|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow15",
+    "pick": "line6|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow15",
+    "pick": "line6|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow15",
+    "pick": "line6|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow15",
+    "pick": "line6|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow16",
+    "pick": "line7|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow16",
+    "pick": "line7|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow16",
+    "pick": "line7|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow16",
+    "pick": "line7|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow16",
+    "pick": "line7|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow17",
+    "pick": "line8|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow17",
+    "pick": "line8|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow17",
+    "pick": "line8|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow17",
+    "pick": "line8|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow17",
+    "pick": "line8|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow18",
+    "pick": "line9|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow18",
+    "pick": "line9|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow18",
+    "pick": "line9|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow18",
+    "pick": "line9|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow18",
+    "pick": "line9|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "equipment_3": [
+   {
+    "text": "Item NoRow19",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow19",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow19",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow19",
+    "pick": "line1|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow19",
+    "pick": "line1|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow20",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow20",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow20",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow20",
+    "pick": "line2|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow20",
+    "pick": "line2|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow21",
+    "pick": "line3|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow21",
+    "pick": "line3|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow21",
+    "pick": "line3|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow21",
+    "pick": "line3|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow21",
+    "pick": "line3|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow22",
+    "pick": "line4|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow22",
+    "pick": "line4|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow22",
+    "pick": "line4|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow22",
+    "pick": "line4|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow22",
+    "pick": "line4|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow23",
+    "pick": "line5|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow23",
+    "pick": "line5|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow23",
+    "pick": "line5|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow23",
+    "pick": "line5|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow23",
+    "pick": "line5|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow24",
+    "pick": "line6|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow24",
+    "pick": "line6|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow24",
+    "pick": "line6|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow24",
+    "pick": "line6|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow24",
+    "pick": "line6|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Item NoRow25",
+    "pick": "line7|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Equipment DescriptionRow25",
+    "pick": "line7|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Manufacturers NameRow25",
+    "pick": "line7|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model NoRow25",
+    "pick": "line7|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Method of InstallationRow25",
+    "pick": "line7|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ]
+ }
+}

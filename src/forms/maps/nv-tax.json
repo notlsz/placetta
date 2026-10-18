@@ -1,0 +1,628 @@
+{
+ "form": "nv-tax",
+ "rev": "TAX-F006 Nevada Business Registration",
+ "pdf": "nv-tax.pdf",
+ "url": "https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf",
+ "checked": "2026-10-18",
+ "notes": "Nevada's joint business registration (Department of Taxation sales/use tax permit and the Employment Security Division's unemployment insurance account). Addresses print whole on one line. Owners: name as 'Last, First MI'; dates MM/DD/YYYY. Business activities: name every one that applies ('Retail Sales - New, Service'). The SSN or ITIN boxes are never printed; the signer writes them. The acquisition details, filing frequency, payment and security boxes, the consolidated-account and contact pages and the signatures and dates are left for the signer.",
+ "lines": [
+  {
+   "id": "purpose",
+   "line": "1",
+   "en": "Reason for registering",
+   "zh": "登记原因",
+   "options": [
+    "New Business",
+    "Add Location",
+    "Change in Ownership/Entity/Officers",
+    "Change in Location Address"
+   ]
+  },
+  {
+   "id": "permits",
+   "line": "2",
+   "en": "Permits needed",
+   "zh": "所需许可证",
+   "hint": {
+    "en": "Name each: \"Sales/Use Tax Permit\" (and \"Consumer Use Tax Permit\" or \"Certificate of Authority\" if needed).",
+    "zh": "逐项写明：\"Sales/Use Tax Permit\"（如需要再加 \"Consumer Use Tax Permit\" 或 \"Certificate of Authority\"）。"
+   }
+  },
+  {
+   "id": "entity_type",
+   "line": "4",
+   "en": "Business entity",
+   "zh": "企业类型",
+   "options": [
+    "Sole Proprietor",
+    "Partnership",
+    "Corporation",
+    "Limited Liability Company",
+    "Limited Partnership",
+    "Limited Liability Partnership"
+   ]
+  },
+  {
+   "id": "nv_business_id",
+   "line": "5",
+   "en": "Nevada Business ID (NVBID)",
+   "zh": "内华达企业编号（NVBID）"
+  },
+  {
+   "id": "fein",
+   "line": "6",
+   "en": "Federal tax ID number (FEIN)",
+   "zh": "联邦税号（FEIN）"
+  },
+  {
+   "id": "incorporated",
+   "line": "7",
+   "en": "State and date of incorporation",
+   "zh": "注册州与注册日期",
+   "hint": {
+    "en": "e.g. \"Nevada, 03/15/2026\"",
+    "zh": "如 \"Nevada, 03/15/2026\""
+   }
+  },
+  {
+   "id": "entity_name",
+   "line": "8",
+   "en": "Corporate or entity name (as on the state business license)",
+   "zh": "公司或实体名称（与州营业执照一致）"
+  },
+  {
+   "id": "dba",
+   "line": "8",
+   "en": "Nevada name (DBA)",
+   "zh": "内华达经营名称（DBA）"
+  },
+  {
+   "id": "entity_address",
+   "line": "9",
+   "en": "Corporate or entity address",
+   "zh": "公司或实体地址"
+  },
+  {
+   "id": "entity_phone",
+   "line": "9",
+   "en": "Corporate or entity phone",
+   "zh": "公司或实体电话"
+  },
+  {
+   "id": "email",
+   "line": "9",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "location",
+   "line": "10",
+   "en": "Location of Nevada business operations",
+   "zh": "内华达营业地点"
+  },
+  {
+   "id": "location_phone",
+   "line": "10",
+   "en": "Location phone",
+   "zh": "营业地点电话"
+  },
+  {
+   "id": "fax",
+   "line": "10",
+   "en": "Business fax",
+   "zh": "企业传真"
+  },
+  {
+   "id": "mailing",
+   "line": "11",
+   "en": "Location mailing address",
+   "zh": "营业地点邮寄地址"
+  },
+  {
+   "id": "records",
+   "line": "13",
+   "en": "Location of business records",
+   "zh": "业务记录存放地点"
+  },
+  {
+   "id": "owner1",
+   "line": "14",
+   "en": "Owner, partner or officer 1: name (Last, First MI)",
+   "zh": "所有人、合伙人或高管 1：姓名（姓, 名 中间名首字母）",
+   "hint": {
+    "en": "As \"Chen, Mei L\". A company that owns this one: its name and federal ID. The SSN is written by hand.",
+    "zh": "写作 \"Chen, Mei L\"。如由其他公司持有：填该公司名称及联邦税号。社会安全号手写。"
+   }
+  },
+  {
+   "id": "owner1_percent",
+   "line": "14",
+   "en": "Owner, partner or officer 1: percent owned",
+   "zh": "所有人、合伙人或高管 1：持股比例"
+  },
+  {
+   "id": "owner1_dob",
+   "line": "14",
+   "en": "Owner, partner or officer 1: date of birth",
+   "zh": "所有人、合伙人或高管 1：出生日期"
+  },
+  {
+   "id": "owner1_title",
+   "line": "14",
+   "en": "Owner, partner or officer 1: title",
+   "zh": "所有人、合伙人或高管 1：职务"
+  },
+  {
+   "id": "owner1_address",
+   "line": "14",
+   "en": "Owner, partner or officer 1: residence address",
+   "zh": "所有人、合伙人或高管 1：住址"
+  },
+  {
+   "id": "owner1_phone",
+   "line": "14",
+   "en": "Owner, partner or officer 1: residence phone",
+   "zh": "所有人、合伙人或高管 1：住宅电话"
+  },
+  {
+   "id": "owner2",
+   "line": "14",
+   "en": "Owner, partner or officer 2: name (Last, First MI)",
+   "zh": "所有人、合伙人或高管 2：姓名（姓, 名 中间名首字母）"
+  },
+  {
+   "id": "owner2_percent",
+   "line": "14",
+   "en": "Owner, partner or officer 2: percent owned",
+   "zh": "所有人、合伙人或高管 2：持股比例"
+  },
+  {
+   "id": "owner2_dob",
+   "line": "14",
+   "en": "Owner, partner or officer 2: date of birth",
+   "zh": "所有人、合伙人或高管 2：出生日期"
+  },
+  {
+   "id": "owner2_title",
+   "line": "14",
+   "en": "Owner, partner or officer 2: title",
+   "zh": "所有人、合伙人或高管 2：职务"
+  },
+  {
+   "id": "owner2_address",
+   "line": "14",
+   "en": "Owner, partner or officer 2: residence address",
+   "zh": "所有人、合伙人或高管 2：住址"
+  },
+  {
+   "id": "owner2_phone",
+   "line": "14",
+   "en": "Owner, partner or officer 2: residence phone",
+   "zh": "所有人、合伙人或高管 2：住宅电话"
+  },
+  {
+   "id": "started",
+   "line": "15",
+   "en": "Date business started in Nevada",
+   "zh": "在内华达开始营业的日期"
+  },
+  {
+   "id": "location_opened",
+   "line": "15",
+   "en": "Date this location opened in Nevada",
+   "zh": "此地点在内华达开业的日期"
+  },
+  {
+   "id": "employees",
+   "line": "16",
+   "en": "Employees in Nevada: how many (0 if none)",
+   "zh": "内华达员工人数（没有则填 0）"
+  },
+  {
+   "id": "ui_number",
+   "line": "17",
+   "en": "Unemployment insurance (ESD) account number, if any",
+   "zh": "失业保险（ESD）账号（如有）"
+  },
+  {
+   "id": "activities",
+   "line": "18",
+   "en": "Business activities (all that apply)",
+   "zh": "业务活动（可多选）",
+   "options": [
+    "Service",
+    "Retail Sales - New",
+    "Retail Sales - Used",
+    "Wholesale",
+    "Manufacturing",
+    "Tobacco/OTP",
+    "Retail Liquor",
+    "Live Entertainment",
+    "Marketplace Seller",
+    "Leasing (other than employees)",
+    "Construction/Erection"
+   ],
+   "hint": {
+    "en": "Name each that applies, e.g. \"Retail Sales - New, Service\".",
+    "zh": "逐项写明，如 \"Retail Sales - New, Service\"。"
+   }
+  },
+  {
+   "id": "description",
+   "line": "19",
+   "en": "Nature of your business in Nevada: products sold, labor or services",
+   "zh": "在内华达的业务性质：销售的产品、劳务或服务"
+  },
+  {
+   "id": "naics",
+   "line": "19",
+   "en": "NAICS code",
+   "zh": "NAICS 代码"
+  },
+  {
+   "id": "language",
+   "line": "19",
+   "en": "Preferred language",
+   "zh": "首选语言"
+  },
+  {
+   "id": "monthly_receipts",
+   "line": "21",
+   "en": "Estimated total monthly Nevada receipts",
+   "zh": "预计每月内华达总收入"
+  },
+  {
+   "id": "monthly_taxable",
+   "line": "22",
+   "en": "Estimated total monthly Nevada taxable receipts",
+   "zh": "预计每月内华达应税收入"
+  },
+  {
+   "id": "locations",
+   "line": "26",
+   "en": "Total Nevada business locations",
+   "zh": "内华达营业地点总数"
+  },
+  {
+   "id": "tangible",
+   "line": "31",
+   "en": "Will you sell or lease tangible personal property in Nevada?",
+   "zh": "是否在内华达销售或租赁有形动产？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Responsible party: printed name and title",
+   "zh": "负责人：正楷姓名与职务"
+  }
+ ],
+ "blank": {
+  "nv_business_id": "^(none|no|n/?a)\\.?$",
+  "fax": "^(none|no|n/?a)\\.?$",
+  "ui_number": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "purpose": [
+   {
+    "check": "New Business",
+    "if": "^new"
+   },
+   {
+    "check": "Add Location",
+    "if": "add.*location"
+   },
+   {
+    "check": "Change in OwnershipEntityOfficers",
+    "if": "ownership"
+   },
+   {
+    "check": "Change in Location",
+    "if": "change.*location"
+   }
+  ],
+  "permits": [
+   {
+    "check": "SalesUse Tax Permit",
+    "if": "sales"
+   },
+   {
+    "check": "Consumer Use Tax Permit",
+    "if": "consumer"
+   },
+   {
+    "check": "Certificate of Authority",
+    "if": "authority"
+   }
+  ],
+  "entity_type": [
+   {
+    "check": "Sole Proprietor",
+    "if": "^sole"
+   },
+   {
+    "check": "Partnership",
+    "if": "^(general )?partnership"
+   },
+   {
+    "check": "Corporation",
+    "if": "^corp"
+   },
+   {
+    "check": "Limited Liability Company",
+    "if": "^(limited liability company|llc)"
+   },
+   {
+    "check": "Limited Partnership",
+    "if": "^limited partnership"
+   },
+   {
+    "check": "Limited Liability Partnership",
+    "if": "^limited liability partnership|^llp"
+   }
+  ],
+  "nv_business_id": [
+   {
+    "text": "NVBID",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "fein": [
+   {
+    "text": "FED first 2 digits",
+    "pick": "ein1"
+   },
+   {
+    "text": "FED last digits",
+    "pick": "ein2"
+   }
+  ],
+  "incorporated": [
+   {
+    "text": "State  Date of Incorporation"
+   }
+  ],
+  "entity_name": [
+   {
+    "text": "CorporateEntity Name as shown on State Business License"
+   }
+  ],
+  "dba": [
+   {
+    "text": "Nevada Name DBA"
+   }
+  ],
+  "entity_address": [
+   {
+    "text": "CorporateEntity Address Street Number Name Suite or Unit City State Zip"
+   }
+  ],
+  "entity_phone": [
+   {
+    "text": "CorporateEntity Telephone"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email Address"
+   }
+  ],
+  "location": [
+   {
+    "text": "Location of Nevada Business Operations Street Number Name Suite or Unit City State Zip"
+   }
+  ],
+  "location_phone": [
+   {
+    "text": "Location Telephone"
+   }
+  ],
+  "fax": [
+   {
+    "text": "Business Fax",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Location Mailing Address Street Number Name Suite or Unit City State Zip"
+   }
+  ],
+  "records": [
+   {
+    "text": "Location of Business Records Street Number Name Suite or Unit City State Zip"
+   }
+  ],
+  "owner1": [
+   {
+    "text": "Last First MI If owned by another entitys then enter the owning entitys name and FIDs"
+   }
+  ],
+  "owner1_percent": [
+   {
+    "text": "Percent Owned"
+   }
+  ],
+  "owner1_dob": [
+   {
+    "text": "Date of Birth",
+    "pick": "date"
+   }
+  ],
+  "owner1_title": [
+   {
+    "text": "Title"
+   }
+  ],
+  "owner1_address": [
+   {
+    "text": "Residence Address Street Number Name Suite or Unit City State Zip"
+   }
+  ],
+  "owner1_phone": [
+   {
+    "text": "Residence Telephone"
+   }
+  ],
+  "owner2": [
+   {
+    "text": "Last First MI"
+   }
+  ],
+  "owner2_percent": [
+   {
+    "text": "Percent Owned_2"
+   }
+  ],
+  "owner2_dob": [
+   {
+    "text": "Date of Birth_2",
+    "pick": "date"
+   }
+  ],
+  "owner2_title": [
+   {
+    "text": "Title_2"
+   }
+  ],
+  "owner2_address": [
+   {
+    "text": "Residence Address Street Number Name Suite or Unit City State Zip_2"
+   }
+  ],
+  "owner2_phone": [
+   {
+    "text": "Residence Telephone_2"
+   }
+  ],
+  "started": [
+   {
+    "text": "Date Business Started in Nevada",
+    "pick": "date"
+   }
+  ],
+  "location_opened": [
+   {
+    "text": "Date location opened in Nevada",
+    "pick": "date"
+   }
+  ],
+  "employees": [
+   {
+    "text": "Do you have employees in Nevada if so how many",
+    "pick": "digits"
+   }
+  ],
+  "ui_number": [
+   {
+    "text": "Unemployment Insurance  UIESD",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "activities": [
+   {
+    "check": "Service",
+    "if": "service"
+   },
+   {
+    "check": "Retail Sales  New",
+    "if": "retail sales.{1,3}new"
+   },
+   {
+    "check": "Retail Sales  Used",
+    "if": "retail sales.{1,3}used"
+   },
+   {
+    "check": "Wholesale",
+    "if": "wholesale"
+   },
+   {
+    "check": "Manufacturing",
+    "if": "manufacturing"
+   },
+   {
+    "check": "TobaccoOTP",
+    "if": "tobacco.otp"
+   },
+   {
+    "check": "Retail Liquor",
+    "if": "retail liquor"
+   },
+   {
+    "check": "Live Entertainment",
+    "if": "live entertainment"
+   },
+   {
+    "check": "Marketplace Seller",
+    "if": "marketplace seller"
+   },
+   {
+    "check": "Leasing other than employees",
+    "if": "leasing .other than employees."
+   },
+   {
+    "check": "ConstructionErection",
+    "if": "construction.erection"
+   }
+  ],
+  "description": [
+   {
+    "text": "Description of Busines"
+   }
+  ],
+  "naics": [
+   {
+    "text": "NAICS Code",
+    "pick": "digits"
+   }
+  ],
+  "language": [
+   {
+    "text": "Preferred Language"
+   }
+  ],
+  "monthly_receipts": [
+   {
+    "text": "Estimated total monthly Nevada receipts"
+   }
+  ],
+  "monthly_taxable": [
+   {
+    "text": "Estimated total Nevada monthly TAXABLE receipts"
+   }
+  ],
+  "locations": [
+   {
+    "text": "Total Nevada Business Locations",
+    "pick": "digits"
+   }
+  ],
+  "tangible": [
+   {
+    "radio": "Will you or your business sell andor lease tangible personal property in Nevada Tangible personal property is property which",
+    "value": "Yes_2",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Will you or your business sell andor lease tangible personal property in Nevada Tangible personal property is property which",
+    "value": "No_3",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Print Name and Title"
+   }
+  ]
+ },
+ "sign": {
+  "page": 2,
+  "x": 33,
+  "y": 240,
+  "w": 184,
+  "h": 16
+ }
+}

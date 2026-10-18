@@ -1,0 +1,1134 @@
+{
+ "form": "sat-co",
+ "rev": "Certificate of Occupancy Application (Rev 9/26)",
+ "pdf": "sat-co.pdf",
+ "url": "https://docsonline.sanantonio.gov/FileUploads/dsd/form_CertificateOfOccupancyApplication.pdf",
+ "checked": "2026-10-18",
+ "notes": "City of San Antonio Development Services' certificate of occupancy application. A flat, print-only form: answers are printed in the cells and an X goes in the Y or N box of each question. The building number cell is too small to print in and is left blank, as are the applicant's signature and its date.",
+ "lines": [
+  {
+   "id": "business_name",
+   "line": "Header",
+   "en": "Name of business",
+   "zh": "企业名称"
+  },
+  {
+   "id": "business_address",
+   "line": "Header",
+   "en": "Address of business",
+   "zh": "营业地址"
+  },
+  {
+   "id": "suite",
+   "line": "Header",
+   "en": "Suite number",
+   "zh": "单元号"
+  },
+  {
+   "id": "owner",
+   "line": "Header",
+   "en": "Owner of business",
+   "zh": "企业所有人"
+  },
+  {
+   "id": "applicant",
+   "line": "Header",
+   "en": "Applicant name",
+   "zh": "申请人姓名"
+  },
+  {
+   "id": "phone",
+   "line": "Header",
+   "en": "Phone number",
+   "zh": "电话号码"
+  },
+  {
+   "id": "email",
+   "line": "Header",
+   "en": "Email",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "description",
+   "line": "Header",
+   "en": "Detailed description of the business",
+   "zh": "企业详细说明"
+  },
+  {
+   "id": "additional_info",
+   "line": "Header",
+   "en": "Additional information on business use",
+   "zh": "关于营业用途的补充信息"
+  },
+  {
+   "id": "in_operation",
+   "line": "Header",
+   "en": "Is the business currently in operation?",
+   "zh": "企业目前是否在营业？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "use_changing",
+   "line": "Header",
+   "en": "Is the use of the building or space changing from the previous use?",
+   "zh": "建筑或空间的用途是否较之前改变？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "shared_parking",
+   "line": "Header",
+   "en": "Is there an existing shared parking agreement?",
+   "zh": "是否有现行共享停车协议？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "remodel_permit",
+   "line": "Property",
+   "en": "Is a commercial remodel building permit in review or inspections for this application?",
+   "zh": "是否有与本申请相关、正在审核或检查中的商业改建许可？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "trade_permits",
+   "line": "Property",
+   "en": "Are there any on-going mechanical, electrical or plumbing permits?",
+   "zh": "是否有进行中的机械、电气或管道许可？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "sprinkler",
+   "line": "Property",
+   "en": "Is there an existing fire sprinkler system?",
+   "zh": "是否有现成的消防喷淋系统？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "fire_alarm",
+   "line": "Property",
+   "en": "Is there an existing fire alarm system?",
+   "zh": "是否有现成的火警系统？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "industrial",
+   "line": "Property",
+   "en": "Is this a warehouse, manufacturing, repair or maintenance shop, laboratory or hospital use?",
+   "zh": "是否为仓库、制造、维修、实验室或医院用途？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "power",
+   "line": "Property",
+   "en": "Does the building or space currently have electrical power?",
+   "zh": "建筑或空间目前是否通电？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "racks",
+   "line": "Property",
+   "en": "Will the use involve display or storage of products in racks (including retail)?",
+   "zh": "是否使用货架陈列或储存商品（含零售）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "hazmat",
+   "line": "Property",
+   "en": "Will the building or space store or use hazardous materials defined in the IFC?",
+   "zh": "是否储存或使用 IFC 定义的危险物品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "gaming",
+   "line": "Business type",
+   "en": "Will there be any gaming devices?",
+   "zh": "是否有博彩设备？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "food_drink",
+   "line": "Business type",
+   "en": "Will there be food or drink?",
+   "zh": "是否提供食品或饮料？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "childcare",
+   "line": "Business type",
+   "en": "Childcare, school or nursing home?",
+   "zh": "是否为托儿所、学校或养老院？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "alcohol",
+   "line": "Business type",
+   "en": "Will alcohol be sold?",
+   "zh": "是否销售酒精饮料？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "bnb",
+   "line": "Business type",
+   "en": "Is this a bed and breakfast?",
+   "zh": "是否为民宿？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "headshop",
+   "line": "Business type",
+   "en": "Headshop?",
+   "zh": "是否为烟具店？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "transitional",
+   "line": "Business type",
+   "en": "Transitional home?",
+   "zh": "是否为过渡性住所？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "sob",
+   "line": "Business type",
+   "en": "Sexually oriented business?",
+   "zh": "是否为色情行业？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "boarding",
+   "line": "Business type",
+   "en": "Boarding home?",
+   "zh": "是否为寄宿之家？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "auto_repair",
+   "line": "Business type",
+   "en": "Automobile repair or body shop?",
+   "zh": "是否为汽车维修或车身店？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "salvage",
+   "line": "Business type",
+   "en": "Salvage yard or metal recycling?",
+   "zh": "是否为废品场或金属回收？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "nightclub_sq_ft",
+   "line": "Live entertainment",
+   "en": "Square footage of the building, excluding kitchen, restrooms and storage",
+   "zh": "建筑面积（不含厨房、洗手间和储藏区）"
+  },
+  {
+   "id": "bar_no_cover",
+   "line": "Live entertainment",
+   "en": "Alcohol: bar or tavern without a cover charge, 3 or more days a week",
+   "zh": "酒精：不收入场费的酒吧或酒馆，每周 3 天或以上",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "bar_cover",
+   "line": "Live entertainment",
+   "en": "Alcohol: bar or tavern with a cover charge, 3 or more days a week",
+   "zh": "酒精：收入场费的酒吧或酒馆，每周 3 天或以上",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "nightclub_no_cover",
+   "line": "Live entertainment",
+   "en": "Alcohol: nightclub without a cover charge, 3 or more days a week",
+   "zh": "酒精：不收入场费的夜总会，每周 3 天或以上",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "nightclub_cover",
+   "line": "Live entertainment",
+   "en": "Alcohol: nightclub with a cover charge, 3 or more days a week",
+   "zh": "酒精：收入场费的夜总会，每周 3 天或以上",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "live_no_cover",
+   "line": "Live entertainment",
+   "en": "Live entertainment without a cover charge, 3 or more days a week (not food service)",
+   "zh": "不收入场费的现场娱乐，每周 3 天或以上（不含餐饮场所）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "live_cover",
+   "line": "Live entertainment",
+   "en": "Live entertainment with a cover charge, 3 or more days a week (not food service)",
+   "zh": "收入场费的现场娱乐，每周 3 天或以上（不含餐饮场所）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "food_no_cover",
+   "line": "Live entertainment",
+   "en": "Food service establishment without a cover charge, 3 or more days a week",
+   "zh": "不收入场费的餐饮场所，每周 3 天或以上",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "food_cover",
+   "line": "Live entertainment",
+   "en": "Food service establishment with a cover charge, 3 or more days a week",
+   "zh": "收入场费的餐饮场所，每周 3 天或以上",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "health_uses",
+   "line": "Live entertainment",
+   "en": "Will this business have any of the listed uses (restaurant, fast food, grocery, bar, school, pool, hotel, or any business that sells or serves food or drinks)?",
+   "zh": "是否有所列用途（餐厅、快餐、杂货、酒吧、学校、泳池、酒店，或任何出售或供应食品饮料的企业）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Printed name of applicant",
+   "zh": "申请人正楷姓名"
+  }
+ ],
+ "blank": {
+  "nightclub_sq_ft": "^(none|no|n/?a)\\.?$",
+  "suite": "^(none|no|n/?a)\\.?$",
+  "additional_info": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "business_name": [
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 662.7,
+     "w": 380
+    }
+   }
+  ],
+  "business_address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 640.2,
+     "w": 250
+    }
+   }
+  ],
+  "suite": [
+   {
+    "at": {
+     "page": 0,
+     "x": 515,
+     "y": 640.2,
+     "w": 40
+    },
+    "if": "^(?!(none|no|n/?a)\\.?$)"
+   }
+  ],
+  "owner": [
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 617.7,
+     "w": 380
+    }
+   }
+  ],
+  "applicant": [
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 595.2,
+     "w": 380
+    }
+   }
+  ],
+  "phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 573.7,
+     "w": 128
+    }
+   }
+  ],
+  "email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 340,
+     "y": 573.7,
+     "w": 214
+    }
+   }
+  ],
+  "description": [
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 554,
+     "w": 382,
+     "size": 8,
+     "lines": 2,
+     "lead": 10
+    }
+   }
+  ],
+  "additional_info": [
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 529.5,
+     "w": 382,
+     "size": 8,
+     "lines": 2,
+     "lead": 10
+    },
+    "if": "^(?!(none|no|n/?a)\\.?$)"
+   }
+  ],
+  "in_operation": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 56.7,
+     "y": 496.7,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 88,
+     "y": 496.5,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "use_changing": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 287.4,
+     "y": 496.9,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 319.2,
+     "y": 496.8,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "shared_parking": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 463.5,
+     "y": 468.8,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 496.3,
+     "y": 468.8,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "remodel_permit": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 52.8,
+     "y": 438.5,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 78.3,
+     "y": 438.5,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "trade_permits": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 52.8,
+     "y": 417.5,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 78.3,
+     "y": 417.5,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "sprinkler": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 52.8,
+     "y": 396.5,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 78.3,
+     "y": 396.5,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "fire_alarm": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 336.2,
+     "y": 394.9,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 359.5,
+     "y": 394.9,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "industrial": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 52.8,
+     "y": 376.2,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 78.3,
+     "y": 376.3,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "power": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 52.8,
+     "y": 355.8,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 78.3,
+     "y": 356,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "racks": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 53.1,
+     "y": 337.5,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 78.3,
+     "y": 337.9,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "hazmat": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 53.1,
+     "y": 320.1,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 78.3,
+     "y": 319.7,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "gaming": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.5,
+     "y": 265,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 76.8,
+     "y": 265.2,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "food_drink": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.5,
+     "y": 240.8,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 76.2,
+     "y": 241.2,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "childcare": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.3,
+     "y": 214.1,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 77.1,
+     "y": 214.3,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "alcohol": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 49.8,
+     "y": 187.1,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 76.8,
+     "y": 186.8,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "bnb": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.6,
+     "y": 153.5,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 76.6,
+     "y": 153.9,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "headshop": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.8,
+     "y": 125,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 76.3,
+     "y": 125.5,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "transitional": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.5,
+     "y": 102.4,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 76.8,
+     "y": 101.8,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "sob": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.6,
+     "y": 72.9,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 76.8,
+     "y": 72.4,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "boarding": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 50.3,
+     "y": 741.8,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 77.3,
+     "y": 741.9,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "auto_repair": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 52.6,
+     "y": 721.2,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 77.5,
+     "y": 721.7,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "salvage": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 52.9,
+     "y": 701.7,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 77.5,
+     "y": 702,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "nightclub_sq_ft": [
+   {
+    "at": {
+     "page": 1,
+     "x": 510,
+     "y": 616,
+     "w": 58,
+     "size": 8
+    },
+    "pick": "digits",
+    "if": "\\d"
+   }
+  ],
+  "bar_no_cover": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 52.3,
+     "y": 549.7,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 81.3,
+     "y": 549.2,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "bar_cover": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 52.3,
+     "y": 525.7,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 81.3,
+     "y": 525.5,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "nightclub_no_cover": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 51.5,
+     "y": 501.7,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 81.3,
+     "y": 501.7,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "nightclub_cover": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 51.5,
+     "y": 474,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 81.3,
+     "y": 473.5,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "live_no_cover": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 51.5,
+     "y": 450,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 81.3,
+     "y": 449.7,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "live_cover": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 51.5,
+     "y": 414,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 81.3,
+     "y": 414,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "food_no_cover": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 51.5,
+     "y": 390.8,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 81.3,
+     "y": 390.9,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "food_cover": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 51.5,
+     "y": 367.6,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 81.3,
+     "y": 367.2,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "health_uses": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 52.3,
+     "y": 147.1,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 80,
+     "y": 147.3,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "signer": [
+   {
+    "at": {
+     "page": 1,
+     "x": 165,
+     "y": 79.2,
+     "w": 250
+    }
+   }
+  ]
+ }
+}

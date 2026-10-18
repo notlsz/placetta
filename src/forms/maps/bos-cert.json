@@ -1,0 +1,134 @@
+{
+ "form": "bos-cert",
+ "rev": "Form 1001C Business Certificate (2025)",
+ "pdf": "bos-cert.pdf",
+ "url": "https://www.boston.gov/sites/default/files/file/2025/03/2025-New-Business-Certificate-Form_0.pdf",
+ "checked": "2026-10-18",
+ "notes": "Boston's business certificate (the DBA filing under M.G.L. c. 110, s. 5). The business address splits into street, city, state and ZIP; P.O. boxes are not allowed. Owners: one per line, 'Full name, residential or corporate address'. The owners sign in front of a notary on the back, so the signature lines and the notary block are left blank; the expiry date and the City Clerk's attestation are the Clerk's.",
+ "lines": [
+  {
+   "id": "filing_type",
+   "line": "Header",
+   "en": "New filing or renewal",
+   "zh": "新登记或续期",
+   "options": [
+    "New Filing",
+    "Renewal"
+   ]
+  },
+  {
+   "id": "business_name",
+   "line": "Title",
+   "en": "Business name (the title the business is conducted under)",
+   "zh": "经营名称（营业所用名称）"
+  },
+  {
+   "id": "business_address",
+   "line": "Address",
+   "en": "Address where the business is conducted (no P.O. box)",
+   "zh": "营业地址（不可用邮政信箱）"
+  },
+  {
+   "id": "owners",
+   "line": "Owners",
+   "en": "Individuals or corporation conducting the business: one per line, \"full name, residential or corporate address\"",
+   "zh": "经营该业务的个人或公司：每行一位，\"全名, 住址或公司地址\""
+  },
+  {
+   "id": "phone",
+   "line": "Contact",
+   "en": "Local telephone number",
+   "zh": "本地电话"
+  },
+  {
+   "id": "business_type",
+   "line": "Contact",
+   "en": "Type of business",
+   "zh": "业务类型"
+  },
+  {
+   "id": "email",
+   "line": "Contact",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  }
+ ],
+ "boxes": {
+  "filing_type": [
+   {
+    "radio": "Group2",
+    "value": "Choice1",
+    "if": "^new"
+   },
+   {
+    "radio": "Group2",
+    "value": "Choice2",
+    "if": "^renew"
+   }
+  ],
+  "business_name": [
+   {
+    "text": "Text3"
+   }
+  ],
+  "business_address": [
+   {
+    "text": "amended the undersigned hereby declares that a business under the title of 2",
+    "pick": "street"
+   },
+   {
+    "text": "amended the undersigned hereby declares that a business under the title of 3",
+    "pick": "city"
+   },
+   {
+    "text": "amended the undersigned hereby declares that a business under the title of 4",
+    "pick": "state"
+   },
+   {
+    "text": "amended the undersigned hereby declares that a business under the title of 5",
+    "pick": "zip"
+   }
+  ],
+  "owners": [
+   {
+    "text": "Print Full Name s 1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "PO Box not permitted 1",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "Print Full Name s 2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "PO Box not permitted 2",
+    "pick": "line2|tail"
+   },
+   {
+    "text": "Text4",
+    "pick": "line3|head"
+   },
+   {
+    "text": "PO Box not permitted 3",
+    "pick": "line3|tail"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Text5"
+   }
+  ],
+  "business_type": [
+   {
+    "text": "Type of Business"
+   }
+  ],
+  "email": [
+   {
+    "text": "Local Telephone Number"
+   }
+  ]
+ }
+}

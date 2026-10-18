@@ -1,0 +1,297 @@
+{
+ "form": "mult-food-license",
+ "rev": "Restaurant and Bed & Breakfast License Application (EHS-0035 3/9/16)",
+ "pdf": "mult-food-license.pdf",
+ "url": "https://multco.us/file/restaurant/bed_&_breakfast_license_application/download",
+ "checked": "2026-10-18",
+ "notes": "Multnomah County Environmental Health's restaurant and bed and breakfast license application. Addresses go on one line each as printed. The facility number is assigned by the county, so a new facility leaves it blank. The signature, its date and the 'do not write below' office block (including the chain question) are left for the applicant and the county.",
+ "lines": [
+  {
+   "id": "facility_number",
+   "line": "Facility",
+   "en": "Facility number (from the county; leave blank if new)",
+   "zh": "设施编号（由县政府分配；新设施留空）"
+  },
+  {
+   "id": "facility_name",
+   "line": "Facility",
+   "en": "Facility name",
+   "zh": "设施名称"
+  },
+  {
+   "id": "new_facility",
+   "line": "Facility",
+   "en": "Is this a new restaurant facility and location?",
+   "zh": "是否为新的餐厅设施与地点？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "new_owner_opening",
+   "line": "Facility",
+   "en": "Date of opening under new ownership",
+   "zh": "新所有人接手后开业日期"
+  },
+  {
+   "id": "previously_licensed",
+   "line": "Facility",
+   "en": "Was this facility licensed previously?",
+   "zh": "此设施以前是否持有执照？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "previous_last_date",
+   "line": "Facility",
+   "en": "Date of last operation for the previous owner",
+   "zh": "前所有人最后营业日期"
+  },
+  {
+   "id": "former_name",
+   "line": "Facility",
+   "en": "Former facility name",
+   "zh": "设施原名称"
+  },
+  {
+   "id": "own_other",
+   "line": "Facility",
+   "en": "Do you own other facilities?",
+   "zh": "您是否拥有其他设施？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "facility_address",
+   "line": "Facility",
+   "en": "Facility location address (number, street, city, state, ZIP)",
+   "zh": "设施地址（门牌号、街道、城市、州、邮编）"
+  },
+  {
+   "id": "owner_individuals",
+   "line": "Owner",
+   "en": "Owner name (individuals)",
+   "zh": "所有人姓名（个人）"
+  },
+  {
+   "id": "corporation",
+   "line": "Owner",
+   "en": "Corporation name",
+   "zh": "公司名称"
+  },
+  {
+   "id": "billing_name",
+   "line": "Billing",
+   "en": "Billing name",
+   "zh": "账单名称"
+  },
+  {
+   "id": "billing_address",
+   "line": "Billing",
+   "en": "Billing address",
+   "zh": "账单地址"
+  },
+  {
+   "id": "owner_home",
+   "line": "Owner",
+   "en": "Owner home address",
+   "zh": "所有人住址"
+  },
+  {
+   "id": "owner_home_phone",
+   "line": "Owner",
+   "en": "Owner home telephone",
+   "zh": "所有人住宅电话"
+  },
+  {
+   "id": "facility_phone",
+   "line": "Facility",
+   "en": "Facility telephone",
+   "zh": "设施电话"
+  },
+  {
+   "id": "owner_office_phone",
+   "line": "Owner",
+   "en": "Owner office telephone",
+   "zh": "所有人办公电话"
+  },
+  {
+   "id": "facility_fax",
+   "line": "Facility",
+   "en": "Facility fax",
+   "zh": "设施传真"
+  },
+  {
+   "id": "owner_cell",
+   "line": "Owner",
+   "en": "Owner cell phone",
+   "zh": "所有人手机"
+  },
+  {
+   "id": "email",
+   "line": "Owner",
+   "en": "Email",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "fee",
+   "line": "Application",
+   "en": "License fee paid ($)",
+   "zh": "已付执照费（美元）",
+   "hint": {
+    "en": "The fee from the county's fee schedule, e.g. \"1027\".",
+    "zh": "按县收费表填写金额，如 \"1027\"。"
+   }
+  }
+ ],
+ "blank": {
+  "facility_number": "^(none|no|n/?a|new)\\.?$",
+  "new_owner_opening": "^(none|no|n/?a)\\.?$",
+  "previous_last_date": "^(none|no|n/?a)\\.?$",
+  "former_name": "^(none|no|n/?a)\\.?$",
+  "corporation": "^(none|no|n/?a)\\.?$",
+  "owner_home_phone": "^(none|no|n/?a)\\.?$",
+  "owner_office_phone": "^(none|no|n/?a)\\.?$",
+  "facility_fax": "^(none|no|n/?a)\\.?$",
+  "owner_cell": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "facility_number": [
+   {
+    "text": "Facility Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)(?!new)"
+   }
+  ],
+  "facility_name": [
+   {
+    "text": "Facility Name"
+   }
+  ],
+  "new_facility": [
+   {
+    "check": "Check Box31",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box32",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "new_owner_opening": [
+   {
+    "text": "Date of Opening under new Ownership",
+    "pick": "date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "previously_licensed": [
+   {
+    "check": "Check Box33",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box34",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "previous_last_date": [
+   {
+    "text": "Date of Last Operation for previous Owner",
+    "pick": "date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "former_name": [
+   {
+    "text": "Former Facility Name",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "own_other": [
+   {
+    "check": "Check Box35",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box36",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "facility_address": [
+   {
+    "text": "Facility Location Address number street city state zip code"
+   }
+  ],
+  "owner_individuals": [
+   {
+    "text": "Owner Name individuals"
+   }
+  ],
+  "corporation": [
+   {
+    "text": "Corporation Name",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "billing_name": [
+   {
+    "text": "Billing Name"
+   }
+  ],
+  "billing_address": [
+   {
+    "text": "Billing Address number street city state zip code"
+   }
+  ],
+  "owner_home": [
+   {
+    "text": "Owner Home Address number street city state zip code"
+   }
+  ],
+  "owner_home_phone": [
+   {
+    "text": "Owner Home Telephone Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "facility_phone": [
+   {
+    "text": "Facility Telephone Number"
+   }
+  ],
+  "owner_office_phone": [
+   {
+    "text": "Owner Office Telephone Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "facility_fax": [
+   {
+    "text": "Facility FAX Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_cell": [
+   {
+    "text": "Owner Cell Phone Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email"
+   }
+  ],
+  "fee": [
+   {
+    "text": "Application is hereby made to operate the above facility in compliance with the provisions of Oregon Revised Statutes Chapter",
+    "pick": "digits"
+   }
+  ]
+ }
+}

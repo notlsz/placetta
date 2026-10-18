@@ -13,7 +13,8 @@ import { PDFDocument, PDFName, StandardFonts, PDFTextField, PDFCheckBox, PDFRadi
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import { FORMS } from "../src/forms/registry.ts";
 import { MAPS } from "../src/forms/maps/index.ts";
-import { fillMapped, fillOfficial, valuesOf } from "../src/forms/fill.ts";
+import { fillForm, fillMapped, fillOfficial, valuesOf } from "../src/forms/fill.ts";
+import { readBack } from "../src/forms/readback.ts";
 import { layout, pdfLibWriter, writeAnswers, type FormMap, type Spot, type Writer } from "../src/forms/boxes.ts";
 import { addressProblems } from "../src/forms/addressCheck.ts";
 import type { Field } from "../src/model.ts";
@@ -187,13 +188,18 @@ async function checkMapped(id: string, map: FormMap) {
       } else if (c.kind === "radio") {
         const f = of.getFieldMaybe(c.name);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const got = f instanceof PDFRadioGroup ? f.getSelected() : f instanceof PDFCheckBox ? (f.acroField.getValue() as any)?.decodeText?.() : undefined;
+        const raw = f instanceof PDFRadioGroup || f instanceof PDFCheckBox ? (f.acroField.dict.lookup(PDFName.of("V")) as any)?.decodeText?.() : undefined;
+        const got = f instanceof PDFRadioGroup && f.getSelected() === c.value ? c.value : raw;
         if (got !== c.value) P(`${c.id}: ${c.name} set to "${got}", not "${c.value}"`);
       } else if (c.kind === "choice") {
         const f = of.getFieldMaybe(c.name);
         if (!(f instanceof PDFDropdown || f instanceof PDFOptionList) || !f.getSelected().some(s => s.toLowerCase().startsWith(c.value.toLowerCase().slice(0, 4)))) P(`${c.id}: dropdown ${c.name} not set to ${c.value}`);
       }
     }
+    // the app's own fill and read-back (what keeps an application from being ready) agree the form came out right
+    const app = await fillForm(id, fields, async file => new Uint8Array(readFileSync(`public/forms/${file}`)));
+    if (!app) P("the app's fill doesn't fill this form");
+    else for (const x of (await readBack(id, app)).issues) P(`the app's read-back finds ${x.id} ${x.kind}: wanted "${x.want.slice(0, 30)}", got "${(x.got ?? "").slice(0, 30)}"`);
     // printed answers: read the page text back with positions
     const draws = rec.calls.filter((c): c is Extract<Call, { kind: "draw" }> => c.kind === "draw");
     if (draws.length) {
@@ -215,9 +221,12 @@ async function checkMapped(id: string, map: FormMap) {
           if (box[0] < view[0] || box[2] > view[2] || box[1] < view[1] || box[3] > view[3]) P(`${c.id}: "${p.text.slice(0, 30)}" runs off page ${p.page + 1}`);
           // printed on top of the form's own words: a sign the spot is wrong
           const isMark = c.value === "X" && p.text === "X";
+          // an "O" drawn around a printed one-letter choice, as in "( Y / N )", circles it the way the form asks
+          const isRing = c.value === "O" && p.text === "O";
           hits: for (const i of printed.items[p.page] ?? []) {
             for (const wd of words(i)) {
               if (isMark && wd.glyph) continue;   // an X in a printed box is where it belongs
+              if (isRing && (wd.glyph || wd.str.length === 1)) continue;
               const o = overlap(box, wd.box);
               if (o > 3 && o > 0.2 * Math.min(area(box), area(wd.box))) { P(`${c.id}: "${p.text.slice(0, 30)}" covers the printed "${wd.str.slice(0, 30)}" on page ${p.page + 1}`); break hits; }
             }

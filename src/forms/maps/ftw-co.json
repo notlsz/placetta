@@ -1,0 +1,757 @@
+{
+ "form": "ftw-co",
+ "rev": "Certificate of Occupancy packet: application, use verification form and verification business letter (11/24/2025)",
+ "pdf": "ftw-co.pdf",
+ "url": "https://www.fortworthtexas.gov/files/assets/public/v/1/development-services/documents/resources-applications-forms-videos/c/certificate-of-occupancy-oeo-packet.pdf",
+ "checked": "2026-10-18",
+ "notes": "City of Fort Worth Development Services' certificate of occupancy packet. A flat, print-only form: answers are printed on the lines, the chosen Y or N is circled, and an X goes in the use verification boxes. The change-of-use section is answered only when a change of use comes with a remodel. The signatures and their dates are left for the applicant.",
+ "lines": [
+  {
+   "id": "project_address",
+   "line": "Application",
+   "en": "Project address",
+   "zh": "项目地址"
+  },
+  {
+   "id": "suite",
+   "line": "Application",
+   "en": "Building, suite or unit",
+   "zh": "楼栋、单元或单位号"
+  },
+  {
+   "id": "business_name",
+   "line": "Application",
+   "en": "Name of business",
+   "zh": "企业名称"
+  },
+  {
+   "id": "proposed_use",
+   "line": "Application",
+   "en": "Proposed business use",
+   "zh": "拟营业用途"
+  },
+  {
+   "id": "previous_use",
+   "line": "Application",
+   "en": "Previous business use",
+   "zh": "原营业用途"
+  },
+  {
+   "id": "electrical_release",
+   "line": "Application",
+   "en": "Electrical release?",
+   "zh": "是否需电力放行？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "zoning",
+   "line": "Application",
+   "en": "Zoning of property",
+   "zh": "物业分区"
+  },
+  {
+   "id": "lnc",
+   "line": "Application",
+   "en": "Legal non-conforming number (LNC#), if any",
+   "zh": "合法不合规编号（LNC#，如有）"
+  },
+  {
+   "id": "annexation",
+   "line": "Application",
+   "en": "Annexation? (yes needs a copy of the annexation letter)",
+   "zh": "是否为并入地区？（是则需附并入函）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "mobile_vendor",
+   "line": "Application",
+   "en": "Mobile vendor? \"Yes, license plate\" or \"No\"",
+   "zh": "是否为流动摊贩？\"Yes, 车牌号\" 或 \"No\""
+  },
+  {
+   "id": "site_contact",
+   "line": "Application",
+   "en": "Site contact name",
+   "zh": "现场联系人姓名"
+  },
+  {
+   "id": "site_phone",
+   "line": "Application",
+   "en": "Site contact phone",
+   "zh": "现场联系人电话"
+  },
+  {
+   "id": "site_email",
+   "line": "Application",
+   "en": "Site contact email",
+   "zh": "现场联系人电子邮箱"
+  },
+  {
+   "id": "change_with_remodel",
+   "line": "Change of use",
+   "en": "Change of use with a remodel?",
+   "zh": "用途变更是否伴随改建？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "cost_total",
+   "line": "Change of use",
+   "en": "Total cost of construction with materials and labor ($)",
+   "zh": "工程总造价（含材料与人工，美元）"
+  },
+  {
+   "id": "cost_no_mep",
+   "line": "Change of use",
+   "en": "Total cost of construction not including mechanical, electrical and plumbing ($)",
+   "zh": "不含机电管道的工程造价（美元）"
+  },
+  {
+   "id": "tabs",
+   "line": "Change of use",
+   "en": "TABS number (if construction costs $50,000 or more)",
+   "zh": "TABS 编号（工程造价 5 万美元及以上）"
+  },
+  {
+   "id": "contractor_reg",
+   "line": "Change of use",
+   "en": "City of Fort Worth contractor registration number",
+   "zh": "沃斯堡市承包商登记号"
+  },
+  {
+   "id": "contractor",
+   "line": "Change of use",
+   "en": "Contractor: \"business name, phone, email\"",
+   "zh": "承包商：\"公司名称, 电话, 电子邮箱\""
+  },
+  {
+   "id": "plans_contact",
+   "line": "Change of use",
+   "en": "Plans exam contact: \"name, phone, email\"",
+   "zh": "图纸审查联系人：\"姓名, 电话, 电子邮箱\""
+  },
+  {
+   "id": "applicant",
+   "line": "Applicant",
+   "en": "Applicant: \"name, phone, email\"",
+   "zh": "申请人：\"姓名, 电话, 电子邮箱\""
+  },
+  {
+   "id": "uses",
+   "line": "Use verification",
+   "en": "Uses that apply (none, or every one that applies)",
+   "zh": "适用的用途（没有，或逐项写明）",
+   "options": [
+    "Alcohol sales",
+    "Tobacco, smoking or e-cigarette sales (51% or more of gross sales)",
+    "Outside sales and/or storage",
+    "Sexually oriented business",
+    "Auto-related uses",
+    "Riveting",
+    "Landfill, recycling, household hazardous waste or waste tire facility",
+    "Storage/warehouse use",
+    "Manufacturing"
+   ],
+   "hint": {
+    "en": "Name each that applies, or \"None\".",
+    "zh": "逐项写明，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "company",
+   "line": "Use verification",
+   "en": "Company represented",
+   "zh": "所代表的公司"
+  },
+  {
+   "id": "letter_uses",
+   "line": "Business letter",
+   "en": "Type of use(s), in detail (up to three lines)",
+   "zh": "用途类型详细说明（最多三行）"
+  },
+  {
+   "id": "letter_storage",
+   "line": "Business letter",
+   "en": "Additional manufacturing, storage or warehousing information",
+   "zh": "补充的生产、储存或仓储信息"
+  },
+  {
+   "id": "employees",
+   "line": "Business letter",
+   "en": "Number of employees",
+   "zh": "员工人数"
+  },
+  {
+   "id": "hours",
+   "line": "Business letter",
+   "en": "Hours of operation: \"open - close\"",
+   "zh": "营业时间：\"开门 - 关门\""
+  }
+ ],
+ "blank": {
+  "suite": "^(none|no|n/?a)\\.?$",
+  "lnc": "^(none|no|n/?a)\\.?$",
+  "cost_total": "^(none|no|n/?a)\\.?$",
+  "cost_no_mep": "^(none|no|n/?a)\\.?$",
+  "tabs": "^(none|no|n/?a)\\.?$",
+  "contractor_reg": "^(none|no|n/?a)\\.?$",
+  "contractor": "^(none|no|n/?a)\\.?$",
+  "plans_contact": "^(none|no|n/?a)\\.?$",
+  "uses": "^(none|no|n/?a)\\.?$",
+  "letter_storage": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "project_address": [
+   {
+    "at": {
+     "page": 1,
+     "x": 96,
+     "y": 655.2,
+     "w": 250,
+     "size": 9
+    }
+   }
+  ],
+  "suite": [
+   {
+    "at": {
+     "page": 1,
+     "x": 452,
+     "y": 655.2,
+     "w": 74,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "business_name": [
+   {
+    "at": {
+     "page": 1,
+     "x": 107,
+     "y": 628.1,
+     "w": 243,
+     "size": 9
+    }
+   }
+  ],
+  "proposed_use": [
+   {
+    "at": {
+     "page": 1,
+     "x": 131,
+     "y": 601.3,
+     "w": 168,
+     "size": 9
+    }
+   }
+  ],
+  "previous_use": [
+   {
+    "at": {
+     "page": 1,
+     "x": 370,
+     "y": 601.3,
+     "w": 164,
+     "size": 9
+    }
+   }
+  ],
+  "electrical_release": [
+   {
+    "at": {
+     "page": 1,
+     "x": 113.2,
+     "y": 569.1,
+     "size": 15
+    },
+    "value": "O",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 126.7,
+     "y": 569.1,
+     "size": 15
+    },
+    "value": "O",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "zoning": [
+   {
+    "at": {
+     "page": 1,
+     "x": 110,
+     "y": 540.6,
+     "w": 53,
+     "size": 8
+    }
+   }
+  ],
+  "lnc": [
+   {
+    "at": {
+     "page": 1,
+     "x": 315,
+     "y": 540.6,
+     "w": 103,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "annexation": [
+   {
+    "at": {
+     "page": 1,
+     "x": 78.2,
+     "y": 511.8,
+     "size": 15
+    },
+    "value": "O",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 92.7,
+     "y": 511.8,
+     "size": 15
+    },
+    "value": "O",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "mobile_vendor": [
+   {
+    "at": {
+     "page": 1,
+     "x": 91.2,
+     "y": 484.9,
+     "size": 15
+    },
+    "value": "O",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 105.7,
+     "y": 484.9,
+     "size": 15
+    },
+    "value": "O",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 231,
+     "y": 486.8,
+     "w": 138,
+     "size": 9
+    },
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "site_contact": [
+   {
+    "at": {
+     "page": 1,
+     "x": 112,
+     "y": 460.1,
+     "w": 368,
+     "size": 9
+    }
+   }
+  ],
+  "site_phone": [
+   {
+    "at": {
+     "page": 1,
+     "x": 94,
+     "y": 433.2,
+     "w": 158,
+     "size": 9
+    }
+   }
+  ],
+  "site_email": [
+   {
+    "at": {
+     "page": 1,
+     "x": 331,
+     "y": 433.2,
+     "w": 194,
+     "size": 9
+    }
+   }
+  ],
+  "change_with_remodel": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 49.3,
+     "y": 348.6,
+     "size": 8
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 49.3,
+     "y": 337.1,
+     "size": 8
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "cost_total": [
+   {
+    "at": {
+     "page": 1,
+     "x": 219,
+     "y": 319.7,
+     "w": 68,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "cost_no_mep": [
+   {
+    "at": {
+     "page": 1,
+     "x": 314,
+     "y": 308.1,
+     "w": 73,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "tabs": [
+   {
+    "at": {
+     "page": 1,
+     "x": 230,
+     "y": 296.6,
+     "w": 138,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_reg": [
+   {
+    "at": {
+     "page": 1,
+     "x": 227,
+     "y": 270.1,
+     "w": 118,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor": [
+   {
+    "at": {
+     "page": 1,
+     "x": 157,
+     "y": 243.3,
+     "w": 143,
+     "size": 9
+    },
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 85,
+     "y": 225.7,
+     "w": 214,
+     "size": 9
+    },
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 85,
+     "y": 208.3,
+     "w": 214,
+     "size": 9
+    },
+    "pick": "tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "plans_contact": [
+   {
+    "at": {
+     "page": 1,
+     "x": 147,
+     "y": 175.7,
+     "w": 154,
+     "size": 9
+    },
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 85,
+     "y": 158.3,
+     "w": 213,
+     "size": 9
+    },
+    "pick": "tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 85,
+     "y": 140.8,
+     "w": 213,
+     "size": 9
+    },
+    "pick": "tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "applicant": [
+   {
+    "at": {
+     "page": 1,
+     "x": 100,
+     "y": 108,
+     "w": 199,
+     "size": 9
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 85,
+     "y": 90.6,
+     "w": 214,
+     "size": 9
+    },
+    "pick": "tail|head"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 85,
+     "y": 73.1,
+     "w": 214,
+     "size": 9
+    },
+    "pick": "tail|tail"
+   },
+   {
+    "at": {
+     "page": 2,
+     "x": 168,
+     "y": 109.5,
+     "w": 150,
+     "size": 9
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 3,
+     "x": 199,
+     "y": 263.1,
+     "w": 180,
+     "size": 9
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 3,
+     "x": 425,
+     "y": 263.1,
+     "w": 132,
+     "size": 9
+    },
+    "pick": "tail|head"
+   }
+  ],
+  "uses": [
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 590.1,
+     "size": 8
+    },
+    "if": "alcohol"
+   },
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 577.7,
+     "size": 8
+    },
+    "if": "tobacco|smok|e-?cig"
+   },
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 512.9,
+     "size": 8
+    },
+    "if": "outside"
+   },
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 500.6,
+     "size": 8
+    },
+    "if": "sexually"
+   },
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 435.3,
+     "size": 8
+    },
+    "if": "auto"
+   },
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 406.8,
+     "size": 8
+    },
+    "if": "rivet"
+   },
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 390.3,
+     "size": 8
+    },
+    "if": "landfill|recycl|waste"
+   },
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 295.4,
+     "size": 8
+    },
+    "if": "storage|warehouse"
+   },
+   {
+    "mark": {
+     "page": 2,
+     "x": 100.8,
+     "y": 237,
+     "size": 8
+    },
+    "if": "manufactur"
+   }
+  ],
+  "company": [
+   {
+    "at": {
+     "page": 2,
+     "x": 458,
+     "y": 82.4,
+     "w": 106,
+     "size": 8
+    }
+   }
+  ],
+  "letter_uses": [
+   {
+    "at": {
+     "page": 3,
+     "x": 73,
+     "y": 546.2,
+     "w": 498,
+     "size": 9,
+     "lines": 3,
+     "lead": 19.4
+    }
+   }
+  ],
+  "letter_storage": [
+   {
+    "at": {
+     "page": 3,
+     "x": 73,
+     "y": 453.7,
+     "w": 494,
+     "size": 9,
+     "lines": 3,
+     "lead": 18.8
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "employees": [
+   {
+    "at": {
+     "page": 3,
+     "x": 196,
+     "y": 369.9,
+     "w": 114,
+     "size": 9
+    },
+    "pick": "digits"
+   }
+  ],
+  "hours": [
+   {
+    "at": {
+     "page": 3,
+     "x": 180,
+     "y": 316.8,
+     "w": 72,
+     "size": 9
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 3,
+     "x": 270,
+     "y": 316.8,
+     "w": 80,
+     "size": 9
+    },
+    "pick": "tail"
+   }
+  ]
+ }
+}

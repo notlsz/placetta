@@ -1,0 +1,324 @@
+{
+ "form": "il-sos",
+ "rev": "Form LLC-5.5 Articles of Organization (February 2022)",
+ "pdf": "il-sos.pdf",
+ "url": "https://www.ilsos.gov/publications/pdf_publications/llc55.pdf",
+ "checked": "2026-10-18",
+ "notes": "Illinois Secretary of State's articles of organization. The registered agent's name is split into first name, middle initial and last name, and the office address into number, street, city and ZIP. Managers take one per line, 'name, address'. The date, the organizers' signatures and the office-use boxes are left for the organizers and the Secretary of State.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "1",
+   "en": "Limited liability company name (must contain \"Limited Liability Company\", \"LLC\" or \"L.L.C.\")",
+   "zh": "有限责任公司名称（须含 \"Limited Liability Company\"、\"LLC\" 或 \"L.L.C.\"）"
+  },
+  {
+   "id": "principal_address",
+   "line": "2",
+   "en": "Address of the principal place of business where records are kept (no P.O. box or c/o)",
+   "zh": "主要营业地址（保存公司记录处，不可用邮政信箱或转交）"
+  },
+  {
+   "id": "effective",
+   "line": "3",
+   "en": "Articles effective on: \"Filing date\", or a later date (within 60 days)",
+   "zh": "章程生效日：\"Filing date\"，或较晚日期（60 天内）",
+   "hint": {
+    "en": "\"Filing date\", or the date as MM/DD/YYYY.",
+    "zh": "填 \"Filing date\"，或日期 MM/DD/YYYY。"
+   }
+  },
+  {
+   "id": "agent",
+   "line": "4",
+   "en": "Registered agent's name (must reside in Illinois)",
+   "zh": "注册代理人姓名（须居住在伊利诺伊州）"
+  },
+  {
+   "id": "agent_office",
+   "line": "4",
+   "en": "Registered office address in Illinois (no P.O. box or c/o)",
+   "zh": "伊利诺伊州注册办公地址（不可用邮政信箱或转交）"
+  },
+  {
+   "id": "purposes",
+   "line": "5",
+   "en": "Specific purposes, if any, one per line (a professional LLC must state its professional service)",
+   "zh": "具体经营目的（如有），每行一项（专业 LLC 须写明专业服务）",
+   "hint": {
+    "en": "\"None\" keeps the printed purpose: any lawful business.",
+    "zh": "填 \"None\" 即采用表上印好的目的：任何合法业务。"
+   }
+  },
+  {
+   "id": "dissolution",
+   "line": "6",
+   "en": "Dissolution date from the operating agreement, if any (otherwise perpetual)",
+   "zh": "运营协议规定的解散日期（如有，否则为永久存续）",
+   "hint": {
+    "en": "MM/DD/YYYY, or \"None\".",
+    "zh": "MM/DD/YYYY，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "other_provisions",
+   "line": "7",
+   "en": "Other provisions for the internal affairs of the company (optional), one per line",
+   "zh": "公司内部事务的其他条款（可选），每行一项"
+  },
+  {
+   "id": "managers",
+   "line": "9",
+   "en": "Managers and any member with a manager's authority: one per line, \"name, business address\"",
+   "zh": "经理及具有经理权限的成员：每行一位，\"姓名, 营业地址\"",
+   "hint": {
+    "en": "e.g. \"Mei Chen, 2210 S Wentworth Ave, Chicago, IL 60616\"; up to five; \"None\" for a member-managed LLC.",
+    "zh": "如 \"Mei Chen, 2210 S Wentworth Ave, Chicago, IL 60616\"；最多五位；成员管理型 LLC 填 \"None\"。"
+   }
+  },
+  {
+   "id": "organizer",
+   "line": "10",
+   "en": "Organizer 1: name and title (type or print)",
+   "zh": "组织人 1：姓名与职务（正楷）"
+  },
+  {
+   "id": "organizer_company",
+   "line": "10",
+   "en": "Organizer 1: company name, if signing for a company",
+   "zh": "组织人 1：代表公司签署时的公司名称"
+  },
+  {
+   "id": "organizer_address",
+   "line": "10",
+   "en": "Organizer 1: address",
+   "zh": "组织人 1：地址"
+  },
+  {
+   "id": "organizer2",
+   "line": "10",
+   "en": "Organizer 2, if any: name",
+   "zh": "组织人 2（如有）：姓名"
+  },
+  {
+   "id": "organizer2_company",
+   "line": "10",
+   "en": "Organizer 2: company name, if signing for a company",
+   "zh": "组织人 2：代表公司签署时的公司名称"
+  },
+  {
+   "id": "organizer2_address",
+   "line": "10",
+   "en": "Organizer 2: address",
+   "zh": "组织人 2：地址"
+  }
+ ],
+ "blank": {
+  "purposes": "^(none|no|n/?a)\\.?$",
+  "dissolution": "^(none|no|n/?a)\\.?$",
+  "other_provisions": "^(none|no|n/?a)\\.?$",
+  "managers": "^(none|no|n/?a)\\.?$",
+  "organizer_company": "^(none|no|n/?a)\\.?$",
+  "organizer2": "^(none|no|n/?a)\\.?$",
+  "organizer2_company": "^(none|no|n/?a)\\.?$",
+  "organizer2_address": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "name": [
+   {
+    "text": "2"
+   }
+  ],
+  "principal_address": [
+   {
+    "text": "3"
+   }
+  ],
+  "effective": [
+   {
+    "radio": "Check Box1",
+    "value": "Yes",
+    "if": "^filing"
+   },
+   {
+    "radio": "Check Box1",
+    "value": "no",
+    "if": "^\\d"
+   },
+   {
+    "text": "5",
+    "pick": "date",
+    "if": "^\\d"
+   }
+  ],
+  "agent": [
+   {
+    "text": "6",
+    "pick": "first"
+   },
+   {
+    "text": "66",
+    "pick": "mi"
+   },
+   {
+    "text": "61",
+    "pick": "last"
+   }
+  ],
+  "agent_office": [
+   {
+    "text": "7",
+    "pick": "street|streetno"
+   },
+   {
+    "text": "67",
+    "pick": "street|streetname"
+   },
+   {
+    "text": "9",
+    "pick": "city"
+   },
+   {
+    "text": "661",
+    "pick": "zip"
+   }
+  ],
+  "purposes": [
+   {
+    "text": "10",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "11",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "12",
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "13",
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "14",
+    "pick": "line5",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "dissolution": [
+   {
+    "text": "15",
+    "pick": "date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "other_provisions": [
+   {
+    "text": "15b",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "16",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "17",
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "18",
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "managers": [
+   {
+    "text": "19",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "20",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "21",
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "22",
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "23",
+    "pick": "line5",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "organizer": [
+   {
+    "text": "30"
+   }
+  ],
+  "organizer_company": [
+   {
+    "text": "32",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "organizer_address": [
+   {
+    "text": "29",
+    "pick": "street"
+   },
+   {
+    "text": "31",
+    "pick": "city"
+   },
+   {
+    "text": "33",
+    "pick": "statezip"
+   }
+  ],
+  "organizer2": [
+   {
+    "text": "35",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "organizer2_company": [
+   {
+    "text": "37",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "organizer2_address": [
+   {
+    "text": "34",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "36",
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "38",
+    "pick": "statezip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ]
+ }
+}
