@@ -18,6 +18,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 import { HOOK_KINDS, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
+import { deadlineRules } from "../_shared/business_rules.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { normalizeState, openingLine, openingPath, overdue, publishedDays, runsOn, type Routine } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
@@ -468,6 +469,12 @@ Deno.serve(async (req) => {
     created.push(...list.filter((u) => got.has(u.dedupe)));
   }
 
+  // Business rules on deadlines (src/businessRules.ts): each "a deadline is under N days away" rule fires once per
+  // deadline; its message goes out through the business's own channels and a checklist item lands on the application.
+  let ruled = 0;
+  try { ruled = await deadlineRules(admin, (k) => Deno.env.get(k), [...states.entries()].map(([id, state]) => ({ id, name: names.get(id) ?? "", state })), today); }
+  catch (e) { console.error("business rules", String(e).slice(0, 160)); }
+
   // Odelia's allowance: at 50% and 80% the owner hears how much is left and that saver mode starts at 60%. The database
   // writes the Update (once per threshold per period) and hands back what it wrote, so it goes out like the others.
   let aiAlerts = 0;
@@ -681,5 +688,5 @@ Deno.serve(async (req) => {
   if (!sweep) console.error("self-filing sweep did not run");
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, ai_alerts: aiAlerts, ai_throttled: throttled });
+  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
 });

@@ -38,6 +38,7 @@ import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
 import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
 import { claim, type Lease, type RunsTable, saveOnto, stamp } from "./lease.ts";
+import { deliverNotice } from "../_shared/business_rules.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
@@ -431,6 +432,8 @@ export async function work(runId: string, token: string | null, ticket: string |
       // and who asked from there, for the change card a business fact or a new name goes up on
       sender: await senderOf(run),
       role: mainRole,
+      // business rules (src/businessRules.ts): what a rule asks to tell someone goes out through the business's own channels
+      notify: (n) => bg(deliverNotice(admin, env, ws, n).then((r) => { if (!r.ok) console.error("business rule", ws, n.via, r.why); })),
     });
     clearTimeout(flushT);   // the last write below carries the steps; a late flush would bring the draft back
     await save();
@@ -748,6 +751,11 @@ export async function handle(req: Request): Promise<Response> {
   if (!configured()) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
   const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
   if (!prompt) return fail(400, "bad_request", "prompt is required.");
+  // "/apply" and "/go" carry out an owner's approval (held changes, an approved plan: src/held.ts): only an owner starts them
+  if (/^\s*\/(apply|go)\b/i.test(prompt)) {
+    const { data: mine } = await admin.from("workspace_members").select("role").eq("workspace_id", ws).eq("user_id", user.id).maybeSingle();
+    if (mine?.role !== "owner") return fail(403, "forbidden", "Only an owner of this workspace can approve that.");
+  }
   const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-12)
     .map((t: { role: "user" | "assistant"; content: string }) => ({ role: t.role, content: t.content.slice(0, 4000) }));
   // the same request again within ten minutes: the earlier run, whose reply the app shows. Checked before the gate and

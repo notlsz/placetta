@@ -32,6 +32,7 @@ import { cityName, countyOf, stateCode as stateFromAny } from "./counties";
 import { COUNTRIES } from "./forms/world";
 import type { Lang } from "./i18n";
 import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
+import { controlsBrief, jobsDone, runMode, withControls } from "./autonomy";
 
 /* ------------------------------------------------------------------ *
  * The live agent: a real model reads the workspace and acts on it
@@ -1744,9 +1745,12 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         const made: Made = { apps: new Set(), approvals: [], memory: [], skills: [], files: [], lastToolAt: 0 };
         const runStart = new Date().toISOString();
         step({ state: "searching", label: B("Reading your workspace", "读取您的工作区") });
-        const tools = model.tools ? makeTools(() => ws, apply, step, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal }) : undefined;
+        /* Owner controls (src/autonomy.ts): this run's mode and the rules around every tool, the same as on the server. */
+        const mode = runMode(ws, req.text);
+        const tools = model.tools ? withControls(makeTools(() => ws, apply, step, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal }),
+          { get: () => ws, apply, mode, remote: false, run: "b" + Date.parse(runStart).toString(36), made, mark: () => { made.lastToolAt = streamed.length; } }) : undefined;
         const research = model.kind === "server";
-        const brief = rules(ws, lang, !!o.account, research, o.services?.connected() ?? [], !!tools, { me: o.services?.me, names: tools?.map(t => t.name) });
+        const brief = rules(ws, lang, !!o.account, research, o.services?.connected() ?? [], !!tools, { me: o.services?.me, names: tools?.map(t => t.name) }) + controlsBrief(ws, mode);
         const turns: Turn[] = [...(model.system ? [] : [{ role: "user" as const, content: brief }]), ...history.slice(-12), { role: "user", content: req.text }];
         let sources: Source[] = [];
         const text = await model.chat(turns, {
@@ -1758,6 +1762,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         // cite agency pages first; keep at most four
         const cited = [...sources.filter(x => official(x.url)), ...sources.filter(x => !official(x.url))].slice(0, 4);
         apply(settleJobs(runStart));
+        jobsDone({ get: () => ws, apply }, runStart);   // business rules: "a job is done"
         onEvent({ type: "reply", reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
           files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } });
         return;

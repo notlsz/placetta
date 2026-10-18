@@ -29,6 +29,7 @@ export type Reply = {
   next?: { label: Bi; req: Request };
   sources?: { title: string; url: string }[];   // official pages the agent read, cited
   table?: { title: Bi; columns: Bi[]; rows: string[][]; cite?: string[][] };   // a grid the agent built, e.g. reviewed documents; cite: the document's words behind each cell
+  undo?: string;            // the run's undo point (src/rewind.ts): "Undo what she did" on this turn
 };
 export type Context = { lang: Lang; current: Workspace };
 export type AgentEvent =
@@ -88,7 +89,7 @@ export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
     business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
     facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto, spend: s.spend, jobs: s.jobs, routines: s.routines,
-    firstPlan: s.firstPlan,
+    firstPlan: s.firstPlan, controls: s.controls, undo: s.undo,
   };
 }
 /** What's saved: everything but the audit trail (that has its own table) and payment cards (made from the filings). */
@@ -156,5 +157,7 @@ export const applyChange = (c: Change): P => w => {
     const spend = w.spend ?? { policy: DEFAULT_POLICY, purchases: [] };
     return { ...w, spend: { ...spend, policy: { ...spend.policy, budgets: c.budgets } } };
   }
+  // held changes and plans are run by the app when an owner approves them (src/held.ts), not here
+  if (c.op === "held" || c.op === "plan") return w;
   return { ...w, apps: w.apps.filter(a => a.id !== c.app), approvals: w.approvals.filter(a => a.app !== c.app) };
 };

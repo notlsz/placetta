@@ -34,7 +34,11 @@ export declare function runRounds(o: {
   sender?: string;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for background checks. */
   role?: Role;
+  /** Business rules (src/businessRules.ts): a message a rule asks to deliver, through the business's own channels. */
+  notify?: (n: Notice) => void;
 }): Promise<{ reply: Reply } | { paused: RunState }>;
+/** What a business rule asks the server to tell someone (src/businessRules.ts). */
+export type Notice = { rule: string; key: string; via: "email" | "text" | "slack" | "lark" | "wechat"; to?: string; text: Bi };
 export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";
 export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;
 

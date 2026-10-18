@@ -1,5 +1,7 @@
 import type { Budget, Purchase, SpendPolicy } from "./spend.ts";
 import type { Job, Routine } from "./jobs";
+import type { Controls, HeldCall } from "./autonomy";
+import type { UndoPoint } from "./rewind";
 import type { OrbState } from "thinking-orbs";
 import { ago, inDays } from "./time";
 
@@ -74,6 +76,9 @@ export type Approval = {
   filing?: string;          // pay: the filing it belongs to
   purchase?: string;        // pay: the purchase Odelia asked to make (Spending), approved here
   change?: Change;          // change: what the agent will change once you confirm
+  /* Owner controls (src/autonomy.ts, src/businessRules.ts) */
+  auto?: { rule: string; label: Bi };      // send: goes out under an owner's Always allow rule (a message only; never a filing, payment or fee)
+  second?: { by: string[]; rule: string }; // a business rule wants two different owners to approve it; by: who has
 };
 /** A change to something that already exists, which the agent only makes after you confirm it. */
 export type Change =
@@ -86,7 +91,11 @@ export type Change =
    *  lark). from: who sent it (their number or address). */
   | { op: "set_fact"; label: Bi; value: string; group: FactGroup; was?: string; via: string; from?: string }
   /** A new name for the business (or a new goal) asked for from outside the app, confirmed the same way. */
-  | { op: "rename_business"; name?: string; goal?: string; was: Bi; wasGoal?: Bi; via: string; from?: string };
+  | { op: "rename_business"; name?: string; goal?: string; was: Bi; wasGoal?: Bi; via: string; from?: string }
+  /* Owner controls (src/autonomy.ts): changes held under Ask me first, run once an owner approves; a plan written under
+     Plan first, which an owner approves before Odelia starts it. */
+  | { op: "held"; calls: HeldCall[] }
+  | { op: "plan"; job: string };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
 export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
@@ -151,6 +160,10 @@ export type Workspace = {
   jobs?: Job[];                            // Odelia's jobs, each with the plan she keeps current (Work)
   routines?: Routine[];                    // jobs she repeats on a schedule
   firstPlan?: FirstPlan;                   // the instant plan written at sign-up from the registry, before any model call
+  /* Owner controls: how much Odelia does on her own, Always allow and Never rules, house rules and business rules
+     (src/autonomy.ts; only an owner changes them, the database holds that line), and Undo for her last runs (src/rewind.ts). */
+  controls?: Controls;
+  undo?: UndoPoint[];
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval
