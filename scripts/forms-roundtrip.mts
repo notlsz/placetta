@@ -216,9 +216,12 @@ async function checkMapped(id: string, map: FormMap) {
           if (box[0] < view[0] || box[2] > view[2] || box[1] < view[1] || box[3] > view[3]) P(`${c.id}: "${p.text.slice(0, 30)}" runs off page ${p.page + 1}`);
           // printed on top of the form's own words: a sign the spot is wrong
           const isMark = c.value === "X" && p.text === "X";
+          // an "O" drawn around a printed one-letter choice, as in "( Y / N )", circles it the way the form asks
+          const isRing = c.value === "O" && p.text === "O";
           hits: for (const i of printed.items[p.page] ?? []) {
             for (const wd of words(i)) {
               if (isMark && wd.glyph) continue;   // an X in a printed box is where it belongs
+              if (isRing && (wd.glyph || wd.str.length === 1)) continue;
               const o = overlap(box, wd.box);
               if (o > 3 && o > 0.2 * Math.min(area(box), area(wd.box))) { P(`${c.id}: "${p.text.slice(0, 30)}" covers the printed "${wd.str.slice(0, 30)}" on page ${p.page + 1}`); break hits; }
             }

@@ -19,6 +19,7 @@ import m_den_plan_review from "./den-plan-review.json";
 import m_den_zoning from "./den-zoning.json";
 import m_edi_food_license from "./edi-food-license.json";
 import m_fl_sunbiz from "./fl-sunbiz.json";
+import m_ftw_co from "./ftw-co.json";
 import m_fulton_plan_review from "./fulton-plan-review.json";
 import m_hou_co from "./hou-co.json";
 import m_hou_food_dealer from "./hou-food-dealer.json";
@@ -80,6 +81,7 @@ export const MAPS: Record<string, FormMap> = {
   "den-zoning": m_den_zoning as FormMap,
   "edi-food-license": m_edi_food_license as FormMap,
   "fl-sunbiz": m_fl_sunbiz as FormMap,
+  "ftw-co": m_ftw_co as FormMap,
   "fulton-plan-review": m_fulton_plan_review as FormMap,
   "hou-co": m_hou_co as FormMap,
   "hou-food-dealer": m_hou_food_dealer as FormMap,
