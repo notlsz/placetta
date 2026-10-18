@@ -1,0 +1,668 @@
+{
+ "form": "va-vec",
+ "rev": "VEC-FC-27 (Report to Determine Liability)",
+ "pdf": "va-vec.pdf",
+ "url": "https://vec.virginia.gov/sites/default/files/documents/fc_27new.pdf",
+ "checked": "2026-10-18",
+ "notes": "The Virginia Employment Commission's Report to Determine Liability. Most boxes are character cells: names and addresses are cut at the cell count (30 for names and streets), phones print area code, exchange and number in their own cells, ZIP codes as five digits and the plus-four, dates as month, day and year. The FEIN prints as 2 and 7 digits. Answers 'No' or 'Yes: MM/DD/YYYY' for the FUTA and liability questions tick the box and write the date. The locality is the city or county where the work is done; an answer naming a county ticks County, otherwise City. The responsible party's SSN cells are never printed; the signer writes them. Only the general-employer liability questions are asked; the agricultural, domestic and nonprofit questions, the acquisition details and the signature date are left for the signer.",
+ "lines": [
+  {
+   "id": "vec_account",
+   "line": "Header",
+   "en": "VEC account number, if you already have one",
+   "zh": "已有的弗吉尼亚就业委员会（VEC）账号（如有）"
+  },
+  {
+   "id": "fein",
+   "line": "Header",
+   "en": "Federal ID number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "org_type",
+   "line": "Type of Organization",
+   "en": "Type of organization",
+   "zh": "组织类型",
+   "options": [
+    "Sole Proprietor",
+    "Individual",
+    "Corporation",
+    "LLC",
+    "LLP",
+    "General Partnership",
+    "Limited Partnership",
+    "Government",
+    "Other"
+   ],
+   "hint": {
+    "en": "For Other, write \"Other: \" and the type.",
+    "zh": "选其他时，写 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "state_formed",
+   "line": "State of Incorporation",
+   "en": "State of incorporation or formation (two letters)",
+   "zh": "注册或成立所在州（两个字母）"
+  },
+  {
+   "id": "peo",
+   "line": "PEO",
+   "en": "Are you a Professional Employer Organization (PEO)?",
+   "zh": "是否为专业雇主组织（PEO）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "employer_name",
+   "line": "Employer Name",
+   "en": "Employer name",
+   "zh": "雇主名称"
+  },
+  {
+   "id": "dba",
+   "line": "Doing Business As",
+   "en": "Doing business as",
+   "zh": "经营名称（DBA）"
+  },
+  {
+   "id": "attention",
+   "line": "Attention",
+   "en": "Attention (who mail goes to)",
+   "zh": "收件人"
+  },
+  {
+   "id": "mailing",
+   "line": "Address",
+   "en": "Mailing address",
+   "zh": "邮寄地址"
+  },
+  {
+   "id": "county",
+   "line": "County",
+   "en": "County (of the mailing address)",
+   "zh": "邮寄地址所在县"
+  },
+  {
+   "id": "phone",
+   "line": "Phone Number",
+   "en": "Phone number",
+   "zh": "电话"
+  },
+  {
+   "id": "fax",
+   "line": "Fax Number",
+   "en": "Fax number",
+   "zh": "传真号码"
+  },
+  {
+   "id": "location_type",
+   "line": "Business Location",
+   "en": "The business location is a",
+   "zh": "营业地点类型",
+   "options": [
+    "Physical Location",
+    "Employee Residence",
+    "Job/Worksite"
+   ]
+  },
+  {
+   "id": "location",
+   "line": "Business Location",
+   "en": "Business location address in Virginia",
+   "zh": "弗吉尼亚州营业地点地址"
+  },
+  {
+   "id": "locality",
+   "line": "Locality",
+   "en": "Virginia city or county where the work is done",
+   "zh": "实际工作所在的弗吉尼亚城市或县",
+   "hint": {
+    "en": "e.g. \"Fairfax County\" or \"Falls Church City\"",
+    "zh": "如 \"Fairfax County\" 或 \"Falls Church City\""
+   }
+  },
+  {
+   "id": "based_elsewhere",
+   "line": "Base of operation",
+   "en": "Is the business located in a state other than Virginia, with that state its base of operation?",
+   "zh": "企业是否位于弗吉尼亚以外的州并以该州为经营基地？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "contractors",
+   "line": "Workers",
+   "en": "Anyone working for you whom you consider self-employed or an independent contractor?",
+   "zh": "是否有您视为自雇或独立承包商的工作人员？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "description",
+   "line": "Description",
+   "en": "Main business activity in detail",
+   "zh": "主要业务活动详述"
+  },
+  {
+   "id": "first_employees",
+   "line": "First employees",
+   "en": "When you first had employees working in Virginia",
+   "zh": "首次在弗吉尼亚雇用员工的日期"
+  },
+  {
+   "id": "employees",
+   "line": "Number of employees",
+   "en": "Number of employees working in Virginia",
+   "zh": "在弗吉尼亚工作的员工人数"
+  },
+  {
+   "id": "futa",
+   "line": "FUTA",
+   "en": "Ever liable under the Federal Unemployment Tax Act (FUTA)? \"No\", or \"Yes: date\"",
+   "zh": "是否曾承担联邦失业税（FUTA）义务？填 \"No\"，或 \"Yes: 日期\""
+  },
+  {
+   "id": "liable_1500",
+   "line": "Liability 1",
+   "en": "Paid gross wages of $1,500 or more in a calendar quarter? \"No\", or \"Yes: date\"",
+   "zh": "某一季度工资总额是否达到 1,500 美元？填 \"No\"，或 \"Yes: 日期\""
+  },
+  {
+   "id": "liable_20_weeks",
+   "line": "Liability 2",
+   "en": "Had one or more employees in each of 20 different weeks in a calendar year? \"No\", or \"Yes: date\"",
+   "zh": "一年中是否有 20 个不同周雇有至少一名员工？填 \"No\"，或 \"Yes: 日期\""
+  },
+  {
+   "id": "acquired",
+   "line": "Acquisition",
+   "en": "Did you acquire any of the organization, trade, business or assets of another employer?",
+   "zh": "是否收购了其他雇主的组织、业务或资产？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "responsible",
+   "line": "Responsible party",
+   "en": "Responsible party: name",
+   "zh": "负责人：姓名",
+   "hint": {
+    "en": "Their SSN is written by hand on the signed form.",
+    "zh": "其社会安全号由本人在签字件上手写。"
+   }
+  },
+  {
+   "id": "responsible_title",
+   "line": "Responsible party",
+   "en": "Responsible party: title",
+   "zh": "负责人：职务"
+  },
+  {
+   "id": "responsible_email",
+   "line": "Responsible party",
+   "en": "Responsible party: email",
+   "zh": "负责人：电子邮箱"
+  },
+  {
+   "id": "responsible_address",
+   "line": "Responsible party",
+   "en": "Responsible party: residence address",
+   "zh": "负责人：住址"
+  },
+  {
+   "id": "responsible_phone",
+   "line": "Responsible party",
+   "en": "Responsible party: phone",
+   "zh": "负责人：电话"
+  },
+  {
+   "id": "contact",
+   "line": "Signature",
+   "en": "Contact's name, title and phone number",
+   "zh": "联系人姓名、职务与电话",
+   "hint": {
+    "en": "e.g. \"Mei Chen, Managing Member, (703) 555-0142\"",
+    "zh": "如 \"Mei Chen, Managing Member, (703) 555-0142\""
+   }
+  },
+  {
+   "id": "contact_email",
+   "line": "Signature",
+   "en": "Contact email address",
+   "zh": "联系人电子邮箱"
+  }
+ ],
+ "blank": {
+  "vec_account": "^(none|no|n/?a)\\.?$",
+  "dba": "^(none|no|n/?a)\\.?$",
+  "attention": "^(none|no|n/?a)\\.?$",
+  "fax": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "vec_account": [
+   {
+    "text": "AccountNumber",
+    "pick": "digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "fein": [
+   {
+    "text": "FIN-1",
+    "pick": "ein1"
+   },
+   {
+    "text": "FIN-2",
+    "pick": "ein2"
+   }
+  ],
+  "org_type": [
+   {
+    "radio": "TypeOfOrganization",
+    "value": "SoleProprietor",
+    "if": "^sole"
+   },
+   {
+    "radio": "TypeOfOrganization",
+    "value": "Individual",
+    "if": "^individual"
+   },
+   {
+    "radio": "TypeOfOrganization",
+    "value": "Corporation",
+    "if": "^corp"
+   },
+   {
+    "radio": "TypeOfOrganization",
+    "value": "LLC",
+    "if": "^(llc|limited liability company)"
+   },
+   {
+    "radio": "TypeOfOrganization",
+    "value": "LLP",
+    "if": "^(llp|limited liability partnership)"
+   },
+   {
+    "radio": "TypeOfOrganization",
+    "value": "GeneralPartnership",
+    "if": "^general"
+   },
+   {
+    "radio": "TypeOfOrganization",
+    "value": "LimitiedPartnership",
+    "if": "^limited partnership"
+   },
+   {
+    "radio": "TypeOfOrganization",
+    "value": "Government",
+    "if": "^gov"
+   },
+   {
+    "radio": "TypeOfOrganization",
+    "value": "Other",
+    "if": "^other"
+   },
+   {
+    "text": "OrganizationOther",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "state_formed": [
+   {
+    "text": "StateOfIncorporation",
+    "upper": true,
+    "max": 2
+   }
+  ],
+  "peo": [
+   {
+    "radio": "PEO",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "PEO",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "employer_name": [
+   {
+    "text": "EmployerName"
+   }
+  ],
+  "dba": [
+   {
+    "text": "DoingBusinessAs",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "attention": [
+   {
+    "text": "Attention",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Address1",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "EmployerInfo-Zip-1",
+    "pick": "zip|zip5"
+   },
+   {
+    "text": "EmployerInfo-Zip-2",
+    "pick": "zip|zip4"
+   }
+  ],
+  "county": [
+   {
+    "text": "Country"
+   }
+  ],
+  "phone": [
+   {
+    "text": "EmployerPhoneNumber-1",
+    "pick": "phone1"
+   },
+   {
+    "text": "EmployerPhoneNumber-2",
+    "pick": "phone2"
+   },
+   {
+    "text": "EmployerPhoneNumber-3",
+    "pick": "phone3"
+   }
+  ],
+  "fax": [
+   {
+    "text": "EmployerFaxNumber-1",
+    "pick": "phone1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "EmployerFaxNumber-2",
+    "pick": "phone2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "EmployerFaxNumber-3",
+    "pick": "phone3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "location_type": [
+   {
+    "radio": "LocationType",
+    "value": "PhysicalLocation",
+    "if": "^physical"
+   },
+   {
+    "radio": "LocationType",
+    "value": "EmployeeResidence",
+    "if": "residence"
+   },
+   {
+    "radio": "LocationType",
+    "value": "JobWorksite",
+    "if": "job|worksite"
+   }
+  ],
+  "location": [
+   {
+    "text": "BusinessLocationAddress1",
+    "pick": "street"
+   },
+   {
+    "text": "BusinessLocationState",
+    "pick": "state"
+   },
+   {
+    "text": "BusinessLocation-Zip-1",
+    "pick": "zip|zip5"
+   },
+   {
+    "text": "BusinessLocation-Zip-2",
+    "pick": "zip|zip4"
+   }
+  ],
+  "locality": [
+   {
+    "text": "LocatlityName"
+   },
+   {
+    "radio": "LocationCity-County",
+    "value": "County",
+    "if": "county"
+   },
+   {
+    "radio": "LocationCity-County",
+    "value": "PhysicalLocation",
+    "if": "^(?!.*county)"
+   }
+  ],
+  "based_elsewhere": [
+   {
+    "radio": "BaseOfOperation",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "BaseOfOperation",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "contractors": [
+   {
+    "radio": "Workers",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Workers",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "description": [
+   {
+    "text": "DescriptionLine1"
+   }
+  ],
+  "first_employees": [
+   {
+    "text": "FirstHaveEmployees-1",
+    "pick": "mm"
+   },
+   {
+    "text": "FirstHaveEmployees-2",
+    "pick": "dd"
+   },
+   {
+    "text": "FirstHaveEmployees-3",
+    "pick": "yyyy"
+   }
+  ],
+  "employees": [
+   {
+    "text": "NumberOfEmployees",
+    "pick": "digits"
+   }
+  ],
+  "futa": [
+   {
+    "radio": "FUTA",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "FUTA",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "LiableUnderFUTA-1",
+    "pick": "tail|mm",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "LiableUnderFUTA-2",
+    "pick": "tail|dd",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "LiableUnderFUTA-3",
+    "pick": "tail|yyyy",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "liable_1500": [
+   {
+    "radio": "yes-no-1",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "yes-no-1",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "WhatDate-1-1",
+    "pick": "tail|mm",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "WhatDate-2-1",
+    "pick": "tail|dd",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "WhatDate-3-1",
+    "pick": "tail|yyyy",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "liable_20_weeks": [
+   {
+    "radio": "yes-no-2",
+    "value": "No",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "yes-no-2",
+    "value": "2",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "WhatDate-1-2",
+    "pick": "tail|mm",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "WhatDate-2-2",
+    "pick": "tail|dd",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "WhatDate-3-2",
+    "pick": "tail|yyyy",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "acquired": [
+   {
+    "radio": "yes-no-11",
+    "value": "No",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "yes-no-11",
+    "value": "2",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "responsible": [
+   {
+    "text": "ResponsiblePartyName"
+   }
+  ],
+  "responsible_title": [
+   {
+    "text": "ResponsiblePartyTitle"
+   }
+  ],
+  "responsible_email": [
+   {
+    "text": "ResponsiblePartyEmail"
+   }
+  ],
+  "responsible_address": [
+   {
+    "text": "ResponsiblePartyAddress",
+    "pick": "street"
+   },
+   {
+    "text": "ResponsiblePartyCity",
+    "pick": "city"
+   },
+   {
+    "text": "ResponsibleParty-State",
+    "pick": "state"
+   },
+   {
+    "text": "ResponsibleParty-Zip-1",
+    "pick": "zip|zip5"
+   },
+   {
+    "text": "ResponsibleParty-Zip-2",
+    "pick": "zip|zip4"
+   }
+  ],
+  "responsible_phone": [
+   {
+    "text": "ResponsibleParty-Phone.0",
+    "pick": "phone1"
+   },
+   {
+    "text": "ResponsibleParty-Phone.1",
+    "pick": "phone2"
+   },
+   {
+    "text": "ResponsibleParty-Phone.2",
+    "pick": "phone3"
+   }
+  ],
+  "contact": [
+   {
+    "text": "PrintedNameandTitle"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "ContactEmailAddress"
+   }
+  ]
+ }
+}

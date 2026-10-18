@@ -1,0 +1,1060 @@
+{
+ "form": "wa-bls",
+ "rev": "Business License Application (BLS-700-028)",
+ "pdf": "wa-bls.pdf",
+ "url": "https://dor.wa.gov/sites/default/files/2022-03/700028_0.pdf",
+ "checked": "2026-10-18",
+ "notes": "Washington's Business License Application, filled for a new business opening a location with employees. Yes/No questions take Yes or No; the married questions 'No' or 'Yes: spouse name'. Addresses split into street, city, state and ZIP. Dates print MM/DD/YYYY. Positions: one per line, 'position and duties, number of workers, weekly hours' (no commas inside the duties). Every SSN box (owners and spouses) is left for the person to write by hand. The endorsement and fee tables, minor work permits, the affiliated businesses, closing an old UBI, the spouses' dates of birth and the signature and its date are left for the signer.",
+ "lines": [
+  {
+   "id": "legal_name",
+   "line": "Cover",
+   "en": "Legal entity or owner name",
+   "zh": "法定实体或业主名称"
+  },
+  {
+   "id": "ubi",
+   "line": "Cover",
+   "en": "UBI number, if you already have one",
+   "zh": "统一企业标识号（UBI），如已有"
+  },
+  {
+   "id": "purpose",
+   "line": "1",
+   "en": "Why you are applying",
+   "zh": "申请原因",
+   "options": [
+    "Open or reopen a business",
+    "Open an additional location",
+    "Add an endorsement to an existing location",
+    "Change ownership",
+    "Register a trade name",
+    "Change location"
+   ]
+  },
+  {
+   "id": "employees",
+   "line": "1",
+   "en": "Will the business have employees?",
+   "zh": "企业是否会有员工？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "minors",
+   "line": "1",
+   "en": "Will it have employees under age 18?",
+   "zh": "是否会有未满 18 岁的员工？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "registrations",
+   "line": "2",
+   "en": "Registrations needed",
+   "zh": "所需登记项目",
+   "hint": {
+    "en": "Name each: \"Tax registration, Unemployment Insurance, Industrial Insurance, Trade name\".",
+    "zh": "逐项写明：\"Tax registration, Unemployment Insurance, Industrial Insurance, Trade name\"。"
+   }
+  },
+  {
+   "id": "separate_returns",
+   "line": "2",
+   "en": "Do you want a separate tax return for each business?",
+   "zh": "是否希望每个营业地点单独报税？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "trade_name",
+   "line": "2",
+   "en": "New trade name (doing business as)",
+   "zh": "新经营名称（DBA）"
+  },
+  {
+   "id": "fein",
+   "line": "3",
+   "en": "Federal Employer Identification Number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "entity_type",
+   "line": "3a",
+   "en": "Ownership structure",
+   "zh": "所有权结构",
+   "options": [
+    "Sole proprietorship",
+    "Corporation",
+    "Nonprofit corporation",
+    "Limited liability company",
+    "Partnership",
+    "Limited partnership",
+    "Limited liability partnership",
+    "Limited liability limited partnership",
+    "Joint venture"
+   ]
+  },
+  {
+   "id": "entity_name",
+   "line": "3b",
+   "en": "Name of the corporation, LLC, partnership, LLP, LLLP or joint venture",
+   "zh": "公司、LLC、合伙、LLP、LLLP 或合资企业名称"
+  },
+  {
+   "id": "formed",
+   "line": "3b",
+   "en": "State and year incorporated or formed",
+   "zh": "注册或成立的州和年份",
+   "hint": {
+    "en": "e.g. \"Washington, 2026\"",
+    "zh": "如 \"Washington, 2026\""
+   }
+  },
+  {
+   "id": "open_date",
+   "line": "3c",
+   "en": "Business open date",
+   "zh": "开业日期"
+  },
+  {
+   "id": "business_name",
+   "line": "3d",
+   "en": "Primary business name (trade name)",
+   "zh": "主要经营名称"
+  },
+  {
+   "id": "city_limits",
+   "line": "3d",
+   "en": "Is this location inside city limits?",
+   "zh": "此营业地点是否在城市辖区内？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "mailing",
+   "line": "3d",
+   "en": "Business mailing address",
+   "zh": "企业邮寄地址"
+  },
+  {
+   "id": "location",
+   "line": "3d",
+   "en": "Business street address (the location)",
+   "zh": "营业地点街道地址"
+  },
+  {
+   "id": "phone",
+   "line": "3d",
+   "en": "Business phone",
+   "zh": "企业电话"
+  },
+  {
+   "id": "email",
+   "line": "3d",
+   "en": "Business email",
+   "zh": "企业电子邮箱"
+  },
+  {
+   "id": "person1",
+   "line": "3",
+   "en": "Governing person 1: name",
+   "zh": "管理人 1：姓名",
+   "hint": {
+    "en": "Owners, partners, officers or LLC members. Their SSN is written by hand on the signed form.",
+    "zh": "业主、合伙人、高管或 LLC 成员。其社会安全号由本人在签字件上手写。"
+   }
+  },
+  {
+   "id": "person1_title",
+   "line": "3",
+   "en": "Governing person 1: title",
+   "zh": "管理人 1：职务"
+  },
+  {
+   "id": "person1_dob",
+   "line": "3",
+   "en": "Governing person 1: date of birth",
+   "zh": "管理人 1：出生日期"
+  },
+  {
+   "id": "person1_address",
+   "line": "3",
+   "en": "Governing person 1: home address",
+   "zh": "管理人 1：住址"
+  },
+  {
+   "id": "person1_percent",
+   "line": "3",
+   "en": "Governing person 1: percent owned",
+   "zh": "管理人 1：持股比例"
+  },
+  {
+   "id": "person1_phone",
+   "line": "3",
+   "en": "Governing person 1: home phone",
+   "zh": "管理人 1：住宅电话"
+  },
+  {
+   "id": "person1_email",
+   "line": "3",
+   "en": "Governing person 1: email",
+   "zh": "管理人 1：电子邮箱"
+  },
+  {
+   "id": "person1_married",
+   "line": "3",
+   "en": "Governing person 1: married? If yes, the spouse's name",
+   "zh": "管理人 1：是否已婚？如是，填写配偶姓名",
+   "hint": {
+    "en": "\"No\", or \"Yes: spouse's name\". The spouse's SSN is written by hand.",
+    "zh": "填 \"No\"，或 \"Yes: 配偶姓名\"。配偶社会安全号手写。"
+   }
+  },
+  {
+   "id": "person2",
+   "line": "3",
+   "en": "Governing person 2: name",
+   "zh": "管理人 2：姓名"
+  },
+  {
+   "id": "person2_title",
+   "line": "3",
+   "en": "Governing person 2: title",
+   "zh": "管理人 2：职务"
+  },
+  {
+   "id": "person2_dob",
+   "line": "3",
+   "en": "Governing person 2: date of birth",
+   "zh": "管理人 2：出生日期"
+  },
+  {
+   "id": "person2_address",
+   "line": "3",
+   "en": "Governing person 2: home address",
+   "zh": "管理人 2：住址"
+  },
+  {
+   "id": "person2_percent",
+   "line": "3",
+   "en": "Governing person 2: percent owned",
+   "zh": "管理人 2：持股比例"
+  },
+  {
+   "id": "person2_phone",
+   "line": "3",
+   "en": "Governing person 2: home phone",
+   "zh": "管理人 2：住宅电话"
+  },
+  {
+   "id": "person2_email",
+   "line": "3",
+   "en": "Governing person 2: email",
+   "zh": "管理人 2：电子邮箱"
+  },
+  {
+   "id": "person2_married",
+   "line": "3",
+   "en": "Governing person 2: married? If yes, the spouse's name",
+   "zh": "管理人 2：是否已婚？如是，填写配偶姓名",
+   "hint": {
+    "en": "\"No\", or \"Yes: spouse's name\". The spouse's SSN is written by hand.",
+    "zh": "填 \"No\"，或 \"Yes: 配偶姓名\"。配偶社会安全号手写。"
+   }
+  },
+  {
+   "id": "contractors",
+   "line": "4b",
+   "en": "Do you plan to hire independent contractors (reported on a 1099)?",
+   "zh": "是否计划雇用独立承包商（以 1099 申报）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "gross_income",
+   "line": "4c",
+   "en": "Estimated gross income in Washington for the first year",
+   "zh": "第一年在华盛顿州的预计总收入",
+   "options": [
+    "$0-$12,000",
+    "$12,001-$28,000",
+    "$28,001-$60,000",
+    "$60,001-$100,000",
+    "$100,001 and above"
+   ]
+  },
+  {
+   "id": "activities",
+   "line": "4d",
+   "en": "Business activities in Washington (all that apply)",
+   "zh": "在华盛顿州的业务活动（可多选）",
+   "hint": {
+    "en": "Name each: \"Retail, Services\".",
+    "zh": "逐项写明：\"Retail, Services\"。"
+   }
+  },
+  {
+   "id": "description",
+   "line": "4e",
+   "en": "Principal products or services in Washington, in detail",
+   "zh": "在华盛顿州的主要产品或服务详述"
+  },
+  {
+   "id": "acquired",
+   "line": "4f",
+   "en": "Did you buy, lease or acquire all or part of an existing business?",
+   "zh": "是否收购、租赁或取得现有企业的全部或部分？",
+   "options": [
+    "All",
+    "Part",
+    "None"
+   ]
+  },
+  {
+   "id": "owned_before",
+   "line": "4j",
+   "en": "Have you ever owned another business? If yes, its name and UBI",
+   "zh": "是否曾拥有其他企业？如是，填写名称和 UBI",
+   "hint": {
+    "en": "\"No\", or \"Yes: business name, UBI number\".",
+    "zh": "填 \"No\"，或 \"Yes: 企业名称, UBI 号\"。"
+   }
+  },
+  {
+   "id": "bank",
+   "line": "4k",
+   "en": "Your bank's name and branch",
+   "zh": "开户银行名称和分行",
+   "hint": {
+    "en": "e.g. \"Cathay Bank, Chinatown\"",
+    "zh": "如 \"Cathay Bank, Chinatown\""
+   }
+  },
+  {
+   "id": "first_employment",
+   "line": "5a",
+   "en": "Date of first (or planned) employment at this location",
+   "zh": "此地点首次（或计划）雇用员工的日期"
+  },
+  {
+   "id": "first_wages",
+   "line": "5a",
+   "en": "First date wages paid",
+   "zh": "首次支付工资的日期"
+  },
+  {
+   "id": "employee_count",
+   "line": "5b",
+   "en": "Number of people you employ or plan to employ at this location (not owners)",
+   "zh": "此地点雇用或计划雇用的人数（不含业主）"
+  },
+  {
+   "id": "risk_class",
+   "line": "5c",
+   "en": "Workers' compensation business type (the closest class)",
+   "zh": "工伤保险业务类别（最接近的一类）",
+   "options": [
+    "(13) Retail/Wholesale: stores and warehousing",
+    "(14) Food services, chore, assisted living, janitorial",
+    "(11) Manufacturing: food, ice, beverages",
+    "(16) IT, professional services, medical, salon, schools",
+    "(15) Media, entertainment, lodging",
+    "(09) Vehicle services, transportation"
+   ]
+  },
+  {
+   "id": "positions",
+   "line": "5d",
+   "en": "Positions: one per line, \"position and duties, number of workers, weekly hours\"",
+   "zh": "职位：每行一项，\"职位与职责, 人数, 每周工时\""
+  },
+  {
+   "id": "officer_ui",
+   "line": "5g",
+   "en": "Corporations: unemployment insurance coverage for corporate officers?",
+   "zh": "公司：是否为公司高管投保失业保险？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "officer_wc",
+   "line": "5h",
+   "en": "Workers' compensation coverage for corporate officers or LLC members?",
+   "zh": "是否为公司高管或 LLC 成员投保工伤保险？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "elective_wc",
+   "line": "5i",
+   "en": "Elective workers' compensation for excluded employment?",
+   "zh": "是否为豁免类雇佣选择投保工伤保险？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "preparer",
+   "line": "6",
+   "en": "Application prepared by: name",
+   "zh": "申请表填写人：姓名"
+  },
+  {
+   "id": "preparer_title",
+   "line": "6",
+   "en": "Preparer's title",
+   "zh": "填写人职务"
+  },
+  {
+   "id": "preparer_phone",
+   "line": "6",
+   "en": "Preparer's phone",
+   "zh": "填写人电话"
+  },
+  {
+   "id": "language",
+   "line": "6",
+   "en": "Would you like language assistance? If yes, what language",
+   "zh": "是否需要语言协助？如是，哪种语言",
+   "hint": {
+    "en": "\"No\", or \"Yes: Chinese (Mandarin)\".",
+    "zh": "填 \"No\"，或 \"Yes: Chinese (Mandarin)\"。"
+   }
+  }
+ ],
+ "blank": {
+  "ubi": "^(none|no|n/?a)\\.?$",
+  "trade_name": "^(none|no|n/?a)\\.?$",
+  "employees": "^(n|no|否)\\b",
+  "minors": "^(n|no|否)\\b"
+ },
+ "boxes": {
+  "legal_name": [
+   {
+    "text": "Text Field 7"
+   }
+  ],
+  "ubi": [
+   {
+    "text": "Text Field 8000",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "purpose": [
+   {
+    "check": "Check Box 369",
+    "if": "^open (or re)?open|^(re)?open a business"
+   },
+   {
+    "check": "Check Box 368",
+    "if": "additional location"
+   },
+   {
+    "check": "Check Box 367",
+    "if": "endorsement"
+   },
+   {
+    "check": "Check Box 366",
+    "if": "ownership"
+   },
+   {
+    "check": "Check Box 365",
+    "if": "register a trade name"
+   },
+   {
+    "check": "Check Box 360",
+    "if": "change location"
+   }
+  ],
+  "employees": [
+   {
+    "check": "Check Box 363",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "minors": [
+   {
+    "check": "Check Box 362",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "registrations": [
+   {
+    "check": "Check Box 376",
+    "if": "tax"
+   },
+   {
+    "check": "Check Box 373",
+    "if": "industrial|workers.? comp"
+   },
+   {
+    "check": "Check Box 372",
+    "if": "unemployment"
+   },
+   {
+    "check": "Check Box 370",
+    "if": "trade name"
+   }
+  ],
+  "separate_returns": [
+   {
+    "check": "Check Box 37676",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 3767676",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "trade_name": [
+   {
+    "text": "Text Field 171",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "fein": [
+   {
+    "text": "Text Field 136",
+    "pick": "ein"
+   }
+  ],
+  "entity_type": [
+   {
+    "check": "Check Box 387",
+    "if": "^sole"
+   },
+   {
+    "check": "Check Box 388",
+    "if": "^corp"
+   },
+   {
+    "check": "Check Box 389",
+    "if": "^nonprofit"
+   },
+   {
+    "check": "Check Box 390",
+    "if": "^(limited liability company|llc)"
+   },
+   {
+    "check": "Check Box 391",
+    "if": "^(general )?partnership"
+   },
+   {
+    "check": "Check Box 392",
+    "if": "^limited partnership"
+   },
+   {
+    "check": "Check Box 393",
+    "if": "^limited liability partnership|^llp"
+   },
+   {
+    "check": "Check Box 394",
+    "if": "^limited liability limited|^lllp"
+   },
+   {
+    "check": "Check Box 395",
+    "if": "^joint"
+   }
+  ],
+  "entity_name": [
+   {
+    "text": "Text Field 29"
+   }
+  ],
+  "formed": [
+   {
+    "text": "Text Field 30",
+    "pick": "head"
+   },
+   {
+    "text": "Text Field 31",
+    "pick": "tail|digits"
+   }
+  ],
+  "open_date": [
+   {
+    "text": "Text Field 34",
+    "pick": "date"
+   }
+  ],
+  "business_name": [
+   {
+    "text": "Text Field 33"
+   }
+  ],
+  "city_limits": [
+   {
+    "check": "Check Box 385",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 3850",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Text Field 37",
+    "pick": "street"
+   },
+   {
+    "text": "Text Field 57",
+    "pick": "city"
+   },
+   {
+    "text": "Text Field 56",
+    "pick": "state"
+   },
+   {
+    "text": "Text Field 55",
+    "pick": "zip"
+   }
+  ],
+  "location": [
+   {
+    "text": "Text Field 41",
+    "pick": "street"
+   },
+   {
+    "text": "Text Field 44",
+    "pick": "city"
+   },
+   {
+    "text": "Text Field 43",
+    "pick": "state"
+   },
+   {
+    "text": "Text Field 42",
+    "pick": "zip"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Text Field 45"
+   }
+  ],
+  "email": [
+   {
+    "text": "Text Field 47"
+   }
+  ],
+  "person1": [
+   {
+    "text": "Text Field 48"
+   }
+  ],
+  "person1_title": [
+   {
+    "text": "Text Field 49"
+   }
+  ],
+  "person1_dob": [
+   {
+    "text": "Text Field 149",
+    "pick": "date"
+   }
+  ],
+  "person1_address": [
+   {
+    "text": "Text Field 165",
+    "pick": "street"
+   },
+   {
+    "text": "Text Field 60",
+    "pick": "city"
+   },
+   {
+    "text": "Text Field 59",
+    "pick": "state"
+   },
+   {
+    "text": "Text Field 58",
+    "pick": "zip"
+   }
+  ],
+  "person1_percent": [
+   {
+    "text": "Text Field 148",
+    "pick": "digits"
+   }
+  ],
+  "person1_phone": [
+   {
+    "text": "Text Field 50"
+   }
+  ],
+  "person1_email": [
+   {
+    "text": "Text Field 3333"
+   }
+  ],
+  "person1_married": [
+   {
+    "check": "Check Box 396",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 3960",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "Text Field 166",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "person2": [
+   {
+    "text": "Text Field 16777"
+   }
+  ],
+  "person2_title": [
+   {
+    "text": "Text Field 75"
+   }
+  ],
+  "person2_dob": [
+   {
+    "text": "Text Field 150",
+    "pick": "date"
+   }
+  ],
+  "person2_address": [
+   {
+    "text": "Text Field 70",
+    "pick": "street"
+   },
+   {
+    "text": "Text Field 69",
+    "pick": "city"
+   },
+   {
+    "text": "Text Field 68",
+    "pick": "state"
+   },
+   {
+    "text": "Text Field 67",
+    "pick": "zip"
+   }
+  ],
+  "person2_percent": [
+   {
+    "text": "Text Field 151",
+    "pick": "digits"
+   }
+  ],
+  "person2_phone": [
+   {
+    "text": "Text Field 74"
+   }
+  ],
+  "person2_email": [
+   {
+    "text": "Text Field 33333"
+   }
+  ],
+  "person2_married": [
+   {
+    "check": "Check Box 398",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 3980",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "Text Field 66",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "contractors": [
+   {
+    "check": "Check Box 406",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 4060",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "gross_income": [
+   {
+    "check": "Check Box 408",
+    "if": "^\\$?0"
+   },
+   {
+    "check": "Check Box 4080",
+    "if": "^\\$?12"
+   },
+   {
+    "check": "Check Box 40800",
+    "if": "^\\$?28"
+   },
+   {
+    "check": "Check Box 408000",
+    "if": "^\\$?60"
+   },
+   {
+    "check": "Check Box 4080000",
+    "if": "^\\$?100"
+   }
+  ],
+  "activities": [
+   {
+    "check": "Check Box 413",
+    "if": "wholesale"
+   },
+   {
+    "check": "Check Box 4130",
+    "if": "retail"
+   },
+   {
+    "check": "Check Box 41300",
+    "if": "manufactur"
+   },
+   {
+    "check": "Check Box 413000",
+    "if": "service"
+   }
+  ],
+  "description": [
+   {
+    "text": "Text Field 94"
+   }
+  ],
+  "acquired": [
+   {
+    "check": "Check Box 417",
+    "if": "^all"
+   },
+   {
+    "check": "Check Box 4170",
+    "if": "^part"
+   },
+   {
+    "check": "Check Box 41700",
+    "if": "^none|^no\\b"
+   }
+  ],
+  "owned_before": [
+   {
+    "check": "Check Box 424",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 4240",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "Text Field 105",
+    "pick": "tail|head",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Text Field 106",
+    "pick": "tail|tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "bank": [
+   {
+    "text": "Text Field 107",
+    "pick": "head"
+   },
+   {
+    "text": "Text Field 108",
+    "pick": "tail"
+   }
+  ],
+  "first_employment": [
+   {
+    "text": "Text Field 109",
+    "pick": "date"
+   }
+  ],
+  "first_wages": [
+   {
+    "text": "Text Field 1010",
+    "pick": "date"
+   }
+  ],
+  "employee_count": [
+   {
+    "text": "Text Field 1011",
+    "pick": "digits"
+   }
+  ],
+  "risk_class": [
+   {
+    "check": "Check Box 426000",
+    "if": "\\(?13\\)?"
+   },
+   {
+    "check": "Check Box 4260000000",
+    "if": "\\(?14\\)?"
+   },
+   {
+    "check": "Check Box 42642600",
+    "if": "\\(?11\\)?"
+   },
+   {
+    "check": "Check Box 4264260000000",
+    "if": "\\(?16\\)?"
+   },
+   {
+    "check": "Check Box 426426000",
+    "if": "\\(?15\\)?"
+   },
+   {
+    "check": "Check Box 42600",
+    "if": "\\(?0?9\\)"
+   }
+  ],
+  "positions": [
+   {
+    "text": "Text Field 1018",
+    "pick": "line1|head"
+   },
+   {
+    "text": "Text Field 1024",
+    "pick": "line1|tail|head|digits"
+   },
+   {
+    "text": "Text Field 1030",
+    "pick": "line1|tail|tail|digits"
+   },
+   {
+    "text": "Text Field 1019",
+    "pick": "line2|head"
+   },
+   {
+    "text": "Text Field 1025",
+    "pick": "line2|tail|head|digits"
+   },
+   {
+    "text": "Text Field 1031",
+    "pick": "line2|tail|tail|digits"
+   },
+   {
+    "text": "Text Field 1020",
+    "pick": "line3|head"
+   },
+   {
+    "text": "Text Field 1026",
+    "pick": "line3|tail|head|digits"
+   },
+   {
+    "text": "Text Field 1032",
+    "pick": "line3|tail|tail|digits"
+   },
+   {
+    "text": "Text Field 1021",
+    "pick": "line4|head"
+   },
+   {
+    "text": "Text Field 1027",
+    "pick": "line4|tail|head|digits"
+   },
+   {
+    "text": "Text Field 1033",
+    "pick": "line4|tail|tail|digits"
+   },
+   {
+    "text": "Text Field 1022",
+    "pick": "line5|head"
+   },
+   {
+    "text": "Text Field 1028",
+    "pick": "line5|tail|head|digits"
+   },
+   {
+    "text": "Text Field 1034",
+    "pick": "line5|tail|tail|digits"
+   }
+  ],
+  "officer_ui": [
+   {
+    "check": "Check Box 446",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 44646",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "officer_wc": [
+   {
+    "check": "Check Box 448",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 44848",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "elective_wc": [
+   {
+    "check": "Check Box 450",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 45050",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "preparer": [
+   {
+    "text": "Text Field 1037"
+   }
+  ],
+  "preparer_title": [
+   {
+    "text": "Text Field 1038"
+   }
+  ],
+  "preparer_phone": [
+   {
+    "text": "Text Field 1039"
+   }
+  ],
+  "language": [
+   {
+    "check": "Check Box 452",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box 4522",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "Text Field 1041",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ]
+ },
+ "sign": {
+  "page": 5,
+  "x": 86,
+  "y": 127,
+  "w": 375,
+  "h": 14
+ }
+}

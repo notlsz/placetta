@@ -1,0 +1,810 @@
+{
+ "form": "or-payroll",
+ "rev": "Form OR-CER (Rev. 11-29-23)",
+ "pdf": "or-payroll.pdf",
+ "url": "https://www.oregon.gov/dor/forms/FormsPubs/form-or-cer_211-055.pdf",
+ "checked": "2026-10-18",
+ "notes": "Oregon's Combined Employer's Registration (Revenue withholding, Employment Department unemployment tax and the Workers' Benefit Fund). Phones and dates print in their separate boxes; the FEIN in its two. Addresses split into street, city, state and ZIP. Each responsible party's SSN boxes are never printed; the person writes them. The transit district boxes, the acquisition details and the signature and its date are left for the signer.",
+ "lines": [
+  {
+   "id": "legal_name",
+   "line": "A",
+   "en": "Legal business name (as registered with the IRS and Oregon Secretary of State)",
+   "zh": "企业法定名称（与 IRS 和俄勒冈州务卿登记一致）"
+  },
+  {
+   "id": "fein",
+   "line": "A",
+   "en": "Federal employer identification number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "phone",
+   "line": "A",
+   "en": "Phone",
+   "zh": "电话"
+  },
+  {
+   "id": "dba",
+   "line": "A",
+   "en": "Doing business as (DBA)",
+   "zh": "经营名称（DBA）"
+  },
+  {
+   "id": "email",
+   "line": "A",
+   "en": "Email",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "entity_type",
+   "line": "B",
+   "en": "Business entity type",
+   "zh": "企业实体类型",
+   "options": [
+    "Corporation",
+    "Sub-chapter S Corporation",
+    "Sole proprietorship (individual)",
+    "LLP (Limited liability partnership)",
+    "Partnership-general",
+    "Partnership-limited",
+    "Non-profit 501(c)(3) (attach federal exemption)",
+    "Other nonprofit",
+    "LLC-Corporation",
+    "LLC-S Corporation",
+    "LLC-Partnership",
+    "LLC-Disregarded entity",
+    "Recognized Indian Tribe",
+    "Other tax entity"
+   ],
+   "hint": {
+    "en": "For another type, write \"Other tax entity: \" and the type.",
+    "zh": "其他类型请写 \"Other tax entity: \" 加类型。"
+   }
+  },
+  {
+   "id": "mailing",
+   "line": "B",
+   "en": "Business mailing address",
+   "zh": "企业邮寄地址"
+  },
+  {
+   "id": "physical",
+   "line": "B",
+   "en": "Business physical address in Oregon",
+   "zh": "俄勒冈州营业实际地址"
+  },
+  {
+   "id": "home_address",
+   "line": "B",
+   "en": "Is the physical address an employee's home?",
+   "zh": "实际地址是否为员工住所？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "naics",
+   "line": "B",
+   "en": "NAICS code",
+   "zh": "NAICS 代码"
+  },
+  {
+   "id": "responsible1",
+   "line": "C",
+   "en": "Responsible party 1: name",
+   "zh": "负责人 1：姓名",
+   "hint": {
+    "en": "Owners, partners, officers or members responsible for payroll taxes. Their SSN is written by hand on the signed form.",
+    "zh": "负责工资税的业主、合伙人、高管或成员。其社会安全号由本人在签字件上手写。"
+   }
+  },
+  {
+   "id": "responsible1_ein",
+   "line": "C",
+   "en": "Responsible party 1: FEIN (only when it is a company)",
+   "zh": "负责人 1：联邦雇主识别号（仅限其为公司时）"
+  },
+  {
+   "id": "responsible1_address",
+   "line": "C",
+   "en": "Responsible party 1: address",
+   "zh": "负责人 1：地址"
+  },
+  {
+   "id": "responsible1_duties",
+   "line": "C",
+   "en": "Responsible party 1: responsible for (filing tax returns, paying taxes, hiring and firing, deciding which creditors to pay first)",
+   "zh": "负责人 1：负责事项（报税、缴税、招聘与解雇、决定债权人付款顺序）",
+   "hint": {
+    "en": "Name each, e.g. \"Filing tax returns, Paying taxes, Hiring/firing\".",
+    "zh": "逐项写明，如 \"Filing tax returns, Paying taxes, Hiring/firing\"。"
+   }
+  },
+  {
+   "id": "responsible2",
+   "line": "C",
+   "en": "Responsible party 2: name",
+   "zh": "负责人 2：姓名"
+  },
+  {
+   "id": "responsible2_ein",
+   "line": "C",
+   "en": "Responsible party 2: FEIN (only when it is a company)",
+   "zh": "负责人 2：联邦雇主识别号（仅限其为公司时）"
+  },
+  {
+   "id": "responsible2_address",
+   "line": "C",
+   "en": "Responsible party 2: address",
+   "zh": "负责人 2：地址"
+  },
+  {
+   "id": "responsible2_duties",
+   "line": "C",
+   "en": "Responsible party 2: responsible for (filing tax returns, paying taxes, hiring and firing, deciding which creditors to pay first)",
+   "zh": "负责人 2：负责事项（报税、缴税、招聘与解雇、决定债权人付款顺序）",
+   "hint": {
+    "en": "Name each, e.g. \"Filing tax returns, Paying taxes, Hiring/firing\".",
+    "zh": "逐项写明，如 \"Filing tax returns, Paying taxes, Hiring/firing\"。"
+   }
+  },
+  {
+   "id": "special_employees",
+   "line": "D",
+   "en": "Are any employees courtesy withholding, agricultural, working on a fishing vessel or domestic (in-home)?",
+   "zh": "是否有员工属于礼让预扣、农业、渔船作业或家政（居家）类？",
+   "hint": {
+    "en": "Name each that applies, or \"None\".",
+    "zh": "逐项写明适用的类型，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "domestic_withholding",
+   "line": "D",
+   "en": "Does any domestic worker request withholding?",
+   "zh": "是否有家政员工要求预扣税？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "llc_members",
+   "line": "D",
+   "en": "Approximate number of LLC members",
+   "zh": "LLC 成员大约人数"
+  },
+  {
+   "id": "owners_officers",
+   "line": "D",
+   "en": "Approximate number of owners or officers",
+   "zh": "业主或高管大约人数"
+  },
+  {
+   "id": "employees",
+   "line": "D",
+   "en": "Approximate number of employees",
+   "zh": "员工大约人数"
+  },
+  {
+   "id": "first_paid",
+   "line": "D",
+   "en": "Date employees were (or will be) first paid",
+   "zh": "首次（或预计首次）支付员工工资的日期"
+  },
+  {
+   "id": "first_hired",
+   "line": "E",
+   "en": "Date the first Oregon employee was (or will be) hired",
+   "zh": "首位俄勒冈员工的（预计）雇用日期"
+  },
+  {
+   "id": "payroll_quarter",
+   "line": "E",
+   "en": "Calendar quarter and year payroll first exceeds $1,000",
+   "zh": "工资总额首次超过 1,000 美元的季度和年份",
+   "hint": {
+    "en": "Quarter, then year: \"4, 2026\".",
+    "zh": "先写季度再写年份：\"4, 2026\"。"
+   }
+  },
+  {
+   "id": "workers_comp",
+   "line": "E",
+   "en": "Do employees need to be covered by a workers' compensation policy?",
+   "zh": "员工是否需要工伤保险保单？",
+   "options": [
+    "Yes",
+    "No, but I choose to have coverage",
+    "No, employees are covered by federal WC",
+    "No, only owners/corporate officers",
+    "No, other: (explain)"
+   ]
+  },
+  {
+   "id": "payroll_service",
+   "line": "E",
+   "en": "Off-site payroll service, accountant or bookkeeper: name",
+   "zh": "外部工资服务、会计或记账人：名称"
+  },
+  {
+   "id": "payroll_contact",
+   "line": "E",
+   "en": "Payroll service: individual contact name",
+   "zh": "工资服务：联系人姓名"
+  },
+  {
+   "id": "payroll_address",
+   "line": "E",
+   "en": "Payroll service mailing address",
+   "zh": "工资服务邮寄地址"
+  },
+  {
+   "id": "payroll_forms",
+   "line": "E",
+   "en": "Send forms to the payroll service's address?",
+   "zh": "是否将表格寄往工资服务地址？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "payroll_bills",
+   "line": "E",
+   "en": "Send billings to the payroll service's address?",
+   "zh": "是否将账单寄往工资服务地址？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "contact",
+   "line": "F",
+   "en": "Registration contact person: name",
+   "zh": "登记联系人：姓名"
+  },
+  {
+   "id": "contact_title",
+   "line": "F",
+   "en": "Registration contact: title",
+   "zh": "登记联系人：职务"
+  },
+  {
+   "id": "contact_phone",
+   "line": "F",
+   "en": "Registration contact: phone",
+   "zh": "登记联系人：电话"
+  },
+  {
+   "id": "contact_email",
+   "line": "F",
+   "en": "Registration contact: email",
+   "zh": "登记联系人：电子邮箱"
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Signer: printed name",
+   "zh": "签署人：正楷姓名"
+  },
+  {
+   "id": "signer_title",
+   "line": "Signature",
+   "en": "Signer: title",
+   "zh": "签署人：职务"
+  },
+  {
+   "id": "signer_phone",
+   "line": "Signature",
+   "en": "Signer: phone",
+   "zh": "签署人：电话"
+  }
+ ],
+ "blank": {
+  "dba": "^(none|no|n/?a)\\.?$",
+  "home_address": "^(n|no|否)\\b",
+  "special_employees": "^(none|no|n/?a)\\.?$",
+  "payroll_service": "^(none|no|n/?a)\\.?$",
+  "payroll_contact": "^(none|no|n/?a)\\.?$",
+  "payroll_address": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "legal_name": [
+   {
+    "text": "cer-p1-1"
+   }
+  ],
+  "fein": [
+   {
+    "text": "cer-p1-2",
+    "pick": "ein1"
+   },
+   {
+    "text": "cer-p1-3",
+    "pick": "ein2"
+   }
+  ],
+  "phone": [
+   {
+    "text": "cer-p1-4",
+    "pick": "phone1"
+   },
+   {
+    "text": "cer-p1-5",
+    "pick": "phone2"
+   },
+   {
+    "text": "cer-p1-6",
+    "pick": "phone3"
+   }
+  ],
+  "dba": [
+   {
+    "text": "cer-p1-7",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "email": [
+   {
+    "text": "cer-p1-8"
+   }
+  ],
+  "entity_type": [
+   {
+    "radio": "Check Box1#0",
+    "value": "Corporation",
+    "if": "^corp"
+   },
+   {
+    "radio": "Check Box1#1",
+    "value": "Sub-chapter S Corporation",
+    "if": "^sub"
+   },
+   {
+    "radio": "Check Box1#2",
+    "value": "Sole proprietorship (individual)",
+    "if": "^sole"
+   },
+   {
+    "radio": "Check Box1#3",
+    "value": "LLP (Limited liability partnership)",
+    "if": "^llp"
+   },
+   {
+    "radio": "Check Box1#4",
+    "value": "Partnership-general",
+    "if": "^partnership.general|^general partnership"
+   },
+   {
+    "radio": "Check Box1#5",
+    "value": "Partnership-limited",
+    "if": "^partnership.limited|^limited partnership"
+   },
+   {
+    "radio": "Check Box1#6",
+    "value": "Non-profit 501(c)(3) (attach federal exemption)",
+    "if": "^non.?profit 501"
+   },
+   {
+    "radio": "Check Box1#7",
+    "value": "Other nonprofit",
+    "if": "^other nonprofit"
+   },
+   {
+    "radio": "Check Box1#8",
+    "value": "LLC-Corporation",
+    "if": "^llc.corp"
+   },
+   {
+    "radio": "Check Box1#9",
+    "value": "LLC-S Corporation",
+    "if": "^llc.s"
+   },
+   {
+    "radio": "Check Box1#10",
+    "value": "LLC-Partnership",
+    "if": "^llc.partner"
+   },
+   {
+    "radio": "Check Box1#11",
+    "value": "LLC-Disregarded entity",
+    "if": "^llc.disregard|^single.member"
+   },
+   {
+    "radio": "Check Box1#12",
+    "value": "Recognized Indian Tribe",
+    "if": "^recognized|tribe"
+   },
+   {
+    "radio": "Check Box1#13",
+    "value": "Other tax entity:",
+    "if": "^other tax"
+   },
+   {
+    "text": "cer-p1-10",
+    "pick": "tail",
+    "if": "^other tax"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "cer-p1-11",
+    "pick": "street"
+   },
+   {
+    "text": "cer-p1-12",
+    "pick": "city"
+   },
+   {
+    "text": "cer-p1-13",
+    "pick": "state"
+   },
+   {
+    "text": "cer-p1-14",
+    "pick": "zip"
+   }
+  ],
+  "physical": [
+   {
+    "text": "cer-p1-15",
+    "pick": "street"
+   },
+   {
+    "text": "cer-p1-16",
+    "pick": "city"
+   },
+   {
+    "text": "cer-p1-17",
+    "pick": "state"
+   },
+   {
+    "text": "cer-p1-18",
+    "pick": "zip"
+   }
+  ],
+  "home_address": [
+   {
+    "check": "cer-p1-19",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "naics": [
+   {
+    "text": "cer-p1-20",
+    "pick": "digits"
+   }
+  ],
+  "responsible1": [
+   {
+    "text": "cer-p1-21"
+   }
+  ],
+  "responsible1_ein": [
+   {
+    "text": "cer-p1-25",
+    "pick": "ein1"
+   },
+   {
+    "text": "cer-p1-26",
+    "pick": "ein2"
+   }
+  ],
+  "responsible1_address": [
+   {
+    "text": "cer-p1-27",
+    "pick": "street"
+   },
+   {
+    "text": "cer-p1-28",
+    "pick": "city"
+   },
+   {
+    "text": "cer-p1-29",
+    "pick": "state"
+   },
+   {
+    "text": "cer-p1-30",
+    "pick": "zip"
+   }
+  ],
+  "responsible1_duties": [
+   {
+    "check": "cer-p1-31",
+    "if": "filing"
+   },
+   {
+    "check": "cer-p1-32",
+    "if": "paying"
+   },
+   {
+    "check": "cer-p1-33",
+    "if": "hiring"
+   },
+   {
+    "check": "cer-p1-34",
+    "if": "creditor"
+   }
+  ],
+  "responsible2": [
+   {
+    "text": "cer-p1-35"
+   }
+  ],
+  "responsible2_ein": [
+   {
+    "text": "cer-p1-39",
+    "pick": "ein1"
+   },
+   {
+    "text": "cer-p1-40",
+    "pick": "ein2"
+   }
+  ],
+  "responsible2_address": [
+   {
+    "text": "cer-p1-41",
+    "pick": "street"
+   },
+   {
+    "text": "cer-p1-42",
+    "pick": "city"
+   },
+   {
+    "text": "cer-p1-43",
+    "pick": "state"
+   },
+   {
+    "text": "cer-p1-44",
+    "pick": "zip"
+   }
+  ],
+  "responsible2_duties": [
+   {
+    "check": "cer-p1-45",
+    "if": "filing"
+   },
+   {
+    "check": "cer-p1-46",
+    "if": "paying"
+   },
+   {
+    "check": "cer-p1-47",
+    "if": "hiring"
+   },
+   {
+    "check": "cer-p1-48",
+    "if": "creditor"
+   }
+  ],
+  "special_employees": [
+   {
+    "check": "cer-p1-49",
+    "if": "courtesy"
+   },
+   {
+    "check": "cer-p1-50",
+    "if": "agricult"
+   },
+   {
+    "check": "cer-p1-51",
+    "if": "fishing"
+   },
+   {
+    "check": "cer-p1-52",
+    "if": "domestic"
+   }
+  ],
+  "domestic_withholding": [
+   {
+    "radio": "Check Box2#0",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Check Box2#1",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "llc_members": [
+   {
+    "text": "cer-p1-54",
+    "pick": "digits"
+   }
+  ],
+  "owners_officers": [
+   {
+    "text": "cer-p1-55",
+    "pick": "digits"
+   }
+  ],
+  "employees": [
+   {
+    "text": "cer-p1-56",
+    "pick": "digits"
+   }
+  ],
+  "first_paid": [
+   {
+    "text": "cer-p1-57",
+    "pick": "mm"
+   },
+   {
+    "text": "cer-p1-58",
+    "pick": "dd"
+   },
+   {
+    "text": "cer-p1-59",
+    "pick": "yyyy"
+   }
+  ],
+  "first_hired": [
+   {
+    "text": "cer-p2-10",
+    "pick": "mm"
+   },
+   {
+    "text": "cer-p2-11",
+    "pick": "dd"
+   },
+   {
+    "text": "cer-p2-12",
+    "pick": "yyyy"
+   }
+  ],
+  "payroll_quarter": [
+   {
+    "text": "cer-p2-13",
+    "pick": "head|digits"
+   },
+   {
+    "text": "cer-p2-14",
+    "pick": "tail|digits"
+   }
+  ],
+  "workers_comp": [
+   {
+    "radio": "Check Box3#0",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Check Box3#1",
+    "value": "No, but I choose to have coverage",
+    "if": "^no.*choose"
+   },
+   {
+    "check": "cer-p2-16",
+    "if": "federal"
+   },
+   {
+    "check": "cer-p2-17",
+    "if": "only owners"
+   },
+   {
+    "check": "cer-p2-18",
+    "if": "^no.*other"
+   },
+   {
+    "text": "cer-p2-19",
+    "pick": "tail",
+    "if": "^no.*other"
+   }
+  ],
+  "payroll_service": [
+   {
+    "text": "cer-p2-35",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "payroll_contact": [
+   {
+    "text": "cer-p2-36",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "payroll_address": [
+   {
+    "text": "cer-p2-37",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "cer-p2-38",
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "cer-p2-39",
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "cer-p2-40",
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "payroll_forms": [
+   {
+    "radio": "Check Box5#0",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Check Box5#1",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "payroll_bills": [
+   {
+    "radio": "Check Box6#0",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Check Box6#1",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "contact": [
+   {
+    "text": "cer-p2-43"
+   }
+  ],
+  "contact_title": [
+   {
+    "text": "cer-p2-44"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "cer-p2-45",
+    "pick": "phone1"
+   },
+   {
+    "text": "cer-p2-46",
+    "pick": "phone2"
+   },
+   {
+    "text": "cer-p2-47",
+    "pick": "phone3"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "cer-p2-48"
+   }
+  ],
+  "signer": [
+   {
+    "text": "cer-p2-55"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "cer-p2-56"
+   }
+  ],
+  "signer_phone": [
+   {
+    "text": "cer-p2-49",
+    "pick": "phone1"
+   },
+   {
+    "text": "cer-p2-50",
+    "pick": "phone2"
+   },
+   {
+    "text": "cer-p2-51",
+    "pick": "phone3"
+   }
+  ]
+ }
+}

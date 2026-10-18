@@ -187,7 +187,8 @@ async function checkMapped(id: string, map: FormMap) {
       } else if (c.kind === "radio") {
         const f = of.getFieldMaybe(c.name);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const got = f instanceof PDFRadioGroup ? f.getSelected() : f instanceof PDFCheckBox ? (f.acroField.getValue() as any)?.decodeText?.() : undefined;
+        const raw = f instanceof PDFRadioGroup || f instanceof PDFCheckBox ? (f.acroField.dict.lookup(PDFName.of("V")) as any)?.decodeText?.() : undefined;
+        const got = f instanceof PDFRadioGroup && f.getSelected() === c.value ? c.value : raw;
         if (got !== c.value) P(`${c.id}: ${c.name} set to "${got}", not "${c.value}"`);
       } else if (c.kind === "choice") {
         const f = of.getFieldMaybe(c.name);

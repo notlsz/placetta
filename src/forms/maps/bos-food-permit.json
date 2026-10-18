@@ -1,0 +1,595 @@
+{
+ "form": "bos-food-permit",
+ "rev": "Food Establishment Permit Application (Revised 7/2019, posted 2026)",
+ "pdf": "bos-food-permit.pdf",
+ "url": "https://www.boston.gov/sites/default/files/file/2026/07/%28English%29%20Food%20Establishment%20Permit%20Application%20updated-combined.pdf",
+ "checked": "2026-10-18",
+ "notes": "Boston Inspectional Services' food establishment permit application with the Massachusetts workers' compensation affidavit. Name lines take 'Name, Title'. Hours: seven entries, Sunday to Saturday, separated by semicolons ('Closed' for a day off). Officers: one per line, 'name / title / address'. The ownership-type, day, food-establishment-type and risk-question checkboxes share field names across pages in this PDF, so they are left for the applicant to tick; so are the signatures, the office-use boxes and the issuing-authority block.",
+ "lines": [
+  {
+   "id": "business_name",
+   "line": "1",
+   "en": "Business name",
+   "zh": "企业名称"
+  },
+  {
+   "id": "address",
+   "line": "2",
+   "en": "Business address (the physical address shown to the public)",
+   "zh": "营业地址（对公众展示的实际地址）"
+  },
+  {
+   "id": "mailing",
+   "line": "3",
+   "en": "Business mailing address, if different",
+   "zh": "企业邮寄地址（如不同）"
+  },
+  {
+   "id": "phone",
+   "line": "4",
+   "en": "Business phone (the public number)",
+   "zh": "企业电话（对外号码）"
+  },
+  {
+   "id": "applicant",
+   "line": "5",
+   "en": "Applicant name and title",
+   "zh": "申请人姓名与职务"
+  },
+  {
+   "id": "applicant_address",
+   "line": "6",
+   "en": "Applicant address",
+   "zh": "申请人地址"
+  },
+  {
+   "id": "applicant_phone",
+   "line": "7",
+   "en": "Applicant phone",
+   "zh": "申请人电话"
+  },
+  {
+   "id": "applicant_email",
+   "line": "8",
+   "en": "Applicant email",
+   "zh": "申请人电子邮箱"
+  },
+  {
+   "id": "org_type",
+   "line": "9",
+   "en": "Establishment owned by an association, corporation, individual, partnership or other legal entity",
+   "zh": "场所所有人类型：协会、公司、个人、合伙或其他法律实体",
+   "options": [
+    "Association",
+    "Corporation",
+    "Individual",
+    "Partnership",
+    "Legal Entity"
+   ]
+  },
+  {
+   "id": "officers",
+   "line": "9",
+   "en": "Owners or officers: one per line, \"name / title / address\"",
+   "zh": "所有人或高管：每行一位，\"姓名 / 职务 / 地址\""
+  },
+  {
+   "id": "owner",
+   "line": "10",
+   "en": "Business owner and title (corporation name)",
+   "zh": "企业所有人及职务（公司名称）"
+  },
+  {
+   "id": "owner_address",
+   "line": "11",
+   "en": "Business owner address (corporation address)",
+   "zh": "企业所有人地址（公司地址）"
+  },
+  {
+   "id": "daily_manager",
+   "line": "12",
+   "en": "Person responsible for daily operations: name and title",
+   "zh": "日常运营负责人：姓名与职务"
+  },
+  {
+   "id": "daily_address",
+   "line": "12",
+   "en": "Daily operations person: address",
+   "zh": "日常运营负责人：地址"
+  },
+  {
+   "id": "daily_phone",
+   "line": "12",
+   "en": "Daily operations person: phone",
+   "zh": "日常运营负责人：电话"
+  },
+  {
+   "id": "emergency_phone",
+   "line": "12",
+   "en": "Emergency phone number",
+   "zh": "紧急电话"
+  },
+  {
+   "id": "supervisor",
+   "line": "13",
+   "en": "District or regional supervisor, if any: name and title",
+   "zh": "区域主管（如有）：姓名与职务"
+  },
+  {
+   "id": "supervisor_address",
+   "line": "13",
+   "en": "District supervisor: address",
+   "zh": "区域主管：地址"
+  },
+  {
+   "id": "supervisor_phone",
+   "line": "13",
+   "en": "District supervisor: phone",
+   "zh": "区域主管：电话"
+  },
+  {
+   "id": "water_sewage",
+   "line": "14",
+   "en": "Source of water and sewage disposal",
+   "zh": "供水与污水处理来源"
+  },
+  {
+   "id": "rubbish",
+   "line": "15",
+   "en": "Rubbish disposal company and rendering company (for grease)",
+   "zh": "垃圾清运公司与油脂回收公司"
+  },
+  {
+   "id": "hours",
+   "line": "16",
+   "en": "Hours, Sunday to Saturday, separated by semicolons",
+   "zh": "营业时间：周日至周六，以分号分隔",
+   "hint": {
+    "en": "e.g. \"10am-9pm; 10am-9pm; Closed; 10am-9pm; 10am-9pm; 10am-10pm; 10am-10pm\"",
+    "zh": "如 \"10am-9pm; 10am-9pm; Closed; 10am-9pm; 10am-9pm; 10am-10pm; 10am-10pm\""
+   }
+  },
+  {
+   "id": "days_open",
+   "line": "16",
+   "en": "Days of operation (checkboxes)",
+   "zh": "营业日（勾选框）"
+  },
+  {
+   "id": "food_employees",
+   "line": "17",
+   "en": "Number of food employees",
+   "zh": "食品从业员工人数"
+  },
+  {
+   "id": "pic_certified",
+   "line": "18",
+   "en": "Person in charge certified in food protection management (attach the certificate)",
+   "zh": "持有食品安全管理证书的负责人（附证书）"
+  },
+  {
+   "id": "anti_choking",
+   "line": "19",
+   "en": "Person trained in anti-choking procedures (25 seats or more): name",
+   "zh": "受过防噎急救培训的人员（25 座及以上）：姓名"
+  },
+  {
+   "id": "seats",
+   "line": "20",
+   "en": "Food service: number of seats",
+   "zh": "餐饮服务：座位数"
+  },
+  {
+   "id": "retail_sq_ft",
+   "line": "20",
+   "en": "Retail: square feet",
+   "zh": "零售：面积（平方英尺）"
+  },
+  {
+   "id": "establishment_type",
+   "line": "20",
+   "en": "Type of food establishment (checkboxes)",
+   "zh": "食品场所类型（勾选框）"
+  },
+  {
+   "id": "risk_questions",
+   "line": "21",
+   "en": "Food process and risk questions (page 5)",
+   "zh": "食品加工与风险问题（第 5 页）"
+  },
+  {
+   "id": "ein",
+   "line": "Signature",
+   "en": "Federal ID / EIN number",
+   "zh": "联邦税号（EIN）"
+  },
+  {
+   "id": "wc_business_name",
+   "line": "WC affidavit",
+   "en": "Workers' compensation affidavit: business or organization name",
+   "zh": "工伤保险声明：企业或组织名称"
+  },
+  {
+   "id": "wc_address",
+   "line": "WC affidavit",
+   "en": "Workers' compensation affidavit: business address",
+   "zh": "工伤保险声明：企业地址"
+  },
+  {
+   "id": "wc_phone",
+   "line": "WC affidavit",
+   "en": "Workers' compensation affidavit: phone",
+   "zh": "工伤保险声明：电话"
+  },
+  {
+   "id": "wc_employer_type",
+   "line": "WC affidavit",
+   "en": "Workers' compensation: which applies",
+   "zh": "工伤保险：适用情形",
+   "options": [
+    "Employer with employees",
+    "Sole proprietor or partnership with no employees",
+    "Corporation whose officers are exempt",
+    "Non-profit staffed by volunteers"
+   ]
+  },
+  {
+   "id": "wc_employees",
+   "line": "WC affidavit",
+   "en": "Number of employees",
+   "zh": "员工人数"
+  },
+  {
+   "id": "wc_business_type",
+   "line": "WC affidavit",
+   "en": "Type of business",
+   "zh": "业务类型",
+   "options": [
+    "Retail",
+    "Restaurant/Bar/Eating Establishment",
+    "Office and/or Sales",
+    "Non-profit",
+    "Entertainment",
+    "Manufacturing",
+    "Health Care",
+    "Other"
+   ]
+  },
+  {
+   "id": "wc_insurer",
+   "line": "WC affidavit",
+   "en": "Workers' compensation insurance company",
+   "zh": "工伤保险公司"
+  },
+  {
+   "id": "wc_insurer_address",
+   "line": "WC affidavit",
+   "en": "Insurer's address",
+   "zh": "保险公司地址"
+  },
+  {
+   "id": "wc_policy",
+   "line": "WC affidavit",
+   "en": "Policy number and expiration date",
+   "zh": "保单号与到期日",
+   "hint": {
+    "en": "e.g. \"WC-4471-2026, 11/01/2027\"",
+    "zh": "如 \"WC-4471-2026, 11/01/2027\""
+   }
+  }
+ ],
+ "unmapped": {
+  "org_type": "This PDF gives these checkboxes the same names as the risk questions on page 5, so ticking one would tick another: the applicant ticks them by hand.",
+  "days_open": "This PDF gives these checkboxes the same names as the risk questions on page 5, so ticking one would tick another: the applicant ticks them by hand.",
+  "establishment_type": "This PDF gives these checkboxes the same names as the risk questions on page 5, so ticking one would tick another: the applicant ticks them by hand.",
+  "risk_questions": "This PDF gives these checkboxes the same names as the risk questions on page 5, so ticking one would tick another: the applicant ticks them by hand."
+ },
+ "blank": {
+  "mailing": "^(none|no|n/?a|same)\\.?$",
+  "supervisor": "^(none|no|n/?a)\\.?$",
+  "supervisor_address": "^(none|no|n/?a)\\.?$",
+  "supervisor_phone": "^(none|no|n/?a)\\.?$",
+  "anti_choking": "^(none|no|n/?a)\\.?$",
+  "retail_sq_ft": "^(none|no|n/?a)\\.?$",
+  "wc_insurer": "^(none|no|n/?a)\\.?$",
+  "wc_insurer_address": "^(none|no|n/?a)\\.?$",
+  "wc_policy": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "business_name": [
+   {
+    "text": "Business Name"
+   }
+  ],
+  "address": [
+   {
+    "text": "2 Business Address This is the vlivsical address of vour establishment disvlaved to the vublicl"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "3 Business Mailing Address If different than above",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   }
+  ],
+  "phone": [
+   {
+    "text": "4 Business Phone Number Public number to customers"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "5 Applicant Name  Title"
+   }
+  ],
+  "applicant_address": [
+   {
+    "text": "6 Applicant Address"
+   }
+  ],
+  "applicant_phone": [
+   {
+    "text": "7 Applicant Phone Number"
+   }
+  ],
+  "applicant_email": [
+   {
+    "text": "8 Applicant Email"
+   }
+  ],
+  "officers": [
+   {
+    "text": "Name / Title / Address",
+    "pick": "line1"
+   },
+   {
+    "text": "Name / Title / Address 2",
+    "pick": "line2"
+   },
+   {
+    "text": "Name / Title / Address 3",
+    "pick": "line3"
+   }
+  ],
+  "owner": [
+   {
+    "text": "10 Business Owner and Title Corvoration name"
+   }
+  ],
+  "owner_address": [
+   {
+    "text": "11 Business Owner Address Corporation address"
+   }
+  ],
+  "daily_manager": [
+   {
+    "text": "Name  Title"
+   }
+  ],
+  "daily_address": [
+   {
+    "text": "Address 1"
+   }
+  ],
+  "daily_phone": [
+   {
+    "text": "Phone Number 1"
+   }
+  ],
+  "emergency_phone": [
+   {
+    "text": "Emergency Phone Number"
+   }
+  ],
+  "supervisor": [
+   {
+    "text": "Name  Title_2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "supervisor_address": [
+   {
+    "text": "Address_2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "supervisor_phone": [
+   {
+    "text": "Phone Number_2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "water_sewage": [
+   {
+    "text": "14 Source of Water Sewage Disposal"
+   }
+  ],
+  "rubbish": [
+   {
+    "text": "15 Rubbish Disposal Company  Renderin Company for grease"
+   }
+  ],
+  "hours": [
+   {
+    "text": "Hours 1",
+    "pick": "line1"
+   },
+   {
+    "text": "Hours",
+    "pick": "line2"
+   },
+   {
+    "text": "Hours 3",
+    "pick": "line3"
+   },
+   {
+    "text": "Hours 4",
+    "pick": "line4"
+   },
+   {
+    "text": "Hours 5",
+    "pick": "line5"
+   },
+   {
+    "text": "Hours 6",
+    "pick": "line6"
+   },
+   {
+    "text": "Hours 7",
+    "pick": "line7"
+   }
+  ],
+  "food_employees": [
+   {
+    "text": "17 Number of Food Employees",
+    "pick": "digits"
+   }
+  ],
+  "pic_certified": [
+   {
+    "text": "18 Name of Person In Charge Certified in Food Protection Management Please attach covv of certificate"
+   }
+  ],
+  "anti_choking": [
+   {
+    "text": "19 Do you have a person trained in D Yes antichoking procedures D No If 25 seats or more",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "seats": [
+   {
+    "text": "of seats",
+    "pick": "digits"
+   }
+  ],
+  "retail_sq_ft": [
+   {
+    "text": "Sq feet",
+    "pick": "digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "ein": [
+   {
+    "text": "Federal ID EIN Number",
+    "pick": "ein"
+   }
+  ],
+  "wc_business_name": [
+   {
+    "text": "BusinessOrganization Name"
+   }
+  ],
+  "wc_address": [
+   {
+    "text": "Text40",
+    "pick": "street"
+   },
+   {
+    "text": "CityStateZip",
+    "pick": "citystatezip"
+   }
+  ],
+  "wc_phone": [
+   {
+    "text": "Phone"
+   },
+   {
+    "text": "Phone number"
+   }
+  ],
+  "wc_employer_type": [
+   {
+    "check": "Check Box98",
+    "if": "^employer|employees"
+   },
+   {
+    "check": "Check Box99",
+    "if": "sole proprietor|partnership"
+   },
+   {
+    "check": "Check Box100",
+    "if": "corporation.*officers|exempt"
+   },
+   {
+    "check": "Check Box101",
+    "if": "non.?profit"
+   }
+  ],
+  "wc_employees": [
+   {
+    "text": "with number of employees",
+    "pick": "digits"
+   }
+  ],
+  "wc_business_type": [
+   {
+    "check": "Check Box102",
+    "if": "^retail"
+   },
+   {
+    "check": "Check Box103",
+    "if": "restaurant|bar|eating"
+   },
+   {
+    "check": "Check Box104",
+    "if": "office|sales"
+   },
+   {
+    "check": "Check Box105",
+    "if": "^non.?profit"
+   },
+   {
+    "check": "Check Box106",
+    "if": "entertain"
+   },
+   {
+    "check": "Check Box107",
+    "if": "manufactur"
+   },
+   {
+    "check": "Check Box108",
+    "if": "health"
+   },
+   {
+    "check": "Check Box109",
+    "if": "^other"
+   },
+   {
+    "text": "Other",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "wc_insurer": [
+   {
+    "text": "Insurance Company Name",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "wc_insurer_address": [
+   {
+    "text": "Insurers Address",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "CityStateZip_2",
+    "pick": "citystatezip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "wc_policy": [
+   {
+    "text": "policy number or self ins lic number",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Expiration Date",
+    "pick": "tail|date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ]
+ }
+}
