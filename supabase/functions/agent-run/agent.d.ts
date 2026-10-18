@@ -1,7 +1,8 @@
 // Types for agent.js (the agent's core, bundled from src/ by scripts/build-agent.mjs). Kept by hand: the shapes the
 // function relies on. The source of truth is src/core.ts, src/live.ts and src/serverRun.ts.
 export type Bi = { en: string; zh: string };
-export type Step = { state: string; label: Bi; tool?: string };
+/** A step, or a moment of the replay (src/core.ts Step, src/replay.ts): when, which bot, which job, and what happened. */
+export type Step = { state: string; label: Bi; tool?: string; at?: string; bot?: string; job?: string; kind?: string; [k: string]: unknown };
 export type Reply = { text: Bi[]; approvals?: string[]; apps?: string[]; files?: string[]; sources?: { title: string; url: string }[]; [k: string]: unknown };
 export type Audit = { id: string; at: string; actor: "you" | "agent" | "agency" | "team" | "placetta"; action: Bi; object: Bi; detail?: Bi };
 export type Workspace = { audit: Audit[]; meta?: { city?: string; region?: string; what?: string; entity?: string }; [k: string]: unknown };
@@ -20,7 +21,11 @@ export type Services = {
   me?: string;
   setting?(key: string, value: string): string;
   network?(keys: string[]): Promise<Lesson[]>;
+  /** Store bots (split_job): start one run per store job; which started now and which wait their turn. */
+  split?(o: { parent: string; children: { job: string; store: string; title: Bi; prompt: string }[] }): Promise<{ started: string[]; queued: string[] }>;
 };
+/** What a store's bot came back with, for the run that split the work. */
+export type ChildResult = { job: string; store: string; status: string; reply: string };
 export declare function normalizeState(name: string, s: Record<string, unknown>): Workspace;
 export declare function stripState(w: Workspace): Record<string, unknown>;
 export declare function startState(history: Turn[], prompt: string): RunState;
@@ -34,7 +39,13 @@ export declare function runRounds(o: {
   sender?: string;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for background checks. */
   role?: Role;
-}): Promise<{ reply: Reply } | { paused: RunState }>;
+  /** The run's id: the jobs it works link to it, for their replay. */
+  runId?: string;
+  /** A store's bot: the store's job and the store it works. */
+  child?: { job: string; store: string };
+  /** The stores' bots this run started: how many are still open, and what each came back with. */
+  family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> };
+}): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }>;
 export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";
 export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;
 

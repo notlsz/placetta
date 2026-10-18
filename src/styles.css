@@ -1957,3 +1957,131 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 /* The sidebar's footer (Settings, language) stays in view when the More group makes the list taller than the window:
    the list scrolls under it and the footer sits at the bottom on the sidebar's own background. */
 .side > .side-bot { position: sticky; bottom: -14px; margin-bottom: -14px; padding-bottom: 14px; background: var(--side); z-index: 1; }
+
+/* ------------------------------ store bots, under a chief of staff (Work, Home, Stores) ------------------------------ */
+.cos .lnk, .bot-group .lnk, .sb-done .lnk { display: inline; padding: 0; border: 0; background: none; font: inherit; color: var(--blue-ink); cursor: pointer; }
+.cos .lnk:hover, .bot-group .lnk:hover, .sb-done .lnk:hover { text-decoration: underline; text-underline-offset: 2px; }
+.cos .lnk.quiet { color: var(--ink3); }
+.lnk.watch { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
+.lnk.watch svg { width: 12px; height: 12px; flex: none; }
+.job-foot { display: flex; align-items: center; margin-top: 10px; }
+.job-foot:empty { display: none; }
+.job-from { margin: 6px 0 0; font-size: 12.5px; color: var(--ink3); }
+.job-s.queued { background: var(--mist2); color: var(--ink3); }
+
+/* the chief of staff: a job split across stores, each store's bot and where its part stands */
+.cos { margin: 0 0 10px; padding: 16px 18px 14px; border-radius: 18px; background: var(--card); box-shadow: 0 0 0 1px var(--line), 0 12px 28px -22px rgba(45, 75, 120, .4); }
+.cos.compact { margin: 10px 0 4px; padding: 12px 14px 10px; background: var(--card2); box-shadow: 0 0 0 1px var(--line); }
+.cos-h { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.cos-bot { display: grid; place-items: center; }
+.cos-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cos-t small { font-size: 12.5px; color: var(--ink3); }
+.cos-t b { font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
+.cos.compact .cos-t b { font-size: 14px; }
+.cos-prog { display: flex; align-items: center; gap: 12px; margin: 12px 0 6px; }
+.cos-prog .job-bar { flex: 1; margin: 0; }
+.cos-n { flex: none; font-size: 12.5px; color: var(--ink2); font-variant-numeric: tabular-nums; }
+.cos-kids { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.cos-kid { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 0; }
+.cos-kid + .cos-kid { border-top: 1px solid var(--line); }
+.cos.compact .cos-kid { grid-template-columns: 24px minmax(0, 1fr) auto; padding: 3px 0; border-top: 0; }
+.kid-bot { display: grid; place-items: center; }
+.kid-tx { display: flex; flex-direction: column; min-width: 0; }
+.kid-tx b { font-weight: 500; font-size: 14px; }
+.cos.compact .kid-tx b { font-weight: 400; font-size: 13px; color: var(--ink2); }
+.kid-tx small { font-size: 12.5px; color: var(--ink3); line-height: 1.4; }
+.kid-s { font-style: normal; font-size: 12px; font-weight: 500; padding: 2px 10px; border-radius: 99px; white-space: nowrap; background: var(--mist2); color: var(--ink2); }
+.kid-s.running { background: var(--sky-wash); color: var(--blue-ink); }
+.kid-s.waiting, .kid-s.unchecked { background: var(--warm-soft); color: var(--warm); }
+.kid-s.queued, .kid-s.stopped { color: var(--ink3); }
+.cos .job-act { margin-top: 12px; }
+.cos .job-act .lnk.watch { margin-left: 0; }
+
+/* a store's group in Work (and its section on the store's page): its bot, then its jobs */
+.bot-h h2 { align-items: center; gap: 10px; }
+.bot-ico { display: grid; place-items: center; flex: none; }
+.bot-name { display: flex; flex-direction: column; min-width: 0; }
+.bot-name small { font-size: 12.5px; font-weight: 400; color: var(--ink3); letter-spacing: 0; }
+
+/* Stores: each store's bot, in a line on its card */
+.store-bot { display: flex; align-items: center; gap: 8px; margin-top: -2px; font-size: 13px; color: var(--ink2); }
+.store-bot.needs { color: var(--warm); }
+.sb-bot { display: grid; place-items: center; flex: none; }
+.sb-done { margin-top: 8px; }
+.sb-done .row { display: flex; align-items: center; gap: 12px; }
+.sb-done .lr-tx { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sb-done .lr-tx b { font-weight: 500; font-size: 14px; }
+.sb-done .lr-tx small { font-size: 12.5px; color: var(--ink3); }
+
+/* ------------------------------ the replay: watch how she did it ------------------------------ */
+.wb-h { padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.wb-kicker { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; color: var(--blue-ink); }
+.wb-kicker svg { width: 12px; height: 12px; }
+.sh-h.wb-h h2 { margin: 10px 0 4px; font-size: 26px; }
+.wb-meta { margin: 0 0 12px; font-size: 13px; color: var(--ink3); }
+.wb-player { display: grid; grid-template-columns: auto auto auto minmax(0, 1fr) auto; align-items: center; gap: 4px; padding: 6px 16px 6px 6px; border-radius: 16px; background: var(--mist); }
+.wb-player .icbtn:disabled { opacity: .35; cursor: default; }
+.wb-play { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 15px 0 12px; border-radius: 999px; background: var(--ink); color: var(--on-ink); font-size: 13.5px; font-weight: 500; white-space: nowrap; }
+.wb-play:hover { background: var(--ink-hover); }
+.wb-play svg { width: 14px; height: 14px; flex: none; }
+.wb-scrub { -webkit-appearance: none; appearance: none; width: 100%; min-width: 0; height: 24px; margin: 0 8px; background: transparent; cursor: pointer; }
+.wb-scrub::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--blue-ink) var(--pct, 0%), rgba(var(--e), .12) var(--pct, 0%)); }
+.wb-scrub::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin-top: -6px; border-radius: 50%; background: var(--card); box-shadow: 0 0 0 1.5px var(--blue-ink), 0 1px 3px rgba(var(--e), .2); }
+.wb-scrub::-moz-range-track { height: 4px; border-radius: 4px; background: rgba(var(--e), .12); }
+.wb-scrub::-moz-range-progress { height: 4px; border-radius: 4px; background: var(--blue-ink); }
+.wb-scrub::-moz-range-thumb { width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--card); box-shadow: 0 0 0 1.5px var(--blue-ink), 0 1px 3px rgba(var(--e), .2); }
+.wb-scrub:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 6px; }
+.wb-pos { font-size: 12.5px; color: var(--ink2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sheet .wb-body { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; overflow-y: auto; padding: 18px 30px 30px; }
+.wb-card { padding: 16px 18px; border-radius: 18px; background: var(--mist); }
+.wb-card.bad { background: var(--warm-soft); }
+.wb-card-h { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.wb-bot { display: grid; place-items: center; width: 38px; height: 38px; }
+.wb-who { display: flex; flex-direction: column; min-width: 0; }
+.wb-who b { font-size: 14px; font-weight: 600; }
+.wb-who small { font-size: 12.5px; color: var(--ink3); }
+.wb-kind { font-style: normal; font-size: 12px; font-weight: 500; padding: 2px 10px; border-radius: 99px; background: var(--card); color: var(--ink2); box-shadow: 0 0 0 1px var(--line); white-space: nowrap; }
+.wb-card.k-check .wb-kind, .wb-card.k-approval .wb-kind, .wb-card.k-split .wb-kind { color: var(--blue-ink); }
+.wb-label { margin: 12px 0 0; font: 400 19px/1.35 var(--display); letter-spacing: -.015em; color: var(--ink); }
+.wb-io { display: flex; flex-direction: column; gap: 2px; margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
+.wb-io span { font-size: 12px; color: var(--ink3); }
+.wb-io.bad { color: var(--warm); }
+.wb-diff { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.wb-diff-h, .wb-h3 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--ink3); }
+.wb-h3 { margin-top: 8px; }
+.wb-diff h4 { margin: 0 0 4px; font-size: 12.5px; font-weight: 500; color: var(--ink2); }
+.wb-diff ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.wb-diff li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 13.5px; line-height: 1.45; }
+.wb-k { color: var(--ink2); }
+.wb-v { color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
+.wb-diff li small { flex-basis: 100%; font-size: 12px; color: var(--ink3); }
+.wb-more { margin: 0; font-size: 12.5px; color: var(--ink3); }
+.wb-items { margin-top: 12px; }
+.wb-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.wb-list button { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: baseline; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 10px; background: none; font: inherit; text-align: left; color: var(--ink2); cursor: pointer; }
+.wb-list button:hover { background: var(--mist); }
+.wb-list li.now button { background: var(--sky-wash); color: var(--ink); }
+.wb-list li.next button { color: var(--ink3); }
+.wb-time { font-size: 12px; color: var(--ink3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wb-day { margin: 10px 0 2px; padding: 0 10px; font-size: 12px; font-weight: 500; color: var(--ink2); }
+.wb-day:first-child { margin-top: 0; }
+.wb-what { display: flex; flex-direction: column; min-width: 0; }
+.wb-what b { font-weight: 400; font-size: 13.5px; line-height: 1.45; }
+.wb-list li.now .wb-what b { font-weight: 500; }
+.wb-what small { font-size: 12px; color: var(--ink3); }
+.wb-flag { font-style: normal; font-size: 11.5px; font-weight: 500; color: var(--warm); white-space: nowrap; }
+@media (max-width: 640px) {
+  .sh-h.wb-h h2 { font-size: 22px; }
+  .wb-player { grid-template-columns: auto auto auto minmax(0, 1fr); row-gap: 2px; padding: 6px 10px 4px 6px; }
+  .wb-scrub { grid-column: 1 / -1; grid-row: 2; margin: 0 4px; }
+  .wb-pos { justify-self: end; }
+  .sheet .wb-body { padding: 14px 18px 24px; }
+  .wb-list button { grid-template-columns: 60px minmax(0, 1fr) auto; padding: 8px 6px; }
+  .wb-card { padding: 14px; }
+}
+@media (max-width: 520px) {
+  .cos-h { grid-template-columns: auto minmax(0, 1fr); row-gap: 6px; }
+  .cos-h .job-s { grid-column: 2; justify-self: start; }
+}
+.job-bot-on { display: inline-flex; align-items: center; min-height: 34px; font-size: 13.5px; color: var(--blue-ink); }
+.bot-group .lnk.quiet, .sb-done .lnk.quiet { color: var(--ink3); }

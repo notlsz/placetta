@@ -23,6 +23,11 @@
 // Every run from outside the app carries its channel, and can't remove deadlines, set up routines, save memory or
 // skills, or change stores; a business fact or the business's name goes up as a change card (with who asked) for an
 // owner to confirm; anything it prepares still needs an approval in the app.
+// Store bots (family.ts): a run in the app may split a request across stores (split_job). Each store's part is a run
+// of its own (parent_run, job_id, store_id), started side by side up to ODELIA_PARALLEL at once, the rest 'queued';
+// the run that split them goes 'waiting' with its answer so far, and is woken (back to 'running', by ticket) when the
+// last of them finishes, to write one summary. A finishing run starts the next queued one; so does the watchdog.
+// Every run keeps its moments on steps (src/replay.ts): the job's replay in the app.
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -38,11 +43,14 @@ import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
 import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
 import { claim, type Lease, type RunsTable, saveOnto, stamp } from "./lease.ts";
+import { type FamilyDb, fill, spawn, stillOpen, wake } from "./family.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
 type Block = Record<string, unknown>;
-type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark" | "wechat" | "email"; reply_to?: string | null; chat_to?: ChatTo | null };
+type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark" | "wechat" | "email"; reply_to?: string | null; chat_to?: ChatTo | null;
+  /** A store's bot: the run that split the work, the store's job and the store. */
+  parent_run?: string | null; job_id?: string | null; store_id?: string | null };
 /** The channels a chat bot answers in: Slack, Lark and WeChat. */
 const CHATS = new Set(["slack", "lark", "wechat"]);
 
@@ -334,6 +342,58 @@ async function atCapacity(ws: string) {
   return (count ?? 0) >= PARALLEL;
 }
 
+/** agent_runs for the store bots (family.ts). `run` is the run that splits work: its store runs are its person's, in
+ *  its language. */
+function familyTable(run: Run | null): FamilyDb {
+  return {
+    async running(ws, fresh) {
+      const { count } = await admin.from("agent_runs").select("id", { count: "exact", head: true }).eq("workspace_id", ws).eq("kind", "task").eq("status", "running").gt("heartbeat_at", fresh);
+      return count ?? 0;
+    },
+    async queued(ws, limit) {
+      const { data } = await admin.from("agent_runs").select("id").eq("workspace_id", ws).eq("status", "queued").order("created_at", { ascending: true }).limit(limit);
+      return (data ?? []).map((r) => r.id as string);
+    },
+    async insert(parent, kids) {
+      if (!run) throw new Error("No run to split.");
+      const at = new Date().toISOString();
+      const { data, error } = await admin.from("agent_runs").insert(kids.map((k) => ({
+        workspace_id: run.workspace_id, created_by: run.created_by, kind: "task", prompt: k.prompt.slice(0, 4000), lang: run.lang, deep: false, channel: "app",
+        status: "queued", state: startState([], k.prompt.slice(0, 4000)), heartbeat_at: at, parent_run: parent, job_id: k.job.slice(0, 80), store_id: k.store.slice(0, 80), ...(k.title ? { title: k.title } : {}),
+      }))).select("id, job_id");
+      if (error || !data) throw new Error("Couldn't start the stores' runs.");
+      return kids.map((k) => String(data.find((r) => r.job_id === k.job)?.id ?? ""));
+    },
+    async update(id, fields, where) {
+      let q = admin.from("agent_runs").update(fields).eq("id", id);
+      if (where.status) q = q.eq("status", where.status);
+      if (where.heartbeat_at) q = q.eq("heartbeat_at", where.heartbeat_at);
+      const { data, error } = await q.select("id");
+      if (error) { console.error("family update", id, error.code); return 0; }
+      return data?.length ?? 0;
+    },
+    async children(parent) {
+      const { data } = await admin.from("agent_runs").select("id, status").eq("parent_run", parent);
+      return (data ?? []) as { id: string; status: string }[];
+    },
+  };
+}
+/** Starts the store runs waiting their turn in a workspace, as far as its cap allows. They start without the person's
+ *  session, so connected apps (mail, drives) stay with runs the person started themselves. */
+async function startQueued(ws: string) {
+  for (const s of await fill(familyTable(null), ws, PARALLEL, STALE_MS).catch(() => [])) bg(work(s.id, null, s.ticket));
+}
+/** After a run ends: its slot is free for the next store run waiting its turn, and when it was the last store of a
+ *  split, the run that split them wakes to write the summary. */
+async function afterRun(run: Run) {
+  try {
+    await startQueued(run.workspace_id);
+    if (run.parent_run) { const ticket = await wake(familyTable(null), run.parent_run); if (ticket) await handOver(run.parent_run, null, ticket); }
+  } catch (e) { console.error("after run", run.id, String((e as Error)?.message ?? e).slice(0, 120)); }
+}
+/** The first words of a reply, for the run that split the work. */
+const replyText = (r: unknown) => ((r as { text?: { en?: string }[] } | null)?.text ?? []).map((t) => t.en ?? "").join(" ").trim();
+
 /** Work on a run until it's done, stopped, or time to hand over. Only with the run's lease (lease.ts): a run someone
  *  else holds, or one already finished, is left alone. */
 export async function work(runId: string, token: string | null, ticket: string | null = null) {
@@ -345,7 +405,7 @@ export async function work(runId: string, token: string | null, ticket: string |
   const lostLease = () => err("lease_lost", "Another instance took the run over.");
 
   const { data: row } = await admin.from("workspaces").select("name, state").eq("id", ws).maybeSingle();
-  if (!row) { await lease.write({ status: "failed", error: "The workspace is gone." }, { running: true }); return; }
+  if (!row) { await lease.write({ status: "failed", error: "The workspace is gone." }, { running: true }); await afterRun(run); return; }
   let cur: Workspace = normalizeState(row.name, row.state ?? {});
   const pending: Patch[] = [];
   const steps: Step[] = Array.isArray(run.steps) ? [...run.steps] : [];
@@ -388,6 +448,12 @@ export async function work(runId: string, token: string | null, ticket: string |
   }).catch((e) => { saveError = e as Error; console.error("commit", runId, String(e).slice(0, 160)); }));
   /** Saves what's pending, and stops the run if it couldn't be saved. */
   const save = async () => { await commit(); if (saveError) throw saveError; };
+  /** Saves what's pending, then takes the workspace as it's saved now: the stores' bots saved their work meanwhile. */
+  const sync = async () => {
+    await save();
+    const { data: fresh } = await admin.from("workspaces").select("name, state").eq("id", ws).maybeSingle();
+    if (fresh) cur = { ...normalizeState(fresh.name ?? row.name, fresh.state ?? {}), audit: cur.audit };
+  };
 
   // Stop when the person says so, or when another instance has the run; renew the lease through long model calls.
   const ctl = new AbortController();
@@ -398,8 +464,22 @@ export async function work(runId: string, token: string | null, ticket: string |
     if (Date.now() - renewed > RENEW_MS) { renewed = Date.now(); await lease.write({}); if (lease.lost) ctl.abort(); }
   }, 3000);
 
+  // A store's bot works one store's part; any other run in the app may split work across the stores' bots.
+  const child = run.parent_run && run.job_id ? { job: run.job_id, store: run.store_id ?? "" } : undefined;
+  const fam = familyTable(run);
+  let ended = false;   // done, failed or stopped: its slot frees up, and a store's run may wake the run that split it
+
   try {
     const svc = await servicesFor(ws, run, token);
+    if (!child && (run.channel ?? "app") === "app") {
+      svc.split = async ({ children }) => {
+        await save();   // the store jobs are in the workspace before their runs start
+        const out = await spawn(fam, { ws, parent: run.id, cap: PARALLEL, staleMs: STALE_MS }, children.map((c) => ({ job: c.job, store: c.store, prompt: c.prompt, title: c.title })));
+        // started by this run for the same person: they carry its session, so connected apps work for them too
+        for (const s of out.runs) bg(work(s.id, token, s.ticket));
+        return { started: out.started, queued: out.queued };
+      };
+    }
     const state = run.state ?? startState([], run.prompt);
     // The task's spend so far, from every earlier chunk: the ceiling is for the whole task.
     const who: Who = { uid: run.created_by, spent: Number(state.spent) || 0 };
@@ -431,6 +511,17 @@ export async function work(runId: string, token: string | null, ticket: string |
       // and who asked from there, for the change card a business fact or a new name goes up on
       sender: await senderOf(run),
       role: mainRole,
+      // the replay: jobs link this run; a store's bot works its part; a run that split work waits for its stores
+      runId: run.id,
+      ...(child ? { child } : {}),
+      ...(!child ? { family: {
+        pending: async () => stillOpen(await fam.children(run.id)),
+        results: async () => {
+          await sync();
+          const { data } = await admin.from("agent_runs").select("job_id, store_id, status, reply, error").eq("parent_run", run.id);
+          return (data ?? []).map((r) => ({ job: String(r.job_id ?? ""), store: String(r.store_id ?? ""), status: String(r.status), reply: replyText(r.reply) || String(r.error ?? "") }));
+        },
+      } } : {}),
     });
     clearTimeout(flushT);   // the last write below carries the steps; a late flush would bring the draft back
     await save();
@@ -439,11 +530,23 @@ export async function work(runId: string, token: string | null, ticket: string |
       if (next) await handOver(runId, token, next);
       return;
     }
+    if ("waiting" in out) {
+      // Its stores' bots are at work: it waits with its answer so far, which the app shows. Its slot is free for the
+      // next store waiting its turn, and if they all finished meanwhile it wakes straight away.
+      const parked = await lease.write({ status: "waiting", state: { ...out.waiting, spent: who.spent }, steps, draft: null, ...(out.reply ? { reply: out.reply } : {}), updated_at: new Date().toISOString() }, { running: true });
+      if (parked) {
+        await startQueued(ws);
+        const ticket = await wake(fam, run.id);
+        if (ticket) await handOver(runId, token, ticket);
+      }
+      return;
+    }
     // Saver mode is said once per period, at the end of the reply, in the person's language.
     if (who.reduced && run.kind === "task" && await saverNoticeDue(admin, ws).catch(() => false)) {
       out.reply.text = [...out.reply.text, { en: saverLine("en", who.renews ?? null, who.reduced), zh: saverLine("zh", who.renews ?? null, who.reduced) }];
     }
     await finish(run, out.reply, steps, lease);
+    ended = true;
     bg(learnFromRun(run, cur, state, out.reply));
   } catch (e) {
     clearTimeout(flushT);
@@ -451,6 +554,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     if (lease.lost) return;
     await commit().catch(() => undefined);
     const code = (e as { code?: string }).code;
+    ended = true;
     if (code === "cancelled" || ctl.signal.aborted) await lease.write({ steps, draft: null, state: null, updated_at: new Date().toISOString() });
     else {
       console.error("run failed", runId, code, String((e as Error)?.message ?? e).slice(0, 200));
@@ -462,6 +566,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
+    if (ended && !lease.lost) await afterRun(run);
   }
 }
 
@@ -543,6 +648,8 @@ async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease) {
   // The answer goes out only from the instance that marked the run done: not when it was stopped meanwhile, and not
   // from a second instance that lost the run, so nobody gets it twice.
   if (!(await lease.write({ status: "done", reply, steps, draft: null, state: null, updated_at: now }, { running: true }))) return;
+  // A store's bot answers the run that split the work, not the person: its one summary is the update they get.
+  if (run.parent_run) return;
   const said = reply.text.map((t) => t.en).join(" ").trim();
   // Asked by text or on a call: the answer goes back by text, which is where they're watching.
   if (run.channel === "sms" || run.channel === "voice") {
@@ -627,7 +734,14 @@ export async function handle(req: Request): Promise<Response> {
         if (r.attempts >= MAX_ATTEMPTS) await admin.from("agent_runs").update({ status: "failed", error: "The agent stopped responding. Try again." }).eq("id", r.id).eq("status", "running").eq("heartbeat_at", r.heartbeat_at);
         else await handOver(r.id, null, null);   // no ticket: it's taken only while its holder is still quiet
       }
-      return json(200, { ok: true, resumed: (stale ?? []).length });
+      // Store bots: runs waiting their turn start where there's room, and a run whose stores all finished (its wake-up
+      // lost with an instance) is woken.
+      const { data: queued } = await admin.from("agent_runs").select("workspace_id").eq("status", "queued").limit(50);
+      for (const ws of new Set((queued ?? []).map((r) => String(r.workspace_id)))) await startQueued(ws);
+      const { data: parked } = await admin.from("agent_runs").select("id").eq("status", "waiting").lt("updated_at", new Date(Date.now() - 60_000).toISOString()).limit(20);
+      let woken = 0;
+      for (const r of parked ?? []) { const ticket = await wake(familyTable(null), r.id); if (ticket) { woken++; await handOver(r.id, null, ticket); } }
+      return json(200, { ok: true, resumed: (stale ?? []).length, woken });
     }
     // watch: the weekly background check the monitor starts
     const ws = String(body.workspace_id ?? "");

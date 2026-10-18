@@ -4,8 +4,9 @@ import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
 import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
 import { B } from "./bi";
-import { settleJobs, type Job } from "./jobs";
-import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone } from "./harness";
+import { MAIN_BOT, proven, reconcile, settleJobs, type Job } from "./jobs";
+import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone, storeName, storeRules } from "./harness";
+import { approvalMoments, checkMoment, linkRun, MAX_MOMENTS, replyMoment, scrubStep, toolMoment } from "./replay";
 
 /* ------------------------------------------------------------------ *
  * The agent's tool loop as the server runs it: the same tools and
@@ -13,6 +14,14 @@ import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, h
  * conversation and what the agent made so far are plain data, so a run
  * that reaches the server's time limit is saved and picked up again by a
  * fresh instance. The person can close the app; the work carries on.
+ *
+ * Store bots under a chief of staff: a run in the app can split a request
+ * across stores (split_job). Each store's part runs here too, as its own
+ * run (child), from that store's facts and applications; the run that
+ * split them waits, then wakes with their results to write one summary.
+ * And every run keeps its moments for the replay (src/replay.ts): each
+ * step, each tool call with what it changed, each approval, verdict and
+ * new shift, with when and which bot, scrubbed of anything secret.
  * ------------------------------------------------------------------ */
 
 /** One model call. role says what the call is for (src/live.ts Role), so the server can pick the cheapest model that
@@ -27,7 +36,12 @@ export type RunState = {
   text: string;
   lastToolAt: number;
   sources: Source[];
-  made: { apps: string[]; approvals: string[]; memory: Bi[]; skills?: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"] };
+  made: { apps: string[]; approvals: string[]; memory: Bi[]; skills?: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"]; job?: string; split?: string[] };
+  /** Store bots: this run split work across stores and is waiting for them (waiting), or has been woken with their
+   *  results to write the summary (woke). */
+  waiting?: boolean; woke?: boolean;
+  /** Tool moments recorded for the replay so far (capped at MAX_MOMENTS). */
+  moments?: number;
   /** The harness (src/harness.ts): what was asked, rounds in this seat, whether this seat is handing off, and how many
    *  times the checker has sent the work back. */
   request?: string; seatRounds?: number; handing?: boolean; checks?: number;
@@ -60,7 +74,29 @@ const REMOTE_NEVER: Record<string, string> = {
   skill_save: "Skills and playbooks can't be saved",
   update_store: "Stores can't be changed",
   remove_store: "Stores can't be removed",
+  split_job: "Work can't be split across the stores' bots",
 };
+/** Why a store's bot can't use a tool, or null when it can. It works its own store's part and never splits again. */
+export function childRefuses(child: { job: string; store: string } | undefined, tool: string): string | null {
+  if (!child || tool !== "split_job") return null;
+  return `Error: You're the bot for one store (${child.store}). Only the main Odelia splits work across stores; do this store's part, job ${child.job}, yourself.`;
+}
+/** What a store's bot came back with, as the main run reads it when it wakes. */
+export type ChildResult = { job: string; store: string; status: string; reply: string };
+/** The message that wakes the main run once every store's bot has finished: each store's part, and what to write. */
+export function familyReport(w: Workspace, parents: string[], res: ChildResult[]): string {
+  const lines = parents.flatMap(pid => {
+    const p = (w.jobs ?? []).find(j => j.id === pid);
+    return (p?.children ?? []).map(id => {
+      const k = (w.jobs ?? []).find(j => j.id === id), r = res.find(x => x.job === id);
+      const where = storeName(w, k?.store)?.en ?? k?.store ?? "a store";
+      const state = !k ? "its job is gone" : proven(k) ? `done and checked by the reviewer (${k.checked ? `${k.checked.passed} of ${k.checked.of}` : "nothing to check"})`
+        : k.status === "waiting" ? `waiting on the person: ${k.waiting?.en ?? "see its card"}` : k.status === "stopped" ? "stopped" : r?.status === "failed" ? "its bot hit a problem and stopped" : `${k.status}, ${k.steps.filter(s => s.done).length} of ${k.steps.length} steps`;
+      return `- ${where} (job ${id}): ${state}.${r?.reply ? `\n  Its answer: ${r.reply.replace(/\s+/g, " ").slice(0, 700)}` : ""}`;
+    });
+  });
+  return `Every store's bot has finished. Where each store's part stands, as the workspace shows it:\n${lines.join("\n")}\n\nNow write one combined summary for the person: lead with what's done across the stores, then each store that still needs something and exactly what, by name. Don't redo the stores' work. The split job ticks itself as each store is checked, and a separate reviewer checks it after your summary.`;
+}
 /** Plain SMS only reads and drafts: these tools, and no other. */
 const PLAIN_SMS_MAY = new Set([
   "find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "show_licenses", "city_records", "check_progress",
@@ -170,25 +206,65 @@ export async function runRounds(o: {
   maxRounds?: number;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for the monitor's background checks. */
   role?: Role;
-}): Promise<{ reply: Reply } | { paused: RunState }> {
+  /** The run's id: every job it works links to it, so the job's replay can show its moments (src/replay.ts). */
+  runId?: string;
+  /** A store's bot: this run works one store's part (its job and store) of a job split across stores. */
+  child?: { job: string; store: string };
+  /** The stores' bots this run started (split_job): how many are still working or waiting their turn, and what each
+   *  came back with. With it, a run that split work waits for them and then writes one summary. */
+  family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> };
+}): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
-  const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt };
-  const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
+  const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt,
+    job: st.made.job ?? o.child?.job, split: st.made.split };
+  const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table,
+    ...(made.job ? { job: made.job } : {}), ...(made.split?.length ? { split: made.split } : {}) } });
   const mainRole: Role = o.role ?? "plan";
   const model = messagesModel("server", (body, _signal, deep, role) => o.send(body, deep, role ?? mainRole));
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
   const from = { channel: o.channel, plainSms: st.plainSms === true };
   const apply = (p: Patch) => o.apply(guardPatch(from, p));
-  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal,
-    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}) });
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms);
+  // Every moment carries when, which bot and which job, for the job's replay.
+  const bot = o.child?.store ?? MAIN_BOT;
+  const step = (s: Step) => o.step(scrubStep({ at: new Date().toISOString(), bot, ...(made.job ? { job: made.job } : {}), ...s }));
+  /** Links this run to the jobs it worked (only when one isn't linked yet, so a round with nothing new saves nothing). */
+  const link = () => { if (!o.runId) return; const w = o.ws(); if (linkRun(w, o.runId, st.started!, o.child?.job) !== w) apply(x => linkRun(x, o.runId!, st.started!, o.child?.job)); };
+
+  // A store's bot starts by taking its store's part: off the queue and onto its own run. A part that's gone or was
+  // stopped meanwhile isn't worked.
+  const mine = o.child ? (o.ws().jobs ?? []).find(j => j.id === o.child!.job) : undefined;
+  if (o.child && (!mine || mine.status === "stopped" || mine.status === "done")) {
+    return { reply: { text: [B(mine?.status === "done" ? "This store's part is already done." : "This store's part was stopped before its bot started, so nothing was done.", mine?.status === "done" ? "这家门店的部分已经完成。" : "这家门店的部分在助手开始前已被停止，没有做任何事。")] } };
+  }
+  if (o.child && st.rounds === 0) apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === o.child!.job ? { ...j, status: "running" as const, waiting: undefined, updated: new Date().toISOString() } : j)) }));
+
+  // Woken with every store's bot finished: their results go to the model, and it writes the one summary. Still some
+  // working (a wake-up too early): keep waiting, without a model call.
+  if (st.waiting && o.family) {
+    if ((await o.family.pending()) > 0) return { waiting: save() };
+    const res = await o.family.results();
+    st.waiting = false; st.woke = true;
+    apply(w => reconcile(w));
+    st.messages.push({ role: "user", content: familyReport(o.ws(), made.split ?? [], res) });
+    made.lastToolAt = st.text.length;
+    step({ state: "connecting", label: B("Every store's bot is back. Writing one summary", "各门店的助手都已完成，正在汇总") });
+  }
+
+  const tools = makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal,
+    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) });
+  const childJob = o.child ? (o.ws().jobs ?? []).find(j => j.id === o.child!.job) : undefined;
+  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms)
+    + (childJob ? storeRules(o.ws(), childJob, o.lang) : "");
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
   let finished = false;
+  // The jobs that are this run's own: a store's bot has its store's part; any other run, every job but the stores'
+  // parts (their own bots work, check and hand those off, side by side with this one).
+  const own = (j: Job) => (o.child ? j.id === o.child.job : !j.parent);
   // The job this run is working: the newest one it touched that's still open.
-  const activeJob = (): Job | undefined => (o.ws().jobs ?? []).filter(j => j.updated >= st.started! && j.status === "running").sort((a, b) => b.updated.localeCompare(a.updated))[0];
+  const activeJob = (): Job | undefined => (o.ws().jobs ?? []).filter(j => own(j) && j.updated >= st.started! && j.status === "running" && !j.children?.length).sort((a, b) => b.updated.localeCompare(a.updated))[0];
   const checkedNow: string[] = [];
   const unchecked: string[] = [];      // jobs the checker couldn't look at: they stay open, never done on the agent's word
   const recheck = new Set<string>();   // sent back by the checker: checked again after the fixes
@@ -196,11 +272,11 @@ export async function runRounds(o: {
 
   work: for (;;) {
     // A run working a job may hand it through fresh seats; any other run has one seat's rounds.
-    const onJob = () => (o.ws().jobs ?? []).some(j => j.updated >= st.started!);
+    const onJob = () => (o.ws().jobs ?? []).some(j => own(j) && j.updated >= st.started!);
     while (st.rounds < (onJob() ? max * MAX_SEATS : max)) {
       // leave room for one more model call and the save
-      if (Date.now() > o.until) return { paused: save() };
-      if (st.rounds === 0) o.step({ state: "searching", label: { en: "Reading your workspace", zh: "读取您的工作区" } });
+      if (Date.now() > o.until) { link(); return { paused: save() }; }
+      if (st.rounds === 0) step({ state: "searching", label: { en: "Reading your workspace", zh: "读取您的工作区" } });
       st.rounds++; st.seatRounds = (st.seatRounds ?? 0) + 1;
       const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep, mainRole);
       last = data.content;
@@ -214,14 +290,26 @@ export async function runRounds(o: {
       st.messages.push({ role: "assistant", content: data.content });
       const results: Record<string, unknown>[] = [];
       for (const u of uses) {
-        const refused = channelRefuses(from, String(u.name ?? ""), (u.input ?? {}) as Record<string, unknown>);
+        const name = String(u.name ?? ""), input = (u.input ?? {}) as Record<string, unknown>;
+        const before = o.ws();
+        const refused = channelRefuses(from, name, input) ?? childRefuses(o.child, name);
+        let content: string, error: boolean;
         if (refused) {
           results.push({ type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true });
-          continue;
+          content = refused; error = true;
+        } else {
+          const r = await runTool(tools, u);
+          const note = r.is_error ? null : channelNote(from, name);
+          results.push((note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>);
+          content = r.content; error = !!r.is_error;
         }
-        const r = await runTool(tools, u);
-        const note = r.is_error ? null : channelNote(from, String(u.name ?? ""));
-        results.push((note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>);
+        // the replay: what she used, what she gave it, what came back and what it changed, and any approval it put up
+        if ((st.moments ?? 0) < MAX_MOMENTS) {
+          st.moments = (st.moments ?? 0) + 1;
+          const m = toolMoment({ name, input, content, error, before, after: o.ws() });
+          step(m);
+          for (const a of approvalMoments(m.diff)) step(a);
+        }
       }
       // The harness: a seat that has handed off gives the job to a fresh agent with a clean context (no compaction);
       // one that's nearly out of room is told to write its handoff first.
@@ -231,7 +319,8 @@ export async function runRounds(o: {
         apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === job.id ? { ...j, seat } : j)) }));
         st.messages = [{ role: "user", content: harnessBrief(o.ws(), { ...job, seat }, st.request ?? "", o.lang) }];
         st.seatRounds = 0; st.handing = false;
-        o.step({ state: "shaping", label: { en: `A fresh shift picked up the job (shift ${seat})`, zh: `新一班接手了这项工作（第 ${seat} 班）` } });
+        step({ state: "shaping", kind: "shift", job: job.id, label: { en: `A fresh shift picked up the job (shift ${seat})`, zh: `新一班接手了这项工作（第 ${seat} 班）` } });
+        link();
         await o.round?.(save());
         continue;
       }
@@ -241,18 +330,47 @@ export async function runRounds(o: {
         st.handing = true;
       }
       st.messages.push({ role: "user", content: results });
+      link();
       await o.round?.(save());
     }
     // out of rounds with tool results the model never saw: say the work isn't finished, never "Done."
     if (!finished) { const more = outOfSteps(o.lang); st.text += (st.text ? "\n\n" : "") + more; made.lastToolAt = Math.min(made.lastToolAt, st.text.length - more.length); break; }
 
+    // Split across stores and the stores' bots are still at it: this run waits for them. Its answer so far (who's on
+    // what) goes to the person now; when the last store's bot finishes, the run wakes with their results and writes
+    // the one summary (above). The split job isn't checked before then.
+    if (o.family && made.split?.length && !st.woke) {
+      const pending = await o.family.pending();
+      if (pending > 0) {
+        const said = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
+        st.waiting = true;
+        st.messages.push({ role: "assistant", content: last });
+        made.lastToolAt = st.text.length;
+        step({ state: "breathing", label: B(`Waiting for ${pending} store bot${pending === 1 ? "" : "s"} to finish`, `等待 ${pending} 家门店的助手完成`) });
+        link();
+        const interim = honest(said, o.lang) || (o.lang === "zh" ? "每家门店的助手都在处理各自的部分，完成后我会汇总。" : "Each store's bot is on its part. I'll write one summary when they finish.");
+        return { waiting: save(), reply: { text: [same(interim)], ...(made.approvals.length ? { approvals: made.approvals } : {}) } };
+      }
+      // the stores' bots were quicker: their results now, and the summary in this same run
+      const res = await o.family.results();
+      st.woke = true;
+      st.messages.push({ role: "assistant", content: last });
+      apply(w => reconcile(w));
+      st.messages.push({ role: "user", content: familyReport(o.ws(), made.split, res) });
+      made.lastToolAt = st.text.length;
+      finished = false;
+      step({ state: "connecting", label: B("Every store's bot is back. Writing one summary", "各门店的助手都已完成，正在汇总") });
+      continue work;
+    }
+
     // The proof: before a job counts as done, a separate checker, which never saw the work, verifies its done list
     // against the workspace and the reply. What fails goes back to the agent (up to MAX_CHECKS times); after that the
     // job waits, saying plainly what isn't done.
     const reply = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
-    const due = (o.ws().jobs ?? []).filter(j => j.updated >= st.started! && j.done?.length && (j.status === "done" || (j.status === "running" && j.steps.every(x => x.done))) && (!j.checked || j.checked.at < j.updated || recheck.has(j.id)));
+    // (a split job whose stores are all proven waits on its summary: it's due once this run has it in hand)
+    const due = (o.ws().jobs ?? []).filter(j => own(j) && j.updated >= st.started! && j.done?.length && (j.status === "done" || ((j.status === "running" || (j.status === "waiting" && !!j.children?.length)) && j.steps.every(x => x.done))) && (!j.checked || j.checked.at < j.updated || recheck.has(j.id) || (!!j.children?.length && !(j.done ?? []).every(d => d.ok === true))));
     if (!due.length) break;
-    o.step({ state: "weaving", label: { en: "A separate reviewer is checking the work", zh: "独立检查正在核对工作" } });
+    step({ state: "weaving", label: { en: "A separate reviewer is checking the work", zh: "独立检查正在核对工作" } });
     const final = (st.checks ?? 0) >= MAX_CHECKS || st.rounds >= max * MAX_SEATS - 1;
     const sendBack: string[] = [];
     for (const j of due) {
@@ -266,9 +384,11 @@ export async function runRounds(o: {
         // nothing checked; now it waits, saying so, until a check can run.
         apply(w => ({ ...w, jobs: (w.jobs ?? []).map(x => (x.id === j.id && (x.status === "done" || x.status === "running") ? { ...x, status: "waiting" as const, waiting: B("A separate reviewer couldn't check this yet. Ask Odelia to check it again.", "独立检查暂时无法核对这项工作。请让 Odelia 再检查一次。"), updated: new Date().toISOString() } : x)) }));
         if (!unchecked.includes(j.id)) unchecked.push(j.id);
+        step({ state: "weaving", kind: "check", job: j.id, ok: false, label: B("A separate reviewer couldn't check it yet, so it stays open", "独立检查暂时无法核对，工作仍未完成") });
         continue;
       }
       apply(applyVerdict(j.id, verdict, { final, lang: o.lang }));
+      step(checkMoment(j, verdict));
       if (!(st.firstChecks ??= []).some(c => c.job === j.id)) st.firstChecks.push({ job: j.id, passed: verdict.filter(v => v.ok).length, of: verdict.length });
       if (!checkedNow.includes(j.id)) checkedNow.push(j.id);
       recheck.delete(j.id);
@@ -282,20 +402,24 @@ export async function runRounds(o: {
     st.messages.push({ role: "user", content: `${sendBack.join("\n\n")}\n\nFix what you can now with your tools, update the plan (set_plan), and say plainly what still needs the person. Your earlier answer won't be sent; write the answer again.` });
     made.lastToolAt = st.text.length;   // the answer they get is the one after the fixes
     finished = false;
-    o.step({ state: "shaping", label: { en: "The reviewer sent work back; finishing it", zh: "检查发现未完成项，继续完成" } });
+    step({ state: "shaping", label: { en: "The reviewer sent work back; finishing it", zh: "检查发现未完成项，继续完成" } });
     continue work;
   }
 
-  apply(settleJobs(st.started));
+  apply(settleJobs(st.started, { child: o.child?.job }));
+  // a split job ticks from its stores as they're checked
+  if ((o.ws().jobs ?? []).some(j => j.children?.length && j.updated >= st.started!)) apply(w => reconcile(w));
+  link();
   // a reply that says "done" while a job it worked is still open gets that job's open steps, so it can't claim more
   const said = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
-  const open = saysDone(said) || !said ?(o.ws().jobs ?? []).filter(j => j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(s => !s.done) && !checkedNow.includes(j.id)).slice(0, 2) : [];
+  const open = saysDone(said) || !said ?(o.ws().jobs ?? []).filter(j => own(j) && j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(s => !s.done) && !checkedNow.includes(j.id)).slice(0, 2) : [];
   const proof = [...open.map(j => openLine(j, o.lang)),...checkedNow.map(id => (o.ws().jobs ?? []).find(j => j.id === id)).filter((j): j is Job => !!j).map(j => proofLine(j, o.lang)),
     ...unchecked.filter(id => !checkedNow.includes(id)).slice(0, 1).map(() => (o.lang === "zh" ? "独立检查暂时无法核对，所以这项工作仍未完成。" : "A separate reviewer couldn't check the work yet, so the job stays open."))].filter(Boolean).join(" ");
   // a business fact put up for an owner's approval: the reply says it's waiting, even when the model didn't
   const waits = factCards(o.ws(), made.approvals).length > 0 && !/approv|confirm|批准|确认/i.test(said) ? waitingLine(o.lang) : "";
   const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, proof].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
+  step(replyMoment(final));
   return { reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
     files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } };
 }

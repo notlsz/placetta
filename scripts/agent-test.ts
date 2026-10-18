@@ -4,7 +4,11 @@
    audit trail, and that errors go back to the model instead of ending the run.
    npm run test:agent */
 import { DEFAULT_POLICY } from "../src/spend.ts";
-import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, type Channel, type RunState, type Send } from "../src/serverRun";
+import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
+import { fill, spawn, stillOpen, wake, type FamilyDb } from "../supabase/functions/agent-run/family";
+import { momentsFor, type RunLog } from "../src/replay";
+import { applyVerdict } from "../src/harness";
+import { family, proven } from "../src/jobs";
 import { applyChange, confirmChange, normalizeState, type Step } from "../src/core";
 import { DOCS_PER_RUN, liveAgent, makeTools, messagesModel, pdfPages, rules, type Block, type Made, type Role, type Services } from "../src/live";
 import { BUILTIN } from "../src/skills";
@@ -80,9 +84,10 @@ const ctxOf = (body: Record<string, unknown>): Ctx => {
 const covered = new Set<string>();
 let declared: string[] = [];
 
-type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; steps: Step[]; calls: Call[]; bodies: Record<string, unknown>[]; roles: (Role | undefined)[]; state: RunState };
+type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; waiting?: RunState; steps: Step[]; calls: Call[]; bodies: Record<string, unknown>[]; roles: (Role | undefined)[]; state: RunState };
 /** One request through runRounds, the code agent-run runs. */
-async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; svc?: Services; account?: boolean; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; sender?: string; role?: Role }): Promise<Run> {
+async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; svc?: Services; account?: boolean; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; sender?: string; role?: Role;
+  runId?: string; child?: { job: string; store: string }; family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> } }): Promise<Run> {
   let w = o.ws, i = 0;
   const steps: Step[] = [], bodies: Record<string, unknown>[] = [], roles: (Role | undefined)[] = [];
   const state = o.state ?? startState([], o.prompt ?? "");
@@ -100,10 +105,11 @@ async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; sc
     return turn(ctxOf(body));
   };
   const out = await runRounds({ state, ws: () => w, apply: p => { w = p(w); }, step: s => { steps.push(s); }, send, lang: o.lang ?? "en", deep: false, account: o.account ?? true,
-    svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, sender: o.sender, role: o.role });
+    svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, sender: o.sender, role: o.role,
+    runId: o.runId, child: o.child, family: o.family });
   const calls = callsOf(state.messages);
   for (const c of calls) if (c.ok) covered.add(c.name);
-  return { w, steps, calls, bodies, roles, state, ...("reply" in out ? { reply: out.reply as unknown as Record<string, unknown> } : { paused: out.paused }) };
+  return { w, steps, calls, bodies, roles, state, ...("waiting" in out ? { waiting: out.waiting, reply: out.reply as unknown as Record<string, unknown> } : "reply" in out ? { reply: out.reply as unknown as Record<string, unknown> } : { paused: out.paused }) };
 }
 const textOf = (r: Run) => ((r.reply?.text as { en: string }[]) ?? []).map(t => t.en).join(" ");
 const callNamed = (r: Run, n: string) => r.calls.filter(c => c.name === n);
@@ -828,6 +834,148 @@ async function harness() {
 let r4wJob: string | undefined;
 const r4w = () => r4wJob;
 
+/** agent_runs in memory, for the store bots (supabase/functions/agent-run/family.ts): each conditional update applies
+ *  whole, the way Postgres does. */
+function memRuns() {
+  type Row = { id: string; ws: string; status: string; heartbeat_at: string; parent_run: string | null; job_id: string | null; store_id: string | null; n: number };
+  const rows: Row[] = [];
+  let n = 0;
+  const db: FamilyDb = {
+    async running(ws, fresh) { return rows.filter(r => r.ws === ws && r.status === "running" && r.heartbeat_at > fresh).length; },
+    async queued(ws, limit) { return rows.filter(r => r.ws === ws && r.status === "queued").sort((a, b) => a.n - b.n).slice(0, limit).map(r => r.id); },
+    async insert(parent, kids) { return kids.map(k => { const id = `run-${++n}`; rows.push({ id, ws: rows.find(r => r.id === parent)?.ws ?? "w", status: "queued", heartbeat_at: new Date().toISOString(), parent_run: parent, job_id: k.job, store_id: k.store, n }); return id; }); },
+    async update(id, fields, where) { const r = rows.find(x => x.id === id); if (!r || (where.status && r.status !== where.status) || (where.heartbeat_at && r.heartbeat_at !== where.heartbeat_at)) return 0; Object.assign(r, fields); return 1; },
+    async children(parent) { return rows.filter(r => r.parent_run === parent).map(r => ({ id: r.id, status: r.status })); },
+  };
+  const add = (status: string) => { const id = `run-${++n}`; rows.push({ id, ws: "w", status, heartbeat_at: new Date().toISOString(), parent_run: null, job_id: null, store_id: null, n }); return id; };
+  return { db, rows, add, running: () => rows.filter(r => r.status === "running").length };
+}
+
+async function storeBots() {
+  console.log("\n# Store bots under a chief of staff: split_job, the parallel cap, the parent waits, each store proven, the replay");
+  const store = (id: string, name: string, address: string) => ({ id, name: same(name), address, stage: "open" as const, rules: [], logs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [`a-${id}`],
+    certs: [{ id: `c-${id}`, person: "Wen L.", kind: same("Food Protection Certificate"), expires: "2026-11-20" }] });
+  const ws = workspace({ stores: [store("fl", "Flushing", "136-20 Roosevelt Ave, Flushing, NY 11354"), store("bk", "Brooklyn", "300 Atlantic Ave, Brooklyn, NY 11201"), store("lic", "Long Island City", "44-02 Vernon Blvd, Long Island City, NY 11101")],
+    apps: [app("a-fl", "draft"), app("a-bk", "draft"), app("a-lic", "draft")] });
+  const fam = memRuns(), parentRun = fam.add("running");
+  const replies: Record<string, string> = {};
+  const acct = account();
+  const svc: Services = { ...acct.svc, split: async ({ children }) => { const out = await spawn(fam.db, { ws: "w", parent: parentRun, cap: 3, staleMs: 180_000 }, children.map(c => ({ job: c.job, store: c.store, prompt: c.prompt }))); return { started: out.started, queued: out.queued }; } };
+  const famOps = { pending: async () => stillOpen(await fam.db.children(parentRun)),
+    results: async (): Promise<ChildResult[]> => fam.rows.filter(r => r.parent_run === parentRun).map(r => ({ job: r.job_id!, store: r.store_id ?? "", status: r.status, reply: replies[r.job_id!] ?? "" })) };
+  const DONE = ["The city's inspection checklist is checked against the store", "Every staff certificate expiring within 60 days has a renewal deadline"];
+
+  // 1. the main run splits the request into one job per store, starts what the cap allows, and waits
+  const r1 = await agent({ ws, svc, runId: "run-main", family: famOps, prompt: "Get all 3 stores ready for inspection. My SSN is 123-45-6789 and our key is sk-ant-api03-SECRETSECRETSECRET.",
+    script: [
+      () => ask(["split_job", { title: "Get every store ready for its next inspection", instructions: "Walk the city's inspection checklist against your store, put a renewal deadline on every staff certificate expiring within 60 days, and say what the store still needs.", done: DONE }]),
+      () => say("Each store's bot is on it: Flushing and Brooklyn now, Long Island City next. One summary when they're back."),
+    ] });
+  const offered = ((r1.bodies[0].tools as { name: string }[]) ?? []).map(t => t.name);
+  ok(offered.includes("split_job"), "the main run in the app, with two or more stores, is offered split_job");
+  const parent = (r1.w.jobs ?? []).find(j => j.children?.length)!;
+  const kids = (parent?.children ?? []).map(id => r1.w.jobs!.find(j => j.id === id)!);
+  eq(kids.map(k => [k.store, k.parent === parent.id, k.done?.map(d => d.text.en)]), [["fl", true, DONE], ["bk", true, DONE], ["lic", true, DONE]], "one job per store, each linked to the job it's part of, with the done list it was split with");
+  eq(kids.map(k => k.status), ["running", "running", "queued"], "with the cap of 3 (the main run counts), two stores start and the third waits its turn");
+  eq(fam.rows.filter(r => r.parent_run === parentRun).map(r => r.status), ["running", "running", "queued"], "and their runs on the server say the same");
+  ok(fam.running() <= 3, `never more than the cap at work (${fam.running()} running)`);
+  ok(!!r1.waiting && r1.waiting.waiting === true && /Each store's bot is on it/.test(textOf(r1)), "the main run waits for its stores, with its answer so far for the person", { waiting: !!r1.waiting, text: textOf(r1) });
+  ok(parent.status === "running" && parent.steps.every(s => s.check?.jobs?.length === 1 && !s.done), "the split job is running, one step per store, each proven only by its store's job");
+  ok(parent.runs?.includes("run-main") && kids.every(k => !k.runs?.includes("run-main")), "the split job links the main run (its replay); each store's job will link its own bot's run");
+  const split = r1.steps.find(s => s.kind === "tool" && s.fn === "split_job");
+  ok(split && split.bot === "odelia" && split.at && split.job === parent.id && split.diff?.jobs?.length === 4 && r1.steps.some(s => s.kind === "split"), "the replay has the split: when, which bot, which job, and the 4 jobs it made", split);
+
+  // the server parks the main run and the freed slot goes to the store waiting its turn
+  await fam.db.update(parentRun, { status: "waiting" }, { status: "running" });
+  const next = await fill(fam.db, "w", 3, 180_000);
+  eq([next.length, fam.rows.find(r => r.job_id === kids[2].id)?.status, fam.running()], [1, "running", 3], "parked, it frees its slot: Long Island City starts, 3 at work");
+  eq(await wake(fam.db, parentRun), null, "the main run isn't woken while a store's bot still works");
+
+  // 2. each store's bot works its part from its store's facts, can't split again or plan another job, and is checked
+  let w = r1.w;
+  const verdicts: Record<string, { ok: boolean; why: string }[]> = { fl: [{ ok: true, why: "24 items checked" }, { ok: true, why: "Deadline set" }], bk: [{ ok: true, why: "Checklist checked" }, { ok: true, why: "Deadline set" }], lic: [{ ok: true, why: "Checklist checked" }, { ok: false, why: "No renewal deadline for Wen L." }] };
+  const childRuns: RunLog[] = [];
+  for (const kid of kids) {
+    const row = fam.rows.find(r => r.job_id === kid.id)!;
+    const s = kid.store!;
+    const r = await agent({ ws: w, svc: acct.svc, runId: row.id, child: { job: kid.id, store: s }, prompt: `Get every store ready.\n\nYour store: ${s}. Your job: ${kid.id}.`,
+      json: t => (/You are checking this job/.test(t) ? { items: verdicts[s] } : {}),
+      script: [
+        () => ask(["split_job", { title: "Split again", instructions: "Split this store's part across the stores again.", done: DONE }], ["set_plan", { job_id: parent.id, title: "Take over", steps: [{ title: "Done", done: true }] }],
+          ...(s === "fl" ? [["remember", { label: "Bank account number", value: "123456789012" }], ["draft_message", { to: "Landlord", message: "Please send the grease trap record. Our routing number 021000021 is on file." }]] as [string, unknown][] : [])),
+        () => ask(["set_plan", { title: kid.title.en, steps: [{ title: "Walk the checklist", done: true }, { title: "Renewal deadlines", done: true }, { title: "Say what's left", done: true }] }],
+          ["fill_fields", { application_id: `a-${s}`, fields: [{ label: "Business name", value: `Lucky Leaf ${s.toUpperCase()}` }] }]),
+        () => say(`${s} is ready.`), () => say(`${s}: the deadline is still missing.`), () => say(`${s}: still missing the deadline.`),
+      ] });
+    w = r.w;
+    replies[kid.id] = textOf(r);
+    const sys = String(r.bodies[0].system);
+    ok(/You are Odelia's bot for one store/.test(sys) && sys.includes(ws.stores!.find(x => x.id === s)!.address) && /This store's facts/.test(sys) && /Wen L\.: Food Protection Certificate/.test(sys), `${s}: its bot works from its store's facts and applications`);
+    ok(!((r.bodies[0].tools as { name: string }[]) ?? []).some(t => t.name === "split_job"), `${s}: a store's bot isn't offered split_job`);
+    const [again, other] = r.calls;
+    ok(!again.ok && /Only the main Odelia splits/.test(again.out) && !other.ok && /plan only your job/.test(other.out), `${s}: it can't split again or plan another job`, [again.out, other.out]);
+    const mine = r.w.jobs!.find(j => j.id === kid.id)!;
+    ok(mine.runs?.includes(row.id) && r.steps.every(x => x.bot === s && x.at), `${s}: its job links its bot's run, and every moment says which bot and when`);
+    childRuns.push({ id: row.id, at: r.steps[0].at!, bot: s, job: kid.id, steps: r.steps });
+    await fam.db.update(row.id, { status: "done" }, {});
+    await fill(fam.db, "w", 3, 180_000);
+  }
+  const [fl, bk, lic] = kids.map(k => w.jobs!.find(j => j.id === k.id)!);
+  ok(proven(fl) && proven(bk), "Flushing's and Brooklyn's parts are done and passed their reviewer");
+  ok(lic.status === "waiting" && !proven(lic) && /renewal deadline/.test(lic.waiting?.en ?? ""), "Long Island City's reviewer found the deadline missing: it waits, saying what for", lic);
+  const fl2 = childRuns[0].steps;
+  ok(fl2.some(x => x.kind === "check" && x.ok === true) && fl2.some(x => x.kind === "tool" && x.fn === "fill_fields" && x.diff?.fields?.[0]?.value === "Lucky Leaf FL") && fl2.some(x => x.kind === "reply"), "a store's replay has the verdict, the lines it filled with their values, and its answer");
+  ok(fl2.some(x => x.kind === "approval"), "and the approval its message put up, as its own moment");
+
+  // 3. woken: the main run writes one summary; the split job isn't done while a store's part isn't proven
+  const t1 = await wake(fam.db, parentRun);
+  ok(!!t1 && (await wake(fam.db, parentRun)) === null, "the last store's bot finishing wakes the main run, once");
+  let reviewed = 0;
+  const r2 = await agent({ ws: w, svc, runId: "run-main", family: famOps, state: r1.waiting!, json: t => { if (/You are checking this job/.test(t)) reviewed++; return { items: [{ ok: true, why: "x" }, { ok: true, why: "x" }] }; },
+    script: [c => {
+      const msg = String((c.body.messages as { content: unknown }[]).at(-1)?.content);
+      ok(/Every store's bot has finished/.test(msg) && /Flushing \(job .+\): done and checked by the reviewer/.test(msg) && /Long Island City \(job .+\): waiting on the person/.test(msg) && /Its answer: fl is ready/.test(msg), "woken, it gets where each store stands and what each bot answered", msg.slice(0, 600));
+      return say("Flushing and Brooklyn are ready and checked. Long Island City still needs a renewal deadline for Wen L.");
+    }] });
+  const p2 = r2.w.jobs!.find(j => j.id === parent.id)!;
+  ok(!r2.waiting && /Long Island City still needs/.test(textOf(r2)), "it answers with one summary", textOf(r2));
+  ok(p2.status === "waiting" && /Long Island City/.test(p2.waiting?.en ?? "") && reviewed === 0 && !proven(p2), "the split job isn't done, nor checked, while a store's part isn't proven", p2);
+  eq(family(r2.w, p2).done, 2, "2 of 3 stores done");
+
+  // the reviewer can't pass the split job while a store's part isn't proven
+  const forced = applyVerdict(parent.id, [{ ok: true, why: "x" }, { ok: true, why: "x" }], { final: true, lang: "en" })(r2.w).jobs!.find(j => j.id === parent.id)!;
+  ok(forced.status !== "done" && forced.done?.[0].ok === false, "a reviewer's pass doesn't make it done while a store's part isn't proven", forced);
+
+  // 4. the person fixes Long Island City; Odelia carries on, the reviewer checks the split job, and it's done
+  const fixed = reconcile({ ...r2.w, jobs: r2.w.jobs!.map(j => (j.id === lic.id ? { ...j, status: "done" as const, waiting: undefined, done: j.done!.map(d => ({ ...d, ok: true })), checked: { at: new Date().toISOString(), passed: 2, of: 2 } } : j)) });
+  const p3 = fixed.jobs!.find(j => j.id === parent.id)!;
+  ok(p3.steps.every(s => s.done) && p3.status === "waiting" && /One summary of them is next/.test(p3.waiting?.en ?? "") && nextAction(fixed, p3)?.who === "odelia", "every store proven: the split job's steps tick, and its summary is next", p3);
+  const r3 = await agent({ ws: fixed, svc, runId: "run-main-2", prompt: `Carry on with the job "${parent.title.en}" (job ${parent.id}) until it's done.`,
+    json: t => (/You are checking this job/.test(t) ? { items: [{ ok: true, why: "All 3 stores are done and checked" }, { ok: true, why: "The reply sums up every store" }] } : {}),
+    script: [
+      () => ask(["set_plan", { job_id: parent.id, title: "Mark it done", steps: [{ title: "Everything", done: true }], status: "done" }]),
+      () => say("All 3 stores are ready and checked: Flushing, Brooklyn and Long Island City."),
+    ] });
+  const sp = callNamed(r3, "set_plan")[0];
+  const p4 = r3.w.jobs!.find(j => j.id === parent.id)!;
+  ok(sp.ok && /steps you sent weren't used/.test(sp.out) && p4.steps.length === 3, "set_plan can't rewrite the split job's steps: they stay one per store", sp.out);
+  ok(p4.status === "done" && proven(p4) && /Checked by a separate reviewer: all 2 done/.test(textOf(r3)), "the reviewer checks it once every store is proven: done, and the reply carries the proof", { status: p4.status, text: textOf(r3) });
+
+  // 5. the replay: the main run's moments and each store bot's, in time order, with no secrets in any of them
+  const logs: RunLog[] = [{ id: "run-main", at: r1.steps[0].at!, steps: [...r1.steps, ...r2.steps] }, { id: "run-main-2", at: r3.steps[0].at!, steps: r3.steps }, ...childRuns];
+  const moments = momentsFor(r3.w, p4, logs);
+  ok(new Set(moments.map(m => m.bot)).size === 4 && moments.every((m, i) => i === 0 || (moments[i - 1].at ?? "") <= (m.at ?? "")), "the split job's replay has all 4 bots' moments, in time order", [...new Set(moments.map(m => m.bot))]);
+  ok(["tool", "split", "check", "approval", "reply"].every(k => moments.some(m => m.kind === k)), "with tools, the split, verdicts, approvals and answers");
+  const all = JSON.stringify(logs);
+  ok(!/123-45-6789|sk-ant|SECRETSECRET|123456789012|021000021|My SSN|grease trap record/.test(all), "nothing secret in the replay: no SSN, key, bank number, the request's words or a message body", (all.match(/123-45-6789|sk-ant|SECRETSECRET|123456789012|021000021|My SSN|grease trap record/) ?? [])[0]);
+  ok(/Bank account number: \[hidden\]/.test(all), "a secret value shows as hidden where its line does");
+
+  // 6. from outside the app, never: not offered, and refused when called anyway
+  const remote = await agent({ ws, svc, channel: "slack", sender: "mei@luckyleaf.com", prompt: "Get all 3 stores ready for inspection.",
+    script: [() => ask(["split_job", { title: "Every store", instructions: "Walk the checklist for your store and say what's missing.", done: DONE }]), () => say("I can only do that from the app.")] });
+  ok(!((remote.bodies[0].tools as { name: string }[]) ?? []).some(t => t.name === "split_job") && !remote.calls[0].ok && /can't be split/.test(remote.calls[0].out) && !(remote.w.jobs ?? []).length, "from Slack, split_job isn't offered and is refused: nothing is split", remote.calls[0].out);
+}
+
 async function settings() {
   console.log("\n# change_setting, edit_workspace, show_licenses");
   const acct = account();
@@ -1204,6 +1352,7 @@ await settings();
 await work();
 proofLoop();
 await harness();
+await storeBots();
 await network();
 await errors();
 await limits();

@@ -20,7 +20,8 @@ import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, CheckItem, Doc, Field, FactGroup, Level, LicenseHit, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { daysFromNow, money, nowIso } from "./time";
-import { cadence, met, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
+import { cadence, MAIN_BOT, MAX_CHILDREN, met, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
+import { replyMoment, scrubStep, traced } from "./replay";
 import { claimsAction, emailsIn, HONEST, injected, SECRET_WHY, secretNumber } from "./guard";
 import { basisLine, openingLine, openingPath, preflight } from "./smart";
 import { cityOf as recordsCity, cityRecords } from "./opendata";
@@ -245,7 +246,9 @@ function snapshot(w: Workspace, lang: Lang) {
     documents: w.docs.slice(0, 30).map(d => (d.app ? `${d.name} (application ${d.app})` : d.name)),
     running: w.running.map(r => b(r.label)),
     // jobs not yet done, with their plans, so set_plan can pick one up again; and the routines
-    jobs: (w.jobs ?? []).filter(j => j.status === "running" || j.status === "waiting").slice(0, 8).map(j => ({ id: j.id, title: b(j.title), status: j.status, steps: j.steps.map(x => `${x.done ? "[x]" : "[ ]"} ${b(x.title)}`), ...(j.waiting ? { waiting_on: b(j.waiting) } : {}) })),
+    // a store's part of a split job names its store and the job it's part of; a split job, how many stores it went to
+    jobs: (w.jobs ?? []).filter(j => j.status === "running" || j.status === "waiting" || j.status === "queued").slice(0, 10).map(j => ({ id: j.id, title: b(j.title), status: j.status, steps: j.steps.map(x => `${x.done ? "[x]" : "[ ]"} ${b(x.title)}`), ...(j.waiting ? { waiting_on: b(j.waiting) } : {}),
+      ...(j.store ? { store: j.store } : {}), ...(j.parent ? { part_of: j.parent } : {}), ...(j.children?.length ? { split_across_stores: j.children } : {}) })),
     routines: (w.routines ?? []).map(r => ({ id: r.id, title: b(r.title), when: b(cadence(r)), paused: r.paused || undefined, next: nextRun(r, daysFromNow(0)) })),
   };
 }
@@ -277,7 +280,8 @@ How you work:
 - Chain the tools. To map a business or a new store: ${can("add_store") ? "add_store first if it isn't in Stores yet, then " : ""}find_official_forms for its business and place, then prepare_application once for each license it needs (with the store_id when there's more than one store), fill each from the workspace facts, memory and documents, add_deadline for the dates that matter (the opening date, each filing's file-by date, renewals), then request_filing_approval for each one that's complete. request_filing_approval refuses an incomplete application and says what's missing: that's expected, not a failure. For progress or "what's next": check_progress first${mail ? ", then search_email for recent mail from the agencies and read_email what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${drives ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
 ${w.apps.some(a => a.preview) ? `- Applications marked preview (${w.apps.filter(a => a.preview).length} of them) were listed from Placetta's registry the moment the workspace was created, before anyone checked them against the agency: the right agency and form as the library knows them, with the lines empty. They are the plan the person already sees, so refine them, never re-map: keep their ids. prepare_application with the same official_form_id (or the same name) returns that application instead of adding a second one and fills it; fill_fields and update_application work on it directly. For each: verify it against the agency's current page or form (find_official_forms, or the official link), fill its fields and checklist from the facts, memory and documents, correct the fee or time when the agency says otherwise, add what the registry missed with prepare_application, remove what doesn't apply with remove_application, and clear the preview mark (filling it or preparing it does; update_application verified true does when nothing else changed). Say "verified" only after you checked the agency's own page.
 ` : ""}${can("set_plan") ? `- Work like an engineer on a ticket. For any job of three or more steps (mapping a store, a renewal, getting ready for an inspection, answering an agency's request), set_plan first, then work the plan in order and set_plan again as each step finishes. One plan per job: when a job in the workspace's jobs is still open, pick it up with its job_id instead of starting another. Blocked on something only someone else can give? Finish every other step first, then set the job to waiting and say exactly what you need and from whom.
-- Do the whole job, not only the forms: chase what a filing needs from other people (the landlord's authorization letter, the contractor's license, the architect's stamped plans) with draft_message, get a store ready for each inspection, write status reports for the owner or headquarters with draft_document, compare cities by the permits, fees and time to open, and keep staff certificates and renewals current.${can("schedule_routine") ? " When they want something done on a schedule ('every Monday', 'each month', 'until it's approved'), schedule_routine it." : ""}
+${can("split_job") ? `- When they ask for the same work across several stores (get every store ready for its inspection, renew everything due this quarter at every location), split_job it instead of doing the stores one by one: each store's own bot works its part at the same time, a separate reviewer checks each, and you write one summary when they're all back.
+` : ""}- Do the whole job, not only the forms: chase what a filing needs from other people (the landlord's authorization letter, the contractor's license, the architect's stamped plans) with draft_message, get a store ready for each inspection, write status reports for the owner or headquarters with draft_document, compare cities by the permits, fees and time to open, and keep staff certificates and renewals current.${can("schedule_routine") ? " When they want something done on a schedule ('every Monday', 'each month', 'until it's approved'), schedule_routine it." : ""}
 ` : ""}- Act, don't advise. When the person asks for something, do every step you can yourself, start to end, in this turn: ${research ? "research the requirement (start from usa.gov or sba.gov if it helps you find the agency, then read and cite the agency's own page), " : ""}find the official form, prepare the application, fill every line of the form from the workspace facts, memory and their documents, draft any letter it needs, add the deadlines and put the filing up for approval. When they only ask what they'd need somewhere, without asking you to start, ${can("show_licenses") ? "list it with show_licenses" : "answer"} instead of adding applications. Never stop at an explanation when you could have done the step.
 - When you're blocked on something only the person knows, finish everything else first, then ask for all of it in one short question at the end. Never ask more than one question in a reply.
 - If a tool returns an error, read it, fix the call (a real id from the workspace, a YYYY-MM-DD date, the missing argument) and try once more; if it still fails, say in one sentence what didn't work. Never claim a step worked when its tool returned an error.
@@ -330,7 +334,7 @@ export const isDate = (s: string) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) retur
  *  dropped in favour of) an older one with the same id. */
 const usedIds = (w: Workspace) => new Set<string>([
   ...w.apps.map(a => a.id), ...w.deadlines.map(d => d.id), ...w.approvals.map(a => a.id), ...w.closed.map(a => a.id),
-  ...(w.stores ?? []).map(s => s.id), ...w.docs.map(d => d.id), ...w.facts.map(f => f.id),
+  ...(w.stores ?? []).map(s => s.id), ...w.docs.map(d => d.id), ...w.facts.map(f => f.id), ...(w.jobs ?? []).map(j => j.id),
 ]);
 const freshId = (w: Workspace, base: string) => { const used = usedIds(w); let id = base + "-" + seq++; while (used.has(id)) id = base + "-" + seq++; return id; };
 const US_STATES: Record<string, string> = { alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA", colorado: "CO", connecticut: "CT", delaware: "DE", "district of columbia": "DC", florida: "FL", georgia: "GA", hawaii: "HI", idaho: "ID", illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS", kentucky: "KY", louisiana: "LA", maine: "ME", maryland: "MD", massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS", missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV", "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY", "north carolina": "NC", "north dakota": "ND", ohio: "OH", oklahoma: "OK", oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC", "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT", vermont: "VT", virginia: "VA", washington: "WA", "west virginia": "WV", wisconsin: "WI", wyoming: "WY" };
@@ -356,11 +360,17 @@ export type Services = {
   network?(keys: string[]): Promise<Lesson[]>;
   /** Low-risk settings the agent may change for the person. Returns what it was set to. */
   setting?(key: string, value: string): string;
+  /** Store bots (split_job): starts one run per store job on the server, a few at once (the workspace's parallel cap),
+   *  the rest waiting their turn. Which store jobs started now and which wait. Only the server's main runs have it. */
+  split?(o: { parent: string; children: { job: string; store: string; title: Bi; prompt: string }[] }): Promise<{ started: string[]; queued: string[] }>;
 };
-export type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; skills: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"]; lastToolAt: number };
+/** job: the job this run is on now (its moments carry it). split: the jobs this run split across stores. */
+export type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; skills: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"]; lastToolAt: number; job?: string; split?: string[] };
 /** asked: set when the request came from outside the app (src/serverRun.ts): the channel (email, sms, voice, slack,
- *  lark) and who sent it. Then a business fact or the business's name only changes once an owner confirms it in the app. */
-export type X = { model: Model; files: Map<string, File>; svc?: Services; signal: AbortSignal; asked?: { via: string; sender?: string } };
+ *  lark) and who sent it. Then a business fact or the business's name only changes once an owner confirms it in the app.
+ *  child: this run is one store's bot, working that store's part of a job split across stores: it plans only that job
+ *  and can't split again. */
+export type X = { model: Model; files: Map<string, File>; svc?: Services; signal: AbortSignal; asked?: { via: string; sender?: string }; child?: { job: string; store: string } };
 
 const MAIL = ["gmail", "outlook_mail"], CAL = ["gcal", "outlook_cal"], DRIVES = ["gdrive", "dropbox"], POS = ["square", "toast"];
 const APP_NAMES: Record<string, string> = { gmail: "Gmail", outlook_mail: "Outlook mail", gcal: "Google Calendar", outlook_cal: "Outlook Calendar", gdrive: "Google Drive", dropbox: "Dropbox", quickbooks: "QuickBooks", slack: "Slack", square: "Square", toast: "Toast" };
@@ -481,7 +491,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
   // "the business tax registration" mid-sentence; Title Case names ("Food Service Establishment Permit") and acronyms stay as they are
   const nm = (a: Application) => { const n = a.name[lang]; const titled = n.split(/\s+/).filter(w => /^[A-Z]/.test(w)).length > 1; return lang === "en" && /^[A-Z][a-z]/.test(n) && !titled ? n.charAt(0).toLowerCase() + n.slice(1) : n; };
   const mark = () => { made.lastToolAt = textLen(); };
-  const job = { current: "" };   // the job this run's set_plan calls keep updating
+  // the job this run's set_plan calls keep updating: for a store's bot, its store's part from the start
+  const job = { current: x.child?.job ?? "" };
+  if (x.child) made.job = x.child.job;
   let docsRead = 0;              // documents review_documents has read in this run (capped at DOCS_PER_RUN)
   const reviewed = new Set<string>();   // and which ones, so "review everything" again moves on to the rest
   // Instructions found inside what this run read (a document, an email). They're data: each one is flagged to the
@@ -958,6 +970,19 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const id0 = str(i.job_id) || job.current;
         const old = id0 ? jobs.find(j => j.id === id0) : undefined;
         if (str(i.job_id) && !old) throw new Error(`No job "${str(i.job_id)}". Leave job_id out to start a new one.`);
+        // a store's bot plans its own store's part and nothing else; a job split across stores has no plan of its own
+        if (x.child && old?.id !== x.child.job) throw new Error(`You're the bot for one store: plan only your job, ${x.child.job} (job_id ${x.child.job}). Other stores' bots work theirs.`);
+        if (old?.children?.length) {
+          // A job split across stores keeps its own steps and done list: they tick as each store's part is done and
+          // proven, never by say-so. Setting its plan only picks it up again (so a separate reviewer checks it once
+          // every store is), or says what it waits on.
+          const at = new Date().toISOString(), kids = old.children.map(id => (get().jobs ?? []).find(j => j.id === id));
+          const w8 = str(i.status) === "waiting" && str(i.waiting_on) ? { status: "waiting" as const, waiting: same(str(i.waiting_on, 240)) } : {};
+          apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === old.id ? { ...j, ...w8, updated: at } : j)) }));
+          job.current = old.id; made.job = old.id; mark();
+          return { job_id: old.id, split_across_stores: old.children.length, stores_done_and_checked: kids.filter(k => k && k.status === "done" && (k.done ?? []).every(d => d.ok === true)).length,
+            note: "This job is split across stores. Its steps tick as each store's part is done and checked, so the steps you sent weren't used. Once every store is checked, a separate reviewer checks it before it counts as done." };
+        }
         const allDone = steps.every(x => x.done);
         // "done" only when every step is: a job set done with steps still open used to count as finished
         const asked = str(i.status);
@@ -969,14 +994,18 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const doneTexts = arr(i.done).map(x => str(x, 200)).filter(Boolean).slice(0, 8);
         const pbId = str(i.playbook_id) && activeSkills(get()).some(s => s.id === str(i.playbook_id)) ? str(i.playbook_id) : old?.playbook;
         const pb = pbId ? activeSkills(get()).find(s => s.id === pbId) : undefined;
-        const doneList = doneTexts.length ? doneTexts.map(t => old?.done?.find(d => d.text.en === t) ?? { text: same(t) })
+        // a store's part keeps the done list it was split with (what the chief of staff asked for); its bot may only add to it
+        const doneList = x.child && old?.done?.length ? [...old.done, ...doneTexts.filter(t => !old.done!.some(d => d.text.en === t)).map(t => ({ text: same(t) }))].slice(0, 8)
+          : doneTexts.length ? doneTexts.map(t => old?.done?.find(d => d.text.en === t) ?? { text: same(t) })
           : old?.done ?? (pb?.done?.length ? pb.done.map(t => ({ text: same(t) })) : undefined);
         if (!old && !doneList?.length && steps.length >= 3) throw new Error("Give the job its done list: 2 to 8 things that will be true when it's finished, each something the workspace can show. A separate checker verifies them before the job counts as done.");
         const changed = !old || JSON.stringify(old.steps) !== JSON.stringify(steps) || JSON.stringify(old.done?.map(d => d.text.en)) !== JSON.stringify(doneList?.map(d => d.text.en));
-        const next: Job = { id, title: same(title), status, steps, ...(waiting ? { waiting } : {}), started: old?.started ?? now, updated: now, ...(apps.length || old?.apps ? { apps: apps.length ? apps : old?.apps } : {}), ...(old?.routine ? { routine: old.routine } : {}),
+        // (a store's part keeps the name it was split with)
+        const next: Job = { id, title: x.child && old ? old.title : same(title), status, steps, ...(waiting ? { waiting } : {}), started: old?.started ?? now, updated: now, ...(apps.length || old?.apps ? { apps: apps.length ? apps : old?.apps } : {}), ...(old?.routine ? { routine: old.routine } : {}),
           ...(pbId ? { playbook: pbId } : {}), ...(doneList?.length ? { done: doneList } : {}), ...(old?.checked && !changed ? { checked: old.checked } : {}),
-          ...(old?.files ? { files: old.files } : {}), ...(old?.handoffs ? { handoffs: old.handoffs } : {}), seat: old?.seat ?? 1 };
-        job.current = id;
+          ...(old?.files ? { files: old.files } : {}), ...(old?.handoffs ? { handoffs: old.handoffs } : {}), seat: old?.seat ?? 1,
+          ...(old?.parent ? { parent: old.parent } : {}), ...(old?.store ? { store: old.store } : {}), ...(old?.runs ? { runs: old.runs } : {}) };
+        job.current = id; made.job = id;
         const n = steps.filter(x => x.done).length;
         S(status === "done" ? "working" : "shaping", old ? L(`Plan: ${n} of ${steps.length} done`, `计划：已完成 ${n}/${steps.length}`) : L(`Planned ${steps.length} steps: ${title}`, `已规划 ${steps.length} 步：${title}`));
         // the newest first; done jobs beyond the last 20 drop off
@@ -1510,8 +1539,73 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         return { proposed: true, approval_id: id, budgets: budgets.map(b => ({ store: b.store, period: b.period, amount: b.amount })) };
       },
     },
+    // Store bots under a chief of staff: only the main run in the app splits work (never a store's own bot, never a
+    // request from outside the app), only on the server, and only across two or more stores.
+    ...(x.svc?.split && !x.child && !x.asked && (get().stores ?? []).length >= 2 ? [splitTool()] : []),
     ...(x.svc ? accountTools() : []),
   ];
+
+  /* One job across several stores becomes one job per store, each worked by its store's own bot on the server, side by
+     side (src/jobs.ts parent and children; supabase/functions/agent-run/family.ts starts them under the workspace's
+     parallel cap). The job itself is done only when every store's part is done and proven. */
+  function splitTool(): Tool {
+    return {
+      name: "split_job",
+      description: `Split a request that covers several stores ("get all 3 stores ready for inspection", "renew everything due this quarter at every location") into one job per store. Each store gets its own bot, Odelia for that store, which works its part on Placetta's server at the same time as the others, from that store's own facts and applications; a separate reviewer checks each store's part. A few run at once and the rest wait their turn. Use it only for work that is really per store, across two or more stores; for one store or one filing, do it yourself. Write the instructions for one store, complete on their own (each bot gets the same instructions for its own store and sees nothing else of this conversation), and the done list each store's part must meet. At most ${MAX_CHILDREN} stores. After splitting, don't do the stores' work yourself: end your reply in a sentence or two saying which stores are being worked on. When every store's bot has finished you get their results and write one combined summary.`,
+      inputSchema: { type: "object" as const, properties: {
+        title: { type: "string", description: "The whole request, short, e.g. 'Get every store ready for its next inspection'" },
+        instructions: { type: "string", description: "What each store's bot does for its store, start to end, complete on its own" },
+        store_ids: { type: "array", items: { type: "string" }, description: `The stores by id, 2 to ${MAX_CHILDREN} (default: every store)` },
+        done: { type: "array", items: { type: "string" }, description: "What finished looks like for each store's part: 2 to 8 items, each something the workspace can show" },
+      }, required: ["title", "instructions", "done"] },
+      async execute(i: Record<string, unknown>) {
+        const title = str(i.title, 100), how = str(i.instructions, 2500);
+        if (title.length < 3) throw new Error("Give the job a short title.");
+        if (how.length < 20) throw new Error("Write the instructions each store's bot follows: what to do for its store, start to end.");
+        const asked = [...new Set(arr(i.store_ids).map(v => str(v, 80)).filter(Boolean))];
+        const ids = asked.length ? asked : (get().stores ?? []).map(s => s.id);
+        if (ids.length > MAX_CHILDREN) throw new Error(`At most ${MAX_CHILDREN} stores in one split (you gave ${ids.length}). Split the first ${MAX_CHILDREN} now and the rest once they finish.`);
+        const stores = ids.map(id => findStore(id));
+        if (stores.length < 2) throw new Error("Split only across two or more stores. For one store, do the work yourself.");
+        const before = (made.split ?? []).reduce((n, p) => n + ((get().jobs ?? []).find(j => j.id === p)?.children?.length ?? 0), 0);
+        if (before + stores.length > MAX_CHILDREN) throw new Error(`This run already split ${before} store jobs; at most ${MAX_CHILDREN} in one run.`);
+        const doneTexts = arr(i.done).map(v => str(v, 200)).filter(Boolean).slice(0, 8);
+        if (doneTexts.length < 2) throw new Error("Give each store's part its done list: 2 to 8 things that will be true when that store's part is finished, each something the workspace can show. A separate reviewer checks each store against it.");
+        const now = new Date().toISOString(), w0 = get();
+        const parentId = freshId(w0, "job");
+        const kidIds = stores.map(() => freshId(w0, "job"));   // the counter moves on each time, so each is new
+        const kids: Job[] = stores.map((s, k) => {
+          const apps = (s.apps ?? []).filter(a => w0.apps.some(x => x.id === a));
+          return { id: kidIds[k], title: B(`${s.name.en}: ${title}`, `${s.name.zh}：${title}`), status: "queued", parent: parentId, store: s.id,
+            steps: [{ title: B(`Work out what ${s.name.en} needs`, `梳理${s.name.zh}需要做的事`), done: false }],
+            done: doneTexts.map(t => ({ text: same(t) })), ...(apps.length ? { apps } : {}), started: now, updated: now, seat: 1 };
+        });
+        const parent: Job = { id: parentId, title: same(title), status: "running", children: kidIds, started: now, updated: now, seat: 1,
+          steps: stores.map((s, k) => ({ title: B(`${s.name.en}: done and checked`, `${s.name.zh}：完成并通过检查`), done: false, check: { jobs: [kidIds[k]] } })),
+          done: [{ text: B("Every store's part is done and checked by a separate reviewer", "每家门店的部分都已完成并通过独立检查"), check: { jobs: kidIds } },
+            { text: B("You got one summary covering every store", "您收到了涵盖每家门店的汇总") }] };
+        apply(w => ({ ...w, jobs: [parent, ...kids, ...(w.jobs ?? [])] }));
+        job.current = parentId; made.job = parentId; made.split = [...(made.split ?? []), parentId];
+        let r: { started: string[]; queued: string[] };
+        try {
+          r = await x.svc!.split!({ parent: parentId, children: kids.map((k, n) => ({ job: k.id, store: stores[n].id, title: k.title,
+            prompt: `${title}\n\nYour store: ${stores[n].name.en} (store ${stores[n].id}). Your job: ${k.id}.\n\n${how}` })) });
+        } catch (e) {
+          // nothing started: the jobs go again, and the model hears why
+          apply(w => ({ ...w, jobs: (w.jobs ?? []).filter(j => j.id !== parentId && !kidIds.includes(j.id)) }));
+          made.split = (made.split ?? []).filter(p => p !== parentId); job.current = ""; made.job = undefined;
+          throw new Error(`Couldn't start the stores' bots: ${e instanceof Error ? e.message : String(e)}. Do the work yourself, store by store.`);
+        }
+        const started = new Set(r.started);
+        if (started.size) apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (started.has(j.id) && j.status === "queued" ? { ...j, status: "running" as const } : j)) }));
+        step({ state: "weaving", kind: "split", job: parentId, label: L(`Split it across ${stores.length} stores: ${r.started.length} started, ${r.queued.length} waiting their turn`, `分给 ${stores.length} 家门店：${r.started.length} 家已开始，${r.queued.length} 家排队`) });
+        mark();
+        return { parent_job: parentId, started: r.started.length, queued: r.queued.length,
+          stores: kids.map((k, n) => ({ job_id: k.id, store_id: stores[n].id, store: stores[n].name.en, status: started.has(k.id) ? "started" : "waiting its turn" })),
+          next: "Each store's bot works its part on its own, side by side. Don't do their work. End your reply now in one or two sentences saying which stores are being worked on; when they all finish you'll get their results and write one combined summary." };
+      },
+    };
+  }
 
   /* The person's connected apps. Each tool says plainly when the app isn't connected, so the agent can point to Settings. */
   function accountTools(): Tool[] {
@@ -1743,8 +1837,10 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         let streamed = "";
         const made: Made = { apps: new Set(), approvals: [], memory: [], skills: [], files: [], lastToolAt: 0 };
         const runStart = new Date().toISOString();
-        step({ state: "searching", label: B("Reading your workspace", "读取您的工作区") });
-        const tools = model.tools ? makeTools(() => ws, apply, step, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal }) : undefined;
+        // every moment carries when, who and which job, so the job's replay can show it (src/replay.ts)
+        const moment = (s: Step) => step(scrubStep({ at: new Date().toISOString(), bot: MAIN_BOT, ...(made.job ? { job: made.job } : {}), ...s }));
+        moment({ state: "searching", label: B("Reading your workspace", "读取您的工作区") });
+        const tools = model.tools ? traced(makeTools(() => ws, apply, moment, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal }), () => ws, moment) : undefined;
         const research = model.kind === "server";
         const brief = rules(ws, lang, !!o.account, research, o.services?.connected() ?? [], !!tools, { me: o.services?.me, names: tools?.map(t => t.name) });
         const turns: Turn[] = [...(model.system ? [] : [{ role: "user" as const, content: brief }]), ...history.slice(-12), { role: "user", content: req.text }];
@@ -1758,6 +1854,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         // cite agency pages first; keep at most four
         const cited = [...sources.filter(x => official(x.url)), ...sources.filter(x => !official(x.url))].slice(0, 4);
         apply(settleJobs(runStart));
+        if (made.job) moment(replyMoment(final));
         onEvent({ type: "reply", reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
           files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } });
         return;

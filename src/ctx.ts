@@ -99,6 +99,10 @@ export type Ctx = {
   run(req: Request, shown: string | null): void;
   openApp(id: string, tab?: Tab, edit?: boolean): void;
   openApproval(id: string): void;
+  /** Watch how a job was done: its replay, moment by moment (src/Watch.tsx). */
+  openReplay(jobId: string): void;
+  /** Stop a job, and every store's part of it when it's split across stores (their runs on the server too). */
+  stopJob(jobId: string): void;
   approve(id: string, sig?: Signed): void | Promise<void>;
   /** Several filings that passed every check, approved together from one tap. */
   approveAll(ids: string[]): void;

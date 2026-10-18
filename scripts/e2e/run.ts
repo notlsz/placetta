@@ -342,6 +342,58 @@ try {
     check("a resumed task that already cost its limit stops before another model call", cont.status === 202 && after?.status === "failed" && /too large for one go/.test(after?.error ?? "") && modelCalls.length === before, { cont: cont.status, after, ticket, calls: modelCalls.length - before });
   });
 
+  /* ---------------- a4. store bots under a chief of staff ---------------- */
+  // One request across both stores: the main run splits it (split_job), each store's part runs as its own run beside it,
+  // the main run waits, wakes when the last store's bot is done, and writes one summary; a separate reviewer checks each
+  // store's part and then the whole job. Every run keeps its moments for the job's replay.
+  const SPLIT_DONE = ["The city's inspection checklist is checked against the store", "The store's open items are written down"];
+  scripts.push(
+    { name: "split-main", match: (p) => p.startsWith("Get both stores ready for their next inspection."), turns: [
+      { tool: "split_job", input: { title: "Every store ready for inspection", instructions: "Walk the city's inspection checklist against your store and write down what it still needs, with dates.", done: SPLIT_DONE, store_ids: ["st-main", "st-roosevelt"] } },
+      { text: "Each store's bot is on it: Main St and Roosevelt Ave. One summary when both are back." },
+    ] },
+    { name: "split-st-main", match: (p) => p.startsWith("Every store ready for inspection") && p.includes("Your store: Flushing, Main St"), turns: [
+      { tool: "set_plan", input: { title: "Main St", steps: [{ title: "Walk the checklist", done: true }, { title: "Write down what's left", done: true }] } },
+      { text: "Main St is ready; one fix noted." },
+    ] },
+    { name: "split-st-roosevelt", match: (p) => p.startsWith("Every store ready for inspection") && p.includes("Your store: Flushing, Roosevelt Ave"), turns: [
+      { tool: "set_plan", input: { title: "Roosevelt Ave", steps: [{ title: "Walk the checklist", done: true }, { title: "Write down what's left", done: true }] } },
+      { text: "Roosevelt Ave waits on its CO paperwork; the list is written." },
+    ] },
+    { name: "split-summary", match: (p) => p.startsWith("Every store's bot has finished"), turns: [
+      { text: (c) => (/Flushing, Main St \(job .+\): done and checked/.test(c.prompt) && /Roosevelt Ave \(job .+\): done and checked/.test(c.prompt) ? "Both stores are ready and checked: Main St has one fix noted, Roosevelt Ave waits on its CO paperwork." : "Not every store reported back.") },
+    ] },
+    { name: "split-review", match: (p) => p.startsWith("You are checking this job"), turns: [{ text: JSON.stringify({ items: [{ ok: true, why: "The workspace shows it" }, { ok: true, why: "The workspace shows it" }] }) }] },
+    // checked jobs teach the network (learnFromRun): nothing new to learn here
+    { name: "split-learn", match: (p) => p.startsWith("Keys you may use"), turns: [{ text: JSON.stringify({ confirm: [], contradict: [], new: [] }) }] },
+  );
+  await scenario("a4. store bots under a chief of staff", async () => {
+    const [{ t0 }] = await sql`select now() as t0`;
+    const r = await call("agent-run", { action: "start", workspace_id: ws, prompt: "Get both stores ready for their next inspection. My SSN is 123-45-6789.", lang: "en" }, { jwt: owner.jwt });
+    check("the request starts one run", r.status === 202 && typeof r.data?.id === "string", r);
+    await settle();
+    const runs = await sql`select id, status, parent_run, job_id, store_id, steps, reply from public.agent_runs where id = ${r.data.id} or parent_run = ${r.data.id} order by created_at`;
+    const [main, ...kids] = runs;
+    check("each store's part ran as its own run, linked to the run that split it", kids.length === 2 && kids.every((k) => k.parent_run === main.id && k.status === "done" && /^job-/.test(String(k.job_id))) && kids.map((k) => k.store_id).sort().join() === "st-main,st-roosevelt", kids.map((k) => [k.store_id, k.status, k.job_id]));
+    check("the main run waited for them, then answered with one summary", main.status === "done" && /Both stores are ready and checked/.test(main.reply?.text?.[0]?.en ?? "") && /Checked by a separate reviewer: all 2 done/.test(main.reply?.text?.[0]?.en ?? ""), main.reply);
+    const p = await rpc("poll_agent_run", { p_id: main.id }, owner.jwt);
+    check("polling the run shows each store's run and where it stands", p.status === 200 && (p.data?.children ?? []).length === 2 && p.data.children.every((c: { status: string }) => c.status === "done"), p.data?.children);
+    const st = await wsState() as unknown as { jobs: { id: string; status: string; parent?: string; store?: string; children?: string[]; runs?: string[]; checked?: { passed: number; of: number } }[] };
+    const parent = st.jobs.find((j) => j.children?.length);
+    const parts = st.jobs.filter((j) => j.parent === parent?.id);
+    check("the split job and both stores' parts are done, each checked by a separate reviewer", parent?.status === "done" && parent.checked?.passed === 2 && parts.length === 2 && parts.every((j) => j.status === "done" && j.checked?.passed === 2 && j.checked.of === 2), { parent, parts });
+    check("each job links the run that worked it, for its replay", !!parent?.runs?.includes(main.id) && parts.every((j) => kids.some((k) => j.runs?.includes(k.id) && k.job_id === j.id)), { parent: parent?.runs, parts: parts.map((j) => j.runs) });
+    type M = { kind?: string; bot?: string; at?: string; fn?: string };
+    const mainSteps = main.steps as M[], kidSteps = kids.map((k) => k.steps as M[]);
+    check("the replay: the main run's moments include the split; each store's are its own bot's, with when", mainSteps.some((s) => s.kind === "split") && mainSteps.some((s) => s.kind === "tool" && s.fn === "split_job" && s.bot === "odelia")
+      && kidSteps.every((ks, i) => ks.length > 0 && ks.every((s) => s.bot === kids[i].store_id && !!s.at) && ks.some((s) => s.kind === "check")), { main: mainSteps.map((s) => s.kind), kids: kidSteps.map((ks) => ks.map((s) => s.kind)) });
+    check("nothing secret in any run's moments", !/123-45-6789|My SSN/.test(JSON.stringify(runs.map((x) => x.steps))));
+    const ups = await sql`select dedupe from public.updates where workspace_id = ${ws} and dedupe in ${sql(kids.map((k) => `run:${k.id}`))}`;
+    check("a store's bot answers the main run, not the person: no update or email of its own", ups.length === 0, ups);
+    // three runs' calls and a task in a minute: the next scenarios start with the allowance they had before this one
+    await sql`delete from public.ai_events where workspace_id = ${ws} and kind in ('call', 'task') and at >= ${t0}`;
+  });
+
   /* ---------------- b. SMS ---------------- */
   scripts.push(
     { name: "sms-status", match: (p) => p.endsWith("What's due this month?"), turns: [

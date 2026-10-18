@@ -9,7 +9,35 @@ import { countyOf } from "./counties";
 /* The agent's contract and the patches it makes to a workspace. No sample data here: this runs in the browser and,
    for background work, on the server. */
 
-export type Step = { state: OrbState; label: Bi; tool?: string };
+/** One moment of a run. Plain steps (no kind) are the progress the chat shows; the rest are the replay's moments
+ *  (src/replay.ts): a tool she used, an approval she put up, the reviewer's verdict, a fresh shift, a job split across
+ *  stores, the answer. Every run keeps them all, in order, on agent_runs.steps (or the workspace's runLog when the run
+ *  happened in the browser), so anyone can watch how a job was done. Nothing in them is a prompt or a secret. */
+export type Step = {
+  state: OrbState; label: Bi; tool?: string;
+  at?: string;      // when
+  bot?: string;     // who: "odelia" for the main run, or the store id of that store's bot
+  job?: string;     // the job it was for
+  kind?: "tool" | "approval" | "check" | "shift" | "split" | "reply";
+  fn?: string;      // the tool's own name (kind tool)
+  in?: Bi;          // what she gave it, in a line
+  out?: Bi;         // what came back, in a line
+  ok?: boolean;     // false when the tool refused or failed
+  diff?: Diff;      // what changed in the workspace
+  items?: { ok: boolean; text: Bi; why?: Bi }[];   // the reviewer's verdict, item by item (kind check)
+};
+/** What one moment changed in the workspace, as a replay shows it. Values are shortened and secrets masked. */
+export type Diff = {
+  fields?: { app: Bi; label: Bi; value: string }[];
+  docs?: string[];
+  approvals?: Bi[];
+  deadlines?: { date: string; title: Bi }[];
+  items?: { app: Bi; item: Bi }[];
+  stores?: Bi[];
+  facts?: { label: Bi; value: string }[];
+  jobs?: Bi[];
+  more?: number;    // changes beyond what's listed
+};
 export type Request =
   | { text: string }
   | { approve: string }
@@ -88,7 +116,7 @@ export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
     business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
     facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto, spend: s.spend, jobs: s.jobs, routines: s.routines,
-    firstPlan: s.firstPlan,
+    firstPlan: s.firstPlan, ...(s.runLog ? { runLog: s.runLog } : {}),
   };
 }
 /** What's saved: everything but the audit trail (that has its own table) and payment cards (made from the filings). */
