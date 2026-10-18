@@ -6,7 +6,7 @@ import { API_MODELS } from "./live";
 import { fmtAgo, fmtDay } from "./time";
 import { Footer, I, Modal, Select } from "./ui";
 import { ACCENTS, applyAccent, readAccent, useTheme, type Theme } from "./hooks";
-import { IMPORT_PROMPT, PREFS, PROFILE, importMemory } from "./memory";
+import { IMPORT_PROMPT, PREFS, PROFILE, fileLabel, importMemory } from "./memory";
 import { RememberedList } from "./Remembered";
 import type { MemoryFile, MemoryKind, Skill, SkillSource } from "./model";
 import { allSkills, dropSkill, putSkill, toggleSkill } from "./skills";
@@ -854,10 +854,10 @@ function MemoryGroup() {
       {rows.length ? (
         <ul className="sg-list">{rows.map(f => (
           <li key={f.id} className="sg-row">
-            <span className="sg-tx"><b>{f.name}</b><small>{f.summary}{f.lines.length ? "" : (zh ? "（暂无内容）" : " (nothing yet)")}{files.includes(f) ? (zh ? `，${ago(f.updated, zh)}更新` : `. Updated ${ago(f.updated, zh)}`) : ""}</small></span>
+            <span className="sg-tx"><b>{fileLabel(f, zh ? "zh" : "en").name}</b><small>{fileLabel(f, zh ? "zh" : "en").summary}{f.lines.length ? "" : (zh ? "（暂无内容）" : " (nothing yet)")}{files.includes(f) ? (zh ? `，${ago(f.updated, zh)}更新` : `. Updated ${ago(f.updated, zh)}`) : ""}</small></span>
             <span className="sg-r">
               <button type="button" className="sbtn quiet" onClick={() => { setView(f); setDraft(f.lines.join("\n")); }}>{zh ? "查看" : "View"}</button>
-              {files.includes(f) && <button type="button" className="sbtn quiet warm" aria-label={zh ? `删除 ${f.name}` : `Delete ${f.name}`} onClick={() => { if (window.confirm(zh ? `删除“${f.name}”中的全部记忆？` : `Delete everything in ${f.name}?`)) setMemory(b => ({ ...b, files: b.files.filter(x => x.id !== f.id) })); }}>{zh ? "删除" : "Delete"}</button>}
+              {files.includes(f) && <button type="button" className="sbtn quiet warm" aria-label={zh ? `删除 ${fileLabel(f, "zh").name}` : `Delete ${f.name}`} onClick={() => { if (window.confirm(zh ? `删除“${f.name}”中的全部记忆？` : `Delete everything in ${f.name}?`)) setMemory(b => ({ ...b, files: b.files.filter(x => x.id !== f.id) })); }}>{zh ? "删除" : "Delete"}</button>}
             </span>
           </li>
         ))}</ul>
@@ -877,7 +877,7 @@ function MemoryGroup() {
       {table(zh ? "话题" : "Topics", group("topic"))}
       {table(zh ? "领域" : "Areas", group("area"))}
       {view && (
-        <SetSheet title={view.name} sub={view.summary} onClose={() => setView(null)}>
+        <SetSheet title={fileLabel(view, zh ? "zh" : "en").name} sub={fileLabel(view, zh ? "zh" : "en").summary} onClose={() => setView(null)}>
           <div className="sst-form">
             <p className="sg-note">{zh ? "每行一条。可直接修改、增加或删除。" : "One fact per line. Edit, add or delete lines."}</p>
             <textarea className="memedit" value={draft} onChange={e => setDraft(e.target.value)} rows={14} aria-label={view.name} />

@@ -83,6 +83,7 @@ function scan(o) {
   // the text on screen
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const CJK = /[㐀-鿿＀-￯　-〿]/;
+  const PEOPLE = ".cmt-b, .upd.k-mention .upd-b, .kv.data dd, dd > span, .langpick";
   const okEnglish = new RegExp(o.okEnglish || "^$", "i");
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     const t = n.nodeValue.replace(/\s+/g, " ").trim();
@@ -96,7 +97,9 @@ function scan(o) {
     if (/\{[a-zA-Z_]\w*\}/.test(t)) add("text", `unfilled placeholder in: ${t}`, el);
     if (/^[a-z]+(?:_[a-zA-Z0-9]+)+$/.test(t) && !/^(sk|pk|rk|whsec|plk)_/.test(t)) add("text", `interface key shown as text: ${t}`, el);
     if (/[·•]/.test(t.replace(/•{2,}/g, ""))) add("dot", `separator dot in: ${t}`, el);
-    if (zh && !CJK.test(t)) {
+    // what people wrote (comments, a teammate's mention), the values a form carries to a US agency, and languages
+    // named in their own script are theirs, not the interface's
+    if (zh && !CJK.test(t) && !el.closest(PEOPLE)) {
       // a whole English sentence (four or more words) where Chinese was expected; names, addresses, agencies, form
       // titles, file names and the like are allowed by okEnglish
       const words = t.match(/[A-Za-z][A-Za-z'’-]*/g) || [];
@@ -105,7 +108,7 @@ function scan(o) {
   }
   // English labels on controls in Chinese (a button the person reads)
   if (zh) for (const el of document.querySelectorAll("button,[role=tab],[role=option],[role=menuitem],a.pill,a.sbtn,label")) {
-    if (!shown(el) || el.closest("[data-qa-skip]")) continue;
+    if (!shown(el) || el.closest("[data-qa-skip]") || el.closest(PEOPLE)) continue;
     const t = (el.innerText || "").replace(/\s+/g, " ").trim();
     if (!t || CJK.test(t) || t.length < 3) continue;
     const words = t.match(/[A-Za-z][A-Za-z'’-]*/g) || [];
@@ -768,7 +771,7 @@ flow("stores", ["sample", "preview"], async w => {
     await w.look(`store ${i + 1}`);
     if (!(await w.expect(await p.locator("main .back").filter({ visible: true }).count(), `store ${i + 1} didn't open its page`))) continue;
     // the store's bot: its jobs, and the replay of one
-    if (w.combo.build === "sample") await w.expect(await p.getByText(new RegExp(w.L("This store's bot", "这家门店的助手|门店助手"))).filter({ visible: true }).count(), `store ${i + 1} has no store bot section`);
+    if (w.combo.build === "sample") await w.expect(await p.getByText(new RegExp(w.L("This store's bot", "这家店的助手"))).filter({ visible: true }).count(), `store ${i + 1} has no store bot section`);
     if (await w.tap(p.locator("main .lnk.watch").first(), { optional: true })) await replay(w);
     // every control on the store's page: logs, inspections (open each one), mock inspection, How
     await openStore(i);
@@ -876,8 +879,13 @@ flow("odelia-chat", ["sample", "preview"], async w => {
 flow("odelia-plan-first", ["sample", "preview"], async w => {
   const p = w.p;
   await w.go("odelia");
-  if (!(await w.tap(".composer .pf", { what: "the Plan first toggle" }))) return;
-  await w.expect(await p.locator(".composer .pf[aria-pressed=true], .composer .pf.on").count(), "Plan first doesn't show as on after a tap");
+  // Plan first is turned on from ⌘K (and Settings, and "/plan"); a quiet toggle then shows in the message box
+  await p.locator(".cmdk-open").filter({ visible: true }).first().click().catch(async () => { await p.keyboard.press("Control+k"); });
+  await p.waitForTimeout(300);
+  await p.keyboard.type(w.L("Plan first", "先做计划")); await p.waitForTimeout(300);
+  await w.look("⌘K: Plan first");
+  await p.keyboard.press("Enter"); await p.waitForTimeout(500);
+  if (!(await w.expect(await p.locator(".composer .pf[aria-pressed=true]").filter({ visible: true }).count(), "⌘K Plan first didn't turn Plan first on in the message box"))) return;
   await send(w, w.L("Get the Fremont store its permits", "为弗里蒙特门店办好许可"));
   await w.look("plan written");
   if (!(await w.expect(await p.locator(".plan-gate").filter({ visible: true }).count(), "no plan waiting for approval after Plan first"))) return;
@@ -903,8 +911,11 @@ flow("odelia-memory-person-undo", ["sample", "preview"], async w => {
   await send(w, w.L("Kevin Wu is our contractor, kevin@kbuild.com. Text me for anything due this week.", "Kevin 是我们的承包商，邮箱 kevin@kbuild.com。本周到期的事请发短信给我。"));
   await p.waitForTimeout(1500);
   await w.look("remembered");
+  // what a run kept is one line, "Remembered 2 things", that opens to each detail with its Forget
+  const kept = p.locator(".kept-t").filter({ visible: true }).last();
+  if (await w.expect(await kept.count(), "no Remembered line after saying who the contractor is")) { await kept.click(); await p.waitForTimeout(300); await w.look("remembered open"); }
   const chip = p.locator(".rmb-chip").filter({ visible: true });
-  if (await w.expect(await chip.count(), "no Remembered chip after saying who the contractor is")) {
+  if (await w.expect(await chip.count(), "the Remembered line opens to no details")) {
     await w.tap(p.locator(".rmb-chip .rmb-b").filter({ hasText: w.L("Forget", "忘记") }).first(), { what: "Forget" });
     await w.look("forgotten");
     await w.tap(p.locator(".rmb-chip .rmb-b").filter({ hasText: w.L("Undo", "撤销") }).first(), { what: "Undo forget" });
@@ -913,14 +924,33 @@ flow("odelia-memory-person-undo", ["sample", "preview"], async w => {
   // an answer that states a requirement and changes the workspace: its Sources line, and Undo what she did
   await send(w, w.L("What changed in the county plan check?", "县政府的图纸审查有什么变化？"));
   await w.look("rule change answered");
-  const srcs = p.locator(".answer .sources").filter({ visible: true }).last();
+  // the latest answer's "…": Listen, the steps, Sources, Watch how she did it, Undo what she did, Ask a person
+  const more = async name => {
+    const b = p.locator(".t-more").filter({ visible: true }).last();
+    if (!(await b.count())) return false;
+    await b.click(); await p.waitForTimeout(250);
+    const it = p.locator("[role=menu] [role=menuitem]").filter({ hasText: name }).filter({ visible: true }).first();
+    if (!(await it.count())) { await p.keyboard.press("Escape"); return false; }
+    await it.click(); await p.waitForTimeout(400); return true;
+  };
+  await p.locator(".t-more").filter({ visible: true }).last().click().catch(() => {}); await p.waitForTimeout(250);
+  await w.look("answer menu"); await p.keyboard.press("Escape");
   // (the scripted demo answers about the sample's own permits; a new account's permits are others)
-  if (w.combo.build === "sample" && await w.expect(await srcs.count(), "no Sources line under an answer that states a requirement")) {
+  if (w.combo.build === "sample" && await w.expect(await more(new RegExp("^" + w.L("Sources", "来源") + "$")), "the answer's … has no Sources")) {
+    const srcs = p.locator(".answer .sources").filter({ visible: true }).last();
+    await w.look("sources shown");
     const links = await srcs.locator("a").evaluateAll(as => as.map(a => a.getAttribute("href") ?? ""));
     await w.expect(links.length && links.every(h => /^https:\/\//.test(h)), `the Sources line's links aren't agency pages: ${links.join(", ")}`);
   }
+  // Undo what she did
+  if (await more(new RegExp(w.L("Undo what she did", "撤销她这次的操作")))) {
+    await w.look("undo asked");
+    await w.tap(p.locator(".undo-ask .pill.ink").first(), { what: "Undo (confirm)" });
+    await p.waitForTimeout(600);
+    await w.look("undone");
+  } else if (w.combo.build === "sample") await w.record("step", "the answer's … offers no Undo what she did");
   // Ask a person
-  if (await w.tap(p.locator(".ask-person").filter({ visible: true }).first(), { what: "Ask a person" })) {
+  if (await w.expect(await more(new RegExp(w.L("Ask a person", "找真人"))), "the answer's … has no Ask a person")) {
     await w.look("ask a person");
     const ta = p.locator("[role=dialog] textarea").filter({ visible: true }).first();
     if (await w.expect(await ta.count(), "Ask a person has no message box")) {
@@ -931,17 +961,8 @@ flow("odelia-memory-person-undo", ["sample", "preview"], async w => {
     }
     await w.close();
   }
-  // Undo what she did, where a reply offers it
-  const undo = p.locator(".undo-b").filter({ visible: true });
-  if (await undo.count()) {
-    await undo.first().click(); await p.waitForTimeout(300);
-    await w.look("undo asked");
-    await w.tap(p.locator(".undo-ask .pill.ink").first(), { what: "Undo (confirm)" });
-    await p.waitForTimeout(600);
-    await w.look("undone");
-  } else if (w.combo.build === "sample") await w.record("step", "no reply in the chat offers Undo what she did");
-  // replay from the chat
-  if (await w.tap(p.locator("main .lnk.watch, .panel .lnk.watch").filter({ visible: true }).first(), { optional: true })) await replay(w);
+  // replay from the chat, where the answer's job has one
+  if (await more(new RegExp(w.L("Watch how she did it", "看她是怎么做的")))) await replay(w);
 });
 
 flow("odelia-work", ["sample", "preview"], async w => {
@@ -949,8 +970,8 @@ flow("odelia-work", ["sample", "preview"], async w => {
   await w.go("odelia/work");
   await w.look("work");
   if (w.combo.build === "sample") {
-    await w.expect(await p.getByText(new RegExp(w.L("Across your stores", "所有门店"))).count(), "no chief-of-staff row (Across your stores) on Work");
-    await w.expect(await p.getByText(new RegExp(w.L("This store's bot", "门店助手|这家门店"))).count(), "no store group with its bot on Work");
+    await w.expect(await p.getByText(new RegExp(w.L("Across your stores", "跨门店的工作"))).count(), "no chief-of-staff row (Across your stores) on Work");
+    await w.expect(await p.getByText(new RegExp(w.L("This store's bot", "这家店的助手"))).count(), "no store group with its bot on Work");
   }
   for (const t of await p.locator("main .hz-tog, main .sec-h.tog").all()) { await t.click().catch(() => {}); await p.waitForTimeout(200); }
   await w.look("work opened up");
@@ -1000,7 +1021,7 @@ flow("settings", ["sample", "preview"], async w => {
       await opt.click(); await p.waitForTimeout(500);
       const h = await p.locator("main h1").first().innerText();
       await w.expect(w.zh ? !/[一-鿿]/.test(h) : /[一-鿿]/.test(h), `picking ${w.zh ? "English" : "中文"} didn't change the page (h1 "${h}")`);
-      await w.look("language switched");
+      // (the page is now in the other language: it's checked in that language's own run)
     }
   }
 });
@@ -1014,35 +1035,45 @@ flow("settings-odelia-controls", ["sample", "preview"], async w => {
     if (await r.count()) { await r.check({ force: true }).catch(() => r.click().catch(() => {})); await p.waitForTimeout(300); await w.look(`mode ${m}`); }
     else await w.record("step", `no "${m}" permission mode in Settings, Odelia`);
   }
-  // an allow / never rule
-  const what = p.locator("main select[aria-label]").filter({ visible: true }).first();
-  if (await what.count()) {
-    const opts = await what.locator("option").evaluateAll(os => os.map(o => o.value));
-    if (opts.length) await what.selectOption(opts[0]);
-    const inp = p.locator("main input[placeholder*='landlord'], main input[placeholder*='房东']").filter({ visible: true }).first();
+  // a Never rule, in its side sheet
+  if (await w.tap(new RegExp(w.L("Add a Never rule", "添加“绝不”规则")), { what: "Add a Never rule" })) {
+    await w.look("never rule sheet");
+    const sh = p.locator("[role=dialog]").filter({ visible: true }).last();
+    const sel = sh.locator("select").first();
+    if (await sel.count()) { const o = await sel.locator("option").evaluateAll(os => os.map(x => x.value).filter(Boolean)); if (o.length) await sel.selectOption(o[0]); }
+    const inp = sh.locator("input:not([type=checkbox]):not([type=radio])").filter({ visible: true }).first();
     if (await inp.count()) await inp.fill(w.L("landlord", "房东"));
-    await w.tap(p.locator("main .sbtn.ink").filter({ hasText: new RegExp("^" + w.L("Add", "添加") + "$") }).first(), { what: "Add (rule)" });
-    await w.look("rule added");
+    await w.tap(sh.locator("button[type=submit]").first(), { what: "Add (Never rule)" });
+    await w.look("never rule added");
+    await w.close();
   }
-  // a business rule
-  const ruleTo = p.locator("main input[placeholder*='@']").filter({ visible: true }).first();
-  if (await ruleTo.count()) {
-    await ruleTo.fill("kevin@contractor.com");
-    await w.tap(new RegExp("^" + w.L("Add rule", "添加规则")), { what: "Add rule (business rule)" });
+  // a business rule, in its side sheet
+  await w.go("settings/odelia");
+  if (await w.tap(new RegExp(w.L("Add a business rule", "添加业务规则")), { what: "Add a business rule" })) {
+    await w.look("business rule sheet");
+    const sh = p.locator("[role=dialog]").filter({ visible: true }).last();
+    for (const s of await sh.locator("select").all()) { const o = await s.locator("option").evaluateAll(os => os.map(x => x.value).filter(Boolean)); if (o.length) await s.selectOption(o[0]).catch(() => {}); }
+    const to = sh.locator("input[placeholder*='@'], input[type=email]").filter({ visible: true }).first();
+    if (await to.count()) await to.fill("kevin@contractor.com");
+    await w.look("business rule filled");
+    await w.tap(sh.locator("button[type=submit]").first(), { what: "Add rule (business rule)" });
     await w.look("business rule added");
+    await w.close();
   }
   // memory and skills
   for (const name of [w.L("View", "查看"), w.L("Start import", "开始导入"), w.L("Create skill", "创建技能")]) {
     await w.go("settings/odelia");
     if (await w.tap(new RegExp("^" + name), { optional: true })) { await w.look(`odelia settings: ${name}`); await w.close(); }
   }
-  // house rules
+  // house rules: the row in Business facts opens its side sheet
   await w.go("settings/facts");
+  await w.tap(p.locator("#set-house .sg-r button").first(), { what: "House rules Edit" });
+  await w.look("house rules sheet");
   await w.tap(new RegExp(w.L("Start from the example", "从示例开始")), { optional: true });
   const house = p.locator("#house-text");
   if (await w.expect(await house.count(), "no house rules box in Business facts")) {
     await house.fill(w.L("We close on Mondays. Mei approves every filing.", "我们周一休息。Mei 批准每一项申报。"));
-    await w.tap(p.locator("main .sbtn.ink").filter({ hasText: new RegExp("^" + w.L("Save", "保存") + "$") }).first(), { what: "Save house rules" });
+    await w.tap(p.locator("[role=dialog] .sbtn.ink, main .sbtn.ink").filter({ hasText: new RegExp("^" + w.L("Save", "保存") + "$") }).filter({ visible: true }).first(), { what: "Save house rules" });
     await w.look("house rules saved");
   }
   // edit a business fact
@@ -1056,7 +1087,7 @@ flow("settings-integrations", ["sample", "preview"], async w => {
   // the bot set-up forms (WeChat, Slack, Lark)
   for (const bot of ["WeChat", "Slack", "Lark"]) {
     await w.go("settings/connections");
-    const row = p.locator(".sg-row").filter({ hasText: new RegExp(`Odelia in ${bot}|${bot}.*Odelia|在${bot === "WeChat" ? "微信" : bot === "Lark" ? "飞书" : "Slack"}`) }).first();
+    const row = p.locator(".sg-row").filter({ hasText: new RegExp(`Odelia in ${bot}|${bot}.*Odelia|${bot === "WeChat" ? "微信" : bot === "Lark" ? "飞书" : "Slack"} ?中的 Odelia`) }).first();
     if (!(await row.count())) { await w.record("step", `no Odelia in ${bot} row in Connections`); continue; }
     await row.getByRole("button").first().click().catch(() => {}); await p.waitForTimeout(600);
     await w.look(`${bot} bot form`);
@@ -1209,8 +1240,11 @@ flow("site-home", ["site"], async w => {
   }
   else await w.record("step", "no language toggle on the landing page");
   // the lead form: the hero box, then the sheet, to the end
-  await p.fill("#st-hero", "Los Angeles");
-  await p.locator("form.starter[data-src=hero] button[type=submit]").click();
+  // the box in the hero where the page has one; otherwise its Get my plan button
+  if (await p.locator("#st-hero").isVisible().catch(() => false)) {
+    await p.fill("#st-hero", "Los Angeles");
+    await p.locator("form.starter[data-src=hero] button[type=submit]").click();
+  } else if (!(await w.tap(p.locator("main [data-open], section [data-open], [data-open]").filter({ visible: true }).nth(1), { what: "the hero's Get my plan" }))) return;
   await p.waitForTimeout(800);
   await w.look("lead sheet");
   if (!(await w.expect(await p.locator("#sheet").isVisible().catch(() => false), "Get my plan didn't open the sheet"))) return;
@@ -1219,7 +1253,11 @@ flow("site-home", ["site"], async w => {
   // the market (skipped when the box already said it), industry and headquarters, opening and how many, then contact
   for (let i = 1; i <= 5 && !(await body.locator("#q-contact").count()); i++) {
     await step(i);
-    if (await body.locator("#q-market").count()) await w.tap(body.locator("[data-next]"), { what: "Next on the market step" });
+    if (await body.locator("#q-market").count()) {
+      // a market typed in the hero carries over; otherwise pick one (picking moves on by itself)
+      if (await body.locator("[data-next]").isDisabled().catch(() => false)) await body.locator("[data-k=market]").first().click();
+      else await w.tap(body.locator("[data-next]"), { what: "Next on the market step" });
+    }
     else if (await body.locator("[data-k=industry]").count()) { await body.locator("[data-k=industry]").first().click(); await body.locator("[data-k=hq]").first().click(); }
     else if (await body.locator("[data-k=opening]").count()) { await body.locator("[data-k=opening]").first().click(); await body.locator("[data-k=locations]").first().click(); }
     await p.waitForTimeout(300);
@@ -1394,8 +1432,8 @@ async function worker() {
         });
         await ctx.route(u => u.pathname === "/__qa-embed.html", r => r.fulfill({ status: 200, contentType: "text/html", body: EMBED_PAGE(c.lang) }));
         // the host's rewrites (vercel.json): /trust and the section pages
-        await ctx.route(u => u.origin === new URL(c.base).origin && /^\/(trust|privacy|terms)$/.test(u.pathname), async r => r.fulfill({ response: await r.fetch({ url: r.request().url().replace(/\/(trust|privacy|terms)(\?|#|$)/, "/$1.html$2") }) }));
-        await ctx.route(u => u.origin === new URL(c.base).origin && /^\/(how-it-works|customers|pricing|faq|backers|sample-plan)$/.test(u.pathname), async r => r.fulfill({ response: await r.fetch({ url: new URL(c.base).origin + "/index.html" }) }));
+        await ctx.route(u => u.origin === new URL(c.base).origin && /^\/(trust|privacy|terms)$/.test(u.pathname), async r => { try { return await r.fulfill({ response: await r.fetch({ url: r.request().url().replace(/\/(trust|privacy|terms)(\?|#|$)/, "/$1.html$2") }) }); } catch { return r.abort().catch(() => {}); } });
+        await ctx.route(u => u.origin === new URL(c.base).origin && /^\/(how-it-works|customers|pricing|faq|backers|sample-plan)$/.test(u.pathname), async r => { try { return await r.fulfill({ response: await r.fetch({ url: new URL(c.base).origin + "/index.html" }) }); } catch { return r.abort().catch(() => {}); } });
       }
       await f.run(w);
     } catch (e) {

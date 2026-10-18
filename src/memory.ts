@@ -19,6 +19,17 @@ const base = (kind: MemoryKind, name: string, summary: string): MemoryFile => ({
 export const PROFILE = () => base("you", "Profile", "Who you are: name, role, company and where you work");
 export const PREFS = () => base("you", "Preferences", "How you want Placetta to work: language, tone, format, approvals");
 
+/** The two files every book starts with, named in the reader's language (what's stored stays as it is; a file the
+ *  person or the agent named itself shows as written). */
+const BUILT_IN: Record<string, { name: [string, string]; summary: [string, string] }> = {
+  profile: { name: ["Profile", "个人资料"], summary: ["Who you are: name, role, company and where you work", "您是谁：姓名、职位、公司和工作地点"] },
+  preferences: { name: ["Preferences", "偏好"], summary: ["How you want Placetta to work: language, tone, format, approvals", "您希望快哉如何工作：语言、语气、格式和审批"] },
+};
+export function fileLabel(f: MemoryFile, lang: "en" | "zh"): { name: string; summary: string } {
+  const k = BUILT_IN[f.id], i = lang === "zh" ? 1 : 0;
+  return { name: k && f.name === k.name[0] ? k.name[i] : f.name, summary: k && f.summary === k.summary[0] ? k.summary[i] : f.summary };
+}
+
 /** Add a fact to a file (made if it doesn't exist). Returns the new book, or null when the setting keeps it out. */
 export function remember(book: MemoryBook, o: { kind: MemoryKind; file: string; summary?: string; fact: string; sensitive?: boolean }): MemoryBook | null {
   const fact = o.fact.trim().slice(0, 400);

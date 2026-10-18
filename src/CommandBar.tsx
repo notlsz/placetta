@@ -75,8 +75,11 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
     // A page named exactly what was typed ("deadlines", "work", an old name like "applications") is where they meant to
     // go: it comes first, so Enter opens it instead of running a playbook that only mentions the word.
     const named = (p: (typeof PAGES)[number]) => [p.en, p.zh, ...(p.also ?? "").split(" ")].some(n => { const x = n.toLowerCase(); return !!x && (x === s || x.split(/[:：]\s*/).pop() === s); });
-    const lead = out.filter(h => PAGES.some(p => named(p) && h.id === "v-" + p.v + (p.sub ? "-" + p.sub : "")));
-    if (lead.length) { const pages = out.filter(h => h.id.startsWith("v-") && !lead.includes(h)); return [...lead, ...pages, ...out.filter(h => !lead.includes(h) && !pages.includes(h))]; }
+    // The same for anything else named exactly what was typed ("先做计划", "Plan first"): a Chinese name of four
+    // characters would otherwise read as a sentence and go to Odelia as a job.
+    const lead = out.filter(h => h.id !== "ask" && (h.label.toLowerCase() === s || PAGES.some(p => named(p) && h.id === "v-" + p.v + (p.sub ? "-" + p.sub : ""))));
+    // (the rest of its own group follows it, so each group keeps one heading)
+    if (lead.length) { const same = out.filter(h => !lead.includes(h) && h.group === lead[0].group); return [...lead, ...same, ...out.filter(h => !lead.includes(h) && !same.includes(h))]; }
     return out;
   }, [q, ws, zh, b, ask, go, openApp, openReplay, setOpen]);
 
