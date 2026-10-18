@@ -38,6 +38,11 @@ import { HONEST } from "../src/guard";
 import type { AgentComment } from "../src/live";
 import { agentComments, mentionsIn, odeliaAsk, odeliaMayStart, postLocal, SAMPLE_PEOPLE } from "../src/collab";
 import { buildGrid, preparePrompt, storesOfWorkspace, toPrepare } from "../src/review";
+import { formById } from "../src/forms/registry";
+import { answersHash, fileable, needsForm, refreshForms } from "../src/forms/versions";
+import { evidence, formFailures } from "../src/harness";
+import type { FilledNote } from "../src/core";
+import type { Bi } from "../src/bi";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -1970,6 +1975,120 @@ async function speed() {
   console.log(`  TTFT browser path: ${b0.first} ms -> ${b1.first} ms; server draft: ${s0.first} ms -> ${s1.first} ms; a round of lookups: ${SPEED.lookups.before} ms -> ${SPEED.lookups.after} ms`);
 }
 
+/* ================================================================== the agency's own form, always current (src/forms/versions.ts) */
+
+/** The agencies' PDFs from disk, as agent-run gets them from the site. */
+const formPdf = async (file: string) => new Uint8Array(readFileSync(file.startsWith("pdf/") ? "src/forms/" + file : "public/forms/" + file));
+/** Every text box's value and every printed word of a filled PDF: what anyone opening it would read. */
+async function pdfWords(bytes: Uint8Array): Promise<string[]> {
+  const { PDFDocument } = await import("pdf-lib");
+  const d = await PDFDocument.load(bytes, { ignoreEncryption: true });
+  return d.getForm().getFields().map(f => { try { return String((f as unknown as { getText(): string }).getText() ?? ""); } catch { return ""; } }).filter(Boolean);
+}
+/** An EIN application (Form SS-4) filled from the shop's facts, with the trade name from Context on line 2. */
+function ss4App(over: Record<string, string> = {}): Application {
+  const off = formById("irs-ss4")!;
+  const v: Record<string, string> = { l1: "Lucky Leaf Tea LLC", l2: "Lucky Leaf", l4a: "136-20 Roosevelt Ave", l4b: "Flushing, NY 11354", l5a: "N/A", l5b: "N/A", l6: "Queens County, NY", l7a: "Mei Chen", l7b: "By hand",
+    l8a: "Yes", l8b: "1", l8c: "Yes", l9a: "Other: Foreign-owned U.S. disregarded entity", l9b: "N/A", l10: "Started a new milk tea shop", l11: "09/01/2026", l12: "December", l13: "4",
+    l15: "11/15/2026", l16: "Accommodation & food service", l17: "Milk tea and snacks, made to order", l18: "No", sign: "Mei Chen, Managing Member", phone: "(718) 555-0100", ...over };
+  return { id: "ein", name: B("Employer Identification Number (EIN)", "雇主识别号"), agency: B("Internal Revenue Service", "美国国税局"), level: "federal", status: "draft", official: "irs-ss4",
+    fees: [{ label: same("Fee"), amount: 0 }], est: same("Same day online"), source: { label: "irs.gov", url: "https://www.irs.gov" }, form: same(off.form),
+    fields: off.fields.map(o => ({ id: o.id, label: B(`Line ${o.line}: ${o.label.en}`, `第 ${o.line} 行：${o.label.zh}`), value: v[o.id] ?? "", from: same("From Context") })), checklist: [] };
+}
+
+async function filledForms() {
+  console.log("\n# The agency's own form, filled again on every change: versions, read-back, the reply's card, and cards taken back");
+  const { svc, stored } = account();
+  svc.formPdf = formPdf;
+  const w0 = workspace({ apps: [ss4App({ l13: "" })] });
+
+  // 1. Odelia fills the last line and asks for approval: version 1 of the SS-4, read back, kept, on the card and in the reply
+  const r1 = await agent({ ws: w0, svc, prompt: "Finish the EIN application and put it up for approval.",
+    script: [() => ask(["fill_fields", { application_id: "ein", fields: [{ label: "13", value: "4" }] }]), () => ask(["request_filing_approval", { application_id: "ein" }]), () => say("The EIN application is filled and waiting for your approval.")] });
+  const a1 = r1.w.apps[0], v1 = a1.versions?.[0];
+  const req1 = callNamed(r1, "request_filing_approval")[0];
+  ok(req1.ok && /all \d+ lines match/.test(String(req1.parsed?.official_form)), "before the card goes up, the SS-4 is filled with the answers and read back", req1.out);
+  ok(a1.versions?.length === 1 && v1?.n === 1 && v1.read.ok && v1.read.checked >= 15 && v1.hash === answersHash(a1), "version 1 of the filled SS-4 is kept on the application, read back line by line", v1 && { n: v1.n, read: v1.read });
+  const doc1 = r1.w.docs.find(d => d.id === v1?.doc);
+  ok(doc1?.name === "Form SS-4, filled, version 1.pdf" && doc1.app === "ein" && doc1.tag.en === "Filled form, current version" && !!doc1.path && stored.has(doc1.path), "it's in Documents as \"Form SS-4, filled, version 1\", tagged with the application, current, stored in the account", doc1);
+  const card1 = r1.w.approvals.find(x => x.kind === "file" && x.app === "ein")!;
+  ok(card1?.hash === v1?.hash && card1.version === 1, "the approval card is for exactly these answers: version 1", card1 && { hash: card1.hash, version: card1.version });
+  const f1 = (r1.reply?.forms as FilledNote[] | undefined)?.[0];
+  ok(f1?.app === "ein" && f1.form === "Form SS-4" && f1.version === 1 && f1.ok && f1.filled === Object.keys(v1!.answers).length && f1.doc === v1!.doc, "the reply ends with the filled form: Form SS-4, version 1", f1);
+  const words1 = await pdfWords(new Uint8Array(await (stored.get(doc1!.path!) as Blob).arrayBuffer()));
+  ok(words1.includes("Lucky Leaf Tea LLC") && words1.includes("4") && words1.includes("Lucky Leaf"), "the kept PDF has the answers in the form's own boxes, the new line 13 too", words1.slice(0, 8));
+  ok(r1.steps.some(s => /Filled the agency's form: Form SS-4, version 1/.test(s.label.en)), "the step says the form was filled");
+  ok(fileable(r1.w, card1).ok && (fileable(r1.w, card1) as { version?: { n: number } }).version?.n === 1, "the card can be filed: its answers are the ones on version 1");
+
+  // 2. A new fact: the trade name changes; line 2 held it, so the form is filled again (version 2, one line changed),
+  //    the card for version 1 is taken back and a fresh one for version 2 goes up
+  const r2 = await agent({ ws: r1.w, svc, prompt: "We trade as Lucky Leaf Tea House now.",
+    script: [() => ask(["remember", { label: "Trade name", value: "Lucky Leaf Tea House" }]), () => say("Saved the new trade name; the EIN application has it too.")] });
+  const a2 = r2.w.apps[0], v2 = a2.versions?.at(-1);
+  ok(callNamed(r2, "remember")[0].parsed?.also_updated_applications?.toString() === "ein" && a2.fields.find(f => f.id === "l2")?.value === "Lucky Leaf Tea House", "the fact fed line 2 of the open application");
+  ok(a2.versions?.length === 2 && v2?.n === 2 && v2.read.ok && v2.why?.en === "A business fact changed", "version 2 is filled, read back, and says a business fact changed", v2 && { n: v2.n, why: v2.why });
+  eq(v2?.changed.map(c => [c.id, c.was, c.now]), [["l2", "Lucky Leaf", "Lucky Leaf Tea House"]], "version 2 records exactly the line that changed, from what to what");
+  ok(r2.w.docs.find(d => d.id === v1!.doc)?.tag.en === "Filled form, earlier version" && r2.w.docs.find(d => d.id === v2!.doc)?.name === "Form SS-4, filled, version 2.pdf", "version 1 stays in Documents, marked earlier; version 2 is the current one");
+  const gone = r2.w.closed.find(x => x.id === card1.id), card2 = r2.w.approvals.find(x => x.kind === "file" && x.app === "ein");
+  ok(!r2.w.approvals.some(x => x.id === card1.id) && gone?.withdrawn && /answers changed after this was put up/.test(gone.withdrawn.why.en) && gone.withdrawn.next === card2?.id, "the card for version 1 is taken back, saying why, pointing at the fresh one", gone?.withdrawn);
+  ok(card2 && card2.id !== card1.id && card2.hash === v2!.hash && card2.version === 2 && a2.status === "ready", "a fresh card for version 2 is put up, and the application stays ready", card2 && { id: card2.id, version: card2.version, status: a2.status });
+  const f2 = (r2.reply?.forms as FilledNote[] | undefined)?.[0];
+  ok(f2?.version === 2 && f2.changed === 1 && (r2.reply?.approvals as string[]).includes(card2!.id) && !(r2.reply?.approvals as string[]).includes(card1.id), "the reply carries Form SS-4, version 2, 1 line changed, and the fresh card", { f2, approvals: r2.reply?.approvals });
+  ok(r2.w.audit.some(x => x.action.en === "Took back an approval card") && r2.w.audit.some(x => x.action.en === "Filled the agency's form" && /version 2: 1 line changed/.test(x.detail?.en ?? "")), "the audit trail has the card taken back and the form filled again");
+
+  // 3. Change after approval: the old card can't be filed; the fresh one can, until the answers move again
+  ok(!fileable(r2.w, gone!).ok && /Review the new version/.test((fileable(r2.w, gone!) as { why: Bi }).why.en), "the taken-back card can't be filed");
+  ok(fileable(r2.w, card2!).ok && (fileable(r2.w, card2!) as { version?: { n: number } }).version?.n === 2, "the fresh card files version 2, exactly what was approved");
+  const typed = setField("ein", "l17", "Milk tea, coffee and snacks")(r2.w);
+  const g = fileable(typed, card2!);
+  ok(!g.ok && /changed after this was put up/.test((g as { why: Bi }).why.en), "answers changed after the card went up (before a new version was even filled): it can't be filed without approving again", g);
+
+  // 4. A line that doesn't come out right on the form keeps it from being ready: characters the SS-4 can't print
+  const r4 = await agent({ ws: workspace({ apps: [ss4App({ l1: "幸运叶茶饮 Lucky Leaf Tea LLC" })] }), svc, prompt: "Put the EIN application up for approval.",
+    script: [() => ask(["request_filing_approval", { application_id: "ein" }]), () => say("Line 1 needs English letters.")] });
+  const req4 = callNamed(r4, "request_filing_approval")[0];
+  ok(req4.parsed?.approval_requested === false && /Line 1/.test(String(req4.parsed?.lines)) && /English letters/.test(String(req4.parsed?.lines)), "request_filing_approval refuses, naming the exact line and what's wrong with it", req4.out);
+  ok(!r4.w.approvals.some(x => x.kind === "file") && r4.w.apps[0].status === "draft" && /Line 1/.test(r4.w.apps[0].next?.en ?? ""), "no card goes up, and the application says which line keeps it from being ready", r4.w.apps[0].next);
+  const v4 = r4.w.apps[0].versions?.at(-1);
+  ok(v4 && !v4.read.ok && v4.read.problems.some(p => p.id === "l1" && p.kind === "characters") && /isn't ready to file/.test(textOf(r4)), "the version kept says so, and so does the reply", { problems: v4?.read.problems, reply: textOf(r4) });
+  const f4 = (r4.reply?.forms as FilledNote[] | undefined)?.[0];
+  ok(f4 && !f4.ok && /Line 1/.test(f4.problem?.en ?? ""), "the reply's card says it doesn't match yet, and where", f4);
+  // a card already up when a mismatch appears is taken back, and the reviewer can't pass the job
+  const bad = { ...v4!, hash: answersHash(r4.w.apps[0]) };
+  const withCard = addApproval({ id: "ap-x", kind: "file", app: "ein", title: same("File the EIN"), does: [], action: same("Approve"), hash: bad.hash })(r4.w);
+  ok(!fileable(withCard, withCard.approvals[0]).ok, "a card whose filled form doesn't match can't be filed");
+  const job = { id: "j1", title: same("EIN"), status: "running" as const, steps: [{ title: same("Fill it"), done: true }], apps: ["ein"], started: "", updated: "", seat: 1 };
+  ok(formFailures(r4.w, job as never).length === 1 && (evidence(r4.w, job as never, "done").applications[0] as { filled_form?: { lines_that_dont_match?: string[] } }).filled_form?.lines_that_dont_match?.[0]?.startsWith("Line 1"), "the reviewer's evidence has the read-back, and the job can't pass with it", formFailures(r4.w, job as never));
+
+  // 5. The SSN never reaches the PDF: typed into line 7b, it's left off and the read-back stops the filing
+  const r5 = await agent({ ws: workspace({ apps: [ss4App({ l7b: "123-45-6789" })] }), svc, prompt: "File the EIN application.",
+    script: [() => ask(["request_filing_approval", { application_id: "ein" }]), () => say("Line 7b should be written by hand.")] });
+  const v5 = r5.w.apps[0].versions?.at(-1);
+  ok(v5 && !v5.read.ok && v5.read.problems.some(p => p.id === "l7b" && p.kind === "secret") && !r5.w.approvals.some(x => x.kind === "file"), "an SSN on a line stops it: \"By hand\" instead, and no card", v5?.read.problems);
+  const words5 = await pdfWords(new Uint8Array(await (stored.get(r5.w.docs.find(d => d.id === v5?.doc)!.path!) as Blob).arrayBuffer()));
+  ok(words5.length > 10 && !words5.some(t => /\d{3}-\d{2}-\d{4}/.test(t)), "the filled PDF has no SSN anywhere", words5.filter(t => /\d/.test(t)));
+
+  // 6. From outside the app (an email): the form is filled and kept the same way, and the reply carries it
+  const r6 = await agent({ ws: workspace({ apps: [ss4App({ l13: "" })] }), svc, channel: "email", sender: "mei@luckyleaf.com", prompt: "We'll have 5 employees. Update the EIN application.",
+    script: [() => ask(["fill_fields", { application_id: "ein", fields: [{ label: "13", value: "5" }] }]), () => say("Line 13 now says 5. Approve it in the app.")] });
+  const f6 = (r6.reply?.forms as FilledNote[] | undefined)?.[0];
+  ok(f6?.version === 1 && f6.ok && !!f6.path && stored.has(f6.path), "a run from email fills the form too, keeps the PDF in the account, and the reply carries it (agent-run attaches it, or texts a link)", f6);
+  // plain SMS changes nothing, so it fills nothing
+  const r7 = await agent({ ws: workspace({ apps: [ss4App({ l13: "" })] }), svc, channel: "sms", state: { ...startState([], "Status?"), plainSms: true }, prompt: "Status?", script: [() => say("Line 13 is still empty.")] });
+  ok(!r7.reply?.forms && !r7.w.apps[0].versions, "a plain text message fills nothing");
+
+  // 7. A business fact confirmed in the app feeds its lines too (the app then fills the form again)
+  const fed = applyChange({ op: "set_fact", label: same("Trade name"), value: "Lucky Leaf Tea Bar", group: "business", via: "email" })(r1.w);
+  ok(fed.apps[0].fields.find(f => f.id === "l2")?.value === "Lucky Leaf Tea Bar" && needsForm(fed.apps[0]), "a confirmed fact change fills the lines that held the old value, and the form needs filling again");
+  const short = applyChange({ op: "set_fact", label: same("Hires staff"), value: "No", group: "business", via: "email" })(workspace({ apps: [ss4App()], facts: [{ id: "h", group: "business", label: same("Hires staff"), value: same("Yes"), source: same("x") }] }));
+  ok(short.apps[0].fields.find(f => f.id === "l8a")?.value === "Yes", "a fact like \"Yes\" feeds nothing: any line could hold it on its own");
+  // the person's own edit, a version later, records why
+  let mine = setField("ein", "l17", "Milk tea, coffee and snacks", B("You edited", "您修改的"))(r2.w);
+  const out = await refreshForms({ get: () => mine, apply: p => { mine = p(mine); }, load: formPdf });
+  ok(out.notes[0]?.version === 3 && mine.apps[0].versions?.at(-1)?.why?.en === "You edited it" && mine.apps[0].versions?.at(-1)?.changed.map(c => c.id).join() === "l17", "the person's own edit makes version 3, saying they edited it", out.notes);
+  ok(out.withdrawn.length === 1 && out.cards.length === 1 && !needsForm(mine.apps[0]), "and the card for version 2 is taken back for a fresh one; nothing left to fill", out);
+}
+
 /* ================================================================== what Odelia did this month (src/monthly.ts) */
 
 function monthly() {
@@ -2034,6 +2153,7 @@ await roles();
 await chinese();
 await sources();
 await staffLanguages();
+await filledForms();
 promptConsistency();
 
 /* The version people accept in the app (accept_terms refuses any other) is the version of the legal text they read. */

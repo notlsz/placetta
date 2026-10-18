@@ -19,12 +19,14 @@ import { filingBlockers } from "./core";
 import { BY_HAND } from "./guard";
 import { Working } from "./Bot";
 import { AllowRule } from "./AllowRule";
+import { FilledStatus } from "./FilledForm";
+import { fileable, formName, latestVersion } from "./forms/versions";
 /* Team review: the permit's comment thread and who it's assigned to (src/Comments.tsx) */
 import { AssignPicker, CommentThread, useItemThread, useTeam } from "./Comments";
 
 /* ------------------------- application, opened ------------------------- */
 
-export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: Tab; edit: boolean; onTab: (t: Tab) => void; onClose: () => void }) {
+export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: string; tab: Tab; edit: boolean; version?: number; onTab: (t: Tab) => void; onClose: () => void }) {
   const { b, t, lang, ws, openApproval, busy, cloud, ask } = useApp();
   const team = useTeam();
   const a = ws.apps.find(x => x.id === id);
@@ -73,7 +75,7 @@ export function AppDrawer({ id, tab, edit, onTab, onClose }: { id: string; tab: 
       <div className="sh-body">
         {tab === "progress" && <Progress a={a} />}
         {tab === "check" && <Checklist a={a} />}
-        {tab === "form" && <FormPreview key={a.id + String(edit)} a={a} startEdit={edit} />}
+        {tab === "form" && <FormPreview key={a.id + String(edit)} a={a} startEdit={edit} version={version} />}
         {tab === "fees" && <Fees a={a} />}
         {tab === "receipt" && <Receipt a={a} />}
         {tab === "comments" && <AppComments a={a} />}
@@ -220,8 +222,8 @@ function AddrRule({ form, field, value }: { form: string; field: string; value: 
   );
 }
 
-function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
-  const { b, t, lang, say, editFields, downloadApp, cloud } = useApp();
+function FormPreview({ a, startEdit, version }: { a: Application; startEdit: boolean; version?: number }) {
+  const { b, t, lang, say, editFields, downloadApp, cloud, filledPdf } = useApp();
   const [making, setMaking] = useState(false);
   const canEdit = !["approved", "review"].includes(a.status) && a.fields.length > 0;
   const [edit, setEdit] = useState(startEdit && canEdit);
@@ -237,9 +239,11 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
     if (!off) return;
     setMaking(true);
     try {
-      const { fillOfficial } = await import("./forms/fill");
-      const blob = await fillOfficial(off.id, a.fields);
-      if (blob) { const r = await saveFile(`${off.id}-${a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40)}.pdf`, blob); if (r === "unavailable") say(t("t_noDl")); }
+      // the current version, as kept in Documents (filled again from these answers when none is kept yet)
+      const cur = latestVersion(a);
+      const bytes = await filledPdf(a.id, cur?.n);
+      const name = cur ? `${formName(a)}, filled, version ${cur.n}.pdf` : `${off.id}-${a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40)}.pdf`;
+      if (bytes) { const r = await saveFile(name, new Blob([bytes as BlobPart], { type: "application/pdf" })); if (r === "unavailable") say(t("t_noDl")); }
     } catch { say(lang === "zh" ? "无法生成官方表格，请稍后再试。" : "Couldn't make the official form. Try again."); }
     setMaking(false);
   };
@@ -260,6 +264,7 @@ function FormPreview({ a, startEdit }: { a: Application; startEdit: boolean }) {
           <p>{lang === "zh" ? `${off.agency.zh}。${METHOD[off.method].zh}。${off.how.zh}` : `${off.agency.en}. ${METHOD[off.method].en}. ${off.how.en}`}</p>
           {off.foreign && <p className="off-note">{b(off.foreign)}</p>}
           {onlineOnly(off) && <p className="off-note">{b(ONLINE_ONLY)}</p>}
+          {canFill(off) && <FilledStatus a={a} version={version} />}
           <div className="off-act">
             {canFill(off) && a.fields.some(f => f.value) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void official()}><I.download />{making ? "…" : lang === "zh" ? "下载已填写的官方表格" : "Download the filled official form"}</button>}
             {off.pdf && !(canFill(off) && a.fields.some(f => f.value)) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void blank()}><I.download />{making ? "…" : lang === "zh" ? "下载官方表格" : "Download the official form"}</button>}
@@ -350,7 +355,9 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const needSig = !!cloud && a.kind === "file" && !!off?.sign && !!off.esign;
   const left = app && a.kind === "file" ? filingBlockers(app) : { empty: [], missing: [] };
   const pf = preflight(ws, a, daysFromNow(0));
-  const blocked = left.empty.length + left.missing.length + pf.errors.length > 0;
+  // a card for answers that changed since it was put up, or a filled form that doesn't match them, can't be approved
+  const gate = fileable(ws, a);
+  const blocked = left.empty.length + left.missing.length + pf.errors.length > 0 || !gate.ok;
   const zh = lang === "zh";
   return (
     <Modal label={b(a.title)} onClose={onClose} wide>
@@ -373,6 +380,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
             )}
           </section>
         )}
+        {!gate.ok && <section className="ap-left" role="alert"><h3>{b(gate.why)}</h3></section>}
         {left.empty.length + left.missing.length > 0 && (
           <section className="ap-left" role="alert">
             <h3>{lang === "zh" ? "提交前还需要" : "Needed before it can be filed"}</h3>

@@ -1,0 +1,26 @@
+# Who must approve a change, once branch protection requires code owner review (.github/branch-protection.json).
+# Today one person owns everything. The paths below are the ones that change what customers' data is exposed to;
+# when a second reviewer joins, add them to these lines first. docs/soc2/policies/change-management.md
+
+*                         @notlsz
+
+# Database: tables, row-level security, grants, retention, the audit log
+/supabase/migrations/     @notlsz
+/supabase/tests/          @notlsz
+# Server functions: every path a request takes past the browser, and their JWT settings
+/supabase/functions/      @notlsz
+/supabase/config.toml     @notlsz
+# The portal filer that signs in to agency sites
+/worker/                  @notlsz
+/render.yaml              @notlsz
+# Hosting headers (CSP, HSTS, framing)
+/vercel.json              @notlsz
+# CI, secret scan, dependency updates, branch protection, this file
+/.github/                 @notlsz
+# Policies and the control matrix
+/docs/soc2/               @notlsz
+/docs/AI_RISK_REGISTER.md @notlsz
+# Legal terms and the public trust page
+/legal/                   @notlsz
+/site/trust.html          @notlsz
+/site/.well-known/        @notlsz

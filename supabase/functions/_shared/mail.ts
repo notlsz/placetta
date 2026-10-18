@@ -167,17 +167,22 @@ export const replySubject = (s: string) => (/^\s*(re|回复)\s*[:：]/i.test(s) 
 
 export type MailResult = { ok: boolean; status: number; id?: string; detail?: string };
 /** One email from Odelia, threaded under theirs. Postmark when it's set up, else Resend. */
-export async function sendMail(env: Env, o: { to: string; subject: string; text: string; html: string; inReplyTo?: string }, f: typeof fetch = fetch): Promise<MailResult> {
+/** A file sent with an email: the filled form Odelia hands back, for one. */
+export type Attachment = { name: string; content: Uint8Array; type: string };
+const base64 = (b: Uint8Array) => { let s = ""; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(s); };
+export async function sendMail(env: Env, o: { to: string; subject: string; text: string; html: string; inReplyTo?: string; attachments?: Attachment[] }, f: typeof fetch = fetch): Promise<MailResult> {
   if (!mailOutReady(env)) return { ok: false, status: 503, detail: "not_configured" };
   const from = `${env("ODELIA_EMAIL_NAME") || "Odelia (Placetta)"} <${odeliaEmail(env)}>`;
   const thread = o.inReplyTo ? { "In-Reply-To": o.inReplyTo, References: o.inReplyTo } : {};
+  const files = (o.attachments ?? []).map((a) => ({ name: a.name.replace(/[\r\n"]/g, " ").slice(0, 150), data: base64(a.content), type: a.type }));
   try {
     const pm = env("POSTMARK_SERVER_TOKEN");
     const res = pm
       ? await f("https://api.postmarkapp.com/email", { method: "POST", headers: { "X-Postmark-Server-Token": pm, "Content-Type": "application/json", Accept: "application/json" }, signal: AbortSignal.timeout(15000),
-        body: JSON.stringify({ From: from, To: o.to, Subject: o.subject, TextBody: o.text, HtmlBody: o.html, MessageStream: "outbound", Headers: Object.entries(thread).map(([Name, Value]) => ({ Name, Value })) }) })
+        body: JSON.stringify({ From: from, To: o.to, Subject: o.subject, TextBody: o.text, HtmlBody: o.html, MessageStream: "outbound", Headers: Object.entries(thread).map(([Name, Value]) => ({ Name, Value })),
+          ...(files.length ? { Attachments: files.map((x) => ({ Name: x.name, Content: x.data, ContentType: x.type })) } : {}) }) })
       : await f(`${RESEND}/emails`, { method: "POST", headers: { Authorization: `Bearer ${env("RESEND_API_KEY")}`, "Content-Type": "application/json" }, signal: AbortSignal.timeout(15000),
-        body: JSON.stringify({ from, to: [o.to], subject: o.subject, text: o.text, html: o.html, headers: thread }) });
+        body: JSON.stringify({ from, to: [o.to], subject: o.subject, text: o.text, html: o.html, headers: thread, ...(files.length ? { attachments: files.map((x) => ({ filename: x.name, content: x.data, content_type: x.type })) } : {}) }) });
     const j = await res.json().catch(() => ({})) as { MessageID?: string; id?: string; Message?: string; message?: string };
     return res.ok ? { ok: true, status: res.status, id: String(j.MessageID ?? j.id ?? "") } : { ok: false, status: res.status, detail: String(j.Message ?? j.message ?? "").slice(0, 200) };
   } catch (e) { return { ok: false, status: 502, detail: String(e).slice(0, 200) }; }

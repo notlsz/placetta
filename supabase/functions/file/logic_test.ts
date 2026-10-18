@@ -2,8 +2,8 @@
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
 import {
-  afterHold, askedToResubmit, canFaxSigned, check, emailFor, envFrom, faxFailures, faxFile, faxTo, type Filing, holdMinutes, holds, isForeign, killSwitchOn,
-  mailOutcome, mailTo, pick, refusalOf, signedCopy, teamApproved,
+  afterHold, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
+  holds, isForeign, killSwitchOn, mailOutcome, mailTo, ownerPacket, pick, refusalOf, signedCopy, teamApproved,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -181,4 +181,81 @@ Deno.test("Undo and the send can't both win: the database's answers are told apa
   assertEquals(refusalOf("too_late: the time to undo is over"), null);
   assertEquals(refusalOf("filing_stopped: the customer stopped this filing"), "stopped");
   assertEquals(refusalOf("filing_changed: the filing moved on (agent_state)"), "changed");
+});
+
+/* ---------------- owner packets, fees that travel with a filing, attachments ---------------- */
+
+const all = { hasLogin: true, mailConnected: true };
+const pdf = (n: number) => Array.from({ length: n }, (_, i) => ({ name: `doc${i + 1}.pdf`, path: `${WS}/docs/doc${i + 1}.pdf` }));
+
+Deno.test("an owner-only form is never sent: it becomes the owner's packet, whatever else is switched on", () => {
+  const owner = dest({ fax: undefined, mail: undefined, owner: { why: "Notarized in person", mail: { name: "City Clerk", line1: "Room 601", city: "Boston", state: "MA", zip: "02201" } } });
+  assertEquals(pick(filing(), owner, ENV, all), "owner");
+  assertEquals(pick(filing({}, { fee_estimate: 65 }), owner, ENV, all), "owner");
+  // No filled form or signature is checked: the owner sends it.
+  assertEquals(check(filing({ pdf_path: undefined }), owner, { docPaths: docs }, "owner"), []);
+});
+
+Deno.test("the owner packet says why, where and what goes with it, in English and Chinese, with only an https link", () => {
+  const d = dest({ fax: undefined, mail: undefined, signature: "wet", payment: "with_filing", attach: ["Check payable to the City"],
+    owner: { why: "The form must be notarized.", url: "https://www.boston.gov/permitting/permits/business-certificate", mail: { name: "City Clerk's Office", line1: "Room 601", line2: "1 City Hall Square", city: "Boston", state: "MA", zip: "02201" } } });
+  const p = ownerPacket(filing({ form: { en: "Business Certificate", zh: "营业证明" } }, { fee_estimate: 65 }), d);
+  assert(p.en.includes("notarized") && p.en.includes("owner-packet.pdf") && p.en.includes("$65"));
+  assert(p.zh.includes("营业证明") && p.zh.includes("65 美元"));
+  assert(p.lines.some((l) => l.includes("Room 601")) && p.lines.some((l) => l.includes("Check payable")) && p.lines.every((l) => l.length <= 90 || !l.includes(" ")));
+  assertEquals(p.link, "https://www.boston.gov/permitting/permits/business-certificate");
+  assertEquals(ownerPacket(filing(), dest({ owner: { why: "In person", url: "http://agency.gov/form" } })).link, null);
+});
+
+Deno.test("a fee the agency wants with the filing keeps it off email, fax and mail, even with no estimate on the filing", () => {
+  assert(feeBlocks(filing(), dest({ payment: "with_filing" })));
+  assert(!feeBlocks(filing(), dest({ payment: "invoice" })));
+  assertEquals(pick(filing(), dest({ payment: "with_filing", email: "a@x.gov" }), ENV, { hasLogin: false, mailConnected: true }), "team");
+  assertEquals(pick(filing(), dest({ payment: "in_person" }), ENV, { hasLogin: false, mailConnected: true }), "team");
+  // The portal still takes it: the person pays on the agency's site when the worker hands it to them.
+  assertEquals(pick(filing(), dest({ payment: "with_filing", portal: "x.gov" }), ENV, all), "portal");
+  // An invoice comes after, so nothing travels with it.
+  assertEquals(pick(filing(), dest({ payment: "invoice", email: "a@x.gov" }), ENV, { hasLogin: false, mailConnected: true }), "email");
+});
+
+Deno.test("a fee or extra documents keep a hand-signed copy from going by fax", () => {
+  const wet = dest({ signature: "wet" });
+  const signedLog = [{ en: "", zh: "", kind: "signed_copy", ref: `${WS}/receipts/signed.pdf` }];
+  assert(canFaxSignedFor(filing({}, { agent_log: signedLog }), wet, ENV));
+  assert(!canFaxSignedFor(filing({}, { agent_log: signedLog, fee_estimate: 50 }), wet, ENV));
+  assert(!canFaxSignedFor(filing({}, { agent_log: signedLog }), dest({ signature: "wet", payment: "with_filing" }), ENV));
+  assert(!canFaxSignedFor(filing({ attachments: pdf(1) }, { agent_log: signedLog }), wet, ENV));
+  assertEquals(pick(filing({ attachments: pdf(1) }, { agent_log: signedLog }), wet, ENV, all), "team");
+});
+
+Deno.test("a fax or a letter carries only the form; an email carries at most four attachments", () => {
+  const d = dest({ email: "a@x.gov" });
+  assertEquals(pick(filing({ attachments: pdf(4) }), d, ENV, all), "email");
+  assertEquals(pick(filing({ attachments: pdf(5) }), d, ENV, all), "team");
+  assertEquals(pick(filing({ attachments: pdf(1) }), d, ENV, { hasLogin: false, mailConnected: false }), "team");   // would have been fax
+  assertEquals(pick(filing({ attachments: pdf(1) }), dest({ fax: undefined }), ENV, all), "team");                   // would have been mail
+  assertEquals(pick(filing(), dest({ fax: undefined }), ENV, all), "mail");
+});
+
+Deno.test("an agency that takes it from a filer only with the owner's signed authorization gets it", () => {
+  const d = dest({ email: "a@x.gov", onBehalf: "authorization", authorization: "Power of Attorney/Authority to Act form" });
+  const signedAs = { signature: { name: "A", signed_at: "n", kind: "drawn" as const } };
+  const missing = check(filing(signedAs), d, { docPaths: docs }, "email");
+  assert(missing.some((p) => p.kind === "file" && p.en.includes("Power of Attorney")));
+  const poa = { name: "Power of Attorney.pdf", path: `${WS}/docs/poa.pdf` };
+  assertEquals(check(filing({ ...signedAs, attachments: [poa] }), d, { docPaths: new Set([...docs, poa.path]) }, "email"), []);
+});
+
+Deno.test("what is checked follows where it goes: a portal filing needs no filled PDF, an email does", () => {
+  const d = dest({ portal: "x.gov", email: "a@x.gov", signature: "none" });
+  assertEquals(check(filing({ pdf_path: undefined }), d, { docPaths: docs }, "portal"), []);
+  assert(check(filing({ pdf_path: undefined }), d, { docPaths: docs }, "email").some((p) => p.kind === "file"));
+});
+
+Deno.test("a saved login opens a portal only on its host and, on a shared host, its agency's path", () => {
+  const dallas = dest({ portal: "aca-prod.accela.com", tenant: "/dallastx", portalUrl: "https://aca-prod.accela.com/dallastx" });
+  assert(hasLoginFor(["https://aca-prod.accela.com/DALLASTX/Default.aspx"], dallas));
+  assert(!hasLoginFor(["https://aca-prod.accela.com/CFW/Default.aspx"], dallas));
+  assert(!hasLoginFor(["https://aca-prod.accela.com/DALLASTX"], dest({ email: "a@x.gov" })));
+  assert(hasLoginFor(["https://www.sjpermits.org/"], dest({ portal: "sjpermits.org" })));
 });
