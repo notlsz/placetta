@@ -922,6 +922,20 @@ html[lang="zh-CN"] .qh{letter-spacing:0}
 #vcard .arow{grid-template-columns:20px minmax(0,1fr) auto;padding:8px 10px;margin:0 -10px;border-radius:12px}
 #vcard .arow.cur{background:#F5F7FA}
 #vcard .aw{display:none!important}
+/* Oct 18: the typed line and dated rows */
+#vcard .aask{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:7px 7px 7px 14px;border:1px solid #E6EAF0;border-radius:12px;background:#FAFBFC;font-size:13.5px;line-height:1.35;color:var(--ink);min-height:40px}
+#vcard .aaskt{flex:1;min-width:0}
+#vcard .acar{display:inline-block;width:1.5px;height:1.05em;margin-left:1px;vertical-align:-2px;background:var(--ink);opacity:0}
+#vcard .aaskt.typing .acar{opacity:1}
+@media (prefers-reduced-motion:no-preference){#vcard .aaskt.typing .acar{animation:acar 1s steps(1) infinite}}
+@keyframes acar{50%{opacity:0}}
+#vcard .asend{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--ink);color:#fff}
+#vcard .arow .a .adt{margin-left:10px;font:11px var(--mono);color:#8A93A3;font-variant-numeric:tabular-nums}
+#vcard .arow,#vcard .gl i{transition:opacity .35s ease,transform .35s ease,background-color .4s}
+#vcard .arow.pre{opacity:0;transform:translateY(6px)}
+#vcard .gl i.pre{opacity:0}
+@media (prefers-reduced-motion:reduce){#vcard .arow,#vcard .gl i{transition:none}}
+@media (max-width:639px){#vcard .aask{font-size:12.5px;margin-bottom:12px}#vcard .arow .a .adt{display:block;margin:1px 0 0}}
 #vcard .asx{padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:#F1F2F5;color:#5B6578}
 #vcard .asx.d{background:#E8F3EC;color:#2E7149}
 #vcard .asx.r{background:#FBF3E4;color:#93651E}
@@ -1086,6 +1100,25 @@ html[lang="zh-CN"] .fct h3{letter-spacing:0}
 .fcard .ftoast[data-st].on{transform:none}
 .fcard .fbtn[data-fx="press"].on{animation:fpress .55s ease}
 @keyframes fpress{0%{transform:none}35%{transform:scale(.9);box-shadow:0 0 0 6px rgba(15,27,51,.12)}100%{transform:none;box-shadow:0 0 0 0 rgba(15,27,51,0)}}
+/* how it works (Oct 18): plan rows and a renewal month, in the plan demo's language */
+.hwplan{display:flex;flex-direction:column}
+.hwr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid #F0F2F5}
+.hwr:first-child{border-top:0}
+.hwr .nm{display:flex;flex-direction:column;min-width:0}
+.hwr .nm b{font-size:12.5px;font-weight:500;line-height:1.3;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hwr .nm small{font-size:11px;line-height:1.3;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hwd{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.hwd em{font:10.5px var(--mono);font-style:normal;color:#8A93A3;white-space:nowrap}
+.hws{font-size:11px;font-weight:500;color:#5B6578;white-space:nowrap}
+.hws.d{color:#2E7149}.hws.r{color:#93651E}.hws.b{color:#B3473A}
+.hwmore{padding-top:7px;border-top:1px solid #F0F2F5;font-size:11.5px;color:var(--muted)}
+.hwcal{margin:0 0 8px}
+.hwmo{font-size:11.5px;font-weight:500;color:var(--ink2);margin-bottom:6px}
+.hwg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center}
+.hwg i{font-style:normal;font-size:10px;line-height:16px;color:var(--faint)}
+.hwg span{font-size:10.5px;line-height:19px;border-radius:5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.hwg span.a{background:#FBF3E4;color:#93651E;font-weight:600}
+.hwg span.b{background:#E8EFF8;color:#3B5F8E;font-weight:600}
 .fprog{height:3px;border-radius:2px;background:#EBEEF3;margin:-2px 0 10px;overflow:hidden}
 .fprog i{display:block;height:100%;width:0;border-radius:2px;background:#3F9A62;transition:width .35s ease}
 @media (prefers-reduced-motion:reduce){.fcard [data-st]:not([data-fx]){opacity:1;transform:none}}
@@ -1669,6 +1702,11 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
   .cscard:not(.planopen)>.csr{display:none}}
 /* experts: one line per category until "Show all" */
 #xpArt:not(.open) .xpflow{max-height:1.75em;max-height:1lh;overflow:hidden}
+/* Oct 18, less is more: three categories until "Show all", in smaller type with tighter rows */
+#xpArt:not(.open) .xprow:nth-child(n+4){display:none}
+#experts .xpart{gap:20px}
+#experts .xprow{padding-top:14px}
+@media (min-width:1024px){#experts .xpart{gap:24px}#experts .xprow{padding-top:16px}#experts .xpflow{font-size:28px}}
 .xpmore{margin-top:14px;border:0;background:none;padding:6px 0;font:inherit;font-size:14px;color:var(--ink2);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .xpmore:hover{color:var(--ink)}
 .xpcat{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:10px}
@@ -1793,6 +1831,17 @@ html[lang="zh-CN"] .xpflow{font-family:var(--zhserif);font-weight:400}
 #monitor .mnhero .mnttl{font-size:26px;line-height:1.25;letter-spacing:-.5px}
 #monitor .mncd b{font-size:56px}
 .mnrisk{margin-top:16px;font-size:15px;line-height:1.5;color:var(--ink2)}
+/* Oct 18: the store an alert hits and what's at stake (sample) */
+.mnst{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px;margin-top:14px;padding:12px 14px;border:1px solid #EDF0F4;border-radius:12px}
+.mnst>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mnst small{font-size:11.5px;color:var(--muted)}
+.mnst b{font-size:14px;font-weight:500;line-height:1.3;color:var(--ink)}
+.mnst .mnusd{font-size:20px;font-weight:500;letter-spacing:-.3px;color:#B3473A;font-variant-numeric:tabular-nums}
+.mnst span{font-size:12px;line-height:1.35;color:var(--ink2)}
+.mnsm{position:absolute;top:8px;right:10px;font-style:normal;font-size:10.5px;color:var(--faint)}
+.mnr .m .mnusd{color:#B3473A;font-variant-numeric:tabular-nums}
+.mnst .mnusd.up,.mnr .m .mnusd.up{color:#2E7149}
+@media (max-width:639px){.mnst{grid-template-columns:1fr;gap:10px}}
 .mnrisk b{margin-right:8px;font-weight:600;color:var(--hi)}
 .mnrisk.k-cost b{color:#9A5B00}.mnrisk.k-time b{color:var(--hi)}
 #monitor .mnhero .mndo{margin-top:28px;padding:22px 22px;background:var(--gs-ll);box-shadow:none}
@@ -1927,6 +1976,7 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .pmbar.bad i{width:100%;background:linear-gradient(90deg,#E9A79E,#C9574A)}
 .pmbar.good i{width:55%;min-width:8px;background:var(--gs)}
 .frcap{margin-top:14px;text-align:center;font-size:14px;color:var(--ink2)}
+.frcap.frhq{margin-top:4px;color:var(--ink)}
 /* industries: Alven's "does what property managers do" sticky list + grey panel */
 .insec{margin-top:160px}
 @media (min-width:1024px){.inscroll{height:185vh}.instick{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center}}
@@ -1998,6 +2048,19 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .inart .incap{z-index:2}.inart .incap::before{content:"";position:absolute;inset:-34px -28px -24px;z-index:-1;background:linear-gradient(to bottom,rgba(15,27,51,0),rgba(15,27,51,.78) 38%,rgba(15,27,51,.92));pointer-events:none}
 .incap b{display:block;font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.15;letter-spacing:-.3px}
 .incap p{margin-top:6px;max-width:520px;font-size:14px;line-height:1.45;color:rgba(220,232,245,.75)}
+/* Oct 18: the chosen sector's permits, named */
+.inpm{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;list-style:none;padding:0}
+.inpm li.inpmh{flex-basis:100%;padding:0;border:0;background:none;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(220,232,245,.6)}
+html[lang="zh-CN"] .inpm li.inpmh{letter-spacing:.02em}
+.inpm li{padding:6px 11px;border:1px solid rgba(220,232,245,.24);border-radius:8px;background:rgba(255,255,255,.06);font-size:13px;line-height:1.25;color:#fff}
+@media (max-width:1023px){.inpm{gap:6px;margin-top:10px}.inpm li{font-size:12px;padding:5px 9px}
+  /* phones: the picture keeps the top of the panel and the caption sits under it, so the permits never cover it */
+  .inpanel.inart{min-height:0;padding-top:212px}
+  .inart canvas{bottom:auto;height:220px}
+  .inart .incap{position:relative;left:auto;right:auto;bottom:auto;padding:0 18px 18px}
+  .inart .incap::before{inset:-36px 0 0}
+  .inphoto{top:110px;height:180px}
+  .inphoto.incover{top:0;height:228px}}
 @media (max-width:1023px){.inpanel.inart{min-height:360px}.incap{left:18px;right:18px;bottom:16px}.incap b{font-size:20px}.incap p{font-size:13px}}
 .inphoto{position:absolute;left:50%;top:44%;height:74%;width:auto;max-width:86%;object-fit:contain;transform:translate(-50%,-50%) scale(.96);opacity:0;transition:opacity .6s ease,transform .8s cubic-bezier(.22,1,.36,1);pointer-events:none;-webkit-user-drag:none;user-select:none;filter:drop-shadow(0 30px 40px rgba(0,0,0,.35))}
 .inphoto.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -2075,6 +2138,24 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .ptfile{color:var(--ink2);opacity:.35}
 .ptf.done .ptfile,.ptf.on .ptfile{opacity:1;color:var(--ink)}
 .ptact{display:flex;justify-content:flex-end;margin-top:16px}
+/* Oct 18: an answer given in Chinese lands in English, then the agency's receipt */
+.ptask{display:flex;align-items:center;gap:8px;max-height:0;overflow:hidden;opacity:0;transition:max-height .4s ease,opacity .3s,margin .4s;font-size:12px}
+.ptzh.ask .ptask{max-height:40px;opacity:1;margin:2px 0 4px}
+.ptwho{color:var(--muted);white-space:nowrap}
+.ptzhb{padding:5px 10px;border-radius:10px 10px 10px 3px;background:#E9F6EE;color:#1F5A36;font-size:12.5px}
+.pttr{font-style:normal;font-size:11px;color:var(--gs-d);opacity:0;transition:opacity .4s}
+.ptzh.done .pttr{opacity:1}
+.ptrc{position:absolute;left:0;right:0;top:41px;bottom:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;background:#fff;text-align:center;opacity:0;visibility:hidden;transition:opacity .45s,visibility .45s}
+.ptwin.s2 .ptrc{opacity:1;visibility:visible}
+.ptrc b{font-size:16px;font-weight:600;color:var(--ink)}
+.ptrc dl{width:min(340px,100%);margin:4px 0 0;border-top:1px solid #F0F2F5}
+.ptrc dl div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #F0F2F5;font-size:12.5px;text-align:left}
+.ptrc dt{color:var(--muted)}
+.ptrc dd{margin:0;color:var(--ink);text-align:right}
+.ptrc small{font-size:11px;color:var(--muted)}
+.ptwin.s2 .ptcur{opacity:0}
+#portal .ptpanel{padding-bottom:92px}
+@media (max-width:767px){#portal .ptpanel{padding-bottom:100px}}
 .ptbtn{padding:8px 14px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;transition:transform .15s}
 .ptbtn.press{transform:scale(.94)}
 .ptcur{position:absolute;left:0;top:0;display:flex;align-items:flex-start;gap:2px;pointer-events:none;transition:transform .7s cubic-bezier(.22,1,.36,1);transform:translate(460px,40px)}
@@ -2253,11 +2334,92 @@ body #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
 /* testimonials: the quote and name sit together in the middle of the white side, no dead gap */
 @media (min-width:900px){#case .tsx .tsl{justify-content:center}#case .tsx .tsp{margin-top:8px}#case .tsx .tslgs,#case .tsx .tswm{margin-bottom:8px}}
 @media (min-width:1024px){#case .tsq{font-size:36px;line-height:1.22;letter-spacing:-.8px}}
+/* Oct 18 pricing, from 601282ab: one price up front, the waiting math, every other plan one tap away under "More plans" */
+#pricing .prrow{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+@media (min-width:1024px){#pricing .prrow{grid-template-columns:minmax(0,1fr) minmax(0,600px);gap:48px;align-items:start}#pricing .prl{margin-bottom:0;padding-top:24px}}
+#pricing .srcl{display:block;margin-top:-2px;font-size:12px;line-height:1.4;color:var(--muted)}
+#pricing .srcl a{color:inherit;text-underline-offset:2px}
+.prcard{min-width:0;border-radius:20px;background:#fff;padding:26px 22px;box-shadow:0 0 0 1px #ebebeb,0 28px 70px rgba(15,27,51,.07)}
+@media (min-width:1024px){.prcard{padding:40px 44px}}
+.prone{margin-bottom:18px;font-size:14px;font-weight:500;color:var(--ink2)}
+.prv{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px}
+.prv b{font-family:var(--serif);font-weight:300;font-size:76px;line-height:.95;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+@media (min-width:1024px){.prv b{font-size:104px}}
+html[lang="zh-CN"] .prv b{font-family:var(--serif);letter-spacing:-.02em}
+.prv span{font-size:17px;line-height:1.3;color:var(--ink2)}
+.prps{margin-top:12px;font-size:14px;font-weight:500;color:var(--gs-ink)}
+.prbtn{display:flex;width:100%;margin-top:24px;padding:14px 18px;font-size:15px;line-height:18px;border-radius:10px}
+.princ{margin-top:28px;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+html[lang="zh-CN"] .princ{letter-spacing:.2em}
+.prlist{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:640px){.prlist{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px}}
+.prlist li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.4;color:var(--ink)}
+.prlist svg{flex:none;margin-top:2px;color:var(--ok)}
+#pricing .pmath{margin-top:48px}
+.prmore{margin-top:28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.prmore summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 2px;cursor:pointer;list-style:none}
+.prmore summary::-webkit-details-marker{display:none}
+.prmore summary>span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prmore summary b{font-size:18px;font-weight:500;letter-spacing:-.2px;color:var(--ink)}
+.prmore summary small{font-size:14px;line-height:1.4;color:var(--muted)}
+.prmore summary svg{flex:none;color:var(--ink2);transition:transform .3s}
+.prmore[open] summary svg{transform:rotate(180deg)}
+.prmore summary:focus-visible{outline:2px solid var(--gs-d);outline-offset:2px;border-radius:8px}
+.prmb{padding:4px 0 28px}
+.prmb>.sub{margin-bottom:20px}
+/* work together as the channels section, from 601282ab */
+#together .wtc{height:auto!important}
+#together .wtc>svg{inset:-3%;height:106%}
+#together .wti{position:relative;inset:auto;flex-direction:column;gap:36px;padding:64px 20px 56px}
+@media (min-width:1024px){#together .wti{gap:48px;padding:132px 40px 120px}}
+#together .chbox{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:760px}
+#together .chl{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 26px;margin:0;padding:0;list-style:none}
+#together .chl li{display:inline-flex;align-items:center;gap:8px;font-size:15px;line-height:1.2;color:#fff;white-space:nowrap}
+#together .chl svg{flex:none;width:18px;height:18px;color:#fff;opacity:.85}
+#together .chn{max-width:520px;text-align:center;font-size:14px;line-height:1.5;color:rgba(255,255,255,.74);text-wrap:pretty}
+#together .chwc{display:flex;flex-direction:column;align-items:center;gap:12px}
+#together .chadd{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:0;border-radius:10px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);color:#fff;font-size:14px;line-height:16px}
+#together .chadd:hover{background:rgba(255,255,255,.2)}
+#together .chadd svg{width:16px;height:16px}
+#together .chqr{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border-radius:14px;background:#fff}
+#together .chqr img{display:block;width:132px;height:132px}
+#together .chqr p{font-size:12px;color:var(--ink2)}
+/* the QR placeholder stays on phones too, under the channels */
+@media (max-width:1023px){.ox #together .wti,#together .wti{padding-bottom:124px}}
+#together .wtw.wtq{flex-direction:column;justify-content:center;align-items:center;gap:10px}
+#together .wtq .wth{flex:none;color:#fff;text-align:center;max-width:760px;text-wrap:balance}
+#together .wtq .rot{width:300px}
+/* customer stories, Alven style (from 601282ab): a heading, one tab per person (name, then role and company), and the chosen
+   story leading with the job Placetta took off them in serif, their quote under it, and one result over the portrait */
+#case .tssec{margin-top:72px}
+#case .tsh3{margin:0 0 20px;font-family:var(--serif);font-weight:300;font-optical-sizing:auto;font-size:30px;line-height:1.1;letter-spacing:-.018em;color:var(--ink);text-wrap:balance}
+@media (min-width:1024px){#case .tssec{margin-top:96px}#case .tsh3{font-size:44px;letter-spacing:-.022em;margin-bottom:28px}}
+html[lang="zh-CN"] #case .tsh3{font-family:var(--zhserif);font-weight:500;letter-spacing:.01em}
+#case .tsbar,#case .tsbar.tsbar{justify-content:flex-start;margin:0 0 16px}
+#case #tsTabs .tstab{min-width:0;max-width:240px}
+#case #tsTabs .tstab span{white-space:nowrap}
+#case #tsGrid:focus-visible,#case #tsTabs .tstab:focus-visible{outline:2px solid var(--gs-d);outline-offset:2px}
+#case .tsx .tspain{margin:0;font-family:var(--serif);font-weight:300;font-optical-sizing:auto;font-size:28px;line-height:1.12;letter-spacing:-.018em;color:var(--ink);text-wrap:balance}
+html[lang="zh-CN"] #case .tsx .tspain{font-family:var(--zhserif);font-weight:500;letter-spacing:.01em;line-height:1.3}
+#case .tsx .tspain+.tsq{font-size:18px;line-height:1.45;letter-spacing:-.1px;color:var(--ink2)}
+@media (min-width:1024px){#case .tsx .tspain{font-size:44px;letter-spacing:-.022em}#case .tsx .tspain+.tsq{font-size:20px}}
+@media (min-width:900px){#case .tsx .tsl{gap:22px;padding:44px 48px}#case .tsx .tspain{margin-top:12px}}
+@media (max-width:767px){#case #tsTabs{margin-inline:0}#case .tsx .tsl{gap:18px}html[lang="zh-CN"] #case .tsrs strong{font-size:34px}}
 /* built for trust and security: Alven cards, white with a hairline, no grey slabs */
 #cn .cntiles .tile{background:#fff;border:1px solid #ebebeb;border-radius:20px;box-shadow:none}
 #cn .secl{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 @media (min-width:768px){#cn .secl{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
 #cn .secl li{border-radius:14px;background:#fff;border:1px solid #ebebeb;padding:18px 20px}
+/* Oct 18, Harvey and Vanta style: the controls as a quiet checklist, one honest audit status line, the trust center link */
+#cn .cnsec .ir{display:flex;flex-direction:column;align-items:flex-start}
+#cn .cnsec .secl{gap:0 32px}
+#cn .cnsec .secl li{padding:14px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;font-size:15px}
+#cn .secsoc{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-top:20px;font-size:14px;line-height:1.45;color:var(--ink2)}
+#cn .secsoc b{font-weight:500;color:var(--ink)}
+#cn .secsoc span{flex:1;min-width:240px}
+#cn .secsoc a{color:var(--gs-d);text-decoration:none;white-space:nowrap}
+#cn .secsoc a:hover{text-decoration:underline;text-underline-offset:3px}
+@media (min-width:1280px){#cn .secsoc{width:850px}}
 /* backers without a mark file: set as a wordmark, not a serif caption */
 .bkg li.nm span{font-family:var(--sans,inherit)!important;font-weight:650;font-size:17px;letter-spacing:-.4px;color:var(--ink)}
 /* experts: clean names, no small photos breaking each line */
@@ -2382,9 +2544,28 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 #diff .aft .per{flex:0 0 auto;width:112px}
 @media (min-width:1024px){#diff .aft .per{width:124px}}
 #diff .bag{gap:16px}
+/* Oct 18: heading and stats sit together at the top instead of being pushed apart; each person's cost, sourced */
+@media (min-width:1280px){#diff .dl{justify-content:flex-start;gap:48px}}
+#diff .pcost{display:block;margin-top:2px;font-size:11px;line-height:1.3;color:#5B6475;text-align:center;font-variant-numeric:tabular-nums}
+@media (min-width:1024px){#diff .pcost{font-size:12.5px}}
+#diff .dsrc{font-size:11px;line-height:1.45;color:var(--muted)}
+#diff .dsrc a{color:inherit;text-underline-offset:2px}
+/* second pass: once in view, the four people fade back one by one and the owner with Odelia steps forward (motion allowed only) */
+@media (prefers-reduced-motion:no-preference){
+  #diff #before .per .sil,#diff #before .per .tag{transition:opacity .6s ease,filter .6s ease}
+  #diff.dgo #before .per .sil,#diff.dgo #before .per .tag{opacity:.45;filter:grayscale(1)}
+  #diff.dgo #before .per:nth-child(2) .sil,#diff.dgo #before .per:nth-child(2) .tag{transition-delay:.15s}
+  #diff.dgo #before .per:nth-child(3) .sil,#diff.dgo #before .per:nth-child(3) .tag{transition-delay:.3s}
+  #diff.dgo #before .per:nth-child(4) .sil,#diff.dgo #before .per:nth-child(4) .tag{transition-delay:.45s}
+  #diff .aft .per{transition:transform .7s cubic-bezier(.2,.9,.3,1.2) .8s}
+  #diff.dgo .aft .per{transform:translateY(-4px) scale(1.03)}
+}
+@media (min-width:1024px){#diff .dsrc{font-size:12px}}
 @media (min-width:1024px){#diff .bag{gap:24px}}
 .hnote{margin-top:-6px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.74);text-shadow:0 1px 8px rgba(0,0,0,.3)}
 @media (min-width:1024px){.hnote{margin-top:-12px}}
+.hst .hnote,.hst .hnote.hnote{margin-top:-2px;text-wrap:pretty}
+@media (min-width:1024px){.stwrap.hst{max-width:520px}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2445,11 +2626,15 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       <div class="hstack">
         <h1 data-i18n="hero.h1">Your store is built.<br><em>Your permits aren't.</em></h1>
         <p class="hsub" data-i18n="hero.sub">Every month without them is rent on an empty store. Odelia ends the forms sent back, the missed renewals and the hourly bills, in English or Chinese.</p>
-        <div class="hcta">
-          <button type="button" class="btn b-white hbtn" data-open="hero" data-i18n="cta.plan">Get my plan</button>
-          <a class="btn b-glass hbtn" href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo" data-i18n="hero.demo">Book a demo</a>
+        <div class="stwrap hst">
+          <form class="starter" data-src="hero" novalidate>
+            <label class="sr" for="st-hero" data-i18n="st.label">Where are you opening?</label>
+            <input id="st-hero" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
+            <button type="submit" class="btn b-white" data-i18n="cta.plan">Get my plan</button>
+          </form>
+          <p class="hnote" data-i18n="hero.note">Four quick questions, about a minute. Nothing is filed or paid without your approval.</p>
+          <p class="stalt"><a href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo"><span data-i18n="hero.demo">Book a demo</span><i aria-hidden="true">→</i></a></p>
         </div>
-        <p class="hnote" data-i18n="hero.note">Four quick questions, about a minute. Nothing is filed or paid without your approval.</p>
         <a class="hbk" href="/backers" data-sec="backers" id="hBk"></a>
       </div>
     </div>
@@ -2469,7 +2654,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         </div>
       </div>
       <div class="dcard">
-        <div class="bag"><div class="bal"><p data-i18n="diff.before">Before</p></div><div class="bgrid" id="before" role="list" aria-label="Before" data-i18n-aria="diff.before"></div></div>
+        <div class="bag"><div class="bal"><p data-i18n="diff.before">Before</p></div><div class="bgrid" id="before" role="list" aria-label="Before" data-i18n-aria="diff.before"></div><p class="dsrc" data-i18n="diff.src"></p></div>
         <div class="bag"><div class="bal"><p data-i18n="diff.after">After</p></div>
           <div class="aft" role="list" aria-label="After" data-i18n-aria="diff.after">
             <div class="per" role="listitem"><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag" data-i18n="diff.team">Store owner</div></div>
@@ -2498,6 +2683,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <div class="atabs"><span class="tb on" data-i18n="app.t1">Entry plan</span><span class="tb" data-i18n="app.t2">Filings</span><span class="tb" data-i18n="app.t3">Documents</span><span class="tb" data-i18n="app.t4">Renewals</span></div>
         <div class="abody">
           <div class="alist">
+            <div class="aask" aria-hidden="true"><span class="aaskt"><span id="appAsk"></span><i class="acar"></i></span><span class="asend"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></span></div>
             <div class="ahead"><b data-i18n="app.reqs">Requirements</b><em id="appCount">3 / 8</em></div>
             <div class="aprog"><i id="appProg"></i></div>
             <div id="appRows"></div>
@@ -2539,8 +2725,11 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       <div role="listitem"><b>2</b><span>languages for every plan and dashboard: English and Chinese</span></div>
       <div role="listitem"><b>0</b><span>filings sent without your approval</span></div>
     </div>
-    <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
-    <div class="tsgrid" id="tsGrid"></div>
+    <div class="tssec" id="tsSec">
+      <h3 class="tsh3" id="tsH" data-i18n="ts.h">Don't just take our word for it.</h3>
+      <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
+      <div class="tsgrid" id="tsGrid" role="tabpanel" tabindex="0"></div>
+    </div>
     <div class="cshd">
       <h3 class="h3" data-i18n="bel.cases">Example plans</h3>
       <div class="tstabs cstabs" role="tablist" id="caseTabs" aria-label="Case studies" data-i18n-aria="bel.cases"></div>
@@ -2595,7 +2784,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
             <div><h2 class="t28" id="inH" data-i18n="in.h">Built for every brand entering the US.</h2><p class="insub" data-i18n="in.sub">x</p></div>
             <div class="inlist" role="group"><button type="button" class="inb on" data-k="0" aria-pressed="true"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3h9l-.6 6.2a3.9 3.9 0 0 1-7.8 0zM12 13.2V21M8.5 21h7"/></svg><span data-i18n="in.r">x</span></button><button type="button" class="inb" data-k="1" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5 5 4h14l1.5 5.5M4 9.5h16v.5a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0A2.7 2.7 0 0 1 4 10zM5 12.5V20h14v-7.5M10 20v-4.5h4V20"/></svg><span data-i18n="in.s">x</span></button><button type="button" class="inb" data-k="2" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16.5V20M9.5 9l-2 1.5 2 1.5M14.5 9l2 1.5-2 1.5"/></svg><span data-i18n="in.tk">x</span></button><button type="button" class="inb" data-k="3" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7.5h10a4.5 4.5 0 0 1 4.4 5.4l-.8 4a2.6 2.6 0 0 1-4.6 1L14.5 16h-5L8 17.9a2.6 2.6 0 0 1-4.6-1l-.8-4A4.5 4.5 0 0 1 7 7.5zM7 10.5v3M5.5 12h3M15.5 11.5h.01M17.5 13.5h.01"/></svg><span data-i18n="in.gm">x</span></button><button type="button" class="inb" data-k="4" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/></svg><span data-i18n="in.c">x</span></button><button type="button" class="inb" data-k="5" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V10l5 3V10l5 3V10l5 3V5h3v15zM7 17h2M12 17h2M17 17h1"/></svg><span data-i18n="in.mf">x</span></button><button type="button" class="inb" data-k="6" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v4H9zM8 7h8l1 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V10zM10 14h4"/></svg><span data-i18n="in.bt">x</span></button><button type="button" class="inb" data-k="7" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.9c0 5.6-7.5 10-7.5 10zM12 11v5M9.5 13.5h5"/></svg><span data-i18n="in.hc">x</span></button><button type="button" class="inb" data-k="8" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V11l2-4.5h10L19 11v5M3.5 16h17v2.5h-17zM7 18.5V20M17 18.5V20M7.5 13h1M15.5 13h1M5 11h14"/></svg><span data-i18n="in.av">x</span></button><button type="button" class="inb" data-k="9" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V9l9-5 9 5v11M7 20v-7h10v7M7 16h10"/></svg><span data-i18n="in.w">x</span></button><button type="button" class="inb" data-k="10" aria-pressed="false"><svg viewBox="0 0 24 24"  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3zM5 18v2M19 18v2"/></svg><span data-i18n="in.f">x</span></button></div>
           </div>
-          <div class="inpanel inart" aria-live="polite"><canvas id="inCv" aria-hidden="true"></canvas><img class="inphoto incover" id="inPhotoGm" src="media/industries/game-studios.jpg" alt="" loading="lazy" decoding="async" draggable="false"><img class="inphoto" id="inPhoto" hidden src="media/industries/tech-robot.png" alt="" loading="lazy" decoding="async" draggable="false"><div class="incap" id="inCap"><b id="inCapT"></b><p id="inCapP"></p></div></div>
+          <div class="inpanel inart" aria-live="polite"><canvas id="inCv" aria-hidden="true"></canvas><img class="inphoto incover" id="inPhotoGm" src="media/industries/game-studios.jpg" alt="" loading="lazy" decoding="async" draggable="false"><img class="inphoto" id="inPhoto" hidden src="media/industries/tech-robot.png" alt="" loading="lazy" decoding="async" draggable="false"><div class="incap" id="inCap"><b id="inCapT"></b><p id="inCapP"></p><ul class="inpm" id="inPm" aria-label="Permits" data-i18n-aria="in.pm"></ul></div></div>
         </div>
       </div>
     </div>
@@ -2675,16 +2864,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
           <div class="fui">
             <div class="fhd"><b data-i18n="lm.plan">Entry plan</b><span data-i18n="hw.wals">San José, CA</span></div>
             <div class="fprog"><i></i></div>
-            <ul class="fchips">
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5.5L12 3l8 2.5V21M9 21v-4h6v4M8 8.5h2M14 8.5h2M8 12.5h2M14 12.5h2M2.5 21h19"/></svg><span data-i18n="cat.entity">Entity formation</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="3" width="15" height="18" rx="2"/><path d="M8 7.5h8M8 11.5h8M8 15.5h4.5"/></svg><span data-i18n="cat.license">Business licenses and tax</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 4.5V3h6v1.5M9 13l2 2 4-4.5"/></svg><span data-i18n="cat.health">Health permits</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.8 3.6 5 5.2 5 10a5 5 0 0 1-10 0c0-2.4 1.4-3.6 2.4-5 .5 1.4 1.4 2.2 2.4 2.4C11.2 8 11.5 5.2 12 3z"/></svg><span data-i18n="cat.fire">Fire and building permits</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="9" rx="1.5"/><path d="M8 13v8M16 13v8M7 8.5h10"/></svg><span data-i18n="cat.sign">Sign permits</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3h9l-.6 6.2a3.9 3.9 0 0 1-7.8 0zM12 13.2V21M8.5 21h7"/></svg><span data-i18n="cat.liquor">Liquor licenses</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5l6-3 6 3 6-3v14l-6 3-6-3-6 3z"/><path d="M9 3.5v14M15 6.5v14"/></svg><span data-i18n="cat.zoning">Zoning and occupancy</span></li>
-            <li data-st data-ms="260"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5A8 8 0 0 0 6.3 6.3L4 8.5M4 4v4.5h4.5M4 12.5a8 8 0 0 0 13.7 5.2L20 15.5M20 20v-4.5h-4.5"/></svg><span data-i18n="cat.renew">Renewals and regulatory changes</span></li>
-            </ul>
+            <div class="hwplan" id="hwPlan" role="list"></div>
           </div>
           <div class="ftoast" data-st data-ms="700"><span class="orb"></span><span><b data-i18n="f1.t">Entry plan ready</b><small data-i18n="f1.ts">8 requirements, in order, with estimated fees</small></span></div>
         </div>
@@ -2705,6 +2885,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <div class="fcv">
           <div class="fui">
             <div class="fhd"><b data-i18n="lm.wallet">Renewal calendar</b><span data-i18n="hw.wals">San José, CA</span></div>
+            <div class="hwcal" id="hwCal" aria-hidden="true"></div>
             <div class="fcrow" data-st data-ms="450"><i class="dot a"></i><span class="nm" data-i18n="f3.r1">Health permit</span><span class="pill p-r" data-i18n="f3.r1d">Due in 30 days</span></div>
             <div class="fcrow" data-st data-ms="450"><i class="dot"></i><span class="nm" data-i18n="f3.r2">Business tax certificate</span><span class="dt" data-i18n="f3.r2d">Renews Jan 2027</span></div>
             <div class="fcrow" data-st data-ms="450"><i class="dot"></i><span class="nm" data-i18n="f3.r3">Fire inspection</span><span class="dt" data-i18n="f3.r3d">Due Jun 2027</span></div>
@@ -2741,9 +2922,11 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
             <div class="ptf" data-f="0"><small data-i18n="pt.f1">Business name</small><span class="ptv" data-v="Qinghuan Tea House LLC"></span></div>
             <div class="ptf" data-f="1"><small data-i18n="pt.f2">Site address</small><span class="ptv" data-v="1 Market St, San José, CA"></span></div>
             <div class="ptf" data-f="2"><small data-i18n="pt.f3">Seats</small><span class="ptv" data-v="42"></span></div>
-            <div class="ptf ptup" data-f="3"><small data-i18n="pt.f4">Floor plan</small><span class="ptfile"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>floor-plan.pdf</span></div>
+            <div class="ptf ptzh" data-f="3"><small data-i18n="pt.f5">Hours of operation</small><div class="ptask"><span class="ptwho" data-i18n="pt.who">Your answer, in WeChat</span><span class="ptzhb" lang="zh-CN">每天早上八点到晚上十点</span></div><span class="ptv" data-v="Daily, 8 AM to 10 PM"></span><em class="pttr" data-i18n="pt.tr">Translated from your answer in Chinese</em></div>
+            <div class="ptf ptup" data-f="4"><small data-i18n="pt.f4">Floor plan</small><span class="ptfile"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>floor-plan.pdf</span></div>
             <div class="ptact"><span class="ptbtn" id="ptBtn" data-i18n="pt.submit">Submit application</span></div>
           </div>
+          <div class="ptrc" id="ptRc"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2F7A4C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><b data-i18n="pt.rc">Application received</b><dl><div><dt data-i18n="pt.rc1">Confirmation no.</dt><dd>FP-26-04821</dd></div><div><dt data-i18n="pt.rc2">Form</dt><dd data-i18n="pt.form">Food facility plan check application</dd></div><div><dt data-i18n="pt.rc3">Submitted</dt><dd data-i18n="pt.rc3v">Oct 18, 2026, 10:42 AM</dd></div></dl><small data-i18n="pt.rcs">Sample receipt, saved to your documents</small></div>
           <span class="ptcur" id="ptCur"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M1 1l11 6.2-5 .9 2.6 5.4-2 1-2.6-5.4L1 13z" fill="#0F1B33" stroke="#fff" stroke-width="1"/></svg><em>Odelia</em></span>
         </div>
         <div class="ftoast pttoast" id="ptToast"><span class="orb"></span><span><b data-i18n="pt.t">Submitted. Receipt saved.</b><small data-i18n="pt.ts">I'll follow up with the county on Thursday.</small></span></div>
@@ -2898,8 +3081,8 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       </div>
     </div>
     <div class="irow cnsec">
-      <div class="il"><h2 class="t28" data-i18n="sec.h">Security</h2><a class="seclink" href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a></div>
-      <div class="ir"><ul class="secl"><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.1">Agency logins encrypted in a vault</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.2">Every use of a login is logged</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.3">A full audit trail of every action</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.4">Nothing filed, paid or sent without your approval</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.5">Payments run through Stripe, and we never see full card numbers</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.6">Your content is never sold or used to train AI models</span></li></ul></div>
+      <div class="il"><h2 class="t28" data-i18n="sec.h">Security</h2><a class="seclink" href="/trust" data-i18n="sec.trust">Visit our Trust Center</a><a class="seclink" href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a></div>
+      <div class="ir"><ul class="secl"><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.4">Nothing filed, paid or sent without your approval</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.1">Agency logins encrypted in a vault</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.2">Every use of a login is logged</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.3">A full audit trail of every action</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.6">Your content is never sold or used to train AI models</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.5">Payments run through Stripe, and we never see full card numbers</span></li></ul><p class="secsoc"><b>SOC 2 Type I</b><span data-i18n="sec.soc">In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.</span><a href="/trust" data-i18n="sec.det">Details →</a></p></div>
     </div>
   </div>
 </section>
@@ -2952,6 +3135,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
     </div>
     </div>
     <p class="frcap" data-i18n="fr.cap">$149 per store a month, paid by each franchisee. Headquarters sees every store for free.</p>
+    <p class="frcap frhq" data-i18n="fr.hqv">Headquarters sees each store's status, never its documents.</p>
   </div>
 </section>
 
@@ -2969,7 +3153,24 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 
 <section class="sec rv" data-rv="up" id="pricing" aria-labelledby="priceH">
   <div class="ctr">
-    <div class="sh"><h2 class="h2" id="priceH" data-i18n="price.h">One price per location.</h2><p class="sub" data-i18n="price.sub">$149 per location a month, billed yearly, or $299 on Pro for stores inspected often. Headquarters signs once, and each franchisee pays for its own stores.</p><p class="sub psub2" data-i18n="price.promise">Every license, permit and certificate a store can't open or sell without, mapped, filed with your approval and tracked for renewal.</p></div>
+    <div class="prrow">
+      <div class="sh prl"><h2 class="h2" id="priceH" data-i18n="price.x">Less than three hours of an expediter.</h2><p class="sub" data-i18n="price.xsub">Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.</p><small class="srcl" data-i18n="price.src">Source: <a href="https://www.permitflow.com/blog/nyc-permit-expediter" target="_blank" rel="noopener">PermitFlow, NYC permit expediter costs</a></small><p class="sub psub2" data-i18n="price.promise">Every license, permit and certificate a store can't open or sell without, mapped, filed with your approval and tracked for renewal.</p></div>
+      <div class="prcard">
+        <p class="prone" data-i18n="price.h">One price per location.</p>
+        <p class="prv"><b id="prV">$149</b><span data-i18n="price.lu">per location a month</span></p>
+        <p class="prps" id="prPs">Billed yearly</p>
+        <button type="button" class="btn b-ink prbtn" data-open="pricing" data-i18n="cta.plan">Get my plan</button>
+        <p class="princ" data-i18n="price.inc">Included</p>
+        <ul class="prlist">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i1">Every license and permit mapped, filed with your approval and tracked</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i2">Renewals filed before they lapse</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i3">Staff certificates and vendor proof for every store</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i4">Rule-change alerts for your markets</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i5">Odelia included, with a monthly allowance per location</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i6">English and Chinese, for your whole team</span></li>
+        </ul>
+      </div>
+    </div>
     <div class="pmath">
       <div class="pmhd"><h3 class="t28" data-i18n="price.m.h">The math on waiting</h3><p class="pmsub" data-i18n="price.m.sub">One month of waiting costs more than a restaurant opening and a full year with Odelia.</p></div>
       <div class="pmgrid">
@@ -2982,8 +3183,14 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="pmnote" data-i18n="price.m.note">Illustrative calculation, not a quote or a promise. Your rent, timeline and agency fees will differ.</p>
       </div>
     </div>
-    <div class="plans" id="tiers"></div>
-    <p class="pfine" data-i18n="price.fine">Each plan includes a monthly Odelia allowance for its locations, twice as much on Pro; $49 packs add $25 more and carry over. Inspections and rush filings are quoted per step, importers per product line. Attorneys and customs brokers bill you directly. Government fees go directly to each agency.</p>
+    <details class="prmore" id="prMore">
+      <summary><span><b data-i18n="price.more">More plans</b><small data-i18n="price.moresub">A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <div class="prmb">
+        <p class="sub" data-i18n="price.sub">$149 per location a month, billed yearly, or $299 on Pro for stores inspected often. Headquarters signs once, and each franchisee pays for its own stores.</p>
+        <div class="plans" id="tiers"></div>
+        <p class="pfine" data-i18n="price.fine">Each plan includes a monthly Odelia allowance for its locations, twice as much on Pro; $49 packs add $25 more and carry over. Inspections and rush filings are quoted per step, importers per product line. Attorneys and customs brokers bill you directly. Government fees go directly to each agency.</p>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -2996,7 +3203,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 </section>
 
 <!-- ======================= WORK TOGETHER ======================= -->
-<section class="ox mt160 rv" data-rv="tilt">
+<section class="ox mt160 rv" data-rv="tilt" id="together" aria-labelledby="wtH">
   <div class="ctr">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="gMin" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/></pattern><pattern id="gMaj" width="120" height="120" patternUnits="userSpaceOnUse"><path d="M120 0H0V120" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="1"/></pattern><g id="fp" fill="none" stroke="currentColor" stroke-width="1.3">
       <rect x="840" y="150" width="560" height="620"/><rect x="848" y="158" width="544" height="604"/>
@@ -3026,10 +3233,14 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <rect x="0" y="0" width="1600" height="1000" fill="rgba(15,27,51,.74)"/>
       </svg>
       <div class="wti">
-        <div class="wtw">
-          <p class="t28 l" data-i18n="wt.l">Work together</p>
+        <div class="wtw wtq">
+          <h2 class="t28 wth" id="wtH" data-i18n="wt.h">Answer from the app your team already uses</h2>
           <div class="rot"><div class="rotl" id="rotl"></div></div>
-          <p class="t28 r" data-i18n="wt.r">from day one</p>
+        </div>
+        <div class="chbox">
+          <ul class="chl" aria-label="Channels" data-i18n-aria="ch.aria"><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.wechat">WeChat</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg><span data-i18n="ch.slack">Slack</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg><span data-i18n="ch.lark">Lark / 飞书</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5z"/><path fill="currentColor" stroke="none" d="M9.3 7.9c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z"/></svg><span data-i18n="ch.wa">WhatsApp</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg><span data-i18n="ch.im">iMessage</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span data-i18n="ch.mail">Email</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg><span data-i18n="ch.tel">Phone</span></li></ul>
+          <p class="chn" data-i18n="ch.note">Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.</p>
+          <div class="chwc" id="chWc" hidden><button type="button" class="chadd" id="chAdd" aria-expanded="false" aria-controls="chQr"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.add">Add us on WeChat</span></button><div class="chqr" id="chQr" hidden><img id="chQrImg" alt="" width="132" height="132"><p data-i18n="ch.qr">Scan with WeChat to add Placetta</p></div></div>
         </div>
       </div>
       <a class="qr" id="wtQr" href="/?src=qr"><img class="qrimg" id="wtQrImg" src="media/placetta-qr.svg" alt="QR code for placetta" width="64" height="64" decoding="async" draggable="false"><p id="wtQrT" data-i18n="wt.qr">Scan to open Placetta on your phone</p></a>
@@ -3040,7 +3251,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 <!-- ======================= FINAL CTA ======================= -->
 <section class="ctas rv" data-rv="up" aria-labelledby="finalH">
   <div>
-    <h2 class="ctah" id="finalH" data-i18n="final.h">Stay ahead of your competitors.<br>Hire Odelia.</h2>
+    <h2 class="ctah" id="finalH" data-i18n="final.h">Stop paying rent on an empty store.<br>Hire Odelia.</h2>
     <div class="stwrap light">
       <form class="starter" data-src="final" novalidate>
         <label class="sr" for="st-final" data-i18n="st.label">Where are you opening?</label>
@@ -3298,8 +3509,11 @@ zh:{
  "faq.sub":"还有其他问题？请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"
 }};
 /* hero and before and after, from the Oct 17 redesign */
-Object.assign(T.en, {"diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "Minutes", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
-Object.assign(T.zh, {"diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "几分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
+Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
+Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
+/* Oct 18 section pass: new strings for the sections changed that day */
+Object.assign(T.en, {"final.h": "Stop paying rent on an empty store.<br>Hire Odelia.", "wt.h": "Answer from the app your team already uses", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta", "price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"final.h": "别再为空店付房租。<br>让 Odelia 加入您的团队。", "wt.h": "在团队常用的应用里直接回复", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉", "price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -3365,6 +3579,7 @@ const FAQ = [
  [["What happens after my store opens?","门店开业之后呢？"],["We keep it compliant. Renewal dates, inspections and rule changes are tracked for every location, and the policy monitor tells you what each change means for your stores and what to do next.","我们持续为您保持合规。每家门店的续期日期、检查和规则变化都会被跟踪，政策监测会告诉您每项变化对门店意味着什么、下一步该做什么。"]],
  [["Who files the applications?","申请由谁提交？"],["Odelia, Placetta's AI agent, prepares each application from your documents. You review and approve it, then Odelia files it and follows up until the agency decides. When an agency needs a person, in person or on the phone, our team steps in.","快哉的智能代理 Odelia 根据您的资料准备每一份申请。您审阅并确认后，由 Odelia 提交，并持续跟进直至机构作出决定。如机构需要专人到场或电话沟通，由我们的团队接手。"]],
  [["What if a filing is rejected?","申请被退回怎么办？"],["Odelia reads the agency's reason, corrects the application with you and resubmits it, and our team steps in when the agency needs a person. Nothing is filed without your approval.","Odelia 会读取机构给出的原因，与您一起修正后重新提交；如机构需要专人处理，由我们的团队接手。未经您批准，不会提交任何申请。"]],
+ [["Can I get a refund?", "可以退款吗？"], ["Fees are non-refundable, except under the open-by-date guarantee or where the law requires a refund, as our <a href=\"terms.html\" data-legal=\"terms.html\">terms</a> say. If a permit we file is why a store opens after the date we agreed in writing, the guarantee refunds that store's opening fee. You can cancel your plan at any time in Settings, Billing; it ends with your current billing period and you keep the service until then. Questions about a charge: email <a href=\"mailto:support@placetta.com\">support@placetta.com</a>.", "除开业日期保证和法律要求退款的情形外，费用不予退还，详见我们的<a href=\"terms.html\" data-legal=\"terms.html\">服务条款</a>。如果门店因我们提交的某项许可而晚于书面约定的日期开业，该保证会退还这家门店的开业费。您可以随时在“设置 → 账单”中取消方案，取消在当前计费周期结束时生效，在此之前服务照常。对某笔费用有疑问，请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"]],
  [["Is this legal advice?","这是法律意见吗？"],["No. Placetta is software and a managed service. Where a step requires a licensed attorney, we introduce an independent attorney you engage directly. Placetta takes no referral fee.","不是。快哉是软件和托管服务。如某一步骤需要持牌律师，我们会为您介绍独立执业的律师，由您直接聘请。快哉不收取介绍费。"]],
  [["Which markets do you cover?","覆盖哪些市场？"],["All 50 US states and 170+ countries. Tell us your target city and we'll map every license, permit and registration it requires.","美国全部 50 个州，以及全球 170 多个国家和地区。告诉我们您的目标城市，我们会列出当地所需的全部执照、许可和登记。"]],
  [["How fast can you open my location?","多快能让我的门店开业？"],["It depends on the jurisdiction and your build-out. Your entry plan includes a projected timeline before you commit. Timelines are estimates. For a new store, the optional open-by-date guarantee refunds the opening fee if a permit we file is why you open late.","取决于所在辖区和装修工程。您的开店计划会在您决定前给出预计时间表。时间均为预估。新店可选按期开业保障：如因我们提交的许可导致延期开业，退还开业费用。"]],
@@ -3411,18 +3626,39 @@ document.getElementById("lBtn").addEventListener("click", e => { const m = docum
 
 /* ============ video-style sample plan ============ */
 const DUR = 18; let vt = 6, vPlaying = !RM, vVisible = false, vLast = 0;
+/* the intro runs on negative time: the line types itself (-INTRO to -INTRO+TYPE), then the rows land one by one with their dates */
+const INTRO = 4.4, TYPE = 2, vSeen = {v: false};
+const W0 = Date.UTC(2026, 10, 16); // week 1 of the sample plan starts Mon Nov 16, 2026, so week 16 ends in Mar 2027
+function wkDates(w){ const a = new Date(W0 + (w[0] - 1) * 6048e5), b = new Date(W0 + (w[1] * 7 - 1) * 864e5), zh = lang === "zh";
+  if (zh) return `${a.getUTCMonth() + 1}月${a.getUTCDate()}日–${b.getUTCMonth() !== a.getUTCMonth() ? (b.getUTCMonth() + 1) + "月" : ""}${b.getUTCDate()}日`;
+  const m = d => d.toLocaleString("en-US", {month: "short", timeZone: "UTC"});
+  return `${m(a)} ${a.getUTCDate()}–${b.getUTCMonth() !== a.getUTCMonth() ? m(b) + " " : ""}${b.getUTCDate()}`; }
 function status(r, tt){ if (tt >= r.d) return "d"; if (r.blk) return "b"; return tt >= r.s ? "r" : "q"; }
 let vFloat = "";
 function renderApp(){
   const i = L();
-  document.getElementById("appRows").innerHTML = PLAN.map((r,k) => `<div class="arow" id="ar${k}"><span class="ast" id="as${k}"></span><div style="min-width:0"><div class="n">${r.n[i]}</div><div class="a">${r.a[i]}</div></div><span class="aw">${i ? "第" + r.w[0] + "–" + r.w[1] + "周" : "W" + r.w[0] + "–" + r.w[1]}</span><span class="asx" id="ap${k}"></span></div>`).join("");
+  document.getElementById("appRows").innerHTML = PLAN.map((r,k) => `<div class="arow" id="ar${k}"><span class="ast" id="as${k}"></span><div style="min-width:0"><div class="n">${r.n[i]}</div><div class="a">${r.a[i]}<span class="adt">${wkDates(r.w)}</span></div></div><span class="aw">${i ? "第" + r.w[0] + "–" + r.w[1] + "周" : "W" + r.w[0] + "–" + r.w[1]}</span><span class="asx" id="ap${k}"></span></div>`).join("");
   vFloat = "";
   document.getElementById("gantt").innerHTML = PLAN.map((r,k) => `<div class="gl"><i id="gb${k}" style="left:${(r.w[0]-1)/16*100}%;width:${(r.w[1]-r.w[0]+1)/16*100}%"></i></div>`).join("") + `<div class="gaxis">${[1,5,9,13].map(n => `<span>${i ? "第" + n + "周" : "W" + n}</span>`).join("")}</div><span class="today" id="today"></span>`;
-  paintApp();
+  paintApp(); renderHow();
 }
 const GC = {q:"#E2E7EE",r:"#E9C47F",d:"#7399C6",b:"#E8B4AA"};
+/* how it works (Oct 18): card 1 shows the sample plan's first rows with their dates and status; card 3 a month of renewals */
+function renderHow(){
+  const i = L(), pl = document.getElementById("hwPlan"), cal = document.getElementById("hwCal");
+  if (pl) pl.innerHTML = PLAN.slice(0, 5).map(r => { const s = status(r, 6); return `<div class="hwr" role="listitem"><span class="nm"><b>${r.n[i]}</b><small>${r.a[i]}</small></span><span class="hwd"><em>${wkDates(r.w)}</em><span class="hws ${s}">${t("st." + s)}</span></span></div>`; }).join("") + `<p class="hwmore">${t("hw.more")}</p>`;
+  if (cal){ // January 2027 starts on a Friday; the health permit is due the 14th, the business tax certificate renews the 31st
+    const wd = i ? ["日","一","二","三","四","五","六"] : ["S","M","T","W","T","F","S"], mk = {14: "a", 31: "b"};
+    cal.innerHTML = `<p class="hwmo">${t("hw.mo")}</p><div class="hwg">${wd.map(d => `<i>${d}</i>`).join("")}${Array.from({length: 5}, () => "<span></span>").join("")}${Array.from({length: 31}, (_, k) => `<span${mk[k + 1] ? ` class="${mk[k + 1]}"` : ""}>${k + 1}</span>`).join("")}</div>`; }
+}
 function paintApp(){
   let done = 0;
+  const ask = t("app.ask"), it = vt + INTRO, el = document.getElementById("appAsk");
+  if (el){ const n = vt >= 0 || vt < -INTRO ? ask.length : Math.min(ask.length, Math.round(ask.length * it / TYPE));
+    if (el.textContent.length !== n || el.textContent !== ask.slice(0, n)) el.textContent = ask.slice(0, n);
+    el.parentNode.classList.toggle("typing", vt < 0 && it < TYPE + .4); }
+  PLAN.forEach((r,k) => { const on = vt >= 0 || vt + INTRO >= TYPE + .3 + k * .22; const row = document.getElementById("ar"+k), g = document.getElementById("gb"+k);
+    if (row) row.classList.toggle("pre", !on); if (g) g.classList.toggle("pre", !on); });
   PLAN.forEach((r,k) => { const s = status(r, vt); if (s === "d") done++;
     const p = document.getElementById("ap"+k); if (!p) return; if (p.dataset.s !== s){ p.dataset.s = s; p.className = "asx "+s; p.textContent = t("st."+s); document.getElementById("as"+k).className = "ast "+s; }
     const g = document.getElementById("gb"+k); if (g) g.style.background = GC[s]; });
@@ -3441,19 +3677,19 @@ function paintApp(){
       document.getElementById("vToastS").textContent = t("app.toastS").replace("{a}", PLAN[last].a[i]);
       ts.hidden = false; if (changed && !RM){ ts.classList.remove("pop"); void ts.offsetWidth; ts.classList.add("pop"); } }
   }
-  const wk = 1 + 15 * Math.min(vt, DUR) / DUR; const td = document.getElementById("today");
+  const wk = 1 + 15 * Math.max(0, Math.min(vt, DUR)) / DUR; const td = document.getElementById("today");
   if (td){ td.style.left = ((wk - .5) / 16 * 100) + "%"; td.dataset.l = lang === "zh" ? `第 ${Math.floor(wk)} 周` : `${t("app.week")} ${Math.floor(wk)}`; }
-  document.getElementById("vBar").style.width = (Math.min(vt, DUR) / DUR * 100) + "%";
+  document.getElementById("vBar").style.width = ((Math.min(vt, DUR) + INTRO) / (DUR + INTRO) * 100) + "%";
 }
 function vLoop(ts){
-  if (vPlaying && vVisible){ if (vLast) { vt += (ts - vLast) / 1000; if (vt > DUR + 2.5) vt = 0; } vLast = ts; paintApp(); } else vLast = 0;
+  if (vPlaying && vVisible){ if (vLast) { vt += (ts - vLast) / 1000; if (vt > DUR + 2.5) vt = -INTRO; } vLast = ts; paintApp(); } else vLast = 0;
   requestAnimationFrame(vLoop);
 }
 function setPlay(p){ vPlaying = p; const ic = document.getElementById("vIcon"), b = document.getElementById("vPlay");
   ic.innerHTML = p ? '<rect x="1" y="1" width="3.6" height="12" rx="1"/><rect x="8.4" y="1" width="3.6" height="12" rx="1"/>' : '<path d="M2 1.2v11.6a.8.8 0 0 0 1.2.7l9-5.8a.8.8 0 0 0 0-1.4l-9-5.8A.8.8 0 0 0 2 1.2z"/>';
   b.setAttribute("aria-label", t(p ? "aria.pause" : "aria.play")); }
 document.getElementById("vPlay").addEventListener("click", () => setPlay(!vPlaying));
-document.getElementById("vRestart").addEventListener("click", () => { vt = 0; setPlay(true); paintApp(); });
+document.getElementById("vRestart").addEventListener("click", () => { vt = -INTRO; setPlay(true); paintApp(); });
 
 /* ============ cost of waiting: month visual + rent calculator ============ */
 let sIdx = 0, rent = 15000;
@@ -3624,7 +3860,7 @@ function caseUI(D, ids, o){
   function render(anim){
     const i = L(), c = D[st.c], m = c.mk[st.m], rows = $("rows");
     const lon = !!(lead && lead.on());
-    $("tabs").innerHTML = (lead ? `<button type="button" role="tab" class="tstab" data-case="-1" aria-selected="${lon}" aria-controls="${lead.panel}" tabindex="${lon ? 0 : -1}">${lead.label()}</button>` : "") + D.map((x, k) => `<button type="button" role="tab"${lead ? ' class="tstab"' : ""} data-case="${k}" aria-selected="${!lon && k === st.c}" aria-controls="${ids.body}" tabindex="${!lon && k === st.c ? 0 : -1}">${lead ? `<b>${nm(x.tab || x.n)}</b><span>${t(x.ex ? "bel.ex" : "bel.tag")}</span>` : `${x.sym ? `<svg viewBox="${x.vb}" aria-hidden="true"><use href="#${x.sym}"/></svg>` : ""}${nm(x.tab || x.n)}`}</button>`).join("");
+    $("tabs").innerHTML = D.map((x, k) => `<button type="button" role="tab"${lead ? ' class="tstab"' : ""} data-case="${k}" aria-selected="${!lon && k === st.c}" aria-controls="${ids.body}" tabindex="${!lon && k === st.c ? 0 : -1}">${lead ? `<b>${nm(x.tab || x.n)}</b><span>${t(x.ex ? "bel.ex" : "bel.tag")}</span>` : `${x.sym ? `<svg viewBox="${x.vb}" aria-hidden="true"><use href="#${x.sym}"/></svg>` : ""}${nm(x.tab || x.n)}`}</button>`).join("") + (lead ? `<button type="button" role="tab" class="tstab" data-case="-1" aria-selected="${lon}" aria-controls="${lead.panel}" tabindex="${lon ? 0 : -1}">${lead.label()}</button>` : "");
     const logo = $("logo"); logo.innerHTML = Array.isArray(c.logo) ? c.logo[i] : c.logo; logo.setAttribute("role", "img"); logo.setAttribute("aria-label", nm(c.n));
     if (ids.nm) $("nm").textContent = c.nm ? c.nm[i] : "";
     const tag = $("body").querySelector(".beltag"); if (tag) { tag.hidden = !!c.notag && !c.ex; tag.textContent = t(c.ex ? "bel.ex" : "bel.tag"); }
@@ -3657,7 +3893,7 @@ function caseUI(D, ids, o){
   return render;
 }
 // one section: "Tea houses" opens the five tea-house plans, the other tabs are single case studies
-let teaOn = true;
+let teaOn = false;   // Oct 18: the real case study (Wakimasu) leads; the example tea houses are the last tab
 const showTea = () => { document.getElementById("teaCard").hidden = !teaOn; document.getElementById("caseCard").hidden = teaOn; };
 const caseLead = {panel: "teaBody", label: () => `<b>${t("tea.tabs")}</b><span>${t("tea.sub")}</span>`, on: () => teaOn, set: v => { teaOn = v; showTea(); renderCases(v ? undefined : "case"); renderTea(v ? "case" : undefined); }};
 const renderCases = caseUI(CASES, {tabs: "caseTabs", body: "caseBody", logo: "caseLogo", t: "caseT", p: "caseP", st: "caseSt", win: "caseWin", mtabs: "belTabs", rows: "belRows", src: "belSrc"}, {ev: "case", lead: caseLead});
@@ -3681,12 +3917,15 @@ function renderProof(){
 }
 
 /* ============ pricing, faq ============ */
-function renderPrice(){ const i = L(); document.getElementById("tiers").innerHTML = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}${p.hl ? `<small>${t("price.risk")}</small>` : ""}</div></div>`).join(""); }
+function renderPrice(){ const i = L();
+  // Oct 18: the one number up front is Essentials, read from TIERS so it can never drift from the plan cards
+  const pv = document.getElementById("prV"), pps = document.getElementById("prPs"); if (pv) pv.textContent = TIERS[0].v[i]; if (pps) pps.textContent = TIERS[0].ps[i];
+  document.getElementById("tiers").innerHTML = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}${p.hl ? `<small>${t("price.risk")}</small>` : ""}</div></div>`).join(""); }
 let fOpen = 0;
 function renderFaq(){
   const i = L();
   document.getElementById("faqList").innerHTML = FAQ.map((f,k) => `<div class="fq ${k===fOpen?"on":""}"><button type="button" data-f="${k}" aria-expanded="${k===fOpen}"><span class="fqt">${f[0][i]}</span><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></button><div class="tg"><div><p>${f[1][i]}</p></div></div></div>`).join("");
-  document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { const k = +b.dataset.f; fOpen = fOpen === k ? -1 : k; renderFaq(); }));
+  document.querySelectorAll("#faqList [data-f]").forEach(b => b.addEventListener("click", () => { const k = +b.dataset.f; fOpen = fOpen === k ? -1 : k; renderFaq(); }));
 }
 
 /* ============ scroll: nav state ============ */
@@ -3707,10 +3946,11 @@ const io = new IntersectionObserver(es => es.forEach(e => {
   e.target.classList.remove("pre"); io.unobserve(e.target);
 }), {threshold:0, rootMargin:"0px 0px -4% 0px"});
 document.querySelectorAll(".rv").forEach(el => { if (!RM && el.getBoundingClientRect().top > innerHeight) { el.classList.add("pre"); io.observe(el); } });
-new IntersectionObserver(es => es.forEach(e => { vVisible = e.isIntersecting; })).observe(document.getElementById("vcard"));
+// the finished plan is the still frame; the first time it scrolls into view (motion allowed) it plays from the typed line
+new IntersectionObserver(es => es.forEach(e => { vVisible = e.isIntersecting; if (vVisible && !vSeen.v){ vSeen.v = true; if (vPlaying){ vt = -INTRO; paintApp(); } } })).observe(document.getElementById("vcard"));
 
 /* ============ sample-plan links ============ */
-document.addEventListener("click", e => { if (e.target.closest('a[data-sec="sample"]')) { track("sample_plan_click", {}); vt = 0; setPlay(true); } });
+document.addEventListener("click", e => { if (e.target.closest('a[data-sec="sample"]')) { track("sample_plan_click", {}); vt = -INTRO; setPlay(true); } });
 
 /* ============ plan request: 4 quick steps ============ */
 const MARKETS = [["Los Angeles, CA","加州洛杉矶"],["New York, NY","纽约"],["San Francisco Bay Area","旧金山湾区"],["Houston, TX","得州休斯顿"],["Seattle, WA","华盛顿州西雅图"],["Several markets","多个市场"]];
@@ -3996,7 +4236,7 @@ addEventListener("scroll", () => requestAnimationFrame(updateMbar), {passive:tru
 (() => { const f = document.getElementById("favicon"); if (f && f.parentElement !== document.head) { document.querySelectorAll('head link[rel~="icon"]').forEach(l => l.remove()); document.head.appendChild(f); } })();
 
 /* ============ franchise brand strip ============ */
-const BRANDS = ["Tiger Sugar","Chatime","Miniso","Hertz","Planet Fitness","The UPS Store","Ligne Roset","Natuzzi","Roche Bobois","BoConcept","Oppein Home","Gautier","Calligaris","Schmidt","KUKA Home","Quanu","QM Qumei","Crunch Fitness","Gold's Gym","Naisnow","Happy Lamb Hot Pot","Zhu Guang Yu Hot Pot","Tim Hortons","Paris Baguette","Gong Cha","bb.q Chicken","Jollibee","Pollo Campero","Tous les Jours","Gyu-Kaku","Bafang Yunji","Chagee","Molly Tea","LINLEE","Tastien","Juewei","Kuafu Fried Skewers","Zhengxin Chicken","Auntea Jenny","Guming","Wallace","Luckin Coffee","Cotti Coffee","Mixue","Zhangliang Malatang","Yang Guofu Malatang","Yang's Braised Chicken Rice","Meiyijia","Yonny","Tantanxiang","Yi Dian Dian","Five Guys","Chili's","Wingstop","McDonald's","Wendy's","Popeyes","Chick-fil-A","Burger King","Subway","Domino's","7-Eleven","Lawson","FamilyMart","KFC","Dunkin'","Starbucks","Costa Coffee","Dutch Bros Coffee","Yogurtland","Pizza Hut"];
+const BRANDS = ["Chatime","Tous les Jours","bb.q Chicken","Paris Baguette","Molly Tea","Chagee","Tiger Sugar","Gong Cha","Happy Lamb Hot Pot","Gyu-Kaku","Luckin Coffee","Mixue","Jollibee","Tim Hortons","Pollo Campero","Bafang Yunji","Naisnow","Zhu Guang Yu Hot Pot","LINLEE","Tastien","Juewei","Kuafu Fried Skewers","Zhengxin Chicken","Auntea Jenny","Guming","Wallace","Cotti Coffee","Zhangliang Malatang","Yang Guofu Malatang","Yang's Braised Chicken Rice","Tantanxiang","Yi Dian Dian","Five Guys","Chili's","Wingstop","McDonald's","Wendy's","Popeyes","Chick-fil-A","Burger King","Subway","Domino's","KFC","Dunkin'","Starbucks","Costa Coffee","Dutch Bros Coffee","Yogurtland","Pizza Hut","Miniso","Hertz","Planet Fitness","The UPS Store","Ligne Roset","Natuzzi","Roche Bobois","BoConcept","Oppein Home","Gautier","Calligaris","Schmidt","KUKA Home","Quanu","QM Qumei","Crunch Fitness","Gold's Gym","Meiyijia","Yonny","7-Eleven","Lawson","FamilyMart"];
 // Logo files supplied by the user; brands without a file show their name until one is added.
 const LOGOS = {"Hertz": "logos/hertz.png", "Planet Fitness": {src: "logos/planet-fitness.png", big: true}, "The UPS Store": "logos/ups-store.png", "Ligne Roset": {src: "logos/ligne-roset.png", tall: true}, "Natuzzi": {src: "logos/natuzzi.png", mid: true}, "BoConcept": "logos/boconcept.png", "Oppein Home": "logos/oppein.png", "Gautier": "logos/gautier.png", "Calligaris": "logos/calligaris.png", "Schmidt": "logos/schmidt.png", "KUKA Home": {src: "logos/kuka.png", tall: true}, "Quanu": {src: "logos/quanu.png", mq: true}, "QM Qumei": {src: "logos/qumei.png", tall: true}, "Roche Bobois": {src: "logos/roche-bobois.png", big: true}, "Crunch Fitness": {src: "logos/crunch-fitness.png", big: true}, "Gold's Gym": {src: "logos/golds-gym.png", big: true, label: ["Gold's Gym","Gold's Gym"]}, "Starbucks": {src: "logos/starbucks.png", tall: true}, "Chick-fil-A": {src: "logos/chick-fil-a.png", tall: true}, "Costa Coffee": {src: "logos/costa-coffee.png", tall: true}, "Luckin Coffee": "logos/luckin-coffee.png", "Chagee": "logos/chagee.png", "Mixue": "logos/mixue.png", "Auntea Jenny": "logos/auntea-jenny.png", "Guming": "logos/guming.png", "Chili's": "logos/chilis.png", "Wallace": {src: "logos/wallace.png", tall: true}, "Happy Lamb Hot Pot": {src: "logos/happy-lamb.png", tall: true, label: ["Happy Lamb","快乐小羊"]}, "Gyu-Kaku": {src: "logos/gyu-kaku.png", tall: true}, "KFC": {src: "logos/kfc.png", tall: true}, "McDonald's": "logos/mcdonalds.png", "Domino's": "logos/dominos.png", "Paris Baguette": {src: "logos/paris-baguette.png", thin: true}, "Tim Hortons": "logos/tim-hortons.png", "7-Eleven": {src: "logos/7-eleven.png", tall: true}, "Tastien": "logos/tastien.png", "Tous les Jours": {src: "logos/tous-les-jours.png", mid: true}, "bb.q Chicken": "logos/bbq-chicken.png", "Bafang Yunji": {src: "logos/bafang.png", tall: true}, "Zhengxin Chicken": {src: "logos/zhengxin.png", tall: true}, "Juewei": "logos/juewei.png", "Naisnow": {src: "logos/naisnow.png", tall: true}, "Pizza Hut": {src: "logos/pizza-hut.png", tall: true}, "Five Guys": "logos/five-guys.png", "Yi Dian Dian": "logos/yi-dian-dian.png", "Wingstop": "logos/wingstop.png", "Wendy's": {src: "logos/wendys.png", tall: true}, "Popeyes": {src: "logos/popeyes.png", tall: true}, "Burger King": {src: "logos/burger-king.png", tall: true}, "Subway": {src: "logos/subway.png", mid: true}, "Yogurtland": "logos/yogurtland.png", "Dunkin'": {src: "logos/dunkin.png", mid: true}, "Dutch Bros Coffee": "logos/dutch-bros.png", "Tiger Sugar": {src: "logos/tiger-sugar.png", tall: true}, "Chatime": "logos/chatime.png", "Miniso": {src: "logos/miniso.png", tall: true}, "Gong Cha": {src: "logos/gong-cha.png", tall: true}, "Jollibee": {src: "logos/jollibee.png", tall: true}, "Pollo Campero": "logos/pollo-campero.png", "Molly Tea": "logos/molly-tea.png", "Zhangliang Malatang": "logos/zhangliang.png", "Yang's Braised Chicken Rice": "logos/yang-mingyu.png", "Meiyijia": "logos/meiyijia.png", "Lawson": {src: "logos/lawson.png", mid: true}, "FamilyMart": {src: "logos/familymart.png", mid: true}, "Cotti Coffee": {src: "logos/cotti.png", mid: true}, "Yang Guofu Malatang": "logos/yang-guofu.png", "Kuafu Fried Skewers": "logos/kuafu.png", "LINLEE": "logos/linlee.png", "Zhu Guang Yu Hot Pot": "logos/zhu-guangyu.png", "Yonny": "logos/yonny.png", "Tantanxiang": {src: "logos/tantanxiang.png", tall: true}};
 /* backers: operators who invested in Placetta, shown with their company's mark; a missing file falls back to the name */
@@ -4380,6 +4620,28 @@ function monFeatured(){
 const TICK_IC = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const NEXT_IC = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 let monAll = false;
+/* Oct 18: each alert names the store it hits and what's at stake. SAMPLE data, shown with a "Sample" tag: the stores are
+   the page's own examples (Qinghuan in San José, the franchisees in Irvine and Houston) or sample stores, and the dollar
+   figures are illustrations built from the page's own numbers ($15,000 a month rent, 12 staff), not quotes or results.
+   Keyed by each change's English short title in MON. */
+const MON_STORE = {
+ "FDA 2026 Food Code": [["Qinghuan Tea House, San José, CA", "清欢茶舍，加州圣何塞"], "$1,500", ["a failed inspection: re-inspection fee and a day closed", "检查不合格：复检费加停业一天"]],
+ "Greece pay transparency law": [["Sample store, Athens", "示例门店，雅典"], "$6,000", ["back pay review for 9 staff", "9 名员工的薪酬追溯核查"]],
+ "US–China tariff cut and truce": [["Qinghuan Tea House, San José, CA", "清欢茶舍，加州圣何塞"], "$3,200", ["lower duty on a $32,000 container of tableware that lands before Jan 10", "1 月 10 日前到港的一柜 32,000 美元餐具，关税更低"], "save"],
+ "California minimum wage to $17.40": [["Franchisee, Irvine CA", "加盟商，加州尔湾"], "$12,480 a year", ["12 staff, 50 cents more an hour, 2,080 hours each", "12 名员工，每小时多 0.5 美元，每人 2,080 小时"]],
+ "Malaysia imported food rules": [["Sample store, Kuala Lumpur", "示例门店，吉隆坡"], "$9,000", ["one container held at the border without supplier certificates", "缺少供应商证书，一柜货物在口岸被扣"]],
+ "EU packaging rules now apply": [["Sample store, Paris", "示例门店，巴黎"], "$4,800", ["takeaway cups, wrappers and containers to replace", "需要更换的外带杯、包装纸和餐盒"]],
+ "Korea adds four allergens": [["Sample store, Seoul", "示例门店，首尔"], "$2,500", ["menu boards and labels to reprint", "需要重印的菜单和标签"]],
+ "Mixue opens in Mexico and Brazil": [["Planned store, Mexico City", "筹备中的门店，墨西哥城"], "$15,000 a month", ["rent while its permits are pending", "许可未下来期间的房租"]],
+ "12,000 new US franchise units": [["Franchisee, Houston TX", "加盟商，得州休斯顿"], "$15,000 a month", ["rent on each new unit that opens late", "每家新店延迟开业期间的房租"]],
+ "Vietnam food safety decree": [["Sample store, Ho Chi Minh City", "示例门店，胡志明市"], "$7,500", ["3 products off the shelf for about 15 working days each", "3 款产品各下架约 15 个工作日"]],
+ "Mexico tariffs up to 50%": [["Planned store, Mexico City", "筹备中的门店，墨西哥城"], "$16,000", ["up to 50% duty on a $32,000 container from China", "从中国运来的 32,000 美元货柜，最高 50% 关税"]],
+ "Texas and Florida lease limits": [["Franchisee, Houston TX", "加盟商，得州休斯顿"], "$15,000 a month", ["rent on a lease that may not hold", "可能无效的租约所付的房租"]],
+ "Indonesia halal deadline": [["Sample store, Jakarta", "示例门店，雅加达"], "$11,000", ["unlabeled stock pulled from shelves", "未贴标的库存被下架"]]
+};
+const monSt = x => MON_STORE[x.t[0]];
+function monStore(x, i){ const v = monSt(x); if (!v) return "";
+  return `<div class="mnst"><div><small>${t("mon.st")}</small><b>${v[0][i]}</b></div><div><small>${t(v[3] ? "mon.save" : "mon.usd")}</small><b class="mnusd${v[3] ? " up" : ""}">${v[1].replace(" a month", i ? "/月" : " a month").replace(" a year", i ? "/年" : " a year")}</b><span>${v[2][i]}</span></div><em class="mnsm">${t("mon.smp")}</em></div>`; }
 function renderMon(center){
   const i = L();
   if (monSel < 0 || monSel >= MON.length){ monSel = monFeatured(); center = true; }
@@ -4396,7 +4658,7 @@ function renderMon(center){
   const fresh = x => x.d.length === 10 && monDays(x.d) >= -7;
   const order = MON.map((x, k) => k).filter(k => keep(MON[k])).sort((a, b) => (fresh(MON[b]) - fresh(MON[a])) || rank[MON[a].lv] - rank[MON[b].lv] || (MON[a].d < MON[b].d ? 1 : -1));
   const MNTOP = 2, shown = monAll ? order : order.slice(0, MNTOP).concat(order.slice(MNTOP).filter(k => k === monSel));
-  list.innerHTML = shown.map(k => [MON[k], k]).map(([x, k]) => `<button type="button" class="mnr${k === monSel ? " on" : ""}" role="option" aria-selected="${k === monSel}" data-ti="${k}"><span class="t">${x.t[i]}</span><span class="pill ${monPill(x.lv)}">${t("mon.i." + x.lv)}</span><span class="m"><b>${monCode(x.mk)}</b>${monDate(x.d)}${fresh(x) ? `<i class="mnnew">${t("mon.new")}</i>` : ""}</span></button>`).join("") + (order.length > MNTOP ? `<button type="button" class="mnmore" id="mnMore" aria-expanded="${monAll}">${monAll ? t("agy.less") : t("mon.all").replace("{n}", order.length)}</button>` : "");
+  list.innerHTML = shown.map(k => [MON[k], k]).map(([x, k]) => `<button type="button" class="mnr${k === monSel ? " on" : ""}" role="option" aria-selected="${k === monSel}" data-ti="${k}"><span class="t">${x.t[i]}</span><span class="pill ${monPill(x.lv)}">${t("mon.i." + x.lv)}</span><span class="m"><b>${monCode(x.mk)}</b>${monDate(x.d)}${monSt(x) ? `<span class="mnusd${monSt(x)[3] ? " up" : ""}">${monSt(x)[1].replace(/ a (month|year)/, "")}</span>` : ""}${fresh(x) ? `<i class="mnnew">${t("mon.new")}</i>` : ""}</span></button>`).join("") + (order.length > MNTOP ? `<button type="button" class="mnmore" id="mnMore" aria-expanded="${monAll}">${monAll ? t("agy.less") : t("mon.all").replace("{n}", order.length)}</button>` : "");
   if (center){ const on = list.querySelector(".on"); if (on){ const top = on.offsetTop - list.offsetTop; if (top < list.scrollTop || top + on.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = Math.max(0, top - 8); } }
   renderMonDetail(MON[monSel]);
   const dls = MON_DL.map(x => ({x, n: monDays(x.d)})).filter(o => o.n >= 0 && keep(o.x)).slice(0, 3);
@@ -4417,7 +4679,7 @@ function renderMonDetail(x){
   document.getElementById("mnDet").innerHTML = `<div class="mndt">
       <p class="mncatch"><span class="orb"></span><b>${t("mon.catch")}</b><span>${monLead(x, dd)}</span></p>
       <div class="mntop2"><div><div class="mnmeta"><span class="pill ${monPill(x.lv)}">${t("mon.lv." + x.lv)}</span><span class="mkn">${w.n[i]}</span><span>${monDate(x.d)}</span></div><p class="mnttl">${x.h[i]}</p></div>${due !== undefined && dd ? `<div class="mncd ${monCls(due)}"><b>${due}</b><span>${t(due === 1 ? "mon.day1" : "mon.dayn")}</span><small>${monDate(dd.d)}</small></div>` : ""}</div>
-      <p class="mnrisk k-${kind}"><b>${t("mon.imp." + kind)}</b>${x.imp ? x.imp[1][i] : x.m[i]}</p>
+      <p class="mnrisk k-${kind}"><b>${t("mon.imp." + kind)}</b>${x.imp ? x.imp[1][i] : x.m[i]}</p>${monStore(x, i)}
       <div class="mndo"><span class="ic">${NEXT_IC}</span><div><b>${t("mon.l.next")}</b><p>${x.act[i]}</p></div></div>
       <p class="mndone">${t("mon.done")} ${[t("mon.dn1"), t("mon.dn2"), dd ? t("mon.dn3") : t("mon.dn4")].map(s => `<span class="it">${TICK_IC}${s}</span>`).join("")}</p>
     </div>
@@ -4445,6 +4707,7 @@ function openSample(){
     <div class="mnmb">
       <div><p class="lb">${w.n[i]}${i ? "，" : ", "}${t("mon.f." + x.c)}</p><p class="tx" style="color:var(--ink);font-weight:500">${x.h[i]}</p></div>
       ${due !== undefined && dd ? `<div class="mndue"><span>${due === 0 ? t("mon.duet") : t(due === 1 ? "mon.due1" : "mon.due").replace("{n}", due)}</span><small>${monDate(dd.d)}</small></div>` : ""}
+      ${monStore(x, i)}
       <div><p class="lb">${t("mon.l.next")}</p><p class="tx" style="color:var(--ink)">${x.act[i]}</p></div>
       <div><p class="lb">${t("mon.l.means")}</p><p class="tx">${x.m[i]}</p></div>
       <div class="ft"><a href="${x.u}" target="_blank" rel="noopener">${t("src")}${i ? "：" : ": "}${x.s[i]} ↗</a><button type="button" class="btn b-ink" data-plan="${x.mk}">${t("mon.plan").replace("{m}", w.n[i])}</button></div>
@@ -4478,21 +4741,26 @@ document.getElementById("monitor").addEventListener("click", e => {
 /* ============ testimonials: real customer quotes ============ */
 const TS_ALL = [
   {flag: "chagee", logo: "logos/ink/chagee.png", lh: 30, alt: ["CHAGEE", "霸王茶姬"], n: "Jackie", co: ["CHAGEE", "霸王茶姬"], ph: "media/people/jackie.jpg", big: "media/people/jackie-l.jpg", rl: ["Owner, CHAGEE", "店主，霸王茶姬"],
+   role: ["Owner", "店主"], pain: ["Months of approval time", "数月的审批时间"],
    q: ["Placetta saves us months in approval time.", "快哉为我们节省了数月的审批时间。"],
    st: ["5 months", "5 个月"], sl: ["saved in approval time", "节省的审批时间"]},
-  {flag: "stanford", logo: "logos/ink/stanford.svg", lh: 30, alt: ["Stanford University", "斯坦福大学"], n: "Stefan", co: ["Stanford", "斯坦福大学"], ph: "media/people/stefan.jpg", big: "media/people/stefan-l.jpg", rl: ["Stanford University", "斯坦福大学"],
-   q: ["Experts are fantastic! I was connected with an ex-Partner from Goldman Sachs, who assisted with our GTM and business model.", "专家团队太棒了！我被对接到一位前高盛合伙人，他帮我们梳理了市场进入策略和商业模式。"],
-   st: ["9 filings", "9 项申报"], sl: ["permits and filings handled, approved in 4 months", "许可与申报全部代办，4 个月获批"]},
   {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", co: ["Starbucks", "星巴克"], ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
+   role: ["General Manager", "总经理"], pain: ["Tedious regulatory approvals", "繁琐的监管审批"],
    q: ["Placetta has taken over the tedious regulatory approvals so my team can focus on scaling instead of filings.", "快哉接手了繁琐的监管审批，让我的团队专注于扩张，而不是埋头申报。"],
    st: ["3 filings", "3 项申报"], sl: ["handled end to end by Placetta, so his team stays on scaling", "由快哉全程代办，团队专注扩张"]},
+  {flag: "stanford", logo: "logos/ink/stanford.svg", lh: 30, alt: ["Stanford University", "斯坦福大学"], n: "Stefan", co: ["Stanford", "斯坦福大学"], ph: "media/people/stefan.jpg", big: "media/people/stefan-l.jpg", rl: ["Stanford University", "斯坦福大学"],
+   pain: ["Permits and filings", "许可与申报"],
+   q: ["Experts are fantastic! I was connected with an ex-Partner from Goldman Sachs, who assisted with our GTM and business model.", "专家团队太棒了！我被对接到一位前高盛合伙人，他帮我们梳理了市场进入策略和商业模式。"],
+   st: ["9 filings", "9 项申报"], sl: ["permits and filings handled, approved in 4 months", "许可与申报全部代办，4 个月获批"]},
   {logo: "logos/ink/yale.svg", lh: 34, alt: ["Yale University", "耶鲁大学"], n: "Jean", co: ["Yale", "耶鲁大学"], ph: "media/people/jean.jpg", big: "media/people/jean-l.jpg", rl: ["Yale University, $1.5M NSF research grant", "耶鲁大学，获美国国家科学基金会 150 万美元研究资助"],
    q: ["They were the fastest company I've worked with.", "他们是我合作过的速度最快的公司。"],
    st: ["Fastest", "最快"], sl: ["company Jean has worked with", "Jean 合作过的公司中最快的一家"]},
   {needsMc: 1, mc: ["A friend of Placetta's founder", "快哉创始人的朋友"], logo: "logos/ink/princeton.png", lh: 44, alt: ["Princeton University", "普林斯顿大学"], vlogo: "logos/ink/belluh.svg", vlh: 22, valt: "Belluh", n: "Odelia W.", co: ["Princeton", "普林斯顿大学"], ph: "media/people/odelia.jpg", big: "media/people/odelia-l.jpg", rl: ["Belluh (acq., 7 figures), Princeton University", "Belluh（已被收购，七位数），普林斯顿大学"],
+   pain: ["Navigating the regulatory landscape", "整个监管流程"],
    q: ["I was introduced to this platform by my best friend. Placetta's founders worked with me to understand my exact needs and navigate the regulatory landscape.", "我经朋友介绍认识这个平台。快哉的创始人和我一起梳理了我的具体需求，带我走过了整个监管流程。"],
    st: ["Founder-led", "创始人亲自对接"], sl: ["her exact needs and the rules that applied, mapped with Placetta's founders", "快哉创始人亲自梳理她的需求和适用规定"]},
   {needsMc: 1, mc: ["Faramir and Placetta share a founder", "Faramir 与快哉为同一位创始人"], logo: "logos/ink/eth-zurich.svg", lh: 26, alt: ["ETH Zürich", "苏黎世联邦理工学院"], vlogo: "logos/ink/faramir.svg", vlh: 20, valt: "Faramir", n: "Matteo", co: ["ETH Zürich", "苏黎世联邦理工"], ph: "media/people/matteo.jpg", big: "media/people/matteo-l.jpg", rl: ["Faramir, ETH Zürich", "Faramir，苏黎世联邦理工学院"],
+   pain: ["Permits and registrations", "许可与登记"],
    q: ["Simple. Extremely easy to use.", "简单，非常好用。"],
    st: ["7 filings", "7 项申报"], sl: ["permits and registrations Placetta handled for Faramir", "快哉为 Faramir 代办的许可与登记"]}
 ];
@@ -4508,19 +4776,24 @@ function renderTsStrip(){
   const res = {5: [["“Fastest”", "“最快”"], ["company Jean has worked with, Yale researcher", "耶鲁研究员 Jean 合作过速度最快的公司"]]};
   el.innerHTML = [0, 4, 5].map(k => { const v = TS[k], r = res[k]; return `<button type="button" class="tsx" data-ts="${k}"><img src="${v.logo}" alt="${v.alt[i]}" style="height:${Math.round(v.lh * .7)}px" draggable="false"><b>${r ? r[0][i] : v.st[i]}</b><span>${r ? r[1][i] : v.sl[i]}</span></button>`; }).join("");
 }
+function tsWho(v, i){ return v.role ? v.rl[i] : v.co[i]; }
 function tsOff(){ if (TS.length) return false; ["tsBar", "tsGrid"].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; }); return true; }
 function renderTsTabs(){
   if (tsOff()) return;
   renderTsStrip();
   const i = L();
-  document.getElementById("tsTabs").innerHTML = TS.map((v, k) => `<button type="button" role="tab" class="tstab" data-ts="${k}" aria-selected="${k === tsK}" aria-controls="tsGrid"><b>${v.n}</b><span>${v.co[i]}</span><i><b></b></i></button>`).join("");
+  const el = document.getElementById("tsTabs"), had = el.contains(document.activeElement);
+  el.innerHTML = TS.map((v, k) => `<button type="button" role="tab" class="tstab" id="tsTab${k}" data-ts="${k}" aria-selected="${k === tsK}" aria-controls="tsGrid" tabindex="${k === tsK ? 0 : -1}"><b>${v.n}</b><span>${tsWho(v, i)}</span><i><b></b></i></button>`).join("");
+  document.getElementById("tsGrid").setAttribute("aria-labelledby", "tsTab" + tsK);
+  const on = el.children[tsK];
+  if (on) { if (had) on.focus({preventScroll: true}); const l = on.offsetLeft - 4, r = on.offsetLeft + on.offsetWidth + 4; if (l < el.scrollLeft) el.scrollLeft = l; else if (r > el.scrollLeft + el.clientWidth) el.scrollLeft = r - el.clientWidth; }
 }
 function renderTs(swap){
   if (tsOff()) return;
   const i = L(), x = TS[tsK];
   renderTsTabs();
   document.getElementById("tsGrid").innerHTML = `<figure class="tsx${swap ? " sw" : ""}">
-    <div class="tsl">${x.logo ? `<div class="tslgs"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async">${x.vlogo ? `<span class="tslgd" aria-hidden="true"></span><img class="tslg" src="${x.vlogo}" alt="${esc(x.valt)}" style="--lh:${x.vlh}px" decoding="async">` : ""}</div>` : `<p class="tswm">${x.wm[i]}</p>`}<blockquote class="tsq">“${x.q[i]}”</blockquote>
+    <div class="tsl">${x.logo ? `<div class="tslgs"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async">${x.vlogo ? `<span class="tslgd" aria-hidden="true"></span><img class="tslg" src="${x.vlogo}" alt="${esc(x.valt)}" style="--lh:${x.vlh}px" decoding="async">` : ""}</div>` : `<p class="tswm">${x.wm[i]}</p>`}${x.pain ? `<p class="tspain">${x.pain[i]}</p>` : ""}<blockquote class="tsq">“${x.q[i]}”</blockquote>
       <figcaption class="tsp"><span class="tsav" aria-hidden="true" style="background-image:url('${x.ph}')"></span><span class="tsw"><b>${x.n}</b><span>${x.rl[i]}</span>${x.mc ? `<small class="tsmc">${x.mc[i]}</small>` : ""}</span>
         </span></figcaption></div>
     <div class="tsph"><div class="tsbg" role="img" aria-label="${esc(x.n + ", " + x.rl[i])}" style="background-image:url('${x.big}')"></div><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
@@ -4531,6 +4804,11 @@ function renderTs(swap){
 let tsT = null;
 function tsNext(){ clearTimeout(tsT); if (RM || !TS.length) return; tsT = setTimeout(() => { if (document.hidden) { tsNext(); renderTsTabs(); return; } tsK = (tsK + 1) % TS.length; renderTs(true); tsNext(); }, 8000); }
 document.getElementById("tsTabs").addEventListener("click", e => { const b = e.target.closest("[data-ts]"); if (!b) return; const k = Number(b.dataset.ts); if (k !== tsK) { tsK = k; renderTs(true); track("testimonial_nav", {to: tsK}); } if (!tsHold) tsNext(); });
+document.getElementById("tsTabs").addEventListener("keydown", e => {
+  const n = TS.length, to = {ArrowRight: tsK + 1, ArrowDown: tsK + 1, ArrowLeft: tsK - 1, ArrowUp: tsK - 1, Home: 0, End: n - 1}[e.key];
+  if (to === undefined || !n) return; e.preventDefault();
+  tsK = (to + n) % n; renderTs(true); track("testimonial_nav", {to: tsK});
+});
 ["tsGrid", "tsTabs"].forEach(id => { const el = document.getElementById(id);
   el.addEventListener("mouseenter", () => { tsHold = true; clearTimeout(tsT); document.getElementById("tsBar").classList.add("hold"); });
   el.addEventListener("mouseleave", () => { tsHold = false; document.getElementById("tsBar").classList.remove("hold"); renderTsTabs(); tsNext(); }); });
@@ -4538,10 +4816,16 @@ tsNext();
 
 /* ============ WeChat QR: set WECHAT_QR to the image path and it appears in the final call to action and the form ============ */
 const WECHAT_QR = "";
-if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getElementById("fqr").hidden = false; const q = document.getElementById("wtQrImg"); if (q){ q.src = WECHAT_QR; document.getElementById("wtQrT").setAttribute("data-i18n", "fqr.t"); document.getElementById("wtQrT").textContent = t("fqr.t"); } }
+if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getElementById("fqr").hidden = false;
+  // work together: "Add us on WeChat" shows only with a real code behind it, and opens the code in place (601282ab)
+  const wc = document.getElementById("chWc"), add = document.getElementById("chAdd"), box = document.getElementById("chQr");
+  if (wc && add && box){ document.getElementById("chQrImg").src = WECHAT_QR; wc.hidden = false;
+    add.addEventListener("click", () => { box.hidden = !box.hidden; add.setAttribute("aria-expanded", String(!box.hidden)); track("wechat_qr_open", {open: !box.hidden}); }); } const q = document.getElementById("wtQrImg"); if (q){ q.src = WECHAT_QR; document.getElementById("wtQrT").setAttribute("data-i18n", "fqr.t"); document.getElementById("wtQrT").textContent = t("fqr.t"); } }
 
 /* ============ boot ============ */
 /* ============ restored sections (from the earlier site) ============ */
+// what each person costs, from the public sources in diff.src
+const BEFORE_COST = [["$2,000–$7,500 a restaurant","每家餐厅 2,000–7,500 美元"],["$349 an hour","每小时 349 美元"],["$101,280 a year","年薪 101,280 美元"],["$24.36 an hour","每小时 24.36 美元"]];
 const BEFORE = [["Permit expediter","许可代办","On hold","电话排队中"],["Lawyer","律师","Billed hourly","按小时计费"],["Operations manager","运营经理","Form sent back","表格被退回"],["Bookkeeper","会计","Renewal overdue","续期逾期"]];
 
 
@@ -4573,7 +4857,10 @@ function renderDash(){
 }
 
 
-function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map(b => `<div class="per" role="listitem"><span class="pain">${b[2 + i]}</span><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div></div>`).join(""); }
+// second pass: the before-to-after beat plays once, when the card is half in view
+(() => { const d = document.getElementById("diff"); if (!d || RM || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ setTimeout(() => d.classList.add("dgo"), 600); io.disconnect(); } }), {threshold: .5}); io.observe(d.querySelector(".dcard") || d); })();
+function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map((b, k) => `<div class="per" role="listitem"><span class="pain">${b[2 + i]}</span><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div><small class="pcost">${BEFORE_COST[k] ? BEFORE_COST[k][i] : ""}</small></div>`).join(""); }
 
 
 const isLg = () => innerWidth >= 1024;
@@ -4611,6 +4898,8 @@ function renderInd(k){
   document.querySelectorAll(".inb").forEach(b => { const on = +b.dataset.k === inK; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
   const key = IN_KEYS[inK], ct = document.getElementById("inCapT"); if (!ct) return;
   ct.textContent = t("in." + key); document.getElementById("inCapP").textContent = t("in." + key + "p");
+  const pm = document.getElementById("inPm"), rows = IND[inK] && IND[inK].rows, li = L(); // the sector's own permits, by name
+  if (pm) pm.innerHTML = rows ? (IND[inK].w ? `<li class="inpmh">${esc(IND[inK].t[li])}${li ? "，" : ", "}${esc(IND[inK].w[li])}</li>` : "") + rows.map(r => `<li>${esc(r[0][li])}</li>`).join("") : "";
   // phones: the picture opens right under the chosen sector, like an accordion; wider screens keep it on the right
   const pn = document.querySelector(".inpanel"), row = document.querySelector(".inrow"), btn = document.querySelector(`.inb[data-k="${inK}"]`);
   if (pn && row && btn){
@@ -4632,18 +4921,24 @@ function renderInd(k){
 function fitTable(){ document.querySelectorAll(".abox").forEach(box => { if (isLg()) { box.style.removeProperty("--ts"); return; } box.style.setProperty("--ts", (box.clientWidth / 600).toFixed(4)); }); }
 
 const CH = [
- {ic:"wechat",t:["WeChat with Placetta","微信联系快哉"]},
- {ic:"email",t:["email to Placetta","邮件联系快哉"]},
- {ic:"phone",t:["call with Placetta","电话联系快哉"]},
- {ic:"chat",t:["chat with Placetta","在线咨询快哉"]},
- {ic:"dash",t:["your dashboard","登录您的看板"]}
+ {ic:"wechat",t:["WeChat with our team","微信联系我们的团队"]},
+ {ic:"slack",t:["Slack with Odelia","在 Slack 与 Odelia 协作"]},
+ {ic:"lark",t:["Lark with Odelia","在飞书与 Odelia 协作"]},
+ {ic:"wa",t:["WhatsApp with Odelia","WhatsApp 联系 Odelia"]},
+ {ic:"im",t:["iMessage with Odelia","iMessage 联系 Odelia"]},
+ {ic:"email",t:["email to Odelia","给 Odelia 发邮件"]},
+ {ic:"phone",t:["call Odelia any time","随时致电 Odelia"]}
 ];
 const CHIC = {
  wechat:'<span class="ci" style="background:#2AAE67"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg></span>',
  email:'<span class="ci" style="background:#fff"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="2.2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>',
  phone:'<span class="ci" style="background:#34B36A"><svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg></span>',
  chat:'<span class="ci" style="background:#3B82F6"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 4c5 0 9 3.1 9 7s-4 7-9 7c-1 0-2-.1-2.9-.4L4 20l1.4-3.6C4 15 3 13.1 3 11c0-3.9 4-7 9-7z"/></svg></span>',
- dash:'<span class="ci orb"></span>'
+ dash:'<span class="ci orb"></span>',
+ slack:'<span class="ci" style="background:#4A154B"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg></span>',
+ lark:'<span class="ci" style="background:#3370FF"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg></span>',
+ wa:'<span class="ci" style="background:#25D366"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5zm-2.7 4.4c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z" fill-rule="evenodd"/></svg></span>',
+ im:'<span class="ci" style="background:#34C759"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg></span>'
 };
 let rIdx = 0;
 function renderRot(){
@@ -4713,8 +5008,10 @@ function renderXp(){
     let src = im, w = im.naturalWidth;
     while (w / 2 >= TP) { const h = document.createElement("canvas"); w = Math.round(w / 2); h.width = h.height = w; const hg2 = h.getContext("2d"); hg2.imageSmoothingQuality = "high"; hg2.drawImage(src, 0, 0, w, w); src = h; }
     const c = document.createElement("canvas"); c.width = c.height = TP; const cg = c.getContext("2d"); cg.imageSmoothingQuality = "high"; cg.drawImage(src, 0, 0, TP, TP); tiles[k] = c; };
-  for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => { ims[k] = im; mkTile(k);
-    if (++loaded === XPN && !run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
+  // Oct 18: the whale is drawn at once in plain tiles and each face fills in as its photo arrives, so the panel is never empty
+  let pend = false;
+  const redraw = () => { if (run || pend) return; pend = true; requestAnimationFrame(n => { pend = false; frame(n); }); };
+  for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => { ims[k] = im; mkTile(k); loaded++; redraw(); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
   const size = () => {
     if (W && cv.clientWidth === W) return;   // its height follows its width only: a phone's toolbar moving changes nothing here
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth;
@@ -4748,7 +5045,9 @@ function renderXp(){
   let sd = null;   // the still whale's pixels, read once per resize
   size(); addEventListener("resize", size);
   const face = (c, r) => ((c * 7 + r * 13) % XPN + XPN) % XPN;
+  const PH = ["#2C4A72", "#36557F", "#2F4E78", "#3B5B86"];   // placeholder tiles, in the whale's blues
   function frame(now){
+    if (!st.width || !st.height){ W = 0; size(); if (!st.width || !st.height){ if (run && !RM) requestAnimationFrame(frame); return; } }   // laid out at zero width: try again next frame
     const t = RM ? 0 : (now - t0) / 1000;
     const W4 = st.width, H4 = st.height, k = sc * SS, px = (offX + PX0 * sc) * SS, py = (offY + PY0 * sc) * SS;
     if (!sd || sd.width !== W4) sd = sg.getImageData(0, 0, W4, H4);
@@ -4791,6 +5090,7 @@ function renderXp(){
       if (G > 128) { g.fillStyle = "#0A1426"; g.fillRect(x, y, cell, cell); continue; }       // eye, mouth
       const k = face(c, rs), px = Math.round(x * dpr), py = Math.round(y * dpr);
       if (tiles[k]) { g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(tiles[k], px, py); g.setTransform(dpr, 0, 0, dpr, 0, 0); }
+      else { g.fillStyle = PH[k % 4]; g.fillRect(px / dpr, py / dpr, TP / dpr, TP / dpr); }
       // lit from above, darker toward the belly, with a band of light rippling along the body
       const v = rs / rows, shade = B > 128 ? .03 : Math.min(.32, Math.max(0, (v - .45) * .8)) - .02;   // light touch, so every face stays clear
       g.fillStyle = shade > 0 ? `rgba(11,22,42,${shade.toFixed(3)})` : `rgba(235,244,252,${(-shade).toFixed(3)})`;
@@ -4799,7 +5099,8 @@ function renderXp(){
     g.globalAlpha = 1;
     if (run && !RM) requestAnimationFrame(frame);
   }
-  new IntersectionObserver(es => es.forEach(e => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); })).observe(cv);
+  new IntersectionObserver(es => es.forEach(e => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); }), {rootMargin: "600px 0px"}).observe(cv);
+  frame(performance.now());   // the still whale on first paint
 })();
 
 /* industries art: each sector drawn as a mosaic of small tiles on the deep navy, the same way the experts' whale is
@@ -5079,17 +5380,18 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   const at = (ms, f) => timers.push(setTimeout(f, ms));
   const step = k => steps.forEach((li, i) => li.classList.toggle("on", i === k));
   const aim = el => { if (!el) return; const r = el.getBoundingClientRect(), w = win.getBoundingClientRect(), fld = el.classList.contains("ptf"); cur.style.transform = fld ? `translate(${r.right - w.left - 74}px,${r.top - w.top + r.height - 16}px)` : `translate(${r.left - w.left + Math.min(r.width - 20, 60)}px,${r.top - w.top + r.height / 2}px)`; };   // on a field she points at its right end, clear of the text she types
-  function reset(){ timers.forEach(clearTimeout); timers = []; win.className = "ptwin"; fs.forEach(f => { f.classList.remove("on", "done"); const v = f.querySelector(".ptv"); if (v) v.textContent = ""; }); toast.classList.remove("on"); step(-1); }
+  function reset(){ timers.forEach(clearTimeout); timers = []; win.className = "ptwin"; fs.forEach(f => { f.classList.remove("on", "done", "ask"); const v = f.querySelector(".ptv"); if (v) v.textContent = ""; }); toast.classList.remove("on"); step(-1); }
   function type(f, t0){ const v = f.querySelector(".ptv"), txt = v ? v.dataset.v : ""; at(t0, () => { fs.forEach(x => x.classList.remove("on")); f.classList.add("on"); aim(f); });
     if (v) for (let i = 1; i <= txt.length; i++) at(t0 + 300 + i * 34, () => { v.textContent = txt.slice(0, i); });
     return t0 + 300 + txt.length * 34 + 250; }
   function run(){
-    reset(); if (RM){ win.classList.add("s1"); fs.forEach(f => { const v = f.querySelector(".ptv"); if (v) v.textContent = v.dataset.v; f.classList.add("done"); }); toast.classList.add("on"); step(3); return; }
+    reset(); if (RM){ win.classList.add("s1"); fs.forEach(f => { const v = f.querySelector(".ptv"); if (v) v.textContent = v.dataset.v; f.classList.add("done", "ask"); }); toast.classList.add("on"); step(3); return; }
     step(0); at(500, () => win.classList.add("s1"));
     let t = 1400; at(t - 200, () => step(1));
-    fs.forEach(f => { t = type(f, t); at(t - 50, () => { f.classList.remove("on"); f.classList.add("done"); }); });
+    // the hours come from the owner's answer in Chinese: her WeChat reply shows first, then the field fills in English
+    fs.forEach(f => { if (f.classList.contains("ptzh")) { const t1 = t; at(t1, () => { fs.forEach(x => x.classList.remove("on")); f.classList.add("ask"); aim(f); }); t += 1200; } t = type(f, t); at(t - 50, () => { f.classList.remove("on"); f.classList.add("done"); }); });
     at(t + 200, () => { step(2); aim(btn); }); at(t + 900, () => { btn.classList.add("press"); setTimeout(() => btn.classList.remove("press"), 180); });
-    at(t + 1300, () => toast.classList.add("on")); at(t + 2600, () => step(3)); at(t + 5200, () => { if (on) run(); });
+    at(t + 1150, () => win.classList.add("s2")); at(t + 1300, () => toast.classList.add("on")); at(t + 2600, () => step(3)); at(t + 6200, () => { if (on) run(); });
   }
   new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !on){ on = true; run(); } else if (!e.isIntersecting && on){ on = false; reset(); } }), {threshold: .35}).observe(win);
 })();
@@ -5173,9 +5475,12 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
   document.querySelectorAll(".fcard").forEach(card => {
     const steps = [...card.querySelectorAll("[data-st]")], bar = card.querySelector(".fprog i"), chips = card.querySelectorAll(".fchips li").length;
     if (!steps.length) return;
-    const show = n => { steps.forEach((el, k) => el.classList.toggle("on", k < n)); if (bar) bar.style.width = Math.min(100, 100 * Math.min(n, chips) / chips) + "%"; };
+    const show = n => { steps.forEach((el, k) => el.classList.toggle("on", k < n)); if (bar && chips) bar.style.width = Math.min(100, 100 * Math.min(n, chips) / chips) + "%"; };
+    if (bar && !chips) bar.style.width = "37.5%";   // how it works: 3 of the plan's 8 requirements approved
     if (RM) { show(steps.length); return; }
     let k = 0, seen = false, t = 0;
+    // how it works: never a blank panel; everything but the toast and the button press is drawn before it scrolls in
+    if (card.closest("#how")) { const first = steps.findIndex(el => el.classList.contains("ftoast") || el.dataset.fx); k = first < 0 ? steps.length : first; show(k); }
     const tick = () => {
       if (!seen) { t = setTimeout(tick, 400); return; }
       if (k < steps.length) { k++; show(k); t = setTimeout(tick, Number(steps[Math.min(k, steps.length - 1)].dataset.ms) || 600); }
@@ -5225,7 +5530,7 @@ addEventListener("popstate", () => { const sec = PATH_SEC[location.pathname.repl
     document.querySelectorAll(".csplan").forEach(b => { b.textContent = t(b.parentElement.classList.contains("planopen") ? "cs.planx" : "cs.plan"); });
   };
   if (art && more) {
-    const fit = () => { const over = [...art.querySelectorAll(".xpflow")].some(f => f.scrollHeight > f.clientHeight + 2); more.hidden = !art.classList.contains("open") && !over; };
+    const fit = () => { const over = art.children.length > 3 || [...art.querySelectorAll(".xpflow")].some(f => f.scrollHeight > f.clientHeight + 2); more.hidden = !art.classList.contains("open") && !over; };
     more.addEventListener("click", () => { const on = art.classList.toggle("open"); more.setAttribute("aria-expanded", on); label(); fit(); });
     new MutationObserver(fit).observe(art, {childList: true}); addEventListener("resize", fit); setTimeout(fit, 400);
   }
