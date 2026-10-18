@@ -2433,6 +2433,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
             <button type="submit" class="btn b-white" data-i18n="st.btn">Get my plan</button>
           </form>
           <p class="stalt"><a href="/app/" data-track="hero_try_agent"><span data-i18n="hero.try">Put Odelia to work</span><i aria-hidden="true">→</i></a><a href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo"><span data-i18n="hero.demo">Book a demo</span><i aria-hidden="true">→</i></a><a href="#check" data-check data-track="hero_store_check"><span data-i18n="hero.check">Already open? Check your stores free</span><i aria-hidden="true">→</i></a></p>
+          <p class="stnote" id="stText" hidden></p>
         </div>
         <a class="hbk" href="/backers" data-sec="backers" id="hBk"></a>
       </div>
@@ -4504,6 +4505,28 @@ tsNext();
 /* ============ WeChat QR: set WECHAT_QR to the image path and it appears in the final call to action and the form ============ */
 const WECHAT_QR = "";
 if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getElementById("fqr").hidden = false; const q = document.getElementById("wtQrImg"); if (q){ q.src = WECHAT_QR; document.getElementById("wtQrT").setAttribute("data-i18n", "fqr.t"); document.getElementById("wtQrT").textContent = t("fqr.t"); } }
+
+/* ============ Text Odelia to start: one line under the hero's form, hidden until the founder sets Odelia's public
+   number (ODELIA_PUBLIC_NUMBER or ODELIA_PUBLIC_WHATSAPP on the odelia-sms function, which answers "line" with them) ============ */
+(function(){
+  const el = document.getElementById("stText");
+  if (!el) return;
+  let start = null;
+  function render(){
+    if (!start) { el.hidden = true; return; }
+    const zh = lang === "zh", eg = zh ? "奶茶店，纽约法拉盛" : "Milk tea shop in Flushing, NY", ways = [];
+    if (start.number) ways.push(`<a href="sms:${esc(start.number)}?&body=${encodeURIComponent(eg)}" data-track="hero_text_start">${esc(start.display || start.number)}</a>`);
+    if (start.whatsapp) ways.push(`<a href="https://wa.me/${esc(start.whatsapp.replace(/^\+/, ""))}?text=${encodeURIComponent(eg)}" target="_blank" rel="noopener" data-track="hero_whatsapp_start">WhatsApp</a>`);
+    if (start.wechat) ways.push(zh ? `微信公众号 ${esc(start.wechat)}` : `WeChat ${esc(start.wechat)}`);
+    const list = ways.length > 1 ? ways.slice(0, -1).join(zh ? "、" : ", ") + (zh ? " 或 " : " or ") + ways[ways.length - 1] : ways[0];
+    el.innerHTML = zh ? `<span>不想填表？把一句话发给 Odelia，例如“${eg}”：${list}</span>` : `<span>No forms: text Odelia one line, like “${eg}”, at ${list}</span>`;
+    el.hidden = false;
+  }
+  // the page's language switch sets <html lang>: say it again in the new language
+  new MutationObserver(render).observe(document.documentElement, {attributes: true, attributeFilter: ["lang"]});
+  fetch(SUPA + "/functions/v1/odelia-sms", {method: "POST", headers: {"Content-Type": "application/json"}, body: '{"action":"line"}'})
+    .then(r => r.ok ? r.json() : null).then(j => { const s = j && j.start; start = s && (s.number || s.whatsapp) ? s : null; render(); }).catch(() => {});
+})();
 
 /* ============ boot ============ */
 /* ============ restored sections (from the earlier site) ============ */
