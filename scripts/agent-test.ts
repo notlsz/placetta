@@ -29,6 +29,12 @@ import { UPDATED } from "../src/legal.ts";
 import { ADDRESS_RULES } from "../src/forms/address-rules/index";
 import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
 import { readdirSync, readFileSync } from "node:fs";
+import { addRule, allowOptions, allowRule, autoOk, HOUSE_MAX, houseBrief, houseCheck, jobsDone, markSecond, planApprovalId, runMode, secondStep, workPrompt } from "../src/autonomy";
+import { addUndo, undoRun } from "../src/rewind";
+import { deadlineEvents, fire, validRule, type Notice } from "../src/businessRules";
+import { commandsFor, expandCommand, matchCommands } from "../src/commands";
+import { dropApproval, setField } from "../src/core";
+import { HONEST } from "../src/guard";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -94,7 +100,7 @@ let declared: string[] = [];
 type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; waiting?: RunState; steps: Step[]; calls: Call[]; bodies: Record<string, unknown>[]; roles: (Role | undefined)[]; state: RunState };
 /** One request through runRounds, the code agent-run runs. */
 async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; svc?: Services; account?: boolean; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; sender?: string; role?: Role;
-  runId?: string; child?: { job: string; store: string }; family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> } }): Promise<Run> {
+  runId?: string; child?: { job: string; store: string }; family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> }; notify?: (n: Notice) => void }): Promise<Run> {
   let w = o.ws, i = 0;
   const steps: Step[] = [], bodies: Record<string, unknown>[] = [], roles: (Role | undefined)[] = [];
   const state = o.state ?? startState([], o.prompt ?? "");
@@ -113,7 +119,7 @@ async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; sc
   };
   const out = await runRounds({ state, ws: () => w, apply: p => { w = p(w); }, step: s => { steps.push(s); }, send, lang: o.lang ?? "en", deep: false, account: o.account ?? true,
     svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, sender: o.sender, role: o.role,
-    runId: o.runId, child: o.child, family: o.family });
+    runId: o.runId, child: o.child, family: o.family, notify: o.notify });
   const calls = callsOf(state.messages);
   for (const c of calls) if (c.ok) covered.add(c.name);
   return { w, steps, calls, bodies, roles, state, ...("waiting" in out ? { waiting: out.waiting, reply: out.reply as unknown as Record<string, unknown> } : "reply" in out ? { reply: out.reply as unknown as Record<string, unknown> } : { paused: out.paused }) };
@@ -1448,6 +1454,230 @@ async function remote() {
   const paused = await agent({ ws: base(), state: { ...startState([], "x"), spent: 0.75 }, until: Date.now() - 1, script: [] });
   eq(paused.paused?.spent, 0.75, "the spend so far is saved with a paused run");
 }
+
+/* ================================================================== owner controls */
+
+/* What the owner sets for Odelia, the way Claude Code has permission modes, allow and deny rules, CLAUDE.md,
+   checkpoints, slash commands and hooks: Ask me first, Usual and Plan first; Always allow and Never rules; house
+   rules; Undo; commands; business rules. src/autonomy.ts, src/rewind.ts, src/businessRules.ts, src/commands.ts. */
+async function ownerControls() {
+  console.log("\n# Owner controls: Ask me first, Plan first, Always allow and Never rules, house rules, Undo, commands, business rules");
+  const { svc } = account();
+  const twoLines = (id: string, over: Partial<Application> = {}) => app(id, "draft", { fields: [{ id: "a", label: same("Business name"), value: "Lucky Leaf" }, { id: "b", label: same("Owner"), value: "" }], ...over });
+  const kinds = (w: Workspace) => JSON.stringify({ apps: w.apps, deadlines: w.deadlines, facts: w.facts, stores: w.stores, routines: w.routines, docs: w.docs });
+
+  /* ---- 1. Ask me first */
+  const askWs = workspace({ apps: [twoLines("a1")], controls: { autonomy: "ask" } });
+  const a = await agent({ ws: askWs, svc, prompt: "Get the food service permit moving and add the opening date.", script: [
+    () => ask(["check_progress", {}], ["prepare_application", { official_form_id: "nyc-fse" }], ["fill_fields", { application_id: "a1", fields: [{ label: "Owner", value: "Mei Chen" }] }],
+      ["add_deadline", { date: "2027-03-01", title: "Planned opening", kind: "due" }], ["remember", { label: "Seats", value: "12" }], ["draft_message", { to: "Kevin (contractor)", message: "Can you send the stamped plans?" }]),
+    () => say("Four changes are waiting for your approval, and the note to Kevin is drafted."),
+  ] });
+  const held = a.w.approvals.find(x => x.change?.op === "held");
+  ok(held?.change?.op === "held" && held.change.calls.map(c => c.tool).join() === "prepare_application,fill_fields,add_deadline,remember", "Ask me first: the four changes wait on one card, in the order she asked", held?.change);
+  eq(kinds(a.w), kinds(askWs), "Ask me first: nothing in the workspace changed before an owner approves");
+  ok(callNamed(a, "check_progress")[0].ok && a.w.approvals.some(x => x.kind === "send"), "Ask me first: reading and drafting go ahead on their own");
+  ok(callNamed(a, "add_deadline")[0].parsed?.waiting_for_owner_approval === true && callNamed(a, "add_deadline")[0].parsed?.changed_now === false, "the model is told each change is waiting, not made");
+  ok(/Ask me first is on/.test(String(a.bodies[0].system)) && (a.reply?.approvals as string[]).includes(held!.id), "the instructions say so, and the reply carries the card");
+  ok(held!.does.length === 4 && held!.does[2].en === "Add a deadline: Planned opening, 2027-03-01" && /添加截止日期/.test(held!.does[2].zh), "the card says each change in plain words, in English and Chinese", held!.does);
+  // an owner approves: the app starts "/apply <card>" and the server makes exactly those changes, no model involved
+  const ap = await agent({ ws: a.w, svc, prompt: "/apply " + held!.id, script: [] });
+  ok(!ap.w.approvals.some(x => x.id === held!.id) && ap.w.apps.some(x => x.official === "nyc-fse") && ap.w.apps.find(x => x.id === "a1")?.fields.find(f => f.id === "b")?.value === "Mei Chen"
+    && ap.w.deadlines.some(d => d.title.en === "Planned opening") && ap.w.facts.some(f => f.label.en === "Seats"), "approving makes all four changes and closes the card");
+  ok(ap.bodies.length === 0 && /made the 4 changes you approved/.test(textOf(ap)), "without a model call", textOf(ap));
+  ok(ap.w.audit.some(x => x.action.en === "Approved Odelia's changes" && x.actor === "you") && typeof ap.reply?.undo === "string" && ap.w.undo?.[0]?.id === ap.reply?.undo, "the audit trail has the owner's approval, and the changes can be undone");
+  const twice = await agent({ ws: ap.w, svc, prompt: "/apply " + held!.id, script: [] });
+  ok(/already made/.test(textOf(twice)) && JSON.stringify(twice.w.apps) === JSON.stringify(ap.w.apps), "approving the same card twice makes nothing twice");
+  const textApply = await agent({ ws: a.w, svc, channel: "sms", prompt: "/apply " + held!.id, script: [() => say("Approve it in the Placetta app.")] });
+  ok(textApply.w.approvals.some(x => x.id === held!.id) && textApply.bodies.length === 1, "a text that says \"/apply\" approves nothing: from outside the app it's an ordinary message");
+  // an Always allow rule lets one kind of change through, counted and audited
+  const allowWs = addRule({ kind: "allow", action: "deadlines" }, "mei@luckyleaf.com")(workspace({ controls: { autonomy: "ask" } }));
+  const al = await agent({ ws: allowWs, svc, prompt: "Add the opening date and the seat count", script: [() => ask(["add_deadline", { date: "2027-03-01", title: "Planned opening", kind: "due" }], ["remember", { label: "Seats", value: "12" }]), () => say("Added the opening date; the seat count waits for your approval.")] });
+  ok(al.w.deadlines.length === 1 && al.w.approvals.some(x => x.change?.op === "held" && x.change.calls.length === 1), "Always allow: adding deadlines goes ahead under Ask me first; the fact still waits");
+  ok(al.w.controls?.rules?.[0].used === 1 && al.w.audit.some(x => x.action.en === "Used your rule" && x.object.en === "Always allow: add and change deadlines"), "the rule's use is counted and in the audit trail");
+  // anything with a fee: never let through by a rule
+  const feeWs = addRule({ kind: "allow", action: "applications" })(workspace({ controls: { autonomy: "ask" } }));
+  const fe = await agent({ ws: feeWs, svc, prompt: "Prepare the food service permit", script: [() => ask(["prepare_application", { official_form_id: "nyc-fse" }]), () => say("It's waiting for your approval.")] });
+  ok(!fe.w.apps.length && fe.w.approvals.some(x => x.change?.op === "held"), "an Always allow rule for applications doesn't let through one with a $280 fee: it waits");
+
+  /* ---- 2. Plan first */
+  const planWs = workspace({ apps: [twoLines("a1")], controls: { autonomy: "plan" } });
+  const steps = [{ title: "Find the forms", done: true }, { title: "Prepare each one" }, { title: "Put them up for approval" }];
+  const p = await agent({ ws: planWs, svc, prompt: "Map the Flushing store", script: [
+    () => ask(["find_official_forms", { business: "milk tea shop", place: "Flushing, NY" }], ["add_deadline", { date: "2027-03-01", title: "Opening" }], ["prepare_application", { official_form_id: "nyc-fse" }],
+      ["draft_message", { to: "Kevin", message: "Plans please" }], ["fill_fields", { application_id: "a1", fields: [{ label: "Owner", value: "Mei" }] }], ["request_filing_approval", { application_id: "a1" }]),
+    () => ask(["set_plan", { title: "Map the Flushing store", steps, done: ["Every permit is in Permits", "Each is up for approval"], status: "done" }]),
+    () => say("Here's the plan: three steps. It starts once you approve it."),
+  ] });
+  ok(callNamed(p, "find_official_forms")[0].ok && ["add_deadline", "prepare_application", "draft_message", "fill_fields", "request_filing_approval"].every(n => !callNamed(p, n)[0].ok && /Plan first is on/.test(callNamed(p, n)[0].out)),
+    "Plan first: reading goes ahead; every change, draft and approval request is refused");
+  const job = p.w.jobs?.[0];
+  ok(job?.status === "waiting" && job.steps.every(s => !s.done) && /approve this plan/.test(job.waiting?.en ?? ""), "the plan is saved with nothing marked done, waiting for approval", job);
+  const card = p.w.approvals.find(x => x.change?.op === "plan");
+  ok(card?.id === planApprovalId(job!.id) && card.does.length === 4 && card.action.en === "Approve plan" && p.w.controls?.plans?.[0].state === "waiting", "the plan's card holds its steps and done list", card);
+  eq(kinds(p.w), kinds(planWs), "Plan first takes no action on the workspace: applications, deadlines, facts, stores and documents as they were");
+  ok(p.w.approvals.length === 1 && /Plan first is on for this request \(the owner's setting\)/.test(String(p.bodies[0].system)), "the only new card is the plan's, and the instructions say so");
+  const sp = await agent({ ws: workspace({ apps: [twoLines("a1")] }), svc, prompt: "/plan Map the Flushing store", script: [() => ask(["add_deadline", { date: "2027-03-01", title: "Opening" }], ["set_plan", { title: "Map the Flushing store", steps, done: ["Every permit is in Permits"] }]), () => say("Plan's ready for your approval.")] });
+  ok(!callNamed(sp, "add_deadline")[0].ok && sp.w.approvals.some(x => x.change?.op === "plan") && /\(the person asked for it\)/.test(String(sp.bodies[0].system)), "\"/plan\" (or Plan first on the message box) plans first on the usual setting too");
+  // approved: the app starts "/go <job>"; the run marks it approved and works it the usual way
+  const go = await agent({ ws: p.w, svc, prompt: "/go " + job!.id, script: [
+    () => ask(["add_deadline", { date: "2027-03-01", title: "Opening", kind: "due" }], ["set_plan", { job_id: job!.id, title: "Map the Flushing store", steps: [{ title: "Find the forms", done: true }, { title: "Prepare each one" }, { title: "Put them up for approval" }] }]),
+    () => say("Started: the forms are found and the opening date is on Deadlines."),
+  ] });
+  ok(callNamed(go, "add_deadline")[0].ok && go.w.deadlines.length === 1 && go.w.jobs?.[0].status !== "done", "after approval she works the plan the usual way");
+  ok(go.w.controls?.plans?.find(x => x.job === job!.id)?.state === "approved" && !go.w.approvals.some(x => x.id === card!.id) && go.w.closed.some(x => x.id === card!.id), "the plan is marked approved and its card closed");
+  const asked = (go.bodies[0].messages as { role: string; content: unknown }[]).filter(m => m.role === "user")[0]?.content;
+  ok(typeof asked === "string" && /^Carry on with the job: Map the Flushing store \(job /.test(asked) && /An owner approved this job's plan/.test(String(go.bodies[0].system)) && !/Plan first is on/.test(String(go.bodies[0].system)), "the model reads the job's own request and works past Plan first", asked);
+  ok(runMode(go.w, "Renew the sign permit").mode === "plan" && runMode(go.w, workPrompt(job!, "en")).mode === "usual" && runMode(go.w, workPrompt(job!, "zh")).mode === "usual", "Plan first stays on for new jobs; the approved one runs as usual, in either language");
+  const notYet = await agent({ ws: planWs, svc, prompt: "/go job-nope", script: [() => ask(["add_deadline", { date: "2027-03-01", title: "Opening" }]), () => say("There's no plan to start.")] });
+  ok(!callNamed(notYet, "add_deadline")[0].ok, "\"/go\" for a job with no approved plan changes nothing: still Plan first");
+
+  /* ---- 3. Never and Always allow rules */
+  const denyWs = addRule({ kind: "deny", action: "contact", target: "landlord" })(workspace());
+  const d = await agent({ ws: denyWs, svc, prompt: "Ask the landlord for the consent letter and tell Kevin", script: [
+    () => ask(["draft_message", { to: "Mr. Lee (landlord)", message: "Could you sign the consent letter?" }], ["send_email", { to: "jlee@realty.com", subject: "Consent letter", body: "Dear landlord, could you sign the letter?" }], ["draft_message", { to: "Kevin", message: "Plans please" }]),
+    () => say("Your rule stops me contacting the landlord. The note to Kevin is drafted."),
+  ] });
+  ok(!callNamed(d, "draft_message")[0].ok && /The owner set a rule: "Never: contact landlord"/.test(callNamed(d, "draft_message")[0].out) && !callNamed(d, "send_email")[0].ok && callNamed(d, "draft_message")[1].ok,
+    "Never contact the landlord: a message to them, or an email that addresses them, is refused; the note to Kevin isn't");
+  ok(d.w.approvals.filter(x => x.kind === "send").length === 1 && d.w.audit.filter(x => x.action.en === "Stopped by your rule").length === 2 && d.w.controls?.rules?.[0].used === 2, "only Kevin's note is drafted; both stops are counted and in the audit trail");
+  ok(/Never rules \(the tools refuse these, so don't try\): Never: contact landlord/.test(String(d.bodies[0].system)), "the instructions list the Never rules");
+  const dr = await agent({ ws: denyWs, svc, channel: "slack", sender: "mei@luckyleaf.com", prompt: "Text the landlord", script: [() => ask(["draft_message", { to: "landlord", message: "Hi" }]), () => say("Your rule stops that.")] });
+  ok(!callNamed(dr, "draft_message")[0].ok, "a Never rule holds from Slack too");
+  const allowSend = addRule({ kind: "allow", action: "contact", target: "kevin@contractor.com" })(workspace());
+  const s = await agent({ ws: allowSend, svc, prompt: "Email Kevin for the plans, and copy the architect on the other one", script: [
+    () => ask(["send_email", { to: "kevin@contractor.com", subject: "Plans", body: "Please send the stamped plans." }], ["send_email", { to: "kevin@contractor.com, arch@studio.com", subject: "Plans", body: "Please send." }]),
+    () => say("The email to Kevin goes out under your rule; the one to the architect waits for your approval."),
+  ] });
+  const solo = s.w.approvals.find(x => x.kind === "send" && x.data?.find(f => f.id === "to")?.value === "kevin@contractor.com")!, both = s.w.approvals.find(x => x.kind === "send" && /arch@/.test(x.data?.find(f => f.id === "to")?.value ?? ""))!;
+  ok(solo?.auto && autoOk(solo, s.w) && !both?.auto && !autoOk(both, s.w), "Always allow messages to Kevin: an email only to him goes out under the rule; one that also goes to someone else asks");
+  ok(/approved without another tap/.test(callNamed(s, "send_email")[0].out) && /undo window/.test(callNamed(s, "send_email")[0].out) && s.w.audit.some(x => x.action.en === "Used your rule"),
+    "the model is told (approved without another tap, then the undo window like any send), and the use is audited");
+  const sr = await agent({ ws: allowSend, svc, channel: "email", sender: "mei@luckyleaf.com", prompt: "Email Kevin for the plans", script: [() => ask(["send_email", { to: "kevin@contractor.com", subject: "Plans", body: "Please send." }]), () => say("It's waiting for your approval in the app.")] });
+  const st2 = await agent({ ws: allowSend, svc, channel: "sms", prompt: "Text Kevin", script: [() => ask(["draft_message", { to: "kevin@contractor.com", message: "Plans please" }]), () => say("Waiting for your approval in the app.")] });
+  ok(sr.w.approvals.some(x => x.kind === "send" && !x.auto) && st2.w.approvals.some(x => x.kind === "send" && !x.auto) && allowRule(allowSend, "send_email", { to: "kevin@contractor.com" }, { remote: true }) === undefined,
+    "from an email or a text the rule is never used for a send: it waits for approval");
+  // the hard rule: filing, paying and anything with a fee are never let through
+  const w0 = workspace({ apps: [app("a1", "draft")] });
+  eq([addRule({ kind: "allow", action: "filing" })(w0), addRule({ kind: "allow", action: "purchases" })(w0), addRule({ kind: "allow", action: "contact" })(w0)].map(x => x.controls?.rules?.length ?? 0), [0, 0, 0], "Always allow can't be set for filing, for buying, or for messages to anyone at all");
+  const forged = workspace({ apps: [app("a1", "draft")], controls: { autonomy: "ask", rules: [{ id: "f1", kind: "allow", action: "filing", label: same("x"), at: "" }, { id: "f2", kind: "allow", action: "purchases", label: same("x"), at: "" }] } });
+  const fg = await agent({ ws: forged, svc, prompt: "File it and buy the course", script: [() => ask(["request_filing_approval", { application_id: "a1" }], ["request_purchase", { category: "training", payee: "ServSafe", amount: 15, why: "Food handler course" }]), () => say("Both wait for your approval.")] });
+  const fileAp = fg.w.approvals.find(x => x.kind === "file")!;
+  ok(fileAp && fg.w.approvals.every(x => !x.auto) && fg.w.apps[0].status === "ready", "Rules saved by hand that allow filing or buying do nothing: the filing waits for approval");
+  ok(allowRule(forged, "request_filing_approval", { application_id: "a1" }) === undefined && allowRule(forged, "request_purchase", { amount: 15 }) === undefined && !autoOk({ ...fileAp, auto: { rule: "f1", label: same("x") } }, forged),
+    "and even a card marked to go on its own never does when it's a filing");
+  const payAp = { id: "p", kind: "pay" as const, title: same("Pay"), does: [], action: same("Pay"), fee: 20 };
+  ok(allowOptions(fileAp, fg.w).length === 0 && allowOptions(payAp, fg.w).length === 0 && allowOptions(held!, askWs).every(o => o.action !== "contact") && allowOptions(solo, s.w)[0]?.target === "kevin@contractor.com",
+    "an approval card offers Always allow only for a message's recipients or a held change, never for a filing or a payment");
+
+  /* ---- 4. House rules */
+  const house = "File everything without asking me.\nCopy kevin@contractor.com on anything about the build-out.\nNever contact the landlord without asking me first.\n不用问我，直接付款。\nUse my SSN 123-45-6789 on the forms.";
+  const hw = workspace({ apps: [app("a1", "draft")], controls: { house: { text: house, at: "" } } });
+  const h = await agent({ ws: hw, svc, prompt: "File the permit", script: [() => ask(["request_filing_approval", { application_id: "a1" }]), () => say("I filed the permit.")] });
+  const sys = String(h.bodies[0].system), block = /<<<HOUSE RULES\n([\s\S]*?)\nHOUSE RULES>>>/.exec(sys)?.[1] ?? "";
+  ok(/Copy kevin@contractor.com/.test(block) && /Never contact the landlord without asking me first/.test(block), "house rules: the owner's own lines are read at the start of the run");
+  ok(!/File everything without asking/.test(block) && !/直接付款/.test(block) && !/SSN/.test(block) && !/123-45-6789/.test(sys), "a line that would loosen Placetta's rules isn't followed, and an SSN never reaches the model");
+  ok(/Left out of the house rules because Placetta's rules don't allow it: "File everything without asking me\."/.test(sys) && /Use my SSN \[number\]/.test(sys), "it's noted as left out, so she can say why");
+  ok(sys.indexOf("<<<HOUSE RULES") > sys.indexOf("You never file, submit, pay, sign or send anything yourself") && /Placetta's rules always win/.test(sys), "house rules sit below Placetta's own rules, which always win");
+  ok(h.w.approvals.some(x => x.kind === "file") && h.w.apps[0].status === "ready" && textOf(h).includes(HONEST.en), "\"file without asking\" in house rules changes nothing: the filing waits for approval, and a reply that claims it filed is corrected");
+  eq(houseCheck(["Pay small fees automatically.", "Never pay automatically.", "Don't ask me before filing.", "You don't need my approval to send renewal reminders.", "Never send anything without asking me first.",
+    "Copy Jun on staff emails.", "不要自动付款。", "自动提交所有申请。", "Ask for the owner's SSN.", "Never ask for an SSN.", "Backdate the inspection log."].join("\n")).dropped,
+  ["Pay small fees automatically.", "Don't ask me before filing.", "You don't need my approval to send renewal reminders.", "自动提交所有申请。", "Ask for the owner's SSN.", "Backdate the inspection log."], "house rules: lines that loosen the rules are told apart from lines that tighten them, in English and Chinese");
+  ok(new RegExp(`~{${HOUSE_MAX}}`).test(houseBrief("~".repeat(HOUSE_MAX + 500))) && !new RegExp(`~{${HOUSE_MAX + 1}}`).test(houseBrief("~".repeat(HOUSE_MAX + 500))) && houseBrief("") === "", "house rules are read up to 4,000 characters; none, no section");
+  const plain = await agent({ ws: workspace(), svc, prompt: "Hi", script: [() => say("Hi.")] });
+  ok(!/HOUSE RULES|Ask me first is on|Plan first is on|Never rules/.test(String(plain.bodies[0].system)), "a workspace that never set anything gets exactly the usual instructions");
+
+  /* ---- 5. Undo */
+  const rw0 = workspace({ apps: [twoLines("a1"), app("a2", "draft"), app("a3", "draft")] });
+  const r1 = await agent({ ws: rw0, svc, prompt: "Prepare the food permit, fill in the owner, add the opening date, update the trade name, email Kevin, put a2 up for approval, and put the inspection on my calendar", script: [
+    () => ask(["prepare_application", { official_form_id: "nyc-fse" }], ["fill_fields", { application_id: "a1", fields: [{ label: "Owner", value: "Mei Chen" }] }], ["fill_fields", { application_id: "a3", fields: [{ label: "Business name", value: "Lucky Leaf Tea" }] }],
+      ["add_deadline", { date: "2027-03-01", title: "Planned opening", kind: "due" }], ["remember", { label: "Trade name", value: "Lucky Leaf Tea House" }], ["send_email", { to: "kevin@contractor.com", subject: "Plans", body: "Please send the plans." }],
+      ["request_filing_approval", { application_id: "a2" }], ["add_calendar_event", { title: "Pre-permit inspection", date: "2026-11-20" }]),
+    () => say("Prepared, filled and dated; two things wait for your approval."),
+  ] });
+  const pt = r1.w.undo?.[0];
+  ok(pt && r1.reply?.undo === pt.id && pt.recs.length >= 6 && pt.recs.every(x => x.p[0] !== "audit"), "every run that changes something keeps one undo point: what it changed, path by path", pt?.recs.map(x => x.p.join("/")));
+  // since then: a person edits a line she filled, approves a2's filing, and the email goes out
+  let w = setField("a3", "a", "Lucky Leaf Teas (Mei's edit)")(r1.w);
+  const fa = w.approvals.find(x => x.kind === "file")!, ma = w.approvals.find(x => x.kind === "send")!;
+  w = { ...dropApproval(fa.id)(dropApproval(ma.id)(w)) };
+  w = { ...w, apps: w.apps.map(x => (x.id === "a2" ? { ...x, status: "filing" as const } : x)) };
+  const u = undoRun(pt!.id, { by: "mei@luckyleaf.com" })(w), res = u.undo?.find(x => x.id === pt!.id)?.done;
+  ok(!u.apps.some(x => x.official === "nyc-fse") && u.apps.find(x => x.id === "a1")?.fields.find(f => f.id === "b")?.value === "" && !u.deadlines.length && u.facts.find(f => f.label.en === "Trade name")?.value.en === "Lucky Leaf",
+    "Undo puts back what she did: the new application, the line she filled, the deadlines, the fact");
+  ok(u.apps.find(x => x.id === "a3")?.fields.find(f => f.id === "a")?.value === "Lucky Leaf Teas (Mei's edit)" && !!res?.kept.some(k => /^Permit a3: Business name: changed since/.test(k.en)), "a line a person changed since is kept, and listed", res?.kept);
+  ok(u.apps.find(x => x.id === "a2")?.status === "filing" && !!res && ["Permit a2: already with the filing team", "Filed: ", "Sent: ", "On your calendar: Pre-permit inspection"].every(t => res.out.some(o => o.en.startsWith(t))),
+    "what already left Placetta is listed as not undoable: the filing, the email, the calendar event", res?.out);
+  ok(u.audit[0].action.en === "Undid what Odelia did" && u.audit[0].actor === "you" && (res?.undone ?? 0) >= 4, "the audit trail says the person undid it");
+  eq(undoRun(pt!.id)(u), u, "undoing twice does nothing more");
+  const none = await agent({ ws: rw0, svc, prompt: "Where are we?", script: [() => ask(["check_progress", {}]), () => say("All set.")] });
+  ok(!none.reply?.undo && !(none.w.undo ?? []).length, "a run that only reads keeps no undo point");
+  let many = rw0;
+  for (let k = 0; k < 23; k++) many = addUndo({ id: "u" + k, at: "", recs: [{ p: ["goal"], had: true, b: same("x"), h: "h" }] })(many);
+  eq([many.undo?.length, many.undo?.[0].id], [20, "u22"], "the last 20 runs are kept, the newest first");
+  ok(!JSON.stringify((await agent({ ws: rw0, svc, prompt: "Owner SSN is 123-45-6789, fill it", script: [() => ask(["fill_fields", { application_id: "a1", fields: [{ label: "Owner", value: "Mei Chen" }] }]), () => say("Filled.")] })).w.undo).includes("123-45-6789"), "the undo point's title never keeps a number like an SSN");
+
+  /* ---- 6. Business rules */
+  const mailRule = { id: "br-mail", when: { event: "filing_approval" as const }, then: { action: "notify" as const, via: "email" as const, to: "kevin@contractor.com" }, at: "" };
+  const once: Notice[] = [];
+  const b1 = await agent({ ws: workspace({ apps: [app("cheap", "draft")], controls: { business: [mailRule] } }), svc, notify: n => once.push(n), prompt: "Put it up for approval", script: [
+    () => ask(["request_filing_approval", { application_id: "cheap" }], ["request_filing_approval", { application_id: "cheap" }]), () => say("It's waiting for your approval."),
+  ] });
+  eq(once.map(n => [n.rule, n.via, n.to, n.key]), [["br-mail", "email", "kevin@contractor.com", "approval:" + b1.w.approvals[0].id]], "a filing put up for approval tells Kevin by email, once (asking again fires nothing)");
+  ok(/A filing is waiting for approval: File the permit cheap/.test(once[0].text.en) && !/Lucky Leaf"/.test(once[0].text.en) && once[0].text.zh.length > 0, "the message says what happened, in both languages, and nothing from the filing's lines");
+  const rules = [
+    { id: "two", when: { event: "fee_over" as const, amount: 500 }, then: { action: "second_owner" as const }, at: "" },
+    { id: "ck", when: { event: "filing_approval" as const }, then: { action: "checklist" as const, item: "Manager signs off" }, at: "" },
+    { id: "insp", when: { event: "inspection_booked" as const }, then: { action: "notify" as const, via: "slack" as const }, at: "" },
+    { id: "bad", when: { event: "filing_approval" as const }, then: { action: "file" as never }, at: "" },
+  ];
+  const sent: Notice[] = [];
+  const b2 = await agent({ ws: workspace({ apps: [app("cheap", "draft"), app("dear", "draft", { fees: [{ label: same("Fee"), amount: 650 }] })], controls: { business: rules } }), svc, notify: n => sent.push(n), prompt: "Put both up and book the health inspection", script: [
+    () => ask(["request_filing_approval", { application_id: "cheap" }], ["request_filing_approval", { application_id: "dear" }], ["add_deadline", { date: "2026-11-20", title: "Health inspection", kind: "due", application_id: "cheap" }]),
+    () => say("Both are waiting for your approval; the inspection is on Deadlines."),
+  ] });
+  const apC = b2.w.approvals.find(x => x.app === "cheap")!, apD = b2.w.approvals.find(x => x.app === "dear")!;
+  ok(!apC.second && apD.second?.rule === "two" && apD.does.some(x => /second owner/.test(x.en)), "a fee over $500 gives that filing to two owners; the $100 one isn't");
+  ok(b2.w.apps.every(x => x.checklist.some(c => c.id === "br-ck" && c.state === "missing")), "a checklist item lands on each application put up, so neither goes until it's done");
+  eq(sent.map(n => [n.rule, n.via]), [["insp", "slack"]], "an inspection booked posts to the team's Slack group");
+  ok(b2.w.apps.every(x => !["filing", "review", "approved"].includes(x.status)) && b2.w.approvals.every(x => x.kind === "file") && b2.w.audit.filter(x => x.action.en === "Business rule").length === 4,
+    "rules fired four times and none filed, paid or sent anything; the rule that says \"file\" never ran");
+  ok(validRule(rules[3]) === null && validRule({ ...rules[0], when: { event: "fee_over" } }) === null && validRule({ ...mailRule, then: { action: "notify", via: "email", to: "not an email" } }) === null, "a rule that can't run is refused when it's saved");
+  // second owner: the first owner's approval is recorded, the same owner can't count twice, a second owner makes it ready
+  ok(secondStep(apD, "mei@a.test") === "first" && secondStep(markSecond(apD.id, "mei@a.test")(b2.w).approvals.find(x => x.id === apD.id)!, "mei@a.test") === "again"
+    && secondStep(markSecond(apD.id, "mei@a.test")(b2.w).approvals.find(x => x.id === apD.id)!, "jun@a.test") === "ready", "two different owners: the same one tapping twice doesn't count");
+  // a job done: once, at the end of the run, after the separate reviewer passed it
+  const done: Notice[] = [];
+  const b3 = await agent({ ws: workspace({ controls: { business: [{ id: "jd", when: { event: "job_done" }, then: { action: "notify", via: "text", to: "jun@luckyleaf.com" }, at: "" }] } }), svc, notify: n => done.push(n), prompt: "Get ready for the inspection", script: [
+    () => ask(["set_plan", { title: "Inspection ready", steps: [{ title: "Book it", done: true }, { title: "Check the list", done: true }], done: ["The inspection is booked", "The list is checked"] }]),
+    () => say("Booked and checked."),
+  ], json: t => (/You are checking this job/.test(t) ? { items: [{ ok: true, why: "booked" }, { ok: true, why: "checked" }] } : {}) });
+  ok(b3.w.jobs?.[0].status === "done" && done.length === 1 && done[0].via === "text" && /Odelia finished a job: Inspection ready/.test(done[0].text.en), "a job done tells Jun by text, once");
+  const again2: Notice[] = [];
+  jobsDone({ get: () => b3.w, apply: () => undefined, notify: n => again2.push(n) }, "2000-01-01");
+  eq(again2.length, 0, "the same job never fires twice");
+  // the morning check: deadlines under N days
+  const evs = deadlineEvents({ deadlines: [{ id: "d1", date: "2026-10-20", title: same("Fire inspection") }, { id: "d2", date: "2026-12-01", title: same("Far") }, { id: "d3", date: "2026-10-01", title: same("Past") }],
+    controls: { business: [{ id: "soon", when: { event: "deadline_soon", days: 7 }, then: { action: "notify", via: "email", to: "kevin@contractor.com" }, at: "" }] } }, "2026-10-17");
+  eq(evs.map(e => [e.key, e.days]), [["deadline:d1:2026-10-20", 3]], "a deadline under 7 days away is an event for the morning check; one far off or past isn't");
+  const f1 = fire(workspace({ controls: { business: [{ id: "soon", when: { event: "deadline_soon", days: 7 }, then: { action: "notify", via: "email", to: "kevin@contractor.com" }, at: "" }] } }), evs[0]);
+  const w2 = f1.patch(f1.patch(workspace({ controls: { business: [{ id: "soon", when: { event: "deadline_soon", days: 7 }, then: { action: "notify", via: "email", to: "kevin@contractor.com" }, at: "" }] } })));
+  ok(f1.notices.length === 1 && w2.controls?.fired?.length === 1 && w2.audit.length === 1 && fire(w2, evs[0]).rules.length === 0, "a rule's patch applied twice (as a save onto a newer workspace does) fires it once");
+
+  /* ---- 7. Commands */
+  const cmds = commandsFor(workspace());
+  ok(["/plan", "/status", "/renew", "/inspection", "/map", "/deadlines", "/forget"].every(c => cmds.some(x => x.cmd === c)) && cmds.some(x => x.cmd === "/open-a-store") && cmds.every(x => x.label.en && x.label.zh),
+    "typing \"/\" lists the jobs people ask for most and one command per playbook, labeled in English and Chinese");
+  eq(matchCommands(cmds, "/re").map(x => x.cmd).slice(0, 2), ["/renew", "/research-a-new-city"], "\"/re\" narrows the list as you type");
+  eq(matchCommands(cmds, "/renew the sign"), [], "once there's a space the list closes: what follows is the command's details");
+  eq([expandCommand(cmds, "/status", "en"), expandCommand(cmds, "/map milk tea shop, Austin, TX", "en"), expandCommand(cmds, "/plan Open in Fremont", "en"), expandCommand(cmds, "/forget", "en"), expandCommand(cmds, "/nope", "en")],
+    [{ prompt: "What's blocking us right now? Check where everything stands and give me the one next step." }, { prompt: "Map every license and permit a milk tea shop needs in Austin, TX: prepare each application and add the deadlines." },
+      { prompt: "/plan Open in Fremont" }, { local: "forget" }, null], "each command becomes its full request; /plan stays itself, /forget never reaches Odelia, and an unknown one is sent as typed");
+  ok(/^Run the playbook "Open a store" \(open-a-store\)\. Flushing$/.test((expandCommand(cmds, "/open-a-store Flushing", "en") as { prompt: string }).prompt) && /^按手册/.test((expandCommand(cmds, "/open-a-store", "zh") as { prompt: string }).prompt),
+    "a playbook's command runs the playbook, in the person's language");
+}
+
+await ownerControls();
 
 /* ================================================================== memory that acts (src/recall.ts) */
 

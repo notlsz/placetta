@@ -49,7 +49,11 @@ export declare function runRounds(o: {
   child?: { job: string; store: string };
   /** The stores' bots this run started: how many are still open, and what each came back with. */
   family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> };
+  /** Business rules (src/businessRules.ts): a message a rule asks to deliver, through the business's own channels. */
+  notify?: (n: Notice) => void;
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }>;
+/** What a business rule asks the server to tell someone (src/businessRules.ts). */
+export type Notice = { rule: string; key: string; via: "email" | "text" | "slack" | "lark" | "wechat"; to?: string; text: Bi };
 export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";
 export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;
 

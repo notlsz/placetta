@@ -38,6 +38,7 @@ import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, t
 import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy } from "./sources";
 import { STAFF_LANGS, staffLanguageCheck, staffLanguages } from "./staff";
 import { mcpTools, MCP_PREFIX, type McpTool } from "./mcp";
+import { controlsBrief, jobsDone, runMode, withControls } from "./autonomy";
 
 /* ------------------------------------------------------------------ *
  * The live agent: a real model reads the workspace and acts on it
@@ -1894,11 +1895,14 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         // Sources (src/sources.ts): each tool notes what it read, for the reply's Sources line
         const used: Used[] = [];
         const mcp = model.tools && o.services?.mcpTools ? await o.services.mcpTools().catch(() => []) : [];
-        // and each records its moment for the replay (traced)
-        const tools = model.tools ? traced(makeTools(() => ws, apply, moment, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal, me, mcp, request: req.text }).map(t => ({ ...t,
-          execute: (i: Record<string, unknown>) => { const out = t.execute(i); const note = (v: unknown) => { addUsed(used, usedBy(t.name, i, v, ws)); return v; }; return out instanceof Promise ? out.then(note) : note(out); } })), () => ws, moment) : undefined;
+        /* Owner controls (src/autonomy.ts): this run's mode and the rules around every tool, the same as on the server. */
+        const mode = runMode(ws, req.text);
+        const noted = model.tools ? makeTools(() => ws, apply, moment, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal, me, mcp, request: req.text }).map(t => ({ ...t,
+          execute: (i: Record<string, unknown>) => { const out = t.execute(i); const note = (v: unknown) => { addUsed(used, usedBy(t.name, i, v, ws)); return v; }; return out instanceof Promise ? out.then(note) : note(out); } })) : undefined;
+        // and each call records its moment for the replay (traced), with what the owner's controls made of it
+        const tools = noted ? traced(withControls(noted, { get: () => ws, apply, mode, remote: false, run: "b" + Date.parse(runStart).toString(36), made, mark: () => { made.lastToolAt = streamed.length; } }), () => ws, moment) : undefined;
         const research = model.kind === "server";
-        const brief = rules(ws, lang, !!o.account, research, o.services?.connected() ?? [], !!tools, { me, names: tools?.map(t => t.name) });
+        const brief = rules(ws, lang, !!o.account, research, o.services?.connected() ?? [], !!tools, { me, names: tools?.map(t => t.name) }) + controlsBrief(ws, mode);
         const turns: Turn[] = [...(model.system ? [] : [{ role: "user" as const, content: brief }]), ...history.slice(-12), { role: "user", content: req.text }];
         let sources: Source[] = [];
         const text = await model.chat(turns, {
@@ -1914,6 +1918,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         const line = sourcesLine(said, used, lang), links = line ? sourceLinks(said, used) : [];
         /* ---- end Sources ---- */
         apply(settleJobs(runStart));
+        jobsDone({ get: () => ws, apply }, runStart);   // business rules: "a job is done"
         if (made.job) moment(replyMoment(final));
         onEvent({ type: "reply", reply: { text: [same(line ? `${final}\n\n${line}` : final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
           files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined } });

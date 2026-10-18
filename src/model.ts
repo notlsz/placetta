@@ -1,5 +1,7 @@
 import type { Budget, Purchase, SpendPolicy } from "./spend.ts";
 import type { Job, Routine } from "./jobs";
+import type { Controls, HeldCall } from "./autonomy";
+import type { UndoPoint } from "./rewind";
 import type { RunLog } from "./replay";
 import type { Step } from "./core";
 import type { OrbState } from "thinking-orbs";
@@ -77,6 +79,9 @@ export type Approval = {
   purchase?: string;        // pay: the purchase Odelia asked to make (Spending), approved here
   change?: Change;          // change: what the agent will change once you confirm
   at?: string;              // when it was put in front of you (how long it has waited)
+  /* Owner controls (src/autonomy.ts, src/businessRules.ts) */
+  auto?: { rule: string; label: Bi };      // send: goes out under an owner's Always allow rule (a message only; never a filing, payment or fee)
+  second?: { by: string[]; rule: string }; // a business rule wants two different owners to approve it; by: who has
 };
 /** A change to something that already exists, which the agent only makes after you confirm it. */
 export type Change =
@@ -92,7 +97,11 @@ export type Change =
   | { op: "rename_business"; name?: string; goal?: string; was: Bi; wasGoal?: Bi; via: string; from?: string }
   /** A connected app's tool that changes something (src/mcp.ts): it runs once, on Placetta's server, after an owner
    *  approves. call: the server's id for it; args: exactly what it runs with. */
-  | { op: "mcp_call"; call: string; server: string; tool: string; title: string; args: Record<string, unknown> };
+  | { op: "mcp_call"; call: string; server: string; tool: string; title: string; args: Record<string, unknown> }
+  /* Owner controls (src/autonomy.ts): changes held under Ask me first, run once an owner approves; a plan written under
+     Plan first, which an owner approves before Odelia starts it. */
+  | { op: "held"; calls: HeldCall[] }
+  | { op: "plan"; job: string };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
 export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
@@ -162,6 +171,10 @@ export type Workspace = {
   /** Requests Odelia answered in this browser (the sample, or without the server's runs), timed as they happened: when
    *  asked, when her first words showed, when the answer was done. An account's server runs are timed in agent_runs. */
   runs?: { id: string; prompt: string; created_at: string; first_text_at?: string | null; done_at?: string | null; status?: string }[];
+  /* Owner controls: how much Odelia does on her own, Always allow and Never rules, house rules and business rules
+     (src/autonomy.ts; only an owner changes them, the database holds that line), and Undo for her last runs (src/rewind.ts). */
+  controls?: Controls;
+  undo?: UndoPoint[];
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval

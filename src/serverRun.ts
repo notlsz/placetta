@@ -9,6 +9,10 @@ import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy, usedI
 import { MCP_PREFIX } from "./mcp";
 import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone, storeName, storeRules } from "./harness";
 import { approvalMoments, checkMoment, linkRun, MAX_MOMENTS, replyMoment, scrubStep, toolMoment } from "./replay";
+import { controlsBrief, jobsDone, runMode, withControls, type ControlCtx, type RunMode } from "./autonomy";
+import { applyHeld, goPlan, ownerCommand } from "./held";
+import { addUndo, recorder, undoTitle, type UndoRec } from "./rewind";
+import type { Notice } from "./businessRules";
 
 /* ------------------------------------------------------------------ *
  * The agent's tool loop as the server runs it: the same tools and
@@ -59,6 +63,8 @@ export type RunState = {
   used?: Used[];
   /** The person's words were read for details to remember (src/recall.ts), so a resumed chunk doesn't read them again. */
   recalled?: boolean;
+  /** Undo (src/rewind.ts): what this run changed so far, and what left Placetta during it, carried across chunks. */
+  undo?: UndoRec[]; outside?: Bi[];
 };
 
 const MAX_ROUNDS = 16;
@@ -86,6 +92,13 @@ const REMOTE_NEVER: Record<string, string> = {
 export function childRefuses(child: { job: string; store: string } | undefined, tool: string): string | null {
   if (!child || tool !== "split_job") return null;
   return `Error: You're the bot for one store (${child.store}). Only the main Odelia splits work across stores; do this store's part, job ${child.job}, yourself.`;
+}
+/** How a store's bot works under the owner's controls (src/autonomy.ts). Work is only split by a run that may change
+ *  things (Plan first refuses split_job), so under Plan first a store's part was already approved with the job that
+ *  split it: its bot works the usual way rather than asking for a second approval of each store's plan. Ask me first
+ *  and every rule hold for it as for any run. */
+export function childMode(m: RunMode, child: { job: string } | undefined): RunMode {
+  return child && m.mode === "plan" ? { mode: "usual", why: "workspace" } : m;
 }
 /** What a store's bot came back with, as the main run reads it when it wakes. */
 export type ChildResult = { job: string; store: string; status: string; reply: string };
@@ -219,6 +232,8 @@ export async function runRounds(o: {
   /** Whose memory the run reads: the person who asked (agent-run passes the run's created_by). Their saved details
    *  (src/recall.ts) go in the instructions, and their people are reached by name. */
   me?: string;
+  /** Business rules (src/businessRules.ts): a message a rule asks to deliver, through the business's own channels. */
+  notify?: (n: Notice) => void;
   /** The run's id: every job it works links to it, so the job's replay can show its moments (src/replay.ts). */
   runId?: string;
   /** A store's bot: this run works one store's part (its job and store) of a job split across stores. */
@@ -231,18 +246,23 @@ export async function runRounds(o: {
   st.started ??= new Date().toISOString();
   const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt,
     job: st.made.job ?? o.child?.job, split: st.made.split };
+  /* Owner controls (src/autonomy.ts): this run's mode (Ask me first, Usual, Plan first) and Undo's record of what it
+     changes (src/rewind.ts), both carried across chunks like the rest of the run. */
+  const rec = recorder(st.undo ?? []);
+  const outside: Bi[] = [...(st.outside ?? [])];
   const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table,
-    ...(made.job ? { job: made.job } : {}), ...(made.split?.length ? { split: made.split } : {}) } });
+    ...(made.job ? { job: made.job } : {}), ...(made.split?.length ? { split: made.split } : {}) }, undo: rec.recs(), outside });
   const mainRole: Role = o.role ?? "plan";
   const model = messagesModel("server", (body, _signal, deep, role) => o.send(body, deep, role ?? mainRole));
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
   const from: { channel?: Channel; plainSms: boolean; mcpReads?: Set<string> } = { channel: o.channel, plainSms: st.plainSms === true };
-  const apply = (p: Patch) => o.apply(guardPatch(from, p));
+  const apply = (p: Patch) => o.apply(rec.wrap(guardPatch(from, p)));
   // Every moment carries when, which bot and which job, for the job's replay.
   const bot = o.child?.store ?? MAIN_BOT;
   const step = (s: Step) => o.step(scrubStep({ at: new Date().toISOString(), bot, ...(made.job ? { job: made.job } : {}), ...s }));
-  /** Links this run to the jobs it worked (only when one isn't linked yet, so a round with nothing new saves nothing). */
-  const link = () => { if (!o.runId) return; const w = o.ws(); if (linkRun(w, o.runId, st.started!, o.child?.job) !== w) apply(x => linkRun(x, o.runId!, st.started!, o.child?.job)); };
+  /** Links this run to the jobs it worked (only when one isn't linked yet, so a round with nothing new saves nothing).
+   *  A record of what happened, like the audit trail: not part of her work, so Undo never takes it back. */
+  const link = () => { if (!o.runId) return; const w = o.ws(); if (linkRun(w, o.runId, st.started!, o.child?.job) !== w) o.apply(x => linkRun(x, o.runId!, st.started!, o.child?.job)); };
 
   // A store's bot starts by taking its store's part: off the queue and onto its own run. A part that's gone or was
   // stopped meanwhile isn't worked.
@@ -267,11 +287,35 @@ export async function runRounds(o: {
   const me = o.me ?? o.svc?.me;
   // Connected apps' tools (src/mcp.ts): none from plain SMS; from anywhere else outside the app, only the ones that read.
   const mcp = from.plainSms ? [] : ((await o.svc?.mcpTools?.().catch(() => [])) ?? []).filter(t => !isRemote(o.channel) || t.read_only);
-  const tools = makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request,
-    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) });
+  // a store's bot has its own key (several start in the same moment), so its held changes and its undo are its own
+  const runKey = "r" + Date.parse(st.started).toString(36) + (o.child ? "-" + o.child.job : "");
+  const ctl: ControlCtx = { get: o.ws, apply, mode: childMode(runMode(o.ws(), st.request ?? ""), o.child), remote: isRemote(o.channel), run: runKey, made, mark: () => { made.lastToolAt = st.text.length; }, notify: o.notify, outside: x => outside.push(x) };
+  const tools = withControls(makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request,
+    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) }), ctl);
   if (isRemote(o.channel)) from.mcpReads = new Set(tools.map(t => t.name).filter(n => n.startsWith(MCP_PREFIX)));
+  /** The run's undo point, once its work is done (src/rewind.ts). */
+  const keepUndo = () => { if (!rec.size()) return undefined; const id = "undo-" + runKey; o.apply(addUndo({ id, at: st.started!, title: undoTitle(st.request ?? ""), recs: rec.recs(), ...(outside.length ? { outside } : {}) })); return id; };
+  /* An owner's approval, carried out here (src/held.ts): agent-run lets only an owner start these, and only from the app.
+     A store's bot never: its words are Odelia's instructions for one store. */
+  const cmd = isRemote(o.channel) || o.child ? null : ownerCommand(st.request ?? "");
+  if (cmd && "apply" in cmd) {
+    step({ state: "working", label: { en: "Making the changes you approved", zh: "正在完成您批准的更改" } });
+    ctl.mode = { mode: "usual", why: "approved" };   // an owner approved exactly these; Never rules still hold
+    const r = await applyHeld(o.ws, apply, tools, cmd.apply, o.lang);
+    jobsDone({ get: o.ws, apply, notify: o.notify }, st.started);
+    const undo = keepUndo();
+    link();
+    return { reply: { text: [r ? r.text : { en: "Those changes were already made, or the card is gone.", zh: "这些更改已经完成，或卡片已不存在。" }], approvals: [], ...(undo ? { undo } : {}) } };
+  }
+  if (cmd && "go" in cmd && st.rounds === 0) {
+    const work = goPlan(o.ws, apply, cmd.go, o.lang, me);
+    // the model reads the job's own request, not the command; the run works it the usual way from here
+    if (work) { const lastUser = [...st.messages].reverse().find(m => m.role === "user"); if (lastUser) lastUser.content = work; }
+    ctl.mode = runMode(o.ws(), st.request ?? "");
+  }
+  const mode = ctl.mode;
   const childJob = o.child ? (o.ws().jobs ?? []).find(j => j.id === o.child!.job) : undefined;
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms)
+  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms) + controlsBrief(o.ws(), mode)
     + (childJob ? storeRules(o.ws(), childJob, o.lang) : "");
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
@@ -433,6 +477,10 @@ export async function runRounds(o: {
   // a split job ticks from its stores as they're checked
   if ((o.ws().jobs ?? []).some(j => j.children?.length && j.updated >= st.started!)) apply(w => reconcile(w));
   link();
+  /* Business rules: each job this run finished fires "a job is done" once. Then the run's undo point, so the person
+     can put back what it changed (src/rewind.ts). */
+  jobsDone({ get: o.ws, apply, notify: o.notify }, st.started);
+  const undoId = keepUndo();
   // a reply that says "done" while a job it worked is still open gets that job's open steps, so it can't claim more
   const said = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
   const open = saysDone(said) || !said ?(o.ws().jobs ?? []).filter(j => own(j) && j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(s => !s.done) && !checkedNow.includes(j.id)).slice(0, 2) : [];
@@ -451,5 +499,5 @@ export async function runRounds(o: {
 
   step(replyMoment(line ? `${final}\n\n${line}` : final));
   return { reply: { text: [same(line ? `${final}\n\n${line}` : final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
-    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined } };
+    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined, ...(undoId ? { undo: undoId } : {}) } };
 }

@@ -21,6 +21,9 @@ import { NOT_CHECKED, splitSources } from "./sources";
 import { LocalHold, useApprovalHold } from "./SendHold";
 import { AskPerson } from "./AskPerson";
 import { AllowanceNote } from "./Allowance";
+import { UndoTurn } from "./UndoTurn";
+import { PlanGate } from "./PlanGate";
+import { planApprovalId } from "./autonomy";
 
 /** The agent, beside the work (dock), over it on a phone (sheet), or as her own page (page: Odelia, Chat): what it's
  *  doing now, every step with the site it used, and what each run produced. */
@@ -131,6 +134,7 @@ function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean;
       )}
       {live && last && <AllowanceNote asked={asked} />}
       {plan && <PlanCard job={plan} compact />}
+      {plan && <PlanGate job={plan} />}
       {live && m.draft && <p className="drafting" aria-live="polite">{m.draft}</p>}
       {r && (
         <div className="answer">
@@ -153,7 +157,7 @@ function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean;
             </figure>
           )}
           {group.length > 1 && <ApproveGroup ids={group} />}
-          {rows.map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
+          {rows.filter(id => !(plan && id === planApprovalId(plan.id))).map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
           {r.memory?.map((x, i) => <Memory key={i} text={x} />)}
           {r.remembered?.length ? <RememberedChips items={r.remembered} /> : null}
@@ -161,6 +165,7 @@ function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean;
           <SourcesRow said={said} links={r.sources} />
           {r.matches && <button type="button" className="pill quiet" onClick={() => go("find")}>{b({ en: "Open the results", zh: "查看结果" })}</button>}
           {r.next && <button type="button" className="pill primary sm" disabled={busy} onClick={() => run(r.next!.req, b(r.next!.label))}><span>{b(r.next.label)}</span><i aria-hidden="true"><I.arrow /></i></button>}
+          {r.undo && <UndoTurn id={r.undo} />}
         </div>
       )}
     </div>
@@ -188,7 +193,7 @@ function SourcesRow({ said, links }: { said: string; links?: { title: string; ur
 
 /** A filing that can go out with others from one tap: complete, nothing the second look flags, no signature to draw. */
 function batchable(w: Workspace, a: Approval | undefined, account: boolean): boolean {
-  if (!a || a.kind !== "file") return false;
+  if (!a || a.kind !== "file" || a.second) return false;   // two owners under a business rule: one at a time
   const app = w.apps.find(x => x.id === a.app);
   if (!app || !readyToFile(app)) return false;
   const off = app.official ? formById(app.official) : undefined;
