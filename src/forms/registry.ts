@@ -1,7 +1,7 @@
 import TIMES from "./times.json";
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
-import { WORLD_FORMS, worldPlaces } from "./world";
+import { WORLD_FORMS, unaccent, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
 import { MORE_US } from "./more-us";
 import { MARKETS_US } from "./markets-us";
@@ -19,7 +19,7 @@ export type Segment = "restaurant" | "retail" | "seller" | "warehouse";
 export type Where = string;
 export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" | "insurer" | "none";
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
-export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean };   // reference: listed in the library and answers, never added to a plan
+export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean };   // reference: listed in the library and answers, never added to a plan
 
 export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
 
@@ -279,6 +279,14 @@ export const FORMS: OfficialForm[] = [
     url: "https://www2.fmc.gov/form18/Form18/FillingInformation.aspx", info: "https://www.fmc.gov/resources-services/licensing-registration/", fee: null, checked: "page", fields: [],
   },
   {
+    id: "ttb-dealer", form: "TTB F 5630.5d (Alcohol Dealer Registration)", title: B("Alcohol dealer registration", "酒类经销商登记"),
+    agency: B("Alcohol and Tobacco Tax and Trade Bureau (TTB)", "美国酒类与烟草税务贸易局（TTB）"), level: "federal", where: "US", segments: ["restaurant", "retail"], needs: { alcohol: true }, method: "online", order: 72,
+    how: B("Every business that sells beer, wine or spirits, restaurants and bars included, registers each location with TTB before it starts selling (Form 5630.5d or Permits Online), and updates it by July 1 when anything changes.", "凡销售啤酒、葡萄酒或烈酒的企业（包括餐厅和酒吧），须在开始销售前为每个门店向 TTB 登记（5630.5d 表或 Permits Online），信息变更时须在 7 月 1 日前更新。"),
+    url: "https://www.ttb.gov/nrc/retail-beverage-alcohol-dealers", info: "https://www.ttb.gov/nrc/retail-beverage-alcohol-dealers",
+    fee: 0, feeNote: B("TTB's page lists no fee.", "TTB 页面未列出费用。"), checked: "page", fields: [],
+    plain: B("A free federal registration for any place that sells alcohol, done once per location before the first sale.", "任何销售酒类的场所须办理的免费联邦登记，每个门店在首次销售前办理一次。"),
+  },
+  {
     id: "phmsa-5800", form: "DOT Form F 5800.2", title: B("Hazardous materials registration", "危险品注册"),
     agency: B("Pipeline and Hazardous Materials Safety Administration (DOT)", "美国交通部管道与危险品安全管理局（PHMSA）"), level: "federal", where: "US", segments: ["warehouse"], needs: { hazmat: true }, method: "online", order: 56,
     how: B("Filed online when you ship or offer certain hazardous materials in bulk, such as large lithium battery shipments.", "运输或托运特定数量危险品（如大批锂电池）时在线申请。"),
@@ -353,6 +361,32 @@ export const FORMS: OfficialForm[] = [
     url: "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page", info: "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page", fee: null, checked: "page", fields: [],
   },
   {
+    id: "nyc-dob-alt", form: "Alteration permit (DOB NOW: Build)", title: B("Building permit for the build-out (DOB alteration)", "装修建筑许可证（建筑局改建许可）"),
+    agency: B("NYC Department of Buildings", "纽约市建筑局"), level: "city", where: "NYC", segments: ["restaurant", "retail", "warehouse"], needs: { buildout: true }, method: "portal", order: 52,
+    how: B("Department of Buildings work permits are required for most construction; a registered design professional (PE or RA) files the alteration in DOB NOW: Build, and a change of use also amends the Certificate of Occupancy.", "大多数施工都须取得建筑局工程许可；由注册专业人员（PE 或 RA）在 DOB NOW: Build 提交改建申请，改变用途时还须修改占用证。"),
+    url: "https://www.nyc.gov/site/buildings/industry/dob-now-build-resources-laa.page", info: "https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page",
+    fee: null, feeNote: B("Set by the Department of Buildings' fees for the work.", "按建筑局的工程收费标准计算。"), checked: "page", fields: [],
+    plain: B("The city's permit to build out the space, filed by your architect or engineer.", "市政府的场所装修许可，由您的建筑师或工程师提交。"),
+  },
+  {
+    id: "nyc-cb-notice", form: "30-day notice to the community board", title: B("Community board notice for the liquor license", "酒类执照社区委员会通知"),
+    agency: B("Your community board (required by the State Liquor Authority)", "所在社区委员会（纽约州酒类管理局要求）"), level: "city", where: "NYC", segments: ["restaurant"], needs: { alcohol: true }, method: "pdf_mail", order: 70,
+    how: B("An on-premises license applicant tells its community board it intends to apply 30 days before filing with the SLA, and sends proof of that notice with the application.", "申请堂饮酒类执照者须在向酒类管理局提交前 30 天通知所在社区委员会，并随申请附上已通知的证明。"),
+    url: "https://sla.ny.gov/community-board-faqs", info: "https://sla.ny.gov/community-board-faqs",
+    fee: 0, takes: B("Notify the board 30 days before filing.", "提交前 30 天通知。"), takesDays: 30, takesSource: "https://sla.ny.gov/community-board-faqs (2026-10-18)", checked: "page", fields: [],
+    plain: B("New York City makes you tell the local community board 30 days before you apply for a liquor license.", "纽约市要求在申请酒类执照前 30 天通知当地社区委员会。"),
+  },
+  {
+    id: "ny-sla-rw", form: "Restaurant Wine license (RW 341)", title: B("Restaurant wine license (beer and wine)", "餐厅葡萄酒执照（啤酒与葡萄酒）"),
+    agency: B("New York State Liquor Authority", "纽约州酒类管理局"), level: "state", where: "NYC", segments: ["restaurant"], needs: { alcohol: true }, method: "online", order: 71,
+    how: B("The SLA's license for a restaurant with a kitchen and a full menu to serve beer and wine, not spirits, on the premises. Serving spirits takes an On-Premises Liquor license instead.", "纽约州酒类管理局为有厨房和完整菜单的餐厅发放的执照，可在店内供应啤酒和葡萄酒，但不含烈酒。供应烈酒须改申请堂饮酒类执照（On-Premises Liquor）。"),
+    url: "https://sla.ny.gov/restaurant-license-quick-reference-0", info: "https://ht.nyc-business.nyc.gov/nycbusiness/description/restaurant-wine-license",
+    fee: 1060, feeNote: B("$960 for the 2-year license in New York City's counties plus a $100 filing fee (SLA fee chart).", "纽约市各县 2 年期执照费 960 美元，另加 100 美元申请费（酒类管理局收费表）。"),
+    renews: B("Every 2 years.", "每 2 年。"), checked: "page", fields: [],
+    after: [{ form: "nyc-cb-notice", label: B("Community board notified 30 days before", "已提前 30 天通知社区委员会") }],
+    plain: B("The state license to serve beer and wine with meals.", "州政府发放的随餐供应啤酒和葡萄酒的执照。"),
+  },
+  {
     id: "nyc-crt", form: "Commercial Rent Tax", title: B("Commercial Rent Tax registration and returns", "商业租金税登记与申报"),
     agency: B("NYC Department of Finance", "纽约市财政局"), level: "city", where: "NYC", segments: ALL, needs: { manhattan: true }, method: "online", order: 85,
     how: B("Only for Manhattan spaces south of 96th Street above the rent threshold.", "仅适用于曼哈顿 96 街以南且租金超过门槛的场所。"),
@@ -393,6 +427,16 @@ export const FORMS: OfficialForm[] = [
     agency: B("California Employment Development Department", "加州就业发展局（EDD）"), level: "state", where: "CA", segments: ALL, needs: { employees: true }, method: "online", order: 60,
     how: B("Register in e-Services for Business within 15 days of paying over $100 in wages.", "支付工资超过 100 美元后 15 天内在 e-Services for Business 登记。"),
     url: "https://edd.ca.gov/en/payroll_taxes/save_time_and_register_online/", pdf: "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf", info: "https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/", takes: B("Mail-in registration takes about 10 to 14 days; online is faster.", "邮寄登记约需 10 至 14 天；网上登记更快。"), takesSource: "https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/ (2026-10-09)", fee: 0, checked: "page", fields: [],
+  },
+  {
+    id: "ca-abc", form: "Retail alcoholic beverage license (Type 41 on-sale beer and wine; Type 47 with spirits)", title: B("Alcoholic beverage license", "酒类销售执照"),
+    agency: B("California Department of Alcoholic Beverage Control", "加州酒类饮料管理局"), level: "state", where: "CA", segments: ["restaurant", "retail"], needs: { alcohol: true }, method: "in_person", order: 71,
+    how: B("A restaurant serving beer and wine applies for a Type 41 license; spirits take a Type 47, which in some places (San Francisco among them) can only be bought from an existing holder. A public posting period comes first; plan on 3 to 6 months.", "供应啤酒和葡萄酒的餐厅申请 41 类执照；含烈酒须申请 47 类，在部分地区（包括旧金山）只能向现有持照人购买。须先经过公示期，预计需要 3 至 6 个月。"),
+    // the agency itself as the link; the 3-to-6-month figure and the license types are from San Francisco's restaurant guide
+    url: "https://www.abc.ca.gov", info: "https://www.abc.ca.gov",
+    fee: null, feeNote: B("Set by ABC for the license type and county.", "按执照类型和所在县由酒类管理局核定。"), takes: B("Plan on 3 to 6 months, including the public posting period.", "预计 3 至 6 个月，含公示期。"), takesDays: 180,
+    takesSource: "https://www.sf.gov/guide-opening-restaurant (2026-10-18)", checked: "page", fields: [],
+    plain: B("The state license to sell or serve alcohol. It takes months, so it's filed early.", "州政府发放的酒类销售或供应执照。办理需要数月，要尽早申请。"),
   },
   {
     id: "ca-sb54", form: "SB 54 producer registration", title: B("Packaging producer registration (EPR)", "包装生产者登记（生产者延伸责任）"),
@@ -481,6 +525,14 @@ export const FORMS: OfficialForm[] = [
     url: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", info: "https://dbs.lacity.gov/services/plan-review-permitting/building-permits", takes: B("Plans are returned within weeks, depending on workload.", "图纸视工作量在数周内返还。"), takesSource: "https://dbs.lacity.gov/services/plan-review-permitting/plan-check-permit/regular-plan-check (2026-10-09)", fee: null, checked: "page", fields: [],
   },
   {
+    id: "la-alcohol-cup", form: "Conditional Use Permit for alcohol sales", title: B("Conditional use permit to sell alcohol", "酒类销售有条件使用许可"),
+    agency: B("Los Angeles Department of City Planning", "洛杉矶市规划局"), level: "city", where: "LA", segments: ["restaurant", "retail"], needs: { alcohol: true }, method: "in_person", order: 70,
+    how: B("The city's restaurant checklist requires a Conditional Use Permit from City Planning to serve alcohol, alongside the state ABC license; it usually takes at least 4 to 5 months.", "洛杉矶市餐厅清单要求供应酒类须向市规划局申请有条件使用许可，并另取得州酒类执照；通常至少需要 4 至 5 个月。"),
+    url: "https://planning.lacity.gov", info: "https://business.lacity.gov/sites/g/files/wph1606/files/2021-02/Restaurant_Bar%20Checklist_0.pdf",
+    fee: null, takes: B("Typically at least 4 to 5 months.", "通常至少 4 至 5 个月。"), takesDays: 150, takesSource: "https://business.lacity.gov/sites/g/files/wph1606/files/2021-02/Restaurant_Bar%20Checklist_0.pdf (2026-10-18)", checked: "page", fields: [],
+    plain: B("Los Angeles's own zoning approval to sell alcohol at the address, on top of the state license.", "洛杉矶市对该地址销售酒类的分区批准，州执照之外另需办理。"),
+  },
+  {
     id: "la-lafd-ops", form: "LAFD operational fire permits", title: B("Fire permits for high-piled storage and hazardous materials", "高堆货物与危险品消防许可证"),
     agency: B("Los Angeles Fire Department, Fire Prevention Bureau", "洛杉矶消防局防火处"), level: "city", where: "LA", segments: ["warehouse", "retail"], needs: { hazmat: true }, method: "portal", order: 78,
     how: B("Needed when storage or batteries cross fire code thresholds; inspected before issue.", "储存或电池数量超过消防规范门槛时需要，发证前检查。"),
@@ -561,6 +613,14 @@ export const FORMS: OfficialForm[] = [
     url: "https://www.houstonpermittingcenter.org/hpwcode1112", pdf: "https://www.houstonpermittingcenter.org/media/6006/download", info: "https://houstonpermittingcenter.org/building-code-enforcement/sign-administration", renews: B("Every year.", "每年续期一次。"), takes: B("About 4 to 11 business days.", "约 4 至 11 个工作日。"), takesSource: "https://www.houstonpermittingcenter.org/hpwcode1112 (2026-10-09)", fee: null, checked: "page", fields: [],
   },
   {
+    id: "hou-buildout", form: "Buildout Permit (HPW Code 1148)", title: B("Buildout permit (building permit for the space)", "装修许可证（场所建筑许可）"),
+    agency: B("City of Houston, Houston Permitting Center", "休斯顿市许可中心"), level: "city", where: "HOU", segments: ["restaurant", "retail", "warehouse"], needs: { buildout: true }, method: "portal", order: 52,
+    how: B("For building out empty space in a commercial building: plan review and inspections, with the Fire Marshal and the Health Department reviewing where the work calls for it. The permit stays on site until final approval.", "适用于商业建筑内空置场所的装修：须经图纸审查和检查，视工程需要由消防署和卫生局审查。许可证须留在现场直至最终验收。"),
+    url: "https://www.houstonpermittingcenter.org/hpwcode1148", info: "https://www.houstonpermittingcenter.org/hpwcode1148",
+    fee: null, feeNote: B("A $33.56 admin fee plus the city fee schedule's permit and plan review fees.", "33.56 美元行政费，另按市收费表缴纳许可费和图纸审查费。"), checked: "page", fields: [],
+    plain: B("The city's permit to build out the space, reviewed and inspected before you open.", "市政府的场所装修许可，开业前须经审查和检查。"),
+  },
+  {
     id: "hou-plan-review", form: "Food establishment plan review", title: B("Food establishment plan review", "食品场所图纸审查"),
     agency: B("Houston Health Department", "休斯顿卫生局"), level: "city", where: "HOU", segments: ["restaurant"], needs: { buildout: true }, method: "portal", order: 50,
     how: B("Submit plans before building or remodeling a food establishment.", "新建或改建食品场所前提交图纸。"),
@@ -619,7 +679,7 @@ export function segmentOf(text: string): Segment {
   const t = text.toLowerCase();
   if (/warehouse|3pl|fulfil|logistic|freight|仓|物流|货代/.test(t)) return "warehouse";
   if (/import|e-?commerce|amazon|seller|shein|temu|tiktok shop|跨境|电商|卖家|进口/.test(t)) return "seller";
-  if (/tea|coffee|restaurant|food|kitchen|bakery|hot ?pot|malatang|noodle|dessert|ice cream|bubble|cafe|奶茶|茶|咖啡|餐|火锅|麻辣烫|面|甜品|烘焙|食/.test(t)) return "restaurant";
+  if (/tea|coffee|restaurant|food|kitchen|bakery|hot ?pot|malatang|noodle|dessert|ice cream|bubble|cafe|\bbar\b|\bpub\b|tavern|brewery|奶茶|茶|咖啡|餐|火锅|麻辣烫|面|甜品|烘焙|食|酒吧/.test(t)) return "restaurant";
   return "retail";
 }
 
@@ -633,8 +693,11 @@ function inNYC(w: string, ny: boolean): boolean {
   if (!ny) return false;
   return /\b(10[0-4]\d\d|11[1-4]\d\d|116\d\d|1100[45])(-\d{4})?\b/.test(w) || NYC_HOOD.test(w);
 }
+/** Places in unincorporated Clark County, Nevada (licensed by the county, not a city): the Strip and the towns around it. */
+const CLARK_UNINCORPORATED = /\b(paradise|spring valley|enterprise|winchester|sunrise manor|whitney|summerlin south|unincorporated clark|las vegas (blvd|boulevard) s(outh)?|the strip)\b|拉斯维加斯大道/;
 /** Where it is: the jurisdictions whose forms apply, at home and abroad. */
-export function placesOf(where: string): Where[] {
+export function placesOf(place: string): Where[] {
+  const where = unaccent(place);
   const w = where.toLowerCase();
   const world = worldPlaces(where);
   const abroad = !!world.country && world.country.code !== "US";
@@ -668,14 +731,16 @@ export function placesOf(where: string): Where[] {
       out.push("SMC");
     }
   }
-  // Clark County, Nevada: the Southern Nevada Health District (LV) covers the whole county, but the business license is
-  // the City of Las Vegas's (LVC) only inside city limits and Clark County's (CCU) in the unincorporated towns, which
-  // hold the Strip and Chinatown under Las Vegas mailing addresses. A named town or a ZIP code wholly outside the city
-  // settles it; any other Las Vegas address keeps both for Odelia to confirm. Henderson licenses its own businesses.
-  if (!abroad && (out.includes("NV") || out.includes("LV"))) {
-    const uninc = /\b(paradise|spring valley|enterprise|winchester|sunrise manor|whitney),?\s*(nv|nevada)\b|\b(891(09|19|69))\b/.test(w);
-    if (uninc) { if (!out.includes("NV")) out.push("NV"); if (!out.includes("LV")) out.push("LV"); out.push("CCU"); }
-    else if (out.includes("LV") && !/henderson/.test(w)) out.push("LVC", "CCU");
+  // A town of unincorporated Clark County named without "Las Vegas" (Spring Valley, NV) still gets the Health District's
+  // steps; ZIP codes wholly outside city limits (the Strip's 89109, 89119, 89169) count as unincorporated too.
+  const clarkTown = CLARK_UNINCORPORATED.test(w) || /\b891(09|19|69)\b/.test(w);
+  if (!abroad && clarkTown && (out.includes("NV") || out.includes("LV")) && !out.includes("LV")) out.push("LV");
+  // A "Las Vegas" address is in the City of Las Vegas or in unincorporated Clark County (the Strip is in Paradise), and
+  // each licenses its own businesses; Henderson and North Las Vegas license their own too. The Health District's steps
+  // (where "LV") apply across the county either way.
+  if (out.includes("LV")) {
+    if (clarkTown) out.push("CLK");
+    else if (/las vegas|拉斯维加斯/.test(w) && !/north las vegas|henderson/.test(w)) out.push("LVC");
   }
   // Santa Clara County runs food permits for San José and the rest of the county
   if (!abroad && (out.includes("SJ") || /santa clara|sunnyvale|mountain view|cupertino|milpitas|palo alto|campbell|los gatos|saratoga|gilroy|morgan hill/.test(w)) && !out.includes("SCC")) { out.push("SCC"); if (!out.includes("CA")) out.push("CA"); }
@@ -683,7 +748,8 @@ export function placesOf(where: string): Where[] {
 }
 
 /** What the library knows about a place: its country, its city, and whether the city has its own local steps. */
-export function placeInfo(where: string) {
+export function placeInfo(place: string) {
+  const where = unaccent(place);
   const p = worldPlaces(where);
   const us = !p.country || p.country.code === "US";
   const usLocal = us && /new york|nyc|flushing|manhattan|brooklyn|queens|los angeles|洛杉矶|houston|休斯顿|纽约|法拉盛/i.test(where);
@@ -699,7 +765,13 @@ export function formsFor(o: { segment: Segment; where: string; needs?: Needs }):
   const places = placesOf(o.where), have = o.needs ?? {};
   return FORMS.filter(f => places.includes(f.where) && !usFormAbroad(f, places) && f.segments.includes(o.segment)
     && Object.keys(f.needs ?? {}).every(k => have[k as keyof Needs]))
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => (formsEntity(a) ? 5 : a.order) - (formsEntity(b) ? 5 : b.order));
+}
+
+/** A form that creates the company itself: filed first, since the EIN and every registration carry its name and number
+    (the IRS: "form your entity through the secretary of state before you apply for an EIN"). */
+export function formsEntity(f: OfficialForm): boolean {
+  return !!f.needs?.newEntity && f.id !== "ny-dos-pub";
 }
 
 /** Search the library: by words in the form number, title or agency, and by place and segment. */

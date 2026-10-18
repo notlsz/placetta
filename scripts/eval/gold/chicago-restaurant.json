@@ -1,0 +1,120 @@
+{
+  "id": "chicago-restaurant",
+  "title": "Restaurant in Chicago",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Restaurant",
+    "where": "Chicago, IL",
+    "lang": "en"
+  },
+  "assumptions": "The company still has to be formed (an LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "il-llc",
+      "name": "Articles of Organization (Illinois LLC)",
+      "agency": "Illinois Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "note": "Not read on an official page in this pass.",
+      "source": "https://www.ilsos.gov",
+      "match": "llc formation|articles of organization|il-sos",
+      "agencyMatch": "illinois secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "il-tax",
+      "name": "Business registration (REG-1) and Certificate of Registration",
+      "agency": "Illinois Department of Revenue",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tax.illinois.gov/research/publications/pubs/retailers-overview-of-sales-and-use-tax/registering-your-business.html",
+      "match": "reg-1|illinois business registration|il-tax",
+      "agencyMatch": "illinois department of revenue"
+    },
+    {
+      "key": "il-ides",
+      "name": "Unemployment insurance employer registration",
+      "agency": "Illinois Department of Employment Security",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 30 days of start-up.",
+      "source": "https://ides.illinois.gov/faqs/employer.html",
+      "match": "unemployment insurance|il-ides",
+      "agencyMatch": "employment security"
+    },
+    {
+      "key": "chi-sanitation",
+      "name": "City of Chicago Food Service Sanitation Certificate",
+      "agency": "Chicago Department of Public Health",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "At least one certified person on the premises at all times.",
+      "source": "https://chicago.gov/city/en/sites/chicago-business-licensing/home/restaurantscafesgrocerystoresandmarkets.html",
+      "match": "sanitation certificate",
+      "agencyMatch": "department of public health|CDPH"
+    },
+    {
+      "key": "chi-rfe",
+      "name": "Retail Food Establishment license",
+      "agency": "City of Chicago, Business Affairs and Consumer Protection",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "feeNote": "$660 (0-1,000 sq ft) to $1,650 (over 10,000 sq ft), 2-year term.",
+      "source": "https://chicago.gov/city/en/sites/chicago-business-licensing/home/restaurantscafesgrocerystoresandmarkets.html",
+      "match": "retail food establishment license|chi-license",
+      "agencyMatch": "business affairs|BACP"
+    },
+    {
+      "key": "chi-plan",
+      "name": "Food establishment plan review (CDPH, with the building permit)",
+      "agency": "Chicago Department of Public Health with the Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Department of Buildings self-certification sheet: \"Self-Certified Plans will not be reviewed by CDPH.\"",
+      "source": "https://www.chicago.gov/content/dam/city/depts/bldgs/general/Self_Cert_Program/2019/11-FOODPROTECTION.pdf",
+      "match": "plan review|building permit",
+      "agencyMatch": "public health|buildings"
+    }
+  ],
+  "order": [
+    {
+      "before": "il-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "chi-sanitation",
+      "after": "chi-rfe",
+      "source": "https://chicago.gov/city/en/sites/chicago-business-licensing/home/restaurantscafesgrocerystoresandmarkets.html",
+      "why": "A food service manager certificate (or course enrollment) goes with the license application when serving prepared food.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

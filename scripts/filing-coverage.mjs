@@ -19,12 +19,12 @@ const destDir = at >= 0 ? args[at + 1] : join(root, "supabase/functions/file");
 const OUT = join(root, "docs/FILING_COVERAGE.md");
 
 // Counted with --dest-dir on the destinations.ts and logic.ts of commit 8c8599b2 (2026-10-17), before the research of
-// 2026-10-18. The same registry of US forms is counted both times (recounted when forms batch 3 and the target markets added 40 US forms:
+// 2026-10-18. The same registry of US forms is counted both times (recounted when forms batch 3, the target markets and the accuracy fixes added 58 US forms:
 // those were all team-only then).
 const BASELINE = {
   date: "2026-10-17",
-  channels: { team: 213, email: 5, fax: 4, mail: 13, portal: 16, owner: 0 },
-  routes: { portal: 16, email: 1, fax: 0, mail: 0, owner: 0, faxSigned: 3, ownerSigns: 6, team: 215 },
+  channels: { team: 231, email: 5, fax: 4, mail: 13, portal: 16, owner: 0 },
+  routes: { portal: 16, email: 1, fax: 0, mail: 0, owner: 0, faxSigned: 3, ownerSigns: 6, team: 233 },
 };
 
 const tmp = mkdtempSync(join(tmpdir(), "filing-coverage-"));
@@ -122,7 +122,7 @@ function report(FORMS, D, L) {
     US: "Federal", NY: "New York State", NYC: "New York City", CA: "California", LA: "Los Angeles", LAC: "Los Angeles County", TX: "Texas", HOU: "Houston",
     SJ: "San José", SCC: "Santa Clara County", SF: "San Francisco", DAL: "Dallas", AUS: "Austin", SAT: "San Antonio", TPA: "Tampa", SDG: "San Diego",
     IRV: "Irvine", ORL: "Orlando", FTW: "Fort Worth", AZ: "Arizona", PHX: "Phoenix", MA: "Massachusetts", BOS: "Boston", GA: "Georgia", ATL: "Atlanta",
-    OAK: "Oakland", SAC: "Sacramento", WA: "Washington", SEA: "Seattle", OR: "Oregon", PDX: "Portland", NV: "Nevada", LV: "Southern Nevada Health District", LVC: "City of Las Vegas", CCU: "Clark County (unincorporated)", PLA: "Plano",
+    OAK: "Oakland", SAC: "Sacramento", WA: "Washington", SEA: "Seattle", OR: "Oregon", PDX: "Portland", NV: "Nevada", LV: "Southern Nevada Health District", LVC: "City of Las Vegas", CLK: "Clark County (unincorporated)", PLA: "Plano",
     IL: "Illinois", CHI: "Chicago", PA: "Pennsylvania", PHL: "Philadelphia", DC: "Washington, DC", VA: "Virginia", ARL: "Arlington", FFX: "Fairfax County",
     NJ: "New Jersey", EDI: "Edison", JC: "Jersey City", FL: "Florida", MIA: "Miami", CO: "Colorado", DEN: "Denver", MN: "Minnesota", MSP: "Minneapolis",
     OH: "Ohio", CMH: "Columbus", MD: "Maryland", MOCO: "Montgomery County, MD", HI: "Hawaii", UT: "Utah", GLN: "Glendale", SGB: "San Gabriel", SMO: "San Mateo", SMC: "San Mateo County", CUP: "Cupertino",

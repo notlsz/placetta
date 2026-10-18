@@ -1,0 +1,170 @@
+{
+  "id": "irvine-boba",
+  "title": "Boba tea shop in Irvine",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Boba tea shop",
+    "where": "Irvine, CA",
+    "lang": "en",
+    "entity": "Pearl Lane LLC"
+  },
+  "assumptions": "The company already exists (Pearl Lane LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ca-seller",
+      "name": "Seller's permit",
+      "agency": "California Department of Tax and Fee Administration",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Every location must have this permit to sell taxable goods.\" Also on the LA restaurant checklist.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "seller'?s permit|ca-cdtfa",
+      "agencyMatch": "tax and fee administration|CDTFA"
+    },
+    {
+      "key": "ca-edd",
+      "name": "Employer payroll tax account registration (DE 1)",
+      "agency": "California Employment Development Department",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 15 days of paying more than $100 in wages in a calendar quarter.",
+      "source": "https://edd.ca.gov/en/Payroll_Taxes/Am_I_Required_to_Register_as_an_Employer",
+      "match": "employer|DE ?1|edd",
+      "agencyMatch": "employment development department|\\bEDD\\b"
+    },
+    {
+      "key": "ca-food-manager",
+      "name": "Food safety (manager) certification, at least one owner or employee",
+      "agency": "Local environmental health agency (California Health and Safety Code 113947.1)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 60 days of opening; valid 5 years.",
+      "source": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+      "match": "food (safety|protection) (manager|certif)|certified food|food manager|manager'?s food safety",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "ca-food-handler",
+      "name": "California Food Handler Card for food employees",
+      "agency": "Local environmental health agency (California Health and Safety Code 113948)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 30 days of hire; valid 3 years; food managers exempt.",
+      "source": "https://www.fresnocountyca.gov/files/assets/county/public-health/environmental-health/food-safety/california-food-handler-card.pdf",
+      "match": "food handler",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "irv-license",
+      "name": "Business license",
+      "agency": "City of Irvine",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Checklist: have your OC Health permit ready if you serve food.",
+      "source": "https://www.cityofirvine.gov/sites/default/files/irvine/repository/business-license-application-checklist.pdf",
+      "match": "irvine business license|irv-license|business license",
+      "agencyMatch": "irvine"
+    },
+    {
+      "key": "oc-plan",
+      "name": "Food facility plan check",
+      "agency": "Orange County Health Care Agency, Environmental Health",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.ochealthinfo.com/food/permit",
+      "match": "plan (check|review)",
+      "agencyMatch": "orange county"
+    },
+    {
+      "key": "oc-permit",
+      "name": "Food facility health permit",
+      "agency": "Orange County Health Care Agency, Environmental Health",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"A health permit will be issued upon completion of a final inspection.\"",
+      "source": "https://www.ochealthinfo.com/food/permit",
+      "match": "health permit",
+      "agencyMatch": "orange county"
+    },
+    {
+      "key": "irv-building",
+      "name": "Building permit for the tenant improvement",
+      "agency": "City of Irvine Building and Safety",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "note": "The city's tenant-improvement page redirected and could not be read.",
+      "source": "https://cityofirvine.org/node/69516",
+      "match": "building permit|tenant improvement",
+      "agencyMatch": "irvine"
+    },
+    {
+      "key": "ca-fbn",
+      "name": "Fictitious Business Name statement",
+      "agency": "County Clerk",
+      "level": "county",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "condition": "Only when trading under a name other than the legal name.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "fictitious business name|\\bFBN\\b|\\bDBA\\b",
+      "agencyMatch": "clerk"
+    }
+  ],
+  "order": [
+    {
+      "before": "oc-plan",
+      "after": "oc-permit",
+      "source": "https://www.ochealthinfo.com/food/permit",
+      "why": "Plan approval before construction; permit after the final inspection.",
+      "verified": true
+    },
+    {
+      "before": "oc-permit",
+      "after": "irv-license",
+      "source": "https://www.cityofirvine.gov/sites/default/files/irvine/repository/business-license-application-checklist.pdf",
+      "why": "Have your OC Health permit ready for the business license if you serve food.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

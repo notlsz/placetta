@@ -1,0 +1,203 @@
+{
+  "id": "flushing-beer-wine",
+  "title": "Korean BBQ restaurant serving beer and wine in Flushing",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Korean BBQ restaurant serving beer and wine",
+    "where": "Flushing, NY 11354",
+    "lang": "en",
+    "entity": "Northern Blvd BBQ LLC"
+  },
+  "assumptions": "The company already exists (Northern Blvd BBQ LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ny-tax",
+      "name": "Certificate of Authority (sales tax vendor registration)",
+      "agency": "New York State Department of Taxation and Finance",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register at least 20 days before beginning business.",
+      "source": "https://www.tax.ny.gov/pubs_and_bulls/tg_bulletins/st/how_to_register_for_nys_sales_tax.htm",
+      "match": "sales tax vendor|certificate of authority|dtf-17",
+      "agencyMatch": "taxation and finance"
+    },
+    {
+      "key": "ny-dol",
+      "name": "Employer registration for unemployment insurance (NYS-100)",
+      "agency": "New York State Department of Labor",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Once $300 or more in wages is paid in a quarter; FEIN needed first.",
+      "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+      "match": "unemployment insurance|NYS-100|ny-dol-100",
+      "agencyMatch": "department of labor"
+    },
+    {
+      "key": "ny-wcb",
+      "name": "Workers' compensation and disability/PFL coverage",
+      "agency": "New York State Workers' Compensation Board",
+      "level": "state",
+      "required": false,
+      "verified": false,
+      "fee": null,
+      "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+      "match": "workers'? comp",
+      "agencyMatch": "workers' compensation board",
+      "condition": "Insurance bought from a carrier, not a filing."
+    },
+    {
+      "key": "nyc-fse",
+      "name": "Food Service Establishment Permit",
+      "agency": "NYC Department of Health and Mental Hygiene",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "food (service )?establishment permit",
+      "agencyMatch": "health and mental hygiene|DOHMH"
+    },
+    {
+      "key": "nyc-fpc",
+      "name": "Food Protection Certificate",
+      "agency": "NYC Department of Health and Mental Hygiene",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "A holder must supervise food operations.",
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "food protection certificate",
+      "agencyMatch": "health and mental hygiene|DOHMH"
+    },
+    {
+      "key": "nyc-co",
+      "name": "Certificate of Occupancy",
+      "agency": "NYC Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "certificate of occupancy",
+      "agencyMatch": "department of buildings|\\bDOB\\b"
+    },
+    {
+      "key": "nyc-sign",
+      "name": "Sign permit",
+      "agency": "NYC Department of Buildings",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "sign permit",
+      "agencyMatch": "department of buildings",
+      "condition": "Signs that are nailed, screwed or illuminated."
+    },
+    {
+      "key": "nyc-alteration",
+      "name": "DOB work permit for the build-out (alteration)",
+      "agency": "NYC Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Department of Buildings work permits are required for most construction projects.\"",
+      "source": "https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page",
+      "match": "alteration|work permit|building permit|build-?out",
+      "agencyMatch": "department of buildings|\\bDOB\\b"
+    },
+    {
+      "key": "nyc-assembly",
+      "name": "Place of Assembly permit",
+      "agency": "NYC Department of Buildings / FDNY",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "assembly",
+      "agencyMatch": "buildings|fire",
+      "condition": "Only for 75 or more people."
+    },
+    {
+      "key": "ny-sla-rw",
+      "name": "Restaurant Wine license (on-premises beer and wine)",
+      "agency": "New York State Liquor Authority",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 1060,
+      "feeNote": "$960 license fee (2-year term, NYC counties) plus a $100 filing fee (SLA fee chart).",
+      "note": "Restaurants must have a kitchen and a full menu.",
+      "source": "https://ht.nyc-business.nyc.gov/nycbusiness/description/restaurant-wine-license",
+      "match": "restaurant wine|on-premises liquor license|beer and wine\\)",
+      "agencyMatch": "^new york state liquor authority"
+    },
+    {
+      "key": "ny-cb-notice",
+      "name": "30-day notice to the community board",
+      "agency": "Community board (required by the State Liquor Authority)",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"notify their community board of their intention to apply for a liquor license 30 days before filing\"; proof goes with the application.",
+      "source": "https://sla.ny.gov/community-board-faqs",
+      "match": "community board",
+      "agencyMatch": "community board|liquor authority",
+      "levels": [
+        "city",
+        "state"
+      ]
+    },
+    {
+      "key": "ttb-dealer",
+      "name": "Alcohol dealer registration (TTB F 5630.5d)",
+      "agency": "Alcohol and Tobacco Tax and Trade Bureau",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"No person may engage in the business of selling or offering to sell distilled spirits, wine, or beer without first registering.\" Before engaging in business; no fee stated.",
+      "source": "https://www.ttb.gov/nrc/retail-beverage-alcohol-dealers",
+      "match": "alcohol dealer|5630|ttb",
+      "agencyMatch": "alcohol and tobacco tax|\\bTTB\\b"
+    }
+  ],
+  "order": [
+    {
+      "before": "ny-cb-notice",
+      "after": "ny-sla-rw",
+      "source": "https://sla.ny.gov/community-board-faqs",
+      "why": "Notify the community board 30 days before filing with the SLA.",
+      "verified": true
+    },
+    {
+      "before": "ein",
+      "after": "ny-dol",
+      "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+      "why": "FEIN needed before the UI registration.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

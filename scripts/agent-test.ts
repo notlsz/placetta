@@ -357,7 +357,7 @@ async function previewRefine() {
     { where: "Sacramento, CA", food: "sacc-health-permit", license: "sac-bot", plan: "sacc-plan-review", also: ["ca-food-manager"] },
     { where: "Seattle, WA", food: "sea-food", license: "sea-business-license", plan: "kc-plan-review", also: ["wa-bls", "wa-food-worker"] },
     { where: "Portland, OR", food: "mult-food-license", license: "pdx-tax", plan: "mult-plan-review", also: ["or-payroll"] },
-    { where: "Las Vegas, NV", food: "lv-food", license: "lv-license", plan: "snhd-plan-review", also: ["cc-business-license", "nv-tax", "nv-esd", "snhd-food-handler"] },
+    { where: "Las Vegas, NV", food: "lv-food", license: "lv-license", plan: "snhd-plan-review", also: ["nv-tax", "nv-esd", "snhd-food-handler", "snhd-cfsm"] },
     { where: "Plano, TX", food: "pla-food-permit", license: "pla-co", plan: "pla-plan-review", also: ["tx-ap201", "tx-food-manager"] },
     { where: "Chicago, IL", food: "chi-license", license: "chi-license", plan: "chi-plan-review", also: ["il-tax", "il-ides", "chi-sanitation"] },
     { where: "Philadelphia, PA", food: "phl-food-license", license: "phl-cal", plan: "phl-plan-review", also: ["phl-tax-account", "phl-food-safety", "pa-tax"] },
@@ -389,6 +389,14 @@ async function previewRefine() {
     const sets = plans.map(({ p }) => p.apps.map(a => a.official).join(","));
     ok(!bad.length && new Set(sets).size === 1,
       `${m.where}: a milk tea shop, restaurant and bakery each get ${m.food} and ${m.license} from the library${m.plan ? `, after ${m.plan}` : ""} (${plans[0].p.apps.length} rows, none generic)`, bad);
+  }
+  // Las Vegas: the city licenses inside its limits, Clark County the unincorporated Strip, never both (clarkcountynv.gov FAQ)
+  {
+    const ids = (where: string) => previewPlan("Restaurant", where, "2027-04-01", { today: "2026-10-18" }).apps.map(a => a.official);
+    const city = ids("500 E Fremont St, Las Vegas, NV 89101"), strip = ids("3570 Las Vegas Blvd S, Paradise, NV 89109"), hend = ids("Henderson, NV");
+    ok(city.includes("lv-license") && !city.includes("cc-business-license") && strip.includes("cc-business-license") && !strip.includes("lv-license")
+      && !hend.includes("lv-license") && !hend.includes("cc-business-license") && [city, strip, hend].every(l => l.includes("lv-food")),
+      "Las Vegas: the city license inside city limits, Clark County's on the Strip, neither in Henderson; the Health District's permit everywhere", { city, strip, hend });
   }
   // what the agencies' own pages say comes first
   const deps = (where: string, id: string) => { const p = previewPlan("Restaurant", where, "2027-04-01", { today: "2026-10-17" }); const r = p.apps.find(a => a.official === id)!; return r.checklist.filter(c => c.dep).map(c => p.apps.find(a => a.id === c.dep)?.official); };

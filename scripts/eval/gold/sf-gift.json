@@ -1,0 +1,125 @@
+{
+  "id": "sf-gift",
+  "title": "Gift shop in San Francisco (no construction)",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Gift shop",
+    "where": "San Francisco, CA",
+    "lang": "en",
+    "entity": "Fog City Goods LLC",
+    "buildout": false
+  },
+  "assumptions": "The company already exists (Fog City Goods LLC). Hires staff. Moves into a space that needs no construction. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ca-seller",
+      "name": "Seller's permit",
+      "agency": "California Department of Tax and Fee Administration",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Every location must have this permit to sell taxable goods.\" Also on the LA restaurant checklist.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "seller'?s permit|ca-cdtfa",
+      "agencyMatch": "tax and fee administration|CDTFA"
+    },
+    {
+      "key": "ca-edd",
+      "name": "Employer payroll tax account registration (DE 1)",
+      "agency": "California Employment Development Department",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 15 days of paying more than $100 in wages in a calendar quarter.",
+      "source": "https://edd.ca.gov/en/Payroll_Taxes/Am_I_Required_to_Register_as_an_Employer",
+      "match": "employer|DE ?1|edd",
+      "agencyMatch": "employment development department|\\bEDD\\b"
+    },
+    {
+      "key": "sf-reg",
+      "name": "Business Registration Certificate",
+      "agency": "San Francisco Office of the Treasurer and Tax Collector",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "san francisco business registration|sf-business-registration",
+      "agencyMatch": "treasurer",
+      "levels": [
+        "city",
+        "county"
+      ]
+    },
+    {
+      "key": "sf-sign",
+      "name": "Sign and awning permit",
+      "agency": "San Francisco Planning Department and Department of Building Inspection",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "condition": "Exterior signs, canopies or awnings (case assumes a new sign).",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "sign",
+      "agencyMatch": "building inspection|planning",
+      "levels": [
+        "city",
+        "county"
+      ]
+    },
+    {
+      "key": "sf-formula",
+      "name": "Formula retail affidavit",
+      "agency": "San Francisco Planning Department",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://sfplanning.org/permit/chain-stores-businesses",
+      "match": "formula retail",
+      "agencyMatch": "planning",
+      "levels": [
+        "city",
+        "county"
+      ],
+      "condition": "Formula retail controls apply to businesses with eleven or more other locations; Planning recommends the affidavit to confirm."
+    },
+    {
+      "key": "ca-fbn",
+      "name": "Fictitious Business Name statement",
+      "agency": "County Clerk",
+      "level": "county",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "condition": "Only when trading under a name other than the legal name.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "fictitious business name|\\bFBN\\b|\\bDBA\\b",
+      "agencyMatch": "clerk"
+    }
+  ],
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "Any food permit, food handler or plan review",
+      "why": "A store that sells no food needs no food permit.",
+      "match": "food (service|establishment|facility|dealer|handler|worker|manager|safety|protection|preparation)|plan (check|review)|retail food|sanitation|victualler|allergen"
+    }
+  ]
+}

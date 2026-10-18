@@ -1,5 +1,5 @@
 // Forms for the target markets the registry didn't cover yet (src/forms/markets.ts; read on 2026-10-18): Maryland and
-// Montgomery County (Rockville), Hawaii, Utah, Virginia's LLC formation, Massachusetts's employer registration, and the
+// Montgomery County (Rockville), Hawaii, Utah, Virginia's LLC formation, and the
 // cities and counties around them: San Mateo and its county, Cupertino, Glendale, San Gabriel, and unincorporated
 // Los Angeles County (Rowland Heights). Each replaces a generic step the planner listed with the jurisdiction's own form
 // or portal, cited to the agency's page. Where the agency publishes a fillable PDF, a box map fills it (src/forms/maps);
@@ -126,7 +126,7 @@ export const MARKETS_US: OfficialForm[] = [
     url: "https://jobs.utah.gov/ui/employer/EmployerRegistration/Intro.aspx", info: "https://jobs.utah.gov/ui/employer/public/osbr.aspx", fee: 0, feeNote: NO_FEE, checked: "page", fields: EMPLOYER,
   },
 
-  /* ------------------------------------------------ Virginia and Massachusetts ------------------------------------------------ */
+  /* ------------------------------------------------ Virginia ------------------------------------------------ */
   {
     id: "va-llc", form: "Articles of Organization (Clerk's Information System)", title: B("LLC formation (Articles of Organization)", "LLC 设立（组织章程）"),
     agency: B("Virginia State Corporation Commission, Clerk's Office", "弗吉尼亚州公司委员会书记官办公室"), level: "state", where: "VA", segments: ALL, needs: { newEntity: true }, method: "online", order: 12,
@@ -134,12 +134,6 @@ export const MARKETS_US: OfficialForm[] = [
     url: "https://cis.scc.virginia.gov/", info: "https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf",
     fee: null, feeNote: B("Paid at checkout in CIS.", "在 CIS 结账时支付。"), checked: "page",
     fields: FORMATION("Registered agent: an individual Virginia resident or a business entity authorized in Virginia", "注册代理人：弗吉尼亚州居民个人或在弗吉尼亚州获授权的企业实体"),
-  },
-  {
-    id: "ma-dua", form: "Register your business (Unemployment Services for Employers)", title: B("New employer registration (unemployment insurance)", "新雇主登记（失业保险）"),
-    agency: B("Massachusetts Department of Unemployment Assistance", "马萨诸塞州失业援助局"), level: "state", where: "MA", segments: [R, T, S, W], needs: { employees: true }, method: "online", order: 60,
-    how: B("\"Employers who pay wages for work done in Massachusetts must register with DUA\": online in Unemployment Services for Employers, Register your Business.", "在马萨诸塞州支付工资的雇主须向 DUA 登记：在 Unemployment Services for Employers 选择 Register your Business 在线办理。"),
-    url: "https://unemployment.mass.gov/Employers/", info: "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance", fee: 0, feeNote: NO_FEE, checked: "page", fields: EMPLOYER,
   },
 
   /* ------------------------------------------------ San Mateo, Cupertino, Glendale, San Gabriel, unincorporated LA County ------------------------------------------------ */

@@ -61,9 +61,11 @@ const opened = (where: string, opening: string) => {
   return { p, w: normalizeState("Moonleaf", { business: B("Moonleaf Tea LLC", "月叶茶"), apps: p.apps, deadlines: p.deadlines, stores: [store] }) };
 };
 const want: Record<string, { usd: number; published: number; unpublished: number; open: string[]; closed: string[] }> = {
-  "Flushing, NY": { usd: 554.6, published: 7, unpublished: 3, open: ["nyc-fse"], closed: ["nyc-co", "ny-wcb", "nyc-sign"] },
-  "Irvine, CA": { usd: 90, published: 5, unpublished: 4, open: ["ca-llc-1", "ca-llc-12"], closed: ["irv-license", "oc-plan-check", "oc-health-permit"] },
-  "Houston, TX": { usd: 325, published: 5, unpublished: 6, open: ["tx-205", "tx-503"], closed: ["hou-food-dealer", "hou-plan-review", "hou-co"] },
+  // unpublished counts include the build-out permits and California's food handler card added from the accuracy gold set; Irvine's
+  // new LLC also files its $20 Statement of Information (LLC-12)
+  "Flushing, NY": { usd: 554.6, published: 7, unpublished: 4, open: ["nyc-fse"], closed: ["nyc-co", "ny-wcb", "nyc-sign", "nyc-dob-alt"] },
+  "Irvine, CA": { usd: 90, published: 5, unpublished: 5, open: ["ca-llc-1", "ca-llc-12"], closed: ["irv-license", "oc-plan-check", "oc-health-permit", "ca-food-handler"] },
+  "Houston, TX": { usd: 325, published: 5, unpublished: 7, open: ["tx-205", "tx-503"], closed: ["hou-food-dealer", "hou-plan-review", "hou-co", "hou-buildout"] },
 };
 const cents = (n: number) => Math.round(n * 100) / 100;
 for (const [where, x] of Object.entries(want)) {
@@ -91,5 +93,5 @@ for (const [where, x] of Object.entries(want)) {
   eq([complex.placetta[0].amount, complex.quoted, complex.placettaUSD], [null, 1, 1788], "a liquor or build-out store is quoted by the team, not guessed");
   // a permit that isn't in the registry is never counted, whatever amount sits on it
   const odd = costToOpen({ ...w, apps: [...w.apps, { ...w.apps[0], id: "x", official: undefined, fees: [{ label: B("Fee", "费用"), amount: 999 }] }] }, { today: "2026-10-17" });
-  eq([odd.agencyUSD, odd.unpublished], [costToOpen(w, { today: "2026-10-17" }).agencyUSD, 4], "an amount the registry doesn't publish is never added");
+  eq([odd.agencyUSD, odd.unpublished], [costToOpen(w, { today: "2026-10-17" }).agencyUSD, 5], "an amount the registry doesn't publish is never added");
 }

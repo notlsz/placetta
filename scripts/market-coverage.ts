@@ -83,12 +83,12 @@ function rowsFor(m: Market): Row[] {
 }
 
 // The jurisdiction rules the markets rest on, checked directly: a Las Vegas mailing address on the Strip is Clark
-// County's, not the City of Las Vegas's; a city address keeps both licenses for Odelia to confirm; Glendale's and San
+// County's, not the City of Las Vegas's; a city address is the city's alone; Glendale's and San
 // Gabriel's food permits are Los Angeles County's; Rockville's are Montgomery County's.
 const places = (a: string) => placesOf(a);
 const expect = (ok: boolean, what: string) => { if (!ok) problems.push(`jurisdiction rule: ${what}`); };
-expect(!places("3570 S Las Vegas Blvd, Las Vegas, NV 89109").includes("LVC") && places("3570 S Las Vegas Blvd, Las Vegas, NV 89109").includes("CCU"), "the Strip (89109) is unincorporated Clark County");
-expect(places("495 S Main St, Las Vegas, NV 89101").includes("LVC"), "downtown Las Vegas keeps the city's license");
+expect(!places("3570 S Las Vegas Blvd, Las Vegas, NV 89109").includes("LVC") && places("3570 S Las Vegas Blvd, Las Vegas, NV 89109").includes("CLK"), "the Strip (89109) is unincorporated Clark County");
+expect(places("495 S Main St, Las Vegas, NV 89101").includes("LVC") && !places("495 S Main St, Las Vegas, NV 89101").includes("CLK"), "downtown Las Vegas is the City of Las Vegas's license only");
 expect(!places("240 S Water St, Henderson, NV 89015").includes("LVC"), "Henderson isn't the City of Las Vegas");
 expect(places("100 W Broadway, Glendale, CA 91210").includes("LAC") && !places("5850 W Glendale Ave, Glendale, AZ 85301").includes("LAC"), "Glendale, CA (not AZ) is in Los Angeles County");
 expect(places("1066 Rockville Pike, Rockville, MD 20852").includes("MOCO") && !places("1066 Rockville Pike, Rockville, MD 20852").includes("CA"), "Rockville is Montgomery County, Maryland");
@@ -97,7 +97,7 @@ expect(!places("727 N Broadway, Los Angeles, CA 90012").includes("LACU"), "the C
 // Las Vegas's license.
 {
   const before = problems.length;
-  rowsFor({ id: "self-test", name: "self-test", kind: "city", state: "NV", address: "495 S Main St, Las Vegas, NV 89101", allowed: ["US", "NV", "LV", "CCU"] });
+  rowsFor({ id: "self-test", name: "self-test", kind: "city", state: "NV", address: "495 S Main St, Las Vegas, NV 89101", allowed: ["US", "NV", "LV", "CLK"] });
   const caught = problems.splice(before).some((p) => p.includes("lv-license is LVC's form"));
   expect(caught, "the check catches a filing on another jurisdiction's form");
 }

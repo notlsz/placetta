@@ -1,0 +1,160 @@
+{
+  "id": "la-food-importer",
+  "title": "Importer of packaged snacks from China, warehouse in Los Angeles",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Importer of packaged snack food, warehouse",
+    "where": "Los Angeles, CA",
+    "lang": "en",
+    "entity": "Pacific Snack Trading LLC",
+    "buildout": false,
+    "signage": false
+  },
+  "assumptions": "The company already exists (Pacific Snack Trading LLC). Hires staff. Moves into a space that needs no construction. No exterior sign.",
+  "items": [
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ca-edd",
+      "name": "Employer payroll tax account registration (DE 1)",
+      "agency": "California Employment Development Department",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 15 days of paying more than $100 in wages in a calendar quarter.",
+      "source": "https://edd.ca.gov/en/Payroll_Taxes/Am_I_Required_to_Register_as_an_Employer",
+      "match": "employer|DE ?1|edd",
+      "agencyMatch": "employment development department|\\bEDD\\b"
+    },
+    {
+      "key": "la-btrc",
+      "name": "Business Tax Registration Certificate",
+      "agency": "City of Los Angeles Office of Finance",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"All companies doing business within the City of Los Angeles\" need one.",
+      "source": "https://business.lacity.gov/plan-business/register-your-business/business-tax-registration-certificate",
+      "match": "los angeles business tax|la-btrc|business tax registration",
+      "agencyMatch": "office of finance"
+    },
+    {
+      "key": "fda-ffr",
+      "name": "Food Facility Registration",
+      "agency": "U.S. Food and Drug Administration",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "Facilities that manufacture, process, pack or hold food register before operations begin; renew Oct-Dec of even years.",
+      "source": "https://fda.gov/media/160931/download",
+      "match": "food facility registration|fda-ffr",
+      "agencyMatch": "food and drug"
+    },
+    {
+      "key": "cbp-5106",
+      "name": "Importer identity (CBP Form 5106)",
+      "agency": "U.S. Customs and Border Protection",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Filed with the first formal entry or request for services (19 CFR 24.5).",
+      "source": "https://www.govinfo.gov/content/pkg/FR-2013-11-12/html/2013-26996.htm",
+      "match": "5106|importer identity",
+      "agencyMatch": "customs and border"
+    },
+    {
+      "key": "cbp-bond",
+      "name": "Customs bond (CBP Form 301)",
+      "agency": "U.S. Customs and Border Protection",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Merchandise isn't released at entry without a single or continuous bond (19 CFR 142.4(a)); the port director may waive it at $2,500 or less.",
+      "source": "https://www.ecfr.gov/current/title-19/chapter-I/part-142/subpart-A/section-142.4",
+      "match": "customs bond|cbp-301",
+      "agencyMatch": "customs and border"
+    },
+    {
+      "key": "ca-pfr",
+      "name": "Processed Food Registration (general food warehouse)",
+      "agency": "California Department of Public Health, Food and Drug Branch",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"PFR certificates are also required for general food warehouses.\"",
+      "source": "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcessedFoodRegistration.aspx",
+      "match": "processed food registration|\\bPFR\\b",
+      "agencyMatch": "department of public health|food and drug branch"
+    },
+    {
+      "key": "fda-pn",
+      "name": "Prior Notice of imported food (per shipment)",
+      "agency": "U.S. Food and Drug Administration",
+      "level": "federal",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.govinfo.gov/content/pkg/CFR-2013-title21-vol1/pdf/CFR-2013-title21-vol1-sec1-279.pdf",
+      "match": "prior notice",
+      "agencyMatch": "food and drug",
+      "condition": "Filed for each shipment, not once."
+    },
+    {
+      "key": "cbp-ace",
+      "name": "ACE portal account",
+      "agency": "U.S. Customs and Border Protection",
+      "level": "federal",
+      "required": false,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.govinfo.gov/content/pkg/FR-2013-11-12/html/2013-26996.htm",
+      "match": "\\bACE\\b",
+      "agencyMatch": "customs and border",
+      "condition": "Optional account for viewing entries."
+    },
+    {
+      "key": "ca-seller",
+      "name": "Seller's permit",
+      "agency": "California Department of Tax and Fee Administration",
+      "level": "state",
+      "required": false,
+      "verified": false,
+      "fee": null,
+      "note": "\"Every location must have this permit to sell taxable goods.\" Also on the LA restaurant checklist.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "seller'?s permit|ca-cdtfa",
+      "agencyMatch": "tax and fee administration|CDTFA",
+      "condition": "A wholesaler selling for resale; CDTFA's own rule for wholesalers wasn't read in this pass."
+    }
+  ],
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "CPSC product certificate",
+      "why": "Food isn't a consumer product under CPSC's certificate rule.",
+      "match": "consumer product safety|cpsc"
+    },
+    {
+      "name": "Retail food health permit",
+      "why": "A warehouse isn't a retail food facility.",
+      "match": "public health permit|food facility plan check"
+    }
+  ]
+}

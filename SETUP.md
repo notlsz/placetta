@@ -228,7 +228,7 @@ How it behaves: a linked phone that writes on WhatsApp is answered on WhatsApp, 
 
 Someone who isn't on Placetta texts Odelia "Milk tea shop in Flushing, NY" (or "奶茶店，纽约法拉盛") by SMS, iMessage, WhatsApp or Placetta's WeChat account and gets back, within seconds and with no model: how many permits the registry has for that business and city, the first three in order with agency and published fee, the time to open, and a link to claim the full plan (signed with the monitor key, good for 7 days, once). The link opens the normal sign-in; after it the plan is the person's workspace and the phone it went to is linked, with the same consent words and ledger as Settings. A line that can't be read gets one question; nothing else is ever sent first, except one reminder the next day at 10am if they reply "remind me". Numbers outside `ODELIA_SMS_COUNTRIES` get nothing.
 
-1. Run `20261018090000_text_start.sql` and deploy `odelia-sms` and `chat-events` (`npm run build:agent` builds `_shared/start.js` first).
+1. Run `20261018090100_text_start.sql` and deploy `odelia-sms` and `chat-events` (`npm run build:agent` builds `_shared/start.js` first).
 2. It's on for any number Odelia already receives on. `ODELIA_TEXT_START=off` brings back the old one-time note for strangers.
 3. The website's hero shows where to text only when you set `ODELIA_PUBLIC_NUMBER` (one of `LINQ_NUMBERS` or `ODELIA_NUMBER`) or `ODELIA_PUBLIC_WHATSAPP` (the `WHATSAPP_NUMBER`). Until then that line stays hidden.
 4. WeChat: connect Placetta's own Official Account to a Placetta workspace in Settings, Integrations, then set `ODELIA_PUBLIC_WECHAT_WS` to that workspace's id (its followers who aren't teammates get text to start) and `ODELIA_PUBLIC_WECHAT` to the account's WeChat ID for the website.
