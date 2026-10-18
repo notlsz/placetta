@@ -2,20 +2,39 @@ import { inspectionsFor } from "./inspections/forStore";
 import { useEffect, useMemo, useState } from "react";
 import { openSettings } from "./Settings";
 import { useApp } from "./ctx";
-import { B, type Cert, type Store } from "./model";
+import { B, type Cert, type Store, type Workspace } from "./model";
 import { countyOf, stateCode, cityName } from "./counties";
 import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
-import { daysFromNow, daysUntil, fmtDay, fmtIn, inDays } from "./time";
+import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, inDays } from "./time";
 import { basisLine, openingLine, openingPath, type Evidence } from "./smart";
 import { I, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
 import { parseStoreList, permitsOnOpening, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
 import * as api from "./cloud/api";
+import { StoreBot } from "./Bot";
+import { storeOf, type Job } from "./jobs";
+import { PlanCard, WatchLink } from "./Work";
 import { StaffLangPick } from "./StaffLang";
 import { StoresCheckPanel } from "./StoresCheck";
 
 /* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
-   a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. */
+   a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. Each store has
+   its own bot (Odelia for that store), and its jobs show with it. */
+
+/** A store's jobs: the ones its bot works there (a job split across stores counts by its parts). */
+function jobsAt(ws: Workspace, s: Store) {
+  const mine = (ws.jobs ?? []).filter(j => !j.children?.length && storeOf(ws.stores, j)?.id === s.id);
+  const live = (j: Job) => j.status !== "done" && j.status !== "stopped";
+  return { open: mine.filter(live).sort((a, b) => Number(b.status === "waiting") - Number(a.status === "waiting") || b.updated.localeCompare(a.updated)), done: mine.filter(j => !live(j)) };
+}
+/** "Its bot: 1 job needs you", in a line; under the bot's own heading (bare), just "1 job needs you". */
+function botLine(jobs: Job[], zh: boolean, finished = 0, bare = false) {
+  const needs = jobs.filter(j => j.status === "waiting").length, n = jobs.length;
+  if (!n && finished) return bare ? (zh ? `已完成 ${finished} 项工作，暂无进行中的` : `Finished ${finished} job${finished === 1 ? "" : "s"}, nothing open`) : zh ? `这家店的助手已完成 ${finished} 项工作，暂无进行中的` : `Its bot finished ${finished} job${finished === 1 ? "" : "s"} and has nothing open`;
+  if (!n) return bare ? (zh ? "暂无进行中的工作" : "Nothing open") : zh ? "这家店的助手暂无进行中的工作" : "Its bot has nothing open";
+  if (needs) return bare ? (zh ? `${needs} 项工作需要您` : `${needs} job${needs === 1 ? "" : "s"} need${needs === 1 ? "s" : ""} you`) : zh ? `这家店的助手：${needs} 项工作需要您` : `Its bot: ${needs} job${needs === 1 ? "" : "s"} need${needs === 1 ? "s" : ""} you`;
+  return bare ? (zh ? `正在处理 ${n} 项工作` : `On ${n} job${n === 1 ? "" : "s"}`) : zh ? `这家店的助手正在处理 ${n} 项工作` : `Its bot is on ${n} job${n === 1 ? "" : "s"}`;
+}
 
 function Ring({ score, band, size = 64 }: { score: number; band: Readiness["band"]; size?: number }) {
   const r = (size - 8) / 2, c = 2 * Math.PI * r;
@@ -78,6 +97,7 @@ function StoreCard({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   const r = readiness(s, ws);
   const logs = todayLogs(s);
   const expiring = s.certs.filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; });
+  const bot = jobsAt(ws, raw);
   return (
     <button type="button" className="store" onClick={onOpen}>
       <div className="store-top">
@@ -97,6 +117,10 @@ function StoreCard({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
           {expiring.length > 0 && <em className="warnline">{b(B(`${expiring.length} certificate expiring`, `${expiring.length} 张证书即将到期`))}</em>}
         </div>
       )}
+      <span className={"store-bot" + (bot.open.some(j => j.status === "waiting") ? " needs" : "")}>
+        <span className="sb-bot" aria-hidden="true"><StoreBot id={raw.id} size={22} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
+        <span>{botLine(bot.open, lang === "zh", bot.done.filter(j => j.status === "done").length)}</span>
+      </span>
     </button>
   );
 }
@@ -107,6 +131,36 @@ function Section({ title, sub, children, side }: { title: string; sub?: string; 
       <div className="sec-h"><h2>{title}</h2>{side}</div>
       {sub && <p className="sec-sub">{sub}</p>}
       {children}
+    </section>
+  );
+}
+
+/** The store's own bot, and the jobs it works here: open ones in full, what needs you first; the last few done, each
+ *  with its replay. */
+function StoreBotSection({ s }: { s: Store }) {
+  const { b, lang, ws } = useApp();
+  const zh = lang === "zh";
+  const { open, done } = jobsAt(ws, s);
+  return (
+    <section className="sec bot-group" aria-label={zh ? "这家店的助手" : "This store's bot"}>
+      <div className="sec-h bot-h">
+        <h2>
+          <span className="bot-ico" aria-hidden="true"><StoreBot id={s.id} size={30} label={b(s.name)} busy={open.some(j => j.status === "running")} /></span>
+          <span className="bot-name"><span>{zh ? "这家店的助手" : "This store's bot"}</span><small>{botLine(open, zh, done.filter(j => j.status === "done").length, true)}</small></span>
+        </h2>
+      </div>
+      {open.map(j => <PlanCard key={j.id} job={j} compact actions />)}
+      {!open.length && <p className="quiet">{zh ? `这家店的工作由它自己的助手负责，例如迎检准备或续期。让 Odelia 处理多家门店时，每家店的助手同时做自己的部分。` : `This store's jobs, like getting ready for an inspection or a renewal, are worked by its own bot. When you ask Odelia for something across stores, each store's bot does its part at the same time.`}</p>}
+      {done.length > 0 && (
+        <ul className="tray sb-done">
+          {done.slice(0, 5).map(j => (
+            <li key={j.id} className="row">
+              <span className="lr-tx"><b>{b(j.title)}</b><small>{j.status === "stopped" ? (zh ? `已停止，${fmtAgo(j.updated, lang)}` : `Stopped ${fmtAgo(j.updated, lang)}`) : (zh ? `已完成，${fmtAgo(j.updated, lang)}` : `Done ${fmtAgo(j.updated, lang)}`)}</small></span>
+              <WatchLink job={j} />
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
@@ -158,6 +212,8 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
           </div>
         ))}
       </div>
+
+      <StoreBotSection s={s} />
 
       <Section title={b(B("What Placetta is worth here", "快哉在这家店的价值"))}>
         <Value s={withPath(s, ws, ev).s} big />

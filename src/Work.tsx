@@ -1,17 +1,41 @@
 import { useRef, useState } from "react";
 import { useApp } from "./ctx";
-import { B } from "./bi";
+import { B, type Bi } from "./bi";
 import { fmtAgo, fmtDay } from "./time";
 import { I } from "./ui";
-import { cadence, continuePrompt, nextAction, nextRun, progress, type Job, type Routine } from "./jobs";
+import { cadence, continuePrompt, family, nextAction, nextRun, progress, proven, storeOf, type Job, type Routine } from "./jobs";
 import { PREVIEW } from "./cloud/api";
 import { toolbox } from "./harness";
+import { hasReplay } from "./replay";
+import { AgentBot, StoreBot } from "./Bot";
+import type { Store, Workspace } from "./model";
 import { AskPerson, jobContext } from "./AskPerson";
 
-/* Work: everything Odelia is on, run like an engineer's tickets. Each job shows her plan and where it stands; what
-   she needs from you comes first; what you gave her while she was busy waits in order; routines repeat on schedule. */
+/* Work: everything Odelia is on, run like an engineer's tickets, and grouped the way the business is: each store has
+   its own bot working that store's jobs, and Odelia coordinates whatever spans stores, like a chief of staff over a
+   team. Each job shows its plan and where it stands; what she needs from you comes first in every group; what you gave
+   her while she was busy waits in order; routines repeat on schedule. Every job can be watched back, moment by moment. */
 
 const today = () => new Date().toISOString().slice(0, 10);
+const open = (j: Job) => j.status !== "done" && j.status !== "stopped";
+const ORDER: Record<string, number> = { waiting: 0, running: 1, queued: 2, done: 3, stopped: 4 };
+const byNeed = (a: Job, b: Job) => (ORDER[a.status] ?? 5) - (ORDER[b.status] ?? 5) || b.updated.localeCompare(a.updated);
+
+/** Where one store's part of a split job stands, in a word or two. */
+function partState(k: Job): { key: string; label: Bi } {
+  if (k.status === "queued") return { key: "queued", label: B("Waiting its turn", "排队中") };
+  if (k.status === "running") return { key: "running", label: B("Working", "进行中") };
+  if (k.status === "waiting") return { key: "waiting", label: B("Needs you", "需要您") };
+  if (k.status === "stopped") return { key: "stopped", label: B("Stopped", "已停止") };
+  return proven(k) ? { key: "done", label: B("Done and checked", "已完成并通过检查") } : { key: "unchecked", label: B("Done, not checked yet", "已完成，待检查") };
+}
+
+/** "Watch how she did it": opens the job's replay, when it has one. */
+export function WatchLink({ job }: { job: Job }) {
+  const { lang, ws, openReplay } = useApp();
+  if (!hasReplay(ws, job)) return null;
+  return <button type="button" className="lnk watch" onClick={() => openReplay(job.id)}><I.play />{lang === "zh" ? "看她是怎么做的" : "Watch how she did it"}</button>;
+}
 
 /** One job's plan: the steps in order, the next one marked, done ones ticked. */
 /** actions: show the one button that moves the job now even on a compact card (Home, Needs you). */
@@ -19,13 +43,15 @@ export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolea
   const { b, lang, ws, openApp } = useApp();
   const p = progress(job), next = job.steps.findIndex(s => !s.done);
   const zh = lang === "zh";
-  const state = job.status === "waiting" ? B("Waiting", "等待中") : job.status === "done" ? B("Done", "已完成") : job.status === "stopped" ? B("Stopped", "已停止") : B("In progress", "进行中");
+  const state = job.status === "waiting" ? B("Waiting", "等待中") : job.status === "done" ? B("Done", "已完成") : job.status === "stopped" ? B("Stopped", "已停止") : job.status === "queued" ? B("Waiting its turn", "排队中") : B("In progress", "进行中");
+  const parent = job.parent ? (ws.jobs ?? []).find(j => j.id === job.parent) : undefined;
   return (
     <section className={"job " + job.status + (compact ? " compact" : "")} aria-label={b(job.title)}>
       <header>
         <span className="job-t"><b>{b(job.title)}</b><small>{zh ? `${p.done}/${p.all} 步，${fmtAgo(job.updated, lang)}更新` : `${p.done} of ${p.all} steps, updated ${fmtAgo(job.updated, lang)}`}</small></span>
         <em className={"job-s " + job.status}>{b(state)}</em>
       </header>
+      {parent && !compact && <p className="job-from">{zh ? `属于“${parent.title.zh || parent.title.en}”，由 Odelia 统筹` : `Part of “${parent.title.en}”, which Odelia coordinates`}</p>}
       <span className="job-bar" aria-hidden="true"><i style={{ width: `${p.all ? (100 * p.done) / p.all : 0}%` }} /></span>
       <ol className="job-steps">
         {job.steps.map((s, i) => (
@@ -42,20 +68,100 @@ export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolea
       {!compact && job.apps?.length ? (
         <p className="job-apps">{job.apps.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <button key={id} type="button" className="lnk" onClick={() => openApp(id)}>{b(a.name)}</button> : null; })}</p>
       ) : null}
+      {(!compact || hasReplay(ws, job)) && <div className="job-foot"><WatchLink job={job} /></div>}
     </section>
   );
+}
+
+/** The chief of staff's row: a job Odelia split across stores, with each store's bot and where its part stands. The
+ *  job is done only when every store's part is done and checked. compact: Home's version, one line per store. */
+export function ChiefRow({ job, compact }: { job: Job; compact?: boolean }) {
+  const { b, lang, ws, busy, ask, stopJob } = useApp();
+  const zh = lang === "zh";
+  const f = family(ws, job);
+  const act = nextAction(ws, job);
+  const state = job.status === "done" ? B("Done", "已完成") : job.status === "stopped" ? B("Stopped", "已停止") : job.status === "waiting" ? B("Needs you", "需要您") : B("In progress", "进行中");
+  const name = (k: Job): Bi => storeOf(ws.stores, k)?.name ?? k.title;
+  return (
+    <section className={"cos " + job.status + (compact ? " compact" : "")} aria-label={b(job.title)}>
+      <header className="cos-h">
+        <span className="cos-bot" aria-hidden="true"><AgentBot size={compact ? 30 : 38} busy={f.working > 0} interactive={false} /></span>
+        <span className="cos-t">
+          <small>{zh ? `Odelia 统筹 ${f.all} 家门店` : `Odelia, coordinating ${f.all} store${f.all === 1 ? "" : "s"}`}</small>
+          <b>{b(job.title)}</b>
+        </span>
+        <em className={"job-s " + job.status}>{b(state)}</em>
+      </header>
+      <div className="cos-prog">
+        <span className="job-bar" aria-hidden="true"><i style={{ width: `${f.all ? (100 * f.done) / f.all : 0}%` }} /></span>
+        <span className="cos-n">{zh ? `${f.all} 家门店中 ${f.done} 家已完成` : `${f.done} of ${f.all} stores done`}</span>
+      </div>
+      <ul className="cos-kids">
+        {f.kids.map(k => {
+          const s = partState(k), p = progress(k);
+          return (
+            <li key={k.id} className={"cos-kid " + s.key}>
+              <span className="kid-bot" aria-hidden="true"><StoreBot id={k.store ?? k.id} size={compact ? 22 : 28} label={b(name(k))} busy={k.status === "running"} /></span>
+              <span className="kid-tx">
+                <b>{b(name(k))}</b>
+                {!compact && <small>{k.status === "waiting" && k.waiting ? b(k.waiting) : zh ? `已完成 ${p.done}/${p.all} 步` : `${p.done} of ${p.all} steps`}</small>}
+              </span>
+              <em className={"kid-s " + s.key}>{b(s.label)}</em>
+            </li>
+          );
+        })}
+      </ul>
+      {!compact && (
+        <div className="job-act">
+          {act?.who === "odelia" && <button type="button" className="sbtn ink" disabled={busy} onClick={() => ask(continuePrompt(job, lang))}><I.spark />{zh ? "让 Odelia 写汇总" : "Have Odelia write the summary"}</button>}
+          <WatchLink job={job} />
+          {open(job) && <button type="button" className="lnk quiet" onClick={() => stopJob(job.id)}>{zh ? "停止所有门店的这项工作" : "Stop it at every store"}</button>}
+        </div>
+      )}
+      {compact && <div className="job-foot"><WatchLink job={job} /></div>}
+    </section>
+  );
+}
+
+/** One store's group: its bot, and the jobs it's working there, what needs you first. */
+function StoreGroup({ store, jobs }: { store?: Store; jobs: Job[] }) {
+  const { b, lang } = useApp();
+  const zh = lang === "zh";
+  const needs = jobs.filter(j => j.status === "waiting").length, working = jobs.filter(j => j.status === "running").length, queued = jobs.filter(j => j.status === "queued").length;
+  const line = [needs ? (zh ? `${needs} 项需要您` : `${needs} need${needs === 1 ? "s" : ""} you`) : "", working ? (zh ? `${working} 项进行中` : `${working} working`) : "", queued ? (zh ? `${queued} 项排队中` : `${queued} waiting their turn`) : ""].filter(Boolean).join(zh ? "，" : ", ");
+  const title = store ? b(store.name) : zh ? "整个企业" : "Whole business";
+  return (
+    <section className="sec bot-group" aria-label={title}>
+      <div className="sec-h bot-h">
+        <h2>
+          <span className="bot-ico" aria-hidden="true">{store ? <StoreBot id={store.id} size={30} label={title} busy={working > 0} /> : <AgentBot size={30} busy={working > 0} interactive={false} />}</span>
+          <span className="bot-name"><span>{title}</span><small>{store ? (zh ? "这家店的助手" : "This store's bot") : (zh ? "Odelia 本人" : "Odelia herself")}{line ? (zh ? `：${line}` : `: ${line}`) : ""}</small></span>
+        </h2>
+      </div>
+      {jobs.map(j => <PlanCard key={j.id} job={j} />)}
+    </section>
+  );
+}
+
+/** The open jobs, grouped by store, groups that need you first. Jobs that span stores (and their parts) aren't here:
+ *  the chief of staff's rows carry them, and each part shows under its own store. */
+function groupsOf(ws: Workspace, jobs: Job[]) {
+  const stores = ws.stores ?? [];
+  const groups = stores.map(s => ({ store: s as Store | undefined, jobs: jobs.filter(j => !j.children?.length && storeOf(stores, j)?.id === s.id).sort(byNeed) }));
+  groups.push({ store: undefined, jobs: jobs.filter(j => !j.children?.length && !storeOf(stores, j)).sort(byNeed) });
+  return groups.filter(g => g.jobs.length).sort((x, y) => Number(y.jobs.some(j => j.status === "waiting")) - Number(x.jobs.some(j => j.status === "waiting")));
 }
 
 /** The one thing that moves this job forward now: your upload, your approval, or Odelia carrying on. Nothing here
  *  ticks a step by hand; steps tick when the workspace shows the work (src/jobs.ts, reconcile). */
 export function JobActions({ job }: { job: Job }) {
-  const { lang, ws, busy, ask, upload, openApproval, editWs, cloud } = useApp();
+  const { lang, ws, busy, ask, upload, openApproval, stopJob, cloud } = useApp();
   const zh = lang === "zh";
   const pick = useRef<HTMLInputElement>(null);
   const [item, setItem] = useState<{ app: string; id: string } | null>(null);
   const act = nextAction(ws, job);
   if (!act) return null;
-  const stop = () => editWs(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === job.id ? { ...j, status: "stopped" as const, updated: new Date().toISOString() } : j)) }));
+  const stop = () => stopJob(job.id);
   const sample = !cloud || PREVIEW;
   return (
     <div className="job-act">
@@ -73,11 +179,12 @@ export function JobActions({ job }: { job: Job }) {
       {act.who === "you" && act.kind === "approve" && (
         <button type="button" className="sbtn ink" onClick={() => openApproval(act.id)}><I.check />{zh ? "查看并批准" : "Review and approve"}</button>
       )}
-      {act.who === "odelia" && (
-        <button type="button" className="sbtn ink" disabled={busy} onClick={() => ask(continuePrompt(job, lang))}>
+      {act.who === "odelia" && (job.parent && (job.status === "running" || job.status === "queued")
+        // a store's part its bot is working (or about to): nothing to ask, it says so
+        ? <span className="job-bot-on">{job.status === "queued" ? (zh ? "这家店的助手排队中，轮到时开始" : "This store's bot starts when a hand is free") : (zh ? "这家店的助手正在处理" : "This store's bot is on it")}</span>
+        : <button type="button" className="sbtn ink" disabled={busy} onClick={() => ask(continuePrompt(job, lang))}>
           <I.spark />{busy ? (zh ? "Odelia 正在工作" : "Odelia is working") : zh ? "让 Odelia 继续" : "Have Odelia carry on"}
-        </button>
-      )}
+        </button>)}
       <button type="button" className="lnk quiet" onClick={stop}>{zh ? "停止这项工作" : "Stop this job"}</button>
     </div>
   );
@@ -151,28 +258,25 @@ export function WorkPage() {
   const [showDone, setShowDone] = useState(false);
   const zh = lang === "zh";
   const jobs = ws.jobs ?? [], routines = ws.routines ?? [];
-  const waiting = jobs.filter(j => j.status === "waiting"), running = jobs.filter(j => j.status === "running");
-  const done = jobs.filter(j => j.status === "done" || j.status === "stopped");
+  const live_ = jobs.filter(open);
+  const chiefs = live_.filter(j => j.children?.length);
+  const groups = groupsOf(ws, live_);
+  const done = jobs.filter(j => !open(j) && !j.parent);
   const empty = !jobs.length && !routines.length && !queued.length && !busy;
   return (
     <div className="work tabbed">
-      <p className="tab-lede">{zh ? "Odelia 手上的每项工作：她的计划、进度，以及需要您提供什么。她可同时处理三项，更多的会排队接着做。" : "Every job Odelia is on: her plan, where it stands, and what she needs from you. She works on up to three at once; more wait their turn."}</p>
+      <p className="tab-lede">{zh ? "Odelia 手上的每项工作，按门店分组：每家门店有自己的助手做本店的部分，跨门店的工作由 Odelia 统筹。她最多同时处理三项，其余排队接着做。每项工作都可以回看她是怎么做的。" : "Every job Odelia is on, grouped by store: each store has its own bot doing that store's part, and Odelia coordinates the work that spans stores. She works up to three at once; more wait their turn. You can watch back how she did any job."}</p>
 
       {busy && live && <p className="work-now"><I.spark /><span>{zh ? "正在做：" : "Working now: "}{b(live.label)}…</span></p>}
 
-      {waiting.length > 0 && (
+      {chiefs.length > 0 && (
         <section className="sec">
-          <div className="sec-h"><h2>{zh ? "需要您" : "Needs you"}<em>{waiting.length}</em></h2></div>
-          {waiting.map(j => <PlanCard key={j.id} job={j} />)}
+          <div className="sec-h"><h2>{zh ? "跨门店的工作" : "Across your stores"}<em>{chiefs.length}</em></h2></div>
+          {chiefs.map(j => <ChiefRow key={j.id} job={j} />)}
         </section>
       )}
 
-      {running.length > 0 && (
-        <section className="sec">
-          <div className="sec-h"><h2>{zh ? "进行中" : "In progress"}<em>{running.length}</em></h2></div>
-          {running.map(j => <PlanCard key={j.id} job={j} />)}
-        </section>
-      )}
+      {groups.map(g => <StoreGroup key={g.store?.id ?? "business"} store={g.store} jobs={g.jobs} />)}
 
       {queued.length > 0 && (
         <section className="sec">
@@ -205,7 +309,7 @@ export function WorkPage() {
       {done.length > 0 && (
         <section className="sec">
           <button type="button" className="sec-h tog" onClick={() => setShowDone(v => !v)} aria-expanded={showDone}><h2>{zh ? "已完成" : "Done"}<em>{done.length}</em></h2><span className={showDone ? "up" : ""}><I.chev /></span></button>
-          {showDone && done.slice(0, 20).map(j => <PlanCard key={j.id} job={j} />)}
+          {showDone && done.slice(0, 20).map(j => (j.children?.length ? <ChiefRow key={j.id} job={j} /> : <PlanCard key={j.id} job={j} />))}
         </section>
       )}
     </div>

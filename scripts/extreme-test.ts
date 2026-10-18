@@ -5,7 +5,11 @@
    workspace, works only in Chinese, refines the instant plan carelessly, calls every tool right and wrong, and loses
    its model vendors one by one. Each check says what held, or why it didn't. No model and no network: everything is
    in memory. npm run test:extreme */
-import { channelHint, channelRefuses, guardPatch, runRounds, startState, type Channel, type RunState, type Send } from "../src/serverRun";
+import { channelHint, channelRefuses, guardPatch, runRounds, startState, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
+import { fill, spawn, stillOpen, wake, type FamilyDb } from "../supabase/functions/agent-run/family";
+import { MAX_MOMENTS, toolWords } from "../src/replay";
+import { proven } from "../src/jobs";
+import { redact, redactValue } from "../src/guard";
 import { confirmChange, normalizeState, type Step, viaWords } from "../src/core";
 import { coreFields, DOCS_PER_RUN, liveAgent, messagesModel, PDF_PAGES, type Block, type Role, type Services } from "../src/live";
 import { B, same } from "../src/bi";
@@ -69,10 +73,11 @@ const ctxOf = (body: Record<string, unknown>): Ctx => {
   return { calls, body, out: n => { const o = calls.filter(c => c.name === n && c.ok).map(c => c.parsed ?? {}); if (!o.length) throw new Error(`script: no successful ${n} yet`); return o[o.length - 1]; } };
 };
 
-type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; steps: Step[]; calls: Call1[]; bodies: Record<string, unknown>[]; roles: (Role | undefined)[]; state: RunState; error?: unknown };
+type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; waiting?: RunState; steps: Step[]; calls: Call1[]; bodies: Record<string, unknown>[]; roles: (Role | undefined)[]; state: RunState; error?: unknown };
 /** One request through runRounds. json answers the model's reads (documents) and the checker; checkerDown makes every
  *  checker call fail, as when the review model is unreachable. */
-async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; checkerDown?: boolean; svc?: Services; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; sender?: string; role?: Role; loop?: Turn; send?: (inner: Send) => Send; notify?: (n: Notice) => void }): Promise<Run> {
+async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; checkerDown?: boolean; svc?: Services; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; sender?: string; role?: Role; loop?: Turn; send?: (inner: Send) => Send;
+  runId?: string; child?: { job: string; store: string }; family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> }; notify?: (n: Notice) => void }): Promise<Run> {
   let w = o.ws, i = 0;
   const steps: Step[] = [], bodies: Record<string, unknown>[] = [], roles: (Role | undefined)[] = [];
   const state = o.state ?? startState([], o.prompt ?? "");
@@ -93,11 +98,12 @@ async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; sc
   let out: Awaited<ReturnType<typeof runRounds>> | undefined, error: unknown;
   try {
     out = await runRounds({ state, ws: () => w, apply: p => { w = p(w); }, step: s => { steps.push(s); }, send, lang: o.lang ?? "en", deep: false, account: true,
-      svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, sender: o.sender, role: o.role, notify: o.notify });
+      svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, sender: o.sender, role: o.role,
+      runId: o.runId, child: o.child, family: o.family, notify: o.notify });
   } catch (e) { error = e; }
   const calls = callsOf(state.messages);
   for (const c of calls) record(c);
-  return { w, steps, calls, bodies, roles, state, error, ...(out && "reply" in out ? { reply: out.reply as unknown as Record<string, unknown> } : out && "paused" in out ? { paused: out.paused } : {}) };
+  return { w, steps, calls, bodies, roles, state, error, ...(out && "waiting" in out ? { waiting: out.waiting, reply: out.reply as unknown as Record<string, unknown> } : out && "reply" in out ? { reply: out.reply as unknown as Record<string, unknown> } : out && "paused" in out ? { paused: out.paused } : {}) };
 }
 const textOf = (r: Run) => ((r.reply?.text as { en: string; zh: string }[]) ?? []).map(t => t.en).join(" ");
 const named = (r: Run, n: string) => r.calls.filter(c => c.name === n);
@@ -842,6 +848,178 @@ async function routes() {
   } finally { console.error = quiet; }
 }
 
+/* ================================================================== 18. store bots and the replay */
+
+/** agent_runs in memory, every call a little late, the way the database is under load. */
+function memRuns(jitter = 0) {
+  type Row = { id: string; ws: string; status: string; heartbeat_at: string; parent_run: string | null; job_id: string | null; store_id: string | null; n: number };
+  const rows: Row[] = [];
+  let n = 0;
+  const late = () => (jitter ? new Promise(r => setTimeout(r, Math.random() * jitter)) : Promise.resolve());
+  const db: FamilyDb = {
+    async running(ws, fresh) { await late(); return rows.filter(r => r.ws === ws && r.status === "running" && r.heartbeat_at > fresh).length; },
+    async queued(ws, limit) { await late(); return rows.filter(r => r.ws === ws && r.status === "queued").sort((a, b) => a.n - b.n).slice(0, limit).map(r => r.id); },
+    async insert(parent, kids) { await late(); return kids.map(k => { const id = `run-${++n}`; rows.push({ id, ws: rows.find(r => r.id === parent)?.ws ?? "w", status: "queued", heartbeat_at: new Date().toISOString(), parent_run: parent, job_id: k.job, store_id: k.store, n }); return id; }); },
+    async update(id, fields, where) { await late(); const r = rows.find(x => x.id === id); if (!r || (where.status && r.status !== where.status) || (where.heartbeat_at && r.heartbeat_at !== where.heartbeat_at)) return 0; Object.assign(r, fields); return 1; },
+    async children(parent) { await late(); return rows.filter(r => r.parent_run === parent).map(r => ({ id: r.id, status: r.status })); },
+  };
+  const add = (status: string, ws = "w") => { const id = `run-${++n}`; rows.push({ id, ws, status, heartbeat_at: new Date().toISOString(), parent_run: null, job_id: null, store_id: null, n }); return id; };
+  return { db, rows, add };
+}
+
+async function storeBots() {
+  begin("18. Store bots under a chief of staff, and the replay");
+  const many = Array.from({ length: 14 }, (_, k) => store(`s${k}`, `Store ${k}`, `${100 + k} Main St, Flushing, NY 11354`, [`a${k}`]));
+  const ws = workspace({ stores: many, apps: many.map((_, k) => app(`a${k}`, "draft")) });
+  const fam = memRuns(), parentRun = fam.add("running");
+  const acct = account();
+  const svc: Services = { ...acct.svc, split: async ({ children }) => { const out = await spawn(fam.db, { ws: "w", parent: parentRun, cap: 3, staleMs: 180_000 }, children.map(c => ({ job: c.job, store: c.store, prompt: c.prompt }))); return { started: out.started, queued: out.queued }; } };
+  const famOps = { pending: async () => stillOpen(await fam.db.children(parentRun)), results: async (): Promise<ChildResult[]> => [] };
+  const DONE = ["The checklist is checked against the store", "Every expiring certificate has a renewal deadline"];
+  const HOW = "Walk the inspection checklist against your store and set renewal deadlines for expiring certificates.";
+  const ids = (n: number, from = 0) => many.slice(from, from + n).map(s => s.id);
+
+  // the model splits carelessly: too many stores, a made-up store, one store, no done list, empty instructions, then
+  // 12 at once, then more past the cap of 12 a run, then marks the split job done itself
+  const r = await agent({
+    ws, svc, family: famOps, runId: "main", prompt: "Renew everything due this quarter at every location.",
+    script: [
+      () => askAll(bad("split_job", { title: "All", instructions: HOW, done: DONE }), bad("split_job", { title: "Two", instructions: HOW, done: DONE, store_ids: ["s1", "nowhere"] }),
+        bad("split_job", { title: "One", instructions: HOW, done: DONE, store_ids: ["s1"] }), bad("split_job", { title: "No list", instructions: HOW, done: [], store_ids: ids(2) }),
+        bad("split_job", { title: "Vague", instructions: "Do it.", done: DONE, store_ids: ids(2) })),
+      () => askAll(["split_job", { title: "Renew what's due at twelve stores", instructions: HOW, done: DONE, store_ids: [...ids(12), "s0", "s1"] }]),
+      () => askAll(bad("split_job", { title: "The rest", instructions: HOW, done: DONE, store_ids: ids(2, 12) })),
+      c => askAll(["set_plan", { job_id: c.out("split_job").parent_job, title: "Done", steps: [{ title: "All", done: true }], status: "done" }]),
+      () => say("All twelve stores are done."),
+    ],
+  });
+  const errs = named(r, "split_job").filter(c => !c.ok).map(c => c.out);
+  ok(/At most 12 stores in one split \(you gave 14\)/.test(errs[0]) && /No store "nowhere"/.test(errs[1]) && /two or more stores/.test(errs[2]) && /done list/.test(errs[3]) && /instructions each store's bot follows/.test(errs[4]),
+    "14 stores, a made-up store, one store, no done list and empty instructions are each refused with why", errs);
+  ok(/already split 12 store jobs; at most 12 in one run/.test(errs[5] ?? ""), "past 12 store jobs in one run, more are refused", errs[5]);
+  const parent = (r.w.jobs ?? []).find(j => j.children?.length)!;
+  eq([(r.w.jobs ?? []).filter(j => j.children?.length).length, parent.children!.length, new Set((r.w.jobs ?? []).filter(j => j.parent).map(j => j.store)).size], [1, 12, 12], "one split job, 12 store jobs, each store once (repeats dropped)");
+  eq([fam.rows.filter(x => x.status === "running").length, fam.rows.filter(x => x.status === "queued").length], [3, 10], "the cap holds: the main run and 2 stores at work, 10 waiting their turn");
+  ok(parent.status !== "done" && parent.steps.length === 12 && parent.steps.every(s => !s.done), "the split job can't be set done: its steps stay one per store, none proven", { status: parent.status, steps: parent.steps.length });
+  ok(!!r.waiting && /isn't finished|Not finished yet/.test(textOf(r)) === false, "the run waits on its stores instead of claiming done", textOf(r));
+
+  // the stores' bots are quicker than the main run: it doesn't wait for nothing, it writes the summary in the same run
+  const quick = await agent({ ws, svc, runId: "quick", prompt: "Get two stores ready.",
+    family: { pending: async () => 0, results: async () => [{ job: "x", store: "s0", status: "done", reply: "Store 0 is ready." }] },
+    script: [
+      () => askAll(["split_job", { title: "Two stores ready", instructions: HOW, done: DONE, store_ids: ids(2) }]),
+      () => say("Each store's bot is on it."),
+      c => { ok(/Every store's bot has finished/.test(String((c.body.messages as { content: unknown }[]).at(-1)?.content)), "they already finished: their results come straight back to the main run"); return say("Both stores are back: here's the summary."); },
+    ] });
+  ok(!quick.waiting && /here's the summary/.test(textOf(quick)) && !/Each store's bot is on it/.test(textOf(quick)), "and the answer is the summary, not \"they're on it\"", textOf(quick));
+
+  // a store's bot that tries to split again, take over the split job or a sibling's part, or the whole business
+  const kid = (r.w.jobs ?? []).find(j => j.parent === parent.id)!, sib = (r.w.jobs ?? []).find(j => j.parent === parent.id && j.id !== kid.id)!;
+  const c = await agent({ ws: r.w, svc, child: { job: kid.id, store: kid.store! }, runId: "kid", prompt: "Your store's part.",
+    script: [
+      () => askAll(bad("split_job", { title: "Again", instructions: HOW, done: DONE, store_ids: ids(2) }), bad("set_plan", { job_id: parent.id, title: "Mine now", steps: [{ title: "x", done: true }] }),
+        bad("set_plan", { job_id: sib.id, title: "Mine too", steps: [{ title: "x", done: true }] }), ["set_plan", { title: "A new job of my own", steps: [{ title: "x" }] }]),
+      () => say("Done with my store."),
+    ] });
+  const ce = c.calls.map(x => x.out);
+  ok(c.calls.slice(0, 3).every(x => !x.ok) && /Only the main Odelia splits/.test(ce[0]) && ce.slice(1, 3).every(o => /plan only your job/.test(o)), "a store's bot can't split again, or plan the split job or a sibling's part", ce);
+  const own = (c.w.jobs ?? []).find(j => j.id === kid.id)!;
+  ok(c.calls[3].ok && c.calls[3].parsed?.job_id === kid.id && own.title.en === kid.title.en, "a plan without a job id is its own store's part, under the name it was split with: no job of its own", { out: ce[3], title: own.title.en });
+  eq([(c.w.jobs ?? []).length, (c.w.jobs ?? []).find(j => j.id === parent.id)?.status, (c.w.jobs ?? []).find(j => j.id === sib.id)?.status], [(r.w.jobs ?? []).length, parent.status, sib.status], "nothing it tried changed another job");
+  ok(c.steps.every(s => s.bot === kid.store), "every moment of its run is its store's bot's");
+
+  // from outside the app: never offered, and refused when called anyway
+  for (const ch of ["sms", "voice", "email", "slack", "lark", "wechat"] as Channel[]) {
+    const x = await agent({ ws, svc, channel: ch, sender: ch === "email" ? "mei@luckyleaf.com" : "+17185550123", prompt: "Get every store ready.",
+      script: [() => askAll(["split_job", { title: "Every store", instructions: HOW, done: DONE, store_ids: ids(3) }]), () => say("From the app only.")] });
+    ok(!((x.bodies[0].tools as { name: string }[]) ?? []).some(t => t.name === "split_job") && !x.calls[0].ok && !(x.w.jobs ?? []).length, `${ch}: split_job isn't offered, a call is refused, nothing is split`, x.calls[0].out);
+  }
+
+  // the cap under load: 4 requests split at once, 5 stores each, runs finishing at random; never more than 3 at work
+  const load = memRuns(3);
+  const parents = [0, 1, 2, 3].map(() => load.add("running"));
+  let active = 0, peak = 0, ran = 0;
+  const startedTwice = new Set<string>(), seen = new Set<string>();
+  const work = async (id: string): Promise<void> => {
+    if (seen.has(id)) startedTwice.add(id); seen.add(id);
+    active++; peak = Math.max(peak, active); ran++;
+    await new Promise(res => setTimeout(res, 2 + Math.random() * 8));
+    await load.db.update(id, { status: "done" }, {});
+    active--;
+    await Promise.all((await fill(load.db, "w", 3, 180_000)).map(s => work(s.id)));
+  };
+  await Promise.all(parents.map(async p => {
+    const out = await spawn(load.db, { ws: "w", parent: p, cap: 3, staleMs: 180_000 }, [0, 1, 2, 3, 4].map(k => ({ job: `${p}-j${k}`, store: `s${k}`, prompt: "x" })));
+    await load.db.update(p, { status: "waiting" }, { status: "running" });   // parked: its slot frees up
+    await Promise.all([...out.runs, ...(await fill(load.db, "w", 3, 180_000))].map(s => work(s.id)));
+  }));
+  for (let k = 0; k < 20 && load.rows.some(x => x.status === "queued"); k++) await Promise.all((await fill(load.db, "w", 3, 180_000)).map(s => work(s.id)));   // the watchdog's sweep
+  eq([ran, startedTwice.size, load.rows.filter(x => x.parent_run && x.status !== "done").length], [20, 0, 0], "all 20 store runs ran, each exactly once");
+  ok(peak <= 3, `never more than the cap of 3 at work at once (peak ${peak})`);
+  const tickets = await Promise.all(parents.flatMap(p => [wake(load.db, p), wake(load.db, p)]));
+  eq(tickets.filter(Boolean).length, 4, "each parked run is woken exactly once, even with two wake-ups racing");
+
+  // proof: a split job is done only when every store's part is done and proven
+  const two = workspace({ stores: many.slice(0, 2), apps: [] });
+  const pj = { id: "p", title: same("Both"), status: "running" as const, children: ["k1", "k2"], started: "2026-10-01T00:00:00Z", updated: "2026-10-01T00:00:00Z",
+    steps: [{ title: same("k1"), done: false, check: { jobs: ["k1"] } }, { title: same("k2"), done: false, check: { jobs: ["k2"] } }], done: [{ text: same("Every store"), check: { jobs: ["k1", "k2"] } }, { text: same("Summary") }] };
+  const kj = (id: string, over = {}) => ({ id, title: same(id), status: "done" as const, parent: "p", store: "s0", steps: [{ title: same("x"), done: true }], done: [{ text: same("y"), ok: true }], checked: { at: "2026-10-01T00:00:00Z", passed: 1, of: 1 }, started: "2026-10-01T00:00:00Z", updated: "2026-10-01T00:00:00Z", ...over });
+  const notProven = reconcile({ ...two, jobs: [pj, kj("k1"), kj("k2", { done: [{ text: same("y"), ok: false }], checked: { at: "2026-10-01T00:00:00Z", passed: 0, of: 1 } })] });
+  ok(proven(notProven.jobs![1]) && !proven(notProven.jobs![2]), "one store's part is proven; the other is marked done but its reviewer said no");
+  ok(notProven.jobs![0].status !== "done" && notProven.jobs![0].steps[0].done && !notProven.jobs![0].steps[1].done, "a store's part marked done but not proven doesn't tick the split job", notProven.jobs![0]);
+  const allProven = reconcile({ ...two, jobs: [{ ...pj, done: [pj.done[0], { ...pj.done[1], ok: true }] }, kj("k1"), kj("k2")] });
+  eq([allProven.jobs![0].status, allProven.jobs![0].steps.every(s => s.done)], ["done", true], "every store proven and the summary checked: done");
+
+  // the replay under attack: secrets in every input, a prompt that mustn't be repeated, errors that echo what was sent
+  const secretWs = workspace({ stores: many.slice(0, 2), apps: [app("a0", "draft", { fields: [{ id: "a", label: same("Business name"), value: "" }, { id: "s", label: same("Owner SSN"), value: "" }] })] });
+  const PROMPT = "Zebra-quartz phrase: never let this sentence reach the replay.";
+  const leak = await agent({ ws: secretWs, svc: acct.svc, runId: "leaky", prompt: PROMPT,
+    script: [
+      () => askAll(["fill_fields", { application_id: "a0", fields: [{ label: "Business name", value: "Lucky Leaf" }, { label: "Owner SSN", value: "123-45-6789" }] }],
+        ["remember", { label: "Card number", value: "4111 1111 1111 1111" }], ["remember", { label: "Wi-Fi", value: "password: hunter22" }],
+        ["set_plan", { job_id: "sk_live_ABCDEFGH12345678", title: "x", steps: [{ title: "y" }] }],
+        ["draft_message", { to: "Landlord", message: `${PROMPT} Our routing number 021000021 and account 000123456789.` }],
+        ["find_files", { query: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.c2lnbmF0dXJlLXNlY3JldA" }],
+        ["search_email", { query: "ssn 987-65-4321" }]),
+      () => askAll(...Array.from({ length: MAX_MOMENTS + 40 }, () => ["check_progress", {}] as [string, unknown])),
+      () => say("Done."),
+    ] });
+  const dump = JSON.stringify(leak.steps);
+  const LEAKS = /123-45-6789|987-65-4321|4111 1111 1111 1111|hunter22|sk_live_ABCDEFGH|021000021|000123456789|eyJhbGciOiJIUzI1NiJ9|Zebra-quartz/;
+  ok(!LEAKS.test(dump), "no SSN, card, password, key, bank number, token or the request's words in any moment", (dump.match(LEAKS) ?? [])[0]);
+  ok(leak.steps.some(s => s.kind === "tool" && s.fn === "fill_fields" && s.diff?.fields?.some(f => f.label.en === "Business name" && f.value === "Lucky Leaf")), "the lines a tool filled still show, with their values");
+  ok(leak.steps.some(s => s.kind === "tool" && s.ok === false && /No job/.test(s.out?.en ?? "")), "a tool's error still shows, with the secret in it masked");
+  eq(leak.steps.filter(s => s.kind === "tool").length, MAX_MOMENTS, `a run keeps at most ${MAX_MOMENTS} tool moments`);
+  ok(leak.steps.every(s => !!s.at && s.bot === "odelia"), "every moment says when and which bot");
+  eq([redact("SSN 123-45-6789, key sk-ant-api03-abcdefghijkl, card 4111-1111-1111-1111"), redactValue("Owner SSN", "123456789"), redactValue("EIN", "12-3456789"), redactValue("Owner SSN", "By hand")],
+    ["SSN •••-••-••••, key [hidden], card [hidden]", "•••-••-••••", "12-3456789", "By hand"], "the guard masks secrets and leaves an EIN and \"By hand\" as they are");
+  eq([toolWords("mcp__notion__notion-search").en, toolWords("mcp__notion__notion-search").zh], ["Used Notion: notion search", "使用 Notion：notion search"], "a connected app's tool reads as the app and what it did");
+
+  // under the owner's controls (src/autonomy.ts): Plan first refuses the split until the plan is approved; Ask me first
+  // lets it through like a plan, and each store's bot then holds its own changes on a card of its own; a store's part
+  // split by a run an owner let work is worked, not planned a second time; and Undo never takes back the replay's record
+  const pf = await agent({ ws: { ...ws, controls: { autonomy: "plan" } }, svc, family: famOps, runId: "pf", prompt: "Renew what's due at two stores.",
+    script: [() => askAll(bad("split_job", { title: "Two stores", instructions: HOW, done: DONE, store_ids: ids(2) })), () => say("Here's the plan.")] });
+  ok(!pf.calls[0].ok && /Plan first is on/.test(pf.calls[0].out) && !(pf.w.jobs ?? []).some(j => j.children?.length), "Plan first: no split before an owner approves the plan", pf.calls[0].out);
+  const famAsk = memRuns(), askRun = famAsk.add("running");
+  const svcAsk: Services = { ...acct.svc, split: async ({ children }) => { const out = await spawn(famAsk.db, { ws: "w", parent: askRun, cap: 3, staleMs: 180_000 }, children.map(x => ({ job: x.job, store: x.store, prompt: x.prompt }))); return { started: out.started, queued: out.queued }; } };
+  const am = await agent({ ws: { ...ws, controls: { autonomy: "ask" } }, svc: svcAsk, family: { pending: async () => 2, results: async () => [] }, runId: "am", prompt: "Renew what's due at two stores.",
+    script: [() => askAll(["split_job", { title: "Two stores", instructions: HOW, done: DONE, store_ids: ids(2) }]), () => say("Each store's bot is on it.")] });
+  const amParent = (am.w.jobs ?? []).find(j => j.children?.length);
+  ok(am.calls[0].ok && amParent?.children?.length === 2 && famAsk.rows.filter(x => x.parent_run === askRun).length === 2 && !am.w.approvals.some(a => a.change?.op === "held"), "Ask me first: splitting is planning, so it isn't held, and the stores' bots start", am.calls[0].out);
+  const amKid = (am.w.jobs ?? []).find(j => j.parent === amParent?.id)!;
+  const ak = await agent({ ws: am.w, svc: acct.svc, child: { job: amKid.id, store: amKid.store! }, runId: "ak", prompt: "Your store's part.",
+    script: [() => askAll(["add_deadline", { date: "2027-03-01", title: "Renew the food permit" }]), () => say("It waits for an owner.")] });
+  const held = ak.w.approvals.filter(a => a.change?.op === "held");
+  ok(held.length === 1 && held[0].id.includes(amKid.id) && !ak.w.deadlines.some(d => d.title.en === "Renew the food permit"), "and each store's bot holds its change on a card of its own", held.map(a => a.id));
+  const pk = await agent({ ws: { ...r.w, controls: { autonomy: "plan" } }, svc: acct.svc, child: { job: kid.id, store: kid.store! }, runId: "pk", prompt: "Your store's part.",
+    script: [() => askAll(["add_deadline", { date: "2027-03-01", title: "Renew the food permit" }]), () => say("Added.")] });
+  ok(pk.calls[0].ok && pk.w.deadlines.some(d => d.title.en === "Renew the food permit") && !pk.w.approvals.some(a => a.change?.op === "plan"), "Plan first: a store's part is worked, not planned a second time", pk.calls[0].out);
+  const undoId = String((pk.reply as { undo?: string } | undefined)?.undo ?? "");
+  const back = undoRun(undoId)(pk.w);
+  ok(!!undoId && !back.deadlines.some(d => d.title.en === "Renew the food permit") && !!(back.jobs ?? []).find(j => j.id === kid.id)?.runs?.includes("pk"), "Undo puts back what a store's bot changed, never the replay's record of it", { undoId, runs: (back.jobs ?? []).find(j => j.id === kid.id)?.runs });
+}
+
 /* ================================================================== 16. owner controls, attacked */
 
 /* The owner's controls with a model that pushes on every one: it tries to work around Plan first and Ask me first,
@@ -1273,6 +1451,7 @@ await toolMatrix();
 await routes();
 await connectedApps();
 await controlsAttack();
+await storeBots();
 
 const sections = [...new Set(results.map(r => r.section))];
 console.log("\n# Summary");

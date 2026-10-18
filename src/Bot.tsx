@@ -33,12 +33,22 @@ export function AgentBot({ size, busy, label = "Odelia", interactive = true, tas
 
 const TASK_TYPES: BotAvatarType[] = ["drop", "pebble", "pill", "ghost", "blob", "circle"];
 /** A background job's bot: same family, its own shape, picked from the job's id so it stays put. */
-export function TaskBot({ id, size = 26, label }: { id: string; size?: number; label: string }) {
+export function TaskBot({ id, size = 26, label, busy = true }: { id: string; size?: number; label: string; busy?: boolean }) {
   let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   return (
-    <BotAvatar type={TASK_TYPES[h % TASK_TYPES.length]} color={BLUES[h % BLUES.length]} size={size} state="working" seed={(h % 100) / 100}
+    <BotAvatar type={TASK_TYPES[h % TASK_TYPES.length]} color={BLUES[h % BLUES.length]} size={size} state={busy ? "working" : "default"} seed={(h % 100) / 100}
       interactive={false} turn={0.4} jumpEvery={0} aria-label={label} {...SOFT} />
   );
+}
+
+/** A store's own bot: Odelia for that one store, in the same family, with a shape of its own picked from the store's
+ *  id (so each store keeps its bot everywhere: Work, Home, Stores and the replay). It hops while it works. */
+export function StoreBot({ id, size = 26, label, busy }: { id: string; size?: number; label: string; busy?: boolean }) {
+  return <TaskBot id={"store:" + id} size={size} label={label} busy={busy} />;
+}
+/** The bot behind a replay's moment: the main Odelia, or a store's bot. */
+export function BotOf({ bot, size, label }: { bot?: string; size: number; label: string }) {
+  return !bot || bot === "odelia" ? <AgentBot size={size} interactive={false} label={label} /> : <StoreBot id={bot} size={size} label={label} busy={false} />;
 }
 
 /** The light-blue beam that rides the border of anything in progress. Only on while `on`. */

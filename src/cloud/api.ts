@@ -395,7 +395,10 @@ export async function downloadDoc(path: string): Promise<Blob> {
 /* ------------------------------ agent runs ------------------------------ */
 
 /** The agent working on the server: it carries on if the app is closed. */
-export type RunRow = { id: string; kind: "task" | "watch"; prompt: string; status: "running" | "done" | "failed" | "stopped"; steps: Step[]; draft: string | null; reply: Reply | null; error: string | null; created_at: string; updated_at: string; seen_at?: string | null };
+/** queued: a store's run waiting its turn; waiting: a run that split work across stores, waiting for their runs
+ *  (children) before it writes one summary. */
+export type RunRow = { id: string; kind: "task" | "watch"; prompt: string; status: "running" | "queued" | "waiting" | "done" | "failed" | "stopped"; steps: Step[]; draft: string | null; reply: Reply | null; error: string | null; created_at: string; updated_at: string; seen_at?: string | null;
+  parent_run?: string | null; job_id?: string | null; store_id?: string | null; children?: { id: string; status: RunRow["status"]; job_id: string | null; store_id: string | null; updated_at: string }[] };
 /** Start a task on the server. null when this server doesn't run the agent itself (an older deploy): the app runs it in the browser. */
 export async function startRun(ws: string, o: { prompt: string; history: { role: string; content: string }[]; lang: string; deep: boolean }): Promise<string | null> {
   const { data, error } = await supabase().functions.invoke("agent-run", { body: { action: "start", workspace_id: ws, ...o } });
@@ -420,10 +423,21 @@ export async function stopRun(id: string) {
 }
 /** The last day's tasks: one still running to follow again, or one that finished while the app was closed. */
 export async function recentRuns(ws: string): Promise<RunRow[]> {
+  // the person's own tasks: a store's run belongs to the run that split the work, which the app follows instead
   const { data, error } = await supabase().from("agent_runs").select("id, kind, prompt, status, steps, draft, reply, error, created_at, updated_at, seen_at")
-    .eq("workspace_id", ws).eq("kind", "task").gt("created_at", new Date(Date.now() - 864e5).toISOString()).order("created_at", { ascending: false }).limit(3);
+    .eq("workspace_id", ws).eq("kind", "task").is("parent_run", null).gt("created_at", new Date(Date.now() - 864e5).toISOString()).order("created_at", { ascending: false }).limit(3);
   if (error) throw fromPg(error);
   return (data ?? []) as RunRow[];
+}
+/** The moments of these runs, for a job's replay (src/replay.ts): each run's steps, its store when it was a store's bot,
+ *  and its job. */
+export async function runMoments(ids: string[]): Promise<{ id: string; at: string; bot?: string; job?: string; steps: Step[] }[]> {
+  const uuids = ids.filter(id => /^[0-9a-f-]{36}$/i.test(id)).slice(0, 40);
+  if (!uuids.length) return [];
+  const { data, error } = await supabase().from("agent_runs").select("id, created_at, steps, store_id, job_id").in("id", uuids);
+  if (error) throw fromPg(error);
+  return ((data ?? []) as { id: string; created_at: string; steps: Step[] | null; store_id: string | null; job_id: string | null }[])
+    .map(r => ({ id: r.id, at: r.created_at, ...(r.store_id ? { bot: r.store_id } : {}), ...(r.job_id ? { job: r.job_id } : {}), steps: Array.isArray(r.steps) ? r.steps : [] }));
 }
 export async function loadWorkspace(ws: string): Promise<{ name: string; state: Partial<Workspace> }> {
   const { data, error } = await supabase().from("workspaces").select("name, state").eq("id", ws).single();

@@ -8,14 +8,16 @@ import { B, type Bi } from "./bi";
  *  - approval: the approval has been put up (waiting, or already decided)
  *  - closed: the person approved it and it went out
  *  - status: the application has reached one of these statuses
+ *  - jobs: those jobs are done and proven (a store's part of a job split across stores)
  *  Every condition given has to hold. */
-export type StepCheck = { app?: string; items?: string[]; approval?: string; closed?: string; status?: string[] };
+export type StepCheck = { app?: string; items?: string[]; approval?: string; closed?: string; status?: string[]; jobs?: string[] };
 export type JobStep = { title: Bi; done: boolean; check?: StepCheck };
 /** One line of what finished looks like, with the checker's verdict once it has looked. */
 export type DoneItem = { text: Bi; ok?: boolean; why?: Bi; check?: StepCheck };
 /** What a seat did and what's next, written when an agent hands the job to a fresh one. */
 export type Handoff = { at: string; seat: number; note: string };
-export type JobStatus = "running" | "waiting" | "done" | "stopped";
+/** queued: a store's part waiting for a free hand (Odelia works a few jobs at once; the rest wait their turn). */
+export type JobStatus = "queued" | "running" | "waiting" | "done" | "stopped";
 export type Job = {
   id: string; title: Bi; status: JobStatus; steps: JobStep[];
   waiting?: Bi;               // what she needs, and from whom, while it's waiting
@@ -29,7 +31,17 @@ export type Job = {
   files?: string[];           // its toolbox: documents made for it
   handoffs?: Handoff[];       // seat to seat
   seat?: number;              // which agent has it now (1 for the first)
+  // Store bots under a chief of staff (split_job in src/live.ts): a request across stores becomes one job per store,
+  // each worked by that store's own bot on the server, side by side, and the main Odelia writes one summary at the end.
+  parent?: string;            // the job this is one store's part of
+  store?: string;             // the store whose bot works it
+  children?: string[];        // the store jobs it was split into
+  runs?: string[];            // the runs that worked it, oldest first: their moments are its replay (src/replay.ts)
 };
+/** The main Odelia, as the bot on a replay's moments; a store's bot is its store id. */
+export const MAIN_BOT = "odelia";
+/** The most stores one request splits into. */
+export const MAX_CHILDREN = 12;
 export type Every = "daily" | "weekly" | "monthly";
 export type Routine = {
   id: string; title: Bi; prompt: string; every: Every;
@@ -74,6 +86,33 @@ export function cadence(r: Routine): Bi {
 /** A job's progress: steps done and in all. */
 export const progress = (j: Job) => ({ done: j.steps.filter(s => s.done).length, all: j.steps.length });
 
+/** Done, and every line of what finished looks like proven (by the workspace, or by the separate reviewer). A done
+ *  job whose list was never checked isn't proven. */
+export const proven = (j: Job | undefined) => !!j && j.status === "done" && (j.done ?? []).every(d => d.ok === true) && (!j.checked || j.checked.passed === j.checked.of);
+
+/** Where a job split across stores stands: its store jobs, and how many are proven, working, waiting their turn,
+ *  waiting on the person, or stopped. */
+export function family(w: { jobs?: Job[] }, parent: Job) {
+  const kids = (parent.children ?? []).map(id => (w.jobs ?? []).find(j => j.id === id)).filter((j): j is Job => !!j);
+  return {
+    kids,
+    all: (parent.children ?? []).length,
+    done: kids.filter(proven).length,
+    working: kids.filter(k => k.status === "running").length,
+    queued: kids.filter(k => k.status === "queued").length,
+    needs: kids.filter(k => k.status === "waiting" || (k.status === "done" && !proven(k))).length,
+    stopped: kids.filter(k => k.status === "stopped").length,
+  };
+}
+/** The store a job is for: its own, or the store whose applications it's about (named on the job, or in what proves
+ *  its steps). undefined for a job about the whole business. */
+export function storeOf<S extends { id: string; apps?: string[] }>(stores: S[] | undefined, j: Job): S | undefined {
+  const all = stores ?? [];
+  if (j.store) return all.find(s => s.id === j.store);
+  const apps = [...(j.apps ?? []), ...j.steps.map(s => s.check?.app), ...(j.done ?? []).map(d => d.check?.app)].filter((a): a is string => !!a);
+  return apps.length ? all.find(s => s.apps?.some(a => apps.includes(a))) : undefined;
+}
+
 /** An application with the agency past its usual time: days it has waited, and the agency's usual days. The agency's
     time comes from its own published processing time; a week of grace before Placetta chases it. */
 export function overdue(submittedAt: string | null | undefined, agencyDays: number | null, today: string): { waited: number; usual: number } | null {
@@ -83,11 +122,13 @@ export function overdue(submittedAt: string | null | undefined, agencyDays: numb
 }
 
 /** When a run ends, a job it left "running" isn't being worked on any more: done when every step is, otherwise it
-    waits for the person to say carry on. Only jobs this run touched (updated since it started). */
-export function settleJobs<W extends { jobs?: Job[] }>(since: string): (w: W) => W {
+    waits for the person to say carry on. Only jobs this run touched (updated since it started). A store's part is
+    settled only by its own bot's run (o.child), and a job split across stores waits on its stores instead. */
+export function settleJobs<W extends { jobs?: Job[] }>(since: string, o: { child?: string } = {}): (w: W) => W {
+  const mine = (j: Job) => j.status === "running" && j.updated >= since && !j.children?.length && (o.child ? j.id === o.child : !j.parent);
   return w => {
-    if (!(w.jobs ?? []).some(j => j.status === "running" && j.updated >= since)) return w;
-    return { ...w, jobs: (w.jobs ?? []).map(j => j.status !== "running" || j.updated < since ? j
+    if (!(w.jobs ?? []).some(mine)) return w;
+    return { ...w, jobs: (w.jobs ?? []).map(j => !mine(j) ? j
       // every step done, but the checker found the done list short: it waits, saying what's missing
       : j.steps.every(x => x.done) && j.checked && j.checked.passed < j.checked.of ? { ...j, status: "waiting" as const, waiting: j.waiting ?? B("The reviewer found parts not done yet.", "检查发现仍有未完成的部分。") }
       : j.steps.every(x => x.done) ? { ...j, status: "done" as const }
@@ -101,7 +142,7 @@ type Checklist = { id: string; label: Bi; state: string; dep?: string };
 type AppLike = { id: string; name: Bi; status: string; checklist: Checklist[] };
 type ApprovalLike = { id: string; title: Bi };
 /** The parts of a workspace the proof loop reads. */
-export type Evidence = { jobs?: Job[]; apps: AppLike[]; approvals: ApprovalLike[]; closed: ApprovalLike[] };
+export type Evidence = { jobs?: Job[]; apps: AppLike[]; approvals: ApprovalLike[]; closed: ApprovalLike[]; stores?: { id: string; name: Bi }[] };
 
 /** The checklist items a check still needs documents for. */
 function missing(w: Evidence, c: StepCheck): Checklist[] {
@@ -116,6 +157,7 @@ export function met(w: Evidence, c: StepCheck): boolean {
   if (c.approval && !w.approvals.some(a => a.id === c.approval) && !w.closed.some(a => a.id === c.approval)) return false;
   if (c.closed && !w.closed.some(a => a.id === c.closed)) return false;
   if (c.status?.length) { const app = w.apps.find(a => a.id === c.app); if (!app || !c.status.includes(app.status)) return false; }
+  if (c.jobs?.length && !c.jobs.every(id => proven((w.jobs ?? []).find(j => j.id === id)))) return false;
   return true;
 }
 
@@ -128,6 +170,13 @@ export type NextAction =
 
 export function nextAction(w: Evidence, job: Job): NextAction {
   if (job.status === "done" || job.status === "stopped") return null;
+  if (job.children?.length) {
+    // split across stores: while a store's bot works, or a store waits on the person (its own card says what for),
+    // nothing moves this job but them; after that, the summary is Odelia's
+    const f = family(w, job);
+    if (f.working || f.queued || f.kids.some(k => k.status === "waiting")) return null;
+    if (job.steps.every(x => x.done) && !(job.done ?? []).every(d => d.ok === true)) return { who: "odelia", step: B("Write one summary of every store", "汇总每家门店的结果") };
+  }
   const s = job.steps.find(x => !x.done);
   if (!s) return null;
   const c = s.check;
@@ -147,22 +196,39 @@ const andList = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, 
  *  Returns the same object when nothing changed, so it is safe to run after every edit. */
 export function reconcile<W extends Evidence>(w: W, now = new Date().toISOString()): W {
   const jobs = w.jobs ?? [];
-  if (!jobs.some(j => j.status !== "done" && j.status !== "stopped" && (j.steps.some(s => s.check) || j.done?.some(d => d.check)))) return w;
+  const open = (j: Job) => j.status !== "done" && j.status !== "stopped";
+  const checks = (j: Job) => j.steps.some(s => s.check) || !!j.done?.some(d => d.check);
+  if (!jobs.some(j => open(j) && (checks(j) || j.children?.length))) return w;
   let changed = false;
-  const next = jobs.map(j => {
-    if (j.status === "done" || j.status === "stopped") return j;
-    if (!j.steps.some(s => s.check) && !j.done?.some(d => d.check)) return j;
+  const one = (ev: Evidence, j: Job): Job => {
+    if (!open(j)) return j;
+    if (!checks(j) && !j.children?.length) return j;
     // a step with a check is done when its evidence is there; steps without one keep what the agent set
-    const steps = j.steps.map(s => (s.check ? { ...s, done: met(w, s.check) } : s));
-    const done = j.done?.map(d => (d.check ? { ...d, ok: met(w, d.check) } : d));
+    const steps = j.steps.map(s => (s.check ? { ...s, done: met(ev, s.check) } : s));
+    const done = j.done?.map(d => (d.check ? { ...d, ok: met(ev, d.check) } : d));
     let n: Job = { ...j, steps, ...(done ? { done } : {}) };
-    const act = nextAction(w, n);
-    const proven = (done ?? []).every(d => d.ok === true);
-    if (steps.every(s => s.done) && proven) n = { ...n, status: "done", waiting: undefined };
-    else if (act?.who === "you") n = { ...n, status: "waiting", waiting: act.kind === "upload"
-      ? B(`${andList(act.items.map(i => i.label.en))} for the ${act.appName.en.toLowerCase()}.`, `${act.appName.zh}：${act.items.map(i => i.label.zh).join("、")}。`)
-      : B(`Your approval: ${act.title.en}.`, `需要您批准：${act.title.zh}。`) };
-    else if (j.status === "waiting" && act?.who === "odelia" && steps.some((s, i) => s.done !== j.steps[i].done)) n = { ...n, status: "running", waiting: undefined };
+    const allProven = (done ?? []).every(d => d.ok === true);
+    if (j.children?.length) {
+      // split across stores: done only when every store's part is done and proven, and so is its own list; working
+      // while any store's bot works or waits its turn; waiting on the person when a store does
+      const f = family(ev, n);
+      if (steps.every(s => s.done) && allProven && f.done === f.all) n = { ...n, status: "done", waiting: undefined };
+      else if (f.working || f.queued) n = { ...n, status: "running", waiting: undefined };
+      else if (f.kids.some(k => k.status === "waiting")) {
+        const names = f.kids.filter(k => k.status === "waiting").map(k => (ev.stores ?? []).find(s => s.id === k.store)?.name ?? k.title);
+        n = { ...n, status: "waiting", waiting: B(`${andList(names.map(x => x.en))} ${names.length === 1 ? "needs you; its card says what for." : "need you; their cards say what for."}`, `${names.map(x => x.zh).join("、")}需要您处理，详见各自的卡片。`) };
+      } else if (f.all && f.done === f.all) {
+        // every store's part is proven; what's left is the one summary, checked like any other line
+        n = { ...n, status: "waiting", waiting: B("Every store is done and checked. One summary of them is next.", "每家门店都已完成并通过检查，接下来是一份汇总。") };
+      }
+    } else {
+      const act = nextAction(ev, n);
+      if (steps.every(s => s.done) && allProven) n = { ...n, status: "done", waiting: undefined };
+      else if (act?.who === "you") n = { ...n, status: "waiting", waiting: act.kind === "upload"
+        ? B(`${andList(act.items.map(i => i.label.en))} for the ${act.appName.en.toLowerCase()}.`, `${act.appName.zh}：${act.items.map(i => i.label.zh).join("、")}。`)
+        : B(`Your approval: ${act.title.en}.`, `需要您批准：${act.title.zh}。`) };
+      else if (j.status === "waiting" && act?.who === "odelia" && steps.some((s, i) => s.done !== j.steps[i].done)) n = { ...n, status: "running", waiting: undefined };
+    }
     if (done?.some(d => d.check)) {
       const passed = (done ?? []).filter(d => d.ok === true).length;
       if (!j.checked || j.checked.passed !== passed || j.checked.of !== done!.length) n = { ...n, checked: { at: now, passed, of: done!.length } };
@@ -172,7 +238,11 @@ export function reconcile<W extends Evidence>(w: W, now = new Date().toISOString
     // "updated" moves only when the work moved: a step, a done item or the status
     const moved = n.status !== j.status || n.steps.some((s, i) => s.done !== j.steps[i]?.done) || (n.done ?? []).some((d, i) => d.ok !== j.done?.[i]?.ok);
     return moved ? { ...n, updated: now } : n;
-  });
+  };
+  // every store's part first, so a job split across stores sees them as they are now
+  const first = jobs.map(j => (j.children?.length ? j : one(w, j)));
+  const ev: Evidence = { ...w, jobs: first };
+  const next = first.map(j => (j.children?.length ? one(ev, j) : j));
   return changed ? { ...w, jobs: next } : w;
 }
 

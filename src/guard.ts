@@ -21,6 +21,32 @@ export function secretNumber(label: string, value: string): boolean {
   // a line that takes an SSN, ITIN or EIN: an EIN written 12-3456789 is fine; any other 9 digits may be an SSN
   return SSN_LINE.test(label) && !EIN_SHAPE.test(v) && /^\D*(\d\D*){9}$/.test(v);
 }
+/* What a replay of Odelia's work may show (src/replay.ts): never a Social Security number or ITIN, a card or bank
+   account number, a password or an access key. Everything a replay writes goes through these two. */
+const CARD_ANY = /\b(?:\d[ -]?){13,19}\b/g;
+const BANK = /\b(routing|account|acct)( number| no\.?| #)?\s*[:#]?\s*\d[\d -]{4,30}\d/gi;
+const IBAN = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}\b/g;
+const KEYS = /\b(sk-[A-Za-z0-9_-]{8,}|sk_(live|test)_[A-Za-z0-9]{8,}|rk_(live|test)_[A-Za-z0-9]{8,}|whsec_[A-Za-z0-9]{6,}|re_[A-Za-z0-9]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{6,}|Bearer\s+[A-Za-z0-9._-]{12,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[A-Z0-9]{16})\b/g;
+const SECRET_WORD = /\b(password|passcode|passwd|pin|secret|api[ _-]?key|token)\b\s*[:=]\s*\S+/gi;
+const SSN_ANY = /(^|[^\d-])\d{3}([- ])\d{2}\2\d{4}(?![\d-])/g;
+/** A line of text with every secret in it masked. */
+export function redact(text: string): string {
+  return String(text ?? "")
+    .replace(KEYS, "[hidden]")
+    .replace(SECRET_WORD, (m) => m.replace(/[:=]\s*\S+$/, ": [hidden]"))
+    .replace(SSN_ANY, (_m, pre: string) => `${pre}•••-••-••••`)
+    .replace(BANK, (_m, word: string) => `${word} [hidden]`)
+    .replace(IBAN, "[hidden]")
+    .replace(CARD_ANY, (m) => (m.replace(/\D/g, "").length >= 13 ? "[hidden]" : m));
+}
+/** A form line's value, as a replay may show it: masked when the line takes a secret number, or the value is one. */
+export function redactValue(label: string, value: string): string {
+  const v = String(value ?? "");
+  if (secretNumber(label, v)) return "•••-••-••••";
+  if (/\b(password|passcode|pin|card number|account number|routing)\b/i.test(label) && v.trim() && !BY_HAND.test(v.trim())) return "[hidden]";
+  return redact(v);
+}
+
 /** Any identifying number in free text: a Social Security number or ITIN, an EIN, a card, bank, routing, passport or
  *  license number, or a long run of digits. Email addresses and phone numbers are not ID numbers and are set aside
  *  before looking. Used by memory (src/recall.ts), which keeps details people mention but never a number like these. */

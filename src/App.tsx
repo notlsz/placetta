@@ -26,6 +26,8 @@ import { FindLicenses, Overview, PageHead, Permits, Tabs, UpdatesPage } from "./
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
 import { WorkPage } from "./Work";
+import { ReplayDrawer } from "./Watch";
+import { inChat, keepRun } from "./replay";
 import { PlaybooksPage } from "./Playbooks";
 import { CommandBar, useCommandKey } from "./CommandBar";
 import { Walkthrough } from "./Walkthrough";
@@ -171,6 +173,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [drawer, setDrawer] = useState<{ id: string; tab: Tab; edit: boolean } | null>(null);
   const [modal, setModal] = useState<string | null>(null);
   const [legal, setLegal] = useState<string | null>(null);
+  const [replay, setReplay] = useState<string | null>(null);   // the job whose replay is open
   const [plans, setPlans] = useState<null | "start" | "file">(null);
   const [limitHit, setLimitHit] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -250,13 +253,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   /* account: save the workspace, log the audit trail, keep filings, files and billing fresh */
   const synced = useRef(new Set((cloud?.audit ?? []).map(a => a.id)));
   const serverRun = useRef<string | null>(null);
+  // runs that split work across stores, while their stores' bots work on the server (watchFamily)
+  const families = useRef(new Set<string>());
   const saveT = useRef(0);
   const lastSaved = useRef("");
   useEffect(() => {
     if (!cloud) return;
     clearTimeout(saveT.current);
     saveT.current = window.setTimeout(() => {
-      if (serverRun.current) return;   // the agent is saving on the server; take its result when it's done
+      if (serverRun.current || families.current.size) return;   // the agent is saving on the server; take its result when it's done
       const body = JSON.stringify(api.strip(ws));
       if (body !== lastSaved.current) { lastSaved.current = body; api.saveState(cloud.wsId, ws).catch(() => { lastSaved.current = ""; say(lang === "zh" ? "保存失败，稍后会重试。" : "Couldn't save. It will retry."); }); }
       const fresh = ws.audit.filter(a => !synced.current.has(a.id) && (a.actor === "you" || a.actor === "agent"));
@@ -384,6 +389,39 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     pushTurn(null, { text: [B(`${ids.length} item${ids.length === 1 ? " is" : "s are"} waiting for you. Everything that passed every check can go with one tap.`, `有 ${ids.length} 项等您处理。通过全部核对的可以一键批准。`)], approvals: ids });
   }, [view_.approvals, pushTurn, say, lang]);
 
+  /* A run that split work across stores: while the stores' bots work on the server, Work and Home show each store as
+     it moves (the workspace is taken again whenever a store's run changes), and the one summary arrives in the chat
+     when the last of them is back. Changes wait meanwhile, as they do for any run on the server. */
+  const watchFamily = useCallback((pid: string) => {
+    if (!cloud || families.current.has(pid)) return;
+    families.current.add(pid);
+    void (async () => {
+      let last = "";
+      try {
+        for (let i = 0; i < 1800; i++) {
+          await new Promise(res => setTimeout(res, 4000));
+          if (!families.current.has(pid)) return;   // the person stopped it: what they see stays as they left it
+          if (document.visibilityState !== "visible") continue;
+          const r = await api.pollRun(pid);
+          const key = r.status + JSON.stringify((r.children ?? []).map(c => c.status + c.updated_at));
+          if (key !== last) {
+            last = key;
+            const row = await api.loadWorkspace(cloud.wsId);
+            const next = normalize(row.name, row.state);
+            lastSaved.current = JSON.stringify(api.strip(next));
+            setWs(w => ({ ...next, audit: w.audit }));
+          }
+          if (r.status === "done" || r.status === "failed" || r.status === "stopped") {
+            if (r.status === "done" && r.reply) pushTurn(null, r.reply);
+            void refreshRef.current(true);
+            break;
+          }
+        }
+      } catch { /* lost track of it: Work still shows every store */ }
+      finally { families.current.delete(pid); }
+    })();
+  }, [cloud, pushTurn]);
+
   /* A task on the server: show its steps as they're saved, then take the workspace it left. */
   const follow = useCallback(async (id: string, onEvent: (e: AgentEvent) => void, signal: AbortSignal) => {
     if (!cloud) return;
@@ -406,11 +444,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       lastSaved.current = JSON.stringify(api.strip(next));
       setWs(w => ({ ...next, audit: w.audit }));
       void refresh(true);
-      if (r.status === "done" && r.reply) onEvent({ type: "reply", reply: r.reply });
+      // split across stores: its answer so far now, the summary when the stores are back
+      if (r.status === "waiting") { if (r.reply) onEvent({ type: "reply", reply: r.reply }); watchFamily(id); }
+      else if (r.status === "done" && r.reply) onEvent({ type: "reply", reply: r.reply });
       else if (r.status === "stopped") throw { code: "cancelled" };
       else throw { code: "run_failed", message: r.error ?? "" };
     } finally { serverRun.current = null; }
-  }, [cloud, refresh]);
+  }, [cloud, refresh, watchFamily]);
 
   /* Memory that acts (src/recall.ts): after a run in this browser, what the person wrote is read for durable details
      (the extract role on the same model, through the same server call; the demo's own reader without a model), kept in
@@ -437,12 +477,17 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const upd = (f: (m: Turn) => Partial<Turn>) => setFeed(ms => ms.map(m => (m.id === aid && m.kind === "turn" ? { ...m, ...f(m) } : m)));
     let said = "";
     const ctl = new AbortController(); abort.current = ctl;
+    // every moment of a run in the browser, for the replay of the jobs it worked (src/replay.ts); the chat shows the steps
+    const moments: Step[] = [];
     let onServer = false, firstAt = "";
     const askedAt = nowIso();
     /* Undo (src/rewind.ts): a request worked in this browser records what it changes; a server run brings its own. */
     const rec = "text" in req ? recorder() : null, askedText = "text" in req ? req.text : "";
     const onEvent = (e: AgentEvent) => {
-      if (e.type === "step") { setStep(e.step); upd(m => ({ steps: [...m.steps, e.step], active: e.index })); }
+      if (e.type === "step") {
+        moments.push(e.step.at ? e.step : { ...e.step, at: nowIso() });
+        if (inChat(e.step)) { setStep(e.step); upd(m => ({ steps: [...m.steps, e.step], active: m.steps.length })); }
+      }
       else if (e.type === "update") setWs(rec ? rec.wrap(e.patch) : e.patch);
       else if (e.type === "draft") { if (e.text && !firstAt) firstAt = nowIso(); upd(() => ({ draft: e.text })); }
       else {
@@ -467,7 +512,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       const id = resumeId ?? (cloud && !api.PREVIEW && "text" in req && m ? await api.startRun(cloud.wsId, { prompt: req.text, history: history.current.slice(-12), lang, deep }) : null);
       onServer = !!id;
       if (id) await follow(id, onEvent, ctl.signal);
-      else await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
+      else {
+        await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
+        // the run happened here: the workspace keeps its moments, linked from each job it worked
+        setWs(keepRun({ id: `local-${Date.now().toString(36)}`, at: askedAt, steps: moments }, askedAt));
+      }
     } catch (err) {
       const code = (err as { code?: string })?.code ?? ((err as Error)?.name === "AbortError" ? "cancelled" : "upstream_error");
       if (code === "cancelled") upd(m2 => ({ reply: { text: [B("Stopped.", "已停止。")] }, active: -1, steps: m2.steps }));
@@ -507,12 +556,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!cloud || api.PREVIEW || resumed.current) return;
     resumed.current = true;
     void api.recentRuns(cloud.wsId).then(rs => {
+      // a request split across stores, still waiting on them: Work shows each store as it moves
+      for (const r of rs) if (r.status === "waiting") watchFamily(r.id);
       const live = rs.find(r => r.status === "running");
       if (live) { setPanelOpen(true); void run({ text: live.prompt }, live.prompt, false, live.id); return; }
       const missed = rs.find(r => r.status === "done" && r.reply && (!r.seen_at || Date.parse(r.updated_at) - Date.parse(r.seen_at) > 20_000));
       if (missed?.reply) { pushTurn(missed.prompt, missed.reply); setPanelOpen(true); void api.pollRun(missed.id).catch(() => undefined); }
     }, () => undefined);
-  }, [cloud, run, pushTurn]);
+  }, [cloud, run, pushTurn, watchFamily]);
 
   /* Asked while she's busy: it waits its turn, like a ticket in a queue, and starts when the current job ends. */
   const [queued, setQueued] = useState<{ id: string; text: string }[]>([]);
@@ -548,7 +599,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       let shown = 0, r: api.RunRow;
       for (;;) {
         r = await api.pollRun(id);
-        if (r.steps.length > shown) { const add = r.steps.slice(shown); shown = r.steps.length; upd(m => ({ steps: [...m.steps, ...add], active: shown - 1 })); }
+        if (r.steps.length > shown) { const add = r.steps.slice(shown).filter(inChat); shown = r.steps.length; if (add.length) upd(m => ({ steps: [...m.steps, ...add], active: m.steps.length + add.length - 1 })); }
         if (r.draft) upd(() => ({ draft: r.draft ?? undefined }));
         if (r.status !== "running") break;
         await new Promise(res => setTimeout(res, 1500));
@@ -558,7 +609,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       lastSaved.current = JSON.stringify(api.strip(next));
       setWs(w => ({ ...next, audit: w.audit }));
       void refresh(true);
-      upd(() => ({ reply: r.status === "done" && r.reply ? r.reply : { text: [same(r.error ?? (lang === "zh" ? "已停止。" : "Stopped."))] }, active: -1, ms: performance.now() - t0, draft: undefined }));
+      if (r.status === "waiting") watchFamily(id);
+      upd(() => ({ reply: (r.status === "done" || r.status === "waiting") && r.reply ? r.reply : { text: [same(r.error ?? (lang === "zh" ? "已停止。" : "Stopped."))] }, active: -1, ms: performance.now() - t0, draft: undefined }));
     } catch { upd(() => ({ reply: { text: [B("I lost track of that job. It's still in Work.", "我暂时跟丢了这项工作，它仍在“工作”页中。")] }, active: -1 })); }
     finally { setSideJobs(n => n - 1); }
   };
@@ -588,7 +640,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   /* approvals: in the demo they run the scripted flow; in an account they go to the team, the outbox or the agency */
   /* While a task runs on the server it owns the workspace; changes wait until it's done (or stopped). */
   const held = useCallback(() => {
-    if (!serverRun.current) return false;
+    if (!serverRun.current && !families.current.size) return false;
     say(lang === "zh" ? "Odelia 正在处理工作区，完成后（或停止后）再修改。" : "Odelia is working on the workspace. Make changes when she's done, or stop her.");
     return true;
   }, [say, lang]);
@@ -1007,6 +1059,19 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
     openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : a?.preview ? "fees" : "check"), edit: !!edit }); },
     openApproval: id => setModal(id),
+    openReplay: id => setReplay(id),
+    stopJob: id => {
+      const w0 = wsRef.current, j = (w0.jobs ?? []).find(x => x.id === id);
+      if (!j) return;
+      const ids = new Set([id, ...(j.children ?? [])]);
+      // on the server, its latest run (and for a split job, each store's) stops too; a split job's run stops its stores'
+      if (cloud && !api.PREVIEW) {
+        const runs = [...ids].flatMap(x => (w0.jobs ?? []).find(y => y.id === x)?.runs?.slice(-1) ?? []);
+        for (const r of runs) { families.current.delete(r); void api.stopRun(r).catch(() => undefined); }
+      }
+      const now = nowIso();
+      setWs(w => ({ ...w, jobs: (w.jobs ?? []).map(x => (ids.has(x.id) && x.status !== "done" && x.status !== "stopped" ? { ...x, status: "stopped" as const, waiting: undefined, updated: now } : x)) }));
+    },
     approve: (id, sig) => void approve(id, sig),
     approveAll: ids => void approveAll(ids),
     upload: (app, item, files) => void upload(app, item, files),
@@ -1053,7 +1118,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   /* page */
   const unread = updates.filter(u => !u.read).length;
-  const waitingJobs = (view_.jobs ?? []).filter(j => j.status === "waiting").length + queued.length;
+  const waitingJobs = (view_.jobs ?? []).filter(j => j.status === "waiting" && !j.children?.length).length + queued.length;
   const permitsTab: PermitsTab = PERMITS_TABS.includes(sub as PermitsTab) ? (sub as PermitsTab) : "todo";
   const odeliaTab: OdeliaTab = ODELIA_TABS.includes(sub as OdeliaTab) ? (sub as OdeliaTab) : "chat";
   const odelia = (
@@ -1202,6 +1267,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         {panelOpen && !chatPage && <AgentPanel feed={feed} tts={tts} mode={dock ? "dock" : "sheet"} onHide={() => setPanelOpen(false)} asked={asked} />}
         {drawer && <AppDrawer id={drawer.id} tab={drawer.tab} edit={drawer.edit} onTab={tab => setDrawer(d => (d ? { ...d, tab, edit: false } : d))} onClose={() => setDrawer(null)} />}
         {modal && <ApproveModal id={modal} onClose={() => setModal(null)} />}
+        {replay && <ReplayDrawer job={replay} onClose={() => setReplay(null)} />}
         {legal && <LegalReader id={legal} onClose={() => setLegal(null)} />}
         {plans && cloudCtx && <Plans reason={plans} filing={plans === "file" ? pendingFiling.current ?? undefined : undefined} onClose={() => setPlans(null)} />}
         {limitHit && cloudCtx && (

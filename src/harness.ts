@@ -1,6 +1,7 @@
 import { B, same, type Bi } from "./bi";
-import type { DoneItem, Job } from "./jobs";
-import type { Workspace } from "./model";
+import { family, proven, type DoneItem, type Job } from "./jobs";
+import type { Store, Workspace } from "./model";
+import { isBlank } from "./core";
 
 /* ------------------------------------------------------------------ *
  * The harness: one structure per job that any agent can put on, work in,
@@ -14,6 +15,9 @@ import type { Workspace } from "./model";
  *   handoffs   what each seat did and what's next, written when an agent
  *              runs out of room, so the next one starts clean (no
  *              compaction) and any model can take the seat
+ * A store's part of a job split across stores also carries its store: the
+ * store's own facts and applications go in its bot's brief (storeBrief),
+ * and the job it's part of is done only when every store's part is.
  * ------------------------------------------------------------------ */
 
 export const MAX_SEATS = 4;            // fresh agents one run may hand a job through
@@ -37,9 +41,45 @@ export function harnessBrief(w: Workspace, job: Job, request: string, lang: "en"
     pb ? `Playbook "${t(pb.name)}" (skill ${pb.id}):\n${pb.body.slice(0, 3000)}` : "",
     files.length ? `Toolbox (reuse these, don't rebuild them):\n${files.map(f => `- ${f.name} (${f.id})`).join("\n")}` : "",
     job.apps?.length ? `Applications: ${job.apps.join(", ")}` : "",
+    job.store ? storeBrief(w, job, lang) : "",
     last.length ? `Handoff notes, newest last:\n${last.map(h => `Seat ${h.seat}: ${h.note}`).join("\n\n")}` : "",
   ].filter(Boolean).join("\n\n");
 }
+
+/** One store's own facts and applications, for the store's bot: what it works from, so it never has to dig the store
+ *  out of the whole business. Facts only, as data. */
+export function storeBrief(w: Workspace, job: Job, lang: "en" | "zh"): string {
+  const st = (w.stores ?? []).find(s => s.id === job.store);
+  if (!st) return "";
+  const t = (b: Bi) => b[lang] || b.en;
+  const apps = w.apps.filter(a => st.apps?.includes(a.id) || job.apps?.includes(a.id)).slice(0, 14);
+  const due = w.deadlines.filter(d => d.app && apps.some(a => a.id === d.app)).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 8);
+  const lines = [
+    `Store ${st.id}: ${t(st.name)}, ${st.address}. ${st.stage === "open" ? `Open${st.opened ? " since " + st.opened : ""}` : `Opening${st.plannedOpen ? ", planned " + st.plannedOpen : ""}${st.projectedOpen ? ", projected " + st.projectedOpen : ""}`}.`,
+    st.grade ? `Letter grade ${st.grade.letter} (${st.grade.date}).` : "",
+    st.rules.length ? `Local rules: ${st.rules.map(r => (r === "nyc_grades" ? "NYC letter grades" : "NYC Fair Workweek")).join(", ")}.` : "",
+    st.certs.length ? `Staff certificates:\n${st.certs.map(c => `- ${c.person}: ${t(c.kind)}, expires ${c.expires}`).join("\n")}` : "",
+    st.permits?.length ? `Permits on file:\n${st.permits.map(p => `- ${t(p.name)}, expires ${p.expires}`).join("\n")}` : "",
+    st.mock ? `Last practice inspection (${st.mock.date}): ${st.mock.checks.filter(c => c.ok === false).map(c => t(c.label)).join("; ") || "nothing failed"}.` : "",
+    apps.length ? `Its applications:\n${apps.map(a => `- ${a.id}: ${t(a.name)} (${a.status})${a.fields.some(f => isBlank(f.value)) ? `, ${a.fields.filter(f => isBlank(f.value)).length} lines empty` : ""}${a.checklist.some(c => c.state === "missing") ? `, missing ${a.checklist.filter(c => c.state === "missing").map(c => t(c.label)).join(", ")}` : ""}`).join("\n")}` : "Its applications: none yet.",
+    due.length ? `Its deadlines:\n${due.map(d => `- ${d.date}: ${t(d.title)}`).join("\n")}` : "",
+  ];
+  return `This store's facts:\n${lines.filter(Boolean).join("\n")}`;
+}
+
+/** The instructions a store's bot works under: who it is, the one job it does, and what it may not do. */
+export function storeRules(w: Workspace, job: Job, lang: "en" | "zh"): string {
+  const st = (w.stores ?? []).find(s => s.id === job.store), parent = (w.jobs ?? []).find(j => j.id === job.parent);
+  const name = st ? st.name[lang] || st.name.en : job.store ?? "";
+  return `
+
+You are Odelia's bot for one store: ${name} (store ${job.store}). The main Odelia split "${parent ? parent.title.en : job.title.en}" across the business's stores and gave you this store's part, job ${job.id}. Other stores' bots are working their parts at the same time. Work only this store: its applications, documents, deadlines, staff and inspections. Don't touch other stores or their applications. Start with set_plan for job ${job.id} (job_id ${job.id}, keep its done list) and keep it current; never start another job. When you finish, answer in two or three sentences for the main Odelia: what you did for this store and what it still needs from the person.
+
+${storeBrief(w, job, lang)}`;
+}
+
+/** Names the store a store job is for, in a line: "Flushing, Main St". */
+export const storeName = (w: Pick<Workspace, "stores">, id: string | undefined): Bi | undefined => (w.stores ?? []).find((s: Store) => s.id === id)?.name;
 
 /** The files a job made or uses: its own, and its playbook's. */
 export function toolbox(w: Workspace, job: Job): { id: string; name: string }[] {
@@ -63,6 +103,9 @@ export function evidence(w: Workspace, job: Job, reply: string) {
     deadlines: w.deadlines.slice(0, 15).map(d => ({ date: d.date, title: d.title.en })),
     toolbox: toolbox(w, job).map(f => f.name),
     recent_documents: w.docs.slice(0, 12).map(d => ({ name: d.name, by: d.by, at: d.at })),
+    // a job split across stores: each store's part as the workspace shows it, with its own reviewer's count
+    ...(job.children?.length ? { stores: family(w, job).kids.map(k => ({ store: storeName(w, k.store)?.en ?? k.store, job: k.title.en, status: k.status, proven: proven(k),
+      steps_done: k.steps.filter(s => s.done).length, steps: k.steps.length, reviewer: k.checked ? `${k.checked.passed} of ${k.checked.of}` : "not checked yet", waiting_on: k.waiting?.en })) } : {}),
     reply_to_person: reply.slice(0, 4000),
   };
 }
@@ -91,14 +134,21 @@ export function applyVerdict(jobId: string, verdict: { ok: boolean; why: string 
     ...w,
     jobs: (w.jobs ?? []).map(j => {
       if (j.id !== jobId || !j.done?.length) return j;
-      const done: DoneItem[] = j.done.map((d, i) => ({ text: d.text, ok: verdict[i]?.ok === true, why: same(verdict[i]?.why ?? "") }));
+      // A line the workspace proves (every store's part done and proven) keeps its proof: the reviewer can't pass it
+      // while the workspace says no, and the proof loop goes on ticking it afterwards.
+      const done: DoneItem[] = j.done.map((d, i) => ({ text: d.text, ...(d.check?.jobs ? { check: d.check } : {}),
+        ok: verdict[i]?.ok === true && (!d.check?.jobs || d.check.jobs.every(id => proven((w.jobs ?? []).find(x => x.id === id)))), why: same(verdict[i]?.why ?? "") }));
       const passed = done.filter(d => d.ok).length, now = new Date().toISOString();
-      const all = passed === done.length;
+      // split across stores: never done before every store's part is done and proven; while a store's bot still
+      // works (or waits its turn) the job is still running
+      const f = j.children?.length ? family(w, j) : null;
+      const all = passed === done.length && (!f || f.done === f.all);
+      const busy = !!f && (f.working > 0 || f.queued > 0);
       const missing = done.filter(d => !d.ok).map(d => d.text.en);
       return {
         ...j, done, checked: { at: now, passed, of: done.length },
-        status: all ? "done" as const : o.final ? "waiting" as const : "running" as const,
-        ...(all ? { waiting: undefined } : o.final ? { waiting: B(`Not done yet: ${missing.join("; ")}`.slice(0, 240), `尚未完成：${missing.join("；")}`.slice(0, 240)) } : {}),
+        status: all ? "done" as const : busy ? "running" as const : o.final || f ? "waiting" as const : "running" as const,
+        ...(all || busy ? { waiting: undefined } : o.final || f ? { waiting: B(`Not done yet: ${missing.join("; ") || "every store's part, checked"}`.slice(0, 240), `尚未完成：${missing.join("；") || "每家门店的部分及检查"}`.slice(0, 240)) } : {}),
         updated: now,
       };
     }),

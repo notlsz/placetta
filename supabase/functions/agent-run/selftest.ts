@@ -275,7 +275,7 @@ export async function selftest(env: (k: string) => string | undefined, o: { budg
         },
       });
       const messages = state.messages as Msg[];
-      const text = "reply" in out ? out.reply.text.map((x) => x.en).join(" ") : "";
+      const text = "reply" in out && out.reply ? out.reply.text.map((x) => x.en).join(" ") : "";
       const run: Run = { w: cur, text, messages, tools: toolsUsed(messages), errors: toolErrors(messages), paused: "paused" in out };
       if (run.paused) return { name: s.name, pass: false, detail: `ran out of time after ${state.rounds} rounds`, ms: Date.now() - t };
       const [pass, detail] = s.check(run, before);

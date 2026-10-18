@@ -15,7 +15,7 @@ import { StoresStrip } from "./Stores";
 import { B, type Bi } from "./model";
 import { takeAutostart } from "./cloud/handoff";
 import { nextAction, nextRun } from "./jobs";
-import { PlanCard } from "./Work";
+import { ChiefRow, PlanCard } from "./Work";
 import { hrefOf, plainClick } from "./route";
 import { HomeMetrics } from "./Metrics";
 import { HeldSends, LocalHold, useApprovalHold } from "./SendHold";
@@ -241,7 +241,8 @@ export function Overview() {
 
   /* 1. Needs you: every approval, and every job stuck on you that no approval row already covers */
   const jobs = ws.jobs ?? [];
-  const waitingJobs = jobs.filter(j => j.status === "waiting").filter(j => {
+  // a job split across stores waits on a store's part, which shows here itself
+  const waitingJobs = jobs.filter(j => j.status === "waiting" && !j.children?.length).filter(j => {
     const act = nextAction(ws, j);
     if (!act || act.who !== "you") return true;
     if (act.kind === "approve") return !ws.approvals.some(a => a.id === act.id);
@@ -249,13 +250,15 @@ export function Overview() {
   });
   const needs = ws.approvals.length + waitingJobs.length;
 
-  /* 2. Odelia is working on: running jobs with their live plan, background watchers, what's queued, and the routines */
-  const running = jobs.filter(j => j.status === "running");
+  /* 2. Odelia is working on: what she coordinates across stores (each store's bot and where its part stands), running
+     jobs with their live plan, background watchers, what's queued, and the routines */
+  const chiefs = jobs.filter(j => j.children?.length && j.status !== "done" && j.status !== "stopped");
+  const running = jobs.filter(j => j.status === "running" && !j.parent && !j.children?.length);
   const routines = ws.routines ?? [], active = routines.filter(r => !r.paused);
   const nextRoutine = active.map(r => nextRun(r, today)).filter((d): d is string => !!d).sort()[0];
   const routineLine = !routines.length ? "" : !active.length ? t("hm_routinesPaused", { n: routines.length })
     : t(routines.length === 1 ? "hm_routines1" : "hm_routinesN", { n: routines.length, d: nextRoutine ? fmtDay(nextRoutine, lang) : "" });
-  const working = running.length > 0 || ws.running.length > 0 || queued.length > 0 || routines.length > 0 || (busy && !!live);
+  const working = chiefs.length > 0 || running.length > 0 || ws.running.length > 0 || queued.length > 0 || routines.length > 0 || (busy && !!live);
 
   /* 3. The opening plan: the count, where it stands, when it lands, and the next permits in order */
   const fp = ws.firstPlan;
@@ -301,6 +304,7 @@ export function Overview() {
       {working && (
         <section className="sec hm-work">
           <SecHead title={t("hm_working")} more={t("nav_work")} onMore={() => go("odelia", "work")} />
+          {chiefs.map(j => <ChiefRow key={j.id} job={j} compact />)}
           {running.map(j => <PlanCard key={j.id} job={j} compact />)}
           {(ws.running.length > 0 || queued.length > 0 || routineLine) && (
             <ul className="tray runs">

@@ -50,8 +50,9 @@ export const AUTONOMY: { id: Autonomy; label: Bi; sub: Bi }[] = [
 /** Reading and looking things up: never changes the workspace. */
 const READ = new Set(["find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "show_licenses", "city_records", "check_progress",
   "address_rules", "inspection_guide", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff"]);
-/** Her own plan and notes for a job. */
-const PLANNING = new Set(["set_plan", "hand_off"]);
+/** Her own plan and notes for a job, and handing a job's parts to the stores' bots (split_job): each store's bot then
+ *  works under these same controls, so under Ask me first its changes wait on its own card. */
+const PLANNING = new Set(["set_plan", "hand_off", "split_job"]);
 /** Drafting, or putting something in front of a person to approve or confirm: these ask already. */
 const DRAFTS = new Set(["draft_message", "send_email", "draft_document", "request_filing_approval", "request_purchase", "set_budgets", "remove_store", "remove_application"]);
 /** What a Plan first run may do: read, research and write the plan. */

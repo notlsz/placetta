@@ -2,6 +2,8 @@ import type { Budget, Purchase, SpendPolicy } from "./spend.ts";
 import type { Job, Routine } from "./jobs";
 import type { Controls, HeldCall } from "./autonomy";
 import type { UndoPoint } from "./rewind";
+import type { RunLog } from "./replay";
+import type { Step } from "./core";
 import type { OrbState } from "thinking-orbs";
 import { ago, inDays } from "./time";
 
@@ -164,6 +166,7 @@ export type Workspace = {
   spend?: { policy: SpendPolicy; purchases: Purchase[] };   // what Odelia may buy (outside an account; an account keeps it on the server)
   jobs?: Job[];                            // Odelia's jobs, each with the plan she keeps current (Work)
   routines?: Routine[];                    // jobs she repeats on a schedule
+  runLog?: RunLog[];                       // the moments of runs that happened in the browser, for each job's replay (src/replay.ts)
   firstPlan?: FirstPlan;                   // the instant plan written at sign-up from the registry, before any model call
   /** Requests Odelia answered in this browser (the sample, or without the server's runs), timed as they happened: when
    *  asked, when her first words showed, when the answer was done. An account's server runs are timed in agent_runs. */
@@ -287,6 +290,71 @@ export const SAMPLE_STORES: Store[] = [
     value: { closures: 0, fines: 0, caught: 1 },
     apps: ["ein", "seller", "edd", "handler", "plancheck", "pto", "btc", "building", "sign", "fire"],
   },
+];
+
+/* The sample's replays (src/replay.ts): the moments of the runs behind its jobs, as the browser keeps them. The plan
+   check went through two shifts; the inspection job was split across both stores, each worked by its own bot. */
+const mo = (min: number, bot: string, job: string, s: Omit<Step, "state"> & { state?: Step["state"] }): Step => ({ state: "working", at: ago(min), bot, job, ...s });
+const PLAN = "job-plan", READY = "job-ready", FL = "job-ready-fl", SJR = "job-ready-sj";
+const planApp = B("Food facility plan check", "食品设施图纸审查");
+export const SAMPLE_RUNS: RunLog[] = [
+  { id: "local-plan-1", at: ago(60 * 26), bot: "odelia", job: PLAN, steps: [
+    mo(60 * 26, "odelia", PLAN, { state: "searching", label: B("Reading your workspace", "读取您的工作区") }),
+    mo(60 * 26 - 1, "odelia", PLAN, { state: "searching", kind: "tool", fn: "find_official_forms", label: B("Looked up the official forms", "查找官方表格"), in: B("milk tea shop, San Jose, CA", "奶茶店，加州圣何塞"), out: B("3 forms found", "找到 3 份表格"), ok: true }),
+    mo(60 * 26 - 2, "odelia", PLAN, { state: "weaving", kind: "tool", fn: "set_plan", label: B("Updated the plan", "更新计划"), in: B("File the plan check with Santa Clara County, 6 steps", "向圣克拉拉县提交图纸审查，6 步"), out: B("0 of 6 steps done", "已完成 0/6 步"), ok: true, diff: { jobs: [B("File the plan check with Santa Clara County", "向圣克拉拉县提交图纸审查")] } }),
+    mo(60 * 26 - 4, "odelia", PLAN, { state: "shaping", kind: "tool", fn: "fill_fields", label: B("Filled form lines", "填写表格"), in: B("Food facility plan check, 4 lines", "食品设施图纸审查，4 行"), out: B("4 lines filled", "已填写 4 行"), ok: true,
+      diff: { fields: [{ app: planApp, label: B("Facility name", "设施名称"), value: "Moonleaf Tea" }, { app: planApp, label: B("Site address", "场地地址"), value: ADDR }, { app: planApp, label: B("Operation", "经营类型"), value: "Beverages made to order, prepackaged snacks. No cooking" }, { app: planApp, label: B("Floor area", "面积"), value: "1,150 sq ft" }] } }),
+    mo(60 * 26 - 9, "odelia", PLAN, { state: "composing", kind: "tool", fn: "draft_document", label: B("Drafted a document", "起草文件"), in: B("Finish schedule, Food facility plan check", "装修材料表，食品设施图纸审查"), out: B("Done", "完成"), ok: true,
+      diff: { docs: ["finish-schedule.xlsx"], items: [{ app: planApp, item: B("Finish schedule (floors, walls, ceilings)", "装修材料表（地面、墙面、天花）") }] } }),
+    mo(60 * 26 - 10, "odelia", PLAN, { state: "weaving", kind: "tool", fn: "set_plan", label: B("Updated the plan", "更新计划"), in: B("File the plan check with Santa Clara County, 6 steps", "向圣克拉拉县提交图纸审查，6 步"), out: B("3 of 6 steps done", "已完成 3/6 步"), ok: true }),
+    mo(60 * 20, "odelia", PLAN, { state: "shaping", kind: "tool", fn: "hand_off", label: B("Wrote notes for the next shift", "为下一班写备注"), in: B("File the plan check with Santa Clara County", "向圣克拉拉县提交图纸审查"), out: B("Done", "完成"), ok: true }),
+    mo(60 * 20 - 1, "odelia", PLAN, { state: "shaping", kind: "shift", label: B("A fresh shift picked up the job (shift 2)", "新一班接手了这项工作（第 2 班）") }),
+  ] },
+  { id: "local-plan-2", at: ago(60 * 3 + 6), bot: "odelia", job: PLAN, steps: [
+    mo(60 * 3 + 6, "odelia", PLAN, { state: "searching", kind: "tool", fn: "check_progress", label: B("Checked progress", "查看进度"), in: planApp, out: B("Waiting on the floor plan and the equipment list", "等待平面图和设备清单"), ok: true }),
+    mo(60 * 3 + 5, "odelia", PLAN, { state: "composing", kind: "tool", fn: "request_filing_approval", label: B("Put a filing up for approval", "提交申报待您批准"), in: planApp, out: B("Not ready yet: documents still missing: Floor plan, to scale, and the equipment list", "还不能提交：尚缺平面图和设备清单"), ok: true }),
+    mo(60 * 3 + 4, "odelia", PLAN, { state: "working", kind: "tool", fn: "update_application", label: B("Updated an application", "更新申请"), in: planApp, out: B("Done", "完成"), ok: true, diff: { approvals: [B("Add the floor plan and equipment list", "上传平面图和设备清单")] } }),
+    mo(60 * 3 + 4, "odelia", PLAN, { state: "composing", kind: "approval", label: B("Put up for your approval: Add the floor plan and equipment list", "提交给您批准：上传平面图和设备清单") }),
+    mo(60 * 3 + 1, "odelia", PLAN, { state: "weaving", label: B("A separate reviewer is checking the work", "独立检查正在核对工作") }),
+    mo(60 * 3, "odelia", PLAN, { state: "weaving", kind: "check", ok: false, label: B("A separate reviewer checked it: 2 of 4 done", "独立检查：4 项中完成 2 项"), items: [
+      { ok: true, text: B("Every line of the county's plan check form is filled", "县政府图纸审查表每一行都已填写"), why: B("All 18 lines have a value", "18 行均已填写") },
+      { ok: true, text: B("The menu and operations narrative is in Documents", "菜单与运营说明已存入文件"), why: B("menu.pdf and finish-schedule.xlsx are attached", "已附 menu.pdf 与 finish-schedule.xlsx") },
+      { ok: false, text: B("The floor plan and equipment list are attached", "已附平面图和设备清单"), why: B("Neither is in Documents yet", "文件中还没有这两份") },
+      { ok: false, text: B("You approved the filing with the $1,385 fee", "您已批准申请及 $1,385 费用"), why: B("Not put up for approval yet", "尚未提交批准") },
+    ] }),
+    mo(60 * 3, "odelia", PLAN, { state: "composing", kind: "reply", label: B("The answer that went to you", "发给您的回复"), out: B("The plan check is filled and the narrative is in. It waits on your floor plan and equipment list; then it goes up for approval with the $1,385 fee.", "图纸审查已填好，说明也已存入。现在等您的平面图和设备清单，之后连同 $1,385 费用提交给您批准。") }),
+  ] },
+  { id: "local-ready", at: ago(95), bot: "odelia", job: READY, steps: [
+    mo(95, "odelia", READY, { state: "searching", label: B("Reading your workspace", "读取您的工作区") }),
+    mo(95, "odelia", READY, { state: "searching", kind: "tool", fn: "check_progress", label: B("Checked progress", "查看进度"), out: B("2 stores, 10 applications", "2 家门店，10 项申请"), ok: true }),
+    mo(94, "odelia", READY, { state: "weaving", kind: "tool", fn: "split_job", label: B("Split the job across stores", "把工作分给各门店"), in: B("Get both stores ready for their next inspection, 2 stores", "让两家门店为下一次检查做好准备，2 家门店"), out: B("2 started, 0 waiting their turn", "2 个已开始，0 个排队"), ok: true,
+      diff: { jobs: [B("Get both stores ready for their next inspection", "让两家门店为下一次检查做好准备"), B("Flushing, Main St: get ready for the next inspection", "法拉盛 Main St 店：为下一次检查做好准备"), B("San Jose, North First St: get ready for the pre-opening inspection", "圣何塞 North First St 店：为开业前检查做好准备")] } }),
+    mo(94, "odelia", READY, { state: "weaving", kind: "split", label: B("Split it across 2 stores: 2 started, 0 waiting their turn", "分给 2 家门店：2 家已开始，0 家排队") }),
+    mo(93, "odelia", READY, { state: "breathing", label: B("Waiting for 2 store bots to finish", "等待 2 家门店的助手完成") }),
+    mo(93, "odelia", READY, { state: "composing", kind: "reply", label: B("The answer that went to you", "发给您的回复"), out: B("Each store's bot is on it: Flushing for its next health inspection, San Jose for the pre-opening inspection. One summary when both are back.", "每家门店的助手都在处理：法拉盛准备下一次卫生检查，圣何塞准备开业前检查。两家都完成后我会汇总。") }),
+  ] },
+  { id: "local-ready-fl", at: ago(94), bot: "flushing", job: FL, steps: [
+    mo(94, "flushing", FL, { state: "searching", label: B("Reading your workspace", "读取您的工作区") }),
+    mo(93, "flushing", FL, { state: "weaving", kind: "tool", fn: "set_plan", label: B("Updated the plan", "更新计划"), in: B("Flushing, Main St: get ready for the next inspection, 4 steps", "法拉盛 Main St 店：为下一次检查做好准备，4 步"), out: B("0 of 4 steps done", "已完成 0/4 步"), ok: true }),
+    mo(91, "flushing", FL, { state: "searching", kind: "tool", fn: "inspection_guide", label: B("Read the inspection checklist", "查阅检查清单"), in: B("Flushing, Main St", "法拉盛 Main St 店"), out: B("24 items on the city's checklist; 1 fix: a thermometer for the reach-in", "市政府清单共 24 项；1 项整改：冷柜温度计"), ok: true }),
+    mo(84, "flushing", FL, { state: "working", kind: "tool", fn: "add_deadline", label: B("Added a deadline", "添加截止日期"), in: B(`Renew Marco's food protection certificate, ${inDays(14)}`, `为 Marco 续期食品保护证书，${inDays(14)}`), out: B("Done", "完成"), ok: true,
+      diff: { deadlines: [{ date: inDays(14), title: B("Renew Marco's food protection certificate", "为 Marco 续期食品保护证书") }] } }),
+    mo(36, "flushing", FL, { state: "weaving", kind: "tool", fn: "set_plan", label: B("Updated the plan", "更新计划"), in: B("Flushing, Main St: get ready for the next inspection, 4 steps", "法拉盛 Main St 店：为下一次检查做好准备，4 步"), out: B("4 of 4 steps done", "已完成 4/4 步"), ok: true }),
+    mo(32, "flushing", FL, { state: "weaving", label: B("A separate reviewer is checking the work", "独立检查正在核对工作") }),
+    mo(31, "flushing", FL, { state: "weaving", kind: "check", ok: true, label: B("A separate reviewer checked it: all 2 done", "独立检查：2 项全部完成"), items: [
+      { ok: true, text: B("Every item on the city's checklist is checked against the store", "市政府清单的每一项都已与门店核对"), why: B("24 items checked; 1 fix noted: a thermometer for the reach-in", "已核对 24 项，记下 1 项整改：冷柜温度计") },
+      { ok: true, text: B("Marco's certificate renewal has a deadline before it expires", "Marco 的证书续期在到期前设有截止日期"), why: B("Deadline set 5 days before it expires", "截止日期设在到期前 5 天") },
+    ] }),
+    mo(31, "flushing", FL, { state: "composing", kind: "reply", label: B("The answer that went to you", "发给您的回复"), out: B("Flushing is ready: all 24 checklist items match but one, a thermometer for the reach-in, and Marco's renewal is on the calendar.", "法拉盛店已就绪：24 项清单中只差冷柜温度计 1 项，Marco 的续期已加入日历。") }),
+  ] },
+  { id: "local-ready-sj", at: ago(94), bot: "sanjose", job: SJR, steps: [
+    mo(94, "sanjose", SJR, { state: "searching", label: B("Reading your workspace", "读取您的工作区") }),
+    mo(93, "sanjose", SJR, { state: "weaving", kind: "tool", fn: "set_plan", label: B("Updated the plan", "更新计划"), in: B("San Jose, North First St: get ready for the pre-opening inspection, 4 steps", "圣何塞 North First St 店：为开业前检查做好准备，4 步"), out: B("0 of 4 steps done", "已完成 0/4 步"), ok: true }),
+    mo(90, "sanjose", SJR, { state: "searching", kind: "tool", fn: "inspection_guide", label: B("Read the inspection checklist", "查阅检查清单"), in: B("San Jose, North First St", "圣何塞 North First St 店"), out: B("18 items on the county's pre-opening list", "县政府开业前清单共 18 项"), ok: true }),
+    mo(70, "sanjose", SJR, { state: "searching", kind: "tool", fn: "check_progress", label: B("Checked progress", "查看进度"), in: B("San Jose, North First St", "圣何塞 North First St 店"), out: B("The plan check waits on the floor plan and equipment list", "图纸审查仍在等平面图和设备清单"), ok: true }),
+    mo(40, "sanjose", SJR, { state: "searching", kind: "tool", fn: "find_files", label: B("Searched the drive", "搜索云盘"), in: B("\"contractor schedule\"", "“承包商进度表”"), out: B("Google Drive or Dropbox isn't connected. Ask the person to connect it in Settings, Integrations.", "未成功：Google Drive or Dropbox isn't connected. Ask the person to connect it in Settings, Integrations."), ok: false }),
+    mo(12, "sanjose", SJR, { state: "weaving", kind: "tool", fn: "set_plan", label: B("Updated the plan", "更新计划"), in: B("San Jose, North First St: get ready for the pre-opening inspection, 4 steps", "圣何塞 North First St 店：为开业前检查做好准备，4 步"), out: B("2 of 4 steps done", "已完成 2/4 步"), ok: true }),
+  ] },
 ];
 
 export const SAMPLE: Workspace = {
@@ -423,6 +491,7 @@ export const SAMPLE: Workspace = {
   deadlines: [
     { id: "dl-fh", date: inDays(5), kind: "due", app: "handler", title: B("Food handler cards due for 4 staff", "4 名员工的食品从业人员卡到期"), agency: B("California Retail Food Code", "加州零售食品法规"), ask: B("Remind them", "提醒他们"), prompt: B("Remind staff about food handler cards", "提醒员工办理食品从业人员卡") },
     { id: "dl-btc", date: inDays(12), kind: "estimate", app: "btc", title: B("Business Tax Certificate decision expected", "营业税证书预计出结果"), agency: SJ },
+    { id: "dl-marco", date: inDays(14), kind: "renewal", title: B("Renew Marco's food protection certificate", "为 Marco 续期食品保护证书"), agency: B("NYC Health Department", "纽约市卫生局") },
     { id: "dl-soi", date: inDays(21), kind: "due", title: B("LLC Statement of Information due ($20)", "有限责任公司信息声明到期（$20）"), agency: B("California Secretary of State", "加州州务卿"), ask: B("Prepare it", "准备申报"), prompt: B("Prepare the Statement of Information", "准备信息声明") },
     { id: "dl-wages", date: inDays(27), kind: "due", app: "edd", title: B("First payroll: employer registration must be filed first", "首次发薪：须先完成雇主登记"), agency: B("California EDD", "加州就业发展局"), ask: B("File what's ready", "提交已就绪的申请"), prompt: B("File everything that's ready", "把能提交的都提交") },
     { id: "dl-plan", date: inDays(38), kind: "estimate", app: "plancheck", title: B("Plan check decision, if it's filed this week", "如本周提交，图纸审查预计出结果"), agency: DEH },
@@ -492,7 +561,43 @@ export const SAMPLE: Workspace = {
     { id: "r-edd", state: "shaping", label: B("Finishing the employer registration", "完成雇主登记"), detail: B("Ready today", "今天可完成") },
   ],
   stores: SAMPLE_STORES,
+  runLog: SAMPLE_RUNS,
   jobs: [
+    // A request across both stores, split by Odelia into one job per store: Flushing's bot finished and passed the
+    // reviewer; San Jose's bot is still at work. The job is done only when both parts are done and checked.
+    { id: "job-ready", title: B("Get both stores ready for their next inspection", "让两家门店为下一次检查做好准备"), status: "running", children: ["job-ready-fl", "job-ready-sj"], started: ago(95), updated: ago(12), seat: 1, runs: ["local-ready"],
+      steps: [
+        { title: B("Flushing, Main St: done and checked", "法拉盛 Main St 店：完成并通过检查"), done: true, check: { jobs: ["job-ready-fl"] } },
+        { title: B("San Jose, North First St: done and checked", "圣何塞 North First St 店：完成并通过检查"), done: false, check: { jobs: ["job-ready-sj"] } },
+      ],
+      done: [
+        { text: B("Every store's part is done and checked by a separate reviewer", "每家门店的部分都已完成并通过独立检查"), ok: false, check: { jobs: ["job-ready-fl", "job-ready-sj"] } },
+        { text: B("You got one summary covering every store", "您收到了涵盖每家门店的汇总") },
+      ],
+      checked: { at: ago(12), passed: 0, of: 2 } },
+    { id: "job-ready-fl", parent: "job-ready", store: "flushing", title: B("Flushing, Main St: get ready for the next inspection", "法拉盛 Main St 店：为下一次检查做好准备"), status: "done", started: ago(94), updated: ago(31), seat: 1, runs: ["local-ready-fl"],
+      steps: [
+        { title: B("Walk the city's inspection checklist against the store", "对照市政府检查清单逐项核对门店"), done: true },
+        { title: B("Note what last week's practice inspection found", "记下上周模拟检查发现的问题"), done: true },
+        { title: B("Put Marco's certificate renewal on the calendar", "把 Marco 的证书续期加入日历"), done: true },
+        { title: B("Hand the manager the list of fixes", "把整改清单交给店长"), done: true },
+      ],
+      done: [
+        { text: B("Every item on the city's checklist is checked against the store", "市政府清单的每一项都已与门店核对"), ok: true, why: B("24 items checked; 1 fix noted: a thermometer for the reach-in", "已核对 24 项，记下 1 项整改：冷柜温度计") },
+        { text: B("Marco's certificate renewal has a deadline before it expires", "Marco 的证书续期在到期前设有截止日期"), ok: true, why: B("Deadline set 5 days before it expires", "截止日期设在到期前 5 天") },
+      ],
+      checked: { at: ago(31), passed: 2, of: 2 } },
+    { id: "job-ready-sj", parent: "job-ready", store: "sanjose", title: B("San Jose, North First St: get ready for the pre-opening inspection", "圣何塞 North First St 店：为开业前检查做好准备"), status: "running", started: ago(94), updated: ago(12), seat: 1, runs: ["local-ready-sj"],
+      steps: [
+        { title: B("Read the county's pre-opening inspection guide", "阅读县政府开业前检查指南"), done: true },
+        { title: B("Match it against the plan check and the build-out", "与图纸审查和装修进度逐项对照"), done: true },
+        { title: B("List what the contractor still has to finish", "列出承包商尚需完成的事项"), done: false },
+        { title: B("Book the inspection once the plan check is approved", "图纸审查获批后预约检查"), done: false },
+      ],
+      done: [
+        { text: B("The county's pre-opening checklist is matched to the store", "县政府开业前检查清单已与门店逐项对照") },
+        { text: B("The contractor's open items are listed with dates", "承包商未完成事项已列出并附日期") },
+      ] },
     { id: "job-plan", title: B("File the plan check with Santa Clara County", "向圣克拉拉县提交图纸审查"), status: "waiting", apps: ["plancheck"], started: ago(60 * 26), updated: ago(60 * 3),
       steps: [
         { title: B("Find the county's plan check form", "找到县政府的图纸审查表"), done: true },
@@ -509,7 +614,7 @@ export const SAMPLE: Workspace = {
         { text: B("The floor plan and equipment list are attached", "已附平面图和设备清单"), ok: false, why: B("Neither is in Documents yet", "文件中还没有这两份"), check: { app: "plancheck", items: ["fp", "eq"] } },
         { text: B("You approved the filing with the $1,385 fee", "您已批准申请及 $1,385 费用"), ok: false, why: B("Not put up for approval yet", "尚未提交批准"), check: { closed: "a-plan" } },
       ],
-      checked: { at: ago(60 * 3), passed: 2, of: 4 }, files: ["d-finish", "d-menu"], seat: 2,
+      checked: { at: ago(60 * 3), passed: 2, of: 4 }, files: ["d-finish", "d-menu"], seat: 2, runs: ["local-plan-1", "local-plan-2"],
       handoffs: [{ at: ago(60 * 20), seat: 1, note: "Filled all 18 lines of the county form from the business facts and wrote the operations narrative (finish-schedule.xlsx). Next: the floor plan and equipment list from the owner or the contractor, then put it up for approval with the $1,385 fee. Reuse menu.pdf; don't redraw the narrative." }] },
     { id: "job-cards", title: B("Get San Jose's staff their food handler cards", "为圣何塞门店员工办理食品从业人员卡"), status: "running", started: ago(45), updated: ago(6),
       steps: [
