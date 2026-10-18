@@ -9,29 +9,79 @@ export type Box =
   | { radio: string; value: string; if?: string }                                                  // a radio group set to its export value
   | { choice: string; if?: string; value?: string }                                               // a dropdown set to the answer (or `value`)
   // Forms with no fillable boxes (a flat scan or print-only PDF): the answer is printed at a spot on the page, in PDF
-  // points from the bottom-left (page from 0). w: the line's width, so a long answer shrinks to fit; mark: an "X" in a
-  // printed checkbox, when the answer matches `if`.
-  | { at: { page: number; x: number; y: number; w?: number; size?: number }; pick?: string; max?: number; upper?: boolean; value?: string; if?: string }
+  // points from the bottom-left (page from 0). w: the line's width, so a long answer shrinks to fit; lines: how many
+  // printed lines the answer may wrap onto (each `lead` points below the last); comb: the number of character boxes
+  // across w, one character centred in each (EIN and ZIP boxes); mark: an "X" in a printed checkbox, when the answer
+  // matches `if`.
+  | { at: Spot; pick?: string; max?: number; upper?: boolean; value?: string; if?: string }
   | { mark: { page: number; x: number; y: number; size?: number }; if?: string };
 
 /** Part of an answer: "123 Main St, Suite 4, San Jose, CA 95112" splits into street, city, state, zip. Picks chain with
     "|", left to right: "line2|head" is the name on the answer's second line, "line2|tail|zip" that line's ZIP code.
     line1..line9: one line of a multi-line answer (one person or item per line). head: before the first comma or " - ";
-    tail: after it. first/middle/last: parts of a person's name. mm/dd/yyyy/date: parts of a date. */
-export type Pick = "street" | "city" | "state" | "zip" | "country" | "citystatezip" | "first" | "last" | "middle" | "mi" | "digits" | "head" | "tail" | "mm" | "dd" | "yyyy" | "date" | `line${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
+    tail: after it. first/middle/last: parts of a person's name. mm/dd/yyyy/date: parts of a date. phone: a US number as
+    408-555-0142, ein: an EIN as 12-3456789 (for boxes printed with the dashes in place). */
+export type Pick = "street" | "city" | "state" | "zip" | "country" | "citystatezip" | "first" | "last" | "middle" | "mi" | "digits" | "head" | "tail" | "mm" | "dd" | "yyyy" | "date" | "phone" | "ein" | `line${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
+
+/** One line of a form as printed on its PDF: what Placetta asks, in English and Chinese. */
+export type MapLine = { id: string; line: string; en: string; zh: string; options?: string[]; hint?: { en: string; zh: string } };
 
 export type FormMap = {
   form: string;          // our form id
   rev: string;           // the revision printed on the PDF this map was checked against
   pdf: string;           // file name under public/forms/
+  url?: string;          // where the agency publishes this PDF (the library's official form link when it has none)
   checked: string;       // when the map was checked by filling a test copy
+  /** The form's lines as printed on this PDF, in order. A library entry that lists fewer lines takes these. */
+  lines?: MapLine[];
   boxes: Record<string, Box[]>;   // our field id -> the boxes it fills
   fixed?: Box[];         // boxes Placetta fills the same way every time (e.g. "new registration")
+  /** Lines of the form with no place on this PDF, each with the reason (e.g. the agency asks it only on its portal). */
+  unmapped?: Record<string, string>;
+  /** Answers that leave a line blank on purpose, as a pattern per line (e.g. "^no$" where the form only has a box to
+      tick for yes). The checks treat them as written. */
+  blank?: Record<string, string>;
   sign?: { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };   // the signature line (PDF points, page from 0)
   notes?: string;
 };
 
-export type Spot = { page: number; x: number; y: number; w?: number; size?: number };
+export type Spot = { page: number; x: number; y: number; w?: number; size?: number; lines?: number; lead?: number; comb?: number };
+/** One run of text as it lands on a flat form. */
+export type Piece = { page: number; x: number; y: number; size: number; text: string };
+
+/** Splits an answer into lines no wider than w (on spaces, and on its own line breaks). */
+function wrap(v: string, w: number, width: (s: string) => number): string[] {
+  const rows: string[] = [];
+  for (const para of v.split(/\n/)) {
+    let row = "";
+    for (const word of para.split(/\s+/).filter(Boolean)) {
+      const next = row ? `${row} ${word}` : word;
+      if (!row || width(next) <= w) row = next;
+      else { rows.push(row); row = word; }
+    }
+    if (row) rows.push(row);
+  }
+  return rows;
+}
+
+/** Where a flat answer is printed: one piece per line (wrapped onto at most `lines` lines, shrinking to fit), or one
+ *  per character for comb boxes. The writer and the checks both use it, so they agree on what lands where. */
+export function layout(at: Spot, v: string, width: (s: string, size: number) => number): Piece[] {
+  const size0 = at.size ?? 9, page = at.page;
+  if (at.comb && at.w) {
+    const cell = at.w / at.comb;
+    return [...v.replace(/\s+/g, "")].slice(0, at.comb).map((ch, i) => ({ page, x: at.x + i * cell + (cell - width(ch, size0)) / 2, y: at.y, size: size0, text: ch }));
+  }
+  if ((at.lines ?? 1) <= 1 || !at.w) {
+    let size = size0;
+    if (at.w) while (size > 5.5 && width(v, size) > at.w) size -= 0.5;
+    return [{ page, x: at.x, y: at.y, size, text: v }];
+  }
+  let size = size0, rows = wrap(v, at.w, s => width(s, size));
+  while (size > 5.5 && (rows.length > at.lines! || rows.some(r => width(r, size) > at.w!))) { size -= 0.5; rows = wrap(v, at.w, s => width(s, size)); }
+  const lead = at.lead ?? size * 1.25;
+  return rows.map((text, i) => ({ page, x: at.x, y: at.y - i * lead, size, text }));
+}
 export type Writer = {
   /** Print text at a spot (flat forms). Optional: a Writer without it skips flat boxes. */
   draw?: (at: Spot, v: string) => boolean;
@@ -110,6 +160,8 @@ function pick1(v: string, p: Pick): string {
     case "head": return v.split(SPLIT)[0].trim();
     case "tail": { const m = SPLIT.exec(v); return m ? v.slice(m.index + m[0].length).trim() : ""; }
     case "digits": return v.replace(/\D/g, "");
+    case "phone": { const d = v.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, ""); return d.length === 10 ? `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}` : v.trim(); }
+    case "ein": { const d = v.replace(/\D/g, ""); return d.length === 9 ? `${d.slice(0, 2)}-${d.slice(2)}` : ""; }
     case "line1": case "line2": case "line3": case "line4": case "line5": case "line6": case "line7": case "line8": case "line9":
       return v.split(/\n|;\s*/).map(x => x.trim()).filter(Boolean)[Number(p.slice(-1)) - 1] ?? "";
     case "mm": case "dd": case "yyyy": return date(v)?.[p] ?? "";
@@ -163,9 +215,7 @@ export function pdfLibWriter(form: any, doc?: any, font?: any): Writer {
     draw: (at, v) => !!t(() => {
       if (!doc || !font) return false;
       const page = doc.getPages()[at.page]; if (!page) return false;
-      let size = at.size ?? 9;
-      if (at.w) while (size > 5.5 && font.widthOfTextAtSize(v, size) > at.w) size -= 0.5;
-      page.drawText(v, { x: at.x, y: at.y, size, font });
+      for (const p of layout(at, v, (s, size) => font.widthOfTextAtSize(s, size))) page.drawText(p.text, { x: p.x, y: p.y, size: p.size, font });
       return true;
     }),
     text: (n, v) => !!t(() => {
@@ -173,20 +223,42 @@ export function pdfLibWriter(form: any, doc?: any, font?: any): Writer {
       const max = f.getMaxLength?.();
       const s = max ? v.slice(0, max) : v;
       f.setText(s);
-      // Auto-sized boxes (font size 0) print a short answer huge, and a long one runs off the line: fit it instead.
+      // Auto-sized boxes (font size 0) print a short answer huge, and a long one runs off the line: fit it instead,
+      // measured in Helvetica, the font the filled boxes are drawn in.
       t(() => {
         const r = f.acroField.getWidgets()[0].getRectangle();
         const da = String(f.acroField.getDefaultAppearance?.() ?? "");
         const set = /(\d+(?:\.\d+)?)\s+Tf/.exec(da);
         const size = set ? Number(set[1]) : 0;
-        if (f.isMultiline() || f.isCombed()) { if (!size) f.setFontSize(Math.min(10, Math.max(7, r.height / 4))); return; }
-        const fit = Math.min(size || 10, r.height * 0.72, (r.width - 4) / Math.max(1, s.length * 0.52));
-        if (!size || fit < size) f.setFontSize(Math.max(5.5, Math.round(fit * 2) / 2));
+        const helv = font ?? t(() => form.getDefaultFont());
+        const width = (x: string, sz: number): number => (helv ? helv.widthOfTextAtSize(x, sz) : x.length * 0.52 * sz);
+        if (f.isCombed()) { if (!size) f.setFontSize(Math.min(10, Math.max(7, r.height / 4))); return; }
+        if (f.isMultiline()) {
+          // wrapped lines are 1.11 times the font size apart in Helvetica: shrink until every line fits the box
+          let sz = size || Math.min(10, Math.max(7, r.height / 4));
+          while (sz > 5.5 && wrap(s, r.width - 4, x => width(x, sz)).length * sz * 1.11 > r.height - 2) sz -= 0.5;
+          if (sz !== size) f.setFontSize(sz);
+          return;
+        }
+        const fit = Math.min(size || 10, r.height * 0.72, (r.width - 4) / Math.max(0.01, width(s, 1)));
+        if (!size || fit < size) f.setFontSize(Math.max(5.5, Math.floor(fit * 2) / 2));
       });
       return true;
     }),
     check: n => !!t(() => { form.getCheckBox(n).check(); return true; }),
-    radio: (n, v) => !!t(() => { form.getRadioGroup(n).select(v); return true; }),
+    radio: (n, v) => !!t(() => {
+      const g = t(() => form.getRadioGroup(n));
+      if (g) { g.select(v); return true; }
+      // checkboxes that share one name, each with its own value (a pick-one row some forms draw as checkboxes)
+      const c = form.getCheckBox(n), af = c.acroField;
+      const on = af.getWidgets().map((w: { getOnValue: () => { decodeText?: () => string; toString: () => string } | undefined }) => w.getOnValue()).find((x: { decodeText?: () => string; toString: () => string } | undefined) => x && (x.decodeText?.() ?? x.toString().slice(1)) === v);
+      if (!on) return false;
+      // pdf-lib only sets such a box to its first value, so set the value and each box's look directly
+      const off = af.dict.context.obj("Off");
+      af.dict.set(af.dict.context.obj("V"), on);
+      for (const w of af.getWidgets()) w.setAppearanceState(w.getOnValue() === on ? on : off);
+      return true;
+    }),
     choice: (n, v) => !!t(() => {
       const f = t(() => form.getDropdown(n)) ?? form.getOptionList(n);
       const opt = (f.getOptions() as string[]).find(o => o.toLowerCase() === v.toLowerCase()) ?? (f.getOptions() as string[]).find(o => o.toLowerCase().startsWith(v.toLowerCase()));
