@@ -1,0 +1,107 @@
+{
+ "form": "oc-plan-check",
+ "rev": "Environmental Health Cover Sheet (7/22/2026)",
+ "pdf": "oc-plan-check.pdf",
+ "url": "https://www.ochealthinfo.com/sites/healthcare/files/2026-07/EH_Cover_Sheet_7_22_2026.pdf",
+ "checked": "2026-10-18",
+ "notes": "The plan check itself is applied for online; this is the cover sheet the county requires with every plan submittal. submitted: the items included with the submittal, by name (Application, Menu, Specification Sheets, Plans, Agency Submittals), each ticked when named; a resubmittal answers 'Resubmittal' or 'Change of Scope' instead. The plan page numbers, the plan checker's notes and approval stamp, and the signature are left blank.",
+ "lines": [
+  {
+   "id": "facility_name",
+   "line": "Project",
+   "en": "Facility name",
+   "zh": "设施名称"
+  },
+  {
+   "id": "facility_address",
+   "line": "Project",
+   "en": "Facility address",
+   "zh": "设施地址"
+  },
+  {
+   "id": "owner_name",
+   "line": "Project",
+   "en": "Project owner name",
+   "zh": "项目业主姓名"
+  },
+  {
+   "id": "owner_email",
+   "line": "Project",
+   "en": "Project owner email",
+   "zh": "项目业主电子邮箱"
+  },
+  {
+   "id": "scope",
+   "line": "Project",
+   "en": "Scope of work",
+   "zh": "工程范围"
+  },
+  {
+   "id": "submitted",
+   "line": "Section 1-2",
+   "en": "Items included with this submittal",
+   "zh": "本次提交所附材料",
+   "hint": {
+    "en": "e.g. \"Application, Menu, Specification Sheets, Plans, Agency Submittals\"",
+    "zh": "如 \"Application, Menu, Specification Sheets, Plans, Agency Submittals\""
+   }
+  }
+ ],
+ "boxes": {
+  "facility_name": [
+   {
+    "text": "Facility Name"
+   }
+  ],
+  "facility_address": [
+   {
+    "text": "Facility Address"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "Project Owner Name "
+   }
+  ],
+  "owner_email": [
+   {
+    "text": "Project Owner Email"
+   }
+  ],
+  "scope": [
+   {
+    "text": "Scope of work "
+   }
+  ],
+  "submitted": [
+   {
+    "check": "Application ",
+    "if": "application"
+   },
+   {
+    "check": "Menu ",
+    "if": "menu"
+   },
+   {
+    "check": "Specification Sheets ",
+    "if": "spec"
+   },
+   {
+    "check": "Plans ",
+    "if": "\\bplans\\b"
+   },
+   {
+    "check": "Agency Submittals ",
+    "if": "agency"
+   },
+   {
+    "check": "Resubmittal ",
+    "if": "resubmittal"
+   },
+   {
+    "check": "Change of Scope",
+    "if": "change of scope"
+   }
+  ]
+ }
+}

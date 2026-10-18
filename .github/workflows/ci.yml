@@ -1,6 +1,8 @@
 # Every change is checked before it ships: types, the agent and planning tests, the team-chat checks, every server
-# function type-checked, and every migration applied to a fresh Postgres with the database tests run against it.
-# Server functions deploy only after this passes on main (deploy-functions.yml).
+# function type-checked, every migration applied to a fresh Postgres with the database tests run against it, and the
+# security checks (no secrets in the commits, no high or critical advisory in production dependencies, Dependabot
+# watching every manifest). Server functions deploy only after this passes on main (deploy-functions.yml).
+# Branch protection requires all four jobs before a merge: .github/branch-protection.json, docs/soc2/BRANCH_PROTECTION.md.
 name: CI
 on:
   pull_request:
@@ -30,9 +32,15 @@ jobs:
       # the live evaluation's harness, on its scripted model (no key in CI): scenarios, tools, graders and report
       - run: npm run eval:live -- --dry --out /tmp/eval.md --json /tmp/eval.json
       - run: npm run test:plan
+      # every form Placetta fills on the agency's own PDF: filled with test answers, then read back line by line
+      - run: npm run test:forms
       - run: npm run test:smart
       - run: npm run test:flow
       - run: npm run test:channels
+      # every filing destination cites its agency page and passes the host rules, every one names a registry form, and
+      # docs/FILING_COVERAGE.md matches what the script generates
+      - name: Filing coverage
+        run: node scripts/filing-coverage.mjs --check
       - name: Production build
         run: npx vite build
   functions:
@@ -64,3 +72,44 @@ jobs:
       - uses: actions/checkout@v4
       - name: Migrations and database tests
         run: bash scripts/test-db.sh
+  # docs/soc2/policies/secure-development.md and vulnerability-management.md
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: No high or critical advisory in production dependencies
+        run: |
+          npm audit --omit=dev --audit-level=high --package-lock-only
+          npm audit --omit=dev --audit-level=high --package-lock-only --prefix worker/filer
+      - name: Dependabot watches every manifest
+        run: node scripts/check-dependabot.mjs
+      - name: Evidence collector tests
+        run: node --test scripts/soc2-evidence.test.mjs
+      - uses: actions/setup-go@v5
+        with: { go-version: stable, cache: false }
+      # Built from the Go module proxy at an exact version, so the download is checked against sum.golang.org.
+      # (gitleaks v8.30.1 needs Go 1.24.11 or newer; the latest stable Go always is.)
+      - name: Install gitleaks v8.30.1
+        run: go install -ldflags "-X github.com/zricethezav/gitleaks/v8/version.Version=v8.30.1" github.com/zricethezav/gitleaks/v8@v8.30.1
+      - name: No secrets in the commits
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        # A pull request: its own commits. A push to main: what the push added. Run by hand: the whole history.
+        # Exceptions (test fixtures, keys that are public by design) are listed, with reasons, in .github/gitleaks.toml.
+        run: |
+          case "$EVENT" in
+            pull_request) range="$BASE..$HEAD" ;;
+            push) if git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then range="$BEFORE..$AFTER"; else range="-1 $AFTER"; fi ;;
+            *) range="" ;;
+          esac
+          args=(git --config .github/gitleaks.toml --redact --no-banner --max-target-megabytes 5)
+          if [ -n "$range" ]; then args+=(--log-opts="$range"); fi
+          "$(go env GOPATH)/bin/gitleaks" version
+          "$(go env GOPATH)/bin/gitleaks" "${args[@]}" .

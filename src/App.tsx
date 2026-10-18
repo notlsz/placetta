@@ -13,6 +13,9 @@ import { TABS, hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type Signed, type Tab, type View } from "./ctx";
 import { formById } from "./forms/registry";
 import { canFill } from "./forms/canFill";
+import { appPdf, fillForm, stampSignature } from "./forms/fill";
+import { readBack } from "./forms/readback";
+import { answersHash, fieldsOf, fileable, formName, latestVersion, needsForm, problemLine, problemsOf, refreshForms, TYPING_MS, type FilledCopy } from "./forms/versions";
 import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
 import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, serverModel, type Model, type Services, type Turn as Msg } from "./live";
@@ -21,7 +24,7 @@ import { applyAccent, saveTheme, unlockAudio, useNarrow, useSpeak } from "./hook
 import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo, Mark } from "./Logo";
 import { SAMPLE_WS } from "./sample";
-import { B, same, type Approval, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
+import { B, same, type Application, type Approval, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
 import { FindLicenses, Overview, PageHead, Permits, Tabs, UpdatesPage } from "./pages";
 import { Settings } from "./Settings";
 import { Stores } from "./Stores";
@@ -170,7 +173,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   // Odelia's chat as a page of its own: the panel isn't shown beside or over it, the page is the panel
   const chatPage = view === "odelia" && (sub ?? "chat") === "chat";
   const dock = wide && panelOpen && !chatPage;
-  const [drawer, setDrawer] = useState<{ id: string; tab: Tab; edit: boolean } | null>(null);
+  const [drawer, setDrawer] = useState<{ id: string; tab: Tab; edit: boolean; v?: number } | null>(null);
   const [modal, setModal] = useState<string | null>(null);
   const [legal, setLegal] = useState<string | null>(null);
   const [replay, setReplay] = useState<string | null>(null);   // the job whose replay is open
@@ -229,6 +232,17 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (view_.approvals.some(a => a.id === id)) { go("overview"); setModal(id); }
     else say(lang === "zh" ? "这项批准已经处理过了。" : "That approval is already taken care of.");
   }, [view_.approvals, go, say, lang]);
+  /* A link from one of Odelia's texts or chats to a filled form: for a member of this workspace, that form at that
+     version (an expired link opens the current one and says so). */
+  const formLink = useRef(cloud?.form ?? null);
+  useEffect(() => {
+    const token = formLink.current; if (!token || !cloud) return;
+    formLink.current = null;
+    void api.openFormLink(token).then(r => {
+      if (r.expired) say(lang === "zh" ? "这个链接已过期。下面是最新版本。" : "That link expired. Here's the newest version.");
+      go("permits"); setDrawer({ id: r.app_id, tab: "form", edit: false, v: r.expired ? undefined : r.version });
+    }, (e: api.ApiError) => say((lang === "zh" && e.message_zh) || e.message));
+  }, [cloud, go, say, lang]);
   const wsRef = useRef(view_);
   useEffect(() => { wsRef.current = view_; }, [view_]);
   const plan = cloud ? api.planOf(billing) : "monthly";
@@ -452,6 +466,32 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     } finally { serverRun.current = null; }
   }, [cloud, refresh, watchFamily]);
 
+  /* The agency's own form, always current (src/forms/versions.ts). Whenever an application's answers change in this
+     browser (a run here, the person's own edit, the answers filled at sign-up, a document read into it, a business fact
+     confirmed here), its official PDF is filled again: a new version, kept in Documents (the account's storage, or this
+     browser for the sample), read back line by line. A run on the server makes its own versions. */
+  const formCopies = useRef(new Map<string, FilledCopy>());
+  const formsBusy = useRef(false);
+  const lastFill = useRef(new Map<string, number>());
+  const [formsTick, setFormsTick] = useState(0);
+  const fillForms = useCallback(async (ids?: string[], by?: Bi) => {
+    if (formsBusy.current) return null;
+    formsBusy.current = true;
+    // what this pass reads: the newest render, or what it just changed when the page hasn't drawn it yet
+    let seen = wsRef.current, mine = wsRef.current;
+    const get = () => { if (wsRef.current !== seen) { seen = wsRef.current; mine = seen; } return mine; };
+    try {
+      return await refreshForms({
+        get, apply: p => { mine = p(get()); setWs(p); }, load: appPdf, ids, cache: formCopies.current, by,
+        keep: async (file: File, a: Application) => {
+          if (cloud && !api.PREVIEW) { const row = await api.uploadDoc(cloud.wsId, file, a.id); paths.current.set(file.name, row.path); return { path: row.path }; }
+          kept.current.set(file.name, file);
+        },
+      });
+    } catch { return null; }
+    finally { formsBusy.current = false; setFormsTick(n => n + 1); }
+  }, [cloud]);
+
   /* Memory that acts (src/recall.ts): after a run in this browser, what the person wrote is read for durable details
      (the extract role on the same model, through the same server call; the demo's own reader without a model), kept in
      their memory and acted on, and the reply shows a Remembered chip for each, one tap from Forget. */
@@ -507,6 +547,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     };
     const m = modelRef.current;
     const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me }) : withDemoPlan(demoAgent);
+    // each application's answers before the run: the ones it changes get their form filled again when it ends
+    const answersBefore = new Map(wsRef.current.apps.map(a => [a.id, answersHash(a)]));
     try {
       // In an account the agent works on the server, so it carries on if the app is closed.
       const id = resumeId ?? (cloud && !api.PREVIEW && "text" in req && m ? await api.startRun(cloud.wsId, { prompt: req.text, history: history.current.slice(-12), lang, deep }) : null);
@@ -516,6 +558,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
         // the run happened here: the workspace keeps its moments, linked from each job it worked
         setWs(keepRun({ id: `local-${Date.now().toString(36)}`, at: askedAt, steps: moments }, askedAt));
+        // and the forms it changed are filled again; the reply ends with each one (a card that opens the PDF)
+        await new Promise(res => setTimeout(res, 0));
+        const changed = wsRef.current.apps.filter(a => answersBefore.get(a.id) !== answersHash(a) && needsForm(a)).map(a => a.id);
+        if (changed.length) {
+          changed.forEach(id => lastFill.current.set(id, Date.now()));
+          const r = await fillForms(changed);
+          if (r?.notes.length) upd(t2 => (t2.reply ? { reply: { ...t2.reply, forms: r.notes, approvals: [...(t2.reply.approvals ?? []).filter(id => !r.withdrawn.includes(id)), ...r.cards.filter(id => !(t2.reply?.approvals ?? []).includes(id))] } } : {}));
+        }
       }
     } catch (err) {
       const code = (err as { code?: string })?.code ?? ((err as Error)?.name === "AbortError" ? "cancelled" : "upstream_error");
@@ -548,7 +598,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if ((voice || voiceOn) && said) tts.speak(said, speakTag(lang));
     else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
-  }, [lang, tts, say, t, deep, cloud, plan, voiceOn, services, follow, recallAfter, me]);
+  }, [lang, tts, say, t, deep, cloud, plan, voiceOn, services, follow, recallAfter, me, fillForms]);
+
+  /* Outside a run (the person typing in the sheet, the answers filled at sign-up, a document read in, a fact confirmed):
+     the form is filled again once the answers settle, at most once every few seconds per application. While a run on
+     the server holds the workspace, it fills them itself. */
+  useEffect(() => {
+    if (busy || formsBusy.current || (cloud && (serverRun.current || families.current.size))) return;
+    const due = view_.apps.filter(needsForm);
+    if (!due.length) return;
+    const now = Date.now();
+    const wait = Math.max(1200, ...due.map(a => TYPING_MS - (now - (lastFill.current.get(a.id) ?? 0))));
+    const timer = window.setTimeout(() => { due.forEach(a => lastFill.current.set(a.id, Date.now())); void fillForms(due.map(a => a.id)); }, wait);
+    return () => clearTimeout(timer);
+  }, [view_.apps, busy, cloud, fillForms, formsTick]);
 
   /* Back in the app: follow a task still running on the server, or show one that finished while it was closed. */
   const resumed = useRef(false);
@@ -674,14 +737,19 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const w = wsRef.current;
     const app = w.apps.find(x => x.id === a.app); if (!app) return null;
     const appDocs = app.checklist.map(c => (c.doc ? w.docs.find(d => d.id === c.doc) : undefined));
+    // the card's own answers, and the version of the filled form they make (a card whose answers changed can't go)
+    const g = fileable(w, a);
+    if (!g.ok) { say(g.why[lang]); return null; }
     try {
       const off = app.official ? formById(app.official) : undefined;
       let pdf_path: string | undefined, signature: api.FilingPayload["signature"];
       if (off && canFill(off)) {
-        const { fillOfficial, stampSignature } = await import("./forms/fill");
-        const blob = await fillOfficial(off.id, app.fields);
-        if (blob) {
-          let bytes: Uint8Array = new Uint8Array(await blob.arrayBuffer());
+        const filled = await fillForm(off.id, g.version ? fieldsOf(g.version.answers) : app.fields, appPdf);
+        // read back once more, the copy that's filed: a line that didn't come out right stops it here
+        const rb = filled ? await readBack(off.id, filled) : null;
+        if (rb && !rb.ok) { const p = problemLine(problemsOf(app, rb)[0]); say(lang === "zh" ? `还不能提交。${p.zh}` : `Not filed. ${p.en}`); return null; }
+        if (filled) {
+          let bytes: Uint8Array = filled.pdf;
           if (sig?.png && off.esign) {
             const signed = await stampSignature(bytes, sig.png, off.id);
             if (signed) { bytes = signed; signature = { name: sig.name, title: sig.title, signed_at: nowIso(), kind: sig.kind }; }
@@ -692,7 +760,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       const filing = await api.requestFiling(cloud.wsId, {
         app_id: app.id, title: a.title, agency: app.agency, portal_url: app.source.url || undefined, fee_estimate: app.fees.reduce((s, f) => s + f.amount, 0),
         payload: {
-          form: app.form, source: app.source, does: a.does, official: app.official, pdf_path, signature,
+          form: app.form, source: app.source, does: a.does, official: app.official, pdf_path, signature, answers_hash: answersHash(app), ...(g.version ? { version: g.version.n } : {}),
           fields: app.fields.map(f => ({ id: f.id, label: f.label, value: f.value, from: f.from })),
           checklist: app.checklist.map((c, i) => ({ label: c.label, state: c.state, doc: appDocs[i]?.path })),
           attachments: appDocs.filter((d): d is Doc => !!d?.path).map(d => ({ name: d.name, path: d.path! })),
@@ -808,6 +876,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         return;
       }
     }
+    // a filing's card is for one set of answers: changed since it was put up, or a filled form that doesn't match them,
+    // and it can't be filed until a fresh card is approved (src/forms/versions.ts)
+    if (a.kind === "file") { const g = fileable(w, a); if (!g.ok) { say(g.why[lang]); return; } }
     // every kind of filing: nothing goes out with an empty field or a missing document
     const filingApp = a.kind === "file" ? w.apps.find(x => x.id === a.app) : undefined;
     if (filingApp && !readyToFile(filingApp)) { say(blockersSay(filingApp)[lang]); return; }
@@ -1058,6 +1129,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     ask, queued, unqueue,
     run: (req, shown) => { if ("text" in req) setPanelOpen(true); void run(req, shown); },
     openApp: (id, tab, edit) => { const a = wsRef.current.apps.find(x => x.id === id); setDrawer({ id, tab: tab ?? (a && a.status === "ready" ? "form" : a?.preview ? "fees" : "check"), edit: !!edit }); },
+    openForm: (id, v) => setDrawer({ id, tab: "form", edit: false, v }),
+    filledPdf: async (id, n) => {
+      const a = wsRef.current.apps.find(x => x.id === id);
+      if (!a?.official || !canFill(formById(a.official))) return null;
+      const v = n ? a.versions?.find(x => x.n === n) : latestVersion(a);
+      if (v) {
+        // the kept copy: from the account's Documents, or this browser; filled again from its answers otherwise
+        if (cloud && v.path) { try { return new Uint8Array(await (await api.downloadDoc(v.path)).arrayBuffer()); } catch { /* filled again below */ } }
+        const own = kept.current.get(`${formName(a)}, filled, version ${v.n}.pdf`);
+        if (own) return new Uint8Array(await own.arrayBuffer());
+        return (await fillForm(a.official, fieldsOf(v.answers), appPdf))?.pdf ?? null;
+      }
+      return (await fillForm(a.official, a.fields, appPdf))?.pdf ?? null;
+    },
     openApproval: id => setModal(id),
     openReplay: id => setReplay(id),
     stopJob: id => {
@@ -1265,7 +1350,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           )}
         </div>
         {panelOpen && !chatPage && <AgentPanel feed={feed} tts={tts} mode={dock ? "dock" : "sheet"} onHide={() => setPanelOpen(false)} asked={asked} />}
-        {drawer && <AppDrawer id={drawer.id} tab={drawer.tab} edit={drawer.edit} onTab={tab => setDrawer(d => (d ? { ...d, tab, edit: false } : d))} onClose={() => setDrawer(null)} />}
+        {drawer && <AppDrawer id={drawer.id} tab={drawer.tab} edit={drawer.edit} version={drawer.v} onTab={tab => setDrawer(d => (d ? { ...d, tab, edit: false } : d))} onClose={() => setDrawer(null)} />}
         {modal && <ApproveModal id={modal} onClose={() => setModal(null)} />}
         {replay && <ReplayDrawer job={replay} onClose={() => setReplay(null)} />}
         {legal && <LegalReader id={legal} onClose={() => setLegal(null)} />}

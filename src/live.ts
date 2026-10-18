@@ -4,6 +4,8 @@ import { canFill } from "./forms/canFill";
 import { addressProblems, checkAddress, formState, RULE_LABEL } from "./forms/addressCheck";
 import { ADDRESS_RULES } from "./forms/address-rules/index";
 import type { AddressCheck } from "./forms/addressCheck";
+import { loaderWith, type LoadPdf } from "./forms/fill";
+import { answersHash, fillAndRead, formName, formOf, latestVersion, problemsOf, type FilledCopy } from "./forms/versions";
 
 /* An address the agency doesn't accept on a line, as a tool tells the model: what's wrong, what the agency accepts,
    what to do without one, and the three sources that say so. */
@@ -12,7 +14,7 @@ const addrOut = (form: string, field: string, value: string, c: AddressCheck) =>
 const ADDR_NEXT = "Leave that line empty. Tell the person in plain words what the agency accepts there and what to do if the business has none (if_the_business_has_none), citing the sources, then fill the address they give.";
 import type { OrbState } from "thinking-orbs";
 import {
-  addApp, addApproval, addDeadline, addDoc, audit, filingBlockers, isBlank, setApp, setCheck, setFact,
+  addApp, addApproval, addDeadline, addDoc, audit, feedFact, feeds, filingBlockers, isBlank, setApp, setCheck, setFact,
   type AgentBackend, type AgentEvent, type Reply, type Request, type Step,
   uid, viaWords,
 } from "./core";
@@ -397,6 +399,9 @@ export type Services = {
   split?(o: { parent: string; children: { job: string; store: string; title: Bi; prompt: string }[] }): Promise<{ started: string[]; queued: string[] }>;
   /** Connected apps (src/mcp.ts): the tools of the apps' own MCP servers this person may use through Odelia. */
   mcpTools?(): Promise<McpTool[]>;
+  /** An agency's PDF by its file name (src/forms/fill.ts pdfFile), for filling it where the app's own way can't reach
+   *  it: the server fetches the site's /app/forms/, a test reads the disk. null to fall back to the app's way. */
+  formPdf?(file: string): Promise<Uint8Array | null>;
 };
 /** job: the job this run is on now (its moments carry it). split: the jobs this run split across stores. */
 export type Made = { apps: Set<string>; approvals: string[]; memory: Bi[]; skills: Bi[]; files: string[]; matches?: Reply["matches"]; table?: Reply["table"]; lastToolAt: number; job?: string; split?: string[] };
@@ -409,7 +414,10 @@ export type X = { model: Model; files: Map<string, File>; svc?: Services; signal
   mcp?: McpTool[]; request?: string;
   /** Whose memory this run reads (src/recall.ts): the signed-in person, the person who started a server run, or the
    *  sample's one person. Their people become contacts draft_message reaches by name. */
-  me?: string };
+  me?: string;
+  /** Filling the agencies' own forms (src/forms/versions.ts): where the PDFs come from, and the copies this run already
+   *  filled, so a form checked before approval isn't filled again when the run keeps its version. */
+  forms?: { load: LoadPdf; cache: Map<string, FilledCopy> } };
 
 const MAIL = ["gmail", "outlook_mail"], CAL = ["gcal", "outlook_cal"], DRIVES = ["gdrive", "dropbox"], POS = ["square", "toast"];
 const APP_NAMES: Record<string, string> = { gmail: "Gmail", outlook_mail: "Outlook mail", gcal: "Google Calendar", outlook_cal: "Outlook Calendar", gdrive: "Google Drive", dropbox: "Dropbox", quickbooks: "QuickBooks", slack: "Slack", square: "Square", toast: "Toast" };
@@ -795,7 +803,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       name: "request_filing_approval",
       description: "Put a complete application in front of the person to approve: they see the exact data, attachments and fee, and only their approval in the app sends it to Placetta's filing team. You never file, pay or submit anything yourself. Only works once every field is filled and every checklist document is in; otherwise it returns what's left: fill what you can, then ask the person for the rest in one short list.",
       inputSchema: { type: "object", properties: { application_id: { type: "string" }, what_happens: { type: "array", items: { type: "string" }, description: "The exact steps that follow approval, in order (used outside a signed-in workspace)" } }, required: ["application_id"] },
-      execute(i) {
+      async execute(i) {
         const a = findApp(i.application_id); notFiled(a);
         const bl = filingBlockers(a);
         if (bl.empty.length || bl.missing.length) {
@@ -806,8 +814,24 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         }
         const badAddr = a.official ? addressProblems(a.official, Object.fromEntries(a.fields.map(f => [f.id, f.value]))) : [];
         if (badAddr.length) { mark(); return { approval_requested: false, why: "An address on this form isn't one the agency accepts on that line.", address_problems: badAddr.map(p => addrOut(a.official!, p.field, p.value, p.check)), do_next: ADDR_NEXT }; }
+        // The agency's own form, filled with these answers and read back: a line that didn't come out right on it (a
+        // choice the form doesn't offer, an answer too long for its box, characters it can't print) is fixed first.
+        // When the PDF can't be reached from here, the app fills and checks it again before anything is filed.
+        const fm = formOf(a) ? await fillAndRead(a, x.forms?.load ?? loaderWith(x.svc?.formPdf), x.forms?.cache).catch(() => null) : null;
+        if (fm && !fm.read.ok) {
+          const probs = problemsOf(a, fm.read);
+          apply(w => setApp(a.id, { status: "draft", next: L(`Not ready. On the filled form, ${probs[0].label.en}: ${probs[0].note.en}`, `尚未就绪。已填写的表格上，${probs[0].label.zh}：${probs[0].note.zh}`) })({ ...w, approvals: w.approvals.filter(x => !(x.app === a.id && x.kind === "file")) }));
+          // the copy that doesn't match is kept as a version too, so the reply hands it back with the line named
+          made.apps.add(a.id); mark();
+          return { approval_requested: false, why: `Placetta filled the official ${formName(a)} with these answers and read it back: these lines don't come out right on the form, so nothing was put in front of the person.`,
+            lines: probs.map(p => `${p.label.en}: ${p.note.en}`), do_next: "Fix each line with fill_fields (shorter, in English letters, one of the form's own choices, or \"By hand\" for an SSN or ITIN) from what you know, or ask the person for it. Then call this again." };
+        }
+        const hash = answersHash(a);
         const existing = get().approvals.find(x => x.app === a.id && x.kind === "file");
-        if (existing) { made.approvals.push(existing.id); mark(); return { approval_id: existing.id, note: "Already waiting for approval" }; }
+        if (existing && (!existing.hash || existing.hash === hash)) { made.approvals.push(existing.id); mark(); return { approval_id: existing.id, note: "Already waiting for approval" }; }
+        // a card for answers that have since changed is taken back; the fresh one below is for these answers
+        if (existing) made.approvals = made.approvals.filter(id => id !== existing.id);
+        if (existing) apply(w => audit("agent", L("Took back an approval card", "撤回了一张批准卡片"), existing.title, L("The answers changed after it was put up", "卡片提交后答案有改动"))({ ...w, approvals: w.approvals.filter(x => x.id !== existing.id), closed: [...w.closed, { ...existing, withdrawn: { at: nowIso(), why: L("The answers changed after this was put up. Review the new version, then approve it.", "这张卡片提交后答案有改动。请先查看新版本，再批准。") } }] }));
         const g = gaps(a);
         if (!a.fields.length) throw new Error(`The ${a.name.en} has no form lines yet. Add the official form's lines with fill_fields (from the agency's own form) before asking for approval.`);
         if (g.empty_fields.length || g.missing_documents.length) throw new Error(`Not ready to file. ${g.empty_fields.length ? `Empty fields: ${g.empty_fields.join("; ")}. ` : ""}${g.missing_documents.length ? `Missing documents: ${g.missing_documents.join("; ")}. ` : ""}Fill what you can from the workspace, then ask the person for the rest in one question.`);
@@ -816,6 +840,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const site = a.source.label || a.agency.en;
         const ap: Approval = {
           id: usedIds(get()).has("ap-" + a.id) ? freshId(get(), "ap-" + a.id) : "ap-" + a.id, kind: "file", app: a.id, title: L(`File the ${nm(a)}`, `提交${nm(a)}`), agency: a.agency, action: B("Approve & file", "批准并提交"),
+          // for these exact answers, and the filled form's version they make (src/forms/versions.ts)
+          ...(formOf(a) ? { hash, version: latestVersion(a)?.hash === hash ? latestVersion(a)!.n : (latestVersion(a)?.n ?? 0) + 1 } : { hash }),
           does: account ? [
             L("Placetta checks it against the agency's current requirements", "快哉对照机构现行要求逐项核对"),
             L(`Placetta submits the application below to ${site} by email, fax, certified mail or the agency's site, with its attachments, and saves the confirmation`, `快哉通过邮件、传真、挂号信或机构网站向 ${site} 提交下方申请及附件，并保存回执`),
@@ -834,7 +860,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // learn it: the next filing of this form fills itself
         const off = a.official ? formById(a.official) : undefined;
         if (off) { const before = get().skills?.length ?? 0; apply(w => learnForm(w, get().apps.find(x => x.id === a.id) ?? a, off.form, off.agency, touches.get(a.id) ?? 1)); if ((get().skills?.length ?? 0) > before) made.skills.push(B(`File ${off.form}`, `申报${off.form}`)); }
-        return { approval_id: ap.id, checked_lines: pf.checked, ...(pf.warnings.length ? { worth_mentioning: pf.warnings.map(e => `${e.label.en}: ${e.note.en}`) } : {}) };
+        return { approval_id: ap.id, checked_lines: pf.checked, ...(pf.warnings.length ? { worth_mentioning: pf.warnings.map(e => `${e.label.en}: ${e.note.en}`) } : {}),
+          ...(fm ? { official_form: `${formName(a)} filled with these answers and read back: all ${fm.read.checked} lines match. The filled form goes back to the person with your reply.` } : {}) };
       },
     },
     {
@@ -908,9 +935,12 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         }
         S("weaving", L(`Committing to memory: ${label}`, `存入记忆：${label}`));
         const text = same(`${label}: ${value}`);
-        apply(w => audit("agent", L("Committed to memory", "存入记忆"), L("Context", "资料"), text)(setFact({ id: existing?.id ?? freshId(w, "f-x"), group: existing?.group ?? group, label: existing?.label ?? same(label), value: same(value), source: L("You told me", "您告诉我的") })(w)));
+        // a fact that changed fills the open applications it fed (their forms are filled again at the end of the run)
+        const fed = existing && feeds(existing.value.en) && existing.value.en.trim() !== value.trim() ? get().apps.filter(a => !["filing", "review", "approved"].includes(a.status) && a.fields.some(f => f.value.trim() === existing.value.en.trim())).map(a => a.id) : [];
+        apply(w => audit("agent", L("Committed to memory", "存入记忆"), L("Context", "资料"), text)(feedFact(existing?.value.en, value)(setFact({ id: existing?.id ?? freshId(w, "f-x"), group: existing?.group ?? group, label: existing?.label ?? same(label), value: same(value), source: L("You told me", "您告诉我的") })(w))));
+        for (const id of fed) made.apps.add(id);
         made.memory.push(text); mark();
-        return { ok: true, ...(existing ? { replaced: `${existing.label.en}: ${existing.value.en}` } : {}) };
+        return { ok: true, ...(existing ? { replaced: `${existing.label.en}: ${existing.value.en}` } : {}), ...(fed.length ? { also_updated_applications: fed } : {}) };
       },
     },
     ...(x.svc?.network ? [{

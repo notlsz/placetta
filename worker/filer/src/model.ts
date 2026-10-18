@@ -5,7 +5,7 @@ import { headingOf, shortText } from "./page.ts";
 import type { Filing } from "./types.ts";
 
 export type ToolCall = { name: string; input: Record<string, unknown> };
-export type StepInput = { filing: Filing; agency: string; state: PageState; recent: string[]; note?: string };
+export type StepInput = { filing: Filing; agency: string; state: PageState; recent: string[]; note?: string; guide?: string[] };
 export interface Model { calls: number; next(i: StepInput): Promise<ToolCall> }
 
 const str = { type: "string" } as const;
@@ -39,6 +39,7 @@ export function prompt(i: StepInput): string {
     "", "Visible text:", shortText(s),
     "", `Your last steps: ${i.recent.slice(-10).join("; ") || "none"}`,
     ...(i.note ? ["", `Note: ${i.note}`] : []),
+    ...(i.guide?.length ? ["", ...i.guide] : []),
     "", "Choose exactly one tool. Fill every field on the page before continuing. Call done only when the agency shows a confirmation.",
   ].join("\n");
 }

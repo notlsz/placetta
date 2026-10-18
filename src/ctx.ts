@@ -104,6 +104,11 @@ export type Ctx = {
   unqueue(id: string): void;
   run(req: Request, shown: string | null): void;
   openApp(id: string, tab?: Tab, edit?: boolean): void;
+  /** Open an application's filled form, at one version (src/forms/versions.ts). */
+  openForm(app: string, version?: number): void;
+  /** The filled PDF of an application's form: one version, or (none kept yet) filled with its answers now. null when
+   *  Placetta doesn't fill this form itself. */
+  filledPdf(app: string, version?: number): Promise<Uint8Array | null>;
   openApproval(id: string): void;
   /** Watch how a job was done: its replay, moment by moment (src/Watch.tsx). */
   openReplay(jobId: string): void;

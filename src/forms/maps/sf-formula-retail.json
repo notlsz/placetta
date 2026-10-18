@@ -4,6 +4,9 @@
  "pdf": "sf-formula-retail.pdf",
  "checked": "2026-10-14",
  "notes": "Answers: project_address is written whole on one line ('street, San Francisco, CA ZIP'). std_* are Yes or No (Yes ticks the YES column, No the NO column). std_total is 'YES count, NO count' (e.g. '3, 5'): the first number goes under YES, the second under NO. affiant_date fills the Date line, so the signature spot carries no date stamp. planning_record_number has no box: the header 'Planning Application Record Number' cell is printed, not fillable (Planning assigns it). The signature and the Applicant's Affidavit declarations (a to e, under penalty of perjury) are left for the signer; the Planning Department Use Only block is never filled.",
+ "unmapped": {
+  "planning_record_number": "Printed header cell, not a fillable box: the Planning Department assigns and writes the record number."
+ },
  "boxes": {
   "project_address": [
    {
