@@ -59,7 +59,11 @@ export type Reply = {
   remembered?: { id: string; text: Bi; suggested?: boolean }[];   // details the person mentioned that this run kept (src/recall.ts)
   table?: { title: Bi; columns: Bi[]; rows: string[][]; cite?: string[][] };   // a grid the agent built, e.g. reviewed documents; cite: the document's words behind each cell
   undo?: string;            // the run's undo point (src/rewind.ts): "Undo what she did" on this turn
+  forms?: FilledNote[];     // the agency's forms this run filled again, each a new version (src/forms/versions.ts)
 };
+/** A filled form a reply hands back: "Filled: Form SS-4, version 2, 3 lines changed", opening the PDF. ok false when
+ *  reading it back found a line that doesn't match (problem says which). link: the short link a text or chat gets. */
+export type FilledNote = { app: string; form: string; title: Bi; version: number; changed: number; filled: number; doc?: string; path?: string; ok: boolean; problem?: Bi; link?: string };
 export type Context = { lang: Lang; current: Workspace };
 export type AgentEvent =
   | { type: "step"; index: number; step: Step }
@@ -93,6 +97,26 @@ export const addDeadline = (d: Deadline): P => w => ({ ...w, deadlines: [...w.de
 export const dropDeadline = (id: string): P => w => ({ ...w, deadlines: w.deadlines.filter(x => x.id !== id) });
 export const dropNudge = (id: string): P => w => ({ ...w, nudges: w.nudges.filter(x => x.id !== id) });
 export const setFact = (f: Fact): P => w => ({ ...w, facts: w.facts.some(x => x.id === f.id) ? w.facts.map(x => (x.id === f.id ? f : x)) : [...w.facts, f] });
+
+/** Where a line came from when a business fact it held changed (src/forms/versions.ts reads it to say why a form was
+ *  filled again). */
+export const FROM_FACT = B("From Context, updated", "来自资料（已更新）");
+/** A value distinctive enough that a line holding it came from that fact: a name, an address, an EIN, a phone number.
+ *  "Yes", "No", "N/A" or a small number could be any line's own answer, so a fact like that feeds nothing. */
+export const feeds = (v: string) => v.trim().length >= 4 && !/^(yes|no|n\/?a|none|true|false|unknown|是|否|无)$/i.test(v.trim()) && !/^\d{1,3}$/.test(v.trim());
+/** A business fact that changed fills the open applications it fed: every line still holding the old value gets the new
+ *  one (filed applications keep what was filed). Each of those applications' forms is then filled again. */
+export const feedFact = (was: string | undefined, now: string): P => w => {
+  const old = (was ?? "").trim();
+  if (!feeds(old) || !now.trim() || old === now.trim()) return w;
+  let hit = false;
+  const apps = w.apps.map(a => {
+    if (["filing", "review", "approved"].includes(a.status) || !a.fields.some(f => f.value.trim() === old)) return a;
+    hit = true;
+    return { ...a, fields: a.fields.map(f => (f.value.trim() === old ? { ...f, value: now, from: FROM_FACT, quote: undefined } : f)) };
+  });
+  return hit ? { ...w, apps } : w;
+};
 
 /** What stops an application from being filed: fields still empty and documents still missing. Every filing path
     (the agent's request, the approval sheet, the demo and the cloud) checks this, for every kind of business. */
@@ -157,10 +181,11 @@ export const applyChange = (c: Change): P => w => {
     const had = w.facts.find(f => f.label.en.toLowerCase() === c.label.en.toLowerCase() || f.label.zh === c.label.zh);
     if (had?.locked) return w;   // a locked rule ("needs your approval") never changes this way
     const v = viaWords(c.via);
-    return setFact({ id: had?.id ?? uid("f-x"), group: had?.group ?? c.group, label: had?.label ?? c.label, value: same(c.value),
-      source: B(`Asked ${v.en}, confirmed in the app`, `${v.zh}提出，已在应用中确认`) })(w);
+    // and every open application whose line held the old value gets the new one (its form is filled again)
+    return feedFact(had?.value.en, c.value)(setFact({ id: had?.id ?? uid("f-x"), group: had?.group ?? c.group, label: had?.label ?? c.label, value: same(c.value),
+      source: B(`Asked ${v.en}, confirmed in the app`, `${v.zh}提出，已在应用中确认`) })(w));
   }
-  if (c.op === "rename_business") return { ...w, business: c.name ? same(c.name) : w.business, goal: c.goal ? same(c.goal) : w.goal };
+  if (c.op === "rename_business") return feedFact(c.name ? w.business.en : undefined, c.name ?? "")({ ...w, business: c.name ? same(c.name) : w.business, goal: c.goal ? same(c.goal) : w.goal });
   if (c.op === "move_store") {
     const nyc = c.state.toUpperCase() === "NY" && /^(new york|nyc|manhattan|brooklyn|queens|bronx|the bronx|staten island|flushing|astoria|long island city)$/i.test(c.city);
     const address = [c.address, c.city, c.state.toUpperCase()].filter(Boolean).join(", ");

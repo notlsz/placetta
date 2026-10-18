@@ -739,6 +739,8 @@ export function CloudRoot() {
       setPhase({ k: "app", s: {
         me, role: row.role, wsId: row.id, initial: normalize(row.name, row.state), audit, billing, filings, docs, integrations, logins,
         workspaces: rows.map(r => ({ id: r.id, name: r.name })), hq, terms, notice, approval: row.id === params.get("ws") ? params.get("approval") ?? undefined : undefined,
+        // a filled form from a text or chat (src/forms/versions.ts): its short link's token
+        form: row.id === params.get("ws") ? params.get("f") ?? undefined : undefined,
         switchTo: id => void open(id),
         newWorkspace: () => setPhase({ k: "onboard", email: me.email, back: row.id }),
         signOut: everywhere => { void api.signOut(!!everywhere).then(() => setPhase({ k: "signin" })); },

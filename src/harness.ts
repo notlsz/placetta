@@ -1,7 +1,8 @@
 import { B, same, type Bi } from "./bi";
 import { family, proven, type DoneItem, type Job } from "./jobs";
-import type { Store, Workspace } from "./model";
+import type { Application, Store, Workspace } from "./model";
 import { isBlank } from "./core";
+import { answersHash, formName, formOf, latestVersion } from "./forms/versions";
 
 /* ------------------------------------------------------------------ *
  * The harness: one structure per job that any agent can put on, work in,
@@ -98,6 +99,8 @@ export function evidence(w: Workspace, job: Job, reply: string) {
       id: a.id, name: a.name.en, status: a.status,
       fields_filled: a.fields.filter(f => String(f.value ?? "").trim()).length, fields_empty: a.fields.filter(f => !String(f.value ?? "").trim()).map(f => f.label.en).slice(0, 12),
       checklist: (a.checklist ?? []).map(c => ({ item: c.label.en, state: c.state, doc: c.doc ? (w.docs.find(d => d.id === c.doc)?.name ?? c.doc) : undefined })),
+      // the agency's own form as filled and read back (src/forms/versions.ts): proof the PDF says what the answers say
+      ...(formOf(a) ? { filled_form: filledEvidence(a) } : {}),
     })),
     approvals_waiting: w.approvals.map(a => ({ title: a.title.en, kind: a.kind })).slice(0, 10),
     deadlines: w.deadlines.slice(0, 15).map(d => ({ date: d.date, title: d.title.en })),
@@ -110,7 +113,27 @@ export function evidence(w: Workspace, job: Job, reply: string) {
   };
 }
 
-export const CHECKER_SYSTEM = `You are the checker. Another agent did a job; you did not see its work and you are not on its side. Grade the job against its definition of done, one item at a time, using only the evidence given: the workspace as it is now and the reply about to go to the person. An item passes only when the evidence shows it; a claim in the reply that the workspace doesn't back up doesn't count, and neither does "will do" or "should". Be strict and short.
+/** The filled form's read-back, as the reviewer sees it: which version, whether it's for the answers the application
+ *  has now, and every line that doesn't match. */
+export function filledEvidence(a: Application) {
+  const v = latestVersion(a);
+  if (!v) return { filled: false, note: "The agency's form hasn't been filled with these answers yet." };
+  return { filled: true, version: v.n, for_current_answers: v.hash === answersHash(a), read_back: v.read.ok ? `all ${v.read.checked} lines match the answers` : "lines don't match",
+    ...(v.read.ok ? {} : { lines_that_dont_match: v.read.problems.map(p => `${p.label.en}: ${p.note.en}`) }) };
+}
+/** The filled forms on a job's applications (or the ones this run worked) that don't match their answers. A job with
+ *  one isn't done, whatever else the evidence shows. */
+export function formFailures(w: Workspace, job: Job, worked: string[] = []): string[] {
+  const ids = job.apps?.length ? job.apps : worked;
+  return w.apps.filter(a => ids.includes(a.id)).flatMap(a => {
+    const v = latestVersion(a);
+    if (!v || v.read.ok || v.hash !== answersHash(a)) return [];
+    const p = v.read.problems[0];
+    return [`${formName(a)} doesn't match its answers on ${p.label.en}: ${p.note.en}`];
+  });
+}
+
+export const CHECKER_SYSTEM = `You are the checker. Another agent did a job; you did not see its work and you are not on its side. Grade the job against its definition of done, one item at a time, using only the evidence given: the workspace as it is now and the reply about to go to the person. An item passes only when the evidence shows it; a claim in the reply that the workspace doesn't back up doesn't count, and neither does "will do" or "should". An application whose filled_form lists lines that don't match is not filled correctly. Be strict and short.
 Answer with JSON only: {"items": [{"ok": true|false, "why": "one short sentence pointing at the evidence"}], one entry per item, in order}`;
 
 export function checkerPrompt(job: Job, ev: unknown): string {
