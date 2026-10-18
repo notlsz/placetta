@@ -539,6 +539,11 @@ q.cite { display: block; margin-top: 3px; font-size: 11.5px; line-height: 1.35; 
 .sh-h h2 { margin: 16px 0 6px; font: 400 30px/1.12 var(--display); letter-spacing: -.03em; }
 .sh-ag { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 0; font-size: 14px; color: var(--ink2); }
 .sh-ag a { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; }
+/* the agency's own sentence under the source link, and the day it was read */
+.src-q { margin: 6px 0 0; padding: 0 0 0 10px; border-left: 2px solid var(--line, #ddd); font-size: 13px; line-height: 1.45; color: var(--ink2); }
+.src-q-l { display: block; font-size: 11.5px; color: var(--ink3, var(--ink2)); }
+.src-q-d { font-size: 11.5px; color: var(--ink3, var(--ink2)); white-space: nowrap; }
+dd.src-q { border-left: 0; padding: 0; margin: 0; }
 .sh-next { margin: 10px 0 0; font-size: 14px; color: var(--ink2); }
 .sh-next em { font-style: normal; color: var(--warm); margin-right: 8px; }
 .seg.tabs { margin: 20px 0 6px; }

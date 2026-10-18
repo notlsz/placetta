@@ -1,0 +1,1947 @@
+[
+ {
+  "id": "irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "cbp-5106",
+  "read": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+  "quote": "shall file CBP Form 5106 with the first formal entry.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "cbp-301",
+  "read": "https://cbp.gov/sites/default/files/assets/documents/2021-Jun/IE%20%E2%80%93%20Bond%20Recommendations.pdf",
+  "quote": "Customs Bonds are the backbone to the importation process guaranteeing the payment of duties, taxes, and fees to CBP",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "cbp-ace",
+  "read": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+  "quote": "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "fda-ffr",
+  "read": "https://www.fda.gov/Food/GuidanceRegulation/FoodFacilityRegistration/ucm324780.htm",
+  "quote": "requires food facilities that are required to register with FDA to renew such registrations.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ttb-dealer",
+  "read": "https://www.ttb.gov/nrc/retail-beverage-alcohol-dealers",
+  "quote": "Registration must be made: Before engaging in business.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "68ed810185e07185",
+  "context": "etail beverage alcohol dealer in permits online. see 27 cfr part 31, subpart e. registration must be made: before engaging in business. for every location of said business. see 27 cfr 31.112. on or before each subse"
+ },
+ {
+  "id": "ny-dos-1336",
+  "read": "https://dos.ny.gov/node/16156",
+  "quote": "Organizers form an LLC by filing the Articles of Organization",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ny-dos-pub",
+  "read": "https://dos.ny.gov/node/16156",
+  "quote": "Failure to publish and file the Certificate of Publication with the Department of State within 120 days",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ny-dtf-17",
+  "read": "https://www.tax.ny.gov/bus/st/register.htm",
+  "quote": "If you must register to collect sales tax and need information about how to register, see Tax Bulletin",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b0206a8b8d2a9f99",
+  "context": " presumption applicable to definition of sales tax vendor for more information. if you must register to collect sales tax and need information about how to register, see tax bulletin how to register for new york state sales tax (tb-st-360). what you will need ny"
+ },
+ {
+  "id": "ny-dol-100",
+  "read": "https://dol.ny.gov/register-unemployment-insurance-0",
+  "quote": "You must complete an employer registration form for us to decide if you are liable under the New York State Unemployment Insurance Law.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f1ec3137a1e2c744",
+  "context": "ity. the conditions for liability differ for the following types of businesses. you must complete an employer registration form for us to decide if you are liable under the new york state unemployment insurance law. if you have any questions about registration, call the employer hotline at 888-"
+ },
+ {
+  "id": "ny-wcb",
+  "read": "https://www.wcb.ny.gov/content/main/coverage-requirements.jsp",
+  "quote": "Disability and Paid Family Leave benefits coverage is required for sole proprietorships with employees, including part-time employees",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "cb06ff5e46cff867",
+  "context": "s coverage is not required for sole proprietorships that do not have employees. disability and paid family leave benefits coverage is required for sole proprietorships with employees, including part-time employees, borrowed employees, leased employees, family members, and volunteers. the sole"
+ },
+ {
+  "id": "nyc-fse",
+  "read": "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit",
+  "quote": "A Food Protection Certificate (FPC) or course registration is needed when applying for the permit.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "96d9708b821ac709",
+  "context": "rvising manager must pass a food protection course and be on-site at all times. a food protection certificate (fpc) or course registration is needed when applying for the permit. certification is needed before opening your establishment. encourage more staff"
+ },
+ {
+  "id": "nyc-fpc",
+  "read": "https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page",
+  "quote": "To receive a certification, you must first complete the free Online Food Protection Course",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "cdec24479289e4c9",
+  "context": "letion of this course and passing of the final exam satisfies that requirement. to receive a certification, you must first complete the free online food protection course, the online course is offered in english, spanish and chinese. the course is se"
+ },
+ {
+  "id": "nyc-sign",
+  "read": "https://www.nyc.gov/site/buildings/property-or-business-owner/sign-permit.page",
+  "quote": "A Sign permit (SG) must be filed for the copy (text or image) to be displayed.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "2b66739abd6954f2",
+  "context": "code §28-105.1 requires department permits for sign displays and installations. a sign permit (sg) must be filed for the copy (text or image) to be displayed. this is filed through dob now: build. if the sign is attached to a structure an"
+ },
+ {
+  "id": "nyc-co",
+  "read": "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page",
+  "quote": "No one may legally occupy a building until the Department has issued a CO or Temporary Certificate of Occupancy (TCO) .",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f74ee8edfae98cbd",
+  "context": "rrent or amended co when there is a change in use, egress or type of occupancy. no one may legally occupy a building until the department has issued a co or temporary certificate of occupancy (tco). a co confirms that the completed work complies with all applicable laws, all pa"
+ },
+ {
+  "id": "nyc-dob-alt",
+  "read": "https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page",
+  "quote": "Department of Buildings work permits are required for most construction projects.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a269beec37a23e1a",
+  "context": "or kitchen and bathroom renovations, depending upon the complexity of the work. department of buildings work permits are required for most construction projects. if the project's scope requires plans and permits, you must hire a new york sta"
+ },
+ {
+  "id": "nyc-cb-notice",
+  "read": "https://sla.ny.gov/community-board-faqs",
+  "quote": "notify their community board of their intention to apply for a liquor license 30 days before filing an application",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ny-sla-rw",
+  "read": "https://ht.nyc-business.nyc.gov/nycbusiness/description/restaurant-wine-license",
+  "quote": "The State Liquor Authority (SLA) gives this license to restaurants.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "cc6ad81cfbca56c7",
+  "context": "restaurant wine license the state liquor authority (sla) gives this license to restaurants. it lets them sell wine and beer. they cannot sell liquor. customers can drink t"
+ },
+ {
+  "id": "ca-llc-1",
+  "read": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+  "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7af5c75e8abe5f14",
+  "context": "r form print form submission cover sheet (rev 03/2024) secretary of state llc-1 articles of organization limited liability company (llc) filing fee - $70.00 certified copy fee (optional) - $5.00 note: llcs may have to pay minimum $800 t"
+ },
+ {
+  "id": "ca-cdtfa",
+  "read": "https://www.sf.gov/guide-opening-restaurant",
+  "quote": "Every location must have this permit to sell taxable goods.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f53c95d94fe027bc",
+  "context": "ler's permits are from the ca department of tax and fee administration (cdtfa). every location must have this permit to sell taxable goods. obtain workers' compensation insurance you will need this insurance if you will"
+ },
+ {
+  "id": "ca-edd-de1",
+  "read": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+  "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ca-abc",
+  "read": "https://www.abc.ca.gov/licensing/frequently-asked-questions",
+  "quote": "Most investigations take approximately 55-65 days, and by law the license cannot be issued for a minimum of 30 days.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "4088b9bc808c6e85",
+  "context": "4070) how long does it normally take for the issuance or transfer of a license? most investigations take approximately 55-65 days, and by law the license cannot be issued for a minimum of 30 days. circumstances often result in a longer waiting period; therefore, before final "
+ },
+ {
+  "id": "la-btrc",
+  "read": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc",
+  "quote": "Once you completed the registration process, you will receive a temporary Business Tax Registration Certificate or Registration Number.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b066d5086145559e",
+  "context": "mail (if available) ** please note that additional information may be required. once you completed the registration process, you will receive a temporary business tax registration certificate or registration number. a permanent business tax registration certificate will be mailed within 4 to 6 "
+ },
+ {
+  "id": "lac-plan-check",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+  "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7b91a046f9ae2c7d",
+  "context": "ns drawn to scale, and specifications to the enforcement agency for review, and shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food facility, (b) plans and specifications may also be required by the enforcement "
+ },
+ {
+  "id": "lac-health-permit",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+  "quote": "After payment of the Public Health Permit fee is made, the permit will be issued.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "556bffb74dae84d7",
+  "context": "l building and safety office prior to your final inspection with eh plan check. after payment of the public health permit fee is made, the permit will be issued. other agencies there are many local, state and federal agencies that regulate b"
+ },
+ {
+  "id": "la-ladbs",
+  "read": "https://dbs.lacity.gov/services/plan-review-permitting/building-permits",
+  "quote": "Building Permits are required for new constructions, additions, alterations, and demolition/removal of a building or structure.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c69c5968476f3ca",
+  "context": "eview... building permits home plan review... building permits building permits building permits are required for new constructions, additions, alterations, and demolition/removal of a building or structure. express permit counter plan check regular plan check about building permits bui"
+ },
+ {
+  "id": "tx-205",
+  "read": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+  "quote": "Title 1, chapter 3, subchapter A of the BOC governs the formation of an LLC",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "62361db16ab31754",
+  "context": "overned by title 3, chapter 101 of the texas business organizations code (boc). title 1, chapter 3, subchapter a of the boc governs the formation of an llc and sets forth the provisions required or permitted to be contained in the cert"
+ },
+ {
+  "id": "tx-503",
+  "read": "https://www.sos.state.tx.us/corp/instructions/503.shtml",
+  "quote": "a separate assumed name certificate must be filed for each assumed name.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "ded3a577058caf68",
+  "context": "may conduct business or professional services under multiple assumed names, but a separate assumed name certificate must be filed for each assumed name. please note that if the name entered as the assumed name in item 1 is exactly t"
+ },
+ {
+  "id": "tx-ap201",
+  "read": "https://comptroller.texas.gov/taxes/permit/",
+  "quote": "You will need to apply using form AP-201, Texas Application (PDF) .",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "5a87c4b47573791d",
+  "context": "e owner, partner, officer or director and do not have a social security number. you will need to apply using form ap-201, texas application (pdf). email the application to sales.applications@cpa.texas.gov or fax the applicatio"
+ },
+ {
+  "id": "tx-twc",
+  "read": "https://www.twc.texas.gov/services/register-tax",
+  "quote": "register with the Texas Workforce Commission (TWC) within 10 days of becoming liable.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 202; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "tx-food-manager",
+  "read": "https://www.dshs.texas.gov/food-managers",
+  "quote": "The food manager certification is obtained by passing a DSHS or ANSI-CFP approved food manager certification examination.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "90369b3ebe5429ff",
+  "context": "irements for food manager certification. obtaining a food manager certification the food manager certification is obtained by passing a dshs or ansi-cfp approved food manager certification examination. the food manger certification examination may be taken at any accredited examin"
+ },
+ {
+  "id": "tx-food-handler",
+  "read": "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+  "quote": "all food employees shall successfully complete an accredited food handler training course, within 30 days of employment.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a49cc7066ba54d9f",
+  "context": " (txdshs), under texas food establishment rules (tfer) §228.31, requires that '…all food employees shall successfully complete an accredited food handler training course, within 30 days of employment.' who is a food employee? food employee is an individual working with unpackaged"
+ },
+ {
+  "id": "hou-co",
+  "read": "https://www.houstonpermittingcenter.org/hpwcode1106",
+  "quote": "The certificate is normally issued at the time of construction or when a remodel or change of use occurs.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "15ee1e0e0c40868f",
+  "context": "ertificate must be valid for the use of the building, space or portion thereof. the certificate is normally issued at the time of construction or when a remodel or change of use occurs. a certificate of occupancy is not required for single-family residences, duplex"
+ },
+ {
+  "id": "hou-sign",
+  "read": "https://houstonpermittingcenter.org/building-code-enforcement/sign-administration",
+  "quote": "Permits must be obtained before signs can be erected, altered, or repaired.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "6b7e7804ccc106f9",
+  "context": " for the final construction to be performed by the sign inspector. sign permits permits must be obtained before signs can be erected, altered, or repaired. permits are only issued to licensed sign contractors. no new permits can be iss"
+ },
+ {
+  "id": "hou-buildout",
+  "read": "https://www.houstonpermittingcenter.org/hpwcode1148",
+  "quote": "Buildout permits must be on-site for inspection.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5c111b4e2354184",
+  "context": " submit additional resources commercial epr user guide inspection what you need buildout permits must be on-site for inspection. if corrections are required, call (832)394-8840 for a reinspection. schedule on"
+ },
+ {
+  "id": "hou-plan-review",
+  "read": "https://www.houstonhealth.org/food-permits/opening-food-establishment",
+  "quote": "Plans must be submitted for the following: Construction of a food establishment.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "3b10040abf71e1a9",
+  "context": " permit application food dealers permit application form 1. are plans required? plans must be submitted for the following: construction of a food establishment. remodeling of an existing space not previously a food establishment. remodeling"
+ },
+ {
+  "id": "hou-food-dealer",
+  "read": "https://www.houstonpermittingcenter.org/hhd1003",
+  "quote": "If inspection is passed then an operating permit is invoiced and processed when payment is received.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f851fa8256cb133c",
+  "context": "is required. if corrections are required, call 832.393.5100 for a reinspection. if inspection is passed then an operating permit is invoiced and processed when payment is received. schedule by phone to request an inspection or re-inspection, call 832-393-5100."
+ },
+ {
+  "id": "wa-sos",
+  "read": "https://sos.wa.gov/node/13051",
+  "quote": "Certificate of Formation for a Limited Liability Company governed by RCW 25.15 is used to create a new business entity",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c50001a6655e498",
+  "context": "ith washington state office of the secretary of state. certificate of formation certificate of formation for a limited liability company governed by rcw 25.15 is used to create a new business entity that has not previously been registered with the office of the secretary of sta"
+ },
+ {
+  "id": "ma-sos",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/c156c512dllccert.pdf",
+  "quote": "Filing fee: $500",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "4a5b4f0244c2bddf",
+  "context": "__________________________ william francis galvin secretary of the commonwealth filing fee: $500 to be filled in by limited liability company contact information: _____________"
+ },
+ {
+  "id": "ma-tax",
+  "read": "https://mass.gov/info-details/register-your-business-with-masstaxconnect",
+  "quote": "Businesses are required to register with an EIN in MassTaxConnect.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ga-sos",
+  "read": "https://georgia.gov/register-llc-georgia-secretary-state",
+  "quote": "You can register an LLC online, by mail, or in person.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": "credit card, check, cashier's check, or money order. create & file registration you can register an llc online, by mail, or in person. applications can be expedited for additional fees. each registration method has"
+ },
+ {
+  "id": "ga-tax",
+  "read": "https://dor.georgia.gov/taxes/business-taxes/tax-registration",
+  "quote": "must register for a sales and use tax number and certificate of registration regardless of whether all sales will be online",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7553af7be0a1a06d",
+  "context": "ny individual or entity meeting the definition of \"dealer\" in o.c.g.a. § 48-8-2 must register for a sales and use tax number and certificate of registration regardless of whether all sales will be online, out of state, wholesale, or exempt from tax. in addition to registering for a "
+ },
+ {
+  "id": "pa-dos",
+  "read": "https://www.pa.gov/agencies/dos/programs/business",
+  "quote": "Online Filing Business Filing Services allows you to submit your filings electronically, but your application still requires human review.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8485996855c4822f",
+  "context": " terminology is important to know when placing business orders. register online online filing business filing services allows you to submit your filings electronically, but your application still requires human review. submissions are processed in the date they are received unless expedited servic"
+ },
+ {
+  "id": "nv-silverflume",
+  "read": "https://dpbh.nv.gov/uploadedFiles/dpbhnvgov/content/Reg/Radiation-Machines/Docs/Informational_Notice_Secretary_of_State_Business_License_8-17-23ADA.pdf",
+  "quote": "the person must obtain the state business license before conducting business in this State.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7566979327465d9b",
+  "context": "le an initial or annual list with the secretary of state pursuant to the title, the person must obtain the state business license before conducting business in this state. nrs 76.105 claim for exemption; renewal; exceptions. 1. except as otherwise pro"
+ },
+ {
+  "id": "co-sos",
+  "read": "https://www.coloradosos.gov/pubs/business/helpFiles/LLCChecklist.pdf",
+  "quote": "Filing Articles of Organization is how you form your LLC in the State of Colorado.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "0aaea82483dc3f0e",
+  "context": "you need to file articles of organization for a limited liability company (llc) filing articles of organization is how you form your llc in the state of colorado. per 7-90-314(1) c.r.s. you must have written consent to list the name of any pe"
+ },
+ {
+  "id": "nj-formation",
+  "read": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+  "quote": "First, file a Certificate of formation/authorization.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "1ae966d357509201",
+  "context": "ber (ein) from the irs. once you obtain an ein, complete the two filings below: first, file a certificate of formation/authorization. the fee is $100 for all for-profit entities and foreign non-profit corporations"
+ },
+ {
+  "id": "sj-business-tax",
+  "read": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate",
+  "quote": "must register for a Business Tax Certificate within 90 days of starting their business.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "scc-plan-check",
+  "read": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
+  "quote": "Ideally, required County Department of Environmental Health (DEH) plans",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "sj-building-ti",
+  "read": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement",
+  "quote": "To obtain a building permit for a tenant improvement project, you must submit plans.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "sj-fire-systems",
+  "read": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
+  "quote": "Projects proposing individual carbon dioxide (CO2) tanks over 100 pounds",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "sj-building-final",
+  "read": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success",
+  "quote": "This final inspection is made after finish grading and the building is completed and ready for occupancy or use.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "scc-health-permit",
+  "read": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate",
+  "quote": "County Health Permit Number (If applicable)",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "sj-sign",
+  "read": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
+  "quote": "Review sign permit info (if you are proposing new signage).",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "sf-business-registration",
+  "read": "https://sftreasurer.org/registration",
+  "quote": "In general, businesses must register if any of the below statements are true: Maintain a fixed place of business within San Francisco .",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "6c232ab3a85e2f03",
+  "context": "bout business registration requirements for lessors of residential real estate. in general, businesses must register if any of the below statements are true: maintain a fixed place of business within san francisco. perform work or render services within san francisco for all or part of any sev"
+ },
+ {
+  "id": "sf-formula-retail",
+  "read": "https://sfplanning.org/permit/chain-stores-businesses",
+  "quote": "By a voter initiative in 2007 (Proposition G), formula retail use was made subject to a Conditional Use Authorization in any NC district",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "cdadf27ba6559c96",
+  "context": "th the san francisco general plan and promotes the general welfare of the city. by a voter initiative in 2007 (proposition g), formula retail use was made subject to a conditional use authorization in any nc district, if not otherwise prohibited. a conditional use authorization is also required "
+ },
+ {
+  "id": "sf-dph-plan-check",
+  "read": "https://sf.gov/guide-building-and-remodeling-food-facility",
+  "quote": "Submit your plans The process for getting a building permit includes review by the Department of Public Health.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "ba612de80cadfb45",
+  "context": "a restaurant. view our construction plan guidelines to prepare for your review. submit your plans the process for getting a building permit includes review by the department of public health. submit plans in person visit the san francisco permit center to apply for a bui"
+ },
+ {
+  "id": "sf-dbi-building",
+  "read": "https://www.sf.gov/learn-about-our-building-permit-review-processes",
+  "quote": "Building permit projects must be sent to the required permitting agencies.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0817929b5493233",
+  "context": "ys we review applications: over-the-counter review in-house review site permits building permit projects must be sent to the required permitting agencies. in san francisco, our permitting agencies are: department of building inspectio"
+ },
+ {
+  "id": "sf-dph-health-permit",
+  "read": "https://www.sf.gov/guide-opening-restaurant",
+  "quote": "Apply for your Health Permit to Operate Apply within 6-8 weeks of your planned open date.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f53c95d94fe027bc",
+  "context": "oyees have a food handler card see the options for getting a food handler card. apply for your health permit to operate apply within 6-8 weeks of your planned open date. you'll need to include proof of worker's compensation insurance, proof of food "
+ },
+ {
+  "id": "sf-sign",
+  "read": "https://sf.gov/step-by-step/get-permit-install-sign-or-awning",
+  "quote": "Most exterior business signs and all awnings require a permit.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "c61c9bbe3f27cb2d",
+  "context": "ps parking lot signs 2 2 determine if you need a permit for your sign or awning most exterior business signs and all awnings require a permit. if you aren't sure if you need a sign permit, check our list of signs that don'"
+ },
+ {
+  "id": "sf-fire-assembly",
+  "read": "https://sf-fire.org/permits",
+  "quote": "Applications for operational or temporary permits shall be submitted to the Bureau of Fire Prevention.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e495628517d0972d",
+  "context": "rmit shall not take the place of any license required by law. apply for permits applications for operational or temporary permits shall be submitted to the bureau of fire prevention. applications for fire department permit shall be accompanied by plans when requ"
+ },
+ {
+  "id": "sdg-business-tax",
+  "read": "https://www.sandiego.gov/treasurer/taxesfees/btax",
+  "quote": "All businesses operating in the City of San Diego are required to obtain a Business Tax Certificate.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "9a007275db10cc32",
+  "context": " fire protection, street maintenance, libraries, parks and other city services. all businesses operating in the city of san diego are required to obtain a business tax certificate. this includes home-based businesses, self-employed persons and independent cont"
+ },
+ {
+  "id": "sdg-co",
+  "read": "https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585",
+  "quote": "A Certificate of Occupancy is issued upon final approval of all inspections for work authorized under a building permit and associated permits.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "62391ecba41de6bb",
+  "context": " approving that use or occupancy. i. when is a certificate of occupancy issued? a certificate of occupancy is issued upon final approval of all inspections for work authorized under a building permit and associated permits. the permit holder may elect to have a copy of their certificate of occupancy de"
+ },
+ {
+  "id": "sdc-plan-check",
+  "read": "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_plancheckreference.pdf",
+  "quote": "The Plan Check Unit reviews and approves plans for the construction and remodeling of health-regulated facilities.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "be711303df008669",
+  "context": "enting state law and the san diego county code (sdcc) of regulatory ordinances. the plan check unit reviews and approves plans for the construction and remodeling of health-regulated facilities. fees for plan review will be assessed based on the scope of work. the building "
+ },
+ {
+  "id": "sdc-health-permit",
+  "read": "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/publications_newbusiness664.pdf",
+  "quote": "Apply for a Health Permit",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e38a113b5cb07c81",
+  "context": "during the final inspection, plan check staff deh land & water quality division apply for a health permit make sure that all necessary corrections have if the food facility is on a sept"
+ },
+ {
+  "id": "irv-license",
+  "read": "https://www.cityofirvine.gov/sites/default/files/irvine/repository/business-license-application-checklist.pdf",
+  "quote": "Ensure your OC Health or ABC permits are ready if you’re in food or beverage service.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "942ed290e02cf945",
+  "context": " sell physical items, have your permit number from the cdtfa. health & alcohol: ensure your oc health or abc permits are ready if you're in food or beverage service. the \"dba\": if your business name is different from your own, ensure it's regist"
+ },
+ {
+  "id": "oc-plan-check",
+  "read": "https://www.ochealthinfo.com/services-programs/environmental-health/plan-check",
+  "quote": "Plan Approval: Congratulations on the approval of your submitted plans, which allows you to initiate construction.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f1a514ec60ea431c",
+  "context": "ps will serve as a guide throughout the process subsequent to plan approval. 1. plan approval: congratulations on the approval of your submitted plans, which allows you to initiate construction. it is the responsibility of the submitter to provide evidence of this approval "
+ },
+ {
+  "id": "oc-health-permit",
+  "read": "https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit",
+  "quote": "A health permit will be issued upon completion of a final inspection.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e16c9591563a193d",
+  "context": "respectively. inspection requests shall be requested 5 working days in advance. a health permit will be issued upon completion of a final inspection. you may not start construction until plans from all agencies have been reviewed"
+ },
+ {
+  "id": "ma-food-manager",
+  "read": "https://www.mass.gov/lists/food-allergen-awareness-guidance",
+  "quote": "each establishment must have a certified food protection manager trained in allergen awareness",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ma-allergen",
+  "read": "https://www.mass.gov/lists/food-allergen-awareness-guidance",
+  "quote": "each establishment must have a certified food protection manager trained in allergen awareness",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ma-dua",
+  "read": "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance",
+  "quote": "Employers who pay wages for work done in Massachusetts must register with DUA.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "bos-cert",
+  "read": "https://www.boston.gov/departments/city-clerk/how-apply-business-certificate",
+  "quote": "Massachusetts law requires most businesses operating under a trade name to file with the City Clerk’s Office .",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7d5654d431ac63bd",
+  "context": "c record that registers your business name and address with the city of boston. massachusetts law requires most businesses operating under a trade name to file with the city clerk's office. you must renew every four years. contact city clerk 617-635-4601 cityclerk@bost"
+ },
+ {
+  "id": "bos-plan-review",
+  "read": "https://www.boston.gov/permitting/permits/food-service-permit",
+  "quote": "Depending on your situation, you may also need a Plan Review before we can issue your permit.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "26d7a4e14dc6c21f",
+  "context": "twice each year. we add businesses to our online database as we do inspections. depending on your situation, you may also need a plan review before we can issue your permit. the food service permit is issued by the inspectional services department. cont"
+ },
+ {
+  "id": "bos-building",
+  "read": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+  "quote": "File a building permit application for any necessary construction.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "66790150c206c981",
+  "context": "ing board of appeal if it is a conditional or forbidden use at that location. • file a building permit application for any necessary construction. for major construction or structural changes, file a long form online. for mino"
+ },
+ {
+  "id": "bos-site",
+  "read": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+  "quote": "Apply for Site Cleanliness License.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "66790150c206c981",
+  "context": "table license • sidewalk café permit • valet parking permit • liquor license • apply for site cleanliness license. • apply for dumpster placement permit: if larger than 3 cubic yards, file an an"
+ },
+ {
+  "id": "bos-co",
+  "read": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+  "quote": "Obtain a Certificate of Occupancy by submitting your Certificate of Occupancy Application.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "66790150c206c981",
+  "context": "nline. for more information on building permit types, visit bit.ly/permit-isd • obtain a certificate of occupancy by submitting your certificate of occupancy application. if you have any questions please reach out to isdcertificates@boston.gov (refer"
+ },
+ {
+  "id": "bos-cv",
+  "read": "https://www.boston.gov/departments/licensing-board/how-get-common-victualler-license",
+  "quote": "You must have this license before you can apply for a Food Service Health Permit from the Inspectional Services Department Health Division (ISD).",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "6e1734808ca6e6f0",
+  "context": "usiness in boston. if you plan to serve alcohol you'll need a separate license. you must have this license before you can apply for a food service health permit from the inspectional services department health division (isd). if you also plan to serve alcohol, or let guests bring their own, you'll need a"
+ },
+ {
+  "id": "bos-food-permit",
+  "read": "https://www.boston.gov/permitting/permits/food-service-permit",
+  "quote": "Before you can serve food to the public, you need to apply for a Food Service Permit and pass a health inspection.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "26d7a4e14dc6c21f",
+  "context": " or sell food to the public in boston. some businesses also need a plan review. before you can serve food to the public, you need to apply for a food service permit and pass a health inspection. we inspect food service businesses at least once a year, but usually twice each"
+ },
+ {
+  "id": "ga-food-manager",
+  "read": "https://dph.georgia.gov/document/document/envhealthfoodfoodservice-rulespdf/download",
+  "quote": "Enough certified food safety managers must be present whenever the establishment is in operation.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "201f9da57acad893",
+  "context": "onitor activities within the food service establishment must be clearly stated. enough certified food safety managers must be present whenever the establishment is in operation. there must be shown to be adequate coverage of management or persons in charge "
+ },
+ {
+  "id": "ca-food-manager",
+  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+  "quote": "food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (PHF), except temporary food facilities, to have at least one owner or employee",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "6fb607e9d2888f3d",
+  "context": " certification the california health and safety code, section 113947.1 requires food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (phf), except temporary food facilities, to have at least one owner or employee who has successfully passed an examination from an accredited food protection m"
+ },
+ {
+  "id": "ca-food-handler",
+  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+  "quote": "A food handler shall obtain a food hander card within 30 days after the date of hire.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "6fb607e9d2888f3d",
+  "context": "m the date of the change to comply with the certified food manager requirement. a food handler shall obtain a food hander card within 30 days after the date of hire. while training is not required to take the examination, many people find that t"
+ },
+ {
+  "id": "ca-cdph-pfr",
+  "read": "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcessedFoodRegistration.aspx",
+  "quote": "PFR certificates are also required for general food warehouses.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 000; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "oak-zoning",
+  "read": "https://www.oaklandca.gov/Planning-Building/Your-Commercial-Projects-Permits/Zoning-Clearance-Permit",
+  "quote": "You’ll need to obtain the Zoning Clearance Permit before applying for your business tax certificate.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "oak-business-tax",
+  "read": "https://www.oaklandca.gov/Business/For-Business-Owners/Starting-Your-Business",
+  "quote": "need to file a Business Tax Certificate and pay an annual tax.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "ac-plan-check",
+  "read": "https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/",
+  "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food facility.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e416a63095341174",
+  "context": "ns drawn to scale, and specifications to the enforcement agency for review, and shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food facility. (b) plans and specifications may also be required by the enforcement agency if "
+ },
+ {
+  "id": "ac-health-permit",
+  "read": "https://www.oaklandca.gov/Business/For-Business-Owners/Starting-Your-Business",
+  "quote": "will need permits from the Alameda County Department of Environmental Health.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "wa-bls",
+  "read": "https://dor.wa.gov/open-business/business-licensing-and-renewals-faqs",
+  "quote": "You need a license if you meet one or more of the following criteria: Your business requires city and state endorsements.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a7b61b1012db8036",
+  "context": " can officially open your business to the public. who needs a business license? you need a license if you meet one or more of the following criteria: your business requires city and state endorsements. you are doing business using a name other than your full name legal name. you p"
+ },
+ {
+  "id": "wa-food-worker",
+  "read": "https://doh.wa.gov/node/5754",
+  "quote": "All food workers are required, per Chapter 246-217 WAC , to have a valid food worker card to work in Washington.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "9b42c70ae29f5332",
+  "context": "face where people put unwrapped food. do i need to get a food worker card? yes. all food workers are required, per chapter 246-217 wac, to have a valid food worker card to work in washington. it's important that your card, or a copy of it, is with you at work and availab"
+ },
+ {
+  "id": "sea-business-license",
+  "read": "https://www.seattle.gov/licenses",
+  "quote": "Anyone doing business in Seattle must have a Seattle business license tax certificate, also known as a business license or general business license.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "be716306e67138f5",
+  "context": " taxes & licenses business licenses subscribe to license and tax email updates. anyone doing business in seattle must have a seattle business license tax certificate, also known as a business license or general business license. in addition to obtaining a business license tax certificate, business owners mu"
+ },
+ {
+  "id": "kc-plan-review",
+  "read": "https://kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit",
+  "quote": "Food business owners must submit plans for review before construction, remodeling, or changing ownership takes place.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "714fa7f62c1d8d38",
+  "context": " food business operates at the same location for more than 21 consecutive days. food business owners must submit plans for review before construction, remodeling, or changing ownership takes place. in seattle and king county, there are about 12,500 permanent food businesses th"
+ },
+ {
+  "id": "sea-food",
+  "read": "https://kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit",
+  "quote": "A successful plan review approval and pre-operational inspection are required prior to starting operations.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "714fa7f62c1d8d38",
+  "context": "rcial commissary kitchens fresh food sections of grocery stores school kitchens a successful plan review approval and pre-operational inspection are required prior to starting operations. information about the plan review process online application for a permanent fo"
+ },
+ {
+  "id": "sea-building",
+  "read": "https://www.seattle.gov/office-of-economic-development/small-business/food-businesses/restaurants",
+  "quote": "Final Inspections Once all permits have been approved and construction has been completed, final inspections need to be scheduled.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "9bc5ee2077f66529",
+  "context": "vices (wsbls) gambling license - washington state gambling commission (wsgc) 5. final inspections once all permits have been approved and construction has been completed, final inspections need to be scheduled. visit our final prep page for the details on how to prepare for and schedule fi"
+ },
+ {
+  "id": "nv-tax",
+  "read": "https://tax.nv.gov/faqs/register-a-business/",
+  "quote": "You must have a Federal Identification Number (FEIN# or EIN) and Business License before registering for a tax permit.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c59bc7f10242ff9",
+  "context": "business legally in nevada. how do i register for a tax permit for my business? you must have a federal identification number (fein# or ein) and business license before registering for a tax permit. register for a tax permit online at my nevada tax. when applying online, you wi"
+ },
+ {
+  "id": "nv-esd",
+  "read": "https://tax.nv.gov/faqs/register-a-business/",
+  "quote": "If you also need to be registered for Unemployment Insurance , DETR will share your details with the Department of Taxation.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c59bc7f10242ff9",
+  "context": "ified business tax, visit the department of training and rehabilitation (detr). if you also need to be registered for unemployment insurance, detr will share your details with the department of taxation. see also: modified business tax types and modified business tax (mbt) faqs what"
+ },
+ {
+  "id": "lv-license",
+  "read": "https://lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License",
+  "quote": "This will provide you with the primary jurisdiction for your location, which determines where you must file for your business license.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a3a141a740b99927",
+  "context": "t local licensing jurisdictions. check your proposed address for your business. this will provide you with the primary jurisdiction for your location, which determines where you must file for your business license. if step 1 confirmed that your proposed business location is in the city of las "
+ },
+ {
+  "id": "cc-business-license",
+  "read": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0746bb4a-633d-43f6-85c8-875896f099a7/original/as/application-checklist-08-13-2026.pdf",
+  "quote": "Proof that you have applied with the Southern Nevada Health District (SNHD).",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "80c4ca38b2523719",
+  "context": "k_county/business_license_fees.php □ apply for a health permit (if applicable): proof that you have applied with the southern nevada health district (snhd). health permits apply to food establishments and businesses operating public poo"
+ },
+ {
+  "id": "snhd-food-handler",
+  "read": "https://www.southernnevadahealthdistrict.org/?p=3661",
+  "quote": "First-time applicants must demonstrate knowledge of safe food handling techniques to obtain their Food Handler Safety Training Card.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7e147d5122ca61e7",
+  "context": "est again. why is the first-time test more comprehensive than the renewal test? first-time applicants must demonstrate knowledge of safe food handling techniques to obtain their food handler safety training card. once employed, food handler safety training card holders will be under the supe"
+ },
+ {
+  "id": "snhd-cfsm",
+  "read": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+  "quote": "A person in charge that is a Certified Food Safety Manager. (Attach copy of certification)",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5a1b54f3281d4f8",
+  "context": "ent during all hours of operation, to include evenings, weekends, and breaks.  a person in charge that is a certified food safety manager. (attach copy of certification)  an employee health policy that excludes or restricts food workers who are ill"
+ },
+ {
+  "id": "snhd-plan-review",
+  "read": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+  "quote": "Plans are reviewed remotely on the day of the appointment.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5a1b54f3281d4f8",
+  "context": "ts for plan submission), you will receive a plan review appointment invitation. plans are reviewed remotely on the day of the appointment. an inspector will contact you via phone or email when they begin reviewing your"
+ },
+ {
+  "id": "lv-food",
+  "read": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+  "quote": "A Certificate of Occupancy or Temporary Certificate of Occupancy must be obtained prior to the final permitting inspection",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5a1b54f3281d4f8",
+  "context": "ional, with water, power, gas, and hot water, with equipment fully operational. a certificate of occupancy or temporary certificate of occupancy must be obtained prior to the final permitting inspection for new construction or remodel projects as required by the jurisdiction. estab"
+ },
+ {
+  "id": "il-tax",
+  "read": "https://tax.illinois.gov/businesses/registration.html",
+  "quote": "Register with us, using one of the above methods, before you make any purchases, sales, or hire an employee.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "56986e20a6f9e1b0",
+  "context": "e your illinois account id or license number and business name in your request. register with us, using one of the above methods, before you make any purchases, sales, or hire an employee. if your business is already registered and your information changes (e.g., addr"
+ },
+ {
+  "id": "il-ides",
+  "read": "https://ides.illinois.gov/employer-resources/tax-employer-information.html",
+  "quote": "You can access the form online through MyTax Illinois and then Register a new business (Form REG-1) .",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "37aa09714fb5978d",
+  "context": "g-ui-1 report to determine liability under the unemployment insurance act form. you can access the form online through mytax illinois and then register a new business (form reg-1). a paper copy of the reg-ui-1 form is also available. contact the ides employer "
+ },
+ {
+  "id": "chi-sanitation",
+  "read": "https://chicago.gov/city/en/depts/cdph/provdrs/food_safety/svcs/enroll_in_a_foodsanitationcertificationcourse.html",
+  "quote": "To obtain a CDPH Foodservice Sanitation Manager Certificate you must attend and pass an approved course.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f6ac836f882c5926",
+  "context": "ness training faq. how to get a cdph foodservice sanitation manager certificate to obtain a cdph foodservice sanitation manager certificate you must attend and pass an approved course. a list of approved training providers is available at the following link: food "
+ },
+ {
+  "id": "chi-plan-review",
+  "read": "https://www.chicago.gov/content/dam/city/depts/bacp/general/Retail%20Food%20Guide.pdf",
+  "quote": "The Plan Review is coordinated between the Department of Public Heath and the Department of Buildings",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "chi-license",
+  "read": "https://www.chicago.gov/city/en/depts/bacp/supp_info/retailfoodestablishment0.html",
+  "quote": "A Retail Food Establishment license can only be issued at a properly zoned, non-residential location.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f342095aa2a7b4e3",
+  "context": "ed, stored, sold, or distributed from a building, or other fixed establishment. a retail food establishment license can only be issued at a properly zoned, non-residential location. the complete \"doing business as\" name (\"dba\") must be reflected on the business"
+ },
+ {
+  "id": "chi-limited",
+  "read": "https://www.chicago.gov/city/en/ofinterest/bus/retail.html",
+  "quote": "the majority of retail establishments will be required to have a City of Chicago Limited Business License.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "ea5edf51ca0e47be",
+  "context": "rofessionals retail establishments retail establishments in the city of chicago the majority of retail establishments will be required to have a city of chicago limited business license. you may however be required to have a different or additional license based on "
+ },
+ {
+  "id": "pa-tax",
+  "read": "https://www.pa.gov/services/revenue/register-my-business-for-taxes",
+  "quote": "New customers can register for various taxes without logging in to myPATH using the Pennsylvania Online Business Tax Registration.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b2963b7e04b21522",
+  "context": ";register&nbsp;for new&nbsp;business&nbsp;tax&nbsp;accounts on&nbsp; mypath. \\n new customers can register for various taxes without logging in to mypath using the pennsylvania online business tax registration. \\n existing customer will need to sign up or login to mypath and use the regist"
+ },
+ {
+  "id": "phl-tax-account",
+  "read": "https://www.phila.gov/services/payments-assistance-taxes/taxes/get-a-tax-account/",
+  "quote": "You also need a PHTIN to get a Commercial Activity License (CAL) , which is required to do any business in Philadelphia.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5d4af1ff0cc9ac1",
+  "context": "r to pay city taxes, you need a philadelphia tax identification number (phtin). you also need a phtin to get a commercial activity license (cal), which is required to do any business in philadelphia. nonprofits aren't liable for the business income and receipts tax (birt), but t"
+ },
+ {
+  "id": "phl-cal",
+  "read": "https://www.phila.gov/services/permits-violations-licenses/get-a-license/business-licenses-permits-and-approvals/get-a-commercial-activity-license/",
+  "quote": "You should always make sure you have a Commercial Activity License before applying for other business licenses.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "3cd4f6d652cea232",
+  "context": "nd license center. online 1 you can apply for this license using eclipse. note: you should always make sure you have a commercial activity license before applying for other business licenses. 2 the license is issued automatically. in person 1 visit the permit and license"
+ },
+ {
+  "id": "phl-food-safety",
+  "read": "https://www.phila.gov/services/permits-violations-licenses/get-a-license/business-licenses/food-businesses/take-a-food-safety-certification-course",
+  "quote": "You can apply and pay for your City of Philadelphia food safety certificate online, in person, or by mail.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "2bf44188ca3b8625",
+  "context": "s that all food is prepared safely and according to the philadelphia food code. you can apply and pay for your city of philadelphia food safety certificate online, in person, or by mail. how online 1 complete a food manager safety course with an approved training pr"
+ },
+ {
+  "id": "phl-plan-review",
+  "read": "https://phila.gov/services/permits-violations-licenses/get-a-license/business-licenses/food-businesses/apply-for-a-plan-review-for-a-stationary-food-business/",
+  "quote": "Anyone opening a stationary food business must submit a plan review for approval.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "d231c02a564ff83b",
+  "context": "ra fee if you begin construction before your plan review has been approved. who anyone opening a stationary food business must submit a plan review for approval. where and when environmental health services (ehs) has walk-in office hours mon"
+ },
+ {
+  "id": "phl-building",
+  "read": "https://www.phila.gov/media/20260806124408/PB_007_F-EZ-Level-I-Commercial-Alterations-Standards-2021-Code.pdf",
+  "quote": "Obtain permits for limited demolition and commercial alterations without submitting plans by meeting the Conditions and Design Limitations below.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a3b2a55bce48f785",
+  "context": " ez permit standard: limited commercial alterations & repairs (non-residential) obtain permits for limited demolition and commercial alterations without submitting plans by meeting the conditions and design limitations below. any deviations from this permit standard will result in permit revocation. spec"
+ },
+ {
+  "id": "phl-food-license",
+  "read": "https://www.phila.gov/services/business-self-employment/starting-a-business/business-licenses-permits-and-approvals/food-businesses/get-a-food-preparation-and-serving-license/",
+  "quote": "You can apply for this license online using eCLIPSE or in person at the Permit and License Center.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e62a873961abb755",
+  "context": "e fee for each month since the license expired. payment methods and details how you can apply for this license online using eclipse or in person at the permit and license center. online 1 upload all required documents. applications are reviewed within five b"
+ },
+ {
+  "id": "va-tax",
+  "read": "https://www.tax.virginia.gov/register-business-virginia",
+  "quote": "While all new businesses are required to register with us online, the following reasons may prevent you from doing so:",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "25f8506142b4836e",
+  "context": "es account. business registration faqs why can't i register my business online? while all new businesses are required to register with us online, the following reasons may prevent you from doing so: you don't have a fein you don't have an ssn you're reopening a closed account o"
+ },
+ {
+  "id": "va-vec",
+  "read": "https://vec.virginia.gov/node/382",
+  "quote": "The fastest and easiest way to register is through iFile/iReg .",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "bb25e26b2b928ddc",
+  "context": "for state unemployment insurance (ui) tax. preferred & easiest: register online the fastest and easiest way to register is through ifile/ireg. online registration lets you: establish your employer account update your busin"
+ },
+ {
+  "id": "va-food-manager",
+  "read": "https://www.vdh.virginia.gov/environmental-health/food-safety-in-virginia/cfpm/",
+  "quote": "Only facilities that meet the criteria for exemption in 12VAC5-421-55 B. or § 35.1-25 . will not need to have a CFPM.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "ce4123cca0a8488a",
+  "context": "food preparation and service who is a certified food protection manager (cfpm). only facilities that meet the criteria for exemption in 12vac5-421-55 b. or § 35.1-25. will not need to have a cfpm. food manager certification provides managers with in-depth knowledge of proper "
+ },
+ {
+  "id": "ffx-bpol",
+  "read": "https://www.fairfaxcounty.gov/topics/starting-business-step-3-license-taxes",
+  "quote": "All businesses with a physical location in Fairfax County — including home-based businesses — must have a business license",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "d41d4395971c0c88",
+  "context": "ommission fairfax county business, professional and occupational license (bpol) all businesses with a physical location in fairfax county — including home-based businesses — must have a business license called a business, professional and occupational license (bpol). file for bpol "
+ },
+ {
+  "id": "ffx-nonrup",
+  "read": "https://www.fairfaxcounty.gov/plan2build/node/204",
+  "quote": "A Non-RUP shall be deemed to authorize and is required for both the initial and continued occupancy and use of the building or land",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "cfa310848ae8eb57",
+  "context": "p) has been approved in accordance with the provisions of the zoning ordinance. a non-rup shall be deemed to authorize and is required for both the initial and continued occupancy and use of the building or land to which it applies. for more information and the permit application, visit the"
+ },
+ {
+  "id": "ffx-plan-review",
+  "read": "https://www.fairfaxcounty.gov/health/permits/new-food-establishment",
+  "quote": "The process to get a permit starts with a commercial plan review before construction begins.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8445ad7d0ef9bc3b",
+  "context": "a permit to operate a food establishment from fairfax county health department. the process to get a permit starts with a commercial plan review before construction begins. more food permitting topics: change of ownership | annual renewals | temporary "
+ },
+ {
+  "id": "ffx-food-permit",
+  "read": "https://www.fairfaxcounty.gov/health/permits/new-food-establishment",
+  "quote": "Upon completing a successful pre-occupancy inspection, the Health Department will issue a permit to operate.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8445ad7d0ef9bc3b",
+  "context": "ction. learn what to expect during a food inspection. step 3: open for business upon completing a successful pre-occupancy inspection, the health department will issue a permit to operate. within 5 to 7 days, an official food establishment permit will be mailed to the"
+ },
+ {
+  "id": "nj-reg",
+  "read": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+  "quote": "Second, after filing the certificate of formation/authorization, file the tax/employer registration form (Form NJ-REG).",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "1ae966d357509201",
+  "context": " fee is $50 for domestic non-profit corporations. file your certificate online. second, after filing the certificate of formation/authorization, file the tax/employer registration form (form nj-reg). file the nj-reg online. once you have successfully completed the two filings ab"
+ },
+ {
+  "id": "edi-plan-review",
+  "read": "https://www.nj.gov/health/ceohs/documents/phfpp/Chapter%2024%20w%20Cottage%20Food%20Rules%201-18-22.pdf",
+  "quote": "A permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before:",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b1eb9bf675bf075e",
+  "context": "hapter. subchapter 9. review of plans 8:24-9.1 plan submission and approval (a) a permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before: 1. the construction of a retail food establishment; 2. the conversion of an exi"
+ },
+ {
+  "id": "edi-food-license",
+  "read": "https://cms2.revize.com/revize/edisonnj/document_center/Retail%20Food%20Fillable%20Application.pdf",
+  "quote": "RETAIL FOOD APPLICATION",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e37c45a5c03bd95c",
+  "context": "sam joshi, mayor department of health phone: (732) 248-7273 fax: (732) 248-0494 retail food application new application renewal milk depot ($50.00) restaurants (refer to chart a) num."
+ },
+ {
+  "id": "co-tax",
+  "read": "https://tax.colorado.gov/new-businesses",
+  "quote": "you must apply for a Colorado sales tax license.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "co-ui",
+  "read": "https://cdle.colorado.gov/employers/recruiting-hiring/new-employer-checklist",
+  "quote": "To receive an unemployment account number, you may register your business online through MyBizColorado.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "87024d1b54f5bdf6",
+  "context": "uired to pay unemployment insurance premiums if you meet specific requirements. to receive an unemployment account number, you may register your business online through mybizcolorado. register your business for an unemployment account register online register onl"
+ },
+ {
+  "id": "den-tax",
+  "read": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/Our-Divisions/Treasury/Business-Tax-Information/Business-Tax-FAQ",
+  "quote": "or you have economic nexus, you are required to obtain a Denver sales tax license",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "6b8646f027e96135",
+  "context": "tax? yes. if you are located in or have some other physical presence in denver, or you have economic nexus, you are required to obtain a denver sales tax license and collect and remit denver sales tax on sales made in denver. if i operate a "
+ },
+ {
+  "id": "den-zoning",
+  "read": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Community-Planning-and-Development/Plan-Review-Permits-and-Inspections/Zoning-Permits/Apply-for-Commercial-Zoning-Permits",
+  "quote": "If your plans meet the requirements of the zoning code and your permit fee has been paid, staff will issue the zoning permit.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7c3f73abaa74cd90",
+  "context": "heck your email for updates from zoning staff as your plans are being reviewed. if your plans meet the requirements of the zoning code and your permit fee has been paid, staff will issue the zoning permit. please note that other types of approvals, both city and state, may still be re"
+ },
+ {
+  "id": "den-plan-review",
+  "read": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Public-Health-Environment/Public-Health-Investigations/Food-Safety/Restaurant-Food-Establishment-Compliance",
+  "quote": "Food Establishment Construction, Remodeling, and Plan Review Information See Plan Review Page for more information.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "552ff2a0aa35a413",
+  "context": "l an administrative citation view the rules governing hearings before the board food establishment construction, remodeling, and plan review information see plan review page for more information. additional information and resources dogs on patios (pdf, 226kb) ( en español ("
+ },
+ {
+  "id": "den-food-license",
+  "read": "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Business-Licensing/Business-licenses/Retail-Food/Retail-food/New",
+  "quote": "Your license will not issue until a proper zone use permit has submitted.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "37003f7fa497ea07",
+  "context": " allow you to begin your application while you secure a proper zone use permit. your license will not issue until a proper zone use permit has submitted. applications that fail to provide a zone use permit will not issue or be eligib"
+ },
+ {
+  "id": "pla-co",
+  "read": "https://content.civicplus.com/api/assets/tx-plano/d2490980-662a-4f38-8def-66070c8691e5",
+  "quote": "A Certificate of Occupancy is required to occupy any building or property with nonresidential or multifamily uses.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7e8f8878b911232b",
+  "context": "ous place on site at the business. when is a certificate of occupancy required? a certificate of occupancy is required to occupy any building or property with nonresidential or multifamily uses. a new co is required when the occupancy, business, business name, or business o"
+ },
+ {
+  "id": "pla-plan-review",
+  "read": "https://content.civicplus.com/api/assets/234824a7-ef4c-481f-8b7b-ab68b680a9fb",
+  "quote": "The City of Plano Food Code requires that complete plans be submitted, reviewed and approved before any construction and/ or remodeling can begin.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "aa49c54c603653b8",
+  "context": "eview\" form, so the plans can be reviewed by the environmental health division. the city of plano food code requires that complete plans be submitted, reviewed and approved before any construction and/ or remodeling can begin. be sure the plans meet the city of plano requirements for food establishments. "
+ },
+ {
+  "id": "pla-food-permit",
+  "read": "https://content.civicplus.com/api/assets/tx-plano/c39480c6-84db-4e2c-b253-d47e9ef3f83a",
+  "quote": "No permit shall be issued or renewed until the applicable permit fee is paid.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b892971ecee5c5e1",
+  "context": "es (e.g. smoking and curing, reduced oxygen packaging for extended shelf-life). no permit shall be issued or renewed until the applicable permit fee is paid. late fees for permit renewals shall apply as indicated. 2 a plan review fee sha"
+ },
+ {
+  "id": "md-sdat",
+  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Create%20or%20Start%20a%20Business/Articles%20of%20Organization%20for%20a%20Limited%20Liability%20Company_0526-A.pdf",
+  "quote": "The address must be located in Maryland. P.O. Boxes cannot be accepted.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "1e11e9887e346633",
+  "context": "dress [required] enter the maryland resident agent's complete physical address. the address must be located in maryland. p.o. boxes cannot be accepted. section (6) – signature of authorized person(s) [required] at least one authori"
+ },
+ {
+  "id": "md-sales",
+  "read": "https://businessexpress.maryland.gov/start/taxes-and-insurance",
+  "quote": "This is required if you sell items in Maryland and collect sales tax.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "9c62ae5d7b5c132d",
+  "context": "? use the cra to register for the following accounts: sales and use tax license this is required if you sell items in maryland and collect sales tax. employer's withholding tax account this is required if you pay salaries, wages,"
+ },
+ {
+  "id": "md-ui",
+  "read": "https://businessexpress.maryland.gov/start/taxes-and-insurance",
+  "quote": "You must apply for an unemployment insurance account through the Maryland Department of Labor if you are:",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "9c62ae5d7b5c132d",
+  "context": "helps businesses respond to former employees' claims for unemployment benefits. you must apply for an unemployment insurance account through the maryland department of labor if you are: an industrial or commercial employer a nonprofit charitable, educational, or re"
+ },
+ {
+  "id": "md-trader",
+  "read": "https://www.marylandcomptroller.gov/businesses/new-business/business-licenses.html",
+  "quote": "may not offer for sale, sell or otherwise dispose of any goods within Maryland, without first obtaining a trader's license",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "d61335427274d4a9",
+  "context": ", section 17-1804. traders license unless you are a grower or manufacturer, you may not offer for sale, sell or otherwise dispose of any goods within maryland, without first obtaining a trader's license from the clerk of the circuit court and opening a sales tax account. business e"
+ },
+ {
+  "id": "moco-plan-review",
+  "read": "https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf",
+  "quote": "Future code violations are prevented by addressing any potential layout & design concerns prior to construction or renovation beginning.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "fda346bbe717cf2e",
+  "context": "nt layout and flow-of- food based on the menu and food preparation processes.  future code violations are prevented by addressing any potential layout & design concerns prior to construction or renovation beginning. section i: documentation required for submission: 1. submit plans via departmen"
+ },
+ {
+  "id": "moco-food-license",
+  "read": "https://www.montgomerycountymd.gov/HHS-Special/LandRLicenseFoodService.html",
+  "quote": "A license must be obtained prior to opening a business.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8c351c6742b6d10c",
+  "context": "sumption with or without charge must apply for a food service facility license. a license must be obtained prior to opening a business. licenses expire on january 31st and must be renewed each year. licenses are not"
+ },
+ {
+  "id": "moco-cfsm",
+  "read": "https://www.montgomerycountymd.gov/HHS-Special/LandRLicenseFoodService.html",
+  "quote": "a licensee must not operate a food service facility unless the facility is under the immediate control of a Certified Food Service Manager.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8c351c6742b6d10c",
+  "context": "4), (7), or (10) letter from the irs. \"montgomery county code 15-8(b)(2) states a licensee must not operate a food service facility unless the facility is under the immediate control of a certified food service manager.\" read more about certified food service manager (cfsm). a use & occupancy permi"
+ },
+ {
+  "id": "rock-building",
+  "read": "https://www.rockvillemd.gov/?p=61177",
+  "quote": "Commercial and residential properties in the City of Rockville are required to obtain permits before starting construction projects",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "35ff9eaf98e30d27",
+  "context": "t applications specialty and other permit applications administrative bulletins commercial and residential properties in the city of rockville are required to obtain permits before starting construction projects related to certain types of work, such as electrical, plumbing, mechanical, or "
+ },
+ {
+  "id": "rock-occupancy",
+  "read": "https://www.rockvillemd.gov/?p=61177",
+  "quote": "Commercial Occupancy Permit Application",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "35ff9eaf98e30d27",
+  "context": "ng permit application occupancy permit residential occupancy permit application commercial occupancy permit application residential construction permit required documents: architectural and structura"
+ },
+ {
+  "id": "ga-dol",
+  "read": "https://dol.georgia.gov/node/2291",
+  "quote": "You must complete an Application for GDOL Tax Account or Status Change (DOL-1A) form and return it to the Georgia Department of Labor",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "66ec5379ab5581ff",
+  "context": "ent insurance how do i set up an unemployment insurance tax account in georgia? you must complete an application for gdol tax account or status change (dol-1a) form and return it to the georgia department of labor, suite 850, 148 andrew young international blvd., atlanta, ga. 30303-1751. form"
+ },
+ {
+  "id": "ga-alcohol",
+  "read": "https://dor.georgia.gov/alcohol/apply-license-sell-alcohol",
+  "quote": "Applicants must file and complete the appropriate license online using the Georgia Tax Center (GTC).",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "18606b059a5ccec7",
+  "context": "ind information, guidelines, and forms related to alcohol licensing in georgia. applicants must file and complete the appropriate license online using the georgia tax center (gtc). to prepare, you may need: background investigation, tax clearance, and fingerpr"
+ },
+ {
+  "id": "gw-plan-review",
+  "read": "https://www.gnrhealth.com/?p=97",
+  "quote": "review of plans prior to construction, permitting establishments, and conducting inspections to insure code compliance.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5e2feb13eee2083",
+  "context": "l health agency regarding food service involve training food service personnel, review of plans prior to construction, permitting establishments, and conducting inspections to insure code compliance. use the links below to find the documentation you need. 2025 georgia food code "
+ },
+ {
+  "id": "gw-food-permit",
+  "read": "https://gnrhealth.com/wp-content/uploads/2024/08/Food-Service-Plan-Review-Requirements-fillable-3-11-16-JER.pdf",
+  "quote": "Food Service Permit Application Front Page (page 1)",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "ef8449d5ef83e34f",
+  "context": " can be accepted)  facility on well?  yes or  no if yes, need epd letter   food service permit application front page (page 1)  owner information  personal name or  corporation/llc (go to www.sos.georgia"
+ },
+ {
+  "id": "dul-zoning",
+  "read": "https://www.duluthga.net/services/city_clerk/new_business_applications/index.php",
+  "quote": "Step 1 - Obtain ZONING USE VERIFICATION",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "28583fe12f5755f1",
+  "context": "tc - also known as \"business license\") application is a three (3) part process. step 1 - obtain zoning use verification ( click here to complete this link prior to applying) business zoning and use c"
+ },
+ {
+  "id": "dul-otc",
+  "read": "https://www.duluthga.net/services/city_clerk/occupational_tax/index.php",
+  "quote": "Every business in the City is required to apply for an Occupational Tax Certificate (OTC) and renew it annually",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f879456d4b2286c0",
+  "context": "ax occupational tax the city of duluth welcomes your business to our community. every business in the city is required to apply for an occupational tax certificate (otc) and renew it annually in order to operate in the city limits. applications may be completed online. c"
+ },
+ {
+  "id": "tx-tabc",
+  "read": "https://www.tabc.texas.gov/static/sites/default/files/2021-08/wine-and-malt-beverage-retailers-permit-bg-on-premise-lc.pdf",
+  "quote": "You are authorized to sell wine and malt beverages at your bar or restaurant.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "721b31fbac12d5cd",
+  "context": "d malt beverage tabc retailer's permit (bg) what can i do with my permit? sales you are authorized to sell wine and malt beverages at your bar or restaurant. these sales can be made for on-premises consumption or for the customer to take"
+ },
+ {
+  "id": "sl-plan-review",
+  "read": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+  "quote": "Plan reviews are only accepted online through Citizen Self-Service (CSS) Portal.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "cc1019a9cc7adebd",
+  "context": "rmit approval, a citation and closure notice may be issued. plan review process plan reviews are only accepted online through citizen self-service (css) portal. submit your menu, floor plans, including equipment & finish schedules for your "
+ },
+ {
+  "id": "sl-food-permit",
+  "read": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+  "quote": "Food permit application must be completed prior to requesting a final food inspection.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "cc1019a9cc7adebd",
+  "context": " permit application will be sent to the email associated with your css account. food permit application must be completed prior to requesting a final food inspection. if for some reason you do not receive an automated email, please see steps belo"
+ },
+ {
+  "id": "sl-co",
+  "read": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+  "quote": "the permits office will issue you a new Certificate of Occupancy via email.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "cc1019a9cc7adebd",
+  "context": "please note: once you receive inspections from fire, building and are approved, the permits office will issue you a new certificate of occupancy via email. after you receive your new food permit and have obtained new certificate of occ"
+ },
+ {
+  "id": "va-abc",
+  "read": "https://law.lis.virginia.gov/vacode/title4.1/chapter3/section4.1-302/",
+  "quote": "who is not licensed sells any alcoholic beverages except as permitted by this subtitle, he shall be guilty of a Class 1 misdemeanor.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b017f8ca66834b72",
+  "context": "4.1-302. illegal sale of alcoholic beverages in general; penalty. if any person who is not licensed sells any alcoholic beverages except as permitted by this subtitle, he shall be guilty of a class 1 misdemeanor. in the event of a second or subsequent conviction under this section, a jail se"
+ },
+ {
+  "id": "wa-lcb",
+  "read": "https://app.leg.wa.gov/RCW/default.aspx?cite=66.24.320",
+  "quote": "a beer and/or wine restaurant license to sell beer, including strong beer, or wine, or both, at retail, for consumption on the premises.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "68d15ef581383597",
+  "context": "e restaurant license — containers — fee — caterer's endorsement. there shall be a beer and/or wine restaurant license to sell beer, including strong beer, or wine, or both, at retail, for consumption on the premises. a patron of the licensee may remove from the premises, recorked or recapped in "
+ },
+ {
+  "id": "nj-abc",
+  "read": "https://www.njoag.gov/about/divisions-and-offices/division-of-alcoholic-beverage-control-home/licensing-bureau-applications-and-information/",
+  "quote": "The Licensing Bureau is responsible for processing and reviewing all retail license transfer and renewal applications submitted by municipalities",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "3667f970debb641a",
+  "context": "beverages. the three types of licenses are manufacturing, wholesale and retail. the licensing bureau is responsible for processing and reviewing all retail license transfer and renewal applications submitted by municipalities to ensure the transactions are in accord with statutes and regulations. this in"
+ },
+ {
+  "id": "nj-plan-review",
+  "read": "https://www.nj.gov/health/ceohs/documents/phfpp/Chapter%2024%20w%20Cottage%20Food%20Rules%201-18-22.pdf",
+  "quote": "A permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before:",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b1eb9bf675bf075e",
+  "context": "hapter. subchapter 9. review of plans 8:24-9.1 plan submission and approval (a) a permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before: 1. the construction of a retail food establishment; 2. the conversion of an exi"
+ },
+ {
+  "id": "ma-alcohol",
+  "read": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXX/Chapter138/Section2",
+  "quote": "sell or expose or keep for sale, store, transport, import or export alcoholic beverages or alcohol, except as authorized by this chapter",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "a094244eef5106b3",
+  "context": "lcoholic beverages section 2. no person shall manufacture, with intent to sell, sell or expose or keep for sale, store, transport, import or export alcoholic beverages or alcohol, except as authorized by this chapter; but the provisions of this chapter shall not apply to sales, storage or transp"
+ },
+ {
+  "id": "pa-plcb",
+  "read": "https://www.lcb.pa.gov/Licensing/Pages/default.aspx",
+  "quote": "The PLCB issues, renews and validates retail and wholesale alcohol licenses.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e70514cb4337697c",
+  "context": "b search agencies liquor control board licensing liquor control board licensing the plcb issues, renews and validates retail and wholesale alcohol licenses. plcb+ <span class=\\\"text-headline--medium\\\">licensing</span></h1>\\r\\n<p><span c"
+ },
+ {
+  "id": "fl-abt",
+  "read": "https://www2.myfloridalicense.com/alcoholic-beverages-and-tobacco/",
+  "quote": "issues licenses or permits that are required for any business or person to manufacture, import, export, store, distribute or sell alcoholic beverages",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "20bd95db1510666e",
+  "context": "f alcoholic beverages & tobacco the division of alcoholic beverages and tobacco issues licenses or permits that are required for any business or person to manufacture, import, export, store, distribute or sell alcoholic beverages and products containing tobacco or nicotine. the division conducts audits to en"
+ },
+ {
+  "id": "va-scc",
+  "read": "https://www.scc.virginia.gov/businesses/new-business-resources/business-types/",
+  "quote": "File Online or complete Articles of Organization (Form LLC1011-DOC)",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "30a56984897e956a",
+  "context": "he limited liability company. business type how to file filing fee virginia llc file online or complete articles of organization (form llc1011-doc) $100 foreign llc file online or complete an application for registration as a f"
+ },
+ {
+  "id": "hi-llc",
+  "read": "https://files.hawaii.gov/dcca/breg/registration/forms/llc-1.pdf",
+  "quote": "State of Hawaii Nonrefundable Filing Fee: $50.00",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "01f4ffa1e83a81db",
+  "context": "print form clear form form llc-1 11/2025 *llc1* state of hawaii nonrefundable filing fee: $50.00 department of commerce and consumer affairs business registration division 335 "
+ },
+ {
+  "id": "hi-get",
+  "read": "https://tax.hawaii.gov/geninfo/get/",
+  "quote": "Complete the Form BB-1, State of Hawaii Basic Business Application, BB-1 Packet , and pay a one-time $20 registration fee.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8163cffb472b8e78",
+  "context": " a get license? register online through the dotax website at hawaii tax online. complete the form bb-1, state of hawaii basic business application, bb-1 packet, and pay a one-time $20 registration fee. additional fees may apply depending on which tax licenses you need. where do i "
+ },
+ {
+  "id": "hi-ui",
+  "read": "https://labor.hawaii.gov/ui/?p=865",
+  "quote": "In most cases, if you have employees working in Hawaii, you must pay unemployment taxes on their wages.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7abfb8210cef49d5",
+  "context": "nt council ui home forms find a law contact ui home / new employer registration in most cases, if you have employees working in hawaii, you must pay unemployment taxes on their wages. tax reports are due quarterly. liable employers must submit a tax report every "
+ },
+ {
+  "id": "hi-food-plan",
+  "read": "https://health.hawaii.gov/san/?p=740",
+  "quote": "Review and approval of building plans in accordance with departmental administrative rules are conducted of newly constructed or renovated food establishments",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "53d4b9d6f1aa9c67",
+  "context": "l facilities, care homes, and transient accommodations (hotels, hostels, etc.). review and approval of building plans in accordance with departmental administrative rules are conducted of newly constructed or renovated food establishments and public swimming pools. preliminary liquor dispenser plans are also reviewed"
+ },
+ {
+  "id": "hi-food-permit",
+  "read": "https://health.hawaii.gov/san/?p=740",
+  "quote": "The branch conducts inspections of and issues permits or licenses to food establishments",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "53d4b9d6f1aa9c67",
+  "context": "gulations issuance of permits and licenses licensing of professionals education the branch conducts inspections of and issues permits or licenses to food establishments, milk plants, dairy farms, public swimming pools, tattoo establishments and mor"
+ },
+ {
+  "id": "ut-llc",
+  "read": "https://corporations.utah.gov/",
+  "quote": "Form a Corporation, Limited Liability Company (LLC), Partnership, Business Trust, DBA, and more.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "04e26db4bb0a4fcb",
+  "context": "le information to the public. what do you want to do today? form a new business form a corporation, limited liability company (llc), partnership, business trust, dba, and more. get started renew a business file an annual report/renewal on an existing busin"
+ },
+ {
+  "id": "ut-sales",
+  "read": "https://tax.utah.gov/sales",
+  "quote": "New businesses estimate the amount of sales and use tax liability when applying for a license and are assigned a filing status.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "d88305d0bf1772f7",
+  "context": "sales tax liability; must be filed electronically through taxpayer access point new businesses estimate the amount of sales and use tax liability when applying for a license and are assigned a filing status. the tax commission reviews accounts annually and notifies businesses in writing"
+ },
+ {
+  "id": "ut-alcohol",
+  "read": "https://abs.utah.gov/licensing/",
+  "quote": "Some cities or municipalities in Utah will not award local consent until a new business or event organizer obtains an alcohol license.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "4b5e4bc0001862fd",
+  "context": "e online portal, perform the same functions as the primary account holder? yes. some cities or municipalities in utah will not award local consent until a new business or event organizer obtains an alcohol license. in those cases, will the system allow a new applicant to skip the local consent"
+ },
+ {
+  "id": "slco-food-permit",
+  "read": "https://www.saltlakecounty.gov/health/food-protection/",
+  "quote": "Under Utah law, operating a food service establishment in Salt Lake County requires a food service permit from the health department.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "28ae04cf057ffc7c",
+  "context": "eports contact slide menu right slco health department food protection overview under utah law, operating a food service establishment in salt lake county requires a food service permit from the health department. health inspectors conduct unscheduled inspections and investigate any alleged v"
+ },
+ {
+  "id": "fre-business-tax",
+  "read": "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account",
+  "quote": "If you do not qualify for an exemption, you will be required to complete a Business Tax Application",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "cup-license",
+  "read": "https://cupertino.gov/businesslicense",
+  "quote": "All persons or entities conducting business within the City of Cupertino are required to obtain a business license",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "cup-building",
+  "read": "https://www.cupertino.gov/Your-City/Departments/Community-Development/Building/Building-Division-FAQ",
+  "quote": "Building permits are required for new Construction, Remodeling and Tenant Improvements",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "mil-license",
+  "read": "https://milpitas.gov/243/Apply",
+  "quote": "The Building and Planning departments will review and approve application.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "48f3a9fbdcd417ba",
+  "context": "t service applications can be submitted online via https://milpitas.hdlgov.com. the building and planning departments will review and approve application. once approve, fees will be emailed or mailed. please submit forms by email to b"
+ },
+ {
+  "id": "mil-building",
+  "read": "https://www.milpitas.gov/DocumentCenter/View/165/Tenant-Improvement-PDF",
+  "quote": "Approved drawings by the Santa Clara Environmental Health Department as required prior to permit issuance",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "2ffdc4bdb2d66851",
+  "context": "nnaire (if any questions on the \"sewer needs inquiry form\" were answered \"yes\") approved drawings by the santa clara environmental health department as required prior to permit issuance page 1 of 2 6/29/2026 s:\\building insp\\handouts 2026\\checklist\\commercial\\word "
+ },
+ {
+  "id": "dly-license",
+  "read": "https://dalycity.org/438",
+  "quote": "A Business License Tax Certificate must be obtained prior to conducting business in the City",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "5e13225fd352c490",
+  "context": "y online. business license online application requirements rules & requirements a business license tax certificate must be obtained prior to conducting business in the city (code 5.04.030) any person operating a business from a private home or residenc"
+ },
+ {
+  "id": "dly-building",
+  "read": "https://dalycity.org/206/Guide-to-Commercial-Tenant-Improvement",
+  "quote": "Restaurant applications require a set of plans reviewed and approved by the San Mateo County Health Department.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "smc-plan-review",
+  "read": "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf",
+  "quote": "No. Plans must be approved first.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 404; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "smc-health-permit",
+  "read": "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf",
+  "quote": "Once your facility passes the final inspection, another invoice will be sent to you for the annual health permit fee.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 404; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "arc-license",
+  "read": "https://www.arcadiaca.gov/government/development_services/business_license/index.php",
+  "quote": "Every business that operates within the City must obtain a business license and comply with all provisions of the Arcadia Municipal Code.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e4c2a96e389ec10b",
+  "context": "ss because of its exciting market opportunities and diverse affluent community. every business that operates within the city must obtain a business license and comply with all provisions of the arcadia municipal code. only businesses specifically exempted by state or federal statute are not requi"
+ },
+ {
+  "id": "arc-building",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+  "quote": "then submit the plans to your local building and safety office for approval.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "556bffb74dae84d7",
+  "context": " floors and walls. submit your plans for approval to the eh plan check program; then submit the plans to your local building and safety office for approval. after approvals, you may begin construction. several inspections may be needed "
+ },
+ {
+  "id": "alh-license",
+  "read": "https://secure.alhambraca.gov/BusinessLicenseApplication/",
+  "quote": "You must also apply for an Occupancy Permit; click here to get the form.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e29dcb5af7b50070",
+  "context": "l address required # of units required application for certificate of occupancy you must also apply for an occupancy permit; click here to get the form. forms must be mailed or brought to city hall, development services department, "
+ },
+ {
+  "id": "alh-co",
+  "read": "https://secure.alhambraca.gov/BusinessLicenseApplication/",
+  "quote": "You must also apply for an Occupancy Permit; click here to get the form.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e29dcb5af7b50070",
+  "context": "l address required # of units required application for certificate of occupancy you must also apply for an occupancy permit; click here to get the form. forms must be mailed or brought to city hall, development services department, "
+ },
+ {
+  "id": "alh-building",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+  "quote": "then submit the plans to your local building and safety office for approval.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "556bffb74dae84d7",
+  "context": " floors and walls. submit your plans for approval to the eh plan check program; then submit the plans to your local building and safety office for approval. after approvals, you may begin construction. several inspections may be needed "
+ },
+ {
+  "id": "gln-brc",
+  "read": "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate",
+  "quote": "Every business located in Glendale, including subleases, is required to apply for",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "smt-business-tax",
+  "read": "https://cityofsanmateo.org/index.aspx?NID=304",
+  "quote": "allow you to apply for a new Business Tax Certificate and renew your existing certificate",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8c7562b5dac6ebc6",
+  "context": "ng hard to provide you with the best available online experience to efficiently allow you to apply for a new business tax certificate and renew your existing certificate. please use the following link to our online application and renewal site. plea"
+ },
+ {
+  "id": "tor-license",
+  "read": "https://www.torranceca.gov/Business/Business-License",
+  "quote": "You need a business license if you: Have a company located in Torrance",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "lacpw-building",
+  "read": "https://permits.lacounty.gov/?p=315",
+  "quote": "If your property is in unincorporated LA County, LA County Public Works will issue your permit.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "88d45b60d7cbdc12",
+  "context": "t meets building code standards and follows local rules. who issues the permit? if your property is in unincorporated la county, la county public works will issue your permit. if your property is outside of la county's jurisdiction, another office may han"
+ },
+ {
+  "id": "ftl-food-license",
+  "read": "https://www.fortleenj.org/192/Applications-Permits-Informational-Mater",
+  "quote": "Retail Food Establishment License Fees and Application",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "dd93f39879ebd251",
+  "context": "rmits & informational materials applications, permits & informational materials retail food establishment license fees and application farmers market application body art establishment application massage therapist"
+ },
+ {
+  "id": "ftl-plan-review",
+  "read": "https://www.nj.gov/health/ceohs/documents/phfpp/Chapter%2024%20w%20Cottage%20Food%20Rules%201-18-22.pdf",
+  "quote": "A permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before:",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b1eb9bf675bf075e",
+  "context": "hapter. subchapter 9. review of plans 8:24-9.1 plan submission and approval (a) a permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before: 1. the construction of a retail food establishment; 2. the conversion of an exi"
+ },
+ {
+  "id": "ftl-construction",
+  "read": "https://www.fortleenj.org/101/Departments",
+  "quote": "make sure your construction is performed to the New Jersey Uniform Construction Code",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "1448002068667008",
+  "context": "re here to help. our inspectors are licensed by the state of nj and are here to make sure your construction is performed to the new jersey uniform construction code and the borough's high standards for your safety. we are here to help you with "
+ },
+ {
+  "id": "hen-license",
+  "read": "https://www.cityofhenderson.com/government/departments/finance/business-licensing/apply-for-a-business-license",
+  "quote": "register your business with the State of Nevada prior to applying for a Henderson business license.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "bel-license",
+  "read": "https://bellevuewa.gov/city-government/departments/finance/business-taxes/business-licenses",
+  "quote": "A business must have a Washington State Business License for all locations before applying for a Bellevue business license.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "07fe9cda5baa8339",
+  "context": "plication by mail. how do i apply for a bellevue business license? please note: a business must have a washington state business license for all locations before applying for a bellevue business license. apply online: go to filelocal to apply for a bellevue business license. click o"
+ },
+ {
+  "id": "bel-building",
+  "read": "https://bellevuewa.gov/city-government/departments/finance/business-taxes/business-licenses",
+  "quote": "Construction, tenant improvements, and certain land use activities require building and land-use permits from the Development Services Department .",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "07fe9cda5baa8339",
+  "context": "ntact dsd land use by email at luzi@bellevuewa.gov or by phone at 425-452-4188. construction, tenant improvements, and certain land use activities require building and land-use permits from the development services department. if you have an active business license and you are having issues with mybuildin"
+ },
+ {
+  "id": "qcy-food-permit",
+  "read": "https://www.quincyma.gov/departments/health/health_department_forms___fees/index.php",
+  "quote": "Food Establishment Applications",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "46010b9b7a42eb03",
+  "context": "n application 1 document vacancy inspection application (pdf) document seq 1.00 food establishment applications 3 documents mobile food application (pdf) document seq 1.00 temporary food perm"
+ },
+ {
+  "id": "qcy-license",
+  "read": "https://www.quincyma.gov/departments/city_clerk/index.php",
+  "quote": "Renew or Apply for a Business License",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "f4e3f3ea504aa0f2",
+  "context": "e, please call 617-376-1131. quick links requesting vital records read more --> renew or apply for a business license read more --> election information read more --> one-day liquor license/special"
+ },
+ {
+  "id": "generic:oui.doleta.gov:https://oui.doleta.gov/unemploy/agencies.asp",
+  "read": "https://oui.doleta.gov/unemploy/agencies.asp",
+  "quote": "Contacts for State UI Tax Information and Assistance",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "fc29e949792bf6c5",
+  "context": "contacts for state ui tax information and assistance, employment & training administration (eta) - u.s. department of labor skip to "
+ },
+ {
+  "id": "generic:sba.gov:https://www.sba.gov/counseling/launch-your-business/",
+  "read": "https://www.sba.gov/counseling/launch-your-business/",
+  "quote": "You’ll need to register your business, pay taxes, and get licenses and permits in the place you choose to locate your business.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8bbc10e3a90cf6f6",
+  "context": "se to start your business in. research the best place to locate your business + you'll need to register your business, pay taxes, and get licenses and permits in the place you choose to locate your business. where you locate your business depends in part on the location of your target m"
+ },
+ {
+  "id": "generic:publichealth.lacounty.gov:https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+  "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "7b91a046f9ae2c7d",
+  "context": "ns drawn to scale, and specifications to the enforcement agency for review, and shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food facility, (b) plans and specifications may also be required by the enforcement "
+ },
+ {
+  "id": "generic:health.alamedacountyca.gov:https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/",
+  "read": "https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/",
+  "quote": "Other agencies including local building, fire, zoning and sanitation districts may have jurisdiction over various aspects of a project.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "e416a63095341174",
+  "context": "ironmental health director's plan check guide for retail food facilities, 2019. other agencies including local building, fire, zoning and sanitation districts may have jurisdiction over various aspects of a project. please consult with them or any other relevant agency for requirements or permi"
+ },
+ {
+  "id": "generic:publichealth.lacounty.gov:https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+  "quote": "then submit the plans to your local building and safety office for approval.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "556bffb74dae84d7",
+  "context": " floors and walls. submit your plans for approval to the eh plan check program; then submit the plans to your local building and safety office for approval. after approvals, you may begin construction. several inspections may be needed "
+ }
+]

@@ -33,7 +33,8 @@
     "test:dnc": "node --test scripts/dnc.test.mjs",
     "dnc": "node scripts/dnc.mjs",
     "test:channels": "esbuild scripts/channels-test.mts --bundle --platform=node --format=esm --outfile=.channels-test.mjs --log-level=error && node .channels-test.mjs; s=$?; rm -f .channels-test.mjs; exit $s",
-    "test:accuracy": "esbuild scripts/eval/accuracy.ts --bundle --platform=node --format=esm --outfile=.accuracy-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .accuracy-test.mjs; s=$?; rm -f .accuracy-test.mjs; exit $s"
+    "proof:read": "esbuild scripts/eval/proof-dump.ts --bundle --platform=node --format=esm --outfile=.proof-dump.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .proof-dump.mjs > .proofs.json && python3 -I scripts/eval/proof-read.py .proofs.json scripts/eval/proof-log.json; s=$?; rm -f .proof-dump.mjs .proofs.json; exit $s",
+    "test:accuracy":"esbuild scripts/eval/accuracy.ts --bundle --platform=node --format=esm --outfile=.accuracy-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .accuracy-test.mjs; s=$?; rm -f .accuracy-test.mjs; exit $s"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

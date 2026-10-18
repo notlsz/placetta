@@ -106,6 +106,8 @@ export const S = {
   tab_fees: B("Fees", "费用"),
   tab_receipt: B("Receipt", "收据"),
   source: B("Source", "来源"),
+  src_quote: B("The agency's words", "机构原文（英文）"),
+  src_checked: B("Read on", "核实日期"),
   upload: B("Upload", "上传"),
   useSample: B("Use a sample file", "使用示例文件"),
   reading: B("Reading", "读取中"),

@@ -701,7 +701,7 @@ export const LIVE_SUGGESTIONS: Bi[] = [
 
 /* ------------------------- license matcher ------------------------- */
 
-export type LicenseHit = { name: Bi; agency: Bi; level: Level; fee: Bi; est: Bi; source: { label: string; url: string }; have?: string; carry?: boolean };
+export type LicenseHit = { name: Bi; agency: Bi; level: Level; fee: Bi; est: Bi; source: { label: string; url: string; quote?: string; checked?: string }; have?: string; carry?: boolean };
 
 const FREE = B("No fee", "免费");
 const VARIES = B("Placetta confirms with the agency", "快哉向机构核实");

@@ -27,6 +27,7 @@ import { FORMS, formsFor, segmentOf } from "../../src/forms/registry";
 import type { Level } from "../../src/model";
 import { answerChecks } from "./answers";
 import { officialSource } from "./official";
+import { UNREAD, formProof, logStats, planRowProof } from "./proof";
 
 type GoldItem = { key: string; name: string; agency: string; level: Level; levels?: Level[]; required: boolean; verified: boolean; fee: number | null; source: string; match: string; agencyMatch: string; condition?: string; note?: string };
 type Gold = {
@@ -165,6 +166,21 @@ function report(title: string, scores: Score[]): Totals {
 }
 
 const fails: string[] = [];
+// passage-level proof: every row of both paths, in every case of the sets scored, carries a quote and the day it was
+// read, and the read log has that quote from that page (scripts/eval/proof.ts)
+{
+  const problems = new Set<string>(); let rowsChecked = 0;
+  for (const { cases } of SETS) for (const g of cases) {
+    const i = g.input;
+    const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
+    for (const a of p.apps) { rowsChecked++; for (const x of planRowProof(a)) problems.add(`${g.id}: ${x}`); }
+    for (const r of library(g)) { rowsChecked++; const f = FORMS.find(x => x.id === r.id); if (f) for (const x of formProof(f)) problems.add(`${g.id} (library): ${x}`); }
+  }
+  const st = logStats();
+  console.log(`\nPassage-level proof: ${rowsChecked} rows checked; read log ${st.total} entries (${st.curl} re-read with curl, ${st.webfetch} read with WebFetch, ${st.missing} not found); unread: ${Object.keys(UNREAD).join(", ") || "none"}`);
+  if (problems.size) { console.log(`  ${[...problems].slice(0, 40).join("\n  ")}`); fails.push(`proof: ${problems.size} row problems`); }
+}
+
 for (const { name: set, cases } of SETS) {
   const unverified = cases.flatMap(g => g.items.filter(i => !i.verified).map(i => `${g.id}: ${i.name}${i.note ? ` (${i.note})` : ""}`));
   console.log(`\n================ ${set === "gold" ? "Gold set (in-sample: the library was fixed against it)" : "Held-out set (scripts/eval/heldout)"} ================`);

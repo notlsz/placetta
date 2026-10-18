@@ -629,6 +629,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         return {
           segment, place, country: info.country ?? "unknown", city: info.city?.en, currency: info.currency,
           forms: list.slice(0, 30).map(f => ({ official_form_id: f.id, form: f.form, title: f.title[lang], agency: f.agency[lang], level: f.level, how_filed: `${METHOD[f.method][lang]}. ${f.how[lang]}`, official_link: f.url, info: f.info,
+            ...(f.proof ? { info_quote: f.proof.quote, info_read_on: f.proof.checked } : {}),
             fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.length ? f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`) : "Not listed yet: prepare_application adds the lines every agency asks; read the official link for the rest",
             attachments: f.attach?.map(a => a[lang]), for_foreign_owners: f.foreign?.[lang], placetta_fills_official_pdf: canFill(f), reread_agency_page_first: f.checked === "known" })),
           not_in_library: !info.country ? "This place isn't in the library yet. Research its national and local requirements on the government's own sites, prepare each one, then skill_save what you learned so the next business there goes faster."

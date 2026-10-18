@@ -767,7 +767,7 @@ export function FindLicenses({ result, live }: { result: { what: string; where: 
                       <span className="hit-n"><b>{b(h.name)}</b><small>{b(h.agency)}</small><small className="hit-e2">{b(h.est)}</small></span>
                       <span className="hit-f">{b(h.fee)}</span>
                       <span className="hit-e">{b(h.est)}</span>
-                      <span className="hit-s">{h.source.url ? <a href={h.source.url} target="_blank" rel="noopener noreferrer">{h.source.label}<I.ext /></a> : <em>{t("fd_check")}</em>}</span>
+                      <span className="hit-s">{h.source.url ? <a href={h.source.url} target="_blank" rel="noopener noreferrer" title={h.source.quote ? `“${h.source.quote}”${h.source.checked ? ` (${t("src_checked")} ${h.source.checked})` : ""}` : undefined}>{h.source.label}<I.ext /></a> : <em>{t("fd_check")}</em>}</span>
                       <span className="hit-a">
                         {h.have ? <button type="button" className="pill quiet sm" onClick={() => openApp(h.have!)}><I.check />{t("fd_have")}</button>
                           : h.carry ? <em className="carry">{t("fd_carry")}</em>

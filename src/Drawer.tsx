@@ -62,6 +62,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
           <span>{b(a.agency)}</span>
           {a.source.url && <a href={a.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{a.source.label}<I.ext /></a>}
         </p>
+        <SourceQuote a={a} />
         {a.next && <p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
         <div className="sh-asg"><AssignPicker item={{ kind: "app", id: a.id }} title={a.name} /></div>
         {a.preview && <p className="sh-pv"><I.spark />{a.status === "ready"
@@ -308,8 +309,23 @@ function Fees({ a }: { a: Application }) {
         <div><dt>{t("th_takes")}</dt><dd>{b(a.est)}</dd></div>
         {a.renews && <div><dt>{t("k_renewal")}</dt><dd>{b(a.renews)}</dd></div>}
         <div><dt>{t("source")}</dt><dd><a href={a.source.url} target="_blank" rel="noopener noreferrer">{a.source.label}<I.ext /></a></dd></div>
+        {a.source.quote && <div><dt>{t("src_quote")}</dt><dd className="src-q">“{a.source.quote}”</dd></div>}
+        {a.source.checked && <div><dt>{t("src_checked")}</dt><dd>{a.source.checked}</dd></div>}
       </dl>
     </div>
+  );
+}
+
+/** The sentence on the agency's page that states the requirement, as read (in English, as the agency wrote it), and the
+    day it was read: under the source link, so the link is proof rather than a pointer. */
+export function SourceQuote({ a }: { a: Pick<Application, "source"> }) {
+  const { t } = useApp();
+  if (!a.source.quote) return null;
+  return (
+    <blockquote className="src-q" lang="en">
+      <span className="src-q-l">{t("src_quote")}</span> “{a.source.quote}”
+      {a.source.checked && <span className="src-q-d"> {t("src_checked")} {a.source.checked}</span>}
+    </blockquote>
   );
 }
 

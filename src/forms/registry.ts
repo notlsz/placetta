@@ -438,11 +438,15 @@ export const FORMS: OfficialForm[] = [
   {
     id: "ca-abc", form: "Retail alcoholic beverage license (Type 41 on-sale beer and wine; Type 47 with spirits)", title: B("Alcoholic beverage license", "酒类销售执照"),
     agency: B("California Department of Alcoholic Beverage Control", "加州酒类饮料管理局"), level: "state", where: "CA", segments: ["restaurant", "retail"], needs: { alcohol: true }, method: "in_person", order: 71,
-    how: B("A restaurant serving beer and wine applies for a Type 41 license; spirits take a Type 47, which in some places (San Francisco among them) can only be bought from an existing holder. A public posting period comes first; plan on 3 to 6 months.", "供应啤酒和葡萄酒的餐厅申请 41 类执照；含烈酒须申请 47 类，在部分地区（包括旧金山）只能向现有持照人购买。须先经过公示期，预计需要 3 至 6 个月。"),
-    // the agency itself as the link; the 3-to-6-month figure and the license types are from San Francisco's restaurant guide
-    url: "https://www.abc.ca.gov", info: "https://www.abc.ca.gov",
-    fee: null, feeNote: B("Set by ABC for the license type and county.", "按执照类型和所在县由酒类管理局核定。"), takes: B("Plan on 3 to 6 months, including the public posting period.", "预计 3 至 6 个月，含公示期。"), takesDays: 180,
-    takesSource: "https://www.sf.gov/guide-opening-restaurant (2026-10-18)", checked: "page", fields: [],
+    // re-read on ABC's own FAQ 2026-10-18: a Type 41 is "On-Sale Beer & Wine – Eating Place"; on-sale general (Type 47)
+    // licenses are limited by county population, which is why many are bought by transfer; ABC's own figure for the
+    // investigation is 55 to 65 days, never under 30 (the 3-to-6-month figure was San Francisco's guide, for the whole
+    // process). The notice is posted at the premises for 30 days.
+    how: B("A restaurant serving beer and wine applies for a Type 41 (on-sale beer and wine, eating place); spirits take a Type 47, whose number is capped by county population, so many are bought from an existing holder by transfer. The notice of application is posted at the premises for 30 days.", "供应啤酒和葡萄酒的餐厅申请 41 类执照（堂饮啤酒和葡萄酒，餐饮场所）；含烈酒须申请 47 类，其数量按县人口设上限，因此多数须向现有持照人受让。申请公告须在场所张贴 30 天。"),
+    url: "https://www.abc.ca.gov", info: "https://www.abc.ca.gov/licensing/frequently-asked-questions",
+    fee: null, feeNote: B("Set by ABC for the license type and county.", "按执照类型和所在县由酒类管理局核定。"), takes: B("ABC's investigation takes about 55 to 65 days, and the license can't issue in under 30; San Francisco's guide plans 3 to 6 months for the whole process.", "酒类管理局的调查约需 55 至 65 天，且不少于 30 天不得发证；旧金山指南建议整个流程预留 3 至 6 个月。"), takesDays: 65,
+    takesSource: "https://www.abc.ca.gov/licensing/frequently-asked-questions (2026-10-18)", checked: "page", fields: [],
+    proof: { quote: "Most investigations take approximately 55-65 days, and by law the license cannot be issued for a minimum of 30 days.", checked: "2026-10-18", read: "https://www.abc.ca.gov/licensing/frequently-asked-questions" },
     plain: B("The state license to sell or serve alcohol. It takes months, so it's filed early.", "州政府发放的酒类销售或供应执照。办理需要数月，要尽早申请。"),
   },
   {

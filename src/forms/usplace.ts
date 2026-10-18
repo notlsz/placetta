@@ -37,6 +37,7 @@ export const COUNTIES: Record<string, County> = {
   SUFFOLK: { code: "SUFFOLK", en: "Suffolk County", zh: "萨福克县", state: "MA" },
   COOK: { code: "COOK", en: "Cook County", zh: "库克县", state: "IL" },
   PHILA: { code: "PHILA", en: "Philadelphia County", zh: "费城县", state: "PA" },
+  SLCO: { code: "SLCO", en: "Salt Lake County", zh: "盐湖县", state: "UT", health: { en: "Salt Lake County Health Department", zh: "盐湖县卫生局" } },
   DENVERC: { code: "DENVERC", en: "Denver County", zh: "丹佛县", state: "CO" },
   RIVERSIDE: { code: "RIVERSIDE", en: "Riverside County", zh: "河滨县", state: "CA", health: { en: "Riverside County Department of Environmental Health", zh: "河滨县环境卫生局" } },
   SBDC: { code: "SBDC", en: "San Bernardino County", zh: "圣贝纳迪诺县", state: "CA", health: { en: "San Bernardino County Environmental Health Services", zh: "圣贝纳迪诺县环境卫生服务处" } },
@@ -91,6 +92,7 @@ add("MA", "SUFFOLK", "boston,chelsea,revere,winthrop");
 add("IL", "COOK", "chicago,evanston,skokie,oak park,schaumburg,naperville");
 add("PA", "PHILA", "philadelphia");
 add("CO", "DENVERC", "denver");
+add("UT", "SLCO", "salt lake city,west valley city,sandy,west jordan,south jordan,murray,midvale,draper,taylorsville,millcreek,holladay,cottonwood heights,riverton,herriman");
 
 /** Chinese names for the places in the table (and the states they're in), so "加州罗兰岗" reads as Rowland Heights, CA. */
 const ZH_CITY: Record<string, string> = {
@@ -103,7 +105,7 @@ const ZH_CITY: Record<string, string> = {
   德卢斯: "Duluth, GA", 亨德森: "Henderson, NV", 拉斯维加斯: "Las Vegas, NV", 贝尔维尤: "Bellevue, WA", 西雅图: "Seattle, WA", 昆西: "Quincy, MA", 波士顿: "Boston, MA",
   罗克维尔: "Rockville, MD", 洛克维尔: "Rockville, MD", 费尔法克斯: "Fairfax, VA", 安嫩代尔: "Annandale, VA",
 };
-const ZH_STATE: Record<string, string> = { 加州: "CA", 加利福尼亚: "CA", 德州: "TX", 德克萨斯: "TX", 纽约州: "NY", 新泽西: "NJ", 华盛顿州: "WA", 内华达: "NV", 马萨诸塞: "MA", 麻省: "MA", 佐治亚: "GA", 乔治亚: "GA", 伊利诺伊: "IL", 宾夕法尼亚: "PA", 宾州: "PA", 佛罗里达: "FL", 佛州: "FL", 马里兰: "MD", 弗吉尼亚: "VA" };
+const ZH_STATE: Record<string, string> = { 加州: "CA", 加利福尼亚: "CA", 德州: "TX", 德克萨斯: "TX", 纽约州: "NY", 新泽西: "NJ", 华盛顿州: "WA", 内华达: "NV", 马萨诸塞: "MA", 麻省: "MA", 佐治亚: "GA", 乔治亚: "GA", 伊利诺伊: "IL", 宾夕法尼亚: "PA", 宾州: "PA", 佛罗里达: "FL", 佛州: "FL", 马里兰: "MD", 弗吉尼亚: "VA", 夏威夷: "HI", 犹他: "UT", 亚利桑那: "AZ" };
 const STATE_RX = /,\s*([A-Za-z]{2})\.?(\s+\d{5}(-\d{4})?)?\s*$/;
 const STREET = /^\s*(\d[\dA-Za-z-]*\s|one |po box|p\.o\.)|\b(st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|pkwy|parkway|hwy|highway|ln|lane|way|ct|court|pl|place|tpke|turnpike|pike|sq|square|center|centre|plaza|suite|ste|unit|#)\b\.?\s*\d*\s*$/i;
 
@@ -133,8 +135,8 @@ export function usPlace(where: string): UsPlace {
   if (m) { state = m[1].toUpperCase(); city = parts.length >= 2 ? parts[parts.length - 2] : undefined; }
   else {
     for (const [zh, code] of Object.entries(ZH_STATE)) if (t.includes(zh)) state = code;
-    const named = /,\s*(california|texas|new jersey|washington|nevada|massachusetts|georgia|maryland|virginia|new york|illinois|pennsylvania|florida)\s*(\d{5})?\s*$/i.exec(locality);
-    if (named) { state = { california: "CA", texas: "TX", "new jersey": "NJ", washington: "WA", nevada: "NV", massachusetts: "MA", georgia: "GA", maryland: "MD", virginia: "VA", "new york": "NY", illinois: "IL", pennsylvania: "PA", florida: "FL" }[named[1].toLowerCase()]; city = parts.length >= 2 ? parts[parts.length - 2] : undefined; }
+    const named = /,\s*(california|texas|new jersey|washington|nevada|massachusetts|georgia|maryland|virginia|new york|illinois|pennsylvania|florida|hawaii|utah|arizona)\s*(\d{5})?\s*$/i.exec(locality);
+    if (named) { state = { california: "CA", texas: "TX", "new jersey": "NJ", washington: "WA", nevada: "NV", massachusetts: "MA", georgia: "GA", maryland: "MD", virginia: "VA", "new york": "NY", illinois: "IL", pennsylvania: "PA", florida: "FL", hawaii: "HI", utah: "UT", arizona: "AZ" }[named[1].toLowerCase()]; city = parts.length >= 2 ? parts[parts.length - 2] : undefined; }
   }
   if (city) city = city.replace(/\d{5}(-\d{4})?/g, "").trim();
   if (city && /^\d/.test(city)) city = undefined;
