@@ -2365,6 +2365,28 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
 .prmore summary:focus-visible{outline:2px solid var(--gs-d);outline-offset:2px;border-radius:8px}
 .prmb{padding:4px 0 28px}
 .prmb>.sub{margin-bottom:20px}
+/* work together as the channels section, from 601282ab */
+#together .wtc{height:auto!important}
+#together .wtc>svg{inset:-3%;height:106%}
+#together .wti{position:relative;inset:auto;flex-direction:column;gap:36px;padding:64px 20px 56px}
+@media (min-width:1024px){#together .wti{gap:48px;padding:132px 40px 120px}}
+#together .chbox{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:760px}
+#together .chl{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 26px;margin:0;padding:0;list-style:none}
+#together .chl li{display:inline-flex;align-items:center;gap:8px;font-size:15px;line-height:1.2;color:#fff;white-space:nowrap}
+#together .chl svg{flex:none;width:18px;height:18px;color:#fff;opacity:.85}
+#together .chn{max-width:520px;text-align:center;font-size:14px;line-height:1.5;color:rgba(255,255,255,.74);text-wrap:pretty}
+#together .chwc{display:flex;flex-direction:column;align-items:center;gap:12px}
+#together .chadd{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:0;border-radius:10px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);color:#fff;font-size:14px;line-height:16px}
+#together .chadd:hover{background:rgba(255,255,255,.2)}
+#together .chadd svg{width:16px;height:16px}
+#together .chqr{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border-radius:14px;background:#fff}
+#together .chqr img{display:block;width:132px;height:132px}
+#together .chqr p{font-size:12px;color:var(--ink2)}
+/* the QR placeholder stays on phones too, under the channels */
+@media (max-width:1023px){.ox #together .wti,#together .wti{padding-bottom:124px}}
+#together .wtw.wtq{flex-direction:column;justify-content:center;align-items:center;gap:10px}
+#together .wtq .wth{flex:none;color:#fff;text-align:center;max-width:760px;text-wrap:balance}
+#together .wtq .rot{width:300px}
 /* customer stories, Alven style (from 601282ab): a heading, one tab per person (name, then role and company), and the chosen
    story leading with the job Placetta took off them in serif, their quote under it, and one result over the portrait */
 #case .tssec{margin-top:72px}
@@ -3167,7 +3189,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 </section>
 
 <!-- ======================= WORK TOGETHER ======================= -->
-<section class="ox mt160 rv" data-rv="tilt">
+<section class="ox mt160 rv" data-rv="tilt" id="together" aria-labelledby="wtH">
   <div class="ctr">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="gMin" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1"/></pattern><pattern id="gMaj" width="120" height="120" patternUnits="userSpaceOnUse"><path d="M120 0H0V120" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="1"/></pattern><g id="fp" fill="none" stroke="currentColor" stroke-width="1.3">
       <rect x="840" y="150" width="560" height="620"/><rect x="848" y="158" width="544" height="604"/>
@@ -3197,10 +3219,14 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <rect x="0" y="0" width="1600" height="1000" fill="rgba(15,27,51,.74)"/>
       </svg>
       <div class="wti">
-        <div class="wtw">
-          <p class="t28 l" data-i18n="wt.l">Work together</p>
+        <div class="wtw wtq">
+          <h2 class="t28 wth" id="wtH" data-i18n="wt.h">Answer from the app your team already uses</h2>
           <div class="rot"><div class="rotl" id="rotl"></div></div>
-          <p class="t28 r" data-i18n="wt.r">from day one</p>
+        </div>
+        <div class="chbox">
+          <ul class="chl" aria-label="Channels" data-i18n-aria="ch.aria"><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.wechat">WeChat</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg><span data-i18n="ch.slack">Slack</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg><span data-i18n="ch.lark">Lark / 飞书</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5z"/><path fill="currentColor" stroke="none" d="M9.3 7.9c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z"/></svg><span data-i18n="ch.wa">WhatsApp</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg><span data-i18n="ch.im">iMessage</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span data-i18n="ch.mail">Email</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg><span data-i18n="ch.tel">Phone</span></li></ul>
+          <p class="chn" data-i18n="ch.note">Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.</p>
+          <div class="chwc" id="chWc" hidden><button type="button" class="chadd" id="chAdd" aria-expanded="false" aria-controls="chQr"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.add">Add us on WeChat</span></button><div class="chqr" id="chQr" hidden><img id="chQrImg" alt="" width="132" height="132"><p data-i18n="ch.qr">Scan with WeChat to add Placetta</p></div></div>
         </div>
       </div>
       <a class="qr" id="wtQr" href="/?src=qr"><img class="qrimg" id="wtQrImg" src="media/placetta-qr.svg" alt="QR code for placetta" width="64" height="64" decoding="async" draggable="false"><p id="wtQrT" data-i18n="wt.qr">Scan to open Placetta on your phone</p></a>
@@ -3472,8 +3498,8 @@ zh:{
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* Oct 18 section pass: new strings for the sections changed that day */
-Object.assign(T.en, {"price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
-Object.assign(T.zh, {"price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
+Object.assign(T.en, {"wt.h": "Answer from the app your team already uses", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta", "price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"wt.h": "在团队常用的应用里直接回复", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉", "price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -4776,7 +4802,11 @@ tsNext();
 
 /* ============ WeChat QR: set WECHAT_QR to the image path and it appears in the final call to action and the form ============ */
 const WECHAT_QR = "";
-if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getElementById("fqr").hidden = false; const q = document.getElementById("wtQrImg"); if (q){ q.src = WECHAT_QR; document.getElementById("wtQrT").setAttribute("data-i18n", "fqr.t"); document.getElementById("wtQrT").textContent = t("fqr.t"); } }
+if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getElementById("fqr").hidden = false;
+  // work together: "Add us on WeChat" shows only with a real code behind it, and opens the code in place (601282ab)
+  const wc = document.getElementById("chWc"), add = document.getElementById("chAdd"), box = document.getElementById("chQr");
+  if (wc && add && box){ document.getElementById("chQrImg").src = WECHAT_QR; wc.hidden = false;
+    add.addEventListener("click", () => { box.hidden = !box.hidden; add.setAttribute("aria-expanded", String(!box.hidden)); track("wechat_qr_open", {open: !box.hidden}); }); } const q = document.getElementById("wtQrImg"); if (q){ q.src = WECHAT_QR; document.getElementById("wtQrT").setAttribute("data-i18n", "fqr.t"); document.getElementById("wtQrT").textContent = t("fqr.t"); } }
 
 /* ============ boot ============ */
 /* ============ restored sections (from the earlier site) ============ */
@@ -4874,18 +4904,24 @@ function renderInd(k){
 function fitTable(){ document.querySelectorAll(".abox").forEach(box => { if (isLg()) { box.style.removeProperty("--ts"); return; } box.style.setProperty("--ts", (box.clientWidth / 600).toFixed(4)); }); }
 
 const CH = [
- {ic:"wechat",t:["WeChat with Placetta","微信联系快哉"]},
- {ic:"email",t:["email to Placetta","邮件联系快哉"]},
- {ic:"phone",t:["call with Placetta","电话联系快哉"]},
- {ic:"chat",t:["chat with Placetta","在线咨询快哉"]},
- {ic:"dash",t:["your dashboard","登录您的看板"]}
+ {ic:"wechat",t:["WeChat with our team","微信联系我们的团队"]},
+ {ic:"slack",t:["Slack with Odelia","在 Slack 与 Odelia 协作"]},
+ {ic:"lark",t:["Lark with Odelia","在飞书与 Odelia 协作"]},
+ {ic:"wa",t:["WhatsApp with Odelia","WhatsApp 联系 Odelia"]},
+ {ic:"im",t:["iMessage with Odelia","iMessage 联系 Odelia"]},
+ {ic:"email",t:["email to Odelia","给 Odelia 发邮件"]},
+ {ic:"phone",t:["call Odelia any time","随时致电 Odelia"]}
 ];
 const CHIC = {
  wechat:'<span class="ci" style="background:#2AAE67"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg></span>',
  email:'<span class="ci" style="background:#fff"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="2.2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>',
  phone:'<span class="ci" style="background:#34B36A"><svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg></span>',
  chat:'<span class="ci" style="background:#3B82F6"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 4c5 0 9 3.1 9 7s-4 7-9 7c-1 0-2-.1-2.9-.4L4 20l1.4-3.6C4 15 3 13.1 3 11c0-3.9 4-7 9-7z"/></svg></span>',
- dash:'<span class="ci orb"></span>'
+ dash:'<span class="ci orb"></span>',
+ slack:'<span class="ci" style="background:#4A154B"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg></span>',
+ lark:'<span class="ci" style="background:#3370FF"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg></span>',
+ wa:'<span class="ci" style="background:#25D366"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5zm-2.7 4.4c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z" fill-rule="evenodd"/></svg></span>',
+ im:'<span class="ci" style="background:#34C759"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg></span>'
 };
 let rIdx = 0;
 function renderRot(){
