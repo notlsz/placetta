@@ -5,6 +5,7 @@ import { fire, isInspection, ruleLabel, validRule, type BrEvent, type BusinessRu
 import type { Approval, Workspace } from "./model";
 import type { Lang } from "./i18n";
 import type { Tool } from "./live";
+import { MCP_PREFIX, mcpApp, mcpReads } from "./mcp";
 
 /* ------------------------------------------------------------------ *
  * The owner's controls over Odelia, the way Claude Code has permission
@@ -21,7 +22,7 @@ import type { Tool } from "./live";
 
 export type Autonomy = "ask" | "usual" | "plan";
 /** What she does, as an owner thinks of it. A rule names one of these and, optionally, who or what it's about. */
-export type ActionKind = "contact" | "applications" | "filing" | "deadlines" | "calendar" | "stores" | "facts" | "documents" | "purchases" | "routines" | "playbooks" | "memory" | "settings";
+export type ActionKind = "contact" | "applications" | "filing" | "deadlines" | "calendar" | "stores" | "facts" | "documents" | "purchases" | "routines" | "playbooks" | "memory" | "settings" | "apps";
 export type OwnerRule = { id: string; kind: "allow" | "deny"; action: ActionKind; target?: string; label: Bi; at: string; by?: string; used?: number; last?: string };
 export type PlanState = { job: string; state: "waiting" | "approved"; at: string; by?: string };
 /** A change Odelia wanted to make under Ask me first: the tool, what she passed it, and what it does in plain words. */
@@ -60,6 +61,8 @@ const PLAN_OK = new Set([...READ, "set_plan"]);
  *  doesn't know counts as a change, on the safe side. */
 export function changes(tool: string, input: Record<string, unknown>): boolean {
   if (READ.has(tool) || PLANNING.has(tool) || DRAFTS.has(tool)) return false;
+  // a connected app's tool (src/mcp.ts) either only reads or puts an approval card up and runs only once an owner approves
+  if (tool.startsWith(MCP_PREFIX)) return false;
   if (tool === "update_store" && str(input.city)) return false;   // a move already waits for a confirmation
   return true;
 }
@@ -78,8 +81,12 @@ export const ACTIONS: Record<ActionKind, { label: Bi; tools: string[]; allowable
   playbooks: { label: B("Save playbooks", "保存手册"), tools: ["skill_save"], allowable: true },
   memory: { label: B("Remember things about you", "记住关于您的信息"), tools: ["memory_save"], allowable: true },
   settings: { label: B("Change your settings", "修改您的设置"), tools: ["change_setting"], allowable: true },
+  // every connected app's tool (named mcp__app__tool): a Never rule can stop one app or all of them. Never allowed ahead:
+  // what an outside app's action costs or sends isn't something Placetta can see.
+  apps: { label: B("Use connected apps", "使用已连接的应用"), tools: [], allowable: false },
 };
-export const actionOf = (tool: string): ActionKind | null => (Object.keys(ACTIONS) as ActionKind[]).find(k => ACTIONS[k].tools.includes(tool)) ?? null;
+export const actionOf = (tool: string): ActionKind | null =>
+  tool.startsWith(MCP_PREFIX) ? "apps" : (Object.keys(ACTIONS) as ActionKind[]).find(k => ACTIONS[k].tools.includes(tool)) ?? null;
 
 const str = (v: unknown, max = 400) => (typeof v === "string" ? v : v == null ? "" : String(v)).trim().slice(0, max);
 const arr = (v: unknown) => (Array.isArray(v) ? v : []);
@@ -100,6 +107,9 @@ export function targetsOf(tool: string, input: Record<string, unknown>, w: Works
   const off = str(input.official_form_id) ? formById(str(input.official_form_id)) : undefined;
   // a message's own words count too: "Never contact the landlord" stops a note that addresses them by name
   const words = tool === "draft_message" || tool === "send_email" ? [str(input.message, 2000), str(input.body, 4000)] : [];
+  // a connected app's tool: its app and action by name ("mcp__square__create_order" reads "square create order"), and
+  // everything it would run with
+  if (tool.startsWith(MCP_PREFIX)) words.push(tool.slice(MCP_PREFIX.length).replace(/_+/g, " "), JSON.stringify(input).slice(0, 4000));
   const all = [
     str(input.to), str(input.title), str(input.subject), ...words, str(input.name), str(input.city), str(input.address),
     str(input.label), str(input.value), str(input.business_name), str(input.goal), str(input.payee), str(input.why), str(input.fact), str(input.setting),
@@ -111,10 +121,11 @@ export function targetsOf(tool: string, input: Record<string, unknown>, w: Works
 
 /** Whether a rule covers a call. Never rules match broadly (the words anywhere in what the call is about); Always allow
  *  rules match narrowly (every recipient on the rule's list, or the exact application or store it names). */
-export function ruleMatches(r: OwnerRule, tool: string, input: Record<string, unknown>, w: Workspace): boolean {
+export function ruleMatches(r: OwnerRule, tool: string, input: Record<string, unknown>, w: Workspace, about: string[] = []): boolean {
   if (r.action !== actionOf(tool)) return false;
   const t = lc(r.target ?? "");
-  if (r.kind === "deny") return !t || targetsOf(tool, input, w).some(x => x.includes(t));
+  // about: more names the call goes by (a connected app's own name, "Google Calendar"), matched with or without spaces
+  if (r.kind === "deny") return !t || [...targetsOf(tool, input, w), ...about.map(lc)].some(x => x.includes(t) || x.replace(/\s+/g, "").includes(t.replace(/\s+/g, "")));
   if (!ACTIONS[r.action].allowable) return false;
   if (r.action === "contact") {
     const want = new Set(recipients(r.target ?? "")), got = recipientsOf(tool, input);
@@ -135,7 +146,7 @@ export function feeOf(tool: string, input: Record<string, unknown>, w: Workspace
 
 const live = (w: Workspace, kind: OwnerRule["kind"]) => (w.controls?.rules ?? []).filter(r => r && r.kind === kind && ACTIONS[r.action]);
 /** The Never rule that stops this call, if any. */
-export const denyRule = (w: Workspace, tool: string, input: Record<string, unknown>) => live(w, "deny").find(r => ruleMatches(r, tool, input, w));
+export const denyRule = (w: Workspace, tool: string, input: Record<string, unknown>, about: string[] = []) => live(w, "deny").find(r => ruleMatches(r, tool, input, w, about));
 /** The Always allow rule that lets this call through without an approval, if any: never for filing, paying, a call
  *  with a fee, or (for messages) a request from outside the app. */
 export function allowRule(w: Workspace, tool: string, input: Record<string, unknown>, o: { remote?: boolean } = {}): OwnerRule | undefined {
@@ -161,6 +172,11 @@ export function describeCall(tool: string, input: Record<string, unknown>, w: Wo
   const an = app ? app.name : undefined;
   const off = str(input.official_form_id) ? formById(str(input.official_form_id)) : undefined;
   const n = arr(input.fields).length;
+  if (tool.startsWith(MCP_PREFIX)) {
+    // a connected app's tool: "Use square: create order"
+    const [app, act] = tool.slice(MCP_PREFIX.length).split("__"), what = (act ?? "").replace(/_/g, " ");
+    return B(`Use ${app}: ${what}`, `使用 ${app}：${what}`);
+  }
   switch (tool) {
     case "prepare_application": { const nm = off ? off.title : same(str(input.name, 120) || "an application"); return B(`Prepare the ${nm.en}`, `准备${nm.zh}`); }
     case "fill_fields": return B(`Fill ${n} line${n === 1 ? "" : "s"} on the ${an?.en ?? "application"}`, `填写${an?.zh ?? "申请"}的 ${n} 项`);
@@ -178,8 +194,7 @@ export function describeCall(tool: string, input: Record<string, unknown>, w: Wo
     case "change_setting": return B(`Change ${str(input.setting, 30)} to ${str(input.value, 40)}`, `将 ${str(input.setting, 30)} 改为 ${str(input.value, 40)}`);
     case "import_file": return B(`Bring a file from your drive into Documents${an ? ` for the ${an.en}` : ""}`, `从网盘导入文件到文件${an ? `（${an.zh}）` : ""}`);
     case "add_calendar_event": return B(`Put on your calendar: ${str(input.title, 120)}, ${str(input.date, 10)}`, `加入日历：${str(input.title, 120)}，${str(input.date, 10)}`);
-    case "review_documents": return B("Read your documents and add renewal reminders", "阅读您的文件并添加续期提醒");
-    default: return B(`Use ${tool.replace(/_/g, " ")}`, `使用 ${tool.replace(/_/g, " ")}`);
+    case "review_documents": return B("Read your documents and add renewal reminders", "阅读您的文件并添加续期提醒");    default: return B(`Use ${tool.replace(/_/g, " ")}`, `使用 ${tool.replace(/_/g, " ")}`);
   }
 }
 
@@ -401,7 +416,8 @@ export function jobsDone(c: Pick<ControlCtx, "get" | "apply" | "notify">, since:
 /**
  * The owner's controls around every tool: Never rules stop a call, Plan first lets only reading and the plan through,
  * Ask me first puts each change on one approval card (unless an Always allow rule covers it), a message an Always
- * allow rule covers goes out without another tap (only from the app), and business rules fire where their events
+ * allow rule covers is approved without another tap (only from the app; the undo window still holds it before it's
+ * sent), Never rules cover connected apps' tools too, and business rules fire where their events
  * happen. Errors go back to the model as tool errors, like any other.
  */
 export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
@@ -423,8 +439,8 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
     ...t,
     async execute(input: Record<string, unknown>) {
       const w = c.get(), name = t.name;
-      // Never rules: in every mode, for every channel
-      const no = denyRule(w, name, input);
+      // Never rules: in every mode, for every channel, connected apps' tools included (by the app's own name too)
+      const no = denyRule(w, name, input, name.startsWith(MCP_PREFIX) ? [mcpApp(t)] : []);
       if (no) {
         c.apply(w2 => audit("agent", B("Stopped by your rule", "被您的规则阻止"), no.label, describeCall(name, input, w2))(usedRule(no.id, now())(w2)));
         throw new Error(`The owner set a rule: "${no.label.en}". Don't do this or look for another way around it. Tell the person in one sentence that their rule stops it.`);
@@ -442,7 +458,8 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
           if (!c.made.approvals.includes(id)) c.made.approvals.push(id);
           return { ...out, status: "waiting", plan_waiting_for_owner_approval: true, approval_id: id, note: PLAN_NOTE };
         }
-        if (!PLAN_OK.has(name)) throw new Error(PLAN_REFUSE);
+        // a connected app's tool that only reads is research; one that changes something waits for the plan's approval
+        if (!PLAN_OK.has(name) && !mcpReads(t)) throw new Error(PLAN_REFUSE);
         return t.execute(input);
       }
       // Ask me first: a change waits on the run's approval card, unless an Always allow rule covers it
@@ -459,7 +476,7 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
         const ap = c.get().approvals.find(a => a.id === str(o.approval_id));
         if (yes && ap && ap.kind === "send" && !ap.fee) {
           c.apply(w2 => audit("agent", B("Used your rule", "使用了您的规则"), yes.label, ap.title)(usedRule(yes.id, now())({ ...w2, approvals: w2.approvals.map(a => (a.id === ap.id ? { ...a, auto: { rule: yes.id, label: yes.label } } : a)) })));
-          return { ...o, goes_out_under_owner_rule: yes.label.en, note: `Under the owner's rule "${yes.label.en}" this message goes out without another approval as soon as an owner has Placetta open. Say so in one short sentence.` };
+          return { ...o, goes_out_under_owner_rule: yes.label.en, note: `Under the owner's rule "${yes.label.en}" this message is approved without another tap as soon as an owner has Placetta open, then waits out the usual undo window before it's sent. Say so in one short sentence.` };
         }
       }
       // Business rules, where their events happen
@@ -513,8 +530,9 @@ export function allowOptions(a: Approval, w: Workspace): { action: ActionKind; t
 export function autoOk(a: Approval, w: Workspace): boolean {
   if (!a.auto || a.kind !== "send" || a.fee || a.second) return false;
   const r = (w.controls?.rules ?? []).find(x => x.id === a.auto!.rule && x.kind === "allow" && x.action === "contact");
-  const to = (a.data ?? []).find(f => f.id === "to")?.value ?? "";
-  return !!r && ruleMatches(r, "draft_message", { to }, w);
+  const to = (a.data ?? []).find(f => f.id === "to")?.value ?? "", message = (a.data ?? []).find(f => f.id === "msg")?.value ?? "";
+  // checked again when the undo window ends: a Never rule added meanwhile stops it too
+  return !!r && ruleMatches(r, "draft_message", { to }, w) && !denyRule(w, "draft_message", { to, message, title: a.title.en });
 }
 
 /** A second owner's approval, for a card a business rule gave to two owners: "first" when this is the first owner,

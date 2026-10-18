@@ -2,6 +2,7 @@ import { useState, type MutableRefObject } from "react";
 import { useApp } from "./ctx";
 import { addRule, allowOptions, secondStep } from "./autonomy";
 import type { Approval } from "./model";
+import { HOLD_MINUTES } from "./hold";
 import "./controls.css";
 
 /* On an approval card: "Always allow" for what the card covers (a message's recipients, or the kinds of change held
@@ -17,7 +18,7 @@ export function AllowRule({ a, commit }: { a: Approval; commit: MutableRefObject
   const second = a.second ? secondStep(a, me) : null;
   return (
     <>
-      {a.auto && <p className="auto-note">{zh ? `按您的规则（${b(a.auto.label)}），这条消息会直接发出，无需再点。` : `Under your rule (${b(a.auto.label)}), this message goes out without another tap.`}</p>}
+      {a.auto && <p className="auto-note">{zh ? `按您的规则（${b(a.auto.label)}），这条消息无需再点即获批准，${HOLD_MINUTES} 分钟内仍可撤销。` : `Under your rule (${b(a.auto.label)}), this message is approved without another tap. You can still undo it for ${HOLD_MINUTES} minutes.`}</p>}
       {second && <p className="second-note">{second === "first"
         ? (zh ? "按您的业务规则，这一项需要两位所有者批准。您批准后，还需另一位所有者批准。" : "Under your business rule, two owners approve this. After you approve, another owner approves it too.")
         : (zh ? "您已批准。还需另一位所有者批准。" : "You approved it. Another owner approves it too.")}</p>}
@@ -29,7 +30,7 @@ export function AllowRule({ a, commit }: { a: Approval; commit: MutableRefObject
               <input type="checkbox" checked={on.includes(i)} onChange={e => setOn(v => (e.target.checked ? [...v, i] : v.filter(x => x !== i)))} />
               <span><b>{b(o.label)}</b>
                 <small>{a.kind === "send"
-                  ? (zh ? "以后只发给这些人的消息，在应用中会直接发出，无需您再批准。来自短信、电话或聊天的请求仍需批准。" : "Next time a message goes only to them, it goes out from the app without a card. Requests by text, call or chat still ask.")
+                  ? (zh ? `以后只发给这些人的消息，在应用中无需您再批准，${HOLD_MINUTES} 分钟内仍可撤销。来自短信、电话或聊天的请求仍需批准。` : `Next time a message goes only to them, it's approved in the app without a card, with ${HOLD_MINUTES} minutes to undo it. Requests by text, call or chat still ask.`)
                   : (zh ? "以后这类更改直接进行，不再等您批准。提交、付款和任何收费的事项始终先问您。" : "Next time she makes this kind of change, it goes ahead without a card. Filing, paying and anything with a fee always ask.")}</small>
               </span>
             </label>

@@ -2,6 +2,7 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import type { Audit, Bi, Workspace } from "../model";
 import type { Reply, Step } from "../core";
 import type { HqLink, HqRow } from "../hq";
+import { readSSE } from "../../supabase/functions/_shared/stream.ts";
 
 /* ------------------------------------------------------------------ *
  * Placetta's backend (Supabase): accounts, saved workspaces, private
@@ -50,9 +51,11 @@ export type Filing = {
   submitted_at: string | null; decided_at: string | null; updated_at: string;
   channel?: FilingChannel | null; agent_state?: AgentState | null; agent_log?: AgentLogEntry[]; handoff_url?: string | null;
   submit_clicked_at?: string | null; attempts?: number;
+  /** While agent_state is "held" (the undo window): when it goes, unless an owner undoes it. */
+  send_after?: string | null;
 };
 export type FilingChannel = "email" | "fax" | "mail" | "portal" | "team";
-export type AgentState = "queued" | "running" | "needs_you" | "done" | "failed" | "handoff";
+export type AgentState = "queued" | "running" | "needs_you" | "done" | "failed" | "handoff" | "held";
 export type AgentLogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string; value?: string };   // value: what was entered (sensitive numbers masked)
 export type FilingPayload = {
   form?: Bi; fields: { label: Bi; value: string; from?: Bi }[]; checklist: { label: Bi; state: string; doc?: string }[];
@@ -314,11 +317,13 @@ export async function logAudit(ws: string, uid: string, entries: Audit[]) {
 const BASE_COLS = "id, workspace_id, app_id, title, agency, portal_url, fee_estimate, payload, status, approved_at, requirements_checked, confirmation_number, fee_paid, receipt_path, note, payment_url, customer_paid_at, submitted_at, decided_at, updated_at";
 const AGENT_COLS = BASE_COLS + ", channel, agent_state, agent_log, handoff_url, submit_clicked_at, attempts";
 /* Until the self-filing migration is applied the agent columns don't exist (42703): fall back to the base columns. */
-let agentCols = true;
+let agentCols = true, holdCols = true;
 const missingCol = (e: { code?: string } | null) => e?.code === "42703" || e?.code === "PGRST204";
 export async function listFilings(ws: string): Promise<Filing[]> {
   const q = (cols: string) => supabase().from("filings").select(cols).eq("workspace_id", ws).order("approved_at", { ascending: false });
-  let { data, error } = await q(agentCols ? AGENT_COLS : BASE_COLS);
+  let { data, error } = await q(agentCols ? (holdCols ? AGENT_COLS + ", send_after" : AGENT_COLS) : BASE_COLS);
+  // before the undo window's migration there's no send_after: keep the agent columns without it
+  if (agentCols && holdCols && missingCol(error)) { holdCols = false; ({ data, error } = await q(AGENT_COLS)); }
   if (agentCols && missingCol(error)) { agentCols = false; ({ data, error } = await q(BASE_COLS)); }
   if (error) throw fromPg(error);
   return (data ?? []) as unknown as Filing[];
@@ -461,6 +466,16 @@ export const signedCopy = (ws: string, filingId: string, path: string) => fn<Fil
 /** Stop a filing before anything has left for the agency. Refused once Placetta has pressed submit or sent it. */
 export const stopFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "stop" });
 export const filingStatus = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "status" });
+/** The undo window: take a held filing back (nothing has left), or end the wait and send it now. */
+export const undoFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "undo" });
+export const sendFilingNow = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "send_now" });
+/** Ask a person on the Placetta team; their reply comes to Updates. Three a day per workspace. */
+export const askPerson = (ws: string, question: string, context: Record<string, unknown>, lang: string) => fn<{ id: string }>("team", { action: "ask", workspace_id: ws, question, context, lang });
+/** The team's reply to a customer's question (staff with two-step). */
+export async function answerPerson(id: string, reply: string) {
+  const { error } = await supabase().rpc("answer_person", { p_id: id, p_reply: reply });
+  if (error) throw fromPg(error);
+}
 export const teamFiling = (ws: string, filingId: string, action: "team_approve" | "take_over") => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action });
 /** Upload the filled official form for a filing before it's approved, so its path can go in the frozen payload. */
 export async function uploadForm(ws: string, appId: string, name: string, bytes: Blob): Promise<string> {
@@ -549,9 +564,41 @@ export async function aiStatus(ws: string): Promise<AiStatus | null> {
 }
 
 /** The agent's model call through the server (company keys, the role's route, research tools, plan and usage checks).
- *  saver and renews_at come back when the workspace is in saver mode (past 60% of its allowance). */
-export const agentCall = (ws: string, request: Record<string, unknown>, o: { deep?: boolean; research?: boolean; role?: string; location?: { city: string; region?: string } } = {}) =>
-  fn<{ content: { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] }[]; stop_reason: string; saver?: boolean; renews_at?: string | null }>("agent", { workspace_id: ws, request, ...o });
+ *  saver and renews_at come back when the workspace is in saver mode (past 60% of its allowance). With onText the
+ *  answer streams: onText gets the whole text so far as the model writes it, and the same complete answer comes back. */
+type AgentAnswer = { content: { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] }[]; stop_reason: string; saver?: boolean; renews_at?: string | null };
+export const agentCall = (ws: string, request: Record<string, unknown>, o: { deep?: boolean; research?: boolean; role?: string; location?: { city: string; region?: string }; onText?: (text: string) => void } = {}) => {
+  const { onText, ...rest } = o;
+  return onText ? agentStream({ workspace_id: ws, request, ...rest, stream: true }, onText) : fn<AgentAnswer>("agent", { workspace_id: ws, request, ...rest });
+};
+/** The streamed call: server-sent events from the agent function ("text" pieces, then "message" or "error"). An older
+ *  server that answers in one piece is read the same way as fn would. */
+async function agentStream(body: Record<string, unknown>, onText: (text: string) => void): Promise<AgentAnswer> {
+  const s = await getSession();
+  if (!s) throw err("unauthorized", "Sign in again.", "请重新登录。");
+  let res: Response;
+  try {
+    res = await net(`${URL_}/functions/v1/agent`, { method: "POST", headers: { "content-type": "application/json", apikey: KEY, Authorization: `Bearer ${s.access_token}` }, body: JSON.stringify(body) });
+  } catch { throw err("upstream_error", "Couldn't reach Placetta. Try again.", "无法连接快哉，请重试。"); }
+  if (!res.ok) {
+    let e: ApiError = err("upstream_error", "Couldn't reach Placetta. Try again.", "无法连接快哉，请重试。");
+    try { const j = await res.json(); if (j?.error?.code) e = err(j.error.code, j.error.message, typeof j.error.message_zh === "string" ? j.error.message_zh : undefined); } catch { /* not JSON */ }
+    if (res.status === 402 && !LIMITS.includes(e.code)) e = err("payment_required", e.message, e.message_zh);
+    throw e;
+  }
+  if (!/text\/event-stream/i.test(res.headers.get("content-type") ?? "") || !res.body) return res.json() as Promise<AgentAnswer>;
+  let text = "", done: AgentAnswer | null = null, failed: ApiError | null = null;
+  await readSSE(res.body, (event, data) => {
+    let d: Record<string, unknown>;
+    try { d = JSON.parse(data); } catch { return; }
+    if (event === "text") { text = d.reset ? String(d.d ?? "") : text + String(d.d ?? ""); onText(text); }
+    else if (event === "message") done = d as unknown as AgentAnswer;
+    else if (event === "error") { const x = (d.error ?? {}) as { code?: string; message?: string }; failed = err(x.code ?? "upstream_error", x.message ?? "Couldn't reach the agent's model. Try again."); }
+  });
+  if (failed) throw failed;
+  if (!done) throw err("upstream_error", "The answer stopped partway. Try again.", "回答中途中断，请重试。");
+  return done;
+}
 
 export async function ttsAudio(ws: string, text: string, lang: string): Promise<ArrayBuffer | null> {
   const s = await getSession(); if (!s) return null;
@@ -609,6 +656,26 @@ export async function teamTasks(): Promise<TeamTask[]> {
   if (error) return [];   // before the migration, or not staff: show nothing rather than fail the queue
   return (data ?? []) as TeamTask[];
 }
+/* What Odelia did this month, measured (src/monthly.ts; odelia_month_* in the 20261017200000_odelia_metrics migration).
+   null when the server is older than these numbers, or in the preview: the card then uses the workspace here. */
+export async function odeliaMonth(ws: string, month?: string): Promise<import("../monthly").MonthMetrics | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("odelia_month_detail", { ws, ...(month ? { p_month: month } : {}) });
+  return error || !data ? null : data as import("../monthly").MonthMetrics;
+}
+/** Headquarters: every franchisee that shared with this email. */
+export async function odeliaMonthHq(month?: string): Promise<import("../monthly").MonthAcross | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("odelia_month_hq", month ? { p_month: month } : {});
+  return error || !data ? null : data as import("../monthly").MonthAcross;
+}
+/** The Placetta team: every workspace. Staff only. */
+export async function odeliaMonthCompany(month?: string): Promise<import("../monthly").MonthAcross | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("odelia_month_company", month ? { p_month: month } : {});
+  return error || !data ? null : data as import("../monthly").MonthAcross;
+}
+
 /** What Odelia's models cost the company this month against plan revenue (public.ai_margin_company). Staff only. */
 export type AiMarginRow = { workspace_id: string; name: string | null; ai_cost_usd: number; revenue_usd: number; allowance_usd: number; cost_pct: number | null; calls: number; top_roles: { role: string; cost_usd: number; calls: number }[] };
 export type AiMargin = { month: string; ai_cost_usd: number; mrr_usd: number; cost_pct: number | null; gross_margin_pct: number | null; workspaces_using_ai: number; calls: number; top: AiMarginRow[]; by_role: { role: string; cost_usd: number; calls: number }[]; by_vendor: { provider: string; cost_usd: number; calls: number }[] };

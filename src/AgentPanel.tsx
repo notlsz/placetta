@@ -16,6 +16,11 @@ import { FilingLive } from "./FilingLive";
 import { LiveBot, Working } from "./Bot";
 import { taskVerb } from "./tasks";
 import { PlanCard } from "./Work";
+import { RememberedChips } from "./Remembered";
+import { NOT_CHECKED, splitSources } from "./sources";
+import { LocalHold, useApprovalHold } from "./SendHold";
+import { AskPerson } from "./AskPerson";
+import { AllowanceNote } from "./Allowance";
 import { UndoTurn } from "./UndoTurn";
 import { PlanGate } from "./PlanGate";
 import { planApprovalId } from "./autonomy";
@@ -43,6 +48,7 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
           <b>{t("agentName")}</b>
           <small aria-live="polite">{busy && live ? <><em className="pn-verb">{b(taskVerb(live.state))}…</em>{b(live.label)}</> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
         </span>
+        <AskPerson compact context={() => panelContext(feed)} />
         {onHide && <button type="button" className="icbtn" onClick={onHide} aria-label={t("hidePanel")} title={t("hidePanel")}><I.x /></button>}
       </header>
 
@@ -55,12 +61,21 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
         )}
         {feed.map(m => m.kind === "user" ? <div key={m.id} className="you"><p>{m.text}</p></div>
           : m.kind === "memory" ? <Memory key={m.id} text={m.text} />
-            : <TurnView key={m.id} m={m} last={m === last} speaking={tts.speaking} onSay={say} />)}
+            : <TurnView key={m.id} m={m} last={m === last} speaking={tts.speaking} onSay={say} asked={askedBefore(feed, m)} />)}
       </div>
 
       <div className="pn-dock"><Composer variant="panel" tts={tts} asked={asked} /></div>
     </aside>
   );
+}
+
+/** What the person asked right before a run, for the allowance note on a long job. */
+const askedBefore = (feed: FeedItem[], m: FeedItem) => { const i = feed.indexOf(m), u = i > 0 ? feed[i - 1] : undefined; return u?.kind === "user" ? u.text : ""; };
+/** What goes to a person with "Ask a person" from the panel: the last exchange with Odelia. */
+function panelContext(feed: FeedItem[]): Record<string, unknown> {
+  const turn = [...feed].reverse().find((x): x is Extract<FeedItem, { kind: "turn" }> => x.kind === "turn" && !!x.reply);
+  const asked = turn ? askedBefore(feed, turn) : "";
+  return { from: "odelia_panel", ...(asked ? { asked: asked.slice(0, 600) } : {}), ...(turn?.reply ? { last_reply: turn.reply.text.map(x => x.en).join(" ").slice(0, 800) } : {}) };
 }
 
 function Memory({ text }: { text: Bi }) {
@@ -69,7 +84,7 @@ function Memory({ text }: { text: Bi }) {
 }
 
 /** One run: a quiet log of the steps, then the answer and whatever it produced. */
-function TurnView({ m, last, speaking, onSay }: { m: Turn; last: boolean; speaking: string | null; onSay: (text: string) => void }) {
+function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean; speaking: string | null; onSay: (text: string) => void; asked: string }) {
   const { b, t, lang, ws, busy, run, go, cloud } = useApp();
   const [show, setShow] = useState(false);
   const live = !m.reply;
@@ -117,12 +132,13 @@ function TurnView({ m, last, speaking, onSay }: { m: Turn; last: boolean; speaki
         </ol>
         </Working>
       )}
+      {live && last && <AllowanceNote asked={asked} />}
       {plan && <PlanCard job={plan} compact />}
       {plan && <PlanGate job={plan} />}
       {live && m.draft && <p className="drafting" aria-live="polite">{m.draft}</p>}
       {r && (
         <div className="answer">
-          {r.text.map((p, i) => <Prose key={i} text={b(p)} />)}
+          {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} /> : null; })}
           {r.chain && <ol className="chain">{r.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
           {filed.map(id => <FilingLive key={id} app={id} />)}
           {(r.apps?.some(id => !covered.has(id) && !filed.includes(id)) || (r.files?.length && !filed.length)) ? (
@@ -144,16 +160,34 @@ function TurnView({ m, last, speaking, onSay }: { m: Turn; last: boolean; speaki
           {rows.filter(id => !(plan && id === planApprovalId(plan.id))).map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
           {r.memory?.map((x, i) => <Memory key={i} text={x} />)}
+          {r.remembered?.length ? <RememberedChips items={r.remembered} /> : null}
           {r.skills?.map((x, i) => <p key={"s" + i} className="mem"><I.spark /><span><b>{t("learned")}</b>{b(x)}</span></p>)}
-          {r.sources && r.sources.length > 0 && (
-            <p className="sources"><span>{b({ en: "Sources", zh: "来源" })}</span>{r.sources.map(x => { let h = x.url; try { h = new URL(x.url).hostname.replace(/^www\./, ""); } catch { /* keep */ } return <a key={x.url} href={x.url} target="_blank" rel="noreferrer" title={x.title}>{h}</a>; })}</p>
-          )}
+          <SourcesRow said={said} links={r.sources} />
           {r.matches && <button type="button" className="pill quiet" onClick={() => go("find")}>{b({ en: "Open the results", zh: "查看结果" })}</button>}
           {r.next && <button type="button" className="pill primary sm" disabled={busy} onClick={() => run(r.next!.req, b(r.next!.label))}><span>{b(r.next.label)}</span><i aria-hidden="true"><I.arrow /></i></button>}
           {r.undo && <UndoTurn id={r.undo} />}
         </div>
       )}
     </div>
+  );
+}
+
+/** Where the answer came from (src/sources.ts): the Sources line the reply ends with, shown as links where there's a
+ *  page; the plain note when it states a rule nothing was checked against; the cited pages of an older reply otherwise. */
+function SourcesRow({ said, links }: { said: string; links?: { title: string; url: string }[] }) {
+  const { b } = useApp();
+  const line = splitSources(said)[1];
+  if (line === NOT_CHECKED.en || line === NOT_CHECKED.zh) return <p className="sources unchecked"><span>{line}</span></p>;
+  const named = line ? line.replace(/^(Sources: |来源：)/, "").split(/, |、/) : [];
+  if (!links?.length && !named.length) return null;
+  const host = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
+  // a name in the line with no page behind it (a document, an email) shows as plain text
+  const plain = named.filter(n => !(links ?? []).some(x => n.startsWith(x.title)));
+  return (
+    <p className="sources"><span>{b({ en: "Sources", zh: "来源" })}</span>
+      {(links ?? []).map(x => <a key={x.url} href={x.url} target="_blank" rel="noreferrer" title={x.url}>{line ? x.title : host(x.url)}{line && x.title !== host(x.url) && <small>{host(x.url)}</small>}</a>)}
+      {plain.map(n => <em key={n}>{n}</em>)}
+    </p>
   );
 }
 
@@ -178,6 +212,7 @@ function ApproveGroup({ ids }: { ids: string[] }) {
   const total = apps.reduce((n, a) => n + (a ? feeTotal(a) : 0), 0);
   const tbd = apps.some(a => a?.fees.some(f => f.tbd));
   const n = list.length;
+  const hold = useApprovalHold(ids[0]);   // the undo window: approved together, not sent yet
   const go = () => { setGoing(true); approveAll(ids); };
   return (
     <div className="agroup" role="group" aria-label={zh ? `${n} 项可以提交` : `${n} ready to file`}>
@@ -203,7 +238,7 @@ function ApproveGroup({ ids }: { ids: string[] }) {
       </ul>
       <div className="ag-f">
         <small>{cloud ? (zh ? "点按之前不会提交任何内容。机构费用由您直接支付给机构。" : "Nothing goes out until you tap. Agency fees are paid to the agency.") : (zh ? "点按之前不会提交任何内容。" : "Nothing goes out until you tap.")}</small>
-        <button type="button" className="pill ink sm" disabled={busy || going} onClick={go}><I.check />{zh ? (n === 2 ? "两项都批准" : `全部批准 ${n} 项`) : n === 2 ? "Approve both" : `Approve all ${n}`}</button>
+        {hold ? <LocalHold hold={hold} compact /> : <button type="button" className="pill ink sm" disabled={busy || going} onClick={go}><I.check />{zh ? (n === 2 ? "两项都批准" : `全部批准 ${n} 项`) : n === 2 ? "Approve both" : `Approve all ${n}`}</button>}
       </div>
     </div>
   );

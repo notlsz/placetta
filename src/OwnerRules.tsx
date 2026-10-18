@@ -68,7 +68,7 @@ export function AutonomyGroup() {
               </Select>
             </label>
             <label>{zh ? "对谁或什么（可选）" : "Who or what (optional)"}
-              <input value={target} onChange={e => setTarget(e.target.value)} placeholder={zh ? "例如：房东" : "e.g. landlord"} maxLength={120} />
+              <input value={target} onChange={e => setTarget(e.target.value)} placeholder={action === "apps" ? (zh ? "例如：Square" : "e.g. Square") : zh ? "例如：房东" : "e.g. landlord"} maxLength={120} />
             </label>
             <button type="submit" className="sbtn ink">{zh ? "添加" : "Add"}</button>
             <p className="rf-note">{zh ? "她用到的工具会直接拒绝，并告诉您是您的规则阻止了它。" : "The tool refuses it outright and she tells you your rule stopped it."}</p>

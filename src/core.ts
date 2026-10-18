@@ -28,6 +28,7 @@ export type Reply = {
   matches?: { what: string; where: string; hits: LicenseHit[] };
   next?: { label: Bi; req: Request };
   sources?: { title: string; url: string }[];   // official pages the agent read, cited
+  remembered?: { id: string; text: Bi; suggested?: boolean }[];   // details the person mentioned that this run kept (src/recall.ts)
   table?: { title: Bi; columns: Bi[]; rows: string[][]; cite?: string[][] };   // a grid the agent built, e.g. reviewed documents; cite: the document's words behind each cell
   undo?: string;            // the run's undo point (src/rewind.ts): "Undo what she did" on this turn
 };
@@ -56,7 +57,8 @@ export const addApp = (a: Application): P => w => ({ ...w, apps: w.apps.some(x =
 export const addDoc = (d: Doc): P => w => ({ ...w, docs: [d, ...w.docs.filter(x => x.id !== d.id)] });
 export const audit = (actor: Audit["actor"], action: Bi, object: Bi, detail?: Bi, who?: Bi): P => w => ({ ...w, audit: [{ id: uid("x"), at: nowIso(), actor, action, object, detail, who }, ...w.audit] });
 export const dropApproval = (id: string): P => w => ({ ...w, approvals: w.approvals.filter(a => a.id !== id), closed: [...w.closed, ...w.approvals.filter(a => a.id === id)] });
-export const addApproval = (a: Approval): P => w => ({ ...w, approvals: w.approvals.some(x => x.id === a.id) ? w.approvals : [a, ...w.approvals] });
+/** Stamped with when it was asked, so Home can say how long it has waited (src/monthly.ts). */
+export const addApproval = (a: Approval): P => w => ({ ...w, approvals: w.approvals.some(x => x.id === a.id) ? w.approvals : [{ ...a, at: a.at ?? nowIso() }, ...w.approvals] });
 export const addTask = (t: Task): P => w => ({ ...w, running: [t, ...w.running.filter(x => x.id !== t.id)] });
 export const dropTask = (id: string): P => w => ({ ...w, running: w.running.filter(x => x.id !== id) });
 export const addDeadline = (d: Deadline): P => w => ({ ...w, deadlines: [...w.deadlines.filter(x => x.id !== d.id), d] });
@@ -89,7 +91,7 @@ export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
     business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
     facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto, spend: s.spend, jobs: s.jobs, routines: s.routines,
-    firstPlan: s.firstPlan, controls: s.controls, undo: s.undo,
+    firstPlan: s.firstPlan, runs: s.runs, controls: s.controls, undo: s.undo,
   };
 }
 /** What's saved: everything but the audit trail (that has its own table) and payment cards (made from the filings). */
@@ -157,6 +159,8 @@ export const applyChange = (c: Change): P => w => {
     const spend = w.spend ?? { policy: DEFAULT_POLICY, purchases: [] };
     return { ...w, spend: { ...spend, policy: { ...spend.policy, budgets: c.budgets } } };
   }
+  // a connected app's action runs on the server when approved (src/App.tsx), never in the workspace itself
+  if (c.op === "mcp_call") return w;
   // held changes and plans are run by the app when an owner approves them (src/held.ts), not here
   if (c.op === "held" || c.op === "plan") return w;
   return { ...w, apps: w.apps.filter(a => a.id !== c.app), approvals: w.approvals.filter(a => a.app !== c.app) };

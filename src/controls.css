@@ -52,6 +52,9 @@
 .undo-done h4 { margin: 10px 0 2px; font-size: 12.5px; font-weight: 600; color: var(--ink3); }
 .undo-done ul { list-style: none; margin: 0; padding: 0; }
 .undo-done li { padding: 2px 0; }
+/* a send still counting down: its title, then the countdown with Undo (src/SendHold.tsx) */
+.undo-held li { display: flex; flex-direction: column; gap: 4px; padding: 4px 0; }
+.undo-held li > small { color: var(--ink3); font-size: 12.5px; }
 
 .plan-gate { display: flex; flex-direction: column; gap: 10px; }
 .plan-gate .pg-btns { display: flex; flex-wrap: wrap; gap: 8px; }

@@ -19,7 +19,12 @@ import type { Workspace } from "./model";
 /** One path her run changed. p: the path ("#id" picks an item of a list by its id); had: whether it existed before;
  *  b: the value before; h: the fingerprint of the value she left; i: where a removed list item was. */
 export type UndoRec = { p: string[]; had: boolean; b?: unknown; h: string; i?: number };
-export type UndoResult = { undone: number; kept: Bi[]; out: Bi[] };
+/** held: what was approved and is still in the undo window before it's sent (src/hold.ts, or a filing the server holds).
+ *  It hasn't left Placetta, so it isn't "can't be undone": the person cancels it from the countdown Undo lists it with. */
+export type HeldOut = { title: Bi; approval?: string; filing?: string };
+export type UndoResult = { undone: number; kept: Bi[]; out: Bi[]; held?: HeldOut[] };
+/** Sends in the undo window right now: approvals this tab holds, and applications whose filing the server holds. */
+export type HeldNow = { approvals?: Set<string>; filings?: Map<string, string> };
 export type UndoPoint = {
   id: string; at: string;
   /** What was asked, for the list and the audit trail. */
@@ -184,14 +189,22 @@ const pushOnce = (list: Bi[], x: Bi) => { if (!list.some(y => y.en === x.en)) li
 /**
  * Put back what one run changed, where it's still as she left it. o.filed: applications with a filing in an account
  * (they left Placetta even when the workspace doesn't say so yet); o.serverDocs: documents in an account live on the
- * server too, so one she saved stays in Documents.
+ * server too, so one she saved stays in Documents. o.held: sends still in the undo window, listed to cancel and left
+ * exactly as approved (their card and their application), so what goes out, if it does, is what the person approved.
  */
-export function restore(cur: Workspace, pt: UndoPoint, o: { filed?: Set<string>; serverDocs?: boolean } = {}): { w: Workspace; res: UndoResult } {
+export function restore(cur: Workspace, pt: UndoPoint, o: { filed?: Set<string>; serverDocs?: boolean; held?: HeldNow } = {}): { w: Workspace; res: UndoResult } {
   let w = cur, undone = 0;
-  const kept: Bi[] = [], out: Bi[] = [];
+  const kept: Bi[] = [], out: Bi[] = [], held: HeldOut[] = [];
+  const heldCards = cur.approvals.filter(a => o.held?.approvals?.has(a.id));
+  const heldApps = new Map<string, HeldOut>();
+  for (const a of heldCards) if (a.app) heldApps.set(a.app, { title: a.title, approval: a.id });
+  for (const [app, filing] of o.held?.filings ?? []) { const x = cur.apps.find(y => y.id === app); heldApps.set(app, { title: x ? B(`File the ${x.name.en}`, `提交${x.name.zh}`) : same(app), filing }); }
+  const holdOnce = (h: HeldOut) => { if (!held.some(x => x.title.en === h.title.en)) held.push(h); };
   const left = new Set([...cur.apps.filter(a => LEFT_STATUS.has(a.status)).map(a => a.id), ...(o.filed ?? [])]);
   for (const rec of [...pt.recs].sort((a, b) => a.p.length - b.p.length)) {
     const top = rec.p[0], id = rec.p[1]?.slice(1);
+    if (top === "apps" && id && heldApps.has(id)) { holdOnce(heldApps.get(id)!); continue; }
+    if (top === "approvals" && id && o.held?.approvals?.has(id)) { const a = heldCards.find(x => x.id === id); if (a) holdOnce(a.app && heldApps.has(a.app) ? heldApps.get(a.app)! : { title: a.title, approval: a.id }); continue; }
     if (top === "apps" && id && left.has(id)) {
       const a = cur.apps.find(x => x.id === id);
       pushOnce(out, B(`${a?.name.en ?? id}: already with the filing team or the agency`, `${a?.name.zh ?? id}：已交给申报团队或机构`));
@@ -200,6 +213,8 @@ export function restore(cur: Workspace, pt: UndoPoint, o: { filed?: Set<string>;
     if (top === "approvals" && rec.p.length === 2 && !rec.had && id) {
       const closed = cur.closed.find(a => a.id === id);
       if (closed) {
+        // approved, and its filing is still in the server's undo window: not gone yet
+        if (closed.app && heldApps.has(closed.app)) { holdOnce(heldApps.get(closed.app)!); continue; }
         if (closed.kind === "file") pushOnce(out, B(`Filed: ${closed.title.en}`, `已提交：${closed.title.zh}`));
         else if (closed.kind === "send") pushOnce(out, B(`Sent: ${closed.title.en}`, `已发送：${closed.title.zh}`));
         else if (closed.kind === "pay") pushOnce(out, B(`Paid: ${closed.title.en}`, `已付款：${closed.title.zh}`));
@@ -219,17 +234,17 @@ export function restore(cur: Workspace, pt: UndoPoint, o: { filed?: Set<string>;
     undone++;
   }
   for (const x of pt.outside ?? []) pushOnce(out, x);
-  return { w, res: { undone, kept, out } };
+  return { w, res: { undone, kept, out, ...(held.length ? { held } : {}) } };
 }
 
 /** The person taps Undo on a finished turn: her changes go back, the rest is listed, and the audit trail says so. */
-export const undoRun = (id: string, o: { filed?: Set<string>; serverDocs?: boolean; by?: string } = {}) => (cur: Workspace): Workspace => {
+export const undoRun = (id: string, o: { filed?: Set<string>; serverDocs?: boolean; held?: HeldNow; by?: string } = {}) => (cur: Workspace): Workspace => {
   const pt = (cur.undo ?? []).find(x => x.id === id);
   if (!pt || pt.done) return cur;
   const { w, res } = restore(cur, pt, o);
   const at = new Date().toISOString();
   const n = { ...w, undo: (w.undo ?? cur.undo ?? []).map(x => (x.id === id ? { ...x, done: { ...res, at, ...(o.by ? { by: o.by } : {}) } } : x)) };
   return audit("you", B("Undid what Odelia did", "撤销了 Odelia 的操作"), pt.title ?? B("A request", "一次请求"),
-    B(`${res.undone} change${res.undone === 1 ? "" : "s"} put back${res.kept.length ? `, ${res.kept.length} kept` : ""}${res.out.length ? `, ${res.out.length} already out` : ""}`,
-      `恢复了 ${res.undone} 项${res.kept.length ? `，保留 ${res.kept.length} 项` : ""}${res.out.length ? `，${res.out.length} 项已无法撤销` : ""}`))(n);
+    B(`${res.undone} change${res.undone === 1 ? "" : "s"} put back${res.kept.length ? `, ${res.kept.length} kept` : ""}${res.out.length ? `, ${res.out.length} already out` : ""}${res.held?.length ? `, ${res.held.length} not sent yet` : ""}`,
+      `恢复了 ${res.undone} 项${res.kept.length ? `，保留 ${res.kept.length} 项` : ""}${res.out.length ? `，${res.out.length} 项已无法撤销` : ""}${res.held?.length ? `，${res.held.length} 项尚未发出` : ""}`))(n);
 };
