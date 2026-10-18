@@ -21,8 +21,9 @@ paths = [
   '''(^|/)worker/filer/test/''',
 ]
 
-# Build output committed for deploys and the demo, generated from source files that are scanned. Their minified lines
-# run to 3 MB, and one commit of dist-single/index.html alone took 88 seconds to scan.
+# Build output committed for deploys and the demo, generated from source files that are scanned (the function bundles
+# by scripts/build-agent.mjs, the demo by vite build --mode single). Their minified lines run to 3 MB, and one commit of
+# dist-single/index.html alone took 88 seconds to scan. A new bundle in scripts/build-agent.mjs gets a line here.
 [[allowlists]]
 description = "generated bundles (their sources are scanned)"
 paths = [
@@ -31,6 +32,7 @@ paths = [
   '''^site/beam\.js$''',
   '''^supabase/functions/agent-run/agent\.js$''',
   '''^supabase/functions/partner-api/plan\.js$''',
+  '''^supabase/functions/_shared/(opening|start)\.js$''',
 ]
 
 # Values that are public by design:
