@@ -380,7 +380,7 @@ export function AssignPicker({ item, title, compact }: { item: ItemRef; title: B
   return (
     <Menu kind="listbox" className="asg" buttonClass={"asg-b" + (who ? " set" : "") + (compact ? " sm" : "")} label={zh ? "分配给" : "Assigned to"}
       buttonLabel={who ? (zh ? `分配给 ${shortName(who)}，点击更改` : `Assigned to ${shortName(who)}. Change`) : (zh ? "分配给某人" : "Assign to someone")}
-      button={<><I.user /><span>{who ? (compact ? shortName(who) : zh ? `分配给 ${shortName(who)}` : `Assigned to ${shortName(who)}`) : (zh ? "分配" : "Assign")}</span><I.chev /></>}
+      button={<><I.user /><span>{who ? (compact ? shortName(who) : zh ? `分配给 ${shortName(who)}` : `Assigned to ${shortName(who)}`) : (zh ? "分配" : "Assign")}</span></>}
       items={[
         ...members.map(p => ({ key: p.id, label: name(p), picked: who?.id === p.id, onPick: () => void team.assign(item, p.id, title) })),
         { key: "none", label: zh ? "不分配" : "Nobody", picked: !who, onPick: () => void team.assign(item, null, title) },

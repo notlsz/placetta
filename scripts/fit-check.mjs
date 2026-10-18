@@ -440,14 +440,14 @@ function align(INDENT_OK) {
       }
     }
   }
-  // the chatbar over the end of the page, scrolled to the bottom
+  // the chatbar over the end of the page, scrolled to the bottom (a sheet or modal over the page stands above the chatbar)
   if (cw && content && shown(cw) && content.scrollHeight > content.clientHeight + 2) {
     const was = content.scrollTop;
     content.scrollTop = content.scrollHeight;
     const top = Math.min(...kids(cw).map(k => R(k).top));
     let last = null, lb = -1;
     for (const e of content.querySelectorAll("*")) {
-      if (e.closest(".dockbar") || !shown(e) || !inFlow(e) || e.closest("svg")) continue;
+      if (e.closest(".dockbar, [aria-modal=true]") || !shown(e) || !inFlow(e) || e.closest("svg")) continue;
       const leaf = !e.children.length || [...e.childNodes].some(n => n.nodeType === 3 && n.data.trim()) || e.matches("img, canvas, input, textarea, select, button, .tray, .card, .store, .file, .sg, .pb, .job");
       if (!leaf || (!e.textContent.trim() && !e.matches("img, canvas, input, textarea, select")) || e.matches(".page")) continue;
       const b = R(e).bottom; if (b > lb) { lb = b; last = e; }

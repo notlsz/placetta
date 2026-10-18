@@ -2,6 +2,7 @@ import { useApp } from "./ctx";
 import { B, same } from "./bi";
 import { audit } from "./core";
 import { STAFF_LANGS, type StaffLang } from "./staff";
+import { Select } from "./ui";
 
 /** The language a staff member reads (src/staff.ts), on their row in Stores: what Odelia drafts to them is written in it.
  *  Set once per person, across every store they work at. The app's own words stay in English and Chinese. */
@@ -13,9 +14,9 @@ export function StaffLangPick({ person, value }: { person: string; value?: Staff
   return (
     <label className="staff-lang" title={b(B("Messages Odelia drafts to this person are written in this language", "Odelia 起草给此人的消息使用这种语言"))}>
       <span className="sr">{b(B(`Messages to ${person} in`, `发给 ${person} 的消息语言`))}</span>
-      <select value={value ?? "en"} onChange={e => set(e.target.value as StaffLang)}>
+      <Select sz="sm" value={value ?? "en"} onChange={e => set(e.target.value as StaffLang)}>
         {STAFF_LANGS.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-      </select>
+      </Select>
     </label>
   );
 }

@@ -1199,7 +1199,14 @@ flow("site-home", ["site"], async w => {
   // the language toggle
   const other = w.zh ? "EN" : "中文";
   const tog = p.locator(".lgt [data-lang], #lBtn").filter({ hasText: new RegExp("^" + other + "$") }).filter({ visible: true }).first();
-  if (await tog.count()) { await tog.click(); await p.waitForTimeout(500); await w.look("landing switched"); await p.locator(".lgt [data-lang]").filter({ hasText: w.zh ? "中文" : "EN" }).first().click().catch(() => {}); await p.waitForTimeout(300); }
+  if (await tog.count()) {
+    // switched to the other language, the headline changes; then back (the screen is checked in its own language's run)
+    const h0 = await p.locator("h1").first().innerText();
+    await tog.click(); await p.waitForTimeout(500);
+    await w.expect((await p.locator("h1").first().innerText()) !== h0, "the landing page's language toggle didn't change the headline");
+    await p.locator(".lgt [data-lang]").filter({ hasText: w.zh ? "中文" : "EN" }).first().click().catch(() => {}); await p.waitForTimeout(300);
+    await w.look("landing switched back");
+  }
   else await w.record("step", "no language toggle on the landing page");
   // the lead form: the hero box, then the sheet, to the end
   await p.fill("#st-hero", "Los Angeles");

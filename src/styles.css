@@ -1837,7 +1837,7 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .tabbar a .nav-bot { width: 24px; height: 24px; }
 .tabbar a[aria-current="page"] { color: var(--blue-ink); }
 .tabbar a[aria-current="page"] > span:not(.nav-bot) { color: var(--ink); }
-.tabbar a em { position: absolute; top: 3px; left: calc(50% + 6px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px; background: var(--warm); color: #fff; font: 600 10.5px/16px var(--sans); font-style: normal; text-align: center; font-variant-numeric: tabular-nums; }
+.tabbar a em { position: absolute; top: 3px; left: calc(50% + 12px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px; background: var(--warm); color: #fff; font: 600 10.5px/16px var(--sans); font-style: normal; text-align: center; font-variant-numeric: tabular-nums; }
 .phone .dockbar { bottom: calc(72px + env(safe-area-inset-bottom)); }
 .phone .dockbar::before { bottom: -12px; height: 70px; }
 .phone .content.chatpage { padding-bottom: 0; }
@@ -1846,6 +1846,9 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
   .page, .page.home { padding-bottom: 196px; }
   .page.settings { padding-bottom: 150px; }
 }
+/* a new workspace's starter chips stand above the message box: the end of the page clears them too (two rows on a phone) */
+.mainwrap:has(.dock-chips) .page { padding-bottom: 222px; }
+@media (max-width: 859px) { .mainwrap:has(.dock-chips) .page { padding-bottom: 292px; } }
 
 /* a page's tabs: one pill row under the title, each a real address */
 .ptabs { display: flex; gap: 2px; width: max-content; max-width: 100%; padding: 4px; margin: 0 0 24px; border-radius: 20px; background: var(--mist2); overflow-x: auto; scrollbar-width: none; }
@@ -1854,7 +1857,9 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .ptabs a:hover { color: var(--ink); }
 .ptabs a[aria-selected="true"] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 2px rgba(var(--e), .08), 0 0 0 .5px rgba(var(--e), .04); }
 .ptabs a span { font-size: 11.5px; font-weight: 500; color: var(--ink3); font-variant-numeric: tabular-nums; }
-.ph + .ptabs { margin-top: -6px; }
+/* the tabs sit closer under a page header: the header gives up some of its bottom space (a negative margin would overlap it) */
+.ph:has(+ .ptabs) { padding-bottom: 24px; }
+@media (max-width: 859px) { .ph:has(+ .ptabs) { padding-bottom: 16px; } }
 @media (max-width: 859px) { .ptabs a { padding: 7px 11px; font-size: 13px; } .ptabs { margin-bottom: 20px; } }
 .tab-lede { margin: 0 0 22px; max-width: 64ch; font-size: 15px; line-height: 1.55; color: var(--ink2); }
 .tab-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
@@ -1863,7 +1868,7 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .tab-empty { padding: 28px 20px; border-radius: 16px; background: var(--mist); text-align: center; }
 .tabbed .sec:first-child, .tabbed > .tab-lede + .sec { margin-top: 0; }
 .tabbed .ph { display: none; }
-.page.permits .ph { padding-bottom: 24px; }
+.page.permits .ph { padding-bottom: 18px; }
 .c-prev { display: block; color: var(--blue-ink) !important; }
 .prev-note { display: flex; align-items: flex-start; gap: 8px; margin: -6px 0 18px; font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
 .prev-note svg { flex: none; margin-top: 3px; color: var(--blue-ink); }
@@ -1880,10 +1885,10 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .feed-empty p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--ink2); }
 @media (max-width: 859px) {
   .page.odelia.chat { padding: 8px 8px calc(64px + env(safe-area-inset-bottom)); }
-  .page.odelia.chat .ptabs { margin: 0 0 8px 4px; }
+  .page.odelia.chat .ptabs { margin: 0 0 8px; }
   .panel.full { border-radius: 20px; }
 }
-.page.odelia .ph { padding-bottom: 18px; }
+.page.odelia .ph { padding-bottom: 12px; }
 
 /* Home: what needs you first, then what Odelia is on, then the plan, the dates and the news */
 .hm-needs .job.compact { margin: 0; background: var(--card); box-shadow: var(--frost); border-radius: 18px; }
@@ -2024,7 +2029,8 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .allow-note .lnk svg { width: 11px; height: 11px; }
 
 /* The language a staff member reads (src/StaffLang.tsx). */
-.staff-lang select { height: 30px; padding: 0 8px; border-radius: 10px; border: 1px solid rgba(var(--e), .12); background: var(--card); color: var(--ink2); font: inherit; font-size: 12.5px; }
+/* the staff language uses the shared field (.sel.sm); it only keeps to its own width */
+.staff-lang .sel { width: auto; }
 .certrow:has(.staff-lang) { grid-template-columns: minmax(0, 1fr) auto auto auto; }
 @media (max-width: 520px) { .certrow:has(.staff-lang) { grid-template-columns: minmax(0, 1fr) auto; } }
 /* Connect any app (MCP), src/McpSettings.tsx: each tool of a connected app on its own line, with whether it only reads
