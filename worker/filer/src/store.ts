@@ -1,5 +1,6 @@
 // Everything the worker reads or writes, behind one interface: Supabase in production, memory in tests.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { loginMatches } from "../../../supabase/functions/file/destinations.ts";
 import type { Filing, LogEntry, Login, Skill } from "./types.ts";
 
 export interface Store {
@@ -7,8 +8,8 @@ export interface Store {
   reload(id: string): Promise<Filing>;
   /** Append to the log, patch agent columns, write the audit row (actor agent). */
   step(f: Filing, entry: LogEntry | null, patch?: Record<string, unknown>): Promise<Filing>;
-  /** The saved login for this portal host; the opening is audited. */
-  login(f: Filing, host: string): Promise<Login | null>;
+  /** The saved login for this portal host (and, on a host many agencies share, this agency's path); the opening is audited. */
+  login(f: Filing, host: string, tenant?: string): Promise<Login | null>;
   skill(key: string): Promise<Skill | null>;
   saveSkill(s: Skill): Promise<void>;
   skillFailed(key: string): Promise<{ disabled: boolean }>;
@@ -23,7 +24,6 @@ export interface Store {
 }
 
 const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, submit_clicked_at, attempts, confirmation_number";
-const hostOf = (u: string | null) => { try { return u ? new URL(/^https?:/i.test(u) ? u : `https://${u}`).hostname.toLowerCase() : ""; } catch { return ""; } };
 
 export class SupabaseStore implements Store {
   private db: SupabaseClient;
@@ -50,10 +50,11 @@ export class SupabaseStore implements Store {
     if (error) throw new Error(`step failed: ${error.message}`);
     return data as unknown as Filing;
   }
-  async login(f: Filing, host: string) {
+  async login(f: Filing, host: string, tenant?: string) {
     const { data, error } = await this.db.from("agency_logins").select("id, agency, url, username, secret_id").eq("workspace_id", f.workspace_id);
     if (error) throw new Error(`logins lookup failed: ${error.message}`);
-    const row = (data ?? []).find((r) => hostOf(r.url as string) === host);
+    // The same host and, on a host many agencies share (Accela, BTExpress), the same agency: Dallas's login never opens Fort Worth.
+    const row = (data ?? []).find((r) => loginMatches(r.url as string, { portal: host, tenant }));
     if (!row) return null;
     const { data: pw, error: e2 } = await this.db.rpc("vault_get", { p_id: row.secret_id });
     if (e2 || typeof pw !== "string") throw new Error("saved login unreadable");

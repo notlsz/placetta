@@ -1,0 +1,20 @@
+{
+  // Type-checks the portal worker as Node runs it (strip-types: only erasable syntax). npm run typecheck uses the
+  // repo root's TypeScript, so run npm ci at the root first.
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["src", "test"]
+}

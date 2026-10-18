@@ -37,6 +37,10 @@ jobs:
       - run: npm run test:smart
       - run: npm run test:flow
       - run: npm run test:channels
+      # every filing destination cites its agency page and passes the host rules, every one names a registry form, and
+      # docs/FILING_COVERAGE.md matches what the script generates
+      - name: Filing coverage
+        run: node scripts/filing-coverage.mjs --check
       - name: Production build
         run: npx vite build
   functions:
