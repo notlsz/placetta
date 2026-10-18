@@ -99,19 +99,21 @@ export function Prose({ text }: { text: string }) {
   return <>{out}</>;
 }
 
-/** Alven-style file card: a type tile, the name, size and where it came from, and a download button. */
-export function FileCard({ d, compact }: { d: Doc; compact?: boolean }) {
+/** Alven-style file card: a type tile, the name, size and where it came from, and a download button.
+ *  extra: something beside the download button (Documents puts the file's comments there). */
+export function FileCard({ d, compact, extra }: { d: Doc; compact?: boolean; extra?: ReactNode }) {
   const { b, t, lang, download, ws } = useApp();
   const app = d.app ? ws.apps.find(a => a.id === d.app) : undefined;
   const ext = d.name.split(".").pop()?.toUpperCase() ?? "FILE";
   return (
-    <div className={"file" + (compact ? " compact" : "")}>
+    <div className={"file" + (compact ? " compact" : "") + (extra ? " has-extra" : "")}>
       <span className={"ftile ft-" + d.kind} aria-hidden="true">{ext.slice(0, 4)}</span>
       <span className="fmeta">
         <b title={d.name}>{d.name}</b>
         <span><em>{bytes(d.size)}</em><em>{b(d.tag)}</em>{!compact && <em>{fmtAgo(d.at, lang)}</em>}</span>
         {!compact && app && <span className="fapp">{b(app.name)}</span>}
       </span>
+      {extra}
       <button type="button" className="fdl" onClick={() => download(d.id)} aria-label={t("download") + " " + d.name} title={t("download")}><I.download /></button>
     </div>
   );

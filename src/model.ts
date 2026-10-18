@@ -104,7 +104,7 @@ export type Change =
   | { op: "plan"; job: string };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
-export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
+export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase" | "mention"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
 
 export type Audit = { id: string; at: string; actor: Actor; who?: Bi; action: Bi; object: Bi; detail?: Bi };
 export type FactGroup = "business" | "location" | "operations" | "rules";

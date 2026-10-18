@@ -261,6 +261,16 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
       if (error || !data) throw new Error("Couldn't open the file.");
       return data;
     },
+    // Team review (migration 20261018120000_team_review): this workspace's comments, which read_comments hands Odelia
+    // as data through the planted-instruction check. Headquarters' comments say "Headquarters", never its staff.
+    async comments(item?: { kind: "app" | "doc" | "job"; id: string }) {
+      let q = admin.from("comments").select("id, item_kind, item_id, author_email, from_hq, body, created_at, resolved_at").eq("workspace_id", ws).order("created_at", { ascending: true }).limit(300);
+      if (item) q = q.eq("item_kind", item.kind).eq("item_id", item.id);
+      const { data, error } = await q;
+      if (error) { if (error.code === "42P01" || error.code === "PGRST205") return []; throw new Error("Couldn't read the comments."); }
+      return (data ?? []).map((c) => ({ id: String(c.id), item: { kind: c.item_kind as "app" | "doc" | "job", id: String(c.item_id) }, by: c.from_hq ? "Headquarters" : String(c.author_email || "A teammate"),
+        hq: !!c.from_hq, text: String(c.body ?? ""), at: String(c.created_at), resolved: !!c.resolved_at }));
+    },
   };
 }
 

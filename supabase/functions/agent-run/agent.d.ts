@@ -25,6 +25,8 @@ export type Services = {
   mcpTools?(): Promise<Record<string, unknown>[]>;
   /** Store bots (split_job): start one run per store job; which started now and which wait their turn. */
   split?(o: { parent: string; children: { job: string; store: string; title: Bi; prompt: string }[] }): Promise<{ started: string[]; queued: string[] }>;
+  /** Team review: the workspace's comments, for read_comments (src/live.ts AgentComment). */
+  comments?(item?: { kind: "app" | "doc" | "job"; id: string }): Promise<{ id: string; item: { kind: "app" | "doc" | "job"; id: string }; by: string; hq: boolean; text: string; at: string; resolved: boolean }[]>;
 };
 /** What a store's bot came back with, for the run that split the work. */
 export type ChildResult = { job: string; store: string; status: string; reply: string };

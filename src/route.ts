@@ -17,7 +17,7 @@ const SLUG: Record<View, string> = {
 
 /** The tabs a page has, by the word in its address. The first is the page's own address. */
 export const TABS: Partial<Record<View, readonly string[]>> = {
-  permits: ["todo", "filed", "documents", "deadlines"],
+  permits: ["todo", "filed", "review", "documents", "deadlines"],
   odelia: ["chat", "work", "playbooks", "updates"],
 };
 
