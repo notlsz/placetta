@@ -1,0 +1,185 @@
+{
+  "id": "sugarland-restaurant",
+  "title": "Dim sum restaurant in Sugar Land",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Dim sum restaurant",
+    "where": "3528 TX-6, Sugar Land, TX 77478",
+    "lang": "en",
+    "signage": false
+  },
+  "assumptions": "The company still has to be formed (an LLC) unless an entity is named. Hires staff. Builds out the space. No new exterior sign (signage: false).",
+  "items": [
+    {
+      "key": "tx-llc",
+      "name": "Certificate of Formation (Texas LLC, Form 205)",
+      "agency": "Texas Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 300,
+      "source": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+      "match": "certificate of formation|tx-205",
+      "agencyMatch": "texas secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "tx-tax",
+      "name": "Sales and Use Tax Permit",
+      "agency": "Texas Comptroller of Public Accounts",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "feeNote": "No fee; a security may be required.",
+      "note": "One permit for each active place of business.",
+      "source": "https://comptroller.texas.gov/taxes/sales/faq/permit.php",
+      "match": "sales and use tax permit|tx-ap201",
+      "agencyMatch": "comptroller"
+    },
+    {
+      "key": "tx-twc",
+      "name": "Unemployment tax account",
+      "agency": "Texas Workforce Commission",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 10 days of becoming liable.",
+      "source": "https://www.twc.texas.gov/services/register-tax",
+      "match": "unemployment tax|tx-twc",
+      "agencyMatch": "workforce commission"
+    },
+    {
+      "key": "tx-food-handler",
+      "name": "Food handler training for food employees",
+      "agency": "Texas Department of State Health Services",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 30 days of employment (§228.31); certified food managers exempt.",
+      "source": "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+      "match": "food handler",
+      "agencyMatch": "state health services"
+    },
+    {
+      "key": "tx-dba",
+      "name": "Assumed Name Certificate",
+      "agency": "Texas Secretary of State",
+      "level": "state",
+      "required": false,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+      "match": "assumed name",
+      "agencyMatch": "secretary of state",
+      "condition": "Only when trading under a name other than the legal name."
+    },
+    {
+      "key": "tx-cfm",
+      "name": "Certified food manager",
+      "agency": "Texas Department of State Health Services (licensed programs); required on site by Houston Health",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Houston's pre-operational inspection asks for the certified food manager's name.",
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+      "match": "certified food manager|food manager",
+      "agencyMatch": "state health services|health|sugar land",
+      "levels": [
+        "state",
+        "city"
+      ],
+      "quote": "A minimum of one employee must have a valid Food Manager Certification during all hours of operation."
+    },
+    {
+      "key": "sl-plan",
+      "name": "Food establishment plan review",
+      "agency": "City of Sugar Land Permits Office",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+      "match": "(plan (check|review)).*(sugar land)|(sugar land).*(plan (check|review))",
+      "agencyMatch": "sugar land",
+      "quote": "Plan reviews are only accepted online through Citizen Self-Service (CSS) Portal."
+    },
+    {
+      "key": "sl-permit",
+      "name": "Food permit",
+      "agency": "City of Sugar Land Food Inspection Program",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+      "match": "(food (establishment )?permit).*(sugar land)|(sugar land).*(food (establishment )?permit)",
+      "agencyMatch": "sugar land",
+      "quote": "Food permit application must be completed prior to requesting a final food inspection."
+    },
+    {
+      "key": "sl-co",
+      "name": "Certificate of Occupancy",
+      "agency": "City of Sugar Land Permits Office",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+      "match": "(certificate of occupancy).*(sugar land)|(sugar land).*(certificate of occupancy)",
+      "agencyMatch": "sugar land",
+      "quote": "the permits office will issue you a new Certificate of Occupancy via email."
+    },
+    {
+      "key": "sl-building",
+      "name": "Building permit for the build-out",
+      "agency": "City of Sugar Land Permits Office",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+      "match": "(building permit|build-?out|finish-out).*(sugar land)|(sugar land).*(building permit|build-?out|finish-out)",
+      "agencyMatch": "sugar land",
+      "note": "The pre-opening sheet covers the food steps; the building permit itself wasn't read."
+    }
+  ],
+  "order": [
+    {
+      "before": "tx-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "sl-plan",
+      "after": "sl-permit",
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+      "why": "Plan review before construction; the food permit before the final inspection.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": [
+    {
+      "name": "Houston's permits",
+      "why": "Sugar Land runs its own permits.",
+      "match": "houston"
+    }
+  ]
+}

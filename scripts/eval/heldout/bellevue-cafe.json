@@ -1,0 +1,159 @@
+{
+  "id": "bellevue-cafe",
+  "title": "Cafe in Bellevue",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Cafe",
+    "where": "500 Bellevue Way NE, Bellevue, WA 98004",
+    "lang": "en",
+    "signage": false
+  },
+  "assumptions": "The company still has to be formed (an LLC) unless an entity is named. Hires staff. Builds out the space. No new exterior sign (signage: false).",
+  "items": [
+    {
+      "key": "wa-llc",
+      "name": "Certificate of Formation (Washington LLC)",
+      "agency": "Washington Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "note": "Not read on an official page in this pass.",
+      "source": "https://ccfs.sos.wa.gov",
+      "match": "llc formation|certificate of formation|wa-sos",
+      "agencyMatch": "washington secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "wa-bls",
+      "name": "Washington State Business License (Business Licensing Service)",
+      "agency": "Washington Department of Revenue, Business Licensing Service",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dor.wa.gov/vi/node/520",
+      "match": "washington business license|wa-bls|business license application",
+      "agencyMatch": "department of revenue|business licensing"
+    },
+    {
+      "key": "wa-employer",
+      "name": "Unemployment insurance and workers' comp accounts (opened through the business license)",
+      "agency": "Washington ESD and L&I (through the Business Licensing Service)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "ESD and L&I \"automatically create your State Unemployment Insurance (SUI) and Workers Compensation (WC) accounts\" from the business license application.",
+      "source": "https://www.business.wa.gov/site/alias__business/14886/hiring-employees.aspx",
+      "match": "washington business license|wa-bls|employment security",
+      "agencyMatch": "department of revenue|business licensing|employment security"
+    },
+    {
+      "key": "wa-fwc",
+      "name": "Washington State Food Worker Card for employees",
+      "agency": "Washington State Department of Health (local health departments)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 10,
+      "note": "Up to 14 days of work before the card, with employer training; first card valid 2 years.",
+      "source": "https://www.doh.wa.gov/foodworkercard",
+      "match": "food worker card",
+      "agencyMatch": "department of health"
+    },
+    {
+      "key": "kc-plan",
+      "name": "Food establishment plan review",
+      "agency": "Public Health, Seattle and King County",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://cdn.kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit",
+      "match": "(plan review).*(king county)|(king county).*(plan review)",
+      "agencyMatch": "king county"
+    },
+    {
+      "key": "kc-permit",
+      "name": "Permanent food service business permit",
+      "agency": "Public Health, Seattle and King County",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://cdn.kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit",
+      "match": "(food (service )?business permit|food service).*(king county)|(king county).*(food (service )?business permit|food service)",
+      "agencyMatch": "king county"
+    },
+    {
+      "key": "bel-license",
+      "name": "Bellevue business license",
+      "agency": "City of Bellevue Finance, Tax Division",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": 119,
+      "source": "https://bellevuewa.gov/city-government/departments/finance/business-taxes/business-licenses",
+      "match": "(bellevue.*business licen|business licen).*(bellevue)|(bellevue).*(bellevue.*business licen|business licen)",
+      "agencyMatch": "bellevue",
+      "quote": "A business must have a Washington State Business License for all locations before applying for a Bellevue business license.",
+      "note": "\"The registration fee for licenses obtained in 2026 is $119.\""
+    },
+    {
+      "key": "bel-building",
+      "name": "Building permit for the tenant improvement",
+      "agency": "City of Bellevue Development Services",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://bellevuewa.gov/city-government/departments/finance/business-taxes/business-licenses",
+      "match": "(building permit|tenant improvement|build-?out|construction permit).*(bellevue)|(bellevue).*(building permit|tenant improvement|build-?out|construction permit)",
+      "agencyMatch": "bellevue",
+      "quote": "Construction, tenant improvements, and certain land use activities require building and land-use permits from the Development Services Department ."
+    }
+  ],
+  "order": [
+    {
+      "before": "wa-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "kc-plan",
+      "after": "kc-permit",
+      "source": "https://kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit",
+      "why": "Plan review approval before the permit to operate.",
+      "verified": true
+    },
+    {
+      "before": "wa-bls",
+      "after": "bel-license",
+      "source": "https://bellevuewa.gov/city-government/departments/finance/business-taxes/business-licenses",
+      "why": "The state business license before the Bellevue license.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": [
+    {
+      "name": "Seattle's license or SDCI",
+      "why": "Bellevue is its own city.",
+      "match": "seattle business license|construction and inspections|SDCI"
+    }
+  ]
+}

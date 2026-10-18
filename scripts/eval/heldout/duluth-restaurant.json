@@ -1,0 +1,188 @@
+{
+  "id": "duluth-restaurant",
+  "title": "Korean restaurant in Duluth, Georgia",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Korean restaurant",
+    "where": "3550 Pleasant Hill Rd, Duluth, GA 30096",
+    "lang": "en",
+    "signage": false
+  },
+  "assumptions": "The company still has to be formed (an LLC) unless an entity is named. Hires staff. Builds out the space. No new exterior sign (signage: false).",
+  "items": [
+    {
+      "key": "ga-llc",
+      "name": "Articles of Organization (Georgia LLC)",
+      "agency": "Georgia Secretary of State, Corporations Division",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://georgia.gov/register-llc-georgia-secretary-state",
+      "match": "articles of organization|llc formation|ga-sos",
+      "agencyMatch": "georgia secretary of state",
+      "quote": "You can register an LLC online, by mail, or in person."
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ga-tax",
+      "name": "Sales and use tax number and certificate of registration",
+      "agency": "Georgia Department of Revenue",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dor.georgia.gov/taxes/business-taxes/tax-registration",
+      "match": "sales (and use )?tax|ga-tax",
+      "agencyMatch": "georgia department of revenue",
+      "quote": "must register for a sales and use tax number and certificate of registration regardless of whether all sales will be online, out of state, wholesale, or exempt from tax."
+    },
+    {
+      "key": "ga-dol",
+      "name": "Unemployment insurance tax account (DOL-1A)",
+      "agency": "Georgia Department of Labor",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dol.georgia.gov/node/2291",
+      "match": "unemployment|DOL-1A|employer registration|ga-dol",
+      "agencyMatch": "georgia department of labor",
+      "quote": "You must complete an Application for GDOL Tax Account or Status Change (DOL-1A) form and return it to the Georgia Department of Labor"
+    },
+    {
+      "key": "ga-cfsm",
+      "name": "Certified food safety manager",
+      "agency": "Georgia Department of Public Health (Rule 511-6-1-.03)",
+      "level": "state",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://dph.georgia.gov/environmental-health/food-service",
+      "match": "food (safety|protection) manager|certified food",
+      "agencyMatch": "public health|health",
+      "note": "The library's Georgia rule; not re-read for this case."
+    },
+    {
+      "key": "gw-plan",
+      "name": "Food service plan review",
+      "agency": "Gwinnett County Environmental Health (GNR Public Health)",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.gnrhealth.com/?p=97",
+      "match": "(plan (check|review)).*(gwinnett)|(gwinnett).*(plan (check|review))",
+      "agencyMatch": "gwinnett",
+      "quote": "review of plans prior to construction, permitting establishments, and conducting inspections"
+    },
+    {
+      "key": "gw-permit",
+      "name": "Food service permit",
+      "agency": "Gwinnett County Environmental Health (GNR Public Health)",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://gnrhealth.com/wp-content/uploads/2024/08/Food-Service-Plan-Review-Requirements-fillable-3-11-16-JER.pdf",
+      "match": "(food service permit|food permit|health permit).*(gwinnett)|(gwinnett).*(food service permit|food permit|health permit)",
+      "agencyMatch": "gwinnett",
+      "quote": "Food Service Permit Application Front Page (page 1)"
+    },
+    {
+      "key": "dul-zoning",
+      "name": "Business zoning and use certificate",
+      "agency": "City of Duluth Planning and Development",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.duluthga.net/services/city_clerk/new_business_applications/index.php",
+      "match": "(zoning (use|and use)|zoning verification|use certificate).*(duluth)|(duluth).*(zoning (use|and use)|zoning verification|use certificate)",
+      "agencyMatch": "duluth",
+      "quote": "Step 1 - Obtain ZONING USE VERIFICATION"
+    },
+    {
+      "key": "dul-otc",
+      "name": "Occupational Tax Certificate (business license)",
+      "agency": "City of Duluth, City Clerk",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.duluthga.net/services/city_clerk/occupational_tax/index.php",
+      "match": "(occupation(al)? tax|business licen).*(duluth)|(duluth).*(occupation(al)? tax|business licen)",
+      "agencyMatch": "duluth",
+      "quote": "Every business in the City is required to apply for an Occupational Tax Certificate (OTC) and renew it annually in order to operate in the City limits."
+    },
+    {
+      "key": "gw-fire-co",
+      "name": "Fire Marshal Certificate of Occupancy",
+      "agency": "Gwinnett County Fire Marshal's Office",
+      "level": "county",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.duluthga.net/services/city_clerk/new_business_applications/index.php",
+      "match": "(certificate of occupancy|fire marshal).*(gwinnett|fire)|(gwinnett|fire).*(certificate of occupancy|fire marshal)",
+      "agencyMatch": "gwinnett|fire",
+      "quote": "Additional information about the Fire Marshal Certificate of Occupancy can be obtained by calling the Gwinnett Fire Plan & Review",
+      "condition": "The city's page points to it; when it applies to a tenant wasn't stated."
+    },
+    {
+      "key": "dul-building",
+      "name": "Building permit for the build-out",
+      "agency": "City of Duluth Planning and Development",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.duluthga.net/services/planning___development/permits___applications/index.php",
+      "match": "(building permit|build-?out|tenant improvement).*(duluth)|(duluth).*(building permit|build-?out|tenant improvement)",
+      "agencyMatch": "duluth",
+      "note": "Duluth's permits page lists applications but no rule for a commercial build-out was read."
+    }
+  ],
+  "order": [
+    {
+      "before": "ga-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "gw-plan",
+      "after": "gw-permit",
+      "source": "https://www.gnrhealth.com/?p=97",
+      "why": "Plans reviewed before construction; then the permit.",
+      "verified": true
+    },
+    {
+      "before": "dul-zoning",
+      "after": "dul-otc",
+      "source": "https://www.duluthga.net/services/city_clerk/new_business_applications/index.php",
+      "why": "Zoning use verification is step 1; the certificate application follows Planning approval.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": [
+    {
+      "name": "Atlanta's or Fulton County's permits",
+      "why": "Duluth is its own city in Gwinnett County.",
+      "match": "atlanta|fulton"
+    }
+  ]
+}

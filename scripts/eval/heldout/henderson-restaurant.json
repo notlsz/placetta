@@ -1,0 +1,169 @@
+{
+  "id": "henderson-restaurant",
+  "title": "Ramen restaurant in Henderson",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Ramen restaurant",
+    "where": "2895 N Green Valley Pkwy, Henderson, NV 89014",
+    "lang": "en",
+    "signage": false
+  },
+  "assumptions": "The company still has to be formed (an LLC) unless an entity is named. Hires staff. Builds out the space. No new exterior sign (signage: false).",
+  "items": [
+    {
+      "key": "nv-sbl",
+      "name": "State Business License (with the LLC formation)",
+      "agency": "Nevada Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Retailers \"must have a Business License (NRS 372.220)\" before the tax permit.",
+      "source": "https://tax.nv.gov/manage-a-business/start/",
+      "match": "state business license|silverflume|llc formation",
+      "agencyMatch": "nevada secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "nv-tax",
+      "name": "Sales/Use Tax Permit",
+      "agency": "Nevada Department of Taxation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 15,
+      "feeNote": "$15 per location.",
+      "source": "https://tax.nv.gov/faqs/register-a-business/",
+      "match": "sales (\\/use )?tax permit|nv-tax",
+      "agencyMatch": "department of taxation"
+    },
+    {
+      "key": "nv-ui",
+      "name": "Unemployment insurance employer registration",
+      "agency": "Nevada Department of Employment, Training and Rehabilitation (Employment Security Division)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tax.nv.gov/manage-a-business/start/",
+      "match": "unemployment insurance|nv-esd",
+      "agencyMatch": "employment, training and rehabilitation|employment security|DETR"
+    },
+    {
+      "key": "snhd-plan",
+      "name": "Food establishment plan review",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "(plan review).*(southern nevada health district)|(southern nevada health district).*(plan review)",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-permit",
+      "name": "Food establishment health permit",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "(health permit).*(southern nevada health district)|(southern nevada health district).*(health permit)",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-handler",
+      "name": "Food Safety Training Cards for employees",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "(food handler|food safety training card).*(southern nevada health district)|(southern nevada health district).*(food handler|food safety training card)",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-cfsm",
+      "name": "Certified Food Safety Manager (person in charge)",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "(certified food (safety|protection) manager|food manager).*(southern nevada health district)|(southern nevada health district).*(certified food (safety|protection) manager|food manager)",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "hen-license",
+      "name": "City of Henderson business license",
+      "agency": "City of Henderson Business Licensing",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.cityofhenderson.com/government/departments/finance/business-licensing/apply-for-a-business-license",
+      "match": "(henderson.*business licen|business licen).*(henderson)|(henderson).*(henderson.*business licen|business licen)",
+      "agencyMatch": "henderson",
+      "quote": "register your business with the State of Nevada prior to applying for a Henderson business license."
+    },
+    {
+      "key": "hen-building",
+      "name": "Building permit for the build-out",
+      "agency": "City of Henderson Building and Fire Safety",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.cityofhenderson.com/government/departments/finance/business-licensing/apply-for-a-business-license",
+      "match": "(building permit|tenant improvement|build-?out).*(henderson)|(henderson).*(building permit|tenant improvement|build-?out)",
+      "agencyMatch": "henderson",
+      "note": "Henderson's building pages weren't read (the site refused direct requests)."
+    }
+  ],
+  "order": [
+    {
+      "before": "nv-sbl",
+      "after": "nv-tax",
+      "source": "https://tax.nv.gov/faqs/register-a-business/",
+      "why": "The state business license before the Department of Taxation registration.",
+      "verified": true
+    },
+    {
+      "before": "nv-sbl",
+      "after": "hen-license",
+      "source": "https://www.cityofhenderson.com/government/departments/finance/business-licensing/apply-for-a-business-license",
+      "why": "Register with the State of Nevada before the Henderson license.",
+      "verified": true
+    },
+    {
+      "before": "snhd-plan",
+      "after": "snhd-permit",
+      "source": "https://southernnevadahealthdistrict.org/?p=299647",
+      "why": "Plans approved before construction; the permit after the final inspection.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": [
+    {
+      "name": "City of Las Vegas or Clark County business license",
+      "why": "Henderson licenses its own businesses.",
+      "match": "city of las vegas business license|lv-license|clark county business license|cc-business-license"
+    }
+  ]
+}

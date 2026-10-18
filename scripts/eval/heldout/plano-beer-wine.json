@@ -1,0 +1,179 @@
+{
+  "id": "plano-beer-wine",
+  "title": "Restaurant serving beer and wine in Plano",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Sichuan restaurant serving beer and wine",
+    "where": "2140 Dallas Pkwy, Plano, TX 75093",
+    "lang": "en",
+    "entity": "Chengdu Plano LLC",
+    "signage": false
+  },
+  "assumptions": "An existing Texas LLC. Hires staff. Builds out. No new sign. Serves beer and wine, no spirits.",
+  "items": [
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "tx-tax",
+      "name": "Sales and Use Tax Permit",
+      "agency": "Texas Comptroller of Public Accounts",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "feeNote": "No fee; a security may be required.",
+      "note": "One permit for each active place of business.",
+      "source": "https://comptroller.texas.gov/taxes/sales/faq/permit.php",
+      "match": "sales and use tax permit|tx-ap201",
+      "agencyMatch": "comptroller"
+    },
+    {
+      "key": "tx-twc",
+      "name": "Unemployment tax account",
+      "agency": "Texas Workforce Commission",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 10 days of becoming liable.",
+      "source": "https://www.twc.texas.gov/services/register-tax",
+      "match": "unemployment tax|tx-twc",
+      "agencyMatch": "workforce commission"
+    },
+    {
+      "key": "tx-food-handler",
+      "name": "Food handler training for food employees",
+      "agency": "Texas Department of State Health Services",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 30 days of employment (§228.31); certified food managers exempt.",
+      "source": "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+      "match": "food handler",
+      "agencyMatch": "state health services"
+    },
+    {
+      "key": "tx-dba",
+      "name": "Assumed Name Certificate",
+      "agency": "Texas Secretary of State",
+      "level": "state",
+      "required": false,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+      "match": "assumed name",
+      "agencyMatch": "secretary of state",
+      "condition": "Only when trading under a name other than the legal name."
+    },
+    {
+      "key": "tx-cfm",
+      "name": "Certified food manager",
+      "agency": "Texas Department of State Health Services (licensed programs); required on site by Houston Health",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "DSHS-licensed program.",
+      "source": "https://www.dshs.texas.gov/food-managers",
+      "match": "certified food manager|food manager",
+      "agencyMatch": "state health services|health|plano",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "pla-co",
+      "name": "Certificate of Occupancy",
+      "agency": "City of Plano Building Inspections",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://content.civicplus.com/api/assets/tx-plano/d2490980-662a-4f38-8def-66070c8691e5",
+      "match": "(certificate of occupancy).*(plano)|(plano).*(certificate of occupancy)",
+      "agencyMatch": "plano",
+      "quote": "A Certificate of Occupancy is required to occupy any building or property with nonresidential or multifamily uses."
+    },
+    {
+      "key": "pla-plan",
+      "name": "Food establishment plan review",
+      "agency": "City of Plano Environmental Health",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://content.civicplus.com/api/assets/234824a7-ef4c-481f-8b7b-ab68b680a9fb",
+      "match": "(plan (check|review)).*(plano)|(plano).*(plan (check|review))",
+      "agencyMatch": "plano",
+      "quote": "The City of Plano Food Code requires that complete plans be submitted, reviewed and approved before any construction and/ or remodeling can begin."
+    },
+    {
+      "key": "pla-permit",
+      "name": "Food establishment permit",
+      "agency": "City of Plano Environmental Health",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.plano.gov/food-permits",
+      "match": "(food establishment permit|food permit).*(plano)|(plano).*(food establishment permit|food permit)",
+      "agencyMatch": "plano",
+      "quote": "Food Permit Applications"
+    },
+    {
+      "key": "tabc-bg",
+      "name": "Wine and Malt Beverage Retailer's Permit (BG)",
+      "agency": "Texas Alcoholic Beverage Commission",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.tabc.texas.gov/static/sites/default/files/2021-08/wine-and-malt-beverage-retailers-permit-bg-on-premise-lc.pdf",
+      "match": "wine and (malt )?beverage retailer|\\bBG\\b|alcohol(ic beverage)? (license|permit)|tabc",
+      "agencyMatch": "alcoholic beverage commission|\\bTABC\\b",
+      "quote": "You are authorized to sell wine and malt beverages at your bar or restaurant."
+    },
+    {
+      "key": "ttb-dealer",
+      "name": "Alcohol dealer registration (TTB F 5630.5d)",
+      "agency": "Alcohol and Tobacco Tax and Trade Bureau",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"No person may engage in the business of selling or offering to sell distilled spirits, wine, or beer without first registering.\" Before engaging in business; no fee stated.",
+      "source": "https://www.ttb.gov/nrc/retail-beverage-alcohol-dealers",
+      "match": "alcohol dealer|5630|ttb",
+      "agencyMatch": "alcohol and tobacco tax|\\bTTB\\b"
+    }
+  ],
+  "order": [
+    {
+      "before": "pla-plan",
+      "after": "pla-permit",
+      "source": "https://content.civicplus.com/api/assets/234824a7-ef4c-481f-8b7b-ab68b680a9fb",
+      "why": "Plans approved before construction; the permit after.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": [
+    {
+      "name": "Any California, New York or Los Angeles alcohol step",
+      "why": "The restaurant is in Texas.",
+      "match": "state liquor authority|alcoholic beverage control|conditional use permit to sell alcohol|community board"
+    }
+  ]
+}

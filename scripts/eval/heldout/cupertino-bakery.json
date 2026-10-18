@@ -1,0 +1,186 @@
+{
+  "id": "cupertino-bakery",
+  "title": "Bakery cafe in Cupertino",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Bakery cafe",
+    "where": "10123 N Wolfe Rd, Cupertino, CA 95014",
+    "lang": "en",
+    "signage": false
+  },
+  "assumptions": "The company still has to be formed (an LLC) unless an entity is named. Hires staff. Builds out the space. No new exterior sign (signage: false).",
+  "items": [
+    {
+      "key": "ca-llc",
+      "name": "Articles of Organization (California LLC)",
+      "agency": "California Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "feeNote": "Fee not read on an official page in this pass (registry says $70).",
+      "note": "SF guide: LLCs \"must register their structure with the CA Secretary of State before registering locally.\"",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "articles of organization.*california|ca-llc-1|california llc",
+      "agencyMatch": "california secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ca-seller",
+      "name": "Seller's permit",
+      "agency": "California Department of Tax and Fee Administration",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Every location must have this permit to sell taxable goods.\" Also on the LA restaurant checklist.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "seller'?s permit|ca-cdtfa",
+      "agencyMatch": "tax and fee administration|CDTFA"
+    },
+    {
+      "key": "ca-edd",
+      "name": "Employer payroll tax account registration (DE 1)",
+      "agency": "California Employment Development Department",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 15 days of paying more than $100 in wages in a calendar quarter.",
+      "source": "https://edd.ca.gov/en/Payroll_Taxes/Am_I_Required_to_Register_as_an_Employer",
+      "match": "employer|DE ?1|edd",
+      "agencyMatch": "employment development department|\\bEDD\\b"
+    },
+    {
+      "key": "ca-food-manager",
+      "name": "Food safety (manager) certification, at least one owner or employee",
+      "agency": "Local environmental health agency (California Health and Safety Code 113947.1)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 60 days of opening; valid 5 years.",
+      "source": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+      "match": "food (safety|protection) (manager|certif)|certified food|food manager|manager'?s food safety",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "ca-food-handler",
+      "name": "California Food Handler Card for food employees",
+      "agency": "Local environmental health agency (California Health and Safety Code 113948)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 30 days of hire; valid 3 years; food managers exempt.",
+      "source": "https://www.fresnocountyca.gov/files/assets/county/public-health/environmental-health/food-safety/california-food-handler-card.pdf",
+      "match": "food handler",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "ca-fbn",
+      "name": "Fictitious Business Name statement",
+      "agency": "County Clerk",
+      "level": "county",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "condition": "Only when trading under a name other than the legal name.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "(fictitious business name|\\bFBN\\b|\\bDBA\\b).*(clerk)|(clerk).*(fictitious business name|\\bFBN\\b|\\bDBA\\b)",
+      "agencyMatch": "clerk"
+    },
+    {
+      "key": "scc-plan",
+      "name": "Food facility plan check",
+      "agency": "County of Santa Clara Department of Environmental Health",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "SJ Streamlined Restaurant Program: County DEH plans \"ideally approved\" before the city building application.",
+      "source": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
+      "match": "(plan (check|review)).*(santa clara)|(santa clara).*(plan (check|review))",
+      "agencyMatch": "santa clara"
+    },
+    {
+      "key": "scc-permit",
+      "name": "Health permit to operate a food facility",
+      "agency": "County of Santa Clara Department of Environmental Health",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "San José's business tax registration asks for the \"county health permit number, if applicable\"; the county issues it.",
+      "source": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate",
+      "match": "(health permit|permit to operate).*(santa clara)|(santa clara).*(health permit|permit to operate)",
+      "agencyMatch": "santa clara"
+    },
+    {
+      "key": "cup-license",
+      "name": "Business license",
+      "agency": "City of Cupertino",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": 185,
+      "source": "https://cupertino.gov/businesslicense",
+      "match": "(business licen).*(cupertino)|(cupertino).*(business licen)",
+      "agencyMatch": "cupertino",
+      "quote": "All persons or entities conducting business within the City of Cupertino are required to obtain a business license",
+      "note": "\"annual base business license fee of $185.00\" ($181 plus the $4 SB 1186 fee), plus a square footage tax in commercial zones; the scored fee is the base."
+    },
+    {
+      "key": "cup-building",
+      "name": "Building permit for the tenant improvement",
+      "agency": "City of Cupertino Building Division",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.cupertino.gov/Your-City/Departments/Community-Development/Building/Building-Division-FAQ",
+      "match": "(building permit|tenant improvement|build-?out).*(cupertino)|(cupertino).*(building permit|tenant improvement|build-?out)",
+      "agencyMatch": "cupertino",
+      "quote": "Building permits are required for new Construction, Remodeling and Tenant Improvements"
+    }
+  ],
+  "order": [
+    {
+      "before": "ca-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "scc-plan",
+      "after": "scc-permit",
+      "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
+      "why": "County plan approval before construction; the permit at the final inspection.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

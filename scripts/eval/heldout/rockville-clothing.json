@@ -1,0 +1,90 @@
+{
+  "id": "rockville-clothing",
+  "title": "Clothing store in Rockville, Maryland",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Clothing store",
+    "where": "11301 Rockville Pike, Rockville, MD 20852",
+    "lang": "en",
+    "entity": "Pike Threads LLC",
+    "buildout": false,
+    "signage": false
+  },
+  "assumptions": "An existing company. Hires staff. Moves into the space as it is (no build-out) with no new sign.",
+  "items": [
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "md-sales",
+      "name": "Sales and use tax license (Combined Registration Application)",
+      "agency": "Comptroller of Maryland",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://businessexpress.maryland.gov/start/taxes-and-insurance",
+      "match": "sales and use tax|sales tax|combined registration|md-cra",
+      "agencyMatch": "comptroller of maryland",
+      "quote": "This is required if you sell items in Maryland and collect sales tax."
+    },
+    {
+      "key": "md-ui",
+      "name": "Unemployment insurance account",
+      "agency": "Maryland Department of Labor",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://businessexpress.maryland.gov/start/taxes-and-insurance",
+      "match": "unemployment|md-ui|combined registration",
+      "agencyMatch": "maryland department of labor|comptroller of maryland",
+      "quote": "You must apply for an unemployment insurance account through the Maryland Department of Labor if you are:"
+    },
+    {
+      "key": "md-trader",
+      "name": "Trader's license",
+      "agency": "Clerk of the Circuit Court (Montgomery County)",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.marylandcomptroller.gov/businesses/new-business/business-licenses.html",
+      "match": "(trader'?s license).*(clerk of the circuit court)|(clerk of the circuit court).*(trader'?s license)",
+      "agencyMatch": "clerk of the circuit court",
+      "quote": "you may not offer for sale, sell or otherwise dispose of any goods within Maryland, without first obtaining a trader's license from the Clerk of the Circuit Court"
+    },
+    {
+      "key": "rock-occupancy",
+      "name": "Commercial occupancy permit",
+      "agency": "City of Rockville Inspection Services",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.rockvillemd.gov/?p=61177",
+      "match": "(occupancy permit|use and occupancy|certificate of occupancy).*(rockville)|(rockville).*(occupancy permit|use and occupancy|certificate of occupancy)",
+      "agencyMatch": "rockville",
+      "quote": "Commercial Occupancy Permit Application",
+      "condition": "When the space's existing occupancy doesn't cover the new tenant."
+    }
+  ],
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "Any food permit, food handler or plan review",
+      "why": "A store that sells no food needs no food permit.",
+      "match": "food (service|establishment|facility|dealer|handler|worker|manager|safety|protection|preparation)|plan (check|review)|retail food|sanitation|victualler|allergen"
+    }
+  ]
+}

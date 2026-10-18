@@ -1,0 +1,174 @@
+{
+  "id": "quincy-restaurant",
+  "title": "Noodle restaurant in Quincy, Massachusetts",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Noodle restaurant",
+    "where": "1585 Hancock St, Quincy, MA 02169",
+    "lang": "en",
+    "entity": "Wollaston Noodle LLC",
+    "signage": false
+  },
+  "assumptions": "An existing Massachusetts LLC. Hires staff. Builds out. No new sign.",
+  "items": [
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ma-dor",
+      "name": "Sales and meals tax registration (MassTaxConnect)",
+      "agency": "Massachusetts Department of Revenue",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Taxpayers must register with DOR to collect taxes before the business actually opens.\"",
+      "source": "https://www.mass.gov/administrative-procedure/ap-616-registration-information-sales-tax-meals-tax-room-occupancy-excise-withholding-tax-and-other-miscellaneous-excises",
+      "match": "sales tax|meals tax|ma-tax|masstaxconnect",
+      "agencyMatch": "department of revenue"
+    },
+    {
+      "key": "ma-dua",
+      "name": "Employer registration with the Department of Unemployment Assistance",
+      "agency": "Massachusetts Department of Unemployment Assistance",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance",
+      "match": "unemployment",
+      "agencyMatch": "unemployment assistance"
+    },
+    {
+      "key": "ma-food-manager",
+      "name": "Food manager certification",
+      "agency": "Massachusetts Department of Public Health (accredited exam)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "food (protection )?manager",
+      "agencyMatch": "public health|health",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "ma-allergen",
+      "name": "Allergen awareness certificate",
+      "agency": "Massachusetts Department of Public Health",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "allergen",
+      "agencyMatch": "public health|health",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "qcy-food",
+      "name": "Food establishment permit",
+      "agency": "City of Quincy Health Department",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.quincyma.gov/departments/health/health_department_forms___fees/index.php",
+      "match": "(food (establishment|service) (health )?permit|food permit).*(quincy)|(quincy).*(food (establishment|service) (health )?permit|food permit)",
+      "agencyMatch": "quincy",
+      "quote": "Food Establishment Applications 3 documents",
+      "note": "Listed on the Health Department's forms page; the applications load in a viewer that wasn't readable."
+    },
+    {
+      "key": "qcy-license",
+      "name": "Business license (City Clerk, Board of License Commissioners)",
+      "agency": "City of Quincy, City Clerk",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.quincyma.gov/departments/city_clerk/index.php",
+      "match": "(business licen|common victualler).*(quincy)|(quincy).*(business licen|common victualler)",
+      "agencyMatch": "quincy",
+      "quote": "Renew or Apply for a Business License",
+      "note": "The clerk chairs the Board of License Commissioners; which license types the online application covers wasn't readable."
+    },
+    {
+      "key": "qcy-cv",
+      "name": "Common victualler license",
+      "agency": "City of Quincy Board of License Commissioners",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXX/Chapter140/Section2",
+      "match": "(common victualler).*(quincy|license commissioners|licensing)|(quincy|license commissioners|licensing).*(common victualler)",
+      "agencyMatch": "quincy|license commissioners|licensing",
+      "note": "M.G.L. c.140 s.2 lets licensing authorities grant it; Quincy's own requirement page wasn't readable."
+    },
+    {
+      "key": "qcy-plan",
+      "name": "Food establishment plan review",
+      "agency": "City of Quincy Health Department",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.quincyma.gov/departments/health/health_department_forms___fees/index.php",
+      "match": "(plan (check|review)).*(quincy)|(quincy).*(plan (check|review))",
+      "agencyMatch": "quincy",
+      "note": "Not on a readable Quincy page."
+    },
+    {
+      "key": "qcy-building",
+      "name": "Building permit for the build-out",
+      "agency": "City of Quincy Inspectional Services Department",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.quincyma.gov/departments/inspectional_services/index.php",
+      "match": "(building permit|build-?out|tenant improvement).*(quincy)|(quincy).*(building permit|build-?out|tenant improvement)",
+      "agencyMatch": "quincy",
+      "note": "ISD's page doesn't state the rule."
+    },
+    {
+      "key": "qcy-cert",
+      "name": "Business certificate (DBA)",
+      "agency": "City of Quincy, City Clerk",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.quincyma.gov/departments/city_clerk/index.php",
+      "match": "(business certificate).*(quincy|clerk)|(quincy|clerk).*(business certificate)",
+      "agencyMatch": "quincy|clerk",
+      "quote": "Apply for a Business Certificate",
+      "condition": "Only when trading under a name other than the legal name."
+    }
+  ],
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "Boston's permits",
+      "why": "Quincy is its own city.",
+      "match": "boston"
+    }
+  ]
+}

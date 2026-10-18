@@ -1,0 +1,111 @@
+{
+  "id": "fortlee-restaurant",
+  "title": "Korean restaurant in Fort Lee",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Korean restaurant",
+    "where": "1600 Lemoine Ave, Fort Lee, NJ 07024",
+    "lang": "en",
+    "signage": false
+  },
+  "assumptions": "The company still has to be formed (an LLC) unless an entity is named. Hires staff. Builds out the space. No new exterior sign (signage: false).",
+  "items": [
+    {
+      "key": "nj-formation",
+      "name": "Certificate of formation",
+      "agency": "NJ Division of Revenue and Enterprise Services",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+      "match": "certificate of formation|business formation|nj-formation|public records filing",
+      "agencyMatch": "division of revenue",
+      "quote": "First, file a Certificate of formation/authorization.",
+      "note": "Fee wording on the page is ambiguous for LLCs; not scored."
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "nj-reg",
+      "name": "Tax and employer registration (Form NJ-REG)",
+      "agency": "NJ Division of Revenue and Enterprise Services",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+      "match": "NJ-REG|tax and employer registration|nj-reg",
+      "agencyMatch": "division of revenue",
+      "quote": "Second, after filing the certificate of formation/authorization, file the tax/employer registration form (Form NJ-REG)."
+    },
+    {
+      "key": "fl-food-license",
+      "name": "Retail food establishment license",
+      "agency": "Borough of Fort Lee Health Department",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.fortleenj.org/192/Applications-Permits-Informational-Mater",
+      "match": "(retail food|food establishment license|food license).*(fort lee)|(fort lee).*(retail food|food establishment license|food license)",
+      "agencyMatch": "fort lee",
+      "quote": "Retail Food Establishment License Fees and Application",
+      "note": "Listed among the Health Department's applications; the fee sheet itself couldn't be read (connection reset)."
+    },
+    {
+      "key": "fl-plan",
+      "name": "Food establishment plan review",
+      "agency": "Borough of Fort Lee Health Department",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.fortleenj.org/192/Applications-Permits-Informational-Mater",
+      "match": "(plan (check|review)).*(fort lee)|(fort lee).*(plan (check|review))",
+      "agencyMatch": "fort lee",
+      "note": "New Jersey's food code calls for plans before construction (N.J.A.C. 8:24-9.1), but Fort Lee's own procedure wasn't read."
+    },
+    {
+      "key": "fl-building",
+      "name": "Construction permit for the build-out",
+      "agency": "Borough of Fort Lee Building Department",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.fortleenj.org/101/Departments",
+      "match": "(construction permit|building permit|build-?out|tenant improvement).*(fort lee)|(fort lee).*(construction permit|building permit|build-?out|tenant improvement)",
+      "agencyMatch": "fort lee",
+      "quote": "Our Inspectors are licensed by the State of NJ and are here to make sure your construction is performed to the New Jersey Uniform Construction Code"
+    }
+  ],
+  "order": [
+    {
+      "before": "nj-formation",
+      "after": "nj-reg",
+      "source": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+      "why": "Certificate of formation first, then NJ-REG.",
+      "verified": true
+    },
+    {
+      "before": "nj-formation",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

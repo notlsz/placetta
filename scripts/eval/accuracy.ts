@@ -1,5 +1,7 @@
-// Ground-truth accuracy for Odelia's permit plans: 30 store openings (scripts/eval/gold/*.json), each researched from
-// the agencies' own pages, scored against the two deterministic paths that build plans:
+// Ground-truth accuracy for Odelia's permit plans: 30 store openings (scripts/eval/gold/*.json, in-sample: the library
+// was fixed against them) and 25 held-out openings in other cities (scripts/eval/heldout/*.json, researched and scored
+// before any fix for them), each researched from the agencies' own pages, scored against the two deterministic paths
+// that build plans:
 //   instant plan   src/plan/preview.ts previewPlan: the app's first screen, a first text to Odelia (agent-run's
 //                  text start, via src/plan/start.ts) and the partner API all build the plan with it
 //   library        src/forms/registry.ts formsFor: what agent-run's find_official_forms tool returns for the business
@@ -36,10 +38,16 @@ type Gold = {
 type Row = { id: string; name: string; agency: string; level: Level; source?: string; fee: number | null };
 
 const here = dirname(fileURLToPath(import.meta.url));
-const goldDir = [join(here, "gold"), join(process.cwd(), "scripts/eval/gold")].find(d => { try { return readdirSync(d).length > 0; } catch { return false; } })!;
-const cases: Gold[] = readdirSync(goldDir).filter(f => f.endsWith(".json")).sort().map(f => JSON.parse(readFileSync(join(goldDir, f), "utf8")));
+const setDir = (name: string) => [join(here, name), join(process.cwd(), "scripts/eval", name)].find(d => { try { return readdirSync(d).length > 0; } catch { return false; } })!;
+const load = (name: string): Gold[] => { const d = setDir(name); return readdirSync(d).filter(f => f.endsWith(".json")).sort().map(f => JSON.parse(readFileSync(join(d, f), "utf8"))); };
+// gold: the 30 openings the library was fixed against (in-sample). heldout: 25 openings in other cities, researched
+// before any fix for them (scripts/eval/heldout). SET=gold or SET=heldout scores one; both by default.
+const SETS = (process.env.SET ? [process.env.SET] : ["gold", "heldout"]).map(name => ({ name, cases: load(name) }));
 // npm passes its own arguments after the script's "exit", so the quiet mode is an environment variable: QUIET=1
 const showMisses = !process.env.QUIET;
+/** A row that hedges whether the requirement applies ("if the city requires one", "We'll confirm with ...") asserts
+    nothing: it never counts as finding a required item, and it is set aside rather than scored right or wrong. */
+const HEDGE = /if (the|your) city requires|if one is required|we'll confirm|we will confirm|如所在城市要求|我们会向/i;
 const TODAY = "2026-10-18", OPENING = "2027-04-01";
 const TARGET = { recall: 0.95, precision: 0.97, agency: 0.97, level: 0.97, order: 0.95, source: 1, fee: 0.9 };
 
@@ -65,18 +73,18 @@ function library(g: Gold): Row[] {
 type Score = {
   id: string; req: number; found: number; rows: number; correct: number; wrong: number; invented: number; setAside: number;
   agencyOk: number; levelOk: number; orderOk: number; orderN: number; sourced: number; feeOk: number; feeN: number;
-  misses: string[]; wrongRows: string[]; agencyMiss: string[]; levelMiss: string[]; orderMiss: string[]; unsourced: string[]; feeMiss: string[];
+  misses: string[]; wrongRows: string[]; agencyMiss: string[]; levelMiss: string[]; orderMiss: string[]; unsourced: string[]; feeMiss: string[]; hedged: string[];
 };
 const text = (r: Row) => `${r.name} | ${r.agency} | ${r.id}`;
 const re = (s: string) => new RegExp(s, "i");
 
 function score(g: Gold, rows: Row[]): Score {
   const s: Score = { id: g.id, req: 0, found: 0, rows: rows.length, correct: 0, wrong: 0, invented: 0, setAside: 0, agencyOk: 0, levelOk: 0, orderOk: 0, orderN: 0, sourced: 0, feeOk: 0, feeN: 0,
-    misses: [], wrongRows: [], agencyMiss: [], levelMiss: [], orderMiss: [], unsourced: [], feeMiss: [] };
+    misses: [], wrongRows: [], agencyMiss: [], levelMiss: [], orderMiss: [], unsourced: [], feeMiss: [], hedged: [] };
   // each gold item's row: the first that matches it and its agency, else the first that matches it
   const rowOf = new Map<string, number>();
   for (const it of g.items) {
-    const hits = rows.map((r, k) => [r, k] as const).filter(([r]) => re(it.match).test(text(r)));
+    const hits = rows.map((r, k) => [r, k] as const).filter(([r]) => !HEDGE.test(r.name) && re(it.match).test(text(r)));
     const best = hits.find(([r]) => re(it.agencyMatch).test(r.agency)) ?? hits[0];
     if (best) rowOf.set(it.key, best[1]);
   }
@@ -93,6 +101,7 @@ function score(g: Gold, rows: Row[]): Score {
     if (officialSource(r.source)) s.sourced++; else s.unsourced.push(`${r.name}: ${r.source ?? "no link"}`);
     const bad = g.mustNotInclude.find(m => re(m.match).test(text(r)));
     if (bad) { s.wrong++; s.wrongRows.push(`${r.name} (${r.agency}): ${bad.why}`); return; }
+    if (HEDGE.test(r.name)) { s.setAside++; s.hedged.push(`${r.name} (${r.agency})`); return; }
     // a row is right when it names a gold item and is filed with that item's agency; the right permit with another
     // place's agency (Los Angeles County's plan check for a San José store) is a wrong row, not a right one
     const named = g.items.filter(it => re(it.match).test(text(r)));
@@ -140,32 +149,34 @@ function report(title: string, scores: Score[]): Totals {
   console.log(`${"-".repeat(100)}`);
   console.log(`${pad("TOTAL", 26)}${lpad(`${sum(s => s.found)}/${sum(s => s.req)}`, 7)}${lpad(pct(sum(s => s.found), sum(s => s.req)), 7)}${lpad(`${sum(s => s.correct)}/${sum(s => s.correct + s.wrong + s.invented)}`, 7)}${lpad((100 * t.precision).toFixed(1) + "%", 7)}`
     + `${lpad((100 * t.agency).toFixed(1) + "%", 10)}${lpad((100 * t.level).toFixed(1) + "%", 10)}${lpad(`${sum(s => s.orderOk)}/${sum(s => s.orderN)}`, 9)}${lpad((100 * t.source).toFixed(1) + "%", 10)}${lpad(`${sum(s => s.feeOk)}/${sum(s => s.feeN)}`, 8)}`);
-  console.log(`  rows set aside (match only an unverified gold item): ${sum(s => s.setAside)}; wrong-jurisdiction or must-not rows: ${sum(s => s.wrong)}; invented rows: ${sum(s => s.invented)}`);
+  console.log(`  rows set aside (match only an unverified gold item, or hedge): ${sum(s => s.setAside)} (${sum(s => s.hedged.length)} hedged); wrong-jurisdiction or must-not rows: ${sum(s => s.wrong)}; invented rows: ${sum(s => s.invented)}`);
   if (showMisses) for (const s of scores) {
-    const lines = [...s.misses.map(m => `missing   ${m}`), ...s.wrongRows.map(m => `wrong     ${m}`), ...s.agencyMiss.map(m => `agency    ${m}`), ...s.levelMiss.map(m => `level     ${m}`),
+    const lines = [...s.misses.map(m => `missing   ${m}`), ...s.wrongRows.map(m => `wrong     ${m}`), ...s.hedged.map(m => `hedged    ${m}`), ...s.agencyMiss.map(m => `agency    ${m}`), ...s.levelMiss.map(m => `level     ${m}`),
       ...s.orderMiss.map(m => `order     ${m}`), ...s.unsourced.map(m => `source    ${m}`), ...s.feeMiss.map(m => `fee       ${m}`)];
     if (lines.length) console.log(`\n  ${s.id}\n    ${lines.join("\n    ")}`);
   }
   return t;
 }
 
-const unverified = cases.flatMap(g => g.items.filter(i => !i.verified).map(i => `${g.id}: ${i.name}${i.note ? ` (${i.note})` : ""}`));
-console.log(`Gold set: ${cases.length} openings, ${cases.reduce((t, g) => t + g.items.filter(i => i.verified && i.required).length, 0)} verified required items, `
-  + `${cases.reduce((t, g) => t + g.items.filter(i => i.verified && !i.required).length, 0)} verified conditional items, ${unverified.length} unverified items set aside, `
-  + `${cases.reduce((t, g) => t + g.order.filter(o => o.verified).length, 0)} verified order constraints.`);
-
-const instant = report("Instant plan (src/plan/preview.ts: the app's first screen, text-to-start, partner API)", cases.map(g => score(g, instantPlan(g))));
-const lib = report("Library (find_official_forms in agent-run, src/forms/registry.ts formsFor)", cases.map(g => score(g, library(g))));
-if (showMisses && unverified.length) console.log(`\nUnverified gold items (not scored):\n  ${[...new Set(unverified)].join("\n  ")}`);
+const fails: string[] = [];
+for (const { name: set, cases } of SETS) {
+  const unverified = cases.flatMap(g => g.items.filter(i => !i.verified).map(i => `${g.id}: ${i.name}${i.note ? ` (${i.note})` : ""}`));
+  console.log(`\n================ ${set === "gold" ? "Gold set (in-sample: the library was fixed against it)" : "Held-out set (scripts/eval/heldout)"} ================`);
+  console.log(`${cases.length} openings, ${cases.reduce((t, g) => t + g.items.filter(i => i.verified && i.required).length, 0)} verified required items, `
+    + `${cases.reduce((t, g) => t + g.items.filter(i => i.verified && !i.required).length, 0)} verified conditional items, ${unverified.length} unverified items set aside, `
+    + `${cases.reduce((t, g) => t + g.order.filter(o => o.verified).length, 0)} verified order constraints.`);
+  const instant = report(`Instant plan, ${set} (src/plan/preview.ts: the app's first screen, text-to-start, partner API)`, cases.map(g => score(g, instantPlan(g))));
+  const lib = report(`Library, ${set} (find_official_forms in agent-run, src/forms/registry.ts formsFor)`, cases.map(g => score(g, library(g))));
+  if (showMisses && unverified.length) console.log(`\nUnverified ${set} items (not scored):\n  ${[...new Set(unverified)].join("\n  ")}`);
+  for (const [name, t] of [["instant plan", instant], ["library", lib]] as const)
+    for (const k of Object.keys(TARGET) as (keyof Totals)[]) if (t[k] + 1e-9 < TARGET[k]) fails.push(`${set} ${name} ${k} ${(100 * t[k]).toFixed(1)}% < ${(100 * TARGET[k]).toFixed(0)}%`);
+}
 
 // her written answers: sample mode and the server's grounding (scripts/eval/answers.ts)
 const answers = await answerChecks();
 console.log(`\nWritten answers (sample mode and the server's grounding): ${answers.filter(c => c.pass).length} of ${answers.length} checks pass\n`);
 for (const c of answers) console.log(`${c.pass ? "ok  " : "FAIL"} ${c.name}${c.pass ? "" : `\n     ${c.detail}`}`);
 
-const fails: string[] = [];
-for (const [name, t] of [["instant plan", instant], ["library", lib]] as const)
-  for (const k of Object.keys(TARGET) as (keyof Totals)[]) if (t[k] + 1e-9 < TARGET[k]) fails.push(`${name} ${k} ${(100 * t[k]).toFixed(1)}% < ${(100 * TARGET[k]).toFixed(0)}%`);
 for (const c of answers) if (!c.pass) fails.push(`answer: ${c.name}`);
 console.log(fails.length ? `\nBelow target: ${fails.join("; ")}` : `\nAll targets met (recall >= 95%, precision >= 97%, agency and level >= 97%, order >= 95%, every row sourced, fees >= 90%, every answer check).`);
 process.exit(fails.length ? 1 : 0);
