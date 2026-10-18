@@ -150,6 +150,12 @@ export const CITIES: City[] = [
   c("DEN", "US", "Denver", "丹佛", ["denver", "丹佛"], true, "CO"),
   c("MSP", "US", "Minneapolis", "明尼阿波利斯", ["minneapolis", "明尼阿波利斯"], true, "MN"),
   c("CMH", "US", "Columbus", "哥伦布", ["columbus, oh", "columbus, ohio", "columbus oh", "俄亥俄州哥伦布", "哥伦布"], true, "OH"),
+  // added 2026-10-18 for the target markets (src/forms/markets.ts), with their own forms in markets-us.ts
+  c("SMO", "US", "San Mateo", "圣马特奥", ["san mateo, ca", "san mateo, california", "san mateo ca", "圣马特奥市"], true, "CA"),
+  c("CUP", "US", "Cupertino", "库比蒂诺", ["cupertino", "库比蒂诺", "库珀蒂诺"], true, "CA"),
+  c("GLN", "US", "Glendale", "格伦代尔", ["glendale, ca", "glendale, california", "glendale ca", "加州格伦代尔", "格伦代尔"], true, "CA"),
+  c("SGB", "US", "San Gabriel", "圣盖博", ["san gabriel", "圣盖博", "圣盖布瑞"], true, "CA"),
+  c("ROC", "US", "Rockville", "罗克维尔", ["rockville, md", "rockville, maryland", "rockville md", "罗克维尔", "洛克维尔"], true, "MD"),
   ...([["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
     .map(([en, zh, st]) => c("US-" + en.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6), "US", en, zh, [en.toLowerCase(), zh], false, st)),
 ];
@@ -170,6 +176,10 @@ export const STATES: { code: string; en: string; zh: string; names: RegExp }[] =
   { code: "CO", en: "Colorado", zh: "科罗拉多州", names: /colorado|,\s*co\.?\s*(\d{5}(-\d{4})?\s*)?$|科罗拉多/i },
   { code: "MN", en: "Minnesota", zh: "明尼苏达州", names: /minnesota|,\s*mn\b|明尼苏达/i },
   { code: "OH", en: "Ohio", zh: "俄亥俄州", names: /\bohio\b|,\s*oh\b|俄亥俄/i },
+  // the target markets' states (src/forms/markets.ts) the registry had no forms for until 2026-10-18
+  { code: "MD", en: "Maryland", zh: "马里兰州", names: /maryland|,\s*md\b|马里兰/i },
+  { code: "HI", en: "Hawaii", zh: "夏威夷州", names: /hawaii|hawai'i|,\s*hi\b|夏威夷/i },
+  { code: "UT", en: "Utah", zh: "犹他州", names: /\butah\b|,\s*ut\b|犹他/i },
   // ", or" and ", co" are ordinary words too, so only at the end of the address (or before the ZIP)
   { code: "OR", en: "Oregon", zh: "俄勒冈州", names: /oregon|,\s*or\.?\s*(\d{5}(-\d{4})?\s*)?$|俄勒冈/i },
 ];

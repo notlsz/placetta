@@ -1,0 +1,294 @@
+{
+ "form": "smo-license",
+ "rev": "Application for Business Tax Certificate (City of San Mateo)",
+ "pdf": "smo-license.pdf",
+ "url": "https://www.cityofsanmateo.org/DocumentCenter/View/232/Gross-Receipts-Form?bidId=",
+ "checked": "2026-10-18",
+ "notes": "Answers: the form prints 'San Mateo, CA 9440' under the street, so only the street and the ZIP's last digit are written. The mailing address is two lines, 'street; city, ST ZIP'. Owners are one per line, 'name, title', with their home addresses and phones on two more answers in the same order (up to three). The property owner is 'name; address; phone'. The first-year tax is on a 12-month estimate of gross receipts. Left for the applicant: the EIN, because the form's one box is 'EIN or Social Security Number'; the fax number; the tax due from the schedule, the fire inspection and state fees (the city's to confirm); and the signature and date. The office-use and planning-review boxes are the city's.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "Business",
+   "en": "Business name",
+   "zh": "企业名称"
+  },
+  {
+   "id": "address",
+   "line": "Business",
+   "en": "Business street address in San Mateo, with its ZIP: 'street, San Mateo, CA 9440x'",
+   "zh": "圣马特奥营业街道地址及邮编：“街道、San Mateo、CA 9440x”"
+  },
+  {
+   "id": "phone",
+   "line": "Business",
+   "en": "Business phone",
+   "zh": "企业电话"
+  },
+  {
+   "id": "mailing",
+   "line": "Business",
+   "en": "Mailing address, if different: 'street; city, ST ZIP', or None",
+   "zh": "邮寄地址（如不同）：“街道；城市、州、邮编”，或 None"
+  },
+  {
+   "id": "email",
+   "line": "Business",
+   "en": "Email contact",
+   "zh": "联系电子邮箱"
+  },
+  {
+   "id": "owners",
+   "line": "Owners",
+   "en": "Business owners or officers, one per line (up to three): 'name, title'",
+   "zh": "企业所有者或高管，每行一位（最多三位）：“姓名、职务”"
+  },
+  {
+   "id": "owner_addresses",
+   "line": "Owners",
+   "en": "Their home addresses, one per line in the same order",
+   "zh": "其住址，按相同顺序每行一个"
+  },
+  {
+   "id": "owner_phones",
+   "line": "Owners",
+   "en": "Their home phones, one per line in the same order",
+   "zh": "其住宅电话，按相同顺序每行一个"
+  },
+  {
+   "id": "activity",
+   "line": "Business",
+   "en": "Describe the business activity",
+   "zh": "描述业务活动"
+  },
+  {
+   "id": "sellers_permit",
+   "line": "Business",
+   "en": "California seller's permit number, or None",
+   "zh": "加州卖家许可证号，或 None"
+  },
+  {
+   "id": "ein",
+   "line": "Business",
+   "en": "Federal tax identification number (EIN)",
+   "zh": "联邦税号（EIN）"
+  },
+  {
+   "id": "employees",
+   "line": "Business",
+   "en": "Number of employees",
+   "zh": "员工人数"
+  },
+  {
+   "id": "start",
+   "line": "Business",
+   "en": "Business start date in San Mateo (MM/DD/YYYY)",
+   "zh": "在圣马特奥开始经营的日期（月/日/年）"
+  },
+  {
+   "id": "square_feet",
+   "line": "Additional",
+   "en": "Floor area of the business in San Mateo (square feet)",
+   "zh": "在圣马特奥的营业面积（平方英尺）"
+  },
+  {
+   "id": "parking",
+   "line": "Additional",
+   "en": "Number of off-street parking spaces, or None",
+   "zh": "路外停车位数，或 None"
+  },
+  {
+   "id": "property_owner",
+   "line": "Additional",
+   "en": "Property owner: 'name; address; phone'",
+   "zh": "物业业主：“姓名；地址；电话”"
+  },
+  {
+   "id": "previous_use",
+   "line": "Additional",
+   "en": "Previous use of the property",
+   "zh": "物业此前用途"
+  },
+  {
+   "id": "gross_receipts",
+   "line": "1",
+   "en": "Total annual gross receipts: a 12-month estimate ('Estimate: $')",
+   "zh": "全年总收入：12 个月预估（“Estimate: $”）"
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Person signing: 'name, title'",
+   "zh": "签署人：“姓名、职务”"
+  }
+ ],
+ "boxes": {
+  "name": [
+   {
+    "text": "Business Name"
+   }
+  ],
+  "address": [
+   {
+    "text": "Address",
+    "pick": "street"
+   },
+   {
+    "text": "Zip code",
+    "pick": "zip|last1"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Business Phone No"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Mailing Address if different from Business Address",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "undefined",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email contact"
+   }
+  ],
+  "owners": [
+   {
+    "text": "Business OwnersOfficers NamesRow1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "TitleRow1",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "Business OwnersOfficers NamesRow2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "TitleRow2",
+    "pick": "line2|tail"
+   },
+   {
+    "text": "Business OwnersOfficers NamesRow3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "TitleRow3",
+    "pick": "line3|tail"
+   }
+  ],
+  "owner_addresses": [
+   {
+    "text": "Home AddressRow1",
+    "pick": "line1"
+   },
+   {
+    "text": "Home AddressRow2",
+    "pick": "line2"
+   },
+   {
+    "text": "Home AddressRow3",
+    "pick": "line3"
+   }
+  ],
+  "owner_phones": [
+   {
+    "text": "Home PhoneRow1",
+    "pick": "line1"
+   },
+   {
+    "text": "Home PhoneRow2",
+    "pick": "line2"
+   },
+   {
+    "text": "Home PhoneRow3",
+    "pick": "line3"
+   }
+  ],
+  "activity": [
+   {
+    "text": "Describe your business activity 1"
+   }
+  ],
+  "sellers_permit": [
+   {
+    "text": "California Sellers Permit Number State Board of Equalization if applicable",
+    "if": "^(?!none$)"
+   }
+  ],
+  "employees": [
+   {
+    "text": "Number of Employees if any"
+   }
+  ],
+  "start": [
+   {
+    "text": "Business Start Date in San Mateo",
+    "pick": "date"
+   }
+  ],
+  "square_feet": [
+   {
+    "text": "Floor area of your business in San Mateo square feet",
+    "pick": "digits"
+   }
+  ],
+  "parking": [
+   {
+    "text": "Number of offstreet parking spaces if any",
+    "if": "^(?!none$)"
+   }
+  ],
+  "property_owner": [
+   {
+    "text": "Property Owner NameRow1",
+    "pick": "line1"
+   },
+   {
+    "text": "AddressRow1",
+    "pick": "line2"
+   },
+   {
+    "text": "Phone NumberRow1",
+    "pick": "line3"
+   }
+  ],
+  "previous_use": [
+   {
+    "text": "Previous use of PropertyRow1"
+   }
+  ],
+  "gross_receipts": [
+   {
+    "text": "Estimated Revenue",
+    "pick": "tail"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Name Print",
+    "pick": "head"
+   },
+   {
+    "text": "Title",
+    "pick": "tail"
+   }
+  ]
+ },
+ "unmapped": {
+  "ein": "The PDF has one box for 'EIN or Social Security Number'. A box that also takes an SSN is never filled by Placetta, so the signer writes the EIN there by hand."
+ },
+ "blank": {
+  "mailing": "^none$",
+  "sellers_permit": "^none$",
+  "parking": "^none$"
+ }
+}

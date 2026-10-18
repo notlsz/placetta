@@ -124,9 +124,9 @@ const SRC_EU = { label: "europa.eu", url: "https://europa.eu/youreurope/business
 const EU = new Set(["FR", "DE", "ES", "IT", "NL", "IE", "BE", "PT", "AT", "SE", "DK", "FI", "PL", "CZ", "HU", "GR"]);
 
 /** The registry forms that register the business for state sales tax, and those that also register it as an employer. */
-const TAX_FORMS = new Set(["ny-dtf-17", "ca-cdtfa", "tx-ap201", "az-tpt", "il-tax", "ma-tax", "fl-dor", "dc-otr", "ga-tax", "pa-tax", "wa-bls", "nj-formation",
+const TAX_FORMS = new Set(["md-cra", "hi-bb1", "ut-tax", "ny-dtf-17", "ca-cdtfa", "tx-ap201", "az-tpt", "il-tax", "ma-tax", "fl-dor", "dc-otr", "ga-tax", "pa-tax", "wa-bls", "nj-formation",
   "nj-reg", "nv-tax", "va-tax", "co-tax", "mn-tax", "oh-vendor"]);
-const EMPLOYER_FORMS = new Set(["ny-dol-100", "ca-edd-de1", "tx-twc", "az-tpt", "wa-bls", "nj-formation",
+const EMPLOYER_FORMS = new Set(["md-cra", "hi-ui", "ut-ui", "ma-dua", "ny-dol-100", "ca-edd-de1", "tx-twc", "az-tpt", "wa-bls", "nj-formation",
   "nj-reg", "pa-tax", "fl-dor", "co-tax", "il-ides", "nv-esd", "dc-does", "va-vec", "mn-ui", "oh-ui", "or-payroll"]);
 
 type Role = "entity" | "ein" | "tax" | "employer" | "plan" | "food" | "license" | "building" | "publication" | "other";
@@ -143,9 +143,11 @@ function roleOf(f: OfficialForm | null, a: Application): Role {
   // the permit that lets a food place open: a food form (or one only restaurants file) that issues a permit or licence,
   // not a course, a plan review, a sign or the building. Chicago's business licence is its food licence. Boston's common
   // victualler licence comes before the health permit, so it isn't the permit itself.
-  const foodForm = f ? !!f.needs?.food || f.id === "chi-license" || (f.level !== "federal" && f.segments.includes("restaurant") && !f.segments.includes("seller") && !f.segments.includes("warehouse")) : /food/.test(a.id);
+  // a general business license a county or city issues to restaurants among others (unincorporated Los Angeles County's)
+  if (/business (tax|license|licence|registration|certificate)/.test(k) && !/food/.test(k) && (a.level === "city" || a.level === "county")) return "license";
+  const foodForm = f ?!!f.needs?.food || f.id === "chi-license" || (f.level !== "federal" && f.segments.includes("restaurant") && !f.segments.includes("seller") && !f.segments.includes("warehouse")) : /food/.test(a.id);
   if (foodForm && /permit|licen|approval|dealer|food business registration/.test(k) && !/manager|handler|protection certificate|pre-opening|plan|\bsign|occupancy|publication|building|fire|hazard|insurance|assembly|formula|premises|victualler/.test(k)) return "food";
-  if (/business (tax|license|licence|registration|certificate)|certificate of use|commercial activity/.test(k) && a.level === "city") return "license";
+  if (/business (tax|license|licence|registration|certificate)|certificate of use|commercial activity/.test(k) && (a.level === "city" || a.level === "county")) return "license";   // a county licenses businesses in its unincorporated towns
   return "other";
 }
 

@@ -1118,6 +1118,126 @@ export const DEST: Record<string, Dest> = {
     also: ["https://dlcp.dc.gov/service/domestic-limited-liability-company"],
   },
 
+  // ---- The target markets' forms (src/forms/markets-us.ts), read from the agencies' own pages on 2026-10-18. ----
+  "md-llc": {
+    // The form's filing instructions: "To file online: Create an account with Maryland Business Express"
+    // (egov.maryland.gov/businessexpress), or mail it with the $100 check. Not given a mail route here: SDAT asks for "an
+    // originally executed" paper copy, and this entry's signature is the portal's.
+    portal: "egov.maryland.gov", portalUrl: "https://egov.maryland.gov/businessexpress",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://dat.maryland.gov/sdat%20forms/artorgan.pdf",
+  },
+  "md-cra": {
+    // "The Central Registration fax number is 410-260-7908" ("Do not fax a cover sheet or our instructions"); "Mail the
+    // application to: Central Registration, Comptroller of Maryland, Revenue Administration Division, 110 Carroll Street,
+    // Annapolis, MD 21411-0001"; online through the Comptroller's interactive CRA. Section F: "Signature* (Required by Law)".
+    fax: { us: "+14102607908" },
+    mail: { name: "Comptroller of Maryland, Revenue Administration Division", line1: "Central Registration", line2: "110 Carroll Street", city: "Annapolis", state: "MD", zip: "21411-0001" },
+    portal: "interactive.marylandtaxes.gov", portalUrl: "https://interactive.marylandtaxes.gov/webapps/comptrollercra/entrance.asp",
+    signature: "wet", payment: "none", onBehalf: "authorization", authorization: "Power of attorney form (Section F box)",
+    checked: "2026-10-18", source: "https://www.marylandtaxes.gov/forms/current_forms/cra.pdf",
+    also: ["https://businessexpress.maryland.gov/start/taxes-and-insurance"],
+  },
+  "moco-food-license": {
+    // "Apply and pay through the CivicGov portal", or "Mail it to Licensure & Regulatory Services, 2425 Reedie Drive, 9th
+    // Floor, Wheaton, MD 20902" or "Fax it to 240-777-3088". The license fee goes with it, so paper goes to the team.
+    portal: "www.civicgov4.com", portalUrl: "https://www.civicgov4.com/md_montgomery/portal/", tenant: "/md_montgomery",
+    fax: { us: "+12407773088" },
+    mail: { name: "Montgomery County DHHS, Licensure & Regulatory Services", line1: "2425 Reedie Drive, 9th Floor", city: "Wheaton", state: "MD", zip: "20902" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.montgomerycountymd.gov/department-health-human-services/about-us/licensure-regulatory-services/environmental-health-unit/food-service-facility-license",
+  },
+  "hi-llc": {
+    // "What BREG forms can I file online?" lists LLC-1; the portal is Hawaii Business Express.
+    portal: "hbe.ehawaii.gov", portalUrl: "https://hbe.ehawaii.gov/BizEx/home.eb",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://cca.hawaii.gov/breg/what-breg-forms-can-i-file-online/",
+    also: ["https://cca.hawaii.gov/breg/registration/dllc/forms/"],
+  },
+  "hi-bb1": {
+    // Form BB-1: "For faster service apply online at hitax.hawaii.gov"; "Mail the completed application to: HAWAII
+    // DEPARTMENT OF TAXATION, P.O. Box 1425, Honolulu, HI 96806-1425", "ATTACH CHECK OR MONEY ORDER HERE" ($20).
+    portal: "hitax.hawaii.gov", portalUrl: "https://hitax.hawaii.gov/",
+    mail: { name: "Hawaii Department of Taxation", line1: "P.O. Box 1425", city: "Honolulu", state: "HI", zip: "96806-1425" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://files.hawaii.gov/tax/forms/2024/bb1_i.pdf",
+  },
+  "hi-ui": {
+    // "Employers may register their company at: https://huiclaims3.hawaii.gov/"
+    portal: "huiclaims3.hawaii.gov", portalUrl: "https://huiclaims3.hawaii.gov/",
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://labor.hawaii.gov/ui/employer-registration/",
+  },
+  "ut-llc": {
+    // "Go to https://businessregistration.utah.gov/, log in with a UtahID, select Formations, choose Domestic".
+    portal: "businessregistration.utah.gov", portalUrl: "https://businessregistration.utah.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://commerce.utah.gov/corporations/business-entities/domestic-limited-liability-company/",
+  },
+  "ut-tax": {
+    // "Apply for a Utah tax account/license" in Taxpayer Access Point (tap.tax.utah.gov); the TC-69 link now opens TAP.
+    portal: "tap.tax.utah.gov", portalUrl: "https://tap.tax.utah.gov/TaxExpress/_/?Link=TapBr",
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://tax.utah.gov/business/create-manage/tax-info-business/",
+  },
+  "ut-ui": {
+    // "Create a new UI account for my business" (jobs.utah.gov/ui/employer/EmployerRegistration/Intro.aspx).
+    portal: "jobs.utah.gov", portalUrl: "https://jobs.utah.gov/ui/employer/EmployerRegistration/Intro.aspx",
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://jobs.utah.gov/ui/employer/public/osbr.aspx",
+  },
+  "va-llc": {
+    // The SCC's how-to guide: "Log on to CIS at cis.scc.virginia.gov", Online Services, Virginia Entity, Limited Liability
+    // Company, Articles of Organization; the signer is added in the Signature Information section; "Add To Shopping
+    // Cart", "Checkout", "Go To Payment" (a LexisNexis payment page with a CAPTCHA), "Pay Now".
+    portal: "cis.scc.virginia.gov", portalUrl: "https://cis.scc.virginia.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf",
+  },
+  "ma-dua": {
+    // "Employers who pay wages for work done in Massachusetts must register with DUA": Unemployment Services for
+    // Employers, "go to the homepage without logging in and select Register your Business".
+    portal: "unemployment.mass.gov", portalUrl: "https://unemployment.mass.gov/Employers/", noLogin: true,
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance",
+  },
+  "smo-license": {
+    // The application: "Send this completed application with your check to the Business Tax Division, City Hall, 330 West
+    // 20th Avenue, San Mateo, CA 94403." The tax goes with it, so the team sends it.
+    mail: { name: "City of San Mateo, Business Tax Division", line1: "City Hall, 330 West 20th Avenue", city: "San Mateo", state: "CA", zip: "94403" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.cityofsanmateo.org/DocumentCenter/View/232/Gross-Receipts-Form?bidId=",
+  },
+  "smc-health-permit": {
+    // "download, complete, and upload to the MyEHS online portal" (smcehs.my.site.com); MyEHS manages "applications,
+    // permits, invoices"; an account is reviewed by staff first.
+    portal: "smcehs.my.site.com", portalUrl: "https://smcehs.my.site.com/s/?language=en_US",
+    signature: "typed", payment: "invoice", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.smchealth.org/node/6706",
+    also: ["https://www.smchealth.org/my-ehs-online-portal"],
+  },
+  "cup-license": {
+    // "the city's business license services moved to HdL on September 22, 2025 ... Website: cupertino.hdlgov.com".
+    portal: "cupertino.hdlgov.com", portalUrl: "https://cupertino.hdlgov.com/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://cupertino.gov/i-want-to/apply-for/business-license-application",
+  },
+  "sgb-license": {
+    // "the business can apply for the City business license by calling (626) 308-2812 or emailing Financeinfo@sgch.org.
+    // Please include your business name and address in the subject line." The license tax is paid to the city.
+    email: "Financeinfo@sgch.org",
+    signature: "wet", payment: "invoice", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023",
+  },
+  "lac-business-license": {
+    // "If your business activity is one that the County licenses, you must apply" ("Restaurant", "Food Establishment"):
+    // the page's Apply link opens the county's EnerGov self-service application assistant.
+    portal: "losangelescountyca-energovweb.tylerhost.net",
+    portalUrl: "https://losangelescountyca-energovweb.tylerhost.net/apps/selfservice#/applicationAssistant?sectionName=All&moduleId=10&categoryName=County%20of%20Los%20Angeles%20Business%20License&showTemplates=false",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://ttc.lacounty.gov/business-license-requirements-2/",
+  },
+
   // California ABC's new retail license packet: the applicants sign before an ABC employee at the district office (with
   // state ID), or on a notarized ABC-211-SIG; the page names no mail or online route ("contact your local district office").
   ...Object.fromEntries(
@@ -1220,6 +1340,9 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   // so the team picks the center; none takes an online submission.
   "irs-8832": { why: "Mailed to Kansas City or Ogden by the entity's state (Ogden for a foreign country); no fax or online route.", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832", checked: "2026-10-18" },
   "irs-2553": { why: "Faxed or mailed to Kansas City (855-887-7734) or Ogden (855-214-7520) by the corporation's state.", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-2553", checked: "2026-10-18" },
+  "moco-plan-review": { why: "Montgomery County's plans are reviewed by the Department of Permitting Services with the restaurant interior alteration permit, filed by the design professional; Environmental Health reviews them there.", source: "https://www.montgomerycountymd.gov/department-health-human-services/about-us/licensure-regulatory-services/environmental-health-unit/food-service-facility-license", checked: "2026-10-18" },
+  "smc-plan-check": { why: "San Mateo County's plan check page didn't load past its navigation for us, so the plan submission route (MyEHS or paper) wasn't confirmed.", source: "https://www.smchealth.org/food-facility-plan-check-process", checked: "2026-10-18" },
+  "gln-brc": { why: "Applied for in the city's GlendalePermits portal, whose address the city's page doesn't print.", source: "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate", checked: "2026-10-18" },
   "irs-8822b": { why: "Mailed to Kansas City or Ogden by the state of the old business address (Ogden for any place outside the US).", source: "https://www.irs.gov/pub/irs-pdf/f8822b.pdf", checked: "2026-10-18" },
   "dal-sign": { why: "A registered sign contractor applies on DallasNow, and lit signs need a registered electrical sign contractor.", source: "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Documents/Signs/SIGN%20PERMITS%20-%20SPSD%20Checklist.pdf", checked: "2026-10-13" },
   "sdg-co": { why: "Not an application: issued after the final inspection of the building permit work.", source: "https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585", checked: "2026-10-12" },

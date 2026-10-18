@@ -811,7 +811,7 @@ export const LOCAL_US: OfficialForm[] = [
   },
   {
     id: "lv-license", form: "General Business License (online portal)", title: B("City of Las Vegas business license", "拉斯维加斯市营业执照"),
-    agency: B("City of Las Vegas, Business Licensing", "拉斯维加斯市营业执照处"), level: "city", where: "LV", segments: [R, T, S, W], method: "portal", order: 58,
+    agency: B("City of Las Vegas, Business Licensing", "拉斯维加斯市营业执照处"), level: "city", where: "LVC", segments: [R, T, S, W], method: "portal", order: 58,
     how: B("For an address inside City of Las Vegas limits; check the jurisdiction first, since other addresses license with Clark County or their own city. Confirm the zoning allows the business and the building is code compliant, get the state business license and register with the Department of Taxation, then apply on the city's online portal.", "适用于拉斯维加斯市界内的地址；请先核实管辖范围，其他地址须向克拉克县或所在城市申请。先确认分区允许该业务且建筑符合规范，取得州营业执照并在税务局登记，然后在市政府在线门户申请。"),
     url: "https://www.lasvegasnevada.gov/dashboard", info: "https://lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License",
     fee: null, takes: B("A license technician emails within 5 business days; the license is issued within 30 days of applying, usually sooner.", "执照专员在 5 个工作日内发邮件联系；执照在申请后 30 天内签发，通常更快。"), takesDays: 30,
@@ -823,7 +823,7 @@ export const LOCAL_US: OfficialForm[] = [
   },
   {
     id: "cc-business-license", form: "Clark County Business License Application", title: B("Clark County business license", "克拉克县营业执照"),
-    agency: B("Clark County Business License", "克拉克县营业执照部门"), level: "county", where: "LV", segments: [R, T, S, W], method: "online", order: 59,
+    agency: B("Clark County Business License", "克拉克县营业执照部门"), level: "county", where: "CCU", segments: [R, T, S, W], method: "online", order: 59,
     how: B("For an address in unincorporated Clark County. Confirm the zoning allows the activity, get the state business license, register with the Department of Taxation, file a fictitious firm name with the County Clerk if you trade under another name, and finish all construction; then apply online or at 500 S Grand Central Pkwy, 3rd floor, with proof of rights to the location and, for food, proof of your Health District application.", "适用于克拉克县非建制区的地址。先确认分区允许该业务，取得州营业执照并在税务局登记；使用其他名称经营的须向县书记官登记虚构商号，并完成全部施工。然后在线或到 500 S Grand Central Pkwy 3 楼申请，提交场所使用权证明，食品企业还须提交已向卫生区申请的证明。"),
     url: "https://blepay.clarkcountynv.gov/NAICSDefault.aspx", info: "https://www.clarkcountynv.gov/business/doing_business_with_clark_county/apply-for-a-business-license",
     pdf: "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0746bb4a-633d-43f6-85c8-875896f099a7/original/as/application-checklist-08-13-2026.pdf",

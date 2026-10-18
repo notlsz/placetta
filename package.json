@@ -23,6 +23,8 @@
     "test:smart": "esbuild scripts/smart-test.ts --bundle --platform=node --format=esm --outfile=.smart-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .smart-test.mjs; s=$?; rm -f .smart-test.mjs; exit $s",
     "test:flow": "esbuild scripts/agent-flow-test.ts --bundle --platform=node --format=esm --outfile=.agent-flow-test.mjs '--external:*.pdf?inline' --packages=external --jsx=automatic --log-level=error && node .agent-flow-test.mjs; s=$?; rm -f .agent-flow-test.mjs; exit $s",
     "selftest": "node scripts/selftest.mjs",
+    "test:markets": "esbuild scripts/market-coverage.ts --bundle --platform=node --format=esm --outfile=.market-test.mjs '--external:*.pdf?inline' --log-level=error && node .market-test.mjs; s=$?; rm -f .market-test.mjs; exit $s",
+    "markets:write": "esbuild scripts/market-coverage.ts --bundle --platform=node --format=esm --outfile=.market-test.mjs '--external:*.pdf?inline' --log-level=error && node .market-test.mjs --write; s=$?; rm -f .market-test.mjs; exit $s",
     "test:words": "node scripts/plain-words.mjs",
     "test:stores": "esbuild scripts/stores-check-test.ts --bundle --platform=node --format=esm --outfile=.stores-check-test.mjs '--external:*.pdf?inline' --log-level=error && node .stores-check-test.mjs; s=$?; rm -f .stores-check-test.mjs; exit $s",
     "site:check": "esbuild src/site/stores-check.ts --bundle --minify --format=iife --target=es2020 --outfile=site/stores-check.js --log-level=warning",

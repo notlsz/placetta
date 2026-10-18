@@ -1,0 +1,102 @@
+{
+ "form": "md-llc",
+ "rev": "Articles of Organization (Revised August 2024)",
+ "pdf": "md-llc.pdf",
+ "url": "https://dat.maryland.gov/sdat%20forms/artorgan.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: the purpose is one or two sentences (a second line goes on the form's second line). Addresses are split onto the form's two lines: street, then city, MD ZIP. The return address is three lines, 'name; street; city, ST ZIP'. The signatures of the authorized person (item 5) and of the resident agent (item 6) are left for them: SDAT asks for an originally executed document. The $100 fee goes with it by check, or the same filing is made online in Maryland Business Express.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "1",
+   "en": "Name of the limited liability company (with LLC, L.L.C., L.C. or Limited Liability Company)",
+   "zh": "有限责任公司名称（须含 LLC、L.L.C.、L.C. 或 Limited Liability Company）"
+  },
+  {
+   "id": "purpose",
+   "line": "2",
+   "en": "Purpose of the LLC: a one or two sentence description of the business",
+   "zh": "LLC 的经营目的：一两句话描述业务"
+  },
+  {
+   "id": "address",
+   "line": "3",
+   "en": "Address of the LLC in Maryland (no P.O. box): street, city, MD ZIP",
+   "zh": "LLC 在马里兰州的地址（不可为邮政信箱）：街道、城市、MD 邮编"
+  },
+  {
+   "id": "agent",
+   "line": "4",
+   "en": "Resident agent's name (a Maryland resident over 18, or a Maryland corporation or LLC); the agent signs too",
+   "zh": "常驻代理人姓名（年满 18 岁的马里兰州居民，或马里兰州公司或 LLC）；代理人也须签字"
+  },
+  {
+   "id": "agent_address",
+   "line": "4",
+   "en": "Resident agent's address (no P.O. box): street, city, MD ZIP",
+   "zh": "常驻代理人地址（不可为邮政信箱）：街道、城市、MD 邮编"
+  },
+  {
+   "id": "return_to",
+   "line": "7",
+   "en": "Filing party's return address: 'name; street; city, ST ZIP'",
+   "zh": "提交人回寄地址：“姓名；街道；城市、州、邮编”"
+  }
+ ],
+ "boxes": {
+  "name": [
+   {
+    "text": "The name of the Limited Liability Company is: 1"
+   }
+  ],
+  "purpose": [
+   {
+    "text": "The purpose for which the Limited Liability is filed is as follows: 1",
+    "pick": "line1"
+   },
+   {
+    "text": "The purpose for which the Limited Liability is filed is as follows: 2",
+    "pick": "line2"
+   }
+  ],
+  "address": [
+   {
+    "text": "The address of the Limited Liability Company in Maryland is: 1",
+    "pick": "street"
+   },
+   {
+    "text": "The address of the Limited Liability Company in Maryland is: 2",
+    "pick": "citystatezip"
+   }
+  ],
+  "agent": [
+   {
+    "text": "The resident agent of the Limited Liability Company in Maryland is: 4"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "The resident agent of the Limited Liability Company in Maryland is: 2",
+    "pick": "street"
+   },
+   {
+    "text": "The resident agent of the Limited Liability Company in Maryland is: 3",
+    "pick": "citystatezip"
+   }
+  ],
+  "return_to": [
+   {
+    "text": "Filing party's return address:",
+    "pick": "line1"
+   },
+   {
+    "text": "Filing party's return address:1",
+    "pick": "line2"
+   },
+   {
+    "text": "Filing party's return address: 2",
+    "pick": "line3"
+   }
+  ]
+ }
+}

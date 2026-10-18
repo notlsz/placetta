@@ -2,7 +2,7 @@
 // Department (4 forms), Accela Citizen Access at aca-prod.accela.com (4), SJPermits (3), BTExpress at county-taxes.net
 // (3), Denver's portals at denvergov.org (3) and California's bizfile Online (3). Fairfax County's PLUS also has 3
 // forms, but its only published guides are videos. Then the formation portals of the states whose Secretary publishes
-// a written walkthrough: Washington's CCFS and Georgia's eCorp (one form each).
+// a written walkthrough: Washington's CCFS, Georgia's eCorp and Virginia's Clerk's Information System (one form each).
 //
 // test/replay.test.ts walks each playbook through a static copy of the pages its guide documents (test/mocks), so a
 // guide's page names, buttons and fee pages stay consistent with what the guards key on.
@@ -376,6 +376,38 @@ export const PLAYBOOKS: Playbook[] = [
           { page: "Review", do: "review", selector: "button:Submit", note: "\"Verify your information. Use \"Edit Info\" or \"Back\" to make changes, then click \"Submit.\"\" The worker compares the page first." },
           { page: "Payment", do: "pay", note: "Processing speed and \"Click to Pay\", then the card on the secure gateway: the person pays ($110)." },
           { page: "Thank You", do: "receipt", note: "\"Check \"Pending Filings\" for status\"; the certificate is emailed once approved." },
+        ],
+      },
+    },
+  },
+  {
+    host: "cis.scc.virginia.gov",
+    name: "Clerk's Information System (Virginia State Corporation Commission)",
+    guides: ["https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf"],
+    read: "2026-10-18",
+    verified: null,
+    // Guide steps 28 and 29: "Review each section of the Articles of Organization", then "Click Add To Shopping Cart";
+    // Checkout and the LexisNexis payment page (with its CAPTCHA) follow.
+    final: [{ page: "Review", button: "Add To Shopping Cart" }],
+    pay: ["Shopping Cart", "Payment"],
+    receipt: ["Confirmation"],
+    forms: {
+      "va-llc": {
+        start: "https://cis.scc.virginia.gov/",
+        steps: [
+          { page: "Log In", do: "sign_in", note: "\"Log on to CIS at cis.scc.virginia.gov\" with the saved login (step 1)." },
+          { page: "Dashboard", do: "open", selector: "link:Online Services", note: "\"Click Online Services on the top left\", then \"Select Form or Register a Business\" (steps 2 and 3)." },
+          { page: "Form or Register a Business", do: "choose", selector: "button:Continue", note: "\"Select Virginia Entity. Click Continue.\" Then \"Select Limited Liability Company, then Articles of Organization from the drop-down. Click Continue.\" (steps 4 and 8)" },
+          { page: "Entity Name", do: "fill", note: "A reserved name takes its Reservation ID and PIN; otherwise \"Enter an Entity Name and click Check Availability\" and Next once it is \"available and acceptable\" (steps 5 to 10)." },
+          { page: "Entity Information", do: "fill", note: "\"Enter the Entity Email Address and Contact Number\", the Industry Code (\"Most select 0 - General\") and Duration (\"Most select Perpetual\"), then Next (steps 11 to 16)." },
+          { page: "Registered Agent", do: "fill", note: "Individual or Entity, search for it or Create Individual RA, the RA Capacity, then Next (steps 17 and 18): the agent the approved values name, or ask the person." },
+          { page: "Principal Office Address", do: "fill", note: "\"Enter the Principal Office Address information\", then Next (steps 19 and 20)." },
+          { page: "Management Structure", do: "choose", note: "\"Select the Management Structure from the Manager/Member Information drop-down\", then Next (steps 21 and 22)." },
+          { page: "Upload Articles", do: "upload", note: "Optional, and left alone: \"If you do not upload Articles, the system will create a filing image\"; an uploaded document isn't approved in real time (steps 23 and 24). Click Next." },
+          { page: "Signature", do: "agree", note: "Signing as an Individual or On behalf of Business Entity, the Signature Information, Add, OK, then Next (steps 25 to 27): only the approved signer, or ask the person." },
+          { page: "Review", do: "review", selector: "button:Add To Shopping Cart", note: "\"Review each section of the Articles of Organization\"; the worker compares it with the approved values before \"Add To Shopping Cart\" (steps 28 and 29)." },
+          { page: "Shopping Cart", do: "pay", note: "\"Click Checkout\", \"Go To Payment\", Continue: the payment page (run by LexisNexis, with a CAPTCHA) is the person's (steps 30 to 35)." },
+          { page: "Confirmation", do: "receipt", note: "\"You will be directed to a confirmation screen\"; \"In the Confirmation pop up window, click I Agree\" (step 36)." },
         ],
       },
     },

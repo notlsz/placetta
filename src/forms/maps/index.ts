@@ -40,6 +40,7 @@ import m_fl_fictitious from "./fl-fictitious.json";
 import m_fl_sunbiz from "./fl-sunbiz.json";
 import m_ftw_co from "./ftw-co.json";
 import m_fulton_plan_review from "./fulton-plan-review.json";
+import m_hi_bb1 from "./hi-bb1.json";
 import m_hou_co from "./hou-co.json";
 import m_hou_food_dealer from "./hou-food-dealer.json";
 import m_hou_sign from "./hou-sign.json";
@@ -61,6 +62,9 @@ import m_lac_health_permit from "./lac-health-permit.json";
 import m_lac_plan_check from "./lac-plan-check.json";
 import m_lv_food from "./lv-food.json";
 import m_ma_sos from "./ma-sos.json";
+import m_md_cra from "./md-cra.json";
+import m_md_llc from "./md-llc.json";
+import m_moco_food_license from "./moco-food-license.json";
 import m_mpls_food_license from "./mpls-food-license.json";
 import m_mpls_plan_review from "./mpls-plan-review.json";
 import m_mult_food_license from "./mult-food-license.json";
@@ -85,6 +89,7 @@ import m_sea_business_license from "./sea-business-license.json";
 import m_sf_dph_plan_check from "./sf-dph-plan-check.json";
 import m_sf_fire_assembly from "./sf-fire-assembly.json";
 import m_sf_formula_retail from "./sf-formula-retail.json";
+import m_smo_license from "./smo-license.json";
 import m_snhd_plan_review from "./snhd-plan-review.json";
 import m_tx_205 from "./tx-205.json";
 import m_tx_304 from "./tx-304.json";
@@ -93,6 +98,7 @@ import m_tx_ap201 from "./tx-ap201.json";
 import m_va_tax from "./va-tax.json";
 import m_va_vec from "./va-vec.json";
 import m_wa_bls from "./wa-bls.json";
+import m_wa_sos from "./wa-sos.json";
 
 export const MAPS: Record<string, FormMap> = {
   "aus-food-permit": m_aus_food_permit as FormMap,
@@ -135,6 +141,7 @@ export const MAPS: Record<string, FormMap> = {
   "fl-sunbiz": m_fl_sunbiz as FormMap,
   "ftw-co": m_ftw_co as FormMap,
   "fulton-plan-review": m_fulton_plan_review as FormMap,
+  "hi-bb1": m_hi_bb1 as FormMap,
   "hou-co": m_hou_co as FormMap,
   "hou-food-dealer": m_hou_food_dealer as FormMap,
   "hou-sign": m_hou_sign as FormMap,
@@ -156,6 +163,9 @@ export const MAPS: Record<string, FormMap> = {
   "lac-plan-check": m_lac_plan_check as FormMap,
   "lv-food": m_lv_food as FormMap,
   "ma-sos": m_ma_sos as FormMap,
+  "md-cra": m_md_cra as FormMap,
+  "md-llc": m_md_llc as FormMap,
+  "moco-food-license": m_moco_food_license as FormMap,
   "mpls-food-license": m_mpls_food_license as FormMap,
   "mpls-plan-review": m_mpls_plan_review as FormMap,
   "mult-food-license": m_mult_food_license as FormMap,
@@ -180,6 +190,7 @@ export const MAPS: Record<string, FormMap> = {
   "sf-dph-plan-check": m_sf_dph_plan_check as FormMap,
   "sf-fire-assembly": m_sf_fire_assembly as FormMap,
   "sf-formula-retail": m_sf_formula_retail as FormMap,
+  "smo-license": m_smo_license as FormMap,
   "snhd-plan-review": m_snhd_plan_review as FormMap,
   "tx-205": m_tx_205 as FormMap,
   "tx-304": m_tx_304 as FormMap,
@@ -188,4 +199,5 @@ export const MAPS: Record<string, FormMap> = {
   "va-tax": m_va_tax as FormMap,
   "va-vec": m_va_vec as FormMap,
   "wa-bls": m_wa_bls as FormMap,
+  "wa-sos": m_wa_sos as FormMap,
 };

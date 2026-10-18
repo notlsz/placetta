@@ -4,6 +4,7 @@ import type { Level } from "../model";
 import { WORLD_FORMS, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
 import { MORE_US } from "./more-us";
+import { MARKETS_US } from "./markets-us";
 import { LINES } from "./lines";
 import { PLAIN } from "./plain";
 import { MAPS } from "./maps";
@@ -579,7 +580,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US);
 
 /* Processing times for filings whose library entry had none, read from each agency's own page (research/times.json,
    kept as src/forms/times.json). An agency that publishes no time says so in words, with no file-by date from it. */
@@ -650,6 +651,32 @@ export function placesOf(where: string): Where[] {
     if (/houston|休斯顿/.test(w)) out.push("HOU");
   }
   for (const code of world.codes) if (!out.includes(code) && code !== "US") out.push(code);
+  if (!abroad) {
+    // Los Angeles County runs food permits in Glendale too (only Pasadena, Long Beach and Vernon have their own health
+    // departments), and licenses restaurants itself in its unincorporated towns (LACU)
+    if (/glendale,?\s*(ca|california)\b|格伦代尔/.test(w) && !out.includes("LAC")) out.push("LAC");
+    if (/\b(rowland heights|hacienda heights|east los angeles|altadena|walnut park|east pasadena|south san jose hills|valinda|west puente valley|la crescenta|marina del rey)\b|罗兰岗/.test(w)) {
+      if (!out.includes("CA")) out.push("CA");
+      if (!out.includes("LAC")) out.push("LAC");
+      out.push("LACU");
+    }
+    // Montgomery County, Maryland runs food licensing for Rockville and the county's other towns
+    if (out.includes("MD") && /\b(rockville|gaithersburg|bethesda|north bethesda|silver spring|wheaton|germantown|potomac|olney|chevy chase|takoma park)\b|罗克维尔|洛克维尔/.test(w)) out.push("MOCO");
+    // San Mateo County Environmental Health runs food permits for San Mateo and the county's other cities
+    if (/\b(san mateo|burlingame|millbrae|san bruno|south san francisco|daly city|foster city|redwood city|menlo park|belmont|san carlos|half moon bay)\b,?\s*(ca|california)\b|圣马特奥/.test(w)) {
+      if (!out.includes("CA")) out.push("CA");
+      out.push("SMC");
+    }
+  }
+  // Clark County, Nevada: the Southern Nevada Health District (LV) covers the whole county, but the business license is
+  // the City of Las Vegas's (LVC) only inside city limits and Clark County's (CCU) in the unincorporated towns, which
+  // hold the Strip and Chinatown under Las Vegas mailing addresses. A named town or a ZIP code wholly outside the city
+  // settles it; any other Las Vegas address keeps both for Odelia to confirm. Henderson licenses its own businesses.
+  if (!abroad && (out.includes("NV") || out.includes("LV"))) {
+    const uninc = /\b(paradise|spring valley|enterprise|winchester|sunrise manor|whitney),?\s*(nv|nevada)\b|\b(891(09|19|69))\b/.test(w);
+    if (uninc) { if (!out.includes("NV")) out.push("NV"); if (!out.includes("LV")) out.push("LV"); out.push("CCU"); }
+    else if (out.includes("LV") && !/henderson/.test(w)) out.push("LVC", "CCU");
+  }
   // Santa Clara County runs food permits for San José and the rest of the county
   if (!abroad && (out.includes("SJ") || /santa clara|sunnyvale|mountain view|cupertino|milpitas|palo alto|campbell|los gatos|saratoga|gilroy|morgan hill/.test(w)) && !out.includes("SCC")) { out.push("SCC"); if (!out.includes("CA")) out.push("CA"); }
   return out;
