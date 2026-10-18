@@ -545,7 +545,7 @@ async function signIn(p) {
 const SETTINGS = ["general", "facts", "team", "odelia", "connections", "billing", "security", "privacy", "activity", "help"];
 const PAGES = [["home", ""], ["permits", "permits"], ["permits-filed", "permits/filed"], ["permits-review", "permits/review"], ["permits-documents", "permits/documents"], ["permits-deadlines", "permits/deadlines"],
   ["find", "permits/find"], ["stores", "stores"], ["odelia-chat", "odelia"], ["odelia-work", "odelia/work"], ["odelia-playbooks", "odelia/playbooks"], ["odelia-updates", "odelia/updates"],
-  ["headquarters", "headquarters"],
+  ["headquarters", "headquarters"], ["partner", "partner"],
   ["old-work", "work"], ["old-applications", "applications"], ["old-documents", "documents"], ["old-deadlines", "deadlines"], ["old-activity", "activity"], ["old-context", "context"], ["old-find", "find"]];
 
 /** Every state checked: a name and how to get there. A state whose opener finds nothing to click is skipped. */
@@ -606,6 +606,9 @@ const STATES = [
   { name: "hq-picked-ask", go: async p => { await open(p, "headquarters"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return clickText(p, "Ask the franchisee"); } },
   { name: "hq-item", go: async p => { await open(p, "headquarters"); return click(p, ".rv-c.s-missing .rv-open, .rv-open"); } },
   { name: "doc-comments", go: async p => { await open(p, "permits/documents"); return click(p, ".cmt-btn.has, .cmt-btn"); } },
+  { name: "stores-check", go: async p => { await open(p, "stores"); return clickText(p, "Check stores already open"); } },
+  { name: "stores-check-list", go: async p => { await open(p, "stores"); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Flushing, NY"); return clickText(p, "Check my stores"); } },
+  { name: "stores-check-gaps", go: async p => { await open(p, "stores"); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Irvine, CA"); if (!(await clickText(p, "Check my stores"))) return false; return clickText(p, "Show my gaps"); } },
   { name: "app-drawer", tabs: true, go: async p => { await open(p, "permits"); return click(p, ".apps-t .tr.row, button.row.arow"); } },
   { name: "app-drawer-crit", tabs: true, go: async p => { await open(p, "permits"); return click(p, ".apps-t .tr.row.crit, button.row.arow.crit"); } },
   ...[0, 1, 2].map(step => ({ name: "tour" + (step ? "-step" + (step + 1) : ""), go: async p => {

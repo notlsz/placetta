@@ -11,7 +11,9 @@
 //                                                          each iMessage line's reputation from Linq
 //
 // Inbound: STOP, START and HELP follow the carriers' rules (Telnyx answers them when the profile has auto-responses;
-// otherwise this does). A number nobody verified gets one text explaining how to link it, then nothing for 90 days.
+// otherwise this does). A number nobody verified can text to start (text_start.ts): "Milk tea shop in Flushing, NY"
+// gets the plan from the registry and a link to claim it, in seconds and with no model; anything else gets one
+// question, once. With ODELIA_TEXT_START=off it gets one text explaining how to link it, then nothing for 90 days.
 // A verified number starts a run as that person in the workspace they used last ("switch to <name>" changes it);
 // On iMessage the typing bubble shows while Odelia works; "On it." goes out only if the run takes more than 8 seconds. Nothing is filed, paid, sent or deleted by text: the
 // reply carries a link to the approval in the app.
@@ -30,6 +32,8 @@ import { currentWorkspace, criticalLines, DOC_MAX, DOC_TYPES, forgetCriticalLine
 import { mailReady, odeliaEmail } from "../_shared/mail.ts";
 import { parseWhatsApp, subscribeChallenge, verifyWhatsApp, waMedia, waMediaHost, waTyping, whatsappNumber, whatsappReady, type WaEvent } from "../_shared/whatsapp.ts";
 import { hashLine, linqLineHealth, linqLines, linqReady, linqTyping, parseLinq, verifyLinq, type LinqEvent } from "../_shared/linq.ts";
+import { sendStartReminders, startForStranger, textStartOn } from "../_shared/text_start_db.ts";
+import { publicStart } from "../_shared/text_start.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -119,12 +123,29 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
     }
   }
 
-  // A number nobody verified: one explanation, then nothing.
+  // A number nobody verified: text to start (text_start.ts). A line that says what and where ("Milk tea shop in
+  // Flushing, NY") gets the plan and a link to claim it; anything else gets one question, once; nothing more is ever
+  // sent first. With ODELIA_TEXT_START=off, the old way: one explanation, then nothing.
   if (!link) {
     const { data: s } = await admin.from("odelia_strangers").select("replied_at, opted_out_at, messages").eq("number", from).maybeSingle();
-    const reply = !s?.opted_out_at && strangerMayGetReply(s?.replied_at as string | null, now);
-    await admin.from("odelia_strangers").upsert({ number: from, last_at: now.toISOString(), messages: Number(s?.messages ?? 0) + 1, ...(reply ? { replied_at: now.toISOString() } : {}) }, { onConflict: "number" });
-    if (reply) await textNumber(from, SAY.stranger[lang], null, via);
+    await admin.from("odelia_strangers").upsert({ number: from, last_at: now.toISOString(), messages: Number(s?.messages ?? 0) + 1 }, { onConflict: "number" });
+    if (s?.opted_out_at) return;
+    if (!textStartOn(env)) {
+      if (!strangerMayGetReply(s?.replied_at as string | null, now)) return;
+      if (await textNumber(from, SAY.stranger[lang], null, via)) await admin.from("odelia_strangers").update({ replied_at: now.toISOString() }).eq("number", from);
+      return;
+    }
+    // iMessage and RCS through Linq get the fuller message; plain SMS (Telnyx, or a Linq line that fell back) the short one
+    const channel = via.app === "whatsapp" ? "whatsapp" : via.line && via.service !== "SMS" ? "imessage" : "sms";
+    if (via.chat) bg(linqTyping(env, via.chat));
+    const r = await startForStranger(admin, env, { channel, handle: from, text, line: via.line ?? null, now });
+    if (!r.reply) return;
+    // back the way it came: the iMessage line they wrote to, WhatsApp, or Telnyx SMS to a text that came by Telnyx
+    const sent = await sendText(admin, env, { to: from, text: r.reply, line: via.line, reply: true, smsOnly: !via.line && !via.app && smsReady(env), whatsapp: waVia(via, r.lang) });
+    if (sent.ok) {
+      await logMessage(admin, { user_id: null, direction: "out", channel: "sms", kind: "system", body: "", provider_id: sent.id, line: sent.line, service: sent.service });
+      await admin.from("odelia_strangers").update({ replied_at: now.toISOString() }).eq("number", from);
+    } else console.error("odelia text start", sent.status, sent.code, sent.detail);
     return;
   }
   // They texted STOP earlier: only START turns texts back on.
@@ -452,16 +473,20 @@ export async function handle(req: Request): Promise<Response> {
     const n = imessage ? linqLines(env)[0] : odeliaNumber(env);
     const callN = voiceReady(env) ? (imessage && env("LINQ_FORWARDS_CALLS") === "1" ? n : odeliaNumber(env)) : null;
     // sms: codes can be texted out (Telnyx); without it, linking is by texting a code to Odelia.
+    // start: where the website tells new businesses to text (null until the founder sets ODELIA_PUBLIC_NUMBER or
+    // ODELIA_PUBLIC_WHATSAPP; text_start.ts publicStart)
     return json(200, { configured: textingReady(env), imessage, sms: smsReady(env), voice: voiceReady(env), number: n, display: n ? prettyPhone(n) : null,
       call_number: callN, call_display: callN ? prettyPhone(callN) : null,
-      whatsapp: whatsappReady(env) ? whatsappNumber(env) : null, email: mailReady(env) ? odeliaEmail(env) : null });
+      whatsapp: whatsappReady(env) ? whatsappNumber(env) : null, email: mailReady(env) ? odeliaEmail(env) : null, start: publicStart(env) });
   }
   if (!(await monitorKeyOk(req.headers.get("x-monitor-key")))) return fail(401, "unauthorized", "unauthorized");
   if (body.action === "send_code") return await sendCode(String(body.code_id ?? ""));
   if (body.action === "flush") {
+    // the one reminder people asked for after a texted plan (SMS, iMessage, WhatsApp or WeChat)
+    const reminders = await sendStartReminders(admin, env).catch((e) => { console.error("text start reminders", String(e).slice(0, 160)); return null; });
     if (!textingReady(env)) { await expireOld(new Date()); return fail(503, "not_configured", "Texting isn't set up."); }
     const lines = linqReady(env) ? await lineHealth().catch((e) => { console.error("line health", String(e).slice(0, 160)); return null; }) : null;
-    return json(200, { ok: true, ...(await flush()), ...(lines ? { lines } : {}) });
+    return json(200, { ok: true, ...(await flush()), ...(lines ? { lines } : {}), ...(reminders ? { reminders } : {}) });
   }
   return fail(400, "bad_request", "Unknown action.");
 }

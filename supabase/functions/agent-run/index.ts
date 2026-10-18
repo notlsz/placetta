@@ -529,6 +529,7 @@ export async function work(runId: string, token: string | null, ticket: string |
   const child = run.parent_run && run.job_id ? { job: run.job_id, store: run.store_id ?? "" } : undefined;
   const fam = familyTable(run);
   let ended = false;   // done, failed or stopped: its slot frees up, and a store's run may wake the run that split it
+  let counting: RunState | null = null;   // the run's tool counts, reported for Agent health however it ends
 
   try {
     const svc = await servicesFor(ws, run, token);
@@ -541,7 +542,7 @@ export async function work(runId: string, token: string | null, ticket: string |
         return { started: out.started, queued: out.queued };
       };
     }
-    const state = run.state ?? startState([], run.prompt);
+    const state = counting = run.state ?? startState([], run.prompt);
     // The task's spend so far, from every earlier chunk: the ceiling is for the whole task.
     const who: Who = { uid: run.created_by, spent: Number(state.spent) || 0 };
     const mainRole = roleOfRun(run);
@@ -624,6 +625,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     }
     await finish(run, out.reply, steps, lease, cur);
     ended = true;
+    bg(toolCounts(runId, state));
     bg(learnFromRun(run, cur, state, out.reply));
   } catch (e) {
     clearTimeout(flushT);
@@ -640,11 +642,19 @@ export async function work(runId: string, token: string | null, ticket: string |
       if (failed) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
       if (failed && run.channel === "email") await mailBack(run, SAY.failed[run.lang], []).catch((x) => console.error("mail back", String(x).slice(0, 120)));
       if (failed && CHATS.has(run.channel ?? "")) await chatBack(run, SAY.failed[run.lang], []).catch(() => undefined);
+      if (failed && counting) bg(toolCounts(runId, counting));
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
     if (ended && !lease.lost) await afterRun(run);
   }
+}
+
+/** The tools a finished run called and how many returned an error, for the team's Agent health page. Best effort:
+ *  a database without the columns yet (20261017210300_agent_health) just doesn't record them. */
+async function toolCounts(runId: string, st: RunState) {
+  const { error } = await admin.rpc("agent_run_tools", { p_id: runId, p_calls: st.toolCalls ?? 0, p_errors: st.toolErrors ?? 0 });
+  if (error) console.error("agent_run_tools", error.code ?? "");
 }
 
 /** The answer to someone who emailed Odelia: by email, in their thread, only to the address they sign in with, with

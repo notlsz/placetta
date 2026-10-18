@@ -3,6 +3,7 @@ import { canFill } from "./forms/canFill";
 import { useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { FilingLive } from "./FilingLive";
+import { AskSpecialist } from "./Specialist";
 import { useApp, type Signed, type Tab } from "./ctx";
 import type { Application, Approval, CheckItem, Doc } from "./model";
 import { openSettings } from "./Settings";
@@ -153,6 +154,7 @@ function Progress({ a }: { a: Application }) {
       </ol>
       {f?.agent_state === "needs_you" && <FinishStep f={f} />}
       <FilingLive app={a.id} embedded />
+      <AskSpecialist app={a} />
       {f?.note && f.status !== "needs_info" && <p className="note">{zh ? "团队备注：" : "From the team: "}{f.note}</p>}
     </div>
   );
