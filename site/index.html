@@ -2050,6 +2050,8 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .incap p{margin-top:6px;max-width:520px;font-size:14px;line-height:1.45;color:rgba(220,232,245,.75)}
 /* Oct 18: the chosen sector's permits, named */
 .inpm{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;list-style:none;padding:0}
+.inpm li.inpmh{flex-basis:100%;padding:0;border:0;background:none;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(220,232,245,.6)}
+html[lang="zh-CN"] .inpm li.inpmh{letter-spacing:.02em}
 .inpm li{padding:6px 11px;border:1px solid rgba(220,232,245,.24);border-radius:8px;background:rgba(255,255,255,.06);font-size:13px;line-height:1.25;color:#fff}
 @media (max-width:1023px){.inpm{gap:6px;margin-top:10px}.inpm li{font-size:12px;padding:5px 9px}
   /* phones: the picture keeps the top of the panel and the caption sits under it, so the permits never cover it */
@@ -4897,7 +4899,7 @@ function renderInd(k){
   const key = IN_KEYS[inK], ct = document.getElementById("inCapT"); if (!ct) return;
   ct.textContent = t("in." + key); document.getElementById("inCapP").textContent = t("in." + key + "p");
   const pm = document.getElementById("inPm"), rows = IND[inK] && IND[inK].rows, li = L(); // the sector's own permits, by name
-  if (pm) pm.innerHTML = rows ? rows.map(r => `<li>${esc(r[0][li])}</li>`).join("") : "";
+  if (pm) pm.innerHTML = rows ? (IND[inK].w ? `<li class="inpmh">${esc(IND[inK].t[li])}${li ? "，" : ", "}${esc(IND[inK].w[li])}</li>` : "") + rows.map(r => `<li>${esc(r[0][li])}</li>`).join("") : "";
   // phones: the picture opens right under the chosen sector, like an accordion; wider screens keep it on the right
   const pn = document.querySelector(".inpanel"), row = document.querySelector(".inrow"), btn = document.querySelector(`.inb[data-k="${inK}"]`);
   if (pn && row && btn){
