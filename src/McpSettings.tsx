@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useApp } from "./ctx";
 import { I } from "./ui";
+import { SetSheet } from "./SetUI";
 import * as api from "./cloud/api";
 import { MCP_CATALOG, type CatalogEntry } from "../supabase/functions/_shared/mcp_catalog";
 import notionLogo from "./assets/integrations/notion.svg";
@@ -37,7 +38,7 @@ const GROUPS: { id: CatalogEntry["group"]; en: string; zh: string }[] = [
   { id: "money", en: "Sales and payments", zh: "销售与收款" },
 ];
 
-const Logo = ({ src }: { src?: string }) => <span className="tile logo" aria-hidden="true">{src ? <img src={src} alt="" /> : <I.plug />}</span>;
+const Logo = ({ src }: { src?: string }) => <span className={"sg-logo" + (src === notionLogo || src === squareLogo ? " mono" : "")} aria-hidden="true">{src ? <img src={src} alt="" /> : <I.plug />}</span>;
 const host = (url: string) => { try { return new URL(url).host; } catch { return url; } };
 
 export function McpConnectors({ pin }: { pin: Pin }) {
@@ -54,7 +55,7 @@ export function McpConnectors({ pin }: { pin: Pin }) {
   const tell = (e: unknown) => { const x = e as api.ApiError; say((zh && x.message_zh) || x.message || (zh ? "出了点问题，请重试。" : "Something went wrong. Try again.")); };
   const load = useCallback(async () => {
     if (!wsId) return;
-    try { setServers((await api.integration<{ servers: Server[] }>(wsId, "mcp_list")).servers); } catch { /* shown as nothing connected */ }
+    try { setServers((await api.integration<{ servers?: Server[] }>(wsId, "mcp_list")).servers ?? []); } catch { /* shown as nothing connected */ }
     try { setReady((await api.integration<{ catalog: Record<string, boolean> }>(wsId, "mcp_available")).catalog); } catch { setReady({}); }
   }, [wsId]);
   useEffect(() => { void load(); }, [load]);
@@ -83,6 +84,7 @@ export function McpConnectors({ pin }: { pin: Pin }) {
   };
 
   const byCatalog = (id: string) => servers.find(s => s.catalog_id === id);
+  const srv = servers.find(s => s.id === shown);
   return (
     <div className="sg-sub mcp">
       <h3>{zh ? "连接任何应用（MCP）" : "Connect any app (MCP)"}</h3>
@@ -95,63 +97,67 @@ export function McpConnectors({ pin }: { pin: Pin }) {
           const summary = zh
             ? `${host(s.url)}，${s.tools.length} 个工具，其中 ${reads} 个只读${off ? `，已关闭 ${off} 个` : ""}`
             : `${host(s.url)}, ${s.tools.length} tools, ${reads} read only${off ? `, ${off} off` : ""}`;
-          return [
+          return (
             <li key={s.id} className="sg-row">
               <Logo src={s.catalog_id ? LOGOS[s.catalog_id] : undefined} />
-              <span className="sg-tx"><b>{s.name}</b><small>{summary}</small>
-                {s.status === "error" ? <em className="bad">{zh ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><i />{zh ? "已连接" : "Connected"}</em>}</span>
+              <span className="sg-tx"><b>{s.name}</b><small>{summary}</small></span>
               <span className="sg-r">
-                <button type="button" className="sbtn quiet" aria-expanded={shown === s.id} onClick={() => setShown(x => (x === s.id ? null : s.id))}>{shown === s.id ? (zh ? "收起" : "Hide") : (zh ? "工具" : "Tools")}</button>
-                {owner && <button type="button" className={"sbtn quiet" + (pin.locked ? " pinned" : "")} disabled={busy === s.id} onClick={guarded(() => {
+                {s.status === "error" ? <em className="bad">{zh ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><I.check />{zh ? "已连接" : "Connected"}</em>}
+                <button type="button" className="sbtn quiet" aria-expanded={shown === s.id} onClick={() => setShown(x => (x === s.id ? null : s.id))}>{zh ? "工具" : "Tools"}</button>
+                {owner && <button type="button" className={"sbtn quiet warm" + (pin.locked ? " pinned" : "")} disabled={busy === s.id} onClick={guarded(() => {
                   if (window.confirm(zh ? `断开${s.name}？Odelia 将不能再使用它的工具。` : `Disconnect ${s.name}? Odelia stops using its tools.`)) void act(s.id, "mcp_disconnect", { id: s.id }, zh ? `已断开${s.name}` : `Disconnected ${s.name}`);
                 })}>{pin.locked && <I.lock />}{zh ? "断开" : "Disconnect"}</button>}
               </span>
-            </li>,
-            shown === s.id ? (
-              <li key={s.id + "-tools"} className="sg-hook mcp-tools">
-                {s.error && <p className="bad">{s.error}</p>}
-                {s.tools.length ? (
-                  <ul>
-                    {s.tools.map(t => (
-                      <li key={t.name}>
-                        <span className="mcp-t"><b>{t.title || t.name}</b>{t.description && <small>{t.description}</small>}</span>
-                        <em className={"mcp-tag" + (t.read_only ? " read" : " ask")}>{t.read_only ? (zh ? "只读" : "Reads only") : (zh ? "需要批准" : "Needs approval")}</em>
-                        <label className="switch" title={owner ? undefined : (zh ? "由所有者设置" : "Owners set this")}>
-                          <input type="checkbox" checked={t.on} disabled={!owner || busy === `${s.id}:${t.name}`} aria-label={zh ? `允许 Odelia 使用 ${t.title || t.name}` : `Let Odelia use ${t.title || t.name}`}
-                            onChange={e => { const on = e.target.checked; pin.guard(() => void act(`${s.id}:${t.name}`, "mcp_tool", { id: s.id, tool: t.name, on })); }} />
-                          <i />
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                ) : <p>{zh ? "这个应用没有列出任何工具。" : "This app didn't list any tools."}</p>}
-                {owner && <p><button type="button" className="linkish" disabled={busy === s.id} onClick={guarded(() => void act(s.id, "mcp_refresh", { id: s.id }, zh ? "工具列表已更新" : "Tool list updated"))}>{zh ? "重新获取工具列表" : "Get the tool list again"}</button></p>}
-              </li>
-            ) : null,
-          ];
+            </li>
+          );
         })}
         {owner || !cloud ? (
-          form ? (
-            <li key="mcp-form" className="sg-hook mcp-add">
-              <p>{form.hint ?? (zh ? "粘贴应用提供的 MCP 服务器地址（以 https:// 开头）。如果应用给了访问令牌，也一并粘贴；否则会打开该应用的登录页面。" : "Paste the MCP server address the app gives you (it starts with https://). If the app gave you an access token, paste it too; otherwise its sign-in page opens.")}</p>
-              <form onSubmit={e => { e.preventDefault(); if (!cloud) { demo(); return; } pin.guard(() => void connect("form", { url: form.url.trim(), name: form.name.trim() || undefined, token: form.token.trim() || undefined })); }}>
-                <input type="url" required autoFocus value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://mcp.example.com/mcp" aria-label={zh ? "服务器地址" : "Server address"} spellCheck={false} autoComplete="off" />
-                <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={zh ? "名称（可选）" : "Name (optional)"} aria-label={zh ? "名称" : "Name"} maxLength={60} autoComplete="off" />
-                <input type="password" value={form.token} onChange={e => setForm({ ...form, token: e.target.value })} placeholder={zh ? "访问令牌（可选）" : "Access token (optional)"} aria-label={zh ? "访问令牌" : "Access token"} autoComplete="off" />
-                <button type="submit" className="sbtn ink" disabled={busy === "form" || !form.url.trim()}>{busy === "form" ? (zh ? "正在连接…" : "Connecting...") : (zh ? "连接" : "Connect")}</button>
-                <button type="button" className="sbtn quiet" onClick={() => setForm(null)}>{zh ? "取消" : "Cancel"}</button>
-              </form>
-              <p className="sg-fine">{zh ? "快哉只连接公共互联网上使用 https 的地址。令牌和登录信息加密保存在保险库中，随时可以断开。" : "Placetta only connects to https addresses on the public internet. Tokens and sign-ins are kept encrypted in a vault, and you can disconnect any time."}</p>
-            </li>
-          ) : (
-            <li key="mcp-open" className="sg-row">
-              <Logo />
-              <span className="sg-tx"><b>{zh ? "添加应用" : "Add an app"}</b><small>{zh ? "任何提供 MCP 服务器的应用" : "Any app that offers an MCP server"}</small></span>
-              <span className="sg-r"><button type="button" className={"sbtn line" + (pin.locked && cloud ? " pinned" : "")} onClick={guarded(() => setForm({ url: "", name: "", token: "" }))}>{pin.locked && cloud && <I.lock />}{zh ? "添加" : "Add"}</button></span>
-            </li>
-          )
+          <li key="mcp-open" className="sg-row">
+            <Logo />
+            <span className="sg-tx"><b>{zh ? "添加应用" : "Add an app"}</b><small>{zh ? "任何提供 MCP 服务器的应用" : "Any app that offers an MCP server"}</small></span>
+            <span className="sg-r"><button type="button" className={"sbtn line" + (pin.locked && cloud ? " pinned" : "")} onClick={guarded(() => setForm({ url: "", name: "", token: "" }))}>{pin.locked && cloud && <I.lock />}{zh ? "添加" : "Add"}</button></span>
+          </li>
         ) : <li key="mcp-owner" className="sg-row"><span className="sg-tx"><small>{zh ? "由所有者连接应用。" : "Owners connect apps."}</small></span></li>}
       </ul>
+
+      {/* a server's tools, each with its switch, in a side sheet */}
+      {srv && (
+        <SetSheet title={srv.name} sub={host(srv.url)} onClose={() => setShown(null)} className="mcp-tools">
+          {srv.error && <p className="bad">{srv.error}</p>}
+          {srv.tools.length ? (
+            <ul>
+              {srv.tools.map(t => (
+                <li key={t.name}>
+                  <span className="mcp-t"><b>{t.title || t.name}</b>{t.description && <small>{t.description}</small>}</span>
+                  <em className={"mcp-tag" + (t.read_only ? " read" : " ask")}>{t.read_only ? (zh ? "只读" : "Reads only") : (zh ? "需要批准" : "Needs approval")}</em>
+                  <label className="switch" title={owner ? undefined : (zh ? "由所有者设置" : "Owners set this")}>
+                    <input type="checkbox" checked={t.on} disabled={!owner || busy === `${srv.id}:${t.name}`} aria-label={zh ? `允许 Odelia 使用 ${t.title || t.name}` : `Let Odelia use ${t.title || t.name}`}
+                      onChange={e => { const on = e.target.checked; pin.guard(() => void act(`${srv.id}:${t.name}`, "mcp_tool", { id: srv.id, tool: t.name, on })); }} />
+                    <i />
+                  </label>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="sg-empty">{zh ? "这个应用没有列出任何工具。" : "This app didn't list any tools."}</p>}
+          {owner && <p><button type="button" className="linkish" disabled={busy === srv.id} onClick={guarded(() => void act(srv.id, "mcp_refresh", { id: srv.id }, zh ? "工具列表已更新" : "Tool list updated"))}>{zh ? "重新获取工具列表" : "Get the tool list again"}</button></p>}
+        </SetSheet>
+      )}
+      {/* connecting by address (and a token, if the app gave one) */}
+      {form && (owner || !cloud) && (
+        <SetSheet title={form.name ? (zh ? `连接${form.name}` : `Connect ${form.name}`) : (zh ? "添加应用" : "Add an app")} onClose={() => setForm(null)}>
+          <p>{form.hint ?? (zh ? "粘贴应用提供的 MCP 服务器地址（以 https:// 开头）。如果应用给了访问令牌，也一并粘贴；否则会打开该应用的登录页面。" : "Paste the MCP server address the app gives you (it starts with https://). If the app gave you an access token, paste it too; otherwise its sign-in page opens.")}</p>
+          <form className="sst-form" onSubmit={e => { e.preventDefault(); if (!cloud) { demo(); return; } pin.guard(() => void connect("form", { url: form.url.trim(), name: form.name.trim() || undefined, token: form.token.trim() || undefined })); }}>
+            <input type="url" required autoFocus value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://mcp.example.com/mcp" aria-label={zh ? "服务器地址" : "Server address"} spellCheck={false} autoComplete="off" />
+            <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={zh ? "名称（可选）" : "Name (optional)"} aria-label={zh ? "名称" : "Name"} maxLength={60} autoComplete="off" />
+            <input type="password" value={form.token} onChange={e => setForm({ ...form, token: e.target.value })} placeholder={zh ? "访问令牌（可选）" : "Access token (optional)"} aria-label={zh ? "访问令牌" : "Access token"} autoComplete="off" />
+            <p className="sg-fine">{zh ? "快哉只连接公共互联网上使用 https 的地址。令牌和登录信息加密保存在保险库中，随时可以断开。" : "Placetta only connects to https addresses on the public internet. Tokens and sign-ins are kept encrypted in a vault, and you can disconnect any time."}</p>
+            <div className="sst-act">
+              <button type="button" className="sbtn quiet" onClick={() => setForm(null)}>{zh ? "取消" : "Cancel"}</button>
+              <button type="submit" className="sbtn ink" disabled={busy === "form" || !form.url.trim()}>{busy === "form" ? (zh ? "正在连接…" : "Connecting...") : (zh ? "连接" : "Connect")}</button>
+            </div>
+          </form>
+        </SetSheet>
+      )}
 
       {GROUPS.map(g => (
         <div key={g.id} className="sg-sub">
@@ -163,7 +169,7 @@ export function McpConnectors({ pin }: { pin: Pin }) {
               let right;
               if (have) right = have.status === "error" && owner
                 ? <button type="button" className="sbtn line" disabled={busy === e.id} onClick={guarded(() => void connect(e.id, { catalog_id: e.id }))}>{zh ? "重新连接" : "Reconnect"}</button>
-                : <em className="ok"><i />{zh ? "已连接" : "Connected"}</em>;
+                : <em className="ok"><I.check />{zh ? "已连接" : "Connected"}</em>;
               else if (cloud && !owner) right = <em className="lock">{zh ? "由所有者连接" : "Owners connect"}</em>;
               else if (!open && !e.token) right = <em className="lock">{zh ? "即将开放" : "Opens soon"}</em>;
               else right = <>

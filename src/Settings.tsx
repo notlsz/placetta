@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./model";
@@ -36,12 +36,13 @@ import dingtalkLogo from "./assets/integrations/dingtalk.svg";
 import teamsLogo from "./assets/integrations/teams.svg";
 import wechatLogo from "./assets/integrations/wechat.svg";
 import { McpConnectors } from "./McpSettings";
+import { SetSheet } from "./SetUI";
 
 
 /* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
    one primary action per group. Only what a business needs to get and stay compliant. */
 
-type Row = { label: Bi; sub?: ReactNode; right?: ReactNode; icon?: ReactNode; pick?: () => void };
+type Row = { label: Bi; sub?: ReactNode; right?: ReactNode; pick?: () => void };
 function Group({ id, title, note, rows, children, hidden }: { id: string; title: Bi; note?: Bi; rows?: Row[]; children?: ReactNode; hidden?: boolean }) {
   const { b } = useApp();
   if (hidden) return null;
@@ -53,7 +54,6 @@ function Group({ id, title, note, rows, children, hidden }: { id: string; title:
         <ul className="sg-list">
           {rows.map((r, i) => (
             <li key={i} className={"sg-row" + (r.pick ? " pick" : "")} onClick={r.pick}>
-              {r.icon && <span className="sg-ico">{r.icon}</span>}
               <span className="sg-tx"><b>{b(r.label)}</b>{r.sub && <small>{r.sub}</small>}</span>
               {r.right && <span className="sg-r">{r.right}</span>}
             </li>
@@ -70,13 +70,16 @@ type PinCtx = { locked: boolean; guard: (fn: () => void) => void };
 const PinLock = createContext<PinCtx>({ locked: false, guard: fn => fn() });
 const usePin = () => useContext(PinLock);
 
-const Btn = ({ children, onClick, kind = "quiet", disabled, guard }: { children: ReactNode; onClick: () => void; kind?: "quiet" | "ink" | "line"; disabled?: boolean; guard?: boolean }) => {
+/** A settings button: quiet is a text button, line and ink are the app's pills, warm is a quiet one for what removes
+ *  or ends something (Disconnect, Delete my account), never red. */
+const Btn = ({ children, onClick, kind = "quiet", disabled, guard }: { children: ReactNode; onClick: () => void; kind?: "quiet" | "ink" | "line" | "warm"; disabled?: boolean; guard?: boolean }) => {
   const pin = usePin();
   const locked = guard && pin.locked;
-  return <button type="button" className={"sbtn " + kind + (locked ? " pinned" : "")} onClick={() => (guard ? pin.guard(onClick) : onClick())} disabled={disabled}>{locked && <I.lock />}{children}</button>;
+  return <button type="button" className={"sbtn " + (kind === "warm" ? "quiet warm" : kind) + (locked ? " pinned" : "")} onClick={() => (guard ? pin.guard(onClick) : onClick())} disabled={disabled}>{locked && <I.lock />}{children}</button>;
 };
 
-const Tile = ({ logo, wide, chat }: { logo?: string; wide?: boolean; chat?: boolean }) => <span className={"tile logo" + (wide ? " wide" : "")} aria-hidden="true">{logo ? <img src={logo} alt="" /> : chat ? <I.message /> : <I.deadlines />}</span>;
+/** An app's logo on its own: no tile or disc behind it. */
+const Tile = ({ logo, wide, chat }: { logo?: string; wide?: boolean; chat?: boolean }) => <span className={"sg-logo" + (wide ? " wide" : "") + (logo === squareLogo ? " mono" : "")} aria-hidden="true">{logo ? <img src={logo} alt="" /> : chat ? <I.message /> : <I.deadlines />}</span>;
 
 type HookKind = api.HookKind;
 const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
@@ -222,6 +225,7 @@ function Integrations() {
   const copy = (t: string) => { void navigator.clipboard?.writeText(t).then(() => say(zh ? "已复制" : "Copied"), () => undefined); };
   useEffect(() => { if (cloud) void cloud.availability().then(setAvail); }, [cloud?.wsId]);   // eslint-disable-line react-hooks/exhaustive-deps
   const conn = (k: string) => cloud?.integrations.find(i => i.kind === k);
+  const nameOf = (k: string) => { const it = INTEGRATIONS.flatMap(g => g.items).find(x => x.kind === k); return it ? (lang === "zh" && it.zh ? it.zh : it.name) : k; };
   const zh = lang === "zh";
   const demo = () => say(zh ? "登录您的快哉账户后即可连接。" : "Sign in to your Placetta account to connect.");
   const openForm = (kind: HookKind) => setForm(f => (f?.kind === kind ? null : { kind, url: "", secret: "" }));
@@ -246,103 +250,111 @@ function Integrations() {
               let right: ReactNode;
               if (it.kind === "feed") right = cloud ? <Btn guard onClick={async () => { try { const u = await cloud.feedUrl(); setFeed(u); await navigator.clipboard?.writeText(u).catch(() => undefined); say(zh ? "订阅链接已复制" : "Link copied"); } catch (e) { say((e as { message: string }).message); } }}>{zh ? "复制链接" : "Copy link"}</Btn> : <Btn onClick={demo}>{zh ? "复制链接" : "Copy link"}</Btn>;
               else if (cloud && !cloud.owner) right = c ? undefined : <em className="lock">{zh ? "由所有者连接" : "Owners connect"}</em>;
-              else if (c) right = <Btn guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{zh ? "断开" : "Disconnect"}</Btn>;
+              else if (c) right = <Btn kind="warm" guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{zh ? "断开" : "Disconnect"}</Btn>;
               else if (soon) right = <em className="lock">{zh ? "即将开放" : "Opens soon"}</em>;
-              else if (it.kind === "toast") right = <Btn guard kind="line" onClick={() => (cloud ? void openToast() : demo())}>{toast ? (zh ? "取消" : "Cancel") : (zh ? "连接" : "Connect")}</Btn>;
-              else if (it.bot) right = <Btn guard kind="line" onClick={() => (cloud ? void openBot(it.kind as api.BotKind) : demo())}>{bot?.kind === it.kind ? (zh ? "取消" : "Cancel") : (zh ? "设置" : "Set up")}</Btn>;
-              else if (viaLink) right = <Btn guard kind="line" onClick={() => (cloud ? openForm(it.kind as HookKind) : demo())}>{form?.kind === it.kind ? (zh ? "取消" : "Cancel") : (zh ? "连接" : "Connect")}</Btn>;
+              else if (it.kind === "toast") right = <Btn guard kind="line" onClick={() => (cloud ? void openToast() : demo())}>{zh ? "连接" : "Connect"}</Btn>;
+              else if (it.bot) right = <Btn guard kind="line" onClick={() => (cloud ? void openBot(it.kind as api.BotKind) : demo())}>{zh ? "设置" : "Set up"}</Btn>;
+              else if (viaLink) right = <Btn guard kind="line" onClick={() => (cloud ? openForm(it.kind as HookKind) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
               else right = <Btn guard kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
-              const status = c ? (c.status === "error" ? <em className="bad">{zh ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><i />{c.account ?? (zh ? "已连接" : "Connected")}</em>) : null;
+              // connected: the status on the right beside Disconnect, and the account it's connected as under the name
+              const status = c ? (c.status === "error" ? <em className="bad">{zh ? "需要重新连接" : "Reconnect needed"}</em> : <em className="ok"><I.check />{zh ? "已连接" : "Connected"}</em>) : null;
               const why = soon && (it.kind === "gcal" || it.kind === "outlook_cal") ? B(`${it.why.en}. Until it opens, subscribe with the calendar feed below.`, `${it.why.zh}。开放前，可用下方的日历订阅。`) : it.why;
               return [
                 <li key={it.kind} className="sg-row">
                   <Tile logo={it.logo} wide={it.wide} chat={it.hook || it.bot} />
-                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}</small>{status}</span>
-                  <span className="sg-r">{right}</span>
+                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}</small>{c?.account && <small className="sg-acct">{c.account}</small>}</span>
+                  {(status || right) && <span className="sg-r">{status}{right}</span>}
                 </li>,
                 it.kind === "wechat_bot" && c && c.status === "connected" && cloud ? <WechatLink key="wechat-link" account={c.account} /> : null,
-                it.kind === "toast" && toast && !c ? (
-                  <li key="toast-form" className="sg-hook sg-bot">
-                    <ol>
-                      <li>{zh ? "在 Toast Web 中：Integrations → Browse & purchase integrations，找到快哉（Placetta），添加到您的门店。" : "In Toast Web: Integrations, Browse & purchase integrations. Find Placetta and add it to your locations."}</li>
-                      <li>{zh ? "再到 Configure integrations，点快哉旁边的齿轮，为每家门店在 Location ID 中填写这个代码，然后 Apply：" : "Then Configure integrations, the gear next to Placetta, and type this code as the Location ID for each location, then Apply:"}</li>
-                    </ol>
-                    {toast.code ? <code className="text-code" aria-label={zh ? "您的 Toast 代码" : "Your Toast code"}>{toast.code}</code> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
-                    <form onSubmit={e => { e.preventDefault(); void checkToast(); }}>
-                      {toast.code && <button type="button" className="sbtn quiet" onClick={() => copy(toast.code!)}><I.copy />{zh ? "复制代码" : "Copy code"}</button>}
-                      <button type="submit" className="sbtn ink" disabled={toast.busy || !toast.code}>{toast.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "检查并连接" : "Check and connect")}</button>
-                    </form>
-                    <p className="sg-fine">{zh ? "只有能管理门店 Toast 集成的人才能填写这个代码，所以快哉只会读取您自己的门店。Toast 可能需要最多 15 分钟才会向快哉开放新门店。快哉只读取销售额、员工和排班，不会更改 Toast 中的任何内容。" : "Only someone who manages your Toast integrations can enter this code, so Placetta reads only your own locations. Toast can take up to 15 minutes to open a new location to Placetta. Placetta reads sales, staff and schedules, and changes nothing in Toast."}</p>
-                  </li>
-                ) : null,
-                form?.kind === it.kind && !c ? (
-                  <li key={it.kind + "-form"} className="sg-hook">
-                    <p>{b(HOOK_HELP[form.kind].how)}</p>
-                    <form onSubmit={e => { e.preventDefault(); void submit(); }}>
-                      <input type="url" required autoFocus value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder={HOOK_HELP[form.kind].ph} aria-label={zh ? "Webhook 链接" : "Webhook link"} spellCheck={false} autoComplete="off" />
-                      {form.kind === "lark" && <input type="password" value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder={zh ? "签名密钥（可选）" : "Signing secret (optional)"} aria-label={zh ? "签名密钥" : "Signing secret"} autoComplete="off" />}
-                      <button type="submit" className="sbtn ink" disabled={form.busy || !form.url.trim()}>{form.busy ? (zh ? "正在发送测试消息…" : "Sending a test message...") : (zh ? "连接并发送测试" : "Connect and test")}</button>
-                    </form>
-                  </li>
-                ) : null,
-                bot?.kind === "wechat_bot" && it.kind === "wechat_bot" && bot.done ? (
-                  <li key="wechat-done" className="sg-hook sg-bot">
-                    <p>{zh ? "已连接。最后一步，在微信开发者平台：我的业务 → 服务号 → 消息与事件推送，填写下面三项，加密方式选“安全模式”，数据格式选 XML，然后提交：" : "Connected. Last step, in the WeChat developer platform: My business, Service account, Message push (消息与事件推送). Fill in these three, choose safe mode (安全模式) and XML, and submit:"}</p>
-                    <p className="sg-note">{zh ? "服务器地址（URL）" : "Server address (URL)"}</p>
-                    <CodeBlock text={api.wechatServerUrl(cloud?.wsId ?? "")} copy={copy} zh={zh} />
-                    <p className="sg-note">Token</p>
-                    <CodeBlock text={bot.v.token ?? ""} copy={copy} zh={zh} />
-                    {bot.v.aes_key && <><p className="sg-note">EncodingAESKey</p><CodeBlock text={bot.v.aes_key} copy={copy} zh={zh} /></>}
-                    <form onSubmit={e => { e.preventDefault(); setBot(null); }}><button type="submit" className="sbtn ink">{zh ? "已在微信中提交" : "Submitted in WeChat"}</button></form>
-                  </li>
-                ) : null,
-                bot?.kind === it.kind && !c && !bot.done ? (
-                  <li key={it.kind + "-bot"} className="sg-hook sg-bot">
-                    {bot.kind === "slack_bot" ? (
-                      <ol>
-                        <li>{zh ? "在 api.slack.com/apps 选择 Create New App → From a manifest，选好工作区，粘贴下面的清单：" : "At api.slack.com/apps choose Create New App, From a manifest, pick your workspace and paste this:"}</li>
-                        {bot.setup?.manifest ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.manifest!)}>{zh ? "复制" : "Copy"}</button>{bot.setup.manifest}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
-                        <li>{zh ? "点 Install to Workspace。然后复制 OAuth & Permissions 里的 Bot User OAuth Token（xoxb- 开头），以及 Basic Information 里的 Signing Secret：" : "Click Install to Workspace. Then copy the Bot User OAuth Token (starts with xoxb-) from OAuth & Permissions, and the Signing Secret from Basic Information:"}</li>
-                      </ol>
-                    ) : bot.kind === "wechat_bot" ? (
-                      <ol>
-                        <li>{zh ? "需要一个以公司主体完成微信认证的服务号。建议专门给团队用一个：开启服务器配置后，在微信后台设置的自动回复和菜单会失效。" : "You need a WeChat service account verified under your company (认证服务号). Use one just for your team: once its server address is on, the auto-replies and menu set in WeChat's console stop."}</li>
-                        <li>{zh ? "在微信开发者平台（developers.weixin.qq.com）：我的业务 → 服务号 → 开发密钥，复制 AppID 和 AppSecret。" : "In the WeChat developer platform (developers.weixin.qq.com): My business, Service account, Development keys. Copy the AppID and the AppSecret."}</li>
-                        <li>{bot.setup?.ips?.length
-                          ? (zh ? `在同一页的 API IP 白名单中添加：${bot.setup.ips.join("、")}` : `Under API IP whitelist on the same page, add: ${bot.setup.ips.join(", ")}`)
-                          : (zh ? "API IP 白名单保持关闭。如果微信给账号管理员发消息，询问是否允许快哉的服务器，请选择允许。" : "Keep the API IP whitelist off. If WeChat messages the account's admin asking to allow Placetta's server, allow it.")}</li>
-                        <li>{zh ? "把 AppID 和 AppSecret 填在下面，连同这个 Token 和 EncodingAESKey（也可换成账号已在用的），点“连接”：" : "Paste the AppID and AppSecret below, with this Token and EncodingAESKey (or the ones the account already uses), and connect:"}</li>
-                      </ol>
-                    ) : (
-                      <ol>
-                        <li>{zh ? "在飞书开放平台（open.feishu.cn）创建企业自建应用，添加“机器人”能力。" : "In the Lark developer console (open.larksuite.com, or open.feishu.cn in China), create a custom app and add the Bot feature."}</li>
-                        <li>{zh ? "权限：开通 im:message（读取与发送消息）、im:message.group_at_msg，以及 contact:user.email:readonly（读取成员邮箱，Odelia 据此确认提问的是哪位快哉团队成员），并把通讯录权限范围设为全部成员。事件订阅：添加 im.message.receive_v1，请求地址填：" : "Permissions: add im:message (read and send messages), im:message.group_at_msg, and contact:user.email:readonly (members' emails, so Odelia knows which Placetta teammate is asking), and set the contact range to all members. Events: add im.message.receive_v1 and set the request URL to:"}</li>
-                        {bot.setup?.events_url ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.events_url)}>{zh ? "复制" : "Copy"}</button>{bot.setup.events_url}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
-                        <li>{zh ? "发布应用版本。然后填入凭证页的 App ID、App Secret，以及事件页的 Verification Token（如开启加密，再填 Encrypt Key）：" : "Publish a version of the app. Then paste the App ID and App Secret (Credentials) and the Verification Token, plus the Encrypt Key if it's on (Events and callbacks):"}</li>
-                      </ol>
-                    )}
-                    <form onSubmit={e => { e.preventDefault(); void submitBot(); }}>
-                      {(bot.kind === "slack_bot"
-                        ? [["bot_token", "Bot User OAuth Token (xoxb-...)", true, "password"], ["signing_secret", "Signing Secret", true, "password"]]
-                        : bot.kind === "wechat_bot"
-                        // the Token and EncodingAESKey stay visible: they're typed into WeChat's console too
-                        ? [["app_id", "AppID (wx...)", true, "text"], ["app_secret", "AppSecret", true, "password"], ["token", "Token", true, "text"], ["aes_key", zh ? "EncodingAESKey（安全模式）" : "EncodingAESKey (safe mode)", false, "text"]]
-                        : [["app_id", "App ID (cli_...)", true, "text"], ["app_secret", "App Secret", true, "password"], ["verification_token", "Verification Token", true, "password"], ["encrypt_key", zh ? "Encrypt Key（可选）" : "Encrypt Key (optional)", false, "password"]]
-                      ).map(([k, ph, req, type]) => <input key={k as string} type={type as string} required={!!req} value={bot.v[k as string] ?? ""} onChange={e => setBot({ ...bot, v: { ...bot.v, [k as string]: e.target.value.trim() } })} placeholder={ph as string} aria-label={ph as string} autoComplete="off" spellCheck={false} />)}
-                      {bot.kind === "lark_bot" && <Select value={bot.v.domain ?? "feishu"} onChange={e => setBot({ ...bot, v: { ...bot.v, domain: e.target.value } })} aria-label={zh ? "版本" : "Edition"}><option value="feishu">{zh ? "飞书（中国）" : "Feishu (China)"}</option><option value="lark">{zh ? "Lark（国际版）" : "Lark (international)"}</option></Select>}
-                      <button type="submit" className="sbtn ink" disabled={bot.busy}>{bot.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "连接" : "Connect")}</button>
-                    </form>
-                    {bot.kind === "wechat_bot" ? <>
-                      <p className="sg-fine">{zh ? "连接后，再把服务器地址、Token 和 EncodingAESKey 填进微信的“消息与事件推送”（下一步会显示）。微信提交时会立即检查这个地址，所以要先在这里连接。" : "After connecting, the server address, Token and EncodingAESKey go into WeChat's Message push (the next step shows them). WeChat checks the address the moment it's submitted, so connect here first."}</p>
-                      <p className="sg-fine">{zh ? "只有关联了微信的快哉团队成员可以给她派任务，她以对方的身份工作。任何申报、付款或发送仍需在快哉中批准。" : "Only Placetta teammates who linked their WeChat can give her jobs, and she works as them. Anything to file, pay or send still waits for approval in Placetta."}</p>
-                    </> : <p className="sg-fine">{zh ? "她以连接者的身份工作，频道里的任何人都可以给她派活。任何申报、付款或发送仍需在快哉中批准。" : "She works as the person who connects her, and anyone in the channel can give her a job. Anything to file, pay or send still waits for approval in Placetta."}</p>}
-                  </li>
-                ) : null,
               ];
             })}
           </ul>
         </div>
       ))}
+      {/* the longer setups open in a side sheet: Toast's code, a team chat's link, a bot's keys and WeChat's last step */}
+      {toast && !conn("toast") && (
+        <SetSheet title={zh ? "连接 Toast" : "Connect Toast"} sub={b(POS_WHY)} onClose={() => setToast(null)} className="sg-bot">
+          <ol>
+            <li>{zh ? "在 Toast Web 中：Integrations → Browse & purchase integrations，找到快哉（Placetta），添加到您的门店。" : "In Toast Web: Integrations, Browse & purchase integrations. Find Placetta and add it to your locations."}</li>
+            <li>{zh ? "再到 Configure integrations，点快哉旁边的齿轮，为每家门店在 Location ID 中填写这个代码，然后 Apply：" : "Then Configure integrations, the gear next to Placetta, and type this code as the Location ID for each location, then Apply:"}</li>
+          </ol>
+          {toast.code ? <code className="text-code" aria-label={zh ? "您的 Toast 代码" : "Your Toast code"}>{toast.code}</code> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
+          <p className="sg-fine">{zh ? "只有能管理门店 Toast 集成的人才能填写这个代码，所以快哉只会读取您自己的门店。Toast 可能需要最多 15 分钟才会向快哉开放新门店。快哉只读取销售额、员工和排班，不会更改 Toast 中的任何内容。" : "Only someone who manages your Toast integrations can enter this code, so Placetta reads only your own locations. Toast can take up to 15 minutes to open a new location to Placetta. Placetta reads sales, staff and schedules, and changes nothing in Toast."}</p>
+          <form className="sst-act" onSubmit={e => { e.preventDefault(); void checkToast(); }}>
+            {toast.code && <button type="button" className="sbtn quiet" onClick={() => copy(toast.code!)}><I.copy />{zh ? "复制代码" : "Copy code"}</button>}
+            <button type="submit" className="sbtn ink" disabled={toast.busy || !toast.code}>{toast.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "检查并连接" : "Check and connect")}</button>
+          </form>
+        </SetSheet>
+      )}
+      {form && !conn(form.kind) && (
+        <SetSheet title={(zh ? "连接" : "Connect ") + nameOf(form.kind)} sub={b(CHAT_WHY)} onClose={() => setForm(null)}>
+          <p>{b(HOOK_HELP[form.kind].how)}</p>
+          <form className="sst-form" onSubmit={e => { e.preventDefault(); void submit(); }}>
+            <input type="url" required autoFocus value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder={HOOK_HELP[form.kind].ph} aria-label={zh ? "Webhook 链接" : "Webhook link"} spellCheck={false} autoComplete="off" />
+            {form.kind === "lark" && <input type="password" value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder={zh ? "签名密钥（可选）" : "Signing secret (optional)"} aria-label={zh ? "签名密钥" : "Signing secret"} autoComplete="off" />}
+            <div className="sst-act">
+              <button type="button" className="sbtn quiet" onClick={() => setForm(null)}>{zh ? "取消" : "Cancel"}</button>
+              <button type="submit" className="sbtn ink" disabled={form.busy || !form.url.trim()}>{form.busy ? (zh ? "正在发送测试消息…" : "Sending a test message...") : (zh ? "连接并发送测试" : "Connect and test")}</button>
+            </div>
+          </form>
+        </SetSheet>
+      )}
+      {bot?.kind === "wechat_bot" && bot.done && (
+        <SetSheet title={zh ? "最后一步：在微信中提交" : "Last step: submit in WeChat"} onClose={() => setBot(null)} className="sg-bot">
+          <p>{zh ? "已连接。最后一步，在微信开发者平台：我的业务 → 服务号 → 消息与事件推送，填写下面三项，加密方式选“安全模式”，数据格式选 XML，然后提交：" : "Connected. Last step, in the WeChat developer platform: My business, Service account, Message push (消息与事件推送). Fill in these three, choose safe mode (安全模式) and XML, and submit:"}</p>
+          <p className="sst-label">{zh ? "服务器地址（URL）" : "Server address (URL)"}</p>
+          <CodeBlock text={api.wechatServerUrl(cloud?.wsId ?? "")} copy={copy} zh={zh} />
+          <p className="sst-label">Token</p>
+          <CodeBlock text={bot.v.token ?? ""} copy={copy} zh={zh} />
+          {bot.v.aes_key && <><p className="sst-label">EncodingAESKey</p><CodeBlock text={bot.v.aes_key} copy={copy} zh={zh} /></>}
+          <form className="sst-act" onSubmit={e => { e.preventDefault(); setBot(null); }}><button type="submit" className="sbtn ink">{zh ? "已在微信中提交" : "Submitted in WeChat"}</button></form>
+        </SetSheet>
+      )}
+      {bot && !bot.done && !conn(bot.kind) && (
+        <SetSheet title={(zh ? "设置" : "Set up ") + nameOf(bot.kind)} onClose={() => setBot(null)} className="sg-bot">
+          {bot.kind === "slack_bot" ? (
+            <ol>
+              <li>{zh ? "在 api.slack.com/apps 选择 Create New App → From a manifest，选好工作区，粘贴下面的清单：" : "At api.slack.com/apps choose Create New App, From a manifest, pick your workspace and paste this:"}</li>
+              {bot.setup?.manifest ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.manifest!)}>{zh ? "复制" : "Copy"}</button>{bot.setup.manifest}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
+              <li>{zh ? "点 Install to Workspace。然后复制 OAuth & Permissions 里的 Bot User OAuth Token（xoxb- 开头），以及 Basic Information 里的 Signing Secret：" : "Click Install to Workspace. Then copy the Bot User OAuth Token (starts with xoxb-) from OAuth & Permissions, and the Signing Secret from Basic Information:"}</li>
+            </ol>
+          ) : bot.kind === "wechat_bot" ? (
+            <ol>
+              <li>{zh ? "需要一个以公司主体完成微信认证的服务号。建议专门给团队用一个：开启服务器配置后，在微信后台设置的自动回复和菜单会失效。" : "You need a WeChat service account verified under your company (认证服务号). Use one just for your team: once its server address is on, the auto-replies and menu set in WeChat's console stop."}</li>
+              <li>{zh ? "在微信开发者平台（developers.weixin.qq.com）：我的业务 → 服务号 → 开发密钥，复制 AppID 和 AppSecret。" : "In the WeChat developer platform (developers.weixin.qq.com): My business, Service account, Development keys. Copy the AppID and the AppSecret."}</li>
+              <li>{bot.setup?.ips?.length
+                ? (zh ? `在同一页的 API IP 白名单中添加：${bot.setup.ips.join("、")}` : `Under API IP whitelist on the same page, add: ${bot.setup.ips.join(", ")}`)
+                : (zh ? "API IP 白名单保持关闭。如果微信给账号管理员发消息，询问是否允许快哉的服务器，请选择允许。" : "Keep the API IP whitelist off. If WeChat messages the account's admin asking to allow Placetta's server, allow it.")}</li>
+              <li>{zh ? "把 AppID 和 AppSecret 填在下面，连同这个 Token 和 EncodingAESKey（也可换成账号已在用的），点“连接”：" : "Paste the AppID and AppSecret below, with this Token and EncodingAESKey (or the ones the account already uses), and connect:"}</li>
+            </ol>
+          ) : (
+            <ol>
+              <li>{zh ? "在飞书开放平台（open.feishu.cn）创建企业自建应用，添加“机器人”能力。" : "In the Lark developer console (open.larksuite.com, or open.feishu.cn in China), create a custom app and add the Bot feature."}</li>
+              <li>{zh ? "权限：开通 im:message（读取与发送消息）、im:message.group_at_msg，以及 contact:user.email:readonly（读取成员邮箱，Odelia 据此确认提问的是哪位快哉团队成员），并把通讯录权限范围设为全部成员。事件订阅：添加 im.message.receive_v1，请求地址填：" : "Permissions: add im:message (read and send messages), im:message.group_at_msg, and contact:user.email:readonly (members' emails, so Odelia knows which Placetta teammate is asking), and set the contact range to all members. Events: add im.message.receive_v1 and set the request URL to:"}</li>
+              {bot.setup?.events_url ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.events_url)}>{zh ? "复制" : "Copy"}</button>{bot.setup.events_url}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
+              <li>{zh ? "发布应用版本。然后填入凭证页的 App ID、App Secret，以及事件页的 Verification Token（如开启加密，再填 Encrypt Key）：" : "Publish a version of the app. Then paste the App ID and App Secret (Credentials) and the Verification Token, plus the Encrypt Key if it's on (Events and callbacks):"}</li>
+            </ol>
+          )}
+          <form className="sst-form" onSubmit={e => { e.preventDefault(); void submitBot(); }}>
+            {(bot.kind === "slack_bot"
+              ? [["bot_token", "Bot User OAuth Token (xoxb-...)", true, "password"], ["signing_secret", "Signing Secret", true, "password"]]
+              : bot.kind === "wechat_bot"
+              // the Token and EncodingAESKey stay visible: they're typed into WeChat's console too
+              ? [["app_id", "AppID (wx...)", true, "text"], ["app_secret", "AppSecret", true, "password"], ["token", "Token", true, "text"], ["aes_key", zh ? "EncodingAESKey（安全模式）" : "EncodingAESKey (safe mode)", false, "text"]]
+              : [["app_id", "App ID (cli_...)", true, "text"], ["app_secret", "App Secret", true, "password"], ["verification_token", "Verification Token", true, "password"], ["encrypt_key", zh ? "Encrypt Key（可选）" : "Encrypt Key (optional)", false, "password"]]
+            ).map(([k, ph, req, type]) => <input key={k as string} type={type as string} required={!!req} value={bot.v[k as string] ?? ""} onChange={e => setBot({ ...bot, v: { ...bot.v, [k as string]: e.target.value.trim() } })} placeholder={ph as string} aria-label={ph as string} autoComplete="off" spellCheck={false} />)}
+            {bot.kind === "lark_bot" && <Select value={bot.v.domain ?? "feishu"} onChange={e => setBot({ ...bot, v: { ...bot.v, domain: e.target.value } })} aria-label={zh ? "版本" : "Edition"}><option value="feishu">{zh ? "飞书（中国）" : "Feishu (China)"}</option><option value="lark">{zh ? "Lark（国际版）" : "Lark (international)"}</option></Select>}
+            {bot.kind === "wechat_bot" ? <>
+              <p className="sg-fine">{zh ? "连接后，再把服务器地址、Token 和 EncodingAESKey 填进微信的“消息与事件推送”（下一步会显示）。微信提交时会立即检查这个地址，所以要先在这里连接。" : "After connecting, the server address, Token and EncodingAESKey go into WeChat's Message push (the next step shows them). WeChat checks the address the moment it's submitted, so connect here first."}</p>
+              <p className="sg-fine">{zh ? "只有关联了微信的快哉团队成员可以给她派任务，她以对方的身份工作。任何申报、付款或发送仍需在快哉中批准。" : "Only Placetta teammates who linked their WeChat can give her jobs, and she works as them. Anything to file, pay or send still waits for approval in Placetta."}</p>
+            </> : <p className="sg-fine">{zh ? "她以连接者的身份工作，频道里的任何人都可以给她派活。任何申报、付款或发送仍需在快哉中批准。" : "She works as the person who connects her, and anyone in the channel can give her a job. Anything to file, pay or send still waits for approval in Placetta."}</p>}
+            <div className="sst-act">
+              <button type="button" className="sbtn quiet" onClick={() => setBot(null)}>{zh ? "取消" : "Cancel"}</button>
+              <button type="submit" className="sbtn ink" disabled={bot.busy}>{bot.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "连接" : "Connect")}</button>
+            </div>
+          </form>
+        </SetSheet>
+      )}
       {feed && <p className="sg-note mono">{feed}</p>}
       {/* any app's own MCP server, and the one-click list (src/McpSettings.tsx) */}
       <McpConnectors pin={pin} />
@@ -357,23 +369,27 @@ function Logins() {
   if (!cloud) {
     return (
       <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Placetta opens one only to file for you, and each opening shows in your audit trail.", "加密保存在保险库中的机构门户登录信息。快哉只在为您提交时打开，每次打开都会记入审计记录。")}
-        rows={ws.connections.filter(c => c.level !== "vault").map(c => ({ label: c.name, sub: b(c.detail), icon: <I.key />, right: c.state === "connected" ? <em className="ok"><i />{lang === "zh" ? "已保存" : "Saved"}</em> : <Btn kind="line" onClick={() => undefined}>{lang === "zh" ? "添加" : "Add"}</Btn> }))} />
+        rows={ws.connections.filter(c => c.level !== "vault").map(c => ({ label: c.name, sub: b(c.detail), right: c.state === "connected" ? <em className="ok"><I.check />{lang === "zh" ? "已保存" : "Saved"}</em> : <Btn kind="line" onClick={() => undefined}>{lang === "zh" ? "添加" : "Add"}</Btn> }))} />
     );
   }
   return (
     <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Placetta opens one only to file for you, and each opening shows in your audit trail. Never save Social Security or bank numbers here.", "加密保存在保险库中的机构门户登录信息。快哉只在为您提交时打开，每次打开都会记入审计记录。请勿在此保存社会安全号或银行账号。")}
-      rows={cloud.logins.map(l => ({ label: { en: l.agency, zh: l.agency }, icon: <I.key />,
+      rows={cloud.logins.map(l => ({ label: { en: l.agency, zh: l.agency },
         sub: <>{l.username}{l.last_opened_at ? (lang === "zh" ? `，团队上次打开 ${fmtAgo(l.last_opened_at, lang)}` : `. Team last opened it ${fmtAgo(l.last_opened_at, lang)}`) : ""}</>,
-        right: cloud.owner ? <Btn guard onClick={() => void cloud.removeLogin(l.id)}>{lang === "zh" ? "删除" : "Remove"}</Btn> : undefined }))}>
-      {!cloud.owner ? <p className="sg-note">{lang === "zh" ? "只有所有者可以添加或删除登录信息。" : "Only owners can add or remove saved logins."}</p> : adding ? (
-        <form className="sg-form" onSubmit={e => { e.preventDefault(); if (!f.agency.trim() || !f.username.trim() || !f.password) return; void cloud.saveLogin({ agency: f.agency.trim(), url: f.url.trim() || undefined, username: f.username.trim(), password: f.password, note: f.note.trim() || undefined }).then(() => { setAdding(false); setF({ agency: "", url: "", username: "", password: "", note: "" }); }); }}>
-          <input placeholder={lang === "zh" ? "机构，例如 CDTFA" : "Agency, e.g. CDTFA"} value={f.agency} onChange={e => setF({ ...f, agency: e.target.value })} aria-label="Agency" />
-          <input placeholder="https://…" value={f.url} onChange={e => setF({ ...f, url: e.target.value })} aria-label="Website" />
-          <input placeholder={lang === "zh" ? "用户名" : "Username"} autoComplete="off" value={f.username} onChange={e => setF({ ...f, username: e.target.value })} aria-label="Username" />
-          <input type="password" placeholder={lang === "zh" ? "密码" : "Password"} autoComplete="new-password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} aria-label="Password" />
-          <div className="sg-form-act"><Btn onClick={() => setAdding(false)}>{lang === "zh" ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink">{lang === "zh" ? "加密保存" : "Save encrypted"}</button></div>
-        </form>
-      ) : <div className="sg-act"><Btn guard kind="line" onClick={() => setAdding(true)}><I.plus />{lang === "zh" ? "添加登录" : "Add a login"}</Btn></div>}
+        right: cloud.owner ? <Btn kind="warm" guard onClick={() => void cloud.removeLogin(l.id)}>{lang === "zh" ? "删除" : "Remove"}</Btn> : undefined }))}>
+      {!cloud.owner ? <p className="sg-note">{lang === "zh" ? "只有所有者可以添加或删除登录信息。" : "Only owners can add or remove saved logins."}</p>
+        : <div className="sg-act"><Btn guard kind="line" onClick={() => setAdding(true)}><I.plus />{lang === "zh" ? "添加登录" : "Add a login"}</Btn></div>}
+      {cloud.owner && adding && (
+        <SetSheet title={lang === "zh" ? "添加机构登录" : "Add an agency login"} sub={lang === "zh" ? "加密保存在保险库中。快哉只在为您提交时打开。" : "Kept encrypted in a vault. Placetta opens it only to file for you."} onClose={() => setAdding(false)}>
+          <form className="sst-form" onSubmit={e => { e.preventDefault(); if (!f.agency.trim() || !f.username.trim() || !f.password) return; void cloud.saveLogin({ agency: f.agency.trim(), url: f.url.trim() || undefined, username: f.username.trim(), password: f.password, note: f.note.trim() || undefined }).then(() => { setAdding(false); setF({ agency: "", url: "", username: "", password: "", note: "" }); }); }}>
+            <input placeholder={lang === "zh" ? "机构，例如 CDTFA" : "Agency, e.g. CDTFA"} value={f.agency} onChange={e => setF({ ...f, agency: e.target.value })} aria-label="Agency" autoFocus />
+            <input placeholder="https://…" value={f.url} onChange={e => setF({ ...f, url: e.target.value })} aria-label="Website" />
+            <input placeholder={lang === "zh" ? "用户名" : "Username"} autoComplete="off" value={f.username} onChange={e => setF({ ...f, username: e.target.value })} aria-label="Username" />
+            <input type="password" placeholder={lang === "zh" ? "密码" : "Password"} autoComplete="new-password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} aria-label="Password" />
+            <div className="sst-act"><Btn onClick={() => setAdding(false)}>{lang === "zh" ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink">{lang === "zh" ? "加密保存" : "Save encrypted"}</button></div>
+          </form>
+        </SetSheet>
+      )}
     </Group>
   );
 }
@@ -408,7 +424,7 @@ function Team() {
   };
   const rows: Row[] = [
     ...(team?.members ?? []).map(m => ({
-      label: { en: m.email + (m.you ? " (you)" : ""), zh: m.email + (m.you ? "（您）" : "") }, icon: <I.user />,
+      label: { en: m.email + (m.you ? " (you)" : ""), zh: m.email + (m.you ? "（您）" : "") },
       sub: <>{roleName(m.role)}{m.two_step ? (zh ? "，已开启两步登录" : ", two-step on") : ""}</>,
       right: m.you
         ? (m.role !== "owner" || owners > 1 ? <Btn onClick={() => { if (window.confirm(zh ? "确定离开这个工作区？" : "Leave this workspace?")) void act(async () => { await api.removeMember(wsId, m.user_id); cloud.switchTo(""); }); }}>{zh ? "离开" : "Leave"}</Btn> : undefined)
@@ -416,11 +432,11 @@ function Team() {
             <Select sz="sm" value={m.role} aria-label={zh ? "角色" : "Role"} onChange={e => { const v = e.target.value as api.Role; pin.guard(() => void act(() => api.setRole(wsId, m.user_id, v), zh ? "角色已更新" : "Role updated")); }}>
               <option value="owner">{roleName("owner")}</option><option value="member">{roleName("member")}</option>
             </Select>
-            <Btn guard onClick={() => { if (window.confirm(zh ? `将 ${m.email} 移出工作区？` : `Remove ${m.email}?`)) void act(() => api.removeMember(wsId, m.user_id), zh ? "已移出" : "Removed"); }}>{zh ? "移出" : "Remove"}</Btn>
+            <Btn kind="warm" guard onClick={() => { if (window.confirm(zh ? `将 ${m.email} 移出工作区？` : `Remove ${m.email}?`)) void act(() => api.removeMember(wsId, m.user_id), zh ? "已移出" : "Removed"); }}>{zh ? "移出" : "Remove"}</Btn>
           </> : undefined,
     })),
     ...(team?.invites ?? []).map(i => ({
-      label: { en: i.email, zh: i.email }, icon: <I.bell />,
+      label: { en: i.email, zh: i.email },
       sub: <>{roleName(i.role)}{zh ? "，已邀请，等待登录" : ", invited, waiting for them to sign in"}</>,
       right: <>
         <Btn guard onClick={() => void act(async () => { const r = await api.resendInvite(wsId, i.id); say(sentNote(r.sent, i.email)); })}>{zh ? "重发" : "Resend"}</Btn>
@@ -480,9 +496,9 @@ function HqShare() {
       note={B(`Headquarters sees each of your ${n} store${n === 1 ? "" : "s"}: stage, licenses current, due soon or overdue, and applications pending. Never your documents, logins, chats or staff. They also get a one-page summary every Monday.`,
         `总部可以看到您 ${n} 家门店各自的阶段、有效执照、即将到期或逾期事项，以及办理中的申请，但看不到您的文件、登录信息、对话或员工信息。总部每周一还会收到一页摘要。`)}
       rows={(links ?? []).map(l => ({
-        label: { en: l.hq_email, zh: l.hq_email }, icon: <I.hq />,
+        label: { en: l.hq_email, zh: l.hq_email },
         sub: <>{l.brand ? (zh ? `品牌：${l.brand}，` : `${l.brand}, `) : ""}{zh ? `${fmtDay(l.created_at, lang, true)} 起共享` : `shared since ${fmtDay(l.created_at, lang, true)}`}</>,
-        right: cloud.owner ? <Btn guard onClick={() => remove(l)}>{zh ? "移除" : "Remove"}</Btn> : undefined,
+        right: cloud.owner ? <Btn kind="warm" guard onClick={() => remove(l)}>{zh ? "移除" : "Remove"}</Btn> : undefined,
       }))}>
       {links && links.length === 0 && !cloud.owner && <p className="sg-note">{zh ? "尚未与总部共享。" : "Not shared with headquarters yet."}</p>}
       {cloud.owner ? (
@@ -631,27 +647,27 @@ function PhoneGroup() {
 
   const wa = line.whatsapp ? line.whatsapp.replace(/^\+/, "") : "";
   const rows: Row[] = [
-    ...(number ? [{ label: B("Odelia's number", "Odelia 的号码"), icon: <I.phone />,
+    ...(number ? [{ label: B("Odelia's number", "Odelia 的号码"),
       sub: <>{display}{line.imessage ? (zh ? "，可发 iMessage（安卓手机为短信）" : ", on iMessage (texts from Android)") : (zh ? "，可发短信" : ", for texts")}
         {line.voice && (callApart ? <>{zh ? `；来电请拨 ${prettyPhone(callNumber!)}` : `. Calls: ${prettyPhone(callNumber!)}`}</> : (zh ? "，也可打电话" : ", and calls"))}</>,
       right: <>{number && <a className="sbtn quiet" href={`sms:${number}`}>{zh ? "发短信" : "Text"}</a>}<Btn onClick={() => saveContact(number, zh, callNumber)}><I.download />{zh ? "保存联系人" : "Save contact"}</Btn></> }] as Row[] : []),
-    ...(line.email ? [{ label: B("Email Odelia", "给 Odelia 发邮件"), icon: <I.message />,
+    ...(line.email ? [{ label: B("Email Odelia", "给 Odelia 发邮件"),
       sub: <>{line.email}{zh ? "。用您登录快哉的邮箱写信或转发机构来信，附件会存入“文件”。" : ". Write or forward an agency's letter from the address you sign in with; attachments go into Documents."}</>,
       right: <a className="sbtn quiet" href={`mailto:${line.email}`}>{zh ? "写邮件" : "Write"}</a> }] as Row[] : []),
-    ...(wa ? [{ label: B("Odelia on WhatsApp", "Odelia 的 WhatsApp"), icon: <I.message />,
+    ...(wa ? [{ label: B("Odelia on WhatsApp", "Odelia 的 WhatsApp"),
       sub: <>{prettyPhone(line.whatsapp!)}{zh ? "，用已关联的号码发消息即可" : ", from your linked number"}</>,
       right: <a className="sbtn quiet" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">{zh ? "打开 WhatsApp" : "Open WhatsApp"}</a> }] as Row[] : []),
-    { label: B("Your phone", "您的手机"), icon: <I.user />,
+    { label: B("Your phone", "您的手机"),
       sub: link ? <>{prettyPhone(link.number)}{verified ? (link.opted_out ? (zh ? `，已回复 STOP 退订短信。发送 START 到 ${display} 可重新开启。` : `, texts are off because it texted STOP. Text START to ${display} to turn them back on.`) : (zh ? "，已验证" : ", verified")) : (zh ? "，等待验证" : ", waiting for the code")}</> : (zh ? "未关联" : "Not linked"),
-      right: verified ? <Btn guard onClick={remove}>{zh ? "取消关联" : "Remove"}</Btn> : link ? <Btn onClick={() => void act(() => api.phoneRemove())}>{zh ? "取消" : "Cancel"}</Btn> : undefined },
+      right: verified ? <Btn kind="warm" guard onClick={remove}>{zh ? "取消关联" : "Remove"}</Btn> : link ? <Btn onClick={() => void act(() => api.phoneRemove())}>{zh ? "取消" : "Cancel"}</Btn> : undefined },
     ...(verified ? [
-      { label: B("Texts about important updates", "重要更新短信通知"), icon: <I.message />,
+      { label: B("Texts about important updates", "重要更新短信通知"),
         sub: zh ? "有事等您批准，或 7 天内到期时发短信。每天最多 3 条。" : "When something needs your approval or is due within 7 days. At most 3 a day.",
         right: <Toggle on={link!.texts_on} set={v => prefs({ texts: v })} label={zh ? "重要更新短信" : "Texts about important updates"} /> },
-      { label: B("Calls for urgent items", "紧急事项来电"), icon: <I.bell />,
+      { label: B("Calls for urgent items", "紧急事项来电"),
         sub: line.voice ? (zh ? "可能被停业、检查未通过，或逾期事项影响开业时致电。每天最多 1 通。" : "A closure risk, a failed inspection, or something overdue that blocks opening. At most 1 a day.") : (zh ? "来电功能还没有设置好，紧急事项会改为短信通知。" : "Calls aren't set up yet, so urgent items come by text."),
         right: <Toggle on={link!.calls_on} set={v => prefs({ calls: v })} label={zh ? "紧急事项来电" : "Calls for urgent items"} /> },
-      { label: B("Quiet hours", "免打扰时段"), icon: <I.moon />,
+      { label: B("Quiet hours", "免打扰时段"),
         sub: zh ? `这段时间不发短信也不打电话，按${link!.tz === deviceTz() ? "这台设备的" : ` ${link!.tz} `}时间。您主动联系时，Odelia 随时回复。` : `No texts or calls from Odelia then, in ${link!.tz === deviceTz() ? "this device's time zone" : link!.tz}. She always answers when you reach out.`,
         right: <>
           <Select sz="sm" value={link!.quiet_start} aria-label={zh ? "开始" : "From"} onChange={e => prefs({ quietStart: e.target.value, tz: deviceTz() })}>
@@ -749,25 +765,31 @@ function Security() {
       ? B("You're on the Placetta team. The filing queue opens only after you sign in with two-step, because it holds customers' records and saved logins.", "您是快哉团队成员。申报队列包含客户记录和已保存的登录信息，开启两步登录并用验证码登录后才能打开。")
       : B("Two-step sign-in asks for a code from your phone each time you sign in. Owners should turn it on.", "两步登录会在每次登录时要求输入手机上的验证码。建议所有者开启。")}
       rows={[
-        { label: B("Two-step sign-in", "两步登录"), icon: <I.lock />,
+        { label: B("Two-step sign-in", "两步登录"),
           sub: on ? (zh ? "已开启：身份验证器应用" : "On: authenticator app") : (zh ? "未开启" : "Off"),
           right: on
             ? <Btn guard onClick={() => { if (window.confirm(zh ? "确定关闭两步登录？" : "Turn off two-step sign-in?")) void api.twoStepOff(factor!).then(() => { setFactor(null); say(zh ? "已关闭两步登录" : "Two-step sign-in is off"); cloud.reopen(); }).catch(e => say((e as api.ApiError).message)); }}>{zh ? "关闭" : "Turn off"}</Btn>
             : !setup ? <Btn guard kind="ink" onClick={() => setSetup(true)}>{zh ? "开启" : "Turn on"}</Btn> : undefined },
-        { label: B("Password", "密码"), icon: <I.key />, sub: zh ? "用邮箱和密码登录，或改用邮箱验证码。" : "Sign in with your email and password, or with an email code.",
+        { label: B("Password", "密码"), sub: zh ? "用邮箱和密码登录，或改用邮箱验证码。" : "Sign in with your email and password, or with an email code.",
           right: !pw.open ? <Btn guard onClick={() => setPw(x => ({ ...x, open: true }))}>{zh ? "修改密码" : "Change password"}</Btn> : undefined },
-        { label: B("Sign out everywhere", "在所有设备上退出"), sub: zh ? "退出所有设备上的登录，包括这台。" : "Ends every session on every device, including this one.", icon: <I.logout />,
+        { label: B("Sign out everywhere", "在所有设备上退出"), sub: zh ? "退出所有设备上的登录，包括这台。" : "Ends every session on every device, including this one.",
           right: <Btn onClick={() => { if (window.confirm(zh ? "在所有设备上退出？" : "Sign out on every device?")) cloud.signOut(true); }}>{zh ? "全部退出" : "Sign out all"}</Btn> },
       ]}>
       {pw.open && (
-        <form className="sg-form pwform" onSubmit={e => { e.preventDefault(); void savePw(); }}>
-          <input id="pw-new" type={pw.show ? "text" : "password"} autoComplete="new-password" placeholder={zh ? "新密码（至少 8 个字符）" : "New password (8+ characters)"} value={pw.a} onChange={e => setPw(x => ({ ...x, a: e.target.value }))} aria-label={zh ? "新密码" : "New password"} autoFocus />
-          <input id="pw-again" type={pw.show ? "text" : "password"} autoComplete="new-password" placeholder={zh ? "再次输入新密码" : "Type it again"} value={pw.b} onChange={e => setPw(x => ({ ...x, b: e.target.value }))} aria-label={zh ? "确认新密码" : "Confirm new password"} />
-          <label className="check"><input type="checkbox" checked={pw.show} onChange={e => setPw(x => ({ ...x, show: e.target.checked }))} /><span>{zh ? "显示密码" : "Show passwords"}</span></label>
-          <div className="sg-form-act"><Btn onClick={() => setPw({ open: false, a: "", b: "", show: false, busy: false })}>{zh ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink" disabled={pw.busy || !pw.a || !pw.b}>{pw.busy ? "…" : zh ? "保存新密码" : "Save new password"}</button></div>
-        </form>
+        <SetSheet title={zh ? "修改密码" : "Change password"} sub={zh ? "用邮箱和密码登录，或改用邮箱验证码。" : "Sign in with your email and password, or with an email code."} onClose={() => setPw({ open: false, a: "", b: "", show: false, busy: false })}>
+          <form className="sst-form pwform" onSubmit={e => { e.preventDefault(); void savePw(); }}>
+            <input id="pw-new" type={pw.show ? "text" : "password"} autoComplete="new-password" placeholder={zh ? "新密码（至少 8 个字符）" : "New password (8+ characters)"} value={pw.a} onChange={e => setPw(x => ({ ...x, a: e.target.value }))} aria-label={zh ? "新密码" : "New password"} autoFocus />
+            <input id="pw-again" type={pw.show ? "text" : "password"} autoComplete="new-password" placeholder={zh ? "再次输入新密码" : "Type it again"} value={pw.b} onChange={e => setPw(x => ({ ...x, b: e.target.value }))} aria-label={zh ? "确认新密码" : "Confirm new password"} />
+            <label className="check"><input type="checkbox" checked={pw.show} onChange={e => setPw(x => ({ ...x, show: e.target.checked }))} /><span>{zh ? "显示密码" : "Show passwords"}</span></label>
+            <div className="sst-act"><Btn onClick={() => setPw({ open: false, a: "", b: "", show: false, busy: false })}>{zh ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink" disabled={pw.busy || !pw.a || !pw.b}>{pw.busy ? "…" : zh ? "保存新密码" : "Save new password"}</button></div>
+          </form>
+        </SetSheet>
       )}
-      {setup && <TwoStepSetup lang={lang} onCancel={() => setSetup(false)} onDone={() => { setSetup(false); say(zh ? "两步登录已开启" : "Two-step sign-in is on"); cloud.reopen(); }} />}
+      {setup && (
+        <SetSheet title={zh ? "开启两步登录" : "Turn on two-step sign-in"} sub={zh ? "两步登录会在每次登录时要求输入手机上的验证码。" : "Two-step sign-in asks for a code from your phone each time you sign in."} onClose={() => setSetup(false)}>
+          <TwoStepSetup lang={lang} onCancel={() => setSetup(false)} onDone={() => { setSetup(false); say(zh ? "两步登录已开启" : "Two-step sign-in is on"); cloud.reopen(); }} />
+        </SetSheet>
+      )}
     </Group>
   );
 }
@@ -808,8 +830,8 @@ function DeleteAccount({ onClose }: { onClose: () => void }) {
 /* ---------------------------------- memory ---------------------------------- */
 
 const ago = (iso: string, zh: boolean) => fmtAgo(iso, zh ? "zh" : "en");
-function Toggle({ on, set, label }: { on: boolean; set: (v: boolean) => void; label: string }) {
-  return <label className="switch" onClick={e => e.stopPropagation()}><input type="checkbox" checked={on} onChange={e => set(e.target.checked)} aria-label={label} /><i /></label>;
+function Toggle({ on, set, label, disabled }: { on: boolean; set: (v: boolean) => void; label: string; disabled?: boolean }) {
+  return <label className="switch" onClick={e => e.stopPropagation()}><input type="checkbox" checked={on} disabled={disabled} onChange={e => set(e.target.checked)} aria-label={label} /><i /></label>;
 }
 
 function MemoryGroup() {
@@ -825,25 +847,21 @@ function MemoryGroup() {
   const files = memory.files;
   const you = [files.find(f => f.id === "profile") ?? PROFILE(), files.find(f => f.id === "preferences") ?? PREFS()];
   const group = (k: MemoryKind) => files.filter(f => f.kind === k).sort((a, b) => a.name.localeCompare(b.name));
+  // each memory file is a row: its name, its summary and when it changed, View and Delete on the right
   const table = (title: string, rows: MemoryFile[]) => (
     <div className="sg-sub mem">
       <h3>{title}</h3>
       {rows.length ? (
-        <table className="memt">
-          <thead><tr><th>{zh ? "名称" : "Name"}</th><th>{zh ? "摘要" : "Summary"}</th><th>{zh ? "最后更新" : "Last updated"}</th><th><span className="sr">{zh ? "操作" : "Actions"}</span></th></tr></thead>
-          <tbody>{rows.map(f => (
-            <tr key={f.id}>
-              <td><b>{f.name}</b></td>
-              <td>{f.summary}{f.lines.length ? "" : <em>{zh ? "（暂无内容）" : " (nothing yet)"}</em>}</td>
-              <td className="when">{files.includes(f) ? ago(f.updated, zh) : "-"}</td>
-              <td className="acts">
-                <button type="button" className="sbtn quiet" onClick={() => { setView(f); setDraft(f.lines.join("\n")); }}>{zh ? "查看" : "View"}</button>
-                {files.includes(f) && <button type="button" className="sbtn quiet" aria-label={zh ? `删除 ${f.name}` : `Delete ${f.name}`} onClick={() => { if (window.confirm(zh ? `删除“${f.name}”中的全部记忆？` : `Delete everything in ${f.name}?`)) setMemory(b => ({ ...b, files: b.files.filter(x => x.id !== f.id) })); }}><I.x /></button>}
-              </td>
-            </tr>
-          ))}</tbody>
-        </table>
-      ) : <p className="sg-note">{zh ? "还没有。和快哉聊得越多，这里会越充实。" : "Nothing yet. This fills in as you work with Placetta."}</p>}
+        <ul className="sg-list">{rows.map(f => (
+          <li key={f.id} className="sg-row">
+            <span className="sg-tx"><b>{f.name}</b><small>{f.summary}{f.lines.length ? "" : (zh ? "（暂无内容）" : " (nothing yet)")}{files.includes(f) ? (zh ? `，${ago(f.updated, zh)}更新` : `. Updated ${ago(f.updated, zh)}`) : ""}</small></span>
+            <span className="sg-r">
+              <button type="button" className="sbtn quiet" onClick={() => { setView(f); setDraft(f.lines.join("\n")); }}>{zh ? "查看" : "View"}</button>
+              {files.includes(f) && <button type="button" className="sbtn quiet warm" aria-label={zh ? `删除 ${f.name}` : `Delete ${f.name}`} onClick={() => { if (window.confirm(zh ? `删除“${f.name}”中的全部记忆？` : `Delete everything in ${f.name}?`)) setMemory(b => ({ ...b, files: b.files.filter(x => x.id !== f.id) })); }}>{zh ? "删除" : "Delete"}</button>}
+            </span>
+          </li>
+        ))}</ul>
+      ) : <p className="sg-empty">{zh ? "还没有。和快哉聊得越多，这里会越充实。" : "Nothing yet. This fills in as you work with Placetta."}</p>}
     </div>
   );
   return (
@@ -859,12 +877,11 @@ function MemoryGroup() {
       {table(zh ? "话题" : "Topics", group("topic"))}
       {table(zh ? "领域" : "Areas", group("area"))}
       {view && (
-        <Modal label={view.name} onClose={() => setView(null)}>
-          <header className="m-h"><span className="m-eyebrow"><I.spark />{zh ? "记忆" : "Memory"}</span><h2>{view.name}</h2><p>{view.summary}</p></header>
-          <div className="m-body">
+        <SetSheet title={view.name} sub={view.summary} onClose={() => setView(null)}>
+          <div className="sst-form">
             <p className="sg-note">{zh ? "每行一条。可直接修改、增加或删除。" : "One fact per line. Edit, add or delete lines."}</p>
-            <textarea className="memedit" value={draft} onChange={e => setDraft(e.target.value)} rows={12} aria-label={view.name} />
-            <div className="sg-form-act">
+            <textarea className="memedit" value={draft} onChange={e => setDraft(e.target.value)} rows={14} aria-label={view.name} />
+            <div className="sst-act">
               <Btn onClick={() => setView(null)}>{zh ? "取消" : "Cancel"}</Btn>
               <button type="button" className="sbtn ink" onClick={() => {
                 const lines = draft.split("\n").map(l => l.replace(/^[-*•]\s*/, "").trim()).filter(Boolean).slice(0, 60);
@@ -873,19 +890,18 @@ function MemoryGroup() {
               }}>{zh ? "保存" : "Save"}</button>
             </div>
           </div>
-        </Modal>
+        </SetSheet>
       )}
       {imp === 1 && (
-        <Modal label={zh ? "导入记忆" : "Import memory"} onClose={() => setImp(0)} wide>
-          <header className="m-h"><span className="m-eyebrow"><I.spark />{zh ? "记忆" : "Memory"}</span><h2>{zh ? "把记忆导入快哉" : "Import memory to Placetta"}</h2></header>
-          <div className="m-body memimp">
+        <SetSheet title={zh ? "把记忆导入快哉" : "Import memory to Placetta"} onClose={() => setImp(0)}>
+          <div className="memimp">
             <section><h3><span className="num">1</span>{zh ? "把这段提示词复制到您在其他 AI 助手的对话中" : "Copy this prompt into a chat with your other AI assistant"}</h3>
               <pre className="mempr">{IMPORT_PROMPT}</pre>
               <Btn onClick={() => { void navigator.clipboard?.writeText(IMPORT_PROMPT).then(() => say(zh ? "已复制" : "Copied"), () => say(zh ? "无法复制，请手动选中复制" : "Couldn't copy. Select the text and copy it.")); }}>{zh ? "复制提示词" : "Copy prompt"}</Btn>
             </section>
             <section><h3><span className="num">2</span>{zh ? "把结果粘贴到下面，加入快哉的记忆" : "Paste the results below to add them to Placetta's memory"}</h3>
               <textarea className="memedit" rows={8} value={paste} onChange={e => setPaste(e.target.value)} placeholder="[2026-01-05] - …" aria-label={zh ? "粘贴导出的记忆" : "Paste the exported memory"} />
-              <div className="sg-form-act">
+              <div className="sst-act">
                 <Btn onClick={() => setImp(0)}>{zh ? "取消" : "Cancel"}</Btn>
                 <button type="button" className="sbtn ink" disabled={!paste.trim()} onClick={() => {
                   let added = 0, skipped = 0;
@@ -896,7 +912,7 @@ function MemoryGroup() {
               </div>
             </section>
           </div>
-        </Modal>
+        </SetSheet>
       )}
     </Group>
   );
@@ -921,22 +937,20 @@ function SkillEditor({ sk, onClose }: { sk: Skill | "new"; onClose: () => void }
     onClose();
   };
   return (
-    <Modal label={fresh ? (zh ? "创建技能" : "Create skill") : sk.name[lang]} onClose={onClose} wide>
-      <header className="m-h"><span className="m-eyebrow"><I.spark />{zh ? "技能" : "Skill"}{!fresh && <>{zh ? "，" : ", "}{SRC_LABEL[sk.source][lang]}</>}</span>
-        <h2>{fresh ? (zh ? "创建技能" : "Create a skill") : sk.name[lang]}</h2>
-        {!fresh && sk.uses > 0 && <p>{zh ? `已使用 ${sk.uses} 次` : `Used ${sk.uses} time${sk.uses === 1 ? "" : "s"}`}{sk.firstSteps && sk.lastSteps ? (zh ? `。第一次用了 ${sk.firstSteps} 步，最近一次 ${sk.lastSteps} 步。` : `. The first took ${sk.firstSteps} step${sk.firstSteps === 1 ? "" : "s"}, the last took ${sk.lastSteps}.`) : "."}</p>}</header>
-      <div className="m-body skedit">
+    <SetSheet title={fresh ? (zh ? "创建技能" : "Create a skill") : sk.name[lang]} onClose={onClose}
+      sub={fresh ? undefined : <>{SRC_LABEL[sk.source][lang]}{sk.uses > 0 && <>{zh ? `，已使用 ${sk.uses} 次` : `. Used ${sk.uses} time${sk.uses === 1 ? "" : "s"}`}{sk.firstSteps && sk.lastSteps ? (zh ? `。第一次用了 ${sk.firstSteps} 步，最近一次 ${sk.lastSteps} 步。` : `. The first took ${sk.firstSteps} step${sk.firstSteps === 1 ? "" : "s"}, the last took ${sk.lastSteps}.`) : "."}</>}</>}>
+      <div className="skedit">
         <label><span>{zh ? "名称" : "Name"}</span><input value={name} onChange={e => setName(e.target.value)} readOnly={ro} placeholder={zh ? "例如：在厦门开奶茶店" : "e.g. Open a milk tea shop in Xiamen"} maxLength={80} /></label>
         <label><span>{zh ? "用途" : "What it's for"}</span><input value={desc} onChange={e => setDesc(e.target.value)} readOnly={ro} placeholder={zh ? "一句话说明它做什么、什么时候用" : "One sentence: what it does and when to use it"} maxLength={300} /></label>
         <label><span>{zh ? "说明" : "Instructions"}</span><textarea className="memedit" rows={12} value={body} onChange={e => setBody(e.target.value)} readOnly={ro} placeholder={zh ? "1. 第一步……\n2. ……" : "1. First...\n2. ..."} /></label>
         {!fresh && sk.fills && sk.fills.length > 0 && <p className="sg-note">{zh ? `记得 ${sk.fills.length} 行表格各自的来源，下次会自动填写。` : `Remembers where ${sk.fills.length} lines of the form come from, so the next one fills itself.`}</p>}
         {ro ? <p className="sg-note">{zh ? "快哉内置技能，可以关闭但不能修改。" : "Built into Placetta. You can turn it off but not edit it."}</p> : null}
-        <div className="sg-form-act">
+        <div className="sst-act">
           <Btn onClick={onClose}>{ro ? (zh ? "关闭" : "Close") : zh ? "取消" : "Cancel"}</Btn>
           {!ro && <button type="button" className="sbtn ink" onClick={save}>{fresh ? (zh ? "创建" : "Create") : zh ? "保存" : "Save"}</button>}
         </div>
       </div>
-    </Modal>
+    </SetSheet>
   );
 }
 
@@ -949,21 +963,18 @@ function SkillsGroup() {
   const match = (s: Skill) => !q.trim() || `${s.name.en} ${s.name.zh} ${s.description.en} ${s.description.zh}`.toLowerCase().includes(q.trim().toLowerCase());
   const mine = all.filter(s => s.source !== "placetta").filter(match), ours = all.filter(s => s.source === "placetta").filter(match);
   const auto = ws.skillsAuto !== false;
+  // each skill is a row: its name (opens it), where it came from and what it's for, the switch on the right
   const table = (rows: Skill[]) => (
-    <table className="memt skt">
-      <thead><tr><th>{zh ? "名称" : "Name"}</th><th>{zh ? "说明" : "Description"}</th><th>{zh ? "更新" : "Updated"}</th><th><span className="sr">{zh ? "开关与操作" : "On and actions"}</span></th></tr></thead>
-      <tbody>{rows.map(s => (
-        <tr key={s.id} className={s.on ? "" : "off"}>
-          <td><button type="button" className="sk-n" onClick={() => setOpen(s)}><b>{s.name[lang]}</b><small>{SRC_LABEL[s.source][lang]}{s.uses ? (zh ? `，用过 ${s.uses} 次` : `, used ${s.uses}x`) : ""}</small></button></td>
-          <td>{s.description[lang]}</td>
-          <td className="when">{fmtDay(s.updated, lang, true)}</td>
-          <td className="acts">
-            <Toggle on={s.on} set={v => editWs(toggleSkill(s.id, v))} label={(zh ? "启用 " : "Turn on ") + s.name[lang]} />
-            {s.source !== "placetta" && <button type="button" className="sbtn quiet" aria-label={zh ? `删除 ${s.name.zh}` : `Delete ${s.name.en}`} onClick={() => { if (window.confirm(zh ? `删除技能“${s.name.zh}”？` : `Delete the skill "${s.name.en}"?`)) { editWs(dropSkill(s.id)); say(zh ? "已删除。" : "Deleted."); } }}><I.x /></button>}
-          </td>
-        </tr>
-      ))}</tbody>
-    </table>
+    <ul className="sg-list skl">{rows.map(s => (
+      <li key={s.id} className={"sg-row" + (s.on ? "" : " off")}>
+        <button type="button" className="sg-tx sk-n" onClick={() => setOpen(s)}><b>{s.name[lang]}</b><small>{s.description[lang]}</small>
+          <small>{SRC_LABEL[s.source][lang]}{s.uses ? (zh ? `，用过 ${s.uses} 次` : `, used ${s.uses}x`) : ""}{zh ? `，${fmtDay(s.updated, lang, true)}更新` : `, updated ${fmtDay(s.updated, lang, true)}`}</small></button>
+        <span className="sg-r">
+          {s.source !== "placetta" && <button type="button" className="sbtn quiet warm" aria-label={zh ? `删除 ${s.name.zh}` : `Delete ${s.name.en}`} onClick={() => { if (window.confirm(zh ? `删除技能“${s.name.zh}”？` : `Delete the skill "${s.name.en}"?`)) { editWs(dropSkill(s.id)); say(zh ? "已删除。" : "Deleted."); } }}>{zh ? "删除" : "Delete"}</button>}
+          <Toggle on={s.on} set={v => editWs(toggleSkill(s.id, v))} label={(zh ? "启用 " : "Turn on ") + s.name[lang]} />
+        </span>
+      </li>
+    ))}</ul>
   );
   return (
     <Group id="skills" title={B("Skills", "技能")} note={B("Skills teach Placetta how you work. It learns new ones as it fills forms and researches new cities, so the next time is faster, and you can write your own.", "技能教快哉按您的方式做事。它在填写表格、调研新城市时自动学习新技能，下次更快完成；您也可以自己编写。")}
@@ -975,17 +986,11 @@ function SkillsGroup() {
       </div>
       <div className="sg-sub mem">
         <h3>{zh ? "您的技能" : "Your skills"}</h3>
-        {mine.length ? table(mine) : (
-          <div className="sk-empty">
-            <I.spark />
-            <b>{q ? (zh ? "没有匹配的技能" : "No skills match") : zh ? "添加您的第一个技能" : "Add your first skills"}</b>
-            {!q && <p>{zh ? "技能教快哉按您的方式做事。快哉会在工作中自动创建，您也可以自己编写。" : "Skills teach Placetta how you work. Placetta creates them as it works, or create your own."}</p>}
-          </div>
-        )}
+        {mine.length ? table(mine) : <p className="sg-empty">{q ? (zh ? "没有匹配的技能。" : "No skills match.") : zh ? "还没有。快哉会在工作中自动创建，您也可以自己编写。" : "None yet. Placetta creates them as it works, or create your own."}</p>}
       </div>
       <div className="sg-sub mem">
         <h3>{zh ? "来自快哉" : "From Placetta"}</h3>
-        {ours.length ? table(ours) : <p className="sg-note">{zh ? "没有匹配的技能。" : "No skills match."}</p>}
+        {ours.length ? table(ours) : <p className="sg-empty">{zh ? "没有匹配的技能。" : "No skills match."}</p>}
       </div>
       {open && <SkillEditor sk={open} onClose={() => setOpen(null)} />}
     </Group>
@@ -1005,7 +1010,7 @@ function LanguageGroup() {
   const pick = (code: string) => { saveSpeak(code); setPicked(speakOf(code) ?? null); setLang(uiLangOf(code)); setOpen(false); setQ(""); };
   return (
     <Group id="language" title={B("Language", "语言")} note={B("Placetta writes and speaks to you in this language, and drafts agency letters in the agency's own language. Menus and pages show in English, or Chinese for the Chinese options.", "快哉用这里选择的语言与您交流，并用机构所在地的语言起草致机构的信函。菜单和页面显示英文，选择中文时显示中文。")}
-      rows={[{ label: B("Language", "语言"), sub: <>{cur.native}{cur.native !== cur.en ? <span className="quiet">, {cur.en}</span> : null}</>, icon: <I.globe />, right: <Btn onClick={() => setOpen(true)}>{zh ? "更改" : "Change"}</Btn> }]}>
+      rows={[{ label: B("Language", "语言"), sub: <>{cur.native}{cur.native !== cur.en ? <span className="quiet">, {cur.en}</span> : null}</>, right: <Btn onClick={() => setOpen(true)}>{zh ? "更改" : "Change"}</Btn> }]}>
       {open && (
         <Modal label={zh ? "语言" : "Language"} onClose={() => { setOpen(false); setQ(""); }}>
           <header className="m-h"><span className="m-eyebrow"><I.globe />{zh ? "语言" : "Language"}</span><h2>{zh ? "选择语言" : "Choose a language"}</h2></header>
@@ -1088,19 +1093,21 @@ function PinGroup({ st, setSt, ask }: { st: api.PinStatus | null; setSt: (s: api
         : (zh ? "已开启。受保护的设置已锁定。" : "On. Protected settings are locked.");
   return (
     <Group id="pin" title={B("Settings PIN", "设置 PIN")} note={B("Like an account PIN in a game: even someone signed in as you can't change protected settings without it. Placetta keeps only a scrambled copy, and 5 wrong tries lock it for 15 minutes.", "类似游戏里的账户 PIN：即使有人登录了您的账户，没有 PIN 也改不了受保护的设置。快哉只保存加密后的 PIN，连续输错 5 次会锁定 15 分钟。")}
-      rows={[{ label: B("Settings PIN", "设置 PIN"), icon: <I.lock />, sub,
+      rows={[{ label: B("Settings PIN", "设置 PIN"), sub,
         right: !st.on ? (!form ? <Btn kind="ink" onClick={() => setForm("new")}>{zh ? "开启" : "Turn on"}</Btn> : undefined) : <>
           {unlocked ? <Btn onClick={() => void api.pinLock().then(setSt)}>{zh ? "立即锁定" : "Lock now"}</Btn> : <Btn kind="ink" onClick={() => ask(zh ? "解锁设置" : "Unlock settings", api.pinUnlock)}>{zh ? "解锁" : "Unlock"}</Btn>}
           {!form && <Btn onClick={() => setForm("change")}>{zh ? "更换 PIN" : "Change PIN"}</Btn>}
           <Btn onClick={() => ask(zh ? "关闭设置 PIN" : "Turn off the settings PIN", api.pinClear, () => say(zh ? "设置 PIN 已关闭。" : "Settings PIN is off."))}>{zh ? "关闭" : "Turn off"}</Btn>
         </> }]}>
       {form && (
-        <form className="sg-form pinform" onSubmit={e => { e.preventDefault(); void save(); }}>
-          {form === "change" && <PinInput id="pin-cur" value={cur} onChange={setCur} label={zh ? "当前 PIN" : "Current PIN"} auto />}
-          <PinInput id="pin-new" value={a} onChange={setA} label={zh ? "新 PIN" : "New PIN"} auto={form === "new"} />
-          <PinInput id="pin-again" value={b2} onChange={setB2} label={zh ? "再次输入 PIN" : "Type it again"} />
-          <div className="sg-form-act"><Btn onClick={() => { setForm(null); setA(""); setB2(""); setCur(""); }}>{zh ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink" disabled={busy || a.length !== 6 || b2.length !== 6 || (form === "change" && cur.length !== 6)}>{busy ? "…" : zh ? "保存 PIN" : "Save PIN"}</button></div>
-        </form>
+        <SetSheet title={form === "change" ? (zh ? "更换 PIN" : "Change PIN") : (zh ? "开启设置 PIN" : "Turn on the settings PIN")} sub={zh ? "6 位数字。连续输错 5 次会锁定 15 分钟。" : "6 digits. 5 wrong tries lock it for 15 minutes."} onClose={() => { setForm(null); setA(""); setB2(""); setCur(""); }}>
+          <form className="sst-form pinform" onSubmit={e => { e.preventDefault(); void save(); }}>
+            {form === "change" && <label className="sst-field"><span>{zh ? "当前 PIN" : "Current PIN"}</span><PinInput id="pin-cur" value={cur} onChange={setCur} label={zh ? "当前 PIN" : "Current PIN"} auto /></label>}
+            <label className="sst-field"><span>{zh ? "新 PIN" : "New PIN"}</span><PinInput id="pin-new" value={a} onChange={setA} label={zh ? "新 PIN" : "New PIN"} auto={form === "new"} /></label>
+            <label className="sst-field"><span>{zh ? "再次输入 PIN" : "Type it again"}</span><PinInput id="pin-again" value={b2} onChange={setB2} label={zh ? "再次输入 PIN" : "Type it again"} /></label>
+            <div className="sst-act"><Btn onClick={() => { setForm(null); setA(""); setB2(""); setCur(""); }}>{zh ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink" disabled={busy || a.length !== 6 || b2.length !== 6 || (form === "change" && cur.length !== 6)}>{busy ? "…" : zh ? "保存 PIN" : "Save PIN"}</button></div>
+          </form>
+        </SetSheet>
       )}
     </Group>
   );
@@ -1123,7 +1130,8 @@ const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "pin", "phone"]
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
 let settingsTarget: string | null = null;
-const takeSettingsTarget = () => { const t = settingsTarget; settingsTarget = null; return t; };
+let settingsOpenedAt = false;
+const takeSettingsTarget = () => { const t = settingsTarget; settingsTarget = null; if (t) settingsOpenedAt = true; return t; };
 /** Opens Settings at one section (e.g. "hq", "security"), switching to its category. */
 export function openSettings(go: (v: "settings") => void, section: string) {
   settingsTarget = section;
@@ -1164,8 +1172,21 @@ export function Settings() {
   // Like Anthropic's settings: a short sidebar of categories, and only the chosen one on the right.
   const CATS = SETTINGS_CATS.map(c => ({ ...c, items: c.items.filter(k => cloud || !CLOUD_ONLY.has(k)) })).filter(c => c.items.length);
   const [cat, setCatRaw] = useState<string>(() => catOf(takeSettingsTarget() ?? "") ?? catOf(readRoute().sub ?? "") ?? readCat() ?? "general");
-  const setCat = (c: string, step = false) => { setCatRaw(c); setRoute("settings", c, !step); try { localStorage.setItem("placetta-settings-cat", c); } catch { /* storage off */ } };
-  useEffect(() => { setRoute("settings", cat, true); }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+  // On a phone (or wherever the column is too narrow for the list beside it) Settings is a list of categories that
+  // opens one at a time, with a row back to the list, the way a phone's own settings work. Opened at a category
+  // (a link, ⌘K, a button elsewhere in the app), it starts inside that category. Wide, both always show.
+  const [inCat, setInCat] = useState(() => !!readRoute().sub || settingsOpenedAt);
+  const pushed = useRef(false);
+  const setCat = (c: string, step = false) => { setCatRaw(c); setInCat(true); setRoute("settings", c, !step); if (step) pushed.current = true; try { localStorage.setItem("placetta-settings-cat", c); } catch { /* storage off */ } };
+  const toTop = () => { window.scrollTo({ top: 0 }); document.querySelector(".content")?.scrollTo({ top: 0 }); };
+  const back = () => { setInCat(false); if (pushed.current) { pushed.current = false; history.back(); } else setRoute("settings", undefined, true); toTop(); };
+  useEffect(() => { settingsOpenedAt = false; if (inCat) setRoute("settings", cat, true); }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+  // the browser's Back from a category to the list, and Forward into it again
+  useEffect(() => {
+    const on = () => { const r = readRoute(); if (r.view === "settings") setInCat(!!r.sub); };
+    window.addEventListener("popstate", on);
+    return () => window.removeEventListener("popstate", on);
+  }, []);
   // the category showing, for the sidebar (its More group lights Activity and Business facts)
   useEffect(() => { window.dispatchEvent(new CustomEvent("placetta:settings-at", { detail: cat })); }, [cat]);
   useEffect(() => {
@@ -1178,20 +1199,25 @@ export function Settings() {
 
   return (
     <PinLock.Provider value={pinCtx}>
-    <div className="page settings">
+    <div className={"page settings" + (inCat ? " at-cat" : "")}>
       <header className="ph"><div className="ph-tx"><h1>{t("nav_settings")}</h1></div></header>
       <div className="set-grid">
         <nav className="set-nav" aria-label={t("nav_settings")}>
-          {CATS.map(c => <a key={c.id} className="set-tab" href={hrefOf("settings", c.id)} aria-current={c.id === active.id ? "page" : undefined} onClick={e => { if (!plainClick(e)) return; e.preventDefault(); setCat(c.id, true); window.scrollTo({ top: 0 }); }}>{b(c.label)}</a>)}
+          {CATS.map(c => <a key={c.id} className="set-tab" href={hrefOf("settings", c.id)} aria-current={c.id === active.id ? "page" : undefined} onClick={e => { if (!plainClick(e)) return; e.preventDefault(); setCat(c.id, true); toTop(); }}><span>{b(c.label)}</span><I.chevR /></a>)}
         </nav>
         <div className="set-col">
+          {/* on a phone: the row back to the list, and the category's name */}
+          <div className="set-head">
+            <a className="set-back" href={hrefOf("settings")} onClick={e => { if (!plainClick(e)) return; e.preventDefault(); back(); }}><I.chevL />{t("nav_settings")}</a>
+            <h1>{b(active.label)}</h1>
+          </div>
           <Group id="account" hidden={!show("account")} title={B("Account", "账户")} rows={cloud ? [
-            { label: B("Email", "邮箱"), sub: <>{cloud.email}{lang === "zh" ? `，${cloud.owner ? "所有者" : "成员"}` : `, ${cloud.owner ? "owner" : "member"}`}</>, icon: <I.user /> },
-            { label: B("Business", "企业"), sub: b(ws.business), icon: <I.store />, right: <Btn onClick={cloud.newWorkspace}>{lang === "zh" ? "新建企业" : "New business"}</Btn> },
-            { label: B("Sign out", "退出登录"), icon: <I.logout />, right: <Btn onClick={cloud.signOut}>{lang === "zh" ? "退出" : "Sign out"}</Btn> },
-            ...(api.PREVIEW ? [{ label: B("Data in this browser", "此浏览器中的数据"), sub: b(B("Your accounts and workspaces here are kept in this browser. Start over clears them.", "这里的账户和工作区保存在此浏览器中，重新开始会清空。")), icon: <I.spark />,
+            { label: B("Email", "邮箱"), sub: <>{cloud.email}{lang === "zh" ? `，${cloud.owner ? "所有者" : "成员"}` : `, ${cloud.owner ? "owner" : "member"}`}</> },
+            { label: B("Business", "企业"), sub: b(ws.business), right: <Btn onClick={cloud.newWorkspace}>{lang === "zh" ? "新建企业" : "New business"}</Btn> },
+            { label: B("Sign out", "退出登录"), right: <Btn onClick={cloud.signOut}>{lang === "zh" ? "退出" : "Sign out"}</Btn> },
+            ...(api.PREVIEW ? [{ label: B("Data in this browser", "此浏览器中的数据"), sub: b(B("Your accounts and workspaces here are kept in this browser. Start over clears them.", "这里的账户和工作区保存在此浏览器中，重新开始会清空。")),
               right: <Btn onClick={() => { void import("./cloud/preview").then(m => { m.resetPreview(); location.reload(); }); }}>{lang === "zh" ? "清空重来" : "Start over"}</Btn> }] : []),
-          ] : [{ label: B("Sample workspace", "示例工作区"), sub: b(B("Everything here is sample data. Create an account to save your own business.", "这里都是示例数据。注册账户即可保存您自己的企业。")), icon: <I.user /> }]} />
+          ] : [{ label: B("Sample workspace", "示例工作区"), sub: b(B("Everything here is sample data. Create an account to save your own business.", "这里都是示例数据。注册账户即可保存您自己的企业。")) }]} />
 
           {show("facts") && <ContextPage />}
           {show("house") && <HouseRulesGroup />}
@@ -1204,9 +1230,9 @@ export function Settings() {
 
           <Group id="billing" hidden={!show("billing")} title={B("Plan and billing", "方案与账单")} note={B("Payment methods and invoices are handled by Stripe; Placetta never sees card numbers. Government fees are paid by you directly to each agency.", "付款方式和发票由 Stripe 处理，快哉看不到卡号。政府规费由您直接支付给各机构。")}
             rows={[
-              { label: planName, sub: renew || (bl?.free && !bl.subscription_status ? b(B("Paid plans start later. Nothing is charged now.", "付费方案稍后推出，现在不收取任何费用。")) : cloud?.plan === "entry" ? b(B("Credited toward your first year on an annual plan", "可抵扣年度方案首年费用")) : undefined), icon: <I.card />,
+              { label: planName, sub: renew || (bl?.free && !bl.subscription_status ? b(B("Paid plans start later. Nothing is charged now.", "付费方案稍后推出，现在不收取任何费用。")) : cloud?.plan === "entry" ? b(B("Credited toward your first year on an annual plan", "可抵扣年度方案首年费用")) : undefined),
                 right: cloud && !cloud.owner ? <em className="lock">{lang === "zh" ? "由所有者管理" : "Managed by owners"}</em> : cloud ? <>{cloud.plan !== "monthly" && <Btn guard kind="ink" onClick={() => cloud.openPlans(cloud.plan === "none" ? "start" : "file")}>{lang === "zh" ? "选择方案" : "Choose a plan"}</Btn>}{bl?.stripe_customer_id && <Btn guard onClick={() => void cloud.portal()}>{lang === "zh" ? "管理账单" : "Manage billing"}</Btn>}</> : undefined },
-              ...(ai && ai.plan !== "none" ? [{ label: B("Odelia allowance", "Odelia 额度"), sub: aiSub, icon: <I.spark />,
+              ...(ai && ai.plan !== "none" ? [{ label: B("Odelia allowance", "Odelia 额度"), sub: aiSub,
                 right: <span className="aimeter" aria-label={`${ai.used_pct}%`}><i style={{ width: `${ai.used_pct}%` }} className={ai.used_pct >= 100 ? "full" : ai.used_pct >= (ai.saver_at_pct ?? 60) ? "near" : ""} /></span> },
                 ...(cloud?.owner && (ai.plan === "monthly" || ai.plan === "entry" || ai.plan === "comped") ? [{ label: B("Odelia packs", "Odelia 加量包"), sub: b(B("More allowance on top of your plan. It carries over until it's used.", "在方案之外增加额度，长期有效直到用完。")),
                   right: <Btn guard onClick={() => void cloud.buyPack()}>{lang === "zh" ? "购买加量包" : "Add a pack"}</Btn> }] : [])] : []),
@@ -1217,7 +1243,7 @@ export function Settings() {
 
           <Group id="agent" hidden={!show("agent")} title={B("Agent and voice", "助理与语音")} rows={[
             { label: mode === "server" ? B("Live", "实时") : mode === "claude" ? B("Live through your Claude account", "通过您的 Claude 账户实时运行") : mode === "api" ? B(`Live: Claude API (${apiName})`, `实时：Claude API（${apiName}）`) : B("Demo answers", "演示回答"),
-              sub: mode === "server" ? b(B("Researches official agency pages and cites them. Answers are short; nothing is filed without you.", "查阅机构官方页面并注明出处。回答简短，未经您批准不会提交任何内容。")) : mode === "demo" ? b(B("Scripted replies for the sample workspace.", "示例工作区的脚本回复。")) : undefined, icon: <I.spark /> },
+              sub: mode === "server" ? b(B("Researches official agency pages and cites them. Answers are short; nothing is filed without you.", "查阅机构官方页面并注明出处。回答简短，未经您批准不会提交任何内容。")) : mode === "demo" ? b(B("Scripted replies for the sample workspace.", "示例工作区的脚本回复。")) : undefined },
             ...(mode !== "demo" ? [{ label: B("Think longer on hard questions", "复杂问题多思考一会儿"), sub: t("deepNote"), right: <label className="switch"><input type="checkbox" checked={deep} onChange={e => setDeep(e.target.checked)} /><i /></label> }] : []),
             { label: B("Read every reply aloud", "朗读每一条回复"), sub: b(B("Voice messages are always answered aloud.", "语音消息始终会语音回复。")), right: <label className="switch"><input type="checkbox" checked={voiceOn} onChange={e => setVoiceOn(e.target.checked)} /><i /></label> },
             ...(mode === "api" ? [{ label: B("Anthropic API key", "Anthropic API 密钥"), right: <Btn onClick={dropKey}>{t("key_drop")}</Btn> }] : []),
@@ -1238,14 +1264,14 @@ export function Settings() {
           {show("brules") && <BusinessRulesGroup />}
           {show("phone") && <PhoneGroup />}
           <Group id="approvals" hidden={!show("approvals")} title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never files, buys, pays or sends without your approval, and that can't be turned off.", "快哉会自行准备材料，但未经您批准绝不提交、购买、付款或发送，此项无法关闭。")}
-            rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you, unless an Always allow rule you set covers it", "代您发送的每一条消息（您设置的“始终允许”规则除外）")].map(l => ({ label: l, icon: <I.lock />, right: <em className="lock">{t("alwaysOn")}</em> }))} />
+            rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you, unless an Always allow rule you set covers it", "代您发送的每一条消息（您设置的“始终允许”规则除外）")].map(l => ({ label: l, right: <em className="lock">{t("alwaysOn")}</em> }))} />
           {show("spending") && <SpendingGroup />}
           {show("memory") && <MemoryGroup />}
           {show("skills") && <SkillsGroup />}
 
           <Group id="appearance" hidden={!show("appearance")} title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([
-            ["light", B("Light", "浅色"), <I.sun />], ["dark", B("Dark", "深色"), <I.moon />], ["system", B("Match this device", "跟随设备"), <I.monitor />],
-          ] as [Theme, Bi, ReactNode][]).map(([k, l, ic]) => ({ label: l, icon: ic, pick: () => setTheme(k), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="theme" checked={theme === k} onChange={() => setTheme(k)} aria-label={b(l)} /><i /></label> }))}>
+            ["light", B("Light", "浅色")], ["dark", B("Dark", "深色")], ["system", B("Match this device", "跟随设备")],
+          ] as [Theme, Bi][]).map(([k, l]) => ({ label: l, pick: () => setTheme(k), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="theme" checked={theme === k} onChange={() => setTheme(k)} aria-label={b(l)} /><i /></label> }))}>
             <div className="sg-sub accent">
               <h3>{lang === "zh" ? "主题色" : "Accent color"}</h3>
               <p className="sg-note">{lang === "zh" ? "按钮、链接、高亮和助理光效的颜色。选一个，或输入您自己的颜色。" : "The color of buttons, links, highlights and the agent's glow. Pick one or enter your own."}</p>
@@ -1261,26 +1287,26 @@ export function Settings() {
           {show("language") && <LanguageGroup />}
 
           <Group id="data" hidden={!show("data")} title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
-            { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), icon: <I.download />, right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
-            { label: B("Export the audit trail", "导出审计记录"), sub: "CSV", icon: <I.audit />, right: <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> },
-            { label: B("Trust and security", "信任与安全"), sub: b(B("How we protect your data, and every company that processes it", "我们如何保护您的数据，以及处理数据的每一家公司")), icon: <I.shield />, right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.vercel.app/trust" : "/trust"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
-            ...(cloud ? [{ label: B("Delete your account", "删除账户"), sub: b(B("Deletes your account and the workspaces you own alone, except records the law requires us to keep.", "删除您的账户和您单独拥有的工作区，法律要求保留的记录除外。")), icon: <I.x />, right: <Btn guard onClick={() => setDel(true)}>{b(B("Delete my account", "删除我的账户"))}</Btn> }] : []),
+            { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
+            { label: B("Export the audit trail", "导出审计记录"), sub: "CSV", right: <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> },
+            { label: B("Trust and security", "信任与安全"), sub: b(B("How we protect your data, and every company that processes it", "我们如何保护您的数据，以及处理数据的每一家公司")), right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.vercel.app/trust" : "/trust"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
+            ...(cloud ? [{ label: B("Delete your account", "删除账户"), sub: b(B("Deletes your account and the workspaces you own alone, except records the law requires us to keep.", "删除您的账户和您单独拥有的工作区，法律要求保留的记录除外。")), right: <Btn kind="warm" guard onClick={() => setDel(true)}>{b(B("Delete my account", "删除我的账户"))}</Btn> }] : []),
           ]}>
             {del && <DeleteAccount onClose={() => setDel(false)} />}
           </Group>
 
           <Group id="help" hidden={!show("help")} title={B("Help", "帮助")} rows={[
-            { label: B("Take the tour", "查看导览"), sub: b(B("Three cards: how Odelia works, in one minute", "三张卡片，一分钟了解 Odelia")), icon: <I.spark />, right: <Btn onClick={() => replayTour()}>{lang === "zh" ? "开始" : "Start"}</Btn> },
-            { label: B("Help Center", "帮助中心"), sub: b(B("Guides for every part of Placetta", "快哉各项功能的使用指南")), icon: <I.help />, right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.vercel.app/help/" : "/help/"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
-            { label: B("Email support", "邮件支持"), sub: "support@placetta.com", icon: <I.help />, right: <a className="sbtn quiet" href="mailto:support@placetta.com">{lang === "zh" ? "写邮件" : "Email"}</a> },
-            { label: B("Report a problem", "报告问题"), icon: <I.bell />, right: <a className="sbtn quiet" href="mailto:support@placetta.com?subject=Problem%20report">{lang === "zh" ? "报告" : "Report"}</a> },
-            { label: B("How Placetta's AI works", "快哉的 AI 如何工作"), icon: <I.spark />, right: <Btn onClick={() => openLegal("ai")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
+            { label: B("Take the tour", "查看导览"), sub: b(B("Three cards: how Odelia works, in one minute", "三张卡片，一分钟了解 Odelia")), right: <Btn onClick={() => replayTour()}>{lang === "zh" ? "开始" : "Start"}</Btn> },
+            { label: B("Help Center", "帮助中心"), sub: b(B("Guides for every part of Placetta", "快哉各项功能的使用指南")), right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.vercel.app/help/" : "/help/"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
+            { label: B("Email support", "邮件支持"), sub: "support@placetta.com", right: <a className="sbtn quiet" href="mailto:support@placetta.com">{lang === "zh" ? "写邮件" : "Email"}</a> },
+            { label: B("Report a problem", "报告问题"), right: <a className="sbtn quiet" href="mailto:support@placetta.com?subject=Problem%20report">{lang === "zh" ? "报告" : "Report"}</a> },
+            { label: B("How Placetta's AI works", "快哉的 AI 如何工作"), right: <Btn onClick={() => openLegal("ai")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
           ]} />
 
           <Group id="legal" hidden={!show("legal")} title={B("Legal", "法律")} note={B("Replies are generated by AI and can be wrong. Nothing is filed, paid or sent without your approval.", "回复由 AI 生成，可能有误。未经您批准，不会提交、付款或发送任何内容。")} rows={[
-            { label: B("Terms of Service", "服务条款"), icon: <I.scale />, right: <Btn onClick={() => openLegal("terms")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
-            { label: B("Privacy Policy", "隐私政策"), icon: <I.lock />, right: <Btn onClick={() => openLegal("privacy")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
-            { label: B("Filing Authorization", "申报授权书"), sub: cloud ? b(B("You gave it when you created this workspace", "您在创建工作区时已授权")) : undefined, icon: <I.form />, right: <Btn onClick={() => openLegal("authorization")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
+            { label: B("Terms of Service", "服务条款"), right: <Btn onClick={() => openLegal("terms")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
+            { label: B("Privacy Policy", "隐私政策"), right: <Btn onClick={() => openLegal("privacy")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
+            { label: B("Filing Authorization", "申报授权书"), sub: cloud ? b(B("You gave it when you created this workspace", "您在创建工作区时已授权")) : undefined, right: <Btn onClick={() => openLegal("authorization")}>{lang === "zh" ? "阅读" : "Read"}</Btn> },
           ]} />
           <Footer full />
         </div>
@@ -1347,24 +1373,34 @@ function SpendingGroup() {
       </ul>
       <div className="sg-sub">
         <h3>{zh ? "可以购买的类别" : "What she may ask to buy"}</h3>
-        <div className="spend-cats">{SPEND_CATEGORIES.map(c => (
-          <label key={c.id} className="check"><input type="checkbox" disabled={!canEdit} checked={policy.allowed.includes(c.id)} onChange={e => set({ allowed: e.target.checked ? [...policy.allowed, c.id] : policy.allowed.filter(x => x !== c.id) })} /><span><b>{tx(c.label)}</b><small>{tx(c.hint)}</small></span></label>
-        ))}</div>
+        <ul className="sg-list">{SPEND_CATEGORIES.map(c => (
+          <li key={c.id} className="sg-row">
+            <span className="sg-tx"><b>{tx(c.label)}</b><small>{tx(c.hint)}</small></span>
+            <span className="sg-r"><Toggle on={policy.allowed.includes(c.id)} disabled={!canEdit} set={v => set({ allowed: v ? [...policy.allowed, c.id] : policy.allowed.filter(x => x !== c.id) })} label={tx(c.label)} /></span>
+          </li>
+        ))}</ul>
       </div>
       <div className="sg-sub">
         <h3>{zh ? "收款方" : "Who may be paid"}</h3>
-        <div className="spend-payees">
+        <ul className="sg-list" role="radiogroup" aria-label={zh ? "收款方" : "Who may be paid"}>
           {([["government", B("Government agencies only", "仅限政府机构")], ["listed", B("Agencies, plus the payees listed below", "政府机构及下列收款方")], ["any", B("Anyone, except the blocked list", "任何收款方（禁止名单除外）")]] as [SpendPolicy["payees"], Bi][]).map(([k, l]) => (
-            <label key={k} className="check"><input type="radio" name="spend-payees" disabled={!canEdit} checked={policy.payees === k} onChange={() => set({ payees: k })} /><span>{tx(l)}</span></label>
+            <li key={k} className={"sg-row" + (canEdit ? " pick" : "")} onClick={() => { if (canEdit) set({ payees: k }); }}>
+              <span className="sg-tx"><b>{tx(l)}</b></span>
+              <span className="sg-r"><label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="spend-payees" disabled={!canEdit} checked={policy.payees === k} onChange={() => set({ payees: k })} aria-label={tx(l)} /><i /></label></span>
+            </li>
           ))}
-        </div>
+        </ul>
         <label className="spend-field">{zh ? "允许的收款方（名称或网址，每行一个）" : "Allowed payees (name or web address, one per line)"}<textarea rows={2} disabled={!canEdit} value={policy.listed.join("\n")} onChange={e => set({ listed: e.target.value.split("\n").map(s => s.trim()).filter(Boolean) })} placeholder="usps.com" /></label>
         <label className="spend-field">{zh ? "禁止的收款方（每行一个）" : "Never pay (one per line)"}<textarea rows={2} disabled={!canEdit} value={policy.blocked.join("\n")} onChange={e => set({ blocked: e.target.value.split("\n").map(s => s.trim()).filter(Boolean) })} /></label>
       </div>
-      <div className="sg-sub spend-limits">
+      <div className="sg-sub">
         <h3>{zh ? "金额上限" : "Limits"}</h3>
-        <label className="spend-field">{zh ? "单笔最高（美元）" : "Most for one purchase (USD)"}<input inputMode="decimal" disabled={!canEdit} value={policy.perPurchase} onChange={e => set({ perPurchase: num(e.target.value) })} /></label>
-        <label className="spend-field">{zh ? "超过此金额需两位所有者批准（美元）" : "Two owners approve above (USD)"}<input inputMode="decimal" disabled={!canEdit} value={policy.secondOver ?? ""} placeholder={zh ? "不需要" : "Never"} onChange={e => set({ secondOver: e.target.value.trim() ? num(e.target.value) : undefined })} /></label>
+        <ul className="sg-list">
+          <li className="sg-row"><label className="sg-tx" htmlFor="spend-per"><b>{zh ? "单笔最高（美元）" : "Most for one purchase (USD)"}</b></label>
+            <span className="sg-r"><input id="spend-per" className="sg-num" inputMode="decimal" disabled={!canEdit} value={policy.perPurchase} onChange={e => set({ perPurchase: num(e.target.value) })} /></span></li>
+          <li className="sg-row"><label className="sg-tx" htmlFor="spend-second"><b>{zh ? "超过此金额需两位所有者批准（美元）" : "Two owners approve above (USD)"}</b></label>
+            <span className="sg-r"><input id="spend-second" className="sg-num" inputMode="decimal" disabled={!canEdit} value={policy.secondOver ?? ""} placeholder={zh ? "不需要" : "Never"} onChange={e => set({ secondOver: e.target.value.trim() ? num(e.target.value) : undefined })} /></span></li>
+        </ul>
       </div>
       <div className="sg-sub spend-bud">
         <h3>{zh ? "预算" : "Budgets"}</h3>
@@ -1405,7 +1441,7 @@ function SpendingGroup() {
       {!canEdit && <p className="sg-note">{zh ? "只有所有者可以修改支出规则。" : "Only an owner can change the spending rules."}</p>}
       <div className="sg-sub spend-bud">
         <h3>{zh ? "购买记录" : "Purchases"}</h3>
-        {!purchases.length ? <p className="sg-note">{zh ? "还没有购买。Odelia 申请的每一笔都会列在这里，包括被规则拦下的。" : "None yet. Every purchase Odelia asks for shows here, including any the rules stopped."}</p> : (
+        {!purchases.length ? <p className="sg-empty">{zh ? "还没有购买。Odelia 申请的每一笔都会列在这里，包括被规则拦下的。" : "None yet. Every purchase Odelia asks for shows here, including any the rules stopped."}</p> : (
           <table className="memt spend-p">
             <thead><tr><th>{zh ? "日期" : "Date"}</th><th>{zh ? "收款方" : "Payee"}</th><th>{zh ? "用途" : "For"}</th><th>{zh ? "金额" : "Amount"}</th><th>{zh ? "状态" : "Status"}</th><th><span className="sr">{zh ? "操作" : "Actions"}</span></th></tr></thead>
             <tbody>{purchases.map(p => (
