@@ -1,0 +1,60 @@
+/* Memory that acts (src/Remembered.tsx) and What Odelia did this month (src/Metrics.tsx). Colors come from the theme's
+   tokens in styles.css, so light and dark both follow. No dots between items and no circles behind icons. */
+
+/* ------------------------------ Remembered chips under a reply ------------------------------ */
+.rmb { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 0; }
+.rmb-chip { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0; padding: 7px 8px 7px 11px; border-radius: 12px; background: var(--sky-wash); font-size: 13.5px; line-height: 1.4; color: var(--ink2); }
+.rmb-chip > svg { flex: none; color: var(--blue-ink); }
+.rmb-k { font-weight: 600; color: var(--blue-deep); }
+.rmb-t { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+.rmb-chip.sug { background: var(--warm-soft); }
+.rmb-chip.sug .rmb-k { color: var(--warm); }
+.rmb-chip.off { background: var(--mist); }
+.rmb-chip.off .rmb-k, .rmb-chip.off .rmb-t { color: var(--ink3); }
+.rmb-chip.off .rmb-t { text-decoration: line-through; }
+.rmb-b { flex: none; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--card); color: var(--ink); font-size: 12.5px; font-weight: 500; cursor: pointer; box-shadow: 0 0 0 1px rgba(var(--e), .08); }
+.rmb-b:hover { background: var(--sky); }
+.rmb-b.quiet { background: transparent; box-shadow: none; color: var(--ink2); }
+
+/* ------------------------------ Settings, Memory: the details ------------------------------ */
+.rmb-list .sg-note { margin: 0 0 8px; }
+.rmb-rows { margin: 0 0 12px; padding: 0; list-style: none; }
+.rmb-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.rmb-row:first-child { border-top: 0; }
+.rmb-tx { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; font-size: 13.5px; line-height: 1.45; }
+.rmb-tx b { font-weight: 500; font-size: 14.5px; color: var(--ink); }
+.rmb-tx q { color: var(--ink2); font-style: normal; overflow-wrap: anywhere; }
+.rmb-tx small { color: var(--ink3); font-size: 12.5px; }
+.rmb-kind { text-transform: none; font-weight: 500; color: var(--blue-ink) !important; }
+.rmb-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; flex: none; }
+.rmb-acts .sbtn { height: 30px; padding: 0 12px; font-size: 12.5px; }
+.rmb-undo { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 10px; padding: 8px 8px 8px 12px; border-radius: 12px; background: var(--mist); font-size: 13.5px; color: var(--ink2); }
+@media (max-width: 520px) { .rmb-row { flex-direction: column; gap: 8px; } .rmb-acts { justify-content: flex-start; } }
+
+/* ------------------------------ What Odelia did this month ------------------------------ */
+.met .sec-h h2 .for { font-weight: 400; }
+.met-card { padding: 14px; border-radius: 20px; background: var(--mist); }
+.hq .met { margin: 0 0 26px; }
+.q-list .met { margin-top: 0; margin-bottom: 18px; }
+.met-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 8px; }
+.met-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; padding: 12px 14px; border: 0; border-radius: 14px; background: var(--card); color: var(--ink); text-align: left; cursor: pointer; box-shadow: 0 0 0 1px rgba(var(--e), .05); transition: box-shadow .15s, background .15s; }
+.met-tile:hover { box-shadow: 0 0 0 1px rgba(var(--e), .12); }
+.met-tile.on { background: var(--sky-wash); box-shadow: 0 0 0 1.5px var(--blue-ink); }
+.met-tile b { font: 400 26px/1.15 var(--display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.met-tile span { font-size: 12.5px; line-height: 1.35; color: var(--ink2); }
+.met-tile small { font-size: 11.5px; color: var(--ink3); }
+.met-ev { margin-top: 10px; padding: 12px 14px; border-radius: 14px; background: var(--card); }
+.met-ev-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; font-size: 13.5px; }
+.met-ev-h b { font-weight: 600; }
+.met-rows { margin: 0; padding: 0; list-style: none; max-height: 260px; overflow: auto; }
+.met-rows li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.met-rows li:first-child { border-top: 0; }
+.met-rows li span { min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+.met-rows li small { flex: none; max-width: 55%; text-align: right; color: var(--ink3); font-size: 12.5px; }
+.met-note { margin: 10px 2px 0; font-size: 12px; color: var(--ink3); }
+@media (max-width: 520px) {
+  .met-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .met-tile b { font-size: 22px; }
+  .met-rows li { flex-direction: column; gap: 2px; }
+  .met-rows li small { max-width: none; text-align: left; }
+}

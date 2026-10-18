@@ -45,6 +45,9 @@ begin
   execute 'reset role';
   res := res || jsonb_build_object('stopping the split run stops its stores too', (select array_agg(status order by created_at) from public.agent_runs where id in (p, c1, c2)) = array['stopped', 'stopped', 'stopped']);
   res := res || jsonb_build_object('and nothing else', (select status from public.agent_runs where id = other) = 'running');
+  -- this month's numbers count the requests (the split one and the other), not the stores' runs
+  res := res || jsonb_build_object('a store run is not a request of its own in the month''s numbers', (public.odelia_month_of(w, current_date)->>'runs_count')::int = 2);
+  res := res || jsonb_build_object('nor in the totals across workspaces', (public.odelia_month_across(array[w], current_date)->'totals'->>'runs')::int = 2);
   delete from public.agent_runs where id = p;
   res := res || jsonb_build_object('store runs go with the run that split them', not exists (select 1 from public.agent_runs where id in (c1, c2)));
   raise exception 'TEST_RESULTS %', res;

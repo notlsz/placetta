@@ -5,6 +5,8 @@ import { fmtAgo, money } from "../time";
 import { I, Pill } from "../ui";
 import * as api from "./api";
 import { openSettings } from "../Settings";
+import { CompanyMetrics } from "../Metrics";
+import { AskReply } from "./AskReply";
 
 /* The Placetta team's filing queue. Each request is exactly what the customer approved: the form, the fields,
    the attachments and the agency site. The team checks it against the agency's current requirements, submits it,
@@ -27,6 +29,7 @@ const KIND: Record<string, Bi> = {
   destination_stale: B("Re-check where this form is sent", "重新核实提交地址"),
   line_health: B("An iMessage line needs care", "iMessage 线路需要处理"),
   ai_spend: B("Unusual AI spend, in saver mode today", "AI 用量异常，今日为节省模式"),
+  ask_person: B("A customer asks for a person", "客户请求真人协助"),
 };
 
 /** What Odelia's models cost this month against what the plans pay, with the ten workspaces that cost the most. */
@@ -205,6 +208,7 @@ export function Queue() {
       <div className="q-grid">
         <div className="q-list">
           <AiMarginCard />
+          <CompanyMetrics />
           {tasks.length > 0 && (
             <section className="sec">
               <div className="sec-h"><h2>{lang === "zh" ? "团队待办" : "Team tasks"}<em>{tasks.length}</em></h2></div>
@@ -215,6 +219,7 @@ export function Queue() {
                   </button>
                   <small className="ago">{fmtAgo(t.created_at, lang)}</small>
                   <Pill sm kind="quiet" onClick={() => void finish(t.id)}>{lang === "zh" ? "完成" : "Done"}</Pill>
+                  {t.kind === "ask_person" && <AskReply t={t} onDone={id => setTasks(x => x.filter(y => y.id !== id))} />}
                 </div>
               ))}</div>
             </section>

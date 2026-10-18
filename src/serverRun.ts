@@ -2,9 +2,11 @@ import { same, type Bi } from "./bi";
 import type { Reply, Step } from "./core";
 import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
-import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
+import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runAll, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
 import { B } from "./bi";
 import { MAIN_BOT, proven, reconcile, settleJobs, type Job } from "./jobs";
+import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy, usedInBlocks } from "./sources";
+import { MCP_PREFIX } from "./mcp";
 import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone, storeName, storeRules } from "./harness";
 import { approvalMoments, checkMoment, linkRun, MAX_MOMENTS, replyMoment, scrubStep, toolMoment } from "./replay";
 
@@ -26,7 +28,7 @@ import { approvalMoments, checkMoment, linkRun, MAX_MOMENTS, replyMoment, scrubS
 
 /** One model call. role says what the call is for (src/live.ts Role), so the server can pick the cheapest model that
  *  does that job well: the main loop's role (plan, short or watch), review for the checker, extract for reading files. */
-export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role) => Promise<{ content: Block[]; stop_reason: string }>;
+export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role, onText?: (text: string) => void) => Promise<{ content: Block[]; stop_reason: string }>;
 /** Everything needed to pick a run up again. */
 export type RunState = {
   messages: { role: string; content: unknown }[];
@@ -53,6 +55,10 @@ export type RunState = {
   plainSms?: boolean;
   /** What the whole task has cost so far in US dollars, across every chunk a fresh instance picked up. */
   spent?: number;
+  /** What this run's tools actually read (registry forms, agency pages, documents), for the reply's Sources line. */
+  used?: Used[];
+  /** The person's words were read for details to remember (src/recall.ts), so a resumed chunk doesn't read them again. */
+  recalled?: boolean;
 };
 
 const MAX_ROUNDS = 16;
@@ -115,9 +121,13 @@ export function channelNote(o: { channel?: Channel; plainSms?: boolean }, tool: 
 }
 const via = (channel: Channel | undefined) => (channel === "sms" ? "a text" : channel === "voice" ? "a call" : channel === "email" ? "an email" : channel === "slack" ? "Slack" : channel === "wechat" ? "WeChat" : "Lark");
 
-/** Why a tool can't run for a request from this channel (the tool result the model sees), or null when it can. */
-export function channelRefuses(o: { channel?: Channel; plainSms?: boolean }, tool: string, input: Record<string, unknown>): string | null {
+/** Why a tool can't run for a request from this channel (the tool result the model sees), or null when it can.
+ *  mcpReads: the connected apps' tools this run was offered from outside the app, which are only ones that read. */
+export function channelRefuses(o: { channel?: Channel; plainSms?: boolean; mcpReads?: Set<string> }, tool: string, input: Record<string, unknown>): string | null {
   if (!isRemote(o.channel)) return null;
+  // connected apps (src/mcp.ts): nothing from plain SMS, and from anywhere else outside the app only what reads
+  if (tool.startsWith(MCP_PREFIX) && (o.plainSms || !o.mcpReads?.has(tool)))
+    return `Error: From ${o.plainSms ? "a plain text message" : via(o.channel)} Odelia ${o.plainSms ? "doesn't use connected apps" : "only reads from connected apps"}. Tell them to do this in the Placetta app.`;
   if (o.plainSms && !PLAIN_SMS_MAY.has(tool))
     return "Error: This request came by plain SMS, which can be forged, so from it you can only look things up and draft for approval. Nothing in the workspace changes. Tell them to make this change in the Placetta app.";
   if (REMOTE_NEVER[tool]) return `Error: ${REMOTE_NEVER[tool]} from ${via(o.channel)}. Tell them to do it in the Placetta app.`;
@@ -206,6 +216,9 @@ export async function runRounds(o: {
   maxRounds?: number;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for the monitor's background checks. */
   role?: Role;
+  /** Whose memory the run reads: the person who asked (agent-run passes the run's created_by). Their saved details
+   *  (src/recall.ts) go in the instructions, and their people are reached by name. */
+  me?: string;
   /** The run's id: every job it works links to it, so the job's replay can show its moments (src/replay.ts). */
   runId?: string;
   /** A store's bot: this run works one store's part (its job and store) of a job split across stores. */
@@ -223,7 +236,7 @@ export async function runRounds(o: {
   const mainRole: Role = o.role ?? "plan";
   const model = messagesModel("server", (body, _signal, deep, role) => o.send(body, deep, role ?? mainRole));
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
-  const from = { channel: o.channel, plainSms: st.plainSms === true };
+  const from: { channel?: Channel; plainSms: boolean; mcpReads?: Set<string> } = { channel: o.channel, plainSms: st.plainSms === true };
   const apply = (p: Patch) => o.apply(guardPatch(from, p));
   // Every moment carries when, which bot and which job, for the job's replay.
   const bot = o.child?.store ?? MAIN_BOT;
@@ -251,10 +264,14 @@ export async function runRounds(o: {
     step({ state: "connecting", label: B("Every store's bot is back. Writing one summary", "各门店的助手都已完成，正在汇总") });
   }
 
-  const tools = makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal,
+  const me = o.me ?? o.svc?.me;
+  // Connected apps' tools (src/mcp.ts): none from plain SMS; from anywhere else outside the app, only the ones that read.
+  const mcp = from.plainSms ? [] : ((await o.svc?.mcpTools?.().catch(() => [])) ?? []).filter(t => !isRemote(o.channel) || t.read_only);
+  const tools = makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request,
     ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) });
+  if (isRemote(o.channel)) from.mcpReads = new Set(tools.map(t => t.name).filter(n => n.startsWith(MCP_PREFIX)));
   const childJob = o.child ? (o.ws().jobs ?? []).find(j => j.id === o.child!.job) : undefined;
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms)
+  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms)
     + (childJob ? storeRules(o.ws(), childJob, o.lang) : "");
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
@@ -278,29 +295,34 @@ export async function runRounds(o: {
       if (Date.now() > o.until) { link(); return { paused: save() }; }
       if (st.rounds === 0) step({ state: "searching", label: { en: "Reading your workspace", zh: "读取您的工作区" } });
       st.rounds++; st.seatRounds = (st.seatRounds ?? 0) + 1;
-      const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep, mainRole);
+      // streamed into the draft: the app shows the words as the model writes them, not when the round ends
+      const before = st.text;
+      const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep, mainRole,
+        o.draft ? t => { if (t) o.draft!(clean((before ? before + "\n\n" + t : t).slice(made.lastToolAt))); } : undefined);
       last = data.content;
       for (const c of data.content) for (const ci of c.citations ?? []) if (ci.url && !sources.has(ci.url)) sources.set(ci.url, { url: ci.url, title: ci.title || ci.url });
       st.sources = [...sources.values()];
+      addUsed(st.used ??= [], usedInBlocks(data.content));
       const text = data.content.filter(c => c.type === "text").map(c => c.text).join("");
       if (text) { st.text += (st.text ? "\n\n" : "") + text; o.draft?.(clean(st.text.slice(made.lastToolAt))); }
       if (data.stop_reason === "pause_turn") { st.messages.push({ role: "assistant", content: data.content }); continue; }
       const uses = data.content.filter(c => c.type === "tool_use");
       if (!uses.length || data.stop_reason !== "tool_use") { finished = true; break; }
       st.messages.push({ role: "assistant", content: data.content });
-      const results: Record<string, unknown>[] = [];
-      for (const u of uses) {
+      // in the order the model asked; several lookups in a row run side by side (READ_ONLY in src/live.ts)
+      const results: Record<string, unknown>[] = await runAll(uses, async u => {
         const name = String(u.name ?? ""), input = (u.input ?? {}) as Record<string, unknown>;
         const before = o.ws();
         const refused = channelRefuses(from, name, input) ?? childRefuses(o.child, name);
-        let content: string, error: boolean;
+        let out: Record<string, unknown>, content: string, error: boolean;
         if (refused) {
-          results.push({ type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true });
+          out = { type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true };
           content = refused; error = true;
         } else {
           const r = await runTool(tools, u);
+          if (!r.is_error) addUsed(st.used ??= [], usedBy(name, input, r.content, o.ws()));
           const note = r.is_error ? null : channelNote(from, name);
-          results.push((note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>);
+          out = (note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>;
           content = r.content; error = !!r.is_error;
         }
         // the replay: what she used, what she gave it, what came back and what it changed, and any approval it put up
@@ -310,7 +332,8 @@ export async function runRounds(o: {
           step(m);
           for (const a of approvalMoments(m.diff)) step(a);
         }
-      }
+        return out;
+      });
       // The harness: a seat that has handed off gives the job to a fresh agent with a clean context (no compaction);
       // one that's nearly out of room is told to write its handoff first.
       const job = activeJob();
@@ -419,7 +442,14 @@ export async function runRounds(o: {
   const waits = factCards(o.ws(), made.approvals).length > 0 && !/approv|confirm|批准|确认/i.test(said) ? waitingLine(o.lang) : "";
   const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, proof].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
-  step(replyMoment(final));
-  return { reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
-    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } };
+
+  /* ---- Sources: from what this run's tools read, never from the model's words (src/sources.ts) ---- */
+  const used = addUsed([...(st.used ?? [])], citedPages(st.sources));
+  const line = sourcesLine(said, used, o.lang, o.channel === "sms" || o.channel === "voice");
+  const links = line ? sourceLinks(said, used) : [];
+  /* ---- end Sources ---- */
+
+  step(replyMoment(line ? `${final}\n\n${line}` : final));
+  return { reply: { text: [same(line ? `${final}\n\n${line}` : final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
+    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined } };
 }

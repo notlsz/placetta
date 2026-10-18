@@ -89,6 +89,12 @@ const WORDS: Record<string, Bi> = {
 };
 export function toolWords(name: string): Bi {
   if (WORDS[name]) return WORDS[name];
+  // a connected app's tool (src/mcp.ts names them mcp__<app>__<tool>): the app, then what it did
+  const m = /^mcp__([a-z0-9]+)__(.+)$/.exec(name);
+  if (m) {
+    const app = m[1].charAt(0).toUpperCase() + m[1].slice(1), what = clip(m[2].replace(/[_-]+/g, " "), 40);
+    return B(`Used ${app}: ${what}`, `使用 ${app}：${what}`);
+  }
   const h = clip(name.replace(/[_-]+/g, " "), 40);
   return B(h.charAt(0).toUpperCase() + h.slice(1), `使用工具：${h}`);
 }

@@ -32,8 +32,10 @@
 // AGENT_ALLOW_FREE=1, and are never sent customer files, because free tiers may keep or train on prompts.
 // PDFs (document blocks) only go to models that read them: Anthropic, Gemini, OpenRouter.
 
+import { anthropicMessage, openaiCompletion, type OnText } from "./stream.ts";
+
 type Block = Record<string, unknown>;
-export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
+export type Role ="plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
 export const ROLES: Role[] = ["plan", "review", "extract", "translate", "draft", "short", "watch", "deep"];
 /** The old three-way split, kept so older call sites keep working: fast is extract, standard is plan, deep is deep. */
 export type Tier = "fast" | "standard" | "deep";
@@ -202,11 +204,13 @@ export function fromOpenAI(d: Record<string, unknown>, model: string): Record<st
   };
 }
 
+/** One call to Anthropic. A streamed answer that started fine is left unread for the caller (text is ""); anything
+ *  else, an error included, is read whole. */
 async function anthropic(f: Fetch, key: string, payload: Record<string, unknown>, beta: string | null) {
   const headers: Record<string, string> = { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" };
   if (beta) headers["anthropic-beta"] = beta;
   const res = await f("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(payload) });
-  return { res, text: await res.text() };
+  return { res, text: res.ok && payload.stream ? "" : await res.text() };
 }
 
 /**
@@ -233,8 +237,8 @@ export function withCache(payload: Record<string, unknown>): Record<string, unkn
 }
 
 /** Anthropic with its research tools, stepping down when the account lacks web fetch or web search. */
-async function viaAnthropic(f: Fetch, key: string, call: Call, model: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null) {
-  const payload: Record<string, unknown> = withCache({ ...call.payload, model });
+async function viaAnthropic(f: Fetch, key: string, call: Call, model: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null, stream = false) {
+  const payload: Record<string, unknown> = withCache({ ...call.payload, model, ...(stream ? { stream: true } : {}) });
   let { res, text } = await anthropic(f, key, payload, call.beta);
   if (research && res.status === 400 && /web_fetch|beta/i.test(text)) { payload.tools = withCache({ tools: [...research.pageTools, research.search] }).tools; ({ res, text } = await anthropic(f, key, payload, null)); }
   if (research && res.status === 400 && /web_search/i.test(text)) { payload.tools = research.pageTools.length ? withCache({ tools: research.pageTools }).tools : undefined; ({ res, text } = await anthropic(f, key, payload, null)); }
@@ -257,18 +261,32 @@ export function candidates(env: Env, call: Call, fallbackModel: string): [string
   return route;
 }
 
+/** A streamed answer that came without usage (a vendor that doesn't send it in the stream): an estimate at about four
+ *  characters a token, so the call is still priced and counted against the allowance rather than free. */
+function withUsage(data: Record<string, unknown>, payload: Record<string, unknown>): Record<string, unknown> {
+  const u = (data.usage ?? {}) as Record<string, unknown>;
+  if (Number(u.input_tokens) > 0 || Number(u.output_tokens) > 0) return data;
+  const out = JSON.stringify(data.content ?? "").length;
+  return { ...data, usage: { input_tokens: Math.ceil(JSON.stringify(payload.messages ?? "").length / 4) + Math.ceil(String(payload.system ?? "").length / 4), output_tokens: Math.ceil(out / 4), estimated: true } };
+}
+
 /**
  * Sends the call down its route. Returns the first answer in Anthropic's format, or the last failure.
  * research: the server tools to use when the model is Anthropic; other models answer without web research.
+ * onText: stream the answer. The model's words arrive as they're written (the whole text so far each time), and the
+ * same complete answer comes back at the end. A model that fails before it says anything falls through to the next one,
+ * as without streaming; one that breaks off mid-answer does too, and onText starts again with the next model's words.
  */
-export async function callModel(env: Env, call: Call, fallbackModel: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null, f: Fetch = fetch): Promise<Result> {
+export async function callModel(env: Env, call: Call, fallbackModel: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null, f: Fetch = fetch, onText?: OnText): Promise<Result> {
   const route = candidates(env, call, fallbackModel);
+  const stream = !!onText;
   let last: Result = { ok: false, status: 503, text: "No model has a key. Add one in the Edge Function secrets.", model: "" };
   for (const [p, model] of route) {
     try {
       if (p === "anthropic") {
         const key = env("ANTHROPIC_API_KEY"); if (!key) continue;
-        const { res, text } = await viaAnthropic(f, key, call, model, research);
+        const { res, text } = await viaAnthropic(f, key, call, model, research, stream);
+        if (res.ok && stream) { const data = withUsage(await anthropicMessage(res, onText), call.payload); return { ok: true, status: 200, data, text: JSON.stringify(data), model: `${p}:${model}` }; }
         if (res.ok) return { ok: true, status: 200, data: JSON.parse(text), text, model: `${p}:${model}` };
         last = { ok: false, status: res.status, text, model: `${p}:${model}` };
       } else {
@@ -276,7 +294,11 @@ export async function callModel(env: Env, call: Call, fallbackModel: string, res
         const body = toOpenAI({ ...call.payload, tools: research ? research.pageTools : call.payload.tools }, model);
         // OpenRouter routes to many hosts: only those that don't keep or train on prompts may serve our calls.
         if (p === "openrouter") (body as Record<string, unknown>).provider = { data_collection: "deny" };
+        // the usage comes in the stream's last piece where the vendor supports asking for it (Gemini's endpoint isn't
+        // asked; withUsage estimates when it's missing)
+        if (stream) Object.assign(body, { stream: true, ...(p === "gemini" ? {} : { stream_options: { include_usage: true } }) });
         const res = await f(cfg.url, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(body) });
+        if (res.ok && stream) { const data = withUsage(fromOpenAI(await openaiCompletion(res, onText), `${p}:${model}`), call.payload); return { ok: true, status: 200, data, text: JSON.stringify(data), model: `${p}:${model}` }; }
         const text = await res.text();
         if (res.ok) { const data = fromOpenAI(JSON.parse(text), `${p}:${model}`); return { ok: true, status: 200, data, text, model: `${p}:${model}` }; }
         last = { ok: false, status: res.status, text, model: `${p}:${model}` };

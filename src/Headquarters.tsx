@@ -5,6 +5,7 @@ import type { Lang } from "./i18n";
 import { Logo } from "./Logo";
 import { daysUntil, fmtDay, fmtIn } from "./time";
 import * as api from "./cloud/api";
+import { HqMetrics } from "./Metrics";
 
 /* Headquarters: every store across every franchisee that shared with this email, in one view. Read only. Works inside
    a workspace (a nav entry) and on its own, for a headquarters account with no workspace of its own. */
@@ -60,6 +61,8 @@ export function Headquarters({ lang, initial }: { lang: Lang; initial: HqRow[] }
       </dl>
 
       {err && <p className="note">{err}</p>}
+
+      <HqMetrics lang={lang} />
 
       {lines.length === 0 ? (
         <div className="empty">
