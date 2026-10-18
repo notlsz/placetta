@@ -1,5 +1,5 @@
 import { checkAddress, RULE_LABEL } from "./forms/addressCheck";
-import { canFill } from "./forms/canFill";
+import { canFill, onlineOnly, ONLINE_ONLY } from "./forms/canFill";
 import { useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { FilingLive } from "./FilingLive";
@@ -248,6 +248,7 @@ function FormPreview({ a, startEdit, version }: { a: Application; startEdit: boo
           <div className="off-h"><I.form /><div><b>{off.form}</b><span>{b(off.title)}</span></div></div>
           <p>{lang === "zh" ? `${off.agency.zh}。${METHOD[off.method].zh}。${off.how.zh}` : `${off.agency.en}. ${METHOD[off.method].en}. ${off.how.en}`}</p>
           {off.foreign && <p className="off-note">{b(off.foreign)}</p>}
+          {onlineOnly(off) && <p className="off-note">{b(ONLINE_ONLY)}</p>}
           {canFill(off) && <FilledStatus a={a} version={version} />}
           <div className="off-act">
             {canFill(off) && a.fields.some(f => f.value) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void official()}><I.download />{making ? "…" : lang === "zh" ? "下载已填写的官方表格" : "Download the filled official form"}</button>}

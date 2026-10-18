@@ -32,16 +32,8 @@ function ss4(v: Record<string, string>, put: Put) {
   else if (e.startsWith("corporation")) { put.check(P + "c1_3[4]"); const m = /(\d{4}[a-z-]*)/i.exec(v.l9a); put.text(P + "f1_16[0]", m ? m[1] : "1120"); }
   else if (e.startsWith("sole")) put.check(P + "c1_3[0]");
   else if (e) { put.check(P + "c1_3[15]"); put.text(P + "f1_19[0]", v.l9a.replace(/^other\s*[:(-]?\s*/i, "").replace(/\)$/, "")); }
-  // the type goes on the short blank beside the box (about 11 characters at its size, whole words) and runs on to the
-  // line below; it used to be cut at 18 characters, which ran past the blank ("Started a new m" showed, "ilk" didn't)
-  if (v.l10) {
-    put.check(P + "c1_4[0]");
-    const words = v.l10.trim().split(/\s+/);
-    let first = "";
-    while (words.length && (first ? first + " " + words[0] : words[0]).length <= 11) first = first ? first + " " + words.shift() : words.shift()!;
-    if (first) put.text(P + "f1_25[0]", first);
-    if (words.length) put.text(P + "f1_26[0]", words.join(" "));
-  }
+  // line 10's box after "(specify type)" holds about 13 characters: break at a space, the rest goes on the line below
+  if (v.l10) { put.check(P + "c1_4[0]"); const cut = v.l10.length <= 13 ? v.l10.length : Math.max(v.l10.lastIndexOf(" ", 13), 0); put.text(P + "f1_25[0]", v.l10.slice(0, cut).trim()); if (cut < v.l10.length) put.text(P + "f1_26[0]", v.l10.slice(cut).trim().slice(0, 60)); }
   const a = norm(v.l16 ?? "");
   const ACT: [RegExp, number][] = [[/health/, 0], [/agent|broker/, 1], [/construction/, 2], [/rental|leasing/, 3], [/transport|warehous/, 4], [/accommodation|food/, 5], [/wholesale/, 6], [/retail/, 7], [/real estate/, 8], [/manufactur/, 9], [/finance|insurance/, 10]];
   const hit = ACT.find(([r]) => r.test(a));
@@ -209,8 +201,9 @@ export async function fillForm(formId: string, fields: Field[], load: LoadPdf = 
   if (form?.fill) {
     const doc = await PDFDocument.load(bytes);
     const f = doc.getForm();
-    const ok = (fn: () => void) => { try { fn(); return true; } catch { return false; } };   // a box this revision doesn't have
-    runFill(formId, values, recorder(real, { text: (n, v) => ok(() => f.getTextField(n).setText(v)), check: n => ok(() => f.getCheckBox(n).check()), radio: () => false, choice: () => false }));
+    // the same writer as the mapped forms: a box this revision doesn't have is skipped, a long answer shrinks to fit
+    const w = pdfLibWriter(f);
+    runFill(formId, values, recorder(real, { text: (n, v) => w.text(n, v), check: n => w.check(n), radio: () => false, choice: () => false }));
     pdf = await doc.save();
   } else {
     const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });

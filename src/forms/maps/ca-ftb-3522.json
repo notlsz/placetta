@@ -4,6 +4,9 @@
   "pdf": "ca-ftb-3522.pdf",
   "checked": "2026-10-14",
   "notes": "tax_year: 'Calendar year 2026' leaves the fiscal-year dates blank (as the voucher asks); a fiscal year is 'mm/dd/yyyy - mm/dd/yyyy' (or 'mm/dd/yyyy, mm/dd/yyyy'). telephone: a 10-digit U.S. number, written as digits. amount: whole dollars ('800' or '$800'); the voucher prints the '.00'. The voucher has no signature line.",
+  "blank": {
+    "tax_year": "^calendar"
+  },
   "boxes": {
     "tax_year": [
       { "text": "3522_1001", "pick": "head|date", "if": "^(?!.*calendar)\\s*(\\d{1,2}/\\d{1,2}/\\d{4}|\\d{4}-\\d{1,2}-\\d{1,2})" },

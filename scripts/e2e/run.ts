@@ -587,14 +587,14 @@ try {
     const [downRun] = await sql`select status, error from public.agent_runs where prompt = 'Is there anything new from the city?'`;
     check("when the model is down the run fails and the owner is told by text", downRun?.status === "failed" && /busy/.test(downRun.error ?? "") && sms(mark, OWNER_PHONE).length === 1 && /hit a problem/.test(sms(mark, OWNER_PHONE)[0].body.text), { downRun, texts: sms(mark).map((x) => x.body.text) });
 
-    // a number nobody linked: one explanation, then silence
+    // a number nobody linked, with a line that isn't "<business> in <city>": one question, then silence
     mark = recorded.length;
     await telnyxPost("odelia-sms", smsEvent(STRANGER, "hi is this the permit place", "msg-in-6"));
     await settle();
     await telnyxPost("odelia-sms", smsEvent(STRANGER, "hello??", "msg-in-7"));
     await settle();
     const toStranger = sms(mark, STRANGER);
-    check("an unknown number gets one explanation, then silence", toStranger.length === 1 && /isn't linked to an account/.test(toStranger[0].body.text), toStranger.map((x) => x.body.text));
+    check("an unknown number gets one question, then silence", toStranger.length === 1 && /What are you opening, and where\? e\.g\. Milk tea shop in Flushing, NY/.test(toStranger[0].body.text), toStranger.map((x) => x.body.text));
     const [stranger] = await sql`select messages, replied_at from public.odelia_strangers where number = ${STRANGER}`;
     check("strangers are counted, their words not kept", stranger?.messages === 2 && (await sql`select count(*)::int n from public.odelia_messages where user_id is null and direction = 'in' and body <> ''`)[0].n === 0, stranger);
     check("no run for a stranger", (await sql`select count(*)::int n from public.agent_runs where channel = 'sms'`)[0].n === 8);
@@ -749,12 +749,22 @@ try {
     check("the owner moves to the working line", (await sql`select line from public.phone_links where user_id = ${owner.id}`)[0].line === L1);
     stubs.linqState.restricted.delete(L2);
 
-    // a stranger texts a line: one explanation, by iMessage, from that line
+    // a stranger texts a line: the one question, by iMessage, from that line
     mark = recorded.length;
     await linqPost(msg("+16465550188", L1, "hi", "im-stranger"));
     await settle();
     const st = imsg(mark, "+16465550188");
-    check("a stranger gets one explanation by iMessage from the line they texted", st.length === 1 && st[0].body.from === L1 && /isn't linked to an account/.test(words(st[0])), st.map((r) => r.body));
+    check("a stranger gets the one question by iMessage from the line they texted", st.length === 1 && st[0].body.from === L1 && /What are you opening, and where\?/.test(words(st[0])), st.map((r) => r.body));
+    // a business texts its line by iMessage: the fuller plan, from the same line
+    mark = recorded.length;
+    await linqPost(msg("+16465550122", L1, "奶茶店，纽约法拉盛", "im-text-to-start"));
+    await settle();
+    // (a conversation Linq hasn't seen opened can't start with a link, so the words go first and the link follows)
+    const ims = imsg(mark, "+16465550122").filter((r) => r.status < 300), imText = ims.map(words).join("\n");
+    check("a business gets its plan by iMessage, in Chinese, on several lines, from the line it texted", ims.length >= 1 && ims[0].body.from === L1 && /^快哉：在纽约法拉盛开奶茶店需要 \d+ 项许可。/.test(imText)
+      && /\n1\. 组织章程\n纽约州务院公司处，\$200/.test(imText) && /回复 STOP 退订。/.test(imText) && /https:\/\/app\.placetta\.test\/app\/\?s=[A-Za-z0-9]{10}\.\d+\.[A-Za-z0-9_-]{16}/.test(imText), ims.map((r) => [r.body.from, words(r)]));
+    const [imRow] = await sql`select channel, line, lang from public.text_starts where handle = '+16465550122'`;
+    check("its pending plan remembers the iMessage line", imRow?.channel === "imessage" && imRow.line === L1 && imRow.lang === "zh", imRow);
 
     // linking a phone with both set up: a texted-out code goes by Telnyx SMS (registered, and it never opens an iMessage conversation)
     mark = recorded.length;
@@ -905,12 +915,22 @@ try {
     await settle();
     check("a text by SMS is answered by SMS, and WhatsApp is no longer where updates go", sms(mark, OWNER_PHONE).length === 1 && wa(mark).length === 0 && (await sql`select via from public.phone_links where user_id = ${owner.id}`)[0].via === null, { sms: sms(mark).map((r) => r.body.text), wa: wa(mark).map(waBody) });
 
-    // a stranger on WhatsApp: one explanation, there
+    // a stranger on WhatsApp: the one question, there
     mark = recorded.length;
     stubs.waState.open.add("16465550177");
     await waPost([text("16465550177", "hi, permits?", "wamid.stranger")]);
     await settle();
-    check("a stranger on WhatsApp gets one explanation there", wa(mark, "16465550177").length === 1 && /isn't linked to an account/.test(waBody(wa(mark, "16465550177")[0])), wa(mark).map(waBody));
+    check("a stranger on WhatsApp gets the one question there", wa(mark, "16465550177").length === 1 && /What are you opening, and where\?/.test(waBody(wa(mark, "16465550177")[0])), wa(mark).map(waBody));
+    // a business on WhatsApp: the plan, fuller than a text, there
+    mark = recorded.length;
+    stubs.waState.open.add("16465550166");
+    await waPost([text("16465550166", "Hot pot restaurant in Irvine, CA", "wamid.start")]);
+    await settle();
+    const waStart = wa(mark, "16465550166").map(waBody);
+    check("a business on WhatsApp gets its plan there, on several lines, with the claim link", waStart.length === 1 && /Hot pot restaurant in Irvine, CA needs \*\d+ permits\*/.test(waStart[0])
+      && /\n1\. \*Articles of Organization\*\nCalifornia Secretary of State, \$70/.test(waStart[0]) && /https:\/\/app\.placetta\.test\/app\/\?s=[A-Za-z0-9]{10}\.\d+\.[A-Za-z0-9_-]{16}/.test(waStart[0]), waStart);
+    const [waRow] = await sql`select channel, lang from public.text_starts where handle = '+16465550166'`;
+    check("its pending plan is kept for that WhatsApp number", waRow?.channel === "whatsapp" && waRow.lang === "en", waRow);
 
     for (const k of Object.keys(WA_ENV)) Deno.env.delete(k);
     await sql`delete from public.ai_events where user_id = ${owner.id} and kind = 'task' and at >= ${textingStart}`;
@@ -1027,6 +1047,122 @@ try {
 
     for (const k of ["ODELIA_EMAIL", "RESEND_WEBHOOK_SECRET"]) Deno.env.delete(k);
     await sql`delete from public.ai_events where user_id = ${owner.id} and kind = 'task' and at >= ${textingStart}`;
+  });
+
+  /* ---------------- b5. text to start ---------------- */
+  // A business that isn't on Placetta texts one line and gets its plan in seconds, with no model; asks once for the
+  // reminder and gets it once; claims the link after signing up and finds the plan and its phone already there.
+  await scenario("b5. text to start", async () => {
+    const BIZ = "+16465550133", BIZ_ZH = "+16465550134", BIZ_HALF = "+16465550135", ABROAD = "+447700900123";
+    const tokenOf = (s: string) => /\?s=([A-Za-z0-9]{10}\.\d{9,11}\.[A-Za-z0-9_-]{16})/.exec(s)?.[1] ?? "";
+    const models = modelCalls.length, runs0 = (await sql`select count(*)::int n from public.agent_runs`)[0].n;
+
+    // the website shows nothing until the founder sets the public number; then Odelia's number
+    const off = await call("odelia-sms", { action: "line" });
+    Deno.env.set("ODELIA_PUBLIC_NUMBER", ODELIA);
+    const on = await call("odelia-sms", { action: "line" });
+    Deno.env.delete("ODELIA_PUBLIC_NUMBER");
+    check("the website's line is off until ODELIA_PUBLIC_NUMBER is set", off.data?.start === null && on.data?.start?.number === ODELIA && on.data?.start?.display === "+1 (212) 555-0100", [off.data?.start, on.data?.start]);
+
+    // one line by SMS: the plan within seconds, under 320 characters
+    mark = recorded.length;
+    const t0s = Date.now();
+    await telnyxPost("odelia-sms", smsEvent(BIZ, "Milk tea shop in Flushing, NY", "start-1"));
+    await settle();
+    const took = Date.now() - t0s;
+    const plan = sms(mark, BIZ).map((x) => String(x.body.text));
+    const [row] = await sql`select * from public.text_starts where handle = ${BIZ}`;
+    check("one line gets the plan back by SMS, in seconds", plan.length === 1 && took < 5000 && new RegExp(`^Placetta: Milk tea shop in Flushing, NY needs ${row?.permits} permits\\. First: 1\\) Articles of Organization, NY Dept of State, \\$200; 2\\) EIN, IRS, free; 3\\) `).test(plan[0]), { took, plan });
+    check("the SMS is under 320 characters, with the time to open, the claim link and STOP", plan[0]?.length < 320 && /About \d+ months to open\./.test(plan[0]) && /https:\/\/app\.placetta\.test\/app\/\?s=/.test(plan[0]) && /Reply STOP to opt out\.$/.test(plan[0]), plan);
+    check("no model was asked and no run started", modelCalls.length === models && (await sql`select count(*)::int n from public.agent_runs`)[0].n === runs0);
+    check("the pending workspace holds the plan the first screen would build", row?.channel === "sms" && row.what === "Milk tea shop" && row.place === "Flushing, NY" && Array.isArray(row.state?.apps) && row.state.apps.length === row.permits
+      && row.state.apps.every((a: { preview?: boolean }) => a.preview === true) && row.state.firstPlan?.where === "Flushing, NY" && !row.claimed_at && new Date(row.expires_at).getTime() - Date.now() > 6.9 * 864e5, row && { ...row, state: undefined });
+    const inLog = await sql`select direction, body from public.odelia_messages where provider_id = 'start-1' or (direction = 'out' and user_id is null and created_at >= ${new Date(t0s)})`;
+    check("the texts are logged without the stranger's words", inLog.length === 2 && inLog.every((m) => m.body === ""), inLog);
+    check("their text in is in the consent ledger", (await sql`select count(*)::int n from public.phone_consent_log where number = ${BIZ} and event = 'texted_to_start' and user_id is null`)[0].n === 1);
+
+    // nothing more unless asked; then the one reminder, once, at 10am where the business is
+    mark = recorded.length;
+    await telnyxPost("odelia-sms", smsEvent(BIZ, "thanks!", "start-2"));
+    await settle();
+    check("small talk after the plan gets nothing (no follow-ups)", sms(mark, BIZ).length === 0);
+    await telnyxPost("odelia-sms", smsEvent(BIZ, "remind me", "start-3"));
+    await settle();
+    const [rem] = await sql`select remind_at, tz from public.text_starts where id = ${row.id}`;
+    const at = new Date(rem.remind_at);
+    const local = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hour12: false }).format(at);
+    check("\"remind me\" sets one reminder, tomorrow at 10am in New York, and says so", sms(mark, BIZ).length === 1 && /once more tomorrow at 10am/.test(sms(mark, BIZ)[0].body.text) && local === "10" && at.getTime() > Date.now(), { at: rem.remind_at, texts: sms(mark, BIZ).map((x) => x.body.text) });
+    mark = recorded.length;
+    await call("odelia-sms", { action: "flush" }, { headers: MK });
+    check("before it's due, nothing goes", sms(mark, BIZ).length === 0);
+    // due now, and midday where it's going
+    const h = new Date().getUTCHours(), off12 = ((12 - h) + 24) % 24 > 12 ? ((12 - h) + 24) % 24 - 24 : ((12 - h) + 24) % 24;
+    await sql`update public.text_starts set remind_at = now() - interval '1 minute', tz = ${off12 >= 0 ? `Etc/GMT-${off12}` : `Etc/GMT+${-off12}`} where id = ${row.id}`;
+    const fl = await call("odelia-sms", { action: "flush" }, { headers: MK });
+    await call("odelia-sms", { action: "flush" }, { headers: MK });
+    const reminders = sms(mark, BIZ).map((x) => String(x.body.text));
+    check("the reminder goes once, with the same link", fl.data?.reminders?.sent === 1 && reminders.length === 1 && /as you asked/.test(reminders[0]) && tokenOf(reminders[0]) === tokenOf(plan[0]), { fl: fl.data, reminders });
+    check("asking for it is in the consent ledger", (await sql`select count(*)::int n from public.phone_consent_log where number = ${BIZ} and event = 'asked_reminder'`)[0].n === 1);
+
+    // in Chinese, and STOP: nothing after it, not even the reminder they asked for
+    mark = recorded.length;
+    await telnyxPost("odelia-sms", smsEvent(BIZ_ZH, "奶茶店，纽约法拉盛", "start-zh-1"));
+    await settle();
+    const zh = sms(mark, BIZ_ZH).map((x) => String(x.body.text));
+    check("Chinese in, Chinese out, under 320 characters", zh.length === 1 && /^快哉：在纽约法拉盛开奶茶店需要 \d+ 项许可。前三项：1）组织章程，纽约州务院公司处，\$200；/.test(zh[0]) && zh[0].length < 320 && /回复 STOP 退订。$/.test(zh[0]), zh);
+    await telnyxPost("odelia-sms", smsEvent(BIZ_ZH, "提醒我", "start-zh-2"));
+    await settle();
+    await telnyxPost("odelia-sms", smsEvent(BIZ_ZH, "STOP", "start-zh-3"));
+    await settle();
+    const stopped = sms(mark, BIZ_ZH).map((x) => String(x.body.text));
+    check("STOP still works as before: one confirmation, recorded", stopped.length === 3 && /明天上午 10 点/.test(stopped[1]) && /won't get more texts|不再给您发短信/.test(stopped[2])
+      && (await sql`select count(*)::int n from public.phone_consent_log where number = ${BIZ_ZH} and event = 'stop'`)[0].n === 1, stopped);
+    mark = recorded.length;
+    await sql`update public.text_starts set remind_at = now() - interval '1 minute', tz = 'UTC' where handle = ${BIZ_ZH}`;
+    await telnyxPost("odelia-sms", smsEvent(BIZ_ZH, "Bakery in Houston TX", "start-zh-4"));
+    await settle();
+    await call("odelia-sms", { action: "flush" }, { headers: MK });
+    check("after STOP, no plan and no reminder", sms(mark, BIZ_ZH).length === 0, sms(mark, BIZ_ZH).map((x) => x.body.text));
+
+    // a number abroad gets nothing at all
+    mark = recorded.length;
+    await telnyxPost("odelia-sms", smsEvent(ABROAD, "Milk tea shop in Flushing, NY", "start-uk"));
+    await settle();
+    check("a number outside the countries Placetta texts gets nothing", sms(mark).length === 0 && (await sql`select count(*)::int n from public.text_starts where handle = ${ABROAD}`)[0].n === 0);
+
+    // half a line, the question, then the other half
+    mark = recorded.length;
+    await telnyxPost("odelia-sms", smsEvent(BIZ_HALF, "Hi, I want to open a bakery", "start-half-1"));
+    await settle();
+    const [half] = await sql`select what, place from public.text_start_parts where handle = ${BIZ_HALF}`;
+    await telnyxPost("odelia-sms", smsEvent(BIZ_HALF, "Houston TX", "start-half-2"));
+    await settle();
+    const halfTexts = sms(mark, BIZ_HALF).map((x) => String(x.body.text));
+    check("an answer naming only the city completes the line", halfTexts.length === 2 && /What are you opening, and where\?/.test(halfTexts[0]) && /^Placetta: Bakery in Houston, TX needs \d+ permits\./.test(halfTexts[1])
+      && half?.what === "Bakery" && half.place === null && (await sql`select count(*)::int n from public.text_start_parts where handle = ${BIZ_HALF}`)[0].n === 0, { half, halfTexts });
+
+    // the claim: a new account opens the link, signs in, and the plan and the phone are there
+    const token = tokenOf(plan[0]);
+    const peek = await rpc("text_start_peek", { p_token: token }, ANON_KEY);
+    check("before signing in, the link says what the plan is for, and only the last four digits", peek.data?.status === "ok" && peek.data?.what === "Milk tea shop" && peek.data?.phone_last4 === "0133" && !JSON.stringify(peek.data).includes("6465550133"), peek.data);
+    const biz: Who = { id: await mkUser("lin@moonleaf-tea.example", { full_name: "Lin Zhao" }), email: "lin@moonleaf-tea.example", jwt: "" };
+    biz.jwt = await userJwt(biz);
+    const claim = await rpc("text_start_claim", { p_token: token, p_link_phone: true }, biz.jwt);
+    const wid = claim.data?.workspace_id;
+    check("claiming makes the workspace and links the phone", claim.status === 200 && typeof wid === "string" && claim.data?.phone === "linked", claim);
+    const [w] = await sql`select name, state, authorized_at from public.workspaces where id = ${wid ?? null}`;
+    check("the plan is already there, the same rows", w?.name === "Milk tea shop in Flushing" && w.state?.apps?.length === row.permits && JSON.stringify(w.state.apps.map((a: { id: string }) => a.id)) === JSON.stringify(row.state.apps.map((a: { id: string }) => a.id)) && !!w.authorized_at, w && { name: w.name, apps: w.state?.apps?.length });
+    const own = await rest(`workspaces?id=eq.${wid}&select=id,name`, { jwt: biz.jwt });
+    check("it's theirs: they read it through the API as its owner", own.status === 200 && own.data?.[0]?.id === wid, own);
+    const [pl] = await sql`select number, verified_at, last_workspace_id, tz, opted_out_at from public.phone_links where user_id = ${biz.id}`;
+    const [{ tz: startTz }] = await sql`select tz from public.text_starts where id = ${row.id}`;
+    check("the phone is linked and verified, pointed at the new workspace, in the business's time zone", pl?.number === BIZ && !!pl.verified_at && pl.last_workspace_id === wid && pl.tz === startTz && pl.opted_out_at === null, pl);
+    check("linking it is in the consent ledger, with the current version", (await sql`select count(*)::int n from public.phone_consent_log where user_id = ${biz.id} and number = ${BIZ} and event = 'linked' and disclosure_version = public.phone_consent_version()`)[0].n === 1);
+    const again = await rpc("text_start_claim", { p_token: token, p_link_phone: true }, biz.jwt);
+    const forged = await rpc("text_start_claim", { p_token: token.slice(0, -1) + (token.endsWith("A") ? "B" : "A"), p_link_phone: true }, biz.jwt);
+    check("the link works once, and a changed one not at all", again.status >= 400 && /start_used/.test(again.data?.message ?? "") && forged.status >= 400 && /start_invalid/.test(forged.data?.message ?? ""), [again.data, forged.data]);
+    check("the reminder won't go for a claimed plan", (await sql`select count(*)::int n from public.text_starts where id = ${row.id} and claimed_by = ${biz.id}`)[0].n === 1);
+    check("still no model, start to finish", modelCalls.length === models);
   });
 
   /* ---------------- c. voice ---------------- */

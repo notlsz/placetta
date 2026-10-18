@@ -4,6 +4,9 @@
  "pdf": "sf-dph-plan-check.pdf",
  "checked": "2026-10-14",
  "notes": "Answers: business_address one line as it should print. plan_review_service one of its options ('Field Site Evaluation' and 'Office Preliminary Review' also select Consultation Only). food_facility_type one of its options; 'Other' with food_facility_type_other filled. food_prep_facility and prepackaged_only: 'Yes' selects that line (they are one radio pair, so answer only one). will_cook / will_cool / will_wash_thaw: Yes or No. The signature and the date beside it are left for the applicant (the date question has no box Placetta fills).",
+ "unmapped": {
+  "date": "The date beside the applicant's signature is written by the applicant when signing."
+ },
  "boxes": {
   "business_address": [
    {
