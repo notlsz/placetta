@@ -30,6 +30,7 @@ import m_kc_plan_review from "./kc-plan-review.json";
 import m_lac_health_permit from "./lac-health-permit.json";
 import m_lac_plan_check from "./lac-plan-check.json";
 import m_lv_food from "./lv-food.json";
+import m_mpls_food_license from "./mpls-food-license.json";
 import m_mult_food_license from "./mult-food-license.json";
 import m_mult_plan_review from "./mult-plan-review.json";
 import m_nv_esd from "./nv-esd.json";
@@ -85,6 +86,7 @@ export const MAPS: Record<string, FormMap> = {
   "lac-health-permit": m_lac_health_permit as FormMap,
   "lac-plan-check": m_lac_plan_check as FormMap,
   "lv-food": m_lv_food as FormMap,
+  "mpls-food-license": m_mpls_food_license as FormMap,
   "mult-food-license": m_mult_food_license as FormMap,
   "mult-plan-review": m_mult_plan_review as FormMap,
   "nv-esd": m_nv_esd as FormMap,
