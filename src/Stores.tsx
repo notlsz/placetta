@@ -11,6 +11,7 @@ import { I, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
 import { parseStoreList, permitsOnOpening, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
 import * as api from "./cloud/api";
+import { StaffLangPick } from "./StaffLang";
 
 /* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
    a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. */
@@ -196,6 +197,7 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
               return (
                 <li key={c.id} className="row certrow">
                   <span className="lr-tx"><b>{c.person}</b><small>{b(c.kind)}</small></span>
+                  <StaffLangPick person={c.person} value={c.lang} />
                   <span className={"cert-exp" + (d < 0 ? " bad" : d <= 30 ? " warn" : "")}>{d < 0 ? b(B("Expired", "已过期")) : fmtIn(d, lang)}<small>{fmtDay(c.expires, lang, true)}</small></span>
                   {d <= 30 && <Pill sm disabled={busy} onClick={() => ask(b(B(`Draft a text to ${c.person} to renew their ${c.kind.en} before ${c.expires}`, `起草短信提醒 ${c.person} 在 ${c.expires} 前续期${c.kind.zh}`)))}>{b(B("Remind", "提醒"))}</Pill>}
                 </li>

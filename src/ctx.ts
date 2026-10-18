@@ -62,6 +62,12 @@ export type CloudCtx = {
   cancelFiling(filingId: string): Promise<void>;
   /** Stop a filing that's on its way, before anything reaches the agency; it comes back to you to approve again. */
   stopFiling(filingId: string): Promise<void>;
+  /** Undo a filing during its undo window (it's held, nothing has left); it comes back to you to approve again. */
+  undoFiling(filingId: string): Promise<void>;
+  /** End a filing's undo window early: it goes now. */
+  sendFilingNow(filingId: string): Promise<void>;
+  /** Ask a person on the Placetta team (src/AskPerson.tsx); true once the team has it. */
+  askPerson(question: string, context: Record<string, unknown>): Promise<boolean>;
   /** A stored file (a screenshot of an agency page, the form as sent) as a URL this page can show. */
   fileUrl(path: string): Promise<string | null>;
   exportData(): void;

@@ -17,6 +17,8 @@ import { takeAutostart } from "./cloud/handoff";
 import { nextAction, nextRun } from "./jobs";
 import { PlanCard } from "./Work";
 import { hrefOf, plainClick } from "./route";
+import { HeldSends, LocalHold, useApprovalHold } from "./SendHold";
+import { CostLine } from "./CostToOpen";
 
 export const INK = "#4D73A3";
 const LEVELS: Level[] = ["federal", "state", "county", "city"];
@@ -116,6 +118,7 @@ function BatchApprove() {
 export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
   const { b, t, lang, ws, busy, openApproval, openApp, approve, upload, cloud } = useApp();
   const pick = useRef<HTMLInputElement>(null);
+  const hold = useApprovalHold(a.id);   // the undo window (src/SendHold.tsx): approved, not sent yet
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
   const fee = a.kind === "pay" ? a.fee ?? 0 : app && a.kind === "file" ? feeTotal(app) : 0;
   const Icon = KIND_ICON[a.kind];
@@ -141,7 +144,7 @@ export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
           <input ref={pick} type="file" hidden multiple onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (app && missing && f.length) upload(app.id, missing.id, f); }} />
           <Pill onClick={() => (app && missing ? pick.current?.click() : app && openApp(app.id, "check"))} disabled={busy} sm={compact}>{t("upload")}</Pill>
         </>
-      ) : <Pill onClick={() => openApproval(a.id)} disabled={busy} sm={compact}>{t("approve")}</Pill>}
+      ) : hold ? <LocalHold hold={hold} compact /> : <Pill onClick={() => openApproval(a.id)} disabled={busy} sm={compact}>{t("approve")}</Pill>}
     </div>
   );
 }
@@ -315,6 +318,8 @@ export function Overview() {
         <div className="plan-card">
           <p className="plan-sum">{t(n === 1 ? "hm_plan1" : "hm_planN", { n, a: approved, r: agency, t: n - approved - agency })}</p>
           {landing && <p className="plan-open"><I.deadlines />{t("hm_open", { d: fmtDay(landing, lang, true) })}</p>}
+          <CostLine />
+
           {nextUp.length > 0 && (
             <>
               <p className="plan-h">{t("hm_next")}</p>
@@ -402,6 +407,7 @@ export function Permits({ tab }: { tab: PermitsTab }) {
         <button type="button" className="pill quiet" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
       </PageHead>
       <Tabs view="permits" tabs={tabs} current={tab} />
+      {(tab === "todo" || tab === "filed") && <CostLine page />}
       {tab === "todo" && <PermitTable rows={todo} empty={t("allClear")} />}
       {tab === "filed" && <PermitTable rows={filed} empty={t("empty")} />}
       {tab === "documents" && <Documents />}
@@ -566,6 +572,7 @@ export function UpdatesPage() {
       <p className="tab-lede">{b(cloud
         ? B("Placetta checks every morning for filing changes, deadlines and renewals, and emails the owners when something needs them.", "快哉每天早上检查申报进展、截止日期和续期，有需要处理的事项时会发邮件通知所有者。")
         : B("What changed and what's coming up, checked every morning.", "每天早上检查的最新进展和即将到来的事项。"))}</p>
+      <HeldSends />
       {updates.length === 0 ? (
         <div className="empty-up"><p>{b(B("Nothing new. Deadlines, renewals and filing changes show up here as they happen.", "暂无新动态。截止日期、续期和申报进展会在发生时显示在这里。"))}</p></div>
       ) : <UpdateList items={updates} />}

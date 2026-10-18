@@ -103,7 +103,8 @@ export type Location = { id: string; name: Bi; county: Bi; state: "active" | "ma
 // show the value: opened on time, stayed open, no fines.
 export type LogKind = "temps" | "cleaning" | "pest";
 export type DailyLog = { date: string; kind: LogKind; done: boolean; by?: string; reading?: string };
-export type Cert = { id: string; person: string; kind: Bi; expires: string };
+/** lang: the language this person reads, for the messages Odelia drafts to them (src/staff.ts). */
+export type Cert = { id: string; person: string; kind: Bi; expires: string; lang?: "en" | "zh" | "es" };
 export type MockCheck = { id: string; area: Bi; label: Bi; ok: boolean | null };
 export type StoreRule = "nyc_grades" | "nyc_fww";
 export type Store = {
@@ -211,8 +212,8 @@ export const SAMPLE_STORES: Store[] = [
     logs: days(-13, -1).flatMap(d => (["temps", "cleaning", "pest"] as LogKind[]).map((k): DailyLog => ({ date: d, kind: k, done: !LOG_MISSED.has(d + k), by: k === "temps" ? "Wen" : "Marco", reading: k === "temps" ? "Walk-in 38°F, reach-in 36°F" : undefined })))
       .concat([{ date: inDays(0), kind: "temps", done: true, by: "Wen", reading: "Walk-in 37°F, reach-in 36°F" }, { date: inDays(0), kind: "cleaning", done: true, by: "Marco" }, { date: inDays(0), kind: "pest", done: false }]),
     certs: [
-      { id: "c1", person: "Wen L.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(412) },
-      { id: "c2", person: "Marco D.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(19) },
+      { id: "c1", person: "Wen L.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(412), lang: "zh" },
+      { id: "c2", person: "Marco D.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(19), lang: "es" },
       { id: "c3", person: "Ana P.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(233) },
     ],
     schedule: { postedThrough: inDays(15), changes: 1, premiumOwed: 0, source: B("Entered by you", "您录入的") },

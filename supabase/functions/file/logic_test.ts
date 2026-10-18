@@ -2,8 +2,8 @@
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
 import {
-  askedToResubmit, canFaxSigned, check, emailFor, envFrom, faxFailures, faxFile, faxTo, type Filing, isForeign, killSwitchOn, mailOutcome, mailTo, pick,
-  refusalOf, signedCopy, teamApproved,
+  afterHold, askedToResubmit, canFaxSigned, check, emailFor, envFrom, faxFailures, faxFile, faxTo, type Filing, holdMinutes, holds, isForeign, killSwitchOn,
+  mailOutcome, mailTo, pick, refusalOf, signedCopy, teamApproved,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -145,4 +145,40 @@ Deno.test("fax failures and resubmission are read from the log", () => {
   assertEquals(faxFailures(two), 2);
   assert(!askedToResubmit(two));
   assert(askedToResubmit(filing({}, { agent_log: [{ en: "", zh: "", kind: "resubmit" }] })));
+});
+
+/* ---------------- the undo window ---------------- */
+
+Deno.test("the undo window is 10 minutes unless SEND_HOLD_MINUTES says otherwise; 0 turns it off", () => {
+  assertEquals(envFrom(() => undefined).holdMinutes, 10);
+  assertEquals(holdMinutes(undefined), 10);
+  assertEquals(holdMinutes(""), 10);
+  assertEquals(holdMinutes("0"), 0);
+  assertEquals(holdMinutes("3"), 3);
+  assertEquals(holdMinutes("2.9"), 2);
+  assertEquals(holdMinutes("later"), 10);            // a typo never switches the window off
+  assertEquals(holdMinutes("-5"), 10);
+  assertEquals(holdMinutes("100000"), 1440);         // at most a day
+  assertEquals(envFrom((k) => (k === "SEND_HOLD_MINUTES" ? "0" : undefined)).holdMinutes, 0);
+});
+Deno.test("every channel that leaves Placetta waits; the team's doesn't", () => {
+  const on = { holdMinutes: 10 }, off = { holdMinutes: 0 };
+  for (const c of ["email", "fax", "mail", "portal"] as const) { assert(holds(c, on), c); assert(!holds(c, off), c); }
+  assert(!holds("team", on));
+});
+Deno.test("when the time is up: email, fax and mail send; the portal is already queued; anything odd goes to the team", () => {
+  assertEquals(afterHold({ channel: "fax", agent_state: "running" }, true), "fax");
+  assertEquals(afterHold({ channel: "email", agent_state: "running" }, true), "email");
+  assertEquals(afterHold({ channel: "mail", agent_state: "running" }, true), "mail");
+  assertEquals(afterHold({ channel: "portal", agent_state: "queued" }, true), "queued");
+  assertEquals(afterHold({ channel: "fax", agent_state: "running" }, false), "team");     // the destination was withdrawn meanwhile
+  assertEquals(afterHold({ channel: "fax", agent_state: "held" }, true), "team");         // never sends a row the release didn't return
+  assertEquals(afterHold({ channel: "team", agent_state: "running" }, true), "team");
+});
+Deno.test("Undo and the send can't both win: the database's answers are told apart", () => {
+  // The release is a compare-and-set on agent_state = 'held'. An Undo after it gets too_late, which the sender never
+  // retries on; the sender's claim after an Undo is refused as stopped.
+  assertEquals(refusalOf("too_late: the time to undo is over"), null);
+  assertEquals(refusalOf("filing_stopped: the customer stopped this filing"), "stopped");
+  assertEquals(refusalOf("filing_changed: the filing moved on (agent_state)"), "changed");
 });

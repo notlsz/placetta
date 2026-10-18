@@ -6,6 +6,7 @@ import { I } from "./ui";
 import { cadence, continuePrompt, nextAction, nextRun, progress, type Job, type Routine } from "./jobs";
 import { PREVIEW } from "./cloud/api";
 import { toolbox } from "./harness";
+import { AskPerson, jobContext } from "./AskPerson";
 
 /* Work: everything Odelia is on, run like an engineer's tickets. Each job shows her plan and where it stands; what
    she needs from you comes first; what you gave her while she was busy waits in order; routines repeat on schedule. */
@@ -36,6 +37,7 @@ export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolea
       </ol>
       {job.status === "waiting" && job.waiting && <p className="job-need"><b>{zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
       {(!compact || actions) && <JobActions job={job} />}
+      {(job.status === "waiting" || (job.checked && job.checked.passed < job.checked.of)) && <AskPerson context={() => jobContext(job)} />}
       <Harness job={job} compact={compact} />
       {!compact && job.apps?.length ? (
         <p className="job-apps">{job.apps.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <button key={id} type="button" className="lnk" onClick={() => openApp(id)}>{b(a.name)}</button> : null; })}</p>

@@ -30,6 +30,8 @@ const ENV: Record<string, string> = {
   OAUTH_STATE_SECRET: "e2e-oauth-state-secret-0123456789abcdef",
   // self-filing: on for Form SS-4 by fax only, without the two-key review, so a filing can go all the way
   FILER_AGENCIES: "irs-ss4", FILER_CHANNELS: "fax", FILER_TWO_KEY: "0", TELNYX_FAX_CONNECTION_ID: "fax_conn_e2e", TELNYX_FAX_FROM: "+12125550101", FILER_SECRET: "e2e-filer-secret-0123456789abcdef0123",
+  // the undo window is off except in "f2. the undo window", which turns it on
+  SEND_HOLD_MINUTES: "0",
 };
 for (const [k, v] of Object.entries(ENV)) Deno.env.set(k, v);
 
@@ -1276,6 +1278,103 @@ try {
     check("one not yet sent stops: canceled, and the stop is in its log", halt.status === 200 && hs.status === "canceled" && hs.agent_state === "failed" && hs.last === "stopped", { halt: halt.data, hs });
     const blocked = await sql`select public.filing_agent_step(${filing}::uuid, '{"en":"Pressed Submit","zh":"点击提交","kind":"submit"}'::jsonb, jsonb_build_object('submit_clicked_at', now())) ok`.then(() => false, (e) => /filing_stopped/.test(String(e?.message)));
     check("and nothing can submit it after", blocked);
+  });
+
+  /* ---------------- f2. the undo window ---------------- */
+  // After the approval, what Placetta sends waits SEND_HOLD_MINUTES; Undo takes it back, the sweep sends it when the time
+  // is up, and the two can never both win (supabase/functions/file, migration 20261017140500_send_hold_ask_person).
+  const member: Who = { id: await mkUser("li@goldenox.example", { full_name: "Li Wei" }), email: "li@goldenox.example", jwt: "" };
+  member.jwt = await userJwt(member);
+  await scenario("f2. the undo window", async () => {
+    Deno.env.set("SEND_HOLD_MINUTES", "10");
+    await sql`insert into public.workspace_members (workspace_id, user_id, role) values (${ws}, ${member.id}, 'member') on conflict do nothing`;
+    try {
+      const pdfPath = `${ws}/filings/ss4-filled.pdf`;   // in Documents since "f. filing"
+      const faxes = (m: number) => since(m).filter((x) => x.service === "telnyx" && x.path === "/v2/faxes");
+      const sweep = () => call("file", {}, { headers: MK, jwt: SERVICE_KEY });
+      let n = 0;
+      // an SS-4 for a new company, signed by hand and uploaded: without the window Placetta would fax it right away
+      const ss4 = async (name: string) => {
+        const app = `app-ein-hold-${++n}`;
+        const ins = await rest("filings", { method: "POST", jwt: owner.jwt, prefer: "return=representation", body: {
+          workspace_id: ws, app_id: app, title: { en: `EIN for ${name}`, zh: `${name} 的雇主识别号` }, agency: { en: "IRS", zh: "美国国税局" }, fee_estimate: 0,
+          payload: { official: "irs-ss4", form: { en: "Form SS-4", zh: "SS-4 表" }, pdf_path: pdfPath, us_address: true, fields: [{ id: "l1", label: same("Legal name"), value: name }, { id: "l7b", label: same("Responsible party SSN, ITIN or EIN"), value: "By hand" }],
+            checklist: [], signature: { name: "Mei Chen", title: "Member", signed_at: new Date().toISOString(), kind: "typed" } },
+        } });
+        const id = ins.data?.[0]?.id as string;
+        await call("file", { action: "start", workspace_id: ws, filing_id: id }, { jwt: owner.jwt });
+        const signedPath = `${ws}/uploads/ss4-signed-hold-${n}.pdf`, bytes = new TextEncoder().encode(`%PDF-1.4\n% ${name}, signed by hand\n`);
+        await (await fetch(`${GATEWAY}/storage/v1/object/documents/${signedPath}`, { method: "POST", headers: { Authorization: `Bearer ${SERVICE_KEY}`, "content-type": "application/pdf" }, body: bytes as BodyInit })).body?.cancel();
+        await rest("documents", { method: "POST", jwt: owner.jwt, body: { workspace_id: ws, app_id: app, name: `SS-4 signed ${n}.pdf`, path: signedPath, size: bytes.length, mime: "application/pdf", source: "customer" }, prefer: "return=minimal" });
+        return { id, s: await call("file", { action: "signed", workspace_id: ws, filing_id: id, path: signedPath }, { jwt: owner.jwt }) };
+      };
+
+      mark = recorded.length;
+      const a = await ss4("Hold Test One LLC");
+      const left = Date.parse(a.s.data?.filing?.send_after ?? "") - Date.now();
+      check("approved and checked, the fax waits ten minutes instead of leaving", a.s.status === 200 && a.s.data?.filing?.agent_state === "held" && a.s.data?.filing?.channel === "fax" && left > 9 * 60_000 && left <= 10 * 60_000 && faxes(mark).length === 0, a.s.data);
+      const sw0 = await sweep();
+      check("the sweep leaves it alone before its time", sw0.data?.released === 0 && faxes(mark).length === 0 && (await sql`select agent_state from public.filings where id = ${a.id}`)[0].agent_state === "held", sw0.data);
+      const asMember = await call("file", { action: "undo", workspace_id: ws, filing_id: a.id }, { jwt: member.jwt });
+      check("Undo is an owner's, like Stop", asMember.status === 403, asMember);
+      const u = await call("file", { action: "undo", workspace_id: ws, filing_id: a.id }, { jwt: owner.jwt });
+      const [ua] = await sql`select status, agent_state, send_after, agent_log->-1->>'kind' last, agent_log->-1->>'ref' who from public.filings where id = ${a.id}`;
+      check("Undo cancels it and says who", u.status === 200 && ua.status === "canceled" && ua.agent_state === "failed" && !ua.send_after && ua.last === "undone" && ua.who === owner.email, { u: u.data, ua });
+      check("Undo is in the audit trail and in Updates", (await sql`select count(*)::int n from public.audit_log where workspace_id = ${ws} and action->>'en' = 'Undid the send before anything left'`)[0].n === 1
+        && (await rest(`updates?workspace_id=eq.${ws}&dedupe=eq.undone:${a.id}&select=title`, { jwt: owner.jwt })).data?.[0]?.title?.en === "Undone: EIN for Hold Test One LLC");
+      await sql`update public.filings set send_after = now() - interval '1 minute' where id = ${a.id}`;
+      await sweep();
+      check("nothing was faxed, then or after its time", faxes(mark).length === 0, faxes(mark));
+
+      // the time runs out: the sweep sends it, once, even with two sweeps at the same moment; Undo is then too late
+      mark = recorded.length;
+      const b = await ss4("Hold Test Two LLC");
+      await sql`update public.filings set send_after = now() - interval '1 second' where id = ${b.id}`;
+      const [s1, s2] = await Promise.all([sweep(), sweep()]);
+      const [fb] = await sql`select agent_state, provider_ref, submit_clicked_at from public.filings where id = ${b.id}`;
+      check("when the time is up the sweep faxes it, once", faxes(mark).length === 1 && ["running", "done"].includes(fb.agent_state) && !!fb.provider_ref && !!fb.submit_clicked_at && (s1.data?.released ?? 0) + (s2.data?.released ?? 0) === 1, { s1: s1.data, s2: s2.data, fb, n: faxes(mark).length });
+      const late = await call("file", { action: "undo", workspace_id: ws, filing_id: b.id }, { jwt: owner.jwt });
+      check("Undo after it left is refused, saying so in both languages", late.status === 409 && late.data?.error?.code === "too_late" && !!late.data?.error?.message_zh, late);
+
+      // the race: Undo and the sweep at the same moment, three times; exactly one wins each time
+      for (let k = 1; k <= 3; k++) {
+        mark = recorded.length;
+        const c = await ss4(`Race Test ${k} LLC`);
+        await sql`update public.filings set send_after = now() - interval '1 second' where id = ${c.id}`;
+        const [undo] = await Promise.all([call("file", { action: "undo", workspace_id: ws, filing_id: c.id }, { jwt: owner.jwt }), sweep()]);
+        const [fc] = await sql`select status from public.filings where id = ${c.id}`;
+        const sent = faxes(mark).length;
+        check(`race ${k}: Undo and the send never both win`, (undo.status === 200 && fc.status === "canceled" && sent === 0) || (undo.status === 409 && fc.status !== "canceled" && sent === 1), { undo: undo.status, fc, sent });
+      }
+
+      // Send now: the owner ends the wait
+      mark = recorded.length;
+      const d = await ss4("Send Now LLC");
+      const now = await call("file", { action: "send_now", workspace_id: ws, filing_id: d.id }, { jwt: owner.jwt });
+      check("Send now ends the wait and faxes it at once", now.status === 200 && faxes(mark).length === 1 && (await sql`select agent_log @> '[{"kind":"hold_over"}]'::jsonb ok from public.filings where id = ${d.id}`)[0].ok, now.data);
+    } finally { Deno.env.set("SEND_HOLD_MINUTES", "0"); }
+  });
+
+  /* ---------------- f3. ask a person ---------------- */
+  await scenario("f3. ask a person", async () => {
+    mark = recorded.length;
+    const ask = (q: string, who: Who, lang = "en") => call("team", { action: "ask", workspace_id: ws, question: q, lang, context: { job: { id: "j-plan", title: "Get the plan check approved", waiting_on: "The county's comments" } } }, { jwt: who.jwt });
+    const q1 = await ask("The county sent back the plan check. What do they want?", member, "zh");
+    check("a member asks a person", q1.status === 200 && typeof q1.data?.id === "string", q1);
+    const [t] = await sql`select kind, asked_by, lang, detail, title from public.team_tasks where id = ${q1.data?.id ?? null}`;
+    check("it's a team task with the question and what they were looking at", t?.kind === "ask_person" && t.asked_by === member.id && t.lang === "zh" && t.detail?.context?.job?.id === "j-plan" && t.title === "Golden Ox Noodle asks: The county sent back the plan check. What do they want?", t);
+    check("the team is emailed", emails(mark).some((e) => JSON.stringify(e.body.to) === JSON.stringify([staff.email]) && /A customer asks for a person: Golden Ox Noodle/.test(e.body.subject)), emails(mark).map((e) => e.body.subject));
+    const told = await rest(`updates?workspace_id=eq.${ws}&dedupe=eq.ask:${q1.data?.id}&select=kind,body`, { jwt: member.jwt });
+    check("they're told in Updates that a person replies there", told.data?.[0]?.kind === "team" && /^A person on the Placetta team replies here/.test(told.data?.[0]?.body?.en ?? ""), told);
+    const q2 = await ask("Is the sign permit right?", owner), q3 = await ask("Third question", owner), q4 = await ask("Fourth question", owner);
+    check("three a day per workspace: the fourth is refused, in both languages", q2.status === 200 && q3.status === 200 && q4.status === 429 && q4.data?.error?.code === "rate_limited" && !!q4.data?.error?.message_zh, q4);
+    check("someone outside the workspace can't ask", (await ask("Let me in", hq)).status === 403);
+    const asOwner = await rpc("answer_person", { p_id: q2.data?.id, p_reply: "Looks right." }, owner.jwt);
+    const ans = await rpc("answer_person", { p_id: q1.data?.id, p_reply: "They want the grease interceptor sized on sheet A2. We marked it up; it's in Documents." }, staff.jwt);
+    check("the team replies (staff with two-step only)", (ans.status === 200 || ans.status === 204) && asOwner.status >= 400, { ans, asOwner });
+    const reply = await rest(`updates?workspace_id=eq.${ws}&dedupe=eq.ask-reply:${q1.data?.id}&select=kind,title,body`, { jwt: member.jwt });
+    check("the reply shows in the workspace's Updates", reply.data?.[0]?.kind === "team" && reply.data?.[0]?.title?.en === "A person at Placetta replied" && /grease interceptor/.test(reply.data?.[0]?.body?.en ?? ""), reply);
+    check("and the task is closed", !!(await sql`select done_at from public.team_tasks where id = ${q1.data?.id ?? null}`)[0]?.done_at);
   });
 
   /* ---------------- g. headquarters ---------------- */

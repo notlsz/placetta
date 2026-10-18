@@ -110,6 +110,7 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `APP_ORIGINS` | Your app address. Checkout, invites and integrations only return there. |
 | `DEV_ORIGINS` | Optional, development only. Origins such as `http://localhost:5173` that Stripe checkout may return to. Without it, localhost is refused. |
 | `FILER_DAILY_CAP` | Optional. Faxes and letters Placetta self-files for one workspace in 24 hours before the team takes over. Default 10. |
+| `SEND_HOLD_MINUTES` | Optional. The undo window: after an approval, an email, fax, letter or portal submission waits this many minutes, with Undo, before it leaves (a pg_cron job sends it when the time is up). Default 10; 0 turns it off. |
 | `FORMS_PER_HOUR` | Optional. Official forms one person can fetch through the `forms` function in an hour. Default 60. |
 | `ODELIA_SMS_COUNTRIES` | Optional. Country codes Odelia texts verification codes to, comma separated. Default `1,86` (US, Canada, mainland China mobiles). To add one, also add it to `app_settings.phone_countries`. |
 | `OAUTH_STATE_SECRET` | Any long random string. |

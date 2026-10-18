@@ -1,9 +1,10 @@
-// team: invite people to a workspace and email them.
+// team: invite people to a workspace and email them, and pass a question to a person on the Placetta team.
 // POST {workspace_id, action, ...}.
 //   invite {email, role: "owner" | "member", return_url?}   owners: records the invite (the database checks and audits it), then emails it
 //   resend {id, return_url?}                                owners: emails an open invite again
 //   remove {user_id}                                        owners remove anyone; anyone can remove themselves (leave)
 //   delete_account {confirm: "DELETE"}                      no workspace_id: deletes the caller's account (see deleteAccount)
+//   ask {question, context?, lang?}                         owners and members: a person on the Placetta team replies in Updates (askPerson)
 // The invite is accepted when that email signs in (accept_invites in the database), so the email only has to get them to sign in:
 // new people get Supabase's invite email, people with an account get a sign-in link.
 import { createClient, type User } from "npm:@supabase/supabase-js@2";
@@ -137,6 +138,41 @@ async function deleteAccount(user: User, jwt: string, body: Record<string, unkno
   return ok({ deleted: true, workspaces: alone.length });
 }
 
+/* ------------------------------------------------------------------ ask a person
+   A member or owner asks the Placetta team instead of Odelia. The database records the request as a team task (with
+   what they were looking at), tells them in Updates that a person replies there, and allows three a day per workspace
+   (ask_person). Then the team is emailed, so a person sees it the same hour. */
+async function askPerson(ws: string, user: User, jwt: string, body: Record<string, unknown>) {
+  await requireAccess(ws, user, jwt, "member");
+  const question = text(body.question, "question", 2, 2000);
+  const lang = body.lang === "zh" ? "zh" : "en";
+  const context = body.context && typeof body.context === "object" && !Array.isArray(body.context) ? body.context : {};
+  // As the person, so the database checks they belong here and counts the request against the workspace.
+  const { data: id, error } = await userClient(jwt).rpc("ask_person", { ws, p_question: question, p_context: context, p_lang: lang });
+  if (error) {
+    const m = error.message ?? "";
+    if (/rate_limited/.test(m)) throw new HttpError("rate_limited", "You've asked the team three times today. They're on it and reply in Updates; ask Odelia for anything else in the meantime.", "今天已向团队求助三次。他们正在处理，会在“动态”中回复；其他事情可以先问 Odelia。");
+    if (/forbidden/.test(m)) throw new HttpError("forbidden", "You are not a member of this workspace.", "您不是这个工作区的成员。");
+    throw new HttpError("bad_request", "Say what you need help with.", "请写下需要帮助的内容。");
+  }
+  const key = Deno.env.get("RESEND_API_KEY"), from = Deno.env.get("MAIL_FROM");
+  if (key && from) {
+    const { data: staff } = await admin.from("staff_emails").select("email");
+    const to = (staff ?? []).map((s) => s.email as string).filter(Boolean);
+    const { data: w } = await admin.from("workspaces").select("name").eq("id", ws).maybeSingle();
+    const app = appOrigins()[0] ?? "";
+    if (to.length) {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ from, to, subject: `A customer asks for a person: ${(w?.name as string | undefined) ?? "a workspace"}`,
+          text: `${user.email ?? "A member"} asks (${lang === "zh" ? "reply in Chinese" : "reply in English"}):\n\n${question}\n\n${app ? `Reply from the filing queue: ${app}/app/` : ""}\n` }),
+      }).catch((e) => { console.error("ask alert failed:", String(e).slice(0, 120)); return null; });
+      if (r && !r.ok) console.error("ask alert failed:", r.status);
+    }
+  }
+  return ok({ id });
+}
+
 serve(async (req) => {
   const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
@@ -158,6 +194,8 @@ serve(async (req) => {
     }
     return ok({ removed: target });
   }
+
+  if (body.action === "ask") return await askPerson(ws, user, jwt, body);
 
   await requireAccess(ws, user, jwt, "owner");
   const redirectTo = allowedReturn(body.return_url, appOrigins()) ?? undefined;
@@ -192,5 +230,5 @@ serve(async (req) => {
     return ok({ id, sent: await sendInvite(inv.email as string, redirectTo) });
   }
 
-  throw new HttpError("bad_request", "Unknown action. Use invite, resend or remove.");
+  throw new HttpError("bad_request", "Unknown action. Use invite, resend, remove or ask.");
 });

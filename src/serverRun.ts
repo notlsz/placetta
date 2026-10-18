@@ -5,6 +5,7 @@ import type { Workspace } from "./model";
 import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
 import { B } from "./bi";
 import { settleJobs, type Job } from "./jobs";
+import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy, usedInBlocks } from "./sources";
 import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone } from "./harness";
 
 /* ------------------------------------------------------------------ *
@@ -39,6 +40,8 @@ export type RunState = {
   plainSms?: boolean;
   /** What the whole task has cost so far in US dollars, across every chunk a fresh instance picked up. */
   spent?: number;
+  /** What this run's tools actually read (registry forms, agency pages, documents), for the reply's Sources line. */
+  used?: Used[];
 };
 
 const MAX_ROUNDS = 16;
@@ -206,6 +209,7 @@ export async function runRounds(o: {
       last = data.content;
       for (const c of data.content) for (const ci of c.citations ?? []) if (ci.url && !sources.has(ci.url)) sources.set(ci.url, { url: ci.url, title: ci.title || ci.url });
       st.sources = [...sources.values()];
+      addUsed(st.used ??= [], usedInBlocks(data.content));
       const text = data.content.filter(c => c.type === "text").map(c => c.text).join("");
       if (text) { st.text += (st.text ? "\n\n" : "") + text; o.draft?.(clean(st.text.slice(made.lastToolAt))); }
       if (data.stop_reason === "pause_turn") { st.messages.push({ role: "assistant", content: data.content }); continue; }
@@ -220,6 +224,7 @@ export async function runRounds(o: {
           continue;
         }
         const r = await runTool(tools, u);
+        if (!r.is_error) addUsed(st.used ??= [], usedBy(String(u.name ?? ""), (u.input ?? {}) as Record<string, unknown>, r.content, o.ws()));
         const note = r.is_error ? null : channelNote(from, String(u.name ?? ""));
         results.push((note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>);
       }
@@ -296,6 +301,13 @@ export async function runRounds(o: {
   const waits = factCards(o.ws(), made.approvals).length > 0 && !/approv|confirm|批准|确认/i.test(said) ? waitingLine(o.lang) : "";
   const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, proof].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
-  return { reply: { text: [same(final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
-    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: cited.length ? cited : undefined } };
+
+  /* ---- Sources: from what this run's tools read, never from the model's words (src/sources.ts) ---- */
+  const used = addUsed([...(st.used ?? [])], citedPages(st.sources));
+  const line = sourcesLine(said, used, o.lang, o.channel === "sms" || o.channel === "voice");
+  const links = line ? sourceLinks(said, used) : [];
+  /* ---- end Sources ---- */
+
+  return { reply: { text: [same(line ? `${final}\n\n${line}` : final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
+    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined } };
 }
