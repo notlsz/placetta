@@ -4,6 +4,11 @@
   "pdf": "irs-5472.pdf",
   "checked": "2026-10-14",
   "notes": "name: 'Name, street, city, ST ZIP' (or the name, a semicolon, then the address). The three-part answers (4b, 8b IDs; 4c-4e, 8f-8g countries; 8c-8d activity and code) are split on semicolons or new lines, or on commas when there are none ('none' leaves an ID box blank). received/paid: one amount per category separated by semicolons, labelled ('Sales: 120000; Services: 30000; Total: 150000') or bare in the label's order (sales; rents; services; loans; interest; other); loans go on the ending-balance line (17b/31b), 'none' writes 0 on the total line, and 'estimate' ticks the estimates box. The Part III foreign/U.S. person box follows the 8g tax-residence country. Part V's description goes on an attached sheet; the map only ticks its box. The tax-year header, lines 1f-1i, 1k, 2, Parts VI-IX are left for the preparer.",
+  "blank": {
+    "initial_year": "^(n|no|否)\\b",
+    "de": "^(n|no|否)\\b",
+    "de_transactions": "^(none|no|n/?a|nil|0|无|没有)\\.?$"
+  },
   "boxes": {
     "name": [
       { "text": "topmostSubform[0].Page1[0].Line1a[0].f1_5[0]", "pick": "line1", "if": "[;\\n]" },

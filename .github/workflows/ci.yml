@@ -30,6 +30,8 @@ jobs:
       # the live evaluation's harness, on its scripted model (no key in CI): scenarios, tools, graders and report
       - run: npm run eval:live -- --dry --out /tmp/eval.md --json /tmp/eval.json
       - run: npm run test:plan
+      # every form Placetta fills on the agency's own PDF: filled with test answers, then read back line by line
+      - run: npm run test:forms
       - run: npm run test:smart
       - run: npm run test:flow
       - run: npm run test:channels

@@ -1,0 +1,1639 @@
+{
+ "form": "tx-ap201",
+ "rev": "AP-201 (Rev.7-26/31)",
+ "pdf": "tx-ap201.pdf",
+ "url": "https://comptroller.texas.gov/forms/ap-201.pdf",
+ "checked": "2026-10-18",
+ "notes": "Texas Application for a sales and use tax permit, filled for a business entity with one place of business. Yes/No questions take Yes or No. Phones print as 408-555-0142 and the FEIN as 12-3456789 in the form's own cells; dates print MMDDYYYY in their cells. Items 10-14 are for a sole proprietor and take only the name and FEIN here; the Social Security number boxes (items 9 and 11) are never printed, the signer writes them. Items 30c-30f (agents when there is no Texas place of business), 42 (out-of-state winery), 52 (9-1-1 fees) and the previous owner's title, phone and taxpayer number are left for the signer. The legal name repeats at the top of pages 3 to 5. The date of signature is left for the signer.",
+ "lines": [
+  {
+   "id": "org_type",
+   "line": "1",
+   "en": "Business organization type",
+   "zh": "企业组织类型",
+   "options": [
+    "Profit Corporation",
+    "Limited Liability Company",
+    "Limited Partnership",
+    "General Partnership",
+    "Professional Corporation",
+    "Professional Association",
+    "Nonprofit Corporation",
+    "Joint Venture",
+    "Other"
+   ],
+   "hint": {
+    "en": "For Other, write \"Other: \" and the type.",
+    "zh": "选其他时，写 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "legal_name",
+   "line": "2",
+   "en": "Legal name of the corporation, partnership, LLC, association or other entity",
+   "zh": "公司、合伙、LLC、协会或其他实体的法定名称"
+  },
+  {
+   "id": "fein",
+   "line": "3-4",
+   "en": "Federal Employer Identification Number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）",
+   "hint": {
+    "en": "12-3456789, or \"None\" if the entity has no FEIN yet.",
+    "zh": "12-3456789；尚无 FEIN 时填写 \"None\"。"
+   }
+  },
+  {
+   "id": "tx_taxpayer_number",
+   "line": "5",
+   "en": "Any current or past 11-digit Texas Taxpayer Number",
+   "zh": "现有或曾有的 11 位德州纳税人编号"
+  },
+  {
+   "id": "tx_vendor_number",
+   "line": "6",
+   "en": "Ever received a Texas vendor or payee number (TIN)? If yes, the number",
+   "zh": "是否曾获得德州供应商或收款人编号（TIN）？如有请填写号码",
+   "hint": {
+    "en": "\"No\", or the 11-digit number.",
+    "zh": "填 \"No\"，或填写 11 位号码。"
+   }
+  },
+  {
+   "id": "formation",
+   "line": "7a-7b",
+   "en": "Home state or country where the entity was formed, and the formation date",
+   "zh": "实体成立的州或国家，以及成立日期",
+   "hint": {
+    "en": "e.g. \"Texas, 03/15/2026\"",
+    "zh": "如 \"Texas, 03/15/2026\""
+   }
+  },
+  {
+   "id": "home_file_number",
+   "line": "7c",
+   "en": "Home state registration or file number",
+   "zh": "注册州的登记号或档案号"
+  },
+  {
+   "id": "tx_sos_number",
+   "line": "7d",
+   "en": "Non-Texas entities: Texas Secretary of State file number",
+   "zh": "非德州实体：德州州务卿档案号"
+  },
+  {
+   "id": "merger",
+   "line": "8",
+   "en": "If a corporation: involved in a merger within the last seven years?",
+   "zh": "如为公司：过去七年内是否发生过合并？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "officer1",
+   "line": "9",
+   "en": "Partner, officer or managing member 1: name",
+   "zh": "合伙人、高管或管理成员 1：姓名",
+   "hint": {
+    "en": "List every general partner, officer or managing member; the form has room for two.",
+    "zh": "列出所有普通合伙人、高管或管理成员；表上可填两位。"
+   }
+  },
+  {
+   "id": "officer1_position",
+   "line": "9",
+   "en": "Partner, officer or managing member 1: position held",
+   "zh": "合伙人、高管或管理成员 1：职位",
+   "options": [
+    "General Partner",
+    "Officer/Director",
+    "Managing Member",
+    "Other"
+   ],
+   "hint": {
+    "en": "For Other, write \"Other: \" and the position.",
+    "zh": "选其他时，写 \"Other: \" 加职位。"
+   }
+  },
+  {
+   "id": "officer1_phone",
+   "line": "9",
+   "en": "Partner, officer or managing member 1: phone",
+   "zh": "合伙人、高管或管理成员 1：电话"
+  },
+  {
+   "id": "officer1_address",
+   "line": "9",
+   "en": "Partner, officer or managing member 1: home address",
+   "zh": "合伙人、高管或管理成员 1：住址"
+  },
+  {
+   "id": "officer1_ein",
+   "line": "9",
+   "en": "Partner, officer or managing member 1: FEIN (only when the member is a company)",
+   "zh": "合伙人、高管或管理成员 1：联邦雇主识别号（仅限成员为公司时）"
+  },
+  {
+   "id": "officer1_percent",
+   "line": "9",
+   "en": "Partner, officer or managing member 1: percent of ownership",
+   "zh": "合伙人、高管或管理成员 1：持股比例"
+  },
+  {
+   "id": "officer1_county",
+   "line": "9",
+   "en": "Partner, officer or managing member 1: county (or country outside the U.S.)",
+   "zh": "合伙人、高管或管理成员 1：所在县（美国境外填国家）"
+  },
+  {
+   "id": "officer2",
+   "line": "9",
+   "en": "Partner, officer or managing member 2: name",
+   "zh": "合伙人、高管或管理成员 2：姓名"
+  },
+  {
+   "id": "officer2_position",
+   "line": "9",
+   "en": "Partner, officer or managing member 2: position held",
+   "zh": "合伙人、高管或管理成员 2：职位",
+   "options": [
+    "General Partner",
+    "Officer/Director",
+    "Managing Member",
+    "Other"
+   ],
+   "hint": {
+    "en": "For Other, write \"Other: \" and the position.",
+    "zh": "选其他时，写 \"Other: \" 加职位。"
+   }
+  },
+  {
+   "id": "officer2_phone",
+   "line": "9",
+   "en": "Partner, officer or managing member 2: phone",
+   "zh": "合伙人、高管或管理成员 2：电话"
+  },
+  {
+   "id": "officer2_address",
+   "line": "9",
+   "en": "Partner, officer or managing member 2: home address",
+   "zh": "合伙人、高管或管理成员 2：住址"
+  },
+  {
+   "id": "officer2_ein",
+   "line": "9",
+   "en": "Partner, officer or managing member 2: FEIN (only when the member is a company)",
+   "zh": "合伙人、高管或管理成员 2：联邦雇主识别号（仅限成员为公司时）"
+  },
+  {
+   "id": "officer2_percent",
+   "line": "9",
+   "en": "Partner, officer or managing member 2: percent of ownership",
+   "zh": "合伙人、高管或管理成员 2：持股比例"
+  },
+  {
+   "id": "officer2_county",
+   "line": "9",
+   "en": "Partner, officer or managing member 2: county (or country outside the U.S.)",
+   "zh": "合伙人、高管或管理成员 2：所在县（美国境外填国家）"
+  },
+  {
+   "id": "sole_proprietor",
+   "line": "10",
+   "en": "Sole proprietor only: legal name (first, middle initial, last)",
+   "zh": "仅限独资：业主法定姓名（名、中间名首字母、姓）"
+  },
+  {
+   "id": "mailing",
+   "line": "15",
+   "en": "Mailing address of the taxpaying entity",
+   "zh": "纳税实体的邮寄地址"
+  },
+  {
+   "id": "mailing_county",
+   "line": "15",
+   "en": "County of the mailing address (or country outside the U.S.)",
+   "zh": "邮寄地址所在县（美国境外填国家）"
+  },
+  {
+   "id": "phone",
+   "line": "16",
+   "en": "Daytime phone number",
+   "zh": "日间电话"
+  },
+  {
+   "id": "fax",
+   "line": "17",
+   "en": "Fax number",
+   "zh": "传真号码"
+  },
+  {
+   "id": "mobile",
+   "line": "18",
+   "en": "Mobile phone number",
+   "zh": "手机号码"
+  },
+  {
+   "id": "website",
+   "line": "19",
+   "en": "Business website address",
+   "zh": "企业网站"
+  },
+  {
+   "id": "records_contact",
+   "line": "20",
+   "en": "Contact person for business records: name",
+   "zh": "业务记录联系人：姓名"
+  },
+  {
+   "id": "records_email",
+   "line": "20",
+   "en": "Contact person for business records: email",
+   "zh": "业务记录联系人：电子邮箱"
+  },
+  {
+   "id": "records_phone",
+   "line": "20",
+   "en": "Contact person for business records: phone",
+   "zh": "业务记录联系人：电话"
+  },
+  {
+   "id": "alt_contact",
+   "line": "21",
+   "en": "Alternate contact for business records: name",
+   "zh": "业务记录备用联系人：姓名"
+  },
+  {
+   "id": "alt_email",
+   "line": "21",
+   "en": "Alternate contact for business records: email",
+   "zh": "业务记录备用联系人：电子邮箱"
+  },
+  {
+   "id": "alt_phone",
+   "line": "21",
+   "en": "Alternate contact for business records: phone",
+   "zh": "业务记录备用联系人：电话"
+  },
+  {
+   "id": "bank",
+   "line": "22",
+   "en": "Bank or financial institution, and account type (business or personal)",
+   "zh": "开户银行或金融机构，以及账户类型（企业或个人）",
+   "hint": {
+    "en": "e.g. \"Cathay Bank, Business\"",
+    "zh": "如 \"Cathay Bank, Business\""
+   }
+  },
+  {
+   "id": "card_processor",
+   "line": "23",
+   "en": "Card or online payment processor, and the merchant ID it assigned",
+   "zh": "银行卡或在线支付处理商，以及其分配的商户号",
+   "hint": {
+    "en": "e.g. \"Square, 9876543210\"",
+    "zh": "如 \"Square, 9876543210\""
+   }
+  },
+  {
+   "id": "dba",
+   "line": "24a",
+   "en": "Business name (DBA) of the place of business",
+   "zh": "营业地点的营业名称（DBA）"
+  },
+  {
+   "id": "location",
+   "line": "24b-24f",
+   "en": "Place of business: street address (not a P.O. box), city, ZIP",
+   "zh": "营业地点：街道地址（不可用邮政信箱）、城市、邮编"
+  },
+  {
+   "id": "location_phone",
+   "line": "24g",
+   "en": "Place of business phone",
+   "zh": "营业地点电话"
+  },
+  {
+   "id": "directions",
+   "line": "24h",
+   "en": "Directions, if the place of business is hard to find",
+   "zh": "如营业地点不易找到，请写明方位"
+  },
+  {
+   "id": "city_limits",
+   "line": "25",
+   "en": "Within what city limits is the place of business? (or \"Not in a city\")",
+   "zh": "营业地点位于哪个城市辖区内？（不在城市内则填 \"Not in a city\"）"
+  },
+  {
+   "id": "location_county",
+   "line": "26",
+   "en": "County of the place of business",
+   "zh": "营业地点所在县"
+  },
+  {
+   "id": "home_based",
+   "line": "27",
+   "en": "Operated from your home?",
+   "zh": "是否在家中经营？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "ship_other",
+   "line": "28",
+   "en": "Ship or deliver to Texas cities or counties other than where the place of business is?",
+   "zh": "是否向营业地点以外的德州城市或县送货？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "landlord",
+   "line": "29",
+   "en": "Name and address of the owner or landlord of the place of business",
+   "zh": "营业场所业主或房东的姓名与地址"
+  },
+  {
+   "id": "other_locations",
+   "line": "30",
+   "en": "Other Texas locations (distribution center, warehouse, office)? \"No\", or one address per line",
+   "zh": "德州是否有其他地点（配送中心、仓库、办公室）？填 \"No\"，或每行一个地址"
+  },
+  {
+   "id": "agents",
+   "line": "31",
+   "en": "Any representative, agent or salesperson in Texas operating under your authority?",
+   "zh": "在德州是否有以您名义经营的代表、代理人或销售人员？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "sells_tangible",
+   "line": "32",
+   "en": "Receipts from the sale, lease or rental of tangible personal property in Texas?",
+   "zh": "是否有在德州销售、租赁有形动产的收入？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "customer_location",
+   "line": "33",
+   "en": "Taxable services at a customer's location, or shipping goods to customers?",
+   "zh": "是否在客户所在地提供应税服务，或向客户运送商品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "temporary",
+   "line": "34",
+   "en": "Sell at temporary locations (fairs, markets, events)? \"No\", or \"Yes: events, period\"",
+   "zh": "是否在临时地点销售（集市、展会、活动）？填 \"No\"，或 \"Yes: 活动, 时段\""
+  },
+  {
+   "id": "franchisee",
+   "line": "35",
+   "en": "A franchisee or licensee operating under your name that collects Texas sales tax?",
+   "zh": "是否有以您名义经营、需代收德州销售税的加盟商或被许可人？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "related_seller",
+   "line": "36",
+   "en": "Owned with someone who has a Texas location selling the same line of products?",
+   "zh": "是否与在德州有营业地点并销售同类商品的人存在重大持股关系？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "related_promoter",
+   "line": "37",
+   "en": "Owned with someone who keeps a Texas location to promote your sales?",
+   "zh": "是否与在德州设点推广您销售的人存在重大持股关系？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "internet_sales",
+   "line": "38",
+   "en": "Internet or mail order sales?",
+   "zh": "是否有网络或邮购销售？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "marketplace",
+   "line": "39",
+   "en": "Are you a marketplace provider?",
+   "zh": "您是否为市场平台提供方？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "over_8000",
+   "line": "40",
+   "en": "Will monthly taxable sales exceed $8,000?",
+   "zh": "每月应税销售额是否超过 8,000 美元？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "alcohol",
+   "line": "41",
+   "en": "Sell alcoholic beverages? If yes, which permit",
+   "zh": "是否销售酒精饮料？如是，持有哪种许可证",
+   "options": [
+    "No",
+    "Yes: Mixed Beverage",
+    "Yes: Beer and wine"
+   ]
+  },
+  {
+   "id": "tabc_license",
+   "line": "42",
+   "en": "Texas Alcoholic Beverage Commission license number(s) for this address",
+   "zh": "此地址的德州酒精饮料委员会许可证号"
+  },
+  {
+   "id": "health_spa",
+   "line": "43",
+   "en": "Sell memberships to a health spa?",
+   "zh": "是否销售健身会所会员资格？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "ecigarettes",
+   "line": "44",
+   "en": "Sell electronic cigarettes?",
+   "zh": "是否销售电子烟？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "fireworks",
+   "line": "45",
+   "en": "Sell fireworks?",
+   "zh": "是否销售烟花？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "single_local_tax",
+   "line": "46",
+   "en": "Elect the optional Single Local Tax rate (only if you answered No to 30-37, 39 and 43)?",
+   "zh": "是否选用可选的单一地方税率（仅当第 30-37、39 和 43 题均答否时）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "start_date",
+   "line": "47",
+   "en": "Date you will begin making sales in Texas",
+   "zh": "开始在德州销售的日期"
+  },
+  {
+   "id": "all_year",
+   "line": "48",
+   "en": "Operate all year? \"Yes\", or \"No: the months you operate\"",
+   "zh": "是否全年营业？填 \"Yes\"，或 \"No: 营业月份\""
+  },
+  {
+   "id": "naics",
+   "line": "49a",
+   "en": "NAICS code",
+   "zh": "NAICS 代码"
+  },
+  {
+   "id": "business_type",
+   "line": "49b",
+   "en": "Principal type of business",
+   "zh": "主要业务类型",
+   "options": [
+    "Retail Trade",
+    "Services",
+    "Wholesale Trade",
+    "Manufacturing",
+    "Transportation",
+    "Real Estate",
+    "Other"
+   ],
+   "hint": {
+    "en": "For Other, write \"Other: \" and the type.",
+    "zh": "选其他时，写 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "activity",
+   "line": "49d",
+   "en": "Primary business activity and the products or services sold",
+   "zh": "主要业务活动及所售商品或服务"
+  },
+  {
+   "id": "interest_earned",
+   "line": "50",
+   "en": "Required to report interest earned on sales tax?",
+   "zh": "是否需申报销售税所赚取的利息？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "diesel",
+   "line": "51",
+   "en": "Sell, lease or rent off-road heavy-duty diesel equipment?",
+   "zh": "是否销售、租赁非道路重型柴油设备？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "prepaid_wireless",
+   "line": "53",
+   "en": "Sell prepaid wireless telecommunications services?",
+   "zh": "是否销售预付费无线通信服务？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "prev_dba",
+   "line": "54",
+   "en": "If you bought a business: the previous owner's trade name (DBA)",
+   "zh": "如收购了企业：前业主的营业名称（DBA）"
+  },
+  {
+   "id": "prev_legal_name",
+   "line": "54",
+   "en": "If you bought a business: the previous owner's legal name",
+   "zh": "如收购了企业：前业主的法定名称"
+  },
+  {
+   "id": "prev_address",
+   "line": "54",
+   "en": "If you bought a business: the previous owner's address",
+   "zh": "如收购了企业：前业主的地址"
+  },
+  {
+   "id": "purchased_items",
+   "line": "54",
+   "en": "If you bought a business: what you purchased (inventory, corporate stock, equipment, real estate, other assets)",
+   "zh": "如收购了企业：所购项目（存货、公司股份、设备、不动产、其他资产）"
+  },
+  {
+   "id": "purchase_price",
+   "line": "54",
+   "en": "If you bought a business: purchase price",
+   "zh": "如收购了企业：收购价格"
+  },
+  {
+   "id": "purchase_date",
+   "line": "54",
+   "en": "If you bought a business: date of purchase",
+   "zh": "如收购了企业：收购日期"
+  },
+  {
+   "id": "signer1",
+   "line": "55",
+   "en": "Signer 1: name and title (sole owner, partner, officer, director or member)",
+   "zh": "签署人 1：姓名与职务（独资业主、合伙人、高管、董事或成员）"
+  },
+  {
+   "id": "signer1_license",
+   "line": "55",
+   "en": "Signer 1: driver license number and state",
+   "zh": "签署人 1：驾照号码与签发州",
+   "hint": {
+    "en": "e.g. \"41234567, TX\", or \"By hand\" to write it on the printed form.",
+    "zh": "如 \"41234567, TX\"；或填写 \"手写\"，在打印件上手写。"
+   }
+  },
+  {
+   "id": "signer1_adult",
+   "line": "55",
+   "en": "Signer 1: at least 18 years of age?",
+   "zh": "签署人 1：是否年满 18 岁？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer2",
+   "line": "55",
+   "en": "Signer 2: name and title (sole owner, partner, officer, director or member)",
+   "zh": "签署人 2：姓名与职务（独资业主、合伙人、高管、董事或成员）"
+  },
+  {
+   "id": "signer2_license",
+   "line": "55",
+   "en": "Signer 2: driver license number and state",
+   "zh": "签署人 2：驾照号码与签发州",
+   "hint": {
+    "en": "e.g. \"41234567, TX\", or \"By hand\" to write it on the printed form.",
+    "zh": "如 \"41234567, TX\"；或填写 \"手写\"，在打印件上手写。"
+   }
+  },
+  {
+   "id": "signer2_adult",
+   "line": "55",
+   "en": "Signer 2: at least 18 years of age?",
+   "zh": "签署人 2：是否年满 18 岁？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer3",
+   "line": "55",
+   "en": "Signer 3: name and title (sole owner, partner, officer, director or member)",
+   "zh": "签署人 3：姓名与职务（独资业主、合伙人、高管、董事或成员）"
+  },
+  {
+   "id": "signer3_license",
+   "line": "55",
+   "en": "Signer 3: driver license number and state",
+   "zh": "签署人 3：驾照号码与签发州",
+   "hint": {
+    "en": "e.g. \"41234567, TX\", or \"By hand\" to write it on the printed form.",
+    "zh": "如 \"41234567, TX\"；或填写 \"手写\"，在打印件上手写。"
+   }
+  },
+  {
+   "id": "signer3_adult",
+   "line": "55",
+   "en": "Signer 3: at least 18 years of age?",
+   "zh": "签署人 3：是否年满 18 岁？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  }
+ ],
+ "blank": {
+  "tx_taxpayer_number": "^(none|no|n/?a)\\.?$",
+  "tx_sos_number": "^(none|no|n/?a)\\.?$",
+  "sole_proprietor": "^(none|no|n/?a)\\.?$",
+  "fax": "^(none|no|n/?a)\\.?$",
+  "mobile": "^(none|no|n/?a)\\.?$",
+  "website": "^(none|no|n/?a)\\.?$",
+  "directions": "^(none|no|n/?a)\\.?$",
+  "tabc_license": "^(none|no|n/?a)\\.?$",
+  "alt_contact": "^(none|no|n/?a)\\.?$",
+  "alt_email": "^(none|no|n/?a)\\.?$",
+  "alt_phone": "^(none|no|n/?a)\\.?$",
+  "card_processor": "^(none|no|n/?a)\\.?$",
+  "prev_dba": "^(none|no|n/?a)\\.?$",
+  "prev_legal_name": "^(none|no|n/?a)\\.?$",
+  "prev_address": "^(none|no|n/?a)\\.?$",
+  "purchase_price": "^(none|no|n/?a)\\.?$",
+  "purchase_date": "^(none|no|n/?a)\\.?$",
+  "purchased_items": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "org_type": [
+   {
+    "check": "BusOrgType01",
+    "if": "^(profit )?corp|^for-?profit"
+   },
+   {
+    "check": "BusOrgType07",
+    "if": "^(limited liability company|llc)"
+   },
+   {
+    "check": "BusOrgType10",
+    "if": "^(limited partnership|lp)$"
+   },
+   {
+    "check": "BusOrgType02",
+    "if": "^(general )?partnership"
+   },
+   {
+    "check": "BusOrgType13",
+    "if": "^professional corp"
+   },
+   {
+    "check": "BusOrgType05",
+    "if": "^professional assoc"
+   },
+   {
+    "check": "BusOrgType04",
+    "if": "^non-?profit"
+   },
+   {
+    "check": "BusOrgType11",
+    "if": "^joint venture"
+   },
+   {
+    "check": "BusOrgType16",
+    "if": "^other"
+   },
+   {
+    "text": "1",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "2"
+   },
+   {
+    "text": "Page3Name"
+   },
+   {
+    "text": "Page4Name"
+   },
+   {
+    "text": "Page5Name"
+   }
+  ],
+  "fein": [
+   {
+    "text": "3",
+    "pick": "ein"
+   },
+   {
+    "check": "Check Box4",
+    "if": "^(none|no|applied|n/?a|无|没有)"
+   }
+  ],
+  "tx_taxpayer_number": [
+   {
+    "text": "5",
+    "pick": "digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "tx_vendor_number": [
+   {
+    "check": "TIN6b",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "check": "TIN6a",
+    "if": "\\d"
+   },
+   {
+    "text": "6",
+    "pick": "digits",
+    "if": "\\d"
+   }
+  ],
+  "formation": [
+   {
+    "text": "7a",
+    "pick": "head"
+   },
+   {
+    "text": "7b",
+    "pick": "tail|date|digits"
+   }
+  ],
+  "home_file_number": [
+   {
+    "text": "7c"
+   }
+  ],
+  "tx_sos_number": [
+   {
+    "text": "7d",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "merger": [
+   {
+    "check": "Merger8a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Merger8b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "officer1": [
+   {
+    "text": "9a1"
+   }
+  ],
+  "officer1_position": [
+   {
+    "check": "Box9a1",
+    "if": "^general partner"
+   },
+   {
+    "check": "Box9a2",
+    "if": "^(officer|director)"
+   },
+   {
+    "check": "Box9a3",
+    "if": "^managing member"
+   },
+   {
+    "check": "Box9a4",
+    "if": "^other"
+   },
+   {
+    "text": "9k1",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "officer1_phone": [
+   {
+    "text": "9b1",
+    "pick": "phone"
+   }
+  ],
+  "officer1_address": [
+   {
+    "text": "9c1",
+    "pick": "street"
+   },
+   {
+    "text": "9d1",
+    "pick": "city"
+   },
+   {
+    "text": "9e1",
+    "pick": "state"
+   },
+   {
+    "text": "9f1",
+    "pick": "zip"
+   }
+  ],
+  "officer1_ein": [
+   {
+    "text": "9h1",
+    "pick": "ein"
+   }
+  ],
+  "officer1_percent": [
+   {
+    "text": "9i1",
+    "pick": "digits"
+   }
+  ],
+  "officer1_county": [
+   {
+    "text": "9j1"
+   }
+  ],
+  "officer2": [
+   {
+    "text": "9a2"
+   }
+  ],
+  "officer2_position": [
+   {
+    "check": "Box9b1",
+    "if": "^general partner"
+   },
+   {
+    "check": "Box9b2",
+    "if": "^(officer|director)"
+   },
+   {
+    "check": "Box9b3",
+    "if": "^managing member"
+   },
+   {
+    "check": "Box9b4",
+    "if": "^other"
+   },
+   {
+    "text": "9k2",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "officer2_phone": [
+   {
+    "text": "9b2",
+    "pick": "phone"
+   }
+  ],
+  "officer2_address": [
+   {
+    "text": "9c2",
+    "pick": "street"
+   },
+   {
+    "text": "9d2",
+    "pick": "city"
+   },
+   {
+    "text": "9e2",
+    "pick": "state"
+   },
+   {
+    "text": "9f2",
+    "pick": "zip"
+   }
+  ],
+  "officer2_ein": [
+   {
+    "text": "9h2",
+    "pick": "ein"
+   }
+  ],
+  "officer2_percent": [
+   {
+    "text": "9i2",
+    "pick": "digits"
+   }
+  ],
+  "officer2_county": [
+   {
+    "text": "9j2"
+   }
+  ],
+  "sole_proprietor": [
+   {
+    "text": "10",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "15a",
+    "pick": "street"
+   },
+   {
+    "text": "15c",
+    "pick": "city"
+   },
+   {
+    "text": "15d",
+    "pick": "state"
+   },
+   {
+    "text": "15e",
+    "pick": "zip"
+   }
+  ],
+  "mailing_county": [
+   {
+    "text": "15f"
+   }
+  ],
+  "phone": [
+   {
+    "text": "16",
+    "pick": "phone"
+   }
+  ],
+  "fax": [
+   {
+    "text": "17",
+    "pick": "phone",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "mobile": [
+   {
+    "text": "18",
+    "pick": "phone",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "website": [
+   {
+    "text": "19",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "records_contact": [
+   {
+    "text": "20a"
+   }
+  ],
+  "records_email": [
+   {
+    "text": "20b"
+   }
+  ],
+  "records_phone": [
+   {
+    "text": "20d"
+   }
+  ],
+  "alt_contact": [
+   {
+    "text": "21a",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "alt_email": [
+   {
+    "text": "21b",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "alt_phone": [
+   {
+    "text": "21d",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "bank": [
+   {
+    "text": "22",
+    "pick": "head"
+   },
+   {
+    "check": "Account22b1",
+    "if": "\\bbusiness\\b"
+   },
+   {
+    "check": "Account22b2",
+    "if": "\\bpersonal\\b"
+   }
+  ],
+  "card_processor": [
+   {
+    "text": "23a",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "23b",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "dba": [
+   {
+    "text": "24a"
+   }
+  ],
+  "location": [
+   {
+    "text": "24b",
+    "pick": "street"
+   },
+   {
+    "text": "24d",
+    "pick": "city"
+   },
+   {
+    "text": "24f",
+    "pick": "zip"
+   }
+  ],
+  "location_phone": [
+   {
+    "text": "24g",
+    "pick": "phone"
+   }
+  ],
+  "directions": [
+   {
+    "text": "24h",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "city_limits": [
+   {
+    "text": "25a",
+    "if": "^(?!not\\b|none\\b|outside\\b)"
+   },
+   {
+    "check": "Check Box25",
+    "if": "^(not|none|outside)\\b"
+   }
+  ],
+  "location_county": [
+   {
+    "text": "26"
+   }
+  ],
+  "home_based": [
+   {
+    "check": "POB27a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "POB27b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "ship_other": [
+   {
+    "check": "POBja",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "POBjb",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "landlord": [
+   {
+    "text": "28"
+   }
+  ],
+  "other_locations": [
+   {
+    "check": "29b",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "check": "29a",
+    "if": "^(?!(n|no|否)\\b)"
+   },
+   {
+    "text": "29a1",
+    "pick": "line1|street",
+    "if": "^(?!(n|no|否)\\b)"
+   },
+   {
+    "text": "29a2",
+    "pick": "line1|city",
+    "if": "^(?!(n|no|否)\\b)"
+   },
+   {
+    "text": "29a3",
+    "pick": "line1|zip",
+    "if": "^(?!(n|no|否)\\b)"
+   },
+   {
+    "text": "29b1",
+    "pick": "line2|street",
+    "if": "^(?!(n|no|否)\\b)"
+   },
+   {
+    "text": "29b2",
+    "pick": "line2|city",
+    "if": "^(?!(n|no|否)\\b)"
+   },
+   {
+    "text": "29b3",
+    "pick": "line2|zip",
+    "if": "^(?!(n|no|否)\\b)"
+   }
+  ],
+  "agents": [
+   {
+    "check": "30a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "30b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "sells_tangible": [
+   {
+    "check": "31a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "31b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "customer_location": [
+   {
+    "check": "CustLoc32a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "CustLoc32b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "temporary": [
+   {
+    "check": "TempLoc33b",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "check": "TempLoc33a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "33b1",
+    "pick": "tail|head",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "33b2",
+    "pick": "tail|tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "franchisee": [
+   {
+    "check": "34a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "34b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "related_seller": [
+   {
+    "check": "35a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "35b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "related_promoter": [
+   {
+    "check": "36a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "36b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "internet_sales": [
+   {
+    "check": "IntSales37a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "IntSales37b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "marketplace": [
+   {
+    "check": "38a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "38b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "over_8000": [
+   {
+    "check": "Taxable39a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Taxable39b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "alcohol": [
+   {
+    "check": "40b",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "check": "40a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "40c",
+    "if": "mixed"
+   },
+   {
+    "check": "40d",
+    "if": "beer|wine"
+   }
+  ],
+  "tabc_license": [
+   {
+    "text": "41",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "health_spa": [
+   {
+    "check": "Spa42a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Spa42b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "ecigarettes": [
+   {
+    "check": "Item43a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Item43b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "fireworks": [
+   {
+    "check": "Item44a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Item44b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "single_local_tax": [
+   {
+    "check": "45a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "45b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "start_date": [
+   {
+    "text": "46",
+    "pick": "date|digits"
+   }
+  ],
+  "all_year": [
+   {
+    "check": "AllYear47a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "AllYear47b",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "47b",
+    "pick": "tail",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "naics": [
+   {
+    "text": "48a",
+    "pick": "digits"
+   }
+  ],
+  "business_type": [
+   {
+    "check": "NAICS48b03",
+    "if": "^retail"
+   },
+   {
+    "check": "NAICS48b08",
+    "if": "^services"
+   },
+   {
+    "check": "NAICS48b15",
+    "if": "^wholesale"
+   },
+   {
+    "check": "NAICS48b14",
+    "if": "^manufacturing"
+   },
+   {
+    "check": "NAICS48b02",
+    "if": "^transportation"
+   },
+   {
+    "check": "NAICS48b04",
+    "if": "^real"
+   },
+   {
+    "check": "NAICS48b17",
+    "if": "^other"
+   },
+   {
+    "text": "48c",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "activity": [
+   {
+    "text": "48d"
+   }
+  ],
+  "interest_earned": [
+   {
+    "check": "IntEarned49a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "IntEarned49b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "diesel": [
+   {
+    "check": "Diesel50a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Diesel50b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "prepaid_wireless": [
+   {
+    "check": "Prepaid52a",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Prepaid52b",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "prev_dba": [
+   {
+    "text": "53a",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "prev_legal_name": [
+   {
+    "text": "53c",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "prev_address": [
+   {
+    "text": "53f",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "53g",
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "53h",
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "53i",
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "purchased_items": [
+   {
+    "check": "Check Box53j",
+    "if": "inventory"
+   },
+   {
+    "check": "Check Box53k",
+    "if": "stock"
+   },
+   {
+    "check": "Check Box53l",
+    "if": "equipment"
+   },
+   {
+    "check": "Check Box53m",
+    "if": "real estate"
+   },
+   {
+    "check": "Check Box53n",
+    "if": "other"
+   }
+  ],
+  "purchase_price": [
+   {
+    "text": "53o",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "purchase_date": [
+   {
+    "text": "53p",
+    "pick": "date|digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "signer1": [
+   {
+    "text": "54a1"
+   }
+  ],
+  "signer1_license": [
+   {
+    "text": "54b1",
+    "pick": "head"
+   },
+   {
+    "text": "54c1",
+    "pick": "tail",
+    "upper": true
+   }
+  ],
+  "signer1_adult": [
+   {
+    "check": "54d1",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "54e1",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "signer2": [
+   {
+    "text": "54a2"
+   }
+  ],
+  "signer2_license": [
+   {
+    "text": "54b2",
+    "pick": "head"
+   },
+   {
+    "text": "54c2",
+    "pick": "tail",
+    "upper": true
+   }
+  ],
+  "signer2_adult": [
+   {
+    "check": "54d2",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "54e2",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "signer3": [
+   {
+    "text": "54a3"
+   }
+  ],
+  "signer3_license": [
+   {
+    "text": "54b3",
+    "pick": "head"
+   },
+   {
+    "text": "54c3",
+    "pick": "tail",
+    "upper": true
+   }
+  ],
+  "signer3_adult": [
+   {
+    "check": "54d3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "54e3",
+    "if": "^(n|no|否)\\b"
+   }
+  ]
+ },
+ "sign": {
+  "page": 4,
+  "x": 338,
+  "y": 581,
+  "w": 228,
+  "h": 22
+ }
+}

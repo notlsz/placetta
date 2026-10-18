@@ -4,6 +4,15 @@
   "pdf": "lac-plan-check.pdf",
   "checked": "2026-10-14",
   "notes": "site: 'Business name/DBA, street, City, CA ZIP' (name first). Addresses: 'street, City, CA ZIP'. Yes/no answers: Yes or No. scope: one of the four Section 1 lines; for a fire rebuild add the fire's name after a comma. square_footage: one printed Section 3 line (restaurant/caterer or food market, regular fee), which ticks the NEW/REMODEL FACILITY box and the size line and writes that line's fee as the Total Amount Due; expedited fees, supermarkets and other facility types are ticked by hand. php_number, remodel_operation, remodel_scope: remodels only (N/A otherwise). Signature and its date are left for the signer.",
+  "blank": {
+    "built_before_2004": "^(n|no|false|否)\\b",
+    "prepackaged_only": "^(n|no|false|否)\\b",
+    "reusable_tableware": "^(n|no|false|否)\\b",
+    "common_restroom": "^(n|no|false|否)\\b",
+    "common_janitorial": "^(n|no|false|否)\\b",
+    "php_number": "^(n/?a|none|no|not applicable|无|否)\\.?$",
+    "remodel_scope": "^(n/?a|none|no|not applicable|无|否)\\.?$"
+  },
   "boxes": {
     "request_date": [
       { "text": "Date of Request", "pick": "date" }
