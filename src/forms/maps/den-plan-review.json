@@ -1,0 +1,2096 @@
+{
+ "form": "den-plan-review",
+ "rev": "Retail/Wholesale Food Establishment Plan Review Application (SUDP health application, accessible)",
+ "pdf": "den-plan-review.pdf",
+ "url": "https://denvergov.org/files/assets/public/v/1/public-health-and-environment/documents/phi/final_sudp-health_food-application_accessible.pdf",
+ "checked": "2026-10-18",
+ "notes": "Denver Development Services' retail and wholesale food establishment plan review application. Lists that say 'check all that apply' take every item that applies, by name. Equipment and fixture counts take a number each. Tables take one row per line, the columns separated by commas, as the hints show; sink dimensions go in as length, width and depth. The building submittal checklists on pages 2 and 3, the date, and the certification box are left for the applicant; the type-of-establishment boxes in this PDF are named out of step with their printed labels, so each label is paired with the box beside it.",
+ "lines": [
+  {
+   "id": "project_address",
+   "line": "Page 4",
+   "en": "Project address and ZIP code",
+   "zh": "项目地址与邮编"
+  },
+  {
+   "id": "establishment",
+   "line": "Establishment",
+   "en": "Name of establishment",
+   "zh": "场所名称"
+  },
+  {
+   "id": "establishment_phone",
+   "line": "Establishment",
+   "en": "Establishment phone",
+   "zh": "场所电话"
+  },
+  {
+   "id": "establishment_email",
+   "line": "Establishment",
+   "en": "Establishment email",
+   "zh": "场所电子邮箱"
+  },
+  {
+   "id": "establishment_cell",
+   "line": "Establishment",
+   "en": "Establishment cell",
+   "zh": "场所手机"
+  },
+  {
+   "id": "owner",
+   "line": "Owner",
+   "en": "Owner: individuals or corporate name",
+   "zh": "所有人：个人或公司名称"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Owner",
+   "en": "Owner phone",
+   "zh": "所有人电话"
+  },
+  {
+   "id": "owner_email",
+   "line": "Owner",
+   "en": "Owner email",
+   "zh": "所有人电子邮箱"
+  },
+  {
+   "id": "owner_cell",
+   "line": "Owner",
+   "en": "Owner cell",
+   "zh": "所有人手机"
+  },
+  {
+   "id": "owner_mailing",
+   "line": "Owner",
+   "en": "Owner mailing address",
+   "zh": "所有人邮寄地址"
+  },
+  {
+   "id": "contact",
+   "line": "Contact",
+   "en": "Primary contact: \"name, company\"",
+   "zh": "主要联系人：\"姓名, 公司\""
+  },
+  {
+   "id": "contact_phone",
+   "line": "Contact",
+   "en": "Primary contact: phone",
+   "zh": "主要联系人：电话"
+  },
+  {
+   "id": "contact_cell",
+   "line": "Contact",
+   "en": "Primary contact: cell",
+   "zh": "主要联系人：手机"
+  },
+  {
+   "id": "contact_email",
+   "line": "Contact",
+   "en": "Primary contact: email (plan review comments go here)",
+   "zh": "主要联系人：电子邮箱（审核意见将发至此）"
+  },
+  {
+   "id": "contact_mailing",
+   "line": "Contact",
+   "en": "Primary contact: mailing address",
+   "zh": "主要联系人：邮寄地址"
+  },
+  {
+   "id": "architect",
+   "line": "Contact",
+   "en": "Architect or engineer of record: \"name, company\"",
+   "zh": "注册建筑师或工程师：\"姓名, 公司\""
+  },
+  {
+   "id": "architect_phone",
+   "line": "Contact",
+   "en": "Architect or engineer: phone",
+   "zh": "建筑师或工程师：电话"
+  },
+  {
+   "id": "architect_cell",
+   "line": "Contact",
+   "en": "Architect or engineer: cell",
+   "zh": "建筑师或工程师：手机"
+  },
+  {
+   "id": "architect_email",
+   "line": "Contact",
+   "en": "Architect or engineer: email",
+   "zh": "建筑师或工程师：电子邮箱"
+  },
+  {
+   "id": "architect_mailing",
+   "line": "Contact",
+   "en": "Architect or engineer: mailing address",
+   "zh": "建筑师或工程师：邮寄地址"
+  },
+  {
+   "id": "contractor",
+   "line": "Contact",
+   "en": "Contractor: \"name, company\"",
+   "zh": "承包商：\"姓名, 公司\""
+  },
+  {
+   "id": "contractor_license",
+   "line": "Contact",
+   "en": "Contractor license number",
+   "zh": "承包商执照号"
+  },
+  {
+   "id": "contractor_phone",
+   "line": "Contact",
+   "en": "Contractor: phone",
+   "zh": "承包商：电话"
+  },
+  {
+   "id": "contractor_cell",
+   "line": "Contact",
+   "en": "Contractor: cell",
+   "zh": "承包商：手机"
+  },
+  {
+   "id": "contractor_email",
+   "line": "Contact",
+   "en": "Contractor: email",
+   "zh": "承包商：电子邮箱"
+  },
+  {
+   "id": "contractor_mailing",
+   "line": "Contact",
+   "en": "Contractor: mailing address",
+   "zh": "承包商：邮寄地址"
+  },
+  {
+   "id": "setting",
+   "line": "Section I",
+   "en": "The operation takes place in a",
+   "zh": "经营场所类型",
+   "options": [
+    "Institutional setting",
+    "Wholesale/manufacturing setting",
+    "Retail setting",
+    "Marijuana setting"
+   ]
+  },
+  {
+   "id": "establishment_type",
+   "line": "Section I",
+   "en": "Type of establishment (all that apply)",
+   "zh": "场所类型（可多选）",
+   "options": [
+    "Animal Concept Facility",
+    "Concession",
+    "Food Court",
+    "Bakery",
+    "Convenience Store",
+    "Full-Service Restaurant",
+    "Bar",
+    "Distillery",
+    "Ice Cream Shop",
+    "Brewery",
+    "Fast Food",
+    "Market (Grocery)",
+    "Commissary kitchen",
+    "Fish/Meat Market",
+    "Pet Food",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each that applies; for a type not listed write only \"Other: \" and the type.",
+    "zh": "逐项写明；未列出的类型只写 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "scope",
+   "line": "Section I",
+   "en": "Scope of work (all that apply), or \"None\" for a new establishment",
+   "zh": "工程范围（可多选），新场所填 \"None\"",
+   "options": [
+    "Addition of seating",
+    "Food concept and/or menu changes",
+    "Addition of equipment",
+    "Change in plumbing fixtures and/or drains",
+    "Interior remodel with no changes to equipment",
+    "Change of ownership/business name",
+    "Pretreatment device (grease or solids interceptor)",
+    "Domestic water meter/tap change",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each that applies; for something not listed write only \"Other: \" and what it is. A change of use goes on its own line below.",
+    "zh": "逐项写明；未列出的只写 \"Other: \" 加说明。用途变更请填下一行。"
+   }
+  },
+  {
+   "id": "change_of_use",
+   "line": "Section I",
+   "en": "Change of use: \"from, to\", or \"None\"",
+   "zh": "用途变更：\"原用途, 新用途\"，没有则填 \"None\""
+  },
+  {
+   "id": "process_water",
+   "line": "Section I",
+   "en": "Manufacturing or wholesale: water used for production and for clean-up (gallons a day), \"production, clean-up\", or \"N/A\"",
+   "zh": "生产或批发：生产用水与清洁用水（加仑/天），\"生产, 清洁\"，不适用填 \"N/A\""
+  },
+  {
+   "id": "main_ingredients",
+   "line": "Section I",
+   "en": "Manufacturing or wholesale: main ingredients (no quantities), or \"N/A\"",
+   "zh": "生产或批发：主要原料（不写数量），不适用填 \"N/A\""
+  },
+  {
+   "id": "seasonal",
+   "line": "Section I",
+   "en": "Is this a seasonal operation? If yes: \"Yes, months a year, days a week, hours a day\"",
+   "zh": "是否季节性经营？如是：\"Yes, 每年月数, 每周天数, 每天小时数\"",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "cooking_equipment",
+   "line": "Section II",
+   "en": "Cooking equipment counts, one per line in the printed order: Stove, Range (up to 6 burners), Stove and oven combo, Grills, Griddles, Ovens, Pizza ovens",
+   "zh": "烹饪设备数量，按表格顺序每行一个：炉灶、灶台（最多 6 个灶头）、炉灶烤箱一体、烤架、扒炉、烤箱、披萨烤箱",
+   "hint": {
+    "en": "Seven numbers, one per line, 0 where there is none.",
+    "zh": "七个数字，每行一个，没有的写 0。"
+   }
+  },
+  {
+   "id": "cooking_equipment_2",
+   "line": "Section II",
+   "en": "More cooking equipment counts, one per line: Smokers, Broilers, Salamanders, Fryers (2 baskets each), Woks, Tilt kettles, Rice cookers",
+   "zh": "更多烹饪设备数量，每行一个：烟熏炉、焗炉、明火焗炉、炸炉（每台 2 篮）、炒锅灶、可倾式汤锅、电饭锅",
+   "hint": {
+    "en": "Seven numbers, one per line, 0 where there is none.",
+    "zh": "七个数字，每行一个，没有的写 0。"
+   }
+  },
+  {
+   "id": "kitchen_fixtures",
+   "line": "Section II",
+   "en": "Kitchen drainage fixture counts, one per line: Hand sinks, Preparation sinks, Pot (pre-rinse) sinks, 2 or 3-compartment sinks, Garbage disposals, Dish washers, Mop sinks, Floor sinks, Floor drains",
+   "zh": "厨房排水设施数量，每行一个：洗手池、备餐池、预冲洗池、两格或三格水槽、垃圾处理器、洗碗机、拖把池、地漏水槽、地漏",
+   "hint": {
+    "en": "Nine numbers, one per line, 0 where there is none.",
+    "zh": "九个数字，每行一个，没有的写 0。"
+   }
+  },
+  {
+   "id": "bar_fixtures",
+   "line": "Section II",
+   "en": "Bar or wait station drainage fixture counts, one per line: Hand sinks, Dump sinks, 2 or 3-compartment sinks, Dish washers, Floor sinks, Floor drains",
+   "zh": "吧台或服务台排水设施数量，每行一个：洗手池、倾倒池、两格或三格水槽、洗碗机、地漏水槽、地漏",
+   "hint": {
+    "en": "Six numbers, one per line, 0 where there is none.",
+    "zh": "六个数字，每行一个，没有的写 0。"
+   }
+  },
+  {
+   "id": "employees_per_shift",
+   "line": "Section III",
+   "en": "Maximum number of employees per shift",
+   "zh": "每班最多员工人数"
+  },
+  {
+   "id": "hours",
+   "line": "Section III",
+   "en": "Hours of operation, Sunday to Saturday, one day per line: \"open - close\" or \"Closed\"",
+   "zh": "营业时间，周日至周六每行一天：\"开门 - 关门\" 或 \"Closed\""
+  },
+  {
+   "id": "indoor_seats",
+   "line": "Section III",
+   "en": "Number of indoor seats where meals are served",
+   "zh": "室内用餐座位数"
+  },
+  {
+   "id": "outdoor_seats",
+   "line": "Section III",
+   "en": "Number of outdoor seats where meals are served (all dining and bar areas)",
+   "zh": "室外用餐座位数（含所有用餐与吧台区）"
+  },
+  {
+   "id": "total_sq_ft",
+   "line": "Section III",
+   "en": "Total square feet of the facility",
+   "zh": "设施总面积（平方英尺）"
+  },
+  {
+   "id": "dining_sq_ft",
+   "line": "Section III",
+   "en": "Total square feet where meals will be served",
+   "zh": "用餐区总面积（平方英尺）"
+  },
+  {
+   "id": "service_type",
+   "line": "Section III",
+   "en": "Type of service (all that apply)",
+   "zh": "服务类型（可多选）",
+   "options": [
+    "On-site consumption",
+    "Off-site consumption",
+    "Single-use utensils",
+    "Multi-use utensils",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each that applies; for a service not listed write only \"Other: \" and what it is.",
+    "zh": "逐项写明；未列出的服务只写 \"Other: \" 加说明。"
+   }
+  },
+  {
+   "id": "meals",
+   "line": "Section III",
+   "en": "Maximum meals: \"breakfast, lunch, dinner\" (0 for a meal not served)",
+   "zh": "最多供餐数：\"早餐, 午餐, 晚餐\"（不供应的写 0）"
+  },
+  {
+   "id": "meals_total",
+   "line": "Section III",
+   "en": "Meals: \"total a day, maximum an hour, percent carry-out\"",
+   "zh": "供餐：\"每日总数, 每小时最多, 外带百分比\""
+  },
+  {
+   "id": "held_cold",
+   "line": "Section IV",
+   "en": "Will food be held cold? (refrigeration, ice baths, etc.)",
+   "zh": "是否冷藏保存食品？（冰箱、冰浴等）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "held_hot",
+   "line": "Section IV",
+   "en": "Will food be held hot? (steam tables)",
+   "zh": "是否热保存食品？（蒸汽台）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "fresh_produce",
+   "line": "Section IV",
+   "en": "Will fresh produce (including garnishes) be required for the menu?",
+   "zh": "菜单是否需要新鲜农产品（含装饰）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "cooled",
+   "line": "Section IV",
+   "en": "Will food be cooled after cooking?",
+   "zh": "烹饪后是否冷却食品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "reheated",
+   "line": "Section IV",
+   "en": "Will food be reheated after cooling?",
+   "zh": "冷却后是否再加热？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "thawed",
+   "line": "Section IV",
+   "en": "Will frozen food need to be thawed?",
+   "zh": "冷冻食品是否需要解冻？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "cooked_raw",
+   "line": "Section IV",
+   "en": "Will proteins or vegetables be fully cooked from a raw state?",
+   "zh": "蛋白质或蔬菜是否从生的状态完全烹熟？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "sold_to_others",
+   "line": "Section IV",
+   "en": "Will foods be prepared to sell to other establishments?",
+   "zh": "是否制备食品出售给其他场所？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "catering",
+   "line": "Section IV",
+   "en": "Will catering be conducted?",
+   "zh": "是否提供外烩？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "self_service",
+   "line": "Section IV",
+   "en": "Will self-service foods (buffets, salad bars) be provided?",
+   "zh": "是否提供自助食品（自助餐、沙拉吧）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "bulk",
+   "line": "Section IV",
+   "en": "Will food items be sold in bulk to the public?",
+   "zh": "是否向公众散装销售食品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "commissary",
+   "line": "Section IV",
+   "en": "Will another facility, such as a commissary, prepare food served here?",
+   "zh": "是否由中央厨房等其他设施制备在此供应的食品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "mip",
+   "line": "Section V",
+   "en": "Will marijuana-infused products be manufactured, stored or sold?",
+   "zh": "是否生产、储存或销售大麻制品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "extractions",
+   "line": "Section V",
+   "en": "Will extractions be conducted on site to produce infused edibles?",
+   "zh": "是否在现场提取以生产大麻食品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "oil_wholesale",
+   "line": "Section V",
+   "en": "Will extracted oil be sold wholesale to other marijuana facilities?",
+   "zh": "是否向其他大麻设施批发提取油？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "trim_edibles",
+   "line": "Section V",
+   "en": "Is trim from the facility intended for any edible production?",
+   "zh": "设施的修剪物是否用于食品生产？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "mj_refrigeration",
+   "line": "Section V",
+   "en": "Is commercial refrigeration provided on site?",
+   "zh": "现场是否配备商用冷藏？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "plumbing",
+   "line": "Section VIII",
+   "en": "Plumbing fixtures: one per line, \"ID on plans, number, fixture or equipment, direct or indirect\"",
+   "zh": "排水设施：每行一项，\"图纸编号, 数量, 设施或设备, 直接或间接排水\"",
+   "hint": {
+    "en": "Up to 9 lines, e.g. \"HS-1, 3, Hand sink, Direct\".",
+    "zh": "最多 9 行，如 \"HS-1, 3, Hand sink, Direct\"。"
+   }
+  },
+  {
+   "id": "shower",
+   "line": "Section VIII",
+   "en": "Shower on site with hot water? \"Yes, how many\" or \"No\"",
+   "zh": "现场是否有带热水的淋浴？\"Yes, 数量\" 或 \"No\""
+  },
+  {
+   "id": "clothes_washer",
+   "line": "Section VIII",
+   "en": "Clothes washer on site with hot water? \"Yes, how many\" or \"No\"",
+   "zh": "现场是否有带热水的洗衣机？\"Yes, 数量\" 或 \"No\""
+  },
+  {
+   "id": "garbage_disposal",
+   "line": "Section VIII",
+   "en": "Is a garbage disposal provided?",
+   "zh": "是否配有垃圾处理器？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "prep_sinks",
+   "line": "Section VIII",
+   "en": "Food prep sinks: one per line, \"ID on plans, drainboard length, length, width, depth\" (inches)",
+   "zh": "备餐水槽：每行一个，\"图纸编号, 沥水板长度, 长, 宽, 深\"（英寸）",
+   "hint": {
+    "en": "Up to 3 lines, e.g. \"PS-1, 18, 18, 18, 12\".",
+    "zh": "最多 3 行，如 \"PS-1, 18, 18, 18, 12\"。"
+   }
+  },
+  {
+   "id": "ware_sinks",
+   "line": "Section IX",
+   "en": "Manual ware washing sinks: one per line, \"ID, soiled drainboard, length, width, depth, clean drainboard, pre-rinse Y/N\" (inches)",
+   "zh": "手工洗碗水槽：每行一个，\"编号, 脏碟沥水板, 长, 宽, 深, 洁碟沥水板, 预冲洗 Y/N\"（英寸）",
+   "hint": {
+    "en": "Up to 3 lines, e.g. \"3C-1, 24, 18, 18, 14, 24, Y\".",
+    "zh": "最多 3 行，如 \"3C-1, 24, 18, 18, 14, 24, Y\"。"
+   }
+  },
+  {
+   "id": "dish_machines",
+   "line": "Section IX",
+   "en": "Dish machines: one per line, \"ID, make, model, heat or chemical, drainboard length, pre-rinse Y/N, soak sink length, width, depth\"",
+   "zh": "洗碗机：每行一台，\"编号, 品牌, 型号, 热力或化学消毒, 沥水板长度, 预冲洗 Y/N, 浸泡池长, 宽, 深\"",
+   "hint": {
+    "en": "Up to 3 lines, or \"None\".",
+    "zh": "最多 3 行，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "water_heater_count",
+   "line": "Section X",
+   "en": "How many water heaters service this facility?",
+   "zh": "服务此设施的热水器数量"
+  },
+  {
+   "id": "tank_heaters",
+   "line": "Section X",
+   "en": "Tank water heaters: one per line, \"make, model, kW or BTU rating, recovery GPH at 100F rise\"",
+   "zh": "储水式热水器：每行一台，\"品牌, 型号, 千瓦或 BTU, 100F 温升恢复速率 GPH\"",
+   "hint": {
+    "en": "Up to 2 lines, or \"None\".",
+    "zh": "最多 2 行，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "tankless_heaters",
+   "line": "Section X",
+   "en": "Tankless water heaters: one per line, \"make, model, BTU rating, GPM at 80F or 100F rise, storage tank gallons\"",
+   "zh": "即热式热水器：每行一台，\"品牌, 型号, BTU, 80F 或 100F 温升流量 GPM, 储水罐加仑\"",
+   "hint": {
+    "en": "Up to 2 lines, or \"None\".",
+    "zh": "最多 2 行，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "building_checklist",
+   "line": "Pages 2-3",
+   "en": "Building permit submittal checklist (zoning, drawings, code analysis, reports)",
+   "zh": "建筑许可提交核对表（分区、图纸、规范分析、报告）"
+  }
+ ],
+ "unmapped": {
+  "building_checklist": "The checklist on pages 2 and 3 records which drawings and reports the designer has bundled with the building submittal, so the designer ticks it."
+ },
+ "blank": {
+  "establishment_cell": "^(none|no|n/?a|not applicable)\\.?$",
+  "owner_cell": "^(none|no|n/?a|not applicable)\\.?$",
+  "contact_cell": "^(none|no|n/?a|not applicable)\\.?$",
+  "architect": "^(none|no|n/?a|not applicable)\\.?$",
+  "architect_phone": "^(none|no|n/?a|not applicable)\\.?$",
+  "architect_cell": "^(none|no|n/?a|not applicable)\\.?$",
+  "architect_email": "^(none|no|n/?a|not applicable)\\.?$",
+  "architect_mailing": "^(none|no|n/?a|not applicable)\\.?$",
+  "contractor": "^(none|no|n/?a|not applicable)\\.?$",
+  "contractor_license": "^(none|no|n/?a|not applicable)\\.?$",
+  "contractor_phone": "^(none|no|n/?a|not applicable)\\.?$",
+  "contractor_cell": "^(none|no|n/?a|not applicable)\\.?$",
+  "contractor_email": "^(none|no|n/?a|not applicable)\\.?$",
+  "contractor_mailing": "^(none|no|n/?a|not applicable)\\.?$",
+  "scope": "^(none|no|n/?a|not applicable)\\.?$",
+  "change_of_use": "^(none|no|n/?a|not applicable)\\.?$",
+  "process_water": "^(none|no|n/?a|not applicable)\\.?$",
+  "main_ingredients": "^(none|no|n/?a|not applicable)\\.?$",
+  "dish_machines": "^(none|no|n/?a|not applicable)\\.?$",
+  "tank_heaters": "^(none|no|n/?a|not applicable)\\.?$",
+  "tankless_heaters": "^(none|no|n/?a|not applicable)\\.?$"
+ },
+ "boxes": {
+  "project_address": [
+   {
+    "text": "Address"
+   }
+  ],
+  "establishment": [
+   {
+    "text": "Name of Establishment"
+   }
+  ],
+  "establishment_phone": [
+   {
+    "text": "Establishment Phone"
+   }
+  ],
+  "establishment_email": [
+   {
+    "text": "establishment email"
+   }
+  ],
+  "establishment_cell": [
+   {
+    "text": "establishment cell",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner": [
+   {
+    "text": "Owner Name"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "Owner phone"
+   }
+  ],
+  "owner_email": [
+   {
+    "text": "Owner email"
+   }
+  ],
+  "owner_cell": [
+   {
+    "text": "Owner Cell",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_mailing": [
+   {
+    "text": "Owner Mailing address"
+   }
+  ],
+  "contact": [
+   {
+    "text": "Name of Primary Contact",
+    "pick": "head"
+   },
+   {
+    "text": "Company name",
+    "pick": "tail"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Contact phone"
+   }
+  ],
+  "contact_cell": [
+   {
+    "text": "contact cell",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "contact email"
+   }
+  ],
+  "contact_mailing": [
+   {
+    "text": "contact mailing address"
+   }
+  ],
+  "architect": [
+   {
+    "text": "Name of architect or engineer of record",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "architect/engineer company name",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "architect_phone": [
+   {
+    "text": "architect/engineer phone",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "architect_cell": [
+   {
+    "text": "architect/engineer cell",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "architect_email": [
+   {
+    "text": "architect/engineer email",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "architect_mailing": [
+   {
+    "text": "architect/engineer mailing address",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor": [
+   {
+    "text": "name of contractor",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "contractor company name",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_license": [
+   {
+    "text": "License #",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_phone": [
+   {
+    "text": "Contractor phone",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_cell": [
+   {
+    "text": "contractor cell",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_email": [
+   {
+    "text": "contractor email",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_mailing": [
+   {
+    "text": "contractor mailing address",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "setting": [
+   {
+    "check": "Institutional setting examples include but not limited to schools hospitals assisted living etc",
+    "if": "institution"
+   },
+   {
+    "check": "Wholesalesmanufacturing setting examples include but not limited to dairy factories meat production",
+    "if": "wholesale|manufactur"
+   },
+   {
+    "check": "Retail setting nonwholesale nonproduction",
+    "if": "retail"
+   },
+   {
+    "check": "Marijuana setting dispensaries MIP hospitality operations etc",
+    "if": "marijuana"
+   }
+  ],
+  "establishment_type": [
+   {
+    "check": "Animal Concept Facility",
+    "if": "(^|,)[^,]*(animal)"
+   },
+   {
+    "check": "Convenience Store",
+    "if": "(^|,)[^,]*(concession)"
+   },
+   {
+    "check": "Ice Cream Shop",
+    "if": "(^|,)[^,]*(food court)"
+   },
+   {
+    "check": "Bakery",
+    "if": "(^|,)[^,]*(bakery)"
+   },
+   {
+    "check": "Distillery",
+    "if": "(^|,)[^,]*(convenience)"
+   },
+   {
+    "check": "Market Grocery",
+    "if": "(^|,)[^,]*(full.?service|restaurant)"
+   },
+   {
+    "check": "Bar",
+    "if": "(^|,)[^,]*(\\bbar\\b)"
+   },
+   {
+    "check": "Fast Food",
+    "if": "(^|,)[^,]*(distillery)"
+   },
+   {
+    "check": "Pet Food",
+    "if": "(^|,)[^,]*(ice cream)"
+   },
+   {
+    "check": "Brewery",
+    "if": "(^|,)[^,]*(brewery)"
+   },
+   {
+    "check": "FishMeat Market",
+    "if": "(^|,)[^,]*(fast food)"
+   },
+   {
+    "check": "Market",
+    "if": "(^|,)[^,]*(market \\(grocery\\)|grocery)"
+   },
+   {
+    "check": "Commissary kitchen",
+    "if": "(^|,)[^,]*(commissary)"
+   },
+   {
+    "check": "Food Court",
+    "if": "(^|,)[^,]*(fish|meat market)"
+   },
+   {
+    "check": "Pet food",
+    "if": "(^|,)[^,]*(pet food)"
+   },
+   {
+    "check": "Other",
+    "if": "^other\\s*:"
+   },
+   {
+    "text": "other (type of establishment)",
+    "pick": "tail",
+    "if": "^other\\s*:"
+   }
+  ],
+  "scope": [
+   {
+    "check": "Check Box38",
+    "if": "(^|,)[^,]*(seating)"
+   },
+   {
+    "check": "Check Box45",
+    "if": "(^|,)[^,]*(concept|menu)"
+   },
+   {
+    "check": "Check Box39",
+    "if": "(^|,)[^,]*(addition of equipment|equipment added)"
+   },
+   {
+    "check": "Check Box40",
+    "if": "(^|,)[^,]*(plumbing)"
+   },
+   {
+    "check": "Check Box47",
+    "if": "(^|,)[^,]*(interior remodel)"
+   },
+   {
+    "check": "Check Box41",
+    "if": "(^|,)[^,]*(ownership|business name)"
+   },
+   {
+    "check": "Check Box62",
+    "if": "(^|,)[^,]*(pretreatment|interceptor)"
+   },
+   {
+    "check": "Check Box42",
+    "if": "(^|,)[^,]*(water meter|tap)"
+   },
+   {
+    "check": "Check Box44",
+    "if": "^other\\s*:"
+   },
+   {
+    "text": "Other (scope of work)",
+    "pick": "tail",
+    "if": "^other\\s*:"
+   }
+  ],
+  "change_of_use": [
+   {
+    "check": "Check Box43",
+    "if": "^(?!(none|no|n/?a)\\.?$)"
+   },
+   {
+    "text": "change of use from",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a)\\.?$)"
+   },
+   {
+    "text": "change of use to",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a)\\.?$)"
+   }
+  ],
+  "process_water": [
+   {
+    "text": "production",
+    "pick": "head|digits",
+    "if": "^(?!(n/?a|none|not applicable))"
+   },
+   {
+    "text": "clean up",
+    "pick": "tail|digits",
+    "if": "^(?!(n/?a|none|not applicable))"
+   }
+  ],
+  "main_ingredients": [
+   {
+    "text": "main ingredients",
+    "if": "^(?!(n/?a|none|not applicable)\\.?$)"
+   }
+  ],
+  "seasonal": [
+   {
+    "check": "yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "no",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "text": "number of months",
+    "pick": "tail|head",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "days out of a week",
+    "pick": "tail|tail|head",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "hours out of the day",
+    "pick": "tail|tail|tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "cooking_equipment": [
+   {
+    "text": "1",
+    "pick": "line1|digits"
+   },
+   {
+    "text": "2",
+    "pick": "line2|digits"
+   },
+   {
+    "text": "3",
+    "pick": "line3|digits"
+   },
+   {
+    "text": "4",
+    "pick": "line4|digits"
+   },
+   {
+    "text": "5",
+    "pick": "line5|digits"
+   },
+   {
+    "text": "6",
+    "pick": "line6|digits"
+   },
+   {
+    "text": "7",
+    "pick": "line7|digits"
+   }
+  ],
+  "cooking_equipment_2": [
+   {
+    "text": "8",
+    "pick": "line1|digits"
+   },
+   {
+    "text": "9",
+    "pick": "line2|digits"
+   },
+   {
+    "text": "10",
+    "pick": "line3|digits"
+   },
+   {
+    "text": "11",
+    "pick": "line4|digits"
+   },
+   {
+    "text": "12",
+    "pick": "line5|digits"
+   },
+   {
+    "text": "13",
+    "pick": "line6|digits"
+   },
+   {
+    "text": "14",
+    "pick": "line7|digits"
+   }
+  ],
+  "kitchen_fixtures": [
+   {
+    "text": "1_2",
+    "pick": "line1|digits"
+   },
+   {
+    "text": "2_2",
+    "pick": "line2|digits"
+   },
+   {
+    "text": "3_2",
+    "pick": "line3|digits"
+   },
+   {
+    "text": "5_2",
+    "pick": "line4|digits"
+   },
+   {
+    "text": "6_2",
+    "pick": "line5|digits"
+   },
+   {
+    "text": "7_2",
+    "pick": "line6|digits"
+   },
+   {
+    "text": "8_2",
+    "pick": "line7|digits"
+   },
+   {
+    "text": "9_2",
+    "pick": "line8|digits"
+   },
+   {
+    "text": "10_2",
+    "pick": "line9|digits"
+   }
+  ],
+  "bar_fixtures": [
+   {
+    "text": "1_3",
+    "pick": "line1|digits"
+   },
+   {
+    "text": "2_3",
+    "pick": "line2|digits"
+   },
+   {
+    "text": "1_4",
+    "pick": "line3|digits"
+   },
+   {
+    "text": "2_4",
+    "pick": "line4|digits"
+   },
+   {
+    "text": "3_3",
+    "pick": "line5|digits"
+   },
+   {
+    "text": "4_3",
+    "pick": "line6|digits"
+   }
+  ],
+  "employees_per_shift": [
+   {
+    "text": "Max number of employees per shift",
+    "pick": "digits"
+   }
+  ],
+  "hours": [
+   {
+    "text": "Sun",
+    "pick": "line1|head"
+   },
+   {
+    "text": "to",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "Mon",
+    "pick": "line2|head"
+   },
+   {
+    "text": "to_2",
+    "pick": "line2|tail"
+   },
+   {
+    "text": "Tue",
+    "pick": "line3|head"
+   },
+   {
+    "text": "to_3",
+    "pick": "line3|tail"
+   },
+   {
+    "text": "Wed",
+    "pick": "line4|head"
+   },
+   {
+    "text": "to_4",
+    "pick": "line4|tail"
+   },
+   {
+    "text": "Thur",
+    "pick": "line5|head"
+   },
+   {
+    "text": "to_5",
+    "pick": "line5|tail"
+   },
+   {
+    "text": "Fri",
+    "pick": "line6|head"
+   },
+   {
+    "text": "to_6",
+    "pick": "line6|tail"
+   },
+   {
+    "text": "Sat",
+    "pick": "line7|head"
+   },
+   {
+    "text": "to_7",
+    "pick": "line7|tail"
+   }
+  ],
+  "indoor_seats": [
+   {
+    "text": "number of indoor seats",
+    "pick": "digits"
+   }
+  ],
+  "outdoor_seats": [
+   {
+    "text": "# of outdoor seats",
+    "pick": "digits"
+   }
+  ],
+  "total_sq_ft": [
+   {
+    "text": "total square feet of facility",
+    "pick": "digits"
+   }
+  ],
+  "dining_sq_ft": [
+   {
+    "text": "total square feed where meals will be served",
+    "pick": "digits"
+   }
+  ],
+  "service_type": [
+   {
+    "check": "Onsite consumption",
+    "if": "(^|,)[^,]*(on.?site)"
+   },
+   {
+    "check": "Offsite consumption",
+    "if": "(^|,)[^,]*(off.?site)"
+   },
+   {
+    "check": "Singleuse utensils",
+    "if": "(^|,)[^,]*(single)"
+   },
+   {
+    "check": "Multiuse utensils",
+    "if": "(^|,)[^,]*(multi)"
+   },
+   {
+    "check": "Other_3",
+    "if": "^other\\s*:"
+   },
+   {
+    "text": "undefined_4",
+    "pick": "tail",
+    "if": "^other\\s*:"
+   }
+  ],
+  "meals": [
+   {
+    "check": "Breakfast",
+    "if": "^\\s*0*[1-9]"
+   },
+   {
+    "text": "Max  of meals",
+    "pick": "head|digits"
+   },
+   {
+    "check": "Lunch",
+    "if": "^[^,]*,\\s*0*[1-9]"
+   },
+   {
+    "text": "1_5",
+    "pick": "tail|head|digits"
+   },
+   {
+    "check": "Dinner",
+    "if": "^[^,]*,[^,]*,\\s*0*[1-9]"
+   },
+   {
+    "text": "2_5",
+    "pick": "tail|tail|digits"
+   }
+  ],
+  "meals_total": [
+   {
+    "text": "Totalday",
+    "pick": "head|digits"
+   },
+   {
+    "text": "Maxhour",
+    "pick": "tail|head|digits"
+   },
+   {
+    "text": "that are carryout",
+    "pick": "tail|tail|digits"
+   }
+  ],
+  "held_cold": [
+   {
+    "check": "Check Box71",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box93",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "held_hot": [
+   {
+    "check": "Check Box72",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box94",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "fresh_produce": [
+   {
+    "check": "Check Box73",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box95",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "cooled": [
+   {
+    "check": "Check Box84",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box96",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "reheated": [
+   {
+    "check": "Check Box85",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box97",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "thawed": [
+   {
+    "check": "Check Box86",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box98",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "cooked_raw": [
+   {
+    "check": "Check Box87",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box99",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "sold_to_others": [
+   {
+    "check": "Check Box88",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box100",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "catering": [
+   {
+    "check": "Check Box89",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box101",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "self_service": [
+   {
+    "check": "Check Box90",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box102",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "bulk": [
+   {
+    "check": "Check Box91",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box103",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "commissary": [
+   {
+    "check": "Check Box92",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box104",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "mip": [
+   {
+    "check": "Check Box106",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box111",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "extractions": [
+   {
+    "check": "Check Box107",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box112",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "oil_wholesale": [
+   {
+    "check": "Check Box108",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box113",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "trim_edibles": [
+   {
+    "check": "Check Box109",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box114",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "mj_refrigeration": [
+   {
+    "check": "Check Box110",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box115",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "plumbing": [
+   {
+    "text": "ID  on plansRow1",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow1",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow1",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow1",
+    "pick": "line1|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow2",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow2",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow2",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow2",
+    "pick": "line2|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow3",
+    "pick": "line3|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow3",
+    "pick": "line3|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow3",
+    "pick": "line3|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow3",
+    "pick": "line3|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow4",
+    "pick": "line4|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow4",
+    "pick": "line4|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow4",
+    "pick": "line4|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow4",
+    "pick": "line4|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow5",
+    "pick": "line5|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow5",
+    "pick": "line5|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow5",
+    "pick": "line5|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow5",
+    "pick": "line5|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow6",
+    "pick": "line6|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow6",
+    "pick": "line6|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow6",
+    "pick": "line6|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow6",
+    "pick": "line6|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow7",
+    "pick": "line7|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow7",
+    "pick": "line7|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow7",
+    "pick": "line7|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow7",
+    "pick": "line7|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow8",
+    "pick": "line8|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow8",
+    "pick": "line8|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow8",
+    "pick": "line8|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow8",
+    "pick": "line8|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow9",
+    "pick": "line9|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": " of FixturesRow9",
+    "pick": "line9|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fixture or EquipmentRow9",
+    "pick": "line9|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Direct or Indirect DrainageRow9",
+    "pick": "line9|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "shower": [
+   {
+    "check": "Check Box116",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box119",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "text": "of Fixtures 1",
+    "pick": "tail|digits",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "clothes_washer": [
+   {
+    "check": "Check Box117",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box120",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "text": "of Fixtures 2",
+    "pick": "tail|digits",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "garbage_disposal": [
+   {
+    "check": "Check Box118",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box121",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "prep_sinks": [
+   {
+    "text": "ID  on plansRow1_2",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of drainboardRow1",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow1",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow1_2",
+    "pick": "line1|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow1_3",
+    "pick": "line1|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow2_2",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of drainboardRow2",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow2",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow2_2",
+    "pick": "line2|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow2_3",
+    "pick": "line2|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow3_2",
+    "pick": "line3|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of drainboardRow3",
+    "pick": "line3|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow3",
+    "pick": "line3|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow3_2",
+    "pick": "line3|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartments L x W x D in inchesRow3_3",
+    "pick": "line3|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "ware_sinks": [
+   {
+    "text": "ID  on plansRow1_3",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of soiled drainboardRow1",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow1",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow1_2",
+    "pick": "line1|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow1_3",
+    "pick": "line1|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of clean drainboardRow1",
+    "pick": "line1|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Prerinse sprayer YNRow1",
+    "pick": "line1|tail|tail|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow2_3",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of soiled drainboardRow2",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow2",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow2_2",
+    "pick": "line2|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow2_3",
+    "pick": "line2|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of clean drainboardRow2",
+    "pick": "line2|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Prerinse sprayer YNRow2",
+    "pick": "line2|tail|tail|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow3_3",
+    "pick": "line3|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of soiled drainboardRow3",
+    "pick": "line3|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow3",
+    "pick": "line3|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow3_2",
+    "pick": "line3|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Dimensions of sink compartment L x W x D in inchesRow3_3",
+    "pick": "line3|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Length of clean drainboardRow3",
+    "pick": "line3|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Prerinse sprayer YNRow3",
+    "pick": "line3|tail|tail|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "dish_machines": [
+   {
+    "text": "ID  on plansRow1_4",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "MakeRow1",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model Row1",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Heatchemical sanitizingRow1",
+    "pick": "line1|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Drainboard lengthRow1",
+    "pick": "line1|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Pre rinse YNRow1",
+    "pick": "line1|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow1",
+    "pick": "line1|tail|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow1_2",
+    "pick": "line1|tail|tail|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow1_3",
+    "pick": "line1|tail|tail|tail|tail|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow2_4",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "MakeRow2",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model Row2",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Heatchemical sanitizingRow2",
+    "pick": "line2|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Drainboard lengthRow2",
+    "pick": "line2|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Pre rinse YNRow2",
+    "pick": "line2|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow2",
+    "pick": "line2|tail|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow2_2",
+    "pick": "line2|tail|tail|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow2_3",
+    "pick": "line2|tail|tail|tail|tail|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ID  on plansRow3_4",
+    "pick": "line3|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "MakeRow3",
+    "pick": "line3|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model Row3",
+    "pick": "line3|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Heatchemical sanitizingRow3",
+    "pick": "line3|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Drainboard lengthRow3",
+    "pick": "line3|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Pre rinse YNRow3",
+    "pick": "line3|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow3",
+    "pick": "line3|tail|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow3_2",
+    "pick": "line3|tail|tail|tail|tail|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Utensil soak sink dimensions L x W x D in inchesRow3_3",
+    "pick": "line3|tail|tail|tail|tail|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "water_heater_count": [
+   {
+    "text": "How many water heaters service this facility",
+    "pick": "digits"
+   }
+  ],
+  "tank_heaters": [
+   {
+    "text": "MakeRow1_2",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model Row1_2",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "kWBTU ratingRow1",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Recovery rate GPH  100F riseRow1",
+    "pick": "line1|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "MakeRow2_2",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model Row2_2",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "kWBTU ratingRow2",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Recovery rate GPH  100F riseRow2",
+    "pick": "line2|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "tankless_heaters": [
+   {
+    "text": "MakeRow1_3",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model Row1_3",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "BTU ratingRow1",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Flow rate GPM  80F or 100F riseRow1",
+    "pick": "line1|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Storage tank capacity gallons if applicableRow1",
+    "pick": "line1|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "MakeRow2_3",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Model Row2_3",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "BTU ratingRow2",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Flow rate GPM  80F or 100F riseRow2",
+    "pick": "line2|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Storage tank capacity gallons if applicableRow2",
+    "pick": "line2|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ]
+ }
+}

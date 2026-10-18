@@ -15,6 +15,7 @@ import m_cbp_301 from "./cbp-301.json";
 import m_cmh_plan_review from "./cmh-plan-review.json";
 import m_dal_co from "./dal-co.json";
 import m_dal_food_permit from "./dal-food-permit.json";
+import m_den_plan_review from "./den-plan-review.json";
 import m_hou_co from "./hou-co.json";
 import m_hou_food_dealer from "./hou-food-dealer.json";
 import m_hou_sign from "./hou-sign.json";
@@ -63,6 +64,7 @@ export const MAPS: Record<string, FormMap> = {
   "cmh-plan-review": m_cmh_plan_review as FormMap,
   "dal-co": m_dal_co as FormMap,
   "dal-food-permit": m_dal_food_permit as FormMap,
+  "den-plan-review": m_den_plan_review as FormMap,
   "hou-co": m_hou_co as FormMap,
   "hou-food-dealer": m_hou_food_dealer as FormMap,
   "hou-sign": m_hou_sign as FormMap,
