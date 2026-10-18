@@ -1,0 +1,2027 @@
+{
+ "form": "snhd-plan-review",
+ "rev": "Health Permit Application and plan review packet (05/2022)",
+ "pdf": "snhd-plan-review.pdf",
+ "url": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+ "checked": "2026-10-18",
+ "notes": "Southern Nevada Health District's health permit application, plan submission instructions and food questionnaire. Addresses split into street, city, state and ZIP. Lists that say 'check all that apply' take every item that applies, by name; yes/no questions take Yes, No or N/A as printed. In this PDF 'Grow my own Produce' and 'Other Special Process' share one box name, so ticking one would tick both; the applicant ticks them by hand. The signatures, their dates and the office-use table are left for the applicant and the district. The district's PDF leaves 122 of its fillable boxes off the form's field list, so no filler could see them; the copy bundled here lists them again and is otherwise unchanged.",
+ "lines": [
+  {
+   "id": "application_type",
+   "line": "Owner information",
+   "en": "Application type (all that apply)",
+   "zh": "申请类型（可多选）",
+   "options": [
+    "New Permit",
+    "Change of Permit Holder",
+    "Remodel"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "new_construction",
+   "line": "Owner information",
+   "en": "New construction?",
+   "zh": "是否新建？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "ownership",
+   "line": "Owner information",
+   "en": "Ownership type",
+   "zh": "所有权类型",
+   "options": [
+    "Sole Proprietorship",
+    "Partnership",
+    "Corporation",
+    "LLC"
+   ]
+  },
+  {
+   "id": "open_operating",
+   "line": "Owner information",
+   "en": "Is the facility open and operating?",
+   "zh": "设施目前是否在营业？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "owner_name",
+   "line": "Owner information",
+   "en": "Owner name",
+   "zh": "所有人姓名"
+  },
+  {
+   "id": "entity_name",
+   "line": "Owner information",
+   "en": "Corporation or LLC name (must match the business license)",
+   "zh": "公司或 LLC 名称（须与营业执照一致）"
+  },
+  {
+   "id": "owner_mailing",
+   "line": "Owner information",
+   "en": "Owner mailing address",
+   "zh": "所有人邮寄地址",
+   "hint": {
+    "en": "Street, suite, city, state ZIP; the suite goes in its own box.",
+    "zh": "街道、单元、城市、州 邮编；单元号写在单独格内。"
+   }
+  },
+  {
+   "id": "owner_suite",
+   "line": "Owner information",
+   "en": "Owner mailing address: suite or apartment",
+   "zh": "所有人邮寄地址：单元或公寓号"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Owner information",
+   "en": "Owner phone",
+   "zh": "所有人电话"
+  },
+  {
+   "id": "owner_alt_phone",
+   "line": "Owner information",
+   "en": "Alternate phone",
+   "zh": "备用电话"
+  },
+  {
+   "id": "owner_email",
+   "line": "Owner information",
+   "en": "Owner email",
+   "zh": "所有人电子邮箱"
+  },
+  {
+   "id": "plan_contact",
+   "line": "Owner information",
+   "en": "Plan review contact: \"name, phone, email\"",
+   "zh": "图纸审核联系人：\"姓名, 电话, 电子邮箱\""
+  },
+  {
+   "id": "dba",
+   "line": "Business information",
+   "en": "Name of business (DBA)",
+   "zh": "营业名称（DBA）"
+  },
+  {
+   "id": "business_address",
+   "line": "Business information",
+   "en": "Physical address of the business",
+   "zh": "营业场所地址"
+  },
+  {
+   "id": "business_suite",
+   "line": "Business information",
+   "en": "Business suite or unit",
+   "zh": "营业场所单元号"
+  },
+  {
+   "id": "apn",
+   "line": "Business information",
+   "en": "Assessor's parcel number (if there is no physical address)",
+   "zh": "地块编号 APN（无实际地址时填写）"
+  },
+  {
+   "id": "license_jurisdiction",
+   "line": "Business information",
+   "en": "Business license jurisdiction",
+   "zh": "营业执照管辖地",
+   "options": [
+    "CLV (City of Las Vegas)",
+    "CC (Clark County)",
+    "NLV (North Las Vegas)",
+    "HEND (Henderson)"
+   ]
+  },
+  {
+   "id": "business_phone",
+   "line": "Business information",
+   "en": "Business phone",
+   "zh": "营业电话"
+  },
+  {
+   "id": "business_email",
+   "line": "Business information",
+   "en": "Business email",
+   "zh": "营业电子邮箱"
+  },
+  {
+   "id": "mail_to",
+   "line": "Business information",
+   "en": "Mail health permits and invoices to",
+   "zh": "卫生许可与发票寄送至",
+   "options": [
+    "Owner's Address",
+    "Business Address"
+   ]
+  },
+  {
+   "id": "opening_date",
+   "line": "Business information",
+   "en": "Projected opening date",
+   "zh": "预计开业日期"
+  },
+  {
+   "id": "hours",
+   "line": "Business information",
+   "en": "Hours of operation",
+   "zh": "营业时间"
+  },
+  {
+   "id": "septic",
+   "line": "Business information",
+   "en": "Septic tank?",
+   "zh": "是否使用化粪池？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "municipal_sewer",
+   "line": "Business information",
+   "en": "Municipal sewer connection?",
+   "zh": "是否接入市政污水管网？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "water_supply",
+   "line": "Business information",
+   "en": "Water supply",
+   "zh": "供水",
+   "options": [
+    "Municipal System",
+    "Well",
+    "N/A"
+   ]
+  },
+  {
+   "id": "grease_interceptor",
+   "line": "Business information",
+   "en": "Grease interceptor?",
+   "zh": "是否有隔油池？",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "nciaa",
+   "line": "Business information",
+   "en": "Nevada Clean Indoor Air Act",
+   "zh": "内华达州室内清洁空气法",
+   "options": [
+    "Exempt",
+    "Not Exempt"
+   ]
+  },
+  {
+   "id": "permit_deletion",
+   "line": "Business information",
+   "en": "Do any existing health permits require deletion? (Yes needs a Notice of Business Closure.)",
+   "zh": "是否有现有卫生许可需注销？（是则需填写停业通知）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "permit_type",
+   "line": "Permit type",
+   "en": "Permit type (all that apply)",
+   "zh": "许可类型（可多选）",
+   "options": [
+    "Annual Event Coordinator",
+    "Childcare",
+    "School",
+    "Water Store",
+    "Bar",
+    "Cosmetic Manufacturer",
+    "Supplement/Drug Manufacturer",
+    "Vending Machine",
+    "Body Art",
+    "Food / Drink",
+    "Warehouse/Storage",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "signer",
+   "line": "Acknowledgement",
+   "en": "Owner or applicant: \"print name, title\" (pages 1 and 2)",
+   "zh": "所有人或申请人：\"正楷姓名, 职务\"（第 1、2 页）"
+  },
+  {
+   "id": "operated_before",
+   "line": "Food operation",
+   "en": "Have you ever operated a food establishment before?",
+   "zh": "您以前是否经营过食品场所？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "facility_has",
+   "line": "Food operation",
+   "en": "The facility has (all that apply)",
+   "zh": "设施具备（可多选）",
+   "options": [
+    "A person in charge who can demonstrate food safety knowledge",
+    "A person in charge present during all hours",
+    "A person in charge who is a Certified Food Safety Manager",
+    "An employee health policy",
+    "All employees have Food Safety Training Cards"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "employees_per_shift",
+   "line": "Food operation",
+   "en": "Number of employees per shift",
+   "zh": "每班员工人数"
+  },
+  {
+   "id": "staff_restrooms",
+   "line": "Food operation",
+   "en": "Number of staff restrooms",
+   "zh": "员工洗手间数量"
+  },
+  {
+   "id": "customer_restrooms",
+   "line": "Food operation",
+   "en": "Number of customer restrooms",
+   "zh": "顾客洗手间数量"
+  },
+  {
+   "id": "food_area_size",
+   "line": "Food operation",
+   "en": "Size of food handling and storage area (sq ft)",
+   "zh": "食品处理与储存区面积（平方英尺）"
+  },
+  {
+   "id": "total_sq_ft",
+   "line": "Food operation",
+   "en": "Total square feet of facility",
+   "zh": "设施总面积（平方英尺）"
+  },
+  {
+   "id": "drive_thru",
+   "line": "Food operation",
+   "en": "Number of drive-thru windows",
+   "zh": "得来速窗口数量"
+  },
+  {
+   "id": "seats_inside",
+   "line": "Food operation",
+   "en": "Number of dining seats inside",
+   "zh": "室内座位数"
+  },
+  {
+   "id": "seats_outside",
+   "line": "Food operation",
+   "en": "Number of dining seats outside",
+   "zh": "室外座位数"
+  },
+  {
+   "id": "meals_per_day",
+   "line": "Food operation",
+   "en": "Number of meals served per day",
+   "zh": "每日供餐数量"
+  },
+  {
+   "id": "activities",
+   "line": "Food operation",
+   "en": "Activities that pertain to your operation (all that apply)",
+   "zh": "与您经营相关的活动（可多选）",
+   "options": [
+    "HACCP Plan",
+    "Vacuum Sealing",
+    "Curing/Smoking",
+    "Preservatives/Additives",
+    "Outdoor Dog Patio",
+    "Catering",
+    "Par Cooking",
+    "Open-Air Dining",
+    "Time as a Control",
+    "Packaging Food for Grab and Go",
+    "Seafood Tank",
+    "Canning/Jarring",
+    "Not applicable"
+   ],
+   "hint": {
+    "en": "Name each that applies, or \"Not applicable\". Grow my own produce and other special processes are ticked by hand on this PDF.",
+    "zh": "逐项写明，没有则填 \"Not applicable\"。自种农产品和其他特殊加工需在此 PDF 上手动勾选。"
+   }
+  },
+  {
+   "id": "sold_to_businesses",
+   "line": "Food operation",
+   "en": "Are any foods sold to other businesses?",
+   "zh": "是否向其他企业销售食品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "other_location",
+   "line": "Food operation",
+   "en": "Are any foods cooked or sold at another location?",
+   "zh": "是否在其他地点烹饪或销售食品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "fda_usda",
+   "line": "Food operation",
+   "en": "Is your facility FDA or USDA registered?",
+   "zh": "设施是否在 FDA 或 USDA 注册？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "restricted",
+   "line": "Food operation",
+   "en": "Are you handling any restricted substance, drug, supplement or cosmetic?",
+   "zh": "是否经营受管制物质、药物、补充剂或化妆品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "nv_sos",
+   "line": "Food operation",
+   "en": "Is your business licensed with the Nevada Secretary of State?",
+   "zh": "企业是否已在内华达州务卿处登记？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "business_license_applied",
+   "line": "Food operation",
+   "en": "Have you applied for a business license with the local licensing jurisdiction?",
+   "zh": "是否已向当地发照机构申请营业执照？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "floor_materials",
+   "line": "Finishes and lighting",
+   "en": "Floor materials in food handling, warewashing and restroom areas",
+   "zh": "食品处理、洗碗及洗手间区域的地面材料"
+  },
+  {
+   "id": "wall_materials",
+   "line": "Finishes and lighting",
+   "en": "Wall materials",
+   "zh": "墙面材料"
+  },
+  {
+   "id": "ceiling_materials",
+   "line": "Finishes and lighting",
+   "en": "Ceiling materials",
+   "zh": "天花材料"
+  },
+  {
+   "id": "handwash_temp",
+   "line": "Plumbing and refuse",
+   "en": "Hot water temperature required for handwashing",
+   "zh": "洗手所需热水温度",
+   "hint": {
+    "en": "e.g. \"100F\".",
+    "zh": "如 \"100F\"。"
+   }
+  },
+  {
+   "id": "warewash_temp",
+   "line": "Plumbing and refuse",
+   "en": "Hot water temperature required in the first compartment of the 3-compartment sink",
+   "zh": "三格水槽第一格所需热水温度",
+   "hint": {
+    "en": "e.g. \"110F\".",
+    "zh": "如 \"110F\"。"
+   }
+  },
+  {
+   "id": "backflow_mop",
+   "line": "Plumbing and refuse",
+   "en": "Backflow protection: mop sink",
+   "zh": "防回流装置：拖把池",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "backflow_hose",
+   "line": "Plumbing and refuse",
+   "en": "Backflow protection: hose bibs",
+   "zh": "防回流装置：软管龙头",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "backflow_soda",
+   "line": "Plumbing and refuse",
+   "en": "Backflow protection: soda system",
+   "zh": "防回流装置：汽水系统",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "sanitizer",
+   "line": "Plumbing and refuse",
+   "en": "Type of sanitizer",
+   "zh": "消毒剂类型",
+   "options": [
+    "Chlorine",
+    "Ammonia Based (QUAT)",
+    "Other",
+    "N/A"
+   ]
+  },
+  {
+   "id": "test_strips",
+   "line": "Plumbing and refuse",
+   "en": "Do you have test strips for your sanitizer?",
+   "zh": "是否有消毒剂试纸？",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "contact_time",
+   "line": "Plumbing and refuse",
+   "en": "Required contact time for your sanitizer",
+   "zh": "消毒剂所需接触时间"
+  },
+  {
+   "id": "water_heater_capacity",
+   "line": "Plumbing and refuse",
+   "en": "Hot water heater capacity (gallons)",
+   "zh": "热水器容量（加仑）"
+  },
+  {
+   "id": "water_heater_type",
+   "line": "Plumbing and refuse",
+   "en": "Type of hot water heater",
+   "zh": "热水器类型",
+   "options": [
+    "Gas",
+    "Electric, Tank",
+    "Electric, Tankless"
+   ]
+  },
+  {
+   "id": "water_heater_recovery",
+   "line": "Plumbing and refuse",
+   "en": "Hot water heater recovery rate (gallons per hour)",
+   "zh": "热水器恢复速率（加仑/小时）"
+  },
+  {
+   "id": "grease_present",
+   "line": "Plumbing and refuse",
+   "en": "Is there a grease interceptor present? Where? (\"Yes, Outside in-ground\" or \"Yes, Indoors\")",
+   "zh": "是否有隔油池？位置？（\"Yes, Outside in-ground\" 或 \"Yes, Indoors\"）",
+   "options": [
+    "Yes, Outside in-ground",
+    "Yes, Indoors",
+    "Yes, Other",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "grease_cleaning",
+   "line": "Plumbing and refuse",
+   "en": "How often is the grease interceptor cleaned or pumped?",
+   "zh": "隔油池多久清理或抽取一次？",
+   "options": [
+    "Weekly",
+    "Monthly",
+    "Quarterly",
+    "N/A"
+   ]
+  },
+  {
+   "id": "garbage_per_week",
+   "line": "Plumbing and refuse",
+   "en": "Garbage removal: pickups per week",
+   "zh": "垃圾清运：每周次数"
+  },
+  {
+   "id": "pest_control",
+   "line": "Plumbing and refuse",
+   "en": "Pest control service: \"Yes, company name\" or \"No\"",
+   "zh": "虫害防治服务：\"Yes, 公司名称\" 或 \"No\""
+  },
+  {
+   "id": "linen_service",
+   "line": "Plumbing and refuse",
+   "en": "Cleaning service for linens or floor mats: \"Yes, company name\", \"No\" or \"N/A\"",
+   "zh": "布草或地垫清洗服务：\"Yes, 公司名称\"、\"No\" 或 \"N/A\""
+  },
+  {
+   "id": "pest_prevention",
+   "line": "Plumbing and refuse",
+   "en": "What you will do to prevent pests (all that apply)",
+   "zh": "防虫措施（可多选）",
+   "options": [
+    "Deep clean regularly",
+    "Get the facility sprayed monthly",
+    "Keep drains clean",
+    "Seal holes and penetrations",
+    "Repair plumbing leaks",
+    "Make doors weather tight",
+    "Maintain floors and walls in good condition",
+    "Know how to identify pests",
+    "Implement a pest management plan before there is a problem"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "handwash_when",
+   "line": "Food preparation",
+   "en": "When should employees wash hands? (all that apply)",
+   "zh": "员工应在何时洗手？（可多选）",
+   "options": [
+    "When changing tasks",
+    "After coming in from break",
+    "When hands are contaminated",
+    "Between glove changes",
+    "After touching raw egg or raw meat",
+    "All of the Above"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "scrub_time",
+   "line": "Food preparation",
+   "en": "How long employees scrub hands with warm soapy water",
+   "zh": "员工用温肥皂水搓手时长",
+   "hint": {
+    "en": "e.g. \"10 to 15 seconds\".",
+    "zh": "如 \"10 to 15 seconds\"。"
+   }
+  },
+  {
+   "id": "bare_hand",
+   "line": "Food preparation",
+   "en": "How employees prevent bare-hand contact with ready-to-eat food",
+   "zh": "员工如何避免徒手接触即食食品",
+   "options": [
+    "Gloves",
+    "Utensils",
+    "Deli Paper",
+    "Other",
+    "N/A"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "cooling_method",
+   "line": "Food preparation",
+   "en": "How food will be cooled",
+   "zh": "食品冷却方式",
+   "options": [
+    "Ice Bath",
+    "Shallow Pans",
+    "Mechanical Refrigeration",
+    "Ice Paddle",
+    "Other",
+    "Not Applicable"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "cooling_steps",
+   "line": "Food preparation",
+   "en": "How quickly food must cool from 135F to 41F: \"step one; step two\", or \"N/A\"",
+   "zh": "食品从 135F 冷却到 41F 的时限：\"第一步; 第二步\"，或 \"N/A\"",
+   "hint": {
+    "en": "\"step one, step two\", e.g. \"135F to 70F within 2 hours, 70F to 41F within 4 more hours\".",
+    "zh": "\"第一步, 第二步\"，如 \"135F to 70F within 2 hours, 70F to 41F within 4 more hours\"。"
+   }
+  },
+  {
+   "id": "thaw_method",
+   "line": "Food preparation",
+   "en": "How food will be thawed",
+   "zh": "食品解冻方式",
+   "options": [
+    "Cool Running Water",
+    "Refrigeration",
+    "Microwave",
+    "Other",
+    "N/A"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "animal_foods",
+   "line": "Food preparation",
+   "en": "Animal foods that will be served",
+   "zh": "将供应的动物性食品",
+   "options": [
+    "Steaks",
+    "Chicken",
+    "Pork",
+    "Seafood",
+    "Eggs",
+    "Wild Game",
+    "Stuffed Meats",
+    "Other",
+    "None"
+   ],
+   "hint": {
+    "en": "Name each that applies.",
+    "zh": "逐项写明。"
+   }
+  },
+  {
+   "id": "cook_temps",
+   "line": "Food preparation",
+   "en": "Temperatures raw animal foods are cooked to",
+   "zh": "生动物性食品的烹饪温度",
+   "hint": {
+    "en": "Six temperatures in the printed order: steaks, chicken, stuffed meats, seafood, eggs, pork; \"N/A\" for any not served, e.g. \"N/A, 165F, N/A, N/A, 155F, N/A\". Just \"N/A\" if none.",
+    "zh": "按表格顺序写六个温度：牛排、鸡肉、酿肉、海鲜、蛋、猪肉；未供应的写 \"N/A\"，如 \"N/A, 165F, N/A, N/A, 155F, N/A\"。全部不供应只写 \"N/A\"。"
+   }
+  },
+  {
+   "id": "raw_undercooked",
+   "line": "Food preparation",
+   "en": "Will raw animal products be served raw or undercooked?",
+   "zh": "是否供应生的或未熟透的动物性食品？",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "consumer_advisory",
+   "line": "Food preparation",
+   "en": "Is a consumer advisory present?",
+   "zh": "是否有消费者提示？",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "alcohol",
+   "line": "Food preparation",
+   "en": "Will alcohol be served in the facility?",
+   "zh": "设施内是否供应酒精饮料？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "alcohol_sign",
+   "line": "Food preparation",
+   "en": "Will there be an alcohol warning sign posted?",
+   "zh": "是否张贴酒精警示标志？",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "cold_temp",
+   "line": "Food storage",
+   "en": "Cold food must be stored below what temperature?",
+   "zh": "冷藏食品须低于多少温度？",
+   "hint": {
+    "en": "e.g. \"41F\".",
+    "zh": "如 \"41F\"。"
+   }
+  },
+  {
+   "id": "hot_temp",
+   "line": "Food storage",
+   "en": "Hot food must be held above what temperature?",
+   "zh": "热食须保持在多少温度以上？",
+   "hint": {
+    "en": "e.g. \"135F\".",
+    "zh": "如 \"135F\"。"
+   }
+  },
+  {
+   "id": "air_dry_space",
+   "line": "Food storage",
+   "en": "Is there adequate space to air dry all wares after washing?",
+   "zh": "是否有足够空间晾干洗净的器具？",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "cold_space",
+   "line": "Food storage",
+   "en": "Is there adequate space for refrigerated foods, including extra space for cooling?",
+   "zh": "是否有足够冷藏空间（含冷却所需）？",
+   "options": [
+    "Yes",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "raw_same_cooler",
+   "line": "Food storage",
+   "en": "Will raw animal foods be stored in the same cooler as ready-to-eat foods? If yes, how is cross-contamination prevented?",
+   "zh": "生动物性食品是否与即食食品同柜存放？如是，如何防止交叉污染？",
+   "options": [
+    "Yes, store raw animal food below ready-to-eat food",
+    "Yes, Other",
+    "No",
+    "N/A"
+   ]
+  },
+  {
+   "id": "grow_or_other_process",
+   "line": "Food operation",
+   "en": "Grow my own produce, or another special process",
+   "zh": "自种农产品，或其他特殊加工"
+  }
+ ],
+ "unmapped": {
+  "grow_or_other_process": "This PDF gives 'Grow my own Produce' and 'Other Special Process' one box name, so ticking one ticks both; the applicant ticks the right one by hand."
+ },
+ "blank": {
+  "entity_name": "^(none|no|n/?a|not applicable)\\.?$",
+  "owner_suite": "^(none|no|n/?a|not applicable)\\.?$",
+  "owner_alt_phone": "^(none|no|n/?a|not applicable)\\.?$",
+  "business_suite": "^(none|no|n/?a|not applicable)\\.?$",
+  "apn": "^(none|no|n/?a|not applicable)\\.?$"
+ },
+ "boxes": {
+  "application_type": [
+   {
+    "check": "undefined",
+    "if": "(^|,)[^,]*(new permit)"
+   },
+   {
+    "check": "undefined_2",
+    "if": "(^|,)[^,]*(change)"
+   },
+   {
+    "check": "undefined 2",
+    "if": "(^|,)[^,]*(remodel)"
+   }
+  ],
+  "new_construction": [
+   {
+    "check": "undefined_3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "undefined_4",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "ownership": [
+   {
+    "radio": "LLC",
+    "value": "undefined_5",
+    "if": "sole"
+   },
+   {
+    "radio": "LLC",
+    "value": "undefined_6",
+    "if": "partner"
+   },
+   {
+    "radio": "LLC",
+    "value": "undefined_7",
+    "if": "corp"
+   },
+   {
+    "radio": "LLC",
+    "value": "undefined_8",
+    "if": "llc|limited liability"
+   }
+  ],
+  "open_operating": [
+   {
+    "radio": "No",
+    "value": "undefined_9",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "No",
+    "value": "undefined_10",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "Owner Name"
+   }
+  ],
+  "entity_name": [
+   {
+    "text": "Corporation or LLC Name must match business license",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_mailing": [
+   {
+    "text": "Mailing Address",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "ZIP Code",
+    "pick": "zip"
+   }
+  ],
+  "owner_suite": [
+   {
+    "text": "SuiteApt",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "Owner Phone"
+   }
+  ],
+  "owner_alt_phone": [
+   {
+    "text": "Alternate Phone",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_email": [
+   {
+    "text": "Owner EMail"
+   }
+  ],
+  "plan_contact": [
+   {
+    "text": "Who may the inspector contact for Plan Review Name",
+    "pick": "head"
+   },
+   {
+    "text": "Who may the inspector contact for Plan Review Phone",
+    "pick": "tail|head"
+   },
+   {
+    "text": "Who may the inspector contact for Plan Review Email",
+    "pick": "tail|tail"
+   }
+  ],
+  "dba": [
+   {
+    "text": "Name of Business DBA"
+   }
+  ],
+  "business_address": [
+   {
+    "text": "Address of Business",
+    "pick": "street"
+   },
+   {
+    "text": "City_2",
+    "pick": "city"
+   },
+   {
+    "text": "ZIP Code_2",
+    "pick": "zip"
+   }
+  ],
+  "business_suite": [
+   {
+    "text": "SuiteUnit",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "apn": [
+   {
+    "text": "Assessors Parcel Number APN",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "license_jurisdiction": [
+   {
+    "radio": "HEND",
+    "value": "CLV",
+    "if": "^(clv|city of las vegas|las vegas)"
+   },
+   {
+    "radio": "HEND",
+    "value": "undefined_11",
+    "if": "^(cc|clark)"
+   },
+   {
+    "radio": "HEND",
+    "value": "undefined_12",
+    "if": "^(nlv|north las vegas)"
+   },
+   {
+    "radio": "HEND",
+    "value": "undefined_13",
+    "if": "^(hend|henderson)"
+   }
+  ],
+  "business_phone": [
+   {
+    "text": "Business Phone"
+   }
+  ],
+  "business_email": [
+   {
+    "text": "Business EMail"
+   }
+  ],
+  "mail_to": [
+   {
+    "check": "Owners Address",
+    "if": "owner"
+   },
+   {
+    "check": "undefined_14",
+    "if": "business"
+   }
+  ],
+  "opening_date": [
+   {
+    "text": "Projected Opening Date",
+    "pick": "date"
+   }
+  ],
+  "hours": [
+   {
+    "text": "Hours of Operation"
+   }
+  ],
+  "septic": [
+   {
+    "check": "undefined_15",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "undefined_16",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "municipal_sewer": [
+   {
+    "check": "YES",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "undefined_20",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "water_supply": [
+   {
+    "radio": "NA",
+    "value": "Municipal System",
+    "if": "municipal|city|public"
+   },
+   {
+    "radio": "NA",
+    "value": "undefined_21",
+    "if": "well"
+   },
+   {
+    "radio": "NA",
+    "value": "undefined_22",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "grease_interceptor": [
+   {
+    "radio": "NA_2",
+    "value": "YES_2",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "NA_2",
+    "value": "undefined_23",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "NA_2",
+    "value": "undefined_24",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "nciaa": [
+   {
+    "check": "Exempt",
+    "if": "^exempt"
+   },
+   {
+    "check": "undefined_25",
+    "if": "^not"
+   }
+  ],
+  "permit_deletion": [
+   {
+    "radio": "NO",
+    "value": "undefined_38",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "NO",
+    "value": "undefined_39",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "permit_type": [
+   {
+    "check": "undefined_26",
+    "if": "(^|,)[^,]*(event)"
+   },
+   {
+    "check": "undefined_27",
+    "if": "(^|,)[^,]*(child)"
+   },
+   {
+    "check": "undefined_28",
+    "if": "(^|,)[^,]*(school)"
+   },
+   {
+    "check": "undefined_29",
+    "if": "(^|,)[^,]*(water store)"
+   },
+   {
+    "check": "undefined_30",
+    "if": "(^|,)[^,]*(\\bbar\\b)"
+   },
+   {
+    "check": "undefined_31",
+    "if": "(^|,)[^,]*(cosmetic)"
+   },
+   {
+    "check": "undefined_32",
+    "if": "(^|,)[^,]*(supplement|drug)"
+   },
+   {
+    "check": "undefined_33",
+    "if": "(^|,)[^,]*(vending)"
+   },
+   {
+    "check": "undefined_34",
+    "if": "(^|,)[^,]*(body art)"
+   },
+   {
+    "check": "undefined_35",
+    "if": "(^|,)[^,]*(food|drink)"
+   },
+   {
+    "check": "undefined_36",
+    "if": "(^|,)[^,]*(warehouse|storage)"
+   },
+   {
+    "check": "undefined_37",
+    "if": "(^|,)[^,]*(\\bother\\b)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "OwnerApplicant  Print Name",
+    "pick": "head"
+   },
+   {
+    "text": "OwnerApplicant  Title",
+    "pick": "tail"
+   },
+   {
+    "text": "OwnerApplicant  Print Name_2",
+    "pick": "head"
+   },
+   {
+    "text": "OwnerApplicant  Title_2",
+    "pick": "tail"
+   }
+  ],
+  "operated_before": [
+   {
+    "radio": "undefined_40",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_40",
+    "value": "No",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "facility_has": [
+   {
+    "check": "A person in charge that can demonstrate knowledge of food safety practices",
+    "if": "knowledge"
+   },
+   {
+    "check": "A person in charge that is present during all hours of operation to include evenings weekends and breaks",
+    "if": "all hours|present"
+   },
+   {
+    "check": "A person in charge that is a Certified Food Safety Manager Attach copy of certification",
+    "if": "certified"
+   },
+   {
+    "check": "An employee health policy that excludes or restricts food workers who are ill or have infected cuts or wounds",
+    "if": "health policy"
+   },
+   {
+    "check": "All employees have Food Safety Training Cards",
+    "if": "training card"
+   }
+  ],
+  "employees_per_shift": [
+   {
+    "text": "Number of Employees per shift",
+    "pick": "digits"
+   }
+  ],
+  "staff_restrooms": [
+   {
+    "text": "Number of Staff Restrooms",
+    "pick": "digits"
+   }
+  ],
+  "customer_restrooms": [
+   {
+    "text": "Number of Customer Restrooms",
+    "pick": "digits"
+   }
+  ],
+  "food_area_size": [
+   {
+    "text": "Size of Food HandlingStorage Area"
+   }
+  ],
+  "total_sq_ft": [
+   {
+    "text": "Total Square Feet of Facility",
+    "pick": "digits"
+   }
+  ],
+  "drive_thru": [
+   {
+    "text": "Number of DriveThru Windows",
+    "pick": "digits"
+   }
+  ],
+  "seats_inside": [
+   {
+    "text": "Number of Dining Seats Inside",
+    "pick": "digits"
+   }
+  ],
+  "seats_outside": [
+   {
+    "text": "Number of Dining Seats Outside",
+    "pick": "digits"
+   }
+  ],
+  "meals_per_day": [
+   {
+    "text": "Number of Meals Served per Day",
+    "pick": "digits"
+   }
+  ],
+  "activities": [
+   {
+    "check": "HACCP Plan",
+    "if": "(^|,)[^,]*(haccp)"
+   },
+   {
+    "check": "Vacuum Sealing",
+    "if": "(^|,)[^,]*(vacuum)"
+   },
+   {
+    "check": "CuringSmoking",
+    "if": "(^|,)[^,]*(curing|smoking)"
+   },
+   {
+    "check": "Preservatives",
+    "if": "(^|,)[^,]*(preservative|additive)"
+   },
+   {
+    "check": "Dog Patio",
+    "if": "(^|,)[^,]*(dog)"
+   },
+   {
+    "check": "Catering",
+    "if": "(^|,)[^,]*(catering)"
+   },
+   {
+    "check": "Par Cooking",
+    "if": "(^|,)[^,]*(par cook)"
+   },
+   {
+    "check": "Open Air",
+    "if": "(^|,)[^,]*(open.?air)"
+   },
+   {
+    "check": "Time Control",
+    "if": "(^|,)[^,]*(time as)"
+   },
+   {
+    "check": "Packaging Food for Grab and Go",
+    "if": "(^|,)[^,]*(grab)"
+   },
+   {
+    "check": "Seafood Tank",
+    "if": "(^|,)[^,]*(seafood tank)"
+   },
+   {
+    "check": "Canning jarring",
+    "if": "(^|,)[^,]*(canning|jarring)"
+   },
+   {
+    "check": "Not applicable",
+    "if": "(^|,)[^,]*(^(not applicable|n/?a|none)$)"
+   }
+  ],
+  "sold_to_businesses": [
+   {
+    "radio": "undefined_42",
+    "value": "YES_3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_42",
+    "value": "NO_2",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "other_location": [
+   {
+    "radio": "undefined_43",
+    "value": "YES_4",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_43",
+    "value": "NO_3",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "fda_usda": [
+   {
+    "radio": "undefined_44",
+    "value": "YES_5",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_44",
+    "value": "NO_4",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "restricted": [
+   {
+    "radio": "undefined_45",
+    "value": "YES_6",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_45",
+    "value": "NO_5",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "nv_sos": [
+   {
+    "radio": "undefined_46",
+    "value": "YES_7",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_46",
+    "value": "NO_6",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "business_license_applied": [
+   {
+    "radio": "undefined_47",
+    "value": "YES_8",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_47",
+    "value": "NO_7",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "floor_materials": [
+   {
+    "text": "Floor materials in open food handling areas warewashing areas and restrooms"
+   }
+  ],
+  "wall_materials": [
+   {
+    "text": "Wall materials in open food handling areas warewashing areas and restrooms"
+   }
+  ],
+  "ceiling_materials": [
+   {
+    "text": "Ceiling materials in open food handling areas warewashing areas and restrooms"
+   }
+  ],
+  "handwash_temp": [
+   {
+    "text": "What is the hot water temperature required for handwashing"
+   }
+  ],
+  "warewash_temp": [
+   {
+    "text": "What hot water temperature is required in the first compartment of the 3 compartment sink when warewashing"
+   }
+  ],
+  "backflow_mop": [
+   {
+    "radio": "Mop Sink",
+    "value": "YES_9",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Mop Sink",
+    "value": "NO_8",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "Mop Sink",
+    "value": "NA_3",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "backflow_hose": [
+   {
+    "radio": "Hose Bibs",
+    "value": "YES_10",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Hose Bibs",
+    "value": "NO_9",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "Hose Bibs",
+    "value": "NA_5",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "backflow_soda": [
+   {
+    "radio": "Soda System",
+    "value": "YES_11",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Soda System",
+    "value": "NO_10",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "Soda System",
+    "value": "NA_6",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "sanitizer": [
+   {
+    "check": "undefined_17",
+    "if": "chlorine"
+   },
+   {
+    "check": "undefined_18",
+    "if": "ammonia|quat"
+   },
+   {
+    "check": "undefined_19",
+    "if": "^other"
+   },
+   {
+    "check": "NA_4",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "test_strips": [
+   {
+    "radio": "undefined_48",
+    "value": "YES_12",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_48",
+    "value": "NO_11",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "undefined_48",
+    "value": "NA_8",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "contact_time": [
+   {
+    "text": "What is the required contact time for your sanitizer"
+   }
+  ],
+  "water_heater_capacity": [
+   {
+    "text": "capacity",
+    "pick": "digits"
+   }
+  ],
+  "water_heater_type": [
+   {
+    "check": "Gas",
+    "if": "^gas"
+   },
+   {
+    "check": "Electric",
+    "if": "^electric"
+   },
+   {
+    "check": "Tank",
+    "if": "electric.*\\btank\\b"
+   },
+   {
+    "check": "Tankless",
+    "if": "tankless"
+   }
+  ],
+  "water_heater_recovery": [
+   {
+    "text": "recovery",
+    "pick": "digits"
+   }
+  ],
+  "grease_present": [
+   {
+    "radio": "undefined_49",
+    "value": "YES_13",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_49",
+    "value": "NO_12",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "undefined_49",
+    "value": "NA_11",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "check": "Outside Inground",
+    "if": "outside|in-?ground"
+   },
+   {
+    "check": "Indoors",
+    "if": "indoor"
+   },
+   {
+    "check": "Other",
+    "if": "^yes,\\s*other"
+   }
+  ],
+  "grease_cleaning": [
+   {
+    "check": "Weekly",
+    "if": "weekly"
+   },
+   {
+    "check": "Monthly",
+    "if": "monthly"
+   },
+   {
+    "check": "Quarterly",
+    "if": "quarterly"
+   },
+   {
+    "check": "NA_7",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "garbage_per_week": [
+   {
+    "text": "garbage",
+    "pick": "digits"
+   }
+  ],
+  "pest_control": [
+   {
+    "radio": "Control Service",
+    "value": "YES_14",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Control Service",
+    "value": "NO_13",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "text": "Name of Company",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "linen_service": [
+   {
+    "radio": "linens andor floor mats",
+    "value": "YES_15",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "linens andor floor mats",
+    "value": "NO_14",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "linens andor floor mats",
+    "value": "NA_13",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "text": "Name of Company_2",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "pest_prevention": [
+   {
+    "check": "deep clean",
+    "if": "deep clean"
+   },
+   {
+    "check": "spray",
+    "if": "spray"
+   },
+   {
+    "check": "Keep drains clean",
+    "if": "drains"
+   },
+   {
+    "check": "seal holes",
+    "if": "seal"
+   },
+   {
+    "check": "leaks",
+    "if": "leak"
+   },
+   {
+    "check": "weather tight",
+    "if": "weather"
+   },
+   {
+    "check": "Maintain floors and walls in good condition",
+    "if": "floors and walls"
+   },
+   {
+    "check": "identify",
+    "if": "identify"
+   },
+   {
+    "check": "Implement a pest management plan before there is a problem",
+    "if": "management plan"
+   }
+  ],
+  "handwash_when": [
+   {
+    "check": "When changing tasks",
+    "if": "changing tasks"
+   },
+   {
+    "check": "After coming in from break",
+    "if": "break"
+   },
+   {
+    "check": "contaminated hands",
+    "if": "contaminated"
+   },
+   {
+    "check": "Between glove changes",
+    "if": "glove"
+   },
+   {
+    "check": "After touching raw egg or raw meat",
+    "if": "raw egg|raw meat"
+   },
+   {
+    "check": "all above",
+    "if": "all of the above|^all"
+   }
+  ],
+  "scrub_time": [
+   {
+    "text": "How long should an employee scrub their hands with warm soapy water when handwashing"
+   }
+  ],
+  "bare_hand": [
+   {
+    "check": "Gloves",
+    "if": "gloves"
+   },
+   {
+    "check": "utensils",
+    "if": "utensil"
+   },
+   {
+    "check": "Deli Paper",
+    "if": "deli"
+   },
+   {
+    "check": "other 29",
+    "if": "^other|,\\s*other"
+   },
+   {
+    "check": "NA_9",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "cooling_method": [
+   {
+    "check": "ice bath",
+    "if": "ice bath"
+   },
+   {
+    "check": "shallow pans",
+    "if": "shallow"
+   },
+   {
+    "check": "mechanical ref",
+    "if": "mechanical"
+   },
+   {
+    "check": "ice paddle",
+    "if": "paddle"
+   },
+   {
+    "check": "other cool",
+    "if": "^other|,\\s*other"
+   },
+   {
+    "check": "na cool",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "cooling_steps": [
+   {
+    "text": "Step One",
+    "pick": "head",
+    "if": "^(?!(n/?a|not applicable)\\b)"
+   },
+   {
+    "text": "Step Two",
+    "pick": "tail",
+    "if": "^(?!(n/?a|not applicable)\\b)"
+   },
+   {
+    "check": "NA_10",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "thaw_method": [
+   {
+    "check": "cool running water",
+    "if": "running water"
+   },
+   {
+    "check": "refer",
+    "if": "refrigerat"
+   },
+   {
+    "check": "microwave",
+    "if": "microwave"
+   },
+   {
+    "check": "other thaw",
+    "if": "^other|,\\s*other"
+   },
+   {
+    "check": "NA_thaw",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "animal_foods": [
+   {
+    "check": "steakss",
+    "if": "(^|,)[^,]*(steak)"
+   },
+   {
+    "check": "chicken",
+    "if": "(^|,)[^,]*(chicken)"
+   },
+   {
+    "check": "pork",
+    "if": "(^|,)[^,]*(pork)"
+   },
+   {
+    "check": "seafood",
+    "if": "(^|,)[^,]*(seafood)"
+   },
+   {
+    "check": "egg",
+    "if": "(^|,)[^,]*(egg)"
+   },
+   {
+    "check": "game",
+    "if": "(^|,)[^,]*(game)"
+   },
+   {
+    "check": "stuffed meats",
+    "if": "(^|,)[^,]*(stuffed)"
+   },
+   {
+    "check": "other served",
+    "if": "(^|,)[^,]*(^other|,\\s*other)"
+   },
+   {
+    "check": "none served",
+    "if": "(^|,)[^,]*(^none$)"
+   }
+  ],
+  "cook_temps": [
+   {
+    "text": "Steaks",
+    "pick": "head",
+    "if": "^(?!(n/?a|not applicable)$)"
+   },
+   {
+    "text": "Chicken",
+    "pick": "tail|head",
+    "if": "^(?!(n/?a|not applicable)$)"
+   },
+   {
+    "text": "Stuffed Meat",
+    "pick": "tail|tail|head",
+    "if": "^(?!(n/?a|not applicable)$)"
+   },
+   {
+    "text": "Seafood",
+    "pick": "tail|tail|tail|head",
+    "if": "^(?!(n/?a|not applicable)$)"
+   },
+   {
+    "text": "Egg",
+    "pick": "tail|tail|tail|tail|head",
+    "if": "^(?!(n/?a|not applicable)$)"
+   },
+   {
+    "text": "Pork",
+    "pick": "tail|tail|tail|tail|tail",
+    "if": "^(?!(n/?a|not applicable)$)"
+   },
+   {
+    "check": "NA_12",
+    "if": "^(n/?a|not applicable)$"
+   }
+  ],
+  "raw_undercooked": [
+   {
+    "radio": "undefined_50",
+    "value": "YES_16",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_50",
+    "value": "NO_15",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "undefined_50",
+    "value": "NA_15",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "consumer_advisory": [
+   {
+    "radio": "undefined_51",
+    "value": "YES_17",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_51",
+    "value": "NO_16",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "undefined_51",
+    "value": "NA_16",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "alcohol": [
+   {
+    "radio": "undefined_52",
+    "value": "YES_18",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_52",
+    "value": "NO_17",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "alcohol_sign": [
+   {
+    "radio": "undefined_53",
+    "value": "YES_19",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_53",
+    "value": "NO_18",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "undefined_53",
+    "value": "NA_17",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "cold_temp": [
+   {
+    "text": "Cold food must be stored below what temperature"
+   }
+  ],
+  "hot_temp": [
+   {
+    "text": "Hot food must be held above what temperature"
+   }
+  ],
+  "air_dry_space": [
+   {
+    "radio": "undefined_54",
+    "value": "YES_20",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_54",
+    "value": "NO_19",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "undefined_54",
+    "value": "NA_18",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "cold_space": [
+   {
+    "radio": "undefined_55",
+    "value": "YES_21",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_55",
+    "value": "NO_20",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "undefined_55",
+    "value": "NA_19",
+    "if": "^(na|n/a|not applicable)\\b"
+   }
+  ],
+  "raw_same_cooler": [
+   {
+    "radio": "undefined_56",
+    "value": "YES_22",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_56",
+    "value": "NO_21",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "radio": "undefined_56",
+    "value": "NA_20",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "check": "Store raw animal food below ready",
+    "if": "below"
+   },
+   {
+    "check": "Store raw animal food above ready",
+    "if": "above"
+   },
+   {
+    "check": "Other_2",
+    "if": "^yes,\\s*other"
+   }
+  ]
+ }
+}

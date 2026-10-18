@@ -1,0 +1,553 @@
+{
+ "form": "den-zoning",
+ "rev": "Use Permit Application UP-01 (Revised 08.02.17)",
+ "pdf": "den-zoning.pdf",
+ "url": "https://denvergov.org/files/assets/public/v/1/community-planning-and-development/documents/ds/commercial-zoning/zoning_usepermit_application.pdf",
+ "checked": "2026-10-18",
+ "notes": "Denver Community Planning and Development's zoning use permit application (filed through e-permits with this PDF and the plans). Names go in as 'Last, First'; addresses are split into street, city, state and ZIP. In this PDF the agent's business name and the proposal's business name share one box, so it is left for the applicant; the signature and its date are too.",
+ "lines": [
+  {
+   "id": "property_address",
+   "line": "Subject property",
+   "en": "Property address",
+   "zh": "物业地址"
+  },
+  {
+   "id": "zone_district",
+   "line": "Subject property",
+   "en": "Zone district (denvergov.org/zoning)",
+   "zh": "分区（denvergov.org/zoning）"
+  },
+  {
+   "id": "legal_description",
+   "line": "Subject property",
+   "en": "Legal description (denvergov.org/property)",
+   "zh": "法定地块描述（denvergov.org/property）"
+  },
+  {
+   "id": "owner_name",
+   "line": "Property owner",
+   "en": "Property owner name (Last, First)",
+   "zh": "物业所有人姓名（姓, 名）"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Property owner",
+   "en": "Property owner phone",
+   "zh": "物业所有人电话"
+  },
+  {
+   "id": "owner_address",
+   "line": "Property owner",
+   "en": "Property owner address",
+   "zh": "物业所有人地址"
+  },
+  {
+   "id": "owner_email",
+   "line": "Property owner",
+   "en": "Property owner email",
+   "zh": "物业所有人电子邮箱"
+  },
+  {
+   "id": "permit_type",
+   "line": "Permit type",
+   "en": "Zoning permit type (all that apply)",
+   "zh": "分区许可类型（可多选）",
+   "options": [
+    "UP-01 New Use/Change of Use",
+    "UP-02 Marijuana Businesses",
+    "TP-01 Special Event Parking",
+    "TP-02 Temporary Uses",
+    "CP-01 New Commercial Structures / Expansions / Exterior Modifications / Site Improvements",
+    "Floor Plan Modifications (no exterior work, for business license renewal)"
+   ]
+  },
+  {
+   "id": "current_permit",
+   "line": "Change of owner or business name",
+   "en": "Do you have a current use permit? \"Yes, permit number, business name on file\" or \"No\"",
+   "zh": "是否持有现行使用许可？\"Yes, 许可编号, 存档企业名称\" 或 \"No\""
+  },
+  {
+   "id": "new_business_name",
+   "line": "Change of owner or business name",
+   "en": "New business name",
+   "zh": "新企业名称"
+  },
+  {
+   "id": "current_uses",
+   "line": "Change of owner or business name",
+   "en": "Current use(s)",
+   "zh": "现有用途"
+  },
+  {
+   "id": "parking_provided",
+   "line": "Change of owner or business name",
+   "en": "Number of bicycle and vehicle parking spaces provided",
+   "zh": "提供的自行车与机动车停车位数"
+  },
+  {
+   "id": "current_floor_area",
+   "line": "Change of owner or business name",
+   "en": "Gross floor area of the current use (sq ft)",
+   "zh": "现有用途总建筑面积（平方英尺）"
+  },
+  {
+   "id": "applicant",
+   "line": "Applicant",
+   "en": "Applicant (business owner): \"business name, name (Last First)\"",
+   "zh": "申请人（企业主）：\"企业名称, 姓名（姓 名）\"",
+   "hint": {
+    "en": "e.g. \"Lotus Tea House LLC, Chen Mei\".",
+    "zh": "如 \"Lotus Tea House LLC, Chen Mei\"。"
+   }
+  },
+  {
+   "id": "applicant_phone",
+   "line": "Applicant",
+   "en": "Applicant phone",
+   "zh": "申请人电话"
+  },
+  {
+   "id": "applicant_address",
+   "line": "Applicant",
+   "en": "Applicant address",
+   "zh": "申请人地址"
+  },
+  {
+   "id": "applicant_email",
+   "line": "Applicant",
+   "en": "Applicant email",
+   "zh": "申请人电子邮箱"
+  },
+  {
+   "id": "agent",
+   "line": "Agent",
+   "en": "Agent, if different from the applicant: name (Last, First)",
+   "zh": "代理人（如与申请人不同）：姓名（姓, 名）"
+  },
+  {
+   "id": "agent_phone",
+   "line": "Agent",
+   "en": "Agent phone",
+   "zh": "代理人电话"
+  },
+  {
+   "id": "agent_address",
+   "line": "Agent",
+   "en": "Agent address",
+   "zh": "代理人地址"
+  },
+  {
+   "id": "agent_email",
+   "line": "Agent",
+   "en": "Agent email",
+   "zh": "代理人电子邮箱"
+  },
+  {
+   "id": "zpin_zpse",
+   "line": "Proposal",
+   "en": "Will a ZPIN or a ZPSE be required?",
+   "zh": "是否需要 ZPIN 或 ZPSE？",
+   "options": [
+    "Neither",
+    "ZPIN",
+    "ZPSE"
+   ]
+  },
+  {
+   "id": "proposal",
+   "line": "Proposal",
+   "en": "Proposal: the full scope, including uses and gross floor areas",
+   "zh": "项目说明：完整范围，含用途与总建筑面积"
+  },
+  {
+   "id": "uses_to_remain",
+   "line": "Proposal",
+   "en": "Uses to remain (gross floor area, enclosed or unenclosed)",
+   "zh": "保留用途（总建筑面积，室内或室外）"
+  },
+  {
+   "id": "zone_lot_size",
+   "line": "Proposal",
+   "en": "Zone lot size",
+   "zh": "分区地块面积"
+  },
+  {
+   "id": "structures",
+   "line": "Proposal",
+   "en": "Structures: \"existing, to remain, proposed\"",
+   "zh": "建筑物数量：\"现有, 保留, 新建\""
+  },
+  {
+   "id": "height",
+   "line": "Proposal",
+   "en": "Proposed building height: \"stories, feet\"",
+   "zh": "拟建建筑高度：\"层数, 英尺\""
+  },
+  {
+   "id": "transparency",
+   "line": "Proposal",
+   "en": "Transparency provided: \"primary street, side street\"",
+   "zh": "临街透明度：\"主街, 侧街\""
+  },
+  {
+   "id": "parking",
+   "line": "Proposal",
+   "en": "Parking spaces, one line each for standard, compact, accessible, total and bicycle: \"required, provided\"",
+   "zh": "停车位，标准、紧凑、无障碍、合计、自行车各一行：\"要求, 提供\"",
+   "hint": {
+    "en": "Five lines, e.g. \"4, 6\".",
+    "zh": "五行，如 \"4, 6\"。"
+   }
+  },
+  {
+   "id": "signer",
+   "line": "Signatures",
+   "en": "Owner or authorized agent: full name (print)",
+   "zh": "所有人或授权代理人：全名（正楷）"
+  },
+  {
+   "id": "business_name_shared",
+   "line": "Agent / Proposal",
+   "en": "Agent's business name, and the business name on the proposal page",
+   "zh": "代理人企业名称，及项目页上的企业名称"
+  }
+ ],
+ "unmapped": {
+  "business_name_shared": "This PDF uses one box name for both, so whatever is typed in one shows in the other; the applicant fills it by hand."
+ },
+ "blank": {
+  "new_business_name": "^(none|no|n/?a)\\.?$",
+  "current_uses": "^(none|no|n/?a)\\.?$",
+  "parking_provided": "^(none|no|n/?a)\\.?$",
+  "current_floor_area": "^(none|no|n/?a)\\.?$",
+  "agent": "^(none|no|n/?a)\\.?$",
+  "agent_phone": "^(none|no|n/?a)\\.?$",
+  "agent_address": "^(none|no|n/?a)\\.?$",
+  "agent_email": "^(none|no|n/?a)\\.?$",
+  "zpin_zpse": "^neither|^(none|no|n/?a)\\.?$",
+  "uses_to_remain": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "property_address": [
+   {
+    "text": "Property Address"
+   }
+  ],
+  "zone_district": [
+   {
+    "text": "Zone district"
+   }
+  ],
+  "legal_description": [
+   {
+    "text": "Legal Description wwwdenvergovorgproperty"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "Owner Name Last First"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "Phone"
+   }
+  ],
+  "owner_address": [
+   {
+    "text": "Owner Address",
+    "pick": "street"
+   },
+   {
+    "text": "Owner City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "Owner Zip",
+    "pick": "zip"
+   }
+  ],
+  "owner_email": [
+   {
+    "text": "Owner Email"
+   }
+  ],
+  "permit_type": [
+   {
+    "check": "Check Box100",
+    "if": "(^|,)[^,]*(up-?01|new use|change of use)"
+   },
+   {
+    "check": "Check Box101",
+    "if": "(^|,)[^,]*(up-?02|marijuana)"
+   },
+   {
+    "check": "Check Box102",
+    "if": "(^|,)[^,]*(tp-?01|event parking)"
+   },
+   {
+    "check": "Check Box103",
+    "if": "(^|,)[^,]*(tp-?02|temporary)"
+   },
+   {
+    "check": "Check Box104",
+    "if": "(^|,)[^,]*(cp-?01|new commercial|exterior|site improvement)"
+   },
+   {
+    "check": "Check Box105",
+    "if": "(^|,)[^,]*(floor plan)"
+   }
+  ],
+  "current_permit": [
+   {
+    "check": "Check Box106",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Permit Number",
+    "pick": "tail|head",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Business Name on File",
+    "pick": "tail|tail",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box107",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "new_business_name": [
+   {
+    "check": "Check Box108",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "New Business Name",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "current_uses": [
+   {
+    "check": "Check Box109",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Current Uses",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "parking_provided": [
+   {
+    "check": "Check Box110",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Number of Bicycle and Vehicle Parking Spaces Provided",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "current_floor_area": [
+   {
+    "check": "Check Box111",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Gross Floor Area of Current Use",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "Business Name_2",
+    "pick": "head"
+   },
+   {
+    "text": "Name Last First",
+    "pick": "tail"
+   }
+  ],
+  "applicant_phone": [
+   {
+    "text": "Applicant Phone"
+   }
+  ],
+  "applicant_address": [
+   {
+    "text": "Applicant Address",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State_2",
+    "pick": "state"
+   },
+   {
+    "text": "Zip",
+    "pick": "zip"
+   }
+  ],
+  "applicant_email": [
+   {
+    "text": "Email"
+   }
+  ],
+  "agent": [
+   {
+    "text": "Name Last First_2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "agent_phone": [
+   {
+    "text": "Phone_2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "Address_2",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "City_2",
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State_3",
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Zip_2",
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "agent_email": [
+   {
+    "text": "Email_2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "zpin_zpse": [
+   {
+    "check": "Check Box43",
+    "if": "zpin"
+   },
+   {
+    "check": "Check Box44",
+    "if": "zpse"
+   }
+  ],
+  "proposal": [
+   {
+    "text": "Provide a detailed description of the full scope including uses and gross floor areas of your project in a narrative below or attached Will a  ZPIN  or ZPSE be required refer to the Use and Required Minimum Parking table found in articles 39 typically related to care facilities industrial uses unlisted home occupations and outdoor eatingserving areas"
+   }
+  ],
+  "uses_to_remain": [
+   {
+    "text": "Uses to Remain include gross floor area and indicate if they are enclosed or unenclosed",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "zone_lot_size": [
+   {
+    "text": "Zone Lot Size"
+   }
+  ],
+  "structures": [
+   {
+    "text": " Existing Structures",
+    "pick": "head|digits"
+   },
+   {
+    "text": " Structures To Remain",
+    "pick": "tail|head|digits"
+   },
+   {
+    "text": " Proposed Structures",
+    "pick": "tail|tail|digits"
+   }
+  ],
+  "height": [
+   {
+    "text": "Proposed Building Height Stories",
+    "pick": "head"
+   },
+   {
+    "text": "Proposed Building Height Feet",
+    "pick": "tail"
+   }
+  ],
+  "transparency": [
+   {
+    "text": "Transparency Provided Primary Street",
+    "pick": "head"
+   },
+   {
+    "text": "Transparency Provided Side Street",
+    "pick": "tail"
+   }
+  ],
+  "parking": [
+   {
+    "text": "Standard Parking Spaces Required",
+    "pick": "line1|head"
+   },
+   {
+    "text": "Standard Parking Spaces Provided",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "Compact Parking Spaces Required",
+    "pick": "line2|head"
+   },
+   {
+    "text": "Compact Parking Spaces Provided",
+    "pick": "line2|tail"
+   },
+   {
+    "text": "Accessible Parking Spaces Required",
+    "pick": "line3|head"
+   },
+   {
+    "text": "Accessible Parking Spaces Provided",
+    "pick": "line3|tail"
+   },
+   {
+    "text": "Total Parking Spaces Required",
+    "pick": "line4|head"
+   },
+   {
+    "text": "Total Parking Spaces Provided",
+    "pick": "line4|tail"
+   },
+   {
+    "text": "Bicycle Parking Spaces Required",
+    "pick": "line5|head"
+   },
+   {
+    "text": "Bicycle Parking Spaces Provided",
+    "pick": "line5|tail"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Full Name Print"
+   }
+  ]
+ }
+}

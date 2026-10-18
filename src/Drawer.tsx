@@ -19,15 +19,19 @@ import { filingBlockers } from "./core";
 import { BY_HAND } from "./guard";
 import { Working } from "./Bot";
 import { AllowRule } from "./AllowRule";
-import { FilledStatus } from "./FilledForm";
-import { fileable, formName, latestVersion } from "./forms/versions";
+import { FilledStatus, OnlineAnswers } from "./FilledForm";
+import { fileable } from "./forms/versions";
+/* Team review: the permit's comment thread and who it's assigned to (src/Comments.tsx) */
+import { AssignPicker, CommentThread, useItemThread, useTeam } from "./Comments";
 
 /* ------------------------- application, opened ------------------------- */
 
 export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: string; tab: Tab; edit: boolean; version?: number; onTab: (t: Tab) => void; onClose: () => void }) {
   const { b, t, lang, ws, openApproval, busy, cloud, ask } = useApp();
+  const team = useTeam();
   const a = ws.apps.find(x => x.id === id);
   if (!a) return null;
+  const talk = team.openCount({ kind: "app", id });
   const appr = ws.approvals.find(x => x.app === id && x.kind !== "upload");
   const done = a.checklist.filter(c => c.state !== "missing").length;
   const zh = lang === "zh";
@@ -43,6 +47,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
     { k: "form", l: t("tab_form") },
     { k: "fees", l: t("tab_fees") },
     { k: "receipt", l: t("tab_receipt") },
+    { k: "comments", l: zh ? "评论" : "Comments", n: talk ? String(talk) : undefined },
   ];
   return (
     <Sheet label={b(a.name)} onClose={onClose}>
@@ -58,6 +63,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
           {a.source.url && <a href={a.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{a.source.label}<I.ext /></a>}
         </p>
         {a.next && <p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
+        <div className="sh-asg"><AssignPicker item={{ kind: "app", id: a.id }} title={a.name} /></div>
         {a.preview && <p className="sh-pv"><I.spark />{a.status === "ready"
           // filled at sign-up (src/plan/prefill.ts) on the registry's own copy of the agency's form
           ? (zh ? "用快哉登记库里的机构官方表格，根据您的注册信息填好。提交前，快哉会对照机构现行要求逐项核对。" : "Filled from your signup on the agency's own form, from Placetta's registry. Placetta checks it against the agency's current requirements before filing.")
@@ -72,6 +78,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
         {tab === "form" && <FormPreview key={a.id + String(edit)} a={a} startEdit={edit} version={version} />}
         {tab === "fees" && <Fees a={a} />}
         {tab === "receipt" && <Receipt a={a} />}
+        {tab === "comments" && <AppComments a={a} />}
       </div>
       {appr ? (
         <footer className="sh-f">
@@ -86,6 +93,14 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
       ) : null}
     </Sheet>
   );
+}
+
+/* ------------------------------- comments (Team review) ------------------------------- */
+
+/** The permit's thread: the team's comments, @mentions of teammates, headquarters (when the owner shares with it) and
+ *  Odelia, who starts on the permit when an owner or member mentions her. */
+function AppComments({ a }: { a: Application }) {
+  return <CommentThread source={useItemThread({ kind: "app", id: a.id }, a.name)} />;
 }
 
 /* ------------------------------- progress ------------------------------- */
@@ -208,7 +223,7 @@ function AddrRule({ form, field, value }: { form: string; field: string; value: 
 }
 
 function FormPreview({ a, startEdit, version }: { a: Application; startEdit: boolean; version?: number }) {
-  const { b, t, lang, say, editFields, downloadApp, cloud, filledPdf } = useApp();
+  const { b, t, lang, say, editFields, downloadApp, cloud } = useApp();
   const [making, setMaking] = useState(false);
   const canEdit = !["approved", "review"].includes(a.status) && a.fields.length > 0;
   const [edit, setEdit] = useState(startEdit && canEdit);
@@ -220,18 +235,6 @@ function FormPreview({ a, startEdit, version }: { a: Application; startEdit: boo
     setEdit(false);
   };
   const off = a.official ? formById(a.official) : undefined;
-  const official = async () => {
-    if (!off) return;
-    setMaking(true);
-    try {
-      // the current version, as kept in Documents (filled again from these answers when none is kept yet)
-      const cur = latestVersion(a);
-      const bytes = await filledPdf(a.id, cur?.n);
-      const name = cur ? `${formName(a)}, filled, version ${cur.n}.pdf` : `${off.id}-${a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40)}.pdf`;
-      if (bytes) { const r = await saveFile(name, new Blob([bytes as BlobPart], { type: "application/pdf" })); if (r === "unavailable") say(t("t_noDl")); }
-    } catch { say(lang === "zh" ? "无法生成官方表格，请稍后再试。" : "Couldn't make the official form. Try again."); }
-    setMaking(false);
-  };
   // the agency's own blank PDF, for forms Placetta doesn't fill itself: through the server in the app, straight from the agency elsewhere
   const blank = async () => {
     if (!off?.pdf) return;
@@ -249,13 +252,14 @@ function FormPreview({ a, startEdit, version }: { a: Application; startEdit: boo
           <p>{lang === "zh" ? `${off.agency.zh}。${METHOD[off.method].zh}。${off.how.zh}` : `${off.agency.en}. ${METHOD[off.method].en}. ${off.how.en}`}</p>
           {off.foreign && <p className="off-note">{b(off.foreign)}</p>}
           {onlineOnly(off) && <p className="off-note">{b(ONLINE_ONLY)}</p>}
-          {canFill(off) && <FilledStatus a={a} version={version} />}
           <div className="off-act">
-            {canFill(off) && a.fields.some(f => f.value) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void official()}><I.download />{making ? "…" : lang === "zh" ? "下载已填写的官方表格" : "Download the filled official form"}</button>}
             {off.pdf && !(canFill(off) && a.fields.some(f => f.value)) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void blank()}><I.download />{making ? "…" : lang === "zh" ? "下载官方表格" : "Download the official form"}</button>}
             <a className="pill quiet sm" href={off.pdf ?? off.url} target="_blank" rel="noopener noreferrer">{off.pdf ? (lang === "zh" ? "官方表格" : "Official form") : (lang === "zh" ? "机构办理入口" : "Agency filing page")}<I.ext /></a>
             {off.info !== (off.pdf ?? off.url) && <a className="pill quiet sm" href={off.info} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "机构说明" : "Agency page"}<I.ext /></a>}
           </div>
+          {/* the agency's own form as filled, page by page, with its versions; or, for a filing only taken online, the answers as a plain page */}
+          {canFill(off) && a.fields.some(f => f.value) && <FilledStatus a={a} version={version} />}
+          {!canFill(off) && onlineOnly(off) && a.fields.length > 0 && <OnlineAnswers a={a} />}
         </div>
       )}
       <div className={"paper" + (edit ? " editing" : "")}>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useApp, type View } from "./ctx";
 import { allSkills } from "./skills";
+import { hasReplay } from "./replay";
 import { I } from "./ui";
 
 /* ⌘K (Ctrl+K): jump to anything in the workspace, or hand Odelia a job, from anywhere, without the mouse. Type to
@@ -21,7 +22,7 @@ const PAGES: { v: View; sub?: string; en: string; zh: string; also?: string }[] 
 ];
 
 export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
-  const { b, lang, ws, go, ask, openApp } = useApp();
+  const { b, lang, ws, go, ask, openApp, openReplay } = useApp();
   const [q, setQ] = useState("");
   const [at, setAt] = useState(0);
   const input = useRef<HTMLInputElement>(null);
@@ -46,12 +47,33 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
     take(ws.stores ?? [], 4, st => has(st.name.en, st.name.zh, st.address) ? { id: "s-" + st.id, group: g("Stores", "门店"), label: b(st.name), sub: st.address, run: close(() => go("stores")) } : null);
     take(ws.jobs ?? [], 4, j => has(j.title.en, j.title.zh) ? { id: "j-" + j.id, group: g("Work", "工作"), label: b(j.title), sub: j.status === "waiting" ? g("Needs you", "需要您") : j.status === "done" ? g("Done", "已完成") : j.status === "queued" ? g("Waiting its turn", "排队中") : g("In progress", "进行中"), run: close(() => go("odelia", "work")) } : null);
     take(allSkills(ws).filter(x => x.on && x.kind !== "form"), 4, p => has(p.name.en, p.name.zh, p.description.en) ? { id: "p-" + p.id, group: g("Playbooks", "手册"), label: b(p.name), sub: g("Run it", "运行"), run: close(() => ask(zh ? `按手册“${p.name.zh}”（${p.id}）来做。` : `Run the playbook "${p.name.en}" (${p.id}).`)) } : null);
+    /* What the Odelia panel keeps behind the "…" on her latest answer, and what left the message box (src/AgentPanel.tsx,
+       src/Composer.tsx): typed for, never in the empty list. The panel opens first when it isn't (her page, Chat). */
+    if (s) {
+      const toPanel = (what: string) => close(() => {
+        const fire = () => dispatchEvent(new CustomEvent("placetta:odelia", { detail: what }));
+        if (document.querySelector("aside.panel")) fire(); else { go("odelia"); setTimeout(fire, 120); }
+      });
+      const toBox = (what: string) => close(() => dispatchEvent(new CustomEvent("placetta:composer", { detail: what })));
+      const watched = (ws.jobs ?? []).filter(j => hasReplay(ws, j)).sort((x, y) => y.updated.localeCompare(x.updated))[0];
+      const acts: { id: string; en: string; zh: string; also: string; run: () => void; sub?: string }[] = [
+        { id: "person", en: "Ask a person", zh: "找真人", also: "help human team support 帮助 人工 团队", sub: g("A person on the Placetta team replies in Updates", "快哉团队的工作人员会在动态中回复"), run: toPanel("ask-person") },
+        ...((ws.undo ?? []).some(u => !u.done) ? [{ id: "undo", en: "Undo what she did", zh: "撤销她这次的操作", also: "undo revert put back 撤销 恢复", sub: g("Her latest run that changed something", "她最近一次做了更改的操作"), run: toPanel("undo") }] : []),
+        ...(watched ? [{ id: "watch", en: "Watch how she did it", zh: "看她是怎么做的", also: "replay watch 回放", sub: b(watched.title), run: close(() => openReplay(watched.id)) }] : []),
+        { id: "listen", en: "Listen to her answer", zh: "朗读她的回答", also: "listen read aloud speak voice 朗读 听", run: toPanel("listen") },
+        { id: "steps", en: "Show her steps", zh: "查看她的步骤", also: "steps what she did 步骤", run: toPanel("steps") },
+        { id: "sources", en: "Sources for her answer", zh: "她回答的来源", also: "sources citations links 来源 出处", run: toPanel("sources") },
+        { id: "plan", en: "Plan first", zh: "先做计划", also: "plan approve first 计划", sub: g("She writes the plan for your next request and waits for your approval", "下一项请求她先写计划，等您批准"), run: toBox("plan-first") },
+        { id: "upload", en: "Upload a file", zh: "上传文件", also: "upload attach file document lease 上传 附件 文件 租约", run: toBox("attach") },
+      ];
+      take(acts, 4, x => has(x.en, x.zh, x.also) ? { id: "o-" + x.id, group: "Odelia", label: zh ? x.zh : x.en, sub: x.sub, run: x.run } : null);
+    }
     take([...ws.deadlines].sort((a, b) => a.date.localeCompare(b.date)), 4, d => has(d.title.en, d.title.zh) ? { id: "d-" + d.id, group: g("Deadlines", "截止日期"), label: b(d.title), sub: d.date, run: close(() => go("permits", "deadlines")) } : null);
     take(ws.docs, 4, d => has(d.name) && s ? { id: "f-" + d.id, group: g("Documents", "文件"), label: d.name, run: close(() => go("permits", "documents")) } : null);
     take(PAGES, s ? 4 : 14, p => has(p.en, p.zh, p.also) ? { id: "v-" + p.v + (p.sub ? "-" + p.sub : ""), group: g("Go to", "前往"), label: zh ? p.zh : p.en, run: close(() => go(p.v, p.sub)) } : null);
     if (askHit && !sentence) out.push(askHit);
     return out;
-  }, [q, ws, zh, b, ask, go, openApp, setOpen]);
+  }, [q, ws, zh, b, ask, go, openApp, openReplay, setOpen]);
 
   if (!open) return null;
   const pick = (i: number) => hits[i]?.run();

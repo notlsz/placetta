@@ -1,0 +1,619 @@
+{
+ "form": "mult-plan-review",
+ "rev": "Restaurant Plan Review Application (EHS-0025 2/13/23)",
+ "pdf": "mult-plan-review.pdf",
+ "url": "https://multco.us/file/restaurant_plan_review_application/download",
+ "checked": "2026-10-18",
+ "notes": "Multnomah County Environmental Health's restaurant plan review application. Addresses go on one line each as printed. Menu items: one per row, 'item, hot or cold, cooked to order yes or no, cooking method'; the hot/cold and yes/no columns are two-cell boxes, so an X lands in the left or right cell. Equipment sizes are cubic feet or dimensions. The second 'Other' equipment row and the Dishwasher row repeat one box name across two columns in this PDF, so they are ticked but not written; the signature, its date and the office-use block are left for the applicant.",
+ "lines": [
+  {
+   "id": "facility_name",
+   "line": "Facility",
+   "en": "Facility name",
+   "zh": "设施名称"
+  },
+  {
+   "id": "facility_address",
+   "line": "Facility",
+   "en": "Facility location address (number, street, city, state, ZIP)",
+   "zh": "设施地址（门牌号、街道、城市、州、邮编）"
+  },
+  {
+   "id": "owner_individuals",
+   "line": "Owner",
+   "en": "Owner name (individuals)",
+   "zh": "所有人姓名（个人）"
+  },
+  {
+   "id": "corporation",
+   "line": "Owner",
+   "en": "Corporation name",
+   "zh": "公司名称"
+  },
+  {
+   "id": "owner_address",
+   "line": "Owner",
+   "en": "Owner address",
+   "zh": "所有人地址"
+  },
+  {
+   "id": "owner_email",
+   "line": "Owner",
+   "en": "Owner email",
+   "zh": "所有人电子邮箱"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Owner",
+   "en": "Owner telephone",
+   "zh": "所有人电话"
+  },
+  {
+   "id": "owner_cell",
+   "line": "Owner",
+   "en": "Owner cell phone",
+   "zh": "所有人手机"
+  },
+  {
+   "id": "owner_fax",
+   "line": "Owner",
+   "en": "Owner fax",
+   "zh": "所有人传真"
+  },
+  {
+   "id": "contact",
+   "line": "Contact",
+   "en": "Contact for plan review",
+   "zh": "图纸审核联系人"
+  },
+  {
+   "id": "contact_address",
+   "line": "Contact",
+   "en": "Contact address",
+   "zh": "联系人地址"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Contact",
+   "en": "Contact telephone",
+   "zh": "联系人电话"
+  },
+  {
+   "id": "contact_cell",
+   "line": "Contact",
+   "en": "Contact cell phone",
+   "zh": "联系人手机"
+  },
+  {
+   "id": "contact_email",
+   "line": "Contact",
+   "en": "Contact email",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "approval_to",
+   "line": "Contact",
+   "en": "Plan review approval should be sent to",
+   "zh": "图纸审核批复寄送给",
+   "options": [
+    "Owner",
+    "Contact",
+    "Owner and Contact"
+   ]
+  },
+  {
+   "id": "completion_date",
+   "line": "Contact",
+   "en": "Approximate completion date",
+   "zh": "预计完工日期"
+  },
+  {
+   "id": "construction_type",
+   "line": "Type of construction",
+   "en": "Type of construction (for a remodel, add what is remodeled)",
+   "zh": "施工类型（改建请说明改建内容）",
+   "options": [
+    "New Construction",
+    "Remodel",
+    "Consultation"
+   ],
+   "hint": {
+    "en": "e.g. \"New Construction\", or \"Remodel: new tea bar counter\".",
+    "zh": "如 \"New Construction\"，或 \"Remodel: 新建茶饮吧台\"。"
+   }
+  },
+  {
+   "id": "open_during",
+   "line": "Type of construction",
+   "en": "Food service open or closed during construction or remodel",
+   "zh": "施工或改建期间餐饮服务营业还是停业",
+   "options": [
+    "Open",
+    "Closed"
+   ]
+  },
+  {
+   "id": "water",
+   "line": "Type of construction",
+   "en": "Water supply",
+   "zh": "供水"
+  },
+  {
+   "id": "sewage",
+   "line": "Type of construction",
+   "en": "Sewage disposal",
+   "zh": "污水处理",
+   "options": [
+    "Sewer",
+    "Subsurface"
+   ]
+  },
+  {
+   "id": "fee",
+   "line": "Application",
+   "en": "Plan review fee paid ($)",
+   "zh": "已付图纸审核费（美元）",
+   "hint": {
+    "en": "The fee from the county's fee schedule, e.g. \"1028\".",
+    "zh": "按县收费表填写金额，如 \"1028\"。"
+   }
+  },
+  {
+   "id": "menu_1",
+   "line": "Menu items",
+   "en": "Menu item 1",
+   "zh": "菜单项目 1",
+   "hint": {
+    "en": "\"Item, hot or cold, cooked to order yes or no, how it is cooked\", e.g. \"Tapioca pearls, hot, no, boiled, held hot under 4 hours\".",
+    "zh": "\"品名, hot 或 cold, 是否现点现做 yes 或 no, 烹饪方式\"，如 \"Tapioca pearls, hot, no, boiled, held hot under 4 hours\"。"
+   }
+  },
+  {
+   "id": "menu_2",
+   "line": "Menu items",
+   "en": "Menu item 2",
+   "zh": "菜单项目 2",
+   "hint": {
+    "en": "\"Item, hot or cold, cooked to order yes or no, how it is cooked\", e.g. \"Tapioca pearls, hot, no, boiled, held hot under 4 hours\".",
+    "zh": "\"品名, hot 或 cold, 是否现点现做 yes 或 no, 烹饪方式\"，如 \"Tapioca pearls, hot, no, boiled, held hot under 4 hours\"。"
+   }
+  },
+  {
+   "id": "menu_3",
+   "line": "Menu items",
+   "en": "Menu item 3",
+   "zh": "菜单项目 3",
+   "hint": {
+    "en": "\"Item, hot or cold, cooked to order yes or no, how it is cooked\", e.g. \"Tapioca pearls, hot, no, boiled, held hot under 4 hours\".",
+    "zh": "\"品名, hot 或 cold, 是否现点现做 yes 或 no, 烹饪方式\"，如 \"Tapioca pearls, hot, no, boiled, held hot under 4 hours\"。"
+   }
+  },
+  {
+   "id": "refrigerators",
+   "line": "Equipment",
+   "en": "Refrigerators: size or capacity",
+   "zh": "冷藏柜：尺寸或容量",
+   "hint": {
+    "en": "Size or capacity of each, one per line (up to two), or \"None\".",
+    "zh": "每台的尺寸或容量，每行一台（最多两台），没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "freezers",
+   "line": "Equipment",
+   "en": "Freezers: size or capacity",
+   "zh": "冷冻柜：尺寸或容量",
+   "hint": {
+    "en": "Size or capacity of each, one per line (up to two), or \"None\".",
+    "zh": "每台的尺寸或容量，每行一台（最多两台），没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "walkin_refrigerator",
+   "line": "Equipment",
+   "en": "Walk-in refrigerator: size",
+   "zh": "步入式冷藏库：尺寸",
+   "hint": {
+    "en": "Size or capacity, e.g. \"8 x 6 x 8 ft\", or \"None\".",
+    "zh": "尺寸或容量，如 \"8 x 6 x 8 ft\"，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "walkin_freezer",
+   "line": "Equipment",
+   "en": "Walk-in freezer: size",
+   "zh": "步入式冷冻库：尺寸",
+   "hint": {
+    "en": "Size or capacity, e.g. \"8 x 6 x 8 ft\", or \"None\".",
+    "zh": "尺寸或容量，如 \"8 x 6 x 8 ft\"，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "other_cold",
+   "line": "Equipment",
+   "en": "Other equipment: type and size",
+   "zh": "其他设备：类型与尺寸",
+   "hint": {
+    "en": "e.g. \"Prep table, 4 x 2 ft\", or \"None\".",
+    "zh": "如 \"Prep table, 4 x 2 ft\"，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "cooking_equipment",
+   "line": "Equipment",
+   "en": "Cooking and other equipment (all that apply)",
+   "zh": "烹饪及其他设备（可多选）",
+   "options": [
+    "Deep Fryer",
+    "Grill",
+    "Stove",
+    "Oven",
+    "Ice Machine",
+    "Dishwasher",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each one, or \"None\".",
+    "zh": "逐项写明，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "stove_burners",
+   "line": "Equipment",
+   "en": "Stove: number of burners",
+   "zh": "炉灶：灶头数量"
+  }
+ ],
+ "blank": {
+  "corporation": "^(none|no|n/?a)\\.?$",
+  "owner_cell": "^(none|no|n/?a)\\.?$",
+  "owner_fax": "^(none|no|n/?a)\\.?$",
+  "contact_cell": "^(none|no|n/?a)\\.?$",
+  "refrigerators": "^(none|no|n/?a)\\.?$",
+  "freezers": "^(none|no|n/?a)\\.?$",
+  "walkin_refrigerator": "^(none|no|n/?a)\\.?$",
+  "walkin_freezer": "^(none|no|n/?a)\\.?$",
+  "other_cold": "^(none|no|n/?a)\\.?$",
+  "cooking_equipment": "^(none|no|n/?a)\\.?$",
+  "stove_burners": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "facility_name": [
+   {
+    "text": "Facility Name"
+   }
+  ],
+  "facility_address": [
+   {
+    "text": "Facility Location Address number street city state zip code"
+   }
+  ],
+  "owner_individuals": [
+   {
+    "text": "Owner Name individuals"
+   }
+  ],
+  "corporation": [
+   {
+    "text": "Corporation Name",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_address": [
+   {
+    "text": "Owner Address number street city state zip code"
+   }
+  ],
+  "owner_email": [
+   {
+    "text": "Owner Email"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "Owner Telephone Number"
+   }
+  ],
+  "owner_cell": [
+   {
+    "text": "Owner Cell Phone Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_fax": [
+   {
+    "text": "Owner FAX Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contact": [
+   {
+    "text": "Contact for Plan Review"
+   }
+  ],
+  "contact_address": [
+   {
+    "text": "Contact Address number street city state zip code"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Contact Telephone Number"
+   }
+  ],
+  "contact_cell": [
+   {
+    "text": "Contact Cell Phone Number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Contact Email"
+   }
+  ],
+  "approval_to": [
+   {
+    "check": "Check Box 1",
+    "if": "owner"
+   },
+   {
+    "check": "Check Box 2",
+    "if": "contact"
+   }
+  ],
+  "completion_date": [
+   {
+    "text": "Approximate completion date",
+    "pick": "date"
+   }
+  ],
+  "construction_type": [
+   {
+    "check": "Check Box 3",
+    "if": "^new"
+   },
+   {
+    "check": "Check Box 4",
+    "if": "^remodel"
+   },
+   {
+    "text": "Remodel",
+    "pick": "tail",
+    "if": "^remodel"
+   },
+   {
+    "check": "Check Box 5",
+    "if": "^consult"
+   }
+  ],
+  "open_during": [
+   {
+    "check": "Check Box 6",
+    "if": "^open"
+   },
+   {
+    "check": "Check Box 7",
+    "if": "^closed"
+   }
+  ],
+  "water": [
+   {
+    "text": "Water supply"
+   }
+  ],
+  "sewage": [
+   {
+    "check": "Check Box 8",
+    "if": "^sewer"
+   },
+   {
+    "check": "Check Box 9",
+    "if": "^subsurface|septic"
+   }
+  ],
+  "fee": [
+   {
+    "text": "Payment of the",
+    "pick": "digits"
+   }
+  ],
+  "menu_1": [
+   {
+    "text": "FOOD ITEMRow1",
+    "pick": "head"
+   },
+   {
+    "text": "HOT",
+    "value": "X ",
+    "if": "^[^,]*,\\s*hot"
+   },
+   {
+    "text": "HOT",
+    "value": " X",
+    "if": "^[^,]*,\\s*cold"
+   },
+   {
+    "text": "YES",
+    "value": "X ",
+    "if": "^[^,]*,[^,]*,\\s*(y|yes)\\b"
+   },
+   {
+    "text": "YES",
+    "value": " X",
+    "if": "^[^,]*,[^,]*,\\s*(n|no)\\b"
+   },
+   {
+    "text": "DESCRIBE COOKING METHOD How cooked rapidly cooled rapidly reheated hot holding cold holding etcRow1",
+    "pick": "tail|tail|tail"
+   }
+  ],
+  "menu_2": [
+   {
+    "text": "FOOD ITEMRow2",
+    "pick": "head"
+   },
+   {
+    "text": "undefined",
+    "value": "X ",
+    "if": "^[^,]*,\\s*hot"
+   },
+   {
+    "text": "undefined",
+    "value": " X",
+    "if": "^[^,]*,\\s*cold"
+   },
+   {
+    "text": "undefined_2",
+    "value": "X ",
+    "if": "^[^,]*,[^,]*,\\s*(y|yes)\\b"
+   },
+   {
+    "text": "undefined_2",
+    "value": " X",
+    "if": "^[^,]*,[^,]*,\\s*(n|no)\\b"
+   },
+   {
+    "text": "DESCRIBE COOKING METHOD How cooked rapidly cooled rapidly reheated hot holding cold holding etcRow2",
+    "pick": "tail|tail|tail"
+   }
+  ],
+  "menu_3": [
+   {
+    "text": "FOOD ITEMRow3",
+    "pick": "head"
+   },
+   {
+    "text": "COOKED TO ORDER  Is the food item cooked to order cooked before the operator serves it or was the food",
+    "value": "X ",
+    "if": "^[^,]*,\\s*hot"
+   },
+   {
+    "text": "COOKED TO ORDER  Is the food item cooked to order cooked before the operator serves it or was the food",
+    "value": " X",
+    "if": "^[^,]*,\\s*cold"
+   },
+   {
+    "text": "undefined_3",
+    "value": "X ",
+    "if": "^[^,]*,[^,]*,\\s*(y|yes)\\b"
+   },
+   {
+    "text": "undefined_3",
+    "value": " X",
+    "if": "^[^,]*,[^,]*,\\s*(n|no)\\b"
+   },
+   {
+    "text": "DESCRIBE COOKING METHOD How cooked rapidly cooled rapidly reheated hot holding cold holding etcRow3",
+    "pick": "tail|tail|tail"
+   }
+  ],
+  "refrigerators": [
+   {
+    "check": "Check Box 10",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "DIMENSIONCAPACITYRefrigerator",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "check": "Check Box 12",
+    "if": "\\n\\s*\\S"
+   },
+   {
+    "text": "DIMENSIONCAPACITYRefrigerator_2",
+    "pick": "line2",
+    "if": "\\n\\s*\\S"
+   }
+  ],
+  "freezers": [
+   {
+    "check": "Check Box 14",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "DIMENSIONCAPACITYFreezer",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "check": "Check Box 16",
+    "if": "\\n\\s*\\S"
+   },
+   {
+    "text": "DIMENSIONCAPACITYFreezer_2",
+    "pick": "line2",
+    "if": "\\n\\s*\\S"
+   }
+  ],
+  "walkin_refrigerator": [
+   {
+    "check": "Check Box 18",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "DIMENSIONCAPACITYWalkin Refrigerator",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "walkin_freezer": [
+   {
+    "check": "Check Box 20",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "DIMENSIONCAPACITYWalkin Freezer",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "other_cold": [
+   {
+    "check": "Check Box 22",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "DIMENSIONCAPACITYOther",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "cooking_equipment": [
+   {
+    "check": "Check Box 11",
+    "if": "(^|,)\\s*deep fryer|fryer\\b"
+   },
+   {
+    "check": "Check Box 13",
+    "if": "(^|,)\\s*grill\\b"
+   },
+   {
+    "check": "Check Box 15",
+    "if": "(^|,)\\s*stove\\b"
+   },
+   {
+    "check": "Check Box 17",
+    "if": "(^|,)\\s*oven\\b"
+   },
+   {
+    "check": "Check Box 19",
+    "if": "(^|,)\\s*ice machine\\b"
+   },
+   {
+    "check": "Check Box 21",
+    "if": "(^|,)\\s*dishwasher\\b"
+   },
+   {
+    "check": "Check Box 23",
+    "if": "(^|,)\\s*other\\b"
+   }
+  ],
+  "stove_burners": [
+   {
+    "text": " of burners",
+    "pick": "digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ]
+ }
+}

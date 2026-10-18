@@ -1,0 +1,754 @@
+{
+ "form": "il-tax",
+ "rev": "REG-1 Illinois Business Registration Application",
+ "pdf": "il-tax.pdf",
+ "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/reg/documents/reg-1.pdf",
+ "checked": "2026-10-18",
+ "notes": "Filled for a business that sells in Illinois from its own location. Phones, dates of birth and dates print in their separate boxes (area code, exchange, number; month, day, year). Yes/No questions take Yes or No; merchandise takes Retail, Wholesale or No. The FEIN prints as 12-3456789. Every SSN box (the individual owner's, each owner's and the signer's) is left for the person to write by hand. The Secretary of State ID number, the unitary group FEIN, businesses that own this one, and the utility, hotel, fuel, rental, cannabis and other specialty taxes are left blank; so are the signature and its date.",
+ "lines": [
+  {
+   "id": "fein",
+   "line": "1",
+   "en": "Federal employer identification number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "legal_name",
+   "line": "2",
+   "en": "Legal business name",
+   "zh": "企业法定名称"
+  },
+  {
+   "id": "dba",
+   "line": "3",
+   "en": "Doing-business-as (DBA), assumed or trade name, if different",
+   "zh": "营业名称（DBA）（如不同）"
+  },
+  {
+   "id": "location",
+   "line": "4",
+   "en": "Business location (no P.O. box)",
+   "zh": "营业地址（不可用邮政信箱）"
+  },
+  {
+   "id": "mail_care_of",
+   "line": "5",
+   "en": "Mailing address: in-care-of name",
+   "zh": "邮寄地址：转交人姓名"
+  },
+  {
+   "id": "mailing",
+   "line": "5",
+   "en": "Mailing address",
+   "zh": "邮寄地址"
+  },
+  {
+   "id": "org_type",
+   "line": "6",
+   "en": "Organization type",
+   "zh": "组织类型",
+   "options": [
+    "Proprietorship",
+    "Partnership",
+    "Corporation",
+    "S Corporation",
+    "LLC taxed as a corporation",
+    "LLC taxed as a partnership",
+    "LLC taxed as an S corporation",
+    "Single-member LLC",
+    "Not-for-profit organization",
+    "Trust or estate"
+   ]
+  },
+  {
+   "id": "unitary",
+   "line": "8",
+   "en": "Is your business part of a unitary group?",
+   "zh": "企业是否属于合并集团？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "contact",
+   "line": "9",
+   "en": "Contact person for your business: name",
+   "zh": "企业联系人：姓名"
+  },
+  {
+   "id": "contact_title",
+   "line": "9",
+   "en": "Contact person: title",
+   "zh": "联系人：职务"
+  },
+  {
+   "id": "contact_phone",
+   "line": "9",
+   "en": "Contact person: phone",
+   "zh": "联系人：电话"
+  },
+  {
+   "id": "contact_fax",
+   "line": "9",
+   "en": "Contact person: fax",
+   "zh": "联系人：传真"
+  },
+  {
+   "id": "contact_email",
+   "line": "9",
+   "en": "Contact person: email",
+   "zh": "联系人：电子邮箱"
+  },
+  {
+   "id": "owner1",
+   "line": "10a",
+   "en": "Owner, partner or officer 1: name",
+   "zh": "所有人、合伙人或高管 1：姓名",
+   "hint": {
+    "en": "Their SSN is written by hand on the signed form.",
+    "zh": "其社会安全号由本人在签字件上手写。"
+   }
+  },
+  {
+   "id": "owner1_title",
+   "line": "10a",
+   "en": "Owner, partner or officer 1: title",
+   "zh": "所有人、合伙人或高管 1：职务"
+  },
+  {
+   "id": "owner1_address",
+   "line": "10a",
+   "en": "Owner, partner or officer 1: home address (no P.O. box)",
+   "zh": "所有人、合伙人或高管 1：住址（不可用邮政信箱）"
+  },
+  {
+   "id": "owner1_dob",
+   "line": "10a",
+   "en": "Owner, partner or officer 1: date of birth",
+   "zh": "所有人、合伙人或高管 1：出生日期"
+  },
+  {
+   "id": "owner1_phone",
+   "line": "10a",
+   "en": "Owner, partner or officer 1: phone",
+   "zh": "所有人、合伙人或高管 1：电话"
+  },
+  {
+   "id": "owner1_percent",
+   "line": "10a",
+   "en": "Owner, partner or officer 1: ownership percentage",
+   "zh": "所有人、合伙人或高管 1：持股比例"
+  },
+  {
+   "id": "owner2",
+   "line": "10b",
+   "en": "Owner, partner or officer 2: name",
+   "zh": "所有人、合伙人或高管 2：姓名"
+  },
+  {
+   "id": "owner2_title",
+   "line": "10b",
+   "en": "Owner, partner or officer 2: title",
+   "zh": "所有人、合伙人或高管 2：职务"
+  },
+  {
+   "id": "owner2_address",
+   "line": "10b",
+   "en": "Owner, partner or officer 2: home address (no P.O. box)",
+   "zh": "所有人、合伙人或高管 2：住址（不可用邮政信箱）"
+  },
+  {
+   "id": "owner2_dob",
+   "line": "10b",
+   "en": "Owner, partner or officer 2: date of birth",
+   "zh": "所有人、合伙人或高管 2：出生日期"
+  },
+  {
+   "id": "owner2_phone",
+   "line": "10b",
+   "en": "Owner, partner or officer 2: phone",
+   "zh": "所有人、合伙人或高管 2：电话"
+  },
+  {
+   "id": "owner2_percent",
+   "line": "10b",
+   "en": "Owner, partner or officer 2: ownership percentage",
+   "zh": "所有人、合伙人或高管 2：持股比例"
+  },
+  {
+   "id": "activity",
+   "line": "11",
+   "en": "Describe your business activities",
+   "zh": "描述您的业务活动"
+  },
+  {
+   "id": "naics",
+   "line": "11",
+   "en": "NAICS number",
+   "zh": "NAICS 代码"
+  },
+  {
+   "id": "employees",
+   "line": "12",
+   "en": "Will you have Illinois employees?",
+   "zh": "是否会有伊利诺伊州员工？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "first_payroll",
+   "line": "12",
+   "en": "Date of your first payroll in Illinois",
+   "zh": "在伊利诺伊州首次发薪的日期"
+  },
+  {
+   "id": "merchandise",
+   "line": "13",
+   "en": "Sales of merchandise (tangible personal property): retail or wholesale",
+   "zh": "销售商品（有形动产）：零售或批发",
+   "options": [
+    "Retail",
+    "Wholesale",
+    "No"
+   ]
+  },
+  {
+   "id": "services",
+   "line": "13",
+   "en": "Services that transfer property on which tax must be collected?",
+   "zh": "是否提供需代收税款的附带财产转让的服务？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "over_200",
+   "line": "13",
+   "en": "Will your monthly sales and use tax liability be over $200?",
+   "zh": "每月销售与使用税是否会超过 200 美元？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "supplier_collects",
+   "line": "13",
+   "en": "Does your supplier collect Illinois sales tax on merchandise your business uses or consumes?",
+   "zh": "供应商是否对您企业自用的商品代收伊利诺伊销售税？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "chicago_soft_drinks",
+   "line": "13",
+   "en": "Soft drinks (other than fountain soft drinks) sold in Chicago?",
+   "zh": "是否在芝加哥销售软饮料（现调饮料除外）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "tobacco",
+   "line": "13",
+   "en": "Cigarettes or tobacco products?",
+   "zh": "是否销售香烟或烟草制品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "liquor",
+   "line": "13",
+   "en": "Liquor at retail (bar, tavern, liquor store)?",
+   "zh": "是否零售酒类（酒吧、酒馆、酒类商店）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Signer: printed name",
+   "zh": "签署人：正楷姓名",
+   "hint": {
+    "en": "The signer writes their SSN by hand beside the signature.",
+    "zh": "签署人在签名旁手写其社会安全号。"
+   }
+  },
+  {
+   "id": "signer_title",
+   "line": "Signature",
+   "en": "Signer: title",
+   "zh": "签署人：职务"
+  },
+  {
+   "id": "signer_address",
+   "line": "Signature",
+   "en": "Signer: address",
+   "zh": "签署人：地址"
+  },
+  {
+   "id": "signer_phone",
+   "line": "Signature",
+   "en": "Signer: phone",
+   "zh": "签署人：电话"
+  }
+ ],
+ "blank": {
+  "dba": "^(none|no|n/?a)\\.?$",
+  "mail_care_of": "^(none|no|n/?a)\\.?$",
+  "contact_fax": "^(none|no|n/?a)\\.?$",
+  "chicago_soft_drinks": "^(n|no|否)\\b",
+  "tobacco": "^(n|no|否)\\b",
+  "liquor": "^(n|no|否)\\b",
+  "merchandise": "^(n|no|否)\\b"
+ },
+ "boxes": {
+  "fein": [
+   {
+    "text": "Individual FEIN",
+    "pick": "ein"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "Legal Business Name"
+   }
+  ],
+  "dba": [
+   {
+    "text": "Doing-business-as (DBA), assumed, or trade name, if different from Line 2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "location": [
+   {
+    "text": "Street address  No PO Box number",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "ZIP",
+    "pick": "zip"
+   }
+  ],
+  "mail_care_of": [
+   {
+    "text": "Incareof name",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Street address or PO Box number",
+    "pick": "street"
+   },
+   {
+    "text": "City_2",
+    "pick": "city"
+   },
+   {
+    "text": "State_2",
+    "pick": "state"
+   },
+   {
+    "text": "ZIP_2",
+    "pick": "zip"
+   }
+  ],
+  "org_type": [
+   {
+    "radio": "Organization type",
+    "value": "Proprietorship",
+    "if": "^(sole )?proprietor"
+   },
+   {
+    "radio": "Organization type",
+    "value": "Partnership",
+    "if": "^partnership"
+   },
+   {
+    "radio": "Organization type",
+    "value": "Corporation",
+    "if": "^corp"
+   },
+   {
+    "radio": "Organization type",
+    "value": "S Corp (Subchapter S Corporation)",
+    "if": "^s corp"
+   },
+   {
+    "radio": "Organization type",
+    "value": "LLC - Corporation",
+    "if": "^llc.*\\bcorporation"
+   },
+   {
+    "radio": "Organization type",
+    "value": "LLC -Partnership",
+    "if": "^llc.*partnership"
+   },
+   {
+    "radio": "Organization type",
+    "value": "LLC - S Corporation",
+    "if": "^llc.*s corp"
+   },
+   {
+    "radio": "Organization type",
+    "value": "LLC - Single member",
+    "if": "^single.member|^llc.*single"
+   },
+   {
+    "radio": "Organization type",
+    "value": "Not-for-profit organization",
+    "if": "^not.for.profit|^nonprofit"
+   },
+   {
+    "radio": "Organization type",
+    "value": "Trust or estate",
+    "if": "^trust|^estate"
+   }
+  ],
+  "unitary": [
+   {
+    "radio": "Unitary Group",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Unitary Group",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "contact": [
+   {
+    "text": "Name"
+   }
+  ],
+  "contact_title": [
+   {
+    "text": "Title"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Phone",
+    "pick": "phone1"
+   },
+   {
+    "text": "Phone2",
+    "pick": "phone2"
+   },
+   {
+    "text": "Phone3",
+    "pick": "phone3"
+   }
+  ],
+  "contact_fax": [
+   {
+    "text": "Fax1",
+    "pick": "phone1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fax2",
+    "pick": "phone2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fax3",
+    "pick": "phone3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Email address"
+   }
+  ],
+  "owner1": [
+   {
+    "text": "A Name"
+   }
+  ],
+  "owner1_title": [
+   {
+    "text": "A Title"
+   }
+  ],
+  "owner1_address": [
+   {
+    "text": "A Street Address",
+    "pick": "street"
+   },
+   {
+    "text": "A City",
+    "pick": "city"
+   },
+   {
+    "text": "A State",
+    "pick": "state"
+   },
+   {
+    "text": "A Zip",
+    "pick": "zip"
+   }
+  ],
+  "owner1_dob": [
+   {
+    "text": "Date of Birth Month",
+    "pick": "date|mm"
+   },
+   {
+    "text": "Date of Birth Day",
+    "pick": "date|dd"
+   },
+   {
+    "text": "Date of Birth Year",
+    "pick": "date|yyyy"
+   }
+  ],
+  "owner1_phone": [
+   {
+    "text": "Individual Phone Number Part 1",
+    "pick": "phone1"
+   },
+   {
+    "text": "Individual Phone Number Part 2",
+    "pick": "phone2"
+   },
+   {
+    "text": "Individual Phone Number Part 3",
+    "pick": "phone3"
+   }
+  ],
+  "owner1_percent": [
+   {
+    "text": "Ownership percentage",
+    "pick": "digits"
+   }
+  ],
+  "owner2": [
+   {
+    "text": "B Name"
+   }
+  ],
+  "owner2_title": [
+   {
+    "text": "B Title"
+   }
+  ],
+  "owner2_address": [
+   {
+    "text": "B Street Address",
+    "pick": "street"
+   },
+   {
+    "text": "B City",
+    "pick": "city"
+   },
+   {
+    "text": "B State",
+    "pick": "state"
+   },
+   {
+    "text": "B Zip",
+    "pick": "zip"
+   }
+  ],
+  "owner2_dob": [
+   {
+    "text": "B Date of Birth",
+    "pick": "date|mm"
+   },
+   {
+    "text": "B Date of Birth Day",
+    "pick": "date|dd"
+   },
+   {
+    "text": "B Date of Birth Year",
+    "pick": "date|yyyy"
+   }
+  ],
+  "owner2_phone": [
+   {
+    "text": "Individual B's Phone Number Part 1",
+    "pick": "phone1"
+   },
+   {
+    "text": "Individual B's Phone Number Part 2",
+    "pick": "phone2"
+   },
+   {
+    "text": "Individual B's Phone Number Part 3",
+    "pick": "phone3"
+   }
+  ],
+  "owner2_percent": [
+   {
+    "text": "Ownership percentage_2",
+    "pick": "digits"
+   }
+  ],
+  "activity": [
+   {
+    "text": "Provide your North American Industry Classification System"
+   }
+  ],
+  "naics": [
+   {
+    "text": "NAICS number",
+    "pick": "digits"
+   }
+  ],
+  "employees": [
+   {
+    "radio": "Employees",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Employees",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "first_payroll": [
+   {
+    "text": "First Payroll Date - Month",
+    "pick": "date|mm"
+   },
+   {
+    "text": "First Payroll Date - Day",
+    "pick": "date|dd"
+   },
+   {
+    "text": "First Payroll Date - Year",
+    "pick": "date|yyyy"
+   }
+  ],
+  "merchandise": [
+   {
+    "check": "Merchandise Checkbox",
+    "if": "retail|wholesale"
+   },
+   {
+    "radio": "Retail Wholesale",
+    "value": "Yes",
+    "if": "retail"
+   },
+   {
+    "radio": "Retail Wholesale",
+    "value": "No",
+    "if": "wholesale"
+   }
+  ],
+  "services": [
+   {
+    "radio": "Services Checkbox",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Services Checkbox",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "over_200": [
+   {
+    "radio": "Over $200 Checkbox",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Over $200 Checkbox",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "supplier_collects": [
+   {
+    "radio": "Mechandise",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Mechandise",
+    "value": "No",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "chicago_soft_drinks": [
+   {
+    "check": "Soft drinks",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "tobacco": [
+   {
+    "check": "Tobacco Products",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "liquor": [
+   {
+    "check": "Liquor checkbox",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Printed Name"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "Signee Title"
+   }
+  ],
+  "signer_address": [
+   {
+    "text": "Signee Address"
+   }
+  ],
+  "signer_phone": [
+   {
+    "text": "Signee Phone1",
+    "pick": "phone1"
+   },
+   {
+    "text": "Signee Phone2",
+    "pick": "phone2"
+   },
+   {
+    "text": "Signee Phone3",
+    "pick": "phone3"
+   }
+  ]
+ },
+ "sign": {
+  "page": 1,
+  "x": 88,
+  "y": 120,
+  "w": 192,
+  "h": 12
+ }
+}

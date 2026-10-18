@@ -89,6 +89,11 @@ function fileReady(ctx: Context): Plan {
       S("solving", "Checking every answer against the EDD's requirements", "对照加州就业发展局的要求逐项核对", "edd.ca.gov"),
     ],
     updates: [all(
+      // the last three lines of the DE 1, from the business facts: the app fills the agency's form again (version 2)
+      // and the reply ends with it (src/forms/versions.ts)
+      setField("edd", "email", "owner@moonleaf.example", B("From your business facts", "来自企业资料")),
+      setField("edd", "contact_person", "Mei Lin, (408) 555-0142, owner@moonleaf.example, Owner", B("From your business facts", "来自企业资料")),
+      setField("edd", "declarant", "Mei Lin, Managing Member, (408) 555-0142", B("From your business facts", "来自企业资料")),
       setApp("edd", { status: "ready", next: B("Ready to file. Waiting for your approval", "可以提交，等待您批准") }),
       setCheck("edd", "form", { state: "done", doc: "d-edd", note: B("Filled by Placetta", "快哉已填写") }),
       addDoc(doc("d-edd", "employer-registration.pdf", 164_000, "agent", "edd", B("Prepared", "已准备"))),
@@ -247,7 +252,75 @@ const runPlaybook = (ctx: Context, text: string): Plan => {
   };
 };
 
+/* Team review (src/review.ts, src/collab.ts): the review table's "Ask Odelia to prepare", and an @mention of Odelia in a
+   comment on a permit. */
+const MOVED = ["ready", "filing", "review", "approved"];
+/** Picked applications, one job per store (as split_job makes them on the server), each step proven from the workspace. */
+function preparePicked(ctx: Context, text: string): Plan {
+  const w = ctx.current, stores = w.stores ?? [];
+  const lines = [...text.matchAll(/^- (.+?)\s*[(（]store ([^)）]+)[)）][:：]\s*(.+)$/gm)];
+  const groups = lines.map(m => ({ store: stores.find(s => s.id === m[2]), apps: [...m[3].matchAll(/[(（]([a-z0-9-]+)[)）]/gi)].map(x => w.apps.find(a => a.id === x[1])).filter((a): a is Application => !!a) }))
+    .filter((g): g is { store: NonNullable<typeof g.store>; apps: Application[] } => !!g.store && g.apps.length > 0);
+  const steps = [S("searching", "Reading your workspace", "读取您的工作区"), S("weaving", "Splitting the work across stores", "把工作分给各门店")];
+  if (!groups.length) return { steps, reply: { text: [B("I couldn't find those applications. Pick them again in the table.", "找不到这些申请，请在表格中重新选择。")] } };
+  const now = nowIso(), parent = `job-prep-${(seq++).toString(36)}`;
+  const kids = groups.map((g, k) => ({
+    id: `${parent}-${k}`, parent: groups.length > 1 ? parent : undefined, store: g.store.id, status: "running" as const, started: now, updated: now, seat: 1, apps: g.apps.map(a => a.id),
+    title: B(`${g.store.name.en}: prepare ${g.apps.length} application${g.apps.length === 1 ? "" : "s"}`, `${g.store.name.zh}：准备 ${g.apps.length} 项申请`),
+    steps: g.apps.flatMap(a => {
+      const missing = a.checklist.filter(c => c.state === "missing" && !c.dep).map(c => c.id);
+      return [
+        ...(missing.length ? [{ title: B(`The documents for the ${a.name.en.toLowerCase()}`, `${a.name.zh}的文件`), done: false, check: { app: a.id, items: missing } }] : []),
+        { title: B(`Fill the ${a.name.en.toLowerCase()} and put it up for approval`, `填好${a.name.zh}并提交批准`), done: false, check: { app: a.id, status: MOVED } },
+      ];
+    }),
+  }));
+  const top = groups.length > 1 ? [{ id: parent, title: B(`Prepare ${groups.reduce((n, g) => n + g.apps.length, 0)} applications across ${groups.length} stores`, `为 ${groups.length} 家门店准备 ${groups.reduce((n, g) => n + g.apps.length, 0)} 项申请`),
+    status: "running" as const, started: now, updated: now, seat: 1, children: kids.map(k => k.id),
+    steps: kids.map((k, i) => ({ title: B(`${groups[i].store.name.en}: done and checked`, `${groups[i].store.name.zh}：完成并通过检查`), done: false, check: { jobs: [k.id] } })),
+    done: [{ text: B("Every store's part is done and checked by a separate reviewer", "每家门店的部分都已完成并通过独立检查"), check: { jobs: kids.map(k => k.id) } }] }] : [];
+  const waits = groups.map(g => ({ g, need: g.apps.flatMap(a => a.checklist.filter(c => c.state === "missing" && !c.dep).map(c => c.label)) })).filter(x => x.need.length);
+  const say = (lang: "en" | "zh") => groups.map(g => lang === "zh" ? `${g.store.name.zh}（${g.apps.length} 项）` : `${g.store.name.en} (${g.apps.length})`).join(lang === "zh" ? "、" : ", ");
+  const wait = waits.length ? B(` ${waits.map(x => `${x.g.store.name.en} waits on ${x.need.map(l => l.en.toLowerCase()).slice(0, 2).join(" and ")}`).join("; ")}.`, `${waits.map(x => `${x.g.store.name.zh}在等${x.need.map(l => l.zh).slice(0, 2).join("和")}`).join("；")}。`) : B("", "");
+  return {
+    steps,
+    updates: [w2 => reconcile(audit("agent", B("Split the job across stores", "把工作分给各门店"), top[0]?.title ?? kids[0].title, B(say("en"), say("zh")))({ ...w2, jobs: [...top, ...kids, ...(w2.jobs ?? [])] }))],
+    reply: { text: [groups.length > 1
+      ? B(`Each store's bot has its part: ${say("en")}.${wait.en} One summary when they're back.`, `每家门店的助手都已接手：${say("zh")}。${wait.zh}全部完成后我会汇总。`)
+      : B(`On it for ${say("en")}.${wait.en} Each goes up for your approval once it's complete.`, `开始处理${say("zh")}。${wait.zh}每项完整后都会提交给您批准。`)], apps: groups.flatMap(g => g.apps.map(a => a.id)).slice(0, 3) },
+  };
+}
+/** Someone @mentioned Odelia in a comment on a permit: she reads its thread and says where it stands and what's next. */
+function fromComment(ctx: Context, text: string): Plan {
+  const id = /[(（]application ([^)）]+)[)）]/.exec(text)?.[1];
+  const a = ctx.current.apps.find(x => x.id === id);
+  const steps = [S("searching", "Reading the comments", "阅读评论"), S("solving", "Checking the application", "检查申请")];
+  if (!a) return { steps, reply: { text: [B("I couldn't find that application. It may have been removed.", "找不到这项申请，可能已被删除。")] } };
+  const missing = a.checklist.filter(c => c.state === "missing" && !c.dep), empty = a.fields.filter(f => !f.value.trim()).map(f => f.label);
+  const need = [...missing.map(c => c.label), ...empty];
+  // a job on the permit, its steps proven from the workspace like any other (src/jobs.ts)
+  const now = nowIso(), store = (ctx.current.stores ?? []).find(s => s.apps?.includes(a.id));
+  const job = { id: `job-cmt-${(seq++).toString(36)}`, title: B(`From a comment: ${a.name.en}`, `来自评论：${a.name.zh}`), status: "running" as const, started: now, updated: now, seat: 1, apps: [a.id], ...(store ? { store: store.id } : {}),
+    steps: [
+      { title: B("Read the comments on it", "阅读它的评论"), done: true },
+      ...(missing.length ? [{ title: B(`The documents for the ${a.name.en.toLowerCase()}`, `${a.name.zh}的文件`), done: false, check: { app: a.id, items: missing.map(c => c.id) } }] : []),
+      { title: B("Fill it and put it up for approval", "填好并提交批准"), done: false, check: { app: a.id, status: MOVED } },
+    ] };
+  return {
+    steps,
+    updates: MOVED.includes(a.status) ? [audit("agent", B("Read the comments", "阅读评论"), a.name)]
+      : [w2 => reconcile(audit("agent", B("Read the comments", "阅读评论"), a.name)({ ...w2, jobs: [job, ...(w2.jobs ?? [])] }))],
+    reply: { text: [MOVED.includes(a.status)
+      ? B(`The ${a.name.en.toLowerCase()} is ${a.status === "ready" ? "complete and waiting for your approval" : a.status === "approved" ? "approved" : "with the agency"}. Nothing else to do on it from the comments.`, `${a.name.zh}${a.status === "ready" ? "已填好，等您批准" : a.status === "approved" ? "已批准" : "已在机构办理"}。评论里没有其他需要处理的。`)
+      : need.length
+        ? B(`On it: the ${a.name.en.toLowerCase()}. I read its comments. It still needs ${need.slice(0, 3).map(l => l.en.toLowerCase()).join(", ")}; it goes up for your approval once that's in.`, `开始处理${a.name.zh}。评论我已看过。还需要${need.slice(0, 3).map(l => l.zh).join("、")}，齐全后提交给您批准。`)
+        : B(`On it: the ${a.name.en.toLowerCase()} has everything it needs. It's going up for your approval.`, `开始处理：${a.name.zh}资料已齐全，即将提交给您批准。`)], apps: [a.id] },
+  };
+}
+
 const SCRIPTS: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
+  { match: /^prepare these applications|^准备这些申请/i, plan: preparePicked },
+  { match: /asked you in a comment on|的评论中请你处理/i, plan: fromComment },
   { match: /^carry on with the job|^继续这项工作/i, plan: carryOn },
   { match: /^interview me|teach (odelia|you) a job|就一项我想交给你|教 ?odelia/i, plan: interview },
   { match: /^run the playbook|^按手册/i, plan: runPlaybook },

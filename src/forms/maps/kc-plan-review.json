@@ -1,0 +1,1024 @@
+{
+ "form": "kc-plan-review",
+ "rev": "Plan Review Questionnaire (May 2026)",
+ "pdf": "kc-plan-review.pdf",
+ "url": "https://cdn.kingcounty.gov/-/media/king-county/depts/dph/documents/certificates-permits-licenses/food-worker-business-permits/permanent-businesses/plan-review-application-questionnaire.pdf",
+ "checked": "2026-10-18",
+ "notes": "Public Health Seattle and King County's food plan review questionnaire. Part A's requirement boxes take an X when the applicant acknowledges them. Part B and C questions are NA, Yes or No as printed (an answer of No needs an explanation sent with the plans; this PDF has no box for it). Question 25 takes every food handling step that applies, by name. The finish schedule takes one answer per area: 'floors, coving, walls, ceiling, counters'.",
+ "lines": [
+  {
+   "id": "facility_name",
+   "line": "Header",
+   "en": "Facility name",
+   "zh": "设施名称"
+  },
+  {
+   "id": "applicant",
+   "line": "Header",
+   "en": "Applicant name",
+   "zh": "申请人姓名"
+  },
+  {
+   "id": "acknowledge",
+   "line": "A",
+   "en": "General minimum requirements: mop sink, restrooms, hand sinks, refrigeration, cleanable surfaces, 3-compartment sink and hot water, plumbing and ventilation approval. Does the plan meet them all?",
+   "zh": "基本要求：拖把池、洗手间、洗手池、冷藏、易清洁表面、三格水槽与热水、管道及通风审批。图纸是否全部满足？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q1_sneezeguard",
+   "line": "B1",
+   "en": "All self-service, open food prep and food on display is protected by a barrier or sneezeguard",
+   "zh": "所有自助区、开放式备餐和展示食品均有隔板或防喷罩保护",
+   "options": [
+    "NA",
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q2_nsf",
+   "line": "B2",
+   "en": "All equipment is ANSI/NSF grade or equivalent",
+   "zh": "所有设备均为 ANSI/NSF 级或同等级别",
+   "options": [
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q3_ceilings",
+   "line": "B3",
+   "en": "All ceilings above food prep or service areas are finished and closed, or a drop ceiling",
+   "zh": "备餐或服务区上方天花均已完成封闭或为吊顶",
+   "options": [
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q4_sources",
+   "line": "B4",
+   "en": "All food is received from licensed wholesalers or prepared on site",
+   "zh": "所有食品均来自持证批发商或现场制备",
+   "options": [
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q5_cooling",
+   "line": "B5",
+   "en": "A walk-in or other dedicated refrigeration is reserved for cooling hot foods rapidly",
+   "zh": "有步入式冷库或专用冷藏设备用于快速冷却热食",
+   "options": [
+    "NA",
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q6_prep_top",
+   "line": "B6",
+   "en": "A prep-top refrigerator is provided where food is assembled to order",
+   "zh": "现点现组装食品处配有备餐台冰柜",
+   "options": [
+    "NA",
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q7_undercounter",
+   "line": "B7",
+   "en": "An undercounter cooler is provided in the beverage station (bar, espresso, bubble tea, etc.)",
+   "zh": "饮品站（吧台、咖啡、珍珠奶茶等）配有台下冷柜",
+   "options": [
+    "NA",
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q8_dump_sink",
+   "line": "B8",
+   "en": "A dump sink or 3-compartment sink is provided in the beverage station",
+   "zh": "饮品站配有倾倒池或三格水槽",
+   "options": [
+    "NA",
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q9_produce_sink",
+   "line": "B9",
+   "en": "A dedicated produce prep sink is provided (indirect drain)",
+   "zh": "配有专用蔬果清洗池（间接排水）",
+   "options": [
+    "NA",
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q10_meat_sink",
+   "line": "B10",
+   "en": "A dedicated meat or seafood prep sink is provided (indirect drain)",
+   "zh": "配有专用肉类/海鲜处理池（间接排水）",
+   "options": [
+    "NA",
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q11_advisory",
+   "line": "B11",
+   "en": "A consumer advisory is on the menus for animal proteins served raw or undercooked",
+   "zh": "菜单上对生或未熟透的动物蛋白有消费者提示",
+   "options": [
+    "NA",
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q12_water",
+   "line": "B12",
+   "en": "Water supply is from a municipal supplier",
+   "zh": "供水来自市政供水",
+   "options": [
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q13_sewer",
+   "line": "B13",
+   "en": "The facility is on the public sewer system",
+   "zh": "设施接入公共污水系统",
+   "options": [
+    "Yes",
+    "No"
+   ],
+   "hint": {
+    "en": "A \"No\" needs an explanation sent with the plans.",
+    "zh": "选 \"No\" 需随图纸附上说明。"
+   }
+  },
+  {
+   "id": "q14_commissary",
+   "line": "C14",
+   "en": "Is this facility a commissary kitchen only, without retail sales?",
+   "zh": "此设施是否仅为中央厨房、无零售？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q15_dfdo",
+   "line": "C15",
+   "en": "Are you a donated food distributing organization or a non-profit?",
+   "zh": "您是否为捐赠食品分发组织或非营利组织？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q16_overnight",
+   "line": "C16",
+   "en": "Are you planning to cook or hot hold food overnight unattended?",
+   "zh": "是否计划夜间无人看管时烹饪或保温食品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q17_outdoor",
+   "line": "C17",
+   "en": "Are you planning an outdoor BBQ or other outdoor food service?",
+   "zh": "是否计划户外烧烤或其他户外餐饮服务？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q18_grab_go",
+   "line": "C18",
+   "en": "Will you package foods on site for grab-and-go service (labeled)?",
+   "zh": "是否会现场包装即买即走食品（附标签）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q19_juice",
+   "line": "C19",
+   "en": "Will you bottle juice on site (labeled, with the warning label)?",
+   "zh": "是否会现场灌装果汁（附标签及警示）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q20_special_cleaning",
+   "line": "C20",
+   "en": "Do you have equipment that needs special cleaning (soft-serve, automated espresso with milk dispenser, etc.)?",
+   "zh": "是否有需特殊清洁的设备（软冰淇淋机、带奶管的全自动咖啡机等）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q21_open_during_remodel",
+   "line": "C21",
+   "en": "Remodel only: will the facility stay open during construction?",
+   "zh": "仅限改建：施工期间设施是否继续营业？",
+   "options": [
+    "Yes",
+    "NA",
+    "No"
+   ]
+  },
+  {
+   "id": "q22_additives",
+   "line": "C22",
+   "en": "Are you planning to add ingredients or supplements such as CBD, kava or sea moss?",
+   "zh": "是否计划在食品中添加 CBD、卡瓦、海苔藓等成分？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q23_animals",
+   "line": "C23",
+   "en": "Are you planning to have live animals (pets) on the premises?",
+   "zh": "是否计划在场所内饲养活体动物（宠物）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q24_special_processes",
+   "line": "C24",
+   "en": "Are you planning special processes (sous vide, reduced oxygen packaging, smoking, fermenting, curing, sprouting, shellfish tanks)?",
+   "zh": "是否计划特殊加工（真空低温、减氧包装、烟熏、发酵、腌制、发芽、贝类活养）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "q25_steps",
+   "line": "25",
+   "en": "Food handling steps that will occur (all that apply)",
+   "zh": "将进行的食品处理步骤（可多选）",
+   "options": [
+    "Packaged food only",
+    "Cold holding",
+    "Assemble, portion or mix food",
+    "Reheat to serve immediately",
+    "Produce rinsing",
+    "Raw shell eggs",
+    "Eggs: baking",
+    "Eggs: cook",
+    "Eggs: serve without cooking",
+    "Raw meat or seafood",
+    "Meat: sell pre-packaged only",
+    "Meat: cut",
+    "Meat: cook",
+    "Hot holding",
+    "Cooling",
+    "Time as a public health control"
+   ],
+   "hint": {
+    "en": "Name each that applies, e.g. \"Cold holding, Assemble, portion or mix food, Produce rinsing, Raw shell eggs, Eggs: cook, Hot holding\".",
+    "zh": "逐项写明，如 \"Cold holding, Assemble, portion or mix food, Produce rinsing, Raw shell eggs, Eggs: cook, Hot holding\"。"
+   }
+  },
+  {
+   "id": "finish_kitchen",
+   "line": "25 IV",
+   "en": "Finish schedule, Kitchen: floors, coving, walls, ceiling, counters",
+   "zh": "装修表，厨房：地面、踢脚、墙面、天花、台面",
+   "hint": {
+    "en": "\"floors, coving, walls, ceiling, counters\", e.g. \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\".",
+    "zh": "\"地面, 踢脚, 墙面, 天花, 台面\"，如 \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\"。"
+   }
+  },
+  {
+   "id": "finish_storage",
+   "line": "25 IV",
+   "en": "Finish schedule, Storage area: floors, coving, walls, ceiling, counters",
+   "zh": "装修表，储藏区：地面、踢脚、墙面、天花、台面",
+   "hint": {
+    "en": "\"floors, coving, walls, ceiling, counters\", e.g. \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\".",
+    "zh": "\"地面, 踢脚, 墙面, 天花, 台面\"，如 \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\"。"
+   }
+  },
+  {
+   "id": "finish_bar",
+   "line": "25 IV",
+   "en": "Finish schedule, Bar/beverage area: floors, coving, walls, ceiling, counters",
+   "zh": "装修表，吧台/饮品区：地面、踢脚、墙面、天花、台面",
+   "hint": {
+    "en": "\"floors, coving, walls, ceiling, counters\", e.g. \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\".",
+    "zh": "\"地面, 踢脚, 墙面, 天花, 台面\"，如 \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\"。"
+   }
+  },
+  {
+   "id": "finish_front",
+   "line": "25 IV",
+   "en": "Finish schedule, Front service area: floors, coving, walls, ceiling, counters",
+   "zh": "装修表，前台服务区：地面、踢脚、墙面、天花、台面",
+   "hint": {
+    "en": "\"floors, coving, walls, ceiling, counters\", e.g. \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\".",
+    "zh": "\"地面, 踢脚, 墙面, 天花, 台面\"，如 \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\"。"
+   }
+  },
+  {
+   "id": "finish_bathrooms",
+   "line": "25 IV",
+   "en": "Finish schedule, Bathrooms: floors, coving, walls, ceiling, counters",
+   "zh": "装修表，洗手间：地面、踢脚、墙面、天花、台面",
+   "hint": {
+    "en": "\"floors, coving, walls, ceiling, counters\", e.g. \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\".",
+    "zh": "\"地面, 踢脚, 墙面, 天花, 台面\"，如 \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\"。"
+   }
+  },
+  {
+   "id": "finish_other",
+   "line": "25 IV",
+   "en": "Finish schedule, Other (grocery, etc.): floors, coving, walls, ceiling, counters",
+   "zh": "装修表，其他（杂货等）：地面、踢脚、墙面、天花、台面",
+   "hint": {
+    "en": "\"floors, coving, walls, ceiling, counters\", e.g. \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\".",
+    "zh": "\"地面, 踢脚, 墙面, 天花, 台面\"，如 \"Sealed concrete, Rubber, FRP, Vinyl tile, Stainless steel\"。"
+   }
+  }
+ ],
+ "blank": {
+  "acknowledge": "^(n|no)\\b(?!/)"
+ },
+ "boxes": {
+  "facility_name": [
+   {
+    "text": "undefined"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "undefined_2"
+   }
+  ],
+  "acknowledge": [
+   {
+    "text": "mop sink",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Restroom for employees within 200 feet Restroom for customers if seating is offered",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Handwashing sinks conveniently located in all food preparation food dispensing and",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Refrigeration must be provided to safely store and prepare cold foods Refrigeration capacity",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Floors walls and ceilings are smooth nonabsorbent and easily cleanable",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "3compartment sink is provided onsite if you have any open food",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Basins are large enough to fully submerge and wash all equipment",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "With attached drainboards OR racks or shelving provided for soiled and clean",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Hot water tank is large enough to fill 2 halves of the 3comp sink basins with",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "I understand that plumbing approval from the local authority having jurisdiction AHJ is required",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "I understand that adequate ventilation may be required for cooking deep fat frying or any other",
+    "value": "X",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "q1_sneezeguard": [
+   {
+    "radio": "Group1",
+    "value": "Choice1",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group1",
+    "value": "Choice2",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group1",
+    "value": "Choice3",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q2_nsf": [
+   {
+    "radio": "Group2",
+    "value": "Choice4",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group2",
+    "value": "Choice5",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q3_ceilings": [
+   {
+    "radio": "Group3",
+    "value": "Choice6",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group3",
+    "value": "Choice7",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q4_sources": [
+   {
+    "radio": "Group4",
+    "value": "Choice8",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group4",
+    "value": "Choice9",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q5_cooling": [
+   {
+    "radio": "Group5",
+    "value": "Choice1",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group5",
+    "value": "Choice2",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group5",
+    "value": "Choice3",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q6_prep_top": [
+   {
+    "radio": "Group6",
+    "value": "Choice4",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group6",
+    "value": "Choice5",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group6",
+    "value": "Choice6",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q7_undercounter": [
+   {
+    "radio": "Group7",
+    "value": "Choice7",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group7",
+    "value": "Choice10",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group7",
+    "value": "Choice11",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q8_dump_sink": [
+   {
+    "radio": "Group8",
+    "value": "Choice12",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group8",
+    "value": "Choice13",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group8",
+    "value": "Choice14",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q9_produce_sink": [
+   {
+    "radio": "Group9",
+    "value": "Choice15",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group9",
+    "value": "Choice16",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group9",
+    "value": "Choice17",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q10_meat_sink": [
+   {
+    "radio": "Group10",
+    "value": "Choice18",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group10",
+    "value": "Choice19",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group10",
+    "value": "Choice20",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q11_advisory": [
+   {
+    "radio": "Group11",
+    "value": "Choice21",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group11",
+    "value": "Choice22",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group11",
+    "value": "Choice23",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q12_water": [
+   {
+    "radio": "Group12",
+    "value": "Choice24",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group12",
+    "value": "Choice25",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q13_sewer": [
+   {
+    "radio": "Group13",
+    "value": "Choice26",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group13",
+    "value": "Choice27",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q14_commissary": [
+   {
+    "radio": "Group14",
+    "value": "Choice1",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group14",
+    "value": "Choice2",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q15_dfdo": [
+   {
+    "radio": "Group15",
+    "value": "Choice3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group15",
+    "value": "Choice4",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q16_overnight": [
+   {
+    "radio": "Group16",
+    "value": "Choice5",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group16",
+    "value": "Choice6",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q17_outdoor": [
+   {
+    "radio": "Group17",
+    "value": "Choice7",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group17",
+    "value": "Choice8",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q18_grab_go": [
+   {
+    "radio": "Group18",
+    "value": "Choice9",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group18",
+    "value": "Choice10",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q19_juice": [
+   {
+    "radio": "Group19",
+    "value": "Choice11",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group19",
+    "value": "Choice12",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q20_special_cleaning": [
+   {
+    "radio": "Group20",
+    "value": "Choice13",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group20",
+    "value": "Choice14",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q21_open_during_remodel": [
+   {
+    "radio": "Group21",
+    "value": "Choice16",
+    "if": "^(na|n/a|not applicable)\\b"
+   },
+   {
+    "radio": "Group21",
+    "value": "Choice15",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group21",
+    "value": "Choice17",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q22_additives": [
+   {
+    "radio": "Group22",
+    "value": "Choice18",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group22",
+    "value": "Choice19",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q23_animals": [
+   {
+    "radio": "Group23",
+    "value": "Choice20",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group23",
+    "value": "Choice21",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q24_special_processes": [
+   {
+    "radio": "Group24",
+    "value": "Choice22",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group24",
+    "value": "Choice23",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "q25_steps": [
+   {
+    "check": "Packaged food only no open food such as grocery store#1",
+    "if": "packaged food only"
+   },
+   {
+    "check": "Cold holding food in refrigerators and at 41F or below#1",
+    "if": "cold holding"
+   },
+   {
+    "check": "Assemble portion or mix food making sandwiches drinks etc#1",
+    "if": "assembl|portion|mix"
+   },
+   {
+    "check": "Reheat to serve immediately reheat food to order using turbo chef microwave etc no hot holding#1",
+    "if": "reheat"
+   },
+   {
+    "check": "Produce rinsing produce must be washed prior to cuttingserving unless commercially prewashed#1",
+    "if": "produce"
+   },
+   {
+    "check": "Have raw shell eggs#1",
+    "if": "eggs"
+   },
+   {
+    "check": "Baking cakes or breads#1",
+    "if": "eggs?:?\\s*bak|^bak|,\\s*bak"
+   },
+   {
+    "check": "Cook#1",
+    "if": "eggs?:?\\s*cook"
+   },
+   {
+    "check": "Serve without cooking such as in drinks and dressing#1",
+    "if": "without cooking"
+   },
+   {
+    "check": "Have raw meatseafood#1",
+    "if": "raw meat|seafood"
+   },
+   {
+    "check": "Sell prepackaged only#1",
+    "if": "pre-?packaged only"
+   },
+   {
+    "check": "Cut#1",
+    "if": "meat:?\\s*cut|,\\s*cut\\b"
+   },
+   {
+    "check": "Cook_2#1",
+    "if": "meat:?\\s*cook"
+   },
+   {
+    "check": "Hot holding keep the food hot during operation at 135F or above#1",
+    "if": "hot holding"
+   },
+   {
+    "check": "Cooling save hot leftovers cook hot food in advance and cool it rapidly for later use#1",
+    "if": "cooling"
+   },
+   {
+    "check": "Time as a public health control food held at room temperature up to 4 hours then discarded#1",
+    "if": "time as"
+   }
+  ],
+  "finish_kitchen": [
+   {
+    "text": "FloorsKitchen#1",
+    "pick": "head"
+   },
+   {
+    "text": "CovingKitchen#1",
+    "pick": "tail|head"
+   },
+   {
+    "text": "WallsKitchen#1",
+    "pick": "tail|tail|head"
+   },
+   {
+    "text": "CeilingKitchen#1",
+    "pick": "tail|tail|tail|head"
+   },
+   {
+    "text": "CountersKitchen#1",
+    "pick": "tail|tail|tail|tail"
+   }
+  ],
+  "finish_storage": [
+   {
+    "text": "FloorsStorage Area#1",
+    "pick": "head"
+   },
+   {
+    "text": "CovingStorage Area#1",
+    "pick": "tail|head"
+   },
+   {
+    "text": "WallsStorage Area#1",
+    "pick": "tail|tail|head"
+   },
+   {
+    "text": "CeilingStorage Area#1",
+    "pick": "tail|tail|tail|head"
+   },
+   {
+    "text": "CountersStorage Area#1",
+    "pick": "tail|tail|tail|tail"
+   }
+  ],
+  "finish_bar": [
+   {
+    "text": "FloorsBarbeverage area#1",
+    "pick": "head"
+   },
+   {
+    "text": "CovingBarbeverage area#1",
+    "pick": "tail|head"
+   },
+   {
+    "text": "WallsBarbeverage area#1",
+    "pick": "tail|tail|head"
+   },
+   {
+    "text": "CeilingBarbeverage area#1",
+    "pick": "tail|tail|tail|head"
+   },
+   {
+    "text": "CountersBarbeverage area#1",
+    "pick": "tail|tail|tail|tail"
+   }
+  ],
+  "finish_front": [
+   {
+    "text": "FloorsFront service area#1",
+    "pick": "head"
+   },
+   {
+    "text": "CovingFront service area#1",
+    "pick": "tail|head"
+   },
+   {
+    "text": "WallsFront service area#1",
+    "pick": "tail|tail|head"
+   },
+   {
+    "text": "CeilingFront service area#1",
+    "pick": "tail|tail|tail|head"
+   },
+   {
+    "text": "CountersFront service area#1",
+    "pick": "tail|tail|tail|tail"
+   }
+  ],
+  "finish_bathrooms": [
+   {
+    "text": "FloorsBathrooms#1",
+    "pick": "head"
+   },
+   {
+    "text": "CovingBathrooms#1",
+    "pick": "tail|head"
+   },
+   {
+    "text": "WallsBathrooms#1",
+    "pick": "tail|tail|head"
+   },
+   {
+    "text": "CeilingBathrooms#1",
+    "pick": "tail|tail|tail|head"
+   },
+   {
+    "text": "CountersBathrooms#1",
+    "pick": "tail|tail|tail|tail"
+   }
+  ],
+  "finish_other": [
+   {
+    "text": "FloorsOther grocery etc#1",
+    "pick": "head"
+   },
+   {
+    "text": "CovingOther grocery etc#1",
+    "pick": "tail|head"
+   },
+   {
+    "text": "WallsOther grocery etc#1",
+    "pick": "tail|tail|head"
+   },
+   {
+    "text": "CeilingOther grocery etc#1",
+    "pick": "tail|tail|tail|head"
+   },
+   {
+    "text": "CountersOther grocery etc#1",
+    "pick": "tail|tail|tail|tail"
+   }
+  ]
+ }
+}

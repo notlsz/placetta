@@ -1,0 +1,712 @@
+{
+ "form": "cmh-plan-review",
+ "rev": "Columbus Public Health Food Facility Plan Review Application",
+ "pdf": "cmh-plan-review.pdf",
+ "url": "https://www.columbus.gov/files/sharedassets/city/v/10/public-health/planreview-application.pdf",
+ "checked": "2026-10-18",
+ "notes": "Columbus Public Health's food facility plan review application. Addresses split into street, city, state and ZIP. Establishment types, special processes and the plans submitted take every one that applies, by name. Finish schedule: one area per line, 'area, floor, walls, ceiling, coving'. The office-use block, the detailed plan checklist sub-items and the signature and its date are left for the applicant.",
+ "lines": [
+  {
+   "id": "facility_name",
+   "line": "Facility",
+   "en": "Name of facility",
+   "zh": "设施名称"
+  },
+  {
+   "id": "facility_address",
+   "line": "Facility",
+   "en": "Facility address",
+   "zh": "设施地址"
+  },
+  {
+   "id": "facility_email",
+   "line": "Facility",
+   "en": "Facility email",
+   "zh": "设施电子邮箱"
+  },
+  {
+   "id": "facility_phone",
+   "line": "Facility",
+   "en": "Facility phone",
+   "zh": "设施电话"
+  },
+  {
+   "id": "owner",
+   "line": "Ownership",
+   "en": "Ownership entity name",
+   "zh": "所有权实体名称"
+  },
+  {
+   "id": "owner_email",
+   "line": "Ownership",
+   "en": "Ownership email (and send the payment invoice to it?)",
+   "zh": "所有权人电子邮箱（是否将付款发票发至此邮箱？）",
+   "hint": {
+    "en": "The email, then Yes or No for the invoice: \"owner@example.com, Yes\".",
+    "zh": "电子邮箱后写 Yes 或 No：\"owner@example.com, Yes\"。"
+   }
+  },
+  {
+   "id": "owner_phone",
+   "line": "Ownership",
+   "en": "Ownership phone",
+   "zh": "所有权人电话"
+  },
+  {
+   "id": "owner_mailing",
+   "line": "Ownership",
+   "en": "Mailing address, if different than the facility address",
+   "zh": "邮寄地址（如与设施地址不同）"
+  },
+  {
+   "id": "owner_ein",
+   "line": "Ownership",
+   "en": "Ownership EIN",
+   "zh": "所有权人 EIN"
+  },
+  {
+   "id": "contact",
+   "line": "Contact",
+   "en": "Contact person: name",
+   "zh": "联系人：姓名"
+  },
+  {
+   "id": "contact_email",
+   "line": "Contact",
+   "en": "Contact person: email (and send the payment invoice to it?)",
+   "zh": "联系人：电子邮箱（是否将付款发票发至此邮箱？）"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Contact",
+   "en": "Contact person: phone",
+   "zh": "联系人：电话"
+  },
+  {
+   "id": "project",
+   "line": "Project",
+   "en": "Type of project",
+   "zh": "项目类型",
+   "options": [
+    "New Establishment",
+    "Full Remodel",
+    "Remodel/Alteration of Existing Food Establishment",
+    "Change of Ownership"
+   ]
+  },
+  {
+   "id": "remodel_details",
+   "line": "Project",
+   "en": "For a remodel: project details",
+   "zh": "改建：项目说明"
+  },
+  {
+   "id": "construction_start",
+   "line": "Project",
+   "en": "Estimated date construction begins",
+   "zh": "预计施工开始日期"
+  },
+  {
+   "id": "opening_date",
+   "line": "Project",
+   "en": "Estimated opening date",
+   "zh": "预计开业日期"
+  },
+  {
+   "id": "facility_type",
+   "line": "Type",
+   "en": "Type of facility (all that apply)",
+   "zh": "设施类型（可多选）",
+   "options": [
+    "Restaurant or Diner",
+    "Bakery",
+    "Meat/Fish Market",
+    "Caterer",
+    "Convenience Store",
+    "Diner/Cafe",
+    "Pizza Shop",
+    "Coffee Shop",
+    "Bar",
+    "Grocery Store",
+    "Child Care facility",
+    "Long Term Care",
+    "School",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each one that applies; for a type not listed write only \"Other: \" and the type.",
+    "zh": "逐项写明；未列出的类型只写 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "produce_washed",
+   "line": "Operations",
+   "en": "Will fruits and vegetables be washed in the establishment?",
+   "zh": "是否会在场所内清洗水果和蔬菜？",
+   "options": [
+    "Yes",
+    "No",
+    "Not applicable"
+   ]
+  },
+  {
+   "id": "square_feet",
+   "line": "Type",
+   "en": "Square feet inside the food establishment",
+   "zh": "食品场所内部面积（平方英尺）"
+  },
+  {
+   "id": "water",
+   "line": "Utilities",
+   "en": "Water supply: City, or \"Other: \" and the source",
+   "zh": "供水：City，或 \"Other: \" 加水源"
+  },
+  {
+   "id": "sewage",
+   "line": "Utilities",
+   "en": "Sewage disposal",
+   "zh": "污水处理",
+   "options": [
+    "Sanitary Sewer",
+    "Onsite Wastewater Treatment System"
+   ]
+  },
+  {
+   "id": "processes",
+   "line": "Operations",
+   "en": "Special processes (all that apply)",
+   "zh": "特殊加工方式（可多选）",
+   "options": [
+    "Sushi",
+    "Cooling food",
+    "Reheating food in bulk",
+    "Smoking or curing",
+    "Reduced-oxygen packaging",
+    "Serve a highly susceptible population",
+    "Serve raw or undercooked menu items",
+    "Catering"
+   ],
+   "hint": {
+    "en": "Name each that applies, or \"None\".",
+    "zh": "逐项写明，没有则填 \"None\"。"
+   }
+  },
+  {
+   "id": "offsite_prep",
+   "line": "Operations",
+   "en": "Do you plan to prepare foods off site? If yes, describe",
+   "zh": "是否计划在场外制备食品？如是，请说明",
+   "hint": {
+    "en": "\"No\", or \"Yes: where and what\".",
+    "zh": "填 \"No\"，或 \"Yes: 地点与内容\"。"
+   }
+  },
+  {
+   "id": "plans_submitted",
+   "line": "Plans",
+   "en": "Plans and documents submitted",
+   "zh": "已提交的图纸与文件",
+   "hint": {
+    "en": "Name each one, e.g. \"Site plan, Menu, Floor plan, Equipment list, Plumbing drawings, Finish schedule, Lighting plan\".",
+    "zh": "逐项写明，如 \"Site plan, Menu, Floor plan, Equipment list, Plumbing drawings, Finish schedule, Lighting plan\"。"
+   }
+  },
+  {
+   "id": "finish_schedule",
+   "line": "Finish schedule",
+   "en": "Interior finish schedule: one area per line, \"area, floor, walls, ceiling, coving\"",
+   "zh": "室内装修表：每行一个区域，\"区域, 地面, 墙面, 天花, 踢脚\""
+  }
+ ],
+ "blank": {
+  "owner_mailing": "^(none|no|n/?a|same)\\.?$",
+  "remodel_details": "^(none|no|n/?a)\\.?$",
+  "processes": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "facility_name": [
+   {
+    "text": "Name of Facility"
+   }
+  ],
+  "facility_address": [
+   {
+    "text": "Address",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "ZIP",
+    "pick": "zip"
+   }
+  ],
+  "facility_email": [
+   {
+    "text": "Email"
+   }
+  ],
+  "facility_phone": [
+   {
+    "text": "Phone"
+   }
+  ],
+  "owner": [
+   {
+    "text": "Ownership Entity Name"
+   }
+  ],
+  "owner_email": [
+   {
+    "text": "Email_2",
+    "pick": "head"
+   },
+   {
+    "radio": "Send payment invoice to this email",
+    "value": "Yes",
+    "if": ",\\s*(y|yes)\\b"
+   },
+   {
+    "radio": "Send payment invoice to this email",
+    "value": "No",
+    "if": ",\\s*(n|no)\\b"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "Phone_2"
+   }
+  ],
+  "owner_mailing": [
+   {
+    "text": "Mailing Address if different than facility address",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "text": "City_2",
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "text": "State_2",
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "text": "ZIP_2",
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   }
+  ],
+  "owner_ein": [
+   {
+    "text": "Ownership EIN",
+    "pick": "ein"
+   }
+  ],
+  "contact": [
+   {
+    "text": "Name"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Email_3",
+    "pick": "head"
+   },
+   {
+    "radio": "Send payment invoice to this email_2",
+    "value": "Yes_2",
+    "if": ",\\s*(y|yes)\\b"
+   },
+   {
+    "radio": "Send payment invoice to this email_2",
+    "value": "No_2",
+    "if": ",\\s*(n|no)\\b"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Phone_3"
+   }
+  ],
+  "project": [
+   {
+    "check": "New Establishment 8021",
+    "if": "^new"
+   },
+   {
+    "check": "Full Remodel torn down and rebuilt full inside demo 8021",
+    "if": "^full"
+   },
+   {
+    "check": "RemodelAlteration of Existing Food Establishment 8025",
+    "if": "^remodel|alteration"
+   },
+   {
+    "check": "Change of Ownership 8036",
+    "if": "ownership"
+   }
+  ],
+  "remodel_details": [
+   {
+    "text": "For remodel briefly describe project details",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "construction_start": [
+   {
+    "text": "Estimated date construction begins 1",
+    "pick": "date"
+   }
+  ],
+  "opening_date": [
+   {
+    "text": "Estimated opening date",
+    "pick": "date"
+   }
+  ],
+  "facility_type": [
+   {
+    "check": "Restaurant or Diner",
+    "if": "(^|,)\\s*restaurant.{1,4}diner\\s*(,|$)"
+   },
+   {
+    "check": "Bakery",
+    "if": "(^|,)\\s*bakery\\s*(,|$)"
+   },
+   {
+    "check": "MeatFish Market",
+    "if": "(^|,)\\s*meat.fish market\\s*(,|$)"
+   },
+   {
+    "check": "Caterer",
+    "if": "(^|,)\\s*caterer\\s*(,|$)"
+   },
+   {
+    "check": "Convenience Store",
+    "if": "(^|,)\\s*convenience store\\s*(,|$)"
+   },
+   {
+    "check": "DinerCafe",
+    "if": "(^|,)\\s*diner.cafe\\s*(,|$)"
+   },
+   {
+    "check": "Pizza Shop",
+    "if": "(^|,)\\s*pizza shop\\s*(,|$)"
+   },
+   {
+    "check": "Coffee Shop",
+    "if": "(^|,)\\s*coffee shop\\s*(,|$)"
+   },
+   {
+    "check": "Bar",
+    "if": "(^|,)\\s*bar\\s*(,|$)"
+   },
+   {
+    "check": "Grocery Store",
+    "if": "(^|,)\\s*grocery store\\s*(,|$)"
+   },
+   {
+    "check": "Child Care facility",
+    "if": "(^|,)\\s*child care facility\\s*(,|$)"
+   },
+   {
+    "check": "Long Term Care",
+    "if": "(^|,)\\s*long term care\\s*(,|$)"
+   },
+   {
+    "check": "School",
+    "if": "(^|,)\\s*school\\s*(,|$)"
+   },
+   {
+    "check": "Other please specify",
+    "if": "^other"
+   },
+   {
+    "text": "undefined",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "produce_washed": [
+   {
+    "check": "Yes_4",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "No_4",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "check": "Not applicable",
+    "if": "^(not applicable|n/?a)"
+   }
+  ],
+  "square_feet": [
+   {
+    "text": "Square Feet Inside Food Establishment",
+    "pick": "digits"
+   }
+  ],
+  "water": [
+   {
+    "check": "City_3",
+    "if": "^city"
+   },
+   {
+    "check": "Onsite WellOther please specify",
+    "if": "^(well|other)"
+   },
+   {
+    "text": "undefined_2",
+    "pick": "tail",
+    "if": "^(well|other)"
+   }
+  ],
+  "sewage": [
+   {
+    "check": "Sanitary Sewer",
+    "if": "sanitary|sewer"
+   },
+   {
+    "check": "Onsite Wastewater Treatment System",
+    "if": "onsite|septic"
+   }
+  ],
+  "processes": [
+   {
+    "check": "Sushi",
+    "if": "sushi"
+   },
+   {
+    "check": "Cooling food",
+    "if": "cooling"
+   },
+   {
+    "check": "Reheating food in bulk",
+    "if": "reheat"
+   },
+   {
+    "check": "Smoking or curing",
+    "if": "smok|cur"
+   },
+   {
+    "check": "Reducedoxygen packaging",
+    "if": "reduced"
+   },
+   {
+    "check": "Serve highly susceptible population",
+    "if": "susceptible"
+   },
+   {
+    "check": "Serve raw or undercooked menu items",
+    "if": "raw|undercooked"
+   },
+   {
+    "check": "Catering this is not delivery only services",
+    "if": "cater"
+   }
+  ],
+  "offsite_prep": [
+   {
+    "radio": "undefined_3",
+    "value": "Yes_5",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "undefined_3",
+    "value": "No_5",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "If yes describe 1",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "plans_submitted": [
+   {
+    "check": "Site plan",
+    "if": "site plan"
+   },
+   {
+    "check": "Proposed menu or list of food and beverage items All facilities must submit",
+    "if": "menu"
+   },
+   {
+    "check": "Facility floor plan drawn to scale to include location of",
+    "if": "floor plan"
+   },
+   {
+    "check": "Equipment list including make and model numbers Commercial equipment only",
+    "if": "equipment list"
+   },
+   {
+    "check": "Basic plumbing drawings including the following",
+    "if": "plumbing"
+   },
+   {
+    "check": "Interior finish schedule with materials for floors walls ceilings and coving Example included",
+    "if": "finish"
+   },
+   {
+    "check": "Lighting plan include type of fixtures and location of lights",
+    "if": "lighting"
+   },
+   {
+    "check": "Ventilation hoods",
+    "if": "hood|ventilation"
+   }
+  ],
+  "finish_schedule": [
+   {
+    "text": "Example KitchenRow1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "Quarry tileRow1",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": "FRPRow1",
+    "pick": "line1|tail|tail|head"
+   },
+   {
+    "text": "Vinyl acoustic tileRow1",
+    "pick": "line1|tail|tail|tail|head"
+   },
+   {
+    "text": "6 quarry tileRow1",
+    "pick": "line1|tail|tail|tail|tail"
+   },
+   {
+    "text": "Example KitchenRow2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "Quarry tileRow2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": "FRPRow2",
+    "pick": "line2|tail|tail|head"
+   },
+   {
+    "text": "Vinyl acoustic tileRow2",
+    "pick": "line2|tail|tail|tail|head"
+   },
+   {
+    "text": "6 quarry tileRow2",
+    "pick": "line2|tail|tail|tail|tail"
+   },
+   {
+    "text": "Example KitchenRow3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "Quarry tileRow3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": "FRPRow3",
+    "pick": "line3|tail|tail|head"
+   },
+   {
+    "text": "Vinyl acoustic tileRow3",
+    "pick": "line3|tail|tail|tail|head"
+   },
+   {
+    "text": "6 quarry tileRow3",
+    "pick": "line3|tail|tail|tail|tail"
+   },
+   {
+    "text": "Example KitchenRow4",
+    "pick": "line4|head"
+   },
+   {
+    "text": "Quarry tileRow4",
+    "pick": "line4|tail|head"
+   },
+   {
+    "text": "FRPRow4",
+    "pick": "line4|tail|tail|head"
+   },
+   {
+    "text": "Vinyl acoustic tileRow4",
+    "pick": "line4|tail|tail|tail|head"
+   },
+   {
+    "text": "6 quarry tileRow4",
+    "pick": "line4|tail|tail|tail|tail"
+   },
+   {
+    "text": "Example KitchenRow5",
+    "pick": "line5|head"
+   },
+   {
+    "text": "Quarry tileRow5",
+    "pick": "line5|tail|head"
+   },
+   {
+    "text": "FRPRow5",
+    "pick": "line5|tail|tail|head"
+   },
+   {
+    "text": "Vinyl acoustic tileRow5",
+    "pick": "line5|tail|tail|tail|head"
+   },
+   {
+    "text": "6 quarry tileRow5",
+    "pick": "line5|tail|tail|tail|tail"
+   },
+   {
+    "text": "Example KitchenRow6",
+    "pick": "line6|head"
+   },
+   {
+    "text": "Quarry tileRow6",
+    "pick": "line6|tail|head"
+   },
+   {
+    "text": "FRPRow6",
+    "pick": "line6|tail|tail|head"
+   },
+   {
+    "text": "Vinyl acoustic tileRow6",
+    "pick": "line6|tail|tail|tail|head"
+   },
+   {
+    "text": "6 quarry tileRow6",
+    "pick": "line6|tail|tail|tail|tail"
+   },
+   {
+    "text": "Example KitchenRow7",
+    "pick": "line7|head"
+   },
+   {
+    "text": "Quarry tileRow7",
+    "pick": "line7|tail|head"
+   },
+   {
+    "text": "FRPRow7",
+    "pick": "line7|tail|tail|head"
+   },
+   {
+    "text": "Vinyl acoustic tileRow7",
+    "pick": "line7|tail|tail|tail|head"
+   },
+   {
+    "text": "6 quarry tileRow7",
+    "pick": "line7|tail|tail|tail|tail"
+   }
+  ]
+ }
+}

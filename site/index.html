@@ -2366,6 +2366,25 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 @media (max-width:639px){.belrows.st3 li.sbub{padding:12px 13px}.belrows.st3 li.scn{padding-left:21px}}
 .disc .fmade,.fmade{display:flex!important;align-items:center;gap:8px;margin-top:14px!important;font-size:12.5px!important;line-height:1.4!important;color:var(--muted)}
 .fmade .ffr{width:18px;height:12px;border-radius:2px;box-shadow:0 0 0 .5px rgba(15,27,51,.18)}
+
+/* hero buttons and the before and after section, from the Oct 17 redesign */
+/* hero: one primary and one secondary button */
+.hcta{display:flex;flex-wrap:wrap;gap:10px}
+.hbtn{padding:12px 18px;font-size:15px;line-height:18px;letter-spacing:-.2px;border-radius:10px}
+.b-glass{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.34);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.b-glass:hover{background:rgba(255,255,255,.22)}
+/* before and after: four people you hire and chase, then the store owner with Odelia */
+#diff .bgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 8px}
+@media (min-width:640px){#diff .bgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}}
+#diff .per{width:100%;max-width:124px}
+#diff .tag{width:100%;max-width:none}
+@media (max-width:639px){#diff .tag{height:38px;font-size:11px}#diff .pain{font-size:10.5px}#diff .per svg.sil{width:24px;height:72px}#diff .aft .with{font-size:11px}#diff .aft .orb{width:34px;height:34px}#diff .aft .orbw{height:72px}#diff .bal p{font-size:12px}}
+#diff .aft .per{flex:0 0 auto;width:112px}
+@media (min-width:1024px){#diff .aft .per{width:124px}}
+#diff .bag{gap:16px}
+@media (min-width:1024px){#diff .bag{gap:24px}}
+.hnote{margin-top:-6px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.74);text-shadow:0 1px 8px rgba(0,0,0,.3)}
+@media (min-width:1024px){.hnote{margin-top:-12px}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2424,21 +2443,44 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p data-i18n="hero.badge">Every requirement linked to its official source</p>
       </div>
       <div class="hstack">
-        <h1 data-i18n="hero.h1">Meet Odelia,<br><em>the compliance agent for brands entering the&nbsp;US.</em></h1>
-        <p class="hsub" data-i18n="hero.sub">Odelia maps every permit and registration your US launch needs, files each one with your approval in the order agencies require, and keeps them current, in English or Chinese.</p>
-        <div class="stwrap">
-          <form class="starter" data-src="hero" novalidate>
-            <label class="sr" for="st-hero" data-i18n="st.label">Where are you opening?</label>
-            <input id="st-hero" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
-            <button type="submit" class="btn b-white" data-i18n="st.btn">Get my plan</button>
-          </form>
-          <p class="stalt"><a href="/app/" data-track="hero_try_agent"><span data-i18n="hero.try">Put Odelia to work</span><i aria-hidden="true">→</i></a><a href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo"><span data-i18n="hero.demo">Book a demo</span><i aria-hidden="true">→</i></a></p>
+        <h1 data-i18n="hero.h1">Your store is built.<br><em>Your permits aren't.</em></h1>
+        <p class="hsub" data-i18n="hero.sub">Every month without them is rent on an empty store. Odelia ends the forms sent back, the missed renewals and the hourly bills, in English or Chinese.</p>
+        <div class="hcta">
+          <button type="button" class="btn b-white hbtn" data-open="hero" data-i18n="cta.plan">Get my plan</button>
+          <a class="btn b-glass hbtn" href="mailto:support@placetta.com?subject=Placetta%20demo" data-track="hero_demo" data-i18n="hero.demo">Book a demo</a>
         </div>
+        <p class="hnote" data-i18n="hero.note">Four quick questions, about a minute. Nothing is filed or paid without your approval.</p>
         <a class="hbk" href="/backers" data-sec="backers" id="hBk"></a>
       </div>
     </div>
     <div class="hbot"><p data-i18n="brands.l">Built for</p><div class="mq" aria-label="Industries" data-i18n-aria="aria.brands"><div class="mqt" id="mqt"></div></div></div>
   </div>
+</section>
+
+<!-- ======================= BEFORE / AFTER: the team you'd hire, or Odelia ======================= -->
+<section class="ox mt160 rv" data-rv="up" id="diff" aria-labelledby="diffH">
+  <div class="ctr">
+    <div class="drow">
+      <div class="dl">
+        <h2 class="t28" id="diffH" data-i18n="diff.h">The difference Odelia makes</h2>
+        <div>
+          <div class="ds"><b data-i18n="diff.2b">4 → 1</b><span data-i18n="diff.2s">People to hire and chase, down to one agent you approve</span></div>
+          <div class="ds"><b data-i18n="diff.1b">Minutes</b><span data-i18n="diff.1s">From one line to a full entry plan</span></div>
+        </div>
+      </div>
+      <div class="dcard">
+        <div class="bag"><div class="bal"><p data-i18n="diff.before">Before</p></div><div class="bgrid" id="before" role="list" aria-label="Before" data-i18n-aria="diff.before"></div></div>
+        <div class="bag"><div class="bal"><p data-i18n="diff.after">After</p></div>
+          <div class="aft" role="list" aria-label="After" data-i18n-aria="diff.after">
+            <div class="per" role="listitem"><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag" data-i18n="diff.team">Store owner</div></div>
+            <p class="with" data-i18n="diff.with">with</p>
+            <div class="per" role="listitem"><div class="orbw"><span class="orb"></span></div><div class="tag" data-i18n="tm.r4">Odelia</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><g id="sil" fill="#D3D9E3"><circle cx="15" cy="9" r="8.6"/><path d="M5.5 21.5h19a5.5 5.5 0 0 1 5.5 5.5v21.5a4.5 4.5 0 0 1-4.5 4.5h-1.6L22 87.2a2.2 2.2 0 0 1-2.2 2.1h-9.6A2.2 2.2 0 0 1 8 87.2L6.1 53H4.5A4.5 4.5 0 0 1 0 48.5V27a5.5 5.5 0 0 1 5.5-5.5z"/></g></defs></svg>
 </section>
 
 <!-- ======================= PRODUCT DEMO ======================= -->
@@ -3255,6 +3297,9 @@ zh:{
  "price.promise":"门店开业和营业离不开的每一项执照、许可和证书：逐项梳理，经您批准后提交，并跟踪续期。", "price.sub":"基础版每家门店每月 149 美元，经常接受检查的门店可选专业版，每月 299 美元，均按年计费。每位加盟商为自己的门店付费。",
  "faq.sub":"还有其他问题？请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"
 }};
+/* hero and before and after, from the Oct 17 redesign */
+Object.assign(T.en, {"diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "Minutes", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
+Object.assign(T.zh, {"diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "几分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -3264,8 +3309,8 @@ const CLAIMS = {
   en:{"map.fs":"containers of customer goods we help bring into new markets every year"},
   zh:{"map.fs":"个货柜：每年我们协助客户运入新市场的货物"}},
  monthsSooner: {
-  en:{"hero.sub":"Odelia maps every permit and registration your US launch needs, files each one with your approval, and keeps them current. Open months sooner, in English or Chinese.", "proof.h":"Brands open sooner with Placetta."},
-  zh:{"hero.sub":"Odelia 梳理您在美国开业所需的每一项许可与登记，经您确认后逐项申报，并持续更新。提前数月开业，中英文均可。", "proof.h":"品牌借助快哉，更早开业。"}},
+  en:{"hero.sub":"Every month without them is rent on an empty store. Odelia ends the forms sent back, the missed renewals and the hourly bills, so you open months sooner.", "proof.h":"Brands open sooner with Placetta."},
+  zh:{"hero.sub":"执照晚一个月，空店的房租就多付一个月。Odelia 帮您告别被退回的表格、错过的续期和按小时计费的账单，让您提前数月开业。", "proof.h":"品牌借助快哉，更早开业。"}},
  backersLogos: {
   en:{"bk.h":"Backed by operators from", "bk.hero":"Backed by operators from OpenAI, Anthropic, SpaceX and 21 more"},
   zh:{"bk.h":"我们的投资人来自", "bk.hero":"投资人来自 OpenAI、Anthropic、SpaceX 等 24 家公司"}},
@@ -4497,7 +4542,7 @@ if (WECHAT_QR){ document.getElementById("fqrImg").src = WECHAT_QR; document.getE
 
 /* ============ boot ============ */
 /* ============ restored sections (from the earlier site) ============ */
-const BEFORE = [["City business license office","市营业执照办公室","On hold","电话排队中"],["County health department","县卫生部门","Form sent back","表格被退回"],["Fire marshal","消防部门","Inspection pending","等待检查"],["Building department","建筑部门","Plans resubmitted","图纸重新提交"],["State tax agency","州税务机构","Separate login","另一个账户"],["Permit consultant","许可顾问","Billed hourly","按小时计费"]];
+const BEFORE = [["Permit expediter","许可代办","On hold","电话排队中"],["Lawyer","律师","Billed hourly","按小时计费"],["Operations manager","运营经理","Form sent back","表格被退回"],["Bookkeeper","会计","Renewal overdue","续期逾期"]];
 
 
 const DASHROWS = [
@@ -4528,7 +4573,7 @@ function renderDash(){
 }
 
 
-function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map(b => `<div class="per"><span class="pain">${b[2 + i]}</span><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div></div>`).join(""); }
+function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map(b => `<div class="per" role="listitem"><span class="pain">${b[2 + i]}</span><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div></div>`).join(""); }
 
 
 const isLg = () => innerWidth >= 1024;

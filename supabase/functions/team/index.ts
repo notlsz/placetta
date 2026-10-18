@@ -5,6 +5,8 @@
 //   remove {user_id}                                        owners remove anyone; anyone can remove themselves (leave)
 //   delete_account {confirm: "DELETE"}                      no workspace_id: deletes the caller's account (see deleteAccount)
 //   ask {question, context?, lang?}                         owners and members: a person on the Placetta team replies in Updates (askPerson)
+//   notify                                                  no workspace_id: sends the mention notices the caller's own comments
+//                                                           and assignments just made, by each person's channel (_shared/notices.ts)
 // The invite is accepted when that email signs in (accept_invites in the database), so the email only has to get them to sign in:
 // new people get Supabase's invite email, people with an account get a sign-in link.
 import { createClient, type User } from "npm:@supabase/supabase-js@2";
@@ -27,6 +29,7 @@ import {
   userClient,
   uuidParam,
 } from "./shared.ts";
+import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
 
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
@@ -173,10 +176,30 @@ async function askPerson(ws: string, user: User, jwt: string, body: Record<strin
   return ok({ id });
 }
 
+/* ------------------------------------------------------------------ notify
+   A comment or an assignment just made in the app (comment_post, assign_item, hq_ask in the database) wrote a notice
+   for each person it names. This sends the ones the caller made, right away, each by that person's own channel; the
+   monitor sends anything left each morning. Only notices the caller created, so it can't be used to mail anyone else. */
+async function notifyMine(user: User) {
+  const key = Deno.env.get("RESEND_API_KEY") ?? "", from = Deno.env.get("MAIL_FROM") ?? "";
+  const mail = async (to: string, subject: string, body: string, html: string) => {
+    if (!key || !from) return false;
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to: [to], subject, text: body, html }),
+    }).catch((e) => { console.error("notice mail failed:", String(e).slice(0, 120)); return null; });
+    if (r && !r.ok) console.error("notice mail failed:", r.status);
+    return !!r?.ok;
+  };
+  const r = await deliverNotices(noticeDb(admin), { mail, text: outboxText(admin) }, { app: appOrigins()[0] ?? "", today: new Date().toISOString().slice(0, 10), by: user.id, limit: 60 });
+  return ok({ sent: r.emailed + r.texted, only_in_app: r.quiet });
+}
+
 serve(async (req) => {
   const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
   if (body.action === "delete_account") return await deleteAccount(user, jwt, body);
+  if (body.action === "notify") return await notifyMine(user);
   const ws = uuidParam(body.workspace_id, "workspace_id");
 
   if (body.action === "remove") {
@@ -230,5 +253,5 @@ serve(async (req) => {
     return ok({ id, sent: await sendInvite(inv.email as string, redirectTo) });
   }
 
-  throw new HttpError("bad_request", "Unknown action. Use invite, resend, remove or ask.");
+  throw new HttpError("bad_request", "Unknown action. Use invite, resend, remove, ask or notify.");
 });

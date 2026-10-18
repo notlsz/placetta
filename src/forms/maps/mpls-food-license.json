@@ -1,0 +1,914 @@
+{
+ "form": "mpls-food-license",
+ "rev": "Restaurant license application (last updated 4/1/26)",
+ "pdf": "mpls-food-license.pdf",
+ "url": "https://www.minneapolismn.gov/media/-www-content-assets/documents/Restaurant-Application.pdf",
+ "checked": "2026-10-18",
+ "notes": "City of Minneapolis restaurant license application. Addresses are split into street, city, state and ZIP. Each owner takes five lines (name; telephone; home address; title; ownership %). Social Security or ITIN numbers and owners' dates of birth are never written by Placetta and are left for the owners, as are the electronic-signature name, the terms checkboxes, the data privacy advisory (form 2) and the attachments checklist. In this PDF the 'license denied or revoked: No' box shares its name with the menu checkbox on page 1, so both are ticked by hand.",
+ "lines": [
+  {
+   "id": "payment",
+   "line": "1",
+   "en": "Payment method",
+   "zh": "付款方式",
+   "options": [
+    "Cash",
+    "Check",
+    "Credit card"
+   ]
+  },
+  {
+   "id": "cfpm",
+   "line": "1",
+   "en": "Certified food protection manager: certificate attached, or none yet",
+   "zh": "注册食品安全经理：附证书，或暂无",
+   "options": [
+    "Certificate attached",
+    "None yet"
+   ]
+  },
+  {
+   "id": "legal_name",
+   "line": "2",
+   "en": "Legal company name",
+   "zh": "公司法定名称"
+  },
+  {
+   "id": "dba",
+   "line": "2",
+   "en": "Business name / DBA",
+   "zh": "营业名称 / DBA"
+  },
+  {
+   "id": "applicant",
+   "line": "2",
+   "en": "Applicant: name (Last, First, MI)",
+   "zh": "申请人：姓名（姓, 名, 中间名首字母）"
+  },
+  {
+   "id": "applicant_role",
+   "line": "2",
+   "en": "Applicant is an owner, partner or manager",
+   "zh": "申请人身份：所有人、合伙人或经理",
+   "options": [
+    "Owner",
+    "Partner",
+    "Manager"
+   ]
+  },
+  {
+   "id": "business_address",
+   "line": "2",
+   "en": "Business address",
+   "zh": "营业地址",
+   "hint": {
+    "en": "Street, city, state ZIP; the suite goes on its own line below.",
+    "zh": "街道、城市、州 邮编；单元号填在下一行。"
+   }
+  },
+  {
+   "id": "suite",
+   "line": "2",
+   "en": "Suite",
+   "zh": "单元号"
+  },
+  {
+   "id": "mailing",
+   "line": "2",
+   "en": "Mailing address, if different",
+   "zh": "邮寄地址（如不同）"
+  },
+  {
+   "id": "email",
+   "line": "2",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "cell",
+   "line": "2",
+   "en": "Cell phone number",
+   "zh": "手机号码"
+  },
+  {
+   "id": "business_phone",
+   "line": "2",
+   "en": "Business telephone number",
+   "zh": "营业电话"
+  },
+  {
+   "id": "mn_tax_id",
+   "line": "2",
+   "en": "Minnesota sales tax ID number (required)",
+   "zh": "明尼苏达州销售税号（必填）"
+  },
+  {
+   "id": "ssn_itin",
+   "line": "2",
+   "en": "Social Security number or ITIN (required)",
+   "zh": "社会安全号码或 ITIN（必填）"
+  },
+  {
+   "id": "ownership",
+   "line": "2",
+   "en": "Type of ownership",
+   "zh": "所有权类型",
+   "options": [
+    "Corporation",
+    "LLC",
+    "Sole proprietor",
+    "Partnership",
+    "Non-profit"
+   ]
+  },
+  {
+   "id": "incorporated",
+   "line": "2",
+   "en": "Date and state of incorporation: \"date, state\"",
+   "zh": "成立日期与州：\"日期, 州\""
+  },
+  {
+   "id": "publicly_traded",
+   "line": "2",
+   "en": "Is this business publicly traded?",
+   "zh": "企业是否公开上市？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "opening_date",
+   "line": "2",
+   "en": "Proposed opening date",
+   "zh": "预计开业日期"
+  },
+  {
+   "id": "license_type",
+   "line": "2",
+   "en": "License: restaurant (13 or more seats) or food manufacturer (12 or fewer seats)",
+   "zh": "执照：餐厅（13 座及以上）或食品制造商（12 座及以下）",
+   "options": [
+    "Restaurant - 13 or more seats",
+    "Food Manufacturer - 12 or less seats"
+   ]
+  },
+  {
+   "id": "situation",
+   "line": "3",
+   "en": "Business situation (all that apply)",
+   "zh": "经营情况（可多选）",
+   "options": [
+    "Starting a new business in an existing building",
+    "Starting a new business in a new building",
+    "Changing or adding kitchen equipment",
+    "Remodeling"
+   ]
+  },
+  {
+   "id": "adding_license",
+   "line": "3",
+   "en": "Adding a license to an existing business: its name",
+   "zh": "为现有企业增加执照：企业名称"
+  },
+  {
+   "id": "taking_over",
+   "line": "3",
+   "en": "Taking over an existing business: the previous business's name",
+   "zh": "接手现有企业：原企业名称"
+  },
+  {
+   "id": "construction",
+   "line": "3",
+   "en": "Planning or completed construction or remodeling? \"Yes, contractor or building manager\" or \"No\"",
+   "zh": "是否计划或已完成施工或改建？\"Yes, 承包商或物业经理\" 或 \"No\""
+  },
+  {
+   "id": "gas_equipment",
+   "line": "3",
+   "en": "Adding kitchen or bar equipment that needs gas, plumbing or mechanical connections?",
+   "zh": "是否新增需燃气、管道或机械连接的厨房或吧台设备？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "ventless",
+   "line": "3",
+   "en": "Adding ventless cooking equipment or a ventless hood?",
+   "zh": "是否新增无排烟烹饪设备或无排烟罩？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "changes",
+   "line": "3",
+   "en": "Explain the remodeling, construction or equipment changes",
+   "zh": "说明改建、施工或设备变更"
+  },
+  {
+   "id": "owner_1",
+   "line": "4",
+   "en": "Owner 1",
+   "zh": "所有人 1",
+   "hint": {
+    "en": "Five lines: full name (last, first, middle); telephone; home address; title; ownership %.",
+    "zh": "五行：全名（姓, 名, 中间名）；电话；住址；职务；持股比例。"
+   }
+  },
+  {
+   "id": "owner_2",
+   "line": "4",
+   "en": "Owner 2, if any",
+   "zh": "所有人 2（如有）",
+   "hint": {
+    "en": "Five lines: full name (last, first, middle); telephone; home address; title; ownership %.",
+    "zh": "五行：全名（姓, 名, 中间名）；电话；住址；职务；持股比例。"
+   }
+  },
+  {
+   "id": "owner_3",
+   "line": "4",
+   "en": "Owner 3, if any",
+   "zh": "所有人 3（如有）",
+   "hint": {
+    "en": "Five lines: full name (last, first, middle); telephone; home address; title; ownership %.",
+    "zh": "五行：全名（姓, 名, 中间名）；电话；住址；职务；持股比例。"
+   }
+  },
+  {
+   "id": "owner_4",
+   "line": "4",
+   "en": "Owner 4, if any",
+   "zh": "所有人 4（如有）",
+   "hint": {
+    "en": "Five lines: full name (last, first, middle); telephone; home address; title; ownership %.",
+    "zh": "五行：全名（姓, 名, 中间名）；电话；住址；职务；持股比例。"
+   }
+  },
+  {
+   "id": "owner_dob",
+   "line": "4",
+   "en": "Owners' dates of birth",
+   "zh": "所有人出生日期"
+  },
+  {
+   "id": "description",
+   "line": "5",
+   "en": "A detailed description of your business",
+   "zh": "企业详细说明"
+  },
+  {
+   "id": "foods",
+   "line": "5",
+   "en": "Describe the foods you sell",
+   "zh": "说明所售食品"
+  },
+  {
+   "id": "entertainment",
+   "line": "5",
+   "en": "Entertainment at the business, including TV or radio",
+   "zh": "场所内的娱乐（含电视或广播）"
+  },
+  {
+   "id": "hours",
+   "line": "5",
+   "en": "Days and hours of operation",
+   "zh": "营业日与营业时间"
+  },
+  {
+   "id": "inside",
+   "line": "5",
+   "en": "Inside: \"seats, tables, square feet\"",
+   "zh": "室内：\"座位数, 桌数, 平方英尺\""
+  },
+  {
+   "id": "patio",
+   "line": "5",
+   "en": "Private patio, if any: \"days and hours, seats, tables, square feet\", or \"None\"",
+   "zh": "私人露台（如有）：\"日期与时间, 座位数, 桌数, 平方英尺\"，没有则填 \"None\""
+  },
+  {
+   "id": "sidewalk",
+   "line": "5",
+   "en": "Sidewalk cafe, if any (separate application): \"days and hours, seats, tables, square feet\", or \"None\"",
+   "zh": "人行道咖啡座（如有，须另行申请）：\"日期与时间, 座位数, 桌数, 平方英尺\"，没有则填 \"None\""
+  },
+  {
+   "id": "licenses_held",
+   "line": "5",
+   "en": "Licenses you hold or held in Minneapolis (business or individual)",
+   "zh": "您在明尼阿波利斯现持或曾持有的执照（企业或个人）"
+  },
+  {
+   "id": "denied",
+   "line": "5",
+   "en": "Has a business license ever been denied or revoked? If yes: date, city and state, and reason",
+   "zh": "是否曾被拒发或吊销营业执照？如是：日期、城市与州、原因",
+   "hint": {
+    "en": "\"No\", or \"Yes, date, city and state, reason\". A \"No\" is ticked by hand on this PDF.",
+    "zh": "\"No\"，或 \"Yes, 日期, 城市与州, 原因\"。此 PDF 上的 \"No\" 需手动勾选。"
+   }
+  },
+  {
+   "id": "workers_comp",
+   "line": "6",
+   "en": "Workers' compensation: \"company, policy number, dates of coverage\", or \"Only worker\" or \"No covered employees\"",
+   "zh": "工伤保险：\"保险公司, 保单号, 承保期间\"，或 \"Only worker\"、\"No covered employees\""
+  },
+  {
+   "id": "signer_title",
+   "line": "7",
+   "en": "Applicant's title",
+   "zh": "申请人职务"
+  }
+ ],
+ "unmapped": {
+  "ssn_itin": "Placetta never writes Social Security or ITIN numbers; the applicant writes it by hand.",
+  "owner_dob": "Placetta doesn't keep owners' dates of birth; each owner writes theirs by hand."
+ },
+ "blank": {
+  "sidewalk": "^(none|no|n/?a)\\.?$",
+  "suite": "^(none|no|n/?a)\\.?$",
+  "mailing": "^(none|no|n/?a|same)\\.?$",
+  "cell": "^(none|no|n/?a)\\.?$",
+  "incorporated": "^(none|no|n/?a)\\.?$",
+  "adding_license": "^(none|no|n/?a)\\.?$",
+  "taking_over": "^(none|no|n/?a)\\.?$",
+  "changes": "^(none|no|n/?a)\\.?$",
+  "owner_2": "^(none|no|n/?a)\\.?$",
+  "owner_3": "^(none|no|n/?a)\\.?$",
+  "owner_4": "^(none|no|n/?a)\\.?$",
+  "licenses_held": "^(none|no|n/?a)\\.?$",
+  "denied": "^(n|no)\\b(?!/)"
+ },
+ "boxes": {
+  "payment": [
+   {
+    "check": "Cash Do not mail cash you must drop it off in person",
+    "if": "^cash"
+   },
+   {
+    "check": "Check Make checks payable toMinneapolis Finance Department",
+    "if": "^check"
+   },
+   {
+    "check": "Credit card Mail drop off or email your application to businesslicensesminneapolismngov Do not",
+    "if": "^credit|card"
+   }
+  ],
+  "cfpm": [
+   {
+    "check": "Attach a copy of your Minnesota Department of Health certificate",
+    "if": "^(attach|yes|certificate)"
+   },
+   {
+    "check": "I currently do not have a Certified Food Protection Manager",
+    "if": "^(none|no|not yet)"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "Legal company name"
+   }
+  ],
+  "dba": [
+   {
+    "text": "Business nameDBA"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "Name Last First MI"
+   }
+  ],
+  "applicant_role": [
+   {
+    "check": "Owner",
+    "if": "^owner"
+   },
+   {
+    "check": "Partner",
+    "if": "^partner"
+   },
+   {
+    "check": "Manager",
+    "if": "^manager"
+   }
+  ],
+  "business_address": [
+   {
+    "text": "Business address",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "Zip code",
+    "pick": "zip"
+   }
+  ],
+  "suite": [
+   {
+    "text": "Suite",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Mailing address if different than business address",
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "text": "City_2",
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "text": "State_2",
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "text": "Zip code_2",
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email address"
+   }
+  ],
+  "cell": [
+   {
+    "text": "Cell phone number",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "business_phone": [
+   {
+    "text": "Business telephone number"
+   }
+  ],
+  "mn_tax_id": [
+   {
+    "text": "Minnesota sales tax ID number Required"
+   }
+  ],
+  "ownership": [
+   {
+    "check": "Corporation",
+    "if": "^corp"
+   },
+   {
+    "check": "LLC",
+    "if": "^(llc|limited liability)"
+   },
+   {
+    "check": "Sole proprietor",
+    "if": "^sole"
+   },
+   {
+    "check": "Partnership",
+    "if": "^partner"
+   },
+   {
+    "check": "Nonprofit",
+    "if": "^non.?profit"
+   }
+  ],
+  "incorporated": [
+   {
+    "text": "Date of incorporation",
+    "pick": "head|date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State of incorporation",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "publicly_traded": [
+   {
+    "radio": "Is this business publicly traded",
+    "value": "Yes",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Is this business publicly traded",
+    "value": "No",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "opening_date": [
+   {
+    "text": "Proposed opening date",
+    "pick": "date"
+   }
+  ],
+  "license_type": [
+   {
+    "check": "Restaurant13 or more seats",
+    "if": "^restaurant"
+   },
+   {
+    "check": "Food Manufacturer12 or less seats",
+    "if": "manufacturer"
+   }
+  ],
+  "situation": [
+   {
+    "check": "Starting a new business in an existing building",
+    "if": "(^|,)[^,]*(existing building)"
+   },
+   {
+    "check": "Starting a new business in a new building",
+    "if": "(^|,)[^,]*(new building)"
+   },
+   {
+    "check": "Changing or adding kitchen equipment",
+    "if": "(^|,)[^,]*(kitchen equipment)"
+   },
+   {
+    "check": "Remodeling",
+    "if": "(^|,)[^,]*(remodel)"
+   }
+  ],
+  "adding_license": [
+   {
+    "check": "Adding a license to an existing business",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Name of business",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "taking_over": [
+   {
+    "check": "Taking over an existing business",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Name of previous business",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "construction": [
+   {
+    "radio": "construction or remodeling",
+    "value": "Yes_2",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "construction or remodeling",
+    "value": "No_2",
+    "if": "^(n|no)\\b(?!/)"
+   },
+   {
+    "text": "Name of contractor or building manager",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "gas_equipment": [
+   {
+    "radio": "New kitchen or bar equipment that requires gas plumbing or mechanical connections",
+    "value": "Yes_3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "New kitchen or bar equipment that requires gas plumbing or mechanical connections",
+    "value": "No_3",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "ventless": [
+   {
+    "radio": "Ventless cooking equipment or a ventless hood",
+    "value": "Yes_4",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Ventless cooking equipment or a ventless hood",
+    "value": "No_4",
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "changes": [
+   {
+    "text": "Explain the type remodeling construction or equipment changes",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_1": [
+   {
+    "text": "Full name last first middle",
+    "pick": "line1"
+   },
+   {
+    "text": "Telephone",
+    "pick": "line2"
+   },
+   {
+    "text": "Home address",
+    "pick": "line3|street"
+   },
+   {
+    "text": "City_3",
+    "pick": "line3|city"
+   },
+   {
+    "text": "State_3",
+    "pick": "line3|state"
+   },
+   {
+    "text": "Zip code_3",
+    "pick": "line3|zip"
+   },
+   {
+    "text": "Title",
+    "pick": "line4"
+   },
+   {
+    "text": "Ownership",
+    "pick": "line5"
+   }
+  ],
+  "owner_2": [
+   {
+    "text": "Full name last first middle_2",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Telephone_2",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Home address_2",
+    "pick": "line3|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "City_4",
+    "pick": "line3|city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State_4",
+    "pick": "line3|state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Zip code_4",
+    "pick": "line3|zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Title_2",
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Ownership_2",
+    "pick": "line5",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_3": [
+   {
+    "text": "Full name last first middle_3",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Telephone_3",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Home address_3",
+    "pick": "line3|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "City_5",
+    "pick": "line3|city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State_5",
+    "pick": "line3|state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Zip code_5",
+    "pick": "line3|zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Title_3",
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Ownership_3",
+    "pick": "line5",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_4": [
+   {
+    "text": "Full name last first middle_4",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Telephone_4",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Home address_4",
+    "pick": "line3|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "City_6",
+    "pick": "line3|city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State_6",
+    "pick": "line3|state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Zip code_6",
+    "pick": "line3|zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Title_4",
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Ownership_4",
+    "pick": "line5",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "description": [
+   {
+    "text": "Give us a detailed description of your business"
+   }
+  ],
+  "foods": [
+   {
+    "text": "Describe the foods that you sell"
+   }
+  ],
+  "entertainment": [
+   {
+    "text": "Describe any entertainment you will provide at the business including TV or radio"
+   }
+  ],
+  "hours": [
+   {
+    "text": "List days and hours of operation"
+   }
+  ],
+  "inside": [
+   {
+    "text": "number of seats inside",
+    "pick": "head|digits"
+   },
+   {
+    "text": "Number of seats Number of tables",
+    "pick": "tail|head|digits"
+   },
+   {
+    "text": "Total square footage for business use",
+    "pick": "tail|tail|digits"
+   }
+  ],
+  "patio": [
+   {
+    "check": "Private patio",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "check": "None",
+    "if": "^(none|no|n/?a)\\.?$"
+   },
+   {
+    "text": "Private patio List days and hours of operation",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "number of seats on private patio",
+    "pick": "tail|head|digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Number of seats Number of tables_2",
+    "pick": "tail|tail|head|digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Total square footage for business use_2",
+    "pick": "tail|tail|tail|digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "sidewalk": [
+   {
+    "check": "Sidewalk caférequires a seperate application",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Sidewalk caférequires a seperate application List days and hours of operation",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Number of seats on Sidewalk Cafe",
+    "pick": "tail|head|digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Number of seats Number of tables_3",
+    "pick": "tail|tail|head|digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Total square footage for business use_3",
+    "pick": "tail|tail|tail|digits",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "licenses_held": [
+   {
+    "text": "List any licenses you currently have or previously held in Minneapolis business or individual",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "denied": [
+   {
+    "check": "undefined_2",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "text": "Have you ever had a business license denied or revoked by any government entity No Yes If Yes list the date of denialrevocation city and state and reason for denial or revocation",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "workers_comp": [
+   {
+    "text": "Workers compensation company",
+    "pick": "head",
+    "if": "^(?!only|no covered)"
+   },
+   {
+    "text": "Policy number",
+    "pick": "tail|head",
+    "if": "^(?!only|no covered)"
+   },
+   {
+    "text": "Dates of coverage",
+    "pick": "tail|tail",
+    "if": "^(?!only|no covered)"
+   },
+   {
+    "check": "I am the only worker and I have no employees",
+    "if": "^only"
+   },
+   {
+    "check": "I have no employees who are covered by workers compensation law Only employees who are",
+    "if": "^no covered"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "Title_5"
+   }
+  ]
+ }
+}

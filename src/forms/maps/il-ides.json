@@ -1,0 +1,560 @@
+{
+ "form": "il-ides",
+ "rev": "REG-UI-1 (Revised May 2023)",
+ "pdf": "il-ides.pdf",
+ "url": "https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/REG-UI-1.pdf",
+ "checked": "2026-10-18",
+ "notes": "The Illinois Department of Employment Security's Report to Determine Liability, for a business that hires in Illinois. Addresses print whole on one line. The FEIN prints in its two boxes. org_type ticks one printed type ('Other: <type>' writes it). Questions 12 to 15 apply by entity type: answer only the one for your type, and leave the others blank. Products: one per line, 'product, percent'. Dates print MM/DD/YYYY. Question 19 (FUTA liability) and the liability and coverage questions on page 3 (domestic, agricultural, nonprofit and general employers) are left for the signer, as are the signature and its date.",
+ "lines": [
+  {
+   "id": "business_name",
+   "line": "1",
+   "en": "Business name",
+   "zh": "企业名称"
+  },
+  {
+   "id": "dba",
+   "line": "2",
+   "en": "Doing business as",
+   "zh": "经营名称（DBA）"
+  },
+  {
+   "id": "primary_address",
+   "line": "3",
+   "en": "Primary business address",
+   "zh": "主要营业地址"
+  },
+  {
+   "id": "secondary_address",
+   "line": "4",
+   "en": "Secondary address: the Illinois business location, if different",
+   "zh": "第二地址：伊利诺伊州营业地点（如不同）"
+  },
+  {
+   "id": "phone",
+   "line": "5",
+   "en": "Phone number",
+   "zh": "电话"
+  },
+  {
+   "id": "email",
+   "line": "6",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "fein",
+   "line": "7",
+   "en": "FEIN",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "ides_account",
+   "line": "8",
+   "en": "IDES employer account number previously assigned, if any",
+   "zh": "IDES 曾分配的雇主账号（如有）"
+  },
+  {
+   "id": "org_type",
+   "line": "9",
+   "en": "Type of organization",
+   "zh": "组织类型",
+   "options": [
+    "Association",
+    "Cooperative",
+    "C-Corporation",
+    "Government",
+    "Municipal Government",
+    "Political Subdivision",
+    "Instrumentality",
+    "LLC-Corporation",
+    "LLC-Partnership",
+    "LLC-Single Member",
+    "Partnership",
+    "Receiver",
+    "S-Corporation",
+    "Sole Proprietor",
+    "Trustee in Bankruptcy",
+    "Trust/Estate",
+    "Other"
+   ],
+   "hint": {
+    "en": "For Other, write \"Other: \" and the type.",
+    "zh": "选其他时，写 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "settlement_fund",
+   "line": "10",
+   "en": "Is this a qualified settlement fund?",
+   "zh": "是否为合格和解基金？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "activity",
+   "line": "11",
+   "en": "Primary business activity in Illinois",
+   "zh": "在伊利诺伊州的主要业务活动"
+  },
+  {
+   "id": "product",
+   "line": "11",
+   "en": "Principal product or service",
+   "zh": "主要产品或服务"
+  },
+  {
+   "id": "top_products",
+   "line": "11",
+   "en": "If more than one: the top two products or services, each with its percent of sales",
+   "zh": "如有多项：前两项产品或服务及各占销售额的百分比",
+   "hint": {
+    "en": "One per line: \"Milk tea, 70\" then \"Pastries, 30\".",
+    "zh": "每行一项：\"Milk tea, 70\"，再 \"Pastries, 30\"。"
+   }
+  },
+  {
+   "id": "naics",
+   "line": "11",
+   "en": "NAICS code",
+   "zh": "NAICS 代码"
+  },
+  {
+   "id": "corp_incorporated",
+   "line": "12",
+   "en": "Corporations: date and state of incorporation",
+   "zh": "公司：成立日期与成立州",
+   "hint": {
+    "en": "e.g. \"03/15/2026, IL\"",
+    "zh": "如 \"03/15/2026, IL\""
+   }
+  },
+  {
+   "id": "corp_officers_paid",
+   "line": "12",
+   "en": "Corporations: any pay, including dividends, to the officers?",
+   "zh": "公司：是否向高管支付过任何报酬（含股息）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "llc_workers",
+   "line": "13",
+   "en": "LLCs: anyone performing services other than the member managers?",
+   "zh": "LLC：除成员经理外是否有其他人提供服务？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "llc_tax_treatment",
+   "line": "13",
+   "en": "LLCs: how the member managers are treated for federal tax purposes",
+   "zh": "LLC：成员经理在联邦税务上的身份",
+   "options": [
+    "Sole Proprietor",
+    "Partner",
+    "Other"
+   ],
+   "hint": {
+    "en": "For Other, write \"Other: \" and how.",
+    "zh": "选其他时，写 \"Other: \" 加说明。"
+   }
+  },
+  {
+   "id": "llc_corp_organized",
+   "line": "13",
+   "en": "LLC taxed as a corporation: date and state of organization",
+   "zh": "按公司纳税的 LLC：组建日期与组建州"
+  },
+  {
+   "id": "partnership_workers",
+   "line": "14",
+   "en": "Partnerships: anyone performing services other than the partners?",
+   "zh": "合伙企业：除合伙人外是否有其他人提供服务？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "sole_prop_workers",
+   "line": "15",
+   "en": "Sole proprietors: anyone performing services other than the owner's parent, spouse or child under 18?",
+   "zh": "独资企业：除业主的父母、配偶或未满 18 岁子女外是否有他人提供服务？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "first_employed",
+   "line": "16",
+   "en": "Date you first began employing workers in Illinois",
+   "zh": "首次在伊利诺伊州雇用员工的日期"
+  },
+  {
+   "id": "first_payroll",
+   "line": "17",
+   "en": "Date of your first payroll in Illinois",
+   "zh": "在伊利诺伊州首次发薪的日期"
+  },
+  {
+   "id": "acquired",
+   "line": "18",
+   "en": "Did you acquire your Illinois business, or part of it, by purchase, reorganization or change in entity?",
+   "zh": "是否通过收购、重组或实体变更取得伊利诺伊业务或其一部分？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "futa",
+   "line": "19",
+   "en": "Liable under the Federal Unemployment Tax Act (FUTA) in the year you began employing in Illinois or the prior year?",
+   "zh": "开始在伊利诺伊州雇人的当年或前一年是否承担联邦失业税（FUTA）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Signer: printed name",
+   "zh": "签署人：正楷姓名"
+  },
+  {
+   "id": "signer_title",
+   "line": "Signature",
+   "en": "Signer: title",
+   "zh": "签署人：职务"
+  }
+ ],
+ "unmapped": {
+  "futa": "The form's Yes and No boxes share one value, so ticking one would tick both: the signer ticks it."
+ },
+ "blank": {
+  "dba": "^(none|no|n/?a)\\.?$",
+  "secondary_address": "^(none|no|n/?a|same)\\.?$",
+  "ides_account": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "business_name": [
+   {
+    "text": "Business Name"
+   }
+  ],
+  "dba": [
+   {
+    "text": "2 Doing Business As",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "primary_address": [
+   {
+    "text": "Primary Business Address"
+   }
+  ],
+  "secondary_address": [
+   {
+    "text": "Secondary Address",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Phone Number"
+   }
+  ],
+  "email": [
+   {
+    "text": "6 Email Address"
+   }
+  ],
+  "fein": [
+   {
+    "text": "FEIN",
+    "pick": "ein1"
+   },
+   {
+    "text": "undefined",
+    "pick": "ein2"
+   }
+  ],
+  "ides_account": [
+   {
+    "text": "8  IDES previously assigned employer account no",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "org_type": [
+   {
+    "radio": "9Type",
+    "value": "0",
+    "if": "^association"
+   },
+   {
+    "radio": "9Type",
+    "value": "1",
+    "if": "^cooperative"
+   },
+   {
+    "radio": "9Type",
+    "value": "2",
+    "if": "^c\\W?corporation"
+   },
+   {
+    "radio": "9Type",
+    "value": "3",
+    "if": "^government"
+   },
+   {
+    "radio": "9Type",
+    "value": "4",
+    "if": "^municipal government"
+   },
+   {
+    "radio": "9Type",
+    "value": "5",
+    "if": "^political subdivision"
+   },
+   {
+    "radio": "9Type",
+    "value": "6",
+    "if": "^instrumentality"
+   },
+   {
+    "radio": "9Type",
+    "value": "7",
+    "if": "^llc\\W?corporation"
+   },
+   {
+    "radio": "9Type",
+    "value": "8",
+    "if": "^llc\\W?partnership"
+   },
+   {
+    "radio": "9Type",
+    "value": "9",
+    "if": "^llc\\W?single member"
+   },
+   {
+    "radio": "9Type",
+    "value": "10",
+    "if": "^partnership"
+   },
+   {
+    "radio": "9Type",
+    "value": "11",
+    "if": "^receiver"
+   },
+   {
+    "radio": "9Type",
+    "value": "12",
+    "if": "^s\\W?corporation"
+   },
+   {
+    "radio": "9Type",
+    "value": "13",
+    "if": "^sole proprietor"
+   },
+   {
+    "radio": "9Type",
+    "value": "14",
+    "if": "^trustee in bankruptcy"
+   },
+   {
+    "radio": "9Type",
+    "value": "15",
+    "if": "^trust\\W?estate"
+   },
+   {
+    "radio": "9Type",
+    "value": "16",
+    "if": "^other"
+   },
+   {
+    "text": "Other",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "settlement_fund": [
+   {
+    "radio": "10",
+    "value": "0",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "10",
+    "value": "1",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "activity": [
+   {
+    "text": "What is your principal product or service"
+   }
+  ],
+  "product": [
+   {
+    "text": "If you have more than one product or service list the top two and indicate"
+   }
+  ],
+  "top_products": [
+   {
+    "text": "the percentages that each contributes to your total revenue 1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "of Sales or receipts",
+    "pick": "line1|tail|digits"
+   },
+   {
+    "text": "the percentages that each contributes to your total revenue 2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "of Sales or receipts_2",
+    "pick": "line2|tail|digits"
+   }
+  ],
+  "naics": [
+   {
+    "text": "Enter your NAICS Code here",
+    "pick": "digits"
+   }
+  ],
+  "corp_incorporated": [
+   {
+    "text": "Date3_af_date",
+    "pick": "head|date"
+   },
+   {
+    "text": "State in which incorporated",
+    "pick": "tail"
+   }
+  ],
+  "corp_officers_paid": [
+   {
+    "radio": "12",
+    "value": "Choice1",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "12",
+    "value": "Choice2",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "llc_workers": [
+   {
+    "radio": "13",
+    "value": "Choice3",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "13",
+    "value": "Choice4",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "llc_tax_treatment": [
+   {
+    "radio": "Group13",
+    "value": "Choice1",
+    "if": "^sole"
+   },
+   {
+    "radio": "Group13",
+    "value": "Choice2",
+    "if": "^partner"
+   },
+   {
+    "radio": "Group13",
+    "value": "Choice3",
+    "if": "^other"
+   },
+   {
+    "text": "Sole Proprietor  Partner   Other Explain",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "llc_corp_organized": [
+   {
+    "text": "Date1_af_date",
+    "pick": "head|date"
+   },
+   {
+    "text": "State in which Organized",
+    "pick": "tail"
+   }
+  ],
+  "partnership_workers": [
+   {
+    "radio": "14",
+    "value": "0",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "14",
+    "value": "1",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "sole_prop_workers": [
+   {
+    "radio": "15",
+    "value": "0",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "15",
+    "value": "1",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "first_employed": [
+   {
+    "text": "16Date",
+    "pick": "date"
+   }
+  ],
+  "first_payroll": [
+   {
+    "text": "17Date",
+    "pick": "date"
+   }
+  ],
+  "acquired": [
+   {
+    "radio": "Group18",
+    "value": "Choice4",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "radio": "Group18",
+    "value": "Choice1",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Printed Name"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "Title 1"
+   }
+  ]
+ }
+}

@@ -120,8 +120,22 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
   const ta = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { const el = ta.current; if (!el) return; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 128) + "px"; }, [draft]);
   const attach = useRef<HTMLInputElement>(null);
+  const pickFile = useCallback(() => attach.current?.click(), []);
   /* Commands ("/" in the box) and Plan first (src/SlashMenu.tsx): a command becomes its request when it's sent. */
-  const slash = useSlash({ draft, setDraft, variant });
+  const slash = useSlash({ draft, setDraft, variant, onUpload: pickFile });
+  /* The box keeps only the mic and send (or stop). Files come in by "/upload", by dropping them on the box, from the
+     Upload she asks for in a reply, or from ⌘K; Plan first by "/plan", ⌘K or Settings. ⌘K sends "placetta:composer". */
+  const { setPlan } = slash;
+  useEffect(() => {
+    const on = (e: Event) => {
+      const what = (e as CustomEvent<"attach" | "plan-first">).detail;
+      if (what === "attach") pickFile();
+      if (what === "plan-first") { setPlan(true); setTimeout(() => ta.current?.focus(), 0); }
+    };
+    addEventListener("placetta:composer", on);
+    return () => removeEventListener("placetta:composer", on);
+  }, [pickFile, setPlan]);
+  const [over, setOver] = useState(false);
   // while she's busy, what you send waits its turn (Work, Up next)
   const send = () => { const q = draft.trim(); if (q) { setDraft(""); slash.send(q); } };
   const level = useCallback(() => Math.max(sim.level(), tts.level()), [sim, tts]);
@@ -134,7 +148,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
       {dock && showLive && busy && live && (
         <p className="dock-live" aria-live="polite"><b>{b(taskVerb(live.state))}…</b><span>{b(live.label)}</span>{live.tool && <em>{live.tool}</em>}</p>
       )}
-      {!dock && open.length > 0 && !busy && (
+      {!dock && open.length > 0 && !busy && !asked.length && (
         <div className="sugg">{open.map(s => <button key={s.en} type="button" onClick={() => ask(b(s))}>{b(s)}</button>)}</div>
       )}
       {dock && chips.length > 0 && !busy && (
@@ -143,12 +157,13 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
       {slash.menu}
       <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={dock ? 0.16 : 0.1} scale={dock ? 1.1 : 0.9} borderRadius={RADIUS[variant]}>
         <BorderBeam className="c-edge" size="md" theme="light" colorVariant="ice" borderRadius={RADIUS[variant]} staticColors brightness={1} saturation={1} strength={0.85} css={EDGE_CSS}>
-        <form className="composer" onSubmit={e => { e.preventDefault(); send(); }}>
+        <form className={"composer" + (over ? " drop" : "")} onSubmit={e => { e.preventDefault(); send(); }}
+          onDragOver={e => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setOver(true); } }} onDragLeave={() => setOver(false)}
+          onDrop={e => { const f = Array.from(e.dataTransfer.files ?? []); setOver(false); if (f.length) { e.preventDefault(); upload("", "", f); } }}>
           {dock && <span className="c-bot" aria-hidden="true"><LiveBot size={34} busy={busy} task={busy && live ? live.state : undefined} /></span>}
-          {!dock && <button type="button" className="ic" aria-label={t("attach")} title={t("attach")} onClick={() => attach.current?.click()} disabled={busy}><I.plus /></button>}
           <input ref={attach} type="file" multiple hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload("", "", f); }} />
           <label htmlFor={"ask-" + variant} className="sr">{t("askPh")}</label>
-          <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={slash.plan ? (lang === "zh" ? "描述要做的事，Odelia 先写计划" : "Describe the job; Odelia plans it first") : narrow ? t("askPhShort") : t("askPh")} onChange={e => setDraft(e.target.value)}
+          <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={slash.plan ? (lang === "zh" ? "要做什么？她先写计划" : "What's the job? She plans it first") : narrow ? t("askPhShort") : t("askPh")} onChange={e => setDraft(e.target.value)}
             {...slash.inputProps} onKeyDown={e => { if (slash.onKey(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
           {slash.toggle(busy)}
           <button type="button" className="ic mic" aria-label={t("talk")} title={t("talk")} onClick={startVoice} disabled={busy}><I.mic /></button>

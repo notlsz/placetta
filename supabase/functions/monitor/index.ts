@@ -27,6 +27,7 @@ import { weeklyGovernance } from "./governance.ts";
 // any vendor that may take a conversation (a Gemini key without GEMINI_PAID may not), not just Anthropic or Gemini
 import { canConverse } from "../_shared/llm.ts";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
+import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -701,6 +702,11 @@ Deno.serve(async (req) => {
   }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (!sweep) console.error("self-filing sweep did not run");
 
+  // Team review (_shared/notices.ts): mentions, assignments and headquarters' questions the app didn't send yet, and
+  // the reminders set for today, each by the person's own channel.
+  const mentions = await deliverNotices(noticeDb(admin), { mail: (to, subject, text, html) => (RESEND && FROM ? sendMail([to], subject, text, html) : Promise.resolve(false)), text: outboxText(admin) },
+    { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
+
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
 });

@@ -27,6 +27,8 @@ export type Services = {
   split?(o: { parent: string; children: { job: string; store: string; title: Bi; prompt: string }[] }): Promise<{ started: string[]; queued: string[] }>;
   /** An agency's PDF by its file name, for filling it on the server (src/forms/fill.ts); null to use the bundle's own. */
   formPdf?(file: string): Promise<Uint8Array | null>;
+  /** Team review: the workspace's comments, for read_comments (src/live.ts AgentComment). */
+  comments?(item?: { kind: "app" | "doc" | "job"; id: string }): Promise<{ id: string; item: { kind: "app" | "doc" | "job"; id: string }; by: string; hq: boolean; text: string; at: string; resolved: boolean }[]>;
 };
 /** What a store's bot came back with, for the run that split the work. */
 export type ChildResult = { job: string; store: string; status: string; reply: string };

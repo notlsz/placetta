@@ -1,0 +1,309 @@
+{
+ "form": "fl-sunbiz",
+ "rev": "Articles of Organization for Florida Limited Liability Company with cover letter (CR2E047)",
+ "pdf": "fl-sunbiz.pdf",
+ "url": "https://form.sunbiz.org/pdf/cr2e047.pdf",
+ "checked": "2026-10-18",
+ "notes": "Florida Division of Corporations' articles of organization with its cover letter. Addresses go in as one line each and are split into street and city, state and ZIP on the printed lines. Article IV takes one manager or authorized member per line: 'AMBR or MGR, name, address'. The registered agent's signature and the member's signature are left for them.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "Article I",
+   "en": "Name of the limited liability company (must contain \"Limited Liability Company\", \"L.L.C.\" or \"LLC\")",
+   "zh": "有限责任公司名称（须含 \"Limited Liability Company\"、\"L.L.C.\" 或 \"LLC\"）"
+  },
+  {
+   "id": "principal_office",
+   "line": "Article II",
+   "en": "Principal office street address",
+   "zh": "主要办公地址"
+  },
+  {
+   "id": "mailing",
+   "line": "Article II",
+   "en": "Mailing address of the principal office",
+   "zh": "主要办公室邮寄地址"
+  },
+  {
+   "id": "agent_name",
+   "line": "Article III",
+   "en": "Registered agent: name (an individual or a business registered in Florida, not the LLC itself)",
+   "zh": "注册代理人：姓名（个人或在佛州注册的企业，不能是本 LLC）"
+  },
+  {
+   "id": "agent_address",
+   "line": "Article III",
+   "en": "Registered agent: Florida street address (no P.O. box)",
+   "zh": "注册代理人：佛州街道地址（不可用邮政信箱）"
+  },
+  {
+   "id": "managers",
+   "line": "Article IV",
+   "en": "Managers or authorized members: one per line, \"AMBR or MGR, name, address\"",
+   "zh": "经理或授权成员：每行一位，\"AMBR 或 MGR, 姓名, 地址\"",
+   "hint": {
+    "en": "e.g. \"AMBR, Mei Chen, 2210 NE 2nd Ave, Miami, FL 33137\"; up to four.",
+    "zh": "如 \"AMBR, Mei Chen, 2210 NE 2nd Ave, Miami, FL 33137\"；最多四位。"
+   }
+  },
+  {
+   "id": "effective_date",
+   "line": "Article V",
+   "en": "Effective date, if other than the filing date (optional)",
+   "zh": "生效日期（如不同于提交日期，可选）"
+  },
+  {
+   "id": "other_provisions",
+   "line": "Article VI",
+   "en": "Other provisions, if any",
+   "zh": "其他条款（如有）"
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Typed or printed name of the member or authorized representative signing",
+   "zh": "签署人（成员或授权代表）正楷姓名"
+  },
+  {
+   "id": "correspondence",
+   "line": "Cover letter",
+   "en": "Return correspondence to: \"name, firm or company, address\"",
+   "zh": "回函寄送：\"姓名, 公司, 地址\"",
+   "hint": {
+    "en": "e.g. \"Mei Chen, Lotus Tea LLC, 2210 NE 2nd Ave, Miami, FL 33137\".",
+    "zh": "如 \"Mei Chen, Lotus Tea LLC, 2210 NE 2nd Ave, Miami, FL 33137\"。"
+   }
+  },
+  {
+   "id": "email",
+   "line": "Cover letter",
+   "en": "Email for future annual report notices",
+   "zh": "接收年报通知的电子邮箱"
+  },
+  {
+   "id": "phone_contact",
+   "line": "Cover letter",
+   "en": "For questions call: \"name, phone\"",
+   "zh": "如有疑问请致电：\"姓名, 电话\""
+  },
+  {
+   "id": "fee",
+   "line": "Cover letter",
+   "en": "Check enclosed for",
+   "zh": "随附支票金额",
+   "options": [
+    "$125.00 filing fee",
+    "$130.00 with a certificate of status",
+    "$155.00 with a certified copy",
+    "$160.00 with a certificate of status and a certified copy"
+   ]
+  }
+ ],
+ "blank": {
+  "effective_date": "^(none|no|n/?a)\\.?$",
+  "other_provisions": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "name": [
+   {
+    "text": "Must conatin the words Limited Liability Company LLC or LLC"
+   },
+   {
+    "text": "Name of Limited Liability Company"
+   }
+  ],
+  "principal_office": [
+   {
+    "text": "Principal Office Address 1",
+    "pick": "street"
+   },
+   {
+    "text": "Principal Office Address 2",
+    "pick": "citystatezip"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Mailing Address 1",
+    "pick": "street"
+   },
+   {
+    "text": "Mailing Address 2",
+    "pick": "citystatezip"
+   }
+  ],
+  "agent_name": [
+   {
+    "text": "Name"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "Florida street address PO Box NOT acceptable",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "Zip",
+    "pick": "zip"
+   }
+  ],
+  "managers": [
+   {
+    "text": "MGR  Manager",
+    "pick": "line1|head"
+   },
+   {
+    "text": "1",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": "2",
+    "pick": "line1|tail|tail|street"
+   },
+   {
+    "text": "3",
+    "pick": "line1|tail|tail|citystatezip"
+   },
+   {
+    "text": "undefined",
+    "pick": "line2|head"
+   },
+   {
+    "text": "1_2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": "2_2",
+    "pick": "line2|tail|tail|street"
+   },
+   {
+    "text": "3_2",
+    "pick": "line2|tail|tail|citystatezip"
+   },
+   {
+    "text": "undefined_2",
+    "pick": "line3|head"
+   },
+   {
+    "text": "1_3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": "2_3",
+    "pick": "line3|tail|tail|street"
+   },
+   {
+    "text": "3_3",
+    "pick": "line3|tail|tail|citystatezip"
+   },
+   {
+    "text": "undefined_3",
+    "pick": "line4|head"
+   },
+   {
+    "text": "1_4",
+    "pick": "line4|tail|head"
+   },
+   {
+    "text": "2_4",
+    "pick": "line4|tail|tail|street"
+   },
+   {
+    "text": "3_4",
+    "pick": "line4|tail|tail|citystatezip"
+   }
+  ],
+  "effective_date": [
+   {
+    "text": "OPTIONAL",
+    "pick": "date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "other_provisions": [
+   {
+    "text": "ARTICLE VI Other provisions if any 1",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ARTICLE VI Other provisions if any 2",
+    "pick": "line2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "ARTICLE VI Other provisions if any 3",
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "constitutes a third degree felony as provided for in s817155 FS"
+   }
+  ],
+  "correspondence": [
+   {
+    "text": "Name of Person",
+    "pick": "head"
+   },
+   {
+    "text": "FirmCompany",
+    "pick": "tail|head"
+   },
+   {
+    "text": "Address",
+    "pick": "tail|tail|street"
+   },
+   {
+    "text": "CityState and Zip Code",
+    "pick": "tail|tail|citystatezip"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email address to be used for future annual report notification"
+   }
+  ],
+  "phone_contact": [
+   {
+    "text": "Name of Person_2",
+    "pick": "head"
+   },
+   {
+    "text": "Area Code",
+    "pick": "tail|phone1"
+   },
+   {
+    "text": "Daytime Telephone Number",
+    "pick": "tail|phonelocal"
+   }
+  ],
+  "fee": [
+   {
+    "check": "12500 Filing Fee",
+    "if": "125"
+   },
+   {
+    "check": "13000 Filing Fee",
+    "if": "130"
+   },
+   {
+    "check": "15500 Filing Fee",
+    "if": "155"
+   },
+   {
+    "check": "16000 Filing Fee",
+    "if": "160"
+   }
+  ]
+ }
+}

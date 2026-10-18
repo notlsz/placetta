@@ -1,0 +1,757 @@
+{
+ "form": "bos-cv",
+ "rev": "Common Victualler (No Alcohol) Application (Revised 11/2023)",
+ "pdf": "bos-cv.pdf",
+ "url": "https://www.boston.gov/sites/default/files/file/2023/10/Common%20Victualler%20(CV)%20No%20Alcohol%20Application%2011.2023.pdf",
+ "checked": "2026-10-18",
+ "notes": "The Boston Licensing Board's common victualler license (no alcohol), with the personal information form for the applicant. Attachments: name each one included ('Lease, Inspection Certificate, Floor plan, Personal information forms, Business entity summary'), each ticked on the checklist. Officers and owners: one per line, 'name, title, stock or percent owned'. Prior employment: one per line, 'dates, position, employer, employer address'. Yes/No questions take Yes or No; the patio questions apply only when a patio is requested. The signatures, the dates signed, the board's restrictions and the wage theft prevention page are left for the applicant.",
+ "lines": [
+  {
+   "id": "attachments",
+   "line": "Checklist",
+   "en": "Documents included with the application",
+   "zh": "随申请附上的文件",
+   "hint": {
+    "en": "Name each one, e.g. \"Lease, Inspection Certificate, Floor plan, Personal information forms, Business entity summary\".",
+    "zh": "逐项写明，如 \"Lease, Inspection Certificate, Floor plan, Personal information forms, Business entity summary\"。"
+   }
+  },
+  {
+   "id": "entity_name",
+   "line": "1",
+   "en": "Entity name (e.g. LLC, Inc, Corp)",
+   "zh": "实体名称（如 LLC、Inc、Corp）"
+  },
+  {
+   "id": "dba",
+   "line": "2",
+   "en": "Doing business as (d/b/a)",
+   "zh": "经营名称（DBA）"
+  },
+  {
+   "id": "address",
+   "line": "3",
+   "en": "Physical business address in Boston",
+   "zh": "波士顿营业实际地址"
+  },
+  {
+   "id": "phone",
+   "line": "4",
+   "en": "Business phone",
+   "zh": "企业电话"
+  },
+  {
+   "id": "ein",
+   "line": "5",
+   "en": "Business tax EIN",
+   "zh": "企业税号（EIN）"
+  },
+  {
+   "id": "email",
+   "line": "6",
+   "en": "Business contact email",
+   "zh": "企业联系电子邮箱"
+  },
+  {
+   "id": "manager",
+   "line": "7",
+   "en": "Manager of record",
+   "zh": "备案经理"
+  },
+  {
+   "id": "manager_phone",
+   "line": "8",
+   "en": "Manager's phone",
+   "zh": "经理电话"
+  },
+  {
+   "id": "franchise",
+   "line": "9",
+   "en": "Is this business a franchise?",
+   "zh": "该企业是否为加盟店？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "opening_date",
+   "line": "10",
+   "en": "Expected opening date",
+   "zh": "预计开业日期"
+  },
+  {
+   "id": "premise",
+   "line": "11",
+   "en": "Description of the premise: floors, rooms, where the kitchen, storage and bathrooms are, seats, patio",
+   "zh": "场所描述：楼层、房间、厨房、储藏室及卫生间位置、座位、露台"
+  },
+  {
+   "id": "square_feet",
+   "line": "12",
+   "en": "Total square footage",
+   "zh": "总面积（平方英尺）"
+  },
+  {
+   "id": "egresses",
+   "line": "13",
+   "en": "Number of egresses (entrances and exits)",
+   "zh": "出入口数量"
+  },
+  {
+   "id": "takeout_only",
+   "line": "14",
+   "en": "Takeout only (0 seats)?",
+   "zh": "是否仅外带（0 座）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "seating",
+   "line": "15",
+   "en": "Seating capacity of the premise",
+   "zh": "场所座位容量"
+  },
+  {
+   "id": "hours",
+   "line": "16",
+   "en": "Hours of operation: days of the week with opening and closing hours",
+   "zh": "营业时间：每周营业日及开关门时间"
+  },
+  {
+   "id": "patio",
+   "line": "17",
+   "en": "Requesting the use of an outdoor patio?",
+   "zh": "是否申请使用户外露台？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "patio_property",
+   "line": "17a",
+   "en": "Patio: on private property, public property or both",
+   "zh": "露台：位于私有、公共还是两者兼有的场地",
+   "options": [
+    "Private",
+    "Public",
+    "Both"
+   ]
+  },
+  {
+   "id": "patio_months",
+   "line": "17b",
+   "en": "Patio: months it will be in use",
+   "zh": "露台：使用月份"
+  },
+  {
+   "id": "patio_capacity",
+   "line": "17c",
+   "en": "Patio: capacity",
+   "zh": "露台：容量"
+  },
+  {
+   "id": "patio_hours",
+   "line": "17d",
+   "en": "Patio: hours of operation",
+   "zh": "露台：营业时间"
+  },
+  {
+   "id": "pic_permit",
+   "line": "17f",
+   "en": "Public patio: do you have a Public Improvement Commission (PIC) permit?",
+   "zh": "公共场地露台：是否持有公共改善委员会（PIC）许可？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "previous_cv",
+   "line": "18",
+   "en": "Was a common victualler license held at this address before? If yes, the business name and license number",
+   "zh": "此地址以前是否持有过普通餐饮许可证？如是，填写企业名称和许可证号",
+   "hint": {
+    "en": "\"No\", or \"Yes: Golden Dragon Bakery, LB-123456\".",
+    "zh": "填 \"No\"，或 \"Yes: Golden Dragon Bakery, LB-123456\"。"
+   }
+  },
+  {
+   "id": "attorney",
+   "line": "19-22",
+   "en": "Attorney, if any: name",
+   "zh": "律师（如有）：姓名"
+  },
+  {
+   "id": "attorney_phone",
+   "line": "20",
+   "en": "Attorney's phone",
+   "zh": "律师电话"
+  },
+  {
+   "id": "attorney_address",
+   "line": "21",
+   "en": "Attorney's address",
+   "zh": "律师地址"
+  },
+  {
+   "id": "attorney_email",
+   "line": "22",
+   "en": "Attorney's email",
+   "zh": "律师电子邮箱"
+  },
+  {
+   "id": "officers",
+   "line": "23",
+   "en": "Officers, directors and owners: one per line, \"name, title, stock or percent owned\"",
+   "zh": "高管、董事及所有人：每行一位，\"姓名, 职务, 持股数或比例\""
+  },
+  {
+   "id": "applicant",
+   "line": "Signature",
+   "en": "Applicant: printed name",
+   "zh": "申请人：正楷姓名"
+  },
+  {
+   "id": "applicant_home",
+   "line": "Personal form",
+   "en": "Applicant: home address",
+   "zh": "申请人：住址"
+  },
+  {
+   "id": "applicant_email",
+   "line": "Personal form",
+   "en": "Applicant: email",
+   "zh": "申请人：电子邮箱"
+  },
+  {
+   "id": "applicant_work_phone",
+   "line": "Personal form",
+   "en": "Applicant: work phone",
+   "zh": "申请人：工作电话"
+  },
+  {
+   "id": "applicant_cell",
+   "line": "Personal form",
+   "en": "Applicant: cell phone",
+   "zh": "申请人：手机"
+  },
+  {
+   "id": "applicant_dob",
+   "line": "Personal form",
+   "en": "Applicant: date of birth",
+   "zh": "申请人：出生日期"
+  },
+  {
+   "id": "applicant_title",
+   "line": "Personal form",
+   "en": "Applicant: title as it relates to the business",
+   "zh": "申请人：在企业中的职务"
+  },
+  {
+   "id": "applicant_interest",
+   "line": "Personal form",
+   "en": "Applicant: interest in the business",
+   "zh": "申请人：在企业中的权益"
+  },
+  {
+   "id": "applicant_employer",
+   "line": "Personal form",
+   "en": "Applicant: place of current employment",
+   "zh": "申请人：目前工作单位"
+  },
+  {
+   "id": "employment_history",
+   "line": "Personal form",
+   "en": "Applicant: employment history, one per line, \"dates, position, employer, employer address\"",
+   "zh": "申请人：工作经历，每行一项，\"起止日期, 职位, 雇主, 雇主地址\""
+  },
+  {
+   "id": "business_name_wage",
+   "line": "Wage theft page",
+   "en": "Name of business (wage theft prevention page)",
+   "zh": "企业名称（防止工资盗窃页）"
+  },
+  {
+   "id": "signer_wage",
+   "line": "Wage theft page",
+   "en": "Typed or printed name (wage theft prevention page)",
+   "zh": "正楷姓名（防止工资盗窃页）"
+  }
+ ],
+ "blank": {
+  "attorney": "^(none|no|n/?a)\\.?$",
+  "attorney_phone": "^(none|no|n/?a)\\.?$",
+  "attorney_address": "^(none|no|n/?a)\\.?$",
+  "attorney_email": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "attachments": [
+   {
+    "check": "Check Box1",
+    "if": "lease|deed"
+   },
+   {
+    "check": "Check Box2",
+    "if": "inspection"
+   },
+   {
+    "check": "Check Box3",
+    "if": "assembly"
+   },
+   {
+    "check": "Check Box4",
+    "if": "occupancy"
+   },
+   {
+    "check": "Check Box5",
+    "if": "floor plan"
+   },
+   {
+    "check": "Check Box6",
+    "if": "personal information"
+   },
+   {
+    "check": "Check Box7",
+    "if": "entity summary|corporations division"
+   }
+  ],
+  "entity_name": [
+   {
+    "text": "Entity Name Ex LLC Inc Corp"
+   },
+   {
+    "text": "Entity Name"
+   }
+  ],
+  "dba": [
+   {
+    "text": "Doing Business As dba"
+   }
+  ],
+  "address": [
+   {
+    "text": "Physical Business Address",
+    "pick": "street"
+   },
+   {
+    "text": "City1",
+    "pick": "city"
+   },
+   {
+    "text": "Zip Code1",
+    "pick": "zip"
+   },
+   {
+    "text": "Premise Address"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Business Phone No"
+   }
+  ],
+  "ein": [
+   {
+    "text": "Business Tax EIN Number",
+    "pick": "ein"
+   }
+  ],
+  "email": [
+   {
+    "text": "Business Contact Email Address"
+   }
+  ],
+  "manager": [
+   {
+    "text": "Manager of Record"
+   }
+  ],
+  "manager_phone": [
+   {
+    "text": "Manager Phone No"
+   }
+  ],
+  "franchise": [
+   {
+    "check": "Check Box8",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box9",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "opening_date": [
+   {
+    "text": "10 What is the expected opening date",
+    "pick": "date"
+   }
+  ],
+  "premise": [
+   {
+    "text": "Where is the kitchenstorage Bathrooms Number of seats Patio 2"
+   }
+  ],
+  "square_feet": [
+   {
+    "text": "12 Total Square Footage",
+    "pick": "digits"
+   }
+  ],
+  "egresses": [
+   {
+    "text": "13 No of Egresses EntrancesExits",
+    "pick": "digits"
+   }
+  ],
+  "takeout_only": [
+   {
+    "check": "Check Box10",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box11",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "seating": [
+   {
+    "text": "15 Seating capacity of the premise",
+    "pick": "digits"
+   }
+  ],
+  "hours": [
+   {
+    "text": "16 Hours of Operations Specify days of week along with the opening and closing hours 1"
+   }
+  ],
+  "patio": [
+   {
+    "check": "Check Box12",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box13",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "patio_property": [
+   {
+    "check": "Check Box14",
+    "if": "^private"
+   },
+   {
+    "check": "Check Box15",
+    "if": "^public"
+   },
+   {
+    "check": "Check Box16",
+    "if": "^both"
+   }
+  ],
+  "patio_months": [
+   {
+    "text": "When will the patio be in use Please specify the months"
+   }
+  ],
+  "patio_capacity": [
+   {
+    "text": "Capacity of the patio",
+    "pick": "digits"
+   }
+  ],
+  "patio_hours": [
+   {
+    "text": "Patio hours of operation"
+   }
+  ],
+  "pic_permit": [
+   {
+    "check": "Check Box122323",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box12546464",
+    "if": "^(n|no|否)\\b"
+   }
+  ],
+  "previous_cv": [
+   {
+    "check": "Check Box14535",
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "check": "Check Box1257657",
+    "if": "^(n|no|否)\\b"
+   },
+   {
+    "text": "If yes please list the business name and license number ex LB123456 2",
+    "pick": "tail",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "attorney": [
+   {
+    "text": "19 Attorneys Name",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "attorney_phone": [
+   {
+    "text": "20 Attorneys Phone No",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "attorney_address": [
+   {
+    "text": "21 Attorneys Address",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "attorney_email": [
+   {
+    "text": "22 Attorneys Email",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "officers": [
+   {
+    "text": "Name of PersonEntityRow1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "TitlePositionRow1",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": " Stock  OwnedRow1",
+    "pick": "line1|tail|tail"
+   },
+   {
+    "text": "Name of PersonEntityRow2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "TitlePositionRow2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": " Stock  OwnedRow2",
+    "pick": "line2|tail|tail"
+   },
+   {
+    "text": "Name of PersonEntityRow3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "TitlePositionRow3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": " Stock  OwnedRow3",
+    "pick": "line3|tail|tail"
+   },
+   {
+    "text": "Name of PersonEntityRow4",
+    "pick": "line4|head"
+   },
+   {
+    "text": "TitlePositionRow4",
+    "pick": "line4|tail|head"
+   },
+   {
+    "text": " Stock  OwnedRow4",
+    "pick": "line4|tail|tail"
+   },
+   {
+    "text": "Name of PersonEntityRow5",
+    "pick": "line5|head"
+   },
+   {
+    "text": "TitlePositionRow5",
+    "pick": "line5|tail|head"
+   },
+   {
+    "text": " Stock  OwnedRow5",
+    "pick": "line5|tail|tail"
+   },
+   {
+    "text": "Name of PersonEntityRow6",
+    "pick": "line6|head"
+   },
+   {
+    "text": "TitlePositionRow6",
+    "pick": "line6|tail|head"
+   },
+   {
+    "text": " Stock  OwnedRow6",
+    "pick": "line6|tail|tail"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "PRINT NAME"
+   },
+   {
+    "text": "Your Name"
+   }
+  ],
+  "applicant_home": [
+   {
+    "text": "Home Address",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "Zip Code",
+    "pick": "zip"
+   }
+  ],
+  "applicant_email": [
+   {
+    "text": "Email Address"
+   }
+  ],
+  "applicant_work_phone": [
+   {
+    "text": "WorkPhone No"
+   }
+  ],
+  "applicant_cell": [
+   {
+    "text": "Cell Phone No"
+   }
+  ],
+  "applicant_dob": [
+   {
+    "text": "Date of Birth",
+    "pick": "date"
+   }
+  ],
+  "applicant_title": [
+   {
+    "text": "Your title as it relates to the businesslicense"
+   }
+  ],
+  "applicant_interest": [
+   {
+    "text": "Describe your interestin the businesslicense"
+   }
+  ],
+  "applicant_employer": [
+   {
+    "text": "Place ofcurrentemployment"
+   }
+  ],
+  "employment_history": [
+   {
+    "text": "DatesRow1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "PositionRow1",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": "EmployerRow1",
+    "pick": "line1|tail|tail|head"
+   },
+   {
+    "text": "Employer AddressRow1",
+    "pick": "line1|tail|tail|tail"
+   },
+   {
+    "text": "DatesRow2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "PositionRow2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": "EmployerRow2",
+    "pick": "line2|tail|tail|head"
+   },
+   {
+    "text": "Employer AddressRow2",
+    "pick": "line2|tail|tail|tail"
+   },
+   {
+    "text": "DatesRow3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "PositionRow3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": "EmployerRow3",
+    "pick": "line3|tail|tail|head"
+   },
+   {
+    "text": "Employer AddressRow3",
+    "pick": "line3|tail|tail|tail"
+   },
+   {
+    "text": "DatesRow4",
+    "pick": "line4|head"
+   },
+   {
+    "text": "PositionRow4",
+    "pick": "line4|tail|head"
+   },
+   {
+    "text": "EmployerRow4",
+    "pick": "line4|tail|tail|head"
+   },
+   {
+    "text": "Employer AddressRow4",
+    "pick": "line4|tail|tail|tail"
+   },
+   {
+    "text": "DatesRow5",
+    "pick": "line5|head"
+   },
+   {
+    "text": "PositionRow5",
+    "pick": "line5|tail|head"
+   },
+   {
+    "text": "EmployerRow5",
+    "pick": "line5|tail|tail|head"
+   },
+   {
+    "text": "Employer AddressRow5",
+    "pick": "line5|tail|tail|tail"
+   }
+  ],
+  "business_name_wage": [
+   {
+    "text": "Name of Business"
+   }
+  ],
+  "signer_wage": [
+   {
+    "text": "Typed or Printed name of person"
+   }
+  ]
+ },
+ "sign": {
+  "page": 2,
+  "x": 213,
+  "y": 322,
+  "w": 144,
+  "h": 12
+ }
+}

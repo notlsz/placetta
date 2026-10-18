@@ -1,0 +1,48 @@
+/* The Odelia panel, kept clean (src/AgentPanel.tsx): one quiet Work link in the header, one "…" under her latest
+   answer, what she kept as one quiet line. Whitespace over boxes, plain icons, muted secondary text. */
+
+/* header: bot, name and status, Work, close */
+.pn-work { flex: none; height: 32px; padding: 0 8px; border-radius: 8px; font-size: 13px; color: var(--ink3); transition: color .15s; }
+.pn-work:hover, .pn-work:focus-visible { color: var(--ink); }
+.pn-h .icbtn { margin-left: -4px; }
+
+/* a finished turn: the line above the answer is a status, not a control */
+.turn .work-hd { color: var(--ink3); }
+.turn .work-hd.wait { color: var(--warm); }
+
+/* the "…" under her latest finished answer */
+.t-foot { display: flex; align-items: center; margin: -4px 0 0 -6px; }
+.t-more { display: inline-grid; place-items: center; width: 32px; height: 28px; border-radius: 8px; color: var(--ink3); transition: color .15s; }
+.t-more:hover, .t-more:focus-visible, .t-more[aria-expanded="true"] { color: var(--ink); }
+.t-more-wrap .menu { min-width: 200px; }
+
+/* what a run kept: one line, opens to the details */
+.kept { display: flex; flex-direction: column; gap: 6px; }
+.kept-t { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 13px; color: var(--ink3); transition: color .15s; }
+.kept-t > svg { width: 14px; height: 14px; color: var(--ink3); }
+.kept-t i { display: inline-grid; transition: transform .2s; }
+.kept-t i.up { transform: rotate(180deg); }
+.kept-t:hover, .kept-t[aria-expanded="true"] { color: var(--ink2); }
+.kept-b { display: flex; flex-direction: column; gap: 8px; padding-left: 20px; }
+.kept-b .rmb { margin: 0; }
+.kept-b .rmb-chip { padding: 0; background: none; }
+.kept-b .rmb-chip.sug, .kept-b .rmb-chip.off { background: none; }
+.kept-b .rmb-chip > svg { display: none; }
+.kept-b .rmb-k { font-weight: 500; }
+.kept-b .rmb-b { height: auto; padding: 2px 4px; background: none; box-shadow: none; color: var(--blue-ink); }
+.kept-b .rmb-b:hover { background: none; color: var(--ink); }
+.kept-b .rmb-b.quiet { color: var(--ink3); }
+.kept-b .mem > svg { display: none; }
+.kept-b .mem b, .kept-b .rmb-k { font-weight: 500; color: var(--ink2); }
+
+/* Plan first, while it's on: a quiet blue icon in the box that turns it off (no box behind it) */
+.composer .pf[aria-pressed="true"] { background: none; color: var(--blue-ink); }
+.composer .pf[aria-pressed="true"]:hover { color: var(--ink); }
+
+/* a plan card inside a turn: Ask a person and Watch how she did it are in the turn's "…" */
+.turn .job .ask-person, .turn .job .job-foot { display: none; }
+
+/* the message box: a quiet outline while files are dragged over it */
+.composer.drop { box-shadow: inset 0 0 0 1.5px var(--blue-ink); }
+
+:root[data-theme="dark"] .pn-work, :root[data-theme="dark"] .t-more, :root[data-theme="dark"] .kept-t { color: var(--ink3); }

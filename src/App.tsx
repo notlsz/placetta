@@ -53,6 +53,8 @@ import { addUndo, recorder, undoTitle } from "./rewind";
 import { applyHeldHere } from "./held";
 import { withDemoPlan } from "./demoPlan";
 import { ownerApprove } from "./cloud/owners";
+/* Team review: comments, @mentions, Assigned to and the Mine filter (src/Comments.tsx, src/collab.ts) */
+import { CollabCtx, useCollab } from "./Comments";
 
 const KEY = "placetta-api-key", KEY_MODEL = "placetta-api-model";
 const readKey = () => { try { return { key: localStorage.getItem(KEY) ?? "", model: localStorage.getItem(KEY_MODEL) ?? API_MODELS[0].id }; } catch { return { key: "", model: API_MODELS[0].id }; } };
@@ -129,6 +131,7 @@ const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
   team: B(`Tell me more: ${u.title.en}`, `详细说说：${u.title.zh}`),
   mail: B(`Read this reply and tell me what to do next: ${u.title.en}`, `读一下这封回复，告诉我下一步怎么做：${u.title.zh}`),
   purchase: B(`What's this purchase and what happens next: ${u.title.en}`, `这笔购买是什么，接下来怎么办：${u.title.zh}`),
+  mention: B(`What does this comment need from me: ${u.title.en}`, `这条评论需要我做什么：${u.title.zh}`),
 })[u.kind];
 
 const PLAN_LABEL: Record<string, Bi> = {
@@ -199,8 +202,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   }, []);
   // An old address (/work, /applications, /context and the rest) opens its new home, and the bar shows the new address.
   useEffect(() => { const r = readRoute(); if (r.legacy) { setRoute(r.view, r.sub, true); if (r.view === "settings" && r.sub) window.dispatchEvent(new CustomEvent("placetta:settings", { detail: r.sub })); } }, []);
-  // An address for a page this account can't open (the team queue, headquarters) goes home.
-  const canQueue = !!(cloud?.me.staff || cloud?.me.staff_email), canHq = !!cloud?.hq.length;
+  // An address for a page this account can't open (the team queue, headquarters) goes home. The sample shows its
+  // brand's headquarters view (src/Headquarters.tsx), so the review table across franchisees can be seen.
+  const canQueue = !!(cloud?.me.staff || cloud?.me.staff_email), canHq = !!cloud?.hq.length || !cloud;
   // a partner account (src/Partner.tsx) gets a nav entry; anyone signed in can open /app/partner to sign up
   const partnerMe = usePartnerMe(!!cloud);
   useEffect(() => {
@@ -222,6 +226,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [serverUpdates, setServerUpdates] = useState<api.UpdateRow[]>([]);
   const [readLocal, setReadLocal] = useState<Set<string>>(() => new Set());
   const view_ = useMemo(() => (cloud ? withServer(ws, filings, docs, purchases) : ws), [cloud, ws, filings, docs, purchases]);
+  /* Team review (src/Comments.tsx): the comments, assignments and notices of this workspace, one store for every page.
+     An @mention of Odelia on a permit starts her through ask (set below, once it exists). */
+  const askRef = useRef<(text: string) => void>(() => undefined);
+  const collab = useCollab({ cloud, ws: view_, lang, say, editWs: setWs, ask: text => askRef.current(text) });
+  const collabRef = useRef(collab);
+  collabRef.current = collab;
   /* A link from one of Odelia's texts opens that exact approval (approving still happens here, in the app). */
   const linked = useRef(cloud?.approval ?? null);
   const readyLink = useRef(false);
@@ -302,7 +312,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     return () => window.clearInterval(t);
   }, [cloud]);
   /* the Updates inbox: the monitor's updates in an account (worked out locally until its first run), the sample's otherwise */
-  const updates = useMemo<UpdateItem[]>(() => {
+  const updatesBase = useMemo<UpdateItem[]>(() => {
     const base = cloud && serverUpdates.length
       ? serverUpdates.map(u => ({ id: u.id, kind: u.kind, title: u.title, body: u.body ?? undefined, app: u.app_id ?? undefined, at: u.created_at, read: !!u.read_at, prompt: askFor(u) }))
       : localUpdates(view_).map(u => ({ ...u, read: readLocal.has(u.id) }));
@@ -311,9 +321,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const live = liveFilingUpdates(filings).filter(u => !seen.has(u.title.en)).map(u => ({ ...u, read: readLocal.has(u.id) }));
     return [...live, ...base].sort((x, y) => y.at.localeCompare(x.at));
   }, [cloud, serverUpdates, view_, readLocal, filings]);
+  // and this person's own: mentions, assignments and headquarters' questions (Team review)
+  const updates = useMemo(() => [...collab.updates, ...updatesBase].sort((x, y) => y.at.localeCompare(x.at)), [collab.updates, updatesBase]);
   const readUpdates = useCallback(() => {
     if (!updates.some(u => !u.read)) return;
     setReadLocal(new Set(updates.map(u => u.id)));
+    collabRef.current.readAll();
     if (cloud && serverUpdates.some(u => !u.read_at)) void api.readUpdates(cloud.wsId).then(() => setServerUpdates(us => us.map(u => ({ ...u, read_at: u.read_at ?? nowIso() }))), () => undefined);
   }, [updates, cloud, serverUpdates]);
   const refreshRef = useRef(refresh);
@@ -546,7 +559,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       }
     };
     const m = modelRef.current;
-    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me }) : withDemoPlan(demoAgent);
+    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me, comments: item => collabRef.current.forAgent(item) }) : withDemoPlan(demoAgent);
     // each application's answers before the run: the ones it changes get their form filled again when it ends
     const answersBefore = new Map(wsRef.current.apps.map(a => [a.id, answersHash(a)]));
     try {
@@ -559,7 +572,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         // the run happened here: the workspace keeps its moments, linked from each job it worked
         setWs(keepRun({ id: `local-${Date.now().toString(36)}`, at: askedAt, steps: moments }, askedAt));
         // and the forms it changed are filled again; the reply ends with each one (a card that opens the PDF)
-        await new Promise(res => setTimeout(res, 0));
+        // (once the page has drawn what the run changed, and any fill already under way has finished)
+        await new Promise(res => setTimeout(res, 60));
+        for (let i = 0; i < 300 && formsBusy.current; i++) await new Promise(res => setTimeout(res, 100));
         const changed = wsRef.current.apps.filter(a => answersBefore.get(a.id) !== answersHash(a) && needsForm(a)).map(a => a.id);
         if (changed.length) {
           changed.forEach(id => lastFill.current.set(id, Date.now()));
@@ -641,6 +656,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
     run({ text: q }, q, voice);
   }, [run, say, lang, cloud, plan]);   // eslint-disable-line react-hooks/exhaustive-deps
+  askRef.current = ask;   // an @mention of Odelia in a comment (Team review)
 
   /* A job started while another runs: it works on the server on its own and shows in the chat and in Work as it goes. */
   const [, setSideJobs] = useState(0);
@@ -1223,7 +1239,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     overview: <Overview />, permits: <Permits tab={permitsTab} />, stores: <Stores />, odelia,
     find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
     queue: cloud?.me.staff ? <Queue /> : cloud?.me.staff_email ? <QueueLocked /> : <Overview />,
-    hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : <Overview />,
+    hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : !cloud ? <Headquarters lang={lang} initial={[]} sample={{ ws: view_, team: collab }} /> : <Overview />,
     partner: <PartnerPage lang={lang} sample={!cloud} />,
   }[view];
   const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, odelia: waitingJobs };
@@ -1281,7 +1297,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       )}
       <ul className="nav">
         <li><button type="button" className="cmdk-open" onClick={() => setCmdk(true)} title={lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job"}><I.find /><span>{lang === "zh" ? "搜索" : "Search"}</span><kbd>{/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd></button></li>
-        {!!cloud?.hq.length && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
+        {canHq && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
         {!!partnerMe && <li><a {...navLink("partner")} aria-current={view === "partner" ? "page" : undefined} title={slim ? b(B("Partner", "合作伙伴")) : undefined}><I.user /><span>{b(B("Partner", "合作伙伴"))}</span></a></li>}
         {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
       </ul>
@@ -1309,7 +1325,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   );
 
   return (
-    <AppCtx.Provider value={ctx}>
+    <AppCtx.Provider value={ctx}><CollabCtx.Provider value={collab}>
       <div className={"shell" + (dock ? " docked" : "") + (phone ? " phone" : "") + (slim ? " slim" : "")}>
         {side}
         {phone && navOpen && <div className="navscrim" onClick={() => setNavOpen(false)} />}
@@ -1370,6 +1386,6 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         <CommandBar open={cmdk} setOpen={setCmdk} />
         <Walkthrough />
       </div>
-    </AppCtx.Provider>
+    </CollabCtx.Provider></AppCtx.Provider>
   );
 }

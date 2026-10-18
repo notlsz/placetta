@@ -1,0 +1,511 @@
+{
+ "form": "phx-co",
+ "rev": "Commercial/Multifamily Permit/Plan Review Application (TRT/DOC/00033, Rev. 06/21)",
+ "pdf": "phx-co.pdf",
+ "url": "https://www.phoenix.gov/content/dam/phoenix/pddsite/documents/trt/external/dsd_trt_pdf_00033.pdf",
+ "checked": "2026-10-18",
+ "notes": "City of Phoenix Planning and Development's commercial permit and plan review application. Company blocks take six lines (name, address, contact person, phone, fax, email); the address is split into street, city, state and ZIP. For more than one building, page 2 takes one building per line. The date, the applicant's signature and everything under 'Staff Use Only' are left for the applicant and the city.",
+ "lines": [
+  {
+   "id": "project_address",
+   "line": "Project",
+   "en": "Project address",
+   "zh": "项目地址"
+  },
+  {
+   "id": "floor",
+   "line": "Project",
+   "en": "Floor",
+   "zh": "楼层"
+  },
+  {
+   "id": "suite",
+   "line": "Project",
+   "en": "Suite or space",
+   "zh": "单元或空间"
+  },
+  {
+   "id": "building_no",
+   "line": "Project",
+   "en": "Building number",
+   "zh": "楼栋编号"
+  },
+  {
+   "id": "building_area",
+   "line": "Project",
+   "en": "Building area (sq ft)",
+   "zh": "建筑面积（平方英尺）"
+  },
+  {
+   "id": "valuation",
+   "line": "Project",
+   "en": "Proposed work valuation ($)",
+   "zh": "拟施工工程造价（美元）"
+  },
+  {
+   "id": "construction_type",
+   "line": "Project",
+   "en": "Construction type (building code, e.g. V-B)",
+   "zh": "建筑类型（建筑规范，如 V-B）"
+  },
+  {
+   "id": "occupancy_type",
+   "line": "Project",
+   "en": "Occupancy type (e.g. B or A-2)",
+   "zh": "使用类型（如 B 或 A-2）"
+  },
+  {
+   "id": "description",
+   "line": "Project",
+   "en": "Description of work (and the original plan review log number for a revision)",
+   "zh": "工程说明（如为修改，请写原图纸审核编号）",
+   "hint": {
+    "en": "Up to four lines.",
+    "zh": "最多四行。"
+   }
+  },
+  {
+   "id": "applicant",
+   "line": "Applicant",
+   "en": "Applicant: printed name",
+   "zh": "申请人：正楷姓名"
+  },
+  {
+   "id": "applicant_phone",
+   "line": "Applicant",
+   "en": "Applicant phone",
+   "zh": "申请人电话"
+  },
+  {
+   "id": "applicant_email",
+   "line": "Applicant",
+   "en": "Applicant email",
+   "zh": "申请人电子邮箱"
+  },
+  {
+   "id": "contact_role",
+   "line": "Contact information",
+   "en": "Contact is the owner, the contractor, or other",
+   "zh": "联系人身份：所有人、承包商或其他",
+   "options": [
+    "Owner",
+    "Contractor",
+    "Other"
+   ],
+   "hint": {
+    "en": "\"Owner\", \"Contractor\", or \"Other: \" and the role.",
+    "zh": "\"Owner\"、\"Contractor\"，或 \"Other: \" 加身份。"
+   }
+  },
+  {
+   "id": "owner_block",
+   "line": "Contact information",
+   "en": "Owner or business: name, address, contact person, phone, fax, email",
+   "zh": "所有人或企业：名称、地址、联系人、电话、传真、电子邮箱",
+   "hint": {
+    "en": "Six lines: business name; address; contact person; phone; fax (or \"None\"); email.",
+    "zh": "六行：公司名称；地址；联系人；电话；传真（没有填 \"None\"）；电子邮箱。"
+   }
+  },
+  {
+   "id": "contractor_block",
+   "line": "Contractor",
+   "en": "Contractor: business name, address, contact person, phone, fax, email",
+   "zh": "承包商：名称、地址、联系人、电话、传真、电子邮箱",
+   "hint": {
+    "en": "Six lines: business name; address; contact person; phone; fax (or \"None\"); email.",
+    "zh": "六行：公司名称；地址；联系人；电话；传真（没有填 \"None\"）；电子邮箱。"
+   }
+  },
+  {
+   "id": "roc_license",
+   "line": "Contractor",
+   "en": "Contractor's state license class and number (ROC)",
+   "zh": "承包商州执照类别与号码（ROC）"
+  },
+  {
+   "id": "field_contact",
+   "line": "Field contact",
+   "en": "Field contact (required for permit by inspection): \"name, phone\"",
+   "zh": "现场联系人（按检查发证时必填）：\"姓名, 电话\""
+  },
+  {
+   "id": "developer_block",
+   "line": "Developer",
+   "en": "Developer or owner business: name, address, contact person, phone, fax, email",
+   "zh": "开发商或业主企业：名称、地址、联系人、电话、传真、电子邮箱",
+   "hint": {
+    "en": "Six lines: business name; address; contact person; phone; fax (or \"None\"); email.",
+    "zh": "六行：公司名称；地址；联系人；电话；传真（没有填 \"None\"）；电子邮箱。"
+   }
+  },
+  {
+   "id": "buildings",
+   "line": "Page 2",
+   "en": "More than one building: one per line, \"building number, area, valuation, construction type, occupancy type\"",
+   "zh": "多栋建筑：每行一栋，\"楼栋编号, 面积, 造价, 建筑类型, 使用类型\"",
+   "hint": {
+    "en": "Up to four lines, or \"None\" for a single building. The first building's construction and occupancy types are the ones given above.",
+    "zh": "最多四行，单栋建筑填 \"None\"。第一栋的建筑类型与使用类型沿用上面的答案。"
+   }
+  },
+  {
+   "id": "staff_use",
+   "line": "Page 2",
+   "en": "Staff use: project and permit numbers, special categories, structure, scope, fees and clearances",
+   "zh": "工作人员填写：项目与许可编号、特殊类别、结构、范围、费用与审核"
+  }
+ ],
+ "unmapped": {
+  "staff_use": "Everything under 'Staff Use Only' on page 2 is filled in by the city."
+ },
+ "blank": {
+  "floor": "^(none|no|n/?a)\\.?$",
+  "suite": "^(none|no|n/?a)\\.?$",
+  "building_no": "^(none|no|n/?a)\\.?$",
+  "contractor_block": "^(none|no|n/?a)\\.?$",
+  "roc_license": "^(none|no|n/?a)\\.?$",
+  "field_contact": "^(none|no|n/?a)\\.?$",
+  "developer_block": "^(none|no|n/?a)\\.?$",
+  "buildings": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "project_address": [
+   {
+    "text": "Project Address"
+   }
+  ],
+  "floor": [
+   {
+    "text": "Floor",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "suite": [
+   {
+    "text": "SuiteSpace",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "building_no": [
+   {
+    "text": "Building",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "building_area": [
+   {
+    "text": "Building Area"
+   }
+  ],
+  "valuation": [
+   {
+    "text": "Proposed Work Valuation"
+   }
+  ],
+  "construction_type": [
+   {
+    "text": "Construction Type"
+   }
+  ],
+  "occupancy_type": [
+   {
+    "text": "Occupancy Type"
+   }
+  ],
+  "description": [
+   {
+    "text": "Description of Work 1",
+    "pick": "line1"
+   },
+   {
+    "text": "Description of Work 2",
+    "pick": "line2"
+   },
+   {
+    "text": "Description of Work 3",
+    "pick": "line3"
+   },
+   {
+    "text": "Description of Work 4",
+    "pick": "line4"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "Print Name"
+   }
+  ],
+  "applicant_phone": [
+   {
+    "text": "Applicant Phone"
+   }
+  ],
+  "applicant_email": [
+   {
+    "text": "Email"
+   }
+  ],
+  "contact_role": [
+   {
+    "check": "Owner",
+    "if": "^owner"
+   },
+   {
+    "check": "Contractor",
+    "if": "^contractor"
+   },
+   {
+    "check": "undefined",
+    "if": "^other"
+   },
+   {
+    "text": "Other",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "owner_block": [
+   {
+    "text": "OwnerBusiness Name",
+    "pick": "line1"
+   },
+   {
+    "text": "Address",
+    "pick": "line2|street"
+   },
+   {
+    "text": "City",
+    "pick": "line2|city"
+   },
+   {
+    "text": "State",
+    "pick": "line2|state"
+   },
+   {
+    "text": "Zip Code",
+    "pick": "line2|zip"
+   },
+   {
+    "text": "Contact Person",
+    "pick": "line3"
+   },
+   {
+    "text": "Phone",
+    "pick": "line4"
+   },
+   {
+    "text": "Fax",
+    "pick": "line5"
+   },
+   {
+    "text": "Email_2",
+    "pick": "line6"
+   }
+  ],
+  "contractor_block": [
+   {
+    "text": "Contractor Business Name",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Address_2",
+    "pick": "line2|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "City_2",
+    "pick": "line2|city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State_2",
+    "pick": "line2|state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Zip Code_2",
+    "pick": "line2|zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Contact Person_2",
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Phone_2",
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fax_2",
+    "pick": "line5",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Email_3",
+    "pick": "line6",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "roc_license": [
+   {
+    "text": "State License Class and Number ROC",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "field_contact": [
+   {
+    "text": "Name",
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Phone_3",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "developer_block": [
+   {
+    "text": "DeveloperOwnerBusiness Name",
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Address_3",
+    "pick": "line2|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "City_3",
+    "pick": "line2|city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State_3",
+    "pick": "line2|state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Zip Code_3",
+    "pick": "line2|zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Contact Person_3",
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Phone_4",
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Fax_3",
+    "pick": "line5",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Email_4",
+    "pick": "line6",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "buildings": [
+   {
+    "text": "Building # 1",
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Building Areea",
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Valuation 1",
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Building # 2",
+    "pick": "line2|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Building Area 2",
+    "pick": "line2|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Valuation 2",
+    "pick": "line2|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Construction Type 2",
+    "pick": "line2|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Occupancy Type 2",
+    "pick": "line2|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Building # 3",
+    "pick": "line3|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Building Area 3",
+    "pick": "line3|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Valuation 3",
+    "pick": "line3|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Construction Type 3",
+    "pick": "line3|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Occupancy Type 3",
+    "pick": "line3|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Building # 4",
+    "pick": "line4|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Building Area 4",
+    "pick": "line4|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Valuation 4",
+    "pick": "line4|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Construction Type 4",
+    "pick": "line4|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "Occupancy Type 4",
+    "pick": "line4|tail|tail|tail|tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ]
+ }
+}

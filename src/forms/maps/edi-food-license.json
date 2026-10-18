@@ -1,0 +1,373 @@
+{
+ "form": "edi-food-license",
+ "rev": "Township of Edison Department of Health Retail Food Application",
+ "pdf": "edi-food-license.pdf",
+ "url": "https://cms2.revize.com/revize/edisonnj/document_center/Retail%20Food%20Fillable%20Application.pdf",
+ "checked": "2026-10-18",
+ "notes": "Township of Edison Department of Health's retail food license application. A flat, print-only form: answers are printed on the lines and an X goes in the chosen boxes. A restaurant license prints its number of seats; a retail food license its square feet. Card numbers, expiration dates, CID and billing ZIP are never written by Placetta; the health department's section is left for the township.",
+ "lines": [
+  {
+   "id": "application",
+   "line": "Header",
+   "en": "New application or renewal",
+   "zh": "新申请或续期",
+   "options": [
+    "New application",
+    "Renewal"
+   ]
+  },
+  {
+   "id": "license",
+   "line": "License",
+   "en": "License type",
+   "zh": "执照类型",
+   "options": [
+    "Restaurant (Chart A)",
+    "Retail food (Chart B)",
+    "Milk depot",
+    "Ice depot",
+    "Frozen dessert, retail",
+    "Wholesale food"
+   ]
+  },
+  {
+   "id": "seats",
+   "line": "License",
+   "en": "Restaurant: number of seats",
+   "zh": "餐厅：座位数"
+  },
+  {
+   "id": "square_feet",
+   "line": "License",
+   "en": "Retail food: square feet of location",
+   "zh": "零售食品：营业面积（平方英尺）"
+  },
+  {
+   "id": "business_name",
+   "line": "Business",
+   "en": "Business name",
+   "zh": "企业名称"
+  },
+  {
+   "id": "business_location",
+   "line": "Business",
+   "en": "Business location",
+   "zh": "营业地点"
+  },
+  {
+   "id": "business_phone",
+   "line": "Business",
+   "en": "Business phone number",
+   "zh": "营业电话"
+  },
+  {
+   "id": "business_fax",
+   "line": "Business",
+   "en": "Business fax number",
+   "zh": "营业传真"
+  },
+  {
+   "id": "email",
+   "line": "Business",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "owner",
+   "line": "Owner",
+   "en": "Owner's name",
+   "zh": "所有人姓名"
+  },
+  {
+   "id": "home_address",
+   "line": "Owner",
+   "en": "Owner's home address",
+   "zh": "所有人住址"
+  },
+  {
+   "id": "home_phone",
+   "line": "Owner",
+   "en": "Owner's home phone number",
+   "zh": "所有人住宅电话"
+  },
+  {
+   "id": "payment",
+   "line": "Payment",
+   "en": "Method of payment",
+   "zh": "付款方式",
+   "options": [
+    "Check",
+    "Money order",
+    "Credit card",
+    "Cash"
+   ]
+  },
+  {
+   "id": "card",
+   "line": "Payment",
+   "en": "Credit card name, number, expiration, CID and billing ZIP",
+   "zh": "信用卡持卡人、卡号、有效期、CID 与账单邮编"
+  }
+ ],
+ "unmapped": {
+  "card": "Placetta never writes card details; the applicant fills them in by hand or pays another way."
+ },
+ "blank": {
+  "seats": "^(none|no|n/?a)\\.?$",
+  "square_feet": "^(none|no|n/?a)\\.?$",
+  "business_fax": "^(none|no|n/?a)\\.?$",
+  "home_phone": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "application": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 37.8,
+     "y": 620.9,
+     "size": 8
+    },
+    "if": "^new"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 336.8,
+     "y": 620.9,
+     "size": 8
+    },
+    "if": "^renew"
+   }
+  ],
+  "license": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 148.2,
+     "y": 591.6,
+     "size": 8
+    },
+    "if": "restaurant"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 148.2,
+     "y": 557.2,
+     "size": 8
+    },
+    "if": "retail food"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 387.1,
+     "y": 603.1,
+     "size": 8
+    },
+    "if": "milk"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 387.1,
+     "y": 580.1,
+     "size": 8
+    },
+    "if": "ice depot"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 387.1,
+     "y": 557.2,
+     "size": 8
+    },
+    "if": "frozen"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 387.1,
+     "y": 534.1,
+     "size": 8
+    },
+    "if": "wholesale"
+   }
+  ],
+  "seats": [
+   {
+    "at": {
+     "page": 0,
+     "x": 210,
+     "y": 579.5,
+     "w": 42,
+     "size": 9
+    },
+    "pick": "digits",
+    "if": "\\d"
+   }
+  ],
+  "square_feet": [
+   {
+    "at": {
+     "page": 0,
+     "x": 254,
+     "y": 545,
+     "w": 42,
+     "size": 9
+    },
+    "pick": "digits",
+    "if": "\\d"
+   }
+  ],
+  "business_name": [
+   {
+    "at": {
+     "page": 0,
+     "x": 197,
+     "y": 384.8,
+     "w": 390
+    }
+   }
+  ],
+  "business_location": [
+   {
+    "at": {
+     "page": 0,
+     "x": 197,
+     "y": 367,
+     "w": 390
+    }
+   }
+  ],
+  "business_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 197,
+     "y": 334.2,
+     "w": 130
+    }
+   }
+  ],
+  "business_fax": [
+   {
+    "at": {
+     "page": 0,
+     "x": 456,
+     "y": 334.2,
+     "w": 120
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 197,
+     "y": 320,
+     "w": 214
+    }
+   }
+  ],
+  "owner": [
+   {
+    "at": {
+     "page": 0,
+     "x": 197,
+     "y": 302.3,
+     "w": 214
+    }
+   }
+  ],
+  "home_address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 197,
+     "y": 284.6,
+     "w": 388
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 105,
+     "y": 266.8,
+     "w": 108
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 276,
+     "y": 266.8,
+     "w": 66
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 375,
+     "y": 266.8,
+     "w": 62
+    },
+    "pick": "zip"
+   }
+  ],
+  "home_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 197,
+     "y": 249.1,
+     "w": 114
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "payment": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 226.3,
+     "y": 221.6,
+     "size": 8
+    },
+    "if": "^check"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 334.3,
+     "y": 221.6,
+     "size": 8
+    },
+    "if": "^money"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 430.3,
+     "y": 221.6,
+     "size": 8
+    },
+    "if": "^credit|card"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 492.3,
+     "y": 221.6,
+     "size": 8
+    },
+    "if": "^cash"
+   }
+  ]
+ }
+}

@@ -1,0 +1,1272 @@
+{
+ "form": "sea-business-license",
+ "rev": "2026 Application for Business License Tax Certificate (City of Seattle, License and Tax Administration)",
+ "pdf": "sea-business-license.pdf",
+ "url": "https://www.seattle.gov/documents/Departments/CityFinance/Business%20Licenses/BLTC%20Application%20Packet-2026%20rate.pdf",
+ "checked": "2026-10-18",
+ "notes": "City of Seattle's business license tax certificate application. A flat, print-only form: answers are printed on the lines, digits one per printed blank in the UBI boxes, and an X in the chosen boxes. Addresses are printed over their Address / City / State / Zip labels; phone numbers around the form's own dash. Owners take three lines each (name and title; residence address; telephone). Owners' dates of birth, the signature and its date, the fee total and the office-use boxes are left for the applicant and the city; the NAICS code is entered by the office.",
+ "lines": [
+  {
+   "id": "ubi",
+   "line": "Header",
+   "en": "Washington UBI number: \"UBI, business ID, location ID\" (9, 3 and 4 digits)",
+   "zh": "华盛顿州 UBI：\"UBI, 业务编号, 地点编号\"（9、3、4 位数字）",
+   "hint": {
+    "en": "e.g. \"604123456, 001, 0001\"; \"None\" for a sole proprietor without one.",
+    "zh": "如 \"604123456, 001, 0001\"；没有 UBI 的独资经营者填 \"None\"。"
+   }
+  },
+  {
+   "id": "contractor_no",
+   "line": "Header",
+   "en": "Washington contractor number",
+   "zh": "华盛顿州承包商编号"
+  },
+  {
+   "id": "email",
+   "line": "Header",
+   "en": "Email contact",
+   "zh": "联系电子邮箱"
+  },
+  {
+   "id": "website",
+   "line": "Header",
+   "en": "Website address",
+   "zh": "网站地址"
+  },
+  {
+   "id": "registered_before",
+   "line": "Business",
+   "en": "Has your business previously registered with Seattle?",
+   "zh": "企业以前是否在西雅图登记过？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "entity_type",
+   "line": "Business",
+   "en": "Type of business (one)",
+   "zh": "企业类型（单选）",
+   "options": [
+    "Sole Proprietor",
+    "Corporation",
+    "Partnership",
+    "LLC",
+    "Other"
+   ],
+   "hint": {
+    "en": "One of the options, or \"Other: \" and the type.",
+    "zh": "选一项，或 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "nonprofit",
+   "line": "Business",
+   "en": "Is the business a non-profit organization?",
+   "zh": "企业是否为非营利组织？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "legal_name",
+   "line": "Business",
+   "en": "Legal name of business entity (a sole proprietor: last name first, with middle initial)",
+   "zh": "企业法定名称（独资：姓在前，含中间名首字母）"
+  },
+  {
+   "id": "trade_name",
+   "line": "Business",
+   "en": "Trade name or dba",
+   "zh": "营业名称或 dba"
+  },
+  {
+   "id": "start_date",
+   "line": "Business",
+   "en": "Starting date of business in Seattle",
+   "zh": "在西雅图开始营业的日期"
+  },
+  {
+   "id": "location",
+   "line": "Locations",
+   "en": "Physical business location (a street address, not a P.O. box)",
+   "zh": "营业场所实际地址（街道地址，不可用邮政信箱）"
+  },
+  {
+   "id": "branch_only",
+   "line": "Locations",
+   "en": "Is this location being added as a branch only to an existing license?",
+   "zh": "此地点是否仅作为分支加入现有执照？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "license_mailing",
+   "line": "Locations",
+   "en": "Mailing address for the license and renewal (\"Same\" if the same as above)",
+   "zh": "执照与续期邮寄地址（与上相同填 \"Same\"）"
+  },
+  {
+   "id": "tax_mailing",
+   "line": "Locations",
+   "en": "Mailing address for tax forms (\"Same\" if the same as above)",
+   "zh": "税表邮寄地址（与上相同填 \"Same\"）"
+  },
+  {
+   "id": "business_phone",
+   "line": "Locations",
+   "en": "Business phone",
+   "zh": "营业电话"
+  },
+  {
+   "id": "cell_phone",
+   "line": "Locations",
+   "en": "Cellular phone",
+   "zh": "手机"
+  },
+  {
+   "id": "fax",
+   "line": "Locations",
+   "en": "Fax",
+   "zh": "传真"
+  },
+  {
+   "id": "branches",
+   "line": "Other locations",
+   "en": "Other business locations in Seattle: one per line, \"trade name; address; ZIP; telephone; separate tax reporting yes or no\"",
+   "zh": "西雅图其他营业地点：每行一个，\"营业名称; 地址; 邮编; 电话; 是否单独报税\"",
+   "hint": {
+    "en": "One branch on one line: \"trade name, street, ZIP, telephone, yes or no\".",
+    "zh": "一个分支写一行：\"营业名称, 街道, 邮编, 电话, yes 或 no\"。"
+   }
+  },
+  {
+   "id": "nature",
+   "line": "Page 2",
+   "en": "Nature of business (all that apply)",
+   "zh": "业务性质（可多选）",
+   "options": [
+    "Manufacturing-Extracting",
+    "Printing & Publishing",
+    "Tour Operator",
+    "Wholesale",
+    "Retail",
+    "Service",
+    "Transportation",
+    "Short-Term Rental",
+    "Gambling Activity",
+    "Utility Services",
+    "Charging Admission for Events/Shows",
+    "Distributing Sweetened Beverage Syrups/Concentrates",
+    "Other"
+   ]
+  },
+  {
+   "id": "price_scanning",
+   "line": "Page 2",
+   "en": "Does your business own or operate price scanning equipment?",
+   "zh": "企业是否拥有或使用价格扫描设备？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "products",
+   "line": "Page 2",
+   "en": "Describe in detail the principal products or services",
+   "zh": "详细说明主要产品或服务"
+  },
+  {
+   "id": "owner_1",
+   "line": "Page 2",
+   "en": "Sole proprietor, partner, corporate officer or resident agent 1",
+   "zh": "独资者、合伙人、公司高管或常驻代理人 1",
+   "hint": {
+    "en": "Three lines: name and title; residence address; telephone.",
+    "zh": "三行：姓名与职务；住址；电话。"
+   }
+  },
+  {
+   "id": "owner_2",
+   "line": "Page 2",
+   "en": "Partner, officer or agent 2, if any",
+   "zh": "合伙人、高管或代理人 2（如有）",
+   "hint": {
+    "en": "Three lines: name and title; residence address; telephone.",
+    "zh": "三行：姓名与职务；住址；电话。"
+   }
+  },
+  {
+   "id": "owner_3",
+   "line": "Page 2",
+   "en": "Partner, officer or agent 3, if any",
+   "zh": "合伙人、高管或代理人 3（如有）",
+   "hint": {
+    "en": "Three lines: name and title; residence address; telephone.",
+    "zh": "三行：姓名与职务；住址；电话。"
+   }
+  },
+  {
+   "id": "owner_4",
+   "line": "Page 2",
+   "en": "Partner, officer or agent 4, if any",
+   "zh": "合伙人、高管或代理人 4（如有）",
+   "hint": {
+    "en": "Three lines: name and title; residence address; telephone.",
+    "zh": "三行：姓名与职务；住址；电话。"
+   }
+  },
+  {
+   "id": "owner_dob",
+   "line": "Page 2",
+   "en": "Owners' dates of birth",
+   "zh": "所有人出生日期"
+  },
+  {
+   "id": "tax_ack",
+   "line": "Page 2",
+   "en": "I understand the tax filing requirements for this certificate",
+   "zh": "我了解此执照的报税要求",
+   "options": [
+    "Yes"
+   ]
+  },
+  {
+   "id": "purchased",
+   "line": "Page 2",
+   "en": "If you purchased this business, did you take over the entire business or only a portion?",
+   "zh": "如为收购，是接手整个企业还是部分？",
+   "options": [
+    "Not purchased",
+    "The entire business",
+    "Only a portion"
+   ]
+  },
+  {
+   "id": "former_owner",
+   "line": "Page 2",
+   "en": "Former owner: \"name; current address; telephone; customer number\"",
+   "zh": "原所有人：\"姓名; 现地址; 电话; 客户编号\""
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Applicant's name, as printed in the declaration and under the signature",
+   "zh": "申请人姓名（声明中及签名下方）"
+  },
+  {
+   "id": "signer_title",
+   "line": "Signature",
+   "en": "Applicant's title",
+   "zh": "申请人职务"
+  }
+ ],
+ "unmapped": {
+  "owner_dob": "Placetta doesn't keep owners' dates of birth; each owner writes theirs by hand."
+ },
+ "blank": {
+  "ubi": "^(none|no|n/?a)\\.?$",
+  "contractor_no": "^(none|no|n/?a)\\.?$",
+  "website": "^(none|no|n/?a)\\.?$",
+  "trade_name": "^(none|no|n/?a)\\.?$",
+  "cell_phone": "^(none|no|n/?a)\\.?$",
+  "fax": "^(none|no|n/?a)\\.?$",
+  "branches": "^(none|no|n/?a)\\.?$",
+  "owner_2": "^(none|no|n/?a)\\.?$",
+  "owner_3": "^(none|no|n/?a)\\.?$",
+  "owner_4": "^(none|no|n/?a)\\.?$",
+  "purchased": "^not|^(none|no|n/?a)\\.?$",
+  "former_owner": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "ubi": [
+   {
+    "at": {
+     "page": 0,
+     "x": 133,
+     "y": 529,
+     "w": 141,
+     "size": 9,
+     "comb": 9
+    },
+    "pick": "head|digits",
+    "if": "\\d"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 284,
+     "y": 529,
+     "w": 46,
+     "size": 9,
+     "comb": 3
+    },
+    "pick": "tail|head|digits",
+    "if": "\\d"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 341,
+     "y": 529,
+     "w": 61,
+     "size": 9,
+     "comb": 4
+    },
+    "pick": "tail|tail|digits",
+    "if": "\\d"
+   }
+  ],
+  "contractor_no": [
+   {
+    "at": {
+     "page": 0,
+     "x": 152,
+     "y": 495.8,
+     "w": 228,
+     "size": 8
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 90,
+     "y": 473.3,
+     "w": 228,
+     "size": 8
+    }
+   }
+  ],
+  "website": [
+   {
+    "at": {
+     "page": 0,
+     "x": 386,
+     "y": 473.3,
+     "w": 188,
+     "size": 8
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "registered_before": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 234.2,
+     "y": 421,
+     "size": 7
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 271.3,
+     "y": 421,
+     "size": 7
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "entity_type": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 169.2,
+     "y": 400.1,
+     "size": 7
+    },
+    "if": "^sole"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 241.2,
+     "y": 400.1,
+     "size": 7
+    },
+    "if": "^corp"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 313.2,
+     "y": 400.1,
+     "size": 7
+    },
+    "if": "^partner"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 386.2,
+     "y": 400.1,
+     "size": 7
+    },
+    "if": "^(llc|limited liability)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 421.2,
+     "y": 400.1,
+     "size": 7
+    },
+    "if": "^other"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 458,
+     "y": 400.4,
+     "w": 116,
+     "size": 8
+    },
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "nonprofit": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 178.2,
+     "y": 383.1,
+     "size": 7
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 207.2,
+     "y": 383.1,
+     "size": 7
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "legal_name": [
+   {
+    "at": {
+     "page": 0,
+     "x": 210,
+     "y": 366.2,
+     "w": 364,
+     "size": 8
+    }
+   }
+  ],
+  "trade_name": [
+   {
+    "at": {
+     "page": 0,
+     "x": 178,
+     "y": 339.2,
+     "w": 396,
+     "size": 8
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "start_date": [
+   {
+    "at": {
+     "page": 0,
+     "x": 274,
+     "y": 322.3,
+     "w": 104,
+     "size": 8
+    },
+    "pick": "mm"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 400,
+     "y": 322.3,
+     "w": 72,
+     "size": 8
+    },
+    "pick": "dd"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 492,
+     "y": 322.3,
+     "w": 82,
+     "size": 8
+    },
+    "pick": "yyyy"
+   }
+  ],
+  "location": [
+   {
+    "at": {
+     "page": 0,
+     "x": 160,
+     "y": 246.6,
+     "w": 216,
+     "size": 8
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 380,
+     "y": 246.6,
+     "w": 74,
+     "size": 8
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 458,
+     "y": 246.6,
+     "w": 58,
+     "size": 8
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 520,
+     "y": 246.6,
+     "w": 54,
+     "size": 8
+    },
+    "pick": "zip"
+   }
+  ],
+  "branch_only": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 351.2,
+     "y": 222.1,
+     "size": 7
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 387.2,
+     "y": 222.1,
+     "size": 7
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "license_mailing": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 58.8,
+     "y": 192.4,
+     "size": 7
+    },
+    "if": "^same"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 186,
+     "y": 204.6,
+     "w": 190,
+     "size": 8
+    },
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 380,
+     "y": 204.6,
+     "w": 74,
+     "size": 8
+    },
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 458,
+     "y": 204.6,
+     "w": 58,
+     "size": 8
+    },
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 520,
+     "y": 204.6,
+     "w": 54,
+     "size": 8
+    },
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   }
+  ],
+  "tax_mailing": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 58.8,
+     "y": 159.8,
+     "size": 7
+    },
+    "if": "^same"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 150,
+     "y": 172.1,
+     "w": 191,
+     "size": 8
+    },
+    "pick": "street",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 345,
+     "y": 172.1,
+     "w": 73,
+     "size": 8
+    },
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 422,
+     "y": 172.1,
+     "w": 58,
+     "size": 8
+    },
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 484,
+     "y": 172.1,
+     "w": 90,
+     "size": 8
+    },
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|same)\\b)"
+   }
+  ],
+  "business_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 100,
+     "y": 142,
+     "w": 36,
+     "size": 8
+    },
+    "pick": "phone1"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 144,
+     "y": 142,
+     "w": 102,
+     "size": 8
+    },
+    "pick": "phonelocal"
+   }
+  ],
+  "cell_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 322,
+     "y": 142,
+     "w": 30,
+     "size": 8
+    },
+    "pick": "phone1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 360,
+     "y": 142,
+     "w": 66,
+     "size": 8
+    },
+    "pick": "phonelocal",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "fax": [
+   {
+    "at": {
+     "page": 0,
+     "x": 448,
+     "y": 142,
+     "w": 26,
+     "size": 8
+    },
+    "pick": "phone1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 482,
+     "y": 142,
+     "w": 46,
+     "size": 8
+    },
+    "pick": "phonelocal",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "branches": [
+   {
+    "at": {
+     "page": 0,
+     "x": 36,
+     "y": 72,
+     "w": 132,
+     "size": 8
+    },
+    "pick": "line1|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 72,
+     "w": 72,
+     "size": 7
+    },
+    "pick": "line1|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 250,
+     "y": 72,
+     "w": 98,
+     "size": 8
+    },
+    "pick": "line1|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 354,
+     "y": 72,
+     "w": 88,
+     "size": 8
+    },
+    "pick": "line1|tail|tail|tail|head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 501.3,
+     "y": 72.2,
+     "size": 7
+    },
+    "if": "^[^\\n]*,\\s*(y|yes)\\s*($|\\n)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 542.2,
+     "y": 72.2,
+     "size": 7
+    },
+    "if": "^[^\\n]*,\\s*(n|no)\\s*($|\\n)"
+   }
+  ],
+  "nature": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 37.8,
+     "y": 698.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(manufactur|extract)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 133.2,
+     "y": 698.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(printing|publishing)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 216.2,
+     "y": 698.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(tour)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 276.2,
+     "y": 698.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(wholesale)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 325.3,
+     "y": 698.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(retail)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 359.2,
+     "y": 698.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(service)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 397.3,
+     "y": 698.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(transport)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 444.8,
+     "y": 716.4,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(short.?term)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 37.2,
+     "y": 680.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(gambling)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 109.8,
+     "y": 681.1,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(utility)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 178.8,
+     "y": 681.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(admission)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 319.8,
+     "y": 682.1,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(syrup|concentrate)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 519.8,
+     "y": 681.5,
+     "size": 7
+    },
+    "if": "(^|,)[^,]*(other)"
+   }
+  ],
+  "price_scanning": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 332.2,
+     "y": 662,
+     "size": 7
+    },
+    "if": "^(y|yes|是)\\b"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 368.2,
+     "y": 662,
+     "size": 7
+    },
+    "if": "^(n|no)\\b(?!/)"
+   }
+  ],
+  "products": [
+   {
+    "at": {
+     "page": 1,
+     "x": 38,
+     "y": 626,
+     "w": 536,
+     "size": 8,
+     "lines": 3,
+     "lead": 18
+    }
+   }
+  ],
+  "owner_1": [
+   {
+    "at": {
+     "page": 1,
+     "x": 38,
+     "y": 510,
+     "w": 138,
+     "size": 8
+    },
+    "pick": "line1"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 180,
+     "y": 510,
+     "w": 155,
+     "size": 8
+    },
+    "pick": "line2|street"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 339,
+     "y": 510,
+     "w": 98,
+     "size": 7
+    },
+    "pick": "line2|citystatezip"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 440,
+     "y": 510,
+     "w": 80,
+     "size": 8
+    },
+    "pick": "line3"
+   }
+  ],
+  "owner_2": [
+   {
+    "at": {
+     "page": 1,
+     "x": 38,
+     "y": 491.5,
+     "w": 138,
+     "size": 8
+    },
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 180,
+     "y": 491.5,
+     "w": 155,
+     "size": 8
+    },
+    "pick": "line2|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 339,
+     "y": 491.5,
+     "w": 98,
+     "size": 7
+    },
+    "pick": "line2|citystatezip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 440,
+     "y": 491.5,
+     "w": 80,
+     "size": 8
+    },
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_3": [
+   {
+    "at": {
+     "page": 1,
+     "x": 38,
+     "y": 473,
+     "w": 138,
+     "size": 8
+    },
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 180,
+     "y": 473,
+     "w": 155,
+     "size": 8
+    },
+    "pick": "line2|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 339,
+     "y": 473,
+     "w": 98,
+     "size": 7
+    },
+    "pick": "line2|citystatezip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 440,
+     "y": 473,
+     "w": 80,
+     "size": 8
+    },
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_4": [
+   {
+    "at": {
+     "page": 1,
+     "x": 38,
+     "y": 454.5,
+     "w": 138,
+     "size": 8
+    },
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 180,
+     "y": 454.5,
+     "w": 155,
+     "size": 8
+    },
+    "pick": "line2|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 339,
+     "y": 454.5,
+     "w": 98,
+     "size": 7
+    },
+    "pick": "line2|citystatezip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 440,
+     "y": 454.5,
+     "w": 80,
+     "size": 8
+    },
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "tax_ack": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 42.4,
+     "y": 348.6,
+     "size": 9
+    },
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "purchased": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 332.5,
+     "y": 326.5,
+     "size": 7
+    },
+    "if": "entire|^all"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 476.5,
+     "y": 326.5,
+     "size": 7
+    },
+    "if": "only|portion|part"
+   }
+  ],
+  "former_owner": [
+   {
+    "at": {
+     "page": 1,
+     "x": 38,
+     "y": 307,
+     "w": 110,
+     "size": 8
+    },
+    "pick": "line1",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 150,
+     "y": 307,
+     "w": 116,
+     "size": 7
+    },
+    "pick": "line2|street",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 270,
+     "y": 307,
+     "w": 104,
+     "size": 7
+    },
+    "pick": "line2|citystatezip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 378,
+     "y": 307,
+     "w": 86,
+     "size": 8
+    },
+    "pick": "line3",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 468,
+     "y": 307,
+     "w": 106,
+     "size": 8
+    },
+    "pick": "line4",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "signer": [
+   {
+    "at": {
+     "page": 1,
+     "x": 88,
+     "y": 256.2,
+     "w": 183,
+     "size": 8
+    }
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 156,
+     "y": 192.3,
+     "w": 215,
+     "size": 8
+    }
+   }
+  ],
+  "signer_title": [
+   {
+    "at": {
+     "page": 1,
+     "x": 404,
+     "y": 192.3,
+     "w": 170,
+     "size": 8
+    }
+   }
+  ]
+ }
+}

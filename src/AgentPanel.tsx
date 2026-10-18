@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { speakTag } from "./langs";
 import { Composer } from "./Composer";
 import { useApp } from "./ctx";
@@ -6,7 +6,7 @@ import type { FeedItem, Turn } from "./feed";
 import type { Bi } from "./model";
 import { unlockAudio, type Speaker } from "./hooks";
 import { NeedRow } from "./pages";
-import { AppArtifact, FileCard, I, Prose, feeTotal } from "./ui";
+import { AppArtifact, FileCard, I, Menu, Prose, feeTotal, type MenuItem } from "./ui";
 import { preflight } from "./smart";
 import { readyToFile } from "./core";
 import { formById } from "./forms/registry";
@@ -19,19 +19,32 @@ import { PlanCard } from "./Work";
 import { RememberedChips } from "./Remembered";
 import { NOT_CHECKED, splitSources } from "./sources";
 import { LocalHold, useApprovalHold } from "./SendHold";
-import { AskPerson } from "./AskPerson";
+import { AskSheet } from "./AskPerson";
 import { AllowanceNote } from "./Allowance";
 import { UndoTurn } from "./UndoTurn";
 import { PlanGate } from "./PlanGate";
 import { FilledCard, WithdrawnRow } from "./FilledForm";
 import { planApprovalId } from "./autonomy";
+import { hasReplay } from "./replay";
+import "./panel-clean.css";
+
+/* Less is more (the founder, on this screen): the owner says what they need, Odelia does the permit work, they approve.
+   So the panel shows only that: the message box, her reply and live status, the Approve and Upload she asks for, and one
+   quiet way to see her work. Everything else sits behind one "…" on her latest finished turn (Listen, the steps,
+   Sources, Watch how she did it, Undo what she did, Ask a person), and ⌘K finds each of them (src/CommandBar.tsx sends
+   "placetta:odelia" here). */
+
+/** What ⌘K asks the panel to do with her latest turn. */
+export type PanelAction = "ask-person" | "undo" | "listen" | "steps" | "sources";
+type Poke = { what: PanelAction; n: number };
 
 /** The agent, beside the work (dock), over it on a phone (sheet), or as her own page (page: Odelia, Chat): what it's
  *  doing now, every step with the site it used, and what each run produced. */
 export function AgentPanel({ feed, tts, mode, onHide, asked }: {
   feed: FeedItem[]; tts: Speaker; mode: "dock" | "sheet" | "page"; onHide?: () => void; asked: string[];
 }) {
-  const { t, b, lang, ws, busy, live } = useApp();
+  const { t, b, lang, ws, busy, live, go, say: toast } = useApp();
+  const zh = lang === "zh";
 
   const scroller = useRef<HTMLDivElement>(null);
   const last = feed[feed.length - 1];
@@ -41,6 +54,28 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
   const agencies = ws.connections.filter(c => c.state === "connected" && c.level !== "vault").length;
   const say = useCallback((text: string) => { unlockAudio(); if (tts.speaking === text) tts.stop(); else tts.speak(text, speakTag(lang)); }, [tts, lang]);
 
+  // her latest finished turn: the only one with the "…", and the one ⌘K acts on
+  const turns = feed.filter((x): x is Turn => x.kind === "turn");
+  const lastTurn = turns[turns.length - 1];
+  const latest = lastTurn?.reply && !busy ? lastTurn : undefined;
+  const [asking, setAsking] = useState(false);
+  const [poke, setPoke] = useState<(Poke & { turn: number }) | null>(null);
+  const feedRef = useRef(feed);
+  useEffect(() => { feedRef.current = feed; }, [feed]);
+  useEffect(() => {
+    const on = (e: Event) => {
+      const what = (e as CustomEvent<PanelAction>).detail;
+      if (what === "ask-person") { setAsking(true); return; }
+      const all = feedRef.current.filter((x): x is Turn => x.kind === "turn" && !!x.reply);
+      // Undo goes to the newest turn that still has something to put back; the rest to her latest answer
+      const target = what === "undo" ? [...all].reverse().find(x => x.reply?.undo && (ws.undo ?? []).some(u => u.id === x.reply!.undo && !u.done)) : all[all.length - 1];
+      if (!target) { toast(what === "undo" ? (zh ? "没有可以撤销的操作。" : "Nothing to undo.") : (zh ? "她还没有回答。" : "She hasn't answered yet.")); return; }
+      setPoke(p => ({ what, turn: target.id, n: (p?.n ?? 0) + 1 }));
+    };
+    addEventListener("placetta:odelia", on);
+    return () => removeEventListener("placetta:odelia", on);
+  }, [ws.undo, toast, zh]);
+
   return (
     <aside className={"panel " + (mode === "page" ? "full" : mode)} aria-label={t("agentName")}>
       <header className="pn-h">
@@ -49,8 +84,8 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
           <b>{t("agentName")}</b>
           <small aria-live="polite">{busy && live ? <><em className="pn-verb">{b(taskVerb(live.state))}…</em>{b(live.label)}</> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
         </span>
-        <AskPerson compact context={() => panelContext(feed)} />
-        {onHide && <button type="button" className="icbtn" onClick={onHide} aria-label={t("hidePanel")} title={t("hidePanel")}><I.x /></button>}
+        {mode !== "page" && <button type="button" className="pn-work" onClick={() => { go("odelia", "work"); if (mode === "sheet") onHide?.(); }}>{t("nav_work")}</button>}
+        {onHide && <button type="button" className="icbtn" onClick={onHide} aria-label={t("close")} title={t("close")}><I.x /></button>}
       </header>
 
       <div className="feed" ref={scroller}>
@@ -62,8 +97,10 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
         )}
         {feed.map(m => m.kind === "user" ? <div key={m.id} className="you"><p>{m.text}</p></div>
           : m.kind === "memory" ? <Memory key={m.id} text={m.text} />
-            : <TurnView key={m.id} m={m} last={m === last} speaking={tts.speaking} onSay={say} asked={askedBefore(feed, m)} />)}
+            : <TurnView key={m.id} m={m} last={m === last} latest={m === latest} speaking={tts.speaking} onSay={say} asked={askedBefore(feed, m)}
+                onAskPerson={() => setAsking(true)} poke={poke?.turn === m.id ? poke : undefined} />)}
       </div>
+      {asking && <AskSheet context={panelContext(feed)} onClose={() => setAsking(false)} />}
 
       <div className="pn-dock"><Composer variant="panel" tts={tts} asked={asked} /></div>
     </aside>
@@ -84,10 +121,44 @@ function Memory({ text }: { text: Bi }) {
   return <p className="mem"><I.spark /><span><b>{t("committed")}</b>{b(text)}</span></p>;
 }
 
+const UndoMark = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>;
+
+/** What a run kept, as one quiet line ("Remembered 2 things") that opens to the details, each with its Forget. */
+function KeptLine({ memory, remembered, learned }: { memory?: Bi[]; remembered?: { id: string; text: Bi; suggested?: boolean }[]; learned?: Bi[] }) {
+  const { b, t, lang, memory: book } = useApp();
+  const [open, setOpen] = useState(false);
+  const live = book?.items ?? [];
+  const kept = (remembered ?? []).filter(c => live.some(x => x.id === c.id));
+  const toSave = kept.filter(c => live.find(x => x.id === c.id)?.status === "suggested").length;
+  const n = (memory?.length ?? 0) + (learned?.length ?? 0) + kept.length - toSave;
+  if (!n && !toSave) return null;
+  const zh = lang === "zh";
+  const label = zh ? [n ? `记住了 ${n} 件事` : "", toSave ? `${toSave} 件待保存` : ""].filter(Boolean).join("，")
+    : [n ? `Remembered ${n} thing${n === 1 ? "" : "s"}` : "", toSave ? `${toSave} to save` : ""].filter(Boolean).join(", ");
+  const body: ReactNode = (
+    <>
+      {memory?.map((x, i) => <Memory key={i} text={x} />)}
+      {remembered?.length ? <RememberedChips items={remembered} /> : null}
+      {learned?.map((x, i) => <p key={"s" + i} className="mem"><I.spark /><span><b>{t("learned")}</b>{b(x)}</span></p>)}
+    </>
+  );
+  return (
+    <div className="kept">
+      <button type="button" className="kept-t" aria-expanded={open} onClick={() => setOpen(v => !v)}><I.spark /><span>{label}</span><i className={open ? "up" : ""} aria-hidden="true"><I.chev /></i></button>
+      {open && <div className="kept-b">{body}</div>}
+    </div>
+  );
+}
+
 /** One run: a quiet log of the steps, then the answer and whatever it produced. */
-function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean; speaking: string | null; onSay: (text: string) => void; asked: string }) {
-  const { b, t, lang, ws, busy, run, go, cloud } = useApp();
+function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }: {
+  m: Turn; last: boolean; latest: boolean; speaking: string | null; onSay: (text: string) => void; asked: string; onAskPerson: () => void; poke?: Poke;
+}) {
+  const { b, t, lang, ws, busy, run, go, cloud, openReplay } = useApp();
   const [show, setShow] = useState(false);
+  const [showSources, setShowSources] = useState(false);
+  const [undoing, setUndoing] = useState(false);
+  const foot = useRef<HTMLDivElement>(null);
   const live = !m.reply;
   const r = m.reply;
   const said = r ? r.text.map(b).join(" ") : "";
@@ -102,11 +173,27 @@ function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean;
   const cur = live ? m.steps[m.active] : undefined;
   // the plan this run kept: the job it last updated
   const plan = !last ? undefined : (ws.jobs ?? []).filter(j => j.updated >= m.at).sort((x, y) => y.updated.localeCompare(x.updated))[0];
-  const listen = said ? (
-    <button type="button" className={"say" + (speaking === said ? " on" : "")} onClick={() => onSay(said)} aria-label={speaking === said ? t("stopListen") : t("listen")}>
-      {speaking === said ? <I.stopSq /> : <I.speaker />}<span>{speaking === said ? t("stopListen") : t("listen")}</span>
-    </button>
-  ) : null;
+  const zh = lang === "zh";
+  const undoPt = r?.undo ? (ws.undo ?? []).find(x => x.id === r.undo) : undefined;
+  const hasSources = !!r && (!!r.sources?.length || !!splitSources(said)[1]);
+  // ⌘K (src/CommandBar.tsx) asked for one of the things behind the "…"
+  useEffect(() => {
+    if (!poke) return;
+    if (poke.what === "listen" && said) onSay(said);
+    if (poke.what === "steps") setShow(true);
+    if (poke.what === "sources") setShowSources(true);
+    if (poke.what === "undo") setUndoing(true);
+    setTimeout(() => foot.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 60);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poke?.n]);
+  const more: MenuItem[] = !latest || !r ? [] : [
+    ...(said ? [{ key: "listen", label: speaking === said ? t("stopListen") : t("listen"), icon: speaking === said ? <I.stopSq /> : <I.speaker />, onPick: () => onSay(said) }] : []),
+    ...(m.steps.length ? [{ key: "steps", label: show ? (zh ? "收起步骤" : "Hide the steps") : (zh ? `查看 ${m.steps.length} 个步骤` : `Show the ${m.steps.length} steps`), icon: <I.chev />, onPick: () => setShow(s => !s) }] : []),
+    ...(hasSources ? [{ key: "sources", label: showSources ? (zh ? "收起来源" : "Hide sources") : (zh ? "来源" : "Sources"), icon: <I.ext />, onPick: () => setShowSources(s => !s) }] : []),
+    ...(plan && hasReplay(ws, plan) ? [{ key: "watch", label: zh ? "看她是怎么做的" : "Watch how she did it", icon: <I.play />, onPick: () => openReplay(plan.id) }] : []),
+    ...(undoPt && !undoPt.done ? [{ key: "undo", label: zh ? "撤销她这次的操作" : "Undo what she did", icon: <UndoMark />, disabled: busy, onPick: () => setUndoing(true) }] : []),
+    { key: "person", label: zh ? "找真人" : "Ask a person", icon: <I.user />, onPick: onAskPerson },
+  ];
   return (
     <div className="turn">
       <div className={"work-hd" + (!live && asking ? " wait" : "")}>
@@ -115,8 +202,6 @@ function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean;
         {live && cur
           ? <span className="wh-now" aria-live="polite"><b>{b(taskVerb(cur.state))}…</b><small>{b(cur.label)}</small></span>
           : <span>{live ? t("working") : asking ? t("waitingYou") : m.ms ? t("workedFor", { s: Math.max(1, Math.round(m.ms / 1000)) }) : fmtAgo(m.at, lang)}</span>}
-        {!live && m.steps.length > 0 && <button type="button" className="steps-t" onClick={() => setShow(s => !s)} aria-expanded={show}>{t("stepsN", { n: m.steps.length })}<span className={show ? "up" : ""}><I.chev /></span></button>}
-        {listen}
       </div>
       {(live || show) && m.steps.length > 0 && (
         <Working on={live} size="sm">
@@ -162,13 +247,17 @@ function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean;
           {/* the agency's forms this run filled again: each opens the filled form on its application */}
           {r.forms?.map(n => <FilledCard key={n.app + n.version} n={n} />)}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return a.withdrawn ? <WithdrawnRow key={id} a={a} /> : <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
-          {r.memory?.map((x, i) => <Memory key={i} text={x} />)}
-          {r.remembered?.length ? <RememberedChips items={r.remembered} /> : null}
-          {r.skills?.map((x, i) => <p key={"s" + i} className="mem"><I.spark /><span><b>{t("learned")}</b>{b(x)}</span></p>)}
-          <SourcesRow said={said} links={r.sources} />
-          {r.matches && <button type="button" className="pill quiet" onClick={() => go("find")}>{b({ en: "Open the results", zh: "查看结果" })}</button>}
-          {r.next && <button type="button" className="pill primary sm" disabled={busy} onClick={() => run(r.next!.req, b(r.next!.label))}><span>{b(r.next.label)}</span><i aria-hidden="true"><I.arrow /></i></button>}
-          {r.undo && <UndoTurn id={r.undo} />}
+          <KeptLine memory={r.memory} remembered={r.remembered} learned={r.skills} />
+          {showSources && <SourcesRow said={said} links={r.sources} />}
+          {last && r.matches && <button type="button" className="pill quiet" onClick={() => go("find")}>{b({ en: "Open the results", zh: "查看结果" })}</button>}
+          {last && r.next && <button type="button" className="pill primary sm" disabled={busy} onClick={() => run(r.next!.req, b(r.next!.label))}><span>{b(r.next.label)}</span><i aria-hidden="true"><I.arrow /></i></button>}
+          {r.undo && <UndoTurn id={r.undo} open={undoing} onClose={() => setUndoing(false)} />}
+          {more.length > 0 && (
+            <div className="t-foot" ref={foot}>
+              <Menu className="t-more-wrap" buttonClass="t-more" label={zh ? "更多" : "More"} buttonLabel={zh ? "更多操作" : "More for this answer"}
+                button={<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="18.5" cy="12" r="1.6" /></svg>} items={more} />
+            </div>
+          )}
         </div>
       )}
     </div>

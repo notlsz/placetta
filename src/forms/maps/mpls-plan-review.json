@@ -1,0 +1,554 @@
+{
+ "form": "mpls-plan-review",
+ "rev": "Food Business Plan Review Application (last updated 6/24/2026)",
+ "pdf": "mpls-plan-review.pdf",
+ "url": "https://www.minneapolismn.gov/media/-www-content-assets/documents/Food-Plan-Review-Application-(July-2026).pdf",
+ "checked": "2026-10-18",
+ "notes": "City of Minneapolis Environmental Health's food business plan review application. A flat, print-only form: answers are printed in the cells under their labels and an X goes in the chosen boxes. Addresses are split into street, city, state and ZIP. The construction category takes exactly one; the license type takes every one that applies, by name. The application is emailed; the fee is collected by phone, so no card details go on it.",
+ "lines": [
+  {
+   "id": "legal_name",
+   "line": "Applicant information",
+   "en": "Legal or corporate name of business",
+   "zh": "企业法定或公司名称"
+  },
+  {
+   "id": "dba",
+   "line": "Applicant information",
+   "en": "Business name / DBA",
+   "zh": "营业名称 / DBA"
+  },
+  {
+   "id": "jobsite",
+   "line": "Applicant information",
+   "en": "Jobsite address including suite (or the licensed kitchen address for a mobile food unit)",
+   "zh": "施工地址含单元号（流动餐车填持证厨房地址）"
+  },
+  {
+   "id": "applicant",
+   "line": "Applicant information",
+   "en": "Applicant name",
+   "zh": "申请人姓名"
+  },
+  {
+   "id": "applicant_email",
+   "line": "Applicant information",
+   "en": "Applicant email",
+   "zh": "申请人电子邮箱"
+  },
+  {
+   "id": "cell",
+   "line": "Applicant information",
+   "en": "Cell number",
+   "zh": "手机号码"
+  },
+  {
+   "id": "mailing",
+   "line": "Applicant information",
+   "en": "Applicant's mailing address",
+   "zh": "申请人邮寄地址"
+  },
+  {
+   "id": "uploader_email",
+   "line": "Applicant information",
+   "en": "Email of the person who will upload documents",
+   "zh": "上传文件人员的电子邮箱"
+  },
+  {
+   "id": "category",
+   "line": "Construction category",
+   "en": "Construction category (one)",
+   "zh": "施工类别（单选）",
+   "options": [
+    "New business/construction, new food truck/cart",
+    "New or change of equipment requiring gas, mechanical or plumbing",
+    "New or change of ventless hood or ventless cooking equipment",
+    "Remodel (new owner, same business)",
+    "Remodel (same owner, same business)",
+    "Remodel (different business)"
+   ]
+  },
+  {
+   "id": "license_type",
+   "line": "License type",
+   "en": "License type (all that apply)",
+   "zh": "执照类型（可多选）",
+   "options": [
+    "Commissary or community kitchen",
+    "Farmers markets",
+    "Food carts (indoor, kiosk, sidewalk, etc.)",
+    "Food shelf",
+    "Food manufacturer (bakery, deli, cafe, etc.)",
+    "Grocery, confectionery or liquor store",
+    "Institutional facility (daycares, schools, etc.)",
+    "Mobile food unit (trailers, trucks, etc.)",
+    "Meat market",
+    "Restaurant",
+    "Vending machine(s)",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each that applies; for a type not listed write only \"Other: \" and the type.",
+    "zh": "逐项写明；未列出的类型只写 \"Other: \" 加类型。"
+   }
+  },
+  {
+   "id": "project",
+   "line": "Project description",
+   "en": "Project description: include floor number, kitchen number and/or suite number",
+   "zh": "项目说明：含楼层、厨房编号和/或单元号"
+  },
+  {
+   "id": "risk_level",
+   "line": "Other information",
+   "en": "Risk level (from the city's risk level definitions)",
+   "zh": "风险等级（按市政府风险等级定义）",
+   "options": [
+    "Risk Level 1",
+    "Risk Level 2",
+    "Risk Level 3"
+   ]
+  },
+  {
+   "id": "square_feet",
+   "line": "Other information",
+   "en": "Total square footage of new construction or remodel area",
+   "zh": "新建或改建区域总面积（平方英尺）"
+  },
+  {
+   "id": "floors",
+   "line": "Other information",
+   "en": "Number of floors where food operations take place",
+   "zh": "进行食品经营的楼层数"
+  },
+  {
+   "id": "start_date",
+   "line": "Other information",
+   "en": "Project start date",
+   "zh": "项目开始日期"
+  },
+  {
+   "id": "completion_date",
+   "line": "Other information",
+   "en": "Projected completion date",
+   "zh": "预计完工日期"
+  }
+ ],
+ "boxes": {
+  "legal_name": [
+   {
+    "at": {
+     "page": 0,
+     "x": 34,
+     "y": 594.5,
+     "w": 262,
+     "size": 8
+    }
+   }
+  ],
+  "dba": [
+   {
+    "at": {
+     "page": 0,
+     "x": 304,
+     "y": 594.5,
+     "w": 266,
+     "size": 8
+    }
+   }
+  ],
+  "jobsite": [
+   {
+    "at": {
+     "page": 0,
+     "x": 34,
+     "y": 556,
+     "w": 262,
+     "size": 8
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 304,
+     "y": 558,
+     "w": 162,
+     "size": 8
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 475,
+     "y": 558,
+     "w": 48,
+     "size": 8
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 530,
+     "y": 558,
+     "w": 44,
+     "size": 8
+    },
+    "pick": "zip"
+   }
+  ],
+  "applicant": [
+   {
+    "at": {
+     "page": 0,
+     "x": 34,
+     "y": 531.5,
+     "w": 262,
+     "size": 8
+    }
+   }
+  ],
+  "applicant_email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 304,
+     "y": 531.5,
+     "w": 162,
+     "size": 8
+    }
+   }
+  ],
+  "cell": [
+   {
+    "at": {
+     "page": 0,
+     "x": 475,
+     "y": 531.5,
+     "w": 100,
+     "size": 8
+    }
+   }
+  ],
+  "mailing": [
+   {
+    "at": {
+     "page": 0,
+     "x": 34,
+     "y": 507,
+     "w": 262,
+     "size": 8
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 304,
+     "y": 507,
+     "w": 162,
+     "size": 8
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 475,
+     "y": 507,
+     "w": 48,
+     "size": 8
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 530,
+     "y": 507,
+     "w": 44,
+     "size": 8
+    },
+    "pick": "zip"
+   }
+  ],
+  "uploader_email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 215,
+     "y": 491.7,
+     "w": 355,
+     "size": 8
+    }
+   }
+  ],
+  "category": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 34.9,
+     "y": 451.6,
+     "size": 8
+    },
+    "if": "^new business|truck|cart|construction"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 34.9,
+     "y": 439.5,
+     "size": 8
+    },
+    "if": "gas|mechanical|plumbing"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 34.9,
+     "y": 427.2,
+     "size": 8
+    },
+    "if": "ventless"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 368.2,
+     "y": 451.6,
+     "size": 8
+    },
+    "if": "remodel.*new owner"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 368.3,
+     "y": 439.5,
+     "size": 8
+    },
+    "if": "remodel.*same owner"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 367.4,
+     "y": 427.2,
+     "size": 8
+    },
+    "if": "remodel.*different"
+   }
+  ],
+  "license_type": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 34.9,
+     "y": 400.6,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(commissary|community kitchen)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 34.9,
+     "y": 388.4,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(farmers)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 34.9,
+     "y": 376.1,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(food carts?)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 34.9,
+     "y": 364,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(food shelf)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 231.5,
+     "y": 400.6,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(manufacturer)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 231.5,
+     "y": 388.4,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(grocery|confectionery|liquor)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 231.5,
+     "y": 376.1,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(institutional)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 231.5,
+     "y": 364,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(mobile)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 444.4,
+     "y": 400.6,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(meat market)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 444.4,
+     "y": 388.4,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(restaurant)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 444.4,
+     "y": 376.1,
+     "size": 8
+    },
+    "if": "(^|,)[^,]*(vending)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 444.4,
+     "y": 364,
+     "size": 8
+    },
+    "if": "^other\\s*:"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 483,
+     "y": 364.5,
+     "w": 86,
+     "size": 7
+    },
+    "pick": "tail",
+    "if": "^other\\s*:"
+   }
+  ],
+  "project": [
+   {
+    "at": {
+     "page": 0,
+     "x": 36,
+     "y": 318,
+     "w": 530,
+     "size": 8
+    }
+   }
+  ],
+  "risk_level": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 34.9,
+     "y": 287.7,
+     "size": 8
+    },
+    "if": "1"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 100.7,
+     "y": 287.7,
+     "size": 8
+    },
+    "if": "2"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 166.4,
+     "y": 287.7,
+     "size": 8
+    },
+    "if": "3"
+   }
+  ],
+  "square_feet": [
+   {
+    "at": {
+     "page": 0,
+     "x": 531,
+     "y": 288,
+     "w": 43,
+     "size": 8
+    },
+    "pick": "digits"
+   }
+  ],
+  "floors": [
+   {
+    "at": {
+     "page": 0,
+     "x": 514,
+     "y": 275,
+     "w": 62,
+     "size": 8
+    },
+    "pick": "digits"
+   }
+  ],
+  "start_date": [
+   {
+    "at": {
+     "page": 0,
+     "x": 110,
+     "y": 254.6,
+     "w": 185,
+     "size": 8
+    },
+    "pick": "date"
+   }
+  ],
+  "completion_date": [
+   {
+    "at": {
+     "page": 0,
+     "x": 416,
+     "y": 254.6,
+     "w": 155,
+     "size": 8
+    },
+    "pick": "date"
+   }
+  ]
+ }
+}

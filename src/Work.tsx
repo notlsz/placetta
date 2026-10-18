@@ -10,6 +10,7 @@ import { hasReplay } from "./replay";
 import { AgentBot, StoreBot } from "./Bot";
 import type { Store, Workspace } from "./model";
 import { AskPerson, jobContext } from "./AskPerson";
+import { AssignPicker, CommentsButton } from "./Comments";
 
 /* Work: everything Odelia is on, run like an engineer's tickets, and grouped the way the business is: each store has
    its own bot working that store's jobs, and Odelia coordinates whatever spans stores, like a chief of staff over a
@@ -68,7 +69,9 @@ export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolea
       {!compact && job.apps?.length ? (
         <p className="job-apps">{job.apps.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <button key={id} type="button" className="lnk" onClick={() => openApp(id)}>{b(a.name)}</button> : null; })}</p>
       ) : null}
-      {(!compact || hasReplay(ws, job)) && <div className="job-foot"><WatchLink job={job} /></div>}
+      {(!compact || hasReplay(ws, job)) && <div className="job-foot"><WatchLink job={job} />
+        {/* Team review: who has this job, and its comments */}
+        {!compact && <span className="job-team"><AssignPicker item={{ kind: "job", id: job.id }} title={job.title} compact /><CommentsButton item={{ kind: "job", id: job.id }} title={job.title} label /></span>}</div>}
     </section>
   );
 }
