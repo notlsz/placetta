@@ -16,10 +16,12 @@ import m_cmh_plan_review from "./cmh-plan-review.json";
 import m_dal_co from "./dal-co.json";
 import m_dal_food_permit from "./dal-food-permit.json";
 import m_den_plan_review from "./den-plan-review.json";
+import m_fl_sunbiz from "./fl-sunbiz.json";
 import m_hou_co from "./hou-co.json";
 import m_hou_food_dealer from "./hou-food-dealer.json";
 import m_hou_sign from "./hou-sign.json";
 import m_il_ides from "./il-ides.json";
+import m_il_sos from "./il-sos.json";
 import m_il_tax from "./il-tax.json";
 import m_irs_5472 from "./irs-5472.json";
 import m_irs_w7 from "./irs-w7.json";
@@ -36,6 +38,7 @@ import m_ny_dtf_17 from "./ny-dtf-17.json";
 import m_oc_health_permit from "./oc-health-permit.json";
 import m_oc_plan_check from "./oc-plan-check.json";
 import m_or_payroll from "./or-payroll.json";
+import m_sac_bot from "./sac-bot.json";
 import m_sacc_plan_review from "./sacc-plan-review.json";
 import m_sf_dph_plan_check from "./sf-dph-plan-check.json";
 import m_sf_formula_retail from "./sf-formula-retail.json";
@@ -65,10 +68,12 @@ export const MAPS: Record<string, FormMap> = {
   "dal-co": m_dal_co as FormMap,
   "dal-food-permit": m_dal_food_permit as FormMap,
   "den-plan-review": m_den_plan_review as FormMap,
+  "fl-sunbiz": m_fl_sunbiz as FormMap,
   "hou-co": m_hou_co as FormMap,
   "hou-food-dealer": m_hou_food_dealer as FormMap,
   "hou-sign": m_hou_sign as FormMap,
   "il-ides": m_il_ides as FormMap,
+  "il-sos": m_il_sos as FormMap,
   "il-tax": m_il_tax as FormMap,
   "irs-5472": m_irs_5472 as FormMap,
   "irs-w7": m_irs_w7 as FormMap,
@@ -85,6 +90,7 @@ export const MAPS: Record<string, FormMap> = {
   "oc-health-permit": m_oc_health_permit as FormMap,
   "oc-plan-check": m_oc_plan_check as FormMap,
   "or-payroll": m_or_payroll as FormMap,
+  "sac-bot": m_sac_bot as FormMap,
   "sacc-plan-review": m_sacc_plan_review as FormMap,
   "sf-dph-plan-check": m_sf_dph_plan_check as FormMap,
   "sf-formula-retail": m_sf_formula_retail as FormMap,

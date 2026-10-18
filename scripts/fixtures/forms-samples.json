@@ -1330,5 +1330,53 @@
   "tank_heaters": ["A. O. Smith, BTH-120, 120000 BTU, 116","None"],
   "tankless_heaters": ["None","Rinnai, CU199iN, 199000, 9.8, 50\nNavien, NPE-240A2, 199900, 11.2, 0"],
   "cooking_equipment_2": ["0\n0\n0\n0\n0\n0\n1","0\n0\n0\n1\n0\n0\n2"]
+ },
+ "sac-bot": {
+  "business_name": "Lotus Tea House LLC dba Lotus Tea",
+  "start_date": "02/01/2027",
+  "phone": "(916) 555-0142",
+  "phone2": ["None","(916) 555-0143"],
+  "email": "mei.chen@lotusteahouse.com",
+  "business_address": "5650 Freeport Blvd, Suite 3, Sacramento, CA 95822",
+  "home_address": ["No","Yes"],
+  "ein": ["93-4567890","None"],
+  "employees": ["6","2"],
+  "ownership": ["LLC","Sole"],
+  "description": ["Tea shop serving milk tea and pastries","Home-based bakery"],
+  "classification": ["Gross Receipts, 450000","Residential Rental, 4"],
+  "mailing": "2210 Riverside Blvd, Sacramento, CA 95818",
+  "owners": ["Mei Chen, Managing Member\nLin Wei, Member","Mei Chen, Owner"]
+ },
+ "fl-sunbiz": {
+  "name": "Lotus Tea House LLC",
+  "principal_office": "2210 NE 2nd Ave, Suite 4, Miami, FL 33137",
+  "mailing": ["2210 NE 2nd Ave, Suite 4, Miami, FL 33137","PO Box 381, Miami, FL 33137"],
+  "agent_name": ["Registered Agents of Florida LLC","Lin Wei"],
+  "agent_address": ["1200 Brickell Ave, Suite 1950, Miami, FL 33131","88 SW 7th St, Miami, FL 33130"],
+  "managers": ["AMBR, Mei Chen, 2210 NE 2nd Ave, Miami, FL 33137\nAMBR, Lin Wei, 88 SW 7th St, Miami, FL 33130","MGR, Mei Chen, 2210 NE 2nd Ave, Miami, FL 33137"],
+  "effective_date": ["None","01/15/2027"],
+  "other_provisions": ["None","The company is managed by its manager.\nMembers may act by written consent."],
+  "signer": "Mei Chen",
+  "correspondence": "Mei Chen, Lotus Tea House LLC, 2210 NE 2nd Ave, Miami, FL 33137",
+  "email": "mei.chen@lotusteahouse.com",
+  "phone_contact": "Mei Chen, (305) 555-0142",
+  "fee": ["$125.00 filing fee","$160.00 with a certificate of status and a certified copy"]
+ },
+ "il-sos": {
+  "name": "Lotus Tea House LLC",
+  "principal_address": "2210 S Wentworth Ave, Suite 2, Chicago, IL 60616",
+  "effective": ["Filing date","01/15/2027"],
+  "agent": ["Lin J Wei","Mei Chen"],
+  "agent_office": ["88 W Cermak Rd, Chicago, IL 60616","1250 N Clark St, Chicago, IL 60610"],
+  "purposes": ["None","Operate a tea shop and bakery\nSell packaged tea at retail"],
+  "dissolution": ["None","12/31/2050"],
+  "other_provisions": ["None","Members may act by written consent."],
+  "managers": ["None","Mei Chen, 2210 S Wentworth Ave, Chicago, IL 60616\nLin Wei, 88 W Cermak Rd, Chicago, IL 60616"],
+  "organizer": ["Mei Chen, Member","Mei Chen, Manager"],
+  "organizer_company": ["None","Lotus Holdings Inc"],
+  "organizer_address": "2210 S Wentworth Ave, Chicago, IL 60616",
+  "organizer2": ["None","Lin Wei"],
+  "organizer2_company": "None",
+  "organizer2_address": ["None","88 W Cermak Rd, Chicago, IL 60616"]
  }
 }
