@@ -1,0 +1,825 @@
+{
+ "form": "va-tax",
+ "rev": "Form R-1 (Rev. 09/26)",
+ "pdf": "va-tax.pdf",
+ "url": "https://www.tax.virginia.gov/sites/default/files/taxforms/business-registration/any/r-1-any.pdf",
+ "checked": "2026-10-18",
+ "notes": "Virginia Tax accepts the paper R-1 only for one of the reasons at the top (most new businesses must register online); paper_reason ticks it. Filled for the sections a tea shop or store needs: business profile (I), responsible parties (II), corporation or pass-through income tax (III), employer withholding (IV) and retail sales and use tax (V-A). Dates print MM/DD/YYYY. Addresses print as the street, then 'City, ST ZIP'. Seasonal answers list the months open ('May, Jun, Jul, Aug'); 'All year' ticks none. The SSN boxes (item 2a and each responsible party's) are never printed; the signer writes them. The FEIN repeats at the top of every page. The 'if different' mailing addresses and contacts inside each tax section, the insurance, communications, litter, vending and agricultural sections are left blank. The signature and its date are left for the signer.",
+ "lines": [
+  {
+   "id": "paper_reason",
+   "line": "Reason",
+   "en": "Reason for submitting the paper form",
+   "zh": "提交纸质表格的原因",
+   "options": [
+    "You don't have a FEIN",
+    "You don't have an SSN",
+    "Reopening a previously closed account",
+    "The FEIN is associated with another account",
+    "Your SSN is associated with another business",
+    "You were a responsible party for another business"
+   ]
+  },
+  {
+   "id": "legal_name",
+   "line": "1",
+   "en": "Business name: full legal name (sole proprietor: owner's name)",
+   "zh": "企业名称：完整法定名称（独资：业主姓名）"
+  },
+  {
+   "id": "fein",
+   "line": "2",
+   "en": "Federal Employer Identification Number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "entity_type",
+   "line": "3",
+   "en": "Entity type",
+   "zh": "实体类型",
+   "options": [
+    "Sole proprietor (or single-member LLC taxed as an individual)",
+    "C Corporation",
+    "Nonprofit Corporation",
+    "LLC electing to file as a corporation",
+    "S Corporation",
+    "General Partnership",
+    "Limited Partnership",
+    "Limited Liability Partnership",
+    "LLC electing to file as a pass-through entity"
+   ]
+  },
+  {
+   "id": "dba",
+   "line": "4",
+   "en": "Trading as (doing business as) name",
+   "zh": "经营名称（DBA）"
+  },
+  {
+   "id": "activity",
+   "line": "5",
+   "en": "Primary business activity",
+   "zh": "主要业务活动"
+  },
+  {
+   "id": "tobacco",
+   "line": "5",
+   "en": "Will you sell tobacco products?",
+   "zh": "是否销售烟草制品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "retail_food",
+   "line": "5",
+   "en": "A retail food establishment, food manufacturer or food warehouse (not solely a restaurant)?",
+   "zh": "是否为零售食品店、食品加工或食品仓储（不包括纯餐厅）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "business_address",
+   "line": "6",
+   "en": "Primary business address (physical)",
+   "zh": "主要营业地址（实际地址）"
+  },
+  {
+   "id": "mailing_address",
+   "line": "7",
+   "en": "Primary mailing address, if different",
+   "zh": "主要邮寄地址（如不同）"
+  },
+  {
+   "id": "contact",
+   "line": "8",
+   "en": "Primary contact for tax matters: name",
+   "zh": "税务主要联系人：姓名"
+  },
+  {
+   "id": "contact_title",
+   "line": "8",
+   "en": "Primary contact: title",
+   "zh": "主要联系人：职务"
+  },
+  {
+   "id": "contact_phone",
+   "line": "8",
+   "en": "Primary contact: phone",
+   "zh": "主要联系人：电话"
+  },
+  {
+   "id": "responsible1",
+   "line": "II 1a",
+   "en": "Responsible party 1: name",
+   "zh": "负责人 1：姓名",
+   "hint": {
+    "en": "Officers, partners or members responsible for the taxes. Their SSN is written by hand on the signed form.",
+    "zh": "负责纳税的高管、合伙人或成员。其社会安全号由本人在签字件上手写。"
+   }
+  },
+  {
+   "id": "responsible1_title",
+   "line": "II 1c",
+   "en": "Responsible party 1: title",
+   "zh": "负责人 1：职务"
+  },
+  {
+   "id": "responsible1_since",
+   "line": "II 1d",
+   "en": "Responsible party 1: date the role began",
+   "zh": "负责人 1：任职开始日期"
+  },
+  {
+   "id": "responsible1_phone",
+   "line": "II 1e",
+   "en": "Responsible party 1: home phone",
+   "zh": "负责人 1：住宅电话"
+  },
+  {
+   "id": "responsible1_address",
+   "line": "II 1f-g",
+   "en": "Responsible party 1: residence address",
+   "zh": "负责人 1：住址"
+  },
+  {
+   "id": "responsible2",
+   "line": "II 2a",
+   "en": "Responsible party 2: name",
+   "zh": "负责人 2：姓名"
+  },
+  {
+   "id": "responsible2_title",
+   "line": "II 2c",
+   "en": "Responsible party 2: title",
+   "zh": "负责人 2：职务"
+  },
+  {
+   "id": "responsible2_since",
+   "line": "II 2d",
+   "en": "Responsible party 2: date the role began",
+   "zh": "负责人 2：任职开始日期"
+  },
+  {
+   "id": "responsible2_phone",
+   "line": "II 2e",
+   "en": "Responsible party 2: home phone",
+   "zh": "负责人 2：住宅电话"
+  },
+  {
+   "id": "responsible2_address",
+   "line": "II 2f-g",
+   "en": "Responsible party 2: residence address",
+   "zh": "负责人 2：住址"
+  },
+  {
+   "id": "corp_liable_date",
+   "line": "III-A 1",
+   "en": "Corporations: date you became liable for corporation income tax",
+   "zh": "公司：开始承担公司所得税义务的日期"
+  },
+  {
+   "id": "corp_formation",
+   "line": "III-A 2",
+   "en": "Corporations: date and state of incorporation",
+   "zh": "公司：成立日期与成立州",
+   "hint": {
+    "en": "e.g. \"03/15/2026, Virginia\"",
+    "zh": "如 \"03/15/2026, Virginia\""
+   }
+  },
+  {
+   "id": "corp_tax_year",
+   "line": "III-A 3",
+   "en": "Corporations: tax year",
+   "zh": "公司：纳税年度",
+   "options": [
+    "Calendar year",
+    "Fiscal year"
+   ],
+   "hint": {
+    "en": "For a fiscal year: \"Fiscal year: July, June\" (beginning and ending months).",
+    "zh": "财年请写 \"Fiscal year: July, June\"（起止月份）。"
+   }
+  },
+  {
+   "id": "pte_liable_date",
+   "line": "III-B 1",
+   "en": "Pass-through entities: date you became liable for reporting pass-through income",
+   "zh": "转嫁实体：开始申报转嫁收入的日期"
+  },
+  {
+   "id": "pte_formation",
+   "line": "III-B 2",
+   "en": "Pass-through entities: date and state of formation",
+   "zh": "转嫁实体：成立日期与成立州",
+   "hint": {
+    "en": "e.g. \"03/15/2026, Virginia\"",
+    "zh": "如 \"03/15/2026, Virginia\""
+   }
+  },
+  {
+   "id": "pte_tax_year",
+   "line": "III-B 3",
+   "en": "Pass-through entities: tax year",
+   "zh": "转嫁实体：纳税年度",
+   "options": [
+    "Calendar year",
+    "Fiscal year"
+   ],
+   "hint": {
+    "en": "For a fiscal year: \"Fiscal year: July, June\".",
+    "zh": "财年请写 \"Fiscal year: July, June\"。"
+   }
+  },
+  {
+   "id": "wh_start_date",
+   "line": "IV 1",
+   "en": "Employer withholding: date you had employees and began paying wages",
+   "zh": "雇主预扣税：开始雇用员工并支付工资的日期"
+  },
+  {
+   "id": "wh_frequency",
+   "line": "IV 2",
+   "en": "Employer withholding: filing frequency",
+   "zh": "雇主预扣税：申报频率",
+   "options": [
+    "Quarterly (less than $300 a quarter)",
+    "Monthly ($300 to $2,999 a quarter)",
+    "Semi-Weekly ($3,000 or more a quarter)"
+   ]
+  },
+  {
+   "id": "wh_season",
+   "line": "IV 3",
+   "en": "Employer withholding: seasonal business, the months it is active (or \"All year\")",
+   "zh": "雇主预扣税：季节性经营的营业月份（全年则填 \"All year\"）"
+  },
+  {
+   "id": "sales_start_date",
+   "line": "V-A 1",
+   "en": "Retail sales and use tax: anticipated date of first retail sale",
+   "zh": "零售销售与使用税：预计首次零售日期"
+  },
+  {
+   "id": "sales_filing",
+   "line": "V-A 2",
+   "en": "Retail sales: how multiple locations file",
+   "zh": "零售销售：多个门店的申报方式",
+   "options": [
+    "One location",
+    "One combined return in the same locality",
+    "One consolidated return for all locations",
+    "A separate return for each location"
+   ]
+  },
+  {
+   "id": "sales_season",
+   "line": "V-A 3",
+   "en": "Retail sales: seasonal business, the months it is active (or \"All year\")",
+   "zh": "零售销售：季节性经营的营业月份（全年则填 \"All year\"）"
+  },
+  {
+   "id": "specialty_dealer",
+   "line": "V-A 4",
+   "en": "Specialty dealer (selling at flea markets, craft shows and similar)?",
+   "zh": "是否为特殊经销商（在跳蚤市场、手工艺展等地销售）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "location_opened",
+   "line": "V-A 5b",
+   "en": "Business location: date opened",
+   "zh": "营业地点：开业日期"
+  },
+  {
+   "id": "location_name",
+   "line": "V-A 5c",
+   "en": "Business location: trade name",
+   "zh": "营业地点：经营名称"
+  },
+  {
+   "id": "location_address",
+   "line": "V-A 5d",
+   "en": "Business location: physical address (no P.O. box)",
+   "zh": "营业地点：实际地址（不可用邮政信箱）"
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Signer: printed name",
+   "zh": "签署人：正楷姓名"
+  },
+  {
+   "id": "signer_title",
+   "line": "Signature",
+   "en": "Signer: title",
+   "zh": "签署人：职务"
+  },
+  {
+   "id": "signer_phone",
+   "line": "Signature",
+   "en": "Signer: daytime phone",
+   "zh": "签署人：日间电话"
+  }
+ ],
+ "blank": {
+  "tobacco": "^(n|no|否)\\b",
+  "retail_food": "^(n|no|否)\\b",
+  "specialty_dealer": "^(n|no|否)\\b",
+  "mailing_address": "^(same|none|n/?a)",
+  "wh_season": "^(all year|year.?round|全年)",
+  "sales_season": "^(all year|year.?round|全年)",
+  "sales_filing": "^one location",
+  "corp_liable_date": "^(none|n/?a)",
+  "corp_formation": "^(none|n/?a)",
+  "pte_liable_date": "^(none|n/?a)",
+  "pte_formation": "^(none|n/?a)",
+  "wh_start_date": "^(none|n/?a)"
+ },
+ "boxes": {
+  "paper_reason": [
+   {
+    "check": "You don’t have a FEIN",
+    "if": "fein"
+   },
+   {
+    "check": "You don’t have an SSN",
+    "if": "\\bssn\\b(?!.*associated)"
+   },
+   {
+    "check": "Reopening a previously closed account",
+    "if": "reopen"
+   },
+   {
+    "check": "The FEIN you need to register is associated with another account",
+    "if": "fein.*associated"
+   },
+   {
+    "check": "Your SSN is associated with another business",
+    "if": "ssn.*associated"
+   },
+   {
+    "check": "You were a responsible party",
+    "if": "responsible party"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "1 Business Name Enter full legal name of business Sole Proprietors  enter owners name first middle initial last"
+   }
+  ],
+  "fein": [
+   {
+    "text": "2 Federal Employer Identification Number FEIN If your business does not have a FEIN contact the IRS",
+    "pick": "ein"
+   },
+   {
+    "text": "FEIN",
+    "pick": "ein"
+   }
+  ],
+  "entity_type": [
+   {
+    "check": "Sole Proprietor",
+    "if": "^sole"
+   },
+   {
+    "check": "CCorporation",
+    "if": "^c corp"
+   },
+   {
+    "check": "Nonprofit",
+    "if": "^nonprofit corp"
+   },
+   {
+    "check": "LLC",
+    "if": "^(llc|limited liability company).*corporation"
+   },
+   {
+    "check": "S Corp",
+    "if": "^s corp"
+   },
+   {
+    "check": "General Partnership",
+    "if": "^general partnership"
+   },
+   {
+    "check": "Limited Partnership",
+    "if": "^limited partnership"
+   },
+   {
+    "check": "Limited Liability Partnership",
+    "if": "^limited liability partnership"
+   },
+   {
+    "check": "Pass Through LLC",
+    "if": "^(llc|limited liability company).*pass"
+   }
+  ],
+  "dba": [
+   {
+    "text": "4 Trading As Name or Doing Business as Name"
+   }
+  ],
+  "activity": [
+   {
+    "text": "Primary Business Activity Description"
+   }
+  ],
+  "tobacco": [
+   {
+    "check": "Tobacco Products",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "retail_food": [
+   {
+    "check": "Food Products",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "business_address": [
+   {
+    "text": "6 Primary Business Street Address",
+    "pick": "street"
+   },
+   {
+    "text": "6 Primary Business Address City State ZIP",
+    "pick": "citystatezip"
+   }
+  ],
+  "mailing_address": [
+   {
+    "text": "7 Primary Mailing Street Address",
+    "pick": "street",
+    "if": "^(?!(same|none|n/?a))"
+   },
+   {
+    "text": "7 Primary Business Address City State ZIP",
+    "pick": "citystatezip",
+    "if": "^(?!(same|none|n/?a))"
+   }
+  ],
+  "contact": [
+   {
+    "text": "8 Prim Cont Name"
+   }
+  ],
+  "contact_title": [
+   {
+    "text": "8 Prim Cont Title"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "8 Cont Ph Number"
+   }
+  ],
+  "responsible1": [
+   {
+    "text": "a Name of Responsible Party"
+   }
+  ],
+  "responsible1_title": [
+   {
+    "text": "c Relationship Title"
+   }
+  ],
+  "responsible1_since": [
+   {
+    "text": "d Relationship Date",
+    "pick": "date"
+   }
+  ],
+  "responsible1_phone": [
+   {
+    "text": "e Home Phone Number Including Area Code"
+   }
+  ],
+  "responsible1_address": [
+   {
+    "text": "f Residence Address",
+    "pick": "street"
+   },
+   {
+    "text": "g City State ZIP",
+    "pick": "citystatezip"
+   }
+  ],
+  "responsible2": [
+   {
+    "text": "a Name of Responsible Party_2"
+   }
+  ],
+  "responsible2_title": [
+   {
+    "text": "c Relationship Title_2"
+   }
+  ],
+  "responsible2_since": [
+   {
+    "text": "d Relationship Date_2",
+    "pick": "date"
+   }
+  ],
+  "responsible2_phone": [
+   {
+    "text": "e Home Phone Number Including Area Code_2"
+   }
+  ],
+  "responsible2_address": [
+   {
+    "text": "f Residence Address_2",
+    "pick": "street"
+   },
+   {
+    "text": "g City State ZIP_2",
+    "pick": "citystatezip"
+   }
+  ],
+  "corp_liable_date": [
+   {
+    "text": "1 Date you became liable for Corporation Income tax MMDDYY",
+    "pick": "date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "corp_formation": [
+   {
+    "text": "Date MMDDYY",
+    "pick": "head|date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "corp_tax_year": [
+   {
+    "radio": "Tax Year",
+    "value": "Calendar Year ((Jan 1 to Dec 31)",
+    "if": "^calendar"
+   },
+   {
+    "radio": "Tax Year",
+    "value": "Fiscal Year",
+    "if": "^fiscal"
+   },
+   {
+    "text": "Fiscal Year  Beginning month",
+    "pick": "tail|head",
+    "if": "^fiscal"
+   },
+   {
+    "text": "and Ending month",
+    "pick": "tail|tail",
+    "if": "^fiscal"
+   }
+  ],
+  "pte_liable_date": [
+   {
+    "text": "1 Date you became liable for reporting PassThrough Entity Income MMDDYY",
+    "pick": "date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "pte_formation": [
+   {
+    "text": "Date MMDDYY_2",
+    "pick": "head|date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "text": "State_2",
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "pte_tax_year": [
+   {
+    "check": "B3 Tax Year",
+    "if": "^calendar"
+   },
+   {
+    "radio": "Tax Year b 3",
+    "value": "Fiscal year",
+    "if": "^fiscal"
+   },
+   {
+    "text": "Fiscal Year  Beginning month_2",
+    "pick": "tail|head",
+    "if": "^fiscal"
+   },
+   {
+    "text": "and Ending month_3",
+    "pick": "tail|tail",
+    "if": "^fiscal"
+   }
+  ],
+  "wh_start_date": [
+   {
+    "text": "1 Date you had employees and began paying wages MMDDYY",
+    "pick": "date",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "wh_frequency": [
+   {
+    "radio": "File Freq",
+    "value": "Quarterly",
+    "if": "^quarter"
+   },
+   {
+    "radio": "File Freq",
+    "value": "Monthly",
+    "if": "^month"
+   },
+   {
+    "radio": "File Freq",
+    "value": "Semi-Weekly",
+    "if": "^semi"
+   }
+  ],
+  "wh_season": [
+   {
+    "check": "Jan Wh",
+    "if": "\\bjan"
+   },
+   {
+    "check": "Feb Wh",
+    "if": "\\bfeb"
+   },
+   {
+    "check": "Mar Wh",
+    "if": "\\bmar"
+   },
+   {
+    "check": "Apr Wh",
+    "if": "\\bapr"
+   },
+   {
+    "check": "May Wh",
+    "if": "\\bmay"
+   },
+   {
+    "check": "Jun Wh",
+    "if": "\\bjun"
+   },
+   {
+    "check": "Jul Wh",
+    "if": "\\bjul"
+   },
+   {
+    "check": "Aug Wh",
+    "if": "\\baug"
+   },
+   {
+    "check": "Sep Wh",
+    "if": "\\bsep"
+   },
+   {
+    "check": "Oct Wh",
+    "if": "\\boct"
+   },
+   {
+    "check": "Nov Wh",
+    "if": "\\bnov"
+   },
+   {
+    "check": "Dec Wh",
+    "if": "\\bdec"
+   }
+  ],
+  "sales_start_date": [
+   {
+    "text": "1 Date You Became Liable Anticipated date of first retail sale MMDDYY",
+    "pick": "date"
+   }
+  ],
+  "sales_filing": [
+   {
+    "radio": "File Opt",
+    "value": "File one combined retun",
+    "if": "combined"
+   },
+   {
+    "radio": "File Opt",
+    "value": "file one consolidated return",
+    "if": "consolidated"
+   },
+   {
+    "radio": "File Opt",
+    "value": "file Separate return",
+    "if": "separate"
+   }
+  ],
+  "sales_season": [
+   {
+    "check": "Jan SU",
+    "if": "\\bjan"
+   },
+   {
+    "check": "Feb SU",
+    "if": "\\bfeb"
+   },
+   {
+    "check": "Mar SU",
+    "if": "\\bmar"
+   },
+   {
+    "check": "Apr SU",
+    "if": "\\bapr"
+   },
+   {
+    "check": "May SU",
+    "if": "\\bmay"
+   },
+   {
+    "check": "Jun SU",
+    "if": "\\bjun"
+   },
+   {
+    "check": "Jul SU",
+    "if": "\\bjul"
+   },
+   {
+    "check": "Aug SU",
+    "if": "\\baug"
+   },
+   {
+    "check": "Sep SU",
+    "if": "\\bsep"
+   },
+   {
+    "check": "Oct SU",
+    "if": "\\boct"
+   },
+   {
+    "check": "Nov SU",
+    "if": "\\bnov"
+   },
+   {
+    "check": "Dec SU",
+    "if": "\\bdec"
+   }
+  ],
+  "specialty_dealer": [
+   {
+    "check": "VA4 specialty dealer",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "location_opened": [
+   {
+    "text": "b Date Location Opened",
+    "pick": "date"
+   }
+  ],
+  "location_name": [
+   {
+    "text": "c Trade Name of Business"
+   }
+  ],
+  "location_address": [
+   {
+    "text": "e Business Physical Street  Address   No PO Boxes",
+    "pick": "street"
+   },
+   {
+    "text": "City State and ZIP",
+    "pick": "citystatezip"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Print Name"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "Title"
+   }
+  ],
+  "signer_phone": [
+   {
+    "text": "p 7 ix - Cont Ph Number"
+   }
+  ]
+ },
+ "sign": {
+  "page": 8,
+  "x": 40,
+  "y": 402,
+  "w": 262,
+  "h": 20
+ }
+}

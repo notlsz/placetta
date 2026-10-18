@@ -4,6 +4,18 @@
   "pdf": "irs-w7.pdf",
   "checked": "2026-10-14",
   "notes": "Addresses: a U.S. address on one line ('street, city, ST ZIP') or two lines (street; city, state or province, country, postal code); a one-line foreign address splits after its first comma. birth_name and prev_name: 'First Middle Last'. Dates are written as MMDDYYYY into the form's date boxes. id_type 'Other: <document>' ticks Other and writes the document. Reason a also ticks box h. id_number (6d) and prev_number (6f ITIN/IRSN) are deliberately not mapped: the applicant writes them by hand; so are the SSN/ITIN after the d/e name, the signature and its date. The Acceptance Agent block is left for the agent.",
+  "unmapped": {
+    "id_number": "The applicant writes the document number by hand; Placetta never prints identity numbers.",
+    "prev_number": "The applicant writes the ITIN or IRSN by hand; Placetta never prints it."
+  },
+  "blank": {
+    "foreign_tin": "^(none|no|n/?a|无|没有|-+)\\.?$",
+    "visa": "^(none|no|n/?a|无|没有|-+)\\.?$",
+    "delegate": "^(none|no|n/?a|无|没有|-+)\\.?$",
+    "middle_name": "^(none|no|n/?a|无|没有|-+)\\.?$",
+    "birth_name": "^(none|no|n/?a|无|没有|-+)\\.?$",
+    "other": "^(none|no|n/?a|无|没有|-+)\\.?$"
+  },
   "boxes": {
     "app_type": [
       { "check": "topmostSubform[0].Page1[0].c1_1[0]", "if": "^(apply|new|新)" },

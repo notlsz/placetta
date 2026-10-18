@@ -4,6 +4,9 @@
  "pdf": "tx-503.pdf",
  "checked": "2026-10-14",
  "notes": "Answers: entity_type is one of the options; 'Other: <type>' (or any type not printed) ticks Other and writes the type. principal_office: 'street, city, ST ZIP' (a US address also gets country USA; a foreign address goes whole on the street line). duration: '10 years', 'A number of years: 5' (or '5 years'), or 'Until a date: 12/31/2034'. counties: 'All counties', 'All except those listed: Harris, Travis' or 'Only those listed: Harris, Travis'; a short list goes on the line beside the box, a long one on the full-width line under it. signer has no box: Form 503 prints no name line, only the signature; the date box gets the signing date when the form is signed. Signature left for the signer.",
+ "unmapped": {
+  "signer": "Form 503 prints no name line, only the signature; the date box is stamped when the form is signed."
+ },
  "boxes": {
   "assumed_name": [
    {

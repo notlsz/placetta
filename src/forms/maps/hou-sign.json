@@ -4,6 +4,9 @@
  "pdf": "hou-sign.pdf",
  "checked": "2026-10-14",
  "notes": "Answers: permit_category one of its options. City/ST/ZIP answers 'City, ST ZIP'; office/sign/billing address answers the street line (a full address prints its street only). Per-sign answers take one line per sign, A to E in order, with no blank lines: sign_schedule_new_electrical 'New', 'Electrical' or 'New, Electrical'; sign_schedule_type the location code ('N3 Wall' prints N3); sign_schedule_dimensions \"width, height, max height\" each as feet and inches, e.g. 12' 0\", 3' 6\", 18' 0\" (both numbers always); sign_schedule_pn 'P.N., original P.N.'; sign_messages the message, prefixed 'Refurb:' to tick its Refurb box, and a sixth line prints on 'Other'. cms_ack_printed_name_phone 'Name, phone'. The affidavit's signatures are sworn before a notary and the notary's lines (affiant name, date, seal) stay blank, so no signature spot is set; Faces and Poles have no question and stay blank.",
+ "unmapped": {
+  "notes": "This revision of Form CE-1423 (February 2026) prints no Notes box."
+ },
  "boxes": {
   "permit_category": [
    {

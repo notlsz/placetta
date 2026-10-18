@@ -30,7 +30,8 @@ function ss4(v: Record<string, string>, put: Put) {
   else if (e.startsWith("corporation")) { put.check(P + "c1_3[4]"); const m = /(\d{4}[a-z-]*)/i.exec(v.l9a); put.text(P + "f1_16[0]", m ? m[1] : "1120"); }
   else if (e.startsWith("sole")) put.check(P + "c1_3[0]");
   else if (e) { put.check(P + "c1_3[15]"); put.text(P + "f1_19[0]", v.l9a.replace(/^other\s*[:(-]?\s*/i, "").replace(/\)$/, "")); }
-  if (v.l10) { put.check(P + "c1_4[0]"); put.text(P + "f1_25[0]", v.l10.slice(0, 18)); if (v.l10.length > 18) put.text(P + "f1_26[0]", v.l10.slice(18, 60)); }
+  // line 10's box after "(specify type)" holds about 13 characters: break at a space, the rest goes on the line below
+  if (v.l10) { put.check(P + "c1_4[0]"); const cut = v.l10.length <= 13 ? v.l10.length : Math.max(v.l10.lastIndexOf(" ", 13), 0); put.text(P + "f1_25[0]", v.l10.slice(0, cut).trim()); if (cut < v.l10.length) put.text(P + "f1_26[0]", v.l10.slice(cut).trim().slice(0, 60)); }
   const a = norm(v.l16 ?? "");
   const ACT: [RegExp, number][] = [[/health/, 0], [/agent|broker/, 1], [/construction/, 2], [/rental|leasing/, 3], [/transport|warehous/, 4], [/accommodation|food/, 5], [/wholesale/, 6], [/retail/, 7], [/real estate/, 8], [/manufactur/, 9], [/finance|insurance/, 10]];
   const hit = ACT.find(([r]) => r.test(a));
@@ -113,10 +114,11 @@ export async function fillOfficial(formId: string, fields: Field[]): Promise<Blo
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   const doc = await PDFDocument.load(bytes);
-  const pdf = doc.getForm();
+  // the same writer as the mapped forms: a box this revision doesn't have is skipped, and a long answer shrinks to fit its box
+  const w = pdfLibWriter(doc.getForm());
   const put: Put = {
-    text: (name, v) => { try { pdf.getTextField(name).setText(v.replace(/[^\x20-\x7E -ÿ]/g, "")); } catch { /* a field this revision doesn't have */ } },
-    check: name => { try { pdf.getCheckBox(name).check(); } catch { /* idem */ } },
+    text: (name, v) => { w.text(name, v.replace(/[^\x20-\x7E -ÿ]/g, "")); },
+    check: name => { w.check(name); },
   };
   FILL[form.fill](valuesOf(fields), put);
   const out = await doc.save();
