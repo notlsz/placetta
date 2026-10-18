@@ -1,0 +1,60 @@
+/* Odelia's cloud (src/Bot.tsx and src/CloudSvg.tsx): the tool beside her, and the small vector cloud's motion. */
+
+/* The step's orb, her tool: small, just off the cloud's lower-right lobe with a little air between them. Placed from
+   the cloud's size (--s), so it sits the same way at every size, and stays clear of a title beside the cloud. */
+.livebot .lb-tool { position: absolute; right: auto; bottom: auto; left: calc(var(--s) * 0.88 - 2px); top: calc(var(--s) * 0.88 - 2px); width: 16px !important; height: 16px !important; pointer-events: none; }
+/* on the small vector cloud the tool is a single breathing dot in the brand blue, in the same spot (also beside a
+   line of text, so it never reads as a separator) */
+.lb-dot { position: absolute; left: calc(var(--s) * 0.93); top: calc(var(--s) * 0.9 - 1.5px); width: 5px; height: 5px; border-radius: 50%; background: #4D73A3; pointer-events: none; animation: lb-dot 1.3s ease-in-out infinite alternate; }
+.livebot.beside { position: relative; }
+@keyframes lb-dot { from { transform: scale(.7); opacity: .5; } to { transform: scale(1); opacity: 1; } }
+:root[data-theme="dark"] .lb-dot { background: #8DB2E0; }
+
+/* the plush canvas, with the vector cloud standing in for it until its pile has baked */
+.plush { position: relative; display: inline-grid; place-items: center; flex: none; }
+.plush-stand { position: absolute; inset: 0; pointer-events: none; transition: opacity .3s ease-out; }
+.plush-stand.gone { opacity: 0; }
+.plush > canvas { position: relative; }
+
+.cloud-svg { display: block; flex: none; overflow: visible; }
+.cloud-svg .cs-hop, .cloud-svg .cs-squash, .cloud-svg .cs-eye, .cloud-svg .cs-look { transform-box: fill-box; }
+.cloud-svg .cs-squash { transform-origin: 50% 100%; }
+.cloud-svg .cs-eye { transform-origin: 50% 50%; animation: cs-blink var(--blink, 5s) linear infinite; }
+
+/* busy: up on an arc (eases out going up, in coming down), lands into a small squash, springs back and crouches for
+   the next one */
+.cloud-svg.hop .cs-hop { animation: cs-hop .92s infinite; }
+.cloud-svg.hop .cs-squash { animation: cs-squash .92s linear infinite; }
+@keyframes cs-hop {
+  0% { translate: 0 0; animation-timing-function: cubic-bezier(.33, .66, .66, 1); }
+  29% { translate: 0 -12px; animation-timing-function: cubic-bezier(.33, 0, .66, .34); }
+  58%, 100% { translate: 0 0; }
+}
+@keyframes cs-squash {
+  0% { scale: 1.055 .94; }
+  7% { scale: .975 1.035; }
+  29% { scale: 1 1; }
+  51% { scale: .975 1.035; }
+  58% { scale: 1.06 .93; }
+  66% { scale: .985 1.02; }
+  75% { scale: 1.008 .992; }
+  84% { scale: 1 1; }
+  100% { scale: 1.055 .94; }
+}
+/* idle: a slow breath, and now and then a glance to one side and the other */
+.cloud-svg.idle .cs-squash { animation: cs-breathe 3.6s ease-in-out infinite; }
+.cloud-svg.calm .cs-squash { animation: cs-breathe 6s ease-in-out infinite; }
+.cloud-svg.idle .cs-look { animation: cs-look 9s ease-in-out infinite; }
+@keyframes cs-breathe { 0%, 100% { scale: 1 1; } 50% { scale: 1.012 .985; } }
+@keyframes cs-look { 0%, 14%, 92%, 100% { translate: 0 0; } 22%, 40% { translate: -2.6px .6px; } 50%, 70% { translate: 2.4px -.4px; } }
+@keyframes cs-blink { 0%, 95.6%, 100% { scale: 1 1; } 97.4% { scale: 1 .08; } }
+
+/* the plush still touch screens show in place of the canvas, floating gently (faster while busy) */
+.cloud-still { position: relative; display: inline-block; flex: none; }
+.cloud-still img { position: absolute; left: 5%; top: 16%; width: 90%; height: auto; user-select: none; -webkit-user-select: none; animation: cs-float 3.2s ease-in-out infinite; }
+.cloud-still.busy img { animation-duration: 1.1s; }
+@keyframes cs-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cloud-svg .cs-hop, .cloud-svg .cs-squash, .cloud-svg .cs-eye, .cloud-svg .cs-look, .lb-dot, .cloud-still img { animation: none !important; }
+}
