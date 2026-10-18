@@ -7,6 +7,7 @@ import type { Filing } from "./cloud/api";
 import { I, Modal, feeTotal } from "./ui";
 import { fmtStamp, money } from "./time";
 import { FilingHold } from "./SendHold";
+import { ReviewBadges } from "./Specialist";
 
 /*
  * Watch it file. Every filing, live while it runs and replayable after: each page of the agency's site with what was
@@ -264,6 +265,7 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
       )}
 
       <footer className="fl-f">
+        <ReviewBadges appId={run.app.id} />
         {run.events.length > 1 && <button type="button" className="pill quiet sm" onClick={() => setOpen(0)}><I.play />{zh ? "回放" : "Replay"}</button>}
         {run.receipt && !run.sample && cloud && <button type="button" className="pill quiet sm" onClick={() => void cloud.fileUrl(run.receipt!).then(u => u && window.open(u, "_blank", "noopener"))}>{zh ? "机构回执" : "Agency receipt"}</button>}
         {run.receipt && run.sample && <button type="button" className="pill quiet sm" onClick={() => download(run.receipt!)}>{zh ? "机构回执" : "Agency receipt"}</button>}

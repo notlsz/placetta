@@ -63,6 +63,8 @@ export type RunState = {
   used?: Used[];
   /** The person's words were read for details to remember (src/recall.ts), so a resumed chunk doesn't read them again. */
   recalled?: boolean;
+  /** Tools called so far and how many returned an error, for the team's Agent health page. */
+  toolCalls?: number; toolErrors?: number;
   /** Undo (src/rewind.ts): what this run changed so far, and what left Placetta during it, carried across chunks. */
   undo?: UndoRec[]; outside?: Bi[];
 };
@@ -358,6 +360,7 @@ export async function runRounds(o: {
         const name = String(u.name ?? ""), input = (u.input ?? {}) as Record<string, unknown>;
         const before = o.ws();
         const refused = channelRefuses(from, name, input) ?? childRefuses(o.child, name);
+        st.toolCalls = (st.toolCalls ?? 0) + 1;   // for the team's Agent health page
         let out: Record<string, unknown>, content: string, error: boolean;
         if (refused) {
           out = { type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true };
@@ -369,6 +372,7 @@ export async function runRounds(o: {
           out = (note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>;
           content = r.content; error = !!r.is_error;
         }
+        if (error) st.toolErrors = (st.toolErrors ?? 0) + 1;
         // the replay: what she used, what she gave it, what came back and what it changed, and any approval it put up
         if ((st.moments ?? 0) < MAX_MOMENTS) {
           st.moments = (st.moments ?? 0) + 1;
