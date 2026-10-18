@@ -54,8 +54,9 @@ export function McpConnectors({ pin }: { pin: Pin }) {
   const tell = (e: unknown) => { const x = e as api.ApiError; say((zh && x.message_zh) || x.message || (zh ? "出了点问题，请重试。" : "Something went wrong. Try again.")); };
   const load = useCallback(async () => {
     if (!wsId) return;
-    try { setServers((await api.integration<{ servers: Server[] }>(wsId, "mcp_list")).servers); } catch { /* shown as nothing connected */ }
-    try { setReady((await api.integration<{ catalog: Record<string, boolean> }>(wsId, "mcp_available")).catalog); } catch { setReady({}); }
+    // an answer without the list (an older server, or the preview's stand-in backend) is nothing connected, not a crash
+    try { setServers((await api.integration<{ servers?: Server[] }>(wsId, "mcp_list")).servers ?? []); } catch { /* shown as nothing connected */ }
+    try { setReady((await api.integration<{ catalog?: Record<string, boolean> }>(wsId, "mcp_available")).catalog ?? {}); } catch { setReady({}); }
   }, [wsId]);
   useEffect(() => { void load(); }, [load]);
   const demo = () => say(zh ? "登录您的快哉账户后即可连接。" : "Sign in to your Placetta account to connect.");

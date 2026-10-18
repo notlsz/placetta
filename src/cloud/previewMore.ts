@@ -64,6 +64,13 @@ export async function moreRpc(fn: string, body: Record<string, unknown>, c: Clai
   const staff = () => { if (!k.isStaff(c)) return k.pgErr("Placetta team only."); return null; };
 
   switch (fn) {
+    /* ---------------- the team's AI cost card (src/cloud/Ops.tsx) ---------------- */
+    // The preview calls no model, so nothing is spent; revenue is the plans its workspaces turned on, at list price.
+    case "ai_margin_company": {
+      const no = staff(); if (no) return no;
+      const mrr = k.t("billing").filter(b => b.subscription_status === "active").reduce((s, b) => s + (b.subscription_plan === "pro" ? 299 : 149), 0);
+      return k.json({ month: k.now().slice(0, 7), ai_cost_usd: 0, mrr_usd: mrr, cost_pct: mrr ? 0 : null, gross_margin_pct: mrr ? 100 : null, workspaces_using_ai: 0, calls: 0, top: [], by_role: [], by_vendor: [] });
+    }
     /* ---------------- partners ---------------- */
     case "partner_me": return k.json(meOf(mine()));
     case "partner_apply": {

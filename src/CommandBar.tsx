@@ -50,6 +50,11 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
     take(ws.docs, 4, d => has(d.name) && s ? { id: "f-" + d.id, group: g("Documents", "文件"), label: d.name, run: close(() => go("permits", "documents")) } : null);
     take(PAGES, s ? 4 : 14, p => has(p.en, p.zh, p.also) ? { id: "v-" + p.v + (p.sub ? "-" + p.sub : ""), group: g("Go to", "前往"), label: zh ? p.zh : p.en, run: close(() => go(p.v, p.sub)) } : null);
     if (askHit && !sentence) out.push(askHit);
+    // A page named exactly what was typed ("deadlines", "work", an old name like "applications") is where they meant to
+    // go: it comes first, so Enter opens it instead of running a playbook that only mentions the word.
+    const named = (p: (typeof PAGES)[number]) => [p.en, p.zh, ...(p.also ?? "").split(" ")].some(n => { const x = n.toLowerCase(); return !!x && (x === s || x.split(/[:：]\s*/).pop() === s); });
+    const lead = out.filter(h => PAGES.some(p => named(p) && h.id === "v-" + p.v + (p.sub ? "-" + p.sub : "")));
+    if (lead.length) { const pages = out.filter(h => h.id.startsWith("v-") && !lead.includes(h)); return [...lead, ...pages, ...out.filter(h => !lead.includes(h) && !pages.includes(h))]; }
     return out;
   }, [q, ws, zh, b, ask, go, openApp, setOpen]);
 
