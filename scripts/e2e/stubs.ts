@@ -280,8 +280,12 @@ export type Ctx = { payload: any; prompt: string; round: number; results: { name
 export type Turn = { tool: string; input: Record<string, unknown> | ((c: Ctx) => Record<string, unknown>); say?: string; delayMs?: number } | { text: string | ((c: Ctx) => string); delayMs?: number } | { error: number; delayMs?: number };
 export type Script = { name: string; match: (prompt: string) => boolean; turns: Turn[] };
 export const scripts: Script[] = [];
-export type ModelCall = { script: string | null; round: number; payload: any; beta: string | null; reply: any };
+export type ModelCall = { script: string | null; round: number; payload: any; beta: string | null; reply: any; streamed?: boolean };
 export const modelCalls: ModelCall[] = [];
+/** Memory's extraction model (src/recall.ts): each function gets what the person said and answers its items, or null
+ *  to leave it to the next one; with none, nothing is found. */
+export const recallReplies: ((said: string) => unknown[] | null)[] = [];
+export const recallCalls: { said: string; payload: any }[] = [];
 
 /** What the real Messages API would refuse: roles out of order, a tool_result without its tool_use, unknown tools. */
 function invalid(p: any, headers: Headers): string | null {
@@ -341,6 +345,15 @@ async function anthropic(req: Request, path: string, body: any): Promise<Respons
     if (b.type === "tool_result") results.push({ name: nameOf.get(b.tool_use_id) ?? "", content: textOf(b.content), is_error: !!b.is_error });
   }
   const toolNames = (body.tools ?? []).filter((t: Block) => !("type" in t)).map((t: Block) => t.name);
+  // Memory's extraction pass (src/recall.ts) quotes the person's words, so it would match their chat's script: it's
+  // answered here instead, from recallReplies (by what the person said), and counted apart in recallCalls.
+  if (prompt.startsWith("Pull out the durable details")) {
+    const said = /Their message:\n"""\n([\s\S]*?)\n"""/.exec(prompt)?.[1] ?? "";
+    const items = recallReplies.map((f) => f(said)).find(Boolean) ?? [];
+    recallCalls.push({ said, payload: body });
+    const reply = { id: rid("msg_"), type: "message", role: "assistant", model: body.model, content: [{ type: "text", text: JSON.stringify({ items }) }], stop_reason: "end_turn", stop_sequence: null, usage: { input_tokens: 400, output_tokens: 40 } };
+    return body.stream === true ? streamOf(reply) : json(200, reply);
+  }
   const script = scripts.find((s) => s.match(prompt)) ?? null;
   const ctx: Ctx = { payload: body, prompt, round, results, toolNames };
   let content: Block[], stop: string;
@@ -365,8 +378,32 @@ async function anthropic(req: Request, path: string, body: any): Promise<Respons
     }
   }
   const reply = { id: rid("msg_"), type: "message", role: "assistant", model: body.model, content, stop_reason: stop, stop_sequence: null, usage: { input_tokens: 1200 + JSON.stringify(msgs).length / 4 | 0, output_tokens: 60 } };
-  modelCalls.push({ script: script?.name ?? null, round, payload: body, beta: req.headers.get("anthropic-beta"), reply });
-  return json(200, reply);
+  modelCalls.push({ script: script?.name ?? null, round, payload: body, beta: req.headers.get("anthropic-beta"), reply, streamed: body.stream === true });
+  return body.stream === true ? streamOf(reply) : json(200, reply);
+}
+
+/** The same reply as the Messages API streams it: text in a few pieces, a tool call's input as pieces of JSON, the
+ *  stop reason and usage at the end, a little apart, as the real thing arrives. */
+function streamOf(reply: { content: Block[]; stop_reason: string; usage: Record<string, number> } & Record<string, unknown>): Response {
+  const ev = (type: string, data: Record<string, unknown>) => `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
+  const parts: string[] = [ev("message_start", { message: { ...reply, content: [], stop_reason: null, usage: { input_tokens: reply.usage.input_tokens, output_tokens: 1 } } })];
+  reply.content.forEach((b, index) => {
+    if (b.type === "text") {
+      parts.push(ev("content_block_start", { index, content_block: { type: "text", text: "" } }));
+      const words = String(b.text).split(/(?<= )/);
+      for (let i = 0; i < words.length; i += 4) parts.push(ev("content_block_delta", { index, delta: { type: "text_delta", text: words.slice(i, i + 4).join("") } }));
+    } else if (b.type === "tool_use") {
+      parts.push(ev("content_block_start", { index, content_block: { ...b, input: {} } }));
+      const raw = JSON.stringify(b.input ?? {});
+      for (let i = 0; i < raw.length; i += 40) parts.push(ev("content_block_delta", { index, delta: { type: "input_json_delta", partial_json: raw.slice(i, i + 40) } }));
+    } else parts.push(ev("content_block_start", { index, content_block: b }));
+    parts.push(ev("content_block_stop", { index }));
+  });
+  parts.push(ev("message_delta", { delta: { stop_reason: reply.stop_reason, stop_sequence: null }, usage: { output_tokens: reply.usage.output_tokens } }), ev("message_stop", {}));
+  const enc = new TextEncoder();
+  return new Response(new ReadableStream({
+    async start(c) { for (const p of parts) { c.enqueue(enc.encode(p)); await new Promise((r) => setTimeout(r, 2)); } c.close(); },
+  }), { status: 200, headers: { "content-type": "text/event-stream" } });
 }
 
 /* ------------------------------ the patched fetch ------------------------------ */

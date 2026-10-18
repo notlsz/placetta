@@ -16,6 +16,7 @@ import { FilingLive } from "./FilingLive";
 import { LiveBot, Working } from "./Bot";
 import { taskVerb } from "./tasks";
 import { PlanCard } from "./Work";
+import { RememberedChips } from "./Remembered";
 
 /** The agent, beside the work (dock), over it on a phone (sheet), or as her own page (page: Odelia, Chat): what it's
  *  doing now, every step with the site it used, and what each run produced. */
@@ -140,6 +141,7 @@ function TurnView({ m, last, speaking, onSay }: { m: Turn; last: boolean; speaki
           {rows.map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
           {r.memory?.map((x, i) => <Memory key={i} text={x} />)}
+          {r.remembered?.length ? <RememberedChips items={r.remembered} /> : null}
           {r.skills?.map((x, i) => <p key={"s" + i} className="mem"><I.spark /><span><b>{t("learned")}</b>{b(x)}</span></p>)}
           {r.sources && r.sources.length > 0 && (
             <p className="sources"><span>{b({ en: "Sources", zh: "来源" })}</span>{r.sources.map(x => { let h = x.url; try { h = new URL(x.url).hostname.replace(/^www\./, ""); } catch { /* keep */ } return <a key={x.url} href={x.url} target="_blank" rel="noreferrer" title={x.title}>{h}</a>; })}</p>

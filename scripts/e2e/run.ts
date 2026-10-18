@@ -342,6 +342,68 @@ try {
     check("a resumed task that already cost its limit stops before another model call", cont.status === 202 && after?.status === "failed" && /too large for one go/.test(after?.error ?? "") && modelCalls.length === before, { cont: cont.status, after, ticket, calls: modelCalls.length - before });
   });
 
+  /* ---------------- a4. memory that acts, the streamed draft, the run clock ---------------- */
+  const SAID = "Text me, don't email. Kevin is our contractor, kevin@kbuild.example. My SSN is 123-45-6789.";
+  stubs.recallReplies.push((said) => said.includes("Kevin is our contractor") ? [
+    { kind: "preference", text: "Reach them by text, not email", text_zh: "用短信联系，不要发邮件", source: "Text me, don't email.", reach: "text", avoid: ["email"] },
+    { kind: "person", text: "Kevin, contractor, kevin@kbuild.example", text_zh: "Kevin，承包商，kevin@kbuild.example", source: "Kevin is our contractor, kevin@kbuild.example.", name: "Kevin", role: "contractor", email: "kevin@kbuild.example" },
+    // a model that keeps what it never may: dropped by the checks (src/recall.ts, src/guard.ts)
+    { kind: "preference", text: "Their SSN is 123-45-6789", source: "My SSN is 123-45-6789." },
+  ] : said.includes("Rosa is our architect") ? [
+    { kind: "person", text: "Rosa, architect, rosa@arch.example", text_zh: "Rosa，建筑师，rosa@arch.example", source: "Rosa is our architect, rosa@arch.example.", name: "Rosa", role: "architect", email: "rosa@arch.example" },
+  ] : null);
+  scripts.push(
+    { name: "remember-once", match: (p) => p.includes("Kevin is our contractor"), turns: [{ text: "Got it. I'll text you, not email, and write to Kevin when the plans are stamped." }] },
+    { name: "sms-rosa", match: (p) => p.includes("Rosa is our architect"), turns: [{ text: "Noted. I'll ask her for the stamped plans when they're due." }] },
+    { name: "uses-memory", match: (p) => p.includes("Ask our contractor"), turns: [{ tool: "draft_message", input: { to: "Kevin", message: "Hi Kevin, are the stamped floor plans ready?" } }, { text: "Drafted a note to Kevin for your approval." }] },
+    { name: "unwatched", match: (p) => p.includes("Check the CO paperwork quietly"), turns: [{ text: "The CO paperwork still needs the stamped floor plans." }] },
+  );
+  await scenario("a4. memory and speed", async () => {
+    const started = new Date();
+    type Item = { id: string; kind: string; status: string; source: string; via?: string; person?: { name: string; email?: string } };
+    const itemsOf = async () => (((await wsState()) as unknown as { memories?: Record<string, { items?: Item[] }> }).memories?.[owner.id]?.items ?? []);
+    // said once, in the app
+    const r = await call("agent-run", { action: "start", workspace_id: ws, prompt: SAID, lang: "en" }, { jwt: owner.jwt });
+    await settle();
+    const p = await rpc("poll_agent_run", { p_id: r.data?.id }, owner.jwt);
+    const items = await itemsOf();
+    check("the run kept two details in the owner's memory, each saved with the sentence it came from", p.data?.status === "done" && items.length === 2 && items.every((i) => i.status === "saved" && SAID.includes(i.source.replace(/\.$/, ""))), items);
+    check("never the SSN", !JSON.stringify(await wsState()).includes("123-45-6789"));
+    check("the reply carries a Remembered chip for each", p.data?.reply?.remembered?.length === 2 && p.data.reply.remembered.every((c: { suggested?: boolean }) => !c.suggested), p.data?.reply?.remembered);
+    check("one extraction call (the extract role, on the cheap model), apart from the chat", stubs.recallCalls.filter((c) => c.said.includes("Kevin is our contractor")).length === 1 && /haiku/.test(stubs.recallCalls.at(-1)?.payload?.model ?? "") && modelCalls.filter((c) => c.script === "remember-once").length === 1, stubs.recallCalls.map((c) => c.payload?.model));
+    // from a text message: a suggestion, never used until confirmed in the app
+    await telnyxPost("odelia-sms", smsEvent(OWNER_PHONE, "Rosa is our architect, rosa@arch.example.", "msg-in-rosa"));
+    await settle();
+    const rosa = (await itemsOf()).find((i) => i.person?.name === "Rosa");
+    check("from a text: suggested, not saved", rosa?.status === "suggested" && rosa?.via === "sms", rosa);
+    // the next run uses what was said once, and not the suggestion
+    const r2 = await call("agent-run", { action: "start", workspace_id: ws, prompt: "Ask our contractor whether the stamped plans are ready.", lang: "en" }, { jwt: owner.jwt });
+    await settle();
+    const calls = modelCalls.filter((c) => c.script === "uses-memory");
+    const sys = (calls[0]?.payload.system ?? []).map((b: { text?: string }) => b.text ?? "").join("");
+    check("next run: its instructions carry the details, not the suggestion", /Reach them by text, never by email/.test(sys) && /Kevin, contractor, kevin@kbuild\.example/.test(sys) && !/rosa@arch/.test(sys), sys.slice(sys.indexOf("Details they told you once"), sys.indexOf("Details they told you once") + 400));
+    const draft = (await wsState()).approvals.find((a) => a.kind === "send") as unknown as { data?: { id: string; value: string }[] } | undefined;
+    check("a draft to \"Kevin\" goes to the address he was given once", draft?.data?.find((d) => d.id === "to")?.value === "Kevin (contractor), kevin@kbuild.example", draft?.data);
+    check("the chat's answers were streamed (Anthropic's event stream, read piece by piece)", calls.length === 2 && calls.every((c) => c.streamed), calls.map((c) => c.streamed));
+    const [t] = await sql`select created_at, first_text_at, done_at from public.agent_runs where id = ${r2.data?.id}`;
+    check("the run clock: first words, then done, after the request", !!t?.first_text_at && !!t?.done_at && t.created_at <= t.first_text_at && t.first_text_at <= t.done_at, t);
+    // they said not to email: a run nobody watched tells them by text instead
+    mark = recorded.length;
+    const r3 = await call("agent-run", { action: "start", workspace_id: ws, prompt: "Check the CO paperwork quietly.", lang: "en" }, { jwt: owner.jwt });
+    await sql`update public.agent_runs set seen_at = now() - interval '10 minutes' where id = ${r3.data?.id}`;
+    await settle();
+    const [ob] = await sql`select body from public.odelia_outbox where user_id = ${owner.id} and dedupe = ${"done:" + r3.data?.id}`;
+    check("a finished run nobody watched: no email to an owner who said don't email, a text instead", emails(mark).every((e) => !e.body.to.includes(owner.email)) && /CO paperwork/.test(ob?.body ?? ""), { emails: emails(mark).map((e) => e.body.to), ob });
+    // Forget (Settings, Memory, or the chip): the state without them, saved as the app saves it
+    await saveState((s) => { const m = (s as unknown as { memories: Record<string, { items: Item[] }> }).memories; return { ...s, memories: { ...m, [owner.id]: { ...m[owner.id], items: [] } } } as typeof s; });
+    check("forgotten: nothing left to act on", (await itemsOf()).length === 0);
+    await sql`update public.odelia_outbox set dropped_at = now(), note = 'e2e' where user_id = ${owner.id} and dedupe = ${"done:" + r3.data?.id}`;
+    // this scenario's tasks and calls don't count against the next ones' limits, and its text isn't b.'s history
+    await sql`delete from public.ai_events where workspace_id = ${ws} and at >= ${started}`;
+    await sql`delete from public.odelia_messages where user_id = ${owner.id} and created_at >= ${started}`;
+    await sql`delete from public.agent_runs where workspace_id = ${ws} and channel = 'sms' and created_at >= ${started}`;
+  });
+
   /* ---------------- b. SMS ---------------- */
   scripts.push(
     { name: "sms-status", match: (p) => p.endsWith("What's due this month?"), turns: [
@@ -1306,6 +1368,35 @@ try {
       check("the weekly HQ email goes out once on Monday", r1.data?.hq_reports === 1 && r2.data?.hq_reports === 0 && hqMail.length === 1, { r1: r1.data, r2: r2.data, n: hqMail.length });
       check("it lists the store at risk, without anything sensitive", /Moonleaf weekly store status/.test(hqMail[0]?.body.subject) && /Golden Ox Noodle, Flushing/.test(hqMail[0]?.body.text) && !hqMail[0]?.body.text.includes(EIN), hqMail[0]?.body.text);
     } finally { clockOffset = 0; }
+  });
+
+  /* ---------------- g2. what Odelia did this month ---------------- */
+  await scenario("g2. metrics", async () => {
+    const d = await rpc("odelia_month_detail", { ws }, owner.jwt);
+    const m = d.data;
+    check("the owner reads this month's numbers", d.status === 200 && m?.month?.slice(0, 7) === day(0).slice(0, 7) && m.runs_count >= 3 && m.median_first_ms != null && m.median_done_ms != null && m.mapped.length >= 3, { status: d.status, runs: m?.runs_count, first: m?.median_first_ms });
+    // the same definitions in the app (src/monthly.ts) give the same numbers from the same records
+    const { monthMetrics } = await import("../../supabase/functions/agent-run/agent.js");
+    const iso = (x: unknown) => (x instanceof Date ? x.toISOString() : x == null ? null : String(x));
+    const runs = (await sql`select id, prompt, created_at, first_text_at, done_at, status from public.agent_runs where workspace_id = ${ws} and kind = 'task'`).map((x) => ({ id: x.id, prompt: x.prompt, created_at: iso(x.created_at)!, first_text_at: iso(x.first_text_at), done_at: iso(x.done_at), status: x.status }));
+    const filings = (await sql`select id, app_id, title, status, submitted_at, decided_at from public.filings where workspace_id = ${ws}`).map((f) => ({ ...f, submitted_at: iso(f.submitted_at), decided_at: iso(f.decided_at) }));
+    const t = monthMetrics({ ...(await wsState()), audit: [] } as never, { today: day(0), runs: runs as never, filings: filings as never });
+    const ids = (xs: { id: string }[]) => xs.map((x) => String(x.id)).sort().join(",");
+    const near = (a: number | null, b: number | null) => (a == null && b == null) || (a != null && b != null && Math.abs(a - b) <= 2);
+    check("the app's definitions and the database's agree", ["mapped", "filled", "waiting", "submitted", "approved", "renewals"].every((k) => ids(t[k as "mapped"]) === ids(m[k])) && near(t.median_first_ms, m.median_first_ms) && near(t.median_done_ms, m.median_done_ms) && t.runs.length === m.runs_count && t.plan_ms === m.plan_ms,
+      Object.fromEntries(["mapped", "filled", "waiting", "submitted", "approved", "renewals"].map((k) => [k, [ids(t[k as "mapped"]), ids(m[k])]]).concat([["first", [t.median_first_ms, m.median_first_ms]], ["done", [t.median_done_ms, m.median_done_ms]], ["runs", [t.runs.length, m.runs_count]]])));
+    check("every number has its list: runs with times, filings with dates", m.runs.every((r: { first_ms: number | null }) => r.first_ms == null || r.first_ms >= 0) && m.submitted.every((x: { at: string }) => !!x.at));
+    // headquarters: numbers for each franchisee that shared, never a prompt or a title
+    const h = await rpc("odelia_month_hq", {}, hq.jwt);
+    const blob = JSON.stringify(h.data ?? {});
+    check("headquarters sees each franchisee's numbers", h.status === 200 && h.data?.rows?.length === 1 && h.data.rows[0].name === "Golden Ox Noodle" && h.data.totals.runs === m.runs_count && h.data.totals.mapped === m.mapped.length, h.data);
+    check("and nothing of what they asked or filed", !blob.includes("Where do things stand") && !blob.includes("Food service establishment permit") && !blob.includes(EIN), blob.slice(0, 300));
+    check("an unproven email gets nothing", (await rpc("odelia_month_hq", {}, hqUnproven.jwt)).data == null);
+    // the Placetta team: every workspace; nobody else
+    const c = await rpc("odelia_month_company", {}, staff.jwt);
+    check("the team sees every workspace's numbers", c.status === 200 && c.data?.workspaces >= 1 && c.data.rows.some((x: { workspace_id: string }) => x.workspace_id === ws) && c.data.totals.runs >= m.runs_count, c.data?.totals);
+    check("an owner can't read the company's numbers", (await rpc("odelia_month_company", {}, owner.jwt)).status >= 400);
+    check("headquarters can't read the workspace's own numbers", (await rpc("odelia_month_detail", { ws }, hq.jwt)).status >= 400);
   });
 
   /* ---------------- h. account deletion ---------------- */

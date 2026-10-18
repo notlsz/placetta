@@ -24,6 +24,7 @@ import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
 // any vendor that may take a conversation (a Gemini key without GEMINI_PAID may not), not just Anthropic or Gemini
 import { canConverse } from "../_shared/llm.ts";
+import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -495,7 +496,12 @@ Deno.serve(async (req) => {
 
   // Phones: urgent items become a call (or a text), important ones a text, for owners who linked a phone.
   let phoned = 0;
-  const notices = created.map((u) => ({ u, level: urgency(u, criticalApps(all.find((w) => w.id === u.workspace_id)?.state)) })).filter((x) => x.level);
+  const stateOf = (ws: string) => all.find((w) => w.id === ws)?.state;
+  // An owner who told Odelia "text me, don't email" (src/recall.ts) gets every update by text, since the email digest
+  // below skips them; everyone else only the urgent and important ones.
+  const textsAll = (ws: string, uid: string) => wantsTexts(stateOf(ws), uid) && !mayEmail(stateOf(ws), uid);
+  const hasTexters = (ws: string) => Object.keys(((stateOf(ws) ?? {}) as { memories?: Record<string, unknown> }).memories ?? {}).some((uid) => textsAll(ws, uid));
+  const notices = created.map((u) => ({ u, level: urgency(u, criticalApps(stateOf(u.workspace_id))) })).filter((x) => x.level || x.u.workspace_id && hasTexters(x.u.workspace_id));
   if (notices.length) {
     const wsIds = [...new Set(notices.map((x) => x.u.workspace_id))];
     const { data: owners } = await admin.from("workspace_members").select("workspace_id, user_id").in("workspace_id", wsIds).eq("role", "owner");
@@ -508,6 +514,7 @@ Deno.serve(async (req) => {
     for (const { u, level } of notices) {
       for (const o of (owners ?? []).filter((x) => x.workspace_id === u.workspace_id)) {
         const l = byUser.get(o.user_id as string);
+        if (!level && !textsAll(u.workspace_id, o.user_id as string)) continue;
         if (!l || (!l.texts_on && !(level === "urgent" && l.calls_on))) continue;
         const lang = l.lang === "zh" ? "zh" : "en";
         rows.push({ user_id: o.user_id, workspace_id: u.workspace_id, kind: level === "urgent" && l.calls_on ? "call" : "text", urgent: level === "urgent",
@@ -552,6 +559,7 @@ Deno.serve(async (req) => {
       const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", ws).eq("role", "owner");
       const emails: string[] = [];
       for (const o of owners ?? []) {
+        if (!mayEmail(stateOf(ws), o.user_id)) continue;   // they told Odelia not to email them (src/recall.ts)
         const { data } = await admin.auth.admin.getUserById(o.user_id);
         if (data?.user?.email && data.user.email_confirmed_at) emails.push(data.user.email);
       }

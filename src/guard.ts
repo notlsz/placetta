@@ -21,6 +21,22 @@ export function secretNumber(label: string, value: string): boolean {
   // a line that takes an SSN, ITIN or EIN: an EIN written 12-3456789 is fine; any other 9 digits may be an SSN
   return SSN_LINE.test(label) && !EIN_SHAPE.test(v) && /^\D*(\d\D*){9}$/.test(v);
 }
+/** Any identifying number in free text: a Social Security number or ITIN, an EIN, a card, bank, routing, passport or
+ *  license number, or a long run of digits. Email addresses and phone numbers are not ID numbers and are set aside
+ *  before looking. Used by memory (src/recall.ts), which keeps details people mention but never a number like these. */
+const PHONE_SHAPE = /(?<![\d-])(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}(?![\d-])|(?<!\d)\+86[\s-]?1\d{2}[\s-]?\d{4}[\s-]?\d{4}(?!\d)|(?<!\d)1[3-9]\d{9}(?!\d)/g;
+const EMAIL_SHAPE = /[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[a-z]{2,}/gi;
+export function idNumber(text: string): boolean {
+  const t = String(text ?? "").replace(EMAIL_SHAPE, " ").replace(PHONE_SHAPE, " ");
+  if (SSN_SHAPE.test(t) || /\b\d{2}-\d{7}\b/.test(t)) return true;                       // SSN or ITIN, EIN
+  if (/(?<!\d)(?:\d[ -]?){13,19}(?!\d)/.test(t)) return true;                             // a card or account number
+  if (/(?<![\d.])\d{8,}(?![\d.])/.test(t)) return true;                                   // a long bare number
+  return /\b(ssn|social security|itin|passport|driver'?s? licen[cs]e|licen[cs]e (no|number|#)|account (no|number|#)|routing|iban|swift|card (no|number))\b[^.\n]{0,24}[A-Z0-9]*\d[A-Z0-9-]{3,}/i.test(t)
+    || /(身份证|护照|驾照|社会安全号|社安号|银行账号|卡号)[^。\n]{0,12}\d{4,}/.test(t);
+}
+/** Health, beliefs, politics, money and the like: kept in memory only when "Include sensitive topics" is on. */
+export const SENSITIVE = /\b(health|diagnos|illness|disease|medication|therapy|pregnan|religio|church|mosque|temple|faith|politic|vote|party member|union|salary|income|debt|credit score|sexual|orientation|gender identity|disab|immigration|visa status|criminal|arrest)\w*/i;
+
 /** "By hand": the line is answered, and the signer writes it on the printed copy (an SSN, an ITIN, a passport number).
  *  It counts as filled, nothing is printed in that box, and the format checks before approval leave it alone. */
 export const BY_HAND = /^(by hand|written by hand|(the )?signer (writes|fills)( it)?( in)? by hand|手写|由签署人手写|签署人手写)\.?$/i;
@@ -51,8 +67,9 @@ export function injected(text: string): string | null {
   }
   return null;
 }
-/** The email addresses in a text, lowercased. */
-export const emailsIn = (text: string) => [...String(text ?? "").matchAll(/[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[a-z]{2,}/gi)].map(m => m[0].toLowerCase().replace(/[.]+$/, ""));
+/** The email addresses in a text, lowercased. Only the characters an address is made of, so Chinese text right before
+ *  one ("是我们的承包商，kevin@kbuild.com", with a full-width comma) isn't taken as part of it. */
+export const emailsIn = (text: string) => [...String(text ?? "").matchAll(/[A-Za-z0-9._%+'-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[a-z]{2,}/gi)].map(m => m[0].toLowerCase().replace(/[.]+$/, ""));
 
 /** A government address: .gov, .mil, .us, or a city or county domain Placetta knows is the agency's own. */
 export const governmentAddress = (email: string) => /\.(gov|mil|us)$/i.test(email.split("@")[1] ?? "") || /@([a-z0-9-]+\.)*(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov|lacounty\.gov|houstontx\.gov|sanjoseca\.gov)$/i.test(email);

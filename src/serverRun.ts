@@ -2,7 +2,7 @@ import { same, type Bi } from "./bi";
 import type { Reply, Step } from "./core";
 import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
-import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
+import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runAll, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
 import { B } from "./bi";
 import { settleJobs, type Job } from "./jobs";
 import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone } from "./harness";
@@ -17,7 +17,7 @@ import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, h
 
 /** One model call. role says what the call is for (src/live.ts Role), so the server can pick the cheapest model that
  *  does that job well: the main loop's role (plan, short or watch), review for the checker, extract for reading files. */
-export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role) => Promise<{ content: Block[]; stop_reason: string }>;
+export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role, onText?: (text: string) => void) => Promise<{ content: Block[]; stop_reason: string }>;
 /** Everything needed to pick a run up again. */
 export type RunState = {
   messages: { role: string; content: unknown }[];
@@ -39,6 +39,8 @@ export type RunState = {
   plainSms?: boolean;
   /** What the whole task has cost so far in US dollars, across every chunk a fresh instance picked up. */
   spent?: number;
+  /** The person's words were read for details to remember (src/recall.ts), so a resumed chunk doesn't read them again. */
+  recalled?: boolean;
 };
 
 const MAX_ROUNDS = 16;
@@ -170,6 +172,9 @@ export async function runRounds(o: {
   maxRounds?: number;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for the monitor's background checks. */
   role?: Role;
+  /** Whose memory the run reads: the person who asked (agent-run passes the run's created_by). Their saved details
+   *  (src/recall.ts) go in the instructions, and their people are reached by name. */
+  me?: string;
 }): Promise<{ reply: Reply } | { paused: RunState }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
@@ -180,9 +185,10 @@ export async function runRounds(o: {
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
   const from = { channel: o.channel, plainSms: st.plainSms === true };
   const apply = (p: Patch) => o.apply(guardPatch(from, p));
-  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal,
+  const me = o.me ?? o.svc?.me;
+  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me,
     ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}) });
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms);
+  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms);
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
@@ -202,7 +208,10 @@ export async function runRounds(o: {
       if (Date.now() > o.until) return { paused: save() };
       if (st.rounds === 0) o.step({ state: "searching", label: { en: "Reading your workspace", zh: "读取您的工作区" } });
       st.rounds++; st.seatRounds = (st.seatRounds ?? 0) + 1;
-      const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep, mainRole);
+      // streamed into the draft: the app shows the words as the model writes them, not when the round ends
+      const before = st.text;
+      const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep, mainRole,
+        o.draft ? t => { if (t) o.draft!(clean((before ? before + "\n\n" + t : t).slice(made.lastToolAt))); } : undefined);
       last = data.content;
       for (const c of data.content) for (const ci of c.citations ?? []) if (ci.url && !sources.has(ci.url)) sources.set(ci.url, { url: ci.url, title: ci.title || ci.url });
       st.sources = [...sources.values()];
@@ -212,17 +221,14 @@ export async function runRounds(o: {
       const uses = data.content.filter(c => c.type === "tool_use");
       if (!uses.length || data.stop_reason !== "tool_use") { finished = true; break; }
       st.messages.push({ role: "assistant", content: data.content });
-      const results: Record<string, unknown>[] = [];
-      for (const u of uses) {
+      // in the order the model asked; several lookups in a row run side by side (READ_ONLY in src/live.ts)
+      const results: Record<string, unknown>[] = await runAll(uses, async u => {
         const refused = channelRefuses(from, String(u.name ?? ""), (u.input ?? {}) as Record<string, unknown>);
-        if (refused) {
-          results.push({ type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true });
-          continue;
-        }
+        if (refused) return { type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true };
         const r = await runTool(tools, u);
         const note = r.is_error ? null : channelNote(from, String(u.name ?? ""));
-        results.push((note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>);
-      }
+        return (note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>;
+      });
       // The harness: a seat that has handed off gives the job to a fresh agent with a clean context (no compaction);
       // one that's nearly out of room is told to write its handoff first.
       const job = activeJob();

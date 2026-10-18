@@ -4,9 +4,11 @@
 // call through the AI gate (budget, rate limits, the company's daily ceiling) and prices it.
 // It is not a general model: the server's own instructions come first on every call, so it can't be used as a free
 // chatbot. A workspace past 60% of its allowance runs in saver mode (cheaper models, no research, shorter answers);
-// past 100% it stops.
+// past 100% it stops. With stream: true the answer comes back as server-sent events while the model writes it (the app
+// shows the words arriving), ending with the same complete message.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { callModel, canConverse, ROLES, type Role } from "../_shared/llm.ts";
+import { sse } from "../_shared/stream.ts";
 import { gate, record } from "../_shared/ai_gate.ts";
 
 const CORS = {
@@ -147,14 +149,45 @@ Deno.serve(async (req) => {
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
   if (tools.length) payload.tools = tools;
 
-  const out = await callModel(env, { payload, role, research, beta: research ? FETCH_BETA : null }, anthropicModel,
-    research ? { search, fetch: fetchTool, pageTools } : null);
-  if (!out.ok) {
+  const call = { payload, role, research, beta: research ? FETCH_BETA : null };
+  const tools_ = research ? { search, fetch: fetchTool, pageTools } : null;
+  const failed = (out: { model: string; status: number; text: string }) => {
     console.error("models", out.model, out.status, out.text.slice(0, 300));
     const code = out.status === 429 || out.status === 529 ? "rate_limited" : out.status === 401 || out.status === 503 ? "not_configured" : "upstream_error";
-    return fail(code === "rate_limited" ? 429 : 502, code, code === "rate_limited" ? "The agent is busy. Try again in a moment." : "Couldn't reach the agent's model. Try again.");
+    return { status: code === "rate_limited" ? 429 : 502, code, message: code === "rate_limited" ? "The agent is busy. Try again in a moment." : "Couldn't reach the agent's model. Try again." };
+  };
+  const saver = g.tier === "reduced" ? { saver: true, renews_at: g.period_end } : {};
+
+  // Streamed (the app asks with stream: true): the model's words go out as they're written, as server-sent events:
+  // "text" with each new piece ({d}), or the whole text again ({reset, d}) when a model broke off and the next one
+  // started over; then "message" with the complete answer, the same JSON as without streaming; or "error".
+  if (body.stream === true) {
+    const enc = new TextEncoder();
+    return new Response(new ReadableStream<Uint8Array>({
+      async start(ctl) {
+        let shown = "";
+        const send = (event: string, data: unknown) => { try { ctl.enqueue(enc.encode(sse(event, data))); } catch { /* the app went away */ } };
+        try {
+          const out = await callModel(env, call, anthropicModel, tools_, fetch, (t) => {
+            if (t.startsWith(shown)) { if (t.length > shown.length) send("text", { d: t.slice(shown.length) }); }
+            else send("text", { reset: true, d: t });
+            shown = t;
+          });
+          if (!out.ok) { const f = failed(out); send("error", { error: { code: f.code, message: f.message } }); return; }
+          const data = out.data as { usage?: Record<string, never> };
+          await record(admin, g.event, out.model, data.usage, role);
+          send("message", { ...data, ...saver });
+        } catch (e) {
+          console.error("agent stream", String(e).slice(0, 200));
+          send("error", { error: { code: "upstream_error", message: "Couldn't reach the agent's model. Try again." } });
+        } finally { try { ctl.close(); } catch { /* closed */ } }
+      },
+    }), { status: 200, headers: { ...CORS, "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" } });
   }
+
+  const out = await callModel(env, call, anthropicModel, tools_);
+  if (!out.ok) { const f = failed(out); return fail(f.status, f.code, f.message); }
   const data = out.data as { usage?: Record<string, never> };
   await record(admin, g.event, out.model, data.usage, role);
-  return json(200, { ...data, ...(g.tier === "reduced" ? { saver: true, renews_at: g.period_end } : {}) });
+  return json(200, { ...data, ...saver });
 });

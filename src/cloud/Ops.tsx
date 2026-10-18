@@ -5,6 +5,7 @@ import { fmtAgo, money } from "../time";
 import { I, Pill } from "../ui";
 import * as api from "./api";
 import { openSettings } from "../Settings";
+import { CompanyMetrics } from "../Metrics";
 
 /* The Placetta team's filing queue. Each request is exactly what the customer approved: the form, the fields,
    the attachments and the agency site. The team checks it against the agency's current requirements, submits it,
@@ -205,6 +206,7 @@ export function Queue() {
       <div className="q-grid">
         <div className="q-list">
           <AiMarginCard />
+          <CompanyMetrics />
           {tasks.length > 0 && (
             <section className="sec">
               <div className="sec-h"><h2>{lang === "zh" ? "团队待办" : "Team tasks"}<em>{tasks.length}</em></h2></div>

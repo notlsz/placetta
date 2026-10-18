@@ -111,6 +111,8 @@ export type Ctx = {
   updateStore(id: string, f: (s: Store) => Store, log?: { action: Bi; object: Bi; detail?: Bi }): void;
   /** This person's memory (Settings, Memory), and a way to change it. */
   memory: MemoryBook | null;
+  /** Whose memory it is: the signed-in person's id, or the sample's one person (src/recall.ts). */
+  me: string;
   setMemory(f: (b: MemoryBook) => MemoryBook): void;
   /** Change the workspace directly (Settings: skills). */
   editWs(f: (w: Workspace) => Workspace): void;

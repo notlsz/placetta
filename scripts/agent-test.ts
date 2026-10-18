@@ -6,7 +6,14 @@
 import { DEFAULT_POLICY } from "../src/spend.ts";
 import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, type Channel, type RunState, type Send } from "../src/serverRun";
 import { applyChange, confirmChange, normalizeState, type Step } from "../src/core";
-import { DOCS_PER_RUN, liveAgent, makeTools, messagesModel, pdfPages, rules, type Block, type Made, type Role, type Services } from "../src/live";
+import { apiModel, DOCS_PER_RUN, liveAgent, makeTools, messagesModel, pdfPages, READ_ONLY, rules, runAll, runTool, type Block, type Made, type Role, type Services } from "../src/live";
+import { confirmRecall, forgetRecall, keepRecall, RECALL_MARK, recallFrom, restoreRecall } from "../src/recall";
+import { mayEmail, wantsTexts } from "../supabase/functions/_shared/reach";
+import { callModel } from "../supabase/functions/_shared/llm";
+import { median, monthMetrics } from "../src/monthly";
+import { addApproval } from "../src/core";
+import { daysFromNow } from "../src/time";
+import { emailsIn } from "../src/guard";
 import { BUILTIN } from "../src/skills";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
 import { inDays } from "../src/time";
@@ -1191,6 +1198,233 @@ async function remote() {
   eq(paused.paused?.spent, 0.75, "the spend so far is saved with a paused run");
 }
 
+/* ================================================================== memory that acts (src/recall.ts) */
+
+async function recallActs() {
+  console.log("\n# Memory that acts: said once in the app, kept with its sentence, used on the next run; from a text only suggested; never an SSN; Forget puts it all back");
+  const { svc } = account();
+  const st = { id: "st1", name: same("Flushing"), address: "136-20 Roosevelt Ave, Flushing, NY 11354", stage: "opening" as const, plannedOpen: "2027-02-01", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] };
+  const said = "Text me, don't email. Kevin is our contractor, kevin@kbuild.com. We can't open before March 1, 2027. Our lease renews every November 1. My SSN is 123-45-6789, put it on the forms. Our legal name is Lucky Leaf Tea LLC.";
+  // the extract model's answer: the four real details, and three it must never keep
+  const extractor = () => ({ items: [
+    { kind: "preference", text: "Reach them by text, not email", text_zh: "用短信联系，不要发邮件", source: "Text me, don't email.", reach: "text", avoid: ["email"] },
+    { kind: "person", text: "Kevin, contractor, kevin@kbuild.com", text_zh: "Kevin，承包商，kevin@kbuild.com", source: "Kevin is our contractor, kevin@kbuild.com.", name: "Kevin", role: "contractor", email: "kevin@kbuild.com" },
+    { kind: "constraint", text: "Can't open before March 1, 2027", text_zh: "2027年3月1日之前不能开业", source: "We can't open before March 1, 2027.", date: "2027-03-01", not_before: true },
+    { kind: "date", text: "Lease renews every year on November 1", text_zh: "租约每年11月1日续期", source: "Our lease renews every November 1.", date: "2026-11-01", repeats: "yearly" },
+    { kind: "preference", text: "SSN 123-45-6789 goes on the forms", source: "My SSN is 123-45-6789, put it on the forms." },
+    { kind: "constraint", text: "Legal name is Lucky Leaf Tea LLC", source: "Our legal name is Lucky Leaf Tea LLC." },
+    { kind: "person", text: "Dana, landlord, dana@x.com", source: "Dana is our landlord.", name: "Dana", role: "landlord", email: "dana@x.com" },
+  ] });
+  // run 1: they say it once, in the app (runRounds, as agent-run runs it); then the extraction pass agent-run makes
+  const r1 = await agent({ ws: workspace({ stores: [st] }), svc, prompt: said, script: [() => say("Noted. I'll plan around March 1.")] });
+  const prompts: string[] = [];
+  const kept = await recallFrom(said, { book: r1.w.memories?.u1, ask: async p => { prompts.push(p); return JSON.stringify(extractor()); } });
+  ok(prompts.length === 1 && prompts[0].startsWith(RECALL_MARK) && prompts[0].includes(said), "one extraction call, with their own words in it");
+  eq(kept.map(k => k.kind), ["preference", "person", "constraint", "date"], "four details kept: how to reach them, Kevin, the opening limit, the lease date");
+  ok(kept.every(k => k.status === "saved" && !!k.at && said.includes(k.source.replace(/\.$/, ""))), "each saved (asked in the app) with the sentence it came from and when");
+  const w1 = keepRecall("u1", kept)(r1.w);
+  const items = w1.memories?.u1?.items ?? [];
+  ok(!JSON.stringify(w1).includes("123-45-6789"), "the SSN is never saved anywhere (src/guard.ts)");
+  ok(!items.some(i => /legal name|Lucky Leaf Tea LLC/i.test(i.text.en)), "a fact a form asks for isn't memory: it keeps the confirm flow (remember)");
+  ok(!items.some(i => i.person?.name === "Dana"), "a detail that isn't in their words is dropped");
+  eq(w1.stores?.[0].plannedOpen, "2027-03-01", "acted on: the store's planned opening moved to March 1");
+  ok(w1.deadlines.some(d => d.kind === "milestone" && d.date === "2027-03-01") && w1.deadlines.some(d => d.kind === "renewal" && /lease renews/i.test(d.title.en) && d.date.endsWith("-11-01")), "the limit and the lease renewal are on Deadlines");
+  ok(w1.audit.some(a => a.action.en === "Moved the planned opening" && /can't open before/i.test(a.detail?.en ?? "")), "the move is in the audit trail, in their own words");
+  ok(!mayEmail(w1, "u1") && wantsTexts(w1, "u1"), "the server reads how to reach them: text, never email");
+
+  // run 2: used without being asked again
+  const r2 = await agent({ ws: w1, svc, prompt: "Ask Kevin when the walls will be done.", script: [() => ask(["draft_message", { to: "Kevin", message: "Hi Kevin, when will the walls be done?" }]), () => say("Drafted a note to Kevin.")] });
+  const sys = String(r2.bodies[0].system);
+  ok(/Reach them by text, never by email/.test(sys) && /Kevin, contractor, kevin@kbuild\.com/.test(sys) && /Can't open before March 1, 2027/.test(sys) && /they said it \d{4}-\d{2}-\d{2}/.test(sys), "the next run's instructions carry them, each with when it was said");
+  eq(r2.w.approvals.find(a => a.kind === "send")?.data?.find(d => d.id === "to")?.value, "Kevin (contractor), kevin@kbuild.com", "draft_message to \"Kevin\" goes to the address given once");
+  // the browser's loop reads the same memory
+  let n = 0, bw = w1;
+  const bm = messagesModel("api", async () => (n++ === 0 ? ask(["draft_message", { to: "our contractor", message: "Walls?" }]) : say("Drafted.")));
+  await liveAgent(bm, [], new Map(), false, { me: "u1" }).run({ text: "Ask our contractor about the walls" }, { lang: "en", current: bw }, e => { if (e.type === "update") bw = e.patch(bw); }, new AbortController().signal);
+  eq(bw.approvals.find(a => a.kind === "send")?.data?.find(d => d.id === "to")?.value, "Kevin (contractor), kevin@kbuild.com", "in the browser too: \"our contractor\" is Kevin");
+
+  // from a text message: only suggested
+  const sms = "Kevin is our contractor, kevin@kbuild.com. Text me, don't email.";
+  const sug = await recallFrom(sms, { via: "sms", ask: async () => JSON.stringify(extractor()) });
+  ok(sug.length === 2 && sug.every(s => s.status === "suggested" && s.via === "sms"), "from a text: suggested, not saved");
+  const w2 = keepRecall("u2", sug)(workspace({ stores: [st] }));
+  ok(!w2.deadlines.length && w2.stores?.[0].plannedOpen === "2027-02-01" && mayEmail(w2, "u2") && !wantsTexts(w2, "u2"), "a suggestion changes nothing: no deadline, no store date, not how they're reached");
+  const r3 = await agent({ ws: w2, svc: { ...svc, me: "u2" }, prompt: "Ask Kevin about the walls.", script: [() => ask(["draft_message", { to: "Kevin", message: "Walls?" }]), () => say("Drafted.")] });
+  ok(!/kevin@kbuild/.test(String(r3.bodies[0].system)) && r3.w.approvals.find(a => a.kind === "send")?.data?.find(d => d.id === "to")?.value === "Kevin", "an unconfirmed suggestion is never used: not in the instructions, not in a draft");
+  const w3 = confirmRecall("u2", sug.find(s => s.kind === "person")!.id)(w2);
+  ok(w3.memories?.u2?.items?.find(s => s.kind === "person")?.status === "saved", "confirmed in the app, it's saved");
+
+  // Forget: gone, what it changed is put back, and the next run doesn't use it
+  const kevin = items.find(i => i.kind === "person")!, limit = items.find(i => i.kind === "constraint")!;
+  // (the draft run 2 left is approved and gone, so its title doesn't carry the address into the next run)
+  const w4 = { ...forgetRecall(limit.id)(forgetRecall(kevin.id)(r2.w)), approvals: [] };
+  ok(!(w4.memories?.u1?.items ?? []).some(i => i.id === kevin.id || i.id === limit.id), "Forget removes them from memory");
+  eq(w4.stores?.[0].plannedOpen, "2027-02-01", "the store's planned opening goes back to what it was");
+  ok(!w4.deadlines.some(d => d.id === limit.made?.deadline), "and the limit's deadline is gone");
+  const r4 = await agent({ ws: w4, svc, prompt: "Ask Kevin about the walls.", script: [() => ask(["draft_message", { to: "Kevin", message: "Walls?" }]), () => say("Drafted.")] });
+  ok(!/kevin@kbuild/.test(String(r4.bodies[0].system)) && !/open before March 1/.test(String(r4.bodies[0].system)), "the next run doesn't know them");
+  eq(r4.w.approvals.find(a => a.kind === "send")?.data?.find(d => d.id === "to")?.value, "Kevin", "and doesn't use the forgotten address");
+  ok(restoreRecall("u1", kevin)(w4).memories?.u1?.items?.some(i => i.id === kevin.id), "Undo brings it back");
+
+  // the sample's reader (no model) finds the same kinds, never the SSN; plain questions cost nothing; Generate off keeps nothing
+  const demo = await recallFrom(said, { today: "2026-10-17" });
+  eq(demo.map(d => d.kind).sort(), ["constraint", "date", "person", "preference"], "the demo's reader keeps the same four kinds");
+  ok(!JSON.stringify(demo).includes("123-45-6789") && demo.find(d => d.kind === "constraint")?.date === "2027-03-01", "and never the SSN; the limit has its date");
+  const zh = await recallFrom("Kevin 是我们的承包商，kevin@kbuild.com。别发邮件，给我发短信。2027年3月1日之前不能开业。", { today: "2026-10-17" });
+  ok(zh.length === 3 && zh.find(k => k.kind === "person")?.person?.email === "kevin@kbuild.com", "it reads Chinese too, and an address after a full-width comma is only the address", zh.map(k => k.person ?? k.text.zh));
+  eq(emailsIn("是我们的承包商，kevin@kbuild.com。Rosa: rosa.l@arch.example.com"), ["kevin@kbuild.com", "rosa.l@arch.example.com"], "emailsIn takes only an address's own characters");
+  let calls = 0;
+  await recallFrom("Where do things stand?", { ask: async () => { calls++; return "{}"; } });
+  eq(calls, 0, "a plain question isn't sent to the extraction model");
+  eq((await recallFrom(said, { book: { settings: { searchChats: true, generate: false, sensitive: false }, files: [] }, ask: async () => JSON.stringify(extractor()) })).length, 0, "with Generate memory off, nothing is kept");
+}
+
+/* ================================================================== speed: streaming and lookups side by side */
+
+/** A vendor with simulated latency: it starts writing after TTFB ms and writes a word every GAP ms. Streams (Anthropic's
+ *  event stream) when asked, and answers whole otherwise, as the real API does. */
+const TTFB = 250, GAP = 12, LOOKUP = 220;
+const pause = (ms: number) => new Promise(r => setTimeout(r, ms));
+function slowVendor(next: () => { content: Block[]; stop_reason: string }): typeof fetch {
+  return (async (_u: string, init: RequestInit) => {
+    const body = JSON.parse(String(init.body)), r = next();
+    await pause(TTFB);
+    const words = r.content.flatMap(b => (b.type === "text" ? String(b.text).split(/(?<= )/) : ["x"]));
+    if (!body.stream) { await pause(words.length * GAP); return new Response(JSON.stringify({ id: "m", type: "message", role: "assistant", ...r, usage: { input_tokens: 10, output_tokens: words.length } }), { headers: { "content-type": "application/json" } }); }
+    const ev = (t: string, d: object) => new TextEncoder().encode(`event: ${t}\ndata: ${JSON.stringify({ type: t, ...d })}\n\n`);
+    return new Response(new ReadableStream({ async start(c) {
+      c.enqueue(ev("message_start", { message: { id: "m", type: "message", role: "assistant", content: [], usage: { input_tokens: 10 } } }));
+      for (const [index, b] of r.content.entries()) {
+        if (b.type === "text") {
+          c.enqueue(ev("content_block_start", { index, content_block: { type: "text", text: "" } }));
+          for (const w of String(b.text).split(/(?<= )/)) { c.enqueue(ev("content_block_delta", { index, delta: { type: "text_delta", text: w } })); await pause(GAP); }
+        } else {
+          c.enqueue(ev("content_block_start", { index, content_block: { ...b, input: {} } }));
+          c.enqueue(ev("content_block_delta", { index, delta: { type: "input_json_delta", partial_json: JSON.stringify(b.input ?? {}) } })); await pause(GAP);
+        }
+        c.enqueue(ev("content_block_stop", { index }));
+      }
+      c.enqueue(ev("message_delta", { delta: { stop_reason: r.stop_reason }, usage: { output_tokens: words.length } }));
+      c.enqueue(ev("message_stop", {}));
+      c.close();
+    } }), { headers: { "content-type": "text/event-stream" } });
+  }) as unknown as typeof fetch;
+}
+export const SPEED: Record<string, { before: number; after: number }> = {};
+
+async function speed() {
+  console.log(`\n# Speed: time to first word, before and after (simulated latency: the model starts after ${TTFB} ms and writes a word every ${GAP} ms; each lookup takes ${LOOKUP} ms)`);
+  const answer = Array.from({ length: 40 }, (_, i) => `word${i}`).join(" ");
+  // 1. the browser's loop, straight to Anthropic (apiModel): the whole answer at the end before, the first word now
+  const browser = async (stream: boolean) => {
+    let n = 0;
+    const vendor = slowVendor(() => (n++ === 0 ? ask(["check_progress", {}]) : say(answer)));
+    // before: the app asked for the whole answer (no stream), as it did until now
+    const f: typeof fetch = stream ? vendor : ((u, init) => vendor(u, { ...init, body: JSON.stringify({ ...JSON.parse(String(init?.body)), stream: false }) })) as typeof fetch;
+    const t0 = performance.now(); let first = 0, done = 0, text = "";
+    await liveAgent(apiModel("sk-test", "claude-sonnet-5-5", f), [], new Map(), false).run({ text: "Where are we?" }, { lang: "en", current: workspace({ apps: [app("a1", "draft")] }) },
+      e => { if (e.type === "draft" && e.text && !first) first = performance.now() - t0; if (e.type === "reply") { done = performance.now() - t0; text = e.reply.text[0].en; } }, new AbortController().signal);
+    return { first: Math.round(first || done), done: Math.round(done), text };
+  };
+  const b0 = await browser(false), b1 = await browser(true);
+  ok(b0.text === answer && b1.text === answer, "the browser gets the same whole answer either way");
+  // the saving is the time the model spends writing the rest of the answer (40 words at GAP ms), less some slack for a busy machine
+  ok(b0.first - b1.first > 40 * GAP * 0.6, `browser: the first word shows at ${b1.first} ms instead of ${b0.first} ms`);
+  SPEED.browser = { before: b0.first, after: b1.first };
+
+  // 2. the server's loop (runRounds, as agent-run runs it) through the real router (callModel) and the draft it saves:
+  // two lookups in one round, then the answer
+  const server = async (fast: boolean) => {
+    let n = 0;
+    const vendor = slowVendor(() => (n++ === 0 ? ask(["network_lessons", { city: "Flushing", region: "NY" }], ["network_lessons", { agency: "NYC Department of Health" }]) : say(answer)));
+    const env = (k: string) => ({ ANTHROPIC_API_KEY: "a" } as Record<string, string>)[k];
+    const send: Send = async (body, _deep, role, onText) => {
+      // before: agent-run asked for whole answers; now it streams the main loop's rounds into the draft
+      const out = await callModel(env, { payload: { model: "claude-sonnet-5-5", ...body }, role: (role ?? "plan") as never, research: false, beta: null }, "claude-sonnet-5-5", null, vendor, fast ? onText : undefined);
+      if (!out.ok) throw new Error(out.text);
+      return out.data as { content: Block[]; stop_reason: string };
+    };
+    const { svc } = account();
+    const lookups: number[] = [];
+    const slow = { ...svc, network: async () => { const t = performance.now(); await pause(LOOKUP); lookups.push(performance.now() - t); return []; } };
+    // before: lookups ran one at a time (take them out of READ_ONLY for the old behaviour)
+    if (!fast) READ_ONLY.delete("network_lessons");
+    try {
+      let w = workspace(), first = 0, last = "";
+      const t0 = performance.now();
+      const out = await runRounds({ state: startState([], "What do other businesses know about Flushing?"), ws: () => w, apply: p => { w = p(w); }, step: () => {}, draft: t => { if (t && !first) first = performance.now() - t0; last = t; },
+        send, lang: "en", deep: false, account: true, svc: slow, signal: new AbortController().signal, until: Date.now() + 60_000, research: false });
+      return { first: Math.round(first), done: Math.round(performance.now() - t0), text: "reply" in out ? (out.reply.text[0] as { en: string }).en : "", last };
+    } finally { READ_ONLY.add("network_lessons"); }
+  };
+  const s0 = await server(false), s1 = await server(true);
+  ok(s0.text === answer && s1.text === answer && s1.last === answer, "the server's run ends with the same answer, and its last draft is the whole answer");
+  ok(s1.first < s0.first - LOOKUP * 0.8 - GAP * 20, `server: the draft shows the first word at ${s1.first} ms instead of ${s0.first} ms`);
+  SPEED.server = { before: s0.first, after: s1.first };
+
+  // 3. the lookups themselves: side by side, in the order asked, with a change between them still in order
+  const { svc } = account();
+  let w = workspace({ apps: [app("a1", "draft")] });
+  const slowSvc = { ...svc, network: async () => { await pause(LOOKUP); return []; } };
+  const made: Made = { apps: new Set(), approvals: [], memory: [], skills: [], files: [], lastToolAt: 0 };
+  const tools = makeTools(() => w, p => { w = p(w); }, () => {}, made, "en", () => 0, true, { model: messagesModel("server", async () => say("")), files: new Map(), svc: slowSvc, signal: new AbortController().signal });
+  const uses = [["network_lessons", { city: "Flushing" }], ["network_lessons", { agency: "NYC DOH" }], ["add_deadline", { date: "2027-01-05", title: "Renew" }], ["check_progress", {}], ["network_lessons", { form: "nyc-fse" }]]
+    .map(([name, input], i) => ({ type: "tool_use", id: `t${i}`, name: name as string, input: input as Record<string, unknown> }));
+  let t0 = performance.now();
+  for (const u of uses) await runTool(tools, u);
+  const one = performance.now() - t0;
+  t0 = performance.now();
+  const res = await runAll(uses, u => runTool(tools, u));
+  const side = performance.now() - t0;
+  eq(res.map(r => r.tool_use_id), ["t0", "t1", "t2", "t3", "t4"], "results come back in the order the model asked");
+  ok(/Renew/.test(res[3].content) || /next_30_days/.test(res[3].content), "a lookup after a change sees it (check_progress after add_deadline)");
+  ok(side < one - LOOKUP * 0.8, `three lookups and a change: ${Math.round(side)} ms side by side instead of ${Math.round(one)} ms one at a time`);
+  SPEED.lookups = { before: Math.round(one), after: Math.round(side) };
+  console.log(`  TTFT browser path: ${b0.first} ms -> ${b1.first} ms; server draft: ${s0.first} ms -> ${s1.first} ms; a round of lookups: ${SPEED.lookups.before} ms -> ${SPEED.lookups.after} ms`);
+}
+
+/* ================================================================== what Odelia did this month (src/monthly.ts) */
+
+function monthly() {
+  console.log("\n# What Odelia did this month: measured from the records, each with the list behind it");
+  const today = "2026-10-17";
+  const w = workspace({
+    apps: [app("a1", "ready"), app("a2", "draft", { fields: [{ id: "x", label: same("Owner"), value: "TBD" }] }), app("a3", "todo", { fields: [] })],
+    approvals: [{ id: "ap1", kind: "file", app: "a1", title: same("File a1"), does: [], action: same("Approve"), at: "2026-10-15T10:00:00.000Z" }, { id: "pay1", kind: "pay", title: same("Pay"), does: [], action: same("Pay") }],
+    deadlines: [{ id: "r1", date: "2027-01-01", kind: "renewal", title: same("Renew a1") }, { id: "r0", date: "2026-01-01", kind: "renewal", title: same("Lapsed") }, { id: "d1", date: "2026-12-01", kind: "due", title: same("Due") }],
+    firstPlan: { at: "2026-10-01T00:00:00Z", what: "Milk tea shop", where: "Flushing, NY", apps: 3, ms: 2400 },
+    runs: [
+      { id: "x1", prompt: "a", created_at: "2026-10-16T10:00:00.000Z", first_text_at: "2026-10-16T10:00:01.000Z", done_at: "2026-10-16T10:00:09.000Z", status: "done" },
+      { id: "x2", prompt: "b", created_at: "2026-10-16T11:00:00.000Z", first_text_at: "2026-10-16T11:00:03.000Z", done_at: "2026-10-16T11:00:21.000Z", status: "done" },
+      { id: "x3", prompt: "stopped", created_at: "2026-10-16T12:00:00.000Z", first_text_at: "2026-10-16T12:00:02.000Z", done_at: null, status: "stopped" },
+      { id: "x4", prompt: "last month", created_at: "2026-09-16T11:00:00.000Z", first_text_at: "2026-09-16T11:00:30.000Z", done_at: "2026-09-16T11:01:00.000Z", status: "done" },
+    ],
+  });
+  const filings = [
+    { id: "f1", app_id: "a1", title: same("A1"), status: "submitted", submitted_at: "2026-10-10T00:00:00Z", decided_at: null },
+    { id: "f2", app_id: "a2", title: same("A2"), status: "accepted", submitted_at: "2026-09-20T00:00:00Z", decided_at: "2026-10-12T00:00:00Z" },
+    { id: "f3", app_id: "a3", title: same("A3"), status: "accepted", submitted_at: "2026-08-20T00:00:00Z", decided_at: "2026-09-12T00:00:00Z" },
+  ];
+  const m = monthMetrics(w, { today, filings });
+  eq([m.month, m.plan_ms, m.runs.length], ["2026-10-01", 2400, 3], "the month, the time to plan, this month's three requests (not last month's)");
+  eq([m.median_first_ms, m.median_done_ms], [2000, 15000], "medians: first words 1, 2 and 3 s gives 2 s; done 8 and 21 s gives 15 s (a stopped run has no done time)");
+  eq([m.mapped.length, m.filled.map(x => x.id)], [3, ["a1"]], "three permits mapped, one fully filled (\"TBD\" is blank, no lines isn't filled)");
+  eq(m.waiting.map(x => [x.id, x.at]), [["ap1", "2026-10-15T10:00:00.000Z"]], "approvals waiting, with when they were asked (payments are the agency's)");
+  eq([m.submitted.map(x => x.id), m.approved.map(x => x.id)], [["f1"], ["f2"]], "submitted and approved this month, from the filings");
+  eq(m.renewals.map(x => x.id), ["r1"], "renewals caught before they lapse: the one still ahead");
+  ok(!("hours" in m) && !Object.keys(m).some(k => /hour|saved/i.test(k)), "no hours-saved number: nothing in docs/ gives a time per task to derive it from");
+  eq(median([1, 2, 3, 4]), 3, "an even count takes the mean of the two middle values, rounded (as percentile_cont)");
+  // the sample: from its audit trail, and the approvals' age from when they were asked
+  const s = monthMetrics(SAMPLE_WS, { today: daysFromNow(0) });
+  ok(s.mapped.length === SAMPLE_WS.apps.length && s.waiting.length === SAMPLE_WS.approvals.length && s.waiting.some(x => x.at) && s.renewals.length >= 1, "the sample's numbers come from its own records", { waiting: s.waiting, renewals: s.renewals.length });
+  // a new approval is stamped with when it was asked
+  const stamped = addApproval({ id: "n1", kind: "send", title: same("x"), does: [], action: same("Send") })(workspace());
+  ok(!!stamped.approvals[0].at, "addApproval stamps when it was asked");
+}
+
+await recallActs();
+await speed();
+monthly();
 await progress();
 await remote();
 await stores();

@@ -3,6 +3,7 @@ import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { blockersSay, confirmChange, readyToFile } from "./core";
 import { emptyBook } from "./memory";
+import { chipsOf, keepRecall, recallFrom, SAMPLE_ME } from "./recall";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
 import { AgentBot } from "./Bot";
@@ -313,11 +314,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [apiName, setApiName] = useState("");
   const [deep, setDeep] = useState(false);
   const history = useRef<Msg[]>([]);
+  /* Whose memory (src/recall.ts): the signed-in person, or the sample's one person, so the demo remembers too. */
+  const me = cloud?.me.id ?? SAMPLE_ME;
   const abort = useRef<AbortController | null>(null);
   useEffect(() => {
     if (cloud && !api.PREVIEW) {
       const m = wsRef.current.meta, loc = m?.city ? { city: m.city, region: m.region } : undefined;
-      setModel(serverModel((body, d, role) => api.agentCall(cloud.wsId, body, { deep: d, location: loc, role }) as never));
+      setModel(serverModel((body, d, role, onText) => api.agentCall(cloud.wsId, body, { deep: d, location: loc, role, onText }) as never));
       return;
     }
     let on = true;
@@ -379,9 +382,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         r = await api.pollRun(id);
         r.steps.slice(shown).forEach((s, i) => onEvent({ type: "step", index: shown + i, step: s }));
         shown = r.steps.length;
-        if (r.draft && r.draft !== draft) { draft = r.draft; onEvent({ type: "draft", text: draft }); }
+        const moved = !!r.draft && r.draft !== draft;
+        if (moved) { draft = r.draft!; onEvent({ type: "draft", text: draft }); }
         if (r.status !== "running") break;
-        await new Promise(res => setTimeout(res, 900));
+        // while words are arriving the server saves them every 300 ms, so look as often; otherwise less
+        await new Promise(res => setTimeout(res, moved ? 300 : 700));
       }
       const row = await api.loadWorkspace(cloud.wsId);
       const next = normalize(row.name, row.state);
@@ -393,6 +398,17 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       else throw { code: "run_failed", message: r.error ?? "" };
     } finally { serverRun.current = null; }
   }, [cloud, refresh]);
+
+  /* Memory that acts (src/recall.ts): after a run in this browser, what the person wrote is read for durable details
+     (the extract role on the same model, through the same server call; the demo's own reader without a model), kept in
+     their memory and acted on, and the reply shows a Remembered chip for each, one tap from Forget. */
+  const recallAfter = useCallback(async (said: string, turn: number, prior?: string) => {
+    const m = modelRef.current;
+    const kept = await recallFrom(said, { book: wsRef.current.memories?.[me], prior, ask: m ? p => m.json(p, { signal: new AbortController().signal, role: "extract" }) : undefined });
+    if (!kept.length) return;
+    setWs(keepRecall(me, kept));
+    setFeed(ms => ms.map(x => (x.id === turn && x.kind === "turn" && x.reply ? { ...x, reply: { ...x.reply, remembered: [...(x.reply.remembered ?? []), ...chipsOf(kept)] } } : x)));
+  }, [me]);
 
   const run = useCallback(async (req: Request, shown: string | null, voice = false, resumeId?: string) => {
     if (busyRef.current) return;
@@ -408,25 +424,32 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const upd = (f: (m: Turn) => Partial<Turn>) => setFeed(ms => ms.map(m => (m.id === aid && m.kind === "turn" ? { ...m, ...f(m) } : m)));
     let said = "";
     const ctl = new AbortController(); abort.current = ctl;
+    let onServer = false, firstAt = "";
+    const askedAt = nowIso();
     const onEvent = (e: AgentEvent) => {
       if (e.type === "step") { setStep(e.step); upd(m => ({ steps: [...m.steps, e.step], active: e.index })); }
       else if (e.type === "update") setWs(e.patch);
-      else if (e.type === "draft") upd(() => ({ draft: e.text }));
+      else if (e.type === "draft") { if (e.text && !firstAt) firstAt = nowIso(); upd(() => ({ draft: e.text })); }
       else {
         const r: Reply = e.reply;
         upd(() => ({ reply: r, active: -1, ms: performance.now() - t0, draft: undefined }));
         said = r.text.map(x => x[lang]).join(" ");
         if (r.matches) setMatch(r.matches);
+        // memory that acts: a run on the server reads it there (agent-run); one here reads it now (src/recall.ts)
+        if ("text" in req && !onServer) void recallAfter(req.text, aid, history.current.filter(x => x.role === "assistant").at(-1)?.content);
+        // timed for What Odelia did this month (src/monthly.ts); a server run is timed in agent_runs
+        if ("text" in req && !onServer) { const done = nowIso(); setWs(w => ({ ...w, runs: [...(w.runs ?? []), { id: `run-${aid}-${Date.now().toString(36)}`, prompt: req.text.slice(0, 200), created_at: askedAt, first_text_at: firstAt || done, done_at: done, status: "done" }].slice(-60) })); }
         if ("text" in req && modelRef.current) history.current.push({ role: "user", content: req.text }, { role: "assistant", content: said });
         // past chats, kept per person so the agent can search them later (Settings, Memory)
         if ("text" in req && cloud && said) { const me = cloud.me.id, at = nowIso(); setWs(w => ({ ...w, chats: { ...(w.chats ?? {}), [me]: [...(w.chats?.[me] ?? []), { at, role: "you" as const, text: req.text.slice(0, 2000) }, { at, role: "agent" as const, text: said.slice(0, 2000) }].slice(-300) } })); }
       }
     };
     const m = modelRef.current;
-    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent }) : demoAgent;
+    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me }) : demoAgent;
     try {
       // In an account the agent works on the server, so it carries on if the app is closed.
       const id = resumeId ?? (cloud && !api.PREVIEW && "text" in req && m ? await api.startRun(cloud.wsId, { prompt: req.text, history: history.current.slice(-12), lang, deep }) : null);
+      onServer = !!id;
       if (id) await follow(id, onEvent, ctl.signal);
       else await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
     } catch (err) {
@@ -460,7 +483,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if ((voice || voiceOn) && said) tts.speak(said, speakTag(lang));
     else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
-  }, [lang, tts, say, t, deep, cloud, plan, voiceOn, services, follow]);
+  }, [lang, tts, say, t, deep, cloud, plan, voiceOn, services, follow, recallAfter, me]);
 
   /* Back in the app: follow a task still running on the server, or show one that finished while it was closed. */
   const resumed = useRef(false);
@@ -899,9 +922,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       setFeed(fd => [...fd, { id: nid(), kind: "memory", text }]);
       say(`${t("committed")}: ${text[lang]}`);
     },
-    memory: cloud ? view_.memories?.[cloud.me.id] ?? emptyBook() : null,
+    memory: view_.memories?.[me] ?? emptyBook(), me,
     editWs: f => setWs(f),
-    setMemory: f => { if (cloud) { const me = cloud.me.id; setWs(w => ({ ...w, memories: { ...(w.memories ?? {}), [me]: f(w.memories?.[me] ?? emptyBook()) } })); } },
+    setMemory: f => setWs(w => ({ ...w, memories: { ...(w.memories ?? {}), [me]: f(w.memories?.[me] ?? emptyBook()) } })),
     updateStore: (id, f, log) => !held() && setWs(w => {
       const next = { ...w, stores: (w.stores ?? []).map(s => (s.id === id ? f(s) : s)) };
       return log ? audit("you", log.action, log.object, log.detail)(next) : next;
@@ -910,7 +933,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     openLegal: id => setLegal(id),
     cloud: cloudCtx,
     updates, readUpdates,
-  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, sub, ask, queued, unqueue, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
+  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, sub, ask, queued, unqueue, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held, me]);
 
   /* page */
   const unread = updates.filter(u => !u.read).length;

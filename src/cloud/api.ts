@@ -2,6 +2,7 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import type { Audit, Bi, Workspace } from "../model";
 import type { Reply, Step } from "../core";
 import type { HqLink, HqRow } from "../hq";
+import { readSSE } from "../../supabase/functions/_shared/stream.ts";
 
 /* ------------------------------------------------------------------ *
  * Placetta's backend (Supabase): accounts, saved workspaces, private
@@ -549,9 +550,41 @@ export async function aiStatus(ws: string): Promise<AiStatus | null> {
 }
 
 /** The agent's model call through the server (company keys, the role's route, research tools, plan and usage checks).
- *  saver and renews_at come back when the workspace is in saver mode (past 60% of its allowance). */
-export const agentCall = (ws: string, request: Record<string, unknown>, o: { deep?: boolean; research?: boolean; role?: string; location?: { city: string; region?: string } } = {}) =>
-  fn<{ content: { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] }[]; stop_reason: string; saver?: boolean; renews_at?: string | null }>("agent", { workspace_id: ws, request, ...o });
+ *  saver and renews_at come back when the workspace is in saver mode (past 60% of its allowance). With onText the
+ *  answer streams: onText gets the whole text so far as the model writes it, and the same complete answer comes back. */
+type AgentAnswer = { content: { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] }[]; stop_reason: string; saver?: boolean; renews_at?: string | null };
+export const agentCall = (ws: string, request: Record<string, unknown>, o: { deep?: boolean; research?: boolean; role?: string; location?: { city: string; region?: string }; onText?: (text: string) => void } = {}) => {
+  const { onText, ...rest } = o;
+  return onText ? agentStream({ workspace_id: ws, request, ...rest, stream: true }, onText) : fn<AgentAnswer>("agent", { workspace_id: ws, request, ...rest });
+};
+/** The streamed call: server-sent events from the agent function ("text" pieces, then "message" or "error"). An older
+ *  server that answers in one piece is read the same way as fn would. */
+async function agentStream(body: Record<string, unknown>, onText: (text: string) => void): Promise<AgentAnswer> {
+  const s = await getSession();
+  if (!s) throw err("unauthorized", "Sign in again.", "请重新登录。");
+  let res: Response;
+  try {
+    res = await net(`${URL_}/functions/v1/agent`, { method: "POST", headers: { "content-type": "application/json", apikey: KEY, Authorization: `Bearer ${s.access_token}` }, body: JSON.stringify(body) });
+  } catch { throw err("upstream_error", "Couldn't reach Placetta. Try again.", "无法连接快哉，请重试。"); }
+  if (!res.ok) {
+    let e: ApiError = err("upstream_error", "Couldn't reach Placetta. Try again.", "无法连接快哉，请重试。");
+    try { const j = await res.json(); if (j?.error?.code) e = err(j.error.code, j.error.message, typeof j.error.message_zh === "string" ? j.error.message_zh : undefined); } catch { /* not JSON */ }
+    if (res.status === 402 && !LIMITS.includes(e.code)) e = err("payment_required", e.message, e.message_zh);
+    throw e;
+  }
+  if (!/text\/event-stream/i.test(res.headers.get("content-type") ?? "") || !res.body) return res.json() as Promise<AgentAnswer>;
+  let text = "", done: AgentAnswer | null = null, failed: ApiError | null = null;
+  await readSSE(res.body, (event, data) => {
+    let d: Record<string, unknown>;
+    try { d = JSON.parse(data); } catch { return; }
+    if (event === "text") { text = d.reset ? String(d.d ?? "") : text + String(d.d ?? ""); onText(text); }
+    else if (event === "message") done = d as unknown as AgentAnswer;
+    else if (event === "error") { const x = (d.error ?? {}) as { code?: string; message?: string }; failed = err(x.code ?? "upstream_error", x.message ?? "Couldn't reach the agent's model. Try again."); }
+  });
+  if (failed) throw failed;
+  if (!done) throw err("upstream_error", "The answer stopped partway. Try again.", "回答中途中断，请重试。");
+  return done;
+}
 
 export async function ttsAudio(ws: string, text: string, lang: string): Promise<ArrayBuffer | null> {
   const s = await getSession(); if (!s) return null;
@@ -609,6 +642,26 @@ export async function teamTasks(): Promise<TeamTask[]> {
   if (error) return [];   // before the migration, or not staff: show nothing rather than fail the queue
   return (data ?? []) as TeamTask[];
 }
+/* What Odelia did this month, measured (src/monthly.ts; odelia_month_* in the 20261017200000_odelia_metrics migration).
+   null when the server is older than these numbers, or in the preview: the card then uses the workspace here. */
+export async function odeliaMonth(ws: string, month?: string): Promise<import("../monthly").MonthMetrics | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("odelia_month_detail", { ws, ...(month ? { p_month: month } : {}) });
+  return error || !data ? null : data as import("../monthly").MonthMetrics;
+}
+/** Headquarters: every franchisee that shared with this email. */
+export async function odeliaMonthHq(month?: string): Promise<import("../monthly").MonthAcross | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("odelia_month_hq", month ? { p_month: month } : {});
+  return error || !data ? null : data as import("../monthly").MonthAcross;
+}
+/** The Placetta team: every workspace. Staff only. */
+export async function odeliaMonthCompany(month?: string): Promise<import("../monthly").MonthAcross | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("odelia_month_company", month ? { p_month: month } : {});
+  return error || !data ? null : data as import("../monthly").MonthAcross;
+}
+
 /** What Odelia's models cost the company this month against plan revenue (public.ai_margin_company). Staff only. */
 export type AiMarginRow = { workspace_id: string; name: string | null; ai_cost_usd: number; revenue_usd: number; allowance_usd: number; cost_pct: number | null; calls: number; top_roles: { role: string; cost_usd: number; calls: number }[] };
 export type AiMargin = { month: string; ai_cost_usd: number; mrr_usd: number; cost_pct: number | null; gross_margin_pct: number | null; workspaces_using_ai: number; calls: number; top: AiMarginRow[]; by_role: { role: string; cost_usd: number; calls: number }[]; by_vendor: { provider: string; cost_usd: number; calls: number }[] };

@@ -33,7 +33,8 @@ import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/od
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/mail.ts";
 // @ts-types="./agent.d.ts"
-import { agencyKey, DISTILL_SYSTEM, distillPrompt, filingEvidence, type Lesson, lessonKeys, lessonsBrief, normalizeState, parseDistill, rank, runEvidence, runRounds, startState, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
+import { agencyKey, chipsOf, DISTILL_SYSTEM, distillPrompt, filingEvidence, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
+import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
 import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
@@ -58,6 +59,8 @@ const SAVER_MAX_TOKENS = 2000;
 /** Work per instance before saving and handing over (the free plan stops an instance at 150 s). */
 const CHUNK_MS = Number(env("AGENT_CHUNK_SECONDS", "70")) * 1000;
 const STALE_MS = 3 * 60_000, MAX_ATTEMPTS = 8;
+/** How often a streaming answer's draft is saved for the app to show. */
+const DRAFT_MS = 300;
 /** How often a working instance renews its lease even when it has nothing else to save (a long model call). */
 const RENEW_MS = 30_000;
 /** Tries to save the agent's changes onto a workspace that others keep changing, before the save fails. */
@@ -127,7 +130,7 @@ type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttl
  * price. In saver mode (the workspace is past 60% of its allowance, or throttled for the day) the main loop runs on the
  * draft route instead of plan, research is off and answers are shorter; at 100% the gate stops the call.
  */
-async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, role: Role = "plan", who: Who = { uid: null, spent: 0 }) {
+async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, role: Role = "plan", who: Who = { uid: null, spent: 0 }, onText?: (text: string) => void) {
   if (signal.aborted) throw err("cancelled", "Stopped");
   if (!configured())
     throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
@@ -156,8 +159,9 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   if (g.tier === "reduced" && pageTools.length && typeof payload.system === "string") payload.system += "\n\nWeb research (web_search, web_fetch) is off for now. Work from the workspace and your other tools, keep the answer short, and say plainly when something would need checking on the agency's own site.";
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
   if (tools.length) payload.tools = tools;
+  // onText: the answer streams (the main loop's rounds), so the run's draft shows the words as they're written
   const out = await callModel((k) => Deno.env.get(k), { payload, role, research, beta: research ? FETCH_BETA : null }, anthropicModel,
-    research ? { search, fetch: fetchTool, pageTools } : null);
+    research ? { search, fetch: fetchTool, pageTools } : null, fetch, onText);
   if (!out.ok) {
     console.error("models", out.model, out.status, out.text.slice(0, 300));
     throw out.status === 429 || out.status === 529 ? err("rate_limited", "The agent is busy. Try again in a moment.") : err(out.status === 401 || out.status === 503 ? "not_configured" : "upstream_error", "Couldn't reach the agent's model. Try again.");
@@ -303,6 +307,27 @@ export async function learnFromAgencies() {
   return { ok: true, seen: (rows ?? []).length, learned };
 }
 
+/* ------------------------------ memory that acts ------------------------------ */
+// What the person wrote is read for durable details (how to reach them, their people, limits on the plan, dates,
+// vendors: src/recall.ts) on the cheap extract model, alongside the work, and kept in their memory when the run ends.
+// From outside the app (a text, a call, an email, a chat) a detail is only a suggestion until they confirm it in the app.
+
+async function recallFor(run: Run, w: Workspace, who: Who): Promise<Recall[]> {
+  if (run.kind !== "task" || !run.created_by) return [];
+  try {
+    const book = ((w as { memories?: Record<string, MemoryBook> }).memories ?? {})[run.created_by];
+    // what Odelia said just before, for context ("who's your contractor?" "Kevin, kevin@..."); never a source
+    const prior = [...(run.state?.messages ?? [])].reverse().find((m) => m.role === "assistant" && typeof m.content === "string")?.content as string | undefined;
+    return await recallFrom(run.prompt, {
+      book, prior, ...(run.channel && run.channel !== "app" ? { via: run.channel } : {}),
+      ask: async (prompt) => {
+        const d = await model(run.workspace_id, { messages: [{ role: "user", content: prompt }], max_tokens: 900 }, false, undefined, new AbortController().signal, "extract", who) as unknown as { content: Block[] };
+        return d.content.filter((c) => c.type === "text").map((c) => String(c.text ?? "")).join("");
+      },
+    });
+  } catch (e) { console.error("recall", run.id, String((e as Error)?.message ?? e).slice(0, 120)); return []; }
+}
+
 /* ------------------------------ a run ------------------------------ */
 
 const short = (s: string, n = 90) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
@@ -350,10 +375,11 @@ export async function work(runId: string, token: string | null, ticket: string |
   const pending: Patch[] = [];
   const steps: Step[] = Array.isArray(run.steps) ? [...run.steps] : [];
   let draft: string | null = null, flushT: ReturnType<typeof setTimeout> | undefined, flushing: PromiseLike<unknown> = Promise.resolve();
+  // At most one write every DRAFT_MS while the model writes: the app polls the draft and shows the words arriving. (It
+  // used to wait for 600 ms of quiet, which a streaming answer never gives, so nothing showed until the end.)
   const flush = (now = false) => {
-    const go = () => { flushing = lease.write({ steps, draft, updated_at: new Date().toISOString() }); };
-    clearTimeout(flushT);
-    if (now) go(); else flushT = setTimeout(go, 600);
+    const go = () => { flushT = undefined; flushing = lease.write({ steps, draft, updated_at: new Date().toISOString() }); };
+    if (now) { clearTimeout(flushT); go(); } else if (flushT === undefined) flushT = setTimeout(go, DRAFT_MS);
   };
   // Save the agent's changes onto the newest saved state (the person may have changed things meanwhile), and log them.
   // One save at a time; each takes the patches made so far.
@@ -412,6 +438,8 @@ export async function work(runId: string, token: string | null, ticket: string |
       if (ls.length) { steps.push({ state: "searching", label: { en: `Starting from ${ls.length} lesson${ls.length === 1 ? "" : "s"} other businesses taught me`, zh: `参考其他商家积累的 ${ls.length} 条经验` } }); flush(); }
     }
     const location = cur.meta?.city ? { city: cur.meta.city, region: cur.meta.region } : undefined;
+    // memory: read alongside the work on a fresh run (a resumed one reads it when it ends), so it adds no wait
+    const recalling = !state.rounds && !state.recalled ? recallFor(run, cur, who) : null;
     const out = await runRounds({
       state, ws: () => cur, lang: run.lang, deep: run.deep, account: true, svc, signal: ctl.signal, until,
       apply: (p) => { cur = p(cur); pending.push(p); },
@@ -422,8 +450,8 @@ export async function work(runId: string, token: string | null, ticket: string |
         if (!(await lease.write({ state: st, steps, draft, updated_at: new Date().toISOString() })) && lease.lost) throw lostLease();
       },
       draft: (t) => { draft = t; flush(); },
-      send: async (body, deep, role) => {
-        try { return await model(ws, body, deep, location, ctl.signal, role ?? mainRole, who) as never; }
+      send: async (body, deep, role, onText) => {
+        try { return await model(ws, body, deep, location, ctl.signal, role ?? mainRole, who, onText) as never; }
         finally { state.spent = who.spent; }
       },
       // Every channel, so a request from outside the app gets the remote rules (src/serverRun.ts).
@@ -431,8 +459,19 @@ export async function work(runId: string, token: string | null, ticket: string |
       // and who asked from there, for the change card a business fact or a new name goes up on
       sender: await senderOf(run),
       role: mainRole,
+      // whose memory it reads: the person who asked
+      me: run.created_by ?? undefined,
     });
     clearTimeout(flushT);   // the last write below carries the steps; a late flush would bring the draft back
+    if (!("paused" in out) && !state.recalled) {
+      const kept = await (recalling ?? recallFor(run, cur, who));
+      state.recalled = true;
+      if (kept.length && run.created_by) {
+        const p = keepRecall(run.created_by, kept);
+        cur = p(cur); pending.push(p);
+        out.reply.remembered = chipsOf(kept);
+      }
+    }
     await save();
     if ("paused" in out) {
       const next = await lease.release({ state: { ...out.paused, spent: who.spent }, steps, draft, updated_at: new Date().toISOString() });
@@ -443,7 +482,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     if (who.reduced && run.kind === "task" && await saverNoticeDue(admin, ws).catch(() => false)) {
       out.reply.text = [...out.reply.text, { en: saverLine("en", who.renews ?? null, who.reduced), zh: saverLine("zh", who.renews ?? null, who.reduced) }];
     }
-    await finish(run, out.reply, steps, lease);
+    await finish(run, out.reply, steps, lease, cur);
     bg(learnFromRun(run, cur, state, out.reply));
   } catch (e) {
     clearTimeout(flushT);
@@ -538,7 +577,20 @@ async function queueApprovalTexts(run: Run, title: { en: string; zh: string }, a
   if (rows.length) await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
 }
 
-async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease) {
+/** Owners who asked for texts and said not to email them hear about finished work by text instead (the outbox holds
+ *  it for their quiet hours), on their verified number with texts on. */
+async function textInstead(run: Run, ids: string[], title: { en: string; zh: string }, said: { en: string; zh: string }) {
+  if (!ids.length) return;
+  const { data: links } = await admin.from("phone_links").select("user_id, lang").in("user_id", ids).not("verified_at", "is", null).eq("texts_on", true).is("opted_out_at", null);
+  const origin = appOrigin(env);
+  const rows = (links ?? []).map((l) => ({
+    user_id: l.user_id, workspace_id: run.workspace_id, kind: "text", urgent: false, dedupe: `done:${run.id}`,
+    body: l.lang === "zh" ? short(`${title.zh}。${said.zh}`, 300) : short(`${title.en}. ${said.en}`, 300), link: appLink(origin, run.workspace_id) || null,
+  }));
+  if (rows.length) await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
+}
+
+async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease, w?: Workspace) {
   const now = new Date().toISOString();
   // The answer goes out only from the instance that marked the run done: not when it was stopped meanwhile, and not
   // from a second instance that lost the run, so nobody gets it twice.
@@ -570,11 +622,16 @@ async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease) {
   const zh = reply.text.map((t) => t.zh).join(" ").trim();
   await admin.from("updates").upsert({ workspace_id: run.workspace_id, kind: "agent", title, body: { en: short(said, 600), zh: short(zh, 600) }, dedupe: `run:${run.id}` }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
   const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", run.workspace_id).eq("role", "owner");
-  const emails: string[] = [];
-  for (const o of owners ?? []) { const { data } = await admin.auth.admin.getUserById(o.user_id); if (data?.user?.email && data.user.email_confirmed_at) emails.push(data.user.email); }
+  const emails: string[] = [], texts: string[] = [];
+  for (const o of owners ?? []) {
+    // how each owner asked to be reached (src/recall.ts): never by email when they said so; by text when they asked
+    if (!mayEmail(w, o.user_id)) { if (wantsTexts(w, o.user_id)) texts.push(o.user_id); continue; }
+    const { data } = await admin.auth.admin.getUserById(o.user_id); if (data?.user?.email && data.user.email_confirmed_at) emails.push(data.user.email);
+  }
   const waiting = (reply.approvals ?? []).length;
   const app = (env("APP_ORIGINS").split(",")[0] ?? "").trim().replace(/\/+$/, "");
   await sendMail(emails, title.en, `${said}${waiting ? `\n\n${waiting} item${waiting === 1 ? "" : "s"} waiting for your approval.` : ""}${app ? `\n\nOpen Placetta: ${app}/app/` : ""}\n`);
+  await textInstead(run, texts, title, { en: said, zh }).catch((e) => console.error("text instead", String(e).slice(0, 120)));
   await queueApprovalTexts(run, title, reply.approvals ?? []).catch((e) => console.error("approval texts", String(e).slice(0, 120)));
 }
 

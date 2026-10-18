@@ -7,6 +7,7 @@ import { fmtAgo, fmtDay } from "./time";
 import { Footer, I, Modal, Select } from "./ui";
 import { ACCENTS, applyAccent, readAccent, useTheme, type Theme } from "./hooks";
 import { IMPORT_PROMPT, PREFS, PROFILE, importMemory } from "./memory";
+import { RememberedList } from "./Remembered";
 import type { MemoryFile, MemoryKind, Skill, SkillSource } from "./model";
 import { allSkills, dropSkill, putSkill, toggleSkill } from "./skills";
 import { LANGUAGES, readSpeak, saveSpeak, speakOf, uiLangOf } from "./langs";
@@ -850,6 +851,7 @@ function MemoryGroup() {
         { label: B("Include sensitive topics in memory", "记忆中包含敏感话题"), sub: zh ? "允许保存健康、宗教信仰、政治或财务等敏感细节。" : "Let Placetta save sensitive details like health, religious beliefs, politics or finances.", right: <Toggle on={st.sensitive} set={set("sensitive")} label="Include sensitive topics" /> },
         { label: B("Import memory from other AI assistants", "从其他 AI 助手导入记忆"), sub: zh ? "把其他 AI 助手对您的了解带到快哉。我们会给您一段提示词，用来取出那边的记忆。" : "Bring what another AI assistant knows about you. We'll give you a prompt that gets your memory out of it.", right: <Btn onClick={() => { setImp(1); setPaste(""); }}>{zh ? "开始导入" : "Start import"}</Btn> },
       ]}>
+      <RememberedList />
       {table(zh ? "您" : "You", you)}
       {table(zh ? "话题" : "Topics", group("topic"))}
       {table(zh ? "领域" : "Areas", group("area"))}
@@ -1114,7 +1116,7 @@ const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "activity", label: B("Activity", "活动记录"), items: ["activity"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
 ];
-const CLOUD_ONLY = new Set(["team", "hq", "security", "pin", "phone", "memory"]);
+const CLOUD_ONLY = new Set(["team", "hq", "security", "pin", "phone"]);
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
 let settingsTarget: string | null = null;

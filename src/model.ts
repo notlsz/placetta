@@ -74,6 +74,7 @@ export type Approval = {
   filing?: string;          // pay: the filing it belongs to
   purchase?: string;        // pay: the purchase Odelia asked to make (Spending), approved here
   change?: Change;          // change: what the agent will change once you confirm
+  at?: string;              // when it was put in front of you (how long it has waited)
 };
 /** A change to something that already exists, which the agent only makes after you confirm it. */
 export type Change =
@@ -151,6 +152,9 @@ export type Workspace = {
   jobs?: Job[];                            // Odelia's jobs, each with the plan she keeps current (Work)
   routines?: Routine[];                    // jobs she repeats on a schedule
   firstPlan?: FirstPlan;                   // the instant plan written at sign-up from the registry, before any model call
+  /** Requests Odelia answered in this browser (the sample, or without the server's runs), timed as they happened: when
+   *  asked, when her first words showed, when the answer was done. An account's server runs are timed in agent_runs. */
+  runs?: { id: string; prompt: string; created_at: string; first_text_at?: string | null; done_at?: string | null; status?: string }[];
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval
@@ -172,7 +176,32 @@ export type Skill = {
 export type MemoryKind = "you" | "topic" | "area";
 export type MemoryFile = { id: string; kind: MemoryKind; name: string; summary: string; lines: string[]; updated: string; sensitive?: boolean };
 export type MemorySettings = { searchChats: boolean; generate: boolean; sensitive: boolean };
-export type MemoryBook = { settings: MemorySettings; files: MemoryFile[] };
+/** items: details the person mentioned once that Odelia acts on (src/recall.ts): how to reach them, their people,
+ *  limits on the plan, dates that come back, vendors. Each keeps the sentence it came from. */
+export type MemoryBook = { settings: MemorySettings; files: MemoryFile[]; items?: Recall[] };
+export type RecallKind = "preference" | "person" | "constraint" | "date" | "vendor";
+export type ReachBy = "text" | "email" | "call";
+export type Recall = {
+  id: string; kind: RecallKind;
+  /** What Odelia remembers, one short line in both languages. */
+  text: Bi;
+  /** The person's own sentence it came from, exactly as they wrote it. */
+  source: string;
+  /** When they said it. */
+  at: string;
+  /** saved: Odelia uses it. suggested: it came from outside the app (a text, a call, an email, a chat) and waits for
+   *  the person to confirm it in the app; until then it's never used. */
+  status: "saved" | "suggested";
+  /** The channel a suggestion came by (sms, voice, email, slack, lark, wechat). */
+  via?: string;
+  reach?: ReachBy; avoid?: ReachBy[];
+  person?: { name: string; role?: string; email?: string; phone?: string };
+  date?: string; notBefore?: boolean; repeats?: "yearly" | "monthly" | "weekly";
+  vendor?: { name: string; what?: string };
+  /** What acting on it changed in the workspace, so Forget can put it back: the deadline it added, and the stores whose
+   *  planned opening it moved (with the date each had). */
+  made?: { deadline?: string; stores?: { id: string; was?: string; to: string }[] };
+};
 export type ChatLine = { at: string; role: "you" | "agent"; text: string };
 
 /* ------------------------------------------------------------------ */

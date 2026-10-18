@@ -17,6 +17,7 @@ import { takeAutostart } from "./cloud/handoff";
 import { nextAction, nextRun } from "./jobs";
 import { PlanCard } from "./Work";
 import { hrefOf, plainClick } from "./route";
+import { HomeMetrics } from "./Metrics";
 
 export const INK = "#4D73A3";
 const LEVELS: Level[] = ["federal", "state", "county", "city"];
@@ -336,6 +337,8 @@ export function Overview() {
         </div>
         {fp?.ms != null && previews > 0 && <p className="plan-time" data-indent><I.check />{b(firstLine(fp.apps, fp.ms, !!fp.win && ws.apps.some(a => a.id === fp.win), fp.filled ?? 0))}</p>}
       </section>
+
+      <HomeMetrics />
 
       {(ws.stores ?? []).length > 0 && (
         <section className="sec">

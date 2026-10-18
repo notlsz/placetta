@@ -1,4 +1,6 @@
 import type { ChatLine, MemoryBook, MemoryFile, MemoryKind, MemorySettings } from "./model";
+import { SENSITIVE } from "./guard";
+import { recallBrief } from "./recall";
 
 /* Memory, the way Claude does it: a few small files about you (Profile, Preferences), the topics you care about and
    the areas you're working on, one fact per line. The agent reads them when a reply needs them, adds what you tell it
@@ -10,8 +12,8 @@ export const emptyBook = (): MemoryBook => ({ settings: { ...DEFAULT_SETTINGS },
 const now = () => new Date().toISOString();
 export const slugOf = (s: string) => s.toLowerCase().replace(/[^a-z0-9一-鿿]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "note";
 
-/** Health, beliefs, politics, money and the like: kept only when "Include sensitive topics" is on. */
-export const SENSITIVE = /\b(health|diagnos|illness|disease|medication|therapy|pregnan|religio|church|mosque|temple|faith|politic|vote|party member|union|salary|income|debt|credit score|sexual|orientation|gender identity|disab|immigration|visa status|criminal|arrest)\w*/i;
+/** Health, beliefs, politics, money and the like: kept only when "Include sensitive topics" is on (src/guard.ts). */
+export { SENSITIVE };
 
 const base = (kind: MemoryKind, name: string, summary: string): MemoryFile => ({ id: kind === "you" ? slugOf(name) : `${kind}-${slugOf(name)}`, kind, name, summary, lines: [], updated: now() });
 export const PROFILE = () => base("you", "Profile", "Who you are: name, role, company and where you work");
@@ -46,10 +48,13 @@ export function searchChats(lines: ChatLine[], q: string) {
     .map(x => ({ at: x.at.slice(0, 10), role: x.role, text: x.text.slice(0, 500) }));
 }
 
-/** What the agent sees each turn: the files' names and lines, short. */
+/** What the agent sees each turn: the files' names and lines, short, then the details the person mentioned once
+ *  (src/recall.ts), with what to do with them. */
 export function memoryBrief(book: MemoryBook | undefined) {
-  if (!book || !book.files.length) return undefined;
-  return book.files.map(f => `${f.kind === "you" ? "" : f.kind === "topic" ? "Topic: " : "Area: "}${f.name}\n${f.lines.slice(-12).map(l => "- " + l).join("\n")}`).join("\n\n").slice(0, 4000);
+  if (!book) return undefined;
+  const files = book.files.map(f => `${f.kind === "you" ? "" : f.kind === "topic" ? "Topic: " : "Area: "}${f.name}\n${f.lines.slice(-12).map(l => "- " + l).join("\n")}`).join("\n\n").slice(0, 4000);
+  const said = recallBrief(book);
+  return [files, said].filter(Boolean).join("\n\n") || undefined;
 }
 
 /** The prompt to paste into another AI assistant, in Placetta's own words. */

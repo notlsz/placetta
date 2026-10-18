@@ -10,7 +10,7 @@ export type RunState = { messages: { role: string; content: unknown }[]; rounds:
 export type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] };
 /** What a model call is for; the server routes each role to its own model (../_shared/llm.ts). */
 export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
-export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role) => Promise<{ content: Block[]; stop_reason: string }>;
+export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role, onText?: (text: string) => void) => Promise<{ content: Block[]; stop_reason: string }>;
 export type Services = {
   filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[] }[];
   connected(): string[];
@@ -34,6 +34,8 @@ export declare function runRounds(o: {
   sender?: string;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for background checks. */
   role?: Role;
+  /** Whose memory the run reads: the person who asked. */
+  me?: string;
 }): Promise<{ reply: Reply } | { paused: RunState }>;
 export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";
 export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;
@@ -52,3 +54,16 @@ export declare function worthLearning(ev: Evidence): boolean;
 export declare function filingEvidence(f: { title?: Bi | null; agency?: Bi | null; status: string; note?: string | null; days?: number | null; form?: string | null }): unknown;
 export declare function rank(ls: Lesson[]): Lesson[];
 export declare function agencyKey(agency: string): string;
+
+// Memory that acts (src/recall.ts)
+export type Recall = { id: string; kind: "preference" | "person" | "constraint" | "date" | "vendor"; text: Bi; source: string; at: string; status: "saved" | "suggested"; via?: string; [k: string]: unknown };
+export type MemoryBook = { settings: { searchChats: boolean; generate: boolean; sensitive: boolean }; files: unknown[]; items?: Recall[] };
+export declare function recallFrom(said: string, o: { ask?: (prompt: string) => Promise<unknown>; today?: string; at?: string; prior?: string; via?: string; book?: MemoryBook }): Promise<Recall[]>;
+export declare function keepRecall(me: string, items: Recall[], today?: string): (w: Workspace) => Workspace;
+export declare function chipsOf(items: Recall[]): { id: string; text: Bi; suggested?: boolean }[];
+
+// What Odelia did this month (src/monthly.ts)
+export type MetricItem = { id: string; title: Bi; at?: string | null; date?: string; status?: string };
+export type MonthMetrics = { month: string; plan_ms: number | null; plan_at: string | null; plan_apps: number | null; runs: { id: string; prompt: string; created_at: string; first_ms: number | null; done_ms: number | null }[];
+  median_first_ms: number | null; median_done_ms: number | null; mapped: MetricItem[]; filled: MetricItem[]; waiting: MetricItem[]; submitted: MetricItem[]; approved: MetricItem[]; renewals: MetricItem[] };
+export declare function monthMetrics(w: Workspace, o: { today: string; runs?: { id: string; prompt: string; created_at: string; first_text_at?: string | null; done_at?: string | null; status?: string }[]; filings?: { id: string; app_id: string; title: Bi; status: string; submitted_at: string | null; decided_at: string | null }[] }): MonthMetrics;
