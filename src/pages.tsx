@@ -20,6 +20,23 @@ import { hrefOf, plainClick } from "./route";
 import { HomeMetrics } from "./Metrics";
 import { HeldSends, LocalHold, useApprovalHold } from "./SendHold";
 import { CostLine } from "./CostToOpen";
+/* Team review: the review table, comments on documents, and the Mine filter (src/ReviewTable.tsx, src/Comments.tsx) */
+import { hasReview, PermitsReview } from "./ReviewTable";
+import { CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
+import { shortName } from "./collab";
+
+/** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
+const mineApp = (team: Collab, id?: string) => !!id && team.isMine({ kind: "app", id });
+const mineJob = (team: Collab, j: { id: string; apps?: string[] }) => team.isMine({ kind: "job", id: j.id }) || (j.apps ?? []).some(a => mineApp(team, a));
+/** The Mine filter shows where there's a team to share the work with. */
+const teamOf = (team: Collab) => team.people.filter(p => p.role !== "hq").length > 1 || team.assignments.length > 0;
+/** Who a permit is assigned to and its open comments, under its name in a list. */
+function TeamLine({ id }: { id: string }) {
+  const team = useTeam();
+  const who = team.assigneeOf({ kind: "app", id }), n = team.openCount({ kind: "app", id });
+  if (!who && !n) return null;
+  return <small className="c-team">{who && <span><I.user />{shortName(who)}</span>}{n > 0 && <span><I.message />{n}</span>}</small>;
+}
 
 export const INK = "#4D73A3";
 const LEVELS: Level[] = ["federal", "state", "county", "city"];
@@ -233,8 +250,12 @@ export function Overview() {
     });
     return () => cancelAnimationFrame(frame);
   }, []);   // once, when Home first shows the plan // eslint-disable-line react-hooks/exhaustive-deps
+  const team = useTeam();
   if (!n) return <Welcome />;
   const c = (s: Status[]) => ws.apps.filter(a => s.includes(a.status)).length;
+  /* Team review: Mine keeps what's assigned to this person (and the jobs about it) in each section below */
+  const mine = team.mine && teamOf(team);
+  const mineN = ws.apps.filter(a => mineApp(team, a.id)).length + (ws.jobs ?? []).filter(j => j.status !== "done" && j.status !== "stopped" && team.isMine({ kind: "job", id: j.id })).length;
   const approved = c(["approved"]), agency = c(["review", "filing"]), you = c(["ready", "needs"]);
   const today = daysFromNow(0);
   const zh = lang === "zh";
@@ -247,13 +268,14 @@ export function Overview() {
     if (!act || act.who !== "you") return true;
     if (act.kind === "approve") return !ws.approvals.some(a => a.id === act.id);
     return !ws.approvals.some(a => a.kind === "upload" && a.app === act.app);
-  });
-  const needs = ws.approvals.length + waitingJobs.length;
+  }).filter(j => !mine || mineJob(team, j));
+  const approvals = mine ? ws.approvals.filter(a => mineApp(team, a.app)) : ws.approvals;
+  const needs = approvals.length + waitingJobs.length;
 
   /* 2. Odelia is working on: what she coordinates across stores (each store's bot and where its part stands), running
      jobs with their live plan, background watchers, what's queued, and the routines */
-  const chiefs = jobs.filter(j => j.children?.length && j.status !== "done" && j.status !== "stopped");
-  const running = jobs.filter(j => j.status === "running" && !j.parent && !j.children?.length);
+  const chiefs = jobs.filter(j => j.children?.length && j.status !== "done" && j.status !== "stopped" && (!mine || mineJob(team, j)));
+  const running = jobs.filter(j => j.status === "running" && !j.parent && !j.children?.length && (!mine || mineJob(team, j)));
   const routines = ws.routines ?? [], active = routines.filter(r => !r.paused);
   const nextRoutine = active.map(r => nextRun(r, today)).filter((d): d is string => !!d).sort()[0];
   const routineLine = !routines.length ? "" : !active.length ? t("hm_routinesPaused", { n: routines.length })
@@ -265,7 +287,7 @@ export function Overview() {
   const previews = ws.apps.filter(isPreview).length;
   const landing = fp?.projectedOpen
     ?? (ws.stores ?? []).filter(s => s.stage === "opening").map(s => openingPath(s, ws, today).landing).filter((d): d is string => !!d).sort().at(-1) ?? null;
-  const nextUp = [...ws.apps].filter(a => a.status !== "approved").sort(byPriority).slice(0, 3);
+  const nextUp = [...ws.apps].filter(a => a.status !== "approved" && (!mine || mineApp(team, a.id))).sort(byPriority).slice(0, 3);
 
   /* the line under the title: the business, its place (unless the name already says it) and the goal, whichever exist */
   const biz = b(ws.business), place = ws.locations[0] ? b(ws.locations[0].name) : "", goal = b(ws.goal);
@@ -290,12 +312,20 @@ export function Overview() {
         <LiveLine />
       </header>
 
+      {teamOf(team) && (
+        <div className="mine-row">
+          <MineToggle count={mineN} />
+          {mine && <p className="mine-note">{zh ? "只显示分配给您的申请和工作。" : "Showing only the applications and jobs assigned to you."}</p>}
+        </div>
+      )}
+      {mine && needs === 0 && !chiefs.length && !running.length && <p className="quiet mine-empty">{zh ? "没有分配给您、需要处理的事项。" : "Nothing assigned to you needs you right now."}</p>}
+
       {needs > 0 && (
         <section className="sec hm-needs">
           <SecHead title={t("needsYou")} count={needs} />
-          <BatchApprove />
+          {!mine && <BatchApprove />}
           <div className="stack">
-            {ws.approvals.map(a => <NeedRow key={a.id} a={a} />)}
+            {approvals.map(a => <NeedRow key={a.id} a={a} />)}
             {waitingJobs.map(j => <PlanCard key={j.id} job={j} compact actions />)}
           </div>
         </section>
@@ -399,15 +429,24 @@ export function Overview() {
 
 /** Permits: one page for everything you file. To do (yours and Odelia's to finish), Filed (with an agency, the team or
  *  issued), the documents behind them and the dates they set. Find licenses is a button here, not a place of its own. */
-export function Permits({ tab }: { tab: PermitsTab }) {
-  const { t, ws, go } = useApp();
-  const todo = ws.apps.filter(a => !FILED.includes(a.status)), filed = ws.apps.filter(a => FILED.includes(a.status));
+export function Permits({ tab: asked }: { tab: PermitsTab }) {
+  const { t, ws, go, lang } = useApp();
+  const team = useTeam();
+  /* Team review: a workspace with two or more stores gets the review table, stores against permits */
+  const review = hasReview(ws.stores);
+  const tab: PermitsTab = asked === "review" && !review ? "todo" : asked;
+  const mine = team.mine && teamOf(team);
+  const keep = (a: Application) => !mine || mineApp(team, a.id);
+  const todo = ws.apps.filter(a => !FILED.includes(a.status) && keep(a)), filed = ws.apps.filter(a => FILED.includes(a.status) && keep(a));
   const soon = ws.deadlines.filter(d => { const k = daysUntil(d.date); return k >= 0 && k <= 30; }).length;
   const tabs = [
     { id: "todo", label: t("nav_todo"), count: todo.length }, { id: "filed", label: t("nav_filed"), count: filed.length },
+    ...(review ? [{ id: "review", label: lang === "zh" ? "按门店" : "By store" }] : []),
     { id: "documents", label: t("nav_docs"), count: ws.docs.length }, { id: "deadlines", label: t("nav_deadlines"), count: soon },
   ];
-  const sub = tab === "documents" ? t("docs_sub") : tab === "deadlines" ? t("dl_sub") : t("apps_sub");
+  const sub = tab === "documents" ? t("docs_sub") : tab === "deadlines" ? t("dl_sub") : tab === "review"
+    ? (lang === "zh" ? "每家门店的每项许可一目了然：状态、下一个日期，点开即可处理。可以多选后一起交给 Odelia、分配或设置提醒。" : "Every permit at every store in one table: its state and next date, one click from the application. Pick several to hand to Odelia, assign or remind.")
+    : t("apps_sub");
   return (
     <div className="page permits">
       <PageHead title={t("nav_apps")} sub={sub}>
@@ -415,8 +454,14 @@ export function Permits({ tab }: { tab: PermitsTab }) {
       </PageHead>
       <Tabs view="permits" tabs={tabs} current={tab} />
       {(tab === "todo" || tab === "filed") && <CostLine page />}
-      {tab === "todo" && <PermitTable rows={todo} empty={t("allClear")} />}
+      {(tab === "todo" || tab === "filed") && teamOf(team) && (
+        <div className="mine-row">
+          <MineToggle count={ws.apps.filter(a => mineApp(team, a.id) && (tab === "todo" ? !FILED.includes(a.status) : FILED.includes(a.status))).length} />
+        </div>
+      )}
+      {tab === "todo" && <PermitTable rows={todo} empty={mine ? (lang === "zh" ? "没有分配给您的待办许可。" : "Nothing to do is assigned to you.") : t("allClear")} />}
       {tab === "filed" && <PermitTable rows={filed} empty={t("empty")} />}
+      {tab === "review" && <PermitsReview />}
       {tab === "documents" && <Documents />}
       {tab === "deadlines" && <Deadlines />}
     </div>
@@ -442,7 +487,8 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
                   return (
                     <Working key={a.id} on={a.status === "draft"} size="line">
                     <button type="button" className={"tr row" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)} role="row">
-                      <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}</span>
+                      <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}
+                        <TeamLine id={a.id} /></span>
                       <span className="c-st"><StatusChip s={a.status} /></span>
                       <span className="c-fee">{feeText(a, t)}</span>
                       <span className="c-est">{b(a.est)}</span>
@@ -482,7 +528,7 @@ export function Documents() {
           <input ref={input} type="file" multiple hidden onChange={e => { const fs = Array.from(e.target.files ?? []); e.target.value = ""; if (fs.length) upload("", "", fs); }} />
         </div>
       </div>
-      {docs.length ? <div className="files grid">{docs.map(d => <FileCard key={d.id} d={d} />)}</div> : <p className="quiet tab-empty">{t("empty")}</p>}
+      {docs.length ? <div className="files grid">{docs.map(d => <FileCard key={d.id} d={d} extra={<CommentsButton item={{ kind: "doc", id: d.id }} title={{ en: d.name, zh: d.name }} />} />)}</div> : <p className="quiet tab-empty">{t("empty")}</p>}
     </div>
   );
 }
@@ -540,6 +586,7 @@ const UPDATE_KIND: Record<string, { label: { en: string; zh: string }; Icon: () 
   filing: { label: B("Filing", "申报"), Icon: I.apps }, payment: { label: B("Payment", "付款"), Icon: I.card }, team: { label: B("Team", "团队"), Icon: I.user },
   mail: { label: B("Reply", "回复"), Icon: I.message },
   purchase: { label: B("Purchase", "购买"), Icon: I.card },
+  mention: { label: B("Comment", "评论"), Icon: I.message },
 };
 
 /** Updates as rows: each one opens the permit or hands it to Odelia. Home shows the latest few; the Updates tab, all. */
@@ -558,7 +605,7 @@ function UpdateList({ items }: { items: import("./model").UpdateItem[] }) {
               <p className="upd-m"><span>{b(k.label)}</span><span>{fmtAgo(u.at, lang)}</span>{!u.read && <em>{b(B("New", "新"))}</em>}</p>
             </div>
             <div className="upd-act">
-              {app && <button type="button" className="sbtn quiet" onClick={() => openApp(app.id)}>{b(B("Open", "打开"))}</button>}
+              {app && <button type="button" className="sbtn quiet" onClick={() => openApp(app.id, u.kind === "mention" ? "comments" : undefined)}>{b(B("Open", "打开"))}</button>}
               {u.prompt && <button type="button" className="sbtn ink" onClick={() => ask(b(u.prompt!))}>{b(B("Handle it", "去处理"))}</button>}
             </div>
           </li>

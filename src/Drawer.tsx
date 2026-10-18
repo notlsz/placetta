@@ -21,13 +21,17 @@ import { Working } from "./Bot";
 import { AllowRule } from "./AllowRule";
 import { FilledStatus } from "./FilledForm";
 import { fileable, formName, latestVersion } from "./forms/versions";
+/* Team review: the permit's comment thread and who it's assigned to (src/Comments.tsx) */
+import { AssignPicker, CommentThread, useItemThread, useTeam } from "./Comments";
 
 /* ------------------------- application, opened ------------------------- */
 
 export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: string; tab: Tab; edit: boolean; version?: number; onTab: (t: Tab) => void; onClose: () => void }) {
   const { b, t, lang, ws, openApproval, busy, cloud, ask } = useApp();
+  const team = useTeam();
   const a = ws.apps.find(x => x.id === id);
   if (!a) return null;
+  const talk = team.openCount({ kind: "app", id });
   const appr = ws.approvals.find(x => x.app === id && x.kind !== "upload");
   const done = a.checklist.filter(c => c.state !== "missing").length;
   const zh = lang === "zh";
@@ -43,6 +47,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
     { k: "form", l: t("tab_form") },
     { k: "fees", l: t("tab_fees") },
     { k: "receipt", l: t("tab_receipt") },
+    { k: "comments", l: zh ? "评论" : "Comments", n: talk ? String(talk) : undefined },
   ];
   return (
     <Sheet label={b(a.name)} onClose={onClose}>
@@ -58,6 +63,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
           {a.source.url && <a href={a.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{a.source.label}<I.ext /></a>}
         </p>
         {a.next && <p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
+        <div className="sh-asg"><AssignPicker item={{ kind: "app", id: a.id }} title={a.name} /></div>
         {a.preview && <p className="sh-pv"><I.spark />{a.status === "ready"
           // filled at sign-up (src/plan/prefill.ts) on the registry's own copy of the agency's form
           ? (zh ? "用快哉登记库里的机构官方表格，根据您的注册信息填好。提交前，快哉会对照机构现行要求逐项核对。" : "Filled from your signup on the agency's own form, from Placetta's registry. Placetta checks it against the agency's current requirements before filing.")
@@ -72,6 +78,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
         {tab === "form" && <FormPreview key={a.id + String(edit)} a={a} startEdit={edit} version={version} />}
         {tab === "fees" && <Fees a={a} />}
         {tab === "receipt" && <Receipt a={a} />}
+        {tab === "comments" && <AppComments a={a} />}
       </div>
       {appr ? (
         <footer className="sh-f">
@@ -86,6 +93,14 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
       ) : null}
     </Sheet>
   );
+}
+
+/* ------------------------------- comments (Team review) ------------------------------- */
+
+/** The permit's thread: the team's comments, @mentions of teammates, headquarters (when the owner shares with it) and
+ *  Odelia, who starts on the permit when an owner or member mentions her. */
+function AppComments({ a }: { a: Application }) {
+  return <CommentThread source={useItemThread({ kind: "app", id: a.id }, a.name)} />;
 }
 
 /* ------------------------------- progress ------------------------------- */
