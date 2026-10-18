@@ -2287,6 +2287,20 @@ html[lang="zh-CN"] .bkg li.nm span{font-family:var(--zhserif)}
 body #agencies .agt-f{color:#1F3F6B!important}
 #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
 body #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
+/* Oct 18: lighter tiles. We file is the strongest tone but still light, with partners lighter, we monitor white;
+   ink text throughout, so the section no longer reads as a wall of navy */
+#agencies .agk-f{background:#D5E3F2;color:var(--ink);box-shadow:none}
+#agencies .agk-p{background:#EAF1F8}
+#agencies .agk-m{background:#fff;box-shadow:inset 0 0 0 1px #DCE6F0}
+#agencies .agk-f .agh b,#agencies .agk-f small{color:var(--ink)}
+#agencies .agk-f span{color:rgba(15,27,51,.62)}
+body #agencies .agi .agk-f .agt,body #agencies .agk-f .agt{color:#1F3F6B!important}
+#agencies .agkey .agt-f::after{background:#D5E3F2;box-shadow:inset 0 0 0 1px #B9CDE4}
+#agencies .agkey .agt-p::after{background:#EAF1F8;box-shadow:inset 0 0 0 1px #D3E0EE}
+#agencies .agkey .agt-m::after{background:#fff;box-shadow:inset 0 0 0 1px #C9D6E4}
+#mpsvg .mpfoc [data-city]{pointer-events:auto;cursor:pointer}
+.mpcnt{flex-basis:100%;margin:2px 0 0;font-size:14px;line-height:1.45;color:var(--ink2)}
+.mpcnt b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
 #cn .dash .dchip{position:relative;z-index:1;background:rgba(255,255,255,.88)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:999px!important;padding:5px 11px!important}
 #cn .cnc .cnlm{background:rgba(255,255,255,.85)!important;border-radius:999px!important;padding:4px 11px!important}
 /* testimonials: the large portrait on the right; no small round photo by the name */
@@ -2972,6 +2986,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
           <p id="mpinfo" data-i18n="map.prompt">Pick a state or country to start a plan there.</p>
           <button type="button" class="btn b-ink" id="mpgo" hidden></button>
         </div>
+        <p class="mpcnt" id="mpcnt" aria-live="polite" hidden></p>
       </div>
     </div>
         <div class="agcard" id="agCard">
@@ -3512,8 +3527,8 @@ zh:{
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* Oct 18 section pass: new strings for the sections changed that day */
-Object.assign(T.en, {"final.h": "Stop paying rent on an empty store.<br>Hire Odelia.", "wt.h": "Answer from the app your team already uses", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta", "price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
-Object.assign(T.zh, {"final.h": "别再为空店付房租。<br>让 Odelia 加入您的团队。", "wt.h": "在团队常用的应用里直接回复", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉", "price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
+Object.assign(T.en, {"map.ccnt": "{m}: {n} city and county permits and filings in our form library, plus the state's {s} and {f} federal.", "map.ccnt0": "{m}: its city and county forms are researched when you start a plan there.", "map.cnt": "{m}: {n} permits and filings in our form library, {s} state and {l} city and county, plus {f} federal.", "map.cnt0": "{m}: {f} federal filings in our form library. Its state and city forms are researched when you start a plan.", "map.tipn": "{n} state and local forms", "final.h": "Stop paying rent on an empty store.<br>Hire Odelia.", "wt.h": "Answer from the app your team already uses", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta", "price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"map.ccnt": "{m}：我们的表格库中有市县级许可与申报 {n} 项，另有州级 {s} 项和联邦 {f} 项。", "map.ccnt0": "{m}：在您开始计划时，我们会逐项调研当地市县的表格。", "map.cnt": "{m}：我们的表格库中有 {n} 项许可与申报，州级 {s} 项，市县级 {l} 项，另有联邦 {f} 项。", "map.cnt0": "{m}：表格库中有联邦 {f} 项。该州和城市的表格会在您开始计划时逐项调研。", "map.tipn": "州和地方表格 {n} 项", "final.h": "别再为空店付房租。<br>让 Odelia 加入您的团队。", "wt.h": "在团队常用的应用里直接回复", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉", "price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -4426,7 +4441,7 @@ function addFocus(){
   f.c.forEach(([en, zh, x, y], n) => {
     const rr = n ? r : r * 1.25, dot = [x - rr * 1.6, y - rr * 1.6, x + rr * 1.6, y + rr * 1.6];
     if (x < V[0] || x > V[2] || y < V[1] || y > V[3] || (n && hit(dot))) return;
-    boxes.push(dot); ds.push({n, nm: i ? zh : en, x, y, rr, dot});
+    boxes.push(dot); ds.push({n, nm: i ? zh : en, en, x, y, rr, dot});
   });
   let lms = "";
   (f.l || []).forEach(([key, x, y]) => { const ic = FOC.icons[key], k = Math.min(T / ic.h, T * 1.1 / ic.w), w = ic.w * k, h = ic.h * k, gap = r * 1.5;
@@ -4455,6 +4470,7 @@ function addFocus(){
     const pl = document.createElementNS(NS, "rect"), q = pick[2]; pl.setAttribute("class", "fcp");
     [["x", q[0]], ["y", q[1]], ["width", q[2] - q[0]], ["height", q[3] - q[1]], ["rx", (q[3] - q[1]) / 2]].forEach(([a, v]) => pl.setAttribute(a, v.toFixed(2)));
     g.insertBefore(pl, tx);
+    if (us){ tx.dataset.city = pl.dataset.city = d.en; tx.dataset.nm = pl.dataset.nm = d.nm; }   // a tap shows the city's count
     const c = document.createElementNS(NS, "circle"); c.setAttribute("class", "fcd" + (n ? "" : " big")); c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", rr.toFixed(3));
     g.appendChild(c);
   });
@@ -4517,8 +4533,27 @@ if (!RM) setInterval(() => {
   el.classList.remove("ping"); void el.getBoundingClientRect(); el.classList.add("ping");
   setTimeout(() => el.classList.remove("ping"), 1700);
 }, 900);
+/* Oct 18: tapping a state shows how many of its permits and filings are in Placetta's form library: the state's own
+   forms and the city and county forms of its metros, counted from src/forms (registry.ts, local-us.ts) on 2026-10-18.
+   Federal forms (15) apply everywhere. Recount when the library grows. [state forms, city and county forms] */
+const MAP_FED = 15;
+const MAP_FORMS = {"California": [8, 34], "Texas": [8, 26], "New York": [5, 5], "Florida": [4, 7], "Virginia": [3, 7], "Minnesota": [3, 2],
+  "Washington": [2, 3], "Ohio": [2, 3], "Nevada": [2, 5], "Massachusetts": [2, 4], "Illinois": [2, 3], "Arizona": [2, 3],
+  "Pennsylvania": [1, 5], "Oregon": [1, 3], "New Jersey": [1, 4], "Georgia": [1, 3], "Colorado": [1, 4], "District of Columbia": [0, 6]};
+// the city labels shown when a state is open: city and county forms in the library for that metro (same count, same date)
+const MAP_CITY = {"Los Angeles": 6, "San Francisco": 7, "San Diego": 4, "Houston": 5, "San Antonio": 2, "Dallas": 6, "New York": 5, "Miami": 3, "Orlando": 2,
+  "Arlington": 3, "Minneapolis": 2, "Seattle": 3, "Columbus": 3, "Las Vegas": 5, "Boston": 4, "Chicago": 3, "Phoenix": 3, "Philadelphia": 5, "Portland": 3,
+  "Atlanta": 3, "Denver": 4, "Washington": 6};
+function cityCount(en, nm){ const n = MAP_CITY[en], st = (mSvg._items || []).find(x => x.key === mSel), f = st && MAP_FORMS[st.key];
+  if (!n) return t("map.ccnt0").replace("{m}", nm);
+  return t("map.ccnt").replace("{m}", nm).replace("{n}", `<b>${n}</b>`).replace("{s}", f ? f[0] : 0).replace("{f}", MAP_FED); }
+function mapCount(it){ if (!it || mView !== "us") return "";
+  const f = MAP_FORMS[it.key], m = mName(it);
+  if (!f) return t("map.cnt0").replace("{m}", m).replace("{f}", MAP_FED);
+  return t("map.cnt").replace("{m}", m).replace("{n}", `<b>${f[0] + f[1]}</b>`).replace("{s}", f[0]).replace("{l}", f[1]).replace("{f}", MAP_FED); }
 function paintSel(){
   const items = mSvg._items || [], it = items.find(x => x.key === mSel), go = document.getElementById("mpgo"), info = document.getElementById("mpinfo");
+  const cnt = document.getElementById("mpcnt"), c = mapCount(it); if (cnt){ cnt.innerHTML = c; cnt.hidden = !c; }
   if (!it){ go.hidden = true; info.hidden = false; info.textContent = t("map.prompt"); return; }
   info.hidden = true; go.hidden = false; go.textContent = t("map.go").replace("{m}", mName(it));
 }
@@ -4532,12 +4567,14 @@ function selectMarket(key){
   if (key) track("map_select", {view: mView, market: key});
 }
 document.getElementById("mpzo").addEventListener("click", () => { selectMarket(null); track("map_zoom_out", {view: mView}); });
-mSvg.addEventListener("click", e => { const el = e.target.closest(".hit"); if (!el) return; selectMarket(mSvg._items[+el.dataset.i].key); });
+mSvg.addEventListener("click", e => { const cy = e.target.closest("[data-city]");
+  if (cy){ const cnt = document.getElementById("mpcnt"); cnt.innerHTML = cityCount(cy.dataset.city, cy.dataset.nm); cnt.hidden = false; track("map_city", {city: cy.dataset.city}); return; }
+  const el = e.target.closest(".hit"); if (!el) return; selectMarket(mSvg._items[+el.dataset.i].key); });
 mSvg.addEventListener("pointermove", e => {
   const el = e.target.closest(".hit");
   if (!el || e.pointerType === "touch"){ mTip.hidden = true; return; }
   const it = mSvg._items[+el.dataset.i], r = mWrap.getBoundingClientRect();
-  mTip.innerHTML = `<b>${esc(mName(it))}</b><span>${t("map.t" + it.t)}</span>`;
+  const fc = mView === "us" && MAP_FORMS[it.key]; mTip.innerHTML = `<b>${esc(mName(it))}</b><span>${t("map.t" + it.t)}</span>${fc ? `<span>${t("map.tipn").replace("{n}", fc[0] + fc[1])}</span>` : ""}`;
   mTip.style.left = (e.clientX - r.left) + "px"; mTip.style.top = (e.clientY - r.top) + "px"; mTip.hidden = false;
 });
 mSvg.addEventListener("pointerleave", () => { mTip.hidden = true; });
