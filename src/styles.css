@@ -1117,8 +1117,7 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 :root[data-theme="dark"] .panel { background: radial-gradient(460px 240px at 50% -80px, rgba(70, 104, 150, .22) 0%, rgba(70, 104, 150, 0) 72%) no-repeat, var(--card); }
 :root[data-theme="dark"] .m-h { background: radial-gradient(420px 160px at 30% -40px, rgba(70, 104, 150, .22), rgba(70, 104, 150, 0) 75%) no-repeat; }
 :root[data-theme="dark"] .gate { background: radial-gradient(1200px 600px at 50% -200px, rgba(70, 104, 150, .26) 0%, rgba(70, 104, 150, .08) 45%, rgba(var(--w), 0) 75%) no-repeat, var(--bg); }
-:root[data-theme="dark"] .pill > i { background: var(--card); color: var(--ink); }
-:root[data-theme="dark"] .pill.ink > i { background: var(--on-ink); color: var(--ink); }
+:root[data-theme="dark"] .pill > i { background: none; color: currentColor; }   /* the arrow sits in the pill on its own, as in light mode */
 :root[data-theme="dark"] img.brandlogo, :root[data-theme="dark"] .logo-ink { filter: invert(1) hue-rotate(180deg); }
 
 /* the official form, on the Application tab */

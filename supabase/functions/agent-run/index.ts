@@ -45,6 +45,8 @@ import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
 import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
 import { claim, type Lease, type RunsTable, saveOnto, stamp } from "./lease.ts";
 import { deliverNotice } from "../_shared/business_rules.ts";
+import { filledLines, formAttachments, linkForms, type FilledForm } from "../_shared/form_links.ts";
+import type { Attachment } from "../_shared/mail.ts";
 import { type FamilyDb, fill, spawn, stillOpen, wake } from "./family.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
@@ -255,6 +257,9 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
       return { path };
     },
     network: (keys: string[]) => lessonsFor(keys),
+    // The agencies' PDFs for filling a form here (src/forms/fill.ts): the two kept with the code are inside agent.js; the
+    // rest are the site's own copies under /app/forms/, or the "forms" storage bucket when the site can't be reached.
+    formPdf: (file: string) => sitePdf(file),
     async readFile(path: string) {
       if (!path.startsWith(ws + "/")) throw new Error("That file belongs to another workspace.");
       const { data, error } = await admin.storage.from("documents").download(path);
@@ -263,6 +268,27 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
     },
   };
 }
+
+/** The agencies' PDFs this instance already fetched, by file name (they're the same for everyone). */
+const PDFS = new Map<string, Uint8Array>();
+async function sitePdf(file: string): Promise<Uint8Array | null> {
+  if (file.startsWith("pdf/") || !/^[\w.-]+\.pdf$/.test(file)) return null;
+  const had = PDFS.get(file);
+  if (had) return had;
+  let bytes: Uint8Array | null = null;
+  const origin = appOrigin(env);
+  if (origin) {
+    const res = await fetch(`${origin}/app/forms/${file}`, { signal: AbortSignal.timeout(15000) }).catch(() => null);
+    if (res?.ok) bytes = new Uint8Array(await res.arrayBuffer());
+  }
+  if (!bytes || !isPdf(bytes)) {
+    const { data } = await admin.storage.from("forms").download(file).catch(() => ({ data: null }));
+    if (data) bytes = new Uint8Array(await data.arrayBuffer());
+  }
+  if (bytes && isPdf(bytes)) { PDFS.set(file, bytes); return bytes; }
+  return null;
+}
+const isPdf = (b: Uint8Array) => b.length > 8 && b[0] === 0x25 && b[1] === 0x50 && b[2] === 0x44 && b[3] === 0x46;
 
 /* ------------------------------ the network ------------------------------ */
 // Every business makes Odelia better for every other one (src/learning.ts). After a run: its jobs' first independent
@@ -649,7 +675,7 @@ async function toolCounts(runId: string, st: RunState) {
 
 /** The answer to someone who emailed Odelia: by email, in their thread, only to the address they sign in with, with
  *  the link to the approval waiting in the app. Nothing is approved by email. */
-async function mailBack(run: Run, text: string, approvals: string[]) {
+async function mailBack(run: Run, text: string, approvals: string[], attachments: Attachment[] = []) {
   if (run.channel !== "email" || !run.reply_to || !run.created_by) return;
   const { data: u } = await admin.auth.admin.getUserById(run.created_by);
   const to = String(u?.user?.email ?? "").toLowerCase();
@@ -659,18 +685,18 @@ async function mailBack(run: Run, text: string, approvals: string[]) {
   const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
   const footer = approve ? `${SAY.approve[run.lang]} ${approve}` : `${SAY.open[run.lang]} ${appLink(origin, run.workspace_id)}`;
   const body = mailBody(text || SAY.ack[run.lang], origin ? footer : undefined);
-  const r = await sendOdeliaMail(env, { to, subject: replySubject(String(asked?.subject ?? "")), text: body.text, html: body.html, inReplyTo: String(asked?.provider_id ?? "").replace(/^mail:/, "") || undefined });
+  const r = await sendOdeliaMail(env, { to, subject: replySubject(String(asked?.subject ?? "")), text: body.text, html: body.html, inReplyTo: String(asked?.provider_id ?? "").replace(/^mail:/, "") || undefined, ...(attachments.length ? { attachments } : {}) });
   if (r.ok) await logMessage(admin, { user_id: run.created_by, workspace_id: run.workspace_id, direction: "out", channel: "email", kind: "reply", body: body.text, provider_id: r.id ? `mail:${r.id}` : null, run_id: run.id });
   else console.error("odelia mail", r.status, r.detail);
 }
 
 /** The answer to a job asked in Slack, Lark or WeChat, in the same thread (in WeChat, the same chat). Approvals stay in
  *  the app: the reply links to them. */
-async function chatBack(run: Run, text: string, approvals: string[]) {
+async function chatBack(run: Run, text: string, approvals: string[], extra = "") {
   if (!run.chat_to) return;
   const origin = appOrigin(env);
   const link = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
-  const more = link ? (run.lang === "zh" ? `\n\n等您批准：${link}` : `\n\nWaiting for your approval: ${link}`) : "";
+  const more = (extra ? `\n\n${extra}` : "") + (link ? (run.lang === "zh" ? `\n\n等您批准：${link}` : `\n\nWaiting for your approval: ${link}`) : "");
   const said = text || (run.lang === "zh" ? "完成了。" : "Done.");
   if (run.chat_to.kind === "wechat") {
     const acct = await wechatAccount(admin, run.workspace_id);
@@ -693,14 +719,16 @@ async function chatBack(run: Run, text: string, approvals: string[]) {
  * The answer to someone who texted or called: plain text, at most three messages, ending with the link to the exact
  * approval waiting in the app (or the app, when there are several or the answer runs long). Nothing is approved by text.
  */
-async function textBack(run: Run, text: string, approvals: string[]) {
+async function textBack(run: Run, text: string, approvals: string[], extra = "") {
   if ((run.channel !== "sms" && run.channel !== "voice") || !run.reply_to || !run.created_by) return;
   const link = await linkOf(admin, run.created_by);
   // Only ever to the number this person verified, and only while it's still theirs.
   if (!link?.verified_at || link.number !== normalizePhone(run.reply_to)) return;
   const origin = appOrigin(env);
   const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
-  const segments = splitSms(text, { max: 3, lang: run.lang, more: appLink(origin, run.workspace_id), tail: approve ? `${SAY.approve[run.lang]} ${approve}` : undefined });
+  // the filled form's line and link, then the approval's: always kept, whatever else is cut to fit
+  const tail = [extra, approve ? `${SAY.approve[run.lang]} ${approve}` : ""].filter(Boolean).join(" ");
+  const segments = splitSms(text, { max: 3, lang: run.lang, more: appLink(origin, run.workspace_id), tail: tail || undefined });
   await textUser(admin, env, { link, workspace_id: run.workspace_id, segments, kind: "reply", run_id: run.id });
 }
 
@@ -741,20 +769,27 @@ async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease, w?: W
   // A store's bot answers the run that split the work, not the person: its one summary is the update they get.
   if (run.parent_run) return;
   const said = reply.text.map((t) => t.en).join(" ").trim();
+  // The agency's forms this run filled again (src/forms/versions.ts): attached to an email; by text or in a chat, a
+  // short link that opens the filled PDF in the app for a member of the workspace, for seven days.
+  const forms = (reply.forms ?? []) as FilledForm[];
+  const linked = forms.length && run.channel && run.channel !== "app" && run.channel !== "email"
+    ? await linkForms(admin, { ws: run.workspace_id, by: run.created_by, origin: appOrigin(env), forms }).catch(() => forms) : forms;
+  const formLine = linked.length ? filledLines(linked, run.lang) : "";
   // Asked by text or on a call: the answer goes back by text, which is where they're watching.
   if (run.channel === "sms" || run.channel === "voice") {
-    await textBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim() || SAY.ack[run.lang], reply.approvals ?? []).catch((e) => console.error("text back", String(e).slice(0, 120)));
+    await textBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim() || SAY.ack[run.lang], reply.approvals ?? [], formLine).catch((e) => console.error("text back", String(e).slice(0, 120)));
     return;
   }
-  // Asked by email: the answer goes back by email, in their thread.
+  // Asked by email: the answer goes back by email, in their thread, with the filled forms attached.
   if (run.channel === "email") {
-    await mailBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim(), reply.approvals ?? []).catch((e) => console.error("mail back", String(e).slice(0, 120)));
+    const files = forms.length ? await formAttachments(admin, run.workspace_id, forms).catch(() => []) : [];
+    await mailBack(run, [reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim(), formLine].filter(Boolean).join("\n\n"), reply.approvals ?? [], files).catch((e) => console.error("mail back", String(e).slice(0, 120)));
     return;
   }
   // Asked in Slack, Lark or WeChat: the answer goes back to the same thread or chat, with the link to anything waiting
   // for approval.
   if (CHATS.has(run.channel ?? "")) {
-    await chatBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim(), reply.approvals ?? []).catch((e) => console.error("chat back", String(e).slice(0, 120)));
+    await chatBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim(), reply.approvals ?? [], formLine).catch((e) => console.error("chat back", String(e).slice(0, 120)));
     return;
   }
   if (run.kind === "watch" && /^no changes\.?$/i.test(said)) return;

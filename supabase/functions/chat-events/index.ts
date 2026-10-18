@@ -12,13 +12,17 @@
 // workspace. WeChat doesn't share emails, so a teammate links their WeChat once by sending the account the 6-digit
 // code Settings shows them (wechat_links). Guests, people from another company in a shared channel, followers who
 // haven't linked, and anyone else get a polite note in both languages and no run. Anything to file, pay or send still
-// waits for an approval in the app.
+// waits for an approval in the app. The one exception is Placetta's own public account (the workspace named by
+// ODELIA_PUBLIC_WECHAT_WS): a follower who isn't on the team can text to start ("奶茶店，纽约法拉盛") and gets the plan
+// and its claim link as the reply (_shared/text_start.ts), with no run and no model.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type Bot, type ChatSender, type ChatTo, chatReply, type LarkBot, larkOpen, larkSender, larkText, larkWorks, NEEDS_EMAIL_SCOPE, NOT_TEAMMATE, type SlackBot, slackSender, slackSigned, slackText, slackWho } from "../_shared/bots.ts";
 import { HOOK_KINDS, postHook } from "../_shared/channels.ts";
-import { type WechatBot, wxCredsWork, wxHandle, wxUrlCheck } from "../_shared/wechat.ts";
+import { type WechatBot, WX_SAY, wxCredsWork, wxHandle, wxUrlCheck } from "../_shared/wechat.ts";
 import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
+import { publicWechatWs, startForStranger, textStartOn } from "../_shared/text_start_db.ts";
 
+const env = (k: string) => Deno.env.get(k);
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -151,6 +155,7 @@ async function wechat(url: URL, ws: string, body: string) {
   const acct = await wechatAccount(admin, ws);
   if (!acct) return plain("", 401);
   const { bot, save } = acct;
+  const isPublic = textStartOn(env) && publicWechatWs(env) === ws;
   const r = await wxHandle(bot, url.searchParams, body, {
     firstTime,
     claim: async (openid, code) => {
@@ -162,6 +167,12 @@ async function wechat(url: URL, ws: string, body: string) {
     // the job starts after the answer has gone back (WeChat waits 5 seconds); its answer comes as a customer service message
     start: (uid, openid, text, lang) => later(wechatJob(ws, bot, save, uid, openid, text, lang)),
     notTeammate: NOT_TEAMMATE,
+    // Placetta's own public account (ODELIA_PUBLIC_WECHAT_WS): a follower who isn't on the team can text to start, and
+    // gets the plan as the passive reply, from the registry, with no model
+    ...(isPublic ? {
+      welcome: WX_SAY.startWelcome,
+      stranger: async (openid: string, text: string) => (await startForStranger(admin, env, { channel: "wechat", handle: `wx:${openid}`, text })).reply,
+    } : {}),
   });
   return new Response(r.body, { status: r.status, headers: { "Content-Type": r.type } });
 }

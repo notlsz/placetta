@@ -1,0 +1,51 @@
+# Secret scanning for Placetta (gitleaks v8.30.1, run by the "security" job in .github/workflows/ci.yml).
+# Every default gitleaks rule applies. The allowlists below are the only exceptions, and each one names why.
+# Checked against the full history on 2026-10-18: the 22 findings were all one of these, none a live secret.
+# Adding an exception: say why here, keep it as narrow as the value or path allows, and get it reviewed in the PR.
+
+title = "Placetta secret scan"
+
+[extend]
+useDefault = true
+
+# Test code and fixtures hold fake keys on purpose (the extreme test plants an sk_live_ lookalike, a sample JWT, fake
+# webhook links and test signing secrets to prove they never reach a log or a reply). A real key never belongs here.
+[[allowlists]]
+description = "test files and fixtures"
+paths = [
+  '''(^|/)scripts/[^/]*[-.]test\.m?[jt]s$''',
+  '''(^|/)scripts/e2e/''',
+  '''(^|/)scripts/fixtures/''',
+  '''(^|/)supabase/functions/.*(_test|\.test)\.ts$''',
+  '''(^|/)supabase/tests/''',
+  '''(^|/)worker/filer/test/''',
+]
+
+# Build output committed for deploys and the demo, generated from source files that are scanned (the function bundles
+# by scripts/build-agent.mjs, the demo by vite build --mode single). Their minified lines run to 3 MB, and one commit of
+# dist-single/index.html alone took 88 seconds to scan. A new bundle in scripts/build-agent.mjs gets a line here.
+[[allowlists]]
+description = "generated bundles (their sources are scanned)"
+paths = [
+  '''^dist-single/''',
+  '''^bundles/''',
+  '''^site/beam\.js$''',
+  '''^supabase/functions/agent-run/agent\.js$''',
+  '''^supabase/functions/partner-api/plan\.js$''',
+  '''^supabase/functions/_shared/(opening|start)\.js$''',
+]
+
+# Values that are public by design:
+#   the Supabase publishable key (sb_publishable_...), which the browser sends and row-level security limits;
+#   the legacy anon key of project esquxzcfsylffuijvzec (role "anon"), matched on its exact claims so a service_role
+#     key, or any other project's key, is still caught;
+#   the IndexNow key, which IndexNow requires us to publish at placetta.com/<key>.txt;
+#   Slack's documented placeholder webhook (T00000000/B00000000/XXXX...).
+[[allowlists]]
+description = "public by design"
+regexes = [
+  '''sb_publishable_[A-Za-z0-9_-]+''',
+  '''eyJ[A-Za-z0-9_-]+\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzcXV4emNmc3lsZmZ1aWp2emVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5OTEzMzQsImV4cCI6MjEwNjU2NzMzNH0\.[A-Za-z0-9_-]+''',
+  '''c354f93ce636a507cf25b5fada30d1a5''',
+  '''hooks\.slack\.com/services/T0+/B0+/X+''',
+]
