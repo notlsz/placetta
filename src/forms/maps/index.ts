@@ -29,6 +29,7 @@ import m_cmh_plan_review from "./cmh-plan-review.json";
 import m_cook_food_license from "./cook-food-license.json";
 import m_dal_co from "./dal-co.json";
 import m_dal_food_permit from "./dal-food-permit.json";
+import m_dc_dlcp from "./dc-dlcp.json";
 import m_den_plan_review from "./den-plan-review.json";
 import m_den_zoning from "./den-zoning.json";
 import m_edi_food_license from "./edi-food-license.json";
@@ -74,6 +75,7 @@ import m_nyc_dcwp_license from "./nyc-dcwp-license.json";
 import m_oc_health_permit from "./oc-health-permit.json";
 import m_oc_plan_check from "./oc-plan-check.json";
 import m_or_payroll from "./or-payroll.json";
+import m_pa_dos from "./pa-dos.json";
 import m_phl_plan_review from "./phl-plan-review.json";
 import m_phx_co from "./phx-co.json";
 import m_sac_bot from "./sac-bot.json";
@@ -122,6 +124,7 @@ export const MAPS: Record<string, FormMap> = {
   "cook-food-license": m_cook_food_license as FormMap,
   "dal-co": m_dal_co as FormMap,
   "dal-food-permit": m_dal_food_permit as FormMap,
+  "dc-dlcp": m_dc_dlcp as FormMap,
   "den-plan-review": m_den_plan_review as FormMap,
   "den-zoning": m_den_zoning as FormMap,
   "edi-food-license": m_edi_food_license as FormMap,
@@ -167,6 +170,7 @@ export const MAPS: Record<string, FormMap> = {
   "oc-health-permit": m_oc_health_permit as FormMap,
   "oc-plan-check": m_oc_plan_check as FormMap,
   "or-payroll": m_or_payroll as FormMap,
+  "pa-dos": m_pa_dos as FormMap,
   "phl-plan-review": m_phl_plan_review as FormMap,
   "phx-co": m_phx_co as FormMap,
   "sac-bot": m_sac_bot as FormMap,

@@ -2306,5 +2306,33 @@
   "change": ["Limited liability company change","Other: Change of corporate officers' addresses"],
   "details": ["Jason Zhou joined as a member with a 25% interest on 09/01/2026.","The secretary moved to 10 Almaden Blvd, San Jose, CA 95113."],
   "signer": ["Mei Chen, Managing Member","Lin Wei, President"]
+ },
+ "pa-dos": {
+  "name": ["Lotus Tea House LLC","Golden Dragon Noodle Company LLC"],
+  "registered_office": ["1001 Race St, Philadelphia, PA 19107, Philadelphia","None"],
+  "cro": ["None","Keystone Registered Agents Inc., Allegheny"],
+  "organizers": ["Mei Chen","Lin Wei\nMei Chen\nJason Zhou"],
+  "effective": ["Upon filing","On a later date: 01/02/2027"],
+  "veteran": ["No","No"],
+  "return_to": ["Mei Chen; 1001 Race St, Unit 2; Philadelphia, PA 19107","None"],
+  "return_email": ["None","filings@goldendragon.example"]
+ },
+ "dc-dlcp": {
+  "clean_hands": ["No","No"],
+  "signer": ["Mei Chen","Lin Wei"],
+  "license_type": ["Food Services","Other: Tea retail"],
+  "seats": ["24","None"],
+  "applicant_type": ["Limited Liability Co.","Corporation (For-Profit)"],
+  "owner_name": ["Lotus Tea House LLC","Golden Dragon Noodle Inc."],
+  "trade_name": ["Lotus Tea House","None"],
+  "location": ["Not in my home: CO2600123","Not in my home: CO2600456"],
+  "address": ["700 H St NW, Washington, DC 20001","1100 H St NE, Washington, DC 20002"],
+  "phone": ["(202) 555-0142","(202) 555-0187"],
+  "email": ["owner@lotustea.example","office@goldendragon.example"],
+  "billing": ["Same","88 Bush St, San Francisco, CA 94104"],
+  "agent": ["Mei Chen","Capitol Registered Agents Inc."],
+  "agent_address": ["700 H St NW, Washington, DC 20001","1400 K St NW, Washington, DC 20005"],
+  "agent_phone": ["(202) 555-0142","(202) 555-0110"],
+  "agent_email": ["owner@lotustea.example","agent@capitolra.example"]
  }
 }
