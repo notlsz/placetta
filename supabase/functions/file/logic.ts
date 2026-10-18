@@ -1,9 +1,12 @@
 // The dispatcher's decisions, kept free of I/O so they can be tested: is this agency switched on, is the filing
 // complete, which channel sends it, and is the owner foreign. index.ts does the sending.
-import type { Dest } from "./destinations.ts";
+import { type Dest, loginMatches } from "./destinations.ts";
 
 export type Bi = { en: string; zh: string };
 export type Channel = "email" | "fax" | "mail" | "portal" | "team";
+/** Where a filing goes: a channel, or "owner" when the agency takes it only from the business itself (Odelia
+    prepares the packet and nothing is sent; the filing's channel column says "team"). */
+export type Route = Channel | "owner";
 export type LogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string };
 
 export type Payload = {
@@ -91,8 +94,13 @@ export function isForeign(p: Payload): boolean {
 
 export type Problem = { en: string; zh: string; kind: "missing" | "secret" | "signature" | "file" };
 
-/** Everything that must be true before anything is sent. Empty when the filing can go. */
-export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<string> }): Problem[] {
+/** An attachment that is the owner's signed authorization for someone else to file (a power of attorney, an
+    authority to act, an agent or authorization letter, a disclosure the agency names for that). */
+const AUTHORIZATION = /authori[sz]|power of attorney|\bpoa\b|authority to act|agent letter|disclosure|授权|委托/i;
+
+/** Everything that must be true before anything is sent. Empty when the filing can go. route is where pick() is
+    sending it: the filled form and signature are checked only when Placetta sends paper (email, fax or mail). */
+export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<string> }, route?: Route): Problem[] {
   const out: Problem[] = [];
   const p = f.payload;
   for (const x of p.fields ?? []) {
@@ -111,7 +119,12 @@ export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<strin
   }
   const signed = signedCopy(f);
   if (signed && (!signed.startsWith(`${f.workspace_id}/`) || !ctx.docPaths.has(signed))) out.push({ kind: "file", en: "The signed copy isn't in Documents. Upload it again.", zh: "文件中找不到签名件，请重新上传。" });
-  const paperless = !!d?.portal;
+  // A portal takes its own answers and an owner packet is sent by the owner; email, fax and mail carry our copy.
+  const paperless = route ? route === "portal" || route === "owner" : !!d?.portal || !!d?.owner;
+  if (d?.onBehalf === "authorization" && route !== "owner" && !(p.attachments ?? []).some((a) => AUTHORIZATION.test(a.name))) {
+    const what = d.authorization ?? "authorization";
+    out.push({ kind: "file", en: `The agency takes this from someone filing for you only with your signed ${what}. Sign it and add it to this application's documents.`, zh: `机构要求代办人提交时附上您签署的授权文件（${what}）。请签署后添加到本申请的文件中。` });
+  }
   if (d && !paperless) {
     if (!p.pdf_path) out.push({ kind: "file", en: "The filled official form is missing. Approve it again from the application.", zh: "缺少已填写的官方表格。请在申请中重新批准。" });
     else if (!p.pdf_path.startsWith(`${f.workspace_id}/`) || !ctx.docPaths.has(p.pdf_path)) out.push({ kind: "file", en: "The filled official form isn't in Documents.", zh: "文件中找不到已填写的官方表格。" });
@@ -127,23 +140,39 @@ export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<strin
 
 export type Facts = { hasLogin: boolean; mailConnected: boolean };
 
-/** The first channel that fits, in order: portal, email, fax, mail, else the team. A wet signature rules out
-    every channel that would send our copy (email, fax and mail); the person signs it themselves. */
 /** The filing carries an agency fee. */
 export const feeDue = (f: Filing): boolean => Number(f.fee_estimate ?? 0) > 0;
 
-export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Channel {
+/** A fee has to go with the filing: the filing's own fee, or the agency's page says the fee is sent with it or paid at
+    the counter. Placetta never sends money, so email, fax and mail are out; the team takes it with the payment. */
+export const feeBlocks = (f: Filing, d: Dest | undefined): boolean =>
+  feeDue(f) || d?.payment === "with_filing" || d?.payment === "in_person";
+
+/** An email carries the filled form and at most four attachments (integrations' mail_send takes five files). */
+export const EMAIL_ATTACHMENTS = 4;
+const extraFiles = (f: Filing) => (f.payload.attachments ?? []).length;
+
+/** Where it goes, in order: the owner when only the business can submit it, then portal, email, fax, mail, else the
+    team. A wet signature rules out every channel that would send our copy (email, fax and mail); the person signs it
+    themselves. A fee rules out email, fax and mail. A fax or a letter carries only the form, so a filing with
+    attachments never goes by fax or mail, and an email with more than four goes to the team. */
+export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Route {
   if (!d) return "team";
+  if (d.owner) return "owner";
   const on = (c: Channel) => env.channels.includes(c);
   if (d.portal && (facts.hasLogin || d.noLogin) && env.portalWorker && on("portal")) return "portal";
-  // An agency fee can't travel in an email, a fax or a letter from Placetta: the team takes the filing with the payment.
-  if (feeDue(f)) return "team";
-  if (d.signature === "wet") return signedCopy(f) && canFaxSigned(d, env) ? "fax" : "team";
-  if (d.email && facts.mailConnected && on("email")) return "email";
+  if (feeBlocks(f, d)) return "team";
+  if (d.signature === "wet") return signedCopy(f) && canFaxSignedFor(f, d, env) ? "fax" : "team";
+  if (d.email && facts.mailConnected && on("email") && extraFiles(f) <= EMAIL_ATTACHMENTS) return "email";
+  if (extraFiles(f)) return "team";
   if (d.fax && env.fax && on("fax")) return "fax";
   if (d.mail && env.mail && on("mail")) return "mail";
   return "team";
 }
+
+/** A saved login opens this destination's portal (same host and, on a shared host, the same agency's path). */
+export const hasLoginFor = (logins: (string | null | undefined)[], d: Dest | undefined): boolean =>
+  !!d?.portal && logins.some((u) => loginMatches(u, d));
 
 /** The agency's fax number or address for this owner. */
 export function faxTo(d: Dest, p: Payload): string | null {
@@ -165,6 +194,69 @@ export const faxFile = (f: Filing): string | undefined => signedCopy(f) ?? f.pay
 /** Placetta can fax a hand-signed copy for this form when the agency takes faxes and fax is switched on. */
 export const canFaxSigned = (d: Dest | undefined, env: Env): boolean => !!d?.fax && env.fax && env.channels.includes("fax");
 
+/** ...and for this filing: no fee has to go with it, and nothing but the form (a fax carries only the form). */
+export const canFaxSignedFor = (f: Filing, d: Dest | undefined, env: Env): boolean =>
+  canFaxSigned(d, env) && !feeBlocks(f, d) && extraFiles(f) === 0;
+
+/** The hand-back that asks the owner to send an owner-only form themselves, with the packet Odelia prepared. */
+export const OWNER_REF = "owner_packet";
+
+/** What the owner packet says: why only the business can submit it, where it goes, and what goes with it. Plain
+    ASCII lines for the packet's cover page; the log entry carries the same in English and Chinese. */
+export function ownerPacket(f: Filing, d: Dest): { en: string; zh: string; lines: string[]; link: string | null } {
+  const o = d.owner!;
+  const form = f.payload.form?.en || f.title.en;
+  const formZh = f.payload.form?.zh || f.title.zh;
+  const addr = o.mail ? [o.mail.name, o.mail.line1, o.mail.line2, `${o.mail.city}, ${o.mail.state} ${o.mail.zip}`].filter(Boolean).join(", ") : "";
+  const where = o.url ? `on ${o.url}` : o.email ? `by email to ${o.email}` : `by mail to ${addr}`;
+  const whereZh = o.url ? `在 ${o.url} 办理` : o.email ? `发送邮件至 ${o.email}` : `邮寄至 ${addr}`;
+  const fee = feeDue(f) ? ` The agency's fee (about $${Number(f.fee_estimate)}) is yours to pay.` : "";
+  const feeZh = feeDue(f) ? `机构费用（约 ${Number(f.fee_estimate)} 美元）由您支付。` : "";
+  const link = o.url && /^https:\/\//.test(o.url) ? o.url : null;
+  return {
+    en: `${form} is one you do yourself: ${o.why} Odelia put a packet in Documents (owner-packet.pdf) with what to send and where. Send it ${where}.${fee} Tap "I've done it" once it's sent.`,
+    zh: `${formZh}需要由您本人办理。快哉已把材料包放在“文件”中（owner-packet.pdf），写明要提交什么、交到哪里。请${whereZh}。${feeZh}办完后点击“我已完成”。`,
+    lines: [
+      `Owner packet: ${form}`,
+      `For: ${f.payload.fields?.find((x) => x.id === "l1")?.value || f.title.en}`,
+      "",
+      "Why you send it yourself:",
+      ...wrap(o.why),
+      "",
+      "Where it goes:",
+      ...(o.url ? wrap(o.url) : []),
+      ...(o.email ? [`Email: ${o.email}`] : []),
+      ...(addr ? wrap(`Mail: ${addr}`) : []),
+      "",
+      `Signature: ${d.signature === "wet" ? "sign by hand" : d.signature === "none" ? "none" : "electronic signature accepted"}`,
+      `Fee: ${feeDue(f) ? `about $${Number(f.fee_estimate)}, ` : ""}${PAYMENT_SAID[d.payment ?? ""] ?? "as the agency asks"}`,
+      ...(d.attach?.length ? ["", "What goes with it:", ...d.attach.flatMap((a) => wrap(a))] : []),
+      "",
+      "Your filled form and documents are in Placetta's Documents.",
+      ...wrap(`The agency's page: ${d.source} (checked ${d.checked})`),
+    ],
+    link,
+  };
+}
+
+const PAYMENT_SAID: Record<string, string> = {
+  none: "no fee", portal: "paid on the agency's site", invoice: "the agency sends a bill",
+  with_filing: "a check or money order goes with it", in_person: "paid in person or to the exam provider",
+};
+
+/** Lines of at most 90 characters, for the packet's cover page. */
+function wrap(s: string, width = 90): string[] {
+  const out: string[] = [];
+  let line = "";
+  // A word longer than a line (a long link) is cut into pieces.
+  const words = s.split(/\s+/).flatMap((w) => w.length > width ? w.match(new RegExp(`.{1,${width}}`, "g"))! : [w]);
+  for (const w of words) {
+    if (line && (line + " " + w).length > width) { out.push(line); line = w; } else line = line ? `${line} ${w}` : w;
+  }
+  if (line) out.push(line);
+  return out;
+}
+
 /** True once the team approved this filing's review (two-key period), recorded in its log. */
 export const teamApproved = (f: Filing) => f.agent_log.some((e) => e.kind === "two_key_ok");
 
@@ -185,7 +277,8 @@ export function emailFor(f: Filing): { subject: string; body: string } {
   };
 }
 
-export const CHANNEL_SAID: Record<Exclude<Channel, "team">, Bi> = {
+export const CHANNEL_SAID: Record<Exclude<Route, "team">, Bi> = {
+  owner: { en: "by you, with the packet Placetta prepared", zh: "由您本人凭快哉准备的材料包办理" },
   email: { en: "by email", zh: "通过邮件" },
   fax: { en: "by fax", zh: "通过传真" },
   mail: { en: "by certified mail", zh: "通过挂号信" },
