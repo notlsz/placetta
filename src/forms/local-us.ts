@@ -278,7 +278,7 @@ export const LOCAL_US: OfficialForm[] = [
     // Inspection Frequency Analysis, which the agency's page 2 says every application must include.
     fields: [
       F("name", "Establishment", "Establishment name", "场所名称"),
-      F("employees", "Establishment", "Employees in total (full time, part time and self)", "员工总数（含全职、兼职及本人）", undefined, B("e.g. \"7 (4 full time, 2 part time, 1 self)\"", "如“7 (4 full time, 2 part time, 1 self)”")),
+      F("employees", "Establishment", "Employees in total (full time, part time and self)", "员工总数（含全职、兼职及本人）", undefined, B("Total, then full time/part time/self as the form prints it, e.g. \"7 (4/2/1)\"", "总数，再按表格写全职/兼职/本人，如“7 (4/2/1)”")),
       F("address", "Establishment", "Physical address, including suite", "实际地址（含单元号）"),
       F("mailing", "Establishment", "Mailing address for the permit and renewal notices", "接收许可证及续期通知的邮寄地址"),
       F("hours", "Establishment", "Days and hours of operation", "营业日及营业时间", undefined, B("e.g. \"Mon-Sun 10am-9pm\"", "如“Mon-Sun 10am-9pm”")),
