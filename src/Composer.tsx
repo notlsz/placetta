@@ -78,7 +78,9 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
   const open = useMemo(() => (mode === "demo" ? SUGGESTIONS : suggestions(ws, daysFromNow(0), LIVE_SUGGESTIONS)).filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked, mode, ws]);
   // the dock's starter chips: an empty or nearly empty workspace gets three, the workspace's own first, no two alike
   // nothing verified or uploaded yet: a brand-new workspace, or one whose permits are still the registry's instant plan
-  const nearlyEmpty = !ws.approvals.length && !ws.docs.length && (ws.apps.length < 3 || ws.apps.every(a => a.preview));
+  // (the application filled at sign-up and waiting for approval, src/plan/prefill.ts, doesn't make it any less new)
+  const firstWin = ws.firstPlan?.win;
+  const nearlyEmpty = !ws.approvals.some(a => !(firstWin && a.app === firstWin)) && !ws.docs.length && (ws.apps.length < 3 || ws.apps.every(a => a.preview || a.id === firstWin));
   const chips = useMemo(() => {
     if (!starters || !nearlyEmpty) return [] as Bi[];
     const out: Bi[] = [];

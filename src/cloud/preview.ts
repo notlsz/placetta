@@ -406,7 +406,9 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       if (body.action === "sync_locations") return json({ ok: true, synced: false });
       const no = needOwner(); if (no) return no;
       if (body.action === "portal") return fnErr("not_configured", "Billing management opens Stripe on the live app.", 409);
-      const b = t("billing").find(x => x.workspace_id === ws); if (b) Object.assign(b, PLAN_SET[String(body.plan)] ?? {}, { stripe_customer_id: "cus_preview" });
+      // the plans sheet asks for "locations" with its tier (Essentials or Pro): that turns the yearly plan on too
+      const set = body.plan === "locations" ? { subscription_status: "active", subscription_plan: body.tier === "pro" ? "pro" : "essentials" } : PLAN_SET[String(body.plan)];
+      const b = t("billing").find(x => x.workspace_id === ws); if (b) Object.assign(b, set ?? {}, { stripe_customer_id: "cus_preview" });
       audit(ws, c.sub, "you", "Started", "开通", { en: String(body.plan), zh: String(body.plan) });
       save(); return json({ ok: true, url: "preview:billing" });
     }

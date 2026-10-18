@@ -112,7 +112,12 @@ function fileReady(ctx: Context): Plan {
   };
 }
 
-function blocking(): Plan {
+/** The agency pages behind a scripted answer that states a requirement: each application's own official page, shown
+ *  under the answer as its Sources, the way a live run cites what it read (src/sources.ts). */
+const cite = (ctx: Context, ...ids: string[]) => ids.map(id => ctx.current.apps.find(a => a.id === id)?.source)
+  .filter((s): s is { label: string; url: string } => !!s?.url).map(s => ({ title: s.label, url: s.url }));
+
+function blocking(ctx: Context): Plan {
   return {
     steps: [
       S("searching", "Checking the status of every application", "查看每项申请的进度"),
@@ -126,6 +131,7 @@ function blocking(): Plan {
       ],
       chain: [B("Plan check", "图纸审查"), B("Building permit", "建筑许可"), B("Build-out", "装修施工"), B("Fire and health inspections", "消防与卫生检查"), B("Permit to operate", "经营许可")],
       approvals: ["a-docs"],
+      sources: cite(ctx, "plancheck", "building"),
     },
   };
 }
@@ -200,6 +206,7 @@ function ruleChange(ctx: Context): Plan {
     reply: {
       text: [B("The county now wants a grease interceptor worksheet with food plan checks. I added it to your checklist and started it; I'll finish once your equipment list is in.", "县政府现要求食品图纸审查附隔油池计算表。我已加入清单并开始填写，设备清单到位后完成。")],
       apps: ["plancheck"],
+      sources: cite(ctx, "plancheck"),
     },
   };
 }
