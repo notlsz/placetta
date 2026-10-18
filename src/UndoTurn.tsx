@@ -26,10 +26,15 @@ function HeldItem({ h }: { h: HeldOut }) {
   return <li>{b(h.title)}{live ?? <small>{after}</small>}</li>;
 }
 
-export function UndoTurn({ id }: { id: string }) {
+/** open/onClose: the panel opens the question from the turn's "…" (src/AgentPanel.tsx) or ⌘K, so no button shows here;
+ *  without them it shows its own "Undo what she did". */
+export function UndoTurn({ id, open, onClose }: { id: string; open?: boolean; onClose?: () => void }) {
   const { b, lang, ws, busy, editWs, cloud, say } = useApp();
   const holds = useHolds();
-  const [ask, setAsk] = useState(false);
+  const [own, setOwn] = useState(false);
+  const held = !!onClose;
+  const ask = held ? !!open : own;
+  const setAsk = (v: boolean) => (held ? (v ? undefined : onClose!()) : setOwn(v));
   const pt = (ws.undo ?? []).find(x => x.id === id);
   if (!pt) return null;
   const zh = lang === "zh";
@@ -54,6 +59,7 @@ export function UndoTurn({ id }: { id: string }) {
     setAsk(false);
     say(zh ? "已撤销她这一轮的操作。" : "Undone. What she changed in that turn is back the way it was.");
   };
+  if (held && !ask) return null;
   return (
     <div className="undo">
       {ask ? (

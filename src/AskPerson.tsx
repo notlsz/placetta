@@ -28,7 +28,8 @@ export function AskPerson({ context, compact }: { context: () => Record<string, 
   );
 }
 
-function AskSheet({ context, onClose }: { context: Record<string, unknown>; onClose: () => void }) {
+/** The sheet itself, opened from the AskPerson button or from Odelia's "…" and ⌘K (src/AgentPanel.tsx). */
+export function AskSheet({ context, onClose }: { context: Record<string, unknown>; onClose: () => void }) {
   const { b, lang, cloud } = useApp();
   const zh = lang === "zh";
   const [q, setQ] = useState("");

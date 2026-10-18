@@ -2,18 +2,25 @@ import { useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from
 import { useApp } from "./ctx";
 import { commandsFor, expandCommand, matchCommands, type Command } from "./commands";
 import { PLAN_CMD } from "./autonomy";
+import { B } from "./bi";
 import "./controls.css";
 
 /* The message box's commands: type "/" for the list (keyboard: arrows, Enter or Tab to pick, Escape to close; or tap
-   one), and Plan first, which sends the next request as "/plan …" so Odelia writes the plan and waits for approval. */
+   one), and Plan first, which sends the next request as "/plan …" so Odelia writes the plan and waits for approval.
+   Plan first has no button of its own in the box: "/plan", ⌘K and Settings turn it on, and while it's on a quiet chip
+   says so and turns it off. "/upload" opens the file picker (the box has no attach button). */
+
+const UPLOAD: Command = { cmd: "/upload", label: B("Upload a file", "上传文件"), hint: B("A lease, a floor plan, a photo: Odelia reads it", "租约、平面图、照片：Odelia 会读取") };
 
 const PlanIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h7" /><path d="M4 6l1.2 1.2L7.5 5M4 12l1.2 1.2 2.3-2.2" /><path d="M4.5 18h1.5" /></svg>;
 
 export type Slash = {
   /** The list over the message box, or nothing. */
   menu: ReactNode;
-  /** The Plan first toggle for the message box. */
+  /** The Plan first chip while it's on (tap to turn it off); nothing otherwise. */
   toggle: (disabled?: boolean) => ReactNode;
+  /** Turn Plan first on or off for the next request (⌘K). */
+  setPlan: (on: boolean) => void;
   /** Keys while typing: true when the menu used it. */
   onKey: (e: KeyboardEvent<HTMLTextAreaElement>) => boolean;
   /** Send what was typed: a command becomes its request, "/forget" starts a fresh conversation, Plan first adds "/plan". */
@@ -23,9 +30,9 @@ export type Slash = {
   plan: boolean;
 };
 
-export function useSlash({ draft, setDraft, variant }: { draft: string; setDraft: (s: string) => void; variant: string }): Slash {
+export function useSlash({ draft, setDraft, variant, onUpload }: { draft: string; setDraft: (s: string) => void; variant: string; onUpload?: () => void }): Slash {
   const { lang, ws, ask, b } = useApp();
-  const list = useMemo(() => commandsFor(ws), [ws]);
+  const list = useMemo(() => (onUpload ? [...commandsFor(ws), UPLOAD] : commandsFor(ws)), [ws, onUpload]);
   const hits = useMemo(() => matchCommands(list, draft), [list, draft]);
   const [at, setAt] = useState(0);
   const [shut, setShut] = useState(false);
@@ -37,6 +44,7 @@ export function useSlash({ draft, setDraft, variant }: { draft: string; setDraft
   const zh = lang === "zh";
 
   const send = (text: string) => {
+    if (onUpload && text.trim().toLowerCase() === UPLOAD.cmd) { onUpload(); return; }
     const x = expandCommand(list, text, lang);
     if (x && "local" in x) { window.dispatchEvent(new CustomEvent("placetta:forget")); setPlan(false); return; }
     const q = x ? x.prompt : text;
@@ -44,6 +52,7 @@ export function useSlash({ draft, setDraft, variant }: { draft: string; setDraft
     setPlan(false);
   };
   const pick = (c: Command) => {
+    if (c === UPLOAD) { setDraft(""); onUpload?.(); return; }
     if (c.local || (!c.args && !c.needs)) { setDraft(""); send(c.cmd); return; }
     setDraft(c.cmd + " ");
     setShut(true);
@@ -58,7 +67,7 @@ export function useSlash({ draft, setDraft, variant }: { draft: string; setDraft
     return false;
   };
   const listId = "slash-" + variant;
-  const builtin = (c: Command) => !c.cmd.startsWith("/") || ["/plan", "/status", "/renew", "/inspection", "/map", "/deadlines", "/forget"].includes(c.cmd);
+  const builtin = (c: Command) => !c.cmd.startsWith("/") || ["/plan", "/status", "/renew", "/inspection", "/map", "/deadlines", "/forget", "/upload"].includes(c.cmd);
   let last = "";
   const menu = open ? (
     <div className="slash" role="presentation">
@@ -81,14 +90,14 @@ export function useSlash({ draft, setDraft, variant }: { draft: string; setDraft
       </ul>
     </div>
   ) : null;
-  const toggle = (disabled?: boolean) => (
+  const toggle = (disabled?: boolean) => !plan ? null : (
     <button type="button" className="pf" aria-pressed={plan} disabled={disabled} onClick={() => setPlan(v => !v)}
       title={zh ? "先做计划：Odelia 先写好计划，等您批准后再做" : "Plan first: Odelia writes the plan and waits for your approval"} aria-label={zh ? "先做计划" : "Plan first"}>
       <PlanIcon /><span className="pf-w">{zh ? "先做计划" : "Plan first"}</span>
     </button>
   );
   return {
-    menu, toggle, onKey, send, plan,
+    menu, toggle, onKey, send, plan, setPlan,
     inputProps: { role: "combobox", "aria-autocomplete": "list", "aria-expanded": open, "aria-controls": open ? listId : undefined, "aria-activedescendant": open ? `${listId}-${Math.min(at, hits.length - 1)}` : undefined },
   };
 }
