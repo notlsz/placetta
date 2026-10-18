@@ -1,0 +1,437 @@
+{
+ "form": "sacc-plan-review",
+ "rev": "Food Facility Plan Review Application, New Construction / Major Remodel / Minor Remodel, FY 2026-2027 (Rev. 07/01/26)",
+ "pdf": "sacc-plan-review.pdf",
+ "url": "https://emd.saccounty.gov/content/dam/emd/docs/transition/Application%20for%20Food%20Facility%20Plan%20Review%202026-2027.pdf",
+ "checked": "2026-10-18",
+ "notes": "Sacramento County EMD's food facility plan review application with its preview checklist. Addresses split into street, city and ZIP. Scope of work takes every item that applies, by name; the fee category by its PE number. The checklist's 'page #' column is where each item sits in the stamped plans, so it is left for the designer. The office-use header, the SRH/FA/PR/CT/PE row and the approval line are left for the county.",
+ "lines": [
+  {
+   "id": "facility_name",
+   "line": "Facility information",
+   "en": "Facility name",
+   "zh": "设施名称"
+  },
+  {
+   "id": "facility_phone",
+   "line": "Facility information",
+   "en": "Facility phone",
+   "zh": "设施电话"
+  },
+  {
+   "id": "facility_address",
+   "line": "Facility information",
+   "en": "Facility address",
+   "zh": "设施地址"
+  },
+  {
+   "id": "facility_type",
+   "line": "Facility information",
+   "en": "Type of facility (restaurant, market, etc.)",
+   "zh": "设施类型（餐厅、市场等）"
+  },
+  {
+   "id": "square_feet",
+   "line": "Facility information",
+   "en": "Square feet",
+   "zh": "面积（平方英尺）"
+  },
+  {
+   "id": "billing_name",
+   "line": "Payment / billing contact",
+   "en": "Payment or billing contact: name",
+   "zh": "付款/账单联系人：姓名"
+  },
+  {
+   "id": "billing_phone",
+   "line": "Payment / billing contact",
+   "en": "Billing contact: phone",
+   "zh": "账单联系人：电话"
+  },
+  {
+   "id": "billing_address",
+   "line": "Payment / billing contact",
+   "en": "Billing contact: address",
+   "zh": "账单联系人：地址"
+  },
+  {
+   "id": "billing_email",
+   "line": "Payment / billing contact",
+   "en": "Billing contact: email",
+   "zh": "账单联系人：电子邮箱"
+  },
+  {
+   "id": "billing_fax",
+   "line": "Payment / billing contact",
+   "en": "Billing contact: fax",
+   "zh": "账单联系人：传真"
+  },
+  {
+   "id": "plans_contact",
+   "line": "Plan submittal contact",
+   "en": "Plan submittal contact: name",
+   "zh": "图纸提交联系人：姓名"
+  },
+  {
+   "id": "plans_phone",
+   "line": "Plan submittal contact",
+   "en": "Plan submittal contact: phone",
+   "zh": "图纸提交联系人：电话"
+  },
+  {
+   "id": "plans_email",
+   "line": "Plan submittal contact",
+   "en": "Plan submittal contact: email",
+   "zh": "图纸提交联系人：电子邮箱"
+  },
+  {
+   "id": "plans_fax",
+   "line": "Plan submittal contact",
+   "en": "Plan submittal contact: fax",
+   "zh": "图纸提交联系人：传真"
+  },
+  {
+   "id": "scope",
+   "line": "Scope of work",
+   "en": "Scope of work (all that apply)",
+   "zh": "工程范围（可多选）",
+   "options": [
+    "New Construction",
+    "Remodeling Existing Permitted Food Facility",
+    "Adding New Equipment",
+    "Replacing Existing Approved Equipment",
+    "Changing Facility Floorplan / Layout",
+    "Adding or Replacing Sinks",
+    "Adding or Replacing Dishwasher",
+    "Adding or Replacing Water Heater",
+    "Adding or Replacing Hood Ventilation System",
+    "Adding or Replacing Walk-in Refrigerator or Freezer",
+    "Replacing Floor, Wall, or Ceiling Finishes",
+    "Substantial Menu Change",
+    "Other"
+   ],
+   "hint": {
+    "en": "Name each that applies; for something else write only \"Other: \" and what it is.",
+    "zh": "逐项写明；其他内容只写 \"Other: \" 加说明。"
+   }
+  },
+  {
+   "id": "fee_category",
+   "line": "Fee",
+   "en": "Plan review category and fee",
+   "zh": "图纸审核类别与费用",
+   "options": [
+    "PE 1710 New Construction Retail Market",
+    "PE 1711 New Construction < 2000 Sq.Ft.",
+    "PE 1712 New Construction 2000-6000 Sq.Ft.",
+    "PE 1713 New Construction > 6000 Sq.Ft.",
+    "PE 1714 Major Remodel",
+    "PE 1715 Minor Remodel With Inspection",
+    "PE 1716 Minor Remodel Without Inspection",
+    "PE 1717 Single Equipment Replacement",
+    "PE 1740 New Construction Mobile Food Facility"
+   ]
+  },
+  {
+   "id": "catering",
+   "line": "Checklist: storage",
+   "en": "Will you be doing any catering?",
+   "zh": "是否会提供外烩服务？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "raw_animal",
+   "line": "Checklist: menu",
+   "en": "Will any raw meat, poultry or seafood be cooked?",
+   "zh": "是否会烹饪生肉、禽肉或海鲜？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "water",
+   "line": "Checklist: utilities",
+   "en": "Water provided by (the water utility), or \"Onsite well\"",
+   "zh": "供水单位，或 \"Onsite well\""
+  },
+  {
+   "id": "sewer",
+   "line": "Checklist: utilities",
+   "en": "Sanitary sewer provided by (the sewer district), or \"Onsite wastewater treatment\"",
+   "zh": "污水处理单位，或 \"Onsite wastewater treatment\""
+  },
+  {
+   "id": "checklist_pages",
+   "line": "Checklist",
+   "en": "Page number in the plans for each checklist item",
+   "zh": "核对表各项在图纸中的页码"
+  }
+ ],
+ "unmapped": {
+  "checklist_pages": "The checklist's 'page #' column points at sheets in the stamped plans, which the designer numbers; Placetta leaves it for them."
+ },
+ "blank": {
+  "billing_fax": "^(none|no|n/?a)\\.?$",
+  "plans_fax": "^(none|no|n/?a)\\.?$",
+  "catering": "^(n|no)\\b",
+  "raw_animal": "^(n|no)\\b"
+ },
+ "boxes": {
+  "facility_name": [
+   {
+    "text": "Facility Name"
+   },
+   {
+    "text": "Preview Checklist for Food Establishment Plan Review"
+   }
+  ],
+  "facility_phone": [
+   {
+    "text": "Ph"
+   }
+  ],
+  "facility_address": [
+   {
+    "text": "Address",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "Zip",
+    "pick": "zip"
+   }
+  ],
+  "facility_type": [
+   {
+    "text": "Type of Facility restaurant market etc"
+   }
+  ],
+  "square_feet": [
+   {
+    "text": "SqFt",
+    "pick": "digits"
+   }
+  ],
+  "billing_name": [
+   {
+    "text": "Name"
+   }
+  ],
+  "billing_phone": [
+   {
+    "text": "Ph_2"
+   }
+  ],
+  "billing_address": [
+   {
+    "text": "Address_2",
+    "pick": "street"
+   },
+   {
+    "text": "City_2",
+    "pick": "city"
+   },
+   {
+    "text": "Zip_2",
+    "pick": "zip"
+   }
+  ],
+  "billing_email": [
+   {
+    "text": "Email"
+   }
+  ],
+  "billing_fax": [
+   {
+    "text": "Fax",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "plans_contact": [
+   {
+    "text": "Name_2"
+   }
+  ],
+  "plans_phone": [
+   {
+    "text": "Ph_3"
+   }
+  ],
+  "plans_email": [
+   {
+    "text": "Email_2"
+   }
+  ],
+  "plans_fax": [
+   {
+    "text": "Fax_2",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "scope": [
+   {
+    "text": "New Construction",
+    "value": "X",
+    "if": "(^|,)[^,]*(new construction)"
+   },
+   {
+    "text": "Remodeling Existing Permitted Food Facility",
+    "value": "X",
+    "if": "(^|,)[^,]*(remodel)"
+   },
+   {
+    "text": "Adding New Equipment",
+    "value": "X",
+    "if": "(^|,)[^,]*(adding new equipment)"
+   },
+   {
+    "text": "Replacing Existing Approved Equipment",
+    "value": "X",
+    "if": "(^|,)[^,]*(replacing existing)"
+   },
+   {
+    "text": "Changing Facility Floorplan  Layout",
+    "value": "X",
+    "if": "(^|,)[^,]*(floor ?plan|layout)"
+   },
+   {
+    "text": "Adding or Replacing Sinks",
+    "value": "X",
+    "if": "(^|,)[^,]*(sinks)"
+   },
+   {
+    "text": "Adding or Replacing Dishwasher",
+    "value": "X",
+    "if": "(^|,)[^,]*(dishwasher)"
+   },
+   {
+    "text": "Adding or Replacing Water Heater",
+    "value": "X",
+    "if": "(^|,)[^,]*(water heater)"
+   },
+   {
+    "text": "Adding or Replacing Hood Ventilation System",
+    "value": "X",
+    "if": "(^|,)[^,]*(hood)"
+   },
+   {
+    "text": "Adding or Replacing Walkin Refrigerator or Freezer",
+    "value": "X",
+    "if": "(^|,)[^,]*(walk.?in)"
+   },
+   {
+    "text": "Replacing Floor Wall or Ceiling Finishes",
+    "value": "X",
+    "if": "(^|,)[^,]*(finishes)"
+   },
+   {
+    "text": "Substantial Menu Change",
+    "value": "X",
+    "if": "(^|,)[^,]*(menu change)"
+   },
+   {
+    "text": "Other",
+    "value": "X",
+    "if": "(^|,)[^,]*(other)"
+   },
+   {
+    "text": "undefined_2",
+    "if": "^other\\s*:"
+   }
+  ],
+  "fee_category": [
+   {
+    "text": "PE 1710 New Construction Retail Market",
+    "value": "X",
+    "if": "1710"
+   },
+   {
+    "text": "PE 1711 New Construction  2000 SqFt",
+    "value": "X",
+    "if": "1711"
+   },
+   {
+    "text": "PE 1712 New Construction 2000  6000 SqFt",
+    "value": "X",
+    "if": "1712"
+   },
+   {
+    "text": "PE 1713",
+    "value": "X",
+    "if": "1713"
+   },
+   {
+    "text": "PE 1714",
+    "value": "X",
+    "if": "1714"
+   },
+   {
+    "text": "PE 1715 Minor Remodel With Inspection",
+    "value": "X",
+    "if": "1715"
+   },
+   {
+    "text": "PE 1716",
+    "value": "X",
+    "if": "1716"
+   },
+   {
+    "text": "PE 1717",
+    "value": "X",
+    "if": "1717"
+   },
+   {
+    "text": "PE 1740",
+    "value": "X",
+    "if": "1740"
+   }
+  ],
+  "catering": [
+   {
+    "check": "Will you be doing any catering requires more storage",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "raw_animal": [
+   {
+    "check": "Will any raw meat poultry or seafood be cooked",
+    "if": "^(y|yes|是)\\b"
+   }
+  ],
+  "water": [
+   {
+    "check": "Check Box4",
+    "if": "^(?!onsite|well)"
+   },
+   {
+    "text": "Water provided by",
+    "if": "^(?!onsite|well)"
+   },
+   {
+    "check": "Check Box1",
+    "if": "^(onsite|well)"
+   }
+  ],
+  "sewer": [
+   {
+    "check": "Check Box3",
+    "if": "^(?!onsite|septic)"
+   },
+   {
+    "text": "Sanitary sewer provided by",
+    "if": "^(?!onsite|septic)"
+   },
+   {
+    "check": "Check Box2",
+    "if": "^(onsite|septic)"
+   }
+  ]
+ }
+}
