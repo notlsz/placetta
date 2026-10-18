@@ -22,8 +22,8 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { previewPlan } from "../../src/plan/preview";
-import { formsFor, segmentOf } from "../../src/forms/registry";
+import { previewPlan, sellsAlcohol } from "../../src/plan/preview";
+import { FORMS, formsFor, segmentOf } from "../../src/forms/registry";
 import type { Level } from "../../src/model";
 import { answerChecks } from "./answers";
 import { officialSource } from "./official";
@@ -39,7 +39,8 @@ type Row = { id: string; name: string; agency: string; level: Level; source?: st
 
 const here = dirname(fileURLToPath(import.meta.url));
 const setDir = (name: string) => [join(here, name), join(process.cwd(), "scripts/eval", name)].find(d => { try { return readdirSync(d).length > 0; } catch { return false; } })!;
-const load = (name: string): Gold[] => { const d = setDir(name); return readdirSync(d).filter(f => f.endsWith(".json")).sort().map(f => JSON.parse(readFileSync(join(d, f), "utf8"))); };
+// ONLY=<regex> scores the cases whose id matches (e.g. ONLY='brooklyn|sandiego')
+const load = (name: string): Gold[] => { const d = setDir(name); return readdirSync(d).filter(f => f.endsWith(".json")).sort().map(f => JSON.parse(readFileSync(join(d, f), "utf8")) as Gold).filter(g => !process.env.ONLY || new RegExp(process.env.ONLY).test(g.id)); };
 // gold: the 30 openings the library was fixed against (in-sample). heldout: 25 openings in other cities, researched
 // before any fix for them (scripts/eval/heldout). SET=gold or SET=heldout scores one; both by default.
 const SETS = (process.env.SET ? [process.env.SET] : ["gold", "heldout"]).map(name => ({ name, cases: load(name) }));
@@ -48,6 +49,10 @@ const showMisses = !process.env.QUIET;
 /** A row that hedges whether the requirement applies ("if the city requires one", "We'll confirm with ...") asserts
     nothing: it never counts as finding a required item, and it is set aside rather than scored right or wrong. */
 const HEDGE = /if (the|your) city requires|if one is required|we'll confirm|we will confirm|如所在城市要求|我们会向/i;
+// GENERAL_ONLY=1: drop the city entries added for the held-out cities (src/forms/beachhead.ts), so the held-out score
+// shows what the state and county layers and the named-agency fallbacks get right on their own
+const HELDOUT_CITIES = new Set(["FRE", "CUP", "MIL", "DLY", "ARC", "ALH", "TOR", "FTL", "SUG", "DUL", "HEN", "BEL", "QCY", "ROCK", "GLN", "SMT"]);
+if (process.env.GENERAL_ONLY) for (let k = FORMS.length - 1; k >= 0; k--) if (HELDOUT_CITIES.has(FORMS[k].where)) FORMS.splice(k, 1);
 const TODAY = "2026-10-18", OPENING = "2027-04-01";
 const TARGET = { recall: 0.95, precision: 0.97, agency: 0.97, level: 0.97, order: 0.95, source: 1, fee: 0.9 };
 
@@ -62,7 +67,8 @@ function instantPlan(g: Gold): Row[] {
 /** What find_official_forms returns (src/live.ts), with the flags the model sets for this case. */
 function library(g: Gold): Row[] {
   const i = g.input, segment = segmentOf(i.what);
-  const imports = /import|进口/i.test(i.what), alcohol = /\b(beer|wine|liquor|alcohol|cocktail|bar)\b|酒/i.test(i.what);
+  // the flags the model sets, read the way the instant plan reads them ("noodle bar" isn't a bar that serves alcohol)
+  const imports = /import|进口/i.test(i.what), alcohol = sellsAlcohol(i.what);
   const needs = { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, food: segment === "restaurant" || /food|snack|食品/i.test(i.what), imports, alcohol };
   return formsFor({ segment, where: i.where, needs }).filter(f => f.order < 88)
     .map(f => ({ id: f.id, name: f.title.en, agency: f.agency.en, level: f.level, source: f.info || f.url, fee: f.fee }));

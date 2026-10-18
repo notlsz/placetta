@@ -3,6 +3,9 @@ import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import { WORLD_FORMS, unaccent, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
+import { BEACHHEAD } from "./beachhead";
+import { PROOF } from "./proof";
+import { countyFor, usPlace } from "./usplace";
 import { LINES } from "./lines";
 import { PLAIN } from "./plain";
 import { MAPS } from "./maps";
@@ -55,6 +58,12 @@ export type OfficialForm = {
   /** Other library forms this one waits on, when the agency's own page says so (Boston's food permit is issued only
       after the common victualler license). The instant plan links them when both are in it. */
   after?: { form: string; label: Bi }[];
+  /** Places inside `where` this form doesn't apply to, because a local form replaces it (New Jersey's plan review rule
+      is Edison's own entry in Edison). */
+  except?: Where[];
+  /** The proof behind the source link: a sentence (under 25 words) from the official page that states the requirement,
+      the day it was read, and the URL that was fetched to read it (src/forms/proof.ts, scripts/eval/proof.ts). */
+  proof?: { quote: string; checked: string; read: string };
 };
 
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
@@ -638,7 +647,26 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...BEACHHEAD);
+
+/* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
+   city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue
+   as in Seattle, the Southern Nevada Health District's in Henderson as in Las Vegas. */
+const COUNTY_OF_FORM: Record<string, string> = {
+  "ac-plan-check": "ALA", "ac-health-permit": "ALA", "oc-plan-check": "ORC", "oc-health-permit": "ORC", "sdc-plan-check": "SDC", "sdc-health-permit": "SDC",
+  "sacc-plan-review": "SACC", "sacc-health-permit": "SACC", "kc-plan-review": "KC", "sea-food": "KC",
+  "snhd-food-handler": "SNHD", "snhd-cfsm": "SNHD", "snhd-plan-review": "SNHD", "lv-food": "SNHD",
+  "mc-plan-review": "MARI", "mc-food-permit": "MARI", "mult-plan-review": "MULT", "mult-food-license": "MULT",
+  "fulton-plan-review": "FULC", "fulton-food-permit": "FULC", "hc-business-tax": "HILL", "ocfl-business-tax": "ORFL", "mdc-btr": "MDC",
+};
+for (const f of FORMS) if (COUNTY_OF_FORM[f.id]) f.where = COUNTY_OF_FORM[f.id];
+// Edison's plan review fee is in the township code (ecode360), which refuses automated reads; the requirement itself is
+// New Jersey's food code, read on nj.gov. Edison's retail food license is linked to the township's own application.
+{
+  const nj = "https://www.nj.gov/health/ceohs/documents/phfpp/Chapter%2024%20w%20Cottage%20Food%20Rules%201-18-22.pdf";
+  const edi = FORMS.find(f => f.id === "edi-plan-review"); if (edi) { edi.info = nj; edi.url = nj; }
+  const lic = FORMS.find(f => f.id === "edi-food-license"); if (lic) lic.info = lic.url;
+}
 
 /* Processing times for filings whose library entry had none, read from each agency's own page (research/times.json,
    kept as src/forms/times.json). An agency that publishes no time says so in words, with no file-by date from it. */
@@ -669,6 +697,9 @@ for (const f of FORMS) {
 }
 // What each form is, the way a person would say it (src/forms/plain.ts): shown on the instant plan a new workspace starts with.
 for (const f of FORMS) { const p = PLAIN[f.id]; if (p && !f.plain) f.plain = p; }
+// The sentence on each source page that states the requirement, with the day it was read (src/forms/proof.ts). A proof
+// read from another page than the one linked moves the link to that page, so the link and the quote always match.
+for (const f of FORMS) { const p = PROOF[f.id]; if (p && !f.proof) { f.proof = p; if (p.link && p.link !== (f.info || f.url)) f.info = p.link; } }
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 
@@ -700,27 +731,39 @@ export function placesOf(place: string): Where[] {
   const world = worldPlaces(where);
   const abroad = !!world.country && world.country.code !== "US";
   const out: Where[] = abroad ? [] : ["US"];
+  // the city as the address gives it (the street line dropped: "2140 Dallas Pkwy, Plano" is in Plano, not Dallas)
+  const up = abroad ? undefined : usPlace(where);
+  const loc = (up?.locality ?? where).toLowerCase(), city = up?.city?.toLowerCase();
   if (!abroad) {
-    const ny = NYC.test(w) || /,\s*ny\b|new york|纽约/.test(w);
+    const ny = NYC.test(loc) || /,\s*ny\b|new york|纽约/.test(loc) || up?.state === "NY";
     if (ny) out.push("NY");
-    if (inNYC(w, ny)) out.push("NYC");
-    if (/,\s*ca\b|california|加州|los angeles|洛杉矶|san francisco|\bsf\b|旧金山|san jose|圣何塞|irvine|arcadia|alhambra|san gabriel/.test(w)) out.push("CA");
-    if (/los angeles|洛杉矶|\bla\b/.test(w)) out.push("LA", "LAC");
-    // Pasadena, Long Beach and Vernon run their own health departments, so LA County's food permits don't apply there
-    else if (/arcadia|alhambra|san gabriel|monterey park|rowland heights|torrance|el monte/.test(w) && !/pasadena|long beach|vernon/.test(w)) out.push("LAC");
-    if (/,\s*tx\b|texas|德州|houston|休斯顿|dallas|达拉斯|austin|奥斯汀|plano/.test(w)) out.push("TX");
-    if (/houston|休斯顿/.test(w)) out.push("HOU");
+    if (inNYC(loc, ny)) out.push("NYC");
+    if (up?.state === "CA" || /,\s*ca\b|california|加州|los angeles|洛杉矶|san francisco|\bsf\b|旧金山|san jose|圣何塞|irvine|arcadia|alhambra|san gabriel/.test(loc)) out.push("CA");
+    // the City of Los Angeles itself (its own business tax, LADBS and alcohol CUP); other county cities get the county's steps
+    if (city ? /^(los angeles|la)$/.test(city) : /los angeles|洛杉矶|\bla\b/.test(loc)) out.push("LA", "LAC");
+    if (up?.state === "TX" || (!up?.state && /texas|德州|houston|休斯顿|dallas|达拉斯|austin|奥斯汀/.test(loc))) out.push("TX");
+    if (city ? city === "houston" : /houston|休斯顿/.test(loc)) out.push("HOU");
   }
   for (const code of world.codes) if (!out.includes(code) && code !== "US") out.push(code);
+  if (!abroad) {
+    // the county whose health department, business tax or building office applies (src/forms/usplace.ts); a city that
+    // runs its own health department (Pasadena, Long Beach, Berkeley) doesn't take the county's food steps
+    const st = up?.state ?? world.city?.state;
+    const c = up?.county ? up : world.city?.state ? countyFor(world.city.en, world.city.state) : undefined;
+    if (c?.county && !c.ownHealth && !out.includes(c.county.code)) out.push(c.county.code);
+    if (c?.county?.code === "LAC" && c.unincorporated) out.push("LACU");
+    if (st && /^[A-Z]{2}$/.test(st) && !out.includes(st)) out.push(st);
+  }
   // A "Las Vegas" address is in the City of Las Vegas or in unincorporated Clark County (the Strip is in Paradise), and
   // each licenses its own businesses; Henderson and North Las Vegas license their own too. The Health District's steps
-  // (where "LV") apply across the county either way.
-  if (out.includes("LV")) {
-    if (CLARK_UNINCORPORATED.test(w)) out.push("CLK");
-    else if (/las vegas|拉斯维加斯/.test(w) && !/north las vegas|henderson/.test(w)) out.push("LVC");
+  // (where "SNHD") apply across the county either way.
+  if (out.includes("SNHD") || out.includes("LV")) {
+    if (CLARK_UNINCORPORATED.test(w) || up?.unincorporated) out.push("CLK");
+    else if (city ? city === "las vegas" : /las vegas|拉斯维加斯/.test(loc) && !/north las vegas|henderson/.test(loc)) out.push("LVC");
   }
   // Santa Clara County runs food permits for San José and the rest of the county
-  if (!abroad && (out.includes("SJ") || /santa clara|sunnyvale|mountain view|cupertino|milpitas|palo alto|campbell|los gatos|saratoga|gilroy|morgan hill/.test(w)) && !out.includes("SCC")) { out.push("SCC"); if (!out.includes("CA")) out.push("CA"); }
+  if (!abroad && out.includes("SJ") && !out.includes("SCC")) out.push("SCC");
+  if (!abroad && out.includes("SCC") && !out.includes("CA")) out.push("CA");
   return out;
 }
 
@@ -729,7 +772,8 @@ export function placeInfo(place: string) {
   const where = unaccent(place);
   const p = worldPlaces(where);
   const us = !p.country || p.country.code === "US";
-  const usLocal = us && /new york|nyc|flushing|manhattan|brooklyn|queens|los angeles|洛杉矶|houston|休斯顿|纽约|法拉盛/i.test(where);
+  const loc = us ? usPlace(where).locality : where;
+  const usLocal = us && /new york|nyc|flushing|manhattan|brooklyn|queens|los angeles|洛杉矶|houston|休斯顿|纽约|法拉盛/i.test(loc);
   return { country: p.country?.code ?? (us ? "US" : undefined), city: p.city, local: p.known || usLocal, currency: p.country?.currency ?? "USD" };
 }
 
@@ -740,7 +784,7 @@ const usFormAbroad = (f: OfficialForm, places: Where[]) => !places.includes("US"
 /** The forms an opening needs, in the order they're filed. */
 export function formsFor(o: { segment: Segment; where: string; needs?: Needs }): OfficialForm[] {
   const places = placesOf(o.where), have = o.needs ?? {};
-  return FORMS.filter(f => places.includes(f.where) && !usFormAbroad(f, places) && f.segments.includes(o.segment)
+  return FORMS.filter(f => places.includes(f.where) && !(f.except ?? []).some(x => places.includes(x)) && !usFormAbroad(f, places) && f.segments.includes(o.segment)
     && Object.keys(f.needs ?? {}).every(k => have[k as keyof Needs]))
     .sort((a, b) => (formsEntity(a) ? 5 : a.order) - (formsEntity(b) ? 5 : b.order));
 }

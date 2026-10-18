@@ -89,9 +89,16 @@ export async function answerChecks(): Promise<Check[]> {
   }
   /* ---------------- sample mode: "I'm not sure, here's who to ask" instead of a guess ---------------- */
   {
+    // Texas's TABC permit is in the library since 2026-10-18 (src/forms/beachhead.ts): answered from it, no fee invented
     const r = await ask("Do I need a liquor license in Austin, Texas?");
-    check("a liquor license in Austin (not in the library): not sure, names Texas's alcohol agency and where to find it, no license name or fee invented",
-      /I'm not sure/.test(said(r)) && /Here's who to ask/.test(said(r)) && /Texas's alcohol beverage control agency/.test(said(r)) && !DOLLARS.test(said(r)) && !!r.sources?.length && r.sources.every(s => official(s.url)), r);
+    check("a liquor license in Austin: TABC's permit from the library, tabc.texas.gov cited, no fee invented",
+      /Texas Alcoholic Beverage Commission/.test(said(r)) && !DOLLARS.test(said(r)) && cites(r, "tx-tabc") && r.sources!.every(s => official(s.url)), r);
+  }
+  {
+    // Illinois's state liquor license isn't in the library: not sure, and who to ask
+    const r = await ask("Do I need a liquor license in Chicago?");
+    check("a liquor license in Chicago (Illinois's not in the library): not sure, says who to ask, no license name or fee invented",
+      /I'm not sure/.test(said(r)) && /Here's who to ask/.test(said(r)) && !DOLLARS.test(said(r)) && !!r.sources?.length && r.sources.every(s => official(s.url)), r);
   }
   {
     const r = await ask("How much is a fireworks permit in San Jose?");
@@ -129,8 +136,10 @@ export async function answerChecks(): Promise<Check[]> {
       !!cdtfa && cdtfa.agency === formById("ca-cdtfa")!.agency.en && out.forms.some(f => f.official_form_id === "scc-health-permit")
         && !out.forms.some(f => /lac-|la-btrc/.test(f.official_form_id)) && out.forms.every(f => official(f.official_link) && official(f.info)), out.forms.map(f => [f.official_form_id, f.official_link]));
     const austin = await find.execute({ business: "restaurant serving beer and wine", place: "Austin, TX", serves_alcohol: true }) as { forms: { official_form_id: string; level: string }[]; not_in_library?: string };
-    check("server tool: a liquor question in Austin returns no invented state license (only TTB's federal registration) and tells the model to check the agency",
-      !austin.forms.some(f => f.level === "state" && /alcohol|liquor|wine/i.test(f.official_form_id)) && austin.forms.some(f => f.official_form_id === "ttb-dealer") && /Check the agency pages|Research/.test(austin.not_in_library ?? ""), austin);
+    const chicago = await find.execute({ business: "restaurant serving beer and wine", place: "Chicago, IL", serves_alcohol: true }) as { forms: { official_form_id: string; level: string }[]; not_in_library?: string };
+    check("server tool: a liquor question in Austin returns TABC's permit and TTB's registration; in Chicago (no Illinois liquor license in the library) no invented state license",
+      austin.forms.some(f => f.official_form_id === "tx-tabc") && austin.forms.some(f => f.official_form_id === "ttb-dealer")
+        && !chicago.forms.some(f => f.level === "state" && /alcohol|liquor|wine|abc|lcb/i.test(f.official_form_id)) && chicago.forms.some(f => f.official_form_id === "ttb-dealer"), { austin, chicago });
   }
   {
     // a first text to Odelia (agent-run's text start): the plan's first steps name their agency and only published fees

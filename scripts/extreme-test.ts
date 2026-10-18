@@ -717,12 +717,12 @@ async function preview() {
   eq(official.length, new Set(official).size, "no official form twice");
   ok(r.w.apps.every(a => a.preview === false), "every refined row lost its preview mark", r.w.apps.filter(a => a.preview).map(a => a.id));
   ok(r.w.stores![0].apps!.length === ids.length && new Set(r.w.stores![0].apps).size === ids.length, "the store lists each application once");
-  // a place the registry doesn't cover locally (McKinney; Plano has its own library steps since 2026-10-17): a
+  // a place the registry doesn't cover locally (Pleasanton; Texas cities mostly have no business license, so McKinney no longer gets that row): a
   // certificate of occupancy from the city must not swallow the business license row
-  const mck = previewPlan("Milk tea shop", "McKinney, TX", undefined, { today: "2026-10-16" });
-  const lic = mck.apps.find(a => a.id === "pv-g-local-license")!;
-  const p = await agent({ ws: workspace({ apps: mck.apps, stores: [store("mckinney", "McKinney", "McKinney, TX", mck.apps.map(a => a.id))] }), prompt: "Verify McKinney.",
-    script: [() => ask(["prepare_application", { name: "Certificate of Occupancy", agency: lic.agency.en, level: "city", agency_url: "https://www.mckinneytexas.org", store_id: "mckinney" }], ["prepare_application", { name: "City Permit", agency: "City of McKinney", level: "city", store_id: "mckinney" }], ["prepare_application", { name: "Business registration", agency: lic.agency.en, level: "city", store_id: "mckinney" }]), () => say("Done.")] });
+  const plt = previewPlan("Milk tea shop", "Pleasanton, CA", undefined, { today: "2026-10-16" });
+  const lic = plt.apps.find(a => a.id === "pv-g-local-license")!;
+  const p = await agent({ ws: workspace({ apps: plt.apps, stores: [store("pleasanton", "Pleasanton", "Pleasanton, CA", plt.apps.map(a => a.id))] }), prompt: "Verify Pleasanton.",
+    script: [() => ask(["prepare_application", { name: "Certificate of Occupancy", agency: lic.agency.en, level: "city", agency_url: "https://www.cityofpleasantonca.gov", store_id: "pleasanton" }], ["prepare_application", { name: "City Permit", agency: "City of Pleasanton", level: "city", store_id: "pleasanton" }], ["prepare_application", { name: "Business registration", agency: lic.agency.en, level: "city", store_id: "pleasanton" }]), () => say("Done.")] });
   const pp = named(p, "prepare_application");
   ok(pp[0].ok && pp[0].parsed?.application_id !== lic.id && !pp[0].parsed?.refined_preview, "a certificate of occupancy from the same city is its own application, not the license row renamed", pp[0].out.slice(0, 200));
   ok(pp[1].parsed?.application_id !== lic.id, "a name with no real words in it (\"City Permit\") doesn't take over a preview row");

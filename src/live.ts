@@ -668,7 +668,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // agency alone used to be enough, so a certificate of occupancy from the City of Plano refined (and took over)
         // the preview row for Plano's business license, under the license's name.
         const sameThing = (a: Application) => {
-          const x = words(a.name.en), y = words(name), common = [...y].filter(t => x.has(t)).length;
+          // a preview row's "…: We'll confirm with <agency>" names who to ask, not what the filing is
+          const x = words(a.name.en.replace(/:\s*We'll confirm with .*$/, "")), y = words(name), common = [...y].filter(t => x.has(t)).length;
           return y.size > 0 && (common >= Math.min(2, y.size) || (common >= 1 && a.level === level && a.agency.en.toLowerCase() === agency.toLowerCase()));
         };
         // a filed one is the record; preparing the same form again (a renewal) makes a new one

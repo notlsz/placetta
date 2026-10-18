@@ -6,7 +6,7 @@
 // Pure functions: Root.tsx writes the result into the new workspace; the tests call it directly.
 import { B, same, type Bi } from "../bi";
 import { formsFor, placeInfo, placesOf, segmentOf, type OfficialForm, type Segment, type Where } from "../forms/registry";
-import { countyOf } from "../counties";
+import { usPlace } from "../forms/usplace";
 import type { Application, CheckItem, Deadline, Field, Level, Store, Workspace } from "../model";
 import { publishedDays } from "../plan";
 import { openingPath } from "../smart";
@@ -112,8 +112,8 @@ export function stateOf(where: string): string | undefined {
   for (const [code, s] of Object.entries(STATES)) if (code !== "DC" && (new RegExp(`\\b${s.en.toLowerCase()}\\b`).test(w) || t.includes(s.zh))) return code;
   return undefined;
 }
-/** The city in "Flushing, NY 11354". */
-const cityOf = (where: string) => where.split(",")[0].replace(/\d{5}(-\d{4})?/g, "").trim();
+/** The city in "Flushing, NY 11354" or "100 W Main St, Alhambra, CA 91801" (never the street). */
+const cityOf = (where: string) => { const c = usPlace(where).city; if (c) return c; const first = where.split(",")[0].replace(/\d{5}(-\d{4})?/g, "").trim(); return /^\d/.test(first) ? "" : first; };
 
 /* --------------------------------------------------------------- the rows */
 
@@ -125,19 +125,34 @@ const FEE_SET = B("Set by the agency's fee schedule. Odelia confirms it before y
 const FEE_PUB = B("The agency's published fee. Odelia confirms it before you pay.", "机构公布的费用，付款前 Odelia 会确认。");
 const NO_TIME = B("The agency doesn't publish a processing time. Placetta tracks it from the day it's filed.", "机构未公布办理时间。快哉从提交之日起跟踪。");
 const CONFIRMS = B("Odelia confirms the time with the agency", "Odelia 向机构核实办理时间");
-const SRC_DOL = { label: "oui.doleta.gov", url: "https://oui.doleta.gov/unemploy/agencies.asp" };
-const SRC_FDA = { label: "fda.gov", url: "https://www.fda.gov/food/retail-food-protection" };
-const SRC_SBA = { label: "sba.gov", url: "https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits" };
+// The generic rows' sources, each with the sentence read on it on 2026-10-18 (scripts/eval/proof-log.json)
+const READ = "2026-10-18";
+const SRC_DOL = { label: "oui.doleta.gov", url: "https://oui.doleta.gov/unemploy/agencies.asp", quote: "Contacts for State UI Tax Information and Assistance", checked: READ };
+const SRC_SBA = { label: "sba.gov", url: "https://www.sba.gov/counseling/launch-your-business/", quote: "You’ll need to register your business, pay taxes, and get licenses and permits in the place you choose to locate your business.", checked: READ };
+/** California's plan approval rule (Health and Safety Code 114380), as Los Angeles County's page quotes it: statewide. */
+const SRC_CA_PLAN = { label: "publichealth.lacounty.gov", url: "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm", quote: "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food", checked: READ };
+/** Alameda County's plan check guide: the other local agencies a California build-out goes through. */
+const SRC_CA_LOCAL = { label: "health.alamedacountyca.gov", url: "https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/", quote: "Other agencies including local building, fire, zoning and sanitation districts may have jurisdiction over various aspects of a project.", checked: READ };
+/** Los Angeles County: the city's building and safety office approves a food facility's plans after the county. */
+const SRC_LAC_BUILDING = { label: "publichealth.lacounty.gov", url: "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm", quote: "then submit the plans to your local building and safety office for approval.", checked: READ };
+/** Who licenses alcohol where the state's own license isn't in the library: named, so the row says whose page Odelia reads. */
+const ALCOHOL_AGENCY: Record<string, [string, string]> = {
+  IL: ["the Illinois Liquor Control Commission, after the local liquor control commissioner", "伊利诺伊州酒类管理委员会（须先取得地方酒类管理专员许可）"],
+  NV: ["the city or county liquor licensing office (Nevada licenses alcohol locally)", "所在市或县的酒类执照办公室（内华达州由地方发放酒类执照）"],
+  MD: ["the county Board of License Commissioners (liquor board)", "所在县酒类执照委员会"],
+  NY: ["the New York State Liquor Authority", "纽约州酒类管理局"],
+};
+const confirm = (en: string, zh: string) => B(`We'll confirm with ${en}`, `我们会向${zh}核实`);
 const SRC_EU = { label: "europa.eu", url: "https://europa.eu/youreurope/business/running-business/start-ups/starting-business/index_en.htm" };
 const EU = new Set(["FR", "DE", "ES", "IT", "NL", "IE", "BE", "PT", "AT", "SE", "DK", "FI", "PL", "CZ", "HU", "GR"]);
 
 /** The registry forms that register the business for state sales tax, and those that also register it as an employer. */
 const TAX_FORMS = new Set(["ny-dtf-17", "ca-cdtfa", "tx-ap201", "az-tpt", "il-tax", "ma-tax", "fl-dor", "dc-otr", "ga-tax", "pa-tax", "wa-bls", "nj-formation",
-  "nj-reg", "nv-tax", "va-tax", "co-tax", "mn-tax", "oh-vendor"]);
+  "nj-reg", "nv-tax", "va-tax", "co-tax", "mn-tax", "oh-vendor", "md-sales"]);
 // Colorado's sales tax registration doesn't open the unemployment account (CDLE does, co-ui); Washington's business
 // license does (ESD and L&I open theirs from it), as do Arizona's joint application and Pennsylvania's myPATH.
 const EMPLOYER_FORMS = new Set(["ny-dol-100", "ca-edd-de1", "tx-twc", "az-tpt", "wa-bls", "nj-formation",
-  "nj-reg", "pa-tax", "fl-dor", "co-ui", "ma-dua", "il-ides", "nv-esd", "dc-does", "va-vec", "mn-ui", "oh-ui", "or-payroll"]);
+  "nj-reg", "pa-tax", "fl-dor", "co-ui", "ma-dua", "il-ides", "nv-esd", "dc-does", "va-vec", "mn-ui", "oh-ui", "or-payroll", "md-ui", "ga-dol"]);
 /** What it is says it sells alcohol: "restaurant serving beer and wine", "wine bar", "酒吧" (not "no alcohol"). */
 const ALCOHOL = /\b(beer|wine|liquor|alcohol(ic)?|spirits|cocktails?|sake|soju|brewery|brewpub|pub|tavern|wine bar|cocktail bar|sports bar)\b|啤酒|葡萄酒|白酒|洋酒|酒吧|酒水|卖酒/i;
 const NO_ALCOHOL = /\b(no|without|non-?)\s*(alcohol|beer|wine|liquor)|alcohol-free|不(卖|售)酒|无酒精/i;
@@ -161,7 +176,7 @@ function roleOf(f: OfficialForm | null, a: Application): Role {
   // victualler licence comes before the health permit, so it isn't the permit itself.
   const foodForm = f ? !!f.needs?.food || f.id === "chi-license" || (f.level !== "federal" && f.segments.includes("restaurant") && !f.segments.includes("seller") && !f.segments.includes("warehouse")) : /food/.test(a.id);
   if (foodForm && /permit|licen|approval|dealer|food business registration/.test(k) && !/manager|handler|protection certificate|pre-opening|plan|\bsign|occupancy|publication|building|fire|hazard|insurance|assembly|formula|premises|victualler|wine|liquor|alcohol|beer|community board|cleanliness/.test(k)) return "food";
-  if (/business (tax|license|licence|registration|certificate)|certificate of use|commercial activity/.test(k) && a.level === "city") return "license";
+  if (/business (tax|license|licence|registration|certificate)|certificate of use|commercial activity|occupational tax/.test(k) && a.level === "city") return "license";
   return "other";
 }
 
@@ -180,11 +195,11 @@ function fromForm(f: OfficialForm): Application {
     ...(f.currency && f.currency !== "USD" ? { currency: f.currency } : {}),
     feeNote: f.feeNote ?? (f.fee == null ? FEE_SET : FEE_PUB),
     est: f.takes ?? NO_TIME, renews: f.renews,
-    source: { label: host(f.info || f.url), url: f.info || f.url }, form: same(f.form), fields, checklist,
+    source: { label: host(f.info || f.url), url: f.info || f.url, ...(f.proof ? { quote: f.proof.quote, checked: f.proof.checked } : {}) }, form: same(f.form), fields, checklist,
   };
 }
 
-type GenericRow = { id: string; level: Level; name: Bi; agency: Bi; plain: Bi; source: { label: string; url: string }; est?: Bi; feeNote?: Bi; fee?: number; currency?: string };
+type GenericRow = { id: string; level: Level; name: Bi; agency: Bi; plain: Bi; source: { label: string; url: string; quote?: string; checked?: string }; est?: Bi; feeNote?: Bi; fee?: number; currency?: string };
 function generic(g: GenericRow): Application {
   return {
     id: "pv-g-" + g.id, name: g.name, agency: g.agency, level: g.level, status: "todo", preview: true, plain: g.plain,
@@ -213,12 +228,18 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const city = cityOf(where);
 
   if (us) {
-    const code = stateOf(where), st = code ? STATES[code] : undefined;
-    const county = code ? countyOf(city, code) : undefined;
-    // a city the registry covers runs its own health department (New York City, Houston); elsewhere it's usually the county's
-    const health = info.local && city ? B(`${city} health department`, `${city}卫生部门`)
-      : county && /County/.test(county.en) ? B(`${county.en.split(",")[0]} health department`, `${county.zh.split("，")[0]}卫生部门`) : B("County or city health department", "县或市卫生部门");
+    const up = usPlace(where);
+    const code = up.state ?? stateOf(where), st = code ? STATES[code] : undefined;
+    const county = up.county;
+    // whose health department: a city that runs its own (Pasadena, Berkeley), the county's named one, or, where neither is
+    // in the library, the place's own name for Odelia to confirm
+    const named = up.ownHealth ?? county?.health;
+    const health = named ? B(named.en, named.zh)
+      : county ? B(`${county.en} health department`, `${county.zh}卫生部门`)
+      : city ? B(`the ${city} health department`, `${city}卫生部门`) : B("your city or county health department", "所在市或县卫生部门");
     const stEn = st?.en ?? "your state", stZh = st?.zh ?? "所在州";
+    // the local office to confirm with: the county where the place is unincorporated, the city otherwise
+    const localEn = up.unincorporated && county ? `${county.en}` : city ? `the City of ${city}` : "your city", localZh = up.unincorporated && county ? county.zh : city ? `${city}市` : "所在城市";
     // the state layer: sales tax, then the employer account
     if (st?.tax && !forms.some(f => TAX_FORMS.has(f.id))) rows.push({ order: ORDER.tax, f: null, a: generic({
       id: `${code!.toLowerCase()}-tax`, level: "state", name: st.taxName ? B(st.taxName[0], st.taxName[1]) : B(`${st.en} sales tax permit`, `${st.zh}销售税许可证`), agency: B(st.tax[0], st.tax[1]),
@@ -233,22 +254,55 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     // the local layer, where the registry has no steps for this city yet (a covered city's registry list stands as it
     // is, except that a food place always gets its operating permit listed)
     const foodPlace = food && (segment === "restaurant" || segment === "retail");
-    if (foodPlace && buildout && !info.local && !roles().has("plan")) rows.push({ order: ORDER.plan, f: null, a: generic({
-      id: "plan-review", level: "county", name: B("Food facility plan review", "食品设施图纸审查"), agency: health, source: SRC_FDA,
-      plain: B("The health department reviews your kitchen plans before you build. Nearly every county asks for it before a new food place opens.", "卫生部门在施工前审查厨房图纸。几乎每个县都在新餐饮场所开业前要求这一步。"),
+    const healthLevel: Level = up.ownHealth || !county ? "city" : "county";
+    // California's plan approval rule is statewide, so the step is certain and only the county is named; elsewhere,
+    // where the library has no plan review for the place, the row says whom Odelia confirms it with
+    // (a covered city's own list stands: its plan review and building steps are what the library read for it)
+    if (foodPlace && buildout && !(info.local && !up.unincorporated) && !roles().has("plan")) rows.push({ order: ORDER.plan, f: null, a: generic(code === "CA" && named ? {
+      id: "plan-review", level: healthLevel, name: B("Food facility plan check", "食品设施图纸审查"), agency: health, source: SRC_CA_PLAN,
+      plain: B("California requires the health department's approval of your plans before any construction starts.", "加州要求在任何施工开始前取得卫生部门对图纸的批准。"),
+    } : {
+      id: "plan-review", level: healthLevel, name: B(`Food facility plan review: ${confirm(health.en, health.zh).en}`, `食品设施图纸审查：${confirm(health.en, health.zh).zh}`), agency: health, source: code === "CA" ? SRC_CA_PLAN : SRC_SBA,
+      plain: B("Most health departments review a food place's plans before construction. Odelia confirms this one's rules before you build.", "多数卫生部门会在施工前审查餐饮场所的图纸。Odelia 会在您施工前核实当地规定。"),
     }) });
     if (foodPlace && !roles().has("food")) rows.push({ order: ORDER.food, f: null, a: generic({
-      id: "food-permit", level: "county", name: B("Food establishment health permit", "餐饮场所卫生许可证"), agency: health, source: SRC_FDA, est: B("Issued after the opening inspection", "开业检查通过后发放"),
-      plain: B("The permit that lets a food place open. Issued after an inspection, renewed every year.", "让餐饮场所开业的许可证。检查通过后发放，每年续期。"),
+      id: "food-permit", level: healthLevel, name: B(`Food establishment health permit: ${confirm(health.en, health.zh).en}`, `餐饮场所卫生许可证：${confirm(health.en, health.zh).zh}`), agency: health, source: SRC_SBA, est: B("Issued after the opening inspection", "开业检查通过后发放"),
+      plain: B("The permit that lets a food place open, issued after an inspection. Odelia confirms the issuing office and its form.", "让餐饮场所开业的许可证，检查通过后发放。Odelia 会核实发证机构及其表格。"),
     }) });
-    if (alcohol && !forms.some(f => f.needs?.alcohol && f.level !== "federal")) rows.push({ order: 71, f: null, a: generic({
-      id: "alcohol", level: "state", name: B(`${stEn} alcohol license`, `${stZh}酒类执照`), agency: B(`${stEn} alcohol beverage control agency`, `${stZh}酒类管理机构`), source: SRC_SBA,
-      plain: B("Selling beer, wine or spirits takes a state liquor license, and often a local approval too. Odelia finds the agency and the license type for your place.", "销售啤酒、葡萄酒或烈酒须取得州酒类执照，通常还需当地审批。Odelia 会查明您所在地的机构和执照类型。"),
+    if (alcohol && !forms.some(f => f.needs?.alcohol && f.level !== "federal")) {
+      const ag = (code && ALCOHOL_AGENCY[code]) ?? [`the ${stEn} alcoholic beverage control agency`, `${stZh}酒类管理机构`];
+      rows.push({ order: 71, f: null, a: generic({
+        id: "alcohol", level: "state", name: B(`${stEn} alcohol license: ${confirm(ag[0], ag[1]).en}`, `${stZh}酒类执照：${confirm(ag[0], ag[1]).zh}`), agency: B(ag[0].replace(/^the /, ""), ag[1]), source: SRC_SBA,
+        plain: B("Selling beer, wine or spirits takes a license, often from both the state and the city or county. Odelia confirms the agency and the license type for your place.", "销售啤酒、葡萄酒或烈酒须取得执照，通常须同时取得州和市或县的批准。Odelia 会核实您所在地的机构和执照类型。"),
+      }) });
+    }
+    // the local license: named in the library for the cities it covers; Texas cities mostly have none; elsewhere the row
+    // names the city (or, unincorporated, the county) Odelia confirms with
+    if (!roles().has("license") && !(info.local && !up.unincorporated) && code !== "TX") rows.push({ order: ORDER.license, f: null, a: generic({
+      id: "local-license", level: up.unincorporated ? "county" : "city",
+      name: B(`Local business license or tax registration: ${confirm(localEn, localZh).en}`, `当地营业执照或营业税登记：${confirm(localEn, localZh).zh}`),
+      agency: up.unincorporated && county ? B(`${county.en} business licensing`, `${county.zh}营业执照部门`) : city ? B(`City of ${city}`, `${city}市`) : B("Your city", "所在城市"), source: SRC_SBA,
+      plain: B("Most cities and some counties register every business inside their limits and charge a yearly tax. Odelia confirms the office and the form for your address.", "多数城市和部分县会登记辖区内每家企业并收取年费。Odelia 会核实您地址所属的办理机构和表格。"),
     }) });
-    if (!info.local && !roles().has("license")) rows.push({ order: ORDER.license, f: null, a: generic({
-      id: "local-license", level: "city", name: B("Local business license or tax registration, if the city requires one", "当地营业执照或营业税登记（如所在城市要求）"), agency: city ? B(`City of ${city}`, `${city}市`) : B("Your city", "所在城市"), source: SRC_SBA,
-      plain: B("Many cities register every business inside their limits and charge a yearly tax. Some, like most Texas cities, don't. Odelia checks yours.", "许多城市会登记市内每家企业并收取年费，有些城市（如德州多数城市）则不需要。Odelia 会核实您所在的城市。"),
+    // Texas cities license through the Certificate of Occupancy instead (Houston, Dallas, Plano and Sugar Land all do)
+    if (code === "TX" && !info.local && segment !== "seller" && !forms.some(f => /certificate of occupancy/i.test(f.title.en))) rows.push({ order: 62, f: null, a: generic({
+      id: "occupancy", level: "city", name: B(`Certificate of Occupancy: ${confirm(localEn, localZh).en}`, `占用证：${confirm(localEn, localZh).zh}`),
+      agency: city ? B(`City of ${city}`, `${city}市`) : B("Your city", "所在城市"), source: SRC_SBA,
+      plain: B("Texas cities rarely sell a business license, but most require a Certificate of Occupancy before a business moves in. Odelia confirms your city's.", "德州城市很少发放营业执照，但多数要求企业入驻前取得占用证。Odelia 会核实您所在城市的要求。"),
     }) });
+    // the build-out: Los Angeles County's cities approve plans in their building and safety office after the county;
+    // elsewhere the row names the office Odelia confirms with
+    if (buildout && segment !== "seller" && !(info.local && !up.unincorporated) && !roles().has("building")) {
+      const lacCity = county?.code === "LAC" && !up.unincorporated && city && !/^los angeles$/i.test(city);
+      rows.push({ order: ORDER.building, f: null, a: generic(lacCity ? {
+        id: "building", level: "city", name: B("Building permit for the build-out", "装修建筑许可证"), agency: B(`City of ${city} Building and Safety`, `${city}市建筑与安全部门`), source: SRC_LAC_BUILDING,
+        plain: B("The city's building and safety office approves the plans and inspects the build-out.", "市建筑与安全部门审批图纸并检查装修。"),
+      } : {
+        id: "building", level: up.unincorporated ? "county" : "city", name: B(`Building permit for the build-out: ${confirm(`${localEn} building department`, `${localZh}建筑部门`).en}`, `装修建筑许可证：${confirm(`${localEn} building department`, `${localZh}建筑部门`).zh}`),
+        agency: B(`${localEn.replace(/^the /, "")} building department`, `${localZh}建筑部门`), source: code === "CA" ? SRC_CA_LOCAL : SRC_SBA,
+        plain: B("Building out a space almost always takes a permit and inspections from the local building office. Odelia confirms which office and what it needs.", "装修场所几乎都需要当地建筑部门的许可和检查。Odelia 会核实具体机构及所需材料。"),
+      }) });
+    }
   } else {
     // abroad: the registry's national and city steps; for a country it doesn't cover yet, the EU's common three
     const c = info.country, eu = !!c && EU.has(c), cur = info.currency;

@@ -1,6 +1,7 @@
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import type { FormField, Method, Needs, OfficialForm, Segment } from "./registry";
+import { usLocality } from "./usplace";
 
 /* Beyond the US forms library: the major cities in China, Europe, the Middle East and the US tier 1, with each
    country's core registrations and each city's own portal. Links are the agencies' official sites. These entries are
@@ -122,14 +123,16 @@ export const CITIES: City[] = [
   c("SJ", "US", "San Jose", "圣何塞", ["san jose", "圣何塞", "圣荷西"], true, "CA"),
   c("CHI", "US", "Chicago", "芝加哥", ["chicago", "芝加哥", "chinatown chicago", "the loop", "wicker park"], true, "IL"),
   c("SEA", "US", "Seattle", "西雅图", ["seattle", "西雅图", "capitol hill", "international district"], true, "WA"),
-  c("BOS", "US", "Boston", "波士顿", ["boston", "波士顿", "back bay", "cambridge, ma"], true, "MA"),
-  c("MIA", "US", "Miami", "迈阿密", ["miami", "迈阿密", "brickell", "wynwood", "miami beach"], true, "FL"),
+  // Cambridge and Miami Beach are their own cities, with their own licenses: not Boston's or Miami's
+  c("BOS", "US", "Boston", "波士顿", ["boston", "波士顿", "back bay"], true, "MA"),
+  c("MIA", "US", "Miami", "迈阿密", ["miami", "迈阿密", "brickell", "wynwood"], true, "FL"),
   c("DAL", "US", "Dallas", "达拉斯", ["dallas", "达拉斯"], true, "TX"),
   c("AUS", "US", "Austin", "奥斯汀", ["austin", "奥斯汀"], true, "TX"),
   c("DC", "US", "Washington, DC", "华盛顿特区", ["washington, dc", "washington dc", "d.c.", "华盛顿特区"], true, "DC"),
-  c("ATL", "US", "Atlanta", "亚特兰大", ["atlanta", "亚特兰大", "duluth, ga"], true, "GA"),
+  // Duluth (Gwinnett County) and Henderson are their own cities: not Atlanta's or Las Vegas's (added below)
+  c("ATL", "US", "Atlanta", "亚特兰大", ["atlanta", "亚特兰大"], true, "GA"),
   c("PHL", "US", "Philadelphia", "费城", ["philadelphia", "philly", "费城"], true, "PA"),
-  c("LV", "US", "Las Vegas", "拉斯维加斯", ["las vegas", "拉斯维加斯", "henderson, nv"], true, "NV"),
+  c("LV", "US", "Las Vegas", "拉斯维加斯", ["las vegas", "拉斯维加斯"], true, "NV"),
   c("SAT", "US", "San Antonio", "圣安东尼奥", ["san antonio", "圣安东尼奥"], true, "TX"),
   c("TPA", "US", "Tampa", "坦帕", ["tampa", "坦帕", "ybor city"], true, "FL"),
   c("SDG", "US", "San Diego", "圣地亚哥", ["san diego", "圣地亚哥", "圣迭戈", "convoy street", "kearny mesa"], true, "CA"),
@@ -150,6 +153,25 @@ export const CITIES: City[] = [
   c("DEN", "US", "Denver", "丹佛", ["denver", "丹佛"], true, "CO"),
   c("MSP", "US", "Minneapolis", "明尼阿波利斯", ["minneapolis", "明尼阿波利斯"], true, "MN"),
   c("CMH", "US", "Columbus", "哥伦布", ["columbus, oh", "columbus, ohio", "columbus oh", "俄亥俄州哥伦布", "哥伦布"], true, "OH"),
+  // added 2026-10-18 with their own sourced steps in beachhead.ts; false where the library has only some of the city's
+  // steps, so the plan names whom Odelia confirms the rest with. Names shared with another US city match only with
+  // their state; a full address is also read by its city (src/forms/usplace.ts).
+  c("FRE", "US", "Fremont", "弗里蒙特", ["fremont, ca", "fremont, california", "弗里蒙特", "费利蒙"], false, "CA"),
+  c("CUP", "US", "Cupertino", "库比蒂诺", ["cupertino", "库比蒂诺", "苹果城"], true, "CA"),
+  c("MIL", "US", "Milpitas", "米尔皮塔斯", ["milpitas", "米尔皮塔斯", "苗必达"], true, "CA"),
+  c("DLY", "US", "Daly City", "戴利城", ["daly city", "戴利城"], true, "CA"),
+  c("ARC", "US", "Arcadia", "阿凯迪亚", ["arcadia, ca", "arcadia, california", "阿凯迪亚", "阿卡迪亚"], true, "CA"),
+  c("ALH", "US", "Alhambra", "阿罕布拉", ["alhambra, ca", "alhambra, california", "阿罕布拉"], true, "CA"),
+  c("TOR", "US", "Torrance", "托伦斯", ["torrance", "托伦斯"], false, "CA"),
+  c("GLN", "US", "Glendale", "格伦代尔", ["glendale, ca", "glendale, california", "格伦代尔"], false, "CA"),
+  c("SMT", "US", "San Mateo", "圣马特奥", ["san mateo, ca", "san mateo, california", "圣马特奥市"], false, "CA"),
+  c("FTL", "US", "Fort Lee", "李堡", ["fort lee, nj", "fort lee, new jersey", "李堡"], true, "NJ"),
+  c("SUG", "US", "Sugar Land", "糖城", ["sugar land", "sugarland, tx", "糖城"], false, "TX"),
+  c("DUL", "US", "Duluth", "德卢斯", ["duluth, ga", "duluth, georgia", "德卢斯"], false, "GA"),
+  c("HEN", "US", "Henderson", "亨德森", ["henderson, nv", "henderson, nevada", "亨德森"], false, "NV"),
+  c("BEL", "US", "Bellevue", "贝尔维尤", ["bellevue, wa", "bellevue, washington", "贝尔维尤"], true, "WA"),
+  c("QCY", "US", "Quincy", "昆西", ["quincy, ma", "quincy, massachusetts", "昆西"], false, "MA"),
+  c("ROCK", "US", "Rockville", "罗克维尔", ["rockville, md", "rockville, maryland", "罗克维尔", "洛克维尔"], true, "MD"),
   ...([["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
     .map(([en, zh, st]) => c("US-" + en.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6), "US", en, zh, [en.toLowerCase(), zh], false, st)),
 ];
@@ -170,6 +192,7 @@ export const STATES: { code: string; en: string; zh: string; names: RegExp }[] =
   { code: "CO", en: "Colorado", zh: "科罗拉多州", names: /colorado|,\s*co\.?\s*(\d{5}(-\d{4})?\s*)?$|科罗拉多/i },
   { code: "MN", en: "Minnesota", zh: "明尼苏达州", names: /minnesota|,\s*mn\b|明尼苏达/i },
   { code: "OH", en: "Ohio", zh: "俄亥俄州", names: /\bohio\b|,\s*oh\b|俄亥俄/i },
+  { code: "MD", en: "Maryland", zh: "马里兰州", names: /maryland|,\s*md\b|马里兰/i },
   // ", or" and ", co" are ordinary words too, so only at the end of the address (or before the ZIP)
   { code: "OR", en: "Oregon", zh: "俄勒冈州", names: /oregon|,\s*or\.?\s*(\d{5}(-\d{4})?\s*)?$|俄勒冈/i },
 ];
@@ -476,10 +499,15 @@ const has = (text: string, alias: string) => /[a-z]/.test(alias) ? new RegExp(`(
 export const unaccent = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 export function worldPlaces(place: string): Place {
   const where = unaccent(place);
-  const w = where.toLowerCase();
+  // a city's name is read from the place, not the street line ("2140 Dallas Pkwy, Plano, TX" is Plano)
+  const w = usLocality(where).toLowerCase();
   // an address that names a US state is in the US, so a city abroad that shares its name (Alexandria, VA) doesn't match
   const usState = STATES.some(s => s.names.test(where));
-  const city = CITIES.find(x => (!usState || x.country === "US") && x.aliases.some(a => has(w, a.toLowerCase())));
+  // a full US address names its city second to last ("…, Arcadia, CA 91007"): that city first, then any alias
+  const parts = w.split(",").map(s => s.trim()), named = parts.length >= 2 ? parts[parts.length - 2] : "";
+  const lastSt = /^([a-z]{2})(\s+\d{5}(-\d{4})?)?$/.exec(parts[parts.length - 1] ?? "")?.[1]?.toUpperCase();
+  const city = (named ? CITIES.find(x => x.country === "US" && x.en.toLowerCase() === named && (!lastSt || x.state === lastSt)) : undefined)
+    ?? CITIES.find(x => (!usState || x.country === "US") && x.aliases.some(a => has(w, a.toLowerCase())));
   const country = COUNTRIES.find(x => x.code === city?.country) ?? COUNTRIES.find(x => x.code !== "US" && x.names.test(w));
   const codes: string[] = [];
   if (country) codes.push(country.code);

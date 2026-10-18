@@ -1,0 +1,185 @@
+{
+  "id": "sanmateo-milk-tea",
+  "title": "Milk tea shop in downtown San Mateo",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Milk tea shop",
+    "where": "100 E 3rd Ave, San Mateo, CA 94401",
+    "lang": "en",
+    "signage": false
+  },
+  "assumptions": "The company still has to be formed (an LLC) unless an entity is named. Hires staff. Builds out the space. No new exterior sign (signage: false).",
+  "items": [
+    {
+      "key": "ca-llc",
+      "name": "Articles of Organization (California LLC)",
+      "agency": "California Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "feeNote": "Fee not read on an official page in this pass (registry says $70).",
+      "note": "SF guide: LLCs \"must register their structure with the CA Secretary of State before registering locally.\"",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "articles of organization.*california|ca-llc-1|california llc",
+      "agencyMatch": "california secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ca-seller",
+      "name": "Seller's permit",
+      "agency": "California Department of Tax and Fee Administration",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Every location must have this permit to sell taxable goods.\" Also on the LA restaurant checklist.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "seller'?s permit|ca-cdtfa",
+      "agencyMatch": "tax and fee administration|CDTFA"
+    },
+    {
+      "key": "ca-edd",
+      "name": "Employer payroll tax account registration (DE 1)",
+      "agency": "California Employment Development Department",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 15 days of paying more than $100 in wages in a calendar quarter.",
+      "source": "https://edd.ca.gov/en/Payroll_Taxes/Am_I_Required_to_Register_as_an_Employer",
+      "match": "employer|DE ?1|edd",
+      "agencyMatch": "employment development department|\\bEDD\\b"
+    },
+    {
+      "key": "ca-food-manager",
+      "name": "Food safety (manager) certification, at least one owner or employee",
+      "agency": "Local environmental health agency (California Health and Safety Code 113947.1)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 60 days of opening; valid 5 years.",
+      "source": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+      "match": "food (safety|protection) (manager|certif)|certified food|food manager|manager'?s food safety",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "ca-food-handler",
+      "name": "California Food Handler Card for food employees",
+      "agency": "Local environmental health agency (California Health and Safety Code 113948)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 30 days of hire; valid 3 years; food managers exempt.",
+      "source": "https://www.fresnocountyca.gov/files/assets/county/public-health/environmental-health/food-safety/california-food-handler-card.pdf",
+      "match": "food handler",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "ca-fbn",
+      "name": "Fictitious Business Name statement",
+      "agency": "County Clerk",
+      "level": "county",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "condition": "Only when trading under a name other than the legal name.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "(fictitious business name|\\bFBN\\b|\\bDBA\\b).*(clerk)|(clerk).*(fictitious business name|\\bFBN\\b|\\bDBA\\b)",
+      "agencyMatch": "clerk"
+    },
+    {
+      "key": "smc-plan",
+      "name": "Food facility plan review",
+      "agency": "San Mateo County Environmental Health Services",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf",
+      "match": "(plan (check|review)).*(san mateo county)|(san mateo county).*(plan (check|review))",
+      "agencyMatch": "san mateo county",
+      "quote": "No. Plans must be approved first."
+    },
+    {
+      "key": "smc-permit",
+      "name": "Health permit to operate",
+      "agency": "San Mateo County Environmental Health Services",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf",
+      "match": "(health permit|permit to operate).*(san mateo county)|(san mateo county).*(health permit|permit to operate)",
+      "agencyMatch": "san mateo county",
+      "quote": "Once your facility passes the final inspection, another invoice will be sent to you for the annual health permit fee."
+    },
+    {
+      "key": "smt-btc",
+      "name": "Business Tax Certificate",
+      "agency": "City of San Mateo Finance Department",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://cityofsanmateo.org/index.aspx?NID=304",
+      "match": "(business tax|business licen).*(city of san mateo)|(city of san mateo).*(business tax|business licen)",
+      "agencyMatch": "city of san mateo",
+      "quote": "allow you to apply for a new Business Tax Certificate and renew your existing certificate"
+    },
+    {
+      "key": "smt-building",
+      "name": "Building permit for the build-out",
+      "agency": "City of San Mateo Building Division",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://www.cityofsanmateo.org",
+      "match": "(building permit|build-?out|tenant improvement).*(city of san mateo)|(city of san mateo).*(building permit|build-?out|tenant improvement)",
+      "agencyMatch": "city of san mateo",
+      "note": "Not read for this case."
+    }
+  ],
+  "order": [
+    {
+      "before": "ca-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "smc-plan",
+      "after": "smc-permit",
+      "source": "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf",
+      "why": "Plans approved first; the permit invoice follows the final inspection.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

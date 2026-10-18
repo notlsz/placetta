@@ -1,0 +1,163 @@
+{
+  "id": "strip-noodle-bar",
+  "title": "Noodle bar on the Las Vegas Strip (Paradise, unincorporated Clark County)",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Noodle bar",
+    "where": "3570 Las Vegas Blvd S, Las Vegas, NV 89109",
+    "lang": "en",
+    "signage": false
+  },
+  "assumptions": "The company still has to be formed (an LLC) unless an entity is named. Hires staff. Builds out the space. No new exterior sign (signage: false).",
+  "items": [
+    {
+      "key": "nv-sbl",
+      "name": "State Business License (with the LLC formation)",
+      "agency": "Nevada Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Retailers \"must have a Business License (NRS 372.220)\" before the tax permit.",
+      "source": "https://tax.nv.gov/manage-a-business/start/",
+      "match": "state business license|silverflume|llc formation",
+      "agencyMatch": "nevada secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "nv-tax",
+      "name": "Sales/Use Tax Permit",
+      "agency": "Nevada Department of Taxation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 15,
+      "feeNote": "$15 per location.",
+      "source": "https://tax.nv.gov/faqs/register-a-business/",
+      "match": "sales (\\/use )?tax permit|nv-tax",
+      "agencyMatch": "department of taxation"
+    },
+    {
+      "key": "nv-ui",
+      "name": "Unemployment insurance employer registration",
+      "agency": "Nevada Department of Employment, Training and Rehabilitation (Employment Security Division)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tax.nv.gov/manage-a-business/start/",
+      "match": "unemployment insurance|nv-esd",
+      "agencyMatch": "employment, training and rehabilitation|employment security|DETR"
+    },
+    {
+      "key": "snhd-plan",
+      "name": "Food establishment plan review",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "(plan review).*(southern nevada health district)|(southern nevada health district).*(plan review)",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-permit",
+      "name": "Food establishment health permit",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "(health permit).*(southern nevada health district)|(southern nevada health district).*(health permit)",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-handler",
+      "name": "Food Safety Training Cards for employees",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "(food handler|food safety training card).*(southern nevada health district)|(southern nevada health district).*(food handler|food safety training card)",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-cfsm",
+      "name": "Certified Food Safety Manager (person in charge)",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "(certified food (safety|protection) manager|food manager).*(southern nevada health district)|(southern nevada health district).*(certified food (safety|protection) manager|food manager)",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "cc-license",
+      "name": "Clark County business license",
+      "agency": "Clark County Business License",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0746bb4a-633d-43f6-85c8-875896f099a7/original/as/application-checklist-08-13-2026.pdf",
+      "match": "(clark county business licen|business licen).*(clark county)|(clark county).*(clark county business licen|business licen)",
+      "agencyMatch": "clark county",
+      "quote": "Proof that you have applied with the Southern Nevada Health District (SNHD).",
+      "note": "For unincorporated Clark County; apply within 30 days of opening."
+    },
+    {
+      "key": "cc-building",
+      "name": "Building permit for the build-out",
+      "agency": "Clark County Department of Building and Fire Prevention",
+      "level": "county",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "source": "https://files.clarkcountynv.gov/Building & Fire Prevention/How To Guides/BPG023.pdf",
+      "match": "(building permit|build-?out|tenant improvement).*(clark county)|(clark county).*(building permit|build-?out|tenant improvement)",
+      "agencyMatch": "clark county",
+      "note": "The county's building guides refused requests."
+    }
+  ],
+  "order": [
+    {
+      "before": "nv-sbl",
+      "after": "nv-tax",
+      "source": "https://tax.nv.gov/faqs/register-a-business/",
+      "why": "The state business license before the Department of Taxation registration.",
+      "verified": true
+    },
+    {
+      "before": "snhd-plan",
+      "after": "snhd-permit",
+      "source": "https://southernnevadahealthdistrict.org/?p=299647",
+      "why": "Plans approved before construction; the permit after the final inspection.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": [
+    {
+      "name": "City of Las Vegas business license",
+      "why": "The Strip and Spring Valley are unincorporated Clark County.",
+      "match": "city of las vegas business license|lv-license"
+    }
+  ]
+}

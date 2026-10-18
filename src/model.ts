@@ -46,7 +46,9 @@ export type Application = {
   currency?: Currency;
   feeNote?: Bi;
   est: Bi;                   // how long the agency usually takes
-  source: { label: string; url: string };
+  // quote: the sentence on that page that states the requirement (under 25 words, in English as the agency wrote it),
+  // checked: the day it was read (YYYY-MM-DD)
+  source: { label: string; url: string; quote?: string; checked?: string };
   form?: Bi;                 // the form Placetta fills
   fields: Field[];
   checklist: CheckItem[];
