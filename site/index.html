@@ -1702,6 +1702,11 @@ html[lang="zh-CN"] .xpc li{letter-spacing:0}
   .cscard:not(.planopen)>.csr{display:none}}
 /* experts: one line per category until "Show all" */
 #xpArt:not(.open) .xpflow{max-height:1.75em;max-height:1lh;overflow:hidden}
+/* Oct 18, less is more: three categories until "Show all", in smaller type with tighter rows */
+#xpArt:not(.open) .xprow:nth-child(n+4){display:none}
+#experts .xpart{gap:20px}
+#experts .xprow{padding-top:14px}
+@media (min-width:1024px){#experts .xpart{gap:24px}#experts .xprow{padding-top:16px}#experts .xpflow{font-size:28px}}
 .xpmore{margin-top:14px;border:0;background:none;padding:6px 0;font:inherit;font-size:14px;color:var(--ink2);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .xpmore:hover{color:var(--ink)}
 .xpcat{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:10px}
@@ -4888,8 +4893,10 @@ function renderXp(){
     let src = im, w = im.naturalWidth;
     while (w / 2 >= TP) { const h = document.createElement("canvas"); w = Math.round(w / 2); h.width = h.height = w; const hg2 = h.getContext("2d"); hg2.imageSmoothingQuality = "high"; hg2.drawImage(src, 0, 0, w, w); src = h; }
     const c = document.createElement("canvas"); c.width = c.height = TP; const cg = c.getContext("2d"); cg.imageSmoothingQuality = "high"; cg.drawImage(src, 0, 0, TP, TP); tiles[k] = c; };
-  for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => { ims[k] = im; mkTile(k);
-    if (++loaded === XPN && !run) frame(performance.now()); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
+  // Oct 18: the whale is drawn at once in plain tiles and each face fills in as its photo arrives, so the panel is never empty
+  let pend = false;
+  const redraw = () => { if (run || pend) return; pend = true; requestAnimationFrame(n => { pend = false; frame(n); }); };
+  for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => { ims[k] = im; mkTile(k); loaded++; redraw(); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
   const size = () => {
     if (W && cv.clientWidth === W) return;   // its height follows its width only: a phone's toolbar moving changes nothing here
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth;
@@ -4923,7 +4930,9 @@ function renderXp(){
   let sd = null;   // the still whale's pixels, read once per resize
   size(); addEventListener("resize", size);
   const face = (c, r) => ((c * 7 + r * 13) % XPN + XPN) % XPN;
+  const PH = ["#2C4A72", "#36557F", "#2F4E78", "#3B5B86"];   // placeholder tiles, in the whale's blues
   function frame(now){
+    if (!st.width || !st.height){ W = 0; size(); if (!st.width || !st.height){ if (run && !RM) requestAnimationFrame(frame); return; } }   // laid out at zero width: try again next frame
     const t = RM ? 0 : (now - t0) / 1000;
     const W4 = st.width, H4 = st.height, k = sc * SS, px = (offX + PX0 * sc) * SS, py = (offY + PY0 * sc) * SS;
     if (!sd || sd.width !== W4) sd = sg.getImageData(0, 0, W4, H4);
@@ -4966,6 +4975,7 @@ function renderXp(){
       if (G > 128) { g.fillStyle = "#0A1426"; g.fillRect(x, y, cell, cell); continue; }       // eye, mouth
       const k = face(c, rs), px = Math.round(x * dpr), py = Math.round(y * dpr);
       if (tiles[k]) { g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(tiles[k], px, py); g.setTransform(dpr, 0, 0, dpr, 0, 0); }
+      else { g.fillStyle = PH[k % 4]; g.fillRect(px / dpr, py / dpr, TP / dpr, TP / dpr); }
       // lit from above, darker toward the belly, with a band of light rippling along the body
       const v = rs / rows, shade = B > 128 ? .03 : Math.min(.32, Math.max(0, (v - .45) * .8)) - .02;   // light touch, so every face stays clear
       g.fillStyle = shade > 0 ? `rgba(11,22,42,${shade.toFixed(3)})` : `rgba(235,244,252,${(-shade).toFixed(3)})`;
@@ -4974,7 +4984,8 @@ function renderXp(){
     g.globalAlpha = 1;
     if (run && !RM) requestAnimationFrame(frame);
   }
-  new IntersectionObserver(es => es.forEach(e => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); })).observe(cv);
+  new IntersectionObserver(es => es.forEach(e => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); }), {rootMargin: "600px 0px"}).observe(cv);
+  frame(performance.now());   // the still whale on first paint
 })();
 
 /* industries art: each sector drawn as a mosaic of small tiles on the deep navy, the same way the experts' whale is
@@ -5404,7 +5415,7 @@ addEventListener("popstate", () => { const sec = PATH_SEC[location.pathname.repl
     document.querySelectorAll(".csplan").forEach(b => { b.textContent = t(b.parentElement.classList.contains("planopen") ? "cs.planx" : "cs.plan"); });
   };
   if (art && more) {
-    const fit = () => { const over = [...art.querySelectorAll(".xpflow")].some(f => f.scrollHeight > f.clientHeight + 2); more.hidden = !art.classList.contains("open") && !over; };
+    const fit = () => { const over = art.children.length > 3 || [...art.querySelectorAll(".xpflow")].some(f => f.scrollHeight > f.clientHeight + 2); more.hidden = !art.classList.contains("open") && !over; };
     more.addEventListener("click", () => { const on = art.classList.toggle("open"); more.setAttribute("aria-expanded", on); label(); fit(); });
     new MutationObserver(fit).observe(art, {childList: true}); addEventListener("resize", fit); setTimeout(fit, 400);
   }
