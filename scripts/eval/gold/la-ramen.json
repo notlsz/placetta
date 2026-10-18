@@ -1,0 +1,203 @@
+{
+  "id": "la-ramen",
+  "title": "Ramen restaurant in Los Angeles",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Ramen restaurant",
+    "where": "Los Angeles, CA",
+    "lang": "en"
+  },
+  "assumptions": "The company still has to be formed (an LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "ca-llc",
+      "name": "Articles of Organization (California LLC)",
+      "agency": "California Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "feeNote": "Fee not read on an official page in this pass (registry says $70).",
+      "note": "SF guide: LLCs \"must register their structure with the CA Secretary of State before registering locally.\"",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "articles of organization.*california|ca-llc-1|california llc",
+      "agencyMatch": "california secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ca-seller",
+      "name": "Seller's permit",
+      "agency": "California Department of Tax and Fee Administration",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Every location must have this permit to sell taxable goods.\" Also on the LA restaurant checklist.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "seller'?s permit|ca-cdtfa",
+      "agencyMatch": "tax and fee administration|CDTFA"
+    },
+    {
+      "key": "ca-edd",
+      "name": "Employer payroll tax account registration (DE 1)",
+      "agency": "California Employment Development Department",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 15 days of paying more than $100 in wages in a calendar quarter.",
+      "source": "https://edd.ca.gov/en/Payroll_Taxes/Am_I_Required_to_Register_as_an_Employer",
+      "match": "employer|DE ?1|edd",
+      "agencyMatch": "employment development department|\\bEDD\\b"
+    },
+    {
+      "key": "ca-food-manager",
+      "name": "Food safety (manager) certification, at least one owner or employee",
+      "agency": "Local environmental health agency (California Health and Safety Code 113947.1)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 60 days of opening; valid 5 years.",
+      "source": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+      "match": "food (safety|protection) (manager|certif)|certified food|food manager|manager'?s food safety",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "ca-food-handler",
+      "name": "California Food Handler Card for food employees",
+      "agency": "Local environmental health agency (California Health and Safety Code 113948)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 30 days of hire; valid 3 years; food managers exempt.",
+      "source": "https://www.fresnocountyca.gov/files/assets/county/public-health/environmental-health/food-safety/california-food-handler-card.pdf",
+      "match": "food handler",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "la-btrc",
+      "name": "Business Tax Registration Certificate",
+      "agency": "City of Los Angeles Office of Finance",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"All companies doing business within the City of Los Angeles\" need one.",
+      "source": "https://business.lacity.gov/plan-business/register-your-business/business-tax-registration-certificate",
+      "match": "los angeles business tax|la-btrc|business tax registration",
+      "agencyMatch": "office of finance"
+    },
+    {
+      "key": "lac-plan",
+      "name": "Food facility plan check",
+      "agency": "Los Angeles County Department of Public Health, Environmental Health",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+      "match": "plan (check|review)",
+      "agencyMatch": "los angeles county"
+    },
+    {
+      "key": "lac-permit",
+      "name": "Public Health Permit (food facility)",
+      "agency": "Los Angeles County Department of Public Health, Environmental Health",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Issued after the final inspection and payment of the permit fee.",
+      "source": "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+      "match": "public health permit|health permit",
+      "agencyMatch": "los angeles county"
+    },
+    {
+      "key": "la-building",
+      "name": "Building permit (LADBS)",
+      "agency": "Los Angeles Department of Building and Safety",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Required for interior or exterior changes.\"",
+      "source": "https://business.lacity.gov/sites/g/files/wph1606/files/2021-02/Restaurant_Bar%20Checklist_0.pdf",
+      "match": "building permit",
+      "agencyMatch": "building and safety|LADBS"
+    },
+    {
+      "key": "la-sign",
+      "name": "Sign permit",
+      "agency": "Los Angeles Department of Building and Safety",
+      "level": "city",
+      "required": false,
+      "verified": false,
+      "fee": null,
+      "source": "https://business.lacity.gov/sites/g/files/wph1606/files/2021-02/Restaurant_Bar%20Checklist_0.pdf",
+      "match": "sign permit",
+      "agencyMatch": "building and safety",
+      "condition": "Not on the city's restaurant checklist; LADBS issues sign permits."
+    },
+    {
+      "key": "ca-fbn",
+      "name": "Fictitious Business Name statement",
+      "agency": "County Clerk",
+      "level": "county",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "condition": "Only when trading under a name other than the legal name.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "fictitious business name|\\bFBN\\b|\\bDBA\\b",
+      "agencyMatch": "clerk"
+    }
+  ],
+  "order": [
+    {
+      "before": "ca-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "lac-plan",
+      "after": "lac-permit",
+      "source": "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+      "why": "Plans go to EH plan check before construction; the permit is issued after the final inspection.",
+      "verified": true
+    },
+    {
+      "before": "la-building",
+      "after": "lac-permit",
+      "source": "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+      "why": "\"you must obtain all approvals from your local building and safety office prior to your final inspection\"",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

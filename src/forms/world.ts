@@ -456,6 +456,7 @@ export const WORLD_FORMS: OfficialForm[] = [
     ["ga-tax", "GA", "state", 30, 0, "Georgia Tax Center registration", "Sales tax registration", "销售税登记", "Georgia Department of Revenue", "佐治亚州税务局", "https://gtc.dor.ga.gov", "Register for sales and withholding tax online.", "在线登记销售税和预扣税。", false],
     ["pa-dos", "PA", "state", 20, 125, "Certificate of Organization", "LLC formation", "LLC 设立", "Pennsylvania Department of State", "宾夕法尼亚州州务厅", "https://file.dos.pa.gov", "Form the LLC or register a foreign company online.", "在线设立 LLC 或办理外州公司登记。", true],
     ["nv-silverflume", "NV", "state", 20, null, "Articles of Organization and State Business License", "LLC formation and state business license", "LLC 设立与州营业执照", "Nevada Secretary of State (SilverFlume)", "内华达州州务卿（SilverFlume）", "https://www.nvsilverflume.gov", "Form the company and get the state business license together online.", "在线同时设立公司并取得州营业执照。", true],
+    ["co-sos", "CO", "state", 20, null, "Articles of Organization", "LLC formation", "LLC 设立", "Colorado Secretary of State", "科罗拉多州州务卿", "https://www.coloradosos.gov", "Form the LLC online with the Secretary of State, or register a company formed elsewhere.", "通过州务卿网站在线设立 LLC，或为外地公司办理登记。", true],
     ["nj-formation", "NJ", "state", 20, null, "Public Records Filing for New Business Entity", "Business formation and tax registration", "企业设立与税务登记", "NJ Division of Revenue and Enterprise Services", "新泽西州税收与企业服务处", "https://www.nj.gov/treasury/revenue/", "Form or register the company, then register for state taxes.", "设立或登记公司后登记州税务。", true],
   ] as const).map(([id, where, level, order, fee, form, ten, tzh, aen, azh, url, hen, hzh, formation]) => W({ id, where, level: level as Level, method: "online", order, fee, cur: "USD",
     ...(formation ? { needs: { newEntity: true } } : {}), ...(/food|dbpr/.test(id) ? { segs: ["restaurant"] as Segment[], needs: { food: true } } : {}),
@@ -471,7 +472,10 @@ export type Place = { codes: string[]; country?: Country; city?: City; known: bo
 const has = (text: string, alias: string) => /[a-z]/.test(alias) ? new RegExp(`(^|[^a-z])${alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z]|$)`, "i").test(text) : text.includes(alias);
 
 /** The countries, states and cities in a place, as the codes the steps use. known: a city with its own local steps. */
-export function worldPlaces(where: string): Place {
+/** Accents dropped, so "San José" and "Querétaro" match the library's "san jose" and "queretaro" (Chinese is unchanged). */
+export const unaccent = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+export function worldPlaces(place: string): Place {
+  const where = unaccent(place);
   const w = where.toLowerCase();
   // an address that names a US state is in the US, so a city abroad that shares its name (Alexandria, VA) doesn't match
   const usState = STATES.some(s => s.names.test(where));

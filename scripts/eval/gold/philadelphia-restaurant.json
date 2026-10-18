@@ -1,0 +1,163 @@
+{
+  "id": "philadelphia-restaurant",
+  "title": "Restaurant in Philadelphia",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Restaurant",
+    "where": "Philadelphia, PA",
+    "lang": "en"
+  },
+  "assumptions": "The company still has to be formed (an LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "pa-llc",
+      "name": "Certificate of Organization (Pennsylvania LLC)",
+      "agency": "Pennsylvania Department of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 125,
+      "source": "https://www.puc.pa.gov/pcdocs/1936046.pdf",
+      "match": "llc formation|certificate of organization|pa-dos",
+      "agencyMatch": "pennsylvania department of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "pa-tax",
+      "name": "PA Online Business Tax Registration (sales tax license; employer withholding and UC)",
+      "agency": "Pennsylvania Department of Revenue (myPATH), with L&I for UC",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "UC registration is filed through myPATH within 30 days after covered services begin.",
+      "source": "https://www.pa.gov/agencies/dli/programs-services/unemployment/for-employers/uc-tax-payment",
+      "match": "pennsylvania tax registration|pa-tax|mypath",
+      "agencyMatch": "department of revenue|labor (&|and) industry"
+    },
+    {
+      "key": "phl-tax",
+      "name": "Philadelphia tax account (BIRT)",
+      "agency": "City of Philadelphia Department of Revenue",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://business.phila.gov/?p=1402",
+      "match": "philadelphia tax account|BIRT|business income",
+      "agencyMatch": "department of revenue"
+    },
+    {
+      "key": "phl-cal",
+      "name": "Commercial Activity License",
+      "agency": "City of Philadelphia, Department of Licenses and Inspections",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://business.phila.gov/?p=1402",
+      "match": "commercial activity license",
+      "agencyMatch": "licenses and inspections|L&I"
+    },
+    {
+      "key": "phl-plan",
+      "name": "Food establishment plan review",
+      "agency": "Philadelphia Department of Public Health, Office of Food Protection",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://business.phila.gov/?p=1402",
+      "match": "plan review",
+      "agencyMatch": "public health|food protection"
+    },
+    {
+      "key": "phl-food",
+      "name": "Food Preparation and Serving License",
+      "agency": "City of Philadelphia, Department of Licenses and Inspections",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "feeNote": "$415 (30+ seats) or $299; renewed annually.",
+      "source": "https://www.phila.gov/services/business-self-employment/starting-a-business/business-licenses-permits-and-approvals/food-businesses/get-a-food-preparation-and-serving-license/",
+      "match": "food preparation and serving",
+      "agencyMatch": "licenses and inspections|L&I"
+    },
+    {
+      "key": "phl-safety",
+      "name": "Food safety certification",
+      "agency": "Philadelphia Department of Public Health",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "note": "Linked from the license page but not stated there as a prerequisite.",
+      "source": "https://www.phila.gov/services/business-self-employment/starting-a-business/business-licenses-permits-and-approvals/food-businesses/get-a-food-preparation-and-serving-license/",
+      "match": "food safety certif",
+      "agencyMatch": "public health"
+    },
+    {
+      "key": "phl-building",
+      "name": "Building permit",
+      "agency": "City of Philadelphia, Department of Licenses and Inspections",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"You will likely need to apply for a building permit.\"",
+      "source": "https://business.phila.gov/?p=1402",
+      "match": "building permit",
+      "agencyMatch": "licenses and inspections|L&I"
+    },
+    {
+      "key": "phl-zoning",
+      "name": "Zoning approval (proof of occupancy)",
+      "agency": "City of Philadelphia, Department of Licenses and Inspections",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.phila.gov/services/business-self-employment/starting-a-business/business-licenses-permits-and-approvals/food-businesses/get-a-food-preparation-and-serving-license/",
+      "match": "zoning",
+      "agencyMatch": "licenses and inspections",
+      "condition": "Unless a license for the same space and business type was issued within 3 years."
+    }
+  ],
+  "order": [
+    {
+      "before": "pa-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "phl-cal",
+      "after": "phl-food",
+      "source": "https://www.phila.gov/services/business-self-employment/starting-a-business/business-licenses-permits-and-approvals/food-businesses/get-a-food-preparation-and-serving-license/",
+      "why": "The Food Preparation and Serving License requires the Commercial Activity License.",
+      "verified": true
+    },
+    {
+      "before": "phl-tax",
+      "after": "phl-food",
+      "source": "https://www.phila.gov/services/business-self-employment/starting-a-business/business-licenses-permits-and-approvals/food-businesses/get-a-food-preparation-and-serving-license/",
+      "why": "It also requires the BIRT tax account.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

@@ -1,0 +1,241 @@
+{
+  "id": "boston-restaurant",
+  "title": "Restaurant in Boston",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Restaurant",
+    "where": "Boston, MA",
+    "lang": "en"
+  },
+  "assumptions": "The company still has to be formed (an LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "ma-llc",
+      "name": "Certificate of Organization (Massachusetts LLC)",
+      "agency": "Secretary of the Commonwealth, Corporations Division",
+      "level": "state",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "note": "Not read on an official page in this pass.",
+      "source": "https://www.sec.state.ma.us",
+      "match": "llc formation|certificate of organization|ma-sos",
+      "agencyMatch": "secretary of the commonwealth"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ma-dor",
+      "name": "Sales and meals tax registration (MassTaxConnect)",
+      "agency": "Massachusetts Department of Revenue",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Taxpayers must register with DOR to collect taxes before the business actually opens.\"",
+      "source": "https://www.mass.gov/administrative-procedure/ap-616-registration-information-sales-tax-meals-tax-room-occupancy-excise-withholding-tax-and-other-miscellaneous-excises",
+      "match": "sales tax|meals tax|ma-tax|masstaxconnect",
+      "agencyMatch": "department of revenue"
+    },
+    {
+      "key": "ma-dua",
+      "name": "Employer registration with the Department of Unemployment Assistance",
+      "agency": "Massachusetts Department of Unemployment Assistance",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance",
+      "match": "unemployment",
+      "agencyMatch": "unemployment assistance"
+    },
+    {
+      "key": "ma-food-manager",
+      "name": "Food manager certification",
+      "agency": "Massachusetts Department of Public Health (accredited exam)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "food (protection )?manager",
+      "agencyMatch": "public health|health",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "ma-allergen",
+      "name": "Allergen awareness certificate",
+      "agency": "Massachusetts Department of Public Health",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "allergen",
+      "agencyMatch": "public health|health",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "bos-cert",
+      "name": "Business Certificate",
+      "agency": "City of Boston, City Clerk",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "condition": "Listed in the restaurant guide; under Massachusetts law it is for trading under a name other than the legal name (an LLC under its own registered name files with the Secretary of the Commonwealth instead).",
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "business certificate",
+      "agencyMatch": "city clerk"
+    },
+    {
+      "key": "bos-plan",
+      "name": "Health plan review (food establishment review)",
+      "agency": "City of Boston Inspectional Services, Health Division",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "plan review",
+      "agencyMatch": "inspectional services"
+    },
+    {
+      "key": "bos-cv",
+      "name": "Common Victualler License",
+      "agency": "City of Boston Licensing Board",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "common victualler",
+      "agencyMatch": "licensing board"
+    },
+    {
+      "key": "bos-permit",
+      "name": "Food service health permit",
+      "agency": "City of Boston Inspectional Services, Health Division",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "food service (health )?permit|food permit",
+      "agencyMatch": "inspectional services"
+    },
+    {
+      "key": "bos-co",
+      "name": "Certificate of Occupancy (or Certificate of Inspection)",
+      "agency": "City of Boston Inspectional Services",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Required before the health inspection.",
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "certificate of (occupancy|inspection)",
+      "agencyMatch": "inspectional services"
+    },
+    {
+      "key": "bos-building",
+      "name": "Building permit (long or short form)",
+      "agency": "City of Boston Inspectional Services",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "building permit",
+      "agencyMatch": "inspectional services"
+    },
+    {
+      "key": "bos-site",
+      "name": "Site Cleanliness License",
+      "agency": "City of Boston",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Listed under Step 4 approvals in the city's restaurant guide.",
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "site cleanliness",
+      "agencyMatch": "boston"
+    },
+    {
+      "key": "bos-assembly",
+      "name": "Place of Assembly Permit",
+      "agency": "Boston Fire Department",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "match": "assembly",
+      "agencyMatch": "fire",
+      "condition": "Occupancy of 50 or more."
+    }
+  ],
+  "order": [
+    {
+      "before": "ma-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "bos-cv",
+      "after": "bos-permit",
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "why": "The Common Victualler License comes before the final food service permit.",
+      "verified": true
+    },
+    {
+      "before": "bos-co",
+      "after": "bos-permit",
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "why": "The CO or Certificate of Inspection must be in hand before the health inspection.",
+      "verified": true
+    },
+    {
+      "before": "bos-plan",
+      "after": "bos-building",
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "why": "Health plan review comes before any construction or alteration.",
+      "verified": true
+    },
+    {
+      "before": "ma-food-manager",
+      "after": "bos-permit",
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "why": "Food manager certification is submitted with the food service permit.",
+      "verified": true
+    },
+    {
+      "before": "ma-allergen",
+      "after": "bos-permit",
+      "source": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+      "why": "Allergen awareness certification is submitted with the food service permit.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

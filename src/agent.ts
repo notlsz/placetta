@@ -2,6 +2,7 @@ import type { OrbState } from "thinking-orbs";
 import { nextAction, progress, reconcile } from "./jobs";
 import { B, MATCH_FREMONT, MATCH_SJ, SRC, genericMatch, same, type Application, type Approval, type Bi, type Doc, type Fact, type Workspace } from "./model";
 import { inDays, money, nowIso } from "./time";
+import { groundedAnswer } from "./answer";
 
 /* ------------------------------------------------------------------ *
  * The contract between the workspace and whatever runs the agent.
@@ -325,6 +326,20 @@ function fromComment(ctx: Context, text: string): Plan {
   };
 }
 
+/** A question about a requirement, answered from the official forms library with the agency's page as the source,
+ *  or "I'm not sure, here's who to ask" when the library doesn't have it (src/answer.ts). Null: not such a question. */
+function question(ctx: Context, text: string): Plan | null {
+  // "What changed in the county plan check?" and a rule notice are the rule-change flow's, not a lookup
+  if (/\bchang|\bnotice\b|new rule|变化|通知/i.test(text)) return null;
+  const store = (ctx.current.stores ?? []).find(s => s.stage === "opening") ?? ctx.current.stores?.[0];
+  const g = groundedAnswer(text, { home: store?.address });
+  if (!g) return null;
+  return {
+    steps: [S("searching", "Looking it up in the official forms library", "在官方表格库中查找", "placetta"), S("composing", g.sure ? "Answering from the agency's own page" : "Saying who to ask", g.sure ? "根据机构官方页面作答" : "说明应咨询谁")],
+    reply: { text: [g.text], sources: g.sources },
+  };
+}
+
 const SCRIPTS: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
   { match: /^prepare these applications|^准备这些申请/i, plan: preparePicked },
   { match: /asked you in a comment on|的评论中请你处理/i, plan: fromComment },
@@ -587,7 +602,10 @@ function plan(req: Request, ctx: Context): Plan {
   if ("approveAll" in req) return fileAll(req.approveAll, ctx);
   if ("upload" in req) return upload(req.upload, ctx);
   if ("match" in req) return match(req.match.what, req.match.where);
-  return SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx, req.text) ?? FALLBACK();
+  // the scripted jobs that start with their own words first, then a question about a requirement, then the rest
+  const own = SCRIPTS.slice(0, 6).find(s => s.match.test(req.text));
+  if (own) return own.plan(ctx, req.text);
+  return question(ctx, req.text) ?? SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx, req.text) ?? FALLBACK();
 }
 
 /** Scripted stand-in for the real agent, so the product can be designed and tested end to end. */
