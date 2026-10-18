@@ -1,0 +1,82 @@
+<!doctype html>
+<!-- Static copy of the Clerk's Information System pages the SCC's "Form a VA Limited Liability Company in the Clerk's
+     Information System" guide documents (steps 1 to 36). Written from the guide, not recorded from the live site. -->
+<html><head><meta name="replay-form" content="va-llc"></head><body>
+<template data-title="Log In">
+  <h1>Log In</h1>
+  <p><label for="u">User ID</label><input id="u"></p>
+  <p><label for="p">Password</label><input id="p" type="password"></p>
+  <button>Log In</button>
+</template>
+<template data-title="Dashboard">
+  <h1>Dashboard</h1>
+  <nav><a href="#os">Online Services</a> <a href="#corr">Correspondence</a></nav>
+  <p><a href="#form">Form or Register a Business</a></p>
+</template>
+<template data-title="Form or Register a Business">
+  <h1>Form or Register a Business</h1>
+  <p><label><input type="radio" name="t"> Virginia Entity</label> <label><input type="radio" name="t"> Foreign Entity</label></p>
+  <p><label for="k">Entity Type</label><select id="k"><option></option><option>Limited Liability Company</option></select></p>
+  <p><label for="f">Filing</label><select id="f"><option></option><option>Articles of Organization</option></select></p>
+  <button>Continue</button>
+</template>
+<template data-title="Entity Name">
+  <h1>Entity Name</h1>
+  <p>Have you reserved a name? <label><input type="radio" name="r"> Yes</label> <label><input type="radio" name="r"> No</label></p>
+  <p><label for="n">Entity Name</label><input id="n"></p>
+  <button>Check Availability</button> <button>Back</button> <button>Next</button>
+</template>
+<template data-title="Entity Information">
+  <h1>Entity Information</h1>
+  <p><label for="e">Entity Email Address</label><input id="e" type="email"></p>
+  <p><label for="c">Contact Number</label><input id="c"></p>
+  <p><label for="i">Business Type</label><select id="i"><option>0 - General</option></select></p>
+  <p><label><input type="radio" name="d"> Perpetual</label></p>
+  <button>Back</button> <button>Next</button>
+</template>
+<template data-title="Registered Agent">
+  <h1>Registered Agent</h1>
+  <p><label><input type="radio" name="ra"> Individual</label> <label><input type="radio" name="ra"> Entity</label></p>
+  <p><label for="l">Last Name</label><input id="l"></p>
+  <button>Search</button> <button>Create Individual RA</button> <button>Back</button> <button>Next</button>
+</template>
+<template data-title="Principal Office Address">
+  <h1>Principal Office Address</h1>
+  <p><label for="a">Address Line 1</label><input id="a"></p>
+  <p><label for="z">Zip Code</label><input id="z"></p>
+  <button>Back</button> <button>Next</button>
+</template>
+<template data-title="Management Structure">
+  <h1>Management Structure</h1>
+  <p><label for="m">Manager/Member Information</label><select id="m"><option>Member-managed</option><option>Manager-managed</option></select></p>
+  <button>Back</button> <button>Next</button>
+</template>
+<template data-title="Upload Articles">
+  <h1>Upload Articles</h1>
+  <p><label><input type="radio" name="up"> The uploaded document will act as the filing image</label></p>
+  <p><label for="f2">Articles of Organization</label><input id="f2" type="file"></p>
+  <button>Attach</button> <button>Back</button> <button>Next</button>
+</template>
+<template data-title="Signature">
+  <h1>Signature</h1>
+  <p><label><input type="radio" name="s"> Individual</label> <label><input type="radio" name="s"> On behalf of Business Entity</label></p>
+  <p><label for="sn">Printed Name</label><input id="sn"></p>
+  <button>Add</button> <button>Back</button> <button>Next</button>
+</template>
+<template data-title="Review">
+  <h1>Review</h1>
+  <h2>Articles of Organization</h2>
+  <p>Entity Name: Lotus Tea House LLC</p>
+  <button>Back</button> <button>Add To Shopping Cart</button>
+</template>
+<template data-title="Shopping Cart">
+  <h1>Shopping Cart</h1>
+  <p>Articles of Organization: $100.00</p>
+  <button>Checkout</button>
+</template>
+<template data-title="Confirmation">
+  <h1>Confirmation</h1>
+  <p>Your filing has been submitted.</p>
+  <button>I Agree</button>
+</template>
+</body></html>

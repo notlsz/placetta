@@ -1,0 +1,621 @@
+{
+ "form": "nj-formation",
+ "rev": "Public Records Filing for New Business Entity (page 16 of the Division of Revenue's legacy registration packet, 03/2026)",
+ "pdf": "nj-reg.pdf",
+ "url": "https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf",
+ "checked": "2026-10-18",
+ "notes": "A flat, print-only form on page 16 of the same packet as NJ-REG: answers are printed on its lines. entity_type prints the code before the dash (DLC for a New Jersey LLC). Directors and incorporators (corporations only; an LLC answers None) are one per line, 'name, street, city, ST ZIP', split into the form's columns. The signers are 'name, title'; their signatures and dates are left for them. Stock (item 4) and duration (item 5) are left blank as the form says for an LLC; a corporation's authorized shares, the item 11 entity-specific statements on page 17 and any attached articles are left for the applicant. The fee goes with the filing.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "1",
+   "en": "Business name (with its designator, e.g. LLC)",
+   "zh": "企业名称（含后缀，如 LLC）"
+  },
+  {
+   "id": "entity_type",
+   "line": "2",
+   "en": "Type of business entity (code from the instructions)",
+   "zh": "企业实体类型（说明中的代码）",
+   "options": [
+    "DLC - Domestic Limited Liability Company",
+    "FLC - Foreign Limited Liability Company",
+    "DP - Domestic For-Profit Corporation",
+    "FR - Foreign For-Profit Corporation"
+   ]
+  },
+  {
+   "id": "purpose",
+   "line": "3",
+   "en": "Business purpose (code or short description)",
+   "zh": "经营目的（代码或简述）"
+  },
+  {
+   "id": "foreign_state",
+   "line": "6",
+   "en": "State or country of formation (foreign entities only), or None",
+   "zh": "成立州或国家（仅外州/外国实体），或 None"
+  },
+  {
+   "id": "foreign_date",
+   "line": "7",
+   "en": "Date of formation (foreign entities only, MM/DD/YYYY), or None",
+   "zh": "成立日期（仅外州/外国实体，月/日/年），或 None"
+  },
+  {
+   "id": "agent",
+   "line": "8",
+   "en": "Registered agent name",
+   "zh": "注册代理人名称"
+  },
+  {
+   "id": "agent_office",
+   "line": "8",
+   "en": "Registered office: a New Jersey street address (street, city, NJ ZIP)",
+   "zh": "注册办公室：新泽西州街道地址（街道、城市、NJ 邮编）"
+  },
+  {
+   "id": "main_address",
+   "line": "8",
+   "en": "Main or principal business address (street, city, ST ZIP)",
+   "zh": "主要营业地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "directors",
+   "line": "9",
+   "en": "Corporations: initial directors (limited partnerships: general partners), one per line 'name, street, city, ST ZIP' (up to three), or None",
+   "zh": "公司：首届董事（有限合伙：普通合伙人），每行一位“姓名、街道、城市、州、邮编”（最多三位），或 None"
+  },
+  {
+   "id": "incorporators",
+   "line": "10",
+   "en": "Corporations: incorporators, one per line 'name, street, city, ST ZIP' (up to three), or None",
+   "zh": "公司：发起人，每行一位“姓名、街道、城市、州、邮编”（最多三位），或 None"
+  },
+  {
+   "id": "signer",
+   "line": "Signatures",
+   "en": "Person signing for the public record: 'name, title'",
+   "zh": "为公开记录签署的人：“姓名、职务”"
+  },
+  {
+   "id": "signer2",
+   "line": "Signatures",
+   "en": "A second person signing: 'name, title', or None",
+   "zh": "第二位签署人：“姓名、职务”，或 None"
+  }
+ ],
+ "boxes": {
+  "name": [
+   {
+    "at": {
+     "page": 15,
+     "x": 45,
+     "y": 585,
+     "w": 545,
+     "size": 10
+    }
+   }
+  ],
+  "entity_type": [
+   {
+    "at": {
+     "page": 15,
+     "x": 152,
+     "y": 562.5,
+     "w": 64,
+     "size": 10
+    },
+    "pick": "head"
+   }
+  ],
+  "purpose": [
+   {
+    "at": {
+     "page": 15,
+     "x": 462,
+     "y": 561,
+     "w": 134,
+     "size": 9
+    }
+   }
+  ],
+  "foreign_state": [
+   {
+    "at": {
+     "page": 15,
+     "x": 45,
+     "y": 497,
+     "w": 330,
+     "size": 9.5
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "foreign_date": [
+   {
+    "at": {
+     "page": 15,
+     "x": 413,
+     "y": 496.5,
+     "w": 180,
+     "size": 9.5
+    },
+    "pick": "date",
+    "if": "^(?!none$)"
+   }
+  ],
+  "agent": [
+   {
+    "at": {
+     "page": 15,
+     "x": 145,
+     "y": 469.5,
+     "w": 290,
+     "size": 9.5
+    }
+   }
+  ],
+  "agent_office": [
+   {
+    "at": {
+     "page": 15,
+     "x": 72,
+     "y": 431,
+     "w": 228,
+     "size": 9.5
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 72,
+     "y": 409,
+     "w": 138,
+     "size": 9.5
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 250,
+     "y": 409,
+     "w": 50,
+     "size": 9.5
+    },
+    "pick": "zip"
+   }
+  ],
+  "main_address": [
+   {
+    "at": {
+     "page": 15,
+     "x": 354,
+     "y": 431,
+     "w": 226,
+     "size": 9.5
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 354,
+     "y": 409,
+     "w": 90,
+     "size": 9.5
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 489,
+     "y": 409,
+     "w": 24,
+     "size": 9.5
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 539,
+     "y": 409,
+     "w": 42,
+     "size": 9.5
+    },
+    "pick": "zip"
+   }
+  ],
+  "directors": [
+   {
+    "at": {
+     "page": 15,
+     "x": 40,
+     "y": 319,
+     "w": 180,
+     "size": 9.5
+    },
+    "pick": "line1|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 237,
+     "y": 319,
+     "w": 147,
+     "size": 9.5
+    },
+    "pick": "line1|tail|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 400,
+     "y": 319,
+     "w": 76,
+     "size": 9.5
+    },
+    "pick": "line1|tail|city",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 494,
+     "y": 319,
+     "w": 34,
+     "size": 9.5
+    },
+    "pick": "line1|tail|state",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 544,
+     "y": 319,
+     "w": 52,
+     "size": 9.5
+    },
+    "pick": "line1|tail|zip",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 40,
+     "y": 297,
+     "w": 180,
+     "size": 9.5
+    },
+    "pick": "line2|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 237,
+     "y": 297,
+     "w": 147,
+     "size": 9.5
+    },
+    "pick": "line2|tail|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 400,
+     "y": 297,
+     "w": 76,
+     "size": 9.5
+    },
+    "pick": "line2|tail|city",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 494,
+     "y": 297,
+     "w": 34,
+     "size": 9.5
+    },
+    "pick": "line2|tail|state",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 544,
+     "y": 297,
+     "w": 52,
+     "size": 9.5
+    },
+    "pick": "line2|tail|zip",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 40,
+     "y": 275,
+     "w": 180,
+     "size": 9.5
+    },
+    "pick": "line3|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 237,
+     "y": 275,
+     "w": 147,
+     "size": 9.5
+    },
+    "pick": "line3|tail|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 400,
+     "y": 275,
+     "w": 76,
+     "size": 9.5
+    },
+    "pick": "line3|tail|city",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 494,
+     "y": 275,
+     "w": 34,
+     "size": 9.5
+    },
+    "pick": "line3|tail|state",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 544,
+     "y": 275,
+     "w": 52,
+     "size": 9.5
+    },
+    "pick": "line3|tail|zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "incorporators": [
+   {
+    "at": {
+     "page": 15,
+     "x": 40,
+     "y": 201,
+     "w": 180,
+     "size": 9.5
+    },
+    "pick": "line1|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 237,
+     "y": 201,
+     "w": 147,
+     "size": 9.5
+    },
+    "pick": "line1|tail|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 400,
+     "y": 201,
+     "w": 76,
+     "size": 9.5
+    },
+    "pick": "line1|tail|city",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 494,
+     "y": 201,
+     "w": 34,
+     "size": 9.5
+    },
+    "pick": "line1|tail|state",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 544,
+     "y": 201,
+     "w": 52,
+     "size": 9.5
+    },
+    "pick": "line1|tail|zip",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 40,
+     "y": 179,
+     "w": 180,
+     "size": 9.5
+    },
+    "pick": "line2|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 237,
+     "y": 179,
+     "w": 147,
+     "size": 9.5
+    },
+    "pick": "line2|tail|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 400,
+     "y": 179,
+     "w": 76,
+     "size": 9.5
+    },
+    "pick": "line2|tail|city",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 494,
+     "y": 179,
+     "w": 34,
+     "size": 9.5
+    },
+    "pick": "line2|tail|state",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 544,
+     "y": 179,
+     "w": 52,
+     "size": 9.5
+    },
+    "pick": "line2|tail|zip",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 40,
+     "y": 157,
+     "w": 180,
+     "size": 9.5
+    },
+    "pick": "line3|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 237,
+     "y": 157,
+     "w": 147,
+     "size": 9.5
+    },
+    "pick": "line3|tail|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 400,
+     "y": 157,
+     "w": 76,
+     "size": 9.5
+    },
+    "pick": "line3|tail|city",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 494,
+     "y": 157,
+     "w": 34,
+     "size": 9.5
+    },
+    "pick": "line3|tail|state",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 544,
+     "y": 157,
+     "w": 52,
+     "size": 9.5
+    },
+    "pick": "line3|tail|zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "signer": [
+   {
+    "at": {
+     "page": 15,
+     "x": 228,
+     "y": 97,
+     "w": 140,
+     "size": 9.5
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 386,
+     "y": 97,
+     "w": 112,
+     "size": 9.5
+    },
+    "pick": "tail"
+   }
+  ],
+  "signer2": [
+   {
+    "at": {
+     "page": 15,
+     "x": 228,
+     "y": 75,
+     "w": 140,
+     "size": 9.5
+    },
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 15,
+     "x": 386,
+     "y": 75,
+     "w": 112,
+     "size": 9.5
+    },
+    "pick": "tail",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "foreign_state": "^none$",
+  "foreign_date": "^none$",
+  "directors": "^none$",
+  "incorporators": "^none$",
+  "signer2": "^none$"
+ }
+}

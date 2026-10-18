@@ -12,19 +12,15 @@ const R = "restaurant" as const, T = "retail" as const, S = "seller" as const, W
 const ALL = [R, T, S, W];
 const READ = "2026-10-18";
 const P = (quote: string, read: string) => ({ quote, read, checked: READ });
-const NO_FEE = B("The agency's page lists no fee for this.", "机构页面未列出此项费用。");
 
 const LAC_HOWTO = "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm";
 const NJ_RULE = "https://www.nj.gov/health/ceohs/documents/phfpp/Chapter%2024%20w%20Cottage%20Food%20Rules%201-18-22.pdf";
-const SMC_FAQ = "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf";
 const SL = "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements";
 const DUL_NEW = "https://www.duluthga.net/services/city_clerk/new_business_applications/index.php";
 const GW = "https://www.gnrhealth.com/?p=97";
 const GW_REQ = "https://gnrhealth.com/wp-content/uploads/2024/08/Food-Service-Plan-Review-Requirements-fillable-3-11-16-JER.pdf";
 const MOCO_FOOD = "https://www.montgomerycountymd.gov/HHS-Special/LandRLicenseFoodService.html";
-const MOCO_PLAN = "https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf";
 const ROCK = "https://www.rockvillemd.gov/?p=61177";
-const MD_EXPRESS = "https://businessexpress.maryland.gov/start/taxes-and-insurance";
 const BEL = "https://bellevuewa.gov/city-government/departments/finance/business-taxes/business-licenses";
 
 type Proof = { quote: string; read: string; checked: string };
@@ -32,23 +28,6 @@ const f = (o: Omit<OfficialForm, "checked" | "fields"> & { proof: Proof }): Offi
 
 export const BEACHHEAD: OfficialForm[] = [
   /* ------------------------------------------------ Maryland ------------------------------------------------ */
-  f({ id: "md-sdat", form: "Articles of Organization (Limited Liability Company)", title: B("Articles of Organization (Maryland LLC)", "组织章程（马里兰州 LLC）"),
-    agency: B("Maryland Department of Assessments and Taxation", "马里兰州评估与税务局"), level: "state", where: "MD", segments: ALL, needs: { newEntity: true }, method: "online", order: 12,
-    how: B("Filed with SDAT online through Maryland Business Express, or on the paper form, with a Maryland principal office and a resident agent who signs to consent.", "通过 Maryland Business Express 在线或以纸质表格向 SDAT 提交，须有马里兰州主要办公地址和签字同意的常驻代理人。"),
-    url: "https://businessexpress.maryland.gov", info: "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Create%20or%20Start%20a%20Business/Articles%20of%20Organization%20for%20a%20Limited%20Liability%20Company_0526-A.pdf",
-    fee: null, feeNote: B("SDAT's form doesn't print the filing fee; Odelia confirms it before you pay.", "SDAT 表格未印明申请费，付款前 Odelia 会确认。"),
-    proof: P("The address must be located in Maryland. P.O. Boxes cannot be accepted.", "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Create%20or%20Start%20a%20Business/Articles%20of%20Organization%20for%20a%20Limited%20Liability%20Company_0526-A.pdf"),
-    plain: B("Creates the company in Maryland.", "在马里兰州成立公司。") }),
-  f({ id: "md-sales", form: "Combined Registration Application (sales and use tax license)", title: B("Maryland sales and use tax license", "马里兰州销售与使用税执照"),
-    agency: B("Comptroller of Maryland", "马里兰州审计长办公室"), level: "state", where: "MD", segments: ALL, method: "online", order: 20,
-    how: B("Register online with the Combined Registration Application, which also opens employer withholding and the unemployment insurance account.", "通过综合登记申请（Combined Registration Application）在线登记，可同时开立雇主预扣税和失业保险账户。"),
-    url: "https://interactive.marylandtaxes.gov/webapps/comptrollercra", info: MD_EXPRESS, fee: null, feeNote: NO_FEE,
-    proof: P("This is required if you sell items in Maryland and collect sales tax.", MD_EXPRESS) }),
-  f({ id: "md-ui", form: "Unemployment insurance account (Combined Registration Application)", title: B("Unemployment insurance employer account", "失业保险雇主账户"),
-    agency: B("Maryland Department of Labor", "马里兰州劳工部"), level: "state", where: "MD", segments: ALL, needs: { employees: true }, method: "online", order: 60,
-    how: B("Opened through the Combined Registration Application once you have employees; wages and new hires are reported every quarter.", "有员工后通过综合登记申请开立，每季度申报工资和新雇员。"),
-    url: "https://interactive.marylandtaxes.gov/webapps/comptrollercra", info: MD_EXPRESS, fee: null, feeNote: NO_FEE,
-    proof: P("You must apply for an unemployment insurance account through the Maryland Department of Labor if you are:", MD_EXPRESS) }),
   f({ id: "md-trader", form: "Trader's License", title: B("Trader's license", "商贩执照（Trader's License）"),
     agency: B("Clerk of the Circuit Court (your county)", "所在县巡回法院书记官"), level: "county", where: "MD", segments: [T, S], method: "in_person", order: 56,
     how: B("Anyone who sells goods in Maryland, other than a grower or manufacturer, gets this from the county's Circuit Court clerk before selling, after opening a sales tax account and registering the entity with SDAT.", "除种植者或制造商外，在马里兰州销售商品者须在销售前向所在县巡回法院书记官申领，申领前须已开立销售税账户并在 SDAT 登记实体。"),
@@ -57,16 +36,6 @@ export const BEACHHEAD: OfficialForm[] = [
     proof: P("may not offer for sale, sell or otherwise dispose of any goods within Maryland, without first obtaining a trader's license", "https://www.marylandcomptroller.gov/businesses/new-business/business-licenses.html"),
     plain: B("Maryland's license to sell goods, from the county court clerk.", "马里兰州的商品销售执照，由县法院书记官发放。") }),
   // Montgomery County (Maryland): food licensing for the whole county, Rockville and Gaithersburg included
-  f({ id: "moco-plan-review", form: "HHS Plan Review (food service facility)", title: B("Food service plan review", "餐饮服务图纸审查"),
-    agency: B("Montgomery County Department of Health and Human Services, Licensure and Regulatory Services", "蒙哥马利县卫生与公众服务局许可与监管服务处"), level: "county", where: "MOCO", segments: [R, T], needs: { food: true, buildout: true }, method: "portal", order: 60,
-    how: B("Submit scaled drawings, the menu (and a HACCP plan for moderate and high priority places) and equipment spec sheets through the permitting portal for the county's health review before construction.", "施工前通过许可门户提交按比例图纸、菜单（中高风险场所另附 HACCP 计划）和设备规格表，供县卫生部门审查。"),
-    url: MOCO_PLAN, info: MOCO_PLAN, fee: null,
-    proof: P("Future code violations are prevented by addressing any potential layout & design concerns prior to construction or renovation beginning.", MOCO_PLAN) }),
-  f({ id: "moco-food-license", form: "Food Service Facility License", title: B("Food service facility license", "餐饮服务场所执照"),
-    agency: B("Montgomery County Department of Health and Human Services, Licensure and Regulatory Services", "蒙哥马利县卫生与公众服务局许可与监管服务处"), level: "county", where: "MOCO", segments: [R, T], needs: { food: true }, method: "online", order: 76,
-    how: B("Anyone preparing or serving food to the public applies before opening; the facility must be under the control of a Certified Food Service Manager.", "凡向公众制作或供应食品者须在开业前申请；场所须由注册餐饮服务经理管理。"),
-    url: MOCO_FOOD, info: MOCO_FOOD, fee: null, feeNote: B("Set by the county's license fee schedule.", "按县执照收费表计算。"), renews: B("Every year; licenses expire January 31.", "每年续期，执照于 1 月 31 日到期。"),
-    proof: P("A license must be obtained prior to opening a business.", MOCO_FOOD), after: [{ form: "moco-cfsm", label: B("Certified Food Service Manager in place", "已配备注册餐饮服务经理") }] }),
   f({ id: "moco-cfsm", form: "Certified Food Service Manager (Montgomery County Code 15-8)", title: B("Certified food service manager", "注册餐饮服务经理"),
     agency: B("Montgomery County Department of Health and Human Services", "蒙哥马利县卫生与公众服务局"), level: "county", where: "MOCO", segments: [R, T], needs: { food: true }, method: "online", order: 40,
     how: B("The facility must be under the immediate control of a Certified Food Service Manager, licensed by the county.", "场所须由经县政府认证的注册餐饮服务经理直接管理。"),
@@ -74,12 +43,12 @@ export const BEACHHEAD: OfficialForm[] = [
     proof: P("a licensee must not operate a food service facility unless the facility is under the immediate control of a Certified Food Service Manager.", MOCO_FOOD) }),
   // Rockville issues its own building and occupancy permits
   f({ id: "rock-building", form: "Building and trade permits (MGO Connect)", title: B("Building permit for the build-out", "装修建筑许可证"),
-    agency: B("City of Rockville Inspection Services", "罗克维尔市检查服务处"), level: "city", where: "ROCK", segments: [R, T, W], needs: { buildout: true }, method: "portal", order: 65,
+    agency: B("City of Rockville Inspection Services", "罗克维尔市检查服务处"), level: "city", where: "ROC", segments: [R, T, W], needs: { buildout: true }, method: "portal", order: 65,
     how: B("Apply through MGO Connect before construction; most permits need inspections before the work is final.", "施工前通过 MGO Connect 申请；多数许可在完工前须经检查。"),
     url: "https://www.rockvillemd.gov/mgoconnect", info: ROCK, fee: null,
     proof: P("Commercial and residential properties in the City of Rockville are required to obtain permits before starting construction projects", ROCK) }),
   f({ id: "rock-occupancy", form: "Commercial Occupancy Permit Application", title: B("Commercial occupancy permit", "商业使用许可"),
-    agency: B("City of Rockville Inspection Services", "罗克维尔市检查服务处"), level: "city", where: "ROCK", segments: [R, T, W], method: "portal", order: 62,
+    agency: B("City of Rockville Inspection Services", "罗克维尔市检查服务处"), level: "city", where: "ROC", segments: [R, T, W], method: "portal", order: 62,
     how: B("A commercial tenant applies through MGO Connect; the city inspects before the permit issues.", "商业租户通过 MGO Connect 申请，市政府检查后签发。"),
     url: "https://www.rockvillemd.gov/mgoconnect", info: ROCK, fee: null, proof: P("Commercial Occupancy Permit Application", ROCK) }),
 
@@ -171,26 +140,6 @@ export const BEACHHEAD: OfficialForm[] = [
     proof: P("issues licenses or permits that are required for any business or person to manufacture, import, export, store, distribute or sell alcoholic beverages", "https://www2.myfloridalicense.com/alcoholic-beverages-and-tobacco/") }),
 
   /* ------------------------------------------------ Virginia, Hawaii, Utah ------------------------------------------------ */
-  f({ id: "va-scc", form: "Articles of Organization (Form LLC1011)", title: B("Articles of Organization (Virginia LLC)", "组织章程（弗吉尼亚州 LLC）"),
-    agency: B("Virginia State Corporation Commission, Clerk's Office", "弗吉尼亚州公司委员会书记官办公室"), level: "state", where: "VA", segments: ALL, needs: { newEntity: true }, method: "online", order: 12,
-    how: B("File online in the Clerk's Information System (CIS), or on Form LLC1011.", "通过书记官信息系统（CIS）在线提交，或填写 LLC1011 表。"),
-    url: "https://cis.scc.virginia.gov", info: "https://www.scc.virginia.gov/businesses/new-business-resources/business-types/", fee: 100,
-    proof: P("File Online or complete Articles of Organization (Form LLC1011-DOC)", "https://www.scc.virginia.gov/businesses/new-business-resources/business-types/") }),
-  f({ id: "hi-llc", form: "Articles of Organization (Form LLC-1)", title: B("Articles of Organization (Hawaii LLC)", "组织章程（夏威夷州 LLC）"),
-    agency: B("Hawaii Department of Commerce and Consumer Affairs, Business Registration Division", "夏威夷州商务与消费者事务部企业登记处"), level: "state", where: "HI", segments: ALL, needs: { newEntity: true }, method: "online", order: 12,
-    how: B("Register online through the Business Registration Division for an instant filing, or on paper Form LLC-1.", "通过企业登记处在线登记即时提交，或填写纸质 LLC-1 表。"),
-    url: "https://hbe.ehawaii.gov", info: "https://files.hawaii.gov/dcca/breg/registration/forms/llc-1.pdf", fee: 50, feeNote: B("$50 nonrefundable filing fee.", "50 美元不可退还的申请费。"),
-    proof: P("State of Hawaii Nonrefundable Filing Fee: $50.00", "https://files.hawaii.gov/dcca/breg/registration/forms/llc-1.pdf") }),
-  f({ id: "hi-get", form: "Form BB-1 (State of Hawaii Basic Business Application)", title: B("General excise tax (GET) license", "一般消费税（GET）执照"),
-    agency: B("Hawaii Department of Taxation", "夏威夷州税务局"), level: "state", where: "HI", segments: ALL, method: "online", order: 20,
-    how: B("Register online at Hawaii Tax Online with Form BB-1; the same application opens withholding and other tax accounts.", "通过 Hawaii Tax Online 以 BB-1 表在线登记；同一申请可开立预扣税等其他税务账户。"),
-    url: "https://hitax.hawaii.gov", info: "https://tax.hawaii.gov/geninfo/get/", fee: 20, feeNote: B("A one-time $20 fee.", "一次性 20 美元。"),
-    proof: P("Complete the Form BB-1, State of Hawaii Basic Business Application, BB-1 Packet , and pay a one-time $20 registration fee.", "https://tax.hawaii.gov/geninfo/get/") }),
-  f({ id: "hi-ui", form: "New Employer Registration (Form UC-1)", title: B("Unemployment insurance employer registration", "失业保险雇主登记"),
-    agency: B("Hawaii Department of Labor and Industrial Relations, Unemployment Insurance Division", "夏威夷州劳工与劳资关系部失业保险处"), level: "state", where: "HI", segments: ALL, needs: { employees: true }, method: "online", order: 60,
-    how: B("Business owners create a profile on the New Employer Web Application, or file Form UC-1; tax reports are due every quarter.", "企业主在新雇主网络应用上建立账户，或提交 UC-1 表；每季度申报税款。"),
-    url: "https://labor.hawaii.gov/ui/?p=865", info: "https://labor.hawaii.gov/ui/?p=865", fee: 0,
-    proof: P("In most cases, if you have employees working in Hawaii, you must pay unemployment taxes on their wages.", "https://labor.hawaii.gov/ui/?p=865") }),
   f({ id: "hi-food-plan", form: "Plan review (Food Safety Branch)", title: B("Food establishment plan review", "食品经营场所图纸审查"),
     agency: B("Hawaii Department of Health, Food Safety Branch", "夏威夷州卫生局食品安全处"), level: "state", where: "HI", segments: [R, T], needs: { food: true, buildout: true }, method: "in_person", order: 60,
     how: B("Hawaii's Department of Health, not the county, reviews the building plans of a new or renovated food establishment.", "在夏威夷，新建或改建食品经营场所的建筑图纸由州卫生局（而非县政府）审查。"),
@@ -201,16 +150,6 @@ export const BEACHHEAD: OfficialForm[] = [
     how: B("The Department of Health inspects and permits every food establishment statewide; renewals are invoiced and paid online.", "州卫生局对全州食品经营场所进行检查并发放许可；续期账单可在线缴纳。"),
     url: "https://health.hawaii.gov/san/?p=740", info: "https://health.hawaii.gov/san/?p=740", fee: null, renews: B("Every year.", "每年。"),
     proof: P("The branch conducts inspections of and issues permits or licenses to food establishments", "https://health.hawaii.gov/san/?p=740") }),
-  f({ id: "ut-llc", form: "Certificate of Organization (LLC)", title: B("Utah LLC formation", "犹他州 LLC 设立"),
-    agency: B("Utah Division of Corporations and Commercial Code", "犹他州公司与商法处"), level: "state", where: "UT", segments: ALL, needs: { newEntity: true }, method: "online", order: 12,
-    how: B("Form the LLC online with the Division of Corporations.", "通过公司处在线设立 LLC。"),
-    url: "https://corporations.utah.gov/", info: "https://corporations.utah.gov/", fee: null,
-    proof: P("Form a Corporation, Limited Liability Company (LLC), Partnership, Business Trust, DBA, and more.", "https://corporations.utah.gov/") }),
-  f({ id: "ut-sales", form: "Sales and use tax license (TC-69 / Taxpayer Access Point)", title: B("Utah sales and use tax license", "犹他州销售与使用税执照"),
-    agency: B("Utah State Tax Commission", "犹他州税务委员会"), level: "state", where: "UT", segments: ALL, method: "online", order: 20,
-    how: B("Apply for the license online (Taxpayer Access Point) before selling; the Commission assigns a filing frequency from your estimate.", "开始销售前通过 Taxpayer Access Point 在线申请执照；委员会根据预估税额指定申报频率。"),
-    url: "https://tap.utah.gov", info: "https://tax.utah.gov/sales", fee: 0,
-    proof: P("New businesses estimate the amount of sales and use tax liability when applying for a license and are assigned a filing status.", "https://tax.utah.gov/sales") }),
   f({ id: "ut-alcohol", form: "Restaurant alcohol license (DABS)", title: B("Utah restaurant alcohol license", "犹他州餐厅酒类执照"),
     agency: B("Utah Department of Alcoholic Beverage Services", "犹他州酒类饮料服务局"), level: "state", where: "UT", segments: [R], needs: { alcohol: true }, method: "online", order: 71,
     how: B("Apply through DABS's online licensing system; the city or county gives local consent, and some give it only after the state license.", "通过 DABS 在线许可系统申请；须取得市或县的地方同意，部分地方在州执照之后才给予同意。"),
@@ -229,12 +168,6 @@ export const BEACHHEAD: OfficialForm[] = [
     url: "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account", info: "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account",
     fee: 34, feeNote: B("$30 registration tax for a commercial business plus the $4 state fee.", "商业企业登记税 30 美元，另加 4 美元州费用。"), renews: B("Every year.", "每年。"),
     proof: P("If you do not qualify for an exemption, you will be required to complete a Business Tax Application", "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account") }),
-  f({ id: "cup-license", form: "Business License (HdL)", title: B("City of Cupertino business license", "库比蒂诺市营业执照"),
-    agency: B("City of Cupertino", "库比蒂诺市"), level: "city", where: "CUP", segments: ALL, method: "online", order: 50,
-    how: B("Everyone doing business in Cupertino holds one; applications and renewals run through HdL since September 2025.", "在库比蒂诺经营者均须持有；自 2025 年 9 月起申请和续期均通过 HdL 办理。"),
-    url: "https://cupertino.gov/businesslicense", info: "https://cupertino.gov/businesslicense",
-    fee: 185, feeNote: B("$185 base a year ($181 plus the $4 state fee); businesses in commercial zones add a square footage tax.", "每年基本费 185 美元（181 美元加 4 美元州费用）；商业区企业另按面积征税。"), renews: B("Every calendar year.", "每个日历年。"),
-    proof: P("All persons or entities conducting business within the City of Cupertino are required to obtain a business license", "https://cupertino.gov/businesslicense") }),
   f({ id: "cup-building", form: "Building permit (tenant improvement)", title: B("Building permit for the tenant improvement", "租户装修建筑许可证"),
     agency: B("City of Cupertino Building Division", "库比蒂诺市建筑处"), level: "city", where: "CUP", segments: [R, T, W], needs: { buildout: true }, method: "portal", order: 65,
     how: B("Apply through the city's online permit portal; food facilities bring the county-approved plans.", "通过市政府在线许可门户申请；食品场所须附县政府批准的图纸。"),
@@ -261,19 +194,8 @@ export const BEACHHEAD: OfficialForm[] = [
     agency: B("City of Daly City Building Division", "戴利城建筑处"), level: "city", where: "DLY", segments: [R, T, W], needs: { buildout: true }, method: "in_person", order: 65,
     how: B("Apply with the city's tenant improvement submittal; a restaurant includes plans approved by San Mateo County Health. Permits must be obtained within 180 days of applying.", "按市政府租户装修要求提交；餐厅须附圣马特奥县卫生部门批准的图纸。须在申请后 180 天内领取许可。"),
     url: "https://dalycity.org/206/Guide-to-Commercial-Tenant-Improvement", info: "https://dalycity.org/206/Guide-to-Commercial-Tenant-Improvement", fee: null,
-    after: [{ form: "smc-plan-review", label: B("County-approved plans", "县政府批准的图纸") }],
+    after: [{ form: "smc-plan-check", label: B("County-approved plans", "县政府批准的图纸") }],
     proof: P("Restaurant applications require a set of plans reviewed and approved by the San Mateo County Health Department.", "https://dalycity.org/206/Guide-to-Commercial-Tenant-Improvement") }),
-  f({ id: "smc-plan-review", form: "Food facility plan review", title: B("Food facility plan review", "食品设施图纸审查"),
-    agency: B("San Mateo County Environmental Health Services", "圣马特奥县环境卫生服务处"), level: "county", where: "SMC", segments: [R, T], needs: { food: true, buildout: true }, method: "online", order: 60,
-    how: B("Plans are approved before construction starts; allow up to 20 business days for review. The review fee is separate from the permit.", "开工前须获图纸批准；审查最长需 20 个工作日。审查费与许可费分开收取。"),
-    url: SMC_FAQ, info: SMC_FAQ, fee: null, takes: B("Up to 20 business days.", "最长 20 个工作日。"), takesDays: 28, takesSource: `${SMC_FAQ} (${READ})`,
-    proof: P("No. Plans must be approved first.", SMC_FAQ) }),
-  f({ id: "smc-health-permit", form: "Health permit (food facility)", title: B("Health permit to operate", "食品设施卫生营业许可证"),
-    agency: B("San Mateo County Environmental Health Services", "圣马特奥县环境卫生服务处"), level: "county", where: "SMC", segments: [R, T], needs: { food: true }, method: "online", order: 76,
-    how: B("Issued once the facility passes the final inspection; the annual permit fee is invoiced then.", "场所通过最终检查后签发，届时开具年度许可费账单。"),
-    url: SMC_FAQ, info: SMC_FAQ, fee: null, renews: B("Every year.", "每年。"),
-    proof: P("Once your facility passes the final inspection, another invoice will be sent to you for the annual health permit fee.", SMC_FAQ) }),
-
   /* ------------------------------------------------ Los Angeles County cities ------------------------------------------------ */
   f({ id: "arc-license", form: "Business License Application", title: B("City of Arcadia business license", "阿凯迪亚市营业执照"),
     agency: B("City of Arcadia Development Services, Business License Division", "阿凯迪亚市发展服务局营业执照处"), level: "city", where: "ARC", segments: ALL, method: "pdf_mail", order: 50,
@@ -301,18 +223,6 @@ export const BEACHHEAD: OfficialForm[] = [
     how: B("After the county health plan check approves a food facility's plans, the city's building and safety office approves them before construction.", "食品场所的图纸经县卫生部门审批后，还须经市建筑与安全部门批准方可施工。"),
     url: LAC_HOWTO, info: LAC_HOWTO, fee: null, after: [{ form: "lac-plan-check", label: B("County health plan approval", "县卫生部门图纸批准") }],
     proof: P("then submit the plans to your local building and safety office for approval.", LAC_HOWTO) }),
-  f({ id: "gln-brc", form: "Business Registration Certificate (BRC)", title: B("City of Glendale Business Registration Certificate", "格伦代尔市营业登记证书"),
-    agency: B("City of Glendale Community Development", "格伦代尔市社区发展局"), level: "city", where: "GLN", segments: ALL, method: "online", order: 50,
-    how: B("Every business located in Glendale, subleases included, applies; the certificate replaces the zoning use certificate and the use and occupancy permit, and renews every year.", "位于格伦代尔的每家企业（含转租）均须申请；该证书取代分区用途证明和使用与占用许可，每年续期。"),
-    url: "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate",
-    info: "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate",
-    fee: 496.39, feeNote: B("$496.39; the yearly renewal is $128.77.", "496.39 美元；每年续期 128.77 美元。"), renews: B("Every year.", "每年。"),
-    proof: P("Every business located in Glendale, including subleases, is required to apply for", "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate") }),
-  f({ id: "smt-business-tax", form: "Business Tax Certificate (HdL online application)", title: B("City of San Mateo Business Tax Certificate", "圣马特奥市营业税证书"),
-    agency: B("City of San Mateo Finance Department", "圣马特奥市财政局"), level: "city", where: "SMT", segments: ALL, method: "online", order: 50,
-    how: B("Apply online for a new Business Tax Certificate; HdL administers it and its renewals for the city.", "在线申请新的营业税证书；由 HdL 代市政府办理申请和续期。"),
-    url: "https://cityofsanmateo.org/index.aspx?NID=304", info: "https://cityofsanmateo.org/index.aspx?NID=304", fee: null, renews: B("Every year.", "每年。"),
-    proof: P("allow you to apply for a new Business Tax Certificate and renew your existing certificate", "https://cityofsanmateo.org/index.aspx?NID=304") }),
   f({ id: "tor-license", form: "Business License", title: B("City of Torrance business license", "托伦斯市营业执照"),
     agency: B("City of Torrance Finance Department, Business License", "托伦斯市财政局营业执照处"), level: "city", where: "TOR", segments: ALL, method: "online", order: 50,
     how: B("Any company located in Torrance holds one; check the zoning with Community Development before signing a lease.", "位于托伦斯的公司均须持有；签租约前须向社区发展局核实分区。"),

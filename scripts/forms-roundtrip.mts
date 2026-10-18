@@ -22,6 +22,8 @@ import { sample, secretLine, type Pass } from "./forms-samples.mts";
 
 const argv = process.argv.slice(2);
 const pngDir = argv.includes("--png") ? argv[argv.indexOf("--png") + 1] : "";
+// --png-b keeps the second answer set's pages instead (its longer answers and the other ends of each choice)
+const pngPass: Pass = argv.includes("--png-b") ? "b" : "a";
 const only = argv.filter((a, i) => !a.startsWith("--") && argv[i - 1] !== "--png");
 const SECRET_NAME = /\bssn\b|social.?sec|\bitin\b|taxpayer.?id(entification)? ?num/i;
 
@@ -135,6 +137,13 @@ async function checkMapped(id: string, map: FormMap) {
   for (const k of Object.keys(map.blank ?? {})) if (!map.boxes[k]) fail(`blank "${k}" is not a mapped line`);
   const blank = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const acro = blank.getForm().getFields().length > 0;
+  // every box the map names is on this PDF: the writer skips a missing one quietly (another revision may lack it), so a
+  // misspelled name would leave that part of an answer unwritten
+  const names = new Set(blank.getForm().getFields().map(x => x.getName()));
+  for (const [k, bs] of [...Object.entries(map.boxes), ["fixed", map.fixed ?? []] as const]) for (const b of bs) {
+    const n = "text" in b ? b.text : "check" in b ? b.check : "radio" in b ? b.radio : "choice" in b ? b.choice : undefined;
+    if (n && !names.has(n)) fail(`${k}: box "${n.slice(0, 60)}" is not on this PDF`);
+  }
   const printed = await textItems(bytes);
   res.kind = acro ? (Object.values(map.boxes).flat().some(b => "at" in b || "mark" in b) ? "fillable + printed" : "fillable") : "printed";
 
@@ -211,7 +220,9 @@ async function checkMapped(id: string, map: FormMap) {
         if ((c.at.lines ?? 1) > 1 && pieces.length > c.at.lines!) P(`${c.id}: "${c.value.slice(0, 30)}…" needs ${pieces.length} lines, the form has ${c.at.lines}`);
         for (const p of pieces) {
           const items = got.items[p.page] ?? [];
-          const hit = items.find(i => i.str.trim() === p.text.trim() && Math.abs(i.x - p.x) < 1.5 && Math.abs(i.y - p.y) < 1.5);
+          // pdf.js joins a row of comb characters into one item ("0 3"): a comb character counts when such an item spans it
+          const hit = items.find(i => i.str.trim() === p.text.trim() && Math.abs(i.x - p.x) < 1.5 && Math.abs(i.y - p.y) < 1.5)
+            ?? (c.at.comb ? items.find(i => Math.abs(i.y - p.y) < 1.5 && p.x >= i.x - 1.5 && p.x <= i.x + i.w + 1.5 && i.str.replace(/\s+/g, "").includes(p.text.trim())) : undefined);
           if (!hit) { P(`${c.id}: "${p.text.slice(0, 40)}" not found on page ${p.page + 1} at (${Math.round(p.x)}, ${Math.round(p.y)})`); continue; }
           const pw = rec.font.widthOfTextAtSize(p.text, p.size);
           if (c.at.w && !c.at.comb && pw > c.at.w + 0.5) P(`${c.id}: "${p.text.slice(0, 40)}" is ${Math.round(pw)}pt wide at ${p.size}pt, its line is ${Math.round(c.at.w)}pt`);
@@ -226,6 +237,7 @@ async function checkMapped(id: string, map: FormMap) {
           hits: for (const i of printed.items[p.page] ?? []) {
             for (const wd of words(i)) {
               if (isMark && wd.glyph) continue;   // an X in a printed box is where it belongs
+              if (c.at.comb && wd.glyph) continue;   // so is a digit in a printed character box (a comb drawn as box glyphs)
               if (isRing && (wd.glyph || wd.str.length === 1)) continue;
               const o = overlap(box, wd.box);
               if (o > 3 && o > 0.2 * Math.min(area(box), area(wd.box))) { P(`${c.id}: "${p.text.slice(0, 30)}" covers the printed "${wd.str.slice(0, 30)}" on page ${p.page + 1}`); break hits; }
@@ -247,7 +259,7 @@ async function checkMapped(id: string, map: FormMap) {
     }
     const allText = [...of.getFields().map(f => (f instanceof PDFTextField ? f.getText() ?? "" : "")), ...(await textItems(pdf)).items.flat().map(i => i.str)].join(" ");
     if (/\b123-45-6789\b|\b123456789\b/.test(allText)) P("the test SSN 123-45-6789 reached the PDF");
-    if (pngDir && pass === "a") keep(id, pdf);
+    if (pngDir && pass === pngPass) keep(id, pdf);
   }
 }
 
@@ -312,7 +324,7 @@ async function checkCode(id: string) {
     for (const box of spec.checks(pass)) { const f = of.getFieldMaybe(full(id, box)); if (!(f instanceof PDFCheckBox) || !f.isChecked()) P(`checkbox ${box} not ticked`); else res.writes++; }
     const allText = of.getFields().map(f => (f instanceof PDFTextField ? f.getText() ?? "" : "")).join(" ");
     if (/\b123-45-6789\b|\b123456789\b/.test(allText)) P("the test SSN 123-45-6789 reached the PDF");
-    if (pngDir && pass === "a") keep(id, pdf);
+    if (pngDir && pass === pngPass) keep(id, pdf);
   }
 }
 

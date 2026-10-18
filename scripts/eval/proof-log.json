@@ -639,7 +639,7 @@
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
-  "sha256": "f1a514ec60ea431c",
+  "sha256": "b4843c1b90495516",
   "context": "ps will serve as a guide throughout the process subsequent to plan approval. 1. plan approval: congratulations on the approval of your submitted plans, which allows you to initiate construction. it is the responsibility of the submitter to provide evidence of this approval "
  },
  {
@@ -686,7 +686,7 @@
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
-  "sha256": "7d5654d431ac63bd",
+  "sha256": "343b64082b5e5482",
   "context": "c record that registers your business name and address with the city of boston. massachusetts law requires most businesses operating under a trade name to file with the city clerk's office. you must renew every four years. contact city clerk 617-635-4601 cityclerk@bost"
  },
  {
@@ -696,7 +696,7 @@
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
-  "sha256": "26d7a4e14dc6c21f",
+  "sha256": "794326ccd68a9218",
   "context": "twice each year. we add businesses to our online database as we do inspections. depending on your situation, you may also need a plan review before we can issue your permit. the food service permit is issued by the inspectional services department. cont"
  },
  {
@@ -736,7 +736,7 @@
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
-  "sha256": "6e1734808ca6e6f0",
+  "sha256": "8f1998bfb9f20db6",
   "context": "usiness in boston. if you plan to serve alcohol you'll need a separate license. you must have this license before you can apply for a food service health permit from the inspectional services department health division (isd). if you also plan to serve alcohol, or let guests bring their own, you'll need a"
  },
  {
@@ -746,7 +746,7 @@
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
-  "sha256": "26d7a4e14dc6c21f",
+  "sha256": "794326ccd68a9218",
   "context": " or sell food to the public in boston. some businesses also need a plan review. before you can serve food to the public, you need to apply for a food service permit and pass a health inspection. we inspect food service businesses at least once a year, but usually twice each"
  },
  {
@@ -1240,7 +1240,7 @@
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
-  "sha256": "552ff2a0aa35a413",
+  "sha256": "223e7a0f457590d1",
   "context": "l an administrative citation view the rules governing hearings before the board food establishment construction, remodeling, and plan review information see plan review page for more information. additional information and resources dogs on patios (pdf, 226kb) ( en español ("
  },
  {
@@ -1284,34 +1284,191 @@
   "context": "es (e.g. smoking and curing, reduced oxygen packaging for extended shelf-life). no permit shall be issued or renewed until the applicable permit fee is paid. late fees for permit renewals shall apply as indicated. 2 a plan review fee sha"
  },
  {
-  "id": "md-sdat",
-  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Create%20or%20Start%20a%20Business/Articles%20of%20Organization%20for%20a%20Limited%20Liability%20Company_0526-A.pdf",
-  "quote": "The address must be located in Maryland. P.O. Boxes cannot be accepted.",
+  "id": "ca-llc-12",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/statements",
+  "quote": "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties",
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
-  "sha256": "1e11e9887e346633",
-  "context": "dress [required] enter the maryland resident agent's complete physical address. the address must be located in maryland. p.o. boxes cannot be accepted. section (6) – signature of authorized person(s) [required] at least one authori"
+  "sha256": "de2ef21656e66668",
+  "context": "rations, limited liability companies and limited partnerships available online. failure to file the required statement of information with the secretary of state as outlined in statute may result in penalties being assessed by the franchise tax board and suspension or forfeiture. in addi"
  },
  {
-  "id": "md-sales",
+  "id": "md-llc",
+  "read": "https://dat.maryland.gov/sdat%20forms/artorgan.pdf",
+  "quote": "FEES: (1) Certificate of Organization $100.00",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "aa75bdd2ca547f0b",
+  "context": " documents must be typed or printed. no handwritten documents will be accepted. fees: (1) certificate of organization $100.00 (2) certified copy of document above $20.00 + $1.00 page (3) certificate of sta"
+ },
+ {
+  "id": "md-cra",
   "read": "https://businessexpress.maryland.gov/start/taxes-and-insurance",
-  "quote": "This is required if you sell items in Maryland and collect sales tax.",
+  "quote": "You can register tax accounts using the Maryland Comptroller's Combined Registration Application (CRA).",
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
   "sha256": "9c62ae5d7b5c132d",
-  "context": "? use the cra to register for the following accounts: sales and use tax license this is required if you sell items in maryland and collect sales tax. employer's withholding tax account this is required if you pay salaries, wages,"
+  "context": "cycling fee), transient vendor license, etc. how do i register my tax accounts? you can register tax accounts using the maryland comptroller's combined registration application (cra). this single form lets you sign up for multiple maryland tax accounts at once. n"
  },
  {
-  "id": "md-ui",
-  "read": "https://businessexpress.maryland.gov/start/taxes-and-insurance",
-  "quote": "You must apply for an unemployment insurance account through the Maryland Department of Labor if you are:",
+  "id": "moco-plan-review",
+  "read": "https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf",
+  "quote": "An HHS plan review & approval is required for any facility that sells or prepares food and drink items before a Building Permit",
   "checked": "2026-10-18",
   "method": "curl",
   "found": true,
-  "sha256": "9c62ae5d7b5c132d",
-  "context": "helps businesses respond to former employees' claims for unemployment benefits. you must apply for an unemployment insurance account through the maryland department of labor if you are: an industrial or commercial employer a nonprofit charitable, educational, or re"
+  "sha256": "fda346bbe717cf2e",
+  "context": "240-314-8240  https://www.rockvillemd.gov/165/permits-inspections please note: an hhs plan review & approval is required for any facility that sells or prepares food and drink items before a building permit will be issued by any of the permitting divisions listed above. az 10/15/2024 2"
+ },
+ {
+  "id": "moco-food-license",
+  "read": "https://www.montgomerycountymd.gov/department-health-human-services/about-us/licensure-regulatory-services/environmental-health-unit/food-service-facility-license",
+  "quote": "A license must be obtained prior to opening a business.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8c351c6742b6d10c",
+  "context": "sumption with or without charge must apply for a food service facility license. a license must be obtained prior to opening a business. licenses expire on january 31st and must be renewed each year. licenses are not"
+ },
+ {
+  "id": "hi-llc",
+  "read": "https://files.hawaii.gov/dcca/breg/registration/forms/llc-1.pdf",
+  "quote": "State of Hawaii Nonrefundable Filing Fee: $50.00",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "01f4ffa1e83a81db",
+  "context": "print form clear form form llc-1 11/2025 *llc1* state of hawaii nonrefundable filing fee: $50.00 department of commerce and consumer affairs business registration division 335 "
+ },
+ {
+  "id": "hi-bb1",
+  "read": "https://tax.hawaii.gov/geninfo/get/",
+  "quote": "Complete the Form BB-1, State of Hawaii Basic Business Application, BB-1 Packet , and pay a one-time $20 registration fee.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "8163cffb472b8e78",
+  "context": " a get license? register online through the dotax website at hawaii tax online. complete the form bb-1, state of hawaii basic business application, bb-1 packet, and pay a one-time $20 registration fee. additional fees may apply depending on which tax licenses you need. where do i "
+ },
+ {
+  "id": "hi-ui",
+  "read": "https://labor.hawaii.gov/ui/employer-registration/",
+  "quote": "Liable employers must submit a tax report every quarter, even if there are no paid employees that quarter",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b6bb082084226306",
+  "context": "unemployment taxes on their wages in this state. tax reports are due quarterly. liable employers must submit a tax report every quarter, even if there are no paid employees that quarter and/or taxes are unable to be paid. note: future hire dates are not accepted. e"
+ },
+ {
+  "id": "ut-llc",
+  "read": "https://commerce.utah.gov/corporations/business-entities/domestic-limited-liability-company/",
+  "quote": "A Domestic Limited Liability Company (LLC) is formed by one or more individuals or entities through a special written agreement.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "1fdd23702f6c7430",
+  "context": " company - commerce.utah.gov skip to content domestic limited liability company a domestic limited liability company (llc) is formed by one or more individuals or entities through a special written agreement. the agreement details the organization of the llc including: provisions for man"
+ },
+ {
+  "id": "ut-tax",
+  "read": "https://tax.utah.gov/business/create-manage/tax-info-business/",
+  "quote": "Taxpayer Access Point – TAP – Register your business, file and pay taxes, and manage your online account.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "1e4ea6019ad4ac72",
+  "context": "s. please contact us at 801-297-2200 or [email protected] for more information. taxpayer access point – tap – register your business, file and pay taxes, and manage your online account. starting, dissolving, or reinstating a corporation purchasing or selling a busi"
+ },
+ {
+  "id": "ut-ui",
+  "read": "https://jobs.utah.gov/ui/employer/public/osbr.aspx",
+  "quote": "You will be required to setup a user account before you can start the employer registration process.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "bd25a459379aab72",
+  "context": "ncies and only need an unemployment insurance account number for your business. you will be required to setup a user account before you can start the employer registration process. create a new ui account for my business x my to do list close"
+ },
+ {
+  "id": "va-llc",
+  "read": "https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf",
+  "quote": "This how-to guide will walk you through forming a Virginia Limited Liability Company online in the new Clerk's Information System (CIS)",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "11f146941e4198d4",
+  "context": "ers (the owners) who share in the profits and losses of the company's business. this how-to guide will walk you through forming a virginia limited liability company online in the new clerk's information system (cis) https://cis.scc.virginia.gov/. 1 log on to cis at cis.scc.virginia.gov note: go"
+ },
+ {
+  "id": "smo-license",
+  "read": "https://www.cityofsanmateo.org/3323/Starting-a-Business",
+  "quote": "Business Tax Applications can be applied for online and are issued by the Finance Department.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "feceac5240ba8843",
+  "context": "it simply registers the business with the city for tax and regulatory purposes. business tax applications can be applied for online and are issued by the finance department. obtain building permits if the business involves interior or exterior modificat"
+ },
+ {
+  "id": "smc-plan-check",
+  "read": "https://www.smchealth.org/food-facility-plan-check-process",
+  "quote": "Plans must be received and approved before any construction or remodeling takes place.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "3ac4721b5063dabd",
+  "context": "support public health and safety, and comply with local and state health codes. plans must be received and approved before any construction or remodeling takes place. plan review is required for: new construction remodels replacement or installat"
+ },
+ {
+  "id": "smc-health-permit",
+  "read": "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf",
+  "quote": "Once your facility passes the final inspection, another invoice will be sent to you for the annual health permit fee.",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 404; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "cup-license",
+  "read": "https://cupertino.gov/businesslicense",
+  "quote": "All persons or entities conducting business within the City of Cupertino are required to obtain a business license",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "gln-brc",
+  "read": "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate",
+  "quote": "Every business located in Glendale, including subleases, is required to apply for",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "sgb-license",
+  "read": "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023",
+  "quote": "A Business License Certificate must be issued prior to conducting business.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "11cdbedda2a6b51d",
+  "context": " gabriel or indirectly; this includes independent contractors and home offices. a business license certificate must be issued prior to conducting business. the city ordinance section 110.03 states no person shall engage in any business"
+ },
+ {
+  "id": "lac-business-license",
+  "read": "https://ttc.lacounty.gov/business-license-requirements-2/",
+  "quote": "you must confirm that your business activity is one that the County licenses.",
+  "checked": "2026-10-18",
+  "method": "curl",
+  "found": true,
+  "sha256": "b576c179b8485565",
+  "context": "of the county or contract cities of malibu, santa clarita, or westlake village, you must confirm that your business activity is one that the county licenses. please click here for a list of licensable activities: business activities that"
  },
  {
   "id": "md-trader",
@@ -1322,26 +1479,6 @@
   "found": true,
   "sha256": "d61335427274d4a9",
   "context": ", section 17-1804. traders license unless you are a grower or manufacturer, you may not offer for sale, sell or otherwise dispose of any goods within maryland, without first obtaining a trader's license from the clerk of the circuit court and opening a sales tax account. business e"
- },
- {
-  "id": "moco-plan-review",
-  "read": "https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf",
-  "quote": "Future code violations are prevented by addressing any potential layout & design concerns prior to construction or renovation beginning.",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "fda346bbe717cf2e",
-  "context": "nt layout and flow-of- food based on the menu and food preparation processes.  future code violations are prevented by addressing any potential layout & design concerns prior to construction or renovation beginning. section i: documentation required for submission: 1. submit plans via departmen"
- },
- {
-  "id": "moco-food-license",
-  "read": "https://www.montgomerycountymd.gov/HHS-Special/LandRLicenseFoodService.html",
-  "quote": "A license must be obtained prior to opening a business.",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "8c351c6742b6d10c",
-  "context": "sumption with or without charge must apply for a food service facility license. a license must be obtained prior to opening a business. licenses expire on january 31st and must be renewed each year. licenses are not"
  },
  {
   "id": "moco-cfsm",
@@ -1544,46 +1681,6 @@
   "context": "f alcoholic beverages & tobacco the division of alcoholic beverages and tobacco issues licenses or permits that are required for any business or person to manufacture, import, export, store, distribute or sell alcoholic beverages and products containing tobacco or nicotine. the division conducts audits to en"
  },
  {
-  "id": "va-scc",
-  "read": "https://www.scc.virginia.gov/businesses/new-business-resources/business-types/",
-  "quote": "File Online or complete Articles of Organization (Form LLC1011-DOC)",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "30a56984897e956a",
-  "context": "he limited liability company. business type how to file filing fee virginia llc file online or complete articles of organization (form llc1011-doc) $100 foreign llc file online or complete an application for registration as a f"
- },
- {
-  "id": "hi-llc",
-  "read": "https://files.hawaii.gov/dcca/breg/registration/forms/llc-1.pdf",
-  "quote": "State of Hawaii Nonrefundable Filing Fee: $50.00",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "01f4ffa1e83a81db",
-  "context": "print form clear form form llc-1 11/2025 *llc1* state of hawaii nonrefundable filing fee: $50.00 department of commerce and consumer affairs business registration division 335 "
- },
- {
-  "id": "hi-get",
-  "read": "https://tax.hawaii.gov/geninfo/get/",
-  "quote": "Complete the Form BB-1, State of Hawaii Basic Business Application, BB-1 Packet , and pay a one-time $20 registration fee.",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "8163cffb472b8e78",
-  "context": " a get license? register online through the dotax website at hawaii tax online. complete the form bb-1, state of hawaii basic business application, bb-1 packet, and pay a one-time $20 registration fee. additional fees may apply depending on which tax licenses you need. where do i "
- },
- {
-  "id": "hi-ui",
-  "read": "https://labor.hawaii.gov/ui/?p=865",
-  "quote": "In most cases, if you have employees working in Hawaii, you must pay unemployment taxes on their wages.",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "7abfb8210cef49d5",
-  "context": "nt council ui home forms find a law contact ui home / new employer registration in most cases, if you have employees working in hawaii, you must pay unemployment taxes on their wages. tax reports are due quarterly. liable employers must submit a tax report every "
- },
- {
   "id": "hi-food-plan",
   "read": "https://health.hawaii.gov/san/?p=740",
   "quote": "Review and approval of building plans in accordance with departmental administrative rules are conducted of newly constructed or renovated food establishments",
@@ -1602,26 +1699,6 @@
   "found": true,
   "sha256": "53d4b9d6f1aa9c67",
   "context": "gulations issuance of permits and licenses licensing of professionals education the branch conducts inspections of and issues permits or licenses to food establishments, milk plants, dairy farms, public swimming pools, tattoo establishments and mor"
- },
- {
-  "id": "ut-llc",
-  "read": "https://corporations.utah.gov/",
-  "quote": "Form a Corporation, Limited Liability Company (LLC), Partnership, Business Trust, DBA, and more.",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "04e26db4bb0a4fcb",
-  "context": "le information to the public. what do you want to do today? form a new business form a corporation, limited liability company (llc), partnership, business trust, dba, and more. get started renew a business file an annual report/renewal on an existing busin"
- },
- {
-  "id": "ut-sales",
-  "read": "https://tax.utah.gov/sales",
-  "quote": "New businesses estimate the amount of sales and use tax liability when applying for a license and are assigned a filing status.",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "d88305d0bf1772f7",
-  "context": "sales tax liability; must be filed electronically through taxpayer access point new businesses estimate the amount of sales and use tax liability when applying for a license and are assigned a filing status. the tax commission reviews accounts annually and notifies businesses in writing"
  },
  {
   "id": "ut-alcohol",
@@ -1647,15 +1724,6 @@
   "id": "fre-business-tax",
   "read": "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account",
   "quote": "If you do not qualify for an exemption, you will be required to complete a Business Tax Application",
-  "checked": "2026-10-18",
-  "method": "webfetch",
-  "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-18"
- },
- {
-  "id": "cup-license",
-  "read": "https://cupertino.gov/businesslicense",
-  "quote": "All persons or entities conducting business within the City of Cupertino are required to obtain a business license",
   "checked": "2026-10-18",
   "method": "webfetch",
   "found": true,
@@ -1710,24 +1778,6 @@
   "note": "curl got the page without the sentence; read with WebFetch on 2026-10-18"
  },
  {
-  "id": "smc-plan-review",
-  "read": "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf",
-  "quote": "No. Plans must be approved first.",
-  "checked": "2026-10-18",
-  "method": "webfetch",
-  "found": true,
-  "note": "curl got 404; read with WebFetch on 2026-10-18"
- },
- {
-  "id": "smc-health-permit",
-  "read": "https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf",
-  "quote": "Once your facility passes the final inspection, another invoice will be sent to you for the annual health permit fee.",
-  "checked": "2026-10-18",
-  "method": "webfetch",
-  "found": true,
-  "note": "curl got 404; read with WebFetch on 2026-10-18"
- },
- {
   "id": "arc-license",
   "read": "https://www.arcadiaca.gov/government/development_services/business_license/index.php",
   "quote": "Every business that operates within the City must obtain a business license and comply with all provisions of the Arcadia Municipal Code.",
@@ -1776,25 +1826,6 @@
   "found": true,
   "sha256": "556bffb74dae84d7",
   "context": " floors and walls. submit your plans for approval to the eh plan check program; then submit the plans to your local building and safety office for approval. after approvals, you may begin construction. several inspections may be needed "
- },
- {
-  "id": "gln-brc",
-  "read": "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate",
-  "quote": "Every business located in Glendale, including subleases, is required to apply for",
-  "checked": "2026-10-18",
-  "method": "webfetch",
-  "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-18"
- },
- {
-  "id": "smt-business-tax",
-  "read": "https://cityofsanmateo.org/index.aspx?NID=304",
-  "quote": "allow you to apply for a new Business Tax Certificate and renew your existing certificate",
-  "checked": "2026-10-18",
-  "method": "curl",
-  "found": true,
-  "sha256": "8c7562b5dac6ebc6",
-  "context": "ng hard to provide you with the best available online experience to efficiently allow you to apply for a new business tax certificate and renew your existing certificate. please use the following link to our online application and renewal site. plea"
  },
  {
   "id": "tor-license",

@@ -12,7 +12,7 @@ import hashlib, html, json, os, re, subprocess, sys, tempfile
 WEBFETCH = set("""sj-business-tax sj-building-ti sj-fire-systems sj-sign sj-building-final scc-plan-check scc-health-permit
 ac-health-permit oak-zoning oak-business-tax ma-dua ma-food-manager ma-allergen ma-tax nyc-cb-notice ny-dos-1336 ny-dos-pub
 cbp-5106 cbp-301 cbp-ace fda-ffr ca-cdph-pfr ca-edd-de1 co-tax co-ui tx-twc chi-plan-review chi-limited wa-sos hen-license
-cup-license cup-building dly-license dly-building fre-business-tax tor-license gln-brc mil-license smc-plan-review smc-health-permit ca-abc""".split())
+cup-license cup-building dly-license dly-building fre-business-tax tor-license gln-brc mil-license smc-health-permit ca-abc""".split())
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36"
 
 

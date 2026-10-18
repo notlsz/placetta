@@ -61,9 +61,10 @@ const opened = (where: string, opening: string) => {
   return { p, w: normalizeState("Moonleaf", { business: B("Moonleaf Tea LLC", "月叶茶"), apps: p.apps, deadlines: p.deadlines, stores: [store] }) };
 };
 const want: Record<string, { usd: number; published: number; unpublished: number; open: string[]; closed: string[] }> = {
-  // unpublished counts include the build-out permits and California's food handler card added from the accuracy gold set
+  // unpublished counts include the build-out permits and California's food handler card added from the accuracy gold set; Irvine's
+  // new LLC also files its $20 Statement of Information (LLC-12)
   "Flushing, NY": { usd: 554.6, published: 7, unpublished: 4, open: ["nyc-fse"], closed: ["nyc-co", "ny-wcb", "nyc-sign", "nyc-dob-alt"] },
-  "Irvine, CA": { usd: 70, published: 4, unpublished: 5, open: ["ca-llc-1"], closed: ["irv-license", "oc-plan-check", "oc-health-permit", "ca-food-handler"] },
+  "Irvine, CA": { usd: 90, published: 5, unpublished: 5, open: ["ca-llc-1", "ca-llc-12"], closed: ["irv-license", "oc-plan-check", "oc-health-permit", "ca-food-handler"] },
   "Houston, TX": { usd: 325, published: 5, unpublished: 7, open: ["tx-205", "tx-503"], closed: ["hou-food-dealer", "hou-plan-review", "hou-co", "hou-buildout"] },
 };
 const cents = (n: number) => Math.round(n * 100) / 100;

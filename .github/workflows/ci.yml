@@ -41,6 +41,10 @@ jobs:
       # docs/FILING_COVERAGE.md matches what the script generates
       - name: Filing coverage
         run: node scripts/filing-coverage.mjs --check
+      # the target markets: every filing in each city's and state's plan is on its own jurisdiction's form, every mapped
+      # PDF is on that agency's site, and docs/MARKET_COVERAGE.md matches what the script generates
+      - name: Market coverage
+        run: npm run test:markets
       - name: Production build
         run: npx vite build
   functions:

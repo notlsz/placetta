@@ -153,25 +153,26 @@ export const CITIES: City[] = [
   c("DEN", "US", "Denver", "丹佛", ["denver", "丹佛"], true, "CO"),
   c("MSP", "US", "Minneapolis", "明尼阿波利斯", ["minneapolis", "明尼阿波利斯"], true, "MN"),
   c("CMH", "US", "Columbus", "哥伦布", ["columbus, oh", "columbus, ohio", "columbus oh", "俄亥俄州哥伦布", "哥伦布"], true, "OH"),
-  // added 2026-10-18 with their own sourced steps in beachhead.ts; false where the library has only some of the city's
+  // added 2026-10-18 (the target markets of src/forms/markets.ts among them) with their own sourced steps in beachhead.ts; false where the library has only some of the city's
   // steps, so the plan names whom Odelia confirms the rest with. Names shared with another US city match only with
   // their state; a full address is also read by its city (src/forms/usplace.ts).
   c("FRE", "US", "Fremont", "弗里蒙特", ["fremont, ca", "fremont, california", "弗里蒙特", "费利蒙"], false, "CA"),
-  c("CUP", "US", "Cupertino", "库比蒂诺", ["cupertino", "库比蒂诺", "苹果城"], true, "CA"),
+  c("CUP", "US", "Cupertino", "库比蒂诺", ["cupertino", "库比蒂诺", "库珀蒂诺", "苹果城"], true, "CA"),
   c("MIL", "US", "Milpitas", "米尔皮塔斯", ["milpitas", "米尔皮塔斯", "苗必达"], true, "CA"),
   c("DLY", "US", "Daly City", "戴利城", ["daly city", "戴利城"], true, "CA"),
   c("ARC", "US", "Arcadia", "阿凯迪亚", ["arcadia, ca", "arcadia, california", "阿凯迪亚", "阿卡迪亚"], true, "CA"),
   c("ALH", "US", "Alhambra", "阿罕布拉", ["alhambra, ca", "alhambra, california", "阿罕布拉"], true, "CA"),
   c("TOR", "US", "Torrance", "托伦斯", ["torrance", "托伦斯"], false, "CA"),
-  c("GLN", "US", "Glendale", "格伦代尔", ["glendale, ca", "glendale, california", "格伦代尔"], false, "CA"),
-  c("SMT", "US", "San Mateo", "圣马特奥", ["san mateo, ca", "san mateo, california", "圣马特奥市"], false, "CA"),
+  c("GLN", "US", "Glendale", "格伦代尔", ["glendale, ca", "glendale, california", "glendale ca", "加州格伦代尔", "格伦代尔"], false, "CA"),
+  c("SGB", "US", "San Gabriel", "圣盖博", ["san gabriel", "圣盖博", "圣盖布瑞"], false, "CA"),
+  c("SMO", "US", "San Mateo", "圣马特奥", ["san mateo, ca", "san mateo, california", "san mateo ca", "圣马特奥市"], false, "CA"),
   c("FTL", "US", "Fort Lee", "李堡", ["fort lee, nj", "fort lee, new jersey", "李堡"], true, "NJ"),
   c("SUG", "US", "Sugar Land", "糖城", ["sugar land", "sugarland, tx", "糖城"], false, "TX"),
   c("DUL", "US", "Duluth", "德卢斯", ["duluth, ga", "duluth, georgia", "德卢斯"], false, "GA"),
   c("HEN", "US", "Henderson", "亨德森", ["henderson, nv", "henderson, nevada", "亨德森"], false, "NV"),
   c("BEL", "US", "Bellevue", "贝尔维尤", ["bellevue, wa", "bellevue, washington", "贝尔维尤"], true, "WA"),
   c("QCY", "US", "Quincy", "昆西", ["quincy, ma", "quincy, massachusetts", "昆西"], false, "MA"),
-  c("ROCK", "US", "Rockville", "罗克维尔", ["rockville, md", "rockville, maryland", "罗克维尔", "洛克维尔"], true, "MD"),
+  c("ROC", "US", "Rockville", "罗克维尔", ["rockville, md", "rockville, maryland", "rockville md", "罗克维尔", "洛克维尔"], true, "MD"),
   ...([["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
     .map(([en, zh, st]) => c("US-" + en.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6), "US", en, zh, [en.toLowerCase(), zh], false, st)),
 ];
@@ -192,7 +193,10 @@ export const STATES: { code: string; en: string; zh: string; names: RegExp }[] =
   { code: "CO", en: "Colorado", zh: "科罗拉多州", names: /colorado|,\s*co\.?\s*(\d{5}(-\d{4})?\s*)?$|科罗拉多/i },
   { code: "MN", en: "Minnesota", zh: "明尼苏达州", names: /minnesota|,\s*mn\b|明尼苏达/i },
   { code: "OH", en: "Ohio", zh: "俄亥俄州", names: /\bohio\b|,\s*oh\b|俄亥俄/i },
+  // the target markets' states (src/forms/markets.ts) the registry had no forms for until 2026-10-18
   { code: "MD", en: "Maryland", zh: "马里兰州", names: /maryland|,\s*md\b|马里兰/i },
+  { code: "HI", en: "Hawaii", zh: "夏威夷州", names: /hawaii|hawai'i|,\s*hi\b|夏威夷/i },
+  { code: "UT", en: "Utah", zh: "犹他州", names: /\butah\b|,\s*ut\b|犹他/i },
   // ", or" and ", co" are ordinary words too, so only at the end of the address (or before the ZIP)
   { code: "OR", en: "Oregon", zh: "俄勒冈州", names: /oregon|,\s*or\.?\s*(\d{5}(-\d{4})?\s*)?$|俄勒冈/i },
 ];

@@ -52,7 +52,7 @@ const showMisses = !process.env.QUIET;
 const HEDGE = /if (the|your) city requires|if one is required|we'll confirm|we will confirm|如所在城市要求|我们会向/i;
 // GENERAL_ONLY=1: drop the city entries added for the held-out cities (src/forms/beachhead.ts), so the held-out score
 // shows what the state and county layers and the named-agency fallbacks get right on their own
-const HELDOUT_CITIES = new Set(["FRE", "CUP", "MIL", "DLY", "ARC", "ALH", "TOR", "FTL", "SUG", "DUL", "HEN", "BEL", "QCY", "ROCK", "GLN", "SMT"]);
+const HELDOUT_CITIES = new Set(["FRE", "CUP", "MIL", "DLY", "ARC", "ALH", "TOR", "FTL", "SUG", "DUL", "HEN", "BEL", "QCY", "ROC", "GLN", "SMO", "SGB"]);
 if (process.env.GENERAL_ONLY) for (let k = FORMS.length - 1; k >= 0; k--) if (HELDOUT_CITIES.has(FORMS[k].where)) FORMS.splice(k, 1);
 const TODAY = "2026-10-18", OPENING = "2027-04-01";
 const TARGET = { recall: 0.95, precision: 0.97, agency: 0.97, level: 0.97, order: 0.95, source: 1, fee: 0.9 };

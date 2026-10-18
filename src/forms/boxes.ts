@@ -20,10 +20,10 @@ export type Box =
     "|", left to right: "line2|head" is the name on the answer's second line, "line2|tail|zip" that line's ZIP code.
     statezip: "CA 95112". streetno, streetname: a street line split into its house number and the rest ("street|streetno").
     line1..line9: one line of a multi-line answer (one person or item per line). head: before the first comma or " - ";
-    tail: after it. first/middle/last: parts of a person's name. mm/dd/yyyy/date: parts of a date. phone: a US number as
+    tail: after it. first/middle/last: parts of a person's name. mm/dd/yyyy/date: parts of a date (yy: the year's last two digits; last1: the last character, for a box after a printed part). phone: a US number as
     408-555-0142 (phone1, phone2, phone3: its three parts; phonelocal: 555-0142 after a printed area code), ein: an EIN
     as 12-3456789 (for boxes printed with the dashes in place). */
-export type Pick = "street" | "city" | "state" | "zip" | "country" | "citystatezip" | "statezip" | "streetno" | "streetname" | "first" | "last" | "middle" | "mi" | "digits" | "head" | "tail" | "mm" | "dd" | "yyyy" | "date" | "phone" | "ein" | "phone1" | "phone2" | "phone3" | "phonelocal" | "ein1" | "ein2" | "zip5" | "zip4" | `line${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
+export type Pick = "street" | "city" | "state" | "zip" | "country" | "citystatezip" | "statezip" | "streetno" | "streetname" | "first" | "last" | "middle" | "mi" | "digits" | "head" | "tail" | "mm" | "dd" | "yyyy" | "yy" | "last1" | "date" | "phone" | "ein" | "phone1" | "phone2" | "phone3" | "phonelocal" | "ein1" | "ein2" | "zip5" | "zip4" | `line${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
 
 /** One line of a form as printed on its PDF: what Placetta asks, in English and Chinese. */
 export type MapLine = { id: string; line: string; en: string; zh: string; options?: string[]; hint?: { en: string; zh: string } };
@@ -97,6 +97,8 @@ export type Writer = {
 // into a box that is itself for an SSN or ITIN (a bare 9-digit EIN or state file number is fine elsewhere).
 const SECRET = /\b\d{3}-\d{2}-\d{4}\b|\b9\d{2} [5-9]\d \d{4}\b/;   // a bare 9-digit EIN (e.g. 934567890) is not an ITIN
 const SECRET_BOX = /ssn|social.?sec|itin|taxpayer.?id/i;
+// ...unless the box itself is named for the EIN (Form 2848's "TaxpayerIDEIN"), where a bare 9-digit EIN belongs
+const EIN_BOX = /EIN(\[\d+\])?$|\bf?ein\b|employer/;
 const NINE = /\b\d{9}\b/;
 const STATES = /^(A[KLRZ]|C[AOT]|D[CE]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY]|PR|GU|VI)$/i;
 
@@ -178,6 +180,8 @@ function pick1(v: string, p: Pick): string {
     case "line1": case "line2": case "line3": case "line4": case "line5": case "line6": case "line7": case "line8": case "line9":
       return v.split(/\n|;\s*/).map(x => x.trim()).filter(Boolean)[Number(p.slice(-1)) - 1] ?? "";
     case "mm": case "dd": case "yyyy": return date(v)?.[p] ?? "";
+    case "yy": return date(v)?.yyyy.slice(2) ?? "";   // a year printed as two boxes (New Jersey's NJ-REG)
+    case "last1": return v.trim().slice(-1);   // the one box a form leaves after its printed part (San Mateo prints "9440" and boxes the ZIP's last digit)
     case "date": { const d = date(v); return d ? `${d.mm}/${d.dd}/${d.yyyy}` : v; }
   }
 }
@@ -200,7 +204,8 @@ export function writeAnswers(map: FormMap, values: Record<string, string>, w: Wr
       ok = !!w.draw?.(b.at, s);
     } else if ("text" in b) {
       let s = b.value ?? pick(v, b.pick);
-      if (!s || (!b.value && (SECRET.test(s) || (SECRET_BOX.test(b.text) && NINE.test(s.replace(/[- ]/g, "")))))) return;
+      const einOnly = EIN_BOX.test(b.text) && !/ssn|social.?sec|itin/i.test(b.text);
+      if (!s || (!b.value && (SECRET.test(s) || (SECRET_BOX.test(b.text) && !einOnly && NINE.test(s.replace(/[- ]/g, "")))))) return;
       s = latin(s);
       if (b.upper) s = s.toUpperCase();
       if (b.max) s = s.slice(0, b.max);
@@ -224,6 +229,10 @@ export function writeAnswers(map: FormMap, values: Record<string, string>, w: Wr
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pdfLibWriter(form: any, doc?: any, font?: any): Writer {
   const t = <T,>(f: () => T) => { try { return f(); } catch { return undefined; } };
+  // A box the agency's PDF leaves without the Print flag shows on screen but drops off the printed, faxed or mailed
+  // copy (Maryland's CRA): every box Placetta fills is marked to print.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const printable = (f: any) => t(() => { for (const w of f.acroField.getWidgets()) w.setFlagTo(4, true); });
   return {
     draw: (at, v) => !!t(() => {
       if (!doc || !font) return false;
@@ -236,10 +245,13 @@ export function pdfLibWriter(form: any, doc?: any, font?: any): Writer {
       const max = f.getMaxLength?.();
       const s = max ? v.slice(0, max) : v;
       f.setText(s);
+      printable(f);
       // Auto-sized boxes (font size 0) print a short answer huge, and a long one runs off the line: fit it instead,
       // measured in Helvetica, the font the filled boxes are drawn in.
       t(() => {
-        const r = f.acroField.getWidgets()[0].getRectangle();
+        // a box drawn upside down (Florida's HR-7005 finish schedule) has a negative height: size it by its real height
+        const r0 = f.acroField.getWidgets()[0].getRectangle();
+        const r = { ...r0, width: Math.abs(r0.width), height: Math.abs(r0.height) };
         const da = String(f.acroField.getDefaultAppearance?.() ?? "");
         const set = /(\d+(?:\.\d+)?)\s+Tf/.exec(da);
         const size = set ? Number(set[1]) : 0;
@@ -258,11 +270,11 @@ export function pdfLibWriter(form: any, doc?: any, font?: any): Writer {
       });
       return true;
     }),
-    check: n => !!t(() => { form.getCheckBox(n).check(); return true; }),
+    check: n => !!t(() => { const c = form.getCheckBox(n); c.check(); printable(c); return true; }),
     radio: (n, v) => !!t(() => {
       const g = t(() => form.getRadioGroup(n));
       const opts: string[] = g ? g.getOptions() : [];
-      if (g && opts.includes(v) && opts.indexOf(v) === opts.lastIndexOf(v)) { g.select(v); return true; }
+      if (g && opts.includes(v) && opts.indexOf(v) === opts.lastIndexOf(v)) { g.select(v); printable(g); return true; }
       // a radio row whose buttons are told apart only by their own value (its option list repeats one name), or
       // checkboxes that share one name, each with its own value (a pick-one row some forms draw as checkboxes)
       const af = (g ?? form.getCheckBox(n)).acroField;

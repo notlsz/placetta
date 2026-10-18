@@ -1,0 +1,412 @@
+{
+ "form": "ca-abc-256",
+ "rev": "ABC-256-LLC (rev. 07/19)",
+ "pdf": "ca-abc-256.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-256-LLC.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: managers and officers take up to four names, one per line. members takes up to ten lines (five on page 1, five continued on the reverse), each 'name, percentage, effective date'. Item 8 (the attorney's address) has no fillable box on this PDF, so it is printed on its row; 'None' leaves the attorney lines and the last amendment date blank. Dates are written MM/DD/YYYY. The signature and the date signed are left for the manager or designee.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "1",
+   "en": "Limited liability company name",
+   "zh": "有限责任公司名称"
+  },
+  {
+   "id": "phone",
+   "line": "2",
+   "en": "Telephone number",
+   "zh": "电话"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "hq_address",
+   "line": "4",
+   "en": "Company headquarters address (street, city, state, ZIP)",
+   "zh": "公司总部地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "hq_phone",
+   "line": "5",
+   "en": "Headquarters telephone number",
+   "zh": "总部电话"
+  },
+  {
+   "id": "attorney",
+   "line": "6",
+   "en": "Company attorney's name",
+   "zh": "公司律师姓名"
+  },
+  {
+   "id": "attorney_phone",
+   "line": "7",
+   "en": "Attorney's telephone number",
+   "zh": "律师电话"
+  },
+  {
+   "id": "attorney_address",
+   "line": "8",
+   "en": "Company attorney's address",
+   "zh": "公司律师地址"
+  },
+  {
+   "id": "llc1_date",
+   "line": "9",
+   "en": "Date LLC-1 filed with the Secretary of State",
+   "zh": "向州务卿提交 LLC-1 的日期"
+  },
+  {
+   "id": "llc1_state",
+   "line": "10",
+   "en": "State where the LLC-1 was filed with the Secretary of State",
+   "zh": "提交 LLC-1 的州"
+  },
+  {
+   "id": "formed_state",
+   "line": "11",
+   "en": "State where the LLC was formed",
+   "zh": "LLC 成立的州"
+  },
+  {
+   "id": "amended",
+   "line": "12",
+   "en": "Have the articles of organization (LLC-2 or LLC-10) been amended?",
+   "zh": "组织章程（LLC-2 或 LLC-10）是否修改过？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "agreement_date",
+   "line": "13",
+   "en": "Operating agreement date",
+   "zh": "运营协议日期"
+  },
+  {
+   "id": "amendment_date",
+   "line": "14",
+   "en": "Last amendment date",
+   "zh": "最近修订日期"
+  },
+  {
+   "id": "management",
+   "line": "15",
+   "en": "The LLC will be managed by",
+   "zh": "LLC 的管理方式",
+   "options": [
+    "One manager",
+    "More than one manager",
+    "Members",
+    "Single member"
+   ]
+  },
+  {
+   "id": "managers",
+   "line": "16",
+   "en": "Name(s) of manager(s), one per line",
+   "zh": "经理姓名，每行一位"
+  },
+  {
+   "id": "officers",
+   "line": "17",
+   "en": "Officers authorized by the articles or agreement, one per line",
+   "zh": "章程或协议授权的高管，每行一位"
+  },
+  {
+   "id": "members",
+   "line": "18",
+   "en": "All members, one per line: 'name, percentage of ownership, effective date'",
+   "zh": "所有成员，每行一位：“姓名、持股比例、生效日期”"
+  },
+  {
+   "id": "printed_name",
+   "line": "19",
+   "en": "Printed name of the manager or designee signing",
+   "zh": "签署的经理或指定人姓名（印刷体）"
+  }
+ ],
+ "boxes": {
+  "name": [
+   {
+    "text": "1 LIMITED LIABILITY COMPANY NAME"
+   }
+  ],
+  "phone": [
+   {
+    "text": "2 TELEPHONE NUMBER"
+   }
+  ],
+  "premises": [
+   {
+    "text": "Premises Address"
+   }
+  ],
+  "hq_address": [
+   {
+    "text": "4 COMPANY HEADQUARTERS ADDRESS Street number and name city state zip code"
+   }
+  ],
+  "hq_phone": [
+   {
+    "text": "5 HEADQUARTERS TELEPHONE NUMBER"
+   }
+  ],
+  "attorney": [
+   {
+    "text": "6 COMPANY ATTORNEYS NAME",
+    "if": "^(?!none$)"
+   }
+  ],
+  "attorney_phone": [
+   {
+    "text": "7 ATTORNEYS TELEPHONE NUMBER",
+    "if": "^(?!none$)"
+   }
+  ],
+  "attorney_address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 26,
+     "y": 564,
+     "w": 420,
+     "size": 8.5
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "llc1_date": [
+   {
+    "text": "9 DATE LLC1 FILED WITH SECRETARY OF STATE",
+    "pick": "date"
+   }
+  ],
+  "llc1_state": [
+   {
+    "text": "10 STATE WHERE LLC1 FILED WITH SECRETARY OF STATE"
+   }
+  ],
+  "formed_state": [
+   {
+    "text": "11 STATE WHERE LLC FORMED"
+   }
+  ],
+  "amended": [
+   {
+    "radio": "Check Box1",
+    "value": "YES",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Check Box2",
+    "value": "NO",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "agreement_date": [
+   {
+    "text": "13 OPERATING AGREEMENT DATE",
+    "pick": "date"
+   }
+  ],
+  "amendment_date": [
+   {
+    "text": "14 LAST AMENDMENT DATE",
+    "if": "^(?!none$)"
+   }
+  ],
+  "management": [
+   {
+    "check": "Check Box3",
+    "if": "^one manager"
+   },
+   {
+    "check": "Check Box4",
+    "if": "^more than"
+   },
+   {
+    "check": "Check Box5",
+    "if": "^members"
+   },
+   {
+    "check": "Check Box6",
+    "if": "^single"
+   }
+  ],
+  "managers": [
+   {
+    "text": "MANAGER PRINTED NAME",
+    "pick": "line1"
+   },
+   {
+    "text": "MANAGER PRINTED NAME_2",
+    "pick": "line2"
+   },
+   {
+    "text": "MANAGER PRINTED NAME_3",
+    "pick": "line3"
+   },
+   {
+    "text": "MANAGER PRINTED NAME_4",
+    "pick": "line4"
+   }
+  ],
+  "officers": [
+   {
+    "text": "OFFICER PRINTED NAME",
+    "pick": "line1"
+   },
+   {
+    "text": "OFFICER PRINTED NAME_2",
+    "pick": "line2"
+   },
+   {
+    "text": "OFFICER PRINTED NAME_3",
+    "pick": "line3"
+   },
+   {
+    "text": "OFFICER PRINTED NAME_4",
+    "pick": "line4"
+   }
+  ],
+  "members": [
+   {
+    "text": "MEMBER S PRINTED NAME",
+    "pick": "line1|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE",
+    "pick": "line1|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_2",
+    "pick": "line2|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_3",
+    "pick": "line3|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_4",
+    "pick": "line4|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_4",
+    "pick": "line4|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_4",
+    "pick": "line4|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_5",
+    "pick": "line5|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_5",
+    "pick": "line5|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_5",
+    "pick": "line5|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_6",
+    "pick": "line6|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_6",
+    "pick": "line6|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_6",
+    "pick": "line6|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_7",
+    "pick": "line7|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_7",
+    "pick": "line7|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_7",
+    "pick": "line7|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_8",
+    "pick": "line8|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_8",
+    "pick": "line8|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_8",
+    "pick": "line8|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_9",
+    "pick": "line9|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_9",
+    "pick": "line9|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_9",
+    "pick": "line9|tail|tail|head"
+   },
+   {
+    "text": "MEMBER S PRINTED NAME_10",
+    "pick": "line10|head"
+   },
+   {
+    "text": "PERCENTAGE OF OWNERSHIP_10",
+    "pick": "line10|tail|head"
+   },
+   {
+    "text": "EFFECTIVE DATE_10",
+    "pick": "line10|tail|tail|head"
+   }
+  ],
+  "printed_name": [
+   {
+    "text": "PRINTED NAME"
+   }
+  ]
+ },
+ "blank": {
+  "attorney": "^none$",
+  "attorney_phone": "^none$",
+  "attorney_address": "^none$",
+  "amendment_date": "^none$"
+ }
+}

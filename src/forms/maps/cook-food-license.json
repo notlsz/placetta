@@ -1,0 +1,270 @@
+{
+ "form": "cook-food-license",
+ "rev": "Retail Food Establishment License Application (Cook County Department of Public Health, Environmental Health Division)",
+ "pdf": "cook-food-license.pdf",
+ "url": "https://cookcountypublichealth.org/wp-content/uploads/2019/01/Retail-Food-License-Application.pdf",
+ "checked": "2026-10-18",
+ "notes": "A flat, print-only form: answers are printed on the blanks. Addresses are 'street, town, ST ZIP' and split onto the address, town and ZIP blanks; telephones print the area code inside the printed parentheses and the number after them. license_fee prints digits only after the printed $ (the fee schedule on the county's page sets it by seats, or by square footage without seats). 'None' leaves seats or other blank. The applicants' signatures and dates are left for the owners; the check goes with the mailed form.",
+ "lines": [
+  {
+   "id": "establishment",
+   "line": "Establishment/Corporation Name",
+   "en": "Establishment or corporation name",
+   "zh": "经营场所或公司名称"
+  },
+  {
+   "id": "operation",
+   "line": "For operation of",
+   "en": "For operation of (the kind of food establishment)",
+   "zh": "经营类型（食品经营场所种类）"
+  },
+  {
+   "id": "address",
+   "line": "Address, Town, Zip Code",
+   "en": "Establishment address (street, town, IL ZIP) in unincorporated Cook County",
+   "zh": "经营场所地址（街道、镇、IL 邮编），位于库克县非建制区"
+  },
+  {
+   "id": "phone",
+   "line": "Telephone #",
+   "en": "Establishment telephone",
+   "zh": "经营场所电话"
+  },
+  {
+   "id": "seats",
+   "line": "No. of Seats",
+   "en": "Number of seats (or None)",
+   "zh": "座位数（或 None）"
+  },
+  {
+   "id": "square_feet",
+   "line": "Square Footage",
+   "en": "Square footage",
+   "zh": "面积（平方英尺）"
+  },
+  {
+   "id": "other",
+   "line": "Other",
+   "en": "Other (mobile unit, tavern, packaged liquor, day care...), or None",
+   "zh": "其他（流动餐车、酒馆、包装酒类、托儿所等），或 None"
+  },
+  {
+   "id": "license_fee",
+   "line": "License Fee",
+   "en": "License fee from the fee schedule (dollars)",
+   "zh": "按收费表的执照费（美元）"
+  },
+  {
+   "id": "owner",
+   "line": "Owner/Operator Name(s)",
+   "en": "Owner or operator name(s)",
+   "zh": "所有者或经营者姓名"
+  },
+  {
+   "id": "owner_address",
+   "line": "Owner Address, Town, Zip Code",
+   "en": "Owner's address (street, town, ST ZIP)",
+   "zh": "所有者地址（街道、镇、州、邮编）"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Owner Telephone #",
+   "en": "Owner's telephone",
+   "zh": "所有者电话"
+  }
+ ],
+ "boxes": {
+  "establishment": [
+   {
+    "at": {
+     "page": 0,
+     "x": 235,
+     "y": 530.0,
+     "w": 320,
+     "size": 10
+    }
+   }
+  ],
+  "operation": [
+   {
+    "at": {
+     "page": 0,
+     "x": 139,
+     "y": 502.4,
+     "w": 415,
+     "size": 10
+    }
+   }
+  ],
+  "address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 100,
+     "y": 474.8,
+     "w": 455,
+     "size": 10
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 89,
+     "y": 447.2,
+     "w": 245,
+     "size": 10
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 394,
+     "y": 447.2,
+     "w": 160,
+     "size": 10
+    },
+    "pick": "zip"
+   }
+  ],
+  "phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 129,
+     "y": 419.6,
+     "w": 32,
+     "size": 10
+    },
+    "pick": "phone1"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 419.6,
+     "w": 140,
+     "size": 10
+    },
+    "pick": "phonelocal"
+   }
+  ],
+  "seats": [
+   {
+    "at": {
+     "page": 0,
+     "x": 120,
+     "y": 364.3,
+     "w": 108,
+     "size": 10
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "square_feet": [
+   {
+    "at": {
+     "page": 0,
+     "x": 312,
+     "y": 364.3,
+     "w": 98,
+     "size": 10
+    }
+   }
+  ],
+  "other": [
+   {
+    "at": {
+     "page": 0,
+     "x": 444,
+     "y": 364.3,
+     "w": 112,
+     "size": 10
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "license_fee": [
+   {
+    "at": {
+     "page": 0,
+     "x": 506,
+     "y": 336.7,
+     "w": 50,
+     "size": 10
+    },
+    "pick": "digits"
+   }
+  ],
+  "owner": [
+   {
+    "at": {
+     "page": 0,
+     "x": 193,
+     "y": 309.1,
+     "w": 362,
+     "size": 10
+    }
+   }
+  ],
+  "owner_address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 100,
+     "y": 281.5,
+     "w": 455,
+     "size": 10
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 89,
+     "y": 253.9,
+     "w": 245,
+     "size": 10
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 394,
+     "y": 253.9,
+     "w": 160,
+     "size": 10
+    },
+    "pick": "zip"
+   }
+  ],
+  "owner_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 129,
+     "y": 226.3,
+     "w": 32,
+     "size": 10
+    },
+    "pick": "phone1"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 172,
+     "y": 226.3,
+     "w": 140,
+     "size": 10
+    },
+    "pick": "phonelocal"
+   }
+  ]
+ },
+ "blank": {
+  "seats": "^none$",
+  "other": "^none$"
+ }
+}

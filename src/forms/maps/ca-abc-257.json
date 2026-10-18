@@ -1,0 +1,78 @@
+{
+ "form": "ca-abc-257",
+ "rev": "ABC-257 (Rev. 11/2024)",
+ "pdf": "ca-abc-257.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-257.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: the header and the applicant's printed name. The diagram itself (the boundaries, entrances, exits, interior walls, bars, counters and storage, drawn to the ABC's instructions) is drawn by the applicant on the PDF's grid or attached; the signature, date and the ABC inspector's certification are left blank.",
+ "lines": [
+  {
+   "id": "applicant",
+   "line": "1",
+   "en": "Applicant name(s): an individual's first, middle and last name, or the entity's name",
+   "zh": "申请人名称：个人填名、中间名、姓；实体填实体名称"
+  },
+  {
+   "id": "license_types",
+   "line": "License",
+   "en": "License type(s) applied for (e.g. 41 On-Sale Beer & Wine Eating Place)",
+   "zh": "申请的执照类型（如 41 类餐馆啤酒和葡萄酒堂食）"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "private_residence",
+   "line": "4",
+   "en": "Is the licensed premises located in a private residence?",
+   "zh": "持牌场所是否位于私人住宅内？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "printed_name",
+   "line": "Signature",
+   "en": "Applicant's printed name",
+   "zh": "申请人姓名（印刷体）"
+  }
+ ],
+ "boxes": {
+  "applicant": [
+   {
+    "text": "Applicant Name(s)"
+   }
+  ],
+  "license_types": [
+   {
+    "text": "License Type(s)"
+   }
+  ],
+  "premises": [
+   {
+    "text": "Premises Address"
+   }
+  ],
+  "private_residence": [
+   {
+    "radio": "Licensed Premises Locatd in a Private Residence?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Licensed Premises Locatd in a Private Residence?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "printed_name": [
+   {
+    "text": "Applicant Printed Name"
+   }
+  ]
+ }
+}

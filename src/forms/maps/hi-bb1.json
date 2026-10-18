@@ -1,0 +1,973 @@
+{
+ "form": "hi-bb1",
+ "rev": "Form BB-1 (Rev. 9/2023), Basic Business Application",
+ "pdf": "hi-bb1.pdf",
+ "url": "https://files.hawaii.gov/tax/forms/2024/bb1_i.pdf",
+ "checked": "2026-10-18",
+ "notes": "A flat, machine-read form: answers are printed in its boxes, dates and numbers one character to a cell. Answers: the mailing and Hawaii addresses are 'street, city, ST ZIP'; 'Same' leaves line 7 blank, as the form asks only for a different location. A fiscal year is 'Fiscal year ending: MM/DD'. Owners are 'Last, First M.I.; title; residential address; phone' (up to two; a separate sheet for more). Withholding 'Yes: date' ticks 22a with the date wages begin; the general excise license ticks 22b GET/Use with its filing period and start date, and line 24 lists the GE location. Left for the applicant: every FEIN/TIN/SSN choice and number for the owners in line 20 (Placetta never writes an SSN), lines 17 to 19 (parent corporation), the other tax types on page 2, the fees due and the total on line 21 ($20 for the GE license), and the signature and date. Mailed with the fee to the Department of Taxation, or the same application made online at hitax.hawaii.gov.",
+ "lines": [
+  {
+   "id": "purpose",
+   "line": "1",
+   "en": "Purpose of application",
+   "zh": "申请目的",
+   "options": [
+    "New",
+    "Add",
+    "Change"
+   ]
+  },
+  {
+   "id": "fein",
+   "line": "2",
+   "en": "Federal EIN",
+   "zh": "联邦雇主识别号（EIN）"
+  },
+  {
+   "id": "hawaii_id",
+   "line": "3",
+   "en": "Hawaii Tax I.D. number, if one was already issued, or None",
+   "zh": "夏威夷税号（如已取得），或 None"
+  },
+  {
+   "id": "legal_name",
+   "line": "4",
+   "en": "Legal name of the taxpayer or employer",
+   "zh": "纳税人或雇主法定名称"
+  },
+  {
+   "id": "dba",
+   "line": "5",
+   "en": "Trade name (DBA), if any, or None",
+   "zh": "商号（DBA），如有，或 None"
+  },
+  {
+   "id": "care_of",
+   "line": "6",
+   "en": "Mailing 'care of' name, or None",
+   "zh": "邮寄转交人姓名，或 None"
+  },
+  {
+   "id": "mailing",
+   "line": "6",
+   "en": "Mailing address: street or P.O. box, city, ST ZIP",
+   "zh": "邮寄地址：街道或邮政信箱、城市、州、邮编"
+  },
+  {
+   "id": "location",
+   "line": "7",
+   "en": "Physical location in Hawaii: 'Same' (as the mailing address), or street, city, HI ZIP",
+   "zh": "夏威夷营业地点：“Same”（同邮寄地址），或街道、城市、HI 邮编"
+  },
+  {
+   "id": "organization",
+   "line": "8",
+   "en": "Type of legal organization",
+   "zh": "法律组织类型",
+   "options": [
+    "LLC",
+    "Single-Member LLC",
+    "Corporation",
+    "S Corporation",
+    "Sole Proprietorship",
+    "General Partnership",
+    "Limited Partnership",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "disability",
+   "line": "9",
+   "en": "Does all or part of the business qualify for a disability exemption?",
+   "zh": "企业是否全部或部分符合残障豁免条件？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "began",
+   "line": "10",
+   "en": "Date the business began in Hawaii (MM/DD/YYYY)",
+   "zh": "在夏威夷开始经营的日期（月/日/年）"
+  },
+  {
+   "id": "organized",
+   "line": "11",
+   "en": "Date of organization (MM/DD/YYYY)",
+   "zh": "组织成立日期（月/日/年）"
+  },
+  {
+   "id": "org_state",
+   "line": "12",
+   "en": "State of organization (two letters)",
+   "zh": "组织成立州（两个字母）"
+  },
+  {
+   "id": "period",
+   "line": "13",
+   "en": "Accounting period: 'Calendar year', or 'Fiscal year ending: MM/DD'",
+   "zh": "会计期间：“Calendar year”，或“Fiscal year ending: 月/日”"
+  },
+  {
+   "id": "method",
+   "line": "14",
+   "en": "Accounting method",
+   "zh": "会计方法",
+   "options": [
+    "Cash",
+    "Accrual"
+   ]
+  },
+  {
+   "id": "naics",
+   "line": "15",
+   "en": "6-digit NAICS code",
+   "zh": "6 位 NAICS 代码"
+  },
+  {
+   "id": "activity",
+   "line": "15",
+   "en": "Business activity",
+   "zh": "业务活动"
+  },
+  {
+   "id": "phone",
+   "line": "16",
+   "en": "Business phone",
+   "zh": "企业电话"
+  },
+  {
+   "id": "email",
+   "line": "16",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "owner1",
+   "line": "20",
+   "en": "First sole proprietor, partner, member or officer: 'Last, First M.I.; title; residential address; phone'",
+   "zh": "第一位独资经营者、合伙人、成员或高管：“姓, 名；职务；住址；电话”"
+  },
+  {
+   "id": "owner2",
+   "line": "20",
+   "en": "Second one, the same way, or None",
+   "zh": "第二位，同上格式，或 None"
+  },
+  {
+   "id": "withholding",
+   "line": "22a",
+   "en": "Register for withholding: 'Yes: date wages begin (MM/DD/YYYY)', or No",
+   "zh": "登记预扣税：“Yes: 开始支付工资日期（月/日/年）”，或 No"
+  },
+  {
+   "id": "get",
+   "line": "22b",
+   "en": "General excise license: 'filing period: date activity begins' (e.g. 'Monthly: 03/01/2027')",
+   "zh": "一般消费税执照：“申报周期: 开始经营日期”（如“Monthly: 03/01/2027”）",
+   "options": [
+    "Monthly: MM/DD/YYYY",
+    "Quarterly: MM/DD/YYYY",
+    "Semiannual: MM/DD/YYYY"
+   ]
+  },
+  {
+   "id": "tobacco_citation",
+   "line": "23",
+   "en": "Ever cited for a cigarette or tobacco violation?",
+   "zh": "是否曾因卷烟或烟草违规被处罚？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "ge_location",
+   "line": "24",
+   "en": "General excise business location: 'address; name'",
+   "zh": "一般消费税营业地点：“地址；名称”"
+  },
+  {
+   "id": "signer",
+   "line": "Certification",
+   "en": "Owner, partner, member, officer or agent signing: 'name, title'",
+   "zh": "签署的所有者、合伙人、成员、高管或代理人：“姓名、职务”"
+  }
+ ],
+ "boxes": {
+  "purpose": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 59.1,
+     "y": 665.7
+    },
+    "if": "^new"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 109.1,
+     "y": 665.7
+    },
+    "if": "^add"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 213.1,
+     "y": 665.7
+    },
+    "if": "^change"
+   }
+  ],
+  "fein": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 49.1,
+     "y": 649.7
+    }
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 46,
+     "y": 629,
+     "w": 135,
+     "size": 10
+    },
+    "pick": "ein"
+   }
+  ],
+  "hawaii_id": [
+   {
+    "at": {
+     "page": 0,
+     "x": 232,
+     "y": 629,
+     "w": 152,
+     "size": 10
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "legal_name": [
+   {
+    "at": {
+     "page": 0,
+     "x": 46,
+     "y": 594,
+     "w": 250,
+     "size": 10
+    }
+   }
+  ],
+  "dba": [
+   {
+    "at": {
+     "page": 0,
+     "x": 328,
+     "y": 594,
+     "w": 250,
+     "size": 10
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "care_of": [
+   {
+    "at": {
+     "page": 0,
+     "x": 46,
+     "y": 561,
+     "w": 250,
+     "size": 10
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "mailing": [
+   {
+    "at": {
+     "page": 0,
+     "x": 46,
+     "y": 531,
+     "w": 250,
+     "size": 10
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 46,
+     "y": 501,
+     "w": 88,
+     "size": 10
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 138,
+     "y": 501,
+     "w": 40,
+     "size": 10
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 210,
+     "y": 501,
+     "w": 86,
+     "size": 10
+    },
+    "pick": "zip"
+   }
+  ],
+  "location": [
+   {
+    "at": {
+     "page": 0,
+     "x": 328,
+     "y": 561,
+     "w": 250,
+     "size": 10
+    },
+    "pick": "street",
+    "if": "^(?!same$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 328,
+     "y": 531,
+     "w": 84,
+     "size": 10
+    },
+    "pick": "city",
+    "if": "^(?!same$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 416,
+     "y": 531,
+     "w": 40,
+     "size": 10
+    },
+    "pick": "state",
+    "if": "^(?!same$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 488,
+     "y": 531,
+     "w": 90,
+     "size": 10
+    },
+    "pick": "zip",
+    "if": "^(?!same$)"
+   }
+  ],
+  "organization": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.1,
+     "y": 459.7
+    },
+    "if": "^corporation$"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 116.1,
+     "y": 459.7
+    },
+    "if": "^s corporation"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 191.1,
+     "y": 459.7
+    },
+    "if": "^general partnership"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 286.1,
+     "y": 459.7
+    },
+    "if": "^limited partnership"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 382.1,
+     "y": 459.7
+    },
+    "if": "^nonprofit"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 50.1,
+     "y": 447.7
+    },
+    "if": "^sole"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 143.1,
+     "y": 447.7
+    },
+    "if": "^single-member llc"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 240.1,
+     "y": 447.7
+    },
+    "if": "^llc$"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 359.1,
+     "y": 447.7
+    },
+    "if": "^other"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 445,
+     "y": 450,
+     "w": 133,
+     "size": 9
+    },
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "disability": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 73.1,
+     "y": 403.7
+    },
+    "if": "^(y|yes|是)"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 125.1,
+     "y": 403.7
+    },
+    "if": "^(n|no|否)"
+   }
+  ],
+  "began": [
+   {
+    "at": {
+     "page": 0,
+     "x": 181.2,
+     "y": 408,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "mm"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 206.8,
+     "y": 408,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "dd"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 232.4,
+     "y": 408,
+     "w": 40,
+     "size": 9,
+     "comb": 4
+    },
+    "pick": "yyyy"
+   }
+  ],
+  "organized": [
+   {
+    "at": {
+     "page": 0,
+     "x": 322.2,
+     "y": 408,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "mm"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 347.8,
+     "y": 408,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "dd"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 373.4,
+     "y": 408,
+     "w": 40,
+     "size": 9,
+     "comb": 4
+    },
+    "pick": "yyyy"
+   }
+  ],
+  "org_state": [
+   {
+    "at": {
+     "page": 0,
+     "x": 502,
+     "y": 407,
+     "w": 20.6,
+     "size": 9,
+     "comb": 2
+    },
+    "upper": true
+   }
+  ],
+  "period": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 44.1,
+     "y": 375.7
+    },
+    "if": "^calendar"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 44.1,
+     "y": 363.7
+    },
+    "if": "^fiscal"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 125,
+     "y": 368,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "tail|mm",
+    "if": "^fiscal"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 150.3,
+     "y": 368,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "tail|dd",
+    "if": "^fiscal"
+   }
+  ],
+  "method": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 236.1,
+     "y": 369.7
+    },
+    "if": "^cash"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 278.1,
+     "y": 369.7
+    },
+    "if": "^accrual"
+   }
+  ],
+  "naics": [
+   {
+    "at": {
+     "page": 0,
+     "x": 394,
+     "y": 368,
+     "w": 60,
+     "size": 9,
+     "comb": 6
+    },
+    "pick": "digits"
+   }
+  ],
+  "activity": [
+   {
+    "at": {
+     "page": 0,
+     "x": 386,
+     "y": 342,
+     "w": 193,
+     "size": 9
+    }
+   }
+  ],
+  "phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 30,
+     "y": 304,
+     "w": 30,
+     "size": 9,
+     "comb": 3
+    },
+    "pick": "phone1"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 65.6,
+     "y": 304,
+     "w": 30,
+     "size": 9,
+     "comb": 3
+    },
+    "pick": "phone2"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 101.2,
+     "y": 304,
+     "w": 40,
+     "size": 9,
+     "comb": 4
+    },
+    "pick": "phone3"
+   }
+  ],
+  "email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 388,
+     "y": 306,
+     "w": 190,
+     "size": 9
+    }
+   }
+  ],
+  "owner1": [
+   {
+    "at": {
+     "page": 0,
+     "x": 154,
+     "y": 201,
+     "w": 125,
+     "size": 8
+    },
+    "pick": "line1"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 282,
+     "y": 201,
+     "w": 72,
+     "size": 8
+    },
+    "pick": "line2"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 357,
+     "y": 201,
+     "w": 140,
+     "size": 8
+    },
+    "pick": "line3"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 500,
+     "y": 201,
+     "w": 79,
+     "size": 8
+    },
+    "pick": "line4"
+   }
+  ],
+  "owner2": [
+   {
+    "at": {
+     "page": 0,
+     "x": 154,
+     "y": 169.5,
+     "w": 125,
+     "size": 8
+    },
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 282,
+     "y": 169.5,
+     "w": 72,
+     "size": 8
+    },
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 357,
+     "y": 169.5,
+     "w": 140,
+     "size": 8
+    },
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 500,
+     "y": 169.5,
+     "w": 79,
+     "size": 8
+    },
+    "pick": "line4",
+    "if": "^(?!none$)"
+   }
+  ],
+  "withholding": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 57.7,
+     "y": 675.4
+    },
+    "if": "^(y|yes|是)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 208.8,
+     "y": 675,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "mm",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 234.4,
+     "y": 675,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "dd",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 260.1,
+     "y": 675,
+     "w": 40,
+     "size": 9,
+     "comb": 4
+    },
+    "pick": "yyyy",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "get": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 76.7,
+     "y": 640.4
+    }
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 319.7,
+     "y": 640.4
+    },
+    "if": "^mo"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 346.7,
+     "y": 640.4
+    },
+    "if": "^q"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 373.7,
+     "y": 640.4
+    },
+    "if": "^semi"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 208.8,
+     "y": 641,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "mm"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 234.4,
+     "y": 641,
+     "w": 20,
+     "size": 9,
+     "comb": 2
+    },
+    "pick": "dd"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 260.1,
+     "y": 641,
+     "w": 40,
+     "size": 9,
+     "comb": 4
+    },
+    "pick": "yyyy"
+   }
+  ],
+  "tobacco_citation": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 321.7,
+     "y": 256.4
+    },
+    "if": "^(y|yes|是)"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 369.7,
+     "y": 256.4
+    },
+    "if": "^(n|no|否)"
+   }
+  ],
+  "ge_location": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 32.7,
+     "y": 180.4
+    }
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 124,
+     "y": 172,
+     "w": 295,
+     "size": 9
+    },
+    "pick": "line1"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 434,
+     "y": 172,
+     "w": 148,
+     "size": 9
+    },
+    "pick": "line2"
+   }
+  ],
+  "signer": [
+   {
+    "at": {
+     "page": 0,
+     "x": 278,
+     "y": 51,
+     "w": 145,
+     "size": 9
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 430,
+     "y": 51,
+     "w": 100,
+     "size": 9
+    },
+    "pick": "tail"
+   }
+  ]
+ },
+ "blank": {
+  "hawaii_id": "^none$",
+  "dba": "^none$",
+  "care_of": "^none$",
+  "location": "^same$",
+  "owner2": "^none$",
+  "withholding": "^(n|no|否)$"
+ }
+}

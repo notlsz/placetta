@@ -1,0 +1,236 @@
+{
+ "form": "ca-llc-5",
+ "rev": "LLC-5 (REV 03/2024), with the Submission Cover Sheet",
+ "pdf": "ca-llc-5.pdf",
+ "url": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-5.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: addresses are 'street, city, ST ZIP' and split into the form's boxes (3b's state is printed as CA). mailing 'Same as 3a' or 'Same as 3b' ticks that box instead. agent is an individual's full name (first, middle and last go in 4a) or a registered corporate agent's name (recognized by Inc., LLC, Corp., Services and the like, it goes in 4c); agent_address is only for an individual agent, and 'None' leaves it and 1b blank. The cover sheet's entity number and comments, the return address and the signature are left for the signer.",
+ "lines": [
+  {
+   "id": "contact",
+   "line": "Cover sheet",
+   "en": "Contact person for this filing (first and last name)",
+   "zh": "本次提交的联系人（名和姓）"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Cover sheet",
+   "en": "Contact person's phone (optional)",
+   "zh": "联系人电话（可选）"
+  },
+  {
+   "id": "contact_email",
+   "line": "Cover sheet",
+   "en": "Contact person's email",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "name",
+   "line": "1a",
+   "en": "LLC name, exactly as on the certificate of good standing",
+   "zh": "LLC 名称（与存续证明完全一致）"
+  },
+  {
+   "id": "alt_name",
+   "line": "1b",
+   "en": "California alternate name, only if required (or None)",
+   "zh": "加州替代名称，仅在需要时填写（或填 None）"
+  },
+  {
+   "id": "jurisdiction",
+   "line": "2a",
+   "en": "Jurisdiction (state, foreign country or place where the LLC is formed)",
+   "zh": "成立地（州、外国或 LLC 成立地）"
+  },
+  {
+   "id": "principal",
+   "line": "3a",
+   "en": "Street address of the principal executive office (street, city, ST ZIP)",
+   "zh": "主要行政办公室街道地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "ca_office",
+   "line": "3b",
+   "en": "Street address of the principal office in California, if any (or None)",
+   "zh": "加州主要办公室街道地址（如有，或填 None）"
+  },
+  {
+   "id": "mailing",
+   "line": "3c",
+   "en": "Mailing address of the principal executive office: 'Same as 3a', 'Same as 3b', or the address",
+   "zh": "主要行政办公室邮寄地址：“Same as 3a”、“Same as 3b”或具体地址"
+  },
+  {
+   "id": "agent",
+   "line": "4",
+   "en": "California agent for service of process: an individual's full name, or the registered corporate agent's name",
+   "zh": "加州法律文书送达代理人：个人全名，或注册公司代理人名称"
+  },
+  {
+   "id": "agent_address",
+   "line": "4b",
+   "en": "Individual agent's California street address (or None for a corporate agent)",
+   "zh": "个人代理人的加州街道地址（公司代理人填 None）"
+  },
+  {
+   "id": "signer",
+   "line": "5",
+   "en": "Type or print name of the person signing",
+   "zh": "签署人姓名（打印或印刷体）"
+  }
+ ],
+ "boxes": {
+  "contact": [
+   {
+    "text": "Contact Person - First Name",
+    "pick": "first"
+   },
+   {
+    "text": "Contact Person - Last Name",
+    "pick": "last"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Contact Person - Phone Number"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Contact Person - Email"
+   }
+  ],
+  "name": [
+   {
+    "text": "Entity Information - Name"
+   },
+   {
+    "text": "1a"
+   }
+  ],
+  "alt_name": [
+   {
+    "text": "1b",
+    "if": "^(?!none$)"
+   }
+  ],
+  "jurisdiction": [
+   {
+    "text": "2b"
+   }
+  ],
+  "principal": [
+   {
+    "text": "3aStreetAddress",
+    "pick": "street"
+   },
+   {
+    "text": "3aCity",
+    "pick": "city"
+   },
+   {
+    "text": "3aState",
+    "pick": "state"
+   },
+   {
+    "text": "3aZip",
+    "pick": "zip"
+   }
+  ],
+  "ca_office": [
+   {
+    "text": "3btreetAddress",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "3bcity",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "3bZip",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "mailing": [
+   {
+    "check": "Check Box1",
+    "if": "^same as 3a"
+   },
+   {
+    "check": "Check Box2",
+    "if": "^same as 3b"
+   },
+   {
+    "text": "3cStreetAddress",
+    "pick": "street",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "3cCity",
+    "pick": "city",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "3cState",
+    "pick": "state",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "3cZip",
+    "pick": "zip",
+    "if": "^(?!same)"
+   }
+  ],
+  "agent": [
+   {
+    "text": "4aAgentsName",
+    "pick": "first",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "4aAgentsMiddleName",
+    "pick": "middle",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "4aAgentsLastName",
+    "pick": "last",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "4cAgentsName",
+    "if": "^.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "4bAgentsAddress",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "4bCity",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "4bZip",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "5TypeNameOfSigner"
+   }
+  ]
+ },
+ "blank": {
+  "alt_name": "^none$",
+  "ca_office": "^none$",
+  "agent_address": "^none$"
+ }
+}

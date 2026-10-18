@@ -1,0 +1,406 @@
+{
+ "form": "moco-food-license",
+ "rev": "Food Service Facility License Application (Last Update 4/1/2026)",
+ "pdf": "moco-food-license.pdf",
+ "url": "https://assets.montgomerycountymd.gov/files/2026-04/Food%20Service%20Facility%20License%20App_April2026.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: an address is 'street, city, ST ZIP', split into the form's street number, street name, city, state and ZIP boxes, with the suite as its own answer. The PDF has one From and one To box repeated on all seven days, so hours are written only when they're the same every day; 'Varies' leaves them for the applicant to write day by day. water 'Public: WSSC' ticks Public and WSSC. A partnership or LLC without workers' compensation insurance attaches the Commission's Certificate of Compliance instead. Left for the applicant: today's date, the fax boxes (the PDF uses one field for the facility's fax and the emergency contact's), the signature, and the whole payment page: Placetta never writes a card number. The checklist on page 1 is the county's. Mailed with the fee to Licensure & Regulatory Services, or faxed; the license fee ($200 to $525 by priority) is the person's.",
+ "lines": [
+  {
+   "id": "purpose",
+   "line": "Application",
+   "en": "Application for",
+   "zh": "申请类型",
+   "options": [
+    "New",
+    "Change of Owner",
+    "Name Change",
+    "Renewal"
+   ]
+  },
+  {
+   "id": "mail_to",
+   "line": "Application",
+   "en": "Mail the license to",
+   "zh": "执照邮寄至",
+   "options": [
+    "Facility",
+    "Owner"
+   ]
+  },
+  {
+   "id": "seats",
+   "line": "Application",
+   "en": "Number of seats (or square footage if there are no seats)",
+   "zh": "座位数（无座位的填面积）"
+  },
+  {
+   "id": "catering",
+   "line": "Application",
+   "en": "Does the facility provide catering?",
+   "zh": "是否提供外烩服务？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "facility_name",
+   "line": "Facility",
+   "en": "Name of facility",
+   "zh": "设施名称"
+  },
+  {
+   "id": "facility_address",
+   "line": "Facility",
+   "en": "Address of facility: street, city, MD ZIP (the suite goes on the next line)",
+   "zh": "设施地址：街道、城市、MD 邮编（套房号填下一项）"
+  },
+  {
+   "id": "facility_suite",
+   "line": "Facility",
+   "en": "Suite number, or None",
+   "zh": "套房号，或 None"
+  },
+  {
+   "id": "former_name",
+   "line": "Facility",
+   "en": "Former name of the facility, or None",
+   "zh": "设施原名称，或 None"
+  },
+  {
+   "id": "owner_name",
+   "line": "Owner",
+   "en": "Name of owner",
+   "zh": "所有者名称"
+  },
+  {
+   "id": "phone",
+   "line": "Owner",
+   "en": "Telephone number",
+   "zh": "电话"
+  },
+  {
+   "id": "fein",
+   "line": "Owner",
+   "en": "Federal tax ID number (EIN)",
+   "zh": "联邦税号（EIN）"
+  },
+  {
+   "id": "email",
+   "line": "Owner",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "hours",
+   "line": "Hours",
+   "en": "Hours when they are the same every day: 'opening; closing' (e.g. '11:00 AM; 9:00 PM'), or 'Varies'",
+   "zh": "每天营业时间相同时填写：“开门；关门”（如“11:00 AM; 9:00 PM”），否则填 Varies"
+  },
+  {
+   "id": "corp_name",
+   "line": "Owner",
+   "en": "Owner or corporation name",
+   "zh": "所有者或公司名称"
+  },
+  {
+   "id": "corp_address",
+   "line": "Owner",
+   "en": "Address of the owner or corporation: street, city, ST ZIP",
+   "zh": "所有者或公司地址：街道、城市、州、邮编"
+  },
+  {
+   "id": "corp_suite",
+   "line": "Owner",
+   "en": "Owner's suite number, or None",
+   "zh": "所有者地址套房号，或 None"
+  },
+  {
+   "id": "water",
+   "line": "Page 2",
+   "en": "Water supply",
+   "zh": "供水",
+   "options": [
+    "Public: WSSC",
+    "Public: City of Rockville",
+    "Public: Poolesville",
+    "On-site well"
+   ]
+  },
+  {
+   "id": "sewage",
+   "line": "Page 2",
+   "en": "Sewage",
+   "zh": "污水处理",
+   "options": [
+    "Public",
+    "On-site septic system"
+   ]
+  },
+  {
+   "id": "comp_insurer",
+   "line": "Page 2",
+   "en": "Workers' compensation insurance company, or None (sole proprietor with no employees)",
+   "zh": "工伤保险公司，或 None（无员工的独资经营者）"
+  },
+  {
+   "id": "comp_policy",
+   "line": "Page 2",
+   "en": "Workers' compensation policy or binder number, or None",
+   "zh": "工伤保险保单或暂保单号，或 None"
+  },
+  {
+   "id": "sole_proprietor",
+   "line": "Page 2",
+   "en": "Is it a sole proprietorship with no employees?",
+   "zh": "是否为无员工的独资经营？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "emergency_contact",
+   "line": "Page 2",
+   "en": "Emergency contact: 'name, telephone (not the facility's), email'",
+   "zh": "紧急联系人：“姓名、电话（非设施电话）、电子邮箱”"
+  },
+  {
+   "id": "signer",
+   "line": "Page 2",
+   "en": "Applicant signing: 'name, title'",
+   "zh": "签署申请人：“姓名、职务”"
+  }
+ ],
+ "boxes": {
+  "purpose": [
+   {
+    "check": "Check Box - New",
+    "if": "^new"
+   },
+   {
+    "check": "Check Box - Change of Owner",
+    "if": "^change of owner"
+   },
+   {
+    "check": "Check Box - Name Change",
+    "if": "^name"
+   },
+   {
+    "check": "Check Box - Renewal",
+    "if": "^renewal"
+   }
+  ],
+  "mail_to": [
+   {
+    "check": "Check Box - Facility",
+    "if": "^facility"
+   },
+   {
+    "check": "Check Box - Owner",
+    "if": "^owner"
+   }
+  ],
+  "seats": [
+   {
+    "text": "Number of seats or square footage (if no seats)"
+   }
+  ],
+  "catering": [
+   {
+    "check": "Check Box - Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Check Box - No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "facility_name": [
+   {
+    "text": "Name of Facility"
+   }
+  ],
+  "facility_address": [
+   {
+    "text": "Facility Street Number",
+    "pick": "street|streetno"
+   },
+   {
+    "text": "Facility Street Name",
+    "pick": "street|streetname"
+   },
+   {
+    "text": "Facilty City",
+    "pick": "city"
+   },
+   {
+    "text": "Facility State",
+    "pick": "state"
+   },
+   {
+    "text": "Facility Zip Code",
+    "pick": "zip"
+   }
+  ],
+  "facility_suite": [
+   {
+    "text": "Facility Suite Number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "former_name": [
+   {
+    "text": "Former Name of Facility (if applicable)",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "Name of Owner"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Telephone Number"
+   }
+  ],
+  "fein": [
+   {
+    "text": "Federal Tax ID Number",
+    "pick": "ein"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email Address"
+   }
+  ],
+  "hours": [
+   {
+    "text": "From",
+    "pick": "line1",
+    "if": "^(?!varies$)"
+   },
+   {
+    "text": "To",
+    "pick": "line2",
+    "if": "^(?!varies$)"
+   }
+  ],
+  "corp_name": [
+   {
+    "text": "Owner/Corporation Name"
+   }
+  ],
+  "corp_address": [
+   {
+    "text": "Owner/Corporation Street Number",
+    "pick": "street|streetno"
+   },
+   {
+    "text": "Owner/Corporation Street Name",
+    "pick": "street|streetname"
+   },
+   {
+    "text": "Owner/Corporation City",
+    "pick": "city"
+   },
+   {
+    "text": "Owner/Corporation State",
+    "pick": "state"
+   },
+   {
+    "text": "Owner/Corporation Zip Code",
+    "pick": "zip"
+   }
+  ],
+  "corp_suite": [
+   {
+    "text": "Owner/Corporation Suite Number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "water": [
+   {
+    "check": "Check Box - Public",
+    "if": "^public"
+   },
+   {
+    "check": "Check Box - WSSC",
+    "if": "wssc"
+   },
+   {
+    "check": "Check Box - City of Rockville",
+    "if": "rockville"
+   },
+   {
+    "check": "Check Box -Poolesville",
+    "if": "poolesville"
+   },
+   {
+    "check": "Check Box - On-Site/Well",
+    "if": "well"
+   }
+  ],
+  "sewage": [
+   {
+    "check": "Check Box - On-Site/Septic System",
+    "if": "septic"
+   }
+  ],
+  "comp_insurer": [
+   {
+    "text": "Company Name",
+    "if": "^(?!none$)"
+   }
+  ],
+  "comp_policy": [
+   {
+    "text": "Policy/Binder Number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "sole_proprietor": [
+   {
+    "check": "Check Box - Check her if Sole Proprietor",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "emergency_contact": [
+   {
+    "text": "Emergency Contact Name",
+    "pick": "head"
+   },
+   {
+    "text": "Telephoen Number (Not Facility Telepohone Number)",
+    "pick": "tail|head"
+   },
+   {
+    "text": "Emergency Contact's Email Address",
+    "pick": "tail|tail"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Printed Name of Applicant",
+    "pick": "head"
+   },
+   {
+    "text": "Printed Title of Applicant",
+    "pick": "tail"
+   }
+  ]
+ },
+ "blank": {
+  "facility_suite": "^none$",
+  "former_name": "^none$",
+  "corp_suite": "^none$",
+  "comp_insurer": "^none$",
+  "comp_policy": "^none$",
+  "hours": "^varies$",
+  "sewage": "^public$",
+  "sole_proprietor": "^(n|no|否)$"
+ }
+}

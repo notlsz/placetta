@@ -1,7 +1,11 @@
-// Playbooks for the five portals the most registry forms use (supabase/functions/file/destinations.ts): My Health
+// Playbooks for the portals the most registry forms use (supabase/functions/file/destinations.ts): My Health
 // Department (4 forms), Accela Citizen Access at aca-prod.accela.com (4), SJPermits (3), BTExpress at county-taxes.net
-// (3) and Denver's portals at denvergov.org (3). Fairfax County's PLUS also has 3 forms, but its only published guides
-// are videos, so Denver, whose guides are written, takes the fifth place.
+// (3), Denver's portals at denvergov.org (3) and California's bizfile Online (3). Fairfax County's PLUS also has 3
+// forms, but its only published guides are videos. Then the formation portals of the states whose Secretary publishes
+// a written walkthrough: Washington's CCFS, Georgia's eCorp and Virginia's Clerk's Information System (one form each).
+//
+// test/replay.test.ts walks each playbook through a static copy of the pages its guide documents (test/mocks), so a
+// guide's page names, buttons and fee pages stay consistent with what the guards key on.
 //
 // Each playbook is written from the portal's published user guide, cited below, because Placetta can't open these
 // portals to record them. So none is verified: the worker refuses a playbook whose `verified` is null unless
@@ -286,6 +290,124 @@ export const PLAYBOOKS: Playbook[] = [
           { page: "Documents", do: "upload", note: "\"you might need to combine documents and upload them in a single .pdf\"; the zoning use permit and the sales tax license." },
           { page: "Review", do: "review", selector: "button:Continue Application", note: "The worker compares the review page with the approved values first." },
           { page: "Pay Fees", do: "pay", note: "\"you will be prompted to submit fees in the online portal\": the person pays ($150 application fee)." },
+        ],
+      },
+    },
+  },
+  {
+    host: "bizfileonline.sos.ca.gov",
+    name: "bizfile Online (California Secretary of State)",
+    guides: [
+      "https://bpd.cdn.sos.ca.gov/ucc/ucc-online-help.pdf",
+      "https://bpd.cdn.sos.ca.gov/bizfile/bizfile-online-account-setup.pdf",
+      "https://www.sos.ca.gov/business-programs/business-entities/faqs",
+    ],
+    read: "2026-10-18",
+    verified: null,
+    // Help guide 11.1.8 (File Document): "Choose File Online to send the document to the Shopping Cart"; the Shopping
+    // Cart then takes the fee. The other choice there, Print and Mail, is never used.
+    final: [{ page: "File Document", button: "File Online" }],
+    pay: ["Shopping Cart", "Checkout", "Payment"],
+    receipt: ["My Work Queue", "Receipt"],
+    forms: Object.fromEntries(([
+      ["ca-llc-1", "Articles of Organization - CA LLC", null],
+      ["ca-llc-5", "Application to Register a Foreign LLC", "The Certificate of Good Standing from where the LLC was formed, from the approved files."],
+      ["ca-llc-12", "Statement of Information - LLC", null],
+    ] as const).map(([id, form, upload]) => [id, {
+      start: "https://bizfileonline.sos.ca.gov/",
+      steps: [
+        { page: "Login", do: "sign_in", note: "Click the Login button in the upper right corner, enter the Username and Password, and click Sign In (account guide)." },
+        ...(id === "ca-llc-12" ? [{ page: "My Records", do: "open", note: "The LLC must be in My Records: the account guide's Request Access sends a PIN to the entity's mailing address. If the LLC isn't listed, call need_person." } as Step] : []),
+        { page: "Forms", do: "choose", selector: "button:File Online", note: `"Click on Forms on the Left Navigation Pane. Make sure the Business tab is selected at the top." Select ${form}; "a pop-up window will describe the form and fee, and select File Online" (7.1).` },
+        { page: form, do: "fill", note: "\"Each section of the workflow is listed on the left\" (11.1): fill each from the approved values and use Next Step. \"The user cannot submit a document if any sections are missing required information\" (7.13)." },
+        ...(upload ? [{ page: "Attachments", do: "upload", note: upload } as Step] : []),
+        { page: "Review", do: "review", note: "\"The Review page gives the user a chance to review the data that has been entered\"; it becomes public record, so the worker compares it with the approved values (11.1.7)." },
+        { page: "File Document", do: "submit", selector: "button:File Online", note: "\"Choose File Online to send the document to the Shopping Cart\" (11.1.8), never Print and Mail. The final-submit guard runs first." },
+        { page: "Shopping Cart", do: "pay", note: "\"The Shopping Cart will automatically open on the right-hand side of the page\" (11.2.1): checkout and the fee are the person's." },
+        { page: "My Work Queue", do: "receipt", note: "\"After a filing, check its status in the My Work Queue tab\"; note the receipt or work order number." },
+      ] as Step[],
+    }])),
+  },
+  {
+    host: "ccfs.sos.wa.gov",
+    name: "Corporations and Charities Filing System (Washington Secretary of State)",
+    guides: ["https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/start-domestic-wa-limited-liability-company-llc-online"],
+    read: "2026-10-18",
+    verified: null,
+    // "On the Review page, select "Add to Cart"": what the worker commits to; Checkout and "Place your Order" take the fee.
+    final: [{ page: "Review", button: "Add to Cart" }],
+    pay: ["Shopping Cart", "Checkout"],
+    receipt: ["Order Confirmation", "Confirmation"],
+    forms: {
+      "wa-sos": {
+        start: "https://ccfs.sos.wa.gov/",
+        steps: [
+          { page: "Login", do: "sign_in", note: "\"Log in to your account\" with the saved login." },
+          { page: "Dashboard", do: "open", selector: "link:Create or Register a Business", note: "\"Select \"Create or Register a Business\" from the left navigation bar.\"" },
+          { page: "Create or Register a Business", do: "choose", selector: "button:Continue", note: "\"Select \"I would like to form a Washington State business.\"\", \"WA Limited Liability Company\" from the business type drop-down, then Continue." },
+          { page: "Business Information", do: "fill", note: "Fill each section from the approved values. \"All businesses must designate a Registered Agent in Washington State\"; the return address only receives the confirmation." },
+          { page: "Authorized Person", do: "agree", note: "The Authorized Person's first and last name, and the box \"This document is hereby executed under penalty of law and is to the best of my knowledge, true and correct\": only the approved signer, or ask the person." },
+          { page: "Review", do: "review", selector: "button:Add to Cart", note: "\"On the Review page, select \"Add to Cart.\"\" The worker compares the page with the approved values first." },
+          { page: "Shopping Cart", do: "pay", note: "\"Select \"Checkout\"\", \"Proceed to Checkout\", then \"Enter the required payment information\" and \"Place your Order\": the person pays ($180 plus the processing fee)." },
+          { page: "Order Confirmation", do: "receipt", note: "The guide doesn't show this page: note any order or filing number it shows." },
+        ],
+      },
+    },
+  },
+  {
+    host: "ecorp.sos.ga.gov",
+    name: "eCorp Online Services (Georgia Secretary of State, Corporations Division)",
+    guides: ["https://sos.ga.gov/sites/default/files/forms/Online%20Services%20User%20Guide.pdf", "https://sos.ga.gov/how-to-guide/how-guide-register-domestic-entity"],
+    read: "2026-10-18",
+    verified: null,
+    // User guide: on the review page "Verify your information ... then click Submit"; the payment page follows.
+    final: [{ page: "Review", button: "Submit" }],
+    pay: ["Payment"],
+    receipt: ["Thank You"],
+    forms: {
+      "ga-sos": {
+        start: "https://ecorp.sos.ga.gov/",
+        steps: [
+          { page: "Customer Login", do: "sign_in", note: "Online Services, then on the Customer Login page \"enter your User ID and Password, then click Log In\"." },
+          { page: "Business Formation", do: "choose", note: "In Create Business, choose a new domestic business and select Domestic Limited Liability Company from the dropdown (the how-to guide: \"create or register a business\")." },
+          { page: "Business Name", do: "fill", note: "The name (or name choices), the Business Purpose NAICS code or \"Any Legal Purpose\", the Principal Office Address and the business email, from the approved values; Continue." },
+          { page: "Registered Agent", do: "fill", note: "\"Create Registered Agent\": a Georgia street address where the agent can be personally served. Then the organizers (the guide's example adds incorporators the same way)." },
+          { page: "Certification", do: "agree", note: "\"Check the certify box, select an Effective Date, enter your name in the Authorizer Signature field, choose your title\": only the approved signer, or ask the person." },
+          { page: "Review", do: "review", selector: "button:Submit", note: "\"Verify your information. Use \"Edit Info\" or \"Back\" to make changes, then click \"Submit.\"\" The worker compares the page first." },
+          { page: "Payment", do: "pay", note: "Processing speed and \"Click to Pay\", then the card on the secure gateway: the person pays ($110)." },
+          { page: "Thank You", do: "receipt", note: "\"Check \"Pending Filings\" for status\"; the certificate is emailed once approved." },
+        ],
+      },
+    },
+  },
+  {
+    host: "cis.scc.virginia.gov",
+    name: "Clerk's Information System (Virginia State Corporation Commission)",
+    guides: ["https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf"],
+    read: "2026-10-18",
+    verified: null,
+    // Guide steps 28 and 29: "Review each section of the Articles of Organization", then "Click Add To Shopping Cart";
+    // Checkout and the LexisNexis payment page (with its CAPTCHA) follow.
+    final: [{ page: "Review", button: "Add To Shopping Cart" }],
+    pay: ["Shopping Cart", "Payment"],
+    receipt: ["Confirmation"],
+    forms: {
+      "va-llc": {
+        start: "https://cis.scc.virginia.gov/",
+        steps: [
+          { page: "Log In", do: "sign_in", note: "\"Log on to CIS at cis.scc.virginia.gov\" with the saved login (step 1)." },
+          { page: "Dashboard", do: "open", selector: "link:Online Services", note: "\"Click Online Services on the top left\", then \"Select Form or Register a Business\" (steps 2 and 3)." },
+          { page: "Form or Register a Business", do: "choose", selector: "button:Continue", note: "\"Select Virginia Entity. Click Continue.\" Then \"Select Limited Liability Company, then Articles of Organization from the drop-down. Click Continue.\" (steps 4 and 8)" },
+          { page: "Entity Name", do: "fill", note: "A reserved name takes its Reservation ID and PIN; otherwise \"Enter an Entity Name and click Check Availability\" and Next once it is \"available and acceptable\" (steps 5 to 10)." },
+          { page: "Entity Information", do: "fill", note: "\"Enter the Entity Email Address and Contact Number\", the Industry Code (\"Most select 0 - General\") and Duration (\"Most select Perpetual\"), then Next (steps 11 to 16)." },
+          { page: "Registered Agent", do: "fill", note: "Individual or Entity, search for it or Create Individual RA, the RA Capacity, then Next (steps 17 and 18): the agent the approved values name, or ask the person." },
+          { page: "Principal Office Address", do: "fill", note: "\"Enter the Principal Office Address information\", then Next (steps 19 and 20)." },
+          { page: "Management Structure", do: "choose", note: "\"Select the Management Structure from the Manager/Member Information drop-down\", then Next (steps 21 and 22)." },
+          { page: "Upload Articles", do: "upload", note: "Optional, and left alone: \"If you do not upload Articles, the system will create a filing image\"; an uploaded document isn't approved in real time (steps 23 and 24). Click Next." },
+          { page: "Signature", do: "agree", note: "Signing as an Individual or On behalf of Business Entity, the Signature Information, Add, OK, then Next (steps 25 to 27): only the approved signer, or ask the person." },
+          { page: "Review", do: "review", selector: "button:Add To Shopping Cart", note: "\"Review each section of the Articles of Organization\"; the worker compares it with the approved values before \"Add To Shopping Cart\" (steps 28 and 29)." },
+          { page: "Shopping Cart", do: "pay", note: "\"Click Checkout\", \"Go To Payment\", Continue: the payment page (run by LexisNexis, with a CAPTCHA) is the person's (steps 30 to 35)." },
+          { page: "Confirmation", do: "receipt", note: "\"You will be directed to a confirmation screen\"; \"In the Confirmation pop up window, click I Agree\" (step 36)." },
         ],
       },
     },

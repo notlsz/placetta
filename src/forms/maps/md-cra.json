@@ -1,0 +1,789 @@
+{
+ "form": "md-cra",
+ "rev": "Form CRA, Combined Registration Application (COM/RAD-093, Rev 11/25)",
+ "pdf": "md-cra.pdf",
+ "url": "https://www.marylandtaxes.gov/forms/current_forms/cra.pdf",
+ "checked": "2026-10-18",
+ "notes": "One application for Maryland's sales and use tax license, employer withholding and the unemployment insurance account (Sections A to F). Answers: dates are printed as MMDDYYYY, as the form asks. Owners are one per line, 'Last, First, Title', with their addresses and telephone numbers on two more answers in the same order (up to three); 'Yes' or 'No' ticks the matching box. Left for the applicant: every Social Security Number box (1b on each page and each owner's), which Placetta never writes; the 'Maryland number if registered' column; the cannabis, tobacco wholesale and motor fuel detail boxes; the electronic filing opt-in; and the signature and date. No fee. It may be faxed (410-260-7908, Sections A and E filled, no cover sheet) or mailed to Central Registration, or the same registration made online.",
+ "lines": [
+  {
+   "id": "fein",
+   "line": "1a",
+   "en": "Federal Employer Identification Number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "sdat_id",
+   "line": "1c",
+   "en": "Department of Assessments and Taxation entity ID number",
+   "zh": "马里兰州评估与税务局实体识别号"
+  },
+  {
+   "id": "legal_name",
+   "line": "2a",
+   "en": "Legal name of the business (an LLC or corporation's full name; a sole proprietor's first name)",
+   "zh": "企业法定名称（LLC 或公司的全称；独资经营者填名）"
+  },
+  {
+   "id": "owner_last_name",
+   "line": "2b",
+   "en": "Sole proprietor's last name, or None",
+   "zh": "独资经营者的姓，或 None"
+  },
+  {
+   "id": "trade_name",
+   "line": "3",
+   "en": "Trade name, if different, or None",
+   "zh": "商号（如不同），或 None"
+  },
+  {
+   "id": "address",
+   "line": "4",
+   "en": "Physical business location in Maryland (no P.O. box): 'street, suite, city, MD ZIP'",
+   "zh": "马里兰州营业地点（不可为邮政信箱）：“街道、套房、城市、MD 邮编”"
+  },
+  {
+   "id": "county",
+   "line": "4",
+   "en": "County",
+   "zh": "县"
+  },
+  {
+   "id": "phone",
+   "line": "4",
+   "en": "Business telephone",
+   "zh": "企业电话"
+  },
+  {
+   "id": "email",
+   "line": "4",
+   "en": "Business email",
+   "zh": "企业电子邮箱"
+  },
+  {
+   "id": "mailing",
+   "line": "5",
+   "en": "Mailing address: 'Same', or 'street, city, ST ZIP'",
+   "zh": "邮寄地址：“Same”（同上），或“街道、城市、州、邮编”"
+  },
+  {
+   "id": "reason",
+   "line": "6",
+   "en": "Reason for applying",
+   "zh": "申请原因",
+   "options": [
+    "New business",
+    "Additional location(s)",
+    "Change of entity",
+    "Purchased going business",
+    "Re-activate/Re-open"
+   ]
+  },
+  {
+   "id": "sales_tax",
+   "line": "8a",
+   "en": "Register for sales and use tax?",
+   "zh": "是否登记销售和使用税？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "withholding",
+   "line": "8e",
+   "en": "Register for employer withholding tax (and unemployment insurance)?",
+   "zh": "是否登记雇主预扣税（及失业保险）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "ownership",
+   "line": "9",
+   "en": "Type of ownership",
+   "zh": "所有权类型",
+   "options": [
+    "Limited liability company",
+    "Maryland corporation",
+    "Non-Maryland corporation",
+    "Sole proprietorship",
+    "Partnership"
+   ]
+  },
+  {
+   "id": "first_sales",
+   "line": "10",
+   "en": "Date of first sales in Maryland (MM/DD/YYYY), or None",
+   "zh": "在马里兰州首次销售日期（月/日/年），或 None"
+  },
+  {
+   "id": "first_wages",
+   "line": "11",
+   "en": "Date first wages paid in Maryland subject to withholding (MM/DD/YYYY), or None",
+   "zh": "在马里兰州首次支付需预扣工资的日期（月/日/年），或 None"
+  },
+  {
+   "id": "comp_policy",
+   "line": "13",
+   "en": "Workers' compensation insurance policy or binder number, or None",
+   "zh": "工伤保险保单或暂保单号，或 None"
+  },
+  {
+   "id": "pays_wages",
+   "line": "14a",
+   "en": "Paying (or will pay) wages for work in Maryland, including to corporate officers?",
+   "zh": "是否（将）为在马里兰州的工作支付工资（含公司高管）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "wages_date",
+   "line": "14b",
+   "en": "If yes, date wages first paid (MM/DD/YYYY), or None",
+   "zh": "如是，首次支付工资日期（月/日/年），或 None"
+  },
+  {
+   "id": "employees",
+   "line": "15",
+   "en": "Number of employees",
+   "zh": "员工人数"
+  },
+  {
+   "id": "first_quarter_wages",
+   "line": "16",
+   "en": "Estimated gross wages in the first quarter",
+   "zh": "首季度预计工资总额"
+  },
+  {
+   "id": "sales_location",
+   "line": "17",
+   "en": "Sales situation",
+   "zh": "销售情况",
+   "options": [
+    "Physical location only (no online sales to Maryland customers)",
+    "Physical location and online sales to Maryland customers",
+    "Online only (no physical sales location)",
+    "No sales (use tax only)"
+   ]
+  },
+  {
+   "id": "naics",
+   "line": "18",
+   "en": "6-digit NAICS code of the business activity",
+   "zh": "业务活动的 6 位 NAICS 代码"
+  },
+  {
+   "id": "activity",
+   "line": "19",
+   "en": "Business activity that generates revenue (e.g. Tea house)",
+   "zh": "产生收入的业务活动（如茶饮店）"
+  },
+  {
+   "id": "products",
+   "line": "19",
+   "en": "Products sold or services performed (one line, or two lines)",
+   "zh": "销售的产品或提供的服务（一行或两行）"
+  },
+  {
+   "id": "one_location",
+   "line": "20",
+   "en": "Does the business have only one physical location in Maryland?",
+   "zh": "企业在马里兰州是否只有一个实体营业地点？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "owners",
+   "line": "21",
+   "en": "Owners, partners, members or officers, one per line (up to three): 'Last, First, Title'",
+   "zh": "所有者、合伙人、成员或高管，每行一位（最多三位）：“姓、名、职务”"
+  },
+  {
+   "id": "owner_addresses",
+   "line": "21",
+   "en": "Their home addresses, one per line in the same order: 'street, city, ST ZIP'",
+   "zh": "其住址，按相同顺序每行一个：“街道、城市、州、邮编”"
+  },
+  {
+   "id": "owner_phones",
+   "line": "21",
+   "en": "Their telephone numbers, one per line in the same order",
+   "zh": "其电话，按相同顺序每行一个"
+  },
+  {
+   "id": "officers_paid",
+   "line": "B1",
+   "en": "Will corporate officers receive compensation, salary or a share of profits?",
+   "zh": "公司高管是否领取报酬、薪金或利润分配？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "acquired",
+   "line": "B2",
+   "en": "Did you acquire all or part of another employer's assets, business or workforce?",
+   "zh": "是否收购了其他雇主的全部或部分资产、业务或员工？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "payroll_1000",
+   "line": "B4a",
+   "en": "Will you have a total payroll of $1,000 or more in a calendar quarter? 'Yes: earliest quarter and year' or No",
+   "zh": "某一日历季度工资总额是否将达到 1,000 美元或以上？“Yes: 最早季度和年份”或 No"
+  },
+  {
+   "id": "llc_employees",
+   "line": "B6a",
+   "en": "As an LLC, do you employ anyone other than a member?",
+   "zh": "作为 LLC，是否雇用成员以外的人员？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "llc_8832",
+   "line": "B6b",
+   "en": "Has the LLC filed IRS Form 8832 to be classified as a corporation?",
+   "zh": "LLC 是否已提交 IRS 8832 表选择按公司分类？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "alcohol_wholesale",
+   "line": "C1",
+   "en": "Any manufacture, wholesale distribution or storage of alcoholic beverages (not retail)?",
+   "zh": "是否从事酒精饮料的生产、批发分销或仓储（零售除外）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "alcohol_retail",
+   "line": "C1A",
+   "en": "Will you sell alcoholic beverages directly to customers (e.g. a bar or restaurant)?",
+   "zh": "是否直接向顾客销售酒精饮料（如酒吧或餐厅）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "fuels",
+   "line": "D1",
+   "en": "Do you import or buy motor fuels in Maryland for resale, distribution or your own use?",
+   "zh": "是否在马里兰州进口或购买机动车燃料用于转售、分销或自用？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "F",
+   "en": "Person signing: 'name, title'",
+   "zh": "签署人：“姓名、职务”"
+  },
+  {
+   "id": "poa",
+   "line": "F",
+   "en": "Is a power of attorney form attached (a preparer files it for the business)?",
+   "zh": "是否附有授权委托书（由代办人代为提交）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "preparer",
+   "line": "F",
+   "en": "Preparer other than the applicant: 'name, telephone, email', or None",
+   "zh": "申请人以外的填表人：“姓名、电话、电子邮箱”，或 None"
+  }
+ ],
+ "boxes": {
+  "fein": [
+   {
+    "text": "Enter FEIN",
+    "pick": "digits"
+   }
+  ],
+  "sdat_id": [
+   {
+    "text": "Enter Department of Assessments and Taxation Entity Identification Number"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "Enter Legal first name of dealer, employer, corporation or owner"
+   }
+  ],
+  "owner_last_name": [
+   {
+    "text": "Enter Legal last name of dealer, employer, corporation or owner",
+    "if": "^(?!none$)"
+   }
+  ],
+  "trade_name": [
+   {
+    "text": "Enter Trade name",
+    "if": "^(?!none$)"
+   }
+  ],
+  "address": [
+   {
+    "text": "Enter Street Address - Line 1",
+    "pick": "street"
+   },
+   {
+    "text": "Enter City",
+    "pick": "city"
+   },
+   {
+    "text": "Enter State",
+    "pick": "state"
+   },
+   {
+    "text": "Enter Zip Code",
+    "pick": "zip"
+   }
+  ],
+  "county": [
+   {
+    "text": "Enter County"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Enter Telephone number",
+    "pick": "digits"
+   }
+  ],
+  "email": [
+   {
+    "text": "Enter Email address"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Enter Mailing Address - Line 1",
+    "pick": "street",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "Enter City - Mailing Address",
+    "pick": "city",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "Enter State - Mailing Address",
+    "pick": "state",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "Enter Zip Code - Mailing Address",
+    "pick": "zip",
+    "if": "^(?!same$)"
+   }
+  ],
+  "reason": [
+   {
+    "check": "Check for New Business",
+    "if": "^new"
+   },
+   {
+    "check": "Check for Additional location(s)",
+    "if": "^additional"
+   },
+   {
+    "check": "Check for Change of entity",
+    "if": "^change"
+   },
+   {
+    "check": "Check for Purchased going business",
+    "if": "^purchased"
+   },
+   {
+    "check": "Check for Re-activate/Re-open",
+    "if": "^re-?(activate|open)"
+   }
+  ],
+  "sales_tax": [
+   {
+    "check": "Check for Sales and use tax",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "withholding": [
+   {
+    "check": "Check for Employer withholding tax",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "ownership": [
+   {
+    "check": "Check for Limited liability company",
+    "if": "^(limited liability|llc)"
+   },
+   {
+    "check": "Check for Maryland corporation",
+    "if": "^maryland corporation"
+   },
+   {
+    "check": "Check for Non-Maryland corporation",
+    "if": "^non-maryland"
+   },
+   {
+    "check": "Check for Sole proprietorship",
+    "if": "^sole"
+   },
+   {
+    "check": "Check for Partnership",
+    "if": "^partnership"
+   }
+  ],
+  "first_sales": [
+   {
+    "text": "Enter Date first sales made in Maryland",
+    "pick": "date|digits",
+    "if": "^(?!none$)"
+   }
+  ],
+  "first_wages": [
+   {
+    "text": "Enter Date first wages paid in Maryland subject to",
+    "pick": "date|digits",
+    "if": "^(?!none$)"
+   }
+  ],
+  "comp_policy": [
+   {
+    "text": "Enter Worker's compensation insurance policy",
+    "if": "^(?!none$)"
+   }
+  ],
+  "pays_wages": [
+   {
+    "check": "Check for Yes_14a",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Check Box 76",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "wages_date": [
+   {
+    "text": "If yes, enter date wages first paid_14b",
+    "pick": "date|digits",
+    "if": "^(?!none$)"
+   }
+  ],
+  "employees": [
+   {
+    "text": "Enter Number of employees_15"
+   }
+  ],
+  "first_quarter_wages": [
+   {
+    "text": "Enter Estimated gross wages paid in first quarter of operation"
+   }
+  ],
+  "sales_location": [
+   {
+    "check": "Check if Applicant has a physical sales location within Maryland and will not make online sales to customers in Maryland",
+    "if": "^physical location only"
+   },
+   {
+    "check": "Check if Applicant has a physical sales location in Maryland and will make online sales to customers in Maryland",
+    "if": "^physical location and online"
+   },
+   {
+    "check": "Check if Applicant will make online sales to Maryland customers and does not have a physical sales location in Maryland",
+    "if": "^online only"
+   },
+   {
+    "check": "Check if Applicant does not make sales. The sales and use tax account is requested for reporting use tax only",
+    "if": "^no sales"
+   }
+  ],
+  "naics": [
+   {
+    "text": "Enter your 6 digit NAICS Code that best describes the profit or nonprofit business activity that generates revenue",
+    "pick": "digits"
+   }
+  ],
+  "activity": [
+   {
+    "text": "Describe for profit or nonprofit business activity that generates revenue"
+   }
+  ],
+  "products": [
+   {
+    "text": "Specify the product manufactured and/or sold, or the type of service performed",
+    "pick": "line1"
+   },
+   {
+    "text": "Specify the product manufactured and/or sold, or the type of service performed - Line 2",
+    "pick": "line2"
+   }
+  ],
+  "one_location": [
+   {
+    "check": "Does the business have only one physical location in Maryland? Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Does the business have only one physical location in Maryland? No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "owners": [
+   {
+    "text": "Enter Last name_1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "Enter first name_1",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": "Enter Title_1",
+    "pick": "line1|tail|tail"
+   },
+   {
+    "text": "Enter Last name_2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "Enter first name_2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": "Enter Title_2",
+    "pick": "line2|tail|tail"
+   },
+   {
+    "text": "Enter Last name_3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "Enter first name_3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": "Enter Title_3",
+    "pick": "line3|tail|tail"
+   }
+  ],
+  "owner_addresses": [
+   {
+    "text": "Enter Street Address_1",
+    "pick": "line1|street"
+   },
+   {
+    "text": "Enter City_1",
+    "pick": "line1|city"
+   },
+   {
+    "text": "Enter State_1",
+    "pick": "line1|state"
+   },
+   {
+    "text": "Enter Zip_1",
+    "pick": "line1|zip"
+   },
+   {
+    "text": "Enter Street Address_2",
+    "pick": "line2|street"
+   },
+   {
+    "text": "Enter City_2",
+    "pick": "line2|city"
+   },
+   {
+    "text": "Enter State_2",
+    "pick": "line2|state"
+   },
+   {
+    "text": "Enter ZIP_2",
+    "pick": "line2|zip"
+   },
+   {
+    "text": "Enter Street Address_3",
+    "pick": "line3|street"
+   },
+   {
+    "text": "Enter City_3",
+    "pick": "line3|city"
+   },
+   {
+    "text": "Enter State_3",
+    "pick": "line3|state"
+   },
+   {
+    "text": "Enter ZIP_3",
+    "pick": "line3|zip"
+   }
+  ],
+  "owner_phones": [
+   {
+    "text": "Enter Telephone_1",
+    "pick": "line1|digits"
+   },
+   {
+    "text": "Enter Telephone_2",
+    "pick": "line2|digits"
+   },
+   {
+    "text": "Enter Telephone_3",
+    "pick": "line3|digits"
+   }
+  ],
+  "officers_paid": [
+   {
+    "check": "Will corporate officers receive compensation, salary or distribution of profits? Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Will corporate officers receive compensation, salary or distribution of profits? No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "acquired": [
+   {
+    "check": "Did you acquire by sale or otherwise, all or part of the assets, business, organization, or workforce of another employer? Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Check Box 85",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "payroll_1000": [
+   {
+    "check": "Have you or will you have as an individual or local college club, college fraternity or sorority a total payroll of $1,000 or more… Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "text": "If yes, indicate the earliest quarter and calendar year_4b",
+    "pick": "tail",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Have you or will you have as an individual or local college club, college fraternity or sorority a total payroll of $1,000 or more… No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "llc_employees": [
+   {
+    "check": "As a Limited Liability Company, do you employ anyone other than a member? Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "As a Limited Liability Company, do you employ anyone other than a member? No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "llc_8832": [
+   {
+    "check": "Has the Limited Liability Company filed IRS form 8832 whereby it elected to be classified as a corporation. Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Has the Limited Liability Company filed IRS form 8832 whereby it elected to be classified as a corporation. No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "alcohol_wholesale": [
+   {
+    "check": "Will you engage in any business activity pertaining to the manufacture, sale, distribution, or storage of alcoholic beverages (excludes retail)? Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Will you engage in any business activity pertaining to the manufacture, sale, distribution, or storage of alcoholic beverages (excludes retail)? No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "alcohol_retail": [
+   {
+    "check": "Will you sell alcoholic beverages directly to customers as part of a retail business (e.g., bar, restaurant)? Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "Will you sell alcoholic beverages directly to customers as part of a retail business (e.g., bar, restaurant)? No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "fuels": [
+   {
+    "check": "1.\tDo you plan to import or purchase in Maryland, any of the following fuels for resale, distribution, or for your use? Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "1.\tDo you plan to import or purchase in Maryland, any of the following fuels for resale, distribution, or for your use? No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Print Name",
+    "pick": "head"
+   },
+   {
+    "text": "Enter Title",
+    "pick": "tail"
+   }
+  ],
+  "poa": [
+   {
+    "check": "Check Box 74",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "preparer": [
+   {
+    "text": "Enter Name of Preparer other than applicant",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Enter Telephone number_2",
+    "pick": "tail|head|digits",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Enter Email address_2",
+    "pick": "tail|tail",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "mailing": "^same$",
+  "owner_last_name": "^none$",
+  "trade_name": "^none$",
+  "first_sales": "^none$",
+  "first_wages": "^none$",
+  "comp_policy": "^none$",
+  "wages_date": "^none$",
+  "preparer": "^none$",
+  "sales_tax": "^(n|no|否)$",
+  "withholding": "^(n|no|否)$",
+  "poa": "^(n|no|否)$"
+ }
+}

@@ -1,0 +1,155 @@
+{
+ "form": "irs-1120",
+ "rev": "Form 1120 (2025)",
+ "pdf": "irs-1120.pdf",
+ "url": "https://www.irs.gov/pub/irs-pdf/f1120.pdf",
+ "checked": "2026-10-18",
+ "notes": "Mapped for the pro forma Form 1120 that a foreign-owned single-member LLC (a disregarded entity) files with Form 5472: the Form 5472 instructions ask for the name, address and items B and E only, with 'Foreign-owned U.S. DE' written across the top, which pro_forma 'Yes' prints. address is one line, 'street, suite, city, ST ZIP' (or 'street, district, Province 200120, Country' abroad): the street with its suite goes in the street box (the room box stays blank), and the country box is filled only for an address abroad. A regular corporation's return (income, deductions, tax and payments, Schedules C to M-2) is the preparer's work and isn't asked here; items A (consolidated and other elections), the tax year dates for a fiscal year, the paid preparer section, and the signature and its date are left for the signer and preparer. The XFA layer is dropped by the filler so the filled boxes show.",
+ "lines": [
+  {
+   "id": "pro_forma",
+   "line": "Top",
+   "en": "Is this the pro forma Form 1120 a foreign-owned U.S. disregarded entity files with Form 5472?",
+   "zh": "这是否为外资美国非独立实体随 5472 表提交的形式 1120 表？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "name",
+   "line": "Name",
+   "en": "Name",
+   "zh": "名称"
+  },
+  {
+   "id": "address",
+   "line": "Address",
+   "en": "Address: number and street, city, state or province, ZIP or postal code, and country if abroad",
+   "zh": "地址：门牌号和街道、城市、州或省、邮编，境外另填国家"
+  },
+  {
+   "id": "ein",
+   "line": "B",
+   "en": "Employer identification number",
+   "zh": "雇主识别号（EIN）"
+  },
+  {
+   "id": "date_incorporated",
+   "line": "C",
+   "en": "Date incorporated (date the entity was formed)",
+   "zh": "成立日期"
+  },
+  {
+   "id": "total_assets",
+   "line": "D",
+   "en": "Total assets",
+   "zh": "总资产"
+  },
+  {
+   "id": "return_check",
+   "line": "E",
+   "en": "Check if",
+   "zh": "勾选项",
+   "options": [
+    "None",
+    "Initial return",
+    "Final return",
+    "Name change",
+    "Address change"
+   ]
+  },
+  {
+   "id": "signer_title",
+   "line": "Sign Here",
+   "en": "Title of the officer signing",
+   "zh": "签署高管职务"
+  }
+ ],
+ "boxes": {
+  "pro_forma": [
+   {
+    "at": {
+     "page": 0,
+     "x": 240,
+     "y": 778,
+     "w": 200,
+     "size": 11
+    },
+    "value": "Foreign-owned U.S. DE",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "name": [
+   {
+    "text": "topmostSubform[0].Page1[0].NameFieldsReadOrder[0].f1_4[0]"
+   }
+  ],
+  "address": [
+   {
+    "text": "topmostSubform[0].Page1[0].NameFieldsReadOrder[0].f1_5[0]",
+    "pick": "street"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].NameFieldsReadOrder[0].f1_7[0]",
+    "pick": "city"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].NameFieldsReadOrder[0].f1_8[0]",
+    "pick": "state"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].NameFieldsReadOrder[0].f1_9[0]",
+    "pick": "country",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].NameFieldsReadOrder[0].f1_10[0]",
+    "pick": "zip"
+   }
+  ],
+  "ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_11[0]"
+   }
+  ],
+  "date_incorporated": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_12[0]",
+    "pick": "date"
+   }
+  ],
+  "total_assets": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_13[0]"
+   }
+  ],
+  "return_check": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_6[0]",
+    "if": "^initial"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_7[0]",
+    "if": "^final"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_8[0]",
+    "if": "^name"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_9[0]",
+    "if": "^address"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "topmostSubform[0].Page1[0].SignHere-ReadOrder[0].f1_58[0]"
+   }
+  ]
+ },
+ "blank": {
+  "pro_forma": "^(n|no|否)$",
+  "return_check": "^none$"
+ }
+}

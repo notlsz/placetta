@@ -1,0 +1,826 @@
+{
+ "form": "ca-abc-217",
+ "rev": "ABC-217 (rev. 06/2025)",
+ "pdf": "ca-abc-217.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-217.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: license_type and transaction tick their box; 'Other: text' also writes the text. Escrow, bookkeeper and landlord take three lines each: name, address, telephone. funds takes up to eight lines, one per source: 'amount, type, source and terms' (the first two commas split the columns). banks takes up to two lines, 'bank name, bank address'; account numbers are never written by Placetta and stay for the applicant, as do items 13 to 15 (convictions and violations, which the applicant answers and explains), the P-12 licensee box and the section boxes under person-to-person transfers. 'None' leaves an optional line blank. The signature, date and attestation are left for the applicant and the ABC employee or notary.",
+ "lines": [
+  {
+   "id": "applicant",
+   "line": "1",
+   "en": "Applicant name(s): an individual's first, middle and last name, or the entity's name",
+   "zh": "申请人名称：个人填名、中间名、姓；实体填实体名称"
+  },
+  {
+   "id": "license_type",
+   "line": "2",
+   "en": "License type",
+   "zh": "执照类型",
+   "options": [
+    "41 On-Sale Beer & Wine Eating Place",
+    "47 On-Sale General Eating Place",
+    "40 On-Sale Beer",
+    "42 On-Sale Beer & Wine Public Premises",
+    "48 On-Sale General Public Premises",
+    "20 Off-Sale Beer & Wine",
+    "21 Off-Sale General",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "transaction",
+   "line": "3",
+   "en": "Transaction type",
+   "zh": "交易类型",
+   "options": [
+    "Original (new)",
+    "Person-to-person transfer",
+    "Premises-to-premises transfer",
+    "Exchange",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "temporary_permit",
+   "line": "4",
+   "en": "Temporary permit requested (person-to-person transfers only)?",
+   "zh": "是否申请临时许可（仅限人对人转让）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "county",
+   "line": "5",
+   "en": "County",
+   "zh": "县"
+  },
+  {
+   "id": "premises_phone",
+   "line": "6",
+   "en": "Premises telephone number",
+   "zh": "经营场所电话"
+  },
+  {
+   "id": "outside_city",
+   "line": "7",
+   "en": "Are the premises outside city limits?",
+   "zh": "经营场所是否在市界之外？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "dba",
+   "line": "8",
+   "en": "Business name (DBA) you will use",
+   "zh": "将使用的营业名称（DBA）"
+  },
+  {
+   "id": "mailing_address",
+   "line": "9",
+   "en": "Business mailing address (street, city, state, ZIP)",
+   "zh": "企业邮寄地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "mailing_type",
+   "line": "10",
+   "en": "Is the mailing address permanent or temporary?",
+   "zh": "邮寄地址为永久还是临时？",
+   "options": [
+    "Permanent",
+    "Temporary"
+   ]
+  },
+  {
+   "id": "license_cost",
+   "line": "11",
+   "en": "ABC license cost (item 33a)",
+   "zh": "ABC 执照费用（第 33a 项）"
+  },
+  {
+   "id": "subtotal",
+   "line": "12",
+   "en": "Subtotal (item 33f)",
+   "zh": "小计（第 33f 项）"
+  },
+  {
+   "id": "transferor",
+   "line": "16",
+   "en": "Transferor's name (transfers only)",
+   "zh": "转让方名称（仅转让）"
+  },
+  {
+   "id": "transferor_license",
+   "line": "17",
+   "en": "Transferor's ABC license number",
+   "zh": "转让方 ABC 执照号"
+  },
+  {
+   "id": "transferor_premises",
+   "line": "18",
+   "en": "Transferor's premises address (where the license is now issued)",
+   "zh": "转让方经营场所地址（现执照所在地）"
+  },
+  {
+   "id": "under_construction",
+   "line": "19",
+   "en": "Are the premises under construction?",
+   "zh": "经营场所是否在施工中？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "completion_date",
+   "line": "19",
+   "en": "If yes, estimated completion date",
+   "zh": "如是，预计完工日期"
+  },
+  {
+   "id": "franchise",
+   "line": "20",
+   "en": "Is it a franchise?",
+   "zh": "是否为特许经营？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "contact_name",
+   "line": "21",
+   "en": "Name of person ABC may contact for the applicant",
+   "zh": "ABC 可联系的申请人联系人姓名"
+  },
+  {
+   "id": "contact_title",
+   "line": "22",
+   "en": "Title of contact person",
+   "zh": "联系人职务"
+  },
+  {
+   "id": "contact_phone",
+   "line": "23",
+   "en": "Contact telephone number",
+   "zh": "联系人电话"
+  },
+  {
+   "id": "contact_email",
+   "line": "24",
+   "en": "Contact email address",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "currently_licensed",
+   "line": "25",
+   "en": "Is the premises currently licensed?",
+   "zh": "该场所目前是否持有执照？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "current_type",
+   "line": "25",
+   "en": "If yes, type of license",
+   "zh": "如是，执照类型"
+  },
+  {
+   "id": "current_operating",
+   "line": "26",
+   "en": "Is the current license operating?",
+   "zh": "现有执照是否在营业？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "date_closed",
+   "line": "26",
+   "en": "If not, date closed",
+   "zh": "如否，关闭日期"
+  },
+  {
+   "id": "escrow",
+   "line": "27",
+   "en": "Escrow company: name, address, telephone (one per line)",
+   "zh": "托管公司：名称、地址、电话（每行一项）"
+  },
+  {
+   "id": "bookkeeper",
+   "line": "28",
+   "en": "Bookkeeper or accountant: name, address, telephone (one per line)",
+   "zh": "记账员或会计师：名称、地址、电话（每行一项）"
+  },
+  {
+   "id": "landlord",
+   "line": "29",
+   "en": "Landlord: name, address, telephone (one per line)",
+   "zh": "房东：名称、地址、电话（每行一项）"
+  },
+  {
+   "id": "monthly_rent",
+   "line": "30",
+   "en": "Monthly rent",
+   "zh": "月租金"
+  },
+  {
+   "id": "lease_expires",
+   "line": "31",
+   "en": "Lease expiration date",
+   "zh": "租约到期日"
+  },
+  {
+   "id": "rent_includes",
+   "line": "32",
+   "en": "Does the lease include furniture or fixtures?",
+   "zh": "租约是否包括家具或固定装置？",
+   "options": [
+    "All",
+    "Some",
+    "None"
+   ]
+  },
+  {
+   "id": "cost_license",
+   "line": "33a",
+   "en": "Investment: ABC license",
+   "zh": "投资：ABC 执照"
+  },
+  {
+   "id": "cost_furniture",
+   "line": "33b",
+   "en": "Investment: furniture and fixtures",
+   "zh": "投资：家具和固定装置"
+  },
+  {
+   "id": "cost_inventory",
+   "line": "33c",
+   "en": "Investment: inventory",
+   "zh": "投资：存货"
+  },
+  {
+   "id": "cost_goodwill",
+   "line": "33d",
+   "en": "Investment: goodwill or non-compete covenant",
+   "zh": "投资：商誉或竞业禁止"
+  },
+  {
+   "id": "cost_leasehold",
+   "line": "33e",
+   "en": "Investment: leasehold and improvements",
+   "zh": "投资：租赁权益和装修"
+  },
+  {
+   "id": "cost_subtotal",
+   "line": "33f",
+   "en": "Subtotal (usually equals the recorded notice)",
+   "zh": "小计（通常等于登记公告）"
+  },
+  {
+   "id": "cost_fees",
+   "line": "33g",
+   "en": "Fees for other licenses, permits and deposits (approximate)",
+   "zh": "其他执照、许可和押金费用（约数）"
+  },
+  {
+   "id": "cost_working",
+   "line": "33h",
+   "en": "Working capital (approximate)",
+   "zh": "营运资金（约数）"
+  },
+  {
+   "id": "cost_realty",
+   "line": "33i",
+   "en": "Realty or interest therein",
+   "zh": "不动产或其权益"
+  },
+  {
+   "id": "cost_total",
+   "line": "33j",
+   "en": "Total investment (items f through i)",
+   "zh": "投资总额（f 至 i 项）"
+  },
+  {
+   "id": "funds",
+   "line": "34",
+   "en": "Source of funds: one per line, 'amount, type, source and terms of repayment'",
+   "zh": "资金来源：每行一项，“金额、类型、来源和还款条件”"
+  },
+  {
+   "id": "banks",
+   "line": "35",
+   "en": "Bank accounts for this business: one per line, 'bank name, bank address'",
+   "zh": "本业务的银行账户：每行一项，“银行名称、银行地址”"
+  },
+  {
+   "id": "bank_signers",
+   "line": "35c",
+   "en": "Names of all persons authorized to sign on the bank account(s)",
+   "zh": "所有获授权在银行账户签字的人的姓名"
+  },
+  {
+   "id": "printed_name",
+   "line": "36",
+   "en": "Printed name of the applicant signing",
+   "zh": "签署申请人姓名（印刷体）"
+  }
+ ],
+ "boxes": {
+  "applicant": [
+   {
+    "text": "APPLICANTS NAME(S) 1"
+   }
+  ],
+  "license_type": [
+   {
+    "check": "Check Box4",
+    "if": "^41"
+   },
+   {
+    "check": "Check Box6",
+    "if": "^47"
+   },
+   {
+    "check": "Check Box3",
+    "if": "^40"
+   },
+   {
+    "check": "Check Box5",
+    "if": "^42"
+   },
+   {
+    "check": "Check Box7",
+    "if": "^48"
+   },
+   {
+    "check": "Check Box1",
+    "if": "^20"
+   },
+   {
+    "check": "Check Box2",
+    "if": "^21"
+   },
+   {
+    "check": "Check Box8",
+    "if": "^other"
+   },
+   {
+    "text": "Text15",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "transaction": [
+   {
+    "check": "Check Box9",
+    "if": "^original"
+   },
+   {
+    "check": "Check Box10",
+    "if": "^person"
+   },
+   {
+    "check": "Check Box14",
+    "if": "^premises"
+   },
+   {
+    "check": "Check Box15",
+    "if": "^exchange"
+   },
+   {
+    "check": "Check Box16",
+    "if": "^other"
+   },
+   {
+    "text": "Other",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "temporary_permit": [
+   {
+    "check": "TEMPORARY PERMIT REQUESTED_1",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "TEMPORARY PERMIT REQUESTED_2",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "premises": [
+   {
+    "text": "5  PREMISES ADDRESS Where license to be issued Street number and name city zip code"
+   }
+  ],
+  "county": [
+   {
+    "text": "County"
+   }
+  ],
+  "premises_phone": [
+   {
+    "text": "Text6"
+   }
+  ],
+  "outside_city": [
+   {
+    "check": "PREMISES ARE INSIDE CITY LIMITS_1",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "PREMISES ARE INSIDE CITY LIMITS_2",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "dba": [
+   {
+    "text": "8  BUSINESS NAME DBA YOU WILL USE"
+   }
+  ],
+  "mailing_address": [
+   {
+    "text": "9  BUSINESS MAILING ADDRESS Street number and name city state zip code"
+   }
+  ],
+  "mailing_type": [
+   {
+    "check": "Permanent",
+    "if": "^perm"
+   },
+   {
+    "check": "Temporary",
+    "if": "^temp"
+   }
+  ],
+  "license_cost": [
+   {
+    "text": "11  ABC LICENSE COST Item 33a on reverse"
+   }
+  ],
+  "subtotal": [
+   {
+    "text": "12  SUBTOTAL Item 33f on reverse"
+   }
+  ],
+  "transferor": [
+   {
+    "text": "Text1",
+    "if": "^(?!none$)"
+   }
+  ],
+  "transferor_license": [
+   {
+    "text": "Text2",
+    "if": "^(?!none$)"
+   }
+  ],
+  "transferor_premises": [
+   {
+    "text": "20  FRANCHISE Yes No",
+    "if": "^(?!none$)"
+   }
+  ],
+  "under_construction": [
+   {
+    "check": "PREMISES UNDER CONSTRUCTION_1",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "PREMISES UNDER CONSTRUCTION_2",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "completion_date": [
+   {
+    "text": "IF YES LIST ESTIMATED COMPLETION DATE",
+    "if": "^(?!none$)"
+   }
+  ],
+  "franchise": [
+   {
+    "check": "FRANCHISE_1",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "FRANCHISE_2",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "contact_name": [
+   {
+    "text": "21  NAME OF PERSON WE MAY CONTACT For the applicant"
+   }
+  ],
+  "contact_title": [
+   {
+    "text": "22  TITLE OF CONTACT PERSON"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "23  CONTACT TELEPHONE NUMBER"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "24  CONTACT EMAIL ADDRESS"
+   }
+  ],
+  "currently_licensed": [
+   {
+    "check": "PREMISES IS CURRENTLY LICENSED_1",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "PREMISES IS CURRENTLY LICENSED_2",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "current_type": [
+   {
+    "text": "IF YES TYPE OF LICENSE",
+    "if": "^(?!none$)"
+   }
+  ],
+  "current_operating": [
+   {
+    "check": "CURRENT LICENSE IS OPERATING_1",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "CURRENT LICENSE IS OPERATING_2",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "date_closed": [
+   {
+    "text": "IF NO DATE CLOSED",
+    "if": "^(?!none$)"
+   }
+  ],
+  "escrow": [
+   {
+    "text": "27  ESCROW COMPANYS NAME",
+    "pick": "line1"
+   },
+   {
+    "text": "ESCROW COMPANYS ADDRESS",
+    "pick": "line2"
+   },
+   {
+    "text": "TELEPHONE NUMBER",
+    "pick": "line3"
+   }
+  ],
+  "bookkeeper": [
+   {
+    "text": "28  BOOKKEEPERACCOUNTANTS NAME",
+    "pick": "line1"
+   },
+   {
+    "text": "BOOKKEEPERACCOUNTANTS ADDRESS",
+    "pick": "line2"
+   },
+   {
+    "text": "TELEPHONE NUMBER_2",
+    "pick": "line3"
+   }
+  ],
+  "landlord": [
+   {
+    "text": "29  LANDLORDS NAME",
+    "pick": "line1"
+   },
+   {
+    "text": "LANDLORDS ADDRESS",
+    "pick": "line2"
+   },
+   {
+    "text": "TELEPHONE NUMBER_3",
+    "pick": "line3"
+   }
+  ],
+  "monthly_rent": [
+   {
+    "text": "30  MONTHLY RENT"
+   }
+  ],
+  "lease_expires": [
+   {
+    "text": "31  LEASE EXPIRATION DATE"
+   }
+  ],
+  "rent_includes": [
+   {
+    "check": "ALL",
+    "if": "^all"
+   },
+   {
+    "check": "SOME",
+    "if": "^some"
+   },
+   {
+    "check": "NONE",
+    "if": "^none"
+   }
+  ],
+  "cost_license": [
+   {
+    "text": "COST_1"
+   }
+  ],
+  "cost_furniture": [
+   {
+    "text": "COST_2"
+   }
+  ],
+  "cost_inventory": [
+   {
+    "text": "COST_3"
+   }
+  ],
+  "cost_goodwill": [
+   {
+    "text": "COST_4"
+   }
+  ],
+  "cost_leasehold": [
+   {
+    "text": "COST_5"
+   }
+  ],
+  "cost_subtotal": [
+   {
+    "text": "COST_6"
+   }
+  ],
+  "cost_fees": [
+   {
+    "text": "COST_7"
+   }
+  ],
+  "cost_working": [
+   {
+    "text": "COST_8"
+   }
+  ],
+  "cost_realty": [
+   {
+    "text": "COST_9"
+   }
+  ],
+  "cost_total": [
+   {
+    "text": "fill_38"
+   }
+  ],
+  "funds": [
+   {
+    "text": "10000Row1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "LoanRow1",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": "from ABC Bank  85 over 5 yrs monthly payment  2052Row1",
+    "pick": "line1|tail|tail"
+   },
+   {
+    "text": "10000Row2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "LoanRow2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": "from ABC Bank  85 over 5 yrs monthly payment  2052Row2",
+    "pick": "line2|tail|tail"
+   },
+   {
+    "text": "10000Row3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "LoanRow3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": "from ABC Bank  85 over 5 yrs monthly payment  2052Row3",
+    "pick": "line3|tail|tail"
+   },
+   {
+    "text": "10000Row4",
+    "pick": "line4|head"
+   },
+   {
+    "text": "LoanRow4",
+    "pick": "line4|tail|head"
+   },
+   {
+    "text": "from ABC Bank  85 over 5 yrs monthly payment  2052Row4",
+    "pick": "line4|tail|tail"
+   },
+   {
+    "text": "10000Row5",
+    "pick": "line5|head"
+   },
+   {
+    "text": "LoanRow5",
+    "pick": "line5|tail|head"
+   },
+   {
+    "text": "from ABC Bank  85 over 5 yrs monthly payment  2052Row5",
+    "pick": "line5|tail|tail"
+   },
+   {
+    "text": "10000Row6",
+    "pick": "line6|head"
+   },
+   {
+    "text": "LoanRow6",
+    "pick": "line6|tail|head"
+   },
+   {
+    "text": "from ABC Bank  85 over 5 yrs monthly payment  2052Row6",
+    "pick": "line6|tail|tail"
+   },
+   {
+    "text": "10000Row7",
+    "pick": "line7|head"
+   },
+   {
+    "text": "LoanRow7",
+    "pick": "line7|tail|head"
+   },
+   {
+    "text": "from ABC Bank  85 over 5 yrs monthly payment  2052Row7",
+    "pick": "line7|tail|tail"
+   },
+   {
+    "text": "10000Row8",
+    "pick": "line8|head"
+   },
+   {
+    "text": "LoanRow8",
+    "pick": "line8|tail|head"
+   },
+   {
+    "text": "from ABC Bank  85 over 5 yrs monthly payment  2052Row8",
+    "pick": "line8|tail|tail"
+   }
+  ],
+  "banks": [
+   {
+    "text": "BANK NAME a",
+    "pick": "line1|head"
+   },
+   {
+    "text": "Text10",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "Text12",
+    "pick": "line2|head"
+   },
+   {
+    "text": "BANK ADDRESSb",
+    "pick": "line2|tail"
+   }
+  ],
+  "bank_signers": [
+   {
+    "text": "I understand that falsification of the information on this form may constitute grounds for denial or revocation of the licenses"
+   }
+  ],
+  "printed_name": [
+   {
+    "text": "PRINTED NAME"
+   }
+  ]
+ },
+ "blank": {
+  "transferor": "^none$",
+  "transferor_license": "^none$",
+  "transferor_premises": "^none$",
+  "completion_date": "^none$",
+  "current_type": "^none$",
+  "date_closed": "^none$"
+ }
+}

@@ -1,0 +1,475 @@
+{
+ "form": "wa-sos",
+ "rev": "Certificate of Formation, Limited Liability Company (Revised 6.2025)",
+ "pdf": "wa-sos.pdf",
+ "url": "https://www.sos.wa.gov/sites/default/files/2025-06/6.2025%20-%20LLC%20-%20COF_0.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: the $180 filing fee box is always ticked; 'Yes' to expedite ticks the $100 box. A UBI or name reservation number ticks Yes and writes it; 'None' ticks No. Duration 'Years: 30' or 'Expires: date'; a later effective date is 'Specify: MM/DD/YYYY'. The registered agent is either a commercial agent (name only) or a non-commercial one (name, email, Washington street address); the other answers None. Addresses are 'street, city, ST ZIP' and go on each block's first line ('Same' ticks the same-as-street box). Executors are 'name; address; country; printed name and title' (up to two). Left for the signers: the agent's and each executor's signature and date. The form's first page of instructions is left as it is. Mailed with the fee to the Corporations and Charities Division, or the same filing made online in CCFS.",
+ "lines": [
+  {
+   "id": "expedite",
+   "line": "Fee",
+   "en": "Expedite the filing for $100 more?",
+   "zh": "是否加急（另付 100 美元）？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "ubi",
+   "line": "1",
+   "en": "Washington UBI number, if the business already has one, or None",
+   "zh": "华盛顿州 UBI 号（如已有），或 None"
+  },
+  {
+   "id": "name",
+   "line": "2",
+   "en": "Business entity name (with Limited Liability Company, Limited Liability, LLC, L.L.C. or Co.)",
+   "zh": "企业实体名称（须含 Limited Liability Company、Limited Liability、LLC、L.L.C. 或 Co.）"
+  },
+  {
+   "id": "reservation",
+   "line": "2",
+   "en": "Name reservation number, or None",
+   "zh": "名称保留号，或 None"
+  },
+  {
+   "id": "duration",
+   "line": "3",
+   "en": "Period of duration",
+   "zh": "存续期限",
+   "options": [
+    "Perpetual",
+    "Years: number",
+    "Expires: MM/DD/YYYY"
+   ]
+  },
+  {
+   "id": "effective",
+   "line": "4",
+   "en": "Effective date",
+   "zh": "生效日期",
+   "options": [
+    "Date of filing",
+    "Specify: MM/DD/YYYY (within 90 days)"
+   ]
+  },
+  {
+   "id": "commercial_agent",
+   "line": "5",
+   "en": "Commercial registered agent's name, or None",
+   "zh": "商业注册代理人名称，或 None"
+  },
+  {
+   "id": "agent",
+   "line": "5",
+   "en": "Non-commercial registered agent: a person's first and last name, a business's name, or an office title (e.g. Member), or None",
+   "zh": "非商业注册代理人：个人姓名、企业名称或职位名称（如 Member），或 None"
+  },
+  {
+   "id": "agent_email",
+   "line": "5",
+   "en": "Registered agent's email (required for a non-commercial agent), or None",
+   "zh": "注册代理人电子邮箱（非商业代理人必填），或 None"
+  },
+  {
+   "id": "agent_phone",
+   "line": "5",
+   "en": "Registered agent's phone, or None",
+   "zh": "注册代理人电话，或 None"
+  },
+  {
+   "id": "agent_address",
+   "line": "5",
+   "en": "Registered agent's Washington street address (no P.O. box or PMB): 'street, city, WA ZIP', or None",
+   "zh": "注册代理人华盛顿州街道地址（不可为邮政信箱或 PMB）：“街道、城市、WA 邮编”，或 None"
+  },
+  {
+   "id": "agent_mailing",
+   "line": "5",
+   "en": "Agent's mailing address: 'Same', or 'street, city, WA ZIP', or None",
+   "zh": "代理人邮寄地址：“Same”（同上）或“街道、城市、WA 邮编”，或 None"
+  },
+  {
+   "id": "agent_signer",
+   "line": "5",
+   "en": "Registered agent signing the consent to serve: 'name, title', or None",
+   "zh": "签署同意担任注册代理人的人：“姓名、职务”，或 None"
+  },
+  {
+   "id": "office",
+   "line": "6",
+   "en": "Principal office, where the records are kept (no P.O. box or PMB): 'street, city, ST ZIP' (and country if abroad)",
+   "zh": "主要办公地点（保存记录处，不可为邮政信箱或 PMB）：“街道、城市、州、邮编”（境外另填国家）"
+  },
+  {
+   "id": "office_country",
+   "line": "6",
+   "en": "Principal office country",
+   "zh": "主要办公地点所在国家"
+  },
+  {
+   "id": "office_mailing",
+   "line": "6",
+   "en": "Principal office mailing address: 'Same', or 'street, city, ST ZIP'",
+   "zh": "主要办公地点邮寄地址：“Same”（同上）或“街道、城市、州、邮编”"
+  },
+  {
+   "id": "office_email",
+   "line": "6",
+   "en": "Principal office email",
+   "zh": "主要办公地点电子邮箱"
+  },
+  {
+   "id": "office_phone",
+   "line": "6",
+   "en": "Principal office phone, or None",
+   "zh": "主要办公地点电话，或 None"
+  },
+  {
+   "id": "return_to",
+   "line": "7",
+   "en": "Return address for the confirmation: 'attention; email; street, city, ST ZIP', or None",
+   "zh": "确认函回寄地址：“收件人；电子邮箱；街道、城市、州、邮编”，或 None"
+  },
+  {
+   "id": "executor1",
+   "line": "8",
+   "en": "Executor signing: 'name; street, city, ST ZIP; country; printed name and title'",
+   "zh": "签署的执行人：“姓名；街道、城市、州、邮编；国家；印刷体姓名及职务”"
+  },
+  {
+   "id": "executor2",
+   "line": "8",
+   "en": "A second executor, the same way, or None",
+   "zh": "第二位执行人，同上格式，或 None"
+  }
+ ],
+ "boxes": {
+  "expedite": [
+   {
+    "check": "Expedite filing add 100 dollars",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "ubi": [
+   {
+    "check": "Yes the business has a UBI number",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "UBI number",
+    "pick": "digits",
+    "if": "^(?!none$)"
+   },
+   {
+    "check": "No the business does not have a UBI number",
+    "if": "^none$"
+   }
+  ],
+  "name": [
+   {
+    "text": "Business name"
+   }
+  ],
+  "reservation": [
+   {
+    "check": "Yes the business has a named reserved",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Reservation number",
+    "if": "^(?!none$)"
+   },
+   {
+    "check": "No the business does not have a name reserved",
+    "if": "^none$"
+   }
+  ],
+  "duration": [
+   {
+    "check": "Perpetual duration",
+    "if": "^perpetual"
+   },
+   {
+    "check": "Duration of a certain number of years",
+    "if": "^years"
+   },
+   {
+    "text": "Number of years of duration",
+    "pick": "tail",
+    "if": "^years"
+   },
+   {
+    "check": "Specific date to expire",
+    "if": "^expires"
+   },
+   {
+    "text": "Date company should expire",
+    "pick": "tail|date",
+    "if": "^expires"
+   }
+  ],
+  "effective": [
+   {
+    "check": "Effective date for the filing is the day it is processed",
+    "if": "^date of filing"
+   },
+   {
+    "check": "Effective date is within 90 days in the future",
+    "if": "^specify"
+   },
+   {
+    "text": "Specific date to take effect",
+    "pick": "tail|date",
+    "if": "^specify"
+   }
+  ],
+  "commercial_agent": [
+   {
+    "text": "Commercial Registered Agent Name",
+    "if": "^(?!none$)"
+   }
+  ],
+  "agent": [
+   {
+    "text": "Non-commercial Registered Agent Name",
+    "if": "^(?!none$)"
+   }
+  ],
+  "agent_email": [
+   {
+    "text": "Registered agent email address",
+    "if": "^(?!none$)"
+   }
+  ],
+  "agent_phone": [
+   {
+    "text": "Registered agent phone number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "Registered agent street address line 1",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Registered agent street zip",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Registered agent street city",
+    "pick": "city",
+    "if": "^(?!none$)"
+   }
+  ],
+  "agent_mailing": [
+   {
+    "check": "Is registered agent mailing address same as street",
+    "if": "^same$"
+   },
+   {
+    "text": "Registered agent mailing address line 1",
+    "pick": "street",
+    "if": "^(?!(same|none)$)"
+   },
+   {
+    "text": "Registered agent mailing zip",
+    "pick": "zip",
+    "if": "^(?!(same|none)$)"
+   },
+   {
+    "text": "Registered agent mailing city",
+    "pick": "city",
+    "if": "^(?!(same|none)$)"
+   }
+  ],
+  "agent_signer": [
+   {
+    "text": "Registered agent printed name  and title of signor",
+    "if": "^(?!none$)"
+   }
+  ],
+  "office": [
+   {
+    "text": "Principal Office street address line 1",
+    "pick": "street"
+   },
+   {
+    "text": "Principal office street zip",
+    "pick": "zip"
+   },
+   {
+    "text": "Principal office street City",
+    "pick": "city"
+   },
+   {
+    "text": "Principal office street State",
+    "pick": "state"
+   }
+  ],
+  "office_country": [
+   {
+    "text": "Principal office street Country"
+   }
+  ],
+  "office_mailing": [
+   {
+    "check": "Is Principal office mailing address same as street",
+    "if": "^same$"
+   },
+   {
+    "text": "Principal office mailing address line 1",
+    "pick": "street",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "Principal office mailing zip",
+    "pick": "zip",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "Principal office mailing city",
+    "pick": "city",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "Principal office mailing state",
+    "pick": "state",
+    "if": "^(?!same$)"
+   }
+  ],
+  "office_email": [
+   {
+    "text": "Principal office email"
+   }
+  ],
+  "office_phone": [
+   {
+    "text": "Principal office phone number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "return_to": [
+   {
+    "text": "Return address for this filing attention to",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Return address for this filing email address",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Return address for this filing mailing address",
+    "pick": "line3|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Return address for this filing mailing address city",
+    "pick": "line3|city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Return address for this filing mailing address state",
+    "pick": "line3|state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Return address for this filing mailing address zip",
+    "pick": "line3|zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "executor1": [
+   {
+    "text": "Executor 1 name",
+    "pick": "line1"
+   },
+   {
+    "text": "Executor 1 mailing address",
+    "pick": "line2|street"
+   },
+   {
+    "text": "Executor 1 mailing city",
+    "pick": "line2|city"
+   },
+   {
+    "text": "Executor 1 mailing state",
+    "pick": "line2|state"
+   },
+   {
+    "text": "Executor 1 mailing zip",
+    "pick": "line2|zip"
+   },
+   {
+    "text": "Executor 1 mailing country",
+    "pick": "line3"
+   },
+   {
+    "text": "Executor 1 printed name and title",
+    "pick": "line4"
+   }
+  ],
+  "executor2": [
+   {
+    "text": "Executor 2 name",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Executor 2 mailing address",
+    "pick": "line2|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Executor 2 mailing city",
+    "pick": "line2|city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Executor 2 mailing state",
+    "pick": "line2|state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Executor 2 mailing zip",
+    "pick": "line2|zip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Executor 2 mailing country",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Executor 2 printed name and title",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "fixed": [
+  {
+   "check": "180 dollar filing fee"
+  }
+ ],
+ "blank": {
+  "expedite": "^(n|no|否)$",
+  "commercial_agent": "^none$",
+  "agent": "^none$",
+  "agent_email": "^none$",
+  "agent_phone": "^none$",
+  "agent_address": "^none$",
+  "agent_mailing": "^none$",
+  "agent_signer": "^none$",
+  "office_phone": "^none$",
+  "return_to": "^none$",
+  "executor2": "^none$"
+ }
+}

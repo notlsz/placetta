@@ -445,6 +445,9 @@ export const DEST: Record<string, Dest> = {
   "fl-dor": {
     // "The Department's online Florida Business Tax Application" (taxapps.floridarevenue.com/taxregistration), with the
     // "user id and password you created for your online registration profile".
+    // The paper DR-1 (R. 01/26) that Placetta fills prints "Mail to: Account Management MS 1-5730, Florida Department of
+    // Revenue, 5050 W Tennessee St, Tallahassee FL 32399-0160". Not added as a mail route: this entry's signature is the
+    // portal's typed one, and the paper form is signed by hand.
     portal: "taxapps.floridarevenue.com", portalUrl: "https://taxapps.floridarevenue.com/taxregistration",
     signature: "typed", onBehalf: "unstated",
     checked: "2026-10-18", source: "https://floridarevenue.com/taxes/registration",
@@ -1003,6 +1006,259 @@ export const DEST: Record<string, Dest> = {
     signature: "none", payment: "in_person",
     checked: "2026-10-17", source: "https://www.southernnevadahealthdistrict.org/?p=3661",
   },
+
+  // ---- Forms batch 3, read from the agencies' own pages on 2026-10-18 (IRS authorizations and the foreign-owned DE's
+  // extension, California, Florida, New York City, Cook County, and the state formation filings). ----
+  "irs-8821": {
+    // "Securely upload and submit forms for power of attorney (POA) and tax information authorization (TIA)": "Sign in
+    // or create an account" goes through sa.www4.irs.gov to the upload tool on connect.irs.gov. "For forms submitted
+    // online, we accept these types of electronic signature" (typed names among them); "We don't accept electronically
+    // signature for forms by fax or mail." The fax and mail units depend on the taxpayer's state, so those stay with the team.
+    portal: "connect.irs.gov", alsoOn: ["sa.www4.irs.gov"],
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.irs.gov/tax-professionals/submit-forms-2848-and-8821-online",
+  },
+  "irs-2848": {
+    // The same upload tool; the representative signs Part II.
+    portal: "connect.irs.gov", alsoOn: ["sa.www4.irs.gov"],
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.irs.gov/tax-professionals/submit-forms-2848-and-8821-online",
+  },
+  "irs-1120": {
+    // Foreign-owned U.S. DEs: "Fax (300 DPI or higher) to 855-887-7737" or mail to the PIN Unit; "These filers do not
+    // use the mailing address provided in the Instructions for Form 1120." Filed with Form 5472.
+    fax: { us: "+18558877737", foreign: "+18558877737" },
+    faxQuality: "very_high",
+    mail: { name: "Internal Revenue Service", line1: "1973 Rulon White Blvd", line2: "M/S 6112 Attn: PIN Unit", city: "Ogden", state: "UT", zip: "84201" },
+    signature: "wet", payment: "none",
+    checked: "2026-10-18", source: "https://www.irs.gov/instructions/i5472",
+  },
+  "irs-7004": {
+    // "The DE must fax or mail the Form 7004 to the fax number or mailing address identified earlier" (the PIN Unit's),
+    // "do not use the regular filing address listed in the Instructions for Form 7004", with "Foreign-owned U.S. DE"
+    // across the top. The registry's irs-7004 is that foreign-owned DE's extension.
+    fax: { us: "+18558877737", foreign: "+18558877737" },
+    faxQuality: "very_high",
+    mail: { name: "Internal Revenue Service", line1: "1973 Rulon White Blvd", line2: "M/S 6112 Attn: PIN Unit", city: "Ogden", state: "UT", zip: "84201" },
+    signature: "wet", payment: "none",
+    checked: "2026-10-18", source: "https://www.irs.gov/instructions/i5472",
+    also: ["https://www.irs.gov/filing/where-to-file-form-7004"],
+  },
+  "ca-llc-12": {
+    // "Statements of Information can be filed online at bizfileOnline.sos.ca.gov"; "Electronic signatures on filings
+    // submitted through the Secretary of State's online process are the only" electronic signatures it accepts.
+    portal: "bizfileonline.sos.ca.gov", portalUrl: "https://bizfileonline.sos.ca.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.sos.ca.gov/business-programs/business-entities/faqs",
+  },
+  "fl-fictitious": {
+    // "Register a Florida Fictitious Name" (efile.sunbiz.org/ficregintro.html); $50, by credit card online. "You, the
+    // applicant, certify the name has been advertised when you sign the application."
+    portal: "efile.sunbiz.org", portalUrl: "https://efile.sunbiz.org/ficregintro.html",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://dos.fl.gov/sunbiz/start-business/efile/fl-fictitious-name-registration/",
+  },
+  "nyc-dcwp-license": {
+    // DCWP licenses: "Apply Online" (a866-dcwpbp.nyc.gov/licensing/apply-license) with "a registered account with the City
+    // of New York"; the Licensing Center is only for applicants who need an in-person visit. Someone else preparing it
+    // needs "the Granting Authority to Act Affirmation form", and "The applicant must sign the license application".
+    portal: "a866-dcwpbp.nyc.gov", portalUrl: "https://a866-dcwpbp.nyc.gov/licensing/apply-license",
+    signature: "typed", payment: "portal", onBehalf: "authorization", authorization: "Granting Authority to Act Affirmation",
+    attach: ["Granting Authority to Act Affirmation, when someone else prepares or submits it"],
+    checked: "2026-10-18", source: "https://nyc-business.nyc.gov/nycbusiness/description/cigarette-retail-dealer-license",
+  },
+  "cook-food-license": {
+    // The page: "Please mail completed applications and applicable payment to the address listed on the application";
+    // "Make checks or money orders payable to Cook County Department of Public Health." The application prints the
+    // Environmental Health Division's Bridgeview address. The fee goes with it, so the team sends it.
+    mail: { name: "Cook County Department of Public Health, Environmental Health Division", line1: "10220 S. 76th Avenue, Room 250", city: "Bridgeview", state: "IL", zip: "60455" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://cookcountypublichealth.org/contact-us/permits-and-licenses/retail-food-establishment-application/",
+    also: ["https://cookcountypublichealth.org/wp-content/uploads/2019/01/Retail-Food-License-Application.pdf"],
+  },
+  // State formation filings that were team-only until their pages were read in this round.
+  "wa-sos": {
+    // "Visit our Corporations and Charities Filing System" (ccfs.sos.wa.gov): log in, "Create or Register a Business",
+    // "WA Limited Liability Company", checkout; the Authorized Person types their name and checks "This document is
+    // hereby executed under penalty of law". $180 plus a processing fee, paid at checkout.
+    portal: "ccfs.sos.wa.gov", portalUrl: "https://ccfs.sos.wa.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/start-domestic-wa-limited-liability-company-llc-online",
+  },
+  "ma-sos": {
+    // "File Online" (corp.sec.state.ma.us/corpweb/loginsystem/externallogin.aspx); "The certificate must be signed by the
+    // person forming the LLC"; $500.
+    portal: "corp.sec.state.ma.us", portalUrl: "https://corp.sec.state.ma.us/corpweb/loginsystem/externallogin.aspx",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.sec.state.ma.us/divisions/corporations/filing-by-subject/limited-liability/corporations-limited-liability-company.htm",
+  },
+  "pa-dos": {
+    // "To submit registration forms ... go to the" Business Filing Services portal (file.dos.pa.gov/forms/business);
+    // the Business Hub's LLC guide: "Legally create the domestic LLC by filing the Certificate of Organization", $125.
+    portal: "file.dos.pa.gov", portalUrl: "https://file.dos.pa.gov/forms/business",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.pa.gov/services/dos/register-a-business",
+    also: ["https://hub.business.pa.gov/Home/HelpCenterDetail/RegisteraPADomesticLLC"],
+  },
+  "ga-sos": {
+    // "Visit the Secretary of State's online services page" (ecorp.sos.ga.gov), "Create a user account", "create or
+    // register a business", "Domestic Limited Liability Company"; "Pay the $110 fee" by credit card.
+    portal: "ecorp.sos.ga.gov", portalUrl: "https://ecorp.sos.ga.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://sos.ga.gov/how-to-guide/how-guide-register-domestic-entity",
+    also: ["https://sos.ga.gov/sites/default/files/forms/Online%20Services%20User%20Guide.pdf"],
+  },
+  "dc-dlcp": {
+    // Steps to a Basic Business License: register the company "via BOSS/CorpOnline" (corponline.dlcp.dc.gov), then
+    // "Apply for a Business License" at boss.dc.gov with "the required supporting documentation and payment"; "Online
+    // filers must pay by credit card."
+    portal: "boss.dc.gov", portalUrl: "https://boss.dc.gov/", alsoOn: ["corponline.dlcp.dc.gov"],
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://dlcp.dc.gov/page/steps-obtaining-basic-business-license-0",
+    also: ["https://dlcp.dc.gov/service/domestic-limited-liability-company"],
+  },
+
+  // ---- The target markets' forms (src/forms/markets-us.ts), read from the agencies' own pages on 2026-10-18. ----
+  "md-llc": {
+    // The form's filing instructions: "To file online: Create an account with Maryland Business Express"
+    // (egov.maryland.gov/businessexpress), or mail it with the $100 check. Not given a mail route here: SDAT asks for "an
+    // originally executed" paper copy, and this entry's signature is the portal's.
+    portal: "egov.maryland.gov", portalUrl: "https://egov.maryland.gov/businessexpress",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://dat.maryland.gov/sdat%20forms/artorgan.pdf",
+  },
+  "md-cra": {
+    // "The Central Registration fax number is 410-260-7908" ("Do not fax a cover sheet or our instructions"); "Mail the
+    // application to: Central Registration, Comptroller of Maryland, Revenue Administration Division, 110 Carroll Street,
+    // Annapolis, MD 21411-0001"; online through the Comptroller's interactive CRA. Section F: "Signature* (Required by Law)".
+    fax: { us: "+14102607908" },
+    mail: { name: "Comptroller of Maryland, Revenue Administration Division", line1: "Central Registration", line2: "110 Carroll Street", city: "Annapolis", state: "MD", zip: "21411-0001" },
+    portal: "interactive.marylandtaxes.gov", portalUrl: "https://interactive.marylandtaxes.gov/webapps/comptrollercra/entrance.asp",
+    signature: "wet", payment: "none", onBehalf: "authorization", authorization: "Power of attorney form (Section F box)",
+    checked: "2026-10-18", source: "https://www.marylandtaxes.gov/forms/current_forms/cra.pdf",
+    also: ["https://businessexpress.maryland.gov/start/taxes-and-insurance"],
+  },
+  "moco-food-license": {
+    // "Apply and pay through the CivicGov portal", or "Mail it to Licensure & Regulatory Services, 2425 Reedie Drive, 9th
+    // Floor, Wheaton, MD 20902" or "Fax it to 240-777-3088". The license fee goes with it, so paper goes to the team.
+    portal: "www.civicgov4.com", portalUrl: "https://www.civicgov4.com/md_montgomery/portal/", tenant: "/md_montgomery",
+    fax: { us: "+12407773088" },
+    mail: { name: "Montgomery County DHHS, Licensure & Regulatory Services", line1: "2425 Reedie Drive, 9th Floor", city: "Wheaton", state: "MD", zip: "20902" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.montgomerycountymd.gov/department-health-human-services/about-us/licensure-regulatory-services/environmental-health-unit/food-service-facility-license",
+  },
+  "hi-llc": {
+    // "What BREG forms can I file online?" lists LLC-1; the portal is Hawaii Business Express.
+    portal: "hbe.ehawaii.gov", portalUrl: "https://hbe.ehawaii.gov/BizEx/home.eb",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://cca.hawaii.gov/breg/what-breg-forms-can-i-file-online/",
+    also: ["https://cca.hawaii.gov/breg/registration/dllc/forms/"],
+  },
+  "hi-bb1": {
+    // Form BB-1: "For faster service apply online at hitax.hawaii.gov"; "Mail the completed application to: HAWAII
+    // DEPARTMENT OF TAXATION, P.O. Box 1425, Honolulu, HI 96806-1425", "ATTACH CHECK OR MONEY ORDER HERE" ($20).
+    portal: "hitax.hawaii.gov", portalUrl: "https://hitax.hawaii.gov/",
+    mail: { name: "Hawaii Department of Taxation", line1: "P.O. Box 1425", city: "Honolulu", state: "HI", zip: "96806-1425" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://files.hawaii.gov/tax/forms/2024/bb1_i.pdf",
+  },
+  "hi-ui": {
+    // "Employers may register their company at: https://huiclaims3.hawaii.gov/"
+    portal: "huiclaims3.hawaii.gov", portalUrl: "https://huiclaims3.hawaii.gov/",
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://labor.hawaii.gov/ui/employer-registration/",
+  },
+  "ut-llc": {
+    // "Go to https://businessregistration.utah.gov/, log in with a UtahID, select Formations, choose Domestic".
+    portal: "businessregistration.utah.gov", portalUrl: "https://businessregistration.utah.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://commerce.utah.gov/corporations/business-entities/domestic-limited-liability-company/",
+  },
+  "ut-tax": {
+    // "Apply for a Utah tax account/license" in Taxpayer Access Point (tap.tax.utah.gov); the TC-69 link now opens TAP.
+    portal: "tap.tax.utah.gov", portalUrl: "https://tap.tax.utah.gov/TaxExpress/_/?Link=TapBr",
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://tax.utah.gov/business/create-manage/tax-info-business/",
+  },
+  "ut-ui": {
+    // "Create a new UI account for my business" (jobs.utah.gov/ui/employer/EmployerRegistration/Intro.aspx).
+    portal: "jobs.utah.gov", portalUrl: "https://jobs.utah.gov/ui/employer/EmployerRegistration/Intro.aspx",
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://jobs.utah.gov/ui/employer/public/osbr.aspx",
+  },
+  "va-llc": {
+    // The SCC's how-to guide: "Log on to CIS at cis.scc.virginia.gov", Online Services, Virginia Entity, Limited Liability
+    // Company, Articles of Organization; the signer is added in the Signature Information section; "Add To Shopping
+    // Cart", "Checkout", "Go To Payment" (a LexisNexis payment page with a CAPTCHA), "Pay Now".
+    portal: "cis.scc.virginia.gov", portalUrl: "https://cis.scc.virginia.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf",
+  },
+  "ma-dua": {
+    // "Employers who pay wages for work done in Massachusetts must register with DUA": Unemployment Services for
+    // Employers, "go to the homepage without logging in and select Register your Business".
+    portal: "unemployment.mass.gov", portalUrl: "https://unemployment.mass.gov/Employers/", noLogin: true,
+    signature: "typed", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance",
+  },
+  "smo-license": {
+    // The application: "Send this completed application with your check to the Business Tax Division, City Hall, 330 West
+    // 20th Avenue, San Mateo, CA 94403." The tax goes with it, so the team sends it.
+    mail: { name: "City of San Mateo, Business Tax Division", line1: "City Hall, 330 West 20th Avenue", city: "San Mateo", state: "CA", zip: "94403" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.cityofsanmateo.org/DocumentCenter/View/232/Gross-Receipts-Form?bidId=",
+  },
+  "smc-health-permit": {
+    // "download, complete, and upload to the MyEHS online portal" (smcehs.my.site.com); MyEHS manages "applications,
+    // permits, invoices"; an account is reviewed by staff first.
+    portal: "smcehs.my.site.com", portalUrl: "https://smcehs.my.site.com/s/?language=en_US",
+    signature: "typed", payment: "invoice", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://www.smchealth.org/node/6706",
+    also: ["https://www.smchealth.org/my-ehs-online-portal"],
+  },
+  "cup-license": {
+    // "the city's business license services moved to HdL on September 22, 2025 ... Website: cupertino.hdlgov.com".
+    portal: "cupertino.hdlgov.com", portalUrl: "https://cupertino.hdlgov.com/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://cupertino.gov/i-want-to/apply-for/business-license-application",
+  },
+  "sgb-license": {
+    // "the business can apply for the City business license by calling (626) 308-2812 or emailing Financeinfo@sgch.org.
+    // Please include your business name and address in the subject line." The license tax is paid to the city.
+    email: "Financeinfo@sgch.org",
+    signature: "wet", payment: "invoice", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023",
+  },
+  "lac-business-license": {
+    // "If your business activity is one that the County licenses, you must apply" ("Restaurant", "Food Establishment"):
+    // the page's Apply link opens the county's EnerGov self-service application assistant.
+    portal: "losangelescountyca-energovweb.tylerhost.net",
+    portalUrl: "https://losangelescountyca-energovweb.tylerhost.net/apps/selfservice#/applicationAssistant?sectionName=All&moduleId=10&categoryName=County%20of%20Los%20Angeles%20Business%20License&showTemplates=false",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-18", source: "https://ttc.lacounty.gov/business-license-requirements-2/",
+  },
+
+  // California ABC's new retail license packet: the applicants sign before an ABC employee at the district office (with
+  // state ID), or on a notarized ABC-211-SIG; the page names no mail or online route ("contact your local district office").
+  ...Object.fromEntries(
+    ["ca-abc-217", "ca-abc-258", "ca-abc-255", "ca-abc-140", "ca-abc-247", "ca-abc-257", "ca-abc-211", "ca-abc-243", "ca-abc-256"].map((id): [string, Dest] => [id, {
+      owner: {
+        why: "ABC takes a new license application at the district office for the premises, where each applicant signs before an ABC employee and shows state ID (or signs ABC-211-SIG before a notary); the page names no mail or online route.",
+        url: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+      },
+      signature: "wet", payment: "in_person",
+      checked: "2026-10-18", source: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+    }]),
+  ),
+  "ca-abc-244": {
+    // The form: "When this form is completed, it must be submitted to the District office. Fees are non-refundable".
+    owner: {
+      why: "ABC-244 says it \"must be submitted to the District office\" with the fee, signed by a licensed principal.",
+      url: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+    },
+    signature: "wet", payment: "in_person",
+    checked: "2026-10-18", source: "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-244.pdf",
+  },
 };
 
 /**
@@ -1078,13 +1334,16 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "ca-sb54": { why: "Registration is with Circular Action Alliance, the producer organization, not a government agency.", source: "https://calrecycle.ca.gov/packaging/packaging-epr/", checked: "2026-10-17" },
   "uspto-tm": { why: "A foreign-domiciled applicant must be represented by a US-licensed attorney, who files it.", source: "https://www.uspto.gov/trademarks/basics/do-i-need-attorney", checked: "2026-10-17" },
   "fda-prior-notice": { why: "Filed for each shipment by whoever has the shipment data, usually the customs broker.", source: "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/guidance-industry-what-you-need-know-about-prior-notice-imported-food-shipments", checked: "2026-10-17" },
-  "il-sos": { why: "A state-fee formation filing whose submission page wasn't re-read in this round.", source: "https://www.ilsos.gov", checked: "2026-10-17" },
-  "wa-sos": { why: "A state-fee formation filing whose submission page wasn't re-read in this round.", source: "https://ccfs.sos.wa.gov", checked: "2026-10-17" },
-  "ma-sos": { why: "A state-fee formation filing whose submission page wasn't re-read in this round.", source: "https://www.sec.state.ma.us", checked: "2026-10-17" },
-  "ga-sos": { why: "A state-fee formation filing whose submission page wasn't re-read in this round.", source: "https://ecorp.sos.ga.gov", checked: "2026-10-17" },
-  "pa-dos": { why: "A state-fee formation filing whose submission page wasn't re-read in this round.", source: "https://file.dos.pa.gov", checked: "2026-10-17" },
-  "nv-silverflume": { why: "A state-fee formation and license filing whose submission page wasn't re-read in this round.", source: "https://www.nvsilverflume.gov", checked: "2026-10-17" },
-  "dc-dlcp": { why: "Corporate registration and the basic business license together; the registration route wasn't re-read in this round.", source: "https://dlcp.dc.gov", checked: "2026-10-17" },
+  "il-sos": { why: "ilsos.gov refuses automated reads, so the online filing's address couldn't be confirmed on the Secretary's own page.", source: "https://www.ilsos.gov/departments/business-services/incorporation.html", checked: "2026-10-18" },
+  "nv-silverflume": { why: "nvsilverflume.gov now redirects to the new ORION portal (orion.nv.gov), and nvsos.gov's pages refuse automated reads, so the new portal's route couldn't be confirmed on the Secretary's own page.", source: "https://www.nvsilverflume.gov/checklist", checked: "2026-10-18" },
+  // The IRS sends these to a different service center by the business's state (the dispatcher has one address per form),
+  // so the team picks the center; none takes an online submission.
+  "irs-8832": { why: "Mailed to Kansas City or Ogden by the entity's state (Ogden for a foreign country); no fax or online route.", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832", checked: "2026-10-18" },
+  "irs-2553": { why: "Faxed or mailed to Kansas City (855-887-7734) or Ogden (855-214-7520) by the corporation's state.", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-2553", checked: "2026-10-18" },
+  "moco-plan-review": { why: "Health and Human Services reviews the plans before any building permit issues; they go in with the building permit to the permitting office for the address (the county's Department of Permitting Services, or the City of Rockville's or Gaithersburg's), filed by the design professional.", source: "https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf", checked: "2026-10-18" },
+  "smc-plan-check": { why: "San Mateo County's plan check page didn't load past its navigation for us, so the plan submission route (MyEHS or paper) wasn't confirmed.", source: "https://www.smchealth.org/food-facility-plan-check-process", checked: "2026-10-18" },
+  "gln-brc": { why: "Applied for in the city's GlendalePermits portal, whose address the city's page doesn't print.", source: "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate", checked: "2026-10-18" },
+  "irs-8822b": { why: "Mailed to Kansas City or Ogden by the state of the old business address (Ogden for any place outside the US).", source: "https://www.irs.gov/pub/irs-pdf/f8822b.pdf", checked: "2026-10-18" },
   "dal-sign": { why: "A registered sign contractor applies on DallasNow, and lit signs need a registered electrical sign contractor.", source: "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Documents/Signs/SIGN%20PERMITS%20-%20SPSD%20Checklist.pdf", checked: "2026-10-13" },
   "sdg-co": { why: "Not an application: issued after the final inspection of the building permit work.", source: "https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585", checked: "2026-10-12" },
   "sdc-health-permit": { why: "The county issues it in person with the plan check; no remote route is published.", source: "https://www.sandiegocounty.gov/content/sdc/deh/fhd/food/food_faq.html", checked: "2026-10-12" },
@@ -1134,7 +1393,12 @@ function addressProblems(id: string, a: Address | undefined, label: string): str
   return out;
 }
 
-const firstSegment = (u: string | undefined) => (urlOf(u)?.pathname.split("/").filter(Boolean)[0] ?? "").toLowerCase();
+/** The first folder of a portal link's path, where a shared host keeps each agency (Accela's /dallastx). A page at the
+    host's root (efile.sunbiz.org/llc_file.html) has none: two pages of one agency's site are not two agencies. */
+const firstSegment = (u: string | undefined) => {
+  const parts = urlOf(u)?.pathname.split("/").filter(Boolean) ?? [];
+  return parts.length > 1 || (parts[0] && !/\.[a-z0-9]+$/i.test(parts[0])) ? parts[0].toLowerCase() : "";
+};
 
 /** Every reason an entry can't ship. The tests and CI fail on any. */
 export function destinationProblems(dest: Record<string, Dest> = DEST): string[] {

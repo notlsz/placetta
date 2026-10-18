@@ -1,0 +1,365 @@
+{
+ "form": "dc-dlcp",
+ "rev": "Basic Business License Application (DLCP)",
+ "pdf": "dc-dlcp.pdf",
+ "url": "https://dlcp.dc.gov/sites/default/files/dc/sites/dlcp/publication/attachments/BBL%20Application%20(Fillable).pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: clean_hands 'No' ticks 'I do not owe $100 or more to DC Government'; 'Yes' leaves it blank (the license can't issue until the debt is paid). location writes the certificate of occupancy (or home occupancy permit) number after the colon. billing 'Same' ticks the same-address box. The agent's city is printed (Washington, DC), so only the street and ZIP are written. Left for the applicant: the signature and date; the EIN, because the form's one box is 'Federal EIN or SSN'; the permit's 'Date Issued', because the PDF has one field printed under both the home occupancy permit and the certificate of occupancy; the box beside the 'Business's Physical Address' heading; and a regulated business type, picked from the form's own list. Step 6: the form goes to the DLCP Business License Center with payment, or the same application is filed online.",
+ "lines": [
+  {
+   "id": "clean_hands",
+   "line": "Step 4",
+   "en": "Does the applicant owe $100 or more to the DC Government?",
+   "zh": "申请人是否欠华盛顿特区政府 100 美元或以上？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "Step 4",
+   "en": "Printed name of the person signing",
+   "zh": "签署人姓名（印刷体）"
+  },
+  {
+   "id": "ein",
+   "line": "Step 4",
+   "en": "Federal EIN",
+   "zh": "联邦雇主识别号（EIN）"
+  },
+  {
+   "id": "license_type",
+   "line": "A",
+   "en": "License type",
+   "zh": "执照类型",
+   "options": [
+    "Food Services",
+    "General Business",
+    "Beauty & Grooming",
+    "Charitable Services",
+    "Employment Services",
+    "Entertainment Services",
+    "Flammable Product Sales/Services",
+    "Health Services",
+    "Lodging",
+    "Rental Housing",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "seats",
+   "line": "A",
+   "en": "Number of seats or units, or None",
+   "zh": "座位或单元数，或 None"
+  },
+  {
+   "id": "applicant_type",
+   "line": "B",
+   "en": "Applicant type",
+   "zh": "申请人类型",
+   "options": [
+    "Limited Liability Co.",
+    "Corporation (For-Profit)",
+    "Corporation (Non-Profit)",
+    "Sole Proprietor",
+    "Partnership",
+    "Trust"
+   ]
+  },
+  {
+   "id": "owner_name",
+   "line": "B",
+   "en": "Owner or entity name",
+   "zh": "所有者或实体名称"
+  },
+  {
+   "id": "trade_name",
+   "line": "B",
+   "en": "Registered trade name of the business, or None",
+   "zh": "企业注册商号，或 None"
+  },
+  {
+   "id": "location",
+   "line": "C",
+   "en": "Where the business is",
+   "zh": "经营地点",
+   "options": [
+    "Not in my home: certificate of occupancy number",
+    "In my home: home occupancy permit number",
+    "Not in DC"
+   ]
+  },
+  {
+   "id": "address",
+   "line": "C",
+   "en": "Business's physical address (street, city, ST ZIP)",
+   "zh": "企业实际地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "phone",
+   "line": "C",
+   "en": "Business phone",
+   "zh": "企业电话"
+  },
+  {
+   "id": "email",
+   "line": "C",
+   "en": "Business email",
+   "zh": "企业电子邮箱"
+  },
+  {
+   "id": "billing",
+   "line": "C",
+   "en": "Billing address: 'Same', or 'street, city, ST ZIP'",
+   "zh": "账单地址：“Same”（同营业地址），或“街道、城市、州、邮编”"
+  },
+  {
+   "id": "agent",
+   "line": "D",
+   "en": "Agent's name (a DC resident who receives legal documents; can be yourself)",
+   "zh": "代理人姓名（接收法律文件的华盛顿特区居民，可为本人）"
+  },
+  {
+   "id": "agent_address",
+   "line": "D",
+   "en": "Agent's address in Washington, DC (street, Washington, DC ZIP)",
+   "zh": "代理人在华盛顿特区的地址（街道、Washington, DC、邮编）"
+  },
+  {
+   "id": "agent_phone",
+   "line": "D",
+   "en": "Agent's phone",
+   "zh": "代理人电话"
+  },
+  {
+   "id": "agent_email",
+   "line": "D",
+   "en": "Agent's email",
+   "zh": "代理人电子邮箱"
+  }
+ ],
+ "boxes": {
+  "clean_hands": [
+   {
+    "check": "I do not owe 100 or more to DC Government",
+    "if": "^(n|no|否)$"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Print Name"
+   }
+  ],
+  "license_type": [
+   {
+    "check": "Food Services",
+    "if": "^food"
+   },
+   {
+    "check": "General Business - Standard",
+    "if": "^general"
+   },
+   {
+    "check": "Beauty & Grooming Services",
+    "if": "^beauty"
+   },
+   {
+    "check": "Charitable Services",
+    "if": "^charit"
+   },
+   {
+    "check": "Employment Services",
+    "if": "^employment"
+   },
+   {
+    "check": "Entertainment Services",
+    "if": "^entertain"
+   },
+   {
+    "check": "Flammable Product Sales & Services",
+    "if": "^flammable"
+   },
+   {
+    "check": "Health Services",
+    "if": "^health"
+   },
+   {
+    "check": "Lodging",
+    "if": "^lodging"
+   },
+   {
+    "check": "Rental Housing",
+    "if": "^rental"
+   },
+   {
+    "check": "Other",
+    "if": "^other"
+   },
+   {
+    "text": "Other License Type",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "seats": [
+   {
+    "check": "# of Seats/Units",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Number of Seats/Units",
+    "pick": "digits",
+    "if": "^(?!none$)"
+   }
+  ],
+  "applicant_type": [
+   {
+    "check": "Sole Proprietor",
+    "if": "^sole"
+   },
+   {
+    "check": "Partnership",
+    "if": "^partnership"
+   },
+   {
+    "check": "Limited Liability Co",
+    "if": "^(limited liability|llc)"
+   },
+   {
+    "check": "Corporation",
+    "if": "^corporation.*for-profit|^corporation \\(for"
+   },
+   {
+    "check": "Corporation_2",
+    "if": "^corporation.*non-profit"
+   },
+   {
+    "check": "Trust",
+    "if": "^trust"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "Owner or Entity Name"
+   }
+  ],
+  "trade_name": [
+   {
+    "text": "Registered Trade Name of Business if applicable",
+    "if": "^(?!none$)"
+   }
+  ],
+  "location": [
+   {
+    "check": "Not in my home",
+    "if": "^not in my home"
+   },
+   {
+    "text": "Not in my home Certificate of Occupancy  Date Issued",
+    "pick": "tail",
+    "if": "^not in my home"
+   },
+   {
+    "check": "In my home",
+    "if": "^in my home"
+   },
+   {
+    "text": "In my home Home Occupancy Permit  Date Issued",
+    "pick": "tail",
+    "if": "^in my home"
+   },
+   {
+    "check": "Property Not in DC",
+    "if": "^not in dc"
+   }
+  ],
+  "address": [
+   {
+    "text": "Address",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "ZIP",
+    "pick": "zip"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Phone"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email"
+   }
+  ],
+  "billing": [
+   {
+    "check": "My billing address is the same as my business location If not please provide your billing address",
+    "if": "^same$"
+   },
+   {
+    "text": "Billing Address",
+    "pick": "street",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "City_2",
+    "pick": "city",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "State_2",
+    "pick": "state",
+    "if": "^(?!same$)"
+   },
+   {
+    "text": "ZIP_2",
+    "pick": "zip",
+    "if": "^(?!same$)"
+   }
+  ],
+  "agent": [
+   {
+    "text": "Agents Name"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "Address_2",
+    "pick": "street"
+   },
+   {
+    "text": "ZIP_3",
+    "pick": "zip"
+   }
+  ],
+  "agent_phone": [
+   {
+    "text": "Phone_3"
+   }
+  ],
+  "agent_email": [
+   {
+    "text": "Email_3"
+   }
+  ]
+ },
+ "unmapped": {
+  "ein": "The PDF has one box for 'Federal EIN or SSN'. A box that also takes an SSN is never filled by Placetta, so the signer writes the EIN there by hand."
+ },
+ "blank": {
+  "clean_hands": "^(y|yes|是)$",
+  "seats": "^none$",
+  "trade_name": "^none$"
+ }
+}

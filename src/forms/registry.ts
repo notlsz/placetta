@@ -6,6 +6,8 @@ import { LOCAL_US } from "./local-us";
 import { BEACHHEAD } from "./beachhead";
 import { PROOF } from "./proof";
 import { countyFor, usPlace } from "./usplace";
+import { MORE_US } from "./more-us";
+import { MARKETS_US } from "./markets-us";
 import { LINES } from "./lines";
 import { PLAIN } from "./plain";
 import { MAPS } from "./maps";
@@ -651,7 +653,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...BEACHHEAD);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD);
 
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue
@@ -761,8 +763,11 @@ export function placesOf(place: string): Where[] {
   // A "Las Vegas" address is in the City of Las Vegas or in unincorporated Clark County (the Strip is in Paradise), and
   // each licenses its own businesses; Henderson and North Las Vegas license their own too. The Health District's steps
   // (where "SNHD") apply across the county either way.
+  // ZIP codes wholly outside city limits (the Strip's 89109, 89119, 89169) count as unincorporated too.
+  const clarkTown = CLARK_UNINCORPORATED.test(w) || /\b891(09|19|69)\b/.test(w);
+  if (!abroad && clarkTown && out.includes("NV") && !out.includes("SNHD")) out.push("SNHD");
   if (out.includes("SNHD") || out.includes("LV")) {
-    if (CLARK_UNINCORPORATED.test(w) || up?.unincorporated) out.push("CLK");
+    if (clarkTown || up?.unincorporated) out.push("CLK");
     else if (city ? city === "las vegas" : /las vegas|拉斯维加斯/.test(loc) && !/north las vegas|henderson/.test(loc)) out.push("LVC");
   }
   // Santa Clara County runs food permits for San José and the rest of the county

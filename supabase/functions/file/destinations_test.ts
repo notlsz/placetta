@@ -49,6 +49,9 @@ Deno.test("the host rules refuse addresses, internal names and links off the age
 Deno.test("a host several agencies share needs each agency's path, and a login for one never opens another", () => {
   const shared = { a: base({ portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/dallastx" }), b: base({ portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/CFW" }) };
   assertEquals(destinationProblems(shared).filter((p) => p.includes("tenant path")).length, 2);
+  // Two pages at the root of one agency's site (Sunbiz's LLC and fictitious name filings) are not two agencies.
+  const oneSite = { a: base({ portal: "efile.sunbiz.org", portalUrl: "https://efile.sunbiz.org/llc_file.html" }), b: base({ portal: "efile.sunbiz.org", portalUrl: "https://efile.sunbiz.org/ficregintro.html" }) };
+  assertEquals(destinationProblems(oneSite).filter((p) => p.includes("tenant path")).length, 0);
   const dallas = DEST["dal-co"], fortWorth = DEST["ftw-co"];
   assert(dallas.tenant && fortWorth.tenant && dallas.portal === fortWorth.portal);
   assert(loginMatches("https://aca-prod.accela.com/DALLASTX/Login.aspx", dallas));

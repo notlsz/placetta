@@ -1,0 +1,1233 @@
+{
+ "form": "nj-reg",
+ "rev": "NJ-REG (03/2026), pages 10 to 12 of the Division of Revenue's legacy registration packet",
+ "pdf": "nj-reg.pdf",
+ "url": "https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf",
+ "checked": "2026-10-18",
+ "notes": "A flat, print-only form inside the Division of Revenue's 42-page registration packet: answers are printed on pages 10 to 12 and an X goes in each box chosen. The FEIN, dates, state, fiscal month and NAICS go one character to a printed box (dates as MM, DD and the year's last two digits); the FEIN and name are repeated in the page 11 and 12 headers. owner1 to owner4 are 'full name, title, percent'; their Social Security number boxes are never filled. wages and sales_tax 'Yes, date' tick Yes and fill the date boxes. 'None' leaves an optional line blank. Lines I and J (the business and county/municipality codes from Tables A and B), N (SIC), the seasonal months, questions 1b to 8, 10 and 12 to 23, the daytime phone and the signature are left for the applicant.",
+ "lines": [
+  {
+   "id": "reason",
+   "line": "A",
+   "en": "Reason for filing",
+   "zh": "提交原因",
+   "options": [
+    "Original application for a new business",
+    "Application for an additional location of an existing registered business",
+    "Applying for a Business Registration Certificate"
+   ]
+  },
+  {
+   "id": "fein",
+   "line": "B",
+   "en": "FEIN, or 'Applied for'",
+   "zh": "联邦雇主识别号（FEIN），或“Applied for”"
+  },
+  {
+   "id": "name",
+   "line": "C",
+   "en": "Name (the entity's name, or the owner's or partners' names if not an entity)",
+   "zh": "名称（实体名称；非实体的填所有者或合伙人姓名）"
+  },
+  {
+   "id": "trade_name",
+   "line": "D",
+   "en": "Trade name, or None",
+   "zh": "商号，或 None"
+  },
+  {
+   "id": "location",
+   "line": "E",
+   "en": "Business location (street, city, NJ ZIP+4; no P.O. box)",
+   "zh": "营业地点（街道、城市、NJ 9 位邮编；不可用邮政信箱）"
+  },
+  {
+   "id": "mailing_name",
+   "line": "F",
+   "en": "Mailing name, if different from the business location (or None)",
+   "zh": "邮寄收件名称（如与营业地点不同，或 None）"
+  },
+  {
+   "id": "mailing",
+   "line": "F",
+   "en": "Mailing address (street, city, ST ZIP), or None",
+   "zh": "邮寄地址（街道、城市、州、邮编），或 None"
+  },
+  {
+   "id": "begin_date",
+   "line": "G",
+   "en": "Beginning date for this business (MM/DD/YYYY)",
+   "zh": "本企业开始经营日期（月/日/年）"
+  },
+  {
+   "id": "ownership",
+   "line": "H",
+   "en": "Type of ownership",
+   "zh": "所有权类型",
+   "options": [
+    "LLC (Single Member)",
+    "LLC (1065 Filer)",
+    "LLC (1120 Filer)",
+    "NJ Corporation",
+    "Out-of-State Corporation",
+    "S Corporation",
+    "Sole Proprietor",
+    "Partnership",
+    "Limited Partnership",
+    "LLP",
+    "Other"
+   ]
+  },
+  {
+   "id": "county",
+   "line": "K",
+   "en": "County (New Jersey only)",
+   "zh": "县（仅限新泽西州）"
+  },
+  {
+   "id": "seasonal",
+   "line": "L",
+   "en": "Will this business be seasonal?",
+   "zh": "本企业是否为季节性经营？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "incorporated",
+   "line": "M",
+   "en": "Date of incorporation (an entity; MM/DD/YYYY), or None",
+   "zh": "注册日期（实体；月/日/年），或 None"
+  },
+  {
+   "id": "inc_state",
+   "line": "M",
+   "en": "State of incorporation (two-letter code), or None",
+   "zh": "注册州（两字母代码），或 None"
+  },
+  {
+   "id": "fiscal_month",
+   "line": "M",
+   "en": "Fiscal month (the month the fiscal year ends, 01 to 12)",
+   "zh": "财年截止月份（01 至 12）"
+  },
+  {
+   "id": "subsidiary",
+   "line": "M",
+   "en": "Is this a subsidiary of another corporation? If yes, 'Yes, parent name, parent FEIN'",
+   "zh": "是否为其他公司的子公司？如是，“Yes, 母公司名称, 母公司 FEIN”",
+   "options": [
+    "No",
+    "Yes, parent name, parent FEIN"
+   ]
+  },
+  {
+   "id": "naics",
+   "line": "O",
+   "en": "NAICS code (six digits)",
+   "zh": "NAICS 代码（六位）"
+  },
+  {
+   "id": "owner1",
+   "line": "P",
+   "en": "Owner, partner or responsible officer #1: 'full name, title, percent of ownership'",
+   "zh": "第 1 位所有者、合伙人或负责高管：“全名、职务、持股比例”"
+  },
+  {
+   "id": "owner1_address",
+   "line": "P",
+   "en": "Owner #1's home address (street, city, ST ZIP)",
+   "zh": "第 1 位所有者住址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "owner2",
+   "line": "P",
+   "en": "Owner, partner or responsible officer #2: 'full name, title, percent of ownership', or None",
+   "zh": "第 2 位所有者、合伙人或负责高管：“全名、职务、持股比例”，或 None"
+  },
+  {
+   "id": "owner2_address",
+   "line": "P",
+   "en": "Owner #2's home address (street, city, ST ZIP), or None",
+   "zh": "第 2 位所有者住址（街道、城市、州、邮编），或 None"
+  },
+  {
+   "id": "owner3",
+   "line": "P",
+   "en": "Owner, partner or responsible officer #3: 'full name, title, percent of ownership', or None",
+   "zh": "第 3 位所有者、合伙人或负责高管：“全名、职务、持股比例”，或 None"
+  },
+  {
+   "id": "owner3_address",
+   "line": "P",
+   "en": "Owner #3's home address (street, city, ST ZIP), or None",
+   "zh": "第 3 位所有者住址（街道、城市、州、邮编），或 None"
+  },
+  {
+   "id": "owner4",
+   "line": "P",
+   "en": "Owner, partner or responsible officer #4: 'full name, title, percent of ownership', or None",
+   "zh": "第 4 位所有者、合伙人或负责高管：“全名、职务、持股比例”，或 None"
+  },
+  {
+   "id": "owner4_address",
+   "line": "P",
+   "en": "Owner #4's home address (street, city, ST ZIP), or None",
+   "zh": "第 4 位所有者住址（街道、城市、州、邮编），或 None"
+  },
+  {
+   "id": "wages",
+   "line": "1a",
+   "en": "Will you pay wages, salaries or commissions to employees working in New Jersey within the next 6 months? If yes, 'Yes, date of first payment'",
+   "zh": "未来 6 个月内是否向在新泽西州工作的员工支付工资、薪金或佣金？如是，“Yes, 首次支付日期”",
+   "options": [
+    "Yes, 11/15/2026",
+    "No"
+   ]
+  },
+  {
+   "id": "business_type",
+   "line": "9",
+   "en": "Type of business (all that apply)",
+   "zh": "业务类型（可多选）",
+   "options": [
+    "Retail",
+    "Service",
+    "Wholesale",
+    "Manufacturer",
+    "Construction",
+    "Government"
+   ]
+  },
+  {
+   "id": "principal_product",
+   "line": "9",
+   "en": "Principal product or service in New Jersey",
+   "zh": "在新泽西州的主要产品或服务"
+  },
+  {
+   "id": "activity",
+   "line": "9",
+   "en": "Type of activity in New Jersey",
+   "zh": "在新泽西州的活动类型"
+  },
+  {
+   "id": "sales_tax",
+   "line": "11a",
+   "en": "Will you collect New Jersey sales tax or pay use tax? If yes, 'Yes, date of first sale'",
+   "zh": "是否会代收新泽西州销售税或缴纳使用税？如是，“Yes, 首笔销售日期”",
+   "options": [
+    "Yes, 11/02/2026",
+    "No"
+   ]
+  },
+  {
+   "id": "contact",
+   "line": "24",
+   "en": "Contact person",
+   "zh": "联系人"
+  },
+  {
+   "id": "contact_title",
+   "line": "24",
+   "en": "Contact person's title",
+   "zh": "联系人职务"
+  },
+  {
+   "id": "contact_email",
+   "line": "24",
+   "en": "Contact email address",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "signer_title",
+   "line": "24",
+   "en": "Title of the owner, partner or officer signing",
+   "zh": "签署的所有者、合伙人或高管职务"
+  }
+ ],
+ "boxes": {
+  "reason": [
+   {
+    "mark": {
+     "page": 9,
+     "x": 55.9,
+     "y": 691.2,
+     "size": 9
+    },
+    "if": "^original"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 55.9,
+     "y": 625.2,
+     "size": 9
+    },
+    "if": "^application for an additional"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 55.9,
+     "y": 612.1,
+     "size": 9
+    },
+    "if": "^applying for a business registration certificate"
+   }
+  ],
+  "fein": [
+   {
+    "at": {
+     "page": 9,
+     "x": 91.9,
+     "y": 594.8,
+     "w": 28.4,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "ein1",
+    "if": "^\\d"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 134.9,
+     "y": 594.8,
+     "w": 98.6,
+     "size": 10,
+     "comb": 7
+    },
+    "pick": "ein2",
+    "if": "^\\d"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 55.0,
+     "y": 581.2,
+     "size": 9
+    },
+    "if": "^applied"
+   },
+   {
+    "at": {
+     "page": 10,
+     "x": 62,
+     "y": 747.5,
+     "w": 170,
+     "size": 9.5
+    },
+    "pick": "ein",
+    "if": "^\\d"
+   },
+   {
+    "at": {
+     "page": 11,
+     "x": 65,
+     "y": 751.5,
+     "w": 170,
+     "size": 9.5
+    },
+    "pick": "ein",
+    "if": "^\\d"
+   }
+  ],
+  "name": [
+   {
+    "at": {
+     "page": 9,
+     "x": 124,
+     "y": 567.5,
+     "w": 463,
+     "size": 10
+    }
+   },
+   {
+    "at": {
+     "page": 10,
+     "x": 299,
+     "y": 747.5,
+     "w": 172,
+     "size": 9.5
+    }
+   },
+   {
+    "at": {
+     "page": 11,
+     "x": 305,
+     "y": 751.5,
+     "w": 172,
+     "size": 9.5
+    }
+   }
+  ],
+  "trade_name": [
+   {
+    "at": {
+     "page": 9,
+     "x": 104,
+     "y": 541.5,
+     "w": 480,
+     "size": 10
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "location": [
+   {
+    "at": {
+     "page": 9,
+     "x": 103,
+     "y": 510.5,
+     "w": 212,
+     "size": 9.5
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 103,
+     "y": 494.5,
+     "w": 130,
+     "size": 9.5
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 262,
+     "y": 494.5,
+     "w": 50,
+     "size": 9.5
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 103,
+     "y": 478.5,
+     "w": 110,
+     "size": 9.5
+    },
+    "pick": "zip"
+   }
+  ],
+  "mailing_name": [
+   {
+    "at": {
+     "page": 9,
+     "x": 392,
+     "y": 513.5,
+     "w": 196,
+     "size": 9.5
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "mailing": [
+   {
+    "at": {
+     "page": 9,
+     "x": 392,
+     "y": 497.5,
+     "w": 196,
+     "size": 9.5
+    },
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 392,
+     "y": 481.5,
+     "w": 125,
+     "size": 9.5
+    },
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 545,
+     "y": 481.5,
+     "w": 48,
+     "size": 9.5
+    },
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 405,
+     "y": 462.5,
+     "w": 120,
+     "size": 9.5
+    },
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "begin_date": [
+   {
+    "at": {
+     "page": 9,
+     "x": 177.8,
+     "y": 434.5,
+     "w": 30.6,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "mm"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 223.7,
+     "y": 434.5,
+     "w": 30.6,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "dd"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 270.2,
+     "y": 434.5,
+     "w": 30.8,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "yy"
+   }
+  ],
+  "ownership": [
+   {
+    "mark": {
+     "page": 9,
+     "x": 55.0,
+     "y": 406.3,
+     "size": 9
+    },
+    "if": "^nj corporation|^new jersey corporation"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 145.7,
+     "y": 406.3,
+     "size": 9
+    },
+    "if": "^sole"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 226.6,
+     "y": 406.3,
+     "size": 9
+    },
+    "if": "^partnership"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 316.5,
+     "y": 406.3,
+     "size": 9
+    },
+    "if": "^out-of-state corporation"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 428.8,
+     "y": 406.3,
+     "size": 9
+    },
+    "if": "^llp"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 473.6,
+     "y": 406.3,
+     "size": 9
+    },
+    "if": "^other"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 54.3,
+     "y": 392.0,
+     "size": 9
+    },
+    "if": "^limited partnership"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 145.7,
+     "y": 392.0,
+     "size": 9
+    },
+    "if": "^llc.*1065"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 226.6,
+     "y": 392.0,
+     "size": 9
+    },
+    "if": "^llc.*1120"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 316.5,
+     "y": 392.0,
+     "size": 9
+    },
+    "if": "^llc.*single"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 428.8,
+     "y": 392.0,
+     "size": 9
+    },
+    "if": "^s corporation"
+   }
+  ],
+  "county": [
+   {
+    "at": {
+     "page": 9,
+     "x": 366,
+     "y": 358.8,
+     "w": 82,
+     "size": 9.5
+    }
+   }
+  ],
+  "seasonal": [
+   {
+    "mark": {
+     "page": 9,
+     "x": 191.2,
+     "y": 340.4,
+     "size": 9
+    },
+    "if": "^(y|yes|是)"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 228.4,
+     "y": 340.4,
+     "size": 9
+    },
+    "if": "^(n|no|否)"
+   }
+  ],
+  "incorporated": [
+   {
+    "at": {
+     "page": 9,
+     "x": 138.8,
+     "y": 296.5,
+     "w": 31.8,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "mm",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 186.5,
+     "y": 296.5,
+     "w": 31.7,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "dd",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 234.1,
+     "y": 296.5,
+     "w": 32.2,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "yy",
+    "if": "^(?!none$)"
+   }
+  ],
+  "inc_state": [
+   {
+    "at": {
+     "page": 9,
+     "x": 399.5,
+     "y": 296.5,
+     "w": 31.7,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "head",
+    "if": "^(?!none$)"
+   }
+  ],
+  "fiscal_month": [
+   {
+    "at": {
+     "page": 9,
+     "x": 526.3,
+     "y": 296.5,
+     "w": 31.8,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "digits"
+   }
+  ],
+  "subsidiary": [
+   {
+    "mark": {
+     "page": 9,
+     "x": 229.8,
+     "y": 262.6,
+     "size": 9
+    },
+    "if": "^(y|yes|是)"
+   },
+   {
+    "mark": {
+     "page": 9,
+     "x": 266.9,
+     "y": 262.6,
+     "size": 9
+    },
+    "if": "^(n|no|否)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 222,
+     "y": 250.5,
+     "w": 370,
+     "size": 9.5
+    },
+    "pick": "tail",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "naics": [
+   {
+    "at": {
+     "page": 9,
+     "x": 370.3,
+     "y": 233.8,
+     "w": 88.6,
+     "size": 10,
+     "comb": 6
+    },
+    "pick": "digits"
+   }
+  ],
+  "wages": [
+   {
+    "mark": {
+     "page": 10,
+     "x": 517.3,
+     "y": 715.9,
+     "size": 9
+    },
+    "if": "^(y|yes|是)"
+   },
+   {
+    "mark": {
+     "page": 10,
+     "x": 556.0,
+     "y": 716.5,
+     "size": 9
+    },
+    "if": "^(n|no|否)"
+   },
+   {
+    "at": {
+     "page": 10,
+     "x": 263.7,
+     "y": 701.8,
+     "w": 28.9,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "mm",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "at": {
+     "page": 10,
+     "x": 307.1,
+     "y": 701.8,
+     "w": 29.1,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "dd",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "at": {
+     "page": 10,
+     "x": 351.3,
+     "y": 701.8,
+     "w": 28.9,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "yy",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "business_type": [
+   {
+    "mark": {
+     "page": 10,
+     "x": 143.6,
+     "y": 251.6,
+     "size": 9
+    },
+    "if": "manufactur"
+   },
+   {
+    "mark": {
+     "page": 10,
+     "x": 263.3,
+     "y": 251.6,
+     "size": 9
+    },
+    "if": "service"
+   },
+   {
+    "mark": {
+     "page": 10,
+     "x": 384.2,
+     "y": 251.6,
+     "size": 9
+    },
+    "if": "wholesale"
+   },
+   {
+    "mark": {
+     "page": 10,
+     "x": 143.6,
+     "y": 237.9,
+     "size": 9
+    },
+    "if": "construction"
+   },
+   {
+    "mark": {
+     "page": 10,
+     "x": 263.3,
+     "y": 237.9,
+     "size": 9
+    },
+    "if": "retail"
+   },
+   {
+    "mark": {
+     "page": 10,
+     "x": 384.2,
+     "y": 237.9,
+     "size": 9
+    },
+    "if": "government"
+   }
+  ],
+  "principal_product": [
+   {
+    "at": {
+     "page": 10,
+     "x": 218,
+     "y": 224.5,
+     "w": 370,
+     "size": 9.5
+    }
+   }
+  ],
+  "activity": [
+   {
+    "at": {
+     "page": 10,
+     "x": 167,
+     "y": 209.5,
+     "w": 420,
+     "size": 9.5
+    }
+   }
+  ],
+  "sales_tax": [
+   {
+    "mark": {
+     "page": 11,
+     "x": 518.7,
+     "y": 719.7,
+     "size": 9
+    },
+    "if": "^(y|yes|是)"
+   },
+   {
+    "mark": {
+     "page": 11,
+     "x": 557.3,
+     "y": 720.2,
+     "size": 9
+    },
+    "if": "^(n|no|否)"
+   },
+   {
+    "at": {
+     "page": 11,
+     "x": 303.4,
+     "y": 705.6,
+     "w": 30.3,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "mm",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "at": {
+     "page": 11,
+     "x": 348.9,
+     "y": 705.6,
+     "w": 30.4,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "dd",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "at": {
+     "page": 11,
+     "x": 394.4,
+     "y": 705.6,
+     "w": 30.5,
+     "size": 10,
+     "comb": 2
+    },
+    "pick": "yy",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "contact": [
+   {
+    "at": {
+     "page": 11,
+     "x": 199,
+     "y": 164.2,
+     "w": 185,
+     "size": 9.5
+    }
+   }
+  ],
+  "contact_title": [
+   {
+    "at": {
+     "page": 11,
+     "x": 409,
+     "y": 164.2,
+     "w": 180,
+     "size": 9.5
+    }
+   }
+  ],
+  "contact_email": [
+   {
+    "at": {
+     "page": 11,
+     "x": 431,
+     "y": 149.7,
+     "w": 160,
+     "size": 9.5
+    }
+   }
+  ],
+  "signer_title": [
+   {
+    "at": {
+     "page": 11,
+     "x": 97,
+     "y": 120.8,
+     "w": 200,
+     "size": 9.5
+    }
+   }
+  ],
+  "owner1": [
+   {
+    "at": {
+     "page": 9,
+     "x": 30,
+     "y": 183.5,
+     "w": 162,
+     "size": 9
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 198,
+     "y": 166.6,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "tail|head"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 538,
+     "y": 175.0,
+     "w": 58,
+     "size": 9
+    },
+    "pick": "tail|tail|head"
+   }
+  ],
+  "owner1_address": [
+   {
+    "at": {
+     "page": 9,
+     "x": 368,
+     "y": 183.5,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 368,
+     "y": 166.6,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "citystatezip"
+   }
+  ],
+  "owner2": [
+   {
+    "at": {
+     "page": 9,
+     "x": 30,
+     "y": 145.7,
+     "w": 162,
+     "size": 9
+    },
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 198,
+     "y": 128.79999999999998,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 538,
+     "y": 137.2,
+     "w": 58,
+     "size": 9
+    },
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner2_address": [
+   {
+    "at": {
+     "page": 9,
+     "x": 368,
+     "y": 145.7,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 368,
+     "y": 128.79999999999998,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "citystatezip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner3": [
+   {
+    "at": {
+     "page": 9,
+     "x": 30,
+     "y": 108.0,
+     "w": 162,
+     "size": 9
+    },
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 198,
+     "y": 91.1,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 538,
+     "y": 99.5,
+     "w": 58,
+     "size": 9
+    },
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner3_address": [
+   {
+    "at": {
+     "page": 9,
+     "x": 368,
+     "y": 108.0,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 368,
+     "y": 91.1,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "citystatezip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner4": [
+   {
+    "at": {
+     "page": 9,
+     "x": 30,
+     "y": 70.2,
+     "w": 162,
+     "size": 9
+    },
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 198,
+     "y": 53.300000000000004,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 538,
+     "y": 61.7,
+     "w": 58,
+     "size": 9
+    },
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner4_address": [
+   {
+    "at": {
+     "page": 9,
+     "x": 368,
+     "y": 70.2,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 9,
+     "x": 368,
+     "y": 53.300000000000004,
+     "w": 164,
+     "size": 9
+    },
+    "pick": "citystatezip",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "trade_name": "^none$",
+  "mailing_name": "^none$",
+  "mailing": "^none$",
+  "incorporated": "^none$",
+  "inc_state": "^none$",
+  "owner2": "^none$",
+  "owner2_address": "^none$",
+  "owner3": "^none$",
+  "owner3_address": "^none$",
+  "owner4": "^none$",
+  "owner4_address": "^none$"
+ }
+}

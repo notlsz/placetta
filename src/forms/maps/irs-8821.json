@@ -1,0 +1,267 @@
+{
+ "form": "irs-8821",
+ "rev": "Form 8821 (Rev. January 2021)",
+ "pdf": "irs-8821.pdf",
+ "url": "https://www.irs.gov/pub/irs-pdf/f8821.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: taxpayer and designee take the name on the first line and the address on the next (the box wraps). ein is the business's EIN only: the SSN and ITIN never go on the form. Line 3 takes up to three rows: put one tax type, form, period and matter per line (or separated by ';') in the four answers, row by row. Only the first designee is asked for; a second designee, the Intermediate Service Provider box and the plan number are left for the signer. A 'No' to the yes-or-no lines leaves its single box blank. The signature and its date are left for the signer. The XFA layer is dropped by the filler so the filled boxes show.",
+ "lines": [
+  {
+   "id": "taxpayer",
+   "line": "1",
+   "en": "Taxpayer name and address",
+   "zh": "纳税人名称和地址",
+   "hint": {
+    "en": "The business name on the first line, its address on the next.",
+    "zh": "第一行写企业名称，下一行写地址。"
+   }
+  },
+  {
+   "id": "ein",
+   "line": "1",
+   "en": "Taxpayer identification number (EIN)",
+   "zh": "纳税人识别号（EIN）",
+   "hint": {
+    "en": "The business's EIN. Placetta never writes an SSN or ITIN; the signer adds one by hand if needed.",
+    "zh": "填写企业 EIN。快哉从不填写 SSN 或 ITIN，如需填写由签署人手写。"
+   }
+  },
+  {
+   "id": "phone",
+   "line": "1",
+   "en": "Daytime telephone number",
+   "zh": "日间联系电话"
+  },
+  {
+   "id": "designee",
+   "line": "2",
+   "en": "Designee name and address (the person who may see the tax information)",
+   "zh": "被授权人姓名和地址（可查看税务信息的人）",
+   "hint": {
+    "en": "Name on the first line, address on the next.",
+    "zh": "第一行写姓名，下一行写地址。"
+   }
+  },
+  {
+   "id": "designee_caf",
+   "line": "2",
+   "en": "Designee CAF No.",
+   "zh": "被授权人 CAF 编号"
+  },
+  {
+   "id": "designee_ptin",
+   "line": "2",
+   "en": "Designee PTIN",
+   "zh": "被授权人 PTIN"
+  },
+  {
+   "id": "designee_phone",
+   "line": "2",
+   "en": "Designee telephone No.",
+   "zh": "被授权人电话"
+  },
+  {
+   "id": "designee_fax",
+   "line": "2",
+   "en": "Designee fax No.",
+   "zh": "被授权人传真"
+  },
+  {
+   "id": "designee_copies",
+   "line": "2",
+   "en": "Send the designee copies of notices and communications?",
+   "zh": "是否将通知和往来函件副本寄给被授权人？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "tax_type",
+   "line": "3(a)",
+   "en": "Type of tax information (income, employment, payroll, excise...), one per line",
+   "zh": "税务信息类型（所得税、雇佣税、工资税、消费税等），每行一项"
+  },
+  {
+   "id": "tax_form",
+   "line": "3(b)",
+   "en": "Tax form number (1120, 941, 720...), one per line",
+   "zh": "税表编号（1120、941、720 等），每行一项"
+  },
+  {
+   "id": "tax_years",
+   "line": "3(c)",
+   "en": "Year(s) or period(s), one per line",
+   "zh": "年度或期间，每行一项"
+  },
+  {
+   "id": "tax_matters",
+   "line": "3(d)",
+   "en": "Specific tax matters, one per line",
+   "zh": "具体税务事项，每行一项"
+  },
+  {
+   "id": "specific_use",
+   "line": "4",
+   "en": "Is this for a specific use not recorded on the CAF?",
+   "zh": "是否为不记录在 CAF 上的特定用途？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "retain_prior",
+   "line": "5",
+   "en": "Keep prior tax information authorizations in effect (attach copies)?",
+   "zh": "是否保留先前的税务信息授权（需附副本）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "6",
+   "en": "Print name of the person signing",
+   "zh": "签署人姓名（印刷体）"
+  },
+  {
+   "id": "signer_title",
+   "line": "6",
+   "en": "Title (if applicable)",
+   "zh": "职务（如适用）"
+  }
+ ],
+ "boxes": {
+  "taxpayer": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_6[0]"
+   }
+  ],
+  "ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_7[0]"
+   }
+  ],
+  "phone": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_8[0]"
+   }
+  ],
+  "designee": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_10[0]"
+   }
+  ],
+  "designee_caf": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_11[0]"
+   }
+  ],
+  "designee_ptin": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_12[0]"
+   }
+  ],
+  "designee_phone": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_13[0]"
+   }
+  ],
+  "designee_fax": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_14[0]"
+   }
+  ],
+  "designee_copies": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_2[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "tax_type": [
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow1[0].f1_20[0]",
+    "pick": "line1"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow2[0].f1_24[0]",
+    "pick": "line2"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow3[0].f1_28[0]",
+    "pick": "line3"
+   }
+  ],
+  "tax_form": [
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow1[0].f1_21[0]",
+    "pick": "line1"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow2[0].f1_25[0]",
+    "pick": "line2"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow3[0].f1_29[0]",
+    "pick": "line3"
+   }
+  ],
+  "tax_years": [
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow1[0].f1_22[0]",
+    "pick": "line1"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow2[0].f1_26[0]",
+    "pick": "line2"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow3[0].f1_30[0]",
+    "pick": "line3"
+   }
+  ],
+  "tax_matters": [
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow1[0].f1_23[0]",
+    "pick": "line1"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow2[0].f1_27[0]",
+    "pick": "line2"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow3[0].f1_31[0]",
+    "pick": "line3"
+   }
+  ],
+  "specific_use": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_11[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "retain_prior": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_12[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_32[0]"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_33[0]"
+   }
+  ]
+ },
+ "blank": {
+  "designee_copies": "^(n|no|否)$",
+  "specific_use": "^(n|no|否)$",
+  "retain_prior": "^(n|no|否)$"
+ }
+}

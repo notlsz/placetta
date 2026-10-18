@@ -1,0 +1,164 @@
+{
+ "form": "pa-dos",
+ "rev": "DSCB:15-8821 (rev. 2/2017)",
+ "pdf": "pa-dos.pdf",
+ "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dos/programs/business/forms/offsite-forms/15-8821-Cert-of-Org-Dom-LLC.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: item 2 is either (a) the registered office, written on its one line as 'street, city, PA ZIP, county', or (b) a commercial registered office provider, 'provider, county'; the other answers None. Organizers are one per line, up to three. A later effective date is 'On a later date: MM/DD/YYYY' (the hour is left for the organizer). The return address is three lines, 'name; street; city, ST ZIP', and ticks its box, as does a return email. Items 5 and 6 (restricted professional and benefit companies) don't apply to a food or retail business and are left blank, as are the organizers' signatures and the testimony date on page 2. The $125 fee is paid by check with the paper form, or online at the Department's Business Filing Services.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "1",
+   "en": "Name of the limited liability company (with its designator, e.g. LLC)",
+   "zh": "有限责任公司名称（含后缀，如 LLC）"
+  },
+  {
+   "id": "registered_office",
+   "line": "2(a)",
+   "en": "Registered office in Pennsylvania: 'number and street, city, PA ZIP, county' (no P.O. box), or None when a commercial registered office provider is used",
+   "zh": "宾夕法尼亚州注册办公室：“门牌号和街道、城市、PA 邮编、县”（不可仅用邮政信箱）；使用商业注册办公室服务商的填 None"
+  },
+  {
+   "id": "cro",
+   "line": "2(b)",
+   "en": "Commercial registered office provider and county of venue: 'provider name, county', or None",
+   "zh": "商业注册办公室服务商及管辖县：“服务商名称、县”，或 None"
+  },
+  {
+   "id": "organizers",
+   "line": "3",
+   "en": "Name of each organizer, one per line (up to three); all organizers sign page 2",
+   "zh": "每位发起人姓名，每行一位（最多三位）；所有发起人须在第 2 页签字"
+  },
+  {
+   "id": "effective",
+   "line": "4",
+   "en": "When the certificate takes effect",
+   "zh": "证书生效时间",
+   "options": [
+    "Upon filing",
+    "On a later date: MM/DD/YYYY"
+   ]
+  },
+  {
+   "id": "veteran",
+   "line": "Fee",
+   "en": "Does the LLC qualify for the veteran/reservist-owned small business fee exemption (proof attached)?",
+   "zh": "是否符合退伍军人/预备役人员所有小企业免费条件（附证明）？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "return_to",
+   "line": "Return",
+   "en": "Return the filed document by mail to: 'name; street; city, ST ZIP', or None",
+   "zh": "备案文件邮寄退回地址：“姓名；街道；城市、州、邮编”，或 None"
+  },
+  {
+   "id": "return_email",
+   "line": "Return",
+   "en": "Return the filed document by email to (address), or None",
+   "zh": "备案文件电子邮件退回地址，或 None"
+  }
+ ],
+ "boxes": {
+  "name": [
+   {
+    "text": "Name of LLC"
+   }
+  ],
+  "registered_office": [
+   {
+    "text": "Address of LLC Registered Office",
+    "if": "^(?!none$)"
+   }
+  ],
+  "cro": [
+   {
+    "text": "Name of Commercial Registered Office Provider",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "County",
+    "pick": "tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "organizers": [
+   {
+    "text": "Organizer Name 1",
+    "pick": "line1"
+   },
+   {
+    "text": "Organizer Name 2",
+    "pick": "line2"
+   },
+   {
+    "text": "Organizer Name 3",
+    "pick": "line3"
+   }
+  ],
+  "effective": [
+   {
+    "check": "Check Box 4",
+    "if": "^upon"
+   },
+   {
+    "check": "Check Box 5",
+    "if": "^on "
+   },
+   {
+    "text": "Date",
+    "pick": "tail|date",
+    "if": "^on "
+   }
+  ],
+  "veteran": [
+   {
+    "check": "Check Box 3",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "return_to": [
+   {
+    "check": "Check Box 1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Name",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Address",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City State Zip",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   }
+  ],
+  "return_email": [
+   {
+    "check": "Check Box 2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Return Email",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "registered_office": "^none$",
+  "cro": "^none$",
+  "return_to": "^none$",
+  "return_email": "^none$",
+  "veteran": "^(n|no|否)$"
+ }
+}

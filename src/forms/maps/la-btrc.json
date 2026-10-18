@@ -1,0 +1,369 @@
+{
+ "form": "la-btrc",
+ "rev": "Business Tax Application (Rev. 01/2026)",
+ "pdf": "la-btrc.pdf",
+ "url": "https://finance.lacity.gov/sites/g/files/wph1721/files/2026-04/a_Business-Tax-Registration-Certificate-Application-RevisionJanuary2026-English.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: addresses are 'street, city, ST ZIP' and split into the street, city, state and ZIP boxes. description takes up to two lines. The form prints one box for 'Social Security Number OR Federal Employer Identification Number': since the same box takes an SSN, Placetta leaves it for the signer, who writes the FEIN there by hand. Gross receipts are asked only for 2023 to 2025 (a new business answers None); earlier years, the date and the signature are left for the signer.",
+ "lines": [
+  {
+   "id": "business_type",
+   "line": "Business Type",
+   "en": "Business type",
+   "zh": "企业类型",
+   "options": [
+    "LLC",
+    "Corporation",
+    "Individual",
+    "Partnership",
+    "Trust"
+   ]
+  },
+  {
+   "id": "legal_name",
+   "line": "Legal Name",
+   "en": "Legal name (not the DBA)",
+   "zh": "法定名称（非 DBA）"
+  },
+  {
+   "id": "start_date",
+   "line": "Starting Date",
+   "en": "Starting date of business in the City of Los Angeles (MM/DD/YYYY)",
+   "zh": "在洛杉矶市开业日期（月/日/年）"
+  },
+  {
+   "id": "address",
+   "line": "Business Address",
+   "en": "Business address (no P.O. box): street, city, ST ZIP",
+   "zh": "营业地址（不可用邮政信箱）：街道、城市、州、邮编"
+  },
+  {
+   "id": "address_residential",
+   "line": "Business Address",
+   "en": "Is the business address a residential address?",
+   "zh": "营业地址是否为住宅地址？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "mailing",
+   "line": "Mailing Address",
+   "en": "Mailing address: street, city, ST ZIP",
+   "zh": "邮寄地址：街道、城市、州、邮编"
+  },
+  {
+   "id": "mailing_residential",
+   "line": "Mailing Address",
+   "en": "Is the mailing address a residential address?",
+   "zh": "邮寄地址是否为住宅地址？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "care_of",
+   "line": "Care of (C/O)",
+   "en": "Care of (C/O), or None",
+   "zh": "转交人（C/O），或 None"
+  },
+  {
+   "id": "dba",
+   "line": "DBA",
+   "en": "Doing business as (DBA)",
+   "zh": "营业名称（DBA）"
+  },
+  {
+   "id": "tobacco",
+   "line": "Tobacco",
+   "en": "Do you sell tobacco products?",
+   "zh": "是否销售烟草制品？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "fein",
+   "line": "SSN or FEIN",
+   "en": "Federal employer identification number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "sellers_permit",
+   "line": "Sales Tax Number",
+   "en": "Sales tax number (seller's permit), or None",
+   "zh": "销售税号（销售许可证），或 None"
+  },
+  {
+   "id": "description",
+   "line": "Description of Business",
+   "en": "Description of business (up to two lines)",
+   "zh": "业务说明（最多两行）"
+  },
+  {
+   "id": "contact",
+   "line": "Business Contact Person",
+   "en": "Business contact person",
+   "zh": "企业联系人"
+  },
+  {
+   "id": "contact_title",
+   "line": "Title",
+   "en": "Contact person's title",
+   "zh": "联系人职务"
+  },
+  {
+   "id": "contact_email",
+   "line": "Email Address",
+   "en": "Contact email address",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Phone Number",
+   "en": "Contact phone number",
+   "zh": "联系人电话"
+  },
+  {
+   "id": "receipts_2023",
+   "line": "Gross Receipts",
+   "en": "Gross receipts for 2023 (if the business began before this year), or None",
+   "zh": "2023 年营业总额（如在今年之前开业），或 None"
+  },
+  {
+   "id": "receipts_2024",
+   "line": "Gross Receipts",
+   "en": "Gross receipts for 2024, or None",
+   "zh": "2024 年营业总额，或 None"
+  },
+  {
+   "id": "receipts_2025",
+   "line": "Gross Receipts",
+   "en": "Gross receipts for 2025, or None",
+   "zh": "2025 年营业总额，或 None"
+  },
+  {
+   "id": "signer",
+   "line": "Declaration: Name",
+   "en": "Name of the person signing the declaration",
+   "zh": "签署声明的人员姓名"
+  },
+  {
+   "id": "signer_title",
+   "line": "Declaration: Title",
+   "en": "Title of the person signing",
+   "zh": "签署人职务"
+  },
+  {
+   "id": "signer_email",
+   "line": "Declaration: Email",
+   "en": "Email of the person signing",
+   "zh": "签署人电子邮箱"
+  },
+  {
+   "id": "signer_phone",
+   "line": "Declaration: Phone Number",
+   "en": "Phone number of the person signing",
+   "zh": "签署人电话"
+  }
+ ],
+ "boxes": {
+  "business_type": [
+   {
+    "check": "LLC",
+    "if": "^llc"
+   },
+   {
+    "check": "Corporation",
+    "if": "^corporation"
+   },
+   {
+    "check": "Individual",
+    "if": "^individual"
+   },
+   {
+    "check": "Partnership",
+    "if": "^partnership"
+   },
+   {
+    "check": "Trust",
+    "if": "^trust"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "Legal Name (Do not use Doing Business As here)"
+   }
+  ],
+  "start_date": [
+   {
+    "text": "Starting Date of business in the City of Los Angeles MO/DAY/YEAR",
+    "pick": "date"
+   }
+  ],
+  "address": [
+   {
+    "text": "Business Address (Do not use PO Box here)",
+    "pick": "street"
+   },
+   {
+    "text": "Business Address - City",
+    "pick": "city"
+   },
+   {
+    "text": "Business Address - State",
+    "pick": "state"
+   },
+   {
+    "text": "Business Address - Zip",
+    "pick": "zip"
+   }
+  ],
+  "address_residential": [
+   {
+    "check": "Yes - this Business Address is a residential address",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "No - this Business Address is not a residential address",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "Mailing Address",
+    "pick": "street"
+   },
+   {
+    "text": "Mailing Address - City",
+    "pick": "city"
+   },
+   {
+    "text": "Mailing Address - State",
+    "pick": "state"
+   },
+   {
+    "text": "Mailing Address - Zip",
+    "pick": "zip"
+   }
+  ],
+  "mailing_residential": [
+   {
+    "check": "Yes - this Mailing Address is a residential address",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "No - this Mailing Address is not a residential address",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "care_of": [
+   {
+    "text": "Care of (C/O)",
+    "if": "^(?!none$)"
+   }
+  ],
+  "dba": [
+   {
+    "text": "Doing Business As (DBA)"
+   }
+  ],
+  "tobacco": [
+   {
+    "check": "Yes - I sell tobacco products",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "No - I do not sell tobacco products",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "sellers_permit": [
+   {
+    "text": "Sales Tax Number (Seller's Permit)",
+    "if": "^(?!none$)"
+   }
+  ],
+  "description": [
+   {
+    "text": "Description of Business",
+    "pick": "line1"
+   },
+   {
+    "text": "Description of Business 2",
+    "pick": "line2"
+   }
+  ],
+  "contact": [
+   {
+    "text": "Business Contact Person"
+   }
+  ],
+  "contact_title": [
+   {
+    "text": "Business Contact Title"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Business Contact Email Address"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Business Contact Phone Number"
+   }
+  ],
+  "receipts_2023": [
+   {
+    "text": "2023 Gross Receipts",
+    "if": "^(?!none$)"
+   }
+  ],
+  "receipts_2024": [
+   {
+    "text": "2024 Gross Receipts",
+    "if": "^(?!none$)"
+   }
+  ],
+  "receipts_2025": [
+   {
+    "text": "2025 Gross Receipts",
+    "if": "^(?!none$)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Name"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "Title"
+   }
+  ],
+  "signer_email": [
+   {
+    "text": "Email Address"
+   }
+  ],
+  "signer_phone": [
+   {
+    "text": "Phone Number"
+   }
+  ]
+ },
+ "unmapped": {
+  "fein": "The PDF has one box for 'Social Security Number OR Federal Employer Identification Number'. A box that also takes an SSN is never filled by Placetta, so the signer writes the FEIN there by hand."
+ },
+ "blank": {
+  "care_of": "^none$",
+  "sellers_permit": "^none$",
+  "receipts_2023": "^none$",
+  "receipts_2024": "^none$",
+  "receipts_2025": "^none$"
+ }
+}

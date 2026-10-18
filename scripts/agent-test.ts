@@ -380,7 +380,10 @@ async function previewRefine() {
       const out: string[] = [];
       for (const id of want) if (at(id) < 0) out.push(`${kind}: no ${id}`);
       for (const id of GENERIC) if (p.apps.some(a => a.id === id)) out.push(`${kind}: generic ${id}`);
-      if (!p.local || p.generic !== 0) out.push(`${kind}: local ${p.local}, ${p.generic} generic rows`);
+      // the company's formation is a state step: where the library has no formation filing for the state (Oregon, DC,
+      // Minnesota, Ohio) the plan names the state's office and says Odelia confirms it; the city's own steps are what this checks
+      const local = p.generic - (p.apps.some(a => a.id === "pv-g-formation") ? 1 : 0);
+      if (!p.local || local !== 0) out.push(`${kind}: local ${p.local}, ${local} generic local rows`);
       const food = at(m.food) >= 0 ? row(m.food) : undefined;
       if (food && (!food.critical || !/\.(gov|us|org|com)\//.test(food.source.url + "/") || /sba\.gov|fda\.gov/.test(food.source.url))) out.push(`${kind}: ${m.food} not critical or not sourced from the agency`);
       if (food && m.plan && at(m.plan) >= 0 && !(at(m.plan) < at(m.food) && food.checklist.some(c => c.dep === row(m.plan!).id))) out.push(`${kind}: ${m.food} doesn't follow ${m.plan}`);

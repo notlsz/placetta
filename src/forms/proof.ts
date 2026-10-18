@@ -167,4 +167,28 @@ export const PROOF: Record<string, Proof> = {
   "nj-reg": p(NJ_REG, "Second, after filing the certificate of formation/authorization, file the tax/employer registration form (Form NJ-REG)."),
   "edi-plan-review": p("https://www.nj.gov/health/ceohs/documents/phfpp/Chapter%2024%20w%20Cottage%20Food%20Rules%201-18-22.pdf", "A permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before:"),
   "edi-food-license": p("https://cms2.revize.com/revize/edisonnj/document_center/Retail%20Food%20Fillable%20Application.pdf", "RETAIL FOOD APPLICATION"),
+
+  /* the target markets' forms (src/forms/markets-us.ts, src/forms/more-us.ts) */
+  "ca-llc-12": p("https://www.sos.ca.gov/business-programs/business-entities/statements", "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties"),
+  "md-llc": p("https://dat.maryland.gov/sdat%20forms/artorgan.pdf", "FEES: (1) Certificate of Organization $100.00"),
+  "md-cra": p("https://businessexpress.maryland.gov/start/taxes-and-insurance", "You can register tax accounts using the Maryland Comptroller's Combined Registration Application (CRA)."),
+  "moco-plan-review": p("https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf", "An HHS plan review & approval is required for any facility that sells or prepares food and drink items before a Building Permit"),
+  "moco-food-license": p("https://www.montgomerycountymd.gov/department-health-human-services/about-us/licensure-regulatory-services/environmental-health-unit/food-service-facility-license", "A license must be obtained prior to opening a business."),
+  "hi-llc": at("https://files.hawaii.gov/dcca/breg/registration/forms/llc-1.pdf", "State of Hawaii Nonrefundable Filing Fee: $50.00"),
+  "hi-bb1": p("https://tax.hawaii.gov/geninfo/get/", "Complete the Form BB-1, State of Hawaii Basic Business Application, BB-1 Packet , and pay a one-time $20 registration fee."),
+  "hi-ui": p("https://labor.hawaii.gov/ui/employer-registration/", "Liable employers must submit a tax report every quarter, even if there are no paid employees that quarter"),
+  "ut-llc": p("https://commerce.utah.gov/corporations/business-entities/domestic-limited-liability-company/", "A Domestic Limited Liability Company (LLC) is formed by one or more individuals or entities through a special written agreement."),
+  "ut-tax": p("https://tax.utah.gov/business/create-manage/tax-info-business/", "Taxpayer Access Point – TAP – Register your business, file and pay taxes, and manage your online account."),
+  "ut-ui": p("https://jobs.utah.gov/ui/employer/public/osbr.aspx", "You will be required to setup a user account before you can start the employer registration process."),
+  "va-llc": p("https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf", "This how-to guide will walk you through forming a Virginia Limited Liability Company online in the new Clerk's Information System (CIS)"),
+  "smo-license": p("https://www.cityofsanmateo.org/3323/Starting-a-Business", "Business Tax Applications can be applied for online and are issued by the Finance Department."),
+  "smc-plan-check": p("https://www.smchealth.org/food-facility-plan-check-process", "Plans must be received and approved before any construction or remodeling takes place."),
+  // the form's page (smchealth.org/my-ehs-online-portal) answered 404 on 2026-10-18; the county's plan review FAQ says when the permit comes
+  "smc-health-permit": at("https://www.smchealth.org/sites/main/files/file-attachments/20251104_plan_review_faqs.pdf", "Once your facility passes the final inspection, another invoice will be sent to you for the annual health permit fee."),
+  // cupertino.gov refuses curl (403): read with WebFetch
+  "cup-license": at("https://cupertino.gov/businesslicense", "All persons or entities conducting business within the City of Cupertino are required to obtain a business license"),
+  // glendaleca.gov refuses curl (403): read with WebFetch
+  "gln-brc": p("https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate", "Every business located in Glendale, including subleases, is required to apply for"),
+  "sgb-license": p("https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023", "A Business License Certificate must be issued prior to conducting business."),
+  "lac-business-license": p("https://ttc.lacounty.gov/business-license-requirements-2/", "you must confirm that your business activity is one that the County licenses."),
 };

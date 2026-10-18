@@ -1,0 +1,215 @@
+{
+ "form": "irs-8822b",
+ "rev": "Form 8822-B (Rev. December 2019)",
+ "pdf": "irs-8822b.pdf",
+ "url": "https://www.irs.gov/pub/irs-pdf/f8822b.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: each address is one line as the form prints it ('street, city, ST ZIP'); a foreign address also fills the country, province and postal code boxes beneath it (a US address leaves them blank). responsible_ein is written only when it is an EIN (12-3456789): an individual's SSN or ITIN never goes on the form ('By hand' leaves the box for the signer). A 'No' to lines 1 to 3 leaves its box blank. The tax-exempt box, the signature and its date are left for the signer. The XFA layer is dropped by the filler so the filled boxes show.",
+ "lines": [
+  {
+   "id": "affects_returns",
+   "line": "1",
+   "en": "Does the change affect employment, excise, income and other business returns (720, 940, 941, 990, 1041, 1065, 1120...)?",
+   "zh": "变更是否影响雇佣、消费、所得等营业申报（720、940、941、990、1041、1065、1120 等）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "affects_plans",
+   "line": "2",
+   "en": "Does it affect employee plan returns (5500, 5500-EZ...)?",
+   "zh": "是否影响员工计划申报（5500、5500-EZ 等）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "affects_location",
+   "line": "3",
+   "en": "Does it change the business location?",
+   "zh": "是否变更营业地点？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "name",
+   "line": "4a",
+   "en": "Business name",
+   "zh": "企业名称"
+  },
+  {
+   "id": "ein",
+   "line": "4b",
+   "en": "Employer identification number",
+   "zh": "雇主识别号（EIN）"
+  },
+  {
+   "id": "old_mailing",
+   "line": "5",
+   "en": "Old mailing address (street, city, state, ZIP, or the foreign address)",
+   "zh": "原邮寄地址（街道、城市、州、邮编，或境外地址）"
+  },
+  {
+   "id": "new_mailing",
+   "line": "6",
+   "en": "New mailing address",
+   "zh": "新邮寄地址"
+  },
+  {
+   "id": "new_location",
+   "line": "7",
+   "en": "New business location",
+   "zh": "新营业地点"
+  },
+  {
+   "id": "responsible_name",
+   "line": "8",
+   "en": "New responsible party's name",
+   "zh": "新负责人姓名"
+  },
+  {
+   "id": "responsible_ein",
+   "line": "9",
+   "en": "New responsible party's EIN",
+   "zh": "新负责人 EIN",
+   "hint": {
+    "en": "Only when the responsible party is an entity with an EIN. An individual's SSN or ITIN is never written: answer \"By hand\" and the signer adds it.",
+    "zh": "仅当负责人为拥有 EIN 的实体时填写。个人的 SSN 或 ITIN 不会被填写：请回答“By hand”，由签署人自行填写。"
+   }
+  },
+  {
+   "id": "contact_phone",
+   "line": "10",
+   "en": "Daytime telephone number of person to contact",
+   "zh": "联系人日间电话"
+  },
+  {
+   "id": "signer_title",
+   "line": "10",
+   "en": "Title of the owner, officer or representative signing",
+   "zh": "签署人（所有者、高管或代表）职务"
+  }
+ ],
+ "boxes": {
+  "affects_returns": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_2[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "affects_plans": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_3[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "affects_location": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_4[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "name": [
+   {
+    "text": "topmostSubform[0].Page1[0].Line4aReadOrder[0].f1_1[0]"
+   }
+  ],
+  "ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].Line4bReadOrder[0].f1_2[0]"
+   }
+  ],
+  "old_mailing": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_3[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_4[0]",
+    "pick": "country",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_5[0]",
+    "pick": "state",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_6[0]",
+    "pick": "zip",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   }
+  ],
+  "new_mailing": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_7[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_8[0]",
+    "pick": "country",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_9[0]",
+    "pick": "state",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_10[0]",
+    "pick": "zip",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   }
+  ],
+  "new_location": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_11[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_12[0]",
+    "pick": "country",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_13[0]",
+    "pick": "state",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_14[0]",
+    "pick": "zip",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   }
+  ],
+  "responsible_name": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_15[0]"
+   }
+  ],
+  "responsible_ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_16[0]",
+    "if": "^\\d{2}-?\\d{7}$"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_17[0]"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_18[0]"
+   }
+  ]
+ },
+ "blank": {
+  "affects_returns": "^(n|no|否)$",
+  "affects_plans": "^(n|no|否)$",
+  "affects_location": "^(n|no|否)$",
+  "responsible_ein": "^by hand$"
+ }
+}

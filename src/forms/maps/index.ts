@@ -4,46 +4,82 @@ import m_aus_food_permit from "./aus-food-permit.json";
 import m_aus_food_plan_review from "./aus-food-plan-review.json";
 import m_aus_food_preopening from "./aus-food-preopening.json";
 import m_az_llc from "./az-llc.json";
+import m_az_tpt from "./az-tpt.json";
 import m_bos_cert from "./bos-cert.json";
 import m_bos_cv from "./bos-cv.json";
 import m_bos_food_permit from "./bos-food-permit.json";
 import m_bos_plan_review from "./bos-plan-review.json";
+import m_ca_abc_140 from "./ca-abc-140.json";
+import m_ca_abc_211 from "./ca-abc-211.json";
+import m_ca_abc_217 from "./ca-abc-217.json";
+import m_ca_abc_243 from "./ca-abc-243.json";
+import m_ca_abc_244 from "./ca-abc-244.json";
+import m_ca_abc_247 from "./ca-abc-247.json";
+import m_ca_abc_255 from "./ca-abc-255.json";
+import m_ca_abc_256 from "./ca-abc-256.json";
+import m_ca_abc_257 from "./ca-abc-257.json";
+import m_ca_abc_258 from "./ca-abc-258.json";
 import m_ca_edd_de1 from "./ca-edd-de1.json";
 import m_ca_ftb_3522 from "./ca-ftb-3522.json";
 import m_ca_llc_1 from "./ca-llc-1.json";
+import m_ca_llc_12 from "./ca-llc-12.json";
+import m_ca_llc_5 from "./ca-llc-5.json";
 import m_cbp_301 from "./cbp-301.json";
 import m_cmh_plan_review from "./cmh-plan-review.json";
+import m_cook_food_license from "./cook-food-license.json";
 import m_dal_co from "./dal-co.json";
 import m_dal_food_permit from "./dal-food-permit.json";
+import m_dc_dlcp from "./dc-dlcp.json";
 import m_den_plan_review from "./den-plan-review.json";
 import m_den_zoning from "./den-zoning.json";
 import m_edi_food_license from "./edi-food-license.json";
+import m_fl_dbpr from "./fl-dbpr.json";
+import m_fl_dbpr_plan from "./fl-dbpr-plan.json";
+import m_fl_dor from "./fl-dor.json";
+import m_fl_fictitious from "./fl-fictitious.json";
 import m_fl_sunbiz from "./fl-sunbiz.json";
 import m_ftw_co from "./ftw-co.json";
 import m_fulton_plan_review from "./fulton-plan-review.json";
+import m_hi_bb1 from "./hi-bb1.json";
 import m_hou_co from "./hou-co.json";
 import m_hou_food_dealer from "./hou-food-dealer.json";
 import m_hou_sign from "./hou-sign.json";
 import m_il_ides from "./il-ides.json";
 import m_il_sos from "./il-sos.json";
 import m_il_tax from "./il-tax.json";
+import m_irs_1120 from "./irs-1120.json";
+import m_irs_2553 from "./irs-2553.json";
+import m_irs_2848 from "./irs-2848.json";
 import m_irs_5472 from "./irs-5472.json";
+import m_irs_7004 from "./irs-7004.json";
+import m_irs_8821 from "./irs-8821.json";
+import m_irs_8822b from "./irs-8822b.json";
+import m_irs_8832 from "./irs-8832.json";
 import m_irs_w7 from "./irs-w7.json";
 import m_kc_plan_review from "./kc-plan-review.json";
+import m_la_btrc from "./la-btrc.json";
 import m_lac_health_permit from "./lac-health-permit.json";
 import m_lac_plan_check from "./lac-plan-check.json";
 import m_lv_food from "./lv-food.json";
+import m_ma_sos from "./ma-sos.json";
+import m_md_cra from "./md-cra.json";
+import m_md_llc from "./md-llc.json";
+import m_moco_food_license from "./moco-food-license.json";
 import m_mpls_food_license from "./mpls-food-license.json";
 import m_mpls_plan_review from "./mpls-plan-review.json";
 import m_mult_food_license from "./mult-food-license.json";
 import m_mult_plan_review from "./mult-plan-review.json";
+import m_nj_formation from "./nj-formation.json";
+import m_nj_reg from "./nj-reg.json";
 import m_nv_esd from "./nv-esd.json";
 import m_nv_tax from "./nv-tax.json";
 import m_ny_dol_100 from "./ny-dol-100.json";
 import m_ny_dtf_17 from "./ny-dtf-17.json";
+import m_nyc_dcwp_license from "./nyc-dcwp-license.json";
 import m_oc_health_permit from "./oc-health-permit.json";
 import m_oc_plan_check from "./oc-plan-check.json";
 import m_or_payroll from "./or-payroll.json";
+import m_pa_dos from "./pa-dos.json";
 import m_phl_plan_review from "./phl-plan-review.json";
 import m_phx_co from "./phx-co.json";
 import m_sac_bot from "./sac-bot.json";
@@ -53,6 +89,7 @@ import m_sea_business_license from "./sea-business-license.json";
 import m_sf_dph_plan_check from "./sf-dph-plan-check.json";
 import m_sf_fire_assembly from "./sf-fire-assembly.json";
 import m_sf_formula_retail from "./sf-formula-retail.json";
+import m_smo_license from "./smo-license.json";
 import m_snhd_plan_review from "./snhd-plan-review.json";
 import m_tx_205 from "./tx-205.json";
 import m_tx_304 from "./tx-304.json";
@@ -61,52 +98,89 @@ import m_tx_ap201 from "./tx-ap201.json";
 import m_va_tax from "./va-tax.json";
 import m_va_vec from "./va-vec.json";
 import m_wa_bls from "./wa-bls.json";
+import m_wa_sos from "./wa-sos.json";
 
 export const MAPS: Record<string, FormMap> = {
   "aus-food-permit": m_aus_food_permit as FormMap,
   "aus-food-plan-review": m_aus_food_plan_review as FormMap,
   "aus-food-preopening": m_aus_food_preopening as FormMap,
   "az-llc": m_az_llc as FormMap,
+  "az-tpt": m_az_tpt as FormMap,
   "bos-cert": m_bos_cert as FormMap,
   "bos-cv": m_bos_cv as FormMap,
   "bos-food-permit": m_bos_food_permit as FormMap,
   "bos-plan-review": m_bos_plan_review as FormMap,
+  "ca-abc-140": m_ca_abc_140 as FormMap,
+  "ca-abc-211": m_ca_abc_211 as FormMap,
+  "ca-abc-217": m_ca_abc_217 as FormMap,
+  "ca-abc-243": m_ca_abc_243 as FormMap,
+  "ca-abc-244": m_ca_abc_244 as FormMap,
+  "ca-abc-247": m_ca_abc_247 as FormMap,
+  "ca-abc-255": m_ca_abc_255 as FormMap,
+  "ca-abc-256": m_ca_abc_256 as FormMap,
+  "ca-abc-257": m_ca_abc_257 as FormMap,
+  "ca-abc-258": m_ca_abc_258 as FormMap,
   "ca-edd-de1": m_ca_edd_de1 as FormMap,
   "ca-ftb-3522": m_ca_ftb_3522 as FormMap,
   "ca-llc-1": m_ca_llc_1 as FormMap,
+  "ca-llc-12": m_ca_llc_12 as FormMap,
+  "ca-llc-5": m_ca_llc_5 as FormMap,
   "cbp-301": m_cbp_301 as FormMap,
   "cmh-plan-review": m_cmh_plan_review as FormMap,
+  "cook-food-license": m_cook_food_license as FormMap,
   "dal-co": m_dal_co as FormMap,
   "dal-food-permit": m_dal_food_permit as FormMap,
+  "dc-dlcp": m_dc_dlcp as FormMap,
   "den-plan-review": m_den_plan_review as FormMap,
   "den-zoning": m_den_zoning as FormMap,
   "edi-food-license": m_edi_food_license as FormMap,
+  "fl-dbpr": m_fl_dbpr as FormMap,
+  "fl-dbpr-plan": m_fl_dbpr_plan as FormMap,
+  "fl-dor": m_fl_dor as FormMap,
+  "fl-fictitious": m_fl_fictitious as FormMap,
   "fl-sunbiz": m_fl_sunbiz as FormMap,
   "ftw-co": m_ftw_co as FormMap,
   "fulton-plan-review": m_fulton_plan_review as FormMap,
+  "hi-bb1": m_hi_bb1 as FormMap,
   "hou-co": m_hou_co as FormMap,
   "hou-food-dealer": m_hou_food_dealer as FormMap,
   "hou-sign": m_hou_sign as FormMap,
   "il-ides": m_il_ides as FormMap,
   "il-sos": m_il_sos as FormMap,
   "il-tax": m_il_tax as FormMap,
+  "irs-1120": m_irs_1120 as FormMap,
+  "irs-2553": m_irs_2553 as FormMap,
+  "irs-2848": m_irs_2848 as FormMap,
   "irs-5472": m_irs_5472 as FormMap,
+  "irs-7004": m_irs_7004 as FormMap,
+  "irs-8821": m_irs_8821 as FormMap,
+  "irs-8822b": m_irs_8822b as FormMap,
+  "irs-8832": m_irs_8832 as FormMap,
   "irs-w7": m_irs_w7 as FormMap,
   "kc-plan-review": m_kc_plan_review as FormMap,
+  "la-btrc": m_la_btrc as FormMap,
   "lac-health-permit": m_lac_health_permit as FormMap,
   "lac-plan-check": m_lac_plan_check as FormMap,
   "lv-food": m_lv_food as FormMap,
+  "ma-sos": m_ma_sos as FormMap,
+  "md-cra": m_md_cra as FormMap,
+  "md-llc": m_md_llc as FormMap,
+  "moco-food-license": m_moco_food_license as FormMap,
   "mpls-food-license": m_mpls_food_license as FormMap,
   "mpls-plan-review": m_mpls_plan_review as FormMap,
   "mult-food-license": m_mult_food_license as FormMap,
   "mult-plan-review": m_mult_plan_review as FormMap,
+  "nj-formation": m_nj_formation as FormMap,
+  "nj-reg": m_nj_reg as FormMap,
   "nv-esd": m_nv_esd as FormMap,
   "nv-tax": m_nv_tax as FormMap,
   "ny-dol-100": m_ny_dol_100 as FormMap,
   "ny-dtf-17": m_ny_dtf_17 as FormMap,
+  "nyc-dcwp-license": m_nyc_dcwp_license as FormMap,
   "oc-health-permit": m_oc_health_permit as FormMap,
   "oc-plan-check": m_oc_plan_check as FormMap,
   "or-payroll": m_or_payroll as FormMap,
+  "pa-dos": m_pa_dos as FormMap,
   "phl-plan-review": m_phl_plan_review as FormMap,
   "phx-co": m_phx_co as FormMap,
   "sac-bot": m_sac_bot as FormMap,
@@ -116,6 +190,7 @@ export const MAPS: Record<string, FormMap> = {
   "sf-dph-plan-check": m_sf_dph_plan_check as FormMap,
   "sf-fire-assembly": m_sf_fire_assembly as FormMap,
   "sf-formula-retail": m_sf_formula_retail as FormMap,
+  "smo-license": m_smo_license as FormMap,
   "snhd-plan-review": m_snhd_plan_review as FormMap,
   "tx-205": m_tx_205 as FormMap,
   "tx-304": m_tx_304 as FormMap,
@@ -124,4 +199,5 @@ export const MAPS: Record<string, FormMap> = {
   "va-tax": m_va_tax as FormMap,
   "va-vec": m_va_vec as FormMap,
   "wa-bls": m_wa_bls as FormMap,
+  "wa-sos": m_wa_sos as FormMap,
 };

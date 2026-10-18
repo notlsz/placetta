@@ -146,6 +146,16 @@ const ALCOHOL_AGENCY: Record<string, [string, string]> = {
 };
 /** The state agency that opens the unemployment insurance account, where the library has no form for it. */
 const EMPLOYER_AGENCY: Record<string, [string, string]> = { UT: ["Utah Department of Workforce Services", "犹他州劳动力服务局"] };
+/** Who forms a company where it isn't the Secretary of State (the generic formation row names it). */
+const FORMATION_AGENCY: Record<string, [string, string]> = {
+  DC: ["District of Columbia Department of Licensing and Consumer Protection, Corporations Division", "华盛顿特区许可与消费者保护局公司处"],
+  AZ: ["Arizona Corporation Commission", "亚利桑那州公司委员会"], VA: ["Virginia State Corporation Commission", "弗吉尼亚州公司委员会"],
+  MD: ["Maryland State Department of Assessments and Taxation", "马里兰州评估与税务局"], HI: ["Hawaii Department of Commerce and Consumer Affairs, Business Registration Division", "夏威夷州商业与消费者事务部企业登记处"],
+  UT: ["Utah Division of Corporations and Commercial Code", "犹他州公司与商业法典处"], NJ: ["New Jersey Division of Revenue and Enterprise Services", "新泽西州税务与企业服务处"],
+  NY: ["New York Department of State, Division of Corporations", "纽约州州务厅公司处"], PA: ["Pennsylvania Department of State", "宾夕法尼亚州州务厅"],
+  MA: ["Massachusetts Secretary of the Commonwealth, Corporations Division", "马萨诸塞州联邦秘书公司处"], FL: ["Florida Department of State, Division of Corporations", "佛罗里达州州务厅公司处"],
+  OR: ["Oregon Secretary of State, Corporation Division", "俄勒冈州州务卿公司处"],
+};
 const confirm = (en: string, zh: string) => B(`We'll confirm with ${en}`, `我们会向${zh}核实`);
 /** The generic rows' sources, for the proof check (scripts/eval/proof.ts). */
 export const GENERIC_SOURCES = [SRC_DOL, SRC_SBA, SRC_CA_PLAN, SRC_CA_LOCAL, SRC_LAC_BUILDING];
@@ -153,12 +163,12 @@ const SRC_EU = { label: "europa.eu", url: "https://europa.eu/youreurope/business
 const EU = new Set(["FR", "DE", "ES", "IT", "NL", "IE", "BE", "PT", "AT", "SE", "DK", "FI", "PL", "CZ", "HU", "GR"]);
 
 /** The registry forms that register the business for state sales tax, and those that also register it as an employer. */
-const TAX_FORMS = new Set(["ny-dtf-17", "ca-cdtfa", "tx-ap201", "az-tpt", "il-tax", "ma-tax", "fl-dor", "dc-otr", "ga-tax", "pa-tax", "wa-bls", "nj-formation",
-  "nj-reg", "nv-tax", "va-tax", "co-tax", "mn-tax", "oh-vendor", "md-sales", "hi-get", "ut-sales"]);
+const TAX_FORMS = new Set(["md-cra", "hi-bb1", "ut-tax", "ny-dtf-17", "ca-cdtfa", "tx-ap201", "az-tpt", "il-tax", "ma-tax", "fl-dor", "dc-otr", "ga-tax", "pa-tax", "wa-bls", "nj-formation",
+  "nj-reg", "nv-tax", "va-tax", "co-tax", "mn-tax", "oh-vendor"]);
 // Colorado's sales tax registration doesn't open the unemployment account (CDLE does, co-ui); Washington's business
 // license does (ESD and L&I open theirs from it), as do Arizona's joint application and Pennsylvania's myPATH.
-const EMPLOYER_FORMS = new Set(["ny-dol-100", "ca-edd-de1", "tx-twc", "az-tpt", "wa-bls", "nj-formation",
-  "nj-reg", "pa-tax", "fl-dor", "co-ui", "ma-dua", "il-ides", "nv-esd", "dc-does", "va-vec", "mn-ui", "oh-ui", "or-payroll", "md-ui", "ga-dol", "hi-ui"]);
+const EMPLOYER_FORMS = new Set(["md-cra", "hi-ui", "ut-ui", "ny-dol-100", "ca-edd-de1", "tx-twc", "az-tpt", "wa-bls", "nj-formation",
+  "nj-reg", "pa-tax", "fl-dor", "co-ui", "ma-dua", "il-ides", "nv-esd", "dc-does", "va-vec", "mn-ui", "oh-ui", "or-payroll", "ga-dol"]);
 /** What it is says it sells alcohol: "restaurant serving beer and wine", "wine bar", "酒吧" (not "no alcohol"). */
 const ALCOHOL = /\b(beer|wine|liquor|alcohol(ic)?|spirits|cocktails?|sake|soju|brewery|brewpub|pub|tavern|wine bar|cocktail bar|sports bar)\b|啤酒|葡萄酒|白酒|洋酒|酒吧|酒水|卖酒/i;
 const NO_ALCOHOL = /\b(no|without|non-?)\s*(alcohol|beer|wine|liquor)|alcohol-free|不(卖|售)酒|无酒精/i;
@@ -180,9 +190,11 @@ function roleOf(f: OfficialForm | null, a: Application): Role {
   // the permit that lets a food place open: a food form (or one only restaurants file) that issues a permit or licence,
   // not a course, a plan review, a sign or the building. Chicago's business licence is its food licence. Boston's common
   // victualler licence comes before the health permit, so it isn't the permit itself.
+  // a general business license a county or city issues to restaurants among others (unincorporated Los Angeles County's)
+  if (/business (tax|license|licence|registration|certificate)/.test(k) && !/food/.test(k) && (a.level === "city" || a.level === "county")) return "license";
   const foodForm = f ? !!f.needs?.food || f.id === "chi-license" || (f.level !== "federal" && f.segments.includes("restaurant") && !f.segments.includes("seller") && !f.segments.includes("warehouse")) : /food/.test(a.id);
   if (foodForm && /permit|licen|approval|dealer|food business registration/.test(k) && !/manager|handler|protection certificate|pre-opening|plan|\bsign|occupancy|publication|building|fire|hazard|insurance|assembly|formula|premises|victualler|wine|liquor|alcohol|beer|community board|cleanliness/.test(k)) return "food";
-  if (/business (tax|license|licence|registration|certificate)|certificate of use|commercial activity|occupational tax/.test(k) && a.level === "city") return "license";
+  if (/business (tax|license|licence|registration|certificate)|certificate of use|commercial activity|occupational tax/.test(k) && (a.level === "city" || a.level === "county")) return "license";   // a county licenses businesses in its unincorporated towns
   return "other";
 }
 
@@ -261,9 +273,10 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
       }) });
     }
     // the company, where the library has no formation filing for the state
+    const former = (code && FORMATION_AGENCY[code]) ?? [`${stEn} Secretary of State`, `${stZh}州务卿`];
     if (st && needs.newEntity && !forms.some(f => formsEntityFor(f))) rows.push({ order: ORDER.entity, f: null, a: generic({
-      id: "formation", level: "state", name: B(`Company formation (LLC or corporation): ${confirm(`the ${stEn} Secretary of State`, `${stZh}州务卿`).en}`, `成立公司（LLC 或公司）：${confirm(`${stEn} Secretary of State`, `${stZh}州务卿`).zh}`),
-      agency: B(`${stEn} Secretary of State`, `${stZh}州务卿`), source: SRC_SBA,
+      id: "formation", level: "state", name: B(`Company formation (LLC or corporation): ${confirm(`the ${former[0]}`, former[1]).en}`, `成立公司（LLC 或公司）：${confirm(former[0], former[1]).zh}`),
+      agency: B(former[0], former[1]), source: SRC_SBA,
       plain: B("The company is formed with the state first; its name and number go on every other filing.", "公司须先在州政府成立；其名称和编号会用在其他所有申请上。"),
     }) });
     // the local layer, where the registry has no steps for this city yet (a covered city's registry list stands as it

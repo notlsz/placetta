@@ -145,12 +145,13 @@
       "agency": "City of San Gabriel",
       "level": "city",
       "required": true,
-      "verified": false,
+      "verified": true,
       "fee": null,
-      "source": "https://www.sangabrielcity.com",
+      "source": "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023",
       "match": "(business licen).*(san gabriel)|(san gabriel).*(business licen)",
       "agencyMatch": "san gabriel",
-      "note": "The city's site refused requests; the code text was only on a third-party site (gocodebook), which isn't an official source."
+      "note": "Verified 2026-10-18 from the City's own Business License Guidelines and Fees PDF (read with curl); earlier the city's site refused requests and this item was unverified.",
+      "quote": "A Business License Certificate must be issued prior to conducting business."
     },
     {
       "key": "sgb-building",
