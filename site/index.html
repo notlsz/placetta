@@ -2278,6 +2278,22 @@ body #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
 /* testimonials: the quote and name sit together in the middle of the white side, no dead gap */
 @media (min-width:900px){#case .tsx .tsl{justify-content:center}#case .tsx .tsp{margin-top:8px}#case .tsx .tslgs,#case .tsx .tswm{margin-bottom:8px}}
 @media (min-width:1024px){#case .tsq{font-size:36px;line-height:1.22;letter-spacing:-.8px}}
+/* customer stories, Alven style (from 601282ab): a heading, one tab per person (name, then role and company), and the chosen
+   story leading with the job Placetta took off them in serif, their quote under it, and one result over the portrait */
+#case .tssec{margin-top:72px}
+#case .tsh3{margin:0 0 20px;font-family:var(--serif);font-weight:300;font-optical-sizing:auto;font-size:30px;line-height:1.1;letter-spacing:-.018em;color:var(--ink);text-wrap:balance}
+@media (min-width:1024px){#case .tssec{margin-top:96px}#case .tsh3{font-size:44px;letter-spacing:-.022em;margin-bottom:28px}}
+html[lang="zh-CN"] #case .tsh3{font-family:var(--zhserif);font-weight:500;letter-spacing:.01em}
+#case .tsbar,#case .tsbar.tsbar{justify-content:flex-start;margin:0 0 16px}
+#case #tsTabs .tstab{min-width:0;max-width:240px}
+#case #tsTabs .tstab span{white-space:nowrap}
+#case #tsGrid:focus-visible,#case #tsTabs .tstab:focus-visible{outline:2px solid var(--gs-d);outline-offset:2px}
+#case .tsx .tspain{margin:0;font-family:var(--serif);font-weight:300;font-optical-sizing:auto;font-size:28px;line-height:1.12;letter-spacing:-.018em;color:var(--ink);text-wrap:balance}
+html[lang="zh-CN"] #case .tsx .tspain{font-family:var(--zhserif);font-weight:500;letter-spacing:.01em;line-height:1.3}
+#case .tsx .tspain+.tsq{font-size:18px;line-height:1.45;letter-spacing:-.1px;color:var(--ink2)}
+@media (min-width:1024px){#case .tsx .tspain{font-size:44px;letter-spacing:-.022em}#case .tsx .tspain+.tsq{font-size:20px}}
+@media (min-width:900px){#case .tsx .tsl{gap:22px;padding:44px 48px}#case .tsx .tspain{margin-top:12px}}
+@media (max-width:767px){#case #tsTabs{margin-inline:0}#case .tsx .tsl{gap:18px}html[lang="zh-CN"] #case .tsrs strong{font-size:34px}}
 /* built for trust and security: Alven cards, white with a hairline, no grey slabs */
 #cn .cntiles .tile{background:#fff;border:1px solid #ebebeb;border-radius:20px;box-shadow:none}
 #cn .secl{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
@@ -2576,8 +2592,11 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       <div role="listitem"><b>2</b><span>languages for every plan and dashboard: English and Chinese</span></div>
       <div role="listitem"><b>0</b><span>filings sent without your approval</span></div>
     </div>
-    <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
-    <div class="tsgrid" id="tsGrid"></div>
+    <div class="tssec" id="tsSec">
+      <h3 class="tsh3" id="tsH" data-i18n="ts.h">Don't just take our word for it.</h3>
+      <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
+      <div class="tsgrid" id="tsGrid" role="tabpanel" tabindex="0"></div>
+    </div>
     <div class="cshd">
       <h3 class="h3" data-i18n="bel.cases">Example plans</h3>
       <div class="tstabs cstabs" role="tablist" id="caseTabs" aria-label="Case studies" data-i18n-aria="bel.cases"></div>
@@ -3338,8 +3357,8 @@ zh:{
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* Oct 18 section pass: new strings for the sections changed that day */
-Object.assign(T.en, {"in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
-Object.assign(T.zh, {"in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
+Object.assign(T.en, {"ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -3677,7 +3696,7 @@ function caseUI(D, ids, o){
   function render(anim){
     const i = L(), c = D[st.c], m = c.mk[st.m], rows = $("rows");
     const lon = !!(lead && lead.on());
-    $("tabs").innerHTML = (lead ? `<button type="button" role="tab" class="tstab" data-case="-1" aria-selected="${lon}" aria-controls="${lead.panel}" tabindex="${lon ? 0 : -1}">${lead.label()}</button>` : "") + D.map((x, k) => `<button type="button" role="tab"${lead ? ' class="tstab"' : ""} data-case="${k}" aria-selected="${!lon && k === st.c}" aria-controls="${ids.body}" tabindex="${!lon && k === st.c ? 0 : -1}">${lead ? `<b>${nm(x.tab || x.n)}</b><span>${t(x.ex ? "bel.ex" : "bel.tag")}</span>` : `${x.sym ? `<svg viewBox="${x.vb}" aria-hidden="true"><use href="#${x.sym}"/></svg>` : ""}${nm(x.tab || x.n)}`}</button>`).join("");
+    $("tabs").innerHTML = D.map((x, k) => `<button type="button" role="tab"${lead ? ' class="tstab"' : ""} data-case="${k}" aria-selected="${!lon && k === st.c}" aria-controls="${ids.body}" tabindex="${!lon && k === st.c ? 0 : -1}">${lead ? `<b>${nm(x.tab || x.n)}</b><span>${t(x.ex ? "bel.ex" : "bel.tag")}</span>` : `${x.sym ? `<svg viewBox="${x.vb}" aria-hidden="true"><use href="#${x.sym}"/></svg>` : ""}${nm(x.tab || x.n)}`}</button>`).join("") + (lead ? `<button type="button" role="tab" class="tstab" data-case="-1" aria-selected="${lon}" aria-controls="${lead.panel}" tabindex="${lon ? 0 : -1}">${lead.label()}</button>` : "");
     const logo = $("logo"); logo.innerHTML = Array.isArray(c.logo) ? c.logo[i] : c.logo; logo.setAttribute("role", "img"); logo.setAttribute("aria-label", nm(c.n));
     if (ids.nm) $("nm").textContent = c.nm ? c.nm[i] : "";
     const tag = $("body").querySelector(".beltag"); if (tag) { tag.hidden = !!c.notag && !c.ex; tag.textContent = t(c.ex ? "bel.ex" : "bel.tag"); }
@@ -3710,7 +3729,7 @@ function caseUI(D, ids, o){
   return render;
 }
 // one section: "Tea houses" opens the five tea-house plans, the other tabs are single case studies
-let teaOn = true;
+let teaOn = false;   // Oct 18: the real case study (Wakimasu) leads; the example tea houses are the last tab
 const showTea = () => { document.getElementById("teaCard").hidden = !teaOn; document.getElementById("caseCard").hidden = teaOn; };
 const caseLead = {panel: "teaBody", label: () => `<b>${t("tea.tabs")}</b><span>${t("tea.sub")}</span>`, on: () => teaOn, set: v => { teaOn = v; showTea(); renderCases(v ? undefined : "case"); renderTea(v ? "case" : undefined); }};
 const renderCases = caseUI(CASES, {tabs: "caseTabs", body: "caseBody", logo: "caseLogo", t: "caseT", p: "caseP", st: "caseSt", win: "caseWin", mtabs: "belTabs", rows: "belRows", src: "belSrc"}, {ev: "case", lead: caseLead});
@@ -4532,21 +4551,26 @@ document.getElementById("monitor").addEventListener("click", e => {
 /* ============ testimonials: real customer quotes ============ */
 const TS_ALL = [
   {flag: "chagee", logo: "logos/ink/chagee.png", lh: 30, alt: ["CHAGEE", "霸王茶姬"], n: "Jackie", co: ["CHAGEE", "霸王茶姬"], ph: "media/people/jackie.jpg", big: "media/people/jackie-l.jpg", rl: ["Owner, CHAGEE", "店主，霸王茶姬"],
+   role: ["Owner", "店主"], pain: ["Months of approval time", "数月的审批时间"],
    q: ["Placetta saves us months in approval time.", "快哉为我们节省了数月的审批时间。"],
    st: ["5 months", "5 个月"], sl: ["saved in approval time", "节省的审批时间"]},
-  {flag: "stanford", logo: "logos/ink/stanford.svg", lh: 30, alt: ["Stanford University", "斯坦福大学"], n: "Stefan", co: ["Stanford", "斯坦福大学"], ph: "media/people/stefan.jpg", big: "media/people/stefan-l.jpg", rl: ["Stanford University", "斯坦福大学"],
-   q: ["Experts are fantastic! I was connected with an ex-Partner from Goldman Sachs, who assisted with our GTM and business model.", "专家团队太棒了！我被对接到一位前高盛合伙人，他帮我们梳理了市场进入策略和商业模式。"],
-   st: ["9 filings", "9 项申报"], sl: ["permits and filings handled, approved in 4 months", "许可与申报全部代办，4 个月获批"]},
   {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", co: ["Starbucks", "星巴克"], ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
+   role: ["General Manager", "总经理"], pain: ["Tedious regulatory approvals", "繁琐的监管审批"],
    q: ["Placetta has taken over the tedious regulatory approvals so my team can focus on scaling instead of filings.", "快哉接手了繁琐的监管审批，让我的团队专注于扩张，而不是埋头申报。"],
    st: ["3 filings", "3 项申报"], sl: ["handled end to end by Placetta, so his team stays on scaling", "由快哉全程代办，团队专注扩张"]},
+  {flag: "stanford", logo: "logos/ink/stanford.svg", lh: 30, alt: ["Stanford University", "斯坦福大学"], n: "Stefan", co: ["Stanford", "斯坦福大学"], ph: "media/people/stefan.jpg", big: "media/people/stefan-l.jpg", rl: ["Stanford University", "斯坦福大学"],
+   pain: ["Permits and filings", "许可与申报"],
+   q: ["Experts are fantastic! I was connected with an ex-Partner from Goldman Sachs, who assisted with our GTM and business model.", "专家团队太棒了！我被对接到一位前高盛合伙人，他帮我们梳理了市场进入策略和商业模式。"],
+   st: ["9 filings", "9 项申报"], sl: ["permits and filings handled, approved in 4 months", "许可与申报全部代办，4 个月获批"]},
   {logo: "logos/ink/yale.svg", lh: 34, alt: ["Yale University", "耶鲁大学"], n: "Jean", co: ["Yale", "耶鲁大学"], ph: "media/people/jean.jpg", big: "media/people/jean-l.jpg", rl: ["Yale University, $1.5M NSF research grant", "耶鲁大学，获美国国家科学基金会 150 万美元研究资助"],
    q: ["They were the fastest company I've worked with.", "他们是我合作过的速度最快的公司。"],
    st: ["Fastest", "最快"], sl: ["company Jean has worked with", "Jean 合作过的公司中最快的一家"]},
   {needsMc: 1, mc: ["A friend of Placetta's founder", "快哉创始人的朋友"], logo: "logos/ink/princeton.png", lh: 44, alt: ["Princeton University", "普林斯顿大学"], vlogo: "logos/ink/belluh.svg", vlh: 22, valt: "Belluh", n: "Odelia W.", co: ["Princeton", "普林斯顿大学"], ph: "media/people/odelia.jpg", big: "media/people/odelia-l.jpg", rl: ["Belluh (acq., 7 figures), Princeton University", "Belluh（已被收购，七位数），普林斯顿大学"],
+   pain: ["Navigating the regulatory landscape", "整个监管流程"],
    q: ["I was introduced to this platform by my best friend. Placetta's founders worked with me to understand my exact needs and navigate the regulatory landscape.", "我经朋友介绍认识这个平台。快哉的创始人和我一起梳理了我的具体需求，带我走过了整个监管流程。"],
    st: ["Founder-led", "创始人亲自对接"], sl: ["her exact needs and the rules that applied, mapped with Placetta's founders", "快哉创始人亲自梳理她的需求和适用规定"]},
   {needsMc: 1, mc: ["Faramir and Placetta share a founder", "Faramir 与快哉为同一位创始人"], logo: "logos/ink/eth-zurich.svg", lh: 26, alt: ["ETH Zürich", "苏黎世联邦理工学院"], vlogo: "logos/ink/faramir.svg", vlh: 20, valt: "Faramir", n: "Matteo", co: ["ETH Zürich", "苏黎世联邦理工"], ph: "media/people/matteo.jpg", big: "media/people/matteo-l.jpg", rl: ["Faramir, ETH Zürich", "Faramir，苏黎世联邦理工学院"],
+   pain: ["Permits and registrations", "许可与登记"],
    q: ["Simple. Extremely easy to use.", "简单，非常好用。"],
    st: ["7 filings", "7 项申报"], sl: ["permits and registrations Placetta handled for Faramir", "快哉为 Faramir 代办的许可与登记"]}
 ];
@@ -4562,19 +4586,24 @@ function renderTsStrip(){
   const res = {5: [["“Fastest”", "“最快”"], ["company Jean has worked with, Yale researcher", "耶鲁研究员 Jean 合作过速度最快的公司"]]};
   el.innerHTML = [0, 4, 5].map(k => { const v = TS[k], r = res[k]; return `<button type="button" class="tsx" data-ts="${k}"><img src="${v.logo}" alt="${v.alt[i]}" style="height:${Math.round(v.lh * .7)}px" draggable="false"><b>${r ? r[0][i] : v.st[i]}</b><span>${r ? r[1][i] : v.sl[i]}</span></button>`; }).join("");
 }
+function tsWho(v, i){ return v.role ? v.rl[i] : v.co[i]; }
 function tsOff(){ if (TS.length) return false; ["tsBar", "tsGrid"].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; }); return true; }
 function renderTsTabs(){
   if (tsOff()) return;
   renderTsStrip();
   const i = L();
-  document.getElementById("tsTabs").innerHTML = TS.map((v, k) => `<button type="button" role="tab" class="tstab" data-ts="${k}" aria-selected="${k === tsK}" aria-controls="tsGrid"><b>${v.n}</b><span>${v.co[i]}</span><i><b></b></i></button>`).join("");
+  const el = document.getElementById("tsTabs"), had = el.contains(document.activeElement);
+  el.innerHTML = TS.map((v, k) => `<button type="button" role="tab" class="tstab" id="tsTab${k}" data-ts="${k}" aria-selected="${k === tsK}" aria-controls="tsGrid" tabindex="${k === tsK ? 0 : -1}"><b>${v.n}</b><span>${tsWho(v, i)}</span><i><b></b></i></button>`).join("");
+  document.getElementById("tsGrid").setAttribute("aria-labelledby", "tsTab" + tsK);
+  const on = el.children[tsK];
+  if (on) { if (had) on.focus({preventScroll: true}); const l = on.offsetLeft - 4, r = on.offsetLeft + on.offsetWidth + 4; if (l < el.scrollLeft) el.scrollLeft = l; else if (r > el.scrollLeft + el.clientWidth) el.scrollLeft = r - el.clientWidth; }
 }
 function renderTs(swap){
   if (tsOff()) return;
   const i = L(), x = TS[tsK];
   renderTsTabs();
   document.getElementById("tsGrid").innerHTML = `<figure class="tsx${swap ? " sw" : ""}">
-    <div class="tsl">${x.logo ? `<div class="tslgs"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async">${x.vlogo ? `<span class="tslgd" aria-hidden="true"></span><img class="tslg" src="${x.vlogo}" alt="${esc(x.valt)}" style="--lh:${x.vlh}px" decoding="async">` : ""}</div>` : `<p class="tswm">${x.wm[i]}</p>`}<blockquote class="tsq">“${x.q[i]}”</blockquote>
+    <div class="tsl">${x.logo ? `<div class="tslgs"><img class="tslg" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${x.lh}px" decoding="async">${x.vlogo ? `<span class="tslgd" aria-hidden="true"></span><img class="tslg" src="${x.vlogo}" alt="${esc(x.valt)}" style="--lh:${x.vlh}px" decoding="async">` : ""}</div>` : `<p class="tswm">${x.wm[i]}</p>`}${x.pain ? `<p class="tspain">${x.pain[i]}</p>` : ""}<blockquote class="tsq">“${x.q[i]}”</blockquote>
       <figcaption class="tsp"><span class="tsav" aria-hidden="true" style="background-image:url('${x.ph}')"></span><span class="tsw"><b>${x.n}</b><span>${x.rl[i]}</span>${x.mc ? `<small class="tsmc">${x.mc[i]}</small>` : ""}</span>
         </span></figcaption></div>
     <div class="tsph"><div class="tsbg" role="img" aria-label="${esc(x.n + ", " + x.rl[i])}" style="background-image:url('${x.big}')"></div><div class="tsrs"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></div></div>
@@ -4585,6 +4614,11 @@ function renderTs(swap){
 let tsT = null;
 function tsNext(){ clearTimeout(tsT); if (RM || !TS.length) return; tsT = setTimeout(() => { if (document.hidden) { tsNext(); renderTsTabs(); return; } tsK = (tsK + 1) % TS.length; renderTs(true); tsNext(); }, 8000); }
 document.getElementById("tsTabs").addEventListener("click", e => { const b = e.target.closest("[data-ts]"); if (!b) return; const k = Number(b.dataset.ts); if (k !== tsK) { tsK = k; renderTs(true); track("testimonial_nav", {to: tsK}); } if (!tsHold) tsNext(); });
+document.getElementById("tsTabs").addEventListener("keydown", e => {
+  const n = TS.length, to = {ArrowRight: tsK + 1, ArrowDown: tsK + 1, ArrowLeft: tsK - 1, ArrowUp: tsK - 1, Home: 0, End: n - 1}[e.key];
+  if (to === undefined || !n) return; e.preventDefault();
+  tsK = (to + n) % n; renderTs(true); track("testimonial_nav", {to: tsK});
+});
 ["tsGrid", "tsTabs"].forEach(id => { const el = document.getElementById(id);
   el.addEventListener("mouseenter", () => { tsHold = true; clearTimeout(tsT); document.getElementById("tsBar").classList.add("hold"); });
   el.addEventListener("mouseleave", () => { tsHold = false; document.getElementById("tsBar").classList.remove("hold"); renderTsTabs(); tsNext(); }); });
