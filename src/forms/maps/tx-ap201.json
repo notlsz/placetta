@@ -206,6 +206,12 @@
    "zh": "仅限独资：业主法定姓名（名、中间名首字母、姓）"
   },
   {
+   "id": "owner_ssn",
+   "line": "9, 11",
+   "en": "Social Security number of the sole owner, each partner and officer (written by hand)",
+   "zh": "独资业主、各合伙人及高管的社会安全号（手写）"
+  },
+  {
    "id": "mailing",
    "line": "15",
    "en": "Mailing address of the taxpaying entity",
@@ -706,6 +712,9 @@
    ]
   }
  ],
+ "unmapped": {
+  "owner_ssn": "An SSN is never printed by Placetta: the signer writes it in the boxes of items 9 and 11 on the signed copy."
+ },
  "blank": {
   "tx_taxpayer_number": "^(none|no|n/?a)\\.?$",
   "tx_sos_number": "^(none|no|n/?a)\\.?$",
