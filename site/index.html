@@ -2548,6 +2548,16 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 @media (min-width:1024px){#diff .pcost{font-size:12.5px}}
 #diff .dsrc{font-size:11px;line-height:1.45;color:var(--muted)}
 #diff .dsrc a{color:inherit;text-underline-offset:2px}
+/* second pass: once in view, the four people fade back one by one and the owner with Odelia steps forward (motion allowed only) */
+@media (prefers-reduced-motion:no-preference){
+  #diff #before .per .sil,#diff #before .per .tag{transition:opacity .6s ease,filter .6s ease}
+  #diff.dgo #before .per .sil,#diff.dgo #before .per .tag{opacity:.45;filter:grayscale(1)}
+  #diff.dgo #before .per:nth-child(2) .sil,#diff.dgo #before .per:nth-child(2) .tag{transition-delay:.15s}
+  #diff.dgo #before .per:nth-child(3) .sil,#diff.dgo #before .per:nth-child(3) .tag{transition-delay:.3s}
+  #diff.dgo #before .per:nth-child(4) .sil,#diff.dgo #before .per:nth-child(4) .tag{transition-delay:.45s}
+  #diff .aft .per{transition:transform .7s cubic-bezier(.2,.9,.3,1.2) .8s}
+  #diff.dgo .aft .per{transform:translateY(-4px) scale(1.03)}
+}
 @media (min-width:1024px){#diff .dsrc{font-size:12px}}
 @media (min-width:1024px){#diff .bag{gap:24px}}
 .hnote{margin-top:-6px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.74);text-shadow:0 1px 8px rgba(0,0,0,.3)}
@@ -4845,6 +4855,9 @@ function renderDash(){
 }
 
 
+// second pass: the before-to-after beat plays once, when the card is half in view
+(() => { const d = document.getElementById("diff"); if (!d || RM || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ setTimeout(() => d.classList.add("dgo"), 600); io.disconnect(); } }), {threshold: .5}); io.observe(d.querySelector(".dcard") || d); })();
 function renderBefore(){ if (!document.getElementById("before")) return; const i = L(); document.getElementById("before").innerHTML = BEFORE.map((b, k) => `<div class="per" role="listitem"><span class="pain">${b[2 + i]}</span><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag">${b[i]}</div><small class="pcost">${BEFORE_COST[k] ? BEFORE_COST[k][i] : ""}</small></div>`).join(""); }
 
 
