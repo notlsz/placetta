@@ -398,9 +398,10 @@ export async function work(runId: string, token: string | null, ticket: string |
     if (Date.now() - renewed > RENEW_MS) { renewed = Date.now(); await lease.write({}); if (lease.lost) ctl.abort(); }
   }, 3000);
 
+  let counting: RunState | null = null;   // the run's tool counts, reported for Agent health however it ends
   try {
     const svc = await servicesFor(ws, run, token);
-    const state = run.state ?? startState([], run.prompt);
+    const state = counting = run.state ?? startState([], run.prompt);
     // The task's spend so far, from every earlier chunk: the ceiling is for the whole task.
     const who: Who = { uid: run.created_by, spent: Number(state.spent) || 0 };
     const mainRole = roleOfRun(run);
@@ -444,6 +445,7 @@ export async function work(runId: string, token: string | null, ticket: string |
       out.reply.text = [...out.reply.text, { en: saverLine("en", who.renews ?? null, who.reduced), zh: saverLine("zh", who.renews ?? null, who.reduced) }];
     }
     await finish(run, out.reply, steps, lease);
+    bg(toolCounts(runId, state));
     bg(learnFromRun(run, cur, state, out.reply));
   } catch (e) {
     clearTimeout(flushT);
@@ -459,6 +461,7 @@ export async function work(runId: string, token: string | null, ticket: string |
       if (failed) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
       if (failed && run.channel === "email") await mailBack(run, SAY.failed[run.lang], []).catch((x) => console.error("mail back", String(x).slice(0, 120)));
       if (failed && CHATS.has(run.channel ?? "")) await chatBack(run, SAY.failed[run.lang], []).catch(() => undefined);
+      if (failed && counting) bg(toolCounts(runId, counting));
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
@@ -467,6 +470,13 @@ export async function work(runId: string, token: string | null, ticket: string |
 
 /** The answer to someone who emailed Odelia: by email, in their thread, only to the address they sign in with, with
  *  the link to the approval waiting in the app. Nothing is approved by email. */
+/** The tools a finished run called and how many returned an error, for the team's Agent health page. Best effort:
+ *  a database without the columns yet (20261017150300_agent_health) just doesn't record them. */
+async function toolCounts(runId: string, st: RunState) {
+  const { error } = await admin.rpc("agent_run_tools", { p_id: runId, p_calls: st.toolCalls ?? 0, p_errors: st.toolErrors ?? 0 });
+  if (error) console.error("agent_run_tools", error.code ?? "");
+}
+
 async function mailBack(run: Run, text: string, approvals: string[]) {
   if (run.channel !== "email" || !run.reply_to || !run.created_by) return;
   const { data: u } = await admin.auth.admin.getUserById(run.created_by);

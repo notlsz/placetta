@@ -11,6 +11,7 @@ import { I, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
 import { parseStoreList, permitsOnOpening, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
 import * as api from "./cloud/api";
+import { StoresCheckPanel } from "./StoresCheck";
 
 /* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
    a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. */
@@ -395,6 +396,7 @@ export function Stores() {
   const { t, b, ws, ask, busy, lang, cloud, go } = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [bulk, setBulk] = useState(false);
+  const [check, setCheck] = useState(false);
   const stores = ws.stores ?? [];
   const s = stores.find(x => x.id === open);
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
@@ -404,8 +406,10 @@ export function Stores() {
         <div className="ph-acts">
           {cloud?.owner && stores.length > 0 && <Pill onClick={() => openSettings(go, "hq")}>{lang === "zh" ? "与总部共享" : "Share with headquarters"}</Pill>}
           {!bulk && <Pill onClick={() => setBulk(true)}>{lang === "zh" ? "规划多家门店" : "Plan many stores"}</Pill>}
+          {!check && <Pill onClick={() => setCheck(true)}>{lang === "zh" ? "检查已开业门店" : "Check stores already open"}</Pill>}
         </div></header>
       {bulk && <BulkPlan onClose={() => setBulk(false)} />}
+      {check && <StoresCheckPanel onClose={() => setCheck(false)} />}
       {stores.length ? (
         <div className="stores">{stores.map(x => <StoreCard key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>
       ) : (

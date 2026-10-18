@@ -17,6 +17,7 @@ import type { HqLink } from "./hq";
 import { TwoStepSetup } from "./cloud/TwoStep";
 import { replayTour } from "./Walkthrough";
 import { AuditTrail, ContextPage } from "./pages";
+import { PartnerSharing } from "./Partner";
 import gmailLogo from "./assets/integrations/gmail.png";
 import outlookLogo from "./assets/integrations/outlook.svg";
 import gcalLogo from "./assets/integrations/calendar.png";
@@ -1105,7 +1106,7 @@ function PinGroup({ st, setSt, ask }: { st: api.PinStatus | null; setSt: (s: api
 const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "general", label: B("General", "通用"), items: ["account", "appearance", "language"] },
   { id: "facts", label: B("Business facts", "企业资料"), items: ["facts"] },
-  { id: "team", label: B("Team", "团队"), items: ["team", "hq"] },
+  { id: "team", label: B("Team", "团队"), items: ["team", "hq", "partner"] },
   { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "phone", "approvals", "memory", "skills"] },
   { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
   { id: "billing", label: B("Billing", "账单"), items: ["billing", "spending"] },
@@ -1114,7 +1115,7 @@ const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "activity", label: B("Activity", "活动记录"), items: ["activity"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
 ];
-const CLOUD_ONLY = new Set(["team", "hq", "security", "pin", "phone", "memory"]);
+const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "pin", "phone", "memory"]);
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
 let settingsTarget: string | null = null;
@@ -1192,6 +1193,7 @@ export function Settings() {
           {show("activity") && <AuditTrail />}
           {show("team") && <Team />}
           {show("hq") && <HqShare />}
+          {show("partner") && <PartnerSharing />}
           {show("security") && <Security />}
           {cloud && show("pin") && <PinGroup st={pinSt} setSt={st => { setPinSt(st); setNow(new Date().toISOString()); }} ask={ask} />}
 

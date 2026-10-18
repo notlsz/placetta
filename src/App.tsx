@@ -38,6 +38,7 @@ import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
 import { Queue, QueueLocked } from "./cloud/Ops";
+import { PartnerPage, usePartnerMe } from "./Partner";
 
 const KEY = "placetta-api-key", KEY_MODEL = "placetta-api-model";
 const readKey = () => { try { return { key: localStorage.getItem(KEY) ?? "", model: localStorage.getItem(KEY_MODEL) ?? API_MODELS[0].id }; } catch { return { key: "", model: API_MODELS[0].id }; } };
@@ -185,6 +186,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   useEffect(() => { const r = readRoute(); if (r.legacy) { setRoute(r.view, r.sub, true); if (r.view === "settings" && r.sub) window.dispatchEvent(new CustomEvent("placetta:settings", { detail: r.sub })); } }, []);
   // An address for a page this account can't open (the team queue, headquarters) goes home.
   const canQueue = !!(cloud?.me.staff || cloud?.me.staff_email), canHq = !!cloud?.hq.length;
+  // a partner account (src/Partner.tsx) gets a nav entry; anyone signed in can open /app/partner to sign up
+  const partnerMe = usePartnerMe(!!cloud);
   useEffect(() => {
     if ((view === "queue" && !canQueue) || (view === "hq" && !canHq)) { setView("overview"); setSub(undefined); setRoute("overview", undefined, true); }
     else if (view !== "settings") setRoute(view, sub, true);
@@ -935,6 +938,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     find: <FindLicenses result={match} live={matching ? (step ? step.label[lang] + "…" : t("working") + "…") : null} />, settings: <Settings />,
     queue: cloud?.me.staff ? <Queue /> : cloud?.me.staff_email ? <QueueLocked /> : <Overview />,
     hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : <Overview />,
+    partner: <PartnerPage lang={lang} sample={!cloud} />,
   }[view];
   const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, odelia: waitingJobs };
   const wsSub = cloud ? (billing?.free && !billing.subscription_status ? b(B("Early access", "抢先体验")) : plan === "monthly" ? b(PLAN_LABEL[billing?.subscription_plan ?? ""] ?? B("Monthly plan", "月度方案")) : plan === "entry" ? b(B("Entry plan", "开店计划")) : b(B("No plan yet", "尚未开通"))) : t("sampleWs");
@@ -992,6 +996,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       <ul className="nav">
         <li><button type="button" className="cmdk-open" onClick={() => setCmdk(true)} title={lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job"}><I.find /><span>{lang === "zh" ? "搜索" : "Search"}</span><kbd>{/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd></button></li>
         {!!cloud?.hq.length && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
+        {!!partnerMe && <li><a {...navLink("partner")} aria-current={view === "partner" ? "page" : undefined} title={slim ? b(B("Partner", "合作伙伴")) : undefined}><I.user /><span>{b(B("Partner", "合作伙伴"))}</span></a></li>}
         {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
       </ul>
       {phone && <>

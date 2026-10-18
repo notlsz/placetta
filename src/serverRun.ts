@@ -39,6 +39,8 @@ export type RunState = {
   plainSms?: boolean;
   /** What the whole task has cost so far in US dollars, across every chunk a fresh instance picked up. */
   spent?: number;
+  /** Tools called so far and how many returned an error, for the team's Agent health page. */
+  toolCalls?: number; toolErrors?: number;
 };
 
 const MAX_ROUNDS = 16;
@@ -215,11 +217,14 @@ export async function runRounds(o: {
       const results: Record<string, unknown>[] = [];
       for (const u of uses) {
         const refused = channelRefuses(from, String(u.name ?? ""), (u.input ?? {}) as Record<string, unknown>);
+        st.toolCalls = (st.toolCalls ?? 0) + 1;
         if (refused) {
+          st.toolErrors = (st.toolErrors ?? 0) + 1;
           results.push({ type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true });
           continue;
         }
         const r = await runTool(tools, u);
+        if (r.is_error) st.toolErrors = (st.toolErrors ?? 0) + 1;
         const note = r.is_error ? null : channelNote(from, String(u.name ?? ""));
         results.push((note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>);
       }
