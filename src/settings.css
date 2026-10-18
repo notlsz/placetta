@@ -229,6 +229,7 @@
   .settings .sg-row:has(> .sg-logo) .sg-logo { align-self: start; height: 20px; margin-top: 0; }
   .settings .sg-form.invite { grid-template-columns: minmax(0, 1fr) auto; }
   .settings .sg-form.invite input { grid-column: 1 / -1; }
+  .settings .sg-form.invite > .sbtn:last-of-type { grid-column: 2; }
   .settings .sg-hook { padding-left: 0; }
   .settings .fact { grid-template-columns: minmax(0, 1fr) 32px; gap: 4px 16px; }
   .settings .sg-num { width: 96px; }
