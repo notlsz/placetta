@@ -5,7 +5,7 @@ import { LegalBody } from "../Legal";
 import { LEGAL, UPDATED } from "../legal";
 import { Logo } from "../Logo";
 import { I, Menu, Select } from "../ui";
-import { B, same, type Bi, type Store, type Workspace } from "../model";
+import { B, type Bi } from "../model";
 import type { Lang } from "../i18n";
 import * as api from "./api";
 import { normalize, type CloudSession } from "./session";
@@ -14,17 +14,17 @@ import { TwoStepCode } from "./TwoStep";
 import { HqHome } from "../Headquarters";
 import { applyTheme, readTheme } from "../hooks";
 import type { HqRow } from "../hq";
-import { previewPlan } from "../plan/preview";
-import { FROM_SIGNUP, firstPlanClock, parseAddress, prefill } from "../plan/prefill";
-import { nowIso } from "../time";
+import { firstPlanClock } from "../plan/prefill";
+import { CITIES, ownWords, parsePlace, readLine, SELLS, STATES } from "../plan/line";
+import { firstWorkspace } from "../plan/start";
+import { phoneConsent } from "../consent";
+import { captureStart, claimStart, clearStart, peekStart, pendingStart, type StartClaim, type StartPeek } from "./textStart";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
    Invites to a teammate's workspace are accepted on sign-in. New businesses start with onboarding (and the filing
-   authorization); the workspace, files and the audit trail live in the account. */
+   authorization); the workspace, files and the audit trail live in the account. A business that texted Odelia to
+   start opens the link from her reply: the plan she texted is claimed here after sign-in (ClaimStart). */
 
-const STATES: [string, string][] = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"], ["DC", "District of Columbia"], ["FL", "Florida"], ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"], ["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"], ["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"], ["ME", "Maine"], ["MD", "Maryland"], ["MA", "Massachusetts"], ["MI", "Michigan"], ["MN", "Minnesota"], ["MS", "Mississippi"], ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"], ["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"], ["NM", "New Mexico"], ["NY", "New York"], ["NC", "North Carolina"], ["ND", "North Dakota"], ["OH", "Ohio"], ["OK", "Oklahoma"], ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"], ["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"], ["TX", "Texas"], ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"], ["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"], ["WY", "Wyoming"]];
-const NYC = /^(new york|nyc|manhattan|brooklyn|queens|bronx|the bronx|staten island|flushing|astoria|long island city)$/i;
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "store";
 const readLang = (): Lang => { try { const v = localStorage.getItem("placetta-lang") ?? localStorage.getItem("placetta-agent-lang"); if (v === "en" || v === "zh") return v; } catch { /* blocked */ } return navigator.language?.toLowerCase().startsWith("zh") ? "zh" : "en"; };
 const lastWs = { get: () => { try { return localStorage.getItem("placetta-ws") ?? ""; } catch { return ""; } }, set: (v: string) => { try { localStorage.setItem("placetta-ws", v); } catch { /* blocked */ } } };
 
@@ -104,7 +104,7 @@ function RegionPick({ lang }: { lang: Lang }) {
   );
 }
 
-function SignIn({ lang }: { lang: Lang }) {
+function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
   const L = (x: Bi) => x[lang];
   const [hand] = useState(readHandoff);
   const [email, setEmail] = useState(hand?.email ?? "");
@@ -194,13 +194,16 @@ function SignIn({ lang }: { lang: Lang }) {
     : step === "confirm" ? L(B("Confirm your email.", "请确认邮箱。"))
     : step === "reset" ? L(B("Check your email.", "请查收邮件。"))
     : step === "password" ? (mode === "create" ? L(B("Create your password.", "设置密码。")) : L(B("Enter your password.", "输入密码。")))
+    : start ? L(B("Your plan from Odelia is one step away.", "Odelia 发给您的计划只差一步。"))
     : hand ? L(B("Your license plan is one step away.", "您的执照计划只差一步。")) : L(B("Sign in to Placetta.", "登录快哉。"));
+  const startPlace = start ? (lang === "zh" ? start.place_zh || start.place : start.place) : "";
   const sub = step === "phone" ? L(B("Log in or sign up with your phone number. No password needed.", "用手机号登录或注册，无需密码。"))
     : step === "phonecode" ? L(B(`We texted a 6-digit code to ${cc} ${phone}.`, `6 位验证码已发送至 ${cc} ${phone}。`))
     : step === "code" ? L(B(`We sent a sign-in link to ${email}. Open it on this device, or enter the code from the email.`, `登录链接已发送至 ${email}。请在此设备上打开，或输入邮件中的验证码。`))
     : step === "confirm" ? L(B(`We sent a confirmation link to ${email}. Open it, then sign in with your password.`, `确认链接已发送至 ${email}。打开链接后，用密码登录。`))
     : step === "reset" ? L(B(`If there's an account for ${email}, we sent it a link to set a new password. Open it on this device.`, `如果 ${email} 已注册，我们已向其发送设置新密码的链接。请在此设备上打开。`))
     : step === "password" ? null
+    : start ? L(B(`Sign in or create an account to open it: ${start.permits ?? 0} permits for ${start.what} in ${startPlace}, in order.`, `登录或创建账户即可打开：${startPlace}${start.what}需要的 ${start.permits ?? 0} 项许可，已按顺序排好。`))
     : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。"))
     : L(B("New or invited? Sign in with your work email.", "新用户或受邀成员，请用工作邮箱登录。"));
   return (
@@ -299,49 +302,96 @@ function SignIn({ lang }: { lang: Lang }) {
    and when (tap a chip). Legal entity and street are optional and tucked away. Then an unchecked "I agree" box for the
    Terms and Privacy Policy (recorded with its version by accept_terms), and the Filing Authorization, granted by
    creating the workspace (create_workspace records authorized_at), stated right beside it. */
-const SELLS: { en: string; zh: string }[] = [
-  { en: "Milk tea", zh: "奶茶" }, { en: "Coffee", zh: "咖啡" }, { en: "Bakery and desserts", zh: "烘焙甜品" },
-  { en: "Restaurant", zh: "餐厅" }, { en: "Grocery", zh: "超市" }, { en: "Retail", zh: "零售" },
-  { en: "Importer or online seller", zh: "进口商或电商卖家" }, { en: "Warehouse or 3PL", zh: "仓库或第三方物流" },
-];
 const WHEN: { en: string; zh: string; months: number | null }[] = [
   { en: "Within 3 months", zh: "3 个月内", months: 3 }, { en: "In 3 to 6 months", zh: "3 到 6 个月", months: 6 },
   { en: "In 6 to 12 months", zh: "6 到 12 个月", months: 12 }, { en: "Already open", zh: "已开业", months: 0 }, { en: "Not sure yet", zh: "还不确定", months: null },
 ];
-const CITIES = ["San Antonio, TX", "Fort Worth, TX", "New York, NY", "Flushing, NY", "Brooklyn, NY", "Manhattan, NY", "Queens, NY", "Jersey City, NJ", "Edison, NJ", "Boston, MA", "Philadelphia, PA",
-  "Washington, DC", "Chicago, IL", "Houston, TX", "Dallas, TX", "Austin, TX", "Atlanta, GA", "Miami, FL", "Orlando, FL", "Seattle, WA", "Bellevue, WA", "Portland, OR",
-  "San Francisco, CA", "San Jose, CA", "Oakland, CA", "Cupertino, CA", "Fremont, CA", "Los Angeles, CA", "Arcadia, CA", "Irvine, CA", "San Gabriel, CA", "San Diego, CA",
-  "Las Vegas, NV", "Phoenix, AZ", "Denver, CO", "Minneapolis, MN", "Detroit, MI", "Columbus, OH", "Honolulu, HI"];
 
-/** "Flushing, NY" or "Flushing, New York" -> city and two-letter state. */
-function parsePlace(v: string): { city: string; state: string } | null {
-  const m = /^\s*([^,]+?)\s*,\s*([A-Za-z .]+?)\s*$/.exec(v);
-  if (!m) return null;
-  const st = m[2].trim().toLowerCase().replace(/\./g, "");
-  const hit = STATES.find(([c, n]) => c.toLowerCase() === st || n.toLowerCase() === st);
-  return hit ? { city: m[1].trim(), state: hit[0] } : null;
+/** The Filing Authorization a new workspace grants, stated beside the button that creates it. */
+function FilingAuthNote({ lang, onDoc }: { lang: Lang; onDoc: (doc: string) => void }) {
+  const L = (x: Bi) => x[lang];
+  return <p>{L(B("Filing Authorization: by creating the workspace, you grant Placetta the ", "申报授权：创建工作区即表示您授予快哉"))}<button type="button" className="lnk" onClick={() => onDoc("authorization")}>{L(B("Filing Authorization", "《申报授权书》"))}</button>{L(B(". It authorizes Placetta to prepare applications for this business and to submit the ones you approve, as its authorized agent for that limited purpose. You confirm you have authority to act for the business.", "所述权限：授权快哉为本企业准备申请，并作为该有限目的的授权代理人提交您批准的申请。您确认有权代表本企业行事。"))}</p>;
+}
+
+/* A plan Odelia texted, after sign-in: one screen to make it this person's workspace. The Terms box and the Filing
+   Authorization are the same as onboarding's. The phone it was texted to is linked only with the main button, which
+   sits under the same consent words as Settings (src/consent.ts); the other button opens the plan without it. */
+function ClaimStart({ lang, email, token, peek, onDone, onSkip }: { lang: Lang; email: string; token: string; peek: StartPeek; onDone: (id: string, notice?: string) => void; onSkip: (notice?: string) => void }) {
+  const L = (x: Bi) => x[lang];
+  const zh = lang === "zh";
+  const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [gone, setGone] = useState(false);
+  const [doc, setDoc] = useState<string | null>(null);
+  const d = LEGAL.find(x => x.id === doc);
+  const phone = peek.channel !== "wechat" && !!peek.phone_last4;
+  const n = peek.permits ?? 0;
+  const place = zh ? peek.place_zh || peek.place : peek.place;
+  const claim = async (link: boolean) => {
+    if (!agree) { setErr(L(B("Check the box to agree to the Terms of Service and Privacy Policy.", "请勾选同意《服务条款》和隐私政策。"))); return; }
+    setBusy(true); setErr("");
+    try {
+      const r = await claimStart(token, link);
+      await api.acceptTerms(UPDATED, r.workspace_id).catch(() => null);
+      clearStart();
+      const said: Record<StartClaim["phone"], Bi | null> = {
+        linked: B(`Your plan is here, and the phone ending in ${peek.phone_last4} is linked. Text Odelia anytime.`, `计划已就绪，尾号 ${peek.phone_last4} 的手机已关联，随时可以发短信给 Odelia。`),
+        kept: B("Your plan is here. Your account already has another phone linked, so that one stays.", "计划已就绪。您的账户已关联了另一个手机号，保持不变。"),
+        taken: B("Your plan is here. That phone is linked to another Placetta account, so it wasn't linked here.", "计划已就绪。该手机号已关联到另一个快哉账户，所以没有在这里关联。"),
+        pin_required: B("Your plan is here. Unlock Settings with your PIN to link the phone.", "计划已就绪。请用设置密码解锁“设置”后再关联手机。"),
+        declined: null, none: null,
+      };
+      const s = said[r.phone];
+      onDone(r.workspace_id, s ? L(s) : undefined);
+    } catch (e) {
+      const c = (e as { code?: string }).code;
+      if (c === "start_used" || c === "start_expired" || c === "start_invalid") {
+        setGone(true);
+        setErr(c === "start_expired" ? L(B("This link has expired. Text Odelia again for a new one, or start here.", "这个链接已过期。请再给 Odelia 发一次消息获取新链接，或在这里开始。"))
+          : c === "start_used" ? L(B("This plan was already opened in another account.", "这个计划已在另一个账户中打开。"))
+          : L(B("This link doesn't work. Text Odelia again for a new one, or start here.", "这个链接无效。请再给 Odelia 发一次消息获取新链接，或在这里开始。")));
+        clearStart();
+      } else setErr((e as api.ApiError).message || L(B("Something went wrong. Try again.", "出了点问题，请重试。")));
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="gate-card wide">
+      <div className="gate-bot"><GateBot /></div>
+      <h1>{L(B("Your plan is ready.", "您的计划已准备好。"))}</h1>
+      <p className="gate-sub">{L(B(`${n} permit${n === 1 ? "" : "s"} for ${peek.what} in ${place}, in the order the agencies want them. It opens as your workspace, and Odelia keeps working on it with you.`, `${place}${peek.what}需要的 ${n} 项许可，已按各机构要求的顺序排好。打开后就是您的工作区，Odelia 会和您一起继续办理。`))}</p>
+      {!gone && (
+        <form className="onb" onSubmit={e => { e.preventDefault(); void claim(phone); }}>
+          <div className="onb-legal">
+            <TermsCheck id="claim-agree" lang={lang} checked={agree} onChange={v => { setAgree(v); if (v) setErr(""); }} onDoc={setDoc} />
+            <FilingAuthNote lang={lang} onDoc={setDoc} />
+            {phone && <p>{L(B(`Link the phone ending in ${peek.phone_last4}, the one Odelia texted, so you can text her about this plan. `, `关联尾号 ${peek.phone_last4} 的手机（即收到 Odelia 消息的手机），就可以发短信和她沟通这个计划。`))}{phoneConsent("link", zh)}</p>}
+          </div>
+          <div className="onb-act">
+            {phone && <button type="button" className="sbtn quiet" disabled={busy || !agree} onClick={() => void claim(false)}>{L(B("Open without linking my phone", "打开，但不关联手机"))}</button>}
+            <button type="submit" className="sbtn ink big" disabled={busy || !agree}>{busy ? "…" : phone ? L(B("Open my plan and link my phone", "打开计划并关联手机")) : L(B("Open my plan", "打开计划"))}</button>
+          </div>
+        </form>
+      )}
+      {gone && <div className="onb-act"><button type="button" className="sbtn ink big" onClick={() => onSkip()}>{L(B("Continue", "继续"))}</button></div>}
+      {err && <p className="gate-err" role="alert">{err}</p>}
+      <p className="onb-who">{L(B(`Signed in as ${email}`, `已登录 ${email}`))}</p>
+      {d && (
+        <div className="scrim" onMouseDown={e => { if (e.target === e.currentTarget) setDoc(null); }}>
+          <div className="modal wide" role="dialog" aria-modal="true" aria-label={d.title[lang]}>
+            <header className="m-h"><h2>{d.title[lang]}</h2><button type="button" className="icbtn close" onClick={() => setDoc(null)} aria-label="Close">×</button></header>
+            <div className="m-body legal"><LegalBody text={d.body[lang]} /></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* One line instead of a form: "Milk tea shop in Flushing, NY" or "奶茶店，法拉盛". What it sells and the city are read
-   from the words; anything missing is asked right there, one field at a time. */
-const ZH_CITIES: [RegExp, string, string][] = [[/法拉盛/, "Flushing, NY", "纽约法拉盛"], [/布鲁克林/, "Brooklyn, NY", "纽约布鲁克林"], [/曼哈顿/, "Manhattan, NY", "纽约曼哈顿"], [/皇后区/, "Queens, NY", "纽约皇后区"], [/纽约/, "New York, NY", "纽约"],
-  [/圣何塞|圣荷西/, "San Jose, CA", "加州圣何塞"], [/旧金山|三藩市/, "San Francisco, CA", "旧金山"], [/洛杉矶/, "Los Angeles, CA", "洛杉矶"], [/尔湾/, "Irvine, CA", "加州尔湾"], [/圣地亚哥/, "San Diego, CA", "圣地亚哥"], [/阿卡迪亚/, "Arcadia, CA", "加州阿卡迪亚"],
-  [/圣盖博/, "San Gabriel, CA", "加州圣盖博"], [/库比蒂诺/, "Cupertino, CA", "加州库比蒂诺"], [/弗里蒙特|佛利蒙/, "Fremont, CA", "加州弗里蒙特"], [/奥克兰/, "Oakland, CA", "加州奥克兰"], [/休斯顿/, "Houston, TX", "休斯顿"], [/达拉斯/, "Dallas, TX", "达拉斯"], [/奥斯汀/, "Austin, TX", "奥斯汀"],
-  [/圣安东尼奥/, "San Antonio, TX", "圣安东尼奥"], [/沃斯堡/, "Fort Worth, TX", "沃斯堡"], [/西雅图/, "Seattle, WA", "西雅图"], [/波士顿/, "Boston, MA", "波士顿"], [/芝加哥/, "Chicago, IL", "芝加哥"], [/凤凰城/, "Phoenix, AZ", "凤凰城"], [/拉斯维加斯/, "Las Vegas, NV", "拉斯维加斯"],
-  [/费城/, "Philadelphia, PA", "费城"], [/亚特兰大/, "Atlanta, GA", "亚特兰大"], [/迈阿密/, "Miami, FL", "迈阿密"], [/波特兰/, "Portland, OR", "波特兰"], [/丹佛/, "Denver, CO", "丹佛"]];
-const KINDS: [RegExp, string][] = [[/milk ?tea|bubble tea|boba|tea shop|奶茶|茶饮|珍珠/i, "Milk tea"], [/coffee|caf[eé]|咖啡/i, "Coffee"], [/bakery|bake|dessert|cake|烘焙|甜品|面包|蛋糕/i, "Bakery and desserts"],
-  [/restaurant|hot ?pot|noodle|dumpling|bbq|kitchen|餐厅|火锅|面馆|饭店|饺子|烧烤|餐馆/i, "Restaurant"], [/grocery|supermarket|market|超市|生鲜/i, "Grocery"], [/import|e-?commerce|online|amazon|进口|电商|跨境/i, "Importer or online seller"],
-  [/warehouse|3pl|fulfil|仓库|物流/i, "Warehouse or 3PL"], [/retail|boutique|store|shop|零售|门店|商店/i, "Retail"]];
-/** What the line says: the city and state, what it sells, and whether it's already open. */
-function readLine(t: string): { place: string; sell: string; open: boolean } {
-  const low = t.toLowerCase();
-  let place = ZH_CITIES.find(([re]) => re.test(t))?.[1] ?? "";
-  if (!place) place = CITIES.find(c => low.includes(c.toLowerCase())) ?? CITIES.find(c => new RegExp(`\\b${c.split(",")[0].toLowerCase()}\\b`).test(low)) ?? "";
-  if (!place) { const m = /\b(?:in|at)\s+([A-Za-z .'-]+,\s*[A-Za-z .]+)\s*$/i.exec(t); if (m && parsePlace(m[1])) place = m[1].trim(); }
-  const sell = KINDS.find(([re]) => re.test(t))?.[1] ?? "";
-  return { place, sell, open: /already open|we'?re open|已开业|已经开业|已营业/i.test(t) };
-}
-
+   from the words (src/plan/line.ts, the same reading a first text to Odelia gets); anything missing is asked right
+   there, one field at a time. */
 function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: string; onCreated: (id: string) => void; onCancel?: () => void }) {
   const L = (x: Bi) => x[lang];
   // answers from the website's questionnaire, if they came that way
@@ -353,7 +403,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   const sellNow = f.sell || read.sell || (line.trim() && !read.sell ? "other" : "");
   const placeNow = f.place || read.place;
   // their own words for what it is ("Hot pot restaurant", "奶茶店"), so Odelia knows exactly what she's licensing
-  const own = line.replace(/\s+(in|at)\s+.*$/i, "").replace(/[，,].*$/, "").replace(/^(a|an|my|our)\s+/i, "").trim();
+  const own = ownWords(line);
   const otherNow = f.other || (sellNow === "other" ? own : "");
   const whenNow = f.when >= 0 ? f.when : read.open ? 3 : 4;
   const [busy, setBusy] = useState(false);
@@ -389,53 +439,14 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
     const { city, state } = at;
     // the time to plan runs from this press to the plan on Home (src/pages.tsx reads it)
     firstPlanClock.start();
-    // no name yet is fine: one is made from the line, and it can be renamed any time
-    const brand = f.brand.trim() || (lang === "zh" ? `${city}${what}` : `${what} in ${city}`);
     // the three answers (a skip keeps only what the first screen's details box already had)
     const notFormed = !skip && more.notFormed;
-    const legal = notFormed ? "" : (skip ? "" : more.legal.trim()) || f.entity.trim();
-    const owner = skip ? "" : more.owner.trim();
-    const addressText = (skip ? "" : more.address.trim()) || f.street.trim();
     setBusy(true); setErr("");
-    const st = STATES.find(s => s[0] === state)?.[1] ?? state, nyc = state === "NY" && NYC.test(city);
-    const w = WHEN[whenNow];
-    const month = w && w.months ? new Date(Date.now() + w.months * 30.4 * 864e5) : null;
-    const monthIso = month ? month.toISOString().slice(0, 7) : "";
-    const monthEn = month ? month.toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "";
-    const monthZh = month ? `${month.getFullYear()} 年 ${month.getMonth() + 1} 月` : "";
-    const open = w?.months === 0;
-    const place = `${city}, ${state}`;
-    // the store's street and ZIP, read from the address (a street with no number, or one in Chinese characters, isn't one)
-    const addr = parseAddress(addressText, place);
-    const street = addr?.street ?? "";
-    const store: Store = {
-      id: slug(city), name: same(street ? `${city}, ${street}` : city), address: street ? `${street}, ${city}, ${state}${addr?.zip ? " " + addr.zip : ""}` : [addressText, city, state].filter(Boolean).join(", "),
-      stage: open ? "open" : "opening", plannedOpen: monthIso ? monthIso + "-15" : undefined, rules: nyc ? ["nyc_grades", "nyc_fww"] : [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [],
-    };
-    // The instant plan, from Placetta's registry and before any model call: every permit for this kind of business in
-    // this place, in order, with fees and times, so the first screen already shows the work. Odelia verifies each one
-    // against the agency when the plan starts; the rows stay, marked preview until then.
-    const first = previewPlan(what, place, store.plannedOpen, { entity: legal, storeId: store.id });
-    // Then every line the answers settle, on every form, and the first win put up for approval (src/plan/prefill.ts).
-    const filled = prefill(first.apps, { what, where: place, legal, owner, address: addressText, brand: f.brand.trim(), open });
-    store.apps = filled.apps.map(a => a.id);
-    if (!open && first.projectedOpen) store.projectedOpen = first.projectedOpen;
-    const ws: Workspace = normalize(brand, {
-      business: same(brand), goal: month ? B(`Open by ${monthEn}`, `${monthZh}开业`) : same(""),
-      locations: [{ id: slug(city), name: same(city), county: same(st), state: "active" }],
-      apps: filled.apps, deadlines: first.deadlines, approvals: filled.approvals,
-      firstPlan: { at: nowIso(), what, where: place, whereZh: ZH_CITIES.find(([, en]) => en === place)?.[2], apps: first.apps.length, opening: store.plannedOpen, projectedOpen: first.projectedOpen ?? undefined, filled: filled.filled, win: filled.win?.app },
-      facts: [
-        ...(legal ? [{ id: "f-name", group: "business" as const, label: B("Legal name", "法定名称"), value: same(legal), source: FROM_SIGNUP }] : []),
-        ...(notFormed ? [{ id: "f-formed", group: "business" as const, label: B("Company formed", "公司是否已成立"), value: B("Not yet", "尚未成立"), source: FROM_SIGNUP }] : []),
-        ...(owner ? [{ id: "f-owner", group: "business" as const, label: B("Owner", "所有人"), value: same(owner), source: FROM_SIGNUP }] : []),
-        { id: "f-sell", group: "operations", label: B("What you sell", "销售内容"), value: same(what), source: B("You told me", "您告诉我的") },
-        { id: "f-addr", group: "location", label: B("Storefront", "门店"), value: same(store.address), source: street ? FROM_SIGNUP : B("You told me", "您告诉我的") },
-        ...(month ? [{ id: "f-open", group: "location" as const, label: B("Target opening", "目标开业"), value: B(monthEn, monthZh), source: B("You told me", "您告诉我的") }] : []),
-        { id: "f-appr", group: "rules", label: B("Needs your approval", "需要您批准"), value: B("Every filing, payment and message", "每一次提交、付款和消息"), source: B("Always on", "始终开启"), locked: true },
-      ],
-      stores: [store],
-      meta: { city, region: st, what, entity: legal || undefined },
+    // the plan, the store and the facts, built the same way as for a business that texted Odelia (src/plan/start.ts)
+    const { name: brand, state: ws } = firstWorkspace({
+      what, city, state, lang, brand: f.brand.trim(), months: WHEN[whenNow]?.months ?? null, notFormed,
+      legal: notFormed ? "" : (skip ? "" : more.legal.trim()) || f.entity.trim(), owner: skip ? "" : more.owner.trim(),
+      address: (skip ? "" : more.address.trim()) || f.street.trim(),
     });
     try {
       const id = await api.createWorkspace(brand, ws);
@@ -538,7 +549,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
 
         <div className="onb-legal">
           <TermsCheck id="onb-agree" lang={lang} checked={agree} onChange={v => { setAgree(v); if (v) setErr(""); }} onDoc={setDoc} />
-          <p>{L(B("Filing Authorization: by creating the workspace, you grant Placetta the ", "申报授权：创建工作区即表示您授予快哉"))}<button type="button" className="lnk" onClick={() => setDoc("authorization")}>{L(B("Filing Authorization", "《申报授权书》"))}</button>{L(B(". It authorizes Placetta to prepare applications for this business and to submit the ones you approve, as its authorized agent for that limited purpose. You confirm you have authority to act for the business.", "所述权限：授权快哉为本企业准备申请，并作为该有限目的的授权代理人提交您批准的申请。您确认有权代表本企业行事。"))}</p>
+          <FilingAuthNote lang={lang} onDoc={setDoc} />
         </div>
         <div className="onb-act">
           {onCancel && <button type="button" className="sbtn quiet" onClick={onCancel}>{L(B("Cancel", "取消"))}</button>}
@@ -606,12 +617,24 @@ function SetPassword({ lang, onDone, onCancel }: { lang: Lang; onDone: () => voi
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "hq"; email: string; rows: HqRow[] } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
+type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
 
 export function CloudRoot() {
   const [lang, setLangState] = useState<Lang>(() => readHandoff()?.lang ?? readLang());
   const setLang = (l: Lang) => { setLangState(l); try { localStorage.setItem("placetta-lang", l); localStorage.setItem("placetta-agent-lang", l); } catch { /* blocked */ } };
   useEffect(() => { document.documentElement.lang = lang === "zh" ? "zh-CN" : "en"; }, [lang]);
+  // A plan Odelia texted (/app/?s=…): kept through sign-in, described on the sign-in screen, claimed right after it.
+  const [start, setStart] = useState<{ token: string; peek: StartPeek | null } | null>(() => { if (api.PREVIEW) return null; const t = captureStart(); return t ? { token: t, peek: null } : null; });
+  useEffect(() => {
+    if (!start || start.peek) return;
+    void peekStart(start.token).then(p => {
+      setStart({ token: start.token, peek: p });
+      // the language they texted in, unless they've picked one here before
+      let chosen = false;
+      try { chosen = !!localStorage.getItem("placetta-lang"); } catch { /* blocked */ }
+      if (!chosen && (p.lang === "en" || p.lang === "zh")) setLangState(p.lang);
+    }).catch(() => undefined);
+  }, [start]);
   const [phase, setPhaseRaw] = useState<Phase>({ k: "loading" });
   const booted = useRef(false);
   // A password reset link signs in with a recovery session: hold everything else until the new password is set.
@@ -629,6 +652,19 @@ export function CloudRoot() {
       const agreed = api.termsAgreed.take();
       if (agreed === UPDATED) await api.acceptTerms(agreed).catch(() => null);
       const me = await api.whoami();
+      // A plan Odelia texted waits to be claimed: that comes first. A link that's used up or expired is let go, and a
+      // plan this person already claimed just opens.
+      const tok = api.PREVIEW ? null : pendingStart();
+      if (tok) {
+        const peek = await peekStart(tok).catch(() => null);
+        if (peek?.status === "ok") { setPhase({ k: "claim", email: me.email, token: tok, peek }); return; }
+        if (peek) {
+          clearStart();
+          if (peek.workspace_id) wsId = peek.workspace_id;
+          else notice = peek.status === "expired" ? L(B("The link to your texted plan has expired. Text Odelia again for a new one.", "短信计划的链接已过期。请再给 Odelia 发一次消息获取新链接。"))
+            : peek.status === "used" ? L(B("That texted plan was already opened in another account.", "该短信计划已在另一个账户中打开。")) : notice;
+        }
+      }
       let rows = await api.myWorkspaces();
       // The Placetta team works from the filing queue; give them a workspace of their own to open it from.
       if (!rows.length && me.staff_email) { await api.createWorkspace("Placetta team", normalize("Placetta team", {})); rows = await api.myWorkspaces(); }
@@ -690,7 +726,8 @@ export function CloudRoot() {
   return (
     <Frame lang={lang} setLang={setLang}>
       {phase.k === "loading" && <div className="gate-card"><div className="gate-bot"><GateBot busy /></div><p className="gate-sub">{L(B("Opening your workspace…", "正在打开工作区…"))}</p></div>}
-      {phase.k === "signin" && <SignIn lang={lang} />}
+      {phase.k === "signin" && <SignIn lang={lang} start={start?.peek?.status === "ok" ? start.peek : null} />}
+      {phase.k === "claim" && <ClaimStart lang={lang} email={phase.email} token={phase.token} peek={phase.peek} onDone={(id, n) => { setStart(null); void open(id, n); }} onSkip={() => { clearStart(); setStart(null); void open(lastWs.get()); }} />}
       {phase.k === "recover" && <SetPassword lang={lang} onDone={recovered} onCancel={() => { recovering.current = false; void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back !== undefined ? () => void open(phase.back!) : undefined} />}

@@ -16,6 +16,7 @@ import { DEFAULT_POLICY, SPEND_CATEGORIES, policyProblems, spentIn, suggestBudge
 import type { IntegrationKind } from "./cloud/api";
 import type { HqLink } from "./hq";
 import { TwoStepSetup } from "./cloud/TwoStep";
+import { phoneConsent } from "./consent";
 import { replayTour } from "./Walkthrough";
 import { AuditTrail, ContextPage } from "./pages";
 import { AutonomyGroup, BusinessRulesGroup, HouseRulesGroup } from "./OwnerRules";
@@ -665,7 +666,7 @@ function PhoneGroup() {
 
   return (
     <Group id="phone" title={B("Text and call Odelia", "发短信或致电 Odelia")}
-      // The consent text: when it changes, bump phone_consent_version() (supabase/migrations/..._phone_consent_log.sql).
+      // The consent text is in src/consent.ts: when it changes, bump phone_consent_version() (..._phone_consent_log.sql).
       note={B("Text or call Odelia like a coworker. She answers from your workspace, starts work for you, and texts you first when something needs you. Odelia is an AI: her calls use an AI voice and are transcribed as they happen, and your texts and a record of each call are kept with your account. Filing, paying, sending and deleting still wait for your approval in the app.", "像和同事一样给 Odelia 发短信或打电话。她根据您的工作区回答问题、替您开始办理，有事需要您时会先发短信给您。Odelia 是 AI：通话使用 AI 语音并会实时转录，您的短信和每次通话的记录随您的账户保存。提交、付款、发送和删除仍需您在应用中批准。")}
       rows={rows}>
       {showForm && (
@@ -673,11 +674,7 @@ function PhoneGroup() {
           <input type="tel" inputMode="tel" autoComplete="tel" placeholder={link && !adding ? prettyPhone(link.number) : zh ? "您的手机号" : "Your mobile number"} value={num} onChange={e => setNum(e.target.value)} aria-label={zh ? "手机号" : "Mobile number"} />
           {link && <Btn onClick={() => { setAdding(false); setNum(""); setMsg(""); }}>{zh ? "取消" : "Cancel"}</Btn>}
           <button type="submit" className={"sbtn ink" + (pin.locked ? " pinned" : "")} disabled={busy || (!num.trim() && !link)}>{pin.locked && <I.lock />}{busy ? "…" : (line.imessage || !line.sms) ? (zh ? "获取验证码" : "Get a code") : zh ? "发送验证码" : "Send code"}</button>
-          <p className="sg-note">{(line.imessage || !line.sms) ? (zh
-            ? "您将用这个号码把一个 6 位验证码发给 Odelia。关联后，用这个号码发短信或打电话就能联系 Odelia。发送验证码即表示您同意快哉就您的工作区向这个号码发送短信和拨打电话，包括自动短信和使用 AI 语音的电话。短信频率不定，可能产生短信和流量费用。回复 STOP 退订，回复 HELP 获取帮助。同意不是购买任何服务的条件。"
-            : "You'll text a 6-digit code to Odelia from this number. Once linked, texts and calls from this number reach Odelia as you. By texting the code, you agree to texts and calls from Placetta at this number about your workspace, including automated texts and calls with an AI voice. Message frequency varies. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent isn't a condition of purchase.") : zh
-            ? "我们会发送一个 6 位验证码。关联后，用这个号码发短信或打电话就能联系 Odelia。确认验证码即表示您同意快哉就您的工作区向这个号码发送短信和拨打电话，包括自动短信和使用 AI 语音的电话。短信频率不定，可能产生短信和流量费用。回复 STOP 退订，回复 HELP 获取帮助。同意不是购买任何服务的条件。"
-            : "We'll text a 6-digit code. Once linked, texts and calls from this number reach Odelia as you. By confirming the code, you agree to texts and calls from Placetta at this number about your workspace, including automated texts and calls with an AI voice. Message frequency varies. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent isn't a condition of purchase."}{" "}
+          <p className="sg-note">{phoneConsent((line.imessage || !line.sms) ? "text_code" : "send_code", zh)}{" "}
             <button type="button" className="linkish" onClick={() => openLegal("terms")}>{zh ? "服务条款" : "Terms"}</button>{zh ? "，" : ", "}
             <button type="button" className="linkish" onClick={() => openLegal("privacy")}>{zh ? "隐私政策" : "Privacy Policy"}</button></p>
         </form>
