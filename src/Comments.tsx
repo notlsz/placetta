@@ -5,7 +5,7 @@ import type { CloudSession } from "./cloud/session";
 import * as api from "./cloud/api";
 import * as capi from "./cloud/collab";
 import {
-  agentComments, assignLocal, handleOf, initials, itemKey, mentionsIn, ODELIA, odeliaAsk, postLocal, resolveLocal, sampleTeam, SAMPLE_PEOPLE, segments, shortName, typing,
+  agentComments, assignLocal, handleOf, initials, itemKey, mentionsIn, ODELIA, ODELIA_AT, odeliaAsk, postLocal, resolveLocal, sampleTeam, SAMPLE_PEOPLE, segments, shortName, typing,
   type Assignment, type Comment, type ItemRef, type LocalTeam, type Notice, type Person,
 } from "./collab";
 import { audit } from "./core";
@@ -300,7 +300,7 @@ function NewComment({ source, autoFocus }: { source: ThreadSource; autoFocus?: b
     }
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); }
   };
-  const odelia = source.canOdelia && /(^|[\s(（])@odelia\b/i.test(text);
+  const odelia = source.canOdelia && ODELIA_AT.test(text);
   return (
     <div className="cmt-new">
       <div className="cmt-box">

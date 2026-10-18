@@ -48,15 +48,21 @@ export const initials = (p: Pick<Person, "name" | "email"> | undefined) => {
   return (w.length > 1 ? w[0][0] + w[w.length - 1][0] : n.slice(0, 2)).toUpperCase();
 };
 
+/** Whether an @ after this character starts a mention. Chinese needs no space before it ("今天能发吗？@Jun"); a letter,
+ *  digit or dot before it is an email address ("mei@moonleaf.example"), not a mention. */
+export const mentionCanFollow = (ch: string | undefined) => !ch || !/[A-Za-z0-9._%+\-@]/.test(ch);
+/** "@Odelia" as a mention, not inside an email address. */
+export const ODELIA_AT = /(^|[^A-Za-z0-9._%+\-@])@odelia\b/i;
+
 /** The mentions written in a comment: Odelia (where she can be), and each person whose @handle appears in it. */
 export function mentionsIn(body: string, people: Person[], o: { odelia: boolean }): Mention[] {
   const text = body.toLowerCase(), out: Mention[] = [];
-  if (o.odelia && /(^|[\s(（])@odelia\b/i.test(body)) out.push({ kind: "odelia" });
+  if (o.odelia && ODELIA_AT.test(body)) out.push({ kind: "odelia" });
   // longest handles first, so "@Jun Huang" isn't also read as someone called "Jun"
   for (const p of [...people].sort((a, b) => handleOf(b).length - handleOf(a).length)) {
     const h = "@" + handleOf(p).toLowerCase();
     let at = text.indexOf(h);
-    while (at >= 0 && at > 0 && !/[\s(（]/.test(text[at - 1])) at = text.indexOf(h, at + 1);
+    while (at > 0 && !mentionCanFollow(text[at - 1])) at = text.indexOf(h, at + 1);
     if (at < 0) continue;
     const after = text[at + h.length];
     if (after && /[\p{L}\p{N}@._-]/u.test(after) && !/[,.;:!?，。；：！？]/.test(after)) continue;
@@ -84,7 +90,7 @@ export function segments(body: string, people: Person[]): { text: string; mentio
 /** The person mention being typed at the caret ("@ju"), or null. */
 export function typing(text: string, caret: number): { start: number; query: string } | null {
   const before = text.slice(0, caret), at = before.lastIndexOf("@");
-  if (at < 0 || (at > 0 && !/[\s(（]/.test(before[at - 1]))) return null;
+  if (at < 0 || !mentionCanFollow(before[at - 1])) return null;
   const q = before.slice(at + 1);
   if (q.length > 40 || /\n/.test(q) || /\s{2}/.test(q)) return null;
   return { start: at, query: q };
@@ -101,7 +107,7 @@ export const odeliaMayStart = (c: Pick<Comment, "item" | "askedOdelia" | "author
  *  that permit only, with its other comments as context. A comment with instructions aimed at an AI, or asking to send
  *  private details somewhere (src/guard.ts), doesn't start her: comments get pasted from anywhere. */
 export function odeliaAsk(body: string, app: Pick<Application, "id" | "name">, who: string, lang: "en" | "zh"): { prompt: string } | { blocked: Bi } {
-  const text = body.replace(/(^|[\s(（])@odelia\b[,:，：]?/gi, "$1").replace(/\s+/g, " ").trim();
+  const text = body.replace(/(^|[^A-Za-z0-9._%+\-@])@odelia\b[,:，：]?/gi, "$1").replace(/\s+/g, " ").trim();
   if (injected(text)) return { blocked: B(
     "Odelia didn't start: the comment reads like instructions to send private details somewhere. If you mean it, ask her in the chat, where anything she sends waits for your approval.",
     "Odelia 没有开始：这条评论像是要求把私密信息发到别处的指令。如果确实需要，请在对话中告诉她，她发出的任何内容都会先等您批准。") };

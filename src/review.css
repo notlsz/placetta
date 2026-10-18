@@ -139,6 +139,8 @@
 /* the comment button takes room on each card: cards a little wider, so a card's details stay on one line */
 .files.grid:has(.file.has-extra) { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
 @media (max-width: 420px) { .files.grid:has(.file.has-extra) { grid-template-columns: minmax(0, 1fr); } }
+/* the Comments tab makes six in a permit's drawer: tighter tabs on phones, so they wrap as little as they can */
+@media (max-width: 640px) { .sheet .seg.tabs button { padding: 7px 9px; } }
 
 /* ------------------------------ assigned to, and Mine ------------------------------ */
 .asg { max-width: 100%; }
