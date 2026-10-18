@@ -2119,6 +2119,24 @@ html[lang^="zh"] #cn .cnq p{font-family:var(--zh);letter-spacing:.08em}
 .ptfile{color:var(--ink2);opacity:.35}
 .ptf.done .ptfile,.ptf.on .ptfile{opacity:1;color:var(--ink)}
 .ptact{display:flex;justify-content:flex-end;margin-top:16px}
+/* Oct 18: an answer given in Chinese lands in English, then the agency's receipt */
+.ptask{display:flex;align-items:center;gap:8px;max-height:0;overflow:hidden;opacity:0;transition:max-height .4s ease,opacity .3s,margin .4s;font-size:12px}
+.ptzh.ask .ptask{max-height:40px;opacity:1;margin:2px 0 4px}
+.ptwho{color:var(--muted);white-space:nowrap}
+.ptzhb{padding:5px 10px;border-radius:10px 10px 10px 3px;background:#E9F6EE;color:#1F5A36;font-size:12.5px}
+.pttr{font-style:normal;font-size:11px;color:var(--gs-d);opacity:0;transition:opacity .4s}
+.ptzh.done .pttr{opacity:1}
+.ptrc{position:absolute;left:0;right:0;top:41px;bottom:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;background:#fff;text-align:center;opacity:0;visibility:hidden;transition:opacity .45s,visibility .45s}
+.ptwin.s2 .ptrc{opacity:1;visibility:visible}
+.ptrc b{font-size:16px;font-weight:600;color:var(--ink)}
+.ptrc dl{width:min(340px,100%);margin:4px 0 0;border-top:1px solid #F0F2F5}
+.ptrc dl div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #F0F2F5;font-size:12.5px;text-align:left}
+.ptrc dt{color:var(--muted)}
+.ptrc dd{margin:0;color:var(--ink);text-align:right}
+.ptrc small{font-size:11px;color:var(--muted)}
+.ptwin.s2 .ptcur{opacity:0}
+#portal .ptpanel{padding-bottom:92px}
+@media (max-width:767px){#portal .ptpanel{padding-bottom:100px}}
 .ptbtn{padding:8px 14px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;transition:transform .15s}
 .ptbtn.press{transform:scale(.94)}
 .ptcur{position:absolute;left:0;top:0;display:flex;align-items:flex-start;gap:2px;pointer-events:none;transition:transform .7s cubic-bezier(.22,1,.36,1);transform:translate(460px,40px)}
@@ -2808,9 +2826,11 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
             <div class="ptf" data-f="0"><small data-i18n="pt.f1">Business name</small><span class="ptv" data-v="Qinghuan Tea House LLC"></span></div>
             <div class="ptf" data-f="1"><small data-i18n="pt.f2">Site address</small><span class="ptv" data-v="1 Market St, San José, CA"></span></div>
             <div class="ptf" data-f="2"><small data-i18n="pt.f3">Seats</small><span class="ptv" data-v="42"></span></div>
-            <div class="ptf ptup" data-f="3"><small data-i18n="pt.f4">Floor plan</small><span class="ptfile"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>floor-plan.pdf</span></div>
+            <div class="ptf ptzh" data-f="3"><small data-i18n="pt.f5">Hours of operation</small><div class="ptask"><span class="ptwho" data-i18n="pt.who">Your answer, in WeChat</span><span class="ptzhb" lang="zh-CN">每天早上八点到晚上十点</span></div><span class="ptv" data-v="Daily, 8 AM to 10 PM"></span><em class="pttr" data-i18n="pt.tr">Translated from your answer in Chinese</em></div>
+            <div class="ptf ptup" data-f="4"><small data-i18n="pt.f4">Floor plan</small><span class="ptfile"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>floor-plan.pdf</span></div>
             <div class="ptact"><span class="ptbtn" id="ptBtn" data-i18n="pt.submit">Submit application</span></div>
           </div>
+          <div class="ptrc" id="ptRc"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2F7A4C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><b data-i18n="pt.rc">Application received</b><dl><div><dt data-i18n="pt.rc1">Confirmation no.</dt><dd>FP-26-04821</dd></div><div><dt data-i18n="pt.rc2">Form</dt><dd data-i18n="pt.form">Food facility plan check application</dd></div><div><dt data-i18n="pt.rc3">Submitted</dt><dd data-i18n="pt.rc3v">Oct 18, 2026, 10:42 AM</dd></div></dl><small data-i18n="pt.rcs">Sample receipt, saved to your documents</small></div>
           <span class="ptcur" id="ptCur"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M1 1l11 6.2-5 .9 2.6 5.4-2 1-2.6-5.4L1 13z" fill="#0F1B33" stroke="#fff" stroke-width="1"/></svg><em>Odelia</em></span>
         </div>
         <div class="ftoast pttoast" id="ptToast"><span class="orb"></span><span><b data-i18n="pt.t">Submitted. Receipt saved.</b><small data-i18n="pt.ts">I'll follow up with the county on Thursday.</small></span></div>
@@ -3368,8 +3388,8 @@ zh:{
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* Oct 18 section pass: new strings for the sections changed that day */
-Object.assign(T.en, {"hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
-Object.assign(T.zh, {"hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
+Object.assign(T.en, {"pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -5190,17 +5210,18 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   const at = (ms, f) => timers.push(setTimeout(f, ms));
   const step = k => steps.forEach((li, i) => li.classList.toggle("on", i === k));
   const aim = el => { if (!el) return; const r = el.getBoundingClientRect(), w = win.getBoundingClientRect(), fld = el.classList.contains("ptf"); cur.style.transform = fld ? `translate(${r.right - w.left - 74}px,${r.top - w.top + r.height - 16}px)` : `translate(${r.left - w.left + Math.min(r.width - 20, 60)}px,${r.top - w.top + r.height / 2}px)`; };   // on a field she points at its right end, clear of the text she types
-  function reset(){ timers.forEach(clearTimeout); timers = []; win.className = "ptwin"; fs.forEach(f => { f.classList.remove("on", "done"); const v = f.querySelector(".ptv"); if (v) v.textContent = ""; }); toast.classList.remove("on"); step(-1); }
+  function reset(){ timers.forEach(clearTimeout); timers = []; win.className = "ptwin"; fs.forEach(f => { f.classList.remove("on", "done", "ask"); const v = f.querySelector(".ptv"); if (v) v.textContent = ""; }); toast.classList.remove("on"); step(-1); }
   function type(f, t0){ const v = f.querySelector(".ptv"), txt = v ? v.dataset.v : ""; at(t0, () => { fs.forEach(x => x.classList.remove("on")); f.classList.add("on"); aim(f); });
     if (v) for (let i = 1; i <= txt.length; i++) at(t0 + 300 + i * 34, () => { v.textContent = txt.slice(0, i); });
     return t0 + 300 + txt.length * 34 + 250; }
   function run(){
-    reset(); if (RM){ win.classList.add("s1"); fs.forEach(f => { const v = f.querySelector(".ptv"); if (v) v.textContent = v.dataset.v; f.classList.add("done"); }); toast.classList.add("on"); step(3); return; }
+    reset(); if (RM){ win.classList.add("s1"); fs.forEach(f => { const v = f.querySelector(".ptv"); if (v) v.textContent = v.dataset.v; f.classList.add("done", "ask"); }); toast.classList.add("on"); step(3); return; }
     step(0); at(500, () => win.classList.add("s1"));
     let t = 1400; at(t - 200, () => step(1));
-    fs.forEach(f => { t = type(f, t); at(t - 50, () => { f.classList.remove("on"); f.classList.add("done"); }); });
+    // the hours come from the owner's answer in Chinese: her WeChat reply shows first, then the field fills in English
+    fs.forEach(f => { if (f.classList.contains("ptzh")) { const t1 = t; at(t1, () => { fs.forEach(x => x.classList.remove("on")); f.classList.add("ask"); aim(f); }); t += 1200; } t = type(f, t); at(t - 50, () => { f.classList.remove("on"); f.classList.add("done"); }); });
     at(t + 200, () => { step(2); aim(btn); }); at(t + 900, () => { btn.classList.add("press"); setTimeout(() => btn.classList.remove("press"), 180); });
-    at(t + 1300, () => toast.classList.add("on")); at(t + 2600, () => step(3)); at(t + 5200, () => { if (on) run(); });
+    at(t + 1150, () => win.classList.add("s2")); at(t + 1300, () => toast.classList.add("on")); at(t + 2600, () => step(3)); at(t + 6200, () => { if (on) run(); });
   }
   new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !on){ on = true; run(); } else if (!e.isIntersecting && on){ on = false; reset(); } }), {threshold: .35}).observe(win);
 })();
