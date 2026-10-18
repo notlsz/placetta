@@ -2332,6 +2332,39 @@ body #agencies .agk-f .agt{color:rgba(255,255,255,.85)!important}
 /* testimonials: the quote and name sit together in the middle of the white side, no dead gap */
 @media (min-width:900px){#case .tsx .tsl{justify-content:center}#case .tsx .tsp{margin-top:8px}#case .tsx .tslgs,#case .tsx .tswm{margin-bottom:8px}}
 @media (min-width:1024px){#case .tsq{font-size:36px;line-height:1.22;letter-spacing:-.8px}}
+/* Oct 18 pricing, from 601282ab: one price up front, the waiting math, every other plan one tap away under "More plans" */
+#pricing .prrow{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+@media (min-width:1024px){#pricing .prrow{grid-template-columns:minmax(0,1fr) minmax(0,600px);gap:48px;align-items:start}#pricing .prl{margin-bottom:0;padding-top:24px}}
+#pricing .srcl{display:block;margin-top:-2px;font-size:12px;line-height:1.4;color:var(--muted)}
+#pricing .srcl a{color:inherit;text-underline-offset:2px}
+.prcard{min-width:0;border-radius:20px;background:#fff;padding:26px 22px;box-shadow:0 0 0 1px #ebebeb,0 28px 70px rgba(15,27,51,.07)}
+@media (min-width:1024px){.prcard{padding:40px 44px}}
+.prone{margin-bottom:18px;font-size:14px;font-weight:500;color:var(--ink2)}
+.prv{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px}
+.prv b{font-family:var(--serif);font-weight:300;font-size:76px;line-height:.95;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+@media (min-width:1024px){.prv b{font-size:104px}}
+html[lang="zh-CN"] .prv b{font-family:var(--serif);letter-spacing:-.02em}
+.prv span{font-size:17px;line-height:1.3;color:var(--ink2)}
+.prps{margin-top:12px;font-size:14px;font-weight:500;color:var(--gs-ink)}
+.prbtn{display:flex;width:100%;margin-top:24px;padding:14px 18px;font-size:15px;line-height:18px;border-radius:10px}
+.princ{margin-top:28px;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+html[lang="zh-CN"] .princ{letter-spacing:.2em}
+.prlist{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:640px){.prlist{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px}}
+.prlist li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.4;color:var(--ink)}
+.prlist svg{flex:none;margin-top:2px;color:var(--ok)}
+#pricing .pmath{margin-top:48px}
+.prmore{margin-top:28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.prmore summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 2px;cursor:pointer;list-style:none}
+.prmore summary::-webkit-details-marker{display:none}
+.prmore summary>span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prmore summary b{font-size:18px;font-weight:500;letter-spacing:-.2px;color:var(--ink)}
+.prmore summary small{font-size:14px;line-height:1.4;color:var(--muted)}
+.prmore summary svg{flex:none;color:var(--ink2);transition:transform .3s}
+.prmore[open] summary svg{transform:rotate(180deg)}
+.prmore summary:focus-visible{outline:2px solid var(--gs-d);outline-offset:2px;border-radius:8px}
+.prmb{padding:4px 0 28px}
+.prmb>.sub{margin-bottom:20px}
 /* customer stories, Alven style (from 601282ab): a heading, one tab per person (name, then role and company), and the chosen
    story leading with the job Placetta took off them in serif, their quote under it, and one result over the portrait */
 #case .tssec{margin-top:72px}
@@ -3084,7 +3117,24 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 
 <section class="sec rv" data-rv="up" id="pricing" aria-labelledby="priceH">
   <div class="ctr">
-    <div class="sh"><h2 class="h2" id="priceH" data-i18n="price.h">One price per location.</h2><p class="sub" data-i18n="price.sub">$149 per location a month, billed yearly, or $299 on Pro for stores inspected often. Headquarters signs once, and each franchisee pays for its own stores.</p><p class="sub psub2" data-i18n="price.promise">Every license, permit and certificate a store can't open or sell without, mapped, filed with your approval and tracked for renewal.</p></div>
+    <div class="prrow">
+      <div class="sh prl"><h2 class="h2" id="priceH" data-i18n="price.x">Less than three hours of an expediter.</h2><p class="sub" data-i18n="price.xsub">Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.</p><small class="srcl" data-i18n="price.src">Source: <a href="https://www.permitflow.com/blog/nyc-permit-expediter" target="_blank" rel="noopener">PermitFlow, NYC permit expediter costs</a></small><p class="sub psub2" data-i18n="price.promise">Every license, permit and certificate a store can't open or sell without, mapped, filed with your approval and tracked for renewal.</p></div>
+      <div class="prcard">
+        <p class="prone" data-i18n="price.h">One price per location.</p>
+        <p class="prv"><b id="prV">$149</b><span data-i18n="price.lu">per location a month</span></p>
+        <p class="prps" id="prPs">Billed yearly</p>
+        <button type="button" class="btn b-ink prbtn" data-open="pricing" data-i18n="cta.plan">Get my plan</button>
+        <p class="princ" data-i18n="price.inc">Included</p>
+        <ul class="prlist">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i1">Every license and permit mapped, filed with your approval and tracked</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i2">Renewals filed before they lapse</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i3">Staff certificates and vendor proof for every store</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i4">Rule-change alerts for your markets</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i5">Odelia included, with a monthly allowance per location</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="price.i6">English and Chinese, for your whole team</span></li>
+        </ul>
+      </div>
+    </div>
     <div class="pmath">
       <div class="pmhd"><h3 class="t28" data-i18n="price.m.h">The math on waiting</h3><p class="pmsub" data-i18n="price.m.sub">One month of waiting costs more than a restaurant opening and a full year with Odelia.</p></div>
       <div class="pmgrid">
@@ -3097,8 +3147,14 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="pmnote" data-i18n="price.m.note">Illustrative calculation, not a quote or a promise. Your rent, timeline and agency fees will differ.</p>
       </div>
     </div>
-    <div class="plans" id="tiers"></div>
-    <p class="pfine" data-i18n="price.fine">Each plan includes a monthly Odelia allowance for its locations, twice as much on Pro; $49 packs add $25 more and carry over. Inspections and rush filings are quoted per step, importers per product line. Attorneys and customs brokers bill you directly. Government fees go directly to each agency.</p>
+    <details class="prmore" id="prMore">
+      <summary><span><b data-i18n="price.more">More plans</b><small data-i18n="price.moresub">A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <div class="prmb">
+        <p class="sub" data-i18n="price.sub">$149 per location a month, billed yearly, or $299 on Pro for stores inspected often. Headquarters signs once, and each franchisee pays for its own stores.</p>
+        <div class="plans" id="tiers"></div>
+        <p class="pfine" data-i18n="price.fine">Each plan includes a monthly Odelia allowance for its locations, twice as much on Pro; $49 packs add $25 more and carry over. Inspections and rush filings are quoted per step, importers per product line. Attorneys and customs brokers bill you directly. Government fees go directly to each agency.</p>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -3416,8 +3472,8 @@ zh:{
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* Oct 18 section pass: new strings for the sections changed that day */
-Object.assign(T.en, {"fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
-Object.assign(T.zh, {"fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
+Object.assign(T.en, {"price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
+Object.assign(T.zh, {"price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 const CLAIMS = {
  stats31000: {
@@ -3820,7 +3876,10 @@ function renderProof(){
 }
 
 /* ============ pricing, faq ============ */
-function renderPrice(){ const i = L(); document.getElementById("tiers").innerHTML = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}${p.hl ? `<small>${t("price.risk")}</small>` : ""}</div></div>`).join(""); }
+function renderPrice(){ const i = L();
+  // Oct 18: the one number up front is Essentials, read from TIERS so it can never drift from the plan cards
+  const pv = document.getElementById("prV"), pps = document.getElementById("prPs"); if (pv) pv.textContent = TIERS[0].v[i]; if (pps) pps.textContent = TIERS[0].ps[i];
+  document.getElementById("tiers").innerHTML = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}${p.hl ? `<small>${t("price.risk")}</small>` : ""}</div></div>`).join(""); }
 let fOpen = 0;
 function renderFaq(){
   const i = L();
