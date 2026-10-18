@@ -135,6 +135,8 @@
 .file.has-extra { grid-template-columns: 44px minmax(0, 1fr) auto 36px; gap: 6px; }
 .file.has-extra .ftile { margin-right: 6px; }
 .file.has-extra .cmt-btn { min-width: 30px; padding: 0 5px; }
+/* a long note ("Filled form, current version") wraps rather than hides on a narrow card with the comment button */
+.file.has-extra .fmeta > span em { white-space: normal; min-width: 0; }
 .file.compact.has-extra { grid-template-columns: 36px minmax(0, 1fr) auto 32px; }
 /* the comment button takes room on each card: cards a little wider, so a card's details stay on one line */
 .files.grid:has(.file.has-extra) { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
