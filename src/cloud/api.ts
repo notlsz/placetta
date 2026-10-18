@@ -51,9 +51,11 @@ export type Filing = {
   submitted_at: string | null; decided_at: string | null; updated_at: string;
   channel?: FilingChannel | null; agent_state?: AgentState | null; agent_log?: AgentLogEntry[]; handoff_url?: string | null;
   submit_clicked_at?: string | null; attempts?: number;
+  /** While agent_state is "held" (the undo window): when it goes, unless an owner undoes it. */
+  send_after?: string | null;
 };
 export type FilingChannel = "email" | "fax" | "mail" | "portal" | "team";
-export type AgentState = "queued" | "running" | "needs_you" | "done" | "failed" | "handoff";
+export type AgentState = "queued" | "running" | "needs_you" | "done" | "failed" | "handoff" | "held";
 export type AgentLogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string; value?: string };   // value: what was entered (sensitive numbers masked)
 export type FilingPayload = {
   form?: Bi; fields: { label: Bi; value: string; from?: Bi }[]; checklist: { label: Bi; state: string; doc?: string }[];
@@ -315,11 +317,13 @@ export async function logAudit(ws: string, uid: string, entries: Audit[]) {
 const BASE_COLS = "id, workspace_id, app_id, title, agency, portal_url, fee_estimate, payload, status, approved_at, requirements_checked, confirmation_number, fee_paid, receipt_path, note, payment_url, customer_paid_at, submitted_at, decided_at, updated_at";
 const AGENT_COLS = BASE_COLS + ", channel, agent_state, agent_log, handoff_url, submit_clicked_at, attempts";
 /* Until the self-filing migration is applied the agent columns don't exist (42703): fall back to the base columns. */
-let agentCols = true;
+let agentCols = true, holdCols = true;
 const missingCol = (e: { code?: string } | null) => e?.code === "42703" || e?.code === "PGRST204";
 export async function listFilings(ws: string): Promise<Filing[]> {
   const q = (cols: string) => supabase().from("filings").select(cols).eq("workspace_id", ws).order("approved_at", { ascending: false });
-  let { data, error } = await q(agentCols ? AGENT_COLS : BASE_COLS);
+  let { data, error } = await q(agentCols ? (holdCols ? AGENT_COLS + ", send_after" : AGENT_COLS) : BASE_COLS);
+  // before the undo window's migration there's no send_after: keep the agent columns without it
+  if (agentCols && holdCols && missingCol(error)) { holdCols = false; ({ data, error } = await q(AGENT_COLS)); }
   if (agentCols && missingCol(error)) { agentCols = false; ({ data, error } = await q(BASE_COLS)); }
   if (error) throw fromPg(error);
   return (data ?? []) as unknown as Filing[];
@@ -462,6 +466,16 @@ export const signedCopy = (ws: string, filingId: string, path: string) => fn<Fil
 /** Stop a filing before anything has left for the agency. Refused once Placetta has pressed submit or sent it. */
 export const stopFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "stop" });
 export const filingStatus = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "status" });
+/** The undo window: take a held filing back (nothing has left), or end the wait and send it now. */
+export const undoFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "undo" });
+export const sendFilingNow = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "send_now" });
+/** Ask a person on the Placetta team; their reply comes to Updates. Three a day per workspace. */
+export const askPerson = (ws: string, question: string, context: Record<string, unknown>, lang: string) => fn<{ id: string }>("team", { action: "ask", workspace_id: ws, question, context, lang });
+/** The team's reply to a customer's question (staff with two-step). */
+export async function answerPerson(id: string, reply: string) {
+  const { error } = await supabase().rpc("answer_person", { p_id: id, p_reply: reply });
+  if (error) throw fromPg(error);
+}
 export const teamFiling = (ws: string, filingId: string, action: "team_approve" | "take_over") => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action });
 /** Upload the filled official form for a filing before it's approved, so its path can go in the frozen payload. */
 export async function uploadForm(ws: string, appId: string, name: string, bytes: Blob): Promise<string> {

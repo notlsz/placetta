@@ -971,6 +971,109 @@ async function chinese() {
 
 /* ------------------------------------------------------------------ the instructions only point at real tools */
 
+/* Where an answer came from (src/sources.ts): a reply that states a fee, a rule or a deadline ends with a Sources line
+   built from what the run's tools read, never from the model's own words; with nothing read, it says it wasn't checked. */
+async function sources() {
+  console.log("\n# Sources: from the tools the run used, not from the model's text");
+  const fse = "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit";
+  const looked = await agent({
+    ws: workspace(), prompt: "What does the NYC food permit cost?",
+    script: [
+      () => ask(["find_official_forms", { business: "milk tea shop", place: "Flushing, NY" }]),
+      () => say("The Food Service Establishment Permit is $280 and you may open 22 days after applying. See https://fees.example.com/nyc for more."),
+    ],
+  });
+  const t1 = textOf(looked), links = (looked.reply?.sources ?? []) as { title: string; url: string }[];
+  ok(/\n\nSources: Food Service Establishment Permit \(nyc-business\.nyc\.gov\)/.test(t1), "a fee from the registry ends with the form it came from", t1);
+  ok(!/fees\.example\.com/.test(t1.split("Sources:")[1] ?? "") && !links.some(l => /example\.com/.test(l.url)), "a link the model wrote itself is never a source", { t1, links });
+  ok(links.some(l => l.url === fse), "the app gets the form's page as a link", links);
+  ok(t1.split("\n\n").at(-1)!.split(", ").length <= 4, "four sources at most", t1);
+
+  const bare = await agent({ ws: workspace(), prompt: "How much is the permit?", script: [() => say("The permit fee is $280, due before you open.")] });
+  ok(textOf(bare).endsWith("\n\nNot checked against the agency yet."), "a fee stated with nothing read says it wasn't checked", textOf(bare));
+  ok(!bare.reply?.sources, "and lists no sources");
+
+  const plain = await agent({ ws: workspace(), prompt: "Thanks", script: [() => say("You're welcome.")] });
+  eq(textOf(plain), "You're welcome.", "a reply that states no rule gets no line");
+
+  // a page the search service fetched (its own blocks, not the model's text) is a source; the official one comes first
+  const fetched = await agent({
+    ws: workspace(), prompt: "Do I need to post the grade?",
+    script: [() => ({ content: [
+      { type: "server_tool_use", id: "srvtoolu_1", name: "web_fetch", input: { url: "https://www.nyc.gov/site/doh/business/food-operators/letter-grading-for-restaurants.page" } },
+      { type: "web_fetch_tool_result", tool_use_id: "srvtoolu_1", content: { type: "web_fetch_result", url: "https://www.nyc.gov/site/doh/business/food-operators/letter-grading-for-restaurants.page", content: { title: "Letter grading" } } } as unknown as Block,
+      { type: "text", text: "Yes. You must post the letter grade at the front door." },
+    ], stop_reason: "end_turn" })],
+  });
+  ok(/\n\nSources: nyc\.gov$/.test(textOf(fetched)), "an agency page the search service fetched is the source", textOf(fetched));
+
+  // a document the run read is named; documents have no link
+  const docs = await agent({
+    ws: workspace(), prompt: "When does the lease end?",
+    script: [() => ask(["find_files", { query: "lease" }]), () => ask(["import_file", { source: "gdrive", file_id: "drv1" }]), () => say("Your lease ends 2031-08-31, so the renewal is due before then.")],
+    svc: account().svc,
+  });
+  ok(/Sources: .*lease\.txt/.test(textOf(docs)), "a document the run read is named", textOf(docs));
+
+  // in Chinese, the line is in Chinese
+  const zh = await agent({ ws: workspace(), lang: "zh", prompt: "许可证多少钱？", script: [() => ask(["find_official_forms", { search: "Food Service Establishment", place: "Flushing, NY" }]), () => say("餐饮服务场所许可证费用为 280 美元。")] });
+  ok(/\n\n来源：Food Service Establishment Permit（nyc-business\.nyc\.gov）$/.test(textOf(zh).replace(/\n\n来源/, "\n\n来源")) || /来源：Food Service Establishment Permit/.test(((zh.reply?.text as { zh: string }[])[0]).zh), "in Chinese the line is 来源", (zh.reply?.text as { zh: string }[])?.[0]);
+  const zhBare = await agent({ ws: workspace(), lang: "zh", prompt: "费用？", script: [() => say("费用为 280 美元。")] });
+  ok(((zhBare.reply?.text as { zh: string }[])[0]).zh.endsWith("尚未与机构核对。"), "and the note is in Chinese", zhBare.reply?.text);
+
+  // a text message gets the short form: sites only
+  const sms = await agent({ ws: workspace(), channel: "sms", role: "short", prompt: "cost of the food permit?", script: [() => ask(["find_official_forms", { business: "milk tea shop", place: "Flushing, NY" }]), () => say("The food service establishment permit is $280.")] });
+  ok(/Sources: nyc-business\.nyc\.gov$/.test(textOf(sms)), "by text, just the site", textOf(sms));
+
+  // the browser's loop does the same
+  let w = workspace(); let n = 0, reply = "";
+  const model = messagesModel("api", async () => (n++ === 0 ? ask(["find_official_forms", { business: "milk tea shop", place: "Flushing, NY" }]) : say("The Food Service Establishment Permit costs $280.")));
+  await liveAgent(model, [], new Map(), false).run({ text: "Cost?" }, { lang: "en", current: w }, e => { if (e.type === "update") w = e.patch(w); if (e.type === "reply") reply = e.reply.text[0].en; }, new AbortController().signal);
+  ok(/\n\nSources: Food Service Establishment Permit \(nyc-business\.nyc\.gov\)/.test(reply), "the browser's loop ends with the same line", reply);
+}
+
+/* The language each staff member reads (src/staff.ts): draft_message writes to them in it, English, Chinese or Spanish. */
+async function staffLanguages() {
+  console.log("\n# Staff messages in the language each person reads");
+  const store = { id: "s1", name: same("Flushing"), address: "136-20 Roosevelt Ave, Flushing, NY 11354", stage: "open" as const, rules: [], logs: [], value: { closures: 0, fines: 0, caught: 0 },
+    certs: [
+      { id: "c1", person: "Marco D.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(19), lang: "es" as const },
+      { id: "c2", person: "Wen L.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(40), lang: "zh" as const },
+      { id: "c3", person: "Ana P.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(60) },
+    ] };
+  const ws = workspace({ stores: [store] });
+  ok(/Marco D\.: Spanish/.test(rules(ws, "en", true, false, [], true)) && /Wen L\.: Chinese/.test(rules(ws, "en", true, false, [], true)), "the workspace tells Odelia who reads what");
+  const es = "Hola Marco, tu certificado de protección de alimentos vence pronto. Por favor renuévalo antes del " + inDays(19) + ". Gracias.";
+  const r = await agent({
+    ws, prompt: "Remind Marco to renew his food protection certificate",
+    script: [
+      () => ask(["draft_message", { to: "Marco D.", message: "Hi Marco, your Food Protection Certificate expires soon. Please renew it before " + inDays(19) + ". Thanks." }]),
+      c => { ok(/Marco D\. reads Spanish/.test(c.err("draft_message") ?? ""), "an English draft to a Spanish reader goes back to Odelia, saying why", c.err("draft_message")); return ask(["draft_message", { to: "Marco D.", message: es, title: "Remind Marco about his certificate" }]); },
+      () => say("Drafted a reminder to Marco in Spanish. It's waiting for your approval."),
+    ],
+  });
+  const ap = r.w.approvals.find(a => a.kind === "send");
+  ok(ap && ap.data?.find(f => f.id === "msg")?.value === es, "the Spanish message is what goes up for approval", ap);
+  ok(ap?.does.some(d => d.en === "Written in Spanish for Marco D., the language set on their staff contact" && d.zh.includes("西班牙语")), "the approval says which language and why, in English and Chinese", ap?.does);
+
+  const zh = await agent({
+    ws, prompt: "Remind Wen too",
+    script: [
+      () => ask(["draft_message", { to: "Wen L.", message: "Wen, please renew your certificate." }], ["draft_message", { to: "Marco D. and Wen L.", message: es }], ["draft_message", { to: "Wen L.", message: "温，你的食品保护证书快到期了，请尽快续期。谢谢！" }], ["draft_message", { to: "Ana P.", message: "Hi Ana, your certificate is good until " + inDays(60) + "." }]),
+      () => say("Drafted both reminders."),
+    ],
+  });
+  const [wenEn, both, wenZh, ana] = callNamed(zh, "draft_message");
+  ok(!wenEn.ok && /reads Chinese/.test(wenEn.out), "an English draft to a Chinese reader is refused", wenEn.out);
+  ok(!both.ok && /different languages/.test(both.out), "one message to people who read different languages is refused", both.out);
+  ok(wenZh.ok && zh.w.approvals.some(a => a.does.some(d => d.en.startsWith("Written in Chinese for Wen L."))), "a Chinese draft to Wen goes up", wenZh.out);
+  ok(ana.ok && !zh.w.approvals.find(a => a.data?.some(f => f.value.startsWith("Hi Ana")))?.does.some(d => /Written in/.test(d.en)), "staff with no language set get it as written", ana.out);
+
+  // the guess at a message's language
+  const { langOf } = await import("../src/staff");
+  eq([langOf(es), langOf("温，请续期。"), langOf("Please renew your card before Friday."), langOf("¿Puedes cubrir el turno del sábado?")], ["es", "zh", "en", "es"], "a message's language, read from its words");
+}
+
 function promptConsistency() {
   console.log("\n# The instructions and the built-in skills only name tools the model has");
   const made: Made = { apps: new Set(), approvals: [], memory: [], skills: [], files: [], lastToolAt: 0 };
@@ -1443,6 +1546,8 @@ await errors();
 await limits();
 await roles();
 await chinese();
+await sources();
+await staffLanguages();
 promptConsistency();
 
 /* The version people accept in the app (accept_terms refuses any other) is the version of the legal text they read. */

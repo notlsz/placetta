@@ -158,5 +158,7 @@ export const applyChange = (c: Change): P => w => {
     const spend = w.spend ?? { policy: DEFAULT_POLICY, purchases: [] };
     return { ...w, spend: { ...spend, policy: { ...spend.policy, budgets: c.budgets } } };
   }
+  // a connected app's action runs on the server when approved (src/App.tsx), never in the workspace itself
+  if (c.op === "mcp_call") return w;
   return { ...w, apps: w.apps.filter(a => a.id !== c.app), approvals: w.approvals.filter(a => a.app !== c.app) };
 };

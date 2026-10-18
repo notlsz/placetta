@@ -7,6 +7,7 @@ import { chipsOf, keepRecall, recallFrom, SAMPLE_ME } from "./recall";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
 import { AgentBot } from "./Bot";
+import { HOLD_MINUTES, startHold } from "./hold";
 import { reconcile } from "./jobs";
 import { TABS, hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type Signed, type Tab, type View } from "./ctx";
@@ -36,6 +37,7 @@ import { preflight } from "./smart";
 import { I, Menu, Modal } from "./ui";
 import * as api from "./cloud/api";
 import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
+import { runApproved, type McpTool } from "./mcp";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
 import { Queue, QueueLocked } from "./cloud/Ops";
@@ -344,6 +346,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     spend: async (action, body) => { const r = await api.spend<never>(cloud.wsId, action, body); void api.spendGet(cloud.wsId).then(sp => { if (sp) setPurchases(sp.purchases); }); return r; },
     saveFile: async (file, appId) => { const row = await api.uploadDoc(cloud.wsId, file, appId); paths.current.set(file.name, row.path); void refreshRef.current(); return { path: row.path }; },
     readFile: path => api.downloadDoc(path),
+    // connected apps' own MCP servers (src/mcp.ts); none in the preview
+    mcpTools: async () => (api.PREVIEW ? [] : (await api.integration<{ tools: McpTool[] }>(cloud.wsId, "mcp_tools")).tools),
     me: cloud.me.id,
     setting: (key, value) => {
       const v = value.trim().toLowerCase();
@@ -684,6 +688,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (p.payeeUrl) window.open(p.payeeUrl, "_blank", "noopener,noreferrer");
     say(zh ? "已批准。请在机构页面付款，然后点“我已付款”。" : "Approved. Pay it on the agency's page, then tap \"I've paid it\".");
   };
+  /* The undo window (src/hold.ts): what the app sends itself (the sample's filings, a message from your own mailbox)
+     waits HOLD_MINUTES with an Undo, then comes back through approve, which lets it pass. In an account the server
+     holds filings itself (supabase/functions/file). True when a hold just started. */
+  const approveRef = useRef<(id: string, sig?: Signed) => void | Promise<void>>(() => undefined);
+  const holdFirst = (a: Approval, sig?: Signed) => {
+    const go = () => (!cloud && busyRef.current ? window.setTimeout(go, 1500) : void approveRef.current(a.id, sig));
+    const started = startHold({ ids: [a.id], app: a.app, title: a.title, go });
+    if (started) say(lang === "zh" ? `${HOLD_MINUTES} 分钟后发送，在此之前可以撤销。` : `Sending in ${HOLD_MINUTES} minutes. You can undo it until then.`);
+    return started;
+  };
   const approve = useCallback(async (id: string, sig?: Signed) => {
     if (held()) return;
     if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
@@ -705,6 +719,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       } catch (e) { say((e as api.ApiError).message); }
       return;
     }
+    // a connected app's action (src/mcp.ts): an owner's approval runs it once, on the server
+    if (a.kind === "change" && a.change?.op === "mcp_call") {
+      if (!cloud || !ownerOk()) return;
+      try {
+        const r = await runApproved((action, body) => api.integration(cloud.wsId, action, body), a);
+        setWs(x => audit("you", B("Approved and ran", "批准并执行"), a.title, r.detail)(dropApproval(id)(x)));
+        say(r.say[lang]);
+      } catch (e) {
+        const er = e as api.ApiError;
+        if (er.code === "too_late" || er.code === "changed") setWs(dropApproval(id));
+        say((lang === "zh" && er.message_zh) || er.message);
+      }
+      return;
+    }
     if (a.kind === "change" && a.change) {
       const c = a.change;
       // a business fact or the business's name, asked for from outside the app: only an owner saves it
@@ -714,7 +742,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     if (a.kind === "pay" && a.purchase) { await approvePurchase(a); return; }
-    if (!cloud) { run({ approve: id }, shown); return; }
+    if (!cloud) { if ((a.kind === "file" || a.kind === "send") && holdFirst(a, sig)) return; run({ approve: id }, shown); return; }
     if (!ownerOk()) return;
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
     if (a.kind === "file") {
@@ -724,6 +752,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     if (a.kind === "send") {
+      if (holdFirst(a, sig)) return;
       const to = a.data?.find(f => f.id === "to")?.value ?? "", body = a.data?.find(f => f.id === "msg")?.value ?? "";
       const subject = a.data?.find(f => f.id === "subject")?.value || a.title.en;
       const mail = integrations.find(i => (i.kind === "gmail" || i.kind === "outlook_mail") && i.status === "connected");
@@ -747,6 +776,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
     run({ approve: id }, shown);
   }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk, held]);
+  approveRef.current = approve;
   /* Everything ready, from one tap: the same checks as one at a time (complete, nothing the second look says is wrong),
      filed in turn, and one answer that shows each filing live. */
   const approveAll = useCallback(async (ids: string[]) => {
@@ -760,7 +790,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!ok.length) return;
     if (ok.length === 1) return approve(ok[0].id);
     const shown = lang === "zh" ? `全部批准：${ok.map(a => a.title.zh).join("、")}` : `Approve all: ${ok.map(a => a.title.en).join(", ")}`;
-    if (!cloud) { run({ approveAll: ok.map(a => a.id) }, shown); return; }
+    if (!cloud) {
+      // the undo window covers the group: one countdown, one Undo, then every filing in it goes together
+      const ids = ok.map(a => a.id), go = () => (busyRef.current ? window.setTimeout(go, 1500) : void run({ approveAll: ids }, shown));
+      if (startHold({ ids, title: B(`${ok.length} filings`, `${ok.length} 份申请`), go })) { say(lang === "zh" ? `${HOLD_MINUTES} 分钟后提交，在此之前可以撤销。` : `Filing in ${HOLD_MINUTES} minutes. You can undo it until then.`); return; }
+      run({ approveAll: ids }, shown); return;
+    }
     if (!ownerOk()) return;
     if (plan !== "monthly") { hold(ok[0].id); setPlans("file"); return; }
     setPanelOpen(true);
@@ -818,6 +853,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       window.location.href = url;
     };
     const fail = (e: unknown) => { const x = e as api.ApiError; say((lang === "zh" && x?.message_zh) || x?.message || String(e)); };
+    /** Stop or Undo a filing before anything left: it comes back to you, exactly as it was before you approved it. */
+    const takeBack = async (id: string, how: "stop" | "undo") => {
+      const f = filings.find(x => x.id === id);
+      try {
+        await (how === "undo" ? api.undoFiling : api.stopFiling)(cloud.wsId, id);
+        if (f) setWs(x => {
+          const back = [...x.closed].reverse().find(a => a.kind === "file" && a.app === f.app_id);
+          const w2 = setApp(f.app_id, { status: "ready", next: how === "undo" ? B("Undone before it was sent. Approve again when you're ready", "已在发送前撤销，准备好后可再次批准") : B("Stopped before it was sent. Approve again when you're ready", "已在发送前停止，准备好后可再次批准") })(x);
+          return back ? { ...w2, approvals: [back, ...w2.approvals.filter(a => a.id !== back.id)], closed: w2.closed.filter(a => a.id !== back.id) } : w2;
+        });
+        await refresh();
+        say(how === "undo" ? (lang === "zh" ? "已撤销，没有发出任何内容。" : "Undone. Nothing was sent.") : (lang === "zh" ? "已停止，没有任何内容发给机构。" : "Stopped. Nothing reached the agency."));
+      } catch (e) { fail(e); }
+    };
     return {
       email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner,
       wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces, hq: cloud.hq, termsHold,
@@ -854,20 +903,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         } catch (e) { fail(e); }
       },
       cancelFiling: async id => { if (!ownerOk()) return; try { await api.cancelFiling(id); await refresh(); } catch (e) { fail(e); } },
-      stopFiling: async id => {
-        const f = filings.find(x => x.id === id);
-        try {
-          await api.stopFiling(cloud.wsId, id);
-          // back to you, exactly as it was before you approved it
-          if (f) setWs(x => {
-            const back = [...x.closed].reverse().find(a => a.kind === "file" && a.app === f.app_id);
-            const w2 = setApp(f.app_id, { status: "ready", next: B("Stopped before it was sent. Approve again when you're ready", "已在发送前停止，准备好后可再次批准") })(x);
-            return back ? { ...w2, approvals: [back, ...w2.approvals.filter(a => a.id !== back.id)], closed: w2.closed.filter(a => a.id !== back.id) } : w2;
-          });
-          await refresh();
-          say(lang === "zh" ? "已停止，没有任何内容发给机构。" : "Stopped. Nothing reached the agency.");
-        } catch (e) { fail(e); }
-      },
+      stopFiling: id => takeBack(id, "stop"),
+      // the undo window (src/hold.ts, supabase/functions/file): Undo while it's held, or Send now
+      undoFiling: id => takeBack(id, "undo"),
+      sendFilingNow: async id => { if (!ownerOk()) return; try { await api.sendFilingNow(cloud.wsId, id); await refresh(); say(lang === "zh" ? "好的，现在发送。" : "Sending it now."); } catch (e) { fail(e); } },
+      // Ask a person (src/AskPerson.tsx): owners and members; the reply comes to Updates
+      askPerson: async (question, context) => { try { await api.askPerson(cloud.wsId, question, context, lang); await refresh(); return true; } catch (e) { fail(e); return false; } },
       fileUrl: async path => { try { return URL.createObjectURL(await api.downloadDoc(path)); } catch { return null; } },
       exportData: () => {
         const data = { exported: nowIso(), workspace: api.strip(wsRef.current), audit: wsRef.current.audit, filings, documents: docs.map(d => ({ name: d.name, size: d.size, created_at: d.created_at, source: d.source })) };

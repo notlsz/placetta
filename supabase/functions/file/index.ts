@@ -6,8 +6,11 @@
 //   signed  { path } the hand-signed copy of a wet-signature form, uploaded to Documents: Placetta faxes it
 //   status  refresh a fax or letter that's on its way
 //   stop    the customer stops it before anything has left for the agency (refused once submit_clicked_at is set)
+//   undo    the customer takes it back during the undo window (SEND_HOLD_MINUTES, 10 by default), while it's held
+//   send_now  the customer ends the undo window early and it goes now
 //   team_approve, take_over   the Placetta team (two-step) in the two-key period, or taking a run over
-// POST { action: "sweep" } with x-monitor-key: the monitor's run (stuck runs, fax and mail status, stale destinations)
+// POST { action: "sweep" } with x-monitor-key: the monitor's run, and every minute while a held send is due (held sends
+//   whose time is up, stuck runs, fax and mail status, stale destinations)
 // POST ?provider=telnyx: Telnyx fax webhooks, verified with TELNYX_PUBLIC_KEY.
 //
 // Ground rules: one approval, one submission (only filings.payload, which the database keeps frozen); submit_clicked_at
@@ -21,12 +24,12 @@ import {
 } from "./shared.ts";
 import { DEST, staleDestinations, type Dest } from "./destinations.ts";
 import {
-  askedToResubmit, canFaxSigned, check, DUPLICATE_REF, emailFor, envFrom, faxFailures, faxFile, faxTo, type Filing, isForeign, killSwitchOn,
-  type LogEntry, mailOutcome, mailTo, pick, type Refusal, refusalOf, signedCopy, teamApproved,
+  afterHold, askedToResubmit, canFaxSigned, check, DUPLICATE_REF, emailFor, envFrom, faxFailures, faxFile, faxTo, type Filing, holds, isForeign,
+  killSwitchOn, type LogEntry, mailOutcome, mailTo, pick, type Refusal, refusalOf, signedCopy, teamApproved,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
-const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate";
+const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate, send_after";
 const log = (en: string, zh: string, kind = "info", ref?: string): LogEntry => ({ en, zh, kind, ...(ref ? { ref } : {}) });
 
 // ------------------------------------------------------------------ the filing row
@@ -63,7 +66,7 @@ function view(f: Filing) {
   return {
     filing: {
       id: f.id, status: f.status, channel: f.channel, agent_state: f.agent_state, agent_log: f.agent_log, handoff_url: f.handoff_url,
-      confirmation_number: f.confirmation_number, submit_clicked_at: f.submit_clicked_at,
+      confirmation_number: f.confirmation_number, submit_clicked_at: f.submit_clicked_at, send_after: f.send_after ?? null,
     },
   };
 }
@@ -446,6 +449,8 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   }
   f = await step(f, log("Checked against the agency's requirements", "已按机构要求核对", "check"),
     { channel, agent_state: channel === "team" ? "handoff" : "running", requirements_checked: true, status: "in_progress" });
+  // The undo window: nothing leaves for SEND_HOLD_MINUTES, so the person can take it back. The sweep sends it after.
+  if (holds(channel, e)) return view(await holdSend(f, e.holdMinutes));
   switch (channel) {
     case "email": return await sendEmail(f, d!);
     case "fax": return await sendFax(f, d!);
@@ -518,6 +523,57 @@ async function signed(f: Filing, path: string, by: string) {
     { expect_agent_state: "needs_you", agent_state: null, handoff_url: null });
   console.log("signed copy uploaded by", by.slice(0, 120));
   return await startAgain(g);
+}
+
+// ------------------------------------------------------------------ the undo window
+// A send waits SEND_HOLD_MINUTES after the approval. The database decides every step under the row lock (migration
+// 20261017140500_send_hold_ask_person): the hold, the release when the time is up, and Undo, so an Undo and the send
+// can never both happen. After a release this function sends on the channel it picked before the hold.
+
+async function rpcFiling(fn: string, args: Record<string, unknown>): Promise<Filing> {
+  const { data, error } = await admin.rpc(fn, args);
+  if (error) {
+    if (/too_late/.test(error.message ?? "")) throw new HttpError("too_late", "The time to undo is over: it's on its way. Use Stop until it reaches the agency.", "撤销时间已过，正在发送。在送达机构前仍可点“停止”。");
+    const why = refusalOf(error.message);
+    if (why) throw new Refused(why);
+    throw new Error(`${fn} failed: ${error.message?.slice(0, 200) ?? error.code}`);
+  }
+  return data as unknown as Filing;
+}
+
+const holdSend = (f: Filing, minutes: number) => rpcFiling("filing_hold", { p_id: f.id, p_minutes: minutes });
+
+/** Released from the hold (by the sweep, or by "Send now"): send it on its channel. */
+async function sendHeld(f: Filing) {
+  const d = DEST[f.payload.official ?? ""];
+  switch (afterHold(f, !!d)) {
+    case "email": return await sendEmail(f, d!);
+    case "fax": return await sendFax(f, d!);
+    case "mail": return await sendMail(f, d!);
+    case "queued": return view(f);   // the portal worker takes it from the queue
+    default: return await toTeam(f, "The agency's address changed while it waited. The Placetta team sends it.", "等待期间机构地址有变，由快哉团队提交。");
+  }
+}
+
+/** Undo: the database cancels it only while it's still held. */
+const undo = async (f: Filing, by: string) => view(await rpcFiling("undo_held_filing", { p_id: f.id, p_by: by }));
+
+/** Send now: the owner ends the wait early. Only a filing that's still held; anything else is answered as it is. */
+async function sendNow(f: Filing) {
+  const { data, error } = await admin.rpc("filing_release_held", { p_id: f.id, p_now: true });
+  if (error) throw new Error(`release failed: ${error.message?.slice(0, 200) ?? error.code}`);
+  const g = (data ?? [])[0] as Filing | undefined;
+  return g ? await sendHeld(g) : view(f);
+}
+
+/** Every held send whose time is up: released (each row once, whoever else is sweeping) and sent. */
+async function releaseDue(): Promise<number> {
+  const { data, error } = await admin.rpc("filing_release_held", { p_id: null, p_now: false });
+  if (error) { console.error("release held:", error.code ?? ""); return 0; }
+  for (const g of (data ?? []) as Filing[]) {
+    try { await sendHeld(g); } catch (e) { if (!(e instanceof Refused)) console.error("send held:", describe(e)); }
+  }
+  return (data ?? []).length;
 }
 
 async function refreshStatus(f: Filing) {
@@ -617,6 +673,7 @@ async function lostRuns(): Promise<number> {
 }
 
 async function sweep() {
+  const released = await releaseDue();
   const { data: n } = await admin.rpc("requeue_stuck_filings");
   const lost = await lostRuns();
   const { data: rows } = await admin.from("filings").select(COLS).in("channel", ["fax", "mail"])
@@ -628,7 +685,7 @@ async function sweep() {
     await admin.from("team_tasks").upsert({ kind: "destination_stale", title: `Re-check ${s.id} destinations (last checked ${s.checked}) on ${s.source}`, dedupe: `stale:${s.id}:${s.checked}` },
       { onConflict: "dedupe", ignoreDuplicates: true });
   }
-  return { requeued: n ?? 0, lost, refreshed: rows?.length ?? 0 };
+  return { released, requeued: n ?? 0, lost, refreshed: rows?.length ?? 0 };
 }
 
 // ------------------------------------------------------------------ router
@@ -663,8 +720,8 @@ serve(async (req) => {
     const f = await loadFiling(ws, filingId);
     return await settled(() => action === "team_approve" ? teamApprove(f, by) : takeOver(f, by));
   }
-  if (!["start", "resume", "signed", "stop", "status"].includes(action)) {
-    throw new HttpError("bad_request", "action must be start, resume, signed, stop or status.");
+  if (!["start", "resume", "signed", "stop", "status", "undo", "send_now"].includes(action)) {
+    throw new HttpError("bad_request", "action must be start, resume, signed, stop, undo, send_now or status.");
   }
   // Sending, carrying on, and stopping are an owner's, as in the database (only owners approve or cancel filings);
   // any member can check on one.
@@ -676,6 +733,8 @@ serve(async (req) => {
     if (action === "resume") return resume(f, by, resubmit);
     if (action === "start") return start(f, req, by, resubmit);
     if (action === "signed") return signed(f, String(body.path ?? "").slice(0, 500), by);
+    if (action === "undo") return undo(f, by);
+    if (action === "send_now") return sendNow(f);
     return stop(f, by);
   });
 });

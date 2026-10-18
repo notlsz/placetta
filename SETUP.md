@@ -110,6 +110,7 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `APP_ORIGINS` | Your app address. Checkout, invites and integrations only return there. |
 | `DEV_ORIGINS` | Optional, development only. Origins such as `http://localhost:5173` that Stripe checkout may return to. Without it, localhost is refused. |
 | `FILER_DAILY_CAP` | Optional. Faxes and letters Placetta self-files for one workspace in 24 hours before the team takes over. Default 10. |
+| `SEND_HOLD_MINUTES` | Optional. The undo window: after an approval, an email, fax, letter or portal submission waits this many minutes, with Undo, before it leaves (a pg_cron job sends it when the time is up). Default 10; 0 turns it off. |
 | `FORMS_PER_HOUR` | Optional. Official forms one person can fetch through the `forms` function in an hour. Default 60. |
 | `ODELIA_SMS_COUNTRIES` | Optional. Country codes Odelia texts verification codes to, comma separated. Default `1,86` (US, Canada, mainland China mobiles). To add one, also add it to `app_settings.phone_countries`. |
 | `OAUTH_STATE_SECRET` | Any long random string. |
@@ -147,6 +148,20 @@ Every provider uses one redirect address: `https://esquxzcfsylffuijvzec.supabase
 | Toast | `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`, `TOAST_API_HOST` (the production hostname Toast gives you; `https://ws-api.toasttab.com` by default) | Partner integration: Toast's integration partnership process (doc.toasttab.com, Developer guide, Integration partnership process). Once Toast approves Placetta, its integrations team issues the partner client ID and secret and the hostnames. Ask for the scopes `orders:read`, `labor:read`, `labor.employees:read`, `restaurants:read` and the partners API. No redirect: an owner adds Placetta in Toast Web (Integrations) and types the code Settings shows them as the Location ID, which is how Placetta knows those locations are theirs. |
 
 The calendar feed needs nothing. Square and Toast show "Opens soon" until their keys are set. Owners connect them; only owners can read sales and staff through Odelia (`get_sales`, `get_staff`), and only from the app.
+
+### Connect any app (MCP)
+
+Settings, Integrations, Connect any app: an owner pastes any app's MCP server address (with a token, or signs in where the app asks), or picks one of the apps listed (`supabase/functions/_shared/mcp_catalog.ts`). Needs `OAUTH_STATE_SECRET` and `APP_ORIGINS` for the sign-in; nothing else for Notion, Airtable, Linear, Square, Stripe, Zapier and Dropbox, which let Placetta register itself (it serves its client document at `.../functions/v1/oauth-callback/mcp-client.json`). The rest only take clients registered with them first; each shows "Opens soon" until its secrets are set, with the redirect address above:
+
+| App | Secrets | Where |
+| --- | --- | --- |
+| Google Drive, Gmail | `MCP_GOOGLE_CLIENT_ID`, `MCP_GOOGLE_CLIENT_SECRET` | Google Cloud console: a new Web application client with "Use this client for an AI-powered agent" ticked, the Drive and Gmail MCP APIs on (developers.google.com/workspace/guides/configure-mcp-servers). |
+| Slack | `MCP_SLACK_CLIENT_ID`, `MCP_SLACK_CLIENT_SECRET` | A Slack app set up for the Slack MCP server (docs.slack.dev/ai/slack-mcp-server). |
+| Asana | `MCP_ASANA_CLIENT_ID`, `MCP_ASANA_CLIENT_SECRET` | An Asana app (developers.asana.com, integrating with Asana's MCP server). |
+| HubSpot | `MCP_HUBSPOT_CLIENT_ID`, `MCP_HUBSPOT_CLIENT_SECRET` | HubSpot: Development, MCP Connectors. |
+| Box | `MCP_BOX_CLIENT_ID`, `MCP_BOX_CLIENT_SECRET` | Box Admin Console: the Box MCP server's integration credentials. |
+
+Tools that only read run when Odelia needs them; anything else waits for an owner's approval in the app and runs once. From email, texts, calls and chat she only reads, and from plain SMS not at all. Tokens live in the vault; disconnecting drops them.
 
 ## Odelia in WeChat (a business's own Official Account)
 

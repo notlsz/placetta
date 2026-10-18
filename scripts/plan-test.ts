@@ -47,3 +47,49 @@ eq(titles("1 Main St, Albany, NY 12207").some(id => id.startsWith("nyc-")), fals
 eq(titles("1 Colorado Blvd, Pasadena, CA 91101").some(id => id.startsWith("lac-")), false, "Pasadena doesn't get LA County's food permits");
 eq(titles("1 Pine Ave, Long Beach, CA 90802").some(id => id.startsWith("lac-")), false, "Long Beach doesn't either");
 eq(titles("1 Main St, Alhambra, CA 91801").some(id => id.startsWith("lac-")), true, "Alhambra does");
+
+// Cost to open (src/cost.ts), checked against the registry for three cities: every published fee counted, every fee the
+// registry doesn't publish left out and reported, never guessed; Placetta's own price from the Stripe catalog.
+import { previewPlan } from "../src/plan/preview";
+import { costToOpen } from "../src/cost";
+import { formById } from "../src/forms/registry";
+import { normalizeState } from "../src/core";
+import { CATALOG } from "../supabase/functions/_shared/stripe_catalog.ts";
+const opened = (where: string, opening: string) => {
+  const p = previewPlan("Milk tea shop", where, opening, { today: "2026-10-17", storeId: "st1" });
+  const store = { id: "st1", name: B(where, where), address: where, stage: "opening" as const, plannedOpen: opening, rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: p.apps.map(a => a.id) };
+  return { p, w: normalizeState("Moonleaf", { business: B("Moonleaf Tea LLC", "月叶茶"), apps: p.apps, deadlines: p.deadlines, stores: [store] }) };
+};
+const want: Record<string, { usd: number; published: number; unpublished: number; open: string[]; closed: string[] }> = {
+  "Flushing, NY": { usd: 554.6, published: 7, unpublished: 3, open: ["nyc-fse"], closed: ["nyc-co", "ny-wcb", "nyc-sign"] },
+  "Irvine, CA": { usd: 70, published: 4, unpublished: 4, open: ["ca-llc-1"], closed: ["irv-license", "oc-plan-check", "oc-health-permit"] },
+  "Houston, TX": { usd: 325, published: 5, unpublished: 6, open: ["tx-205", "tx-503"], closed: ["hou-food-dealer", "hou-plan-review", "hou-co"] },
+};
+const cents = (n: number) => Math.round(n * 100) / 100;
+for (const [where, x] of Object.entries(want)) {
+  const { p, w } = opened(where, "2027-03-01");
+  const c = costToOpen(w, { today: "2026-10-17" });
+  // the registry, read directly: what the plan's forms publish
+  const forms = p.apps.map(a => (a.official ? formById(a.official) : undefined));
+  eq(cents(c.agencyUSD), cents(forms.reduce((s, f) => s + (f?.fee ?? 0), 0)), `${where}: agency fees add up exactly what the registry publishes`);
+  eq([cents(c.agencyUSD), c.published, c.unpublished], [x.usd, x.published, x.unpublished], `${where}: $${x.usd} published across ${x.published} permits, ${x.unpublished} not published`);
+  eq(c.fees.filter(f => f.fee == null).length, forms.filter(f => !f || f.fee == null).length, `${where}: every fee the registry leaves open stays open`);
+  eq(x.closed.every(id => c.fees.find(f => f.app === "pv-" + id)?.fee === null), true, `${where}: ${x.closed.join(", ")} say "not published", with no amount`);
+  eq(x.open.every(id => c.fees.find(f => f.app === "pv-" + id)?.fee === formById(id)!.fee && c.fees.find(f => f.app === "pv-" + id)?.source === formById(id)!.info), true, `${where}: published fees carry the agency's page`);
+  eq(c.placetta.map(r => r.amount), [CATALOG.food.cents / 100, CATALOG.essentials.cents / 100], `${where}: Placetta is the food opening fee and a year of Essentials, from the Stripe catalog`);
+  eq(c.totalUSD, cents(x.usd + 6500 + 1788), `${where}: the total is what's known, nothing more`);
+  eq(!!c.landing && c.landing === p.projectedOpen, true, `${where}: the time to open is the opening path's date`);
+}
+{
+  // the plan in billing: Pro, a comped account, and an entry plan already paid; a complex store is quoted, never priced
+  const { w } = opened("Flushing, NY", "2027-03-01");
+  eq(costToOpen(w, { today: "2026-10-17", billing: { plan: "monthly", tier: "pro" } }).placetta.map(r => r.amount), [6500, 3588], "Pro: a year of Pro instead");
+  eq(costToOpen(w, { today: "2026-10-17", billing: { plan: "monthly", comped: true } }).placettaUSD, 0, "comped: nothing to pay");
+  const entry = costToOpen(w, { today: "2026-10-17", billing: { plan: "entry", entryMarkets: 1 } });
+  eq([entry.placetta.at(-1)?.paid, entry.placettaUSD], [true, 8288], "an entry plan already paid is shown, not charged again");
+  const complex = costToOpen({ ...w, stores: w.stores!.map(s => ({ ...s, kind: "complex" }) as typeof s) }, { today: "2026-10-17" });
+  eq([complex.placetta[0].amount, complex.quoted, complex.placettaUSD], [null, 1, 1788], "a liquor or build-out store is quoted by the team, not guessed");
+  // a permit that isn't in the registry is never counted, whatever amount sits on it
+  const odd = costToOpen({ ...w, apps: [...w.apps, { ...w.apps[0], id: "x", official: undefined, fees: [{ label: B("Fee", "费用"), amount: 999 }] }] }, { today: "2026-10-17" });
+  eq([odd.agencyUSD, odd.unpublished], [costToOpen(w, { today: "2026-10-17" }).agencyUSD, 4], "an amount the registry doesn't publish is never added");
+}

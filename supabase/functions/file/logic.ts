@@ -23,6 +23,7 @@ export type Filing = {
   provider_ref: string | null; submit_clicked_at: string | null; attempts: number; requirements_checked: boolean;
   confirmation_number: string | null; portal_url: string | null;
   fee_estimate?: number | string | null;            // the agency fee; paid by the person, so never sent by email, fax or mail
+  send_after?: string | null;                       // while agent_state is "held": when it goes, unless the person undoes it
 };
 
 export type Env = {
@@ -34,7 +35,28 @@ export type Env = {
   dailyCap: number;          // FILER_DAILY_CAP: faxes and letters one workspace self-files in 24 hours (default 10)
   fax: boolean;              // TELNYX_API_KEY, TELNYX_FAX_CONNECTION_ID and TELNYX_FAX_FROM set
   mail: boolean;             // LOB_API_KEY and LOB_FROM set
+  holdMinutes: number;       // SEND_HOLD_MINUTES: the undo window before anything leaves (default 10, 0 turns it off)
 };
+
+/** The undo window, from SEND_HOLD_MINUTES: 10 when it isn't set or isn't a number, 0 to switch it off, at most a day. */
+export function holdMinutes(raw: string | undefined): number {
+  const s = (raw ?? "").trim();
+  if (!s) return 10;
+  const n = Number(s);
+  return Number.isFinite(n) && n >= 0 ? Math.min(Math.floor(n), 1440) : 10;
+}
+
+/** A send waits out the undo window when it's going to leave Placetta by email, fax, mail or an agency's site and the
+    window is on. The team's channel doesn't wait: a person sends it, after their own checks. */
+export const holds = (channel: Channel, env: Pick<Env, "holdMinutes">): boolean => env.holdMinutes > 0 && channel !== "team";
+
+/** What a held filing does when the sweep finds its time is up, from the row the release returned: the channel to send
+    on now, or "queued" for the portal worker (the release already queued it), or "team" when the destination is gone. */
+export function afterHold(f: Pick<Filing, "channel" | "agent_state">, hasDest: boolean): "email" | "fax" | "mail" | "queued" | "team" {
+  if (f.channel === "portal") return "queued";
+  if (!hasDest || f.agent_state !== "running") return "team";
+  return f.channel === "email" || f.channel === "fax" || f.channel === "mail" ? f.channel : "team";
+}
 
 export function envFrom(get: (k: string) => string | undefined): Env {
   const list = (k: string) => (get(k) ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
@@ -49,6 +71,7 @@ export function envFrom(get: (k: string) => string | undefined): Env {
     dailyCap: get("FILER_DAILY_CAP")?.trim() && Number.isFinite(cap) && cap >= 0 ? Math.floor(cap) : 10,
     fax: !!(get("TELNYX_API_KEY") && get("TELNYX_FAX_CONNECTION_ID") && get("TELNYX_FAX_FROM")),
     mail: !!(get("LOB_API_KEY") && get("LOB_FROM")),
+    holdMinutes: holdMinutes(get("SEND_HOLD_MINUTES")),
   };
 }
 

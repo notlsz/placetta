@@ -20,6 +20,8 @@ export type Services = {
   me?: string;
   setting?(key: string, value: string): string;
   network?(keys: string[]): Promise<Lesson[]>;
+  /** Connected apps' tools (src/mcp.ts McpTool), from integrations mcp_tools. */
+  mcpTools?(): Promise<Record<string, unknown>[]>;
 };
 export declare function normalizeState(name: string, s: Record<string, unknown>): Workspace;
 export declare function stripState(w: Workspace): Record<string, unknown>;
