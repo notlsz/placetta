@@ -2,9 +2,9 @@ import type { Bi } from "../model";
 import { supabase, type ApiError } from "./api";
 
 /* ------------------------------------------------------------------ *
- * Specialist reviews (supabase/migrations/20261017150200_specialist_reviews.sql),
+ * Specialist reviews (supabase/migrations/20261017210200_specialist_reviews.sql),
  * Agent health, the incident log and the weekly governance summary
- * (20261017150300_agent_health.sql). The team's calls need two-step
+ * (20261017210300_agent_health.sql). The team's calls need two-step
  * sign-in; the database checks it on every one.
  * ------------------------------------------------------------------ */
 

@@ -3,7 +3,7 @@ import { supabase, type ApiError } from "./api";
 /* ------------------------------------------------------------------ *
  * Partners: the people who bring Chinese brands to the US (franchisors,
  * brokers, landlords, investors, accountants). The database rules are in
- * supabase/migrations/20261017150100_partners.sql; partners read their
+ * supabase/migrations/20261017210100_partners.sql; partners read their
  * consenting referrals straight from workspace_referrals, where row-level
  * security shows them only those rows and only the shared columns.
  * ------------------------------------------------------------------ */

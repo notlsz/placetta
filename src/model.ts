@@ -74,6 +74,7 @@ export type Approval = {
   filing?: string;          // pay: the filing it belongs to
   purchase?: string;        // pay: the purchase Odelia asked to make (Spending), approved here
   change?: Change;          // change: what the agent will change once you confirm
+  at?: string;              // when it was put in front of you (how long it has waited)
 };
 /** A change to something that already exists, which the agent only makes after you confirm it. */
 export type Change =
@@ -86,7 +87,10 @@ export type Change =
    *  lark). from: who sent it (their number or address). */
   | { op: "set_fact"; label: Bi; value: string; group: FactGroup; was?: string; via: string; from?: string }
   /** A new name for the business (or a new goal) asked for from outside the app, confirmed the same way. */
-  | { op: "rename_business"; name?: string; goal?: string; was: Bi; wasGoal?: Bi; via: string; from?: string };
+  | { op: "rename_business"; name?: string; goal?: string; was: Bi; wasGoal?: Bi; via: string; from?: string }
+  /** A connected app's tool that changes something (src/mcp.ts): it runs once, on Placetta's server, after an owner
+   *  approves. call: the server's id for it; args: exactly what it runs with. */
+  | { op: "mcp_call"; call: string; server: string; tool: string; title: string; args: Record<string, unknown> };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
 export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
@@ -103,7 +107,8 @@ export type Location = { id: string; name: Bi; county: Bi; state: "active" | "ma
 // show the value: opened on time, stayed open, no fines.
 export type LogKind = "temps" | "cleaning" | "pest";
 export type DailyLog = { date: string; kind: LogKind; done: boolean; by?: string; reading?: string };
-export type Cert = { id: string; person: string; kind: Bi; expires: string };
+/** lang: the language this person reads, for the messages Odelia drafts to them (src/staff.ts). */
+export type Cert = { id: string; person: string; kind: Bi; expires: string; lang?: "en" | "zh" | "es" };
 export type MockCheck = { id: string; area: Bi; label: Bi; ok: boolean | null };
 export type StoreRule = "nyc_grades" | "nyc_fww";
 export type Store = {
@@ -151,6 +156,9 @@ export type Workspace = {
   jobs?: Job[];                            // Odelia's jobs, each with the plan she keeps current (Work)
   routines?: Routine[];                    // jobs she repeats on a schedule
   firstPlan?: FirstPlan;                   // the instant plan written at sign-up from the registry, before any model call
+  /** Requests Odelia answered in this browser (the sample, or without the server's runs), timed as they happened: when
+   *  asked, when her first words showed, when the answer was done. An account's server runs are timed in agent_runs. */
+  runs?: { id: string; prompt: string; created_at: string; first_text_at?: string | null; done_at?: string | null; status?: string }[];
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval
@@ -172,7 +180,32 @@ export type Skill = {
 export type MemoryKind = "you" | "topic" | "area";
 export type MemoryFile = { id: string; kind: MemoryKind; name: string; summary: string; lines: string[]; updated: string; sensitive?: boolean };
 export type MemorySettings = { searchChats: boolean; generate: boolean; sensitive: boolean };
-export type MemoryBook = { settings: MemorySettings; files: MemoryFile[] };
+/** items: details the person mentioned once that Odelia acts on (src/recall.ts): how to reach them, their people,
+ *  limits on the plan, dates that come back, vendors. Each keeps the sentence it came from. */
+export type MemoryBook = { settings: MemorySettings; files: MemoryFile[]; items?: Recall[] };
+export type RecallKind = "preference" | "person" | "constraint" | "date" | "vendor";
+export type ReachBy = "text" | "email" | "call";
+export type Recall = {
+  id: string; kind: RecallKind;
+  /** What Odelia remembers, one short line in both languages. */
+  text: Bi;
+  /** The person's own sentence it came from, exactly as they wrote it. */
+  source: string;
+  /** When they said it. */
+  at: string;
+  /** saved: Odelia uses it. suggested: it came from outside the app (a text, a call, an email, a chat) and waits for
+   *  the person to confirm it in the app; until then it's never used. */
+  status: "saved" | "suggested";
+  /** The channel a suggestion came by (sms, voice, email, slack, lark, wechat). */
+  via?: string;
+  reach?: ReachBy; avoid?: ReachBy[];
+  person?: { name: string; role?: string; email?: string; phone?: string };
+  date?: string; notBefore?: boolean; repeats?: "yearly" | "monthly" | "weekly";
+  vendor?: { name: string; what?: string };
+  /** What acting on it changed in the workspace, so Forget can put it back: the deadline it added, and the stores whose
+   *  planned opening it moved (with the date each had). */
+  made?: { deadline?: string; stores?: { id: string; was?: string; to: string }[] };
+};
 export type ChatLine = { at: string; role: "you" | "agent"; text: string };
 
 /* ------------------------------------------------------------------ */
@@ -211,8 +244,8 @@ export const SAMPLE_STORES: Store[] = [
     logs: days(-13, -1).flatMap(d => (["temps", "cleaning", "pest"] as LogKind[]).map((k): DailyLog => ({ date: d, kind: k, done: !LOG_MISSED.has(d + k), by: k === "temps" ? "Wen" : "Marco", reading: k === "temps" ? "Walk-in 38°F, reach-in 36°F" : undefined })))
       .concat([{ date: inDays(0), kind: "temps", done: true, by: "Wen", reading: "Walk-in 37°F, reach-in 36°F" }, { date: inDays(0), kind: "cleaning", done: true, by: "Marco" }, { date: inDays(0), kind: "pest", done: false }]),
     certs: [
-      { id: "c1", person: "Wen L.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(412) },
-      { id: "c2", person: "Marco D.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(19) },
+      { id: "c1", person: "Wen L.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(412), lang: "zh" },
+      { id: "c2", person: "Marco D.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(19), lang: "es" },
       { id: "c3", person: "Ana P.", kind: B("Food Protection Certificate", "食品保护证书"), expires: inDays(233) },
     ],
     schedule: { postedThrough: inDays(15), changes: 1, premiumOwed: 0, source: B("Entered by you", "您录入的") },

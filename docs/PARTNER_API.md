@@ -10,7 +10,7 @@ and accountants who bring brands to the US). Two things:
 Base address: `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/partner-api`
 
 The code is in `supabase/functions/partner-api/` (rules in `logic.ts`, tested in `logic_test.ts`) and the database
-side in `supabase/migrations/20261017150100_partners.sql`.
+side in `supabase/migrations/20261017210100_partners.sql`.
 
 ## What a referred business shares
 
@@ -122,7 +122,7 @@ writing and set by the Placetta team.
 ## For the Placetta team
 
 - Approve partners, set each share, pause a code and record payouts in Filing queue, Partners.
-- Deploy: the migration `20261017150100_partners.sql`, then `supabase functions deploy partner-api` (its
+- Deploy: the migration `20261017210100_partners.sql`, then `supabase functions deploy partner-api` (its
   `verify_jwt = false` is in `supabase/config.toml`; it checks its own keys). `npm run build:agent` rebuilds its
   `plan.js` from `src/plan/preview.ts`.
 - Tests: `deno test -A supabase/functions/partner-api/logic_test.ts` and `supabase/tests/partners.sql`

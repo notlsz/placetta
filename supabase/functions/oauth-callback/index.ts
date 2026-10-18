@@ -3,8 +3,12 @@
 // It exchanges the code and parks the tokens in oauth_pending. It does not connect anything: the app finishes
 // the connection with integrations {action: "finish", id} as the signed-in user, which binds it to that user.
 // Always ends in a 302 back to the app: ?connect_finish=<id>&kind=<kind>, or ?connect_error=<short code>.
-import { admin, allowedReturn, appOrigins, CORS_HEADERS, describe, HttpError, isMember, json, verifyState, withParam } from "./shared.ts";
-import { dropSecret, exchangeCode, isKind, writeBundle } from "./providers.ts";
+// It also serves Placetta's client metadata document (GET .../oauth-callback/mcp-client.json): the client id Placetta
+// signs in to an app's MCP server with, when that app's sign-in server takes client ID metadata documents.
+import { admin, allowedReturn, appOrigins, CORS_HEADERS, describe, HttpError, isMember, json, SUPABASE_URL, verifyState, withParam } from "./shared.ts";
+import { dropSecret, exchangeCode, isKind, REDIRECT_URI, writeBundle } from "./providers.ts";
+import { clientMetadata } from "../_shared/mcp.ts";
+import { CLIENT_DOC_PATH, mcpCallback } from "./mcp.ts";
 
 const RESULT_PARAMS = ["connected", "connect_error", "connect_finish", "kind"];
 
@@ -33,10 +37,26 @@ Deno.serve(async (req) => {
     fallback ? redirect(withParam(fallback, "connect_error", code)) : json({ error: { code: "bad_request", message: "This sign-in link is not valid." } }, 400);
 
   if (req.method !== "GET") return refuse("bad_request");
+  // the client metadata document: its client_id is its own address, exactly (client-registration, metadata documents)
+  if (new URL(req.url).pathname.endsWith(CLIENT_DOC_PATH)) return json(clientMetadata(`${SUPABASE_URL}/functions/v1/oauth-callback${CLIENT_DOC_PATH}`, REDIRECT_URI));
   const q = new URL(req.url).searchParams;
 
   const st = await verifyState(q.get("state"));
   if (typeof st === "string") return refuse(st);
+
+  // an app's own MCP server (integrations mcp_connect): its pending row holds the PKCE verifier and where to trade the code
+  if (st.kind.startsWith("mcp:")) {
+    const back = allowedReturn(st.ret, origins) ?? fallback;
+    if (!back) return refuse("invalid_state");
+    try {
+      if (!(await isMember(st.ws, st.uid))) return redirect(withParams(back, { connect_error: "forbidden" }));
+    } catch (e) {
+      console.error("membership check failed:", describe(e));
+      return redirect(withParams(back, { connect_error: "server_error" }));
+    }
+    const r = await mcpCallback({ id: st.kind.slice(4), ws: st.ws, uid: st.uid, q });
+    return redirect(withParams(back, "finish" in r ? { connect_finish: r.finish, kind: "mcp" } : { connect_error: r.error }));
+  }
   if (!isKind(st.kind)) return refuse("invalid_state");
   const kind = st.kind;
   const ret = allowedReturn(st.ret, origins) ?? fallback;

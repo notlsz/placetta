@@ -198,9 +198,9 @@ export async function moreRpc(fn: string, body: Record<string, unknown>, c: Clai
     case "agent_run_replay": {
       const no = staff(); if (no) return no;
       const r = k.t("agent_runs").find(x => x.id === body.p_id); if (!r) return k.pgErr("No such run.");
-      const done = (r.finished_at ?? (r.status !== "running" ? r.updated_at : null)) as string | null;
+      const done = (r.done_at ?? (r.status !== "running" ? r.updated_at : null)) as string | null;
       const calls = k.t("ai_events").filter(e => e.workspace_id === r.workspace_id && String(e.at) >= String(r.created_at) && Date.parse(String(e.at)) <= Date.parse(done ?? String(r.created_at)) + 5000);
-      return k.json({ ...r, business: k.t("workspaces").find(w => w.id === r.workspace_id)?.name ?? null, done_at: done, prompt: String(r.prompt ?? "").slice(0, 600),
+      return k.json({ ...r, business: k.t("workspaces").find(w => w.id === r.workspace_id)?.name ?? null, first_reply_at: r.first_text_at ?? null, done_at: done, prompt: String(r.prompt ?? "").slice(0, 600),
         reply: (r.reply as Row | null)?.text ?? null, steps: r.steps ?? [], calls: calls.map(e => ({ at: e.at, kind: e.kind, role: e.role ?? null, provider: e.provider ?? null, model: e.model ?? null, cost_usd: e.cost_usd, saver: e.saver ?? null })),
         cost_usd: r4(calls.reduce((s, e) => s + Number(e.cost_usd), 0)), checks: k.t("odelia_job_checks").filter(x => x.run_id === r.id) });
     }
@@ -242,8 +242,8 @@ function health(k: PreviewKit, days: number) {
   const since = new Date(Date.now() - (days - 1) * DAY).toISOString().slice(0, 10);
   type Run = Row & { done: string | null; reply_s: number | null; done_s: number | null };
   const runs = k.t("agent_runs").filter(r => String(r.created_at).slice(0, 10) >= since).map((r): Run => {
-    const done = (r.finished_at ?? (r.status !== "running" ? r.updated_at : null)) as string | null, t0 = Date.parse(String(r.created_at));
-    return { ...r, done, reply_s: r.first_reply_at ? (Date.parse(String(r.first_reply_at)) - t0) / 1000 : null, done_s: done ? (Date.parse(done) - t0) / 1000 : null };
+    const done = (r.done_at ?? (r.status !== "running" ? r.updated_at : null)) as string | null, t0 = Date.parse(String(r.created_at));
+    return { ...r, done, reply_s: r.first_text_at ? (Date.parse(String(r.first_text_at)) - t0) / 1000 : null, done_s: done ? (Date.parse(done) - t0) / 1000 : null };
   });
   const ev = k.t("ai_events").filter(e => String(e.at).slice(0, 10) >= since), checks = k.t("odelia_job_checks").filter(x => String(x.at).slice(0, 10) >= since), thr = k.t("ai_throttles").filter(x => String(x.at).slice(0, 10) >= since);
   const costOf = (r: (typeof runs)[number]) => ev.filter(e => e.workspace_id === r.workspace_id && String(e.at) >= String(r.created_at) && Date.parse(String(e.at)) <= Date.parse(r.done ?? String(r.created_at)) + 5000).reduce((s, e) => s + Number(e.cost_usd), 0);
@@ -269,6 +269,6 @@ function health(k: PreviewKit, days: number) {
     by_vendor: [...vendors.values()].sort((a, b) => b.cost_usd - a.cost_usd),
     slowest: runs.filter(r => r.done_s != null).sort((a, b) => b.done_s! - a.done_s!).slice(0, 10).map(pick),
     costliest: runs.map(r => ({ r, c: costOf(r) })).filter(x => x.c > 0).sort((a, b) => b.c - a.c).slice(0, 10).map(x => pick(x.r)),
-    measured_since: { first_reply: runs.find(r => r.first_reply_at)?.created_at ?? null, tools: runs.find(r => r.tool_calls != null)?.created_at ?? null, saver: ev.find(e => e.saver != null)?.at ?? null },
+    measured_since: { first_reply: runs.find(r => r.first_text_at)?.created_at ?? null, tools: runs.find(r => r.tool_calls != null)?.created_at ?? null, saver: ev.find(e => e.saver != null)?.at ?? null },
   };
 }

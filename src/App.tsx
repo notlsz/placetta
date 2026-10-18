@@ -3,9 +3,11 @@ import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { blockersSay, confirmChange, readyToFile } from "./core";
 import { emptyBook } from "./memory";
+import { chipsOf, keepRecall, recallFrom, SAMPLE_ME } from "./recall";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
 import { AgentBot } from "./Bot";
+import { HOLD_MINUTES, startHold } from "./hold";
 import { reconcile } from "./jobs";
 import { TABS, hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type Signed, type Tab, type View } from "./ctx";
@@ -35,6 +37,7 @@ import { preflight } from "./smart";
 import { I, Menu, Modal } from "./ui";
 import * as api from "./cloud/api";
 import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
+import { runApproved, type McpTool } from "./mcp";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
 import { Queue, QueueLocked } from "./cloud/Ops";
@@ -316,11 +319,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [apiName, setApiName] = useState("");
   const [deep, setDeep] = useState(false);
   const history = useRef<Msg[]>([]);
+  /* Whose memory (src/recall.ts): the signed-in person, or the sample's one person, so the demo remembers too. */
+  const me = cloud?.me.id ?? SAMPLE_ME;
   const abort = useRef<AbortController | null>(null);
   useEffect(() => {
     if (cloud && !api.PREVIEW) {
       const m = wsRef.current.meta, loc = m?.city ? { city: m.city, region: m.region } : undefined;
-      setModel(serverModel((body, d, role) => api.agentCall(cloud.wsId, body, { deep: d, location: loc, role }) as never));
+      setModel(serverModel((body, d, role, onText) => api.agentCall(cloud.wsId, body, { deep: d, location: loc, role, onText }) as never));
       return;
     }
     let on = true;
@@ -344,6 +349,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     spend: async (action, body) => { const r = await api.spend<never>(cloud.wsId, action, body); void api.spendGet(cloud.wsId).then(sp => { if (sp) setPurchases(sp.purchases); }); return r; },
     saveFile: async (file, appId) => { const row = await api.uploadDoc(cloud.wsId, file, appId); paths.current.set(file.name, row.path); void refreshRef.current(); return { path: row.path }; },
     readFile: path => api.downloadDoc(path),
+    // connected apps' own MCP servers (src/mcp.ts); none in the preview
+    mcpTools: async () => (api.PREVIEW ? [] : (await api.integration<{ tools: McpTool[] }>(cloud.wsId, "mcp_tools")).tools),
     me: cloud.me.id,
     setting: (key, value) => {
       const v = value.trim().toLowerCase();
@@ -382,9 +389,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         r = await api.pollRun(id);
         r.steps.slice(shown).forEach((s, i) => onEvent({ type: "step", index: shown + i, step: s }));
         shown = r.steps.length;
-        if (r.draft && r.draft !== draft) { draft = r.draft; onEvent({ type: "draft", text: draft }); }
+        const moved = !!r.draft && r.draft !== draft;
+        if (moved) { draft = r.draft!; onEvent({ type: "draft", text: draft }); }
         if (r.status !== "running") break;
-        await new Promise(res => setTimeout(res, 900));
+        // while words are arriving the server saves them every 300 ms, so look as often; otherwise less
+        await new Promise(res => setTimeout(res, moved ? 300 : 700));
       }
       const row = await api.loadWorkspace(cloud.wsId);
       const next = normalize(row.name, row.state);
@@ -396,6 +405,17 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       else throw { code: "run_failed", message: r.error ?? "" };
     } finally { serverRun.current = null; }
   }, [cloud, refresh]);
+
+  /* Memory that acts (src/recall.ts): after a run in this browser, what the person wrote is read for durable details
+     (the extract role on the same model, through the same server call; the demo's own reader without a model), kept in
+     their memory and acted on, and the reply shows a Remembered chip for each, one tap from Forget. */
+  const recallAfter = useCallback(async (said: string, turn: number, prior?: string) => {
+    const m = modelRef.current;
+    const kept = await recallFrom(said, { book: wsRef.current.memories?.[me], prior, ask: m ? p => m.json(p, { signal: new AbortController().signal, role: "extract" }) : undefined });
+    if (!kept.length) return;
+    setWs(keepRecall(me, kept));
+    setFeed(ms => ms.map(x => (x.id === turn && x.kind === "turn" && x.reply ? { ...x, reply: { ...x.reply, remembered: [...(x.reply.remembered ?? []), ...chipsOf(kept)] } } : x)));
+  }, [me]);
 
   const run = useCallback(async (req: Request, shown: string | null, voice = false, resumeId?: string) => {
     if (busyRef.current) return;
@@ -411,25 +431,32 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const upd = (f: (m: Turn) => Partial<Turn>) => setFeed(ms => ms.map(m => (m.id === aid && m.kind === "turn" ? { ...m, ...f(m) } : m)));
     let said = "";
     const ctl = new AbortController(); abort.current = ctl;
+    let onServer = false, firstAt = "";
+    const askedAt = nowIso();
     const onEvent = (e: AgentEvent) => {
       if (e.type === "step") { setStep(e.step); upd(m => ({ steps: [...m.steps, e.step], active: e.index })); }
       else if (e.type === "update") setWs(e.patch);
-      else if (e.type === "draft") upd(() => ({ draft: e.text }));
+      else if (e.type === "draft") { if (e.text && !firstAt) firstAt = nowIso(); upd(() => ({ draft: e.text })); }
       else {
         const r: Reply = e.reply;
         upd(() => ({ reply: r, active: -1, ms: performance.now() - t0, draft: undefined }));
         said = r.text.map(x => x[lang]).join(" ");
         if (r.matches) setMatch(r.matches);
+        // memory that acts: a run on the server reads it there (agent-run); one here reads it now (src/recall.ts)
+        if ("text" in req && !onServer) void recallAfter(req.text, aid, history.current.filter(x => x.role === "assistant").at(-1)?.content);
+        // timed for What Odelia did this month (src/monthly.ts); a server run is timed in agent_runs
+        if ("text" in req && !onServer) { const done = nowIso(); setWs(w => ({ ...w, runs: [...(w.runs ?? []), { id: `run-${aid}-${Date.now().toString(36)}`, prompt: req.text.slice(0, 200), created_at: askedAt, first_text_at: firstAt || done, done_at: done, status: "done" }].slice(-60) })); }
         if ("text" in req && modelRef.current) history.current.push({ role: "user", content: req.text }, { role: "assistant", content: said });
         // past chats, kept per person so the agent can search them later (Settings, Memory)
         if ("text" in req && cloud && said) { const me = cloud.me.id, at = nowIso(); setWs(w => ({ ...w, chats: { ...(w.chats ?? {}), [me]: [...(w.chats?.[me] ?? []), { at, role: "you" as const, text: req.text.slice(0, 2000) }, { at, role: "agent" as const, text: said.slice(0, 2000) }].slice(-300) } })); }
       }
     };
     const m = modelRef.current;
-    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent }) : demoAgent;
+    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me }) : demoAgent;
     try {
       // In an account the agent works on the server, so it carries on if the app is closed.
       const id = resumeId ?? (cloud && !api.PREVIEW && "text" in req && m ? await api.startRun(cloud.wsId, { prompt: req.text, history: history.current.slice(-12), lang, deep }) : null);
+      onServer = !!id;
       if (id) await follow(id, onEvent, ctl.signal);
       else await agent.run(req, { lang, current: wsRef.current }, onEvent, ctl.signal);
     } catch (err) {
@@ -463,7 +490,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     busyRef.current = false; setBusy(false); setStep(null); setUploading(null); setMatching(false);
     if ((voice || voiceOn) && said) tts.speak(said, speakTag(lang));
     else if (said && !panelRef.current) say(said.split(/(?<=[.!?])\s+|(?<=[。！？])/)[0]);
-  }, [lang, tts, say, t, deep, cloud, plan, voiceOn, services, follow]);
+  }, [lang, tts, say, t, deep, cloud, plan, voiceOn, services, follow, recallAfter, me]);
 
   /* Back in the app: follow a task still running on the server, or show one that finished while it was closed. */
   const resumed = useRef(false);
@@ -664,6 +691,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (p.payeeUrl) window.open(p.payeeUrl, "_blank", "noopener,noreferrer");
     say(zh ? "已批准。请在机构页面付款，然后点“我已付款”。" : "Approved. Pay it on the agency's page, then tap \"I've paid it\".");
   };
+  /* The undo window (src/hold.ts): what the app sends itself (the sample's filings, a message from your own mailbox)
+     waits HOLD_MINUTES with an Undo, then comes back through approve, which lets it pass. In an account the server
+     holds filings itself (supabase/functions/file). True when a hold just started. */
+  const approveRef = useRef<(id: string, sig?: Signed) => void | Promise<void>>(() => undefined);
+  const holdFirst = (a: Approval, sig?: Signed) => {
+    const go = () => (!cloud && busyRef.current ? window.setTimeout(go, 1500) : void approveRef.current(a.id, sig));
+    const started = startHold({ ids: [a.id], app: a.app, title: a.title, go });
+    if (started) say(lang === "zh" ? `${HOLD_MINUTES} 分钟后发送，在此之前可以撤销。` : `Sending in ${HOLD_MINUTES} minutes. You can undo it until then.`);
+    return started;
+  };
   const approve = useCallback(async (id: string, sig?: Signed) => {
     if (held()) return;
     if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
@@ -685,6 +722,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       } catch (e) { say((e as api.ApiError).message); }
       return;
     }
+    // a connected app's action (src/mcp.ts): an owner's approval runs it once, on the server
+    if (a.kind === "change" && a.change?.op === "mcp_call") {
+      if (!cloud || !ownerOk()) return;
+      try {
+        const r = await runApproved((action, body) => api.integration(cloud.wsId, action, body), a);
+        setWs(x => audit("you", B("Approved and ran", "批准并执行"), a.title, r.detail)(dropApproval(id)(x)));
+        say(r.say[lang]);
+      } catch (e) {
+        const er = e as api.ApiError;
+        if (er.code === "too_late" || er.code === "changed") setWs(dropApproval(id));
+        say((lang === "zh" && er.message_zh) || er.message);
+      }
+      return;
+    }
     if (a.kind === "change" && a.change) {
       const c = a.change;
       // a business fact or the business's name, asked for from outside the app: only an owner saves it
@@ -694,7 +745,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     if (a.kind === "pay" && a.purchase) { await approvePurchase(a); return; }
-    if (!cloud) { run({ approve: id }, shown); return; }
+    if (!cloud) { if ((a.kind === "file" || a.kind === "send") && holdFirst(a, sig)) return; run({ approve: id }, shown); return; }
     if (!ownerOk()) return;
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
     if (a.kind === "file") {
@@ -704,6 +755,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     if (a.kind === "send") {
+      if (holdFirst(a, sig)) return;
       const to = a.data?.find(f => f.id === "to")?.value ?? "", body = a.data?.find(f => f.id === "msg")?.value ?? "";
       const subject = a.data?.find(f => f.id === "subject")?.value || a.title.en;
       const mail = integrations.find(i => (i.kind === "gmail" || i.kind === "outlook_mail") && i.status === "connected");
@@ -727,6 +779,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     }
     run({ approve: id }, shown);
   }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk, held]);
+  approveRef.current = approve;
   /* Everything ready, from one tap: the same checks as one at a time (complete, nothing the second look says is wrong),
      filed in turn, and one answer that shows each filing live. */
   const approveAll = useCallback(async (ids: string[]) => {
@@ -740,7 +793,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!ok.length) return;
     if (ok.length === 1) return approve(ok[0].id);
     const shown = lang === "zh" ? `全部批准：${ok.map(a => a.title.zh).join("、")}` : `Approve all: ${ok.map(a => a.title.en).join(", ")}`;
-    if (!cloud) { run({ approveAll: ok.map(a => a.id) }, shown); return; }
+    if (!cloud) {
+      // the undo window covers the group: one countdown, one Undo, then every filing in it goes together
+      const ids = ok.map(a => a.id), go = () => (busyRef.current ? window.setTimeout(go, 1500) : void run({ approveAll: ids }, shown));
+      if (startHold({ ids, title: B(`${ok.length} filings`, `${ok.length} 份申请`), go })) { say(lang === "zh" ? `${HOLD_MINUTES} 分钟后提交，在此之前可以撤销。` : `Filing in ${HOLD_MINUTES} minutes. You can undo it until then.`); return; }
+      run({ approveAll: ids }, shown); return;
+    }
     if (!ownerOk()) return;
     if (plan !== "monthly") { hold(ok[0].id); setPlans("file"); return; }
     setPanelOpen(true);
@@ -798,6 +856,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       window.location.href = url;
     };
     const fail = (e: unknown) => { const x = e as api.ApiError; say((lang === "zh" && x?.message_zh) || x?.message || String(e)); };
+    /** Stop or Undo a filing before anything left: it comes back to you, exactly as it was before you approved it. */
+    const takeBack = async (id: string, how: "stop" | "undo") => {
+      const f = filings.find(x => x.id === id);
+      try {
+        await (how === "undo" ? api.undoFiling : api.stopFiling)(cloud.wsId, id);
+        if (f) setWs(x => {
+          const back = [...x.closed].reverse().find(a => a.kind === "file" && a.app === f.app_id);
+          const w2 = setApp(f.app_id, { status: "ready", next: how === "undo" ? B("Undone before it was sent. Approve again when you're ready", "已在发送前撤销，准备好后可再次批准") : B("Stopped before it was sent. Approve again when you're ready", "已在发送前停止，准备好后可再次批准") })(x);
+          return back ? { ...w2, approvals: [back, ...w2.approvals.filter(a => a.id !== back.id)], closed: w2.closed.filter(a => a.id !== back.id) } : w2;
+        });
+        await refresh();
+        say(how === "undo" ? (lang === "zh" ? "已撤销，没有发出任何内容。" : "Undone. Nothing was sent.") : (lang === "zh" ? "已停止，没有任何内容发给机构。" : "Stopped. Nothing reached the agency."));
+      } catch (e) { fail(e); }
+    };
     return {
       email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner,
       wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces, hq: cloud.hq, termsHold,
@@ -834,20 +906,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         } catch (e) { fail(e); }
       },
       cancelFiling: async id => { if (!ownerOk()) return; try { await api.cancelFiling(id); await refresh(); } catch (e) { fail(e); } },
-      stopFiling: async id => {
-        const f = filings.find(x => x.id === id);
-        try {
-          await api.stopFiling(cloud.wsId, id);
-          // back to you, exactly as it was before you approved it
-          if (f) setWs(x => {
-            const back = [...x.closed].reverse().find(a => a.kind === "file" && a.app === f.app_id);
-            const w2 = setApp(f.app_id, { status: "ready", next: B("Stopped before it was sent. Approve again when you're ready", "已在发送前停止，准备好后可再次批准") })(x);
-            return back ? { ...w2, approvals: [back, ...w2.approvals.filter(a => a.id !== back.id)], closed: w2.closed.filter(a => a.id !== back.id) } : w2;
-          });
-          await refresh();
-          say(lang === "zh" ? "已停止，没有任何内容发给机构。" : "Stopped. Nothing reached the agency.");
-        } catch (e) { fail(e); }
-      },
+      stopFiling: id => takeBack(id, "stop"),
+      // the undo window (src/hold.ts, supabase/functions/file): Undo while it's held, or Send now
+      undoFiling: id => takeBack(id, "undo"),
+      sendFilingNow: async id => { if (!ownerOk()) return; try { await api.sendFilingNow(cloud.wsId, id); await refresh(); say(lang === "zh" ? "好的，现在发送。" : "Sending it now."); } catch (e) { fail(e); } },
+      // Ask a person (src/AskPerson.tsx): owners and members; the reply comes to Updates
+      askPerson: async (question, context) => { try { await api.askPerson(cloud.wsId, question, context, lang); await refresh(); return true; } catch (e) { fail(e); return false; } },
       fileUrl: async path => { try { return URL.createObjectURL(await api.downloadDoc(path)); } catch { return null; } },
       exportData: () => {
         const data = { exported: nowIso(), workspace: api.strip(wsRef.current), audit: wsRef.current.audit, filings, documents: docs.map(d => ({ name: d.name, size: d.size, created_at: d.created_at, source: d.source })) };
@@ -902,9 +966,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       setFeed(fd => [...fd, { id: nid(), kind: "memory", text }]);
       say(`${t("committed")}: ${text[lang]}`);
     },
-    memory: cloud ? view_.memories?.[cloud.me.id] ?? emptyBook() : null,
+    memory: view_.memories?.[me] ?? emptyBook(), me,
     editWs: f => setWs(f),
-    setMemory: f => { if (cloud) { const me = cloud.me.id; setWs(w => ({ ...w, memories: { ...(w.memories ?? {}), [me]: f(w.memories?.[me] ?? emptyBook()) } })); } },
+    setMemory: f => setWs(w => ({ ...w, memories: { ...(w.memories ?? {}), [me]: f(w.memories?.[me] ?? emptyBook()) } })),
     updateStore: (id, f, log) => !held() && setWs(w => {
       const next = { ...w, stores: (w.stores ?? []).map(s => (s.id === id ? f(s) : s)) };
       return log ? audit("you", log.action, log.object, log.detail)(next) : next;
@@ -913,7 +977,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     openLegal: id => setLegal(id),
     cloud: cloudCtx,
     updates, readUpdates,
-  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, sub, ask, queued, unqueue, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held]);
+  }), [lang, t, b, view_, busy, step, uploading, model, apiName, deep, voiceOn, go, sub, ask, queued, unqueue, run, approve, approveAll, upload, save, say, cloud, cloudCtx, updates, readUpdates, held, me]);
 
   /* page */
   const unread = updates.filter(u => !u.read).length;

@@ -3,30 +3,22 @@
 -- slowest and most expensive runs with a replay of each), a weekly governance summary, and an incident log the team
 -- keeps (what happened, the impact, the fix). Safe to run twice.
 --
+-- The run's times come from the run clock (20261017200000_odelia_metrics: first_text_at, the first words shown, and
+-- done_at, when the answer was done); a run that failed or was stopped finishes at its last save (updated_at).
 -- What's measured from here on (nothing is backfilled):
---   agent_runs.first_reply_at   the first time a run showed words (its draft) or its answer, set by the database
---   agent_runs.finished_at      when it stopped running (done, failed or stopped), set by the database
 --   agent_runs.tool_calls/errors  the tools it called and how many returned an error (agent-run writes them)
 --   ai_events.saver             whether the workspace was in saver mode when the call was made
--- Runs from before this migration count their finish from updated_at and have no first-reply time.
 
-alter table public.agent_runs add column if not exists first_reply_at timestamptz;
-alter table public.agent_runs add column if not exists finished_at timestamptz;
 alter table public.agent_runs add column if not exists tool_calls int check (tool_calls is null or tool_calls >= 0);
 alter table public.agent_runs add column if not exists tool_errors int check (tool_errors is null or tool_errors >= 0);
 create index if not exists agent_runs_created on public.agent_runs (created_at);
 
-create or replace function public.agent_runs_times() returns trigger
-language plpgsql set search_path = '' as $$
-begin
-  if new.first_reply_at is null and (coalesce(new.draft, '') <> '' or new.reply is not null) then new.first_reply_at := now(); end if;
-  if new.finished_at is null and old.status = 'running' and new.status <> 'running' then new.finished_at := now(); end if;
-  return new;
-end $$;
-revoke execute on function public.agent_runs_times() from public, anon, authenticated;
-drop trigger if exists agent_runs_times on public.agent_runs;
-create trigger agent_runs_times before update on public.agent_runs for each row
-  when (new.first_reply_at is null or new.finished_at is null) execute function public.agent_runs_times();
+-- When a run stopped running: the run clock's done time, or its last save for one that failed or was stopped.
+create or replace function public.agent_run_end(r public.agent_runs) returns timestamptz
+language sql stable set search_path = '' as $$
+  select coalesce(r.done_at, case when r.status in ('done', 'failed', 'stopped') then r.updated_at end);
+$$;
+revoke execute on function public.agent_run_end(public.agent_runs) from public, anon, authenticated;
 
 -- agent-run reports a run's tool counts when it ends.
 create or replace function public.agent_run_tools(p_id uuid, p_calls int, p_errors int) returns void
@@ -74,8 +66,8 @@ begin
   return (
     with days as (select generate_series(since, current_date, interval '1 day')::date as d),
     runs as (
-      select r.id, r.workspace_id, r.created_at, r.status, r.kind, r.channel, r.title, r.prompt, r.tool_calls, r.tool_errors, r.first_reply_at,
-             coalesce(r.finished_at, case when r.status <> 'running' then r.updated_at end) as done_at
+      select r.id, r.workspace_id, r.created_at, r.status, r.kind, r.channel, r.title, r.prompt, r.tool_calls, r.tool_errors, r.first_text_at as first_reply_at,
+             public.agent_run_end(r) as done_at
         from public.agent_runs r where r.created_at >= since
     ),
     timed as (
@@ -155,7 +147,7 @@ begin
           'cost_usd', round(p.cost_usd, 4), 'tool_calls', p.tool_calls, 'tool_errors', p.tool_errors) as o
         from pick p where p.cost_usd > 0 order by p.cost_usd desc limit 10) x),
       'measured_since', jsonb_build_object(
-        'first_reply', (select min(created_at) from public.agent_runs where first_reply_at is not null),
+        'first_reply', (select min(created_at) from public.agent_runs where first_text_at is not null),
         'tools', (select min(created_at) from public.agent_runs where tool_calls is not null),
         'saver', (select min(at) from public.ai_events where saver is not null)))
   );
@@ -179,11 +171,11 @@ begin
   if not public.is_staff() then raise exception 'Placetta team only.'; end if;
   select * into r from public.agent_runs where id = p_id;
   if r.id is null then raise exception 'No such run.'; end if;
-  done_at := coalesce(r.finished_at, case when r.status <> 'running' then r.updated_at end);
+  done_at := public.agent_run_end(r);
   return jsonb_build_object(
     'id', r.id, 'workspace_id', r.workspace_id, 'business', (select name from public.workspaces where id = r.workspace_id),
     'kind', r.kind, 'channel', r.channel, 'status', r.status, 'title', r.title, 'prompt', left(r.prompt, 600), 'error', r.error,
-    'created_at', r.created_at, 'first_reply_at', r.first_reply_at, 'done_at', done_at,
+    'created_at', r.created_at, 'first_reply_at', r.first_text_at, 'done_at', done_at,
     'tool_calls', r.tool_calls, 'tool_errors', r.tool_errors, 'steps', r.steps,
     'reply', case when jsonb_typeof(r.reply->'text') = 'array' then r.reply->'text' end,
     'calls', (select coalesce(jsonb_agg(jsonb_build_object('at', e.at, 'kind', e.kind, 'role', e.role, 'provider', e.provider, 'model', e.model, 'cost_usd', e.cost_usd, 'saver', e.saver) order by e.at), '[]'::jsonb)

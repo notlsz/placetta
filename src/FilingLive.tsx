@@ -6,6 +6,7 @@ import { B } from "./model";
 import type { Filing } from "./cloud/api";
 import { I, Modal, feeTotal } from "./ui";
 import { fmtStamp, money } from "./time";
+import { FilingHold } from "./SendHold";
 import { ReviewBadges } from "./Specialist";
 
 /*
@@ -20,7 +21,7 @@ type Kind = "check" | "open" | "page" | "fill" | "upload" | "click" | "refused" 
   | "needs" | "team" | "stopped" | "retry" | "info";
 type Ev = { kind: Kind; at?: string; text: Bi; label?: Bi; value?: string; frame?: number; row?: number; ref?: string };
 type Frame = { kind: "page" | "review" | "done"; title: Bi; rows: { label: Bi; value: string }[]; img?: string; note?: Bi };
-type State = "queued" | "running" | "needs_you" | "done" | "team" | "stopped" | "failed";
+type State = "queued" | "running" | "needs_you" | "done" | "team" | "stopped" | "failed" | "held";
 export type Run = {
   app: Application; host: string; channel: string; state: State; events: Ev[]; frames: Frame[];
   confirmation?: string; sample: boolean; filing?: Filing; receipt?: string; pdf?: string;
@@ -79,7 +80,7 @@ function fromFiling(f: Filing, app: Application): Run {
       case "visit": case "queued": events.push({ kind: "open", at, text }); break;
       case "need_person": case "needs_you": case "wet_signature": events.push({ kind: "needs", at, text }); break;
       case "handoff": case "take_over": case "review_wait": case "you_sent": events.push({ kind: "team", at, text }); break;
-      case "stopped": events.push({ kind: "stopped", at, text }); break;
+      case "stopped": case "undone": events.push({ kind: "stopped", at, text }); break;
       case "retry": case "fax_failed": events.push({ kind: "retry", at, text }); break;
       case "fax_queued": case "mail_event": events.push({ kind: "sent", at, text }); break;
       default: events.push({ kind: "info", at, text });
@@ -93,7 +94,7 @@ function fromFiling(f: Filing, app: Application): Run {
   const st = f.agent_state;
   const state: State = f.status === "canceled" ? "stopped"
     : f.status === "submitted" || f.status === "accepted" || st === "done" ? "done"
-    : st === "needs_you" ? "needs_you" : st === "running" ? "running" : st === "queued" ? "queued"
+    : st === "held" ? "held" : st === "needs_you" ? "needs_you" : st === "running" ? "running" : st === "queued" ? "queued"
     : st === "failed" ? "failed" : "team";
   return { app, host, channel: f.channel ?? "team", state, events, frames, confirmation: f.confirmation_number ?? undefined, sample: false, filing: f, receipt: f.receipt_path ?? undefined, pdf: f.payload?.pdf_path };
 }
@@ -208,6 +209,7 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
   const head: Record<State, Bi> = {
     queued: B("Starting", "即将开始"), running: B("Filing now", "正在提交"), needs_you: B("Needs you for one step", "需要您完成一步"),
     done: B("Submitted", "已提交"), team: B("With the Placetta team", "由快哉团队处理"), stopped: B("Stopped before anything was sent", "已在发送前停止"), failed: B("Didn't go through", "未能完成"),
+    held: B("Approved, waiting before it's sent", "已批准，等待发送"),
   };
   const evIndex = (e: Ev) => run.events.indexOf(e);
 
@@ -222,6 +224,8 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
         {run.sample && <span className="tag">{zh ? "示例" : "Sample"}</span>}
         {canStop && <button type="button" className="pill quiet sm fl-stop" disabled={stopping || busy} onClick={() => { setStopping(true); void cloud!.stopFiling(f!.id).finally(() => setStopping(false)); }}><I.stopSq />{zh ? "停止" : "Stop"}</button>}
       </header>
+
+      {f && state === "held" && <FilingHold f={f} />}
 
       <ol className="fl-evs">
         {visible.map((g, gi) => {

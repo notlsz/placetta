@@ -1,5 +1,5 @@
 /* The trust page's incident log line: shown only when Placetta's incident log exists (public.incident_log_public, in
-   supabase/migrations/20261017150300_agent_health.sql), with the day it began and the entries the team made public.
+   supabase/migrations/20261017210300_agent_health.sql), with the day it began and the entries the team made public.
    Until it answers, the roadmap says nothing about it. The publishable key only reads what that function returns. */
 (function () {
   var SUPA = "https://esquxzcfsylffuijvzec.supabase.co", KEY = "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p";
