@@ -19,6 +19,8 @@ services:
         value: "1"
       - key: FILER_TWO_KEY
         value: "10"          # the first 10 portal filings wait for a person on the team to check the review page
+      - key: FILER_ALLOW_UNVERIFIED
+        value: "0"           # 1 only while staff watch a playbook's first run (worker/filer/src/playbooks.ts); 0 refuses unverified playbooks
       - key: SUPABASE_URL
         value: https://esquxzcfsylffuijvzec.supabase.co
       - key: SUPABASE_SERVICE_ROLE_KEY

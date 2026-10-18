@@ -34,7 +34,7 @@ Deno.test("the SS-4 fills on the server from the bundle's own copy, reads back, 
   assert(texts.includes("Moonleaf Tea LLC") && texts.includes("100 N First St"), "the answers are in the form's own boxes");
   assert(!texts.some((t) => SSN.test(t)), "no SSN anywhere on the PDF");
   // line 10 runs on to the line below by whole words, so nothing is cut off in the short blank
-  assert(texts.includes("Started a new") && texts.includes("milk tea shop"), JSON.stringify(texts.filter((t) => /milk|Started/.test(t))));
+  assert(texts.includes("Started a") && texts.includes("new milk tea shop"), JSON.stringify(texts.filter((t) => /milk|Started/.test(t))));
   const clean = await readBack("irs-ss4", (await fillForm("irs-ss4", fields.map((f) => (f.id === "l7b" ? F("l7b", "Foreign") : f)), disk))!);
   assert(clean.ok, JSON.stringify(clean.issues));
 });

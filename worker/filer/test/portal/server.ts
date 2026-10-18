@@ -2,7 +2,10 @@
 // confirmation number, and variants with a CAPTCHA, card fields, or a review page that differs from what was entered.
 import { createServer, type Server } from "node:http";
 
-export type Variant = { captcha?: boolean; pay?: boolean; alter?: boolean };
+// Variants for playbooks: a review page whose send button says only "Continue" (neutral), a send that is a link
+// (link), a sign-in form that posts to another host name for the same server (signInHost), and a fee page with a
+// "Check Out" button and no card fields after the submit (feePage).
+export type Variant = { captcha?: boolean; pay?: boolean; alter?: boolean; neutral?: boolean; link?: boolean; signInHost?: string; feePage?: boolean };
 export type Portal = { url: string; submissions: number; close(): Promise<void>; variant: Variant };
 
 const page = (title: string, body: string) => `<!doctype html><html><head><title>${title}</title></head><body><h1>${title}</h1>${body}</body></html>`;
@@ -24,9 +27,10 @@ export async function startPortal(variant: Variant = {}): Promise<Portal> {
     const go = (to: string) => { res.writeHead(303, { location: to }); res.end(); };
     const html = (h: string) => { res.writeHead(200, { "content-type": "text/html" }); res.end(h); };
     const f = (action: string, inner: string, button = "Continue", enc = "") => `<form method="post" action="${action}"${enc}>${inner}<button type="submit">${button}</button></form>`;
+    const port = (srv.address() as { port: number }).port;
     switch (u.pathname) {
-      case "/": return html(page("Sign in", f("/login", `${field("user", "Username")}<p><label for="pw">Password</label><input id="pw" name="pw" type="password"></p>`, "Sign in")));
-      case "/login": if (form.user === "demo" && form.pw === "s3cret") { authed = true; return go("/business"); } return go("/");
+      case "/": return html(page("Sign in", f(variant.signInHost ? `http://${variant.signInHost}:${port}/login` : "/login", `${field("user", "Username")}<p><label for="pw">Password</label><input id="pw" name="pw" type="password"></p>`, "Sign in")));
+      case "/login": if (form.user === "demo" && form.pw === "s3cret") { authed = true; return go(variant.signInHost ? `http://127.0.0.1:${port}/business` : "/business"); } return go("/");
       case "/business": if (!authed) return go("/");
         return html(page("Business", (variant.captcha ? `<div class="g-recaptcha"></div>` : "") + f("/owner", field("name", "Legal name") + field("addr", "Business address"))));
       case "/owner": return html(page("Owner", f("/activity", field("owner", "Owner name") + field("otitle", "Title"))));
@@ -34,9 +38,13 @@ export async function startPortal(variant: Variant = {}): Promise<Portal> {
       case "/review": {
         const name = variant.alter ? (data.name ?? "") + " Holdings" : data.name;
         const shown = variant.alter ? "Someone Else LLC" : name;
-        return html(page("Review", `<p>Legal name: ${shown}</p><p>Business address: ${data.addr}</p><p>Owner name: ${data.owner}</p><p>Title: ${data.otitle}</p><p>Activity: ${data.act}</p><p>File: ${data.upload}</p>` + f(variant.pay ? "/pay" : "/submit", "", "Submit filing")));
+        const values = `<p>Legal name: ${shown}</p><p>Business address: ${data.addr}</p><p>Owner name: ${data.owner}</p><p>Title: ${data.otitle}</p><p>Activity: ${data.act}</p><p>File: ${data.upload}</p>`;
+        if (variant.link) return html(page("Review", values + `<p><a href="/submit">Submit filing</a></p>`));
+        return html(page("Review", values + f(variant.pay ? "/pay" : variant.feePage ? "/fees" : "/submit", "", variant.neutral ? "Continue" : "Submit filing")));
       }
       case "/pay": return html(page("Pay the fee", f("/submit", `<p><label for="cc">Card number</label><input id="cc" name="cc" autocomplete="cc-number"></p>`, "Pay")));
+      case "/fees": p.submissions++; return html(page("Pay Fees", `<p>Application fee: $150.00</p>` + f("/receipt", "", "Check Out")));
+      case "/receipt": return html(page("Receipt", `<p>Record Number: DEN-${String(10000 + p.submissions)}</p>`));
       case "/submit": p.submissions++; return html(page("Filed", `<p>Thank you.</p><p>Confirmation number: CA-${String(10000 + p.submissions)}</p>`));
       default: res.writeHead(404); res.end();
     }

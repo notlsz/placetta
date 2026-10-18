@@ -3,6 +3,7 @@ import { test, after } from "node:test";
 import assert from "node:assert";
 import { openBrowser } from "../src/main.ts";
 import type { Model, StepInput, ToolCall } from "../src/model.ts";
+import type { Playbook } from "../src/playbooks.ts";
 import { portalKey, Worker } from "../src/run.ts";
 import type { Store } from "../src/store.ts";
 import type { Filing, LogEntry, Skill } from "../src/types.ts";
@@ -25,7 +26,8 @@ class Mem implements Store {
     for (const [k, v] of Object.entries(patch)) if (!(k === "submit_clicked_at" && this.f.submit_clicked_at)) (this.f as unknown as Record<string, unknown>)[k] = v;
     return { ...this.f };
   }
-  async login() { return { username: "demo", password: "s3cret", host: "127.0.0.1" }; }
+  tenant?: string;
+  async login(_f: Filing, _host: string, tenant?: string) { this.tenant = tenant; return { username: "demo", password: "s3cret", host: "127.0.0.1" }; }
   async skill(k: string) { return this.skills.get(k) ?? null; }
   async saveSkill(s: Skill) { this.skills.set(s.key, s); }
   async skillFailed() { return { disabled: false }; }
@@ -40,9 +42,10 @@ class Mem implements Store {
 
 /** A stand-in for Claude: fills each empty field from the approved values, then continues. */
 class Scripted implements Model {
-  calls = 0; first: ToolCall[] = [];
+  calls = 0; first: ToolCall[] = []; guide: string[] = [];
   async next(i: StepInput): Promise<ToolCall> {
     this.calls++;
+    if (i.guide) this.guide = i.guide;
     if (this.first.length) return this.first.shift()!;
     const s = i.state, p = i.filing.payload;
     const m = /Confirmation number: (\S+)/.exec(s.text);
@@ -54,7 +57,7 @@ class Scripted implements Model {
       const v = p.fields?.find((f) => f.label.en === c.label)?.value;
       if (v && c.value !== v) return c.tag === "select" ? { name: "select", input: { selector: c.selector, option: v } } : { name: "fill", input: { selector: c.selector, value: v } };
     }
-    return { name: "click", input: { selector: s.buttons[0].selector } };
+    return { name: "click", input: { selector: s.buttons[0]?.selector ?? s.links[0].selector } };
   }
 }
 
@@ -154,4 +157,75 @@ test("a stop before submit ends the run and nothing reaches the agency", async (
   assert.equal(p.submissions, 0);
   assert.equal(store.f.submit_clicked_at, null);
   assert.ok(!store.f.agent_log.some((e) => e.kind === "retry"), "a stopped run isn't retried");
+});
+
+/* ---------------- playbooks written from a portal's published guide ---------------- */
+
+const steps = { start: "http://127.0.0.1/", steps: [{ page: "Business", do: "fill" as const, note: "Legal name and business address." }] };
+const playbook = (over: Partial<Playbook> = {}): Playbook => ({
+  host: "127.0.0.1", name: "Test portal", guides: ["https://agency.gov/guide.pdf"], read: "2026-10-18", verified: null,
+  forms: { "test-llc": steps }, final: [{ page: "Review", button: "Continue" }], pay: ["Pay Fees"], receipt: ["Receipt"], ...over,
+});
+const withPlaybook = (pb: Playbook) => ({ playbookOf: (_h: string, official: string) => (pb.forms[official] ? { playbook: pb, form: pb.forms[official] } : null) });
+const VERIFIED = { on: "2026-10-20", by: "staff@placetta", filing: "f0" };
+
+test("a playbook that hasn't had its supervised first run is refused unless FILER_ALLOW_UNVERIFIED=1", async () => {
+  const p = await portal(), store = new Mem();
+  let opened = false;
+  const r = await worker(store, new Scripted(), p.url, { ...withPlaybook(playbook()), open: async () => { opened = true; return openBrowser(); } }).run(store.f);
+  assert.equal(r, null);
+  assert.equal(opened, false, "no browser is opened");
+  assert.equal(store.f.agent_state, "handoff");
+  assert.ok(store.tasks.includes("first_run"));
+  assert.ok(store.f.agent_log.some((e) => e.ref === "unverified_playbook" && e.zh.length > 0));
+  assert.equal(p.submissions, 0);
+});
+
+test("with FILER_ALLOW_UNVERIFIED=1 the first run follows the guide and stops at the review page for the team, then submits once approved", async () => {
+  const p = await portal(), store = new Mem(), m = new Scripted();   // store.filed is 99: the two-key period is over
+  const r = await worker(store, m, p.url, { ...withPlaybook(playbook({ final: [{ page: "Review", button: "Submit filing" }] })), allowUnverified: true }).run(store.f);
+  assert.equal(r?.kind, "review");
+  assert.ok(store.tasks.includes("review") && store.docs.includes("review-page.png"));
+  assert.ok(store.f.agent_log.some((e) => e.kind === "playbook"));
+  assert.ok(m.guide.some((l) => l.startsWith("Published guide for Test portal")), "the model reads the guide's steps");
+  assert.equal(p.submissions, 0);
+  // The team approved the review page: the next run submits.
+  const again = new Mem(); again.f.agent_log = [{ en: "", zh: "", kind: "two_key_ok" }];
+  const r2 = await worker(again, new Scripted(), p.url, { ...withPlaybook(playbook()), allowUnverified: true }).run(again.f);
+  assert.equal(r2?.kind, "submitted");
+  assert.equal(p.submissions, 1);
+});
+
+test("the guide's send button gets the final-submit guard even when it only says Continue", async () => {
+  const p = await portal({ neutral: true }), store = new Mem(); store.filed = 0;
+  const r = await worker(store, new Scripted(), p.url, withPlaybook(playbook({ verified: VERIFIED }))).run(store.f);
+  assert.equal(r?.kind, "review");
+  assert.equal(p.submissions, 0);
+  assert.equal(store.f.submit_clicked_at, null);
+});
+
+test("a submit that is a link gets the same guard as a submit button", async () => {
+  const p = await portal({ link: true }), store = new Mem(); store.filed = 0;
+  const r = await worker(store, new Scripted(), p.url).run(store.f);
+  assert.equal(r?.kind, "review");
+  assert.equal(p.submissions, 0);
+});
+
+test("the page the guide names for the agency's fee goes to the person, even with no card fields", async () => {
+  const p = await portal({ feePage: true }), store = new Mem();
+  const r = await worker(store, new Scripted(), p.url, withPlaybook(playbook({ verified: VERIFIED, final: [{ page: "Review", button: "Submit filing" }] }))).run(store.f);
+  assert.equal(r?.kind, "needs_you");
+  assert.ok(store.f.agent_log.some((e) => e.kind === "need_person" && e.ref === "payment"));
+  assert.ok(store.f.submit_clicked_at, "the application went in before the fee page");
+});
+
+test("a sign-in on another host the destination names is allowed; without it the run never leaves the portal", async () => {
+  const p = await portal({ signInHost: "localhost" }), store = new Mem();
+  const r = await worker(store, new Scripted(), p.url, { routeOf: () => ({ alsoOn: ["localhost"], tenant: "/dallastx" }) }).run(store.f);
+  assert.equal(r?.kind, "submitted");
+  assert.equal(store.tenant, "/dallastx", "the saved login is looked up with the agency's path");
+  const p2 = await portal({ signInHost: "localhost" }), store2 = new Mem();
+  const r2 = await worker(store2, new Scripted(), p2.url).run(store2.f);
+  assert.notEqual(r2?.kind, "submitted");
+  assert.equal(p2.submissions, 0);
 });
