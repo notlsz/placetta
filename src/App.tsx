@@ -35,6 +35,7 @@ import { preflight } from "./smart";
 import { I, Menu, Modal } from "./ui";
 import * as api from "./cloud/api";
 import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
+import { runApproved, type McpTool } from "./mcp";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
 import { Queue, QueueLocked } from "./cloud/Ops";
@@ -341,6 +342,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     spend: async (action, body) => { const r = await api.spend<never>(cloud.wsId, action, body); void api.spendGet(cloud.wsId).then(sp => { if (sp) setPurchases(sp.purchases); }); return r; },
     saveFile: async (file, appId) => { const row = await api.uploadDoc(cloud.wsId, file, appId); paths.current.set(file.name, row.path); void refreshRef.current(); return { path: row.path }; },
     readFile: path => api.downloadDoc(path),
+    // connected apps' own MCP servers (src/mcp.ts); none in the preview
+    mcpTools: async () => (api.PREVIEW ? [] : (await api.integration<{ tools: McpTool[] }>(cloud.wsId, "mcp_tools")).tools),
     me: cloud.me.id,
     setting: (key, value) => {
       const v = value.trim().toLowerCase();
@@ -680,6 +683,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         setWs(x => audit("you", B("Set budgets", "设置预算"), a.title)(dropApproval(id)(x)));
         say(lang === "zh" ? "预算已设置。可在“设置 > 支出”中修改。" : "Budgets set. Change them any time in Settings, Spending.");
       } catch (e) { say((e as api.ApiError).message); }
+      return;
+    }
+    // a connected app's action (src/mcp.ts): an owner's approval runs it once, on the server
+    if (a.kind === "change" && a.change?.op === "mcp_call") {
+      if (!cloud || !ownerOk()) return;
+      try {
+        const r = await runApproved((action, body) => api.integration(cloud.wsId, action, body), a);
+        setWs(x => audit("you", B("Approved and ran", "批准并执行"), a.title, r.detail)(dropApproval(id)(x)));
+        say(r.say[lang]);
+      } catch (e) {
+        const er = e as api.ApiError;
+        if (er.code === "too_late" || er.code === "changed") setWs(dropApproval(id));
+        say((lang === "zh" && er.message_zh) || er.message);
+      }
       return;
     }
     if (a.kind === "change" && a.change) {

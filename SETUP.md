@@ -148,6 +148,20 @@ Every provider uses one redirect address: `https://esquxzcfsylffuijvzec.supabase
 
 The calendar feed needs nothing. Square and Toast show "Opens soon" until their keys are set. Owners connect them; only owners can read sales and staff through Odelia (`get_sales`, `get_staff`), and only from the app.
 
+### Connect any app (MCP)
+
+Settings, Integrations, Connect any app: an owner pastes any app's MCP server address (with a token, or signs in where the app asks), or picks one of the apps listed (`supabase/functions/_shared/mcp_catalog.ts`). Needs `OAUTH_STATE_SECRET` and `APP_ORIGINS` for the sign-in; nothing else for Notion, Airtable, Linear, Square, Stripe, Zapier and Dropbox, which let Placetta register itself (it serves its client document at `.../functions/v1/oauth-callback/mcp-client.json`). The rest only take clients registered with them first; each shows "Opens soon" until its secrets are set, with the redirect address above:
+
+| App | Secrets | Where |
+| --- | --- | --- |
+| Google Drive, Gmail | `MCP_GOOGLE_CLIENT_ID`, `MCP_GOOGLE_CLIENT_SECRET` | Google Cloud console: a new Web application client with "Use this client for an AI-powered agent" ticked, the Drive and Gmail MCP APIs on (developers.google.com/workspace/guides/configure-mcp-servers). |
+| Slack | `MCP_SLACK_CLIENT_ID`, `MCP_SLACK_CLIENT_SECRET` | A Slack app set up for the Slack MCP server (docs.slack.dev/ai/slack-mcp-server). |
+| Asana | `MCP_ASANA_CLIENT_ID`, `MCP_ASANA_CLIENT_SECRET` | An Asana app (developers.asana.com, integrating with Asana's MCP server). |
+| HubSpot | `MCP_HUBSPOT_CLIENT_ID`, `MCP_HUBSPOT_CLIENT_SECRET` | HubSpot: Development, MCP Connectors. |
+| Box | `MCP_BOX_CLIENT_ID`, `MCP_BOX_CLIENT_SECRET` | Box Admin Console: the Box MCP server's integration credentials. |
+
+Tools that only read run when Odelia needs them; anything else waits for an owner's approval in the app and runs once. From email, texts, calls and chat she only reads, and from plain SMS not at all. Tokens live in the vault; disconnecting drops them.
+
 ## Odelia in WeChat (a business's own Official Account)
 
 Chinese store owners live in WeChat. A business points its own WeChat service account at Placetta, each teammate links their WeChat once, and then they message the account like a coworker: Odelia does the job as them and answers in the chat. Nothing for Placetta to set up beyond deploying; each business does this in Settings, Integrations, Odelia in WeChat, which walks them through it:

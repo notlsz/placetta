@@ -86,7 +86,10 @@ export type Change =
    *  lark). from: who sent it (their number or address). */
   | { op: "set_fact"; label: Bi; value: string; group: FactGroup; was?: string; via: string; from?: string }
   /** A new name for the business (or a new goal) asked for from outside the app, confirmed the same way. */
-  | { op: "rename_business"; name?: string; goal?: string; was: Bi; wasGoal?: Bi; via: string; from?: string };
+  | { op: "rename_business"; name?: string; goal?: string; was: Bi; wasGoal?: Bi; via: string; from?: string }
+  /** A connected app's tool that changes something (src/mcp.ts): it runs once, on Placetta's server, after an owner
+   *  approves. call: the server's id for it; args: exactly what it runs with. */
+  | { op: "mcp_call"; call: string; server: string; tool: string; title: string; args: Record<string, unknown> };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
 export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };

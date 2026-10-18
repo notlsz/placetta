@@ -5,6 +5,7 @@ import type { Workspace } from "./model";
 import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
 import { B } from "./bi";
 import { settleJobs, type Job } from "./jobs";
+import { MCP_PREFIX } from "./mcp";
 import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone } from "./harness";
 
 /* ------------------------------------------------------------------ *
@@ -79,9 +80,13 @@ export function channelNote(o: { channel?: Channel; plainSms?: boolean }, tool: 
 }
 const via = (channel: Channel | undefined) => (channel === "sms" ? "a text" : channel === "voice" ? "a call" : channel === "email" ? "an email" : channel === "slack" ? "Slack" : channel === "wechat" ? "WeChat" : "Lark");
 
-/** Why a tool can't run for a request from this channel (the tool result the model sees), or null when it can. */
-export function channelRefuses(o: { channel?: Channel; plainSms?: boolean }, tool: string, input: Record<string, unknown>): string | null {
+/** Why a tool can't run for a request from this channel (the tool result the model sees), or null when it can.
+ *  mcpReads: the connected apps' tools this run was offered from outside the app, which are only ones that read. */
+export function channelRefuses(o: { channel?: Channel; plainSms?: boolean; mcpReads?: Set<string> }, tool: string, input: Record<string, unknown>): string | null {
   if (!isRemote(o.channel)) return null;
+  // connected apps (src/mcp.ts): nothing from plain SMS, and from anywhere else outside the app only what reads
+  if (tool.startsWith(MCP_PREFIX) && (o.plainSms || !o.mcpReads?.has(tool)))
+    return `Error: From ${o.plainSms ? "a plain text message" : via(o.channel)} Odelia ${o.plainSms ? "doesn't use connected apps" : "only reads from connected apps"}. Tell them to do this in the Placetta app.`;
   if (o.plainSms && !PLAIN_SMS_MAY.has(tool))
     return "Error: This request came by plain SMS, which can be forged, so from it you can only look things up and draft for approval. Nothing in the workspace changes. Tell them to make this change in the Placetta app.";
   if (REMOTE_NEVER[tool]) return `Error: ${REMOTE_NEVER[tool]} from ${via(o.channel)}. Tell them to do it in the Placetta app.`;
@@ -178,10 +183,13 @@ export async function runRounds(o: {
   const mainRole: Role = o.role ?? "plan";
   const model = messagesModel("server", (body, _signal, deep, role) => o.send(body, deep, role ?? mainRole));
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
-  const from = { channel: o.channel, plainSms: st.plainSms === true };
+  const from: { channel?: Channel; plainSms: boolean; mcpReads?: Set<string> } = { channel: o.channel, plainSms: st.plainSms === true };
   const apply = (p: Patch) => o.apply(guardPatch(from, p));
-  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal,
+  // Connected apps' tools (src/mcp.ts): none from plain SMS; from anywhere else outside the app, only the ones that read.
+  const mcp = from.plainSms ? [] : ((await o.svc?.mcpTools?.().catch(() => [])) ?? []).filter(t => !isRemote(o.channel) || t.read_only);
+  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, mcp, request: st.request,
     ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}) });
+  if (isRemote(o.channel)) from.mcpReads = new Set(tools.map(t => t.name).filter(n => n.startsWith(MCP_PREFIX)));
   const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me: o.svc?.me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms);
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));

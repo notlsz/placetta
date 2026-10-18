@@ -38,9 +38,13 @@ const INJECTION: RegExp[] = [
   /(忽略|无视|忘记)[^。\n]{0,12}(指令|指示|规则|提示|设定)/,
   /(发送|转发|发给|邮寄|传真)[^。\n]{0,30}(EIN|税号|社会安全号|社安号|银行|账号|密码|护照)/i,
 ];
-export function injected(text: string): string | null {
+/** describesTool: the text is a connected app's own description of a tool, which is written to an AI by design ("the
+ *  assistant should use this to send..."), so only the plainly hostile patterns count there (ignore your instructions,
+ *  a new system prompt, sending private numbers somewhere). */
+export function injected(text: string, describesTool = false): string | null {
   const t = String(text ?? "");
   for (const re of INJECTION) {
+    if (describesTool && re === INJECTION[3]) continue;
     const m = re.exec(t);
     if (!m) continue;
     // the sentence it sits in, so the person sees what it says
@@ -50,6 +54,18 @@ export function injected(text: string): string | null {
     return s.length > 200 ? s.slice(0, 199).trimEnd() + "…" : s;
   }
   return null;
+}
+/** Text from outside (a connected app's answer) made safe to show and to hand the model: Social Security numbers and
+ *  payment card numbers masked to their last four digits, and the invisible characters that can hide words (zero-width
+ *  and direction marks, other control characters) taken out. Line breaks and tabs stay. */
+const SSN_ALL = /(^|[^\d-])(\d{3})([- ])(\d{2})\3(\d{4})(?![\d-])/g;
+const CARD = /(?<![\d-])\d(?:[ -]?\d){12,18}(?![\d-])/g;
+const luhn = (digits: string) => { let sum = 0; for (let i = 0; i < digits.length; i++) { let d = Number(digits[digits.length - 1 - i]); if (i % 2) { d *= 2; if (d > 9) d -= 9; } sum += d; } return sum % 10 === 0; };
+export function scrub(text: string): string {
+  return String(text ?? "")
+    .replace(/[​-‏‪-‮⁠-⁤⁦-⁩﻿]|[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
+    .replace(SSN_ALL, (_m, pre: string, _a: string, sep: string, _b: string, last: string) => `${pre}•••${sep}••${sep}${last}`)
+    .replace(CARD, m => { const d = m.replace(/\D/g, ""); return d.length >= 13 && d.length <= 19 && luhn(d) ? `•••• ${d.slice(-4)}` : m; });
 }
 /** The email addresses in a text, lowercased. */
 export const emailsIn = (text: string) => [...String(text ?? "").matchAll(/[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[a-z]{2,}/gi)].map(m => m[0].toLowerCase().replace(/[.]+$/, ""));

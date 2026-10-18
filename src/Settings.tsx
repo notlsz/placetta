@@ -31,6 +31,7 @@ import wecomLogo from "./assets/integrations/wecom.svg";
 import dingtalkLogo from "./assets/integrations/dingtalk.svg";
 import teamsLogo from "./assets/integrations/teams.svg";
 import wechatLogo from "./assets/integrations/wechat.svg";
+import { McpConnectors } from "./McpSettings";
 
 
 /* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
@@ -181,6 +182,7 @@ function WechatLink({ account }: { account: string | null }) {
 
 function Integrations() {
   const { b, lang, cloud, say } = useApp();
+  const pin = usePin();
   const [feed, setFeed] = useState("");
   const [avail, setAvail] = useState<api.Availability | null>(null);
   const [form, setForm] = useState<{ kind: HookKind; url: string; secret: string; busy?: boolean } | null>(null);
@@ -338,6 +340,8 @@ function Integrations() {
         </div>
       ))}
       {feed && <p className="sg-note mono">{feed}</p>}
+      {/* any app's own MCP server, and the one-click list (src/McpSettings.tsx) */}
+      <McpConnectors pin={pin} />
     </Group>
   );
 }
