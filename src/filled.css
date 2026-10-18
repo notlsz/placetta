@@ -5,14 +5,34 @@
 .resolved.withdrawn { flex-wrap: wrap; }
 .resolved.withdrawn .wd-ico { display: grid; color: var(--warm); }
 .resolved.withdrawn em { color: var(--ink2); font-style: normal; }
-.ff { margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--card); box-shadow: inset 0 0 0 1px rgba(115, 153, 198, .25); }
-.ff-v { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; margin: 0; font-size: 14px; }
-.ff-v span { font-size: 13px; color: var(--ink2); }
+
+.ff { margin: 14px 0 0; padding: 14px; border-radius: 16px; background: var(--card); box-shadow: inset 0 0 0 1px rgba(115, 153, 198, .25); min-width: 0; }
+.ff-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.ff-h > b { font-size: 14.5px; font-weight: 600; }
+.ff-pick { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink2); min-width: 0; max-width: 100%; }
+.ff-pick .sel { max-width: min(300px, 70vw); }
+.ff-one { font-size: 13px; color: var(--ink2); }
+.ff-v { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 6px 0 0; font-size: 13px; color: var(--ink2); }
 .ff-read { margin: 6px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--ink2); }
 .ff-read.ok { color: var(--blue-deep); }
 .ff-read.bad { color: var(--warm); }
+.ff-changed { margin-top: 10px; }
+.ff-changed > b { display: block; font-size: 13.5px; font-weight: 600; }
 .ff-changes { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.ff-changes li { display: flex; flex-wrap: wrap; gap: 2px 8px; padding: 6px 10px; border-radius: 10px; background: var(--warm-soft); font-size: 13px; }
+.ff-changes li { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; padding: 7px 10px; border-radius: 10px; background: var(--warm-soft); font-size: 13px; min-width: 0; }
 .ff-changes li span { flex-basis: 100%; color: var(--ink2); }
-.ff-changes li s { color: var(--ink3); }
-.ff-changes li em { font-style: normal; color: var(--ink); font-weight: 500; }
+.ff-changes li s { color: var(--ink3); overflow-wrap: anywhere; }
+.ff-changes li svg { width: 12px; height: 12px; flex: none; color: var(--warm); }
+.ff-changes li em { font-style: normal; color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
+.ff-close { margin: 10px 0 0; }
+.ff-close .ff-close-scroll { overflow-x: auto; border-radius: 10px; box-shadow: 0 0 0 1px rgba(var(--e), .1); }
+.ff-close img { display: block; width: 100%; height: auto; background: #fff; }
+/* on a phone the close-up stays readable: wider than the column, and it scrolls sideways */
+@media (max-width: 600px) { .ff-close img { width: 560px; max-width: none; } }
+.ff-close figcaption { margin-top: 4px; font-size: 12px; color: var(--ink3); }
+.ff-pages { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; max-height: 70vh; overflow: auto; border-radius: 10px; background: var(--mist); padding: 8px; }
+.ff-pages img { display: block; width: 100%; height: auto; background: #fff; box-shadow: 0 1px 3px rgba(var(--e), .12); }
+.ff-pages.zoom img { width: 200%; max-width: none; }
+.ff-pages.loading { min-height: 160px; align-items: center; justify-content: center; font-size: 13px; color: var(--ink3); }
+.ff-zoom { margin-top: 8px; }
+.ff .off-act { margin-top: 10px; }

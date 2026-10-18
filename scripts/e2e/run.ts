@@ -1627,6 +1627,65 @@ try {
     check("and the task is closed", !!(await sql`select done_at from public.team_tasks where id = ${q1.data?.id ?? null}`)[0]?.done_at);
   });
 
+  /* ---------------- f4. the filled form ---------------- */
+  // A run from outside the app changes an EIN application's answers: the server fills the IRS's own SS-4 (pdf-lib, the
+  // PDF inside the agent's bundle), reads it back, keeps it in Documents as version 1, then 2; by email it goes back
+  // attached, by text as a short link that only a member opens, for a week (src/forms/versions.ts).
+  scripts.push(
+    { name: "form-email", match: (p) => p.includes("EIN application: we expect 6 employees"), turns: [
+      { tool: "fill_fields", input: { application_id: "app-ein", fields: [{ label: "13", value: "6" }] } },
+      { text: "Line 13 of your EIN application now says 6. The filled form is attached." },
+    ] },
+    { name: "form-text", match: (p) => p.includes("EIN application: make it 7 employees"), turns: [
+      { tool: "fill_fields", input: { application_id: "app-ein", fields: [{ label: "13", value: "7" }] } },
+      { text: "Line 13 now says 7." },
+    ] },
+  );
+  await scenario("f4. the filled form", async () => {
+    const f4Start = new Date().toISOString();
+    const ss4 = { l1: "Golden Ox Noodle LLC", l2: "Golden Ox Noodle", l4a: "40-10 Roosevelt Ave", l4b: "Flushing, NY 11354", l6: "Queens County, NY", l7a: "Mei Chen", l7b: "By hand", l8a: "Yes", l8b: "1", l8c: "Yes",
+      l9a: "Other: Foreign-owned U.S. disregarded entity", l10: "Started a new noodle restaurant", l11: "09/01/2026", l12: "December", l13: "", l16: "Accommodation & food service", l17: "Hand-pulled noodles", l18: "No", phone: "(718) 555-0123" };
+    await saveState((s) => ({ ...s, apps: [...s.apps.filter((a) => a.id !== "app-ein"), { id: "app-ein", name: { en: "Employer Identification Number", zh: "雇主识别号" }, agency: { en: "Internal Revenue Service", zh: "美国国税局" },
+      level: "federal", status: "draft", official: "irs-ss4", fees: [], est: same("Same day"), source: { label: "irs.gov", url: "https://www.irs.gov" }, form: same("Form SS-4"),
+      fields: Object.entries(ss4).map(([id, value]) => ({ id, label: same(id === "l13" ? "Line 13: Highest number of employees expected in the next 12 months" : id), value })), checklist: [] }] }));
+    Deno.env.set("ODELIA_EMAIL", "odelia@placetta.test");
+    const sentBefore = stubs.resendState.sent.length;
+    const r1 = await call("agent-run", { action: "start_as", user_id: owner.id, workspace_id: ws, prompt: "EIN application: we expect 6 employees", channel: "email", reply_to: owner.email }, { headers: MK });
+    await settle();
+    const [doc1] = await sql`select name, path, app_id, source from public.documents where workspace_id = ${ws} and name = 'Form SS-4, filled, version 1.pdf'`;
+    check("a run from email fills the SS-4 on the server and keeps it in Documents as version 1", r1.status < 300 && doc1?.app_id === "app-ein" && doc1.source === "agent" && doc1.path.startsWith(ws + "/"), { r1, doc1 });
+    const st1 = await wsState();
+    const v1 = (st1.apps.find((a) => a.id === "app-ein") as { versions?: { n: number; read: { ok: boolean; checked: number }; answers: Record<string, string> }[] } | undefined)?.versions?.[0];
+    check("the version is on the application, read back line by line", v1?.n === 1 && v1.read.ok && v1.read.checked >= 10 && v1.answers.l13 === "6" && !("l7b" in v1.answers), v1);
+    const mail = stubs.resendState.sent.slice(sentBefore).find((m: { to: string[] }) => m.to?.[0] === owner.email);
+    const att = mail?.attachments?.[0];
+    const bytes = att ? Uint8Array.from(atob(att.content), (c) => c.charCodeAt(0)) : new Uint8Array();
+    check("the email answer carries the filled PDF, and says so", att?.filename === "Form SS-4, filled, version 1.pdf" && bytes.length > 50_000 && /Filled: Form SS-4, version 1/.test(mail?.text ?? ""), { to: mail?.to, att: att && { filename: att.filename, size: bytes.length }, text: mail?.text });
+    const { PDFDocument } = await import("npm:pdf-lib@1.17.1");
+    // deno-lint-ignore no-explicit-any
+    const words = (await PDFDocument.load(bytes)).getForm().getFields().map((f: any) => { try { return String(f.getText?.() ?? ""); } catch { return ""; } });
+    check("the attached PDF is the IRS's form with the answers in its boxes, and no SSN", words.includes("Golden Ox Noodle LLC") && words.includes("6") && !words.some((w: string) => /\d{3}-\d{2}-\d{4}/.test(w)), words.filter(Boolean).slice(0, 6));
+
+    // by text (iMessage or WhatsApp, not plain SMS): version 2, and a short link that only a member opens
+    mark = recorded.length;
+    await call("agent-run", { action: "start_as", user_id: owner.id, workspace_id: ws, prompt: "EIN application: make it 7 employees", channel: "sms", reply_to: OWNER_PHONE, plain_sms: false }, { headers: MK });
+    await settle();
+    const [link] = await sql`select token, app_id, version, path, expires_at from public.form_links where workspace_id = ${ws} order by created_at desc limit 1`;
+    const outText = since(mark).filter((r) => r.method === "POST" && (r.service === "telnyx" || r.service === "linq")).map((r) => JSON.stringify(r.body)).join(" ");
+    check("version 2 is kept, and the text back ends with its short link", link?.app_id === "app-ein" && link.version === 2 && outText.includes(`f=${link.token}`) && /Filled: Form SS-4, version 2, 1 line changed/.test(outText),
+      { link, outText: outText.slice(0, 600) });
+    check("the link lasts a week", link && Math.abs(Date.parse(link.expires_at) - Date.now() - 7 * 864e5) < 120_000, link?.expires_at);
+    const opened = await rpc("open_form_link", { p_token: link?.token }, owner.jwt);
+    const row = Array.isArray(opened.data) ? opened.data[0] : opened.data;
+    check("a member opens it: the application, version 2 and its file", opened.status === 200 && row?.app_id === "app-ein" && row.version === 2 && row.path === link?.path && row.expired === false, opened);
+    const outsider = await rpc("open_form_link", { p_token: link?.token }, hq.jwt);
+    check("someone outside the workspace gets nothing", outsider.status >= 400 && !JSON.stringify(outsider.data).includes(ws + "/"), outsider);
+    const direct = await rest(`form_links?select=token`, { jwt: owner.jwt });
+    check("nobody reads the links table directly", direct.status >= 400 || (Array.isArray(direct.data) && direct.data.length === 0), direct.status);
+    Deno.env.delete("ODELIA_EMAIL");
+    await sql`delete from public.ai_events where user_id = ${owner.id} and kind in ('call', 'task') and at >= ${f4Start}`;
+  });
+
   /* ---------------- g. headquarters ---------------- */
   await scenario("g. headquarters", async () => {
     const share = await rpc("hq_share", { ws, p_email: "Compliance@Moonleaf.example", p_brand: "Moonleaf" }, owner.jwt);

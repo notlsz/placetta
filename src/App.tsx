@@ -572,7 +572,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         // the run happened here: the workspace keeps its moments, linked from each job it worked
         setWs(keepRun({ id: `local-${Date.now().toString(36)}`, at: askedAt, steps: moments }, askedAt));
         // and the forms it changed are filled again; the reply ends with each one (a card that opens the PDF)
-        await new Promise(res => setTimeout(res, 0));
+        // (once the page has drawn what the run changed, and any fill already under way has finished)
+        await new Promise(res => setTimeout(res, 60));
+        for (let i = 0; i < 300 && formsBusy.current; i++) await new Promise(res => setTimeout(res, 100));
         const changed = wsRef.current.apps.filter(a => answersBefore.get(a.id) !== answersHash(a) && needsForm(a)).map(a => a.id);
         if (changed.length) {
           changed.forEach(id => lastFill.current.set(id, Date.now()));
