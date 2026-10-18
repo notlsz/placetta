@@ -1,0 +1,239 @@
+{
+ "form": "ca-abc-255",
+ "rev": "ABC-255 (Rev. 11/2024)",
+ "pdf": "ca-abc-255.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-255.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: items 9 to 15 come from the city planning department (or the county's, outside city limits), as the form says. Items 14 and 15 (the planner's phone and email) have no fillable box on this PDF, so they are printed on their rows. 'None' leaves an optional line blank. The signature and the date signed are left for the applicant; the ABC-use-only block stays blank.",
+ "lines": [
+  {
+   "id": "applicant",
+   "line": "1",
+   "en": "Applicant name(s): an individual's first, middle and last name, or the entity's name",
+   "zh": "申请人名称：个人填名、中间名、姓；实体填实体名称"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "parcel",
+   "line": "3",
+   "en": "Parcel number of the property (from the County Assessor's Office)",
+   "zh": "物业地块编号（向县估税办公室查询）"
+  },
+  {
+   "id": "license_types",
+   "line": "License",
+   "en": "License type(s) applied for (e.g. 41 On-Sale Beer & Wine Eating Place)",
+   "zh": "申请的执照类型（如 41 类餐馆啤酒和葡萄酒堂食）"
+  },
+  {
+   "id": "upgrade",
+   "line": "5",
+   "en": "Is this an upgrade of licensed privileges?",
+   "zh": "是否为执照权限升级？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "current_license",
+   "line": "6",
+   "en": "Current license type at this location, if any",
+   "zh": "该地点现有执照类型（如有）"
+  },
+  {
+   "id": "business_type",
+   "line": "7",
+   "en": "Type of business (restaurant, mini-mart, gas station...)",
+   "zh": "业务类型（餐馆、便利店、加油站等）"
+  },
+  {
+   "id": "inside_city",
+   "line": "8",
+   "en": "Are the premises inside the city limits?",
+   "zh": "经营场所是否在市界之内？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "zoned",
+   "line": "9",
+   "en": "How are the premises zoned? (C commercial, R residential...)",
+   "zh": "经营场所的分区类型（C 商业、R 住宅等）"
+  },
+  {
+   "id": "zoning_allows",
+   "line": "10",
+   "en": "Does zoning allow the intended use?",
+   "zh": "分区是否允许拟定用途？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "cup_required",
+   "line": "11",
+   "en": "Is a conditional use permit (CUP) or other land use permit required?",
+   "zh": "是否需要有条件使用许可（CUP）或其他土地使用许可？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "cup_filed",
+   "line": "12",
+   "en": "If yes, date you filed the CUP or other land use permit application",
+   "zh": "如是，提交 CUP 或其他土地使用许可申请的日期"
+  },
+  {
+   "id": "planner",
+   "line": "13",
+   "en": "Name of the planner contacted at the planning department",
+   "zh": "联系的规划部门规划师姓名"
+  },
+  {
+   "id": "planner_phone",
+   "line": "14",
+   "en": "Planner's phone number",
+   "zh": "规划师电话"
+  },
+  {
+   "id": "planner_email",
+   "line": "15",
+   "en": "Planner's email address",
+   "zh": "规划师电子邮箱"
+  }
+ ],
+ "boxes": {
+  "applicant": [
+   {
+    "text": "1. Applicant(s) Name"
+   }
+  ],
+  "premises": [
+   {
+    "text": "2. Premises Address"
+   }
+  ],
+  "parcel": [
+   {
+    "text": "3. Parcel Number of Property"
+   }
+  ],
+  "license_types": [
+   {
+    "text": "4. Type of License Applied For"
+   }
+  ],
+  "upgrade": [
+   {
+    "radio": "5. Upgrade of Licensed Privileges",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "5. Upgrade of Licensed Privileges",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "current_license": [
+   {
+    "text": "6. Current License Type at This Location, If Any",
+    "if": "^(?!none$)"
+   }
+  ],
+  "business_type": [
+   {
+    "text": "7. Type of Business"
+   }
+  ],
+  "inside_city": [
+   {
+    "radio": "8. Are the Premises Inside the City Limits? Yes/No",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "8. Are the Premises Inside the City Limits? Yes/No",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "zoned": [
+   {
+    "text": "9. How Are Applicant Premises Zoned? State Type"
+   }
+  ],
+  "zoning_allows": [
+   {
+    "radio": "10. Does Zoning Allow Intended Use? Yes/No",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "10. Does Zoning Allow Intended Use? Yes/No",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "cup_required": [
+   {
+    "radio": "11. Is A Conditional Use Permit (CUP)/Other Land Use Permit Required? Yes/No",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "11. Is A Conditional Use Permit (CUP)/Other Land Use Permit Required? Yes/No",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "cup_filed": [
+   {
+    "text": "12. If Yes, Date You Filed Application for CUP/Other Land Use Permit",
+    "if": "^(?!none$)"
+   }
+  ],
+  "planner": [
+   {
+    "text": "13. Name of Planner Contacted at Planning Department"
+   }
+  ],
+  "planner_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 40,
+     "y": 227.5,
+     "w": 530,
+     "size": 9
+    }
+   }
+  ],
+  "planner_email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 40,
+     "y": 200.5,
+     "w": 530,
+     "size": 9
+    }
+   }
+  ]
+ },
+ "blank": {
+  "current_license": "^none$",
+  "cup_filed": "^none$"
+ }
+}

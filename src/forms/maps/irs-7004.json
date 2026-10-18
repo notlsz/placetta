@@ -1,0 +1,326 @@
+{
+ "form": "irs-7004",
+ "rev": "Form 7004 (Rev. December 2025)",
+ "pdf": "irs-7004.pdf",
+ "url": "https://www.irs.gov/pub/irs-pdf/f7004.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: pro_forma 'Yes' prints 'Foreign-owned U.S. DE' across the top, as the Form 5472 instructions ask of a foreign-owned single-member LLC extending its pro forma Form 1120 (that extension is faxed or mailed to the IRS PIN Unit in Ogden, not the regular Form 7004 address). form_code writes the two digits of the return being extended into the two code boxes (12 for Form 1120, which is also the code for the pro forma 1120 that carries Form 5472). calendar_year is the year's last two digits. country is for an address abroad; 'None' leaves it blank. short_year 'Not a short year' ticks nothing. A 'No' to lines 2 to 4 leaves its box blank. A fiscal year's beginning and ending dates (line 5a) are left for the signer, who writes them only when the tax year isn't the calendar year. The XFA layer is dropped by the filler so the filled boxes show.",
+ "lines": [
+  {
+   "id": "pro_forma",
+   "line": "Top",
+   "en": "Is this for the pro forma Form 1120 a foreign-owned U.S. disregarded entity files with Form 5472?",
+   "zh": "这是否为外资美国非独立实体随 5472 表提交的形式 1120 表申请延期？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "name",
+   "line": "Name",
+   "en": "Name",
+   "zh": "名称"
+  },
+  {
+   "id": "ein",
+   "line": "Identifying number",
+   "en": "Identifying number (EIN)",
+   "zh": "识别号（EIN）"
+  },
+  {
+   "id": "street",
+   "line": "Address",
+   "en": "Number and street",
+   "zh": "门牌号和街道"
+  },
+  {
+   "id": "suite",
+   "line": "Address",
+   "en": "Room or suite no.",
+   "zh": "房间或套房号"
+  },
+  {
+   "id": "city",
+   "line": "Address",
+   "en": "City or town",
+   "zh": "城市"
+  },
+  {
+   "id": "state",
+   "line": "Address",
+   "en": "State or province",
+   "zh": "州或省"
+  },
+  {
+   "id": "country",
+   "line": "Address",
+   "en": "Country (if outside the United States)",
+   "zh": "国家（如在美国境外）"
+  },
+  {
+   "id": "zip",
+   "line": "Address",
+   "en": "ZIP or foreign postal code",
+   "zh": "邮编或境外邮政编码"
+  },
+  {
+   "id": "form_code",
+   "line": "1",
+   "en": "Form code for the return being extended",
+   "zh": "需延期申报表的表格代码",
+   "options": [
+    "12 (Form 1120)",
+    "09 (Form 1065)",
+    "25 (Form 1120-S)",
+    "34 (Form 1120-C)",
+    "15 (Form 1120-F)"
+   ]
+  },
+  {
+   "id": "foreign_no_office",
+   "line": "2",
+   "en": "Is it a foreign corporation without an office or place of business in the United States?",
+   "zh": "是否为在美国没有办公室或营业场所的外国公司？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "common_parent",
+   "line": "3",
+   "en": "Is it the common parent of a group filing a consolidated return?",
+   "zh": "是否为合并申报集团的母公司？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "qualifies_6081",
+   "line": "4",
+   "en": "Does it qualify under Regulations section 1.6081-5?",
+   "zh": "是否符合法规第 1.6081-5 条？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "calendar_year",
+   "line": "5a",
+   "en": "Calendar year (last two digits, e.g. 26)",
+   "zh": "日历年度（后两位，如 26）"
+  },
+  {
+   "id": "short_year",
+   "line": "5b",
+   "en": "Short tax year reason",
+   "zh": "短纳税年度原因",
+   "options": [
+    "Not a short year",
+    "Initial return",
+    "Final return",
+    "Change in accounting period",
+    "Consolidated return to be filed",
+    "Other"
+   ]
+  },
+  {
+   "id": "tentative_tax",
+   "line": "6",
+   "en": "Tentative total tax",
+   "zh": "预估总税额"
+  },
+  {
+   "id": "payments",
+   "line": "7",
+   "en": "Total payments and credits",
+   "zh": "已付款项与抵免总额"
+  },
+  {
+   "id": "balance_due",
+   "line": "8",
+   "en": "Balance due",
+   "zh": "应缴余额"
+  }
+ ],
+ "boxes": {
+  "pro_forma": [
+   {
+    "at": {
+     "page": 0,
+     "x": 240,
+     "y": 772,
+     "w": 200,
+     "size": 11
+    },
+    "value": "Foreign-owned U.S. DE",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "name": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_1[0]"
+   }
+  ],
+  "ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_2[0]"
+   }
+  ],
+  "street": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_3[0]"
+   }
+  ],
+  "suite": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_4[0]"
+   }
+  ],
+  "city": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_5[0]"
+   }
+  ],
+  "state": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_6[0]"
+   }
+  ],
+  "country": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_7[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "zip": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_8[0]"
+   }
+  ],
+  "form_code": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_9[0]",
+    "value": "1",
+    "if": "^12\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_10[0]",
+    "value": "2",
+    "if": "^12\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_9[0]",
+    "value": "0",
+    "if": "^09\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_10[0]",
+    "value": "9",
+    "if": "^09\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_9[0]",
+    "value": "2",
+    "if": "^25\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_10[0]",
+    "value": "5",
+    "if": "^25\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_9[0]",
+    "value": "3",
+    "if": "^34\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_10[0]",
+    "value": "4",
+    "if": "^34\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_9[0]",
+    "value": "1",
+    "if": "^15\\b"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_10[0]",
+    "value": "5",
+    "if": "^15\\b"
+   }
+  ],
+  "foreign_no_office": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_1[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "common_parent": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_2[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "qualifies_6081": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_3[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "calendar_year": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_11[0]",
+    "pick": "digits"
+   }
+  ],
+  "short_year": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_4[0]",
+    "if": "^initial"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_4[1]",
+    "if": "^final"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_4[2]",
+    "if": "^change"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_4[3]",
+    "if": "^consolidated"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_4[4]",
+    "if": "^other"
+   }
+  ],
+  "tentative_tax": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_16[0]"
+   }
+  ],
+  "payments": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_17[0]"
+   }
+  ],
+  "balance_due": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_18[0]"
+   }
+  ]
+ },
+ "blank": {
+  "pro_forma": "^(n|no|否)$",
+  "country": "^none$",
+  "foreign_no_office": "^(n|no|否)$",
+  "common_parent": "^(n|no|否)$",
+  "qualifies_6081": "^(n|no|否)$",
+  "short_year": "^not a short"
+ }
+}

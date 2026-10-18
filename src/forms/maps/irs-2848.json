@@ -1,0 +1,370 @@
+{
+ "form": "irs-2848",
+ "rev": "Form 2848 (Rev. January 2021)",
+ "pdf": "irs-2848.pdf",
+ "url": "https://www.irs.gov/pub/irs-pdf/f2848.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: ein is the business's EIN only, written in the EIN box; the SSN and ITIN boxes are never filled. One representative is asked for (rows 2 to 4 stay for the signer: the IRS sends notices to only two). Line 3 takes up to three rows: one matter, form and period per line (or ';') in the three answers. other_acts ticks the box and writes the text; 'None' leaves both blank, as does 'None' on deletions. A 'No' to a yes-or-no line leaves its single box blank. Part II (the representative's designation, licensing jurisdiction, bar or enrollment number, signature and date) belongs to the representative, and the taxpayer's signature and date to the signer. The XFA layer is dropped by the filler so the filled boxes show.",
+ "lines": [
+  {
+   "id": "taxpayer_name",
+   "line": "1",
+   "en": "Taxpayer name",
+   "zh": "纳税人名称"
+  },
+  {
+   "id": "taxpayer_address",
+   "line": "1",
+   "en": "Taxpayer address",
+   "zh": "纳税人地址"
+  },
+  {
+   "id": "ein",
+   "line": "1",
+   "en": "Taxpayer identification number: EIN",
+   "zh": "纳税人识别号：EIN",
+   "hint": {
+    "en": "The business's EIN. Placetta never writes an SSN or ITIN; those boxes stay for the signer.",
+    "zh": "填写企业 EIN。快哉从不填写 SSN 或 ITIN，这些栏留给签署人。"
+   }
+  },
+  {
+   "id": "phone",
+   "line": "1",
+   "en": "Daytime telephone number",
+   "zh": "日间联系电话"
+  },
+  {
+   "id": "rep_name",
+   "line": "2",
+   "en": "Representative's name",
+   "zh": "代理人姓名"
+  },
+  {
+   "id": "rep_address",
+   "line": "2",
+   "en": "Representative's address",
+   "zh": "代理人地址"
+  },
+  {
+   "id": "rep_caf",
+   "line": "2",
+   "en": "Representative's CAF No.",
+   "zh": "代理人 CAF 编号"
+  },
+  {
+   "id": "rep_ptin",
+   "line": "2",
+   "en": "Representative's PTIN",
+   "zh": "代理人 PTIN"
+  },
+  {
+   "id": "rep_phone",
+   "line": "2",
+   "en": "Representative's telephone No.",
+   "zh": "代理人电话"
+  },
+  {
+   "id": "rep_fax",
+   "line": "2",
+   "en": "Representative's fax No.",
+   "zh": "代理人传真"
+  },
+  {
+   "id": "rep_copies",
+   "line": "2",
+   "en": "Send the representative copies of notices and communications?",
+   "zh": "是否将通知和往来函件副本寄给代理人？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "matter",
+   "line": "3",
+   "en": "Description of matter (income, employment, payroll...), one per line",
+   "zh": "事项说明（所得税、雇佣税、工资税等），每行一项"
+  },
+  {
+   "id": "tax_form",
+   "line": "3",
+   "en": "Tax form number (1120, 941, 720...), one per line",
+   "zh": "税表编号（1120、941、720 等），每行一项"
+  },
+  {
+   "id": "years",
+   "line": "3",
+   "en": "Year(s) or period(s), one per line",
+   "zh": "年度或期间，每行一项"
+  },
+  {
+   "id": "specific_use",
+   "line": "4",
+   "en": "Is this for a specific use not recorded on the CAF?",
+   "zh": "是否为不记录在 CAF 上的特定用途？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "access_records",
+   "line": "5a",
+   "en": "Access my IRS records via an Intermediate Service Provider?",
+   "zh": "是否允许通过中介服务商访问 IRS 记录？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "disclosure",
+   "line": "5a",
+   "en": "Authorize disclosure to third parties?",
+   "zh": "是否授权向第三方披露？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "substitute",
+   "line": "5a",
+   "en": "Authorize substituting or adding representatives?",
+   "zh": "是否授权替换或增加代理人？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "sign_return",
+   "line": "5a",
+   "en": "Authorize the representative to sign a return?",
+   "zh": "是否授权代理人签署申报表？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "other_acts",
+   "line": "5a",
+   "en": "Other acts authorized",
+   "zh": "其他授权事项"
+  },
+  {
+   "id": "deletions",
+   "line": "5b",
+   "en": "Other specific deletions to the acts authorized",
+   "zh": "对授权事项的其他具体删减"
+  },
+  {
+   "id": "retain_prior",
+   "line": "6",
+   "en": "Keep prior powers of attorney in effect (attach copies)?",
+   "zh": "是否保留先前的授权委托书（需附副本）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "7",
+   "en": "Print name of the person signing",
+   "zh": "签署人姓名（印刷体）"
+  },
+  {
+   "id": "signer_title",
+   "line": "7",
+   "en": "Title (if applicable)",
+   "zh": "职务（如适用）"
+  },
+  {
+   "id": "taxpayer_print",
+   "line": "7",
+   "en": "Print name of taxpayer from line 1 if other than individual",
+   "zh": "第 1 行纳税人名称（非个人时）"
+  }
+ ],
+ "boxes": {
+  "taxpayer_name": [
+   {
+    "text": "topmostSubform[0].Page1[0].TaxpayerName[0]"
+   }
+  ],
+  "taxpayer_address": [
+   {
+    "text": "topmostSubform[0].Page1[0].TaxpayerAddress[0]"
+   }
+  ],
+  "ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].TaxpayerIDEIN[0]"
+   }
+  ],
+  "phone": [
+   {
+    "text": "topmostSubform[0].Page1[0].TaxpayerTelephone[0]"
+   }
+  ],
+  "rep_name": [
+   {
+    "text": "topmostSubform[0].Page1[0].RepresentativesName1[0]"
+   }
+  ],
+  "rep_address": [
+   {
+    "text": "topmostSubform[0].Page1[0].RepresentativesAddress1[0]"
+   }
+  ],
+  "rep_caf": [
+   {
+    "text": "topmostSubform[0].Page1[0].CAFNumber1[0]"
+   }
+  ],
+  "rep_ptin": [
+   {
+    "text": "topmostSubform[0].Page1[0].PTIN1[0]"
+   }
+  ],
+  "rep_phone": [
+   {
+    "text": "topmostSubform[0].Page1[0].TelephoneNo1[0]"
+   }
+  ],
+  "rep_fax": [
+   {
+    "text": "topmostSubform[0].Page1[0].FaxNo1[0]"
+   }
+  ],
+  "rep_copies": [
+   {
+    "check": "topmostSubform[0].Page1[0].SentCopies1[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "matter": [
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow1[0].Description1[0]",
+    "pick": "line1"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow2[0].Description2[0]",
+    "pick": "line2"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow3[0].Description3[0]",
+    "pick": "line3"
+   }
+  ],
+  "tax_form": [
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow1[0].TaxForm1[0]",
+    "pick": "line1"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow2[0].TaxForm2[0]",
+    "pick": "line2"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow3[0].TaxForm3[0]",
+    "pick": "line3"
+   }
+  ],
+  "years": [
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow1[0].Years1[0]",
+    "pick": "line1"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow2[0].Years2[0]",
+    "pick": "line2"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].Table_Line3[0].BodyRow3[0].Years3[0]",
+    "pick": "line3"
+   }
+  ],
+  "specific_use": [
+   {
+    "check": "topmostSubform[0].Page1[0].SpecificUse[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "access_records": [
+   {
+    "check": "topmostSubform[0].Page1[0].AccessRecords[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "disclosure": [
+   {
+    "check": "topmostSubform[0].Page1[0].AuthorizeDisclosure[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "substitute": [
+   {
+    "check": "topmostSubform[0].Page1[0].SubtituteOrAdd[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "sign_return": [
+   {
+    "check": "topmostSubform[0].Page1[0].SignReturn[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "other_acts": [
+   {
+    "check": "topmostSubform[0].Page1[0].OtherActs[0]",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].OtherActs1[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "deletions": [
+   {
+    "text": "topmostSubform[0].Page2[0].SpecificDeletions1[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "retain_prior": [
+   {
+    "check": "topmostSubform[0].Page2[0].RetentionRevocation[1]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "topmostSubform[0].Page2[0].PrintName[0]"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "topmostSubform[0].Page2[0].Title[0]"
+   }
+  ],
+  "taxpayer_print": [
+   {
+    "text": "topmostSubform[0].Page2[0].PrintNameTaxpayer[0]"
+   }
+  ]
+ },
+ "blank": {
+  "rep_copies": "^(n|no|否)$",
+  "specific_use": "^(n|no|否)$",
+  "access_records": "^(n|no|否)$",
+  "disclosure": "^(n|no|否)$",
+  "substitute": "^(n|no|否)$",
+  "sign_return": "^(n|no|否)$",
+  "retain_prior": "^(n|no|否)$",
+  "other_acts": "^none$",
+  "deletions": "^none$"
+ }
+}

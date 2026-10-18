@@ -1,0 +1,125 @@
+{
+ "form": "ca-abc-247",
+ "rev": "ABC-247 (rev. 01/19)",
+ "pdf": "ca-abc-247.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-247.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: residences takes up to eight addresses, one per line ('street, city, ST ZIP'): the street goes on the residence's first row and the city line on its second. 'None' leaves the table blank (no residence within 100 feet). Every Department Use Only box (letter, personal contact, date, distance, name, separation factors, non-interference) stays blank, as do the signature and the date signed.",
+ "lines": [
+  {
+   "id": "applicant",
+   "line": "1",
+   "en": "Applicant name(s): an individual's first, middle and last name, or the entity's name",
+   "zh": "申请人名称：个人填名、中间名、姓；实体填实体名称"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "residences",
+   "line": "3",
+   "en": "Residences within 100 feet of the premises or its parking lot: one address per line, or 'None'",
+   "zh": "距经营场所或其停车场 100 英尺内的住宅：每行一个地址，或填“None”"
+  }
+ ],
+ "boxes": {
+  "applicant": [
+   {
+    "text": "NAME"
+   }
+  ],
+  "premises": [
+   {
+    "text": "Premise address XX"
+   }
+  ],
+  "residences": [
+   {
+    "text": "TextAA",
+    "pick": "line1|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "1Row1",
+    "pick": "line1|citystatezip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "TextBB",
+    "pick": "line2|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "2Row1",
+    "pick": "line2|citystatezip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "TextCC",
+    "pick": "line3|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "3Row1",
+    "pick": "line3|citystatezip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "TextDD",
+    "pick": "line4|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "4Row1",
+    "pick": "line4|citystatezip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "TextEE",
+    "pick": "line5|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "5Row1",
+    "pick": "line5|citystatezip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "TextFF",
+    "pick": "line6|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6Row1",
+    "pick": "line6|citystatezip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "TextGG",
+    "pick": "line7|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "7Row1",
+    "pick": "line7|citystatezip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "TextHH",
+    "pick": "line8|street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "8Row1",
+    "pick": "line8|citystatezip",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "residences": "^none$"
+ }
+}

@@ -1,0 +1,798 @@
+{
+ "form": "az-tpt",
+ "rev": "Arizona Joint Tax Application JT-1/UC-001 (12/24), ADOR 10196 (10/26)",
+ "pdf": "az-tpt.pdf",
+ "url": "https://www.azdor.gov/sites/default/files/2023-03/FORMS_TPT_10196_f.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: addresses are 'street, city, ST ZIP' and split into the form's boxes; a mailing or owner address abroad puts its province in the county/region box and fills the country box. Dates are written as the form's MMDDYYYY boxes. owner1 and owner2 are 'full name, title, % owned' (the name splits into last, first and middle initial). naics takes up to four codes, comma-separated. tobacco 'Yes, retailer' or 'Yes, distributor' ticks Yes and the kind. 'None' leaves an optional line blank. A1 and the page headers print one box for 'Federal Employer Identification Number or Social Security Number': since the same box takes an SSN, it is left for the signer to write the FEIN. Section B's SSN boxes are never filled. The seasonal filing months, the county and city business codes (D4 and D6), most of Section E (withholding and unemployment wage questions), Section F (acquired business), the second signer, the signatures and dates, and the Section I fee worksheet are left for the applicant.",
+ "lines": [
+  {
+   "id": "license_types",
+   "line": "A2",
+   "en": "License types (all that apply, comma-separated): TPT, Withholding/Unemployment Tax, Use Tax, TPT for Cities only",
+   "zh": "执照类型（可多选，逗号分隔）：TPT、预扣/失业税、使用税、仅城市 TPT",
+   "options": [
+    "TPT, Withholding/Unemployment Tax",
+    "TPT",
+    "Withholding/Unemployment Tax",
+    "Use Tax",
+    "TPT for Cities only"
+   ]
+  },
+  {
+   "id": "fein",
+   "line": "A1",
+   "en": "Federal employer identification number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "org_type",
+   "line": "A3",
+   "en": "Type of organization or ownership",
+   "zh": "组织或所有权类型",
+   "options": [
+    "Limited Liability Company",
+    "Corporation",
+    "Subchapter S Corporation",
+    "Partnership",
+    "Individual/Sole Proprietorship",
+    "Association",
+    "Estate",
+    "Trust",
+    "Government",
+    "Receivership",
+    "Joint Venture"
+   ]
+  },
+  {
+   "id": "inc_state",
+   "line": "A3",
+   "en": "State of incorporation or organization (or None)",
+   "zh": "注册或成立所在州（或 None）"
+  },
+  {
+   "id": "inc_date",
+   "line": "A3",
+   "en": "Date of incorporation or organization (MM/DD/YYYY, or None)",
+   "zh": "注册或成立日期（月/日/年，或 None）"
+  },
+  {
+   "id": "legal_name",
+   "line": "A4",
+   "en": "Legal business name",
+   "zh": "企业法定名称"
+  },
+  {
+   "id": "mailing",
+   "line": "A5",
+   "en": "Mailing address (street, city, ST ZIP, or the address abroad)",
+   "zh": "邮寄地址（街道、城市、州、邮编，或境外地址）"
+  },
+  {
+   "id": "phone",
+   "line": "A6",
+   "en": "Business phone (with area code)",
+   "zh": "企业电话（含区号）"
+  },
+  {
+   "id": "email",
+   "line": "A7",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "fax",
+   "line": "A8",
+   "en": "Fax number, or None",
+   "zh": "传真号码，或 None"
+  },
+  {
+   "id": "description",
+   "line": "A9",
+   "en": "Description of business: merchandise sold or taxable activity",
+   "zh": "业务说明：销售的商品或应税活动"
+  },
+  {
+   "id": "naics",
+   "line": "A10",
+   "en": "NAICS codes (up to four, comma-separated)",
+   "zh": "NAICS 代码（最多四个，逗号分隔）"
+  },
+  {
+   "id": "acquired",
+   "line": "A11",
+   "en": "Did you acquire or change the legal form of an existing business?",
+   "zh": "是否收购现有企业或变更其法律形式？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "contractor",
+   "line": "A12",
+   "en": "Are you a construction contractor?",
+   "zh": "是否为建筑承包商？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "withholding_location",
+   "line": "A13",
+   "en": "Withholding physical location (street, city, ST ZIP; no P.O. box), or None",
+   "zh": "预扣税实际地点（街道、城市、州、邮编；不可用邮政信箱），或 None"
+  },
+  {
+   "id": "owner1",
+   "line": "B, owner 1",
+   "en": "Owner, partner, officer or member #1: 'full name, title, % owned'",
+   "zh": "第 1 位所有者、合伙人、高管或成员：“全名、职务、持股比例”"
+  },
+  {
+   "id": "owner1_address",
+   "line": "B, owner 1",
+   "en": "Owner #1's address (street, city, ST ZIP, or abroad)",
+   "zh": "第 1 位所有者地址（街道、城市、州、邮编，或境外）"
+  },
+  {
+   "id": "owner1_phone",
+   "line": "B, owner 1",
+   "en": "Owner #1's phone (with area code)",
+   "zh": "第 1 位所有者电话（含区号）"
+  },
+  {
+   "id": "owner2",
+   "line": "B, owner 2",
+   "en": "Owner #2: 'full name, title, % owned', or None",
+   "zh": "第 2 位所有者：“全名、职务、持股比例”，或 None"
+  },
+  {
+   "id": "owner2_address",
+   "line": "B, owner 2",
+   "en": "Owner #2's address, or None",
+   "zh": "第 2 位所有者地址，或 None"
+  },
+  {
+   "id": "owner2_phone",
+   "line": "B, owner 2",
+   "en": "Owner #2's phone, or None",
+   "zh": "第 2 位所有者电话，或 None"
+  },
+  {
+   "id": "started_az",
+   "line": "C1",
+   "en": "Date business started in Arizona (MM/DD/YYYY)",
+   "zh": "在亚利桑那州开业日期（月/日/年）"
+  },
+  {
+   "id": "sales_began",
+   "line": "C2",
+   "en": "Date sales began (MM/DD/YYYY)",
+   "zh": "开始销售日期（月/日/年）"
+  },
+  {
+   "id": "estimated_liability",
+   "line": "C3",
+   "en": "Estimated tax liability for the first twelve months of business",
+   "zh": "开业首 12 个月的预估纳税额"
+  },
+  {
+   "id": "filing_frequency",
+   "line": "C4",
+   "en": "Filing frequency",
+   "zh": "申报频率",
+   "options": [
+    "Monthly",
+    "Quarterly",
+    "Seasonal",
+    "Annual"
+   ]
+  },
+  {
+   "id": "tobacco",
+   "line": "C5",
+   "en": "Does the business sell tobacco products?",
+   "zh": "是否销售烟草制品？",
+   "options": [
+    "No",
+    "Yes, retailer",
+    "Yes, distributor"
+   ]
+  },
+  {
+   "id": "filing_method",
+   "line": "C6",
+   "en": "TPT filing method",
+   "zh": "TPT 申报方法",
+   "options": [
+    "Cash receipts",
+    "Accrual"
+   ]
+  },
+  {
+   "id": "tires",
+   "line": "C7",
+   "en": "Does the business sell new motor vehicle tires or vehicles?",
+   "zh": "是否销售新机动车轮胎或车辆？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "records_location",
+   "line": "C8",
+   "en": "Tax records physical location (street, city, ST ZIP)",
+   "zh": "税务记录实际存放地点（街道、城市、州、邮编）"
+  },
+  {
+   "id": "contact",
+   "line": "C9",
+   "en": "Name of contact",
+   "zh": "联系人姓名"
+  },
+  {
+   "id": "contact_phone",
+   "line": "C9",
+   "en": "Contact phone (with area code)",
+   "zh": "联系人电话（含区号）"
+  },
+  {
+   "id": "dba",
+   "line": "D1",
+   "en": "Business name, DBA or trade name at this location",
+   "zh": "此地点的企业名称、DBA 或商号"
+  },
+  {
+   "id": "location_phone",
+   "line": "D2",
+   "en": "Phone at this location (with area code)",
+   "zh": "此地点电话（含区号）"
+  },
+  {
+   "id": "location",
+   "line": "D3",
+   "en": "Physical location of the business or commercial lease (street, city, ST ZIP; no P.O. box)",
+   "zh": "企业或商业租赁的实际地点（街道、城市、州、邮编；不可用邮政信箱）"
+  },
+  {
+   "id": "location_county",
+   "line": "D3",
+   "en": "County of the location",
+   "zh": "所在县"
+  },
+  {
+   "id": "reporting_city",
+   "line": "D3",
+   "en": "Reporting city, if different than the physical location city (or None)",
+   "zh": "申报城市（如与实际所在城市不同，或 None）"
+  },
+  {
+   "id": "first_hired",
+   "line": "E1",
+   "en": "Date employees were first hired in Arizona (MM/DD/YYYY, or None)",
+   "zh": "在亚利桑那州首次雇用员工日期（月/日/年，或 None）"
+  },
+  {
+   "id": "signer",
+   "line": "H1",
+   "en": "Print or type name of the person signing",
+   "zh": "签署人姓名（印刷或打字）"
+  },
+  {
+   "id": "signer_title",
+   "line": "H1",
+   "en": "Title of the person signing",
+   "zh": "签署人职务"
+  }
+ ],
+ "boxes": {
+  "license_types": [
+   {
+    "check": "chk.A.2.1",
+    "if": "(^|,\\s*)tpt(?! for cities)\\b"
+   },
+   {
+    "check": "chk.A.2.3",
+    "if": "withholding|unemployment"
+   },
+   {
+    "check": "chk.A.2.2",
+    "if": "use tax"
+   },
+   {
+    "check": "chk.A.2.4",
+    "if": "tpt for cities"
+   }
+  ],
+  "org_type": [
+   {
+    "radio": "Rdo.A.3",
+    "value": "IND",
+    "if": "^individual|^sole"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "CORP",
+    "if": "^corporation"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "SUB C",
+    "if": "^subchapter"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "PART",
+    "if": "^partnership"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "LLC",
+    "if": "^(limited liability company|llc)"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "ASSOC",
+    "if": "^association"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "ESTATE",
+    "if": "^estate"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "GOVT",
+    "if": "^government"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "TRUST",
+    "if": "^trust"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "RECEV",
+    "if": "^receivership"
+   },
+   {
+    "radio": "Rdo.A.3",
+    "value": "JOINT",
+    "if": "^joint"
+   }
+  ],
+  "inc_state": [
+   {
+    "text": "A.3.1",
+    "if": "^(?!none$)"
+   }
+  ],
+  "inc_date": [
+   {
+    "text": "A.3.2",
+    "pick": "date|digits",
+    "if": "^(?!none$)"
+   }
+  ],
+  "legal_name": [
+   {
+    "text": "A.4"
+   },
+   {
+    "text": "Name.2"
+   },
+   {
+    "text": "Name.3"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "A.5.1",
+    "pick": "street"
+   },
+   {
+    "text": "A.5.2",
+    "pick": "city"
+   },
+   {
+    "text": "A.5.3",
+    "pick": "state",
+    "if": "^.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$"
+   },
+   {
+    "text": "A.5.5",
+    "pick": "state",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "A.5.4",
+    "pick": "zip"
+   },
+   {
+    "text": "A.5.6",
+    "pick": "country",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   }
+  ],
+  "phone": [
+   {
+    "text": "A.6"
+   }
+  ],
+  "email": [
+   {
+    "text": "A.7"
+   }
+  ],
+  "fax": [
+   {
+    "text": "A.8",
+    "if": "^(?!none$)"
+   }
+  ],
+  "description": [
+   {
+    "text": "A.9"
+   }
+  ],
+  "naics": [
+   {
+    "text": "A.10.1",
+    "pick": "head"
+   },
+   {
+    "text": "A.10.2",
+    "pick": "tail|head"
+   },
+   {
+    "text": "A.10.3",
+    "pick": "tail|tail|head"
+   },
+   {
+    "text": "A.10.4",
+    "pick": "tail|tail|tail|head"
+   }
+  ],
+  "acquired": [
+   {
+    "radio": "Rdo.A.11",
+    "value": "2",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Rdo.A.11",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "contractor": [
+   {
+    "radio": "Rdo.A.12",
+    "value": "2",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Rdo.A.12",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "withholding_location": [
+   {
+    "text": "A.13.1",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "A.13.2",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "A.13.3",
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "A.13.4",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner1": [
+   {
+    "text": "B.1.3",
+    "pick": "head|last"
+   },
+   {
+    "text": "B.1.4",
+    "pick": "head|first"
+   },
+   {
+    "text": "B.1.5",
+    "pick": "head|mi"
+   },
+   {
+    "text": "B.1.2",
+    "pick": "tail|head"
+   },
+   {
+    "text": "B.2.4",
+    "pick": "tail|tail|head"
+   }
+  ],
+  "owner1_address": [
+   {
+    "text": "B.2.1",
+    "pick": "street"
+   },
+   {
+    "text": "B.2.2",
+    "pick": "city"
+   },
+   {
+    "text": "B.2.3",
+    "pick": "state",
+    "if": "^.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$"
+   },
+   {
+    "text": "B.3.2",
+    "pick": "state",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "B.3.1",
+    "pick": "zip"
+   },
+   {
+    "text": "B.3.4",
+    "pick": "country",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   }
+  ],
+  "owner1_phone": [
+   {
+    "text": "B.3.3"
+   }
+  ],
+  "owner2": [
+   {
+    "text": "B2.1.3",
+    "pick": "head|last",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "B2.1.4",
+    "pick": "head|first",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "B2.1.5",
+    "pick": "head|mi",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "B2.1.2",
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "B2.2.4",
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner2_address": [
+   {
+    "text": "B2.2.1",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "B2.2.2",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "B2.2.3",
+    "pick": "state",
+    "if": "^.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$"
+   },
+   {
+    "text": "B2.3.2",
+    "pick": "state",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   },
+   {
+    "text": "B2.3.1",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "B2.3.4",
+    "pick": "country",
+    "if": "^(?!.*,\\s*[a-z]{2}\\.?\\s+\\d{5}(-\\d{4})?\\s*$)"
+   }
+  ],
+  "owner2_phone": [
+   {
+    "text": "B2.3.3",
+    "if": "^(?!none$)"
+   }
+  ],
+  "started_az": [
+   {
+    "text": "C.1",
+    "pick": "date|digits"
+   }
+  ],
+  "sales_began": [
+   {
+    "text": "C.2",
+    "pick": "date|digits"
+   }
+  ],
+  "estimated_liability": [
+   {
+    "text": "C.3"
+   }
+  ],
+  "filing_frequency": [
+   {
+    "radio": "Rdo.FileFreq",
+    "value": "0",
+    "if": "^monthly"
+   },
+   {
+    "radio": "Rdo.FileFreq",
+    "value": "1",
+    "if": "^quarterly"
+   },
+   {
+    "radio": "Rdo.FileFreq",
+    "value": "2",
+    "if": "^seasonal"
+   },
+   {
+    "radio": "Rdo.FileFreq",
+    "value": "3",
+    "if": "^annual"
+   }
+  ],
+  "tobacco": [
+   {
+    "check": "chk.C.5.1",
+    "if": "^yes"
+   },
+   {
+    "radio": "Rdo.C.5.2",
+    "value": "Retail",
+    "if": "retail"
+   },
+   {
+    "radio": "Rdo.C.5.2",
+    "value": "Distr",
+    "if": "distribut"
+   }
+  ],
+  "filing_method": [
+   {
+    "check": "chk.6.1",
+    "if": "^cash"
+   },
+   {
+    "check": "chk.6.2",
+    "if": "^accrual"
+   }
+  ],
+  "tires": [
+   {
+    "check": "chk.7",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "records_location": [
+   {
+    "text": "C.8.1",
+    "pick": "street"
+   },
+   {
+    "text": "C.8.2",
+    "pick": "city"
+   },
+   {
+    "text": "C.8.3",
+    "pick": "state"
+   },
+   {
+    "text": "C.8.4",
+    "pick": "zip"
+   }
+  ],
+  "contact": [
+   {
+    "text": "C.9.1"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "C.9.2"
+   }
+  ],
+  "dba": [
+   {
+    "text": "D.1.1"
+   }
+  ],
+  "location_phone": [
+   {
+    "text": "D.1.2"
+   }
+  ],
+  "location": [
+   {
+    "text": "D.2.1",
+    "pick": "street"
+   },
+   {
+    "text": "D.2.2",
+    "pick": "city"
+   },
+   {
+    "text": "D.2.3",
+    "pick": "state"
+   },
+   {
+    "text": "D.2.4",
+    "pick": "zip"
+   }
+  ],
+  "location_county": [
+   {
+    "text": "D.3.1"
+   }
+  ],
+  "reporting_city": [
+   {
+    "text": "D.3.4",
+    "if": "^(?!none$)"
+   }
+  ],
+  "first_hired": [
+   {
+    "text": "E.1",
+    "pick": "date|digits",
+    "if": "^(?!none$)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "H.Print.1"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "H.Title.1"
+   }
+  ]
+ },
+ "unmapped": {
+  "fein": "A1 (and the FEIN-or-SSN box in each page header) is one box for 'Federal Employer Identification Number or Social Security Number'. A box that also takes an SSN is never filled by Placetta, so the signer writes the FEIN there by hand."
+ },
+ "blank": {
+  "inc_state": "^none$",
+  "inc_date": "^none$",
+  "fax": "^none$",
+  "withholding_location": "^none$",
+  "owner2": "^none$",
+  "owner2_address": "^none$",
+  "owner2_phone": "^none$",
+  "reporting_city": "^none$",
+  "first_hired": "^none$",
+  "tires": "^(n|no|否)$",
+  "tobacco": "^no$"
+ }
+}

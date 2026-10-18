@@ -62,7 +62,7 @@ const opened = (where: string, opening: string) => {
 };
 const want: Record<string, { usd: number; published: number; unpublished: number; open: string[]; closed: string[] }> = {
   "Flushing, NY": { usd: 554.6, published: 7, unpublished: 3, open: ["nyc-fse"], closed: ["nyc-co", "ny-wcb", "nyc-sign"] },
-  "Irvine, CA": { usd: 70, published: 4, unpublished: 4, open: ["ca-llc-1"], closed: ["irv-license", "oc-plan-check", "oc-health-permit"] },
+  "Irvine, CA": { usd: 90, published: 5, unpublished: 4, open: ["ca-llc-1", "ca-llc-12"], closed: ["irv-license", "oc-plan-check", "oc-health-permit"] },
   "Houston, TX": { usd: 325, published: 5, unpublished: 6, open: ["tx-205", "tx-503"], closed: ["hou-food-dealer", "hou-plan-review", "hou-co"] },
 };
 const cents = (n: number) => Math.round(n * 100) / 100;

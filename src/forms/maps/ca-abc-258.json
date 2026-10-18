@@ -1,0 +1,1027 @@
+{
+ "form": "ca-abc-258",
+ "rev": "ABC-258 (Rev. 03/2025)",
+ "pdf": "ca-abc-258.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-258.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: the 'choose all that apply' items (business type, meal type, food type, entertainment, surrounding area) take a comma-separated list and tick every box named; 'Other: text' ticks Other and writes the text. Meal hours and each day's hours are 'from; to' as the form asks ('HH:MM AM/PM'); 'None' leaves a meal blank and 'Closed' leaves a day unticked. fixed_bars 'Yes, 2' ticks Yes and writes the number. building 'Shopping Center: name, 10 units or less' ticks the shopping center box, writes its name and ticks the unit count. The ABC-use-only box, the signature and the date are left blank.",
+ "lines": [
+  {
+   "id": "applicant",
+   "line": "1",
+   "en": "Applicant name(s): an individual's first, middle and last name, or the entity's name",
+   "zh": "申请人名称：个人填名、中间名、姓；实体填实体名称"
+  },
+  {
+   "id": "license_types",
+   "line": "License",
+   "en": "License type(s) applied for (e.g. 41 On-Sale Beer & Wine Eating Place)",
+   "zh": "申请的执照类型（如 41 类餐馆啤酒和葡萄酒堂食）"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "cross_street",
+   "line": "4",
+   "en": "Nearest cross street",
+   "zh": "最近的交叉街道"
+  },
+  {
+   "id": "business_type",
+   "line": "5",
+   "en": "Type of business (choose all that apply, separated by commas; 'Other: text' for anything else)",
+   "zh": "业务类型（可多选，以逗号分隔；其他请写“Other: 说明”）",
+   "options": [
+    "Full-Service Restaurant",
+    "Café/Coffee Shop",
+    "Deli or Specialty Restaurant",
+    "Cafeteria/Hofbrau",
+    "Convenience Market",
+    "Convenience Market w/Gasoline",
+    "Supermarket",
+    "Liquor Store",
+    "Cocktail Lounge",
+    "Night Club",
+    "Tavern",
+    "Brew Pub",
+    "Wine Tasting Room",
+    "Bed & Breakfast",
+    "Gift Shop/Florist",
+    "Department Store",
+    "Variety/Drug Store",
+    "Membership Store",
+    "Comedy Club",
+    "Theater",
+    "Private Club",
+    "Fraternal Club",
+    "Veterans Club",
+    "Service Station",
+    "Drive-in Dairy",
+    "Swap Meet/Flea Market",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "food_service",
+   "line": "6",
+   "en": "Food service",
+   "zh": "餐饮服务",
+   "options": [
+    "Full Service",
+    "Minimal",
+    "None"
+   ]
+  },
+  {
+   "id": "meal_type",
+   "line": "7",
+   "en": "Meal type (all that apply)",
+   "zh": "餐饮类型（可多选）",
+   "options": [
+    "Fast Food/Deli",
+    "Dinner House",
+    "Pizza/Pasta",
+    "Seafood",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "food_type",
+   "line": "8",
+   "en": "Type of food (all that apply)",
+   "zh": "食物类型（可多选）",
+   "options": [
+    "Chinese",
+    "Japanese",
+    "Korean",
+    "Thai",
+    "American",
+    "French",
+    "Greek",
+    "Mexican",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "breakfast_hours",
+   "line": "9",
+   "en": "Breakfast hours: from; to (e.g. 07:00 AM; 10:30 AM), or None",
+   "zh": "早餐时间：开始；结束（如 07:00 AM; 10:30 AM），或 None"
+  },
+  {
+   "id": "lunch_hours",
+   "line": "9",
+   "en": "Lunch hours: from; to",
+   "zh": "午餐时间：开始；结束"
+  },
+  {
+   "id": "dinner_hours",
+   "line": "9",
+   "en": "Dinner hours: from; to",
+   "zh": "晚餐时间：开始；结束"
+  },
+  {
+   "id": "sunday",
+   "line": "10",
+   "en": "Sunday operating hours: opens; closes (e.g. 10:00 AM; 09:00 PM), or Closed",
+   "zh": "周日营业时间：开门；关门（如 10:00 AM; 09:00 PM），或 Closed"
+  },
+  {
+   "id": "monday",
+   "line": "10",
+   "en": "Monday operating hours: opens; closes (e.g. 10:00 AM; 09:00 PM), or Closed",
+   "zh": "周一营业时间：开门；关门（如 10:00 AM; 09:00 PM），或 Closed"
+  },
+  {
+   "id": "tuesday",
+   "line": "10",
+   "en": "Tuesday operating hours: opens; closes (e.g. 10:00 AM; 09:00 PM), or Closed",
+   "zh": "周二营业时间：开门；关门（如 10:00 AM; 09:00 PM），或 Closed"
+  },
+  {
+   "id": "wednesday",
+   "line": "10",
+   "en": "Wednesday operating hours: opens; closes (e.g. 10:00 AM; 09:00 PM), or Closed",
+   "zh": "周三营业时间：开门；关门（如 10:00 AM; 09:00 PM），或 Closed"
+  },
+  {
+   "id": "thursday",
+   "line": "10",
+   "en": "Thursday operating hours: opens; closes (e.g. 10:00 AM; 09:00 PM), or Closed",
+   "zh": "周四营业时间：开门；关门（如 10:00 AM; 09:00 PM），或 Closed"
+  },
+  {
+   "id": "friday",
+   "line": "10",
+   "en": "Friday operating hours: opens; closes (e.g. 10:00 AM; 09:00 PM), or Closed",
+   "zh": "周五营业时间：开门；关门（如 10:00 AM; 09:00 PM），或 Closed"
+  },
+  {
+   "id": "saturday",
+   "line": "10",
+   "en": "Saturday operating hours: opens; closes (e.g. 10:00 AM; 09:00 PM), or Closed",
+   "zh": "周六营业时间：开门；关门（如 10:00 AM; 09:00 PM），或 Closed"
+  },
+  {
+   "id": "entertainment",
+   "line": "11",
+   "en": "Entertainment (all that apply)",
+   "zh": "娱乐活动（可多选）",
+   "options": [
+    "None",
+    "Recorded Music",
+    "Karaoke",
+    "Live Entertainment",
+    "Amplified Music",
+    "Juke Box",
+    "Movies",
+    "Patron Dancing",
+    "Pool/Billiard Tables",
+    "Video/Coin-Operated Games",
+    "Card Room",
+    "Floor/Stage Shows",
+    "Amateur/Pro Sports",
+    "Hot Spot/Lottery",
+    "Bikini/Topless/Exotic",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "hire_manager",
+   "line": "12",
+   "en": "Will you hire a manager?",
+   "zh": "是否会聘请经理？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "food_lessee",
+   "line": "12",
+   "en": "Will you have a food lessee?",
+   "zh": "是否会有餐饮承租方？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "to_go",
+   "line": "12",
+   "en": "Do you intend to sell cocktails or servings of wine to go?",
+   "zh": "是否打算外卖鸡尾酒或杯装葡萄酒？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "pass_through",
+   "line": "12",
+   "en": "Does the business have a pass-through window?",
+   "zh": "是否有传递窗口？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "fixed_bars",
+   "line": "12",
+   "en": "Does the business have any fixed bars? If yes, how many (e.g. 'Yes, 1')",
+   "zh": "是否有固定吧台？如有，几个（如“Yes, 1”）",
+   "options": [
+    "Yes, 1",
+    "No"
+   ]
+  },
+  {
+   "id": "patio",
+   "line": "12",
+   "en": "Does the business have a patio?",
+   "zh": "是否有露台？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "non_contiguous",
+   "line": "12",
+   "en": "Does the business have a non-contiguous area (not connected to the main premises)?",
+   "zh": "是否有不相连的区域（与主场所不相连）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "shared_area",
+   "line": "12",
+   "en": "Will you share a common licensed area with another licensee?",
+   "zh": "是否与其他持牌人共享持牌区域？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "parking_lot",
+   "line": "12",
+   "en": "Does the premises have a parking lot?",
+   "zh": "是否有停车场？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "parking_shared",
+   "line": "12",
+   "en": "If yes, is it shared with other businesses?",
+   "zh": "如有，是否与其他企业共用？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "alcohol_percent",
+   "line": "13",
+   "en": "Percentage of total sales from alcoholic beverages",
+   "zh": "酒精饮料销售占总销售额的百分比"
+  },
+  {
+   "id": "capacity",
+   "line": "14",
+   "en": "Patron capacity",
+   "zh": "顾客容量"
+  },
+  {
+   "id": "located_on",
+   "line": "15",
+   "en": "Premises located on",
+   "zh": "经营场所位于",
+   "options": [
+    "Major Thoroughfare",
+    "Secondary Street",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "building",
+   "line": "16",
+   "en": "Building type",
+   "zh": "建筑类型",
+   "options": [
+    "Shopping Center: name, 10 units or less",
+    "Shopping Center: name, more than 10 units",
+    "Free Standing Building"
+   ]
+  },
+  {
+   "id": "surrounding",
+   "line": "17",
+   "en": "Surrounding area (all that apply)",
+   "zh": "周边区域（可多选）",
+   "options": [
+    "Commercial",
+    "Residential",
+    "Industrial",
+    "Rural",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "stories",
+   "line": "18",
+   "en": "Number of stories",
+   "zh": "楼层数",
+   "options": [
+    "Single Story",
+    "Two Story",
+    "Multi-Story: number"
+   ]
+  }
+ ],
+ "boxes": {
+  "applicant": [
+   {
+    "text": "Applicant Name(s)"
+   }
+  ],
+  "license_types": [
+   {
+    "text": "License Type(s)"
+   }
+  ],
+  "premises": [
+   {
+    "text": "Premises Address"
+   }
+  ],
+  "cross_street": [
+   {
+    "text": "Nearest Cross Street"
+   }
+  ],
+  "business_type": [
+   {
+    "check": "FullService Restaurant",
+    "if": "full.?service restaurant"
+   },
+   {
+    "check": "CaféCoffee Shop",
+    "if": "caf[eé]|coffee"
+   },
+   {
+    "check": "Deli or Specialty",
+    "if": "deli or specialty"
+   },
+   {
+    "check": "CafeteriaHofbrau",
+    "if": "cafeteria|hofbrau"
+   },
+   {
+    "check": "Convenience Market",
+    "if": "convenience market(?! w)"
+   },
+   {
+    "check": "Convenience Market_2",
+    "if": "convenience market w"
+   },
+   {
+    "check": "Supermarket",
+    "if": "supermarket"
+   },
+   {
+    "check": "Liquor Store",
+    "if": "liquor store"
+   },
+   {
+    "check": "Cocktail Lounge",
+    "if": "cocktail"
+   },
+   {
+    "check": "Night Club",
+    "if": "night ?club"
+   },
+   {
+    "check": "Tavern",
+    "if": "tavern"
+   },
+   {
+    "check": "Brew Pub",
+    "if": "brew ?pub"
+   },
+   {
+    "check": "Wine Tasting Room",
+    "if": "wine tasting"
+   },
+   {
+    "check": "Bed  Breakfast",
+    "if": "bed (&|and) breakfast"
+   },
+   {
+    "check": "Gift ShopFlorist",
+    "if": "gift shop|florist"
+   },
+   {
+    "check": "Department Store",
+    "if": "department store"
+   },
+   {
+    "check": "VarietyDrug Store",
+    "if": "variety|drug store"
+   },
+   {
+    "check": "Membership Store",
+    "if": "membership store"
+   },
+   {
+    "check": "Comedy Club",
+    "if": "comedy"
+   },
+   {
+    "check": "Theater",
+    "if": "theat"
+   },
+   {
+    "check": "Private Club",
+    "if": "private club"
+   },
+   {
+    "check": "Fraternal Club",
+    "if": "fraternal"
+   },
+   {
+    "check": "Veterans Club",
+    "if": "veterans"
+   },
+   {
+    "check": "Service Station",
+    "if": "service station"
+   },
+   {
+    "check": "Drivein Dairy",
+    "if": "drive.?in dairy"
+   },
+   {
+    "check": "Swap MeetFlea Market",
+    "if": "swap meet|flea market"
+   },
+   {
+    "check": "Other Describe",
+    "if": "^other\\b"
+   },
+   {
+    "text": "Type of Business_Other (Describe)",
+    "pick": "tail",
+    "if": "^other\\b"
+   }
+  ],
+  "food_service": [
+   {
+    "check": "Full Service",
+    "if": "^full"
+   },
+   {
+    "check": "Minimal",
+    "if": "^minimal"
+   },
+   {
+    "check": "None",
+    "if": "^none"
+   }
+  ],
+  "meal_type": [
+   {
+    "check": "Fast FoodDeli",
+    "if": "fast food"
+   },
+   {
+    "check": "Dinner House",
+    "if": "dinner house"
+   },
+   {
+    "check": "PizzaPasta",
+    "if": "pizza|pasta"
+   },
+   {
+    "check": "Seafood",
+    "if": "seafood"
+   },
+   {
+    "check": "Other Describe_2",
+    "if": "^other\\b"
+   },
+   {
+    "text": "Meal Type_Other (Describe)",
+    "pick": "tail",
+    "if": "^other\\b"
+   }
+  ],
+  "food_type": [
+   {
+    "check": "Chinese",
+    "if": "chinese"
+   },
+   {
+    "check": "Japanese",
+    "if": "japanese"
+   },
+   {
+    "check": "Korean",
+    "if": "korean"
+   },
+   {
+    "check": "Thai",
+    "if": "\\bthai"
+   },
+   {
+    "check": "American",
+    "if": "american"
+   },
+   {
+    "check": "French",
+    "if": "french"
+   },
+   {
+    "check": "Greek",
+    "if": "greek"
+   },
+   {
+    "check": "Mexican",
+    "if": "mexican"
+   },
+   {
+    "check": "Other Describe_3",
+    "if": "^other\\b"
+   },
+   {
+    "text": "Type of Food_Other (Describe)",
+    "pick": "tail",
+    "if": "^other\\b"
+   }
+  ],
+  "breakfast_hours": [
+   {
+    "text": "Breakfast Hours_From.0.0",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Breakfast Hours_To",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   }
+  ],
+  "lunch_hours": [
+   {
+    "text": "Lunch Hours_From",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Lunch Hours_To",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   }
+  ],
+  "dinner_hours": [
+   {
+    "text": "Dinner Hours_From",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Dinner Hours_To",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   }
+  ],
+  "sunday": [
+   {
+    "check": "Sunday",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Sunday From Hour",
+    "pick": "line1",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Sunday To Hour",
+    "pick": "line2",
+    "if": "^(?!closed)"
+   }
+  ],
+  "monday": [
+   {
+    "check": "Monday",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Monday From Hours",
+    "pick": "line1",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Monday To Hours",
+    "pick": "line2",
+    "if": "^(?!closed)"
+   }
+  ],
+  "tuesday": [
+   {
+    "check": "Tuesday",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Tuesday From Hours",
+    "pick": "line1",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Tuesday to Hours",
+    "pick": "line2",
+    "if": "^(?!closed)"
+   }
+  ],
+  "wednesday": [
+   {
+    "check": "Wednesday",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Wednesday From Hours",
+    "pick": "line1",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Wednesday To Hours",
+    "pick": "line2",
+    "if": "^(?!closed)"
+   }
+  ],
+  "thursday": [
+   {
+    "check": "Thursday",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Thursday From Hours",
+    "pick": "line1",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Thursday To Hours",
+    "pick": "line2",
+    "if": "^(?!closed)"
+   }
+  ],
+  "friday": [
+   {
+    "check": "Friday",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Friday From Hours",
+    "pick": "line1",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Friday To Hours",
+    "pick": "line2",
+    "if": "^(?!closed)"
+   }
+  ],
+  "saturday": [
+   {
+    "check": "Saturday",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Saturday From Hours",
+    "pick": "line1",
+    "if": "^(?!closed)"
+   },
+   {
+    "text": "Saturday To Hours",
+    "pick": "line2",
+    "if": "^(?!closed)"
+   }
+  ],
+  "entertainment": [
+   {
+    "check": "None_2",
+    "if": "^none"
+   },
+   {
+    "check": "Recorded Music",
+    "if": "recorded music"
+   },
+   {
+    "check": "Karaoke",
+    "if": "karaoke"
+   },
+   {
+    "check": "Live Entertainment",
+    "if": "live entertainment"
+   },
+   {
+    "check": "Amplified Music",
+    "if": "amplified"
+   },
+   {
+    "check": "Juke Box",
+    "if": "juke"
+   },
+   {
+    "check": "Movies",
+    "if": "movies"
+   },
+   {
+    "check": "Patron Dancing",
+    "if": "dancing"
+   },
+   {
+    "check": "PoolBilliard Tables",
+    "if": "pool|billiard"
+   },
+   {
+    "check": "VideoCoinOperated",
+    "if": "video|coin"
+   },
+   {
+    "check": "Card Room",
+    "if": "card room"
+   },
+   {
+    "check": "FloorStage Shows",
+    "if": "floor|stage show"
+   },
+   {
+    "check": "AmateurPro Sports",
+    "if": "sports"
+   },
+   {
+    "check": "Hot SpotLottery",
+    "if": "hot ?spot|lottery"
+   },
+   {
+    "check": "BikiniToplessExotic",
+    "if": "bikini|topless|exotic"
+   },
+   {
+    "check": "Other",
+    "if": "^other\\b"
+   },
+   {
+    "text": "Entertainment_Other Described",
+    "pick": "tail",
+    "if": "^other\\b"
+   }
+  ],
+  "hire_manager": [
+   {
+    "radio": "Will you hire a manager?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Will you hire a manager?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "food_lessee": [
+   {
+    "radio": "Will you have a food lessee?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Will you have a food lessee?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "to_go": [
+   {
+    "radio": "Do you intend to sell cocktails or servings of wine to go?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Do you intend to sell cocktails or servings of wine to go?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "pass_through": [
+   {
+    "radio": "Does your business have a pass-through window?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Does your business have a pass-through window?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "fixed_bars": [
+   {
+    "radio": "Does your business have any fixed bars?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Does your business have any fixed bars?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   },
+   {
+    "text": "If yes, how many fixed bars?",
+    "pick": "tail",
+    "if": "^yes\\s*,"
+   }
+  ],
+  "patio": [
+   {
+    "radio": "Does your business have a patio",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Does your business have a patio",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "non_contiguous": [
+   {
+    "radio": "Does your business have a non-contiguous area?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Does your business have a non-contiguous area?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "shared_area": [
+   {
+    "radio": "Will you share a common licensed area with another licensee?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Will you share a common licensed area with another licensee?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "parking_lot": [
+   {
+    "radio": "Does the premises have a parking lot?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Does the premises have a parking lot?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "parking_shared": [
+   {
+    "radio": "if yes, is it shared with other businesses?",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "if yes, is it shared with other businesses?",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "alcohol_percent": [
+   {
+    "text": "What percentage of your total sales will be from alcoholic beverages"
+   }
+  ],
+  "capacity": [
+   {
+    "text": "Patron Capacity"
+   }
+  ],
+  "located_on": [
+   {
+    "check": "Major Thoroughfare",
+    "if": "^major"
+   },
+   {
+    "check": "Secondary Street",
+    "if": "^secondary"
+   },
+   {
+    "check": "Other Describe_4",
+    "if": "^other"
+   },
+   {
+    "text": "Other (Describe)_Premises Located On",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "building": [
+   {
+    "check": "Free Standing Building",
+    "if": "^free"
+   },
+   {
+    "check": "Shopping Center Name",
+    "if": "^shopping"
+   },
+   {
+    "text": "Enter Shopping Center Name",
+    "pick": "tail|head",
+    "if": "^shopping"
+   },
+   {
+    "check": "10 Units or Less",
+    "if": "10 units or less"
+   },
+   {
+    "check": "More than 10 Units",
+    "if": "more than 10"
+   }
+  ],
+  "surrounding": [
+   {
+    "check": "Commercial",
+    "if": "commercial"
+   },
+   {
+    "check": "Industrial",
+    "if": "industrial"
+   },
+   {
+    "check": "Residential",
+    "if": "residential"
+   },
+   {
+    "check": "Rural",
+    "if": "rural"
+   },
+   {
+    "check": "Other Describe_5",
+    "if": "^other\\b"
+   },
+   {
+    "text": "Other (Describe)_Surrounding Area",
+    "pick": "tail",
+    "if": "^other\\b"
+   }
+  ],
+  "stories": [
+   {
+    "check": "Single Story",
+    "if": "^single"
+   },
+   {
+    "check": "Two Story",
+    "if": "^two"
+   },
+   {
+    "check": "MultiStory  Number of Stories",
+    "if": "^multi"
+   },
+   {
+    "text": "Number of Stories",
+    "pick": "tail",
+    "if": "^multi"
+   }
+  ]
+ },
+ "blank": {
+  "breakfast_hours": "^none$",
+  "lunch_hours": "^none$",
+  "dinner_hours": "^none$",
+  "sunday": "^closed$",
+  "monday": "^closed$",
+  "tuesday": "^closed$",
+  "wednesday": "^closed$",
+  "thursday": "^closed$",
+  "friday": "^closed$",
+  "saturday": "^closed$"
+ }
+}

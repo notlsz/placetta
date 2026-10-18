@@ -1,0 +1,1137 @@
+{
+ "form": "fl-dor",
+ "rev": "DR-1 (R. 01/26)",
+ "pdf": "fl-dor.pdf",
+ "url": "https://floridarevenue.com/Forms_library/current/dr1.pdf",
+ "checked": "2026-10-18",
+ "notes": "A flat, print-only form: answers are printed in the blank space of each line and an X goes in the circle or box chosen. Mapped are the lines every new business answers: identification (FEIN only; the SSN and visa number are never printed), the reason 'business entity not currently registered' with its first taxable date, name, location, mailing address, seasonal months, form of ownership (ownership names the form, its kind and, for an LLC, its tax treatment, which marks every circle that applies), dates, two directors or officers, the primary NAICS code, the business description, the sales and use tax activities, the secure email authorization and its contact, and the declaration's names. The other reasons for applying, sole proprietor and partner details (questions 7 and 8), background and prior owners (10 and 12), the rest of the sales and use tax section, reemployment tax (questions 20 to 28), communications services, documentary stamp, severance and gross receipts taxes, electronic filing enrollment, the signature and the date are left for the applicant.",
+ "lines": [
+  {
+   "id": "fein",
+   "line": "1",
+   "en": "Federal employer identification number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "first_activity",
+   "line": "2",
+   "en": "Reason for applying: a business entity not currently registered; date of its first Florida taxable activity (MM/DD/YYYY)",
+   "zh": "申请原因：尚未登记的企业实体；首次在佛罗里达州发生应税活动的日期（月/日/年）"
+  },
+  {
+   "id": "legal_name",
+   "line": "3",
+   "en": "Legal name of business",
+   "zh": "企业法定名称"
+  },
+  {
+   "id": "dba",
+   "line": "3",
+   "en": "Business trade name (doing business as), or None",
+   "zh": "企业商号（DBA），或 None"
+  },
+  {
+   "id": "location",
+   "line": "3",
+   "en": "Physical address of the business location in Florida (street, city, FL ZIP; no P.O. box)",
+   "zh": "佛罗里达州营业地点实际地址（街道、城市、FL 邮编；不可用邮政信箱）"
+  },
+  {
+   "id": "county",
+   "line": "3",
+   "en": "Florida county of the location",
+   "zh": "营业地点所在的佛罗里达县"
+  },
+  {
+   "id": "phone",
+   "line": "3",
+   "en": "Telephone number of the location",
+   "zh": "营业地点电话"
+  },
+  {
+   "id": "fax",
+   "line": "3",
+   "en": "Fax number, or None",
+   "zh": "传真号码，或 None"
+  },
+  {
+   "id": "mail_to",
+   "line": "3",
+   "en": "Mail to: the name returns and correspondence go to",
+   "zh": "收件人：申报表和往来函件的收件名称"
+  },
+  {
+   "id": "mailing_address",
+   "line": "3",
+   "en": "Mailing address, if different from the location (street), or None",
+   "zh": "邮寄地址（如与营业地点不同，填街道），或 None"
+  },
+  {
+   "id": "mailing_city",
+   "line": "3",
+   "en": "Mailing address city, state and ZIP, or None",
+   "zh": "邮寄地址的城市、州和邮编，或 None"
+  },
+  {
+   "id": "seasonal",
+   "line": "4",
+   "en": "Is the location open only part of the year? 'Yes: first month, last month' or 'No'",
+   "zh": "营业地点是否只在一年中部分时间营业？“Yes: 首月, 末月”或“No”",
+   "options": [
+    "No",
+    "Yes: May, September"
+   ]
+  },
+  {
+   "id": "ownership",
+   "line": "5",
+   "en": "Form of business ownership (with its kind and, for an LLC, how it is taxed)",
+   "zh": "企业所有权形式（含类型；LLC 另需说明税务分类）",
+   "options": [
+    "LLC, single member, disregarded",
+    "LLC, single member, C corporation",
+    "LLC, single member, S corporation",
+    "LLC, multi-member, partnership",
+    "LLC, multi-member, C corporation",
+    "LLC, multi-member, S corporation",
+    "Corporation, C corporation",
+    "Corporation, S corporation",
+    "Corporation, foreign corporation",
+    "Corporation, not-for-profit",
+    "Sole proprietor",
+    "Partnership, general partnership",
+    "Partnership, limited partnership",
+    "Partnership, limited liability partnership",
+    "Partnership, married couple",
+    "Partnership, joint venture",
+    "Trust, business",
+    "Trust, other",
+    "Estate",
+    "Governmental agency"
+   ]
+  },
+  {
+   "id": "incorporated",
+   "line": "6",
+   "en": "Date of Florida incorporation or organization, or of authorization to do business in Florida (MM/DD/YYYY)",
+   "zh": "在佛罗里达州注册或成立日期，或获准在佛罗里达州经营的日期（月/日/年）"
+  },
+  {
+   "id": "fiscal_year_end",
+   "line": "6",
+   "en": "Fiscal year ending date (MM/DD, usually 12/31)",
+   "zh": "财政年度截止日（月/日，通常为 12/31）"
+  },
+  {
+   "id": "officer1",
+   "line": "9",
+   "en": "Director, officer or managing member #1: 'full name, title'",
+   "zh": "第 1 位董事、高管或管理成员：“全名、职务”"
+  },
+  {
+   "id": "officer1_address",
+   "line": "9",
+   "en": "Officer #1's home address (street, city, ST ZIP)",
+   "zh": "第 1 位高管住址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "officer1_phone",
+   "line": "9",
+   "en": "Officer #1's telephone",
+   "zh": "第 1 位高管电话"
+  },
+  {
+   "id": "officer2",
+   "line": "9",
+   "en": "Director, officer or managing member #2: 'full name, title', or None",
+   "zh": "第 2 位董事、高管或管理成员：“全名、职务”，或 None"
+  },
+  {
+   "id": "officer2_address",
+   "line": "9",
+   "en": "Officer #2's home address, or None",
+   "zh": "第 2 位高管住址，或 None"
+  },
+  {
+   "id": "officer2_phone",
+   "line": "9",
+   "en": "Officer #2's telephone, or None",
+   "zh": "第 2 位高管电话，或 None"
+  },
+  {
+   "id": "naics",
+   "line": "11",
+   "en": "Primary six-digit NAICS code",
+   "zh": "主要六位 NAICS 代码"
+  },
+  {
+   "id": "description",
+   "line": "11",
+   "en": "The primary nature of the business and the products or services to be sold",
+   "zh": "企业主要业务性质及拟销售的产品或服务"
+  },
+  {
+   "id": "activities",
+   "line": "13",
+   "en": "Sales and use tax activities at this location (all that apply, comma-separated)",
+   "zh": "此地点的销售和使用税相关活动（可多选，逗号分隔）",
+   "options": [
+    "Sell, serve or prepare food or drinks",
+    "Sell products at retail",
+    "Sell products at wholesale",
+    "Sell by mail, catalog or internet",
+    "Sell at nonpermanent locations",
+    "Repair or alter consumer products",
+    "Rent equipment or goods",
+    "Charge admissions or membership fees"
+   ]
+  },
+  {
+   "id": "email_ok",
+   "line": "Email Communication",
+   "en": "May the Department send information about this application by secure email?",
+   "zh": "是否同意税务局通过安全电子邮件发送本申请相关信息？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "contact",
+   "line": "Email Communication",
+   "en": "Person who can answer questions about this application",
+   "zh": "可回答本申请相关问题的联系人"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Email Communication",
+   "en": "That person's telephone",
+   "zh": "联系人电话"
+  },
+  {
+   "id": "contact_email",
+   "line": "Email Communication",
+   "en": "That person's email address",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "authorized_by",
+   "line": "Declaration",
+   "en": "Officer or director who authorizes the signer ('I certify that I am authorized by ...')",
+   "zh": "授权签署人的高管或董事（“我证明我已获……授权”）"
+  },
+  {
+   "id": "signer",
+   "line": "Declaration",
+   "en": "Printed name of the person signing",
+   "zh": "签署人姓名（印刷体）"
+  },
+  {
+   "id": "signer_title",
+   "line": "Declaration",
+   "en": "Title of the person signing",
+   "zh": "签署人职务"
+  }
+ ],
+ "boxes": {
+  "fein": [
+   {
+    "at": {
+     "page": 0,
+     "x": 290,
+     "y": 500.5,
+     "w": 150,
+     "size": 10
+    }
+   }
+  ],
+  "first_activity": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 97.2,
+     "y": 282.0,
+     "size": 9
+    }
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 262,
+     "y": 266.5,
+     "w": 62,
+     "size": 9.5
+    },
+    "pick": "date"
+   }
+  ],
+  "legal_name": [
+   {
+    "at": {
+     "page": 1,
+     "x": 75,
+     "y": 516,
+     "w": 515,
+     "size": 10
+    }
+   }
+  ],
+  "dba": [
+   {
+    "at": {
+     "page": 1,
+     "x": 112,
+     "y": 489,
+     "w": 478,
+     "size": 10
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "location": [
+   {
+    "at": {
+     "page": 1,
+     "x": 75,
+     "y": 421,
+     "w": 232,
+     "size": 9.5
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 75,
+     "y": 384,
+     "w": 320,
+     "size": 9.5
+    },
+    "pick": "citystatezip"
+   }
+  ],
+  "county": [
+   {
+    "at": {
+     "page": 1,
+     "x": 314,
+     "y": 421,
+     "w": 80,
+     "size": 9.5
+    }
+   }
+  ],
+  "phone": [
+   {
+    "at": {
+     "page": 1,
+     "x": 417,
+     "y": 413.5,
+     "w": 114,
+     "size": 9.5
+    }
+   }
+  ],
+  "fax": [
+   {
+    "at": {
+     "page": 1,
+     "x": 434,
+     "y": 387.5,
+     "w": 146,
+     "size": 9.5
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "mail_to": [
+   {
+    "at": {
+     "page": 1,
+     "x": 75,
+     "y": 324,
+     "w": 210,
+     "size": 9.5
+    }
+   }
+  ],
+  "mailing_address": [
+   {
+    "at": {
+     "page": 1,
+     "x": 292,
+     "y": 324,
+     "w": 298,
+     "size": 9.5
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "mailing_city": [
+   {
+    "at": {
+     "page": 1,
+     "x": 75,
+     "y": 287,
+     "w": 515,
+     "size": 9.5
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "seasonal": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 468.0,
+     "y": 269.7,
+     "size": 9
+    },
+    "if": "^yes"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 513.0,
+     "y": 269.7,
+     "size": 9
+    },
+    "if": "^no"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 291,
+     "y": 244.5,
+     "w": 50,
+     "size": 9.5
+    },
+    "pick": "tail|head",
+    "if": "^yes"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 291,
+     "y": 227.5,
+     "w": 50,
+     "size": 9.5
+    },
+    "pick": "tail|tail|head",
+    "if": "^yes"
+   }
+  ],
+  "ownership": [
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 198.4,
+     "size": 9
+    },
+    "if": "^sole"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 187.6,
+     "size": 9
+    },
+    "if": "^partnership.*married"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 176.3,
+     "size": 9
+    },
+    "if": "^partnership.*married"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 187.6,
+     "size": 9
+    },
+    "if": "^partnership.*general"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 165.0,
+     "size": 9
+    },
+    "if": "^partnership.*general"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 187.6,
+     "size": 9
+    },
+    "if": "^partnership.*limited liability partnership"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 154.7,
+     "size": 9
+    },
+    "if": "^partnership.*limited liability partnership"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 187.6,
+     "size": 9
+    },
+    "if": "^partnership.*limited partnership"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 143.2,
+     "size": 9
+    },
+    "if": "^partnership.*limited partnership"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 187.6,
+     "size": 9
+    },
+    "if": "^partnership.*joint"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 130.3,
+     "size": 9
+    },
+    "if": "^partnership.*joint"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 117.9,
+     "size": 9
+    },
+    "if": "^corporation.*\\bc corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 107.9,
+     "size": 9
+    },
+    "if": "^corporation.*\\bc corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 117.9,
+     "size": 9
+    },
+    "if": "^corporation.*\\bs corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 97.1,
+     "size": 9
+    },
+    "if": "^corporation.*\\bs corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 117.9,
+     "size": 9
+    },
+    "if": "^corporation.*not-for-profit"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 86.3,
+     "size": 9
+    },
+    "if": "^corporation.*not-for-profit"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 74.6,
+     "y": 117.9,
+     "size": 9
+    },
+    "if": "^corporation.*foreign"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 94.3,
+     "y": 71.9,
+     "size": 9
+    },
+    "if": "^corporation.*foreign"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 257.7,
+     "y": 199.3,
+     "size": 9
+    },
+    "if": "^llc.*single.*\\bc corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 277.9,
+     "y": 176.3,
+     "size": 9
+    },
+    "if": "^llc.*single.*\\bc corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 279.8,
+     "y": 119.4,
+     "size": 9
+    },
+    "if": "^llc.*single.*\\bc corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 257.7,
+     "y": 199.3,
+     "size": 9
+    },
+    "if": "^llc.*single.*\\bs corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 277.9,
+     "y": 176.3,
+     "size": 9
+    },
+    "if": "^llc.*single.*\\bs corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 279.8,
+     "y": 107.9,
+     "size": 9
+    },
+    "if": "^llc.*single.*\\bs corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 257.7,
+     "y": 199.3,
+     "size": 9
+    },
+    "if": "^llc.*single.*disregard"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 277.9,
+     "y": 176.3,
+     "size": 9
+    },
+    "if": "^llc.*single.*disregard"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 279.8,
+     "y": 96.4,
+     "size": 9
+    },
+    "if": "^llc.*single.*disregard"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 257.7,
+     "y": 199.3,
+     "size": 9
+    },
+    "if": "^llc.*multi.*partnership"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 277.9,
+     "y": 163.4,
+     "size": 9
+    },
+    "if": "^llc.*multi.*partnership"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 279.8,
+     "y": 51.6,
+     "size": 9
+    },
+    "if": "^llc.*multi.*partnership"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 257.7,
+     "y": 199.3,
+     "size": 9
+    },
+    "if": "^llc.*multi.*\\bc corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 277.9,
+     "y": 163.4,
+     "size": 9
+    },
+    "if": "^llc.*multi.*\\bc corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 279.8,
+     "y": 38.8,
+     "size": 9
+    },
+    "if": "^llc.*multi.*\\bc corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 257.7,
+     "y": 199.3,
+     "size": 9
+    },
+    "if": "^llc.*multi.*\\bs corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 277.9,
+     "y": 163.4,
+     "size": 9
+    },
+    "if": "^llc.*multi.*\\bs corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 279.8,
+     "y": 27.3,
+     "size": 9
+    },
+    "if": "^llc.*multi.*\\bs corp"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 465.1,
+     "y": 201.7,
+     "size": 9
+    },
+    "if": "^estate"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 465.1,
+     "y": 187.5,
+     "size": 9
+    },
+    "if": "^trust.*business"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 479.5,
+     "y": 177.4,
+     "size": 9
+    },
+    "if": "^trust.*business"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 465.1,
+     "y": 187.5,
+     "size": 9
+    },
+    "if": "^trust.*other"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 479.5,
+     "y": 164.1,
+     "size": 9
+    },
+    "if": "^trust.*other"
+   },
+   {
+    "mark": {
+     "page": 1,
+     "x": 465.1,
+     "y": 153.2,
+     "size": 9
+    },
+    "if": "^government"
+   }
+  ],
+  "incorporated": [
+   {
+    "at": {
+     "page": 2,
+     "x": 367,
+     "y": 699.5,
+     "w": 62,
+     "size": 9.5
+    },
+    "pick": "date"
+   }
+  ],
+  "fiscal_year_end": [
+   {
+    "at": {
+     "page": 2,
+     "x": 367,
+     "y": 665.5,
+     "w": 40,
+     "size": 9.5
+    }
+   }
+  ],
+  "officer1": [
+   {
+    "at": {
+     "page": 3,
+     "x": 50,
+     "y": 677,
+     "w": 360,
+     "size": 9.5
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 3,
+     "x": 418,
+     "y": 677,
+     "w": 172,
+     "size": 9.5
+    },
+    "pick": "tail"
+   }
+  ],
+  "officer1_address": [
+   {
+    "at": {
+     "page": 3,
+     "x": 50,
+     "y": 626,
+     "w": 360,
+     "size": 9.5
+    },
+    "pick": "street"
+   },
+   {
+    "at": {
+     "page": 3,
+     "x": 50,
+     "y": 585,
+     "w": 360,
+     "size": 9.5
+    },
+    "pick": "citystatezip"
+   }
+  ],
+  "officer1_phone": [
+   {
+    "at": {
+     "page": 3,
+     "x": 432,
+     "y": 590.5,
+     "w": 104,
+     "size": 9.5
+    }
+   }
+  ],
+  "officer2": [
+   {
+    "at": {
+     "page": 3,
+     "x": 50,
+     "y": 552,
+     "w": 360,
+     "size": 9.5
+    },
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 3,
+     "x": 418,
+     "y": 552,
+     "w": 172,
+     "size": 9.5
+    },
+    "pick": "tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "officer2_address": [
+   {
+    "at": {
+     "page": 3,
+     "x": 50,
+     "y": 501,
+     "w": 360,
+     "size": 9.5
+    },
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 3,
+     "x": 50,
+     "y": 460,
+     "w": 360,
+     "size": 9.5
+    },
+    "pick": "citystatezip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "officer2_phone": [
+   {
+    "at": {
+     "page": 3,
+     "x": 432,
+     "y": 466.5,
+     "w": 104,
+     "size": 9.5
+    },
+    "if": "^(?!none$)"
+   }
+  ],
+  "naics": [
+   {
+    "at": {
+     "page": 3,
+     "x": 343,
+     "y": 112,
+     "w": 110,
+     "size": 10
+    }
+   }
+  ],
+  "description": [
+   {
+    "at": {
+     "page": 4,
+     "x": 71,
+     "y": 708,
+     "w": 505,
+     "size": 10,
+     "lines": 6,
+     "lead": 12
+    }
+   }
+  ],
+  "activities": [
+   {
+    "mark": {
+     "page": 4,
+     "x": 76.3,
+     "y": 242.3,
+     "size": 9
+    },
+    "if": "retail"
+   },
+   {
+    "mark": {
+     "page": 4,
+     "x": 76.3,
+     "y": 230.0,
+     "size": 9
+    },
+    "if": "wholesale"
+   },
+   {
+    "mark": {
+     "page": 4,
+     "x": 76.3,
+     "y": 217.8,
+     "size": 9
+    },
+    "if": "nonpermanent|flea|craft show"
+   },
+   {
+    "mark": {
+     "page": 4,
+     "x": 76.3,
+     "y": 205.5,
+     "size": 9
+    },
+    "if": "mail|catalog|internet"
+   },
+   {
+    "mark": {
+     "page": 4,
+     "x": 76.3,
+     "y": 193.7,
+     "size": 9
+    },
+    "if": "food|drink|prepare|serve"
+   },
+   {
+    "mark": {
+     "page": 4,
+     "x": 76.3,
+     "y": 172.4,
+     "size": 9
+    },
+    "if": "repair|alter"
+   },
+   {
+    "mark": {
+     "page": 4,
+     "x": 76.3,
+     "y": 159.5,
+     "size": 9
+    },
+    "if": "rent equipment|rent goods"
+   },
+   {
+    "mark": {
+     "page": 4,
+     "x": 76.3,
+     "y": 145.1,
+     "size": 9
+    },
+    "if": "admission|membership"
+   }
+  ],
+  "email_ok": [
+   {
+    "mark": {
+     "page": 13,
+     "x": 85.5,
+     "y": 649.3,
+     "size": 9
+    },
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "contact": [
+   {
+    "at": {
+     "page": 13,
+     "x": 68,
+     "y": 577,
+     "w": 340,
+     "size": 9.5
+    }
+   }
+  ],
+  "contact_phone": [
+   {
+    "at": {
+     "page": 13,
+     "x": 432,
+     "y": 583,
+     "w": 104,
+     "size": 9.5
+    }
+   }
+  ],
+  "contact_email": [
+   {
+    "at": {
+     "page": 13,
+     "x": 68,
+     "y": 542,
+     "w": 515,
+     "size": 9.5
+    }
+   }
+  ],
+  "authorized_by": [
+   {
+    "at": {
+     "page": 13,
+     "x": 184,
+     "y": 371,
+     "w": 146,
+     "size": 9.5
+    }
+   }
+  ],
+  "signer": [
+   {
+    "at": {
+     "page": 13,
+     "x": 124,
+     "y": 295.5,
+     "w": 228,
+     "size": 9.5
+    }
+   }
+  ],
+  "signer_title": [
+   {
+    "at": {
+     "page": 13,
+     "x": 391,
+     "y": 295.5,
+     "w": 200,
+     "size": 9.5
+    }
+   }
+  ]
+ },
+ "blank": {
+  "dba": "^none$",
+  "fax": "^none$",
+  "mailing_address": "^none$",
+  "mailing_city": "^none$",
+  "officer2": "^none$",
+  "officer2_address": "^none$",
+  "officer2_phone": "^none$",
+  "email_ok": "^(n|no|否)$"
+ }
+}

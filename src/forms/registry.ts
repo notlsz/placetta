@@ -3,6 +3,7 @@ import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import { WORLD_FORMS, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
+import { MORE_US } from "./more-us";
 import { LINES } from "./lines";
 import { PLAIN } from "./plain";
 import { MAPS } from "./maps";
@@ -578,7 +579,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US);
 
 /* Processing times for filings whose library entry had none, read from each agency's own page (research/times.json,
    kept as src/forms/times.json). An agency that publishes no time says so in words, with no file-by date from it. */

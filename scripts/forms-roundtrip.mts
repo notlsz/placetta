@@ -22,6 +22,8 @@ import { sample, secretLine, type Pass } from "./forms-samples.mts";
 
 const argv = process.argv.slice(2);
 const pngDir = argv.includes("--png") ? argv[argv.indexOf("--png") + 1] : "";
+// --png-b keeps the second answer set's pages instead (its longer answers and the other ends of each choice)
+const pngPass: Pass = argv.includes("--png-b") ? "b" : "a";
 const only = argv.filter((a, i) => !a.startsWith("--") && argv[i - 1] !== "--png");
 const SECRET_NAME = /\bssn\b|social.?sec|\bitin\b|taxpayer.?id(entification)? ?num/i;
 
@@ -226,6 +228,7 @@ async function checkMapped(id: string, map: FormMap) {
           hits: for (const i of printed.items[p.page] ?? []) {
             for (const wd of words(i)) {
               if (isMark && wd.glyph) continue;   // an X in a printed box is where it belongs
+              if (c.at.comb && wd.glyph) continue;   // so is a digit in a printed character box (a comb drawn as box glyphs)
               if (isRing && (wd.glyph || wd.str.length === 1)) continue;
               const o = overlap(box, wd.box);
               if (o > 3 && o > 0.2 * Math.min(area(box), area(wd.box))) { P(`${c.id}: "${p.text.slice(0, 30)}" covers the printed "${wd.str.slice(0, 30)}" on page ${p.page + 1}`); break hits; }
@@ -247,7 +250,7 @@ async function checkMapped(id: string, map: FormMap) {
     }
     const allText = [...of.getFields().map(f => (f instanceof PDFTextField ? f.getText() ?? "" : "")), ...(await textItems(pdf)).items.flat().map(i => i.str)].join(" ");
     if (/\b123-45-6789\b|\b123456789\b/.test(allText)) P("the test SSN 123-45-6789 reached the PDF");
-    if (pngDir && pass === "a") keep(id, pdf);
+    if (pngDir && pass === pngPass) keep(id, pdf);
   }
 }
 
@@ -312,7 +315,7 @@ async function checkCode(id: string) {
     for (const box of spec.checks(pass)) { const f = of.getFieldMaybe(full(id, box)); if (!(f instanceof PDFCheckBox) || !f.isChecked()) P(`checkbox ${box} not ticked`); else res.writes++; }
     const allText = of.getFields().map(f => (f instanceof PDFTextField ? f.getText() ?? "" : "")).join(" ");
     if (/\b123-45-6789\b|\b123456789\b/.test(allText)) P("the test SSN 123-45-6789 reached the PDF");
-    if (pngDir && pass === "a") keep(id, pdf);
+    if (pngDir && pass === pngPass) keep(id, pdf);
   }
 }
 

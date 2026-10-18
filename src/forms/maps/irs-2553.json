@@ -1,0 +1,394 @@
+{
+ "form": "irs-2553",
+ "rev": "Form 2553 (Rev. December 2017)",
+ "pdf": "irs-2553.pdf",
+ "url": "https://www.irs.gov/pub/irs-pdf/f2553.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: the name and EIN are repeated at the top of page 2. tax_year 'Fiscal year ending: month and day' or '52-53-week year ending with reference to: month' ticks the box and writes the month. Up to three shareholders: name and address in column J, 'number of shares or percentage, date acquired' in column L, and the tax year end in column N. Column K (each shareholder's consent signature and date) and column M (each shareholder's SSN or EIN) are left for the shareholders: Placetta never writes an SSN. 'None' leaves an optional line blank; 'No' leaves G's box blank. Parts II to IV (fiscal year and QSub elections), the officer's signature and its date are left for the signer. The XFA layer is dropped by the filler so the filled boxes show. A corporation with a nonresident alien shareholder can't be an S corporation.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "Name",
+   "en": "Name of the corporation (or the entity electing to be treated as one)",
+   "zh": "公司名称（或选择按公司对待的实体名称）"
+  },
+  {
+   "id": "street",
+   "line": "Address",
+   "en": "Number, street, and room or suite no.",
+   "zh": "门牌号、街道及房间或套房号"
+  },
+  {
+   "id": "citystatezip",
+   "line": "Address",
+   "en": "City or town, state, and ZIP code",
+   "zh": "城市、州和邮编"
+  },
+  {
+   "id": "ein",
+   "line": "A",
+   "en": "Employer identification number",
+   "zh": "雇主识别号（EIN）"
+  },
+  {
+   "id": "incorporated",
+   "line": "B",
+   "en": "Date incorporated (MM/DD/YYYY)",
+   "zh": "注册日期（月/日/年）"
+  },
+  {
+   "id": "inc_state",
+   "line": "C",
+   "en": "State of incorporation",
+   "zh": "注册州"
+  },
+  {
+   "id": "changed",
+   "line": "D",
+   "en": "Since applying for the EIN, has the corporation changed its name or address?",
+   "zh": "申请 EIN 后，公司名称或地址是否变更？",
+   "options": [
+    "Neither",
+    "Name",
+    "Address",
+    "Name and address"
+   ]
+  },
+  {
+   "id": "effective",
+   "line": "E",
+   "en": "Election is to be effective for the tax year beginning (MM/DD/YYYY)",
+   "zh": "选择生效的纳税年度起始日（月/日/年）"
+  },
+  {
+   "id": "tax_year",
+   "line": "F",
+   "en": "Selected tax year",
+   "zh": "所选纳税年度",
+   "options": [
+    "Calendar year",
+    "Fiscal year ending: month and day",
+    "52-53-week year ending with reference to December",
+    "52-53-week year ending with reference to: month"
+   ]
+  },
+  {
+   "id": "over_100_family",
+   "line": "G",
+   "en": "More than 100 shareholders listed, but family members count as one so there are no more than 100?",
+   "zh": "列出的股东超过 100 人，但家庭成员合计为一人后不超过 100 人？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "contact",
+   "line": "H",
+   "en": "Name and title of the officer or legal representative the IRS may call",
+   "zh": "IRS 可联系的高管或法定代表人姓名和职务"
+  },
+  {
+   "id": "contact_phone",
+   "line": "H",
+   "en": "Telephone number of that officer or representative",
+   "zh": "该高管或代表的电话"
+  },
+  {
+   "id": "late_explanation",
+   "line": "I",
+   "en": "Late election: reasonable cause and the diligent actions taken (one sentence per line), or None",
+   "zh": "逾期选择：合理原因及已采取的补救措施（每行一句），或 None"
+  },
+  {
+   "id": "signer_title",
+   "line": "Signature",
+   "en": "Title of the officer signing",
+   "zh": "签署高管职务"
+  },
+  {
+   "id": "shareholder1",
+   "line": "J",
+   "en": "Shareholder #1: name and address",
+   "zh": "第 1 位股东：姓名和地址"
+  },
+  {
+   "id": "shareholder1_stock",
+   "line": "L",
+   "en": "Shareholder #1's stock: 'number of shares or percentage, date(s) acquired'",
+   "zh": "第 1 位股东持股：“股数或持股比例、取得日期”"
+  },
+  {
+   "id": "shareholder1_year_end",
+   "line": "N",
+   "en": "Shareholder #1's tax year ends (month and day)",
+   "zh": "第 1 位股东纳税年度截止日（月和日）"
+  },
+  {
+   "id": "shareholder2",
+   "line": "J",
+   "en": "Shareholder #2: name and address, or None",
+   "zh": "第 2 位股东：姓名和地址，或 None"
+  },
+  {
+   "id": "shareholder2_stock",
+   "line": "L",
+   "en": "Shareholder #2's stock: 'number of shares or percentage, date(s) acquired', or None",
+   "zh": "第 2 位股东持股：“股数或持股比例、取得日期”，或 None"
+  },
+  {
+   "id": "shareholder2_year_end",
+   "line": "N",
+   "en": "Shareholder #2's tax year ends (month and day), or None",
+   "zh": "第 2 位股东纳税年度截止日（月和日），或 None"
+  },
+  {
+   "id": "shareholder3",
+   "line": "J",
+   "en": "Shareholder #3: name and address, or None",
+   "zh": "第 3 位股东：姓名和地址，或 None"
+  },
+  {
+   "id": "shareholder3_stock",
+   "line": "L",
+   "en": "Shareholder #3's stock: 'number of shares or percentage, date(s) acquired', or None",
+   "zh": "第 3 位股东持股：“股数或持股比例、取得日期”，或 None"
+  },
+  {
+   "id": "shareholder3_year_end",
+   "line": "N",
+   "en": "Shareholder #3's tax year ends (month and day), or None",
+   "zh": "第 3 位股东纳税年度截止日（月和日），或 None"
+  }
+ ],
+ "boxes": {
+  "name": [
+   {
+    "text": "topmostSubform[0].Page1[0].NameAddress[0].f1_01[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].f2_01[0]"
+   }
+  ],
+  "street": [
+   {
+    "text": "topmostSubform[0].Page1[0].NameAddress[0].f1_02[0]"
+   }
+  ],
+  "citystatezip": [
+   {
+    "text": "topmostSubform[0].Page1[0].NameAddress[0].f1_03[0]"
+   }
+  ],
+  "ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_04[0]"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].f2_02[0]"
+   }
+  ],
+  "incorporated": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_05[0]",
+    "pick": "date"
+   }
+  ],
+  "inc_state": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_06[0]"
+   }
+  ],
+  "changed": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_1[0]",
+    "if": "name"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_2[0]",
+    "if": "address"
+   }
+  ],
+  "effective": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_07[0]",
+    "pick": "date"
+   }
+  ],
+  "tax_year": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_3[0]",
+    "if": "^calendar"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_3[1]",
+    "if": "^fiscal"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_08[0]",
+    "pick": "tail",
+    "if": "^fiscal"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_3[2]",
+    "if": "^52-53.*december"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_3[3]",
+    "if": "^52-53.*to:"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_09[0]",
+    "pick": "tail",
+    "if": "^52-53.*to:"
+   }
+  ],
+  "over_100_family": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_4[0]",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "contact": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_10[0]"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_11[0]"
+   }
+  ],
+  "late_explanation": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_12[0]",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_13[0]",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_14[0]",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_15[0]",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_16[0]",
+    "pick": "line5",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_17[0]",
+    "pick": "line6",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_18[0]",
+    "pick": "line7",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_19[0]",
+    "pick": "line8",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page1[0].f1_20[0]",
+    "pick": "line9",
+    "if": "^(?!none$)"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "topmostSubform[0].Page1[0].f1_21[0]"
+   }
+  ],
+  "shareholder1": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row1[0].f2_03[0]"
+   }
+  ],
+  "shareholder1_stock": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row1[0].f2_06[0]",
+    "pick": "head"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row1[0].f2_07[0]",
+    "pick": "tail"
+   }
+  ],
+  "shareholder1_year_end": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row1[0].f2_09[0]"
+   }
+  ],
+  "shareholder2": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row2[0].f2_10[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "shareholder2_stock": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row2[0].f2_13[0]",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row2[0].f2_14[0]",
+    "pick": "tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "shareholder2_year_end": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row2[0].f2_16[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "shareholder3": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row3[0].f2_17[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "shareholder3_stock": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row3[0].f2_20[0]",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row3[0].f2_21[0]",
+    "pick": "tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "shareholder3_year_end": [
+   {
+    "text": "topmostSubform[0].Page2[0].Table_Part1[0].Row3[0].f2_23[0]",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "late_explanation": "^none$",
+  "shareholder2": "^none$",
+  "shareholder2_stock": "^none$",
+  "shareholder2_year_end": "^none$",
+  "shareholder3": "^none$",
+  "shareholder3_stock": "^none$",
+  "shareholder3_year_end": "^none$",
+  "changed": "^neither$",
+  "over_100_family": "^(n|no|否)$"
+ }
+}

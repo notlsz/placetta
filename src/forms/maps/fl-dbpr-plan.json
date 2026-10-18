@@ -1,0 +1,818 @@
+{
+ "form": "fl-dbpr-plan",
+ "rev": "DBPR HR-7005 (2024 May)",
+ "pdf": "fl-dbpr-plan.pdf",
+ "url": "https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7005_application_for_plan_review.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: addresses are 'street, city, ST ZIP' and split into the form's boxes. mailing 'Same as main address' picks Section 4; any address picks 'use below address' and fills Section 6. lodging 'Yes, name, license number' fills the lodging lines. Each finish area is one line, 'floor, wall, cove base, ceiling'. extinguishers is 'number of 2A10BC, number of K class'. 'None' leaves an optional line blank. The seat counts for culinary education programs, vending serial numbers and cart counts, the routing line for a separate mailing address, the signature and the date are left for the applicant.",
+ "lines": [
+  {
+   "id": "license_type",
+   "line": "1",
+   "en": "Food service license type",
+   "zh": "餐饮服务执照类型",
+   "options": [
+    "Seating",
+    "No Seats",
+    "Culinary Education Program: Seating",
+    "Culinary Education Program: No Seats",
+    "Caterer",
+    "Vending Machine",
+    "Theme Park Cart"
+   ]
+  },
+  {
+   "id": "seats",
+   "line": "1",
+   "en": "Number of seats (seating licenses), or None",
+   "zh": "座位数（有座位执照），或 None"
+  },
+  {
+   "id": "review_type",
+   "line": "2",
+   "en": "Plan review type",
+   "zh": "图纸审查类型",
+   "options": [
+    "New",
+    "Remodel",
+    "Change of ownership"
+   ]
+  },
+  {
+   "id": "previous_license",
+   "line": "2",
+   "en": "Previous DBPR license number (remodel or change of ownership), or None",
+   "zh": "原 DBPR 执照号（改建或所有权变更），或 None"
+  },
+  {
+   "id": "previous_name",
+   "line": "2",
+   "en": "Previous business name, or None",
+   "zh": "原企业名称，或 None"
+  },
+  {
+   "id": "business_type",
+   "line": "4",
+   "en": "Business type",
+   "zh": "企业类型",
+   "options": [
+    "Corporation or LLC",
+    "Partnership, LP, LLP or LLLP",
+    "Individual (sole proprietor)"
+   ]
+  },
+  {
+   "id": "owner_name",
+   "line": "4",
+   "en": "Owner's name (the corporation, LLC, partnership or individual)",
+   "zh": "所有者名称（公司、LLC、合伙企业或个人）"
+  },
+  {
+   "id": "main_routing",
+   "line": "4",
+   "en": "Main address: routing name (management company or contact), or None",
+   "zh": "主要地址：收件名称（管理公司或联系人），或 None"
+  },
+  {
+   "id": "main_address",
+   "line": "4",
+   "en": "Main address (street or P.O. box, city, ST ZIP)",
+   "zh": "主要地址（街道或邮政信箱、城市、州、邮编）"
+  },
+  {
+   "id": "main_county",
+   "line": "4",
+   "en": "County of the main address",
+   "zh": "主要地址所在县"
+  },
+  {
+   "id": "main_phone",
+   "line": "4",
+   "en": "Phone number",
+   "zh": "电话号码"
+  },
+  {
+   "id": "dba",
+   "line": "5",
+   "en": "Establishment name (DBA)",
+   "zh": "经营场所名称（DBA）"
+  },
+  {
+   "id": "location",
+   "line": "5",
+   "en": "Establishment location (street, city, ST ZIP)",
+   "zh": "经营场所地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "location_county",
+   "line": "5",
+   "en": "Florida county of the establishment",
+   "zh": "经营场所所在的佛罗里达县"
+  },
+  {
+   "id": "location_phone",
+   "line": "5",
+   "en": "Establishment phone",
+   "zh": "经营场所电话"
+  },
+  {
+   "id": "mailing",
+   "line": "6",
+   "en": "Mailing address: 'Same as main address', or the address (street, city, ST ZIP)",
+   "zh": "邮寄地址：“Same as main address”或具体地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "lodging",
+   "line": "7",
+   "en": "Is it associated with a public lodging establishment? If yes, 'Yes, lodging name, license number'",
+   "zh": "是否与公共住宿场所相关联？如是，“Yes, 住宿场所名称, 执照号”",
+   "options": [
+    "No",
+    "Yes, name, license number"
+   ]
+  },
+  {
+   "id": "freestanding",
+   "line": "7",
+   "en": "Is the establishment free standing (not within a hotel, mall or other structure)?",
+   "zh": "经营场所是否独立（不在酒店、商场等建筑内）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "construction_start",
+   "line": "9",
+   "en": "Projected start date of construction",
+   "zh": "预计开工日期"
+  },
+  {
+   "id": "construction_end",
+   "line": "9",
+   "en": "Projected completion date of construction",
+   "zh": "预计完工日期"
+  },
+  {
+   "id": "staff",
+   "line": "9",
+   "en": "Maximum number of staff per shift",
+   "zh": "每班最多员工人数"
+  },
+  {
+   "id": "exits",
+   "line": "9",
+   "en": "Number of exits",
+   "zh": "出口数量"
+  },
+  {
+   "id": "square_feet",
+   "line": "9",
+   "en": "Total square footage of the establishment",
+   "zh": "经营场所总面积（平方英尺）"
+  },
+  {
+   "id": "dishwashing",
+   "line": "9",
+   "en": "Dishwashing (all that apply): manual 3-compartment sink, mechanical dishmachine",
+   "zh": "洗碗方式（可多选）：手工三格水槽、机械洗碗机",
+   "options": [
+    "Manual 3-compartment sink",
+    "Mechanical dishmachine",
+    "Manual 3-compartment sink, mechanical dishmachine"
+   ]
+  },
+  {
+   "id": "sanitization",
+   "line": "9",
+   "en": "Sanitization type",
+   "zh": "消毒方式",
+   "options": [
+    "Chemical",
+    "Heat (hot final rinse)"
+   ]
+  },
+  {
+   "id": "hand_sinks",
+   "line": "9",
+   "en": "Number of handwash sinks",
+   "zh": "洗手池数量"
+  },
+  {
+   "id": "prep_sinks",
+   "line": "9",
+   "en": "Number of prep sinks",
+   "zh": "备餐水槽数量"
+  },
+  {
+   "id": "mop_sinks",
+   "line": "9",
+   "en": "Number of mop sinks",
+   "zh": "拖把池数量"
+  },
+  {
+   "id": "public_restrooms",
+   "line": "9",
+   "en": "Number of public restrooms",
+   "zh": "公共洗手间数量"
+  },
+  {
+   "id": "employee_restrooms",
+   "line": "9",
+   "en": "Number of employee restrooms",
+   "zh": "员工洗手间数量"
+  },
+  {
+   "id": "unisex_restrooms",
+   "line": "9",
+   "en": "Number of unisex restrooms",
+   "zh": "无性别洗手间数量"
+  },
+  {
+   "id": "total_restrooms",
+   "line": "9",
+   "en": "Total restrooms",
+   "zh": "洗手间总数"
+  },
+  {
+   "id": "mop_sink_location",
+   "line": "9",
+   "en": "Mop sink location",
+   "zh": "拖把池位置"
+  },
+  {
+   "id": "water_heater_location",
+   "line": "9",
+   "en": "Water heater location",
+   "zh": "热水器位置"
+  },
+  {
+   "id": "food_prep",
+   "line": "10",
+   "en": "Food Preparation finishes: 'floor, wall, cove base, ceiling' (or None)",
+   "zh": "食品加工区装修材料：“地面、墙面、踢脚线、天花板”（或 None）"
+  },
+  {
+   "id": "food_storage",
+   "line": "10",
+   "en": "Food Storage finishes: 'floor, wall, cove base, ceiling' (or None)",
+   "zh": "食品储存区装修材料：“地面、墙面、踢脚线、天花板”（或 None）"
+  },
+  {
+   "id": "dish_area",
+   "line": "10",
+   "en": "Dishwashing Area finishes: 'floor, wall, cove base, ceiling' (or None)",
+   "zh": "洗碗区装修材料：“地面、墙面、踢脚线、天花板”（或 None）"
+  },
+  {
+   "id": "bathrooms",
+   "line": "10",
+   "en": "Bathrooms finishes: 'floor, wall, cove base, ceiling' (or None)",
+   "zh": "洗手间装修材料：“地面、墙面、踢脚线、天花板”（或 None）"
+  },
+  {
+   "id": "dry_storage",
+   "line": "10",
+   "en": "Dry Storage finishes: 'floor, wall, cove base, ceiling' (or None)",
+   "zh": "干货储存区装修材料：“地面、墙面、踢脚线、天花板”（或 None）"
+  },
+  {
+   "id": "bar",
+   "line": "10",
+   "en": "Bar finishes: 'floor, wall, cove base, ceiling' (or None)",
+   "zh": "吧台装修材料：“地面、墙面、踢脚线、天花板”（或 None）"
+  },
+  {
+   "id": "extinguishers",
+   "line": "11",
+   "en": "Fire extinguishers: 'number of 2A10BC, number of K class'",
+   "zh": "灭火器：“2A10BC 数量、K 类数量”"
+  },
+  {
+   "id": "hood_suppression",
+   "line": "11",
+   "en": "Automatic hood suppression system installed?",
+   "zh": "是否安装自动排烟罩灭火系统？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "sprinklers",
+   "line": "11",
+   "en": "Sprinkler system installed?",
+   "zh": "是否安装喷淋系统？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "applicant",
+   "line": "12",
+   "en": "Print name of the applicant",
+   "zh": "申请人姓名（印刷体）"
+  }
+ ],
+ "boxes": {
+  "license_type": [
+   {
+    "radio": "RB-Lic-Type",
+    "value": "Seating",
+    "if": "^seating"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "No-Seats",
+    "if": "^no seats"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "CEP-Seats",
+    "if": "^culinary.*: seating"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "CEP-No-Seats",
+    "if": "^culinary.*no seats"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "Caterer",
+    "if": "^caterer"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "Vending-Machine",
+    "if": "^vending"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "Theme-Park-Cart",
+    "if": "^theme park"
+   }
+  ],
+  "seats": [
+   {
+    "text": "SEAT-Number-of-Seats",
+    "if": "^(?!none$)"
+   }
+  ],
+  "review_type": [
+   {
+    "radio": "RB-App-Type",
+    "value": "New",
+    "if": "^new"
+   },
+   {
+    "radio": "RB-App-Type",
+    "value": "Remodel",
+    "if": "^remodel"
+   },
+   {
+    "radio": "RB-App-Type",
+    "value": "Change-Owner",
+    "if": "^change"
+   }
+  ],
+  "previous_license": [
+   {
+    "text": "Previous-Lic-Number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "previous_name": [
+   {
+    "text": "Previous-Bus-Name",
+    "if": "^(?!none$)"
+   }
+  ],
+  "business_type": [
+   {
+    "radio": "RB-Bus-Type",
+    "value": "Corp-LLC",
+    "if": "^corp"
+   },
+   {
+    "radio": "RB-Bus-Type",
+    "value": "Partnership",
+    "if": "^partner"
+   },
+   {
+    "radio": "RB-Bus-Type",
+    "value": "Sole-Proprietor",
+    "if": "^individual|^sole"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "MA-Owner-Name"
+   }
+  ],
+  "main_routing": [
+   {
+    "text": "MA-Routing",
+    "if": "^(?!none$)"
+   }
+  ],
+  "main_address": [
+   {
+    "text": "MA-Address",
+    "pick": "street"
+   },
+   {
+    "text": "MA-City",
+    "pick": "city"
+   },
+   {
+    "text": "MA-State",
+    "pick": "state"
+   },
+   {
+    "text": "MA-Zip",
+    "pick": "zip"
+   }
+  ],
+  "main_county": [
+   {
+    "text": "MA-County"
+   }
+  ],
+  "main_phone": [
+   {
+    "text": "MA-Phone"
+   }
+  ],
+  "dba": [
+   {
+    "text": "DBA-Name"
+   }
+  ],
+  "location": [
+   {
+    "text": "Location-Address",
+    "pick": "street"
+   },
+   {
+    "text": "Location-City",
+    "pick": "city"
+   },
+   {
+    "text": "Location-Zip",
+    "pick": "zip"
+   }
+  ],
+  "location_county": [
+   {
+    "text": "Location-County"
+   }
+  ],
+  "location_phone": [
+   {
+    "text": "Location-Phone"
+   }
+  ],
+  "mailing": [
+   {
+    "radio": "RB-Mail-Select",
+    "value": "Main-Address",
+    "if": "^same"
+   },
+   {
+    "radio": "RB-Mail-Select",
+    "value": "Mailing-Address",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "LM-Address",
+    "pick": "street",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "LM-City",
+    "pick": "city",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "LM-State",
+    "pick": "state",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "LM-Zip",
+    "pick": "zip",
+    "if": "^(?!same)"
+   }
+  ],
+  "lodging": [
+   {
+    "radio": "RB-Lodging",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "RB-Lodging",
+    "value": "No",
+    "if": "^(n|no|否)"
+   },
+   {
+    "text": "Name-of-Lodging",
+    "pick": "tail|head",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "text": "Lodging-Lic-Number",
+    "pick": "tail|tail",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "freestanding": [
+   {
+    "radio": "RB-Free-Standing",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "RB-Free-Standing",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "construction_start": [
+   {
+    "text": "Construction-Start-Date",
+    "pick": "date"
+   }
+  ],
+  "construction_end": [
+   {
+    "text": "Construction-End-Date",
+    "pick": "date"
+   }
+  ],
+  "staff": [
+   {
+    "text": "Maximum Number of Staff per Shift"
+   }
+  ],
+  "exits": [
+   {
+    "text": "Number of Exits"
+   }
+  ],
+  "square_feet": [
+   {
+    "text": "Total Square Footage of the Establishment"
+   }
+  ],
+  "dishwashing": [
+   {
+    "check": "Manual 3compartment sink with drainboards or equivalent shelving",
+    "if": "manual"
+   },
+   {
+    "check": "Mechanical DishmachineGlass washer",
+    "if": "mechanical|dishmachine"
+   }
+  ],
+  "sanitization": [
+   {
+    "check": "Chemical",
+    "if": "^chemical"
+   },
+   {
+    "check": "Heat Hot Final Rinse",
+    "if": "^heat"
+   }
+  ],
+  "hand_sinks": [
+   {
+    "text": "hand-sinks"
+   }
+  ],
+  "prep_sinks": [
+   {
+    "text": "prep-sinks"
+   }
+  ],
+  "mop_sinks": [
+   {
+    "text": "mop-sinks"
+   }
+  ],
+  "public_restrooms": [
+   {
+    "text": "Public-Restrooms"
+   }
+  ],
+  "employee_restrooms": [
+   {
+    "text": "Employee-Restrooms"
+   }
+  ],
+  "unisex_restrooms": [
+   {
+    "text": "Unisex-Restrooms"
+   }
+  ],
+  "total_restrooms": [
+   {
+    "text": "Total-Restrooms"
+   }
+  ],
+  "mop_sink_location": [
+   {
+    "text": "Mop-Sink-Location"
+   }
+  ],
+  "water_heater_location": [
+   {
+    "text": "Water-Heater-Location"
+   }
+  ],
+  "extinguishers": [
+   {
+    "text": "FIRE1",
+    "pick": "head"
+   },
+   {
+    "text": "FIRE2",
+    "pick": "tail"
+   }
+  ],
+  "hood_suppression": [
+   {
+    "radio": "RB-Auto-Fire",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "RB-Auto-Fire",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "sprinklers": [
+   {
+    "radio": "RB-Sprinkler",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "RB-Sprinkler",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "Applicant-Name"
+   }
+  ],
+  "food_prep": [
+   {
+    "text": "FloorFood-Preparation",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "WallFood-Preparation",
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "BaseboardsFood-Preparation",
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "CeilingFood-Preparation",
+    "pick": "tail|tail|tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "food_storage": [
+   {
+    "text": "FloorFood-Storage",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "WallFood-Storage",
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "BaseboardsFood-Storage",
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "CeilingFood-Storage",
+    "pick": "tail|tail|tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "dish_area": [
+   {
+    "text": "FloorDishwashing-Area",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "WallDishwashing-Area",
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "BaseboardsDishwashing-Area",
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "CeilingDishwashing-Area",
+    "pick": "tail|tail|tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "bathrooms": [
+   {
+    "text": "FloorBathrooms",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "WallBathrooms",
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "BaseboardsBathrooms",
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "CeilingBathrooms",
+    "pick": "tail|tail|tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "dry_storage": [
+   {
+    "text": "FloorDry-Storage",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "WallDry-Storage",
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "BaseboardsDry-Storage",
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "CeilingDry-Storage",
+    "pick": "tail|tail|tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "bar": [
+   {
+    "text": "FloorBar",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "WallBar",
+    "pick": "tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "BaseboardsBar",
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "CeilingBar",
+    "pick": "tail|tail|tail",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "seats": "^none$",
+  "previous_license": "^none$",
+  "previous_name": "^none$",
+  "main_routing": "^none$",
+  "food_prep": "^none$",
+  "food_storage": "^none$",
+  "dish_area": "^none$",
+  "bathrooms": "^none$",
+  "dry_storage": "^none$",
+  "bar": "^none$"
+ }
+}

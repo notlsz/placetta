@@ -1,0 +1,394 @@
+{
+ "form": "ca-llc-12",
+ "rev": "LLC-12 (REV 12/2022), with the Submission Cover Sheet (REV 03/2024)",
+ "pdf": "ca-llc-12.pdf",
+ "url": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-12.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: addresses are 'street, city, ST ZIP' and split into the form's boxes (4c's and 6b's state is printed as CA). manager and agent take an individual's full name (first, middle and last go in their boxes) or an entity's name (recognized by Inc., LLC, Corp., Services and the like, it goes in 5b or 6c instead). entity_number is written digits only. 'None' leaves an optional line blank (jurisdiction for a California LLC, mailing, California office, the agent's address for a corporate agent, CEO, email). Additional managers or members go on Form LLC-12A, which isn't filled here. The cover sheet's comments, the date, and the signature are left for the signer.",
+ "lines": [
+  {
+   "id": "contact",
+   "line": "Cover sheet",
+   "en": "Contact person for this filing (first and last name)",
+   "zh": "本次提交的联系人（名和姓）"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Cover sheet",
+   "en": "Contact person's phone (optional)",
+   "zh": "联系人电话（可选）"
+  },
+  {
+   "id": "contact_email",
+   "line": "Cover sheet",
+   "en": "Contact person's email",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "name",
+   "line": "1",
+   "en": "LLC name, exactly as registered",
+   "zh": "LLC 名称（与登记完全一致）"
+  },
+  {
+   "id": "entity_number",
+   "line": "2",
+   "en": "12-digit Secretary of State entity number",
+   "zh": "州务卿 12 位实体编号"
+  },
+  {
+   "id": "jurisdiction",
+   "line": "3",
+   "en": "State, foreign country or place of organization (only if formed outside California, or None)",
+   "zh": "成立地州、外国或地点（仅在加州以外成立时填写，或填 None）"
+  },
+  {
+   "id": "principal",
+   "line": "4a",
+   "en": "Street address of the principal office (street, city, ST ZIP)",
+   "zh": "主要办公室街道地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "mailing",
+   "line": "4b",
+   "en": "Mailing address of the LLC, if different (or None)",
+   "zh": "LLC 邮寄地址（如不同，或填 None）"
+  },
+  {
+   "id": "ca_office",
+   "line": "4c",
+   "en": "Street address of the California office, if 4a is not in California (or None)",
+   "zh": "加州办公室街道地址（4a 不在加州时填写，或填 None）"
+  },
+  {
+   "id": "manager",
+   "line": "5",
+   "en": "Manager or member: an individual's full name, or the entity's name",
+   "zh": "经理或成员：个人全名，或实体名称"
+  },
+  {
+   "id": "manager_address",
+   "line": "5c",
+   "en": "Manager or member's address",
+   "zh": "经理或成员地址"
+  },
+  {
+   "id": "agent",
+   "line": "6",
+   "en": "California agent for service of process: an individual's full name, or the registered corporate agent's name",
+   "zh": "加州法律文书送达代理人：个人全名，或注册公司代理人名称"
+  },
+  {
+   "id": "agent_address",
+   "line": "6b",
+   "en": "Individual agent's California street address (or None for a corporate agent)",
+   "zh": "个人代理人的加州街道地址（公司代理人填 None）"
+  },
+  {
+   "id": "business_type",
+   "line": "7",
+   "en": "Type of business or services",
+   "zh": "业务或服务类型"
+  },
+  {
+   "id": "ceo",
+   "line": "8a",
+   "en": "Chief executive officer, if elected or appointed (full name, or None)",
+   "zh": "首席执行官（如已选任，填全名，或填 None）"
+  },
+  {
+   "id": "ceo_address",
+   "line": "8b",
+   "en": "Chief executive officer's address (or None)",
+   "zh": "首席执行官地址（或填 None）"
+  },
+  {
+   "id": "labor_judgment",
+   "line": "9",
+   "en": "Does a manager or member have an outstanding final Labor Commissioner or court judgment for a wage order or Labor Code violation?",
+   "zh": "是否有经理或成员存在未执行的劳工专员或法院关于工资令或劳动法违规的终审判决？",
+   "options": [
+    "No",
+    "Yes"
+   ]
+  },
+  {
+   "id": "email",
+   "line": "10",
+   "en": "Email address for entity notifications (opt-in), or None",
+   "zh": "接收实体通知的电子邮箱（自愿），或填 None"
+  },
+  {
+   "id": "signer",
+   "line": "Signature",
+   "en": "Type or print name of the person signing",
+   "zh": "签署人姓名（打印或印刷体）"
+  },
+  {
+   "id": "signer_title",
+   "line": "Signature",
+   "en": "Title of the person signing",
+   "zh": "签署人职务"
+  }
+ ],
+ "boxes": {
+  "contact": [
+   {
+    "text": "Contact Person - First Name",
+    "pick": "first"
+   },
+   {
+    "text": "Contact Person - Last Name",
+    "pick": "last"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Contact Person - Phone Number"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Contact Person - Email"
+   }
+  ],
+  "name": [
+   {
+    "text": "Entity Information - Name"
+   },
+   {
+    "text": "1 Limited Liability Company Name Enter the exact name of the LLC If you registered in California using an alternate name see instructions"
+   }
+  ],
+  "entity_number": [
+   {
+    "text": "Entity Information - Entity Number if applicable"
+   },
+   {
+    "text": "2 12Digit Secretary of State Entity Number",
+    "pick": "digits"
+   }
+  ],
+  "jurisdiction": [
+   {
+    "text": "3 State Foreign Country or Place of Organization only if formed outside of California",
+    "if": "^(?!none$)"
+   }
+  ],
+  "principal": [
+   {
+    "text": "a Street Address of Principal Office Do not list a PO Box",
+    "pick": "street"
+   },
+   {
+    "text": "City no abbreviations",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "Zip Code",
+    "pick": "zip"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "b Mailing Address of LLC if different than item 4a",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City no abbreviations_2",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "State_2",
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Zip Code_2",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "ca_office": [
+   {
+    "text": "c Street Address of California Office if Item 4a is not in California Do not list a PO Box",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City no abbreviations_3",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Zip Code_3",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "manager": [
+   {
+    "text": "a First Name if an individual Do not complete Item 5b",
+    "pick": "first",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "Middle Name",
+    "pick": "middle",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "Last Name",
+    "pick": "last",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "b Entity Name Do not complete Item 5a",
+    "if": "^.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b"
+   }
+  ],
+  "manager_address": [
+   {
+    "text": "c Address",
+    "pick": "street"
+   },
+   {
+    "text": "City no abbreviations_4",
+    "pick": "city"
+   },
+   {
+    "text": "State_3",
+    "pick": "state"
+   },
+   {
+    "text": "Zip Code_4",
+    "pick": "zip"
+   }
+  ],
+  "agent": [
+   {
+    "text": "a California Agent's First Name if agent is not a corporation",
+    "pick": "first",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "Middle Name_2",
+    "pick": "middle",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "Last Name_2",
+    "pick": "last",
+    "if": "^(?!.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b)"
+   },
+   {
+    "text": "c California Registered Corporate Agents Name if agent is a corporation  Do not complete Item 6a or 6b",
+    "if": "^.*\\b(inc|incorporated|llc|l\\.l\\.c|corp|corporation|company|co|ltd|limited|services|agents?|lp|llp)\\b"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "b Street Address if agent is not a corporation Do not enter a PO Box",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City no abbreviations_5",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Zip Code_5",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "business_type": [
+   {
+    "text": "Describe the type of business or services of the Limited Liability Company"
+   }
+  ],
+  "ceo": [
+   {
+    "text": "a First Name",
+    "pick": "first",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Middle Name_3",
+    "pick": "middle",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Last Name_3",
+    "pick": "last",
+    "if": "^(?!none$)"
+   }
+  ],
+  "ceo_address": [
+   {
+    "text": "b Address",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City no abbreviations_6",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "State_4",
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Zip Code_6",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "labor_judgment": [
+   {
+    "radio": "Labot Judgment",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "Labot Judgment",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email Address",
+    "if": "^(?!none$)"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Type or Print Name"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "Title"
+   }
+  ]
+ },
+ "blank": {
+  "jurisdiction": "^none$",
+  "mailing": "^none$",
+  "ca_office": "^none$",
+  "agent_address": "^none$",
+  "ceo": "^none$",
+  "ceo_address": "^none$",
+  "email": "^none$"
+ }
+}

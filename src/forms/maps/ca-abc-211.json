@@ -1,0 +1,316 @@
+{
+ "form": "ca-abc-211",
+ "rev": "ABC-211-SIG (Rev. 12/2024)",
+ "pdf": "ca-abc-211.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-211-SIG.pdf",
+ "checked": "2026-10-18",
+ "notes": "The signature sheet for applicants who can't come to the district office to sign ABC-211: each signature is witnessed by an ABC employee or notarized. Answers: on this PDF each of lines 5 to 7 has its box named for the line below it (item 5's box is called '6 ...'), so the map writes by where each box sits. Corporate signers are 'name, title' (names last, first, middle, as the form asks; the title ticks its box). 'Other: text' writes the text. 'None' leaves an optional line blank. Every signature and date signed, the reverse page's additional signers, and the witness or notary blocks are left for the signers.",
+ "lines": [
+  {
+   "id": "ownership",
+   "line": "1",
+   "en": "Ownership type",
+   "zh": "所有权类型",
+   "options": [
+    "Limited Liability Company",
+    "Corporation",
+    "Sole Owner",
+    "Partnership",
+    "Partnership: married couple",
+    "Partnership: domestic partner",
+    "Limited partnership",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "file_number",
+   "line": "2",
+   "en": "ABC file number, if any (or None)",
+   "zh": "ABC 档案编号（如有，或 None）"
+  },
+  {
+   "id": "license_type",
+   "line": "3",
+   "en": "License type (e.g. 41)",
+   "zh": "执照类型（如 41）"
+  },
+  {
+   "id": "transaction",
+   "line": "4",
+   "en": "Transaction type",
+   "zh": "交易类型",
+   "options": [
+    "Original",
+    "Person to Person Transfer",
+    "Premise to Premise Transfer",
+    "Exchange",
+    "Duplicate (Types 01, 02, 23)",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "applicant",
+   "line": "1",
+   "en": "Applicant name(s): an individual's first, middle and last name, or the entity's name",
+   "zh": "申请人名称：个人填名、中间名、姓；实体填实体名称"
+  },
+  {
+   "id": "mailing",
+   "line": "6",
+   "en": "Applicant's mailing address (street or P.O. box, city, state, ZIP)",
+   "zh": "申请人邮寄地址（街道或邮政信箱、城市、州、邮编）"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "sole_owner",
+   "line": "8",
+   "en": "Sole owner's printed name (last, first, middle), or None",
+   "zh": "独资所有者姓名（姓、名、中间名），或 None"
+  },
+  {
+   "id": "partners",
+   "line": "9",
+   "en": "General partners' printed names (last, first, middle), one per line (up to three), or None",
+   "zh": "普通合伙人姓名（姓、名、中间名），每行一位（最多三位），或 None"
+  },
+  {
+   "id": "officer_top",
+   "line": "10",
+   "en": "Corporation: the President, Vice President or Chairman signing: 'name, title', or None",
+   "zh": "公司：签署的总裁、副总裁或董事长：“姓名、职务”，或 None"
+  },
+  {
+   "id": "officer_second",
+   "line": "10",
+   "en": "Corporation: the Secretary, Assistant Secretary, CFO or Assistant Treasurer signing: 'name, title', or None",
+   "zh": "公司：签署的秘书、助理秘书、首席财务官或助理财务主管：“姓名、职务”，或 None"
+  },
+  {
+   "id": "member_run",
+   "line": "11",
+   "en": "LLC: is the company member-run?",
+   "zh": "LLC：公司是否由成员管理？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "designated",
+   "line": "12",
+   "en": "LLC that isn't member-run: name of the designated manager, managing member or designated officer, or None",
+   "zh": "非成员管理的 LLC：指定经理、管理成员或指定高管姓名，或 None"
+  },
+  {
+   "id": "members",
+   "line": "13",
+   "en": "LLC members signing (last, first, middle), one per line (up to two), or None",
+   "zh": "签署的 LLC 成员（姓、名、中间名），每行一位（最多两位），或 None"
+  }
+ ],
+ "boxes": {
+  "ownership": [
+   {
+    "check": "Sole Owner",
+    "if": "^sole"
+   },
+   {
+    "check": "Married Couple",
+    "if": "^partnership.*married"
+   },
+   {
+    "check": "Domestic Partner",
+    "if": "^partnership.*domestic"
+   },
+   {
+    "check": "Partnership",
+    "if": "^partnership"
+   },
+   {
+    "check": "PartnershipLtd",
+    "if": "^(limited partnership|partnership-ltd)"
+   },
+   {
+    "check": "Corporation",
+    "if": "^corporation"
+   },
+   {
+    "check": "Limited Liability Company",
+    "if": "^(limited liability company|llc)"
+   },
+   {
+    "check": "Other",
+    "if": "^other"
+   },
+   {
+    "text": "undefined",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "file_number": [
+   {
+    "text": "2  FILE NUMBER If any",
+    "if": "^(?!none$)"
+   }
+  ],
+  "license_type": [
+   {
+    "text": "3  LICENSE TYPE"
+   }
+  ],
+  "transaction": [
+   {
+    "check": "Original",
+    "if": "^original"
+   },
+   {
+    "check": "Exchange",
+    "if": "^exchange"
+   },
+   {
+    "check": "Duplicate (Types 01, 02, 23)",
+    "if": "^duplicate"
+   },
+   {
+    "check": "Person to Person Transfer",
+    "if": "^person"
+   },
+   {
+    "check": "Premise to Premise Transfer",
+    "if": "^premise"
+   },
+   {
+    "check": "Other_2",
+    "if": "^other"
+   },
+   {
+    "text": "undefined_2",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "6  APPLICANTS MAILING ADDRESS Street addressPO box city state zip code"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "7  PREMISES ADDRESS Street address city zip code"
+   }
+  ],
+  "premises": [
+   {
+    "text": "APPLICANTS CERTIFICATION"
+   }
+  ],
+  "sole_owner": [
+   {
+    "text": "8  PRINTED NAME Last first middle",
+    "if": "^(?!none$)"
+   }
+  ],
+  "partners": [
+   {
+    "text": "9  PARTNERS PRINTED NAME Last first middle",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "PARTNERS PRINTED NAME Last first middle",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "PARTNERS PRINTED NAME Last first middle_2",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   }
+  ],
+  "officer_top": [
+   {
+    "text": "10  PRINTED NAME Last first middle",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "check": "President",
+    "if": "^[^,]*,\\s*president\\s*$"
+   },
+   {
+    "check": "Vice President",
+    "if": "^[^,]*,\\s*vice president\\s*$"
+   },
+   {
+    "check": "Chairman of the Board",
+    "if": "^[^,]*,\\s*chairman\\s*$"
+   }
+  ],
+  "officer_second": [
+   {
+    "text": "PRINTED NAME Last first middle",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "check": "Secretary",
+    "if": "^[^,]*,\\s*secretary"
+   },
+   {
+    "check": "Asst Secretary",
+    "if": "^[^,]*,\\s*asst\\.? secretary|assistant secretary"
+   },
+   {
+    "check": "Chief Financial Officer",
+    "if": "^[^,]*,\\s*chief financial|cfo"
+   },
+   {
+    "check": "Asst Treasurer",
+    "if": "^[^,]*,\\s*asst\\.? treasurer|assistant treasurer"
+   }
+  ],
+  "member_run": [
+   {
+    "check": "The limited liability company is member-run",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "The limited liability company is member-run_1",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "designated": [
+   {
+    "text": "Name of Designated Manager, Managing Member or Designated Officer",
+    "if": "^(?!none$)"
+   }
+  ],
+  "members": [
+   {
+    "text": "13  MEMBERS PRINTED NAME Last first middle",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "MEMBERS PRINTED NAME Last first middle",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "file_number": "^none$",
+  "sole_owner": "^none$",
+  "partners": "^none$",
+  "officer_top": "^none$",
+  "officer_second": "^none$",
+  "designated": "^none$",
+  "members": "^none$"
+ }
+}

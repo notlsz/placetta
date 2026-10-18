@@ -1,0 +1,414 @@
+{
+ "form": "ca-abc-243",
+ "rev": "ABC-243 (Rev. 10/2024)",
+ "pdf": "ca-abc-243.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-243.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: officers are one per line, 'title, full name', with their addresses and telephone numbers on two more answers in the same order (up to six). stock is one certificate per line, 'to whom issued, certificate number, shares, percentage, date issued' (up to six; a canceled certificate's date and the reverse side are left for the officer). The bank account number (item 9) is never written by Placetta and stays for the officer, as do the signature, title and date. 'None' leaves an optional line blank.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "1",
+   "en": "Name of corporation",
+   "zh": "公司名称"
+  },
+  {
+   "id": "license_number",
+   "line": "2",
+   "en": "ABC license number, if any (or None)",
+   "zh": "ABC 执照号（如有，或 None）"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "phone",
+   "line": "4",
+   "en": "Telephone number",
+   "zh": "电话"
+  },
+  {
+   "id": "attorney",
+   "line": "5",
+   "en": "Attorney's name, or None",
+   "zh": "律师姓名，或 None"
+  },
+  {
+   "id": "attorney_phone",
+   "line": "6",
+   "en": "Attorney's telephone number, or None",
+   "zh": "律师电话，或 None"
+  },
+  {
+   "id": "attorney_address",
+   "line": "7",
+   "en": "Attorney's address, or None",
+   "zh": "律师地址，或 None"
+  },
+  {
+   "id": "bank",
+   "line": "8",
+   "en": "Name of bank (corporate account)",
+   "zh": "开户银行名称（公司账户）"
+  },
+  {
+   "id": "bank_address",
+   "line": "10",
+   "en": "Address of the corporate bank account",
+   "zh": "公司银行账户地址"
+  },
+  {
+   "id": "bank_signers",
+   "line": "11",
+   "en": "Persons authorized to sign on the bank account",
+   "zh": "获授权在银行账户签字的人"
+  },
+  {
+   "id": "incorporated",
+   "line": "12",
+   "en": "Incorporation date (MM/DD/YYYY)",
+   "zh": "注册日期（月/日/年）"
+  },
+  {
+   "id": "inc_state",
+   "line": "13",
+   "en": "State of incorporation",
+   "zh": "注册州"
+  },
+  {
+   "id": "sos_number",
+   "line": "14",
+   "en": "Secretary of State file number",
+   "zh": "州务卿档案编号"
+  },
+  {
+   "id": "officers",
+   "line": "15",
+   "en": "Officers and directors, one per line (up to six): 'title, full name'",
+   "zh": "高管和董事，每行一位（最多六位）：“职务、全名”"
+  },
+  {
+   "id": "officer_addresses",
+   "line": "15",
+   "en": "Their addresses, one per line in the same order",
+   "zh": "其地址，按相同顺序每行一个"
+  },
+  {
+   "id": "officer_phones",
+   "line": "15",
+   "en": "Their telephone numbers, one per line in the same order",
+   "zh": "其电话，按相同顺序每行一个"
+  },
+  {
+   "id": "stock",
+   "line": "16",
+   "en": "Stock certificates, one per line (up to six): 'to whom issued, certificate number, number of shares, percentage, date issued'",
+   "zh": "股票证书，每行一张（最多六张）：“持有人、证书编号、股数、比例、发行日期”"
+  }
+ ],
+ "boxes": {
+  "name": [
+   {
+    "text": "1  NAME OF CORPORATION"
+   }
+  ],
+  "license_number": [
+   {
+    "text": "2  ABC LICENSE NUMBER",
+    "if": "^(?!none$)"
+   }
+  ],
+  "premises": [
+   {
+    "text": "3  PREMISES ADDRESS"
+   }
+  ],
+  "phone": [
+   {
+    "text": "4  TELEPHONE NUMBER"
+   }
+  ],
+  "attorney": [
+   {
+    "text": "5  ATTORNEYS NAME",
+    "if": "^(?!none$)"
+   }
+  ],
+  "attorney_phone": [
+   {
+    "text": "6  ATTORNEYS TELEPHONE NUMBER",
+    "if": "^(?!none$)"
+   }
+  ],
+  "attorney_address": [
+   {
+    "text": "5  ATTORNEYS Address",
+    "if": "^(?!none$)"
+   }
+  ],
+  "bank": [
+   {
+    "text": "8  NAME OF BANK Corporate account"
+   }
+  ],
+  "bank_address": [
+   {
+    "text": "Address"
+   }
+  ],
+  "bank_signers": [
+   {
+    "text": "Text1"
+   }
+  ],
+  "incorporated": [
+   {
+    "text": "12  INCORPORATION DATE",
+    "pick": "date"
+   }
+  ],
+  "inc_state": [
+   {
+    "text": "13  STATE OF INCORPORATION"
+   }
+  ],
+  "sos_number": [
+   {
+    "text": "14  SECRETARY OF STATE FILE NUMBER"
+   }
+  ],
+  "officers": [
+   {
+    "text": "TITLE",
+    "pick": "line1|head"
+   },
+   {
+    "text": "NAME",
+    "pick": "line1|tail"
+   },
+   {
+    "text": "TITLE_2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "NAME_2",
+    "pick": "line2|tail"
+   },
+   {
+    "text": "TITLE_3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "NAME_3",
+    "pick": "line3|tail"
+   },
+   {
+    "text": "TITLE_4",
+    "pick": "line4|head"
+   },
+   {
+    "text": "NAME_4",
+    "pick": "line4|tail"
+   },
+   {
+    "text": "TITLE_5",
+    "pick": "line5|head"
+   },
+   {
+    "text": "NAME_5",
+    "pick": "line5|tail"
+   },
+   {
+    "text": "TITLE_6",
+    "pick": "line6|head"
+   },
+   {
+    "text": "NAME_6",
+    "pick": "line6|tail"
+   }
+  ],
+  "officer_addresses": [
+   {
+    "text": "ADDRESS",
+    "pick": "line1"
+   },
+   {
+    "text": "ADDRESS_2",
+    "pick": "line2"
+   },
+   {
+    "text": "ADDRESS_3",
+    "pick": "line3"
+   },
+   {
+    "text": "ADDRESS_4",
+    "pick": "line4"
+   },
+   {
+    "text": "ADDRESS_5",
+    "pick": "line5"
+   },
+   {
+    "text": "ADDRESS_6",
+    "pick": "line6"
+   }
+  ],
+  "officer_phones": [
+   {
+    "text": "4  TELEPHONE NUMBER1",
+    "pick": "line1"
+   },
+   {
+    "text": "4  TELEPHONE NUMBER2",
+    "pick": "line2"
+   },
+   {
+    "text": "4  TELEPHONE NUMBER3",
+    "pick": "line3"
+   },
+   {
+    "text": "4  TELEPHONE NUMBER4",
+    "pick": "line4"
+   },
+   {
+    "text": "4  TELEPHONE NUMBER5",
+    "pick": "line5"
+   },
+   {
+    "text": "4  TELEPHONE NUMBER6",
+    "pick": "line6"
+   }
+  ],
+  "stock": [
+   {
+    "text": "TO WHOM ISSUEDRow1",
+    "pick": "line1|head"
+   },
+   {
+    "text": "CERTIFICATE NUMBERRow1",
+    "pick": "line1|tail|head"
+   },
+   {
+    "text": "NUMBER OF SHARESRow1",
+    "pick": "line1|tail|tail|head"
+   },
+   {
+    "text": "PERCENTAGE OF OUTSTANDING SHARES OF STOCKRow1",
+    "pick": "line1|tail|tail|tail|head"
+   },
+   {
+    "text": "DATE ISSUEDRow1",
+    "pick": "line1|tail|tail|tail|tail|head"
+   },
+   {
+    "text": "TO WHOM ISSUEDRow2",
+    "pick": "line2|head"
+   },
+   {
+    "text": "CERTIFICATE NUMBERRow2",
+    "pick": "line2|tail|head"
+   },
+   {
+    "text": "NUMBER OF SHARESRow2",
+    "pick": "line2|tail|tail|head"
+   },
+   {
+    "text": "PERCENTAGE OF OUTSTANDING SHARES OF STOCKRow2",
+    "pick": "line2|tail|tail|tail|head"
+   },
+   {
+    "text": "DATE ISSUEDRow2",
+    "pick": "line2|tail|tail|tail|tail|head"
+   },
+   {
+    "text": "TO WHOM ISSUEDRow3",
+    "pick": "line3|head"
+   },
+   {
+    "text": "CERTIFICATE NUMBERRow3",
+    "pick": "line3|tail|head"
+   },
+   {
+    "text": "NUMBER OF SHARESRow3",
+    "pick": "line3|tail|tail|head"
+   },
+   {
+    "text": "PERCENTAGE OF OUTSTANDING SHARES OF STOCKRow3",
+    "pick": "line3|tail|tail|tail|head"
+   },
+   {
+    "text": "DATE ISSUEDRow3",
+    "pick": "line3|tail|tail|tail|tail|head"
+   },
+   {
+    "text": "TO WHOM ISSUEDRow4",
+    "pick": "line4|head"
+   },
+   {
+    "text": "CERTIFICATE NUMBERRow4",
+    "pick": "line4|tail|head"
+   },
+   {
+    "text": "NUMBER OF SHARESRow4",
+    "pick": "line4|tail|tail|head"
+   },
+   {
+    "text": "PERCENTAGE OF OUTSTANDING SHARES OF STOCKRow4",
+    "pick": "line4|tail|tail|tail|head"
+   },
+   {
+    "text": "DATE ISSUEDRow4",
+    "pick": "line4|tail|tail|tail|tail|head"
+   },
+   {
+    "text": "TO WHOM ISSUEDRow5",
+    "pick": "line5|head"
+   },
+   {
+    "text": "CERTIFICATE NUMBERRow5",
+    "pick": "line5|tail|head"
+   },
+   {
+    "text": "NUMBER OF SHARESRow5",
+    "pick": "line5|tail|tail|head"
+   },
+   {
+    "text": "PERCENTAGE OF OUTSTANDING SHARES OF STOCKRow5",
+    "pick": "line5|tail|tail|tail|head"
+   },
+   {
+    "text": "DATE ISSUEDRow5",
+    "pick": "line5|tail|tail|tail|tail|head"
+   },
+   {
+    "text": "TO WHOM ISSUEDRow6",
+    "pick": "line6|head"
+   },
+   {
+    "text": "CERTIFICATE NUMBERRow6",
+    "pick": "line6|tail|head"
+   },
+   {
+    "text": "NUMBER OF SHARESRow6",
+    "pick": "line6|tail|tail|head"
+   },
+   {
+    "text": "PERCENTAGE OF OUTSTANDING SHARES OF STOCKRow6",
+    "pick": "line6|tail|tail|tail|head"
+   },
+   {
+    "text": "DATE ISSUEDRow6",
+    "pick": "line6|tail|tail|tail|tail|head"
+   }
+  ]
+ },
+ "blank": {
+  "license_number": "^none$",
+  "attorney": "^none$",
+  "attorney_phone": "^none$",
+  "attorney_address": "^none$"
+ }
+}

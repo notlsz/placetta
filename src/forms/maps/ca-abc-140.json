@@ -1,0 +1,260 @@
+{
+ "form": "ca-abc-140",
+ "rev": "ABC-140 (Rev. 03/2026)",
+ "pdf": "ca-abc-140.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-140.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: item 4 is the applicant's email (the PDF names that box 'Applicant Entity'; item 5's checkboxes are the entity type). An 'Other' entity ticks the box only: the description is left for the applicant. Each yes-or-no question ticks Yes or No; its details box takes the explanation, and 'None' leaves it blank. The two certification boxes on page 2 (items 10 and 11), the signature and the date signed are left for the person signing.",
+ "lines": [
+  {
+   "id": "applicant",
+   "line": "1",
+   "en": "Applicant name(s): an individual's first, middle and last name, or the entity's name",
+   "zh": "申请人名称：个人填名、中间名、姓；实体填实体名称"
+  },
+  {
+   "id": "license_types",
+   "line": "License",
+   "en": "License type(s) applied for (e.g. 41 On-Sale Beer & Wine Eating Place)",
+   "zh": "申请的执照类型（如 41 类餐馆啤酒和葡萄酒堂食）"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "email",
+   "line": "4",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "entity",
+   "line": "5",
+   "en": "Applicant entity",
+   "zh": "申请人实体类型",
+   "options": [
+    "Limited Liability Company",
+    "Corporation",
+    "Sole Proprietor",
+    "General Partnership",
+    "Limited Partnership",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "own_ca",
+   "line": "6",
+   "en": "Does the applicant hold any ownership or interest, directly or indirectly, in any alcohol business in California?",
+   "zh": "申请人是否直接或间接持有加州任何酒类企业的所有权或权益？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "own_ca_details",
+   "line": "6",
+   "en": "If yes, details of the ownership or interest",
+   "zh": "如是，所有权或权益详情"
+  },
+  {
+   "id": "own_outside",
+   "line": "7",
+   "en": "Does the applicant hold any ownership or interest in any alcohol business outside California?",
+   "zh": "申请人是否持有加州以外任何酒类企业的所有权或权益？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "own_outside_details",
+   "line": "7",
+   "en": "If yes, details of the ownership or interest",
+   "zh": "如是，所有权或权益详情"
+  },
+  {
+   "id": "employed_ca",
+   "line": "8",
+   "en": "Is the applicant currently employed in any alcohol business in California?",
+   "zh": "申请人目前是否受雇于加州任何酒类企业？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "employed_ca_details",
+   "line": "8",
+   "en": "If yes, details of the employment",
+   "zh": "如是，雇佣详情"
+  },
+  {
+   "id": "employed_outside",
+   "line": "9",
+   "en": "Is the applicant currently employed in any alcohol business outside California?",
+   "zh": "申请人目前是否受雇于加州以外任何酒类企业？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "employed_outside_details",
+   "line": "9",
+   "en": "If yes, details of the employment",
+   "zh": "如是，雇佣详情"
+  },
+  {
+   "id": "printed_name",
+   "line": "12",
+   "en": "Printed name of the person signing for the applicant",
+   "zh": "代表申请人签署的人员姓名（印刷体）"
+  },
+  {
+   "id": "title",
+   "line": "13",
+   "en": "Title of the person signing",
+   "zh": "签署人职务"
+  }
+ ],
+ "boxes": {
+  "applicant": [
+   {
+    "text": "Applicant Name(s)"
+   }
+  ],
+  "license_types": [
+   {
+    "text": "License Type(s)"
+   }
+  ],
+  "premises": [
+   {
+    "text": "Premises Address"
+   }
+  ],
+  "email": [
+   {
+    "text": "Applicant Entity"
+   }
+  ],
+  "entity": [
+   {
+    "check": "Limited Liability Company",
+    "if": "^limited liability"
+   },
+   {
+    "check": "Corporation",
+    "if": "^corporation"
+   },
+   {
+    "check": "Sole Proprietor",
+    "if": "^sole"
+   },
+   {
+    "check": "General Partnership",
+    "if": "^general"
+   },
+   {
+    "check": "Limited Partnership",
+    "if": "^limited partnership"
+   },
+   {
+    "check": "Other (Describe)",
+    "if": "^other"
+   }
+  ],
+  "own_ca": [
+   {
+    "radio": "6 yes/no",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "6 yes/no",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "own_ca_details": [
+   {
+    "text": "If yes, explain details of ownership or interest in any business in California",
+    "if": "^(?!none$)"
+   }
+  ],
+  "own_outside": [
+   {
+    "radio": "7 yes/no",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "7 yes/no",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "own_outside_details": [
+   {
+    "text": "If yes, explain details of ownership or interest outside of California",
+    "if": "^(?!none$)"
+   }
+  ],
+  "employed_ca": [
+   {
+    "radio": "8 yes/no",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "8 yes/no",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "employed_ca_details": [
+   {
+    "text": "If yes, explain details of employment",
+    "if": "^(?!none$)"
+   }
+  ],
+  "employed_outside": [
+   {
+    "radio": "9 yes/no",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "9 yes/no",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "employed_outside_details": [
+   {
+    "text": "If yes, explain details of employment outside of California",
+    "if": "^(?!none$)"
+   }
+  ],
+  "printed_name": [
+   {
+    "text": "Printed Name of Person Signing for Applicant"
+   }
+  ],
+  "title": [
+   {
+    "text": "Title of Person Signing Form"
+   }
+  ]
+ },
+ "blank": {
+  "own_ca_details": "^none$",
+  "own_outside_details": "^none$",
+  "employed_ca_details": "^none$",
+  "employed_outside_details": "^none$"
+ }
+}

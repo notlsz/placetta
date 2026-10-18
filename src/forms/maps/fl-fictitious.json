@@ -1,0 +1,223 @@
+{
+ "form": "fl-fictitious",
+ "rev": "Application for Registration of Fictitious Name (CR4E001, 10/20)",
+ "pdf": "fl-fictitious.pdf",
+ "url": "https://form.sunbiz.org/pdf/cr4e001.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: addresses are 'street, city, ST ZIP' and split into the form's boxes. One owner is asked for, the entity (Section 2B) or the individual (Section 2A); 'None' leaves the other blank, and a second owner goes on an attachment. owner_entity_fein takes the number, or 'Applied for' or 'Not applicable' to tick that box. The certification signature and date, and Section 4 (cancellation or change, with the certificate of status and certified copy boxes), are left for the owner. The name must be advertised once in the county before filing, as Section 3 certifies.",
+ "lines": [
+  {
+   "id": "fictitious_name",
+   "line": "1",
+   "en": "Fictitious name to be registered",
+   "zh": "拟登记的虚构名称（DBA）"
+  },
+  {
+   "id": "mailing",
+   "line": "2",
+   "en": "Mailing address of the business (street, city, ST ZIP); acknowledgments go here",
+   "zh": "企业邮寄地址（街道、城市、州、邮编）；确认函寄往此处"
+  },
+  {
+   "id": "county",
+   "line": "3",
+   "en": "Florida county of the principal place of business",
+   "zh": "主要营业地所在的佛罗里达县"
+  },
+  {
+   "id": "fein",
+   "line": "4",
+   "en": "FEI number of the business, or None",
+   "zh": "企业联邦雇主识别号（FEI），或 None"
+  },
+  {
+   "id": "owner_entity",
+   "line": "Section 2B",
+   "en": "Owner that is an entity: its name, or None",
+   "zh": "作为所有者的实体：名称，或 None"
+  },
+  {
+   "id": "owner_entity_address",
+   "line": "Section 2B",
+   "en": "Entity owner's address (street, city, ST ZIP), or None",
+   "zh": "实体所有者地址（街道、城市、州、邮编），或 None"
+  },
+  {
+   "id": "owner_entity_docnum",
+   "line": "Section 2B",
+   "en": "Entity owner's Florida document number, or None",
+   "zh": "实体所有者的佛罗里达文件编号，或 None"
+  },
+  {
+   "id": "owner_entity_fein",
+   "line": "Section 2B",
+   "en": "Entity owner's FEI number, or 'Applied for', or 'Not applicable'",
+   "zh": "实体所有者 FEI 号码，或“Applied for”，或“Not applicable”"
+  },
+  {
+   "id": "owner_individual",
+   "line": "Section 2A",
+   "en": "Owner who is an individual: full name, or None",
+   "zh": "作为所有者的个人：全名，或 None"
+  },
+  {
+   "id": "owner_individual_address",
+   "line": "Section 2A",
+   "en": "Individual owner's address (street, city, ST ZIP), or None",
+   "zh": "个人所有者地址（街道、城市、州、邮编），或 None"
+  },
+  {
+   "id": "email",
+   "line": "Section 3",
+   "en": "Email address for future renewal notices",
+   "zh": "接收续期通知的电子邮箱"
+  },
+  {
+   "id": "phone",
+   "line": "Section 3",
+   "en": "Phone number",
+   "zh": "电话号码"
+  }
+ ],
+ "boxes": {
+  "fictitious_name": [
+   {
+    "text": "Fictitious Name to be Registered See instructions if name includes a business entity suffix or indicator"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "2",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "Zip Code",
+    "pick": "zip"
+   }
+  ],
+  "county": [
+   {
+    "text": "Florida County of principal place of business 1"
+   }
+  ],
+  "fein": [
+   {
+    "text": "FEI Number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_entity": [
+   {
+    "text": "Entity Name",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_entity_address": [
+   {
+    "text": "Address_3",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City_4",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "State_4",
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Zip Code_4",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_entity_docnum": [
+   {
+    "text": "Florida Document Number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_entity_fein": [
+   {
+    "text": "FEI Number_2",
+    "if": "^\\d"
+   },
+   {
+    "check": "Applied For",
+    "if": "^applied"
+   },
+   {
+    "check": "Not Applicable",
+    "if": "^not applicable"
+   }
+  ],
+  "owner_individual": [
+   {
+    "text": "Last",
+    "pick": "last",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "First",
+    "pick": "first",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "MI",
+    "pick": "mi",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_individual_address": [
+   {
+    "text": "Address",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City_2",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "State_2",
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Zip Code_2",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email Address to be used for future renewal notification"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Phone Number"
+   }
+  ]
+ },
+ "blank": {
+  "fein": "^none$",
+  "owner_entity": "^none$",
+  "owner_entity_address": "^none$",
+  "owner_entity_docnum": "^none$",
+  "owner_individual": "^none$",
+  "owner_individual_address": "^none$"
+ }
+}

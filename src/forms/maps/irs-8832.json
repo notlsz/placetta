@@ -1,0 +1,373 @@
+{
+ "form": "irs-8832",
+ "rev": "Form 8832 (Rev. December 2013)",
+ "pdf": "irs-8832.pdf",
+ "url": "https://www.irs.gov/pub/irs-pdf/f8832.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: citystatezip is the city line as the IRS prints it ('San Jose, CA 95112', or province, country and postal code abroad). owner_id takes the owner's EIN; an individual owner's SSN or ITIN is never written and is added by hand. 'None' leaves a line blank (owner, parent, foreign country, late relief). check_if 'None' ticks nothing. effective is written MM/DD/YYYY. late_explanation fills Part II's nine lines, one sentence per line (or ';'). Only the first signature row's title is asked for; the signatures and dates, and the consent rows of other owners, are left for the signers. The XFA layer is dropped by the filler so the filled boxes show.",
+ "lines": [
+  {
+   "id": "name",
+   "line": "Name",
+   "en": "Name of eligible entity making election",
+   "zh": "作出选择的合格实体名称"
+  },
+  {
+   "id": "ein",
+   "line": "EIN",
+   "en": "Employer identification number",
+   "zh": "雇主识别号（EIN）"
+  },
+  {
+   "id": "street",
+   "line": "Address",
+   "en": "Number, street, and room or suite no.",
+   "zh": "门牌号、街道及房间或套房号"
+  },
+  {
+   "id": "citystatezip",
+   "line": "Address",
+   "en": "City or town, state, and ZIP code (or province, country and postal code abroad)",
+   "zh": "城市、州和邮编（境外填写省、国家和邮编）"
+  },
+  {
+   "id": "check_if",
+   "line": "Check if",
+   "en": "Check if this is an address change or a late election relief request",
+   "zh": "如为地址变更或逾期选择补救申请请勾选",
+   "options": [
+    "None",
+    "Address change",
+    "Late classification relief (Rev. Proc. 2009-41)",
+    "Relief for a late change of classification (Rev. Proc. 2010-32)"
+   ]
+  },
+  {
+   "id": "election_type",
+   "line": "1",
+   "en": "Type of election",
+   "zh": "选择类型",
+   "options": [
+    "Initial classification by a newly-formed entity",
+    "Change in current classification"
+   ]
+  },
+  {
+   "id": "prior_election",
+   "line": "2a",
+   "en": "Has the entity filed an entity election that took effect within the last 60 months?",
+   "zh": "该实体过去 60 个月内是否有已生效的实体分类选择？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "prior_initial",
+   "line": "2b",
+   "en": "Was that prior election an initial classification by a newly formed entity, effective on the date of formation?",
+   "zh": "该先前选择是否为新成立实体在成立日生效的初始分类？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "multi_owner",
+   "line": "3",
+   "en": "Does the entity have more than one owner?",
+   "zh": "该实体是否有一个以上所有者？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "owner_name",
+   "line": "4a",
+   "en": "Name of owner (single-owner entities)",
+   "zh": "所有者名称（单一所有者实体）"
+  },
+  {
+   "id": "owner_id",
+   "line": "4b",
+   "en": "Identifying number of owner (EIN)",
+   "zh": "所有者识别号（EIN）",
+   "hint": {
+    "en": "The owner company's EIN. Placetta never writes an individual's SSN or ITIN: the signer adds it.",
+    "zh": "填写所有者公司的 EIN。快哉从不填写个人的 SSN 或 ITIN，由签署人自行填写。"
+   }
+  },
+  {
+   "id": "parent_name",
+   "line": "5a",
+   "en": "Name of parent corporation (consolidated return)",
+   "zh": "母公司名称（合并申报）"
+  },
+  {
+   "id": "parent_ein",
+   "line": "5b",
+   "en": "Employer identification number of the parent corporation",
+   "zh": "母公司雇主识别号"
+  },
+  {
+   "id": "entity_type",
+   "line": "6",
+   "en": "Type of entity",
+   "zh": "实体类型",
+   "options": [
+    "Domestic entity electing to be an association taxable as a corporation",
+    "Domestic entity electing to be a partnership",
+    "Domestic single-owner entity electing to be disregarded",
+    "Foreign entity electing to be an association taxable as a corporation",
+    "Foreign entity electing to be a partnership",
+    "Foreign single-owner entity electing to be disregarded"
+   ]
+  },
+  {
+   "id": "foreign_country",
+   "line": "7",
+   "en": "Foreign country of organization (if organized abroad)",
+   "zh": "境外组织国家（如在境外成立）"
+  },
+  {
+   "id": "effective",
+   "line": "8",
+   "en": "Election is to be effective beginning (month, day, year)",
+   "zh": "选择生效日期（月、日、年）"
+  },
+  {
+   "id": "contact",
+   "line": "9",
+   "en": "Name and title of contact person the IRS may call",
+   "zh": "IRS 可联系的联系人姓名和职务"
+  },
+  {
+   "id": "contact_phone",
+   "line": "10",
+   "en": "Contact person's telephone number",
+   "zh": "联系人电话"
+  },
+  {
+   "id": "signer_title",
+   "line": "Signature",
+   "en": "Title of the person signing (first signature row)",
+   "zh": "签署人职务（第一行签名）"
+  },
+  {
+   "id": "late_explanation",
+   "line": "Part II",
+   "en": "Late election relief: explanation of reasonable cause (one line each)",
+   "zh": "逾期选择补救：合理原因说明（每行一句）"
+  }
+ ],
+ "boxes": {
+  "name": [
+   {
+    "text": "topmostSubform[0].Page1[0].p1-t1[0]"
+   }
+  ],
+  "ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].p1-t2[0]"
+   }
+  ],
+  "street": [
+   {
+    "text": "topmostSubform[0].Page1[0].p1-t4[0]"
+   }
+  ],
+  "citystatezip": [
+   {
+    "text": "topmostSubform[0].Page1[0].p1-t5[0]"
+   }
+  ],
+  "check_if": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_01_0_[0]",
+    "if": "^address"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_06_0_[0]",
+    "if": "^late classification|2009-41"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_07[0]",
+    "if": "^relief for a late change|2010-32"
+   }
+  ],
+  "election_type": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_02_0_[0]",
+    "if": "^initial"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_02_0_[1]",
+    "if": "^change"
+   }
+  ],
+  "prior_election": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_03_0_[0]",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_03_0_[1]",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "prior_initial": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_04_0_[0]",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_04_0_[1]",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "multi_owner": [
+   {
+    "check": "topmostSubform[0].Page1[0].c1_05_0_[0]",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "check": "topmostSubform[0].Page1[0].c1_05_0_[1]",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "topmostSubform[0].Page1[0].p1-t6[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_id": [
+   {
+    "text": "topmostSubform[0].Page1[0].p1-t7[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "parent_name": [
+   {
+    "text": "topmostSubform[0].Page1[0].p1-t8[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "parent_ein": [
+   {
+    "text": "topmostSubform[0].Page1[0].p1-t9[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "entity_type": [
+   {
+    "check": "topmostSubform[0].Page2[0].c2_01_0_[0]",
+    "if": "^domestic.*corporation"
+   },
+   {
+    "check": "topmostSubform[0].Page2[0].c2_01_0_[1]",
+    "if": "^domestic.*partnership"
+   },
+   {
+    "check": "topmostSubform[0].Page2[0].c2_01_0_[2]",
+    "if": "^domestic.*disregard"
+   },
+   {
+    "check": "topmostSubform[0].Page2[0].c2_01_0_[3]",
+    "if": "^foreign.*corporation"
+   },
+   {
+    "check": "topmostSubform[0].Page2[0].c2_01_0_[4]",
+    "if": "^foreign.*partnership"
+   },
+   {
+    "check": "topmostSubform[0].Page2[0].c2_01_0_[5]",
+    "if": "^foreign.*disregard"
+   }
+  ],
+  "foreign_country": [
+   {
+    "text": "topmostSubform[0].Page2[0].p2-t1[0]",
+    "if": "^(?!none$)"
+   }
+  ],
+  "effective": [
+   {
+    "text": "topmostSubform[0].Page2[0].p2-t2[0]",
+    "pick": "date"
+   }
+  ],
+  "contact": [
+   {
+    "text": "topmostSubform[0].Page2[0].p2-t5[0]"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "topmostSubform[0].Page2[0].p2-t7[0]"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "topmostSubform[0].Page2[0].Pg2Table[0].BodyRow1[0].p2-t9[0]"
+   }
+  ],
+  "late_explanation": [
+   {
+    "text": "topmostSubform[0].Page3[0].f3_001[0]",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page3[0].f3_002[0]",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page3[0].f3_003[0]",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page3[0].f3_004[0]",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page3[0].f3_005[0]",
+    "pick": "line5",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page3[0].f3_006[0]",
+    "pick": "line6",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page3[0].f3_007[0]",
+    "pick": "line7",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page3[0].f3_008[0]",
+    "pick": "line8",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "topmostSubform[0].Page3[0].f3_009[0]",
+    "pick": "line9",
+    "if": "^(?!none$)"
+   }
+  ]
+ },
+ "blank": {
+  "check_if": "^none$",
+  "owner_name": "^none$",
+  "owner_id": "^none$",
+  "parent_name": "^none$",
+  "parent_ein": "^none$",
+  "foreign_country": "^none$",
+  "late_explanation": "^none$"
+ }
+}

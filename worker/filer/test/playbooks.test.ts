@@ -10,15 +10,18 @@ import { finalOn, guideLines, payOn, playbookFor, PLAYBOOKS } from "../src/playb
 const onHost = (url: string, host: string) => { const h = new URL(url).hostname; return h === host || h.endsWith("." + host); };
 const state = (heading: string): PageState => ({ url: "https://x.gov/", title: heading, headings: [heading], controls: [], buttons: [], links: [], text: "", frames: [], markers: [] });
 
-test("there are five playbooks, for the portals the most registry forms use", () => {
-  assert.equal(PLAYBOOKS.length, 5);
+// Portals with three or more forms whose only published guides are videos, so there's nothing written to follow.
+const VIDEO_ONLY = new Set(["plus.fairfaxcounty.gov"]);
+
+test("every portal three or more forms use has a playbook, and the state formation portals with written guides too", () => {
+  assert.equal(PLAYBOOKS.length, 8);
+  assert.equal(new Set(PLAYBOOKS.map((p) => p.host)).size, PLAYBOOKS.length, "one playbook per portal");
   const count = new Map<string, number>();
   for (const d of Object.values(DEST)) if (d.portal) count.set(d.portal, (count.get(d.portal) ?? 0) + 1);
-  const chosen = PLAYBOOKS.map((p) => count.get(p.host) ?? 0);
-  const least = Math.min(...chosen);
-  assert.ok(least >= 3, "each covers at least three forms");
-  // No portal left out has more forms than the least-used one chosen (Fairfax's PLUS ties at 3: its guides are videos).
-  for (const [host, n] of count) if (!PLAYBOOKS.some((p) => p.host === host)) assert.ok(n <= least, `${host} has ${n}`);
+  for (const [host, n] of count) {
+    if (n >= 3 && !VIDEO_ONLY.has(host)) assert.ok(PLAYBOOKS.some((p) => p.host === host), `${host} has ${n} forms and no playbook`);
+  }
+  for (const p of PLAYBOOKS) assert.ok(Object.keys(p.forms).length >= 1 && (count.get(p.host) ?? 0) >= Object.keys(p.forms).length, p.host);
 });
 
 test("every playbook is unverified until a supervised first run, and cites the guides it was written from", () => {

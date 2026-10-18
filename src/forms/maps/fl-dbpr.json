@@ -1,0 +1,683 @@
+{
+ "form": "fl-dbpr",
+ "rev": "DBPR HR-7035 (2024 May)",
+ "pdf": "fl-dbpr.pdf",
+ "url": "https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7035_application_for_fixed_food_service_license.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: owners, their addresses and percentages are three lines read row by row (one per line, same order), and likewise the officers, their addresses and titles. plan_status takes the file or license number after the colon. sales_tax 'Exempt' ticks the exempt box. mailing 'Same as main address' picks Section 6; any address picks 'use below address' and fills Section 8. lodging 'Yes, name, license number' fills the lodging lines. 'None' leaves an optional line blank. The SSN box in Section 4 and the owners' and officers' SSN columns are never filled by Placetta; the seat counts for culinary education programs, vending serial numbers and cart counts, the signature and the date are left for the applicant.",
+ "lines": [
+  {
+   "id": "license_type",
+   "line": "1",
+   "en": "Food service license type",
+   "zh": "餐饮服务执照类型",
+   "options": [
+    "Seating",
+    "No Seats",
+    "Culinary Education Program: Seating",
+    "Culinary Education Program: No Seats",
+    "Caterer",
+    "Vending Machine",
+    "Theme Park Cart"
+   ]
+  },
+  {
+   "id": "seats",
+   "line": "1",
+   "en": "Number of seats (seating licenses), or None",
+   "zh": "座位数（有座位执照），或 None"
+  },
+  {
+   "id": "application_type",
+   "line": "2",
+   "en": "Application type",
+   "zh": "申请类型",
+   "options": [
+    "New establishment",
+    "Change of ownership"
+   ]
+  },
+  {
+   "id": "previous_license",
+   "line": "2",
+   "en": "Previous DBPR license number (change of ownership), or None",
+   "zh": "原 DBPR 执照号（所有权变更时），或 None"
+  },
+  {
+   "id": "previous_name",
+   "line": "2",
+   "en": "Previous business name (change of ownership), or None",
+   "zh": "原企业名称（所有权变更时），或 None"
+  },
+  {
+   "id": "plan_status",
+   "line": "3",
+   "en": "Plan review status: 'Completed: file number', 'In progress: file number', 'Not required: change of ownership', or 'Not required: sharing: license number'",
+   "zh": "图纸审查状态：“Completed: 文件号”、“In progress: 文件号”、“Not required: change of ownership”或“Not required: sharing: 执照号”",
+   "options": [
+    "Completed: file number",
+    "In progress: file number",
+    "Not required: change of ownership",
+    "Not required: sharing: license number"
+   ]
+  },
+  {
+   "id": "fein",
+   "line": "4",
+   "en": "Federal employer identification number (FEIN)",
+   "zh": "联邦雇主识别号（FEIN）"
+  },
+  {
+   "id": "sales_tax",
+   "line": "4",
+   "en": "Sales tax number, or 'Exempt'",
+   "zh": "销售税号，或“Exempt”"
+  },
+  {
+   "id": "open_date",
+   "line": "4",
+   "en": "Opening date (MM/DD/YYYY)",
+   "zh": "开业日期（月/日/年）"
+  },
+  {
+   "id": "business_type",
+   "line": "5",
+   "en": "Business type",
+   "zh": "企业类型",
+   "options": [
+    "Corporation or LLC",
+    "Partnership, LP, LLP or LLLP",
+    "Individual (sole proprietor)"
+   ]
+  },
+  {
+   "id": "entity_name",
+   "line": "5",
+   "en": "Corporation, LLC or partnership name (or None for a sole proprietor)",
+   "zh": "公司、LLC 或合伙企业名称（独资经营者填 None）"
+  },
+  {
+   "id": "owners",
+   "line": "5",
+   "en": "Owners of 10% or more, one name per line (up to six)",
+   "zh": "持股 10% 以上的所有者，每行一个姓名（最多六位）"
+  },
+  {
+   "id": "owner_addresses",
+   "line": "5",
+   "en": "Their addresses, one per line in the same order",
+   "zh": "其地址，按相同顺序每行一个"
+  },
+  {
+   "id": "owner_percentages",
+   "line": "5",
+   "en": "Their ownership percentages, one per line in the same order",
+   "zh": "其持股比例，按相同顺序每行一个"
+  },
+  {
+   "id": "officers",
+   "line": "5",
+   "en": "Officers, directors and others who control the operation, one name per line (up to four), or None",
+   "zh": "控制经营的高管、董事等，每行一个姓名（最多四位），或 None"
+  },
+  {
+   "id": "officer_addresses",
+   "line": "5",
+   "en": "Their addresses, one per line in the same order, or None",
+   "zh": "其地址，按相同顺序每行一个，或 None"
+  },
+  {
+   "id": "officer_titles",
+   "line": "5",
+   "en": "Their titles, one per line in the same order, or None",
+   "zh": "其职务，按相同顺序每行一个，或 None"
+  },
+  {
+   "id": "main_routing",
+   "line": "6",
+   "en": "Main address of record: routing name (management company or contact), or None",
+   "zh": "主要记录地址：收件名称（管理公司或联系人），或 None"
+  },
+  {
+   "id": "main_address",
+   "line": "6",
+   "en": "Main address of record (street or P.O. box, city, ST ZIP)",
+   "zh": "主要记录地址（街道或邮政信箱、城市、州、邮编）"
+  },
+  {
+   "id": "main_email",
+   "line": "6",
+   "en": "Email address",
+   "zh": "电子邮箱"
+  },
+  {
+   "id": "main_phone",
+   "line": "6",
+   "en": "Phone number",
+   "zh": "电话号码"
+  },
+  {
+   "id": "dba",
+   "line": "7",
+   "en": "Establishment name (DBA)",
+   "zh": "经营场所名称（DBA）"
+  },
+  {
+   "id": "location",
+   "line": "7",
+   "en": "Establishment location (street, city, ST ZIP)",
+   "zh": "经营场所地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "location_county",
+   "line": "7",
+   "en": "Florida county of the establishment",
+   "zh": "经营场所所在的佛罗里达县"
+  },
+  {
+   "id": "location_phone",
+   "line": "7",
+   "en": "Establishment phone",
+   "zh": "经营场所电话"
+  },
+  {
+   "id": "mailing",
+   "line": "8",
+   "en": "Mailing address: 'Same as main address', or the address (street, city, ST ZIP)",
+   "zh": "邮寄地址：“Same as main address”或具体地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "lodging",
+   "line": "9",
+   "en": "Is it associated with a public lodging establishment? If yes, 'Yes, lodging name, license number'",
+   "zh": "是否与公共住宿场所相关联？如是，“Yes, 住宿场所名称, 执照号”",
+   "options": [
+    "No",
+    "Yes, name, license number"
+   ]
+  },
+  {
+   "id": "freestanding",
+   "line": "9",
+   "en": "Is the establishment free standing (not within a hotel, mall or other structure)?",
+   "zh": "经营场所是否独立（不在酒店、商场等建筑内）？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "applicant",
+   "line": "10",
+   "en": "Applicant name",
+   "zh": "申请人姓名"
+  },
+  {
+   "id": "applicant_title",
+   "line": "10",
+   "en": "Applicant title",
+   "zh": "申请人职务"
+  }
+ ],
+ "boxes": {
+  "license_type": [
+   {
+    "radio": "RB-Lic-Type",
+    "value": "SEAT",
+    "if": "^seating"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "NOST",
+    "if": "^no seats"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "CEP-SEAT",
+    "if": "^culinary.*: seating"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "CEP-NOST",
+    "if": "^culinary.*no seats"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "Caterer 2013CATR",
+    "if": "^caterer"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "VEND",
+    "if": "^vending"
+   },
+   {
+    "radio": "RB-Lic-Type",
+    "value": "PARK",
+    "if": "^theme park"
+   }
+  ],
+  "seats": [
+   {
+    "text": "2010-SEATs",
+    "if": "^(?!none$)"
+   }
+  ],
+  "application_type": [
+   {
+    "radio": "RB-App-Type",
+    "value": "New Establishment New never licensed or closed for more than 18 months",
+    "if": "^new"
+   },
+   {
+    "radio": "RB-App-Type",
+    "value": "Change of Ownership Previously licensed within the last 18 months by Hotels  Restaurants",
+    "if": "^change"
+   }
+  ],
+  "previous_license": [
+   {
+    "text": "Previous-Lic-Number",
+    "if": "^(?!none$)"
+   }
+  ],
+  "previous_name": [
+   {
+    "text": "Previous-Bus-Name",
+    "if": "^(?!none$)"
+   }
+  ],
+  "plan_status": [
+   {
+    "radio": "RB-Plan-Status",
+    "value": "Completed  Enter File Number",
+    "if": "^completed"
+   },
+   {
+    "radio": "RB-Plan-Status",
+    "value": "In progress  Enter File Number",
+    "if": "^in progress"
+   },
+   {
+    "radio": "RB-Plan-Status",
+    "value": "Not required  Change of Ownership of an existing DBPR licensed public food service establishment and no changes were made",
+    "if": "^not required.*change of ownership"
+   },
+   {
+    "radio": "RB-Plan-Status",
+    "value": "Not required  Sharing an existing DBPR licensed public food service establishment Enter the License Number",
+    "if": "^not required.*shar"
+   },
+   {
+    "text": "Completed-File-Number",
+    "pick": "tail",
+    "if": "^completed"
+   },
+   {
+    "text": "In-Progress-File-Number",
+    "pick": "tail",
+    "if": "^in progress"
+   },
+   {
+    "text": "Shared-Lic-Number",
+    "pick": "tail|tail",
+    "if": "^not required.*shar"
+   }
+  ],
+  "fein": [
+   {
+    "text": "FEIN"
+   }
+  ],
+  "sales_tax": [
+   {
+    "check": "CB-Exempt",
+    "if": "^exempt"
+   },
+   {
+    "text": "Sales-Tax-Number",
+    "if": "^(?!exempt)"
+   }
+  ],
+  "open_date": [
+   {
+    "text": "Open-Date",
+    "pick": "date"
+   }
+  ],
+  "business_type": [
+   {
+    "radio": "RB-Owner-Type",
+    "value": "Corp-LLC",
+    "if": "^corp"
+   },
+   {
+    "radio": "RB-Owner-Type",
+    "value": "Partner-LLP",
+    "if": "^partner"
+   },
+   {
+    "radio": "RB-Owner-Type",
+    "value": "Individual",
+    "if": "^individual|^sole"
+   }
+  ],
+  "entity_name": [
+   {
+    "text": "Owner-Name",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owners": [
+   {
+    "text": "1-Owner",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "2-Owner",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "3-Owner",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "4-Owner",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "5-Owner",
+    "pick": "line5",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6-Owner",
+    "pick": "line6",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_addresses": [
+   {
+    "text": "Address1",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Address2",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Address3",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Address4",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Address5",
+    "pick": "line5",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Address6",
+    "pick": "line6",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_percentages": [
+   {
+    "text": "1-Percentage",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "2-Percentage",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "3-Percentage",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "4-Percentage",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "5-Percentage",
+    "pick": "line5",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6-Percentage",
+    "pick": "line6",
+    "if": "^(?!none$)"
+   }
+  ],
+  "officers": [
+   {
+    "text": "1-Officer",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "2-Officer",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "3-Officer",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "4-Officer",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   }
+  ],
+  "officer_addresses": [
+   {
+    "text": "1-OAddress",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "2-OAddress",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "3-OAddress",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "4-OAddress",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   }
+  ],
+  "officer_titles": [
+   {
+    "text": "Title1",
+    "pick": "line1",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Title2",
+    "pick": "line2",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Title3",
+    "pick": "line3",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Title4",
+    "pick": "line4",
+    "if": "^(?!none$)"
+   }
+  ],
+  "main_routing": [
+   {
+    "text": "MA-Routing",
+    "if": "^(?!none$)"
+   }
+  ],
+  "main_address": [
+   {
+    "text": "MA-Address",
+    "pick": "street"
+   },
+   {
+    "text": "MA-City",
+    "pick": "city"
+   },
+   {
+    "text": "MA-State",
+    "pick": "state"
+   },
+   {
+    "text": "MA-Zip",
+    "pick": "zip"
+   }
+  ],
+  "main_email": [
+   {
+    "text": "MA-Email"
+   }
+  ],
+  "main_phone": [
+   {
+    "text": "MA-Phone"
+   }
+  ],
+  "dba": [
+   {
+    "text": "DBA-Name"
+   }
+  ],
+  "location": [
+   {
+    "text": "LL-Address",
+    "pick": "street"
+   },
+   {
+    "text": "LL-City",
+    "pick": "city"
+   },
+   {
+    "text": "LL-Zip",
+    "pick": "zip"
+   }
+  ],
+  "location_county": [
+   {
+    "text": "LL-County"
+   }
+  ],
+  "location_phone": [
+   {
+    "text": "LL-Phone"
+   }
+  ],
+  "mailing": [
+   {
+    "radio": "RB-Mail-Select",
+    "value": "MA",
+    "if": "^same"
+   },
+   {
+    "radio": "RB-Mail-Select",
+    "value": "LM",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "LM-Address",
+    "pick": "street",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "LM-City",
+    "pick": "city",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "LM-State",
+    "pick": "state",
+    "if": "^(?!same)"
+   },
+   {
+    "text": "LM-Zip",
+    "pick": "zip",
+    "if": "^(?!same)"
+   }
+  ],
+  "lodging": [
+   {
+    "radio": "RB-Related-Lodging",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "RB-Related-Lodging",
+    "value": "No",
+    "if": "^(n|no|否)"
+   },
+   {
+    "text": "Lodging-Name",
+    "pick": "tail|head",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "text": "Lodging-Lic-Number",
+    "pick": "tail|tail",
+    "if": "^(y|yes|是)"
+   }
+  ],
+  "freestanding": [
+   {
+    "radio": "RB-Freestanding",
+    "value": "Yes",
+    "if": "^(y|yes|是)"
+   },
+   {
+    "radio": "RB-Freestanding",
+    "value": "No",
+    "if": "^(n|no|否)"
+   }
+  ],
+  "applicant": [
+   {
+    "text": "Applicant-Name"
+   }
+  ],
+  "applicant_title": [
+   {
+    "text": "Applicant-Title"
+   }
+  ]
+ },
+ "blank": {
+  "seats": "^none$",
+  "previous_license": "^none$",
+  "previous_name": "^none$",
+  "entity_name": "^none$",
+  "officers": "^none$",
+  "officer_addresses": "^none$",
+  "officer_titles": "^none$",
+  "main_routing": "^none$"
+ }
+}

@@ -19,11 +19,12 @@ const destDir = at >= 0 ? args[at + 1] : join(root, "supabase/functions/file");
 const OUT = join(root, "docs/FILING_COVERAGE.md");
 
 // Counted with --dest-dir on the destinations.ts and logic.ts of commit 8c8599b2 (2026-10-17), before the research of
-// 2026-10-18. The same registry of US forms is counted both times.
+// 2026-10-18. The same registry of US forms is counted both times (recounted when forms batch 3 added 21 US forms:
+// those were all team-only then).
 const BASELINE = {
   date: "2026-10-17",
-  channels: { team: 173, email: 5, fax: 4, mail: 13, portal: 16, owner: 0 },
-  routes: { portal: 16, email: 1, fax: 0, mail: 0, owner: 0, faxSigned: 3, ownerSigns: 6, team: 175 },
+  channels: { team: 194, email: 5, fax: 4, mail: 13, portal: 16, owner: 0 },
+  routes: { portal: 16, email: 1, fax: 0, mail: 0, owner: 0, faxSigned: 3, ownerSigns: 6, team: 196 },
 };
 
 const tmp = mkdtempSync(join(tmpdir(), "filing-coverage-"));

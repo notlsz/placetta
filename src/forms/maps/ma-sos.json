@@ -1,0 +1,279 @@
+{
+ "form": "ma-sos",
+ "rev": "Limited Liability Company Certificate of Organization (c156c512dllccert 10/6/11)",
+ "pdf": "ma-sos.pdf",
+ "url": "https://www.sec.state.ma.us/divisions/corporations/download/c156c512dllccert.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: managers (up to four), authorized signers (up to three) and real property signers (up to three) are one per line, 'name, business address': the name goes in the name box and the rest in the address box. The resident agent's name also goes in the consent line on page 2, which the agent signs (or the agent's consent is attached). 'None' leaves an optional line blank. The organizer's signatures on page 2 and the filing office's approval block are left blank.",
+ "lines": [
+  {
+   "id": "ein",
+   "line": "Federal Identification No.",
+   "en": "Federal identification number (EIN), if the LLC has one",
+   "zh": "联邦识别号（EIN），如已取得"
+  },
+  {
+   "id": "name",
+   "line": "1",
+   "en": "The exact name of the limited liability company",
+   "zh": "有限责任公司的确切名称"
+  },
+  {
+   "id": "records_office",
+   "line": "2",
+   "en": "Street address of the office in Massachusetts where its records will be kept",
+   "zh": "在马萨诸塞州保存记录的办公室街道地址"
+  },
+  {
+   "id": "character",
+   "line": "3",
+   "en": "The general character of the business",
+   "zh": "业务的一般性质"
+  },
+  {
+   "id": "dissolution",
+   "line": "4",
+   "en": "Latest date of dissolution, if specified (or None)",
+   "zh": "最迟解散日期（如有，或填 None）"
+  },
+  {
+   "id": "agent",
+   "line": "5",
+   "en": "Resident agent's name (an individual or a business entity)",
+   "zh": "常驻代理人名称（个人或企业实体）"
+  },
+  {
+   "id": "agent_address",
+   "line": "5",
+   "en": "Resident agent's street address in Massachusetts",
+   "zh": "常驻代理人在马萨诸塞州的街道地址"
+  },
+  {
+   "id": "managers",
+   "line": "6",
+   "en": "Managers, one per line: 'name, business address' (or None if member-managed)",
+   "zh": "经理，每行一位：“姓名、营业地址”（成员管理的填 None）"
+  },
+  {
+   "id": "authorized",
+   "line": "7",
+   "en": "Other persons authorized to execute documents filed with the Corporations Division, one per line: 'name, business address'",
+   "zh": "其他获授权签署向公司处提交文件的人，每行一位：“姓名、营业地址”"
+  },
+  {
+   "id": "real_property",
+   "line": "8",
+   "en": "Persons authorized to execute instruments affecting real property, one per line: 'name, business address' (or None)",
+   "zh": "获授权签署影响不动产文书的人，每行一位：“姓名、营业地址”（或填 None）"
+  },
+  {
+   "id": "additional",
+   "line": "9",
+   "en": "Additional matters (or None)",
+   "zh": "其他事项（或填 None）"
+  },
+  {
+   "id": "contact",
+   "line": "Contact Information",
+   "en": "Contact for this filing: name, then street, then city line (one per line)",
+   "zh": "本次提交的联系人：姓名、街道、城市行（每行一项）"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Contact Information",
+   "en": "Contact telephone",
+   "zh": "联系电话"
+  },
+  {
+   "id": "contact_email",
+   "line": "Contact Information",
+   "en": "Contact email",
+   "zh": "联系电子邮箱"
+  }
+ ],
+ "boxes": {
+  "ein": [
+   {
+    "text": "Federal Identification No",
+    "if": "^(?!none$)"
+   }
+  ],
+  "name": [
+   {
+    "text": "The exact name of the limited liability company"
+   }
+  ],
+  "records_office": [
+   {
+    "text": "2 The street address of the office in the commonwealth at which its records will be maintained:"
+   }
+  ],
+  "character": [
+   {
+    "text": "The general character of the business"
+   }
+  ],
+  "dissolution": [
+   {
+    "text": "4 Latest date of dissolution if specified",
+    "if": "^(?!none$)"
+   }
+  ],
+  "agent": [
+   {
+    "text": "5 Name"
+   },
+   {
+    "text": "resident agent of the above limited liability company consent to my appointment as resident agent pursuant to GL c 156C  12"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "5 Address"
+   }
+  ],
+  "managers": [
+   {
+    "text": "6 Name.0",
+    "pick": "line1|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6 Address.0",
+    "pick": "line1|tail",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6 Name.1",
+    "pick": "line2|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6 Address.1",
+    "pick": "line2|tail",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6 Name.2",
+    "pick": "line3|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6 Address.2",
+    "pick": "line3|tail",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6 Name.3",
+    "pick": "line4|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "6 Address.3",
+    "pick": "line4|tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "authorized": [
+   {
+    "text": "7 Name.0",
+    "pick": "line1|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "7 Address.0",
+    "pick": "line1|tail",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "7 Name.1",
+    "pick": "line2|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "7 Address.1",
+    "pick": "line2|tail",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "7 Name.2",
+    "pick": "line3|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "7 Address.2",
+    "pick": "line3|tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "real_property": [
+   {
+    "text": "8 Name.0",
+    "pick": "line1|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "8 Address.0",
+    "pick": "line1|tail",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "8 Name.1",
+    "pick": "line2|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "8 Address.1",
+    "pick": "line2|tail",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "8 Name.2",
+    "pick": "line3|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "8 Address.2",
+    "pick": "line3|tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "additional": [
+   {
+    "text": "9 Additional matters:",
+    "if": "^(?!none$)"
+   }
+  ],
+  "contact": [
+   {
+    "text": "Contact Info 1",
+    "pick": "line1"
+   },
+   {
+    "text": "Contact Info 2",
+    "pick": "line2"
+   },
+   {
+    "text": "Contact Info 3",
+    "pick": "line3"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Telephone"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Email"
+   }
+  ]
+ },
+ "blank": {
+  "ein": "^none$",
+  "dissolution": "^none$",
+  "managers": "^none$",
+  "real_property": "^none$",
+  "additional": "^none$"
+ }
+}

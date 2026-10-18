@@ -1,0 +1,177 @@
+{
+ "form": "ca-abc-244",
+ "rev": "ABC-244 (Rev. 03/2025)",
+ "pdf": "ca-abc-244.pdf",
+ "url": "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-244.pdf",
+ "checked": "2026-10-18",
+ "notes": "Reports a change to an existing license that doesn't need a transfer: ownership changes inside a corporation, LLC or limited partnership, condition modification or removal, or a change to the premises. Items 1 to 4 and 6 are the licensee's information as it is before the change. change ticks the matching box; 'Other: text' ticks g and writes the text. details is one line; a longer explanation goes on an attached page (the form asks whether one is attached, in the ABC-only block). The signature and date are left for the licensed principal, and the 'For ABC use only' block is never written. The form goes to the district office with the fee from the ABC fee schedule.",
+ "lines": [
+  {
+   "id": "license_number",
+   "line": "1",
+   "en": "ABC license number",
+   "zh": "ABC 执照号"
+  },
+  {
+   "id": "licensee",
+   "line": "2",
+   "en": "Licensee's name (an individual's first, middle and last name, or the entity's name), as it is now",
+   "zh": "持照人名称（个人填名、中间名、姓；实体填实体名称），按变更前信息填写"
+  },
+  {
+   "id": "dba",
+   "line": "3",
+   "en": "Doing business as (DBA), as it is now",
+   "zh": "营业名称（DBA），按变更前信息填写"
+  },
+  {
+   "id": "premises",
+   "line": "Premises",
+   "en": "Premises address (street number and name, city, ZIP code)",
+   "zh": "经营场所地址（门牌号和街道名、城市、邮编）"
+  },
+  {
+   "id": "district",
+   "line": "5",
+   "en": "ABC district office (e.g. San Jose)",
+   "zh": "ABC 地区办公室（如 San Jose）"
+  },
+  {
+   "id": "mailing",
+   "line": "6",
+   "en": "Business mailing address (street number and name, city, ZIP code), as it is now",
+   "zh": "企业邮寄地址（门牌号和街道名、城市、邮编），按变更前信息填写"
+  },
+  {
+   "id": "phone",
+   "line": "7",
+   "en": "Licensee's telephone number",
+   "zh": "持照人电话"
+  },
+  {
+   "id": "email",
+   "line": "8",
+   "en": "Licensee's email address",
+   "zh": "持照人电子邮箱"
+  },
+  {
+   "id": "change",
+   "line": "9",
+   "en": "Action or change being reported",
+   "zh": "报告的事项或变更",
+   "options": [
+    "Corporate change",
+    "Limited partnership change",
+    "Limited liability company change",
+    "Condition modification or removal",
+    "Premises expansion",
+    "Premises reduction",
+    "Physical character change",
+    "Other: describe"
+   ]
+  },
+  {
+   "id": "details",
+   "line": "10",
+   "en": "Details of the change (one short sentence; attach a page for more)",
+   "zh": "变更详情（一句话；更多内容请附页）"
+  },
+  {
+   "id": "signer",
+   "line": "11",
+   "en": "Licensed principal signing: printed name and title",
+   "zh": "签署的持照负责人：姓名和职务"
+  }
+ ],
+ "boxes": {
+  "license_number": [
+   {
+    "text": "1 License Number"
+   }
+  ],
+  "licensee": [
+   {
+    "text": "2 Licensee's Name"
+   }
+  ],
+  "dba": [
+   {
+    "text": "3 Doing Business As DBA"
+   }
+  ],
+  "premises": [
+   {
+    "text": "4 Premises Address Street number and name city zip code"
+   }
+  ],
+  "district": [
+   {
+    "text": "5 District Office"
+   }
+  ],
+  "mailing": [
+   {
+    "text": "6 Business Mailing Address Street number and name city zip code"
+   }
+  ],
+  "phone": [
+   {
+    "text": "7 Licensees Phone Number"
+   }
+  ],
+  "email": [
+   {
+    "text": "8 Licensees Email Address"
+   }
+  ],
+  "change": [
+   {
+    "check": "9a Corporate Change - Section23405.1",
+    "if": "^corporate"
+   },
+   {
+    "check": "9b Limited Partnership Change - Section 23405.1",
+    "if": "^limited partnership"
+   },
+   {
+    "check": "9c Limited Liability Company Change - Section 23405.2",
+    "if": "^(limited liability company|llc)"
+   },
+   {
+    "check": "9d Conditional Modification/Removal - Section 23803",
+    "if": "^condition"
+   },
+   {
+    "check": "9e Premises Expansion",
+    "if": "^premises expansion"
+   },
+   {
+    "check": "9f Premises Reduction",
+    "if": "^premises reduction"
+   },
+   {
+    "check": "9f Physical Character Change",
+    "if": "^physical"
+   },
+   {
+    "check": "9g Other",
+    "if": "^other"
+   },
+   {
+    "text": "9g Other: data field",
+    "pick": "tail",
+    "if": "^other"
+   }
+  ],
+  "details": [
+   {
+    "text": "10 Details of Change"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Printed Name and Title"
+   }
+  ]
+ }
+}

@@ -1,0 +1,679 @@
+{
+ "form": "nyc-dcwp-license",
+ "rev": "Basic License Application (DCWP, 1/23/2023)",
+ "pdf": "nyc-dcwp-license.pdf",
+ "url": "https://www.nyc.gov/assets/dca/downloads/pdf/businesses/Basic-License-Application.pdf",
+ "checked": "2026-10-18",
+ "notes": "Answers: addresses are 'street, city, ST ZIP' and split into the form's boxes. The EIN's printed boxes are checkboxes on this PDF, so the EIN is printed into them, two digits then seven. officer1 and officer2 are 'full name, title, % of ownership': the name splits into last, first and middle and the title ticks its box (Member, President, Partner...). owner_business is 'name, % of ownership'. inspection_language 'English' answers No to question 6; any other language answers Yes and ticks it ('Other: language' writes it). 'None' leaves an optional line blank. Section 2 (individual general partners' SSN or ITIN, home address and child support certification) is never filled by Placetta; the sales tax number boxes (a broken radio group on this PDF), the section 4 disclosure questions, the preparer's statement, the signature, the date and the voter registration question are left for the applicant.",
+ "lines": [
+  {
+   "id": "structure",
+   "line": "Section 1",
+   "en": "Business's legal structure",
+   "zh": "企业法律结构",
+   "options": [
+    "Limited Liability Company",
+    "Corporation",
+    "S-Corporation",
+    "Sole Proprietorship",
+    "General Partnership",
+    "Limited Partnership",
+    "Limited Liability Partnership",
+    "Nonprofit"
+   ]
+  },
+  {
+   "id": "business_name",
+   "line": "Business Name",
+   "en": "Business name, exactly as filed with the NY Secretary of State or County Clerk",
+   "zh": "企业名称（与纽约州务卿或县书记官处登记完全一致）"
+  },
+  {
+   "id": "dba",
+   "line": "DBA",
+   "en": "Doing-business-as (DBA) or trade name, exactly as filed (only one), or None",
+   "zh": "营业名称（DBA）或商号（与登记完全一致，仅一个），或 None"
+  },
+  {
+   "id": "address",
+   "line": "Business Address",
+   "en": "Address where you operate your business (street, city, ST ZIP)",
+   "zh": "经营地址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "phone",
+   "line": "Phone 1",
+   "en": "Primary phone",
+   "zh": "主要电话"
+  },
+  {
+   "id": "phone2",
+   "line": "Phone 2",
+   "en": "Alternate phone, or None",
+   "zh": "备用电话，或 None"
+  },
+  {
+   "id": "email",
+   "line": "Email",
+   "en": "Email for official DCWP notices, or None (notices then go by mail)",
+   "zh": "接收 DCWP 正式通知的电子邮箱，或 None（通知将邮寄）"
+  },
+  {
+   "id": "ein",
+   "line": "EIN",
+   "en": "Employer identification number (EIN)",
+   "zh": "雇主识别号（EIN）"
+  },
+  {
+   "id": "contact",
+   "line": "Contact Mailing Address",
+   "en": "Person to send notices to, if not the business address (full name), or None",
+   "zh": "如不寄往营业地址，接收通知的联系人（全名），或 None"
+  },
+  {
+   "id": "contact_title",
+   "line": "Contact Mailing Address",
+   "en": "That person's title or position",
+   "zh": "联系人职务"
+  },
+  {
+   "id": "department",
+   "line": "Contact Mailing Address",
+   "en": "Department to send notices to, or None",
+   "zh": "接收通知的部门，或 None"
+  },
+  {
+   "id": "contact_mailing",
+   "line": "Contact Mailing Address",
+   "en": "Contact mailing address (street, city, ST ZIP), or None",
+   "zh": "联系邮寄地址（街道、城市、州、邮编），或 None"
+  },
+  {
+   "id": "officer1",
+   "line": "Section 3",
+   "en": "Individual #1 (partner, officer, member or 10%+ shareholder): 'full name, title, % of ownership'",
+   "zh": "第 1 位个人（合伙人、高管、成员或持股 10% 以上股东）：“全名、职务、持股比例”"
+  },
+  {
+   "id": "officer1_address",
+   "line": "Section 3",
+   "en": "Individual #1's home address (street, city, ST ZIP)",
+   "zh": "第 1 位个人住址（街道、城市、州、邮编）"
+  },
+  {
+   "id": "officer2",
+   "line": "Section 3",
+   "en": "Individual #2: 'full name, title, % of ownership', or None",
+   "zh": "第 2 位个人：“全名、职务、持股比例”，或 None"
+  },
+  {
+   "id": "officer2_address",
+   "line": "Section 3",
+   "en": "Individual #2's home address, or None",
+   "zh": "第 2 位个人住址，或 None"
+  },
+  {
+   "id": "owner_business",
+   "line": "Section 3",
+   "en": "Business #1 that is a shareholder or partner: 'name, % of ownership', or None",
+   "zh": "作为股东或合伙人的第 1 家企业：“名称、持股比例”，或 None"
+  },
+  {
+   "id": "owner_business_ein",
+   "line": "Section 3",
+   "en": "That business's EIN, or None",
+   "zh": "该企业的 EIN，或 None"
+  },
+  {
+   "id": "owner_business_address",
+   "line": "Section 3",
+   "en": "That business's mailing address, or None",
+   "zh": "该企业的邮寄地址，或 None"
+  },
+  {
+   "id": "inspection_language",
+   "line": "Section 4, question 6",
+   "en": "Language you prefer for business inspections",
+   "zh": "希望检查时使用的语言",
+   "options": [
+    "English",
+    "Mandarin",
+    "Cantonese",
+    "Korean",
+    "Spanish",
+    "Vietnamese",
+    "Bengali",
+    "Arabic",
+    "French",
+    "French-Creole",
+    "Haitian Creole",
+    "Hindi",
+    "Italian",
+    "Polish",
+    "Russian",
+    "Farsi",
+    "Hebrew",
+    "Urdu",
+    "Other: language"
+   ]
+  },
+  {
+   "id": "signer",
+   "line": "Affirmation",
+   "en": "Full name of the person signing",
+   "zh": "签署人全名"
+  },
+  {
+   "id": "signer_title",
+   "line": "Affirmation",
+   "en": "Title or position of the person signing",
+   "zh": "签署人职务"
+  }
+ ],
+ "boxes": {
+  "structure": [
+   {
+    "check": "Limited Liability Company",
+    "if": "^limited liability company"
+   },
+   {
+    "check": "Corporation",
+    "if": "^corporation"
+   },
+   {
+    "check": "SCorporation",
+    "if": "^s-?corp"
+   },
+   {
+    "check": "Sole Proprietorship",
+    "if": "^sole"
+   },
+   {
+    "check": "General Partnership",
+    "if": "^general"
+   },
+   {
+    "check": "Limited Partnership",
+    "if": "^limited partnership"
+   },
+   {
+    "check": "Limited Liability Partnership",
+    "if": "^limited liability partnership"
+   },
+   {
+    "check": "Nonprofit",
+    "if": "^nonprofit"
+   }
+  ],
+  "business_name": [
+   {
+    "text": "Business Name Must be exactly as filed with the New York State Secretary of State or County Clerk"
+   }
+  ],
+  "dba": [
+   {
+    "text": "DoingBusinessAs DBATrade Name Must be exactly as filed with the New York State Secretary of State or County Clerk Only one trade name allowed",
+    "if": "^(?!none$)"
+   }
+  ],
+  "address": [
+   {
+    "text": "Address Where You Operate Your Business Building Number Street Name ApartmentSuiteOther",
+    "pick": "street"
+   },
+   {
+    "text": "City",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "ZIP Code",
+    "pick": "zip"
+   }
+  ],
+  "phone": [
+   {
+    "text": "Phone 1 Primary"
+   }
+  ],
+  "phone2": [
+   {
+    "text": "Phone 2 Alternate",
+    "if": "^(?!none$)"
+   }
+  ],
+  "email": [
+   {
+    "text": "Email",
+    "if": "^(?!none$)"
+   }
+  ],
+  "ein": [
+   {
+    "at": {
+     "page": 1,
+     "x": 70,
+     "y": 701,
+     "w": 34,
+     "size": 11,
+     "comb": 2
+    },
+    "pick": "ein1"
+   },
+   {
+    "at": {
+     "page": 1,
+     "x": 112,
+     "y": 701,
+     "w": 117,
+     "size": 11,
+     "comb": 7
+    },
+    "pick": "ein2"
+   }
+  ],
+  "contact": [
+   {
+    "text": "First Name",
+    "pick": "first",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Middle Name optional",
+    "pick": "middle",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Last Name",
+    "pick": "last",
+    "if": "^(?!none$)"
+   }
+  ],
+  "contact_title": [
+   {
+    "text": "TitlePosition",
+    "if": "^(?!none$)"
+   }
+  ],
+  "department": [
+   {
+    "text": "Department",
+    "if": "^(?!none$)"
+   }
+  ],
+  "contact_mailing": [
+   {
+    "text": "Mailing Address Building Number Street Name ApartmentSuiteOther",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City_2",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "State_2",
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "ZIP Code_2",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "officer1": [
+   {
+    "text": "Last Name_4",
+    "pick": "head|last"
+   },
+   {
+    "text": "First Name_3",
+    "pick": "head|first"
+   },
+   {
+    "text": "Middle Name optional_4",
+    "pick": "head|middle"
+   },
+   {
+    "text": " of Ownership",
+    "pick": "tail|tail|head"
+   },
+   {
+    "check": "Chairman",
+    "if": "^[^,]*,\\s*chairman\\s*(,|$)"
+   },
+   {
+    "check": "Director",
+    "if": "^[^,]*,\\s*director\\s*(,|$)"
+   },
+   {
+    "check": "Officer",
+    "if": "^[^,]*,\\s*officer\\s*(,|$)"
+   },
+   {
+    "check": "Shareholder",
+    "if": "^[^,]*,\\s*shareholder\\s*(,|$)"
+   },
+   {
+    "check": "President",
+    "if": "^[^,]*,\\s*president\\s*(,|$)"
+   },
+   {
+    "check": "Corporate Secretary",
+    "if": "^[^,]*,\\s*(corporate )?secretary\\s*(,|$)"
+   },
+   {
+    "check": "Treasurer",
+    "if": "^[^,]*,\\s*treasurer\\s*(,|$)"
+   },
+   {
+    "check": "Trustee",
+    "if": "^[^,]*,\\s*trustee\\s*(,|$)"
+   },
+   {
+    "check": "Vice President",
+    "if": "^[^,]*,\\s*vice president\\s*(,|$)"
+   },
+   {
+    "check": "Partner",
+    "if": "^[^,]*,\\s*partner\\s*(,|$)"
+   },
+   {
+    "check": "Member",
+    "if": "^[^,]*,\\s*(managing )?member\\s*(,|$)"
+   },
+   {
+    "check": "Other",
+    "if": "^[^,]*,\\s*other\\s*(,|$)"
+   }
+  ],
+  "officer1_address": [
+   {
+    "text": "Home Address Building Number Street Name ApartmentSuiteOther_3",
+    "pick": "street"
+   },
+   {
+    "text": "City_5",
+    "pick": "city"
+   },
+   {
+    "text": "State_5",
+    "pick": "state"
+   },
+   {
+    "text": "ZIP Code_5",
+    "pick": "zip"
+   }
+  ],
+  "officer2": [
+   {
+    "text": "Last Name_5",
+    "pick": "head|last",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "First Name_4",
+    "pick": "head|first",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "Middle Name optional_5",
+    "pick": "head|middle",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": " of Ownership_2",
+    "pick": "tail|tail|head",
+    "if": "^(?!none$)"
+   },
+   {
+    "check": "Chairman_2",
+    "if": "^[^,]*,\\s*chairman\\s*(,|$)"
+   },
+   {
+    "check": "Director_2",
+    "if": "^[^,]*,\\s*director\\s*(,|$)"
+   },
+   {
+    "check": "Officer_2",
+    "if": "^[^,]*,\\s*officer\\s*(,|$)"
+   },
+   {
+    "check": "Shareholder_2",
+    "if": "^[^,]*,\\s*shareholder\\s*(,|$)"
+   },
+   {
+    "check": "President_2",
+    "if": "^[^,]*,\\s*president\\s*(,|$)"
+   },
+   {
+    "check": "Corporate Secretary_2",
+    "if": "^[^,]*,\\s*(corporate )?secretary\\s*(,|$)"
+   },
+   {
+    "check": "Treasurer_2",
+    "if": "^[^,]*,\\s*treasurer\\s*(,|$)"
+   },
+   {
+    "check": "Trustee_2",
+    "if": "^[^,]*,\\s*trustee\\s*(,|$)"
+   },
+   {
+    "check": "Vice President_2",
+    "if": "^[^,]*,\\s*vice president\\s*(,|$)"
+   },
+   {
+    "check": "Partner_2",
+    "if": "^[^,]*,\\s*partner\\s*(,|$)"
+   },
+   {
+    "check": "Member_2",
+    "if": "^[^,]*,\\s*(managing )?member\\s*(,|$)"
+   },
+   {
+    "check": "Other_2",
+    "if": "^[^,]*,\\s*other\\s*(,|$)"
+   }
+  ],
+  "officer2_address": [
+   {
+    "text": "Home Address Building Number Street Name ApartmentSuiteOther_4",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City_6",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "State_6",
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "ZIP Code_6",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_business": [
+   {
+    "text": "Business Name",
+    "pick": "head",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": " of Ownership_3",
+    "pick": "tail",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_business_ein": [
+   {
+    "at": {
+     "page": 3,
+     "x": 70,
+     "y": 177,
+     "w": 34,
+     "size": 11,
+     "comb": 2
+    },
+    "pick": "ein1",
+    "if": "^(?!none$)"
+   },
+   {
+    "at": {
+     "page": 3,
+     "x": 112,
+     "y": 177,
+     "w": 117,
+     "size": 11,
+     "comb": 7
+    },
+    "pick": "ein2",
+    "if": "^(?!none$)"
+   }
+  ],
+  "owner_business_address": [
+   {
+    "text": "Mailing Address Building Number Street Name ApartmentSuiteOther_2",
+    "pick": "street",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "City_7",
+    "pick": "city",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "State_7",
+    "pick": "state",
+    "if": "^(?!none$)"
+   },
+   {
+    "text": "ZIP Code_7",
+    "pick": "zip",
+    "if": "^(?!none$)"
+   }
+  ],
+  "inspection_language": [
+   {
+    "radio": "Do you prefer that business inspections be conducted in a",
+    "value": "No_16",
+    "if": "^english$"
+   },
+   {
+    "radio": "Do you prefer that business inspections be conducted in a",
+    "value": "Yes_16",
+    "if": "^(?!english$)"
+   },
+   {
+    "check": "Mandarin",
+    "if": "^mandarin$"
+   },
+   {
+    "check": "Cantonese",
+    "if": "^cantonese$"
+   },
+   {
+    "check": "Korean",
+    "if": "^korean$"
+   },
+   {
+    "check": "Spanish",
+    "if": "^spanish$"
+   },
+   {
+    "check": "Vietnamese",
+    "if": "^vietnamese$"
+   },
+   {
+    "check": "Bengali",
+    "if": "^bengali$"
+   },
+   {
+    "check": "Arabic",
+    "if": "^arabic$"
+   },
+   {
+    "check": "French",
+    "if": "^french$"
+   },
+   {
+    "check": "FrenchCreole",
+    "if": "^french.creole$"
+   },
+   {
+    "check": "Haitian Creole",
+    "if": "^haitian creole$"
+   },
+   {
+    "check": "Hindi",
+    "if": "^hindi$"
+   },
+   {
+    "check": "Italian",
+    "if": "^italian$"
+   },
+   {
+    "check": "Polish",
+    "if": "^polish$"
+   },
+   {
+    "check": "Russian",
+    "if": "^russian$"
+   },
+   {
+    "check": "Farsi",
+    "if": "^farsi$"
+   },
+   {
+    "check": "Hebrew",
+    "if": "^hebrew$"
+   },
+   {
+    "check": "Urdu",
+    "if": "^urdu$"
+   },
+   {
+    "check": "Other_3",
+    "if": "^other\\b"
+   },
+   {
+    "text": "Please specify",
+    "pick": "tail",
+    "if": "^other\\b"
+   }
+  ],
+  "signer": [
+   {
+    "text": "Print Full Name"
+   }
+  ],
+  "signer_title": [
+   {
+    "text": "Print TitlePosition if any"
+   }
+  ]
+ },
+ "blank": {
+  "dba": "^none$",
+  "phone2": "^none$",
+  "email": "^none$",
+  "contact": "^none$",
+  "contact_title": "^none$",
+  "department": "^none$",
+  "contact_mailing": "^none$",
+  "officer2": "^none$",
+  "officer2_address": "^none$",
+  "owner_business": "^none$",
+  "owner_business_ein": "^none$",
+  "owner_business_address": "^none$"
+ }
+}
