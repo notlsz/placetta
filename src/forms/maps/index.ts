@@ -18,6 +18,7 @@ import m_dal_food_permit from "./dal-food-permit.json";
 import m_den_plan_review from "./den-plan-review.json";
 import m_den_zoning from "./den-zoning.json";
 import m_fl_sunbiz from "./fl-sunbiz.json";
+import m_fulton_plan_review from "./fulton-plan-review.json";
 import m_hou_co from "./hou-co.json";
 import m_hou_food_dealer from "./hou-food-dealer.json";
 import m_hou_sign from "./hou-sign.json";
@@ -31,6 +32,7 @@ import m_lac_health_permit from "./lac-health-permit.json";
 import m_lac_plan_check from "./lac-plan-check.json";
 import m_lv_food from "./lv-food.json";
 import m_mpls_food_license from "./mpls-food-license.json";
+import m_mpls_plan_review from "./mpls-plan-review.json";
 import m_mult_food_license from "./mult-food-license.json";
 import m_mult_plan_review from "./mult-plan-review.json";
 import m_nv_esd from "./nv-esd.json";
@@ -43,6 +45,7 @@ import m_or_payroll from "./or-payroll.json";
 import m_phx_co from "./phx-co.json";
 import m_sac_bot from "./sac-bot.json";
 import m_sacc_plan_review from "./sacc-plan-review.json";
+import m_sat_co from "./sat-co.json";
 import m_sf_dph_plan_check from "./sf-dph-plan-check.json";
 import m_sf_fire_assembly from "./sf-fire-assembly.json";
 import m_sf_formula_retail from "./sf-formula-retail.json";
@@ -74,6 +77,7 @@ export const MAPS: Record<string, FormMap> = {
   "den-plan-review": m_den_plan_review as FormMap,
   "den-zoning": m_den_zoning as FormMap,
   "fl-sunbiz": m_fl_sunbiz as FormMap,
+  "fulton-plan-review": m_fulton_plan_review as FormMap,
   "hou-co": m_hou_co as FormMap,
   "hou-food-dealer": m_hou_food_dealer as FormMap,
   "hou-sign": m_hou_sign as FormMap,
@@ -87,6 +91,7 @@ export const MAPS: Record<string, FormMap> = {
   "lac-plan-check": m_lac_plan_check as FormMap,
   "lv-food": m_lv_food as FormMap,
   "mpls-food-license": m_mpls_food_license as FormMap,
+  "mpls-plan-review": m_mpls_plan_review as FormMap,
   "mult-food-license": m_mult_food_license as FormMap,
   "mult-plan-review": m_mult_plan_review as FormMap,
   "nv-esd": m_nv_esd as FormMap,
@@ -99,6 +104,7 @@ export const MAPS: Record<string, FormMap> = {
   "phx-co": m_phx_co as FormMap,
   "sac-bot": m_sac_bot as FormMap,
   "sacc-plan-review": m_sacc_plan_review as FormMap,
+  "sat-co": m_sat_co as FormMap,
   "sf-dph-plan-check": m_sf_dph_plan_check as FormMap,
   "sf-fire-assembly": m_sf_fire_assembly as FormMap,
   "sf-formula-retail": m_sf_formula_retail as FormMap,

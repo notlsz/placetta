@@ -1,0 +1,644 @@
+{
+ "form": "fulton-plan-review",
+ "rev": "Application for Permit to Construct a Food Service Establishment (AS-5.7.19)",
+ "pdf": "fulton-plan-review.pdf",
+ "url": "https://fultoncountyga.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Food-Service-Application.pdf",
+ "checked": "2026-10-18",
+ "notes": "Fulton County Board of Health's application for a permit to construct a food service establishment. A flat, print-only form: answers are printed on the underscore lines. Addresses are printed over their small labels: house number, street (with any suite), city, state and ZIP. The signature, its date and the EHS-use block are left for the applicant and the county.",
+ "lines": [
+  {
+   "id": "est_name",
+   "line": "Establishment",
+   "en": "Establishment name",
+   "zh": "场所名称"
+  },
+  {
+   "id": "est_address",
+   "line": "Establishment",
+   "en": "Establishment address",
+   "zh": "场所地址"
+  },
+  {
+   "id": "est_phone",
+   "line": "Establishment",
+   "en": "Establishment telephone",
+   "zh": "场所电话"
+  },
+  {
+   "id": "est_fax",
+   "line": "Establishment",
+   "en": "Establishment fax",
+   "zh": "场所传真"
+  },
+  {
+   "id": "est_email",
+   "line": "Establishment",
+   "en": "Establishment email",
+   "zh": "场所电子邮箱"
+  },
+  {
+   "id": "est_type",
+   "line": "Establishment",
+   "en": "Establishment type",
+   "zh": "场所类型",
+   "options": [
+    "Extended",
+    "Fixed"
+   ]
+  },
+  {
+   "id": "owner",
+   "line": "Owner",
+   "en": "Owner: \"name, title\"",
+   "zh": "所有人：\"姓名, 职务\""
+  },
+  {
+   "id": "owner_address",
+   "line": "Owner",
+   "en": "Owner address",
+   "zh": "所有人地址"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Owner",
+   "en": "Owner telephone",
+   "zh": "所有人电话"
+  },
+  {
+   "id": "owner_fax",
+   "line": "Owner",
+   "en": "Owner fax",
+   "zh": "所有人传真"
+  },
+  {
+   "id": "owner_email",
+   "line": "Owner",
+   "en": "Owner email",
+   "zh": "所有人电子邮箱"
+  },
+  {
+   "id": "applicant",
+   "line": "Applicant",
+   "en": "Applicant name",
+   "zh": "申请人姓名"
+  },
+  {
+   "id": "applicant_address",
+   "line": "Applicant",
+   "en": "Applicant address",
+   "zh": "申请人地址"
+  },
+  {
+   "id": "applicant_work",
+   "line": "Applicant",
+   "en": "Applicant work phone",
+   "zh": "申请人工作电话"
+  },
+  {
+   "id": "applicant_cell",
+   "line": "Applicant",
+   "en": "Applicant cell phone",
+   "zh": "申请人手机"
+  },
+  {
+   "id": "applicant_email",
+   "line": "Applicant",
+   "en": "Applicant email",
+   "zh": "申请人电子邮箱"
+  },
+  {
+   "id": "applicant_fax",
+   "line": "Applicant",
+   "en": "Applicant fax",
+   "zh": "申请人传真"
+  },
+  {
+   "id": "contractor",
+   "line": "Contractor",
+   "en": "Contractor: \"name, title\"",
+   "zh": "承包商：\"名称, 职务\""
+  },
+  {
+   "id": "contractor_address",
+   "line": "Contractor",
+   "en": "Contractor address",
+   "zh": "承包商地址"
+  },
+  {
+   "id": "contractor_phone",
+   "line": "Contractor",
+   "en": "Contractor telephone",
+   "zh": "承包商电话"
+  },
+  {
+   "id": "contractor_fax",
+   "line": "Contractor",
+   "en": "Contractor fax",
+   "zh": "承包商传真"
+  },
+  {
+   "id": "contractor_email",
+   "line": "Contractor",
+   "en": "Contractor email",
+   "zh": "承包商电子邮箱"
+  },
+  {
+   "id": "signer",
+   "line": "Certification",
+   "en": "Applicant name (print) for the certification",
+   "zh": "声明中的申请人姓名（正楷）"
+  },
+  {
+   "id": "signer_title",
+   "line": "Certification",
+   "en": "Applicant's title",
+   "zh": "申请人职务"
+  }
+ ],
+ "blank": {
+  "est_fax": "^(none|no|n/?a)\\.?$",
+  "owner_fax": "^(none|no|n/?a)\\.?$",
+  "applicant_cell": "^(none|no|n/?a)\\.?$",
+  "applicant_fax": "^(none|no|n/?a)\\.?$",
+  "contractor": "^(none|no|n/?a)\\.?$",
+  "contractor_address": "^(none|no|n/?a)\\.?$",
+  "contractor_phone": "^(none|no|n/?a)\\.?$",
+  "contractor_fax": "^(none|no|n/?a)\\.?$",
+  "contractor_email": "^(none|no|n/?a)\\.?$"
+ },
+ "boxes": {
+  "est_name": [
+   {
+    "at": {
+     "page": 0,
+     "x": 94,
+     "y": 608,
+     "w": 478,
+     "size": 9
+    }
+   }
+  ],
+  "est_address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 104,
+     "y": 588,
+     "w": 32,
+     "size": 8
+    },
+    "pick": "street|streetno"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 140,
+     "y": 588,
+     "w": 236,
+     "size": 8
+    },
+    "pick": "street|streetname"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 378,
+     "y": 588,
+     "w": 110,
+     "size": 8
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 494,
+     "y": 588,
+     "w": 30,
+     "size": 8
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 528,
+     "y": 588,
+     "w": 46,
+     "size": 8
+    },
+    "pick": "zip"
+   }
+  ],
+  "est_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 120,
+     "y": 567,
+     "w": 114,
+     "size": 9
+    }
+   }
+  ],
+  "est_fax": [
+   {
+    "at": {
+     "page": 0,
+     "x": 268,
+     "y": 567,
+     "w": 106,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "est_email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 406,
+     "y": 567,
+     "w": 168,
+     "size": 8
+    }
+   }
+  ],
+  "est_type": [
+   {
+    "mark": {
+     "page": 0,
+     "x": 217.8,
+     "y": 542.4,
+     "size": 8
+    },
+    "if": "^extended"
+   },
+   {
+    "mark": {
+     "page": 0,
+     "x": 361.8,
+     "y": 542.4,
+     "size": 8
+    },
+    "if": "^fixed"
+   }
+  ],
+  "owner": [
+   {
+    "at": {
+     "page": 0,
+     "x": 94,
+     "y": 511.7,
+     "w": 300,
+     "size": 9
+    },
+    "pick": "head"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 432,
+     "y": 511.7,
+     "w": 140,
+     "size": 9
+    },
+    "pick": "tail"
+   }
+  ],
+  "owner_address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 104,
+     "y": 491.3,
+     "w": 32,
+     "size": 8
+    },
+    "pick": "street|streetno"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 140,
+     "y": 491.3,
+     "w": 236,
+     "size": 8
+    },
+    "pick": "street|streetname"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 378,
+     "y": 491.3,
+     "w": 110,
+     "size": 8
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 494,
+     "y": 491.3,
+     "w": 30,
+     "size": 8
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 528,
+     "y": 491.3,
+     "w": 46,
+     "size": 8
+    },
+    "pick": "zip"
+   }
+  ],
+  "owner_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 120,
+     "y": 470.4,
+     "w": 112,
+     "size": 9
+    }
+   }
+  ],
+  "owner_fax": [
+   {
+    "at": {
+     "page": 0,
+     "x": 266,
+     "y": 470.4,
+     "w": 106,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "owner_email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 404,
+     "y": 470.4,
+     "w": 168,
+     "size": 8
+    }
+   }
+  ],
+  "applicant": [
+   {
+    "at": {
+     "page": 0,
+     "x": 94,
+     "y": 439.5,
+     "w": 478,
+     "size": 9
+    }
+   }
+  ],
+  "applicant_address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 104,
+     "y": 418.7,
+     "w": 32,
+     "size": 8
+    },
+    "pick": "street|streetno"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 140,
+     "y": 418.7,
+     "w": 236,
+     "size": 8
+    },
+    "pick": "street|streetname"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 378,
+     "y": 418.7,
+     "w": 110,
+     "size": 8
+    },
+    "pick": "city"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 494,
+     "y": 418.7,
+     "w": 30,
+     "size": 8
+    },
+    "pick": "state"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 528,
+     "y": 418.7,
+     "w": 46,
+     "size": 8
+    },
+    "pick": "zip"
+   }
+  ],
+  "applicant_work": [
+   {
+    "at": {
+     "page": 0,
+     "x": 102,
+     "y": 398.1,
+     "w": 180,
+     "size": 9
+    }
+   }
+  ],
+  "applicant_cell": [
+   {
+    "at": {
+     "page": 0,
+     "x": 346,
+     "y": 398.1,
+     "w": 222,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "applicant_email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 93,
+     "y": 377.3,
+     "w": 190,
+     "size": 8
+    }
+   }
+  ],
+  "applicant_fax": [
+   {
+    "at": {
+     "page": 0,
+     "x": 344,
+     "y": 377.3,
+     "w": 226,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor": [
+   {
+    "at": {
+     "page": 0,
+     "x": 94,
+     "y": 346.2,
+     "w": 300,
+     "size": 9
+    },
+    "pick": "head",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 432,
+     "y": 346.2,
+     "w": 140,
+     "size": 9
+    },
+    "pick": "tail",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_address": [
+   {
+    "at": {
+     "page": 0,
+     "x": 104,
+     "y": 325.6,
+     "w": 60,
+     "size": 8
+    },
+    "pick": "street|streetno",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 170,
+     "y": 325.6,
+     "w": 210,
+     "size": 8
+    },
+    "pick": "street|streetname",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 100,
+     "y": 304.8,
+     "w": 120,
+     "size": 8
+    },
+    "pick": "city",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 270,
+     "y": 304.8,
+     "w": 60,
+     "size": 8
+    },
+    "pick": "state",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   },
+   {
+    "at": {
+     "page": 0,
+     "x": 420,
+     "y": 304.8,
+     "w": 80,
+     "size": 8
+    },
+    "pick": "zip",
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_phone": [
+   {
+    "at": {
+     "page": 0,
+     "x": 120,
+     "y": 284.2,
+     "w": 114,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_fax": [
+   {
+    "at": {
+     "page": 0,
+     "x": 268,
+     "y": 284.2,
+     "w": 106,
+     "size": 9
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "contractor_email": [
+   {
+    "at": {
+     "page": 0,
+     "x": 405,
+     "y": 284.2,
+     "w": 168,
+     "size": 8
+    },
+    "if": "^(?!(none|no|n/?a|not applicable|无|没有|否|-+)\\.?$)"
+   }
+  ],
+  "signer": [
+   {
+    "at": {
+     "page": 0,
+     "x": 82,
+     "y": 254,
+     "w": 194,
+     "size": 9
+    }
+   }
+  ],
+  "signer_title": [
+   {
+    "at": {
+     "page": 0,
+     "x": 255,
+     "y": 194.5,
+     "w": 172,
+     "size": 9
+    }
+   }
+  ]
+ }
+}
