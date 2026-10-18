@@ -44,6 +44,7 @@ import m_ny_dtf_17 from "./ny-dtf-17.json";
 import m_oc_health_permit from "./oc-health-permit.json";
 import m_oc_plan_check from "./oc-plan-check.json";
 import m_or_payroll from "./or-payroll.json";
+import m_phl_plan_review from "./phl-plan-review.json";
 import m_phx_co from "./phx-co.json";
 import m_sac_bot from "./sac-bot.json";
 import m_sacc_plan_review from "./sacc-plan-review.json";
@@ -106,6 +107,7 @@ export const MAPS: Record<string, FormMap> = {
   "oc-health-permit": m_oc_health_permit as FormMap,
   "oc-plan-check": m_oc_plan_check as FormMap,
   "or-payroll": m_or_payroll as FormMap,
+  "phl-plan-review": m_phl_plan_review as FormMap,
   "phx-co": m_phx_co as FormMap,
   "sac-bot": m_sac_bot as FormMap,
   "sacc-plan-review": m_sacc_plan_review as FormMap,
