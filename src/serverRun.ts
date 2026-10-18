@@ -8,6 +8,10 @@ import { settleJobs, type Job } from "./jobs";
 import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy, usedInBlocks } from "./sources";
 import { MCP_PREFIX } from "./mcp";
 import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone } from "./harness";
+import { controlsBrief, jobsDone, runMode, withControls, type ControlCtx } from "./autonomy";
+import { applyHeld, goPlan, ownerCommand } from "./held";
+import { addUndo, recorder, undoTitle, type UndoRec } from "./rewind";
+import type { Notice } from "./businessRules";
 
 /* ------------------------------------------------------------------ *
  * The agent's tool loop as the server runs it: the same tools and
@@ -47,6 +51,8 @@ export type RunState = {
   recalled?: boolean;
   /** Tools called so far and how many returned an error, for the team's Agent health page. */
   toolCalls?: number; toolErrors?: number;
+  /** Undo (src/rewind.ts): what this run changed so far, and what left Placetta during it, carried across chunks. */
+  undo?: UndoRec[]; outside?: Bi[];
 };
 
 const MAX_ROUNDS = 16;
@@ -185,23 +191,50 @@ export async function runRounds(o: {
   /** Whose memory the run reads: the person who asked (agent-run passes the run's created_by). Their saved details
    *  (src/recall.ts) go in the instructions, and their people are reached by name. */
   me?: string;
+  /** Business rules (src/businessRules.ts): a message a rule asks to deliver, through the business's own channels. */
+  notify?: (n: Notice) => void;
 }): Promise<{ reply: Reply } | { paused: RunState }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
   const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt };
-  const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table } });
+  /* Owner controls (src/autonomy.ts): this run's mode (Ask me first, Usual, Plan first) and Undo's record of what it
+     changes (src/rewind.ts), both carried across chunks like the rest of the run. */
+  const rec = recorder(st.undo ?? []);
+  const outside: Bi[] = [...(st.outside ?? [])];
+  const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table }, undo: rec.recs(), outside });
   const mainRole: Role = o.role ?? "plan";
   const model = messagesModel("server", (body, _signal, deep, role) => o.send(body, deep, role ?? mainRole));
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
   const from: { channel?: Channel; plainSms: boolean; mcpReads?: Set<string> } = { channel: o.channel, plainSms: st.plainSms === true };
-  const apply = (p: Patch) => o.apply(guardPatch(from, p));
+  const apply = (p: Patch) => o.apply(rec.wrap(guardPatch(from, p)));
   const me = o.me ?? o.svc?.me;
   // Connected apps' tools (src/mcp.ts): none from plain SMS; from anywhere else outside the app, only the ones that read.
   const mcp = from.plainSms ? [] : ((await o.svc?.mcpTools?.().catch(() => [])) ?? []).filter(t => !isRemote(o.channel) || t.read_only);
-  const tools = makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request,
-    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}) });
+  const runKey = "r" + Date.parse(st.started).toString(36);
+  const ctl: ControlCtx = { get: o.ws, apply, mode: runMode(o.ws(), st.request ?? ""), remote: isRemote(o.channel), run: runKey, made, mark: () => { made.lastToolAt = st.text.length; }, notify: o.notify, outside: x => outside.push(x) };
+  const tools = withControls(makeTools(o.ws, apply, o.step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request,
+    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}) }), ctl);
   if (isRemote(o.channel)) from.mcpReads = new Set(tools.map(t => t.name).filter(n => n.startsWith(MCP_PREFIX)));
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms);
+  /** The run's undo point, once its work is done (src/rewind.ts). */
+  const keepUndo = () => { if (!rec.size()) return undefined; const id = "undo-" + runKey; o.apply(addUndo({ id, at: st.started!, title: undoTitle(st.request ?? ""), recs: rec.recs(), ...(outside.length ? { outside } : {}) })); return id; };
+  /* An owner's approval, carried out here (src/held.ts): agent-run lets only an owner start these, and only from the app. */
+  const cmd = isRemote(o.channel) ? null : ownerCommand(st.request ?? "");
+  if (cmd && "apply" in cmd) {
+    o.step({ state: "working", label: { en: "Making the changes you approved", zh: "正在完成您批准的更改" } });
+    ctl.mode = { mode: "usual", why: "approved" };   // an owner approved exactly these; Never rules still hold
+    const r = await applyHeld(o.ws, apply, tools, cmd.apply, o.lang);
+    jobsDone({ get: o.ws, apply, notify: o.notify }, st.started);
+    const undo = keepUndo();
+    return { reply: { text: [r ? r.text : { en: "Those changes were already made, or the card is gone.", zh: "这些更改已经完成，或卡片已不存在。" }], approvals: [], ...(undo ? { undo } : {}) } };
+  }
+  if (cmd && "go" in cmd && st.rounds === 0) {
+    const work = goPlan(o.ws, apply, cmd.go, o.lang, me);
+    // the model reads the job's own request, not the command; the run works it the usual way from here
+    if (work) { const lastUser = [...st.messages].reverse().find(m => m.role === "user"); if (lastUser) lastUser.content = work; }
+    ctl.mode = runMode(o.ws(), st.request ?? "");
+  }
+  const mode = ctl.mode;
+  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms) + controlsBrief(o.ws(), mode);
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
@@ -310,6 +343,10 @@ export async function runRounds(o: {
   }
 
   apply(settleJobs(st.started));
+  /* Business rules: each job this run finished fires "a job is done" once. Then the run's undo point, so the person
+     can put back what it changed (src/rewind.ts). */
+  jobsDone({ get: o.ws, apply, notify: o.notify }, st.started);
+  const undoId = keepUndo();
   // a reply that says "done" while a job it worked is still open gets that job's open steps, so it can't claim more
   const said = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
   const open = saysDone(said) || !said ?(o.ws().jobs ?? []).filter(j => j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(s => !s.done) && !checkedNow.includes(j.id)).slice(0, 2) : [];
@@ -327,5 +364,5 @@ export async function runRounds(o: {
   /* ---- end Sources ---- */
 
   return { reply: { text: [same(line ? `${final}\n\n${line}` : final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
-    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined } };
+    files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined, ...(undoId ? { undo: undoId } : {}) } };
 }

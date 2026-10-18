@@ -1,0 +1,117 @@
+/* Owner controls: the "/" menu and Plan first on the message box, Undo and the plan's buttons in the chat, Always
+   allow on an approval card, and the Settings pages for how much Odelia does on her own, house rules and business
+   rules. Same tokens as styles.css, so dark mode and the accent color follow. */
+
+/* ---------------------------------------------------------------- the "/" menu */
+.composer-wrap { position: relative; }
+.slash { position: absolute; left: 0; right: 0; bottom: calc(100% + 8px); z-index: 30; display: flex; flex-direction: column; max-height: min(340px, 52vh);
+  border-radius: 18px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .08), 0 24px 50px -22px rgba(30, 50, 90, .4); overflow: hidden; }
+.c-panel .slash { bottom: calc(100% + 6px); }
+.slash-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px 6px; font-size: 12px; color: var(--ink3); }
+.slash-h kbd { font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 3px 6px; border-radius: 6px; background: var(--mist2); color: var(--ink3); }
+.slash ul { list-style: none; margin: 0; padding: 0 6px 6px; overflow-y: auto; overscroll-behavior: contain; }
+.slash li + li.sl-g { margin-top: 4px; }
+.sl-g { padding: 8px 8px 2px; font-size: 11.5px; font-weight: 600; color: var(--ink3); }
+.slash button { display: grid; grid-template-columns: 11em minmax(0, 1fr); align-items: start; column-gap: 12px; width: 100%; min-height: 44px; padding: 8px 10px;
+  border-radius: 12px; text-align: left; color: var(--ink); }
+.slash button.on { background: var(--mist); }
+.slash code { display: flex; flex-direction: column; min-width: 0; font: 500 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--blue-ink); overflow-wrap: anywhere; }
+.slash code small { font-family: var(--sans); font-size: 12px; line-height: 1.35; color: var(--ink3); }
+.slash .sl-t { display: flex; flex-direction: column; min-width: 0; }
+.slash .sl-t b { font-weight: 500; font-size: 14px; line-height: 1.35; }
+.slash .sl-t small { font-size: 12.5px; line-height: 1.35; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 560px) {
+  .slash button { grid-template-columns: minmax(0, 1fr); row-gap: 2px; }
+  .slash code { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 0 8px; }
+  .slash .sl-t small { white-space: normal; }
+}
+
+/* Plan first, on the message box: a small toggle beside the microphone */
+.pf { flex: none; align-self: center; display: inline-flex; align-items: center; gap: 6px; height: 32px; margin: 0 2px; padding: 0 10px; border-radius: 10px;
+  font-size: 12.5px; font-weight: 500; color: var(--ink2); transition: background .15s, color .15s; }
+.pf svg { width: 16px; height: 16px; flex: none; }
+.pf:hover:not(:disabled) { background: var(--mist2); color: var(--ink); }
+.pf[aria-pressed="true"] { background: var(--sky); color: var(--blue-deep); }
+.pf:disabled { opacity: .4; }
+@media (max-width: 560px) { .pf .pf-w { display: none; } .pf { padding: 0 8px; } }
+/* the side panel's message box is narrow: the icon alone keeps the hint on one line */
+.c-panel .pf .pf-w { display: none; }
+.c-panel .pf { padding: 0 8px; }
+
+/* ---------------------------------------------------------------- the chat: Undo and the plan's buttons */
+.undo { display: flex; flex-direction: column; gap: 8px; }
+.undo-b { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: 4px 2px; font-size: 13px; color: var(--ink2); border-radius: 8px; }
+.undo-b:hover:not(:disabled) { color: var(--ink); }
+.undo-b svg { width: 15px; height: 15px; flex: none; }
+.undo-ask { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 12px 14px; border-radius: 14px; background: var(--mist); }
+.undo-ask p { flex: 1 1 220px; margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ink2); }
+.undo-ask .ua-btns { display: flex; gap: 8px; }
+.undo-done { padding: 12px 14px; border-radius: 14px; background: var(--mist); font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
+.undo-done > b { display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ink); }
+.undo-done > b svg { width: 15px; height: 15px; color: var(--blue-ink); }
+.undo-done h4 { margin: 10px 0 2px; font-size: 12.5px; font-weight: 600; color: var(--ink3); }
+.undo-done ul { list-style: none; margin: 0; padding: 0; }
+.undo-done li { padding: 2px 0; }
+/* a send still counting down: its title, then the countdown with Undo (src/SendHold.tsx) */
+.undo-held li { display: flex; flex-direction: column; gap: 4px; padding: 4px 0; }
+.undo-held li > small { color: var(--ink3); font-size: 12.5px; }
+
+.plan-gate { display: flex; flex-direction: column; gap: 10px; }
+.plan-gate .pg-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.plan-gate .pg-note { margin: 0; font-size: 13px; color: var(--ink3); }
+.plan-gate form { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: var(--mist); }
+.plan-gate textarea { width: 100%; min-height: 72px; resize: vertical; border: 0; border-radius: 10px; padding: 10px 12px; background: var(--card); font-size: 14.5px; line-height: 1.45; box-shadow: 0 0 0 1px rgba(var(--e), .08); }
+.plan-gate textarea:focus { outline: 2px solid var(--blue); outline-offset: 0; }
+.plan-gate form .pg-btns { justify-content: flex-end; }
+
+/* ---------------------------------------------------------------- an approval card: Always allow */
+.allow-rule { padding: 14px 16px; border-radius: 16px; background: var(--sky-wash); }
+.allow-rule h3 { margin: 0 0 6px; }
+.allow-rule label { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; align-items: start; padding: 6px 0; cursor: pointer; }
+.allow-rule input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--blue-ink); }
+.allow-rule label b { display: block; font-weight: 500; font-size: 14px; }
+.allow-rule label small { display: block; font-size: 12.5px; color: var(--ink3); line-height: 1.45; }
+.auto-note { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--sky-wash); font-size: 13.5px; color: var(--blue-deep); }
+.second-note { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--warm-soft); font-size: 13.5px; color: var(--warm); }
+
+/* ---------------------------------------------------------------- Settings */
+.mode-row { cursor: pointer; }
+.mode-row.on .sg-tx b { color: var(--blue-deep); }
+.sg-row.mode-row { grid-template-columns: minmax(0, 1fr) auto; }
+.rule-list { list-style: none; margin: 0; padding: 0; }
+.rule-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 0; }
+.rule-list li + li { border-top: 1px solid rgba(var(--e), .045); }
+.rule-list .rl-tx { display: flex; flex-direction: column; min-width: 0; line-height: 1.4; }
+.rule-list .rl-tx b { font-weight: 500; font-size: 14px; overflow-wrap: anywhere; }
+.rule-list .rl-tx small { font-size: 12.5px; color: var(--ink3); }
+.rule-list .rl-kind { font-style: normal; font-size: 12px; font-weight: 600; margin-right: 6px; }
+.rule-list .rl-kind.allow { color: var(--blue-ink); }
+.rule-list .rl-kind.deny { color: var(--warm); }
+.rule-list .rl-r { display: flex; align-items: center; gap: 8px; }
+.rule-empty { margin: 4px 0 0; font-size: 13.5px; color: var(--ink3); }
+.rule-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: end; margin-top: 12px; padding: 14px; border-radius: 16px; background: var(--mist); }
+.rule-form label { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: 12.5px; color: var(--ink3); }
+.rule-form input, .house-form input { height: 38px; border: 0; border-radius: 12px; padding: 0 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .1); font-size: 14px; color: var(--ink); min-width: 0; }
+.rule-form input:focus, .house-form input:focus { outline: 2px solid var(--blue); outline-offset: 0; }
+.rule-form .rf-h { grid-column: 1 / -1; margin: 0; font-size: 13px; font-weight: 600; color: var(--ink2); }
+.rule-form .rf-note { grid-column: 1 / -1; margin: 0; font-size: 12.5px; color: var(--ink3); }
+.rule-form.br { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.rule-form.br .rf-act { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
+@media (max-width: 640px) { .rule-form, .rule-form.br { grid-template-columns: minmax(0, 1fr); } .rule-form .sbtn { justify-self: end; } }
+
+.house-text { display: block; width: 100%; min-height: 260px; resize: vertical; border: 0; border-radius: 14px; padding: 14px 16px; background: var(--mist); color: var(--ink);
+  font: 14.5px/1.6 var(--sans); }
+html[lang="zh-CN"] .house-text { font-family: var(--zh); }
+.house-text::placeholder { color: var(--ink3); }
+.house-text:focus { outline: 2px solid var(--blue); outline-offset: 0; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .08); }
+.house-text[readonly] { color: var(--ink2); }
+.house-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.house-bar small { font-size: 12.5px; color: var(--ink3); }
+.house-bar small.over { color: var(--warm); }
+.house-bar .hb-act { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.house-warn { margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: var(--warm-soft); font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
+.house-warn b { display: block; color: var(--warm); font-weight: 600; }
+.house-warn p { margin: 2px 0 6px; }
+.house-warn ul { list-style: none; margin: 0; padding: 0; }
+.house-warn li { padding: 2px 0; color: var(--ink); overflow-wrap: anywhere; }
+.house-order { margin: 12px 0 0; font-size: 12.5px; color: var(--ink3); }

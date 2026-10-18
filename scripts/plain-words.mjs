@@ -6,7 +6,8 @@
      src/i18n.ts                every string
      src/*.tsx                  every string literal that reads as a sentence (has a space or Chinese characters),
                                 plus every B("…", "…") pair; identifiers in quotes ("handoff" as a state name) don't count
-     src/jobs.ts, src/serverRun.ts, src/harness.ts, src/live.ts
+     src/jobs.ts, src/serverRun.ts, src/harness.ts, src/live.ts, and the owner controls (src/autonomy.ts, rewind.ts,
+     businessRules.ts, commands.ts, held.ts, demoPlan.ts)
                                 B("…", "…") and L("…", "…") pairs and { en: "…", zh: "…" } labels only: the step
                                 labels and notes a person sees, not the instructions written for the model
    Allowed: code comments, import paths, class names, and the restaurant sense of "seats" in the forms library
@@ -21,6 +22,8 @@ const ROOT = new URL("../", import.meta.url).pathname;
 const BANNED = [
   // English: engineer words for how the agent is built, not what it does for you
   /\bharness(es)?\b/i, /\bseats?\b/i, /\bhand-?offs?\b/i, /\bcompactions?\b/i, /\bcheckers?\b/i,
+  // the owner controls copied from Claude Code: people see Business rules and Undo, never hooks or checkpoints
+  /\bhooks?\b/i, /\bcheckpoints?\b/i,
   // Chinese equivalents: 交接 (handoff), 检查器 (checker), 座席 (seat, the agent sense), 上下文压缩 (compaction), 线束 (harness)
   /交接/, /检查器/, /座席/, /上下文压缩/, /线束/,
 ];
@@ -47,7 +50,7 @@ const inPair = lead => /\b[BL]\(\s*$|\{\s*en:\s*$|,\s*$/.test(lead);
 const files = [];
 const srcDir = join(ROOT, "src");
 for (const f of readdirSync(srcDir)) if (f.endsWith(".tsx") || f === "i18n.ts") files.push({ path: join(srcDir, f), all: true });
-for (const f of ["jobs.ts", "serverRun.ts", "harness.ts", "live.ts"]) files.push({ path: join(srcDir, f), all: false });
+for (const f of ["jobs.ts", "serverRun.ts", "harness.ts", "live.ts", "autonomy.ts", "rewind.ts", "businessRules.ts", "commands.ts", "held.ts", "demoPlan.ts"]) files.push({ path: join(srcDir, f), all: false });
 
 const hits = [];
 for (const { path, all } of files) {

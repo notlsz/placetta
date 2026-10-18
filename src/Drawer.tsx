@@ -18,6 +18,7 @@ import { INK } from "./pages";
 import { filingBlockers } from "./core";
 import { BY_HAND } from "./guard";
 import { Working } from "./Bot";
+import { AllowRule } from "./AllowRule";
 
 /* ------------------------- application, opened ------------------------- */
 
@@ -323,6 +324,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const { b, t, lang, ws, approve, openApp, busy, cloud, go } = useApp();
   const a = ws.approvals.find(x => x.id === id);
   const [sig, setSig] = useState<Signed | null>(null);
+  const allow = useRef<(() => void) | null>(null);   // Always allow, ticked on this card (src/AllowRule.tsx): added on approve
   if (!a) return null;
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
   const fee = app && a.kind === "file" ? feeTotal(app) : 0;
@@ -404,6 +406,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
             <SignaturePad onChange={setSig} />
           </section>
         )}
+        <AllowRule a={a} commit={allow} />
         {app && a.kind === "file" && (
           <section>
             <h3>{t("ap_fee")}</h3>
@@ -419,7 +422,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <p>{cloud?.termsHold && <span className="ap-hold" role="note">{lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page to approve this."} </span>}{t("ap_note")} {cloud ? (a.kind === "file" ? t("ap_team") : "") : t("ap_sim")}</p>
         <div className="m-btns">
           {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
-          <Pill kind="ink" disabled={busy || blocked || (needSig && !sig) || !!cloud?.termsHold} onClick={() => { approve(a.id, sig ?? undefined); onClose(); }}>{b(a.action)}</Pill>
+          <Pill kind="ink" disabled={busy || blocked || (needSig && !sig) || !!cloud?.termsHold} onClick={() => { allow.current?.(); approve(a.id, sig ?? undefined); onClose(); }}>{b(a.action)}</Pill>
         </div>
       </footer>
     </Modal>

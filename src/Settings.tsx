@@ -19,6 +19,7 @@ import { TwoStepSetup } from "./cloud/TwoStep";
 import { replayTour } from "./Walkthrough";
 import { AuditTrail, ContextPage } from "./pages";
 import { PartnerSharing } from "./Partner";
+import { AutonomyGroup, BusinessRulesGroup, HouseRulesGroup } from "./OwnerRules";
 import gmailLogo from "./assets/integrations/gmail.png";
 import outlookLogo from "./assets/integrations/outlook.svg";
 import gcalLogo from "./assets/integrations/calendar.png";
@@ -1111,9 +1112,9 @@ function PinGroup({ st, setSt, ask }: { st: api.PinStatus | null; setSt: (s: api
 /* Settings categories, Anthropic style: a few clear groups in the sidebar, one shown at a time. */
 const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "general", label: B("General", "通用"), items: ["account", "appearance", "language"] },
-  { id: "facts", label: B("Business facts", "企业资料"), items: ["facts"] },
+  { id: "facts", label: B("Business facts", "企业资料"), items: ["facts", "house"] },
   { id: "team", label: B("Team", "团队"), items: ["team", "hq", "partner"] },
-  { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "phone", "approvals", "memory", "skills"] },
+  { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "autonomy", "brules", "phone", "approvals", "memory", "skills"] },
   { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
   { id: "billing", label: B("Billing", "账单"), items: ["billing", "spending"] },
   { id: "security", label: B("Security", "安全"), items: ["security", "pin"] },
@@ -1196,6 +1197,7 @@ export function Settings() {
           ] : [{ label: B("Sample workspace", "示例工作区"), sub: b(B("Everything here is sample data. Create an account to save your own business.", "这里都是示例数据。注册账户即可保存您自己的企业。")), icon: <I.user /> }]} />
 
           {show("facts") && <ContextPage />}
+          {show("house") && <HouseRulesGroup />}
           {show("activity") && <AuditTrail />}
           {show("team") && <Team />}
           {show("hq") && <HqShare />}
@@ -1234,9 +1236,12 @@ export function Settings() {
             )}
           </Group>
 
+          {/* Owner controls (src/OwnerRules.tsx): how much Odelia does on her own, with its rules, and business rules */}
+          {show("autonomy") && <AutonomyGroup />}
+          {show("brules") && <BusinessRulesGroup />}
           {show("phone") && <PhoneGroup />}
           <Group id="approvals" hidden={!show("approvals")} title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never files, buys, pays or sends without your approval, and that can't be turned off.", "快哉会自行准备材料，但未经您批准绝不提交、购买、付款或发送，此项无法关闭。")}
-            rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you", "代您发送的每一条消息")].map(l => ({ label: l, icon: <I.lock />, right: <em className="lock">{t("alwaysOn")}</em> }))} />
+            rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you, unless an Always allow rule you set covers it", "代您发送的每一条消息（您设置的“始终允许”规则除外）")].map(l => ({ label: l, icon: <I.lock />, right: <em className="lock">{t("alwaysOn")}</em> }))} />
           {show("spending") && <SpendingGroup />}
           {show("memory") && <MemoryGroup />}
           {show("skills") && <SkillsGroup />}

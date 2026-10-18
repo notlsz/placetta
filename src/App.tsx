@@ -42,6 +42,12 @@ import { normalize, withServer, type CloudSession } from "./cloud/session";
 import { Plans } from "./cloud/Plans";
 import { Queue, QueueLocked } from "./cloud/Ops";
 import { PartnerPage, usePartnerMe } from "./Partner";
+/* Owner controls: Plan first, Ask me first, Always allow, business rules and Undo (src/autonomy.ts, src/rewind.ts) */
+import { approvePlan, autoOk, markSecond, secondStep, workPrompt } from "./autonomy";
+import { addUndo, recorder, undoTitle } from "./rewind";
+import { applyHeldHere } from "./held";
+import { withDemoPlan } from "./demoPlan";
+import { ownerApprove } from "./cloud/owners";
 
 const KEY = "placetta-api-key", KEY_MODEL = "placetta-api-model";
 const readKey = () => { try { return { key: localStorage.getItem(KEY) ?? "", model: localStorage.getItem(KEY_MODEL) ?? API_MODELS[0].id }; } catch { return { key: "", model: API_MODELS[0].id }; } };
@@ -433,12 +439,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const ctl = new AbortController(); abort.current = ctl;
     let onServer = false, firstAt = "";
     const askedAt = nowIso();
+    /* Undo (src/rewind.ts): a request worked in this browser records what it changes; a server run brings its own. */
+    const rec = "text" in req ? recorder() : null, askedText = "text" in req ? req.text : "";
     const onEvent = (e: AgentEvent) => {
       if (e.type === "step") { setStep(e.step); upd(m => ({ steps: [...m.steps, e.step], active: e.index })); }
-      else if (e.type === "update") setWs(e.patch);
+      else if (e.type === "update") setWs(rec ? rec.wrap(e.patch) : e.patch);
       else if (e.type === "draft") { if (e.text && !firstAt) firstAt = nowIso(); upd(() => ({ draft: e.text })); }
       else {
-        const r: Reply = e.reply;
+        let r: Reply = e.reply;
+        if (rec && !r.undo) { const uid = "undo-b" + Date.now().toString(36); setWs(w => addUndo({ id: uid, at: nowIso(), title: undoTitle(askedText), recs: rec.recs() })(w)); r = { ...r, undo: uid }; }
         upd(() => ({ reply: r, active: -1, ms: performance.now() - t0, draft: undefined }));
         said = r.text.map(x => x[lang]).join(" ");
         if (r.matches) setMatch(r.matches);
@@ -452,7 +461,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       }
     };
     const m = modelRef.current;
-    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me }) : demoAgent;
+    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me }) : withDemoPlan(demoAgent);
     try {
       // In an account the agent works on the server, so it carries on if the app is closed.
       const id = resumeId ?? (cloud && !api.PREVIEW && "text" in req && m ? await api.startRun(cloud.wsId, { prompt: req.text, history: history.current.slice(-12), lang, deep }) : null);
@@ -691,6 +700,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (p.payeeUrl) window.open(p.payeeUrl, "_blank", "noopener,noreferrer");
     say(zh ? "已批准。请在机构页面付款，然后点“我已付款”。" : "Approved. Pay it on the agency's page, then tap \"I've paid it\".");
   };
+  const [afterPlan, setAfterPlan] = useState<string | null>(null);   // a plan approved here: the request that starts its work
+  const autoSent = useRef(new Set<string>());                        // messages approved under an Always allow rule
   /* The undo window (src/hold.ts): what the app sends itself (the sample's filings, a message from your own mailbox)
      waits HOLD_MINUTES with an Undo, then comes back through approve, which lets it pass. In an account the server
      holds filings itself (supabase/functions/file). True when a hold just started. */
@@ -706,6 +717,45 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
     const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
     const shown = `${S.approvedIt[lang]}: ${a.title[lang]}`;
+    /* Always allow: a message approved under an owner's rule goes, when its undo window ends, only while the rule still
+       covers it and no Never rule stops it. Otherwise it waits for a person's own approval. */
+    if (autoSent.current.has(id) && a.auto && !autoOk(a, w)) {
+      autoSent.current.delete(id);
+      setWs(x => audit("agent", B("Didn't send: your rule changed", "未发送：您的规则已更改"), a.auto!.label, a.title)({ ...x, approvals: x.approvals.map(y => (y.id === id ? { ...y, auto: undefined } : y)) }));
+      say(lang === "zh" ? "未发送：您的“始终允许”规则已不再适用。如仍要发送，请您亲自批准。" : "Not sent: your Always allow rule no longer covers it. Approve it yourself if you still want it sent.");
+      return;
+    }
+    /* Owner controls (src/autonomy.ts): a plan written under Plan first, or changes held under Ask me first. In an
+       account the server carries them out (agent-run lets only an owner start that run); otherwise this browser does. */
+    if (a.kind === "change" && (a.change?.op === "plan" || a.change?.op === "held")) {
+      if (!ownerOk()) return;
+      const viaServer = !!cloud && !api.PREVIEW && !!modelRef.current;
+      if (a.change.op === "plan") {
+        const job = a.change.job;
+        if (viaServer) { setPanelOpen(true); void run({ text: "/go " + job }, shown); return; }
+        setWs(approvePlan(job, cloud?.me.email));
+        const j = (w.jobs ?? []).find(x => x.id === job);
+        if (j) setAfterPlan(workPrompt(j, lang));
+        return;
+      }
+      if (viaServer) { setPanelOpen(true); void run({ text: "/apply " + a.id }, shown); return; }
+      const r = await applyHeldHere(a.id, { get: () => wsRef.current, apply: setWs, lang, model: modelRef.current, svc: services, files: kept.current, account: !!cloud });
+      if (r) { setPanelOpen(true); pushTurn(shown, { text: [r.text], undo: r.undo }); }
+      return;
+    }
+    /* A business rule wants two owners on this one (src/businessRules.ts): the first owner's approval is recorded and it
+       waits for another. In an account the database counts two owners again when the filing goes in. */
+    if (a.second) {
+      if (cloud && !ownerOk()) return;
+      const me = cloud?.me.email ?? "you", step = secondStep(a, me);
+      if (cloud && a.app && step !== "again") { try { await ownerApprove(cloud.wsId, a.app); } catch { /* the database still checks at filing */ } }
+      if (step !== "ready") {
+        if (step === "first") setWs(x => audit("you", B("Approved, one of two owners", "已批准（两位所有者之一）"), a.title)(markSecond(a.id, me)(x)));
+        say(step === "first" ? (lang === "zh" ? "已批准。按您的业务规则，还需另一位所有者批准后才会进行。" : "Approved. Under your business rule, another owner approves it too before it goes ahead.")
+          : (lang === "zh" ? "您已经批准过了。还需另一位所有者批准。" : "You've approved it already. Another owner approves it too."));
+        return;
+      }
+    }
     // every kind of filing: nothing goes out with an empty field or a missing document
     const filingApp = a.kind === "file" ? w.apps.find(x => x.id === a.app) : undefined;
     if (filingApp && !readyToFile(filingApp)) { say(blockersSay(filingApp)[lang]); return; }
@@ -778,7 +828,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     run({ approve: id }, shown);
-  }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk, held]);
+  }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk, held, services]);
   approveRef.current = approve;
   /* Everything ready, from one tap: the same checks as one at a time (complete, nothing the second look says is wrong),
      filed in turn, and one answer that shows each filing live. */
@@ -786,7 +836,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (held()) return;
     if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
     const w = wsRef.current, today = daysFromNow(0);
-    const ok = ids.map(id => w.approvals.find(a => a.id === id)).filter((a): a is Approval => !!a && a.kind === "file").filter(a => {
+    // one that needs two owners under a business rule is approved on its own, never in a batch
+    const ok = ids.map(id => w.approvals.find(a => a.id === id)).filter((a): a is Approval => !!a && a.kind === "file" && !a.second).filter(a => {
       const app = w.apps.find(x => x.id === a.app);
       return !!app && readyToFile(app) && !preflight(w, a, today).errors.length;
     });
@@ -806,6 +857,27 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     for (const a of ok) { if (await fileOne(a) && a.app) filed.push(a.app); }
     if (filed.length) pushTurn(shown, { text: [B(`Approved ${filed.length === 2 ? "both" : `all ${filed.length}`}. I'm filing each one now; every step and what the agency sends back shows below, live.`, `已批准 ${filed.length} 项。我正在逐一提交，每一步和机构的回执都会实时显示在下方。`)], filed });
   }, [held, cloud, say, lang, approve, run, ownerOk, plan, fileOne, pushTurn]);   // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ---- Owner controls (src/autonomy.ts, src/commands.ts) ---- */
+  // After a plan is approved in this browser: its work starts once the workspace shows the approval.
+  useEffect(() => { if (!afterPlan || busy) return; const q = afterPlan; setAfterPlan(null); ask(q); }, [afterPlan, busy, ask]);
+  // "/forget": a fresh conversation. The workspace, memory and playbooks stay.
+  useEffect(() => {
+    const on = () => { history.current = []; setFeed([]); setAsked([]); say(lang === "zh" ? "已开始新的对话。工作区和记忆保持不变。" : "Fresh conversation. Your workspace and memory stay."); };
+    addEventListener("placetta:forget", on);
+    return () => removeEventListener("placetta:forget", on);
+  }, [say, lang]);
+  // Always allow: a message an owner's rule covers is approved without another tap while an owner has the app open, and
+  // then waits out the undo window like any other send (src/hold.ts). Never a filing, a payment or anything with a fee,
+  // and never one asked for from outside the app (it isn't marked).
+  useEffect(() => {
+    if (!owner || busy || termsHold) return;
+    const a = view_.approvals.find(x => !autoSent.current.has(x.id) && autoOk(x, view_));
+    if (!a) return;
+    autoSent.current.add(a.id);
+    setWs(audit("agent", B("Approved under your rule", "已按您的规则批准"), a.auto!.label, a.title));
+    void approve(a.id);
+  }, [view_, owner, busy, termsHold, approve]);
 
   useEffect(() => {
     const id = pendingFiling.current;

@@ -10,6 +10,7 @@ import { daysFromNow } from "./time";
 import { BorderBeam } from "border-beam";
 import { AgentBot, LiveBot } from "./Bot";
 import { taskVerb } from "./tasks";
+import { useSlash } from "./SlashMenu";
 
 const BEAM = ["#7399C6", "#9DB8DA", "#5F88BA", "#B9CFE8", "#8FAED3", "#C9D8EC", "#A7BFE0"];
 const BAND = { core: "#FFFFFF", above: "#8FAED3", mid: "#C9D8EC", below: "#B9CFE8" };
@@ -119,8 +120,10 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
   const ta = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { const el = ta.current; if (!el) return; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 128) + "px"; }, [draft]);
   const attach = useRef<HTMLInputElement>(null);
+  /* Commands ("/" in the box) and Plan first (src/SlashMenu.tsx): a command becomes its request when it's sent. */
+  const slash = useSlash({ draft, setDraft, variant });
   // while she's busy, what you send waits its turn (Work, Up next)
-  const send = () => { const q = draft.trim(); if (q) { setDraft(""); ask(q); } };
+  const send = () => { const q = draft.trim(); if (q) { setDraft(""); slash.send(q); } };
   const level = useCallback(() => Math.max(sim.level(), tts.level()), [sim, tts]);
   const dock = variant === "dock";
   // voice mode fits any height: the bot shrinks on short screens (an embedded preview can be under 500px tall)
@@ -137,6 +140,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
       {dock && chips.length > 0 && !busy && (
         <div className="sugg dock-chips">{chips.map(s => <button key={s.en} type="button" onClick={() => (isUploadChip(s) ? attach.current?.click() : ask(b(s)))}>{isUploadChip(s) ? <I.upload /> : null}{b(s)}</button>)}</div>
       )}
+      {slash.menu}
       <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={dock ? 0.16 : 0.1} scale={dock ? 1.1 : 0.9} borderRadius={RADIUS[variant]}>
         <BorderBeam className="c-edge" size="md" theme="light" colorVariant="ice" borderRadius={RADIUS[variant]} staticColors brightness={1} saturation={1} strength={0.85} css={EDGE_CSS}>
         <form className="composer" onSubmit={e => { e.preventDefault(); send(); }}>
@@ -144,8 +148,9 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
           {!dock && <button type="button" className="ic" aria-label={t("attach")} title={t("attach")} onClick={() => attach.current?.click()} disabled={busy}><I.plus /></button>}
           <input ref={attach} type="file" multiple hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload("", "", f); }} />
           <label htmlFor={"ask-" + variant} className="sr">{t("askPh")}</label>
-          <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={narrow ? t("askPhShort") : t("askPh")} onChange={e => setDraft(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
+          <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={slash.plan ? (lang === "zh" ? "描述要做的事，Odelia 先写计划" : "Describe the job; Odelia plans it first") : narrow ? t("askPhShort") : t("askPh")} onChange={e => setDraft(e.target.value)}
+            {...slash.inputProps} onKeyDown={e => { if (slash.onKey(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
+          {slash.toggle(busy)}
           <button type="button" className="ic mic" aria-label={t("talk")} title={t("talk")} onClick={startVoice} disabled={busy}><I.mic /></button>
           {busy && !draft.trim()
             ? <button type="button" className="sendb stop" onClick={stop} aria-label={t("stop")} title={t("stop")}><I.stopSq /></button>
