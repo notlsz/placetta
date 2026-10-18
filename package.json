@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && npm run beam && vite build",
+    "build": "tsc -b && node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && npm run beam && npm run site:check && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "build:single": "tsc -b && vite build --mode single",
@@ -23,6 +23,8 @@
     "test:flow": "esbuild scripts/agent-flow-test.ts --bundle --platform=node --format=esm --outfile=.agent-flow-test.mjs '--external:*.pdf?inline' --packages=external --jsx=automatic --log-level=error && node .agent-flow-test.mjs; s=$?; rm -f .agent-flow-test.mjs; exit $s",
     "selftest": "node scripts/selftest.mjs",
     "test:words": "node scripts/plain-words.mjs",
+    "test:stores": "esbuild scripts/stores-check-test.ts --bundle --platform=node --format=esm --outfile=.stores-check-test.mjs '--external:*.pdf?inline' --log-level=error && node .stores-check-test.mjs; s=$?; rm -f .stores-check-test.mjs; exit $s",
+    "site:check": "esbuild src/site/stores-check.ts --bundle --minify --format=iife --target=es2020 --outfile=site/stores-check.js --log-level=warning",
     "leads:fda": "node scripts/fda-leads.mjs",
     "test:fda": "node --test scripts/fda-leads.test.mjs",
     "test:e2e": "deno run -A --no-check --no-lock --node-modules-dir=none scripts/e2e/run.ts",

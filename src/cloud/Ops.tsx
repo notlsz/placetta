@@ -7,6 +7,7 @@ import * as api from "./api";
 import { openSettings } from "../Settings";
 import { CompanyMetrics } from "../Metrics";
 import { AskReply } from "./AskReply";
+import { OpsMore, OpsTabs, useOpsTab } from "./OpsMore";
 
 /* The Placetta team's filing queue. Each request is exactly what the customer approved: the form, the fields,
    the attachments and the agency site. The team checks it against the agency's current requirements, submits it,
@@ -202,9 +203,13 @@ export function Queue() {
   const finish = async (id: string) => { try { await api.finishTeamTask(id); setTasks(t => t.filter(x => x.id !== id)); say(lang === "zh" ? "已完成" : "Done"); } catch (e) { say((e as api.ApiError).message); } };
   useEffect(() => { void load(); void api.getSession().then(s => setMe(s?.user.id ?? "")); const id = setInterval(() => void load(), 20_000); return () => clearInterval(id); }, [load]);
   const cur = useMemo(() => rows.find(r => r.id === sel) ?? null, [rows, sel]);
+  // the review queue, Agent health, partners and the incident log live beside the queue (src/cloud/OpsMore.tsx)
+  const opsTab = useOpsTab();
+  if (opsTab !== "filings") return <OpsMore tab={opsTab} />;
   return (
     <div className="page queue">
       <header className="ph"><div className="ph-tx"><h1>{lang === "zh" ? "申报队列" : "Filing queue"}</h1><p>{lang === "zh" ? "客户批准的每一份申请。核对要求、提交、发送付款链接、上传收据。" : "Every application a customer approved. Check the requirements, submit, send the payment link, upload the receipt."}</p></div></header>
+      <OpsTabs tab={opsTab} />
       <div className="q-grid">
         <div className="q-list">
           <AiMarginCard />

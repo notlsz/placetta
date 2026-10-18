@@ -17,6 +17,13 @@ import type { HqRow } from "../hq";
 import { previewPlan } from "../plan/preview";
 import { FROM_SIGNUP, firstPlanClock, parseAddress, prefill } from "../plan/prefill";
 import { nowIso } from "../time";
+// Partners and the store check (src/Partner.tsx, src/StoresCheck.tsx): the referral a new workspace came through, and
+// the onboarding path for businesses that already run stores
+import { captureRef, embedLine } from "../referral";
+import { claimReferral, PartnerHome, ReferralConsent } from "../Partner";
+import { existingWorkspace, StoresCheck } from "../StoresCheck";
+import { KINDS as STORE_KINDS, toPlan, type StoreResult } from "../plan/existing";
+import { partnerMe } from "./partnersApi";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
    Invites to a teammate's workspace are accepted on sign-in. New businesses start with onboarding (and the filing
@@ -348,7 +355,11 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   const [hand] = useState(readHandoff);
   const [f, setF] = useState({ brand: hand?.brand ?? "", sell: hand?.sell ?? "", other: hand?.other ?? "", place: hand?.place ?? "", state: "", when: hand?.when ?? -1, entity: "", street: "", more: false });
   // the one line; what it says fills the answers above unless they were set by hand
-  const [line, setLine] = useState(hand ? "" : "");
+  const [line, setLine] = useState(() => (hand ? "" : embedLine()));
+  // a business that came through a partner answers once whether the partner sees its progress (off unless ticked)
+  const [share, setShare] = useState(false);
+  // "I already have stores": the free check instead of the one line (src/StoresCheck.tsx)
+  const [mode, setMode] = useState<"plan" | "existing">("plan");
   const read = readLine(line);
   const sellNow = f.sell || read.sell || (line.trim() && !read.sell ? "other" : "");
   const placeNow = f.place || read.place;
@@ -441,10 +452,52 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       const id = await api.createWorkspace(brand, ws);
       // the box they checked, recorded with the version they were shown (if it fails, the app asks again)
       await api.acceptTerms(UPDATED, id).catch(() => null);
+      await claimReferral(id, share);
       if (hand) consumeHandoff();
       onCreated(id);
     } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
+  // the store check's stores, open, with their gaps as the plan
+  const createExisting = async (results: StoreResult[], today: string) => {
+    const ok = results.filter(r => r.ok);
+    if (!ok.length) return;
+    if (!agree) { setErr(L(B("Check the box to agree to the Terms of Service and Privacy Policy.", "请勾选同意《服务条款》和隐私政策。"))); return; }
+    const first = ok[0], city = first.place.split(",")[0].trim(), kind = STORE_KINDS.find(k => k.en === first.store.what);
+    const brand = f.brand.trim() || (lang === "zh" ? `${city}${kind?.zh ?? first.store.what}` : `${first.store.what} in ${city}`);
+    setBusy(true); setErr("");
+    try {
+      const id = await api.createWorkspace(brand, existingWorkspace(toPlan(ok, today), ok, brand));
+      await api.acceptTerms(UPDATED, id).catch(() => null);
+      await claimReferral(id, share);
+      if (hand) consumeHandoff();
+      onCreated(id);
+    } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
+  };
+  const legal = (
+    <div className="onb-legal">
+      <ReferralConsent lang={lang} checked={share} onChange={setShare} />
+      <TermsCheck id="onb-agree" lang={lang} checked={agree} onChange={v => { setAgree(v); if (v) setErr(""); }} onDoc={setDoc} />
+      <p>{L(B("Filing Authorization: by creating the workspace, you grant Placetta the ", "申报授权：创建工作区即表示您授予快哉"))}<button type="button" className="lnk" onClick={() => setDoc("authorization")}>{L(B("Filing Authorization", "《申报授权书》"))}</button>{L(B(". It authorizes Placetta to prepare applications for this business and to submit the ones you approve, as its authorized agent for that limited purpose. You confirm you have authority to act for the business.", "所述权限：授权快哉为本企业准备申请，并作为该有限目的的授权代理人提交您批准的申请。您确认有权代表本企业行事。"))}</p>
+    </div>
+  );
+  const docModal = d && (
+    <div className="scrim" onMouseDown={e => { if (e.target === e.currentTarget) setDoc(null); }}>
+      <div className="modal wide" role="dialog" aria-modal="true" aria-label={d.title[lang]}>
+        <header className="m-h"><h2>{d.title[lang]}</h2><button type="button" className="icbtn close" onClick={() => setDoc(null)} aria-label="Close">×</button></header>
+        <div className="m-body legal"><LegalBody text={d.body[lang]} /></div>
+      </div>
+    </div>
+  );
+  if (mode === "existing") {
+    return (
+      <div className="gate-card wide">
+        <StoresCheck lang={lang} onApply={(r, t) => void createExisting(r, t)} applyLabel={B("Turn these into my plan", "把这些变成我的计划")} busy={busy} err={err} footer={legal} />
+        <button type="button" className="lnk more" onClick={() => { setErr(""); setMode("plan"); }}>{L(B("Opening a new store instead? Describe it in one line", "要开新店？用一句话描述"))}</button>
+        <p className="onb-who">{L(B(`Signed in as ${email}`, `已登录 ${email}`))}</p>
+        {docModal}
+      </div>
+    );
+  }
   if (step === "more") {
     const ex = parsed ?? { city: placeNow.replace(/,.*$/, "").trim() || "Flushing", state: f.state || "NY" };
     return (
@@ -536,10 +589,8 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
           <button type="button" className="lnk more" onClick={() => setF({ ...f, more: true })}>{L(B("Add a name, opening date or address (optional, Odelia asks later)", "添加店名、开业时间或地址（选填，Odelia 之后会问）"))}</button>
         )}
 
-        <div className="onb-legal">
-          <TermsCheck id="onb-agree" lang={lang} checked={agree} onChange={v => { setAgree(v); if (v) setErr(""); }} onDoc={setDoc} />
-          <p>{L(B("Filing Authorization: by creating the workspace, you grant Placetta the ", "申报授权：创建工作区即表示您授予快哉"))}<button type="button" className="lnk" onClick={() => setDoc("authorization")}>{L(B("Filing Authorization", "《申报授权书》"))}</button>{L(B(". It authorizes Placetta to prepare applications for this business and to submit the ones you approve, as its authorized agent for that limited purpose. You confirm you have authority to act for the business.", "所述权限：授权快哉为本企业准备申请，并作为该有限目的的授权代理人提交您批准的申请。您确认有权代表本企业行事。"))}</p>
-        </div>
+        <button type="button" className="lnk more" onClick={() => { setErr(""); setMode("existing"); }}>{L(B("I already have stores: check what each one needs, free", "我已有门店：免费检查每家店需要的许可"))}</button>
+        {legal}
         <div className="onb-act">
           {onCancel && <button type="button" className="sbtn quiet" onClick={onCancel}>{L(B("Cancel", "取消"))}</button>}
           <button type="submit" className="sbtn ink big" disabled={busy || !agree || !line.trim()}>{busy ? "…" : L(B("Start", "开始"))}</button>
@@ -547,14 +598,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       </form>
       {err && <p className="gate-err" role="alert">{err}</p>}
       <p className="onb-who">{L(B(`Signed in as ${email}`, `已登录 ${email}`))}</p>
-      {d && (
-        <div className="scrim" onMouseDown={e => { if (e.target === e.currentTarget) setDoc(null); }}>
-          <div className="modal wide" role="dialog" aria-modal="true" aria-label={d.title[lang]}>
-            <header className="m-h"><h2>{d.title[lang]}</h2><button type="button" className="icbtn close" onClick={() => setDoc(null)} aria-label="Close">×</button></header>
-            <div className="m-body legal"><LegalBody text={d.body[lang]} /></div>
-          </div>
-        </div>
-      )}
+      {docModal}
     </div>
   );
 }
@@ -606,7 +650,7 @@ function SetPassword({ lang, onDone, onCancel }: { lang: Lang; onDone: () => voi
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "hq"; email: string; rows: HqRow[] } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
+type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
 
 export function CloudRoot() {
   const [lang, setLangState] = useState<Lang>(() => readHandoff()?.lang ?? readLang());
@@ -635,7 +679,12 @@ export function CloudRoot() {
       // Headquarters: franchisees that shared their stores with this email (read only, never forces onboarding)
       const hq = await api.hqStores().catch(() => [] as HqRow[]);
       const row = rows.find(r => r.id === wsId) ?? rows[0];
-      if (!row) { setPhase(hq.length ? { k: "hq", email: me.email, rows: hq } : { k: "onboard", email: me.email }); return; }
+      if (!row) {
+        // a partner (or someone opening /app/partner to become one) with no workspace of their own gets the partner page
+        const partner = hq.length ? null : await partnerMe().catch(() => null);
+        setPhase(hq.length ? { k: "hq", email: me.email, rows: hq } : partner || /\/partner\/?$/.test(location.pathname) ? { k: "partner", email: me.email } : { k: "onboard", email: me.email });
+        return;
+      }
       if (joined) notice = lang === "zh" ? `已加入 ${joined} 个团队工作区。` : `You joined ${joined} team workspace${joined > 1 ? "s" : ""}.`;
       lastWs.set(row.id);
       const params = new URLSearchParams(location.search);
@@ -668,6 +717,8 @@ export function CloudRoot() {
 
   useEffect(() => {
     // A link from one of Odelia's texts names the workspace (?ws=) it's about.
+    // a partner's link (?ref=) or plan box (?line=): kept before anything else reads the address (src/referral.ts)
+    captureRef();
     const boot = () => { if (booted.current) return; booted.current = true; void open(new URLSearchParams(location.search).get("ws") || lastWs.get()); };
     void api.getSession().then(s => (s ? boot() : setPhase({ k: "signin" })));
     const sub = api.onAuth((s, event) => {
@@ -679,13 +730,15 @@ export function CloudRoot() {
   const recovered = () => { recovering.current = false; booted.current = true; void open(lastWs.get()); };
 
   // Sign in, sign up, reset, two-step and setup are always light; the workspace follows the person's appearance setting.
-  const gate = phase.k !== "app" && phase.k !== "hq";
+  const gate = phase.k !== "app" && phase.k !== "hq" && phase.k !== "partner";
   useLayoutEffect(() => {
     if (gate) document.documentElement.dataset.theme = "light"; else applyTheme(readTheme());
   }, [gate]);
 
   if (phase.k === "app") return <App key={phase.s.wsId} cloud={phase.s} />;
   if (phase.k === "hq") return <HqHome lang={lang} setLang={setLang} email={phase.email} rows={phase.rows}
+    onNew={() => setPhase({ k: "onboard", email: phase.email, back: "" })} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />;
+  if (phase.k === "partner") return <PartnerHome lang={lang} setLang={setLang} email={phase.email}
     onNew={() => setPhase({ k: "onboard", email: phase.email, back: "" })} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />;
   return (
     <Frame lang={lang} setLang={setLang}>

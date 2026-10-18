@@ -23,6 +23,7 @@ import { deadlineRules } from "../_shared/business_rules.ts";
 import { normalizeState, openingLine, openingPath, overdue, publishedDays, runsOn, type Routine } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
+import { weeklyGovernance } from "./governance.ts";
 // any vendor that may take a conversation (a Gemini key without GEMINI_PAID may not), not just Anthropic or Gemini
 import { canConverse } from "../_shared/llm.ts";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
@@ -601,6 +602,11 @@ Deno.serve(async (req) => {
       if (await sendMail([email], m.subject, m.text, m.html)) hqSent++;
       else await admin.from("hq_reports").delete().eq("hq_email", email).eq("week", today);   // let a later run try again
     }
+  }
+
+  // Mondays: the agent health summary for the team, by email and as an Update, once a week (governance.ts).
+  if (started.getUTCDay() === 1) {
+    await weeklyGovernance(admin, today, RESEND && FROM ? sendMail : null, APP).catch((e) => console.error("governance", String(e).slice(0, 160)));
   }
 
   // Consent records for texts and calls are kept 5 years, then dropped.
