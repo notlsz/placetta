@@ -22,8 +22,10 @@ import m_il_ides from "./il-ides.json";
 import m_il_tax from "./il-tax.json";
 import m_irs_5472 from "./irs-5472.json";
 import m_irs_w7 from "./irs-w7.json";
+import m_kc_plan_review from "./kc-plan-review.json";
 import m_lac_health_permit from "./lac-health-permit.json";
 import m_lac_plan_check from "./lac-plan-check.json";
+import m_lv_food from "./lv-food.json";
 import m_mult_food_license from "./mult-food-license.json";
 import m_mult_plan_review from "./mult-plan-review.json";
 import m_nv_esd from "./nv-esd.json";
@@ -36,6 +38,7 @@ import m_or_payroll from "./or-payroll.json";
 import m_sacc_plan_review from "./sacc-plan-review.json";
 import m_sf_dph_plan_check from "./sf-dph-plan-check.json";
 import m_sf_formula_retail from "./sf-formula-retail.json";
+import m_snhd_plan_review from "./snhd-plan-review.json";
 import m_tx_205 from "./tx-205.json";
 import m_tx_304 from "./tx-304.json";
 import m_tx_503 from "./tx-503.json";
@@ -67,8 +70,10 @@ export const MAPS: Record<string, FormMap> = {
   "il-tax": m_il_tax as FormMap,
   "irs-5472": m_irs_5472 as FormMap,
   "irs-w7": m_irs_w7 as FormMap,
+  "kc-plan-review": m_kc_plan_review as FormMap,
   "lac-health-permit": m_lac_health_permit as FormMap,
   "lac-plan-check": m_lac_plan_check as FormMap,
+  "lv-food": m_lv_food as FormMap,
   "mult-food-license": m_mult_food_license as FormMap,
   "mult-plan-review": m_mult_plan_review as FormMap,
   "nv-esd": m_nv_esd as FormMap,
@@ -81,6 +86,7 @@ export const MAPS: Record<string, FormMap> = {
   "sacc-plan-review": m_sacc_plan_review as FormMap,
   "sf-dph-plan-check": m_sf_dph_plan_check as FormMap,
   "sf-formula-retail": m_sf_formula_retail as FormMap,
+  "snhd-plan-review": m_snhd_plan_review as FormMap,
   "tx-205": m_tx_205 as FormMap,
   "tx-304": m_tx_304 as FormMap,
   "tx-503": m_tx_503 as FormMap,
