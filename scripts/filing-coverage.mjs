@@ -126,6 +126,11 @@ function report(FORMS, D, L) {
     IL: "Illinois", CHI: "Chicago", PA: "Pennsylvania", PHL: "Philadelphia", DC: "Washington, DC", VA: "Virginia", ARL: "Arlington", FFX: "Fairfax County",
     NJ: "New Jersey", EDI: "Edison", JC: "Jersey City", FL: "Florida", MIA: "Miami", CO: "Colorado", DEN: "Denver", MN: "Minnesota", MSP: "Minneapolis",
     OH: "Ohio", CMH: "Columbus", MD: "Maryland", MOCO: "Montgomery County, MD", HI: "Hawaii", UT: "Utah", GLN: "Glendale", SGB: "San Gabriel", SMO: "San Mateo", SMC: "San Mateo County", CUP: "Cupertino",
+    // the counties county steps are filed under (src/forms/usplace.ts), and the cities the held-out accuracy set added
+    KC: "King County", SNHD: "Southern Nevada Health District", ORC: "Orange County, CA", SDC: "San Diego County", ALA: "Alameda County", SACC: "Sacramento County",
+    MARI: "Maricopa County", MULT: "Multnomah County", FULC: "Fulton County", GWIN: "Gwinnett County", HILL: "Hillsborough County", ORFL: "Orange County, FL",
+    MDC: "Miami-Dade County", SLCO: "Salt Lake County", LACU: "Unincorporated Los Angeles County", ROC: "Rockville", FRE: "Fremont", MIL: "Milpitas", DLY: "Daly City",
+    ARC: "Arcadia", ALH: "Alhambra", TOR: "Torrance", FTL: "Fort Lee", SUG: "Sugar Land", DUL: "Duluth, GA", HEN: "Henderson", BEL: "Bellevue", QCY: "Quincy",
   };
   const place = (w) => PLACE[w] ?? w;
   const cell = (s) => String(s ?? "").replace(/\|/g, "/").replace(/\s+/g, " ").trim();

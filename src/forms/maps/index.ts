@@ -9,6 +9,7 @@ import m_bos_cert from "./bos-cert.json";
 import m_bos_cv from "./bos-cv.json";
 import m_bos_food_permit from "./bos-food-permit.json";
 import m_bos_plan_review from "./bos-plan-review.json";
+import m_bos_site from "./bos-site.json";
 import m_ca_abc_140 from "./ca-abc-140.json";
 import m_ca_abc_211 from "./ca-abc-211.json";
 import m_ca_abc_217 from "./ca-abc-217.json";
@@ -110,6 +111,7 @@ export const MAPS: Record<string, FormMap> = {
   "bos-cv": m_bos_cv as FormMap,
   "bos-food-permit": m_bos_food_permit as FormMap,
   "bos-plan-review": m_bos_plan_review as FormMap,
+  "bos-site": m_bos_site as FormMap,
   "ca-abc-140": m_ca_abc_140 as FormMap,
   "ca-abc-211": m_ca_abc_211 as FormMap,
   "ca-abc-217": m_ca_abc_217 as FormMap,

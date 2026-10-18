@@ -2481,5 +2481,21 @@
   "return_to": ["None","Lin Wei; filings@goldendragon.example; 88 Bush St, San Francisco, CA 94104"],
   "executor1": ["Mei Chen; 600 5th Ave S, Seattle, WA 98104; United States; Mei Chen, Member","Lin Wei; 88 Bush St, San Francisco, CA 94104; United States; Lin Wei, Manager"],
   "executor2": ["None","Mei Chen; 12 Elm St, Bellevue, WA 98004; United States; Mei Chen, Member"]
+ },
+ "bos-site": {
+  "business_name": ["Lotus Tea House LLC","Golden Dragon Noodle Inc."],
+  "business_phone": ["(617) 555-0142","(617) 555-0187"],
+  "business_address": ["60 Beach St, Boston, MA 02111","1 Harrison Ave, Boston, MA 02111"],
+  "email": ["owner@lotustea.example","office@goldendragon.example"],
+  "owner_name": ["Mei Chen","Lin Wei"],
+  "owner_phone": ["(617) 555-0110","(415) 555-0187"],
+  "owner_address": ["12 Tyler St, Quincy, MA 02169","88 Bush St, San Francisco, CA 94104"],
+  "property_type": ["Food/Beverage","Other: Tea house with retail counter"],
+  "receptacle": ["Rear","Inside storage, Curbside pickup"],
+  "dpw_approval": ["No","No"],
+  "disposal_company": ["Bay State Waste LLC","Harbor Hauling Inc."],
+  "disposal_phone": ["(617) 555-0300","(617) 555-0400"],
+  "disposal_address": ["100 Industrial Way, Everett, MA 02149","5 Dock St, Chelsea, MA 02150"],
+  "cleaner": ["Jason Zhou","Mei Chen"]
  }
 }
