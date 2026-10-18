@@ -1,4 +1,6 @@
+import { layout } from "./boxes";
 import { CODE_ROOM, placedLines, type Filled, type Wrote } from "./fill";
+import { MAPS } from "./maps";
 import { formById } from "./registry";
 
 /* The read-back: after a form is filled, the saved PDF is opened again and every line is checked against what was
@@ -54,7 +56,7 @@ async function drawnText(doc: any, pages: Set<number>): Promise<Map<number, stri
 
 /** Reads a filled copy back and checks every line against the answers it was filled from. */
 export async function readBack(formId: string, f: Filled): Promise<ReadBack> {
-  const { PDFDocument, StandardFonts } = await import("pdf-lib");
+  const { PDFDocument, PDFName, StandardFonts } = await import("pdf-lib");
   const doc = await PDFDocument.load(f.pdf, { ignoreEncryption: true });
   const form = doc.getForm();
   const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -93,17 +95,28 @@ export async function readBack(formId: string, f: Filled): Promise<ReadBack> {
       } else if (w.kind === "check") {
         if (!form.getCheckBox(w.name).isChecked()) add({ id: w.id, kind: "wrong", want: want(w.id), got: "not ticked" });
       } else if (w.kind === "radio") {
-        const got = form.getRadioGroup(w.name).getSelected() ?? "";
-        if (got !== w.v) add({ id: w.id, kind: "wrong", want: w.v, got });
+        // a group whose buttons share one export value, and a set of same-name checkboxes, are set by the chosen
+        // button's own on-value, so the box's raw value is read too
+        let got = "";
+        try { got = form.getRadioGroup(w.name).getSelected() ?? ""; } catch { /* a set of same-name checkboxes */ }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const raw = (form.getField(w.name).acroField.dict.lookup(PDFName.of("V")) as any)?.decodeText?.() ?? "";
+        if (got !== w.v && raw !== w.v) add({ id: w.id, kind: "wrong", want: w.v, got: got || raw });
       } else if (w.kind === "choice") {
         let sel: string[] = [];
         try { sel = form.getDropdown(w.name).getSelected(); } catch { sel = form.getOptionList(w.name).getSelected(); }
         if (!sel.some(o => o.toLowerCase().startsWith(w.v.toLowerCase()))) add({ id: w.id, kind: "wrong", want: w.v, got: sel.join(", ") });
       } else if (w.kind === "draw") {
-        if (!(drawn.get(w.at.page) ?? []).includes(w.v)) { add({ id: w.id, kind: "wrong", want: w.v, got: "" }); continue; }
+        // the answer lands as the fill lays it out: one run per printed line, or one character per box of a comb
+        const pieces = layout(w.at, w.v, (s, size) => font.widthOfTextAtSize(s, size));
+        const have = drawn.get(w.at.page) ?? [];
+        if (!pieces.every(p => have.includes(p.text))) { add({ id: w.id, kind: "wrong", want: w.v, got: "" }); continue; }
         const page = pages[w.at.page], { width } = page.getSize();
-        // the fill shrinks a long answer down to 5.5 points to fit its line; past that it runs over
-        if ((w.at.w && !fits(w.v, 5.5, w.at.w)) || w.at.x + font.widthOfTextAtSize(w.v, Math.min(w.at.size ?? 9, 5.5)) > width) add({ id: w.id, kind: "overflow", want: w.v, got: w.v });
+        // the fill shrinks a long answer down to 5.5 points to fit its line (or its lines); past that it runs over
+        const over = w.at.comb ? w.v.replace(/\s+/g, "").length > w.at.comb
+          : (w.at.lines ?? 1) > 1 ? pieces.length > w.at.lines! || pieces.some(p => !fits(p.text, p.size, w.at.w ?? width))
+          : !!w.at.w && !fits(w.v, 5.5, w.at.w);
+        if (over || pieces.some(p => p.x + font.widthOfTextAtSize(p.text, p.size) > width)) add({ id: w.id, kind: "overflow", want: w.v, got: w.v });
       }
     } catch {
       add({ id: w.id, kind: "wrong", want: want(w.id), got: "" });
@@ -113,12 +126,14 @@ export async function readBack(formId: string, f: Filled): Promise<ReadBack> {
   // every answer that has a place on the form reached it, in characters the form can print, and no SSN anywhere
   const placed = placedLines(formId), skipped = new Set(f.skipped);
   const room = CODE_ROOM[formById(formId)?.fill ?? ""] ?? {};
+  // answers the form leaves blank on purpose ("None" on an optional line, "No" where it has only a box for yes)
+  const blank = MAPS[formId]?.blank ?? {};
   for (const [id, v] of Object.entries(f.values)) {
     if (!placed.has(id) || skipped.has(id)) continue;
     const value = v.trim();
     if (SSN.test(value) && (DASHED_SSN.test(value) || /ssn|itin|7b/i.test(id))) { add({ id, kind: "secret", want: "" }); continue; }
     if (UNPRINTABLE.test(value)) add({ id, kind: "characters", want: value });
-    if (!ours.some(w => w.id === id)) add({ id, kind: "missing", want: value });
+    if (!ours.some(w => w.id === id) && !(blank[id] && new RegExp(blank[id], "i").test(value))) add({ id, kind: "missing", want: value });
     if (room[id] && value.length > room[id]) add({ id, kind: "overflow", want: value, got: value.slice(0, room[id]) });
   }
   for (const fl of form.getFields()) {

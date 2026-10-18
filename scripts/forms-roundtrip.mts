@@ -13,7 +13,8 @@ import { PDFDocument, PDFName, StandardFonts, PDFTextField, PDFCheckBox, PDFRadi
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import { FORMS } from "../src/forms/registry.ts";
 import { MAPS } from "../src/forms/maps/index.ts";
-import { fillMapped, fillOfficial, valuesOf } from "../src/forms/fill.ts";
+import { fillForm, fillMapped, fillOfficial, valuesOf } from "../src/forms/fill.ts";
+import { readBack } from "../src/forms/readback.ts";
 import { layout, pdfLibWriter, writeAnswers, type FormMap, type Spot, type Writer } from "../src/forms/boxes.ts";
 import { addressProblems } from "../src/forms/addressCheck.ts";
 import type { Field } from "../src/model.ts";
@@ -195,6 +196,10 @@ async function checkMapped(id: string, map: FormMap) {
         if (!(f instanceof PDFDropdown || f instanceof PDFOptionList) || !f.getSelected().some(s => s.toLowerCase().startsWith(c.value.toLowerCase().slice(0, 4)))) P(`${c.id}: dropdown ${c.name} not set to ${c.value}`);
       }
     }
+    // the app's own fill and read-back (what keeps an application from being ready) agree the form came out right
+    const app = await fillForm(id, fields, async file => new Uint8Array(readFileSync(`public/forms/${file}`)));
+    if (!app) P("the app's fill doesn't fill this form");
+    else for (const x of (await readBack(id, app)).issues) P(`the app's read-back finds ${x.id} ${x.kind}: wanted "${x.want.slice(0, 30)}", got "${(x.got ?? "").slice(0, 30)}"`);
     // printed answers: read the page text back with positions
     const draws = rec.calls.filter((c): c is Extract<Call, { kind: "draw" }> => c.kind === "draw");
     if (draws.length) {
