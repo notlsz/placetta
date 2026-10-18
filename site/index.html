@@ -2506,6 +2506,12 @@ html[lang="zh-CN"] .invl{letter-spacing:.2em}
 .invr img{display:block;width:auto;height:calc(var(--h) * .85);opacity:.8;filter:saturate(0) brightness(.55);transition:opacity .2s,filter .2s}
 @media (min-width:1024px){.invr img{height:calc(var(--h) * 1.08)}}
 .invr img:hover{opacity:1;filter:none}
+/* one backers section (Oct 18): the operators who back us, then, under a hairline, the funds behind the brands we serve */
+.bkinv{margin-top:48px;padding-top:36px;border-top:1px solid var(--line,#E3E7EE)}
+.bkinv .invl{text-align:left}
+.bkinv .invr{justify-content:flex-start;max-width:none;margin-inline:0}
+@media (min-width:1024px){.bkinv .invr{gap:28px 48px}.bkinv .invr img{height:calc(var(--h) * .9)}}
+@media (max-width:639px){.bkinv{margin-top:36px;padding-top:28px}.bkinv .invr{gap:20px 28px}}
 
 /* plan steps: a numbered timeline (step, kind, the step that sets the date, the detail) */
 .belrows.st2{display:block;gap:0;padding:6px 4px;background:#fff;border-radius:20px;box-shadow:0 18px 44px rgba(15,27,51,.10),0 1px 2px rgba(15,27,51,.04);overflow:hidden}
@@ -2731,13 +2737,6 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 
 <!-- ======================= INDUSTRIES ======================= -->
 <!-- ======================= CUSTOMERS AND CASE STUDIES ======================= -->
-<section class="inv" id="backed" aria-labelledby="invL">
-  <div class="ctr">
-    <p class="invl" id="invL" data-i18n="inv.l">The brands we serve are backed by</p>
-    <div class="invr" id="invR"></div>
-  </div>
-</section>
-
 <section class="sec rv" data-rv="up" id="case" aria-labelledby="caseH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="caseH" data-i18n="proof.h">See the plan before you sign the lease.</h2><p class="sub" data-i18n="proof.sub">Example plans for businesses like yours, built from official sources. Each one cites the agencies and laws behind it.</p></div>
@@ -3118,6 +3117,10 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
     <ul class="bkg bkt fold" id="bkG"></ul>
     <button type="button" class="bkmore" id="bkMore" aria-controls="bkG" aria-expanded="false"><span data-i18n="bk.more">Show all</span><i aria-hidden="true"></i></button>
     <p class="bknote" data-i18n="bk.note">Investors invested personally. Their former and current employers are not affiliated with Placetta and do not endorse it.</p>
+    <div class="bkinv" id="backed" role="group" aria-labelledby="invL">
+      <p class="invl" id="invL" data-i18n="inv.l">The brands we serve are backed by</p>
+      <div class="invr" id="invR"></div>
+    </div>
   </div>
 </section>
 
