@@ -1433,6 +1433,54 @@ async function connectedApps() {
   ok(!allowOptions({ id: "c", kind: "change", title: same("x"), does: [], action: same("x"), change: { op: "mcp_call", call: "c1", server: "Notion", tool: "create", title: "x", args: {} } }, workspace()).length, "and its approval card never offers one");
 }
 
+/* ================================================================== 19. the filled form (src/forms/versions.ts) */
+
+async function filledFormAttacks() {
+  begin("19. The agency's own form: filled again on every change, read back, and never filed from a card whose answers changed");
+  const { readFileSync } = await import("node:fs");
+  const { formById } = await import("../src/forms/registry");
+  const { answersHash, fileable } = await import("../src/forms/versions");
+  const { addApproval, setField } = await import("../src/core");
+  const acct = account();
+  acct.svc.formPdf = async (file: string) => new Uint8Array(readFileSync(file.startsWith("pdf/") ? "src/forms/" + file : "public/forms/" + file));
+  const off = formById("irs-ss4")!;
+  const v: Record<string, string> = { l1: "Lucky Leaf Tea LLC", l2: "Lucky Leaf", l4a: "136-20 Roosevelt Ave", l4b: "Flushing, NY 11354", l5a: "N/A", l5b: "N/A", l6: "Queens County, NY", l7a: "Mei Chen", l7b: "By hand",
+    l8a: "Yes", l8b: "1", l8c: "Yes", l9a: "Other: Foreign-owned U.S. disregarded entity", l9b: "N/A", l10: "Started a new milk tea shop", l11: "09/01/2026", l12: "December", l13: "4",
+    l15: "11/15/2026", l16: "Accommodation & food service", l17: "Milk tea and snacks", l18: "No", sign: "Mei Chen, Managing Member", phone: "(718) 555-0100" };
+  const ein = (over: Record<string, string> = {}): Application => app("ein", "draft", { official: "irs-ss4", level: "federal", name: B("EIN application", "EIN 申请"), fees: [{ label: same("Fee"), amount: 0 }],
+    fields: off.fields.map(o => ({ id: o.id, label: B(`Line ${o.line}: ${o.label.en}`, `第 ${o.line} 行：${o.label.zh}`), value: { ...v, ...over }[o.id] ?? "" })) });
+
+  // The model asks for approval, then changes a line in the same run and says it's all set: the card it put up is for
+  // answers that no longer stand, so it's taken back; the one card left is for the final answers, and the form is filled
+  // once for the run, not once per change.
+  const r = await agent({ ws: workspace({ apps: [ein()] }), svc: acct.svc, prompt: "Get the EIN application ready.",
+    script: [() => ask(["request_filing_approval", { application_id: "ein" }]), () => ask(["fill_fields", { application_id: "ein", fields: [{ label: "13", value: "6" }] }]),
+      () => ask(["request_filing_approval", { application_id: "ein" }]), () => say("All set, it's ready for your approval.")] });
+  const cards = r.w.approvals.filter(x => x.kind === "file" && x.app === "ein"), a = r.w.apps[0];
+  ok(cards.length === 1 && cards[0].hash === answersHash(a), "one card is left, and it's for the answers as they stand", cards.map(c => c.hash));
+  ok(r.w.closed.some(x => x.app === "ein" && x.withdrawn), "the card put up before the change was taken back");
+  ok(a.versions?.length === 1 && r.w.docs.filter(d => d.app === "ein").length === 1 && a.versions[0].answers.l13 === "6", "the form was filled once for the run, with the final answers", a.versions?.map(x => x.answers.l13));
+  ok(!(r.reply?.approvals as string[]).some(id => r.w.closed.some(x => x.id === id && x.withdrawn)), "the reply doesn't offer the card that was taken back");
+
+  // Characters the form can't print: refused every time it's asked, and nothing can make it ready
+  const zh = await agent({ ws: workspace({ apps: [ein({ l1: "幸运叶茶饮有限公司" })] }), svc: acct.svc, prompt: "File it.",
+    script: [() => ask(["request_filing_approval", { application_id: "ein" }]), () => ask(["request_filing_approval", { application_id: "ein" }], ["update_application", { application_id: "ein", status: "ready" }]), () => say("Filed.")] });
+  ok(named(zh, "request_filing_approval").every(c => c.parsed?.approval_requested === false) && !named(zh, "update_application")[0].ok && !zh.w.approvals.some(x => x.kind === "file"), "a line the form can't print is refused each time; the model can't mark it ready");
+  ok(/isn't ready to file/.test(textOf(zh)) && zh.w.apps[0].status !== "ready", "the reply says so, whatever the model wrote", textOf(zh));
+
+  // A card from before the answers changed, or one made up with an old fingerprint, can't be filed
+  const stale = addApproval({ id: "ap-old", kind: "file", app: "ein", title: same("File it"), does: [], action: same("Approve"), hash: "0000000000000000" })(workspace({ apps: [ein()] }));
+  ok(!fileable(stale, stale.approvals[0]).ok, "a card for other answers can't be filed");
+  const fresh = addApproval({ id: "ap-new", kind: "file", app: "ein", title: same("File it"), does: [], action: same("Approve"), hash: answersHash(ein()) })(workspace({ apps: [ein()] }));
+  ok(fileable(fresh, fresh.approvals[0]).ok && !fileable(setField("ein", "l1", "Lucky Leaf Tea Co")(fresh), fresh.approvals[0]).ok, "a card for these answers can, until a line changes");
+
+  // From a text (iMessage or WhatsApp, not plain SMS): the form is filled and kept, for the reply's link
+  const sms = await agent({ ws: workspace({ apps: [ein({ l13: "" })] }), svc: acct.svc, channel: "sms", sender: "+17185550100", prompt: "6 employees, update the EIN form",
+    script: [() => ask(["fill_fields", { application_id: "ein", fields: [{ label: "13", value: "6" }] }]), () => say("Line 13 says 6 now.")] });
+  const f = (sms.reply?.forms as { path?: string; version: number }[] | undefined)?.[0];
+  ok(f?.version === 1 && !!f.path && acct.stored.has(f.path), "a run from a text fills the form and keeps it, so the reply can link to it", f);
+}
+
 /* ------------------------------------------------------------------ run */
 
 await memoryAttacked();
@@ -1452,6 +1500,7 @@ await routes();
 await connectedApps();
 await controlsAttack();
 await storeBots();
+await filledFormAttacks();
 
 const sections = [...new Set(results.map(r => r.section))];
 console.log("\n# Summary");

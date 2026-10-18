@@ -5,6 +5,7 @@ import { WORLD_FORMS, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
 import { LINES } from "./lines";
 import { PLAIN } from "./plain";
+import { MAPS } from "./maps";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -595,6 +596,16 @@ for (const f of FORMS) {
   f.attach = [...(f.attach ?? []), ...l.attach.filter(a => !have.has(a.en.toLowerCase()))];
   if (l.status === "mapped") f.checked = "form";
   f.lines = { status: l.status, read: l.read, seen: l.seen, sources: l.sources, submit: { email: l.submit.email, fax: l.submit.fax, portal: l.submit.portal, signature: l.submit.signature, source: l.submit.source } };
+}
+// The forms Placetta fills on the agency's own PDF by a box map (src/forms/maps): a map lists the form's lines as printed
+// on that PDF, with the agency's link to it. They replace a shorter list of lines, never a longer one.
+for (const f of FORMS) {
+  const m = MAPS[f.id];
+  if (!m) continue;
+  if (m.url && !f.pdf) f.pdf = m.url;
+  if (!m.lines?.length || m.lines.length < f.fields.length) continue;
+  f.fields = m.lines.map(l => ({ id: l.id, line: l.line, label: B(l.en, l.zh), ...(l.options ? { options: l.options } : {}), ...(l.hint ? { hint: B(l.hint.en, l.hint.zh) } : {}) }));
+  f.checked = "form";
 }
 // What each form is, the way a person would say it (src/forms/plain.ts): shown on the instant plan a new workspace starts with.
 for (const f of FORMS) { const p = PLAIN[f.id]; if (p && !f.plain) f.plain = p; }

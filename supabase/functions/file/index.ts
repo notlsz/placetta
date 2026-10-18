@@ -24,8 +24,8 @@ import {
 } from "./shared.ts";
 import { DEST, staleDestinations, type Dest } from "./destinations.ts";
 import {
-  afterHold, askedToResubmit, canFaxSigned, check, DUPLICATE_REF, emailFor, envFrom, faxFailures, faxFile, faxTo, type Filing, holds, isForeign,
-  killSwitchOn, type LogEntry, mailOutcome, mailTo, pick, type Refusal, refusalOf, signedCopy, teamApproved,
+  afterHold, askedToResubmit, canFaxSignedFor, check, DUPLICATE_REF, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holds,
+  isForeign, killSwitchOn, type LogEntry, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, type Refusal, refusalOf, signedCopy, teamApproved,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
@@ -114,6 +114,17 @@ async function needsYou(f: Filing, en: string, zh: string, handoff_url: string |
   return view(await step(f, log(en, zh, kind), { agent_state: "needs_you", handoff_url }));
 }
 
+/** An agency that takes the form only from the business itself (the owner, or the person being certified): nothing is
+    sent. Odelia puts a one-page packet in Documents (what to send, where, the fee and what goes with it) and the
+    owner taps "I've done it" once it's sent; the team then confirms it with the agency. */
+async function toOwner(f: Filing, d: Dest) {
+  const packet = ownerPacket(f, d);
+  // Saved with the filing's documents (not as its receipt: nothing has reached the agency yet).
+  await saveReceipt(f, "owner-packet.pdf", await receiptPdf(packet.lines), "application/pdf");
+  return view(await step(f, log(packet.en, packet.zh, "needs_you", OWNER_REF),
+    { channel: "team", requirements_checked: true, agent_state: "needs_you", handoff_url: packet.link }));
+}
+
 // ------------------------------------------------------------------ facts about the workspace
 
 async function docPaths(f: Filing): Promise<Set<string>> {
@@ -125,8 +136,6 @@ async function docPaths(f: Filing): Promise<Set<string>> {
   return new Set((data ?? []).map((r) => r.path as string));
 }
 
-const hostOf = (u: string | null | undefined) => { try { return u ? new URL(/^https?:/i.test(u) ? u : `https://${u}`).hostname.toLowerCase() : ""; } catch { return ""; } };
-
 async function facts(f: Filing, d: Dest | undefined) {
   const [logins, mail] = await Promise.all([
     d?.portal ? admin.from("agency_logins").select("url").eq("workspace_id", f.workspace_id) : Promise.resolve({ data: [], error: null }),
@@ -134,7 +143,8 @@ async function facts(f: Filing, d: Dest | undefined) {
   ]);
   if (logins.error || mail.error) throw new Error("workspace lookup failed");
   return {
-    hasLogin: !!d?.portal && (logins.data ?? []).some((r) => hostOf(r.url as string) === d.portal),
+    // The same host, and on a host many agencies share (Accela, BTExpress), the same agency's path.
+    hasLogin: hasLoginFor((logins.data ?? []).map((r) => r.url as string), d),
     mailConnected: (mail.data ?? []).length > 0,
   };
 }
@@ -165,9 +175,13 @@ async function saveReceipt(f: Filing, name: string, bytes: Uint8Array, mime: str
 
 async function receiptPdf(lines: string[]): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
-  const page = doc.addPage([612, 792]);
   const font = await doc.embedFont(StandardFonts.Helvetica);
-  lines.forEach((l, i) => page.drawText(l.replace(/[^\x20-\x7e]/g, " "), { x: 56, y: 720 - i * 18, size: i === 0 ? 14 : 10, font }));
+  // 36 lines to a page, so a long owner packet runs onto a second page instead of off the bottom.
+  let page = doc.addPage([612, 792]);
+  lines.forEach((l, i) => {
+    if (i && i % 36 === 0) page = doc.addPage([612, 792]);
+    page.drawText(l.replace(/[^\x20-\x7e]/g, " "), { x: 56, y: 720 - (i % 36) * 18, size: i === 0 ? 14 : 10, font });
+  });
   return await doc.save();
 }
 
@@ -428,15 +442,20 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
 
   if (!killSwitchOn(f, e)) return await toTeam(f, "Self-filing isn't on for this agency yet. The Placetta team submits it.", "该机构尚未开通自动提交，由快哉团队提交。");
   const d = DEST[f.payload.official ?? ""];
-  const problems = check(f, d, { docPaths: await docPaths(f) });
+  // Where it would go decides what is checked: the filled form and its signature only travel by email, fax and mail.
+  const channel = pick(f, d, e, await facts(f, d));
+  const problems = check(f, d, { docPaths: await docPaths(f) }, channel);
   if (problems.length) {
     return await needsYou(f, problems.map((p) => p.en).join(". ").slice(0, 900), problems.map((p) => p.zh).join("；").slice(0, 900), null, "needs_you");
   }
-  const channel = pick(f, d, e, await facts(f, d));
+  if (channel === "owner") return await toOwner(f, d!);
   if (channel === "team" && d?.signature === "wet" && !d.portal) {
-    const where = d.fax ? `fax it to ${faxTo(d, f.payload)}` : d.mail ? `mail it to ${mailTo(d, f.payload)?.name}, ${mailTo(d, f.payload)?.city}` : "send it to the agency";
-    const whereZh = d.fax ? `传真至 ${faxTo(d, f.payload)}` : d.mail ? `寄往 ${mailTo(d, f.payload)?.name}` : "交给机构";
-    if (canFaxSigned(d, e)) {
+    const where = d.fax ? `fax it to ${faxTo(d, f.payload)}` : d.mail ? `mail it to ${mailTo(d, f.payload)?.name}, ${mailTo(d, f.payload)?.city}` : d.email ? `email it to ${d.email}` : "send it to the agency";
+    const whereZh = d.fax ? `传真至 ${faxTo(d, f.payload)}` : d.mail ? `寄往 ${mailTo(d, f.payload)?.name}` : d.email ? `发送邮件至 ${d.email}` : "交给机构";
+    // The agency's fee goes with it, so the person sends it with the payment rather than Placetta faxing it.
+    const withFee = feeBlocks(f, d) ? " with the agency's fee" : "";
+    const withFeeZh = feeBlocks(f, d) ? "并附上机构费用" : "";
+    if (canFaxSignedFor(f, d, e)) {
       // ref "upload": the app shows an upload button for the signed copy.
       return view(await step(f, log(
         "This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then upload a scan or a clear photo of the signed page here. Placetta faxes it to the agency and saves the confirmation.",
@@ -444,8 +463,8 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
         "wet_signature", "upload"), { channel: "team", requirements_checked: true, agent_state: "needs_you", handoff_url: null }));
     }
     return await needsYou(await step(f, null, { channel: "team", requirements_checked: true }),
-      `This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then ${where}. Tap "I've done it" when it's sent.`,
-      `该机构要求手写签名。请从“文件”下载已填写的表格，手写签名后${whereZh}。发出后点击“我已完成”。`, null, "wet_signature");
+      `This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then ${where}${withFee}. Tap "I've done it" when it's sent.`,
+      `该机构要求手写签名。请从“文件”下载已填写的表格，手写签名后${withFeeZh}${whereZh}。发出后点击“我已完成”。`, null, "wet_signature");
   }
   f = await step(f, log("Checked against the agency's requirements", "已按机构要求核对", "check"),
     { channel, agent_state: channel === "team" ? "handoff" : "running", requirements_checked: true, status: "in_progress" });
@@ -475,6 +494,11 @@ async function resume(f: Filing, by: string, resubmit = false) {
     const g = await step(f, log("You asked Placetta to send it again", "您要求快哉再次提交", "resubmit", by), { ...was, agent_state: null, handoff_url: null });
     return await startAgain(g);
   }
+  if (last?.kind === "needs_you" && last.ref === OWNER_REF) {
+    const g = await step(f, log("You sent it to the agency yourself. The Placetta team confirms it arrived.", "您已亲自提交给机构，快哉团队会确认机构已收到。", "you_sent"), { ...was, agent_state: "handoff", channel: "team" });
+    await teamTask(g, "review", "The owner says they sent an owner-only form themselves (owner packet). Confirm with the agency and record the submission.");
+    return view(g);
+  }
   if (last?.kind === "wet_signature") {
     const g = await step(f, log("You signed and sent it yourself. The Placetta team confirms it reached the agency.", "您已亲自签署并发出，快哉团队会确认机构已收到。", "you_sent"), { ...was, agent_state: "handoff", channel: "team" });
     await teamTask(g, "review", "Customer says they signed and sent the form themselves. Confirm with the agency and record the submission.");
@@ -496,7 +520,7 @@ async function signed(f: Filing, path: string, by: string) {
   const last = [...f.agent_log].reverse().find((e) => ["needs_you", "wet_signature", "need_person"].includes(e.kind));
   if (last?.kind !== "wet_signature") throw new HttpError("bad_request", "This filing isn't waiting for a signed copy.");
   const d = DEST[f.payload.official ?? ""];
-  if (!canFaxSigned(d, env())) throw new HttpError("bad_request", "Placetta can't fax this form yet. Send it yourself, then tap \"I've done it\".");
+  if (!canFaxSignedFor(f, d, env())) throw new HttpError("bad_request", "Placetta can't fax this form yet. Send it yourself, then tap \"I've done it\".", "快哉暂时无法传真这份表格。请您自行提交，然后点击“我已完成”。");
   if (!path.startsWith(`${f.workspace_id}/`)) throw new HttpError("bad_request", "That file isn't in this workspace.");
   const { data: doc, error } = await admin.from("documents").select("path, name, mime").eq("workspace_id", f.workspace_id).eq("path", path).maybeSingle();
   if (error) throw new Error(`documents lookup failed: ${error.code ?? ""}`);

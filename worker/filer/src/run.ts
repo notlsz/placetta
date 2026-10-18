@@ -4,16 +4,28 @@ import type { Browser, Page } from "playwright-core";
 import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, type PageState } from "./guards.ts";
 import type { Model } from "./model.ts";
 import { headingOf, locate, pageState } from "./page.ts";
+import { finalOn, type FormSteps, guideLines, payOn, type Playbook } from "./playbooks.ts";
 import type { Store } from "./store.ts";
 import type { Act, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
 
 export type Session = { browser: Browser; page: Page; liveUrl: string | null; close(): Promise<void> };
+/** The destination's details the worker needs beyond its host: the agency's path on a host many agencies share (so
+    its own saved login is used), the other hosts the portal sends the browser to, and the page to start from. */
+export type Route = { tenant?: string; alsoOn?: string[]; start?: string };
 export type Config = {
   store: Store; model: Model; open(): Promise<Session>;
   portalOf(official: string): string | null;          // the server-side destination host
+  routeOf?(official: string): Route | null;           // from the same destination
+  playbookOf?(host: string, official: string): { playbook: Playbook; form: FormSteps } | null;
+  allowUnverified?: boolean;                          // FILER_ALLOW_UNVERIFIED=1: staff are watching a playbook's first run
   startUrl?(host: string): string;
   dryRun: boolean; twoKey: number; maxSteps: number; maxMs: number; holdMs: number; pollMs: number;
   beforeSubmitClick?(f: Filing): Promise<void>;        // tests: kill the run right after submit_clicked_at
+};
+
+const PAY = {
+  en: "The agency is asking for its fee. Open the live view and pay it yourself, then tap \"I've done it\". Placetta never pays an agency.",
+  zh: "机构要求支付费用。请打开实时画面自行支付后点击“我已完成”。快哉从不替您向机构付款。",
 };
 
 const log = (en: string, zh: string, kind = "info", ref?: string) => ({ en, zh, kind, ...(ref ? { ref } : {}) });
@@ -29,7 +41,12 @@ const STOPPED: Result = { kind: "stopped", trace: [] };
 const urlKey = (u: string) => { try { const x = new URL(u); return x.origin + x.pathname; } catch { return u; } };
 export const portalKey = (host: string, official: string) => `portal:${host}:${official}`;
 
-type Ctx = { f: Filing; host: string; login: Login | null; page: Page; session: Session; trace: TraceStep[]; t0: number; files: Map<string, string>; seen?: string; pages?: number };
+type Ctx = {
+  f: Filing; host: string; hosts: string[]; login: Login | null; page: Page; session: Session; trace: TraceStep[]; t0: number; files: Map<string, string>;
+  pb: { playbook: Playbook; form: FormSteps } | null; seen?: string; pages?: number;
+};
+/** The URL is on the portal or one of the other hosts its destination names. */
+const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
 type Exec = { ok: true } | { ok: false; error: string } | { end: Result };
 
 export class Worker {
@@ -47,22 +64,35 @@ export class Worker {
   async run(f0: Filing): Promise<Result | null> {
     const { store } = this.c;
     let f = f0;
-    const host = this.c.portalOf(f.payload.official ?? "");
+    const official = f.payload.official ?? "";
+    const host = this.c.portalOf(official);
     if (!host) { await this.finish(f, { kind: "handoff", reason: "no_portal", message: { en: "No approved portal for this form.", zh: "该表格没有经核准的网站。" }, trace: [] }); return null; }
     if (f.submit_clicked_at) {
       await this.finish(f, { kind: "handoff", reason: "maybe_submitted", task: "check_agency", trace: [],
         message: { en: "An earlier run may have submitted this. The team checks the agency before anything else.", zh: "之前的运行可能已提交，团队会先向机构核实。" } });
       return null;
     }
+    // A playbook written from the agency's guide but never run on the live site waits for staff to watch its first run.
+    const pb = this.c.playbookOf?.(host, official) ?? null;
+    if (pb && !pb.playbook.verified && !this.c.allowUnverified) {
+      await this.finish(f, { kind: "handoff", reason: "unverified_playbook", task: "first_run", trace: [],
+        message: { en: `Placetta's steps for ${pb.playbook.name} come from the agency's published guide and haven't had their supervised first run. The Placetta team files this one and watches the steps.`, zh: `快哉在${pb.playbook.name}上的操作步骤来自机构公布的指南，尚未经过有人监督的首次运行。这一份由快哉团队提交，并核对这些步骤。` } });
+      return null;
+    }
+    const route = this.c.routeOf?.(official) ?? null;
+    const hosts = [host, ...(route?.alsoOn ?? [])];
     let session: Session | null = null;
     try {
       session = await this.c.open();
       const page = session.page;
-      await page.context().route("**/*", (r) => (r.request().isNavigationRequest() && r.request().frame() === page.mainFrame() && !onPortal(r.request().url(), host) ? r.abort() : r.continue()));
-      const login = await store.login(f, host);
+      await page.context().route("**/*", (r) => (r.request().isNavigationRequest() && r.request().frame() === page.mainFrame() && !onAny(r.request().url(), hosts) ? r.abort() : r.continue()));
+      const login = await store.login(f, host, route?.tenant);
       f = await store.step(f, log(`Opening ${host}`, `打开 ${host}`, "visit"), { provider_ref: null });
-      await page.goto(this.c.startUrl ? this.c.startUrl(host) : `https://${host}/`);
-      const ctx: Ctx = { f, host, login, page, session, trace: [], t0: Date.now(), files: new Map() };
+      if (pb) f = await store.step(f, log(`Following the published guide for ${pb.playbook.name}${pb.playbook.verified ? "" : " (first run, watched by the Placetta team)"}`, `按${pb.playbook.name}公布的指南操作${pb.playbook.verified ? "" : "（首次运行，由快哉团队监督）"}`, "playbook"));
+      // The agency's own start page when the destination names one (on a host many agencies share, it's the agency's path).
+      const start = pb?.form.start ?? route?.start;
+      await page.goto(this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`);
+      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb };
       const key = portalKey(host, f.payload.official!);
       const skill = await store.skill(key);
       let res: Result | null = null;
@@ -101,7 +131,7 @@ export class Worker {
     const rec = (x: Act) => ctx.trace.push({ ...x, url: urlKey(st.url), heading: headingOf(st), at: Date.now() });
     if (a.action === "fill") {
       if (a.login) {
-        if (!ctx.login || !onPortal(st.url, ctx.host)) return { ok: false, error: "No saved login for this site." };
+        if (!ctx.login || !onAny(st.url, ctx.hosts)) return { ok: false, error: "No saved login for this site." };
         await loc.fill(a.login === "username" ? ctx.login.username : ctx.login.password);
         rec({ action: "fill", selector: a.selector, login: a.login });
         ctx.f = await this.c.store.step(ctx.f, log(`Entered the saved ${a.login}`, `已填写保存的${a.login === "username" ? "用户名" : "密码"}`, "quiet"));
@@ -143,17 +173,24 @@ export class Worker {
       ctx.f = await this.c.store.step(ctx.f, log(`Attached ${a.attachment}`, `已上传 ${a.attachment}`, "upload"));
       return { ok: true };
     }
-    // click
-    const text = a.selector.startsWith("button:") ? a.selector.slice(7) : "";
-    if (text && isFinal(text)) {
+    // click. The words on what's clicked decide whether it sends the application, whatever kind of selector picked it:
+    // a "Submit" link or an element chosen by its id gets the same final-submit guard as a "Submit" button.
+    const text = a.selector.startsWith("button:") ? a.selector.slice(7) : a.selector.startsWith("link:") ? a.selector.slice(5)
+      : await loc.evaluate((el) => (el.textContent || (el as HTMLInputElement).value || el.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim()).catch(() => "");
+    const final = !!text && (isFinal(text) || finalOn(ctx.pb?.playbook, st, text));
+    if (final && ctx.f.submit_clicked_at) {
+      // Already submitted in this run: a second "send" is the agency's fee or a confirmation of it, which is the person's.
+      return { end: await this.handBack(ctx, "payment", PAY) };
+    }
+    if (final) {
       const end = await this.beforeSubmit(ctx, st);
       if (end) return { end };
       if (this.c.beforeSubmitClick) await this.c.beforeSubmitClick(ctx.f);
     }
     await Promise.all([page.waitForLoadState("domcontentloaded").catch(() => undefined), loc.click()]);
     await page.waitForLoadState("domcontentloaded").catch(() => undefined);
-    rec({ action: "click", selector: a.selector, ...(text && isFinal(text) ? { submit: true } : {}) });
-    if (!onPortal(page.url(), ctx.host)) return { end: { kind: "handoff", reason: "left_portal", trace: ctx.trace, message: { en: "The run left the agency's site.", zh: "运行离开了机构网站。" } } };
+    rec({ action: "click", selector: a.selector, ...(final ? { submit: true } : {}) });
+    if (!onAny(page.url(), ctx.hosts)) return { end: { kind: "handoff", reason: "left_portal", trace: ctx.trace, message: { en: "The run left the agency's site.", zh: "运行离开了机构网站。" } } };
     ctx.f = await this.c.store.step(ctx.f, log(`Pressed ${text || a.selector.replace(/^\w+:/, "")}`, `点击 ${text || a.selector.replace(/^\w+:/, "")}`, "click"));
     return { ok: true };
   }
@@ -180,7 +217,9 @@ export class Worker {
     }
     const official = ctx.f.payload.official!;
     const approved = ctx.f.agent_log.some((e) => e.kind === "two_key_ok");
-    if (this.c.dryRun || (!approved && (await this.c.store.selfFiled(official)) < this.c.twoKey)) {
+    // A playbook's supervised first run always stops here for the team, whatever the two-key count says.
+    const firstRun = !!ctx.pb && !ctx.pb.playbook.verified;
+    if (this.c.dryRun || (!approved && (firstRun || (await this.c.store.selfFiled(official)) < this.c.twoKey))) {
       ctx.f = await this.c.store.step(ctx.f, log(this.c.dryRun ? "Dry run: stopped at the final submit" : "With the Placetta team for a final check before submitting",
         this.c.dryRun ? "演练：停在最终提交前" : "快哉团队正在提交前做最后核对", "review_page", path ?? undefined));
       return { kind: "review", trace: ctx.trace, message: { en: "Ready to submit. The team reviews the agency's review page first.", zh: "已准备提交，团队先核对机构的核对页面。" } };
@@ -255,13 +294,17 @@ export class Worker {
       if (Date.now() - ctx.t0 > this.c.maxMs) break;
       if (ctx.f.status === "canceled") return { ...STOPPED, trace: ctx.trace };
       const st = await pageState(ctx.page);
-      const stop = mustStop(st);
+      // The guide's fee page goes to the person even before any card field shows.
+      const stop = mustStop(st) ?? (payOn(ctx.pb?.playbook, st) ? { reason: "payment" as const, ...PAY } : null);
       if (stop) {
         const r = await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh });
         if (r.kind === "needs_you" && r.reason === "resumed") continue;
         return r;
       }
-      const call = await this.c.model.next({ filing: ctx.f, agency: ctx.host, state: st, recent, note });
+      // After the submit, the guide's confirmation pattern finds the agency's number without asking the model.
+      const pattern = ctx.f.submit_clicked_at && ctx.pb?.playbook.confirm ? new RegExp(ctx.pb.playbook.confirm, "i").exec(st.text) : null;
+      if (pattern?.[1]) return await this.done(ctx, pattern[1], `Submitted following the published guide for ${ctx.pb!.playbook.name}`, false);
+      const call = await this.c.model.next({ filing: ctx.f, agency: ctx.host, state: st, recent, note, guide: ctx.pb ? guideLines(ctx.pb) : undefined });
       note = undefined;
       const x = call.input as Record<string, string & boolean & number>;
       let r: Exec;

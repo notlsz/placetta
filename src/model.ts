@@ -55,6 +55,27 @@ export type Application = {
   official?: string;         // the official form in the library (src/forms/registry.ts) this application is
   plain?: Bi;                // what this is, in one line a person would say (from the registry's plain field)
   preview?: boolean;         // listed from Placetta's registry at sign-up (src/plan/preview.ts), before Odelia verified it with the agency
+  versions?: FormVersion[];  // the agency's own form, filled, each time its answers changed (src/forms/versions.ts); newest last
+};
+
+/** A line that changed between two filled copies of a form. */
+export type LineChange = { id: string; label: Bi; was: string; now: string };
+/** What reading a filled copy back found wrong on one line (src/forms/readback.ts), in words for the person. */
+export type ReadProblem = { id: string; label: Bi; kind: "missing" | "wrong" | "overflow" | "characters" | "secret"; note: Bi };
+/** One filled copy of the agency's own form: version n, the answers it was filled from (by line id; never an SSN or
+ *  ITIN, which are written by hand), the lines that changed since the version before, what reading it back found,
+ *  and where it's kept (a Documents entry, and its storage path in an account). */
+export type FormVersion = {
+  n: number;
+  at: string;
+  hash: string;                        // of the answers: tells whether the application changed since
+  answers: Record<string, string>;
+  changed: LineChange[];
+  read: { ok: boolean; checked: number; problems: ReadProblem[] };
+  doc?: string;
+  path?: string;
+  size?: number;
+  why?: Bi;                            // what changed it: Odelia, your edit, your signup, a document, a business fact
 };
 
 export type DocKind = "pdf" | "xlsx" | "jpg" | "docx" | "csv" | "zip";
@@ -82,6 +103,12 @@ export type Approval = {
   /* Owner controls (src/autonomy.ts, src/businessRules.ts) */
   auto?: { rule: string; label: Bi };      // send: goes out under an owner's Always allow rule (a message only; never a filing, payment or fee)
   second?: { by: string[]; rule: string }; // a business rule wants two different owners to approve it; by: who has
+  /* A filing's card is for one set of answers (src/forms/versions.ts): the answers' hash and the filled form's version
+     it was put up with. When the answers change after it's put up, it's taken back (withdrawn, kept in closed so the
+     chat can say why) and a fresh card with the new version goes up; a card whose answers changed can't be filed. */
+  hash?: string;
+  version?: number;
+  withdrawn?: { at: string; why: Bi; next?: string };
 };
 /** A change to something that already exists, which the agent only makes after you confirm it. */
 export type Change =

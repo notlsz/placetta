@@ -23,6 +23,7 @@ import { AskPerson } from "./AskPerson";
 import { AllowanceNote } from "./Allowance";
 import { UndoTurn } from "./UndoTurn";
 import { PlanGate } from "./PlanGate";
+import { FilledCard, WithdrawnRow } from "./FilledForm";
 import { planApprovalId } from "./autonomy";
 
 /** The agent, beside the work (dock), over it on a phone (sheet), or as her own page (page: Odelia, Chat): what it's
@@ -158,7 +159,9 @@ function TurnView({ m, last, speaking, onSay, asked }: { m: Turn; last: boolean;
           )}
           {group.length > 1 && <ApproveGroup ids={group} />}
           {rows.filter(id => !(plan && id === planApprovalId(plan.id))).map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
-          {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
+          {/* the agency's forms this run filled again: each opens the filled form on its application */}
+          {r.forms?.map(n => <FilledCard key={n.app + n.version} n={n} />)}
+          {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return a.withdrawn ? <WithdrawnRow key={id} a={a} /> : <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
           {r.memory?.map((x, i) => <Memory key={i} text={x} />)}
           {r.remembered?.length ? <RememberedChips items={r.remembered} /> : null}
           {r.skills?.map((x, i) => <p key={"s" + i} className="mem"><I.spark /><span><b>{t("learned")}</b>{b(x)}</span></p>)}

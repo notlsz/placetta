@@ -1,4 +1,7 @@
 # Weekly dependency updates, each as its own pull request that CI checks before anyone merges it.
+# scripts/check-dependabot.mjs (run in CI) fails if a package-lock.json, a Dockerfile or the workflows lose their entry.
+# The filer's Playwright image and its playwright-core package must stay on the same version: merge those two
+# updates together (worker/filer/Dockerfile says why).
 version: 2
 updates:
   - package-ecosystem: npm
@@ -9,6 +12,10 @@ updates:
     directory: /worker/filer
     schedule: { interval: weekly }
     open-pull-requests-limit: 5
+  - package-ecosystem: docker
+    directory: /worker/filer
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 2
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }

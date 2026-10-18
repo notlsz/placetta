@@ -104,6 +104,8 @@ Likelihood 2, impact 3. Residual: low.
 | The agent has no tool that files, pays or sends; a reply claiming it did gets a correction | `src/live.ts` tool definitions; `src/guard.ts` `claimsAction`, `HONEST` |
 | Server-side: the payload is frozen at approval, destinations only from `DEST`, self-filing only for listed agencies and channels, no SSN or ITIN sent | `supabase/functions/file/index.ts`, `logic.ts` (`check`, `killSwitchOn`, `SECRET_NUMBER`) |
 | The portal filer stops for CAPTCHAs, identity checks, payment fields and secret numbers; the first 10 portal filings wait for a person on the team | `worker/filer/src/guards.ts`; `render.yaml` `FILER_TWO_KEY` |
+| A portal playbook written from an agency's guide runs only after staff watch its first run (refused unless `FILER_ALLOW_UNVERIFIED=1`, and that run stops at the review page); its send button gets the final-submit guard and its fee page goes to the person | `worker/filer/src/playbooks.ts`, `worker/filer/src/run.ts` |
+| Every filing destination cites the agency page it was copied from; owner-only forms become a packet the owner sends, never a send | `supabase/functions/file/destinations.ts`; `scripts/filing-coverage.mjs --check` in CI |
 | A filing leaves at most once; daily fax and mail cap per workspace | pending: `20261016120000_filing_send_once.sql` (`filing_claim_submit`) |
 | Tested | `scripts/extreme-test.ts` sections 1, 3, 8 |
 

@@ -3,7 +3,7 @@
 export type Bi = { en: string; zh: string };
 /** A step, or a moment of the replay (src/core.ts Step, src/replay.ts): when, which bot, which job, and what happened. */
 export type Step = { state: string; label: Bi; tool?: string; at?: string; bot?: string; job?: string; kind?: string; [k: string]: unknown };
-export type Reply = { text: Bi[]; approvals?: string[]; apps?: string[]; files?: string[]; sources?: { title: string; url: string }[]; [k: string]: unknown };
+export type Reply = { text: Bi[]; approvals?: string[]; apps?: string[]; files?: string[]; sources?: { title: string; url: string }[]; forms?: FilledNote[]; [k: string]: unknown };
 export type Audit = { id: string; at: string; actor: "you" | "agent" | "agency" | "team" | "placetta"; action: Bi; object: Bi; detail?: Bi };
 export type Workspace = { audit: Audit[]; meta?: { city?: string; region?: string; what?: string; entity?: string }; [k: string]: unknown };
 export type Turn = { role: "user" | "assistant"; content: string };
@@ -25,6 +25,8 @@ export type Services = {
   mcpTools?(): Promise<Record<string, unknown>[]>;
   /** Store bots (split_job): start one run per store job; which started now and which wait their turn. */
   split?(o: { parent: string; children: { job: string; store: string; title: Bi; prompt: string }[] }): Promise<{ started: string[]; queued: string[] }>;
+  /** An agency's PDF by its file name, for filling it on the server (src/forms/fill.ts); null to use the bundle's own. */
+  formPdf?(file: string): Promise<Uint8Array | null>;
 };
 /** What a store's bot came back with, for the run that split the work. */
 export type ChildResult = { job: string; store: string; status: string; reply: string };
@@ -84,3 +86,17 @@ export type MetricItem = { id: string; title: Bi; at?: string | null; date?: str
 export type MonthMetrics = { month: string; plan_ms: number | null; plan_at: string | null; plan_apps: number | null; runs: { id: string; prompt: string; created_at: string; first_ms: number | null; done_ms: number | null }[];
   median_first_ms: number | null; median_done_ms: number | null; mapped: MetricItem[]; filled: MetricItem[]; waiting: MetricItem[]; submitted: MetricItem[]; approved: MetricItem[]; renewals: MetricItem[] };
 export declare function monthMetrics(w: Workspace, o: { today: string; runs?: { id: string; prompt: string; created_at: string; first_text_at?: string | null; done_at?: string | null; status?: string }[]; filings?: { id: string; app_id: string; title: Bi; status: string; submitted_at: string | null; decided_at: string | null }[] }): MonthMetrics;
+
+// The agencies' own forms (src/forms/fill.ts, readback.ts, versions.ts)
+export type Field = { id: string; label: Bi; value: string; from?: Bi; quote?: string };
+export type LoadPdf = (file: string) => Promise<Uint8Array | null>;
+export type Wrote = { kind: "text" | "check" | "radio" | "choice" | "draw"; id: string | null; ok?: boolean; name?: string; v?: string; at?: { page: number; x: number; y: number; w?: number; size?: number } };
+export type Filled = { pdf: Uint8Array; wrote: Wrote[]; values: Record<string, string>; skipped: string[] };
+export type ReadBack = { ok: boolean; checked: number; issues: { id: string; kind: "missing" | "wrong" | "overflow" | "characters" | "secret"; want: string; got?: string }[] };
+/** A filled form a reply hands back (src/core.ts FilledNote). */
+export type FilledNote = { app: string; form: string; title: Bi; version: number; changed: number; filled: number; doc?: string; path?: string; ok: boolean; problem?: Bi; link?: string };
+export declare const appPdf: LoadPdf;
+export declare function pdfFile(formId: string): string | null;
+export declare function fillForm(formId: string, fields: Field[], load?: LoadPdf): Promise<Filled | null>;
+export declare function readBack(formId: string, f: Filled): Promise<ReadBack>;
+export declare function answersHash(a: { fields: Field[] }): string;

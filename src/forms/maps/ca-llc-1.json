@@ -1,0 +1,222 @@
+{
+ "form": "ca-llc-1",
+ "rev": "LLC-1 (REV 11/2023), with the Submission Cover Sheet (REV 03/2024)",
+ "pdf": "ca-llc-1.pdf",
+ "url": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+ "checked": "2026-10-18",
+ "notes": "The paper Form LLC-1 with the Secretary of State's submission cover sheet (page 1). Addresses 'street, City, CA ZIP'; initial_mailing_address 'Same' leaves item 2b blank. agent_for_service is the individual agent's full name (split into first, middle and last, with agent_address as the California street address), or 'Corporation: <registered corporate agent's name>' for item 3c (then agent_address stays blank). management_structure ticks one of the three item 4 boxes. Item 5, the purpose statement, is printed and is never altered. The organizer signs by hand; the cover sheet's comments are left blank. The page footer reads '2023 California Secretary of State' with no stated limit on copying the form.",
+ "lines": [
+  {
+   "id": "contact",
+   "line": "Cover sheet",
+   "en": "Contact person for this submission: first and last name",
+   "zh": "本次提交的联系人：名和姓"
+  },
+  {
+   "id": "contact_phone",
+   "line": "Cover sheet",
+   "en": "Contact person's phone (optional)",
+   "zh": "联系人电话（可选）"
+  },
+  {
+   "id": "contact_email",
+   "line": "Cover sheet",
+   "en": "Contact person's email",
+   "zh": "联系人电子邮箱"
+  },
+  {
+   "id": "entity_name",
+   "line": "1",
+   "en": "Limited liability company name (must include LLC or L.L.C.)",
+   "zh": "有限责任公司名称（须含 LLC 或 L.L.C.）"
+  },
+  {
+   "id": "designated_office_ca",
+   "line": "2a",
+   "en": "Initial street address of the principal office (not a P.O. box)",
+   "zh": "主要办公室的初始街道地址（不可用邮政信箱）"
+  },
+  {
+   "id": "initial_mailing_address",
+   "line": "2b",
+   "en": "Initial mailing address of the LLC, if different (or \"Same\")",
+   "zh": "LLC 的初始邮寄地址（如不同；相同则填 \"Same\"）"
+  },
+  {
+   "id": "agent_for_service",
+   "line": "3",
+   "en": "Agent for service of process: the individual's full name, or \"Corporation: \" and the registered corporate agent's name",
+   "zh": "法律文书送达代理人：个人全名，或填写 \"Corporation: \" 加注册公司代理人名称"
+  },
+  {
+   "id": "agent_address",
+   "line": "3b",
+   "en": "Individual agent's California street address (not a P.O. box)",
+   "zh": "个人代理人在加州的街道地址（不可用邮政信箱）"
+  },
+  {
+   "id": "management_structure",
+   "line": "4",
+   "en": "The LLC will be managed by",
+   "zh": "LLC 的管理方式",
+   "options": [
+    "One Manager",
+    "More than One Manager",
+    "All LLC Member(s)"
+   ]
+  },
+  {
+   "id": "purpose_statement",
+   "line": "5",
+   "en": "Purpose statement (printed: any lawful act or activity under the California Revised Uniform LLC Act)",
+   "zh": "经营目的声明（已印好：依《加州修订统一有限责任公司法》从事任何合法活动）"
+  },
+  {
+   "id": "organizer",
+   "line": "6",
+   "en": "Organizer: printed name",
+   "zh": "组织人：正楷姓名"
+  }
+ ],
+ "unmapped": {
+  "purpose_statement": "Printed on the form and never altered: there is nothing to fill."
+ },
+ "blank": {
+  "initial_mailing_address": "^(same|与.*相同|相同|同上)"
+ },
+ "boxes": {
+  "contact": [
+   {
+    "text": "Contact Person - First Name",
+    "pick": "first"
+   },
+   {
+    "text": "Contact Person - Last Name",
+    "pick": "last"
+   }
+  ],
+  "contact_phone": [
+   {
+    "text": "Contact Person - Phone Number"
+   }
+  ],
+  "contact_email": [
+   {
+    "text": "Contact Person - Email"
+   }
+  ],
+  "entity_name": [
+   {
+    "text": "1. Limited Liability Company Name (Must contain an LLC identifier such as LLC or L.L.C.  “LLC” will be added, if not included.)"
+   },
+   {
+    "text": "Entity Information - Name"
+   }
+  ],
+  "designated_office_ca": [
+   {
+    "text": "a. Initial Street Address of Principal Office - Do not enter a P.O. Box",
+    "pick": "street"
+   },
+   {
+    "text": "City no abbreviations",
+    "pick": "city"
+   },
+   {
+    "text": "State",
+    "pick": "state"
+   },
+   {
+    "text": "Zip Code",
+    "pick": "zip"
+   }
+  ],
+  "initial_mailing_address": [
+   {
+    "text": "b Initial Mailing Address of LLC if different than item 2a",
+    "pick": "street",
+    "if": "^(?!(same|与.*相同|相同|同上|none|n/?a))"
+   },
+   {
+    "text": "City no abbreviations_2",
+    "pick": "city",
+    "if": "^(?!(same|与.*相同|相同|同上|none|n/?a))"
+   },
+   {
+    "text": "State_2",
+    "pick": "state",
+    "if": "^(?!(same|与.*相同|相同|同上|none|n/?a))"
+   },
+   {
+    "text": "Zip Code_2",
+    "pick": "zip",
+    "if": "^(?!(same|与.*相同|相同|同上|none|n/?a))"
+   }
+  ],
+  "agent_for_service": [
+   {
+    "text": "a California Agents First Name (if agent is not a corporation)",
+    "pick": "first",
+    "if": "^(?!corporation\\s*:)"
+   },
+   {
+    "text": "Middle Name",
+    "pick": "middle",
+    "if": "^(?!corporation\\s*:)"
+   },
+   {
+    "text": "Last Name",
+    "pick": "last",
+    "if": "^(?!corporation\\s*:)"
+   },
+   {
+    "text": "c California Registered Corporate Agents Name (if agent is a corporation) - Do not complete Item 3a or 3b",
+    "pick": "tail",
+    "if": "^corporation\\s*:"
+   }
+  ],
+  "agent_address": [
+   {
+    "text": "b Street Address (if agent is not a corporation) - Do not enter a PO Box",
+    "pick": "street"
+   },
+   {
+    "text": "City no abbreviations_3",
+    "pick": "city"
+   },
+   {
+    "text": "Zip Code_3",
+    "pick": "zip"
+   }
+  ],
+  "management_structure": [
+   {
+    "radio": "RadioButton1",
+    "value": "One Manager",
+    "if": "^one"
+   },
+   {
+    "radio": "RadioButton2",
+    "value": "More than One Manager",
+    "if": "^more"
+   },
+   {
+    "radio": "RadioButton3",
+    "value": "4c",
+    "if": "^all"
+   }
+  ],
+  "organizer": [
+   {
+    "text": "Print your name here"
+   }
+  ]
+ },
+ "sign": {
+  "page": 1,
+  "x": 34,
+  "y": 62,
+  "w": 265,
+  "h": 22
+ }
+}

@@ -1,0 +1,18 @@
+/* The agency's own form, filled (src/FilledForm.tsx). */
+.filled-card { margin-top: 8px; grid-template-columns: 40px minmax(0, 1fr) 14px; }
+.filled-card.bad .atile { color: var(--warm); }
+.filled-card .fc-bad { color: var(--warm); white-space: normal; }
+.resolved.withdrawn { flex-wrap: wrap; }
+.resolved.withdrawn .wd-ico { display: grid; color: var(--warm); }
+.resolved.withdrawn em { color: var(--ink2); font-style: normal; }
+.ff { margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--card); box-shadow: inset 0 0 0 1px rgba(115, 153, 198, .25); }
+.ff-v { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; margin: 0; font-size: 14px; }
+.ff-v span { font-size: 13px; color: var(--ink2); }
+.ff-read { margin: 6px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--ink2); }
+.ff-read.ok { color: var(--blue-deep); }
+.ff-read.bad { color: var(--warm); }
+.ff-changes { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ff-changes li { display: flex; flex-wrap: wrap; gap: 2px 8px; padding: 6px 10px; border-radius: 10px; background: var(--warm-soft); font-size: 13px; }
+.ff-changes li span { flex-basis: 100%; color: var(--ink2); }
+.ff-changes li s { color: var(--ink3); }
+.ff-changes li em { font-style: normal; color: var(--ink); font-weight: 500; }

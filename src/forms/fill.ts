@@ -2,12 +2,14 @@ import { addressProblems } from "./addressCheck";
 import type { Field } from "../model";
 import { formById } from "./registry";
 import { MAPS } from "./maps";
-import { pdfLibWriter, writeAnswers, type FormMap } from "./boxes";
+import { pdfLibWriter, writeAnswers, type FormMap, type Spot, type Writer } from "./boxes";
 import { BY_HAND } from "../guard";
 
 /* Fills the official PDF itself: the agency's own form, downloaded from the agency (federal forms are public domain),
    with each answer written into the form's own field for that line. Nothing private goes in: SSNs, ITINs and passport
-   numbers stay blank for the signer to write by hand. The PDF and pdf-lib load only when someone downloads. */
+   numbers stay blank for the signer to write by hand. The PDF and pdf-lib load only when a form is filled.
+   Every fill also keeps what it wrote on which line, so the filled copy can be read back and checked against the
+   answers (./readback.ts). The app, the server (agent-run, through the agent's bundle) and the tests run this same code. */
 
 type Put = { text: (name: string, v: string) => void; check: (name: string) => void };
 const norm = (s: string) => s.trim().toLowerCase();
@@ -30,7 +32,16 @@ function ss4(v: Record<string, string>, put: Put) {
   else if (e.startsWith("corporation")) { put.check(P + "c1_3[4]"); const m = /(\d{4}[a-z-]*)/i.exec(v.l9a); put.text(P + "f1_16[0]", m ? m[1] : "1120"); }
   else if (e.startsWith("sole")) put.check(P + "c1_3[0]");
   else if (e) { put.check(P + "c1_3[15]"); put.text(P + "f1_19[0]", v.l9a.replace(/^other\s*[:(-]?\s*/i, "").replace(/\)$/, "")); }
-  if (v.l10) { put.check(P + "c1_4[0]"); put.text(P + "f1_25[0]", v.l10.slice(0, 18)); if (v.l10.length > 18) put.text(P + "f1_26[0]", v.l10.slice(18, 60)); }
+  // the type goes on the short blank beside the box (about 11 characters at its size, whole words) and runs on to the
+  // line below; it used to be cut at 18 characters, which ran past the blank ("Started a new m" showed, "ilk" didn't)
+  if (v.l10) {
+    put.check(P + "c1_4[0]");
+    const words = v.l10.trim().split(/\s+/);
+    let first = "";
+    while (words.length && (first ? first + " " + words[0] : words[0]).length <= 11) first = first ? first + " " + words.shift() : words.shift()!;
+    if (first) put.text(P + "f1_25[0]", first);
+    if (words.length) put.text(P + "f1_26[0]", words.join(" "));
+  }
   const a = norm(v.l16 ?? "");
   const ACT: [RegExp, number][] = [[/health/, 0], [/agent|broker/, 1], [/construction/, 2], [/rental|leasing/, 3], [/transport|warehous/, 4], [/accommodation|food/, 5], [/wholesale/, 6], [/retail/, 7], [/real estate/, 8], [/manufactur/, 9], [/finance|insurance/, 10]];
   const hit = ACT.find(([r]) => r.test(a));
@@ -61,11 +72,13 @@ function cbp5106(v: Record<string, string>, put: Put) {
   for (const [k, f] of Object.entries(T1)) if (v[k]) put.text(P1 + f, k === "c3b" ? v[k].replace(/\D/g, "").slice(0, 6) : k === "c3e" ? v[k].replace(/\D/g, "").slice(0, 4) : k === "c3jlast" || k === "c3jfirst" ? v[k].slice(0, 25) : v[k]);
 }
 
-const PDFS: Record<string, () => Promise<string>> = {
-  ss4: () => import("./pdf/irs-fss4.pdf?inline").then(m => m.default as string),
-  cbp5106: () => import("./pdf/cbp-5106.pdf?inline").then(m => m.default as string),
-};
 const FILL = { ss4, cbp5106 };
+/** The lines a code-filled form reads (by field id), and the answers it cuts to fit a box (the rest doesn't show). */
+const CODE_LINES: Record<keyof typeof FILL, string[]> = {
+  ss4: ["l1", "l2", "l4a", "l4b", "l5a", "l5b", "l6", "l7a", "l7b", "l8a", "l8b", "l8c", "l9a", "l9b", "l10", "l11", "l12", "l13", "l15", "l16", "l17", "l18", "sign", "phone"],
+  cbp5106: ["c1a", "c1b", "c1bn", "c1d", "c1g", "c1h", "c1i", "c2a1", "c2acity", "c2ast", "c2azip", "c2aiso", "c2atype", "c2c", "c2e", "c2f", "c3a", "c3b", "c3c", "c3e", "c3jpos", "c3jlast", "c3jfirst", "c3jphone", "c3jmail"],
+};
+export const CODE_ROOM: Record<string, Record<string, number>> = { cbp5106: { c2a1: 32, c3jlast: 25, c3jfirst: 25 } };
 
 /** "By hand": the line is answered, and the signer writes it on the printed copy (src/guard.ts, where the check before
  *  approval reads it too). It counts as filled, and nothing is printed in that box. */
@@ -81,7 +94,139 @@ export const fillable = (formId: string) => !!formById(formId)?.fill || !!MAPS[f
 /** Where the app keeps the agencies' PDFs: /app/forms/ in the app, ./forms/ next to the one-file preview. */
 const FORMS_BASE = import.meta.env?.MODE === "single" ? "forms/" : `${import.meta.env?.BASE_URL ?? "/"}forms/`;
 
-/** Fills an agency PDF from its box map. Pure: the bytes in, the filled bytes out (the checks run this same code). */
+/* ------------------------------ which PDF, and where it comes from ------------------------------ */
+
+/** The file a form fills: an agency's PDF under public/forms/ (the box maps), or one of the two kept with this code
+ *  ("pdf/…", the SS-4 and CBP 5106, filled by code above). null when Placetta doesn't fill this form itself. */
+export function pdfFile(formId: string): string | null {
+  const form = formById(formId);
+  if (form?.fill) return form.fill === "ss4" ? "pdf/irs-fss4.pdf" : "pdf/cbp-5106.pdf";
+  return MAPS[formId]?.pdf ?? null;
+}
+/** Gets an agency PDF's bytes by its file name (pdfFile). null when this place can't get it. */
+export type LoadPdf = (file: string) => Promise<Uint8Array | null>;
+const INLINE: Record<string, () => Promise<string>> = {
+  "pdf/irs-fss4.pdf": () => import("./pdf/irs-fss4.pdf?inline").then(m => m.default as string),
+  "pdf/cbp-5106.pdf": () => import("./pdf/cbp-5106.pdf?inline").then(m => m.default as string),
+};
+const fromDataUrl = (dataUrl: string) => {
+  const bin = atob(dataUrl.slice(dataUrl.indexOf(",") + 1)), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+};
+/** The app's own way to the PDFs: the two kept with the code come inside the app (and inside the server's bundle,
+ *  scripts/build-agent.mjs); the rest from /app/forms/. */
+export const appPdf: LoadPdf = async file => {
+  if (INLINE[file]) return fromDataUrl(await INLINE[file]());
+  const res = await fetch(FORMS_BASE + file);
+  if (!res.ok) throw new Error(`The official form ${file} didn't load (${res.status}).`);
+  return new Uint8Array(await res.arrayBuffer());
+};
+/** The caller's own way first (the server fetches the site's /app/forms/, a test reads the disk), then the app's. */
+export const loaderWith = (own?: LoadPdf): LoadPdf => (own ? async file => (await own(file).catch(() => null)) ?? appPdf(file) : appPdf);
+
+/* ------------------------------ what each line writes ------------------------------ */
+
+/** One thing a fill wrote on the form, with the line (field id) it came from (null: written every time, like the
+ *  "new registration" box), and whether the PDF had that box (ok). The read-back checks each one (./readback.ts). */
+export type Wrote = (
+  | { kind: "text"; name: string; v: string }
+  | { kind: "check"; name: string }
+  | { kind: "radio"; name: string; v: string }
+  | { kind: "choice"; name: string; v: string }
+  | { kind: "draw"; at: Spot; v: string }
+) & { id: string | null; ok?: boolean };
+type Sink = Required<Pick<Writer, "text" | "check" | "radio" | "choice">> & { draw?: Writer["draw"] };
+
+/** Runs a form's fill (its code, or its box map) into a sink. */
+function runFill(formId: string, values: Record<string, string>, s: Sink): void {
+  const form = formById(formId);
+  if (form?.fill) {
+    // the PDF's boxes take Latin-1: curly quotes and dashes become straight ones, anything else it can't print is left out
+    const latin = (v: string) => v.replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-").replace(/[^\x20-\x7E\xA0-\xFF]/g, "");
+    FILL[form.fill](values, { text: (n, v) => { s.text(n, latin(v)); }, check: n => { s.check(n); } });
+    return;
+  }
+  const map = MAPS[formId];
+  if (map) writeAnswers(map, values, s);
+}
+/** A sink that writes nothing (or passes through to the real one) and keeps a list of every write, in order. */
+function recorder(out: Wrote[], inner?: Sink): Sink {
+  const rec = (w: Wrote, ok: boolean) => { out.push({ ...w, ok }); return ok; };
+  return {
+    text: (name, v) => rec({ kind: "text", name, v, id: null }, inner ? inner.text(name, v) : true),
+    check: name => rec({ kind: "check", name, id: null }, inner ? inner.check(name) : true),
+    radio: (name, v) => rec({ kind: "radio", name, v, id: null }, inner ? inner.radio(name, v) : true),
+    choice: (name, v) => rec({ kind: "choice", name, v, id: null }, inner ? inner.choice(name, v) : true),
+    draw: (at, v) => rec({ kind: "draw", at, v, id: null }, inner ? !!inner.draw?.(at, v) : true),
+  };
+}
+/** Every write a fill makes, each with the line it came from. Worked out without a PDF: fill once with every answer,
+ *  then once without each answer in turn; the writes that go away were that answer's. Works the same for the code
+ *  fills (SS-4, CBP 5106) and the box maps, whatever splits or picks a line uses. */
+export function linesOf(formId: string, values: Record<string, string>): Wrote[] {
+  const dry = (v: Record<string, string>) => { const out: Wrote[] = []; runFill(formId, v, recorder(out)); return out; };
+  const all = dry(values);
+  const key = (x: Wrote) => JSON.stringify({ ...x, id: null, ok: null });
+  const owner: (string | null)[] = all.map(() => null);
+  for (const id of Object.keys(values)) {
+    const rest = { ...values };
+    delete rest[id];
+    const left = new Map<string, number>();
+    for (const x of dry(rest)) left.set(key(x), (left.get(key(x)) ?? 0) + 1);
+    all.forEach((x, i) => { const k = key(x), n = left.get(k) ?? 0; if (n) left.set(k, n - 1); else owner[i] ??= id; });
+  }
+  return all.map((x, i) => ({ ...x, id: owner[i] }));
+}
+/** The lines this form puts somewhere on its PDF (by field id). An answer to any other line isn't printed anywhere. */
+export function placedLines(formId: string): Set<string> {
+  const form = formById(formId);
+  if (form?.fill) return new Set(CODE_LINES[form.fill]);
+  return new Set(Object.keys(MAPS[formId]?.boxes ?? {}));
+}
+
+/* ------------------------------ the fill ------------------------------ */
+
+/** A filled copy: the PDF, every write with its line, the answers it was filled from, and the answers kept off the
+ *  form on purpose (an address the agency doesn't accept on that line: the app and Odelia say why). */
+export type Filled = { pdf: Uint8Array; wrote: Wrote[]; values: Record<string, string>; skipped: string[] };
+
+/** Fills the agency's own PDF with an application's answers. The one fill the app, the server, the checks and the tests
+ *  all run. null when Placetta doesn't fill this form itself. */
+export async function fillForm(formId: string, fields: Field[], load: LoadPdf = appPdf): Promise<Filled | null> {
+  const file = pdfFile(formId);
+  if (!file) return null;
+  const bytes = await load(file);
+  if (!bytes) throw new Error(`The official ${formById(formId)?.form ?? formId} PDF didn't load.`);
+  const { PDFDocument, StandardFonts } = await import("pdf-lib");
+  const form = formById(formId), map = MAPS[formId];
+  const values = valuesOf(fields), skipped: string[] = [];
+  // an address the agency doesn't accept on its line never goes on the agency's form (the app and Odelia already say why)
+  if (map && !form?.fill) for (const p of addressProblems(map.form, values)) { delete values[p.field]; skipped.push(p.field); }
+  const tagged = linesOf(formId, values);
+  const real: Wrote[] = [];
+  let pdf: Uint8Array;
+  if (form?.fill) {
+    const doc = await PDFDocument.load(bytes);
+    const f = doc.getForm();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    // the same writer as the mapped forms: a box this revision doesn't have is skipped, and a long answer shrinks to fit its box
+    runFill(formId, values, recorder(real, pdfLibWriter(f, doc, font) as Sink));
+    pdf = await doc.save();
+  } else {
+    const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    const f = doc.getForm();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    runFill(formId, values, recorder(real, pdfLibWriter(f, doc, font) as Sink));
+    // XFA forms (the IRS's and Arizona's) would show their own empty copy in Acrobat; drop it so the filled boxes show.
+    try { f.deleteXFA(); } catch { /* no XFA */ }
+    try { f.updateFieldAppearances(); } catch { /* a box with an odd font keeps its own look */ }
+    pdf = await doc.save();
+  }
+  // the dry run and the real one write the same things in the same order: the real one says which boxes the PDF had
+  return { pdf, wrote: tagged.map((x, i) => ({ ...x, ok: real[i]?.ok ?? false })), values, skipped };
+}
+
 export async function fillMapped(bytes: Uint8Array, map: FormMap, fields: Field[]): Promise<{ pdf: Uint8Array; filled: Set<string> }> {
   const { PDFDocument, StandardFonts } = await import("pdf-lib");
   const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
@@ -98,29 +243,9 @@ export async function fillMapped(bytes: Uint8Array, map: FormMap, fields: Field[
 }
 
 /** The agency's own PDF with the answers written in. Returns null when Placetta can't fill this form itself. */
-export async function fillOfficial(formId: string, fields: Field[]): Promise<Blob | null> {
-  const form = formById(formId);
-  const map = MAPS[formId];
-  if (!form?.fill && map) {
-    const res = await fetch(FORMS_BASE + map.pdf);
-    if (!res.ok) throw new Error(`The official ${form?.form ?? formId} PDF didn't load (${res.status}).`);
-    const { pdf } = await fillMapped(new Uint8Array(await res.arrayBuffer()), map, fields);
-    return new Blob([pdf as BlobPart], { type: "application/pdf" });
-  }
-  if (!form?.fill) return null;
-  const [{ PDFDocument }, dataUrl] = await Promise.all([import("pdf-lib"), PDFS[form.fill]()]);
-  const bin = atob(dataUrl.slice(dataUrl.indexOf(",") + 1));
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  const doc = await PDFDocument.load(bytes);
-  const pdf = doc.getForm();
-  const put: Put = {
-    text: (name, v) => { try { pdf.getTextField(name).setText(v.replace(/[^\x20-\x7E -ÿ]/g, "")); } catch { /* a field this revision doesn't have */ } },
-    check: name => { try { pdf.getCheckBox(name).check(); } catch { /* idem */ } },
-  };
-  FILL[form.fill](valuesOf(fields), put);
-  const out = await doc.save();
-  return new Blob([out as BlobPart], { type: "application/pdf" });
+export async function fillOfficial(formId: string, fields: Field[], load: LoadPdf = appPdf): Promise<Blob | null> {
+  const out = await fillForm(formId, fields, load);
+  return out ? new Blob([out.pdf as BlobPart], { type: "application/pdf" }) : null;
 }
 
 /** Draw a signature image (PNG) on the form's signature line with today's date in its date box. One filing, one
