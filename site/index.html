@@ -816,7 +816,8 @@ html[lang="zh-CN"] .qh{letter-spacing:0}
 .qin[aria-invalid="true"]{border-color:var(--no)}
 .qerr{font-size:12px;color:var(--no);margin-top:6px}
 .qfoot{margin-top:26px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.qfoot small{font-size:12px;line-height:1.35;color:var(--muted);max-width:30ch}
+.stnote>span,.cnbtn small{text-wrap:balance}
+.qfoot small{flex:1 1 220px;font-size:12px;line-height:1.35;color:var(--muted);max-width:44ch}
 .qfoot .btn{padding:12px 18px;font-size:15px}
 .qfoot .btn:disabled{opacity:.3;cursor:default}
 .qprev{margin-top:18px;border-radius:12px;background:var(--gs-ll);border:1px solid #DFE8F3;padding:16px}
@@ -2761,7 +2762,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="belt" id="caseT"></p>
         <p class="belp" id="caseP"></p>
         <div class="belst" id="caseSt"></div>
-        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="case" data-i18n="bel.btn">Plan my next markets</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
+        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="case" data-i18n="bel.btn">Plan my next markets</button><small data-i18n="st.note">$149 per location a month, billed yearly, or start with a $299 one-time entry plan per market, credited toward your first year if you start a plan within 60 days.</small></div>
       </div>
       <div class="csr">
         <div class="belstage">
@@ -2781,7 +2782,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="belt" id="teaT"></p>
         <p class="belp" id="teaP"></p>
         <div class="belst" id="teaSt"></div>
-        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="tea" data-i18n="tea.btn">Plan my US opening</button><small data-i18n="st.note">$299 per market, credited in full to any yearly plan.</small></div>
+        <div class="cnbtn"><button type="button" class="btn b-ink" data-open="tea" data-i18n="tea.btn">Plan my US opening</button><small data-i18n="st.note">$149 per location a month, billed yearly, or start with a $299 one-time entry plan per market, credited toward your first year if you start a plan within 60 days.</small></div>
       </div>
       <div class="csr">
         <div class="belstage">
@@ -3281,7 +3282,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <input id="st-final" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
         <button type="submit" class="btn b-ink" data-i18n="st.btn">Get my plan</button>
       </form>
-      <p class="stnote"><span data-i18n="st.note">$299 per market, credited in full to any yearly plan.</span> <a href="/sample-plan" data-sec="sample" data-i18n="hero.sample">See a sample plan</a></p>
+      <p class="stnote"><span data-i18n="st.note">$149 per location a month, billed yearly, or start with a $299 one-time entry plan per market, credited toward your first year if you start a plan within 60 days.</span> <a href="/sample-plan" data-sec="sample" data-i18n="hero.sample">See a sample plan</a></p>
     </div>
     <div class="fqr" id="fqr" hidden><img id="fqrImg" alt="" width="88" height="88"><p data-i18n="fqr.t">Prefer WeChat? Scan to add Placetta.</p></div>
   </div>
@@ -3389,14 +3390,14 @@ en:{
  "aria.app":"Sample entry plan",
  "tea.tabs":"Tea houses", "tea.sub":"Five examples", "tea.mk":"Steps", "tea.btn":"Plan my US opening", "tea.src":"", "tea.c1":"Sets the opening date", "tea.c2":"Takes longest", "tea.c3":"Biggest risk", "tea.c4":"Every shipment",
  "app.loc":"Tianxin Village, Wuyi Mountains → first US store in San José, CA",
- "st.note":"$299 one-time per market, credited toward your first year if you start a plan within 60 days.",
- "q.fine":"$299 one-time per market, credited toward your first year if you start a plan within 60 days. Ready in minutes.",
+ "st.note":"$149 per location a month, billed yearly, or start with a $299 one-time entry plan per market, credited toward your first year if you start a plan within 60 days.",
+ "q.fine":"$149 per location a month, billed yearly, or start with a $299 one-time entry plan per market, credited toward your first year if you start a plan within 60 days. Ready in minutes.",
  "mon.price":"Included in every monthly plan",
  "price.risk":"Not ready? Start with a one-time $299 entry plan for one market, credited toward your first year if you start a plan within 60 days.", "price.an.l":"A store waiting on permits", "price.an.v":"$15,000<small class=\"pmper\">a month</small>", "price.an.s":"in rent, with no sales. The example store in \"The cost of waiting\".", "price.an.l2":"Placetta for one location, billed yearly", "price.an.v2":"$8,288", "price.an.s2":"One month of waiting costs more than seven months of Placetta.", "price.m.h":"The math on waiting", "price.m.sub":"One month of waiting costs more than a restaurant opening and a full year with Odelia.", "price.m.bad":"Without Odelia", "price.m.good":"With Odelia", "price.m.s1":"Rent with no sales, for every month a permit runs late. The example store waited 8 months.", "price.m.s2":"A restaurant opening filed and tracked to approval ($6,500), plus its first year on Essentials ($1,788).", "price.m.s3":"Per new store opening, retail to restaurant, filed and tracked to approval", "price.ex.l":"A permit expediter, per restaurant", "price.ex.v":"$2,000 to $7,500", "price.ex.s":"Typical permit expediter fee per restaurant opening, before agency fees. <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">Source: PermitPlace</a>", "price.ex.l2":"Placetta, per new store opening", "price.ex.v2":"$3,500 to $6,500", "price.ex.s2":"Every permit for the opening filed and tracked to approval. Add the open-by-date guarantee for $2,500.", "price.f1q":"Is the $299 entry plan credited?", "price.f1a":"Yes, when you start a yearly plan within 60 days of buying it. After that it stays a one-time plan.", "price.f2q":"Who pays government fees?", "price.f2a":"You pay each agency directly, through the payment link we send. Estimated fees are in your plan upfront.", "price.f3q":"What if a filing is rejected?", "price.f3a":"Odelia reads the agency's reason, corrects the application with you and resubmits it, and our team steps in when the agency needs a person. Nothing is filed without your approval.", "price.fine":"Every plan includes Odelia, with a monthly allowance per location, twice as much on Pro. Extra allowance comes in $49 packs that carry over. Government fees go straight to each agency, and attorneys and customs brokers bill you directly.", "price.hq":"10 or more locations, or a brand entering the US from abroad? Headquarters plans start at $25,000 a year. <a href=\"mailto:support@placetta.com?subject=Odelia%20for%20franchisors\" data-track=\"price_scale\">Book a demo</a>", "price.entry":"<b>Not ready for a plan?</b> Get an entry plan for any market for $299 one-time, ready instantly and credited toward your first year if you start a plan within 60 days.",
  "bel.ya":"Approval", "bel.yf":"Filing", "bel.yr":"Rule", "bel.sa":"Granted by the agency", "bel.sf":"Odelia prepares and files it", "bel.sr":"Odelia checks you meet it", "bel.cases":"Example plans", "bel.crit2":"Sets the payout cycle", "bel.tag":"Case study", "bel.tabs":"Markets", "bel.crit":"Sets the launch date", "bel.src":"Source: ", "bel.srcs":"Sources: ", "bel.btn":"Plan my next markets",
  "q.doneT":"Your plan is ready.", "q.doneP":"Your {m} entry plan is generated instantly and sent to {c}.", "q.n1":"Your plan is built instantly from your answers for {m}.", "q.n2":"It lists every requirement, in order, with timelines and fees.",
  "mon.allm":"All markets", "mon.sample":"See a sample alert", "mon.none2":"No deadlines in this market in the next 6 months.", "mon.al.to":"To: your team", "mon.al.subj":"Action needed: {t}", "mon.al.note":"Sample alert built from a real, sourced rule change.", "mon.body3":"Every rule change in your markets, with what it means for your stores and what to do next.", "mon.app":"Placetta Monitor",
- "mbar.t":"Entry plan, $299 one-time per market",
+ "mbar.t":"$149 per location a month, or a $299 one-time entry plan",
  "cta.free":"Get your entry plan",
  "mon.l.aff2":"Affects", "mon.due":"Deadline in {n} days", "mon.due1":"Deadline in 1 day", "mon.duet":"Deadline today", "mon.dayn":"days left", "mon.day1":"day left",
  "ts.tabs":"Stories",
@@ -3472,14 +3473,14 @@ zh:{
  "aria.app":"示例开店计划",
  "tea.tabs":"茶企", "tea.sub":"五个示例", "tea.mk":"环节", "tea.btn":"规划我的美国开店", "tea.src":"", "tea.c1":"决定开业时间", "tea.c2":"耗时最长", "tea.c3":"风险最大", "tea.c4":"每次发货",
  "app.loc":"武夷山天心村 → 加州圣何塞首家美国门店",
- "st.note":"每个市场一次性 299 美元，60 天内开通方案即可抵扣首年费用。",
- "q.fine":"每个市场一次性 299 美元，60 天内开通方案即可抵扣首年费用。几分钟即可生成。",
+ "st.note":"每家门店每月 149 美元，按年计费；也可以先购买每个市场一次性 299 美元的开店计划，60 天内开通方案即可抵扣首年费用。",
+ "q.fine":"每家门店每月 149 美元，按年计费；也可以先购买每个市场一次性 299 美元的开店计划，60 天内开通方案即可抵扣首年费用。几分钟即可生成。",
  "mon.price":"所有月度方案均包含",
  "price.risk":"还没准备好？先以一次性 299 美元获取一个市场的开店计划，60 天内开通方案即可抵扣首年费用。", "price.an.l":"一家等待许可的门店", "price.an.v":"15,000 美元<small class=\"pmper\">每月</small>", "price.an.s":"房租照付，却没有营业收入（即“等待的代价”中的示例门店）。", "price.an.l2":"快哉单店套餐，按年计费", "price.an.v2":"8,288 美元", "price.an.s2":"多等一个月的损失，超过七个月的快哉费用。", "price.m.h":"等待的账单", "price.m.sub":"多等一个月的房租，就超过一家餐厅开业加上一整年 Odelia 的费用。", "price.m.bad":"没有 Odelia", "price.m.good":"有 Odelia", "price.m.s1":"许可每晚一个月，就多付一个月没有营业收入的房租。示例门店等了 8 个月。", "price.m.s2":"一家餐厅开业的全部申报，跟进至获批（6,500 美元），加上首年基础版（1,788 美元）。", "price.m.s3":"每家新店开业，从零售到餐厅，代办申报并跟踪至获批", "price.ex.l":"许可代办公司，每家餐厅", "price.ex.v":"2,000 至 7,500 美元", "price.ex.s":"许可代办公司的常见收费，每家餐厅一次开店，不含政府规费。<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">来源：PermitPlace</a>", "price.ex.l2":"快哉，每家新店开业", "price.ex.v2":"3,500 至 6,500 美元", "price.ex.s2":"开业所需的每一项许可代办申报并跟踪至获批。另可加购 2,500 美元的按期开业保障。", "price.f1q":"299 美元的开店计划可以抵扣吗？", "price.f1a":"可以，只要您在购买后 60 天内开通年度套餐。超过 60 天，则作为一次性计划，不再抵扣。", "price.f2q":"政府规费由谁支付？", "price.f2a":"由您通过我们发送的付款链接直接支付给各机构。预估费用会提前列在计划中。", "price.f3q":"申请被退回怎么办？", "price.f3a":"Odelia 会读取机构给出的原因，与您一起修正后重新提交；如机构需要专人处理，由我们的团队接手。未经您批准，不会提交任何申请。", "price.fine":"每个方案都包含 Odelia，并按门店提供每月额度，专业版翻倍。额外额度以 49 美元加量包购买，长期有效。政府规费直接支付给各机构，律师和报关行直接向您收费。", "price.hq":"10 家及以上门店，或从海外进入美国的品牌？品牌总部方案每年 25,000 美元起。<a href=\"mailto:support@placetta.com?subject=Odelia%20for%20franchisors\" data-track=\"price_scale\">预约演示</a>", "price.entry":"<b>还没准备好订阅？</b>先以一次性 299 美元获取任一市场的开店合规计划，即时生成，60 天内开通套餐即可抵扣首年费用。",
  "bel.ya":"审批", "bel.yf":"备案", "bel.yr":"合规", "bel.sa":"由机构批准", "bel.sf":"Odelia 准备并提交", "bel.sr":"Odelia 核对是否达标", "bel.cases":"示例方案", "bel.crit2":"决定付款周期", "bel.tag":"客户案例", "bel.tabs":"市场", "bel.crit":"决定上线时间", "bel.src":"来源：", "bel.srcs":"来源：", "bel.btn":"规划我的下一个市场",
  "q.doneT":"您的计划已生成。", "q.doneP":"您的{m}开店计划即时生成，并发送至 {c}。", "q.n1":"根据您对{m}的回答，即时生成您的计划。", "q.n2":"计划列出每一项要求、办理顺序、时间和费用。",
  "mon.allm":"全部市场", "mon.sample":"查看提醒示例", "mon.none2":"该市场未来 6 个月没有截止日期。", "mon.al.to":"收件人：您的团队", "mon.al.subj":"需要处理：{t}", "mon.al.note":"示例提醒，内容来自真实且附来源的规则变化。", "mon.body3":"您所在市场的每项规则变化，附上对门店的影响和下一步建议。", "mon.app":"快哉监测",
- "mbar.t":"开店计划，每个市场一次性 299 美元",
+ "mbar.t":"每家门店每月 149 美元，或一次性 299 美元的开店计划",
  "cta.free":"获取您的开店合规计划",
  "mon.l.aff2":"涉及", "mon.due":"距截止还有 {n} 天", "mon.due1":"距截止还有 1 天", "mon.duet":"今天截止", "mon.dayn":"天后截止", "mon.day1":"天后截止",
  "ts.tabs":"故事",
@@ -3596,7 +3597,7 @@ const TIERS = [
   {l:["Headquarters","品牌总部"],v:["$25,000+","25,000 美元"],u:["/year","/年起"],ps:["For 10 or more locations, billed yearly","适用于 10 家及以上门店，按年计费"],cta:["Book a demo","预约演示"],mail:1,n:["For franchisors that require Odelia across the system, and brands entering the US.","适用于在体系内统一要求使用 Odelia 的品牌总部，以及进入美国市场的品牌。"],f:[["Every store's status in one view","一个视图查看每家门店状态"],["Required in your franchise agreement","写入加盟协议"],["US entry for overseas brands, quoted per brand","海外品牌进入美国，按品牌报价"]]},
 ];
 const FAQ = [
- [["How much does it cost?","费用是多少？"],["Start with an entry plan: $299 one-time per market, credited to your first year if you start a plan within 60 days. Then $149 per location a month on Essentials or $299 a month on Pro, billed yearly. Each new store opening is $3,500 for retail and $6,500 for a restaurant or food store, paid once; liquor licenses and complex build-outs are quoted. Exceptions handled by people are quoted per step. Government fees are paid at cost, by you directly to each agency. <a href=\"/pricing\" data-sec=\"pricing\">See pricing</a>","先从开店计划开始：每个市场一次性 299 美元，60 天内开通套餐可抵扣首年费用。之后基础版每家门店每月 149 美元，专业版每月 299 美元，按年计费。每家新店开业一次性收费：零售 3,500 美元，餐厅或食品门店 6,500 美元；酒类执照和复杂装修另行报价。由专人处理的例外事项按步骤报价。政府规费按实际金额，由您直接支付给各机构。<a href=\"/pricing\" data-sec=\"pricing\">查看价格</a>"]],
+ [["How much does it cost?","费用是多少？"],["$149 per location a month on Essentials or $299 a month on Pro, billed yearly. Or start with an entry plan: $299 one-time per market, credited to your first year if you start a plan within 60 days. Each new store opening is $3,500 for retail and $6,500 for a restaurant or food store, paid once; liquor licenses and complex build-outs are quoted. Exceptions handled by people are quoted per step. Government fees are paid at cost, by you directly to each agency. <a href=\"/pricing\" data-sec=\"pricing\">See pricing</a>","基础版每家门店每月 149 美元，专业版每月 299 美元，按年计费。也可以先从开店计划开始：每个市场一次性 299 美元，60 天内开通套餐可抵扣首年费用。每家新店开业一次性收费：零售 3,500 美元，餐厅或食品门店 6,500 美元；酒类执照和复杂装修另行报价。由专人处理的例外事项按步骤报价。政府规费按实际金额，由您直接支付给各机构。<a href=\"/pricing\" data-sec=\"pricing\">查看价格</a>"]],
  [["Who pays, headquarters or the franchisee?","由总部付费还是加盟商付费？"],["Usually each franchisee pays for its own locations, and headquarters makes Odelia the required compliance system in the franchise agreement. A brand can also pay for every store itself.","通常由每位加盟商为自己的门店付费，总部在加盟协议中将 Odelia 设为统一要求的合规系统。品牌也可以为所有门店统一付费。"]],
  [["What's in the one-time $299 entry plan?","一次性 299 美元的开店计划包含什么？"],["Every license, permit and registration your store needs, from federal to city, in the order they run, with timelines and estimated agency fees. It's ready in minutes, and the $299 is credited toward your first year if you start a plan within 60 days.","您的门店所需的每一项执照、许可和登记，从联邦到市级，按办理顺序排列，附时间表和预估规费。几分钟即可生成；60 天内开通套餐，299 美元可抵扣首年费用。"]],
  [["What happens after my store opens?","门店开业之后呢？"],["We keep it compliant. Renewal dates, inspections and rule changes are tracked for every location, and the policy monitor tells you what each change means for your stores and what to do next.","我们持续为您保持合规。每家门店的续期日期、检查和规则变化都会被跟踪，政策监测会告诉您每项变化对门店意味着什么、下一步该做什么。"]],
