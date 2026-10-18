@@ -1,0 +1,191 @@
+{
+  "id": "flushing-milk-tea",
+  "title": "Milk tea shop in Flushing, Queens",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Milk tea shop",
+    "where": "136-20 Roosevelt Ave, Flushing, NY 11354",
+    "lang": "en"
+  },
+  "assumptions": "The company still has to be formed (an LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "ny-llc",
+      "name": "Articles of Organization (New York LLC)",
+      "agency": "New York Department of State, Division of Corporations",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 200,
+      "source": "https://dos.ny.gov/articles-organization-professional-service-domestic-limited-liability-companies-0",
+      "match": "articles of organization.*new york|ny-dos-1336",
+      "agencyMatch": "department of state"
+    },
+    {
+      "key": "ny-publication",
+      "name": "LLC publication and Certificate of Publication",
+      "agency": "New York Department of State, Division of Corporations",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 50,
+      "feeNote": "Plus newspaper charges.",
+      "note": "Publish in two newspapers for six consecutive weeks and file within 120 days.",
+      "source": "https://dos.ny.gov/articles-organization-professional-service-domestic-limited-liability-companies-0",
+      "match": "publication",
+      "agencyMatch": "department of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ny-tax",
+      "name": "Certificate of Authority (sales tax vendor registration)",
+      "agency": "New York State Department of Taxation and Finance",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register at least 20 days before beginning business.",
+      "source": "https://www.tax.ny.gov/pubs_and_bulls/tg_bulletins/st/how_to_register_for_nys_sales_tax.htm",
+      "match": "sales tax vendor|certificate of authority|dtf-17",
+      "agencyMatch": "taxation and finance"
+    },
+    {
+      "key": "ny-dol",
+      "name": "Employer registration for unemployment insurance (NYS-100)",
+      "agency": "New York State Department of Labor",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Once $300 or more in wages is paid in a quarter; FEIN needed first.",
+      "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+      "match": "unemployment insurance|NYS-100|ny-dol-100",
+      "agencyMatch": "department of labor"
+    },
+    {
+      "key": "ny-wcb",
+      "name": "Workers' compensation and disability/PFL coverage",
+      "agency": "New York State Workers' Compensation Board",
+      "level": "state",
+      "required": false,
+      "verified": false,
+      "fee": null,
+      "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+      "match": "workers'? comp",
+      "agencyMatch": "workers' compensation board",
+      "condition": "Insurance bought from a carrier, not a filing."
+    },
+    {
+      "key": "nyc-fse",
+      "name": "Food Service Establishment Permit",
+      "agency": "NYC Department of Health and Mental Hygiene",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "food (service )?establishment permit",
+      "agencyMatch": "health and mental hygiene|DOHMH"
+    },
+    {
+      "key": "nyc-fpc",
+      "name": "Food Protection Certificate",
+      "agency": "NYC Department of Health and Mental Hygiene",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "A holder must supervise food operations.",
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "food protection certificate",
+      "agencyMatch": "health and mental hygiene|DOHMH"
+    },
+    {
+      "key": "nyc-co",
+      "name": "Certificate of Occupancy",
+      "agency": "NYC Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "certificate of occupancy",
+      "agencyMatch": "department of buildings|\\bDOB\\b"
+    },
+    {
+      "key": "nyc-sign",
+      "name": "Sign permit",
+      "agency": "NYC Department of Buildings",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "sign permit",
+      "agencyMatch": "department of buildings",
+      "condition": "Signs that are nailed, screwed or illuminated."
+    },
+    {
+      "key": "nyc-alteration",
+      "name": "DOB work permit for the build-out (alteration)",
+      "agency": "NYC Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Department of Buildings work permits are required for most construction projects.\"",
+      "source": "https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page",
+      "match": "alteration|work permit|building permit|build-?out",
+      "agencyMatch": "department of buildings|\\bDOB\\b"
+    },
+    {
+      "key": "nyc-assembly",
+      "name": "Place of Assembly permit",
+      "agency": "NYC Department of Buildings / FDNY",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+      "match": "assembly",
+      "agencyMatch": "buildings|fire",
+      "condition": "Only for 75 or more people."
+    }
+  ],
+  "order": [
+    {
+      "before": "ny-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "ny-llc",
+      "after": "ny-publication",
+      "source": "https://dos.ny.gov/articles-organization-professional-service-domestic-limited-liability-companies-0",
+      "why": "Publication follows the filing of the articles.",
+      "verified": true
+    },
+    {
+      "before": "ein",
+      "after": "ny-dol",
+      "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+      "why": "\"Before registering, you need a Federal Employer Identification Number.\"",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

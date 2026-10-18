@@ -3,7 +3,11 @@
 // Boston (with Massachusetts) and Atlanta (with Fulton County and Georgia) on 2026-10-17; and on 2026-10-17 too, Oakland,
 // Sacramento, Seattle, Portland, Las Vegas, Plano, Chicago, Philadelphia, Washington DC, Arlington and Fairfax County,
 // Edison, Jersey City, Miami, Denver, Minneapolis and Columbus, with each state's tax, employer and food manager steps
-// and California's food manager rule. Times and renewals appear only where the agency states them; fees are null where they vary.
+// and California's food manager rule. On 2026-10-18, from the accuracy eval's gold set (scripts/eval/gold): California's food
+// handler card and food warehouse registration, the build-out permits of Seattle, Boston and Philadelphia, Boston's
+// Certificate of Occupancy and site cleanliness license, Chicago's retail license, the Health District's food safety
+// manager, Colorado's and Massachusetts's unemployment registrations, and the Las Vegas city and Clark County split.
+// Times and renewals appear only where the agency states them; fees are null where they vary.
 import { B, type Bi } from "../bi";
 import type { FormField, OfficialForm } from "./registry";
 
@@ -11,6 +15,9 @@ const R = "restaurant" as const, T = "retail" as const, S = "seller" as const, W
 const SRC = (u: string) => `${u} (2026-10-10)`;
 const SRC12 = (u: string) => `${u} (2026-10-12)`;
 const SRC17 = (u: string) => `${u} (2026-10-17)`;
+const SRC18 = (u: string) => `${u} (2026-10-18)`;
+/** Boston's guide to opening a restaurant (ISD, November 2025), read 2026-10-18. */
+const BOS_GUIDE = "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf";
 /** For a registration whose agency page lists no fee at all (rather than a fee that varies). */
 const NO_FEE = B("The agency's page lists no fee for this.", "机构页面未列出此项费用。");
 /** One printed line of a form, as Placetta asks it (same helper as registry.ts). */
@@ -27,7 +34,8 @@ export const LOCAL_US: OfficialForm[] = [
     fee: null, feeNote: B("Set by the city's business tax rate schedule, plus a $4 state fee.", "按市营业税税率表计算，另加 4 美元州费用。"),
     takes: B("If you pay during registration, the account activates in 2 to 3 business days; otherwise the invoice is mailed within 5 to 10 business days.", "登记时付款的，账户在 2 至 3 个工作日内激活；否则账单在 5 至 10 个工作日内寄出。"),
     takesSource: SRC("https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate"),
-    renews: B("Every year.", "每年。"), checked: "page", fields: [],
+    // the city's pay page (read 2026-10-18): "due annually on the 15th of the month from when your business started"
+    renews: B("Every year, due on the 15th of the month your business started in San José; a 25% penalty is added the day after it's due, and another 25% a month later.", "每年续期，在您于圣何塞开业的月份的 15 日到期；逾期次日加收 25% 罚款，再过一个月再加 25%。"), checked: "page", fields: [],
   },
   {
     id: "scc-plan-check", form: "Food Facility Plan Check Application Form", title: B("Food facility plan check", "食品设施图纸审查"),
@@ -387,11 +395,13 @@ export const LOCAL_US: OfficialForm[] = [
   /* --------------------------------------- Irvine and Orange County (CA) --------------------------------------- */
   {
     id: "irv-license", form: "Business License application", title: B("City of Irvine business license", "尔湾市营业执照"),
-    agency: B("City of Irvine Community Development, Business Licensing", "尔湾市社区发展局营业执照处"), level: "city", where: "IRV", segments: [R, T, S, W], method: "online", order: 50,
+    agency: B("City of Irvine Community Development, Business Licensing", "尔湾市社区发展局营业执照处"), level: "city", where: "IRV", segments: [R, T, S, W], method: "online", order: 77,
     how: B("A city tax rather than a regulatory license: apply online or at the public counter, confirm first that the use is allowed at the address, and display the license at the business.", "这是市政税而非监管许可：可在线或到公共柜台申请，先确认该地址允许此用途，并在营业场所张贴执照。"),
     url: "https://cityofirvine.gov/community-development/business-licensing", info: "https://cityofirvine.gov/community-development/business-licensing",
     fee: null, feeNote: B("$78.37 for under 10 employees, $156.88 for 10 or more (new), including the $4 state fee.", "员工少于 10 人为 78.37 美元，10 人及以上为 156.88 美元（新申请，含 4 美元州费用）。"),
     renews: B("Every 12 months from the first day of the application month.", "自申请当月第一天起每 12 个月续期一次。"), checked: "page", fields: [],
+    // the city's checklist: "Have your OC Health or ABC permit ready if you serve food or beverages" (read 2026-10-18)
+    after: [{ form: "oc-health-permit", label: B("OC Health permit in hand (food businesses)", "已取得橙县卫生许可证（餐饮企业）") }],
   },
   {
     id: "oc-plan-check", form: "Food facility plan check", title: B("Food facility plan check", "食品设施图纸审查"),
@@ -553,6 +563,14 @@ export const LOCAL_US: OfficialForm[] = [
     renews: B("Every 5 years.", "每 5 年。"), checked: "page", fields: [],
   },
   {
+    id: "ma-dua", form: "Employer registration (Unemployment Services for Employers)", title: B("Employer registration for unemployment insurance", "失业保险雇主登记"),
+    agency: B("Massachusetts Department of Unemployment Assistance", "马萨诸塞州失业援助局"), level: "state", where: "MA", segments: [R, T, S, W], needs: { employees: true }, method: "online", order: 60,
+    how: B("Employers who pay wages for work done in Massachusetts register with DUA online: open Unemployment Services for Employers without logging in and choose Register your Business.", "在马萨诸塞州支付工资的雇主须在线向失业援助局登记：无需登录，打开 Unemployment Services for Employers 并选择 Register your Business。"),
+    url: "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance", info: "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance",
+    fee: 0, feeNote: NO_FEE, checked: "page", fields: [],
+    plain: B("Registers you as an employer with the state once you have staff on payroll. Free.", "有员工发薪后，向州政府登记为雇主。免费。"),
+  },
+  {
     id: "bos-cert", form: "Business Certificate (City Clerk)", title: B("Boston business certificate (DBA)", "波士顿营业证明（DBA）"),
     agency: B("City of Boston, City Clerk", "波士顿市书记官办公室"), level: "city", where: "BOS", segments: [R, T, S, W], method: "in_person", order: 56,
     how: B("Needed when the business trades under a name other than its legal name. Bring the notarized form, the signed lease and photo ID to City Hall, Room 601 (the clerk notarizes free), or mail them with a check; there is no online filing. An LLC or corporation registers with the Secretary of the Commonwealth first.", "企业以法定名称以外的名称经营时须办理。携带经公证的表格、已签署的租约和带照片证件到市政厅 601 室办理（书记官处免费公证），或连同支票邮寄；不能在线提交。LLC 或公司须先在马萨诸塞州州务卿处登记。"),
@@ -572,6 +590,31 @@ export const LOCAL_US: OfficialForm[] = [
     info: "https://www.boston.gov/permitting/permits/food-service-permit",
     fee: null, feeNote: B("ISD confirms the plan review fee at the appointment.", "图纸审查费在预约审查时由检查服务局确认。"), checked: "page", fields: [],
     attach: [B("Plan review worksheet", "图纸审查表"), B("Two copies of the floor plan, drawn to scale", "两份按比例绘制的平面图"), B("Equipment specifications (NSF, UL or equivalent)", "设备规格（NSF、UL 或同等认证）"), B("Menu", "菜单")],
+  },
+  {
+    id: "bos-building", form: "Long Form or Short Form building permit (online)", title: B("Building permit for the build-out", "装修建筑许可证"),
+    agency: B("City of Boston Inspectional Services", "波士顿市检查服务局"), level: "city", where: "BOS", segments: [R, T, W], needs: { buildout: true }, method: "online", order: 65,
+    how: B("A Long Form permit for major construction or structural change, a Short Form for minor work; only licensed contractors apply. The health plan review comes first, and the building, plumbing, gas, electrical and mechanical permits follow it.", "重大施工或结构改动申请 Long Form 许可，小型工程申请 Short Form；只能由持证承包商申请。先完成卫生图纸审查，之后办理建筑、管道、燃气、电气和机械许可。"),
+    url: "https://www.boston.gov/departments/inspectional-services", info: BOS_GUIDE,
+    fee: null, feeNote: B("Set by ISD's building permit fees for the work.", "按检查服务局建筑许可收费标准计算。"), checked: "page", fields: [],
+    after: [{ form: "bos-plan-review", label: B("Health plan review approved", "卫生图纸审查已获批") }],
+    plain: B("The city's permit to build out the space, filed by a licensed contractor after the health plan review.", "市政府的场所装修许可，在卫生图纸审查之后由持证承包商申请。"),
+  },
+  {
+    id: "bos-site", form: "Site Cleanliness License", title: B("Site cleanliness license", "场地清洁执照"),
+    agency: B("City of Boston Inspectional Services", "波士顿市检查服务局"), level: "city", where: "BOS", segments: [R], needs: { food: true }, method: "online", order: 73,
+    how: B("Listed with the Common Victualler License among the approvals Boston's restaurant guide asks for before the food service permit; it covers how the place keeps its trash and dumpsters.", "波士顿餐厅开业指南把它与普通餐饮执照一同列为食品服务许可之前的审批；涉及垃圾和垃圾箱的管理。"),
+    url: "https://www.boston.gov/departments/inspectional-services", info: BOS_GUIDE,
+    fee: null, checked: "page", fields: [],
+    plain: B("Boston's license for how a restaurant keeps its trash and dumpsters clean.", "波士顿对餐厅垃圾和垃圾箱清洁管理的执照。"),
+  },
+  {
+    id: "bos-co", form: "Certificate of Occupancy application (or Certificate of Inspection)", title: B("Certificate of Occupancy", "占用证"),
+    agency: B("City of Boston Inspectional Services", "波士顿市检查服务局"), level: "city", where: "BOS", segments: [R, T, W], method: "online", order: 74,
+    how: B("Required before opening; Boston's guide accepts a Certificate of Inspection (with the Fire Department's capacity approval) in its place. Either one must be in hand before the health inspection.", "开业前必须取得；波士顿指南也接受检查证书（附消防局容量批准）代替。两者之一须在卫生检查前取得。"),
+    url: "https://www.boston.gov/departments/inspectional-services", info: BOS_GUIDE,
+    fee: null, checked: "page", fields: [],
+    plain: B("Confirms the space may be used the way you plan. The health inspector asks to see it.", "证明场所可按您计划的用途使用。卫生检查员会查看。"),
   },
   {
     id: "bos-cv", form: "Application for Common Victualler (Without Alcohol) License", title: B("Common Victualler License", "普通餐饮执照（Common Victualler）"),
@@ -605,6 +648,7 @@ export const LOCAL_US: OfficialForm[] = [
     renews: B("Every year: the permit runs January 1 to December 31, and the renewal bill comes around the second week of November.", "每年续期：许可有效期为 1 月 1 日至 12 月 31 日，续期账单约在 11 月第二周寄出。"), checked: "page", fields: [],
     // the page lists both certificates with the application and requires the victualler license before the permit
     after: [
+      { form: "bos-co", label: B("Certificate of Occupancy or Inspection in hand", "已取得占用证或检查证书") },
       { form: "ma-food-manager", label: B("A manager passed the food protection exam", "已有经理通过食品保护考试") },
       { form: "ma-allergen", label: B("The person in charge finished allergen training", "现场负责人已完成过敏原培训") },
       { form: "bos-cv", label: B("Common Victualler License issued", "普通餐饮执照已签发") },
@@ -668,8 +712,26 @@ export const LOCAL_US: OfficialForm[] = [
     id: "ca-food-manager", form: "Food Safety Certificate (Health and Safety Code 113947.1)", title: B("Certified food protection manager", "注册食品保护经理"),
     agency: B("California Retail Food Code, enforced by the county or city environmental health department", "加州零售食品法规（由县或市环境卫生部门执行）"), level: "state", where: "CA", segments: [R], needs: { food: true }, method: "online", order: 40,
     how: B("An owner or employee of a place that prepares, handles or serves unpackaged perishable food passes a food protection manager exam from an accredited organization. A new place, a new owner, or a place that loses its certified person has 60 days to have one, and one person can't be certified for two locations. Keep the certificate on file for the inspector.", "制作、处理或供应未包装易腐食品的场所，须有一名业主或员工通过认证机构的食品保护经理考试。新开、更换业主或失去持证人员的场所须在 60 天内配备，且一人不能同时为两个场所持证。证书须存档备查。"),
-    url: "http://publichealth.lacounty.gov/eh/business/certified-food-handler-manager.htm", info: "https://emd.saccounty.gov/EH/Documents/CERTIFIED%20FOOD%20MGR%2008%2005%2015.pdf",
+    // the statute itself: one county's page (Sacramento's, Los Angeles's) is the wrong link for a store in another county
+    url: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113947.1", info: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113947.1",
     fee: null, feeNote: B("Set by the exam provider.", "由考试机构定价。"), renews: B("Every 5 years.", "每 5 年。"), checked: "page", fields: [],
+  },
+  {
+    id: "ca-food-handler", form: "California Food Handler Card (Health and Safety Code 113948)", title: B("Food handler cards for staff", "员工食品处理员卡"),
+    agency: B("California Retail Food Code, enforced by the county or city environmental health department", "加州零售食品法规（由县或市环境卫生部门执行）"), level: "state", where: "CA", segments: [R], needs: { food: true, employees: true }, method: "online", order: 42,
+    how: B("Every employee who prepares, stores or handles food gets a California Food Handler Card from an accredited course within 30 days of hire; the card is good for 3 years. Anyone holding a valid food manager certificate is exempt.", "凡制作、储存或处理食品的员工，须在入职 30 天内通过经认可的课程取得加州食品处理员卡，有效期 3 年。持有有效食品经理证书者免办。"),
+    url: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113948", info: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113948",
+    fee: null, feeNote: B("Set by the accredited course.", "由认可课程定价。"), renews: B("Every 3 years.", "每 3 年。"), checked: "page", fields: [],
+    plain: B("Each employee who handles food takes a short accredited course and gets a card within 30 days of starting.", "每位接触食品的员工在入职 30 天内参加经认可的短期课程并取得食品处理员卡。"),
+  },
+  {
+    id: "ca-cdph-pfr", form: "Processed Food Registration (PFR)", title: B("Processed food registration (food warehouse)", "加工食品登记（食品仓库）"),
+    agency: B("California Department of Public Health, Food and Drug Branch", "加州公共卫生局食品药品处"), level: "state", where: "CA", segments: [W], needs: { food: true }, method: "online", order: 46,
+    how: B("The Food and Drug Branch's basic health permit for food processors, also required for general food warehouses in California.", "加州食品药品处为食品加工企业发放的基本卫生许可，加州的普通食品仓库也须办理。"),
+    url: "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcedureObtainingProcessedFoodRegistration.aspx",
+    info: "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcessedFoodRegistration.aspx",
+    fee: null, feeNote: B("Set by the Food and Drug Branch's fee schedule.", "按食品药品处收费标准计算。"), checked: "page", fields: [],
+    plain: B("A warehouse that holds food in California registers with the state's Food and Drug Branch.", "在加州存放食品的仓库须向州食品药品处登记。"),
   },
 
   /* ------------------------------------------------- Oakland and Alameda County ------------------------------------------------- */
@@ -792,6 +854,15 @@ export const LOCAL_US: OfficialForm[] = [
     renews: B("Every year, through the Public Health Permit Center.", "每年通过公共卫生许可中心续期。"), checked: "page", fields: [],
   },
 
+  {
+    id: "sea-building", form: "Construction permit (Seattle Services Portal)", title: B("Construction permit for the tenant improvement", "租户装修施工许可证"),
+    agency: B("Seattle Department of Construction and Inspections", "西雅图建筑与检查局"), level: "city", where: "SEA", segments: [R, T, W], needs: { buildout: true }, method: "portal", order: 65,
+    how: B("Land use, construction and trade permits for the space come from SDCI; final inspections are scheduled once every permit is approved and the work is done.", "场所的土地使用、施工和专业工种许可由 SDCI 签发；所有许可获批且施工完成后预约竣工检查。"),
+    url: "https://www.seattle.gov/sdci", info: "https://www.seattle.gov/office-of-economic-development/small-business/food-businesses/restaurants",
+    fee: null, feeNote: B("Set by SDCI's fee schedule for the project.", "按 SDCI 的项目收费标准计算。"), checked: "page", fields: [],
+    plain: B("The city's permit for building out the space: construction, plumbing, electrical and the rest.", "市政府对场所装修的许可：施工、管道、电气等。"),
+  },
+
   /* ------------------------------------------------- Nevada, Las Vegas and Clark County ------------------------------------------------- */
   {
     id: "nv-tax", form: "Nevada Business Registration (sales tax permit)", title: B("Nevada sales tax permit", "内华达州销售税许可证"),
@@ -811,7 +882,7 @@ export const LOCAL_US: OfficialForm[] = [
   },
   {
     id: "lv-license", form: "General Business License (online portal)", title: B("City of Las Vegas business license", "拉斯维加斯市营业执照"),
-    agency: B("City of Las Vegas, Business Licensing", "拉斯维加斯市营业执照处"), level: "city", where: "LV", segments: [R, T, S, W], method: "portal", order: 58,
+    agency: B("City of Las Vegas, Business Licensing", "拉斯维加斯市营业执照处"), level: "city", where: "LVC", segments: [R, T, S, W], method: "portal", order: 58,
     how: B("For an address inside City of Las Vegas limits; check the jurisdiction first, since other addresses license with Clark County or their own city. Confirm the zoning allows the business and the building is code compliant, get the state business license and register with the Department of Taxation, then apply on the city's online portal.", "适用于拉斯维加斯市界内的地址；请先核实管辖范围，其他地址须向克拉克县或所在城市申请。先确认分区允许该业务且建筑符合规范，取得州营业执照并在税务局登记，然后在市政府在线门户申请。"),
     url: "https://www.lasvegasnevada.gov/dashboard", info: "https://lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License",
     fee: null, takes: B("A license technician emails within 5 business days; the license is issued within 30 days of applying, usually sooner.", "执照专员在 5 个工作日内发邮件联系；执照在申请后 30 天内签发，通常更快。"), takesDays: 30,
@@ -823,7 +894,7 @@ export const LOCAL_US: OfficialForm[] = [
   },
   {
     id: "cc-business-license", form: "Clark County Business License Application", title: B("Clark County business license", "克拉克县营业执照"),
-    agency: B("Clark County Business License", "克拉克县营业执照部门"), level: "county", where: "LV", segments: [R, T, S, W], method: "online", order: 59,
+    agency: B("Clark County Business License", "克拉克县营业执照部门"), level: "county", where: "CLK", segments: [R, T, S, W], method: "online", order: 59,
     how: B("For an address in unincorporated Clark County. Confirm the zoning allows the activity, get the state business license, register with the Department of Taxation, file a fictitious firm name with the County Clerk if you trade under another name, and finish all construction; then apply online or at 500 S Grand Central Pkwy, 3rd floor, with proof of rights to the location and, for food, proof of your Health District application.", "适用于克拉克县非建制区的地址。先确认分区允许该业务，取得州营业执照并在税务局登记；使用其他名称经营的须向县书记官登记虚构商号，并完成全部施工。然后在线或到 500 S Grand Central Pkwy 3 楼申请，提交场所使用权证明，食品企业还须提交已向卫生区申请的证明。"),
     url: "https://blepay.clarkcountynv.gov/NAICSDefault.aspx", info: "https://www.clarkcountynv.gov/business/doing_business_with_clark_county/apply-for-a-business-license",
     pdf: "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0746bb4a-633d-43f6-85c8-875896f099a7/original/as/application-checklist-08-13-2026.pdf",
@@ -841,6 +912,15 @@ export const LOCAL_US: OfficialForm[] = [
     how: B("Everyone employed in or running a food establishment holds one. A first card means an in-person test at a Health District location with photo ID; some renewals can be done online. A Certified Food Safety Manager card also meets the requirement.", "食品经营场所的所有员工及经营者都须持有。首次办卡须携带带照片证件到卫生区现场考试；部分续期可在线办理。持有注册食品安全经理卡者也视为符合要求。"),
     url: "https://www.southernnevadahealthdistrict.org/?p=3661", info: "https://www.southernnevadahealthdistrict.org/?p=3661",
     fee: 20, feeNote: B("$20 for a first card; $35 to renew within two years after it expires.", "首次办卡 20 美元；过期两年内续期 35 美元。"), renews: B("Every 3 years.", "每 3 年。"), checked: "page", fields: [],
+  },
+  {
+    id: "snhd-cfsm", form: "Certified Food Safety Manager (person in charge)", title: B("Certified food safety manager", "注册食品安全经理"),
+    agency: B("Southern Nevada Health District", "南内华达卫生区"), level: "county", where: "LV", segments: [R, T], needs: { food: true }, method: "in_person", order: 40,
+    how: B("The Health District's permit application asks for a person in charge who is a Certified Food Safety Manager, with a copy of the certificate attached. The certificate comes from an accredited food protection manager exam.", "卫生区的许可申请要求有一名持注册食品安全经理证书的负责人，并附上证书复印件。证书须通过经认可的食品保护经理考试取得。"),
+    url: "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+    info: "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+    fee: null, feeNote: B("Set by the exam provider.", "由考试机构定价。"), checked: "page", fields: [],
+    plain: B("At least one person in charge holds a food safety manager certificate before the Health District permits the place.", "卫生区发证前，至少一名负责人须持有食品安全经理证书。"),
   },
   {
     id: "snhd-plan-review", form: "Health Permit Application with plans (05/2022)", title: B("Food establishment plan review", "食品经营场所图纸审查"),
@@ -905,6 +985,15 @@ export const LOCAL_US: OfficialForm[] = [
     ],
   },
 
+  {
+    id: "chi-limited", form: "Limited Business License (General Retail Sales and Services)", title: B("Chicago limited business license", "芝加哥有限营业执照"),
+    agency: B("City of Chicago, Business Affairs and Consumer Protection", "芝加哥市商业事务与消费者保护局"), level: "city", where: "CHI", segments: [T], method: "online", order: 50,
+    how: B("The license for general retail sales and services in Chicago, at a properly zoned address; apply online or at the Small Business Center in City Hall.", "芝加哥一般零售与服务业的营业执照，地址须分区合规；可在线或到市政厅小企业中心申请。"),
+    url: "https://chicago.gov/city/en/sites/chicago-business-licensing/home/business-licensing.html", info: "https://chicago.gov/city/en/sites/chicago-business-licensing/home/business-licensing.html",
+    fee: 250, feeNote: B("$250 for a two-year license.", "两年期执照 250 美元。"), renews: B("Every 2 years.", "每 2 年。"), takesSource: SRC18("https://chicago.gov/city/en/sites/chicago-business-licensing/home/business-licensing.html"), checked: "page", fields: [],
+    plain: B("Chicago's business license for a store that sells general merchandise.", "芝加哥对销售一般商品的门店发放的营业执照。"),
+  },
+
   /* ------------------------------------------------- Pennsylvania and Philadelphia ------------------------------------------------- */
   {
     id: "pa-tax", form: "Pennsylvania Online Business Tax Registration (myPATH)", title: B("Pennsylvania tax registration (sales tax license and employer accounts)", "宾夕法尼亚州税务登记（销售税执照及雇主账户）"),
@@ -950,6 +1039,14 @@ export const LOCAL_US: OfficialForm[] = [
     takes: B("A worksheet and fee letter within 30 business days; after you return them, the Health Department replies within 30 business days. Expedited review takes 10 business days.", "30 个工作日内寄出审查工作表和收费通知；交回后卫生局在 30 个工作日内答复。加急审查 10 个工作日。"), takesDays: 84,
     takesSource: SRC17("https://phila.gov/services/permits-violations-licenses/get-a-license/business-licenses/food-businesses/apply-for-a-plan-review-for-a-stationary-food-business/"), checked: "page", fields: [],
     after: [{ form: "phl-food-safety", label: B("City food safety certificate in hand", "已取得市食品安全证书") }],
+  },
+  {
+    id: "phl-building", form: "Building permit (eCLIPSE)", title: B("Building permit for the build-out", "装修建筑许可证"),
+    agency: B("City of Philadelphia, Department of Licenses and Inspections", "费城许可与检查局"), level: "city", where: "PHL", segments: [R, T, W], needs: { buildout: true }, method: "online", order: 65,
+    how: B("Construction or alterations to the space need a building permit from L&I's Building Unit, filed in eCLIPSE; signs and emission-producing equipment have their own permits.", "场所施工或改建须向许可与检查局建筑科申请建筑许可，通过 eCLIPSE 提交；招牌和产生排放的设备另有许可。"),
+    url: "https://eclipse.phila.gov/", info: "https://business.phila.gov/?p=1402",
+    fee: null, feeNote: B("Set by L&I's fee schedule for the work.", "按许可与检查局收费标准计算。"), checked: "page", fields: [],
+    plain: B("The city's permit to build out or alter the space.", "市政府的场所装修或改建许可。"),
   },
   {
     id: "phl-food-license", form: "Food Preparation and Serving License (eCLIPSE)", title: B("Food preparation and serving license", "食品制作与供应执照"),
@@ -1214,8 +1311,16 @@ export const LOCAL_US: OfficialForm[] = [
     agency: B("Colorado Department of Revenue", "科罗拉多州税务局"), level: "state", where: "CO", segments: [R, T, S, W], method: "online", order: 20,
     how: B("A business with a Colorado location applies in MyBizColorado for the sales tax license and the wage withholding account (or on paper Form CR0100); MyBizColorado also connects you with the Department of Labor and Employment to set up unemployment insurance.", "在科罗拉多州设有营业地点的企业通过 MyBizColorado 申请销售税执照和工资预扣账户（或填写纸质 CR0100 表）；MyBizColorado 还会对接劳工与就业局开立失业保险账户。"),
     url: "https://mybiz.colorado.gov/", info: "https://tax.colorado.gov/new-businesses",
-    fee: null, takes: B("Applied for online, the account number is shown online; the sales tax license arrives by mail.", "在线申请会在网上显示账号；销售税执照邮寄送达。"), takesDays: null,
+    fee: 16, feeNote: B("$16 for the sales tax license, prorated, plus a $50 deposit the department refunds once conditions are met; the license expires December 31 of odd-numbered years.", "销售税执照 16 美元（按时间折算），另交 50 美元押金，符合条件后退还；执照在奇数年 12 月 31 日到期。"), takes: B("Applied for online, the account number is shown online; the sales tax license arrives by mail.", "在线申请会在网上显示账号；销售税执照邮寄送达。"), takesDays: null,
     takesSource: SRC17("https://tax.colorado.gov/new-businesses"), checked: "page", fields: [],
+  },
+  {
+    id: "co-ui", form: "Employer unemployment insurance account (MyUI Employer+)", title: B("Unemployment insurance employer account", "失业保险雇主账户"),
+    agency: B("Colorado Department of Labor and Employment (CDLE)", "科罗拉多州劳工与就业局（CDLE）"), level: "state", where: "CO", segments: [R, T, S, W], needs: { employees: true }, method: "online", order: 60,
+    how: B("A new employer opens its unemployment insurance account with CDLE in MyUI Employer+ (Create an Employer User Account), or finishes one started in MyBizColorado.", "新雇主在 MyUI Employer+ 向劳工与就业局开立失业保险账户（Create an Employer User Account），或完成在 MyBizColorado 开始的登记。"),
+    url: "https://myui.clouduim.cdle.state.co.us/Employer/Core/Login.aspx", info: "https://myui.clouduim.cdle.state.co.us/Employer/Core/Login.aspx",
+    fee: 0, feeNote: NO_FEE, checked: "page", fields: [],
+    plain: B("Registers you as an employer for unemployment insurance once you have staff on payroll. Free.", "有员工发薪后，登记失业保险雇主账户。免费。"),
   },
   {
     id: "den-tax", form: "Retailer's sales and use tax license (eBiz Tax Center)", title: B("Denver sales tax license", "丹佛销售税执照"),

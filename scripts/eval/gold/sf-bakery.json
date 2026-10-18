@@ -1,0 +1,269 @@
+{
+  "id": "sf-bakery",
+  "title": "Bakery café in San Francisco",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Bakery café",
+    "where": "San Francisco, CA",
+    "lang": "en"
+  },
+  "assumptions": "The company still has to be formed (an LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "ca-llc",
+      "name": "Articles of Organization (California LLC)",
+      "agency": "California Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "feeNote": "Fee not read on an official page in this pass (registry says $70).",
+      "note": "SF guide: LLCs \"must register their structure with the CA Secretary of State before registering locally.\"",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "articles of organization.*california|ca-llc-1|california llc",
+      "agencyMatch": "california secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "ca-seller",
+      "name": "Seller's permit",
+      "agency": "California Department of Tax and Fee Administration",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "\"Every location must have this permit to sell taxable goods.\" Also on the LA restaurant checklist.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "seller'?s permit|ca-cdtfa",
+      "agencyMatch": "tax and fee administration|CDTFA"
+    },
+    {
+      "key": "ca-edd",
+      "name": "Employer payroll tax account registration (DE 1)",
+      "agency": "California Employment Development Department",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Register within 15 days of paying more than $100 in wages in a calendar quarter.",
+      "source": "https://edd.ca.gov/en/Payroll_Taxes/Am_I_Required_to_Register_as_an_Employer",
+      "match": "employer|DE ?1|edd",
+      "agencyMatch": "employment development department|\\bEDD\\b"
+    },
+    {
+      "key": "ca-food-manager",
+      "name": "Food safety (manager) certification, at least one owner or employee",
+      "agency": "Local environmental health agency (California Health and Safety Code 113947.1)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 60 days of opening; valid 5 years.",
+      "source": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+      "match": "food (safety|protection) (manager|certif)|certified food|food manager|manager'?s food safety",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "ca-food-handler",
+      "name": "California Food Handler Card for food employees",
+      "agency": "Local environmental health agency (California Health and Safety Code 113948)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Within 30 days of hire; valid 3 years; food managers exempt.",
+      "source": "https://www.fresnocountyca.gov/files/assets/county/public-health/environmental-health/food-safety/california-food-handler-card.pdf",
+      "match": "food handler",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "sf-reg",
+      "name": "Business Registration Certificate",
+      "agency": "San Francisco Office of the Treasurer and Tax Collector",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "san francisco business registration|sf-business-registration",
+      "agencyMatch": "treasurer",
+      "levels": [
+        "city",
+        "county"
+      ]
+    },
+    {
+      "key": "sf-plan",
+      "name": "Food facility plan review (with the building permit)",
+      "agency": "San Francisco Department of Public Health",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://sf.gov/guide-building-and-remodeling-food-facility",
+      "match": "plan (check|review)",
+      "agencyMatch": "department of public health|\\bDPH\\b",
+      "levels": [
+        "city",
+        "county"
+      ]
+    },
+    {
+      "key": "sf-permit",
+      "name": "Health Permit to Operate",
+      "agency": "San Francisco Department of Public Health",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Apply 6-8 weeks before opening; needs proof of workers' comp, the food safety certificate and the business registration certificate.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "health permit",
+      "agencyMatch": "department of public health|\\bDPH\\b",
+      "levels": [
+        "city",
+        "county"
+      ]
+    },
+    {
+      "key": "sf-building",
+      "name": "Building permit",
+      "agency": "San Francisco Department of Building Inspection",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "building permit",
+      "agencyMatch": "building inspection|\\bDBI\\b",
+      "levels": [
+        "city",
+        "county"
+      ]
+    },
+    {
+      "key": "sf-sign",
+      "name": "Sign and awning permit",
+      "agency": "San Francisco Planning Department and Department of Building Inspection",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "condition": "Exterior signs, canopies or awnings (case assumes a new sign).",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "sign",
+      "agencyMatch": "building inspection|planning",
+      "levels": [
+        "city",
+        "county"
+      ]
+    },
+    {
+      "key": "sf-assembly",
+      "name": "Place of Assembly permit",
+      "agency": "San Francisco Fire Department",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "assembly",
+      "agencyMatch": "fire",
+      "levels": [
+        "city",
+        "county"
+      ],
+      "condition": "Only if 50 or more people may gather at once."
+    },
+    {
+      "key": "sf-formula",
+      "name": "Formula retail affidavit",
+      "agency": "San Francisco Planning Department",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "source": "https://sfplanning.org/permit/chain-stores-businesses",
+      "match": "formula retail",
+      "agencyMatch": "planning",
+      "levels": [
+        "city",
+        "county"
+      ],
+      "condition": "Formula retail controls apply to businesses with eleven or more other locations; Planning recommends the affidavit to confirm."
+    },
+    {
+      "key": "ca-fbn",
+      "name": "Fictitious Business Name statement",
+      "agency": "County Clerk",
+      "level": "county",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "condition": "Only when trading under a name other than the legal name.",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "match": "fictitious business name|\\bFBN\\b|\\bDBA\\b",
+      "agencyMatch": "clerk"
+    }
+  ],
+  "order": [
+    {
+      "before": "ca-llc",
+      "after": "ein",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+      "verified": true
+    },
+    {
+      "before": "ca-llc",
+      "after": "sf-reg",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "why": "Register with the Secretary of State before registering locally.",
+      "verified": true
+    },
+    {
+      "before": "sf-reg",
+      "after": "sf-permit",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "why": "The health permit needs the business registration certificate.",
+      "verified": true
+    },
+    {
+      "before": "ca-food-manager",
+      "after": "sf-permit",
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "why": "The health permit needs proof of the food safety certification.",
+      "verified": true
+    },
+    {
+      "before": "sf-plan",
+      "after": "sf-permit",
+      "source": "https://sf.gov/guide-building-and-remodeling-food-facility",
+      "why": "DPH plan review is part of the building permit; construction inspections only after plans are approved.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

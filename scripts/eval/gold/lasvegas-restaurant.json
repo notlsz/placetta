@@ -1,0 +1,169 @@
+{
+  "id": "lasvegas-restaurant",
+  "title": "Restaurant on Fremont Street, downtown Las Vegas (city limits)",
+  "read": "2026-10-18",
+  "input": {
+    "what": "Restaurant",
+    "where": "500 E Fremont St, Las Vegas, NV 89101",
+    "lang": "en"
+  },
+  "assumptions": "The company still has to be formed (an LLC). Hires staff. Builds out the space. Puts up an exterior sign.",
+  "items": [
+    {
+      "key": "nv-sbl",
+      "name": "State Business License (with the LLC formation)",
+      "agency": "Nevada Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Retailers \"must have a Business License (NRS 372.220)\" before the tax permit.",
+      "source": "https://tax.nv.gov/manage-a-business/start/",
+      "match": "state business license|silverflume|llc formation",
+      "agencyMatch": "nevada secretary of state"
+    },
+    {
+      "key": "ein",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "match": "employer identification number|\\bEIN\\b|irs-ss4",
+      "agencyMatch": "internal revenue service|\\bIRS\\b"
+    },
+    {
+      "key": "nv-tax",
+      "name": "Sales/Use Tax Permit",
+      "agency": "Nevada Department of Taxation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 15,
+      "feeNote": "$15 per location.",
+      "source": "https://tax.nv.gov/faqs/register-a-business/",
+      "match": "sales (\\/use )?tax permit|nv-tax",
+      "agencyMatch": "department of taxation"
+    },
+    {
+      "key": "nv-ui",
+      "name": "Unemployment insurance employer registration",
+      "agency": "Nevada Department of Employment, Training and Rehabilitation (Employment Security Division)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tax.nv.gov/manage-a-business/start/",
+      "match": "unemployment insurance|nv-esd",
+      "agencyMatch": "employment, training and rehabilitation|employment security|DETR"
+    },
+    {
+      "key": "lv-license",
+      "name": "City of Las Vegas business license",
+      "agency": "City of Las Vegas, Business Licensing",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "A business inside city limits files with the City, not the County.",
+      "source": "https://www.clarkcountynv.gov/business/doing_business_with_clark_county/faq",
+      "match": "city of las vegas business license|lv-license",
+      "agencyMatch": "city of las vegas"
+    },
+    {
+      "key": "snhd-plan",
+      "name": "Food establishment plan review",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "plan review",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-permit",
+      "name": "Food establishment health permit",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "health permit",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-handler",
+      "name": "Food Safety Training Cards for employees",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "food handler|food safety training card",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "snhd-cfsm",
+      "name": "Certified Food Safety Manager (person in charge)",
+      "agency": "Southern Nevada Health District",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "match": "certified food (safety|protection) manager|food manager",
+      "agencyMatch": "southern nevada health district"
+    },
+    {
+      "key": "lv-building",
+      "name": "Building permit for the tenant improvement",
+      "agency": "City of Las Vegas Building and Safety",
+      "level": "city",
+      "required": true,
+      "verified": false,
+      "fee": null,
+      "note": "The city's permit guide read covers homes only.",
+      "source": "https://files.lasvegasnevada.gov/building-safety/WHEN-DO-I-NEED-A-PERMIT.pdf",
+      "match": "building permit|tenant improvement",
+      "agencyMatch": "las vegas"
+    }
+  ],
+  "order": [
+    {
+      "before": "nv-sbl",
+      "after": "nv-tax",
+      "source": "https://tax.nv.gov/manage-a-business/start/",
+      "why": "A business license is needed before the tax permit.",
+      "verified": true
+    },
+    {
+      "before": "ein",
+      "after": "nv-tax",
+      "source": "https://tax.nv.gov/manage-a-business/start/",
+      "why": "\"You must have a Federal Identification Number (FEIN# or EIN) and Business License before registering for a tax permit.\"",
+      "verified": true
+    },
+    {
+      "before": "snhd-plan",
+      "after": "snhd-permit",
+      "source": "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf",
+      "why": "Plans are approved before work starts; no opening until the final permitting inspection.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": [
+    {
+      "name": "Clark County business license",
+      "why": "The store is inside City of Las Vegas limits: \"a business located inside Las Vegas city limits files with the City of Las Vegas, not the County.\"",
+      "match": "clark county business license|cc-business-license",
+      "source": "https://www.clarkcountynv.gov/business/doing_business_with_clark_county/faq"
+    }
+  ]
+}

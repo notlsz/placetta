@@ -17,6 +17,8 @@ export type PreviewOptions = {
   employees?: boolean;      // hires staff (default yes)
   signage?: boolean;        // puts up a sign (default yes)
   buildout?: boolean;       // builds out the space (default yes)
+  imports?: boolean;        // imports the goods it sells (default: read from what it is, "importer", "进口")
+  alcohol?: boolean;        // sells beer, wine or spirits (default: read from what it is)
   today?: string;           // YYYY-MM-DD, for tests
   storeId?: string;         // the store the rows belong to, for the projected opening
 };
@@ -94,6 +96,12 @@ const STATES: Record<string, StateRow> = {
   WY: { en: "Wyoming", zh: "怀俄明州", tax: ["Wyoming Department of Revenue", "怀俄明州税务局", "https://revenue.wyo.gov"] },
 };
 
+/** A state's name and, where it has a sales tax, the agency that registers sellers, with its official site. */
+export function stateAgency(code: string): { en: string; zh: string; url: string; state: string; stateZh: string } | undefined {
+  const st = STATES[code.toUpperCase()];
+  return st?.tax ? { en: st.tax[0], zh: st.tax[1], url: st.tax[2], state: st.en, stateZh: st.zh } : undefined;
+}
+
 /** The two-letter state in "Flushing, NY", "Columbus, Ohio 43215" or "俄亥俄州哥伦布". */
 export function stateOf(where: string): string | undefined {
   const t = where.trim();
@@ -126,8 +134,16 @@ const EU = new Set(["FR", "DE", "ES", "IT", "NL", "IE", "BE", "PT", "AT", "SE", 
 /** The registry forms that register the business for state sales tax, and those that also register it as an employer. */
 const TAX_FORMS = new Set(["ny-dtf-17", "ca-cdtfa", "tx-ap201", "az-tpt", "il-tax", "ma-tax", "fl-dor", "dc-otr", "ga-tax", "pa-tax", "wa-bls", "nj-formation",
   "nj-reg", "nv-tax", "va-tax", "co-tax", "mn-tax", "oh-vendor"]);
+// Colorado's sales tax registration doesn't open the unemployment account (CDLE does, co-ui); Washington's business
+// license does (ESD and L&I open theirs from it), as do Arizona's joint application and Pennsylvania's myPATH.
 const EMPLOYER_FORMS = new Set(["ny-dol-100", "ca-edd-de1", "tx-twc", "az-tpt", "wa-bls", "nj-formation",
-  "nj-reg", "pa-tax", "fl-dor", "co-tax", "il-ides", "nv-esd", "dc-does", "va-vec", "mn-ui", "oh-ui", "or-payroll"]);
+  "nj-reg", "pa-tax", "fl-dor", "co-ui", "ma-dua", "il-ides", "nv-esd", "dc-does", "va-vec", "mn-ui", "oh-ui", "or-payroll"]);
+/** What it is says it sells alcohol: "restaurant serving beer and wine", "wine bar", "酒吧" (not "no alcohol"). */
+const ALCOHOL = /\b(beer|wine|liquor|alcohol(ic)?|spirits|cocktails?|sake|soju|brewery|brewpub|pub|tavern|wine bar|cocktail bar|sports bar)\b|啤酒|葡萄酒|白酒|洋酒|酒吧|酒水|卖酒/i;
+const NO_ALCOHOL = /\b(no|without|non-?)\s*(alcohol|beer|wine|liquor)|alcohol-free|不(卖|售)酒|无酒精/i;
+export const sellsAlcohol = (what: string) => ALCOHOL.test(what) && !NO_ALCOHOL.test(what);
+/** What it is says it imports what it sells. */
+export const imports = (what: string) => /\bimport(s|er|ers|ing)?\b|进口|跨境/i.test(what);
 
 type Role = "entity" | "ein" | "tax" | "employer" | "plan" | "food" | "license" | "building" | "publication" | "other";
 /** What a form does in an opening, so the rows can be chained in order. */
@@ -144,7 +160,7 @@ function roleOf(f: OfficialForm | null, a: Application): Role {
   // not a course, a plan review, a sign or the building. Chicago's business licence is its food licence. Boston's common
   // victualler licence comes before the health permit, so it isn't the permit itself.
   const foodForm = f ? !!f.needs?.food || f.id === "chi-license" || (f.level !== "federal" && f.segments.includes("restaurant") && !f.segments.includes("seller") && !f.segments.includes("warehouse")) : /food/.test(a.id);
-  if (foodForm && /permit|licen|approval|dealer|food business registration/.test(k) && !/manager|handler|protection certificate|pre-opening|plan|\bsign|occupancy|publication|building|fire|hazard|insurance|assembly|formula|premises|victualler/.test(k)) return "food";
+  if (foodForm && /permit|licen|approval|dealer|food business registration/.test(k) && !/manager|handler|protection certificate|pre-opening|plan|\bsign|occupancy|publication|building|fire|hazard|insurance|assembly|formula|premises|victualler|wine|liquor|alcohol|beer|community board|cleanliness/.test(k)) return "food";
   if (/business (tax|license|licence|registration|certificate)|certificate of use|commercial activity/.test(k) && a.level === "city") return "license";
   return "other";
 }
@@ -184,9 +200,10 @@ function generic(g: GenericRow): Application {
 export function previewPlan(what: string, where: string, opening?: string, o: PreviewOptions = {}): PreviewPlan {
   const today = o.today ?? daysFromNow(0);
   const segment = segmentOf(what);
-  const food = segment === "restaurant" || /grocery|supermarket|market|food|超市|生鲜|食品/i.test(what);
+  const food = segment === "restaurant" || /grocery|supermarket|market|food|snack|超市|生鲜|食品|零食/i.test(what);
   const employees = o.employees ?? true, buildout = o.buildout ?? true;
-  const needs = { food, employees, signage: o.signage ?? true, buildout, newEntity: !(o.entity ?? "").trim() };
+  const alcohol = o.alcohol ?? sellsAlcohol(what);
+  const needs = { food, employees, signage: o.signage ?? true, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol };
   const info = placeInfo(where), places = placesOf(where);
   const country = info.country ?? "US";
   const us = country === "US";
@@ -215,13 +232,18 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     }) });
     // the local layer, where the registry has no steps for this city yet (a covered city's registry list stands as it
     // is, except that a food place always gets its operating permit listed)
-    if (food && buildout && !info.local && !roles().has("plan")) rows.push({ order: ORDER.plan, f: null, a: generic({
+    const foodPlace = food && (segment === "restaurant" || segment === "retail");
+    if (foodPlace && buildout && !info.local && !roles().has("plan")) rows.push({ order: ORDER.plan, f: null, a: generic({
       id: "plan-review", level: "county", name: B("Food facility plan review", "食品设施图纸审查"), agency: health, source: SRC_FDA,
       plain: B("The health department reviews your kitchen plans before you build. Nearly every county asks for it before a new food place opens.", "卫生部门在施工前审查厨房图纸。几乎每个县都在新餐饮场所开业前要求这一步。"),
     }) });
-    if (food && !roles().has("food")) rows.push({ order: ORDER.food, f: null, a: generic({
+    if (foodPlace && !roles().has("food")) rows.push({ order: ORDER.food, f: null, a: generic({
       id: "food-permit", level: "county", name: B("Food establishment health permit", "餐饮场所卫生许可证"), agency: health, source: SRC_FDA, est: B("Issued after the opening inspection", "开业检查通过后发放"),
       plain: B("The permit that lets a food place open. Issued after an inspection, renewed every year.", "让餐饮场所开业的许可证。检查通过后发放，每年续期。"),
+    }) });
+    if (alcohol && !forms.some(f => f.needs?.alcohol && f.level !== "federal")) rows.push({ order: 71, f: null, a: generic({
+      id: "alcohol", level: "state", name: B(`${stEn} alcohol license`, `${stZh}酒类执照`), agency: B(`${stEn} alcohol beverage control agency`, `${stZh}酒类管理机构`), source: SRC_SBA,
+      plain: B("Selling beer, wine or spirits takes a state liquor license, and often a local approval too. Odelia finds the agency and the license type for your place.", "销售啤酒、葡萄酒或烈酒须取得州酒类执照，通常还需当地审批。Odelia 会查明您所在地的机构和执照类型。"),
     }) });
     if (!info.local && !roles().has("license")) rows.push({ order: ORDER.license, f: null, a: generic({
       id: "local-license", level: "city", name: B("Local business license or tax registration, if the city requires one", "当地营业执照或营业税登记（如所在城市要求）"), agency: city ? B(`City of ${city}`, `${city}市`) : B("Your city", "所在城市"), source: SRC_SBA,
