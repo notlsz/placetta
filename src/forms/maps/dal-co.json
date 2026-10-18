@@ -4,6 +4,28 @@
  "pdf": "dal-co.pdf",
  "checked": "2026-10-14",
  "notes": "This PDF is the Land Use Questionnaire, the fillable part of the CO application; the DallasNow application questions (date, business name, street address, suite, owner/tenant, applicant, proposed use, square footage, and the YES/NO questions) have no box on it and are answered on DallasNow. Answers: luq_business_owner_dba 'Owner legal name, DBA name' (the owner name without commas; with no comma it all goes to Business Owner). luq_restaurant_use: any of Drive-Thru, Take-out only, Tables/Seating (several allowed). luq_alcohol_bar: 'Yes' only for an alcohol establishment/bar that has applied for its TABC permit, optionally 'Yes, cover charge yes|no'; 'No' leaves the bar line blank. luq_additional_services: the services, or No/None (left blank). luq_seating_type: Fixed, Non-fixed or Both. luq_storage_use: 'types: items and storage method', e.g. 'Inside: boxed tea on steel racks' (the types before the colon tick their boxes; the whole answer prints in the description box). luq_owner_printed_name is not printed: it completes the owner's acknowledgement ('I ___ am the business owner and ... acknowledge'), which the owner writes with the signature and date.",
+ "unmapped": {
+  "date": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "business_name": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "business_street_address": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "bldg_suite_no": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "owner_tenant_occupant": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "applicant_if_different": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "proposed_use": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "square_footage": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "change_in_use": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "personal_services": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "hazardous_open_foods": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "alcohol": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "dance_floor": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "medical_use": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "smoking_paraphernalia": "Asked on the DallasNow online application; this PDF (the Land Use Questionnaire) has no box for it.",
+  "luq_owner_printed_name": "Completes the owner's sworn acknowledgement, which the owner writes by hand with the signature and date."
+ },
+ "blank": {
+  "luq_alcohol_bar": "^no\\b",
+  "luq_additional_services": "^\\s*(no|none|n/?a)\\b"
+ },
  "boxes": {
   "luq_business_owner_dba": [
    {

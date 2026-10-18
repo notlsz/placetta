@@ -5,3 +5,5 @@ aus-pre-b https://austin.widen.net/content/lzcrvwjzpn/original/Food-Pre-Opening-
 aus-fp-a https://austin.widen.net/content/2smzwfvayk/pdf/10125FP-v2-Gross-Annual-Sales-(1).pdf
 aus-fp-b https://austin.widen.net/content/2smzwfvayk/original/10125FP-v2-Gross-Annual-Sales-(1).pdf?download=true
 ca-ftb-3522 https://www.ftb.ca.gov/forms/2026/2026-3522.pdf
+ny-dos-1336 https://dos.ny.gov/system/files/documents/2023/03/1336-f.pdf
+co-tax https://tax.colorado.gov/sites/tax/files/documents/CR0100AP.pdf

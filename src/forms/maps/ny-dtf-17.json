@@ -4,6 +4,23 @@
   "pdf": "ny-dtf-17.pdf",
   "checked": "2026-10-14",
   "notes": "This PDF is only the DTF-17-ATT Schedule of Business Locations (the DTF-17 itself is filed online), so it has boxes for the legal name, DBA, start date, the locations and the signer's name and title; status, ein, mailing, email, entity, locations, activities, naics, bulk_sale, home, bank, franchise, parent, alcohol and tobacco have no box on it. physical: one location per line (or ';'), 'street, city, ST ZIP'; lines 1-9 fill location rows 1-9 on page 1 (dba and begin go on the first row only). responsible: one person per line, 'Name, Title, SSN or ITIN, address'; the first person's name and title go in the signature block, the SSN/ITIN, signature and date are left for the signer.",
+  "unmapped": {
+    "status": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "ein": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "mailing": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "email": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "entity": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "locations": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "activities": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "naics": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "bulk_sale": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "home": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "bank": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "franchise": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "parent": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "alcohol": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this.",
+    "tobacco": "Form DTF-17 itself is filed online (New York Business Express); the only fill-in PDF is DTF-17-ATT, the schedule of locations, which has no box for this."
+  },
   "boxes": {
     "legal_name": [
       {"text": "legal name", "max": 60}

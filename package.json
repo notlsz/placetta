@@ -16,6 +16,7 @@
     "legal": "node scripts/build-legal.mts",
     "beam": "esbuild src/site/beam.tsx --bundle --minify --format=iife --jsx=automatic --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=site/beam.js --log-level=warning",
     "test:plan": "esbuild scripts/plan-test.ts --bundle --platform=node --format=esm --outfile=.plan-test.mjs '--external:*.pdf?inline' --log-level=error && node .plan-test.mjs; s=$?; rm -f .plan-test.mjs; exit $s",
+    "test:forms": "node scripts/forms-roundtrip.mjs",
     "test:agent": "esbuild scripts/agent-test.ts --bundle --platform=node --format=esm --outfile=.agent-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .agent-test.mjs; s=$?; rm -f .agent-test.mjs; exit $s",
     "test:extreme": "esbuild scripts/extreme-test.ts --bundle --platform=node --format=esm --outfile=.extreme-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .extreme-test.mjs; s=$?; rm -f .extreme-test.mjs; exit $s",
     "eval:live": "node scripts/live-eval.mjs",
@@ -50,6 +51,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "esbuild": "^0.28.2",
     "oxlint": "^1.81.0",
+    "pdfjs-dist": "^6.3.289",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vite-plugin-singlefile": "^2.3.3"
