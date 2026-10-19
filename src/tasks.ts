@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { OrbState } from "thinking-orbs";
 import { B, type Bi } from "./bi";
 
@@ -11,17 +12,45 @@ export type Wear = "glasses-round" | "glasses-square" | "beanie" | "beret" | "he
  *  `open`: listens with its mouth a little open; every other step smiles with it closed. `still`: no hopping.
  *  `shut`: eyes closed in a content curve. `look`: where the eyes rest while on the step (x right, y down, in face
  *  units; about 3 is a clear glance), when it isn't looking at the work beside it. */
-export type Task = { verb: Bi; wear?: Wear; open?: boolean; still?: boolean; shut?: boolean; look?: [number, number] };
+/** `prop`: what she uses on the step, held at her lower right and in use (OdeliaProps.tsx), from 64px up. `focus`: she
+ *  stays put and works at it (a small quick bob) instead of hopping. */
+export type Prop = "magnifier" | "clipboard" | "laptop" | "pencil" | "waves";
+export type Task = { verb: Bi; wear?: Wear; open?: boolean; still?: boolean; focus?: boolean; shut?: boolean; look?: [number, number]; prop?: Prop };
 export const TASKS: Record<OrbState, Task> = {
-  listening: { verb: B("Listening", "正在聆听"), wear: "headphones", open: true },
-  searching: { verb: B("Searching", "正在搜索"), wear: "glasses-round" },
+  listening: { verb: B("Listening", "正在聆听"), wear: "headphones", open: true, prop: "waves" },
+  searching: { verb: B("Searching", "正在搜索"), wear: "glasses-round", prop: "magnifier", focus: true, look: [2.6, 1.6] },
   solving: { verb: B("Solving", "正在推算"), wear: "glasses-square", look: [1.6, -1.8] },
   weaving: { verb: B("Planning", "正在规划"), wear: "beanie" },
-  composing: { verb: B("Writing", "正在撰写"), wear: "beret", look: [0.6, 2] },
-  shaping: { verb: B("Shaping", "正在整理"), wear: "bow" },
+  composing: { verb: B("Writing", "正在撰写"), wear: "beret", prop: "clipboard", focus: true, look: [2.4, 2.4] },
+  shaping: { verb: B("Shaping", "正在整理"), wear: "bow", prop: "pencil", focus: true, look: [2.4, 2.2] },
   connecting: { verb: B("Connecting", "正在连接"), wear: "bowtie" },
-  working: { verb: B("Working", "正在处理"), wear: "cap" },
+  working: { verb: B("Working", "正在处理"), wear: "cap", prop: "laptop", focus: true, look: [2, 2.6] },
   breathing: { verb: B("Thinking", "正在思考"), still: true, shut: true },
 };
 /** The headline for a step: "Searching", "Planning", "Thinking". */
 export const taskVerb = (s: OrbState): Bi => TASKS[s].verb;
+
+/** A value with the one it replaced, kept for `ms` after a change so the old one can fade out while the new one comes
+ *  in (Odelia's outfit, prop and still between steps). `n` counts the changes, for keys. */
+export function useSwap<T>(v: T, ms = 280): { cur: T; prev: T | undefined; out: boolean; n: number } {
+  const [st, set] = useState({ cur: v, prev: undefined as T | undefined, out: false, n: 0 });
+  if (st.cur !== v) set({ cur: v, prev: st.cur, out: true, n: st.n + 1 });
+  useEffect(() => {
+    if (!st.out) return;
+    const t = setTimeout(() => set(s => ({ ...s, prev: undefined, out: false })), ms);
+    return () => clearTimeout(t);
+  }, [st.n, st.out, ms]);
+  return st;
+}
+
+/** The one-beat "done" pose: true for `ms` after work stops (busy goes from true to false). */
+export function useDone(busy: boolean | undefined, ms = 1300): boolean {
+  const [st, set] = useState({ was: !!busy, done: false, n: 0 });
+  if (st.was !== !!busy) set({ was: !!busy, done: !busy, n: st.n + 1 });
+  useEffect(() => {
+    if (!st.done) return;
+    const t = setTimeout(() => set(s => ({ ...s, done: false })), ms);
+    return () => clearTimeout(t);
+  }, [st.n, st.done, ms]);
+  return st.done;
+}

@@ -7,8 +7,13 @@
 //   outfits   glasses, beret, beanie, cap, hair bow, headphones and bow tie in navy with a soft highlight and a
 //             contact shadow, drawn in the face's coordinates, so they scale with the head and turn with it; hats
 //             sit centred over the face, pulled down over the crown
-//   thinking  eyes closed in a content curve (data-pc includes "shut")
-//   gaze      the eyes rest toward the work beside the cloud (data-pc-look="x,y")
+//   thinking  eyes closed in a content curve (data-pc includes "shut"); done: closed in a happy arc ("done")
+//   gaze      the eyes rest toward the work beside the cloud (data-pc-look="x,y"), and the head turns to it
+//             (canvas.__pcAnim.__pcAim, set by the app)
+//   changes   a new outfit pops in while the old one fades (about 280ms)
+//   tilt      while idle, now and then, the head tips to one side and holds a beat (__pcTilt)
+//   follow    the contact shadow (__pcGround) shrinks as the cloud rises, and the props (__pcFollow) ride the hop
+//   fluff     headphones press into the pile: a deeper dent under the band and cups, a pale ridge beside them
 //   motion    a hop on a real arc that lands into a small squash and settles, no spin on the busy hop, and a blink
 //             every 4 to 7 seconds
 //
@@ -24,7 +29,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 const FILE = "node_modules/bot-avatars/dist/index.es.js";
 const ORIG = FILE + ".placetta-orig";
-const MARK = "/* placetta-patched v3 */";
+const MARK = "/* placetta-patched v4 */";
 const OLD_MARK = "/* placetta-blush */";   // kept in the output so older copies of this script see it and skip
 const OLD_BLUSH = `  ${OLD_MARK}
   if (o.face === "mouth" && globalThis.__botBlush) {
@@ -57,8 +62,10 @@ function __pcInk(t, x0, y0, x1, y1) {
 // wide round pen); W is how open the eye is, so the lighting fades out as it blinks or laughs.
 function __pcEye(t, ink, E, z, B, R, W, shut) {
   if (shut) {
-    // thinking: the eye closed in a content curve, the same line the vector cloud draws
-    t.strokeStyle = ink; t.lineWidth = 2.6; t.lineCap = "round"; t.beginPath(); t.moveTo(-6, 0.1); t.quadraticCurveTo(0, 6.9, 6, 0.1); t.stroke();
+    // thinking (1): the eye closed in a content curve; done (2): closed in a happy arc. The same lines the vector draws.
+    t.strokeStyle = ink; t.lineWidth = 2.6; t.lineCap = "round"; t.beginPath();
+    if (shut === 2) { t.moveTo(-6, 2.6); t.quadraticCurveTo(0, -4.6, 6, 2.6); } else { t.moveTo(-6, 0.1); t.quadraticCurveTo(0, 6.9, 6, 0.1); }
+    t.stroke();
     return;
   }
   const k = Math.max(0, Math.min(1, (W - 0.35) / 0.45));
@@ -95,6 +102,17 @@ function __pcMouth(t, ink, p) {
   const lt = new Path2D(); lt.rect(-40, -40, 80, 80); lt.addPath(p, { a: 1, b: 0, c: 0, d: 1, e: -0.2, f: -0.9 });
   t.fillStyle = "rgba(120,160,215,0.38)"; t.fill(lt, "evenodd");
   t.restore();
+}
+// The outfit with its change between steps (about 280ms): the canvas remembers what it wore, so when data-pc changes
+// the previous outfit fades out while the new one fades in with a small pop from the crown.
+function __pcWearX(t, n, s, eyes, phase) {
+  const c = t.canvas, now = performance.now();
+  if (c.__pcNow !== s.pc) { c.__pcPrev = c.__pcNow; c.__pcNow = s.pc; c.__pcAt = c.__pcPrev === undefined ? 0 : now; }
+  const at = c.__pcAt || 0, k = at ? Math.max(0, Math.min(1, (now - at) / 280)) : 1;
+  if (k < 1 && c.__pcPrev) { t.save(); t.globalAlpha *= 1 - k; __pcWear(t, n, Object.assign({}, s, { pc: c.__pcPrev }), eyes, phase); t.restore(); }
+  t.save(); t.globalAlpha *= k;
+  if (k < 1 && phase === "front") { const e = 1 + 2.70158 * Math.pow(k - 1, 3) + 1.70158 * Math.pow(k - 1, 2), sc = 0.7 + 0.3 * e; t.translate(0, -18); t.scale(sc, sc); t.translate(0, 18); }
+  __pcWear(t, n, s, eyes, phase); t.restore();
 }
 // What the cloud wears. phase "shadow" runs inside the face's clip (the soft shadows each piece casts on the cloth);
 // phase "front" runs unclipped, over the body (the pieces themselves). n is the pose, s the draw options.
@@ -226,8 +244,14 @@ function __pcWear(t, n, s, eyes, phase) {
 
   // headphones: a slim band over the head and a cup at each side
   if (has("headphones")) at(-1, -2, 0, () => {
-    if (shadow) { soft(-36, 3, 4.5, 10.5, 0.3); soft(36, 3, 4.5, 10.5, 0.3); return; }
     const band = new Path2D("M-40.5 -3C-43.5 -33 -24 -49 -3 -48.5C18 -48 42 -36 38.5 -3");
+    if (shadow) {
+      // pressed into the fluff: the pile dips under the band and round each cup, with a pale ridge where it bunches up
+      soft(-37, 3, 6.2, 13, 0.42); soft(37, 3, 6.2, 13, 0.42);
+      t.save(); t.lineCap = "round"; t.translate(0.6, 1.4); t.strokeStyle = "rgba(12,30,66,0.1)"; t.lineWidth = 9; t.stroke(band); t.strokeStyle = "rgba(12,30,66,0.14)"; t.lineWidth = 5.4; t.stroke(band); t.restore();
+      t.save(); t.lineCap = "round"; t.translate(0.4, 4.6); t.strokeStyle = "rgba(240,248,255,0.22)"; t.lineWidth = 2.2; t.stroke(band); t.restore();
+      return;
+    }
     t.lineCap = "round"; t.strokeStyle = __pcInk(t, -30, -50, 30, 0); t.lineWidth = 3.4; t.stroke(band);
     t.save(); t.translate(-0.5, -0.9); t.strokeStyle = sheen(-34, -48, -8, -30, 0.5); t.lineWidth = 1; t.stroke(band); t.restore();
     for (const side of [-1, 1]) {
@@ -262,7 +286,7 @@ const PATCHES = [
   ["outfit option", '    wear: { hat: b, glasses: M, headphones: y, bowTie: m, color: A, fabric: vn === "fabric" }',
     '    pc: Qt["data-pc"],\n    pcLook: Qt["data-pc-look"] ? String(Qt["data-pc-look"]).split(",").map(Number) : null,\n    wear: { hat: b, glasses: M, headphones: y, bowTie: m, color: A, fabric: vn === "fabric" }'],
   ["lit eyes", "t.strokeStyle = r, t.lineWidth = R, t.stroke(ri(E, z, B));",
-    "o.pc ? __pcEye(t, r, E, z, B, R, W, o.pc.includes(\"shut\")) : (t.strokeStyle = r, t.lineWidth = R, t.stroke(ri(E, z, B)));"],
+    "o.pc ? __pcEye(t, r, E, z, B, R, W, o.pc.includes(\"shut\") ? 1 : o.pc.includes(\"done\") ? 2 : 0) : (t.strokeStyle = r, t.lineWidth = R, t.stroke(ri(E, z, B)));"],
   ["blush", '  if (o.face === "mouth") {\n    const S = h * 0.35,', OLD_BLUSH + '  if (o.face === "mouth") {\n    const S = h * 0.35,'],
   // busy, the cloud smiles with its mouth closed (a little wider); "open" keeps a small open mouth
   ["closed smile", "hw: C(6.5 * O, 9.5 * F, W),\n      t0: C(1.9, 0, 0),\n      a: C(2 / 3, 2 / 3, 0),\n      yt: C(3.53 * O, 1.6 * F, -4 * W / 3),\n      ab: C(2 / 3, 0, 0),\n      yb: C(3.53 * O, 17.3 * F, 4 * W / 3)",
@@ -272,9 +296,9 @@ const PATCHES = [
   ["gaze", "h = n.lookX, d = n.lookY,", "h = n.lookX + (o.pcLook ? o.pcLook[0] : 0), d = n.lookY + (o.pcLook ? o.pcLook[1] : 0),"],
   ["inset smile","t.fillStyle = r, t.fill(ci($));", "o.pc ? __pcMouth(t, r, ci($)) : (t.fillStyle = r, t.fill(ci($)));"],
   // the outfit's contact shadows, inside the face's clip; the pieces themselves after it, unclipped
-  ["outfit shadows", "    const ft = ii(t, o, s);\n", "    const ft = ii(t, o, s);\n    s.__pcEyes = ft, s.pc && __pcWear(t, o, s, ft, \"shadow\");\n"],
+  ["outfit shadows", "    const ft = ii(t, o, s);\n", "    const ft = ii(t, o, s);\n    s.__pcEyes = ft, s.pc && __pcWearX(t, o, s, ft, \"shadow\");\n"],
   ["outfits", "  Y && Z1(t, s.path, et, R, D, V, { y: s.faceY, scale: s.faceScale }), Qa(t, o, s.color, y, m, !0, s.whirl), t.restore();",
-    "  s.pc && (t.save(), t.translate(s.faceX - 50, s.faceY - 50), t.scale(s.faceScale, s.faceScale), __pcWear(t, o, s, k > -0.2 ? s.__pcEyes : null, \"front\"), t.restore());\n" +
+    "  s.pc && (t.save(), t.translate(s.faceX - 50, s.faceY - 50), t.scale(s.faceScale, s.faceScale), __pcWearX(t, o, s, k > -0.2 ? s.__pcEyes : null, \"front\"), t.restore());\n" +
     "  Y && Z1(t, s.path, et, R, D, V, { y: s.faceY, scale: s.faceScale }), Qa(t, o, s.color, y, m, !0, s.whirl), t.restore();"],
   // Until the plush pile has baked the library can only draw a flat grey stand-in. A dressed cloud draws nothing
   // instead (the app shows its vector cloud underneath) and marks its canvas data-pc-baked once the pile is there.
@@ -287,6 +311,23 @@ const PATCHES = [
   ["blink", "2.2 + this.rand() * 2.6", "(globalThis.__botPlacetta ? 4 + this.rand() * 3 : 2.2 + this.rand() * 2.6)"],
   // the busy hop: up on a real arc (slow at the top, quick near the ground), a small squash on landing that springs
   // back and settles, a crouch before the next one, and no spin, so the face and its outfit stay in view
+  // The canvas knows its animator (canvas.__pcAnim), so the app can aim the head and hand it the shadow and the props.
+  ["link", "U.current.setTurn(uo(Et, 0, 2)),", "U.current.setTurn(uo(Et, 0, 2)), Jt.current && (Jt.current.__pcAnim = U.current),"],
+  // Each frame: the head eases toward the work (__pcAim: yaw, pitch, roll in radians); while idle, now and then, it
+  // tips to one side and holds a beat (the signature tilt, __pcTilt); the contact shadow (__pcGround) shrinks and
+  // fades as the cloud rises, and the props layer (__pcFollow) rides the hop (__pcPx: px per body unit).
+  ["aim", "s.lookX = b + k + this.gazeLead, s.lookY = M + L, s.whirl = O, s.whirlAngle = F;",
+    `s.lookX = b + k + this.gazeLead, s.lookY = M + L, s.whirl = O, s.whirlAngle = F;
+    if (globalThis.__botPlacetta) {
+      const aim = this.__pcAim || [0, 0, 0], cur = this.__pcAimNow || (this.__pcAimNow = [0, 0, 0]);
+      for (let j = 0; j < 3; j++) cur[j] = Ps(cur[j], aim[j], 5, n);
+      let tilt = 0;
+      if (this.__pcTilt && this.state === "default") { const ph = (o % 8.5) / 8.5; tilt = W(0.5, 0.6, ph) * (1 - W(0.74, 0.86, ph)); }
+      s.yaw += cur[0] + 0.1 * tilt, s.pitch += cur[1] + 0.06 * tilt, s.roll += cur[2] + 0.17 * tilt;
+      const gr = this.__pcGround, fo = this.__pcFollow, h = Math.max(0, Math.min(1, -m / 18));
+      if (gr) { const v = "scale(" + (1 - 0.34 * h).toFixed(3) + ")"; gr.style.transform !== v && (gr.style.transform = v, gr.style.opacity = (1 - 0.5 * h).toFixed(3)); }
+      if (fo) { const v = "translateY(" + (s.y * (this.__pcPx || 1)).toFixed(1) + "px)"; fo.style.transform !== v && (fo.style.transform = v); }
+    }`],
   ["hop", "      this.hopPhase += n / D0, this.hopPhase >= 1 &&",
     `      if (globalThis.__botPlacetta) {
         const HOP = 0.92, AIR = 0.58;

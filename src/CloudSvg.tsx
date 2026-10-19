@@ -1,5 +1,5 @@
 import { useId, useState, type CSSProperties } from "react";
-import type { Wear } from "./tasks";
+import { useSwap, type Wear } from "./tasks";
 
 /* Odelia's cloud as a crisp vector, for small spots (under about 40px: the chat box, turn headers, the tab bar), and
    standing in for the plush canvas until its pile has baked. It is the same cloud the canvas draws (src/Bot.tsx): the
@@ -54,6 +54,10 @@ const TAILS = "M-1.8 2.6L-6.4 11.4Q-4.6 12.4 -3 10.8L0 5.6L3 10.8Q4.6 12.4 6.4 1
 
 export type CloudProps = {
   size: number; busy?: boolean; wear?: Wear; open?: boolean; still?: boolean; shut?: boolean;
+  /** works at a prop: stays put with a small quick bob instead of hopping */
+  focus?: boolean;
+  /** the one-beat done pose: a happy bounce, eyes closed in a smile */
+  done?: boolean;
   /** where the eyes rest while busy (x right, y down, face units) */
   look?: [number, number];
   /** sweep the eyes side to side (searching) */
@@ -61,15 +65,16 @@ export type CloudProps = {
   label?: string;
 };
 
-export function CloudSvg({ size, busy, wear, open, still, shut, look, scan, label }: CloudProps) {
+export function CloudSvg({ size, busy, wear, open, still, shut, focus, done, look, scan, label }: CloudProps) {
   const id = "cs" + useId().replace(/[^a-zA-Z0-9]/g, "");
   // each cloud blinks on its own beat, somewhere between 4 and 7 seconds
   const [blink] = useState(() => 4 + Math.random() * 3);
   const u = (n: number) => `url(#${id}${n})`;
   // lines stay at least about 0.9px wide however small the cloud (1.1px for the simplified small face)
   const tiny = size < 30, small = size < 40, px = 100 / size, line = (w: number) => Math.max(w, (tiny ? 1.1 : 0.9) * px);
-  const mode = busy && !still ? "hop" : busy ? "calm" : "idle";
-  const mouth = busy ? (open ? SMILE.open : SMILE.busy) : SMILE.idle;
+  const mode = done ? "done" : busy && still ? "calm" : busy && focus ? "focus" : busy ? "hop" : "idle";
+  const outfit = useSwap(wear);
+  const mouth = busy && open && !done ? SMILE.open : busy || done ? SMILE.busy : SMILE.idle;
   const glasses = wear === "glasses-round" || wear === "glasses-square";
   const [lx, ly] = busy && look ? look : [0, 0];
   const style = { "--blink": `${blink.toFixed(2)}s`, "--lx": `${lx}px`, "--ly": `${ly}px` } as CSSProperties;
@@ -110,15 +115,15 @@ export function CloudSvg({ size, busy, wear, open, still, shut, look, scan, labe
               {wear === "headphones" && <><ellipse cx="-37" cy="1" rx="4.5" ry="10.5" fill={u(6)} /><ellipse cx="35" cy="1" rx="4.5" ry="10.5" fill={u(6)} /></>}
               {wear === "bowtie" && <ellipse cx="0.8" cy="30.5" rx="12.5" ry="4.6" fill={u(6)} />}
               {/* the cloth dips round each eye */}
-              {!shut && <><ellipse cx="-11.2" cy="-2.2" rx="11" ry="9.6" fill={u(6)} opacity="0.7" /><ellipse cx="13.8" cy="-2.2" rx="11" ry="9.6" fill={u(6)} opacity="0.7" /></>}
+              {!shut && !done && <><ellipse cx="-11.2" cy="-2.2" rx="11" ry="9.6" fill={u(6)} opacity="0.7" /><ellipse cx="13.8" cy="-2.2" rx="11" ry="9.6" fill={u(6)} opacity="0.7" /></>}
             </g>
           </g>
           <g transform={face}>
             <g className={"cs-look" + (busy && scan ? " scan" : "")}>
               {[-18.3, 18.3].map(x => <ellipse key={x} cx={x} cy="6.1" rx={small ? 8.4 : 7.2} ry={small ? 5.2 : 4.4} fill={u(4)} opacity={small ? 1 : 0.88} />)}
-              {[-12.5, 12.5].map(x => shut ? (
-                // thinking: the eyes closed in a content curve
-                <path key={x} d={`M${x - 6} -3.4Q${x} 3.4 ${x + 6} -3.4`} fill="none" stroke={NAVY} strokeWidth={line(2.6)} strokeLinecap="round" />
+              {[-12.5, 12.5].map(x => shut || done ? (
+                // thinking: the eyes closed in a content curve; done: closed in a happy arc
+                <path key={x} d={done ? `M${x - 6} -1Q${x} -8.2 ${x + 6} -1` : `M${x - 6} -3.4Q${x} 3.4 ${x + 6} -3.4`} fill="none" stroke={NAVY} strokeWidth={line(2.6)} strokeLinecap="round" />
               ) : (
                 <g key={x} className="cs-eye" transform={`translate(${x} -3.5)${tiny && glasses ? " scale(0.74)" : ""}`}>
                   <rect x="-6.3" y="-7.4" width="12.6" height="14.8" rx="6.3" fill={NAVY} />
@@ -126,12 +131,14 @@ export function CloudSvg({ size, busy, wear, open, still, shut, look, scan, labe
                   {!tiny && <ellipse cx="-1.9" cy="-4.1" rx="1.9" ry="1.5" transform="rotate(-23 -1.9 -4.1)" fill="#fff" opacity="0.94" />}
                 </g>
               ))}
-              <g transform={`translate(0 ${busy ? 11.6 : 12.5})`}>
+              <g transform={`translate(0 ${busy || done ? 11.6 : 12.5})`}>
                 {!tiny && <path d={mouth} fill="#fff" opacity="0.42" transform="translate(0.2 0.95)" />}
                 <path d={mouth} fill={NAVY} />
               </g>
             </g>
-            <Outfit wear={wear} u={u} line={line} tiny={tiny} />
+            {/* changing step, the old outfit fades out while the new one pops in from the crown */}
+            {outfit.out && outfit.prev && <g key={"o" + outfit.n} className="cs-wear out"><Outfit wear={outfit.prev} u={u} line={line} tiny={tiny} /></g>}
+            <g key={"i" + outfit.n} className={"cs-wear" + (outfit.n ? " in" : "")}><Outfit wear={wear} u={u} line={line} tiny={tiny} /></g>
           </g>
         </g>
       </g>

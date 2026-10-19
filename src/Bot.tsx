@@ -2,7 +2,8 @@ import { useEffect, useId, useRef, useState, type ReactNode, type CSSProperties 
 import { BotAvatar, type BotAvatarProps, type BotAvatarType } from "bot-avatars";
 import { BorderBeam } from "border-beam";
 import type { OrbState } from "thinking-orbs";
-import { TASKS } from "./tasks";
+import { TASKS, useDone, useSwap, type Prop } from "./tasks";
+import { OdeliaProps } from "./OdeliaProps";
 import { CLOUD as CLOUD_PATH, CloudSvg } from "./CloudSvg";
 import "./bot.css";
 
@@ -54,23 +55,29 @@ const touch = typeof window !== "undefined" && (window.matchMedia?.("(pointer: c
 const SMALL = 40;
 /** The glow behind her while she works, from this size up (smaller, it would read as a smudge). */
 const GLOW = 40;
+/** The prop in use, from this size up (smaller, it crowds the face; the outfit alone carries the step). */
+const PROPS = 64;
 
-/** The plush stills, one per step (idle is the bare cloud), each the whole canvas square. */
+/** The plush stills, one per step (idle is the bare cloud, done the happy pose), each the whole canvas square. */
 const STILLS = import.meta.glob<string>("./assets/odelia/*.webp", { eager: true, query: "?url", import: "default" });
-const stillOf = (task?: OrbState) => STILLS[`./assets/odelia/${task ?? "idle"}.webp`] ?? STILLS["./assets/odelia/idle.webp"];
+const stillOf = (name: string) => STILLS[`./assets/odelia/${name}.webp`] ?? STILLS["./assets/odelia/idle.webp"];
+
+/** The animator the patched library hangs on its canvas (scripts/patch-bot-avatars.mjs: link, aim). */
+type Anim = { __pcAim?: [number, number, number]; __pcTilt?: boolean; __pcGround?: HTMLElement | null; __pcFollow?: HTMLElement | null; __pcPx?: number };
 
 /**
  * The plush canvas's edge. The fur leaves a grainy haze past the outline, which reads as a cut-out, so this filter
  * redraws the silhouette from the canvas's own outline (blurred a touch and pulled back to a clean, soft edge), fills
- * the pile's gaps along it with its own colour, adds a soft rim of light along the upper-left edge, and a fine blue
- * line round the outside so the lit side holds its shape on white (a faint pale one on dark). It works from the drawn
- * pixels, so it follows every hop, turn and outfit. Desktop only: phones skip it (no per-frame cost there).
+ * the pile's gaps along it with its own colour and adds a soft rim of light along the upper-left edge. Instead of a
+ * line round the outside (which read as a sticker), a soft, low shadow below and a faint ambient one all round lift
+ * the lit side off a white page; on dark a faint cool glow does the same. It works from the drawn pixels, so it
+ * follows every hop, turn and outfit. Desktop only: phones skip it (no per-frame cost there).
  */
 function Edge({ id, size, dark }: { id: string; size: number; dark: boolean }) {
-  const blur = Math.max(0.45, size * 0.006), rim = size * 0.022, line = Math.max(0.6, size * 0.007);
+  const blur = Math.max(0.45, size * 0.006), rim = size * 0.022;
   return (
     <svg width="0" height="0" style={{ position: "absolute", width: 0, height: 0 }} aria-hidden="true" focusable="false">
-      <filter id={id} x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
+      <filter id={id} x="-15%" y="-15%" width="130%" height="135%" colorInterpolationFilters="sRGB">
         <feGaussianBlur in="SourceAlpha" stdDeviation={blur} result="soft" />
         <feComponentTransfer in="soft" result="shape"><feFuncA type="linear" slope="2.6" intercept="-0.9" /></feComponentTransfer>
         <feGaussianBlur in="SourceGraphic" stdDeviation={blur * 1.4} result="spread" />
@@ -80,15 +87,17 @@ function Edge({ id, size, dark }: { id: string; size: number; dark: boolean }) {
         <feOffset in="shape" dx={rim} dy={rim * 1.15} result="nudged" />
         <feComposite in="shape" in2="nudged" operator="out" result="crescent" />
         <feGaussianBlur in="crescent" stdDeviation={size * 0.012} result="glow" />
-        <feFlood floodColor="#F4FAFF" floodOpacity={dark ? 0.7 : 0.5} />
+        <feFlood floodColor="#F4FAFF" floodOpacity={dark ? 0.7 : 0.42} />
         <feComposite in2="glow" operator="in" result="light" />
         <feComposite in="light" in2="shape" operator="in" result="rimlight" />
-        <feMorphology in="shape" operator="dilate" radius={line} result="grown" />
-        <feComposite in="grown" in2="shape" operator="out" result="ring" />
-        <feGaussianBlur in="ring" stdDeviation={line * 0.45} result="ringsoft" />
-        <feFlood floodColor={dark ? "#C8E2FC" : "#42699E"} floodOpacity={dark ? 0.26 : 0.42} />
-        <feComposite in2="ringsoft" operator="in" result="outline" />
-        <feMerge><feMergeNode in="outline" /><feMergeNode in="body" /><feMergeNode in="rimlight" /></feMerge>
+        <feGaussianBlur in="shape" stdDeviation={size * 0.03} result="dropblur" />
+        <feOffset in="dropblur" dy={size * 0.028} result="dropmoved" />
+        <feFlood floodColor={dark ? "#000" : "#1B3A66"} floodOpacity={dark ? 0.45 : 0.17} />
+        <feComposite in2="dropmoved" operator="in" result="drop" />
+        <feGaussianBlur in="shape" stdDeviation={size * 0.011} result="ambblur" />
+        <feFlood floodColor={dark ? "#9CC4F2" : "#2E5488"} floodOpacity={dark ? 0.16 : 0.2} />
+        <feComposite in2="ambblur" operator="in" result="ambient" />
+        <feMerge><feMergeNode in="drop" /><feMergeNode in="ambient" /><feMergeNode in="body" /><feMergeNode in="rimlight" /></feMerge>
       </filter>
     </svg>
   );
@@ -97,9 +106,9 @@ function Edge({ id, size, dark }: { id: string; size: number; dark: boolean }) {
  * The canvas bot with its clean edge (on desktop). Until its plush pile has baked, the library can only draw a flat
  * grey stand-in, so a dressed cloud (one with data-pc) draws nothing until then and marks its canvas data-pc-baked when
  * the pile is there (scripts/patch-bot-avatars.mjs). Given a `stand` (the vector cloud), this shows it underneath until
- * that mark, then lets it fade out under the plush.
+ * that mark, then lets it fade out under the plush. `onAnim` gets the canvas's animator once it exists.
  */
-function Plush({ stand, ...props }: BotAvatarProps & { size: number; "data-pc"?: string; "data-pc-look"?: string; stand?: ReactNode }) {
+function Plush({ stand, onAnim, ...props }: BotAvatarProps & { size: number; "data-pc"?: string; "data-pc-look"?: string; stand?: ReactNode; onAnim?: (a: Anim) => void }) {
   const id = "pc-edge" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const ref = useRef<HTMLCanvasElement>(null);
   const dark = useDark();
@@ -114,6 +123,14 @@ function Plush({ stand, ...props }: BotAvatarProps & { size: number; "data-pc"?:
     check();
     return () => watch.disconnect();
   }, [stage]);
+  const hand = useRef(onAnim);
+  useEffect(() => { hand.current = onAnim; });
+  useEffect(() => {
+    let raf = 0;
+    const look = () => { const a = (ref.current as unknown as { __pcAnim?: Anim } | null)?.__pcAnim; if (a) hand.current?.(a); else raf = requestAnimationFrame(look); };
+    if (hand.current) look();
+    return () => cancelAnimationFrame(raf);
+  }, []);
   const bot = <BotAvatar ref={ref} {...SOFT} {...props} style={touch ? SHOWN : { ...SHOWN, filter: `url(#${id})` }} />;
   return (
     <>
@@ -128,12 +145,17 @@ function Plush({ stand, ...props }: BotAvatarProps & { size: number; "data-pc"?:
   );
 }
 
-/** The plush still for the step (the whole canvas square), floating; quicker while busy, slow while thinking. */
-function Still({ size, busy, task, label }: { size: number; busy?: boolean; task?: OrbState; label?: string }) {
-  const calm = busy && task && TASKS[task].still;
+/** The plush still for the step (the whole canvas square), floating, with the prop in use riding along; changing step,
+ *  the old still fades out under the new one. */
+function Still({ size, name, prop, label }: { size: number; name: string; prop?: Prop; label?: string }) {
+  const src = useSwap(stillOf(name));
   return (
-    <span className={"cloud-still" + (busy ? calm ? " calm" : " busy" : "")} style={{ width: size, height: size }} role="img" aria-label={label}>
-      <img src={stillOf(busy ? task : undefined)} alt="" draggable={false} />
+    <span className="cloud-still" style={{ width: size, height: size }} role="img" aria-label={label}>
+      <span className="cs-floater">
+        {src.out && src.prev && <img key={"o" + src.n} className="out" src={src.prev} alt="" draggable={false} />}
+        <img key={"i" + src.n} className={src.n ? "in" : undefined} src={src.cur} alt="" draggable={false} />
+        {size >= PROPS && <OdeliaProps prop={prop} />}
+      </span>
     </span>
   );
 }
@@ -144,29 +166,42 @@ function Aura() {
 }
 
 /**
- * Odelia. `task` dresses her for the step; `gaze` is where the work sits beside her (x right, y down, in her face's
- * units, about 3 a clear glance), so her eyes rest on it while she works.
+ * Odelia. `task` dresses her for the step and hands her its prop; `gaze` is where the work sits beside her (x right,
+ * y down, in her face's units, about 3 a clear glance), so her eyes, and on the large canvas her head, turn to it
+ * while she works. When a job finishes she gives one happy bounce with her eyes closed in a smile; while idle, now and
+ * then, she tips her head to one side and holds it a beat (her signature tilt).
  */
 export function AgentBot({ size, busy, label = "Odelia", interactive = true, task, gaze }: { size: number; busy?: boolean; label?: string; interactive?: boolean; task?: OrbState; gaze?: [number, number] }) {
   const k = busy && task ? TASKS[task] : undefined;
+  const done = useDone(busy);
   const look = k?.look ?? (busy ? gaze : undefined);
-  const calm = !!(busy && k?.still);
+  const calm = !!(busy && k?.still), focus = !!(busy && k?.focus);
+  const prop = size >= PROPS ? k?.prop : undefined;
+  const ground = useRef<HTMLSpanElement>(null), follow = useRef<HTMLSpanElement>(null), anim = useRef<Anim | null>(null);
+  // the large canvas: aim the head at the work, tilt while idle, and hand it the shadow and the props to move
+  const aim: [number, number, number] = look ? [look[0] * 0.075, -look[1] * 0.06, look[0] * 0.02] : [0, 0, 0];
+  const tie = (a: Anim) => { anim.current = a; a.__pcAim = aim; a.__pcTilt = !busy; a.__pcGround = ground.current; a.__pcFollow = follow.current; a.__pcPx = size / 100; };
+  useEffect(() => { if (anim.current) tie(anim.current); });   // eslint-disable-line react-hooks/exhaustive-deps
+  const pc = [k?.wear ?? "cloud", busy && k?.open && !done ? "open" : "", k?.shut ? "shut" : "", done ? "done" : ""].join(" ").replace(/ +/g, " ").trim();
   const s = { "--s": `${size}px` } as CSSProperties;
   let bot: ReactNode;
-  const vector = (lbl?: string) => <CloudSvg size={size} busy={busy} wear={k?.wear} open={k?.open} still={k?.still} shut={k?.shut} look={look} scan={task === "searching"} label={lbl} />;
+  const vector = (lbl?: string) => <CloudSvg size={size} busy={busy} wear={k?.wear} open={k?.open} still={k?.still} focus={k?.focus} shut={k?.shut} done={done} look={look} scan={task === "searching"} label={lbl} />;
   if (size < SMALL) bot = vector(label);
-  else if (touch) bot = <Still size={size} busy={busy} task={task} label={label} />;
+  else if (touch) bot = <Still size={size} name={done ? "done" : busy && task ? task : "idle"} prop={prop} label={label} />;
   else {
-    // thinking is the one quiet task: it stays put and breathes slowly instead of hopping
-    const pc = [k?.wear ?? "cloud", busy && k?.open ? "open" : "", k?.shut ? "shut" : ""].join(" ").replace(/ +/g, " ").trim();
-    bot = <Plush stand={vector()} type="cloud" face="mouth" color={CLOUD} size={size} state={busy && !k?.still ? "working" : "default"} interactive={interactive}
-      turn={calm ? 0.3 : 1} jumpEvery={9} jumpSquashEase="soft" jumpRiseEase="soft" speed={k?.still ? 0.6 : 1} data-pc={pc} data-pc-look={look ? look.join(",") : undefined} aria-label={label} />;
+    // thinking stays put and breathes slowly; a step with a prop stays put and works at it; the rest hop
+    bot = <>
+      <Plush stand={vector()} type="cloud" face="mouth" color={CLOUD} size={size} state={busy && !k?.still && !k?.focus ? "working" : "default"} interactive={interactive}
+        turn={calm || focus ? 0.3 : 1} jumpEvery={9} jumpSquashEase="soft" jumpRiseEase="soft" speed={k?.still ? 0.6 : 1} data-pc={pc}
+        data-pc-look={look ? look.join(",") : undefined} onAnim={tie} aria-label={label} />
+      <span className="pr-follow" ref={follow} aria-hidden="true"><OdeliaProps prop={prop} /></span>
+    </>;
   }
   return (
-    <span className={"odelia-bot" + (busy ? " busy" : "") + (calm ? " calm" : "")} style={s}>
+    <span className={"odelia-bot" + (busy ? " busy" : "") + (calm ? " calm" : "") + (focus ? " focus" : "") + (done ? " done" : "") + (touch && size >= SMALL ? " still" : "")} style={s}>
       {busy && size >= GLOW && <Aura />}
-      {size >= SMALL && <span className={"bot-ground" + (touch ? " float" : "")} aria-hidden="true" />}
-      {bot}
+      {size >= SMALL && <span ref={ground} className={"bot-ground" + (touch ? " float" : "")} aria-hidden="true" />}
+      <span className="bot-body">{bot}</span>
     </span>
   );
 }
