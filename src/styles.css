@@ -153,7 +153,7 @@ html[lang="zh-CN"] .hero h1 { word-break: keep-all; max-width: 13em; letter-spac
 .liveline em { font-style: normal; color: var(--ink3); white-space: nowrap; }
 .liveline .ll-verb { font-weight: 600; white-space: nowrap; margin-right: -2px; }
 .liveline .ll-verb + span { font-size: 12.5px; }
-.liveline.on { background: var(--sky-wash); color: var(--blue-deep); box-shadow: 0 0 0 1px #DCE6F2; }
+.liveline.on { padding-left: 16px; background: var(--sky-wash); color: var(--blue-deep); box-shadow: 0 0 0 1px #DCE6F2; }
 .liveline em.site, .dock-live em { color: var(--blue-ink); }
 .ll-dot { flex: none; width: 7px; height: 7px; margin: 0 2px 0 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 3px var(--sky); }
 
@@ -421,9 +421,7 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 /* Odelia dressed for the step she's on, with the step's orb as her tool */
 .livebot { position: relative; display: inline-grid; place-items: center; flex: none; }
 .lb-bot { display: grid; place-items: center; }
-.lb-tool { position: absolute; right: -9px; bottom: -6px; pointer-events: none; }
 .livebot.beside { display: inline-flex; align-items: center; gap: 2px; }
-.livebot.beside .lb-tool { position: static; }
 .ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--ink2); transition: background .15s, color .15s; }
 .ic:hover:not(:disabled) { background: var(--mist2); color: var(--ink); }
 .ic.mic { color: var(--blue-ink); }

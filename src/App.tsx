@@ -1285,7 +1285,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         <ul className="nav">
           {NAV.map(n => (
             <li key={n.v}><a {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined} title={slim ? t(n.k) : undefined}>
-              {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={22} busy={busy} interactive={false} /></span> : <n.Icon />}
+              {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={22} busy={busy} task={busy ? step?.state : undefined} interactive={false} /></span> : <n.Icon />}
               <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
             </a></li>
           ))}
@@ -1358,7 +1358,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
             <nav className="tabbar" aria-label={t("nav_more")}>
               {NAV.map(n => (
                 <a key={n.v} {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined}>
-                  {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={24} busy={busy} interactive={false} /></span> : <n.Icon />}
+                  {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={24} busy={busy} task={busy ? step?.state : undefined} interactive={false} /></span> : <n.Icon />}
                   <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
                 </a>
               ))}

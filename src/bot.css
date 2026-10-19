@@ -1,14 +1,19 @@
-/* Odelia's cloud (src/Bot.tsx and src/CloudSvg.tsx): the tool beside her, and the small vector cloud's motion. */
+/* Odelia's cloud (src/Bot.tsx and src/CloudSvg.tsx): the glow and the ground under her, and the vector cloud's motion.
+   Every animation here moves only transform or opacity, so phones composite it without repainting a canvas. */
 
-/* The step's orb, her tool: small, just off the cloud's lower-right lobe with a little air between them. Placed from
-   the cloud's size (--s), so it sits the same way at every size, and stays clear of a title beside the cloud. */
-.livebot .lb-tool { position: absolute; right: auto; bottom: auto; left: calc(var(--s) * 0.88 - 2px); top: calc(var(--s) * 0.88 - 2px); width: 16px !important; height: 16px !important; pointer-events: none; }
-/* on the small vector cloud the tool is a single breathing dot in the brand blue, in the same spot (also beside a
-   line of text, so it never reads as a separator) */
-.lb-dot { position: absolute; left: calc(var(--s) * 0.93); top: calc(var(--s) * 0.9 - 1.5px); width: 5px; height: 5px; border-radius: 50%; background: #4D73A3; pointer-events: none; animation: lb-dot 1.3s ease-in-out infinite alternate; }
-.livebot.beside { position: relative; }
-@keyframes lb-dot { from { transform: scale(.7); opacity: .5; } to { transform: scale(1); opacity: 1; } }
-:root[data-theme="dark"] .lb-dot { background: #8DB2E0; }
+.odelia-bot { position: relative; display: inline-grid; place-items: center; flex: none; --aura: rgba(92, 146, 214, .55); --ground: rgba(27, 58, 102, .2); }
+:root[data-theme="dark"] .odelia-bot { --aura: rgba(112, 166, 240, .5); --ground: rgba(0, 0, 0, .55); }
+.odelia-bot > * { grid-area: 1 / 1; }
+
+/* While she works, a soft glow in her own shape breathes behind her (only its opacity moves; the blur is drawn once). */
+.bot-aura { position: absolute; inset: 0; pointer-events: none; opacity: 0; transform: translateY(3%) scale(1.07); filter: blur(calc(var(--s) * .07)); will-change: opacity; }
+.bot-aura svg { display: block; width: 100%; height: 100%; fill: var(--aura); }
+.odelia-bot.busy .bot-aura { animation: bot-aura 2.6s ease-in-out infinite; }
+.odelia-bot.busy.calm .bot-aura { animation-duration: 4.6s; }
+@keyframes bot-aura { 0%, 100% { opacity: .42; } 50% { opacity: .95; } }
+
+/* the soft contact shadow under the plush cloud and the still (the vector cloud draws its own, in step with its hop) */
+.bot-ground { position: absolute; left: 23%; right: 23%; top: 90.5%; height: 6%; pointer-events: none; border-radius: 50%; background: radial-gradient(closest-side, var(--ground), transparent); }
 
 /* the plush canvas, with the vector cloud standing in for it until its pile has baked */
 .plush { position: relative; display: inline-grid; place-items: center; flex: none; }
@@ -16,15 +21,25 @@
 .plush-stand.gone { opacity: 0; }
 .plush > canvas { position: relative; }
 
-.cloud-svg { display: block; flex: none; overflow: visible; }
-.cloud-svg .cs-hop, .cloud-svg .cs-squash, .cloud-svg .cs-eye, .cloud-svg .cs-look { transform-box: fill-box; }
-.cloud-svg .cs-squash { transform-origin: 50% 100%; }
+.livebot.beside { position: relative; }
+
+.cloud-svg { display: block; flex: none; overflow: visible; --cs-edge: rgba(66, 106, 158, .5); }
+:root[data-theme="dark"] .cloud-svg { --cs-edge: rgba(200, 226, 252, .3); }
+.cloud-svg .cs-edge { stroke: var(--cs-edge); }
+.cloud-svg .cs-ground-in { stop-color: #1B3A66; stop-opacity: .22; }
+.cloud-svg .cs-ground-out { stop-color: #1B3A66; stop-opacity: 0; }
+:root[data-theme="dark"] .cloud-svg .cs-ground-in { stop-color: #000; stop-opacity: .5; }
+:root[data-theme="dark"] .cloud-svg .cs-ground-out { stop-color: #000; }
+.cloud-svg .cs-hop, .cloud-svg .cs-squash, .cloud-svg .cs-eye, .cloud-svg .cs-look, .cloud-svg .cs-ground { transform-box: fill-box; }
+.cloud-svg .cs-squash, .cloud-svg .cs-hop { transform-origin: 50% 100%; }
+.cloud-svg .cs-ground { transform-origin: 50% 50%; }
 .cloud-svg .cs-eye { transform-origin: 50% 50%; animation: cs-blink var(--blink, 5s) linear infinite; }
 
-/* busy: up on an arc (eases out going up, in coming down), lands into a small squash, springs back and crouches for
-   the next one */
+/* busy: a crouch, up on an arc (eases out going up, in coming down), lands into a small squash, springs back and
+   crouches for the next one; the shadow below shrinks and fades as she rises */
 .cloud-svg.hop .cs-hop { animation: cs-hop .92s infinite; }
 .cloud-svg.hop .cs-squash { animation: cs-squash .92s linear infinite; }
+.cloud-svg.hop .cs-ground { animation: cs-ground .92s infinite; }
 @keyframes cs-hop {
   0% { translate: 0 0; animation-timing-function: cubic-bezier(.33, .66, .66, 1); }
   29% { translate: 0 -12px; animation-timing-function: cubic-bezier(.33, 0, .66, .34); }
@@ -41,20 +56,53 @@
   84% { scale: 1 1; }
   100% { scale: 1.055 .94; }
 }
-/* idle: a slow breath, and now and then a glance to one side and the other */
+@keyframes cs-ground {
+  0% { scale: 1.04 1; opacity: 1; animation-timing-function: cubic-bezier(.33, .66, .66, 1); }
+  29% { scale: .7 .8; opacity: .5; animation-timing-function: cubic-bezier(.33, 0, .66, .34); }
+  58% { scale: 1.06 1; opacity: 1; }
+  100% { scale: 1.04 1; opacity: 1; }
+}
+/* idle: a slow breath and a gentle float, out of step with each other so it never looks looped, and now and then a
+   glance to one side and the other */
 .cloud-svg.idle .cs-squash { animation: cs-breathe 3.6s ease-in-out infinite; }
-.cloud-svg.calm .cs-squash { animation: cs-breathe 6s ease-in-out infinite; }
+.cloud-svg.idle .cs-hop { animation: cs-float 5.2s ease-in-out infinite; }
+.cloud-svg.idle .cs-ground { animation: cs-ground-float 5.2s ease-in-out infinite; }
 .cloud-svg.idle .cs-look { animation: cs-look 9s ease-in-out infinite; }
-@keyframes cs-breathe { 0%, 100% { scale: 1 1; } 50% { scale: 1.012 .985; } }
+/* thinking: still, eyes closed, a slow deep breath and a slight sway */
+.cloud-svg.calm .cs-squash { animation: cs-breathe-deep 4.6s ease-in-out infinite; }
+.cloud-svg.calm .cs-hop { animation: cs-sway 9.2s ease-in-out infinite; }
+/* busy, the eyes rest toward the work (--lx, --ly), easing over when the step changes; searching sweeps them */
+.cloud-svg:is(.hop, .calm) .cs-look { translate: var(--lx, 0) var(--ly, 0); transition: translate .7s cubic-bezier(.3, .7, .2, 1); }
+.cloud-svg .cs-look.scan { animation: cs-scan 2.4s ease-in-out infinite; }
+@keyframes cs-breathe { 0%, 100% { scale: 1 1; } 50% { scale: 1.014 .984; } }
+@keyframes cs-breathe-deep { 0%, 100% { scale: 1 1; } 45% { scale: 1.022 .975; } }
+@keyframes cs-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
+@keyframes cs-ground-float { 0%, 100% { scale: 1 1; opacity: 1; } 50% { scale: .93 .93; opacity: .8; } }
+@keyframes cs-sway { 0%, 100% { rotate: 0deg; } 25% { rotate: -2.2deg; } 75% { rotate: 2.2deg; } }
 @keyframes cs-look { 0%, 14%, 92%, 100% { translate: 0 0; } 22%, 40% { translate: -2.6px .6px; } 50%, 70% { translate: 2.4px -.4px; } }
+@keyframes cs-scan { 0%, 100% { translate: -2.8px .4px; } 38%, 50% { translate: 2.8px .4px; } 88% { translate: -2.8px .4px; } }
 @keyframes cs-blink { 0%, 95.6%, 100% { scale: 1 1; } 97.4% { scale: 1 .08; } }
 
-/* the plush still touch screens show in place of the canvas, floating gently (faster while busy) */
+/* The plush still phones show in place of the canvas, one for each step, floating gently (quicker while busy, slow
+   while thinking), with its shadow breathing in step. */
 .cloud-still { position: relative; display: inline-block; flex: none; }
-.cloud-still img { position: absolute; left: 5%; top: 16%; width: 90%; height: auto; user-select: none; -webkit-user-select: none; animation: cs-float 3.2s ease-in-out infinite; }
+.cloud-still img { position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; animation: cs-float-still 3.2s ease-in-out infinite; will-change: transform; }
 .cloud-still.busy img { animation-duration: 1.1s; }
-@keyframes cs-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4%; } }
+.cloud-still.calm img { animation-duration: 4.6s; }
+.bot-ground.float { animation: cs-ground-float 3.2s ease-in-out infinite; }
+.odelia-bot.busy .bot-ground.float { animation-duration: 1.1s; }
+.odelia-bot.busy.calm .bot-ground.float { animation-duration: 4.6s; }
+@keyframes cs-float-still { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4%; } }
+
+/* a store's or job's bot on a touch screen: its canvas held still, hopping in CSS while busy */
+.taskbot { display: inline-grid; flex: none; }
+.taskbot.hop { animation: tb-hop 1.1s cubic-bezier(.4, 0, .4, 1) infinite; }
+@keyframes tb-hop { 0%, 60%, 100% { translate: 0 0; } 30% { translate: 0 -14%; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .cloud-svg .cs-hop, .cloud-svg .cs-squash, .cloud-svg .cs-eye, .cloud-svg .cs-look, .lb-dot, .cloud-still img { animation: none !important; }
+  .taskbot.hop { animation: none; }
+  .cloud-svg .cs-hop, .cloud-svg .cs-squash, .cloud-svg .cs-eye, .cloud-svg .cs-look, .cloud-svg .cs-ground, .cloud-still img, .bot-ground { animation: none !important; }
+  .cloud-svg .cs-look { transition: none; }
+  /* still busy, so the glow stays on, held */
+  .odelia-bot.busy .bot-aura { animation: none; opacity: .7; }
 }

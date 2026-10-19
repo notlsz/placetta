@@ -183,7 +183,8 @@ function AppRow({ a }: { a: Application }) {
 function LiveLine() {
   const { b, lang, ws, busy, live } = useApp();
   const last = ws.audit.find(a => a.actor === "agent");
-  if (busy && live) return <Working on size="line"><p className="liveline on" aria-live="polite"><ThinkingOrb state={live.state} size={20} theme="light" color={INK} aria-hidden="true" /><b className="ll-verb">{b(taskVerb(live.state))}…</b><span>{b(live.label)}</span>{live.tool && <em className="site">{live.tool}</em>}</p></Working>;
+  // the step shows on Odelia right above this line (her outfit), so the line carries only the words
+  if (busy && live) return <Working on size="line"><p className="liveline on" aria-live="polite"><b className="ll-verb">{b(taskVerb(live.state))}…</b><span>{b(live.label)}</span>{live.tool && <em className="site">{live.tool}</em>}</p></Working>;
   if (!last) return null;
   return <p className="liveline"><span className="ll-dot" aria-hidden="true" /><span>{b(last.action)}: {b(last.object)}</span><em>{fmtAgo(last.at, lang)}</em></p>;
 }
@@ -191,7 +192,7 @@ function LiveLine() {
 /* -------------------------------- overview -------------------------------- */
 
 function Welcome() {
-  const { t, b, ws, ask, busy, cloud, mode, go } = useApp();
+  const { t, b, ws, ask, busy, live, cloud, mode, go } = useApp();
   const place = ws.meta?.city ?? (ws.locations[0] ? b(ws.locations[0].name) : "");
   const what = ws.meta?.what ?? "";
   const ops = /importer|seller|warehouse|3pl/i.test(what);
@@ -202,7 +203,7 @@ function Welcome() {
   return (
     <div className="page home">
       <header className="hero">
-        <div className="hero-bot"><AgentBot size={96} busy={busy} /></div>
+        <div className="hero-bot"><AgentBot size={96} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} /></div>
         <h1>{b(B(`Let's get ${b(ws.business)} licensed.`, `一起为${b(ws.business)}办齐执照。`))}</h1>
         <p className="lede">{b(B("Placetta maps every license your store needs, in order, from the city to the national government, and prepares each application. You approve; our team files.", "快哉按顺序梳理门店从市级到国家所需的全部执照，并准备好每一份申请。您批准，团队提交。"))}</p>
         <div className="hero-act">
@@ -301,7 +302,7 @@ export function Overview() {
   return (
     <div className="page home">
       <header className="hero">
-        <div className="hero-bot"><AgentBot size={120} busy={busy} /></div>
+        <div className="hero-bot"><AgentBot size={120} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} /></div>
         <h1>{n === 1 ? t("ov_title1") : t("ov_title", { n })}</h1>
         <p className="lede">{t("ov_state", { a: approved, r: agency, n: you })}</p>
         <div className="progress" aria-label={t("ov_done", { d: approved + agency, n })}>

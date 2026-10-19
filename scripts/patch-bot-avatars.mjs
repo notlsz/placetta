@@ -4,8 +4,11 @@
 //   blush     soft pink cheeks on the "mouth" face (colour from globalThis.__botBlush)
 //   face      lit eyes (a specular glint, a faint inner shadow under the cloth's rim, light bounced up from the
 //             cloth) and a smile pressed slightly into the cloth
-//   outfits   glasses, beret, beanie, headphones and bow tie in navy with a soft highlight and a contact shadow,
-//             drawn in the face's coordinates, so they scale with the head and turn with it
+//   outfits   glasses, beret, beanie, cap, hair bow, headphones and bow tie in navy with a soft highlight and a
+//             contact shadow, drawn in the face's coordinates, so they scale with the head and turn with it; hats
+//             sit centred over the face, pulled down over the crown
+//   thinking  eyes closed in a content curve (data-pc includes "shut")
+//   gaze      the eyes rest toward the work beside the cloud (data-pc-look="x,y")
 //   motion    a hop on a real arc that lands into a small squash and settles, no spin on the busy hop, and a blink
 //             every 4 to 7 seconds
 //
@@ -21,7 +24,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 const FILE = "node_modules/bot-avatars/dist/index.es.js";
 const ORIG = FILE + ".placetta-orig";
-const MARK = "/* placetta-patched v2 */";
+const MARK = "/* placetta-patched v3 */";
 const OLD_MARK = "/* placetta-blush */";   // kept in the output so older copies of this script see it and skip
 const OLD_BLUSH = `  ${OLD_MARK}
   if (o.face === "mouth" && globalThis.__botBlush) {
@@ -52,7 +55,12 @@ function __pcInk(t, x0, y0, x1, y1) {
 }
 // An eye as a glossy bead set into the cloth. E, z, B, R are the library's eye stroke (a short curve drawn with a
 // wide round pen); W is how open the eye is, so the lighting fades out as it blinks or laughs.
-function __pcEye(t, ink, E, z, B, R, W) {
+function __pcEye(t, ink, E, z, B, R, W, shut) {
+  if (shut) {
+    // thinking: the eye closed in a content curve, the same line the vector cloud draws
+    t.strokeStyle = ink; t.lineWidth = 2.6; t.lineCap = "round"; t.beginPath(); t.moveTo(-6, 0.1); t.quadraticCurveTo(0, 6.9, 6, 0.1); t.stroke();
+    return;
+  }
   const k = Math.max(0, Math.min(1, (W - 0.35) / 0.45));
   const hw = E + R / 2, mid = (z + B) / 2, top = Math.min(z, mid) - R / 2, bot = Math.max(z, mid) + R / 2, hh = (bot - top) / 2, cy = (top + bot) / 2;
   if (k > 0) {
@@ -145,9 +153,11 @@ function __pcWear(t, n, s, eyes, phase) {
     t.restore();
   }
 
+  // Hats sit centred over the face and are pulled down over the crown, tilted to follow the head from its high left
+  // lobe to its lower right one, so they are worn rather than perched on one bump (the same places as CloudSvg.tsx).
   // beret: a soft navy disc slouched to the right over the crown
-  if (has("beret")) at(-3, -37, 5, () => {
-    t.rotate(0.1);
+  if (has("beret")) at(4, -35, 5, () => {
+    t.rotate(0.157); t.scale(1.12, 1.12);
     if (shadow) { soft(1, 5.5, 25, 5.5, 0.26); return; }
     const p = new Path2D("M-25 3.5C-27 -6 -14 -14.5 2 -14.5C18 -14.5 29 -7 28 1C27.5 4.5 24 6.5 19 6C9 5 -12 6.5 -21 6.5C-24 6.5 -25 5.5 -25 3.5Z");
     const g = t.createRadialGradient(-9, -10, 1, -2, -4, 30);
@@ -156,13 +166,13 @@ function __pcWear(t, n, s, eyes, phase) {
     // the folded band where it meets the head
     t.strokeStyle = "rgba(4,12,32,0.55)"; t.lineWidth = 1.6; t.beginPath(); t.moveTo(-22, 4.6); t.quadraticCurveTo(0, 2.6, 21, 4.4); t.stroke();
     t.save(); t.clip(p); t.fillStyle = sheen(-16, -14, -2, -2, 0.28); t.fillRect(-30, -20, 60, 30); t.restore();
-    // the little stalk on top
-    t.fillStyle = __pcInk(t, -1, -19, 2, -14); t.beginPath(); t.ellipse(0.5, -15.6, 1.5, 2.4, 0.2, 0, Math.PI * 2); t.fill();
+    // the little stalk on top, grown out of the crown
+    t.fillStyle = __pcInk(t, -1, -19, 2, -14); t.fill(new Path2D("M-0.6 -14.2Q-0.4 -18.6 1.6 -18.4Q2.6 -16.8 2 -14.2Z"));
   });
 
   // beanie: a knitted dome over the crown with a ribbed cuff and a pom-pom
-  if (has("beanie")) at(-5, -34, 5, () => {
-    t.rotate(0.06);
+  if (has("beanie")) at(2, -33, 5, () => {
+    t.rotate(0.07); t.scale(1.15, 1.15);
     if (shadow) { soft(0.5, 12, 25, 5.5, 0.28); return; }
     const dome = new Path2D("M-21 5C-22 -10 -11 -17 0 -17C11 -17 22 -10 21 5Z");
     const g = t.createRadialGradient(-9, -12, 1, -2, -4, 28);
@@ -177,9 +187,41 @@ function __pcWear(t, n, s, eyes, phase) {
     t.save(); t.clip(cuff); t.lineWidth = 0.8; t.strokeStyle = "rgba(0,0,0,0.22)";
     for (let x = -22; x <= 22; x += 3.4) { t.beginPath(); t.moveTo(x, 0); t.lineTo(x, 14); t.stroke(); }
     t.fillStyle = sheen(0, 1, 0, 6, 0.22); t.fillRect(-26, 0, 52, 7); t.restore();
-    const pg = t.createRadialGradient(-1.8, -22, 0.4, 0, -20, 5.4);
+    // the pom-pom sits down into the crown, so it reads as part of the hat
+    const pg = t.createRadialGradient(-1.6, -19.6, 0.4, 0, -17.8, 5);
     pg.addColorStop(0, "#5476AE"); pg.addColorStop(0.55, __pcNavy); pg.addColorStop(1, "#0B1938");
-    t.fillStyle = pg; t.beginPath(); t.arc(0, -20, 5, 0, Math.PI * 2); t.fill();
+    t.fillStyle = pg; t.fill(new Path2D("M-4.4 -16.4A4.6 4.6 0 1 1 4.4 -16.4Q0 -15.6 -4.4 -16.4Z"));
+  });
+
+  // cap: a soft six-panel cap, its bill turned out to the right
+  if (has("cap")) at(-1, -33.5, 5, () => {
+    t.rotate(0.087); t.scale(1.12, 1.12);
+    if (shadow) { soft(2, 8, 25, 5.5, 0.28); return; }
+    const bill = new Path2D("M10 2.4C20 0.2 34 1 40.5 5.6C35 9.6 17 9.4 7.5 6.8Z");
+    t.fillStyle = __pcInk(t, 8, 0, 40, 10); t.fill(bill);
+    t.save(); t.clip(bill); t.fillStyle = sheen(14, 0, 18, 6, 0.3); t.fillRect(6, -2, 36, 8); t.restore();
+    const crown = new Path2D("M-22 4C-23 -10 -12 -18.5 0 -18.5C12 -18.5 23 -10 22 4Z");
+    const g = t.createRadialGradient(-9, -12, 1, -2, -4, 28);
+    g.addColorStop(0, "#43669F"); g.addColorStop(0.45, __pcNavy); g.addColorStop(1, "#0B1938");
+    t.fillStyle = g; t.fill(crown);
+    t.save(); t.clip(crown); t.lineWidth = 0.8; t.strokeStyle = "rgba(0,0,0,0.26)";
+    t.stroke(new Path2D("M0 -18.5V3.2M-11 -15Q-13 -6 -12.4 2.6M11 -15Q13 -6 12.4 2.6"));
+    t.fillStyle = sheen(-15, -15, -3, -2, 0.26); t.fillRect(-30, -24, 60, 30); t.restore();
+    t.fillStyle = __pcInk(t, -22, 1, 18, 9); t.fill(new Path2D("M-22.4 1.6Q0 4.6 22.4 1.6L22.6 5.4Q0 8.4 -22.6 5.4Z"));
+    t.fillStyle = __pcInk(t, -3, -21, 3, -18); t.fill(new Path2D("M-2.6 -18.2Q0 -21.2 2.6 -18.2Z"));
+  });
+
+  // bow: a hair bow tied on the right of the crown
+  if (has("bow")) at(23, -28.5, 6, () => {
+    t.rotate(-0.279); t.scale(1.05, 1.05);
+    if (shadow) { soft(0, 5, 12, 5, 0.26); return; }
+    t.fillStyle = __pcInk(t, -8, 0, 8, 12); t.fill(new Path2D("M-1.8 2.6L-6.4 11.4Q-4.6 12.4 -3 10.8L0 5.6L3 10.8Q4.6 12.4 6.4 11.4L1.8 2.6Z"));
+    const p = new Path2D("M-2.6 -2.4C-6 -6 -10.5 -8.2 -12.6 -6C-14.4 -3.4 -14.4 3.4 -12.6 6C-10.5 8.2 -6 6 -2.6 2.4ZM2.6 -2.4C6 -6 10.5 -8.2 12.6 -6C14.4 -3.4 14.4 3.4 12.6 6C10.5 8.2 6 6 2.6 2.4Z");
+    t.fillStyle = __pcInk(t, -12, -8, 12, 8); t.fill(p);
+    t.save(); t.clip(p); t.strokeStyle = "rgba(2,8,24,0.32)"; t.lineWidth = 0.9; t.lineCap = "round";
+    for (const sx of [-1, 1]) { t.beginPath(); t.moveTo(sx * 4.2, -1.2); t.lineTo(sx * 10, -3.6); t.moveTo(sx * 4.2, 1.2); t.lineTo(sx * 10, 3.8); t.stroke(); }
+    t.fillStyle = sheen(-10, -8, -4, 0, 0.32); t.fillRect(-15, -9, 30, 9); t.restore();
+    t.fillStyle = __pcInk(t, -3.4, -3.8, 3.4, 3.8); t.fill(new Path2D("M-1.4 -3.8H1.4Q3.4 -3.8 3.4 -1.8V1.8Q3.4 3.8 1.4 3.8H-1.4Q-3.4 3.8 -3.4 1.8V-1.8Q-3.4 -3.8 -1.4 -3.8Z"));
   });
 
   // headphones: a slim band over the head and a cup at each side
@@ -218,14 +260,17 @@ const PATCHES = [
   ["helpers", "function ii(t, n, o) {", HELPERS + "function ii(t, n, o) {"],
   // the canvas's data-pc attribute reaches the drawing as s.pc
   ["outfit option", '    wear: { hat: b, glasses: M, headphones: y, bowTie: m, color: A, fabric: vn === "fabric" }',
-    '    pc: Qt["data-pc"],\n    wear: { hat: b, glasses: M, headphones: y, bowTie: m, color: A, fabric: vn === "fabric" }'],
+    '    pc: Qt["data-pc"],\n    pcLook: Qt["data-pc-look"] ? String(Qt["data-pc-look"]).split(",").map(Number) : null,\n    wear: { hat: b, glasses: M, headphones: y, bowTie: m, color: A, fabric: vn === "fabric" }'],
   ["lit eyes", "t.strokeStyle = r, t.lineWidth = R, t.stroke(ri(E, z, B));",
-    "o.pc ? __pcEye(t, r, E, z, B, R, W) : (t.strokeStyle = r, t.lineWidth = R, t.stroke(ri(E, z, B)));"],
+    "o.pc ? __pcEye(t, r, E, z, B, R, W, o.pc.includes(\"shut\")) : (t.strokeStyle = r, t.lineWidth = R, t.stroke(ri(E, z, B)));"],
   ["blush", '  if (o.face === "mouth") {\n    const S = h * 0.35,', OLD_BLUSH + '  if (o.face === "mouth") {\n    const S = h * 0.35,'],
   // busy, the cloud smiles with its mouth closed (a little wider); "open" keeps a small open mouth
   ["closed smile", "hw: C(6.5 * O, 9.5 * F, W),\n      t0: C(1.9, 0, 0),\n      a: C(2 / 3, 2 / 3, 0),\n      yt: C(3.53 * O, 1.6 * F, -4 * W / 3),\n      ab: C(2 / 3, 0, 0),\n      yb: C(3.53 * O, 17.3 * F, 4 * W / 3)",
     "hw: C(6.5 * O, !o.pc ? 9.5 * F : o.pc.includes(\"open\") ? 6.6 * F : 7.6 * O, W),\n      t0: C(1.9, !o.pc || o.pc.includes(\"open\") ? 0 : 2.05, 0),\n      a: C(2 / 3, 2 / 3, 0),\n      yt: C(3.53 * O, !o.pc ? 1.6 * F : o.pc.includes(\"open\") ? 1.4 * F : 3.5 * O, -4 * W / 3),\n      ab: C(2 / 3, !o.pc || o.pc.includes(\"open\") ? 0 : 2 / 3, 0),\n      yb: C(3.53 * O, !o.pc ? 17.3 * F : o.pc.includes(\"open\") ? 11.5 * F : 4.6 * O, 4 * W / 3)"],
-  ["inset smile", "t.fillStyle = r, t.fill(ci($));", "o.pc ? __pcMouth(t, r, ci($)) : (t.fillStyle = r, t.fill(ci($)));"],
+  // the eyes rest toward the work beside the cloud (data-pc-look="x,y", in the face's units), on top of their own
+  // glances and the pointer
+  ["gaze", "h = n.lookX, d = n.lookY,", "h = n.lookX + (o.pcLook ? o.pcLook[0] : 0), d = n.lookY + (o.pcLook ? o.pcLook[1] : 0),"],
+  ["inset smile","t.fillStyle = r, t.fill(ci($));", "o.pc ? __pcMouth(t, r, ci($)) : (t.fillStyle = r, t.fill(ci($)));"],
   // the outfit's contact shadows, inside the face's clip; the pieces themselves after it, unclipped
   ["outfit shadows", "    const ft = ii(t, o, s);\n", "    const ft = ii(t, o, s);\n    s.__pcEyes = ft, s.pc && __pcWear(t, o, s, ft, \"shadow\");\n"],
   ["outfits", "  Y && Z1(t, s.path, et, R, D, V, { y: s.faceY, scale: s.faceScale }), Qa(t, o, s.color, y, m, !0, s.whirl), t.restore();",
@@ -269,7 +314,7 @@ const PATCHES = [
 if (existsSync(FILE)) {
   const cur = readFileSync(FILE, "utf8");
   let orig;
-  if (!cur.includes(MARK)) {
+  if (!cur.includes("/* placetta-patched")) {   // any version of this patch: the untouched copy is kept beside it
     orig = cur.replace(OLD_BLUSH, "");   // a fresh install, or the older blush-only patch taken back out
     writeFileSync(ORIG, orig);
   } else if (existsSync(ORIG)) orig = readFileSync(ORIG, "utf8");
