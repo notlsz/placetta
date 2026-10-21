@@ -1,5 +1,6 @@
 // Claude picks one tool per step from the compact page state. The worker carries the tool out and the guards apply
 // whatever is chosen. Tests swap in a scripted model.
+import { ZDR_REFUSED, zdrAllows } from "../../../supabase/functions/_shared/zdr.ts";
 import type { PageState } from "./guards.ts";
 import { headingOf, shortText } from "./page.ts";
 import type { Filing } from "./types.ts";
@@ -46,9 +47,14 @@ export function prompt(i: StepInput): string {
 
 export class AnthropicModel implements Model {
   calls = 0;
-  private key: string; private model: string;
-  constructor(key: string, model = process.env.FILER_MODEL ?? "claude-sonnet-5-5") { this.key = key; this.model = model; }
+  private key: string; private model: string; private env: (k: string) => string | undefined;
+  constructor(key: string, model = process.env.FILER_MODEL ?? "claude-sonnet-5-5", env: (k: string) => string | undefined = (k) => process.env[k]) {
+    this.key = key; this.model = model; this.env = env;
+  }
   async next(i: StepInput): Promise<ToolCall> {
+    // the filing payload and the portal's page go to Anthropic: refused unless it's on the zero-retention list, when one
+    // is required (the run then fails over to the Placetta team like any model error)
+    if (!zdrAllows(this.env, "anthropic", this.model)) throw new Error(ZDR_REFUSED);
     this.calls++;
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",

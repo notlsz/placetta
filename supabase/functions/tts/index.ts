@@ -1,6 +1,8 @@
 // Reads an agent reply aloud with an Azure neural voice (free tier: 500,000 characters a month).
 // Members only, short texts only, and a daily per-workspace character cap so the free tier lasts.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { accessRpc, WORKS } from "../_shared/access.ts";
+import { zdrAllows } from "../_shared/zdr.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -14,18 +16,10 @@ const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-/** The session's assurance level from its JWT (verified by getUser above): "aal2" after two-step sign-in. */
-function aalOf(jwt: string): string {
-  try {
-    const part = jwt.split(".")[1] ?? "";
-    const claims = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=")));
-    return typeof claims.aal === "string" ? claims.aal : "aal1";
-  } catch { return "aal1"; }
-}
 
-/** owner, member, staff (with two-step), mfa_required, staff_mfa_required or none. Same rules as the database. */
+/** owner, admin, member, viewer, staff (with two-step), mfa_required, staff_mfa_required, sso_required or none. Same rules as the database. */
 async function accessFor(ws: string, user: { id: string; email?: string; email_confirmed_at?: string }, jwt: string): Promise<string> {
-  const { data, error } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  const { data, error } = await accessRpc(admin, ws, user.id, jwt);
   if (!error) return String(data);
   // Fail closed: only a missing function (before the teams migration) falls back, and then every member is an owner.
   if (error.code !== "PGRST202") return "none";
@@ -50,6 +44,8 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   const key = Deno.env.get("AZURE_SPEECH_KEY"), region = Deno.env.get("AZURE_SPEECH_REGION");
   if (!key || !region) return fail(503, "not_configured", "Set AZURE_SPEECH_KEY and AZURE_SPEECH_REGION in the Edge Function secrets.");
+  // the reply text goes to Microsoft's speech service: only when it's on the zero-retention list, if one is required
+  if (!zdrAllows((k) => Deno.env.get(k), "azure_speech")) return fail(503, "not_configured", "Reading aloud is off: zero data retention is required and azure_speech isn't on AI_ZDR_PROVIDERS.");
 
   const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
   const { data: auth } = await admin.auth.getUser(jwt);
@@ -68,7 +64,8 @@ Deno.serve(async (req) => {
 
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
-  if (access !== "owner" && access !== "member") return fail(403, "forbidden", "This isn't your workspace.");
+  if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
+  if (!WORKS.has(access)) return fail(403, "forbidden", "This isn't your workspace.");
   const today = new Date().toISOString().slice(0, 10);
   const { data: usage } = await admin.from("agent_usage").select("tts_chars").eq("workspace_id", ws).eq("day", today).maybeSingle();
   if ((usage?.tts_chars ?? 0) + text.length > DAILY_CHARS) return fail(429, "rate_limited", "Today's voice limit is reached.");

@@ -61,6 +61,8 @@ const isStaff = (c: { sub: string; aal: string }) => staffEmail(c.sub) && c.aal 
 const roleIn = (ws: string, uid: string) => t("workspace_members").find(m => m.workspace_id === ws && m.user_id === uid)?.role as string | undefined;
 const isMember = (ws: string, c: { sub: string; aal: string }) => !!roleIn(ws, c.sub) && mfaOk(c);
 const isOwner = (ws: string, c: { sub: string; aal: string }) => roleIn(ws, c.sub) === "owner" && mfaOk(c);
+const isAdmin = (ws: string, c: { sub: string; aal: string }) => (roleIn(ws, c.sub) === "owner" || roleIn(ws, c.sub) === "admin") && mfaOk(c);
+const ROLE_WORD: Record<string, string> = { owner: "Owner", admin: "Admin", member: "Member", viewer: "Viewer" };
 const canSee = (ws: unknown, c: { sub: string; aal: string }) => isMember(String(ws), c) || isStaff(c);
 
 function audit(ws: string, uid: string | null, actor: string, en: string, zh: string, object: { en: string; zh: string }) {
@@ -214,7 +216,7 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
     }
     case "team_list": {
       if (!canSee(ws, c)) return pgErr("Not your workspace.");
-      const owner = isOwner(ws, c) || isStaff(c);
+      const owner = isAdmin(ws, c) || isStaff(c);
       return json({
         me: roleIn(ws, c.sub) ?? null,
         members: t("workspace_members").filter(m => m.workspace_id === ws).map(m => ({ user_id: m.user_id, email: userOf(String(m.user_id)).email, role: m.role, joined_at: m.created_at ?? now(), you: m.user_id === c.sub, two_step: twoStepOn(String(m.user_id)) })),
@@ -222,16 +224,21 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
       });
     }
     case "set_member_role": {
-      if (!isOwner(ws, c)) return pgErr("Only an owner can change roles.");
+      if (!isAdmin(ws, c)) return pgErr("Only an owner or admin can change roles.");
+      if (!ROLE_WORD[String(body.p_role)]) return pgErr("Choose owner, admin, member or viewer.");
       const m = t("workspace_members").find(x => x.workspace_id === ws && x.user_id === body.p_user); if (!m) return pgErr("They're not on this workspace.");
+      if ((m.role === "owner" || body.p_role === "owner") && !isOwner(ws, c)) return pgErr("Only an owner can make or change an owner.");
       if (m.role === "owner" && body.p_role !== "owner" && t("workspace_members").filter(x => x.workspace_id === ws && x.role === "owner").length <= 1) return pgErr("Add another owner first. A workspace needs one.");
-      m.role = body.p_role; audit(ws, c.sub, "you", body.p_role === "owner" ? "Made an owner" : "Made a member", body.p_role === "owner" ? "设为所有者" : "设为成员", { en: userOf(String(m.user_id)).email, zh: userOf(String(m.user_id)).email });
+      const before = String(m.role);
+      m.role = body.p_role; audit(ws, c.sub, "you", "Changed a role", "更改了角色", { en: userOf(String(m.user_id)).email, zh: userOf(String(m.user_id)).email });
+      const last = t("audit_log").at(-1); if (last) last.detail = { en: `${ROLE_WORD[before]} to ${ROLE_WORD[String(body.p_role)]}`, zh: `${ROLE_WORD[before]} to ${ROLE_WORD[String(body.p_role)]}` };
       save(); return json(null);
     }
     case "remove_member": {
       const self = body.p_user === c.sub;
-      if (!(isOwner(ws, c) || (self && isMember(ws, c)))) return pgErr("Only an owner can remove people.");
+      if (!(isAdmin(ws, c) || (self && isMember(ws, c)))) return pgErr("Only an owner or admin can remove people.");
       const m = t("workspace_members").find(x => x.workspace_id === ws && x.user_id === body.p_user); if (!m) return pgErr("They're not on this workspace.");
+      if (m.role === "owner" && !self && !isOwner(ws, c)) return pgErr("Only an owner can remove an owner.");
       if (m.role === "owner" && t("workspace_members").filter(x => x.workspace_id === ws && x.role === "owner").length <= 1) return pgErr("Add another owner first. A workspace needs one.");
       db.tables.workspace_members = t("workspace_members").filter(x => x !== m);
       audit(ws, c.sub, "you", self ? "Left the workspace" : "Removed from the workspace", self ? "离开了工作区" : "移出了工作区", { en: userOf(String(m.user_id)).email, zh: userOf(String(m.user_id)).email });
@@ -239,7 +246,7 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
     }
     case "revoke_invite": {
       const i = t("workspace_invites").find(x => x.id === body.p_id && !x.accepted_at && !x.revoked_at); if (!i) return pgErr("That invite is gone.");
-      if (!isOwner(String(i.workspace_id), c)) return pgErr("Only an owner can cancel invites.");
+      if (!isAdmin(String(i.workspace_id), c)) return pgErr("Only an owner or admin can cancel invites.");
       i.revoked_at = now(); audit(String(i.workspace_id), c.sub, "you", "Canceled an invite", "取消了邀请", { en: String(i.email), zh: String(i.email) });
       save(); return json(null);
     }
@@ -511,16 +518,18 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
     case "team": {
       if (body.action === "delete_account") return fnErr("not_configured", "Deleting an account runs on the live app. Start over in Settings clears this preview.", 503);
       if (body.action === "remove") return rpc("remove_member", { ws, p_user: body.user_id }, c).then(async r => (r.ok ? json({ ok: true, removed: body.user_id }) : fnErr("bad_request", (await r.json()).message)));
-      const no = needOwner(); if (no) return no;
+      if (!isAdmin(ws, c)) return fnErr("forbidden", "Only an owner or admin of this workspace can do that.", 403);
       if (body.action === "invite") {
         const email = String(body.email ?? "").trim().toLowerCase();
+        const role = ROLE_WORD[String(body.role)] ? String(body.role) : "member";
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fnErr("bad_request", "Enter a valid email address.");
+        if (role === "owner" && !isOwner(ws, c)) return fnErr("bad_request", "Only an owner can invite an owner.");
         if (t("workspace_members").some(m => m.workspace_id === ws && userOf(String(m.user_id))?.email === email)) return fnErr("bad_request", "They're already on this workspace.");
         const open = t("workspace_invites").find(i => i.workspace_id === ws && i.email === email && !i.accepted_at && !i.revoked_at);
         const id = String(open?.id ?? uuid());
-        if (open) Object.assign(open, { role: body.role, created_at: now() });
-        else t("workspace_invites").push({ id, workspace_id: ws, email, role: body.role === "owner" ? "owner" : "member", invited_by: c.sub, created_at: now(), expires_at: new Date(Date.now() + 14 * 864e5).toISOString() });
-        audit(ws, c.sub, "you", body.role === "owner" ? "Invited an owner" : "Invited a teammate", body.role === "owner" ? "邀请了所有者" : "邀请了成员", { en: email, zh: email });
+        if (open) Object.assign(open, { role, created_at: now() });
+        else t("workspace_invites").push({ id, workspace_id: ws, email, role, invited_by: c.sub, created_at: now(), expires_at: new Date(Date.now() + 14 * 864e5).toISOString() });
+        audit(ws, c.sub, "you", "Invited someone", "邀请了成员", { en: email, zh: email });
         save(); return json({ ok: true, id, sent: "invite" });
       }
       return json({ ok: true, id: body.id, sent: "sign_in_link" });

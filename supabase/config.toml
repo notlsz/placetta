@@ -42,3 +42,8 @@ verify_jwt = false
 # own site calls it with no session at all. It checks the key itself (only its SHA-256 is stored) and rate-limits both.
 [functions.partner-api]
 verify_jwt = false
+
+# SCIM provisioning: a customer's identity provider (Okta, Entra ID...) calls it with the workspace's SCIM token, not a
+# Supabase session. It checks the token itself (only its SHA-256 is stored) and rate-limits each token.
+[functions.scim]
+verify_jwt = false

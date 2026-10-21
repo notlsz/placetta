@@ -1,10 +1,13 @@
 // npm test (needs a Chromium: npx playwright-core install chromium, or CHROMIUM_PATH)
 import { test, after } from "node:test";
 import assert from "node:assert";
+import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { openBrowser } from "../src/main.ts";
 import type { Model, StepInput, ToolCall } from "../src/model.ts";
 import type { Playbook } from "../src/playbooks.ts";
-import { portalKey, Worker } from "../src/run.ts";
+import { assertFresh, portalKey, type Session, Worker } from "../src/run.ts";
 import type { Store } from "../src/store.ts";
 import type { Filing, LogEntry, Skill } from "../src/types.ts";
 import { startPortal, type Variant } from "./portal/server.ts";
@@ -228,4 +231,91 @@ test("a sign-in on another host the destination names is allowed; without it the
   const r2 = await worker(store2, new Scripted(), p2.url).run(store2.f);
   assert.notEqual(r2?.kind, "submitted");
   assert.equal(p2.submissions, 0);
+});
+
+test("zero data retention: when required and Anthropic (or the filer's model) isn't listed, the model refuses before sending anything", async () => {
+  const { AnthropicModel } = await import("../src/model.ts");
+  const env = (e: Record<string, string>) => (k: string) => e[k];
+  const realFetch = globalThis.fetch;
+  let sent = 0;
+  globalThis.fetch = (async () => { sent++; return new Response("{}", { status: 500 }); }) as typeof fetch;
+  try {
+    const m = new AnthropicModel("k", "claude-sonnet-5-5", env({ AI_ZDR_REQUIRED: "1", AI_ZDR_PROVIDERS: "anthropic:claude-opus-5-5" }));
+    await assert.rejects(m.next({} as StepInput), /Zero data retention is required/);
+    assert.equal(sent, 0);
+    assert.equal(m.calls, 0);
+  } finally { globalThis.fetch = realFetch; }
+});
+
+/* ------------------------------ isolation between runs ------------------------------ */
+
+/** Opens a real browser like the worker does, and keeps what the test needs to look at afterwards. */
+const tracked = () => {
+  const seen: { session: Session; cookiesAtStart: number }[] = [];
+  return {
+    seen,
+    open: async (): Promise<Session> => {
+      const s = await openBrowser();
+      seen.push({ session: s, cookiesAtStart: (await s.page.context().cookies()).length });
+      return s;
+    },
+  };
+};
+
+test("each run: its own new browser and its own folder, both gone when it ends; nothing carries to the next customer", async () => {
+  const p = await portal(), root = await mkdtemp(join(tmpdir(), "filer-iso-"));
+  const t = tracked(), during: string[][] = [];
+  const a = new Mem();
+  a.download = async () => { during.push(await readdir(root)); return new TextEncoder().encode("%PDF-1.4 test"); };
+  // the first customer's run leaves a cookie in its browser
+  const leaveCookie = async () => {
+    const s = await t.open();
+    s.page.on("load", () => { void s.page.context().addCookies([{ name: "sid", value: "customer-a", url: p.url }]).catch(() => undefined); });
+    return s;
+  };
+  assert.equal((await worker(a, new Scripted(), p.url, { open: leaveCookie, tmpRoot: root }).run(a.f))?.kind, "submitted");
+  assert.equal(during.length, 1);
+  assert.equal(during[0].length, 1, "the upload was written inside this run's own folder");
+  assert.match(during[0][0], /^filer-f1-/);
+  assert.deepEqual(await readdir(root), [], "the folder is deleted when the run ends");
+  assert.equal(t.seen[0].session.browser.isConnected(), false, "the browser is closed when the run ends");
+
+  const b = new Mem(); b.f = { ...filing(), id: "f2", workspace_id: "other-customer" };
+  assert.equal((await worker(b, new Scripted(), p.url, { open: t.open, tmpRoot: root }).run(b.f))?.kind, "submitted");
+  assert.equal(t.seen.length, 2);
+  assert.notEqual(t.seen[1].session.browser, t.seen[0].session.browser, "a new browser, not the last one");
+  assert.equal(t.seen[1].cookiesAtStart, 0, "the next customer's run starts with no cookies");
+  assert.deepEqual(await readdir(root), []);
+  await rm(root, { recursive: true, force: true });
+});
+
+test("a failed run still closes its browser and deletes its folder", async () => {
+  const p = await portal(), root = await mkdtemp(join(tmpdir(), "filer-iso-")), t = tracked();
+  const store = new Mem();
+  const broken: Model = { calls: 0, async next() { throw new Error("model down"); } };
+  await worker(store, broken, p.url, { open: t.open, tmpRoot: root }).run(store.f);
+  assert.equal(p.submissions, 0);
+  assert.equal(t.seen[0].session.browser.isConnected(), false);
+  assert.deepEqual(await readdir(root), []);
+  await rm(root, { recursive: true, force: true });
+});
+
+test("a browser session that isn't fresh is refused before it visits the portal", async () => {
+  const p = await portal(), root = await mkdtemp(join(tmpdir(), "filer-iso-")), store = new Mem();
+  let visited = false;
+  const used = async (): Promise<Session> => {
+    const s = await openBrowser();
+    await s.page.context().addCookies([{ name: "sid", value: "someone-else", url: "https://example.com" }]);
+    s.page.on("request", () => { visited = true; });
+    return s;
+  };
+  const probe = await used();
+  await assert.rejects(assertFresh(probe), /isn't fresh/);
+  await probe.close();
+  await worker(store, new Scripted(), p.url, { open: used, tmpRoot: root }).run(store.f);
+  assert.equal(visited, false);
+  assert.equal(p.submissions, 0);
+  assert.ok(store.f.agent_log.every((e) => e.kind !== "visit"));
+  assert.deepEqual(await readdir(root), []);
+  await rm(root, { recursive: true, force: true });
 });

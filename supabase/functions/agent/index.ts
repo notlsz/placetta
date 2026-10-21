@@ -7,6 +7,7 @@
 // past 100% it stops. With stream: true the answer comes back as server-sent events while the model writes it (the app
 // shows the words arriving), ending with the same complete message.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { accessRpc, WORKS } from "../_shared/access.ts";
 import { callModel, canConverse, ROLES, type Role } from "../_shared/llm.ts";
 import { sse } from "../_shared/stream.ts";
 import { gate, record } from "../_shared/ai_gate.ts";
@@ -24,18 +25,10 @@ const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-/** The session's assurance level from its JWT (verified by getUser above): "aal2" after two-step sign-in. */
-function aalOf(jwt: string): string {
-  try {
-    const part = jwt.split(".")[1] ?? "";
-    const claims = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=")));
-    return typeof claims.aal === "string" ? claims.aal : "aal1";
-  } catch { return "aal1"; }
-}
 
-/** owner, member, staff (with two-step), mfa_required, staff_mfa_required or none. Same rules as the database. */
+/** owner, admin, member, viewer, staff (with two-step), mfa_required, staff_mfa_required, sso_required or none. Same rules as the database. */
 async function accessFor(ws: string, user: { id: string; email?: string; email_confirmed_at?: string }, jwt: string): Promise<string> {
-  const { data, error } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  const { data, error } = await accessRpc(admin, ws, user.id, jwt);
   if (!error) return String(data);
   // Fail closed: only a missing function (before the teams migration) falls back, and then every member is an owner.
   if (error.code !== "PGRST202") return "none";
@@ -101,7 +94,10 @@ Deno.serve(async (req) => {
 
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required" || access === "staff_mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
+  if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
   if (access === "none") return fail(403, "forbidden", "This isn't your workspace.");
+  // Odelia changes the workspace: viewers read it but don't ask her to work
+  if (access !== "staff" && !WORKS.has(access)) return fail(403, "forbidden", "You can view this workspace but not change it. Ask an admin for member access.");
   const staff = access === "staff";
 
   if (!staff) {

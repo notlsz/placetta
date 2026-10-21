@@ -244,3 +244,6 @@
 .settings .audit-t .tray .tr { row-gap: 2px; }
 .settings .audit-t .c-det { margin-top: 0 !important; font-size: 13px; color: var(--ink3); }
 .settings .sg-list + .sg-form { padding-top: 16px; border-top: 1px solid var(--line); }
+/* Single sign-on and SCIM (Settings, Security): the TXT record, the SCIM URL and the one-time token */
+.settings .sg-tx small .sg-code { display: block; margin: 6px 0 2px; padding: 6px 10px; }
+.settings .sg-code.wrap { display: block; margin: 0 0 12px; }

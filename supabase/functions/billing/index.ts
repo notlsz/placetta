@@ -12,6 +12,7 @@
 // Credits: entry plans bought in the last 60 days come off the first invoice. Opening fees are not credited.
 // Scale is quoted by the team, so it has no checkout. Actions: prices (any member), checkout, portal, sync_locations (owners).
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { accessRpc, WORKS } from "../_shared/access.ts";
 import { ensureWebhook, priceId, type Item } from "../_shared/stripe_catalog.ts";
 import { openingCounts, returnOrigins, safeReturn, type Store, storesFrom, STRIPE_FAILED } from "./logic.ts";
 
@@ -28,18 +29,10 @@ const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-/** The session's assurance level from its JWT (verified by getUser above): "aal2" after two-step sign-in. */
-function aalOf(jwt: string): string {
-  try {
-    const part = jwt.split(".")[1] ?? "";
-    const claims = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=")));
-    return typeof claims.aal === "string" ? claims.aal : "aal1";
-  } catch { return "aal1"; }
-}
 
-/** owner, member, staff (with two-step), mfa_required, staff_mfa_required or none. Same rules as the database. */
+/** owner, admin, member, viewer, staff (with two-step), mfa_required, staff_mfa_required, sso_required or none. Same rules as the database. */
 async function accessFor(ws: string, user: { id: string; email?: string; email_confirmed_at?: string }, jwt: string): Promise<string> {
-  const { data, error } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  const { data, error } = await accessRpc(admin, ws, user.id, jwt);
   if (!error) return String(data);
   // Fail closed: only a missing function (before the teams migration) falls back, and then every member is an owner.
   if (error.code !== "PGRST202") return "none";
@@ -158,14 +151,15 @@ Deno.serve(async (req) => {
   const ws = String(body.workspace_id ?? "");
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
+  if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
   if (body.action === "prices") {
-    if (access !== "owner" && access !== "member") return fail(403, "forbidden", "This isn't your workspace.");
+    if (!WORKS.has(access) && access !== "viewer") return fail(403, "forbidden", "This isn't your workspace.");
     try { return json(200, { ok: true, ...(await locationPrices()) }); } catch (e) {
       console.error("prices:", (e as Error).message.slice(0, 200));
       return fail(502, "upstream_error", STRIPE_FAILED.en, STRIPE_FAILED.zh);
     }
   }
-  if (access === "member") return fail(403, "forbidden", "Only an owner can change the plan or billing.");
+  if (access === "member" || access === "admin" || access === "viewer") return fail(403, "forbidden", "Only an owner can change the plan or billing.");
   if (access !== "owner") return fail(403, "forbidden", "This isn't your workspace.");
   const back = safeReturn(body.return_url, returnOrigins((k) => Deno.env.get(k)));
   if (!back) return fail(400, "bad_request", "Unknown return address. Add the app's origin to APP_ORIGINS.");

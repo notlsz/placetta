@@ -13,7 +13,7 @@
 
 | Log | What's in it | Where | Kept |
 | --- | --- | --- | --- |
-| The audit trail (`public.audit_log`) | Every action by Odelia, a customer, our team or an agency: what, to what, who, when; every opening of a saved agency login; team changes; filings; deleted documents | Supabase | With the workspace today (see [data-classification-retention.md](data-classification-retention.md) for the change the hardening migration brings) |
+| The audit trail (`public.audit_log`) | Every action by Odelia, a customer, our team, an agency or a customer's identity provider (SCIM): what, to what, who, when; every opening of a saved agency login; team and role changes; filings; deleted documents. With `20261022000000_enterprise_access.sql` (not yet applied): sign-ins with their method, SSO settings, SCIM changes, second-owner approvals and data exports, and owners and admins export it as CSV ([ENTERPRISE.md](../../ENTERPRISE.md#4-the-audit-trail)) | Supabase | With the workspace today (see [data-classification-retention.md](data-classification-retention.md) for the change the hardening migration brings) |
 | AI calls (`ai_events`) | Each model call: workspace, role, model, vendor, tokens, cost | Supabase | With the workspace |
 | Agent runs (`agent_runs`) | Each job: status, timings, tool calls and errors | Supabase | Working notes cleared after 365 days, once the purge is live |
 | Text and call consent (`phone_consent_log`) | Every change to consent | Supabase | 5 years, append-only |

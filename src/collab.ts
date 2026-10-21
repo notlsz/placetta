@@ -15,7 +15,7 @@ export type ItemKind = CommentItemKind;
 export type ItemRef = { kind: ItemKind; id: string };
 export const itemKey = (r: ItemRef) => `${r.kind}:${r.id}`;
 /** Someone a comment can mention: a teammate, or a headquarters email the workspace shares with. */
-export type Person = { id: string; name: string; email: string; role: "owner" | "member" | "hq"; you?: boolean };
+export type Person = { id: string; name: string; email: string; role: "owner" | "admin" | "member" | "viewer" | "hq"; you?: boolean };
 export type Mention = { kind: "member"; user_id: string } | { kind: "hq"; email: string } | { kind: "odelia" };
 export type Comment = {
   id: string; item: ItemRef;

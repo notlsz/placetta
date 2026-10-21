@@ -19,7 +19,7 @@ import { answersHash, fieldsOf, fileable, formName, latestVersion, needsForm, pr
 import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
 import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, serverModel, type Model, type Services, type Turn as Msg } from "./live";
-import { applicationPdf, auditCsv, docBlob, downloads, saveFile } from "./files";
+import { applicationPdf, auditCsv, auditExportCsv, docBlob, downloads, saveFile } from "./files";
 import { applyAccent, saveTheme, unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
 import { Logo, Mark } from "./Logo";
@@ -282,7 +282,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const saveT = useRef(0);
   const lastSaved = useRef("");
   useEffect(() => {
-    if (!cloud) return;
+    if (!cloud || cloud.role === "viewer") return;   // viewers read; the database refuses their writes anyway
     clearTimeout(saveT.current);
     saveT.current = window.setTimeout(() => {
       if (serverRun.current || families.current.size) return;   // the agent is saving on the server; take its result when it's done
@@ -518,6 +518,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   const run = useCallback(async (req: Request, shown: string | null, voice = false, resumeId?: string) => {
     if (busyRef.current) return;
+    if (cloud?.role === "viewer") { say(lang === "zh" ? "您只能查看这个工作区。请管理员给您成员权限，再让 Odelia 工作。" : "You can view this workspace but not change it. Ask an admin for member access to give Odelia work."); return; }
     // The moment of value: the plan is already on screen (src/plan/preview.ts); anything that needs the model waits for a plan.
     if (cloud && plan === "none" && !("approve" in req || "approveAll" in req)) { setPlans("start"); return; }
     busyRef.current = true; setBusy(true);
@@ -712,6 +713,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   /* Owners approve, pay, connect accounts and manage billing; members do the day-to-day work. The database enforces it too. */
   const owner = !cloud || cloud.role === "owner";
+  const admin = !cloud || cloud.role === "owner" || cloud.role === "admin";
+  const viewer = !!cloud && cloud.role === "viewer";
+  const viewOnly = useCallback(() => {
+    if (!viewer) return false;
+    say(lang === "zh" ? "您只能查看这个工作区。请管理员给您成员权限。" : "You can view this workspace but not change it. Ask an admin for member access.");
+    return true;
+  }, [viewer, say, lang]);
   const ownerOk = useCallback(() => {
     if (owner) return true;
     say(lang === "zh" ? "只有所有者可以执行此操作。请联系团队中的所有者。" : "Only an owner can do that. Ask an owner on your team.");
@@ -721,10 +729,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   /* approvals: in the demo they run the scripted flow; in an account they go to the team, the outbox or the agency */
   /* While a task runs on the server it owns the workspace; changes wait until it's done (or stopped). */
   const held = useCallback(() => {
+    if (viewOnly()) return true;
     if (!serverRun.current && !families.current.size) return false;
     say(lang === "zh" ? "Odelia 正在处理工作区，完成后（或停止后）再修改。" : "Odelia is working on the workspace. Make changes when she's done, or stop her.");
     return true;
-  }, [say, lang]);
+  }, [say, lang, viewOnly]);
 
   /* An approval that met the plan wall: kept (in this browser, so it survives the trip to Stripe) and sent to the team
      as soon as the annual plan is on, as the plans sheet promises. */
@@ -1084,7 +1093,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       } catch (e) { fail(e); }
     };
     return {
-      email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner,
+      email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner, admin, viewer,
       wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces, hq: cloud.hq, termsHold,
       openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
       checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
@@ -1126,13 +1135,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       // Ask a person (src/AskPerson.tsx): owners and members; the reply comes to Updates
       askPerson: async (question, context) => { try { await api.askPerson(cloud.wsId, question, context, lang); await refresh(); return true; } catch (e) { fail(e); return false; } },
       fileUrl: async path => { try { return URL.createObjectURL(await api.downloadDoc(path)); } catch { return null; } },
-      exportData: () => {
+      exportData: async () => {
+        // the download goes in the audit trail first; if that can't be recorded, nothing is downloaded
+        try { await api.recordExport(cloud.wsId, "workspace_data"); } catch (e) { if ((e as api.ApiError).code !== "PGRST202") { fail(e); return; } }
         const data = { exported: nowIso(), workspace: api.strip(wsRef.current), audit: wsRef.current.audit, filings, documents: docs.map(d => ({ name: d.name, size: d.size, created_at: d.created_at, source: d.source })) };
         void save(`placetta-data-${inDays(0)}.json`, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
       },
       switchTo: cloud.switchTo, newWorkspace: cloud.newWorkspace, signOut: cloud.signOut, reopen: cloud.reopen,
     };
-  }, [cloud, plan, billing, filings, integrations, logins, docs, say, lang, refresh, save, owner, ownerOk, termsHold]);
+  }, [cloud, plan, billing, filings, integrations, logins, docs, say, lang, refresh, save, owner, admin, viewer, ownerOk, termsHold]);
 
   const ctx: Ctx = useMemo(() => ({
     lang, t, b, setLang, ws: view_, busy, live: step, uploading,
@@ -1186,7 +1197,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       const f = docBlob(d, wsRef.current); void save(f.name, f.blob);
     },
     downloadApp: id => { const a = wsRef.current.apps.find(x => x.id === id); if (a) void save(a.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-answers.pdf", applicationPdf(a)); },
-    exportAudit: () => void save(`placetta-audit-trail-${inDays(0)}.csv`, auditCsv(wsRef.current.audit)),
+    // With an account: the whole trail from the server (owners and admins; the export is itself recorded). The sample
+    // workspace exports what's on screen.
+    exportAudit: async () => {
+      if (!cloud) { void save(`placetta-audit-trail-${inDays(0)}.csv`, auditCsv(wsRef.current.audit)); return; }
+      if (!admin) { say(lang === "zh" ? "只有所有者或管理员可以导出审计记录。" : "Only an owner or admin can export the audit trail."); return; }
+      try {
+        const rows = await api.auditExport(cloud.wsId);
+        void save(`placetta-audit-trail-${inDays(0)}.csv`, new Blob([auditExportCsv(rows)], { type: "text/csv" }));
+      } catch (e) { say((e as api.ApiError).message); }
+    },
     editFields: (app, values) => {
       if (held()) return;
       const a = wsRef.current.apps.find(x => x.id === app); if (!a) return;

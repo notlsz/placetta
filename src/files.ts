@@ -109,6 +109,28 @@ export function docBlob(d: Doc, w: Workspace): { name: string; blob: Blob } {
   ], ["The real file would be stored here. In this sample, the content is a stand-in."]) };
 }
 
+/** One CSV cell: quoted, quotes doubled, and a leading = + - @ (or tab, return) made inert so a spreadsheet shows the
+ *  text instead of running it as a formula (audit cells hold names and messages people typed). */
+export function csvCell(v: unknown): string {
+  let s = v === null || v === undefined ? "" : String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return `"${s.replace(/"/g, '""')}"`;
+}
+/** The audit trail an owner or admin exports from the server (audit_export): every entry, oldest first, UTC times. */
+export type AuditExportRow = {
+  id: number; created_at: string; actor: string; actor_email: string | null; action_en: string; action_zh: string | null;
+  object_en: string | null; object_zh: string | null; detail_en: string | null; detail_zh: string | null;
+};
+export const AUDIT_EXPORT_HEADER = ["Time (UTC)", "Entry", "By", "Person", "Action", "On", "Details", "Action (Chinese)", "On (Chinese)", "Details (Chinese)"];
+const BY: Record<string, string> = { you: "Workspace member", agent: "Placetta (Odelia)", team: "Placetta team", agency: "Agency", idp: "Identity provider (SCIM)" };
+export function auditExportCsv(rows: AuditExportRow[]): string {
+  const lines = [AUDIT_EXPORT_HEADER.map(csvCell).join(","), ...rows.map(r => [
+    new Date(r.created_at).toISOString(), r.id, BY[r.actor] ?? r.actor, r.actor_email ?? "", r.action_en, r.object_en ?? "", r.detail_en ?? "",
+    r.action_zh ?? "", r.object_zh ?? "", r.detail_zh ?? "",
+  ].map(csvCell).join(","))];
+  return "﻿" + lines.join("\r\n") + "\r\n";
+}
+
 export function auditCsv(rows: Audit[]): Blob {
   const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
   const by = (a: Audit) => (a.actor === "agent" ? "Placetta" : a.actor === "you" ? "You" : a.who?.en ?? "Agency");

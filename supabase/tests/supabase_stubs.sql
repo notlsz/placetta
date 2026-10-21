@@ -39,3 +39,8 @@ language sql as $$ insert into net.http_request_queue (url, headers, body, timeo
 -- More of GoTrue's auth.users, for the functions that read or delete accounts.
 alter table auth.users add column if not exists phone text, add column if not exists deleted_at timestamptz,
   add column if not exists last_sign_in_at timestamptz, add column if not exists is_anonymous boolean not null default false;
+-- GoTrue's sessions and refresh tokens (revoke_sessions), and the SAML providers registered with `supabase sso add`.
+create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade, created_at timestamptz default now());
+create table auth.refresh_tokens (id bigserial primary key, token text, user_id varchar(255), session_id uuid references auth.sessions(id) on delete cascade, revoked boolean default false);
+create table auth.sso_providers (id uuid primary key, resource_id text, created_at timestamptz default now());
+create table auth.sso_domains (id uuid primary key default gen_random_uuid(), sso_provider_id uuid not null references auth.sso_providers(id) on delete cascade, domain text not null);

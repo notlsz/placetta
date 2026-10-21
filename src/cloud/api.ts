@@ -89,7 +89,10 @@ export type Availability = { google: boolean; microsoft: boolean; dropbox: boole
 /** A member's own WeChat link to the workspace's WeChat Official Account. */
 export type WechatLink = { connected: boolean; linked: boolean; linked_at: string | null; waiting: boolean };
 export type AgencyLogin = { id: string; agency: string; url: string | null; username: string; note: string | null; created_at: string; last_opened_at: string | null };
-export type Role = "owner" | "member";
+/** Workspace roles. Owners approve filings, payments and messages; admins manage people, sign-in and SCIM; members work
+ *  in the workspace; viewers read it. The database enforces each (supabase/migrations/20261022000000_enterprise_access.sql). */
+export type Role = "owner" | "admin" | "member" | "viewer";
+export const ROLES: Role[] = ["owner", "admin", "member", "viewer"];
 export type WorkspaceRow = { id: string; name: string; state: Partial<Workspace>; authorized_at: string | null; created_at: string; role: Role };
 type AuditRow = { id: number; client_id: string | null; actor: Audit["actor"] | "team"; action: Bi; object: Bi; detail: Bi | null; created_at: string };
 
@@ -177,17 +180,47 @@ export async function whoami(): Promise<Me> {
   return { staff_email: d.staff, two_step: false, aal: "aal1", ...d, email };
 }
 
+/* ------------------------------ single sign-on ------------------------------ */
+
+/** Whether this email's company requires single sign-on, and how (saml, google, azure or custom:<id>). */
+export async function ssoForEmail(email: string): Promise<{ required: boolean; method?: string; domain?: string }> {
+  const { data, error } = await supabase().rpc("sso_for_email", { p_email: email });
+  if (error) return { required: false };
+  return data as { required: boolean; method?: string; domain?: string };
+}
+/** SAML single sign-on by the email's domain: Supabase Auth sends the browser to the company's identity provider
+    (registered by Placetta with `supabase sso add`). */
+export async function signInWithSso(email: string) {
+  const domain = email.trim().toLowerCase().split("@")[1] ?? "";
+  if (!domain) throw err("auth", "Enter your work email.");
+  const { data, error } = await supabase().auth.signInWithSSO({ domain, options: { redirectTo: appHome() } });
+  if (error) throw err(/not found|no sso provider/i.test(error.message) ? "sso_none" : "auth", error.message);
+  if (data?.url) location.assign(data.url);
+}
+
 /* Sign in with Google, Microsoft or a phone number. Each shows only when it's turned on in Supabase (Authentication, Providers);
    phone also needs an SMS provider there. Anything the settings don't confirm stays hidden. */
-export type Provider = "google" | "azure";
-export type SignInOptions = Record<Provider | "phone", boolean>;
+export type Provider = "google" | "azure" | `custom:${string}`;
+export type SignInOptions = Record<"google" | "azure" | "phone" | "saml", boolean>;
 export async function authProviders(): Promise<SignInOptions> {
   try {
     const res = await net(`${URL_}/auth/v1/settings`, { headers: { apikey: KEY } });
-    const j = await res.json() as { external?: Record<string, boolean> };
-    return { google: !!j.external?.google, azure: !!j.external?.azure, phone: j.external?.phone === true };
-  } catch { return { google: false, azure: false, phone: false }; }
+    const j = await res.json() as { external?: Record<string, boolean>; saml_enabled?: boolean };
+    return { google: !!j.external?.google, azure: !!j.external?.azure, phone: j.external?.phone === true, saml: j.saml_enabled === true };
+  } catch { return { google: false, azure: false, phone: false, saml: false }; }
 }
+/** How this session signed in (the access token's amr claim): "password", "otp", "oauth", "sso/saml", "totp"... */
+export async function sessionMethods(): Promise<string[]> {
+  const t = (await getSession())?.access_token ?? "";
+  try {
+    const part = t.split(".")[1] ?? "";
+    const c = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "="))) as { amr?: unknown };
+    return Array.isArray(c.amr) ? c.amr.map(x => (x && typeof x === "object" ? String((x as { method?: unknown }).method ?? "") : String(x))) : [];
+  } catch { return []; }
+}
+/** Whether this session meets the sign-in rule its email's domain sets (the database checks it on every request too). */
+export const meetsSso = (rule: { required: boolean; method?: string }, methods: string[]) =>
+  !rule.required || (rule.method === "saml" ? methods.includes("sso/saml") : methods.includes("oauth"));
 /** Where accounts and data live (the Supabase project's region). */
 export const REGION = { id: "us", label: { en: "United States", zh: "美国" } } as const;
 export async function signInWith(provider: Provider) {
@@ -240,11 +273,17 @@ export async function myWorkspaces(): Promise<WorkspaceRow[]> {
   if (old.error) throw fromPg(old.error);
   return ((old.data ?? []) as WorkspaceRow[]).map(r => ({ ...r, role: "owner" as const }));
 }
-/** Join every workspace this email was invited to. Returns how many. */
+/** Join every workspace this email was invited to, or that its company's identity provider provisioned (SCIM).
+    Returns how many. */
 export async function acceptInvites(): Promise<number> {
   const { data, error } = await supabase().rpc("accept_invites");
   if (error) { if (error.code === "PGRST202") return 0; throw fromPg(error); }
-  return (data as number) ?? 0;
+  const scim = await supabase().rpc("scim_claim");
+  return ((data as number) ?? 0) + (scim.error ? 0 : ((scim.data as number) ?? 0));
+}
+/** A "Signed in" line in each of this person's workspaces' audit trails, once per session (how, from the session). */
+export async function recordSignIn(): Promise<void> {
+  await supabase().rpc("audit_sign_in").then(() => undefined, () => undefined);
 }
 export async function createWorkspace(name: string, state: Workspace): Promise<string> {
   const { data, error } = await supabase().rpc("create_workspace", { p_name: name, p_state: strip(state), p_authorized: true });
@@ -521,9 +560,46 @@ async function fn<T>(name: string, body: Record<string, unknown>): Promise<T> {
   }
   return data as T;
 }
+/* ------------------------------ security: SSO, SCIM, the audit export ------------------------------ */
+
+export type ScimGroup = { id: string; name: string; role: Exclude<Role, "owner"> | null; members: number };
+export type Security = {
+  domain: string | null; txt_name: string | null; txt_value: string | null; verified_at: string | null;
+  method: string; enforced: boolean; my_domain: string; session_ok: boolean | null;
+  scim: { prefix: string; created_at: string; last_used_at: string | null } | null; scim_users: number; groups: ScimGroup[];
+};
+/** What Supabase Auth has on: null where Placetta couldn't check. */
+export type AuthStatus = { saml_enabled: boolean | null; providers: Record<string, boolean> | null; saml_registered: boolean | null };
+async function rpcData<T>(name: string, args: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase().rpc(name, args);
+  if (error) throw fromPg(error);
+  return data as T;
+}
+export const securitySettings = (ws: string) => rpcData<Security>("security_settings", { ws });
+export const ssoStatus = (ws: string) => fn<{ settings: Security; auth: AuthStatus }>("sso", { action: "status", workspace_id: ws });
+export const ssoVerify = (ws: string) =>
+  fn<{ verified: boolean; reason?: "not_found" | "dns_unavailable"; found?: string[]; settings: Security }>("sso", { action: "verify", workspace_id: ws });
+export const ssoSetDomain = (ws: string, domain: string) => rpcData<Security>("sso_set_domain", { ws, p_domain: domain });
+export const ssoSetEnforced = (ws: string, on: boolean, method: string) => rpcData<Security>("sso_set_enforced", { ws, p_on: on, p_method: method });
+/** A new SCIM token (the old one stops working). The token is in the answer once and never again. */
+export const scimTokenCreate = (ws: string) => rpcData<{ prefix: string; token: string }>("scim_token_create", { ws });
+export const scimTokenRevoke = (ws: string) => rpcVoid("scim_token_revoke", { ws });
+export const scimGroupRole = (ws: string, group: string, role: ScimGroup["role"]) => rpcVoid("scim_group_role", { ws, p_group: group, p_role: role });
+/** SCIM's base URL for the identity provider. */
+export const scimUrl = () => `${URL_.replace(/\/+$/, "")}/functions/v1/scim/v2`;
+
+export type AuditExportRow = {
+  id: number; created_at: string; actor: string; actor_email: string | null; action_en: string; action_zh: string | null;
+  object_en: string | null; object_zh: string | null; detail_en: string | null; detail_zh: string | null;
+};
+/** The whole audit trail, for owners and admins; the server records the export first. */
+export const auditExport = (ws: string, from?: string, to?: string) => rpcData<AuditExportRow[]>("audit_export", { ws, p_from: from ?? null, p_to: to ?? null });
+/** Records a data download in the audit trail before the app saves it. */
+export const recordExport = (ws: string, kind: "workspace_data" | "documents" | "filings") => rpcVoid("audit_record_export", { ws, p_kind: kind });
+
 /* ------------------------------ team ------------------------------ */
 
-export type Member = { user_id: string; email: string; role: Role; joined_at: string; you: boolean; two_step: boolean };
+export type Member = { user_id: string; email: string; role: Role; joined_at: string; you: boolean; two_step: boolean; scim?: boolean };
 export type Invite = { id: string; email: string; role: Role; created_at: string; expires_at: string };
 export type Team = { me: Role | null; members: Member[]; invites: Invite[] };
 export async function teamList(ws: string): Promise<Team> {

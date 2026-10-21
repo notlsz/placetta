@@ -2191,3 +2191,4 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 }
 .job-bot-on { display: inline-flex; align-items: center; min-height: 34px; font-size: 13.5px; color: var(--blue-ink); }
 .bot-group .lnk.quiet, .sb-done .lnk.quiet { color: var(--ink3); }
+.gate-card .gate-sso-link { display: block; margin: 12px auto 0; }

@@ -31,8 +31,11 @@
 // Free models (an OpenRouter model ending in ":free", or anything on Groq's free tier) are skipped unless
 // AGENT_ALLOW_FREE=1, and are never sent customer files, because free tiers may keep or train on prompts.
 // PDFs (document blocks) only go to models that read them: Anthropic, Gemini, OpenRouter.
+// Zero data retention (zdr.ts): with AI_ZDR_REQUIRED=1, only providers and models on AI_ZDR_PROVIDERS are used, and
+// Anthropic's web tools only when "anthropic:web-tools" is listed; a call with nothing left is refused.
 
 import { anthropicMessage, openaiCompletion, type OnText } from "./stream.ts";
+import { ZDR_REFUSED, zdrAllows, zdrRequired, zdrWebTools } from "./zdr.ts";
 
 type Block = Record<string, unknown>;
 export type Role ="plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
@@ -137,6 +140,7 @@ const hasDocs = (messages: Block[]) => messages.some((m) => Array.isArray(m.cont
  * customer is treated the same.
  */
 export function vendorOk(env: Env, provider: string, o: { hasFiles: boolean; role?: Role; region?: string; publicOnly?: boolean }): boolean {
+  if (!zdrAllows(env, provider)) return false;
   switch (provider) {
     case "anthropic": case "openai": return true;
     case "gemini": return env("GEMINI_PAID") === "1" || (!o.hasFiles && o.role === "watch" && o.publicOnly === true);
@@ -256,7 +260,7 @@ export function candidates(env: Env, call: Call, fallbackModel: string): [string
   const files = hasFiles(msgs), docs = hasDocs(msgs), allowFree = env("AGENT_ALLOW_FREE") === "1";
   route = route.filter(([p, m]) => !isFree(p, m) || (allowFree && !files));
   if (docs) route = route.filter(([p]) => p === "anthropic" || p === "gemini" || p === "openrouter");   // PDFs need a model that reads them
-  route = route.filter(([p]) => vendorOk(env, p, { hasFiles: files, role, region: call.region, publicOnly: call.publicOnly }));
+  route = route.filter(([p, m]) => vendorOk(env, p, { hasFiles: files, role, region: call.region, publicOnly: call.publicOnly }) && zdrAllows(env, p, m));
   if (call.research && RESEARCH_FIRST.has(role)) route = [...route.filter(([p]) => p === "anthropic"), ...route.filter(([p]) => p !== "anthropic")];
   return route;
 }
@@ -278,9 +282,15 @@ function withUsage(data: Record<string, unknown>, payload: Record<string, unknow
  * as without streaming; one that breaks off mid-answer does too, and onText starts again with the next model's words.
  */
 export async function callModel(env: Env, call: Call, fallbackModel: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null, f: Fetch = fetch, onText?: OnText): Promise<Result> {
+  if (!zdrWebTools(env)) {
+    // web search and fetch run on Anthropic's tool servers: off unless they're on the zero-retention list
+    const tools = Array.isArray(call.payload.tools) ? (call.payload.tools as Block[]).filter((t) => !("type" in t)) : undefined;
+    call = { ...call, research: false, beta: null, payload: { ...call.payload, ...(tools ? { tools: tools.length ? tools : undefined } : {}) } };
+    research = null;
+  }
   const route = candidates(env, call, fallbackModel);
   const stream = !!onText;
-  let last: Result = { ok: false, status: 503, text: "No model has a key. Add one in the Edge Function secrets.", model: "" };
+  let last: Result = { ok: false, status: 503, text: zdrRequired(env) && !route.length ? ZDR_REFUSED : "No model has a key. Add one in the Edge Function secrets.", model: "" };
   for (const [p, model] of route) {
     try {
       if (p === "anthropic") {

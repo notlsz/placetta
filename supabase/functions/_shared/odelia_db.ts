@@ -137,7 +137,8 @@ export async function currentWorkspace(admin: SupabaseClient, link: Link): Promi
 export async function mayUseAgent(admin: SupabaseClient, ws: string, userId: string): Promise<"ok" | "not_member" | "no_plan"> {
   // A verified phone stands in for the second step, so two-step accounts aren't refused here; staff access never comes by phone.
   const { data: access, error } = await admin.rpc("access_for", { ws, uid: userId, p_aal: "aal2" });
-  if (error || (access !== "owner" && access !== "member")) return "not_member";
+  // (no session claims here: someone whose email domain requires SSO gets "sso_required" and can't use these channels)
+  if (error || (access !== "owner" && access !== "admin" && access !== "member")) return "not_member";
   const { data: plan } = await admin.rpc("plan_of", { ws });
   return plan === "none" ? "no_plan" : "ok";
 }

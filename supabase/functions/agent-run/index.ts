@@ -34,6 +34,7 @@
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { callModel, canConverse, type Role } from "../_shared/llm.ts";
+import { accessRpc, WORKS } from "../_shared/access.ts";
 import { overTaskLimit, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tooLarge } from "./limits.ts";
 import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
@@ -94,13 +95,6 @@ const bg = (p: Promise<unknown>) => { const rt = (globalThis as { EdgeRuntime?: 
 
 /* ------------------------------ who's asking ------------------------------ */
 
-function aalOf(jwt: string): string {
-  try {
-    const part = jwt.split(".")[1] ?? "";
-    const claims = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=")));
-    return typeof claims.aal === "string" ? claims.aal : "aal1";
-  } catch { return "aal1"; }
-}
 async function monitorKeyOk(req: Request) {
   const { data } = await admin.rpc("monitor_key_ok", { p_key: req.headers.get("x-monitor-key") ?? "" });
   return data === true;
@@ -1034,10 +1028,13 @@ export async function handle(req: Request): Promise<Response> {
   if (!user) return fail(401, "unauthorized", "Sign in again.");
   const ws = String(body.workspace_id ?? "");
   if (!UUID.test(ws)) return fail(400, "bad_request", "workspace_id is required.");
-  const { data: access, error: accessError } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  const { data: access, error: accessError } = await accessRpc(admin, ws, user.id, jwt);
   if (accessError) return fail(500, "upstream_error", "Couldn't check access.");
   if (access === "mfa_required" || access === "staff_mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
+  if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
   if (access === "none") return fail(403, "forbidden", "This isn't your workspace.");
+  // a task changes the workspace: viewers read it but don't start one
+  if (access !== "staff" && !WORKS.has(String(access))) return fail(403, "forbidden", "You can view this workspace but not change it. Ask an admin for member access.");
   if (access !== "staff") {
     const { data: plan } = await admin.rpc("plan_of", { ws });
     if (plan === "none") return fail(402, "payment_required", "Get the entry plan to start the agent.");

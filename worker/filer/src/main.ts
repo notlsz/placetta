@@ -13,6 +13,9 @@ export const routeOf = (id: string): Route | null => {
   return d?.portal ? { tenant: d.tenant, alsoOn: d.alsoOn, start: d.portalUrl } : null;
 };
 
+/** A new browser session for one run, never reused: a new Browserbase session (no saved Browserbase context, so it
+ *  starts empty), or a new local Chromium process with a new, empty browser context (Playwright gives it a throwaway
+ *  profile folder and deletes it on close). The worker checks it's empty (assertFresh) and closes it when the run ends. */
 export async function openBrowser(): Promise<Session> {
   const key = process.env.BROWSERBASE_API_KEY, project = process.env.BROWSERBASE_PROJECT_ID;
   if (key && project) {

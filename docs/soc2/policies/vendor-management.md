@@ -15,8 +15,9 @@
 2. Before a vendor receives customer information: read its security attestation (SOC 2 Type II or ISO 27001), its data processing terms, and whether it may train on or keep what we send. Record all three here in the same pull request that wires it in. The PR template asks.
 3. A vendor with no independent attestation may be used only when the data it gets is limited (no files, no credentials) and the gap is written in the table, or when the customer chooses to connect it.
 4. AI vendors also follow `vendorOk` in `supabase/functions/_shared/llm.ts`, which decides what each may see. [docs/AI_RISK_REGISTER.md](../../AI_RISK_REGISTER.md) is the source for those rules.
-5. Every 12 months: re-check each status, download the reports we're entitled to, and note the controls each report says the customer (us) must run. Store the reports in the evidence folder, not in the repo.
-6. A vendor's breach notice is an incident: follow [incident-response.md](incident-response.md).
+5. Zero data retention: a provider goes on `AI_ZDR_PROVIDERS` only after its written zero-retention confirmation for Placetta's account is in the evidence folder, with its date and the features it covers; with `AI_ZDR_REQUIRED=1` nothing else gets customer data (`supabase/functions/_shared/zdr.ts`, [docs/ENTERPRISE.md](../../ENTERPRISE.md#6-zero-data-retention)). On 2026-10-22 none is on file and the rule is off.
+6. Every 12 months: re-check each status, download the reports we're entitled to, and note the controls each report says the customer (us) must run. Store the reports in the evidence folder, not in the repo.
+7. A vendor's breach notice is an incident: follow [incident-response.md](incident-response.md).
 
 ## Vendors and their status
 

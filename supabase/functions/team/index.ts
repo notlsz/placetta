@@ -1,8 +1,10 @@
 // team: invite people to a workspace and email them, and pass a question to a person on the Placetta team.
 // POST {workspace_id, action, ...}.
-//   invite {email, role: "owner" | "member", return_url?}   owners: records the invite (the database checks and audits it), then emails it
-//   resend {id, return_url?}                                owners: emails an open invite again
-//   remove {user_id}                                        owners remove anyone; anyone can remove themselves (leave)
+//   invite {email, role: "owner" | "admin" | "member" | "viewer", return_url?}
+//                                                           owners and admins: records the invite (the database checks who
+//                                                           may invite which role, and audits it), then emails it
+//   resend {id, return_url?}                                owners and admins: emails an open invite again
+//   remove {user_id}                                        owners remove anyone, admins anyone but owners; anyone can leave
 //   delete_account {confirm: "DELETE"}                      no workspace_id: deletes the caller's account (see deleteAccount)
 //   ask {question, context?, lang?}                         owners and members: a person on the Placetta team replies in Updates (askPerson)
 //   notify                                                  no workspace_id: sends the mention notices the caller's own comments
@@ -220,13 +222,13 @@ serve(async (req) => {
 
   if (body.action === "ask") return await askPerson(ws, user, jwt, body);
 
-  await requireAccess(ws, user, jwt, "owner");
+  await requireAccess(ws, user, jwt, "admin");
   const redirectTo = allowedReturn(body.return_url, appOrigins()) ?? undefined;
 
   if (body.action === "invite") {
     const email = text(body.email, "email", 3, 254).toLowerCase();
-    const role = body.role === "owner" ? "owner" : "member";
-    // As the signed-in owner, so the database's own checks and audit entry apply.
+    const role = body.role === "owner" || body.role === "admin" || body.role === "viewer" ? body.role : "member";
+    // As the signed-in owner or admin, so the database's own checks and audit entry apply.
     const { data: id, error } = await userClient(jwt).rpc("invite_member", { ws, p_email: email, p_role: role });
     if (error) throw new HttpError("bad_request", (error.message ?? "Couldn't invite them.").replace(/^.*?:\s/, ""));
     const sent = await sendInvite(email, redirectTo);

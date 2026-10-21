@@ -9,6 +9,8 @@
 //   POST /v2/calls/{call_control_id}/actions/{answer|speak|hangup|ai_assistant_start}
 // Webhooks are signed with Ed25519: telnyx-signature-ed25519 over `${telnyx-timestamp}|${raw body}`.
 
+import { zdrAllows } from "./zdr.ts";
+
 export type Lang = "en" | "zh";
 export type Env = (k: string) => string | undefined;
 export type Channel = "sms" | "voice";
@@ -385,7 +387,10 @@ export function readClientState(s: unknown): Record<string, unknown> {
 /** Texting needs the key, the webhook key, Odelia's number and its messaging profile. */
 export const smsReady = (env: Env) => !!(env("TELNYX_API_KEY") && env("TELNYX_PUBLIC_KEY") && env("ODELIA_NUMBER") && env("TELNYX_MESSAGING_PROFILE_ID"));
 /** Calls also need the Call Control connection the number is on and the Telnyx AI Assistant that talks. */
-export const voiceReady = (env: Env) => !!(env("TELNYX_API_KEY") && env("TELNYX_PUBLIC_KEY") && env("ODELIA_NUMBER") && env("TELNYX_VOICE_CONNECTION_ID") && env("TELNYX_ASSISTANT_ID"));
+/** Calls are on: Telnyx is set up, and (when zero data retention is required) Telnyx is on AI_ZDR_PROVIDERS, since its
+ *  assistant hears the call. Without it callers get the one-line goodbye and Odelia texts instead (odelia-voice). */
+export const voiceReady = (env: Env) => !!(env("TELNYX_API_KEY") && env("TELNYX_PUBLIC_KEY") && env("ODELIA_NUMBER") && env("TELNYX_VOICE_CONNECTION_ID") && env("TELNYX_ASSISTANT_ID"))
+  && zdrAllows(env, "telnyx");
 export const odeliaNumber = (env: Env) => normalizePhone(env("ODELIA_NUMBER") ?? "");
 
 export const TELNYX = "https://api.telnyx.com/v2";

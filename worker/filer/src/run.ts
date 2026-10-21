@@ -1,5 +1,15 @@
 // The portal worker: claims a queued portal filing, replays the portal's skill or lets Claude drive, enforces the
 // guards, hands back to the person for CAPTCHAs, ID checks, payments and SSNs, and never submits twice.
+//
+// Isolation between runs (and so between customers): every run opens its own browser session (open(): a new Chromium
+// process with a new, empty browser context, or a new Browserbase session) and gets its own temporary folder for the
+// files it uploads. The session must start empty (no cookies, one blank page) or the run is refused before it visits
+// anything. When the run ends, however it ends, the browser is closed and the folder deleted. Runs go one at a time in
+// one worker container: this is per-run browser and file isolation inside that container, not a separate virtual
+// machine per run.
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { Browser, Page } from "playwright-core";
 import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, type PageState } from "./guards.ts";
 import type { Model } from "./model.ts";
@@ -21,6 +31,7 @@ export type Config = {
   startUrl?(host: string): string;
   dryRun: boolean; twoKey: number; maxSteps: number; maxMs: number; holdMs: number; pollMs: number;
   beforeSubmitClick?(f: Filing): Promise<void>;        // tests: kill the run right after submit_clicked_at
+  tmpRoot?: string;                                    // where each run's own folder is made (the system's temp folder)
 };
 
 const PAY = {
@@ -38,11 +49,24 @@ export const shown = (label: string, value: string) => {
   return d.length >= 4 ? "•••" + d.slice(-4) : "••••";
 };
 const STOPPED: Result = { kind: "stopped", trace: [] };
+
+/** A session another run (or anything else) has used is refused: a new run starts with no cookies and one blank page. */
+export async function assertFresh(session: Session): Promise<void> {
+  const ctx = session.page.context();
+  const cookies = await ctx.cookies();
+  const pages = ctx.pages().filter((p) => p !== session.page);
+  const url = session.page.url();
+  const onSite = /^https?:/i.test(url);
+  if (cookies.length || pages.length || onSite) {
+    throw new Error(`browser session isn't fresh (${cookies.length} cookies, ${pages.length} other pages${onSite ? ", already on a website" : ""})`);
+  }
+}
 const urlKey = (u: string) => { try { const x = new URL(u); return x.origin + x.pathname; } catch { return u; } };
 export const portalKey = (host: string, official: string) => `portal:${host}:${official}`;
 
 type Ctx = {
   f: Filing; host: string; hosts: string[]; login: Login | null; page: Page; session: Session; trace: TraceStep[]; t0: number; files: Map<string, string>;
+  dir: string;                                         // this run's own folder, deleted when it ends
   pb: { playbook: Playbook; form: FormSteps } | null; seen?: string; pages?: number;
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
@@ -82,8 +106,11 @@ export class Worker {
     const route = this.c.routeOf?.(official) ?? null;
     const hosts = [host, ...(route?.alsoOn ?? [])];
     let session: Session | null = null;
+    // this run's own folder for what it uploads; nothing else writes there and it goes when the run ends
+    const dir = await mkdtemp(join(this.c.tmpRoot ?? tmpdir(), `filer-${f.id.replace(/[^\w-]+/g, "").slice(0, 36)}-`));
     try {
       session = await this.c.open();
+      await assertFresh(session);
       const page = session.page;
       await page.context().route("**/*", (r) => (r.request().isNavigationRequest() && r.request().frame() === page.mainFrame() && !onAny(r.request().url(), hosts) ? r.abort() : r.continue()));
       const login = await store.login(f, host, route?.tenant);
@@ -92,7 +119,7 @@ export class Worker {
       // The agency's own start page when the destination names one (on a host many agencies share, it's the agency's path).
       const start = pb?.form.start ?? route?.start;
       await page.goto(this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`);
-      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb };
+      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir };
       const key = portalKey(host, f.payload.official!);
       const skill = await store.skill(key);
       let res: Result | null = null;
@@ -113,6 +140,7 @@ export class Worker {
       return null;
     } finally {
       await session?.close().catch(() => undefined);
+      await rm(dir, { recursive: true, force: true }).catch((e) => console.error("filer: couldn't delete the run's folder", e instanceof Error ? e.message : e));
     }
   }
 
@@ -234,11 +262,7 @@ export class Worker {
     const p = ctx.f.payload;
     const path = name === "form.pdf" ? p.pdf_path : p.attachments?.find((a) => a.name === name)?.path;
     if (!path) return null;
-    const { mkdtemp, writeFile } = await import("node:fs/promises");
-    const { join } = await import("node:path");
-    const { tmpdir } = await import("node:os");
-    const dir = await mkdtemp(join(tmpdir(), "filer-"));
-    const out = join(dir, name.replace(/[^\w.-]+/g, "_"));
+    const out = join(ctx.dir, name.replace(/[^\w.-]+/g, "_"));
     await writeFile(out, await this.c.store.download(path));
     ctx.files.set(name, out);
     return out;

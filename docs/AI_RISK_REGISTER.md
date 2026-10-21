@@ -14,6 +14,10 @@ Run `20261016160000_ai_routing_margin.sql` before deploying the new `agent-run`:
 calls `ai_record` with `p_role` and `p_provider`, and the live function takes five arguments, so until the migration
 runs every call's cost would fail to record.
 
+Updated 2026-10-22: the zero-retention allowlist (R4), portal-run isolation (R5, R6) and the viewer role (R3). These come
+with `20261022000000_enterprise_access.sql` and the redeployed functions and filer, written and tested but not live
+(`docs/ENTERPRISE.md`).
+
 Owner of this register: whoever runs Placetta's security work. Review it whenever `supabase/functions/_shared/llm.ts`
 (routes or `vendorOk`), a model id, or a tool in `src/live.ts` changes.
 
@@ -100,6 +104,7 @@ Likelihood 2, impact 3. Residual: low.
 | Only an owner can request a filing; the database enforces it | RLS policy "members request filings they can file" (`20261005085958_two_step_helpers.sql`: `is_owner` and `can_file`) |
 | Only owners approve purchases; above `secondOver` two different owners; spending is off by default; Placetta never moves the money | `supabase/functions/spend`, `src/spend.ts` (`DEFAULT_POLICY`, `decide`) |
 | Only owners send mail or Slack posts as the business | `supabase/functions/integrations` `OWNER_ONLY` |
+| Viewers can't start Odelia or change anything; admins manage people but can't file, pay or send (pending: `20261022000000_enterprise_access.sql`) | `agent`, `agent-run` (`WORKS` in `_shared/access.ts`); row-level security (`is_member`, `is_owner`) |
 | Approval is refused while a line is blank, holds a placeholder, an SSN or ITIN, or fails a format check | `src/App.tsx` `approve` (`readyToFile`, `preflight`) |
 | The agent has no tool that files, pays or sends; a reply claiming it did gets a correction | `src/live.ts` tool definitions; `src/guard.ts` `claimsAction`, `HONEST` |
 | Server-side: the payload is frozen at approval, destinations only from `DEST`, self-filing only for listed agencies and channels, no SSN or ITIN sent | `supabase/functions/file/index.ts`, `logic.ts` (`check`, `killSwitchOn`, `SECRET_NUMBER`) |
@@ -122,7 +127,8 @@ Likelihood 2, impact 3. Residual: medium until the backup vendors' terms are con
 | Free models skipped unless `AGENT_ALLOW_FREE=1`, and never with files | `llm.ts` `candidates` (`isFree`) |
 | The vendor that answered is logged per call | `ai_events.provider` (pending: `20261016160000_ai_routing_margin.sql`) |
 | Voice assistant created with data retention off | `scripts/launch.mjs` |
-| Tested | `supabase/functions/_shared/llm.test.ts`; `scripts/extreme-test.ts` section 12 |
+| Zero-retention allowlist: with `AI_ZDR_REQUIRED=1`, only providers, models and modes on `AI_ZDR_PROVIDERS` get customer data (agent model calls, Anthropic's web tools, phone calls through Telnyx, reading aloud through Azure Speech, the portal filer's model); a call with nothing allowed is refused before anything is sent. **Off today**: no provider's written confirmation is on file | `supabase/functions/_shared/zdr.ts`; `llm.ts` `vendorOk`, `candidates`, `callModel`; `odelia.ts` `voiceReady`; `tts`; `worker/filer/src/model.ts` |
+| Tested | `supabase/functions/_shared/llm.test.ts`, `zdr_test.ts`; `scripts/extreme-test.ts` section 12; `worker/filer/test/filer.test.ts` |
 
 Gaps, to close before the audit:
 
@@ -136,6 +142,8 @@ Gaps, to close before the audit:
    Fix the doc or the code.
 4. The Privacy Policy's Google Limited Use section says the models that process Google data "are bound not to train
    on it". Gmail text can reach the backups (text only). Gap 1 must close for that sentence to hold for OpenRouter.
+5. Zero data retention is enforceable in code (`zdr.ts`) but not in force: the founder gets each provider's written
+   confirmation, then sets `AI_ZDR_PROVIDERS` and `AI_ZDR_REQUIRED=1` (`docs/ENTERPRISE.md`, section 6).
 
 ### R5. Data leakage between workspaces
 
@@ -149,6 +157,7 @@ Likelihood 1, impact 3. Residual: low.
 | Each run loads one workspace; tools act on that workspace only | `supabase/functions/agent-run`, `src/serverRun.ts` |
 | Cross-business lessons are general and scrubbed of names, emails, phones, numbers, addresses | `src/learning.ts` `scrubLesson`, `DISTILL_SYSTEM` (pending: `20261016110000_network_learning`) |
 | Shared agent skills are the team's unless published | pending: `20261016114500_security_hardening.sql` M5 |
+| Each portal filing run gets a new browser session (refused unless empty) and its own temporary folder, both removed when it ends; nothing carries from one customer's run to the next. Per-run isolation in one worker container, not a VM per run | `worker/filer/src/run.ts` (`assertFresh`, the run's folder), `main.ts` (`openBrowser`); tested in `worker/filer/test/filer.test.ts` |
 
 Gap: `scrubLesson` is pattern-based. A business name without the patterns it checks could pass if the distiller
 writes one; it compares against the source workspace's own name when given `w`.
@@ -166,6 +175,9 @@ Likelihood 1, impact 3. Residual: low.
 | Every opening of a saved login is audited (the staff reveal logs before it shows) | `supabase/functions/logins` (`reveal`), `worker/filer/src/store.ts` `login` |
 | SSN and ITIN never saved, never filed | `src/guard.ts` `secretNumber`; `src/live.ts` tools; `src/smart.ts`; `supabase/functions/file/logic.ts` |
 | Secrets follow their rows when deleted | pending: hardening H1 (`drop_row_secret`) |
+
+The files a portal run uploads are written to that run's own temporary folder and deleted when the run ends
+(`worker/filer/src/run.ts`); before 2026-10-22 each file went to its own temporary folder that was never removed.
 
 Gap: the filer reads the password (`vault_get`) before it writes the audit row (`worker/filer/src/store.ts` `login`).
 If the insert fails the password was still opened. Write the audit row first, as `logins` `reveal` does.

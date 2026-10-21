@@ -22,9 +22,13 @@ export type CloudCtx = {
   staffEmail: boolean;
   /** Two-step sign-in is on for this account. */
   twoStep: boolean;
-  /** owner: approves, pays, connects, invites. member: day-to-day work. */
-  role: "owner" | "member";
+  /** owner: approves, pays, connects. admin: people, sign-in and SCIM. member: day-to-day work. viewer: reads only. */
+  role: "owner" | "admin" | "member" | "viewer";
   owner: boolean;
+  /** Owners and admins: manage people, roles, sign-in, SCIM and the audit export. */
+  admin: boolean;
+  /** Viewers: read the workspace, change nothing. */
+  viewer: boolean;
   wsId: string;
   plan: Plan;
   billing: Billing | null;

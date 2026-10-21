@@ -139,7 +139,7 @@ out("Placetta end-to-end test");
 try {
   stack = await startStack((s) => out(`  ${s}`));
   const sql = stack.sql;
-  await gw.loadFunctions(["agent-run", "odelia-sms", "odelia-mail", "odelia-voice", "billing", "stripe-webhook", "file", "team", "monitor", "integrations", "logins", "oauth-callback", "calendar-feed", "tts", "agent"]);
+  await gw.loadFunctions(["agent-run", "odelia-sms", "odelia-mail", "odelia-voice", "billing", "stripe-webhook", "file", "team", "monitor", "integrations", "logins", "oauth-callback", "calendar-feed", "tts", "agent", "scim", "sso"]);
   gateway = gw.startGateway(sql, stack.restPort);
   out(`  gateway on ${GATEWAY} with ${gw.handlers.size} functions`);
   const monitorKey = String((await sql`select decrypted_secret from vault.decrypted_secrets where name = 'monitor_key'`)[0].decrypted_secret);
@@ -1814,6 +1814,116 @@ try {
   });
 
   /* ---------------- h. account deletion ---------------- */
+  /* ---------------- g3. enterprise access ---------------- */
+  // The four roles in the database and the functions, SCIM provisioning and deprovisioning through the real scim
+  // function, SSO domain verification and enforcement, and the audit export (migration 20261022000000_enterprise_access).
+  await scenario("g3. enterprise access", async () => {
+    const admin: Who = { id: await mkUser("ada@goldenox.example", {}), email: "ada@goldenox.example", jwt: "" };
+    const viewer: Who = { id: await mkUser("vic@goldenox.example", {}), email: "vic@goldenox.example", jwt: "" };
+    admin.jwt = await userJwt(admin); viewer.jwt = await userJwt(viewer);
+    await sql`insert into public.workspace_members (workspace_id, user_id, role) values (${ws}, ${admin.id}, 'member'), (${ws}, ${viewer.id}, 'member') on conflict do nothing`;
+    const roleOf = async (uid: string) => ((await sql`select role from public.workspace_members where workspace_id = ${ws} and user_id = ${uid}`)[0]?.role as string | undefined);
+
+    // roles
+    const r1 = await rpc("set_member_role", { ws, p_user: admin.id, p_role: "admin" }, owner.jwt);
+    const r2 = await rpc("set_member_role", { ws, p_user: viewer.id, p_role: "viewer" }, owner.jwt);
+    check("the owner makes an admin and a viewer", r1.status < 300 && r2.status < 300 && await roleOf(admin.id) === "admin" && await roleOf(viewer.id) === "viewer", { r1, r2 });
+    const read = await rest(`workspaces?id=eq.${ws}&select=id`, { jwt: viewer.jwt });
+    check("a viewer reads the workspace", read.status === 200 && read.data?.length === 1, read);
+    const edit = await rest(`workspaces?id=eq.${ws}`, { method: "PATCH", jwt: viewer.jwt, body: { name: "Changed by a viewer" }, prefer: "return=representation" });
+    check("a viewer can't change it", (edit.data?.length ?? 0) === 0 && (await sql`select name from public.workspaces where id = ${ws}`)[0].name !== "Changed by a viewer", edit);
+    const run = await call("agent-run", { action: "start", workspace_id: ws, prompt: "Where do things stand?", lang: "en" }, { jwt: viewer.jwt });
+    check("a viewer can't start Odelia", run.status === 403 && /view this workspace/.test(run.data?.error?.message ?? ""), run);
+    const vInvite = await call("team", { action: "invite", workspace_id: ws, email: "x@goldenox.example", role: "member" }, { jwt: viewer.jwt });
+    check("a viewer can't invite", vInvite.status === 403, vInvite);
+    const aInvite = await call("team", { action: "invite", workspace_id: ws, email: "new.analyst@goldenox.example", role: "viewer" }, { jwt: admin.jwt });
+    check("an admin invites a viewer through the team function", aInvite.status === 200 && aInvite.data?.id, aInvite);
+    const aOwner = await call("team", { action: "invite", workspace_id: ws, email: "boss@goldenox.example", role: "owner" }, { jwt: admin.jwt });
+    check("an admin can't invite an owner", aOwner.status === 400 && /owner/i.test(aOwner.data?.error?.message ?? ""), aOwner);
+    const demote = await rpc("set_member_role", { ws, p_user: owner.id, p_role: "member" }, admin.jwt);
+    check("an admin can't demote the owner", demote.status >= 400 && await roleOf(owner.id) === "owner", demote);
+
+    // SCIM: a token for the workspace, then the IdP provisions, groups, deprovisions
+    const tok = await rpc("scim_token_create", { ws }, admin.jwt);
+    const token = String(tok.data?.token ?? "");
+    check("an admin makes a SCIM token, shown once", /^scim_[0-9a-f]{8}_[0-9a-f]{64}$/.test(token), tok);
+    const scim = async (method: string, path: string, body?: unknown, bearer = token) => {
+      const res = await fetch(`${GATEWAY}/functions/v1/scim/v2${path}`, { method, headers: { Authorization: `Bearer ${bearer}`, "Content-Type": "application/scim+json", apikey: ANON_KEY }, body: body === undefined ? undefined : JSON.stringify(body) });
+      const text = await res.text();
+      return { status: res.status, data: text ? JSON.parse(text) : null };
+    };
+    check("SCIM refuses a wrong token", (await scim("GET", "/Users", undefined, "scim_00000000_" + "0".repeat(64))).status === 401);
+    const spc = await scim("GET", "/ServiceProviderConfig");
+    check("SCIM ServiceProviderConfig", spc.status === 200 && spc.data?.patch?.supported === true, spc);
+    const hire: Who = { id: "", email: "new.hire@goldenox.example", jwt: "" };
+    const created = await scim("POST", "/Users", { schemas: ["urn:ietf:params:scim:schemas:core:2.0:User"], userName: hire.email, externalId: "00u9", name: { givenName: "Nia", familyName: "Ho" }, active: true });
+    check("the IdP provisions a new hire: 201 with an id", created.status === 201 && created.data?.id && created.data?.userName === hire.email, created);
+    const found = await scim("GET", `/Users?filter=${encodeURIComponent(`userName eq "NEW.HIRE@goldenox.example"`)}`);
+    check("found by userName, case-insensitive", found.data?.totalResults === 1 && found.data?.Resources?.[0]?.id === created.data?.id, found);
+    const again = await scim("POST", "/Users", { schemas: ["urn:ietf:params:scim:schemas:core:2.0:User"], userName: hire.email });
+    check("a second create is 409 uniqueness", again.status === 409 && again.data?.scimType === "uniqueness", again);
+    hire.id = await mkUser(hire.email, {});
+    hire.jwt = await userJwt(hire);
+    const claimed = await rpc("scim_claim", {}, hire.jwt);
+    check("signing in claims the provisioned access, as a member", claimed.data === 1 && await roleOf(hire.id) === "member", claimed);
+    const group = await scim("POST", "/Groups", { schemas: ["urn:ietf:params:scim:schemas:core:2.0:Group"], displayName: "Compliance Admins", members: [{ value: created.data.id }] });
+    check("the IdP pushes a group with the hire in it", group.status === 201 && group.data?.members?.length === 1, group);
+    await rpc("scim_group_role", { ws, p_group: group.data.id, p_role: "admin" }, admin.jwt);
+    check("mapping the group to admin makes the hire an admin", await roleOf(hire.id) === "admin");
+    const sess = (await sql`insert into auth.sessions (user_id) values (${hire.id}) returning id`)[0].id;
+    await sql`insert into auth.refresh_tokens (token, user_id, session_id) values ('rt-hire', ${hire.id}, ${sess})`;
+    const off = await scim("PATCH", `/Users/${created.data.id}`, { schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"], Operations: [{ op: "Replace", path: "active", value: "False" }] });
+    check("deprovisioned (Entra ID's PATCH): off the workspace", off.status === 200 && off.data?.active === false && await roleOf(hire.id) === undefined, off);
+    check("and signed out everywhere", (await sql`select count(*)::int n from auth.sessions where user_id = ${hire.id}`)[0].n === 0 && (await sql`select count(*)::int n from auth.refresh_tokens where user_id = ${hire.id}::text`)[0].n === 0);
+    const after = await rest(`workspaces?id=eq.${ws}&select=id`, { jwt: hire.jwt });
+    check("their old token reaches nothing in the workspace", after.status === 200 && after.data?.length === 0, after);
+    const ownerScim = await scim("POST", "/Users", { schemas: ["urn:ietf:params:scim:schemas:core:2.0:User"], userName: owner.email });
+    const ownerOff = await scim("PATCH", `/Users/${ownerScim.data?.id}`, { schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"], Operations: [{ op: "replace", value: { active: false } }] });
+    check("SCIM can't deprovision an owner", ownerOff.status === 400 && ownerOff.data?.scimType === "mutability" && await roleOf(owner.id) === "owner", ownerOff);
+    const del = await scim("DELETE", `/Users/${created.data.id}`);
+    check("DELETE is 204", del.status === 204, del);
+
+    // SSO: claim the domain with a TXT record, then require SAML from the domain's provider
+    const set = await rpc("sso_set_domain", { ws, p_domain: "goldenox.example" }, admin.jwt);
+    check("an admin sets the company domain", set.status === 200 && set.data?.txt_name === "_placetta-verify.goldenox.example", set);
+    const miss = await call("sso", { action: "verify", workspace_id: ws }, { jwt: admin.jwt });
+    check("not verified before the TXT record exists", miss.status === 200 && miss.data?.verified === false, miss);
+    stubs.dnsState.txt.set("_placetta-verify.goldenox.example", String(set.data?.txt_value));
+    const ver = await call("sso", { action: "verify", workspace_id: ws }, { jwt: admin.jwt });
+    check("verified once the TXT record holds the token", ver.status === 200 && ver.data?.verified === true && ver.data?.settings?.verified_at, ver);
+    const provider = crypto.randomUUID();
+    await sql`insert into auth.sso_providers (id) values (${provider})`;
+    await sql`insert into auth.sso_domains (sso_provider_id, domain) values (${provider}, 'goldenox.example')`;
+    const status = await call("sso", { action: "status", workspace_id: ws }, { jwt: admin.jwt });
+    check("status: SAML on and registered for the domain", status.data?.auth?.saml_enabled === true && status.data?.auth?.saml_registered === true, status);
+    const lockout = await rpc("sso_set_enforced", { ws, p_on: true, p_method: "saml" }, admin.jwt);
+    check("enforcing from a password session at the domain is refused", lockout.status >= 400 && /Sign in with SAML/.test(lockout.data?.message ?? ""), lockout);
+    const samlJwt = (u: Who) => signJwt({ sub: u.id, role: "authenticated", aud: "authenticated", email: u.email, aal: "aal1", session_id: crypto.randomUUID(), amr: [{ method: "sso/saml", timestamp: Math.floor(Date.now() / 1000), provider }] });
+    const on = await rpc("sso_set_enforced", { ws, p_on: true, p_method: "saml" }, await samlJwt(admin));
+    check("from a SAML session it's on", on.status === 200 && on.data?.enforced === true, on);
+    const pw = await call("agent-run", { action: "start", workspace_id: ws, prompt: "Where do things stand?", lang: "en" }, { jwt: member.jwt });
+    check("a password session at the domain gets sso_required from the functions", pw.status === 401 && pw.data?.error?.code === "sso_required", pw);
+    const pwRead = await rest(`workspaces?id=eq.${ws}&select=id`, { jwt: owner.jwt });
+    check("and nothing from the database", pwRead.data?.length === 0, pwRead);
+    const viaSaml = await rest(`workspaces?id=eq.${ws}&select=id`, { jwt: await samlJwt(owner) });
+    check("the same person through SAML reaches it", viaSaml.data?.length === 1, viaSaml);
+    const rule = await rpc("sso_for_email", { p_email: "anyone@goldenox.example" }, ANON_KEY);
+    check("the sign-in screen learns the rule without signing in", rule.data?.required === true && rule.data?.method === "saml", rule);
+    const offAgain = await rpc("sso_set_enforced", { ws, p_on: false }, await samlJwt(admin));
+    check("turned off again", offAgain.data?.enforced === false, offAgain);
+
+    // the audit trail: everything above, exported by an admin, not by a viewer
+    const vExport = await rpc("audit_export", { ws }, viewer.jwt);
+    check("a viewer can't export the audit trail", vExport.status >= 400, vExport);
+    const exp = await rpc("audit_export", { ws }, admin.jwt);
+    const acts = new Set((exp.data ?? []).map((r: { action_en: string }) => r.action_en));
+    const want = ["Changed a role", "Invited someone", "Created a SCIM token", "Provisioned by your identity provider", "Added by your identity provider", "Mapped a SCIM group to a role",
+      "Role changed by your identity provider", "Deactivated by your identity provider", "Deactivation refused: this person is an owner", "Deleted by your identity provider",
+      "Set the sign-in domain", "Verified the sign-in domain", "Required single sign-on", "Stopped requiring single sign-on", "Exported the audit trail"];
+    check("the export holds every role, SCIM, SSO and export change", exp.status === 200 && want.every((a) => acts.has(a)), want.filter((a) => !acts.has(a)));
+    check("SCIM entries are the identity provider's", (exp.data ?? []).some((r: { actor: string; action_en: string }) => r.actor === "idp" && r.action_en === "Deactivated by your identity provider"));
+  });
+
   await scenario("h. account deletion", async () => {
     const r1 = await call("team", { action: "delete_account", confirm: "DELETE" }, { jwt: owner.jwt });
     check("refused while a paid plan is running", r1.status === 409 && r1.data?.error?.code === "subscription_active", r1);

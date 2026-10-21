@@ -22,6 +22,7 @@ import { BUILTIN } from "../src/skills";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
 import { inDays } from "../src/time";
 import { B, same } from "../src/bi";
+import { AUDIT_EXPORT_HEADER, auditExportCsv, csvCell, type AuditExportRow } from "../src/files";
 import type { Application, Workspace } from "../src/model";
 import { continuePrompt, nextAction, reconcile, settleJobs, STOPPED_HERE, type Job } from "../src/jobs";
 import { finishWork, nextRenewal, receiptName, renewalCycle, reportLines, resumable, scheduleRenewals, stampFilings } from "../src/finish";
@@ -2344,6 +2345,29 @@ console.log("\n# Terms version");
   const defs = readdirSync("supabase/migrations").filter(f => f.endsWith(".sql")).sort()
     .map(f => /function public\.current_terms_version\(\)[\s\S]*?select '([^']+)'/.exec(readFileSync(`supabase/migrations/${f}`, "utf8"))?.[1]).filter(Boolean);
   eq(defs.at(-1), UPDATED, "public.current_terms_version() in the newest migration equals UPDATED in src/legal.ts");
+}
+
+/* The audit trail an owner or admin exports (audit_export in the database, auditExportCsv in the app): every column,
+   oldest first as the server sends it, safe in a spreadsheet. */
+console.log("\n# Audit trail export (CSV)");
+{
+  const rows: AuditExportRow[] = [
+    { id: 7, created_at: "2026-10-22T01:02:03.456+00:00", actor: "you", actor_email: "adam@admins.test", action_en: "Changed a role", action_zh: "更改了角色", object_en: "mia@corp.test", object_zh: "mia@corp.test", detail_en: "Member to Viewer", detail_zh: "成员 改为 只读成员" },
+    { id: 8, created_at: "2026-10-22T01:05:00Z", actor: "idp", actor_email: null, action_en: "Deactivated by your identity provider", action_zh: null, object_en: "bob@corp.test", object_zh: null, detail_en: "Removed from the workspace and signed out everywhere", detail_zh: null },
+    { id: 9, created_at: "2026-10-22T01:06:00Z", actor: "you", actor_email: "eve@corp.test", action_en: "Commented", action_zh: null, object_en: "=HYPERLINK(\"http://evil.test\",\"click\")", object_zh: null, detail_en: "line one\nsays \"hi\"", detail_zh: null },
+  ];
+  const csv = auditExportCsv(rows);
+  const lines = csv.slice(1).split("\r\n");
+  eq(csv.charCodeAt(0), 0xfeff, "starts with a byte-order mark so Excel reads it as UTF-8");
+  eq(lines[0], AUDIT_EXPORT_HEADER.map(csvCell).join(","), "header row");
+  eq(lines[1], '"2026-10-22T01:02:03.456Z","7","Workspace member","adam@admins.test","Changed a role","mia@corp.test","Member to Viewer","更改了角色","mia@corp.test","成员 改为 只读成员"', "a role change, every column, UTC time");
+  eq(lines[2].split(",").slice(2, 4).join(","), '"Identity provider (SCIM)",""', "SCIM entries say who: the identity provider, no person");
+  ok(lines[3].includes('"\'=HYPERLINK(""http://evil.test"",""click"")"'), "a formula someone typed is shown as text, never run");
+  ok(csv.includes('"line one\nsays ""hi"""'), "quotes doubled, line breaks kept inside the quoted cell");
+  eq(csv.endsWith("\r\n"), true, "ends with a line break");
+  eq(csvCell(null), '""', "empty for null");
+  eq(csvCell("-1+2"), "\"'-1+2\"", "a leading minus is made inert too");
+  eq(csvCell("+1 (212) 555-0100"), "\"'+1 (212) 555-0100\"", "and a leading plus");
 }
 
 console.log("\n# Every declared tool is exercised");

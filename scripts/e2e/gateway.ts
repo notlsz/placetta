@@ -109,8 +109,16 @@ async function auth(sql: Sql, req: Request, path: string): Promise<Response> {
     authMail.push({ kind: "otp", email: b.email, redirectTo: new URL(req.url).searchParams.get("redirect_to") ?? undefined });
     return Response.json({});
   }
+  // public settings: SAML on, no OAuth providers (the sso function reads this)
+  if (path === "/settings" && req.method === "GET") return Response.json({ external: { email: true, phone: false, google: false, azure: false }, saml_enabled: true, disable_signup: false });
   // admin: the service role only
   if (claims?.role !== "service_role") return authErr(401, "no_authorization", "This endpoint requires a valid service role key");
+  // the SAML identity providers registered with `supabase sso add`, from auth.sso_providers and auth.sso_domains
+  if (path === "/admin/sso/providers" && req.method === "GET") {
+    const rows = await sql`select p.id, coalesce(json_agg(json_build_object('domain', d.domain)) filter (where d.id is not null), '[]') domains
+                             from auth.sso_providers p left join auth.sso_domains d on d.sso_provider_id = p.id group by p.id`;
+    return Response.json({ items: rows.map((r) => ({ id: r.id, domains: r.domains })) });
+  }
   if (path === "/invite" && req.method === "POST") {
     const b = await req.json();
     const [u] = await sql`select id from auth.users where lower(email) = lower(${b.email ?? ""}) and deleted_at is null`;

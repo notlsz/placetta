@@ -394,7 +394,10 @@ function Logins() {
   );
 }
 
-/** The people on this workspace. Owners invite, change roles and remove; everyone can see the team and leave. */
+const ROLE_NAME: Record<api.Role, Bi> = { owner: B("Owner", "所有者"), admin: B("Admin", "管理员"), member: B("Member", "成员"), viewer: B("Viewer", "只读成员") };
+
+/** The people on this workspace. Owners and admins invite, change roles and remove (only an owner makes or changes an
+ *  owner); everyone can see the team and leave. The database enforces each of these. */
 function Team() {
   const { lang, cloud, say } = useApp();
   const zh = lang === "zh";
@@ -406,9 +409,11 @@ function Team() {
   useEffect(() => { void load(); }, [load]);
   const pin = usePin();
   if (!cloud) return null;
-  const owner = cloud.owner;
+  const owner = cloud.owner, manage = cloud.admin;
   const owners = team?.members.filter(m => m.role === "owner").length ?? 0;
-  const roleName = (r: api.Role) => (r === "owner" ? (zh ? "所有者" : "Owner") : (zh ? "成员" : "Member"));
+  const roleName = (r: api.Role) => (ROLE_NAME[r] ?? ROLE_NAME.member)[zh ? "zh" : "en"];
+  // the roles this person may give: an owner any, an admin all but owner
+  const giveable = api.ROLES.filter(r => owner || r !== "owner");
   const act = async (fn: () => Promise<unknown>, done?: string) => { try { await fn(); if (done) say(done); await load(); } catch (e) { say((e as api.ApiError).message); } };
   const sentNote = (sent: string, email: string) => sent === "not_sent"
     ? (zh ? `已邀请 ${email}，但邮件没发出去。请让对方用这个邮箱登录。` : `Invited ${email}, but the email didn't send. Ask them to sign in with that address.`)
@@ -425,12 +430,12 @@ function Team() {
   const rows: Row[] = [
     ...(team?.members ?? []).map(m => ({
       label: { en: m.email + (m.you ? " (you)" : ""), zh: m.email + (m.you ? "（您）" : "") },
-      sub: <>{roleName(m.role)}{m.two_step ? (zh ? "，已开启两步登录" : ", two-step on") : ""}</>,
+      sub: <>{roleName(m.role)}{m.two_step ? (zh ? "，已开启两步登录" : ", two-step on") : ""}{m.scim ? (zh ? "，由身份提供商管理" : ", managed by your identity provider") : ""}</>,
       right: m.you
         ? (m.role !== "owner" || owners > 1 ? <Btn onClick={() => { if (window.confirm(zh ? "确定离开这个工作区？" : "Leave this workspace?")) void act(async () => { await api.removeMember(wsId, m.user_id); cloud.switchTo(""); }); }}>{zh ? "离开" : "Leave"}</Btn> : undefined)
-        : owner ? <>
+        : manage && (owner || m.role !== "owner") ? <>
             <Select sz="sm" value={m.role} aria-label={zh ? "角色" : "Role"} onChange={e => { const v = e.target.value as api.Role; pin.guard(() => void act(() => api.setRole(wsId, m.user_id, v), zh ? "角色已更新" : "Role updated")); }}>
-              <option value="owner">{roleName("owner")}</option><option value="member">{roleName("member")}</option>
+              {giveable.map(r => <option key={r} value={r}>{roleName(r)}</option>)}
             </Select>
             <Btn kind="warm" guard onClick={() => { if (window.confirm(zh ? `将 ${m.email} 移出工作区？` : `Remove ${m.email}?`)) void act(() => api.removeMember(wsId, m.user_id), zh ? "已移出" : "Removed"); }}>{zh ? "移出" : "Remove"}</Btn>
           </> : undefined,
@@ -438,22 +443,22 @@ function Team() {
     ...(team?.invites ?? []).map(i => ({
       label: { en: i.email, zh: i.email },
       sub: <>{roleName(i.role)}{zh ? "，已邀请，等待登录" : ", invited, waiting for them to sign in"}</>,
-      right: <>
+      right: manage && (owner || i.role !== "owner") ? <>
         <Btn guard onClick={() => void act(async () => { const r = await api.resendInvite(wsId, i.id); say(sentNote(r.sent, i.email)); })}>{zh ? "重发" : "Resend"}</Btn>
         <Btn guard onClick={() => void act(() => api.revokeInvite(i.id), zh ? "邀请已取消" : "Invite canceled")}>{zh ? "取消" : "Cancel"}</Btn>
-      </>,
+      </> : undefined,
     })),
   ];
   return (
-    <Group id="team" title={B("Team", "团队")} note={owner
-      ? B("Owners approve filings and payments, manage billing, connect accounts and invite people. Members do the day-to-day work: logs, documents and the agent.", "所有者可批准申报和付款、管理账单、连接账户和邀请成员。成员负责日常工作：记录、文件和助理。")
-      : B("Owners approve filings and payments and manage the team. Ask an owner to change your role.", "所有者负责批准申报和付款，并管理团队。如需更改角色，请联系所有者。")}
+    <Group id="team" title={B("Team", "团队")} note={manage
+      ? B("Owners approve filings, payments and messages, and manage billing. Admins invite people, change roles and set up single sign-on and SCIM. Members do the day-to-day work with Odelia. Viewers can read everything and change nothing. Every role change goes in the audit trail.", "所有者批准申报、付款和消息，并管理账单。管理员邀请成员、更改角色，并设置单点登录和 SCIM。成员与 Odelia 一起处理日常工作。只读成员可以查看全部内容，但不能修改。每次角色变更都会记入审计记录。")
+      : B("Owners approve filings and payments; owners and admins manage the team. Ask one of them to change your role.", "所有者负责批准申报和付款；所有者和管理员管理团队。如需更改角色，请联系他们。")}
       rows={rows}>
-      {owner && (
+      {manage && (
         <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void invite(); }}>
           <input type="email" autoComplete="off" placeholder={zh ? "同事的邮箱" : "Teammate's email"} value={f.email} onChange={e => setF({ ...f, email: e.target.value })} aria-label={zh ? "邮箱" : "Email"} />
           <Select value={f.role} onChange={e => setF({ ...f, role: e.target.value as api.Role })} aria-label={zh ? "角色" : "Role"}>
-            <option value="member">{roleName("member")}</option><option value="owner">{roleName("owner")}</option>
+            {["member", "viewer", "admin", "owner"].filter(r => giveable.includes(r as api.Role)).map(r => <option key={r} value={r}>{roleName(r as api.Role)}</option>)}
           </Select>
           <button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : zh ? "邀请" : "Invite"}</button>
         </form>
@@ -1113,6 +1118,143 @@ function PinGroup({ st, setSt, ask }: { st: api.PinStatus | null; setSt: (s: api
   );
 }
 
+const copy = (text: string, say: (m: string) => void, zh: boolean) =>
+  void navigator.clipboard?.writeText(text).then(() => say(zh ? "已复制" : "Copied"), () => say(zh ? "无法复制，请手动选择。" : "Couldn't copy. Select it instead."));
+const METHOD_NAME: Record<string, Bi> = {
+  saml: B("SAML single sign-on (Okta, Microsoft Entra ID, Google, OneLogin, JumpCloud)", "SAML 单点登录（Okta、Microsoft Entra ID、Google、OneLogin、JumpCloud）"),
+  google: B("Google Workspace", "Google Workspace"), azure: B("Microsoft Entra ID", "Microsoft Entra ID"),
+};
+const methodName = (m: string, zh: boolean) => (METHOD_NAME[m] ?? B(`OpenID Connect (${m})`, `OpenID Connect（${m}）`))[zh ? "zh" : "en"];
+
+/** Single sign-on for the workspace's company domain: claim it with a DNS record, then require everyone at that domain
+ *  to sign in through the company's identity provider. Owners and admins; the database enforces the rule. */
+function SingleSignOn() {
+  const { lang, cloud, say } = useApp();
+  const zh = lang === "zh";
+  const pin = usePin();
+  const [st, setSt] = useState<api.Security | null>(null);
+  const [auth, setAuth] = useState<api.AuthStatus | null>(null);
+  const [domain, setDomain] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const wsId = cloud?.wsId ?? "";
+  const load = useCallback(async () => {
+    if (!wsId || !cloud?.admin) return;
+    try { const r = await api.ssoStatus(wsId); setSt(r.settings); setAuth(r.auth); }
+    catch { try { setSt(await api.securitySettings(wsId)); } catch { setSt(null); } }
+  }, [wsId, cloud?.admin]);
+  useEffect(() => { void load(); }, [load]);
+  if (!cloud) return null;
+  if (!cloud.admin) return <Group id="sso" title={B("Single sign-on", "单点登录")} note={B("Owners and admins set up single sign-on for your company's email domain.", "所有者和管理员可为公司邮箱域名设置单点登录。")} />;
+  const act = async (fn: () => Promise<unknown>, done?: string) => { setBusy(true); try { await fn(); if (done) say(done); await load(); } catch (e) { say((e as api.ApiError).message); } setBusy(false); };
+  const verify = () => act(async () => {
+    const r = await api.ssoVerify(wsId);
+    if (r.verified) { say(zh ? "域名已验证" : "Domain verified"); return; }
+    say(r.reason === "dns_unavailable" ? (zh ? "暂时无法查询 DNS，请稍后再试。" : "Couldn't reach DNS just now. Try again in a minute.")
+      : r.found?.length ? (zh ? `还没找到这条记录。目前的 TXT 记录：${r.found.join("；")}` : `The record isn't there yet. TXT records found: ${r.found.join("; ")}`)
+      : (zh ? "还没找到这条记录。DNS 更改可能需要几分钟到几小时生效。" : "The record isn't there yet. DNS changes can take a few minutes to a few hours."));
+  });
+  const verified = !!st?.verified_at;
+  const method = st?.method ?? "saml";
+  const ready = method === "saml" ? auth?.saml_registered : auth?.providers?.[method] ?? null;
+  const readyNote = ready === true ? (zh ? "已在快哉设置好" : "Set up in Placetta")
+    : ready === false ? (method === "saml" ? (zh ? "尚未设置：请把身份提供商的 SAML 元数据网址发给 support@placetta.com，快哉为您登记" : "Not set up yet: send your identity provider's SAML metadata URL to support@placetta.com and Placetta registers it")
+      : (zh ? "此登录方式尚未开启：请联系 support@placetta.com" : "This sign-in isn't turned on yet: ask support@placetta.com"))
+    : (zh ? "暂时无法确认是否已设置" : "Placetta couldn't check whether it's set up");
+  const lockNote = st?.domain && st.my_domain === st.domain && st.session_ok === false && !st.enforced;
+  const rows: Row[] = st ? [
+    { label: B("Company email domain", "公司邮箱域名"), sub: st.domain ?? (zh ? "未设置" : "Not set"),
+      right: domain === null ? <Btn guard onClick={() => setDomain(st.domain ?? "")}>{st.domain ? (zh ? "更改" : "Change") : (zh ? "设置" : "Set")}</Btn> : undefined },
+    ...(st.domain ? [verified
+      ? { label: B("Domain verified", "域名已验证"), sub: fmtDay(st.verified_at!, lang, true) }
+      : { label: B("Verify you own it", "验证域名所有权"),
+          sub: <>{zh ? "在域名的 DNS 服务商处添加一条 TXT 记录，然后点击检查。" : "Add this TXT record where your domain's DNS is managed, then check."}<br />
+            <code className="sg-code">{st.txt_name}</code><br /><code className="sg-code">{st.txt_value}</code></>,
+          right: <><Btn onClick={() => copy(st.txt_value ?? "", say, zh)}>{zh ? "复制值" : "Copy value"}</Btn><Btn kind="ink" disabled={busy} onClick={() => void verify()}>{zh ? "检查" : "Check"}</Btn></> }] : []),
+    ...(verified ? [
+      { label: B("Sign-in method", "登录方式"), sub: readyNote,
+        right: <Select sz="sm" value={method} aria-label={zh ? "登录方式" : "Sign-in method"} disabled={busy}
+          onChange={e => {
+            let m = e.target.value;
+            // Okta and other OpenID Connect providers: the identifier Placetta gave it in Supabase Auth (custom:...)
+            if (m === "other") {
+              const id = window.prompt(zh ? "快哉为您设置的提供商标识（以 custom: 开头，例如 custom:okta-acme）" : "The provider identifier Placetta set up for you (starts with custom:, for example custom:okta-acme)", "custom:");
+              if (!id || !/^custom:[a-z0-9][a-z0-9:-]{0,42}$/.test(id.trim())) { if (id) say(zh ? "标识应以 custom: 开头，只含小写字母、数字、连字符和冒号。" : "The identifier starts with custom: and has only lowercase letters, numbers, hyphens and colons."); return; }
+              m = id.trim();
+            }
+            pin.guard(() => void act(() => api.ssoSetEnforced(wsId, st.enforced, m), zh ? "已更新" : "Updated"));
+          }}>
+          {["saml", "google", "azure", ...(method.startsWith("custom:") ? [method] : [])].map(m => <option key={m} value={m}>{methodName(m, zh)}</option>)}
+          <option value="other">{zh ? "其他 OpenID Connect 提供商（如 Okta）" : "Another OpenID Connect provider (such as Okta)"}</option>
+        </Select> },
+      { label: B(`Require single sign-on for everyone at ${st.domain}`, `要求 ${st.domain} 的所有人使用单点登录`),
+        sub: lockNote ? (zh ? "请先用单点登录重新登录，确认可用后再开启，以免把自己锁在外面。" : "Sign in with single sign-on first, so you know it works before it's required. That keeps you from locking yourself out.")
+          : st.enforced ? (zh ? "已开启：该域名的邮箱只能通过上面的方式登录，其他登录方式无法访问任何工作区。" : "On: anyone with this domain's email reaches Placetta only by signing in this way. Other sign-ins reach no workspace.")
+          : (zh ? "关闭：也可以用密码、验证码或其他方式登录。" : "Off: passwords, codes and other sign-ins work too."),
+        right: <label className="switch"><input type="checkbox" checked={st.enforced} disabled={busy || (!st.enforced && !!lockNote)}
+          onChange={e => { const on = e.target.checked; if (on && !window.confirm(zh ? `开启后，${st.domain} 的所有人都必须通过单点登录访问快哉。确定开启？` : `Everyone at ${st.domain} will have to sign in with single sign-on to reach Placetta. Turn it on?`)) return; pin.guard(() => void act(() => api.ssoSetEnforced(wsId, on, method), on ? (zh ? "已要求单点登录" : "Single sign-on is required") : (zh ? "已不再要求单点登录" : "Single sign-on is no longer required"))); }} /><i /></label> },
+    ] : []),
+  ] : [];
+  return (
+    <Group id="sso" title={B("Single sign-on", "单点登录")} note={B("Claim your company's email domain, then require everyone at it to sign in through your identity provider: SAML (Okta, Microsoft Entra ID, Google and others), Google Workspace, or Microsoft Entra ID. Every change goes in the audit trail.", "认领公司邮箱域名，然后要求该域名的所有人通过身份提供商登录：SAML（Okta、Microsoft Entra ID、Google 等）、Google Workspace 或 Microsoft Entra ID。每次更改都会记入审计记录。")} rows={rows}>
+      {domain !== null && (
+        <form className="sg-form" onSubmit={e => { e.preventDefault(); const d = domain; pin.guard(() => void act(async () => { await api.ssoSetDomain(wsId, d); setDomain(null); }, zh ? "域名已保存，请添加 TXT 记录完成验证。" : "Saved. Add the TXT record to verify it.")); }}>
+          <input autoComplete="off" spellCheck={false} placeholder="yourcompany.com" value={domain} onChange={e => setDomain(e.target.value)} aria-label={zh ? "公司邮箱域名" : "Company email domain"} autoFocus />
+          <div className="sg-form-act"><Btn onClick={() => setDomain(null)}>{zh ? "取消" : "Cancel"}</Btn><button type="submit" className="sbtn ink" disabled={busy || !domain.trim()}>{zh ? "保存" : "Save"}</button></div>
+          {st?.enforced && <p className="sg-note">{zh ? "更改域名会停止当前的单点登录要求，新域名需要重新验证。" : "Changing the domain ends the current single sign-on requirement; the new domain needs verifying again."}</p>}
+        </form>
+      )}
+    </Group>
+  );
+}
+
+/** SCIM provisioning: the company's identity provider adds and removes people, and its groups give roles. */
+function Provisioning() {
+  const { lang, cloud, say } = useApp();
+  const zh = lang === "zh";
+  const pin = usePin();
+  const [st, setSt] = useState<api.Security | null>(null);
+  const [shown, setShown] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const wsId = cloud?.wsId ?? "";
+  const load = useCallback(async () => { if (!wsId || !cloud?.admin) return; try { setSt(await api.securitySettings(wsId)); } catch { setSt(null); } }, [wsId, cloud?.admin]);
+  useEffect(() => { void load(); }, [load]);
+  if (!cloud) return null;
+  if (!cloud.admin) return <Group id="scim" title={B("Provisioning (SCIM)", "自动开通（SCIM）")} note={B("Owners and admins connect your identity provider to add and remove people automatically.", "所有者和管理员可连接身份提供商，自动添加和移除成员。")} />;
+  const act = async (fn: () => Promise<unknown>, done?: string) => { setBusy(true); try { await fn(); if (done) say(done); await load(); } catch (e) { say((e as api.ApiError).message); } setBusy(false); };
+  const make = () => act(async () => { const r = await api.scimTokenCreate(wsId); setShown(r.token); });
+  const t = st?.scim;
+  const rows: Row[] = st ? [
+    { label: B("SCIM base URL", "SCIM 基础网址"), sub: <code className="sg-code">{api.scimUrl()}</code>, right: <Btn onClick={() => copy(api.scimUrl(), say, zh)}>{zh ? "复制" : "Copy"}</Btn> },
+    { label: B("SCIM token", "SCIM 令牌"),
+      sub: t ? <>{`scim_${t.prefix}_…`}<br />{(zh ? "创建于 " : "Made ") + fmtDay(t.created_at, lang, true)}{t.last_used_at ? (zh ? `，最近使用 ${fmtAgo(t.last_used_at, lang)}` : `, last used ${fmtAgo(t.last_used_at, lang)}`) : (zh ? "，尚未使用" : ", not used yet")}</> : (zh ? "未创建" : "None"),
+      right: <>
+        <Btn guard kind={t ? "quiet" : "ink"} disabled={busy} onClick={() => { if (!t || window.confirm(zh ? "换一个新令牌？旧令牌会立即失效。" : "Make a new token? The old one stops working right away.")) void make(); }}>{t ? (zh ? "更换" : "Replace") : (zh ? "创建令牌" : "Create token")}</Btn>
+        {t && <Btn kind="warm" guard disabled={busy} onClick={() => { if (window.confirm(zh ? "停用 SCIM 令牌？身份提供商将无法再同步。" : "Turn off the SCIM token? Your identity provider stops syncing.")) void act(() => api.scimTokenRevoke(wsId), zh ? "令牌已停用" : "Token turned off"); }}>{zh ? "停用" : "Turn off"}</Btn>}
+      </> },
+    { label: B("People provisioned", "已开通人数"), sub: String(st.scim_users) },
+    ...st.groups.map(g => ({
+      label: { en: g.name, zh: g.name }, sub: zh ? `群组，${g.members} 名成员` : `Group, ${g.members} ${g.members === 1 ? "member" : "members"}`,
+      right: <Select sz="sm" value={g.role ?? ""} aria-label={zh ? "群组角色" : "Group role"} disabled={busy}
+        onChange={e => { const v = (e.target.value || null) as api.ScimGroup["role"]; pin.guard(() => void act(() => api.scimGroupRole(wsId, g.id, v), zh ? "群组角色已更新" : "Group role updated")); }}>
+        <option value="">{zh ? "不设角色" : "No role"}</option>
+        {(["admin", "member", "viewer"] as const).map(r => <option key={r} value={r}>{ROLE_NAME[r][zh ? "zh" : "en"]}</option>)}
+      </Select>,
+    })),
+  ] : [];
+  return (
+    <Group id="scim" title={B("Provisioning (SCIM)", "自动开通（SCIM）")} note={B("Connect Okta, Microsoft Entra ID or another identity provider with SCIM 2.0. People it assigns get access when they sign in; people it deactivates are taken off this workspace and signed out everywhere. Groups give their members the role you pick here, and anyone in no mapped group is a member. Owners are made in Placetta, never by SCIM. Every change goes in the audit trail.", "通过 SCIM 2.0 连接 Okta、Microsoft Entra ID 或其他身份提供商。被分配的人登录后即可访问；被停用的人会被移出工作区，并在所有设备上退出登录。群组成员获得您在此选择的角色，不在任何已设置群组中的人为成员。所有者只能在快哉中设置，SCIM 不会创建所有者。每次更改都会记入审计记录。")} rows={rows}>
+      {shown && (
+        <SetSheet title={zh ? "您的 SCIM 令牌" : "Your SCIM token"} sub={zh ? "现在复制到身份提供商中。关闭后不会再显示，快哉只保存它的哈希值。" : "Copy it into your identity provider now. It isn't shown again: Placetta keeps only its hash."} onClose={() => setShown(null)}>
+          <div className="sst-form">
+            <code className="sg-code wrap">{shown}</code>
+            <div className="sst-act"><Btn onClick={() => copy(shown, say, zh)}>{zh ? "复制" : "Copy"}</Btn><button type="button" className="sbtn ink" onClick={() => setShown(null)}>{zh ? "完成" : "Done"}</button></div>
+          </div>
+        </SetSheet>
+      )}
+    </Group>
+  );
+}
+
 /* Settings categories, Anthropic style: a few clear groups in the sidebar, one shown at a time. */
 const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "general", label: B("General", "通用"), items: ["account", "appearance", "language"] },
@@ -1121,12 +1263,12 @@ const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "autonomy", "brules", "phone", "approvals", "memory", "skills"] },
   { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
   { id: "billing", label: B("Billing", "账单"), items: ["billing", "spending"] },
-  { id: "security", label: B("Security", "安全"), items: ["security", "pin"] },
+  { id: "security", label: B("Security", "安全"), items: ["security", "sso", "scim", "pin"] },
   { id: "privacy", label: B("Privacy and data", "隐私与数据"), items: ["data"] },
   { id: "activity", label: B("Activity", "活动记录"), items: ["activity"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
 ];
-const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "pin", "phone"]);
+const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "sso", "scim", "pin", "phone"]);
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
 let settingsTarget: string | null = null;
@@ -1212,7 +1354,7 @@ export function Settings() {
             <h1>{b(active.label)}</h1>
           </div>
           <Group id="account" hidden={!show("account")} title={B("Account", "账户")} rows={cloud ? [
-            { label: B("Email", "邮箱"), sub: <>{cloud.email}{lang === "zh" ? `，${cloud.owner ? "所有者" : "成员"}` : `, ${cloud.owner ? "owner" : "member"}`}</> },
+            { label: B("Email", "邮箱"), sub: <>{cloud.email}{lang === "zh" ? `，${ROLE_NAME[cloud.role].zh}` : `, ${ROLE_NAME[cloud.role].en.toLowerCase()}`}</> },
             { label: B("Business", "企业"), sub: b(ws.business), right: <Btn onClick={cloud.newWorkspace}>{lang === "zh" ? "新建企业" : "New business"}</Btn> },
             { label: B("Sign out", "退出登录"), right: <Btn onClick={cloud.signOut}>{lang === "zh" ? "退出" : "Sign out"}</Btn> },
             ...(api.PREVIEW ? [{ label: B("Data in this browser", "此浏览器中的数据"), sub: b(B("Your accounts and workspaces here are kept in this browser. Start over clears them.", "这里的账户和工作区保存在此浏览器中，重新开始会清空。")),
@@ -1226,6 +1368,8 @@ export function Settings() {
           {show("hq") && <HqShare />}
           {show("partner") && <PartnerSharing />}
           {show("security") && <Security />}
+          {show("sso") && <SingleSignOn />}
+          {show("scim") && <Provisioning />}
           {cloud && show("pin") && <PinGroup st={pinSt} setSt={st => { setPinSt(st); setNow(new Date().toISOString()); }} ask={ask} />}
 
           <Group id="billing" hidden={!show("billing")} title={B("Plan and billing", "方案与账单")} note={B("Payment methods and invoices are handled by Stripe; Placetta never sees card numbers. Government fees are paid by you directly to each agency.", "付款方式和发票由 Stripe 处理，快哉看不到卡号。政府规费由您直接支付给各机构。")}
@@ -1288,7 +1432,8 @@ export function Settings() {
 
           <Group id="data" hidden={!show("data")} title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
             { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
-            { label: B("Export the audit trail", "导出审计记录"), sub: "CSV", right: <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> },
+            { label: B("Export the audit trail", "导出审计记录"), sub: cloud ? b(B("Every entry, as CSV. Owners and admins; the export is recorded in the trail too.", "全部记录（CSV）。所有者和管理员可导出，导出本身也会记入审计记录。")) : "CSV",
+              right: !cloud || cloud.admin ? <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> : <em className="lock">{lang === "zh" ? "由所有者和管理员导出" : "Owners and admins"}</em> },
             { label: B("Trust and security", "信任与安全"), sub: b(B("How we protect your data, and every company that processes it", "我们如何保护您的数据，以及处理数据的每一家公司")), right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.com/trust" : "/trust"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
             ...(cloud ? [{ label: B("Delete your account", "删除账户"), sub: b(B("Deletes your account and the workspaces you own alone, except records the law requires us to keep.", "删除您的账户和您单独拥有的工作区，法律要求保留的记录除外。")), right: <Btn kind="warm" guard onClick={() => setDel(true)}>{b(B("Delete my account", "删除我的账户"))}</Btn> }] : []),
           ]}>

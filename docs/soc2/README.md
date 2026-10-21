@@ -2,7 +2,7 @@
 
 Placetta has no SOC 2 report today, and the trust page says so. A SOC 2 report needs an independent CPA firm to audit us; that's the founder's step. Everything before it is here: the policies, the control matrix that maps every 2017 Trust Services Criterion to the code and the evidence, a script that collects the evidence, and the CI checks an auditor will look for.
 
-On 2026-10-18 the matrix has **78 controls: 17 in place, 37 partial, 24 gaps**. Most partials are things that are built but not live: migrations written and tested but not applied to the database, functions not redeployed, policies not yet approved. Most gaps are the founder's: backups, branch protection, account settings, an auditor.
+On 2026-10-22 the matrix has **84 controls: 17 in place, 43 partial, 24 gaps** (78 on 2026-10-18, plus six enterprise access controls added built but not live: roles, single sign-on, SCIM, role administration, security events in the audit trail, filing isolation). Most partials are things that are built but not live: migrations written and tested but not applied to the database, functions not redeployed, policies not yet approved. Most gaps are the founder's: backups, branch protection, account settings, an auditor.
 
 ## What's in this folder
 
@@ -16,7 +16,7 @@ On 2026-10-18 the matrix has **78 controls: 17 in place, 37 partial, 24 gaps**. 
 | `.github/workflows/ci.yml`, `security` job | Secret scan (gitleaks v8.30.1), `npm audit` gate, Dependabot coverage check |
 | `.github/CODEOWNERS`, `.github/pull_request_template.md` | Who reviews what, and the security checklist on every pull request |
 
-Related, already in the repo: [docs/AI_RISK_REGISTER.md](../AI_RISK_REGISTER.md) (the AI model inventory and risks), [docs/MIGRATION_DRIFT.md](../MIGRATION_DRIFT.md) (the live migration history against the files), [docs/AI_COSTS.md](../AI_COSTS.md), [site/trust.html](../../site/trust.html), [SETUP.md](../../SETUP.md).
+Related, already in the repo: [docs/ENTERPRISE.md](../ENTERPRISE.md) (roles, SSO, SCIM, the audit export, filing isolation, zero data retention and private networking: what's built, the founder's steps, and what the site may say), [docs/AI_RISK_REGISTER.md](../AI_RISK_REGISTER.md) (the AI model inventory and risks), [docs/MIGRATION_DRIFT.md](../MIGRATION_DRIFT.md) (the live migration history against the files), [docs/AI_COSTS.md](../AI_COSTS.md), [site/trust.html](../../site/trust.html), [SETUP.md](../../SETUP.md).
 
 ## The founder's checklist, in order
 
@@ -44,6 +44,7 @@ Ordered so the real risks close first (no backups, unreviewed changes to product
 | 18 | A penetration test before the Type II window | 1 to 2 weeks elapsed | $5,000 to $15,000 ([Drata](https://drata.com/learn/soc-2/cost)) | CC4.1b |
 | 19 | From the first hire: background check, confidentiality agreement, training | Per hire | Checkr $29.99, $59.99 or $94.99 a report ([Checkr](https://checkr.com/prices)) | CC1.4a, C1.1c |
 | 20 | Decide how long the audit trail is kept after a workspace is deleted; update the Privacy Policy; get counsel to review | 1 hour, plus counsel | Counsel's time | C1.2b |
+| 21 | **Enterprise access**, before the first customer that needs it: apply `20261022000000_enterprise_access.sql`, deploy `scim`, `sso` and the changed functions; turn on SAML and register each customer's identity provider; collect the AI providers' written zero-retention confirmations before setting `AI_ZDR_REQUIRED` ([ENTERPRISE.md](../ENTERPRISE.md)) | Half a day, then about an hour per customer | SAML needs Supabase Pro or above; 50 SSO users a month included on Pro and Team, then $0.015 each ([Supabase](https://supabase.com/docs/guides/platform/manage-your-usage/monthly-active-users-sso)) | CC6.1h, CC6.1i, CC6.2c, CC6.3d, CC7.2d, C1.1d, CC9.2d |
 
 Steps 1 to 13 are about a week of the founder's time and about $140 a month (Supabase about $130, GitHub Pro $4, Google Workspace $7 a user). A first year with a Type I and a penetration test, without a compliance platform, is roughly $14,000 to $32,000; Drata's own estimate for a startup's first year all-in is $25,000 to $50,000 ([Drata](https://drata.com/learn/soc-2/cost)).
 

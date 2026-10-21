@@ -127,7 +127,7 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(() => new URLSearchParams(location.search).get("error_description") ?? "");
   const [noAccount, setNoAccount] = useState(false);
-  const [providers, setProviders] = useState<api.SignInOptions>({ google: false, azure: false, phone: false });
+  const [providers, setProviders] = useState<api.SignInOptions>({ google: false, azure: false, phone: false, saml: false });
   useEffect(() => {
     void api.authProviders().then(setProviders);
     if (new URLSearchParams(location.search).get("error")) history.replaceState(null, "", location.pathname + location.hash);
@@ -137,8 +137,24 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
     try { await api.signInWith(p); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
   const okEmail = () => /\S+@\S+\.\S+/.test(email.trim());
-  const next = () => {
+  const sso = async () => {
     if (!okEmail()) { setErr(L(B("Enter your work email.", "请输入工作邮箱。"))); return; }
+    setBusy(true); setErr("");
+    try { await api.signInWithSso(email.trim()); }
+    catch (e) {
+      const x = e as api.ApiError;
+      setErr(x.code === "sso_none" ? L(B("Single sign-on isn't set up for this email's company yet. Ask your admin, or sign in another way.", "该邮箱所在公司尚未设置单点登录。请联系管理员，或用其他方式登录。")) : x.message);
+      setBusy(false);
+    }
+  };
+  const next = async () => {
+    if (!okEmail()) { setErr(L(B("Enter your work email.", "请输入工作邮箱。"))); return; }
+    // a company that requires single sign-on: straight to it
+    const rule = await api.ssoForEmail(email.trim());
+    if (rule.required) {
+      if (rule.method === "saml") { void sso(); return; }
+      if (rule.method) { void withProvider(rule.method as api.Provider); return; }
+    }
     setErr(""); setNoAccount(false); setPw(""); setStep("password");
   };
   const mailErr = (e: api.ApiError) => e.code === "rate_limited"
@@ -229,12 +245,13 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
         </div>
       )}
       {step === "email" && (
-        <form onSubmit={e => { e.preventDefault(); next(); }}>
+        <form onSubmit={e => { e.preventDefault(); void next(); }}>
           <label className="sr" htmlFor="gate-email">{L(B("Email", "邮箱"))}</label>
           <input id="gate-email" type="email" autoComplete="username" inputMode="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={L(B("you@company.com", "you@company.com"))} autoFocus />
           <button type="submit" className="sbtn ink wide" disabled={busy}>{L(B("Continue", "继续"))}</button>
         </form>
       )}
+      {step === "email" && providers.saml && <button type="button" className="lnk gate-sso-link" disabled={busy} onClick={() => void sso()}>{L(B("Sign in with SSO", "使用单点登录"))}</button>}
       {step === "email" && providers.phone && <span className="gate-or">{L(B("or", "或"))}</span>}
       {step === "email" && providers.phone && <button type="button" className="sbtn line wide sso gate-phone" disabled={busy} onClick={() => { setErr(""); setStep("phone"); }}><PhoneMark />{L(B("Continue with phone", "使用手机号继续"))}</button>}
       {step === "phone" && (
@@ -661,7 +678,7 @@ function SetPassword({ lang, onDone, onCancel }: { lang: Lang; onDone: () => voi
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "onboard"; email: string; back?: string } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
+type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "sso"; email: string; method: string } | { k: "onboard"; email: string; back?: string } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
 
 export function CloudRoot() {
   const [lang, setLangState] = useState<Lang>(() => readHandoff()?.lang ?? readLang());
@@ -691,7 +708,14 @@ export function CloudRoot() {
     try {
       const two = await api.twoStepStatus();
       if (two.next === "aal2" && two.current !== "aal2" && two.factorId) { setPhase({ k: "twostep", factorId: two.factorId }); return; }
+      // a company that requires single sign-on: a session that didn't use it reaches nothing (the database refuses it)
+      const email = (await api.getSession())?.user.email ?? "";
+      if (email) {
+        const rule = await api.ssoForEmail(email);
+        if (!api.meetsSso(rule, await api.sessionMethods())) { setPhase({ k: "sso", email, method: rule.method ?? "saml" }); return; }
+      }
       const joined = await api.acceptInvites().catch(() => 0);
+      void api.recordSignIn();
       // Agreed at sign-up (the checkbox), before there was a session: record it now, if it's still the current version.
       const agreed = api.termsAgreed.take();
       if (agreed === UPDATED) await api.acceptTerms(agreed).catch(() => null);
@@ -784,6 +808,17 @@ export function CloudRoot() {
       {phase.k === "signin" && <SignIn lang={lang} start={start?.peek?.status === "ok" ? start.peek : null} />}
       {phase.k === "claim" && <ClaimStart lang={lang} email={phase.email} token={phase.token} peek={phase.peek} onDone={(id, n) => { setStart(null); void open(id, n); }} onSkip={() => { clearStart(); setStart(null); void open(lastWs.get()); }} />}
       {phase.k === "recover" && <SetPassword lang={lang} onDone={recovered} onCancel={() => { recovering.current = false; void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
+      {phase.k === "sso" && (
+        <div className="gate-card">
+          <h1>{L(B("Your company requires single sign-on.", "您的公司要求单点登录。"))}</h1>
+          <p className="gate-sub">{L(B(`Everyone at ${phase.email.split("@")[1]} signs in to Placetta through their company account.`, `${phase.email.split("@")[1]} 的所有人都需通过公司账户登录快哉。`))}</p>
+          <button type="button" className="sbtn ink wide" onClick={() => {
+            const { email, method } = phase;
+            void api.signOut().then(() => (method === "saml" ? api.signInWithSso(email) : api.signInWith(method as api.Provider))).catch(e => setPhase({ k: "error", msg: (e as api.ApiError).message }));
+          }}>{L(B("Sign in with SSO", "使用单点登录"))}</button>
+          <button type="button" className="lnk" onClick={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }}>{L(B("Sign out", "退出登录"))}</button>
+        </div>
+      )}
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back !== undefined ? () => void open(phase.back!) : undefined} />}
       {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Try again", "重试"))}</button></div>}

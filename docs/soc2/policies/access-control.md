@@ -12,9 +12,11 @@
 ## Customers in the app
 
 1. Sign-in is by email code or link, Google, or Microsoft (Supabase Auth). An account that only ever signed in with Microsoft never claims an invite or team access by email, because Microsoft can send unverified addresses (`SETUP.md`, "Sign in with Google or Microsoft").
-2. Each workspace has owners and members. Owners approve filings, payments, integrations, saved logins, billing and the team; members use logs, documents and Odelia. A workspace always keeps one owner.
-3. Row-level security decides every read and write: `is_member`, `is_owner`, `is_staff` (`supabase/migrations/20261005040308_placetta_app.sql`, `20261005085958_two_step_helpers.sql`). Only an owner can request a filing; the database refuses anyone else.
-4. Two-step sign-in is optional for customers. Once an account turns it on, `mfa_ok()` refuses that account everything until the code is entered (an `aal2` session). An optional six-digit PIN guards sensitive settings (`settings_pin`, locked for 15 minutes after 5 wrong tries).
+2. Each workspace has owners, admins, members and viewers. Owners approve filings, payments, messages, integrations, saved logins and billing, and alone make, change or remove owners; a workspace always keeps one. Admins manage people, roles, single sign-on and SCIM and export the audit trail, but can't file, pay or send. Members use logs, documents and Odelia. Viewers read and change nothing. Every role change and invite is in the audit trail. (Admins and viewers come with `20261022000000_enterprise_access.sql`, written and tested, not yet applied: [docs/ENTERPRISE.md](../../ENTERPRISE.md#1-roles).)
+3. Row-level security decides every read and write: `can_view` for reads, `is_member` (member and up) for writes, `is_admin`, `is_owner`, `is_staff` (`supabase/migrations/20261005040308_placetta_app.sql`, `20261005085958_two_step_helpers.sql`, `20261022000000_enterprise_access.sql`). Only an owner can request a filing; the database refuses anyone else. The server functions apply the same ranks (`requireAccess`).
+4. Single sign-on: a workspace that verified its email domain (a DNS TXT record) can require everyone at it to sign in with SAML or one OAuth/OIDC provider; until they do, the database gives them nothing (`sso_session_ok` inside `mfa_ok()`). Each customer's SAML identity provider is registered by the founder (`supabase sso add`).
+5. SCIM 2.0: a customer's identity provider can add people (they get access when that email signs in) and deactivate them (taken off the workspace, invites canceled, sessions ended). SCIM never makes, changes or removes an owner. Its token is kept only as a SHA-256 and shown once.
+6. Two-step sign-in is optional for customers. Once an account turns it on, `mfa_ok()` refuses that account everything until the code is entered (an `aal2` session). An optional six-digit PIN guards sensitive settings (`settings_pin`, locked for 15 minutes after 5 wrong tries).
 
 ## Staff
 
@@ -62,7 +64,7 @@ In the first week of January, April, July and October, the founder:
 
 ## How we prove it
 
-1. Row-level security and its tests: `supabase/tests/teams.sql`, `hardening.sql`, and the other database tests CI runs on every change.
+1. Row-level security and its tests: `supabase/tests/teams.sql`, `hardening.sql`, `enterprise.sql` (roles, SSO, SCIM), and the other database tests CI runs on every change; the end-to-end scenario "g3. enterprise access" (`npm run test:e2e`).
 2. The evidence bundle: staff list with two-step status, all-account two-step totals, GitHub collaborators, row-level security on every public table (`supabase.database`).
 3. The quarterly access review records.
 4. The audit trail: every opening of a saved login, every team change.

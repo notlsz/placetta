@@ -1,6 +1,6 @@
 // Shared helpers for the Placetta edge functions.
 // The MCP deploy only uploads files inside a function's own folder, so this file is copied into
-// integrations/, oauth-callback/, logins/, team/, spend/, file/ and forms/. Keep the copies identical.
+// integrations/, oauth-callback/, logins/, team/, spend/, file/, forms/ and sso/. Keep the copies identical.
 import { createClient, type SupabaseClient, type User } from "npm:@supabase/supabase-js@2";
 
 export const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
@@ -20,12 +20,13 @@ export function userClient(jwt: string): SupabaseClient {
 // ------------------------------------------------------------------ responses
 
 export type Code =
-  | "unauthorized" | "mfa_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error"
+  | "unauthorized" | "mfa_required" | "sso_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error"
   | "too_late" | "rate_limited" | "too_large";
 
 const STATUS: Record<Code, number> = {
   unauthorized: 401,
   mfa_required: 401,
+  sso_required: 401,
   forbidden: 403,
   bad_request: 400,
   not_found: 404,
@@ -136,25 +137,39 @@ export async function requireUser(req: Request): Promise<{ user: User; jwt: stri
   return { user: data.user, jwt: m[1] };
 }
 
-/** The session's assurance level, from its JWT (already verified by getUser): "aal2" after two-step sign-in. */
-export function aalOf(jwt: string): string {
+/** The session's JWT claims (already verified by getUser): aal, amr (how they signed in), session_id. */
+export function claimsOf(jwt: string): Record<string, unknown> {
   try {
     const part = jwt.split(".")[1] ?? "";
     const b64 = part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=");
     const claims = JSON.parse(atob(b64));
-    return typeof claims.aal === "string" ? claims.aal : "aal1";
+    return claims && typeof claims === "object" && !Array.isArray(claims) ? claims : {};
   } catch {
-    return "aal1";
+    return {};
   }
 }
 
-export type Access = "owner" | "member" | "staff" | "mfa_required" | "staff_mfa_required" | "none";
+/** The session's assurance level, from its JWT (already verified by getUser): "aal2" after two-step sign-in. */
+export function aalOf(jwt: string): string {
+  const aal = claimsOf(jwt).aal;
+  return typeof aal === "string" ? aal : "aal1";
+}
 
-/** What this user may do in this workspace: owner, member, staff (with two-step), or why not. Same rules as the database. */
+/** Workspace roles, lowest to highest. Viewers read; members work; admins manage people and sign-in; owners also approve. */
+export type Role = "viewer" | "member" | "admin" | "owner";
+export const ROLE_RANK: Record<Role, number> = { viewer: 1, member: 2, admin: 3, owner: 4 };
+export type Access = Role | "staff" | "mfa_required" | "staff_mfa_required" | "sso_required" | "none";
+
+/** What this user may do in this workspace: their role, staff (with two-step), or why not. Same rules as the database
+ *  (access_for), including the email domain's SSO rule, checked against how this session signed in. */
 export async function accessFor(ws: string, user: User, jwt: string): Promise<Access> {
-  const { data, error } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  const { data, error } = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt), p_claims: { amr: claimsOf(jwt).amr ?? [] } });
   if (!error) return String(data) as Access;
   if (error.code !== "PGRST202") throw new Error(`access lookup failed: ${error.code ?? ""}`);
+  // Before the enterprise access migration: no SSO rule yet.
+  const old = await admin.rpc("access_for", { ws, uid: user.id, p_aal: aalOf(jwt) });
+  if (!old.error) return String(old.data) as Access;
+  if (old.error.code !== "PGRST202") throw new Error(`access lookup failed: ${old.error.code ?? ""}`);
   // Before the teams migration: members are owners, staff need only their email.
   const { data: m } = await admin.from("workspace_members").select("role").eq("workspace_id", ws).eq("user_id", user.id).maybeSingle();
   if (m) return (m.role === "owner" ? "owner" : "member");
@@ -167,12 +182,23 @@ export async function isMember(ws: string, uid: string): Promise<boolean> {
   return !!data;
 }
 
-/** Owners and members (need "member"), or owners only (need "owner"). Two-step is enforced for anyone who turned it on. */
-export async function requireAccess(ws: string, user: User, jwt: string, need: "member" | "owner"): Promise<Access> {
+/** Whether a role meets a need. Staff aren't a workspace role: callers that let staff in check for them first. */
+export function roleMeets(a: Access, need: Role): boolean {
+  return a in ROLE_RANK && ROLE_RANK[a as Role] >= ROLE_RANK[need];
+}
+
+/** The caller's role when it is at least `need` ("member" lets members, admins and owners in; viewers only read).
+ *  Two-step is enforced for anyone who turned it on, and SSO for anyone whose email domain requires it. */
+export async function requireAccess(ws: string, user: User, jwt: string, need: Role): Promise<Access> {
   const a = await accessFor(ws, user, jwt);
   if (a === "mfa_required") throw new HttpError("mfa_required", "Finish two-step sign-in to continue.");
-  if (a === "owner" || (need === "member" && a === "member")) return a;
-  if (a === "member") throw new HttpError("forbidden", "Only an owner of this workspace can do that.");
+  if (a === "sso_required") throw new HttpError("sso_required", "Your company requires single sign-on. Sign in with SSO to continue.", "您的公司要求单点登录。请用单点登录继续。");
+  if (roleMeets(a, need)) return a;
+  if (a in ROLE_RANK) {
+    if (need === "owner") throw new HttpError("forbidden", "Only an owner of this workspace can do that.");
+    if (need === "admin") throw new HttpError("forbidden", "Only an owner or admin of this workspace can do that.");
+    throw new HttpError("forbidden", "You can view this workspace but not change it. Ask an admin for member access.", "您只能查看这个工作区，不能修改。请管理员给您成员权限。");
+  }
   throw new HttpError("forbidden", "You are not a member of this workspace.");
 }
 
