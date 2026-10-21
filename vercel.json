@@ -10,6 +10,10 @@
       "destination": "/app/index.html"
     },
     {
+      "source": "/furniture",
+      "destination": "/index.html"
+    },
+    {
       "source": "/how-it-works",
       "destination": "/index.html"
     },

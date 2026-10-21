@@ -2644,6 +2644,19 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
   #backers{padding-top:64px}
   .ctas{margin-top:64px;padding:64px 24px 88px}
 }
+
+/* furniture variant (/furniture): what a furniture brand files */
+.fu{display:none}.ind-furniture .fu{display:block}
+.fug{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:40px}
+@media (max-width:1023px){.fug{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.fug{grid-template-columns:minmax(0,1fr)}}
+.fuc{border:1px solid rgba(15,27,51,.1);border-radius:16px;padding:22px 22px 20px;background:#fff;min-width:0}
+.fuc h3{font-size:17px;line-height:1.3;font-weight:600;letter-spacing:-.2px;color:var(--ink);margin:0 0 14px}
+.fuc ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.fuc li{font-size:14px;line-height:1.45;color:var(--ink2)}
+.fuc li b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+.fuc li a{color:var(--ink2);text-decoration:underline;text-underline-offset:2px;font-size:12px}
+.funote{margin-top:18px;font-size:12px;color:var(--muted)}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2726,6 +2739,34 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
     <div class="npc"><img src="logos/ink/chagee.png" alt="CHAGEE" height="26" decoding="async"><b data-i18n="np.1n">5 months</b><span data-i18n="np.1s">saved in approval time</span></div>
     <div class="npc"><img src="logos/ink/starbucks.png" alt="Starbucks" height="34" decoding="async"><b data-i18n="np.2n">3 filings</b><span data-i18n="np.2s">handled end to end for a store GM</span></div>
     <div class="npc"><p class="npw" data-i18n="np.3l">Wakimasu Wagyu</p><b data-i18n="np.3n">10 requirements</b><span data-i18n="np.3s">mapped from Japan to a New York dining room</span></div>
+  </div>
+</section>
+
+
+<!-- ======================= FURNITURE: shown on /furniture ======================= -->
+<section class="sec fu" id="furniture" aria-labelledby="fuH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="fuH" data-i18n="fu.h">What a furniture brand files to sell in a new market.</h2><p class="sub" data-i18n="fu.sub">From the first container to the hundredth showroom, every filing comes from the agency's own rules. Odelia maps them for your markets, files with your approval and renews them before they lapse.</p></div>
+    <div class="fug">
+      <div class="fuc"><h3 data-i18n="fu.c1">Importing into the US</h3><ul>
+        <li><b data-i18n="fu.c1a">Lacey Act declaration</b><span data-i18n="fu.c1as">A plant and plant product declaration (PPQ Form 505) for wood products, filed by the importer.</span> <a href="https://www.aphis.usda.gov/sites/default/files/ppq505.pdf" target="_blank" rel="noopener">USDA APHIS</a></li>
+        <li><b data-i18n="fu.c1b">Formaldehyde rules for composite wood</b><span data-i18n="fu.c1bs">TSCA import certification, and a TSCA Title VI compliance label on finished goods with the fabricator's name and production date.</span> <a href="https://www.epa.gov/node/155807" target="_blank" rel="noopener">EPA</a></li>
+        <li><b data-i18n="fu.c1c">Tip-over standard</b><span data-i18n="fu.c1cs">Dressers, chests and armoires must pass three stability tests, ship with an anti-tip device and carry a certificate of compliance (16 CFR part 1261).</span> <a href="https://www.cpsc.gov/Business--Manufacturing/Business-Education/Business-Guidance/Clothing-Storage-Units" target="_blank" rel="noopener">CPSC</a></li>
+      </ul></div>
+      <div class="fuc"><h3 data-i18n="fu.c2">Selling in each state</h3><ul>
+        <li><b data-i18n="fu.c2a">California furniture license</b><span data-i18n="fu.c2as">A state license before you operate as a retailer, importer, wholesaler or manufacturer of upholstered furniture.</span> <a href="https://bhgs.dca.ca.gov/licensee/lic_brochure.pdf" target="_blank" rel="noopener">Bureau of Household Goods and Services</a></li>
+        <li><b data-i18n="fu.c2b">Sales tax and business registration</b><span data-i18n="fu.c2bs">Registration in each state where you open, sell or store inventory, with returns and renewals on a calendar.</span></li>
+      </ul></div>
+      <div class="fuc"><h3 data-i18n="fu.c3">Showrooms and warehouses</h3><ul>
+        <li><b data-i18n="fu.c3a">Every showroom</b><span data-i18n="fu.c3as">Business license, certificate of occupancy and sign permits, in the order the city issues them.</span></li>
+        <li><b data-i18n="fu.c3b">Every warehouse</b><span data-i18n="fu.c3bs">Fire and storage permits, and the inspections that keep them current.</span></li>
+      </ul></div>
+      <div class="fuc"><h3 data-i18n="fu.c4">Expanding overseas</h3><ul>
+        <li><b data-i18n="fu.c4a">EU Deforestation Regulation</b><span data-i18n="fu.c4as">Due diligence for wood products placed on the EU market, applying to large companies from 30 December 2026.</span> <a href="https://taxnews.ey.com/news/2026-0237-eu-deforestation-regulation-application-postponed-to-30-december-2026" target="_blank" rel="noopener">EY</a></li>
+        <li><b data-i18n="fu.c4b">EU General Product Safety Regulation</b><span data-i18n="fu.c4bs">Products from outside the EU need a responsible economic operator in the EU.</span> <a href="https://eur-lex.europa.eu/eli/reg/2023/988/oj" target="_blank" rel="noopener">EUR-Lex</a></li>
+      </ul></div>
+    </div>
+    <p class="funote" data-i18n="fu.note">Agencies change their rules. Odelia re-reads each official source before she files.</p>
   </div>
 </section>
 
@@ -3606,6 +3647,23 @@ Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/per
 Object.assign(T.en, {"map.ccnt": "{m}: {n} city and county permits and filings in our form library, plus the state's {s} and {f} federal.", "map.ccnt0": "{m}: its city and county forms are researched when you start a plan there.", "map.cnt": "{m}: {n} permits and filings in our form library, {s} state and {l} city and county, plus {f} federal.", "map.cnt0": "{m}: {f} federal filings in our form library. Its state and city forms are researched when you start a plan.", "map.tipn": "{n} state and local forms", "final.h": "Stop paying rent on an empty store.<br>Hire Odelia.", "wt.h": "Answer from the app your team already uses", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta", "price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
 Object.assign(T.zh, {"map.ccnt": "{m}：我们的表格库中有市县级许可与申报 {n} 项，另有州级 {s} 项和联邦 {f} 项。", "map.ccnt0": "{m}：在您开始计划时，我们会逐项调研当地市县的表格。", "map.cnt": "{m}：我们的表格库中有 {n} 项许可与申报，州级 {s} 项，市县级 {l} 项，另有联邦 {f} 项。", "map.cnt0": "{m}：表格库中有联邦 {f} 项。该州和城市的表格会在您开始计划时逐项调研。", "map.tipn": "州和地方表格 {n} 项", "final.h": "别再为空店付房租。<br>让 Odelia 加入您的团队。", "wt.h": "在团队常用的应用里直接回复", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉", "price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
+
+/* furniture variant: placetta.com/furniture or ?for=furniture */
+const VARIANT = (/^\/furniture\/?$/.test(location.pathname) || /[?&]for=furniture\b/.test(location.search)) ? "furniture" : "";
+if (VARIANT === "furniture") {
+  document.documentElement.classList.add("ind-furniture");
+  document.title = "Placetta for furniture brands";
+  addEventListener("load", () => { const b = document.querySelector('.inb[data-k="10"]'); if (b) b.click(); scrollTo(0, 0); });
+  const fuT = () => {
+  Object.assign(T.en, {"hero.h1":"Your showroom is built.<br><em>Your licenses aren't.</em>", "hero.sub":"Every month without them is rent on an empty showroom. Odelia handles the furniture licenses, safety rules and import filings for every showroom, warehouse and new market, in English or Chinese.", "brands.l":"Built for brands like", "st.ph":"Where are you opening? e.g. a showroom in Los Angeles",
+    "fu.h":"What a furniture brand files to sell in a new market.", "fu.sub":"From the first container to the hundredth showroom, every filing comes from the agency's own rules. Odelia maps them for your markets, files with your approval and renews them before they lapse.", "fu.c1":"Importing into the US", "fu.c1a":"Lacey Act declaration", "fu.c1as":"A plant and plant product declaration (PPQ Form 505) for wood products, filed by the importer.", "fu.c1b":"Formaldehyde rules for composite wood", "fu.c1bs":"TSCA import certification, and a TSCA Title VI compliance label on finished goods with the fabricator's name and production date.", "fu.c1c":"Tip-over standard", "fu.c1cs":"Dressers, chests and armoires must pass three stability tests, ship with an anti-tip device and carry a certificate of compliance (16 CFR part 1261).", "fu.c2":"Selling in each state", "fu.c2a":"California furniture license", "fu.c2as":"A state license before you operate as a retailer, importer, wholesaler or manufacturer of upholstered furniture.", "fu.c2b":"Sales tax and business registration", "fu.c2bs":"Registration in each state where you open, sell or store inventory, with returns and renewals on a calendar.", "fu.c3":"Showrooms and warehouses", "fu.c3a":"Every showroom", "fu.c3as":"Business license, certificate of occupancy and sign permits, in the order the city issues them.", "fu.c3b":"Every warehouse", "fu.c3bs":"Fire and storage permits, and the inspections that keep them current.", "fu.c4":"Expanding overseas", "fu.c4a":"EU Deforestation Regulation", "fu.c4as":"Due diligence for wood products placed on the EU market, applying to large companies from 30 December 2026.", "fu.c4b":"EU General Product Safety Regulation", "fu.c4bs":"Products from outside the EU need a responsible economic operator in the EU.", "fu.note":"Agencies change their rules. Odelia re-reads each official source before she files."});
+  Object.assign(T.zh, {"hero.h1":"展厅已经建好，<br><em>执照还没有。</em>", "hero.sub":"没有执照的每个月，都是在为空展厅付租金。Odelia 为您的每个展厅、仓库和新市场办理家具执照、安全规定和进口申报，中英文均可。", "brands.l":"适用于这些品牌", "st.ph":"您在哪里开店？例如洛杉矶的展厅",
+    "fu.h":"家具品牌进入新市场需要申报什么。", "fu.sub":"从第一个货柜到第一百个展厅，每项申报都依据主管机构自己的规定。Odelia 为您的市场逐项梳理，经您批准后提交，并在到期前续办。", "fu.c1":"进口到美国", "fu.c1a":"《雷斯法案》申报", "fu.c1as":"木制品须由进口商提交植物及植物产品申报（PPQ 505 表）。", "fu.c1b":"复合木材甲醛规定", "fu.c1bs":"TSCA 进口证明；含复合木材的成品须贴 TSCA Title VI 合规标签，注明制造商名称和生产年月。", "fu.c1c":"防倾倒标准", "fu.c1cs":"斗柜、五斗柜和衣柜须通过三项稳定性测试，随附防倾倒装置，并出具合规证书（16 CFR 第 1261 部分）。", "fu.c2":"在各州销售", "fu.c2a":"加州家具执照", "fu.c2as":"在加州以软体家具零售商、进口商、批发商或制造商身份经营前，须取得州执照。", "fu.c2b":"销售税与营业登记", "fu.c2bs":"在开店、销售或存放库存的每个州完成登记，报税和续期按日历进行。", "fu.c3":"展厅与仓库", "fu.c3a":"每个展厅", "fu.c3as":"营业执照、使用许可证和招牌许可，按城市的审批顺序办理。", "fu.c3b":"每个仓库", "fu.c3bs":"消防和仓储许可，以及保持有效所需的检查。", "fu.c4":"拓展海外", "fu.c4a":"欧盟《零毁林法规》", "fu.c4as":"在欧盟市场投放木制品须开展尽职调查，大型企业自 2026 年 12 月 30 日起适用。", "fu.c4b":"欧盟《通用产品安全法规》", "fu.c4bs":"欧盟以外的产品须在欧盟境内指定负责的经济经营者。", "fu.note":"主管机构会修改规定。Odelia 每次提交前都会重新核对官方来源。"});
+  };
+  fuT();
+  addEventListener("DOMContentLoaded", () => { fuT(); if (typeof applyAll === "function") applyAll(); if (typeof renderStrip === "function") renderStrip(); });
+}
+
 const CLAIMS = {
  stats31000: {
   en:{"pf.s1":"businesses served worldwide since 2016", "pf.n2":"3+ per day", "pf.s2":"new US businesses served, on average", "pf.s2b":"new US businesses served each day, on average", "price.proof":"31,000+ businesses served worldwide since 2016", "diff.c1":"Customers since 2016", "diff.c2":"Return customers", "map.n3":"3+ per day", "map.s3":"new US businesses served, on average, since 2016", "map.n3w":"7+ per day", "map.s3w":"new businesses served worldwide, on average, since 2016", "map.t1":"Most brand openings", "map.t2":"Active market", "map.t3":"Growing market", "map.sub":"From São Paulo to Nairobi to Kuala Lumpur, one team files the paperwork. The darker the market, the more brands we open there."},
@@ -4347,6 +4405,8 @@ function renderBk(){ const hb = document.getElementById("hBk"), lg = PROOF.backe
 // PROOF.customerNames off: the strip names the industries Odelia is built for, as plain text, and no brand
 const STRIP_INDUSTRIES = [["Milk tea shops", "Coffee shops", "Restaurants", "Hot pot", "Bakeries", "Quick service", "Retail stores", "Furniture showrooms", "Fitness clubs", "Beauty and personal care", "Consumer goods", "Importers", "Warehouses", "Food factories", "Technology companies", "Game studios", "Healthcare and life sciences", "Automotive and EV"],
   ["奶茶店", "咖啡店", "餐厅", "火锅店", "烘焙店", "快餐店", "零售门店", "家具展厅", "健身房", "美妆个护", "消费品", "进口商", "仓储物流", "食品工厂", "科技公司", "游戏工作室", "医疗与生命科学", "汽车与新能源"]];
+const FURN = ["Ligne Roset","Natuzzi","Roche Bobois","BoConcept","Calligaris","Gautier","Schmidt","KUKA Home","QM Qumei","Oppein Home","Quanu"];
+if (VARIANT === "furniture") { const rest = BRANDS.filter(b => !FURN.includes(b)); BRANDS.length = 0; BRANDS.push(...FURN, ...rest); }
 function renderStrip(){
   if (!PROOF.customerNames) { const list = STRIP_INDUSTRIES[lang === "zh" ? 1 : 0], el = document.getElementById("mqt");
     el.innerHTML = list.map(x => `<span>${esc(x)}</span>`).join("") + list.map(x => `<span aria-hidden="true">${esc(x)}</span>`).join("");
