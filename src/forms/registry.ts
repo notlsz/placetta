@@ -4,6 +4,7 @@ import type { Level } from "../model";
 import { WORLD_FORMS, unaccent, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
 import { BEACHHEAD } from "./beachhead";
+import { TOP_CITIES } from "./topcities";
 import { PROOF } from "./proof";
 import { countyFor, usPlace } from "./usplace";
 import { MORE_US } from "./more-us";
@@ -653,7 +654,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES);
 
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue
@@ -783,12 +784,19 @@ export function placeInfo(place: string) {
   const us = !p.country || p.country.code === "US";
   const loc = us ? usPlace(where).locality : where;
   const usLocal = us && /new york|nyc|flushing|manhattan|brooklyn|queens|los angeles|洛杉矶|houston|休斯顿|纽约|法拉盛/i.test(loc);
-  return { country: p.country?.code ?? (us ? "US" : undefined), city: p.city, local: p.known || usLocal, currency: p.country?.currency ?? "USD" };
+  // a city counts as covered only when the library actually holds its own steps: a city-level form for the place, or a
+  // form filed under the city's own code (Arlington's and Fairfax County's are county-run). The hand-set "guide" flag
+  // alone used to hide a city whose forms were missing, so it got neither its steps nor a row saying whom to ask.
+  const places = us ? placesOf(place) : [], st = us ? usPlace(where).state ?? p.city?.state : undefined;
+  const own = !us || FORMS.some(f => places.includes(f.where) && f.where !== "US" && (f.where === p.city?.code || (f.where !== st && f.level === "city")));
+  return { country: p.country?.code ?? (us ? "US" : undefined), city: p.city, local: (p.known || usLocal) && own, currency: p.country?.currency ?? "USD" };
 }
 
 /** A form of a US jurisdiction (priced in dollars) at a place abroad: Israel's country code is also Illinois's, so
     Tel Aviv must not pick up Illinois's forms. */
-const usFormAbroad = (f: OfficialForm, places: Where[]) => !places.includes("US") && (!f.currency || f.currency === "USD");
+const usFormAbroad = (f: OfficialForm, places: Where[]) => !places.includes("US") ? (!f.currency || f.currency === "USD")
+  // and the other way: Delaware's code is Germany's ("DE"), so a Delaware address must not pick up Germany's forms
+  : !!f.currency && f.currency !== "USD";
 
 /** The forms an opening needs, in the order they're filed. */
 export function formsFor(o: { segment: Segment; where: string; needs?: Needs }): OfficialForm[] {

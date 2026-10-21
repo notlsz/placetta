@@ -1,0 +1,191 @@
+{
+  "id": "la-bubble-tea",
+  "title": "Bubble tea shop in Los Angeles's Chinatown",
+  "read": "2026-10-21",
+  "input": {
+    "what": "Bubble tea shop",
+    "where": "727 N Broadway, Los Angeles, CA 90012",
+    "lang": "en",
+    "signage": false
+  },
+  "items": [
+    {
+      "key": "ca-llc-1",
+      "name": "Articles of Organization (California LLC)",
+      "agency": "California Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 70,
+      "source": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+      "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+      "read": "2026-10-21",
+      "match": "\\bca-llc-1\\b|articles of organization.*california",
+      "agencyMatch": "california secretary of state",
+      "feeQuote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00"
+    },
+    {
+      "key": "ca-llc-12",
+      "name": "Statement of Information (California LLC)",
+      "agency": "California Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sos.ca.gov/business-programs/business-entities/statements",
+      "quote": "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties",
+      "read": "2026-10-21",
+      "match": "\\bca-llc-12\\b|statement of information",
+      "agencyMatch": "california secretary of state"
+    },
+    {
+      "key": "irs-ss4",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "quote": "You never have to pay a fee for an EIN.",
+      "read": "2026-10-21",
+      "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+      "agencyMatch": "internal revenue service|\\bIRS\\b",
+      "feeQuote": "You never have to pay a fee for an EIN."
+    },
+    {
+      "key": "ca-cdtfa",
+      "name": "Seller's permit",
+      "agency": "California Department of Tax and Fee Administration",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.sf.gov/guide-opening-restaurant",
+      "quote": "Every location must have this permit to sell taxable goods.",
+      "read": "2026-10-21",
+      "match": "\\bca-cdtfa\\b|seller'?s permit",
+      "agencyMatch": "tax and fee administration|CDTFA"
+    },
+    {
+      "key": "la-btrc",
+      "name": "City of Los Angeles business tax registration",
+      "agency": "City of Los Angeles Office of Finance",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc",
+      "quote": "Once you completed the registration process, you will receive a temporary Business Tax Registration Certificate or Registration Number.",
+      "read": "2026-10-21",
+      "match": "\\bla-btrc\\b|business tax registration",
+      "agencyMatch": "office of finance|city of los angeles"
+    },
+    {
+      "key": "ca-food-manager",
+      "name": "Certified food protection manager",
+      "agency": "Local environmental health agency (California Retail Food Code)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+      "quote": "food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (PHF), except temporary food facilities, to have at least one owner or employee",
+      "read": "2026-10-21",
+      "match": "\\bca-food-manager\\b|food (protection|safety) manager",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "ca-food-handler",
+      "name": "California food handler cards",
+      "agency": "Local environmental health agency (California Retail Food Code)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+      "quote": "A food handler shall obtain a food hander card within 30 days after the date of hire.",
+      "read": "2026-10-21",
+      "match": "\\bca-food-handler\\b|food handler",
+      "agencyMatch": "environmental health|retail food code|health",
+      "levels": [
+        "state",
+        "county",
+        "city"
+      ]
+    },
+    {
+      "key": "lac-plan-check",
+      "name": "Food facility plan check",
+      "agency": "Los Angeles County Department of Public Health, Environmental Health",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+      "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
+      "read": "2026-10-21",
+      "match": "\\blac-plan-check\\b|plan check",
+      "agencyMatch": "los angeles county"
+    },
+    {
+      "key": "la-ladbs",
+      "name": "Building permit (and Certificate of Occupancy)",
+      "agency": "Los Angeles Department of Building and Safety",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dbs.lacity.gov/services/plan-review-permitting/building-permits",
+      "quote": "Building Permits are required for new constructions, additions, alterations, and demolition/removal of a building or structure.",
+      "read": "2026-10-21",
+      "match": "\\bla-ladbs\\b|building permit",
+      "agencyMatch": "building and safety"
+    },
+    {
+      "key": "ca-edd-de1",
+      "name": "Employer registration (DE 1)",
+      "agency": "California Employment Development Department",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+      "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+      "read": "2026-10-21",
+      "match": "\\bca-edd-de1\\b|commercial employers|\\bDE ?1\\b",
+      "agencyMatch": "employment development department|\\bEDD\\b"
+    },
+    {
+      "key": "lac-health-permit",
+      "name": "Public health permit (food facility)",
+      "agency": "Los Angeles County Department of Public Health, Environmental Health",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+      "quote": "After payment of the Public Health Permit fee is made, the permit will be issued.",
+      "read": "2026-10-21",
+      "match": "\\blac-health-permit\\b|public health permit",
+      "agencyMatch": "los angeles county"
+    }
+  ],
+  "order": [
+    {
+      "before": "lac-plan-check",
+      "after": "lac-health-permit",
+      "source": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+      "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
+      "read": "2026-10-21",
+      "why": "Plans are approved before construction; the permit comes after the final inspection.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

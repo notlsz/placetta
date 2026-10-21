@@ -1,0 +1,174 @@
+{
+  "id": "dc-bubble-tea",
+  "title": "Bubble tea shop in Washington, DC",
+  "read": "2026-10-21",
+  "input": {
+    "what": "Bubble tea shop",
+    "where": "Washington, DC",
+    "lang": "en",
+    "signage": false
+  },
+  "items": [
+    {
+      "key": "dc-formation",
+      "name": "Articles of organization (DC LLC)",
+      "agency": "DC Department of Licensing and Consumer Protection, Corporations Division",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dlcp.dc.gov/node/1616716",
+      "quote": "To register domestic limited liability company in the District, customer shall deliver articles of organization form DLC-1 to the Superintendent for filing",
+      "read": "2026-10-21",
+      "match": "\\bdc-formation\\b|company formation|articles of organization",
+      "agencyMatch": "licensing and consumer protection",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "irs-ss4",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "quote": "You never have to pay a fee for an EIN.",
+      "read": "2026-10-21",
+      "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+      "agencyMatch": "internal revenue service|\\bIRS\\b",
+      "feeQuote": "You never have to pay a fee for an EIN."
+    },
+    {
+      "key": "dc-otr",
+      "name": "DC tax registration",
+      "agency": "DC Office of Tax and Revenue",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dlcp.dc.gov/node/1621001",
+      "quote": "All applicants for a Basic Business License must be registered and in good standing with the DC Office of Tax and Revenue.",
+      "read": "2026-10-21",
+      "match": "\\bdc-otr\\b|tax registration",
+      "agencyMatch": "tax and revenue",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "dc-food-manager",
+      "name": "Certified food protection manager",
+      "agency": "DC Health",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dlcp.dc.gov/node/1806261",
+      "quote": "All applicants for a Basic Business License for a Food Services Business, must have a Certified Food Protection Manager",
+      "read": "2026-10-21",
+      "match": "\\bdc-food-manager\\b|food protection manager",
+      "agencyMatch": "dc health",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "dc-does",
+      "name": "Unemployment insurance employer registration",
+      "agency": "DC Department of Employment Services",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://unemployment.dc.gov/page/employer-service-portal",
+      "quote": "Any business that has employees working in the District of Columbia is required to register online at essp.does.dc.gov",
+      "read": "2026-10-21",
+      "match": "\\bdc-does\\b|unemployment",
+      "agencyMatch": "employment services",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "dc-plan-review",
+      "name": "Food establishment plan review",
+      "agency": "DC Health",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dchealth.dc.gov/sites/default/files/dc/sites/doh/publication/attachments/FS%28redtop%29%20-%20Plan%20review%202018%20v2.pdf",
+      "quote": "Plans are to be submitted: before construction of a food establishment, before conversion of an existing structure to a food establishment;",
+      "read": "2026-10-21",
+      "match": "\\bdc-plan-review\\b|plan review",
+      "agencyMatch": "dc health",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "dc-co",
+      "name": "Certificate of Occupancy",
+      "agency": "DC Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dob.dc.gov/sites/default/files/dc/sites/dob/Certificate%20of%20Occupancy--A%20Quick%20Guide.pdf",
+      "quote": "A Certificate of Occupancy (C of O) verifies that the use of a building, structure, or land in the District complies with the legal and safety standards",
+      "read": "2026-10-21",
+      "match": "\\bdc-co\\b|certificate of occupancy",
+      "agencyMatch": "department of buildings",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "dc-food",
+      "name": "Basic Business License (food services)",
+      "agency": "DC Department of Licensing and Consumer Protection",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dlcp.dc.gov/service/business-licensing-division",
+      "quote": "Anyone engaging in business activity within the District is required to be licensed in accordance with the specific activity conducted (e.g., convenience stores, home improvement contractors, residential rentals, restaurants).",
+      "read": "2026-10-21",
+      "match": "\\bdc-food\\b|business license",
+      "agencyMatch": "licensing and consumer protection",
+      "levels": [
+        "state",
+        "city"
+      ]
+    },
+    {
+      "key": "dc-building",
+      "name": "Building permit",
+      "agency": "DC Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dob.dc.gov/sites/default/files/dc/sites/dob/Certificate%20of%20Occupancy--A%20Quick%20Guide.pdf",
+      "quote": "Building permits and final inspections are required.",
+      "read": "2026-10-21",
+      "match": "\\bdc-building\\b|building permit",
+      "agencyMatch": "department of buildings",
+      "levels": [
+        "state",
+        "city"
+      ]
+    }
+  ],
+  "order": [],
+  "mustNotInclude": []
+}

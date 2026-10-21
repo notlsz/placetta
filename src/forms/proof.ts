@@ -24,6 +24,13 @@ const MA_ALLERGEN = "https://www.mass.gov/lists/food-allergen-awareness-guidance
 const NJ_REG = "https://www.nj.gov/treasury/revenue/gettingregistered.shtml";
 const SJ_SRP = "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program";
 const NV_TAX = "https://tax.nv.gov/faqs/register-a-business/";
+const DAL_CO = "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx";
+const AUS_FOOD = "https://www.austintexas.gov/health/programs/fixed-food-establishments";
+const FULTON_GUIDE = "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Starting-A-Food-Service-Business.pdf";
+const FL_DBPR = "https://www2.myfloridalicense.com/hotels-restaurants/licensing/general/";
+const MIA_BTR = "https://www.miami.gov/Business/Business-Tax-Receipt-BTR";
+const ARL_FOOD = "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction";
+const MARICOPA_QUALIFY = "https://www.wrr.maricopa.gov/DocumentCenter/View/5798/Responsibilities-to-Qualify-for-a-Permit-PDF";
 
 export const PROOF: Record<string, Proof> = {
   /* federal */
@@ -191,4 +198,43 @@ export const PROOF: Record<string, Proof> = {
   "gln-brc": p("https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate", "Every business located in Glendale, including subleases, is required to apply for"),
   "sgb-license": p("https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023", "A Business License Certificate must be issued prior to conducting business."),
   "lac-business-license": p("https://ttc.lacounty.gov/business-license-requirements-2/", "you must confirm that your business activity is one that the County licenses."),
+
+  /* Read on 2026-10-21 for the strict accuracy set (scripts/eval/strict): the top cities' forms that had no quote on
+     record, so the plan abstained on them. Each sentence was copied from the fetched page (atlantaga.gov refuses curl,
+     so its two were read word for word through WebFetch). */
+  "dal-co": p(DAL_CO, "shall not use or change the use of a building, a portion of a building, or land without obtaining a Certificate of Occupancy"),
+  "dal-food-permit": p("https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx", "Food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments."),
+  "dal-plan-review": at("https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/default.aspx", "If you are building a new food or drink establishment or remodeling an existing facility: Apply on DallasNow"),
+  "aus-co": at(AUS_FOOD, "is required to obtain a Certificate of Occupancy after a new or remodeled construction"),
+  "aus-food-plan-review": p(AUS_FOOD, "Plan Review — required for new construction and remodels."),
+  "aus-food-preopening": p(AUS_FOOD, "Pre‑Opening Inspection — required for all new establishments, remodeled facilities, and changes of ownership."),
+  "aus-food-permit": at(AUS_FOOD, "To operate a food business in Austin or Travis County, you must obtain a Food Enterprise Operating Permit."),
+  "atl-license": p("https://atlantaga.gov/government/departments/finance/office-of-revenue/frequently-asked-questions", "Current state law mandates that you register your business in the municipality or jurisdiction where it is located."),
+  // Fulton County's restaurant inspection page answers 404 since; its starting guide says both steps
+  "fulton-plan-review": at(FULTON_GUIDE, "the facility must undergo a plan review process."),
+  "fulton-food-permit": at(FULTON_GUIDE, "All food service operations must receive a food service permit from Environmental Health Services to operate in Fulton County."),
+  "dc-otr": p("https://dlcp.dc.gov/node/1621001", "All applicants for a Basic Business License must be registered and in good standing with the DC Office of Tax and Revenue."),
+  "dc-does": p("https://unemployment.dc.gov/page/employer-service-portal", "Any business that has employees working in the District of Columbia is required to register online at essp.does.dc.gov"),
+  "dc-food-manager": at("https://dlcp.dc.gov/node/1806261", "All applicants for a Basic Business License for a Food Services Business, must have a Certified Food Protection Manager"),
+  "dc-plan-review": p("https://dchealth.dc.gov/sites/default/files/dc/sites/doh/publication/attachments/FS%28redtop%29%20-%20Plan%20review%202018%20v2.pdf", "Plans are to be submitted: before construction of a food establishment, before conversion of an existing structure to a food establishment;"),
+  "dc-co": p("https://dob.dc.gov/sites/default/files/dc/sites/dob/Certificate%20of%20Occupancy--A%20Quick%20Guide.pdf", "verifies that the use of a building, structure, or land in the District complies with the legal and safety standards"),
+  "dc-food": at("https://dlcp.dc.gov/service/business-licensing-division", "Business Licensing at DLCP issues the licenses that businesses need to operate legally in the District."),
+  "jc-co": p("https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses", "Per City Code, a Certificate of Occupancy is required for new construction, major renovations or changes in building use."),
+  "jc-food-license": p("https://www.jerseycitynj.gov/cms/one.aspx?pageId=7214272", "Find HHS licensing applications for beauty salons, barbershops, body art, kennels, pet shops, shelters and retail food establishments."),
+  "fl-sunbiz": at("https://www.flsenate.gov/Laws/Statutes/2025/605.0201", "One or more persons may act as authorized representatives to form a limited liability company by signing and delivering articles of organization"),
+  "fl-dor": at("https://floridarevenue.com/taxes/taxesfees/Pages/sales_tax.aspx", "If they are, you must register to collect sales tax or pay use tax."),
+  "fl-food-manager": p("https://www2.myfloridalicense.com/hotels-restaurants/food-lodging/food-manager/", "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment."),
+  "fl-dbpr": p(FL_DBPR, "to obtain a license from the division before commencing operation."),
+  "fl-dbpr-plan": at(FL_DBPR, "operators of public food service establishments to submit properly prepared facility plans and specifications to the division for review and approval"),
+  "mia-btr": p(MIA_BTR, "Every business needs to obtain a Business Tax Receipt to operate in the City (also known as an Occupational License)."),
+  "mdc-btr": at(MIA_BTR, "In addition, every business is also required to obtain a Miami-Dade County Local Business Tax Receipt (formerly known as an Occupational License)."),
+  "mia-cu": at(MIA_BTR, "Most businesses need a CU before they can get a BTR."),
+  "arl-bpol": p("https://www.arlingtonva.us/Government/Programs/Taxes/Business-License-and-Taxes", "Businesses operating in or from Arlington County must register and obtain a business license within 75 days of starting operations"),
+  "arl-plan-review": p(ARL_FOOD, "you will need to submit a food service establishment plan."),
+  "arl-food-license": p(ARL_FOOD, "Once your plans are approved and you pay the appropriate fees, you may apply for a food establishment license."),
+  "az-llc": at("https://www.azleg.gov/ars/29/03201.htm", "One or more persons may act as organizers to form a limited liability company by delivering to the commission for filing the articles"),
+  "az-tpt": p("https://azdor.gov/business/transaction-privilege-tax/tpt-license", "they must register with both agencies at the same time by completing an Arizona Joint Tax Application (Form JT-1/UC-001)"),
+  "mc-plan-review": at(MARICOPA_QUALIFY, "All establishments and premises undergoing remodeling or construction must meet current code and Department requirements and follow the plan review permitting process."),
+  "mc-food-permit": at(MARICOPA_QUALIFY, "Prior to approval of a permit to operate, the establishment and operator must demonstrate sufficient compliance with all applicable regulations."),
+  "phx-co": p("https://www.phoenix.gov/administration/departments/pdd/residential-building/resident-plan-reviews/certificate-of-occupancy.html", "A CofO is required for the following projects: New commercial and residential structures Tenant improvement of a newly occupied space"),
 };

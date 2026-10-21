@@ -743,10 +743,13 @@ async function preview() {
   const p = await agent({ ws: workspace({ apps: plt.apps, stores: [store("pleasanton", "Pleasanton", "Pleasanton, CA", plt.apps.map(a => a.id))] }), prompt: "Verify Pleasanton.",
     script: [() => ask(["prepare_application", { name: "Certificate of Occupancy", agency: lic.agency.en, level: "city", agency_url: "https://www.cityofpleasantonca.gov", store_id: "pleasanton" }], ["prepare_application", { name: "City Permit", agency: "City of Pleasanton", level: "city", store_id: "pleasanton" }], ["prepare_application", { name: "Business registration", agency: lic.agency.en, level: "city", store_id: "pleasanton" }]), () => say("Done.")] });
   const pp = named(p, "prepare_application");
-  ok(pp[0].ok && pp[0].parsed?.application_id !== lic.id && !pp[0].parsed?.refined_preview, "a certificate of occupancy from the same city is its own application, not the license row renamed", pp[0].out.slice(0, 200));
+  // since 2026-10-21 an uncovered city's plan also lists the occupancy sign-off after a build-out (an abstention naming
+  // the city's building department): the certificate of occupancy refines that row, never the license row
+  const occ = plt.apps.find(a => a.id === "pv-g-occupancy");
+  ok(pp[0].ok && pp[0].parsed?.application_id !== lic.id && (occ ? pp[0].parsed?.application_id === occ.id : !pp[0].parsed?.refined_preview), "a certificate of occupancy from the same city is its own application (the plan's occupancy row), not the license row renamed", pp[0].out.slice(0, 200));
   ok(pp[1].parsed?.application_id !== lic.id, "a name with no real words in it (\"City Permit\") doesn't take over a preview row");
   ok(pp[2].parsed?.application_id === lic.id && pp[2].parsed?.refined_preview === true, "the city's business registration does refine the license row", pp[2].out.slice(0, 200));
-  ok(p.w.apps.find(a => a.id === lic.id)?.name.en === lic.name.en && p.w.apps.some(a => a.name.en === "Certificate of Occupancy"), "the license row keeps its own name; the CO keeps its own");
+  ok(p.w.apps.find(a => a.id === lic.id)?.name.en === lic.name.en && p.w.apps.some(a => /certificate of occupancy/i.test(a.name.en) && a.id !== lic.id), "the license row keeps its own name; the CO keeps its own");
 }
 
 /* ================================================================== 11. every tool, right and wrong */
