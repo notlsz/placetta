@@ -106,6 +106,27 @@ const RULES: Rule[] = [
 
 const PLACEHOLDER = /\[[^\]]{1,40}\]|\{[^}]{1,40}\}|<[^>]{1,40}>|\bTBD\b|\bXXX+\b|待定|待补充/;
 
+const STOP = new Set(["the", "and", "for", "with", "from", "this", "that", "inc", "llc", "corp", "company", "street", "avenue", "road", "suite", "floor"]);
+/** A line filled from a document, read again against the document's own words (the quote kept with it): every number
+ *  of three or more digits in the answer has to be in the quote (an error: a wrong license, tax or phone number is the
+ *  costliest slip), and an answer without numbers has to share a word with it (a warning: it may be reworded). A quote
+ *  in another script than the answer is checked on its numbers only. Null when the line agrees with its source. */
+export function sourceCheck(f: Pick<Field, "label" | "quote">, v: string): Check | null {
+  const q = (f.quote ?? "").trim();
+  if (!q) return null;
+  const qDigits = digits(q);
+  const runs = (v.match(/\d+/g) ?? []).filter(r => r.length >= 3);
+  const short = (s: string) => (s.length > 90 ? s.slice(0, 87) + "..." : s);
+  if (runs.some(r => !qDigits.includes(r)))
+    return err(f.label, B(`Doesn't match the document it came from, which says "${short(q)}". Read it again.`, `与来源文件不一致，文件原文为“${short(q)}”。请重新核对。`));
+  if (runs.length || /[一-鿿]/.test(q) !== /[一-鿿]/.test(v)) return null;
+  const words = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(x => x.length >= 3 && !STOP.has(x));
+  const want = words(v), have = new Set(words(q));
+  if (want.length && !want.some(x => have.has(x)))
+    return warn(f.label, B(`Not in the words of the document it came from ("${short(q)}"). Check it.`, `与来源文件的原文（“${short(q)}”）不一致，请核对。`));
+  return null;
+}
+
 /** A second look at everything an approval would send, before the person approves it. */
 export function preflight(w: Workspace, a: Approval, today: string): Preflight {
   const app = a.app ? w.apps.find(x => x.id === a.app) : undefined;
@@ -131,6 +152,8 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
     const choices = offForm?.fields.find(x => x.id === f.id)?.options;
     if (choices?.some(c => c.toLowerCase() === v.trim().toLowerCase()) || (/\?\s*$/.test(label) && /^(yes|no|y|n|是|否)$/i.test(v.trim()))) continue;
     if (PLACEHOLDER.test(v)) { add(err(f.label, B("Still has a placeholder in it.", "仍包含占位文字。")), f.id); continue; }
+    // the line against its source: a value read from a document must say what the document's own words say
+    if (f.quote) { const s = sourceCheck(f, v); if (s) { add(s, f.id); continue; } }
     for (const r of RULES) {
       if (!r.test.test(label) || r.skip?.test(label)) continue;
       add(r.check(v, { w, app, today, label }), f.id);

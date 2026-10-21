@@ -4,3 +4,6 @@ export { openingLine, openingPath } from "../smart";
 export { normalizeState } from "../core";
 export { publishedDays } from "../plan";
 export { runsOn, overdue } from "../jobs";
+// Finishing jobs on its own (src/finish.ts, src/today.ts): what the monitor settles, picks back up and asks the owner
+export { finishWork, resumable, stampFilings, MAX_RESUMES } from "../finish";
+export { approvalsLine } from "../today";

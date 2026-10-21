@@ -23,7 +23,11 @@ import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrub
 import { inDays } from "../src/time";
 import { B, same } from "../src/bi";
 import type { Application, Workspace } from "../src/model";
-import { nextAction, reconcile } from "../src/jobs";
+import { continuePrompt, nextAction, reconcile, settleJobs, STOPPED_HERE, type Job } from "../src/jobs";
+import { finishWork, nextRenewal, receiptName, renewalCycle, reportLines, resumable, scheduleRenewals, stampFilings } from "../src/finish";
+import { approvalsLine, oneTap } from "../src/today";
+import { preflight } from "../src/smart";
+import type { Approval } from "../src/model";
 import { SAMPLE_WS } from "../src/sample";
 import { UPDATED } from "../src/legal.ts";
 import { ADDRESS_RULES } from "../src/forms/address-rules/index";
@@ -156,9 +160,11 @@ const app = (id: string, status: Application["status"], over: Partial<Applicatio
 
 function account(o: { filings?: ReturnType<Services["filings"]>; failFilingsOnce?: boolean } = {}) {
   const stored = new Map<string, Blob>(), integrations: [string, Record<string, unknown>][] = [], settings: Record<string, string> = {};
-  let fail = !!o.failFilingsOnce;
+  // failFilingsOnce: the first read by a tool throws. A run reads the filings once as it starts (the record its proof
+  // loop reads, src/finish.ts stampFilings); that read is left alone, so the failure lands on the tool.
+  let reads = 0;
   const svc: Services = {
-    filings: () => { if (fail) { fail = false; throw new Error("database timeout"); } return o.filings ?? []; },
+    filings: () => { reads++; if (o.failFilingsOnce && reads === 2) throw new Error("database timeout"); return o.filings ?? []; },
     connected: () => ["gmail", "gcal", "gdrive", "quickbooks", "toast"],
     async integration<T>(action: string, body: Record<string, unknown>) {
       integrations.push([action, body]);
@@ -735,12 +741,27 @@ function proofLoop() {
   const r1 = reconcile({ ...up(r0, ["fp", "eq"]), approvals: [...r0.approvals, aPlan] });
   const plan1 = r1.jobs!.find(j => j.id === "job-plan")!;
   ok(plan1.steps[3].done && plan1.steps[4].done && !plan1.steps[5].done, "documents in and approval up tick steps 4 and 5 only");
-  ok(plan1.status === "waiting" && /approval/i.test(plan1.waiting!.en), "then it waits on the approval", plan1.waiting);
-  ok(plan1.checked?.passed === 3 && plan1.checked.of === 4, "the check counts 3 of 4 proven", plan1.checked);
-  // approved: done, and every done item proven
+  ok(plan1.status === "waiting" && /approval/i.test(plan1.waiting!.en) && plan1.on === "you", "then it waits on the approval", plan1.waiting);
+  // the filing is under way, so the done list gains "the agency has it", proven only from the filing's record
+  ok(plan1.done!.at(-1)!.check?.proof === "submitted" && plan1.done!.at(-1)!.check?.app === "plancheck", "a filing put up adds the agency's proof to the done list", plan1.done);
+  ok(plan1.checked?.passed === 3 && plan1.checked.of === 5, "the check counts 3 of 5 proven", plan1.checked);
+  // approved: not done yet. The person's approval is a step; the filing is with Placetta, then the agency
   const r2 = reconcile({ ...r1, approvals: r1.approvals.filter(a => a.id !== "a-plan"), closed: [...r1.closed, aPlan] });
   const plan2 = r2.jobs!.find(j => j.id === "job-plan")!;
-  ok(plan2.status === "done" && plan2.checked?.passed === 4, "approved and filed: done, 4 of 4 proven", plan2);
+  ok(plan2.status === "waiting" && plan2.on === "team" && plan2.checked?.passed === 4 && /Placetta is sending/.test(plan2.waiting!.en), "approved: waits on Placetta's filing team, 4 of 5 proven", plan2);
+  ok(nextAction(r2, plan2)?.who === "team", "and nothing is asked of the person");
+  // the agency has it, but no confirmation number or receipt is on file: still not done
+  const sentNoProof = reconcile({ ...r2, apps: r2.apps.map(a => (a.id === "plancheck" ? { ...a, filed: { status: "submitted" } } : a)) });
+  const plan3 = sentNoProof.jobs!.find(j => j.id === "job-plan")!;
+  ok(plan3.status === "waiting" && plan3.on === "agency", "submitted without a confirmation: waits on the agency", plan3);
+  // the confirmation number is on file: done, 5 of 5 proven
+  const r4 = reconcile({ ...sentNoProof, apps: sentNoProof.apps.map(a => (a.id === "plancheck" ? { ...a, filed: { status: "submitted", confirmation: "PC-2026-0412" } } : a)) });
+  const plan4 = r4.jobs!.find(j => j.id === "job-plan")!;
+  ok(plan4.status === "done" && plan4.checked?.passed === 5 && !plan4.on, "confirmation on file: done, 5 of 5 proven", plan4);
+  // the agency sends it back: the person sees what it asked, and it isn't done
+  const back = reconcile({ ...r2, apps: r2.apps.map(a => (a.id === "plancheck" ? { ...a, filed: { status: "needs_info", note: "Add the hood exhaust specification sheet." } } : a)) });
+  const plan5 = back.jobs!.find(j => j.id === "job-plan")!;
+  ok(plan5.status === "waiting" && plan5.on === "you" && /hood exhaust/.test(plan5.waiting!.en), "the agency asks for more: waits on the person, in the agency's words", plan5.waiting);
   // food handler cards: approval sent, then cards trickle in; done only at six of six
   const sent = reconcile({ ...r0, approvals: r0.approvals.filter(a => a.id !== "a-staff"), closed: [...r0.closed, ...r0.approvals.filter(a => a.id === "a-staff")] });
   const c1 = sent.jobs!.find(j => j.id === "job-cards")!;
@@ -753,6 +774,136 @@ function proofLoop() {
   // a job without checks is left to the agent
   const free = { ...base, jobs: [{ id: "j", title: B("x", "x"), status: "running" as const, steps: [{ title: B("a", "a"), done: false }], started: "", updated: "" }] };
   ok(reconcile(free) === free, "a job with no checks is untouched");
+}
+
+/* Finishing on its own (src/finish.ts, src/today.ts): a job runs to the agency's proof, not to "drafted" or "approved";
+   the filings' record is the proof; renewals go on Deadlines; a job she stopped partway is hers to pick back up; one tap
+   approves what passed every check, and nothing else. */
+async function finishing() {
+  console.log("\n# Finishing: the agency's proof, the record, renewals, the done report, picking work back up, one tap");
+  const T = "2026-10-21", NOW = "2026-10-21T15:00:00.000Z";
+  const base = workspace({ apps: [app("a1", "ready", { renews: B("Every year", "每年") }), app("a2", "draft", { renews: B("Does not expire.", "永久有效，无需续期。") })] });
+
+  // the record: each application's latest filing, a canceled one never counts, nothing changes when nothing did
+  const rows = [
+    { app_id: "a1", status: "accepted", confirmation_number: "CN-4471", receipt_path: "ws/receipts/a1.pdf", submitted_at: "2026-10-02T10:00:00Z", decided_at: "2026-10-20T09:00:00Z", channel: "fax" },
+    { app_id: "a1", status: "submitted", confirmation_number: "OLD-1" },
+    { app_id: "a2", status: "canceled" },
+  ];
+  const s1 = stampFilings(base, rows);
+  eq(s1.apps.find(a => a.id === "a1")?.filed, { status: "accepted", confirmation: "CN-4471", receipt: "ws/receipts/a1.pdf", submitted: "2026-10-02", decided: "2026-10-20", channel: "fax" }, "the latest filing is the record: status, confirmation, receipt, days, channel");
+  ok(!s1.apps.find(a => a.id === "a2")?.filed, "a canceled filing is no record");
+  ok(stampFilings(s1, rows) === s1, "stamping the same filings again changes nothing");
+  // a saved workspace comes back from the database (jsonb) with its keys in another order: that's no change
+  const reordered = { ...s1, apps: s1.apps.map(a => (a.filed ? { ...a, filed: Object.fromEntries(Object.entries(a.filed).reverse()) as typeof a.filed } : a)) };
+  ok(stampFilings(reordered, rows) === reordered, "the same record with its keys in another order is no change");
+  eq([receiptName("ws/receipts/0b1c2d3e-1111-4222-8333-444455556666-1761040000000-fax-confirmation.pdf"), receiptName("ws/uploads/permit.pdf")], ["fax-confirmation.pdf", "permit.pdf"], "a receipt reads by its own name");
+  ok(!stampFilings(s1, []).apps.find(a => a.id === "a1")?.filed, "a filing that's gone takes its record with it");
+  eq(stampFilings(base, [{ app_id: "a2", status: "needs_info", payment_url: "https://pay.agency.gov/x" }]).apps.find(a => a.id === "a2")?.filed, { status: "needs_info", pay: true }, "a fee waiting to be paid is on the record");
+
+  // renewals: from the agency's own published cycle and the approval day, never made up
+  eq([renewalCycle("Every year."), renewalCycle("Renew every year."), renewalCycle("Every 2 years."), renewalCycle("Every two years."), renewalCycle("每年"), renewalCycle("Every year by May 15.")],
+    [{ months: 12 }, { months: 12 }, { months: 24 }, { months: 24 }, { months: 12 }, { month: 5, day: 15 }], "the agency's cycles read as months, or a day each year");
+  eq([renewalCycle("Does not expire."), renewalCycle("Every year, by the tax return due date."), renewalCycle("Valid up to 10 years."), renewalCycle(undefined)], [null, null, null, null], "anything else gives no date: none is made up");
+  eq([nextRenewal("2026-10-20", { months: 12 }), nextRenewal("2024-02-29", { months: 12 }), nextRenewal("2026-06-01", { month: 5, day: 15 }), nextRenewal("2026-03-01", { month: 5, day: 15 })],
+    ["2027-10-20", "2025-02-28", "2027-05-15", "2026-05-15"], "the next renewal: a year on (the last day of a shorter month), or the next named day");
+  const r1 = scheduleRenewals(s1, T);
+  const dl = r1.deadlines.find(d => d.app === "a1" && d.kind === "renewal");
+  ok(dl?.date === "2027-10-20" && /Renew the permit a1/i.test(dl.title.en) && !!dl.prompt && !!dl.ask, "an approval puts the next renewal on Deadlines, with what starts it", dl);
+  ok(/counted from .*approval on 2026-10-20.*"Every year"/.test(r1.audit[0]?.detail?.en ?? ""), "the audit trail says how the date was counted", r1.audit[0]);
+  ok(scheduleRenewals(r1, T) === r1, "never twice");
+  ok(scheduleRenewals(s1, "2027-11-01") === s1, "never a date already past");
+  const neverExpires = stampFilings(base, [{ app_id: "a2", status: "accepted", decided_at: "2026-10-20T00:00:00Z" }]);
+  ok(scheduleRenewals(neverExpires, T) === neverExpires, "a permit that doesn't expire gets no renewal");
+
+  // a job runs to the agency's proof: the done report is written from the record, with the next renewal
+  const job: Job = { id: "job-a1", title: B("File permit a1", "提交许可 a1"), status: "running", steps: [{ title: B("Fill it", "填写"), done: true }, { title: B("Ask for approval", "请求批准"), done: true }],
+    done: [{ text: B("Every line is filled", "每项都已填写"), ok: true }], started: NOW, updated: NOW, apps: ["a1"] };
+  const card = { id: "ap-a1", kind: "file" as const, app: "a1", title: B("File the permit a1", "提交许可 a1"), does: [], action: B("Approve & file", "批准并提交") };
+  const open1 = finishWork({ ...base, jobs: [job], approvals: [card] }, NOW).jobs![0];
+  ok(open1.status === "waiting" && open1.on === "you" && open1.done!.some(d => d.check?.proof === "submitted" && d.check.app === "a1"), "a filing put up: the job gains the agency's proof and waits on the approval", open1);
+  const approved = finishWork({ ...base, jobs: [job], approvals: [], closed: [card] }, NOW).jobs![0];
+  ok(approved.status === "waiting" && approved.on === "team" && !approved.report, "approved is not done: with Placetta's team", approved);
+  const fin = finishWork({ ...stampFilings(base, rows), jobs: [job], approvals: [], closed: [card] }, NOW);
+  const j1 = fin.jobs![0];
+  ok(j1.status === "done" && proven(j1) && j1.report?.filed[0]?.confirmation === "CN-4471" && j1.report.filed[0].stage === "issued" && j1.report.filed[0].receipt === "a1.pdf", "the agency approved it: done, proven, and the report has the confirmation and receipt", j1);
+  const lines = reportLines(fin, j1, "en", T);
+  ok(/permit a1: approved by NYC Department of Health on 2026-10-20, confirmation CN-4471, receipt a1\.pdf; next renewal 2027-10-20, on Deadlines\./i.test(lines[0]), "the report says what, where, the proof and the next renewal", lines);
+  ok(/确认号 CN-4471.*下次续办 2027-10-20/.test(reportLines(fin, j1, "zh", T)[0]), "and in Chinese", reportLines(fin, j1, "zh", T));
+  ok(finishWork(fin, NOW) === fin, "finishing again changes nothing");
+  const noProof = finishWork({ ...stampFilings(base, [{ app_id: "a1", status: "submitted" }]), jobs: [job], approvals: [], closed: [card] }, NOW).jobs![0];
+  ok(noProof.status === "waiting" && noProof.on === "agency", "sent but no confirmation number or receipt on file: not done, waiting on the agency", noProof);
+
+  // the checker can't pass the agency's proof, and can't fail it either: the record decides
+  const pending = finishWork({ ...base, jobs: [job], approvals: [], closed: [card] }, NOW);
+  const said = applyVerdict("job-a1", [{ ok: true, why: "looks filed" }, { ok: true, why: "the reply says it's filed" }], { final: true, lang: "en" })(pending).jobs![0];
+  ok(said.done![1].ok === false && /Placetta's filing team/.test(said.done![1].why!.en) && said.status !== "done", "a reviewer's yes doesn't pass a filing the agency doesn't have", said.done);
+  const recorded = applyVerdict("job-a1", [{ ok: true, why: "" }, { ok: false, why: "can't see it" }], { final: true, lang: "en" })({ ...stampFilings(pending, rows) }).jobs![0];
+  ok(recorded.done![1].ok === true && recorded.status === "done", "the record's proof passes whatever the reviewer read", recorded.done);
+
+  // a job she stopped partway is hers to pick back up; one on the agency, the person, a plan or a store's bot isn't
+  const settled = settleJobs<Workspace>("2026-10-21T00:00:00Z")({ ...base, jobs: [{ ...job, status: "running", steps: [{ title: B("Fill it", "填写"), done: false }], done: undefined }] }).jobs![0];
+  ok(settled.status === "waiting" && settled.on === "odelia" && settled.waiting?.en === STOPPED_HERE.en, "a run that stops partway leaves the job on Odelia", settled);
+  const proofOpen = settleJobs<Workspace>("2026-10-21T00:00:00Z")({ ...base, jobs: [{ ...approved, status: "running" }] }).jobs![0];
+  ok(proofOpen.status === "waiting" && (proofOpen.on === "agency" || proofOpen.on === "team"), "every step done but the filing isn't at the agency: waiting on it, never done", proofOpen);
+  const unchecked = settleJobs<Workspace>("2026-10-21T00:00:00Z")({ ...base, jobs: [{ ...approved, status: "running", checked: undefined, on: undefined, waiting: undefined }] }).jobs![0];
+  ok(unchecked.status === "waiting" && unchecked.on === "agency", "and with no reviewer's count yet, the same", unchecked);
+  const old = "2026-10-21T10:00:00.000Z", at = Date.parse(NOW);
+  const mk = (id: string, over: Partial<Job>): Job => ({ id, title: B(`Job ${id}`, `工作 ${id}`), status: "waiting", steps: [{ title: B("Next", "下一步"), done: false }], started: old, updated: old, ...over });
+  const pick = resumable({ ...base, jobs: [
+    mk("stopped", { on: "odelia", waiting: STOPPED_HERE }), mk("legacy", { waiting: STOPPED_HERE }), mk("agency", { on: "agency", waiting: B("x", "x") }), mk("you", { on: "you", waiting: B("x", "x") }),
+    mk("fresh", { on: "odelia", updated: "2026-10-21T14:30:00.000Z" }), mk("part", { on: "odelia", parent: "p" }), mk("planned", { on: "odelia" }),
+    mk("dead", { status: "running", updated: "2026-10-21T08:00:00.000Z" }), mk("alive", { status: "running", updated: "2026-10-21T12:00:00.000Z" }),
+  ], controls: { plans: [{ job: "planned", state: "waiting", at: old }] } }, at);
+  eq(pick.map(p => p.job), ["stopped", "legacy", "dead"], "picked back up: stopped partway (or a run that died), not the agency's, the person's, a plan waiting, a store's part, or one just touched");
+  ok(/Carry on with the job "Job stopped" \(job stopped\)/.test(pick[0].prompt) && /Picked back up/.test(pick[0].title.en), "with the prompt that carries on", pick[0]);
+
+  // the line read again against its source: a number that isn't in the document is an error, words a warning
+  const src = (value: string, quote: string) => preflight(workspace({ apps: [app("q1", "ready", { fields: [{ id: "lic", label: same("License number"), value, quote }] })] }),
+    { id: "x", kind: "file", app: "q1", title: same("x"), does: [], action: same("x") }, T);
+  ok(!src("48213-B", "License No. 48213-B, issued 2025-03-02").errors.length, "a value the document's words show passes");
+  ok(/Doesn't match the document it came from/.test(src("48231-B", "License No. 48213-B, issued 2025-03-02").errors[0]?.note.en ?? ""), "a number the document doesn't show is an error", src("48231-B", "License No. 48213-B"));
+  ok(/Not in the words of the document/.test(src("Golden Ox", "Tenant: Lucky Leaf Tea LLC").warnings[0]?.note.en ?? ""), "a name the document doesn't show is a warning");
+  ok(!src("Lucky Leaf", "租户：幸运叶 Lucky Leaf").errors.length && !src("4471", "执照号 4471").errors.length, "a quote in Chinese is checked on its numbers");
+
+  // one tap: what passed every check goes together; a payment, a change, a fee, a second owner, a flag stays alone
+  const ready = (id: string) => app(id, "ready", { fields: [{ id: "n", label: same("Business name"), value: "Lucky Leaf Tea LLC" }] });
+  const fileCard = (id: string, over: Partial<Approval> = {}): Approval => ({ id: "ap-" + id, kind: "file", app: id, title: same(`File ${id}`), does: [], action: same("Approve & file"), ...over });
+  const msg = (id: string, over: Partial<Approval> = {}): Approval => ({ id, kind: "send", title: same(`Message ${id}`), does: [], action: same("Send"), data: [{ id: "to", label: same("To"), value: "permits@health.nyc.gov" }, { id: "msg", label: same("Message"), value: "Please confirm receipt." }], ...over });
+  const tw = workspace({ apps: [ready("t1"), ready("t2"), app("t3", "draft", { fields: [{ id: "n", label: same("Business name"), value: "" }] })], approvals: [
+    fileCard("t1"), fileCard("t2", { second: { by: [], rule: "r" } }), fileCard("t3"), msg("m1"), msg("m2", { fee: 25 }),
+    { id: "pay", kind: "pay", title: same("Pay"), does: [], action: same("Pay"), fee: 100 }, { id: "chg", kind: "change", title: same("Move"), does: [], action: same("OK"), change: { op: "plan", job: "j" } },
+  ] });
+  const t = oneTap(tw, T, { account: true, filings: true });
+  eq(t.ids, ["ap-t1", "m1"], "one tap: the filing and the message that passed every check");
+  eq(t.solo.map(x => x.id), ["ap-t2", "ap-t3", "m2", "pay", "chg"], "one at a time: two owners, not complete, a fee, a payment, a plan");
+  eq(oneTap(tw, T, { account: true, filings: false }).ids, ["m1"], "without filing on the plan, the messages still go together");
+  ok(/7 things waiting for your approval, 2 in one tap/.test(approvalsLine(tw, T, { account: true, filings: true })!.title.en) && /Nothing is filed, paid or sent until you approve/.test(approvalsLine(tw, T, { account: true, filings: true })!.body.en), "the morning line: how many wait, how many share a tap, and the rule");
+  ok(approvalsLine(workspace(), T, { account: true, filings: true }) === null, "nothing waiting, no line");
+
+  // end to end on the server's loop: a run that files something and says it's done leaves the job open on the approval;
+  // the next run reads the agency's record and finishes it, with the report and the renewal
+  const ws0 = workspace({ apps: [app("a1", "draft", { renews: B("Every year", "每年"), fields: [{ id: "n", label: same("Business name"), value: "Lucky Leaf Tea LLC" }] })] });
+  const run1 = await agent({
+    ws: ws0, prompt: "File permit a1.", json: () => ({ items: [{ ok: true, why: "every line is filled" }, { ok: true, why: "the reply says it's filed" }] }),
+    script: [
+      () => ask(["set_plan", { title: "File permit a1", steps: [{ title: "Fill it" }, { title: "Ask for approval" }, { title: "Tell the owner" }], done: ["Every line is filled"], application_ids: ["a1"] }]),
+      () => ask(["request_filing_approval", { application_id: "a1" }]),
+      c => ask(["set_plan", { job_id: c.out("set_plan").job_id, title: "File permit a1", steps: [{ title: "Fill it", done: true }, { title: "Ask for approval", done: true }, { title: "Tell the owner", done: true }], status: "done" }]),
+      c => { ok(c.out("set_plan").filing_not_at_agency_yet === true, "set_plan says the filing isn't at the agency yet", c.out("set_plan")); return say("Done. It's filed."); },
+    ],
+  });
+  const jr = (run1.w.jobs ?? [])[0];
+  ok(jr && jr.status === "waiting" && jr.on === "you" && jr.done!.some(d => d.check?.proof && d.check.app === "a1") && !proven(jr), "the run ends with the job open, waiting on the approval, never done", jr);
+  ok(/Not yet: The agency has the permit a1/.test(textOf(run1)), "the reply says what isn't done, whatever the model wrote", textOf(run1));
+  const ap = run1.w.approvals.find(a => a.app === "a1" && a.kind === "file")!;
+  const afterApproval = { ...run1.w, approvals: run1.w.approvals.filter(a => a.id !== ap.id), closed: [...run1.w.closed, ap] };
+  const { svc } = account({ filings: [{ app_id: "a1", status: "accepted", confirmation_number: "CN-9", submitted_at: "2026-10-03T00:00:00Z", decided_at: "2026-10-20T00:00:00Z", updated_at: "2026-10-20T00:00:00Z", note: null, payment_url: null, receipt_path: null }] });
+  const run2 = await agent({ ws: afterApproval, svc, prompt: continuePrompt(jr, "en"), script: [() => say("The agency approved it.")] });
+  const jd = (run2.w.jobs ?? [])[0];
+  ok(jd.status === "done" && proven(jd) && jd.report?.filed[0]?.confirmation === "CN-9", "the next run reads the agency's record: done, proven, with the report", jd);
+  ok(run2.w.deadlines.some(d => d.app === "a1" && d.kind === "renewal" && d.date === "2027-10-20"), "and the next renewal is on Deadlines", run2.w.deadlines);
+  ok(/Permit a1: approved by NYC Department of Health on 2026-10-20, confirmation CN-9; next renewal 2027-10-20, on Deadlines\./.test(textOf(run2)), "the reply hands it back: what was filed, the proof, the next renewal", textOf(run2));
 }
 
 async function work() {
@@ -2169,6 +2320,7 @@ await memoryAndSkills();
 await settings();
 await work();
 proofLoop();
+await finishing();
 await harness();
 await storeBots();
 await teamReview();

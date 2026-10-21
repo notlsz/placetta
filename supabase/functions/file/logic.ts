@@ -170,6 +170,31 @@ export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Ro
   return "team";
 }
 
+/** Why a portal run handed a filing back without submitting anything: it couldn't finish on the agency's site (limit),
+    the site sent it elsewhere (left_portal), there's no approved portal for the form (no_portal), or it failed three
+    times (portal_failed). The worker writes these as the hand-back's ref (worker/filer/src/run.ts). */
+export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed"]);
+
+/** A filing the agency's site failed and nobody has acted on since: with the team, nothing submitted, not finished, and
+    the last thing in its log is the portal run's hand-back. Placetta then tries another way before the team does it by
+    hand (reroute in index.ts); whatever it decides goes in the log, so a filing is looked at once. */
+export function rerouteDue(f: Pick<Filing, "channel" | "agent_state" | "submit_clicked_at" | "status" | "agent_log">): boolean {
+  if (f.channel !== "team" || f.agent_state !== "handoff" || f.submit_clicked_at) return false;
+  if (["canceled", "submitted", "accepted", "rejected"].includes(f.status)) return false;
+  const last = f.agent_log[f.agent_log.length - 1];
+  return last?.kind === "handoff" && PORTAL_FAILED.has(last.ref ?? "");
+}
+
+/** Where a filing goes when the agency's site failed: the same rules as pick(), in the same order, with the site left
+    out. Email, fax or certified mail when the agency takes it that way and nothing rules them out (a fee, a wet
+    signature, attachments a fax or letter can't carry); the owner's packet when only the business may send it; else
+    the team. The person's one approval covers it: the card said Placetta sends it by email, fax, certified mail or the
+    agency's site. */
+export function fallback(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Route {
+  if (!d) return "team";
+  return pick(f, { ...d, portal: undefined }, env, facts);
+}
+
 /** A saved login opens this destination's portal (same host and, on a shared host, the same agency's path). */
 export const hasLoginFor = (logins: (string | null | undefined)[], d: Dest | undefined): boolean =>
   !!d?.portal && logins.some((u) => loginMatches(u, d));

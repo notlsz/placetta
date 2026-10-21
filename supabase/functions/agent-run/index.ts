@@ -11,6 +11,8 @@
 //
 // POST {action: "start", workspace_id, prompt, history?, lang?, deep?}         a member (Supabase session)
 // POST {action: "continue", run_id, token?, ticket?} | {action: "watchdog"} | {action: "watch", workspace_id}   the server itself (monitor key)
+// POST {action: "settle", workspace_id}   the monitor key: no model; the filings' record onto the workspace, each job
+//                                          against its proof, renewals and done reports (src/finish.ts)
 // POST {action: "selftest"}   the monitor key: short real-model runs on in-memory scratch workspaces (selftest.ts);
 //                             returns {ok, model, checks: [{name, pass, detail, ms}], total_ms} in under 140 s
 // POST {action: "start_as", user_id, workspace_id, prompt, channel: "sms"|"voice"|"email", reply_to, plain_sms?, history?, lang?}
@@ -38,7 +40,7 @@ import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/od
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/mail.ts";
 // @ts-types="./agent.d.ts"
-import { agencyKey, chipsOf, DISTILL_SYSTEM, distillPrompt, filingEvidence, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
+import { agencyKey, chipsOf, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
@@ -211,8 +213,44 @@ async function senderOf(run: Run): Promise<string | undefined> {
   try { return (await admin.auth.admin.getUserById(run.created_by)).data?.user?.email ?? undefined; } catch { return undefined; }
 }
 
+/** What a run and "settle" read of the filings: status, proof (confirmation, receipt, the decision) and how it went. */
+const FILING_COLS = "app_id, status, confirmation_number, receipt_path, submitted_at, decided_at, updated_at, note, payment_url, customer_paid_at, agent_state, channel, agent_log";
+
+/** settle: the filings' record onto the workspace, every job against its proof, renewals for what the agencies approved,
+ *  and a report on each job just finished (src/finish.ts). No model call. Saved onto the newest state like a run's work
+ *  (never over anyone's save); nothing is written when nothing changed. The monitor calls it each morning. */
+async function settle(ws: string): Promise<{ changed: boolean; finished: number; renewals: number }> {
+  const { data: filings, error } = await admin.from("filings").select(FILING_COLS).eq("workspace_id", ws).order("approved_at", { ascending: false });
+  if (error) throw err("upstream_error", "Couldn't read the filings.");
+  const rows = (filings ?? []) as FilingRow[];
+  const read = async () => {
+    const { data: fresh, error: e } = await admin.from("workspaces").select("name, state, updated_at").eq("id", ws).maybeSingle();
+    if (e) throw err("save_failed", "Couldn't read the workspace: " + e.code);
+    return fresh?.updated_at ? { w: normalizeState(String(fresh.name ?? ""), fresh.state ?? {}), version: String(fresh.updated_at) } : null;
+  };
+  const first = await read();
+  if (!first) return { changed: false, finished: 0, renewals: 0 };
+  const change = (w: Workspace) => finishWork(stampFilings(w, rows));
+  if (change(first.w) === first.w) return { changed: false, finished: 0, renewals: 0 };
+  type J = { id: string; status: string };
+  const doneBefore = new Set(((first.w.jobs ?? []) as J[]).filter((j) => j.status === "done").map((j) => j.id));
+  const deadlinesBefore = ((first.w.deadlines ?? []) as unknown[]).length;
+  const w = await saveOnto<Workspace>({
+    tries: SAVE_TRIES, read,
+    async write(next, version) {
+      const { data: saved, error: e } = await admin.from("workspaces").update({ state: stripState(next), updated_at: new Date().toISOString() }).eq("id", ws).eq("updated_at", version).select("id");
+      if (e) throw err("save_failed", "save failed: " + e.code);
+      return !!saved?.length;
+    },
+  }, change);
+  // the agent's own audit lines (a renewal put on Deadlines), as a run's are
+  const audit = w.audit.filter((a) => a.actor === "agent").map((a) => ({ workspace_id: ws, client_id: a.id, actor: a.actor, actor_id: null, action: a.action, object: a.object, detail: a.detail ?? null }));
+  if (audit.length) await admin.from("audit_log").upsert(audit, { onConflict: "workspace_id,client_id", ignoreDuplicates: true });
+  return { changed: true, finished: ((w.jobs ?? []) as J[]).filter((j) => j.status === "done" && !doneBefore.has(j.id)).length, renewals: Math.max(0, ((w.deadlines ?? []) as unknown[]).length - deadlinesBefore) };
+}
+
 async function servicesFor(ws: string, run: Run, token: string | null): Promise<Services> {
-  const { data: filings } = await admin.from("filings").select("app_id, status, confirmation_number, submitted_at, updated_at, note, payment_url, agent_state, channel, agent_log").eq("workspace_id", ws).order("approved_at", { ascending: false });
+  const { data: filings } = await admin.from("filings").select(FILING_COLS).eq("workspace_id", ws).order("approved_at", { ascending: false });
   // Connected apps act as the person, so they need the person's session: runs the monitor starts don't touch them.
   const { data: ints } = token ? await admin.from("integrations").select("kind, status").eq("workspace_id", ws) : { data: [] as { kind: string; status: string }[] };
   // A request that came by text, call, email or chat has no session, but may read from the apps connected through their
@@ -840,9 +878,14 @@ export async function handle(req: Request): Promise<Response> {
   } catch { return fail(400, "bad_request", "Send JSON."); }
   const action = String(body.action ?? "start");
 
-  if (action === "continue" || action === "watchdog" || action === "watch" || action === "selftest" || action === "learn") {
+  if (action === "continue" || action === "watchdog" || action === "watch" || action === "selftest" || action === "learn" || action === "settle") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
     if (action === "learn") return json(200, await learnFromAgencies());
+    if (action === "settle") {
+      const ws = String(body.workspace_id ?? "");
+      if (!UUID.test(ws)) return fail(400, "bad_request", "workspace_id is required.");
+      try { return json(200, { ok: true, ...(await settle(ws)) }); } catch (e) { console.error("settle", ws, String(e).slice(0, 160)); return fail(500, "upstream_error", "Couldn't settle the workspace."); }
+    }
     if (action === "selftest") {
       // short real-model runs on scratch workspaces held in memory: no workspace is read or written
       // {probe: true}: which server secrets are set (names and yes/no only, never a value), and the checks there are

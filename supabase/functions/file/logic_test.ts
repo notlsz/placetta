@@ -3,7 +3,7 @@ import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
 import {
   afterHold, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
-  holds, isForeign, killSwitchOn, mailOutcome, mailTo, ownerPacket, pick, refusalOf, signedCopy, teamApproved,
+  fallback, holds, isForeign, killSwitchOn, mailOutcome, mailTo, ownerPacket, pick, PORTAL_FAILED, refusalOf, rerouteDue, signedCopy, teamApproved,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -258,4 +258,45 @@ Deno.test("a saved login opens a portal only on its host and, on a shared host, 
   assert(!hasLoginFor(["https://aca-prod.accela.com/CFW/Default.aspx"], dallas));
   assert(!hasLoginFor(["https://aca-prod.accela.com/DALLASTX"], dest({ email: "a@x.gov" })));
   assert(hasLoginFor(["https://www.sjpermits.org/"], dest({ portal: "sjpermits.org" })));
+});
+
+/* ------------------------------ another way when the agency's site fails ------------------------------ */
+
+const handedBack = (ref: string, f: Partial<Filing> = {}): Filing => filing({}, {
+  channel: "team", agent_state: "handoff", status: "in_progress",
+  agent_log: [{ en: "Opening the site", zh: "打开网站", kind: "visit" }, { en: "Couldn't finish", zh: "未能完成", kind: "handoff", ref }], ...f,
+});
+Deno.test("a portal run that failed before submitting is due for another way, once", () => {
+  for (const ref of ["limit", "left_portal", "no_portal", "portal_failed"]) assert(rerouteDue(handedBack(ref)), ref);
+  // another reason for the hand-back (the review page differs, a playbook's first run) stays the team's
+  assert(!rerouteDue(handedBack("review_differs")) && !rerouteDue(handedBack("unverified_playbook")) && !rerouteDue(handedBack("maybe_submitted")));
+  // anything that may have been submitted, or is finished, is never sent another way
+  assert(!rerouteDue(handedBack("limit", { submit_clicked_at: "2026-10-21T00:00:00Z" })));
+  for (const status of ["canceled", "submitted", "accepted", "rejected"]) assert(!rerouteDue(handedBack("limit", { status })), status);
+  // once decided (sent another way, or left with the team) or taken over, the last entry isn't the hand-back
+  const decided = handedBack("limit");
+  assert(!rerouteDue({ ...decided, agent_log: [...decided.agent_log, { en: "Sending by mail instead", zh: "改为邮寄", kind: "reroute", ref: "mail" }] }));
+  assert(!rerouteDue({ ...decided, agent_log: [...decided.agent_log, { en: "The Placetta team took over this filing", zh: "团队接手", kind: "take_over" }] }));
+  assert(!rerouteDue(handedBack("limit", { agent_state: "running" })) && !rerouteDue(handedBack("limit", { channel: "portal" })));
+});
+Deno.test("the other way follows the same rules as the first, without the site", () => {
+  const facts = { hasLogin: true, mailConnected: true };
+  const signed = filing({ signature: { name: "A", signed_at: "n", kind: "drawn" } });
+  // the agency's site failed; it also takes email, fax and mail: email first, as pick() would
+  assertEquals(fallback(signed, dest({ portal: "x.gov", email: "a@x.gov" }), ENV, facts), "email");
+  assertEquals(fallback(signed, dest({ portal: "x.gov" }), ENV, facts), "fax");
+  assertEquals(fallback(signed, dest({ portal: "x.gov", fax: undefined }), ENV, facts), "mail");
+  // never the site again
+  assertEquals(fallback(signed, dest({ portal: "x.gov", fax: undefined, mail: undefined }), ENV, facts), "team");
+  // a fee keeps it off email, fax and mail (Placetta never sends money): the team
+  assertEquals(fallback(filing({}, { fee_estimate: 50 }), dest({ portal: "x.gov", email: "a@x.gov" }), ENV, facts), "team");
+  // a wet signature: the hand-signed copy by fax when there is one, else the team
+  assertEquals(fallback(signed, dest({ portal: "x.gov", signature: "wet" }), ENV, facts), "team");
+  // a channel switched off isn't used; no destination at all is the team's
+  const noFax = envFrom((k) => ({ FILER_AGENCIES: "test-form", FILER_CHANNELS: "mail", TELNYX_API_KEY: "k", TELNYX_FAX_CONNECTION_ID: "c", TELNYX_FAX_FROM: "+1", LOB_API_KEY: "test_x", LOB_FROM: "{}" } as Record<string, string>)[k]);
+  assertEquals(fallback(signed, dest({ portal: "x.gov" }), noFax, facts), "mail");
+  assertEquals(fallback(signed, undefined, ENV, facts), "team");
+  // what goes by paper gets the paper checks: the filled form must be in Documents
+  assert(check(filing({ pdf_path: undefined }), dest({ portal: "x.gov" }), { docPaths: docs }, "mail").some((p) => p.kind === "file"));
+  assertEquals([...PORTAL_FAILED].sort(), ["left_portal", "limit", "no_portal", "portal_failed"]);
 });

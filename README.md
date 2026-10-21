@@ -59,6 +59,24 @@ The agent is an operator: it chains tools until the job is done, then reports. I
 Uploads (PDF, Word, images, text) are read into the application's fields. Email, files and web pages are treated as
 data, never as instructions.
 
+### Finishing jobs on its own (`src/finish.ts`, `src/today.ts`)
+
+- **Done means the agency has it.** A job with a filing under way gets "the agency has it, with its confirmation number
+  or receipt on file" on its done list, proven only from the filings table (never the model's or the reviewer's word).
+  Until then it waits on the person, Placetta's filing team or the agency, and says which.
+- **The done report.** When it finishes, the job records what was filed, where, how, the confirmation number and
+  receipt; an agency approval puts the next renewal on Deadlines from the approval day and the agency's published cycle
+  (no cycle published, no date). The reply, Work and the morning settle all show it.
+- **Another way when a site fails.** A portal run that fails before submitting is sent by email, fax or certified mail
+  when the agency takes it that way (same checks, same undo window, never twice), or becomes the owner's packet;
+  otherwise the team files it, as before (`file` reroute, migration `20261021120000_finish_jobs`).
+- **Picked back up.** Jobs Odelia stopped partway are restarted by the monitor, at most once a day and three times each.
+- **The agency asked.** A filing the agency returned or asked about becomes Odelia's job: she drafts the reply and the
+  corrected application for one-tap approval.
+- **One tap a day.** Home approves together what passed every check (filings and messages, no fee, no flag, no
+  signature to draw); payments, plans, changes and anything flagged stay one at a time. The morning digest says how many.
+- **Settle.** `agent-run` `{action: "settle"}` (monitor key, no model) writes the filings' record onto a workspace's jobs.
+
 ### Background: the monitor and Updates
 
 `supabase/functions/monitor` runs every morning (pg_cron, 12:15 UTC) and writes **Updates**: deadlines in the next two

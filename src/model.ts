@@ -1,5 +1,5 @@
 import type { Budget, Purchase, SpendPolicy } from "./spend.ts";
-import type { Job, Routine } from "./jobs";
+import type { Filed, Job, Routine } from "./jobs";
 import type { Controls, HeldCall } from "./autonomy";
 import type { UndoPoint } from "./rewind";
 import type { RunLog } from "./replay";
@@ -58,6 +58,7 @@ export type Application = {
   plain?: Bi;                // what this is, in one line a person would say (from the registry's plain field)
   preview?: boolean;         // listed from Placetta's registry at sign-up (src/plan/preview.ts), before Odelia verified it with the agency
   versions?: FormVersion[];  // the agency's own form, filled, each time its answers changed (src/forms/versions.ts); newest last
+  filed?: Filed;             // its latest filing as the filings table has it (src/finish.ts stampFilings): the proof a job waits on
 };
 
 /** A line that changed between two filled copies of a form. */

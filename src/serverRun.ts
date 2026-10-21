@@ -6,7 +6,8 @@ import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
 import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runAll, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
 import { B } from "./bi";
-import { MAIN_BOT, proven, reconcile, settleJobs, type Job } from "./jobs";
+import { MAIN_BOT, proven, reconcile, settleJobs, STOPPED_HERE, type Job } from "./jobs";
+import { finishWork, reportLines, stampFilings } from "./finish";
 import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy, usedInBlocks } from "./sources";
 import { MCP_PREFIX } from "./mcp";
 import { applyVerdict, CHECKER_SYSTEM, checkerPrompt, CONTEXT_CHARS, evidence, formFailures, harnessBrief, MAX_CHECKS, MAX_SEATS, openLine, parseVerdict, proofLine, saysDone, storeName, storeRules } from "./harness";
@@ -253,6 +254,18 @@ export async function runRounds(o: {
   st.started ??= new Date().toISOString();
   // each application's answers as the run found them: the ones it changes get their form filled again at the end
   st.forms ??= Object.fromEntries(o.ws().apps.map(a => [a.id, answersHash(a)]));
+  if (st.rounds === 0) {
+    // The filings' own record onto each application (confirmation numbers, receipts, the agencies' decisions), so the
+    // proof loop reads what really happened, not what anyone said. A record, like the run's link: Undo doesn't take it back.
+    // (when the filings can't be read, the record stays as it was: nothing is proven that wasn't)
+    let rows: ReturnType<Services["filings"]> = [];
+    try { rows = o.svc?.filings() ?? []; } catch { rows = []; }
+    if (rows.length) o.apply(w => stampFilings(w, rows));
+    // A job she stopped partway and is now asked to carry on is hers again: working, not waiting.
+    const ref = /\(job ([^)\s]+)\)/.exec(st.request ?? "")?.[1];
+    if (ref) o.apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === ref && j.status === "waiting" && (j.on === "odelia" || (!j.on && j.waiting?.en === STOPPED_HERE.en))
+      ? { ...j, status: "running" as const, on: undefined, waiting: undefined, updated: new Date().toISOString() } : j)) }));
+  }
   const made: Made = { apps: new Set(st.made.apps), approvals: [...st.made.approvals], memory: [...st.made.memory], skills: [...(st.made.skills ?? [])], files: [...st.made.files], matches: st.made.matches, table: st.made.table, lastToolAt: st.lastToolAt,
     job: st.made.job ?? o.child?.job, split: st.made.split };
   /* Owner controls (src/autonomy.ts): this run's mode (Ask me first, Usual, Plan first) and Undo's record of what it
@@ -491,7 +504,9 @@ export async function runRounds(o: {
       if (!(st.firstChecks ??= []).some(c => c.job === j.id)) st.firstChecks.push({ job: j.id, passed: verdict.filter(v => v.ok).length, of: verdict.length });
       if (!checkedNow.includes(j.id)) checkedNow.push(j.id);
       recheck.delete(j.id);
-      const missing = j.done!.filter((_, k) => !verdict[k].ok).map((d, k) => `- ${d.text.en}: ${verdict.filter(v => !v.ok)[k]?.why ?? ""}`);
+      // A filing's proof line waits on the agency (or the person's approval), not on more work: it isn't sent back, and
+      // the job waits on whoever has the filing (src/jobs.ts reconcile)
+      const missing = j.done!.map((d, k) => ({ d, v: verdict[k] })).filter(x => !x.d.check?.proof && !x.v.ok).map(x => `- ${x.d.text.en}: ${x.v.why}`);
       if (missing.length && !final) recheck.add(j.id);
       if (missing.length && !final) sendBack.push(`Job ${j.id} (${j.title.en}) isn't done yet. The checker found:\n${missing.join("\n")}`);
     }
@@ -507,8 +522,9 @@ export async function runRounds(o: {
 
   await fillForms();   // a run that ran out of steps still hands back the forms it changed
   apply(settleJobs(st.started, { child: o.child?.job }));
-  // a split job ticks from its stores as they're checked
-  if ((o.ws().jobs ?? []).some(j => j.children?.length && j.updated >= st.started!)) apply(w => reconcile(w));
+  // every job against its proof (a filing waits on the agency, not on the person; a split job ticks from its stores as
+  // they're checked), the renewals of what the agencies approved, and the report on each job that just finished
+  apply(w => finishWork(w));
   link();
   /* Business rules: each job this run finished fires "a job is done" once. Then the run's undo point, so the person
      can put back what it changed (src/rewind.ts). */
@@ -523,7 +539,10 @@ export async function runRounds(o: {
   const waits = factCards(o.ws(), made.approvals).length > 0 && !/approv|confirm|批准|确认/i.test(said) ? waitingLine(o.lang) : "";
   // a form that didn't come out right is said in the reply, whatever the model wrote: it isn't ready to file
   const formLine = (st.filled ?? []).filter(n => !n.ok && n.problem).map(n => (o.lang === "zh" ? `${n.form}还不能提交。${n.problem!.zh}` : `The ${n.form} isn't ready to file. ${n.problem!.en}`)).join(" ");
-  const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, formLine, proof].filter(Boolean).join("\n\n");
+  // a job that finished in this run says what was filed, the proof and the next renewal, from the record (src/finish.ts)
+  const reported = (o.ws().jobs ?? []).filter(j => own(j) && j.status === "done" && !!j.report && j.report.at >= st.started!)
+    .flatMap(j => reportLines(o.ws(), j, o.lang, new Date().toISOString().slice(0, 10))).slice(0, 4).join(" ");
+  const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, formLine, proof, reported].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
 
   /* ---- Sources: from what this run's tools read, never from the model's words (src/sources.ts) ---- */

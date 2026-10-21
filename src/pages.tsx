@@ -4,17 +4,17 @@ import { useApp, type PermitsTab, type View } from "./ctx";
 import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
 import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
-import { openingPath, preflight } from "./smart";
-import { audit, readyToFile } from "./core";
+import { openingPath } from "./smart";
+import { oneTap } from "./today";
+import { audit } from "./core";
 import { firstPlanClock, secondsSay } from "./plan/prefill";
-import { formById } from "./forms/registry";
 import type { Key } from "./i18n";
 import { AgentBot, TaskBot, Working } from "./Bot";
 import { taskVerb } from "./tasks";
 import { StoresStrip } from "./Stores";
 import { B, type Bi } from "./model";
 import { takeAutostart } from "./cloud/handoff";
-import { nextAction, nextRun } from "./jobs";
+import { awayWait, nextAction, nextRun } from "./jobs";
 import { ChiefRow, PlanCard } from "./Work";
 import { hrefOf, plainClick } from "./route";
 import { HomeMetrics } from "./Metrics";
@@ -88,9 +88,10 @@ const KIND_ICON = { file: I.form, send: I.message, upload: I.clip, pay: I.card, 
 
 /** Something only you can do: frosted, with the one action it needs. */
 /**
- * Approval fatigue is how a rubber stamp starts. Filings that passed every check (complete, no line flagged, no
- * signature to draw) can be approved together, from one list that still names each one and its fee. Anything with a
- * flag, a signature or a payment stays one at a time.
+ * Approval fatigue is how a rubber stamp starts. Today's approvals that passed every check (src/today.ts: filings
+ * complete with no line flagged and no signature to draw, and messages with nothing flagged and no fee) can be approved
+ * together, from one list that still names each one, its agency or recipient, and its fee. Anything with a flag, a
+ * signature, a payment, a change to the business or a second owner stays one at a time.
  */
 function BatchApprove() {
   const { b, lang, ws, busy, approve, cloud } = useApp();
@@ -98,28 +99,28 @@ function BatchApprove() {
   const [going, setGoing] = useState(false);
   const zh = lang === "zh";
   const today = new Date().toISOString().slice(0, 10);
-  const clean = ws.approvals.filter(a => {
-    if (a.kind !== "file") return false;
-    const app = ws.apps.find(x => x.id === a.app);
-    if (!app || !readyToFile(app)) return false;
-    const off = app.official ? formById(app.official) : undefined;
-    if (cloud && off?.sign && off.esign) return false;
-    const pf = preflight(ws, a, today);
-    return !pf.errors.length && !pf.warnings.length;
-  });
-  if (clean.length < 2 || (cloud && cloud.plan !== "monthly")) return null;
+  const clean = oneTap(ws, today, { account: !!cloud, filings: !cloud || cloud.plan === "monthly" }).ids.map(id => ws.approvals.find(a => a.id === id)!).filter(Boolean);
+  if (clean.length < 2) return null;
+  const files = clean.filter(a => a.kind === "file").length, msgs = clean.length - files;
+  const what = (en: boolean) => en
+    ? [files && `${files} filing${files === 1 ? "" : "s"}`, msgs && `${msgs} message${msgs === 1 ? "" : "s"}`].filter(Boolean).join(" and ")
+    : [files && `${files} 份申请`, msgs && `${msgs} 条消息`].filter(Boolean).join("和");
   const go = async () => { setGoing(true); try { for (const a of clean) await approve(a.id); } finally { setGoing(false); setOpen(false); } };
   return (
     <>
       <div className="batch-row">
-        <span>{zh ? `${clean.length} 份申请已通过全部核对，没有需要留意的地方。` : `${clean.length} filings passed every check with nothing flagged.`}</span>
-        <Pill disabled={busy} sm onClick={() => setOpen(true)}>{zh ? `一起批准 ${clean.length} 份` : `Approve ${clean.length} together`}</Pill>
+        <span>{zh ? `${what(false)}已通过全部核对，没有需要留意的地方。` : `${what(true).replace(/^./, c => c.toUpperCase())} passed every check with nothing flagged.`}</span>
+        <Pill disabled={busy} sm onClick={() => setOpen(true)}>{zh ? `一起批准 ${clean.length} 项` : `Approve ${clean.length} together`}</Pill>
       </div>
       {open && (
         <Modal label={zh ? "一起批准" : "Approve together"} onClose={() => setOpen(false)}>
-          <header className="m-h"><h2>{zh ? `批准 ${clean.length} 份申请` : `Approve ${clean.length} filings`}</h2><p>{zh ? "每份都已逐项核对。批准后交由快哉团队提交，机构费用由您直接支付。" : "Each was checked line by line. Once approved, Placetta's team files them; agency fees are paid by you directly."}</p></header>
+          <header className="m-h"><h2>{zh ? `批准 ${clean.length} 项` : `Approve ${clean.length} together`}</h2><p>{zh ? "每项都已逐项核对。批准后，申请交由快哉提交，消息在撤销时限过后发出；机构费用由您直接支付。" : "Each was checked line by line. Once approved, Placetta files the filings and the messages go out after the undo window; agency fees are paid by you directly."}</p></header>
           <div className="m-body">
-            <ol className="batch-list">{clean.map(a => { const app = ws.apps.find(x => x.id === a.app)!; return <li key={a.id}><b>{b(a.title)}</b>{a.agency ? `, ${b(a.agency)}` : ""}. {feeTotal(app) ? money(feeTotal(app), app.currency) : zh ? "无费用" : "No fee"}</li>; })}</ol>
+            <ol className="batch-list">{clean.map(a => {
+              if (a.kind === "send") { const to = a.data?.find(f => f.id === "to")?.value; return <li key={a.id}><b>{b(a.title)}</b>{to ? `, ${zh ? "发给" : "to"} ${to}` : ""}. {zh ? "无费用" : "No fee"}</li>; }
+              const app = ws.apps.find(x => x.id === a.app)!;
+              return <li key={a.id}><b>{b(a.title)}</b>{a.agency ? `, ${b(a.agency)}` : ""}. {feeTotal(app) ? money(feeTotal(app), app.currency) : zh ? "无费用" : "No fee"}</li>;
+            })}</ol>
           </div>
           <footer className="m-f"><div className="m-btns">
             <button type="button" className="pill quiet" onClick={() => setOpen(false)}>{zh ? "逐份查看" : "Review one by one"}</button>
@@ -264,10 +265,12 @@ export function Overview() {
   /* 1. Needs you: every approval, and every job stuck on you that no approval row already covers */
   const jobs = ws.jobs ?? [];
   // a job split across stores waits on a store's part, which shows here itself
-  const waitingJobs = jobs.filter(j => j.status === "waiting" && !j.children?.length).filter(j => {
+  // a job with the agency or Placetta's filing team needs nobody: it shows under what's in motion instead
+  const waitingJobs = jobs.filter(j => j.status === "waiting" && !j.children?.length && !awayWait(j)).filter(j => {
     const act = nextAction(ws, j);
     if (!act || act.who !== "you") return true;
     if (act.kind === "approve") return !ws.approvals.some(a => a.id === act.id);
+    if (act.kind === "answer") return !ws.approvals.some(a => a.kind === "pay" && a.app === act.app);
     return !ws.approvals.some(a => a.kind === "upload" && a.app === act.app);
   }).filter(j => !mine || mineJob(team, j));
   const approvals = mine ? ws.approvals.filter(a => mineApp(team, a.app)) : ws.approvals;
@@ -276,7 +279,7 @@ export function Overview() {
   /* 2. Odelia is working on: what she coordinates across stores (each store's bot and where its part stands), running
      jobs with their live plan, background watchers, what's queued, and the routines */
   const chiefs = jobs.filter(j => j.children?.length && j.status !== "done" && j.status !== "stopped" && (!mine || mineJob(team, j)));
-  const running = jobs.filter(j => j.status === "running" && !j.parent && !j.children?.length && (!mine || mineJob(team, j)));
+  const running = jobs.filter(j => (j.status === "running" || awayWait(j)) && !j.parent && !j.children?.length && (!mine || mineJob(team, j)));
   const routines = ws.routines ?? [], active = routines.filter(r => !r.paused);
   const nextRoutine = active.map(r => nextRun(r, today)).filter((d): d is string => !!d).sort()[0];
   const routineLine = !routines.length ? "" : !active.length ? t("hm_routinesPaused", { n: routines.length })

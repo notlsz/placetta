@@ -12,3 +12,5 @@ export { monthMetrics } from "../monthly";
 export { appPdf, fillForm, pdfFile, type Filled, type LoadPdf } from "../forms/fill";
 export { readBack } from "../forms/readback";
 export { answersHash, fillAndRead, latestVersion, refreshForms } from "../forms/versions";
+// Finishing (src/finish.ts): the filings' record onto the workspace and every job against its proof, for "settle"
+export { finishWork, stampFilings } from "../finish";

@@ -385,7 +385,9 @@ export class Worker {
       const g = await this.c.store.step(cur, log("The run stopped after pressing submit. The team checks with the agency.", "运行在点击提交后中断，团队会向机构核实。", "handoff", msg), { agent_state: "handoff", channel: "team" });
       await this.c.store.teamTask(g, "check_agency", "Run stopped after submit was pressed. Check the agency first.");
     } else if (cur.attempts >= 3) {
-      const g = await this.c.store.step(cur, log("Handed to the Placetta team after 3 tries", "已尝试 3 次，交由快哉团队处理", "handoff", msg), { agent_state: "handoff", channel: "team" });
+      // ref portal_failed: the file function's sweep tries another way the agency takes (email, fax, certified mail, or
+      // the owner's packet) before the team files it by hand (supabase/functions/file reroute); the error is in the task
+      const g = await this.c.store.step(cur, log("The agency's site failed 3 times. Placetta tries another way the agency takes, or the team files it.", "机构网站 3 次未能完成。快哉会改用机构接受的其他方式，否则由团队提交。", "handoff", "portal_failed"), { agent_state: "handoff", channel: "team" });
       await this.c.store.teamTask(g, "handoff", `Portal run failed 3 times: ${msg}`);
     } else {
       await this.c.store.step(cur, log("Something went wrong on the agency's site. Trying again.", "机构网站出现问题，正在重试。", "retry", msg), { agent_state: "queued" });

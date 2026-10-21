@@ -9,8 +9,9 @@
 //   undo    the customer takes it back during the undo window (SEND_HOLD_MINUTES, 10 by default), while it's held
 //   send_now  the customer ends the undo window early and it goes now
 //   team_approve, take_over   the Placetta team (two-step) in the two-key period, or taking a run over
-// POST { action: "sweep" } with x-monitor-key: the monitor's run, and every minute while a held send is due (held sends
-//   whose time is up, stuck runs, fax and mail status, stale destinations)
+// POST { action: "sweep" } with x-monitor-key: the monitor's run, and every minute while a held send is due or a portal
+//   run failed (held sends whose time is up, filings whose agency site failed sent another way, stuck runs, fax and mail
+//   status, stale destinations)
 // POST ?provider=telnyx: Telnyx fax webhooks, verified with TELNYX_PUBLIC_KEY.
 //
 // Ground rules: one approval, one submission (only filings.payload, which the database keeps frozen); submit_clicked_at
@@ -24,8 +25,8 @@ import {
 } from "./shared.ts";
 import { DEST, staleDestinations, type Dest } from "./destinations.ts";
 import {
-  afterHold, askedToResubmit, canFaxSignedFor, check, DUPLICATE_REF, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holds,
-  isForeign, killSwitchOn, type LogEntry, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, type Refusal, refusalOf, signedCopy, teamApproved,
+  afterHold, askedToResubmit, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holds,
+  isForeign, killSwitchOn, type LogEntry, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, type Refusal, refusalOf, rerouteDue, signedCopy, teamApproved,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
@@ -696,8 +697,55 @@ async function lostRuns(): Promise<number> {
   return n;
 }
 
+/** The agency's site failed before anything was submitted: Placetta sends it another way the agency takes (email, fax or
+    certified mail, after the same undo window and the same checks), or prepares the owner's packet when only the
+    business may send it. Nothing is ever sent twice: only a filing with no submit on record, by a compare-and-set on
+    its hand-back. When there's no other way, the team files it, as before, and the log says why. */
+async function reroute(f: Filing) {
+  const e = env();
+  const d = DEST[f.payload.official ?? ""];
+  const was = { expect_agent_state: "handoff" };
+  const route = fallback(f, d, e, await facts(f, d));
+  const problems = route === "team" ? [] : check(f, d, { docPaths: await docPaths(f) }, route);
+  if (route === "team" || problems.length) {
+    const why = route === "team" ? "There's no other way the agency takes it that Placetta can send by itself" : `It can't go another way yet: ${problems.map((p) => p.en).join(". ")}`;
+    const whyZh = route === "team" ? "机构没有其他快哉可以自动提交的方式" : `暂时无法改用其他方式：${problems.map((p) => p.zh).join("；")}`;
+    return view(await step(f, log(`The agency's site didn't work. ${why}, so the Placetta team files it.`.slice(0, 900), `机构网站无法完成。${whyZh}，由快哉团队提交。`.slice(0, 900), "reroute", "team"), was, false));
+  }
+  // Placetta sends it itself now: the team's hand-back task for it is closed
+  await admin.from("team_tasks").update({ done_at: new Date().toISOString() }).eq("filing_id", f.id).eq("kind", "handoff").is("done_at", null);
+  if (route === "owner") {
+    const g = await step(f, log("The agency's site didn't work. This form is one the business sends itself, so Odelia prepared the packet.", "机构网站无法完成。这份表格需由企业本人提交，Odelia 已准备好材料包。", "reroute", "owner"), was);
+    return await toOwner(g, d!);
+  }
+  const said = CHANNEL_SAID[route];
+  const g = await step(f, log(`The agency's site didn't work, so Placetta sends it ${said.en} instead.`, `机构网站无法完成，快哉改为${said.zh}提交。`, "reroute", route),
+    { ...was, channel: route, agent_state: "running", requirements_checked: true, handoff_url: null });
+  if (holds(route, e)) return view(await holdSend(g, e.holdMinutes));
+  switch (route) {
+    case "email": return await sendEmail(g, d!);
+    case "fax": return await sendFax(g, d!);
+    case "mail": return await sendMail(g, d!);
+    default: return view(g);
+  }
+}
+
+/** Every filing whose portal run failed and that hasn't been looked at since: each tried another way, once. */
+async function rerouteFailed(): Promise<number> {
+  const { data, error } = await admin.from("filings").select(COLS).eq("channel", "team").eq("agent_state", "handoff").is("submit_clicked_at", null)
+    .not("status", "in", "(canceled,submitted,accepted,rejected)").limit(50);
+  if (error) { console.error("reroute:", error.code ?? ""); return 0; }
+  let n = 0;
+  for (const r of (data ?? []) as unknown as Filing[]) {
+    if (!rerouteDue(r)) continue;
+    try { await reroute(r); n++; } catch (e) { if (!(e instanceof Refused)) console.error("reroute:", describe(e)); }
+  }
+  return n;
+}
+
 async function sweep() {
   const released = await releaseDue();
+  const rerouted = await rerouteFailed();
   const { data: n } = await admin.rpc("requeue_stuck_filings");
   const lost = await lostRuns();
   const { data: rows } = await admin.from("filings").select(COLS).in("channel", ["fax", "mail"])
@@ -709,7 +757,7 @@ async function sweep() {
     await admin.from("team_tasks").upsert({ kind: "destination_stale", title: `Re-check ${s.id} destinations (last checked ${s.checked}) on ${s.source}`, dedupe: `stale:${s.id}:${s.checked}` },
       { onConflict: "dedupe", ignoreDuplicates: true });
   }
-  return { released, requeued: n ?? 0, lost, refreshed: rows?.length ?? 0 };
+  return { released, rerouted, requeued: n ?? 0, lost, refreshed: rows?.length ?? 0 };
 }
 
 // ------------------------------------------------------------------ router

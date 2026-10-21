@@ -13,7 +13,8 @@ export type Block = { type: string; text?: string; id?: string; name?: string; i
 export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
 export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role, onText?: (text: string) => void) => Promise<{ content: Block[]; stop_reason: string }>;
 export type Services = {
-  filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[] }[];
+  filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[];
+    receipt_path?: string | null; decided_at?: string | null; customer_paid_at?: string | null }[];
   connected(): string[];
   integration<T>(action: string, body: Record<string, unknown>): Promise<T>;
   saveFile(file: File, appId?: string): Promise<{ path: string }>;
@@ -33,6 +34,13 @@ export type Services = {
 /** What a store's bot came back with, for the run that split the work. */
 export type ChildResult = { job: string; store: string; status: string; reply: string };
 export declare function normalizeState(name: string, s: Record<string, unknown>): Workspace;
+/** A filing as the filings table has it (src/finish.ts FilingRow), newest first by approval. */
+export type FilingRow = { app_id: string; status: string; confirmation_number?: string | null; receipt_path?: string | null; submitted_at?: string | null; decided_at?: string | null; channel?: string | null; note?: string | null; payment_url?: string | null; customer_paid_at?: string | null };
+/** Each application's latest filing onto it, as the record the proof loop reads; the same workspace when nothing changed. */
+export declare function stampFilings(w: Workspace, rows: FilingRow[]): Workspace;
+/** Renewals for what the agencies approved, every open job against its proof, and the report on each job just done;
+ *  the same workspace when nothing changed. */
+export declare function finishWork(w: Workspace, now?: string): Workspace;
 export declare function stripState(w: Workspace): Record<string, unknown>;
 export declare function startState(history: Turn[], prompt: string): RunState;
 export declare function runRounds(o: {

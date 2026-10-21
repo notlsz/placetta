@@ -23,7 +23,7 @@ import type { Application, Approval, Change, CheckItem, Doc, Field, FactGroup, L
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { contactFor } from "./recall";
 import { daysFromNow, money, nowIso } from "./time";
-import { cadence, MAIN_BOT, MAX_CHILDREN, met, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
+import { cadence, ensureProof, MAIN_BOT, MAX_CHILDREN, met, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
 import { replyMoment, scrubStep, traced } from "./replay";
 import { claimsAction, emailsIn, HONEST, injected, SECRET_WHY, secretNumber } from "./guard";
 import { basisLine, openingLine, openingPath, preflight } from "./smart";
@@ -333,7 +333,8 @@ ${can("split_job") ? `- When they ask for the same work across several stores (g
 
 Rules:
 - You never file, submit, pay, sign or send anything yourself, and never say you did. Filings, payments and messages go out only after the person approves them in the app.${account ? `
-- After the person approves a filing, Placetta checks it against the agency's requirements, submits it by email, fax, certified mail or the agency's site (or hands it to the Placetta team when no automatic channel fits), and saves the confirmation. It asks the person only for a CAPTCHA, an identity check, a payment or a handwritten signature. Government fees are paid by the business directly to the agency. Never say a filing is submitted until the workspace shows it.` : ""}
+- After the person approves a filing, Placetta checks it against the agency's requirements, submits it by email, fax, certified mail or the agency's site (or hands it to the Placetta team when no automatic channel fits), and saves the confirmation. It asks the person only for a CAPTCHA, an identity check, a payment or a handwritten signature. Government fees are paid by the business directly to the agency. Never say a filing is submitted until the workspace shows it.
+- A job that files something is done when the agency has it (its confirmation number or receipt on file, or its approval), not when the person approves it: Placetta adds that line to the job's done list and finishes the job from the filing's own record. Until then the job waits on Placetta's filing team or the agency; say who has it.` : ""}
 - Addresses on an official form: use the company's own address in the country it is applying in. Before filling an address line, read address_rules for that form: it says what the agency accepts on each line (a street address in the state, the store's own premises, any US address, or an address abroad), each confirmed by three official sources. When the business has no address of the kind a line needs (most often a street address in the state for a registered or statutory agent), never put its address abroad there: say what the agency accepts and what to do without such an address (address_rules says), cite the sources, and leave the line empty. fill_fields and request_filing_approval refuse an address that breaks the rule.
 - Never invent the person's facts. If something is missing, leave the field empty (never "TBD", "unknown" or a placeholder, which count as empty) and ask for it at the end; in a drafted document use [brackets].
 - Never invent a license or permit name, form number, agency, fee, processing time, rule or date. Take them from find_official_forms${research ? " or an official page you read and cite" : ""}; anything you couldn't confirm there, call an estimate to confirm with the agency, or leave out.
@@ -381,7 +382,8 @@ const gaps = (a: Application) => ({ empty_fields: a.fields.filter(f => isBlank(f
 
 /** What a signed-in workspace adds to the agent's hands: the team's filings, the person's connected apps and stored files. */
 export type Services = {
-  filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[] }[];
+  filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[];
+    receipt_path?: string | null; decided_at?: string | null; customer_paid_at?: string | null }[];
   /** Connected integration kinds: gmail, outlook_mail, gcal, outlook_cal, gdrive, dropbox, quickbooks, slack, square, toast. */
   connected(): string[];
   integration<T>(action: string, body: Record<string, unknown>): Promise<T>;
@@ -870,6 +872,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           fix: pf.errors.map(e => `${e.label.en}: ${e.note.en}`), do_next: "Correct these with fill_fields from the documents; ask the person only for what no document shows. Then call this again." };
         S("composing", L(`Asking for your approval to file the ${nm(a)}`, `请您批准提交${nm(a)}`));
         apply(w => audit("agent", L("Asked for approval", "请求批准"), a.name, fee ? same(money(fee, a.currency)) : undefined)(setApp(a.id, { status: "ready", next: L("Ready to file. Waiting for your approval", "可以提交，等待您批准") })(addApproval(ap)(w))));
+        // The job this run is on now covers this filing, and isn't done until the agency has it (src/jobs.ts ensureProof):
+        // the person's approval is a step, not the end
+        if (job.current) apply(w => ({ ...w, jobs: (w.jobs ?? []).map(j => (j.id === job.current && !j.children?.length ? ensureProof(w, { ...j, apps: [...new Set([...(j.apps ?? []), a.id])] }) : j)) }));
         made.approvals.push(ap.id); made.apps.add(a.id); mark();
         // learn it: the next filing of this form fills itself
         const off = a.official ? formById(a.official) : undefined;
@@ -1026,7 +1031,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         title: { type: "string", description: "Short, e.g. 'Map the Flushing store'" },
         steps: { type: "array", items: { type: "object", properties: { title: { type: "string" }, done: { type: "boolean" },
           proof: { type: "object", description: "When the workspace itself can prove the step, say how, and Placetta ticks it from the evidence instead of your say-so: documents arriving on an application's checklist, an approval put up, or an approval the person gave", properties: {
-            application_id: { type: "string" }, checklist_ids: { type: "array", items: { type: "string" } }, approval_id: { type: "string", description: "Done once this approval is put up" }, approved_id: { type: "string", description: "Done once the person approves this" } } } }, required: ["title"] }, description: "Every step, in order" },
+            application_id: { type: "string" }, checklist_ids: { type: "array", items: { type: "string" } }, approval_id: { type: "string", description: "Done once this approval is put up" }, approved_id: { type: "string", description: "Done once the person approves this" },
+            filed_id: { type: "string", description: "An application id: done once the agency has it, with its confirmation number or receipt on file (or its approval)" } } } }, required: ["title"] }, description: "Every step, in order" },
         status: { type: "string", enum: ["running", "waiting", "done", "stopped"] },
         waiting_on: { type: "string", description: "With status waiting: what you need, and from whom" },
         application_ids: { type: "array", items: { type: "string" } },
@@ -1042,6 +1048,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           const items = app ? arr(r.checklist_ids).map(x => str(x)).filter(x => app.checklist.some(c => c.id === x)) : [];
           const known = (id: string) => !!id && (w.approvals.some(a => a.id === id) || w.closed.some(a => a.id === id));
           const c: StepCheck = { ...(app && items.length ? { app: app.id, items } : {}), ...(known(str(r.approval_id)) ? { approval: str(r.approval_id) } : {}), ...(known(str(r.approved_id)) ? { closed: str(r.approved_id) } : {}) };
+          // "the agency has it": proven from the filing's own record, and it names its own application
+          const filed = w.apps.find(a => a.id === str(r.filed_id));
+          if (filed && !c.app) Object.assign(c, { app: filed.id, proof: "submitted" as const });
           return Object.keys(c).length ? c : undefined;
         };
         // A step with proof is done when the workspace shows it, whatever the model says (as reconcile does in the app):
@@ -1090,10 +1099,16 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         if (!old && !doneList?.length && steps.length >= 3) throw new Error("Give the job its done list: 2 to 8 things that will be true when it's finished, each something the workspace can show. A separate checker verifies them before the job counts as done.");
         const changed = !old || JSON.stringify(old.steps) !== JSON.stringify(steps) || JSON.stringify(old.done?.map(d => d.text.en)) !== JSON.stringify(doneList?.map(d => d.text.en));
         // (a store's part keeps the name it was split with)
-        const next: Job = { id, title: x.child && old ? old.title : same(title), status, steps, ...(waiting ? { waiting } : {}), started: old?.started ?? now, updated: now, ...(apps.length || old?.apps ? { apps: apps.length ? apps : old?.apps } : {}), ...(old?.routine ? { routine: old.routine } : {}),
+        const next0: Job = { id, title: x.child && old ? old.title : same(title), status, steps, ...(waiting ? { waiting } : {}), started: old?.started ?? now, updated: now, ...(apps.length || old?.apps ? { apps: apps.length ? apps : old?.apps } : {}), ...(old?.routine ? { routine: old.routine } : {}),
           ...(pbId ? { playbook: pbId } : {}), ...(doneList?.length ? { done: doneList } : {}), ...(old?.checked && !changed ? { checked: old.checked } : {}),
           ...(old?.files ? { files: old.files } : {}), ...(old?.handoffs ? { handoffs: old.handoffs } : {}), seat: old?.seat ?? 1,
           ...(old?.parent ? { parent: old.parent } : {}), ...(old?.store ? { store: old.store } : {}), ...(old?.runs ? { runs: old.runs } : {}) };
+        // A filing under way on the job's applications: its done list gets "the agency has it", proven from the filing's
+        // own record. Marked done before the agency has it, it stays open: the reviewer checks the rest, and then it waits
+        // on whoever has the filing (src/jobs.ts reconcile).
+        const withProof = ensureProof(get(), { ...next0, status: next0.status === "done" ? "running" : next0.status });
+        const filingOpen = (withProof.done ?? []).some(d => d.check?.proof && !met(get(), d.check));
+        const next: Job = { ...next0, ...(withProof.done ? { done: withProof.done } : {}), ...(next0.status === "done" && filingOpen ? { status: "running" as const } : {}) };
         job.current = id; made.job = id;
         const n = steps.filter(x => x.done).length;
         S(status === "done" ? "working" : "shaping", old ? L(`Plan: ${n} of ${steps.length} done`, `计划：已完成 ${n}/${steps.length}`) : L(`Planned ${steps.length} steps: ${title}`, `已规划 ${steps.length} 步：${title}`));
@@ -1103,7 +1118,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const open = steps.filter(x => !x.done).map(x => x.title.en);
         return { job_id: id, done: n, of: steps.length, status, ...(next.done?.length ? { done_list: next.done.length } : {}),
           ...(unproven.length ? { not_proven: unproven, why: "These steps tick when the workspace shows their proof (the documents on the checklist, the approval put up or given), not when they're marked done." } : {}),
-          ...(asked === "done" && !allDone ? { not_done: open, note: "A job is done only when every step is. It stays open." } : {}) };
+          ...(asked === "done" && !allDone ? { not_done: open, note: "A job is done only when every step is. It stays open." } : {}),
+          ...(filingOpen ? { filing_not_at_agency_yet: true, filing_note: "A filing on this job isn't with the agency yet (no confirmation number or receipt on file), so the job stays open until it is. Placetta's filing team or the agency has it; nothing more for you to do on it now. Say plainly who has it and that the job finishes when the confirmation is on file." } : {}) };
       },
     },
     {

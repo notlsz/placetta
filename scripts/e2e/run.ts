@@ -1686,6 +1686,74 @@ try {
     await sql`delete from public.ai_events where user_id = ${owner.id} and kind in ('call', 'task') and at >= ${f4Start}`;
   });
 
+  /* ---------------- f5. finishing on its own ---------------- */
+  // A job runs to the agency's proof, not to the approval (src/finish.ts). The agency's site fails before anything was
+  // submitted, so the file function's sweep sends it another way the agency takes (here, the hand-signed SS-4 by fax),
+  // once; the fax is delivered; and agent-run "settle" (no model) finishes the job from the filing's record, with its
+  // report (migration 20261021120000_finish_jobs).
+  await scenario("f5. finishing on its own", async () => {
+    const b = (en: string) => ({ en, zh: en });
+    const proofLine = b("The agency has the employer identification number, with its confirmation number or receipt on file");
+    const made = await rpc("create_workspace", { p_name: "Finish Test", p_authorized: true, p_state: {
+      business: b("Finish Test LLC"), goal: b("Get the EIN"), locations: [], docs: [], nudges: [], approvals: [], facts: [], running: [], connections: [], deadlines: [],
+      apps: [{ id: "app-ein2", name: b("Employer identification number"), agency: b("Internal Revenue Service"), level: "federal", status: "ready", official: "irs-ss4", fees: [], est: b("Same day"), source: { label: "irs.gov", url: "https://www.irs.gov" }, fields: [], checklist: [] }],
+      closed: [{ id: "ap-ein2", kind: "file", app: "app-ein2", title: b("File the employer identification number"), does: [], action: b("Approve & file") }],
+      jobs: [{ id: "job-ein2", title: b("Get the EIN"), status: "waiting", on: "team", waiting: b("Placetta is sending it."), steps: [{ title: b("Put it up for approval"), done: true }],
+        done: [{ text: proofLine, check: { app: "app-ein2", proof: "submitted" }, ok: false }], started: new Date(Date.now() - 864e5).toISOString(), updated: new Date(Date.now() - 864e5).toISOString(), apps: ["app-ein2"] }],
+    } }, owner.jwt);
+    const ws2 = made.data as string;
+    check("a second workspace with a job waiting on its filing", made.status === 200 && typeof ws2 === "string", made);
+    const put = async (path: string, name: string) => {
+      const bytes = new TextEncoder().encode(`%PDF-1.4\n% ${name}\n`);
+      await (await fetch(`${GATEWAY}/storage/v1/object/documents/${path}`, { method: "POST", headers: { Authorization: `Bearer ${SERVICE_KEY}`, "content-type": "application/pdf" }, body: bytes as BodyInit })).body?.cancel();
+      await sql`insert into public.documents (workspace_id, app_id, name, path, size, mime, source, uploaded_by) values (${ws2}, 'app-ein2', ${name}, ${path}, ${bytes.length}, 'application/pdf', 'customer', ${owner.id})`;
+    };
+    const pdfPath = `${ws2}/filings/ss4-filled.pdf`, signedPath = `${ws2}/uploads/ss4-signed.pdf`;
+    await put(pdfPath, "SS-4 filled.pdf"); await put(signedPath, "SS-4 signed.pdf");
+    // approved by the owner (this workspace has no plan of its own, so the row goes in as the approval would leave it)
+    const payload = { official: "irs-ss4", form: b("Form SS-4"), pdf_path: pdfPath, us_address: true, fields: [{ id: "l1", label: same("Legal name"), value: "Finish Test LLC" }, { id: "l7b", label: same("Responsible party SSN, ITIN or EIN"), value: "By hand" }],
+      checklist: [], signature: { name: "Mei Chen", title: "Member", signed_at: new Date().toISOString(), kind: "typed" } };
+    const [ins] = await sql`insert into public.filings (workspace_id, app_id, title, agency, fee_estimate, payload, approved_by, approved_at)
+      values (${ws2}, 'app-ein2', ${sql.json(b("EIN (Form SS-4)"))}, ${sql.json(b("IRS"))}, 0, ${sql.json(payload as never)}, ${owner.id}, now()) returning id`;
+    const fid = String(ins.id);
+    // the portal run: the signed copy is on record, then the agency's site fails three times before anything is submitted
+    await sql`select public.filing_agent_step(${fid}::uuid, ${sql.json({ en: "You signed it by hand and uploaded it.", zh: "已上传签名件", kind: "signed_copy", ref: signedPath })}::jsonb, '{"channel":"portal","agent_state":"running","status":"in_progress"}'::jsonb)`;
+    await sql`select public.filing_agent_step(${fid}::uuid, '{"en":"The agency''s site failed 3 times.","zh":"机构网站 3 次未能完成","kind":"handoff","ref":"portal_failed"}'::jsonb, '{"channel":"team","agent_state":"handoff"}'::jsonb)`;
+    await sql`insert into public.team_tasks (kind, filing_id, workspace_id, title, dedupe) values ('handoff', ${fid}, ${ws2}, 'Portal run failed 3 times', ${"handoff:" + fid + ":e2e"})`;
+    check("the database says a failed portal run waits for another way", (await sql`select public.filing_reroute_due() due`)[0].due === true);
+    // before the agency has it, nothing is settled as done
+    const early = await call("agent-run", { action: "settle", workspace_id: ws2 }, { headers: MK });
+    const st0 = (await sql`select state from public.workspaces where id = ${ws2}`)[0].state as { jobs: { status: string; on?: string }[] };
+    check("in flight, the job isn't done: it waits on the team, not on the person", early.status === 200 && early.data?.finished === 0 && st0.jobs[0].status === "waiting" && st0.jobs[0].on === "team", { early: early.data, job: st0.jobs[0] });
+
+    mark = recorded.length;
+    const sw = await call("file", {}, { headers: MK, jwt: SERVICE_KEY });
+    const faxes = since(mark).filter((x) => x.service === "telnyx" && x.path === "/v2/faxes");
+    const [fr] = await sql`select channel, agent_state, submit_clicked_at, agent_log from public.filings where id = ${fid}`;
+    const rerouted = (fr?.agent_log as { kind: string; ref?: string; en: string }[] | undefined)?.find((e) => e.kind === "reroute");
+    check("the sweep sends it another way the agency takes: the signed copy, by fax", sw.status === 200 && sw.data?.rerouted >= 1 && faxes.length === 1 && String(faxes[0].body?.media_url ?? "").includes("ss4-signed.pdf") && fr?.channel === "fax" && !!fr.submit_clicked_at, { sw: sw.data, faxes: faxes.length, fr: { ...fr, agent_log: undefined } });
+    check("the log says why, in plain words", rerouted?.ref === "fax" && /The agency's site didn't work, so Placetta sends it by fax instead\./.test(rerouted.en), rerouted);
+    check("the team's hand-back task is closed: Placetta sent it itself", (await sql`select done_at from public.team_tasks where filing_id = ${fid}`)[0]?.done_at !== null);
+    const again = await call("file", {}, { headers: MK, jwt: SERVICE_KEY });
+    check("never twice: a second sweep sends nothing", again.status === 200 && since(mark).filter((x) => x.service === "telnyx" && x.path === "/v2/faxes").length === 1 && (await sql`select public.filing_reroute_due() due`)[0].due === false, again.data);
+
+    // the fax service says it was delivered (the sweep's status check may have seen it already: once either way)
+    const [fq] = await sql`select provider_ref, agent_state from public.filings where id = ${fid}`;
+    if (fq?.agent_state === "running") await telnyxPost(`file?provider=telnyx`, { data: { event_type: "fax.delivered", id: crypto.randomUUID(), occurred_at: new Date().toISOString(), record_type: "event", payload: { fax_id: fq?.provider_ref, page_count: 2, status: "delivered" } } });
+    const [fd] = await sql`select status, receipt_path from public.filings where id = ${fid}`;
+    check("delivered: submitted, with the delivery receipt", fd?.status === "submitted" && !!fd.receipt_path, fd);
+    const s1 = await call("agent-run", { action: "settle", workspace_id: ws2 }, { headers: MK });
+    const st = (await sql`select state from public.workspaces where id = ${ws2}`)[0].state as { jobs: { status: string; done: { ok?: boolean }[]; report?: { filed: { app: string; receipt?: string; channel?: string; stage: string }[] } }[]; deadlines: unknown[] };
+    const j = st.jobs[0];
+    check("delivered: settle finishes the job from the record, with no model call", s1.status === 200 && s1.data?.changed === true && s1.data?.finished === 1 && j.status === "done" && j.done.every((d) => d.ok === true), { s1: s1.data, j });
+    check("the job's report names the filing, how it went and its receipt", j.report?.filed[0]?.app === "app-ein2" && j.report.filed[0].stage === "submitted" && j.report.filed[0].channel === "fax" && j.report.filed[0].receipt === "fax-confirmation.pdf", j.report);
+    check("no renewal is made up for a number that doesn't renew", st.deadlines.length === 0, st.deadlines);
+    const s2 = await call("agent-run", { action: "settle", workspace_id: ws2 }, { headers: MK });
+    check("settling again changes nothing", s2.status === 200 && s2.data?.changed === false, s2.data);
+    // (the owner keeps one workspace for the account deletion below)
+    await sql`delete from public.workspaces where id = ${ws2}`;
+  });
+
   /* ---------------- g. headquarters ---------------- */
   await scenario("g. headquarters", async () => {
     const share = await rpc("hq_share", { ws, p_email: "Compliance@Moonleaf.example", p_brand: "Moonleaf" }, owner.jwt);

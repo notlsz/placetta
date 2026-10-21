@@ -233,7 +233,9 @@ function carryOn(ctx: Context, text: string): Plan {
   const head = B(`${job.title.en}: ${p.done} of ${p.all} steps done.${proof.en}`, `${job.title.zh}：已完成 ${p.done}/${p.all} 步。${proof.zh}`);
   const next = !act ? B("It's done and checked.", "已完成并核对。")
     : act.who === "you" && act.kind === "upload" ? B(`Next I need ${act.items.map(i => i.label.en).join(", ")} for the ${act.appName.en.toLowerCase()}. Upload them on the job in Work and I'll take it from there.`, `下一步需要${act.appName.zh}的${act.items.map(i => i.label.zh).join("、")}。在“工作”页的这项工作上上传，我就接着办。`)
-    : act.who === "you" ? B(`Next is your approval: ${act.title.en}. Nothing goes out until you approve.`, `下一步需要您批准：${act.title.zh}。您批准前不会发出任何内容。`)
+    : act.who === "you" && act.kind === "approve" ? B(`Next is your approval: ${act.title.en}. Nothing goes out until you approve.`, `下一步需要您批准：${act.title.zh}。您批准前不会发出任何内容。`)
+    : act.who === "you" ? B(`Next is yours: ${act.note.en}`, `下一步需要您处理：${act.note.zh}`)
+    : act.who === "team" || act.who === "agency" ? B(`Nothing for you to do now. ${act.line.en}`, `您现在无需处理。${act.line.zh}`)
     : B(`Next: ${act.step.en}.`, `下一步：${act.step.zh}。`);
   return { steps, updates: [() => w], reply: { text: [B(`${head.en} ${next.en}`, `${head.zh}${next.zh}`)], apps: job.apps } };
 }

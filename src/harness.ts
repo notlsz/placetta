@@ -1,5 +1,5 @@
 import { B, same, type Bi } from "./bi";
-import { family, proven, type DoneItem, type Job } from "./jobs";
+import { family, met, proven, stageOf, type DoneItem, type Job } from "./jobs";
 import type { Application, Store, Workspace } from "./model";
 import { isBlank } from "./core";
 import { answersHash, formName, formOf, latestVersion } from "./forms/versions";
@@ -101,6 +101,8 @@ export function evidence(w: Workspace, job: Job, reply: string) {
       checklist: (a.checklist ?? []).map(c => ({ item: c.label.en, state: c.state, doc: c.doc ? (w.docs.find(d => d.id === c.doc)?.name ?? c.doc) : undefined })),
       // the agency's own form as filled and read back (src/forms/versions.ts): proof the PDF says what the answers say
       ...(formOf(a) ? { filled_form: filledEvidence(a) } : {}),
+      // where its filing stands with the agency, from the filing's own record
+      filing: { stage: stageOf(w, a), ...(a.filed?.confirmation ? { confirmation_number: a.filed.confirmation } : {}), receipt_on_file: !!(a.filed?.receipt || a.receipt) },
     })),
     approvals_waiting: w.approvals.map(a => ({ title: a.title.en, kind: a.kind })).slice(0, 10),
     deadlines: w.deadlines.slice(0, 15).map(d => ({ date: d.date, title: d.title.en })),
@@ -159,8 +161,12 @@ export function applyVerdict(jobId: string, verdict: { ok: boolean; why: string 
       if (j.id !== jobId || !j.done?.length) return j;
       // A line the workspace proves (every store's part done and proven) keeps its proof: the reviewer can't pass it
       // while the workspace says no, and the proof loop goes on ticking it afterwards.
-      const done: DoneItem[] = j.done.map((d, i) => ({ text: d.text, ...(d.check?.jobs ? { check: d.check } : {}),
-        ok: verdict[i]?.ok === true && (!d.check?.jobs || d.check.jobs.every(id => proven((w.jobs ?? []).find(x => x.id === id)))), why: same(verdict[i]?.why ?? "") }));
+      // A filing's proof line (the agency has it, with a confirmation number or receipt on file) is the record's to
+      // say, both ways: it passes when the filing's record shows it, whatever the reviewer read, and never before.
+      const done: DoneItem[] = j.done.map((d, i) => d.check?.proof
+        ? { text: d.text, check: d.check, ok: met(w, d.check), ...(met(w, d.check) ? {} : { why: proofWhy(w, d.check.app) }) }
+        : ({ text: d.text, ...(d.check?.jobs ? { check: d.check } : {}),
+          ok: verdict[i]?.ok === true && (!d.check?.jobs || d.check.jobs.every(id => proven((w.jobs ?? []).find(x => x.id === id)))), why: same(verdict[i]?.why ?? "") }));
       const passed = done.filter(d => d.ok).length, now = new Date().toISOString();
       // split across stores: never done before every store's part is done and proven; while a store's bot still
       // works (or waits its turn) the job is still running
@@ -176,6 +182,16 @@ export function applyVerdict(jobId: string, verdict: { ok: boolean; why: string 
       };
     }),
   });
+}
+
+/** Why a filing's proof line isn't met yet, from its record. */
+export function proofWhy(w: Workspace, appId: string | undefined): Bi {
+  const a = appId ? w.apps.find(x => x.id === appId) : undefined;
+  if (!a) return B("The application isn't in the workspace.", "工作区中没有这份申请。");
+  const s = stageOf(w, a);
+  return s === "approval" ? B("Waiting for the person's approval.", "等待批准。") : s === "team" ? B("With Placetta's filing team; not at the agency yet.", "快哉团队办理中，尚未送达机构。")
+    : s === "submitted" ? B("Sent, but no confirmation number or receipt is on file yet.", "已提交，但尚未存档确认号或回执。") : s === "needs" ? B("The agency or a fee needs the person first.", "机构或费用需要先由本人处理。")
+    : s === "returned" ? B("The agency returned it.", "机构已退回。") : B("Not put up for filing yet.", "尚未提交批准。");
 }
 
 /** A reply that says the work is done ("All done.", "完成了"). */

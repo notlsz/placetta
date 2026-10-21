@@ -13,4 +13,14 @@ export declare function normalizeState(name: string, s: Record<string, unknown>)
 export declare function publishedDays(takes?: Bi): number | null;
 export type Routine = { id: string; title: Bi; prompt: string; every: "daily" | "weekly" | "monthly"; day?: number; from: string; paused?: boolean; last?: string; created: string };
 export declare function runsOn(r: Routine, day: string): boolean;
+/** A filing as the filings table has it (src/finish.ts FilingRow), newest first by approval. */
+export type FilingRow = { app_id: string; status: string; confirmation_number?: string | null; receipt_path?: string | null; submitted_at?: string | null; decided_at?: string | null; channel?: string | null; note?: string | null; payment_url?: string | null; customer_paid_at?: string | null };
+type Ws = Record<string, unknown>;
+export declare function stampFilings<W extends Ws>(w: W, rows: FilingRow[]): W;
+export declare function finishWork<W extends Ws>(w: W, now?: string): W;
+/** Jobs Odelia stopped partway and picks back up on her own, with the prompt that carries on. */
+export declare function resumable(w: Ws, now?: number, lang?: "en" | "zh"): { job: string; prompt: string; title: Bi }[];
+export declare const MAX_RESUMES: number;
+/** The morning digest's line about the approvals waiting, and how many share one tap. */
+export declare function approvalsLine(w: Ws, today: string, o: { account: boolean; filings: boolean }): { title: Bi; body: Bi } | null;
 export declare function overdue(submittedAt: string | null | undefined, agencyDays: number | null, today: string): { waited: number; usual: number } | null;

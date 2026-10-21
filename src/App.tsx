@@ -8,7 +8,7 @@ import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
 import { AgentBot } from "./Bot";
 import { HOLD_MINUTES, startHold } from "./hold";
-import { reconcile } from "./jobs";
+import { finishWork, stampFilings } from "./finish";
 import { TABS, hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type Signed, type Tab, type View } from "./ctx";
 import { formById } from "./forms/registry";
@@ -697,8 +697,10 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   alongsideRef.current = alongside;
 
   /* The proof loop: jobs tick from what the workspace shows (an upload, an approval, a filing), never by say-so, and a
-     job is done only when its done list is proven. */
-  useEffect(() => { const r = reconcile(ws); if (r !== ws) setWs(r); }, [ws]);
+     job is done only when its done list is proven. In an account the filings' own record (confirmation numbers,
+     receipts, the agencies' decisions) goes onto each application first: a job that files something is done when the
+     agency has it, its next renewal goes on Deadlines, and it leaves a report of what was filed (src/finish.ts). */
+  useEffect(() => { const s = cloud ? stampFilings(ws, filings) : ws, r = finishWork(s); if (r !== ws) setWs(r); }, [ws, cloud, filings]);
 
   const unqueue = useCallback((id: string) => setQueued(l => l.filter(x => x.id !== id)), []);
   useEffect(() => {
