@@ -94,4 +94,4 @@ User-agent: *
 Allow: /
 Disallow: /app/
 
-Sitemap: https://placetta.com/sitemap.xml
+Sitemap: https://www.placetta.com/sitemap.xml
