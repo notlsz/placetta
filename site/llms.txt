@@ -1,301 +1,200 @@
 # Placetta
 
-> Placetta gets the business licenses, permits and registrations a company needs to open in a new market (restaurants, cafes, milk tea shops, retail stores, importers and warehouses), fills the official government forms and keeps them current. It covers 66 cities across the US, China, Europe and the Middle East, in English and Chinese.
+> Placetta gets the licenses, permits and registrations a business needs to open in a new market, and keeps them current. Placetta (Chinese name 快哉) maps every license, permit and registration a store needs for its address, fills the official government forms, files them after the customer approves, and tracks renewals, inspections and rule changes. It works in English and Chinese.
 
-Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Facts come from Placetta's library of official forms; agencies change requirements, so check the agency's page before filing.
+Odelia, Placetta's AI agent, prepares each application from your documents. You review and approve it, then Odelia files it and follows up until the agency decides. When an agency needs a person, in person or on the phone, our team steps in.
+
+Free license guides: 74 cities in 13 countries (41 in the US), 12 kinds of business, 401 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
 
 ## Start here
-- [License guides, city by city](https://placetta.com/guides/): every city, business and official form
-- [Get a plan for your exact address](https://placetta.com/app/): Placetta maps every filing for an address, fills the official forms and asks for approval before anything is filed
-- [Full text of the answers and city guides](https://placetta.com/llms-full.txt)
-- [Structured data for all guides](https://placetta.com/guides/data.json)
+- [Placetta](https://www.placetta.com/): what it does, pricing and the FAQ
+- [About Placetta](https://www.placetta.com/about.html): the company, what it does, where it works and its prices
+- [How the guides are sourced and checked](https://www.placetta.com/editorial.html): the official-source rule
+- [License guides, city by city](https://www.placetta.com/guides/): every city, business and official form
+- [Full text of the answers and city guides](https://www.placetta.com/llms-full.txt)
+- [Structured data for all guides](https://www.placetta.com/guides/data.json)
+
+## Pricing
+- Essentials: $149/location a month. Billed yearly. For every franchise or company-owned store.
+- Pro: $299/location a month. Billed yearly. For restaurants, tea and food stores that get inspected often.
+- Openings: $3,500/retail store. $6,500 for a restaurant or food store. Liquor and complex build-outs quoted. For each new store, from lease to opening day.
+- Headquarters: $25,000+/year. For 10 or more locations, billed yearly. For franchisors that require Odelia across the system, and brands entering the US.
+- $149 per location a month on Essentials or $299 a month on Pro, billed yearly. Or start with an entry plan: $299 one-time per market, credited to your first year if you start a plan within 60 days. Each new store opening is $3,500 for retail and $6,500 for a restaurant or food store, paid once; liquor licenses and complex build-outs are quoted. Exceptions handled by people are quoted per step. Government fees are paid at cost, by you directly to each agency.
+
+## Guides by kind of business
+- [Restaurants](https://www.placetta.com/guides/business/restaurant.html)
+- [Retail stores](https://www.placetta.com/guides/business/retail-store.html)
+- [Grocery stores](https://www.placetta.com/guides/business/grocery-store.html)
+- [Importers and online sellers](https://www.placetta.com/guides/business/importer-ecommerce.html)
+- [Warehouses and 3PLs](https://www.placetta.com/guides/business/warehouse-3pl.html)
+- [Cosmetics stores](https://www.placetta.com/guides/business/cosmetics-store.html)
+- [Toy stores](https://www.placetta.com/guides/business/toy-store.html)
+- [Milk tea and bubble tea shops](https://www.placetta.com/guides/business/milk-tea-shop.html)
+- [Coffee shops](https://www.placetta.com/guides/business/coffee-shop.html)
+- [Hot pot restaurants](https://www.placetta.com/guides/business/hot-pot-restaurant.html)
+- [Bakeries](https://www.placetta.com/guides/business/bakery.html)
+- [Dessert shops](https://www.placetta.com/guides/business/dessert-shop.html)
+
+## Guides by kind of permit
+- [How much permits cost to open in each city](https://www.placetta.com/guides/permits/permit-costs.html)
+- [How long permits take in each city](https://www.placetta.com/guides/permits/how-long-permits-take.html)
+- [Opening in each city as a foreign company](https://www.placetta.com/guides/permits/foreign-company.html)
+- [Hiring your first employees in each city](https://www.placetta.com/guides/permits/hiring-employees.html)
+- [Build-out and occupancy permits in each city](https://www.placetta.com/guides/permits/build-out-and-occupancy.html)
+- [Importing goods into each city](https://www.placetta.com/guides/permits/importing-goods.html)
+- [Renewals and annual filings in each city](https://www.placetta.com/guides/permits/renewals.html)
+
+## Guides by US state
+- [Arizona](https://www.placetta.com/guides/states/arizona.html)
+- [California](https://www.placetta.com/guides/states/california.html)
+- [Colorado](https://www.placetta.com/guides/states/colorado.html)
+- [Florida](https://www.placetta.com/guides/states/florida.html)
+- [Georgia](https://www.placetta.com/guides/states/georgia.html)
+- [Illinois](https://www.placetta.com/guides/states/illinois.html)
+- [Massachusetts](https://www.placetta.com/guides/states/massachusetts.html)
+- [Maryland](https://www.placetta.com/guides/states/maryland.html)
+- [Minnesota](https://www.placetta.com/guides/states/minnesota.html)
+- [New Jersey](https://www.placetta.com/guides/states/new-jersey.html)
+- [Nevada](https://www.placetta.com/guides/states/nevada.html)
+- [New York State](https://www.placetta.com/guides/states/new-york-state.html)
+- [Ohio](https://www.placetta.com/guides/states/ohio.html)
+- [Pennsylvania](https://www.placetta.com/guides/states/pennsylvania.html)
+- [Texas](https://www.placetta.com/guides/states/texas.html)
+- [Virginia](https://www.placetta.com/guides/states/virginia.html)
+- [Washington State](https://www.placetta.com/guides/states/washington-state.html)
 
 ## Answers
-- [How do I get an EIN without an SSN or ITIN?](https://placetta.com/guides/answers/get-an-ein-without-an-ssn.html)
-- [How long does it take to get an EIN?](https://placetta.com/guides/answers/how-long-does-an-ein-take.html)
-- [Does a foreign-owned single-member LLC have to file Form 5472?](https://placetta.com/guides/answers/form-5472-foreign-owned-llc.html)
-- [Do I still need to file a beneficial ownership report (BOIR)?](https://placetta.com/guides/answers/do-i-need-to-file-a-boir.html)
-- [How do I become an importer of record in the US?](https://placetta.com/guides/answers/become-an-importer-of-record.html)
-- [Does my business need FDA food facility registration?](https://placetta.com/guides/answers/fda-food-facility-registration.html)
-- [Do I need to register cosmetics with the FDA?](https://placetta.com/guides/answers/register-cosmetics-with-the-fda.html)
-- [Do imported consumer products need a certificate of conformity?](https://placetta.com/guides/answers/certificate-of-conformity-for-imports.html)
-- [How much do permits cost to open a restaurant in New York City?](https://placetta.com/guides/answers/nyc-restaurant-permit-cost.html)
-- [How much do permits cost to open a restaurant in Los Angeles?](https://placetta.com/guides/answers/los-angeles-restaurant-permit-cost.html)
-- [How much do permits cost to open a restaurant in Houston?](https://placetta.com/guides/answers/houston-restaurant-permit-cost.html)
-- [Who needs a Food Protection Certificate in New York City?](https://placetta.com/guides/answers/nyc-food-protection-certificate.html)
-- [Do I need a seller's permit in California?](https://placetta.com/guides/answers/california-sellers-permit.html)
-- [When do I need a sales tax Certificate of Authority in New York?](https://placetta.com/guides/answers/new-york-certificate-of-authority.html)
-- [Does a foreign company need to register for VAT in the UK?](https://placetta.com/guides/answers/uk-vat-for-foreign-companies.html)
-- [How do I register a food business in the UK?](https://placetta.com/guides/answers/uk-food-business-registration.html)
-- [How do I get a trade licence in Dubai?](https://placetta.com/guides/answers/dubai-trade-licence.html)
-- [Does a foreign company need a MISA license in Saudi Arabia?](https://placetta.com/guides/answers/saudi-arabia-misa-license.html)
-- [How does a foreign company open a business in China?](https://placetta.com/guides/answers/open-a-company-in-china-as-a-foreigner.html)
-- [Do I need a food business license in China?](https://placetta.com/guides/answers/china-food-business-license.html)
-- [Does a new California LLC have to pay the $800 tax in its first year?](https://placetta.com/guides/answers/california-llc-800-tax-first-year.html)
-- [Does a Texas LLC have to file a franchise tax report if it owes no tax?](https://placetta.com/guides/answers/texas-franchise-tax-no-tax-due.html)
-- [Do I need a sales tax permit in Texas?](https://placetta.com/guides/answers/texas-sales-tax-permit.html)
-- [How do I get a restaurant permit in New York City?](https://placetta.com/guides/answers/nyc-food-service-establishment-permit.html)
-- [How much does a US customs bond cost?](https://placetta.com/guides/answers/how-much-does-a-customs-bond-cost.html)
-- [Can a Chinese investor get an E-2 visa?](https://placetta.com/guides/answers/is-china-an-e2-treaty-country.html)
-- [How does a foreign owner get an ITIN?](https://placetta.com/guides/answers/how-to-get-an-itin.html)
-- [Does a Chinese company need a US attorney to file a trademark?](https://placetta.com/guides/answers/us-trademark-for-chinese-companies.html)
-- [Do food shipments from China need FDA Prior Notice?](https://placetta.com/guides/answers/fda-prior-notice-for-food-imports.html)
-- [Is the $800 de minimis exemption still available for imports?](https://placetta.com/guides/answers/de-minimis-800-exemption-status.html)
-- [Does a single-member LLC with no employees need an EIN?](https://placetta.com/guides/answers/does-a-single-member-llc-need-an-ein.html)
-- [Do restaurant workers in California need a food handler card?](https://placetta.com/guides/answers/california-food-handler-card.html)
-- [Can a foreigner form an LLC in Texas?](https://placetta.com/guides/answers/can-a-foreigner-form-a-texas-llc.html)
+- [How do I get an EIN without an SSN or ITIN?](https://www.placetta.com/guides/answers/get-an-ein-without-an-ssn.html)
+- [How long does it take to get an EIN?](https://www.placetta.com/guides/answers/how-long-does-an-ein-take.html)
+- [Does a foreign-owned single-member LLC have to file Form 5472?](https://www.placetta.com/guides/answers/form-5472-foreign-owned-llc.html)
+- [Do I still need to file a beneficial ownership report (BOIR)?](https://www.placetta.com/guides/answers/do-i-need-to-file-a-boir.html)
+- [How do I become an importer of record in the US?](https://www.placetta.com/guides/answers/become-an-importer-of-record.html)
+- [Does my business need FDA food facility registration?](https://www.placetta.com/guides/answers/fda-food-facility-registration.html)
+- [Do I need to register cosmetics with the FDA?](https://www.placetta.com/guides/answers/register-cosmetics-with-the-fda.html)
+- [Do imported consumer products need a certificate of conformity?](https://www.placetta.com/guides/answers/certificate-of-conformity-for-imports.html)
+- [How much do permits cost to open a restaurant in New York City?](https://www.placetta.com/guides/answers/nyc-restaurant-permit-cost.html)
+- [How much do permits cost to open a restaurant in Los Angeles?](https://www.placetta.com/guides/answers/los-angeles-restaurant-permit-cost.html)
+- [How much do permits cost to open a restaurant in Houston?](https://www.placetta.com/guides/answers/houston-restaurant-permit-cost.html)
+- [Who needs a Food Protection Certificate in New York City?](https://www.placetta.com/guides/answers/nyc-food-protection-certificate.html)
+- [Do I need a seller's permit in California?](https://www.placetta.com/guides/answers/california-sellers-permit.html)
+- [When do I need a sales tax Certificate of Authority in New York?](https://www.placetta.com/guides/answers/new-york-certificate-of-authority.html)
+- [Does a foreign company need to register for VAT in the UK?](https://www.placetta.com/guides/answers/uk-vat-for-foreign-companies.html)
+- [How do I register a food business in the UK?](https://www.placetta.com/guides/answers/uk-food-business-registration.html)
+- [How do I get a trade licence in Dubai?](https://www.placetta.com/guides/answers/dubai-trade-licence.html)
+- [Does a foreign company need a MISA license in Saudi Arabia?](https://www.placetta.com/guides/answers/saudi-arabia-misa-license.html)
+- [How does a foreign company open a business in China?](https://www.placetta.com/guides/answers/open-a-company-in-china-as-a-foreigner.html)
+- [Do I need a food business license in China?](https://www.placetta.com/guides/answers/china-food-business-license.html)
+- [Does a new California LLC have to pay the $800 tax in its first year?](https://www.placetta.com/guides/answers/california-llc-800-tax-first-year.html)
+- [Does a Texas LLC have to file a franchise tax report if it owes no tax?](https://www.placetta.com/guides/answers/texas-franchise-tax-no-tax-due.html)
+- [Do I need a sales tax permit in Texas?](https://www.placetta.com/guides/answers/texas-sales-tax-permit.html)
+- [How do I get a restaurant permit in New York City?](https://www.placetta.com/guides/answers/nyc-food-service-establishment-permit.html)
+- [How much does a US customs bond cost?](https://www.placetta.com/guides/answers/how-much-does-a-customs-bond-cost.html)
+- [Can a Chinese investor get an E-2 visa?](https://www.placetta.com/guides/answers/is-china-an-e2-treaty-country.html)
+- [How does a foreign owner get an ITIN?](https://www.placetta.com/guides/answers/how-to-get-an-itin.html)
+- [Does a Chinese company need a US attorney to file a trademark?](https://www.placetta.com/guides/answers/us-trademark-for-chinese-companies.html)
+- [Do food shipments from China need FDA Prior Notice?](https://www.placetta.com/guides/answers/fda-prior-notice-for-food-imports.html)
+- [Is the $800 de minimis exemption still available for imports?](https://www.placetta.com/guides/answers/de-minimis-800-exemption-status.html)
+- [Does a single-member LLC with no employees need an EIN?](https://www.placetta.com/guides/answers/does-a-single-member-llc-need-an-ein.html)
+- [Do restaurant workers in California need a food handler card?](https://www.placetta.com/guides/answers/california-food-handler-card.html)
+- [Can a foreigner form an LLC in Texas?](https://www.placetta.com/guides/answers/can-a-foreigner-form-a-texas-llc.html)
 
 ## Cities
-- [New York City, United States](https://placetta.com/guides/new-york-city/)
-- [Los Angeles, United States](https://placetta.com/guides/los-angeles/)
-- [Houston, United States](https://placetta.com/guides/houston/)
-- [Beijing, China](https://placetta.com/guides/beijing/)
-- [Shanghai, China](https://placetta.com/guides/shanghai/)
-- [Shenzhen, China](https://placetta.com/guides/shenzhen/)
-- [Guangzhou, China](https://placetta.com/guides/guangzhou/)
-- [Hangzhou, China](https://placetta.com/guides/hangzhou/)
-- [Chengdu, China](https://placetta.com/guides/chengdu/)
-- [Chongqing, China](https://placetta.com/guides/chongqing/)
-- [Wuhan, China](https://placetta.com/guides/wuhan/)
-- [Nanjing, China](https://placetta.com/guides/nanjing/)
-- [Suzhou, China](https://placetta.com/guides/suzhou/)
-- [Tianjin, China](https://placetta.com/guides/tianjin/)
-- [Xi'an, China](https://placetta.com/guides/xi-an/)
-- [London, United Kingdom](https://placetta.com/guides/london/)
-- [Manchester, United Kingdom](https://placetta.com/guides/manchester/)
-- [Paris, France](https://placetta.com/guides/paris/)
-- [Berlin, Germany](https://placetta.com/guides/berlin/)
-- [Munich, Germany](https://placetta.com/guides/munich/)
-- [Hamburg, Germany](https://placetta.com/guides/hamburg/)
-- [Frankfurt, Germany](https://placetta.com/guides/frankfurt/)
-- [Madrid, Spain](https://placetta.com/guides/madrid/)
-- [Barcelona, Spain](https://placetta.com/guides/barcelona/)
-- [Milan, Italy](https://placetta.com/guides/milan/)
-- [Rome, Italy](https://placetta.com/guides/rome/)
-- [Amsterdam, Netherlands](https://placetta.com/guides/amsterdam/)
-- [Dublin, Ireland](https://placetta.com/guides/dublin/)
-- [Dubai, United Arab Emirates](https://placetta.com/guides/dubai/)
-- [Abu Dhabi, United Arab Emirates](https://placetta.com/guides/abu-dhabi/)
-- [Sharjah, United Arab Emirates](https://placetta.com/guides/sharjah/)
-- [Riyadh, Saudi Arabia](https://placetta.com/guides/riyadh/)
-- [Jeddah, Saudi Arabia](https://placetta.com/guides/jeddah/)
-- [Dammam, Saudi Arabia](https://placetta.com/guides/dammam/)
-- [Doha, Qatar](https://placetta.com/guides/doha/)
-- [Istanbul, Türkiye](https://placetta.com/guides/istanbul/)
-- [San Francisco, United States](https://placetta.com/guides/san-francisco/)
-- [San Jose, United States](https://placetta.com/guides/san-jose/)
-- [Chicago, United States](https://placetta.com/guides/chicago/)
-- [Seattle, United States](https://placetta.com/guides/seattle/)
-- [Boston, United States](https://placetta.com/guides/boston/)
-- [Miami, United States](https://placetta.com/guides/miami/)
-- [Dallas, United States](https://placetta.com/guides/dallas/)
-- [Austin, United States](https://placetta.com/guides/austin/)
-- [Washington, DC, United States](https://placetta.com/guides/washington-dc/)
-- [Atlanta, United States](https://placetta.com/guides/atlanta/)
-- [Philadelphia, United States](https://placetta.com/guides/philadelphia/)
-- [Las Vegas, United States](https://placetta.com/guides/las-vegas/)
-- [San Antonio, United States](https://placetta.com/guides/san-antonio/)
-- [Tampa, United States](https://placetta.com/guides/tampa/)
-- [San Diego, United States](https://placetta.com/guides/san-diego/)
-- [Irvine, United States](https://placetta.com/guides/irvine/)
-- [Orlando, United States](https://placetta.com/guides/orlando/)
-- [Fort Worth, United States](https://placetta.com/guides/fort-worth/)
-- [Phoenix, United States](https://placetta.com/guides/phoenix/)
-- [Oakland, United States](https://placetta.com/guides/oakland/)
-- [Sacramento, United States](https://placetta.com/guides/sacramento/)
-- [Portland, United States](https://placetta.com/guides/portland/)
-- [Plano, United States](https://placetta.com/guides/plano/)
-- [Arlington, United States](https://placetta.com/guides/arlington/)
-- [Fairfax County, United States](https://placetta.com/guides/fairfax-county/)
-- [Edison, United States](https://placetta.com/guides/edison/)
-- [Jersey City, United States](https://placetta.com/guides/jersey-city/)
-- [Denver, United States](https://placetta.com/guides/denver/)
-- [Minneapolis, United States](https://placetta.com/guides/minneapolis/)
-- [Columbus, United States](https://placetta.com/guides/columbus/)
+- [New York City, United States](https://www.placetta.com/guides/new-york-city/)
+- [Los Angeles, United States](https://www.placetta.com/guides/los-angeles/)
+- [Houston, United States](https://www.placetta.com/guides/houston/)
+- [Beijing, China](https://www.placetta.com/guides/beijing/)
+- [Shanghai, China](https://www.placetta.com/guides/shanghai/)
+- [Shenzhen, China](https://www.placetta.com/guides/shenzhen/)
+- [Guangzhou, China](https://www.placetta.com/guides/guangzhou/)
+- [Hangzhou, China](https://www.placetta.com/guides/hangzhou/)
+- [Chengdu, China](https://www.placetta.com/guides/chengdu/)
+- [Chongqing, China](https://www.placetta.com/guides/chongqing/)
+- [Wuhan, China](https://www.placetta.com/guides/wuhan/)
+- [Nanjing, China](https://www.placetta.com/guides/nanjing/)
+- [Suzhou, China](https://www.placetta.com/guides/suzhou/)
+- [Tianjin, China](https://www.placetta.com/guides/tianjin/)
+- [Xi'an, China](https://www.placetta.com/guides/xi-an/)
+- [London, United Kingdom](https://www.placetta.com/guides/london/)
+- [Manchester, United Kingdom](https://www.placetta.com/guides/manchester/)
+- [Paris, France](https://www.placetta.com/guides/paris/)
+- [Berlin, Germany](https://www.placetta.com/guides/berlin/)
+- [Munich, Germany](https://www.placetta.com/guides/munich/)
+- [Hamburg, Germany](https://www.placetta.com/guides/hamburg/)
+- [Frankfurt, Germany](https://www.placetta.com/guides/frankfurt/)
+- [Madrid, Spain](https://www.placetta.com/guides/madrid/)
+- [Barcelona, Spain](https://www.placetta.com/guides/barcelona/)
+- [Milan, Italy](https://www.placetta.com/guides/milan/)
+- [Rome, Italy](https://www.placetta.com/guides/rome/)
+- [Amsterdam, Netherlands](https://www.placetta.com/guides/amsterdam/)
+- [Dublin, Ireland](https://www.placetta.com/guides/dublin/)
+- [Dubai, United Arab Emirates](https://www.placetta.com/guides/dubai/)
+- [Abu Dhabi, United Arab Emirates](https://www.placetta.com/guides/abu-dhabi/)
+- [Sharjah, United Arab Emirates](https://www.placetta.com/guides/sharjah/)
+- [Riyadh, Saudi Arabia](https://www.placetta.com/guides/riyadh/)
+- [Jeddah, Saudi Arabia](https://www.placetta.com/guides/jeddah/)
+- [Dammam, Saudi Arabia](https://www.placetta.com/guides/dammam/)
+- [Doha, Qatar](https://www.placetta.com/guides/doha/)
+- [Istanbul, Türkiye](https://www.placetta.com/guides/istanbul/)
+- [San Francisco, United States](https://www.placetta.com/guides/san-francisco/)
+- [San Jose, United States](https://www.placetta.com/guides/san-jose/)
+- [Chicago, United States](https://www.placetta.com/guides/chicago/)
+- [Seattle, United States](https://www.placetta.com/guides/seattle/)
+- [Boston, United States](https://www.placetta.com/guides/boston/)
+- [Miami, United States](https://www.placetta.com/guides/miami/)
+- [Dallas, United States](https://www.placetta.com/guides/dallas/)
+- [Austin, United States](https://www.placetta.com/guides/austin/)
+- [Washington, DC, United States](https://www.placetta.com/guides/washington-dc/)
+- [Atlanta, United States](https://www.placetta.com/guides/atlanta/)
+- [Philadelphia, United States](https://www.placetta.com/guides/philadelphia/)
+- [Las Vegas, United States](https://www.placetta.com/guides/las-vegas/)
+- [San Antonio, United States](https://www.placetta.com/guides/san-antonio/)
+- [Tampa, United States](https://www.placetta.com/guides/tampa/)
+- [San Diego, United States](https://www.placetta.com/guides/san-diego/)
+- [Irvine, United States](https://www.placetta.com/guides/irvine/)
+- [Orlando, United States](https://www.placetta.com/guides/orlando/)
+- [Fort Worth, United States](https://www.placetta.com/guides/fort-worth/)
+- [Phoenix, United States](https://www.placetta.com/guides/phoenix/)
+- [Oakland, United States](https://www.placetta.com/guides/oakland/)
+- [Sacramento, United States](https://www.placetta.com/guides/sacramento/)
+- [Portland, United States](https://www.placetta.com/guides/portland/)
+- [Plano, United States](https://www.placetta.com/guides/plano/)
+- [Arlington, United States](https://www.placetta.com/guides/arlington/)
+- [Fairfax County, United States](https://www.placetta.com/guides/fairfax-county/)
+- [Edison, United States](https://www.placetta.com/guides/edison/)
+- [Jersey City, United States](https://www.placetta.com/guides/jersey-city/)
+- [Denver, United States](https://www.placetta.com/guides/denver/)
+- [Minneapolis, United States](https://www.placetta.com/guides/minneapolis/)
+- [Columbus, United States](https://www.placetta.com/guides/columbus/)
+- [Cupertino, United States](https://www.placetta.com/guides/cupertino/)
+- [Milpitas, United States](https://www.placetta.com/guides/milpitas/)
+- [Daly City, United States](https://www.placetta.com/guides/daly-city/)
+- [Arcadia, United States](https://www.placetta.com/guides/arcadia/)
+- [Alhambra, United States](https://www.placetta.com/guides/alhambra/)
+- [Fort Lee, United States](https://www.placetta.com/guides/fort-lee/)
+- [Bellevue, United States](https://www.placetta.com/guides/bellevue/)
+- [Rockville, United States](https://www.placetta.com/guides/rockville/)
 
-## Optional
-- [Restaurants in New York City](https://placetta.com/guides/new-york-city/restaurant.html): 10 filings
-- [Retail stores in New York City](https://placetta.com/guides/new-york-city/retail-store.html): 8 filings
-- [Importers and online sellers in New York City](https://placetta.com/guides/new-york-city/importer-ecommerce.html): 8 filings
-- [Restaurants in Los Angeles](https://placetta.com/guides/los-angeles/restaurant.html): 10 filings
-- [Retail stores in Los Angeles](https://placetta.com/guides/los-angeles/retail-store.html): 7 filings
-- [Importers and online sellers in Los Angeles](https://placetta.com/guides/los-angeles/importer-ecommerce.html): 11 filings
-- [Restaurants in Houston](https://placetta.com/guides/houston/restaurant.html): 12 filings
-- [Retail stores in Houston](https://placetta.com/guides/houston/retail-store.html): 8 filings
-- [Importers and online sellers in Houston](https://placetta.com/guides/houston/importer-ecommerce.html): 9 filings
-- [Restaurants in Beijing](https://placetta.com/guides/beijing/restaurant.html): 6 filings
-- [Retail stores in Beijing](https://placetta.com/guides/beijing/retail-store.html): 5 filings
-- [Importers and online sellers in Beijing](https://placetta.com/guides/beijing/importer-ecommerce.html): 4 filings
-- [Restaurants in Shanghai](https://placetta.com/guides/shanghai/restaurant.html): 6 filings
-- [Retail stores in Shanghai](https://placetta.com/guides/shanghai/retail-store.html): 5 filings
-- [Importers and online sellers in Shanghai](https://placetta.com/guides/shanghai/importer-ecommerce.html): 4 filings
-- [Restaurants in Shenzhen](https://placetta.com/guides/shenzhen/restaurant.html): 6 filings
-- [Retail stores in Shenzhen](https://placetta.com/guides/shenzhen/retail-store.html): 5 filings
-- [Importers and online sellers in Shenzhen](https://placetta.com/guides/shenzhen/importer-ecommerce.html): 4 filings
-- [Restaurants in Guangzhou](https://placetta.com/guides/guangzhou/restaurant.html): 6 filings
-- [Retail stores in Guangzhou](https://placetta.com/guides/guangzhou/retail-store.html): 5 filings
-- [Importers and online sellers in Guangzhou](https://placetta.com/guides/guangzhou/importer-ecommerce.html): 4 filings
-- [Restaurants in Hangzhou](https://placetta.com/guides/hangzhou/restaurant.html): 6 filings
-- [Retail stores in Hangzhou](https://placetta.com/guides/hangzhou/retail-store.html): 5 filings
-- [Importers and online sellers in Hangzhou](https://placetta.com/guides/hangzhou/importer-ecommerce.html): 4 filings
-- [Restaurants in Chengdu](https://placetta.com/guides/chengdu/restaurant.html): 6 filings
-- [Retail stores in Chengdu](https://placetta.com/guides/chengdu/retail-store.html): 5 filings
-- [Importers and online sellers in Chengdu](https://placetta.com/guides/chengdu/importer-ecommerce.html): 4 filings
-- [Restaurants in Chongqing](https://placetta.com/guides/chongqing/restaurant.html): 6 filings
-- [Retail stores in Chongqing](https://placetta.com/guides/chongqing/retail-store.html): 5 filings
-- [Importers and online sellers in Chongqing](https://placetta.com/guides/chongqing/importer-ecommerce.html): 4 filings
-- [Restaurants in Wuhan](https://placetta.com/guides/wuhan/restaurant.html): 6 filings
-- [Retail stores in Wuhan](https://placetta.com/guides/wuhan/retail-store.html): 5 filings
-- [Importers and online sellers in Wuhan](https://placetta.com/guides/wuhan/importer-ecommerce.html): 4 filings
-- [Restaurants in Nanjing](https://placetta.com/guides/nanjing/restaurant.html): 6 filings
-- [Retail stores in Nanjing](https://placetta.com/guides/nanjing/retail-store.html): 5 filings
-- [Importers and online sellers in Nanjing](https://placetta.com/guides/nanjing/importer-ecommerce.html): 4 filings
-- [Restaurants in Suzhou](https://placetta.com/guides/suzhou/restaurant.html): 6 filings
-- [Retail stores in Suzhou](https://placetta.com/guides/suzhou/retail-store.html): 5 filings
-- [Importers and online sellers in Suzhou](https://placetta.com/guides/suzhou/importer-ecommerce.html): 4 filings
-- [Restaurants in Tianjin](https://placetta.com/guides/tianjin/restaurant.html): 6 filings
-- [Retail stores in Tianjin](https://placetta.com/guides/tianjin/retail-store.html): 5 filings
-- [Importers and online sellers in Tianjin](https://placetta.com/guides/tianjin/importer-ecommerce.html): 4 filings
-- [Restaurants in Xi'an](https://placetta.com/guides/xi-an/restaurant.html): 6 filings
-- [Retail stores in Xi'an](https://placetta.com/guides/xi-an/retail-store.html): 5 filings
-- [Importers and online sellers in Xi'an](https://placetta.com/guides/xi-an/importer-ecommerce.html): 4 filings
-- [Restaurants in London](https://placetta.com/guides/london/restaurant.html): 5 filings
-- [Retail stores in London](https://placetta.com/guides/london/retail-store.html): 3 filings
-- [Importers and online sellers in London](https://placetta.com/guides/london/importer-ecommerce.html): 3 filings
-- [Restaurants in Manchester](https://placetta.com/guides/manchester/restaurant.html): 5 filings
-- [Retail stores in Manchester](https://placetta.com/guides/manchester/retail-store.html): 3 filings
-- [Importers and online sellers in Manchester](https://placetta.com/guides/manchester/importer-ecommerce.html): 3 filings
-- [Restaurants in Paris](https://placetta.com/guides/paris/restaurant.html): 3 filings
-- [Importers and online sellers in Paris](https://placetta.com/guides/paris/importer-ecommerce.html): 3 filings
-- [Restaurants in Berlin](https://placetta.com/guides/berlin/restaurant.html): 4 filings
-- [Retail stores in Berlin](https://placetta.com/guides/berlin/retail-store.html): 4 filings
-- [Importers and online sellers in Berlin](https://placetta.com/guides/berlin/importer-ecommerce.html): 5 filings
-- [Restaurants in Munich](https://placetta.com/guides/munich/restaurant.html): 4 filings
-- [Retail stores in Munich](https://placetta.com/guides/munich/retail-store.html): 4 filings
-- [Importers and online sellers in Munich](https://placetta.com/guides/munich/importer-ecommerce.html): 5 filings
-- [Restaurants in Hamburg](https://placetta.com/guides/hamburg/restaurant.html): 4 filings
-- [Retail stores in Hamburg](https://placetta.com/guides/hamburg/retail-store.html): 4 filings
-- [Importers and online sellers in Hamburg](https://placetta.com/guides/hamburg/importer-ecommerce.html): 5 filings
-- [Restaurants in Frankfurt](https://placetta.com/guides/frankfurt/restaurant.html): 4 filings
-- [Retail stores in Frankfurt](https://placetta.com/guides/frankfurt/retail-store.html): 4 filings
-- [Importers and online sellers in Frankfurt](https://placetta.com/guides/frankfurt/importer-ecommerce.html): 5 filings
-- [Restaurants in Madrid](https://placetta.com/guides/madrid/restaurant.html): 4 filings
-- [Retail stores in Madrid](https://placetta.com/guides/madrid/retail-store.html): 4 filings
-- [Restaurants in Barcelona](https://placetta.com/guides/barcelona/restaurant.html): 4 filings
-- [Retail stores in Barcelona](https://placetta.com/guides/barcelona/retail-store.html): 4 filings
-- [Restaurants in Milan](https://placetta.com/guides/milan/restaurant.html): 3 filings
-- [Retail stores in Milan](https://placetta.com/guides/milan/retail-store.html): 3 filings
-- [Restaurants in Rome](https://placetta.com/guides/rome/restaurant.html): 3 filings
-- [Retail stores in Rome](https://placetta.com/guides/rome/retail-store.html): 3 filings
-- [Restaurants in Amsterdam](https://placetta.com/guides/amsterdam/restaurant.html): 3 filings
-- [Restaurants in Dublin](https://placetta.com/guides/dublin/restaurant.html): 3 filings
-- [Restaurants in Dubai](https://placetta.com/guides/dubai/restaurant.html): 4 filings
-- [Retail stores in Dubai](https://placetta.com/guides/dubai/retail-store.html): 3 filings
-- [Importers and online sellers in Dubai](https://placetta.com/guides/dubai/importer-ecommerce.html): 3 filings
-- [Restaurants in Abu Dhabi](https://placetta.com/guides/abu-dhabi/restaurant.html): 3 filings
-- [Retail stores in Abu Dhabi](https://placetta.com/guides/abu-dhabi/retail-store.html): 3 filings
-- [Restaurants in Sharjah](https://placetta.com/guides/sharjah/restaurant.html): 3 filings
-- [Retail stores in Sharjah](https://placetta.com/guides/sharjah/retail-store.html): 3 filings
-- [Restaurants in Riyadh](https://placetta.com/guides/riyadh/restaurant.html): 6 filings
-- [Retail stores in Riyadh](https://placetta.com/guides/riyadh/retail-store.html): 6 filings
-- [Importers and online sellers in Riyadh](https://placetta.com/guides/riyadh/importer-ecommerce.html): 3 filings
-- [Restaurants in Jeddah](https://placetta.com/guides/jeddah/restaurant.html): 6 filings
-- [Retail stores in Jeddah](https://placetta.com/guides/jeddah/retail-store.html): 6 filings
-- [Importers and online sellers in Jeddah](https://placetta.com/guides/jeddah/importer-ecommerce.html): 3 filings
-- [Restaurants in Dammam](https://placetta.com/guides/dammam/restaurant.html): 6 filings
-- [Retail stores in Dammam](https://placetta.com/guides/dammam/retail-store.html): 6 filings
-- [Importers and online sellers in Dammam](https://placetta.com/guides/dammam/importer-ecommerce.html): 3 filings
-- [Restaurants in Doha](https://placetta.com/guides/doha/restaurant.html): 3 filings
-- [Retail stores in Doha](https://placetta.com/guides/doha/retail-store.html): 3 filings
-- [Restaurants in Istanbul](https://placetta.com/guides/istanbul/restaurant.html): 3 filings
-- [Retail stores in Istanbul](https://placetta.com/guides/istanbul/retail-store.html): 3 filings
-- [Restaurants in San Francisco](https://placetta.com/guides/san-francisco/restaurant.html): 13 filings
-- [Retail stores in San Francisco](https://placetta.com/guides/san-francisco/retail-store.html): 9 filings
-- [Importers and online sellers in San Francisco](https://placetta.com/guides/san-francisco/importer-ecommerce.html): 11 filings
-- [Restaurants in San Jose](https://placetta.com/guides/san-jose/restaurant.html): 13 filings
-- [Retail stores in San Jose](https://placetta.com/guides/san-jose/retail-store.html): 8 filings
-- [Importers and online sellers in San Jose](https://placetta.com/guides/san-jose/importer-ecommerce.html): 11 filings
-- [Restaurants in Chicago](https://placetta.com/guides/chicago/restaurant.html): 7 filings
-- [Retail stores in Chicago](https://placetta.com/guides/chicago/retail-store.html): 4 filings
-- [Importers and online sellers in Chicago](https://placetta.com/guides/chicago/importer-ecommerce.html): 7 filings
-- [Restaurants in Seattle](https://placetta.com/guides/seattle/restaurant.html): 7 filings
-- [Retail stores in Seattle](https://placetta.com/guides/seattle/retail-store.html): 4 filings
-- [Importers and online sellers in Seattle](https://placetta.com/guides/seattle/importer-ecommerce.html): 8 filings
-- [Restaurants in Boston](https://placetta.com/guides/boston/restaurant.html): 9 filings
-- [Retail stores in Boston](https://placetta.com/guides/boston/retail-store.html): 4 filings
-- [Importers and online sellers in Boston](https://placetta.com/guides/boston/importer-ecommerce.html): 8 filings
-- [Restaurants in Miami](https://placetta.com/guides/miami/restaurant.html): 9 filings
-- [Retail stores in Miami](https://placetta.com/guides/miami/retail-store.html): 6 filings
-- [Importers and online sellers in Miami](https://placetta.com/guides/miami/importer-ecommerce.html): 10 filings
-- [Restaurants in Dallas](https://placetta.com/guides/dallas/restaurant.html): 14 filings
-- [Retail stores in Dallas](https://placetta.com/guides/dallas/retail-store.html): 8 filings
-- [Importers and online sellers in Dallas](https://placetta.com/guides/dallas/importer-ecommerce.html): 9 filings
-- [Restaurants in Austin](https://placetta.com/guides/austin/restaurant.html): 14 filings
-- [Retail stores in Austin](https://placetta.com/guides/austin/retail-store.html): 8 filings
-- [Importers and online sellers in Austin](https://placetta.com/guides/austin/importer-ecommerce.html): 9 filings
-- [Restaurants in Washington, DC](https://placetta.com/guides/washington-dc/restaurant.html): 7 filings
-- [Retail stores in Washington, DC](https://placetta.com/guides/washington-dc/retail-store.html): 5 filings
-- [Importers and online sellers in Washington, DC](https://placetta.com/guides/washington-dc/importer-ecommerce.html): 7 filings
-- [Restaurants in Atlanta](https://placetta.com/guides/atlanta/restaurant.html): 7 filings
-- [Retail stores in Atlanta](https://placetta.com/guides/atlanta/retail-store.html): 4 filings
-- [Importers and online sellers in Atlanta](https://placetta.com/guides/atlanta/importer-ecommerce.html): 8 filings
-- [Restaurants in Philadelphia](https://placetta.com/guides/philadelphia/restaurant.html): 8 filings
-- [Retail stores in Philadelphia](https://placetta.com/guides/philadelphia/retail-store.html): 5 filings
-- [Importers and online sellers in Philadelphia](https://placetta.com/guides/philadelphia/importer-ecommerce.html): 9 filings
-- [Restaurants in Las Vegas](https://placetta.com/guides/las-vegas/restaurant.html): 9 filings
-- [Retail stores in Las Vegas](https://placetta.com/guides/las-vegas/retail-store.html): 6 filings
-- [Importers and online sellers in Las Vegas](https://placetta.com/guides/las-vegas/importer-ecommerce.html): 9 filings
-- [Restaurants in San Antonio](https://placetta.com/guides/san-antonio/restaurant.html): 10 filings
-- [Retail stores in San Antonio](https://placetta.com/guides/san-antonio/retail-store.html): 7 filings
-- [Importers and online sellers in San Antonio](https://placetta.com/guides/san-antonio/importer-ecommerce.html): 9 filings
-- [Restaurants in Tampa](https://placetta.com/guides/tampa/restaurant.html): 8 filings
-- [Retail stores in Tampa](https://placetta.com/guides/tampa/retail-store.html): 5 filings
-- [Importers and online sellers in Tampa](https://placetta.com/guides/tampa/importer-ecommerce.html): 9 filings
-- [Restaurants in San Diego](https://placetta.com/guides/san-diego/restaurant.html): 10 filings
-- [Retail stores in San Diego](https://placetta.com/guides/san-diego/retail-store.html): 8 filings
-- [Importers and online sellers in San Diego](https://placetta.com/guides/san-diego/importer-ecommerce.html): 11 filings
-- [Restaurants in Irvine](https://placetta.com/guides/irvine/restaurant.html): 9 filings
-- [Retail stores in Irvine](https://placetta.com/guides/irvine/retail-store.html): 7 filings
-- [Importers and online sellers in Irvine](https://placetta.com/guides/irvine/importer-ecommerce.html): 11 filings
-- [Restaurants in Orlando](https://placetta.com/guides/orlando/restaurant.html): 8 filings
-- [Retail stores in Orlando](https://placetta.com/guides/orlando/retail-store.html): 5 filings
-- [Importers and online sellers in Orlando](https://placetta.com/guides/orlando/importer-ecommerce.html): 9 filings
-- [Restaurants in Fort Worth](https://placetta.com/guides/fort-worth/restaurant.html): 11 filings
-- [Retail stores in Fort Worth](https://placetta.com/guides/fort-worth/retail-store.html): 7 filings
-- [Importers and online sellers in Fort Worth](https://placetta.com/guides/fort-worth/importer-ecommerce.html): 9 filings
-- [Restaurants in Phoenix](https://placetta.com/guides/phoenix/restaurant.html): 6 filings
-- [Retail stores in Phoenix](https://placetta.com/guides/phoenix/retail-store.html): 4 filings
-- [Importers and online sellers in Phoenix](https://placetta.com/guides/phoenix/importer-ecommerce.html): 7 filings
-- [Restaurants in Oakland](https://placetta.com/guides/oakland/restaurant.html): 10 filings
-- [Retail stores in Oakland](https://placetta.com/guides/oakland/retail-store.html): 8 filings
-- [Importers and online sellers in Oakland](https://placetta.com/guides/oakland/importer-ecommerce.html): 12 filings
-- [Restaurants in Sacramento](https://placetta.com/guides/sacramento/restaurant.html): 9 filings
-- [Retail stores in Sacramento](https://placetta.com/guides/sacramento/retail-store.html): 7 filings
-- [Importers and online sellers in Sacramento](https://placetta.com/guides/sacramento/importer-ecommerce.html): 11 filings
-- [Restaurants in Portland](https://placetta.com/guides/portland/restaurant.html): 5 filings
-- [Retail stores in Portland](https://placetta.com/guides/portland/retail-store.html): 3 filings
-- [Importers and online sellers in Portland](https://placetta.com/guides/portland/importer-ecommerce.html): 6 filings
-- [Restaurants in Plano](https://placetta.com/guides/plano/restaurant.html): 11 filings
-- [Retail stores in Plano](https://placetta.com/guides/plano/retail-store.html): 7 filings
-- [Importers and online sellers in Plano](https://placetta.com/guides/plano/importer-ecommerce.html): 9 filings
-- [Restaurants in Arlington](https://placetta.com/guides/arlington/restaurant.html): 7 filings
-- [Retail stores in Arlington](https://placetta.com/guides/arlington/retail-store.html): 4 filings
-- [Importers and online sellers in Arlington](https://placetta.com/guides/arlington/importer-ecommerce.html): 7 filings
-- [Restaurants in Fairfax County](https://placetta.com/guides/fairfax-county/restaurant.html): 8 filings
-- [Retail stores in Fairfax County](https://placetta.com/guides/fairfax-county/retail-store.html): 5 filings
-- [Importers and online sellers in Fairfax County](https://placetta.com/guides/fairfax-county/importer-ecommerce.html): 7 filings
-- [Restaurants in Edison](https://placetta.com/guides/edison/restaurant.html): 5 filings
-- [Retail stores in Edison](https://placetta.com/guides/edison/retail-store.html): 3 filings
-- [Importers and online sellers in Edison](https://placetta.com/guides/edison/importer-ecommerce.html): 7 filings
-- [Restaurants in Jersey City](https://placetta.com/guides/jersey-city/restaurant.html): 5 filings
-- [Retail stores in Jersey City](https://placetta.com/guides/jersey-city/retail-store.html): 4 filings
-- [Importers and online sellers in Jersey City](https://placetta.com/guides/jersey-city/importer-ecommerce.html): 7 filings
-- [Restaurants in Denver](https://placetta.com/guides/denver/restaurant.html): 6 filings
-- [Retail stores in Denver](https://placetta.com/guides/denver/retail-store.html): 4 filings
-- [Importers and online sellers in Denver](https://placetta.com/guides/denver/importer-ecommerce.html): 7 filings
-- [Restaurants in Minneapolis](https://placetta.com/guides/minneapolis/restaurant.html): 6 filings
-- [Retail stores in Minneapolis](https://placetta.com/guides/minneapolis/retail-store.html): 3 filings
-- [Importers and online sellers in Minneapolis](https://placetta.com/guides/minneapolis/importer-ecommerce.html): 6 filings
-- [Restaurants in Columbus](https://placetta.com/guides/columbus/restaurant.html): 6 filings
-- [Retail stores in Columbus](https://placetta.com/guides/columbus/retail-store.html): 3 filings
-- [Importers and online sellers in Columbus](https://placetta.com/guides/columbus/importer-ecommerce.html): 6 filings
+## Help Center
+- [How Placetta submits your filings](https://www.placetta.com/help/essentials/self-filing/)
+- [Signing in to Placetta](https://www.placetta.com/help/essentials/sign-in/)
+- [Creating your workspace](https://www.placetta.com/help/essentials/workspace/)
+- [Your entry plan](https://www.placetta.com/help/essentials/entry-plan/)
+- [Ask Placetta: what the agent does](https://www.placetta.com/help/features/agent/)
+- [Approvals and filing](https://www.placetta.com/help/features/approvals/)
+- [Deadlines and renewals](https://www.placetta.com/help/features/deadlines/)
+- [Updates and the policy monitor](https://www.placetta.com/help/features/updates/)
+- [Documents](https://www.placetta.com/help/features/documents/)
+- [Inviting teammates and roles](https://www.placetta.com/help/team/invite/)
+- [Two-step sign-in](https://www.placetta.com/help/team/two-step/)
+- [Plans and pricing](https://www.placetta.com/help/billing/plans/)
+- [Who pays government fees](https://www.placetta.com/help/billing/gov-fees/)
+- [Where your data lives](https://www.placetta.com/help/security/data/)
+- [English and Chinese](https://www.placetta.com/help/security/languages/)
+- [I didn't get a sign-in email](https://www.placetta.com/help/trouble/no-email/)
+- [I forgot my password](https://www.placetta.com/help/trouble/password/)
+
+## Trust
+- [Trust and security](https://www.placetta.com/trust)
+- [How Placetta's AI works](https://www.placetta.com/ai.html)
+- [Privacy Policy](https://www.placetta.com/privacy.html)
+- [Terms of Service](https://www.placetta.com/terms.html)

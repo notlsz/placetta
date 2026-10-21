@@ -45,6 +45,10 @@ jobs:
       # PDF is on that agency's site, and docs/MARKET_COVERAGE.md matches what the script generates
       - name: Market coverage
         run: npm run test:markets
+      # the website as a crawler with no JavaScript sees it: robots, sitemaps, llms.txt, one h1, canonicals, JSON-LD that
+      # parses and matches the visible FAQ, answer-first guides, no indexed near-duplicates, every page rebuilt (npm run seo)
+      - name: Search and AI crawler checks
+        run: npm run test:seo
       - name: Production build
         run: npx vite build
   functions:

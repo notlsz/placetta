@@ -6,11 +6,13 @@
    Run: npm run guides (output is committed; Vite copies site/ into dist/). */
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { CITIES, COUNTRIES } from "../src/forms/world.ts";
 import { FORMS, METHOD, formById, formsFor, type Needs, type OfficialForm, type Segment } from "../src/forms/registry.ts";
 import { ANSWERS } from "./guides-answers.mts";
+// the site's address and the company entity: one place for every canonical, sitemap and JSON-LD (scripts/seo/config.mjs)
+import { BAIDU_META, ORG_ID, ORIGIN, SEARCH_PATH, SITE_ID, ldTag, orgLd, websiteLd } from "./seo/config.mjs";
 
-const ORIGIN = "https://placetta.com";
 const TODAY = process.env.GUIDES_TODAY ?? new Date().toISOString().slice(0, 10);
 type L = "en" | "zh";
 type Bi = { en: string; zh: string };
@@ -69,13 +71,35 @@ const TOPICS: Topic[] = [
   { slug: "renewals", title: (c, l) => (l === "zh" ? `在${c}需要定期续期的证照` : `Renewals and annual filings in ${c}`), dek: B("What renews, and how often, once the business is open.", "开业后哪些证照需要续期、多久一次。"), pick: f => !!f.renews },
 ];
 
-type Place = { slug: string; name: Bi; where: string; country: string };
+type Place = { slug: string; name: Bi; where: string; country: string; state?: string };
 const PLACES: Place[] = [
-  { slug: "new-york-city", name: B("New York City", "纽约市"), where: "Flushing, New York City, NY", country: "US" },
-  { slug: "los-angeles", name: B("Los Angeles", "洛杉矶"), where: "Los Angeles, CA", country: "US" },
-  { slug: "houston", name: B("Houston", "休斯顿"), where: "Houston, TX", country: "US" },
-  ...CITIES.filter(c => c.guide).map(c => ({ slug: slug(c.en), name: B(c.en, c.zh), where: c.aliases[0] + (c.state ? `, ${c.state}` : ""), country: c.country })),
+  { slug: "new-york-city", name: B("New York City", "纽约市"), where: "Flushing, New York City, NY", country: "US", state: "NY" },
+  { slug: "los-angeles", name: B("Los Angeles", "洛杉矶"), where: "Los Angeles, CA", country: "US", state: "CA" },
+  { slug: "houston", name: B("Houston", "休斯顿"), where: "Houston, TX", country: "US", state: "TX" },
+  ...CITIES.filter(c => c.guide).map(c => ({ slug: slug(c.en), name: B(c.en, c.zh), where: c.aliases[0] + (c.state ? `, ${c.state}` : ""), country: c.country, ...(c.state ? { state: c.state } : {}) })),
 ];
+/* US states by postal code, for "where it applies" and the state hubs */
+const US_STATES: Record<string, Bi> = Object.fromEntries(Object.entries({
+  AL: "Alabama/阿拉巴马州", AK: "Alaska/阿拉斯加州", AZ: "Arizona/亚利桑那州", AR: "Arkansas/阿肯色州", CA: "California/加州", CO: "Colorado/科罗拉多州",
+  CT: "Connecticut/康涅狄格州", DE: "Delaware/特拉华州", DC: "District of Columbia/华盛顿特区", FL: "Florida/佛罗里达州", GA: "Georgia/佐治亚州",
+  HI: "Hawaii/夏威夷州", ID: "Idaho/爱达荷州", IL: "Illinois/伊利诺伊州", IN: "Indiana/印第安纳州", IA: "Iowa/艾奥瓦州", KS: "Kansas/堪萨斯州",
+  KY: "Kentucky/肯塔基州", LA: "Louisiana/路易斯安那州", ME: "Maine/缅因州", MD: "Maryland/马里兰州", MA: "Massachusetts/马萨诸塞州", MI: "Michigan/密歇根州",
+  MN: "Minnesota/明尼苏达州", MS: "Mississippi/密西西比州", MO: "Missouri/密苏里州", MT: "Montana/蒙大拿州", NE: "Nebraska/内布拉斯加州", NV: "Nevada/内华达州",
+  NH: "New Hampshire/新罕布什尔州", NJ: "New Jersey/新泽西州", NM: "New Mexico/新墨西哥州", NY: "New York State/纽约州", NC: "North Carolina/北卡罗来纳州",
+  ND: "North Dakota/北达科他州", OH: "Ohio/俄亥俄州", OK: "Oklahoma/俄克拉何马州", OR: "Oregon/俄勒冈州", PA: "Pennsylvania/宾夕法尼亚州", RI: "Rhode Island/罗得岛州",
+  SC: "South Carolina/南卡罗来纳州", SD: "South Dakota/南达科他州", TN: "Tennessee/田纳西州", TX: "Texas/德州", UT: "Utah/犹他州", VT: "Vermont/佛蒙特州",
+  VA: "Virginia/弗吉尼亚州", WA: "Washington State/华盛顿州", WV: "West Virginia/西弗吉尼亚州", WI: "Wisconsin/威斯康星州", WY: "Wyoming/怀俄明州",
+}).map(([k, v]) => { const [en, zh] = v.split("/"); return [k, B(en, zh)]; }));
+
+/* The day each form's official page was last read and its requirement found on it (scripts/eval/proof-log.json, written
+   by npm run proof:read, plus the proofs carried inline). A page's "Sources checked" date is the latest of its forms'. */
+const PROOF_DAY = new Map<string, string>();
+try {
+  for (const r of JSON.parse(readFileSync("scripts/eval/proof-log.json", "utf8")) as { id: string; checked?: string; found?: boolean }[])
+    if (r.found !== false && r.checked && /^\d{4}-\d\d-\d\d$/.test(r.checked) && r.checked > (PROOF_DAY.get(r.id) ?? "")) PROOF_DAY.set(r.id, r.checked);
+} catch { /* no proof log: no "Sources checked" line */ }
+for (const f of FORMS) { const d = f.proof?.checked; if (d && /^\d{4}-\d\d-\d\d$/.test(d) && d > (PROOF_DAY.get(f.id) ?? "")) PROOF_DAY.set(f.id, d); }
+const checkedOf = (forms: OfficialForm[]) => forms.map(f => PROOF_DAY.get(f.id) ?? "").sort().pop() || "";
 const REGION = (country: string) => (country === "US" ? "us" : country === "CN" ? "cn" : ["AE", "SA", "QA", "KW", "BH", "OM", "TR", "EG", "JO", "IL"].includes(country) ? "me" : "eu");
 const REGIONS: { id: string; name: Bi }[] = [{ id: "us", name: B("United States", "美国") }, { id: "cn", name: B("China", "中国") }, { id: "eu", name: B("Europe", "欧洲") }, { id: "me", name: B("Middle East", "中东") }];
 const countryName = (code: string): Bi => { const c = COUNTRIES.find(x => x.code === code); return c ? B(c.en, c.zh) : B(code, code); };
@@ -92,7 +116,21 @@ const UI = {
   other: B("中文", "English"), onPage: B("In this guide", "本页内容"), updated: B("Updated", "更新于"),
 };
 const base = (l: L) => (l === "zh" ? "/guides/zh" : "/guides");
-const ORG = { "@context": "https://schema.org", "@type": "Organization", name: "Placetta", alternateName: "快哉", url: ORIGIN, logo: ORIGIN + "/apple-touch-icon.png", description: "Placetta gets the business licenses, permits and registrations a company needs to open in a new market, fills the official forms and keeps them current." };
+const ORG = orgLd();
+const PUB = { "@type": "Organization", "@id": ORG_ID, name: "Placetta", url: ORIGIN + "/", logo: { "@type": "ImageObject", url: ORIGIN + "/icon-512.png" } };
+const inLang = (l: L) => (l === "zh" ? "zh-CN" : "en");
+/** An article about this page, linked to the company entity, with the agencies' own pages it is built from as citations. */
+const articleLd = (o: { l: L; path: string; title: string; desc: string; forms?: OfficialForm[]; about?: unknown; type?: string }) => ({
+  "@context": "https://schema.org", "@type": o.type ?? "Article", "@id": ORIGIN + o.path + "#article", headline: o.title.slice(0, 110), name: o.title, description: o.desc,
+  inLanguage: inLang(o.l), url: ORIGIN + o.path, mainEntityOfPage: ORIGIN + o.path, isPartOf: { "@id": SITE_ID }, datePublished: PUBLISHED, dateModified: TODAY,
+  author: PUB, publisher: PUB, image: ORIGIN + "/guides/og.png",
+  ...(o.about ? { about: o.about } : {}),
+  ...(o.forms?.length ? { citation: [...new Set(o.forms.map(f => f.url))].map(u => ({ "@type": "CreativeWork", url: u })) } : {}),
+});
+const placeLd = (p: Place, l: L) => ({ "@type": "City", name: p.name[l], ...(p.state ? { containedInPlace: { "@type": "State", name: US_STATES[p.state]?.[l] ?? p.state } } : {}), ...(p.country ? { addressCountry: p.country } : {}) });
+const faqLd = (l: L, qa: [string, string][]) => ({ "@context": "https://schema.org", "@type": "FAQPage", inLanguage: inLang(l), mainEntity: qa.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) });
+/** The visible questions and answers that faqLd describes, word for word. */
+const faqHtml = (l: L, qa: [string, string][]) => `<section class="faqs"><h2>${l === "zh" ? "常见问题" : "Questions and answers"}</h2>${qa.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join("")}</section>`;
 
 /* Sponsors: shown on every guide. A logo in scripts/sponsors/<name>.svg or .png replaces the name when it's added. Paid links
    carry rel="sponsored", as search engines require. */
@@ -109,8 +147,9 @@ const sponsors = (l: L) => `<aside class="sponsors" aria-label="${l === "zh" ? "
 }).join("")}</aside>`;
 
 type Ctx = { place?: Place; biz?: Biz };
-function page(o: { l: L; path: string; alt: string; title: string; desc: string; crumbs: ([string, string] | [string, string, string])[]; body: string; ld: unknown[]; kind: string; ctx?: Ctx }) {
+function page(o: { l: L; path: string; alt: string; title: string; desc: string; crumbs: ([string, string] | [string, string, string])[]; body: string; ld: unknown[]; kind: string; ctx?: Ctx; noindex?: boolean }) {
   const url = ORIGIN + o.path, altUrl = ORIGIN + o.alt, l = o.l;
+  if (o.noindex) NOINDEX.add(o.path);
   const crumbs = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: o.crumbs.filter((c, i) => !c[2] || i === o.crumbs.length - 1).map(([name, path], i) => ({ "@type": "ListItem", position: i + 1, name, item: ORIGIN + path })) };
   const cityName = o.ctx?.place?.name[l];
   return `<!doctype html>
@@ -120,7 +159,8 @@ function page(o: { l: L; path: string; alt: string; title: string; desc: string;
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(o.title)} | Placetta</title>
 <meta name="description" content="${esc(o.desc)}">
-<link rel="canonical" href="${url}">
+<meta name="robots" content="${o.noindex ? "noindex, follow" : "index, follow, max-snippet:-1, max-image-preview:large"}">
+${l === "zh" ? BAIDU_META + "\n" : ""}<link rel="canonical" href="${url}">
 <link rel="alternate" hreflang="${l === "zh" ? "zh-CN" : "en"}" href="${url}">
 <link rel="alternate" hreflang="${l === "zh" ? "en" : "zh-CN"}" href="${altUrl}">
 <link rel="alternate" hreflang="x-default" href="${l === "en" ? url : altUrl}">
@@ -130,14 +170,19 @@ function page(o: { l: L; path: string; alt: string; title: string; desc: string;
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${ORIGIN}/guides/og.png">
 <meta property="og:site_name" content="Placetta">
+<meta property="og:locale" content="${l === "zh" ? "zh_CN" : "en_US"}">
+<meta property="og:locale:alternate" content="${l === "zh" ? "en_US" : "zh_CN"}">
+<meta property="article:modified_time" content="${TODAY}">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(o.title)}">
+<meta name="twitter:description" content="${esc(o.desc)}">
 <meta name="twitter:image" content="${ORIGIN}/guides/og.png">
 ${FAVICON}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}">
 <link rel="stylesheet" href="/guides/guides.css">
-${[crumbs, ...o.ld].map(x => `<script type="application/ld+json">${JSON.stringify(x).replace(/</g, "\\u003c")}</script>`).join("\n")}
+${[crumbs, ...o.ld].map(ldTag).join("\n")}
 <script src="/guides/guides.js" defer></script>
 </head>
 <body class="pg-${o.kind}">
@@ -163,7 +208,7 @@ ${convert(l, o.ctx ?? {})}
   ${sponsors(l)}
   <a class="brand" href="/" aria-label="Placetta">${BRAND}</a>
   <p>${l === "zh" ? "快哉为进入新市场的企业办理执照、许可和登记，并保持有效。" : "Placetta gets the licenses, permits and registrations a business needs to open in a new market, and keeps them current."}</p>
-  <nav><a href="/">${UI.home[l]}</a><a href="${base(l)}/">${UI.guides[l]}</a><a href="/help/">${l === "zh" ? "帮助中心" : "Help Center"}</a><a href="/privacy.html">${UI.privacy[l]}</a><a href="/terms.html">${UI.terms[l]}</a></nav>
+  <nav><a href="/">${UI.home[l]}</a><a href="${base(l)}/">${UI.guides[l]}</a><a href="/about.html">${l === "zh" ? "关于快哉" : "About Placetta"}</a><a href="/help/">${l === "zh" ? "帮助中心" : "Help Center"}</a><a href="/privacy.html">${UI.privacy[l]}</a><a href="/terms.html">${UI.terms[l]}</a></nav>
   <small>© 2026 Placetta</small>
 </div></footer>
 </body>
@@ -204,13 +249,17 @@ const where = (f: OfficialForm, l: L) => {
   if (city) return l === "zh" ? city.zh : city.en;
   if (country) return l === "zh" ? `${country.zh}全国` : `${country.en}, national`;
   const us: Record<string, Bi> = { NY: B("New York State", "纽约州"), NYC: B("New York City", "纽约市"), CA: B("California", "加州"), LA: B("City of Los Angeles", "洛杉矶市"), LAC: B("Los Angeles County", "洛杉矶县"), TX: B("Texas", "德州"), HOU: B("Houston", "休斯顿") };
-  return us[f.where]?.[l] ?? f.where;
+  return us[f.where]?.[l] ?? US_STATES[f.where]?.[l] ?? f.where;
 };
 const sourceNote = (f: OfficialForm, l: L) => f.checked === "known"
   ? (l === "zh" ? "出自快哉的官方网站资料库。提交前请以机构官网为准，快哉会在每次提交前重新核对。" : "From Placetta's library of official sites. Check the agency's page before you file; Placetta re-checks it before every filing.")
   : (l === "zh" ? "依据机构官网核对。" : "Checked against the agency's own page.");
 const facts = (f: OfficialForm, l: L) => `<dl class="facts"><div><dt>${l === "zh" ? "费用" : "Fee"}</dt><dd>${fee(f, l)}</dd></div><div><dt>${l === "zh" ? "办理" : "Filed"}</dt><dd>${esc(t(METHOD[f.method], l))}</dd></div>${f.takes ? `<div><dt>${l === "zh" ? "时长" : "Takes"}</dt><dd>${esc(t(f.takes, l))}</dd></div>` : ""}${f.renews ? `<div><dt>${l === "zh" ? "续期" : "Renews"}</dt><dd>${esc(t(f.renews, l))}</dd></div>` : ""}</dl>`;
 const hero = (title: string, dek: string, bits: string[]) => `<header class="hero wrap"><h1>${esc(title)}</h1><p class="dek">${esc(dek)}</p><p class="meta">${bits.map(b => `<span>${b}</span>`).join("")}</p></header>`;
+/** The sourcing note at the end of every guide: where the facts come from, and the editorial policy behind them. */
+const sourcing = (l: L, advice = false) => `<p class="fine">${l === "zh"
+  ? `${advice ? "这是一般信息，不是法律或税务意见。" : ""}每项申请都链接到机构官网，事实只取自官方表格和机构页面。各机构要求可能变化，提交前请以机构官网为准。<a href="/editorial.html">我们如何核对来源</a>`
+  : `${advice ? "General information, not legal or tax advice. " : ""}Every filing links to the agency's own page, and every fact comes from an official form or agency page. Agency requirements change; check the agency's page before you file. <a href="/editorial.html">How we source and check these guides</a>`}</p>`;
 const bitsFor = (l: L, n: number) => [`${UI.updated[l]} ${day(l)}`, l === "zh" ? `${n} 项申请` : `${n} filing${n === 1 ? "" : "s"}`, l === "zh" ? "来源：各机构官网" : "Sources: the agencies' own sites"];
 function costOf(forms: OfficialForm[]) {
   const fixed = forms.filter(f => typeof f.fee === "number" && f.fee > 0), free = forms.filter(f => f.fee === 0), varies = forms.filter(f => f.fee === null);
@@ -239,19 +288,35 @@ const embed = (title: string, forms: OfficialForm[], url: string, l: L) => {
 
 /* ------------------------------------------------------------ build */
 
-const urls: { path: string; alt: string; pri: number }[] = [];
+type Kind = "hub" | "guide" | "topic" | "form" | "answer";
+const urls: { path: string; alt: string; type: Kind }[] = [];
+/** Pages kept out of search (noindex, follow): near-duplicates of another page. Left out of the sitemaps and IndexNow. */
+const NOINDEX = new Set<string>();
 /* Each page keeps the date its content last changed: the build hashes the page with today's date masked, and only a page
-   whose hash moved gets today's date (in the "Updated" line, the JSON-LD and the sitemap's lastmod). */
+   whose hash moved gets today's date (in the "Updated" line, the JSON-LD and the sitemap's lastmod). It also keeps the day
+   the page was first published (p): the day version control first added it, or the day this build first wrote it. */
 const DATES_FILE = "scripts/guides-dates.json";
-const DATES: Record<string, { h: string; d: string }> = existsSync(DATES_FILE) ? JSON.parse(readFileSync(DATES_FILE, "utf8")) : {};
+const DATES: Record<string, { h: string; d: string; p?: string }> = existsSync(DATES_FILE) ? JSON.parse(readFileSync(DATES_FILE, "utf8")) : {};
 const NEXT_DATES: typeof DATES = {};
+const ADDED: Record<string, string> = {};
+if (Object.values(DATES).some(x => !x.p)) {
+  try {
+    let day = "";
+    for (const line of execFileSync("git", ["log", "--diff-filter=A", "--name-only", "--format=@%as", "--", "site/guides"], { encoding: "utf8", maxBuffer: 1 << 28 }).split("\n")) {
+      if (line.startsWith("@")) day = line.slice(1);
+      else if (line.startsWith("site/")) ADDED[line.slice(4).replace(/\/index\.html$/, "/")] = day; // newest first, so the oldest add wins
+    }
+  } catch { /* no history: first-published dates start today */ }
+}
+const PUBLISHED = "@@PUBLISHED_DATE@@";
 const fmtDay = (iso: string, l: L) => (l === "zh" ? iso.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, "$1 年 $2 月 $3 日") : new Date(iso + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
 const lastmodOf = (path: string) => NEXT_DATES[path]?.d ?? TODAY;
 const write = (path: string, html: string) => {
   const masked = html.split(TODAY).join("\u0000ISO").split(fmtDay(TODAY, "en")).join("\u0000EN").split(fmtDay(TODAY, "zh")).join("\u0000ZH");
   const h = createHash("sha256").update(masked).digest("hex").slice(0, 16), prev = DATES[path], d = prev && prev.h === h ? prev.d : TODAY;
-  NEXT_DATES[path] = { h, d };
-  const out = masked.split("\u0000ISO").join(d).split("\u0000EN").join(fmtDay(d, "en")).split("\u0000ZH").join(fmtDay(d, "zh"));
+  const pub = [prev?.p, ADDED[path], d].filter((x): x is string => !!x).sort()[0];
+  NEXT_DATES[path] = { h, d, p: pub };
+  const out = masked.split("\u0000ISO").join(d).split("\u0000EN").join(fmtDay(d, "en")).split("\u0000ZH").join(fmtDay(d, "zh")).split(PUBLISHED).join(pub);
   const file = "site" + path.replace(/\/$/, "/index.html"); mkdirSync(file.slice(0, file.lastIndexOf("/")), { recursive: true }); writeFileSync(file, out);
 };
 const keepOg = (() => { try { return readFileSync("site/guides/og.png"); } catch { return null; } })();
@@ -277,6 +342,96 @@ const findGuide = (place: string, seg: string) => guides.find(g => g.place.slug 
 const guideLabel = (g: Guide, l: L) => (l === "zh" ? `${g.place.name.zh}：${g.biz.name.zh}` : `${g.biz.plural.en} in ${g.place.name.en}`);
 const placesUsed = PLACES.filter(p => guides.some(g => g.place === p));
 
+/* Near-duplicates. In a city, kinds of business that file exactly the same filings (a milk tea shop, a coffee shop and a
+   restaurant all do) would be the same page under different names. The first of PRIMARY is the one search engines index;
+   the others stay up for visitors and links (noindex, follow) and the indexed one names them. Same for topic pages. */
+const PRIMARY = ["restaurant", "retail-store", "grocery-store", "importer-ecommerce", "warehouse-3pl", "cosmetics-store", "toy-store", "milk-tea-shop", "coffee-shop", "hot-pot-restaurant", "bakery", "dessert-shop"];
+const sig = (forms: OfficialForm[]) => forms.map(f => f.id).join(",");
+const dupGuide = new Map<Guide, Guide>(), alsoGuide = new Map<Guide, Guide[]>();
+const dupTopicOf = new Map<(typeof topicPages)[number], string>();
+for (const p of placesUsed) {
+  const bySig = new Map<string, Guide[]>();
+  for (const g of guides.filter(x => x.place === p)) bySig.set(sig(g.forms), [...(bySig.get(sig(g.forms)) ?? []), g]);
+  for (const gs of bySig.values()) {
+    const [first, ...rest] = gs.sort((a, b) => PRIMARY.indexOf(a.biz.slug) - PRIMARY.indexOf(b.biz.slug));
+    for (const x of rest) dupGuide.set(x, first);
+    if (rest.length) alsoGuide.set(first, rest);
+  }
+  // a topic page listing exactly a guide's filings (often "permit costs" and the restaurant guide) is that guide again
+  const seen = new Map<string, string>(guides.filter(x => x.place === p && !dupGuide.has(x)).map(g => [sig(g.forms), "g:" + g.biz.slug]));
+  for (const tp of topicPages.filter(x => x.place === p)) { const k = sig(tp.forms); if (seen.has(k)) dupTopicOf.set(tp, seen.get(k)!); else seen.set(k, "t:" + tp.topic.slug); }
+}
+
+/** On a topic page kept out of search, the link to the page that lists the same filings. */
+function dupLink(tp: (typeof topicPages)[number], l: L) {
+  const k = dupTopicOf.get(tp); if (!k) return "";
+  const [kind, sl] = k.split(":"), city = tp.place.name[l];
+  if (kind === "g") { const g = guides.find(x => x.place === tp.place && x.biz.slug === sl)!; return l === "zh" ? `与<a href="${guidePath(g, l)}">${esc(city)}${esc(g.biz.name.zh)}指南</a>的申请完全相同。` : `The same filings as <a href="${guidePath(g, l)}">the guide for ${esc(g.biz.plural.en.toLowerCase())} in ${esc(city)}</a>.`; }
+  const o = TOPICS.find(x => x.slug === sl)!; return l === "zh" ? `与<a href="${topicPath(tp.place, o, l)}">${esc(o.title(city, l))}</a>的申请完全相同。` : `The same filings as <a href="${topicPath(tp.place, o, l)}">${esc(o.title(city, l).replace(/^./, c => c.toLowerCase()))}</a>.`;
+}
+
+/* ------------------------------------------------------------ the parts that make a page answer first */
+
+const agencyNames = (forms: OfficialForm[], l: L) => [...new Set(forms.map(f => t(f.agency, l)))];
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const listEn = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+/** The fee picture in one sentence, from the forms' own fees. */
+function feeLine(forms: OfficialForm[], l: L) {
+  const c = costOf(forms);
+  if (l === "zh") return [c.fixed.length ? `有固定金额的政府规费合计约 ${money(c.total, c.cur)}` : "没有固定金额的政府规费", c.varies.length ? `${c.varies.length} 项按场所或业务计算` : "", c.free.length ? `${c.free.length} 项免费` : ""].filter(Boolean).join("，") + "。";
+  const parts = [c.fixed.length ? `the fixed government fees add up to about ${money(c.total, c.cur)}` : "none of them has a fixed government fee", c.varies.length ? `${plural(c.varies.length, "fee is", "fees are")} set by the space or the business` : "", c.free.length ? `${plural(c.free.length, "filing is", "filings are")} free` : ""].filter(Boolean);
+  const s = listEn(parts);
+  return s.charAt(0).toUpperCase() + s.slice(1) + ".";
+}
+const ON_TOP = B("Build-out, insurance and adviser costs are on top.", "装修、保险和顾问费用不在其内。");
+/** The quotable answer at the top of a guide: how many filings, with whom, in what order and what they cost. */
+function guideAnswer(g: Guide, l: L) {
+  const n = g.forms.length, k = agencyNames(g.forms, l).length, first = t(g.forms[0].title, l), last = t(g.forms[n - 1].title, l), biz = g.biz.name[l], city = g.place.name[l];
+  return l === "zh"
+    ? `在${city}开${biz}，需要向 ${k} 个机构办理 ${n} 项申请，第一项是${first}，最后一项是${last}。${feeLine(g.forms, l)}${t(ON_TOP, l)}`
+    : `Opening ${an(biz)} ${biz} in ${city} takes ${n} filings with ${plural(k, "agency", "agencies")}, starting with the ${lower1(first)} and ending with the ${lower1(last)}. ${feeLine(g.forms, l)} ${t(ON_TOP, l)}`;
+}
+const NOT_LISTED = B("Not listed", "未列明");
+/** Fees and timelines as a table: one row per filing, linked to its step. */
+function glance(forms: OfficialForm[], l: L, intro = "", anchors = true) {
+  const takes = forms.some(f => f.takes), renews = forms.some(f => f.renews);
+  const th = (x: string) => `<th scope="col">${x}</th>`;
+  return `<section class="glance"><h2>${l === "zh" ? "费用与时长一览" : "Fees and timelines at a glance"}</h2>${intro ? `<p>${intro}</p>` : ""}
+<div class="tscroll"><table class="lines gl"><thead><tr>${th(l === "zh" ? "申请" : "Filing")}${th(l === "zh" ? "机构" : "Agency")}${th(l === "zh" ? "政府规费" : "Government fee")}${takes ? th(l === "zh" ? "所需时间" : "How long") : ""}${renews ? th(l === "zh" ? "续期" : "Renews") : ""}</tr></thead><tbody>
+${forms.map((f, i) => `<tr><th scope="row">${anchors ? `<a href="#s${i + 1}">${esc(t(f.title, l))}</a>` : `<a href="${formPath(f, l)}">${esc(t(f.title, l))}</a>`}</th><td>${esc(t(f.agency, l))}</td><td>${fee(f, l)}</td>${takes ? `<td>${esc(f.takes ? t(f.takes, l) : t(NOT_LISTED, l))}</td>` : ""}${renews ? `<td>${esc(f.renews ? t(f.renews, l) : t(NOT_LISTED, l))}</td>` : ""}</tr>`).join("\n")}
+</tbody></table></div></section>`;
+}
+const endDot = (s: string, l: L) => (/[.。!?！？]$/.test(s.trim()) ? s.trim() : s.trim() + (l === "zh" ? "。" : "."));
+/** Questions a guide answers, each answer built from the filings on the page. */
+function guideFaq(g: Guide, l: L): [string, string][] {
+  const biz = g.biz.name[l], city = g.place.name[l], c = costOf(g.forms), ags = agencyNames(g.forms, l), first = g.forms[0];
+  const top = c.fixed.slice().sort((a, b) => (b.fee as number) - (a.fee as number))[0];
+  const timed = g.forms.filter(f => f.takes);
+  const qa: [string, string][] = [];
+  if (l === "zh") {
+    qa.push([`在${city}开${biz}，办许可要花多少钱？`, `${feeLine(g.forms, l)}${top ? `金额最高的一项是${t(top.title, l)}，${money(top.fee as number, c.cur)}。` : ""}${t(ON_TOP, l)}`]);
+    if (timed.length) qa.push([`在${city}开${biz}，办许可需要多长时间？`, `各机构公布的办理时间。${timed.map(f => `${t(f.title, l)}：${endDot(t(f.takes!, l), l)}`).join("")}`]);
+    qa.push([`在${city}开${biz}，要和哪些机构打交道？`, `${g.forms.length} 项申请分别向 ${ags.length} 个机构办理：${ags.join("、")}。`]);
+    qa.push([`在${city}开${biz}，第一步办什么？`, `第一项是${t(first.title, l)}，由${t(first.agency, l)}办理。${endDot(t(first.how, l), l)}`]);
+  } else {
+    qa.push([`How much do the permits cost to open ${an(biz)} ${biz} in ${city}?`, `${feeLine(g.forms, l)}${top ? ` The largest fixed fee is the ${lower1(t(top.title, l))}, at ${money(top.fee as number, c.cur)}.` : ""} ${t(ON_TOP, l)}`]);
+    if (timed.length) qa.push([`How long do the permits take for ${an(biz)} ${biz} in ${city}?`, `The times the agencies give. ${timed.map(f => `${t(f.title, l)}: ${endDot(t(f.takes!, l), l)}`).join(" ")}`]);
+    qa.push([`Which agencies issue the permits for ${an(biz)} ${biz} in ${city}?`, `The ${plural(g.forms.length, "filing goes", "filings go")} to ${plural(ags.length, "agency", "agencies")}: ${listEn(ags)}.`]);
+    qa.push([`What is the first filing to open ${an(biz)} ${biz} in ${city}?`, `The ${lower1(t(first.title, l))}, with the ${t(first.agency, l).replace(/^The /, "")}. ${endDot(t(first.how, l), l)}`]);
+  }
+  return qa;
+}
+const stateOf = (p: Place) => (p.country === "US" && p.state && US_STATES[p.state] ? p.state : "");
+const statePath = (code: string, l: L) => `${base(l)}/states/${slug(US_STATES[code].en)}.html`;
+const bizPath = (b: Biz, l: L) => `${base(l)}/business/${b.slug}.html`;
+const permitPath = (tp: Topic, l: L) => `${base(l)}/permits/${tp.slug}.html`;
+const stateForms = (code: string) => FORMS.filter(f => f.where === code && f.level === "state").sort((a, b) => a.order - b.order);
+/* a state hub when the state has state-level forms of its own to list */
+const STATE_HUBS = [...new Set(placesUsed.map(stateOf).filter(Boolean))].filter(code => stateForms(code).length >= 2).sort();
+const placeCrumbs = (p: Place, l: L): [string, string][] => [[UI.guides[l], base(l) + "/"], ...(STATE_HUBS.includes(stateOf(p)) ? [[US_STATES[stateOf(p)][l], statePath(stateOf(p), l)] as [string, string]] : []), [p.name[l], cityPath(p, l)]];
+const checkedBit = (forms: OfficialForm[], l: L) => { const d = checkedOf(forms); return d ? [`${l === "zh" ? "来源核对于" : "Sources checked"} ${fmtDay(d, l)}`] : []; };
+
+const bizHubsEn: { b: Biz }[] = [];
 for (const l of ["en", "zh"] as L[]) {
   const o: L = l === "en" ? "zh" : "en";
 
@@ -285,59 +440,68 @@ for (const l of ["en", "zh"] as L[]) {
     const biz = g.biz.name[l], city = g.place.name[l];
     const title = l === "zh" ? `在${city}开${biz}需要哪些执照和许可` : `Licenses and permits to open ${an(biz)} ${biz} in ${city}`;
     const desc = l === "zh" ? `在${city}开${biz}需要办理的 ${g.forms.length} 项执照、许可和登记，按顺序列出机构、办理方式、费用和官方链接。` : `The ${g.forms.length} licenses, permits and registrations ${an(biz)} ${biz} in ${city} files, in order, with the agency, how each is filed, the fee and the official link.`;
-    const dek = `${t(g.biz.note, l)} ${l === "zh" ? `以下是按办理顺序排列的 ${g.forms.length} 项申请。` : `Here are the ${g.forms.length} filings, in the order they're made.`}`;
+    const answer = guideAnswer(g, l), qa = guideFaq(g, l), dupOf = dupGuide.get(g), also = alsoGuide.get(g) ?? [];
+    const alsoLine = also.length ? (l === "zh" ? `在${city}，${also.map(x => x.biz.name.zh).join("、")}办理的申请与此完全相同。` : `In ${city}, ${listEn(also.map(x => x.biz.plural.en.toLowerCase()))} file exactly the same filings.`) : "";
+    const dupLine = dupOf ? (l === "zh" ? `与<a href="${guidePath(dupOf, l)}">${esc(dupOf.biz.name.zh)}</a>的申请完全相同。` : `The same filings as <a href="${guidePath(dupOf, l)}">${esc(dupOf.biz.plural.en.toLowerCase())}</a>.`) : "";
     const siblings = guides.filter(x => x.place === g.place && x !== g);
     const qs = ANSWERS.filter(a => a.forms.some(id => g.forms.some(f => f.id === id))).slice(0, 6);
     const tps = topicPages.filter(x => x.place === g.place);
-    const body = `${hero(title, dek, bitsFor(l, g.forms.length))}
+    const body = `${hero(title, answer, [...bitsFor(l, g.forms.length), ...checkedBit(g.forms, l)])}
 <div class="cols wrap"><div class="main">
+${glance(g.forms, l, [esc(t(g.biz.note, l)), esc(alsoLine), dupLine].filter(Boolean).join(" "))}
 ${steps(g.forms, l)}
+${faqHtml(l, qa)}
 ${embed(title, g.forms, ORIGIN + guidePath(g, l), l)}
 ${tps.length ? `<section class="more"><h2>${l === "zh" ? `${city}专题` : `More on opening in ${city}`}</h2><ul class="links">${tps.map(x => `<li><a href="${topicPath(x.place, x.topic, l)}">${esc(x.topic.title(city, l))}</a></li>`).join("")}</ul></section>` : ""}
-${qs.length ? `<section class="more"><h2>${l === "zh" ? "常见问题" : "Questions people ask"}</h2><ul class="qlist">${qs.map(a => `<li><a href="${answerPath(a.slug, l)}">${esc(a.q[l])}</a></li>`).join("")}</ul></section>` : ""}
-<section class="more"><h2>${l === "zh" ? `${city}的其他业务` : `Other businesses in ${city}`}</h2><ul class="links">${siblings.map(x => `<li><a href="${guidePath(x, l)}">${esc(x.biz.plural[l])}</a></li>`).join("")}</ul></section>
-<p class="fine">${l === "zh" ? "各机构要求可能变化，提交前请以机构官网为准。" : "Agency requirements change. Check each agency's page before you file."}</p>
+${qs.length ? `<section class="more"><h2>${l === "zh" ? "相关问答" : "Questions people ask"}</h2><ul class="qlist">${qs.map(a => `<li><a href="${answerPath(a.slug, l)}">${esc(a.q[l])}</a></li>`).join("")}</ul></section>` : ""}
+<section class="more"><h2>${l === "zh" ? `${city}的其他业务` : `Other businesses in ${city}`}</h2><ul class="links">${siblings.map(x => `<li><a href="${guidePath(x, l)}">${esc(x.biz.plural[l])}</a></li>`).join("")}<li><a href="${bizPath(g.biz, l)}">${l === "zh" ? `其他城市的${esc(g.biz.name.zh)}` : `${esc(g.biz.plural.en)} in other cities`}</a></li></ul></section>
+${sourcing(l)}
 </div>${rail(g.forms, l)}</div>`;
-    const ld = { "@context": "https://schema.org", "@type": "HowTo", name: title, description: desc, inLanguage: l === "zh" ? "zh-CN" : "en", dateModified: TODAY, publisher: { "@type": "Organization", name: "Placetta", url: ORIGIN },
-      step: g.forms.map((f, i) => ({ "@type": "HowToStep", position: i + 1, name: t(f.title, l), text: t(f.how, l), url: ORIGIN + guidePath(g, l) })) };
-    write(guidePath(g, l), page({ l, path: guidePath(g, l), alt: guidePath(g, o), title, desc, body, ld: [ld], kind: "guide", ctx: { place: g.place, biz: g.biz },
-      crumbs: [[UI.guides[l], base(l) + "/"], [city, cityPath(g.place, l)], [g.biz.plural[l], guidePath(g, l)]] }));
-    urls.push({ path: guidePath(g, l), alt: guidePath(g, o), pri: 0.8 });
+    const howto = { "@context": "https://schema.org", "@type": "HowTo", name: title, description: desc, inLanguage: inLang(l), dateModified: TODAY, publisher: PUB,
+      step: g.forms.map((f, i) => ({ "@type": "HowToStep", position: i + 1, name: t(f.title, l), text: t(f.how, l), url: ORIGIN + guidePath(g, l) + `#s${i + 1}` })) };
+    write(guidePath(g, l), page({ l, path: guidePath(g, l), alt: guidePath(g, o), title, desc, body, kind: "guide", ctx: { place: g.place, biz: g.biz }, noindex: !!dupOf,
+      ld: [articleLd({ l, path: guidePath(g, l), title, desc: answer, forms: g.forms, about: placeLd(g.place, l) }), howto, faqLd(l, qa)],
+      crumbs: [...placeCrumbs(g.place, l), [g.biz.plural[l], guidePath(g, l)]] }));
+    urls.push({ path: guidePath(g, l), alt: guidePath(g, o), type: "guide" });
   }
 
   /* topics in a city */
   for (const tp of topicPages) {
-    const city = tp.place.name[l], title = tp.topic.title(city, l), c = costOf(tp.forms);
-    let lead = t(tp.topic.dek, l);
-    if (tp.topic.slug === "permit-costs") lead = l === "zh" ? `在${city}，有固定金额的政府规费合计约 ${money(c.total, c.cur)}。另有 ${c.varies.length} 项按场所或业务计算，${c.free.length} 项免费。装修、保险和顾问费用不在其内。` : `In ${city}, the filings with a fixed government fee add up to about ${money(c.total, c.cur)}. ${c.varies.length} more are set by the space or the business, and ${c.free.length} are free. Build-out, insurance and adviser costs are on top.`;
+    const city = tp.place.name[l], title = tp.topic.title(city, l);
+    let lead = `${t(tp.topic.dek, l)} ${l === "zh" ? `${city}共 ${tp.forms.length} 项相关申请。${feeLine(tp.forms, l)}` : `${city} has ${plural(tp.forms.length, "filing", "filings")} on this. ${feeLine(tp.forms, l)}`}`;
+    if (tp.topic.slug === "permit-costs") lead = l === "zh" ? `在${city}，${feeLine(tp.forms, l)}${t(ON_TOP, l)}` : `In ${city}, ${feeLine(tp.forms, l).replace(/^./, ch => ch.toLowerCase())} ${t(ON_TOP, l)}`;
     const desc = `${lead} ${l === "zh" ? `共 ${tp.forms.length} 项申请，附官方链接。` : `${tp.forms.length} filings with official links.`}`.slice(0, 300);
-    const body = `${hero(title, lead, bitsFor(l, tp.forms.length))}
+    const body = `${hero(title, lead, [...bitsFor(l, tp.forms.length), ...checkedBit(tp.forms, l)])}
 <div class="cols wrap"><div class="main">
+${glance(tp.forms, l, dupLink(tp, l))}
 ${steps(tp.forms, l)}
-<section class="more"><h2>${l === "zh" ? `按业务查看${city}指南` : `Guides for each business in ${city}`}</h2><ul class="links">${guides.filter(x => x.place === tp.place).map(x => `<li><a href="${guidePath(x, l)}">${esc(x.biz.plural[l])}</a></li>`).join("")}</ul></section>
-<p class="fine">${l === "zh" ? "各机构要求可能变化，提交前请以机构官网为准。" : "Agency requirements change. Check each agency's page before you file."}</p>
+<section class="more"><h2>${l === "zh" ? `按业务查看${city}指南` : `Guides for each business in ${city}`}</h2><ul class="links">${guides.filter(x => x.place === tp.place).map(x => `<li><a href="${guidePath(x, l)}">${esc(x.biz.plural[l])}</a></li>`).join("")}<li><a href="${permitPath(tp.topic, l)}">${l === "zh" ? "其他城市的同一专题" : "The same topic in other cities"}</a></li></ul></section>
+${sourcing(l)}
 </div>${rail(tp.forms, l)}</div>`;
-    const ld = { "@context": "https://schema.org", "@type": "FAQPage", inLanguage: l === "zh" ? "zh-CN" : "en", mainEntity: [{ "@type": "Question", name: title, acceptedAnswer: { "@type": "Answer", text: `${lead} ${tp.forms.map((f, i) => `${i + 1}. ${t(f.title, l)} (${t(f.agency, l)}${f.takes ? `; ${t(f.takes, l)}` : ""})`).join(" ")}` } }] };
-    write(topicPath(tp.place, tp.topic, l), page({ l, path: topicPath(tp.place, tp.topic, l), alt: topicPath(tp.place, tp.topic, o), title, desc, body, ld: [ld], kind: "topic", ctx: { place: tp.place },
-      crumbs: [[UI.guides[l], base(l) + "/"], [city, cityPath(tp.place, l)], [title, topicPath(tp.place, tp.topic, l)]] }));
-    urls.push({ path: topicPath(tp.place, tp.topic, l), alt: topicPath(tp.place, tp.topic, o), pri: 0.7 });
+    const ld = { "@context": "https://schema.org", "@type": "FAQPage", inLanguage: inLang(l), mainEntity: [{ "@type": "Question", name: title, acceptedAnswer: { "@type": "Answer", text: lead } }] };
+    write(topicPath(tp.place, tp.topic, l), page({ l, path: topicPath(tp.place, tp.topic, l), alt: topicPath(tp.place, tp.topic, o), title, desc, body, kind: "topic", ctx: { place: tp.place }, noindex: dupTopicOf.has(tp),
+      ld: [articleLd({ l, path: topicPath(tp.place, tp.topic, l), title, desc: lead, forms: tp.forms, about: placeLd(tp.place, l) }), ld],
+      crumbs: [...placeCrumbs(tp.place, l), [title, topicPath(tp.place, tp.topic, l)]] }));
+    urls.push({ path: topicPath(tp.place, tp.topic, l), alt: topicPath(tp.place, tp.topic, o), type: "topic" });
   }
 
   /* a city page */
   for (const p of placesUsed) {
     const city = p.name[l], gs = guides.filter(x => x.place === p), tps = topicPages.filter(x => x.place === p);
     const title = l === "zh" ? `在${city}开店：执照与许可指南` : `Opening a business in ${city}: licenses and permits`;
-    const dek = l === "zh" ? `${gs.length} 类业务的完整申请清单，以及费用、时长、外资、雇佣和续期等 ${tps.length} 个专题。` : `Filing lists for ${gs.length} kinds of business, and ${tps.length} topics on costs, timing, foreign owners, hiring and renewals.`;
+    const lo = Math.min(...gs.map(x => x.forms.length)), hi = Math.max(...gs.map(x => x.forms.length));
+    const dek = l === "zh" ? `在${city}开店需要办理 ${lo === hi ? lo : `${lo} 到 ${hi}`} 项申请，视业务而定。这里有 ${gs.length} 类业务的完整申请清单，以及费用、时长、外资、雇佣和续期等 ${tps.length} 个专题。` : `Opening in ${city} takes ${lo === hi ? lo : `${lo} to ${hi}`} filings, depending on the business. Here are the filing lists for ${gs.length} kinds of business, and ${tps.length} topics on costs, timing, foreign owners, hiring and renewals.`;
+    const st = stateOf(p);
     const body = `${hero(title, dek, [`${UI.updated[l]} ${day(l)}`, esc(countryName(p.country)[l])])}
 <div class="wrap city-page">
 <section><h2 class="sec">${l === "zh" ? "按业务" : "By business"}</h2><ul class="tiles">${gs.map(x => `<li><a href="${guidePath(x, l)}"><b>${esc(x.biz.plural[l])}</b><span>${l === "zh" ? `${x.forms.length} 项申请` : `${x.forms.length} filings`}</span></a></li>`).join("")}</ul></section>
-<section><h2 class="sec">${l === "zh" ? "按专题" : "By topic"}</h2><ul class="qgrid">${tps.map(x => `<li><a href="${topicPath(p, x.topic, l)}">${esc(x.topic.title(city, l))}</a></li>`).join("")}</ul></section>
+<section><h2 class="sec">${l === "zh" ? "按专题" : "By topic"}</h2><ul class="qgrid">${tps.map(x => `<li><a href="${topicPath(p, x.topic, l)}">${esc(x.topic.title(city, l))}</a></li>`).join("")}${STATE_HUBS.includes(st) ? `<li><a href="${statePath(st, l)}">${l === "zh" ? `${US_STATES[st].zh}的州级申请` : `State filings in ${US_STATES[st].en}`}</a></li>` : ""}</ul></section>
 </div>`;
-    const ld = { "@context": "https://schema.org", "@type": "CollectionPage", name: title, description: dek, inLanguage: l === "zh" ? "zh-CN" : "en",
-      hasPart: gs.map(x => ({ "@type": "HowTo", name: x.biz.plural[l], url: ORIGIN + guidePath(x, l) })) };
+    const ld = { "@context": "https://schema.org", "@type": "CollectionPage", "@id": ORIGIN + cityPath(p, l) + "#page", name: title, description: dek, inLanguage: inLang(l), url: ORIGIN + cityPath(p, l), isPartOf: { "@id": SITE_ID }, publisher: PUB, about: placeLd(p, l), dateModified: TODAY,
+      hasPart: gs.map(x => ({ "@type": "Article", name: x.biz.plural[l], url: ORIGIN + guidePath(x, l) })) };
     write(cityPath(p, l), page({ l, path: cityPath(p, l), alt: cityPath(p, o), title, desc: dek, body, ld: [ld], kind: "city", ctx: { place: p },
-      crumbs: [[UI.guides[l], base(l) + "/"], [city, cityPath(p, l)]] }));
-    urls.push({ path: cityPath(p, l), alt: cityPath(p, o), pri: 0.9 });
+      crumbs: placeCrumbs(p, l) }));
+    urls.push({ path: cityPath(p, l), alt: cityPath(p, o), type: "hub" });
   }
 
   /* a page per official form */
@@ -349,11 +513,11 @@ ${steps(tp.forms, l)}
       const a = w(f.form), b = w(name); if (!a.size || !b.size) return f.form === name; let n = 0; for (const x of a) if (b.has(x)) n++; return n / Math.min(a.size, b.size) >= 0.6; })();
     const title = same
       ? (l === "zh" ? `${name}办理指南（${where(f, l)}）` : `How to file the ${lower1(name)} (${where(f, l)})`)
-      : (l === "zh" ? `${f.form}：${name}办理指南` : `${f.form}: how to file the ${lower1(name)}`);
+      : (l === "zh" ? `${f.form}：${name}办理指南` : `${f.form}: how to file the ${lower1(name)}`.length > 100 ? `${f.form}: how to file it` : `${f.form}: how to file the ${lower1(name)}`);
     const desc = l === "zh" ? `${t(f.agency, l)}的${name}：谁需要办、如何办理、费用、所需时间${f.fields.length ? "和表格逐行说明" : ""}。` : `${name} from ${t(f.agency, l)}: who files it, how, the fee and how long it takes${f.fields.length ? ", with each line of the form" : ""}.`;
     const users = usedBy.get(f.id) ?? [];
     const qs = ANSWERS.filter(a => a.forms.includes(f.id));
-    const body = `${hero(title, t(f.how, l), [esc(t(f.agency, l)), esc(where(f, l)), `${UI.updated[l]} ${day(l)}`])}
+    const body = `${hero(title, t(f.how, l), [esc(t(f.agency, l)), esc(where(f, l)), `${UI.updated[l]} ${day(l)}`, ...checkedBit([f], l)])}
 <div class="cols wrap"><div class="main">
 <dl class="sheet">
 <div><dt>${l === "zh" ? "机构" : "Agency"}</dt><dd>${esc(t(f.agency, l))}</dd></div>
@@ -367,15 +531,20 @@ ${f.foreign ? `<section class="note"><h2>${l === "zh" ? "股东在境外时" : "
 ${f.fields.length ? `<section><h2>${l === "zh" ? "表格逐行说明" : "The form, line by line"}</h2><table class="lines"><thead><tr><th scope="col">${l === "zh" ? "行" : "Line"}</th><th scope="col">${l === "zh" ? "填写内容" : "What goes there"}</th></tr></thead><tbody>${f.fields.map(x => `<tr><th scope="row">${esc(x.line)}</th><td>${esc(t(x.label, l))}${x.options ? `<small>${esc(x.options.join(" / "))}</small>` : ""}${x.hint ? `<small>${esc(t(x.hint, l))}</small>` : ""}</td></tr>`).join("")}</tbody></table></section>` : ""}
 ${f.attach?.length ? `<section><h2>${l === "zh" ? "需要附上" : "What to attach"}</h2><ul class="plain">${f.attach.map(a => `<li>${esc(t(a, l))}</li>`).join("")}</ul></section>` : ""}
 <section><h2>${l === "zh" ? "官方链接" : "Official links"}</h2><ul class="links"><li><a href="${esc(f.url)}" rel="noopener">${l === "zh" ? "办理入口" : "Where it's filed"}</a></li>${f.info !== f.url ? `<li><a href="${esc(f.info)}" rel="noopener">${l === "zh" ? "机构说明页" : "The agency's page about it"}</a></li>` : ""}${f.pdf && f.pdf !== f.url ? `<li><a href="${esc(f.pdf)}" rel="noopener">${l === "zh" ? "官方 PDF" : "The official PDF"}</a></li>` : ""}</ul><p class="fine">${sourceNote(f, l)}</p></section>
-${qs.length ? `<section class="more"><h2>${l === "zh" ? "常见问题" : "Questions people ask"}</h2><ul class="qlist">${qs.map(a => `<li><a href="${answerPath(a.slug, l)}">${esc(a.q[l])}</a></li>`).join("")}</ul></section>` : ""}
+${qs.length ? `<section class="more"><h2>${l === "zh" ? "相关问答" : "Questions people ask"}</h2><ul class="qlist">${qs.map(a => `<li><a href="${answerPath(a.slug, l)}">${esc(a.q[l])}</a></li>`).join("")}</ul></section>` : ""}
+${sourcing(l)}
 </div>
 ${users.length ? `<aside class="rail"><div class="rail-in"><p class="rail-h">${l === "zh" ? "哪些企业需要" : "Who files it"}</p><ul>${users.slice(0, 14).map(u => `<li><a href="${guidePath(u, l)}">${esc(guideLabel(u, l))}</a></li>`).join("")}</ul><div class="sum"><p>${f.fill ? (l === "zh" ? `快哉会逐行填好 ${f.form}` : `Placetta fills ${f.form} line by line`) : (l === "zh" ? "快哉帮您准备并跟进" : "Placetta prepares and tracks it")}</p><a class="btn" role="link" tabindex="0" data-to="get-plan" data-track="rail_cta">${UI.plan[l]}</a></div></div></aside>` : ""}
 </div>`;
-    const ld = { "@context": "https://schema.org", "@type": "HowTo", name: title, description: desc, inLanguage: l === "zh" ? "zh-CN" : "en", dateModified: TODAY,
+    const svc = { "@context": "https://schema.org", "@type": "GovernmentService", name: name, alternateName: f.form, description: t(f.how, l), url: f.info,
+      provider: { "@type": "GovernmentOrganization", name: t(f.agency, l) }, areaServed: where(f, l), availableChannel: { "@type": "ServiceChannel", serviceUrl: f.url },
+      ...(typeof f.fee === "number" ? { offers: { "@type": "Offer", price: f.fee, priceCurrency: f.currency ?? "USD", description: l === "zh" ? "政府规费" : "Government fee" } } : {}) };
+    const ld = { "@context": "https://schema.org", "@type": "HowTo", name: title, description: desc, inLanguage: inLang(l), dateModified: TODAY, publisher: PUB,
       step: [{ "@type": "HowToStep", text: t(f.how, l) }, ...(f.fields.length ? [{ "@type": "HowToStep", text: (l === "zh" ? "填写：" : "Fill in: ") + f.fields.map(x => t(x.label, l)).join(l === "zh" ? "；" : "; ") }] : []), { "@type": "HowToStep", text: (l === "zh" ? "提交至：" : "File at: ") + f.url }] };
-    write(formPath(f, l), page({ l, path: formPath(f, l), alt: formPath(f, o), title, desc, body, ld: [ld], kind: "form",
+    write(formPath(f, l), page({ l, path: formPath(f, l), alt: formPath(f, o), title, desc, body, kind: "form",
+      ld: [articleLd({ l, path: formPath(f, l), title, desc, forms: [f], about: { "@type": "GovernmentService", name, url: f.info } }), svc, ld],
       crumbs: [[UI.guides[l], base(l) + "/"], [UI.forms[l], `${base(l)}/`, "forms"], [f.form, formPath(f, l)]] }));
-    urls.push({ path: formPath(f, l), alt: formPath(f, o), pri: 0.6 });
+    urls.push({ path: formPath(f, l), alt: formPath(f, o), type: "form" });
   }
 
   /* related answers: the ones sharing a form or a city first, then the next ones in the list, so every answer gets links */
@@ -399,19 +568,84 @@ ${users.length ? `<aside class="rail"><div class="rail-in"><p class="rail-h">${l
     }
     const q = a.q[l];
     const items = forms.map(f => `<li><h3><a href="${formPath(f, l)}">${esc(t(f.title, l))}</a></h3><p class="by">${esc(t(f.agency, l))}<span>${esc(where(f, l))}</span></p><p>${esc(t(f.how, l))}</p>${facts(f, l)}<p class="src"><a href="${esc(f.url)}" rel="noopener">${l === "zh" ? "机构官网" : "The agency's site"}</a></p></li>`).join("");
-    const body = `${hero(q, l === "zh" ? "简明答案，附官方表格和机构链接。" : "The short answer, with the official forms and the agencies' own links.", [`${UI.updated[l]} ${day(l)}`, l === "zh" ? "来源：各机构官网" : "Sources: the agencies' own sites"])}
+    const body = `${hero(q, clean(short), [`${UI.updated[l]} ${day(l)}`, l === "zh" ? "来源：各机构官网" : "Sources: the agencies' own sites", ...checkedBit(forms, l)])}
 <div class="cols wrap"><div class="main">
-<section class="answer"><h2>${l === "zh" ? "简明答案" : "The short answer"}</h2><p>${esc(clean(short))}</p></section>
 ${forms.length ? `<section><h2>${l === "zh" ? (a.cost ? "每项申请及费用" : "相关表格") : (a.cost ? "Every filing and its fee" : "The forms involved")}</h2><ol class="cards">${items}</ol></section>` : ""}
 ${rel.length ? `<section class="more"><h2>${l === "zh" ? "完整指南" : "Full guides"}</h2><ul class="links">${rel.map(g => `<li><a href="${guidePath(g, l)}">${esc(guideLabel(g, l))}</a></li>`).join("")}</ul></section>` : ""}
-<p class="fine">${l === "zh" ? "这是一般信息，不是法律或税务意见。各机构要求可能变化，提交前请以机构官网为准。" : "General information, not legal or tax advice. Agency requirements change; check the agency's page before you file."}</p>
+${sourcing(l, true)}
 </div>
 <aside class="rail"><div class="rail-in"><p class="rail-h">${l === "zh" ? "更多问答" : "More answers"}</p><ul>${related(a).map(x => `<li><a href="${answerPath(x.slug, l)}">${esc(x.q[l])}</a></li>`).join("")}</ul></div></aside>
 </div>`;
-    const ld = { "@context": "https://schema.org", "@type": "FAQPage", inLanguage: l === "zh" ? "zh-CN" : "en", mainEntity: [{ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: clean(short) } }] };
-    write(answerPath(a.slug, l), page({ l, path: answerPath(a.slug, l), alt: answerPath(a.slug, o), title: q, desc: clean(short).slice(0, 155), body, ld: [ld], kind: "answer", ctx: { place },
+    const ld = faqLd(l, [[q, clean(short)]]);
+    write(answerPath(a.slug, l), page({ l, path: answerPath(a.slug, l), alt: answerPath(a.slug, o), title: q, desc: clean(short).slice(0, 155), body, kind: "answer", ctx: { place },
+      ld: [articleLd({ l, path: answerPath(a.slug, l), title: q, desc: clean(short), forms, ...(place ? { about: placeLd(place, l) } : {}) }), ld],
       crumbs: [[UI.guides[l], base(l) + "/"], [UI.answers[l], `${base(l)}/`, "answers"], [q, answerPath(a.slug, l)]] }));
-    urls.push({ path: answerPath(a.slug, l), alt: answerPath(a.slug, o), pri: 0.8 });
+    urls.push({ path: answerPath(a.slug, l), alt: answerPath(a.slug, o), type: "answer" });
+  }
+
+  /* hubs by kind of business: every city's guide for it, with its filings and fixed fees in one table */
+  const bizHubs: { b: Biz; gs: Guide[] }[] = [];
+  const bizSeen = new Map<string, Biz>();
+  for (const b of [...BUSINESSES].sort((x, y) => PRIMARY.indexOf(x.slug) - PRIMARY.indexOf(y.slug))) {
+    const gs = guides.filter(g => g.biz === b); if (gs.length < 2) continue;
+    const k = gs.map(g => g.place.slug + ":" + sig(g.forms)).join("|"), same = bizSeen.get(k); if (!same) bizSeen.set(k, b);
+    bizHubs.push({ b, gs }); if (l === "en") bizHubsEn.push({ b });
+    const title = l === "zh" ? `${b.name.zh}开店执照与许可：按城市查看` : `Licenses and permits to open ${an(b.name.en)} ${b.name.en}, city by city`;
+    const counts = gs.map(g => g.forms.length), lo = Math.min(...counts), hi = Math.max(...counts);
+    const dek = l === "zh" ? `在快哉覆盖的 ${gs.length} 座城市开${b.name.zh}，需要办理 ${lo === hi ? lo : `${lo} 到 ${hi}`} 项申请，视城市而定。${t(b.note, l)}下表列出每座城市的申请数量和固定政府规费。` : `${b.plural.en} file ${lo === hi ? lo : `${lo} to ${hi}`} filings to open, depending on the city, across the ${gs.length} cities Placetta covers. ${t(b.note, l)} The table lists each city's filings and fixed government fees.`;
+    const rows = gs.map(g => { const c = costOf(g.forms); return `<tr><th scope="row"><a href="${guidePath(g, l)}">${esc(g.place.name[l])}</a></th><td>${esc(countryName(g.place.country)[l])}</td><td>${g.forms.length}</td><td>${c.fixed.length ? money(c.total, c.cur) : (l === "zh" ? "无固定规费" : "None fixed")}</td><td>${c.varies.length}</td></tr>`; }).join("\n");
+    const body = `${hero(title, dek, [`${UI.updated[l]} ${day(l)}`, l === "zh" ? `${gs.length} 座城市` : `${gs.length} cities`, ...checkedBit(gs.flatMap(g => g.forms), l)])}
+<div class="cols wrap"><div class="main">
+<section class="glance"><h2>${l === "zh" ? "各城市一览" : "Every city at a glance"}</h2><div class="tscroll"><table class="lines gl"><thead><tr><th scope="col">${l === "zh" ? "城市" : "City"}</th><th scope="col">${l === "zh" ? "国家" : "Country"}</th><th scope="col">${l === "zh" ? "申请数" : "Filings"}</th><th scope="col">${l === "zh" ? "固定政府规费" : "Fixed government fees"}</th><th scope="col">${l === "zh" ? "视情况而定" : "Fees that vary"}</th></tr></thead><tbody>
+${rows}
+</tbody></table></div></section>
+<section class="more"><h2>${l === "zh" ? "其他业务" : "Other kinds of business"}</h2><ul class="links">${BUSINESSES.filter(x => x !== b && guides.filter(g => g.biz === x).length >= 2).map(x => `<li><a href="${bizPath(x, l)}">${esc(x.plural[l])}</a></li>`).join("")}</ul></section>
+${sourcing(l)}
+</div></div>`;
+    const ldc = { "@context": "https://schema.org", "@type": "CollectionPage", "@id": ORIGIN + bizPath(b, l) + "#page", name: title, description: dek, inLanguage: inLang(l), url: ORIGIN + bizPath(b, l), isPartOf: { "@id": SITE_ID }, publisher: PUB, dateModified: TODAY,
+      hasPart: gs.map(g => ({ "@type": "Article", name: guideLabel(g, l), url: ORIGIN + guidePath(g, l) })) };
+    write(bizPath(b, l), page({ l, path: bizPath(b, l), alt: bizPath(b, o), title, desc: dek.slice(0, 300), body, ld: [ldc], kind: "topic", noindex: !!same, ctx: { biz: b },
+      crumbs: [[UI.guides[l], base(l) + "/"], [b.plural[l], bizPath(b, l)]] }));
+    urls.push({ path: bizPath(b, l), alt: bizPath(b, o), type: "hub" });
+  }
+
+  /* hubs by permit type: one topic across every city */
+  const permitHubs = TOPICS.map(tp => ({ tp, ps: topicPages.filter(x => x.topic === tp) })).filter(x => x.ps.length >= 3);
+  for (const { tp, ps } of permitHubs) {
+    const title = tp.title(l === "zh" ? "各城市" : "each city", l);
+    const dek = `${t(tp.dek, l)} ${l === "zh" ? `覆盖 ${ps.length} 座城市，下表列出每座城市的相关申请数和固定政府规费。` : `${ps.length} cities, each with its number of filings and fixed government fees.`}`;
+    const rows = ps.map(x => { const c = costOf(x.forms); return `<tr><th scope="row"><a href="${topicPath(x.place, tp, l)}">${esc(x.place.name[l])}</a></th><td>${esc(countryName(x.place.country)[l])}</td><td>${x.forms.length}</td><td>${c.fixed.length ? money(c.total, c.cur) : (l === "zh" ? "无固定规费" : "None fixed")}</td></tr>`; }).join("\n");
+    const body = `${hero(title, dek, [`${UI.updated[l]} ${day(l)}`, ...checkedBit(ps.flatMap(x => x.forms), l)])}
+<div class="cols wrap"><div class="main">
+<section class="glance"><h2>${l === "zh" ? "各城市一览" : "Every city at a glance"}</h2><div class="tscroll"><table class="lines gl"><thead><tr><th scope="col">${l === "zh" ? "城市" : "City"}</th><th scope="col">${l === "zh" ? "国家" : "Country"}</th><th scope="col">${l === "zh" ? "申请数" : "Filings"}</th><th scope="col">${l === "zh" ? "固定政府规费" : "Fixed government fees"}</th></tr></thead><tbody>
+${rows}
+</tbody></table></div></section>
+<section class="more"><h2>${l === "zh" ? "其他专题" : "Other topics"}</h2><ul class="links">${permitHubs.filter(x => x.tp !== tp).map(x => `<li><a href="${permitPath(x.tp, l)}">${esc(x.tp.title(l === "zh" ? "各城市" : "each city", l))}</a></li>`).join("")}</ul></section>
+${sourcing(l)}
+</div></div>`;
+    const ldc = { "@context": "https://schema.org", "@type": "CollectionPage", "@id": ORIGIN + permitPath(tp, l) + "#page", name: title, description: dek, inLanguage: inLang(l), url: ORIGIN + permitPath(tp, l), isPartOf: { "@id": SITE_ID }, publisher: PUB, dateModified: TODAY,
+      hasPart: ps.map(x => ({ "@type": "Article", name: tp.title(x.place.name[l], l), url: ORIGIN + topicPath(x.place, tp, l) })) };
+    write(permitPath(tp, l), page({ l, path: permitPath(tp, l), alt: permitPath(tp, o), title, desc: dek.slice(0, 300), body, ld: [ldc], kind: "topic",
+      crumbs: [[UI.guides[l], base(l) + "/"], [title, permitPath(tp, l)]] }));
+    urls.push({ path: permitPath(tp, l), alt: permitPath(tp, o), type: "hub" });
+  }
+
+  /* hubs by US state: the state's own filings, then its cities */
+  for (const code of STATE_HUBS) {
+    const st = US_STATES[code][l], sf = stateForms(code), ps = placesUsed.filter(p => stateOf(p) === code);
+    const title = l === "zh" ? `在${st}开店：州级执照、许可与登记` : `Opening a business in ${st}: state licenses, permits and registrations`;
+    const dek = l === "zh" ? `${st}的 ${sf.length} 项州级申请，以及 ${ps.length} 座城市的完整指南。${feeLine(sf, l)}` : `The ${sf.length} state-level filings in ${st}, and full guides for ${plural(ps.length, "city", "cities")} there. ${feeLine(sf, l)}`;
+    const body = `${hero(title, dek, [`${UI.updated[l]} ${day(l)}`, ...checkedBit(sf, l)])}
+<div class="cols wrap"><div class="main">
+${glance(sf, l, "", false)}
+<section class="more"><h2>${l === "zh" ? `${st}的城市指南` : `City guides in ${st}`}</h2><ul class="links">${ps.map(p => `<li><a href="${cityPath(p, l)}">${esc(p.name[l])}</a></li>`).join("")}</ul></section>
+${sourcing(l)}
+</div></div>`;
+    const ldc = { "@context": "https://schema.org", "@type": "CollectionPage", "@id": ORIGIN + statePath(code, l) + "#page", name: title, description: dek, inLanguage: inLang(l), url: ORIGIN + statePath(code, l), isPartOf: { "@id": SITE_ID }, publisher: PUB, dateModified: TODAY,
+      about: { "@type": "State", name: st }, citation: [...new Set(sf.map(f => f.url))].map(u => ({ "@type": "CreativeWork", url: u })), hasPart: ps.map(p => ({ "@type": "CollectionPage", name: p.name[l], url: ORIGIN + cityPath(p, l) })) };
+    write(statePath(code, l), page({ l, path: statePath(code, l), alt: statePath(code, o), title, desc: dek.slice(0, 300), body, ld: [ldc], kind: "topic",
+      crumbs: [[UI.guides[l], base(l) + "/"], [st, statePath(code, l)]] }));
+    urls.push({ path: statePath(code, l), alt: statePath(code, o), type: "hub" });
   }
 
   /* the hub */
@@ -432,14 +666,17 @@ ${rel.length ? `<section class="more"><h2>${l === "zh" ? "完整指南" : "Full 
 <section class="wrap block" id="cities"><h2 class="sec">${l === "zh" ? "品牌正在扩张的城市" : "Where brands are expanding"}</h2>
 <div class="tabs" role="tablist" aria-label="${l === "zh" ? "地区" : "Region"}">${REGIONS.map((r, i) => `<button type="button" role="tab" id="t-${r.id}" aria-controls="r-${r.id}" aria-selected="${i === 0}">${esc(r.name[l])}<span>${placesUsed.filter(p => REGION(p.country) === r.id).length}</span></button>`).join("")}</div>
 ${regionPanels}</section>
+<section class="wrap block" id="by-business"><h2 class="sec">${l === "zh" ? "按业务" : "By kind of business"}</h2><ul class="qgrid">${bizHubs.map(x => `<li><a href="${bizPath(x.b, l)}">${esc(x.b.plural[l])}</a></li>`).join("")}</ul></section>
+<section class="wrap block" id="by-permit"><h2 class="sec">${l === "zh" ? "按许可类型" : "By kind of permit"}</h2><ul class="qgrid">${permitHubs.map(x => `<li><a href="${permitPath(x.tp, l)}">${esc(x.tp.title(l === "zh" ? "各城市" : "each city", l))}</a></li>`).join("")}</ul></section>
+<section class="wrap block" id="by-state"><h2 class="sec">${l === "zh" ? "按美国州" : "By US state"}</h2><ul class="qgrid">${STATE_HUBS.map(c => `<li><a href="${statePath(c, l)}">${esc(US_STATES[c][l])}</a></li>`).join("")}</ul></section>
 <section class="wrap block" id="answers"><h2 class="sec">${UI.answers[l]}</h2><ul class="qgrid">${ANSWERS.map(a => `<li data-f="${esc((a.q.en + " " + a.q.zh).toLowerCase())}"><a href="${answerPath(a.slug, l)}">${esc(a.q[l])}</a></li>`).join("")}</ul></section>
 <section class="wrap block" id="forms"><h2 class="sec">${UI.forms[l]}</h2>
 ${agencies.map(w => { const fs = FORMS.filter(f => where(f, l) === w); return `<details class="fgroup"${w === (l === "zh" ? "美国联邦" : "US federal") ? " open" : ""}><summary><b>${esc(w)}</b><span>${fs.length}</span></summary><ul class="fgrid">${fs.map(f => `<li data-f="${esc((f.form + " " + f.title.en + " " + f.title.zh + " " + f.agency.en + " " + f.agency.zh).toLowerCase())}"><a href="${formPath(f, l)}"><b>${esc(f.form)}</b><span>${esc(t(f.title, l))}</span></a></li>`).join("")}</ul></details>`; }).join("")}
 </section>`;
-  const ld = [{ "@context": "https://schema.org", "@type": "CollectionPage", name: hubTitle, description: hubDek, inLanguage: l === "zh" ? "zh-CN" : "en" }, ORG,
-    { "@context": "https://schema.org", "@type": "WebSite", name: "Placetta", url: ORIGIN, inLanguage: l === "zh" ? "zh-CN" : "en" }];
+  const ld = [{ "@context": "https://schema.org", "@type": "CollectionPage", "@id": ORIGIN + base(l) + "/#page", name: hubTitle, description: hubDek, inLanguage: inLang(l), url: ORIGIN + base(l) + "/", isPartOf: { "@id": SITE_ID }, publisher: PUB, dateModified: TODAY }, ORG,
+    websiteLd(SEARCH_PATH)];
   write(base(l) + "/", page({ l, path: base(l) + "/", alt: base(o) + "/", title: hubTitle, desc: hubDek, body: hub, ld, kind: "hub", crumbs: [[UI.home[l], "/"], [UI.guides[l], base(l) + "/"]] }));
-  urls.push({ path: base(l) + "/", alt: base(o) + "/", pri: 1 });
+  urls.push({ path: base(l) + "/", alt: base(o) + "/", type: "hub" });
 }
 
 /* ------------------------------------------------------------ assets, data and the files engines read */
@@ -454,34 +691,22 @@ const data = {
   cities: placesUsed.map(p => ({ city: p.name.en, country: countryName(p.country).en, url: ORIGIN + cityPath(p, "en"),
     guides: guides.filter(g => g.place === p).map(g => ({ business: g.biz.plural.en, url: ORIGIN + guidePath(g, "en"), filings: g.forms.map(f => ({ name: f.title.en, agency: f.agency.en, fee: f.fee, currency: f.currency ?? "USD", official_link: f.url })) })) })),
   answers: ANSWERS.map(a => ({ question: a.q.en, url: ORIGIN + answerPath(a.slug, "en") })),
+  // the counts every page quotes (llms.txt, the About page), so no number is written by hand anywhere
+  coverage: { cities: placesUsed.length, countries: new Set(placesUsed.map(p => p.country)).size, us_cities: placesUsed.filter(p => p.country === "US").length,
+    business_kinds: BUSINESSES.length, business_guides: guides.length, topic_pages: topicPages.length, official_forms: FORMS.length, answers: ANSWERS.length,
+    indexed_pages: urls.filter(u => !NOINDEX.has(u.path)).length, languages: ["en", "zh-CN"] },
+  hubs: {
+    business: bizHubsEn.map(x => ({ name: x.b.plural.en, url: ORIGIN + bizPath(x.b, "en") })),
+    permits: TOPICS.filter(tp => topicPages.filter(x => x.topic === tp).length >= 3).map(tp => ({ name: tp.title("each city", "en"), url: ORIGIN + permitPath(tp, "en") })),
+    states: STATE_HUBS.map(c => ({ name: US_STATES[c].en, url: ORIGIN + statePath(c, "en") })),
+  },
 };
 writeFileSync("site/guides/data.json", JSON.stringify(data));
 
-const enGuide = (g: Guide) => `- [${g.biz.plural.en} in ${g.place.name.en}](${ORIGIN}${guidePath(g, "en")}): ${g.forms.length} filings`;
-writeFileSync("site/llms.txt", `# Placetta
-
-> Placetta gets the business licenses, permits and registrations a company needs to open in a new market (restaurants, cafes, milk tea shops, retail stores, importers and warehouses), fills the official government forms and keeps them current. It covers ${placesUsed.length} cities across the US, China, Europe and the Middle East, in English and Chinese.
-
-Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Facts come from Placetta's library of official forms; agencies change requirements, so check the agency's page before filing.
-
-## Start here
-- [License guides, city by city](${ORIGIN}/guides/): every city, business and official form
-- [Get a plan for your exact address](${ORIGIN}/app/): Placetta maps every filing for an address, fills the official forms and asks for approval before anything is filed
-- [Full text of the answers and city guides](${ORIGIN}/llms-full.txt)
-- [Structured data for all guides](${ORIGIN}/guides/data.json)
-
-## Answers
-${ANSWERS.map(a => `- [${a.q.en}](${ORIGIN}${answerPath(a.slug, "en")})`).join("\n")}
-
-## Cities
-${placesUsed.map(p => `- [${p.name.en}, ${countryName(p.country).en}](${ORIGIN}${cityPath(p, "en")})`).join("\n")}
-
-## Optional
-${guides.filter(g => ["restaurant", "retail-store", "importer-ecommerce"].includes(g.biz.slug)).map(enGuide).join("\n")}
-`);
+const indexed = (g: Guide) => !dupGuide.has(g);
 writeFileSync("site/llms-full.txt", `# Placetta license guides (full text)
 
-Updated ${TODAY}. Source: ${ORIGIN}/guides/. General information, not legal advice; check each agency's page before filing.
+Updated ${TODAY}. Source: ${ORIGIN}/guides/. Publisher: Placetta (${ORIGIN}/about.html). Sourcing policy: ${ORIGIN}/editorial.html. General information, not legal advice; check each agency's page before filing.
 
 ## Answers
 ${ANSWERS.map(a => {
@@ -490,15 +715,15 @@ ${ANSWERS.map(a => {
 }).join("\n\n")}
 
 ## City guides
-${guides.map(g => `### ${g.biz.plural.en} in ${g.place.name.en}\n${ORIGIN}${guidePath(g, "en")}\n${g.forms.map((f, i) => `${i + 1}. ${f.title.en}, ${f.agency.en}. ${clean(f.how.en)} Fee: ${fee(f, "en")}. ${f.url}`).join("\n")}`).join("\n\n")}
+${guides.filter(indexed).map(g => `### ${g.biz.plural.en} in ${g.place.name.en}\n${ORIGIN}${guidePath(g, "en")}\n${guideAnswer(g, "en")}${alsoGuide.get(g) ? ` The same filings apply to ${listEn(alsoGuide.get(g)!.map(x => x.biz.plural.en.toLowerCase()))}.` : ""}\n${g.forms.map((f, i) => `${i + 1}. ${f.title.en}, ${f.agency.en}. ${clean(f.how.en)} Fee: ${fee(f, "en")}.${f.takes ? ` Takes: ${clean(f.takes.en)}` : ""} ${f.url}`).join("\n")}`).join("\n\n")}
 `);
 
-const site = ["/", "/help/", "/privacy.html", "/terms.html", "/authorization.html", "/ai.html", "/trust.html"].map(p => `<url><loc>${ORIGIN}${p}</loc></url>`);
-const sm = urls.map(u => `<url><loc>${ORIGIN}${u.path}</loc><lastmod>${lastmodOf(u.path)}</lastmod><priority>${u.pri}</priority><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "zh-CN" : "en"}" href="${ORIGIN}${u.path}"/><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "en" : "zh-CN"}" href="${ORIGIN}${u.alt}"/></url>`);
-writeFileSync("site/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...site, ...sm].join("\n")}\n</urlset>\n`);
+/* sitemaps by type (the index, sitemap.xml, and the website's own pages come from scripts/seo/build.mjs); noindex pages stay out */
+mkdirSync("site/sitemaps", { recursive: true });
+for (const type of ["hub", "guide", "topic", "form", "answer"] as Kind[]) {
+  const rows = urls.filter(u => u.type === type && !NOINDEX.has(u.path)).map(u => `<url><loc>${ORIGIN}${u.path}</loc><lastmod>${lastmodOf(u.path)}</lastmod><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "zh-CN" : "en"}" href="${ORIGIN}${u.path}"/><xhtml:link rel="alternate" hreflang="${u.path.includes("/zh/") ? "en" : "zh-CN"}" href="${ORIGIN}${u.alt}"/><xhtml:link rel="alternate" hreflang="x-default" href="${ORIGIN}${u.path.includes("/zh/") ? u.alt : u.path}"/></url>`);
+  writeFileSync(`site/sitemaps/guides-${type}s.xml`, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${rows.join("\n")}\n</urlset>\n`);
+}
 writeFileSync(DATES_FILE, JSON.stringify(Object.fromEntries(Object.entries(NEXT_DATES).sort()), null, 0).replace(/},"/g, '},\n"') + "\n");
-// search engines and AI answer engines are welcome on the website and the guides; the app stays private
-const bots = ["Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended", "Baiduspider", "Bytespider", "Sogou web spider", "360Spider", "YisouSpider", "YandexBot", "DuckDuckBot", "meta-externalagent", "MistralAI-User", "cohere-ai"];
-writeFileSync("site/robots.txt", `${bots.map(b => `User-agent: ${b}\nAllow: /\nDisallow: /app/\n`).join("\n")}\nUser-agent: *\nAllow: /\nDisallow: /app/\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
-writeFileSync("site/guides/urls.txt", urls.map(u => ORIGIN + u.path).join("\n") + "\n");
-console.log(`guides: ${urls.length} pages: per language ${placesUsed.length} cities, ${guides.length} business guides, ${topicPages.length} topic pages, ${FORMS.length} form pages, ${ANSWERS.length} answers`);
+writeFileSync("site/guides/urls.txt", urls.filter(u => !NOINDEX.has(u.path)).map(u => ORIGIN + u.path).join("\n") + "\n");
+console.log(`guides: ${urls.length} pages (${urls.length - NOINDEX.size} indexed, ${NOINDEX.size} near-duplicates noindexed): per language ${placesUsed.length} cities, ${guides.length} business guides, ${topicPages.length} topic pages, ${FORMS.length} form pages, ${ANSWERS.length} answers, ${STATE_HUBS.length} state hubs`);

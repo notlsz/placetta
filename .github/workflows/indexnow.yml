@@ -1,0 +1,20 @@
+# After Vercel reports a successful production deploy, tell the IndexNow engines (Bing, Yandex and others) which pages
+# changed (scripts/indexnow.mjs). Keyless-safe: it uses the public key file committed in site/, sends nothing when that
+# file isn't live on the host, and never fails.
+name: IndexNow
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      all: { description: "Send every URL in the sitemaps", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  ping:
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.event.deployment.sha || github.sha }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/indexnow.mjs ${{ inputs.all && '--all' || '' }}
