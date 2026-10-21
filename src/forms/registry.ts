@@ -4,6 +4,7 @@ import type { Level } from "../model";
 import { WORLD_FORMS, unaccent, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
 import { BEACHHEAD } from "./beachhead";
+import { TOP_CITIES } from "./topcities";
 import { PROOF } from "./proof";
 import { countyFor, usPlace } from "./usplace";
 import { MORE_US } from "./more-us";
@@ -653,7 +654,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES);
 
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue

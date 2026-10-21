@@ -1,0 +1,123 @@
+{
+  "id": "denver-franchise-tea",
+  "title": "Franchised milk tea shop in Denver (existing franchisee company)",
+  "read": "2026-10-21",
+  "input": {
+    "what": "Franchised milk tea shop",
+    "where": "Denver, CO",
+    "lang": "en",
+    "signage": false,
+    "entity": "Mile High Tea LLC"
+  },
+  "items": [
+    {
+      "key": "irs-ss4",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": false,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "quote": "You never have to pay a fee for an EIN.",
+      "read": "2026-10-21",
+      "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+      "agencyMatch": "internal revenue service|\\bIRS\\b",
+      "feeQuote": "You never have to pay a fee for an EIN.",
+      "condition": "Only when the existing company doesn't have an EIN yet."
+    },
+    {
+      "key": "co-tax",
+      "name": "Colorado sales tax license",
+      "agency": "Colorado Department of Revenue",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tax.colorado.gov/new-businesses",
+      "quote": "you must apply for a Colorado sales tax license.",
+      "read": "2026-10-21",
+      "match": "\\bco-tax\\b|sales tax",
+      "agencyMatch": "department of revenue"
+    },
+    {
+      "key": "den-tax",
+      "name": "Denver sales tax license",
+      "agency": "City and County of Denver, Department of Finance",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/Our-Divisions/Treasury/Business-Tax-Information/Business-Tax-FAQ",
+      "quote": "or you have economic nexus, you are required to obtain a Denver sales tax license",
+      "read": "2026-10-21",
+      "match": "\\bden-tax\\b|denver sales tax",
+      "agencyMatch": "denver"
+    },
+    {
+      "key": "den-zoning",
+      "name": "Zoning use permit",
+      "agency": "Denver Community Planning and Development",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Community-Planning-and-Development/Plan-Review-Permits-and-Inspections/Zoning-Permits/Apply-for-Commercial-Zoning-Permits",
+      "quote": "If your plans meet the requirements of the zoning code and your permit fee has been paid, staff will issue the zoning permit.",
+      "read": "2026-10-21",
+      "match": "\\bden-zoning\\b|zoning",
+      "agencyMatch": "denver"
+    },
+    {
+      "key": "co-ui",
+      "name": "Unemployment insurance employer account",
+      "agency": "Colorado Department of Labor and Employment",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://cdle.colorado.gov/employers/recruiting-hiring/new-employer-checklist",
+      "quote": "To receive an unemployment account number, you may register your business online through MyBizColorado.",
+      "read": "2026-10-21",
+      "match": "\\bco-ui\\b|unemployment",
+      "agencyMatch": "labor and employment|CDLE"
+    },
+    {
+      "key": "den-plan-review",
+      "name": "Food establishment plan review",
+      "agency": "Denver Department of Public Health and Environment",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Public-Health-Environment/Public-Health-Investigations/Food-Safety/Restaurant-Food-Establishment-Compliance",
+      "quote": "Food Establishment Construction, Remodeling, and Plan Review Information See Plan Review Page for more information.",
+      "read": "2026-10-21",
+      "match": "\\bden-plan-review\\b|plan review",
+      "agencyMatch": "denver"
+    },
+    {
+      "key": "den-food-license",
+      "name": "Retail food establishment license",
+      "agency": "City and County of Denver, Business Licensing",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Business-Licensing/Business-licenses/Retail-Food/Retail-food/New",
+      "quote": "Your license will not issue until a proper zone use permit has submitted.",
+      "read": "2026-10-21",
+      "match": "\\bden-food-license\\b|retail food",
+      "agencyMatch": "denver"
+    }
+  ],
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "Forming a new company",
+      "why": "The company already exists; it is opening another location.",
+      "match": "articles of organization|certificate of (formation|organization)|llc formation|company formation|\\b(ca-llc-1|tx-205|wa-sos|nj-formation)\\b"
+    }
+  ],
+  "notes": "Not included (no official page found that states it): the Denver building permit for the finish-out. The plan lists it as an abstention naming the City and County of Denver."
+}

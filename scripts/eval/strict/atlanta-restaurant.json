@@ -1,0 +1,152 @@
+{
+  "id": "atlanta-restaurant",
+  "title": "Restaurant in Atlanta",
+  "read": "2026-10-21",
+  "input": {
+    "what": "Restaurant",
+    "where": "Atlanta, GA",
+    "lang": "en",
+    "signage": false
+  },
+  "items": [
+    {
+      "key": "ga-sos",
+      "name": "Georgia LLC registration",
+      "agency": "Georgia Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://georgia.gov/register-llc-georgia-secretary-state",
+      "quote": "You can register an LLC online, by mail, or in person.",
+      "read": "2026-10-21",
+      "match": "\\bga-sos\\b|llc formation|register (an )?llc",
+      "agencyMatch": "secretary of state"
+    },
+    {
+      "key": "irs-ss4",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "quote": "You never have to pay a fee for an EIN.",
+      "read": "2026-10-21",
+      "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+      "agencyMatch": "internal revenue service|\\bIRS\\b",
+      "feeQuote": "You never have to pay a fee for an EIN."
+    },
+    {
+      "key": "ga-tax",
+      "name": "Sales and use tax registration",
+      "agency": "Georgia Department of Revenue",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dor.georgia.gov/taxes/business-taxes/tax-registration",
+      "quote": "must register for a sales and use tax number and certificate of registration regardless of whether all sales will be online",
+      "read": "2026-10-21",
+      "match": "\\bga-tax\\b|sales tax",
+      "agencyMatch": "department of revenue"
+    },
+    {
+      "key": "ga-food-manager",
+      "name": "Certified food safety manager",
+      "agency": "Georgia Department of Public Health",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dph.georgia.gov/document/document/envhealthfoodfoodservice-rulespdf/download",
+      "quote": "Enough certified food safety managers must be present whenever the establishment is in operation.",
+      "read": "2026-10-21",
+      "match": "\\bga-food-manager\\b|food safety manager",
+      "agencyMatch": "public health"
+    },
+    {
+      "key": "atl-license",
+      "name": "Atlanta business license (occupational tax certificate)",
+      "agency": "City of Atlanta, Office of Revenue",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://atlantaga.gov/government/departments/finance/office-of-revenue/frequently-asked-questions",
+      "quote": "Current state law mandates that you register your business in the municipality or jurisdiction where it is located.",
+      "read": "2026-10-21",
+      "match": "\\batl-license\\b|business license|occupational tax",
+      "agencyMatch": "atlanta"
+    },
+    {
+      "key": "fulton-plan-review",
+      "name": "Food service plan review",
+      "agency": "Fulton County Board of Health, Environmental Health Services",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Starting-A-Food-Service-Business.pdf",
+      "quote": "the facility must undergo a plan review process.",
+      "read": "2026-10-21",
+      "match": "\\bfulton-plan-review\\b|plan review",
+      "agencyMatch": "fulton county"
+    },
+    {
+      "key": "ga-dol",
+      "name": "Unemployment insurance tax account (DOL-1A)",
+      "agency": "Georgia Department of Labor",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dol.georgia.gov/node/2291",
+      "quote": "You must complete an Application for GDOL Tax Account or Status Change (DOL-1A) form and return it to the Georgia Department of Labor",
+      "read": "2026-10-21",
+      "match": "\\bga-dol\\b|unemployment",
+      "agencyMatch": "department of labor"
+    },
+    {
+      "key": "fulton-food-permit",
+      "name": "Food service permit",
+      "agency": "Fulton County Board of Health, Environmental Health Services",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Starting-A-Food-Service-Business.pdf",
+      "quote": "All food service operations must receive a food service permit from Environmental Health Services to operate in Fulton County.",
+      "read": "2026-10-21",
+      "match": "\\bfulton-food-permit\\b|food service permit",
+      "agencyMatch": "fulton county"
+    },
+    {
+      "key": "atl-building",
+      "name": "Building permit for the build-out",
+      "agency": "City of Atlanta, Office of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://atlantaga.gov/home/showdocument?id=19215",
+      "quote": "These building permits are needed for any construction, alteration, repair, equipment, use and occupancy",
+      "read": "2026-10-21",
+      "match": "\\batl-building\\b|(building permit|build-?out).*atlanta|atlanta.*(building permit|build-?out)",
+      "agencyMatch": "atlanta"
+    }
+  ],
+  "order": [
+    {
+      "before": "fulton-plan-review",
+      "after": "fulton-food-permit",
+      "source": "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Starting-A-Food-Service-Business.pdf",
+      "quote": "the facility must undergo a plan review process.",
+      "read": "2026-10-21",
+      "why": "The plan review comes before the permit to operate.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

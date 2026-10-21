@@ -278,10 +278,18 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     const code = up.state ?? stateOf(where), st = code ? STATES[code] : undefined;
     const county = up.county;
     // who to ask about a city's own steps: its own .gov site (an unincorporated place's county's), else USA.gov's directory
-    const ask = whoToAsk(city || undefined, code);
+    const wc = info.city, countyRun = !!wc && wc.country === "US" && /county/i.test(wc.en);
+    const ask = whoToAsk((countyRun ? wc!.en : city) || undefined, code);
     const stEn = st?.en ?? "your state", stZh = st?.zh ?? "所在州";
     // the local office to confirm with: the county where the place is unincorporated, the city otherwise
-    const localEn = up.unincorporated && county ? `${county.en}` : city ? `the City of ${city}` : "your city", localZh = up.unincorporated && county ? county.zh : city ? `${city}市` : "所在城市";
+    // a city the library names is incorporated when the county table lists it as a city or CISA's .gov registry has a city
+    // domain for it; a covered county-run place (Fairfax County's Annandale and Tysons) is its county; anywhere else the
+    // row can't say whether a city or the county decides, so it says so instead of naming a "City of" that may not exist
+    const incorporated = !!city && ((!!county && !up.unincorporated) || ask.site === "city" || (!!wc && !countyRun));
+    const localEn = up.unincorporated && county ? `${county.en}` : countyRun ? wc!.en : incorporated ? `the City of ${city}` : city ? `the local government for ${city} (city or county)` : "your city";
+    const localZh = up.unincorporated && county ? county.zh : countyRun ? wc!.zh : incorporated ? `${city}市` : city ? `${city}当地政府（市或县）` : "所在城市";
+    const buildingEn = !up.unincorporated && !countyRun && !incorporated && city ? `the building office for ${city} (city or county)` : `${localEn} building department`;
+    const buildingZh = !up.unincorporated && !countyRun && !incorporated && city ? `${city}的建筑部门（市或县）` : `${localZh}建筑部门`;
     // whose health department: a city that runs its own (Pasadena, Berkeley), the county's named one; where the state's
     // own page says the city or town permits food places (Massachusetts's boards of health), the city's; where the state
     // leaves it to each place (Texas) or the library names no one, the row abstains and names both the city and the county
@@ -356,19 +364,19 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     if (!roles().has("license") && !local && code !== "TX") rows.push({ order: ORDER.license, f: null, a: generic({
       id: "local-license", level: up.unincorporated ? "county" : "city",
       name: B("Local business license or tax registration, and any zoning or use certificate it needs", "当地营业执照或营业税登记，以及所需的分区或用途证明"), ask: B(localEn, localZh),
-      agency: up.unincorporated && county ? B(`${county.en} business licensing`, `${county.zh}营业执照部门`) : city ? B(`City of ${city}`, `${city}市`) : B("Your city", "所在城市"), source: ask.source,
+      agency: up.unincorporated && county ? B(`${county.en} business licensing`, `${county.zh}营业执照部门`) : city ? B(localEn.replace(/^the /, ""), localZh) : B("Your city", "所在城市"), source: ask.source,
       plain: B("Most cities and some counties register every business inside their limits and charge a yearly tax, and many check the zoning first. Odelia confirms the office and the form for your address.", "多数城市和部分县会登记辖区内每家企业并收取年费，许多还会先核查分区。Odelia 会核实您地址所属的办理机构和表格。"),
     }, today) });
     // the occupancy sign-off after a build-out: Texas cities license through the Certificate of Occupancy instead of a
     // business license (Houston, Dallas, Plano and Sugar Land all do); elsewhere the building office's final approval
     if (code === "TX" && !info.local && segment !== "seller" && !forms.some(f => /certificate of occupancy/i.test(f.title.en))) rows.push({ order: 62, f: null, a: generic({
       id: "occupancy", level: "city", name: B("Certificate of Occupancy", "占用证"), ask: B(localEn, localZh),
-      agency: city ? B(`City of ${city}`, `${city}市`) : B("Your city", "所在城市"), source: ask.source,
+      agency: city ? B(localEn.replace(/^the /, ""), localZh) : B("Your city", "所在城市"), source: ask.source,
       plain: B("Texas cities rarely sell a business license, but most require a Certificate of Occupancy before a business moves in. Odelia confirms your city's.", "德州城市很少发放营业执照，但多数要求企业入驻前取得占用证。Odelia 会核实您所在城市的要求。"),
     }, today) });
     else if (buildout && segment !== "seller" && !local && code !== "TX" && !forms.some(f => /occupancy/i.test(f.title.en))) rows.push({ order: 67, f: null, a: generic({
-      id: "occupancy", level: up.unincorporated ? "county" : "city", name: B("Certificate of occupancy (or final sign-off) once the work passes inspection", "工程验收后的占用证（或最终验收）"), ask: B(`${localEn} building department`, `${localZh}建筑部门`),
-      agency: B(`${localEn.replace(/^the /, "")} building department`, `${localZh}建筑部门`), source: ask.source,
+      id: "occupancy", level: up.unincorporated ? "county" : "city", name: B("Certificate of occupancy (or final sign-off) once the work passes inspection", "工程验收后的占用证（或最终验收）"), ask: B(buildingEn, buildingZh),
+      agency: B(buildingEn.replace(/^the /, ""), buildingZh), source: ask.source,
       plain: B("After the final inspection, most building offices issue a certificate of occupancy or sign the work off before you open. Odelia confirms which one yours issues.", "最终检查后，多数建筑部门会在开业前签发占用证或验收。Odelia 会核实您所在地签发哪一种。"),
     }, today) });
     // the build-out: Los Angeles County's cities approve plans in their building and safety office after the county, and
@@ -384,11 +392,18 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
         id: "building", level: "city", name: B("Construction permit for the build-out", "装修施工许可证"), agency: B(`${city} construction official (the municipal enforcing agency)`, `${city}施工官员（市镇执法机构）`), source: municipal,
         plain: B("New Jersey's Uniform Construction Code: work on an existing building needs a construction permit from the municipality's enforcing agency, which inspects it.", "新泽西州统一建筑规范：改建现有建筑须向市镇执法机构申请施工许可，并由其检查。"),
       } : {
-        id: "building", level: up.unincorporated ? "county" : "city", name: B("Building permit for the build-out", "装修建筑许可证"), ask: B(`${localEn} building department`, `${localZh}建筑部门`),
-        agency: B(`${localEn.replace(/^the /, "")} building department`, `${localZh}建筑部门`), source: ask.source,
+        id: "building", level: up.unincorporated ? "county" : "city", name: B("Building permit for the build-out", "装修建筑许可证"), ask: B(buildingEn, buildingZh),
+        agency: B(buildingEn.replace(/^the /, ""), buildingZh), source: ask.source,
         plain: B("Building out a space almost always takes a permit and inspections from the local building office. Odelia confirms which office and what it needs.", "装修场所几乎都需要当地建筑部门的许可和检查。Odelia 会核实具体机构及所需材料。"),
       }, today) });
     }
+    // a covered city whose library steps hold no building permit: the build-out still needs one, so rather than leave it
+    // out silently the row abstains and names the city's building office (Denver's and Miami's weren't quotable yet)
+    if (buildout && segment !== "seller" && local && !roles().has("building")) rows.push({ order: ORDER.building, f: null, a: generic({
+      id: "building", level: "city", name: B("Building permit for the build-out", "装修建筑许可证"), ask: B(buildingEn, buildingZh),
+      agency: B(buildingEn.replace(/^the /, ""), buildingZh), source: ask.source,
+      plain: B("Building out a space almost always takes a permit and inspections from the local building office. Odelia confirms which office and what it needs.", "装修场所几乎都需要当地建筑部门的许可和检查。Odelia 会核实具体机构及所需材料。"),
+    }, today) });
   } else {
     // abroad: the registry's national and city steps; for a country it doesn't cover yet, the EU's common three
     const c = info.country, eu = !!c && EU.has(c), cur = info.currency;

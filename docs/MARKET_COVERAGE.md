@@ -14,22 +14,22 @@ Each market is read at a sample storefront address for a new milk tea shop with 
 | 2. Los Angeles | 11 | 11 | 6 | 9 | 0 |
 | 3. Boston | 13 | 13 | 6 | 10 | 0 |
 | 4. Seattle | 8 | 8 | 4 | 8 | 0 |
-| 5. San Diego | 11 | 11 | 3 | 8 | 0 |
+| 5. San Diego | 12 | 11 | 3 | 8 | 1 |
 | 6. Philadelphia | 9 | 9 | 2 | 7 | 0 |
 | 7. San Francisco | 14 | 14 | 6 | 10 | 0 |
-| 8. Chicago | 7 | 7 | 3 | 5 | 0 |
+| 8. Chicago | 8 | 8 | 3 | 5 | 0 |
 | 9. San Mateo | 12 | 10 | 4 | 9 | 2 |
 | 10. Cupertino | 11 | 11 | 3 | 10 | 0 |
-| 11. Irvine | 10 | 10 | 5 | 8 | 0 |
+| 11. Irvine | 11 | 11 | 5 | 8 | 0 |
 | 12. Houston | 12 | 12 | 6 | 9 | 0 |
 | 13. Glendale | 12 | 10 | 5 | 7 | 2 |
 | 14. San Gabriel | 12 | 10 | 5 | 8 | 2 |
 | 15. Rockville | 8 | 8 | 3 | 4 | 0 |
 | San José | 14 | 14 | 3 | 12 | 0 |
-| Paradise (unincorporated Clark County: the Las Vegas Strip) | 11 | 9 | 4 | 6 | 2 |
-| Spring Valley (unincorporated Clark County) | 11 | 9 | 4 | 6 | 2 |
+| Paradise (unincorporated Clark County: the Las Vegas Strip) | 12 | 10 | 4 | 6 | 2 |
+| Spring Valley (unincorporated Clark County) | 12 | 10 | 4 | 6 | 2 |
 | Rowland Heights (unincorporated Los Angeles County) | 12 | 11 | 5 | 8 | 1 |
-| Tysons (Fairfax County) | 9 | 9 | 2 | 8 | 0 |
+| Tysons (Fairfax County) | 10 | 9 | 2 | 8 | 1 |
 | California | 7 | 7 | 3 | 7 | 0 |
 | New York | 6 | 6 | 2 | 5 | 0 |
 | Massachusetts | 6 | 6 | 1 | 6 | 0 |
@@ -39,7 +39,7 @@ Each market is read at a sample storefront address for a new milk tea shop with 
 | Pennsylvania | 3 | 3 | 1 | 3 | 0 |
 | New Jersey | 3 | 3 | 2 | 3 | 0 |
 | Maryland | 3 | 3 | 2 | 3 | 0 |
-| Nevada | 4 | 4 | 2 | 2 | 0 |
+| Nevada | 5 | 5 | 2 | 2 | 0 |
 | Virginia | 5 | 5 | 2 | 5 | 0 |
 | Arizona | 3 | 3 | 2 | 3 | 0 |
 | Hawaii | 6 | 6 | 1 | 4 | 0 |
@@ -169,6 +169,7 @@ Read at 4646 Convoy St, San Diego, CA 92111. Jurisdictions: US, CA, SDG, SDC. Sa
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
 | Food facility plan check | `sdc-plan-check` Food facility plan check | no | Placetta team: Online through the county's Accela Citizen Access, reached through dehpay.com; the portal's own host isn't printed, so the worker can't be pointed at it. | Filed in person; Online through the county's Accela Citizen Access, reached through dehpay.com; the portal's own host isn't printed, so the worker can't be pointed at it. |
 | Certificate of Occupancy | `sdg-co` Certificate of Occupancy (Information Bulletin 585) | no | Placetta team: Not an application: issued after the final inspection of the building permit work. | Online only (www.sandiego.gov): Placetta prepares the answers summary for the agency's site. |
+| Building permit for the build-out: We'll confirm with the City of San Diego building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with the City of San Diego building department" with no official form in the registry for this place yet. |
 | Public health permit (food facility) | `sdc-health-permit` Public Health Permit (retail food facility) | no | Placetta team: The county issues it in person with the plan check; no remote route is published. | Filed in person; The county issues it in person with the plan check; no remote route is published. |
 
 ## 6. Philadelphia
@@ -218,6 +219,7 @@ Read at 2172 S Archer Ave, Chicago, IL 60616. Jurisdictions: US, IL, CHI.
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Illinois business registration (sales tax) | `il-tax` Form REG-1 (MyTax Illinois) · [PDF](https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/reg/documents/reg-1.pdf) · portal mytax.illinois.gov | yes | portal (mytax.illinois.gov) |  |
 | Chicago food service sanitation certificate | `chi-sanitation` City of Chicago Food Service Sanitation Certificate | no | Owner packet: "To obtain a CDPH Foodservice Sanitation Manager Certificate you must attend and pass an approved course", or apply for reciprocity with a valid ANSI-accredited food protection manager certificate: the person being certified does it. | The owner (or the person certified) does it: "To obtain a CDPH Foodservice Sanitation Manager Certificate you must attend and pass an approved course", or apply for reciprocity with a valid ANSI-accredited food protection manager certificate: the person being certified does it. |
+| Building permit for the interior alteration | `chi-building` Building permit (Express Permit Program or standard plan review) | no | Placetta team: not researched | Online only (chicago.gov): Placetta prepares the answers summary for the agency's site. |
 | Unemployment insurance employer registration | `il-ides` Report to Determine Liability (REG-UI-1) or MyTax Illinois · [PDF](https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/REG-UI-1.pdf) · portal mytax.illinois.gov | yes | portal (mytax.illinois.gov) |  |
 | Food establishment plan review | `chi-plan-review` Food establishment plan review (with the building permit) | no | Placetta team: Reviewed as part of the building permit by a city sanitarian; Public Health isn't on E-Plan. | Filed in person; Reviewed as part of the building permit by a city sanitarian; Public Health isn't on E-Plan. |
 | Chicago retail food establishment license | `chi-license` Retail Food Establishment License · portal chicagobusinessdirect.org | no | portal (chicagobusinessdirect.org) | Online only (chicagobusinessdirect.org): Placetta prepares the answers summary for the agency's site. |
@@ -271,6 +273,7 @@ Read at 4250 Barranca Pkwy, Irvine, CA 92604. Jurisdictions: US, CA, IRV, ORC. O
 | Seller's permit | `ca-cdtfa` CDTFA seller's permit (online registration) · portal onlineservices.cdtfa.ca.gov | no | portal (onlineservices.cdtfa.ca.gov) | Online only (onlineservices.cdtfa.ca.gov): Placetta prepares the answers summary for the agency's site. |
 | Certified food protection manager | `ca-food-manager` Food Safety Certificate (Health and Safety Code 113947.1) | no | Owner packet: An owner or employee passes a food protection manager exam from an accredited organization; the person keeps the certificate for the inspector. | The owner (or the person certified) does it: An owner or employee passes a food protection manager exam from an accredited organization; the person keeps the certificate for the inspector. |
 | Food handler cards for staff | `ca-food-handler` California Food Handler Card (Health and Safety Code 113948) | no | Owner packet: Each employee who handles food earns their own California Food Handler Card from an accredited course and exam within 30 days of hire; the card is the employee's. | The owner (or the person certified) does it: Each employee who handles food earns their own California Food Handler Card from an accredited course and exam within 30 days of hire; the card is the employee's. |
+| Building permit for the tenant improvement | `irv-building` Commercial tenant improvement permit (IrvineReady!) | no | Placetta team: not researched | Online only (cityofirvine.gov): Placetta prepares the answers summary for the agency's site. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
 | Food facility plan check | `oc-plan-check` Food facility plan check · [PDF](https://www.ochealthinfo.com/sites/healthcare/files/2026-07/EH_Cover_Sheet_7_22_2026.pdf) · portal myhealthdepartment.com | yes | portal (myhealthdepartment.com) |  |
 | Food facility health permit | `oc-health-permit` Food Facility Health Permit application · [PDF](https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf) | yes | Placetta team: The plan checker directs the owner or contractor to the application at the final inspection; no address or inbox is published for it. |  |
@@ -377,6 +380,7 @@ Read at 3570 S Las Vegas Blvd, Las Vegas, NV 89109. Jurisdictions: US, NV, LV, S
 |---|---|---|---|---|
 | LLC formation and state business license | `nv-silverflume` Articles of Organization and State Business License | no | Placetta team: nvsilverflume.gov now redirects to the new ORION portal (orion.nv.gov), and nvsos.gov's pages refuse automated reads, so the new portal's route couldn't be confirmed on the Secretary's own page. | Online only (www.nvsilverflume.gov): Placetta prepares the answers summary for the agency's site. |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
+| Nevada state business license | `nv-sbl` State Business License (SilverFlume) | no | Placetta team: not researched | Online only (www.nvsilverflume.gov): Placetta prepares the answers summary for the agency's site. |
 | Nevada sales tax permit | `nv-tax` Nevada Business Registration (sales tax permit) · [PDF](https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf) · portal mynvtax.nv.gov | yes | portal (mynvtax.nv.gov), mail (an agency fee keeps email, fax and mail with the team) |  |
 | Certified food safety manager | `snhd-cfsm` Certified Food Safety Manager (person in charge) | no | Owner packet: The Health District's application asks for "A person in charge that is a Certified Food Safety Manager" with a copy of the certificate attached: that person passes the exam themselves. | The owner (or the person certified) does it: The Health District's application asks for "A person in charge that is a Certified Food Safety Manager" with a copy of the certificate attached: that person passes the exam themselves. |
 | Food handler cards for staff | `snhd-food-handler` Food Handler Safety Training Card | no | Owner packet: A first card means an in-person test at a Health District location with photo ID, taken by the worker. | The owner (or the person certified) does it: A first card means an in-person test at a Health District location with photo ID, taken by the worker. |
@@ -395,6 +399,7 @@ Read at 4255 Spring Mountain Rd, Spring Valley, NV 89102. Jurisdictions: US, NV,
 |---|---|---|---|---|
 | LLC formation and state business license | `nv-silverflume` Articles of Organization and State Business License | no | Placetta team: nvsilverflume.gov now redirects to the new ORION portal (orion.nv.gov), and nvsos.gov's pages refuse automated reads, so the new portal's route couldn't be confirmed on the Secretary's own page. | Online only (www.nvsilverflume.gov): Placetta prepares the answers summary for the agency's site. |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
+| Nevada state business license | `nv-sbl` State Business License (SilverFlume) | no | Placetta team: not researched | Online only (www.nvsilverflume.gov): Placetta prepares the answers summary for the agency's site. |
 | Nevada sales tax permit | `nv-tax` Nevada Business Registration (sales tax permit) · [PDF](https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf) · portal mynvtax.nv.gov | yes | portal (mynvtax.nv.gov), mail (an agency fee keeps email, fax and mail with the team) |  |
 | Certified food safety manager | `snhd-cfsm` Certified Food Safety Manager (person in charge) | no | Owner packet: The Health District's application asks for "A person in charge that is a Certified Food Safety Manager" with a copy of the certificate attached: that person passes the exam themselves. | The owner (or the person certified) does it: The Health District's application asks for "A person in charge that is a Certified Food Safety Manager" with a copy of the certificate attached: that person passes the exam themselves. |
 | Food handler cards for staff | `snhd-food-handler` Food Handler Safety Training Card | no | Owner packet: A first card means an in-person test at a Health District location with photo ID, taken by the worker. | The owner (or the person certified) does it: A first card means an in-person test at a Health District location with photo ID, taken by the worker. |
@@ -438,6 +443,7 @@ Read at 8065 Leesburg Pike, Tysons, VA 22182. Jurisdictions: US, VA, FFX.
 | Unemployment insurance employer registration | `va-vec` VEC FC-27 Report to Determine Liability · [PDF](https://vec.virginia.gov/sites/default/files/documents/fc_27new.pdf) · portal www.business.tax.virginia.gov | yes | portal (www.business.tax.virginia.gov), mail |  |
 | Food establishment plan review | `ffx-plan-review` Food establishment plan review (PLUS) · portal plus.fairfaxcounty.gov | no | portal (plus.fairfaxcounty.gov) | Online only (plus.fairfaxcounty.gov): Placetta prepares the answers summary for the agency's site. |
 | Non-Residential Use Permit | `ffx-nonrup` Non-Residential Use Permit (Non-RUP) · portal plus.fairfaxcounty.gov | no | portal (plus.fairfaxcounty.gov) | Online only (plus.fairfaxcounty.gov): Placetta prepares the answers summary for the agency's site. |
+| Building permit for the build-out: We'll confirm with Fairfax County building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with Fairfax County building department" with no official form in the registry for this place yet. |
 | Food establishment permit to operate | `ffx-food-permit` Food establishment permit application (PLUS) · portal plus.fairfaxcounty.gov | no | portal (plus.fairfaxcounty.gov) | Online only (plus.fairfaxcounty.gov): Placetta prepares the answers summary for the agency's site. |
 
 ## California (state filings)
@@ -554,6 +560,7 @@ Read at 3570 S Las Vegas Blvd, Las Vegas, NV 89109. Jurisdictions: US, NV.
 |---|---|---|---|---|
 | LLC formation and state business license | `nv-silverflume` Articles of Organization and State Business License | no | Placetta team: nvsilverflume.gov now redirects to the new ORION portal (orion.nv.gov), and nvsos.gov's pages refuse automated reads, so the new portal's route couldn't be confirmed on the Secretary's own page. | Online only (www.nvsilverflume.gov): Placetta prepares the answers summary for the agency's site. |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
+| Nevada state business license | `nv-sbl` State Business License (SilverFlume) | no | Placetta team: not researched | Online only (www.nvsilverflume.gov): Placetta prepares the answers summary for the agency's site. |
 | Nevada sales tax permit | `nv-tax` Nevada Business Registration (sales tax permit) · [PDF](https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf) · portal mynvtax.nv.gov | yes | portal (mynvtax.nv.gov), mail (an agency fee keeps email, fax and mail with the team) |  |
 | Unemployment insurance employer account | `nv-esd` Unemployment insurance employer registration · [PDF](https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf) | yes | Placetta team: The registration page says DETR shares details with the Department of Taxation but doesn't name the employer portal's address. |  |
 
@@ -575,9 +582,9 @@ Read at 668 N 44th St, Phoenix, AZ 85008. Jurisdictions: US, AZ.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| Arizona LLC formation: We'll confirm with the Arizona Corporation Commission | `az-llc` Articles of Organization (Form L010) · [PDF](https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf) · portal arizonabusinesscenter.azcc.gov | yes | portal (arizonabusinesscenter.azcc.gov), fax, mail |  |
+| Arizona LLC formation | `az-llc` Articles of Organization (Form L010) · [PDF](https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf) · portal arizonabusinesscenter.azcc.gov | yes | portal (arizonabusinesscenter.azcc.gov), fax, mail |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
-| Transaction privilege tax (TPT) license: We'll confirm with the Arizona Department of Revenue | `az-tpt` Arizona Joint Tax Application (JT-1/UC-001) · [PDF](https://www.azdor.gov/sites/default/files/2023-03/FORMS_TPT_10196_f.pdf) · portal www.aztaxes.gov | yes | portal (www.aztaxes.gov) |  |
+| Transaction privilege tax (TPT) license | `az-tpt` Arizona Joint Tax Application (JT-1/UC-001) · [PDF](https://www.azdor.gov/sites/default/files/2023-03/FORMS_TPT_10196_f.pdf) · portal www.aztaxes.gov | yes | portal (www.aztaxes.gov) |  |
 
 ## Hawaii (state filings)
 
@@ -598,13 +605,13 @@ Read at 1101 Brickell Ave, Miami, FL 33131. Jurisdictions: US, FL.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| LLC formation: We'll confirm with the Florida Division of Corporations (Sunbiz) | `fl-sunbiz` Articles of Organization · [PDF](https://form.sunbiz.org/pdf/cr2e047.pdf) · portal efile.sunbiz.org | yes | portal (efile.sunbiz.org) (an agency fee keeps email, fax and mail with the team) |  |
+| LLC formation | `fl-sunbiz` Articles of Organization · [PDF](https://form.sunbiz.org/pdf/cr2e047.pdf) · portal efile.sunbiz.org | yes | portal (efile.sunbiz.org) (an agency fee keeps email, fax and mail with the team) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
-| Florida sales tax and reemployment tax registration: We'll confirm with the Florida Department of Revenue | `fl-dor` Form DR-1 (Florida Business Tax Application) · [PDF](https://floridarevenue.com/Forms_library/current/dr1.pdf) · portal taxapps.floridarevenue.com | yes | portal (taxapps.floridarevenue.com) |  |
+| Florida sales tax and reemployment tax registration | `fl-dor` Form DR-1 (Florida Business Tax Application) · [PDF](https://floridarevenue.com/Forms_library/current/dr1.pdf) · portal taxapps.floridarevenue.com | yes | portal (taxapps.floridarevenue.com) |  |
 | Registration of a fictitious name (DBA): We'll confirm with the Florida Department of State, Division of Corporations | `fl-fictitious` CR4E001 (10/20) · [PDF](https://form.sunbiz.org/pdf/cr4e001.pdf) · portal efile.sunbiz.org | yes | portal (efile.sunbiz.org) (an agency fee keeps email, fax and mail with the team) |  |
-| Certified food protection manager: We'll confirm with the Florida DBPR, Division of Hotels and Restaurants | `fl-food-manager` Certified food protection manager (section 509.039, Florida Statutes) | no | Owner packet: "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment. Private entities provide the training and testing." | The owner (or the person certified) does it: "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment. Private entities provide the training and testing." |
-| Food service plan review: We'll confirm with the Florida DBPR, Division of Hotels and Restaurants | `fl-dbpr-plan` Food service plan review (with the license application) · [PDF](https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7005_application_for_plan_review.pdf) · portal www.myfloridalicense.com | yes | portal (www.myfloridalicense.com) |  |
-| Florida public food service license: We'll confirm with the Florida DBPR, Division of Hotels and Restaurants | `fl-dbpr` Permanent food service license (seating or non-seating) · [PDF](https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7035_application_for_fixed_food_service_license.pdf) · portal www.myfloridalicense.com | yes | portal (www.myfloridalicense.com) |  |
+| Certified food protection manager | `fl-food-manager` Certified food protection manager (section 509.039, Florida Statutes) | no | Owner packet: "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment. Private entities provide the training and testing." | The owner (or the person certified) does it: "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment. Private entities provide the training and testing." |
+| Food service plan review | `fl-dbpr-plan` Food service plan review (with the license application) · [PDF](https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7005_application_for_plan_review.pdf) · portal www.myfloridalicense.com | yes | portal (www.myfloridalicense.com) |  |
+| Florida public food service license | `fl-dbpr` Permanent food service license (seating or non-seating) · [PDF](https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7035_application_for_fixed_food_service_license.pdf) · portal www.myfloridalicense.com | yes | portal (www.myfloridalicense.com) |  |
 
 ## Utah (state filings)
 

@@ -1,0 +1,152 @@
+{
+  "id": "arlington-milk-tea",
+  "title": "Milk tea shop in Arlington, Virginia",
+  "read": "2026-10-21",
+  "input": {
+    "what": "Milk tea shop",
+    "where": "Arlington, VA",
+    "lang": "en",
+    "signage": false
+  },
+  "items": [
+    {
+      "key": "va-llc",
+      "name": "Articles of Organization (Virginia LLC)",
+      "agency": "Virginia State Corporation Commission",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf",
+      "quote": "This how-to guide will walk you through forming a Virginia Limited Liability Company online in the new Clerk's Information System (CIS)",
+      "read": "2026-10-21",
+      "match": "\\bva-llc\\b|llc formation|articles of organization",
+      "agencyMatch": "corporation commission"
+    },
+    {
+      "key": "irs-ss4",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "quote": "You never have to pay a fee for an EIN.",
+      "read": "2026-10-21",
+      "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+      "agencyMatch": "internal revenue service|\\bIRS\\b",
+      "feeQuote": "You never have to pay a fee for an EIN."
+    },
+    {
+      "key": "va-tax",
+      "name": "Virginia business tax registration",
+      "agency": "Virginia Department of Taxation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.tax.virginia.gov/register-business-virginia",
+      "quote": "While all new businesses are required to register with us online, the following reasons may prevent you from doing so:",
+      "read": "2026-10-21",
+      "match": "\\bva-tax\\b|tax registration",
+      "agencyMatch": "department of taxation"
+    },
+    {
+      "key": "va-food-manager",
+      "name": "Certified food protection manager",
+      "agency": "Virginia Department of Health",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.vdh.virginia.gov/environmental-health/food-safety-in-virginia/cfpm/",
+      "quote": "Only facilities that meet the criteria for exemption in 12VAC5-421-55 B. or § 35.1-25 . will not need to have a CFPM.",
+      "read": "2026-10-21",
+      "match": "\\bva-food-manager\\b|food protection manager",
+      "agencyMatch": "department of health"
+    },
+    {
+      "key": "arl-bpol",
+      "name": "Arlington County business license",
+      "agency": "Arlington County Commissioner of Revenue",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.arlingtonva.us/Government/Programs/Taxes/Business-License-and-Taxes",
+      "quote": "Businesses operating in or from Arlington County must register and obtain a business license within 75 days of starting operations",
+      "read": "2026-10-21",
+      "match": "\\barl-bpol\\b|business license",
+      "agencyMatch": "arlington"
+    },
+    {
+      "key": "va-vec",
+      "name": "Unemployment insurance employer registration",
+      "agency": "Virginia Employment Commission",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://vec.virginia.gov/node/382",
+      "quote": "The fastest and easiest way to register is through iFile/iReg .",
+      "read": "2026-10-21",
+      "match": "\\bva-vec\\b|unemployment",
+      "agencyMatch": "employment commission"
+    },
+    {
+      "key": "arl-plan-review",
+      "name": "Food service plan review",
+      "agency": "Arlington County Public Health Division",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction",
+      "quote": "If you are a new food establishment or plan to make major alterations to an existing establishment, you will need to submit a food service establishment plan.",
+      "read": "2026-10-21",
+      "match": "\\barl-plan-review\\b|plan review",
+      "agencyMatch": "arlington"
+    },
+    {
+      "key": "arl-food-license",
+      "name": "Arlington County food establishment license",
+      "agency": "Arlington County Public Health Division",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction",
+      "quote": "Once your plans are approved and you pay the appropriate fees, you may apply for a food establishment license.",
+      "read": "2026-10-21",
+      "match": "\\barl-food-license\\b|food establishment license",
+      "agencyMatch": "arlington"
+    },
+    {
+      "key": "arl-building",
+      "name": "Commercial building permit",
+      "agency": "Arlington County Permit Office",
+      "level": "county",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction",
+      "quote": "If you are a new establishment or plan to make alterations to your establishment, visit the Arlington County Permit Office’s website with information on Commercial Building Permit Submission Requirements",
+      "read": "2026-10-21",
+      "match": "\\barl-building\\b|(building permit).*arlington|arlington.*(building permit)",
+      "agencyMatch": "arlington"
+    }
+  ],
+  "order": [
+    {
+      "before": "arl-plan-review",
+      "after": "arl-food-license",
+      "source": "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction",
+      "quote": "Once your plans are approved and you pay the appropriate fees, you may apply for a food establishment license.",
+      "read": "2026-10-21",
+      "why": "The food establishment license is applied for once the plans are approved.",
+      "verified": true
+    }
+  ],
+  "mustNotInclude": []
+}

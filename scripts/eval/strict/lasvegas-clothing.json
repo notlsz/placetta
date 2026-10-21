@@ -1,0 +1,105 @@
+{
+  "id": "lasvegas-clothing",
+  "title": "Clothing store in Las Vegas (existing company, no build-out)",
+  "read": "2026-10-21",
+  "input": {
+    "what": "Clothing store",
+    "where": "Las Vegas, NV 89102",
+    "lang": "en",
+    "signage": false,
+    "entity": "Spring Mountain Apparel LLC",
+    "buildout": false
+  },
+  "items": [
+    {
+      "key": "irs-ss4",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": false,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "quote": "You never have to pay a fee for an EIN.",
+      "read": "2026-10-21",
+      "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+      "agencyMatch": "internal revenue service|\\bIRS\\b",
+      "feeQuote": "You never have to pay a fee for an EIN.",
+      "condition": "Only when the existing company doesn't have an EIN yet."
+    },
+    {
+      "key": "nv-sbl",
+      "name": "Nevada state business license",
+      "agency": "Nevada Secretary of State",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://dpbh.nv.gov/uploadedFiles/dpbhnvgov/content/Reg/Radiation-Machines/Docs/Informational_Notice_Secretary_of_State_Business_License_8-17-23ADA.pdf",
+      "quote": "A person shall not conduct business in the State unless and until the person obtains a state business license issued by the Secretary of State.",
+      "read": "2026-10-21",
+      "match": "\\bnv-sbl\\b|state business license",
+      "agencyMatch": "secretary of state"
+    },
+    {
+      "key": "nv-tax",
+      "name": "Nevada sales tax permit",
+      "agency": "Nevada Department of Taxation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tax.nv.gov/faqs/register-a-business/",
+      "quote": "You must have a Federal Identification Number (FEIN# or EIN) and Business License before registering for a tax permit.",
+      "read": "2026-10-21",
+      "match": "\\bnv-tax\\b|sales tax",
+      "agencyMatch": "department of taxation"
+    },
+    {
+      "key": "lv-license",
+      "name": "City of Las Vegas business license",
+      "agency": "City of Las Vegas",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License",
+      "quote": "This will provide you with the primary jurisdiction for your location, which determines where you must file for your business license.",
+      "read": "2026-10-21",
+      "match": "\\blv-license\\b|business license",
+      "agencyMatch": "city of las vegas"
+    },
+    {
+      "key": "nv-esd",
+      "name": "Unemployment insurance employer account",
+      "agency": "Nevada DETR, Employment Security Division",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tax.nv.gov/faqs/register-a-business/",
+      "quote": "If you also need to be registered for Unemployment Insurance , DETR will share your details with the Department of Taxation.",
+      "read": "2026-10-21",
+      "match": "\\bnv-esd\\b|unemployment",
+      "agencyMatch": "employment security|DETR"
+    }
+  ],
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "Forming a new company",
+      "why": "The company already exists; it is opening another location.",
+      "match": "articles of organization|certificate of (formation|organization)|llc formation|company formation|\\b(ca-llc-1|tx-205|wa-sos|nj-formation)\\b"
+    },
+    {
+      "name": "A food permit for a store that sells no food",
+      "why": "It sells no food.",
+      "match": "food (service|establishment|facility|dealer|handler|worker|manager|safety|protection)|plan (check|review)|health permit"
+    },
+    {
+      "name": "Clark County's business license",
+      "why": "The City of Las Vegas licenses businesses inside its limits, not the county.",
+      "match": "clark county business licens|cc-business-license"
+    }
+  ]
+}

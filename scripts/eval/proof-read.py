@@ -23,6 +23,12 @@ cup-license cup-building dly-license dly-building fre-business-tax tor-license g
 WEBFETCH_SEEN = {
     "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm": "2026-10-21",
     "https://permits.lacounty.gov/?p=315": "2026-10-21",
+    "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm": "2026-10-21",
+    "https://atlantaga.gov/government/departments/finance/office-of-revenue/frequently-asked-questions": "2026-10-21",
+    "https://atlantaga.gov/home/showdocument?id=19215": "2026-10-21",
+    "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer": "2026-10-21",
+    "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate": "2026-10-21",
+    "https://www.chicago.gov/content/dam/city/depts/bacp/general/Retail%20Food%20Guide.pdf": "2026-10-21",
 }
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36"
 
@@ -37,7 +43,9 @@ def text_of(url, ua=UA):
     if data[:4] == b"%PDF":
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as t:
             t.write(data); pdf = t.name
-        out = subprocess.run(["pdftotext", "-layout", pdf, "-"], capture_output=True, text=True).stdout; os.unlink(pdf)
+        # both readings of the page: laid out as printed, and in reading order (a two-column brochure splits sentences
+        # across columns when laid out, so a quote is found in either)
+        out = subprocess.run(["pdftotext", "-layout", pdf, "-"], capture_output=True, text=True).stdout + "\n\f\n" + subprocess.run(["pdftotext", pdf, "-"], capture_output=True, text=True).stdout; os.unlink(pdf)
         return out, "200"
     s = data.decode("utf-8", errors="replace")
     s = re.sub(r"(?is)<(script|style|noscript|svg)[^>]*>.*?</\1>", " ", s)

@@ -382,7 +382,11 @@ async function previewRefine() {
       for (const id of GENERIC) if (p.apps.some(a => a.id === id)) out.push(`${kind}: generic ${id}`);
       // the company's formation is a state step: where the library has no formation filing for the state (Oregon, DC,
       // Minnesota, Ohio) the plan names the state's office and says Odelia confirms it; the city's own steps are what this checks
-      const local = p.generic - (p.apps.some(a => a.id === "pv-g-formation") ? 1 : 0);
+      // since 2026-10-21 a covered city whose library steps hold no building permit lists one as an abstention naming the
+      // city's building office (it used to be left out silently): that row is allowed, and must abstain
+      const building = p.apps.find(a => a.id === "pv-g-building");
+      if (building && !(building.abstain && /We'll confirm with .*building department/.test(building.name.en))) out.push(`${kind}: the building row claims without a quote`);
+      const local = p.generic - (p.apps.some(a => a.id === "pv-g-formation") ? 1 : 0) - (building ? 1 : 0);
       if (!p.local || local !== 0) out.push(`${kind}: local ${p.local}, ${local} generic local rows`);
       const food = at(m.food) >= 0 ? row(m.food) : undefined;
       if (food && (!food.critical || !/\.(gov|us|org|com)\//.test(food.source.url + "/") || /sba\.gov|fda\.gov/.test(food.source.url))) out.push(`${kind}: ${m.food} not critical or not sourced from the agency`);

@@ -1,0 +1,12 @@
+{
+  "what": "The strict accuracy set: 21 openings across the top 15 US cities for Chinese food and retail brands (New York, Los Angeles, San Francisco, San Jose, Irvine, Seattle, Houston, Dallas, Austin, Boston, Chicago, Philadelphia, Las Vegas, Atlanta, Washington DC) and the top 15 states (California, New York, Texas, Washington, Massachusetts, Illinois, Pennsylvania, Nevada, Georgia, New Jersey, Florida, Virginia, Arizona, Colorado, Maryland), for restaurants, tea and bubble tea shops, bakeries, retail stores and franchisees. Every expected answer carries the official page's own words, its URL and the day it was read; scripts/eval/strict-log.json records each one found on its page (npm run strict:read).",
+  "researched": "2026-10-21, from .gov pages and the few agency sites not on .gov that name their agency as owner (scripts/eval/official.ts). Scored before any fix for it: instant plan and library recall 124/168 (73.8%), 35 required items abstained on for want of a quote and 9 silently missing.",
+  "left_out": [
+    { "what": "Illinois LLC formation", "why": "ilsos.gov refused every automated read and WebFetch, so the Chicago opening is an existing company (chicago-milk-tea)." },
+    { "what": "Dallas building permit for the finish-out, and Dallas Fire-Rescue's kitchen hood permit", "why": "No official page found that states either requirement (dallascityhall.com's permit pages list fees and checklists only). The plan abstains on both, naming the City of Dallas." },
+    { "what": "Austin building permit for the finish-out", "why": "austintexas.gov's pages read list exemptions and review paths, not the requirement itself. The plan abstains on it, naming the City of Austin." },
+    { "what": "Denver building permit for the finish-out", "why": "No denvergov.org page read states it. The plan abstains on it, naming the City of Denver's building department." },
+    { "what": "City of Miami building permit for the build-out", "why": "miami.gov's building pages read are navigation only. The plan abstains on it, naming the City of Miami's building department; the certificate of occupancy or completion after construction is in the set." },
+    { "what": "Florida fictitious name registration", "why": "Applies only to a trade name, and its sunbiz page answered 404." }
+  ]
+}

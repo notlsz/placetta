@@ -1,0 +1,123 @@
+{
+  "id": "chicago-milk-tea",
+  "title": "Milk tea shop in Chicago (existing company)",
+  "read": "2026-10-21",
+  "input": {
+    "what": "Milk tea shop",
+    "where": "Chicago, IL",
+    "lang": "en",
+    "signage": false,
+    "entity": "Chinatown Tea LLC"
+  },
+  "items": [
+    {
+      "key": "irs-ss4",
+      "name": "Employer Identification Number (EIN)",
+      "agency": "Internal Revenue Service",
+      "level": "federal",
+      "required": false,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+      "quote": "You never have to pay a fee for an EIN.",
+      "read": "2026-10-21",
+      "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+      "agencyMatch": "internal revenue service|\\bIRS\\b",
+      "feeQuote": "You never have to pay a fee for an EIN.",
+      "condition": "Only when the existing company doesn't have an EIN yet."
+    },
+    {
+      "key": "il-tax",
+      "name": "Illinois business registration (REG-1)",
+      "agency": "Illinois Department of Revenue",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tax.illinois.gov/businesses/registration.html",
+      "quote": "Register with us, using one of the above methods, before you make any purchases, sales, or hire an employee.",
+      "read": "2026-10-21",
+      "match": "\\bil-tax\\b|business registration|REG-1",
+      "agencyMatch": "department of revenue"
+    },
+    {
+      "key": "chi-sanitation",
+      "name": "Chicago food service sanitation manager certificate",
+      "agency": "Chicago Department of Public Health",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://chicago.gov/city/en/depts/cdph/provdrs/food_safety/svcs/enroll_in_a_foodsanitationcertificationcourse.html",
+      "quote": "To obtain a CDPH Foodservice Sanitation Manager Certificate you must attend and pass an approved course.",
+      "read": "2026-10-21",
+      "match": "\\bchi-sanitation\\b|sanitation",
+      "agencyMatch": "public health"
+    },
+    {
+      "key": "il-ides",
+      "name": "Unemployment insurance employer registration",
+      "agency": "Illinois Department of Employment Security",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://ides.illinois.gov/employer-resources/tax-employer-information.html",
+      "quote": "You can access the form online through MyTax Illinois and then Register a new business (Form REG-1) .",
+      "read": "2026-10-21",
+      "match": "\\bil-ides\\b|unemployment",
+      "agencyMatch": "employment security"
+    },
+    {
+      "key": "chi-plan-review",
+      "name": "Food establishment plan review",
+      "agency": "Chicago Department of Public Health, with the Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.chicago.gov/content/dam/city/depts/bacp/general/Retail%20Food%20Guide.pdf",
+      "quote": "The Plan Review is coordinated between the Department of Public Heath and the Department of Buildings",
+      "read": "2026-10-21",
+      "match": "\\bchi-plan-review\\b|plan review",
+      "agencyMatch": "public health|buildings"
+    },
+    {
+      "key": "chi-license",
+      "name": "Chicago retail food establishment license",
+      "agency": "City of Chicago, Business Affairs and Consumer Protection",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.chicago.gov/city/en/depts/bacp/supp_info/retailfoodestablishment0.html",
+      "quote": "A Retail Food Establishment license can only be issued at a properly zoned, non-residential location.",
+      "read": "2026-10-21",
+      "match": "\\bchi-license\\b|retail food establishment license",
+      "agencyMatch": "business affairs|city of chicago"
+    },
+    {
+      "key": "chi-building",
+      "name": "Building permit for the interior alteration",
+      "agency": "Chicago Department of Buildings",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/INTWK-alteration.html",
+      "quote": "The Express Permit Program offers a streamlined way to obtain a permit for nonstructural interior alterations affecting up to 2,000 square feet of floor area for many types of spaces, including homes, offices, and stores.",
+      "read": "2026-10-21",
+      "match": "\\bchi-building\\b|(building permit|interior alteration).*chicago|chicago.*(building permit|interior alteration)",
+      "agencyMatch": "chicago"
+    }
+  ],
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "Forming a new company",
+      "why": "The company already exists; it is opening another location.",
+      "match": "articles of organization|certificate of (formation|organization)|llc formation|company formation|\\b(ca-llc-1|tx-205|wa-sos|nj-formation)\\b"
+    }
+  ],
+  "notes": "An existing company, because Illinois LLC formation couldn't be quoted: ilsos.gov refused every automated read."
+}

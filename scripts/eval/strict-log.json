@@ -1,1 +1,2091 @@
-[]
+[
+ {
+  "id": "arlington-milk-tea:va-llc",
+  "read": "https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/business-faqs/llc-faqs/how-to-guide-form-a-virginia-limited-liability-company.pdf",
+  "quote": "This how-to guide will walk you through forming a Virginia Limited Liability Company online in the new Clerk's Information System (CIS)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "01ae19eda81d37e2",
+  "context": "ers (the owners) who share in the profits and losses of the company's business. this how-to guide will walk you through forming a virginia limited liability company online in the new clerk's information system (cis) https://cis.scc.virginia.gov/. 1 log on to cis at cis.scc.virginia.gov note: go"
+ },
+ {
+  "id": "arlington-milk-tea:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "arlington-milk-tea:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "arlington-milk-tea:va-tax",
+  "read": "https://www.tax.virginia.gov/register-business-virginia",
+  "quote": "While all new businesses are required to register with us online, the following reasons may prevent you from doing so:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "25f8506142b4836e",
+  "context": "es account. business registration faqs why can't i register my business online? while all new businesses are required to register with us online, the following reasons may prevent you from doing so: you don't have a fein you don't have an ssn you're reopening a closed account o"
+ },
+ {
+  "id": "arlington-milk-tea:va-food-manager",
+  "read": "https://www.vdh.virginia.gov/environmental-health/food-safety-in-virginia/cfpm/",
+  "quote": "Only facilities that meet the criteria for exemption in 12VAC5-421-55 B. or § 35.1-25 . will not need to have a CFPM.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "ce4123cca0a8488a",
+  "context": "food preparation and service who is a certified food protection manager (cfpm). only facilities that meet the criteria for exemption in 12vac5-421-55 b. or § 35.1-25. will not need to have a cfpm. food manager certification provides managers with in-depth knowledge of proper "
+ },
+ {
+  "id": "arlington-milk-tea:arl-bpol",
+  "read": "https://www.arlingtonva.us/Government/Programs/Taxes/Business-License-and-Taxes",
+  "quote": "Businesses operating in or from Arlington County must register and obtain a business license within 75 days of starting operations",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "442cf4b55e9e3a4b",
+  "context": "es and administers business taxes for businesses operating in arlington county. businesses operating in or from arlington county must register and obtain a business license within 75 days of starting operations. after registering, businesses must file an annual business license by 11:59 p."
+ },
+ {
+  "id": "arlington-milk-tea:va-vec",
+  "read": "https://vec.virginia.gov/node/382",
+  "quote": "The fastest and easiest way to register is through iFile/iReg .",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "bb25e26b2b928ddc",
+  "context": "for state unemployment insurance (ui) tax. preferred & easiest: register online the fastest and easiest way to register is through ifile/ireg. online registration lets you: establish your employer account update your busin"
+ },
+ {
+  "id": "arlington-milk-tea:arl-plan-review",
+  "read": "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction",
+  "quote": "If you are a new food establishment or plan to make major alterations to an existing establishment, you will need to submit a food service establishment plan.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ba6a389e948c156",
+  "context": "ents certified food protection manager starting a business (bizlaunch) overview if you are a new food establishment or plan to make major alterations to an existing establishment, you will need to submit a food service establishment plan. all food establishments that plan to sell prepared or packaged foods need a foo"
+ },
+ {
+  "id": "arlington-milk-tea:arl-food-license",
+  "read": "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction",
+  "quote": "Once your plans are approved and you pay the appropriate fees, you may apply for a food establishment license.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ba6a389e948c156",
+  "context": "ees. please remember to include a contact person and phone number in the plans. once your plans are approved and you pay the appropriate fees, you may apply for a food establishment license. if your establishment is at dca/ronald reagan washington national airport or is"
+ },
+ {
+  "id": "arlington-milk-tea:arl-building",
+  "read": "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction",
+  "quote": "If you are a new establishment or plan to make alterations to your establishment, visit the Arlington County Permit Office’s website with information on Commercial Building Permit Submission Requirements",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ba6a389e948c156",
+  "context": "ense from arlington county. licenses must be renewed annually. submitting plans if you are a new establishment or plan to make alterations to your establishment, visit the arlington county permit office's website with information on commercial building permit submission requirements. submit your plans and the food service plan review application using the permi"
+ },
+ {
+  "id": "arlington-milk-tea:order:arl-plan-review>arl-food-license",
+  "read": "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction",
+  "quote": "Once your plans are approved and you pay the appropriate fees, you may apply for a food establishment license.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ba6a389e948c156",
+  "context": "ees. please remember to include a contact person and phone number in the plans. once your plans are approved and you pay the appropriate fees, you may apply for a food establishment license. if your establishment is at dca/ronald reagan washington national airport or is"
+ },
+ {
+  "id": "atlanta-restaurant:ga-sos",
+  "read": "https://georgia.gov/register-llc-georgia-secretary-state",
+  "quote": "You can register an LLC online, by mail, or in person.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": "credit card, check, cashier's check, or money order. create & file registration you can register an llc online, by mail, or in person. applications can be expedited for additional fees. each registration method has"
+ },
+ {
+  "id": "atlanta-restaurant:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "atlanta-restaurant:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "atlanta-restaurant:ga-tax",
+  "read": "https://dor.georgia.gov/taxes/business-taxes/tax-registration",
+  "quote": "must register for a sales and use tax number and certificate of registration regardless of whether all sales will be online",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7553af7be0a1a06d",
+  "context": "ny individual or entity meeting the definition of \"dealer\" in o.c.g.a. § 48-8-2 must register for a sales and use tax number and certificate of registration regardless of whether all sales will be online, out of state, wholesale, or exempt from tax. in addition to registering for a "
+ },
+ {
+  "id": "atlanta-restaurant:ga-food-manager",
+  "read": "https://dph.georgia.gov/document/document/envhealthfoodfoodservice-rulespdf/download",
+  "quote": "Enough certified food safety managers must be present whenever the establishment is in operation.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "72d407c0e6cadec8",
+  "context": "onitor activities within the food service establishment must be clearly stated. enough certified food safety managers must be present whenever the establishment is in operation. there must be shown to be adequate coverage of management or persons in charge "
+ },
+ {
+  "id": "atlanta-restaurant:atl-license",
+  "read": "https://atlantaga.gov/government/departments/finance/office-of-revenue/frequently-asked-questions",
+  "quote": "Current state law mandates that you register your business in the municipality or jurisdiction where it is located.",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "atlanta-restaurant:fulton-plan-review",
+  "read": "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Starting-A-Food-Service-Business.pdf",
+  "quote": "the facility must undergo a plan review process.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "790b9c024cd16dc7",
+  "context": "vice establishment to open, of my home? needed to open a food service facility. the facility must undergo a plan review process. no, homes are not acceptable. check with the appropriate county and the plan re"
+ },
+ {
+  "id": "atlanta-restaurant:ga-dol",
+  "read": "https://dol.georgia.gov/node/2291",
+  "quote": "You must complete an Application for GDOL Tax Account or Status Change (DOL-1A) form and return it to the Georgia Department of Labor",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "66ec5379ab5581ff",
+  "context": "ent insurance how do i set up an unemployment insurance tax account in georgia? you must complete an application for gdol tax account or status change (dol-1a) form and return it to the georgia department of labor, suite 850, 148 andrew young international blvd., atlanta, ga. 30303-1751. form"
+ },
+ {
+  "id": "atlanta-restaurant:fulton-food-permit",
+  "read": "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Starting-A-Food-Service-Business.pdf",
+  "quote": "All food service operations must receive a food service permit from Environmental Health Services to operate in Fulton County.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "790b9c024cd16dc7",
+  "context": "full details, contact fulton county environmental health services. introduction all food service operations must receive a food service permit from environmental health services to operate in fulton county. obtaining a food service permit from fulton county board of health is the first"
+ },
+ {
+  "id": "atlanta-restaurant:atl-building",
+  "read": "https://atlantaga.gov/home/showdocument?id=19215",
+  "quote": "These building permits are needed for any construction, alteration, repair, equipment, use and occupancy",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "atlanta-restaurant:order:fulton-plan-review>fulton-food-permit",
+  "read": "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Starting-A-Food-Service-Business.pdf",
+  "quote": "the facility must undergo a plan review process.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "790b9c024cd16dc7",
+  "context": "vice establishment to open, of my home? needed to open a food service facility. the facility must undergo a plan review process. no, homes are not acceptable. check with the appropriate county and the plan re"
+ },
+ {
+  "id": "austin-bubble-tea:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "austin-bubble-tea:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "austin-bubble-tea:tx-205",
+  "read": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+  "quote": "Title 1, chapter 3, subchapter A of the BOC governs the formation of an LLC",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "82192abd46f8fab6",
+  "context": "overned by title 3, chapter 101 of the texas business organizations code (boc). title 1, chapter 3, subchapter a of the boc governs the formation of an llc and sets forth the provisions required or permitted to be contained in the cert"
+ },
+ {
+  "id": "austin-bubble-tea:tx-503",
+  "read": "https://www.sos.state.tx.us/corp/instructions/503.shtml",
+  "quote": "a separate assumed name certificate must be filed for each assumed name.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "6895377aa8e56f9c",
+  "context": "may conduct business or professional services under multiple assumed names, but a separate assumed name certificate must be filed for each assumed name. please note that if the name entered as the assumed name in item 1 is exactly t"
+ },
+ {
+  "id": "austin-bubble-tea:tx-ap201",
+  "read": "https://comptroller.texas.gov/taxes/permit/",
+  "quote": "You will need to apply using form AP-201, Texas Application (PDF) .",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "cff66b32f32ef984",
+  "context": "e owner, partner, officer or director and do not have a social security number. you will need to apply using form ap-201, texas application (pdf). email the application to sales.applications@cpa.texas.gov or fax the applicatio"
+ },
+ {
+  "id": "austin-bubble-tea:tx-food-manager",
+  "read": "https://www.dshs.texas.gov/food-managers",
+  "quote": "The food manager certification is obtained by passing a DSHS or ANSI-CFP approved food manager certification examination.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "90369b3ebe5429ff",
+  "context": "irements for food manager certification. obtaining a food manager certification the food manager certification is obtained by passing a dshs or ansi-cfp approved food manager certification examination. the food manger certification examination may be taken at any accredited examin"
+ },
+ {
+  "id": "austin-bubble-tea:tx-food-handler",
+  "read": "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+  "quote": "all food employees shall successfully complete an accredited food handler training course, within 30 days of employment.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a49cc7066ba54d9f",
+  "context": " (txdshs), under texas food establishment rules (tfer) §228.31, requires that '…all food employees shall successfully complete an accredited food handler training course, within 30 days of employment.' who is a food employee? food employee is an individual working with unpackaged"
+ },
+ {
+  "id": "austin-bubble-tea:tx-twc",
+  "read": "https://www.twc.texas.gov/services/register-tax",
+  "quote": "register with the Texas Workforce Commission (TWC) within 10 days of becoming liable.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b2a9c4aa209baea4",
+  "context": "egister a tax account texas unemployment compensation act requires employers to register with the texas workforce commission (twc) within 10 days of becoming liable. registering is easy with unemployment tax registration (utr), twc's quick and f"
+ },
+ {
+  "id": "austin-bubble-tea:aus-co",
+  "read": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+  "quote": "is required to obtain a Certificate of Occupancy after a new or remodeled construction",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "bc07d22224054bdb",
+  "context": "$10 • remodel (all sizes): $10 pre‑opening inspections a pre‑opening inspection is required to obtain a certificate of occupancy after a new or remodeled construction to ensure the approved plans were followed, or before the ownership of an estab"
+ },
+ {
+  "id": "austin-bubble-tea:aus-food-plan-review",
+  "read": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+  "quote": "Plan Review — required for new construction and remodels.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "bc07d22224054bdb",
+  "context": "e permitting process most fixed food establishments follow three main steps: 1. plan review — required for new construction and remodels. 2. pre‑opening inspection — required for all new establishments, remodeled faci"
+ },
+ {
+  "id": "austin-bubble-tea:aus-food-preopening",
+  "read": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+  "quote": "Pre‑Opening Inspection — required for all new establishments, remodeled facilities, and changes of ownership.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "bc07d22224054bdb",
+  "context": "ree main steps: 1. plan review — required for new construction and remodels. 2. pre‑opening inspection — required for all new establishments, remodeled facilities, and changes of ownership. 3. operational permit — issued after the pre-opening inspection approval; must "
+ },
+ {
+  "id": "austin-bubble-tea:aus-food-permit",
+  "read": "https://www.austintexas.gov/health/programs/fixed-food-establishments",
+  "quote": "To operate a food business in Austin or Travis County, you must obtain a Food Enterprise Operating Permit.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "bc07d22224054bdb",
+  "context": "stin public health programs fixed food establishments fixed food establishments to operate a food business in austin or travis county, you must obtain a food enterprise operating permit. this page explains the full permitting process—including plan review, pre‑openi"
+ },
+ {
+  "id": "boston-bakery-cafe:ma-sos",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/c156c512dllccert.pdf",
+  "quote": "Filing fee: $500",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "23cb5180846bfbe3",
+  "context": "__________________________ william francis galvin secretary of the commonwealth filing fee: $500 to be filled in by limited liability company contact information: _____________"
+ },
+ {
+  "id": "boston-bakery-cafe:ma-sos:fee",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/c156c512dllccert.pdf",
+  "quote": "Filing fee: $500",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "23cb5180846bfbe3",
+  "context": "__________________________ william francis galvin secretary of the commonwealth filing fee: $500 to be filled in by limited liability company contact information: _____________"
+ },
+ {
+  "id": "boston-bakery-cafe:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "boston-bakery-cafe:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "boston-bakery-cafe:ma-tax",
+  "read": "https://mass.gov/info-details/register-your-business-with-masstaxconnect",
+  "quote": "Businesses are required to register with an EIN in MassTaxConnect.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "4c22b357d10d452d",
+  "context": "r as a business (including sole proprietorships) that have never filed ma taxes businesses are required to register with an ein in masstaxconnect. sole proprietors must register under their social security number. a sole propr"
+ },
+ {
+  "id": "boston-bakery-cafe:ma-food-manager",
+  "read": "https://www.mass.gov/lists/food-allergen-awareness-guidance",
+  "quote": "each establishment must have a certified food protection manager trained in allergen awareness",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a45b25ffbe7b7b46",
+  "context": "allergen information on food labels are part of the requirements. additionally, each establishment must have a certified food protection manager trained in allergen awareness, with certification valid for five years. effective january 1, 2023, the us foo"
+ },
+ {
+  "id": "boston-bakery-cafe:ma-allergen",
+  "read": "https://www.mass.gov/lists/food-allergen-awareness-guidance",
+  "quote": "each establishment must have a certified food protection manager trained in allergen awareness",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a45b25ffbe7b7b46",
+  "context": "allergen information on food labels are part of the requirements. additionally, each establishment must have a certified food protection manager trained in allergen awareness, with certification valid for five years. effective january 1, 2023, the us foo"
+ },
+ {
+  "id": "boston-bakery-cafe:bos-cert",
+  "read": "https://www.boston.gov/departments/city-clerk/how-apply-business-certificate",
+  "quote": "Massachusetts law requires most businesses operating under a trade name to file with the City Clerk’s Office .",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f4c3eb277b7c3a52",
+  "context": "c record that registers your business name and address with the city of boston. massachusetts law requires most businesses operating under a trade name to file with the city clerk's office. you must renew every four years. contact city clerk 617-635-4601 cityclerk@bost"
+ },
+ {
+  "id": "boston-bakery-cafe:ma-dua",
+  "read": "https://www.mass.gov/how-to/register-a-business-with-the-department-of-unemployment-assistance",
+  "quote": "Employers who pay wages for work done in Massachusetts must register with DUA.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b7ebc03c39477b7a",
+  "context": "able of contents what you need how to register next steps contact what you need employers who pay wages for work done in massachusetts must register with dua. business registrations can be completed online by the business owner, staff, or"
+ },
+ {
+  "id": "boston-bakery-cafe:bos-plan-review",
+  "read": "https://www.boston.gov/permitting/permits/food-service-permit",
+  "quote": "Depending on your situation, you may also need a Plan Review before we can issue your permit.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9420545c93673c1f",
+  "context": "twice each year. we add businesses to our online database as we do inspections. depending on your situation, you may also need a plan review before we can issue your permit. the food service permit is issued by the inspectional services department. cont"
+ },
+ {
+  "id": "boston-bakery-cafe:bos-building",
+  "read": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+  "quote": "File a building permit application for any necessary construction.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9777e5c11bb606e1",
+  "context": "ing board of appeal if it is a conditional or forbidden use at that location. • file a building permit application for any necessary construction. for major construction or structural changes, file a long form online. for mino"
+ },
+ {
+  "id": "boston-bakery-cafe:bos-cv",
+  "read": "https://www.boston.gov/departments/licensing-board/how-get-common-victualler-license",
+  "quote": "You must have this license before you can apply for a Food Service Health Permit from the Inspectional Services Department Health Division (ISD).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "04d5474eac9381cd",
+  "context": "usiness in boston. if you plan to serve alcohol you'll need a separate license. you must have this license before you can apply for a food service health permit from the inspectional services department health division (isd). if you also plan to serve alcohol, or let guests bring their own, you'll need a"
+ },
+ {
+  "id": "boston-bakery-cafe:bos-site",
+  "read": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+  "quote": "Apply for Site Cleanliness License.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9777e5c11bb606e1",
+  "context": "table license • sidewalk café permit • valet parking permit • liquor license • apply for site cleanliness license. • apply for dumpster placement permit: if larger than 3 cubic yards, file an an"
+ },
+ {
+  "id": "boston-bakery-cafe:bos-co",
+  "read": "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf",
+  "quote": "Obtain a Certificate of Occupancy by submitting your Certificate of Occupancy Application.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9777e5c11bb606e1",
+  "context": "nline. for more information on building permit types, visit bit.ly/permit-isd • obtain a certificate of occupancy by submitting your certificate of occupancy application. if you have any questions please reach out to isdcertificates@boston.gov (refer"
+ },
+ {
+  "id": "boston-bakery-cafe:bos-food-permit",
+  "read": "https://www.boston.gov/permitting/permits/food-service-permit",
+  "quote": "Before you can serve food to the public, you need to apply for a Food Service Permit and pass a health inspection.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9420545c93673c1f",
+  "context": " or sell food to the public in boston. some businesses also need a plan review. before you can serve food to the public, you need to apply for a food service permit and pass a health inspection. we inspect food service businesses at least once a year, but usually twice each"
+ },
+ {
+  "id": "boston-bakery-cafe:order:bos-cv>bos-food-permit",
+  "read": "https://www.boston.gov/departments/licensing-board/how-get-common-victualler-license",
+  "quote": "You must have this license before you can apply for a Food Service Health Permit from the Inspectional Services Department Health Division (ISD).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "04d5474eac9381cd",
+  "context": "usiness in boston. if you plan to serve alcohol you'll need a separate license. you must have this license before you can apply for a food service health permit from the inspectional services department health division (isd). if you also plan to serve alcohol, or let guests bring their own, you'll need a"
+ },
+ {
+  "id": "chicago-milk-tea:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "chicago-milk-tea:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "chicago-milk-tea:il-tax",
+  "read": "https://tax.illinois.gov/businesses/registration.html",
+  "quote": "Register with us, using one of the above methods, before you make any purchases, sales, or hire an employee.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "56986e20a6f9e1b0",
+  "context": "e your illinois account id or license number and business name in your request. register with us, using one of the above methods, before you make any purchases, sales, or hire an employee. if your business is already registered and your information changes (e.g., addr"
+ },
+ {
+  "id": "chicago-milk-tea:chi-sanitation",
+  "read": "https://chicago.gov/city/en/depts/cdph/provdrs/food_safety/svcs/enroll_in_a_foodsanitationcertificationcourse.html",
+  "quote": "To obtain a CDPH Foodservice Sanitation Manager Certificate you must attend and pass an approved course.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "84ee7f02998add95",
+  "context": "ness training faq. how to get a cdph foodservice sanitation manager certificate to obtain a cdph foodservice sanitation manager certificate you must attend and pass an approved course. a list of approved training providers is available at the following link: food "
+ },
+ {
+  "id": "chicago-milk-tea:il-ides",
+  "read": "https://ides.illinois.gov/employer-resources/tax-employer-information.html",
+  "quote": "You can access the form online through MyTax Illinois and then Register a new business (Form REG-1) .",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "37aa09714fb5978d",
+  "context": "g-ui-1 report to determine liability under the unemployment insurance act form. you can access the form online through mytax illinois and then register a new business (form reg-1). a paper copy of the reg-ui-1 form is also available. contact the ides employer "
+ },
+ {
+  "id": "chicago-milk-tea:chi-plan-review",
+  "read": "https://www.chicago.gov/content/dam/city/depts/bacp/general/Retail%20Food%20Guide.pdf",
+  "quote": "The Plan Review is coordinated between the Department of Public Heath and the Department of Buildings",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "chicago-milk-tea:chi-license",
+  "read": "https://www.chicago.gov/city/en/depts/bacp/supp_info/retailfoodestablishment0.html",
+  "quote": "A Retail Food Establishment license can only be issued at a properly zoned, non-residential location.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f342095aa2a7b4e3",
+  "context": "ed, stored, sold, or distributed from a building, or other fixed establishment. a retail food establishment license can only be issued at a properly zoned, non-residential location. the complete \"doing business as\" name (\"dba\") must be reflected on the business"
+ },
+ {
+  "id": "chicago-milk-tea:chi-building",
+  "read": "https://chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/INTWK-alteration.html",
+  "quote": "The Express Permit Program offers a streamlined way to obtain a permit for nonstructural interior alterations affecting up to 2,000 square feet of floor area for many types of spaces, including homes, offices, and stores.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "50710a86a4a3cc31",
+  "context": "(nonstructural interior work) interior alteration (nonstructural interior work) the express permit program offers a streamlined way to obtain a permit for nonstructural interior alterations affecting up to 2,000 square feet of floor area for many types of spaces, including homes, offices, and stores. eligibility summary additional terms, conditions, and limitations may apply. wo"
+ },
+ {
+  "id": "dallas-restaurant:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "dallas-restaurant:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "dallas-restaurant:tx-205",
+  "read": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+  "quote": "Title 1, chapter 3, subchapter A of the BOC governs the formation of an LLC",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "82192abd46f8fab6",
+  "context": "overned by title 3, chapter 101 of the texas business organizations code (boc). title 1, chapter 3, subchapter a of the boc governs the formation of an llc and sets forth the provisions required or permitted to be contained in the cert"
+ },
+ {
+  "id": "dallas-restaurant:tx-503",
+  "read": "https://www.sos.state.tx.us/corp/instructions/503.shtml",
+  "quote": "a separate assumed name certificate must be filed for each assumed name.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "6895377aa8e56f9c",
+  "context": "may conduct business or professional services under multiple assumed names, but a separate assumed name certificate must be filed for each assumed name. please note that if the name entered as the assumed name in item 1 is exactly t"
+ },
+ {
+  "id": "dallas-restaurant:tx-ap201",
+  "read": "https://comptroller.texas.gov/taxes/permit/",
+  "quote": "You will need to apply using form AP-201, Texas Application (PDF) .",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "cff66b32f32ef984",
+  "context": "e owner, partner, officer or director and do not have a social security number. you will need to apply using form ap-201, texas application (pdf). email the application to sales.applications@cpa.texas.gov or fax the applicatio"
+ },
+ {
+  "id": "dallas-restaurant:tx-food-manager",
+  "read": "https://www.dshs.texas.gov/food-managers",
+  "quote": "The food manager certification is obtained by passing a DSHS or ANSI-CFP approved food manager certification examination.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "90369b3ebe5429ff",
+  "context": "irements for food manager certification. obtaining a food manager certification the food manager certification is obtained by passing a dshs or ansi-cfp approved food manager certification examination. the food manger certification examination may be taken at any accredited examin"
+ },
+ {
+  "id": "dallas-restaurant:tx-food-handler",
+  "read": "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+  "quote": "all food employees shall successfully complete an accredited food handler training course, within 30 days of employment.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a49cc7066ba54d9f",
+  "context": " (txdshs), under texas food establishment rules (tfer) §228.31, requires that '…all food employees shall successfully complete an accredited food handler training course, within 30 days of employment.' who is a food employee? food employee is an individual working with unpackaged"
+ },
+ {
+  "id": "dallas-restaurant:tx-twc",
+  "read": "https://www.twc.texas.gov/services/register-tax",
+  "quote": "register with the Texas Workforce Commission (TWC) within 10 days of becoming liable.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b2a9c4aa209baea4",
+  "context": "egister a tax account texas unemployment compensation act requires employers to register with the texas workforce commission (twc) within 10 days of becoming liable. registering is easy with unemployment tax registration (utr), twc's quick and f"
+ },
+ {
+  "id": "dallas-restaurant:dal-co",
+  "read": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx",
+  "quote": "shall not use or change the use of a building, a portion of a building, or land without obtaining a Certificate of Occupancy",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "d1c98004b76fc5f0",
+  "context": "elopment code requires that \"except for single family and duplex uses, a person shall not use or change the use of a building, a portion of a building, or land without obtaining a certificate of occupancy (co) from the building official.\" a new co is needed for: - the first use of la"
+ },
+ {
+  "id": "dallas-restaurant:dal-plan-review",
+  "read": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/default.aspx",
+  "quote": "If you are building a new food or drink establishment or remodeling an existing facility: Apply on DallasNow",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "94e4dddeed1fd0ef",
+  "context": " determine which applies to your business. new or remodeled food establishments if you are building a new food or drink establishment or remodeling an existing facility: apply on dallasnow ​​ ​​​ ​​upload two identical sets of scaled plans, including: ​floor plan and "
+ },
+ {
+  "id": "dallas-restaurant:dal-food-permit",
+  "read": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx",
+  "quote": "Food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "49447ff7d800c725",
+  "context": "aintitleheader ​food establishment dch body page content ​ ​ permit information food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments. the applicant is responsible for scheduling and coordinating all required healt"
+ },
+ {
+  "id": "dc-bubble-tea:dc-formation",
+  "read": "https://dlcp.dc.gov/node/1616716",
+  "quote": "To register domestic limited liability company in the District, customer shall deliver articles of organization form DLC-1 to the Superintendent for filing",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "90304cc9a28cbfb3",
+  "context": "liability company may have any lawful purpose, regardless of whether for profit to register domestic limited liability company in the district, customer shall deliver articles of organization form dlc-1 to the superintendent for filing either by web or by mail / walk-in. note: walk-in customers will be charged exp"
+ },
+ {
+  "id": "dc-bubble-tea:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "dc-bubble-tea:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "dc-bubble-tea:dc-otr",
+  "read": "https://dlcp.dc.gov/node/1621001",
+  "quote": "All applicants for a Basic Business License must be registered and in good standing with the DC Office of Tax and Revenue.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a486e169a80bdf99",
+  "context": "ing tax registration and clean hands verifying tax registration and clean hands all applicants for a basic business license must be registered and in good standing with the dc office of tax and revenue. during the licensing application process, the applicant's tax number must pass "
+ },
+ {
+  "id": "dc-bubble-tea:dc-food-manager",
+  "read": "https://dlcp.dc.gov/node/1806261",
+  "quote": "All applicants for a Basic Business License for a Food Services Business, must have a Certified Food Protection Manager",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c99c08c3371cd4e1",
+  "context": "food manager's certificate details dc health food manager's certificate details all applicants for a basic business license for a food services business, must have a certified food protection manager, who is responsible for ensuring food safety in food establishments by actively"
+ },
+ {
+  "id": "dc-bubble-tea:dc-does",
+  "read": "https://unemployment.dc.gov/page/employer-service-portal",
+  "quote": "Any business that has employees working in the District of Columbia is required to register online at essp.does.dc.gov",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "d1c53c5513b5520c",
+  "context": "ether the services are performed on a full-time, part-time, or temporary basis. any business that has employees working in the district of columbia is required to register online at essp.does.dc.gov. what is essp? district of columbia employers and third-party agents (tpas) can"
+ },
+ {
+  "id": "dc-bubble-tea:dc-plan-review",
+  "read": "https://dchealth.dc.gov/sites/default/files/dc/sites/doh/publication/attachments/FS%28redtop%29%20-%20Plan%20review%202018%20v2.pdf",
+  "quote": "Plans are to be submitted: before construction of a food establishment, before conversion of an existing structure to a food establishment;",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a1f3f213fcefa56c",
+  "context": "ations and menu(s) for review and approval, including payment of required fees. plans are to be submitted: before construction of a food establishment, before conversion of an existing structure to a food establishment; before remodeling and/or renovation of a food establishment and when there is a"
+ },
+ {
+  "id": "dc-bubble-tea:dc-co",
+  "read": "https://dob.dc.gov/sites/default/files/dc/sites/dob/Certificate%20of%20Occupancy--A%20Quick%20Guide.pdf",
+  "quote": "A Certificate of Occupancy (C of O) verifies that the use of a building, structure, or land in the District complies with the legal and safety standards",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "896500e75e145e0b",
+  "context": "a quick guide to a certificate of occupancy a certificate of occupancy (c of o) verifies that the use of a building, structure, or land in the district complies with the legal and safety standards in the zoning regulations (dcmr title 11), dc construction codes, and the green"
+ },
+ {
+  "id": "dc-bubble-tea:dc-food",
+  "read": "https://dlcp.dc.gov/service/business-licensing-division",
+  "quote": "Anyone engaging in business activity within the District is required to be licensed in accordance with the specific activity conducted (e.g., convenience stores, home improvement contractors, residential rentals, restaurants).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "be251d69b938a17a",
+  "context": "on of the general public, for hire or compensation in the district of columbia. anyone engaging in business activity within the district is required to be licensed in accordance with the specific activity conducted (e.g., convenience stores, home improvement contractors, residential rentals, restaurants). each licensed business activity has its own set of requirements. you can find d"
+ },
+ {
+  "id": "dc-bubble-tea:dc-building",
+  "read": "https://dob.dc.gov/sites/default/files/dc/sites/dob/Certificate%20of%20Occupancy--A%20Quick%20Guide.pdf",
+  "quote": "Building permits and final inspections are required.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "896500e75e145e0b",
+  "context": "or a different purpose. example: business, store → office→ child care facility. building permits and final inspections are required. occupancy load change the number of people allowed in the space changes. exampl"
+ },
+ {
+  "id": "denver-franchise-tea:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "denver-franchise-tea:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "denver-franchise-tea:co-tax",
+  "read": "https://tax.colorado.gov/new-businesses",
+  "quote": "you must apply for a Colorado sales tax license.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "d88098726351cda3",
+  "context": "our business maintains a physical location in colorado and makes taxable sales, you must apply for a colorado sales tax license. your business can use mybizcolorado to apply for a sales tax license and a wage"
+ },
+ {
+  "id": "denver-franchise-tea:den-tax",
+  "read": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/Our-Divisions/Treasury/Business-Tax-Information/Business-Tax-FAQ",
+  "quote": "or you have economic nexus, you are required to obtain a Denver sales tax license",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "6b8646f027e96135",
+  "context": "tax? yes. if you are located in or have some other physical presence in denver, or you have economic nexus, you are required to obtain a denver sales tax license and collect and remit denver sales tax on sales made in denver. if i operate a "
+ },
+ {
+  "id": "denver-franchise-tea:den-zoning",
+  "read": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Community-Planning-and-Development/Plan-Review-Permits-and-Inspections/Zoning-Permits/Apply-for-Commercial-Zoning-Permits",
+  "quote": "If your plans meet the requirements of the zoning code and your permit fee has been paid, staff will issue the zoning permit.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7c3f73abaa74cd90",
+  "context": "heck your email for updates from zoning staff as your plans are being reviewed. if your plans meet the requirements of the zoning code and your permit fee has been paid, staff will issue the zoning permit. please note that other types of approvals, both city and state, may still be re"
+ },
+ {
+  "id": "denver-franchise-tea:co-ui",
+  "read": "https://cdle.colorado.gov/employers/recruiting-hiring/new-employer-checklist",
+  "quote": "To receive an unemployment account number, you may register your business online through MyBizColorado.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "6da47669e773a72d",
+  "context": "uired to pay unemployment insurance premiums if you meet specific requirements. to receive an unemployment account number, you may register your business online through mybizcolorado. register your business for an unemployment account register online register onl"
+ },
+ {
+  "id": "denver-franchise-tea:den-plan-review",
+  "read": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Public-Health-Environment/Public-Health-Investigations/Food-Safety/Restaurant-Food-Establishment-Compliance",
+  "quote": "Food Establishment Construction, Remodeling, and Plan Review Information See Plan Review Page for more information.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "552ff2a0aa35a413",
+  "context": "l an administrative citation view the rules governing hearings before the board food establishment construction, remodeling, and plan review information see plan review page for more information. additional information and resources dogs on patios (pdf, 226kb) ( en español ("
+ },
+ {
+  "id": "denver-franchise-tea:den-food-license",
+  "read": "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Business-Licensing/Business-licenses/Retail-Food/Retail-food/New",
+  "quote": "Your license will not issue until a proper zone use permit has submitted.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "37003f7fa497ea07",
+  "context": " allow you to begin your application while you secure a proper zone use permit. your license will not issue until a proper zone use permit has submitted. applications that fail to provide a zone use permit will not issue or be eligib"
+ },
+ {
+  "id": "houston-franchise-tea:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "houston-franchise-tea:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "houston-franchise-tea:tx-503",
+  "read": "https://www.sos.state.tx.us/corp/instructions/503.shtml",
+  "quote": "a separate assumed name certificate must be filed for each assumed name.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "6895377aa8e56f9c",
+  "context": "may conduct business or professional services under multiple assumed names, but a separate assumed name certificate must be filed for each assumed name. please note that if the name entered as the assumed name in item 1 is exactly t"
+ },
+ {
+  "id": "houston-franchise-tea:tx-ap201",
+  "read": "https://comptroller.texas.gov/taxes/permit/",
+  "quote": "You will need to apply using form AP-201, Texas Application (PDF) .",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "cff66b32f32ef984",
+  "context": "e owner, partner, officer or director and do not have a social security number. you will need to apply using form ap-201, texas application (pdf). email the application to sales.applications@cpa.texas.gov or fax the applicatio"
+ },
+ {
+  "id": "houston-franchise-tea:tx-food-manager",
+  "read": "https://www.dshs.texas.gov/food-managers",
+  "quote": "The food manager certification is obtained by passing a DSHS or ANSI-CFP approved food manager certification examination.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "90369b3ebe5429ff",
+  "context": "irements for food manager certification. obtaining a food manager certification the food manager certification is obtained by passing a dshs or ansi-cfp approved food manager certification examination. the food manger certification examination may be taken at any accredited examin"
+ },
+ {
+  "id": "houston-franchise-tea:tx-food-handler",
+  "read": "https://www.dshs.texas.gov/food-handlers/faq.aspx",
+  "quote": "all food employees shall successfully complete an accredited food handler training course, within 30 days of employment.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a49cc7066ba54d9f",
+  "context": " (txdshs), under texas food establishment rules (tfer) §228.31, requires that '…all food employees shall successfully complete an accredited food handler training course, within 30 days of employment.' who is a food employee? food employee is an individual working with unpackaged"
+ },
+ {
+  "id": "houston-franchise-tea:tx-twc",
+  "read": "https://www.twc.texas.gov/services/register-tax",
+  "quote": "register with the Texas Workforce Commission (TWC) within 10 days of becoming liable.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b2a9c4aa209baea4",
+  "context": "egister a tax account texas unemployment compensation act requires employers to register with the texas workforce commission (twc) within 10 days of becoming liable. registering is easy with unemployment tax registration (utr), twc's quick and f"
+ },
+ {
+  "id": "houston-franchise-tea:hou-plan-review",
+  "read": "https://www.houstonhealth.org/food-permits/opening-food-establishment",
+  "quote": "Plans must be submitted for the following: Construction of a food establishment.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3b10040abf71e1a9",
+  "context": " permit application food dealers permit application form 1. are plans required? plans must be submitted for the following: construction of a food establishment. remodeling of an existing space not previously a food establishment. remodeling"
+ },
+ {
+  "id": "houston-franchise-tea:hou-buildout",
+  "read": "https://www.houstonpermittingcenter.org/hpwcode1148",
+  "quote": "Buildout permits must be on-site for inspection.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5c111b4e2354184",
+  "context": " submit additional resources commercial epr user guide inspection what you need buildout permits must be on-site for inspection. if corrections are required, call (832)394-8840 for a reinspection. schedule on"
+ },
+ {
+  "id": "houston-franchise-tea:hou-co",
+  "read": "https://www.houstonpermittingcenter.org/hpwcode1106",
+  "quote": "The certificate is normally issued at the time of construction or when a remodel or change of use occurs.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "15ee1e0e0c40868f",
+  "context": "ertificate must be valid for the use of the building, space or portion thereof. the certificate is normally issued at the time of construction or when a remodel or change of use occurs. a certificate of occupancy is not required for single-family residences, duplex"
+ },
+ {
+  "id": "houston-franchise-tea:hou-food-dealer",
+  "read": "https://www.houstonpermittingcenter.org/hhd1003",
+  "quote": "If inspection is passed then an operating permit is invoiced and processed when payment is received.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f851fa8256cb133c",
+  "context": "is required. if corrections are required, call 832.393.5100 for a reinspection. if inspection is passed then an operating permit is invoiced and processed when payment is received. schedule by phone to request an inspection or re-inspection, call 832-393-5100."
+ },
+ {
+  "id": "irvine-franchise-hot-pot:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "irvine-franchise-hot-pot:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "irvine-franchise-hot-pot:ca-cdtfa",
+  "read": "https://www.sf.gov/guide-opening-restaurant",
+  "quote": "Every location must have this permit to sell taxable goods.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f53c95d94fe027bc",
+  "context": "ler's permits are from the ca department of tax and fee administration (cdtfa). every location must have this permit to sell taxable goods. obtain workers' compensation insurance you will need this insurance if you will"
+ },
+ {
+  "id": "irvine-franchise-hot-pot:ca-food-manager",
+  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+  "quote": "food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (PHF), except temporary food facilities, to have at least one owner or employee",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b6b4d1ebb372e472",
+  "context": " certification the california health and safety code, section 113947.1 requires food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (phf), except temporary food facilities, to have at least one owner or employee who has successfully passed an examination from an accredited food protection m"
+ },
+ {
+  "id": "irvine-franchise-hot-pot:ca-food-handler",
+  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+  "quote": "A food handler shall obtain a food hander card within 30 days after the date of hire.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b6b4d1ebb372e472",
+  "context": "m the date of the change to comply with the certified food manager requirement. a food handler shall obtain a food hander card within 30 days after the date of hire. while training is not required to take the examination, many people find that t"
+ },
+ {
+  "id": "irvine-franchise-hot-pot:ca-edd-de1",
+  "read": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+  "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "irvine-franchise-hot-pot:oc-plan-check",
+  "read": "https://www.ochealthinfo.com/services-programs/environmental-health/plan-check",
+  "quote": "Plan Approval: Congratulations on the approval of your submitted plans, which allows you to initiate construction.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "05f3f792aaf81378",
+  "context": "ps will serve as a guide throughout the process subsequent to plan approval. 1. plan approval: congratulations on the approval of your submitted plans, which allows you to initiate construction. it is the responsibility of the submitter to provide evidence of this approval "
+ },
+ {
+  "id": "irvine-franchise-hot-pot:oc-health-permit",
+  "read": "https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit",
+  "quote": "A health permit will be issued upon completion of a final inspection.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "aee98b36dc979a56",
+  "context": "respectively. inspection requests shall be requested 5 working days in advance. a health permit will be issued upon completion of a final inspection. you may not start construction until plans from all agencies have been reviewed"
+ },
+ {
+  "id": "irvine-franchise-hot-pot:irv-license",
+  "read": "https://www.cityofirvine.gov/sites/default/files/irvine/repository/business-license-application-checklist.pdf",
+  "quote": "Ensure your OC Health or ABC permits are ready if you’re in food or beverage service.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "af81b65f3f9da8b3",
+  "context": " sell physical items, have your permit number from the cdtfa. health & alcohol: ensure your oc health or abc permits are ready if you're in food or beverage service. the \"dba\": if your business name is different from your own, ensure it's regist"
+ },
+ {
+  "id": "irvine-franchise-hot-pot:irv-building",
+  "read": "https://cityofirvine.gov/node/69516",
+  "quote": "After you have completed and gathered all of the required documents, you will need to submit your permit application and plans electronically through the IrvineReady!",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7a32d23e9df9dda0",
+  "context": "ty before proceeding with your design plans. refer to the zoning guidance below after you have completed and gathered all of the required documents, you will need to submit your permit application and plans electronically through the irvineready! online permit submittal portal building guidance the california building code h"
+ },
+ {
+  "id": "jerseycity-noodles:nj-formation",
+  "read": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+  "quote": "First, file a Certificate of formation/authorization.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "1ae966d357509201",
+  "context": "ber (ein) from the irs. once you obtain an ein, complete the two filings below: first, file a certificate of formation/authorization. the fee is $100 for all for-profit entities and foreign non-profit corporations"
+ },
+ {
+  "id": "jerseycity-noodles:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "jerseycity-noodles:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "jerseycity-noodles:nj-reg",
+  "read": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+  "quote": "Second, after filing the certificate of formation/authorization, file the tax/employer registration form (Form NJ-REG).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "1ae966d357509201",
+  "context": " fee is $50 for domestic non-profit corporations. file your certificate online. second, after filing the certificate of formation/authorization, file the tax/employer registration form (form nj-reg). file the nj-reg online. once you have successfully completed the two filings ab"
+ },
+ {
+  "id": "jerseycity-noodles:nj-plan-review",
+  "read": "https://www.nj.gov/health/ceohs/documents/phfpp/Chapter%2024%20w%20Cottage%20Food%20Rules%201-18-22.pdf",
+  "quote": "A permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "74a148e17cada05b",
+  "context": "hapter. subchapter 9. review of plans 8:24-9.1 plan submission and approval (a) a permit applicant or operator shall submit to the health authority properly prepared plans and specifications for review and approval before: 1. the construction of a retail food establishment; 2. the conversion of an exi"
+ },
+ {
+  "id": "jerseycity-noodles:jc-co",
+  "read": "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses",
+  "quote": "Per City Code, a Certificate of Occupancy is required for new construction, major renovations or changes in building use.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "640720dbd96f0305",
+  "context": " is required first. learn about the process here. certificate of occupancy (co) per city code, a certificate of occupancy is required for new construction, major renovations or changes in building use. it is required to legally operate a business, ensuring location complies with z"
+ },
+ {
+  "id": "jerseycity-noodles:jc-construction",
+  "read": "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses",
+  "quote": "you will need to apply for the appropriate construction applications and pass inspections before applying for a Certificate of Occupancy.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "640720dbd96f0305",
+  "context": "tion is needed? are you doing any construction in the desired location? if yes, you will need to apply for the appropriate construction applications and pass inspections before applying for a certificate of occupancy. learn which construction permit is needed here. some work is considered ordinar"
+ },
+ {
+  "id": "jerseycity-noodles:jc-food-license",
+  "read": "https://www.jerseycitynj.gov/cms/one.aspx?pageId=7214272",
+  "quote": "Find HHS licensing applications for beauty salons, barbershops, body art, kennels, pet shops, shelters and retail food establishments.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "5df7746e7c7a4200",
+  "context": "n appointment, call 201-547-5285 or 201-547-5173. no walk-ins will be accepted. find hhs licensing applications for beauty salons, barbershops, body art, kennels, pet shops, shelters and retail food establishments. report an environmental health concern if your concern involves an immediate ri"
+ },
+ {
+  "id": "la-bubble-tea:ca-llc-1",
+  "read": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+  "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7d85ce335ef76c37",
+  "context": "r form print form submission cover sheet (rev 03/2024) secretary of state llc-1 articles of organization limited liability company (llc) filing fee - $70.00 certified copy fee (optional) - $5.00 note: llcs may have to pay minimum $800 t"
+ },
+ {
+  "id": "la-bubble-tea:ca-llc-1:fee",
+  "read": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+  "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7d85ce335ef76c37",
+  "context": "r form print form submission cover sheet (rev 03/2024) secretary of state llc-1 articles of organization limited liability company (llc) filing fee - $70.00 certified copy fee (optional) - $5.00 note: llcs may have to pay minimum $800 t"
+ },
+ {
+  "id": "la-bubble-tea:ca-llc-12",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/statements",
+  "quote": "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "de2ef21656e66668",
+  "context": "rations, limited liability companies and limited partnerships available online. failure to file the required statement of information with the secretary of state as outlined in statute may result in penalties being assessed by the franchise tax board and suspension or forfeiture. in addi"
+ },
+ {
+  "id": "la-bubble-tea:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "la-bubble-tea:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "la-bubble-tea:ca-cdtfa",
+  "read": "https://www.sf.gov/guide-opening-restaurant",
+  "quote": "Every location must have this permit to sell taxable goods.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f53c95d94fe027bc",
+  "context": "ler's permits are from the ca department of tax and fee administration (cdtfa). every location must have this permit to sell taxable goods. obtain workers' compensation insurance you will need this insurance if you will"
+ },
+ {
+  "id": "la-bubble-tea:la-btrc",
+  "read": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc",
+  "quote": "Once you completed the registration process, you will receive a temporary Business Tax Registration Certificate or Registration Number.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b066d5086145559e",
+  "context": "mail (if available) ** please note that additional information may be required. once you completed the registration process, you will receive a temporary business tax registration certificate or registration number. a permanent business tax registration certificate will be mailed within 4 to 6 "
+ },
+ {
+  "id": "la-bubble-tea:ca-food-manager",
+  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+  "quote": "food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (PHF), except temporary food facilities, to have at least one owner or employee",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b6b4d1ebb372e472",
+  "context": " certification the california health and safety code, section 113947.1 requires food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (phf), except temporary food facilities, to have at least one owner or employee who has successfully passed an examination from an accredited food protection m"
+ },
+ {
+  "id": "la-bubble-tea:ca-food-handler",
+  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+  "quote": "A food handler shall obtain a food hander card within 30 days after the date of hire.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b6b4d1ebb372e472",
+  "context": "m the date of the change to comply with the certified food manager requirement. a food handler shall obtain a food hander card within 30 days after the date of hire. while training is not required to take the examination, many people find that t"
+ },
+ {
+  "id": "la-bubble-tea:lac-plan-check",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+  "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "la-bubble-tea:la-ladbs",
+  "read": "https://dbs.lacity.gov/services/plan-review-permitting/building-permits",
+  "quote": "Building Permits are required for new constructions, additions, alterations, and demolition/removal of a building or structure.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c69c5968476f3ca",
+  "context": "eview... building permits home plan review... building permits building permits building permits are required for new constructions, additions, alterations, and demolition/removal of a building or structure. express permit counter plan check regular plan check about building permits bui"
+ },
+ {
+  "id": "la-bubble-tea:ca-edd-de1",
+  "read": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+  "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "la-bubble-tea:lac-health-permit",
+  "read": "https://publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+  "quote": "After payment of the Public Health Permit fee is made, the permit will be issued.",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 302; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "la-bubble-tea:order:lac-plan-check>lac-health-permit",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+  "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "lasvegas-clothing:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "lasvegas-clothing:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "lasvegas-clothing:nv-sbl",
+  "read": "https://dpbh.nv.gov/uploadedFiles/dpbhnvgov/content/Reg/Radiation-Machines/Docs/Informational_Notice_Secretary_of_State_Business_License_8-17-23ADA.pdf",
+  "quote": "A person shall not conduct business in the State unless and until the person obtains a state business license issued by the Secretary of State.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "0020824e72834a6f",
+  "context": "pplication and fee for license; activities constituting conduct of business. 1. a person shall not conduct business in the state unless and until the person obtains a state business license issued by the secretary of state. if the person is: a. an entity required to file an initial or annual list with "
+ },
+ {
+  "id": "lasvegas-clothing:nv-tax",
+  "read": "https://tax.nv.gov/faqs/register-a-business/",
+  "quote": "You must have a Federal Identification Number (FEIN# or EIN) and Business License before registering for a tax permit.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c59bc7f10242ff9",
+  "context": "business legally in nevada. how do i register for a tax permit for my business? you must have a federal identification number (fein# or ein) and business license before registering for a tax permit. register for a tax permit online at my nevada tax. when applying online, you wi"
+ },
+ {
+  "id": "lasvegas-clothing:lv-license",
+  "read": "https://lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License",
+  "quote": "This will provide you with the primary jurisdiction for your location, which determines where you must file for your business license.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a3a141a740b99927",
+  "context": "t local licensing jurisdictions. check your proposed address for your business. this will provide you with the primary jurisdiction for your location, which determines where you must file for your business license. if step 1 confirmed that your proposed business location is in the city of las "
+ },
+ {
+  "id": "lasvegas-clothing:nv-esd",
+  "read": "https://tax.nv.gov/faqs/register-a-business/",
+  "quote": "If you also need to be registered for Unemployment Insurance , DETR will share your details with the Department of Taxation.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c59bc7f10242ff9",
+  "context": "ified business tax, visit the department of training and rehabilitation (detr). if you also need to be registered for unemployment insurance, detr will share your details with the department of taxation. see also: modified business tax types and modified business tax (mbt) faqs what"
+ },
+ {
+  "id": "miami-bakery-cafe:fl-sunbiz",
+  "read": "https://www.flsenate.gov/Laws/Statutes/2025/605.0201",
+  "quote": "One or more persons may act as authorized representatives to form a limited liability company by signing and delivering articles of organization to the department for filing.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f3569daf93f05d1f",
+  "context": "05.0201 formation of limited liability company; articles of organization. — (1) one or more persons may act as authorized representatives to form a limited liability company by signing and delivering articles of organization to the department for filing. (2) the articles of organization must state the following: (a) the name of the "
+ },
+ {
+  "id": "miami-bakery-cafe:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "miami-bakery-cafe:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "miami-bakery-cafe:fl-dor",
+  "read": "https://floridarevenue.com/taxes/taxesfees/Pages/sales_tax.aspx",
+  "quote": "If they are, you must register to collect sales tax or pay use tax.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "8fc5f6358cab06fe",
+  "context": "out if your business activity or products will be subject to sales and use tax. if they are, you must register to collect sales tax or pay use tax. here is a partial list of business activities that require you to register with"
+ },
+ {
+  "id": "miami-bakery-cafe:fl-food-manager",
+  "read": "https://www2.myfloridalicense.com/hotels-restaurants/food-lodging/food-manager/",
+  "quote": "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0c76d54830bb397",
+  "context": "overnment news room hotels and restaurants – food service manager certification florida law requires food managers to complete training and pass a certification exam within 30 days of employment. private entities provide the training and testing. food manager certification m"
+ },
+ {
+  "id": "miami-bakery-cafe:fl-dbpr-plan",
+  "read": "https://www2.myfloridalicense.com/hotels-restaurants/licensing/general/",
+  "quote": "Florida law and rule requires operators of public food service establishments to submit properly prepared facility plans and specifications to the division for review and approval",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "762f8e532f02ba4b",
+  "context": "ation rentals and timeshare projects all others plan review (food service only) florida law and rule requires operators of public food service establishments to submit properly prepared facility plans and specifications to the division for review and approval if the establishment is: newly constructed, remodeled, converted from another u"
+ },
+ {
+  "id": "miami-bakery-cafe:mia-cu",
+  "read": "https://www.miami.gov/Business/Business-Tax-Receipt-BTR",
+  "quote": "Most businesses need a CU before they can get a BTR.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "63a431d0ac426b48",
+  "context": "ational license). online step 1. finalize certificate of use (cu), if necessary most businesses need a cu before they can get a btr. you will need to present a copy of your cu. exception: peddlers, food trucks, o"
+ },
+ {
+  "id": "miami-bakery-cafe:fl-dbpr",
+  "read": "https://www2.myfloridalicense.com/hotels-restaurants/licensing/general/",
+  "quote": "Florida law requires owners of new public food service or lodging establishments, and new owners of existing establishments, to obtain a license from the division before commencing operation.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "762f8e532f02ba4b",
+  "context": "tions open government news room hotels and restaurants – licensing introduction florida law requires owners of new public food service or lodging establishments, and new owners of existing establishments, to obtain a license from the division before commencing operation. general information regarding the licensing process is available below and on o"
+ },
+ {
+  "id": "miami-bakery-cafe:mia-btr",
+  "read": "https://www.miami.gov/Business/Business-Tax-Receipt-BTR",
+  "quote": "Every business needs to obtain a Business Tax Receipt to operate in the City (also known as an Occupational License).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "63a431d0ac426b48",
+  "context": " you opening a new business and have finished your cu (or you didn't need one)? every business needs to obtain a business tax receipt to operate in the city (also known as an occupational license). in addition, every business is also required to obtain a miami-dade county loca"
+ },
+ {
+  "id": "miami-bakery-cafe:mdc-btr",
+  "read": "https://www.miami.gov/Business/Business-Tax-Receipt-BTR",
+  "quote": "In addition, every business is also required to obtain a Miami-Dade County Local Business Tax Receipt (formerly known as an Occupational License).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "63a431d0ac426b48",
+  "context": "ess tax receipt to operate in the city (also known as an occupational license). in addition, every business is also required to obtain a miami-dade county local business tax receipt (formerly known as an occupational license). online step 1. finalize certificate of use (cu), if necessary most businesses n"
+ },
+ {
+  "id": "miami-bakery-cafe:mia-co",
+  "read": "https://www.miami.gov/Business/New-Business-Guide",
+  "quote": "If you are in a new building OR a building that has undergone construction, then you will need to show either a Certificate of Occupancy (CO) or a Certificate of Completion (CC)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3232f68fcb5ed0af",
+  "context": "lm department. you can do an online request for these which will save you time. if you are in a new building or a building that has undergone construction, then you will need to show either a certificate of occupancy (co) or a certificate of completion (cc) (whichever applies) in order to obtain your cu. if you have all of the above do"
+ },
+ {
+  "id": "nyc-bakery-cafe:ny-dos-1336",
+  "read": "https://dos.ny.gov/node/16156",
+  "quote": "Organizers form an LLC by filing the Articles of Organization",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "2199cbbb18c38e42",
+  "context": "y company or any other legal entity. how do i form a limited liability company? organizers form an llc by filing the articles of organization, pursuant to section 203 of the limited liability company law, with the departm"
+ },
+ {
+  "id": "nyc-bakery-cafe:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "nyc-bakery-cafe:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "nyc-bakery-cafe:ny-dos-pub",
+  "read": "https://dos.ny.gov/node/16156",
+  "quote": "Failure to publish and file the Certificate of Publication with the Department of State within 120 days",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "2199cbbb18c38e42",
+  "context": "d thereto, must be submitted to the department of state, with a $50 filing fee. failure to publish and file the certificate of publication with the department of state within 120 days will result in the suspension of the llc's authority to carry on, conduct or tr"
+ },
+ {
+  "id": "nyc-bakery-cafe:nyc-co",
+  "read": "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page",
+  "quote": "No one may legally occupy a building until the Department has issued a CO or Temporary Certificate of Occupancy (TCO) .",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f74ee8edfae98cbd",
+  "context": "rrent or amended co when there is a change in use, egress or type of occupancy. no one may legally occupy a building until the department has issued a co or temporary certificate of occupancy (tco). a co confirms that the completed work complies with all applicable laws, all pa"
+ },
+ {
+  "id": "nyc-bakery-cafe:ny-dtf-17",
+  "read": "https://www.tax.ny.gov/bus/st/register.htm",
+  "quote": "If you must register to collect sales tax and need information about how to register, see Tax Bulletin",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b0206a8b8d2a9f99",
+  "context": " presumption applicable to definition of sales tax vendor for more information. if you must register to collect sales tax and need information about how to register, see tax bulletin how to register for new york state sales tax (tb-st-360). what you will need ny"
+ },
+ {
+  "id": "nyc-bakery-cafe:nyc-dob-alt",
+  "read": "https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page",
+  "quote": "Department of Buildings work permits are required for most construction projects.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a269beec37a23e1a",
+  "context": "or kitchen and bathroom renovations, depending upon the complexity of the work. department of buildings work permits are required for most construction projects. if the project's scope requires plans and permits, you must hire a new york sta"
+ },
+ {
+  "id": "nyc-bakery-cafe:ny-dol-100",
+  "read": "https://dol.ny.gov/register-unemployment-insurance-0",
+  "quote": "You must complete an employer registration form for us to decide if you are liable under the New York State Unemployment Insurance Law.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f1ec3137a1e2c744",
+  "context": "ity. the conditions for liability differ for the following types of businesses. you must complete an employer registration form for us to decide if you are liable under the new york state unemployment insurance law. if you have any questions about registration, call the employer hotline at 888-"
+ },
+ {
+  "id": "nyc-bakery-cafe:ny-wcb",
+  "read": "https://www.wcb.ny.gov/content/main/coverage-requirements.jsp",
+  "quote": "Disability and Paid Family Leave benefits coverage is required for sole proprietorships with employees, including part-time employees",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "cb06ff5e46cff867",
+  "context": "s coverage is not required for sole proprietorships that do not have employees. disability and paid family leave benefits coverage is required for sole proprietorships with employees, including part-time employees, borrowed employees, leased employees, family members, and volunteers. the sole"
+ },
+ {
+  "id": "nyc-bakery-cafe:nyc-fpc",
+  "read": "https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page",
+  "quote": "To receive a certification, you must first complete the free Online Food Protection Course",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "cdec24479289e4c9",
+  "context": "letion of this course and passing of the final exam satisfies that requirement. to receive a certification, you must first complete the free online food protection course, the online course is offered in english, spanish and chinese. the course is se"
+ },
+ {
+  "id": "nyc-bakery-cafe:nyc-fse",
+  "read": "https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit",
+  "quote": "A Food Protection Certificate (FPC) or course registration is needed when applying for the permit.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "96d9708b821ac709",
+  "context": "rvising manager must pass a food protection course and be on-site at all times. a food protection certificate (fpc) or course registration is needed when applying for the permit. certification is needed before opening your establishment. encourage more staff"
+ },
+ {
+  "id": "nyc-bakery-cafe:order:ny-dos-1336>irs-ss4",
+  "read": "https://dos.ny.gov/node/16156",
+  "quote": "Organizers form an LLC by filing the Articles of Organization",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "2199cbbb18c38e42",
+  "context": "y company or any other legal entity. how do i form a limited liability company? organizers form an llc by filing the articles of organization, pursuant to section 203 of the limited liability company law, with the departm"
+ },
+ {
+  "id": "philadelphia-tea:pa-dos",
+  "read": "https://www.pa.gov/agencies/dos/programs/business",
+  "quote": "Online Filing Business Filing Services allows you to submit your filings electronically, but your application still requires human review.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "fa07476471e1f9da",
+  "context": " terminology is important to know when placing business orders. register online online filing business filing services allows you to submit your filings electronically, but your application still requires human review. submissions are processed in the date they are received unless expedited servic"
+ },
+ {
+  "id": "philadelphia-tea:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "philadelphia-tea:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "philadelphia-tea:pa-tax",
+  "read": "https://www.pa.gov/services/revenue/register-my-business-for-taxes",
+  "quote": "New customers can register for various taxes without logging in to myPATH using the Pennsylvania Online Business Tax Registration.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b2963b7e04b21522",
+  "context": ";register&nbsp;for new&nbsp;business&nbsp;tax&nbsp;accounts on&nbsp; mypath. \\n new customers can register for various taxes without logging in to mypath using the pennsylvania online business tax registration. \\n existing customer will need to sign up or login to mypath and use the regist"
+ },
+ {
+  "id": "philadelphia-tea:phl-food-safety",
+  "read": "https://www.phila.gov/services/permits-violations-licenses/get-a-license/business-licenses/food-businesses/take-a-food-safety-certification-course",
+  "quote": "You can apply and pay for your City of Philadelphia food safety certificate online, in person, or by mail.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "2bf44188ca3b8625",
+  "context": "s that all food is prepared safely and according to the philadelphia food code. you can apply and pay for your city of philadelphia food safety certificate online, in person, or by mail. how online 1 complete a food manager safety course with an approved training pr"
+ },
+ {
+  "id": "philadelphia-tea:phl-tax-account",
+  "read": "https://www.phila.gov/services/payments-assistance-taxes/taxes/get-a-tax-account/",
+  "quote": "You also need a PHTIN to get a Commercial Activity License (CAL) , which is required to do any business in Philadelphia.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5d4af1ff0cc9ac1",
+  "context": "r to pay city taxes, you need a philadelphia tax identification number (phtin). you also need a phtin to get a commercial activity license (cal), which is required to do any business in philadelphia. nonprofits aren't liable for the business income and receipts tax (birt), but t"
+ },
+ {
+  "id": "philadelphia-tea:phl-cal",
+  "read": "https://www.phila.gov/services/permits-violations-licenses/get-a-license/business-licenses-permits-and-approvals/get-a-commercial-activity-license/",
+  "quote": "You should always make sure you have a Commercial Activity License before applying for other business licenses.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3cd4f6d652cea232",
+  "context": "nd license center. online 1 you can apply for this license using eclipse. note: you should always make sure you have a commercial activity license before applying for other business licenses. 2 the license is issued automatically. in person 1 visit the permit and license"
+ },
+ {
+  "id": "philadelphia-tea:phl-plan-review",
+  "read": "https://phila.gov/services/permits-violations-licenses/get-a-license/business-licenses/food-businesses/apply-for-a-plan-review-for-a-stationary-food-business/",
+  "quote": "Anyone opening a stationary food business must submit a plan review for approval.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "d231c02a564ff83b",
+  "context": "ra fee if you begin construction before your plan review has been approved. who anyone opening a stationary food business must submit a plan review for approval. where and when environmental health services (ehs) has walk-in office hours mon"
+ },
+ {
+  "id": "philadelphia-tea:phl-building",
+  "read": "https://www.phila.gov/media/20260806124408/PB_007_F-EZ-Level-I-Commercial-Alterations-Standards-2021-Code.pdf",
+  "quote": "Obtain permits for limited demolition and commercial alterations without submitting plans by meeting the Conditions and Design Limitations below.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "968bb6bd4d2184f6",
+  "context": " ez permit standard: limited commercial alterations & repairs (non-residential) obtain permits for limited demolition and commercial alterations without submitting plans by meeting the conditions and design limitations below. any deviations from this permit standard will result in permit revocation. spec"
+ },
+ {
+  "id": "philadelphia-tea:phl-food-license",
+  "read": "https://www.phila.gov/services/business-self-employment/starting-a-business/business-licenses-permits-and-approvals/food-businesses/get-a-food-preparation-and-serving-license/",
+  "quote": "You can apply for this license online using eCLIPSE or in person at the Permit and License Center.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e62a873961abb755",
+  "context": "e fee for each month since the license expired. payment methods and details how you can apply for this license online using eclipse or in person at the permit and license center. online 1 upload all required documents. applications are reviewed within five b"
+ },
+ {
+  "id": "phoenix-restaurant:az-llc",
+  "read": "https://www.azleg.gov/ars/29/03201.htm",
+  "quote": "One or more persons may act as organizers to form a limited liability company by delivering to the commission for filing the articles of organization.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e862829c2780c612",
+  "context": "on 29-3201. formation of limited liability company; articles of organization a. one or more persons may act as organizers to form a limited liability company by delivering to the commission for filing the articles of organization. b. the articles of organization must state all of the following: 1. the name of"
+ },
+ {
+  "id": "phoenix-restaurant:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "phoenix-restaurant:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "phoenix-restaurant:az-tpt",
+  "read": "https://azdor.gov/business/transaction-privilege-tax/tpt-license",
+  "quote": "As soon as the businesses commence operations in Arizona, they must register with both agencies at the same time by completing an Arizona Joint Tax Application (Form JT-1/UC-001)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "98b5308878a400a6",
+  "context": "r the city where business transactions are sourced. understanding tpt licensing as soon as the businesses commence operations in arizona, they must register with both agencies at the same time by completing an arizona joint tax application (form jt-1/uc-001) and submitting it to the ador's license & registration section. the application"
+ },
+ {
+  "id": "phoenix-restaurant:mc-plan-review",
+  "read": "https://www.wrr.maricopa.gov/DocumentCenter/View/5798/Responsibilities-to-Qualify-for-a-Permit-PDF",
+  "quote": "All establishments and premises undergoing remodeling or construction must meet current code and Department requirements and follow the plan review permitting process.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "498e66a579da9fc8",
+  "context": "itted, and all stipulations have been properly addressed and are in compliance. all establishments and premises undergoing remodeling or construction must meet current code and department requirements and follow the plan review permitting process. maricopa county – environmental services department – plan review program - rev"
+ },
+ {
+  "id": "phoenix-restaurant:phx-co",
+  "read": "https://www.phoenix.gov/administration/departments/pdd/residential-building/resident-plan-reviews/certificate-of-occupancy.html",
+  "quote": "A CofO is required for the following projects: New commercial and residential structures Tenant improvement of a newly occupied space",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a49992151c6d0b7e",
+  "context": "her laws, indicating that it is in a suitable and safe condition for occupancy. a cofo is required for the following projects: new commercial and residential structures tenant improvement of a newly occupied space tenant improvement or remodel that involves a change in the occupancy type othe"
+ },
+ {
+  "id": "phoenix-restaurant:mc-food-permit",
+  "read": "https://www.wrr.maricopa.gov/DocumentCenter/View/5798/Responsibilities-to-Qualify-for-a-Permit-PDF",
+  "quote": "Prior to approval of a permit to operate, the establishment and operator must demonstrate sufficient compliance with all applicable regulations.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "498e66a579da9fc8",
+  "context": "ruction program at 602.506.6824 or by email at envplanreview@mail.maricopa.gov. prior to approval of a permit to operate, the establishment and operator must demonstrate sufficient compliance with all applicable regulations. please review the list of responsibilities below for items that must be in comp"
+ },
+ {
+  "id": "phoenix-restaurant:mc-cfpm",
+  "read": "https://www.maricopa.gov/DocumentCenter/View/5475/Chapter-7---Food-Employees-Certified-Food-Protection-Managers-PDF",
+  "quote": "Each food establishment shall have at least one (1) Certified Food Protection Manager on staff.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c4c27253537678db",
+  "context": "ts premises a separate file containing food employee training documentation. e. each food establishment shall have at least one (1) certified food protection manager on staff. f. each food establishment shall replace the certified food protection manager "
+ },
+ {
+  "id": "seattle-bakery:wa-sos",
+  "read": "https://sos.wa.gov/node/13051",
+  "quote": "Certificate of Formation for a Limited Liability Company governed by RCW 25.15 is used to create a new business entity",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "15b9490e18a5bc88",
+  "context": "ith washington state office of the secretary of state. certificate of formation certificate of formation for a limited liability company governed by rcw 25.15 is used to create a new business entity that has not previously been registered with the office of the secretary of sta"
+ },
+ {
+  "id": "seattle-bakery:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "seattle-bakery:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "seattle-bakery:wa-bls",
+  "read": "https://dor.wa.gov/open-business/business-licensing-and-renewals-faqs",
+  "quote": "You need a license if you meet one or more of the following criteria: Your business requires city and state endorsements.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a7b61b1012db8036",
+  "context": " can officially open your business to the public. who needs a business license? you need a license if you meet one or more of the following criteria: your business requires city and state endorsements. you are doing business using a name other than your full name legal name. you p"
+ },
+ {
+  "id": "seattle-bakery:wa-food-worker",
+  "read": "https://doh.wa.gov/node/5754",
+  "quote": "All food workers are required, per Chapter 246-217 WAC , to have a valid food worker card to work in Washington.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9b42c70ae29f5332",
+  "context": "face where people put unwrapped food. do i need to get a food worker card? yes. all food workers are required, per chapter 246-217 wac, to have a valid food worker card to work in washington. it's important that your card, or a copy of it, is with you at work and availab"
+ },
+ {
+  "id": "seattle-bakery:sea-business-license",
+  "read": "https://www.seattle.gov/licenses",
+  "quote": "Anyone doing business in Seattle must have a Seattle business license tax certificate, also known as a business license or general business license.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "bc7011b250faebac",
+  "context": " taxes & licenses business licenses subscribe to license and tax email updates. anyone doing business in seattle must have a seattle business license tax certificate, also known as a business license or general business license. in addition to obtaining a business license tax certificate, business owners mu"
+ },
+ {
+  "id": "seattle-bakery:kc-plan-review",
+  "read": "https://kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit",
+  "quote": "Food business owners must submit plans for review before construction, remodeling, or changing ownership takes place.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "714fa7f62c1d8d38",
+  "context": " food business operates at the same location for more than 21 consecutive days. food business owners must submit plans for review before construction, remodeling, or changing ownership takes place. in seattle and king county, there are about 12,500 permanent food businesses th"
+ },
+ {
+  "id": "seattle-bakery:sea-building",
+  "read": "https://www.seattle.gov/office-of-economic-development/small-business/food-businesses/restaurants",
+  "quote": "Final Inspections Once all permits have been approved and construction has been completed, final inspections need to be scheduled.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9bc5ee2077f66529",
+  "context": "vices (wsbls) gambling license - washington state gambling commission (wsgc) 5. final inspections once all permits have been approved and construction has been completed, final inspections need to be scheduled. visit our final prep page for the details on how to prepare for and schedule fi"
+ },
+ {
+  "id": "seattle-bakery:sea-food",
+  "read": "https://kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit",
+  "quote": "A successful plan review approval and pre-operational inspection are required prior to starting operations.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "714fa7f62c1d8d38",
+  "context": "rcial commissary kitchens fresh food sections of grocery stores school kitchens a successful plan review approval and pre-operational inspection are required prior to starting operations. information about the plan review process online application for a permanent fo"
+ },
+ {
+  "id": "sf-dumplings:ca-llc-1",
+  "read": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+  "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7d85ce335ef76c37",
+  "context": "r form print form submission cover sheet (rev 03/2024) secretary of state llc-1 articles of organization limited liability company (llc) filing fee - $70.00 certified copy fee (optional) - $5.00 note: llcs may have to pay minimum $800 t"
+ },
+ {
+  "id": "sf-dumplings:ca-llc-1:fee",
+  "read": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+  "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7d85ce335ef76c37",
+  "context": "r form print form submission cover sheet (rev 03/2024) secretary of state llc-1 articles of organization limited liability company (llc) filing fee - $70.00 certified copy fee (optional) - $5.00 note: llcs may have to pay minimum $800 t"
+ },
+ {
+  "id": "sf-dumplings:ca-llc-12",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/statements",
+  "quote": "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "de2ef21656e66668",
+  "context": "rations, limited liability companies and limited partnerships available online. failure to file the required statement of information with the secretary of state as outlined in statute may result in penalties being assessed by the franchise tax board and suspension or forfeiture. in addi"
+ },
+ {
+  "id": "sf-dumplings:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "sf-dumplings:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "sf-dumplings:ca-cdtfa",
+  "read": "https://www.sf.gov/guide-opening-restaurant",
+  "quote": "Every location must have this permit to sell taxable goods.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f53c95d94fe027bc",
+  "context": "ler's permits are from the ca department of tax and fee administration (cdtfa). every location must have this permit to sell taxable goods. obtain workers' compensation insurance you will need this insurance if you will"
+ },
+ {
+  "id": "sf-dumplings:ca-food-manager",
+  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+  "quote": "food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (PHF), except temporary food facilities, to have at least one owner or employee",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b6b4d1ebb372e472",
+  "context": " certification the california health and safety code, section 113947.1 requires food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (phf), except temporary food facilities, to have at least one owner or employee who has successfully passed an examination from an accredited food protection m"
+ },
+ {
+  "id": "sf-dumplings:ca-food-handler",
+  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+  "quote": "A food handler shall obtain a food hander card within 30 days after the date of hire.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b6b4d1ebb372e472",
+  "context": "m the date of the change to comply with the certified food manager requirement. a food handler shall obtain a food hander card within 30 days after the date of hire. while training is not required to take the examination, many people find that t"
+ },
+ {
+  "id": "sf-dumplings:sf-business-registration",
+  "read": "https://sftreasurer.org/registration",
+  "quote": "In general, businesses must register if any of the below statements are true: Maintain a fixed place of business within San Francisco .",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "6c232ab3a85e2f03",
+  "context": "bout business registration requirements for lessors of residential real estate. in general, businesses must register if any of the below statements are true: maintain a fixed place of business within san francisco. perform work or render services within san francisco for all or part of any sev"
+ },
+ {
+  "id": "sf-dumplings:sf-formula-retail",
+  "read": "https://sfplanning.org/permit/chain-stores-businesses",
+  "quote": "By a voter initiative in 2007 (Proposition G), formula retail use was made subject to a Conditional Use Authorization in any NC district",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "cdadf27ba6559c96",
+  "context": "th the san francisco general plan and promotes the general welfare of the city. by a voter initiative in 2007 (proposition g), formula retail use was made subject to a conditional use authorization in any nc district, if not otherwise prohibited. a conditional use authorization is also required "
+ },
+ {
+  "id": "sf-dumplings:ca-edd-de1",
+  "read": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+  "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "sf-dumplings:sf-dph-plan-check",
+  "read": "https://sf.gov/guide-building-and-remodeling-food-facility",
+  "quote": "Submit your plans The process for getting a building permit includes review by the Department of Public Health.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "ba612de80cadfb45",
+  "context": "a restaurant. view our construction plan guidelines to prepare for your review. submit your plans the process for getting a building permit includes review by the department of public health. submit plans in person visit the san francisco permit center to apply for a bui"
+ },
+ {
+  "id": "sf-dumplings:sf-dbi-building",
+  "read": "https://www.sf.gov/learn-about-our-building-permit-review-processes",
+  "quote": "Building permit projects must be sent to the required permitting agencies.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0817929b5493233",
+  "context": "ys we review applications: over-the-counter review in-house review site permits building permit projects must be sent to the required permitting agencies. in san francisco, our permitting agencies are: department of building inspectio"
+ },
+ {
+  "id": "sf-dumplings:sf-dph-health-permit",
+  "read": "https://www.sf.gov/guide-opening-restaurant",
+  "quote": "Apply for your Health Permit to Operate Apply within 6-8 weeks of your planned open date.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f53c95d94fe027bc",
+  "context": "oyees have a food handler card see the options for getting a food handler card. apply for your health permit to operate apply within 6-8 weeks of your planned open date. you'll need to include proof of worker's compensation insurance, proof of food "
+ },
+ {
+  "id": "sf-dumplings:sf-fire-assembly",
+  "read": "https://sf-fire.org/permits",
+  "quote": "Applications for operational or temporary permits shall be submitted to the Bureau of Fire Prevention.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e495628517d0972d",
+  "context": "rmit shall not take the place of any license required by law. apply for permits applications for operational or temporary permits shall be submitted to the bureau of fire prevention. applications for fire department permit shall be accompanied by plans when requ"
+ },
+ {
+  "id": "silverspring-clothing:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "silverspring-clothing:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "silverspring-clothing:md-cra",
+  "read": "https://businessexpress.maryland.gov/start/taxes-and-insurance",
+  "quote": "You can register tax accounts using the Maryland Comptroller's Combined Registration Application (CRA).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9c62ae5d7b5c132d",
+  "context": "cycling fee), transient vendor license, etc. how do i register my tax accounts? you can register tax accounts using the maryland comptroller's combined registration application (cra). this single form lets you sign up for multiple maryland tax accounts at once. n"
+ },
+ {
+  "id": "silverspring-clothing:md-trader",
+  "read": "https://www.marylandcomptroller.gov/businesses/new-business/business-licenses.html",
+  "quote": "may not offer for sale, sell or otherwise dispose of any goods within Maryland, without first obtaining a trader's license",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "d61335427274d4a9",
+  "context": ", section 17-1804. traders license unless you are a grower or manufacturer, you may not offer for sale, sell or otherwise dispose of any goods within maryland, without first obtaining a trader's license from the clerk of the circuit court and opening a sales tax account. business e"
+ },
+ {
+  "id": "sj-phone-store:irs-ss4",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "sj-phone-store:irs-ss4:fee",
+  "read": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+  "quote": "You never have to pay a fee for an EIN.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "551b3b6874fa07f5",
+  "context": "l issue your ein immediately online. beware of websites that charge for an ein. you never have to pay a fee for an ein. how it works complete the application in one session. you can't save it for lat"
+ },
+ {
+  "id": "sj-phone-store:ca-cdtfa",
+  "read": "https://www.sf.gov/guide-opening-restaurant",
+  "quote": "Every location must have this permit to sell taxable goods.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f53c95d94fe027bc",
+  "context": "ler's permits are from the ca department of tax and fee administration (cdtfa). every location must have this permit to sell taxable goods. obtain workers' compensation insurance you will need this insurance if you will"
+ },
+ {
+  "id": "sj-phone-store:sj-business-tax",
+  "read": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate",
+  "quote": "must register for a Business Tax Certificate within 90 days of starting their business.",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "sj-phone-store:ca-edd-de1",
+  "read": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+  "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got the page without the sentence; read with WebFetch on 2026-10-21"
+ }
+]
