@@ -2393,7 +2393,7 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
 #together .wtc{height:auto!important}
 #together .wtc>svg{inset:-3%;height:106%}
 #together .wti{position:relative;inset:auto;flex-direction:column;gap:36px;padding:64px 20px 56px}
-@media (min-width:1024px){#together .wti{gap:48px;padding:132px 40px 120px}}
+@media (min-width:1024px){#together .wti{gap:48px;padding:120px 40px 88px}}
 #together .chbox{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;max-width:760px}
 #together .chl{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 26px;margin:0;padding:0;list-style:none}
 #together .chl li{display:inline-flex;align-items:center;gap:8px;font-size:15px;line-height:1.2;color:#fff;white-space:nowrap}
@@ -2411,6 +2411,16 @@ html[lang="zh-CN"] .princ{letter-spacing:.2em}
 #together .wtw.wtq{flex-direction:column;justify-content:center;align-items:center;gap:10px}
 #together .wtq .wth{flex:none;color:#fff;text-align:center;max-width:760px;text-wrap:balance}
 #together .wtq .rot{width:300px}
+/* Oct 20, cleaner hierarchy (Alven, Town): heading, one rotating line under it, then the channels as one quiet row, the note, and the QR in the flow */
+#together .wtw.wtq{gap:22px}
+#together .wtc>svg use{opacity:.35}
+#together .chbox{gap:14px;padding-top:28px;border-top:1px solid rgba(255,255,255,.14)}
+#together .chl{gap:10px 22px}
+#together .chl li{font-size:14px;color:rgba(255,255,255,.9)}
+#together .chl svg{width:16px;height:16px;opacity:.75}
+#together .chn{font-size:13px;color:rgba(255,255,255,.62)}
+#together .qr{position:static;margin:6px auto 0;width:max-content;max-width:100%}
+@media (max-width:1023px){.ox #together .wti,#together .wti{padding-bottom:56px}}
 /* customer stories, Alven style (from 601282ab): a heading, one tab per person (name, then role and company), and the chosen
    story leading with the job Placetta took off them in serif, their quote under it, and one result over the portrait */
 #case .tssec{margin-top:72px}
@@ -3294,9 +3304,9 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
           <ul class="chl" aria-label="Channels" data-i18n-aria="ch.aria"><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.wechat">WeChat</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.2 14.6a1.9 1.9 0 1 1-1.9-1.9h1.9zm1 0a1.9 1.9 0 0 1 3.8 0v4.8a1.9 1.9 0 1 1-3.8 0zM9.1 6.2a1.9 1.9 0 1 1 1.9-1.9v1.9zm0 1a1.9 1.9 0 0 1 0 3.8H4.3a1.9 1.9 0 1 1 0-3.8zM17.8 9.1a1.9 1.9 0 1 1 1.9 1.9h-1.9zm-1 0a1.9 1.9 0 0 1-3.8 0V4.3a1.9 1.9 0 1 1 3.8 0zM14.9 17.8a1.9 1.9 0 1 1-1.9 1.9v-1.9zm0-1a1.9 1.9 0 0 1 0-3.8h4.8a1.9 1.9 0 1 1 0 3.8z"/></svg><span data-i18n="ch.slack">Slack</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.6 4.5h7.6c1.4 1.4 2.3 3.1 2.8 5-1.8.4-3.3 1.2-4.6 2.3C13.1 9 11.2 6.5 8.6 4.5zM3.5 10.4c3.5-.3 6.8 1 9.5 3.5l1.8 1.7c1.7-2.5 3.9-4 6.8-4.6-1.6 4.8-5.3 8.3-10.4 8.5-3.2.1-5.8-.9-7.7-2.3z"/></svg><span data-i18n="ch.lark">Lark / 飞书</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5z"/><path fill="currentColor" stroke="none" d="M9.3 7.9c.2-.5.5-.5.8-.5h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3 0 .5.6 1 1.6 2 2.7 2.6.2.1.4.1.5 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.3.6-.2 1.1-1.2 1.8-2.2 1.7-3.4-.3-6.4-3.2-6.8-6.6 0-.5.1-1 .2-1.4z"/></svg><span data-i18n="ch.wa">WhatsApp</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1.2-3.6C4.2 15.1 3 13.3 3 11.2 3 7.2 7 4 12 4z"/></svg><span data-i18n="ch.im">iMessage</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span data-i18n="ch.mail">Email</span></li><li><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2"/></svg><span data-i18n="ch.tel">Phone</span></li></ul>
           <p class="chn" data-i18n="ch.note">Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.</p>
           <div class="chwc" id="chWc" hidden><button type="button" class="chadd" id="chAdd" aria-expanded="false" aria-controls="chQr"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4C5 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.5L4 16.5l2.6-1.3c.8.2 1.6.3 2.4.3h.6a5 5 0 0 1-.2-1.4c0-3.2 3-5.6 6.7-5.6h.6C16 5.8 12.8 4 9 4zM22 14.3c0-2.6-2.6-4.6-5.8-4.6s-5.8 2-5.8 4.6 2.6 4.6 5.8 4.6c.6 0 1.3-.1 1.9-.3l2 1-.5-1.8c1.5-.8 2.4-2.1 2.4-3.5z"/></svg><span data-i18n="ch.add">Add us on WeChat</span></button><div class="chqr" id="chQr" hidden><img id="chQrImg" alt="" width="132" height="132"><p data-i18n="ch.qr">Scan with WeChat to add Placetta</p></div></div>
+          <a class="qr" id="wtQr" href="/?src=qr"><img class="qrimg" id="wtQrImg" src="media/placetta-qr.svg" alt="QR code for placetta" width="64" height="64" decoding="async" draggable="false"><p id="wtQrT" data-i18n="wt.qr">Scan to open Placetta on your phone</p></a>
         </div>
       </div>
-      <a class="qr" id="wtQr" href="/?src=qr"><img class="qrimg" id="wtQrImg" src="media/placetta-qr.svg" alt="QR code for placetta" width="64" height="64" decoding="async" draggable="false"><p id="wtQrT" data-i18n="wt.qr">Scan to open Placetta on your phone</p></a>
     </div>
   </div>
 </section>
