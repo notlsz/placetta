@@ -5,7 +5,8 @@ import { useSwap, type Wear } from "./tasks";
    standing in for the plush canvas until its pile has baked. It is the same cloud the canvas draws (src/Bot.tsx): the
    library's cloud outline, its face placement and smile, the same outfits, lit the same way from the upper left. The
    body is a two-stop gradient with a rim of light along its upper-left edge and a soft blue edge all round, so the lit
-   side still holds its shape on a white page; the eyes are glossy beads; the cheeks are soft. A soft contact shadow
+   side still holds its shape on a white page; the eyes and smile are
+   Odelia's original flat navy (the library's own, no highlight); the cheeks are soft. A soft contact shadow
    sits under it and shrinks as it hops.
 
    Every step reads on the cloud itself: its outfit (tasks.ts), and for thinking, closed eyes. The eyes rest toward the
@@ -29,8 +30,8 @@ function smile(hw: number, t0: number, a: number, yt: number, ab: number, yb: nu
     `C${f(hw - ab * hw)} ${f(yb + t0)} ${f(-hw + ab * hw)} ${f(yb + t0)} ${f(-hw - u)} ${f(c)}` +
     `C${f(-hw - u - x)} ${f(c - p)} ${f(-hw + u - x)} ${f(-c - p)} ${f(-hw + u)} ${f(-c)}Z`;
 }
-// idle, busy (closed and a little wider) and listening (a small open mouth): the same numbers the canvas face uses
-const SMILE = { idle: smile(6.5, 1.9, 2 / 3, 3.53, 2 / 3, 3.53), busy: smile(7.6, 2.05, 2 / 3, 3.5, 2 / 3, 4.6), open: smile(6.6, 0, 2 / 3, 1.4, 0, 11.5) };
+// idle and busy (the big open smile): the library's own mouth, the same numbers the canvas face uses
+const SMILE = { idle: smile(6.5, 1.9, 2 / 3, 3.53, 2 / 3, 3.53), busy: smile(9.5, 0, 2 / 3, 1.6, 0, 17.3) };
 
 /* The outfits, in the face's units (eyes 25 apart, the face's middle at 0 0). Hats sit centred over the face and are
    pulled down over the crown, tilted a little to follow the head from its high left lobe to its lower right one, so
@@ -65,7 +66,7 @@ export type CloudProps = {
   label?: string;
 };
 
-export function CloudSvg({ size, busy, wear, open, still, shut, focus, done, look, scan, label }: CloudProps) {
+export function CloudSvg({ size, busy, wear, still, shut, focus, done, look, scan, label }: CloudProps) {
   const id = "cs" + useId().replace(/[^a-zA-Z0-9]/g, "");
   // each cloud blinks on its own beat, somewhere between 4 and 7 seconds
   const [blink] = useState(() => 4 + Math.random() * 3);
@@ -74,7 +75,8 @@ export function CloudSvg({ size, busy, wear, open, still, shut, focus, done, loo
   const tiny = size < 30, small = size < 40, px = 100 / size, line = (w: number) => Math.max(w, (tiny ? 1.1 : 0.9) * px);
   const mode = done ? "done" : busy && still ? "calm" : busy && focus ? "focus" : busy ? "hop" : "idle";
   const outfit = useSwap(wear);
-  const mouth = busy && open && !done ? SMILE.open : busy || done ? SMILE.busy : SMILE.idle;
+  // the big open smile while hopping, as the canvas does; the small one while idle, thinking or at a prop
+  const mouth = busy && !still && !focus && !done ? SMILE.busy : SMILE.idle;
   const glasses = wear === "glasses-round" || wear === "glasses-square";
   const [lx, ly] = busy && look ? look : [0, 0];
   const style = { "--blink": `${blink.toFixed(2)}s`, "--lx": `${lx}px`, "--ly": `${ly}px` } as CSSProperties;
@@ -93,7 +95,6 @@ export function CloudSvg({ size, busy, wear, open, still, shut, focus, done, loo
         {/* navy with a highlight toward the light, for the eyes and everything the cloud wears */}
         <linearGradient id={id + 5} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#3D5F98" /><stop offset="0.45" stopColor={NAVY} /><stop offset="1" stopColor="#0A1734" /></linearGradient>
         <radialGradient id={id + 6}><stop offset="0" stopColor="#0C1E42" stopOpacity="0.28" /><stop offset="1" stopColor="#0C1E42" stopOpacity="0" /></radialGradient>
-        <linearGradient id={id + 7} x1="0.3" y1="1" x2="0.6" y2="0"><stop offset="0" stopColor="#7098D4" stopOpacity="0.6" /><stop offset="0.5" stopColor="#7098D4" stopOpacity="0" /></linearGradient>
         <radialGradient id={id + 8}><stop offset="0" className="cs-ground-in" /><stop offset="1" className="cs-ground-out" /></radialGradient>
       </defs>
       {!tiny && <ellipse className="cs-ground" cx="50" cy="93.5" rx="30" ry="3.6" fill={u(8)} />}
@@ -114,8 +115,6 @@ export function CloudSvg({ size, busy, wear, open, still, shut, focus, done, loo
               {wear === "bow" && <ellipse cx="0" cy="5" rx="12" ry="5" fill={u(6)} transform={HAT.bow} />}
               {wear === "headphones" && <><ellipse cx="-37" cy="1" rx="4.5" ry="10.5" fill={u(6)} /><ellipse cx="35" cy="1" rx="4.5" ry="10.5" fill={u(6)} /></>}
               {wear === "bowtie" && <ellipse cx="0.8" cy="30.5" rx="12.5" ry="4.6" fill={u(6)} />}
-              {/* the cloth dips round each eye */}
-              {!shut && !done && <><ellipse cx="-11.2" cy="-2.2" rx="11" ry="9.6" fill={u(6)} opacity="0.7" /><ellipse cx="13.8" cy="-2.2" rx="11" ry="9.6" fill={u(6)} opacity="0.7" /></>}
             </g>
           </g>
           <g transform={face}>
@@ -127,12 +126,9 @@ export function CloudSvg({ size, busy, wear, open, still, shut, focus, done, loo
               ) : (
                 <g key={x} className="cs-eye" transform={`translate(${x} -3.5)${tiny && glasses ? " scale(0.74)" : ""}`}>
                   <rect x="-6.3" y="-7.4" width="12.6" height="14.8" rx="6.3" fill={NAVY} />
-                  {!tiny && <rect x="-6.3" y="-7.4" width="12.6" height="14.8" rx="6.3" fill={u(7)} />}
-                  {!tiny && <ellipse cx="-1.9" cy="-4.1" rx="1.9" ry="1.5" transform="rotate(-23 -1.9 -4.1)" fill="#fff" opacity="0.94" />}
                 </g>
               ))}
-              <g transform={`translate(0 ${busy || done ? 11.6 : 12.5})`}>
-                {!tiny && <path d={mouth} fill="#fff" opacity="0.42" transform="translate(0.2 0.95)" />}
+              <g transform={`translate(0 ${mouth === SMILE.busy ? 11.6 : 12.5})`}>
                 <path d={mouth} fill={NAVY} />
               </g>
             </g>
@@ -155,7 +151,7 @@ function Outfit({ wear, u, line, tiny }: { wear?: Wear; u: (n: number) => string
     const lens = (x: number) => round ? <circle cx={x} cy="-3.1" r="9.6" /> : <rect x={x - 10.8} y="-12.4" width="21.6" height="17.8" rx="4.6" />;
     const rx = round ? 9.6 : 10.8;
     return (
-      <g fill={tiny ? "none" : "rgba(235,244,255,0.16)"} stroke={ink} strokeWidth={w} strokeLinecap="round">
+      <g fill="none" stroke={ink} strokeWidth={w} strokeLinecap="round">
         {lens(-12.5)}{lens(12.5)}
         <path d={`M${-12.5 + rx} -4.7Q0 -7.9 ${12.5 - rx} -4.7M${-12.5 - rx} -5.1L${-12.5 - rx - 3.6} -6.3M${12.5 + rx} -5.1L${12.5 + rx + 3.6} -6.3`} fill="none" />
       </g>

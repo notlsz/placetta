@@ -70,7 +70,8 @@ type Anim = { __pcAim?: [number, number, number]; __pcTilt?: boolean; __pcGround
  * redraws the silhouette from the canvas's own outline (blurred a touch and pulled back to a clean, soft edge), fills
  * the pile's gaps along it with its own colour and adds a soft rim of light along the upper-left edge. Instead of a
  * line round the outside (which read as a sticker), a soft, low shadow below and a faint ambient one all round lift
- * the lit side off a white page; on dark a faint cool glow does the same. It works from the drawn pixels, so it
+ * the lit side off a white page; on dark a faint cool glow does the same. A soft band just inside the silhouette, a
+ * touch deeper than the body, keeps the pale upper left from fading into a pale page. It works from the drawn pixels, so it
  * follows every hop, turn and outfit. Desktop only: phones skip it (no per-frame cost there).
  */
 function Edge({ id, size, dark }: { id: string; size: number; dark: boolean }) {
@@ -87,7 +88,7 @@ function Edge({ id, size, dark }: { id: string; size: number; dark: boolean }) {
         <feOffset in="shape" dx={rim} dy={rim * 1.15} result="nudged" />
         <feComposite in="shape" in2="nudged" operator="out" result="crescent" />
         <feGaussianBlur in="crescent" stdDeviation={size * 0.012} result="glow" />
-        <feFlood floodColor="#F4FAFF" floodOpacity={dark ? 0.7 : 0.42} />
+        <feFlood floodColor="#F4FAFF" floodOpacity={dark ? 0.6 : 0.3} />
         <feComposite in2="glow" operator="in" result="light" />
         <feComposite in="light" in2="shape" operator="in" result="rimlight" />
         <feGaussianBlur in="shape" stdDeviation={size * 0.03} result="dropblur" />
@@ -97,7 +98,15 @@ function Edge({ id, size, dark }: { id: string; size: number; dark: boolean }) {
         <feGaussianBlur in="shape" stdDeviation={size * 0.011} result="ambblur" />
         <feFlood floodColor={dark ? "#9CC4F2" : "#2E5488"} floodOpacity={dark ? 0.16 : 0.2} />
         <feComposite in2="ambblur" operator="in" result="ambient" />
-        <feMerge><feMergeNode in="drop" /><feMergeNode in="ambient" /><feMergeNode in="body" /><feMergeNode in="rimlight" /></feMerge>
+        {/* a clean edge from the inside: the silhouette's own rim, a touch deeper, so the pale upper left never fades
+            into a pale page (the home hero's wash) */}
+        <feMorphology in="shape" operator="erode" radius={Math.max(0.5, size * 0.012)} result="inner" />
+        <feComposite in="shape" in2="inner" operator="out" result="band" />
+        <feGaussianBlur in="band" stdDeviation={Math.max(0.35, size * 0.006)} result="bandsoft" />
+        <feFlood floodColor="#2E5488" floodOpacity={dark ? 0.3 : 0.34} />
+        <feComposite in2="bandsoft" operator="in" result="bandtint" />
+        <feComposite in="bandtint" in2="shape" operator="in" result="inneredge" />
+        <feMerge><feMergeNode in="drop" /><feMergeNode in="ambient" /><feMergeNode in="body" /><feMergeNode in="inneredge" /><feMergeNode in="rimlight" /></feMerge>
       </filter>
     </svg>
   );

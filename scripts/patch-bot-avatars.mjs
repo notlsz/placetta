@@ -2,8 +2,8 @@
 //
 // What it adds, all drawn inside the library's own frame so it turns, hops and blinks with the head:
 //   blush     soft pink cheeks on the "mouth" face (colour from globalThis.__botBlush)
-//   face      lit eyes (a specular glint, a faint inner shadow under the cloth's rim, light bounced up from the
-//             cloth) and a smile pressed slightly into the cloth
+//   face      Odelia's original flat face: the library's solid navy oval eyes and smile, with simple navy curves
+//             for closed (thinking) and happy (done) eyes
 //   outfits   glasses, beret, beanie, cap, hair bow, headphones and bow tie in navy with a soft highlight and a
 //             contact shadow, drawn in the face's coordinates, so they scale with the head and turn with it; hats
 //             sit centred over the face, pulled down over the crown
@@ -58,8 +58,8 @@ function __pcInk(t, x0, y0, x1, y1) {
   g.addColorStop(0, __pcHi); g.addColorStop(0.45, __pcNavy); g.addColorStop(1, __pcLo);
   return g;
 }
-// An eye as a glossy bead set into the cloth. E, z, B, R are the library's eye stroke (a short curve drawn with a
-// wide round pen); W is how open the eye is, so the lighting fades out as it blinks or laughs.
+// An eye. Open, it is the library's own flat navy oval (E, z, B, R are its eye stroke, a short curve drawn with a wide
+// round pen); closed for thinking or done, a simple navy curve in the same flat style.
 function __pcEye(t, ink, E, z, B, R, W, shut) {
   if (shut) {
     // thinking (1): the eye closed in a content curve; done (2): closed in a happy arc. The same lines the vector draws.
@@ -68,40 +68,8 @@ function __pcEye(t, ink, E, z, B, R, W, shut) {
     t.stroke();
     return;
   }
-  const k = Math.max(0, Math.min(1, (W - 0.35) / 0.45));
-  const hw = E + R / 2, mid = (z + B) / 2, top = Math.min(z, mid) - R / 2, bot = Math.max(z, mid) + R / 2, hh = (bot - top) / 2, cy = (top + bot) / 2;
-  if (k > 0) {
-    // the cloth dips round the bead: a faint shade just below and right of it
-    t.save(); t.globalAlpha *= k;
-    const g = t.createRadialGradient(hw * 0.2, cy + hh * 0.22, hh * 0.7, hw * 0.2, cy + hh * 0.22, hh * 1.32);
-    g.addColorStop(0, "rgba(22,52,98,0.2)"); g.addColorStop(1, "rgba(22,52,98,0)");
-    t.fillStyle = g; t.beginPath(); t.ellipse(hw * 0.2, cy + hh * 0.22, hw * 1.9, hh * 1.32, 0, 0, Math.PI * 2); t.fill(); t.restore();
-  }
+  // open: the library's own eye, a flat solid navy oval with no highlight (Odelia's original eyes)
   t.strokeStyle = ink; t.lineWidth = R; t.stroke(ri(E, z, B));
-  if (k <= 0) return;
-  t.save(); t.globalAlpha *= k; t.beginPath(); __pcCap(t, 0, top, hw, bot); t.clip();
-  // light bounced up off the cloth into the lower half of the bead
-  const b = t.createRadialGradient(hw * 0.25, bot - hh * 0.2, 0, hw * 0.25, bot - hh * 0.2, hh * 1.05);
-  b.addColorStop(0, "rgba(112,152,212,0.62)"); b.addColorStop(0.6, "rgba(112,152,212,0.16)"); b.addColorStop(1, "rgba(112,152,212,0)");
-  t.fillStyle = b; t.fillRect(-hw, top, hw * 2, hh * 2);
-  // the cloth's rim shades the top of the bead
-  t.fillStyle = "rgba(3,10,28,0.5)"; t.beginPath(); t.rect(-hw - 4, top - 4, hw * 2 + 8, hh * 2 + 8); __pcCap(t, hw * 0.16, top + hh * 0.16, hw, bot + hh * 0.16); t.fill("evenodd");
-  // the glint, and a small second one where the cloth reflects
-  t.fillStyle = "rgba(255,255,255,0.94)"; t.beginPath(); t.ellipse(-hw * 0.3, top + hh * 0.44, hw * 0.3, hh * 0.2, -0.4, 0, Math.PI * 2); t.fill();
-  t.fillStyle = "rgba(255,255,255,0.32)"; t.beginPath(); t.arc(hw * 0.34, bot - hh * 0.34, hw * 0.13, 0, Math.PI * 2); t.fill();
-  t.restore();
-}
-// The smile, pressed slightly into the cloth: the lower lip of the groove catches the light, the top inside is in shade.
-function __pcMouth(t, ink, p) {
-  t.save(); t.translate(0.2, 0.95); t.fillStyle = "rgba(255,255,255,0.42)"; t.fill(p); t.restore();
-  t.fillStyle = ink; t.fill(p);
-  if (typeof Path2D !== "function") return;
-  t.save(); t.clip(p);
-  const sh = new Path2D(); sh.rect(-40, -40, 80, 80); sh.addPath(p, { a: 1, b: 0, c: 0, d: 1, e: 0.35, f: 0.85 });
-  t.fillStyle = "rgba(2,8,24,0.55)"; t.fill(sh, "evenodd");
-  const lt = new Path2D(); lt.rect(-40, -40, 80, 80); lt.addPath(p, { a: 1, b: 0, c: 0, d: 1, e: -0.2, f: -0.9 });
-  t.fillStyle = "rgba(120,160,215,0.38)"; t.fill(lt, "evenodd");
-  t.restore();
 }
 // The outfit with its change between steps (about 280ms): the canvas remembers what it wore, so when data-pc changes
 // the previous outfit fades out while the new one fades in with a small pop from the crown.
@@ -137,7 +105,7 @@ function __pcWear(t, n, s, eyes, phase) {
     return g;
   };
 
-  // glasses: thin navy frames over the eyes, a faint glass with a glint
+  // glasses: thin navy frames over the eyes, clear (no tint over the flat eyes)
   const gl = has("glasses-round") ? "round" : has("glasses-square") ? "square" : null;
   if (gl && eyes && facing > 0.01) {
     const lens = (e) => {
@@ -159,12 +127,6 @@ function __pcWear(t, n, s, eyes, phase) {
       t.strokeStyle = "rgba(12,30,66,0.09)"; t.lineWidth = 4.6; t.stroke(frame);
       t.strokeStyle = "rgba(12,30,66,0.14)"; t.lineWidth = 2.6; t.stroke(frame);
     } else {
-      for (const l of [L, R]) {
-        t.save(); t.clip(l.p);
-        t.fillStyle = "rgba(235,244,255,0.13)"; t.fill(l.p);
-        t.fillStyle = sheen(-30, -14, -6, 2, 0.34); t.beginPath(); t.moveTo(-40, 4); t.lineTo(-30, -16); t.lineTo(40, -16); t.lineTo(30, 4); t.closePath(); t.fill();
-        t.restore();
-      }
       t.strokeStyle = __pcInk(t, -24, -14, 24, 10); t.lineWidth = 2.1; t.stroke(frame);
       t.strokeStyle = sheen(-26, -14, -4, 4, 0.55); t.lineWidth = 0.7; t.stroke(frame);
     }
@@ -288,13 +250,9 @@ const PATCHES = [
   ["lit eyes", "t.strokeStyle = r, t.lineWidth = R, t.stroke(ri(E, z, B));",
     "o.pc ? __pcEye(t, r, E, z, B, R, W, o.pc.includes(\"shut\") ? 1 : o.pc.includes(\"done\") ? 2 : 0) : (t.strokeStyle = r, t.lineWidth = R, t.stroke(ri(E, z, B)));"],
   ["blush", '  if (o.face === "mouth") {\n    const S = h * 0.35,', OLD_BLUSH + '  if (o.face === "mouth") {\n    const S = h * 0.35,'],
-  // busy, the cloud smiles with its mouth closed (a little wider); "open" keeps a small open mouth
-  ["closed smile", "hw: C(6.5 * O, 9.5 * F, W),\n      t0: C(1.9, 0, 0),\n      a: C(2 / 3, 2 / 3, 0),\n      yt: C(3.53 * O, 1.6 * F, -4 * W / 3),\n      ab: C(2 / 3, 0, 0),\n      yb: C(3.53 * O, 17.3 * F, 4 * W / 3)",
-    "hw: C(6.5 * O, !o.pc ? 9.5 * F : o.pc.includes(\"open\") ? 6.6 * F : 7.6 * O, W),\n      t0: C(1.9, !o.pc || o.pc.includes(\"open\") ? 0 : 2.05, 0),\n      a: C(2 / 3, 2 / 3, 0),\n      yt: C(3.53 * O, !o.pc ? 1.6 * F : o.pc.includes(\"open\") ? 1.4 * F : 3.5 * O, -4 * W / 3),\n      ab: C(2 / 3, !o.pc || o.pc.includes(\"open\") ? 0 : 2 / 3, 0),\n      yb: C(3.53 * O, !o.pc ? 17.3 * F : o.pc.includes(\"open\") ? 11.5 * F : 4.6 * O, 4 * W / 3)"],
   // the eyes rest toward the work beside the cloud (data-pc-look="x,y", in the face's units), on top of their own
   // glances and the pointer
   ["gaze", "h = n.lookX, d = n.lookY,", "h = n.lookX + (o.pcLook ? o.pcLook[0] : 0), d = n.lookY + (o.pcLook ? o.pcLook[1] : 0),"],
-  ["inset smile","t.fillStyle = r, t.fill(ci($));", "o.pc ? __pcMouth(t, r, ci($)) : (t.fillStyle = r, t.fill(ci($)));"],
   // the outfit's contact shadows, inside the face's clip; the pieces themselves after it, unclipped
   ["outfit shadows", "    const ft = ii(t, o, s);\n", "    const ft = ii(t, o, s);\n    s.__pcEyes = ft, s.pc && __pcWearX(t, o, s, ft, \"shadow\");\n"],
   ["outfits", "  Y && Z1(t, s.path, et, R, D, V, { y: s.faceY, scale: s.faceScale }), Qa(t, o, s.color, y, m, !0, s.whirl), t.restore();",
