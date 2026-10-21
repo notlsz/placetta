@@ -27,6 +27,8 @@
       count.textContent = v ? (zh ? "找到 " + n + " 项" : n + (n === 1 ? " match" : " matches")) : "";
     });
     q.addEventListener("change", () => track("guides_search", { q: q.value.slice(0, 80) }));
+    // /guides/?q=dubai opens with the search run (the site search that search engines and assistants link to)
+    try { const pre = new URLSearchParams(location.search).get("q"); if (pre) { q.value = pre.slice(0, 80); q.dispatchEvent(new Event("input")); } } catch (e) {}
   }
 
   /* hub: region tabs (every panel shows when scripts are off) */
