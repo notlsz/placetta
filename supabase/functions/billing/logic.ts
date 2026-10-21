@@ -6,7 +6,7 @@
     http://localhost:5173. A localhost return address is refused unless DEV_ORIGINS names it. */
 export function returnOrigins(get: (k: string) => string | undefined): string[] {
   const list = (k: string) => (get(k) ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-  return [...list("APP_ORIGINS"), "https://placetta.vercel.app", ...list("DEV_ORIGINS")].flatMap((o) => {
+  return [...list("APP_ORIGINS"), "https://placetta.com", "https://www.placetta.com", "https://placetta.vercel.app", ...list("DEV_ORIGINS")].flatMap((o) => {
     try {
       const u = new URL(o);
       return u.protocol === "https:" || u.protocol === "http:" ? [u.origin] : [];

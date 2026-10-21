@@ -76,7 +76,7 @@ const MicrosoftMark = () => (
   <svg width="15" height="15" viewBox="0 0 23 23" aria-hidden="true"><path fill="#F35325" d="M1 1h10v10H1z"/><path fill="#81BC06" d="M12 1h10v10H12z"/><path fill="#05A6F0" d="M1 12h10v10H1z"/><path fill="#FFBA08" d="M12 12h10v10H12z"/></svg>
 );
 
-const HELP_URL = api.PREVIEW ? "https://placetta.vercel.app/help/#sign-in" : "/help/#sign-in";
+const HELP_URL = api.PREVIEW ? "https://placetta.com/help/#sign-in" : "/help/#sign-in";
 const openDoc = (id: string) => window.dispatchEvent(new CustomEvent("placetta:doc", { detail: id }));
 
 /** The clickwrap: an unchecked box that must be checked to go on, with links that open the documents right here.

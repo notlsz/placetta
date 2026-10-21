@@ -20,7 +20,7 @@ Deno.test("localhost only when DEV_ORIGINS lists it", () => {
   const dev = returnOrigins(env({ APP_ORIGINS: "https://app.placetta.com", DEV_ORIGINS: "http://localhost:5173" }));
   assertEquals(safeReturn("http://localhost:5173/app/", dev), "http://localhost:5173/app/");
   assertEquals(safeReturn("http://localhost:6666/app/", dev), null);
-  assertEquals(returnOrigins(env({ DEV_ORIGINS: "not a url, ftp://x" })), ["https://placetta.vercel.app"]);
+  assertEquals(returnOrigins(env({ DEV_ORIGINS: "not a url, ftp://x" })), ["https://placetta.com", "https://www.placetta.com", "https://placetta.vercel.app"]);
 });
 Deno.test("stores come from store_billing rows", () => {
   const s = storesFrom([

@@ -225,7 +225,7 @@ export const S = {
   close: B("Close", "关闭"),
   simNote: B("This shared preview can't use your microphone, so the glow is following a simulated voice. Open the Placetta Agent file on your computer to talk to it yourself.", "此共享预览无法使用麦克风，因此光效跟随的是模拟语音。在电脑上打开 Placetta Agent 文件即可亲自对话。"),
   deniedNote: B("Microphone access is blocked. Allow it in your browser's site settings, or type instead.", "麦克风权限被阻止。请在浏览器的网站设置中允许，或改为打字。"),
-  frameNote: B("The microphone can't be used inside this window. Open placetta.vercel.app/app in Chrome, Edge or Safari to talk to Placetta.", "此窗口无法使用麦克风。请在 Chrome、Edge 或 Safari 中打开 placetta.vercel.app/app 与快哉语音对话。"),
+  frameNote: B("The microphone can't be used inside this window. Open placetta.com/app in Chrome, Edge or Safari to talk to Placetta.", "此窗口无法使用麦克风。请在 Chrome、Edge 或 Safari 中打开 placetta.com/app 与快哉语音对话。"),
   noSttNote: B("This browser can't turn speech into text, so type your message instead.", "此浏览器无法将语音转为文字，请改为打字。"),
 
   liveOff: B("Claude isn't available here, so Placetta is answering from the demo script.", "此处无法使用 Claude，快哉改用演示脚本回答。"),
