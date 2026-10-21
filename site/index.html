@@ -2588,7 +2588,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 @media (min-width:1280px){#diff .dl{justify-content:flex-start;gap:48px}}
 #diff .pcost{display:block;margin-top:2px;font-size:11px;line-height:1.3;color:#5B6475;text-align:center;font-variant-numeric:tabular-nums}
 @media (min-width:1024px){#diff .pcost{font-size:12.5px}}
-#diff .dsrc{font-size:11px;line-height:1.45;color:var(--muted)}
+#diff .dsrc{margin:4px 0 0;font-size:10px;line-height:1.45;color:var(--muted);opacity:.75;text-align:left;max-width:640px}
 #diff .dsrc a{color:inherit;text-underline-offset:2px}
 /* second pass: once in view, the four people fade back one by one and the owner with Odelia steps forward (motion allowed only) */
 @media (prefers-reduced-motion:no-preference){
@@ -2600,7 +2600,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
   #diff .aft .per{transition:transform .7s cubic-bezier(.2,.9,.3,1.2) .8s}
   #diff.dgo .aft .per{transform:translateY(-4px) scale(1.03)}
 }
-@media (min-width:1024px){#diff .dsrc{font-size:12px}}
+@media (min-width:1024px){#diff .dsrc{font-size:10.5px}}
 @media (min-width:1024px){#diff .bag{gap:24px}}
 .hnote{margin-top:-6px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.74);text-shadow:0 1px 8px rgba(0,0,0,.3)}
 @media (min-width:1024px){.hnote{margin-top:-12px}}
@@ -2707,7 +2707,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         </div>
       </div>
       <div class="dcard">
-        <div class="bag"><div class="bal"><p data-i18n="diff.before">Before</p></div><div class="bgrid" id="before" role="list" aria-label="Before" data-i18n-aria="diff.before"></div><p class="dsrc" data-i18n="diff.src"></p></div>
+        <div class="bag"><div class="bal"><p data-i18n="diff.before">Before</p></div><div class="bgrid" id="before" role="list" aria-label="Before" data-i18n-aria="diff.before"></div></div>
         <div class="bag"><div class="bal"><p data-i18n="diff.after">After</p></div>
           <div class="aft" role="list" aria-label="After" data-i18n-aria="diff.after">
             <div class="per" role="listitem"><svg class="sil" viewBox="0 0 30 90" aria-hidden="true"><use href="#sil"/></svg><div class="tag" data-i18n="diff.team">Store owner</div></div>
@@ -2715,6 +2715,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
             <div class="per" role="listitem"><div class="orbw"><span class="orb"></span></div><div class="tag" data-i18n="tm.r4">Odelia</div></div>
           </div>
         </div>
+        <p class="dsrc" data-i18n="diff.src"></p>
       </div>
     </div>
   </div>
