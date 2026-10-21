@@ -57,6 +57,9 @@ export type Application = {
   official?: string;         // the official form in the library (src/forms/registry.ts) this application is
   plain?: Bi;                // what this is, in one line a person would say (from the registry's plain field)
   preview?: boolean;         // listed from Placetta's registry at sign-up (src/plan/preview.ts), before Odelia verified it with the agency
+  // Odelia doesn't claim this step: no current quote from an official page says it's required here (none on record, the
+  // last re-read is too old, the page no longer says it, or two sources disagree), so the row names who to ask instead
+  abstain?: boolean;
   versions?: FormVersion[];  // the agency's own form, filled, each time its answers changed (src/forms/versions.ts); newest last
 };
 

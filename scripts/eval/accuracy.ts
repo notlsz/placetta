@@ -7,44 +7,51 @@
 //   library        src/forms/registry.ts formsFor: what agent-run's find_official_forms tool returns for the business
 //                  and place (src/live.ts), with the needs the model passes for the case
 // No model is called. Only verified gold items count toward the scores; unverified ones are listed and set aside.
+// Rows fail closed (src/plan/ask.ts): a row claims a requirement only with a current quote from an official page, and
+// otherwise abstains, naming who to ask. An abstention never counts as finding an item.
 //
-//   recall      required gold items the plan has
-//   precision   plan rows that are right for this opening (a required or conditional gold item), over every row that
-//               isn't an unverified item; a row that matches nothing is invented, one on the case's must-not list is wrong
+//   recall      required gold items the plan claims
+//   covered     required gold items the plan claims, or abstains on while naming the office that decides them (with
+//               that office's link): what's left is silently missing, the failure that costs an opening
+//   precision   plan rows that claim and are right for this opening (a required or conditional gold item), over every
+//               claiming row that isn't an unverified item; a row that matches nothing is invented, one on the case's
+//               must-not list is wrong (an abstention on the must-not list is wrong too)
 //   agency      found items filed with the right agency
 //   level       found items at the right level (federal, state, county, city)
 //   order       gold order constraints (both steps in the plan) that the plan's order keeps
 //   source      plan rows with an official source link
 //   fee         found items whose published gold fee the plan states
 //
-// npm run test:accuracy            the tables, totals and every miss, wrong row and broken order; exit 1 below the targets
-// QUIET=1 npm run test:accuracy    the tables and totals only
+// npm run test:accuracy                the tables, totals and every miss, wrong row and broken order; exit 1 below the
+//                                      targets (all 100%), then the fail-closed checks (scripts/eval/failclosed.ts)
+// QUIET=1 npm run test:accuracy        the tables and totals only
+// GENERAL_ONLY=1 npm run test:accuracy the held-out set with its city entries removed: recall reported, coverage 100%
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { previewPlan, sellsAlcohol } from "../../src/plan/preview";
+import { libraryAnswer, previewPlan, sellsAlcohol } from "../../src/plan/preview";
+import { proofCurrent } from "../../src/plan/ask";
 import { FORMS, formsFor, segmentOf } from "../../src/forms/registry";
-import type { Level } from "../../src/model";
+import type { Application, Level } from "../../src/model";
 import { answerChecks } from "./answers";
 import { officialSource } from "./official";
 import { UNREAD, formProof, logStats, planRowProof } from "./proof";
+import { MAX_PROOF_AGE } from "../../src/plan/ask";
+import { strictProblems } from "./strict";
+import { failClosedChecks } from "./failclosed";
 
-type GoldItem = { key: string; name: string; agency: string; level: Level; levels?: Level[]; required: boolean; verified: boolean; fee: number | null; source: string; match: string; agencyMatch: string; condition?: string; note?: string };
-type Gold = {
-  id: string; title: string; read: string;
-  input: { what: string; where: string; lang: "en" | "zh"; entity?: string; employees?: boolean; buildout?: boolean; signage?: boolean };
-  items: GoldItem[]; order: { before: string; after: string; source: string; why: string; verified: boolean }[];
-  mustNotInclude: { name: string; why: string; match: string; source?: string }[];
-};
-type Row = { id: string; name: string; agency: string; level: Level; source?: string; fee: number | null };
+import type { Gold } from "./strict";
+type Row = { id: string; name: string; agency: string; level: Level; source?: string; fee: number | null; abstain: boolean; quote?: string };
 
 const here = dirname(fileURLToPath(import.meta.url));
 const setDir = (name: string) => [join(here, name), join(process.cwd(), "scripts/eval", name)].find(d => { try { return readdirSync(d).length > 0; } catch { return false; } })!;
 // ONLY=<regex> scores the cases whose id matches (e.g. ONLY='brooklyn|sandiego')
-const load = (name: string): Gold[] => { const d = setDir(name); return readdirSync(d).filter(f => f.endsWith(".json")).sort().map(f => JSON.parse(readFileSync(join(d, f), "utf8")) as Gold).filter(g => !process.env.ONLY || new RegExp(process.env.ONLY).test(g.id)); };
-// gold: the 30 openings the library was fixed against (in-sample). heldout: 25 openings in other cities, researched
-// before any fix for them (scripts/eval/heldout). SET=gold or SET=heldout scores one; both by default.
-const SETS = (process.env.SET ? [process.env.SET] : ["gold", "heldout"]).map(name => ({ name, cases: load(name) }));
+const load = (name: string): Gold[] => { const d = setDir(name); if (!d) return []; return readdirSync(d).filter(f => f.endsWith(".json") && f !== "README.json").sort().map(f => JSON.parse(readFileSync(join(d, f), "utf8")) as Gold).filter(g => !process.env.ONLY || new RegExp(process.env.ONLY).test(g.id)); };
+// gold: the 30 openings the library was fixed against (in-sample). heldout: 33 openings in other cities, researched
+// before any fix for them (scripts/eval/heldout). strict: the top 15 cities and top 15 states for Chinese brands, every
+// expected answer quoted from its official page (scripts/eval/strict). SET=gold, heldout or strict scores one; all three
+// by default, and only the held-out set with GENERAL_ONLY.
+const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict"]).map(name => ({ name, cases: load(name) }));
 // npm passes its own arguments after the script's "exit", so the quiet mode is an environment variable: QUIET=1
 const showMisses = !process.env.QUIET;
 /** A row that hedges whether the requirement applies ("if the city requires one", "We'll confirm with ...") asserts
@@ -53,51 +60,78 @@ const HEDGE = /if (the|your) city requires|if one is required|we'll confirm|we w
 // GENERAL_ONLY=1: drop the city entries added for the held-out cities (src/forms/beachhead.ts), so the held-out score
 // shows what the state and county layers and the named-agency fallbacks get right on their own
 const HELDOUT_CITIES = new Set(["FRE", "CUP", "MIL", "DLY", "ARC", "ALH", "TOR", "FTL", "SUG", "DUL", "HEN", "BEL", "QCY", "ROC", "GLN", "SMO", "SGB"]);
-if (process.env.GENERAL_ONLY) for (let k = FORMS.length - 1; k >= 0; k--) if (HELDOUT_CITIES.has(FORMS[k].where)) FORMS.splice(k, 1);
+const GENERAL = !!process.env.GENERAL_ONLY;
+if (GENERAL) for (let k = FORMS.length - 1; k >= 0; k--) if (HELDOUT_CITIES.has(FORMS[k].where)) FORMS.splice(k, 1);
 const TODAY = "2026-10-18", OPENING = "2027-04-01";
-const TARGET = { recall: 0.95, precision: 0.97, agency: 0.97, level: 0.97, order: 0.95, source: 1, fee: 0.9 };
+// Every target is 100%: a plan row is right, filed with the right agency at the right level, in the agencies' order,
+// linked to an official page, with the published fee; and every required item is found, or (covered) at least never
+// silently missing: a row abstains for it and names the right office. With GENERAL_ONLY the city entries are gone, so
+// recall is reported, not targeted: what can't be claimed must be covered by an abstention instead.
+const TARGET: Record<keyof Totals, number> = { recall: GENERAL ? 0 : 1, covered: 1, precision: 1, agency: 1, level: 1, order: 1, source: 1, fee: 1 };
 
 /* ------------------------------------------------------------------ the two paths */
+
+const fee = (a: Application) => a.fees.some(f => f.tbd) ? null : a.fees.reduce((s, f) => s + f.amount, 0);
+const rowOfApp = (a: Application, id = a.official ?? a.id): Row => ({ id, name: a.name.en, agency: a.agency.en, level: a.level, source: a.source?.url, fee: fee(a), abstain: !!a.abstain, quote: a.source?.quote });
 
 function instantPlan(g: Gold): Row[] {
   const i = g.input;
   const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
-  return p.apps.map(a => ({ id: a.official ?? a.id, name: a.name.en, agency: a.agency.en, level: a.level, source: a.source?.url, fee: a.fees.some(f => f.tbd) ? null : a.fees.reduce((s, f) => s + f.amount, 0) }));
+  return p.apps.map(a => rowOfApp(a));
 }
 
-/** What find_official_forms returns (src/live.ts), with the flags the model sets for this case. */
+/** What find_official_forms returns (src/live.ts), with the flags the model sets for this case: the library's forms, each
+    claimed or not (libraryAnswer), and the local steps the library has no form for. */
 function library(g: Gold): Row[] {
   const i = g.input, segment = segmentOf(i.what);
   // the flags the model sets, read the way the instant plan reads them ("noodle bar" isn't a bar that serves alcohol)
   const imports = /import|进口/i.test(i.what), alcohol = sellsAlcohol(i.what);
   const needs = { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, food: segment === "restaurant" || /food|snack|食品/i.test(i.what), imports, alcohol };
-  return formsFor({ segment, where: i.where, needs }).filter(f => f.order < 88)
-    .map(f => ({ id: f.id, name: f.title.en, agency: f.agency.en, level: f.level, source: f.info || f.url, fee: f.fee }));
+  const known = libraryAnswer(i.what, i.where, needs, TODAY);
+  const forms = formsFor({ segment, where: i.where, needs }).filter(f => f.order < 88).map(f => {
+    const claim = known.claim(f), seen = f.proof ? proofCurrent(f.proof, TODAY) : undefined;
+    return { id: f.id, name: claim ? f.title.en : `${f.title.en}: We'll confirm with ${f.agency.en}`, agency: f.agency.en, level: f.level, source: f.info || f.url, fee: claim ? f.fee : null, abstain: !claim, quote: claim && seen ? f.proof!.quote : undefined };
+  });
+  return [...forms, ...known.steps.map(a => rowOfApp(a))];
 }
 
 /* ------------------------------------------------------------------ scoring */
 
 type Score = {
-  id: string; req: number; found: number; rows: number; correct: number; wrong: number; invented: number; setAside: number;
+  id: string; req: number; found: number; covered: number; rows: number; correct: number; wrong: number; invented: number; setAside: number;
   agencyOk: number; levelOk: number; orderOk: number; orderN: number; sourced: number; feeOk: number; feeN: number;
-  misses: string[]; wrongRows: string[]; agencyMiss: string[]; levelMiss: string[]; orderMiss: string[]; unsourced: string[]; feeMiss: string[]; hedged: string[];
+  misses: string[]; abstained: string[]; misrouted: string[]; wrongRows: string[]; agencyMiss: string[]; levelMiss: string[]; orderMiss: string[]; unsourced: string[]; feeMiss: string[]; hedged: string[];
 };
 const text = (r: Row) => `${r.name} | ${r.agency} | ${r.id}`;
 const re = (s: string) => new RegExp(s, "i");
+/** A row that claims nothing: it abstains (src/plan/ask.ts) or hedges in words. */
+const asks = (r: Row) => r.abstain || HEDGE.test(r.name);
 
 function score(g: Gold, rows: Row[]): Score {
-  const s: Score = { id: g.id, req: 0, found: 0, rows: rows.length, correct: 0, wrong: 0, invented: 0, setAside: 0, agencyOk: 0, levelOk: 0, orderOk: 0, orderN: 0, sourced: 0, feeOk: 0, feeN: 0,
-    misses: [], wrongRows: [], agencyMiss: [], levelMiss: [], orderMiss: [], unsourced: [], feeMiss: [], hedged: [] };
-  // each gold item's row: the first that matches it and its agency, else the first that matches it
+  const s: Score = { id: g.id, req: 0, found: 0, covered: 0, rows: rows.length, correct: 0, wrong: 0, invented: 0, setAside: 0, agencyOk: 0, levelOk: 0, orderOk: 0, orderN: 0, sourced: 0, feeOk: 0, feeN: 0,
+    misses: [], abstained: [], misrouted: [], wrongRows: [], agencyMiss: [], levelMiss: [], orderMiss: [], unsourced: [], feeMiss: [], hedged: [] };
+  // each gold item's row: the first claim that matches it and its agency, else the first claim that matches it
   const rowOf = new Map<string, number>();
   for (const it of g.items) {
-    const hits = rows.map((r, k) => [r, k] as const).filter(([r]) => !HEDGE.test(r.name) && re(it.match).test(text(r)));
+    const hits = rows.map((r, k) => [r, k] as const).filter(([r]) => !asks(r) && re(it.match).test(text(r)));
     const best = hits.find(([r]) => re(it.agencyMatch).test(r.agency)) ?? hits[0];
     if (best) rowOf.set(it.key, best[1]);
   }
   for (const it of g.items.filter(x => x.verified)) {
     const k = rowOf.get(it.key);
-    if (it.required) { s.req++; if (k !== undefined) s.found++; else s.misses.push(`${it.name} (${it.agency})`); }
+    if (it.required) {
+      s.req++;
+      if (k !== undefined) { s.found++; s.covered++; }
+      else {
+        // not claimed: covered when a row abstains for it and names the office that decides it; an abstention that names
+        // another office leaves the person asking the wrong place, so it doesn't count
+        const ask = rows.filter(r => asks(r) && re(it.match).test(text(r)));
+        const right = ask.find(r => re(it.agencyMatch).test(r.agency));
+        if (right) { s.covered++; s.abstained.push(`${it.name}: asks ${right.agency} (${right.source ?? "no link"})`); }
+        else if (ask.length) s.misrouted.push(`${it.name} (${it.agency}): the row asks ${ask[0].agency}`);
+        else s.misses.push(`${it.name} (${it.agency})`);
+      }
+    }
     if (k === undefined) continue;
     const r = rows[k];
     if (re(it.agencyMatch).test(r.agency)) s.agencyOk++; else s.agencyMiss.push(`${it.name}: plan says "${r.agency}", should be ${it.agency}`);
@@ -107,8 +141,9 @@ function score(g: Gold, rows: Row[]): Score {
   rows.forEach(r => {
     if (officialSource(r.source)) s.sourced++; else s.unsourced.push(`${r.name}: ${r.source ?? "no link"}`);
     const bad = g.mustNotInclude.find(m => re(m.match).test(text(r)));
+    // an abstention for a step that doesn't apply still sends the person to ask about it: it's wrong too
     if (bad) { s.wrong++; s.wrongRows.push(`${r.name} (${r.agency}): ${bad.why}`); return; }
-    if (HEDGE.test(r.name)) { s.setAside++; s.hedged.push(`${r.name} (${r.agency})`); return; }
+    if (asks(r)) { s.setAside++; s.hedged.push(`${r.name} (${r.agency})`); return; }
     // a row is right when it names a gold item and is filed with that item's agency; the right permit with another
     // place's agency (Los Angeles County's plan check for a San José store) is a wrong row, not a right one
     const named = g.items.filter(it => re(it.match).test(text(r)));
@@ -135,30 +170,33 @@ const pct = (n: number, d: number) => (d ? (100 * n / d).toFixed(1) + "%" : "n/a
 const pad = (s: string | number, n: number) => String(s).padEnd(n);
 const lpad = (s: string | number, n: number) => String(s).padStart(n);
 
-type Totals = { recall: number; precision: number; agency: number; level: number; order: number; source: number; fee: number };
+type Totals = { recall: number; covered: number; precision: number; agency: number; level: number; order: number; source: number; fee: number };
 function report(title: string, scores: Score[]): Totals {
   console.log(`\n${title}\n`);
-  console.log(`${pad("case", 26)}${lpad("recall", 13)}${lpad("precision", 14)}${lpad("agency", 10)}${lpad("level", 10)}${lpad("order", 9)}${lpad("source", 10)}${lpad("fee", 8)}`);
+  console.log(`${pad("case", 26)}${lpad("recall", 13)}${lpad("covered", 9)}${lpad("precision", 14)}${lpad("agency", 10)}${lpad("level", 10)}${lpad("order", 9)}${lpad("source", 10)}${lpad("fee", 8)}`);
   for (const s of scores) {
-    console.log(`${pad(s.id, 26)}${lpad(`${s.found}/${s.req}`, 7)}${lpad(pct(s.found, s.req), 7)}${lpad(`${s.correct}/${s.correct + s.wrong + s.invented}`, 7)}${lpad(pct(s.correct, s.correct + s.wrong + s.invented), 7)}`
+    console.log(`${pad(s.id, 26)}${lpad(`${s.found}/${s.req}`, 7)}${lpad(pct(s.found, s.req), 7)}${lpad(pct(s.covered, s.req), 9)}${lpad(`${s.correct}/${s.correct + s.wrong + s.invented}`, 7)}${lpad(pct(s.correct, s.correct + s.wrong + s.invented), 7)}`
       + `${lpad(pct(s.agencyOk, s.agencyOk + s.agencyMiss.length), 10)}${lpad(pct(s.levelOk, s.levelOk + s.levelMiss.length), 10)}${lpad(s.orderN ? `${s.orderOk}/${s.orderN}` : "-", 9)}${lpad(pct(s.sourced, s.rows), 10)}${lpad(s.feeN ? `${s.feeOk}/${s.feeN}` : "-", 8)}`);
   }
   const sum = (f: (s: Score) => number) => scores.reduce((t, s) => t + f(s), 0);
-  const t = {
-    recall: sum(s => s.found) / sum(s => s.req),
-    precision: sum(s => s.correct) / sum(s => s.correct + s.wrong + s.invented),
-    agency: sum(s => s.agencyOk) / sum(s => s.agencyOk + s.agencyMiss.length),
-    level: sum(s => s.levelOk) / sum(s => s.levelOk + s.levelMiss.length),
-    order: sum(s => s.orderOk) / (sum(s => s.orderN) || 1),
-    source: sum(s => s.sourced) / sum(s => s.rows),
-    fee: sum(s => s.feeOk) / (sum(s => s.feeN) || 1),
+  const ratio = (n: number, d: number) => (d ? n / d : 1);
+  const t: Totals = {
+    recall: ratio(sum(s => s.found), sum(s => s.req)),
+    covered: ratio(sum(s => s.covered), sum(s => s.req)),
+    precision: ratio(sum(s => s.correct), sum(s => s.correct + s.wrong + s.invented)),
+    agency: ratio(sum(s => s.agencyOk), sum(s => s.agencyOk + s.agencyMiss.length)),
+    level: ratio(sum(s => s.levelOk), sum(s => s.levelOk + s.levelMiss.length)),
+    order: ratio(sum(s => s.orderOk), sum(s => s.orderN)),
+    source: ratio(sum(s => s.sourced), sum(s => s.rows)),
+    fee: ratio(sum(s => s.feeOk), sum(s => s.feeN)),
   };
-  console.log(`${"-".repeat(100)}`);
-  console.log(`${pad("TOTAL", 26)}${lpad(`${sum(s => s.found)}/${sum(s => s.req)}`, 7)}${lpad(pct(sum(s => s.found), sum(s => s.req)), 7)}${lpad(`${sum(s => s.correct)}/${sum(s => s.correct + s.wrong + s.invented)}`, 7)}${lpad((100 * t.precision).toFixed(1) + "%", 7)}`
+  console.log(`${"-".repeat(110)}`);
+  console.log(`${pad("TOTAL", 26)}${lpad(`${sum(s => s.found)}/${sum(s => s.req)}`, 7)}${lpad(pct(sum(s => s.found), sum(s => s.req)), 7)}${lpad((100 * t.covered).toFixed(1) + "%", 9)}${lpad(`${sum(s => s.correct)}/${sum(s => s.correct + s.wrong + s.invented)}`, 7)}${lpad((100 * t.precision).toFixed(1) + "%", 7)}`
     + `${lpad((100 * t.agency).toFixed(1) + "%", 10)}${lpad((100 * t.level).toFixed(1) + "%", 10)}${lpad(`${sum(s => s.orderOk)}/${sum(s => s.orderN)}`, 9)}${lpad((100 * t.source).toFixed(1) + "%", 10)}${lpad(`${sum(s => s.feeOk)}/${sum(s => s.feeN)}`, 8)}`);
-  console.log(`  rows set aside (match only an unverified gold item, or hedge): ${sum(s => s.setAside)} (${sum(s => s.hedged.length)} hedged); wrong-jurisdiction or must-not rows: ${sum(s => s.wrong)}; invented rows: ${sum(s => s.invented)}`);
+  console.log(`  required items not claimed but covered by an abstention naming the right office: ${sum(s => s.abstained.length)}; abstentions naming the wrong office: ${sum(s => s.misrouted.length)}; silently missing: ${sum(s => s.misses.length)}`);
+  console.log(`  rows set aside (match only an unverified gold item, or abstain): ${sum(s => s.setAside)} (${sum(s => s.hedged.length)} abstain); wrong-jurisdiction or must-not rows: ${sum(s => s.wrong)}; invented rows: ${sum(s => s.invented)}`);
   if (showMisses) for (const s of scores) {
-    const lines = [...s.misses.map(m => `missing   ${m}`), ...s.wrongRows.map(m => `wrong     ${m}`), ...s.hedged.map(m => `hedged    ${m}`), ...s.agencyMiss.map(m => `agency    ${m}`), ...s.levelMiss.map(m => `level     ${m}`),
+    const lines = [...s.misses.map(m => `missing   ${m}`), ...s.misrouted.map(m => `misrouted ${m}`), ...s.abstained.map(m => `abstained ${m}`), ...s.wrongRows.map(m => `wrong     ${m}`), ...s.agencyMiss.map(m => `agency    ${m}`), ...s.levelMiss.map(m => `level     ${m}`),
       ...s.orderMiss.map(m => `order     ${m}`), ...s.unsourced.map(m => `source    ${m}`), ...s.feeMiss.map(m => `fee       ${m}`)];
     if (lines.length) console.log(`\n  ${s.id}\n    ${lines.join("\n    ")}`);
   }
@@ -166,32 +204,55 @@ function report(title: string, scores: Score[]): Totals {
 }
 
 const fails: string[] = [];
-// passage-level proof: every row of both paths, in every case of the sets scored, carries a quote and the day it was
-// read, and the read log has that quote from that page (scripts/eval/proof.ts)
+// passage-level proof, fail closed: every row of both paths, in every case of the sets scored, either claims (a quote,
+// the day it was last seen on its page within MAX_PROOF_AGE, and the read log has that quote from that page) or
+// abstains (claims no fee, names who to ask, links an official page) (scripts/eval/proof.ts)
 {
-  const problems = new Set<string>(); let rowsChecked = 0;
+  const problems = new Set<string>(); let rowsChecked = 0, claims = 0, abstentions = 0;
   for (const { cases } of SETS) for (const g of cases) {
     const i = g.input;
     const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
-    for (const a of p.apps) { rowsChecked++; for (const x of planRowProof(a)) problems.add(`${g.id}: ${x}`); }
-    for (const r of library(g)) { rowsChecked++; const f = FORMS.find(x => x.id === r.id); if (f) for (const x of formProof(f)) problems.add(`${g.id} (library): ${x}`); }
+    for (const a of p.apps) { rowsChecked++; if (a.abstain) abstentions++; else claims++; for (const x of planRowProof(a, TODAY)) problems.add(`${g.id}: ${x}`); }
+    for (const r of library(g)) { rowsChecked++; const f = FORMS.find(x => x.id === r.id); if (f && !r.abstain) for (const x of formProof(f)) problems.add(`${g.id} (library): ${x}`); }
   }
   const st = logStats();
-  console.log(`\nPassage-level proof: ${rowsChecked} rows checked; read log ${st.total} entries (${st.curl} re-read with curl, ${st.webfetch} read with WebFetch, ${st.missing} not found); unread: ${Object.keys(UNREAD).join(", ") || "none"}`);
+  console.log(`\nPassage-level proof: ${rowsChecked} rows checked (instant plan: ${claims} claims, each quoted from its page and seen within ${MAX_PROOF_AGE} days; ${abstentions} abstentions naming who to ask); read log ${st.total} entries (${st.curl} read with curl, ${st.webfetch} read with WebFetch, ${st.missing} not found); unread: ${Object.keys(UNREAD).join(", ") || "none"}`);
   if (problems.size) { console.log(`  ${[...problems].slice(0, 40).join("\n  ")}`); fails.push(`proof: ${problems.size} row problems`); }
 }
 
+// the stricter set: every expected answer carries the official page's own words, its URL and the day it was read, and
+// the strict read log (scripts/eval/strict-log.json, `npm run strict:read`) found those words on that page
+for (const { name: set, cases } of SETS.filter(s => s.name === "strict")) {
+  const problems = strictProblems(cases);
+  console.log(`\nStrict set evidence: ${cases.reduce((t, g) => t + g.items.length + g.mustNotInclude.length, 0)} expected answers and must-nots, ${new Set(cases.flatMap(g => g.items.map(i => i.source))).size} official pages; ${problems.length} problems`);
+  if (problems.length) { console.log(`  ${problems.slice(0, 40).join("\n  ")}`); fails.push(`${set} evidence: ${problems.length} problems`); }
+}
+
+const TITLE: Record<string, string> = {
+  gold: "Gold set (in-sample: the library was fixed against it)", heldout: GENERAL ? "Held-out set, city entries removed (GENERAL_ONLY)" : "Held-out set (scripts/eval/heldout)",
+  strict: "Strict set (scripts/eval/strict: top cities and states, every answer quoted from its official page)",
+};
 for (const { name: set, cases } of SETS) {
   const unverified = cases.flatMap(g => g.items.filter(i => !i.verified).map(i => `${g.id}: ${i.name}${i.note ? ` (${i.note})` : ""}`));
-  console.log(`\n================ ${set === "gold" ? "Gold set (in-sample: the library was fixed against it)" : "Held-out set (scripts/eval/heldout)"} ================`);
+  console.log(`\n================ ${TITLE[set] ?? set} ================`);
   console.log(`${cases.length} openings, ${cases.reduce((t, g) => t + g.items.filter(i => i.verified && i.required).length, 0)} verified required items, `
     + `${cases.reduce((t, g) => t + g.items.filter(i => i.verified && !i.required).length, 0)} verified conditional items, ${unverified.length} unverified items set aside, `
     + `${cases.reduce((t, g) => t + g.order.filter(o => o.verified).length, 0)} verified order constraints.`);
   const instant = report(`Instant plan, ${set} (src/plan/preview.ts: the app's first screen, text-to-start, partner API)`, cases.map(g => score(g, instantPlan(g))));
-  const lib = report(`Library, ${set} (find_official_forms in agent-run, src/forms/registry.ts formsFor)`, cases.map(g => score(g, library(g))));
+  const lib = report(`Library, ${set} (find_official_forms in agent-run: src/forms/registry.ts formsFor and libraryAnswer)`, cases.map(g => score(g, library(g))));
   if (showMisses && unverified.length) console.log(`\nUnverified ${set} items (not scored):\n  ${[...new Set(unverified)].join("\n  ")}`);
   for (const [name, t] of [["instant plan", instant], ["library", lib]] as const)
     for (const k of Object.keys(TARGET) as (keyof Totals)[]) if (t[k] + 1e-9 < TARGET[k]) fails.push(`${set} ${name} ${k} ${(100 * t[k]).toFixed(1)}% < ${(100 * TARGET[k]).toFixed(0)}%`);
+}
+
+// fail closed everywhere, not only in the sets: every plan for every place the library names, and every state, for each
+// store type (scripts/eval/failclosed.ts); a quote too old, a page that no longer says it, and two sources that disagree
+// each turn a claim into an abstention
+if (!GENERAL) {
+  const fc = failClosedChecks(TODAY);
+  console.log(`\nFail closed: ${fc.plans} plans, ${fc.rows} rows (${fc.claims} claims, every one quoted from an official page seen within ${MAX_PROOF_AGE} days; ${fc.abstentions} abstentions, every one naming who to ask with an official link); ${fc.checks.filter(c => c.pass).length} of ${fc.checks.length} checks pass`);
+  for (const c of fc.checks) console.log(`${c.pass ? "ok  " : "FAIL"} ${c.name}${c.pass ? "" : `\n     ${c.detail}`}`);
+  for (const c of fc.checks) if (!c.pass) fails.push(`fail-closed: ${c.name}`);
 }
 
 // her written answers: sample mode and the server's grounding (scripts/eval/answers.ts)
@@ -200,5 +261,6 @@ console.log(`\nWritten answers (sample mode and the server's grounding): ${answe
 for (const c of answers) console.log(`${c.pass ? "ok  " : "FAIL"} ${c.name}${c.pass ? "" : `\n     ${c.detail}`}`);
 
 for (const c of answers) if (!c.pass) fails.push(`answer: ${c.name}`);
-console.log(fails.length ? `\nBelow target: ${fails.join("; ")}` : `\nAll targets met (recall >= 95%, precision >= 97%, agency and level >= 97%, order >= 95%, every row sourced, fees >= 90%, every answer check).`);
+console.log(fails.length ? `\nBelow target: ${fails.join("; ")}`
+  : `\nAll targets met (${GENERAL ? "recall reported; " : "recall 100%, "}every required item covered, precision, agency, level and order 100%, every row sourced, every published fee, every row fail closed, every answer check).`);
 process.exit(fails.length ? 1 : 0);

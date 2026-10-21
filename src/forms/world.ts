@@ -501,18 +501,21 @@ const has = (text: string, alias: string) => /[a-z]/.test(alias) ? new RegExp(`(
 /** The countries, states and cities in a place, as the codes the steps use. known: a city with its own local steps. */
 /** Accents dropped, so "San José" and "Querétaro" match the library's "san jose" and "queretaro" (Chinese is unchanged). */
 export const unaccent = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const US_STATE_CODE = /,\s*(AL|AK|AZ|AR|CA|CO|CT|DE|DC|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\.?(\s+\d{5}(-\d{4})?)?\s*$/;
 export function worldPlaces(place: string): Place {
   const where = unaccent(place);
   // a city's name is read from the place, not the street line ("2140 Dallas Pkwy, Plano, TX" is Plano)
   const w = usLocality(where).toLowerCase();
   // an address that names a US state is in the US, so a city abroad that shares its name (Alexandria, VA) doesn't match
-  const usState = STATES.some(s => s.names.test(where));
+  // (any state's postal code after a comma counts: "Florence-Firestone, CA" is in Los Angeles County, not Italy, and
+  // "West Jordan, UT" is in Utah, not Jordan)
+  const usState = STATES.some(s => s.names.test(where)) || US_STATE_CODE.test(where) || /,\s*(ca|tx|ny)\.?(\s+\d{5}(-\d{4})?)?\s*$|\b(california|texas)\b/i.test(where);
   // a full US address names its city second to last ("…, Arcadia, CA 91007"): that city first, then any alias
   const parts = w.split(",").map(s => s.trim()), named = parts.length >= 2 ? parts[parts.length - 2] : "";
   const lastSt = /^([a-z]{2})(\s+\d{5}(-\d{4})?)?$/.exec(parts[parts.length - 1] ?? "")?.[1]?.toUpperCase();
   const city = (named ? CITIES.find(x => x.country === "US" && x.en.toLowerCase() === named && (!lastSt || x.state === lastSt)) : undefined)
     ?? CITIES.find(x => (!usState || x.country === "US") && x.aliases.some(a => has(w, a.toLowerCase())));
-  const country = COUNTRIES.find(x => x.code === city?.country) ?? COUNTRIES.find(x => x.code !== "US" && x.names.test(w));
+  const country = COUNTRIES.find(x => x.code === city?.country) ?? (usState ? undefined : COUNTRIES.find(x => x.code !== "US" && x.names.test(w)));
   const codes: string[] = [];
   if (country) codes.push(country.code);
   if (city?.state) codes.push(city.state);

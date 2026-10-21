@@ -8,6 +8,9 @@ import { B, type Bi } from "./bi";
 import { FORMS, placeInfo, placesOf, type OfficialForm } from "./forms/registry";
 import { worldPlaces } from "./forms/world";
 import { stateAgency, stateOf } from "./plan/preview";
+import { proofCurrent, whoToAsk } from "./plan/ask";
+import { usPlace } from "./forms/usplace";
+import { daysFromNow } from "./time";
 
 export type Grounded = {
   text: Bi;
@@ -59,19 +62,23 @@ export function isRequirementQuestion(q: string): boolean {
 }
 
 /** The grounded answer, or null when it isn't a question about a requirement (the caller handles it as before). */
-export function groundedAnswer(q: string, o: { home?: string } = {}): Grounded | null {
+export function groundedAnswer(q: string, o: { home?: string; today?: string } = {}): Grounded | null {
   if (!isRequirementQuestion(q)) return null;
   const topic = TOPICS.find(t => t.ask.test(q));
   const where = placeOf(q, o.home);
   const places = placesOf(where), info = placeInfo(where), code = stateOf(where) ?? places.find(p => /^[A-Z]{2}$/.test(p) && p !== "US");
   if (!topic) return notSure(B("that", "这一项"), where, code);
-  // the forms for this place: a city or county form only where the place is; the most local first
-  const hits = FORMS.filter(f => topic.form(f) && places.includes(f.where) && !f.needs?.reference && (f.currency ?? "USD") === (info.currency ?? "USD"))
+  // the forms for this place: a city or county form only where the place is; the most local first. Fail closed: only a
+  // form whose page quote was seen recently (src/plan/ask.ts) answers; one without is "not sure", naming its agency
+  const today = o.today ?? daysFromNow(0);
+  const all = FORMS.filter(f => topic.form(f) && places.includes(f.where) && !f.needs?.reference && (f.currency ?? "USD") === (info.currency ?? "USD"))
     .sort((a, b) => LEVEL_RANK[a.level] - LEVEL_RANK[b.level] || a.order - b.order);
+  const hits = all.filter(f => f.proof && proofCurrent(f.proof, today));
+  const unquoted = all.find(f => !hits.includes(f));
   // a local question needs a local answer: the federal TTB registration alone doesn't answer "a liquor license in
   // Austin", and a state form doesn't answer "a business license in Houston"
   const answered = topic.id === "alcohol" ? hits.some(f => f.level !== "federal") : topic.local ? hits.some(f => f.level === "city" || f.level === "county") : hits.length > 0;
-  if (!answered) return notSure(B(topic.en, topic.zh), where, code, topic);
+  if (!answered) return notSure(B(topic.en, topic.zh), where, code, topic, unquoted);
   const top = topic.id === "alcohol" ? hits : hits.slice(0, 1);
   const parts = top.map(f => sayForm(f, q));
   return {
@@ -105,8 +112,18 @@ function sayForm(f: OfficialForm, q: string): Bi {
 }
 
 /** The library doesn't have it: say so, and who decides it. */
-function notSure(what: Bi, where: string, code?: string, topic?: Topic): Grounded {
+function notSure(what: Bi, where: string, code?: string, topic?: Topic, unquoted?: OfficialForm): Grounded {
   const st = code ? stateAgency(code) : undefined;
+  // the library lists a form for it, but has no current quote from the agency's page: that agency decides, at that link
+  if (unquoted) {
+    // the agency's own site, where it's filed (the info page can be another office's guide that quotes it)
+    const url = unquoted.url || unquoted.info;
+    return {
+      text: B(`I'm not sure about ${what.en} there, and I won't guess: Placetta's library lists ${unquoted.title.en}, but has no current quote from the agency's own page saying it applies. Here's who to ask: the ${unquoted.agency.en.replace(/^the /i, "")} (${url}). Tell me the answer they give and I'll keep it with your plan.`,
+        `关于当地的${what.zh}我不确定，也不会猜：快哉的登记库列有${unquoted.title.zh}，但目前没有机构官方页面上说明其适用的最新原文。可以咨询：${unquoted.agency.zh}（${url}）。告诉我他们的答复，我会记入您的计划。`),
+      sources: [{ title: host(url), url }], forms: [], sure: false,
+    };
+  }
   // the city's own site and name, from a city form the library has for the place ("City of Houston, Houston Permitting
   // Center" names the City of Houston)
   const places = placesOf(where);
@@ -114,11 +131,14 @@ function notSure(what: Bi, where: string, code?: string, topic?: Topic): Grounde
   const cityUrl = cityForm ? new URL(cityForm.info || cityForm.url).origin : "";
   const cityName = cityForm ? /^(City (and County )?of [^,]+?)(?=,| Department| Office| Finance| Planning| Building| Community| Business|$)/.exec(cityForm.agency.en)?.[1] : undefined;
   const cityZh = cityForm ? cityForm.agency.zh.replace(/(市|市县).*$/, "$1") + "政府" : "";
+  // no city form: the city's own .gov site from CISA's registry (src/forms/citySites.ts)
+  const up = usPlace(where), asked = whoToAsk(up.city, up.state ?? code);
   // the agency that decides: the state's tax agency for a sales tax question, the state's alcohol agency for a liquor
   // license (SBA lists them by state), the city for a local permit, else SBA's directory of every state's agencies
   const who = topic?.id === "seller" && st ? { en: st.en, zh: st.zh, url: st.url }
     : topic?.id === "alcohol" ? { en: `${st ? st.state + "'s" : "the state's"} alcohol beverage control agency (SBA lists each state's)`, zh: `${st ? st.stateZh : "所在州"}的酒类管理机构（SBA 列有各州机构）`, url: SBA.url }
     : (!topic || topic.local) && cityName && cityUrl ? { en: `the ${cityName}`, zh: cityZh, url: cityUrl }
+    : (!topic || topic.local) && asked.site !== "usa.gov" && up.city ? { en: `the ${asked.org ?? `City of ${up.city}`}`, zh: `${up.city}政府`, url: asked.source.url }
     : { en: "the licensing agencies SBA lists for each state", zh: "SBA 按州列出的各发证机构", url: SBA.url };
   const link = who.url ? ` (${who.url})` : "";
   return {

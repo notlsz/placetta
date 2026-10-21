@@ -37,6 +37,8 @@ import { COUNTRIES } from "./forms/world";
 import type { Lang } from "./i18n";
 import { anthropicMessage } from "../supabase/functions/_shared/stream.ts";
 import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
+import { libraryAnswer } from "./plan/preview";
+import { proofCurrent } from "./plan/ask";
 import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy } from "./sources";
 import { STAFF_LANGS, staffLanguageCheck, staffLanguages } from "./staff";
 import { mcpTools, MCP_PREFIX, type McpTool } from "./mcp";
@@ -338,6 +340,7 @@ Rules:
 - Never invent the person's facts. If something is missing, leave the field empty (never "TBD", "unknown" or a placeholder, which count as empty) and ask for it at the end; in a drafted document use [brackets].
 - Never invent a license or permit name, form number, agency, fee, processing time, rule or date. Take them from find_official_forms${research ? " or an official page you read and cite" : ""}; anything you couldn't confirm there, call an estimate to confirm with the agency, or leave out.
 - A question about a requirement ("Do I need a seller's permit?", "When does the business tax renew?") is answered from find_official_forms${research ? " or an official page you read" : ""}: say what the agency states, name the agency and give its official link. When neither confirms the answer, say you're not sure and who to ask: the agency that decides it and its official site. Never fill the gap with a guess.
+- Claim only what an official page says, in its words. find_official_forms marks each form and local step claim true (with the page's quote and the day it was read) or claim false (no current quote on record, or two official sources disagree): a claim-false step is never stated as required, only as something to confirm with the office it names, at the link it gives, until you read that page and can cite its words. Before saying a plan or an answer is done, check every requirement in it against its quote: drop or reword any you can't back.
 - You are not a lawyer, and Placetta is not a law firm. Say what an agency, statute or rule requires and cite it; don't give legal opinions or tell them what they legally should do. For questions of legal judgment (lease terms, choosing or structuring an entity, contracts, disputes, immigration, liability, what a law means for their situation), say it's a question for a licensed attorney, offer to prepare a short list of questions for one, and keep helping with the filings. Never say Placetta's lawyers will handle something.
 - Never ask for a Social Security number, ITIN, or bank or card numbers in chat. The team collects those on the agency's own site. A form line that asks for one (like line 7b of Form SS-4) is answered "By hand": fill_fields it with exactly that, and the signer writes the number on the signed copy (or "Foreign" when there is none).${research ? `
 - Research requirements, fees and processing times on official government websites with web_search and web_fetch: the agency's own pages (.gov, state, county and city sites). Portals that point to agencies (usa.gov, sba.gov) are fine for finding the right agency, but read and cite the agency's own page. Use the agency's root domain as the application's agency_url. If you can't confirm something on an official page, call it an estimate.` : `
@@ -626,12 +629,19 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         S("searching", L(`Finding the official forms for ${str(i.search) || place || "the business"}`, `查找${str(i.search) || place || "这家企业"}的官方表格`));
         mark();
         const info = placeInfo(place);
+        // fail closed: a form is claimed only with a current quote from its page and no conflicting source; the steps the
+        // library has no form for come with who to ask (src/plan/ask.ts, the same rows the instant plan lists)
+        const known = !str(i.search) && info.country === "US" ? libraryAnswer(str(i.business) || get().business.en, place, needs) : undefined;
+        const claimed = (f: OfficialForm) => known ? known.claim(f) : !!(f.proof && proofCurrent(f.proof, daysFromNow(0)));
         return {
           segment, place, country: info.country ?? "unknown", city: info.city?.en, currency: info.currency,
           forms: list.slice(0, 30).map(f => ({ official_form_id: f.id, form: f.form, title: f.title[lang], agency: f.agency[lang], level: f.level, how_filed: `${METHOD[f.method][lang]}. ${f.how[lang]}`, official_link: f.url, info: f.info,
-            ...(f.proof ? { info_quote: f.proof.quote, info_read_on: f.proof.checked } : {}),
+            ...(claimed(f) ? { claim: true, ...(f.proof ? { info_quote: f.proof.quote, info_read_on: proofCurrent(f.proof, daysFromNow(0)) ?? f.proof.checked } : {}) }
+              : { claim: false, not_claimed: `No current quote from the agency's own page says this applies here${known?.conflicts.length ? ", or two official sources disagree on who issues it" : ""}. Don't tell the person it's required: say you're not sure, and that ${f.agency[lang]} (${f.info || f.url}) decides. Read that page; if it says so, cite its words.` }),
             fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.length ? f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`) : "Not listed yet: prepare_application adds the lines every agency asks; read the official link for the rest",
             attachments: f.attach?.map(a => a[lang]), for_foreign_owners: f.foreign?.[lang], placetta_fills_official_pdf: canFill(f), reread_agency_page_first: f.checked === "known" })),
+          ...(known?.steps.length ? { local_steps: known.steps.map(a => ({ step: a.name[lang], agency: a.agency[lang], level: a.level, link: a.source.url,
+            ...(a.abstain ? { claim: false, who_to_ask: a.source.url } : { claim: true, quote: a.source.quote, read_on: a.source.checked }) })) } : {}),
           not_in_library: !info.country ? "This place isn't in the library yet. Research its national and local requirements on the government's own sites, prepare each one, then skill_save what you learned so the next business there goes faster."
             : !info.local ? `The national${info.country === "US" ? ", state" : ""} steps are here; ${info.city ? info.city.en + "'s" : "the city's"} own local permits aren't. Research the city's official pages for them, then skill_save the local steps you found.`
             : list.length ? "Check the agency pages for anything local not listed (signage, alcohol, outdoor seating)." : "Nothing in the library for this. Research the agency's official page.",
