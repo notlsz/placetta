@@ -2584,6 +2584,16 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 .offsite p{margin:0;font-size:18px;line-height:1.45;color:#5B6475;max-width:300px;text-wrap:balance}
 @media (min-width:1024px){.offsite p{font-size:21px;max-width:340px}}
 
+/* Oct 21: named proof right under the hero, three customers with one hard number each */
+.nproof{background:var(--bg,#F3F4F6);padding-inline:max(16px,env(safe-area-inset-left,0px))}
+.nproof .npi{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:40px 0 8px}
+.nproof .npc{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:4px 20px;border-left:1px solid var(--line,#E3E6EC)}
+.nproof .npc:first-child{border-left:0}
+.nproof img{display:block;height:40px;width:150px;object-fit:contain;filter:grayscale(1);opacity:.8}
+.nproof .npw{margin:0;height:40px;display:flex;align-items:center;font-family:var(--serif);font-size:20px;letter-spacing:-.01em;color:#5B6475}
+.nproof b{font-family:var(--serif);font-weight:300;font-size:34px;line-height:1.05;letter-spacing:-.02em;color:var(--ink,#0F1B33)}
+.nproof span{font-size:13.5px;line-height:1.4;color:var(--muted,#6B7280);max-width:220px}
+@media (max-width:639px){.nproof .npi{grid-template-columns:minmax(0,1fr);gap:22px;padding-top:28px}.nproof .npc{border-left:0;padding:0}.nproof b{font-size:30px}}
 /* hero buttons and the before and after section, from the Oct 17 redesign */
 /* hero: one primary and one secondary button */
 .hcta{display:flex;flex-wrap:wrap;gap:10px}
@@ -2707,6 +2717,15 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       </div>
     </div>
     <div class="hbot"><p data-i18n="brands.l">Built for</p><div class="mq" aria-label="Industries" data-i18n-aria="aria.brands"><div class="mqt" id="mqt"></div></div></div>
+  </div>
+</section>
+
+<!-- ======================= NAMED PROOF: three customers, one hard number each ======================= -->
+<section class="nproof" aria-label="Customer results" data-i18n-aria="np.aria">
+  <div class="npi">
+    <div class="npc"><img src="logos/ink/chagee.png" alt="CHAGEE" height="26" decoding="async"><b data-i18n="np.1n">5 months</b><span data-i18n="np.1s">saved in approval time</span></div>
+    <div class="npc"><img src="logos/ink/starbucks.png" alt="Starbucks" height="34" decoding="async"><b data-i18n="np.2n">3 filings</b><span data-i18n="np.2s">handled end to end for a store GM</span></div>
+    <div class="npc"><p class="npw" data-i18n="np.3l">Wakimasu Wagyu</p><b data-i18n="np.3n">10 requirements</b><span data-i18n="np.3s">mapped from Japan to a New York dining room</span></div>
   </div>
 </section>
 
@@ -3577,6 +3596,9 @@ zh:{
  "price.promise":"门店开业和营业离不开的每一项执照、许可和证书：逐项梳理，经您批准后提交，并跟踪续期。", "price.sub":"基础版每家门店每月 149 美元，经常接受检查的门店可选专业版，每月 299 美元，均按年计费。每位加盟商为自己的门店付费。",
  "faq.sub":"还有其他问题？请发邮件至 <a href=\"mailto:support@placetta.com\">support@placetta.com</a>。"
 }};
+/* named proof strip */
+Object.assign(T.en, {"np.aria":"Customer results","np.1n":"5 months","np.1s":"saved in approval time","np.2n":"3 filings","np.2s":"handled end to end for a store GM","np.3l":"Wakimasu Wagyu","np.3n":"10 requirements","np.3s":"mapped from Japan to a New York dining room"});
+Object.assign(T.zh, {"np.aria":"客户成果","np.1n":"5 个月","np.1s":"节省的审批时间","np.2n":"3 项申报","np.2s":"为门店总经理全程代办","np.3l":"Wakimasu 和牛","np.3n":"10 项要求","np.3s":"从日本工厂到纽约餐厅，逐项梳理"});
 /* hero and before and after, from the Oct 17 redesign */
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、<a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a>（2025 年美国律师平均时薪）、美国劳工统计局 <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月）与 <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了四个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "4 → 1", "diff.2s": "要雇、要催的 4 个人，变成一个由您批准的智能代理", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "店主", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
