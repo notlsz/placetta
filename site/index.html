@@ -2929,8 +2929,10 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
   .xpmore{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:16px;padding:0 16px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(15,27,51,.08),inset 0 0 0 1px rgba(15,27,51,.06);font-size:14px;font-weight:500;color:var(--ink);text-decoration:none}
   .xpmore::after{content:"";width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translate(-1px,-2px);transition:transform .2s}
   .xpmore[aria-expanded="true"]::after{transform:rotate(225deg) translate(-1px,-1px)}
-  .flinks{font-size:15px;gap:24px}
-  .flinks .col{gap:0}
+  /* footer links: two even columns of 44px rows */
+  .flinks{display:grid!important;grid-template-columns:1fr 1fr;grid-template-rows:repeat(6,auto);grid-auto-flow:column;gap:0 16px!important;align-items:center;font-size:15px}
+  .flinks .col>*{min-height:44px;display:inline-flex;align-items:center}
+  .flinks .pair,.flinks .col{display:contents}
   .flinks a,.flinks button{min-height:44px;display:inline-flex;align-items:center}
   #pricing .psrc a,#pricing p a{padding-block:12px;margin-block:-12px}
 
@@ -2977,6 +2979,8 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
   .ctas{padding:48px 16px 56px!important}
   .nproof .npi{padding-top:32px!important}
   .ctas .ctah,.ctas p.ctah{text-wrap:balance}
+  #cost .cbig{gap:24px!important}#cost .cbig>.cbn{padding-bottom:8px!important}#cost .cbig>.ds{padding-top:8px!important}
+  #diff .dl{row-gap:32px!important}
   /* case studies: every tab in view as wrapping pills */
   #case .cstabs{display:flex!important;flex-wrap:wrap!important;gap:6px;overflow:visible!important;margin:0!important;padding:0!important;background:none!important;border-radius:0!important}
   #case .cstabs .tstab{flex:0 0 auto!important;min-width:0!important;min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:0 16px!important;border-radius:999px!important;background:var(--card)!important;color:var(--ink2)!important}
@@ -5571,7 +5575,8 @@ function renderXp(){
   // Oct 18: the whale is drawn at once in plain tiles and each face fills in as its photo arrives, so the panel is never empty
   let pend = false;
   const redraw = () => { if (run || pend) return; pend = true; requestAnimationFrame(n => { pend = false; frame(n); }); };
-  for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => { ims[k] = im; mkTile(k); loaded++; redraw(); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; }
+  // phone95: the advisors' photos load when the panel is a screen or so away, not with the first screen
+  ((el, fn) => { if (!el || !("IntersectionObserver" in window)) return fn(); const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); fn(); } }, {rootMargin: "1200px 0px"}); io.observe(el); })(document.getElementById("experts"), () => { for (let k = 0; k < XPN; k++) { const im = new Image(); im.decoding = "async"; im.onload = () => { ims[k] = im; mkTile(k); loaded++; redraw(); }; im.src = "media/people/advisor-" + (k + 1) + ".jpg"; } });
   const size = () => {
     if (W && cv.clientWidth === W) return;   // its height follows its width only: a phone's toolbar moving changes nothing here
     dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth;
@@ -5758,7 +5763,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   // game studios: tiles sampled straight from the photo, each tile its own shade, on a finer grid
   const sceneImg = new Image(); sceneImg.decoding = "async";
   sceneImg.onload = () => { if (cur === 3) { cur = -1; go(3); } };
-  sceneImg.src = "media/industries/game-studios-bw.jpg";
+  ((el, fn) => { if (!el || !("IntersectionObserver" in window)) return fn(); const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); fn(); } }, {rootMargin: "1200px 0px"}); io.observe(el); })(document.getElementById("industries"), () => { sceneImg.src = "media/industries/game-studios-bw.jpg"; });
   function sceneCells(){
     // a window on the rider and the tiger, cut to the panel's shape so it fills edge to edge, sharpened so the stripes,
     // armour and face read at tile size, and faded into the navy at the edges instead of ending in a hard rectangle
@@ -5787,7 +5792,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
   // tech: the robot cut out of its photo; each tile keeps the photo's colour, lifted so black joints still show on navy
   const botImg = new Image(); botImg.decoding = "async";
   botImg.onload = () => { if (cur === 2) { cur = -1; go(2); } };
-  botImg.src = "media/industries/tech-robot-cut.png";
+  ((el, fn) => { if (!el || !("IntersectionObserver" in window)) return fn(); const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); fn(); } }, {rootMargin: "1200px 0px"}); io.observe(el); })(document.getElementById("industries"), () => { botImg.src = "media/industries/tech-robot-cut.png"; });
   function botCells(){
     // drawn at 3x and read per tile: a tile is a black joint when most of it is dark, so knees, elbows and gloves stay crisp
     const lg = hasSet(2), P = lg ? logoPlan(2) : null, gap = cols < 60 ? 2.5 : 4;   // with brand wordmarks under it, the robot gives up the room they need
