@@ -214,6 +214,12 @@ function roleOf(f: OfficialForm | null, a: Application): Role {
   return "other";
 }
 
+const WHEN = {
+  ship: B("Before the first shipment", "首批货物发运前"),
+  sale: B("Before the first sale", "首笔销售前"),
+  store: B("Before this store opens", "本店开业前"),
+};
+
 const ORDER: Record<Role, number> = { entity: 5, ein: 10, publication: 13, tax: 20, plan: 50, license: 55, employer: 60, building: 65, food: 76, other: 50 };
 
 /** "the California Secretary of State", "your county's health department": an agency as the object of "confirm with". */
@@ -440,6 +446,23 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
 
   // in filing order: the company first (its number goes on everything else), then the library's order
   rows.sort((x, y) => (roleOf(x.f, x.a) === "entity" ? ORDER.entity : x.order) - (roleOf(y.f, y.a) === "entity" ? ORDER.entity : y.order));
+  // an importer's plan in three milestones, the way a broker, a test lab and a licensing service each split it: what
+  // clears the first shipment (the importer number, bond, ISF, the entry declarations and product certificates), what
+  // the first sale needs (sales tax, state product licenses, packaging EPR), and each store's own steps; the company
+  // and the EIN come first and carry no milestone
+  if (needs.imports) for (const r of rows) {
+    const role = roleOf(r.f, r.a), lvl = r.a.level;
+    if (role === "entity" || role === "ein" || role === "publication" || role === "employer") continue;
+    const store = role === "plan" || role === "building" || role === "food" || (role === "license" && segment !== "seller");
+    r.a.when = store ? WHEN.store : lvl === "federal" && r.order >= 30 && r.order < 45 ? WHEN.ship : role === "tax" || role === "license" || (r.order >= 45 && r.order < 50) ? WHEN.sale : undefined;
+  }
+  // and in that order: the company, then the first shipment, the first sale and the store (a stable sort keeps the
+  // library's order inside each milestone)
+  if (needs.imports) {
+    const rank = (r: typeof rows[number]) => { const role = roleOf(r.f, r.a); return role === "entity" || role === "ein" || role === "publication" ? 0
+      : r.a.when === WHEN.ship ? 1 : r.a.when === WHEN.sale ? 2 : r.a.when === WHEN.store ? 3 : r.order < 30 ? 0 : r.order < 45 ? 1 : r.order < 60 ? 2 : 3; };
+    rows.sort((x, y) => rank(x) - rank(y));
+  }
   const apps = rows.map(r => r.a);
   const byRole = new Map<Role, Application>();
   for (const r of rows) { const role = roleOf(r.f, r.a); if (!byRole.has(role)) byRole.set(role, r.a); }

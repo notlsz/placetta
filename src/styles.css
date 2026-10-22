@@ -1813,6 +1813,7 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 /* ================================================================================================================
    First-run preview plan (src/plan/preview.ts): the rows a new workspace starts with, read in the application sheet.
    Kept apart from the layout rules above. */
+.sh-when { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--ink2); }
 .sh-plain { margin: 0 0 10px; font-size: 15.5px; line-height: 1.5; color: var(--ink); }
 .sh-pv { display: flex; align-items: flex-start; gap: 8px; margin: 10px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
 .sh-pv svg { flex: none; margin-top: 3px; color: var(--blue-ink); }

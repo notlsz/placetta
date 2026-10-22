@@ -57,6 +57,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
           <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
         </div>
         <h2>{b(a.name)}</h2>
+        {a.when && <p className="sh-when">{b(a.when)}</p>}
         {a.plain && <p className="sh-plain">{b(a.plain)}</p>}
         <p className="sh-ag">
           <span>{b(a.agency)}</span>
