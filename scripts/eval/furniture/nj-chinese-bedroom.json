@@ -150,7 +150,22 @@
    "match": "\\bcpsc-cert\\b|product safety certificate",
    "agencyMatch": "consumer product safety",
    "note": "The library's general certificate row abstains (no current quote); the clothing storage unit certificate is scored as cpsc-1261."
-  }
+  },
+    {
+      "key": "nj-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "New Jersey Department of Labor, Division of Workers' Compensation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://www.nj.gov/labor/workerscompensation/employer-requirements/",
+      "quote": "All corporations operating in New Jersey must maintain Workers' Compensation insurance or be approved for self-insurance",
+      "read": "2026-10-22",
+      "match": "\\bnj-workers-comp\\b|workers'? comp",
+      "agencyMatch": "New\\ Jersey\\ Department\\ of\\ Labor"
+    }
  ],
  "order": [
   {

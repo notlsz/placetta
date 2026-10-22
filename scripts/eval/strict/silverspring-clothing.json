@@ -54,6 +54,21 @@
       "read": "2026-10-21",
       "match": "\\bmd-trader\\b|trader'?s license",
       "agencyMatch": "clerk of the circuit court"
+    },
+    {
+      "key": "md-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Maryland Workers' Compensation Commission",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://www.wcc.state.md.us/PDF/Publications/QandA_Emplr.pdf",
+      "quote": "every employer in the State of Maryland with one or more employees is required by law to provide workers’ compensation coverage",
+      "read": "2026-10-22",
+      "match": "\\bmd-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Maryland\\ Workers'\\ Compensation\\ Commission"
     }
   ],
   "order": [],

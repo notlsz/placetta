@@ -109,6 +109,21 @@
       "read": "2026-10-21",
       "match": "\\bden-food-license\\b|retail food",
       "agencyMatch": "denver"
+    },
+    {
+      "key": "co-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Colorado Department of Labor and Employment, Division of Workers' Compensation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://cdle.colorado.gov/dwc",
+      "quote": "All businesses with employees operating in Colorado are required to have workers’ compensation insurance, regardless of the number of employees,",
+      "read": "2026-10-22",
+      "match": "\\bco-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Colorado\\ Department\\ of\\ Labor\\ and\\ Employment"
     }
   ],
   "order": [],

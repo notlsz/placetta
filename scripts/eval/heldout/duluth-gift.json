@@ -76,6 +76,21 @@
       "match": "(occupation(al)? tax|business licen).*(duluth)|(duluth).*(occupation(al)? tax|business licen)",
       "agencyMatch": "duluth",
       "quote": "Every business in the City is required to apply for an Occupational Tax Certificate (OTC) and renew it annually in order to operate in the City limits."
+    },
+    {
+      "key": "ga-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Georgia State Board of Workers' Compensation",
+      "level": "state",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff. Georgia requires it of businesses with three or more workers, so it is conditional here.",
+      "source": "https://sbwc.georgia.gov/frequently-asked-questions/workers-compensation-law-faqs",
+      "quote": "The law requires any business with three or more workers, including regular part-time workers, to have workers’ compensation insurance.",
+      "read": "2026-10-22",
+      "match": "\\bga-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Georgia\\ State\\ Board\\ of\\ Workers'\\ Compensation"
     }
   ],
   "order": [

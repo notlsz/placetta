@@ -25,8 +25,7 @@ export type Fix = {
 
 export const FIXES: Fix[] = [
   { id: "fl-fictitious", url: "https://dos.fl.gov/sunbiz/start-business/efile/fl-fictitious-name-registration/", info: "https://dos.fl.gov/sunbiz/start-business/efile/fl-fictitious-name-registration/",
-    proof: { read: "https://dos.fl.gov/sunbiz/start-business/efile/fl-fictitious-name-registration/", quote: "Registration of Fictitious Name $50.00" },
-    why: "The Division of Corporations moved the page (the old one is a 404); the new one states the $50.00 fee the registry already gave." },
+    why: "The Division of Corporations moved the page (the old one is a 404); the new one states the $50.00 fee the registry gives (\"Registration of Fictitious Name $50.00\"). No proof is attached: the filing applies only to a business trading under another name, so the row keeps abstaining rather than claiming it for every Florida store." },
   { id: "sacc-plan-review", info: "https://emd.saccounty.gov/us/en/environmental-health/eh-plan-review.html",
     why: "Sacramento County EMD moved its plan review page (the old .aspx page is a 404)." },
   { id: "sacc-health-permit", url: "https://emd.saccounty.gov/us/en/environmental-health/retail-food-protection-program/selling-food-in-sacramento-county.html",
@@ -35,8 +34,9 @@ export const FIXES: Fix[] = [
     why: "The linked PDF (How to Obtain a Health Permit, 2023) is a 404; the county's Selling Food page states the requirement." },
   { id: "fulton-food-permit", url: "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Food-Service-Application.pdf",
     why: "Fulton County's Restaurant Inspection page is a 404; the Board of Health's food service application PDF is still published." },
-  { id: "smc-health-permit", info: "https://www.smchealth.org/food-program", proof: null,
-    why: "San Mateo County took down its plan review FAQ (20251104_plan_review_faqs.pdf, now a 404), the only page the quote was on; no sentence on the Food Program page states the permit fee step, so the row abstains and names the county until one is read." },
+  { id: "smc-health-permit", info: "https://smchealth.org/division/divisions/environmental-health-services/permits-business-services/food-program/",
+    proof: { read: "https://smchealth.org/division/divisions/environmental-health-services/permits-business-services/food-program/", quote: "You can apply for a food permit, pay invoices, and manage your permits online using MyEHS." },
+    why: "San Mateo County moved its site and took down its plan review FAQ (20251104_plan_review_faqs.pdf, now a 404), the page the quote was on; the county's new Food Program page says the food permit is applied for in MyEHS, the portal the registry links." },
   { id: "fmc-18", info: "https://www2.fmc.gov/form18/Form18/FillingInformation.aspx",
     why: "fmc.gov/resources-services/licensing-registration/ is a 404; the Form 18 filing information page is the Commission's own." },
   { id: "sac-bot", pdf: null,
@@ -55,8 +55,10 @@ export const FIXES: Fix[] = [
   { id: "hou-fire", url: "https://www.houstontx.gov/fire/formsandpermits/",
     why: "Without the trailing slash the page redirects to plain http; the https page answers 200." },
   { id: "fincen-boir", info: "https://www.fincen.gov/boi",
-    proof: { read: "https://www.fincen.gov/boi", quote: "U.S. companies are exempt from BOI reporting requirements." },
+    proof: { read: "https://www.fincen.gov/boi", quote: "U.S. companies are exempt from the Beneficial Ownership Information (BOI) reporting requirements" },
     why: "Status re-read: FinCEN's final rule, effective August 14, 2026, made the March 2025 exemptions permanent. Only foreign-formed companies registered to do business in a U.S. state report, within 30 days of the registration." },
+  { id: "pt-empresa", proof: null,
+    why: "gov.pt moved Empresa na Hora to a script-built page (www.gov.pt/servicos/criar-uma-empresa-na-hora answers with an empty shell), so the quote can't be read; the row abstains and names the office until it is read again." },
   /* proofs added to US entries that had none: each sentence read on the agency's own page today */
   ...([
     ["ca-ftb-3522", "https://www.ftb.ca.gov/file/business/types/limited-liability-company/index.html", "Every LLC that is doing business or organized in California must pay an annual tax of $800.", "confirms the $800 the registry stated"],
@@ -91,7 +93,9 @@ export function applyFixes(forms: OfficialForm[]): string[] {
     if (x.dropTakes) { delete f.takes; f.takesDays = null; }
     if (x.takesSource === null) delete f.takesSource; else if (x.takesSource) f.takesSource = x.takesSource;
     if (x.proof === null) delete f.proof;
-    else if (x.proof) f.proof = { quote: x.proof.quote, read: x.proof.read, checked: AUDIT_READ, ...(x.proof.en ? { en: x.proof.en } : {}) };
+    // the link and the quote always match (src/forms/registry.ts): a new proof moves the agency link to the page it was read on
+    else if (x.proof) { if (!x.info) f.info = x.proof.read; }
+    if (x.proof) f.proof = { quote: x.proof.quote, read: x.proof.read, checked: AUDIT_READ, ...(x.proof.en ? { en: x.proof.en } : {}) };
   }
   return missing;
 }

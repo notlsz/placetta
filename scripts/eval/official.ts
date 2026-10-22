@@ -28,6 +28,15 @@ const ABROAD = new RegExp("(^|\\.)(" + [
   "virk\\.dk", "skat\\.dk", "kk\\.dk", "aarhus\\.dk", "foedevarestyrelsen\\.dk",
   "altinn\\.no", "brreg\\.no", "skatteetaten\\.no", "oslo\\.kommune\\.no", "bergen\\.kommune\\.no", "mattilsynet\\.no",
   "gob\\.mx", "cdmx\\.gob\\.mx", "monterrey\\.gob\\.mx", "guadalajara\\.gob\\.mx", "qroo\\.gob\\.mx", "cancun\\.gob\\.mx", "nl\\.gob\\.mx", "jalisco\\.gob\\.mx",
+  // added 2026-10-22 with the coverage audit (src/forms/intl.ts, src/forms/us-gaps.ts), each fetched that day: Canada's
+  // federal, Ontario's, British Columbia's and the two cities' own sites, the provinces' workers' compensation boards and
+  // Ontario's liquor regulator; Florida's Department of Financial Services (myfloridacfo.com); and the national registries
+  // and tax authorities of the South American, Southeast Asian and African countries added (the Bogotá chamber of
+  // commerce keeps Colombia's public commercial register by law)
+  "canada\\.ca", "gc\\.ca", "ontario\\.ca", "toronto\\.ca", "wsib\\.ca", "agco\\.ca", "gov\\.bc\\.ca", "worksafebc\\.com", "vch\\.ca", "vancouver\\.ca",
+  "myfloridacfo\\.com",
+  "gov\\.br", "sii\\.cl", "registrodeempresasysociedades\\.cl", "dian\\.gov\\.co", "ccb\\.org\\.co", "argentina\\.gob\\.ar", "arca\\.gob\\.ar", "sunat\\.gob\\.pe",
+  "gov\\.sg", "ssm\\.com\\.my", "gov\\.my", "go\\.th", "gov\\.vn", "go\\.id", "gov\\.ph", "gov\\.ng", "go\\.ke", "cipc\\.co\\.za", "gov\\.za", "gov\\.ma", "gov\\.eg",
 ].join("|") + ")$");
 const OFFICIAL_PATHS: [RegExp, RegExp][] = [[/^content\.civicplus\.com$/, /^\/api\/assets\//], [/^cms2\.revize\.com$/, /^\/revize\/edisonnj\//]];
 export const hostOf = (u?: string) => { try { return new URL(u ?? "").hostname.replace(/^www\d?\./, ""); } catch { return ""; } };

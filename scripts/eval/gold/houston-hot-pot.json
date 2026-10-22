@@ -166,6 +166,21 @@
       "match": "sign permit",
       "agencyMatch": "houston",
       "condition": "Only with an exterior sign."
+    },
+    {
+      "key": "tx-workers-comp",
+      "name": "Workers' compensation, or the yearly non-subscriber notice",
+      "agency": "Texas Department of Insurance, Division of Workers' Compensation",
+      "level": "state",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff. Texas doesn't require coverage; an employer without it files the yearly non-subscriber notice, so it is conditional.",
+      "source": "https://Www.Tdi.Texas.Gov/forms/dwc/dwc005nocovst.pdf",
+      "quote": "Annual filing, between February 1 and April 30 each year.",
+      "read": "2026-10-22",
+      "match": "\\btx-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Texas\\ Department\\ of\\ Insurance"
     }
   ],
   "order": [
