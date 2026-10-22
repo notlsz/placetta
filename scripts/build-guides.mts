@@ -227,7 +227,7 @@ function convert(l: L, c: Ctx) {
 <p>${l === "zh" ? "这份指南适用于整座城市。您的具体地址决定了所属的县、卫生辖区和分区规定。快哉按地址梳理每一项申请，用您的资料填好官方表格，添加截止日期，并交给您批准。" : "This guide covers the city. Your exact address decides the county, the health district and the zoning. Placetta maps every filing for it, fills the official forms from your details, adds the deadlines and puts them up for your approval."}</p>
 <ul class="cv-points"><li>${l === "zh" ? "按地址列出的完整申请清单" : "The full list for your address, in filing order"}</li><li>${l === "zh" ? "逐行填好的官方表格" : "The official forms, filled line by line"}</li><li>${l === "zh" ? "续期和检查提醒" : "Renewal and inspection reminders"}</li></ul>
 </div>
-<form class="cv-form" data-lead novalidate>
+<form class="cv-form" data-lead method="post" novalidate>
 <input type="hidden" name="sell" value="${esc(biz?.chip ?? "")}"><input type="hidden" name="business" value="${esc(biz?.slug ?? "")}"><input type="hidden" name="city" value="${esc(c.place?.name.en ?? "")}">
 <label><span>${l === "zh" ? "品牌或公司名称" : "Brand or company name"}</span><input name="company" autocomplete="organization" required maxlength="120"></label>
 <label><span>${l === "zh" ? "门店地址或街区" : "Store address or neighborhood"}</span><input name="address" autocomplete="street-address" maxlength="200" value="${esc(city)}"></label>
