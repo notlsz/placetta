@@ -301,7 +301,184 @@ const DENMARK: OfficialForm[] = [
     proof: [AAR_UDE, "Hvis du som restauratør i Aarhus Kommune vil bruge et offentligt areal foran din café eller restaurant til udeservering, skal du søge om tilladelse.", "If you, as a restaurateur in Aarhus, want to use public ground in front of your café or restaurant for outdoor seating, you must apply for a permit."] }),
 ];
 
-export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK];
+/* ------------------------------------------------------------------ Finland (Helsinki) */
+const FI_PRH = "https://www.prh.fi/fi/yrityksetjayhteisot/yrityksenperustaminen/osakeyhtion-perustaminen-ja-perustamisilmoitus_1.html";
+const FI_VAT = "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/how-to-register-for-vat/";
+const FI_EMP = "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/being-an-employer/employer-register/";
+const HEL_FOOD = "https://www.hel.fi/en/business-and-work/apply-for-permits-and-facilities/food-business/registering-a-food-business";
+const HEL_BUILD = "https://www.hel.fi/static/rakvv/ohjeet/Ravintola_kahvila.pdf";
+
+const FINLAND: OfficialForm[] = [
+  N({ id: "fi-vat", where: "FI", level: "federal", method: "online", order: 25, cur: "EUR", fee: 0,
+    form: "VAT register entry (start-up notification on ytj.fi, or MyTax)", title: ["VAT registration with the Finnish Tax Administration", "向芬兰税务局登记增值税"],
+    agency: ["Verohallinto (Finnish Tax Administration)", "芬兰税务局（Verohallinto）"],
+    how: ["A company is entered in the VAT register with its start-up notification on ytj.fi, or later in MyTax; it must register once turnover passes 20,000 euros in a calendar year.", "公司可在 ytj.fi 提交开业通知时一并登记增值税，或稍后在 MyTax 办理；日历年营业额超过 2 万欧元时必须登记。"],
+    url: "https://www.ytj.fi",
+    proof: [FI_VAT, "it has to be entered in the VAT register if its turnover exceeds €20,000 in a calendar year."] }),
+  N({ id: "fi-employer", where: "FI", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR", fee: 0,
+    form: "Employer register entry (ytj.fi, or MyTax)", title: ["Employer registration with the Finnish Tax Administration", "向芬兰税务局登记雇主"],
+    agency: ["Verohallinto (Finnish Tax Administration)", "芬兰税务局（Verohallinto）"],
+    how: ["A company that pays wages regularly signs up for the employer register and reports every payment of wages to the Incomes Register.", "定期支付工资的公司须登记进入雇主登记册，每次发薪均向收入登记处申报。"],
+    url: "https://www.ytj.fi",
+    proof: [FI_EMP, "Companies acting as regular employers must always sign up for the register of employers."] }),
+  N({ id: "fi-hel-food", where: "FI-HEL", level: "city", segs: ["restaurant", "retail", "warehouse"], needs: { food: true }, method: "online", order: 74, cur: "EUR",
+    form: "Food business notification (elintarvikehuoneistoilmoitus, Ilppa)", title: ["Food premises notification to the city", "向赫尔辛基市申报食品经营场所"],
+    agency: ["City of Helsinki, Environmental Services (food safety unit)", "赫尔辛基市环境服务局（食品安全科）"],
+    how: ["A restaurant or shop notifies the city of its food business four weeks before it starts, online, by email or by post, with a floor plan; the city processes it within a week.", "餐厅或商店须在开业前四周以在线、电邮或邮寄方式向市政府申报食品经营，附平面图；市政府一周内处理。"],
+    url: HEL_FOOD, takes: ["Filed four weeks before opening; processed within a week.", "开业前四周申报；一周内处理。"],
+    proof: [HEL_FOOD, "Submit your notification four weeks before commencing food business activities."] }),
+  N({ id: "fi-hel-build", where: "FI-HEL", level: "city", segs: PREMISES, method: "online", order: 50, cur: "EUR",
+    form: "Rakentamislupa (käyttötarkoituksen muutos), Lupapiste", title: ["Building permit for a change of use (to a restaurant)", "用途变更建筑许可（改为餐厅）"],
+    agency: ["City of Helsinki, Building Control Services (rakennusvalvonta)", "赫尔辛基市建筑监管服务处"],
+    how: ["Turning a shop, café or other premises into a restaurant, or making permit-level changes to the kitchen, ventilation, exits or fire compartments, needs a building permit, applied for in Lupapiste.", "将商店、咖啡馆或其他场所改为餐厅，或对厨房、通风、出口或防火分区作须许可的改动，须在 Lupapiste 申请建筑许可。"],
+    url: HEL_BUILD,
+    proof: [HEL_BUILD, "Rakentamislupa käyttötarkoituksen muutokselle tai teknisille muutoksille tarvitaan, jos huoneiston käyttötarkoitus muutetaan esimerkiksi myymälästä, kahvilasta tai liiketilasta ravintolaksi", "A building permit for a change of use or technical changes is needed if the premises' use is changed, for example from a shop, café or business premises to a restaurant"] }),
+];
+
+/* ------------------------------------------------------------------ Poland (Warsaw) */
+const PL_KRS = "https://www.biznes.gov.pl/pl/portal/ou1503";
+const PL_VAT = "https://www.biznes.gov.pl/pl/portal/ou1609";
+const PL_ZUS = "https://www.biznes.gov.pl/pl/portal/00275";
+const PL_SAN = "https://www.biznes.gov.pl/pl/portal/ou521";
+const PL_USE = "https://www.biznes.gov.pl/pl/portal/ou555";
+const WAW_ALK = "https://warszawa19115.pl/en/-/zezwolenie-na-sprzedaz-napojow-alkoholowych-przeznaczonych-do-spozycia-w-miejscu-sprzedazy-gastronomia-";
+
+const POLAND: OfficialForm[] = [
+  N({ id: "pl-vat", where: "PL", level: "federal", method: "online", order: 25, cur: "PLN",
+    form: "VAT-R (zgłoszenie rejestracyjne w zakresie podatku od towarów i usług)", title: ["VAT registration with the tax office (VAT-R)", "向税务局登记增值税（VAT-R）"],
+    agency: ["Urząd skarbowy (tax office), Krajowa Administracja Skarbowa", "波兰税务局（国家财政管理局）"],
+    how: ["The VAT-R form goes to the tax office, online through the tax portal with a qualified signature or on paper; registering is required once the year's sales pass 240,000 złoty, and optional before.", "VAT-R 表交税务局，可凭合格电子签名经税务门户在线提交或纸质提交；年销售额超过 24 万兹罗提时必须登记，之前可自愿登记。"],
+    url: PL_VAT,
+    proof: [PL_VAT, "Masz obowiązek rejestracji jako podatnik VAT, jeżeli: wartość twojej sprzedaży w poprzednim roku przekroczyła kwotę 240 000 złotych", "You must register as a VAT taxpayer if the value of your sales in the previous year exceeded 240,000 złoty"] }),
+  N({ id: "pl-zus", where: "PL", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "PLN", fee: 0,
+    form: "ZUS ZUA (zgłoszenie pracownika), on PUE/eZUS", title: ["Employer contributions account and staff registration with ZUS", "向波兰社保局（ZUS）登记雇主缴费账户和员工参保"],
+    agency: ["Zakład Ubezpieczeń Społecznych (ZUS)", "波兰社会保险局（ZUS）"],
+    how: ["A company in the KRS is registered as a contribution payer from the court register's data; each employee is then registered with ZUS within 7 days of starting work.", "在 KRS 登记的公司依法院登记数据自动登记为缴费人；每位员工须在开始工作后 7 天内向 ZUS 登记。"],
+    url: PL_ZUS, takes: ["Each employee within 7 days of starting work.", "每位员工开始工作后 7 天内。"],
+    proof: [PL_ZUS, "Pracownika lub współpracownika musisz zgłosić do ZUS w ciągu 7 dni od dnia rozpoczęcia pracy lub współpracy,", "You must register an employee or contractor with ZUS within 7 days of the day they start work,"] }),
+  N({ id: "pl-waw-sanepid", where: "PL-WAW", level: "city", segs: ["restaurant", "retail", "warehouse"], needs: { food: true }, method: "online", order: 74, cur: "PLN",
+    form: "Wniosek o wpis do rejestru zakładów podlegających urzędowej kontroli Państwowej Inspekcji Sanitarnej", title: ["Food premises entry in the sanitary inspection's register (Sanepid)", "食品经营场所在卫生监督局（Sanepid）登记"],
+    agency: ["Państwowy Powiatowy Inspektor Sanitarny w m.st. Warszawie (PSSE Warszawa)", "华沙市县级国家卫生监督员（华沙卫生防疫站）"],
+    how: ["A restaurant or shop selling food asks the Warsaw sanitary inspector to enter its premises in the register at least 14 days before it starts; some activities need approval instead.", "销售食品的餐厅或商店须在开业至少 14 天前申请华沙卫生监督员将其场所登记入册；部分活动须改为审批。"],
+    url: PL_SAN, takes: ["Filed at least 14 days before opening.", "开业至少 14 天前提交。"],
+    proof: [PL_SAN, "Wniosek złóż co najmniej 14 dni przed planowanym rozpoczęciem działalności.", "File the application at least 14 days before the planned start of the business."] }),
+  N({ id: "pl-waw-use", where: "PL-WAW", level: "city", segs: PREMISES, method: "online", order: 50, cur: "PLN",
+    form: "Zgłoszenie zmiany sposobu użytkowania obiektu budowlanego lub jego części (PB-18)", title: ["Change-of-use notice for the building (PB-18)", "建筑用途变更申报（PB-18）"],
+    agency: ["Prezydent m.st. Warszawy (the district office's architecture and building department)", "华沙市长（所在区办事处建筑与施工处）"],
+    how: ["Changing the use of a building or unit, for example to a restaurant, is notified to the city (a city with county rights) on form PB-18, online through e-Budownictwo or on paper; works needing a building permit are applied for together.", "变更建筑物或单元的用途（例如改为餐厅），须以 PB-18 表经 e-Budownictwo 在线或纸质向市政府（具县级权限）申报；需建筑许可的工程一并申请。"],
+    url: "https://wnioski.gunb.gov.pl/",
+    proof: [PL_USE, "Chcesz zmienić sposób użytkowania budynku lub lokalu? Musisz zgłosić zmianę sposobu użytkowania.", "Want to change the use of a building or unit? You must notify the change of use."] }),
+  N({ id: "pl-waw-alcohol", where: "PL-WAW", level: "city", segs: ["restaurant"], needs: { alcohol: true }, method: "pdf_mail", order: 71, cur: "PLN",
+    form: "Wniosek o wydanie zezwolenia na sprzedaż napojów alkoholowych przeznaczonych do spożycia w miejscu sprzedaży", title: ["Alcohol licence for on-site consumption", "店内饮用酒类销售许可"],
+    agency: ["City of Warsaw, district office (opinion of the city's alcohol problems commission)", "华沙市所在区办事处（经市酒类问题委员会审议）"],
+    how: ["A restaurant applies to the district office; staff inspect the premises and the city's commission reviews the location and the licence limit before the licence is issued, separately for each of three strengths of drink.", "餐厅向区办事处申请；工作人员现场查看，市委员会审查位置和许可数量上限后签发，三种酒精度分别发证。"],
+    url: WAW_ALK,
+    feeNote: ["First year at a new location: 525 złoty for drinks up to 4.5% and beer, 525 złoty for 4.5% to 18%, 2,100 złoty above 18%.", "新地点首年：4.5% 以下及啤酒 525 兹罗提，4.5% 至 18% 525 兹罗提，18% 以上 2,100 兹罗提。"],
+    proof: [WAW_ALK, "Zezwolenie wydawane jest w formie decyzji administracyjnej.", "The licence is issued as an administrative decision."] }),
+];
+
+/* ------------------------------------------------------------------ Belgium (Brussels) */
+const BE_SOC = "https://business.belgium.be/fr/creer-votre-entreprise/enregistrer-votre-entreprise/creer-votre-societe";
+const BE_ONSS = "https://www.socialsecurity.be/site_fr/general/first_visit/access/register-as-employer.htm";
+const BRU_HORECA = "https://www.bruxelles.be/horeca-autorisation-exploitation";
+const BRU_URB = "https://www.bruxelles.be/obtenir-une-autorisation-pour-ouvrir-un-commerce";
+const BRU_TERR = "https://www.bruxelles.be/horeca-terrasse";
+
+const BELGIUM: OfficialForm[] = [
+  N({ id: "be-societe", where: "BE", level: "federal", needs: { newEntity: true }, method: "in_person", order: 10, cur: "EUR",
+    form: "Acte constitutif (SRL, SA or SC), filed with the enterprise court registry", title: ["Company formation: deed of incorporation filed with the enterprise court", "设立公司：设立文书提交企业法院"],
+    agency: ["Greffe du tribunal de l'entreprise (through the notary)", "企业法院书记处（经公证人提交）"],
+    how: ["The founders sign the deed (an authentic notarial deed for an SRL, SA or SC) with a financial plan, and the deed is filed with the competent enterprise court registry within 30 days of signing.", "创始人签署设立文书（SRL、SA 或 SC 须为公证文书）并附财务计划，签署后 30 天内提交主管企业法院书记处。"],
+    url: BE_SOC, takes: ["Filed within 30 days of signing the deed.", "签署设立文书后 30 天内提交。"],
+    specialist: ["A Belgian notary draws up the deed of an SRL, SA or SC: Placetta prepares the details and hands them to one.", "比利时 SRL、SA 或 SC 的设立文书须由比利时公证人作成：快哉准备资料并交给公证人。"],
+    proof: [BE_SOC, "L’acte constitutif doit être déposé au greffe du tribunal de l’entreprise compétent, dans les 30 jours après la signature de l’acte constitutif.", "The deed of incorporation must be filed with the competent enterprise court registry within 30 days of signing it."] }),
+  N({ id: "be-onss", where: "BE", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR", fee: 0,
+    form: "Identification employeur (WIDE), then Dimona for each hire", title: ["Employer registration with the social security office (ONSS)", "向比利时社会保障局（ONSS）登记雇主"],
+    agency: ["Office national de sécurité sociale (ONSS)", "比利时国家社会保障局（ONSS）"],
+    how: ["Before the first hire the business identifies itself as an employer with the ONSS through the online service WIDE and receives an ONSS number; each hire is then declared in Dimona.", "首次雇人前，企业通过在线服务 WIDE 向 ONSS 登记为雇主并取得 ONSS 编号；此后每次雇人均须在 Dimona 申报。"],
+    url: BE_ONSS,
+    proof: [BE_ONSS, "Tout employeur qui engage quelqu'un pour la première fois doit s'identifier en tant qu'employeur à l'ONSS.", "Every employer who hires someone for the first time must identify itself as an employer with the ONSS."] }),
+  N({ id: "be-bru-urbanisme", where: "BE-BRU", level: "city", segs: PREMISES, method: "online", order: 50, cur: "EUR",
+    form: "Permis d'urbanisme (changement d'affectation)", title: ["Planning permit for the use (permis d'urbanisme)", "城市规划许可（用途）"],
+    agency: ["City of Brussels, Urbanisme (under the Brussels-Capital Region's planning code)", "布鲁塞尔市城市规划处（依布鲁塞尔首都大区规划法规）"],
+    how: ["A restaurant, café, snack bar or any shop where food or drink is consumed on site needs a planning permit for that use; the operating licence is refused if the building's planning use doesn't match.", "餐厅、咖啡馆、小吃店或任何可现场饮食的商店，须为该用途取得规划许可；建筑规划用途不符时经营许可会被拒绝。"],
+    url: BRU_URB,
+    proof: [BRU_URB, "D’après l’ordonnance régionale du 12 décembre 2002, les activités ci-dessous sont soumises à un permis d’urbanisme :", "Under the regional ordinance of 12 December 2002, the activities below are subject to a planning permit:"] }),
+  N({ id: "be-bru-horeca", where: "BE-BRU", level: "city", segs: ["restaurant"], method: "online", order: 76, cur: "EUR", fee: 150,
+    form: "Autorisation d'exploitation (attestation de conformité)", title: ["Hospitality operating licence (attestation de conformité)", "餐饮经营许可（合规证明）"],
+    agency: ["City of Brussels, Affaires économiques (Horeca)", "布鲁塞尔市经济事务处（餐饮）"],
+    how: ["A restaurant, café or snack bar applies to the city at least 3 months before opening so the file can be finished 20 days before; the licence certifies the premises meet the rules for receiving the public.", "餐厅、咖啡馆或小吃店须在开业至少 3 个月前向市政府申请，以便在开业前 20 天完成；该许可证明场所符合接待公众的规定。"],
+    url: BRU_HORECA, feeNote: ["150 euros file fee.", "档案费 150 欧元。"], takes: ["Filed at least 3 months before opening.", "开业至少 3 个月前提交。"], renews: ["Every 5 years.", "每 5 年。"],
+    proof: [BRU_HORECA, "Vous ouvrez un restaurant, café, snack ? N'oubliez pas de faire une demande d'autorisation d'exploitation ! Vous devez l'obtenir avant l'ouverture.", "Opening a restaurant, café or snack bar? Remember to apply for the operating licence! You must have it before opening."] }),
+  N({ id: "be-bru-terrasse", where: "BE-BRU", level: "city", segs: ["restaurant"], needs: { terrace: true }, method: "online", order: 73, cur: "EUR",
+    form: "Autorisation pour placer une terrasse dans l'espace public", title: ["Outdoor seating on public ground (terrasse)", "公共用地户外座位（terrasse）"],
+    agency: ["City of Brussels, Affaires économiques (Horeca)", "布鲁塞尔市经济事务处（餐饮）"],
+    how: ["A restaurant or café that puts a terrace on public ground applies to the city.", "在公共用地设置露台的餐厅或咖啡馆须向市政府申请。"],
+    url: BRU_TERR,
+    proof: [BRU_TERR, "Une autorisation est nécessaire pour garantir le respect des règles d'occupation de l'espace public et assurer la sécurité des usagers.", "A permit is needed to ensure the rules on occupying public space are kept and users are safe."] }),
+];
+
+/* ------------------------------------------------------------------ Portugal (Lisbon) */
+const PT_EH = "https://registo.justica.gov.pt/Empresas/Empresa-na-Hora";
+const PT_GUIA = "https://areadocomerciante.dgae.gov.pt/documentacao1/documentos/20250530-guia-da-restauracao_2025-pdf.aspx";
+
+const PORTUGAL: OfficialForm[] = [
+  N({ id: "pt-seg-social", where: "PT", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR", fee: 0,
+    form: "Comunicação de admissão de trabalhador (Segurança Social Direta)", title: ["Employer duties with Social Security: hiring declarations", "社会保障雇主义务：雇佣申报"],
+    agency: ["Instituto da Segurança Social (Segurança Social Direta)", "葡萄牙社会保障局（Segurança Social Direta）"],
+    how: ["The company's registration with Social Security follows from the tax start-of-activity declaration; as an employer it declares every new hire online in Segurança Social Direta within the 24 hours before the contract starts.", "公司在社会保障局的登记随税务开业申报自动完成；作为雇主，每名新员工须在合同生效前 24 小时内通过 Segurança Social Direta 在线申报。"],
+    url: "https://www.seg-social.pt/admissao-de-trabalhadores", takes: ["Each hire declared within the 24 hours before the contract starts.", "每名新员工须在合同生效前 24 小时内申报。"],
+    proof: [PT_GUIA, "A admissão de novos trabalhadores nas 24 horas anteriores ao início de produção de efeitos do contrato de trabalho", "Hiring new workers [is declared] in the 24 hours before the employment contract takes effect"] }),
+  N({ id: "pt-lis-utilizacao", where: "PT-LIS", level: "city", segs: PREMISES, method: "online", order: 50, cur: "EUR",
+    form: "Autorização de utilização (or a change of use)", title: ["Use permit for the premises (autorização de utilização)", "场所使用许可（autorização de utilização）"],
+    agency: ["Câmara Municipal de Lisboa (Urbanismo)", "里斯本市政府（城市规划）"],
+    how: ["Whatever the premises, a restaurant needs a use authorisation from the city; in a used building the existing one is checked for restaurant use, or a change of use is applied for.", "无论何种场所，餐厅均须取得市政府的使用许可；旧建筑须核查现有许可是否涵盖餐饮用途，否则须申请用途变更。"],
+    url: PT_GUIA,
+    proof: [PT_GUIA, "Qualquer que seja o espaço onde irá ser instalado o seu estabelecimento, necessita de autorização de utilização, que é concedida pela câmara municipal.", "Whatever the space where your establishment will be installed, you need a use authorisation, which is granted by the municipal council."] }),
+  N({ id: "pt-lis-mcp", where: "PT-LIS", level: "city", segs: ["restaurant"], method: "online", order: 76, cur: "EUR",
+    form: "Mera comunicação prévia (Balcão do Empreendedor, gov.pt)", title: ["Opening notice for a restaurant or bar (mera comunicação prévia)", "餐饮场所开业事先申报（mera comunicação prévia）"],
+    agency: ["Câmara Municipal de Lisboa, through the gov.pt business counter", "里斯本市政府（经 gov.pt 企业服务窗口）"],
+    how: ["Opening a restaurant or bar is, as a rule, a prior notice to the city made on gov.pt, kept on file with proof of the fees paid; where some requirements can't be met, the city's authorisation is needed instead.", "开设餐厅或酒吧一般须在 gov.pt 向市政府提交事先申报，并保存已缴费用的凭证；部分要求无法满足时，须改为取得市政府批准。"],
+    url: "https://www.gov.pt/servicos/abrir-um-estabelecimento-de-restauracao-ou-bebidas",
+    proof: [PT_GUIA, "A abertura de um estabelecimento de restauração ou de bebidas está sujeita a um de dois procedimentos, a efetuar no Portal Gov.pt:", "Opening a restaurant or bar is subject to one of two procedures, made on the Gov.pt portal:"] }),
+];
+
+/* ------------------------------------------------------------------ Ireland (Dublin, Cork) */
+const IE_CRO = "https://cro.ie/registration/company/required-steps/";
+const IE_PAYE = "https://www.revenue.ie/en/employing-people/becoming-an-employer-and-ongoing-obligations/registration-of-employers-for-paye-purposes/index.aspx";
+const IE_FSC = "https://www.gov.ie/en/dublin-city-council/services/getting-a-fire-safety-certificate/";
+const DUB_PLAN = "https://www.dublincity.ie/planning-and-land-use/make-planning-application/apply-planning-permission";
+const ORK_PLAN = "https://www.corkcity.ie/en/council-services/services/planning/planning-application-process/";
+
+const IRELAND: OfficialForm[] = [
+  N({ id: "ie-paye", where: "IE", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR", fee: 0,
+    form: "Employer registration for PAYE (MyEnquiries in ROS)", title: ["Employer registration with Revenue (PAYE)", "向爱尔兰税务局登记雇主（PAYE）"],
+    agency: ["Revenue (Office of the Revenue Commissioners)", "爱尔兰税务局"],
+    how: ["Before paying an employee, the company tells Revenue through MyEnquiries in ROS that it will pay staff; a company registers even if its only employees are its directors.", "向员工发薪前，公司须通过 ROS 中的 MyEnquiries 告知税务局将支付工资；即使只有董事领薪，公司也须登记。"],
+    url: IE_PAYE,
+    proof: [IE_PAYE, "If you hire an employee, you must register as an employer."] }),
+  N({ id: "ie-fsc", where: "IE", level: "city", segs: PREMISES, needs: { buildout: true }, method: "online", order: 52, cur: "EUR",
+    form: "Fire Safety Certificate (BCMS)", title: ["Fire safety certificate for a fit-out or change of use", "装修或用途变更消防安全证书"],
+    agency: ["The council's building control authority (Dublin City Council, Cork City Council fire prevention)", "市议会建筑管控机关（都柏林市议会、科克市议会消防预防科）"],
+    how: ["A fire safety certificate is applied for through the national Building Control Management System before work starts on a new building, an extension, a material alteration or a change of use.", "新建、扩建、重大改建或用途变更，须在开工前通过全国建筑管控管理系统（BCMS）申请消防安全证书。"],
+    url: IE_FSC,
+    feeNote: ["In Dublin, 2.90 euros per square metre, at least 125 euros and at most 12,500 euros.", "都柏林按每平方米 2.90 欧元计，最低 125 欧元，最高 12,500 欧元。"],
+    proof: [IE_FSC, "This is required where the applicant proposes a new building, a new building extension, material alterations to an existing building", "This is required where the applicant proposes a new building, a new building extension, material alterations to an existing building"] }),
+  N({ id: "ie-dub-planning", where: "IE-DUB", level: "city", segs: PREMISES, method: "online", order: 48, cur: "EUR",
+    form: "Planning application (Dublin City Council planning portal)", title: ["Planning permission for a change of use", "用途变更规划许可"],
+    agency: ["Dublin City Council, Planning", "都柏林市议会规划处"],
+    how: ["A significant change of use, such as turning a shop into a restaurant, needs planning permission, applied for online with public notices and the fee in the council's checklist.", "重大用途变更（如将商店改为餐厅）须申请规划许可，在线提交并刊登公告，按市议会清单缴费。"],
+    url: DUB_PLAN,
+    proof: [DUB_PLAN, "In general, you need to apply for planning permission for:"] }),
+  N({ id: "ie-ork-planning", where: "IE-ORK", level: "city", segs: PREMISES, method: "online", order: 48, cur: "EUR",
+    form: "Planning application (Cork City Council)", title: ["Planning permission for a change of use", "用途变更规划许可"],
+    agency: ["Cork City Council, Planning", "科克市议会规划处"],
+    how: ["Development that isn't exempt, including a material change of use, needs planning permission from Cork City Council.", "非豁免开发（包括实质性用途变更）须向科克市议会申请规划许可。"],
+    url: ORK_PLAN,
+    proof: [ORK_PLAN, "All development that is not exempted under planning law requires planning permission."] }),
+];
+
+export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND];
 
 export const FINISH_FIXES: Fix[] = [
   P("at-fb", AT_FB, "In der Regel erlangt die Gesellschaft mit der Eintragung in das Firmenbuch Rechtspersönlichkeit.", "As a rule the company becomes a legal person on its entry in the company register.",
@@ -314,6 +491,24 @@ export const FINISH_FIXES: Fix[] = [
   { ...P("dk-virk", DK_ERST, "Når du vil drive en virksomhed som et anpartsselskab eller aktieselskab, skal dette stiftes i overensstemmelse med lovgivningen og registreres på Virk.", "To run a business as a private or public limited company, it must be founded under the law and registered on Virk.",
     "Proof added from the Danish Business Authority's guide; the fee is from its fee table (erhvervsstyrelsen.dk/gebyrer-og-takster)."),
     fee: 670, feeNote: { en: "670 kroner to register an ApS or A/S.", zh: "注册 ApS 或 A/S 670 丹麦克朗。" } },
+  { ...P("fi-ytj", FI_PRH, "Osakeyhtiö syntyy, kun se rekisteröidään kaupparekisteriin.", "A limited company comes into being when it is entered in the Trade Register.",
+    "Proof added from the Finnish Patent and Registration Office (prh.fi); the fees are from its price list (prh.fi, kaupparekisterin käsittelymaksut, perustaminen). Retitled to the company registration it is."),
+    title: { en: "Company registration with the Trade Register (YTJ start-up notification)", zh: "向贸易登记处注册公司（YTJ 开业通知）" },
+    feeNote: { en: "300 euros for the guided founding on ytj.fi, 400 euros for a founding notification with the company's own documents.", zh: "在 ytj.fi 引导式设立 300 欧元，附自备文件的设立通知 400 欧元。" } },
+  { ...P("pl-biznes", PL_KRS, "Musisz uzyskać wpis do rejestru przedsiębiorców w Krajowym Rejestrze Sądowym (KRS).", "You must obtain an entry in the register of businesses of the National Court Register (KRS).",
+    "Proof added from biznes.gov.pl; the entry was retitled to the filing it is (the KRS entry, made only online) and its agency to the registry court."),
+    url: PL_KRS, title: { en: "Company registration in the National Court Register (KRS)", zh: "在国家法院登记处（KRS）注册公司" },
+    agency: { en: "Sąd rejonowy (the registry court), through the court registers portal (PRS) or S24", zh: "地区法院（登记法院），经法院登记门户（PRS）或 S24" } },
+  { ...P("pt-empresa", PT_EH, "No balcão Empresa na Hora pode fazer todo o processo de constituição de uma sociedade comercial", "At an Empresa na Hora desk you can do the whole process of forming a company",
+    "Proof restored from the Ministry of Justice's registry site (registo.justica.gov.pt), which states the 360-euro fee."),
+    url: PT_EH, fee: 360, feeNote: { en: "360 euros for a normal request.", zh: "普通申请 360 欧元。" } },
+  P("pt-financas", PT_GUIA, "A apresentação à Autoridade Tributária e Aduaneira (AT) da declaração início da atividade é obrigatória", "Filing the start-of-activity declaration with the Tax and Customs Authority (AT) is mandatory",
+    "Proof added from the economic activities directorate's official restaurant guide (dgae.gov.pt, 2025)."),
+  P("ie-cro", IE_CRO, "Please submit a Form A1 and constitution on CORE.", undefined,
+    "Proof added from the Companies Registration Office (cro.ie, read through WebFetch: the site refuses curl)."),
+  { ...P("ie-revenue", "https://www.revenue.ie/en/starting-a-business/registering-for-tax/index.aspx", "You must register for tax with Revenue when you:", undefined,
+    "Retitled: the employer registration is its own entry now (ie-paye); this one is the company's corporation tax and VAT registration."),
+    title: { en: "Tax registration with Revenue (corporation tax and VAT)", zh: "向爱尔兰税务局登记税务（公司税和增值税）" } },
   P("ch-ahv", CH_AHV, "Als Arbeitgeber melden Sie sich bei der Ausgleichskasse an.", "As an employer you register with the compensation fund.",
     "Proof added from the Federal Social Insurance Office's FAQ (bsv.admin.ch)."),
 ];

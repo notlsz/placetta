@@ -24,6 +24,8 @@ export type Fix = {
   except?: string[];
   /** a new title, when the old one named a step the entry doesn't cover */
   title?: { en: string; zh: string };
+  /** the agency that actually takes the filing, when the old entry named a portal's owner instead */
+  agency?: { en: string; zh: string };
   /** a fee an official page states (with its note), for an entry that had none */
   fee?: number; feeNote?: { en: string; zh: string };
   why: string;
@@ -99,6 +101,7 @@ export function applyFixes(forms: OfficialForm[], fixes: Fix[] = FIXES): string[
     if (x.dropTakes) { delete f.takes; f.takesDays = null; }
     if (x.except) f.except = [...(f.except ?? []), ...x.except.filter(e => !(f.except ?? []).includes(e))];
     if (x.title) f.title = x.title;
+    if (x.agency) f.agency = x.agency;
     if (x.fee !== undefined) f.fee = x.fee;
     if (x.feeNote) f.feeNote = x.feeNote;
     if (x.takesSource === null) delete f.takesSource; else if (x.takesSource) f.takesSource = x.takesSource;
