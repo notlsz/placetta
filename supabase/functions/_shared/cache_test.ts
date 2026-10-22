@@ -3,7 +3,7 @@
 // cache (made once, reused, and dropped for the plain call when Gemini refuses it).
 // Run: deno test supabase/functions/_shared/cache_test.ts
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
-import { callModel, fromOpenAI, toOpenAI, withCache } from "./llm.ts";
+import { billedOutput, callModel, fromOpenAI, toOpenAI, withCache } from "./llm.ts";
 import { costOf } from "./ai_cost.ts";
 import { cacheRates } from "./cache_rates.ts";
 import { __forTests, cacheBody, ensureCache, MIN_CACHE_CHARS, stablePart, useCache } from "./gemini_cache.ts";
@@ -46,6 +46,18 @@ Deno.test("OpenAI and Gemini: the cached share of the prompt is read and priced 
   const cached = costOf("gemini:gemini-2.5-flash", { input_tokens: 2_000, cache_read_input_tokens: 8_000, output_tokens: 0 });
   assert(Math.abs(cached / fresh - (2_000 + 8_000 * 0.1) / 10_000) < 0.01, "Gemini 2.5's cached tokens cost a tenth ($0.03 of $0.30)");
   assertEquals(costOf("anthropic:claude-sonnet-5-5", { input_tokens: 1000, cache_read_input_tokens: 6500, cache_creation_input_tokens: 1000, output_tokens: 500 }) > 0, true);
+});
+
+Deno.test("thinking is billed as output, however the vendor reports it", () => {
+  // OpenAI: reasoning is inside completion_tokens; nothing is counted twice
+  assertEquals(billedOutput({ prompt_tokens: 1000, completion_tokens: 900, total_tokens: 1900, completion_tokens_details: { reasoning_tokens: 600 } }), 900);
+  // a vendor whose total carries thinking that completion_tokens leaves out
+  assertEquals(billedOutput({ prompt_tokens: 1000, completion_tokens: 300, total_tokens: 2500 }), 1500);
+  // reasoning reported beside a smaller completion
+  assertEquals(billedOutput({ prompt_tokens: 1000, completion_tokens: 300, completion_tokens_details: { reasoning_tokens: 1200 } }), 1500);
+  assertEquals(billedOutput({}), 0);
+  const d = fromOpenAI({ choices: [{ message: { content: "hi" }, finish_reason: "stop" }], usage: { prompt_tokens: 1000, completion_tokens: 50, total_tokens: 1850 } }, "gemini:gemini-3.8-flash") as { usage: B };
+  assertEquals(d.usage.output_tokens, 850);
 });
 
 Deno.test("OpenAI: calls with the same stable prefix carry the same cache key", async () => {

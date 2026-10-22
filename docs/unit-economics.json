@@ -1,0 +1,265 @@
+{
+  "measured": "2026-10-22",
+  "prices": "supabase/functions/_shared/ai_cost.ts (Anthropic and Gemini read 2026-10-22)",
+  "assumptions": "src/economics.ts ASSUME (FOUNDER TO CONFIRM)",
+  "journeys": [
+    {
+      "id": "chat_turn",
+      "what": "One chat turn on an open store (the average of \"what's due\" and \"which licenses\")",
+      "calls": 2,
+      "prompt": 28076,
+      "cached": 13122,
+      "output": 41.5,
+      "gemini": 0.0124,
+      "gemini2027": 0.0247,
+      "geminiNoCache": 0.0212,
+      "anthropic": 0.0391,
+      "thinkingPer1k": 0.0075,
+      "thinkingPer1k2027": 0.015
+    },
+    {
+      "id": "new_license",
+      "what": "A new license: found, prepared, filled from the workspace, put up for approval",
+      "calls": 5,
+      "prompt": 53463,
+      "cached": 42136,
+      "output": 429,
+      "gemini": 0.0133,
+      "gemini2027": 0.0265,
+      "geminiNoCache": 0.0417,
+      "anthropic": 0.0368,
+      "thinkingPer1k": 0.0188,
+      "thinkingPer1k2027": 0.0375
+    },
+    {
+      "id": "complex_license",
+      "what": "A complex license: beer and wine in Flushing (SLA license, community board notice, TTB registration)",
+      "calls": 5,
+      "prompt": 54561,
+      "cached": 40406,
+      "output": 626,
+      "gemini": 0.016,
+      "gemini2027": 0.032,
+      "geminiNoCache": 0.0433,
+      "anthropic": 0.0457,
+      "thinkingPer1k": 0.0188,
+      "thinkingPer1k2027": 0.0375
+    },
+    {
+      "id": "renewal",
+      "what": "A renewal the monitor starts: found, prepared, filled, put up for approval",
+      "calls": 5,
+      "prompt": 64838,
+      "cached": 51224,
+      "output": 282,
+      "gemini": 0.0151,
+      "gemini2027": 0.0302,
+      "geminiNoCache": 0.0497,
+      "anthropic": 0.042,
+      "thinkingPer1k": 0.0188,
+      "thinkingPer1k2027": 0.0375
+    },
+    {
+      "id": "plan_markets_4",
+      "what": "A four-city entry: four stores added, one plan_markets packet",
+      "calls": 3,
+      "prompt": 32579,
+      "cached": 14656,
+      "output": 219,
+      "gemini": 0.0154,
+      "gemini2027": 0.0307,
+      "geminiNoCache": 0.0253,
+      "anthropic": 0.0485,
+      "thinkingPer1k": 0.0113,
+      "thinkingPer1k2027": 0.0225
+    }
+  ],
+  "filer": {
+    "tokensPerStep": 1732,
+    "usdPerStep": 0.0041,
+    "steps": 30,
+    "maxSteps": 80,
+    "usdAtMax": 0.3251
+  },
+  "routeMix": {
+    "licenses": 580,
+    "stores": 63,
+    "byRoute": {
+      "portal": 248,
+      "email": 1,
+      "fax": 0,
+      "mail": 0,
+      "owner": 15,
+      "team": 316
+    },
+    "byTier": {
+      "license": 471,
+      "free": 66,
+      "complex": 109
+    },
+    "automatedShare": 0.4293,
+    "renewalsPerStoreYear": 2.21,
+    "renewalTeamShare": 0.3853
+  },
+  "teamMinutesPerLicense": 31.34,
+  "fixedMonthUsd": 172,
+  "fixedYearUsd": 2064,
+  "items": [
+    {
+      "item": "Store plan, a store a month (typical)",
+      "price": 149,
+      "ai": 0.69,
+      "delivery": 0.65,
+      "team": 0,
+      "stripe": 5.39,
+      "cost": 6.72,
+      "margin": 0.9548993288590604,
+      "note": "20 chat turns, 4 weekly checks, 0.11 included renewals"
+    },
+    {
+      "item": "Store plan, a store a month (heavy chat)",
+      "price": 149,
+      "ai": 2.92,
+      "delivery": 0.65,
+      "team": 0,
+      "stripe": 5.39,
+      "cost": 8.96,
+      "margin": 0.9398657718120805,
+      "note": "200 chat turns"
+    },
+    {
+      "item": "Store plan, a store a month (abusive: at the allowance)",
+      "price": 149,
+      "ai": 25,
+      "delivery": 0.65,
+      "team": 0,
+      "stripe": 5.39,
+      "cost": 31.04,
+      "margin": 0.7916778523489933,
+      "note": "the gate holds AI at the plan's $25 allowance"
+    },
+    {
+      "item": "New license",
+      "price": 299,
+      "ai": 0.01,
+      "delivery": 0.06,
+      "team": 31.34,
+      "stripe": 8.97,
+      "cost": 40.38,
+      "margin": 0.8649498327759197,
+      "note": "route mix measured over 580 licenses"
+    },
+    {
+      "item": "New license, pessimistic AI and all by the team",
+      "price": 299,
+      "ai": 0.04,
+      "delivery": 0,
+      "team": 45,
+      "stripe": 8.97,
+      "cost": 54.01,
+      "margin": 0.8193645484949833,
+      "note": "worst route, the team files it"
+    },
+    {
+      "item": "Complex license (liquor)",
+      "price": 999,
+      "ai": 0.02,
+      "delivery": 0,
+      "team": 300,
+      "stripe": 29.27,
+      "cost": 329.29,
+      "margin": 0.6703803803803804,
+      "note": "team-led: hearings, notices, corrections"
+    },
+    {
+      "item": "Renewal the plan doesn't include ($99)",
+      "price": 99,
+      "ai": 0.02,
+      "delivery": 0,
+      "team": 30,
+      "stripe": 3.17,
+      "cost": 33.19,
+      "margin": 0.6647474747474748,
+      "note": "it needs the team by definition"
+    },
+    {
+      "item": "Four-city entry (plan_markets), the planning run",
+      "price": 0,
+      "ai": 0.02,
+      "delivery": 0,
+      "team": 0,
+      "stripe": 0,
+      "cost": 0.02,
+      "margin": -1,
+      "note": "the plan preview is free; licenses are bought one by one"
+    }
+  ],
+  "customers": [
+    {
+      "who": "One store, open",
+      "stores": 1,
+      "opens": 0,
+      "revenue": 1872.23,
+      "cost": 108.88,
+      "margin": 0.9418447519802587,
+      "licensesIncluded": 0
+    },
+    {
+      "who": "One store, opening (the typical San José restaurant)",
+      "stores": 1,
+      "opens": 1,
+      "revenue": 7455.23,
+      "cost": 1171.2,
+      "margin": 0.8429022310512218,
+      "licensesIncluded": 0
+    },
+    {
+      "who": "5-store chain, opens 1 a year",
+      "stores": 5,
+      "opens": 1,
+      "revenue": 14944.14,
+      "cost": 1606.71,
+      "margin": 0.8924856164356062,
+      "licensesIncluded": 0
+    },
+    {
+      "who": "20-store chain, opens 1 a year",
+      "stores": 20,
+      "opens": 1,
+      "revenue": 38338.57,
+      "cost": 3100.61,
+      "margin": 0.9191255698895394,
+      "licensesIncluded": 11
+    },
+    {
+      "who": "20-store chain, opens 5 a year (25% growth)",
+      "stores": 20,
+      "opens": 5,
+      "revenue": 41914.57,
+      "cost": 6792.81,
+      "margin": 0.8379367842733446,
+      "licensesIncluded": 55
+    },
+    {
+      "who": "10-store chain, opens 3 a year (25% growth, just over the line)",
+      "stores": 10,
+      "opens": 3,
+      "revenue": 21404.29,
+      "cost": 3857.93,
+      "margin": 0.8197590296150912,
+      "licensesIncluded": 33
+    }
+  ],
+  "guardrail": {
+    "aiShareOfRevenueAlert": 0.1,
+    "aiNoRevenueAlertUsd": 5,
+    "teamOverBudgetFactor": 1.5,
+    "chatTurnsPerStoreDay": 60,
+    "graderSampleRate": 0.2,
+    "sweepStaleDays": 90
+  },
+  "perChatTurn": {
+    "typical": 0.0124,
+    "worst": 0.0391
+  }
+}

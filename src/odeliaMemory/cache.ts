@@ -82,11 +82,15 @@ export function cacheUse(u: Record<string, unknown> | undefined): CacheUse {
     return { input: n(u.input_tokens), read: n(u.cache_read_input_tokens), write: n(u.cache_creation_input_tokens), output: n(u.output_tokens) };
   if ("prompt_tokens" in u) {
     const cached = n((u.prompt_tokens_details as Record<string, unknown> | undefined)?.cached_tokens);
-    return { input: Math.max(0, n(u.prompt_tokens) - cached), read: cached, write: 0, output: n(u.completion_tokens) };
+    // thinking billed as output even when a vendor reports it apart from completion_tokens (llm.ts billedOutput)
+    const reasoning = n((u.completion_tokens_details as Record<string, unknown> | undefined)?.reasoning_tokens);
+    const output = Math.max(n(u.completion_tokens), n(u.total_tokens) ? Math.max(0, n(u.total_tokens) - n(u.prompt_tokens)) : 0, reasoning > n(u.completion_tokens) ? n(u.completion_tokens) + reasoning : 0);
+    return { input: Math.max(0, n(u.prompt_tokens) - cached), read: cached, write: 0, output };
   }
   if ("promptTokenCount" in u) {
     const cached = n(u.cachedContentTokenCount);
-    return { input: Math.max(0, n(u.promptTokenCount) - cached), read: cached, write: 0, output: n(u.candidatesTokenCount) };
+    // Gemini's own usage keeps thinking apart (thoughtsTokenCount) and bills it as output
+    return { input: Math.max(0, n(u.promptTokenCount) - cached), read: cached, write: 0, output: n(u.candidatesTokenCount) + n(u.thoughtsTokenCount) };
   }
   return { input: 0, read: 0, write: 0, output: 0 };
 }

@@ -8,7 +8,7 @@ Written 2026-10-22. Each competitor's strength and weakness comes from a cited p
 |---|---:|---|
 | Finishing the job alone | 7 | Maps, fills the agency's own PDFs, puts complete filings up for one-tap approval, then the team or a portal route files them; store bots split a 20-store request (12 a call, 48 a run). Approval is required by design. No live-model eval has run yet (docs/EVAL.md). |
 | Accuracy with cited sources | 8 | test:accuracy 100% recall and precision on the gold and held-out sets; every plan row carries its agency page and the date it was read; fees agencies don't publish are left open. Weak spot found: Santa Clara County's health permit is proven by a line on San José's business tax page. |
-| Cost transparency | 9 | Every license priced before approval ($299, $999, $99 renewal), cost to open with agency fees, a per-run token cap, and from this pass a failed run isn't charged. No per-run estimate is shown (runs cost about half a cent median, docs/eval-speed.json). |
+| Cost transparency | 9 | Every license priced before approval ($299, $999, $99 renewal), cost to open with agency fees, a per-run token cap, and from this pass a failed run isn't charged. No per-run estimate is shown (runs cost about a cent median at the prices re-read 2026-10-22, docs/eval-speed.json and docs/UNIT-ECONOMICS.md). |
 | Speed | 7 | Modeled on 60 fixtures: 2.8 s median to done, 23.7 s p95. A 4-market entry is one call (plan_markets) instead of four. No live latency measured. |
 | Memory | 8 | Owner-approved memory, recalled across sessions (journeys test), pinned facts from the records survive 200 turns, "don't remember this chat". |
 | Live visibility | 8 | Streaming over Realtime with polling fallback, a trace tree per run, the replay of every tool call. |
@@ -151,4 +151,4 @@ Where the answer is yes (research answers and general documents), Placetta shoul
 4. Twenty stores in one request (12 a call, 48 a run).
 5. A document whose instructions were hidden is still read, with the hidden sentence quoted in full to the owner; visible instructions still keep it from any model.
 
-Skipped, by the rule "only if it improves our agent": routing simple rounds to a cheaper model (the cache is per model, so it costs more, measured), and a cost estimate before each run (runs cost about half a cent; the price that matters, the license's, is already shown before approval).
+Skipped, by the rule "only if it improves our agent": routing simple rounds to a cheaper model (the cache is per model, so it costs more, measured), and a cost estimate before each run (runs cost about a cent; the price that matters, the license's, is already shown before approval).
