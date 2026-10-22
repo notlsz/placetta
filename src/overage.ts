@@ -39,7 +39,17 @@ export type Quote =
   | { kind: "charge"; cents: number; packs: number; line: Bi; capLeftCents: number }
   | { kind: "blocked"; cents: number; packs: number; reason: "no_cap" | "over_cap" | "no_plan"; line: Bi; capLeftCents: number };
 
-export const allowanceOf = (locations: number) => Math.max(0, Math.floor(locations)) * PROPOSED.extraFilingsPerLocationMonth;
+/** What kind of filing an application is, from its own id and name: the entity module's (ids start with ent-), a
+ *  sales tax return, an amendment, or else a license or its renewal, which the plan always includes. */
+export function filingKindOf(a: { id: string; name?: { en: string } }): FilingKind {
+  const n = (a.name?.en ?? "").toLowerCase();
+  if (/^ent-/.test(a.id) || /statement of information|annual report|biennial statement|franchise tax report|annual list\b/.test(n)) return "entity";
+  if (/\bamend(ed|ment)\b/.test(n)) return "amendment";
+  if (/sales (and use )?tax return/.test(n)) return "sales_tax";
+  return "license";
+}
+
+export const allowanceOf =(locations: number) => Math.max(0, Math.floor(locations)) * PROPOSED.extraFilingsPerLocationMonth;
 const usd = (cents: number) => "$" + (cents / 100).toLocaleString("en-US", { minimumFractionDigits: cents % 100 ? 2 : 0, maximumFractionDigits: 2 });
 
 /** What one more filing of this kind costs this month, said before anything happens. */

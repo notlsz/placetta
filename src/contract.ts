@@ -37,13 +37,17 @@ export function yearUsd(t: Term): number {
   return month * 12 * Math.max(1, Math.floor(t.locations)) * (1 - PROPOSED.multiYearDiscountPct / 100);
 }
 
-/** The terms, said before checkout, next to the button that agrees to them (§ 17602(a)(1)). */
-export function disclosure(t: Term): Bi {
-  const y = yearUsd(t), n = Math.max(1, Math.floor(t.locations));
+/** The terms, said before checkout, next to the button that agrees to them (§ 17602(a)(1)). With no tier chosen yet,
+ *  both published prices are said. */
+export function disclosure(t: Omit<Term, "tier"> & { tier?: Term["tier"] }): Bi {
+  const n = Math.max(1, Math.floor(t.locations));
+  const ess = money(yearUsd({ ...t, tier: "essentials" })), pro = money(yearUsd({ ...t, tier: "pro" }));
+  const price = t.tier ? B(`${money(yearUsd({ ...t, tier: t.tier }))} a year`, `每年 ${money(yearUsd({ ...t, tier: t.tier }))}`)
+    : B(`${ess} a year for Essentials or ${pro} for Pro`, `基础版每年 ${ess}，专业版每年 ${pro}`);
   const term = t.years === 1 ? B("one year", "一年") : B(`${t.years} years, billed once a year`, `${t.years} 年，每年计费一次`);
   return B(
-    `Renews automatically. Your plan is for ${term.en} at ${money(y)} a year (${n} location${n === 1 ? "" : "s"}), then renews every year at the same price until you cancel. We email you ${NOTICE_MIN} to ${NOTICE_MAX} days before each renewal with what it will charge. Cancel online any time in Settings, Billing: one click, no call. Government fees are separate and paid to each agency.`,
-    `自动续费。您的方案期限为${term.zh}，每年 ${money(y)}（${n} 家门店），到期后按相同价格每年自动续费，直到您取消。每次续费前 ${NOTICE_MIN} 至 ${NOTICE_MAX} 天，我们会发邮件告知续费金额。可随时在“设置 > 账单”中在线取消：点一下即可，无需致电。政府规费另计，直接支付给各机构。`);
+    `Renews automatically. Your plan is for ${term.en} at ${price.en} (${n} location${n === 1 ? "" : "s"}), then renews every year at the same price until you cancel. We email you ${NOTICE_MIN} to ${NOTICE_MAX} days before each renewal with what it will charge. Cancel online any time in Settings, Billing: one click, no call. Government fees are separate and paid to each agency.`,
+    `自动续费。您的方案期限为${term.zh}，${price.zh}（${n} 家门店），到期后按相同价格每年自动续费，直到您取消。每次续费前 ${NOTICE_MIN} 至 ${NOTICE_MAX} 天，我们会发邮件告知续费金额。可随时在“设置 > 账单”中在线取消：点一下即可，无需致电。政府规费另计，直接支付给各机构。`);
 }
 
 /** The consent line the owner ticks before paying. */

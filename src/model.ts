@@ -14,6 +14,8 @@ import { ago, inDays } from "./time";
 import { B, same, type Bi } from "./bi";
 export { B, same, type Bi };
 
+import type { AgencyNotice } from "./value";
+import type { Entity } from "./entity";
 export type Level = "federal" | "state" | "county" | "city";
 /** approved: issued. review: filed, the agency is reviewing. ready: complete, waiting for your approval.
  *  filing: approved by you, with Placetta's filing team. needs: needs a document or answer from you. draft: Placetta is preparing it. waiting: blocked by another application. todo: not started. */
@@ -179,6 +181,7 @@ export type Store = {
   apps?: string[];               // applications that belong to this store
   permits?: { name: Bi; expires: string }[];   // permits on file for an open store
   ready?: Record<string, boolean>;               // the city's inspection checklists: "<inspection id>:<item id>" ticked when it's in place
+  notices?: AgencyNotice[];                      // notices an agency sent this store, each with its document (src/value.ts)
 };
 
 export type Workspace = {
@@ -207,6 +210,7 @@ export type Workspace = {
   routines?: Routine[];                    // jobs she repeats on a schedule
   runLog?: RunLog[];                       // the moments of runs that happened in the browser, for each job's replay (src/replay.ts)
   firstPlan?: FirstPlan;                   // the instant plan written at sign-up from the registry, before any model call
+  entities?: Entity[];                     // the legal entities and the states each is registered in (src/entity.ts)
   /** Requests Odelia answered in this browser (the sample, or without the server's runs), timed as they happened: when
    *  asked, when her first words showed, when the answer was done. An account's server runs are timed in agent_runs. */
   runs?: { id: string; prompt: string; created_at: string; first_text_at?: string | null; done_at?: string | null; status?: string }[];

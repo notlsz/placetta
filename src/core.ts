@@ -143,7 +143,7 @@ export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
     business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
     facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto, spend: s.spend, jobs: s.jobs, routines: s.routines,
-    firstPlan: s.firstPlan, runs: s.runs, controls: s.controls, undo: s.undo, ...(s.runLog ? { runLog: s.runLog } : {}),
+    firstPlan: s.firstPlan, entities: s.entities, runs: s.runs, controls: s.controls, undo: s.undo, ...(s.runLog ? { runLog: s.runLog } : {}),
   };
 }
 /** What's saved: everything but the audit trail (that has its own table) and payment cards (made from the filings). */

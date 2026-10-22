@@ -2198,3 +2198,28 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .job-bot-on { display: inline-flex; align-items: center; min-height: 34px; font-size: 13.5px; color: var(--blue-ink); }
 .bot-group .lnk.quiet, .sb-done .lnk.quiet { color: var(--ink3); }
 .gate-card .gate-sso-link { display: block; margin: 12px auto 0; }
+
+/* growth: the value report, the contract terms in Plans, the brand plan on Headquarters (src/ValueReport.tsx, src/Growth.tsx, src/HqRollout.tsx) */
+.vr { display: grid; gap: 18px; }
+.vr-sec h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
+.vr-line h4 { margin: 12px 0 4px; font-size: 12.5px; font-weight: 500; color: var(--ink3); }
+.vr-head, .vr-sub, .vr-renew ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.vr-head li, .vr-renew li { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+.vr-head li svg, .vr-renew li svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--blue-ink); }
+.vr-sub li { font-size: 13.5px; line-height: 1.45; color: var(--ink2); }
+.vr-f { margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink3); }
+.vr-notices { margin-top: 12px; display: grid; gap: 8px; }
+.vr-notices .lnk { display: inline-flex; align-items: center; gap: 6px; padding: 0; background: none; border: 0; font: inherit; font-size: 13.5px; color: var(--ink); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.vr-notices .lnk svg { width: 14px; height: 14px; }
+.vr-notices em { font-style: normal; color: var(--ink3); }
+.vr-form label { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink3); }
+.vr-renew { margin: 12px 0; padding: 14px; border-radius: 16px; background: var(--mist); display: grid; gap: 8px; }
+.vr-renew b { font-weight: 600; font-size: 14px; }
+.vr-renew .lnk { justify-self: start; padding: 0; background: none; border: 0; font: inherit; font-size: 13.5px; color: var(--ink); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.plans .plan.terms { margin-top: 10px; }
+.plans .plan.terms p { font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
+.hq-rollout .sg-list { margin-top: 8px; }
+.hq-rollout .sg-tx small + small { margin-top: 2px; }
+.hq-plan-form .check { grid-column: auto; }
+.hq-link { grid-column: 1 / -1; display: block; padding: 10px 12px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .1); font: 12.5px/1.5 ui-monospace, "SF Mono", Menlo, monospace; overflow-wrap: anywhere; user-select: all; }
+@media (max-width: 640px) { .hq-plan-form { grid-template-columns: minmax(0, 1fr); } }

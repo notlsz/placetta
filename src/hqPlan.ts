@@ -49,4 +49,4 @@ export function cleanCode(s: unknown): string | null {
 }
 
 /** The link a new location opens to join. */
-export const inviteLink = (origin: string, code: string) => `${origin.replace(/\/+$/, "")}/app/?hq=${encodeURIComponent(code)}`;
+export const inviteLink = (origin: string, code: string) => `${origin.replace(/\/+$/, "")}/app/settings/team?hq=${encodeURIComponent(code)}`;

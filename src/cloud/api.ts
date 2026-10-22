@@ -648,9 +648,52 @@ export type LocationPrice ={ amount: number; currency: string; interval: string 
 export type PlanPrices = { location: LocationPrice | null; pro?: LocationPrice | null; opening: LocationPrice | null; opening_food?: LocationPrice | null; guarantee?: LocationPrice | null; pack?: LocationPrice | null };
 export const locationPrices = (ws: string) => fn<PlanPrices>("billing", { action: "prices", workspace_id: ws, return_url: appHome() });
 export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: appHome() });
-export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean } = {}) =>
+export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean; term_years?: number; renewal_consent?: boolean } = {}) =>
   fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: appHome() });
 export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { action: "portal", workspace_id: ws, return_url: appHome() });
+
+/* ------------------------------ growth: the cap, modules, the term, the brand plan ------------------------------ */
+
+/** The growth columns of billing (migration 20261022140000_growth_mechanics). Null before it's applied. */
+export type Growth = { modules: string[]; modules_requested: string[]; filing_cap_cents: number; term_years: number; term_started: string | null; auto_renew: boolean; renewal_notice_for: string | null; hq_paid_by: string | null; current_period_end: string | null; paid_locations: number };
+export async function growth(ws: string): Promise<Growth | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().from("billing").select("modules, modules_requested, filing_cap_cents, term_years, term_started, auto_renew, renewal_notice_for, hq_paid_by, current_period_end, paid_locations").eq("workspace_id", ws).maybeSingle();
+  if (error) return null;
+  return (data as Growth | null) ?? null;
+}
+/** This month's filings past the plan: how many, what was charged, the cap. */
+export type FilingMonth = { month: string; locations: number; used: number; charged_cents: number; cap_cents: number; paid: boolean };
+export async function filingMonth(ws: string): Promise<FilingMonth | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("filing_month", { ws });
+  return error ? null : (data as FilingMonth);
+}
+export const setFilingCap = (ws: string, usd: number) => rpcData<number>("filing_cap_set", { ws, p_cents: Math.round(usd) * 100 });
+/** A filing past the plan, approved at the price shown (0 within the allowance). */
+export const filingCharge = (ws: string, o: { ref: string; kind: string; shown_cents: number }) =>
+  fn<{ ok: true; kind: "plan" | "allowance" | "charge"; cents: number; again?: boolean }>("billing", { action: "filing_charge", workspace_id: ws, ...o, return_url: appHome() });
+export const addModule = (ws: string, module: string) => fn<{ ok: true; module: string; state: "on" | "requested" }>("billing", { action: "add_module", workspace_id: ws, module, return_url: appHome() });
+/** Off is the online cancel of auto-renew; on turns it back on. */
+export const setAutoRenew = (ws: string, on: boolean) => fn<{ ok: true; auto_renew: boolean }>("billing", { action: "auto_renew", workspace_id: ws, on, return_url: appHome() });
+
+export type HqPlanView = {
+  plan: { brand: string | null; bill_to: "hq" | "franchisee"; tier: "essentials" | "pro"; status: string | null; period_end: string | null } | null;
+  counts: { workspaces: number; locations: number; people: number };
+  invites: { id: string; label: string | null; created_at: string; expires_at: string; used_at: string | null; workspace: string | null; revoked: boolean }[];
+};
+export async function hqPlanView(): Promise<HqPlanView | null> {
+  if (PREVIEW) return null;
+  const { data, error } = await supabase().rpc("hq_plan_view");
+  if (error) { if (error.code === "PGRST202" || error.code === "42883") return null; throw fromPg(error); }
+  return data as HqPlanView | null;
+}
+export const hqPlanSet = (brand: string, billTo: "hq" | "franchisee", tier: "essentials" | "pro") => rpcData<HqPlanView>("hq_plan_set", { p_brand: brand, p_bill_to: billTo, p_tier: tier });
+export const hqInviteCreate = (label: string) => rpcData<string>("hq_invite_create", { p_label: label });
+export const hqInviteRevoke = (id: string) => rpcVoid("hq_invite_revoke", { p_id: id });
+export const hqInviteRedeem = (ws: string, code: string) => rpcData<{ hq_email: string; brand: string | null; bill_to: "hq" | "franchisee" }>("hq_invite_redeem", { ws, p_code: code });
+export const hqCheckout = () => fn<{ url: string }>("billing", { action: "hq_checkout", renewal_consent: true, return_url: appHome() });
+export const hqSync = () => fn<{ covered: number }>("billing", { action: "hq_sync", return_url: appHome() });
 /** An Odelia pack: more AI allowance, carried over until it's used. */
 export const buyPack = (ws: string, packs = 1) => fn<{ url: string }>("billing", { action: "pack", workspace_id: ws, packs, return_url: appHome() });
 /** How much of this period's Odelia allowance is used. */

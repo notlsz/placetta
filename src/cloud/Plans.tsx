@@ -4,6 +4,11 @@ import { useApp } from "../ctx";
 import { B } from "../model";
 import { filledName } from "../plan/prefill";
 import { I, Modal, Pill, Select } from "../ui";
+import { consentLine, disclosure, NOTICE_MAX } from "../contract.ts";
+import { MODULES } from "../modules.ts";
+import { PROPOSED } from "../pricing.ts";
+import { daysUntil } from "../time";
+import { RenewalValue } from "../ValueReport";
 
 /* The plans sheet: the entry plan to start the agent, and the annual plans for filing by the team.
    Prices match the landing page. Agency fees are always paid by the business to the agency. */
@@ -20,6 +25,9 @@ export function Plans({ reason, filing, onClose }: { reason: "start" | "file"; f
   const [markets, setMarkets] = useState(1);
   const [busy, setBusy] = useState("");
   const [guarantee, setGuarantee] = useState(false);
+  // the contract: a term of one to three years, and the automatic renewal terms agreed to next to the buttons
+  const [years, setYears] = useState(1);
+  const [agreed, setAgreed] = useState(false);
   const [prices, setPrices] = useState<Prices | null>(null);
   const wsId = cloud?.wsId;
   useEffect(() => { if (wsId) void api.locationPrices(wsId).then(setPrices, () => setPrices(null)); }, [wsId]);
@@ -34,7 +42,7 @@ export function Plans({ reason, filing, onClose }: { reason: "start" | "file"; f
   const go = async (p: "entry" | "essentials" | "pro") => {
     setBusy(p);
     if (p === "entry") await cloud.checkout("entry", { markets });
-    else await cloud.checkout("locations", { tier: p, guarantee });
+    else await cloud.checkout("locations", { tier: p, guarantee, term_years: years, renewal_consent: agreed });
     setBusy("");
   };
   const showEntry = cloud.plan === "none";
@@ -61,7 +69,7 @@ export function Plans({ reason, filing, onClose }: { reason: "start" | "file"; f
       <ul>{items.map(([en, z], i) => <li key={i}><I.check />{zh ? z : en}</li>)}</ul>
       <div className="plan-act">
         <span className="mk">{zh ? `${n} 家门店` : `${n} store${n === 1 ? "" : "s"}`}</span>
-        <Pill kind={key === "pro" ? "ink" : undefined} disabled={!!busy || !price} onClick={() => void go(key)}>{busy === key ? "…" : zh ? `选择${name[1]}` : `Choose ${name[0]}`}</Pill>
+        <Pill kind={key === "pro" ? "ink" : undefined} disabled={!!busy || !price || !agreed} onClick={() => void go(key)}>{busy === key ? "…" : zh ? `选择${name[1]}` : `Choose ${name[0]}`}</Pill>
       </div>
     </section>
   );
@@ -80,6 +88,15 @@ export function Plans({ reason, filing, onClose }: { reason: "start" | "file"; f
           {tier("pro", prices?.pro, ["Pro", "专业版"], ["Inspection ready, every day", "每天都能迎检"], [
             ["Everything in Essentials", "包含基础版全部内容"], ["Daily inspection-readiness logs and mock inspections", "每日迎检记录与模拟检查"], ["Staff certificates and vendor proof tracked", "跟踪员工证书与供应商凭证"], ["Twice Odelia's allowance: $50 a location a month", "双倍 Odelia 额度：每店每月 50 美元"]])}
         </div>
+        <section className="plan terms">
+          <div className="plan-h"><b>{b(B("Term and renewal", "期限与续费"))}</b>
+            <label className="mk">{b(B("Term", "期限"))}
+              <Select aria-label={b(B("Term", "期限"))} value={years} onChange={e => setYears(Number(e.target.value))}>{PROPOSED.terms.map(y => <option key={y} value={y}>{zh ? `${y} 年` : `${y} year${y === 1 ? "" : "s"}`}</option>)}</Select>
+            </label></div>
+          <p>{b(disclosure({ years, locations: n }))}</p>
+          <label className="guar"><input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} /><span>{b(consentLine)}</span></label>
+        </section>
+        {cloud.billing?.current_period_end && daysUntil(cloud.billing.current_period_end.slice(0, 10)) >= 0 && daysUntil(cloud.billing.current_period_end.slice(0, 10)) <= NOTICE_MAX && <RenewalValue />}
         {opening.length > 0 && (
           <section className="plan openings">
             <div className="plan-h"><b>{zh ? `${opening.length} 家门店正在筹备开业` : `${opening.length} store${opening.length === 1 ? "" : "s"} still opening`}</b></div>
@@ -104,6 +121,7 @@ export function Plans({ reason, filing, onClose }: { reason: "start" | "file"; f
             </div>
           </section>
         )}
+        <p className="note">{b(B("Grow the same contract with modules, priced by our team: ", "可在同一合同上添加模块，由团队报价："))}{MODULES.map(m => b(m.name)).join(zh ? "、" : ", ")}{b(B(". Add them in Settings, Billing.", "。可在“设置 > 账单”中添加。"))}</p>
         <p className="note">{b(B("Ten or more locations: headquarters plans from $25,000 a year, with every store on one dashboard. Overseas brands entering the US: company setup through the first store, quoted. Government fees are paid by you directly to each agency, at cost. Payments are handled by Stripe.", "10 家及以上门店：总部方案每年 25,000 美元起，所有门店一屏掌握。海外品牌进入美国：从公司设立到首店开业，单独报价。政府规费由您按实际金额直接支付给各机构。付款由 Stripe 处理。"))} <a href="mailto:support@placetta.com?subject=Headquarters%20plan">{b(B("Talk to us", "联系我们"))}</a></p>
       </div>
     </Modal>

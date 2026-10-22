@@ -7,6 +7,7 @@ import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn } from "./time";
 import * as api from "./cloud/api";
 import * as capi from "./cloud/collab";
 import { HqMetrics } from "./Metrics";
+import { HqRollout } from "./HqRollout";
 /* Team review (src/review.ts, src/ReviewTable.tsx, src/Comments.tsx): the review table across franchisees, and the
    permit threads each franchisee shares with headquarters */
 import { buildGrid, statusSay, storesOfHq, storesOfWorkspace, type HqReviewRow, type ReviewCell, type ReviewRow, type ReviewStore } from "./review";
@@ -194,6 +195,7 @@ export function Headquarters({ lang, initial, sample }: { lang: Lang; initial: H
       )}
 
       {!sample && <HqMetrics lang={lang} />}
+      {!sample && <HqRollout lang={lang} say={say} />}
 
       {lines.length === 0 && stores.length === 0 ? (
         <div className="empty">
