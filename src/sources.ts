@@ -17,7 +17,7 @@ import { formById, type OfficialForm } from "./forms/registry";
 export type Used = { kind: "form" | "page" | "doc"; label: string; url?: string; keys?: string[] };
 
 const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } };
-const official = (url: string) => /\.(gov|mil|us)$/.test(host(url)) || /^(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov|santaclaracounty\.gov|ochealthinfo\.com|houstonpermittingcenter\.org|houstonhealth\.org|cityofirvine\.gov|sanjoseca\.gov)$/.test(host(url));
+const official = (url: string) => /\.(gov|mil)$/.test(host(url)) || /\.[a-z]{2}\.us$/.test(host(url)) || /^(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov|santaclaracounty\.gov|ochealthinfo\.com|houstonpermittingcenter\.org|houstonhealth\.org|cityofirvine\.gov|sanjoseca\.gov)$/.test(host(url));
 const isUrl = (v: unknown): v is string => typeof v === "string" && /^https?:\/\/[^\s]+$/i.test(v) && !!host(v);
 const obj = (v: unknown): Record<string, unknown> => (v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {});
 const list = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);

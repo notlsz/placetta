@@ -2082,7 +2082,7 @@ export const clean = (s: string) => s.replace(/\*\*/g, "").replace(/\s*\u2014\s*
 /** Odelia never files, pays or sends anything herself. A reply that says she did gets one plain correction, so a model
  *  that slips can't leave the person thinking something went out (src/guard.ts). */
 export const honest = (text: string, lang: Lang) => (claimsAction(text) ? `${text}\n\n${HONEST[lang]}` : text);
-export const official = (url: string) => { const h = domainOf(url); return /\.(gov|mil|us)$/.test(h) || /^(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov)$/.test(h); };
+export const official = (url: string) => { const h = domainOf(url); return /\.(gov|mil)$/.test(h) || /\.[a-z]{2}\.us$/.test(h) || /^(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov)$/.test(h); };
 
 /** An AgentBackend driven by a real model. Approvals and sample uploads still run the deterministic flows.
  *  `account`: a signed-in workspace (real filings by the team). `paths`: stored files by name, for uploads.
