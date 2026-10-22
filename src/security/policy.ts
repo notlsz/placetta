@@ -72,7 +72,9 @@ export const ROLE_SCOPES: Record<Role, Scope[]> = {
 
 export const SIDE_EFFECT: Scope[] = ["send", "file", "pay", "delete", "settings", "app_write"];
 /** The most of each kind of side effect one run may put up. */
-export const RUN_BUDGET: Partial<Record<Scope, number>> = { send: 12, file: 15, pay: 8, delete: 6, settings: 6, app_write: 6, draft: 30, write: 300 };
+/** The tools that write something a later run reads back as known: memory, business facts and skills. */
+const MEMORY_TOOLS = new Set(["memory_save", "remember", "skill_save"]);
+export const RUN_BUDGET: Partial<Record<Scope, number>> ={ send: 12, file: 15, pay: 8, delete: 6, settings: 6, app_write: 6, draft: 30, write: 300 };
 /** The most one purchase may be, and all of one run's purchases together, in USD, whatever the spending rules say. */
 export const AMOUNT_CAP = 10_000, RUN_AMOUNT_CAP = 25_000, BUDGET_CAP = 100_000;
 
@@ -157,6 +159,15 @@ export function decideCall(p: RunPolicy, tool: string, input: Record<string, unk
   // connected-app changes from it, and nothing it named gets written down
   if (p.taint !== "none" && (scope === "pay" || scope === "file" || scope === "delete" || scope === "settings" || scope === "app_write"))
     return deny(scope, "tainted", `Refused: this run read content that was ${p.taint} for instructions aimed at an AI, so it can't pay, file, remove, change settings or change a connected app. Ask again in a new request.`);
+  // Memory outlives the run, so it's where a planted instruction pays off later (memory poisoning). An address that
+  // appears only in content read from outside never goes into memory, flagged or not: the person confirms it first.
+  if (MEMORY_TOOLS.has(tool)) {
+    for (const [, v] of strings(input)) for (const e of emailsIn(v)) {
+      const x = e.toLowerCase();
+      if (p.untrusted.has(x) && !p.trusted.has(x) && !agencyEmail(x))
+        return deny(scope, "untrusted_address", `Refused: ${x} appears only in content Odelia read from outside, so it isn't kept in memory. Ask the person to confirm it.`);
+    }
+  }
   if (p.taint !== "none" && scope !== "send") {
     for (const [, v] of strings(input)) for (const e of emailsIn(v)) {
       const x = e.toLowerCase();
