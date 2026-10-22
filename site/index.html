@@ -2963,7 +2963,7 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
   .tr95i svg{width:36px;height:36px}
 
   /* security: the first four controls, the rest behind "Show all" */
-  .sc95lists.p95f:not(.p95o)>ul:nth-child(n+2){display:none}
+  .sc95lists.p95f:not(.p95o)>.scg:nth-child(n+2),.sc95lists.p95f:not(.p95o)>.scg:first-child li:nth-child(n+5){display:none}
 
   /* tabs that run past the screen: the last one fades and an arrow says there is more */
   #case #tsBar{position:relative}
@@ -2996,6 +2996,52 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 }
 @media (min-width:768px){.p95fb{display:none!important}}
 /* /phone95:css */
+/* trust95 (Oct 21): trust and security read like a trust page. Every control carries its status in words (In place,
+   Rolling out, In progress), the main subprocessors and the security contact are named, and nothing claims a certificate */
+.tr95p{margin-top:12px;font-size:16px;line-height:1.5;color:var(--ink2);max-width:336px}
+@media (min-width:1024px){
+  .tr95k{height:auto;min-height:0;gap:16px;padding:24px 24px 28px}
+  .tr95k p{font-size:17px;line-height:1.3}
+  .tr95k small{margin-top:8px;font-size:15px;line-height:1.5;color:var(--ink2)}
+  .tr95i{order:-1;margin:0;padding:0;justify-content:flex-start}
+  .tr95i svg{width:32px;height:32px}
+}
+.tr95i{color:var(--gs-d)}
+.tr95k small{color:var(--ink2)!important}
+.sc95i{margin-top:16px;font-size:15px;line-height:1.5;color:var(--ink2);max-width:361px}
+.sc95c{margin-top:20px;display:flex;flex-direction:column;gap:2px;font-size:14px;color:var(--muted)}
+.sc95c a{color:var(--ink);text-decoration:none;font-size:15px}
+.sc95c a:hover{text-decoration:underline}
+.sc95lists .scg ul{list-style:none;margin:0;padding:0}
+.sc95lists .scg li{padding:7px 0!important;font-size:15px;line-height:22px;color:var(--ink)}
+.sc95lists .scg+.scg{margin-top:0}
+.sct{display:inline-flex;align-items:center;height:24px;padding:0 9px;margin-bottom:8px;border-radius:6px;font-size:12px;font-weight:500;letter-spacing:.2px}
+.sct-ok{background:#E3F1E7;color:#256B3C}
+.sct-ro{background:var(--gs-ll);color:var(--gs-ink)}
+.sct-pr{background:#F6EEDD;color:#7A5410}
+@media (min-width:768px){.sc95lists{grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;gap:20px 32px}.sc95lists .scg:first-child{grid-row:span 2}}
+@media (max-width:767px){.sc95lists{gap:20px}}
+.scsub{margin-top:40px}
+.scsubh{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:12px}
+.scsubl{display:grid;grid-template-columns:1fr;gap:8px;margin:0}
+@media (min-width:560px){.scsubl{grid-template-columns:1fr 1fr}}
+@media (min-width:1024px){.scsubl{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.scsubl>div{padding:14px 16px;border-radius:12px;background:var(--card)}
+.scsubl dt{font-size:15px;font-weight:500;color:var(--ink)}
+.scsubl dd{margin:2px 0 0;font-size:14px;line-height:1.4;color:var(--ink2)}
+.scsuba{display:inline-flex;align-items:center;min-height:44px;margin-top:4px;font-size:14px;color:var(--gs-ink);text-decoration:none}
+.scsuba:hover{text-decoration:underline}
+.sc95b b{color:var(--ink)}
+@media (max-width:767px){
+  .sc95c a{min-height:44px;display:inline-flex;align-items:center}
+  .sc95lists .scg li{font-size:16px!important;line-height:24px}
+  .scsubl{gap:0;padding:6px 16px;border-radius:12px;background:var(--card)}
+  .scsubl>div{display:flex;gap:12px;padding:9px 0;background:none;border-radius:0}
+  .scsubl dt{flex:none;width:88px}
+  .scsubl dd{margin:0}
+  .scsubl dd{font-size:15px}
+}
+/* /trust95 */
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3550,7 +3596,7 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 <section class="mt160 rv tr95" data-rv="up" id="trust" aria-labelledby="trH">
   <div class="ctr">
     <div class="tr95r">
-      <h2 class="t28 tr95h" id="trH" data-i18n="trust.h">Built for trust</h2>
+      <div class="tr95h"><h2 class="t28" id="trH" data-i18n="trust.h">Built for trust</h2><p class="tr95p" data-i18n="trust.in">Licensed people step in wherever the law requires them.</p></div>
       <div class="tr95c">
         <div class="tr95k"><p><span data-i18n="trust.1">Independent licensed attorneys</span><small data-i18n="trust.1s">When a filing legally needs a lawyer, we introduce an independent licensed attorney you engage directly.</small></p><div class="tr95i"><svg aria-hidden="true" width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 9v38M19 47h18M11 16h34M28 9v7"/><path d="M11 16 5 30a6 6 0 0 0 12 0zM45 16l-6 14a6 6 0 0 0 12 0z"/></svg></div></div>
         <div class="tr95k"><p><span data-i18n="trust.2">Local permit expediters</span><small data-i18n="trust.2s">In-person filings, pick-ups and inspections, handled in the city where you open.</small></p><div class="tr95i"><svg aria-hidden="true" width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 49S14 36.5 14 25a14 14 0 0 1 28 0c0 11.5-14 24-14 24z"/><path d="M22 25l4.5 4.5L34 22"/></svg></div></div>
@@ -3566,7 +3612,9 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
     <div class="sc95g">
       <div class="sc95l">
         <h2 class="sc95h" id="scH"><span data-i18n="sc.h1">Enterprise security</span> <span class="sc95t" data-i18n="sc.h2">with every step on the record</span></h2>
-        <p class="sc95a"><a href="/trust" data-i18n="sec.trust">Visit our Trust Center</a><a href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a></p>
+        <p class="sc95i" data-i18n="sc.in">Placetta holds no security certification yet. Each control here is marked as it stands today.</p>
+        <p class="sc95a"><a href="/trust" data-i18n="sec.trust">Visit our Trust Center</a><a href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a><a href="/trust#report" data-i18n="sc.rp">Report a security issue</a></p>
+        <p class="sc95c"><span data-i18n="sc.ct">Security contact</span><a href="mailto:security@placetta.com">security@placetta.com</a></p>
       </div>
       <div class="sc95r">
         <div class="sc95b">
@@ -3574,7 +3622,42 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
           <div><b data-i18n="sc.b2">SAML 2.0 SSO</b><small data-i18n="sc.b2s">Rolling out</small></div>
           <div><b data-i18n="sc.b3">SCIM 2.0</b><small data-i18n="sc.b3s">Rolling out</small></div>
         </div>
-        <div class="sc95lists"><ul><li data-i18n="sc.l1">Owner, admin, member and viewer roles, enforced by the database</li><li data-i18n="sc.l2">SAML 2.0 single sign-on, plus Google Workspace, Microsoft Entra ID and OpenID Connect sign-in</li><li data-i18n="sc.l3">Single sign-on required for everyone at your verified email domain</li><li data-i18n="sc.l4">SCIM 2.0 provisioning for users and groups</li></ul><ul><li data-i18n="sc.r1">An append-only audit trail, exportable as CSV</li><li data-i18n="sc.r2">Each portal filing runs in its own new browser session, with its temporary files deleted after</li><li data-i18n="sc.r3">Nothing filed or paid without your approval</li><li data-i18n="sc.r4">Every requirement linked to its official source</li></ul></div>
+        <div class="sc95lists">
+          <div class="scg"><p class="sct sct-ok" data-i18n="sc.ip">In place</p><ul>
+            <li data-i18n="sc.r3">Nothing filed or paid without your approval</li>
+            <li data-i18n="sc.p1">Encrypted in transit with TLS 1.2 or newer, and at rest</li>
+            <li data-i18n="sc.p2">Saved agency logins kept in Supabase Vault, readable only by our server</li>
+            <li data-i18n="sc.p3">Two-step sign-in for your team, and required for our staff before they open customer records</li>
+            <li data-i18n="sc.p4">Card payments handled by Stripe; we never see full card numbers</li>
+            <li data-i18n="sc.p5">Placetta doesn't use your content to train AI models, and doesn't sell it</li>
+            <li data-i18n="sc.r4">Every requirement linked to its official source</li>
+          </ul></div>
+          <div class="scg"><p class="sct sct-ro" data-i18n="sc.b2s">Rolling out</p><ul>
+            <li data-i18n="sc.l1">Owner, admin, member and viewer roles, enforced by the database</li>
+            <li data-i18n="sc.l2">SAML 2.0 single sign-on, plus Google Workspace, Microsoft Entra ID and OpenID Connect sign-in</li>
+            <li data-i18n="sc.l3">Single sign-on required for everyone at your verified email domain</li>
+            <li data-i18n="sc.l4">SCIM 2.0 provisioning for users and groups</li>
+            <li data-i18n="sc.r1">An append-only audit trail, exportable as CSV</li>
+            <li data-i18n="sc.p6">Every sign-in recorded in the audit trail</li>
+            <li data-i18n="sc.r2">Each portal filing runs in its own new browser session, with its temporary files deleted after</li>
+          </ul></div>
+          <div class="scg"><p class="sct sct-pr" data-i18n="sc.b1s">In progress</p><ul>
+            <li data-i18n="sc.p7">SOC 2 Type I audit</li>
+            <li data-i18n="sc.p8">Written confirmation from each AI provider that it keeps none of what we send</li>
+          </ul></div>
+        </div>
+        <div class="scsub" role="group" aria-labelledby="scSubH">
+          <p class="scsubh" id="scSubH" data-i18n="sc.sh">Where your data goes</p>
+          <dl class="scsubl">
+            <div><dt>Supabase</dt><dd data-i18n="sc.s1">Database, files and sign-in, in its US East region</dd></div>
+            <div><dt>Vercel</dt><dd data-i18n="sc.s2">Hosts placetta.com and the app</dd></div>
+            <div><dt>Stripe</dt><dd data-i18n="sc.s3">Plan payments</dd></div>
+            <div><dt>Resend</dt><dd data-i18n="sc.s4">Sign-in links, reminders and filing updates by email</dd></div>
+            <div><dt>Anthropic</dt><dd data-i18n="sc.s5">Claude AI models</dd></div>
+            <div><dt>Render</dt><dd data-i18n="sc.s6">Runs portal filing, in Oregon</dd></div>
+          </dl>
+          <a class="scsuba" href="/trust#subprocessors" data-i18n="sc.sa">All subprocessors, and the AI models used only when needed</a>
+        </div>
         <p class="sc95n" data-i18n="sc.note">Roles, single sign-on, SCIM and the audit trail are rolling out now. Our Trust Center shows where each control stands.</p>
       </div>
     </div>
@@ -4026,6 +4109,8 @@ Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/per
 Object.assign(T.en, {"map.ccnt": "{m}: {n} city and county permits and filings in our form library, plus the state's {s} and {f} federal.", "map.ccnt0": "{m}: its city and county forms are researched when you start a plan there.", "map.cnt": "{m}: {n} permits and filings in our form library, {s} state and {l} city and county, plus {f} federal.", "map.cnt0": "{m}: {f} federal filings in our form library. Its state and city forms are researched when you start a plan.", "map.tipn": "{n} state and local forms", "final.h": "Stop paying rent on an empty store.<br>Hire Odelia.", "wt.h": "Answer from the app your team already uses", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta", "price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
 Object.assign(T.zh, {"map.ccnt": "{m}：我们的表格库中有市县级许可与申报 {n} 项，另有州级 {s} 项和联邦 {f} 项。", "map.ccnt0": "{m}：在您开始计划时，我们会逐项调研当地市县的表格。", "map.cnt": "{m}：我们的表格库中有 {n} 项许可与申报，州级 {s} 项，市县级 {l} 项，另有联邦 {f} 项。", "map.cnt0": "{m}：表格库中有联邦 {f} 项。该州和城市的表格会在您开始计划时逐项调研。", "map.tipn": "州和地方表格 {n} 项", "final.h": "别再为空店付房租。<br>让 Odelia 加入您的团队。", "wt.h": "在团队常用的应用里直接回复", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉", "price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
 /* land95 (Oct 21): the trust and security sections, and the folds and tabs that shorten the page */
+Object.assign(T.en, {"sc.ip": "In place", "sc.in": "Placetta holds no security certification yet. Each control here is marked as it stands today.", "sc.rp": "Report a security issue", "sc.ct": "Security contact", "sc.p1": "Encrypted in transit with TLS 1.2 or newer, and at rest", "sc.p2": "Saved agency logins kept in Supabase Vault, readable only by our server", "sc.p3": "Two-step sign-in for your team, and required for our staff before they open customer records", "sc.p4": "Card payments handled by Stripe; we never see full card numbers", "sc.p5": "Placetta doesn't use your content to train AI models, and doesn't sell it", "sc.p6": "Every sign-in recorded in the audit trail", "sc.p7": "SOC 2 Type I audit", "sc.p8": "Written confirmation from each AI provider that it keeps none of what we send", "sc.sh": "Where your data goes", "sc.s1": "Database, files and sign-in, in its US East region", "sc.s2": "Hosts placetta.com and the app", "sc.s3": "Plan payments", "sc.s4": "Sign-in links, reminders and filing updates by email", "sc.s5": "Claude AI models", "sc.s6": "Runs portal filing, in Oregon", "sc.sa": "All subprocessors, and the AI models used only when needed", "trust.in": "Licensed people step in wherever the law requires them."});
+Object.assign(T.zh, {"sc.ip": "已上线", "sc.in": "快哉目前尚未取得任何安全认证。以下每项控制都按目前的实际进展标注。", "sc.rp": "报告安全问题", "sc.ct": "安全联系邮箱", "sc.p1": "传输中使用 TLS 1.2 或更高版本加密，存储时同样加密", "sc.p2": "保存的政府网站登录信息存放在 Supabase Vault 中，只有我们的服务器可以读取", "sc.p3": "您的团队可开启两步验证登录；我们的员工必须通过两步验证才能查看客户记录", "sc.p4": "银行卡付款由 Stripe 处理，我们看不到完整卡号", "sc.p5": "快哉不会用您的内容训练 AI 模型，也不会出售您的内容", "sc.p6": "每次登录都记入审计记录", "sc.p7": "SOC 2 Type I 审计", "sc.p8": "各 AI 服务商书面确认不保留我们发送的任何内容", "sc.sh": "您的数据交给谁处理", "sc.s1": "数据库、文件存储和登录，位于其美国东部区域", "sc.s2": "托管 placetta.com 和应用", "sc.s3": "套餐付款", "sc.s4": "通过邮件发送登录链接、提醒和申报进展", "sc.s5": "Claude AI 模型", "sc.s6": "运行政府网站申报，位于俄勒冈州", "sc.sa": "全部数据处理方，以及仅在需要时使用的 AI 模型", "trust.in": "凡是法律要求持牌专业人士办理的环节，都由他们负责。"});
 Object.assign(T.en, {"sc.h1": "Enterprise security", "sc.h2": "with every step on the record", "sc.b1": "SOC 2 Type I", "sc.b1s": "In progress", "sc.b2": "SAML 2.0 SSO", "sc.b2s": "Rolling out", "sc.b3": "SCIM 2.0", "sc.b3s": "Rolling out", "sc.l1": "Owner, admin, member and viewer roles, enforced by the database", "sc.l2": "SAML 2.0 single sign-on, plus Google Workspace, Microsoft Entra ID and OpenID Connect sign-in", "sc.l3": "Single sign-on required for everyone at your verified email domain", "sc.l4": "SCIM 2.0 provisioning for users and groups", "sc.r1": "An append-only audit trail, exportable as CSV", "sc.r2": "Each portal filing runs in its own new browser session, with its temporary files deleted after", "sc.r3": "Nothing filed or paid without your approval", "sc.r4": "Every requirement linked to its official source", "sc.note": "Roles, single sign-on, SCIM and the audit trail are rolling out now. Our Trust Center shows where each control stands."});
 Object.assign(T.zh, {"sc.h1": "企业级安全", "sc.h2": "每一步都有据可查", "sc.b1": "SOC 2 Type I", "sc.b1s": "进行中", "sc.b2": "SAML 2.0 单点登录", "sc.b2s": "陆续上线", "sc.b3": "SCIM 2.0", "sc.b3s": "陆续上线", "sc.l1": "所有者、管理员、成员和查看者四种角色，由数据库强制执行", "sc.l2": "SAML 2.0 单点登录，并支持 Google Workspace、Microsoft Entra ID 和 OpenID Connect 登录", "sc.l3": "可要求您已验证邮箱域名下的所有人使用单点登录", "sc.l4": "通过 SCIM 2.0 开通和停用用户与用户组", "sc.r1": "只增不改的审计记录，可导出为 CSV", "sc.r2": "每次在政府网站上的申报都在全新的浏览器会话中进行，临时文件随后删除", "sc.r3": "未经您批准，不提交、不付款", "sc.r4": "每项要求都附官方来源链接", "sc.note": "角色、单点登录、SCIM 和审计记录正在陆续上线。信任中心列出每项控制的进展。"});
 Object.assign(T.en, {"h95.aria": "What Odelia does", "h95.t1": "Maps and files", "h95.t2": "Joins your team", "h95.t3": "Works in portals", "h95.t4": "Asks first"});
