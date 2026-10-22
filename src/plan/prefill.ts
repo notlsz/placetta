@@ -19,6 +19,7 @@ import { formById, type FormField, type OfficialForm } from "../forms/registry";
 import { BY_HAND } from "../guard";
 import type { Application, Approval, Field, Store, Workspace } from "../model";
 import { preflight } from "../smart";
+import { FURNITURE } from "../forms/furniture";
 import { daysFromNow, money } from "../time";
 
 /** What the person told us at sign-up. Everything but what and where is optional. */
@@ -53,6 +54,8 @@ const CJK = /[㐀-鿿豈-﫿]/;
 type Kind = { key: string; activity: string; sells: string; naics?: [string, string]; irs: string; food: boolean; prepares: boolean };
 /** What it is, in the words an official form wants (in English, whatever language the line was typed in). */
 const KINDS: [RegExp, Kind][] = [
+  // furniture first: a "coffee table" or "bar stool" brand isn't a food business (src/forms/furniture.ts)
+  [new RegExp(`^(?![\\s\\S]*(warehouse|3pl|fulfil|仓库|物流))[\\s\\S]*(?:${FURNITURE.source})`, "i"), { key: "furniture", activity: "Furniture store", sells: "Furniture", naics: ["449110", "Furniture Retailers"], irs: "Retail", food: false, prepares: false }],
   [/milk ?tea|bubble tea|boba|tea (shop|house|bar)|奶茶|茶饮|珍珠|茶/i, { key: "tea", activity: "Milk tea shop", sells: "Milk tea and other tea drinks", naics: ["722515", "Snack and Nonalcoholic Beverage Bars"], irs: "Accommodation & food service", food: true, prepares: true }],
   [/coffee|caf[eé]|espresso|咖啡/i, { key: "coffee", activity: "Coffee shop", sells: "Coffee and espresso drinks", naics: ["722515", "Snack and Nonalcoholic Beverage Bars"], irs: "Accommodation & food service", food: true, prepares: true }],
   [/bakery|bake|bread|pastr|cake|烘焙|面包|蛋糕/i, { key: "bakery", activity: "Bakery", sells: "Baked goods", naics: ["311811", "Retail Bakeries"], irs: "Accommodation & food service", food: true, prepares: true }],

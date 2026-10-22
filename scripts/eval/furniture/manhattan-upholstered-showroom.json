@@ -1,0 +1,185 @@
+{
+ "id": "manhattan-upholstered-showroom",
+ "title": "The upholstered furniture brand's New York showroom",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Upholstered furniture showroom",
+  "where": "Manhattan, NY",
+  "lang": "en"
+ },
+ "assumptions": "The same brand's Manhattan showroom, formed as a New York company; the imports are filed by the Los Angeles importer of record, so no import filing is part of this opening. The filings are those of strict/nyc-bakery-cafe.json and gold/flushing-beer-wine.json without the food steps. No official New York page read states a license or registration for upholstered furniture, so none is claimed.",
+ "items": [
+  {
+   "key": "ny-dos-1336",
+   "name": "Articles of Organization (New York LLC)",
+   "agency": "New York Department of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://dos.ny.gov/node/16156",
+   "quote": "Organizers form an LLC by filing the Articles of Organization",
+   "read": "2026-10-21",
+   "match": "\\bny-dos-1336\\b|articles of organization.*new york",
+   "agencyMatch": "department of state"
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-21",
+   "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+   "agencyMatch": "internal revenue service|\\bIRS\\b",
+   "feeQuote": "You never have to pay a fee for an EIN."
+  },
+  {
+   "key": "ny-dos-pub",
+   "name": "LLC publication within 120 days",
+   "agency": "New York Department of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://dos.ny.gov/node/16156",
+   "quote": "Failure to publish and file the Certificate of Publication with the Department of State within 120 days",
+   "read": "2026-10-21",
+   "match": "\\bny-dos-pub\\b|publication",
+   "agencyMatch": "department of state"
+  },
+  {
+   "key": "nyc-co",
+   "name": "Certificate of Occupancy for the use",
+   "agency": "NYC Department of Buildings",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page",
+   "quote": "No one may legally occupy a building until the Department has issued a CO or Temporary Certificate of Occupancy (TCO) .",
+   "read": "2026-10-21",
+   "match": "\\bnyc-co\\b|certificate of occupancy",
+   "agencyMatch": "department of buildings"
+  },
+  {
+   "key": "ny-dtf-17",
+   "name": "Sales tax Certificate of Authority",
+   "agency": "New York State Department of Taxation and Finance",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.tax.ny.gov/bus/st/register.htm",
+   "quote": "If you must register to collect sales tax and need information about how to register, see Tax Bulletin",
+   "read": "2026-10-21",
+   "match": "\\bny-dtf-17\\b|sales tax vendor|certificate of authority",
+   "agencyMatch": "taxation and finance"
+  },
+  {
+   "key": "nyc-dob-alt",
+   "name": "Building permit for the build-out",
+   "agency": "NYC Department of Buildings",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page",
+   "quote": "Department of Buildings work permits are required for most construction projects.",
+   "read": "2026-10-21",
+   "match": "\\bnyc-dob-alt\\b|building permit|alteration",
+   "agencyMatch": "department of buildings"
+  },
+  {
+   "key": "ny-dol-100",
+   "name": "Unemployment insurance employer registration",
+   "agency": "New York State Department of Labor",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+   "quote": "You must complete an employer registration form for us to decide if you are liable under the New York State Unemployment Insurance Law.",
+   "read": "2026-10-21",
+   "match": "\\bny-dol-100\\b|unemployment insurance",
+   "agencyMatch": "department of labor"
+  },
+  {
+   "key": "ny-wcb",
+   "name": "Workers' compensation and disability/paid family leave coverage",
+   "agency": "New York State Workers' Compensation Board",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.wcb.ny.gov/content/main/coverage-requirements.jsp",
+   "quote": "Disability and Paid Family Leave benefits coverage is required for sole proprietorships with employees, including part-time employees",
+   "read": "2026-10-21",
+   "match": "\\bny-wcb\\b|workers'? comp",
+   "agencyMatch": "workers'? compensation board"
+  },
+  {
+   "key": "nyc-sign",
+   "name": "Sign permit",
+   "agency": "NYC Department of Buildings",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://nyc-business.nyc.gov:443/nycbusiness/resources-by-industry/restaurant",
+   "match": "sign permit",
+   "agencyMatch": "department of buildings",
+   "condition": "Signs that are nailed, screwed or illuminated."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "Import filings",
+   "why": "The Los Angeles importer of record files them.",
+   "match": "lacey|tsca|customs|cbp-"
+  },
+  {
+   "name": "California furniture licenses",
+   "why": "Not in California.",
+   "match": "household goods and services|bhgs"
+  },
+  {
+   "name": "Food permits",
+   "why": "Not a food business.",
+   "match": "food service establishment|health permit|plan review"
+  }
+ ],
+ "facts": [
+  {
+   "key": "us-tsca-label",
+   "match": "^us-tsca-label$",
+   "source": "https://www.epa.gov/node/155807",
+   "quote": "must include the fabricator’s name, the date the finished good was produced (in month/year format), and a TSCA Title VI compliance statement.",
+   "read": "2026-10-21",
+   "required": true
+  }
+ ],
+ "mustNotFacts": [
+  {
+   "match": "^ca-",
+   "why": "California's."
+  },
+  {
+   "match": "^us-csu",
+   "why": "No clothing storage units."
+  },
+  {
+   "match": "^(nyc|ny)-",
+   "why": "A food business's fact."
+  },
+  {
+   "match": "^eu-",
+   "why": "Not in the EU."
+  }
+ ]
+}

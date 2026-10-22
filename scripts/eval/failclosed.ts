@@ -10,6 +10,8 @@
 //   answers     a written answer from a form whose quote is stale says "I'm not sure" and who to ask
 import { readFileSync } from "node:fs";
 import { FORMS, formsFor, segmentOf, type OfficialForm } from "../../src/forms/registry";
+import { furnitureNeeds } from "../../src/forms/furniture";
+import { FURNITURE_KINDS } from "../../src/forms/kinds";
 import { CITIES } from "../../src/forms/world";
 import { COUNTIES } from "../../src/forms/usplace";
 import { libraryAnswer, previewPlan, sellsAlcohol } from "../../src/plan/preview";
@@ -21,7 +23,9 @@ import { officialSource } from "./official";
 type Check = { name: string; pass: boolean; detail?: string };
 const STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY",
   "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
-const STORES: { what: string; entity?: string }[] = [{ what: "Restaurant" }, { what: "Bubble tea shop" }, { what: "Bakery" }, { what: "Coffee shop" }, { what: "Clothing store" }, { what: "Franchised milk tea shop", entity: "existing" }];
+const STORES: { what: string; entity?: string }[] = [{ what: "Restaurant" }, { what: "Bubble tea shop" }, { what: "Bakery" }, { what: "Coffee shop" }, { what: "Clothing store" }, { what: "Franchised milk tea shop", entity: "existing" },
+  // furniture (src/forms/furniture.ts): a showroom takes the retail path, an importer the seller path, a warehouse its own
+  { what: "Furniture showroom" }, { what: "Upholstered furniture brand importing sofas" }, { what: "Furniture warehouse" }];
 const addDays = (iso: string, n: number) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 
 /** Every US place the library names: the county table's cities and towns, the world table's US cities, a town per state. */
@@ -48,9 +52,12 @@ export function failClosedChecks(today: string) {
       const bad = [...proofProblems({ id: k.id, url: k.source.url, quote: k.source.quote, checked: k.source.checked }), ...(officialSource(k.source.url) ? [] : ["not an official page"]), ...(proofCurrent({ read: k.source.url, quote: k.source.quote }, today) ? [] : ["quote not current"])];
       for (const x of bad) factProblems.add(`${where}, ${s.what}: ${k.id}: ${x}`);
     }
-    if (segmentOf(s.what) !== "restaurant" && p.facts.length) factProblems.add(`${where}, ${s.what}: store-type facts on a ${segmentOf(s.what)} business`);
+    // food facts only for a food business; furniture's only for furniture, and never for a warehouse
+    const food = p.facts.filter(k => !k.kinds.some(x => FURNITURE_KINDS.includes(x))), furn = p.facts.length - food.length;
+    if (segmentOf(s.what) !== "restaurant" && food.length) factProblems.add(`${where}, ${s.what}: food store-type facts on a ${segmentOf(s.what)} business`);
+    if (furn && (!/furniture/i.test(s.what) || segmentOf(s.what) === "warehouse")) factProblems.add(`${where}, ${s.what}: furniture facts on a ${segmentOf(s.what)} business`);
     // the agent's tool claims what the plan claims: never a form the plan abstains on, never one without a current quote
-    const segment = segmentOf(s.what), needs = { employees: true, buildout: true, signage: true, newEntity: !s.entity, food: segment === "restaurant", imports: false, alcohol: sellsAlcohol(s.what) };
+    const segment = segmentOf(s.what), needs = { employees: true, buildout: true, signage: true, newEntity: !s.entity, food: segment === "restaurant", imports: false, alcohol: sellsAlcohol(s.what), ...furnitureNeeds(s.what) };
     const known = libraryAnswer(s.what, where, needs, today);
     for (const f of formsFor({ segment, where, needs })) {
       const claimed = known.claim(f), row = p.apps.find(a => a.official === f.id);
@@ -59,7 +66,7 @@ export function failClosedChecks(today: string) {
     }
   }
   check(`sweep: every row of ${plans} plans (every place the library names and a town in every state, ${STORES.length} store types) claims with a current official quote or abstains naming who to ask`, !problems.size, [...problems].slice(0, 12));
-  check(`sweep: every store-type fact those plans state (${facts}) carries its official quote, in the read log and current, and only food businesses get them`, !factProblems.size, [...factProblems].slice(0, 12));
+  check(`sweep: every store-type fact those plans state (${facts}) carries its official quote, in the read log and current, and only the kind of business it's about gets it`, !factProblems.size, [...factProblems].slice(0, 12));
   check("sweep: the agent's forms tool claims exactly what the instant plan claims, and nothing without a current quote", !parity.size, [...parity].slice(0, 12));
 
   // stale: the day after every quote ages out, a San José milk tea shop's plan claims nothing at all

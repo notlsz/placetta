@@ -1,0 +1,22 @@
+{
+ "what": "The furniture set: what a furniture brand files to import and sell (src/forms/furniture.ts) and what its plan states beyond the filings (src/forms/kinds.ts, kinds furniture, upholstered and storage). An upholstered furniture brand importing into Los Angeles with showrooms in California and New York (two cases, one per showroom), and a case-goods brand importing dressers into New Jersey.",
+ "researched": "2026-10-21, from official pages only, each quote re-read with scripts/eval/proof-read.py (12 with curl, 1 through WebFetch where EUR-Lex refuses automated reads).",
+ "left_out": [
+  {
+   "what": "Importer Security Filing (ISF)",
+   "why": "Every CBP page for it (the ISF page and its FAQs) refused automated reads (curl 403, WebFetch client error), so the library row abstains and names CBP with its page; the case sets it aside."
+  },
+  {
+   "what": "EU Deforestation Regulation (Regulation (EU) 2023/1115) and its 30 December 2026 date",
+   "why": "EUR-Lex returned an empty bot-wall response to curl and its consolidated text is closed to WebFetch, so no sentence of it could be read; nothing is stated."
+  },
+  {
+   "what": "New York and New Jersey upholstered furniture or stuffed article registrations",
+   "why": "No official New York or New Jersey page found in this pass states one. Massachusetts's and Pennsylvania's are stated, from their own pages."
+  },
+  {
+   "what": "California retail furniture dealer's license fee",
+   "why": "BHGS's retailer application wasn't found on its site (the brochure linked from /furniture returns 404); the fee is left to the agency."
+  }
+ ]
+}

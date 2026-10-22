@@ -1,0 +1,274 @@
+{
+ "id": "la-upholstered-importer",
+ "title": "Upholstered furniture brand importing into Los Angeles, with showrooms",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Upholstered furniture brand importing to Los Angeles with showrooms in California and New York",
+  "where": "Los Angeles, CA",
+  "lang": "en"
+ },
+ "assumptions": "The Los Angeles showroom of a brand that imports upholstered furniture made outside the US. The company, tax, city and building filings are those of strict/la-bubble-tea.json and gold/la-food-importer.json (the same city and importer of record); the furniture filings and facts are read from APHIS, EPA, CPSC and BHGS on 2026-10-21. California's importer's license covers selling at retail (Business and Professions Code 19051, in BHGS's law book), so the retail dealer's license must not appear. The New York showroom is its own case (manhattan-upholstered-showroom).",
+ "items": [
+  {
+   "key": "ca-llc-1",
+   "name": "Articles of Organization (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 70,
+   "source": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+   "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+   "read": "2026-10-21",
+   "match": "\\bca-llc-1\\b|articles of organization.*california",
+   "agencyMatch": "california secretary of state",
+   "feeQuote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00"
+  },
+  {
+   "key": "ca-llc-12",
+   "name": "Statement of Information (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sos.ca.gov/business-programs/business-entities/statements",
+   "quote": "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties",
+   "read": "2026-10-21",
+   "match": "\\bca-llc-12\\b|statement of information",
+   "agencyMatch": "california secretary of state"
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-21",
+   "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+   "agencyMatch": "internal revenue service|\\bIRS\\b",
+   "feeQuote": "You never have to pay a fee for an EIN."
+  },
+  {
+   "key": "ca-cdtfa",
+   "name": "Seller's permit",
+   "agency": "California Department of Tax and Fee Administration",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sf.gov/guide-opening-restaurant",
+   "quote": "Every location must have this permit to sell taxable goods.",
+   "read": "2026-10-21",
+   "match": "\\bca-cdtfa\\b|seller'?s permit",
+   "agencyMatch": "tax and fee administration|CDTFA"
+  },
+  {
+   "key": "la-btrc",
+   "name": "City of Los Angeles business tax registration",
+   "agency": "City of Los Angeles Office of Finance",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc",
+   "quote": "Once you completed the registration process, you will receive a temporary Business Tax Registration Certificate or Registration Number.",
+   "read": "2026-10-21",
+   "match": "\\bla-btrc\\b|business tax registration",
+   "agencyMatch": "office of finance|city of los angeles"
+  },
+  {
+   "key": "cbp-5106",
+   "name": "Importer identity (CBP Form 5106)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Filed with the first formal entry or request for services (19 CFR 24.5).",
+   "source": "https://www.govinfo.gov/content/pkg/FR-2013-11-12/html/2013-26996.htm",
+   "match": "5106|importer identity",
+   "agencyMatch": "customs and border"
+  },
+  {
+   "key": "cbp-301",
+   "name": "Customs bond (CBP Form 301)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Merchandise isn't released at entry without a single or continuous bond (19 CFR 142.4(a)); the port director may waive it at $2,500 or less.",
+   "source": "https://cbp.gov/sites/default/files/assets/documents/2021-Jun/IE%20%E2%80%93%20Bond%20Recommendations.pdf",
+   "match": "customs bond|cbp-301",
+   "agencyMatch": "customs and border",
+   "quote": "Customs Bonds are the backbone to the importation process guaranteeing the payment of duties, taxes, and fees to CBP",
+   "read": "2026-10-18"
+  },
+  {
+   "key": "cbp-isf",
+   "name": "Importer Security Filing (ISF)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": false,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.cbp.gov/border-security/ports-entry/cargo-security/importer-security-filing-102",
+   "read": "2026-10-21",
+   "match": "\\bcbp-isf\\b|importer security filing",
+   "agencyMatch": "customs and border",
+   "note": "CBP's pages refused every automated read (curl 403, WebFetch client error) on 2026-10-21, so the row abstains and this item is set aside."
+  },
+  {
+   "key": "aphis-ppq505",
+   "name": "Lacey Act declaration (PPQ Form 505)",
+   "agency": "USDA APHIS",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.aphis.usda.gov/sites/default/files/ppq505.pdf",
+   "quote": "Importers should have a copy of the form available for CBP to review at the port of entry.",
+   "read": "2026-10-21",
+   "match": "\\baphis-ppq505\\b|lacey act|ppq ?(form )?505",
+   "agencyMatch": "animal and plant health|APHIS"
+  },
+  {
+   "key": "epa-tsca-import",
+   "name": "TSCA Title VI import certification",
+   "agency": "U.S. Environmental Protection Agency",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.epa.gov/node/155807",
+   "quote": "Importers to provide import certification under TSCA beginning March 22, 2019;",
+   "read": "2026-10-21",
+   "match": "\\bepa-tsca-import\\b|tsca",
+   "agencyMatch": "environmental protection"
+  },
+  {
+   "key": "ca-bhgs-importer",
+   "name": "California importer's license (upholstered furniture)",
+   "agency": "California Bureau of Household Goods and Services",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 750,
+   "source": "https://bhgs.dca.ca.gov/forms_pubs/app_importer.pdf",
+   "quote": "An importer’s license is required for those who manufacture or wholesale, through employees or agents, any article of upholstered furniture,",
+   "feeQuote": "The fee for an Importer’s license is $750.",
+   "read": "2026-10-21",
+   "match": "\\bca-bhgs-importer\\b|importer'?s license",
+   "agencyMatch": "household goods and services"
+  },
+  {
+   "key": "cpsc-cert",
+   "name": "Product safety certificate (eFiling)",
+   "agency": "U.S. Consumer Product Safety Commission",
+   "level": "federal",
+   "required": false,
+   "verified": false,
+   "fee": 0,
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification",
+   "read": "2026-10-21",
+   "match": "\\bcpsc-cert\\b|product safety certificate",
+   "agencyMatch": "consumer product safety",
+   "note": "The library's general certificate row abstains (no current quote); the clothing storage unit certificate is scored as cpsc-1261."
+  },
+  {
+   "key": "la-ladbs",
+   "name": "Building permit (and Certificate of Occupancy)",
+   "agency": "Los Angeles Department of Building and Safety",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://dbs.lacity.gov/services/plan-review-permitting/building-permits",
+   "quote": "Building Permits are required for new constructions, additions, alterations, and demolition/removal of a building or structure.",
+   "read": "2026-10-21",
+   "match": "\\bla-ladbs\\b|building permit",
+   "agencyMatch": "building and safety"
+  },
+  {
+   "key": "ca-edd-de1",
+   "name": "Employer registration (DE 1)",
+   "agency": "California Employment Development Department",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+   "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+   "read": "2026-10-21",
+   "match": "\\bca-edd-de1\\b|commercial employers|\\bDE ?1\\b",
+   "agencyMatch": "employment development department|\\bEDD\\b"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "California retail furniture dealer's license",
+   "why": "An importer's license holder doesn't need it (BPC 19051).",
+   "match": "ca-bhgs-retail|retail furniture dealer"
+  },
+  {
+   "name": "Clothing storage unit standard",
+   "why": "The brand sells upholstered furniture, not dressers or chests.",
+   "match": "cpsc-1261|clothing storage"
+  },
+  {
+   "name": "Food permits",
+   "why": "A furniture showroom isn't a food facility.",
+   "match": "food facility|health permit|plan check"
+  }
+ ],
+ "facts": [
+  {
+   "key": "us-tsca-label",
+   "match": "^us-tsca-label$",
+   "source": "https://www.epa.gov/node/155807",
+   "quote": "must include the fabricator’s name, the date the finished good was produced (in month/year format), and a TSCA Title VI compliance statement.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "ca-law-label",
+   "match": "^ca-law-label$",
+   "source": "https://bhgs.dca.ca.gov/forms_pubs/19-014_furnbedlawflyer.pdf",
+   "quote": "Every article of upholstered furniture and bedding products must have a law label to identify the manufacturer,",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "ca-tb117-label",
+   "match": "^ca-tb117-label$",
+   "source": "https://bhgs.dca.ca.gov/forms_pubs/19-014_furnbedlawflyer.pdf",
+   "quote": "Products meeting Technical Bulletin 117-2013 must also have the flammability chemical statement on the label.",
+   "read": "2026-10-21",
+   "required": true
+  }
+ ],
+ "mustNotFacts": [
+  {
+   "match": "^us-csu",
+   "why": "No clothing storage units."
+  },
+  {
+   "match": "^eu-",
+   "why": "Not in the EU."
+  },
+  {
+   "match": "^(ma|pa)-",
+   "why": "Another state's."
+  },
+  {
+   "match": "^(ny|nyc|kc|fl|va|or|mn|ga|mc|oh|tx|chi|ca-(takeout|wholesale))-",
+   "why": "A food business's fact."
+  }
+ ]
+}

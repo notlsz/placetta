@@ -7,7 +7,8 @@
 import { B, same, type Bi } from "../bi";
 import { formsEntity as formsEntityFor, formsFor, placeInfo, placesOf, segmentOf, type OfficialForm, type Segment, type Where } from "../forms/registry";
 import { usPlace } from "../forms/usplace";
-import { kindFactsAt, kindsOf, type KindFact, type StoreKind } from "../forms/kinds";
+import { FURNITURE_KINDS, kindFactsAt, kindsOf, type KindFact, type StoreKind } from "../forms/kinds";
+import { furnitureNeeds } from "../forms/furniture";
 import { FOOD_PERMITTER, MUNICIPAL_BUILDING, proofCurrent, whoToAsk, type Src } from "./ask";
 import type { Application, CheckItem, Deadline, Field, Level, Store, Workspace } from "../model";
 import { publishedDays } from "../plan";
@@ -40,7 +41,7 @@ export type PreviewPlan = {
   layers: Record<Level, number>;
   fees: number;                          // the fees the registry publishes, added up
   varies: number;                        // rows whose fee the agency sets
-  kinds: StoreKind[];                    // the kinds of food business the words name (src/forms/kinds.ts)
+  kinds: StoreKind[];                    // the kinds of business the words name: food, or furniture (src/forms/kinds.ts)
   facts: PlanFact[];                     // what an official page says differs for those kinds here, each quoted and current
   withheld: string[];                    // facts for this place and kind whose quote isn't current: not stated (fail closed)
 };
@@ -270,7 +271,8 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const food = segment === "restaurant" || /grocery|supermarket|market|food|snack|超市|生鲜|食品|零食/i.test(what);
   const employees = o.employees ?? true, buildout = o.buildout ?? true;
   const alcohol = o.alcohol ?? sellsAlcohol(what);
-  const needs = { food, employees, signage: o.signage ?? true, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol };
+  // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)
+  const needs = { food, employees, signage: o.signage ?? true, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, ...furnitureNeeds(what) };
   const info = placeInfo(where), places = placesOf(where);
   const country = info.country ?? "US";
   const us = country === "US";
@@ -463,13 +465,15 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
 
   // what differs for this kind of food business here (a milk tea shop, a coffee shop, a bakery), each fact stated only
   // while its official quote is current; it goes on the row it bears on (the permit to open, the plan review, the build-out)
-  const kinds = segment === "restaurant" ? kindsOf(what) : [];
+  // (food kinds only for a food business; furniture's for a showroom or an importer, but not a warehouse, which stores
+  // goods it doesn't label or sell)
+  const kinds = kindsOf(what).filter(k => segment === "restaurant" || (segment !== "warehouse" && FURNITURE_KINDS.includes(k)));
   const withheld: string[] = [];
   const near: Record<NonNullable<KindFact["about"]>, Role[]> = { food: ["food", "plan", "license"], plan: ["plan", "building", "food"], building: ["building", "plan", "food"], license: ["license", "food"] };
   const facts: PlanFact[] = kindFactsAt(kinds, places).flatMap(k => {
     const seen = proofCurrent(k.proof, today);
     if (!seen) { withheld.push(k.id); return []; }
-    const app = k.about ? near[k.about].map(x => byRole.get(x)).find(Boolean) : undefined;
+    const app = (k.form ?? []).map(id => apps.find(a => a.official === id)).find(Boolean) ?? (k.about ? near[k.about].map(x => byRole.get(x)).find(Boolean) : undefined);
     const source = { label: host(k.proof.read), url: k.proof.read, quote: k.proof.quote, checked: seen };
     if (app) app.notes = [...(app.notes ?? []), { id: k.id, title: k.title, text: k.text, source }];
     return [{ id: k.id, kinds: k.kinds.filter(x => kinds.includes(x)), title: k.title, text: k.text, agency: k.agency, level: k.level, ...(app ? { app: app.id } : {}), source }];

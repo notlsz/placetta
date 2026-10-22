@@ -9,15 +9,25 @@
 // (scripts/build-guides.mts) print it, so a milk tea shop's guide differs from a restaurant's only by what an official
 // page says. Nothing here is a filing: the filings stay in the registry. A fact that names a condition ("if you sell
 // wholesale") says so, and never claims the condition holds.
+//
+// Furniture (2026-10-21): what a furniture brand's plan states beyond its filings (src/forms/furniture.ts): the TSCA
+// Title VI label on finished goods, the clothing storage unit tests and anti-tip device, California's law label and
+// TB 117-2013 statement, Massachusetts's and Pennsylvania's upholstered furniture licensing, and, abroad, the EU's General
+// Product Safety Regulation. They are kinds "furniture", "upholstered" and "storage" (clothing storage units).
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
+import { BHGS_LABELS, CPSC_CSU, EPA_TSCA, isFurniture, furnitureNeeds } from "./furniture";
 
-export type StoreKind = "tea" | "coffee" | "bakery" | "restaurant";
+export type StoreKind = "tea" | "coffee" | "bakery" | "restaurant" | "furniture" | "upholstered" | "storage";
+/** The kinds that aren't food: their facts hold for any segment (a showroom, an importer, a warehouse). */
+export const FURNITURE_KINDS: StoreKind[] = ["furniture", "upholstered", "storage"];
 export type KindFact = {
   id: string;
   kinds: StoreKind[];          // the kinds of business it is about
-  where: string;               // where it applies: a state ("CA"), a county ("KC") or a city ("NYC"), as in the registry
+  where: string | string[];    // where it applies: a state ("CA"), a county ("KC"), a city ("NYC") or countries, as in the registry
+  abroad?: boolean;            // only outside the US (the EU's "DE" is also Delaware's code)
   about?: "food" | "plan" | "building" | "license";   // the plan row it bears on (src/plan/preview.ts roles)
+  form?: string[];             // the library forms it bears on, first found wins (before `about`)
   title: Bi;                   // one line
   text: Bi;                    // what it means for the shop, in plain words
   agency: Bi;
@@ -37,7 +47,83 @@ const MARICOPA = "https://listos.maricopa.gov/DocumentCenter/View/44074/Permit-T
 const NYC_GREASE = "https://ht.nyc-business.nyc.gov/nycbusiness/description/grease-interceptor-information";
 const LAC_CONSTRUCT = "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm";
 
+const MA_DFP = "https://www.mass.gov/how-to/apply-for-a-license-to-manufacture-and-sell-stuffed-toys-bedding-upholstered-furniture-and-related-products";
+const PA_BU = "https://www.pa.gov/agencies/dli/programs-services/labor-management-relations/bureau-of-occupational-and-industrial-safety/bedding-and-upholstery";
+const GPSR = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R0988";
+/** The EU's member states, by the registry's country codes. */
+const EU27 = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
+
 export const KIND_FACTS: KindFact[] = [
+  /* ------------------------------------------------ Furniture: federal ------------------------------------------------ */
+  {
+    id: "us-tsca-label", kinds: ["furniture"], where: "US", form: ["epa-tsca-import"], level: "federal",
+    title: B("Finished goods with composite wood carry a TSCA Title VI label", "含复合木材的成品须贴 TSCA 第六章标签"),
+    text: B("Furniture containing hardwood plywood, MDF or particleboard is labeled with the fabricator's name, the month and year it was produced, and a TSCA Title VI compliance statement. EPA's page names retailers among those the rule applies to.",
+      "含硬木胶合板、中密度纤维板或刨花板的家具须贴标签，注明制造商名称、生产年月及 TSCA 第六章合规声明。EPA 页面将零售商列为适用对象之一。"),
+    agency: B("U.S. Environmental Protection Agency", "美国环境保护署"),
+    proof: P(EPA_TSCA, "must include the fabricator’s name, the date the finished good was produced (in month/year format), and a TSCA Title VI compliance statement."),
+  },
+  {
+    id: "us-csu-tests", kinds: ["storage"], where: "US", form: ["cpsc-1261"], level: "federal",
+    title: B("Dressers and chests pass three stability tests", "梳妆柜和五斗柜须通过三项稳定性测试"),
+    text: B("A clothing storage unit (free-standing, at least 27 inches tall and 30 pounds, like a dresser, chest or armoire) must pass three stability tests: a clothing load, a horizontal force, and a child's weight on carpet.",
+      "衣物收纳家具（独立放置、高至少 27 英寸、重至少 30 磅，如梳妆柜、五斗柜或衣柜）须通过三项稳定性测试：衣物负载、水平推力，以及地毯上的儿童体重测试。"),
+    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会"),
+    proof: P(CPSC_CSU, "Product must pass all three stability tests:"),
+  },
+  {
+    id: "us-csu-antitip", kinds: ["storage"], where: "US", form: ["cpsc-1261"], level: "federal",
+    title: B("An anti-tip device ships in the box", "包装内须附防倾倒装置"),
+    text: B("Every clothing storage unit is packaged with an anti-tip device that meets ASTM F3096, and carries the warning label the standard sets out.",
+      "每件衣物收纳家具须随包装附上符合 ASTM F3096 的防倾倒装置，并贴有标准规定的警示标签。"),
+    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会"),
+    proof: P(CPSC_CSU, "Anti-tip device that meets ASTM F3096 must be packaged with the product"),
+  },
+
+  /* ------------------------------------------------ Furniture: states ------------------------------------------------ */
+  {
+    id: "ca-law-label", kinds: ["upholstered"], where: "CA", form: ["ca-bhgs-importer", "ca-bhgs-retail"], level: "state",
+    title: B("Every piece carries California's law label", "每件家具须贴加州法定标签"),
+    text: B("Upholstered furniture sold in California carries a law label naming the manufacturer, its location (by registry number) and the filling materials, attached before it is offered for sale.",
+      "在加州销售的软体家具须在上架前贴上法定标签，注明制造商、其地点（登记号）及填充材料。"),
+    agency: B("California Bureau of Household Goods and Services", "加州家居用品与服务局"),
+    proof: P(BHGS_LABELS, "Every article of upholstered furniture and bedding products must have a law label to identify the manufacturer,"),
+  },
+  {
+    id: "ca-tb117-label", kinds: ["upholstered"], where: "CA", form: ["ca-bhgs-importer", "ca-bhgs-retail"], level: "state",
+    title: B("The TB 117-2013 label and flame retardant statement", "TB 117-2013 标签及阻燃剂声明"),
+    text: B("Upholstered furniture also carries a flammability label naming the standard it meets. Furniture meeting Technical Bulletin 117-2013 states on that label whether its materials contain added flame retardant chemicals.",
+      "软体家具还须贴阻燃标签，注明所符合的标准。符合第 117-2013 号技术公报的家具须在该标签上声明其材料是否添加了阻燃化学品。"),
+    agency: B("California Bureau of Household Goods and Services", "加州家居用品与服务局"),
+    proof: P(BHGS_LABELS, "Products meeting Technical Bulletin 117-2013 must also have the flammability chemical statement on the label."),
+  },
+  {
+    id: "ma-upholstered-license", kinds: ["upholstered"], where: "MA", about: "license", level: "state",
+    title: B("Massachusetts licenses upholstered furniture makers and sellers", "马萨诸塞州为软体家具制造和销售商发证"),
+    text: B("Massachusetts's Department of Public Health licenses the manufacture and sale of upholstered furniture through its Division of Food Protection. Odelia confirms with the Division whether your business needs the license before anything is filed.",
+      "马萨诸塞州公共卫生部通过其食品保护处为软体家具的制造和销售发证。Odelia 会在提交任何申请前向该处核实您的企业是否需要此执照。"),
+    agency: B("Massachusetts Department of Public Health, Division of Food Protection", "马萨诸塞州公共卫生部食品保护处"),
+    proof: P(MA_DFP, "You must have a license from the Division of Food Protection (DFP) to manufacture and sell stuffed toys, bedding, upholstered furniture,"),
+  },
+  {
+    id: "pa-upholstered-registration", kinds: ["upholstered"], where: "PA", about: "license", level: "state",
+    title: B("Pennsylvania registers upholstered furniture makers", "宾夕法尼亚州为软体家具制造商登记"),
+    text: B("Pennsylvania's Bedding and Upholstery Law requires manufacturers to use only new filling and to register with the Department of Labor and Industry to sell in the state (Form LIBU-32); importers and vendors may register too. Odelia confirms whether yours must.",
+      "宾夕法尼亚州《床上用品与软体家具法》要求制造商只使用新填充物，并向州劳工与工业部登记后方可在该州销售（LIBU-32 表）；进口商和经销商也可登记。Odelia 会核实您是否必须登记。"),
+    agency: B("Pennsylvania Department of Labor and Industry", "宾夕法尼亚州劳工与工业部"),
+    proof: P(PA_BU, "The law requires manufacturers to use only new filling materials in bedding and upholstered furniture and register with the Bureau"),
+  },
+
+  /* ------------------------------------------------ Furniture: the EU (track and explain) ------------------------------------------------ */
+  {
+    id: "eu-gpsr-operator", kinds: ["furniture"], where: EU27, abroad: true, level: "federal",
+    title: B("A responsible economic operator in the EU", "须有一家欧盟境内的责任经济运营商"),
+    text: B("Under the EU's General Product Safety Regulation (EU) 2023/988, furniture made outside the EU is placed on the EU market only with an economic operator established in the EU responsible for it, whose contact details go with the product. Odelia tracks it; it isn't a filing.",
+      "根据欧盟《通用产品安全法规》（EU）2023/988，欧盟境外制造的家具须有一家设在欧盟境内、对其负责的经济运营商，方可投放欧盟市场，其联系方式须随产品提供。Odelia 会跟进此项，它不是一项申报。"),
+    agency: B("European Union (Regulation (EU) 2023/988)", "欧盟（第 2023/988 号法规）"),
+    proof: P(GPSR, "A product covered by this Regulation shall not be placed on the market unless there is an economic operator"),
+  },
+
   /* ------------------------------------------------ New York ------------------------------------------------ */
   {
     id: "ny-wholesale-bakery", kinds: ["bakery"], where: "NY", about: "food", level: "state",
@@ -239,9 +325,15 @@ export const KIND_FACTS: KindFact[] = [
   },
 ];
 
-/** What kinds of food business the words name: "Milk tea shop" is tea, "Bakery cafe" is a bakery and a coffee shop,
-    "Cantonese restaurant" a restaurant. A dessert or ice cream shop is none of them. */
+/** What kinds of business the words name: "Milk tea shop" is tea, "Bakery cafe" is a bakery and a coffee shop,
+    "Cantonese restaurant" a restaurant. A dessert or ice cream shop is none of them. Furniture comes first (a "coffee
+    table" brand isn't a coffee shop): "Upholstered furniture brand" is furniture and upholstered, "dressers" are
+    furniture and clothing storage. */
 export function kindsOf(what: string): StoreKind[] {
+  if (isFurniture(what)) {
+    const n = furnitureNeeds(what);
+    return ["furniture", ...(n.upholstered ? ["upholstered" as const] : []), ...(n.clothingStorage ? ["storage" as const] : [])];
+  }
   const w = what.toLowerCase(), out: StoreKind[] = [];
   if (/\b(tea|boba)\b|奶茶|茶饮|茶铺|茶店/.test(w)) out.push("tea");
   if (/\b(coffee|caf[eé]s?|espresso)\b|咖啡/.test(w)) out.push("coffee");
@@ -252,5 +344,6 @@ export function kindsOf(what: string): StoreKind[] {
 
 /** The facts for these kinds of business at these places (the registry's jurisdictions for the address). */
 export function kindFactsAt(kinds: StoreKind[], places: string[]): KindFact[] {
-  return KIND_FACTS.filter(k => places.includes(k.where) && k.kinds.some(x => kinds.includes(x)));
+  const abroad = !places.includes("US");
+  return KIND_FACTS.filter(k => (Array.isArray(k.where) ? k.where : [k.where]).some(w => places.includes(w)) && (!k.abroad || abroad) && k.kinds.some(x => kinds.includes(x)));
 }

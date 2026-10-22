@@ -12,6 +12,7 @@ import { MARKETS_US } from "./markets-us";
 import { LINES } from "./lines";
 import { PLAIN } from "./plain";
 import { MAPS } from "./maps";
+import { FURNITURE, FURNITURE_FORMS } from "./furniture";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -23,7 +24,8 @@ export type Segment = "restaurant" | "retail" | "seller" | "warehouse";
 export type Where = string;
 export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" | "insurer" | "none";
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
-export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean };   // reference: listed in the library and answers, never added to a plan
+export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
+  wood?: boolean; upholstered?: boolean; clothingStorage?: boolean };   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
 
 export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
 
@@ -36,6 +38,7 @@ export type OfficialForm = {
   where: Where;
   segments: Segment[];
   needs?: Needs;              // only when the business does this
+  unless?: (keyof Needs)[];   // not when the business does any of these (an importer's license covers California's retail one)
   method: Method;
   how: Bi;                    // how it's filed, in one line
   url: string;                // where it's filed: the portal, or the official PDF
@@ -654,7 +657,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS);
 
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue
@@ -714,6 +717,9 @@ export const formById = (id: string) => FORMS.find(f => f.id === id);
 export function segmentOf(text: string): Segment {
   const t = text.toLowerCase();
   if (/warehouse|3pl|fulfil|logistic|freight|仓|物流|货代/.test(t)) return "warehouse";
+  // furniture before food: a "coffee table", a "bar stool", a "kitchen cabinet" or "teak" isn't a food business. A
+  // showroom or store is retail; a brand that only imports is a seller; a furniture warehouse took the warehouse path above
+  if (FURNITURE.test(t)) return /showroom|store|retail|gallery|shop|门店|展厅/.test(t) || !/import|e-?commerce|online|amazon|seller|wholesal|跨境|电商|进口|批发/.test(t) ? "retail" : "seller";
   if (/import|e-?commerce|amazon|seller|shein|temu|tiktok shop|跨境|电商|卖家|进口/.test(t)) return "seller";
   if (/tea|coffee|restaurant|food|kitchen|bakery|hot ?pot|malatang|noodle|dessert|ice cream|bubble|cafe|\bbar\b|\bpub\b|tavern|brewery|奶茶|茶|咖啡|餐|火锅|麻辣烫|面|甜品|烘焙|食|酒吧/.test(t)) return "restaurant";
   return "retail";
@@ -802,7 +808,7 @@ const usFormAbroad = (f: OfficialForm, places: Where[]) => !places.includes("US"
 export function formsFor(o: { segment: Segment; where: string; needs?: Needs }): OfficialForm[] {
   const places = placesOf(o.where), have = o.needs ?? {};
   return FORMS.filter(f => places.includes(f.where) && !(f.except ?? []).some(x => places.includes(x)) && !usFormAbroad(f, places) && f.segments.includes(o.segment)
-    && Object.keys(f.needs ?? {}).every(k => have[k as keyof Needs]))
+    && Object.keys(f.needs ?? {}).every(k => have[k as keyof Needs]) && !(f.unless ?? []).some(k => have[k]))
     .sort((a, b) => (formsEntity(a) ? 5 : a.order) - (formsEntity(b) ? 5 : b.order));
 }
 

@@ -32,6 +32,8 @@ import { fileURLToPath } from "node:url";
 import { libraryAnswer, previewPlan, sellsAlcohol } from "../../src/plan/preview";
 import { proofCurrent } from "../../src/plan/ask";
 import { FORMS, formsFor, segmentOf } from "../../src/forms/registry";
+import { furnitureNeeds } from "../../src/forms/furniture";
+import { FURNITURE_KINDS } from "../../src/forms/kinds";
 import type { Application, Level } from "../../src/model";
 import { answerChecks } from "./answers";
 import { officialSource } from "./official";
@@ -54,7 +56,9 @@ const load = (name: string): Gold[] => { const d = setDir(name); if (!d) return 
 // kinds: the same place opened as a different kind of food business (a bubble tea shop and a restaurant on one Flushing
 // street, a bakery at the San Gabriel restaurant's address), scored on the filings and on what differs by kind
 // (scripts/eval/kinds, src/forms/kinds.ts).
-const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds"]).map(name => ({ name, cases: load(name) }));
+// furniture: furniture brands importing and opening showrooms (an upholstered brand into Los Angeles, a dresser brand
+// into New Jersey), scored on the filings (src/forms/furniture.ts) and on what the plan states beyond them.
+const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds", "furniture"]).map(name => ({ name, cases: load(name) }));
 // npm passes its own arguments after the script's "exit", so the quiet mode is an environment variable: QUIET=1
 const showMisses = !process.env.QUIET;
 /** A row that hedges whether the requirement applies ("if the city requires one", "We'll confirm with ...") asserts
@@ -89,7 +93,7 @@ function library(g: Gold): Row[] {
   const i = g.input, segment = segmentOf(i.what);
   // the flags the model sets, read the way the instant plan reads them ("noodle bar" isn't a bar that serves alcohol)
   const imports = /import|进口/i.test(i.what), alcohol = sellsAlcohol(i.what);
-  const needs = { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, food: segment === "restaurant" || /food|snack|食品/i.test(i.what), imports, alcohol };
+  const needs = { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, food: segment === "restaurant" || /food|snack|食品/i.test(i.what), imports, alcohol, ...furnitureNeeds(i.what) };
   const known = libraryAnswer(i.what, i.where, needs, TODAY);
   const forms = formsFor({ segment, where: i.where, needs }).filter(f => f.order < 88).map(f => {
     const claim = known.claim(f), seen = f.proof ? proofCurrent(f.proof, TODAY) : undefined;
@@ -237,6 +241,7 @@ const TITLE: Record<string, string> = {
   gold: "Gold set (in-sample: the library was fixed against it)", heldout: GENERAL ? "Held-out set, city entries removed (GENERAL_ONLY)" : "Held-out set (scripts/eval/heldout)",
   strict: "Strict set (scripts/eval/strict: top cities and states, every answer quoted from its official page)",
   kinds: "Store-type set (scripts/eval/kinds: the same place as a tea shop, coffee shop, bakery or restaurant)",
+  furniture: "Furniture set (scripts/eval/furniture: furniture brands importing and opening showrooms)",
 };
 
 /* ------------------------------------------------------------------ what differs by kind of business */
@@ -248,7 +253,7 @@ for (const { name: set, cases } of SETS) for (const g of cases.filter(x => x.fac
   const i = g.input;
   const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
   const segment = segmentOf(i.what);
-  const lib = libraryAnswer(i.what, i.where, { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, imports: false, alcohol: sellsAlcohol(i.what) }, TODAY);
+  const lib = libraryAnswer(i.what, i.where, { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, imports: /import|进口/i.test(i.what), alcohol: sellsAlcohol(i.what) }, TODAY);
   for (const [path, facts] of [["instant plan", p.facts], ["library", lib.facts]] as const) {
     const miss: string[] = [], bad: string[] = [];
     for (const want of g.facts ?? []) {
@@ -267,7 +272,8 @@ for (const { name: set, cases } of SETS) for (const g of cases.filter(x => x.fac
       if (proof.length || !officialSource(f.source.url)) { bad.push(`${f.id}: ${proof.join("; ") || "not an official page"}`); continue; }
       factTotals.right++;
     }
-    if (segment !== "restaurant" && facts.length) bad.push(`${facts.length} facts for a ${segment} business`);
+    const food = facts.filter(f => !f.kinds.some(k => FURNITURE_KINDS.includes(k)));
+    if (segment !== "restaurant" && food.length) bad.push(`${food.length} food facts for a ${segment} business`);
     if (miss.length || bad.length) { fails.push(`${set} ${g.id} ${path} facts: ${[...miss, ...bad].join("; ")}`); console.log(`  ${set} ${g.id} (${path}): ${[...miss, ...bad].join("; ")}`); }
   }
 }

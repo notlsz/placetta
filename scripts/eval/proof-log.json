@@ -2677,5 +2677,134 @@
   "method": "webfetch",
   "found": true,
   "note": "curl got 403; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "aphis-ppq505",
+  "read": "https://www.aphis.usda.gov/sites/default/files/ppq505.pdf",
+  "quote": "Importers should have a copy of the form available for CBP to review at the port of entry.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "778c428c31f4bfc1",
+  "context": "4\") fraxinus excelsior switzerland 52 i m3 i 0 submission of paper declaration: importers should have a copy of the form available for cbp to review at the port of entry. after cbp clears the shipment, the importer must mail the original form to the "
+ },
+ {
+  "id": "epa-tsca-import",
+  "read": "https://www.epa.gov/node/155807",
+  "quote": "Importers to provide import certification under TSCA beginning March 22, 2019;",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "4b4e2fba2dbfd2e9",
+  "context": "ngs, the final rule requires: records be kept for three years versus two years; importers to provide import certification under tsca beginning march 22, 2019; manufacturers to disclose upon request formaldehyde testing results to their di"
+ },
+ {
+  "id": "cpsc-1261",
+  "read": "https://www.cpsc.gov/Business--Manufacturing/Business-Education/Business-Guidance/Clothing-Storage-Units",
+  "quote": "For clothing storage units, the citation to use in section 2 of the CPC or GCC is",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7f12681ae839c990",
+  "context": "s products, general certificate of compliance or gcc for general-use products). for clothing storage units, the citation to use in section 2 of the cpc or gcc is \"16 cfr part 1261 – clothing storage units\". for more information on certificat"
+ },
+ {
+  "id": "ca-bhgs-importer",
+  "read": "https://bhgs.dca.ca.gov/forms_pubs/app_importer.pdf",
+  "quote": "An importer’s license is required for those who manufacture or wholesale, through employees or agents, any article of upholstered furniture,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "673ecb589d5aeb14",
+  "context": "es (bureau) licensing unit, along with the appropriate fee (bpc section 19050). an importer's license is required for those who manufacture or wholesale, through employees or agents, any article of upholstered furniture, bedding, or filling material manufactured outside of the united states for the "
+ },
+ {
+  "id": "ca-bhgs-retail",
+  "read": "https://bhgs.dca.ca.gov/forms_pubs/19-012_statelicflyer.pdf",
+  "quote": "Furniture Retailer—A store operation selling upholstered furniture.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "21e94563da08c3ee",
+  "context": "d. state licensing is required before you can operate the following businesses: furniture retailer—a store operation selling upholstered furniture. bedding retailer—a store operation selling bedding products (includes pillows, "
+ },
+ {
+  "id": "kind:us-tsca-label",
+  "read": "https://www.epa.gov/node/155807",
+  "quote": "must include the fabricator’s name, the date the finished good was produced (in month/year format), and a TSCA Title VI compliance statement.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "4b4e2fba2dbfd2e9",
+  "context": "ished goods produced in or imported into the united states after march 22, 2019 must include the fabricator's name, the date the finished good was produced (in month/year format), and a tsca title vi compliance statement. 10. how does epa ensure that composite wood products do not exceed the emission"
+ },
+ {
+  "id": "kind:us-csu-tests",
+  "read": "https://www.cpsc.gov/Business--Manufacturing/Business-Education/Business-Guidance/Clothing-Storage-Units",
+  "quote": "Product must pass all three stability tests:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7f12681ae839c990",
+  "context": "rce for 5 seconds or its opening must act to close the originally open element. product must pass all three stability tests: clothing load – open all doors and extendible elements that are not locked with"
+ },
+ {
+  "id": "kind:us-csu-antitip",
+  "read": "https://www.cpsc.gov/Business--Manufacturing/Business-Education/Business-Guidance/Clothing-Storage-Units",
+  "quote": "Anti-tip device that meets ASTM F3096 must be packaged with the product",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7f12681ae839c990",
+  "context": " of the door or extendible element most likely to cause tip-over for 30 seconds anti-tip device that meets astm f3096 must be packaged with the product warning labels must include certain statements and pictogram(s) dependent on in"
+ },
+ {
+  "id": "kind:ca-law-label",
+  "read": "https://bhgs.dca.ca.gov/forms_pubs/19-014_furnbedlawflyer.pdf",
+  "quote": "Every article of upholstered furniture and bedding products must have a law label to identify the manufacturer,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a09cff4110a77b5d",
+  "context": " 3\" and the type must be in black ink and a minimum of 1/8\" in size. law labels every article of upholstered furniture and bedding products must have a law label to identify the manufacturer, their location, and the filling materials used during the making of the product"
+ },
+ {
+  "id": "kind:ca-tb117-label",
+  "read": "https://bhgs.dca.ca.gov/forms_pubs/19-014_furnbedlawflyer.pdf",
+  "quote": "Products meeting Technical Bulletin 117-2013 must also have the flammability chemical statement on the label.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a09cff4110a77b5d",
+  "context": "pholstered furniture products to describe which flammability standard it meets. products meeting technical bulletin 117-2013 must also have the flammability chemical statement on the label. the flammability chemical statement describes whether articles used to make the"
+ },
+ {
+  "id": "kind:ma-upholstered-license",
+  "read": "https://www.mass.gov/how-to/apply-for-a-license-to-manufacture-and-sell-stuffed-toys-bedding-upholstered-furniture-and-related-products",
+  "quote": "You must have a license from the Division of Food Protection (DFP) to manufacture and sell stuffed toys, bedding, upholstered furniture,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "972d44401412c4c1",
+  "context": "ure and sell stuffed toys, bedding, upholstered furniture, and related products you must have a license from the division of food protection (dfp) to manufacture and sell stuffed toys, bedding, upholstered furniture, and related products in massachusetts. please allow 6 – 8 weeks for processing."
+ },
+ {
+  "id": "kind:pa-upholstered-registration",
+  "read": "https://www.pa.gov/agencies/dli/programs-services/labor-management-relations/bureau-of-occupational-and-industrial-safety/bedding-and-upholstery",
+  "quote": "The law requires manufacturers to use only new filling materials in bedding and upholstered furniture and register with the Bureau",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f6fd1ac3b507e7c9",
+  "context": " bureau of occupational & industrial safety and relates to consumer protection. the law requires manufacturers to use only new filling materials in bedding and upholstered furniture and register with the bureau to sell those items in pennsylvania. for secondhand and renovated items, they m"
+ },
+ {
+  "id": "kind:eu-gpsr-operator",
+  "read": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R0988",
+  "quote": "A product covered by this Regulation shall not be placed on the market unless there is an economic operator",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 202; read with WebFetch on 2026-10-21"
  }
 ]

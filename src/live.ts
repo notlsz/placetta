@@ -34,6 +34,7 @@ import { activeSkills, learnForm, prefill, putSkill, skillIndex } from "./skills
 import { docx } from "./files";
 import { cityName, countyOf, stateCode as stateFromAny } from "./counties";
 import { COUNTRIES } from "./forms/world";
+import { furnitureNeeds } from "./forms/furniture";
 import type { Lang } from "./i18n";
 import { anthropicMessage } from "../supabase/functions/_shared/stream.ts";
 import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
@@ -626,7 +627,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const place = str(i.place) || get().locations.map(l => `${l.name.en}, ${l.county.en}`).join("; ");
         const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}),
           ...(i.builds_out ? { buildout: true } : {}), ...(i.exterior_sign ? { signage: true } : {}), ...(i.hazmat_or_batteries ? { hazmat: true } : {}), ...(i.sells_cosmetics ? { cosmetics: true } : {}),
-          ...(i.food_warehouse || segment === "restaurant" ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}) };
+          ...(i.food_warehouse || segment === "restaurant" ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}),
+          // a furniture brand: wood goods, upholstered furniture, dressers and chests (src/forms/furniture.ts)
+          ...furnitureNeeds(str(i.business) || get().business.en) };
         const list: OfficialForm[] = str(i.search) ? searchForms({ text: str(i.search), where: str(i.place) || undefined }) : formsFor({ segment, where: place, needs });
         S("searching", L(`Finding the official forms for ${str(i.search) || place || "the business"}`, `查找${str(i.search) || place || "这家企业"}的官方表格`));
         mark();

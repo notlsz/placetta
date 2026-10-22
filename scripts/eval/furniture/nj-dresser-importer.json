@@ -1,0 +1,221 @@
+{
+ "id": "nj-dresser-importer",
+ "title": "Case-goods brand importing dressers into New Jersey",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Case-goods brand importing dressers",
+  "where": "Newark, NJ",
+  "lang": "en"
+ },
+ "assumptions": "A brand importing wood dressers through New Jersey, with no store (the seller path). The company and tax filings are those of heldout/edison-bakery.json (New Jersey's formation and NJ-REG); the import filings are the library's; the furniture filings and facts are read from APHIS, EPA and CPSC on 2026-10-21. Dressers are clothing storage units on CPSC's page, so 16 CFR part 1261 applies; nothing upholstered is named, so no California or upholstered-furniture rule appears.",
+ "items": [
+  {
+   "key": "nj-formation",
+   "name": "Certificate of formation",
+   "agency": "NJ Division of Revenue and Enterprise Services",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+   "match": "certificate of formation|business formation|nj-formation|public records filing",
+   "agencyMatch": "division of revenue",
+   "quote": "First, file a Certificate of formation/authorization.",
+   "note": "Fee wording on the page is ambiguous for LLCs; not scored."
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-21",
+   "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+   "agencyMatch": "internal revenue service|\\bIRS\\b",
+   "feeQuote": "You never have to pay a fee for an EIN."
+  },
+  {
+   "key": "nj-reg",
+   "name": "Tax and employer registration (Form NJ-REG)",
+   "agency": "NJ Division of Revenue and Enterprise Services",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+   "match": "NJ-REG|tax and employer registration|nj-reg",
+   "agencyMatch": "division of revenue",
+   "quote": "Second, after filing the certificate of formation/authorization, file the tax/employer registration form (Form NJ-REG)."
+  },
+  {
+   "key": "cbp-5106",
+   "name": "Importer identity (CBP Form 5106)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Filed with the first formal entry or request for services (19 CFR 24.5).",
+   "source": "https://www.govinfo.gov/content/pkg/FR-2013-11-12/html/2013-26996.htm",
+   "match": "5106|importer identity",
+   "agencyMatch": "customs and border"
+  },
+  {
+   "key": "cbp-301",
+   "name": "Customs bond (CBP Form 301)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Merchandise isn't released at entry without a single or continuous bond (19 CFR 142.4(a)); the port director may waive it at $2,500 or less.",
+   "source": "https://cbp.gov/sites/default/files/assets/documents/2021-Jun/IE%20%E2%80%93%20Bond%20Recommendations.pdf",
+   "match": "customs bond|cbp-301",
+   "agencyMatch": "customs and border",
+   "quote": "Customs Bonds are the backbone to the importation process guaranteeing the payment of duties, taxes, and fees to CBP",
+   "read": "2026-10-18"
+  },
+  {
+   "key": "cbp-isf",
+   "name": "Importer Security Filing (ISF)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": false,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.cbp.gov/border-security/ports-entry/cargo-security/importer-security-filing-102",
+   "read": "2026-10-21",
+   "match": "\\bcbp-isf\\b|importer security filing",
+   "agencyMatch": "customs and border",
+   "note": "CBP's pages refused every automated read (curl 403, WebFetch client error) on 2026-10-21, so the row abstains and this item is set aside."
+  },
+  {
+   "key": "cbp-ace",
+   "name": "ACE Secure Data Portal account",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": false,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)",
+   "read": "2026-10-21",
+   "match": "\\bcbp-ace\\b|\\bACE\\b",
+   "agencyMatch": "customs and border",
+   "condition": "An importer of record sees its entries, duties and bond in ACE."
+  },
+  {
+   "key": "aphis-ppq505",
+   "name": "Lacey Act declaration (PPQ Form 505)",
+   "agency": "USDA APHIS",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.aphis.usda.gov/sites/default/files/ppq505.pdf",
+   "quote": "Importers should have a copy of the form available for CBP to review at the port of entry.",
+   "read": "2026-10-21",
+   "match": "\\baphis-ppq505\\b|lacey act|ppq ?(form )?505",
+   "agencyMatch": "animal and plant health|APHIS"
+  },
+  {
+   "key": "epa-tsca-import",
+   "name": "TSCA Title VI import certification",
+   "agency": "U.S. Environmental Protection Agency",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.epa.gov/node/155807",
+   "quote": "Importers to provide import certification under TSCA beginning March 22, 2019;",
+   "read": "2026-10-21",
+   "match": "\\bepa-tsca-import\\b|tsca",
+   "agencyMatch": "environmental protection"
+  },
+  {
+   "key": "cpsc-cert",
+   "name": "Product safety certificate (eFiling)",
+   "agency": "U.S. Consumer Product Safety Commission",
+   "level": "federal",
+   "required": false,
+   "verified": false,
+   "fee": 0,
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification",
+   "read": "2026-10-21",
+   "match": "\\bcpsc-cert\\b|product safety certificate",
+   "agencyMatch": "consumer product safety",
+   "note": "The library's general certificate row abstains (no current quote); the clothing storage unit certificate is scored as cpsc-1261."
+  },
+  {
+   "key": "cpsc-1261",
+   "name": "Clothing storage unit standard and certificate (16 CFR part 1261)",
+   "agency": "U.S. Consumer Product Safety Commission",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Business-Education/Business-Guidance/Clothing-Storage-Units",
+   "quote": "For clothing storage units, the citation to use in section 2 of the CPC or GCC is",
+   "read": "2026-10-21",
+   "match": "\\bcpsc-1261\\b|clothing storage unit",
+   "agencyMatch": "consumer product safety"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "California furniture licenses",
+   "why": "Not in California, and nothing upholstered.",
+   "match": "household goods and services|bhgs"
+  },
+  {
+   "name": "Food permits",
+   "why": "Not a food business.",
+   "match": "food facility|health permit|plan review"
+  }
+ ],
+ "facts": [
+  {
+   "key": "us-tsca-label",
+   "match": "^us-tsca-label$",
+   "source": "https://www.epa.gov/node/155807",
+   "quote": "must include the fabricator’s name, the date the finished good was produced (in month/year format), and a TSCA Title VI compliance statement.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-csu-tests",
+   "match": "^us-csu-tests$",
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Business-Education/Business-Guidance/Clothing-Storage-Units",
+   "quote": "Product must pass all three stability tests:",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-csu-antitip",
+   "match": "^us-csu-antitip$",
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Business-Education/Business-Guidance/Clothing-Storage-Units",
+   "quote": "Anti-tip device that meets ASTM F3096 must be packaged with the product",
+   "read": "2026-10-21",
+   "required": true
+  }
+ ],
+ "mustNotFacts": [
+  {
+   "match": "^ca-",
+   "why": "California's, and nothing upholstered."
+  },
+  {
+   "match": "^eu-",
+   "why": "Not in the EU."
+  },
+  {
+   "match": "^(ma|pa)-",
+   "why": "Another state's."
+  }
+ ]
+}
