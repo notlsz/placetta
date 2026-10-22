@@ -8,4 +8,7 @@ COPY worker/filer/package.json worker/filer/package-lock.json worker/filer/
 RUN cd worker/filer && npm ci --omit=dev
 COPY worker/filer/src worker/filer/src
 WORKDIR /app/worker/filer
+# Run as the image's unprivileged user, not root: the code and node_modules stay root-owned and read-only to it, and
+# each run's files go in its own folder under /tmp (worker/filer/src/run.ts). worker/filer/test/docker.test.ts checks.
+USER pwuser
 CMD ["npm", "start"]

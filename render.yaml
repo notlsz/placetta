@@ -23,7 +23,9 @@ services:
         value: "0"           # 1 only while staff watch a playbook's first run (worker/filer/src/playbooks.ts); 0 refuses unverified playbooks
       - key: SUPABASE_URL
         value: https://esquxzcfsylffuijvzec.supabase.co
+      - key: FILER_DB_KEY
+        sync: false          # the filer's own role key, no table access (docs/soc2/runbooks/filer-least-privilege.md)
       - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false          # Supabase, Project settings, API keys, service_role
+        sync: false          # only until FILER_DB_KEY is set; then delete it from Render (the worker warns while it's used)
       - key: ANTHROPIC_API_KEY
         sync: false          # console.anthropic.com, API keys

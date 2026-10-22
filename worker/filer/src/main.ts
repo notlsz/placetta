@@ -5,7 +5,7 @@ import { DEST } from "../../../supabase/functions/file/destinations.ts";
 import { AnthropicModel } from "./model.ts";
 import { playbookFor } from "./playbooks.ts";
 import { type Route, Worker, type Session } from "./run.ts";
-import { SupabaseStore } from "./store.ts";
+import { dbKey, SupabaseStore } from "./store.ts";
 
 /** The destination's tenant path, other hosts and start page, from destinations.ts like its host. */
 export const routeOf = (id: string): Route | null => {
@@ -42,7 +42,7 @@ export const settings = () => ({
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   if (process.env.FILER_ENABLED !== "1") { console.log("FILER_ENABLED is not 1; the portal worker is off."); process.exit(0); }
-  const store = new SupabaseStore(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const store = new SupabaseStore(process.env.SUPABASE_URL!, dbKey(process.env));
   const w = new Worker({ store, model: new AnthropicModel(process.env.ANTHROPIC_API_KEY!), open: openBrowser, portalOf: (id) => DEST[id]?.portal ?? null,
     routeOf, playbookOf: playbookFor, ...settings() });
   for (;;) {

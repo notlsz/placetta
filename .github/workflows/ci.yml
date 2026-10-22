@@ -53,6 +53,13 @@ jobs:
         run: npm run test:seo
       - name: Production build
         run: npx vite build
+      # the portal filer: types, and the tests that need no browser (its database access goes only through the filer
+      # functions; its image runs as a non-root user; its rerouting and playbooks)
+      - name: Filer types and tests
+        run: |
+          npm ci --prefix worker/filer
+          npm run typecheck --prefix worker/filer
+          cd worker/filer && node --experimental-strip-types --test test/store.test.ts test/docker.test.ts test/reroute.test.ts test/replay.test.ts
   functions:
     runs-on: ubuntu-latest
     steps:
@@ -113,8 +120,8 @@ jobs:
           npm audit --audit-level=high --package-lock-only --prefix worker/filer
       - name: Dependabot watches every manifest
         run: node scripts/check-dependabot.mjs
-      - name: Evidence collector, log export and access review tests
-        run: node --test scripts/soc2-evidence.test.mjs scripts/log-export.test.mjs scripts/access-review.test.mjs
+      - name: Evidence collector, log export, access review and key minting tests
+        run: node --test scripts/soc2-evidence.test.mjs scripts/log-export.test.mjs scripts/access-review.test.mjs scripts/mint-role-key.test.mjs
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with: { go-version: stable, cache: false }
       # Built from the Go module proxy at an exact version, so the download is checked against sum.golang.org.

@@ -8,7 +8,8 @@ export interface Store {
   reload(id: string): Promise<Filing>;
   /** Append to the log, patch agent columns, write the audit row (actor agent). */
   step(f: Filing, entry: LogEntry | null, patch?: Record<string, unknown>): Promise<Filing>;
-  /** The saved login for this portal host (and, on a host many agencies share, this agency's path); the opening is audited. */
+  /** The saved login for this portal host (and, on a host many agencies share, this agency's path); the opening is
+   *  audited before the password is read. */
   login(f: Filing, host: string, tenant?: string): Promise<Login | null>;
   skill(key: string): Promise<Skill | null>;
   saveSkill(s: Skill): Promise<void>;
@@ -23,68 +24,61 @@ export interface Store {
   notify(f: Filing, title: { en: string; zh: string }, body: { en: string; zh: string }): Promise<void>;
 }
 
-const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, submit_clicked_at, attempts, confirmation_number";
-
+/** The worker's database access, through the functions in 20261022120000_filer_least_privilege.sql only: no table is
+ *  read or written directly, so the same code runs on the filer's own role key (FILER_DB_KEY, which has no table grants
+ *  and bypasses no row-level security) or, until that key is made, the service role. Files go through Storage, which
+ *  checks the role's storage policies. */
 export class SupabaseStore implements Store {
   private db: SupabaseClient;
-  constructor(url: string, serviceKey: string) {
-    this.db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  constructor(url: string, key: string, client?: SupabaseClient) {
+    this.db = client ?? createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  }
+  private async call<T>(fn: string, args: Record<string, unknown>, what: string): Promise<T> {
+    const { data, error } = await this.db.rpc(fn, args);
+    if (error) throw new Error(`${what} failed: ${error.message}`);
+    return data as T;
   }
   async claim() {
-    const { data, error } = await this.db.rpc("claim_agent_filing");
-    if (error) throw new Error(`claim failed: ${error.message}`);
-    return ((data ?? []) as Filing[])[0] ?? null;
+    const data = await this.call<Filing[] | null>("claim_agent_filing", {}, "claim");
+    return (data ?? [])[0] ?? null;
   }
   async takeHeld(id: string) {
-    const { data, error } = await this.db.rpc("take_held_filing", { p_id: id });
-    if (error) throw new Error(`take failed: ${error.message}`);
-    return data === true;
+    return (await this.call<boolean>("take_held_filing", { p_id: id }, "take")) === true;
   }
   async reload(id: string) {
-    const { data, error } = await this.db.from("filings").select(COLS).eq("id", id).single();
-    if (error) throw new Error(`reload failed: ${error.message}`);
-    return data as unknown as Filing;
+    const rows = await this.call<Filing[] | null>("filer_filing", { p_id: id }, "reload");
+    const f = (rows ?? [])[0];
+    if (!f) throw new Error("reload failed: not a filing the agent was given");
+    return f;
   }
   async step(f: Filing, entry: LogEntry | null, patch: Record<string, unknown> = {}) {
-    const { data, error } = await this.db.rpc("filing_agent_step", { p_id: f.id, p_entry: entry, p_patch: patch, p_audit: true });
-    if (error) throw new Error(`step failed: ${error.message}`);
-    return data as unknown as Filing;
+    return await this.call<Filing>("filing_agent_step", { p_id: f.id, p_entry: entry, p_patch: patch, p_audit: true }, "step");
   }
   async login(f: Filing, host: string, tenant?: string) {
-    const { data, error } = await this.db.from("agency_logins").select("id, agency, url, username, secret_id").eq("workspace_id", f.workspace_id);
-    if (error) throw new Error(`logins lookup failed: ${error.message}`);
+    const rows = await this.call<{ id: string; agency: string; url: string | null; username: string }[] | null>("filer_logins", { p_filing: f.id }, "logins lookup");
     // The same host and, on a host many agencies share (Accela, BTExpress), the same agency: Dallas's login never opens Fort Worth.
-    const row = (data ?? []).find((r) => loginMatches(r.url as string, { portal: host, tenant }));
+    const row = (rows ?? []).find((r) => loginMatches(r.url as string, { portal: host, tenant }));
     if (!row) return null;
-    const { data: pw, error: e2 } = await this.db.rpc("vault_get", { p_id: row.secret_id });
-    if (e2 || typeof pw !== "string") throw new Error("saved login unreadable");
-    await this.db.from("agency_logins").update({ last_opened_at: new Date().toISOString(), last_opened_by: null }).eq("id", row.id);
-    await this.db.from("audit_log").insert({ workspace_id: f.workspace_id, actor: "agent", actor_id: null,
-      action: { en: `Placetta opened the saved login for ${row.agency}`, zh: `快哉打开了 ${row.agency} 的已保存登录` }, object: f.title });
-    return { username: String(row.username), password: pw, host };
+    // One call, one transaction: the audit entry is written first, then the opening time, then the password is read.
+    // If the audit entry can't be written, the call fails and no password comes back.
+    const { data, error } = await this.db.rpc("filer_open_login", { p_filing: f.id, p_login: row.id });
+    const got = (data as { username: string; password: string }[] | null)?.[0];
+    if (error || !got || typeof got.password !== "string") throw new Error("saved login unreadable");
+    return { username: String(got.username), password: got.password, host };
   }
   async skill(key: string) {
-    const { data } = await this.db.from("agent_skills").select("*").is("workspace_id", null).eq("key", key).maybeSingle();
-    return (data as Skill | null) ?? null;
+    const rows = await this.call<Skill[] | null>("filer_skill", { p_key: key }, "skill lookup");
+    return (rows ?? [])[0] ?? null;
   }
   async saveSkill(s: Skill) {
-    const row = { workspace_id: null, key: s.key, kind: "portal", name: s.name, description: `Recorded from a submitted filing`, body: s.body, source: "agent",
-      enabled: true, uses: s.uses, fails_in_a_row: 0, last_seconds: s.last_seconds, best_seconds: s.best_seconds, updated_at: new Date().toISOString() };
-    const old = await this.skill(s.key);
-    const { error } = old ? await this.db.from("agent_skills").update(row).eq("id", old.id!) : await this.db.from("agent_skills").insert(row);
-    if (error) throw new Error(`skill save failed: ${error.message}`);
+    await this.call("filer_save_skill", { p_key: s.key, p_name: s.name, p_body: s.body, p_uses: s.uses,
+      p_last_seconds: s.last_seconds, p_best_seconds: s.best_seconds }, "skill save");
   }
   async skillFailed(key: string) {
-    const s = await this.skill(key);
-    if (!s) return { disabled: false };
-    const n = s.fails_in_a_row + 1, disabled = n >= 3;
-    await this.db.from("agent_skills").update({ fails_in_a_row: n, enabled: !disabled }).eq("id", s.id!);
-    return { disabled };
+    return { disabled: (await this.call<boolean>("filer_skill_failed", { p_key: key }, "skill update")) === true };
   }
   async selfFiled(official: string) {
-    const { count } = await this.db.from("filings").select("id", { count: "exact", head: true })
-      .eq("payload->>official", official).in("channel", ["email", "fax", "mail", "portal"]).in("status", ["submitted", "accepted"]);
-    return count ?? 0;
+    return (await this.call<number | null>("filer_self_filed", { p_official: official }, "count")) ?? 0;
   }
   async download(path: string) {
     const { data, error } = await this.db.storage.from("documents").download(path);
@@ -95,7 +89,7 @@ export class SupabaseStore implements Store {
     const path = `${f.workspace_id}/receipts/${f.id}-${Date.now()}-${name.replace(/[^\w.-]+/g, "_")}`;
     const up = await this.db.storage.from("documents").upload(path, bytes, { contentType: mime, upsert: false });
     if (up.error) return null;
-    const { error } = await this.db.from("documents").insert({ workspace_id: f.workspace_id, app_id: f.app_id, filing_id: f.id, name, path, size: bytes.length, mime, source: "agent", uploaded_by: null });
+    const { error } = await this.db.rpc("filer_save_doc", { p_filing: f.id, p_name: name, p_path: path, p_size: bytes.length, p_mime: mime });
     if (error) { await this.db.storage.from("documents").remove([path]); return null; }
     return path;
   }
@@ -105,11 +99,21 @@ export class SupabaseStore implements Store {
     return up.error ? null : path;
   }
   async teamTask(f: Filing | null, kind: string, title: string, detail?: unknown) {
-    await this.db.from("team_tasks").upsert({ kind, filing_id: f?.id ?? null, workspace_id: f?.workspace_id ?? null, title, detail: detail ?? null,
-      dedupe: `${kind}:${f?.id ?? title}:${f?.attempts ?? 0}` }, { onConflict: "dedupe", ignoreDuplicates: true });
+    await this.db.rpc("filer_team_task", { p_filing: f?.id ?? null, p_kind: kind, p_title: title, p_detail: detail ?? null,
+      p_dedupe: `${kind}:${f?.id ?? title}:${f?.attempts ?? 0}` });
   }
   async notify(f: Filing, title: { en: string; zh: string }, body: { en: string; zh: string }) {
-    await this.db.from("updates").upsert({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, title, body, dedupe: `agent:${f.id}:${f.agent_state}:${f.attempts}` },
-      { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
+    await this.db.rpc("filer_notify", { p_filing: f.id, p_title: title, p_body: body, p_dedupe: `agent:${f.id}:${f.agent_state}:${f.attempts}` });
   }
+}
+
+/** The key the worker signs in with: the filer's own role key when it's set, otherwise the service role key, with a
+ *  warning, so a deploy before the key exists keeps working (docs/soc2/runbooks/filer-least-privilege.md). */
+export function dbKey(env: Record<string, string | undefined>, warn: (m: string) => void = console.warn): string {
+  if (env.FILER_DB_KEY) return env.FILER_DB_KEY;
+  if (env.SUPABASE_SERVICE_ROLE_KEY) {
+    warn("FILER_DB_KEY is not set: using the service role key, which bypasses row-level security. Make the filer's own key (docs/soc2/runbooks/filer-least-privilege.md).");
+    return env.SUPABASE_SERVICE_ROLE_KEY;
+  }
+  throw new Error("set FILER_DB_KEY (or SUPABASE_SERVICE_ROLE_KEY until it exists)");
 }
