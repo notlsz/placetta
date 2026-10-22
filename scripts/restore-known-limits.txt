@@ -17,3 +17,4 @@ hardening.sql	documents bucket has a size limit
 hardening.sql	documents bucket takes PDFs, images and office files only
 filer_role.sql	adds a receipt for a filing it was given
 filer_role.sql	reads only files of workspaces with a running filing
+security_audit.sql	a signed-in person can still add to their own workspace's documents
