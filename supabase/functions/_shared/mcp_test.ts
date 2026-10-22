@@ -163,6 +163,16 @@ Deno.test("the guard checks again after the DNS lookup, and on every redirect", 
     await assertRejects(() => guardedFetch(redirecting, "https://mcp.fake.test/x", { method: "GET" }, 2000), McpError, "public internet");
     const toPrivateName: Net = { resolve: f.net.resolve, fetch: () => Promise.resolve(new Response(null, { status: 307, headers: { location: "https://evil.example/" } })) };
     await assertRejects(() => guardedFetch(toPrivateName, "https://mcp.fake.test/x", { method: "POST", body: "{}" }, 2000), McpError, "public internet");
+    // a redirect to another origin drops the person's token; one on the same origin keeps it
+    const sent: { url: string; auth: string | null }[] = [];
+    const hopping: Net = { resolve: f.net.resolve, fetch: (input, init) => {
+      const u = String(input);
+      sent.push({ url: u, auth: new Headers(init?.headers).get("authorization") });
+      const to = u === "https://mcp.fake.test/a" ? "/b" : u === "https://mcp.fake.test/b" ? "https://other.fake.test/c" : null;
+      return Promise.resolve(to ? new Response(null, { status: 307, headers: { location: to } }) : new Response("{}", { status: 200 }));
+    } };
+    await guardedFetch(hopping, "https://mcp.fake.test/a", { method: "POST", body: "{}", headers: { Authorization: "Bearer secret-token" } }, 2000);
+    deepStrictEqual(sent.map((s) => s.auth), ["Bearer secret-token", "Bearer secret-token", null]);
     // a name the runtime can't look up at all still gets the name checks
     assertEquals((await guardUrl({ ...f.net, resolve: () => Promise.resolve(null) }, "https://unknown.example/mcp")).hostname, "unknown.example");
     // a client pointed at a private address never sends anything
