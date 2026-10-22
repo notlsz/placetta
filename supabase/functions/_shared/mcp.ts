@@ -171,11 +171,16 @@ export async function guardUrl(net: Net, raw: string): Promise<URL> {
 export async function guardedFetch(net: Net, url: string, init: RequestInit, timeoutMs: number): Promise<{ res: Response; url: string }> {
   const signal = AbortSignal.timeout(timeoutMs);
   let at = url, method = (init.method ?? "GET").toUpperCase(), body = init.body;
+  let first: string | null = null;
   for (let hop = 0; hop <= 3; hop++) {
     const u = await guardUrl(net, at);
+    first ??= u.origin;
+    // like the Fetch standard: a redirect to another origin doesn't carry the person's token or cookies with it
+    const headers = new Headers(init.headers);
+    if (u.origin !== first) { headers.delete("authorization"); headers.delete("cookie"); headers.delete("proxy-authorization"); }
     let res: Response;
     try {
-      res = await net.fetch(u.toString(), { ...init, method, body, redirect: "manual", signal });
+      res = await net.fetch(u.toString(), { ...init, headers, method, body, redirect: "manual", signal });
     } catch (e) {
       if (signal.aborted) throw new McpError("timeout", "The app's server took too long to answer.", "该应用的服务器响应超时。");
       throw new McpError("unreachable", "Couldn't reach the app's server. Check the link and try again.", "无法连接该应用的服务器，请检查链接后重试。", { data: e instanceof Error ? e.message.slice(0, 120) : undefined });

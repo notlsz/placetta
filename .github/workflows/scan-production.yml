@@ -1,0 +1,50 @@
+# Weekly outside-in scan of production: OWASP ZAP's baseline (spider and passive rules only: it reads responses and
+# sends no attack payloads) and nuclei's safe templates (exposures and misconfiguration, no fuzzing, no DoS, no
+# out-of-band callbacks). The same scanners run against a local build with `npm run scan:local`
+# (docs/SECURITY-AUDIT.md, "Two-account test and scanners, 2026-10-22").
+#
+# DISABLED ON PURPOSE: it runs only when started by hand. Turning on the schedule below scans the live site every week
+# and needs the founder's approval first (it is traffic against production, and Vercel's firewall may rate-limit it).
+name: Scan production (manual)
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "17 6 * * 1"   # Mondays 06:17 UTC; uncomment only with the founder's approval
+permissions: { contents: read }
+concurrency:
+  group: scan-production
+  cancel-in-progress: false
+jobs:
+  zap-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # the baseline never runs the active scanner; -m 3: three minutes of spidering; -I: warnings don't fail the job
+      - uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: https://www.placetta.com/
+          rules_file_name: scripts/scan/zap-rules.tsv
+          cmd_options: -m 3 -I
+          allow_issue_writing: false
+          fail_action: false
+          artifact_name: zap-baseline-production
+  nuclei-safe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with: { go-version: stable, cache: false }
+      - name: Install nuclei v3.11.1 (built from the Go module proxy, checked against sum.golang.org)
+        run: go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@v3.11.1
+      - name: Safe templates against production
+        run: |
+          nuclei=$(go env GOPATH)/bin/nuclei
+          "$nuclei" -update-templates -silent
+          # exposures and misconfiguration only; nothing intrusive, no fuzzing or DoS, no out-of-band (interactsh) callbacks
+          "$nuclei" -u https://www.placetta.com -u https://placetta.com \
+            -t http/exposures -t http/misconfiguration -t http/technologies -t ssl \
+            -etags intrusive,dos,fuzz,bruteforce,oast -ni -rl 10 -c 5 -timeout 10 \
+            -jsonl -o nuclei-production.jsonl -stats -si 60 || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with: { name: nuclei-production, path: nuclei-production.jsonl, if-no-files-found: warn }

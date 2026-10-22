@@ -57,6 +57,9 @@ jobs:
       # parses and matches the visible FAQ, answer-first guides, no indexed near-duplicates, every page rebuilt (npm run seo)
       - name: Search and AI crawler checks
         run: npm run test:seo
+      # the Markdown copy of every page and the Atom and RSS feeds made after the build (scripts/agent-ready.mjs)
+      - name: Agent-readable copies and feeds
+        run: node --test scripts/agent-ready.test.mjs
       - name: Production build
         run: npx vite build
       # what anyone can read with F12: none of Odelia's instructions, tool definitions or playbooks, no model id, no
@@ -112,6 +115,17 @@ jobs:
       # the off-site backup (scripts/db-backup.sh) restored by the drill script (scripts/restore-test.sh), on a stand-in
       - name: Backup and restore drill
         run: bash scripts/restore-selftest.sh
+  # the two-account test (scripts/tenancy/run.ts): account B and the anon key try to read, change and delete every kind of
+  # account A's records through PostgREST, every RPC, every edge function action and storage, on a throwaway local
+  # Postgres with every migration, PostgREST and the real functions; nothing of A's may come back or change
+  tenancy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with: { deno-version: v2.x }
+      - name: Two-account test
+        run: PG_BIN=/usr/lib/postgresql/16/bin deno run -A --no-check --no-lock --node-modules-dir=none scripts/tenancy/run.ts
   # docs/soc2/policies/secure-development.md and vulnerability-management.md
   security:
     runs-on: ubuntu-latest

@@ -1,0 +1,112 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Placetta Partner API",
+    "version": "1.0.0",
+    "summary": "Referral status for approved Placetta partners, and the plan box's permit preview.",
+    "description": "Read-only. GET /v1/referrals needs a partner key (Authorization: Bearer plk_...), made in Placetta, Partner, Partner API; keep it on your server. GET /v1/plan needs no key and answers any origin. Errors look like {\"error\": {\"code\", \"message\"}}.",
+    "contact": { "name": "Placetta", "email": "support@placetta.com", "url": "https://www.placetta.com/" }
+  },
+  "servers": [{ "url": "https://esquxzcfsylffuijvzec.supabase.co/functions/v1/partner-api" }],
+  "security": [],
+  "paths": {
+    "/v1/referrals": {
+      "get": {
+        "operationId": "listReferrals",
+        "summary": "The businesses you referred that agreed to share their progress",
+        "description": "Only businesses whose owner turned sharing on are listed, and only these fields. 60 requests a minute per key, 120 a minute per address.",
+        "security": [{ "partnerKey": [] }],
+        "responses": {
+          "200": {
+            "description": "Your consenting referrals",
+            "content": { "application/json": { "schema": {
+              "type": "object", "required": ["data", "count"],
+              "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Referral" } }, "count": { "type": "integer" } }
+            } } }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/v1/plan": {
+      "get": {
+        "operationId": "previewPlan",
+        "summary": "The permits a kind of business needs in a US city, from Placetta's registry of official forms",
+        "description": "No key and no AI. A starting point: Odelia confirms each item with the agency before anything is filed. 20 requests a minute and 300 a day per address.",
+        "parameters": [
+          { "name": "type", "in": "query", "required": true, "description": "The kind of business, like Milk tea or Restaurant", "schema": { "type": "string", "maxLength": 60 } },
+          { "name": "city", "in": "query", "required": true, "description": "The city with its state, like Flushing, NY", "schema": { "type": "string", "maxLength": 80 } },
+          { "name": "ref", "in": "query", "required": false, "description": "Your 8-character partner code", "schema": { "type": "string", "pattern": "^[A-Z2-9]{8}$" } },
+          { "name": "lang", "in": "query", "required": false, "schema": { "type": "string", "enum": ["en", "zh"], "default": "en" } }
+        ],
+        "responses": {
+          "200": { "description": "The plan", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Plan" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "partnerKey": { "type": "http", "scheme": "bearer", "bearerFormat": "plk_<8 hex>_<48 hex>", "description": "A partner key, shown once when it's made. Placetta keeps only its SHA-256." }
+    },
+    "schemas": {
+      "Bilingual": { "type": "object", "required": ["en", "zh"], "properties": { "en": { "type": "string" }, "zh": { "type": "string" } } },
+      "Referral": {
+        "type": "object",
+        "required": ["referral_id", "business_name", "stage", "permits_done", "permits_total", "opening_date", "referred_at", "updated_at"],
+        "properties": {
+          "referral_id": { "type": "string", "description": "Stays the same for a business" },
+          "business_name": { "type": ["string", "null"] },
+          "stage": { "type": ["string", "null"], "enum": ["opening", "open", null] },
+          "permits_done": { "type": ["integer", "null"], "description": "Applications the agency approved" },
+          "permits_total": { "type": ["integer", "null"], "description": "All applications in the business's plan" },
+          "opening_date": { "type": ["string", "null"], "format": "date" },
+          "referred_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "Permit": {
+        "type": "object",
+        "properties": {
+          "name": { "$ref": "#/components/schemas/Bilingual" },
+          "agency": { "$ref": "#/components/schemas/Bilingual" },
+          "level": { "type": "string" },
+          "fee_usd": { "type": ["number", "null"], "description": "null when the agency sets the fee case by case" },
+          "takes": { "oneOf": [{ "$ref": "#/components/schemas/Bilingual" }, { "type": "null" }] },
+          "source": { "type": "string", "format": "uri", "description": "The agency's own page" }
+        }
+      },
+      "Plan": {
+        "type": "object",
+        "properties": {
+          "what": { "type": "string" },
+          "where": { "type": "string" },
+          "count": { "type": "integer" },
+          "known_fees_usd": { "type": "number" },
+          "fees_set_by_agency": { "type": "integer" },
+          "permits": { "type": "array", "items": { "$ref": "#/components/schemas/Permit" } },
+          "partner": { "oneOf": [{ "type": "object", "properties": { "org_name": { "type": "string" } } }, { "type": "null" }] },
+          "start_url": { "type": "string", "format": "uri" },
+          "note": { "$ref": "#/components/schemas/Bilingual" }
+        }
+      },
+      "Error": {
+        "type": "object", "required": ["error"],
+        "properties": { "error": { "type": "object", "required": ["code", "message"], "properties": {
+          "code": { "type": "string", "enum": ["unauthorized", "not_found", "method_not_allowed", "rate_limited", "bad_request", "internal"] },
+          "message": { "type": "string" } } } }
+      }
+    },
+    "responses": {
+      "Error": { "description": "An error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "RateLimited": {
+        "description": "Too many requests",
+        "headers": { "Retry-After": { "schema": { "type": "integer" }, "description": "Seconds to wait" } },
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    }
+  }
+}

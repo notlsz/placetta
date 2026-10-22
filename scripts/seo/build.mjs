@@ -359,6 +359,13 @@ ${DESCRIPTION_ZH}快哉为每个门店地址梳理所需的全部执照、许可
 - [Full text of the answers and city guides](${ORIGIN}/llms-full.txt)
 - [Structured data for all guides](${ORIGIN}/guides/data.json)
 
+## For agents
+Every page has a Markdown copy at the same address ending in .md: [${ORIGIN}/index.md](${ORIGIN}/index.md), [a city guide](${ORIGIN}/guides/new-york-city/milk-tea-shop.md), [a help article](${ORIGIN}/help/essentials/sign-in/index.md).
+- [What agents may read and use](${ORIGIN}/agents.txt): the public pages, the plan preview and the MCP server; not the signed-in app (/app/)
+- [News, guides and help as they change](${ORIGIN}/feed.xml) (Atom; [RSS](${ORIGIN}/rss.xml))
+- [The plan preview and Partner API (OpenAPI)](${ORIGIN}/openapi.json)
+- [Placetta's MCP server](${ORIGIN}/.well-known/mcp/server-card.json): a customer's own stores, read only, with a workspace token
+
 ## Pricing
 ${TIERS.map(x => `- ${x.l[0]}: ${x.v[0]}${x.u[0]}. ${x.ps[0]}. ${x.n[0]}`.replace(/\.\./g, ".")).join("\n")}
 - ${strip(FAQ[0][1][0]).replace(/ See pricing$/, "")}

@@ -2,7 +2,7 @@
 // The partner API and the plan box: keys are checked by their SHA-256, every route is rate-limited, a key only ever
 // reaches its own partner's consenting referrals, and only the shared fields leave.
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
-import { clientIp, type Deps, handle, keyFrom, LIMITS, planQuery, type PlanRow, type ReferralRow, scope, sha256Hex, startUrl } from "./logic.ts";
+import { clientIp, type Deps, handle, json, keyFrom, LIMITS, planQuery, type PlanRow, type ReferralRow, scope, sha256Hex, startUrl } from "./logic.ts";
 // @ts-types="./plan.d.ts"
 import { previewPlan, stateOf } from "./plan.js";
 
@@ -148,4 +148,13 @@ Deno.test("helpers: the caller's address, the plan question, the start link", ()
   const q = planQuery(new URL("https://x/v1/plan?type=%20Hot%20%20pot%20&city=Irvine,%20CA&lang=zh&ref=bad"));
   assertEquals(q, { what: "Hot pot", where: "Irvine, CA", ref: null, lang: "zh" });
   assertEquals(startUrl("https://placetta.com", { what: "Bakery", where: "Houston, TX", ref: null }), "https://placetta.com/app/?line=Bakery+in+Houston%2C+TX");
+});
+
+Deno.test("every answer is JSON a browser won't sniff as something else (nosniff), and is never cached", async () => {
+  for (const r of [json({ ok: true }), json({ error: { code: "x", message: "y" } }, 429, { "Retry-After": "60" })]) {
+    assertEquals(r.headers.get("x-content-type-options"), "nosniff");
+    assertEquals(r.headers.get("cache-control"), "no-store");
+    assert(r.headers.get("content-type")?.startsWith("application/json"));
+    await r.body?.cancel();
+  }
 });

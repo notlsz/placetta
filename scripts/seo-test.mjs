@@ -79,7 +79,7 @@ group("llms.txt and llms-full.txt match the real coverage", () => {
   check("llms.txt states the real city count", t.includes(`${cov.cities} cities in ${cov.countries} countries`) && !/\b66 cities\b/.test(t), (t.match(/\d+ cities/g) || []).join(","));
   check("llms.txt states the real form count", t.includes(`${cov.official_forms} official forms`));
   const links = [...t.matchAll(/\]\((https?:[^)]+)\)/g)].map(m => m[1]);
-  const off = links.filter(u => !u.startsWith(ORIGIN + "/")), missing = links.filter(u => u.startsWith(ORIGIN) && !/\.(txt|json)$/.test(u) && !existsSync(fileFor(u)));
+  const off = links.filter(u => !u.startsWith(ORIGIN + "/")), missing = links.filter(u => u.startsWith(ORIGIN) && !/\.(txt|json)$/.test(u) && !/\/(feed|rss)\.xml$/.test(u) && !existsSync(fileFor(u.replace(/\.md$/, ".html"))));   // .md copies and the feeds are made at build (scripts/agent-ready.mjs) from pages that must exist
   check("llms.txt links are on the origin", !off.length, off.slice(0, 3));
   check("llms.txt links all resolve", !missing.length, missing.slice(0, 3));
   check("llms.txt links About, editorial policy and pricing", t.includes("/about.html") && t.includes("/editorial.html") && t.includes("## Pricing"));

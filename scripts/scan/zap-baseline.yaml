@@ -1,0 +1,30 @@
+# ZAP automation plan: the baseline (spider, then passive rules only; nothing is attacked), against the local build
+# (scripts/scan/serve-dist.mjs, with vercel.json's headers) and the local edge functions (scripts/scan/backend.ts).
+# Run by scripts/scan/local.sh; ${SITE}, ${API} and ${OUT} come from its environment.
+env:
+  contexts:
+    - name: placetta-local
+      urls: ["${SITE}/", "${SITE}/app/"]   # the API is seeded by the requestor job below
+      includePaths: ["${SITE}/.*", "${API}/.*"]
+      excludePaths: ["${SITE}/guides/(?!new-york-city/|answers/).*"]   # 4,000 guide pages share one template; a sample is enough
+  parameters: { failOnError: true, progressToStdout: true }
+jobs:
+  - type: passiveScan-config
+    parameters: { maxAlertsPerRule: 10, scanOnlyInScope: true }
+  - type: requestor
+    requests:
+      - { url: "${API}/functions/v1/partner-api/v1/plan?type=Milk%20tea&city=Flushing,%20NY", method: GET }
+      - { url: "${API}/functions/v1/partner-api/v1/referrals", method: GET }
+      - { url: "${API}/functions/v1/mcp", method: POST, headers: ["Content-Type:application/json"], data: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' }
+      - { url: "${API}/functions/v1/oauth-callback?state=x&code=y", method: GET }
+      - { url: "${API}/functions/v1/calendar-feed?t=x", method: GET }
+  - type: spider
+    parameters: { context: placetta-local, url: "${SITE}/", maxDuration: 3, maxChildren: 25 }
+  - type: spider
+    parameters: { context: placetta-local, url: "${SITE}/help/", maxDuration: 1, maxChildren: 25 }
+  - type: passiveScan-wait
+    parameters: { maxDuration: 10 }
+  - type: report
+    parameters: { template: traditional-json, reportDir: "${OUT}", reportFile: zap-baseline.json }
+  - type: report
+    parameters: { template: traditional-html, reportDir: "${OUT}", reportFile: zap-baseline.html }

@@ -143,8 +143,8 @@ before a workspace id is used, id lookups scoped to the workspace, signed link l
 
 **Vercel headers: pass.** HSTS with preload, `X-Frame-Options: DENY` and `frame-ancestors 'none'`, `nosniff`,
 `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy`, COOP, and a CSP on the app with
-`script-src 'self'` and `connect-src` limited to the Supabase project. Open (Medium): the website's CSP allows
-`'unsafe-inline'` scripts; move the inline scripts to files or hash them.
+`script-src 'self'` and `connect-src` limited to the Supabase project. The website's CSP allowed
+`'unsafe-inline'` scripts at the time; since closed (see Header scan, 2026-10-22).
 
 **Secrets in history: pass.** A pattern scan of every added line in `git log -p --all` (Anthropic, OpenAI, Stripe live
 and test, webhook secrets, Google, Supabase secret and service-role JWTs, private keys, GitHub, Slack, AWS, Telnyx,
@@ -197,7 +197,7 @@ flag.
 | --- | --- | --- |
 | Medium | `dist-single/index.html` is committed and holds the full prompt from before this fix (192 `test:leak` hits). | Rebuild it (`npm run build:single`) and commit, or remove it from git if it isn't published; history keeps the old copy. |
 | Medium | The forms registry (about 2.2 MB, 481 forms) ships to every visitor. | Serve the plan preview from `partner-api` `/v1/plan` and ship no registry. |
-| Medium | Website CSP allows inline scripts. | Move inline scripts to files or add hashes. |
+| Closed | Website CSP allows inline scripts. | Done: the build moves them to `/js/inline/` and the CSP is `script-src 'self'` (Header scan, 2026-10-22). |
 | Medium | Filer Chromium runs with `--no-sandbox` when `CHROMIUM_PATH` is set. | Keep the sandbox on (see above). |
 | Low | `page_hit` (anon) can inflate guide counts; `partner_lookup` (anon) has no rate limit. | Put both behind a small rate-limited edge function. |
 | Low | `can_file`, `can_file_app`, `document_in_use`, `filing_stats` answer for any workspace uuid (a boolean, or counts across 3 or more workspaces). | Add `is_member(ws) or is_service()` where callers allow it. |
@@ -247,7 +247,7 @@ audit. Open: listed above. N/A: doesn't apply.
 | 31 | Secrets in git history | | Pass (scanned, gitleaks in CI) |
 | 32 | Vulnerable dependencies | OWASP A03 (2025, supply chain) | Pass (npm audit in CI, Dependabot, pinned Deno imports) |
 | 33 | Unpinned CI actions and broad workflow permissions | | Pass (SHA-pinned actions, `contents: read`) |
-| 34 | Missing security headers and CSP | OWASP A02 (2025, misconfiguration) | Pass; Medium open (site inline scripts) |
+| 34 | Missing security headers and CSP | OWASP A02 (2025, misconfiguration) | Pass (site scripts `'self'` only since 2026-10-22) |
 | 35 | Source maps published | | Pass (`sourcemap: false`, `test:leak` checks) |
 | 36 | Debug flags or bring-your-own-key paths in production | | Fixed (`__LOCAL_AGENT__`) |
 | 37 | Staff and admin routes reachable by customers | | Pass (staff-only on the server); Low open (code ships) |
@@ -278,6 +278,153 @@ audit. Open: listed above. N/A: doesn't apply.
 4. List the live storage buckets; delete any legacy one, and confirm `official-forms` holds only blank forms.
 5. Decide on the registry: serve the plan preview from the server (Medium, above).
 6. Counsel: whether DNS lookups through Cloudflare belong on the subprocessor list.
+7. (2026-10-22) Apply `20261026100000_graphql_closed.sql` with the normal deploy; then the advisor's pg_graphql
+   warnings should be gone. If the migration role can't drop the extension, turn pg_graphql off in Database,
+   Extensions.
+8. (2026-10-22) DNSSEC on at IONOS. Optional in Vercel: Firewall, the OWASP managed ruleset (log first); the apex as
+   primary domain if you prefer it.
+9. (2026-10-22) Decide whether to run `scan-production.yml` (by hand, or weekly by uncommenting its schedule). It
+   scans production, so it waits for your approval.
+
+## Code review, 2026-10-22
+
+Static review of `src/`, `site/`, `supabase/functions/` and the migrations for injection classes, plus the built
+`dist/`. Nothing was run against production.
+
+| Severity | Finding | Status |
+| --- | --- | --- |
+| Medium | **pg_graphql open to the API roles.** No migration mentioned GraphQL, so a project with Supabase's old default (pg_graphql on, `graphql_public` granted to `anon` and `authenticated`) lets anyone with the publishable key ask `/graphql/v1` for the name of every table and column those roles are granted, and Supabase grants every public table to them. Row-level security still hides the rows; the schema map is free reconnaissance. Placetta never uses GraphQL. | Fixed: `20261026100000_graphql_closed.sql` drops the extension and revokes `graphql` and `graphql_public` from `public`, `anon` and `authenticated` (idempotent; a no-op where it's already off). `supabase/tests/graphql_closed.sql`, checked to fail without the migration; the stubs now emulate Supabase's grants. |
+| Low | **MCP client sent the person's token across origins.** `guardedFetch` follows a 307/308 by hand and passed the same headers on, so an MCP server (or an open redirect on its host) could send Placetta's bearer token for that server to another origin. | Fixed: a hop to another origin drops `Authorization`, `Cookie` and `Proxy-Authorization`, as the Fetch standard does (`_shared/mcp.ts`, test in `mcp_test.ts`). |
+| Low | **Per-address rate limits trust the first `X-Forwarded-For` entry** (`partner-api`, `mcp`, `file`), which a caller can set. Per-key limits are unaffected. | Open: key the address limit on the entry Supabase's gateway appends (the last), after confirming its header behaviour on the live project. |
+| Low | **Lead forms have no `method`.** The guide and landing forms (`cv-form`, `starter`) are sent by script; without it a browser submits them as GET, putting the email in the URL, history and logs (ZAP 10024 below). | Open: `method="post"` in `scripts/build-guides.mts` and `site/index.html` (regenerates every guide page; no visible change). |
+| Info | Layout notes in HTML comments ship in `dist/` (for example "SECURITY: devin.ai's enterprise security layout"). No secret, path or internal host. | Open, optional: strip comments at build. |
+
+Checked and clean:
+
+- **SSRF.** `forms` fetches only government hosts on every hop with redirects followed by hand (`forms/fetch.ts`, tested); the MCP client checks https, no credentials in the URL, a public name, the resolved addresses (v4, v6 and v4-in-v6 private ranges, metadata at 169.254.169.254) on every hop, at most 3 hops, with a size cap. Team-chat webhooks only go to each provider's own host (`hookUrl`). The agent's `web_fetch` is Anthropic's server tool, so it never runs from Placetta's network. Inbound mail and SMS media are fetched from URLs inside signed provider webhooks (Resend's API, Telnyx, Meta, Linq), and only provider hosts get a key. `partner-api` fetches nothing.
+- **Open redirects.** Every `return_to`/`redirectTo` goes through `allowedReturn` (parsed origin against `APP_ORIGINS`). `oauth-callback` redirects only to the signed state's allowed return. The app navigates only to server-made URLs; MCP sign-in pages must be `https://` (checked in `discoverAuthServer`).
+- **XSS.** No `dangerouslySetInnerHTML` in `src/`. Model output renders as React text; links go through `sanitizeOutput`, and React 19 refuses `javascript:` URLs. Every `innerHTML` in `site/` renders constants or escapes (`esc()`) what came from the visitor or the database (`incidents.js`, `legal.js`, help search, the plan form).
+- **Prototype pollution.** No deep merge of untrusted JSON. The one `Object.assign` of parsed JSON (`site/index.html` draft) reads the visitor's own localStorage into a fresh object.
+- **Code injection.** No `eval`, `new Function`, string `setTimeout` or dynamic `import()` of a variable anywhere, shipped bundles included.
+- **SQL injection.** No raw SQL in the functions (PostgREST builder and RPCs with parameters; the only `.or()` filters are constants or a date). Every `execute format(...)` is in a migration and quotes with `%I`, or interpolates `regprocedure`/`pg_policies` text from the catalog at migration time; no runtime dynamic SQL.
+- **JWT.** Every function proves the caller with `auth.getUser` (signature, expiry, revocation by GoTrue) before decoding claims; the gateway checks the rest (`verify_jwt`). Signed OAuth state and text-start links carry an expiry and an HMAC compared in constant time.
+- **Session fixation.** The app uses the PKCE flow (`flowType: "pkce"`); supabase-js refuses an implicit-grant `#access_token` link in that mode, so a link can't sign a visitor in to someone else's account.
+- **Deserialization.** JSON only; no YAML, pickle or custom revivers.
+- **`dist/`.** No `.map`, `.env`, backup, `.git`, SQL or TypeScript files; no `console.log` or TODO in the website's pages. (`test:leak` covers maps and secrets.)
+
+## Header scan (internetsecure.org), 2026-10-22
+
+- **"Missing" CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS: likely a false positive.**
+  `vercel.json` sends all of them on www.placetta.com (checked locally with `scripts/scan/serve-dist.mjs`, which
+  applies `vercel.json` the way Vercel does). The scanner most likely fetched the apex, placetta.com, whose answer is
+  Vercel's domain-level 308 to www: a domain redirect carries no project headers. Optional (dashboard): make the apex
+  the primary domain and redirect www to it, or leave it; the redirect itself has no content to protect.
+- **Permissions-Policy "not restricted to origins": false positive.** `camera=()` turns the camera off for every
+  origin, which is stricter than an origin list. Unchanged.
+- **WAF: covered by Vercel.** Vercel's platform firewall and DDoS mitigation already sit in front of every request.
+  Optional dashboard settings: Firewall, turn on the OWASP managed ruleset (log first, then deny), add a rate-limit
+  rule for `/rest/`-style bursts if needed, and Attack Challenge Mode during an incident. No Sucuri or Cloudflare.
+- **"Server: Vercel": can't be removed on Vercel**, and names no version.
+- **DNSSEC: founder step at IONOS** (Domains, DNS, DNSSEC on), then check the DS record at the registry.
+- **Website CSP and inline scripts: done.** The marketing CSP (`/((?!app/).*)`) is `script-src 'self'` with no
+  `'unsafe-inline'`: the build moves every inline script into `/js/inline/<hash>.js` and refuses inline event handlers
+  (`vite.config.ts` `externalizeScripts`). Verified in local Chromium (Playwright) with `vercel.json`'s headers: `/`,
+  `/zh`, `/furniture`, `/pricing`, `/help/`, a help article, the guides hub, a city hub, a guide, the Chinese guides,
+  `/trust`, `/about.html`, `/news/funding/` and `/app/` load with no CSP violation and no script error. The open item
+  "Website CSP allows inline scripts" above is closed. `style-src` keeps `'unsafe-inline'` for style attributes (ZAP
+  10055 below), accepted.
+
+## Agent-readiness, 2026-10-22
+
+- Every indexed page has a Markdown copy beside it (`/index.md`, `/zh.md`, `/guides/<city>/<business>.md`,
+  `/help/<section>/<article>/index.md`), made after the build by `scripts/agent-ready.mjs` (2,993 pages) and named in
+  each page by `<link rel="alternate" type="text/markdown">`. `llms.txt` and `llms-full.txt` already existed;
+  `llms.txt` now says the rule and links the files below.
+- `/feed.xml` (Atom) and `/rss.xml` (RSS 2.0): every help article and the most recently changed English guides, 60
+  entries, dated from each page's own structured data; every page names the feed. The one news page is `noindex`, so
+  it isn't in the feed.
+- `/openapi.json`: the Partner API (`/v1/referrals` with a partner key, `/v1/plan` public), as `docs/PARTNER_API.md`
+  documents it for partners.
+- `/.well-known/mcp/server-card.json` and `/.well-known/mcp.json`: the MCP server (`docs/mcp/server.json`), its tools,
+  transport and bearer-token auth.
+- `/agents.txt`: the public pages, the plan preview, the MCP server, and not to scrape `/app/`.
+- Not done: `Accept: text/markdown` negotiation. `vercel.json` rewrites run only when no file matches, and every page
+  is a file, so a `has: accept` rewrite would never fire; it needs Edge Middleware or the legacy `routes` array (which
+  can't be combined with the current `rewrites`, `redirects` and `headers`). Not done on purpose: `ai-plugin.json`
+  (OpenAI retired plugins) and x402. `robots.txt` keeps `Disallow: /app/`, which is why AI-bot checkers show
+  "partial".
+
+## Two-account test and scanners, 2026-10-22
+
+All local: the build served from `dist/`, and the e2e stack (a throwaway Postgres with every migration, PostgREST, the
+stand-in gateway, the real edge functions, every outside service stubbed). Nothing touched production; no account was
+made anywhere.
+
+### Two-account test (`npm run test:tenancy`, in CI)
+
+`scripts/tenancy/run.ts`. Account A signs in and makes one private record of every kind, each carrying a marker:
+a workspace with a store and an application (`create_workspace`), a document (its file in storage as A, its row
+through PostgREST), an MCP token (`mcp_token_create`), a comment (`comment_post`), and what only the server writes (a
+chat run and its messages, a memory, a filing). Then account B, signed in to its own workspace, and then a caller with
+only the anon key:
+
+- PostgREST: read every table and view whole; for every table with a `workspace_id` or `user_id`, read, patch into
+  B's workspace and delete A's rows by id, and write a row into A's workspace;
+- every RPC the role may execute (152 for B, 7 for anon), once with each of A's 7 ids in every uuid argument (1,064
+  and 49 calls);
+- every action every edge function names (18 functions, 560 calls each), with A's workspace and record ids;
+- storage, as Supabase Storage queries it: select, move, delete A's object and write into A's folder; ask the storage
+  API for a signed link to A's file.
+
+It passes when no response carries the marker or a signed link to A's file, none of A's rows changed, no row appeared
+in A's workspace outside the audit trail, nothing sent out of the sandbox carried the marker, and A can still read
+its own data. Result: **3,189 checks, all passed; no cross-tenant read or write.** It catches a leak: with a temporary
+`using (true)` select policy on `documents` it fails on both the whole-table and the filtered read. Runs in about 45
+seconds; CI job `tenancy`.
+
+### Scanners (`npm run scan:local`)
+
+`scripts/scan/local.sh` serves `dist/` with `vercel.json`'s headers (`serve-dist.mjs`), starts the local backend
+(`backend.ts`), and runs OWASP ZAP 2.17.0 (automation framework: `zap-baseline.yaml`, spider and passive rules;
+`zap-active.yaml`, the active scanner, local targets only) and nuclei v3.11.1 (exposures, misconfiguration,
+technologies and the CVE templates tagged for JavaScript libraries; no intrusive, DoS, fuzzing or out-of-band
+templates, and none that send to a fixed third-party host). Reports go to `scan-results/` (ignored by git).
+
+How they were installed here: github.com release downloads are blocked in this sandbox, so ZAP's core came from Maven
+Central with its dependencies, its add-ons (network, spider, automation, pscan rules, ascan rules, retire.js, reports
+and their libraries) were built from `zaproxy/zap-extensions`, and nuclei was built from the Go module proxy with
+`nuclei-templates` cloned. On a normal machine: the ZAP Linux package or `brew install zap`, and the nuclei release
+binary (`nuclei -ut` fetches the templates). Set `ZAP_HOME`, `NUCLEI` and `NUCLEI_TEMPLATES`.
+
+Results: **no High; no Medium that is real.** ZAP baseline: 11 alert types, 10 after the `nosniff` fix below (3 Medium, 2 Low, 5 informational). ZAP
+active (the release and beta active rules: injection, path traversal, XSS, CORS, methods and the rest, about 90
+seconds against the site, the app shell and ten seeded API requests): 14 alert types, the baseline's plus the three
+below. nuclei: 53 informational matches, no CVE match. Triage:
+
+| Tool, rule | Where | Verdict |
+| --- | --- | --- |
+| ZAP 10021, X-Content-Type-Options missing | `partner-api` | Real (Low), fixed: every `partner-api` answer sends `nosniff` (`logic.ts`, test in `logic_test.ts`). |
+| ZAP 10024, sensitive information in URL | guide pages, `?email=` | Real (Low), open: the lead forms have no `method` (Code review above). |
+| ZAP 10055, CSP `style-src 'unsafe-inline'` | every page | Accepted: style attributes are used throughout; scripts are `'self'` only. |
+| ZAP 10098, `Access-Control-Allow-Origin: *` | `partner-api`, `calendar-feed`, `oauth-callback` | False positive: no cookies are involved; `partner-api` serves partner sites by design and needs a bearer key for referrals; the feed's secret is its token. |
+| ZAP 90003 and nuclei `missing-sri` | Google Fonts stylesheet | False positive: Google serves different CSS per browser, so it can't carry a hash; CSP limits styles to `fonts.googleapis.com`. |
+| ZAP 90004 and nuclei COEP, CORP, X-Permitted-Cross-Domain-Policies | every page | Accepted: `require-corp` would block Google Fonts; COOP `same-origin` is sent; the cross-domain policy header is for Flash and PDF plug-ins. |
+| ZAP 10096 timestamp, 10031 attribute, 10027 comments, 10049, 10109 | bundle, pages | False positives or informational (numbers in minified code; values the spider typed appearing in static attributes; layout comments). |
+| ZAP 40040, CORS (active) | `agent-run`, `file`, PostgREST | False positive: `Access-Control-Allow-Origin: *` without credentials. These calls carry the session as a bearer header, which another site can't read or send for the visitor (no cookies), so a permissive origin exposes nothing. |
+| ZAP 90028, DELETE allowed (active) | PostgREST `plan_requests` | False positive: PostgREST lists its verbs; row-level security decides (anon may only insert there; the two-account test checks it). |
+| ZAP 10036, Server version (active) and 10021 on PostgREST | `127.0.0.1:54321/rest/v1` | Not applicable: the local PostgREST's own header; production answers through Supabase's gateway. |
+| nuclei missing headers | `127.0.0.1:54321` | Not applicable: the local stand-in gateway, not Supabase's. |
+| nuclei `fingerprinthub` "drupal" | `/` | False positive. |
+| nuclei `llms-file-enum`, `openapi` | `/llms.txt`, `/openapi.json` | Intended: public on purpose. |
+| nuclei CVE templates for JavaScript libraries | site and app | No matches. ZAP's retire.js rule found no vulnerable library either. |
+
+### Production scan workflow (disabled)
+
+`.github/workflows/scan-production.yml` runs ZAP's baseline (passive: spider and passive rules, with
+`scripts/scan/zap-rules.tsv` marking the false positives above) and nuclei's safe templates against
+www.placetta.com and the apex. It is committed **disabled**: `workflow_dispatch` only, with the weekly `schedule`
+commented out. Turning the schedule on, or running it by hand, scans production and needs the founder's approval
+first.
 
 ## Sources
 

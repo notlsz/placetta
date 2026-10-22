@@ -1,0 +1,35 @@
+# Placetta: notes for AI agents and crawlers
+# Placetta gets the licenses, permits and registrations a business needs to open in a new market, and keeps them current.
+
+## Read freely
+# The website, the license guides and the Help Center are public. Every page has a Markdown copy at the same address
+# ending in .md (/index.md, /guides/new-york-city/milk-tea-shop.md, /help/essentials/sign-in/index.md), named by
+# <link rel="alternate" type="text/markdown"> in the page.
+Site: https://www.placetta.com/
+Summary: https://www.placetta.com/llms.txt
+Full-text: https://www.placetta.com/llms-full.txt
+Guides-data: https://www.placetta.com/guides/data.json
+Feed: https://www.placetta.com/feed.xml
+Sitemap: https://www.placetta.com/sitemap.xml
+
+## A plan preview, without signing in
+# The permits a kind of business needs in a US city, from Placetta's registry of official forms, each with the agency's
+# own page. No key; 20 requests a minute and 300 a day per address.
+Plan-preview: GET https://esquxzcfsylffuijvzec.supabase.co/functions/v1/partner-api/v1/plan?type=Milk%20tea&city=Flushing,%20NY
+OpenAPI: https://www.placetta.com/openapi.json
+
+## A customer's own data: the MCP server
+# Read only, scoped to one workspace, with a token the customer makes in Settings, Connections, AI assistants.
+MCP: https://esquxzcfsylffuijvzec.supabase.co/functions/v1/mcp
+MCP-server-card: https://www.placetta.com/.well-known/mcp/server-card.json
+
+## Don't
+# Don't crawl, scrape or automate /app/: it is the signed-in app, and robots.txt disallows it. Use the MCP server.
+# Don't sign up, submit the website's forms or file anything on someone's behalf without that person.
+Disallow: /app/
+
+## Facts
+# Agencies change requirements: cite the agency's own page linked in each guide, and check it before filing.
+# Placetta is not a law firm and does not give legal advice.
+Contact: mailto:support@placetta.com
+Security: https://www.placetta.com/.well-known/security.txt

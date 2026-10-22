@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "protocolVersion": "2026-07-28",
+  "supportedProtocolVersions": ["2026-07-28", "2025-11-25", "2025-06-18", "2025-03-26"],
+  "serverInfo": { "name": "placetta", "title": "Placetta", "version": "1.0.0" },
+  "description": "Read-only compliance status, deadlines, store readiness, permit plans and filings for your stores, in English and Chinese.",
+  "websiteUrl": "https://www.placetta.com/",
+  "documentationUrl": "https://www.placetta.com/help/",
+  "iconUrl": "https://www.placetta.com/icon-512.png",
+  "transport": { "type": "streamable-http", "url": "https://esquxzcfsylffuijvzec.supabase.co/functions/v1/mcp" },
+  "authentication": {
+    "required": true,
+    "schemes": ["bearer"],
+    "description": "A workspace token (plc_mcp_...), made by an owner or admin in Placetta, Settings, Connections, AI assistants. Read only, scoped to one workspace, revocable."
+  },
+  "capabilities": { "tools": { "listChanged": false }, "resources": { "subscribe": false, "listChanged": false }, "prompts": { "listChanged": false } },
+  "tools": [
+    { "name": "compliance_status", "title": "Compliance status", "description": "Each store's licenses and permits by status, with the open items and their next step.", "annotations": { "readOnlyHint": true } },
+    { "name": "upcoming_deadlines", "title": "Upcoming deadlines", "description": "Deadlines in the next 1 to 365 days (default 60), soonest first.", "annotations": { "readOnlyHint": true } },
+    { "name": "store_readiness", "title": "Store readiness", "description": "Ready-to-open or inspection-ready score per store, with its parts.", "annotations": { "readOnlyHint": true } },
+    { "name": "plan_preview", "title": "Plan preview", "description": "The permits a kind of business needs in a US city, from Placetta's registry, each with its source.", "annotations": { "readOnlyHint": true } },
+    { "name": "filing_status", "title": "Filing status", "description": "Filings the team submits: status, confirmation number, dates.", "annotations": { "readOnlyHint": true } }
+  ],
+  "prompts": [
+    { "name": "renewal_checklist", "title": "Prepare my renewal checklist" },
+    { "name": "weekly_brief", "title": "Weekly compliance brief" },
+    { "name": "opening_readiness", "title": "Opening readiness" }
+  ],
+  "registry": { "name": "com.placetta/placetta" }
+}
