@@ -11,7 +11,7 @@ migration `20261016160000_ai_routing_margin.sql` (saver mode, alerts, throttles,
 
 ## The roles and their routes
 
-Synced with Belluh: Gemini first (3.8 Flash for the work, 2.5 Flash when 3.8 is unavailable), Anthropic as the
+Gemini first (3.8 Flash for the work, 2.5 Flash when 3.8 is unavailable), Anthropic as the
 top-of-the-line seat and safety net, and the same three open-model backups (gpt-oss-120b on Groq, Cerebras, OpenRouter),
 each used only when its key is set and only after Gemini and Anthropic can't answer.
 
@@ -102,8 +102,7 @@ Flash-Lite $0.10, $0.40; Flash $0.30, $2.50; Pro $1.25, $10.
 | `draft` (distiller) | 1 | 4,000 in, 500 out | $0.003 (Flash) | $0.007 (Haiku) | $0.013 |
 | **Job** | **19** | | **about $0.30** | **about $0.35** | **about $0.39** |
 
-Two honest notes. First, the main loop is three quarters of the job. With a paid Gemini key it runs on Gemini 3.8 Flash (synced with
-Belluh), so the job costs well under the Sonnet figures above; with only an Anthropic key it stays on Sonnet, and role
+Two honest notes. First, the main loop is three quarters of the job. With a paid Gemini key it runs on Gemini 3.8 Flash, so the job costs well under the Sonnet figures above; with only an Anthropic key it stays on Sonnet, and role
 routing alone trims a job by a quarter, not by half. Second,
 the spread between jobs is wider than the spread between routes: a job that fetches six long agency pages costs
 twice this one, and a job answered straight from the workspace costs a tenth of it. The per-task ceiling

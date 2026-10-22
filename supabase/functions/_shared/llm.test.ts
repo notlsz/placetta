@@ -96,7 +96,7 @@ r = await callModel(k => env[k], { payload, role: "plan", research: true, beta: 
 check("Anthropic down: a research plan falls to Gemini 3.8 Flash", r.ok && r.model === "gemini:gemini-3.8-flash" && calls.length === 2);
 calls.length = 0;
 r = await callModel(k => env[k], { payload, role: "plan", research: false, beta: null }, "claude-sonnet", null, mk({ gemini: () => oai({ content: "flash answer" }), anthropic: () => anth() }));
-check("plan runs on Gemini 3.8 Flash first, as on Belluh", r.ok && r.model === "gemini:gemini-3.8-flash" && calls.length === 1);
+check("plan runs on Gemini 3.8 Flash first", r.ok && r.model === "gemini:gemini-3.8-flash" && calls.length === 1);
 r = await callModel(k => env[k], { payload, role: "review", research: false, beta: null }, "claude-sonnet", null, mk({ gemini: () => oai({ content: "{\"items\":[]}" }), anthropic: () => anth() }));
 check("the checker runs on the other vendor (Sonnet)", r.ok && r.model === "anthropic:claude-sonnet");
 calls.length = 0; env = { GEMINI_API_KEY: "g", GEMINI_PAID: "1", GROQ_API_KEY: "q" };

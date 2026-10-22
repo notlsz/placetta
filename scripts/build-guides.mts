@@ -138,8 +138,6 @@ const faqHtml = (l: L, qa: [string, string][]) => `<section class="faqs"><h2>${l
 /* Sponsors: shown on every guide. A logo in scripts/sponsors/<name>.svg or .png replaces the name when it's added. Paid links
    carry rel="sponsored", as search engines require. */
 const SPONSORS: { name: string; url: string | null; logo?: string }[] = [
-  { name: "Faramir", url: "https://faramir.xyz" },
-  { name: "Belluh", url: "https://belluh.com" },
   { name: "DeepSeek", url: "https://www.deepseek.com" },
 ];
 const LOGOS = SPONSORS.flatMap(sp => ["svg", "png"].flatMap(ext => { try { return [{ name: sp.name, file: `${slug(sp.name)}.${ext}`, bytes: readFileSync(`scripts/sponsors/${slug(sp.name)}.${ext}`) }]; } catch { return []; } }));

@@ -78,7 +78,7 @@ export const canConverse = (env: Env) => Object.entries(PROVIDER_KEYS).some(([p,
 /** The Anthropic models by size. The repo's defaults; AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST change them. */
 export const ANTHROPIC_MODELS = { plan: "claude-sonnet-5-5", deep: "claude-opus-5-5", fast: "claude-haiku-4-5-20251001" };
 const GEMINI = { lite: "gemini-2.5-flash-lite", flash: "gemini-2.5-flash", next: "gemini-3.8-flash", pro: "gemini-2.5-pro" };
-/** The open-model backups, the same as Belluh's: gpt-oss-120b on Groq, then Cerebras, then OpenRouter. Each is used only
+/** The open-model backups: gpt-oss-120b on Groq, then Cerebras, then OpenRouter. Each is used only
  *  when its key is set, only after Gemini and Anthropic can't answer, and never with a customer's files. */
 const BACKUPS: [string, string][] = [["groq", "openai/gpt-oss-120b"], ["cerebras", "gpt-oss-120b"], ["openrouter", "openai/gpt-oss-120b"]];
 
@@ -87,7 +87,7 @@ const BACKUPS: [string, string][] = [["groq", "openai/gpt-oss-120b"], ["cerebras
  * that fits the role (Haiku for the cheap roles, Sonnet for plan and review, Opus for deep), so AGENT_MODEL still
  * picks the exact one. A provider without a key is skipped at call time.
  */
-// Gemini first, as on Belluh: 3.8 Flash for the work, 2.5 Flash when 3.8 is unavailable, Flash-Lite for the cheap reads.
+// Gemini first: 3.8 Flash for the work, 2.5 Flash when 3.8 is unavailable, Flash-Lite for the cheap reads.
 // Anthropic is the top-of-the-line seat (the reviewer when there's a key, deep research) and the safety net; the open
 // gpt-oss backups come last.
 const CHEAP: [string, string][] = [["gemini", GEMINI.lite], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS];
