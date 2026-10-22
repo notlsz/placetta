@@ -481,6 +481,15 @@ export async function recentRuns(ws: string): Promise<RunRow[]> {
   if (error) throw fromPg(error);
   return (data ?? []) as RunRow[];
 }
+/** One past conversation, opened from a link Odelia gave when she searched past chats (/app/?run=<id>,
+ *  src/odeliaMemory/retrieve.ts). Row-level security keeps it to the person's own workspaces. */
+export async function pastRun(ws: string, id: string): Promise<RunRow | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const { data, error } = await supabase().from("agent_runs").select("id, kind, prompt, status, steps, draft, reply, error, created_at, updated_at, seen_at")
+    .eq("workspace_id", ws).eq("id", id).eq("status", "done").maybeSingle();
+  if (error) throw fromPg(error);
+  return (data ?? null) as RunRow | null;
+}
 /** The moments of these runs, for a job's replay (src/replay.ts): each run's steps, its store when it was a store's bot,
  *  and its job. */
 export async function runMoments(ids: string[]): Promise<{ id: string; at: string; bot?: string; job?: string; steps: Step[] }[]> {

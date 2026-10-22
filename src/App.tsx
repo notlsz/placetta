@@ -636,6 +636,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   useEffect(() => {
     if (!cloud || api.PREVIEW || resumed.current) return;
     resumed.current = true;
+    // a link back to a past conversation (Odelia's search of past chats gives /app/?run=<id>): show that one
+    const linked = (() => { try { return new URLSearchParams(location.search).get("run"); } catch { return null; } })();
+    if (linked) {
+      void api.pastRun(cloud.wsId, linked).then(r => {
+        try { const u = new URL(location.href); u.searchParams.delete("run"); window.history.replaceState(null, "", u.pathname + u.search + u.hash); } catch { /* keep the address */ }
+        if (r?.reply) { pushTurn(r.prompt, r.reply); setPanelOpen(true); }
+      }, () => undefined);
+      return;
+    }
     void api.recentRuns(cloud.wsId).then(rs => {
       // a request split across stores, still waiting on them: Work shows each store as it moves
       for (const r of rs) if (r.status === "waiting") watchFamily(r.id);

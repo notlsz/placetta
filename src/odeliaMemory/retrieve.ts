@@ -141,6 +141,6 @@ export function searchConversations(runs: PastRun[], query: string, limit = 5): 
     const words = tokens(query);
     const lines = text.split(/(?<=[.!?。！？])\s+|\n+/);
     const best = lines.map(l => ({ l, n: tokens(l).filter(t => words.includes(t)).length + cosine(qv, sketch(l)) })).sort((a, b) => b.n - a.n || b.l.length - a.l.length)[0]?.l ?? text;
-    return { id: r.id, at: r.at, prompt: r.prompt.slice(0, 160), snippet: best.slice(0, 280), link: `/app?run=${encodeURIComponent(r.id)}`, score: kw[i] + v };
+    return { id: r.id, at: r.at, prompt: r.prompt.slice(0, 160), snippet: best.slice(0, 280), link: `/app/?run=${encodeURIComponent(r.id)}`, score: kw[i] + v };
   }).filter(h => h.score > 0.15).sort((a, b) => b.score - a.score || b.at.localeCompare(a.at)).slice(0, limit);
 }
