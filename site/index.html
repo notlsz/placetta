@@ -3064,13 +3064,15 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 .dvh h2 em{font-style:normal;color:var(--muted);display:block}
 .dvb{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .dvb>div{display:flex;align-items:center;justify-content:center;min-height:132px;border-left:1px solid var(--line)}
-.dvm{display:flex;flex-direction:column;align-items:center;gap:4px;border:1.5px solid #B8BEC9;border-radius:10px;padding:12px 14px;color:#8A92A3;text-align:center}
+.dvm{display:flex;flex-direction:column;align-items:center;gap:0;color:#8A92A3;text-align:center}
+.dvm img{display:block;width:84px;height:84px}
+.dvb>div:nth-child(3n+1){border-left:0}.dvb>div:nth-child(n+4){border-top:1px solid var(--line)}
 .dvm b{font-size:17px;font-weight:500;letter-spacing:.02em;color:#7C8494}
 .dvm i{font-style:normal;font-size:11px;line-height:1.2;color:#9AA1AE}
 .dvl{list-style:none;margin:36px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px}
 .dvl li{font-size:15px;line-height:1.4;color:var(--muted);padding:16px 0;border-bottom:1px solid var(--line)}
 .dvl li:nth-last-child(-n+2){border-bottom:0}
-@media (max-width:599px){.dvm{padding:10px 8px}.dvm b{font-size:15px}.dvb>div{min-height:104px}.dvb>div:first-child{border-left:0}.dvl{grid-template-columns:minmax(0,1fr)}.dvl li:nth-last-child(2){border-bottom:1px solid var(--line)}}
+@media (max-width:599px){.dvm img{width:64px;height:64px}.dvb>div{min-height:104px}.dvl{grid-template-columns:minmax(0,1fr)}.dvl li:nth-last-child(2){border-bottom:1px solid var(--line)}}
 
 /* cleaner hero (Oct 22): the plan box speaks for itself */
 .hero .hnote{display:none}
@@ -3667,10 +3669,13 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
       <div class="dvh"><h2 id="scH"><span data-i18n="dv.h1">Enterprise security</span> <em data-i18n="dv.h2">with fine-grained controls</em></h2></div>
       <div class="dvr">
         <div class="dvb">
-          <div><span class="dvm"><b data-i18n="dv.b1">SOC 2</b><i data-i18n="dv.b1s">Type I in progress</i></span></div>
-          <div><span class="dvm"><b data-i18n="dv.b2">SSO</b><i data-i18n="dv.b2s">Rolling out</i></span></div>
-          <div><span class="dvm"><b data-i18n="dv.b3">SCIM</b><i data-i18n="dv.b3s">Rolling out</i></span></div>
-        </div>
+          <div><span class="dvm"><img src="/img/security/soc2.svg" width="84" height="84" alt="AICPA SOC 2"></span></div>
+          <div><span class="dvm"><img src="/img/security/iso27001.svg" width="84" height="84" alt="ISO 27001"></span></div>
+          <div><span class="dvm"><img src="/img/security/iso42001.svg" width="84" height="84" alt="ISO 42001"></span></div>
+          <div><span class="dvm"><img src="/img/security/gdpr.svg" width="84" height="84" alt="GDPR"></span></div>
+          <div><span class="dvm"><img src="/img/security/pipl.svg" width="84" height="84" alt="China PIPL"></span></div>
+          <div><span class="dvm"><img src="/img/security/scim.svg" width="84" height="84" alt="SCIM"></span></div>
+          </div>
         <ul class="dvl">
           <li data-i18n="dv.l1">Your filings and documents are always yours</li>
           <li data-i18n="dv.l4">Agency logins kept in an encrypted vault</li>
@@ -4127,8 +4132,8 @@ zh:{
 Object.assign(T.en, {"np.aria":"Customer results","np.1n":"5 months","np.1s":"saved in approval time","np.2n":"3 filings","np.2s":"handled end to end for a store GM","np.3l":"Wakimasu Wagyu","np.3n":"10 requirements","np.3s":"mapped from Japan to a New York dining room"});
 Object.assign(T.zh, {"np.aria":"客户成果","np.1n":"5 个月","np.1s":"节省的审批时间","np.2n":"3 项申报","np.2s":"为门店总经理全程代办","np.3l":"Wakimasu 和牛","np.3n":"10 项要求","np.3s":"从日本工厂到纽约餐厅，逐项梳理"});
 /* hero and before and after, from the Oct 17 redesign */
-Object.assign(T.en, {"dv.h1":"Enterprise security","dv.h2":"with fine-grained controls","dv.tc":"Trust Center","dv.b1":"SOC 2","dv.b1s":"Type I in progress","dv.b2":"SSO","dv.b2s":"Rolling out","dv.b3":"SCIM","dv.b3s":"Rolling out","dv.l1":"Your filings and documents are always yours","dv.l2":"Nothing filed or paid without your approval","dv.l3":"Comprehensive audit logs","dv.l4":"Agency logins kept in an encrypted vault","dv.l5":"Two-step sign-in for your whole team","dv.l6":"Encrypted in transit and at rest"});
-Object.assign(T.zh, {"dv.h1":"企业级安全","dv.h2":"精细的权限控制","dv.tc":"信任中心","dv.b1":"SOC 2","dv.b1s":"Type I 审计进行中","dv.b2":"单点登录","dv.b2s":"即将上线","dv.b3":"SCIM","dv.b3s":"即将上线","dv.l1":"您的申报和文件始终归您所有","dv.l2":"未经您批准，不申报、不付款","dv.l3":"完整的审计日志","dv.l4":"机构登录信息存放在加密保险库中","dv.l5":"全团队两步验证登录","dv.l6":"传输和存储全程加密"});
+Object.assign(T.en, {"dv.h1":"Enterprise security","dv.h2":"with fine-grained controls","dv.tc":"Trust Center","dv.b1":"SOC 2","dv.b1s":"Type I in progress","dv.b2":"ISO 27001","dv.b2s":"In progress","dv.b3":"SCIM","dv.b3s":"Rolling out","dv.b4s":"In progress","dv.b5s":"In progress","dv.b6s":"In progress","dv.l1":"Your filings and documents are always yours","dv.l2":"Nothing filed or paid without your approval","dv.l3":"Comprehensive audit logs","dv.l4":"Agency logins kept in an encrypted vault","dv.l5":"Two-step sign-in for your whole team","dv.l6":"Encrypted in transit and at rest"});
+Object.assign(T.zh, {"dv.h1":"企业级安全","dv.h2":"精细的权限控制","dv.tc":"信任中心","dv.b1":"SOC 2","dv.b1s":"Type I 审计进行中","dv.b2":"ISO 27001","dv.b2s":"进行中","dv.b3":"SCIM","dv.b3s":"即将上线","dv.b4s":"进行中","dv.b5s":"进行中","dv.b6s":"进行中","dv.l1":"您的申报和文件始终归您所有","dv.l2":"未经您批准，不申报、不付款","dv.l3":"完整的审计日志","dv.l4":"机构登录信息存放在加密保险库中","dv.l5":"全团队两步验证登录","dv.l6":"传输和存储全程加密"});
 Object.assign(T.en, {"price.det":"See details","price.detsub":"The math on waiting, how Placetta compares, and the rent calculator.","price.moresub":"A one-time entry plan, new store openings and headquarters.","foot.about":"About"});
 Object.assign(T.zh, {"price.det":"查看详情","price.detsub":"等待的成本、与其他方式的对比，以及租金计算器。","price.moresub":"一次性开店合规计划、新店开业和总部方案。","foot.about":"关于我们"});
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
