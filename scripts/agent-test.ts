@@ -50,6 +50,7 @@ import { fillForm } from "../src/forms/fill";
 import { evidence, formFailures } from "../src/harness";
 import type { FilledNote } from "../src/core";
 import type { Bi } from "../src/bi";
+import { growthTests } from "./growth-test";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -2369,6 +2370,8 @@ console.log("\n# Audit trail export (CSV)");
   eq(csvCell("-1+2"), "\"'-1+2\"", "a leading minus is made inert too");
   eq(csvCell("+1 (212) 555-0100"), "\"'+1 (212) 555-0100\"", "and a leading plus");
 }
+
+growthTests(ok, eq);
 
 console.log("\n# Every declared tool is exercised");
 const missed = declared.filter(n => !covered.has(n));

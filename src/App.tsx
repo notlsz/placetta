@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { filingKindOf, IN_PLAN } from "./overage.ts";
+import { shownCharges } from "./FilingCharge";
 import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { blockersSay, confirmChange, readyToFile } from "./core";
@@ -950,6 +952,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
     if (a.kind === "file") {
       if (plan !== "monthly") { hold(id); setPlans("file"); return; }
+      // a filing past the plan's own licenses: approved at the price its card showed (0 within the allowance), under
+      // the owner's monthly cap, before it goes (src/overage.ts); without a price shown, nothing is filed or charged
+      if (filingApp && !IN_PLAN.includes(filingKindOf(filingApp))) {
+        const priced = shownCharges.get(a.id);
+        if (!priced) { say(lang === "zh" ? "请先打开这份申报，查看快哉对它的收费，然后再批准。未收取任何费用。" : "Open this filing first to see Placetta's price for it, then approve. Nothing was charged."); return; }
+        try { await api.filingCharge(cloud.wsId, { ref: a.app!, kind: priced.kind, shown_cents: priced.cents }); }
+        catch (e) { shownCharges.delete(a.id); const er = e as api.ApiError; say((lang === "zh" && er.message_zh) || er.message); return; }
+        shownCharges.delete(a.id);
+      }
       const line = await fileOne(a, sig);
       if (line) { setPanelOpen(true); pushTurn(shown, { text: [line], filed: a.app ? [a.app] : undefined }); }
       return;
@@ -989,7 +1000,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     // one that needs two owners under a business rule is approved on its own, never in a batch
     const ok = ids.map(id => w.approvals.find(a => a.id === id)).filter((a): a is Approval => !!a && a.kind === "file" && !a.second).filter(a => {
       const app = w.apps.find(x => x.id === a.app);
-      return !!app && readyToFile(app) && !preflight(w, a, today).errors.length;
+      // a filing past the plan is approved on its own, after its price was shown in its card (src/FilingCharge.tsx)
+      return !!app && readyToFile(app) && !preflight(w, a, today).errors.length && (!cloud || IN_PLAN.includes(filingKindOf(app)));
     });
     if (!ok.length) return;
     if (ok.length === 1) return approve(ok[0].id);

@@ -1,4 +1,5 @@
 import { checkAddress, RULE_LABEL } from "./forms/addressCheck";
+import { FilingChargeSection } from "./FilingCharge";
 import { canFill, onlineOnly, ONLINE_ONLY } from "./forms/canFill";
 import { useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
@@ -447,6 +448,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
           </section>
         )}
         <AllowRule a={a} commit={allow} />
+        {app && a.kind === "file" && <FilingChargeSection approvalId={a.id} app={app} />}
         {app && a.kind === "file" && (
           <section>
             <h3>{t("ap_fee")}</h3>

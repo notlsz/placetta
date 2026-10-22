@@ -14,7 +14,17 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { accessRpc, WORKS } from "../_shared/access.ts";
 import { ensureWebhook, priceId, type Item } from "../_shared/stripe_catalog.ts";
-import { openingCounts, returnOrigins, safeReturn, type Store, storesFrom, STRIPE_FAILED } from "./logic.ts";
+import { chargeStep, hqCheckout, moduleStep, openingCounts, returnOrigins, safeReturn, type Store, storesFrom, STRIPE_FAILED, termOf } from "./logic.ts";
+import { moduleById } from "../../../src/modules.ts";
+import type { BillTo } from "../../../src/hqPlan.ts";
+// Growth actions (src/overage.ts, src/modules.ts, src/contract.ts, src/hqPlan.ts):
+//   filing_charge  a filing past the plan: counted in the month's allowance, or its price (Odelia packs at the pack
+//                  price) charged as an invoice item, only when the owner approved the exact price shown and it fits
+//                  under the owner's monthly cap (reserved in the database first, filing_charge_reserve)
+//   add_module     a module on the yearly plan: its own price when STRIPE_PRICE_MODULE_<ID> is set, else a team quote
+//   auto_renew     cancel auto-renew online (cancel_at_period_end) or turn it back on, one click either way
+//   hq_checkout    headquarters pays for its brand: locations × the tier's price, people past the included number, and
+//                  the published "from $25,000 a year" floor; hq_sync keeps the location count in step
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -136,6 +146,62 @@ async function entryCents(): Promise<number> {
   try { return Number((await stripeGet(`prices/${encodeURIComponent(id)}`)).unit_amount) || 0; } catch { return 0; }
 }
 
+/**
+ * Headquarters pays for its brand (src/hqPlan.ts). Only the confirmed email the brand plan is kept under, and only when
+ * that plan bills headquarters. The checkout bills every location that joined at the tier's published price, each person
+ * on the franchisees' teams past the included number at the proposed price (FOUNDER TO CONFIRM, src/pricing.ts), and
+ * the top-up to the published $25,000 floor. hq_sync keeps the location count in step and applies coverage.
+ */
+async function hqAction(body: Record<string, unknown>, user: { id: string; email?: string; email_confirmed_at?: string }): Promise<Response> {
+  const email = (user.email ?? "").toLowerCase();
+  if (!email || !user.email_confirmed_at) return fail(403, "forbidden", "Confirm your email first.");
+  const { data: plan } = await admin.from("hq_plans").select("hq_email, bill_to, tier, stripe_customer_id, subscription_id").eq("hq_email", email).maybeSingle();
+  if (!plan) return fail(409, "no_plan", "Set up the brand plan first.", "请先设置品牌方案。");
+  const back = safeReturn(body.return_url, returnOrigins((k) => Deno.env.get(k)));
+  if (!back) return fail(400, "bad_request", "Unknown return address. Add the app's origin to APP_ORIGINS.");
+  const { data: counts } = await admin.rpc("hq_counts", { p_email: email });
+  const c = (counts ?? { locations: 0, people: 0 }) as { locations: number; people: number };
+  const tier = plan.tier === "pro" ? "pro" : "essentials";
+  const { quote, ok } = hqCheckout({ billTo: plan.bill_to as BillTo, tier, locations: c.locations, people: c.people });
+  try {
+    if (body.action === "hq_sync") {
+      if (plan.subscription_id) {
+        const sub = await stripeGet(`subscriptions/${encodeURIComponent(String(plan.subscription_id))}`);
+        const loc = await price(tier);
+        const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => i.price?.id === loc);
+        if (item && item.quantity !== Math.max(1, c.locations)) await stripe(`subscription_items/${item.id}`, { quantity: String(Math.max(1, c.locations)), proration_behavior: "create_prorations" });
+      }
+      const { data: n } = await admin.rpc("hq_cover_apply", { p_email: email });
+      return json(200, { ok: true, covered: n ?? 0, quote });
+    }
+    if (!ok) return fail(409, "nothing_to_bill", plan.bill_to === "hq" ? "No location has joined yet. Send an invite first." : "Franchisees pay for their own stores on this plan.");
+    if (body.renewal_consent !== true) return fail(400, "consent_required", "Agree to the renewal terms first.", "请先同意续费条款。");
+    const loc = await price(tier);
+    if (!loc) return fail(503, "not_configured", "Set STRIPE_SECRET_KEY for per-location billing.");
+    const notReady = await webhookReady();
+    if (notReady) return notReady;
+    const p: Record<string, string> = {
+      mode: "subscription", success_url: `${back}?billing=success`, cancel_url: `${back}?billing=canceled`, client_reference_id: email,
+      "metadata[hq_email]": email, "metadata[plan]": "hq", "metadata[tier]": tier, "subscription_data[metadata][hq_email]": email, "subscription_data[metadata][plan]": "hq",
+      "line_items[0][price]": loc, "line_items[0][quantity]": String(quote.locations),
+    };
+    let i = 1;
+    const inline = (name: string, cents: number, qty: number) => {
+      p[`line_items[${i}][price_data][currency]`] = "usd"; p[`line_items[${i}][price_data][unit_amount]`] = String(cents);
+      p[`line_items[${i}][price_data][recurring][interval]`] = "year"; p[`line_items[${i}][price_data][product_data][name]`] = name;
+      p[`line_items[${i}][quantity]`] = String(qty); i++;
+    };
+    if (quote.extraPeople > 0) inline("Placetta brand plan: people past those included", Math.round((quote.peopleUsd / quote.extraPeople) * 100), quote.extraPeople);
+    if (quote.topUpUsd > 0) inline("Placetta brand plan: headquarters minimum", Math.round(quote.topUpUsd * 100), 1);
+    if (plan.stripe_customer_id) p.customer = String(plan.stripe_customer_id); else p.customer_email = email;
+    const s = await stripe("checkout/sessions", p);
+    return json(200, { ok: true, url: s.url, quote });
+  } catch (e) {
+    console.error("billing hq:", String(body.action ?? ""), (e as Error).message.slice(0, 200));
+    return fail(502, "upstream_error", STRIPE_FAILED.en, STRIPE_FAILED.zh);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
@@ -148,6 +214,8 @@ Deno.serve(async (req) => {
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
+  // Headquarters has no workspace of its own: it is the signed-in, confirmed email its brand plan is kept under.
+  if (body.action === "hq_checkout" || body.action === "hq_sync") return await hqAction(body, user);
   const ws = String(body.workspace_id ?? "");
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
@@ -176,6 +244,9 @@ Deno.serve(async (req) => {
 
     if (body.action === "checkout" && body.plan === "locations") {
       const tier = body.tier === "pro" ? "pro" : "essentials", guarantee = body.guarantee === true;
+      // The automatic renewal terms were shown next to the button and agreed to (src/contract.ts disclosure).
+      if (body.renewal_consent !== true) return fail(400, "consent_required", "Agree to the renewal terms first.", "请先同意续费条款。");
+      const years = termOf(body.term_years);
       const loc = await price(tier);
       if (!loc) return fail(503, "not_configured", "Set STRIPE_SECRET_KEY for per-location billing.");
       const notReady = await webhookReady();
@@ -185,6 +256,7 @@ Deno.serve(async (req) => {
         mode: "subscription", success_url: `${back}?billing=success`, cancel_url: `${back}?billing=canceled`,
         client_reference_id: ws, "metadata[workspace_id]": ws, "metadata[plan]": "locations", "metadata[tier]": tier, "metadata[guarantee]": guarantee ? "1" : "0",
         "subscription_data[metadata][workspace_id]": ws, "subscription_data[metadata][plan]": "locations", "subscription_data[metadata][tier]": tier, "subscription_data[metadata][guarantee]": guarantee ? "1" : "0",
+        "metadata[term_years]": String(years), "subscription_data[metadata][term_years]": String(years), "metadata[renewal_consent]": new Date().toISOString(),
         "line_items[0][price]": loc, "line_items[0][quantity]": String(Math.max(1, all.length)),
       };
       // Stores already open pay no opening fee; each store still opening pays it once, by kind; complex ones are quoted.
@@ -227,6 +299,62 @@ Deno.serve(async (req) => {
       await askForQuote(ws, fresh);
       if (fresh.length) await admin.from("billing").update({ charged_store_ids: [...charged, ...fresh.map((s) => s.id)] }).eq("workspace_id", ws);
       return json(200, { ok: true, synced: true, stores: all.length, new_openings: openings });
+    }
+
+    // A filing past the plan (src/overage.ts): the allowance first; past it, the exact price the owner was shown, under
+    // the owner's hard monthly cap, reserved in the database before Stripe is asked, and let go if Stripe refuses.
+    if (body.action === "filing_charge") {
+      const { data: month, error: me } = await admin.rpc("filing_month", { ws });
+      if (me || !month) return fail(503, "not_configured", "Filing charges aren't set up on this server yet.");
+      const mo = month as { locations: number; used: number; charged_cents: number; cap_cents: number; paid: boolean };
+      const packId = await price("pack");
+      const packCents = packId ? Number((await stripeGet(`prices/${encodeURIComponent(packId)}`)).unit_amount) || undefined : undefined;
+      const step = chargeStep(body, { locations: mo.paid ? Math.max(mo.locations, 1) : 0, used: mo.used, chargedCents: mo.charged_cents, capCents: mo.cap_cents, packCents });
+      if (step.do === "refuse") return fail(step.status, step.code, step.message, step.message_zh);
+      if (step.do === "none") return json(200, { ok: true, kind: "plan", cents: 0 });
+      if (step.charge && (!customer || !packId)) return fail(409, "no_customer", "There's no billing account to charge yet.", "还没有可收费的账单账户。");
+      const { data: held, error: he } = await admin.rpc("filing_charge_reserve", { p_ws: ws, p_ref: String(body.ref), p_kind: step.kind, p_cents: step.cents, p_allow: step.allow, p_user: user.id });
+      if (he) throw new Error(`reserve: ${he.code}`);
+      const r = held as { ok: boolean; id?: string; kind?: string; again?: boolean; code?: string; left_cents?: number };
+      if (!r.ok) return fail(409, r.code ?? "refused", r.code === "over_cap" ? "That would pass your monthly cap. Nothing was charged." : "Nothing was charged.", r.code === "over_cap" ? "这会超过您的每月上限，未收取任何费用。" : "未收取任何费用。");
+      if (r.kind === "allowance" || r.again) return json(200, { ok: true, kind: r.kind, cents: r.kind === "allowance" ? 0 : step.cents, again: !!r.again });
+      try {
+        const item = await stripe("invoiceitems", { customer: customer!, "pricing[price]": packId!, quantity: String(step.packs), ...(bill?.subscription_id ? { subscription: String(bill.subscription_id) } : {}),
+          "metadata[workspace_id]": ws, "metadata[kind]": "filing", "metadata[ref]": String(body.ref), "metadata[approved_by]": user.id });
+        await admin.rpc("filing_charge_settle", { p_id: r.id, p_ok: true, p_item: item.id });
+      } catch (e) {
+        await admin.rpc("filing_charge_settle", { p_id: r.id, p_ok: false, p_item: null });
+        throw e;
+      }
+      await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: user.id, action: { en: "Approved a filing charge", zh: "批准了申报费用" },
+        object: { en: String(body.ref), zh: String(body.ref) }, detail: { en: `$${(step.cents / 100).toFixed(2)} on the next invoice`, zh: `$${(step.cents / 100).toFixed(2)}，计入下一张账单` } });
+      return json(200, { ok: true, kind: "charge", cents: step.cents });
+    }
+
+    // A module (src/modules.ts): billed on the yearly plan from its own price when the founder set one, else quoted.
+    if (body.action === "add_module") {
+      const mod = moduleById(body.module);
+      const env_ = mod ? Deno.env.get(mod.env) : undefined;
+      const subId = bill?.subscription_id as string | null | undefined;
+      const step = moduleStep(body.module, !!env_, !!subId);
+      if (!step.ok) return fail(400, "bad_request", step.message);
+      if (step.billed) {
+        const sub = await stripeGet(`subscriptions/${encodeURIComponent(subId!)}`);
+        const qty = Math.max(1, Number((sub.items?.data ?? []).find((i: { price?: { recurring?: { interval?: string } } }) => i.price?.recurring?.interval === "year")?.quantity) || 1);
+        await stripe("subscription_items", { subscription: subId!, price: env_!, quantity: String(qty), proration_behavior: "create_prorations", "metadata[module]": step.id });
+      }
+      const { data: st, error: e2 } = await admin.rpc("module_apply", { p_ws: ws, p_module: step.id, p_on: step.billed, p_user: user.id });
+      if (e2) throw new Error(`module: ${e2.code}`);
+      return json(200, { ok: true, module: step.id, state: st });
+    }
+
+    // Auto-renew off is the online cancel (Cal. Bus. & Prof. Code § 17602(d)(1)): one call, no other step; on undoes it.
+    if (body.action === "auto_renew") {
+      const on = body.on === true, subId = bill?.subscription_id as string | null | undefined;
+      if (subId) await stripe(`subscriptions/${encodeURIComponent(subId)}`, { cancel_at_period_end: on ? "false" : "true" });
+      const { error: e3 } = await admin.rpc("billing_auto_renew_apply", { p_ws: ws, p_on: on, p_user: user.id });
+      if (e3) throw new Error(`auto_renew: ${e3.code}`);
+      return json(200, { ok: true, auto_renew: on });
     }
 
     // An Odelia pack: more AI allowance on top of the plan, carried over until it's used (like Devin's extra ACUs).

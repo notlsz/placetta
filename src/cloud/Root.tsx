@@ -755,6 +755,8 @@ export function CloudRoot() {
       if (params.get("connect_error")) notice = lang === "zh" ? "连接未完成，请重试。" : "That connection didn't finish. Try again.";
       if (params.get("billing") === "success") notice = lang === "zh" ? "付款成功。几秒后方案会自动生效。" : "Payment received. Your plan switches on in a few seconds.";
       if (params.get("billing") === "cancel") notice = lang === "zh" ? "已取消付款。" : "Checkout canceled.";
+      // a brand's invite link (src/hqPlan.ts inviteLink): kept for Settings, Team, Headquarters, where an owner joins
+      if (params.get("hq")) { try { sessionStorage.setItem("placetta-hq-invite", params.get("hq")!); } catch { /* storage off */ } notice = lang === "zh" ? "品牌邀请：在“设置 > 团队 > 总部”中点“加入品牌”。" : "A brand invited you: choose Join the brand in Settings, Team, Headquarters."; }
       if ([...params.keys()].length) history.replaceState(null, "", location.pathname + location.hash);
       const [audit, billing, filings, docs, integrations, logins, terms] = await Promise.all([
         api.listAudit(row.id), api.getBilling(row.id), api.listFilings(row.id), api.listDocs(row.id), api.listIntegrations(row.id), api.listLogins(row.id),

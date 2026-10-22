@@ -16,6 +16,7 @@ import { storeOf, type Job } from "./jobs";
 import { PlanCard, WatchLink } from "./Work";
 import { StaffLangPick } from "./StaffLang";
 import { StoresCheckPanel } from "./StoresCheck";
+import { NoticeEditor, StoreValue, ValueReportSheet } from "./ValueReport";
 
 /* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
    a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. Each store has
@@ -217,6 +218,11 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
 
       <Section title={b(B("What Placetta is worth here", "快哉在这家店的价值"))}>
         <Value s={withPath(s, ws, ev).s} big />
+      </Section>
+
+      <Section title={b(B("What Placetta delivered here", "快哉在这家店完成的工作"))} sub={b(B("From records only: filings, approval times against the agency median, renewals caught, and fines avoided where an agency notice is on file.", "只用存档记录：申报、与机构中位数对比的审批用时、按时续期，以及有机构通知存档时避免的罚款。"))}>
+        <StoreValue storeId={s.id} />
+        <NoticeEditor storeId={s.id} />
       </Section>
 
       {s.stage === "open" && (
@@ -455,6 +461,7 @@ export function Stores() {
   const [open, setOpen] = useState<string | null>(null);
   const [bulk, setBulk] = useState(false);
   const [check, setCheck] = useState(false);
+  const [report, setReport] = useState(false);
   const stores = ws.stores ?? [];
   const s = stores.find(x => x.id === open);
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
@@ -462,10 +469,12 @@ export function Stores() {
     <div className="page">
       <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p>{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p></div>
         <div className="ph-acts">
+          {stores.length > 0 && <Pill onClick={() => setReport(true)}>{lang === "zh" ? "价值报告" : "Value report"}</Pill>}
           {cloud?.owner && stores.length > 0 && <Pill onClick={() => openSettings(go, "hq")}>{lang === "zh" ? "与总部共享" : "Share with headquarters"}</Pill>}
           {!bulk && <Pill onClick={() => setBulk(true)}>{lang === "zh" ? "规划多家门店" : "Plan many stores"}</Pill>}
           {!check && <Pill onClick={() => setCheck(true)}>{lang === "zh" ? "检查已开业门店" : "Check stores already open"}</Pill>}
         </div></header>
+      {report && <ValueReportSheet onClose={() => setReport(false)} />}
       {bulk && <BulkPlan onClose={() => setBulk(false)} />}
       {check && <StoresCheckPanel onClose={() => setCheck(false)} />}
       {stores.length ? (

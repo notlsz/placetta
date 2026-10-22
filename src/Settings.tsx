@@ -37,13 +37,15 @@ import teamsLogo from "./assets/integrations/teams.svg";
 import wechatLogo from "./assets/integrations/wechat.svg";
 import { McpConnectors } from "./McpSettings";
 import { SetSheet } from "./SetUI";
+import { ContractGroup, EntitiesGroup, FilingCapGroup, ModulesGroup } from "./Growth";
+import { cleanCode } from "./hqPlan.ts";
 
 
 /* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
    one primary action per group. Only what a business needs to get and stay compliant. */
 
 type Row = { label: Bi; sub?: ReactNode; right?: ReactNode; pick?: () => void };
-function Group({ id, title, note, rows, children, hidden }: { id: string; title: Bi; note?: Bi; rows?: Row[]; children?: ReactNode; hidden?: boolean }) {
+export function Group({ id, title, note, rows, children, hidden }: { id: string; title: Bi; note?: Bi; rows?: Row[]; children?: ReactNode; hidden?: boolean }) {
   const { b } = useApp();
   if (hidden) return null;
   return (
@@ -68,11 +70,11 @@ function Group({ id, title, note, rows, children, hidden }: { id: string; title:
 /* The settings PIN: when it's on and not unlocked, sensitive controls ask for it first. */
 type PinCtx = { locked: boolean; guard: (fn: () => void) => void };
 const PinLock = createContext<PinCtx>({ locked: false, guard: fn => fn() });
-const usePin = () => useContext(PinLock);
+export const usePin = () => useContext(PinLock);
 
 /** A settings button: quiet is a text button, line and ink are the app's pills, warm is a quiet one for what removes
  *  or ends something (Disconnect, Delete my account), never red. */
-const Btn = ({ children, onClick, kind = "quiet", disabled, guard }: { children: ReactNode; onClick: () => void; kind?: "quiet" | "ink" | "line" | "warm"; disabled?: boolean; guard?: boolean }) => {
+export const Btn = ({ children, onClick, kind = "quiet", disabled, guard }: { children: ReactNode; onClick: () => void; kind?: "quiet" | "ink" | "line" | "warm"; disabled?: boolean; guard?: boolean }) => {
   const pin = usePin();
   const locked = guard && pin.locked;
   return <button type="button" className={"sbtn " + (kind === "warm" ? "quiet warm" : kind) + (locked ? " pinned" : "")} onClick={() => (guard ? pin.guard(onClick) : onClick())} disabled={disabled}>{locked && <I.lock />}{children}</button>;
@@ -475,6 +477,8 @@ function HqShare() {
   const [links, setLinks] = useState<HqLink[] | null>(null);
   const [f, setF] = useState({ email: "", brand: "" });
   const [busy, setBusy] = useState(false);
+  // an invite from a brand's headquarters (src/hqPlan.ts): from the link it sent (?hq=…), or pasted
+  const [code, setCode] = useState(() => { try { return new URLSearchParams(location.search).get("hq") ?? sessionStorage.getItem("placetta-hq-invite") ?? ""; } catch { return ""; } });
   const wsId = cloud?.wsId ?? "";
   const load = useCallback(async () => { if (!wsId) return; try { setLinks(await api.hqLinks(wsId)); } catch { setLinks([]); } }, [wsId]);
   useEffect(() => { void load(); }, [load]);
@@ -495,6 +499,19 @@ function HqShare() {
     if (!window.confirm(zh ? `停止与 ${l.hq_email} 共享门店状态？` : `Stop sharing store status with ${l.hq_email}?`)) return;
     pin.guard(() => void api.hqUnshare(l.id).then(() => { say(zh ? "已停止共享" : "Stopped sharing"); return load(); }, e => say((e as api.ApiError).message)));
   };
+  const join = async () => {
+    if (pin.locked) { pin.guard(() => void join()); return; }
+    const c = cleanCode(code);
+    if (!c) { say(zh ? "请粘贴总部发来的邀请链接或邀请码。" : "Paste the invite link or code headquarters sent you."); return; }
+    setBusy(true);
+    try {
+      const r = await api.hqInviteRedeem(wsId, c);
+      say(r.bill_to === "hq" ? (zh ? `已加入${r.brand ?? "品牌"}。您的门店由总部付费，总部可以看到门店状态。` : `Joined ${r.brand ?? "the brand"}. Headquarters pays for your stores and sees their status.`)
+        : (zh ? `已加入${r.brand ?? "品牌"}。总部可以看到门店状态；您按门店为自己的门店付费。` : `Joined ${r.brand ?? "the brand"}. Headquarters sees your stores' status; you pay for your own stores, per location.`));
+      setCode(""); try { sessionStorage.removeItem("placetta-hq-invite"); } catch { /* storage off */ } await load();
+    } catch (e) { const er = e as api.ApiError; say((zh && er.message_zh) || er.message); }
+    setBusy(false);
+  };
   const n = (ws.stores ?? []).length;
   return (
     <Group id="hq" title={B("Headquarters", "总部")}
@@ -513,6 +530,12 @@ function HqShare() {
           <button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : zh ? "共享" : "Share"}</button>
         </form>
       ) : <p className="sg-note">{zh ? "只有所有者可以与总部共享或停止共享。" : "Only owners can share with headquarters or stop sharing."}</p>}
+      {cloud.owner && (
+        <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void join(); }}>
+          <input autoComplete="off" placeholder={zh ? "总部的邀请链接或邀请码" : "Invite link or code from headquarters"} value={code} onChange={e => setCode(e.target.value)} aria-label={zh ? "邀请码" : "Invite code"} />
+          <button type="submit" className="sbtn ink" disabled={busy || !code.trim()}>{busy ? "…" : zh ? "加入品牌" : "Join the brand"}</button>
+        </form>
+      )}
     </Group>
   );
 }
@@ -1258,17 +1281,17 @@ function Provisioning() {
 /* Settings categories, Anthropic style: a few clear groups in the sidebar, one shown at a time. */
 const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "general", label: B("General", "通用"), items: ["account", "appearance", "language"] },
-  { id: "facts", label: B("Business facts", "企业资料"), items: ["facts", "house"] },
+  { id: "facts", label: B("Business facts", "企业资料"), items: ["facts", "house", "entities"] },
   { id: "team", label: B("Team", "团队"), items: ["team", "hq", "partner"] },
   { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "autonomy", "brules", "phone", "approvals", "memory", "skills"] },
   { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
-  { id: "billing", label: B("Billing", "账单"), items: ["billing", "spending"] },
+  { id: "billing", label: B("Billing", "账单"), items: ["billing", "contract", "modules", "filingcap", "spending"] },
   { id: "security", label: B("Security", "安全"), items: ["security", "sso", "scim", "pin"] },
   { id: "privacy", label: B("Privacy and data", "隐私与数据"), items: ["data"] },
   { id: "activity", label: B("Activity", "活动记录"), items: ["activity"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
 ];
-const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "sso", "scim", "pin", "phone"]);
+const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "sso", "scim", "pin", "phone", "contract", "filingcap"]);
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
 let settingsTarget: string | null = null;
@@ -1363,6 +1386,7 @@ export function Settings() {
 
           {show("facts") && <ContextPage />}
           {show("house") && <HouseRulesGroup />}
+          {show("entities") && <EntitiesGroup />}
           {show("activity") && <AuditTrail />}
           {show("team") && <Team />}
           {show("hq") && <HqShare />}
@@ -1381,6 +1405,10 @@ export function Settings() {
                 ...(cloud?.owner && (ai.plan === "monthly" || ai.plan === "entry" || ai.plan === "comped") ? [{ label: B("Odelia packs", "Odelia 加量包"), sub: b(B("More allowance on top of your plan. It carries over until it's used.", "在方案之外增加额度，长期有效直到用完。")),
                   right: <Btn guard onClick={() => void cloud.buyPack()}>{lang === "zh" ? "购买加量包" : "Add a pack"}</Btn> }] : [])] : []),
             ]} />
+
+          {show("contract") && <ContractGroup />}
+          {show("modules") && <ModulesGroup />}
+          {show("filingcap") && <FilingCapGroup />}
 
           {show("integrations") && <Integrations />}
           {show("logins") && <Logins />}

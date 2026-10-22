@@ -24,6 +24,7 @@ import { approvalsLine, type FilingRow, finishWork, MAX_RESUMES, normalizeState,
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
 import { weeklyGovernance } from "./governance.ts";
+import { dueNotices, noticeFor, type RenewalRow } from "./renewal_notice.ts";
 // any vendor that may take a conversation (a Gemini key without GEMINI_PAID may not), not just Anthropic or Gemini
 import { canConverse } from "../_shared/llm.ts";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
@@ -665,6 +666,28 @@ Deno.serve(async (req) => {
     }
   }
 
+  // The renewal notice, 15 to 45 days before a yearly plan renews, once per renewal (renewal_notice.ts).
+  let renewalNotices = 0;
+  if (RESEND && FROM) {
+    const { data: rows, error: re } = await admin.from("billing")
+      .select("workspace_id, current_period_end, subscription_status, subscription_plan, paid_locations, auto_renew, renewal_notice_for, hq_paid_by, subscription_id")
+      .not("current_period_end", "is", null);
+    if (re) console.error("renewal notices", re.code);
+    for (const r of dueNotices((rows ?? []) as RenewalRow[], today)) {
+      const renewsOn = String(r.current_period_end).slice(0, 10);
+      const { data: claimed } = await admin.rpc("renewal_notice_claim", { p_ws: r.workspace_id, p_for: renewsOn });
+      if (claimed !== true) continue;
+      const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", r.workspace_id).eq("role", "owner");
+      const emails: string[] = [];
+      // the law asks for this notice, so it goes even to an owner who told Odelia not to email them about other things
+      for (const o of owners ?? []) { const { data } = await admin.auth.admin.getUserById(o.user_id); if (data?.user?.email && data.user.email_confirmed_at) emails.push(data.user.email); }
+      const m = noticeFor(r, names.get(r.workspace_id) ?? "Your business", (states.get(r.workspace_id) ?? null) as Parameters<typeof noticeFor>[2],
+        (filings ?? []) as Parameters<typeof noticeFor>[3], today, `${APP}/app/settings/billing?ws=${encodeURIComponent(r.workspace_id)}`);
+      if (emails.length && await sendMail(emails, m.subject, m.text, m.html)) renewalNotices++;
+      else await admin.rpc("renewal_notice_release", { p_ws: r.workspace_id, p_for: renewsOn });   // a later run tries again
+    }
+  }
+
   // Mondays: the agent health summary for the team, by email and as an Update, once a week (governance.ts).
   if (started.getUTCDay() === 1) {
     await weeklyGovernance(admin, today, RESEND && FROM ? sendMail : null, APP).catch((e) => console.error("governance", String(e).slice(0, 160)));
@@ -809,5 +832,5 @@ Deno.serve(async (req) => {
     { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, agency_asks: answered, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, agency_asks: answered, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
 });

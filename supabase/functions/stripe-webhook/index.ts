@@ -78,7 +78,21 @@ Deno.serve(async (req) => {
         });
         if (error) throw new Error(error.message);
         if (markets) await log(ws, { en: "Paid", zh: "已付款" }, "entry");
+        // the contract term the owner chose next to the renewal terms (src/contract.ts)
+        if (locations && o.metadata?.term_years) {
+          const { error: te } = await admin.rpc("billing_term_apply", { p_ws: ws, p_years: Math.max(1, Math.min(3, Number(o.metadata.term_years) || 1)) });
+          if (te) throw new Error(te.message);
+        }
       }
+    } else if (event.type.startsWith("customer.subscription.") && typeof o.metadata?.hq_email === "string" && !o.metadata?.workspace_id) {
+      // a headquarters paying for its brand (src/hqPlan.ts): its plan, then every linked workspace's coverage
+      const end = o.current_period_end ?? o.items?.data?.[0]?.current_period_end;
+      const createdAt = new Date((Number(event.created) || Math.floor(Date.now() / 1000)) * 1000).toISOString();
+      const { error } = await admin.rpc("hq_subscription_apply", {
+        p_email: o.metadata.hq_email, p_event_at: createdAt, p_customer: typeof o.customer === "string" ? o.customer : null, p_subscription: o.id,
+        p_status: event.type === "customer.subscription.deleted" ? "canceled" : String(o.status), p_period_end: end ? new Date(end * 1000).toISOString() : null,
+      });
+      if (error) throw new Error(error.message);
     } else if (event.type.startsWith("customer.subscription.")) {
       const ws = o.metadata?.workspace_id as string | undefined;
       if (ws) {
@@ -101,6 +115,11 @@ Deno.serve(async (req) => {
         if (error) throw new Error(error.message);
         if (applied === true && event.type === "customer.subscription.created") await log(ws, { en: "Started", zh: "开通" }, o.metadata?.plan ?? "starter");
         if (applied === true && event.type === "customer.subscription.deleted") await log(ws, { en: "Ended", zh: "已结束" }, o.metadata?.plan ?? "starter");
+        // auto-renew turned off or on in Stripe's own portal: kept in step, so no renewal notice goes out after a cancel
+        if (applied === true && typeof o.cancel_at_period_end === "boolean" && status !== "canceled") {
+          const { data: b } = await admin.from("billing").select("auto_renew").eq("workspace_id", ws).maybeSingle();
+          if (b && b.auto_renew === o.cancel_at_period_end) await admin.rpc("billing_auto_renew_apply", { p_ws: ws, p_on: !o.cancel_at_period_end, p_user: null });
+        }
       }
     }
   } catch (e) {
