@@ -34,7 +34,7 @@ jobs:
       # the prompt-injection red team: hostile emails, PDFs, pages, chats, lessons and form fields, each against a
       # model that obeys them; every one must be stopped by Placetta's own code
       - run: npm run test:redteam
-      - run: npm run test:leak
+      - run: npm run test:reply-leak
       # the live evaluation's harness, on its scripted model (no key in CI): scenarios, tools, graders and report
       - run: npm run eval:live -- --dry --out /tmp/eval.md --json /tmp/eval.json
       # the harness's own plumbing: argument checks, A/B, the dated history, the merge gate, skipping without a key
