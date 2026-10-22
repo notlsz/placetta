@@ -44,6 +44,7 @@
     "test:fda": "node --test scripts/fda-leads.test.mjs",
     "test:qa": "node scripts/qa-walk.mjs",
     "test:e2e": "deno run -A --no-check --no-lock --node-modules-dir=none scripts/e2e/run.ts",
+    "test:tenancy": "deno run -A --no-check --no-lock --node-modules-dir=none scripts/tenancy/run.ts",
     "test:dnc": "node --test scripts/dnc.test.mjs",
     "dnc": "node scripts/dnc.mjs",
     "test:channels": "esbuild scripts/channels-test.mts --bundle --platform=node --format=esm --outfile=.channels-test.mjs --log-level=error && node .channels-test.mjs; s=$?; rm -f .channels-test.mjs; exit $s",
