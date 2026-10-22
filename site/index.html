@@ -21,6 +21,9 @@
 <meta name="twitter:description" content="Placetta gets the licenses, permits and registrations a business needs to open in a new market, and keeps them current.">
 <meta name="twitter:image" content="https://www.placetta.com/media/og-home.png">
 <link rel="preload" as="image" href="/media/hero-poster.jpg" fetchpriority="high">
+<link rel="alternate" hreflang="en" href="https://www.placetta.com/">
+<link rel="alternate" hreflang="zh-CN" href="https://www.placetta.com/zh">
+<link rel="alternate" hreflang="x-default" href="https://www.placetta.com/">
 <link rel="alternate" type="text/plain" title="llms.txt" href="https://www.placetta.com/llms.txt">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","@id":"https://www.placetta.com/#organization","name":"Placetta","alternateName":"快哉","legalName":"Placetta Inc.","url":"https://www.placetta.com/","logo":{"@type":"ImageObject","url":"https://www.placetta.com/icon-512.png","width":512,"height":512},"image":"https://www.placetta.com/icon-512.png","description":"Placetta gets the licenses, permits and registrations a business needs to open in a new market, and keeps them current.","email":"support@placetta.com","address":{"@type":"PostalAddress","streetAddress":"9 W 57th St, Fl 48","addressLocality":"New York","addressRegion":"NY","postalCode":"10019","addressCountry":"US"},"contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"support@placetta.com","availableLanguage":["English","Chinese"]}],"knowsLanguage":["en","zh-CN"]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://www.placetta.com/#website","name":"Placetta","alternateName":"快哉","url":"https://www.placetta.com/","inLanguage":["en","zh-CN"],"publisher":{"@id":"https://www.placetta.com/#organization"},"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://www.placetta.com/guides/?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
@@ -4273,7 +4276,8 @@ const CHECK = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circ
 /* ============ state + i18n ============ */
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let lang = "en";
-try { const q = new URLSearchParams(location.search).get("lang"), s = localStorage.getItem("placetta-lang"); if (q === "en" || q === "zh") { lang = q; localStorage.setItem("placetta-lang", q); } else if (s === "en" || s === "zh") lang = s; else if ((navigator.language||"").toLowerCase().startsWith("zh")) lang = "zh"; }
+const ONZH = /^\/zh(\.html)?\/?$/.test(location.pathname);
+try { const q = new URLSearchParams(location.search).get("lang"), s = localStorage.getItem("placetta-lang"); if (ONZH) lang = "zh"; else if (q === "en" || q === "zh") { lang = q; localStorage.setItem("placetta-lang", q); } else if (s === "en" || s === "zh") lang = s; else if ((navigator.language||"").toLowerCase().startsWith("zh")) lang = "zh"; }
 catch(e){ if ((navigator.language||"").toLowerCase().startsWith("zh")) lang = "zh"; }
 const L = () => lang === "zh" ? 1 : 0;
 const t = k => (T[lang][k] ?? T.en[k] ?? k);
@@ -4304,7 +4308,7 @@ const INV = [
 function renderInv(){ const i = L(), one = (hide) => INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${hide ? "" : esc(v.n[i])}"${hide ? ' aria-hidden="true"' : ""} style="--h:${v.h}px" loading="lazy" decoding="async">`).join("");
   document.getElementById("invR").innerHTML = `<div class="ivt">${one(false)}${one(true)}</div>`; }
 function applyAll(){ applyStatic(); if (typeof renderBk === "function") renderBk(); if (typeof renderOld === "function") renderOld(); renderApp(); renderCost(); renderPrice(); renderProof(); renderFaq(); renderTs(); if (typeof renderMon === "function") renderMon(); if (typeof renderBel === "function") renderBel(false); if (typeof renderStrip === "function") renderStrip(); if (typeof renderFlows === "function") renderFlows(); if (typeof renderInv === "function") renderInv(); }
-function setLang(l){ if (l === lang) return; lang = l; try { localStorage.setItem("placetta-lang", l); } catch(e){} track("language_switch", {to: l}); applyAll(); if (typeof renderMap === "function") renderMap(); if (!document.getElementById("modal").hidden) renderStep(); if (typeof updateResume === "function") updateResume(); }
+function setLang(l){ if (l === lang) return; if (ONZH && l === "en") { try { localStorage.setItem("placetta-lang", "en"); } catch(e){} location.href = "/" + location.search + location.hash; return; } lang = l; try { localStorage.setItem("placetta-lang", l); } catch(e){} track("language_switch", {to: l}); applyAll(); if (typeof renderMap === "function") renderMap(); if (!document.getElementById("modal").hidden) renderStep(); if (typeof updateResume === "function") updateResume(); }
 document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { setLang(b.dataset.lang); document.getElementById("lMenu").hidden = true; document.getElementById("lBtn").setAttribute("aria-expanded","false"); }));
 document.getElementById("lBtn").addEventListener("click", e => { const m = document.getElementById("lMenu"); m.hidden = !m.hidden; e.currentTarget.setAttribute("aria-expanded", String(!m.hidden)); });
 

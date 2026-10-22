@@ -63,7 +63,7 @@ const dated = (path, html) => {
 
 /* ------------------------------------------------------------ shared head */
 const OG_IMAGE = ORIGIN + "/media/og-home.png", GUIDES_OG = ORIGIN + "/guides/og.png";
-function head({ path, title, desc, type = "website", image = OG_IMAGE, ld = [], zh = false, extra = "" }) {
+function head({ path, title, desc, type = "website", image = OG_IMAGE, ld = [], zh = false, extra = "", locale = "en_US" }) {
   const url = ORIGIN + path;
   return [
     `<meta name="description" content="${esc(desc)}">`,
@@ -73,7 +73,7 @@ function head({ path, title, desc, type = "website", image = OG_IMAGE, ld = [], 
     verifyTags(),
     `<meta property="og:type" content="${type}">`, `<meta property="og:site_name" content="Placetta">`, `<meta property="og:title" content="${esc(title)}">`,
     `<meta property="og:description" content="${esc(desc)}">`, `<meta property="og:url" content="${url}">`, `<meta property="og:image" content="${image}">`,
-    `<meta property="og:image:width" content="1200">`, `<meta property="og:image:height" content="630">`, `<meta property="og:locale" content="en_US">`, `<meta property="og:locale:alternate" content="zh_CN">`,
+    `<meta property="og:image:width" content="1200">`, `<meta property="og:image:height" content="630">`, `<meta property="og:locale" content="${locale}">`, `<meta property="og:locale:alternate" content="${locale === "en_US" ? "zh_CN" : "en_US"}">`,
     `<meta name="twitter:card" content="summary_large_image">`, `<meta name="twitter:title" content="${esc(title)}">`, `<meta name="twitter:description" content="${esc(desc)}">`, `<meta name="twitter:image" content="${image}">`,
     extra,
     ...ld.map(ldTag),
@@ -122,6 +122,7 @@ function offers() {
   const entry = strip(FAQ[0][1][0]).match(/\$(\d[\d,]*) one-time per market/); if (entry) add("Entry plan", price("$" + entry[1]), "one-time per market", strip(FAQ.find(f => /entry plan/i.test(f[0][0]))?.[1][0] ?? ""));
   return o;
 }
+const HREFLANG = `<link rel="alternate" hreflang="en" href="${ORIGIN}/">\n<link rel="alternate" hreflang="zh-CN" href="${ORIGIN}/zh">\n<link rel="alternate" hreflang="x-default" href="${ORIGIN}/">`;
 const LANDING_TITLE = { en: "Placetta: licenses, permits and registrations to open in a new market", zh: "快哉：进入新市场所需的执照、许可和登记" };
 {
   const d = dated("/", landing);
@@ -131,7 +132,7 @@ const LANDING_TITLE = { en: "Placetta: licenses, permits and registrations to op
     hasOfferCatalog: { "@type": "OfferCatalog", name: "Placetta plans", itemListElement: offers() } };
   const page = webPageLd({ path: "/", title: LANDING_TITLE.en, desc: DESCRIPTION, d, extra: { mainEntity: { "@id": ORIGIN + "/#service" }, primaryImageOfPage: OG_IMAGE } });
   landing = block(landing, "head", head({ path: "/", title: LANDING_TITLE.en, desc: DESCRIPTION, ld: [orgLd(), websiteLd(SEARCH_PATH), page, service, faqLd],
-    extra: `<link rel="preload" as="image" href="/media/hero-poster.jpg" fetchpriority="high">\n<link rel="alternate" type="text/plain" title="llms.txt" href="${ORIGIN}/llms.txt">` }), "</title>");
+    extra: `<link rel="preload" as="image" href="/media/hero-poster.jpg" fetchpriority="high">\n${HREFLANG}\n<link rel="alternate" type="text/plain" title="llms.txt" href="${ORIGIN}/llms.txt">` }), "</title>");
   landing = landing.replace(/<title>[^<]*<\/title>/, `<title>${esc(LANDING_TITLE.en)}</title>`);
   // crawlable links to the content for anything that doesn't run the page's script (people with it see the page as before)
   const data = JSON.parse(readFileSync("site/guides/data.json", "utf8"));
@@ -139,6 +140,38 @@ const LANDING_TITLE = { en: "Placetta: licenses, permits and registrations to op
     ...data.cities.slice(0, 12).map(c => [c.url.replace(ORIGIN, ""), `Opening a business in ${c.city}`]), ["/about.html", "About Placetta"], ["/editorial.html", "How we source and check the guides"], ["/help/", "Help Center"], ["/trust", "Trust and security"], ["/ai.html", "How Placetta's AI works"]];
   landing = block(landing, "links", `<noscript><nav class="ctr" aria-label="Site" style="display:flex;flex-wrap:wrap;gap:8px 20px;padding:24px 0;font-size:14px">${links.map(([h, n]) => `<a href="${h}">${esc(n)}</a>`).join("")}</nav></noscript>`, "<footer>");
   put(LANDING, landing);
+}
+
+/* ------------------------------------------------------------ the Chinese landing page (/zh, served from site/zh.html)
+   The same page, with the Chinese copy its script would set written into the markup, so Baidu and other crawlers that
+   don't run JavaScript read it in Chinese. The page's script starts in Chinese on /zh. */
+{
+  const ZH = "site/zh.html";
+  const zh = k => T.zh[k] ?? T.en[k];
+  let page = landing.replace(/<html lang="[^"]*"/, '<html lang="zh-CN"');
+  const bodyAt = page.indexOf("</style>"), scriptAt = page.indexOf("<script", bodyAt);
+  page = fillInner(page, bodyAt, scriptAt, 'data-i18n="([^"]+)"', k => (typeof zh(k) === "string" && !/\{[a-z]+\}/.test(zh(k)) ? zh(k) : null));
+  const s2 = page.indexOf("<script", bodyAt);
+  page = page.slice(0, bodyAt) + page.slice(bodyAt, s2)
+    .replace(/<[a-zA-Z][^>]*\sdata-i18n-aria="([^"]+)"[^>]*>/g, (tag, k) => (typeof zh(k) === "string" ? setAttr(tag, "aria-label", strip(zh(k))) : tag))
+    .replace(/<input\b[^>]*\sdata-i18n-ph="([^"]+)"[^>]*>/g, (tag, k) => (typeof zh(k) === "string" ? setAttr(tag, "placeholder", zh(k)) : tag)) + page.slice(s2);
+  const CHECKSVG = cutDecl(page, "CHECK").code.slice(1, -1);
+  const tiersHtml = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[1]}</span>${p.tag ? `<span class="ptag">${p.tag[1]}</span>` : ""}</p><p class="pv">${p.v[1]}<small>${p.u[1]}</small></p><p class="pps">${p.ps[1]}</p><p class="pn">${p.n[1]}</p><ul class="plist">${p.f.map(f => `<li>${CHECKSVG}<p>${f[1]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[1]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[1]}</button>`}${p.hl ? `<small>${zh("price.risk")}</small>` : ""}</div></div>`).join("");
+  const ts = page.indexOf('<div class="plans" id="tiers">') + '<div class="plans" id="tiers">'.length;
+  page = page.slice(0, ts) + tiersHtml + page.slice(closeOf(page, "div", ts));
+  const faqHtml = FAQ.map((f, k) => `<div class="fq ${k === 0 ? "on" : ""}"><button type="button" data-f="${k}" aria-expanded="${k === 0}"><span class="fqt">${f[0][1]}</span><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></button><div class="tg"><div><p>${f[1][1]}</p></div></div></div>`).join("");
+  const fs = page.indexOf('<div class="faq" id="faqList">') + '<div class="faq" id="faqList">'.length;
+  page = page.slice(0, fs) + faqHtml + page.slice(closeOf(page, "div", fs));
+  const d = dated("/zh", page);
+  const faqLd = { "@context": "https://schema.org", "@type": "FAQPage", "@id": ORIGIN + "/zh#faq", inLanguage: "zh-CN", mainEntity: FAQ.map(f => ({ "@type": "Question", name: strip(f[0][1]), acceptedAnswer: { "@type": "Answer", text: strip(f[1][1]) } })) };
+  const wp = { ...webPageLd({ path: "/zh", title: LANDING_TITLE.zh, desc: DESCRIPTION_ZH, d, extra: { mainEntity: { "@id": ORIGIN + "/#service" }, primaryImageOfPage: OG_IMAGE } }), inLanguage: "zh-CN" };
+  page = block(page, "head", head({ path: "/zh", title: LANDING_TITLE.zh, desc: DESCRIPTION_ZH, zh: true, locale: "zh_CN", ld: [orgLd(), websiteLd(SEARCH_PATH), wp, faqLd],
+    extra: `<link rel="preload" as="image" href="/media/hero-poster.jpg" fetchpriority="high">\n${HREFLANG}` }), "</title>");
+  page = page.replace(/<title>[^<]*<\/title>/, `<title>${esc(LANDING_TITLE.zh)}</title>`);
+  const data = JSON.parse(readFileSync("site/guides/data.json", "utf8"));
+  const zlinks = [["/guides/zh/", "开店许可指南"], ...data.cities.slice(0, 12).map(c => [c.url.replace(ORIGIN, "").replace("/guides/", "/guides/zh/"), `${c.city} 开店许可指南`]), ["/help/", "帮助中心"], ["/trust", "信任中心"], ["/about.html", "关于快哉"]];
+  page = block(page, "links", `<noscript><nav class="ctr" aria-label="网站" style="display:flex;flex-wrap:wrap;gap:8px 20px;padding:24px 0;font-size:14px">${zlinks.map(([h, n]) => `<a href="${h}">${esc(n)}</a>`).join("")}</nav></noscript>`, "<footer>");
+  put(ZH, page);
 }
 
 /* ------------------------------------------------------------ the Help Center */
@@ -293,14 +326,14 @@ infoPage({
 });
 
 /* ------------------------------------------------------------ sitemaps, robots, llms.txt */
-const PAGES = ["/", "/about.html", "/editorial.html", "/help/", ...[...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => f.slice(4).replace(/index\.html$/, "")), "/trust", "/ai.html", "/privacy.html", "/terms.html", "/authorization.html"];
+const PAGES = ["/", "/zh", "/about.html", "/editorial.html", "/help/", ...[...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => f.slice(4).replace(/index\.html$/, "")), "/trust", "/ai.html", "/privacy.html", "/terms.html", "/authorization.html"];
 const pagesXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PAGES.map(p => `<url><loc>${ORIGIN}${p}</loc><lastmod>${NEXT[p]?.d ?? TODAY}</lastmod></url>`).join("\n")}\n</urlset>\n`;
 put("site/sitemaps/pages.xml", pagesXml);
 const maps = [...new Set(["pages.xml", ...readdirSync("site/sitemaps").filter(f => f.endsWith(".xml"))])].sort();
 const lastOf = f => { const x = f === "pages.xml" ? pagesXml : readFileSync("site/sitemaps/" + f, "utf8"); return [...x.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]).sort().pop() ?? TODAY; };
 put("site/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${maps.map(f => `<sitemap><loc>${ORIGIN}/sitemaps/${f}</loc><lastmod>${lastOf(f)}</lastmod></sitemap>`).join("\n")}\n</sitemapindex>\n`);
 // search engines and AI answer engines are welcome on the website and the guides; the app stays private
-const bots = ["Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended", "Baiduspider", "Bytespider", "Sogou web spider", "360Spider", "YisouSpider", "YandexBot", "DuckDuckBot", "meta-externalagent", "MistralAI-User", "cohere-ai"];
+const bots = ["Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended", "Baiduspider", "Bytespider", "Sogou web spider", "360Spider", "YisouSpider", "YandexBot", "DuckDuckBot", "meta-externalagent", "MistralAI-User", "cohere-ai", "Amazonbot", "DuckAssistBot", "PetalBot", "Yeti", "Google-CloudVertexBot"];
 put("site/robots.txt", `${bots.map(b => `User-agent: ${b}\nAllow: /\nDisallow: /app/\n`).join("\n")}\nUser-agent: *\nAllow: /\nDisallow: /app/\n\nSitemap: ${ORIGIN}/sitemap.xml\n`);
 const helpLinks = [...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => { const h = out.get(f); return `- [${strip((h.match(/<title>([^<]*)</) ?? [, ""])[1]).replace(/ \| Placetta Help Center$/, "")}](${ORIGIN}${f.slice(4).replace(/index\.html$/, "")})`; });
 put("site/llms.txt", `# Placetta
@@ -311,8 +344,13 @@ ${faqA(/Who files/, 0)}
 
 Free license guides: ${cov.cities} cities in ${cov.countries} countries (${cov.us_cities} in the US), ${cov.business_kinds} kinds of business, ${cov.official_forms} official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
 
+## 中文简介
+${DESCRIPTION_ZH}快哉为每个门店地址梳理所需的全部执照、许可和登记，填写政府官方表格，经客户批准后提交，并跟踪续期、检查和规则变化。中英文服务。
+
 ## Start here
 - [Placetta](${ORIGIN}/): what it does, pricing and the FAQ
+- [快哉 (Placetta in Chinese)](${ORIGIN}/zh): the same page in Simplified Chinese
+- [中文开店许可指南](${ORIGIN}/guides/zh/): every city guide in Chinese
 - [About Placetta](${ORIGIN}/about.html): the company, what it does, where it works and its prices
 - [How the guides are sourced and checked](${ORIGIN}/editorial.html): the official-source rule
 - [License guides, city by city](${ORIGIN}/guides/): every city, business and official form

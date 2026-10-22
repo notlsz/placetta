@@ -6,8 +6,13 @@ Odelia, Placetta's AI agent, prepares each application from your documents. You 
 
 Free license guides: 92 cities in 22 countries (41 in the US), 12 kinds of business, 481 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
 
+## 中文简介
+快哉为进入新市场的企业办理执照、许可和登记，并保持有效。快哉为每个门店地址梳理所需的全部执照、许可和登记，填写政府官方表格，经客户批准后提交，并跟踪续期、检查和规则变化。中英文服务。
+
 ## Start here
 - [Placetta](https://www.placetta.com/): what it does, pricing and the FAQ
+- [快哉 (Placetta in Chinese)](https://www.placetta.com/zh): the same page in Simplified Chinese
+- [中文开店许可指南](https://www.placetta.com/guides/zh/): every city guide in Chinese
 - [About Placetta](https://www.placetta.com/about.html): the company, what it does, where it works and its prices
 - [How the guides are sourced and checked](https://www.placetta.com/editorial.html): the official-source rule
 - [License guides, city by city](https://www.placetta.com/guides/): every city, business and official form

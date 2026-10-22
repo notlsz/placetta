@@ -90,6 +90,26 @@ User-agent: cohere-ai
 Allow: /
 Disallow: /app/
 
+User-agent: Amazonbot
+Allow: /
+Disallow: /app/
+
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /app/
+
+User-agent: PetalBot
+Allow: /
+Disallow: /app/
+
+User-agent: Yeti
+Allow: /
+Disallow: /app/
+
+User-agent: Google-CloudVertexBot
+Allow: /
+Disallow: /app/
+
 User-agent: *
 Allow: /
 Disallow: /app/

@@ -35,8 +35,8 @@ const bodyOf = h => { const i = h.search(/<body\b/i); return (i >= 0 ? h.slice(i
 const metaOf = (h, attr, name) => (h.match(new RegExp(`<meta ${attr}="${name}" content="([^"]*)"`)) ?? [])[1];
 const linkOf = (h, rel) => (h.match(new RegExp(`<link rel="${rel}" href="([^"]*)"`)) ?? [])[1];
 const lds = h => [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => m[1]);
-const fileFor = url => { const p = new URL(url).pathname; const map = { "/trust": "/trust.html" }; const q = map[p] ?? p; return "site" + (q.endsWith("/") ? q + "index.html" : q); };
-const urlFor = file => ORIGIN + file.slice(4).replace(/index\.html$/, "").replace(/^\/trust\.html$/, "/trust");
+const fileFor = url => { const p = new URL(url).pathname; const map = { "/trust": "/trust.html", "/zh": "/zh.html" }; const q = map[p] ?? p; return "site" + (q.endsWith("/") ? q + "index.html" : q); };
+const urlFor = file => ORIGIN + file.slice(4).replace(/index\.html$/, "").replace(/^\/trust\.html$/, "/trust").replace(/^\/zh\.html$/, "/zh");
 const DATE = /^\d{4}-\d\d-\d\d(T[\d:.]+(Z|[+-]\d\d:\d\d)?)?$/;
 const today = new Date().toISOString().slice(0, 10);
 
@@ -137,9 +137,10 @@ group(`every page (${files.length}): one h1, title, description, canonical, card
         if (j.author?.["@id"] !== ORG_ID && j.author?.["@type"] !== "Person") note("Article author is the Organization entity or a Person", f);
       }
       if (j["@type"] === "FAQPage") for (const q of j.mainEntity ?? []) {
-        const vis = strip(b);
-        if (!vis.includes(norm(q.name))) note("FAQ question is visible on the page", `${f} "${q.name}"`);
-        if (!vis.includes(norm(q.acceptedAnswer?.text ?? "").slice(0, 160))) note("FAQ answer is visible on the page", `${f} "${q.name}"`);
+        // spaces dropped on both sides: tags inside Chinese text leave spaces the source never had
+        const vis = strip(b).replace(/\s/g, ""), sq = x => norm(x).replace(/\s/g, "");
+        if (!vis.includes(sq(q.name))) note("FAQ question is visible on the page", `${f} "${q.name}"`);
+        if (!vis.includes(sq(q.acceptedAnswer?.text ?? "").slice(0, 160))) note("FAQ answer is visible on the page", `${f} "${q.name}"`);
       }
       if (j["@type"] === "Organization" && (j["@id"] !== ORG_ID || !j.logo || !j.url)) note("Organization has @id, logo and url", f);
       if (j.sameAs && !j.sameAs.every(u => /^https:\/\//.test(u))) note("sameAs are https URLs", f);

@@ -6,6 +6,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/zh",
+      "destination": "/zh.html"
+    },
+    {
       "source": "/app/:path((?!assets/).*)",
       "destination": "/app/index.html"
     },
@@ -47,6 +51,16 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/zh/",
+      "destination": "/zh",
+      "permanent": true
+    },
+    {
+      "source": "/zh.html",
+      "destination": "/zh",
+      "permanent": true
+    },
     {
       "source": "/app",
       "destination": "/app/",
