@@ -165,9 +165,25 @@
       "read": "2026-10-22",
       "match": "\\btx-workers-comp\\b|workers'? comp",
       "agencyMatch": "Texas\\ Department\\ of\\ Insurance"
+    },
+    {
+      "key": "dal-fire-hood",
+      "name": "Kitchen hood fire-extinguishing system permit",
+      "agency": "Dallas Fire-Rescue",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": 250,
+      "note": "Added 2026-10-22, when Dallas Fire-Rescue's Schedule of Permit Fees (2024) was read: conditional on a commercial cooking hood system.",
+      "source": "https://dallascityhall.com/departments/fire-rescue/FPEI%20Docs/Schedule%20of%20Permit%20Fees%202024.pdf",
+      "quote": "Commercial Cooking Fire-Extinguishing System $250",
+      "feeQuote": "Commercial Cooking Fire-Extinguishing System $250",
+      "read": "2026-10-22",
+      "match": "\\bdal-fire-hood\\b|hood",
+      "agencyMatch": "Dallas Fire"
     }
   ],
   "order": [],
   "mustNotInclude": [],
-  "notes": "Not included (no official page found that states it): the Dallas building permit for the finish-out and Dallas Fire-Rescue's kitchen hood permit. The plan lists both as abstentions naming the City of Dallas."
+  "notes": "Not included (no official page found that states it): the Dallas building permit for the finish-out. The plan lists it as an abstention naming the City of Dallas."
 }

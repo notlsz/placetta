@@ -107,6 +107,21 @@
       "read": "2026-10-21",
       "match": "\\bmc-cfpm\\b|food protection manager",
       "agencyMatch": "maricopa"
+    },
+    {
+      "key": "az-jt1",
+      "name": "Employer registration for withholding and unemployment insurance (JT-1)",
+      "agency": "Arizona Department of Revenue, with the Arizona Department of Economic Security",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added 2026-10-22, when ADOR's withholding page was read: an employer registers on the Joint Tax Application.",
+      "source": "https://azdor.gov/business/withholding-tax/employer-withholding-filing-obligations",
+      "quote": "Completing and submitting Arizona Form JT-1 also begins the process of registering the employer for unemployment compensation insurance",
+      "read": "2026-10-22",
+      "match": "\\baz-jt1\\b|JT-1",
+      "agencyMatch": "Arizona Department of Revenue"
     }
   ],
   "order": [],
