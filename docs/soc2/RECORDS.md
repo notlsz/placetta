@@ -6,7 +6,7 @@ Each policy names a record that proves it ran. These are the templates. Complete
 | --- | --- | --- |
 | [Access review](#access-review) | Quarterly | [access-control.md](policies/access-control.md) |
 | [Monthly review](#monthly-review) | Monthly | [logging-monitoring.md](policies/logging-monitoring.md), [vulnerability-management.md](policies/vulnerability-management.md) |
-| [Restore test](#restore-test) | Quarterly, once backups exist | [backup-disaster-recovery.md](policies/backup-disaster-recovery.md) |
+| [Restore test](#restore-test) | Quarterly, once backups exist. The full template is [records/restore-drill-template.md](records/restore-drill-template.md); the steps are [runbooks/backup-restore.md](runbooks/backup-restore.md) | [backup-disaster-recovery.md](policies/backup-disaster-recovery.md) |
 | [Incident](#incident) | Each incident, until the incident log is live | [incident-response.md](policies/incident-response.md) |
 | [Tabletop](#tabletop) | Yearly | [incident-response.md](policies/incident-response.md), [business-continuity.md](policies/business-continuity.md) |
 | [Vendor review](#vendor-review) | Yearly, and per new vendor | [vendor-management.md](policies/vendor-management.md) |

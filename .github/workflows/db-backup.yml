@@ -1,0 +1,87 @@
+# A copy of the database (daily) and of uploaded files (weekly) kept outside Supabase, encrypted before it leaves the
+# runner, in storage the founder picks (any S3-compatible bucket: AWS S3, Cloudflare R2, Backblaze B2).
+# docs/soc2/runbooks/backup-restore.md explains the setup, the bucket's retention and lock settings, and the restore.
+# Supabase's own daily backups and point-in-time recovery are the first line; this copy is for losing the Supabase
+# project or account itself (SOC 2 A1.2b, ISO/IEC 27001 A.8.13 and A.8.14).
+#
+# Skips, with a warning, until these repository secrets exist:
+#   SUPABASE_DB_URL          the session-mode connection string (port 5432) of a read-only role (see the runbook)
+#   BACKUP_AGE_RECIPIENT     the age public key (age1...) whose private key the founder keeps offline
+#   BACKUP_BUCKET            the bucket name; BACKUP_S3_ENDPOINT (optional) for R2 or B2; BACKUP_S3_REGION (optional)
+#   BACKUP_AWS_ACCESS_KEY_ID, BACKUP_AWS_SECRET_ACCESS_KEY   a key that can only put objects in that bucket
+# The weekly file copy also needs Supabase Storage's S3 access keys:
+#   SUPABASE_S3_ENDPOINT (https://<ref>.storage.supabase.co/storage/v1/s3), SUPABASE_S3_REGION, SUPABASE_S3_KEY_ID,
+#   SUPABASE_S3_SECRET
+name: Off-site backup
+on:
+  schedule:
+    - cron: "17 7 * * *"      # every day, 07:17 UTC
+  workflow_dispatch:
+    inputs:
+      files: { description: "Also copy the uploaded files now", type: boolean, default: false }
+concurrency: { group: db-backup, cancel-in-progress: false }
+permissions: { contents: read }
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BACKUP_AGE_RECIPIENT: ${{ secrets.BACKUP_AGE_RECIPIENT }}
+      BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+      BACKUP_S3_ENDPOINT: ${{ secrets.BACKUP_S3_ENDPOINT }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.BACKUP_S3_REGION || 'auto' }}
+    steps:
+      - name: Check the settings
+        id: cfg
+        run: |
+          if [ -n "$SUPABASE_DB_URL" ] && [ -n "$BACKUP_AGE_RECIPIENT" ] && [ -n "$BACKUP_BUCKET" ] && [ -n "$AWS_ACCESS_KEY_ID" ]; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Off-site backup is not set up yet (docs/soc2/runbooks/backup-restore.md, step 3). Nothing was copied."
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        if: steps.cfg.outputs.ok
+      - name: Postgres 17 client and age
+        if: steps.cfg.outputs.ok
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17 age
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Dump the database
+        if: steps.cfg.outputs.ok
+        run: DATABASE_URL="$SUPABASE_DB_URL" bash scripts/db-backup.sh "$RUNNER_TEMP/db"
+      - name: Encrypt and upload the database copy
+        if: steps.cfg.outputs.ok
+        run: |
+          stamp=$(date -u +%Y-%m-%dT%H%MZ)
+          tar -C "$RUNNER_TEMP" -cf - db | age -r "$BACKUP_AGE_RECIPIENT" -o "$RUNNER_TEMP/placetta-db-$stamp.tar.age"
+          rm -rf "$RUNNER_TEMP/db"
+          ep=(); [ -n "$BACKUP_S3_ENDPOINT" ] && ep=(--endpoint-url "$BACKUP_S3_ENDPOINT")
+          aws s3 cp "${ep[@]}" --only-show-errors "$RUNNER_TEMP/placetta-db-$stamp.tar.age" "s3://$BACKUP_BUCKET/db/$(date -u +%Y/%m)/placetta-db-$stamp.tar.age"
+          echo "Uploaded db/$(date -u +%Y/%m)/placetta-db-$stamp.tar.age ($(du -h "$RUNNER_TEMP/placetta-db-$stamp.tar.age" | cut -f1))" >> "$GITHUB_STEP_SUMMARY"
+      - name: Copy the uploaded files (Sundays, or when asked)
+        if: steps.cfg.outputs.ok
+        env:
+          SUPABASE_S3_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          SUPABASE_S3_REGION: ${{ secrets.SUPABASE_S3_REGION }}
+          SUPABASE_S3_KEY_ID: ${{ secrets.SUPABASE_S3_KEY_ID }}
+          SUPABASE_S3_SECRET: ${{ secrets.SUPABASE_S3_SECRET }}
+          FORCE: ${{ inputs.files }}
+        run: |
+          if [ "$FORCE" != "true" ] && [ "$(date -u +%u)" != "7" ]; then echo "Files are copied on Sundays."; exit 0; fi
+          if [ -z "$SUPABASE_S3_KEY_ID" ]; then echo "::warning::Supabase Storage S3 keys not set; uploaded files were not copied."; exit 0; fi
+          mkdir -p "$RUNNER_TEMP/files"
+          AWS_ACCESS_KEY_ID="$SUPABASE_S3_KEY_ID" AWS_SECRET_ACCESS_KEY="$SUPABASE_S3_SECRET" AWS_DEFAULT_REGION="$SUPABASE_S3_REGION" \
+            aws s3 sync --only-show-errors --endpoint-url "$SUPABASE_S3_ENDPOINT" s3://documents "$RUNNER_TEMP/files/documents"
+          count=$(find "$RUNNER_TEMP/files" -type f | wc -l)
+          stamp=$(date -u +%Y-%m-%dT%H%MZ)
+          tar -C "$RUNNER_TEMP" -cf - files | age -r "$BACKUP_AGE_RECIPIENT" -o "$RUNNER_TEMP/placetta-files-$stamp.tar.age"
+          rm -rf "$RUNNER_TEMP/files"
+          ep=(); [ -n "$BACKUP_S3_ENDPOINT" ] && ep=(--endpoint-url "$BACKUP_S3_ENDPOINT")
+          aws s3 cp "${ep[@]}" --only-show-errors "$RUNNER_TEMP/placetta-files-$stamp.tar.age" "s3://$BACKUP_BUCKET/files/$(date -u +%Y/%m)/placetta-files-$stamp.tar.age"
+          echo "Uploaded files/$(date -u +%Y/%m)/placetta-files-$stamp.tar.age: $count files" >> "$GITHUB_STEP_SUMMARY"

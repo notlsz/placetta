@@ -1,0 +1,17 @@
+# Database test checks that can't pass on a restore of the off-Supabase copy (scripts/db-backup.sh), and why.
+# scripts/restore-test.sh reports a listed check as a known limit instead of a failure. Format: <test file><TAB><check>,
+# or <test file><TAB>* when the whole file stops early for a listed reason. Keep each entry to one of the reasons below.
+#
+# Vault: secret values aren't in the copy (their key never leaves Supabase), so a check that reads one fails.
+# Recovery path for them: Supabase's own backup or point-in-time restore, or customers re-enter saved logins.
+updates.sql	monitor key made
+updates.sql	right key accepted
+hardening.sql	monitor key: right key passes
+text_start.sql	*
+# Storage: the buckets and the policies on storage.objects live in Supabase's managed storage schema, which the copy leaves out;
+# applying the migrations to the recovered project re-creates them (docs/soc2/runbooks/backup-restore.md, step 5).
+enterprise.sql	member uploads files
+hardening.sql	an owner deletes the file and the row
+enterprise.sql	viewer reads files
+hardening.sql	documents bucket has a size limit
+hardening.sql	documents bucket takes PDFs, images and office files only

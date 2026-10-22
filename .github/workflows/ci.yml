@@ -83,6 +83,17 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Migrations and database tests
         run: bash scripts/test-db.sh
+      # pg_dump must be at least the server's version to back it up
+      - name: Postgres 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      # the off-site backup (scripts/db-backup.sh) restored by the drill script (scripts/restore-test.sh), on a stand-in
+      - name: Backup and restore drill
+        run: bash scripts/restore-selftest.sh
   # docs/soc2/policies/secure-development.md and vulnerability-management.md
   security:
     runs-on: ubuntu-latest
