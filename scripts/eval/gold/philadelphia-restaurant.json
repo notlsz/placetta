@@ -134,6 +134,21 @@
       "match": "zoning",
       "agencyMatch": "licenses and inspections",
       "condition": "Unless a license for the same space and business type was issued within 3 years."
+    },
+    {
+      "key": "pa-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Pennsylvania Department of Labor and Industry, Bureau of Workers' Compensation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/workers--compensation-for-employers/workers--compensation-compliance",
+      "quote": "The requirement to insure workers' compensation liability is mandatory for any employer who:",
+      "read": "2026-10-22",
+      "match": "\\bpa-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Pennsylvania\\ Department\\ of\\ Labor\\ and\\ Industry"
     }
   ],
   "order": [

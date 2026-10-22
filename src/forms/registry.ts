@@ -13,6 +13,9 @@ import { LINES } from "./lines";
 import { PLAIN } from "./plain";
 import { MAPS } from "./maps";
 import { FURNITURE, FURNITURE_FORMS } from "./furniture";
+import { applyFixes } from "./audit";
+import { US_GAPS } from "./us-gaps";
+import { INTL_FORMS } from "./intl";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -73,6 +76,9 @@ export type OfficialForm = {
   proof?: { quote: string; checked: string; read: string; en?: string };   // en: the quote in English, when the page isn't
   /** A filing only a local professional may make (a notary, a lawyer, a gestor): Placetta prepares it and hands it to one. */
   specialist?: Bi;
+  /** Internal only, never shown or cited: a secondary source (a law firm, a blog, an aggregator) that named this filing
+      when no official page could be read to confirm it. Staff follow it up; the entry stays unverified (no proof). */
+  lead?: string;
 };
 
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
@@ -666,7 +672,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS);
 
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue
@@ -719,6 +725,10 @@ for (const f of FORMS) { const p = PLAIN[f.id]; if (p && !f.plain) f.plain = p; 
 // The sentence on each source page that states the requirement, with the day it was read (src/forms/proof.ts). A proof
 // read from another page than the one linked moves the link to that page, so the link and the quote always match.
 for (const f of FORMS) { const p = PROOF[f.id]; if (p && !f.proof) { f.proof = p; if (p.link && p.link !== (f.info || f.url)) f.info = p.link; } }
+
+// The source audit (src/forms/audit.ts): links moved to the pages the agencies use now, proofs whose page is gone replaced
+// or taken away. Last, so it wins over every layer above.
+export const AUDIT_MISSING = applyFixes(FORMS);
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 

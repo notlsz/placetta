@@ -177,6 +177,21 @@
       "match": "(building permit|build-?out|tenant improvement).*(san diego)|(san diego).*(building permit|build-?out|tenant improvement)",
       "agencyMatch": "san diego",
       "note": "Not read for this case."
+    },
+    {
+      "key": "ca-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "California Department of Industrial Relations, Division of Workers' Compensation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://dir.ca.gov/DWC/Employer.htm",
+      "quote": "California employers are required by law to have workers' compensation insurance, even if they have only one employee.",
+      "read": "2026-10-22",
+      "match": "\\bca-workers-comp\\b|workers'? comp",
+      "agencyMatch": "California\\ Department\\ of\\ Industrial\\ Relations"
     }
   ],
   "order": [

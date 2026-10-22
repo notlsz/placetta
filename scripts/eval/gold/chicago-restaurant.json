@@ -98,6 +98,21 @@
       "source": "https://www.chicago.gov/content/dam/city/depts/bldgs/general/Self_Cert_Program/2019/11-FOODPROTECTION.pdf",
       "match": "plan review|building permit",
       "agencyMatch": "public health|buildings"
+    },
+    {
+      "key": "il-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Illinois Workers' Compensation Commission",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://iwcc.illinois.gov/about/insurance.html",
+      "quote": "If you have one employee, even a part-time employee, you must obtain workers' compensation insurance.",
+      "read": "2026-10-22",
+      "match": "\\bil-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Illinois\\ Workers'\\ Compensation\\ Commission"
     }
   ],
   "order": [

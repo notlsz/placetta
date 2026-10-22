@@ -165,7 +165,22 @@
    "match": "(building permit|tenant improvement|build-?out|plan check.*building|building and safety).*(san gabriel)|(san gabriel).*(building permit|tenant improvement|build-?out|plan check.*building|building and safety)",
    "agencyMatch": "san gabriel",
    "quote": "then submit the plans to your local building and safety office for approval. After approvals, you may begin construction."
-  }
+  },
+    {
+      "key": "ca-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "California Department of Industrial Relations, Division of Workers' Compensation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://dir.ca.gov/DWC/Employer.htm",
+      "quote": "California employers are required by law to have workers' compensation insurance, even if they have only one employee.",
+      "read": "2026-10-22",
+      "match": "\\bca-workers-comp\\b|workers'? comp",
+      "agencyMatch": "California\\ Department\\ of\\ Industrial\\ Relations"
+    }
  ],
  "order": [
   {

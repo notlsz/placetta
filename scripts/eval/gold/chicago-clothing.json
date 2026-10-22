@@ -61,6 +61,21 @@
       "source": "https://chicago.gov/city/en/sites/chicago-business-licensing/home/business-licensing.html",
       "match": "limited business license|chi-limited",
       "agencyMatch": "business affairs|BACP"
+    },
+    {
+      "key": "il-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Illinois Workers' Compensation Commission",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://iwcc.illinois.gov/about/insurance.html",
+      "quote": "If you have one employee, even a part-time employee, you must obtain workers' compensation insurance.",
+      "read": "2026-10-22",
+      "match": "\\bil-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Illinois\\ Workers'\\ Compensation\\ Commission"
     }
   ],
   "order": [],

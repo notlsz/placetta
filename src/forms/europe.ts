@@ -32,6 +32,8 @@ export type EuEntry = {
   info?: string;
   /** places inside `where` where a local entry replaces this one (Paris's Préfecture de police for the mairie) */
   except?: string[];
+  /** internal only, never shown or cited: a secondary source that named the filing when no official page could be read */
+  lead?: string;
 };
 export function E(o: EuEntry): OfficialForm {
   const info = o.proof?.[0] ?? o.info ?? o.url;
@@ -40,7 +42,7 @@ export function E(o: EuEntry): OfficialForm {
     ...(o.needs ? { needs: o.needs } : {}), ...(o.unless ? { unless: o.unless } : {}), method: o.method, how: b(o.how), url: o.url, info,
     fee: o.fee === undefined ? null : o.fee, currency: o.cur, ...(o.feeNote ? { feeNote: b(o.feeNote) } : {}), ...(o.takes ? { takes: b(o.takes) } : {}),
     ...(o.renews ? { renews: b(o.renews) } : {}), fields: [], ...(o.foreign ? { foreign: b(o.foreign) } : {}), ...(o.specialist ? { specialist: b(o.specialist) } : {}),
-    ...(o.plain ? { plain: b(o.plain) } : {}), ...(o.except ? { except: o.except } : {}), checked: o.proof ? "page" : "known", order: o.order,
+    ...(o.plain ? { plain: b(o.plain) } : {}), ...(o.except ? { except: o.except } : {}), ...(o.lead ? { lead: o.lead } : {}), checked: o.proof ? "page" : "known", order: o.order,
     ...(o.proof ? { proof: { read: o.proof[0], quote: o.proof[1], checked: READ_EU, ...(o.proof[2] ? { en: o.proof[2] } : {}) } } : {}),
   };
 }

@@ -46,6 +46,25 @@ export const COUNTRIES: Country[] = [
   { code: "JO", en: "Jordan", zh: "约旦", currency: "JOD", names: /jordan|约旦/i },
   { code: "IL", en: "Israel", zh: "以色列", currency: "ILS", names: /israel|以色列/i },
   // "New Mexico" (新墨西哥州) is a US state, not Mexico
+  // Canada is "CA", like California: kept apart by currency (CAD), as Germany and Delaware are (src/forms/intl.ts)
+  { code: "CA", en: "Canada", zh: "加拿大", currency: "CAD", names: /\bcanada\b|加拿大/i },
+  // added in the coverage audit of 2026-10-22 (src/forms/intl.ts). Colombia's "CO", Morocco's "MA" and Indonesia's "ID"
+  // are also US state codes: kept apart by currency, as Canada and California are
+  { code: "BR", en: "Brazil", zh: "巴西", currency: "BRL", names: /\bbrazil\b|\bbrasil\b|巴西/i },
+  { code: "CL", en: "Chile", zh: "智利", currency: "CLP", names: /\bchile\b|智利/i },
+  { code: "CO", en: "Colombia", zh: "哥伦比亚", currency: "COP", names: /\bcolombia\b|哥伦比亚/i },
+  { code: "AR", en: "Argentina", zh: "阿根廷", currency: "ARS", names: /\bargentina\b|阿根廷/i },
+  { code: "PE", en: "Peru", zh: "秘鲁", currency: "PEN", names: /\bperu\b|\bperú\b|秘鲁/i },
+  { code: "SG", en: "Singapore", zh: "新加坡", currency: "SGD", names: /\bsingapore\b|新加坡/i },
+  { code: "MY", en: "Malaysia", zh: "马来西亚", currency: "MYR", names: /\bmalaysia\b|马来西亚/i },
+  { code: "TH", en: "Thailand", zh: "泰国", currency: "THB", names: /\bthailand\b|泰国/i },
+  { code: "VN", en: "Vietnam", zh: "越南", currency: "VND", names: /\bviet ?nam\b|越南/i },
+  { code: "ID", en: "Indonesia", zh: "印度尼西亚", currency: "IDR", names: /\bindonesia\b|印度尼西亚|印尼/i },
+  { code: "PH", en: "Philippines", zh: "菲律宾", currency: "PHP", names: /\bphilippines\b|菲律宾/i },
+  { code: "NG", en: "Nigeria", zh: "尼日利亚", currency: "NGN", names: /\bnigeria\b|尼日利亚/i },
+  { code: "KE", en: "Kenya", zh: "肯尼亚", currency: "KES", names: /\bkenya\b|肯尼亚/i },
+  { code: "ZA", en: "South Africa", zh: "南非", currency: "ZAR", names: /south africa|南非/i },
+  { code: "MA", en: "Morocco", zh: "摩洛哥", currency: "MAD", names: /\bmorocco\b|\bmaroc\b|摩洛哥/i },
   { code: "MX", en: "Mexico", zh: "墨西哥", currency: "MXN", names: /(?<!new )\bmexico\b|(?<!新)墨西哥|\bcdmx\b|quintana roo|nuevo leon|\bjalisco\b/i },
 ];
 
@@ -61,6 +80,28 @@ export const CITIES: City[] = [
   c("MX-MTY", "MX", "Monterrey", "蒙特雷", ["monterrey", "蒙特雷"], true, "NLE"),
   c("MX-GDL", "MX", "Guadalajara", "瓜达拉哈拉", ["guadalajara", "瓜达拉哈拉"], true, "JAL"),
   c("MX-CUN", "MX", "Cancún", "坎昆", ["cancun", "坎昆", "benito juarez, quintana roo"], true, "ROO"),
+
+  /* Canada: each city's province is its state code ("CA-ON" Ontario, "CA-BC" British Columbia), for the province's own steps */
+  c("CA-TOR", "CA", "Toronto", "多伦多", ["toronto", "多伦多", "scarborough, on", "north york", "markham, on"], true, "CA-ON"),
+  c("CA-VAN", "CA", "Vancouver", "温哥华", ["vancouver, bc", "vancouver, british columbia", "vancouver", "温哥华"], true, "CA-BC"),
+
+  /* South America, Southeast Asia and Africa (src/forms/intl.ts): the national steps apply; Kuala Lumpur's and Nairobi's
+     own licence is in the library, the others' local steps are researched live */
+  c("BR-SAO", "BR", "São Paulo", "圣保罗", ["sao paulo, brazil", "sao paulo, sp", "são paulo", "sao paulo", "圣保罗"], false),
+  c("CL-SCL", "CL", "Santiago", "圣地亚哥（智利）", ["santiago, chile", "santiago de chile", "智利圣地亚哥"], false),
+  c("CO-BOG", "CO", "Bogotá", "波哥大", ["bogota", "波哥大"], false),
+  c("AR-BUE", "AR", "Buenos Aires", "布宜诺斯艾利斯", ["buenos aires", "caba", "布宜诺斯艾利斯"], false),
+  c("PE-LIM", "PE", "Lima", "利马", ["lima, peru", "lima, perú", "miraflores, lima", "利马"], false),
+  c("SG-SIN", "SG", "Singapore", "新加坡", ["singapore", "新加坡"], false),
+  c("MY-KUL", "MY", "Kuala Lumpur", "吉隆坡", ["kuala lumpur", "吉隆坡", "bukit bintang"], true),
+  c("TH-BKK", "TH", "Bangkok", "曼谷", ["bangkok", "曼谷"], false),
+  c("VN-SGN", "VN", "Ho Chi Minh City", "胡志明市", ["ho chi minh", "saigon", "胡志明"], false),
+  c("ID-JKT", "ID", "Jakarta", "雅加达", ["jakarta", "雅加达"], false),
+  c("PH-MNL", "PH", "Manila", "马尼拉", ["manila", "makati", "马尼拉"], false),
+  c("NG-LOS", "NG", "Lagos", "拉各斯", ["lagos, nigeria", "ikeja", "victoria island, lagos", "lekki", "拉各斯"], false),
+  c("KE-NBO", "KE", "Nairobi", "内罗毕", ["nairobi", "内罗毕"], true),
+  c("ZA-JNB", "ZA", "Johannesburg", "约翰内斯堡", ["johannesburg", "sandton", "约翰内斯堡"], false),
+  c("MA-CAS", "MA", "Casablanca", "卡萨布兰卡", ["casablanca", "卡萨布兰卡"], false),
 
   /* China: the guide cities, then the cities where the national steps apply and the agent researches the local ones */
   c("CN-BJ", "CN", "Beijing", "北京", ["beijing", "北京", "chaoyang", "朝阳区", "haidian", "海淀", "dongcheng", "东城", "xicheng", "西城", "sanlitun", "三里屯", "wangfujing", "王府井"]),

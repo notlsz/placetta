@@ -520,6 +520,8 @@ export function kindsOf(what: string): StoreKind[] {
     that does what `have` says (a fact that needs imports isn't stated without it). */
 export function kindFactsAt(kinds: StoreKind[], places: string[], have: Needs = {}): KindFact[] {
   const abroad = !places.includes("US");
-  return KIND_FACTS.filter(k => (Array.isArray(k.where) ? k.where : [k.where]).some(w => places.includes(w)) && (!k.abroad || abroad) && !(k.except ?? []).some(w => places.includes(w))
+  // abroad, a state, county or city fact is a US one (California's "CA" is also Canada's code, Massachusetts's "MA"
+  // Morocco's): only national facts, or ones marked abroad, hold outside the US
+  return KIND_FACTS.filter(k => (Array.isArray(k.where) ? k.where : [k.where]).some(w => places.includes(w)) && (!k.abroad || abroad) && (!abroad || k.abroad || k.level === "federal") && !(k.except ?? []).some(w => places.includes(w))
     && (k.needs ?? []).every(n => have[n]) && k.kinds.some(x => kinds.includes(x)));
 }

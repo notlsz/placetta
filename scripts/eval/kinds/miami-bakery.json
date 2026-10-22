@@ -150,7 +150,22 @@
    "read": "2026-10-21",
    "match": "\\bmia-co\\b|certificate of (occupancy|completion)",
    "agencyMatch": "miami"
-  }
+  },
+    {
+      "key": "fl-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Florida Department of Financial Services, Division of Workers' Compensation",
+      "level": "state",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff. Florida requires it of non-construction employers with four or more employees, so it is conditional here.",
+      "source": "https://www.myfloridacfo.com/division/wc/employer/coverage-requirements",
+      "quote": "Non-Construction Industry Employers with four (4) or more employees, including business owners who are corporate officers",
+      "read": "2026-10-22",
+      "match": "\\bfl-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Florida\\ Department\\ of\\ Financial\\ Services"
+    }
  ],
  "order": [],
  "mustNotInclude": [],

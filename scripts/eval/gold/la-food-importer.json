@@ -142,6 +142,36 @@
       "match": "seller'?s permit|ca-cdtfa",
       "agencyMatch": "tax and fee administration|CDTFA",
       "condition": "A wholesaler selling for resale; CDTFA's own rule for wholesalers wasn't read in this pass."
+    },
+    {
+      "key": "ca-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "California Department of Industrial Relations, Division of Workers' Compensation",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://dir.ca.gov/DWC/Employer.htm",
+      "quote": "California employers are required by law to have workers' compensation insurance, even if they have only one employee.",
+      "read": "2026-10-22",
+      "match": "\\bca-workers-comp\\b|workers'? comp",
+      "agencyMatch": "California\\ Department\\ of\\ Industrial\\ Relations"
+    },
+    {
+      "key": "fda-fsvp",
+      "name": "Foreign supplier verification (FSVP) and the importer's DUNS number at entry",
+      "agency": "U.S. Food and Drug Administration",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: the US importer of food runs a foreign supplier verification program and gives its DUNS number at entry.",
+      "source": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/guidance-industry-compliance-providing-acceptable-unique-facility-identifier-foreign-supplier",
+      "quote": "the unique facility identifier (UFI) recognized as acceptable by FDA for importer identification is provided electronically when filing entry",
+      "read": "2026-10-22",
+      "match": "\\bfda-fsvp\\b|foreign supplier verification",
+      "agencyMatch": "Food and Drug Administration"
     }
   ],
   "order": [],

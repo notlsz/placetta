@@ -161,6 +161,21 @@
       "agencyMatch": "quincy|clerk",
       "quote": "Apply for a Business Certificate",
       "condition": "Only when trading under a name other than the legal name."
+    },
+    {
+      "key": "ma-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Massachusetts Department of Industrial Accidents",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the coverage audit of 2026-10-22: bought from an insurer once there is staff.",
+      "source": "https://www.mass.gov/info-details/workers-compensation-insurance-requirements",
+      "quote": "The requirement applies no matter the number of hours worked or the number of employees.",
+      "read": "2026-10-22",
+      "match": "\\bma-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Massachusetts\\ Department\\ of\\ Industrial\\ Accidents"
     }
   ],
   "order": [],
