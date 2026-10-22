@@ -10,6 +10,8 @@ export type PageState = {
   url: string; title: string; headings: string[]; controls: Control[];
   buttons: { selector: string; text: string }[]; links: { selector: string; text: string; href: string }[];
   text: string; frames: string[]; markers: string[];
+  /** Text on the page a person wouldn't see (tiny, transparent, same colour as its background, off-screen). */
+  hidden?: string[];
 };
 
 export type Stop = { reason: "captcha" | "identity" | "payment" | "secret_number" | "code"; en: string; zh: string };

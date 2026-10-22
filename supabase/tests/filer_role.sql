@@ -1,10 +1,12 @@
 -- The portal filer's own role (20261022120000_filer_least_privilege.sql): no table access, only its functions, only
--- for filings handed to it; a saved password leaves the database only after its audit entry is written.
+-- for filings handed to it; a saved password leaves the database only after its audit entry is written. Since
+-- 20261022190000_agent_security.sql each call also carries the run's token for that filing (the x-filer-run header);
+-- supabase/tests/agent_security.sql checks what happens without one.
 -- Run with scripts/test-db.sh (ends by raising TEST_RESULTS, so nothing is kept).
 do $test$
 declare
   a uuid := gen_random_uuid(); w uuid := gen_random_uuid(); w2 uuid := gen_random_uuid(); f uuid; f2 uuid; fother uuid;
-  l1 uuid; l2 uuid; lother uuid; s1 uuid; s2 uuid; s3 uuid; res jsonb := '{}'::jsonb; ok boolean; n int; n2 int; u text; p text;
+  l1 uuid; l2 uuid; lother uuid; s1 uuid; s2 uuid; s3 uuid; res jsonb := '{}'::jsonb; ok boolean; n int; n2 int; u text; p text; tf text; tf2 text;
   inst uuid := '00000000-0000-0000-0000-000000000000';
 begin
   insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data) values
@@ -38,6 +40,9 @@ begin
       and has_function_privilege('placetta_filer', 'public.filing_agent_step(uuid, jsonb, jsonb, boolean)', 'execute')
       and has_function_privilege('placetta_filer', 'public.filer_open_login(uuid, uuid)', 'execute'));
 
+  -- the run on f starts: its token goes with every call, as the worker's header does
+  tf := public.filer_begin_run(f);
+  perform set_config('request.headers', json_build_object('x-filer-run', tf)::text, true);
   execute 'set local role placetta_filer';
   begin perform 1 from public.agency_logins limit 1; ok := false; exception when insufficient_privilege then ok := true; end;
   res := res || jsonb_build_object('filer cannot read saved logins directly', ok);
@@ -68,6 +73,8 @@ begin
 
   -- The audit entry comes first: when it can't be written, no password comes back and nothing else changes.
   perform public.filing_agent_step(f2, null, '{"channel":"portal","agent_state":"running"}');
+  tf2 := public.filer_begin_run(f2);
+  perform set_config('request.headers', json_build_object('x-filer-run', tf2)::text, true);
   create function pg_temp.no_audit() returns trigger language plpgsql as $f$ begin raise exception 'audit_down'; end $f$;
   create trigger no_audit before insert on public.audit_log for each row execute function pg_temp.no_audit();
   execute 'set local role placetta_filer';
@@ -79,6 +86,7 @@ begin
     'no audit entry, no opening time either', (select last_opened_at is null from public.agency_logins where id = l2));
 
   -- Documents, tasks, updates and skills, each limited to what the worker was given
+  perform set_config('request.headers', json_build_object('x-filer-run', tf)::text, true);
   execute 'set local role placetta_filer';
   begin perform public.filer_save_doc(f, 'x.png', w2::text || '/receipts/' || f::text || '-1-x.png', 10, 'image/png'); ok := false;
   exception when others then ok := sqlerrm = 'path_outside_filing'; end;

@@ -22,6 +22,11 @@ export interface Store {
   saveProof(f: Filing, name: string, bytes: Uint8Array, mime: string): Promise<string | null>;
   teamTask(f: Filing | null, kind: string, title: string, detail?: unknown): Promise<void>;
   notify(f: Filing, title: { en: string; zh: string }, body: { en: string; zh: string }): Promise<void>;
+  /** A run starts on this filing: the database gives it a token for this filing alone, for at most an hour, which every
+   *  call of the run then carries (20261022190000_agent_security.sql). */
+  begin?(f: Filing): Promise<void>;
+  /** The run is over: its token stops working. */
+  end?(): Promise<void>;
 }
 
 /** The worker's database access, through the functions in 20261022120000_filer_least_privilege.sql only: no table is
@@ -29,9 +34,30 @@ export interface Store {
  *  and bypasses no row-level security) or, until that key is made, the service role. Files go through Storage, which
  *  checks the role's storage policies. */
 export class SupabaseStore implements Store {
-  private db: SupabaseClient;
-  constructor(url: string, key: string, client?: SupabaseClient) {
-    this.db = client ?? createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  private base: SupabaseClient;
+  /** The client for the run in progress: the same key, plus the run's token header for its one filing. */
+  private runDb: SupabaseClient | null = null;
+  private make: (headers: Record<string, string>) => SupabaseClient;
+  constructor(url: string, key: string, client?: SupabaseClient, make?: (headers: Record<string, string>) => SupabaseClient) {
+    this.make = make ?? ((headers) => createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { headers } }));
+    this.base = client ?? this.make({});
+  }
+  private get db(): SupabaseClient { return this.runDb ?? this.base; }
+  async begin(f: Filing) {
+    this.runDb = null;
+    const { data, error } = await this.base.rpc("filer_begin_run", { p_filing: f.id, p_minutes: 45 });
+    if (error) {
+      // a database without the run tokens yet keeps working on the filer's role alone, and says so
+      if (error.code === "PGRST202") { console.warn("filer_begin_run is missing: apply 20261022190000_agent_security.sql so each run gets its own token"); return; }
+      throw new Error(`run token failed: ${error.message}`);
+    }
+    if (typeof data !== "string" || data.length < 32) throw new Error("run token failed: no token");
+    this.runDb = this.make({ "x-filer-run": data });
+  }
+  async end() {
+    const run = this.runDb;
+    this.runDb = null;
+    if (run) await run.rpc("filer_end_run", {});
   }
   private async call<T>(fn: string, args: Record<string, unknown>, what: string): Promise<T> {
     const { data, error } = await this.db.rpc(fn, args);
@@ -39,7 +65,9 @@ export class SupabaseStore implements Store {
     return data as T;
   }
   async claim() {
-    const data = await this.call<Filing[] | null>("claim_agent_filing", {}, "claim");
+    const { data: rows, error } = await this.base.rpc("claim_agent_filing", {});
+    if (error) throw new Error(`claim failed: ${error.message}`);
+    const data = rows as Filing[] | null;
     return (data ?? [])[0] ?? null;
   }
   async takeHeld(id: string) {

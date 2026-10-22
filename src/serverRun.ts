@@ -16,6 +16,15 @@ import { controlsBrief, jobsDone, runMode, withControls, type ControlCtx, type R
 import { applyHeld, goPlan, ownerCommand } from "./held";
 import { addUndo, recorder, undoTitle, type UndoRec } from "./rewind";
 import type { Notice } from "./businessRules";
+import { emailsIn } from "./guard";
+import { mcpReads } from "./mcp";
+import { secureTools, Shield, type ToolLog } from "./security/secure";
+import { newRunPolicy, type Actor } from "./security/policy";
+import { neutralize } from "./security/untrusted";
+import { sanitizeOutput } from "./security/output";
+import { scrubCredentials } from "./security/secrets";
+import { keepOwnerControls } from "./security/controls";
+import { scanServerResults } from "./security/web";
 
 /* ------------------------------------------------------------------ *
  * The agent's tool loop as the server runs it: the same tools and
@@ -73,6 +82,10 @@ export type RunState = {
   /** The agencies' forms (src/forms/versions.ts): each application's answers when the run began (their fingerprints),
    *  and the filled copies this run kept, which go back with the reply. */
   forms?: Record<string, string>; filled?: FilledNote[];
+  /** The shield's state across chunks (src/security): what the run has done by kind, spent, which addresses came from
+   *  outside and where, and whether it read something poisoned. A resumed chunk picks it up, so a limit or a taint
+   *  isn't reset by a hand-over. */
+  security?: { used: Record<string, number>; spent: number; untrusted: [string, { label: string; bad: boolean }][]; taint: "none" | "flagged" | "quarantined" };
 };
 
 const MAX_ROUNDS = 16;
@@ -249,6 +262,18 @@ export async function runRounds(o: {
   /** The stores' bots this run started (split_job): how many are still working or waiting their turn, and what each
    *  came back with. With it, a run that split work waits for them and then writes one summary. */
   family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> };
+  /** Who the run acts for (src/security/policy.ts): the requesting person and their role in this workspace, looked up
+   *  by agent-run on every chunk, or the system for background checks. Every tool call is checked against it; the
+   *  service role the server saves with never stands in for them. Without one (tests, the sample) the run is an
+   *  owner's, as before. */
+  actor?: Actor;
+  /** The workspace's id: a tool call naming another workspace or another workspace's file is refused. */
+  workspaceId?: string;
+  /** Each tool call, logged: actor, role, a hash of its input and the decision (agent-run writes them to
+   *  agent_tool_calls). */
+  log?: (e: ToolLog) => void;
+  /** The optional model check for untrusted text the heuristics score in the grey zone (src/security/detect.ts). */
+  classify?: (text: string) => Promise<boolean>;
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
@@ -272,13 +297,29 @@ export async function runRounds(o: {
      changes (src/rewind.ts), both carried across chunks like the rest of the run. */
   const rec = recorder(st.undo ?? []);
   const outside: Bi[] = [...(st.outside ?? [])];
+  /* The shield (src/security): who's asking, the policy on every tool call, and what came in from outside. Carried across
+     chunks in the run's state. */
+  const actor: Actor = o.actor ?? { id: o.me ?? o.svc?.me ?? null, role: "owner" };
+  const shield = new Shield(newRunPolicy(actor, { ws: o.workspaceId }), { log: o.log, check: o.classify, runId: o.runId });
+  if (st.security) {
+    Object.assign(shield.policy.used, st.security.used); shield.policy.spent = st.security.spent; shield.policy.taint = st.security.taint;
+    for (const [e, v] of st.security.untrusted) { shield.policy.untrusted.add(e); shield.seen.set(e, v); }
+  }
+  // the person's own words (the request and their earlier turns) are where trusted addresses come from; hidden characters
+  // in them (zero-width, direction marks, tag characters) are taken out before any model reads them
+  for (const m of st.messages) if (m.role === "user" && typeof m.content === "string") { const n = neutralize(m.content, { html: false }); if (n.changed) m.content = n.text; shield.trust(emailsIn(n.text)); }
+  if (st.request) { const n = neutralize(st.request, { html: false }); st.request = n.text; }
   const save = (): RunState => ({ ...st, lastToolAt: made.lastToolAt, made: { apps: [...made.apps], approvals: made.approvals, memory: made.memory, skills: made.skills, files: made.files, matches: made.matches, table: made.table,
-    ...(made.job ? { job: made.job } : {}), ...(made.split?.length ? { split: made.split } : {}) }, undo: rec.recs(), outside });
+    ...(made.job ? { job: made.job } : {}), ...(made.split?.length ? { split: made.split } : {}) }, undo: rec.recs(), outside,
+    security: { used: { ...shield.policy.used } as Record<string, number>, spent: shield.policy.spent, untrusted: [...shield.seen.entries()].filter(([e]) => shield.policy.untrusted.has(e)), taint: shield.policy.taint } });
   const mainRole: Role = o.role ?? "plan";
   const model = messagesModel("server", (body, _signal, deep, role) => o.send(body, deep, role ?? mainRole));
   // A remote request (or plain SMS) can't make changes it's not allowed to, whichever tool would make them.
   const from: { channel?: Channel; plainSms: boolean; mcpReads?: Set<string> } = { channel: o.channel, plainSms: st.plainSms === true };
-  const apply = (p: Patch) => o.apply(rec.wrap(guardPatch(from, p)));
+  // and nothing a run does changes the owner's controls, unless an owner started it to carry out their own approval
+  let ownerRun = false;
+  const apply = (p: Patch) => o.apply(rec.wrap(guardPatch(from, w => keepOwnerControls(w, p(w), { owner: ownerRun }))));
+  shield.apply = apply;
   // Every moment carries when, which bot and which job, for the job's replay.
   const bot = o.child?.store ?? MAIN_BOT;
   const step = (s: Step) => o.step(scrubStep({ at: new Date().toISOString(), bot, ...(made.job ? { job: made.job } : {}), ...s }));
@@ -315,8 +356,8 @@ export async function runRounds(o: {
   // The agencies' own forms (src/forms/versions.ts): the PDFs come through the server's own way (the site's /app/forms/)
   // and the copies filled to check a form before approval are kept, so the run doesn't fill the same answers twice.
   const forms = { load: loaderWith(o.svc?.formPdf), cache: new Map<string, FilledCopy>() };
-  const tools = withControls(makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request, forms,
-    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) }), ctl);
+  const tools = secureTools(withControls(makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request, forms, shield,
+    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) }), ctl), shield, { get: o.ws, apply, appReadOnly: mcpReads });
   if (isRemote(o.channel)) from.mcpReads = new Set(tools.map(t => t.name).filter(n => n.startsWith(MCP_PREFIX)));
   /* The agency's forms, once the work is done: every application whose answers this run changed (by any tool) is filled
      again, one new version each, kept in Documents and handed back with the reply; a card for answers that changed is
@@ -336,7 +377,9 @@ export async function runRounds(o: {
   const keepUndo = () => { if (!rec.size()) return undefined; const id = "undo-" + runKey; o.apply(addUndo({ id, at: st.started!, title: undoTitle(st.request ?? ""), recs: rec.recs(), ...(outside.length ? { outside } : {}) })); return id; };
   /* An owner's approval, carried out here (src/held.ts): agent-run lets only an owner start these, and only from the app.
      A store's bot never: its words are Odelia's instructions for one store. */
-  const cmd = isRemote(o.channel) || o.child ? null : ownerCommand(st.request ?? "");
+  // only an owner's run carries out an approval: a member can't escalate by typing "/apply" (agent-run checks too)
+  const cmd = isRemote(o.channel) || o.child || actor.role !== "owner" ? null : ownerCommand(st.request ?? "");
+  if (cmd) ownerRun = true;
   if (cmd && "apply" in cmd) {
     step({ state: "working", label: { en: "Making the changes you approved", zh: "正在完成您批准的更改" } });
     ctl.mode = { mode: "usual", why: "approved" };   // an owner approved exactly these; Never rules still hold
@@ -354,8 +397,9 @@ export async function runRounds(o: {
   }
   const mode = ctl.mode;
   const childJob = o.child ? (o.ws().jobs ?? []).find(j => j.id === o.child!.job) : undefined;
-  const system = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms) + controlsBrief(o.ws(), mode)
-    + (childJob ? storeRules(o.ws(), childJob, o.lang) : "");
+  // no credential ever goes into a prompt, whatever the workspace holds (src/security/secrets.ts)
+  const system = scrubCredentials(rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms) + controlsBrief(o.ws(), mode)
+    + (childJob ? storeRules(o.ws(), childJob, o.lang) : ""));
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
@@ -383,11 +427,14 @@ export async function runRounds(o: {
       const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep, mainRole,
         o.draft ? t => { if (t) o.draft!(clean((before ? before + "\n\n" + t : t).slice(made.lastToolAt))); } : undefined);
       last = data.content;
+      // pages the model fetched or searched on the vendor's side: scored like anything else from outside, so a poisoned
+      // page taints the run (and is in the audit trail) even though it reached the model directly
+      scanServerResults(data.content, shield);
       for (const c of data.content) for (const ci of c.citations ?? []) if (ci.url && !sources.has(ci.url)) sources.set(ci.url, { url: ci.url, title: ci.title || ci.url });
       st.sources = [...sources.values()];
       addUsed(st.used ??= [], usedInBlocks(data.content));
       const text = data.content.filter(c => c.type === "text").map(c => c.text).join("");
-      if (text) { st.text += (st.text ? "\n\n" : "") + text; o.draft?.(clean(st.text.slice(made.lastToolAt))); }
+      if (text) { st.text += (st.text ? "\n\n" : "") + text; o.draft?.(sanitizeOutput(clean(st.text.slice(made.lastToolAt))).text); }
       if (data.stop_reason === "pause_turn") { st.messages.push({ role: "assistant", content: data.content }); continue; }
       const uses = data.content.filter(c => c.type === "tool_use");
       if (!uses.length || data.stop_reason !== "tool_use") { finished = true; break; }
@@ -450,7 +497,7 @@ export async function runRounds(o: {
     if (o.family && made.split?.length && !st.woke) {
       const pending = await o.family.pending();
       if (pending > 0) {
-        const said = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
+        const said = sanitizeOutput(clean(st.text.slice(made.lastToolAt).trim() || st.text.trim())).text;
         st.waiting = true;
         st.messages.push({ role: "assistant", content: last });
         made.lastToolAt = st.text.length;
@@ -531,7 +578,8 @@ export async function runRounds(o: {
   jobsDone({ get: o.ws, apply, notify: o.notify }, st.started);
   const undoId = keepUndo();
   // a reply that says "done" while a job it worked is still open gets that job's open steps, so it can't claim more
-  const said = clean(st.text.slice(made.lastToolAt).trim() || st.text.trim());
+  // no image, link or address in the reply that could carry data out (src/security/output.ts)
+  const said = sanitizeOutput(clean(st.text.slice(made.lastToolAt).trim() || st.text.trim())).text;
   const open = saysDone(said) || !said ?(o.ws().jobs ?? []).filter(j => own(j) && j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(s => !s.done) && !checkedNow.includes(j.id)).slice(0, 2) : [];
   const proof = [...open.map(j => openLine(j, o.lang)),...checkedNow.map(id => (o.ws().jobs ?? []).find(j => j.id === id)).filter((j): j is Job => !!j).map(j => proofLine(j, o.lang)),
     ...unchecked.filter(id => !checkedNow.includes(id)).slice(0, 1).map(() => (o.lang === "zh" ? "独立检查暂时无法核对，所以这项工作仍未完成。" : "A separate reviewer couldn't check the work yet, so the job stays open."))].filter(Boolean).join(" ");

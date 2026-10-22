@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "node --experimental-strip-types src/main.ts",
-    "test": "node --experimental-strip-types --test test/playbooks.test.ts test/replay.test.ts test/reroute.test.ts test/store.test.ts test/docker.test.ts test/filer.test.ts",
+    "test": "node --experimental-strip-types --test test/playbooks.test.ts test/replay.test.ts test/reroute.test.ts test/store.test.ts test/docker.test.ts test/filer.test.ts test/sandbox.test.ts",
     "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json"
   },
   "dependencies": {

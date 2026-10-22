@@ -176,6 +176,9 @@ export type McpHands = {
   flag(source: string, says: string, text: string): void;
   /** The line an approval card gets after instructions were found in this run. */
   flagLine(): Bi[];
+  /** The run's shield (src/security): what the app returned, hidden text out, scored and wrapped with where it came
+   *  from, or withheld when quarantined. */
+  take?(text: string, label: string): string;
   /** Put an approval card up; returns its id. */
   card(a: Omit<Approval, "id">): string;
 };
@@ -215,7 +218,7 @@ export function mcpTools(all: McpTool[], request: string, h: McpHands): Tool[] {
         if (inside) h.flag(`${app} (${title})`, inside, text);
         const output = text.length > MCP_OUT ? text.slice(0, MCP_OUT) + "\n[cut]" : text;
         if (r.is_error) throw new Error(`${app} said: ${output.slice(0, 800)}`);
-        return { from: app, third_party: true, output, ...(inside ? { instructions_found: inside, note: NOTE_FLAG } : {}) };
+        return { from: app, third_party: true, output: h.take ? h.take(output, `${app} (${title})`) : output, ...(inside ? { instructions_found: inside, note: NOTE_FLAG } : {}) };
       }
       if (h.remote) throw new Error(`From outside the app, Odelia only reads from ${app}. Tell them to ask for this in the Placetta app.`);
       h.step(L(`Asking an owner to approve: ${title} in ${app}`, `请所有者批准：在${app}中${title}`));

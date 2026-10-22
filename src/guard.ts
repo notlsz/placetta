@@ -114,7 +114,7 @@ export function scrub(text: string): string {
 export const emailsIn = (text: string) => [...String(text ?? "").matchAll(/[A-Za-z0-9._%+'-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[a-z]{2,}/gi)].map(m => m[0].toLowerCase().replace(/[.]+$/, ""));
 
 /** A government address: .gov, .mil, .us, or a city or county domain Placetta knows is the agency's own. */
-export const governmentAddress = (email: string) => /\.(gov|mil|us)$/i.test(email.split("@")[1] ?? "") || /@([a-z0-9-]+\.)*(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov|lacounty\.gov|houstontx\.gov|sanjoseca\.gov)$/i.test(email);
+export const governmentAddress = (email: string) => (/\.(gov|mil)$/i.test(email.split("@")[1] ?? "") || /\.[a-z]{2}\.us$/i.test(email.split("@")[1] ?? "")) || /@([a-z0-9-]+\.)*(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov|lacounty\.gov|houstontx\.gov|sanjoseca\.gov)$/i.test(email);
 /** A business identifier or private number in a message: an EIN, an SSN shape, or bank details. */
 export const carriesIdentifier = (text: string) => /\b\d{2}-\d{7}\b|\b\d{3}-\d{2}-\d{4}\b|\b(routing|account) (number|no\.?)\b|\biban\b|银行账号/i.test(String(text ?? ""));
 
