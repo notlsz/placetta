@@ -15,6 +15,19 @@ import { AUDIT_READ, FIXES } from "../src/forms/audit";
 import { US_GAPS } from "../src/forms/us-gaps";
 import { INTL_FORMS } from "../src/forms/intl";
 import { MEXICO_GAPS } from "../src/forms/mexico";
+import { FINISH_FIXES, FINISH_FORMS } from "../src/forms/finish";
+
+/** Each guide city's status in the audit of 2026-10-22, before the finishing pass (src/forms/finish.ts). */
+const BEFORE: Record<string, string> = {"New York City": "covered", "Los Angeles": "covered", "Houston": "covered", "San Francisco": "covered", "San Jose": "covered", "Chicago": "partial", "Seattle": "covered", "Boston": "covered", "Miami": "covered", "Dallas": "covered", "Austin": "covered", "Washington, DC": "covered", "Atlanta": "covered", "Philadelphia": "covered", "Las Vegas": "covered", "San Antonio": "covered", "Tampa": "partial", "San Diego": "covered", "Irvine": "covered", "Orlando": "covered", "Fort Worth": "covered", "Phoenix": "partial", "Oakland": "covered", "Sacramento": "partial", "Portland": "covered", "Plano": "covered", "Arlington": "covered", "Fairfax County": "covered", "Edison": "covered", "Jersey City": "covered", "Denver": "covered", "Minneapolis": "covered", "Columbus": "unverified", "Cupertino": "covered", "Milpitas": "covered", "Daly City": "covered", "Arcadia": "covered", "Alhambra": "covered", "Fort Lee": "covered", "Bellevue": "covered", "Rockville": "covered", "Mexico City": "partial", "Monterrey": "partial", "Guadalajara": "partial", "Cancún": "partial", "Beijing": "unverified", "Shanghai": "unverified", "Shenzhen": "unverified", "Guangzhou": "unverified", "Hangzhou": "unverified", "Chengdu": "unverified", "Chongqing": "unverified", "Wuhan": "unverified", "Nanjing": "unverified", "Suzhou": "unverified", "Tianjin": "unverified", "Xi'an": "unverified", "London": "covered", "Manchester": "covered", "Paris": "covered", "Berlin": "covered", "Munich": "partial", "Hamburg": "partial", "Frankfurt": "partial", "Madrid": "partial", "Barcelona": "partial", "Milan": "partial", "Rome": "partial", "Amsterdam": "covered", "Rotterdam": "covered", "Dublin": "partial", "Cork": "partial", "Brussels": "unverified", "Lisbon": "unverified", "Zurich": "unverified", "Bern": "unverified", "Vienna": "unverified", "Graz": "unverified", "Stockholm": "unverified", "Gothenburg": "unverified", "Copenhagen": "unverified", "Aarhus": "unverified", "Warsaw": "unverified", "Helsinki": "unverified", "Dubai": "unverified", "Abu Dhabi": "unverified", "Sharjah": "unverified", "Riyadh": "unverified", "Jeddah": "unverified", "Dammam": "unverified", "Doha": "unverified", "Istanbul": "unverified"};
+
+/** Countries with no general local trade licence for a shop or restaurant: the city's own list of what a new restaurant
+    needs names national registrations and local permits (building, alcohol, outdoor seating) and no trade licence. There
+    the local licence step is met by the city's verified building or use permit. Each is a judgement on an official page,
+    quoted, for the founder to check. */
+export const NO_TRADE_LICENCE: Record<string, { read: string; quote: string; en: string; why: string }> = {
+  DK: { read: "https://www.kk.dk/erhverv/butik-gadesalg-og-restaurant/tjekliste-for-nye-restauratoerer", quote: "Nødvendige tilladelser og registreringer",
+    en: "Necessary permits and registrations", why: "Copenhagen's checklist for new restaurateurs lists, under this heading, the Danish Veterinary and Food Administration's registration, the alcohol licence, the building permit and outdoor seating; Denmark has no general trade licence (næringsbrev for restaurants was abolished)." },
+};
 
 const OUT = `${process.cwd()}/docs/COVERAGE.md`;
 const write = process.argv.includes("--write");
@@ -86,6 +99,9 @@ function rowFor(city: string, country: string): Row {
   }
   // a "licence" topic is often folded into the food permit or the business tax registration abroad: count it present then
   if (gaps.includes("local licence (missing)") && (has(below, "food") || has(below, "tax"))) { gaps.splice(gaps.indexOf("local licence (missing)"), 1); ok++; }
+  // a country with no general trade licence (NO_TRADE_LICENCE): the city's verified building or use permit is its local step
+  const country2 = places.find(p => /^[A-Z]{2}$/.test(p) && p !== "EU");
+  if (gaps.includes("local licence (missing)") && country2 && NO_TRADE_LICENCE[country2] && has(["city"], "building")) { gaps.splice(gaps.indexOf("local licence (missing)"), 1); ok++; }
   const status = !places.length ? "no jurisdiction" : gaps.length === 0 ? "covered" : ok >= 3 ? "partial" : "unverified";
   return { city, country, code, address, places, cells, status, gaps };
 }
@@ -127,7 +143,28 @@ function main() {
     }
     p();
   }
+  // the finishing pass, city by city: the status before it, the status now, and what's left
+  const guideRows = rows.filter(r => guideCities.some(g => g.city === r.city));
+  const tally = (st: string, of: (r: Row) => string) => guideRows.filter(r => of(r) === st).length;
+  p("## Before and after the finishing pass");
+  p();
+  p(`The finishing pass (src/forms/finish.ts) took every guide city that wasn't covered through each level for a restaurant and a shop. Before: ${tally("covered", r => BEFORE[r.city])} covered, ${tally("partial", r => BEFORE[r.city])} partial, ${tally("unverified", r => BEFORE[r.city])} unverified. After: ${tally("covered", r => r.status)} covered, ${tally("partial", r => r.status)} partial, ${tally("unverified", r => r.status)} unverified.`);
+  p();
+  p("| City | Country | Before | After | Still short |");
+  p("|---|---|---|---|---|");
+  for (const r of guideRows.filter(r => BEFORE[r.city] !== "covered" || r.status !== "covered")) p(`| ${r.city} | ${r.country} | ${BEFORE[r.city] ?? "new"} | ${r.status} | ${r.gaps.join("; ") || "none"} |`);
+  p();
+  for (const [code, x] of Object.entries(NO_TRADE_LICENCE)) p(`No general trade licence in ${COUNTRIES.find(k => k.code === code)?.en ?? code}: ${x.why} Quote: "${x.quote}" (${x.en}), ${x.read}. The city's verified building or use permit stands as its local step there.`);
+  p();
   p("## What this audit changed");
+  p();
+  p(`### Finishing pass: proofs added to entries already in the registry (${FINISH_FIXES.length})`);
+  p();
+  for (const x of FINISH_FIXES) p(`- \`${x.id}\`: ${x.why}`);
+  p();
+  p(`### Finishing pass: added (${FINISH_FORMS.length}, ${FINISH_FORMS.filter(f => f.proof).length} verified, ${FINISH_FORMS.filter(f => !f.proof).length} unverified)`);
+  p();
+  for (const f of FINISH_FORMS) p(`- \`${f.id}\` (${f.where}, ${f.level}) ${f.title.en}: ${f.agency.en}${f.proof ? "" : " **UNVERIFIED**"}${f.fee != null ? `, fee ${f.fee} ${f.currency ?? "USD"}` : ""}`);
   p();
   p(`### Fixed (${FIXES.length})`);
   p();

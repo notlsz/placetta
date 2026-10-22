@@ -35,6 +35,9 @@ const ABROAD = new RegExp("(^|\\.)(" + [
   // commerce keeps Colombia's public commercial register by law)
   "canada\\.ca", "gc\\.ca", "ontario\\.ca", "toronto\\.ca", "wsib\\.ca", "agco\\.ca", "gov\\.bc\\.ca", "worksafebc\\.com", "vch\\.ca", "vancouver\\.ca",
   "myfloridacfo\\.com",
+  // added 2026-10-22 with the finishing pass (src/forms/finish.ts), each fetched that day: the City of Stockholm's own
+  // top-level domain (.stockholm, run by the city), the Danish Business Authority, Finland's registries and cities
+  "stockholm", "erhvervsstyrelsen\\.dk", "prh\\.fi", "vero\\.fi", "ytj\\.fi", "suomi\\.fi", "hel\\.fi",
   "gov\\.br", "sii\\.cl", "registrodeempresasysociedades\\.cl", "dian\\.gov\\.co", "ccb\\.org\\.co", "argentina\\.gob\\.ar", "arca\\.gob\\.ar", "sunat\\.gob\\.pe",
   "gov\\.sg", "ssm\\.com\\.my", "gov\\.my", "go\\.th", "gov\\.vn", "go\\.id", "gov\\.ph", "gov\\.ng", "go\\.ke", "cipc\\.co\\.za", "gov\\.za", "gov\\.ma", "gov\\.eg",
 ].join("|") + ")$");

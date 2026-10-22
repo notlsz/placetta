@@ -16,6 +16,7 @@ import { FURNITURE, FURNITURE_FORMS } from "./furniture";
 import { applyFixes } from "./audit";
 import { US_GAPS } from "./us-gaps";
 import { INTL_FORMS } from "./intl";
+import { FINISH_FIXES, FINISH_FORMS } from "./finish";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -672,7 +673,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS);
 
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue
@@ -728,7 +729,8 @@ for (const f of FORMS) { const p = PROOF[f.id]; if (p && !f.proof) { f.proof = p
 
 // The source audit (src/forms/audit.ts): links moved to the pages the agencies use now, proofs whose page is gone replaced
 // or taken away. Last, so it wins over every layer above.
-export const AUDIT_MISSING = applyFixes(FORMS);
+// then the finishing pass's proofs for entries already in the library (src/forms/finish.ts)
+export const AUDIT_MISSING = [...applyFixes(FORMS), ...applyFixes(FORMS, FINISH_FIXES)];
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 

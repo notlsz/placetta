@@ -16,6 +16,7 @@ import { COUNTIES } from "../src/forms/usplace";
 import { US_GAPS } from "../src/forms/us-gaps";
 import { INTL_FORMS } from "../src/forms/intl";
 import { MEXICO_GAPS } from "../src/forms/mexico";
+import { FINISH_FORMS } from "../src/forms/finish";
 
 let failed = 0;
 const fail = (m: string) => { failed++; console.error("FAIL", m); };
@@ -63,7 +64,7 @@ for (const k of KIND_FACTS) {
 if (AUDIT_MISSING.length) fail(`the audit fixes entries the registry doesn't have: ${AUDIT_MISSING.join(", ")}`);
 
 // the entries this audit added: bilingual copy, no bullet or dot separators, no leading zeros
-for (const f of [...US_GAPS, ...INTL_FORMS, ...MEXICO_GAPS]) {
+for (const f of [...US_GAPS, ...INTL_FORMS, ...MEXICO_GAPS, ...FINISH_FORMS]) {
   for (const b of [f.title, f.how, f.agency, f.plain, f.feeNote, f.takes, f.renews, f.specialist].filter(Boolean)) {
     for (const s of [b!.en, b!.zh]) {
       if (/[·•∙]/.test(s)) fail(`${f.id}: a dot separator in "${s.slice(0, 60)}"`);
