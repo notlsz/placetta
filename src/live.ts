@@ -1,3 +1,5 @@
+import { answerFits, prefillFromProfile } from "./filingPlaybooks/fill";
+import { entityNeed } from "./entityHome";
 import { PUBLIC_BUNDLE } from "./publicBundle";
 import { inspectionsFor } from "./inspections/forStore";
 import { priceFacts } from "./pricing";
@@ -39,7 +41,9 @@ import { COUNTRIES } from "./forms/world";
 import { furnitureNeeds } from "./forms/furniture";
 import type { Lang } from "./i18n";
 import { anthropicMessage } from "../supabase/functions/_shared/stream.ts";
-import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
+import { FORMS, METHOD, formById, formsFor, placeInfo, placesOf, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
+/** The US state of an address or place ("Flushing, NY" is NY), or "" outside the US. */
+const placeState = (where: string) => (placesOf(where.split(";")[0]).find((c, k, all) => all[0] === "US" && k > 0 && /^[A-Z]{2}$/.test(c)) ?? "");
 import { dealsInFood, libraryAnswer } from "./plan/preview";
 import { entryPacket, packetForModel } from "./plan/packet";
 import { PLAYBOOKS, playbookById } from "./filingPlaybooks";
@@ -183,7 +187,8 @@ export function rules(w: Workspace, lang: Lang, account: boolean, research: bool
 
 How you write (this matters as much as getting the work right):
 - Reply in ${extra.speak ?? replyLanguage(lang)}, or in the language the person writes in if it's a different one.
-- Write like a sharp operator texting a busy owner. Lead with the result, then the one next step. Default to one to three short sentences, under 60 words. Go longer only when they ask for detail or the answer truly needs it.
+- Write like a sharp operator texting a busy owner. Lead with the result, then the one next step. One to three short sentences, at most 60 words (in Chinese, about 100 characters). After a big job (mapping a store, opening one end to end, a set of filings), at most 90 words: what you did in counts ("Mapped 7 filings, 2 up for your approval"), not every filing by name, since the app shows each filing, deadline and empty line; then the one question with what only they can give, naming at most three items and saying the rest are in the app. Go longer only when they ask for detail.
+- In a Chinese reply, write everything in Chinese. A value from an English document (a date, a number, a name, a policy line) keeps its own words, but only the value itself, inside a Chinese sentence: never paste English sentences.
 - Be concrete: the filing, agency, fee, date and what's missing, by name. "Sign permit ready: $445, due Nov 3" beats "a fee will apply soon".
 - When asked what Placetta costs: ${priceFacts("simple")} ${priceFacts("legacy")} Each filing's own price shows in its approval card; never promise a discount, a guarantee or a date.
 - Cut everything else: greetings, praise ("great question"), "I'd be happy to", restating their request, narrating your tool calls or steps, recapping what the app already shows them, hedging, and closing offers ("let me know if..."). Say a reassurance (like "nothing files without your approval") only when it answers a worry they raised.
@@ -195,7 +200,7 @@ How you work:
 - You are an operator, not a chatbot. ${tools ? "When the person asks for something your tools can do, do it now, in as many steps as it takes, then say what you did. Don't describe what you could do, don't ask permission to prepare things, and don't stop after one step when the job needs more." : "Answer directly and concretely."}
 - Refuse anything that breaks the law or deceives an agency (faking a document, a signature or an inspection record, hiding something from an inspector, dodging a required license), even if asked.${tools ? `
 ${can("prepare_application") ? `- To file one of these, use follow_playbook, never the step-by-step tools: ${PLAYBOOKS.map(p => p.name.en.toLowerCase()).join("; ")}. One call does every store; ask for everything it lists in one message, then call it once more with the answers.\n` : ""}- Use the agencies' real forms, never a template. find_official_forms returns the official form for each filing (form number, agency, how it's filed, official link, fee and the form's own fields by line). When a form is there, prepare_application with its official_form_id and fill its fields with the form's own labels. Only when the library has nothing for a filing, ${research ? "research the agency's official page and name the exact form or online service it uses" : "name the form only if you are sure of it and say it's to be confirmed with the agency"}.
-- Chain the tools. To map a business or a new store: ${can("add_store") ? "add_store first if it isn't in Stores yet, then " : ""}find_official_forms for its business and place, then prepare_application once for each license it needs (with the store_id when there's more than one store), fill each from the workspace facts, memory and documents, add_deadline for the dates that matter (the opening date, each filing's file-by date, renewals), then request_filing_approval for each one that's complete. request_filing_approval refuses an incomplete application and says what's missing: that's expected, not a failure. For progress or "what's next": check_progress first${mail ? ", then search_email for recent mail from the agencies and read_email what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${drives ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
+- Chain the tools. To map a business or a new store: ${can("add_store") ? "add_store first if it isn't in Stores yet, then " : ""}find_official_forms for its business and place, then prepare_application once for each license it needs (with the store_id when there's more than one store), fill each from the workspace facts, memory and documents, add_deadline for the dates that matter (the opening date, each filing's file-by date, renewals), then request_filing_approval for each one that's complete. request_filing_approval refuses an incomplete application and says what's missing: that's expected, not a failure. For progress or "what's next": check_progress first${mail ? ", then search_email (query, days) for recent mail from the agencies and read_email (id and kind, both from search_email's results) what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${drives ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
 ${w.apps.some(a => a.preview) ? `- Applications marked preview (${w.apps.filter(a => a.preview).length} of them) were listed from Placetta's registry the moment the workspace was created, before anyone checked them against the agency: the right agency and form as the library knows them, with the lines empty. They are the plan the person already sees, so refine them, never re-map: keep their ids. prepare_application with the same official_form_id (or the same name) returns that application instead of adding a second one and fills it; fill_fields and update_application work on it directly. For each: verify it against the agency's current page or form (find_official_forms, or the official link), fill its fields and checklist from the facts, memory and documents, correct the fee or time when the agency says otherwise, add what the registry missed with prepare_application, remove what doesn't apply with remove_application, and clear the preview mark (filling it or preparing it does; update_application verified true does when nothing else changed). Say "verified" only after you checked the agency's own page.
 ` : ""}${can("set_plan") ? `- Work like an engineer on a ticket. For any job of three or more steps (mapping a store, a renewal, getting ready for an inspection, answering an agency's request), set_plan first, then work the plan in order and set_plan again as each step finishes. One plan per job: when a job in the workspace's jobs is still open, pick it up with its job_id instead of starting another. Blocked on something only someone else can give? Finish every other step first, then set the job to waiting and say exactly what you need and from whom.
 ${can("split_job") ? `- When they ask for the same work across several stores (get every store ready for its inspection, renew everything due this quarter at every location), split_job it instead of doing the stores one by one: each store's own bot works its part at the same time, a separate reviewer checks each, and you write one summary when they're all back.
@@ -206,7 +211,7 @@ ${can("split_job") ? `- When they ask for the same work across several stores (g
 - You can change anything in the workspace the person can: add stores (add_store shows it in Stores right away), rename the business (edit_workspace), save business facts (remember), edit deadlines (edit_deadline) and applications (fill_fields, update_application)${can("change_setting") ? ", and change everyday settings (language, theme, accent color, reading replies aloud) with change_setting" : ""}. Changing something that already exists in a way they may not want, like moving a store to a different city or removing a store or an application, goes through update_store, remove_store or remove_application: that puts a confirmation in front of them and nothing changes until they confirm. Say you've asked them to confirm; never say it's done before they do. After a store moves, map the new city's permits. Remove a deadline only when they ask or it clearly no longer applies.
 - Never touch these yourself, even if asked; point to Settings instead: their password, settings PIN, two-step sign-in, team members and roles, billing, agency logins, integrations, and deleting the account or its data.${ms && can("memory_save") ? `
 - Memory: what you know about the person is below under Memory. Use it when it changes the answer; don't recite it.${ms.generate ? " When they tell you something durable about themselves, their preferences or their work, save it with memory_save (one short fact per call)." : " Saving new memories is off: only memory_save when they explicitly ask you to remember something."}${ms.sensitive ? "" : " Never save health, religion, politics, finances or other sensitive details."}${ms.searchChats ? " search_past_chats finds what they said in earlier chats when they refer to it." : ""}` : ""}
-- Skills are playbooks: before a job, if one of the Skills below fits, skill_read it and follow it; a form skill fills the lines it knows by itself, and a playbook's toolbox has the files made for that job before, so start from them instead of rebuilding. After you work out something that will come up again (a city's local permits the library didn't have, an agency's quirks, a way this business works), skill_save it with its done list and files${w.skillsAuto === false ? " only if they ask (creating skills automatically is off)" : ""}. That's how you get faster each time.
+- Skills are playbooks: before a job, if one of the Skills below fits, skill_read it (its id, the name before the colon in the list) and follow it; a form skill fills the lines it knows by itself, and a playbook's toolbox has the files made for that job before, so start from them instead of rebuilding. After you work out something that will come up again (a city's local permits the library didn't have, an agency's quirks, a way this business works), skill_save it with its done list and files${w.skillsAuto === false ? " only if they ask (creating skills automatically is off)" : ""}. That's how you get faster each time.
 - When they hand you a job this business will repeat (their opening checklist, how they renew a license, how they prepare for an inspection, how they report to headquarters) and no playbook fits, interview them before doing it: ask what you need to run it without them next time (how they do it now, who's involved and how to reach them, which files and templates they use, where things go wrong, and what done looks like). Ask it as up to five short numbered questions in one reply. When they answer, skill_save the playbook (from_interview true, with its steps, done list and files), then do the job from it.
 - Every job has a harness that any agent can pick up: set_plan holds its steps, its done list, its playbook and its toolbox. Keep it current; another agent may finish what you start. Never call a job done in your reply until its steps are done: a separate checker verifies the done list against the workspace and sends back anything missing.
 - Only filing, paying and sending need the person. request_filing_approval, draft_message${can("send_email") ? " and send_email" : ""} put those in front of them to approve. Everything else (preparing, filling, drafting documents, adding deadlines${cal ? ", calendar events" : ""}${drives ? ", importing files" : ""}, remembering facts) you just do.` : ""}${apps.length ? `
@@ -459,7 +464,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         place: { type: "string", description: "City and state or country, e.g. 'Flushing, NY', 'Shanghai', 'London', 'Dubai'" },
         search: { type: "string", description: "Words to search for instead, e.g. 'SS-4' or 'sales tax'" },
         hires_staff: { type: "boolean" }, imports_goods: { type: "boolean" }, new_us_company: { type: "boolean", description: "They still need to form the US company" },
-        foreign_company_registers: { type: "boolean", description: "A company formed outside this state or country registers to do business here" },
+        formed_in_another_us_state: { type: "boolean", description: "The company exists, formed in another US state: it registers here (set from the facts when they say)" },
+        foreign_company_registers: { type: "boolean", description: "A company formed in another country registers to do business here" },
         builds_out: { type: "boolean", description: "Construction or remodeling of the space" }, exterior_sign: { type: "boolean" },
         hazmat_or_batteries: { type: "boolean" }, sells_cosmetics: { type: "boolean" }, food_warehouse: { type: "boolean" }, manhattan_below_96th: { type: "boolean" },
         serves_alcohol: { type: "boolean", description: "Sells or serves beer, wine or spirits" },
@@ -468,7 +474,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       execute(i) {
         const segment = segmentOf(str(i.business) || get().business.en);
         const place = str(i.place) || get().locations.map(l => `${l.name.en}, ${l.county.en}`).join("; ");
-        const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}),
+        const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}), ...(i.formed_in_another_us_state || placeState(place) && entityNeed(get().facts, placeState(place)) === "register" ? { outOfState: true } : {}),
           ...(i.builds_out ? { buildout: true } : {}), ...(i.exterior_sign ? { signage: true } : {}), ...(i.hazmat_or_batteries ? { hazmat: true } : {}), ...(i.sells_cosmetics ? { cosmetics: true } : {}),
           ...(i.food_warehouse || dealsInFood(str(i.business) || get().business.en, segment) ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}), ...(i.outdoor_seating ? { terrace: true } : {}),
           // a furniture brand: wood goods, upholstered furniture, dressers and chests (src/forms/furniture.ts)
@@ -524,7 +530,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "prepare_application",
-      description: "Add a license, permit or registration the business needs to the workspace, with what you can already fill in. With official_form_id (from find_official_forms) it becomes the agency's real form: its number, agency, link, fee and fields by line, which you fill by their labels. Without one (only when the library doesn't have it), give the official name, agency and link you found on the agency's own page. Calling it again for the same form and store returns the one already there. Returns its id, the fields still empty and the documents still missing. Does not file anything.",
+      description: "Add a license, permit or registration the business needs, with what you can fill in. With official_form_id (from find_official_forms) it's the agency's real form (number, agency, link, fee, fields by line, filled by their labels). Without one (only when the library lacks it), give the official name, agency and link from the agency's own page. Calling it again for the same form and store returns the one already there. Returns its id and what's still empty or missing. Files nothing.",
       inputSchema: { type: "object", properties: {
         official_form_id: { type: "string", description: "The id from find_official_forms. Use it whenever the library has the form." },
         name: { type: "string", description: "The license's official name, as the agency writes it" }, agency: { type: "string", description: "The issuing agency's official name" }, level: { type: "string", enum: LEVELS },
@@ -560,7 +566,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const twin = get().apps.find(a => (off ? a.official === off.id : !a.official && (a.name.en.toLowerCase() === name.toLowerCase() || (a.preview && sameThing(a))))
           && !["filing", "review", "approved"].includes(a.status) && (target ? (target.apps ?? []).includes(a.id) : !inStore(a.id)));
         if (twin && !twin.preview) { made.apps.add(twin.id); mark(); return { application_id: twin.id, status: twin.status, already_in_workspace: true, ...gaps(twin) }; }
-        const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee ?? i.fee_usd) || 0);
+        const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee ?? i.fee_usd) || 0), feeGiven = i.fee != null && i.fee !== "" || i.fee_usd != null;
         const currency = (off?.currency ?? (/^[A-Z]{3}$/.test(str(i.currency)) ? str(i.currency) : "USD"));
         // a Social Security number or ITIN is never kept: that line stays empty and the result says to write "By hand"
         const offered = fieldList(i.fields, lang === "zh" ? "来自资料" : "From Context");
@@ -596,7 +602,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         } : {
           // a preview row keeps its bilingual name; the agency, fee, time and link come from what Odelia verified
           id, name: twin ? twin.name : same(name), agency: same(agency), level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, ...(currency !== "USD" ? { currency } : {}),
-          fees: [{ label: L("Estimated fee", "预估费用"), amount: fee }], feeNote: L("Estimate from Placetta. Confirm with the agency before paying.", "快哉的估算，付款前请向机构确认。"),
+          // no fee given is an unknown fee, never $0: the card says to confirm it with the agency
+          ...(feeGiven ? { fees: [{ label: L("Estimated fee", "预估费用"), amount: fee }], feeNote: L("Estimate from Placetta. Confirm with the agency before paying.", "快哉的估算，付款前请向机构确认。") }
+            : { fees: [{ label: L("Government fee", "政府规费"), amount: 0, tbd: true }], feeNote: L("Fee not known yet. Placetta confirms it with the agency before you pay.", "费用尚未确定。付款前快哉会向机构确认。") }),
           est: str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认"),
           source: { label: domainOf(url), url }, form: str(i.form) ? same(str(i.form, 120)) : undefined, fields, checklist,
         };
@@ -605,7 +613,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         if (target) apply(w => ({ ...w, stores: (w.stores ?? []).map(x => (x.id === target.id ? { ...x, apps: [...new Set([...(x.apps ?? []), id])] } : x)) }));
         made.apps.add(id); touch(id); mark();
         return { application_id: id, status, ...(twin ? { refined_preview: true, note: "This was a preview row from the instant plan; it's the same application, now verified and filled, not a new one." } : {}), ...(target ? { store_id: target.id, store: target.name.en } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
-          fee: off?.fee ?? (off ? null : fee), fee_note: app.feeNote?.en,
+          fee: off?.fee ?? (off || !feeGiven ? null : fee), fee_note: app.feeNote?.en,
           ...(blocked.length ? { address_not_filled: blocked.map(p => addrOut(off!.id, p.field, p.value, p.check)), do_next: ADDR_NEXT } : {}),
           ...(secret.length ? { not_stored: secret, why_not_stored: SECRET_WHY } : {}),
           empty_fields: fields.filter(f => isBlank(f.value)).map(f => f.label.en), missing_documents: checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: c.label.en })), ...(known.size ? { filled_from_skill: known.size } : {}),
@@ -766,7 +774,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "draft_message",
-      description: "Draft a text or email to someone (staff, landlord, contractor) for the person to approve. You never send it yourself. Staff with a language set (staff_languages in the workspace: English, Chinese or Spanish) get the message written in that language.",
+      description: "Draft a text or email to someone (staff, landlord, contractor) for the person to approve. You never send it yourself. Staff with a language set (staff_languages in the workspace: English, Chinese or Spanish) get the message in that language: write it in their language yourself (the tool doesn't translate, and refuses a message in another language), keeping names, dates, amounts and links as they are.",
       inputSchema: { type: "object", properties: { to: { type: "string" }, message: { type: "string" }, title: { type: "string", description: "Short summary, e.g. 'Ask the landlord for a consent letter'" } }, required: ["to", "message"] },
       execute(i) {
         const asked = str(i.to, 160), message = str(i.message, 1200);
@@ -908,7 +916,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "set_plan",
-      description: "Put the job's harness on: the plan for a job of three or more steps, the way an engineer would, plus what finished looks like. The person watches it in Work and beside the chat; any agent that picks the job up later works from it. Call it first with every step not done and the done list (from the playbook's done_means when one fits, plus anything this job needs), then again with the same job_id each time a step finishes, the plan changes, or you're blocked (status waiting, and waiting_on says exactly what and from whom). When the last step is done, mark them all done: a separate checker then verifies each done item against the workspace before the job counts as done, and sends back anything missing.",
+      description: "The plan for a job of three or more steps, and what finished looks like. The person watches it in Work; any agent that picks the job up works from it. Call it first with every step and the done list (the playbook's done_means when one fits, plus what this job needs), then again with the same job_id as each step finishes, the plan changes, or you're blocked (status waiting; waiting_on says what and from whom). When all steps are done, a separate checker verifies each done item against the workspace and sends back anything missing.",
       inputSchema: { type: "object" as const, properties: {
         job_id: { type: "string", description: "The job to update; leave out to start one" },
         title: { type: "string", description: "Short, e.g. 'Map the Flushing store'" },
@@ -1082,7 +1090,10 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const st = abroad ? "" : stateCode(i.state);
         if (!abroad && !st) throw new Error(str(i.state) ? `"${str(i.state, 40)}" isn't a US state. Use its two-letter code like NY or its name, or pass country for a store abroad.` : "state is required for a US store (e.g. TX), or pass country for a store abroad.");
         if (str(i.planned_open) && !isDate(str(i.planned_open))) throw new Error(`planned_open "${str(i.planned_open, 40)}" isn't a real date. Use YYYY-MM-DD.`);
-        const address = [str(i.address, 120), city, abroad ? land!.en : st].filter(Boolean).join(", ");
+        // a street address that already ends in its city and state ("4250 Barranca Pkwy, Irvine, CA 92604") is kept as it is;
+        // otherwise the city and state are added to it
+        const street = str(i.address, 120), has = (x: string) => !!x && new RegExp(`(^|[,\\s])${x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([,\\s]|$)`, "i").test(street);
+        const address = has(city) && (abroad ? has(land!.en) : has(st)) ? street : [street, city, abroad ? land!.en : st].filter(Boolean).join(", ");
         // the same store already here (a repeated call, a run picked up again, or "Ave" one time and "Avenue" the next)
         const norm = (a: string) => a.toLowerCase().replace(/[^a-z0-9一-鿿]+/g, " ").replace(/\b(street|st|avenue|ave|road|rd|boulevard|blvd|suite|ste|unit)\b/g, m => m.slice(0, 2)).trim();
         const twin = (get().stores ?? []).find(s => norm(s.address) === norm(address) || (s.name.en.toLowerCase() === name.toLowerCase() && s.address.toLowerCase().includes(city.toLowerCase())));
@@ -1556,7 +1567,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     const run = (name: string, input: Record<string, unknown>) => tools.find(t => t.name === name)!.execute(input) as Promise<Record<string, unknown>> | Record<string, unknown>;
     return {
       name: "follow_playbook",
-      description: `File a license by its playbook instead of step by step: ${PLAYBOOKS.map(p => `${p.id} (${p.name.en.toLowerCase()})`).join(", ")}. One call finds each store's own form, prepares it, fills every line it can from the business profile and earlier filings, reuses documents already uploaded, checks every line in code and puts each complete one up for approval. It returns one list of what's still missing across all the stores: ask the person for all of it in one message, then call this again with their answers. Prefer it over find_official_forms, prepare_application, fill_fields and request_filing_approval for these kinds. Does not file anything.`,
+      description: `File a license by its playbook instead of step by step: ${PLAYBOOKS.map(p => `${p.id} (${p.name.en.toLowerCase()})`).join(", ")}. One call finds each store's forms, prepares and fills them from the business profile, reuses uploaded documents, checks every line and puts complete ones up for approval. It returns what's still missing: ask for all of it in one message, then call again with the answers. Prefer it to the step-by-step tools for these kinds. Files nothing.`,
       inputSchema: { type: "object", properties: {
         playbook: { type: "string", enum: PLAYBOOKS.map(p => p.id) },
         store_ids: { type: "array", items: { type: "string" }, description: "The stores it's for. Leave it out for every store (a city or county permit) or the business (a state filing)." },
@@ -1577,9 +1588,18 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           // the store's own form, from the instant plan for its address (the registry, no model)
           const w = get(), what = [w.business.en, w.goal?.en ?? "", ...w.facts.filter(x => /what you sell|business type|cuisine/i.test(x.label.en)).map(x => x.value.en)].join(" ");
           const segment = segmentOf(what);
-          const form = formsFor({ segment, where: s.address, needs: { food: dealsInFood(what, segment), employees: true, signage: true, buildout: true, alcohol: pb.id === "liquor", newEntity: pb.id === "entity_registration" } })
-            .find(f => pb.match(f));
-          if (!form) { out.push({ store: s.name.en, form: null, note: `The library has no ${pb.name.en.toLowerCase()} form for ${s.address}. Find it the usual way (find_official_forms).` }); continue; }
+          // the company itself: a company formed in another state registers in this one; one formed here files nothing;
+          // with no company yet it's formed; a company whose home state isn't on file is asked about, never formed again
+          const entity = pb.id === "entity_registration" ? entityNeed(w.facts, placeState(s.address)) : null;
+          if (entity === "none") { out.push({ store: s.name.en, form: null, note: `The company was formed in ${placeState(s.address)}, so it has nothing to register there.` }); continue; }
+          if (entity === "ask") { add(ask, "State the company was formed in", s.name.en); out.push({ store: s.name.en, form: null, note: "The company exists, but the facts don't say which state it was formed in: ask, then call follow_playbook again with that answer. Never prepare a new company's formation for it." }); continue; }
+          // every form of this kind the store needs (Miami: the city's business tax receipt and the county's)
+          const formsHere = formsFor({ segment, where: s.address, needs: { food: dealsInFood(what, segment), employees: true, signage: true, buildout: true, alcohol: pb.id === "liquor",
+            ...(entity === "register" ? { outOfState: true } : entity === "form" ? { newEntity: true } : {}) } })
+            .filter(f => pb.match(f) && (entity !== "register" || !!f.needs?.foreignEntity) && (entity !== "form" || !f.needs?.foreignEntity));
+          if (!formsHere.length) { out.push({ store: s.name.en, form: null, note: `No separate ${pb.name.en.toLowerCase()} is listed in the library for ${s.address}; another filing may cover it there (find_official_forms lists what this place needs).` }); continue; }
+          for (const form of formsHere) {
+          // the same form for the same store comes back as the one already there (prepare_application never adds it twice)
           const prep = await run("prepare_application", { official_form_id: form.id, ...(stores.length > 1 || pb.perStore ? { store_id: s.id } : {}) });
           const id = str(prep.application_id);
           // reuse documents already in the workspace for what the checklist still misses
@@ -1594,9 +1614,13 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             });
             if (checklist.some((c, k) => c !== app.checklist[k])) apply(setApp(id, { checklist }));
           }
-          // the person's answers, on the lines that are still empty
-          const empty = new Set(((get().apps.find(a => a.id === id)?.fields ?? []).filter(f => isBlank(f.value)).map(f => f.label.en.toLowerCase())));
-          const fit = answers.filter(a => empty.has(a.label.toLowerCase()) || [...empty].some(e => e.endsWith(": " + a.label.toLowerCase())));
+          // lines the business profile already answers (its facts and the store's own address), before anyone is asked
+          const blank = () => (get().apps.find(a => a.id === id)?.fields ?? []).filter(f => isBlank(f.value));
+          const known = prefillFromProfile(blank().map(f => f.label.en), get().facts, s.address);
+          if (known.length) { try { await run("fill_fields", { application_id: id, fields: known.map(k => ({ ...k, source: lang === "zh" ? "来自您的企业资料" : "From your business profile" })) }); } catch { /* a value a validator refuses stays for the person to give */ } }
+          // the person's answers, on the lines that are still empty: matched by the line's label however it was written
+          // back ("Line 3: Owner name", "Owner name", "Owner name: as on the license", with or without a store's name)
+          const fit = blank().flatMap(f => { const a = answers.find(x => answerFits(x.label, f.label.en, s.name.en, stores.map(z => z.name.en))); return a ? [{ label: f.label.en, value: a.value }] : []; });
           if (fit.length) await run("fill_fields", { application_id: id, fields: fit.map(a => ({ ...a, source: lang === "zh" ? "您告诉我的" : "You told me" })) });
           const now = get().apps.find(a => a.id === id)!;
           const still = now.fields.filter(f => isBlank(f.value)), missing = now.checklist.filter(c => c.state === "missing");
@@ -1609,6 +1633,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           }
           out.push({ store: s.name.en, form: form.id, application_id: id, agency_time: form.takes?.en ?? null, renews: form.renews?.en ?? null,
             fee: form.fee, empty: still.length, missing_documents: missing.length, approval_requested: !!approval?.approval_id });
+          }
         }
         const list = (m: Map<string, Set<string>>) => [...m].map(([k, v]) => (chosen.length > 1 && v.size < chosen.length ? `${k} (${[...v].join(", ")})` : k));
         mark();

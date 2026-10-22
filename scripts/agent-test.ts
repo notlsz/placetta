@@ -3,6 +3,9 @@
    format, the way Claude would. Each scenario checks what the run did to the workspace, what it replied, its steps and
    audit trail, and that errors go back to the model instead of ending the run.
    npm run test:agent */
+import { entityNeed, homeStateOf } from "../src/entityHome";
+import { answerFits, prefillFromProfile } from "../src/filingPlaybooks/fill";
+import { formsFor as formsForReg, segmentOf as segmentOfReg } from "../src/forms/registry";
 import { DEFAULT_POLICY } from "../src/spend.ts";
 import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, TOKEN_CAP, tokensUsed, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
 import { fill, spawn, stillOpen, wake, type FamilyDb } from "../supabase/functions/agent-run/family";
@@ -559,7 +562,7 @@ async function progress() {
   ok(/PA-2291/.test(textOf(r)), "the reply gives the status");
   const sys = String(r.bodies[0].system);
   ok(/"id":"dl-late"/.test(sys), "the workspace snapshot lists deadline ids");
-  ok(/search_email for recent mail/.test(sys), "with a mailbox connected the prompt chains search_email");
+  ok(/search_email (\(query, days\) )?for recent mail/.test(sys), "with a mailbox connected the prompt chains search_email");
 }
 
 async function stores() {
@@ -2555,6 +2558,43 @@ console.log("\n# Filing playbooks: one call per kind, every store, one question"
   const r2 = callNamed(second, "follow_playbook")[0]?.parsed as { filings: { empty: number; approval_requested: boolean }[]; ask_once?: { answers: string[] } } | undefined;
   ok(r2 && r2.filings.every(f => f.empty === 0), "the second call fills every line on both stores from the one set of answers", r2);
   ok(callNamed(first, "follow_playbook").length + callNamed(second, "follow_playbook").length === 2 && first.calls.length + second.calls.length === 2, "two tool calls in two runs for two stores' permits, instead of a find, prepare, fill and approve per store");
+}
+
+/* ------------------------------------------------------------------ company registration and playbook filling */
+{
+  console.log("\n# The company itself: register where it's from another state, never form it again");
+  const F = (pairs: [string, string][]) => pairs.map(([l, v]) => ({ label: { en: l }, value: { en: v } }));
+  const ca = F([["Legal name", "Golden Leaf Foods LLC"], ["Entity", "California limited liability company"], ["EIN", "88-1234471"]]);
+  eq(homeStateOf(ca), "CA", "the home state from 'Entity: California limited liability company'");
+  eq(homeStateOf(F([["State of formation", "Delaware"]])), "DE", "from 'State of formation: Delaware'");
+  eq(homeStateOf(F([["成立州", "加州"]])), "CA", "and in Chinese");
+  eq(homeStateOf(F([["Owner", "Mei Lin, Washington Heights"]])), "", "a state's name in a fact that isn't about the company counts for nothing");
+  eq(entityNeed(ca, "NY"), "register", "a California LLC opening in New York registers there");
+  eq(entityNeed(ca, "CA"), "none", "and files nothing at home");
+  eq(entityNeed(F([["Legal name", "Golden Leaf Foods LLC"]]), "NY"), "ask", "a company whose home state isn't on file is asked about");
+  eq(entityNeed([], "NY"), "form", "with no company yet, it's formed");
+  const ny = formsForReg({ segment: segmentOfReg("milk tea shop"), where: "Flushing, NY", needs: { outOfState: true } });
+  ok(ny.some(f => f.id === "ny-dos-foreign-llc") && !ny.some(f => f.needs?.newEntity), "New York's Application for Authority, no formation", ny.map(f => f.id));
+  ok(!ny.some(f => f.level === "federal" && f.needs?.foreignEntity), "and no filing that's only for a company from another country (Form 5472, the BOIR)", ny.map(f => f.id));
+  for (const [where, id] of [["Phoenix, AZ", "az-acc-foreign"], ["Chicago, IL", "il-sos-foreign-llc"], ["Houston, TX", "tx-304"], ["Miami, FL", "fl-sunbiz-foreign-llc"], ["Seattle, WA", "wa-sos-foreign"]] as const)
+    ok(formsForReg({ segment: "restaurant", where, needs: { outOfState: true } }).some(f => f.id === id), `${where}: ${id}`);
+
+  console.log("\n# Playbooks fill from the profile and take answers by any form of the line's label");
+  const facts = F([["Legal name", "Golden Leaf Foods LLC"], ["Entity", "California limited liability company"], ["EIN", "88-1234471"], ["Owner", "Mei Lin, managing member"], ["Business phone", "408-555-0142"], ["Contact email", "mei@goldenleaf.example"], ["Mailing address", "100 N First St, San Jose, CA 95113"]]);
+  const got = Object.fromEntries(prefillFromProfile(["Line 1: Legal name of entity", "Federal Employer Identification Number (FEIN)", "Business Owner", "Owner E-Mail", "Business phone", "State of formation", "Business location address", "Mailing address", "Number of seats"], facts, "4250 Barranca Pkwy, Irvine, CA 92604").map(x => [x.label, x.value]));
+  eq(got["Line 1: Legal name of entity"], "Golden Leaf Foods LLC", "the legal name");
+  eq(got["Federal Employer Identification Number (FEIN)"], "88-1234471", "the EIN");
+  eq(got["Business Owner"], "Mei Lin, managing member", "the owner");
+  eq(got["Owner E-Mail"], "mei@goldenleaf.example", "the owner's email takes the email, not the owner's name");
+  eq(got["State of formation"], "California", "the state of formation, not the whole phrase");
+  eq(got["Business location address"], "4250 Barranca Pkwy, Irvine, CA 92604", "the premises take the store's address");
+  eq(got["Mailing address"], "100 N First St, San Jose, CA 95113", "the mailing line takes the mailing address");
+  ok(!("Number of seats" in got), "nothing is guessed: no fact, no value");
+  ok(answerFits("Business Owner", "Business Owner: name of the person who owns the business", "Irvine"), "an answer by the line's name fits the line with its description");
+  ok(answerFits("Line 3: Owner name", "Owner name", "Irvine") && answerFits("Owner name", "Line 3: Owner name", "Irvine"), "with or without 'Line N:'");
+  ok(answerFits("Tax ID (Houston, Bellaire Blvd)", "Tax ID", "Houston, Bellaire Blvd", ["Houston, Bellaire Blvd", "Chicago, China Pl"]), "a store's answer fits that store");
+  ok(!answerFits("Tax ID (Houston, Bellaire Blvd)", "Tax ID", "Chicago, China Pl", ["Houston, Bellaire Blvd", "Chicago, China Pl"]), "and not another store");
+  ok(answerFits("Trade name of business (if different from line 1)", "Line 2: Trade name of business (if different from line 1)", "Irvine"), "a label's own note in parentheses isn't taken for a store");
 }
 
 growthTests(ok, eq);

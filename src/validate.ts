@@ -43,7 +43,7 @@ export const premises: Validator = (v) => (PO_BOX.test(v)
 
 const CJK = /[㐀-鿿豈-﫿]/;
 export const latin: Validator = (v) => (CJK.test(v)
-  ? { level: "error", note: B("A US agency's form takes English letters. Write the name as it's registered with the state (in English letters).", "美国机构的表格只接受英文字母。请按州注册时的英文名称填写。") } : null);
+  ? { level: "error", note: B("A US agency's form takes English letters only: write this line in English (a name exactly as it's registered with the state), with no Chinese characters, not even in parentheses.", "美国机构的表格只接受英文字母：请用英文填写这一行（名称须与州登记的英文名称一致），不要包含任何中文，括号里也不行。") } : null);
 
 export const date: Validator = (v) => {
   if (!/\d/.test(v)) return null;

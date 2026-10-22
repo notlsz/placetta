@@ -129,6 +129,19 @@ export const US_GAPS: OfficialForm[] = [
     agency: ["Georgia Secretary of State, Corporations Division", "佐治亚州州务卿公司处"],
     how: ["A company formed elsewhere registers with the Corporations Division before transacting business in Georgia.", "在外州成立的公司须在佐治亚州经营前向公司处注册。"],
     url: "https://sos.ga.gov/how-to-guide/how-to-guide-register-foreign-entity" }),
+  E({ id: "az-acc-foreign", where: "AZ", level: "state", needs: { foreignEntity: true }, method: "online", order: 12, cur: "USD", fee: 150,
+    form: "Foreign Registration Statement (Form L025)", title: ["Registration of an out-of-state LLC", "外州 LLC 在亚利桑那州注册"],
+    agency: ["Arizona Corporation Commission, Corporations Division", "亚利桑那州公司委员会公司处"],
+    how: ["Filed online (Arizona Business Center) or on the paper form, with a certificate of existence from the home state dated within 60 days, a certified copy of the home-state formation documents and the statutory agent's acceptance (Form M002). No publication.", "在线（亚利桑那商业中心）或以纸质表格提交，附母州 60 天内出具的存续证明、母州设立文件的核证副本和法定代理人接受书（M002 表）。无需登报公告。"],
+    url: "https://azcc.gov/corporations/forms",
+    feeNote: ["$150; $35 more for expedited processing.", "150 美元；加急另付 35 美元。"],
+    proof: ["https://azcc.gov/docs/default-source/corps-files/instructions/l025i-instructions-application-for-registration7123c29d942a43c2810255de1f40cd19.pdf?sfvrsn=e87d3b27_12", "Filing fee. The filing fee is $150.00. For Expedited processing, add $35.00."] }),
+  // UNVERIFIED: ilsos.gov refused every automated read; the form's number and name are from its own index, the fee isn't stated
+  E({ id: "il-sos-foreign-llc", where: "IL", level: "state", needs: { foreignEntity: true }, method: "online", order: 12, cur: "USD",
+    form: "Form LLC-45.5, Application for Admission to Transact Business", title: ["Registration of an out-of-state LLC", "外州 LLC 在伊利诺伊州注册"],
+    agency: ["Illinois Secretary of State, Department of Business Services", "伊利诺伊州州务卿商业服务处"],
+    how: ["An LLC formed elsewhere applies to the Secretary of State for admission before doing business in Illinois.", "在外州成立的 LLC 须在伊利诺伊州开展业务前向州务卿申请准入。"],
+    url: "https://www.ilsos.gov/publications/business-services/llc.html" }),
 
   /* ------------------------------------------------------------------ trade names (doing business under another name) */
   E({ id: "ny-assumed-name", where: "NY", level: "state", needs: { reference: true }, method: "pdf_mail", order: 14, cur: "USD",

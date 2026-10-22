@@ -73,7 +73,8 @@ const TEAM = B("Placetta's team files it when the agency needs a wet signature, 
 export const PLAYBOOKS: Playbook[] = [
   {
     id: "business_license", name: B("Business license or tax certificate", "营业执照或营业税证书"), perStore: true,
-    match: f => (f.level === "city" || f.level === "county") && /business (tax|license|registration|operations tax)|commercial activity license|\bbpol\b|business certificate/i.test(t(f)) && !NOT.test(f.title.en),
+    // a city or county license, or a state business license (Washington's: its state tax registration too)
+    match: f => ((f.level === "city" || f.level === "county") && /business (tax|license|registration|operations tax)|commercial activity license|\bbpol\b|business certificate/i.test(t(f)) || f.level === "state" && /\bbusiness license\b/i.test(t(f))) && !NOT.test(f.title.en),
     inputs: [LEGAL, EIN, PREMISES, OWNER, PHONE, OPENING],
     documents: [{ key: "lease", label: B("Signed lease", "签署的租约"), reuse: /lease|租约/i }],
     steps: COMMON_STEPS, rejections: [R.jurisdiction, R.legal, R.premises, R.ein, R.latin, R.twice, R.readback],

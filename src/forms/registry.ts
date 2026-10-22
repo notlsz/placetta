@@ -27,7 +27,7 @@ export type Segment = "restaurant" | "retail" | "seller" | "warehouse";
 export type Where = string;
 export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" | "insurer" | "none";
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
-export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
+export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; outOfState?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
   wood?: boolean; upholstered?: boolean; clothingStorage?: boolean;
   terrace?: boolean };   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
 
@@ -827,8 +827,16 @@ const usFormAbroad = (f: OfficialForm, places: Where[]) => !places.includes("US"
 export function formsFor(o: { segment: Segment; where: string; needs?: Needs }): OfficialForm[] {
   const places = placesOf(o.where), have = o.needs ?? {};
   return FORMS.filter(f => places.includes(f.where) && !(f.except ?? []).some(x => places.includes(x)) && !usFormAbroad(f, places) && f.segments.includes(o.segment)
-    && Object.keys(f.needs ?? {}).every(k => have[k as keyof Needs]) && !(f.unless ?? []).some(k => have[k]))
+    && Object.keys(f.needs ?? {}).every(k => needMet(f, k as keyof Needs, have)) && !(f.unless ?? []).some(k => have[k]))
     .sort((a, b) => (formsEntity(a) ? 5 : a.order) - (formsEntity(b) ? 5 : b.order));
+}
+
+/** Whether a form's need is met. A state's registration for a company formed elsewhere (needs foreignEntity, level
+ *  state) applies both to a company from another US state (outOfState: a California LLC opening in New York) and to one
+ *  from another country; the federal filings for foreign-owned companies (Form 5472, the BOIR) only to the second. */
+export function needMet(f: OfficialForm, k: keyof Needs, have: Needs): boolean {
+  if (k === "foreignEntity" && f.level !== "federal") return !!(have.foreignEntity || have.outOfState);
+  return !!have[k];
 }
 
 /** A form that creates the company itself: filed first, since the EIN and every registration carry its name and number

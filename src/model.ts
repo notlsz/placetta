@@ -481,7 +481,7 @@ export const SAMPLE: Workspace = {
     },
     {
       id: "btc", name: B("Business Tax Certificate", "营业税证书"), agency: B("San Jose Finance Department", "圣何塞市财政局"), level: "city", status: "review",
-      next: B("Filed 2 days ago. Decision expected in about 12 days", "2 天前已提交，预计约 12 天后出结果"), fees: [{ label: B("Business tax, 6 employees", "营业税，6 名员工"), amount: 243 }], feeNote: B("Paid. Sample amount.", "已支付。示例金额。"),
+      next: B("Filed with the city. Waiting on its decision", "已向市政府提交，等待审批结果"), fees: [{ label: B("Business tax, 6 employees", "营业税，6 名员工"), amount: 243 }], feeNote: B("Paid. Sample amount.", "已支付。示例金额。"),
       est: B("Usually 1 to 2 weeks", "通常 1 至 2 周"), source: SRC.sj, form: B("Business tax registration", "营业税登记"), receipt: "d-btc", renews: B("Every year", "每年"),
       fields: [F("name", "Business name", "企业名称", NAME, fromCtx), F("addr", "Business address", "营业地址", ADDR, fromLease), F("staff", "Employees", "员工人数", "6", fromYou), F("start", "Start date in San Jose", "在圣何塞开始营业日期", "March 2027", fromYou)],
       checklist: [{ id: "ein", label: B("EIN", "EIN"), state: "done", doc: "d-ein" }, { id: "seller", label: B("Seller's permit", "销售许可证"), state: "done", doc: "d-seller" }],

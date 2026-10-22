@@ -22,6 +22,7 @@ import { B, same } from "../src/bi";
 import type { Workspace } from "../src/model";
 import { SAMPLE_WS } from "../src/sample";
 import { formsFor, segmentOf } from "../src/forms/registry";
+import { proofCurrent } from "../src/plan/ask";
 import { claimsAction, injected } from "../src/guard";
 import { stampFilings } from "../src/finish";
 import { callModel, canConverse, DEFAULT_ROUTES, PROVIDER_KEYS, type Call } from "../supabase/functions/_shared/llm";
@@ -501,7 +502,13 @@ export function grade(sc: Scenario, r: { before: Workspace; w: Workspace; reply:
   const apps = new Set(w.apps.map(a => a.official).filter(Boolean));
   if (e.forms?.length) c(`the city's own permits are there (${e.forms.join(", ")})`, e.forms.every(f => apps.has(f)), [...apps]);
   if (e.coverage) {
-    const want = baseForms(e.coverage.business, e.coverage.place).map(f => f.id);
+    // the forms it must prepare: not one the business already has done (an EIN on file needs no SS-4), not one only
+    // some businesses file (a DBA, for a store trading under another name), and not one no current official quote backs
+    // (Odelia's rules: a claim-false filing is never stated as required)
+    const hasEin = b.facts.some(f => /\bein\b|employer identification/i.test(f.label.en) && /\d{2}-?\d{7}/.test(f.value.en));
+    const want = baseForms(e.coverage.business, e.coverage.place)
+      .filter(f => !(hasEin && f.id === "irs-ss4") && !/assumed name|\bdba\b|trade name|fictitious|doing business as/i.test(`${f.form} ${f.title.en}`) && !!(f.proof && proofCurrent(f.proof, new Date().toISOString().slice(0, 10))))
+      .map(f => f.id);
     const got = want.filter(f => apps.has(f)).length;
     c(`at least ${Math.round(e.coverage.at * 100)}% of the registry's permits for it`, got / Math.max(1, want.length) >= e.coverage.at, `${got} of ${want.length}: missing ${want.filter(f => !apps.has(f)).join(", ")}`);
   }
@@ -512,7 +519,15 @@ export function grade(sc: Scenario, r: { before: Workspace; w: Workspace; reply:
   if (e.noNewApps) c("nothing invented: no application added", w.apps.length === b.apps.length, w.apps.map(a => a.name.en));
   for (const t of e.tools ?? []) c(`used ${t}`, ok(t), r.calls.map(x => x.name));
   if (e.noChange) { const strip = (x: Workspace) => JSON.stringify({ ...x, audit: [], jobs: [], undo: [] }); c("the workspace didn't change", strip(w) === strip(b), Object.keys({ ...w, ...b }).filter(k => !["audit", "jobs", "undo"].includes(k) && JSON.stringify((w as Record<string, unknown>)[k]) !== JSON.stringify((b as Record<string, unknown>)[k])).map(k => `${k}: ${JSON.stringify((w as Record<string, unknown>)[k]).slice(0, 160)}`)); }
-  if (e.routine) { const rt = (w.routines ?? []).filter(x => !(b.routines ?? []).some(y => y.id === x.id)); c(`a ${e.routine.every} routine${e.routine.day !== undefined ? ` on day ${e.routine.day}` : ""}`, rt.length === 1 && rt[0].every === e.routine.every && (e.routine.day === undefined || rt[0].day === e.routine.day), rt); }
+  if (e.routine) {
+    // a routine added, or one already there changed to do this ("make that Fridays"), or one already there that does
+    // exactly this (asked again for a routine the workspace has: updating or keeping it is right, not adding a second)
+    const fits = (x: { every: string; day?: number }) => x.every === e.routine!.every && (e.routine!.day === undefined || x.day === e.routine!.day);
+    const was = (x: { id: string }) => (b.routines ?? []).find(y => y.id === x.id);
+    const touched = (w.routines ?? []).filter(x => { const y = was(x); return !y || JSON.stringify(y) !== JSON.stringify(x); });
+    const rt = touched.length ? touched : (w.routines ?? []).filter(fits);
+    c(`a ${e.routine.every} routine${e.routine.day !== undefined ? ` on day ${e.routine.day}` : ""}`, rt.length === 1 && fits(rt[0]), rt);
+  }
   if (e.job) { const j = (w.jobs ?? []).find(x => !(b.jobs ?? []).some(y => y.id === x.id)); c("kept a plan of 3+ steps with a done list", !!j && j.steps.length >= 3 && (j.done?.length ?? 0) >= 1, j && { steps: j.steps.length, done: j.done?.length }); c("the separate checker looked at the work", r.checkerRan); }
   for (const d of e.deadlines ?? []) c(`a deadline on ${d}`, w.deadlines.some(x => x.date === d), w.deadlines.map(x => x.date));
   for (const d of e.noDeadlines ?? []) c(`no new deadline left on ${d}`, !w.deadlines.some(x => x.date === d && !b.deadlines.some(y => y.id === x.id)), w.deadlines.map(x => x.date));

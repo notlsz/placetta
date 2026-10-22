@@ -687,8 +687,8 @@ async function chinese() {
     script: [
       () => ask(["add_store", { name: "法拉盛店", address: "136-20 Roosevelt Ave", city: "Flushing", state: "NY", planned_open: "2027-03-01" }], ["find_official_forms", { business: "奶茶店", place: "Flushing, NY" }]),
       c => ask(["set_plan", { title: "开设法拉盛店", steps: [{ title: "梳理许可" }, { title: "准备申请" }, { title: "提交审批" }], done: ["每项许可都有申请", "完整的申请已提交审批"] }], ["prepare_application", { official_form_id: "nyc-fse", store_id: c.out("add_store").store_id }],
-        ["prepare_application", { official_form_id: "irs-ss4", fields: [{ label: "1", value: "幸运叶茶饮有限公司" }] }]),
-      c => { const ss4 = c.calls.find(x => x.name === "prepare_application" && x.input.official_form_id === "irs-ss4")!.parsed!; return ask(["fill_fields", { application_id: ss4.application_id, fields: (ss4.empty_fields as string[]).map(l => ({ label: l, value: plausible(l) ?? "幸运叶" })) }]); },
+        ["prepare_application", { official_form_id: "irs-ss4", fields: [{ label: "1", value: "Lucky Leaf Tea LLC" }] }]),
+      c => { const ss4 = c.calls.find(x => x.name === "prepare_application" && x.input.official_form_id === "irs-ss4")!.parsed!; return ask(["fill_fields", { application_id: ss4.application_id, fields: (ss4.empty_fields as string[]).map(l => ({ label: l, value: plausible(l) ?? "Lucky Leaf" })) }]); },
       c => { const id = c.calls.find(x => x.name === "prepare_application" && x.input.official_form_id === "irs-ss4")!.parsed!.application_id; return ask(["request_filing_approval", { application_id: id }], ["draft_message", { to: "房东", message: "请签署房东同意书。", title: "请房东签署同意书" }], ["check_progress", {}],
         ["set_plan", { title: "开设法拉盛店", steps: [{ title: "梳理许可", done: true }, { title: "准备申请", done: true }, { title: "提交审批", done: true }] }]); },
       () => say("已添加法拉盛店，准备了餐饮服务许可证和 EIN 申请。EIN 申请等待您批准。"),
@@ -781,6 +781,7 @@ async function toolMatrix() {
         ["remember", { label: "Hours", value: "10am to 10pm" }], bad("remember", { label: "", value: "" }),
         ["network_lessons", { city: "Flushing", region: "NY" }], bad("network_lessons", {}),
         ["skill_read", { id: "open-a-store" }], bad("skill_read", {}),
+        ["follow_playbook", { playbook: "health_permit", store_ids: ["st1"] }], bad("follow_playbook", { playbook: "no_such_playbook" }),
         ["skill_save", { kind: "place", city: "Flushing", name: "Open in Flushing", description: "Local steps", steps: "1. Food permit." }], bad("skill_save", { kind: "workflow", name: "x", description: "x", steps: "Owner SSN 123-45-6789" }),
       ),
       () => askAll(
