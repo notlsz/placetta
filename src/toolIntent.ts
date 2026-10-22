@@ -45,7 +45,7 @@ export const groupOf = (tool: string): string | null => {
 export const LOAD_TOOLS = "load_tools";
 
 // words too common to tie a request to a connected app (and the third-party note every app tool's description carries)
-const COMMON = new Set("about after again also before being could doing every first from have here into just like make more most much need only other over please should some still than that their them then there these they this those through under until using want were what when where which while will with within would your yours tool tools output party third treat never instructions comes come data".split(" "));
+const COMMON = new Set("about after again also before being could doing every first from have here into just like make more most much need only other over please should some still than that their them then there these they this those through under until using want were what when where which while will with within would your yours tool tools output party third treat never instructions comes come data search query fetch create update delete lookup".split(" "));
 const wordsOf = (t: string) => new Set((t.toLowerCase().match(/[a-z]{5,}/g) ?? []).filter(w => !COMMON.has(w)));
 
 /** The groups a request is about: its words, files sent with it, a store's bot, and each connected app it names or
