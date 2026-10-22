@@ -18,7 +18,7 @@ begin
   insert into public.workspace_members (workspace_id, user_id, role) select id, a, 'owner' from public.workspaces where id in (w1, w2, w3, w4, w5, w6);
   insert into public.billing (workspace_id, subscription_status, subscription_plan, paid_locations) values
     (w1, 'active', 'locations', 1), (w2, 'active', 'pro', 2), (w4, 'active', 'locations', 1), (w5, 'active', 'locations', 1), (w6, 'active', 'locations', 1);
-  insert into public.billing (workspace_id, entry_markets, entry_paid_at) values (w3, 1, now() - interval '2 days');
+  insert into public.billing (workspace_id, price_model, entry_markets, entry_paid_at) values (w3, 'legacy', 1, now() - interval '2 days');
 
   -- 1. role and vendor land on the event; the old five-argument call still works
   g := public.ai_gate(w1, a, 'call', null);

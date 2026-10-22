@@ -15,7 +15,9 @@ begin
     (wo, 'Opening', now(), x, x, '{"stores":[{"id":"s1","stage":"opening"},{"id":"s2","stage":"open"},{"id":"s3","stage":"opening"}]}');
   insert into public.workspace_members (workspace_id, user_id, role) values (w1, a, 'owner'), (w2, a, 'owner'), (wm, x, 'owner'), (we, x, 'owner'), (wo, x, 'owner');
 
-  -- No paid plan, no AI: not even a small trial, and a new workspace changes nothing
+  -- No paid plan, no AI: not even a small trial, and a new workspace changes nothing. (A customer from before the simple
+  -- model, 'legacy'; on the simple model a workspace gets a small free allowance, supabase/tests/simple_pricing.sql.)
+  insert into public.billing (workspace_id, price_model) values (w1, 'legacy'), (w2, 'legacy');
   g := public.ai_gate(w1, a, 'call', null);
   res := res || jsonb_build_object('no plan, no AI', not (g->>'ok')::boolean and g->>'code' = 'plan_required' and (g->'budget'->>'limit_usd')::numeric = 0);
   g := public.ai_gate(w2, a, 'task', null);
@@ -54,7 +56,7 @@ begin
   res := res || jsonb_build_object('opening stores add budget only when paid and opening', (public.ai_budget(wo)->>'budget_usd')::numeric = 125);
 
   -- Entry: $15 a market for 30 days, then it ends
-  insert into public.billing (workspace_id, entry_markets, entry_paid_at) values (we, 2, now() - interval '3 days');
+  insert into public.billing (workspace_id, price_model, entry_markets, entry_paid_at) values (we, 'legacy', 2, now() - interval '3 days');
   res := res || jsonb_build_object('entry, $15 a market', (public.ai_budget(we)->>'budget_usd')::numeric = 30 and public.ai_budget(we)->>'plan' = 'entry');
   update public.billing set entry_paid_at = now() - interval '31 days' where workspace_id = we;
   g := public.ai_gate(we, x, 'call', null);
