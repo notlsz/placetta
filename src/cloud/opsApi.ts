@@ -1,3 +1,4 @@
+import type { Span } from "../trace";
 import type { Bi } from "../model";
 import { supabase, type ApiError } from "./api";
 
@@ -40,6 +41,9 @@ export type RunReplay = {
   steps: { state: string; label: Bi; tool?: string }[]; reply: Bi[] | null; cost_usd: number;
   calls: { at: string; kind: string; role: string | null; provider: string | null; model: string | null; cost_usd: number; saver: boolean | null }[];
   checks: { job_id: string; passed: number; of: number; at: string }[];
+  /** Each model and tool call (src/trace.ts), and the run's own token, cache and cost totals; absent on older servers. */
+  trace?: Span[];
+  run_tokens?: { calls: number | null; input: number | null; output: number | null; cache_read: number | null; cache_write: number | null; cost_usd: number | null };
 };
 export type Incident = { id: string; happened_at: string; title: string; impact: string; fix: string | null; public: boolean; by: string | null; created_at: string };
 export type GovernanceReport = { week: string; summary: Partial<Health>; emailed_to: number; updates: number };

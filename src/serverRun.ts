@@ -6,6 +6,7 @@ import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
 import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runAll, runTool, type Block, type Made, type Role, type Services, type Source, type Tool, type Turn } from "./live";
 import { groupOf, groupsFor, toolLoader } from "./toolIntent";
+import { addSpan, modelSpan, type Span } from "./trace";
 import { B } from "./bi";
 import { MAIN_BOT, proven, reconcile, settleJobs, STOPPED_HERE, type Job } from "./jobs";
 import { finishWork, reportLines, stampFilings } from "./finish";
@@ -97,6 +98,8 @@ export type RunState = {
   cache?: CacheStats;
   /** The tool groups offered so far (src/toolIntent.ts), so a resumed chunk offers the same tools. */
   toolGroups?: string[];
+  /** The trace (src/trace.ts): each model call and tool call, when, how long, tokens, cache and price. */
+  trace?: Span[];
 };
 
 const MAX_ROUNDS = 16;
@@ -296,6 +299,17 @@ export async function runRounds(o: {
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
+  // the trace: every model call this run makes (the main loop's, the checker's, document reads) as a span
+  const since = () => Date.now() - Date.parse(st.started!);
+  const send0 = o.send;
+  o = { ...o, send: async (body, deep, role, onText) => {
+    const t0 = Date.now(), at = since();
+    try {
+      const data = await send0(body, deep, role, onText);
+      addSpan(st.trace ??= [], modelSpan(role ?? "plan", at, Date.now() - t0, data as { usage?: unknown; model?: unknown; usd?: unknown }));
+      return data;
+    } catch (e) { addSpan(st.trace ??= [], modelSpan(role ?? "plan", at, Date.now() - t0, {}, false)); throw e; }
+  } };
   // each application's answers as the run found them: the ones it changes get their form filled again at the end
   st.forms ??= Object.fromEntries(o.ws().apps.map(a => [a.id, answersHash(a)]));
   if (st.rounds === 0) {
@@ -494,6 +508,7 @@ export async function runRounds(o: {
         const refused = channelRefuses(from, name, input) ?? childRefuses(o.child, name);
         st.toolCalls = (st.toolCalls ?? 0) + 1;   // for the team's Agent health page
         let out: Record<string, unknown>, content: string, error: boolean;
+        const t0 = Date.now(), at = since();
         if (refused) {
           out = { type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true };
           content = refused; error = true;
@@ -506,6 +521,7 @@ export async function runRounds(o: {
           content = r.content; error = !!r.is_error;
         }
         if (error) st.toolErrors = (st.toolErrors ?? 0) + 1;
+        addSpan(st.trace ??= [], { k: "tool", n: name.slice(0, 80), at, ms: Date.now() - t0, ...(error ? { ok: false } : {}) });
         // the replay: what she used, what she gave it, what came back and what it changed, and any approval it put up
         if ((st.moments ?? 0) < MAX_MOMENTS) {
           st.moments = (st.moments ?? 0) + 1;

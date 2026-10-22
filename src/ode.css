@@ -52,6 +52,11 @@ button.pt-tag { cursor: pointer; }
 .pt-months th, .ah-t th { padding: 6px 10px 8px 0; text-align: left; font-weight: 500; font-size: 12.5px; color: var(--ink3); white-space: nowrap; }
 .pt-months td, .ah-t td { padding: 9px 10px 9px 0; border-top: 1px solid rgba(var(--e), .06); font-variant-numeric: tabular-nums; }
 .pt-months td small, .ah-t td small { color: var(--ink3); }
+/* the run trace (src/cloud/OpsMore.tsx Trace): one bar per call on the run's time line */
+.tr-t .tr-line { min-width: 160px; width: 30%; }
+.tr-t .tr-bar { display: block; height: 8px; border-radius: 4px; background: rgba(var(--e), .35); }
+.tr-t .tr-bar.tool { background: rgba(var(--e), .16); }
+.tr-t tr.bad td { color: var(--warm, #a33); }
 .ah-t td { white-space: nowrap; }
 .pt-pay { display: flex; flex-direction: column; gap: 2px; margin: 12px 0 0; padding: 6px; list-style: none; border-radius: 16px; background: var(--mist); }
 .pt-pay li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 10px; font-size: 13.5px; }

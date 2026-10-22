@@ -189,8 +189,10 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
     throw out.status === 429 || out.status === 529 ? err("rate_limited", "The agent is busy. Try again in a moment.") : err(out.status === 401 || out.status === 503 ? "not_configured" : "upstream_error", "Couldn't reach the agent's model. Try again.");
   }
   const data = out.data as { content: Block[]; stop_reason: string; usage?: Record<string, never> };
-  who.spent += await record(admin, g.event, out.model, data.usage, role);
-  return data as { content: never[]; stop_reason: string };
+  const usd = await record(admin, g.event, out.model, data.usage, role);
+  who.spent += usd;
+  // the model and price ride along for the run's trace (src/trace.ts)
+  return { ...data, model: out.model, usd } as unknown as { content: never[]; stop_reason: string };
 }
 
 /** The function's own secret values (any env var named like a key, secret, token or password), read once. */
@@ -476,6 +478,11 @@ async function saveMemory(run: Run, rm: RunMemory | undefined, state: RunState, 
 }
 /** The run's prompt cache use and cost, for the agent run log (agent_runs.cache_*). Best effort before the migration. */
 async function cacheLog(runId: string, st: RunState) {
+  // the trace for the team's Replay: names and numbers only (src/trace.ts)
+  if (st.trace?.length) {
+    const { error: e2 } = await admin.rpc("agent_run_trace", { p_id: runId, p_trace: st.trace });
+    if (e2) console.error("agent_run_trace", e2.code ?? "");
+  }
   const c = st.cache as { calls: number; input: number; read: number; write: number; output: number; prefix?: string } | undefined;
   if (!c) return;
   const { error } = await admin.rpc("agent_run_cache", { p_id: runId, p_calls: c.calls, p_in: c.input, p_read: c.read, p_write: c.write, p_out: c.output, p_cost: Number(st.spent) || 0, p_prefix: c.prefix ?? null });

@@ -36,6 +36,7 @@ import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
 import { groupOf, groupsFor, toolTokens } from "../src/toolIntent";
 import { checkArgs } from "../src/toolArgs";
 import { fromRow, merge, napper, pollDelay, startFeed } from "../src/cloud/runFeed";
+import { addSpan, MAX_SPANS, totals, type Span } from "../src/trace";
 import { readdirSync, readFileSync } from "node:fs";
 import { addRule, allowOptions, allowRule, autoOk, HOUSE_MAX, houseBrief, houseCheck, jobsDone, markSecond, planApprovalId, runMode, secondStep, workPrompt } from "../src/autonomy";
 import { addUndo, undoRun } from "../src/rewind";
@@ -2423,6 +2424,31 @@ console.log("\n# Audit trail export (CSV)");
   ok(b4.ok && (bad.w.deadlines ?? []).filter(d => d.title.en === "Opening").length === 1, "the fixed call runs; an extra argument the schema doesn't name doesn't block it", b4.out);
   eq(checkArgs({ type: "object", properties: { n: { type: "integer", minimum: 1 }, tags: { type: "array", items: { type: "string" }, maxItems: 2 } } }, { n: 0, tags: ["a", 3, "c"] }).errors,
     ["n must be at least 1, got 0", "tags takes at most 2 items, got 3", "tags[1] must be string, got integer 3"], "checkArgs: minimum, maxItems, item types");
+}
+
+/* ------------------------------------------------------------------ the run trace for the team */
+{
+  console.log("\n# The run trace (src/trace.ts): every model and tool call, timed, with tokens, cache and price");
+  const { svc } = account();
+  const r = await agent({ ws: workspace({ apps: [app("a1", "draft")] }), svc, prompt: "Where are we?", delay: 5, script: [
+    () => ask(["check_progress", {}], ["made_up_tool", {}]),
+    () => say("One application is in draft."),
+  ] });
+  const spans = r.state.trace ?? [];
+  const models = spans.filter(x => x.k === "model"), tools = spans.filter(x => x.k === "tool");
+  eq([models.length, tools.map(x => [x.n, x.ok !== false])], [r.bodies.length, [["check_progress", true], ["made_up_tool", false]]], "a span for every model call and every tool call, failures marked");
+  ok(models.every(x => x.ms >= 4 && x.at >= 0) && tools[0].at >= models[0].at + models[0].ms, "spans are timed from the run's start, in order", spans);
+  ok(!JSON.stringify(spans).includes("Where are we"), "no prompt or tool input is kept");
+  const t = totals([
+    { k: "model", n: "plan", at: 0, ms: 900, model: "gemini-flash", in: 200, read: 800, write: 0, out: 120, usd: 0.0012 },
+    { k: "tool", n: "check_progress", at: 900, ms: 40 },
+    { k: "model", n: "plan", at: 950, ms: 600, in: 100, read: 900, write: 0, out: 60, usd: 0.0008 },
+    { k: "tool", n: "fill_fields", at: 1550, ms: 15, ok: false },
+  ]);
+  eq([t.calls, t.tools, t.tool_errors, t.model_ms, t.wall_ms, t.read, t.hit, t.usd, t.slowest[0]], [2, 2, 1, 1500, 1565, 1700, 85, 0.002, "plan"], "totals: calls, errors, time, cache hit rate and cost");
+  const many: Span[] = [];
+  for (let i = 0; i < 200; i++) addSpan(many, { k: "tool", n: "x", at: i, ms: 1 });
+  eq(many.length, MAX_SPANS, "a long run keeps at most 150 spans");
 }
 
 /* ------------------------------------------------------------------ live run updates: pushed and polled, merged */

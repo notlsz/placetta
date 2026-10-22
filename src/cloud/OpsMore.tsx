@@ -8,6 +8,7 @@ import * as ops from "./opsApi";
 import * as pa from "./partnersApi";
 import { KIND as PARTNER_KIND } from "../Partner";
 import "../ode.css";
+import { totals, type Span } from "../trace";
 
 /* The team's pages beside the filing queue (src/cloud/Ops.tsx): the specialist review queue with its one-business-day
    target, Agent health (how Odelia runs: speed, first-try checks, tool errors, cost by vendor and model, saver mode,
@@ -142,6 +143,38 @@ function ReviewQueue() {
 
 /* ------------------------------ Agent health ------------------------------ */
 
+/** The run's trace: each model and tool call on one time line, with tokens, cache reads and price (src/trace.ts). */
+function Trace({ spans }: { spans: Span[] }) {
+  const { lang } = useApp();
+  const zh = lang === "zh";
+  const t = totals(spans);
+  const wall = Math.max(t.wall_ms, 1);
+  const n = (x: number | undefined) => (x == null ? "-" : x.toLocaleString("en-US"));
+  const sec = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`);
+  return (<>
+    <dl className="rr-kv">
+      <div><dt>{zh ? "模型调用" : "Model calls"}</dt><dd>{zh ? `${t.calls} 次，${sec(t.model_ms)}` : `${t.calls}, ${sec(t.model_ms)}`}</dd></div>
+      <div><dt>{zh ? "工具调用" : "Tool calls"}</dt><dd>{zh ? `${t.tools} 次，${sec(t.tool_ms)}，${t.tool_errors} 次出错` : `${t.tools}, ${sec(t.tool_ms)}, ${t.tool_errors} errors`}</dd></div>
+      <div><dt>{zh ? "令牌（输入，输出）" : "Tokens in, out"}</dt><dd>{n(t.in + t.read + t.write)}, {n(t.out)}</dd></div>
+      <div><dt>{zh ? "缓存命中" : "Cache hits"}</dt><dd>{t.hit == null ? "-" : `${t.hit}%`}{t.read ? (zh ? `，${n(t.read)} 个令牌` : `, ${n(t.read)} tokens`) : ""}</dd></div>
+      <div><dt>{zh ? "成本" : "Cost"}</dt><dd>{usd(t.usd, 4)}</dd></div>
+    </dl>
+    <div className="tscroll"><table className="ah-t tr-t">
+      <thead><tr><th>{zh ? "开始" : "Start"}</th><th>{zh ? "调用" : "Call"}</th><th className="tr-line">{zh ? "时间线" : "Time line"}</th><th>{zh ? "耗时" : "Took"}</th><th>{zh ? "输入" : "In"}</th><th>{zh ? "缓存读取" : "Cache read"}</th><th>{zh ? "输出" : "Out"}</th><th>{zh ? "成本" : "Cost"}</th></tr></thead>
+      <tbody>{spans.map((s, i) => (
+        <tr key={i} className={s.ok === false ? "bad" : undefined}>
+          <td>+{sec(s.at)}</td>
+          <td>{s.k === "model" ? <><b>{word(s.n, zh)}</b><small> {s.model ?? ""}</small></> : <code>{s.n}</code>}{s.ok === false && <small>{zh ? "，失败" : ", failed"}</small>}</td>
+          <td className="tr-line"><span className={"tr-bar " + s.k} style={{ marginLeft: `${(100 * s.at) / wall}%`, width: `${Math.max(0.6, (100 * s.ms) / wall)}%` }} /></td>
+          <td>{sec(s.ms)}</td>
+          <td>{s.k === "model" ? n(s.in) : ""}</td><td>{s.k === "model" ? n(s.read) : ""}</td><td>{s.k === "model" ? n(s.out) : ""}</td>
+          <td>{s.k === "model" ? usd(s.usd, 4) : ""}</td>
+        </tr>
+      ))}</tbody>
+    </table></div>
+  </>);
+}
+
 function Replay({ id, onClose }: { id: string; onClose: () => void }) {
   const { b, lang } = useApp();
   const zh = lang === "zh";
@@ -170,6 +203,7 @@ function Replay({ id, onClose }: { id: string; onClose: () => void }) {
           <p className="rr-prompt">{r.prompt}</p>
           <h3>{zh ? "步骤" : "Steps, in order"}</h3>
           <ol className="rr-steps">{r.steps.map((x, i) => <li key={i}>{b(x.label)}{x.tool ? <code>{x.tool}</code> : null}</li>)}</ol>
+          {r.trace && r.trace.length > 0 && <><h3>{zh ? "运行轨迹" : "Trace"}</h3><Trace spans={r.trace} /></>}
           <h3>{zh ? "AI 调用" : "AI calls while it ran"}</h3>
           {r.calls.length ? (
             <div className="tscroll"><table className="ah-t"><thead><tr><th>{zh ? "时间" : "At"}</th><th>{zh ? "用途" : "Role"}</th><th>{zh ? "服务商" : "Vendor"}</th><th>{zh ? "模型" : "Model"}</th><th>{zh ? "成本" : "Cost"}</th><th>{zh ? "节省模式" : "Saver"}</th></tr></thead>

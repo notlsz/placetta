@@ -26,12 +26,17 @@ begin
   update public.agent_runs set draft = 'Here is your plan' where id = r1;
   res := res || jsonb_build_object('the first words set the first reply time', (select first_text_at is not null and done_at is null from public.agent_runs where id = r1));
   update public.agent_runs set first_text_at = created_at + interval '4 seconds' where id = r1;
+  -- its trace (20261023110000_run_trace), saved by agent-run when it ends; one too long is dropped, never cut
+  perform public.agent_run_trace(r1, '[{"k":"model","n":"plan","at":0,"ms":900,"in":200,"read":800,"out":120,"usd":0.0012},{"k":"tool","n":"check_progress","at":900,"ms":40}]');
+  res := res || jsonb_build_object('a trace is saved on its run', (select jsonb_array_length(trace) = 2 from public.agent_runs where id = r1));
   update public.agent_runs set status = 'done', reply = '{"text":[{"en":"Done","zh":"完成"}]}', draft = null where id = r1;
   res := res || jsonb_build_object('finishing sets the done time', (select done_at is not null from public.agent_runs where id = r1),
     'a later save keeps the first reply time', (select first_text_at = created_at + interval '4 seconds' from public.agent_runs where id = r1));
   update public.agent_runs set done_at = created_at + interval '30 seconds' where id = r1;
   -- a second run that failed, with no reply
   insert into public.agent_runs (id, workspace_id, created_by, prompt, status, created_at, updated_at) values (r2, w2, b, 'File my EIN', 'running', now() - interval '2 minutes', now() - interval '2 minutes');
+  perform public.agent_run_trace(r2, (select jsonb_agg(jsonb_build_object('k', 'tool', 'n', 'x', 'at', g, 'ms', 1)) from generate_series(1, 151) g));
+  res := res || jsonb_build_object('a trace over 150 spans isn''t saved', (select trace is null from public.agent_runs where id = r2));
   update public.agent_runs set status = 'failed', error = 'The agent hit a problem and stopped. Try again.', updated_at = now() where id = r2;   -- agent-run saves updated_at with every write
   res := res || jsonb_build_object('a failed run has no first reply, and ends at its last save', (select first_text_at is null and public.agent_run_end(r) = r.updated_at from public.agent_runs r where id = r2));
 
@@ -61,6 +66,8 @@ begin
   res := res || jsonb_build_object('nor replay a run', ok);
   begin perform public.agent_run_tools(r1, 0, 0); ok := false; exception when insufficient_privilege then ok := true; end;
   res := res || jsonb_build_object('nor change tool counts', ok);
+  begin perform public.agent_run_trace(r1, '[]'); ok := false; exception when insufficient_privilege then ok := true; end;
+  res := res || jsonb_build_object('nor write a trace', ok);
 
   perform set_config('request.jwt.claims', json_build_object('sub', st, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   j := public.agent_health(7);
@@ -76,7 +83,8 @@ begin
     'the costliest run, from its workspace''s calls while it ran', j->'costliest'->0->>'id' = r1::text and (j->'costliest'->0->>'cost_usd')::numeric = 0.042);
   j := public.agent_run_replay(r1);
   res := res || jsonb_build_object('a replay has the steps', jsonb_array_length(j->'steps') = 1, 'its calls', jsonb_array_length(j->'calls') = 1,
-    'its timing', (j->>'first_reply_at') is not null and (j->>'done_at') is not null, 'and its checks', jsonb_array_length(j->'checks') = 1);
+    'its timing', (j->>'first_reply_at') is not null and (j->>'done_at') is not null, 'and its checks', jsonb_array_length(j->'checks') = 1,
+    'and its trace', jsonb_array_length(j->'trace') = 2 and j->'trace'->0->>'n' = 'plan', 'and the run''s token and cache totals', j->'run_tokens' ? 'cache_read');
 
   -- the incident log
   iid := public.incident_add(now() - interval '2 days', 'Fax confirmations were late', 'Six customers saw "sending" for 3 hours', 'Retry the status check every 10 minutes', true);
