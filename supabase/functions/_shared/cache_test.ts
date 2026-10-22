@@ -37,13 +37,14 @@ Deno.test("OpenAI and Gemini: the cached share of the prompt is read and priced 
   assertEquals(d.usage, { input_tokens: 2_000, output_tokens: 100, cache_read_input_tokens: 8_000 });
   const plain = fromOpenAI({ choices: [{ message: { content: "hi" }, finish_reason: "stop" }], usage: { prompt_tokens: 7, completion_tokens: 2 } }, "x") as { usage: B };
   assertEquals(plain.usage, { input_tokens: 7, output_tokens: 2 }, "no cached tokens, the same usage as before");
-  assertEquals(cacheRates("gemini:gemini-2.5-flash"), { read: 0.25, write: 1 });
+  assertEquals(cacheRates("gemini:gemini-2.5-flash"), { read: 0.1, write: 1 });
   assertEquals(cacheRates("gemini:gemini-3.8-flash"), { read: 0.1, write: 1 });
-  assertEquals(cacheRates("anthropic:claude-sonnet-5-5"), { read: 0.1, write: 1.25 });
+  assertEquals(cacheRates("anthropic:claude-sonnet-5-5"), { read: 0.05, write: 1.25 });
+  assertEquals(cacheRates("anthropic:claude-haiku-4-5-20251001"), { read: 0.1, write: 1.25 });
   assertEquals(cacheRates("openai:gpt-4o"), { read: 0.5, write: 1 });
   const fresh = costOf("gemini:gemini-2.5-flash", { input_tokens: 10_000, output_tokens: 0 });
   const cached = costOf("gemini:gemini-2.5-flash", { input_tokens: 2_000, cache_read_input_tokens: 8_000, output_tokens: 0 });
-  assert(Math.abs(cached / fresh - (2_000 + 8_000 * 0.25) / 10_000) < 0.01, "Gemini 2.5's cached tokens cost a quarter");
+  assert(Math.abs(cached / fresh - (2_000 + 8_000 * 0.1) / 10_000) < 0.01, "Gemini 2.5's cached tokens cost a tenth ($0.03 of $0.30)");
   assertEquals(costOf("anthropic:claude-sonnet-5-5", { input_tokens: 1000, cache_read_input_tokens: 6500, cache_creation_input_tokens: 1000, output_tokens: 500 }) > 0, true);
 });
 

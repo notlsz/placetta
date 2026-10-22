@@ -288,7 +288,7 @@ export async function memoryTests(ok: Ok, eq: Eq) {
   eq(cacheUse({ promptTokenCount: 1000, cachedContentTokenCount: 600, candidatesTokenCount: 30 }), { input: 400, read: 600, write: 0, output: 30 }, "Gemini's own usage");
   const st = addCall(addCall(emptyStats(), { input: 7000, read: 0, write: 0, output: 300 }, "p1"), { input: 500, read: 6500, write: 0, output: 200 }, "p1");
   ok(st.calls === 2 && st.hits === 1 && Math.abs(hitRate(st) - 6500 / 14000) < 1e-9 && !st.prefixChanged, "a run's hit rate across its calls");
-  ok(Math.abs(savedShare(st, "gemini:gemini-3.8-flash") - 0.4179) < 0.001 && Math.abs(savedShare(st, "gemini:gemini-2.5-flash") - 0.3482) < 0.001, "savings at each provider's cached rate");
+  ok(Math.abs(savedShare(st, "gemini:gemini-3.8-flash") - 0.4179) < 0.001 && Math.abs(savedShare(st, "gemini:gemini-2.5-flash") - 0.4179) < 0.001 && Math.abs(savedShare(st, "gemini:gemini-2.0-flash") - 0.3482) < 0.001, "savings at each provider's cached rate (Gemini 2.5 reads at 10% since 2026-10-22's price check, 2.0 at 25%)");
 
   console.log("\n# The run loop applies memory, the processors and the cache layout");
   const bodies: Record<string, unknown>[] = [];
