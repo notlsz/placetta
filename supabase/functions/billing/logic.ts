@@ -5,7 +5,8 @@ import { allowanceOf, approvalMatches, filingKindOf, filingModeOf, IN_PLAN, quot
 import { moduleById, moduleFactsOf, moduleQuantity, moduleQuote, type ModuleId, type ModuleQuote } from "../../../src/modules.ts";
 import { hqQuote, type BillTo } from "../../../src/hqPlan.ts";
 import { validTerm } from "../../../src/contract.ts";
-import { MODULE_PRICES, moduleStripeCents, moduleStripeInterval, OWNER_PRICE_ENV, stripePriceMatches, TERM_PRICE_ENV, termYearCents } from "../../../src/pricing.ts";
+import { licenseQuoteLine, licenseTierOf, MODULE_PRICES, moduleStripeCents, moduleStripeInterval, OWNER_PRICE_ENV, SIMPLE, SIMPLE_PRICE_ENV, stripePriceMatches, TERM_PRICE_ENV, termYearCents, tierUsd,
+  type LicenseQuote, type LicenseTier, type SimpleItem } from "../../../src/pricing.ts";
 import { DEST } from "../file/destinations.ts";
 
 /** The origins Stripe may send someone back to: the app's own (APP_ORIGINS), its Vercel address (which keeps working
@@ -145,6 +146,47 @@ export function hqCheckout(x: { billTo: BillTo; tier: "essentials" | "pro"; loca
 
 /** The term a checkout may carry: 1, 2 or 3 years, else 1. */
 export const termOf = (y: unknown) => validTerm(typeof y === "string" ? Number(y) : y) ?? 1;
+
+/* ------------------------------ the simple model: per license ------------------------------ */
+
+/** A filing as the simple model prices it: its name, and the agency's own fee (passed through at cost) when the plan
+ *  has it. Null when the workspace has no such filing. */
+export type LicenseFacts = { name: string; govFeeUsd: number | null };
+export function licenseFactsOf(apps: unknown, ref: unknown): LicenseFacts | null {
+  if (typeof ref !== "string" || !ref || ref.length > 120 || !Array.isArray(apps)) return null;
+  const a = apps.find((x) => x && typeof x === "object" && (x as { id?: unknown }).id === ref) as { name?: { en?: unknown }; fees?: unknown } | undefined;
+  if (!a || typeof a.name?.en !== "string" || !a.name.en) return null;
+  const fees = Array.isArray(a.fees) ? a.fees.map((f) => Number((f as { amount?: unknown })?.amount)).filter((n) => Number.isFinite(n) && n >= 0) : [];
+  return { name: a.name.en.slice(0, 200), govFeeUsd: fees.length ? fees.reduce((s, n) => s + n, 0) : null };
+}
+
+/** The quote an owner sees before approving a filing on the simple model: included on the chain plan (or any paid plan),
+ *  free for what staff complete themselves, else $299, $999 or a $99 renewal, from its own Stripe price only. */
+export function simpleQuote(f: LicenseFacts, x: { renewal: boolean; paid: { tier: string; cents: number } | null; covered: boolean; priceOk: (item: SimpleItem) => boolean }): LicenseQuote {
+  const gov = f.govFeeUsd ? "$" + f.govFeeUsd.toLocaleString("en-US", { maximumFractionDigits: 2 }) : null;
+  if (x.covered) return { tier: "chain", cents: 0, priceOk: true, line: licenseQuoteLine("chain", true, false, gov) };
+  const tier = licenseTierOf(f.name, x.renewal);
+  if (x.paid) {
+    const t = (["license", "complex", "renewal", "free"].includes(x.paid.tier) ? x.paid.tier : tier) as LicenseTier;
+    return { tier: t, cents: x.paid.cents, priceOk: true, paid: true, line: licenseQuoteLine(t, true, true, gov) };
+  }
+  const cents = tierUsd(tier) * 100;
+  const ok = tier === "free" || x.priceOk(tier as SimpleItem);
+  return { tier, cents, priceOk: ok, line: licenseQuoteLine(tier, ok, false, gov) };
+}
+
+/** The server's check on an approval: the same kind and the same cents the owner was shown, worked out again now. */
+export function simpleApproval(q: LicenseQuote, shown: { tier?: unknown; cents?: unknown }): { ok: true } | { ok: false; code: string; message: string; message_zh: string } {
+  if (shown.tier !== q.tier || shown.cents !== q.cents) return { ok: false, code: "price_changed", message: `The price changed since it was shown. ${q.line.en} Nothing was charged.`, message_zh: `价格已与显示时不同。${q.line.zh}未收取任何费用。` };
+  return { ok: true };
+}
+
+/** The chain plan: 10 stores or more, every store in the workspace, billed yearly. */
+export const chainQuantity = (stores: number): number | null => (stores >= SIMPLE.chainMinStores ? Math.min(stores, 2000) : null);
+
+/** Whether a simple-model Stripe price is exactly the approved one. */
+export const simplePriceOk = (item: SimpleItem, p: Parameters<typeof stripePriceMatches>[0]) =>
+  stripePriceMatches(p, { cents: SIMPLE_PRICE_ENV[item].cents, interval: SIMPLE_PRICE_ENV[item].interval });
 
 /** What the person sees when Stripe refuses a request. Stripe's own message stays in the server log. */
 export const STRIPE_FAILED = {
