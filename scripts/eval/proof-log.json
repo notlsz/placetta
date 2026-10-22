@@ -2460,5 +2460,222 @@
   "found": true,
   "sha256": "9be0d74aeeebfe17",
   "context": "icans federal, state, territory, county, and municipal courts local governments find contact information for local governments by state. select or type your state or territory: alabama (al) alaska (ak) arizona (az) a"
+ },
+ {
+  "id": "kind:ny-wholesale-bakery",
+  "read": "https://agriculture.ny.gov/food-business-licensing",
+  "quote": "Article 20-C Food Processing Establishment licenses apply to food manufactures, processing plants, wholesale bakeries,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e4e8a2ee8b6bcbed",
+  "context": "ind of establishment you have and what kind of license you need. food processor article 20-c food processing establishment licenses apply to food manufactures, processing plants, wholesale bakeries, and retail food establishments (i.e. grocery stores) that conduct any type of f"
+ },
+ {
+  "id": "kind:nyc-grease-restaurant",
+  "read": "https://ht.nyc-business.nyc.gov/nycbusiness/description/grease-interceptor-information",
+  "quote": "like a restaurant, food processing establishment, hospital or day care and senior center, you need a grease interceptor.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "bf12fe1671c68cdc",
+  "context": " if you run a business that produces and disposes of fat, oil or grease (fogs), like a restaurant, food processing establishment, hospital or day care and senior center, you need a grease interceptor. this system stops fogs from clogging the city's sewer lines. it separates fogs "
+ },
+ {
+  "id": "kind:nyc-grease-drinks",
+  "read": "https://ht.nyc-business.nyc.gov/nycbusiness/description/grease-interceptor-information",
+  "quote": "like a restaurant, food processing establishment, hospital or day care and senior center, you need a grease interceptor.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "bf12fe1671c68cdc",
+  "context": " if you run a business that produces and disposes of fat, oil or grease (fogs), like a restaurant, food processing establishment, hospital or day care and senior center, you need a grease interceptor. this system stops fogs from clogging the city's sewer lines. it separates fogs "
+ },
+ {
+  "id": "kind:ca-takeout-restrooms",
+  "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+  "quote": "that provides space for the consumption of food on the premises shall provide clean toilet facilities in good repair for consumers",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "kind:ca-wholesale-bakery",
+  "read": "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/PFRFAQs.aspx",
+  "quote": "General foods such as bakery products, noodles, seafood (except molluscan shellfish)",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 000; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "kind:kc-coffee-risk",
+  "read": "https://cdn.kingcounty.gov/-/media/king-county/depts/dph/documents/certificates-permits-licenses/food-worker-business-permits/permanent-businesses/food-establishment-risk-levels.pdf?rev=fa5058bfe2344c0da374012f74cac082&hash=6343EB80E0FD05EB643F9899D4DA212D",
+  "quote": "Scooping ice cream, preparing espresso and/or blended drinks with commercially packaged products.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "869d47f6642f8576",
+  "context": "aged raw meat, poultry, or seafood) hot hold cool serve required for: examples: scooping ice cream, preparing espresso and/or blended drinks with commercially packaged products. hot holding and service of commercially prepared hot dogs is allowed. reheat co"
+ },
+ {
+  "id": "kind:kc-bakery-risk",
+  "read": "https://cdn.kingcounty.gov/-/media/king-county/depts/dph/documents/certificates-permits-licenses/food-worker-business-permits/permanent-businesses/food-establishment-risk-levels.pdf?rev=fa5058bfe2344c0da374012f74cac082&hash=6343EB80E0FD05EB643F9899D4DA212D",
+  "quote": "Making smoothies, baking cake, frying donuts, and grilling/toasting sandwiches for immediate service.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "869d47f6642f8576",
+  "context": "king limited preparation serve examples: • • • prepare heat prepare serve serve making smoothies, baking cake, frying donuts, and grilling/toasting sandwiches for immediate service. • drug store • wine tasting room • gas station • coffee shop • espresso caterer"
+ },
+ {
+  "id": "kind:kc-tea-tphc",
+  "read": "https://cdn.kingcounty.gov/-/media/king-county/depts/dph/documents/certificates-permits-licenses/food-worker-business-permits/permanent-businesses/food-establishment-risk-levels.pdf?rev=fa5058bfe2344c0da374012f74cac082&hash=6343EB80E0FD05EB643F9899D4DA212D",
+  "quote": "Using Time as a Public Health Control",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "869d47f6642f8576",
+  "context": "or immediate service. • cooling tcs food service of commercially prepared hot • using time as a public health control dogs is allowed. • any food process that requires a hazard analysis and critica"
+ },
+ {
+  "id": "kind:fl-coffee-agency",
+  "read": "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Retail-Food-Establishment-Permit",
+  "quote": "These food establishments may include supermarkets, grocery stores, convenience stores, coffee shops, bakeries, retail meat markets, retail seafood markets, juice and smoothie bars,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a104d496e791142a",
+  "context": "ssues retail food permits to food establishments selling directly to customers. these food establishments may include supermarkets, grocery stores, convenience stores, coffee shops, bakeries, retail meat markets, retail seafood markets, juice and smoothie bars, ice/water vending machines, food salvage stores, businesses selling prepackaged"
+ },
+ {
+  "id": "kind:fl-tea-agency",
+  "read": "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Retail-Food-Establishment-Permit",
+  "quote": "These food establishments may include supermarkets, grocery stores, convenience stores, coffee shops, bakeries, retail meat markets, retail seafood markets, juice and smoothie bars,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a104d496e791142a",
+  "context": "ssues retail food permits to food establishments selling directly to customers. these food establishments may include supermarkets, grocery stores, convenience stores, coffee shops, bakeries, retail meat markets, retail seafood markets, juice and smoothie bars, ice/water vending machines, food salvage stores, businesses selling prepackaged"
+ },
+ {
+  "id": "kind:fl-bakery-agency",
+  "read": "https://www2.myfloridalicense.com/hotels-restaurants/licensing/jurisdiction/",
+  "quote": "FDACS licenses bakeries, grocery stores, and convenience stores.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "2c654bc9d858dfa8",
+  "context": "mobile units that serve hot dogs and/or full food service bars that serve food. fdacs licenses bakeries, grocery stores, and convenience stores. doh licenses bars that do not serve food, civic and fraternal organizations, an"
+ },
+ {
+  "id": "kind:va-bakery-agency",
+  "read": "https://www.vdh.virginia.gov/content/uploads/sites/20/VDH-VDACS-Retail-MOU-Signed-2025.pdf",
+  "quote": "whose primary business model is the preparation and sale of conventional baked goods (e.g., cakes, cookies, donuts etc.) for offsite consumption",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "72c5a4e2fb382495",
+  "context": "roducts are prepared, processed, or manufactured for wholesale distribution, or whose primary business model is the preparation and sale of conventional baked goods (e.g., cakes, cookies, donuts etc.) for offsite consumption, shall be subject to the authority ofvdacs. in certain exceptions where full-se"
+ },
+ {
+  "id": "kind:va-coffee-agency",
+  "read": "https://www.vdh.virginia.gov/content/uploads/sites/20/VDH-VDACS-Retail-MOU-Signed-2025.pdf",
+  "quote": "there is no wholesale distribution (e.g., coffee and baked goods without wholesale)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "72c5a4e2fb382495",
+  "context": "ss model is providing food service (i.e., onsite consumption) to the public and there is no wholesale distribution (e.g., coffee and baked goods without wholesale), shall be subject to the authority ofvdh. mobile food unit and temporary food e"
+ },
+ {
+  "id": "kind:or-bakery-agency",
+  "read": "https://www.oregon.gov/oda/Documents/Publications/foodsafety/CombinationFacilities.pdf",
+  "quote": "ODA licenses and inspects firms including grocery stores, wineries, breweries, food processors, and bakeries.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a98187a88ad76542",
+  "context": " conduct activities subject to both oda and county health department licensing. oda licenses and inspects firms including grocery stores, wineries, breweries, food processors, and bakeries. county health departments license and inspect restaurants or other venues servi"
+ },
+ {
+  "id": "kind:mn-bakery-agency",
+  "read": "https://www.mda.state.mn.us/food-feed/food-licenses",
+  "quote": "I want to operate a grocery store, convenience store, meat market, bakery, vending machine, or food warehouse.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9487422b19218497",
+  "context": "agriculture, or contact licensing at 651-201-6062 or mda.licensing@state.mn.us. i want to operate a grocery store, convenience store, meat market, bakery, vending machine, or food warehouse. submit a pre-consultation questionnaire to the minnesota department of agricult"
+ },
+ {
+  "id": "kind:mn-coffee-agency",
+  "read": "https://www.mda.state.mn.us/food-feed/food-licenses",
+  "quote": "sells foods such as burgers, tacos, pizzas, egg rolls, hot entrees, fresh lemonade, coffee beverages, or dirty sodas.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9487422b19218497",
+  "context": "food license questions. i want to operate a restaurant, bar, or food stand that sells foods such as burgers, tacos, pizzas, egg rolls, hot entrees, fresh lemonade, coffee beverages, or dirty sodas. contact the minnesota department of health for further guidance at 651-201-4500"
+ },
+ {
+  "id": "kind:ga-bakery-agency",
+  "read": "https://agr.ga.gov/retailers",
+  "quote": "regulates and monitors food retailers: grocery stores, convenience stores, bakeries, seafood operations, salvage food operations, mobile meat trucks, and rolling stores.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "1e90887f429a9d6a",
+  "context": "uel retail food retailers retailers the georgia department of agriculture (gda) regulates and monitors food retailers: grocery stores, convenience stores, bakeries, seafood operations, salvage food operations, mobile meat trucks, and rolling stores. jump to highlights section license types section laws & regulations section con"
+ },
+ {
+  "id": "kind:mc-bakery-permit",
+  "read": "https://listos.maricopa.gov/DocumentCenter/View/44074/Permit-Type-Class-and-Inspection-Frequency-PDF",
+  "quote": "A bakery is a food establishment that exclusively prepares bakery items for immediate service on the premises, directly to a consumer,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c79fcaedf9d46501",
+  "context": "s of mixing, compounding, cooking, baking, or manufacturing any bakery product. a bakery is a food establishment that exclusively prepares bakery items for immediate service on the premises, directly to a consumer, and/or for resale or redistribution by a retail food establishment. boarding ho"
+ },
+ {
+  "id": "kind:mc-drinks-class",
+  "read": "https://listos.maricopa.gov/DocumentCenter/View/44074/Permit-Type-Class-and-Inspection-Frequency-PDF",
+  "quote": "Quick service operations with only limited preparation of menu items or as approved by the Department.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c79fcaedf9d46501",
+  "context": " has a seating capacity of either 0-9 seat s or 10+seating more than 10 seat s. quick service operations with only limited preparation of menu items or as approved by the department. maricopa county – environmental services department – program - rev 10/13/2025 "
+ },
+ {
+  "id": "kind:oh-coffee-risk",
+  "read": "https://codes.ohio.gov/ohio-administrative-code/rule-3701-21-02.3",
+  "quote": "Coffee, self-service hot beverage dispenser drinks, self-service fountain drinks, prepackaged non-time/temperature controlled for safety beverages;",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b81e687b3b4ad3ad",
+  "context": "clude, but are not limited to, an operation that offers for sale or serves: (1) coffee, self-service hot beverage dispenser drinks, self-service fountain drinks, prepackaged non-time/temperature controlled for safety beverages; (2) pre-packaged refrigerated or frozen time/temperature controlled for safety "
+ },
+ {
+  "id": "kind:tx-bakery-manufacturer",
+  "read": "https://dshs.texas.gov/foods/manufacturers.aspx",
+  "quote": "Processing and/or packaging any food product, including dietary supplements, ice, and water, for wholesale distribution or for sale via retail customer self-service.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a07c92a006446300",
+  "context": "nse with dshs. this includes any firm that engages in the following activities: processing and/or packaging any food product, including dietary supplements, ice, and water, for wholesale distribution or for sale via retail customer self-service. selling vended or bottled water or bagging ice. repackaging food products (eg. "
+ },
+ {
+  "id": "kind:chi-bakery-wholesale",
+  "read": "https://chicago.gov/content/city/en/sites/chicago-business-licensing/home/wholesalefood.html",
+  "quote": "only a City of Chicago Retail Food Establishment license is required",
+  "checked": "2026-10-21",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
  }
 ]

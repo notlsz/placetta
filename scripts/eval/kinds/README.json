@@ -1,0 +1,12 @@
+{
+  "what": "The store-type set: the same place opened as a different kind of food business. A bubble tea shop and a restaurant on one Flushing street, a bakery at the San Gabriel restaurant's address, a coffee shop where the Seattle bubble tea case is, a bakery where the Miami bakery cafe is. The filings are copied from the existing case for that place (the kind of food business doesn't change them); the facts are what an official page says differs (src/forms/kinds.ts), each with the page's words, URL and read day, and the facts that must not appear (another kind's, another place's).",
+  "researched": "2026-10-21, from official pages only, each quote re-read with scripts/eval/proof-read.py (19 with curl, 3 through WebFetch where the site refuses automated reads).",
+  "left_out": [
+    { "what": "Tapioca pearls and boba as such", "why": "No official page read names tapioca pearls or boba. Time as a public health control is stated generically (Texas DSHS, Minnesota), so no tea-specific claim is made from it; King County's risk guide is used because it ties that control to a risk category." },
+    { "what": "Las Vegas (Southern Nevada Health District), Boston, Philadelphia, New Jersey, Denver, Montgomery County (Maryland), Washington DC", "why": "No official page found in this pass that states a difference for tea shops, coffee shops or bakeries; those guides stay as they were (a true duplicate stays noindexed)." },
+    { "what": "Tea and coffee shops in Texas, Georgia, Oregon; tea shops in Virginia, Minnesota and Ohio; bakeries in Ohio", "why": "The pages read state rules for bakeries or for coffee by name only. A tea shop isn't named, so nothing is claimed for it there." },
+    { "what": "Florida's licensing agency as a filing change", "why": "DBPR's own page says FDACS licenses bakeries and FDACS permits coffee shops, but which agency licenses a given shop depends on what it serves. The plan keeps DBPR's rows and states the split as a fact that Odelia confirms before filing." },
+    { "what": "Los Angeles and Orange County permit fees by kind of business", "why": "Los Angeles County's fee schedule sets restaurant fees by seats and risk, but no official page read defines which risk a tea shop or bakery is. The Orange County schedule found was labelled as current until June 30, 2025." },
+    { "what": "Guides abroad (33 cities)", "why": "Not researched in this pass." }
+  ]
+}

@@ -63,7 +63,14 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
           {a.source.url && <a href={a.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{a.source.label}<I.ext /></a>}
         </p>
         <SourceQuote a={a} />
-        {a.next && <p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
+        {a.notes?.map(n => (
+          <div key={n.id} className="sh-note">
+            <p><b>{b(n.title)}</b> {b(n.text)}</p>
+            <SourceQuote a={{ source: n.source }} />
+            <a href={n.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{n.source.label}<I.ext /></a>
+          </div>
+        ))}
+        {a.next &&<p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
         <div className="sh-asg"><AssignPicker item={{ kind: "app", id: a.id }} title={a.name} /></div>
         {a.preview && <p className="sh-pv"><I.spark />{a.status === "ready"
           // filled at sign-up (src/plan/prefill.ts) on the registry's own copy of the agency's form

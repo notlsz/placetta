@@ -29,6 +29,10 @@ WEBFETCH_SEEN = {
     "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer": "2026-10-21",
     "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate": "2026-10-21",
     "https://www.chicago.gov/content/dam/city/depts/bacp/general/Retail%20Food%20Guide.pdf": "2026-10-21",
+    # what differs by kind of food business (src/forms/kinds.ts): each page refused curl (403, or no connection)
+    "https://agriculture.ny.gov/food-business-licensing": "2026-10-21",
+    "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/PFRFAQs.aspx": "2026-10-21",
+    "https://chicago.gov/content/city/en/sites/chicago-business-licensing/home/wholesalefood.html": "2026-10-21",
 }
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36"
 
