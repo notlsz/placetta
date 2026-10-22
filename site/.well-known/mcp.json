@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "description": "Placetta's MCP server: read-only compliance status, deadlines, store readiness, permit plans and filings for a customer's own stores. It needs a workspace token; there is no anonymous access.",
+  "servers": [
+    {
+      "name": "com.placetta/placetta",
+      "title": "Placetta",
+      "transport": "streamable-http",
+      "url": "https://esquxzcfsylffuijvzec.supabase.co/functions/v1/mcp",
+      "authentication": { "type": "bearer", "required": true, "tokenPrefix": "plc_mcp_" },
+      "serverCard": "https://www.placetta.com/.well-known/mcp/server-card.json"
+    }
+  ],
+  "publicApis": {
+    "planPreview": "https://esquxzcfsylffuijvzec.supabase.co/functions/v1/partner-api/v1/plan",
+    "openapi": "https://www.placetta.com/openapi.json"
+  }
+}

@@ -57,6 +57,9 @@ jobs:
       # parses and matches the visible FAQ, answer-first guides, no indexed near-duplicates, every page rebuilt (npm run seo)
       - name: Search and AI crawler checks
         run: npm run test:seo
+      # the Markdown copy of every page and the Atom and RSS feeds made after the build (scripts/agent-ready.mjs)
+      - name: Agent-readable copies and feeds
+        run: node --test scripts/agent-ready.test.mjs
       - name: Production build
         run: npx vite build
       # what anyone can read with F12: none of Odelia's instructions, tool definitions or playbooks, no model id, no

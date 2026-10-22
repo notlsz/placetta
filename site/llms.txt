@@ -19,6 +19,13 @@ Free license guides: 92 cities in 22 countries (41 in the US), 12 kinds of busin
 - [Full text of the answers and city guides](https://www.placetta.com/llms-full.txt)
 - [Structured data for all guides](https://www.placetta.com/guides/data.json)
 
+## For agents
+Every page has a Markdown copy at the same address ending in .md: [https://www.placetta.com/index.md](https://www.placetta.com/index.md), [a city guide](https://www.placetta.com/guides/new-york-city/milk-tea-shop.md), [a help article](https://www.placetta.com/help/essentials/sign-in/index.md).
+- [What agents may read and use](https://www.placetta.com/agents.txt): the public pages, the plan preview and the MCP server; not the signed-in app (/app/)
+- [News, guides and help as they change](https://www.placetta.com/feed.xml) (Atom; [RSS](https://www.placetta.com/rss.xml))
+- [The plan preview and Partner API (OpenAPI)](https://www.placetta.com/openapi.json)
+- [Placetta's MCP server](https://www.placetta.com/.well-known/mcp/server-card.json): a customer's own stores, read only, with a workspace token
+
 ## Pricing
 - Store plan: $149/store a month. Billed yearly. For every store, open or opening, kept current.
 - New licenses: $299/license. $999 for a liquor license, building plan review or an import permit. Each one priced before you approve it, and nothing charged without your approval.
