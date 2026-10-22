@@ -472,11 +472,16 @@ export async function pollRun(id: string): Promise<RunRow> {
 }
 /** Live updates for a run on the server, on its private Realtime channel (supabase/functions/agent-run/push.ts; only
  *  the workspace's members may listen). live() is whether the channel is connected; the caller keeps polling either
- *  way, more slowly while it is. Off in the preview. */
+ *  way, more slowly while it is. Off in the preview.
+ *  resume: called when the stream comes back after a gap (the channel rejoins after a dropped connection, the device
+ *  is back online, or the tab is shown again), so the caller reads the row at once and picks up where it left off, as
+ *  Claude Code and ChatGPT resume a stream after a reconnect. The row is the truth, so nothing is lost meanwhile. */
 export type RunWatch = { live(): boolean; close(): void };
-export function watchRun(id: string, on: { progress(u: Pushed): void; end(): void }): RunWatch {
+export function watchRun(id: string, on: { progress(u: Pushed): void; end(): void; resume?(): void }): RunWatch {
   if (PREVIEW || !cloudConfigured) return { live: () => false, close() {} };
-  let ok = false;
+  let ok = false, lost = false;
+  const back = () => { if (typeof document === "undefined" || document.visibilityState !== "hidden") on.resume?.(); };
+  const onVis = () => { if (document.visibilityState === "visible") back(); };
   try {
     const sb = supabase();
     const ch = sb.channel(`run:${id}`, { config: { private: true } })
@@ -485,8 +490,17 @@ export function watchRun(id: string, on: { progress(u: Pushed): void; end(): voi
         on.progress({ from: Number(p.from) || 0, steps: Array.isArray(p.steps) ? p.steps as Step[] : [], draft: typeof p.draft === "string" ? p.draft : null, at: String(p.at ?? "") });
       })
       .on("broadcast", { event: "end" }, () => on.end())
-      .subscribe(st => { ok = st === "SUBSCRIBED"; });
-    return { live: () => ok, close() { ok = false; void sb.removeChannel(ch).catch(() => undefined); } };
+      .subscribe(st => {
+        ok = st === "SUBSCRIBED";
+        if (!ok && st !== "CLOSED") lost = true;
+        else if (ok && lost) { lost = false; back(); }
+      });
+    if (typeof window !== "undefined") { window.addEventListener("online", back); document.addEventListener("visibilitychange", onVis); }
+    return { live: () => ok, close() {
+      ok = false;
+      if (typeof window !== "undefined") { window.removeEventListener("online", back); document.removeEventListener("visibilitychange", onVis); }
+      void sb.removeChannel(ch).catch(() => undefined);
+    } };
   } catch { return { live: () => false, close() {} }; }
 }
 export async function stopRun(id: string) {

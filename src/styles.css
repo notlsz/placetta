@@ -487,6 +487,10 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .steps li.done i { background: #9DB8DA; }
 .steps li.now { color: var(--ink); animation: stepin .3s ease-out; }
 .steps li.now i { background: var(--blue-ink); box-shadow: 0 0 0 4px rgba(115, 153, 198, .25); }
+.steps li { display: flex; align-items: baseline; gap: 8px; }
+.steps li > span { flex: 1; min-width: 0; }
+.st-t, .wh-time { flex: none; font-size: 11.5px; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.wh-time { margin-left: auto; padding-left: 8px; }
 .steps em { display: inline-block; margin-left: 8px; padding: 0 8px; border-radius: 99px; background: var(--sky-wash); color: var(--blue-ink); font-style: normal; font-size: 11.5px; line-height: 18px; }
 @keyframes stepin { from { opacity: .3; transform: translateY(2px); } to { opacity: 1; transform: none; } }
 .answer { display: flex; flex-direction: column; gap: 12px; align-items: stretch; }

@@ -35,7 +35,7 @@ import { ADDRESS_RULES } from "../src/forms/address-rules/index";
 import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
 import { groupOf, groupsFor, toolTokens } from "../src/toolIntent";
 import { checkArgs } from "../src/toolArgs";
-import { fromRow, merge, napper, pollDelay, startFeed } from "../src/cloud/runFeed";
+import { elapsed, fromRow, merge, napper, pollDelay, reveal, startFeed, stepTimes } from "../src/cloud/runFeed";
 import { addSpan, MAX_SPANS, totals, type Span } from "../src/trace";
 import { readdirSync, readFileSync } from "node:fs";
 import { addRule, allowOptions, allowRule, autoOk, HOUSE_MAX, houseBrief, houseCheck, jobsDone, markSecond, planApprovalId, runMode, secondStep, workPrompt } from "../src/autonomy";
@@ -2469,6 +2469,16 @@ console.log("\n# Audit trail export (CSV)");
   eq([pollDelay(true, true), pollDelay(false, true), pollDelay(false, false)], [4000, 300, 700], "polling slows to every 4 s while pushes arrive");
   const z = napper(); const t0 = Date.now(); const p = z.nap(5000); z.wake(); await p;
   ok(Date.now() - t0 < 1000, "a push wakes the poll at once");
+  // the words flow evenly between saves, and the clock
+  const r1 = reveal("", "Hello there, your permit is filed.", 16);
+  ok(r1.length >= 1 && r1.length < 34 && "Hello there, your permit is filed.".startsWith(r1), "a burst of words is revealed a little at a time");
+  eq(reveal("Hello", "Hello there", 1000), "Hello there", "a backlog is cleared within about 600 ms");
+  eq(reveal("Old answer", "New", 16).length <= 3 && "New".startsWith(reveal("Old answer", "New", 16)), true, "a new answer starts over");
+  eq(reveal("", "all at once", 1, { reduced: true }), "all at once", "reduced motion shows the words at once");
+  ok(!/[\uD800-\uDBFF]$/.test(reveal("", "a😀b", 17)), "never cuts an emoji in half");
+  eq([elapsed(8_400), elapsed(65_000), elapsed(3_720_000), elapsed(65_000, true)], ["8s", "1m 05s", "1h 02m", "1分05秒"], "elapsed time as people say it");
+  eq(stepTimes([{ at: "2026-10-22T10:00:00Z" }, { at: "2026-10-22T10:00:03Z" }, { at: "2026-10-22T10:00:04Z" }], Date.parse("2026-10-22T10:00:09Z"), true), [3000, 1000, 5000], "each step's time, the running one to now");
+  eq(stepTimes([{}, { at: "2026-10-22T10:00:03Z" }], 0, false), [null, null], "no time without both ends");
 }
 
 growthTests(ok, eq);

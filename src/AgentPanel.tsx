@@ -26,6 +26,7 @@ import { PlanGate } from "./PlanGate";
 import { FilledCard, WithdrawnRow } from "./FilledForm";
 import { planApprovalId } from "./autonomy";
 import { hasReplay } from "./replay";
+import { elapsed, reveal, stepTimes } from "./cloud/runFeed";
 import "./panel-clean.css";
 
 /* Less is more (the founder, on this screen): the owner says what they need, Odelia does the permit work, they approve.
@@ -150,6 +151,39 @@ function KeptLine({ memory, remembered, learned }: { memory?: Bi[]; remembered?:
   );
 }
 
+/** The clock, ticking each second while on (the live elapsed time, as Claude Code shows it while it works). */
+function useNow(on: boolean): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!on) return;
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [on]);
+  return now;
+}
+
+/** The words so far, revealed as an even flow between the server's 300 ms saves (src/cloud/runFeed.ts, reveal). */
+function useSmooth(text: string | undefined): string {
+  const [shown, setShown] = useState(text ?? "");
+  const cur = useRef(shown);
+  useEffect(() => {
+    const target = text ?? "";
+    const reduced = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || !target || typeof requestAnimationFrame === "undefined") { cur.current = target; setShown(target); return; }
+    let last = performance.now(), raf = 0;
+    const tick = (t: number) => {
+      const next = reveal(cur.current, target, t - last);
+      last = t;
+      if (next !== cur.current) { cur.current = next; setShown(next); }
+      if (next.length < target.length) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [text]);
+  return shown;
+}
+
 /** One run: a quiet log of the steps, then the answer and whatever it produced. */
 function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }: {
   m: Turn; last: boolean; latest: boolean; speaking: string | null; onSay: (text: string) => void; asked: string; onAskPerson: () => void; poke?: Poke;
@@ -171,6 +205,12 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
   const covered = new Set([...pending, ...done].map(id => (ws.approvals.find(a => a.id === id) ?? ws.closed.find(a => a.id === id))?.app).filter(Boolean));
   const filed = r?.filed ?? [];
   const cur = live ? m.steps[m.active] : undefined;
+  // live: the time since she started, and how long each step took (the current one ticking)
+  const now = useNow(live);
+  const t0 = Date.parse(m.at);
+  const sinceStart = live && Number.isFinite(t0) && now >= t0 ? elapsed(now - t0, lang === "zh") : "";
+  const took = stepTimes(m.steps, now, live);
+  const draft = useSmooth(live ? m.draft : undefined);
   // the plan this run kept: the job it last updated
   const plan = !last ? undefined : (ws.jobs ?? []).filter(j => j.updated >= m.at).sort((x, y) => y.updated.localeCompare(x.updated))[0];
   const zh = lang === "zh";
@@ -202,6 +242,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
         {live && cur
           ? <span className="wh-now" aria-live="polite"><b>{b(taskVerb(cur.state))}…</b><small>{b(cur.label)}</small></span>
           : <span>{live ? t("working") : asking ? t("waitingYou") : m.ms ? t("workedFor", { s: Math.max(1, Math.round(m.ms / 1000)) }) : fmtAgo(m.at, lang)}</span>}
+        {sinceStart && <span className="wh-time" aria-label={lang === "zh" ? `已用时 ${sinceStart}` : `Working for ${sinceStart}`}>{sinceStart}</span>}
       </div>
       {(live || show) && m.steps.length > 0 && (
         <Working on={live} size="sm">
@@ -212,6 +253,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
               <li key={i} className={st}>
                 <i aria-hidden="true" />
                 <span>{b(s.label)}{st === "now" ? "…" : ""}{s.tool && <em>{s.tool}</em>}</span>
+                {took[i] != null && (st === "now" || took[i]! >= 1000) && <small className="st-t">{elapsed(took[i]!, lang === "zh")}</small>}
               </li>
             );
           })}
@@ -221,7 +263,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
       {live && last && <AllowanceNote asked={asked} />}
       {plan && <PlanCard job={plan} compact />}
       {plan && <PlanGate job={plan} />}
-      {live && m.draft && <p className="drafting" aria-live="polite">{m.draft}</p>}
+      {live && draft && <p className="drafting" aria-live="polite">{draft}</p>}
       {r && (
         <div className="answer">
           {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} /> : null; })}
