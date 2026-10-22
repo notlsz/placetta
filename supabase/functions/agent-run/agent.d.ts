@@ -63,6 +63,14 @@ export declare function runRounds(o: {
   family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> };
   /** Business rules (src/businessRules.ts): a message a rule asks to deliver, through the business's own channels. */
   notify?: (n: Notice) => void;
+  /** Who the run acts for (src/security/policy.ts): the person and their role now, or the system. */
+  actor?: Actor;
+  /** The workspace's id: a tool call naming another workspace or its files is refused. */
+  workspaceId?: string;
+  /** Each tool call: actor, role, a hash of the input and the decision. */
+  log?: (e: ToolLog) => void;
+  /** The optional model check for untrusted text in the grey zone. */
+  classify?: (text: string) => Promise<boolean>;
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }>;
 /** What a business rule asks the server to tell someone (src/businessRules.ts). */
 export type Notice = { rule: string; key: string; via: "email" | "text" | "slack" | "lark" | "wechat"; to?: string; text: Bi };
@@ -110,3 +118,10 @@ export declare function pdfFile(formId: string): string | null;
 export declare function fillForm(formId: string, fields: Field[], load?: LoadPdf): Promise<Filled | null>;
 export declare function readBack(formId: string, f: Filled): Promise<ReadBack>;
 export declare function answersHash(a: { fields: Field[] }): string;
+
+// Odelia's shield (src/security)
+export type Actor = { id: string | null; role: "owner" | "admin" | "member" | "viewer" | "staff" | "system" };
+export type ToolLog = { at: string; run?: string; tool: string; scope: string | null; actor: string | null; role: Actor["role"]; input_hash: string; decision: "allow" | "deny" | "error"; code?: string; reason?: string };
+export declare const CLASSIFIER_SYSTEM: string;
+export declare function classifierPrompt(text: string): string;
+export declare function parseClassifier(answer: string): boolean;

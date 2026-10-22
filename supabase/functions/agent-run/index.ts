@@ -41,7 +41,7 @@ import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/od
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/mail.ts";
 // @ts-types="./agent.d.ts"
-import { agencyKey, chipsOf, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
+import { agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
@@ -51,6 +51,8 @@ import { deliverNotice } from "../_shared/business_rules.ts";
 import { filledLines, formAttachments, linkForms, type FilledForm } from "../_shared/form_links.ts";
 import type { Attachment } from "../_shared/mail.ts";
 import { type FamilyDb, fill, spawn, stillOpen, wake } from "./family.ts";
+import { actorOf } from "./actor.ts";
+import { secretValues, withoutEnv } from "../_shared/secrets.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
@@ -166,6 +168,9 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   if (g.tier === "reduced" && pageTools.length && typeof payload.system === "string") payload.system += "\n\nWeb research (web_search, web_fetch) is off for now. Work from the workspace and your other tools, keep the answer short, and say plainly when something would need checking on the agency's own site.";
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
   if (tools.length) payload.tools = tools;
+  // none of the server's own secrets ever goes to a model vendor, whatever put it in the conversation (_shared/secrets.ts)
+  const cutSecrets = withoutEnv(payload, serverSecrets());
+  if (cutSecrets.cut) { console.error("model call: cut", cutSecrets.cut, "server secret value(s) from the request"); Object.assign(payload, cutSecrets.body); }
   // onText: the answer streams (the main loop's rounds), so the run's draft shows the words as they're written
   const out = await callModel((k) => Deno.env.get(k), { payload, role, research, beta: research ? FETCH_BETA : null }, anthropicModel,
     research ? { search, fetch: fetchTool, pageTools } : null, fetch, onText);
@@ -177,6 +182,10 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   who.spent += await record(admin, g.event, out.model, data.usage, role);
   return data as { content: never[]; stop_reason: string };
 }
+
+/** The function's own secret values (any env var named like a key, secret, token or password), read once. */
+let SECRETS: string[] | null = null;
+const serverSecrets = () => (SECRETS ??= (() => { try { return secretValues(Deno.env.toObject()); } catch { return []; } })());
 
 /** The main loop's role for a run: watch for the monitor's background checks, short for a text, a call or a chat bot, plan otherwise. */
 const roleOfRun = (run: Run): Role => run.kind === "watch" ? "watch" : run.channel === "sms" || run.channel === "voice" || CHATS.has(run.channel ?? "") ? "short" : "plan";
@@ -589,7 +598,21 @@ export async function work(runId: string, token: string | null, ticket: string |
   let ended = false;   // done, failed or stopped: its slot frees up, and a store's run may wake the run that split it
   let counting: RunState | null = null;   // the run's tool counts, reported for Agent health however it ends
 
+  // every tool call this chunk made: who, their role, a hash of the input and the decision (agent_tool_calls)
+  const toolLog: ToolLog[] = [];
+  const flushLog = async () => {
+    const rows = toolLog.splice(0).map((e) => ({ workspace_id: ws, run_id: run.id, actor_id: e.actor, actor_role: e.role, tool: e.tool.slice(0, 120), scope: e.scope, input_hash: e.input_hash,
+      decision: e.decision, code: e.code ?? null, reason: e.reason ? e.reason.slice(0, 400) : null, at: e.at }));
+    if (!rows.length) return;
+    const { error } = await admin.from("agent_tool_calls").insert(rows);
+    if (error) console.error("tool log", run.id, error.code);
+  };
+
   try {
+    // Who the run acts for, as of now: the person's role in this workspace (or the system for a background check).
+    // Someone who left, or only views it, stops the run; every tool call is checked against this role.
+    const who0 = await actorOf(admin as never, run);
+    if ("refused" in who0) throw err("not_allowed", who0.refused);
     const svc = await servicesFor(ws, run, token);
     if (!child && (run.channel ?? "app") === "app") {
       svc.split = async ({ children }) => {
@@ -621,6 +644,7 @@ export async function work(runId: string, token: string | null, ticket: string |
       // after each round: save the work and where the conversation is (with what it has cost), so a fresh instance can carry on
       round: async (st) => {
         await save();
+        await flushLog();
         if (!(await lease.write({ state: st, steps, draft, updated_at: new Date().toISOString() })) && lease.lost) throw lostLease();
       },
       draft: (t) => { draft = t; flush(); },
@@ -639,6 +663,12 @@ export async function work(runId: string, token: string | null, ticket: string |
       notify: (n) => bg(deliverNotice(admin, env, ws, n).then((r) => { if (!r.ok) console.error("business rule", ws, n.via, r.why); })),
       // the replay: jobs link this run; a store's bot works its part; a run that split work waits for its stores
       runId: run.id,
+      // who the run acts for, the workspace it may touch, the tool-call log, and the optional model check on untrusted text
+      actor: who0.actor, workspaceId: ws, log: (e) => { toolLog.push(e); },
+      ...(env("INJECTION_MODEL_CHECK") === "1" ? { classify: async (text: string) => {
+        const d = await model(ws, { system: CLASSIFIER_SYSTEM, messages: [{ role: "user", content: classifierPrompt(text) }], max_tokens: 8 }, false, undefined, ctl.signal, "extract", who) as unknown as { content: Block[] };
+        return parseClassifier(d.content.filter((c) => c.type === "text").map((c) => String(c.text ?? "")).join(""));
+      } } : {}),
       ...(child ? { child } : {}),
       ...(!child ? { family: {
         pending: async () => stillOpen(await fam.children(run.id)),
@@ -695,7 +725,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     if (code === "cancelled" || ctl.signal.aborted) await lease.write({ steps, draft: null, state: null, updated_at: new Date().toISOString() });
     else {
       console.error("run failed", runId, code, String((e as Error)?.message ?? e).slice(0, 200));
-      const failed = await lease.write({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }, { running: true });
+      const failed = await lease.write({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit", "not_allowed"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }, { running: true });
       // Someone who asked by text or on a call hears about it the same way.
       if (failed) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
       if (failed && run.channel === "email") await mailBack(run, SAY.failed[run.lang], []).catch((x) => console.error("mail back", String(x).slice(0, 120)));
@@ -704,6 +734,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
+    await flushLog().catch(() => undefined);
     if (ended && !lease.lost) await afterRun(run);
   }
 }

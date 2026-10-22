@@ -14,3 +14,7 @@ export { readBack } from "../forms/readback";
 export { answersHash, fillAndRead, latestVersion, refreshForms } from "../forms/versions";
 // Finishing (src/finish.ts): the filings' record onto the workspace and every job against its proof, for "settle"
 export { finishWork, stampFilings } from "../finish";
+// Odelia's shield (src/security): the model check's prompt and how its answer is read, and the tool-call log's shape
+export { CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier } from "../security/detect";
+export type { ToolLog } from "../security/secure";
+export type { Actor } from "../security/policy";

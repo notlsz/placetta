@@ -33,23 +33,5 @@ export function scrubCredentials(text: string): string {
     .replace(KEYS, "[hidden]").replace(PASSWORD, (m) => m.replace(/[:=]\s*\S+$/, ": [hidden]"));
 }
 
-/** Env names whose values are secrets. */
-export const SECRET_ENV = /(KEY|SECRET|TOKEN|PASSWORD|PASS|PRIVATE|CREDENTIAL|SIGNING|WEBHOOK)/i;
-
-/** The secret values among these env vars (8 characters or more, so "1" or "on" is never one). */
-export function secretValues(env: Record<string, string | undefined>): string[] {
-  return Object.entries(env).filter(([k, v]) => SECRET_ENV.test(k) && typeof v === "string" && v.length >= 8).map(([, v]) => v!).sort((a, b) => b.length - a.length);
-}
-
-/** A request body with every one of these secret values cut out, and how many were. */
-export function withoutEnv<T>(body: T, secrets: string[]): { body: T; cut: number } {
-  if (!secrets.length) return { body, cut: 0 };
-  let s = JSON.stringify(body), cut = 0;
-  for (const v of secrets) {
-    const enc = JSON.stringify(v).slice(1, -1);
-    if (!enc || !s.includes(enc)) continue;
-    cut += s.split(enc).length - 1;
-    s = s.split(enc).join("[hidden]");
-  }
-  return { body: cut ? JSON.parse(s) as T : body, cut };
-}
+// the server's own secret values, cut from every model request (the same code agent-run uses)
+export { SECRET_ENV, secretValues, withoutEnv } from "../../supabase/functions/_shared/secrets.ts";
