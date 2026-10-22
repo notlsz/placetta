@@ -2924,7 +2924,8 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
   .starter input{padding:12px 0}
   .vctl button{width:44px;height:44px}
   .vctl{right:6px;bottom:14px;gap:0}
-  .howtry,#hBk,.sc95a a{min-height:44px;display:inline-flex;align-items:center}
+  .howtry,.sc95a a{min-height:44px;display:inline-flex;align-items:center}
+  #hBk,.stalt a{padding-block:11px;margin-block:-11px}
   .hero .hbtn2,.hero a[data-open],.hero .hlink{min-height:44px;display:inline-flex;align-items:center}
   .xpmore{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:16px;padding:0 16px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(15,27,51,.08),inset 0 0 0 1px rgba(15,27,51,.06);font-size:14px;font-weight:500;color:var(--ink);text-decoration:none}
   .xpmore::after{content:"";width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translate(-1px,-2px);transition:transform .2s}
@@ -2947,8 +2948,7 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
   #mpinfo{font-size:15px!important}
   #mpddq{font-size:16px!important}
 
-  .stalt a,.wtabs button,.mptabs button,#lBtn{min-height:44px}
-  .stalt a{display:inline-flex;align-items:center}
+  .wtabs button,.mptabs button,#lBtn{min-height:44px}
   .stnote a{display:inline-block;padding-block:12px;margin-block:-12px}
   .flinks a,.flinks button{min-width:44px}
   .feat .fct p,.faqcta p{font-size:16px!important}
@@ -2995,6 +2995,8 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
   #h95 button[aria-selected="true"]{background:var(--ink);color:#fff}
 }
 @media (min-width:768px){.p95fb{display:none!important}}
+/* short phones (iPhone SE and the like): the hero keeps its first screen clear of the nav */
+@media (max-width:767px) and (max-height:740px){.hsub{font-size:15px!important}.hero .hstack{gap:14px!important}}
 /* /phone95:css */
 /* trust95 (Oct 21): trust and security read like a trust page. Every control carries its status in words (In place,
    Rolling out, In progress), the main subprocessors and the security contact are named, and nothing claims a certificate */
