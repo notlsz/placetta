@@ -36,6 +36,7 @@ import { ADDRESS_RULES } from "../src/forms/address-rules/index";
 import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
 import { groupOf, groupsFor, toolTokens } from "../src/toolIntent";
 import { checkArgs } from "../src/toolArgs";
+import { defaultShield, secureTools } from "../src/security/secure";
 import { elapsed, fromRow, merge, napper, pollDelay, reveal, startFeed, stepTimes } from "../src/cloud/runFeed";
 import { addSpan, keep, MAX_SPANS, totals, tree, type Span, type TraceFilter } from "../src/trace";
 import { readdirSync, readFileSync } from "node:fs";
@@ -1089,6 +1090,21 @@ async function teamReview() {
   eq(reads, [{ kind: "app", id: "a1" }, null, { kind: "app", id: "a1" }], "each read asks only for what it names (a made-up item never reaches the comments)");
   ok(r.w.apps.every((a, i) => a.status === ws.apps[i].status) && !r.w.approvals.length, "reading comments changes nothing in the workspace");
   ok(READ_ONLY.has("read_comments"), "read_comments only reads, so it runs beside other lookups");
+  // the flake behind "each read asks only for what it names": the policy wrapper awaited a SHA-256 of each input before
+  // the tool ran, and crypto.subtle finishes in no fixed order, so a small input's lookup could start before a large one's
+  {
+    const started: string[] = [];
+    const look = (name: string) => ({ name, description: name, inputSchema: { type: "object" as const, properties: {} }, execute: async (i: Record<string, unknown>) => { started.push(String(i.tag)); return "ok"; } });
+    const secured = secureTools([look("find_files"), look("read_comments")], defaultShield("me@luckyleaf.com", "owner"));
+    let inOrder = true;
+    for (let k = 0; k < 20 && inOrder; k++) {
+      started.length = 0;
+      const uses: Block[] = [{ type: "tool_use", id: "u1", name: "find_files", input: { tag: "big", query: "x".repeat(400_000 + k) } }, { type: "tool_use", id: "u2", name: "read_comments", input: { tag: "small" } }];
+      await runAll(uses, u => secured.find(t => t.name === u.name)!.execute(u.input ?? {}));
+      inOrder = started.join() === "big,small";
+    }
+    ok(inOrder, "lookups side by side start in the order the model asked, whatever the size of their input", started);
+  }
   const noComments = await agent({ ws, svc, script: [() => say("ok")] });
   ok(!((noComments.bodies[0].tools as { name: string }[]) ?? []).some(t => t.name === "read_comments") && !/read_comments/.test(String(noComments.bodies[0].system)), "without comments to read, the tool and its line in the instructions aren't there");
 

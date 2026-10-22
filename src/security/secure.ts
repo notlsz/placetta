@@ -109,19 +109,22 @@ export function secureTools(tools: Tool[], s: Shield, o: { get?: () => Workspace
     ...t,
     async execute(input: Record<string, unknown>) {
       const name = t.name, args = input && typeof input === "object" ? input : {};
-      const hash = await sha256(stable(args));
+      // The hash is for the log only. It's started here and awaited after the tool has started: crypto.subtle.digest
+      // finishes on the thread pool in no fixed order, so awaiting it first let lookups the model asked for side by side
+      // (runAll in src/live.ts) start out of order, a smaller input overtaking a larger one.
+      const hashing = sha256(stable(args));
       const d = decideCall(s.policy, name, args, { appReadOnly: o.appReadOnly?.(t) });
       if (!d.allow) {
         const why = reason(s, d, args);
-        s.log({ tool: name, scope: d.scope, input_hash: hash, decision: "deny", code: d.code, reason: why.slice(0, 300) });
+        s.log({ tool: name, scope: d.scope, input_hash: await hashing, decision: "deny", code: d.code, reason: why.slice(0, 300) });
         if (AUDITED.has(d.code)) o.apply?.(audit("agent", B("Refused a step by Placetta's rules", "按快哉的规则拒绝了一步操作"), same(name), same(why.slice(0, 240))));
         throw new Error(why);
       }
       let out: unknown;
       try { out = await t.execute(args); }
-      catch (e) { s.log({ tool: name, scope: d.scope, input_hash: hash, decision: "error", reason: String((e as Error)?.message ?? e).slice(0, 300) }); throw e; }
+      catch (e) { s.log({ tool: name, scope: d.scope, input_hash: await hashing, decision: "error", reason: String((e as Error)?.message ?? e).slice(0, 300) }); throw e; }
       spend(s.policy, d, args);
-      s.log({ tool: name, scope: d.scope, input_hash: hash, decision: "allow" });
+      s.log({ tool: name, scope: d.scope, input_hash: await hashing, decision: "allow" });
       // a message to someone the business never named: the owner sees that on the card before approving it
       const id = out && typeof out === "object" ? String((out as Record<string, unknown>).approval_id ?? "") : "";
       if (d.notes?.length && id && o.apply) {
