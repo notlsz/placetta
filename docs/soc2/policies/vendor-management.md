@@ -73,9 +73,9 @@ The customer chooses these and holds its own contract with each. We keep the acc
 | WeCom | Updates to a group | Type 1 report | ISO/IEC 27018 stated; 27001 not stated | [Tencent WeCom](https://www.tencent.com/en-us/business/wecom.html) |
 | DingTalk | Updates to a group | SOC 2 and SOC 3 | 27001, 27017, 27018 | [DingTalk Enterprise](https://www.alibabacloud.com/en/product/dingtalk-enterprise) |
 
-### In the code but missing from the trust page
+### Added to the trust page on 2026-10-22
 
-These are wired in and a customer can connect them, but `site/trust.html` doesn't list them yet. Add them there (the site belongs to another workstream; this is the list to add):
+These are wired in for a customer to connect. They were missing from `site/trust.html` until 2026-10-22; they are now listed under "Services you connect", each with what it receives, and marked "Rolling out" because their migrations (`20261017120000_wechat_pos.sql`, `20261017140000_mcp_connectors.sql`) aren't confirmed live. Change the tag to "If you connect it" once they are:
 
 | Vendor | Code | Status |
 | --- | --- | --- |
@@ -95,6 +95,6 @@ These are wired in and a customer can connect them, but `site/trust.html` doesn'
 ## How we prove it
 
 1. This table, dated, and its git history.
-2. The vendor reports in the evidence folder, each with the date downloaded (none yet).
+2. The vendor reports in the evidence folder, each with the date downloaded (none yet), tracked in [vendors/README.md](../vendors/README.md) with the request templates.
 3. `ai_events.provider` shows which AI vendors actually answered (`select provider, count(*) from ai_events group by 1`), against the table above. The column arrives with `20261016160000_ai_routing_margin.sql`, which isn't applied to the live database yet; until then `ai_events.model` names the model.
 4. The yearly review record in [RECORDS.md](../RECORDS.md#vendor-review).
