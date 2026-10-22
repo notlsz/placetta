@@ -36,7 +36,7 @@
     "coverage:write": "esbuild scripts/coverage.ts --bundle --platform=node --format=esm --outfile=.coverage-test.mjs '--external:*.pdf?inline' --log-level=error && node .coverage-test.mjs --write; s=$?; rm -f .coverage-test.mjs; exit $s",
     "test:registry": "esbuild scripts/registry-test.ts --bundle --platform=node --format=esm --outfile=.registry-test.mjs '--external:*.pdf?inline' --log-level=error && node .registry-test.mjs; s=$?; rm -f .registry-test.mjs; exit $s",
     "verify:sources": "esbuild scripts/verify-sources.ts --bundle --platform=node --format=esm --outfile=.verify-sources.mjs '--external:*.pdf?inline' --log-level=error && NODE_USE_ENV_PROXY=1 node --no-warnings .verify-sources.mjs; s=$?; rm -f .verify-sources.mjs; exit $s",
-    "test:leak": "node scripts/leak-test.mjs",
+    "test:leak": "esbuild scripts/leak-test.ts --bundle --platform=node --format=esm --outfile=.leak-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .leak-test.mjs; s=$?; rm -f .leak-test.mjs; exit $s",
     "test:demo": "esbuild scripts/demo-quality.ts --bundle --platform=node --format=esm --outfile=.demo-quality.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .demo-quality.mjs; s=$?; rm -f .demo-quality.mjs; exit $s",
     "test:stores": "esbuild scripts/stores-check-test.ts --bundle --platform=node --format=esm --outfile=.stores-check-test.mjs '--external:*.pdf?inline' --log-level=error && node .stores-check-test.mjs; s=$?; rm -f .stores-check-test.mjs; exit $s",
     "site:check": "esbuild src/site/stores-check.ts --bundle --minify --format=iife --target=es2020 --outfile=site/stores-check.js --log-level=warning",
@@ -49,10 +49,9 @@
     "test:channels": "esbuild scripts/channels-test.mts --bundle --platform=node --format=esm --outfile=.channels-test.mjs --log-level=error && node .channels-test.mjs; s=$?; rm -f .channels-test.mjs; exit $s",
     "proof:read": "esbuild scripts/eval/proof-dump.ts --bundle --platform=node --format=esm --outfile=.proof-dump.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .proof-dump.mjs > .proofs.json && python3 -I scripts/eval/proof-read.py .proofs.json scripts/eval/proof-log.json; s=$?; rm -f .proof-dump.mjs .proofs.json; exit $s",
     "strict:read": "esbuild scripts/eval/strict-dump.ts --bundle --platform=node --format=esm --outfile=.strict-dump.mjs --log-level=error && node .strict-dump.mjs > .strict.json && python3 -I scripts/eval/proof-read.py .strict.json scripts/eval/strict-log.json .strict-checks.json; s=$?; rm -f .strict-dump.mjs .strict.json .strict-checks.json; exit $s",
-    "test:accuracy":"esbuild scripts/eval/accuracy.ts --bundle --platform=node --format=esm --outfile=.accuracy-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .accuracy-test.mjs; s=$?; rm -f .accuracy-test.mjs; exit $s",
-    "test:leak": "esbuild scripts/leak-test.ts --bundle --platform=node --format=esm --outfile=.leak-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .leak-test.mjs; s=$?; rm -f .leak-test.mjs; exit $s",
+    "test:accuracy": "esbuild scripts/eval/accuracy.ts --bundle --platform=node --format=esm --outfile=.accuracy-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .accuracy-test.mjs; s=$?; rm -f .accuracy-test.mjs; exit $s",
     "qa": "node scripts/qa.mjs",
-    "econ":"esbuild scripts/econ/measure.ts --bundle --platform=node --format=esm --outfile=.econ.mjs '--external:*.pdf?inline' --external:thinking-orbs --external:playwright-core --log-level=error && node .econ.mjs; s=$?; rm -f .econ.mjs; exit $s"
+    "econ": "esbuild scripts/econ/measure.ts --bundle --platform=node --format=esm --outfile=.econ.mjs '--external:*.pdf?inline' --external:thinking-orbs --external:playwright-core --log-level=error && node .econ.mjs; s=$?; rm -f .econ.mjs; exit $s"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
@@ -66,6 +65,11 @@
     "voice-glow": "^0.2.1"
   },
   "devDependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/noto-sans-sc": "^5.3.1",
+    "@fontsource/noto-serif-sc": "^5.3.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
