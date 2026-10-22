@@ -552,6 +552,20 @@ export async function listUpdates(ws: string): Promise<UpdateRow[]> {
   if (error) throw fromPg(error);
   return (data ?? []) as UpdateRow[];
 }
+/** Live: calls back when the workspace gets a new Update or one of its filings changes stage (migration
+ *  20261024120000_stage_alerts adds both tables to Realtime; row level security decides who hears what). The caller
+ *  still polls, so nothing is lost while the connection is down. */
+export function watchWorkspace(ws: string, changed: (what: "update" | "filing") => void): () => void {
+  if (PREVIEW || !cloudConfigured) return () => {};
+  try {
+    const sb = supabase();
+    const ch = sb.channel(`ws:${ws}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "updates", filter: `workspace_id=eq.${ws}` }, () => changed("update"))
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "filings", filter: `workspace_id=eq.${ws}` }, () => changed("filing"))
+      .subscribe();
+    return () => { void sb.removeChannel(ch); };
+  } catch { return () => {}; }
+}
 export const readUpdates = (ws: string) => supabase().rpc("read_updates", { ws }).then(({ error }) => { if (error) throw fromPg(error); });
 
 /* ------------------------------ billing ------------------------------ */

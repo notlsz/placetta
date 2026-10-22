@@ -58,13 +58,14 @@ jobs:
         run: npm run test:seo
       - name: Production build
         run: npx vite build
-      # the portal filer: types, and the tests that need no browser (its database access goes only through the filer
-      # functions; its image runs as a non-root user; its rerouting and playbooks)
+      # the portal filer: types, and its tests (its database access goes only through the filer functions; its image
+      # runs as a non-root user; its rerouting; and replay.test.ts, which drives each agency playbook in Chromium, so the
+      # filer's own Playwright browser is installed first)
       - name: Filer types and tests
         run: |
           npm ci --prefix worker/filer
           npm run typecheck --prefix worker/filer
-          cd worker/filer && node --experimental-strip-types --test test/store.test.ts test/docker.test.ts test/reroute.test.ts test/replay.test.ts
+          cd worker/filer && npx playwright install --with-deps chromium && node --experimental-strip-types --test test/store.test.ts test/docker.test.ts test/reroute.test.ts test/replay.test.ts
   functions:
     runs-on: ubuntu-latest
     steps:

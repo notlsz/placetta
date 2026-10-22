@@ -29,6 +29,7 @@ import { dueNotices, noticeFor, type RenewalRow } from "./renewal_notice.ts";
 import { canConverse } from "../_shared/llm.ts";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
+import { stageAlert, stageUpdates, type StageFiling, type StageUpdate } from "./stage.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -294,21 +295,9 @@ export function weekAhead(ws: string, state: { deadlines?: unknown; stores?: unk
 
 export function filingUpdates(f: Filing, since: string, now: number): Update[] {
   const out: Update[] = [], t = bi(f.title);
-  if (f.updated_at > since) {
-    const said: Record<string, [Bi, Bi | undefined]> = {
-      submitted: [{ en: `Submitted to the agency: ${t.en}`, zh: `已提交至机构：${t.zh}` }, f.confirmation_number ? { en: `Confirmation ${f.confirmation_number}.`, zh: `确认号 ${f.confirmation_number}。` } : undefined],
-      accepted: [{ en: `Approved by the agency: ${t.en}`, zh: `机构已批准：${t.zh}` }, { en: "The approval is in Documents when the agency sends it.", zh: "机构发来批准文件后会放在“文件”中。" }],
-      rejected: [{ en: `Returned by the agency: ${t.en}`, zh: `被机构退回：${t.zh}` }, f.note ? { en: f.note, zh: f.note } : { en: "The team will tell you what to fix.", zh: "团队会告诉您需要修改什么。" }],
-      needs_info: [{ en: `Action needed: ${t.en}`, zh: `需要您处理：${t.zh}` }, f.payment_url ? { en: "The agency fee is ready to pay.", zh: "机构费用可以支付了。" } : f.note ? { en: f.note, zh: f.note } : undefined],
-    };
-    const s = said[f.status];
-    if (s) out.push({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `filing:${f.id}:${f.status}:${f.updated_at.slice(0, 10)}`, title: s[0], body: s[1] });
-  }
-  if (f.agent_state === "needs_you" && f.updated_at > since) {
-    out.push({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `needs_you:${f.id}:${f.updated_at.slice(0, 10)}`,
-      title: { en: `Placetta needs you for a step: ${t.en}`, zh: `需要您完成一步：${t.zh}` },
-      body: { en: "Open the filing to finish it. Placetta carries on right after.", zh: "打开该申请完成这一步，快哉随后继续办理。" } });
-  }
+  // a stage the filing reached since the last run: the same Updates (and dedupe keys) stage.ts sends the moment it
+  // happens, so one announced live isn't announced again here
+  if (f.updated_at > since) out.push(...stageUpdates(f));
   if (f.status === "needs_info" && f.payment_url && !f.customer_paid_at && now - Date.parse(f.updated_at) > 2 * 864e5) {
     const week = Math.floor(now / (7 * 864e5));
     out.push({ workspace_id: f.workspace_id, kind: "payment", app_id: f.app_id, dedupe: `pay:${f.id}:${week}`,
@@ -458,10 +447,72 @@ ${link ? `<p style="margin:22px 0 0"><a href="${esc(link)}" style="display:inlin
   return { subject, text, html };
 }
 
+/* ------------------------------ stage alerts: the database and the ways out ------------------------------ */
+
+function stageDb() {
+  const people = noticeDb(admin);
+  return {
+    async filing(id: string) {
+      const { data, error } = await admin.from("filings").select("id, workspace_id, app_id, title, status, agent_state, updated_at, confirmation_number, note, payment_url, approved_by, channel").eq("id", id).maybeSingle();
+      if (error) throw new Error("filing: " + error.code);
+      return (data ?? null) as StageFiling | null;
+    },
+    async workspace(id: string) {
+      const { data } = await admin.from("workspaces").select("name, state").eq("id", id).maybeSingle();
+      return data ? { name: String(data.name ?? "Your business"), state: data.state ?? {} } : null;
+    },
+    async members(ws: string) {
+      const { data } = await admin.from("workspace_members").select("user_id, role").eq("workspace_id", ws);
+      return (data ?? []) as { user_id: string; role: string }[];
+    },
+    person: (uid: string) => people.person(uid),
+    async save(u: StageUpdate) {
+      const { data, error } = await admin.from("updates").upsert({ ...u, body: u.body ?? null }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true }).select("dedupe");
+      if (error) { console.error("stage update", u.workspace_id, error.code); return false; }
+      return (data ?? []).length > 0;
+    },
+  };
+}
+function stageOut(key: string) {
+  const text = outboxText(admin);
+  return {
+    mail: (to: string, subject: string, t: string, html: string) => (RESEND && FROM ? sendMail([to], subject, t, html) : Promise.resolve(false)),
+    text,
+    async chats(ws: string, business: string, items: StageUpdate[]) {
+      let n = 0;
+      const { data: hooks } = await admin.from("integrations").select("id, kind, secret_id, meta").eq("workspace_id", ws).in("kind", [...HOOK_KINDS]).eq("status", "connected");
+      for (const h of hooks ?? []) {
+        const { data: raw } = await admin.rpc("vault_get", { p_id: h.secret_id });
+        let link = "", secret: string | undefined;
+        try { const b = JSON.parse(String(raw ?? "")); link = b.webhook_url ?? ""; secret = b.secret || undefined; } catch { /* no saved link */ }
+        if (!link) continue;
+        const lang = (h.meta as { lang?: string } | null)?.lang === "zh" ? "zh" : "en";
+        const r = await postHook(h.kind as HookKind, link, hookDigest(business, items, lang, appLink(APP, ws)), secret);
+        if (r.ok) { n++; await admin.from("integrations").update({ last_used_at: new Date().toISOString() }).eq("id", h.id); }
+        else console.error("stage chat", h.kind, r.why);
+      }
+      return n;
+    },
+    async flush() {
+      await fetch(`${SUPABASE_URL}/functions/v1/odelia-sms`, { method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": key }, body: JSON.stringify({ action: "flush" }) }).catch(() => null);
+    },
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json(405, { error: "Use POST." });
   const { data: okKey } = await admin.rpc("monitor_key_ok", { p_key: req.headers.get("x-monitor-key") ?? "" });
   if (okKey !== true) return json(401, { error: "unauthorized" });
+
+  // A filing just reached a new stage (the trigger in migration 20261024120000_stage_alerts calls this): tell the
+  // people in charge of it now (stage.ts), not in the next morning's run.
+  const asked = (await req.json().catch(() => ({}))) as { action?: unknown; filing_id?: unknown };
+  if (asked.action === "stage") {
+    const id = String(asked.filing_id ?? "");
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return json(400, { error: "filing_id is required." });
+    try { return json(200, await stageAlert(stageDb(), stageOut(req.headers.get("x-monitor-key") ?? ""), { app: APP, filingId: id })); }
+    catch (e) { console.error("stage alert", id, String(e).slice(0, 160)); return json(500, { error: "stage alert failed" }); }
+  }
 
   const started = new Date(), today = day(started), now = started.getTime();
   const { data: settings } = await admin.from("app_settings").select("monitor_last_run").maybeSingle();

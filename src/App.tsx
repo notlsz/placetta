@@ -314,6 +314,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     const t = window.setInterval(load, 120_000);
     return () => window.clearInterval(t);
   }, [cloud]);
+  // live: a new Update or a filing reaching its next stage shows at once (the polling above stays as the safety net)
+  useEffect(() => {
+    if (!cloud) return;
+    let timer = 0;
+    const stop = api.watchWorkspace(cloud.wsId, what => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => { if (what === "filing") void refresh(); else void api.listUpdates(cloud.wsId).then(setServerUpdates, () => undefined); }, 400);
+    });
+    return () => { window.clearTimeout(timer); stop(); };
+  }, [cloud, refresh]);
   /* the Updates inbox: the monitor's updates in an account (worked out locally until its first run), the sample's otherwise */
   const updatesBase = useMemo<UpdateItem[]>(() => {
     const base = cloud && serverUpdates.length
