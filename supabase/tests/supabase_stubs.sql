@@ -44,3 +44,10 @@ create table auth.sessions (id uuid primary key default gen_random_uuid(), user_
 create table auth.refresh_tokens (id bigserial primary key, token text, user_id varchar(255), session_id uuid references auth.sessions(id) on delete cascade, revoked boolean default false);
 create table auth.sso_providers (id uuid primary key, resource_id text, created_at timestamptz default now());
 create table auth.sso_domains (id uuid primary key default gen_random_uuid(), sso_provider_id uuid not null references auth.sso_providers(id) on delete cascade, domain text not null);
+-- Supabase's GraphQL endpoint: the graphql_public schema the API serves, open to the API roles (pg_graphql itself isn't
+-- installed here; 20261026100000_graphql_closed.sql drops it on the live project).
+create schema if not exists graphql_public;
+create function graphql_public.graphql("operationName" text default null, query text default null, variables jsonb default null, extensions jsonb default null)
+  returns jsonb language sql as $$ select '{}'::jsonb $$;
+grant usage on schema graphql_public to anon, authenticated, service_role;
+grant execute on function graphql_public.graphql(text, text, jsonb, jsonb) to anon, authenticated, service_role;
