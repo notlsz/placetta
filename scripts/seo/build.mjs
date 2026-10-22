@@ -118,6 +118,8 @@ function offers() {
     if (/\+$/.test(x.v[0])) { const p = price(x.v[0]); if (p != null) o.push({ "@type": "Offer", name: x.l[0], description: `${x.n[0]} ${x.ps[0]}`, priceCurrency: "USD", priceSpecification: { "@type": "PriceSpecification", minPrice: p, priceCurrency: "USD", unitText: x.u[0].replace(/^\//, "") }, url: ORIGIN + "/pricing" }); continue; }
     add(x.l[0], price(x.v[0]), x.u[0].replace(/^\//, "") + (/yearly/i.test(x.ps[0]) ? ", billed yearly" : ""), x.n[0]);
     const food = x.ps[0].match(/\$([\d,]+) for a restaurant or food store/); if (food) add(`${x.l[0]}, restaurant or food store`, price("$" + food[1]), "restaurant or food store", x.n[0]);
+    // the simple model's complex licenses: "$999 for a liquor license, building plan review or an import permit."
+    const complex = x.ps[0].match(/\$([\d,]+) for (a liquor license[^.]*)/); if (complex) add(`${x.l[0]}, complex`, price("$" + complex[1]), complex[2], x.n[0]);
   }
   const entry = strip(FAQ[0][1][0]).match(/\$(\d[\d,]*) one-time per market/); if (entry) add("Entry plan", price("$" + entry[1]), "one-time per market", strip(FAQ.find(f => /entry plan/i.test(f[0][0]))?.[1][0] ?? ""));
   return o;

@@ -15,11 +15,11 @@ Free license guides: 92 cities in 22 countries (41 in the US), 12 kinds of busin
 - [Structured data for all guides](https://www.placetta.com/guides/data.json)
 
 ## Pricing
-- Essentials: $149/location a month. Billed yearly. For every franchise or company-owned store.
-- Pro: $299/location a month. Billed yearly. For restaurants, tea and food stores that get inspected often.
-- Openings: $3,500/retail store. $6,500 for a restaurant or food store. Liquor and complex build-outs quoted. For each new store, from lease to opening day.
-- Headquarters: $25,000+/year. For 10 or more locations, billed yearly. For franchisors that require Odelia across the system, and brands entering the US.
-- $149 per location a month on Essentials or $299 a month on Pro, billed yearly. Or start with an entry plan: $299 one-time per market, credited to your first year if you start a plan within 60 days. Each new store opening is $3,500 for retail and $6,500 for a restaurant or food store, paid once; liquor licenses and complex build-outs are quoted. Exceptions handled by people are quoted per step. Government fees are paid at cost, by you directly to each agency.
+- Store plan: $149/store a month. Billed yearly. For every store, open or opening, kept current.
+- New licenses: $299/license. $999 for a liquor license, building plan review or an import permit. Each one priced before you approve it, and nothing charged without your approval.
+- Renewals outside the plan: $99/renewal. Only when the store plan doesn't include it. A renewal that needs our team, or for a store without the plan.
+- Plan preview: Free. No card needed. Every license a store needs, in order, with agency fees and timelines.
+- $149 a store a month on the store plan, billed yearly: tracking, renewal monitoring, alerts, your document vault, Odelia, and the renewals she files on her own. Each new license is $299, or $999 for a liquor license, building plan review or an import permit, and its price shows before you approve it. A renewal the plan doesn't include is $99. With 10 or more stores on the plan, every new license is included. Your plan preview is free. Government fees are paid at cost, by you directly to each agency.
 
 ## Guides by kind of business
 - [Restaurants](https://www.placetta.com/guides/business/restaurant.html)
@@ -197,7 +197,7 @@ Free license guides: 92 cities in 22 countries (41 in the US), 12 kinds of busin
 - [How Placetta submits your filings](https://www.placetta.com/help/essentials/self-filing/)
 - [Signing in to Placetta](https://www.placetta.com/help/essentials/sign-in/)
 - [Creating your workspace](https://www.placetta.com/help/essentials/workspace/)
-- [Your entry plan](https://www.placetta.com/help/essentials/entry-plan/)
+- [Your plan](https://www.placetta.com/help/essentials/entry-plan/)
 - [Ask Placetta: what the agent does](https://www.placetta.com/help/features/agent/)
 - [Approvals and filing](https://www.placetta.com/help/features/approvals/)
 - [Deadlines and renewals](https://www.placetta.com/help/features/deadlines/)

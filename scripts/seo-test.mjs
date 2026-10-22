@@ -159,7 +159,8 @@ group("Organization entity on the landing, About and guides hub", () => {
   const site = lds(pages.get("site/index.html")).map(s => JSON.parse(s));
   check("landing has the WebSite with a SearchAction", site.some(j => j["@type"] === "WebSite" && j.potentialAction?.["@type"] === "SearchAction"));
   const svc = site.find(j => j["@type"] === "Service");
-  check("landing has the Service with offers", svc && svc.hasOfferCatalog.itemListElement.length >= 5, svc?.hasOfferCatalog?.itemListElement?.length);
+  // the simple model: the store plan, a new license, a complex license and a renewal (the free plan preview has no Offer)
+  check("landing has the Service with offers", svc && svc.hasOfferCatalog.itemListElement.length >= 4, svc?.hasOfferCatalog?.itemListElement?.length);
   const html = pages.get("site/index.html"), vis = strip(html);
   for (const o of svc?.hasOfferCatalog.itemListElement ?? []) {
     const p = o.price ?? o.priceSpecification?.minPrice; check(`offer ${o.name} price is on the page`, vis.includes("$" + Number(p).toLocaleString("en-US")), p);
