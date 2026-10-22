@@ -704,7 +704,7 @@ ${sourcing(l)}
   }).join("");
   const agencies = [...new Set(FORMS.map(f => where(f, l)))];
   const hub = `<header class="hero hub-hero wrap"><h1>${esc(hubTitle)}</h1><p class="dek">${esc(hubDek)}</p>
-<form class="find" role="search" onsubmit="return false"><label class="sr" for="q">${l === "zh" ? "搜索城市、表格或问题" : "Search cities, forms or questions"}</label><input id="q" type="search" autocomplete="off" placeholder="${l === "zh" ? "搜索城市、表格或问题，例如 上海 或 SS-4" : "Search a city, form or question, e.g. Dubai or SS-4"}"><p class="count" id="count" aria-live="polite"></p></form>
+<form class="find" role="search"><label class="sr" for="q">${l === "zh" ? "搜索城市、表格或问题" : "Search cities, forms or questions"}</label><input id="q" type="search" autocomplete="off" placeholder="${l === "zh" ? "搜索城市、表格或问题，例如 上海 或 SS-4" : "Search a city, form or question, e.g. Dubai or SS-4"}"><p class="count" id="count" aria-live="polite"></p></form>
 <dl class="stats"><div><dt>${l === "zh" ? "城市" : "Cities"}</dt><dd>${placesUsed.length}</dd></div><div><dt>${l === "zh" ? "指南" : "Guides"}</dt><dd>${nGuides}</dd></div><div><dt>${l === "zh" ? "官方表格" : "Official forms"}</dt><dd>${FORMS.length}</dd></div><div><dt>${l === "zh" ? "语言" : "Languages"}</dt><dd>2</dd></div></dl>${sponsors(l)}</header>
 <section class="wrap block" id="cities"><h2 class="sec">${l === "zh" ? "品牌正在扩张的城市" : "Where brands are expanding"}</h2>
 <div class="tabs" role="tablist" aria-label="${l === "zh" ? "地区" : "Region"}">${REGIONS.map((r, i) => `<button type="button" role="tab" id="t-${r.id}" aria-controls="r-${r.id}" aria-selected="${i === 0}">${esc(r.name[l])}<span>${placesUsed.filter(p => REGION(p.country) === r.id).length}</span></button>`).join("")}</div>

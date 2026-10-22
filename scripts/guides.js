@@ -18,6 +18,8 @@
   /* hub: search across cities, answers and forms */
   const q = document.getElementById("q"), count = document.getElementById("count");
   if (q) {
+    // the search filters as you type: Enter never submits the form (no inline handler, so the CSP allows no inline script)
+    q.form?.addEventListener("submit", e => e.preventDefault());
     const items = [...document.querySelectorAll("[data-f]")];
     q.addEventListener("input", () => {
       const v = q.value.trim().toLowerCase(); let n = 0;
