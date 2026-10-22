@@ -44,6 +44,8 @@ const ABROAD = new RegExp("(^|\\.)(" + [
   "gov\\.cn",
   // the UAE federal government's portal (u.ae) and the federal and emirate governments' gov.ae sites; Türkiye's gov.tr
   // and the Istanbul Metropolitan Municipality's own domain; Saudi Arabia's and Qatar's government domains
+  // Québec's government portal and ministries, Revenu Québec, and the City of Montréal
+  "quebec\\.ca", "gouv\\.qc\\.ca", "revenuquebec\\.ca", "montreal\\.ca",
   "u\\.ae", "gov\\.ae", "gov\\.tr", "bel\\.tr", "ibb\\.istanbul", "gov\\.sa", "gov\\.qa",
   // Germany's federal law site (the Federal Ministry of Justice's gesetze-im-internet.de)
   "gesetze-im-internet\\.de",

@@ -612,7 +612,108 @@ const DAL_FIRE_FEES = "https://dallascityhall.com/departments/fire-rescue/FPEI%2
 const DAL_DSD_FEES = "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/DSD%20Fees.pdf";
 const CA_FEES = "https://bpd.cdn.sos.ca.gov/pdf/be-fee-schedule-062018.pdf";
 
+/** An out-of-state company's registration in a state: [state, id suffix, form, agency, filing url, proof page, quote, fee or undefined, fee note]. */
+const FOREIGN = (where: string, form: string, agency: T, url: string, read: string | undefined, quote: string | undefined, fee: number | undefined, feeNote?: T, how?: T) =>
+  N({ id: `${where.toLowerCase()}-foreign-registration`, where, level: "state", needs: { foreignEntity: true }, method: "online", order: 12, cur: "USD", ...(fee !== undefined ? { fee } : {}),
+    form, title: ["Registration of an out-of-state company to do business in the state", "外州公司在本州经营登记"], agency,
+    how: how ?? ["A company formed in another state or abroad registers with the state before it transacts business there, with a certificate of good standing from its home jurisdiction.", "在外州或境外成立的公司须在本州开展业务前向州政府登记，并提交注册地出具的存续证明。"],
+    url, ...(feeNote ? { feeNote } : {}), ...(read && quote ? { proof: [read, quote] as const } : {}) });
+
+const US_FOREIGN: OfficialForm[] = [
+  FOREIGN("PA", "Foreign Registration Statement (DSCB:15-412) with a Docketing Statement", ["Pennsylvania Department of State, Bureau of Corporations and Charitable Organizations", "宾夕法尼亚州州务厅公司与慈善组织局"],
+    "https://www.pa.gov/content/dam/copapwp-pagov/en/dos/programs/business/forms/offsite-forms/15-412-Foreign-Registration-Statement.pdf",
+    "https://www.pa.gov/content/dam/copapwp-pagov/en/dos/programs/business/guides/Business-Guide.pdf", "desiring to do business in this commonwealth must register with the Department of State by filing a Foreign Registration Statement", 250,
+    ["$250, printed on Form DSCB:15-412.", "DSCB:15-412 表上载明 250 美元。"]),
+  FOREIGN("NV", "Application for Registration of Foreign Limited-Liability Company (SilverFlume)", ["Nevada Secretary of State, Commercial Recordings", "内华达州州务卿商业登记处"],
+    "https://www.nvsilverflume.gov", "https://www.leg.state.nv.us/NRS/NRS-086.html", "Before transacting business in this State, a foreign limited-liability company must register with the Secretary of State.", undefined,
+    ["Fee not confirmed: the Secretary of State's own pages build their text in script.", "费用未经确认：州务卿网站以脚本生成内容。"]),
+  FOREIGN("AZ", "Foreign Registration Statement (Form L025)", ["Arizona Corporation Commission, Corporations Division", "亚利桑那州公司委员会公司处"],
+    "https://www.azcc.gov/docs/default-source/corps-files/forms/l025-application-for-registration4afaea2f67c14b72a213ef5b0b8355b0.pdf",
+    "https://azcc.gov/docs/default-source/corps-files/fee-schedules/fee-schedule-llcs.pdf", "Foreign Registration Statement $150.00 $185.00", 150,
+    ["$150, or $185 expedited.", "150 美元，加急 185 美元。"]),
+  FOREIGN("OR", "Application for Authority to Transact Business, Foreign Limited Liability Company", ["Oregon Secretary of State, Corporation Division", "俄勒冈州州务卿公司处"],
+    "https://sos.oregon.gov/business/Documents/business-registry-forms/fllc-authority.pdf",
+    "https://sos.oregon.gov/business/Documents/business-registry-forms/fllc-authority.pdf", "Required Processing Fee $275", 275,
+    ["$275 processing fee, nonrefundable.", "275 美元办理费，不予退还。"]),
+  FOREIGN("VA", "Application for a Certificate of Registration to Transact Business as a Foreign LLC (LLC1052)", ["Virginia State Corporation Commission, Clerk's Office", "弗吉尼亚州公司委员会书记处"],
+    "https://www.scc.virginia.gov/businesses/forms-and-fees/foreign-limited-liability-companies/",
+    "https://www.scc.virginia.gov/businesses/business-faqs/foreign-business-entities/", "may not transact business in Virginia until it obtains a certificate of authority or certificate of registration from the State Corporation Commission.", 100,
+    ["$100 for a new foreign LLC (LLC1052).", "新外州 LLC 登记（LLC1052）100 美元。"]),
+  FOREIGN("NJ", "Certificate of registration for a foreign LLC (Public Records Filing)", ["New Jersey Division of Revenue and Enterprise Services", "新泽西州税收与企业服务处"],
+    "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+    "https://www.nj.gov/treasury/revenue/gettingregistered.shtml", "All individuals or companies doing business in New Jersey must be registered.", 100,
+    ["$100 for a foreign LLC's certificate of registration.", "外州 LLC 登记证书 100 美元。"]),
+  FOREIGN("CO", "Statement of Foreign Entity Authority", ["Colorado Secretary of State, Business Division", "科罗拉多州州务卿商业处"],
+    "https://www.sos.state.co.us/pubs/business/FAQs/foreigns.html",
+    "https://www.sos.state.co.us/pubs/business/FAQs/foreigns.html", "A foreign entity can obtain authority to transact business in Colorado by filing a Statement of Foreign Entity Authority", 100,
+    ["$100, filed online.", "100 美元，在线提交。"]),
+  FOREIGN("MN", "Certificate of Authority to Transact Business in Minnesota (foreign LLC)", ["Minnesota Secretary of State, Business Services", "明尼苏达州州务卿商业服务处"],
+    "https://www.sos.mn.gov/media/1580/foreignllccertificateofauthority.pdf",
+    "https://www.revisor.mn.gov/statutes/cite/322C.0802", "by filing an application with the secretary of state together with a total fee of $185.", 185,
+    ["$185 by statute (Minn. Stat. 322C.0802).", "依法规定 185 美元（明尼苏达州法规 322C.0802）。"]),
+  FOREIGN("OH", "Registration of a Foreign Limited Liability Company", ["Ohio Secretary of State, Business Services", "俄亥俄州州务卿商业服务处"],
+    "https://www.ohiosos.gov",
+    "https://codes.ohio.gov/ohio-revised-code/section-1706.511", "the foreign limited liability company shall register with the secretary of state.", undefined,
+    ["Fee not confirmed: ohiosos.gov refuses automated reads.", "费用未经确认：州务卿网站拒绝自动读取。"]),
+  FOREIGN("MD", "Limited Liability Company Registration (for a non-Maryland LLC)", ["Maryland State Department of Assessments and Taxation, Charter Division", "马里兰州评估与税务局章程处"],
+    "https://dat.maryland.gov/sdat%20forms/llc-foreign.pdf",
+    "https://dat.maryland.gov/sdat%20forms/llc-foreign.pdf", "This document must be accompanied by written proof of existence from the home state", 100,
+    ["$100 filing fee.", "申请费 100 美元。"]),
+  FOREIGN("DC", "Foreign Registration Statement (Form FN-1)", ["DC Department of Licensing and Consumer Protection, Corporations Division", "华盛顿特区许可与消费者保护局公司处"],
+    "https://dlcp.dc.gov/sites/default/files/dc/sites/DLCP/publication/attachments/FN-1%20Foreign%20Registration%20Statement.pdf",
+    "https://dlcp.dc.gov/page/corporations-division-fees-foreign-non-dc-entities", "Foreign registration statement: two hundred twenty dollars ($220);", 220,
+    ["$220.", "220 美元。"]),
+  { ...FOREIGN("IL", "Application for Admission to Transact Business (foreign LLC)", ["Illinois Secretary of State, Department of Business Services", "伊利诺伊州州务卿商业服务部"],
+    "https://www.ilsos.gov", undefined, undefined, undefined), lead: "ilsos.gov and ilga.gov refused every connection from the research sandbox on 2026-10-22; re-read before claiming." },
+];
+
+/* ------------------------------------------------------------------ Québec and Montréal (Canada) */
+const QC_REQ = "https://www.quebec.ca/en/businesses-and-self-employed-workers/start-entreprise/register-constitute-enterprise/learn-about-registration/about-registration";
+const QC_FOOD = "https://www.quebec.ca/entreprises-et-travailleurs-autonomes/industrie-bioalimentaire/permis-alimentaires/permis-restauration-vente-detail";
+const MTL_OPEN = "https://montreal.ca/articles/ouvrir-un-commerce-ou-lancer-une-entreprise-18507";
+const MTL_SIGN = "https://montreal.ca/demarches/obtenir-un-permis-denseigne-commerciale";
+
+const QUEBEC: OfficialForm[] = [
+  N({ id: "ca-qc-req", where: "CA-QC", level: "state", method: "online", order: 12, cur: "CAD",
+    form: "Déclaration d'immatriculation (Registraire des entreprises)", title: ["Company registration in Québec (Registraire des entreprises)", "在魁北克省企业登记处登记公司"],
+    agency: ["Registraire des entreprises du Québec", "魁北克省企业登记处"],
+    how: ["Most enterprises, including a company formed in another province or country that does business in Québec, register with the Registraire des entreprises when they start, and get a Québec enterprise number (NEQ).", "多数企业（包括在魁北克经营的外省或外国公司）须在开业时向企业登记处登记，取得魁北克企业编号（NEQ）。"],
+    url: QC_REQ,
+    proof: [QC_REQ, "In Québec, most enterprises must register with the Registraire des entreprises as soon as they are created, by filing a declaration of registration."] }),
+  N({ id: "ca-qc-qst", where: "CA-QC", level: "state", method: "online", order: 22, cur: "CAD",
+    form: "Inscription aux fichiers de la TPS/TVH et de la TVQ", title: ["Québec sales tax (QST) registration with Revenu Québec", "向魁北克省税务局登记魁北克销售税（QST）"],
+    agency: ["Revenu Québec", "魁北克省税务局"],
+    how: ["A business in Québec registers for the QST (and, through Revenu Québec, for the GST) once it is no longer a small supplier.", "魁北克省企业不再属于小供应商后，须登记魁北克销售税（并经魁北克省税务局登记 GST）。"],
+    url: "https://www.revenuquebec.ca", lead: "revenuquebec.ca answered 403 to every automated read on 2026-10-21 and 2026-10-22; re-read before claiming." }),
+  N({ id: "ca-qc-cnesst", where: "CA-QC", level: "state", needs: { employees: true }, method: "online", order: 61, cur: "CAD",
+    form: "Inscription d'un employeur à la CNESST", title: ["Employer registration with the CNESST (workplace insurance)", "向魁北克省劳动标准、公平、健康与安全委员会（CNESST）登记雇主"],
+    agency: ["Commission des normes, de l'équité, de la santé et de la sécurité du travail (CNESST)", "魁北克省劳动标准、公平、健康与安全委员会（CNESST）"],
+    how: ["An employer in Québec registers with the CNESST when it hires its first worker.", "魁北克省雇主须在雇用首名员工时向 CNESST 登记。"],
+    url: "https://www.cnesst.gouv.qc.ca", lead: "cnesst.gouv.qc.ca answered 403 to every automated read on 2026-10-22; re-read before claiming." }),
+  N({ id: "ca-qc-mapaq", where: "CA-QC", level: "state", segs: ["restaurant", "retail"], needs: { food: true }, method: "pdf_mail", order: 74, cur: "CAD", fee: 367,
+    form: "Demande de permis de restauration et de vente au détail (MAPAQ)", title: ["Food permit for a restaurant or food shop (MAPAQ)", "餐厅或食品店食品许可（MAPAQ）"],
+    agency: ["Ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec (MAPAQ)", "魁北克省农业、渔业与食品部（MAPAQ）"],
+    how: ["The restaurant or retail food permit is applied for by mail with payment, and must be in hand and displayed before the business starts; hygiene is put in the care of someone trained as a food establishment manager.", "餐厅或零售食品许可须附付款邮寄申请，开业前必须取得并张贴；卫生须由受过食品场所管理培训的人负责。"],
+    url: "https://cdn-contenu.quebec.ca/cdn-contenu/adm/min/agriculture-pecheries-alimentation/alimentation/permis-restauration-vente-detail/GM_permis_restauration_vente_detail_MAPAQ.pdf",
+    feeNote: ["367 dollars for general preparation (283 for hot or cold holding, 566 with a buffet), plus 144 dollars to open a first file.", "一般制备 367 加元（保温保冷 283 加元，含自助餐 566 加元），首次申请另加 144 加元开档费。"],
+    renews: ["Every year.", "每年。"],
+    proof: [QC_FOOD, "Vous devez recevoir votre permis avant de commencer vos activités et l’afficher à la vue des clients.", "You must receive your permit before starting and display it where customers can see it."] }),
+  N({ id: "ca-mtl-occupation", where: "CA-MTL", level: "city", segs: PREMISES, method: "online", order: 50, cur: "CAD",
+    form: "Permis d'occupation (certificat d'occupation) pour activité commerciale", title: ["Occupancy permit for the business use (certificat d'occupation)", "商业用途占用许可（certificat d'occupation）"],
+    agency: ["Ville de Montréal, the borough's permit counter", "蒙特利尔市所在区许可窗口"],
+    how: ["After checking the zoning, the business applies to the borough for the occupancy permit for its commercial use; interior or façade work needs a renovation permit too.", "核实分区后，企业须向所在区申请商业用途占用许可；室内或外立面施工还须申请改造许可。"],
+    url: MTL_OPEN,
+    proof: [MTL_OPEN, "Faites ensuite une demande de permis d’occupation pour activité commerciale ou professionnelle, aussi appelé «certificat d’occupation» ou «certificat d’autorisation d’usage».", "Then apply for the occupancy permit for a commercial or professional activity, also called a certificate of occupancy or of authorised use."] }),
+  N({ id: "ca-mtl-enseigne", where: "CA-MTL", level: "city", segs: STORES, needs: { signage: true }, method: "online", order: 80, cur: "CAD",
+    form: "Permis d'enseigne commerciale", title: ["Sign permit (enseigne commerciale)", "商业招牌许可（enseigne commerciale）"],
+    agency: ["Ville de Montréal, the borough's permit counter", "蒙特利尔市所在区许可窗口"],
+    how: ["Installing, replacing or changing a commercial sign needs the borough's permit.", "安装、更换或修改商业招牌须取得所在区许可。"],
+    url: MTL_SIGN,
+    proof: [MTL_SIGN, "Vous voulez installer une enseigne commerciale, la remplacer ou en modifier la structure ou le message? À Montréal, un permis est nécessaire.", "Want to install, replace or change a commercial sign? In Montréal, a permit is needed."] }),
+];
+
 const US_FINISH: OfficialForm[] = [
+  ...US_FOREIGN,
   N({ id: "az-jt1", where: "AZ", level: "state", needs: { employees: true }, method: "online", order: 60, cur: "USD", fee: 0,
     form: "Arizona Joint Tax Application (Form JT-1), on AZTaxes.gov", title: ["Employer registration for withholding and unemployment insurance (JT-1)", "雇主预扣税与失业保险登记（JT-1）"],
     agency: ["Arizona Department of Revenue, with the Arizona Department of Economic Security", "亚利桑那州税务局与经济保障局"],
@@ -621,7 +722,7 @@ const US_FINISH: OfficialForm[] = [
     proof: [AZ_WH, "Completing and submitting Arizona Form JT-1 also begins the process of registering the employer for unemployment compensation insurance"] }),
 ];
 
-export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY, ...UAE, ...TURKIYE, ...MEXICO_MORE, ...US_FINISH];
+export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY, ...UAE, ...TURKIYE, ...MEXICO_MORE, ...QUEBEC, ...US_FINISH];
 
 export const FINISH_FIXES: Fix[] = [
   P("at-fb", AT_FB, "In der Regel erlangt die Gesellschaft mit der Eintragung in das Firmenbuch Rechtspersönlichkeit.", "As a rule the company becomes a legal person on its entry in the company register.",

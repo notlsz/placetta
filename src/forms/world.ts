@@ -84,6 +84,8 @@ export const CITIES: City[] = [
   /* Canada: each city's province is its state code ("CA-ON" Ontario, "CA-BC" British Columbia), for the province's own steps */
   c("CA-TOR", "CA", "Toronto", "多伦多", ["toronto", "多伦多", "scarborough, on", "north york", "markham, on"], true, "CA-ON"),
   c("CA-VAN", "CA", "Vancouver", "温哥华", ["vancouver, bc", "vancouver, british columbia", "vancouver", "温哥华"], true, "CA-BC"),
+  // Québec and Montréal, added in the finishing pass of 2026-10-22 (src/forms/finish.ts)
+  c("CA-MTL", "CA", "Montréal", "蒙特利尔", ["montreal", "montréal", "蒙特利尔", "montreal, qc", "montreal, quebec"], true, "CA-QC"),
 
   /* South America, Southeast Asia and Africa (src/forms/intl.ts): the national steps apply; Kuala Lumpur's and Nairobi's
      own licence is in the library, the others' local steps are researched live */
