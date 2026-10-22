@@ -722,7 +722,41 @@ const US_FINISH: OfficialForm[] = [
     proof: [AZ_WH, "Completing and submitting Arizona Form JT-1 also begins the process of registering the employer for unemployment compensation insurance"] }),
 ];
 
-export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY, ...UAE, ...TURKIYE, ...MEXICO_MORE, ...QUEBEC, ...US_FINISH];
+// City permits in the US cities we list that only some stores need. Tobacco and a burglar alarm have no question in the
+// intake yet, so those two are listed in the library (reference) rather than added to every plan.
+const NYC_TOBACCO = "https://nyc-business.nyc.gov/nycbusiness/description/cigarette-retail-dealer-license";
+const NYC_DINING = "https://nyc-business.nyc.gov/nycbusiness/business-services/initiatives/outdoor-dining";
+const CHI_CAFE = "https://www.chicago.gov/city/en/depts/bacp/supp_info/sidewalkcafe.html";
+const LA_ALARM = "https://finance.lacity.gov/alarm-permits-and-alarm-ordinance-faqs";
+const US_CITY_PERMITS: OfficialForm[] = [
+  N({ id: "nyc-tobacco-dealer", where: "NYC", level: "city", segs: ["retail", "restaurant"], needs: { reference: true }, method: "online", order: 72, cur: "USD",
+    form: "Tobacco Retail Dealer License (DCWP)", title: ["Tobacco retail dealer license", "烟草零售商执照"],
+    agency: ["NYC Department of Consumer and Worker Protection", "纽约市消费者与劳工保护局（DCWP）"],
+    how: ["A store that sells cigarettes or other tobacco products to customers needs this DCWP license, applied for online; it runs to December 31 of the next odd or even year.", "向顾客销售香烟或其他烟草制品的商店须在网上向 DCWP 申请此执照；有效期至下一个奇数年或偶数年的12月31日。"],
+    url: NYC_TOBACCO, feeNote: ["200 USD when applying from January to June, 150 USD from July to December, plus a 2 percent card fee.", "1月至6月申请为200美元，7月至12月申请为150美元，另加2%刷卡手续费。"],
+    renews: ["Every two years, on December 31", "每两年一次，12月31日到期"],
+    proof: [NYC_TOBACCO, "You need this license to sell cigarettes or tobacco products to people."] }),
+  N({ id: "nyc-outdoor-dining", where: "NYC", level: "city", segs: ["restaurant"], needs: { terrace: true }, method: "online", order: 73, cur: "USD",
+    form: "Dining Out NYC application (DOT)", title: ["Outdoor dining permit (Dining Out NYC)", "户外用餐许可（Dining Out NYC）"],
+    agency: ["NYC Department of Transportation", "纽约市交通局"],
+    how: ["A food service establishment applies online to the city's Dining Out NYC program for seating on the sidewalk, in the roadway or both.", "餐饮场所可在网上申请纽约市 Dining Out NYC 计划，在人行道、车行道或两者上设置座位。"],
+    url: NYC_DINING,
+    proof: [NYC_DINING, "Eligible food service establishments may apply for outdoor dining in the roadway, sidewalk, or both."] }),
+  N({ id: "chi-sidewalk-cafe", where: "CHI", level: "city", segs: ["restaurant"], needs: { terrace: true }, method: "online", order: 73, cur: "USD",
+    form: "Sidewalk Cafe Permit (BACP)", title: ["Sidewalk cafe permit", "人行道咖啡座许可"],
+    agency: ["City of Chicago Department of Business Affairs and Consumer Protection", "芝加哥市商业事务与消费者保护局"],
+    how: ["A restaurant that puts tables on the public way applies through the city's permitting web portal.", "在公共道路上摆放桌椅的餐厅须通过市政府许可门户网站申请。"],
+    url: CHI_CAFE,
+    proof: [CHI_CAFE, "Applications for sidewalk cafes must be made through the permitting web portal ."] }),
+  N({ id: "la-alarm-permit", where: "LA", level: "city", segs: ["restaurant", "retail", "warehouse"], needs: { reference: true }, method: "online", order: 85, cur: "USD",
+    form: "Police Alarm Permit Application (Office of Finance, for the LAPD)", title: ["Alarm permit", "报警系统许可"],
+    agency: ["City of Los Angeles Office of Finance, for the LAPD Alarm Section", "洛杉矶市财政办公室（代洛杉矶警察局报警科）"],
+    how: ["A business that runs an alarm system needs an alarm user permit, applied for online or at an Office of Finance branch; the alarm company must make sure one exists before it installs.", "使用报警系统的企业须取得报警用户许可，可在网上或财政办公室分部申请；报警公司安装前须确认许可已存在。"],
+    url: "https://finance.lacity.gov/alarm-permits-general-information",
+    proof: [LA_ALARM, "The Alarm Ordinance requires that an alarm permit be obtained to operate an alarm system in the City of Los Angeles."] }),
+];
+
+export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY, ...UAE, ...TURKIYE, ...MEXICO_MORE, ...QUEBEC, ...US_FINISH, ...US_CITY_PERMITS];
 
 export const FINISH_FIXES: Fix[] = [
   P("at-fb", AT_FB, "In der Regel erlangt die Gesellschaft mit der Eintragung in das Firmenbuch Rechtspersönlichkeit.", "As a rule the company becomes a legal person on its entry in the company register.",
