@@ -180,6 +180,14 @@
   {
    "match": "^eu-",
    "why": "Not in the EU."
+  },
+  {
+   "match": "^us-(uflpa|isf|232|301|ad|oh)-?",
+   "why": "A showroom that doesn't import pays no import duties."
+  },
+  {
+   "match": "^gb-",
+   "why": "Not in Great Britain."
   }
  ]
 }

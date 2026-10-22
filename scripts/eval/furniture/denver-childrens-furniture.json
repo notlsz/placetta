@@ -1,0 +1,313 @@
+{
+ "id": "denver-childrens-furniture",
+ "title": "Children's furniture line importing into Denver",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Children's furniture brand importing kids' beds and desks",
+  "where": "Denver, CO",
+  "lang": "en"
+ },
+ "assumptions": "A children's furniture line (beds and desks for children, wood) imported and sold online from Denver, with no store (the seller path). Colorado's company, tax and employer filings as strict/denver-franchise-tea.json and gold/denver-coffee.json; the LLC is formed (no entity given). Children's furniture takes CPSC's Children's Product Certificate and tracking labels; Colorado's packaging EPR is conditional on the revenue threshold.",
+ "items": [
+  {
+   "key": "co-sos",
+   "name": "Articles of Organization (Colorado LLC)",
+   "agency": "Colorado Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.coloradosos.gov/pubs/business/helpFiles/LLCChecklist.pdf",
+   "quote": "Filing Articles of Organization is how you form your LLC in the State of Colorado.",
+   "read": "2026-10-21",
+   "match": "\\bco-sos\\b|llc formation|articles of organization",
+   "agencyMatch": "secretary of state"
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-21",
+   "match": "\\birs-ss4\\b|employer identification number|\\bEIN\\b",
+   "agencyMatch": "internal revenue service|\\bIRS\\b",
+   "feeQuote": "You never have to pay a fee for an EIN."
+  },
+  {
+   "key": "co-tax",
+   "name": "Colorado sales tax license",
+   "agency": "Colorado Department of Revenue",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 16,
+   "feeNote": "$16, prorated, plus a $50 deposit; expires Dec. 31 of odd-numbered years.",
+   "source": "https://tax.colorado.gov/sites/tax/files/documents/Sales_Tax_Guide_Oct_2025.pdf",
+   "match": "colorado sales tax|co-tax",
+   "agencyMatch": "colorado department of revenue"
+  },
+  {
+   "key": "cbp-5106",
+   "name": "Importer identity (CBP Form 5106)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Filed with the first formal entry or request for services (19 CFR 24.5).",
+   "source": "https://www.govinfo.gov/content/pkg/FR-2013-11-12/html/2013-26996.htm",
+   "match": "5106|importer identity",
+   "agencyMatch": "customs and border"
+  },
+  {
+   "key": "cbp-301",
+   "name": "Customs bond (CBP Form 301)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Merchandise isn't released at entry without a single or continuous bond (19 CFR 142.4(a)); the port director may waive it at $2,500 or less.",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf",
+   "match": "customs bond|cbp-301",
+   "agencyMatch": "customs and border",
+   "quote": "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,",
+   "read": "2026-10-21"
+  },
+  {
+   "key": "cbp-isf",
+   "name": "Importer Security Filing (ISF, 10+2)",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port.",
+   "read": "2026-10-21",
+   "match": "\\bcbp-isf\\b|importer security filing",
+   "agencyMatch": "customs and border",
+   "condition": "Furniture arriving by ocean (19 CFR 149.2(a)); CBP's own pages refuse automated reads, so the regulation is read on GovInfo."
+  },
+  {
+   "key": "cbp-ace",
+   "name": "ACE Secure Data Portal account",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": false,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)",
+   "read": "2026-10-21",
+   "match": "\\bcbp-ace\\b|\\bACE\\b",
+   "agencyMatch": "customs and border",
+   "condition": "An importer of record sees its entries, duties and bond in ACE."
+  },
+  {
+   "key": "aphis-ppq505",
+   "name": "Lacey Act declaration (PPQ Form 505)",
+   "agency": "USDA APHIS",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.aphis.usda.gov/sites/default/files/ppq505.pdf",
+   "quote": "Importers should have a copy of the form available for CBP to review at the port of entry.",
+   "read": "2026-10-21",
+   "match": "\\baphis-ppq505\\b|lacey act|ppq ?(form )?505",
+   "agencyMatch": "animal and plant health|APHIS"
+  },
+  {
+   "key": "epa-tsca-import",
+   "name": "TSCA Title VI import certification",
+   "agency": "U.S. Environmental Protection Agency",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.epa.gov/node/155807",
+   "quote": "Importers to provide import certification under TSCA beginning March 22, 2019;",
+   "read": "2026-10-21",
+   "match": "\\bepa-tsca-import\\b|tsca",
+   "agencyMatch": "environmental protection"
+  },
+  {
+   "key": "cpsc-cpc",
+   "name": "Children's Product Certificate (16 CFR part 1110)",
+   "agency": "U.S. Consumer Product Safety Commission",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/Childrens-Product-Certificate-CPC",
+   "quote": "requires domestic manufacturers and importers of children’s products to certify in a written Children’s Product Certificate (CPC),",
+   "read": "2026-10-21",
+   "match": "\\bcpsc-cpc\\b|children'?s product certificate",
+   "agencyMatch": "consumer product safety"
+  },
+  {
+   "key": "co-epr",
+   "name": "Colorado packaging producer responsibility (EPR)",
+   "agency": "Colorado Department of Public Health and Environment",
+   "level": "state",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://cdphe.colorado.gov/hm/epr-program",
+   "quote": "a producer cannot sell or distribute products that use covered materials in Colorado unless they participate in the Producer Responsibility Program.",
+   "read": "2026-10-21",
+   "match": "\\bco-epr\\b|producer responsibility",
+   "agencyMatch": "public health and environment",
+   "condition": "A producer above the state's revenue threshold (adjusted for inflation every year) selling packaged goods in Colorado."
+  },
+  {
+   "key": "cpsc-cert",
+   "name": "Product safety certificate (eFiling)",
+   "agency": "U.S. Consumer Product Safety Commission",
+   "level": "federal",
+   "required": false,
+   "verified": false,
+   "fee": 0,
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification",
+   "read": "2026-10-21",
+   "match": "\\bcpsc-cert\\b|product safety certificate",
+   "agencyMatch": "consumer product safety",
+   "note": "The library's general certificate row abstains (no current quote); the clothing storage unit certificate is scored as cpsc-1261."
+  },
+  {
+   "key": "den-tax",
+   "name": "Denver sales tax license",
+   "agency": "City and County of Denver, Department of Finance, Treasury",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/Our-Divisions/Treasury/Business-Tax-Information/Business-Tax-FAQ",
+   "match": "denver sales tax",
+   "agencyMatch": "denver",
+   "levels": [
+    "city",
+    "county"
+   ]
+  },
+  {
+   "key": "co-ui",
+   "name": "Unemployment insurance employer account",
+   "agency": "Colorado Department of Labor and Employment (CDLE)",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://myui.clouduim.cdle.state.co.us/Employer/Core/Login.aspx",
+   "match": "unemployment insurance|co-ui",
+   "agencyMatch": "labor and employment|CDLE"
+  }
+ ],
+ "order": [
+  {
+   "before": "cbp-301",
+   "after": "cbp-isf",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "The ISF Importer must possess a basic importation and entry bond",
+   "read": "2026-10-21",
+   "why": "19 CFR 149.5(b): the ISF importer holds a bond (or the agent posts its own) for the filing.",
+   "verified": true
+  },
+  {
+   "before": "cbp-isf",
+   "after": "aphis-ppq505",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port.",
+   "read": "2026-10-21",
+   "why": "The ISF goes in before the cargo is loaded abroad; the Lacey Act declaration is made at entry.",
+   "verified": true
+  }
+ ],
+ "mustNotInclude": [
+  {
+   "name": "Food permits",
+   "why": "Not a food business.",
+   "match": "food|plan review|zoning"
+  },
+  {
+   "name": "Clothing storage unit certificate",
+   "why": "No dressers or chests named.",
+   "match": "cpsc-1261|clothing storage"
+  },
+  {
+   "name": "California furniture licenses",
+   "why": "Not in California.",
+   "match": "household goods and services|bhgs"
+  }
+ ],
+ "facts": [
+  {
+   "key": "us-tsca-label",
+   "match": "^us-tsca-label$",
+   "source": "https://www.epa.gov/node/155807",
+   "quote": "must include the fabricator’s name, the date the finished good was produced (in month/year format), and a TSCA Title VI compliance statement.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-isf-bond",
+   "match": "^us-isf-bond$",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-part113.pdf",
+   "quote": "the principal and surety (jointly and severally) agree to pay liquidated damages of $5,000 for each violation.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-cpsc-efile",
+   "match": "^us-cpsc-efile$",
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/Childrens-Product-Certificate-CPC",
+   "quote": "Beginning July 8, 2026, importers of most regulated consumer products will be required to electronically file (eFile) certificates of compliance",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-cpsc-tracking-label",
+   "match": "^us-cpsc-tracking-label$",
+   "source": "https://cpsc.gov/Business--Manufacturing/Business-Education/tracking-label",
+   "quote": "requires all children’s products to bear distinguishing marks (generally referred to as “tracking labels”) that:",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-uflpa",
+   "match": "^us-uflpa$",
+   "source": "https://www.govinfo.gov/content/pkg/FR-2026-08-03/pdf/2026-15628.pdf",
+   "quote": "apply a rebuttable presumption that goods mined, produced, or manufactured by entities on the UFLPA Entity List are made with forced labor,",
+   "read": "2026-10-21",
+   "required": true
+  }
+ ],
+ "mustNotFacts": [
+  {
+   "match": "^ca-",
+   "why": "California's."
+  },
+  {
+   "match": "^us-(232|oh)-",
+   "why": "Nothing upholstered."
+  },
+  {
+   "match": "^us-(301|ad)-",
+   "why": "Nothing says it is made in China."
+  },
+  {
+   "match": "^us-csu",
+   "why": "No dressers named."
+  },
+  {
+   "match": "^(eu|gb)-",
+   "why": "Not abroad."
+  }
+ ]
+}

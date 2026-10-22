@@ -1,22 +1,30 @@
 {
- "what": "The furniture set: what a furniture brand files to import and sell (src/forms/furniture.ts) and what its plan states beyond the filings (src/forms/kinds.ts, kinds furniture, upholstered and storage). An upholstered furniture brand importing into Los Angeles with showrooms in California and New York (two cases, one per showroom), and a case-goods brand importing dressers into New Jersey.",
- "researched": "2026-10-21, from official pages only, each quote re-read with scripts/eval/proof-read.py (12 with curl, 1 through WebFetch where EUR-Lex refuses automated reads).",
+ "what": "The furniture set: what a furniture brand files to import and sell (src/forms/furniture.ts) and what its plan states beyond the filings (src/forms/kinds.ts, kinds furniture, upholstered, storage, children, china and cnbedroom). An upholstered brand importing into Los Angeles with showrooms in California and New York (two cases, one per showroom), a case-goods brand importing dressers into New Jersey, an upholstered brand importing sofas from Vietnam into Los Angeles, a brand importing Chinese wooden bedroom furniture into New Jersey, a children's furniture line importing into Denver, and an upholstered brand expanding to the EU (Paris) and to Great Britain (London).",
+ "researched": "2026-10-21, from official pages only, each quote re-read with scripts/eval/proof-read.py. Second pass: the ISF from 19 CFR part 149 and the bond from 19 CFR parts 142 and 113 on GovInfo (CBP's own pages refuse automated reads); the Section 232, Section 301, antidumping and UFLPA notices from the Federal Register on GovInfo; CPSC's certificate and tracking label pages; OEHHA's furniture fact sheet; Ohio's rule 4101:6-1-03; CalRecycle, Oregon DEQ and CDPHE for packaging EPR; the Commission's environment pages for the EU Deforestation Regulation (EUR-Lex refuses curl); gov.uk and legislation.gov.uk for Great Britain.",
  "left_out": [
   {
-   "what": "Importer Security Filing (ISF)",
-   "why": "Every CBP page for it (the ISF page and its FAQs) refused automated reads (curl 403, WebFetch client error), so the library row abstains and names CBP with its page; the case sets it aside."
-  },
-  {
-   "what": "EU Deforestation Regulation (Regulation (EU) 2023/1115) and its 30 December 2026 date",
-   "why": "EUR-Lex returned an empty bot-wall response to curl and its consolidated text is closed to WebFetch, so no sentence of it could be read; nothing is stated."
-  },
-  {
    "what": "New York and New Jersey upholstered furniture or stuffed article registrations",
-   "why": "No official New York or New Jersey page found in this pass states one. Massachusetts's and Pennsylvania's are stated, from their own pages."
+   "why": "No official New York or New Jersey page found states one. Massachusetts's, Pennsylvania's and Ohio's are stated, from their own pages."
   },
   {
    "what": "California retail furniture dealer's license fee",
-   "why": "BHGS's retailer application wasn't found on its site (the brochure linked from /furniture returns 404); the fee is left to the agency."
+   "why": "BHGS's retailer application wasn't found on its site; the fee is left to the agency."
+  },
+  {
+   "what": "General Certificate of Conformity eFiling for every regulated product",
+   "why": "The general row (cpsc-cert) also serves non-furniture importers and has no quote that limits it to regulated consumer products, so it abstains; the children's certificate and the clothing storage unit certificate are claimed from their own pages."
+  },
+  {
+   "what": "French and UK company, tax and EORI filings",
+   "why": "Not read on an official page in this pass: the rows abstain and name the office; the EU and GB product rules are scored as facts."
+  },
+  {
+   "what": "Antidumping rates for named exporters and Section 301 exclusions",
+   "why": "Exporter-specific; the plan states the China-wide 216.01 percent cash deposit and says to confirm the exporter's own rate."
+  },
+  {
+   "what": "Other states' packaging EPR (Maine, Minnesota, Maryland, Washington)",
+   "why": "Only California, Oregon and Colorado were read in this pass."
   }
  ]
 }

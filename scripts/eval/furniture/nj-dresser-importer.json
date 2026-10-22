@@ -73,25 +73,26 @@
    "verified": true,
    "fee": null,
    "note": "Merchandise isn't released at entry without a single or continuous bond (19 CFR 142.4(a)); the port director may waive it at $2,500 or less.",
-   "source": "https://cbp.gov/sites/default/files/assets/documents/2021-Jun/IE%20%E2%80%93%20Bond%20Recommendations.pdf",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf",
    "match": "customs bond|cbp-301",
    "agencyMatch": "customs and border",
-   "quote": "Customs Bonds are the backbone to the importation process guaranteeing the payment of duties, taxes, and fees to CBP",
-   "read": "2026-10-18"
+   "quote": "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,",
+   "read": "2026-10-21"
   },
   {
    "key": "cbp-isf",
-   "name": "Importer Security Filing (ISF)",
+   "name": "Importer Security Filing (ISF, 10+2)",
    "agency": "U.S. Customs and Border Protection",
    "level": "federal",
-   "required": false,
-   "verified": false,
+   "required": true,
+   "verified": true,
    "fee": null,
-   "source": "https://www.cbp.gov/border-security/ports-entry/cargo-security/importer-security-filing-102",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port.",
    "read": "2026-10-21",
    "match": "\\bcbp-isf\\b|importer security filing",
    "agencyMatch": "customs and border",
-   "note": "CBP's pages refused every automated read (curl 403, WebFetch client error) on 2026-10-21, so the row abstains and this item is set aside."
+   "condition": "Furniture arriving by ocean (19 CFR 149.2(a)); CBP's own pages refuse automated reads, so the regulation is read on GovInfo."
   },
   {
    "key": "cbp-ace",
@@ -165,7 +166,26 @@
    "agencyMatch": "consumer product safety"
   }
  ],
- "order": [],
+ "order": [
+  {
+   "before": "cbp-301",
+   "after": "cbp-isf",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "The ISF Importer must possess a basic importation and entry bond",
+   "read": "2026-10-21",
+   "why": "19 CFR 149.5(b): the ISF importer holds a bond (or the agent posts its own) for the filing.",
+   "verified": true
+  },
+  {
+   "before": "cbp-isf",
+   "after": "aphis-ppq505",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port.",
+   "read": "2026-10-21",
+   "why": "The ISF goes in before the cargo is loaded abroad; the Lacey Act declaration is made at entry.",
+   "verified": true
+  }
+ ],
  "mustNotInclude": [
   {
    "name": "California furniture licenses",
@@ -184,6 +204,30 @@
    "match": "^us-tsca-label$",
    "source": "https://www.epa.gov/node/155807",
    "quote": "must include the fabricator’s name, the date the finished good was produced (in month/year format), and a TSCA Title VI compliance statement.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-isf-bond",
+   "match": "^us-isf-bond$",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-part113.pdf",
+   "quote": "the principal and surety (jointly and severally) agree to pay liquidated damages of $5,000 for each violation.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-uflpa",
+   "match": "^us-uflpa$",
+   "source": "https://www.govinfo.gov/content/pkg/FR-2026-08-03/pdf/2026-15628.pdf",
+   "quote": "apply a rebuttable presumption that goods mined, produced, or manufactured by entities on the UFLPA Entity List are made with forced labor,",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-cpsc-efile",
+   "match": "^us-cpsc-efile$",
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/Childrens-Product-Certificate-CPC",
+   "quote": "Beginning July 8, 2026, importers of most regulated consumer products will be required to electronically file (eFile) certificates of compliance",
    "read": "2026-10-21",
    "required": true
   },
@@ -210,12 +254,24 @@
    "why": "California's, and nothing upholstered."
   },
   {
-   "match": "^eu-",
-   "why": "Not in the EU."
+   "match": "^(eu|gb)-",
+   "why": "Not in the EU or Great Britain."
   },
   {
    "match": "^(ma|pa)-",
    "why": "Another state's."
+  },
+  {
+   "match": "^us-(232|oh)-",
+   "why": "Nothing upholstered."
+  },
+  {
+   "match": "^us-(301|ad)-",
+   "why": "Nothing says the dressers are made in China."
+  },
+  {
+   "match": "^us-cpsc-tracking",
+   "why": "Not children's furniture."
   }
  ]
 }

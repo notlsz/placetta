@@ -1,0 +1,105 @@
+{
+ "id": "paris-upholstered",
+ "title": "Upholstered furniture brand expanding to the EU (Paris)",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Upholstered furniture brand importing sofas",
+  "where": "Paris, France",
+  "lang": "en"
+ },
+ "assumptions": "A US upholstered furniture brand placing sofas on the EU market through a French company. The French filings abstain (no quote on record) and are set aside; scored are the EU facts: GPSR's responsible operator and the Deforestation Regulation (read on the Commission's environment pages, where EUR-Lex refuses automated reads).",
+ "items": [
+  {
+   "key": "fr-guichet",
+   "name": "Company creation (Guichet unique)",
+   "agency": "INPI",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://formalites.entreprises.gouv.fr",
+   "match": "\\bfr-guichet\\b",
+   "agencyMatch": "inpi|guichet",
+   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+  },
+  {
+   "key": "fr-tax",
+   "name": "Business tax account and VAT",
+   "agency": "Direction générale des Finances publiques",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.impots.gouv.fr/professionnel",
+   "match": "\\bfr-tax\\b",
+   "agencyMatch": "finances publiques",
+   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+  },
+  {
+   "key": "fr-eori",
+   "name": "EORI number",
+   "agency": "Direction générale des douanes",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.douane.gouv.fr",
+   "match": "\\bfr-eori\\b",
+   "agencyMatch": "douanes",
+   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US import filings",
+   "why": "Not in the US.",
+   "match": "cbp-|lacey|tsca|customs and border|cpsc"
+  },
+  {
+   "name": "California furniture licenses",
+   "why": "Not in California.",
+   "match": "household goods|bhgs"
+  }
+ ],
+ "facts": [
+  {
+   "key": "eu-gpsr-operator",
+   "match": "^eu-gpsr-operator$",
+   "source": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R0988",
+   "quote": "A product covered by this Regulation shall not be placed on the market unless there is an economic operator",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "eu-eudr",
+   "match": "^eu-eudr$",
+   "source": "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en",
+   "quote": "must be able to prove that the products do not originate from recently deforested land",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "eu-eudr-dates",
+   "match": "^eu-eudr-dates$",
+   "source": "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en",
+   "quote": "Large and medium operators: 30 December 2026 Micro and small operators: 30 June 2027",
+   "read": "2026-10-21",
+   "required": true
+  }
+ ],
+ "mustNotFacts": [
+  {
+   "match": "^us-",
+   "why": "US rules."
+  },
+  {
+   "match": "^ca-",
+   "why": "California's."
+  },
+  {
+   "match": "^gb-",
+   "why": "Great Britain's, not the EU's."
+  }
+ ]
+}

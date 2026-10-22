@@ -1,0 +1,126 @@
+{
+ "id": "london-upholstered",
+ "title": "Upholstered furniture brand expanding to Great Britain (London)",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Upholstered furniture brand importing sofas",
+  "where": "London, UK",
+  "lang": "en"
+ },
+ "assumptions": "A US upholstered furniture brand selling sofas in Great Britain through a UK company. The UK company and tax filings abstain (no quote on record) and are set aside; scored are Great Britain's product rules: GPSR 2005 traceability, the UK Timber Regulations and the furniture fire safety regulations (cigarette and match tests), each from gov.uk or legislation.gov.uk.",
+ "items": [
+  {
+   "key": "gb-incorporate",
+   "name": "Company incorporation",
+   "agency": "Companies House",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.gov.uk/government/organisations/companies-house",
+   "match": "\\bgb-incorporate\\b",
+   "agencyMatch": "companies house",
+   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+  },
+  {
+   "key": "gb-vat",
+   "name": "VAT registration",
+   "agency": "HM Revenue & Customs",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.gov.uk/register-for-vat",
+   "match": "\\bgb-vat\\b",
+   "agencyMatch": "revenue",
+   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+  },
+  {
+   "key": "gb-paye",
+   "name": "Employer registration (PAYE)",
+   "agency": "HM Revenue & Customs",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.gov.uk/register-employer",
+   "match": "\\bgb-paye\\b",
+   "agencyMatch": "revenue",
+   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+  },
+  {
+   "key": "gb-eori",
+   "name": "EORI number",
+   "agency": "HM Revenue & Customs",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.gov.uk/eori",
+   "match": "\\bgb-eori\\b",
+   "agencyMatch": "revenue",
+   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US import filings",
+   "why": "Not in the US.",
+   "match": "cbp-|lacey|tsca|customs and border|cpsc"
+  },
+  {
+   "name": "California furniture licenses",
+   "why": "Not in California.",
+   "match": "household goods|bhgs"
+  }
+ ],
+ "facts": [
+  {
+   "key": "gb-gpsr-traceability",
+   "match": "^gb-gpsr-traceability$",
+   "source": "https://www.gov.uk/government/publications/general-product-safety-regulations-2005/general-product-safety-regulations-2005-great-britain",
+   "quote": "The producer must also allow for traceability by indicating on the product or its packaging, where reasonable to do so:",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "gb-timber",
+   "match": "^gb-timber$",
+   "source": "https://www.gov.uk/guidance/regulations-timber-and-flegt-licences",
+   "quote": "Operators must not place illegally harvested timber on the GB market and to avoid doing so must first apply a due diligence system,",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "gb-fire-cigarette",
+   "match": "^gb-fire-cigarette$",
+   "source": "https://www.legislation.gov.uk/uksi/1988/1324/regulation/5",
+   "quote": "no furniture to which this regulation applies shall include upholstery which does not pass the cigarette test in Part I of Schedule 4",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "gb-fire-match",
+   "match": "^gb-fire-match$",
+   "source": "https://www.legislation.gov.uk/uksi/1988/1324/regulation/8",
+   "quote": "any visible part of the cover shall pass the match test in Part I of Schedule 5 to these Regulations",
+   "read": "2026-10-21",
+   "required": true
+  }
+ ],
+ "mustNotFacts": [
+  {
+   "match": "^us-",
+   "why": "US rules."
+  },
+  {
+   "match": "^ca-",
+   "why": "California's."
+  },
+  {
+   "match": "^eu-",
+   "why": "The EU's, not Great Britain's."
+  }
+ ]
+}

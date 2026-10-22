@@ -7,7 +7,7 @@
   "where": "Los Angeles, CA",
   "lang": "en"
  },
- "assumptions": "The Los Angeles showroom of a brand that imports upholstered furniture made outside the US. The company, tax, city and building filings are those of strict/la-bubble-tea.json and gold/la-food-importer.json (the same city and importer of record); the furniture filings and facts are read from APHIS, EPA, CPSC and BHGS on 2026-10-21. California's importer's license covers selling at retail (Business and Professions Code 19051, in BHGS's law book), so the retail dealer's license must not appear. The New York showroom is its own case (manhattan-upholstered-showroom).",
+ "assumptions": "The Los Angeles showroom of a brand that imports upholstered furniture made outside the US. The company, tax, city and building filings are those of strict/la-bubble-tea.json and gold/la-food-importer.json (the same city and importer of record); the furniture filings and facts are read from APHIS, EPA, CPSC and BHGS on 2026-10-21. California's importer's license covers selling at retail (Business and Professions Code 19051, in BHGS's law book), so the retail dealer's license must not appear. The New York showroom is its own case (manhattan-upholstered-showroom). Second pass (2026-10-21): the ISF and the bond are read from 19 CFR parts 149 and 142 on GovInfo; SB 54 is conditional (a small producer claims the exemption); the duties and Ohio's registration for brands selling into Ohio are facts on the customs rows.",
  "items": [
   {
    "key": "ca-llc-1",
@@ -103,25 +103,26 @@
    "verified": true,
    "fee": null,
    "note": "Merchandise isn't released at entry without a single or continuous bond (19 CFR 142.4(a)); the port director may waive it at $2,500 or less.",
-   "source": "https://cbp.gov/sites/default/files/assets/documents/2021-Jun/IE%20%E2%80%93%20Bond%20Recommendations.pdf",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf",
    "match": "customs bond|cbp-301",
    "agencyMatch": "customs and border",
-   "quote": "Customs Bonds are the backbone to the importation process guaranteeing the payment of duties, taxes, and fees to CBP",
-   "read": "2026-10-18"
+   "quote": "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,",
+   "read": "2026-10-21"
   },
   {
    "key": "cbp-isf",
-   "name": "Importer Security Filing (ISF)",
+   "name": "Importer Security Filing (ISF, 10+2)",
    "agency": "U.S. Customs and Border Protection",
    "level": "federal",
-   "required": false,
-   "verified": false,
+   "required": true,
+   "verified": true,
    "fee": null,
-   "source": "https://www.cbp.gov/border-security/ports-entry/cargo-security/importer-security-filing-102",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port.",
    "read": "2026-10-21",
    "match": "\\bcbp-isf\\b|importer security filing",
    "agencyMatch": "customs and border",
-   "note": "CBP's pages refused every automated read (curl 403, WebFetch client error) on 2026-10-21, so the row abstains and this item is set aside."
+   "condition": "Furniture arriving by ocean (19 CFR 149.2(a)); CBP's own pages refuse automated reads, so the regulation is read on GovInfo."
   },
   {
    "key": "aphis-ppq505",
@@ -167,6 +168,21 @@
    "agencyMatch": "household goods and services"
   },
   {
+   "key": "ca-sb54",
+   "name": "Packaging producer responsibility (SB 54)",
+   "agency": "CalRecycle",
+   "level": "state",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://calrecycle.ca.gov/packaging/packaging-epr/producerguidance/",
+   "quote": "Producers must apply to participate in the PRO (Circular Actional Alliance) plan, submit an independent producer application, or obtain a small producer exemption.",
+   "read": "2026-10-21",
+   "match": "\\bca-sb54\\b|packaging producer",
+   "agencyMatch": "calrecycle",
+   "condition": "A producer of packaged goods sold in California; a small producer claims the exemption instead."
+  },
+  {
    "key": "cpsc-cert",
    "name": "Product safety certificate (eFiling)",
    "agency": "U.S. Consumer Product Safety Commission",
@@ -209,7 +225,26 @@
    "agencyMatch": "employment development department|\\bEDD\\b"
   }
  ],
- "order": [],
+ "order": [
+  {
+   "before": "cbp-301",
+   "after": "cbp-isf",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "The ISF Importer must possess a basic importation and entry bond",
+   "read": "2026-10-21",
+   "why": "19 CFR 149.5(b): the ISF importer holds a bond (or the agent posts its own) for the filing.",
+   "verified": true
+  },
+  {
+   "before": "cbp-isf",
+   "after": "aphis-ppq505",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port.",
+   "read": "2026-10-21",
+   "why": "The ISF goes in before the cargo is loaded abroad; the Lacey Act declaration is made at entry.",
+   "verified": true
+  }
+ ],
  "mustNotInclude": [
   {
    "name": "California retail furniture dealer's license",
@@ -237,6 +272,46 @@
    "required": true
   },
   {
+   "key": "us-isf-bond",
+   "match": "^us-isf-bond$",
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-part113.pdf",
+   "quote": "the principal and surety (jointly and severally) agree to pay liquidated damages of $5,000 for each violation.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-uflpa",
+   "match": "^us-uflpa$",
+   "source": "https://www.govinfo.gov/content/pkg/FR-2026-08-03/pdf/2026-15628.pdf",
+   "quote": "apply a rebuttable presumption that goods mined, produced, or manufactured by entities on the UFLPA Entity List are made with forced labor,",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-232-upholstered",
+   "match": "^us-232-upholstered$",
+   "source": "https://www.govinfo.gov/content/pkg/FR-2026-01-09/pdf/2026-00327.pdf",
+   "quote": "a 25 percent ad valorem tariff on imports of certain upholstered wooden products, kitchen cabinets, and vanities.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "ca-prop65-furniture",
+   "match": "^ca-prop65-furniture$",
+   "source": "https://www.p65warnings.ca.gov/sites/default/files/downloads/factsheets/furniture_products_fact_sheet.pdf",
+   "quote": "Proposition 65 requires businesses to determine if they must provide a warning about significant exposure to listed chemicals.",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "us-oh-upholstered",
+   "match": "^us-oh-upholstered$",
+   "source": "https://codes.ohio.gov/ohio-administrative-code/rule-4101:6-1-03",
+   "quote": "Any person who engages in manufacturing or wholesaling bedding or upholstered furniture that is to be sold or offered for sale in this state;",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
    "key": "ca-law-label",
    "match": "^ca-law-label$",
    "source": "https://bhgs.dca.ca.gov/forms_pubs/19-014_furnbedlawflyer.pdf",
@@ -259,8 +334,16 @@
    "why": "No clothing storage units."
   },
   {
-   "match": "^eu-",
-   "why": "Not in the EU."
+   "match": "^us-cpsc",
+   "why": "No children's furniture or dressers named."
+  },
+  {
+   "match": "^us-(301|ad)-",
+   "why": "Nothing says the furniture is made in China."
+  },
+  {
+   "match": "^(eu|gb)-",
+   "why": "Not in the EU or Great Britain."
   },
   {
    "match": "^(ma|pa)-",

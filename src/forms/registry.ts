@@ -457,9 +457,13 @@ export const FORMS: OfficialForm[] = [
   },
   {
     id: "ca-sb54", form: "SB 54 producer registration", title: B("Packaging producer registration (EPR)", "包装生产者登记（生产者延伸责任）"),
-    agency: B("CalRecycle, through Circular Action Alliance", "加州资源回收局（经 Circular Action Alliance）"), level: "state", where: "CA", segments: ["seller", "retail", "restaurant"], needs: { imports: true }, method: "portal", order: 92,
-    how: B("The brand owner or importer of packaged goods sold in California registers and reports with the producer organization.", "在加州销售包装商品的品牌方或进口商向生产者组织登记并申报。"),
-    url: "https://circularactionalliance.org/california", info: "https://calrecycle.ca.gov/packaging/packaging-epr/", fee: null, checked: "page", fields: [],
+    agency: B("CalRecycle, through Circular Action Alliance", "加州资源回收局（经 Circular Action Alliance）"), level: "state", where: "CA", segments: ["seller", "retail", "restaurant"], needs: { imports: true }, method: "portal", order: 47,
+    how: B("A producer of packaged goods sold in California applies to participate in Circular Action Alliance's plan, submits an independent producer application, or obtains a small producer exemption; CalRecycle's PEPRS portal or the PRO takes the registration and the reports.",
+      "在加州销售包装商品的生产者须申请加入 Circular Action Alliance 的计划、提交独立生产者申请，或取得小型生产者豁免；登记和申报通过加州资源回收局的 PEPRS 系统或生产者责任组织提交。"),
+    url: "https://calrecycle.ca.gov/packaging/packaging-epr/producerguidance/", info: "https://calrecycle.ca.gov/packaging/packaging-epr/producerguidance/", fee: null, checked: "page", fields: [],
+    plain: B("California's packaging law (SB 54): the brand joins the producer organization, applies on its own, or claims the small producer exemption.", "加州包装法（SB 54）：品牌加入生产者组织、单独申请，或申请小型生产者豁免。"),
+    // read 2026-10-21 with curl (the furniture set's second pass); the typo "Actional" is CalRecycle's own
+    proof: { quote: "Producers must apply to participate in the PRO (Circular Actional Alliance) plan, submit an independent producer application, or obtain a small producer exemption.", checked: "2026-10-21", read: "https://calrecycle.ca.gov/packaging/packaging-epr/producerguidance/" },
   },
   {
     id: "ca-prop65", form: "Proposition 65 warnings (no filing)", title: B("Proposition 65 warning labels", "65 号提案警示标签"),

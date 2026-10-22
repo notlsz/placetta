@@ -19,15 +19,6 @@
   "note": "curl got the page without the sentence; read with WebFetch on 2026-10-18"
  },
  {
-  "id": "cbp-301",
-  "read": "https://cbp.gov/sites/default/files/assets/documents/2021-Jun/IE%20%E2%80%93%20Bond%20Recommendations.pdf",
-  "quote": "Customs Bonds are the backbone to the importation process guaranteeing the payment of duties, taxes, and fees to CBP",
-  "checked": "2026-10-18",
-  "method": "webfetch",
-  "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-18"
- },
- {
   "id": "cbp-ace",
   "read": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
   "quote": "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)",
@@ -2806,5 +2797,245 @@
   "method": "webfetch",
   "found": true,
   "note": "curl got 202; read with WebFetch on 2026-10-21"
+ },
+ {
+  "id": "cbp-301",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf",
+  "quote": "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "1472ede40dd8b136",
+  "context": "on which serves as both the entry and the entry summary, as required by § 142.3 unless a single entry or continuous bond on customs form 301, containing the bond conditions set forth in § 113.62 of this chapter, executed by an approved corporate surety, or secured by cash deposits or obliga"
+ },
+ {
+  "id": "ca-sb54",
+  "read": "https://calrecycle.ca.gov/packaging/packaging-epr/producerguidance/",
+  "quote": "Producers must apply to participate in the PRO (Circular Actional Alliance) plan, submit an independent producer application, or obtain a small producer exemption.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "5b828e3c12d21aa9",
+  "context": "food service ware, helping reduce impacts on communities and local governments. producers must apply to participate in the pro (circular actional alliance) plan, submit an independent producer application, or obtain a small producer exemption. circular action alliance independent producer small producer now available info"
+ },
+ {
+  "id": "cbp-isf",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+  "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a6fdb2380491bf90",
+  "context": "d consignee number(s) (as defined in § 149.3(a)(1) through (4) of this part) no later than 24 hours before the cargo is laden aboard the vessel at the foreign port. (2) manufacturer (or supplier), ship to party, country of origin, and commodity"
+ },
+ {
+  "id": "cpsc-cpc",
+  "read": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/Childrens-Product-Certificate-CPC",
+  "quote": "requires domestic manufacturers and importers of children’s products to certify in a written Children’s Product Certificate (CPC),",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "654f6e7c61e4434f",
+  "context": "ing and certification. section 14 of the cpsa, as codified in 16 cfr part 1110, requires domestic manufacturers and importers of children's products to certify in a written children's product certificate (cpc), based on test results from a third-party, cpsc-accepted laboratory, that their "
+ },
+ {
+  "id": "oh-bedding",
+  "read": "https://codes.ohio.gov/ohio-administrative-code/rule-4101:6-1-03",
+  "quote": "Any person who engages in manufacturing or wholesaling bedding or upholstered furniture that is to be sold or offered for sale in this state;",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7da5d2d79fde40b9",
+  "context": " november 5, 2021 promulgated under: 119.03 pdf: download authenticated pdf (a) any person who engages in manufacturing or wholesaling bedding or upholstered furniture that is to be sold or offered for sale in this state; a person remaking, repairing, or renovating bedding or upholstered furniture fo"
+ },
+ {
+  "id": "or-epr",
+  "read": "https://www.oregon.gov/deq/recycling/Documents/RMAProducerObligationsSummary.pdf",
+  "quote": "Register with and be a member of a producer responsibility organization (PRO) that administers a state-approved producer responsibility program.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "51d5d6b798d6605f",
+  "context": "t cases. 2 how do producers comply? by july 1, 2025, individual producers must: register with and be a member of a producer responsibility organization (pro) that administers a state-approved producer responsibility program. pay an annual membership fee to its pro. the pro will set fee schedules each ye"
+ },
+ {
+  "id": "co-epr",
+  "read": "https://cdphe.colorado.gov/hm/epr-program",
+  "quote": "a producer cannot sell or distribute products that use covered materials in Colorado unless they participate in the Producer Responsibility Program.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "24fc105061a0f5ec",
+  "context": "fill waste by 410,000 tons annually. information for producers as of july 2025, a producer cannot sell or distribute products that use covered materials in colorado unless they participate in the producer responsibility program. producers must pay producer responsibility dues on \"covered materials\" to the p"
+ },
+ {
+  "id": "kind:us-cpsc-efile",
+  "read": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/Childrens-Product-Certificate-CPC",
+  "quote": "Beginning July 8, 2026, importers of most regulated consumer products will be required to electronically file (eFile) certificates of compliance",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "654f6e7c61e4434f",
+  "context": "tact us search search children's product certificate english español tiếng việt beginning july 8, 2026, importers of most regulated consumer products will be required to electronically file (efile) certificates of compliance with u.s. customs and border protection (cbp), via a partner government agency "
+ },
+ {
+  "id": "kind:us-cpsc-tracking-label",
+  "read": "https://cpsc.gov/Business--Manufacturing/Business-Education/tracking-label",
+  "quote": "requires all children’s products to bear distinguishing marks (generally referred to as “tracking labels”) that:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "73e9bea06aa94b77",
+  "context": "tion 15(a)(5)(a) of the consumer product safety act, 15 u.s.c. § 2063(a)(5)(a), requires all children's products to bear distinguishing marks (generally referred to as \"tracking labels\") that: are visible and legible are permanently affixed to the product and its packagin"
+ },
+ {
+  "id": "kind:us-uflpa",
+  "read": "https://www.govinfo.gov/content/pkg/FR-2026-08-03/pdf/2026-15628.pdf",
+  "quote": "apply a rebuttable presumption that goods mined, produced, or manufactured by entities on the UFLPA Entity List are made with forced labor,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "30bb161674b9465b",
+  "context": "2, the uflpa requires the commissioner of u.s. customs and border protection to apply a rebuttable presumption that goods mined, produced, or manufactured by entities on the uflpa entity list are made with forced labor, and therefore, prohibited from importation into the united states verdate sep<1"
+ },
+ {
+  "id": "kind:us-232-upholstered",
+  "read": "https://www.govinfo.gov/content/pkg/FR-2026-01-09/pdf/2026-00327.pdf",
+  "quote": "a 25 percent ad valorem tariff on imports of certain upholstered wooden products, kitchen cabinets, and vanities.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "52a91c167abe5c54",
+  "context": " percent ad valorem tariff on imports of certain softwood timber and lumber and a 25 percent ad valorem tariff on imports of certain upholstered wooden products, kitchen cabinets, and vanities. i further stated that on january 1, 2026, the duty rate for upholstered furnitu"
+ },
+ {
+  "id": "kind:us-301-furniture",
+  "read": "https://www.govinfo.gov/content/pkg/FR-2018-09-21/pdf/2018-20610.pdf",
+  "quote": "Furniture (a/than seats) of wood (a/than bentwood), of a kind used in the bedroom",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c86a0cde0f6290a2",
+  "context": "ture (a/than seats) of bentwood nesoi, of a kind used in the bedroom 9403.50.60 furniture (a/than seats) of wood (a/than bentwood), of a kind used in the bedroom & designed for motor vehicle use 9403.50.90 furniture (a/than seats) of wood (a"
+ },
+ {
+  "id": "kind:us-301-rate",
+  "read": "https://www.govinfo.gov/content/pkg/FR-2019-05-09/pdf/2019-09681.pdf",
+  "quote": "increasing the rate of additional duty from 10 percent to 25 percent for the products of China covered by the September 2018 action",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b4d774dc5799bcd8",
+  "context": "etermined to modify the action being taken in this section 301 investigation by increasing the rate of additional duty from 10 percent to 25 percent for the products of china covered by the september 2018 action in this investigation. the trade representative has further determined to estab"
+ },
+ {
+  "id": "kind:us-ad-bedroom",
+  "read": "https://www.govinfo.gov/content/pkg/FR-2026-08-12/pdf/2026-16446.pdf",
+  "quote": "The product covered by the Order is wooden bedroom furniture from China.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "fbb7202151924b48",
+  "context": "he preliminary results as the final results of the review. scope of the order 2 the product covered by the order is wooden bedroom furniture from china. a full description of the scope of the order is provided in the preliminary res"
+ },
+ {
+  "id": "kind:us-ad-reimbursement",
+  "read": "https://www.govinfo.gov/content/pkg/FR-2026-08-12/pdf/2026-16446.pdf",
+  "quote": "to file a certificate regarding the reimbursement of antidumping duties prior to liquidation of the relevant entries",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "fbb7202151924b48",
+  "context": " final reminder to importers of their responsibility under 19 cfr 351.402(f)(2) to file a certificate regarding the reimbursement of antidumping duties prior to liquidation of the relevant entries during this por. failure to comply with this requirement could result in commer"
+ },
+ {
+  "id": "kind:ca-prop65-furniture",
+  "read": "https://www.p65warnings.ca.gov/sites/default/files/downloads/factsheets/furniture_products_fact_sheet.pdf",
+  "quote": "Proposition 65 requires businesses to determine if they must provide a warning about significant exposure to listed chemicals.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "1f210c1811dd10d9",
+  "context": "chemicals can cause cancer and/or ! · birth defects or other reproductive harm. proposition 65 requires businesses to determine if they must provide a warning about significant exposure to listed chemicals. some chemicals on the proposition 65 list can furniture be present on furniture"
+ },
+ {
+  "id": "kind:us-oh-upholstered",
+  "read": "https://codes.ohio.gov/ohio-administrative-code/rule-4101:6-1-03",
+  "quote": "Any person who engages in manufacturing or wholesaling bedding or upholstered furniture that is to be sold or offered for sale in this state;",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7da5d2d79fde40b9",
+  "context": " november 5, 2021 promulgated under: 119.03 pdf: download authenticated pdf (a) any person who engages in manufacturing or wholesaling bedding or upholstered furniture that is to be sold or offered for sale in this state; a person remaking, repairing, or renovating bedding or upholstered furniture fo"
+ },
+ {
+  "id": "kind:eu-eudr",
+  "read": "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en",
+  "quote": "must be able to prove that the products do not originate from recently deforested land",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "976a2282862466f3",
+  "context": "or or trader who places these commodities on the eu market, or exports from it, must be able to prove that the products do not originate from recently deforested land or have contributed to forest degradation. the regulation on deforestation-free"
+ },
+ {
+  "id": "kind:eu-eudr-dates",
+  "read": "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en",
+  "quote": "Large and medium operators: 30 December 2026 Micro and small operators: 30 June 2027",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "976a2282862466f3",
+  "context": "burdens for companies covered by the regulation. the entry into application is: large and medium operators: 30 december 2026 micro and small operators: 30 june 2027 micro and small operators already covered by the eu timber regulation (eutr): 3"
+ },
+ {
+  "id": "kind:gb-gpsr-traceability",
+  "read": "https://www.gov.uk/government/publications/general-product-safety-regulations-2005/general-product-safety-regulations-2005-great-britain",
+  "quote": "The producer must also allow for traceability by indicating on the product or its packaging, where reasonable to do so:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "82c1cfec6c62e3d2",
+  "context": "risks are not immediately obvious) and to take precautions against those risks. the producer must also allow for traceability by indicating on the product or its packaging, where reasonable to do so: a) the name and address of the producer, and b) the product reference or, where"
+ },
+ {
+  "id": "kind:gb-timber",
+  "read": "https://www.gov.uk/guidance/regulations-timber-and-flegt-licences",
+  "quote": "Operators must not place illegally harvested timber on the GB market and to avoid doing so must first apply a due diligence system,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b149a0e7ea46ccde",
+  "context": "who they buy timber or timber products from, and any traders they sell them to. operators must not place illegally harvested timber on the gb market and to avoid doing so must first apply a due diligence system, under which they: gather information on timber, including its species, quantity"
+ },
+ {
+  "id": "kind:gb-fire-cigarette",
+  "read": "https://www.legislation.gov.uk/uksi/1988/1324/regulation/5",
+  "quote": "no furniture to which this regulation applies shall include upholstery which does not pass the cigarette test in Part I of Schedule 4",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "736a251980ea39e5",
+  "context": "corded on this site. upholstery u.k. [ f1 5. — (1) subject to paragraph 2 below no furniture to which this regulation applies shall include upholstery which does not pass the cigarette test in part i of schedule 4 to these regulations. (2) an invisible part of the cover on any part of furnitu"
+ },
+ {
+  "id": "kind:gb-fire-match",
+  "read": "https://www.legislation.gov.uk/uksi/1988/1324/regulation/8",
+  "quote": "any visible part of the cover shall pass the match test in Part I of Schedule 5 to these Regulations",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3b5edfb58cfe76dc",
+  "context": "ied with a cover on it (whether or not the cover is over the filling material), any visible part of the cover shall pass the match test in part i of schedule 5 to these regulations and any invisible part of the cover shall pass the match test in part iii of th"
+ },
+ {
+  "id": "kind:us-isf-bond",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-part113.pdf",
+  "quote": "the principal and surety (jointly and severally) agree to pay liquidated damages of $5,000 for each violation.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "cf3455450afbeeb5",
+  "context": "scribed by regulation. if the principal defaults with regard to any obligation, the principal and surety (jointly and severally) agree to pay liquidated damages of $5,000 for each violation. (k) agreement to comply with electronic entry and/or advance cargo information "
  }
 ]

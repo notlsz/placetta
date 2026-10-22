@@ -36,7 +36,9 @@ export const PROOF: Record<string, Proof> = {
   /* federal */
   "irs-ss4": at("https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number", "You never have to pay a fee for an EIN."),
   "cbp-5106": at("https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf", "shall file CBP Form 5106 with the first formal entry."),
-  "cbp-301": at("https://cbp.gov/sites/default/files/assets/documents/2021-Jun/IE%20%E2%80%93%20Bond%20Recommendations.pdf", "Customs Bonds are the backbone to the importation process guaranteeing the payment of duties, taxes, and fees to CBP"),
+  // 19 CFR 142.4(a) on GovInfo, read with curl 2026-10-21 (CBP's own bond page only opened through WebFetch)
+  "cbp-301": { quote: "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,", checked: "2026-10-21",
+    read: "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf", link: "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf" },
   "cbp-ace": at("https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf", "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)"),
   "fda-ffr": at("https://www.fda.gov/Food/GuidanceRegulation/FoodFacilityRegistration/ucm324780.htm", "requires food facilities that are required to register with FDA to renew such registrations."),
   "ttb-dealer": p("https://www.ttb.gov/nrc/retail-beverage-alcohol-dealers", "Registration must be made: Before engaging in business."),

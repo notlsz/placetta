@@ -14,6 +14,7 @@ import type { Application, CheckItem, Deadline, Field, Level, Store, Workspace }
 import { publishedDays } from "../plan";
 import { openingPath } from "../smart";
 import { daysFromNow } from "../time";
+import { nextRenewal, PROJECTED_RENEWAL, renewalCycle } from "../renewal";
 
 export type PreviewOptions = {
   entity?: string;          // the legal entity, if it exists already (then no formation step)
@@ -470,7 +471,7 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const kinds = kindsOf(what).filter(k => segment === "restaurant" || (segment !== "warehouse" && FURNITURE_KINDS.includes(k)));
   const withheld: string[] = [];
   const near: Record<NonNullable<KindFact["about"]>, Role[]> = { food: ["food", "plan", "license"], plan: ["plan", "building", "food"], building: ["building", "plan", "food"], license: ["license", "food"] };
-  const facts: PlanFact[] = kindFactsAt(kinds, places).flatMap(k => {
+  const facts: PlanFact[] = kindFactsAt(kinds, places, needs).flatMap(k => {
     const seen = proofCurrent(k.proof, today);
     if (!seen) { withheld.push(k.id); return []; }
     const app = (k.form ?? []).map(id => apps.find(a => a.official === id)).find(Boolean) ?? (k.about ? near[k.about].map(x => byRole.get(x)).find(Boolean) : undefined);
@@ -489,6 +490,17 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
       const days = r.f.takesDays !== undefined ? r.f.takesDays : publishedDays(r.f.takes);
       if (days == null) continue;
       deadlines.push({ id: "pv-dl-" + r.f.id, date: addDays(opening, -(days + BUFFER)), kind: "due", app: r.a.id, agency: r.a.agency, title: B(`File the ${r.a.name.en.replace(/^Application for (Registration as a |)/, "")}`, `提交${r.a.name.zh}`) });
+    }
+    // what recurs: a claimed step whose agency publishes a cycle ("Every year.", "Every 2 years.") lands on the renewal
+    // calendar, counted from the target opening until the agency's approval day is on record (src/finish.ts
+    // scheduleRenewals then replaces it with the date counted from that day)
+    for (const r of rows) {
+      if (r.a.abstain) continue;
+      const c = renewalCycle(r.a.renews?.en);
+      if (!c) continue;
+      const name = r.a.name.en.replace(/^Application for (Registration as a |)/, "");
+      deadlines.push({ id: PROJECTED_RENEWAL + (r.f?.id ?? r.a.id), date: nextRenewal(opening, c), kind: "renewal", app: r.a.id, agency: r.a.agency,
+        title: B(`Renew: ${name} (counted from the target opening)`, `续办：${r.a.name.zh}（按目标开业日推算）`) });
     }
   }
 

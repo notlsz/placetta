@@ -62,37 +62,8 @@ export function stampFilings<W extends Workspace>(w: W, rows: FilingRow[]): W {
 
 /* ------------------------------------------------------------------ renewals */
 
-/** How often a permit renews, read from the agency's own published words ("Every year.", "Every 2 years.", "Every year
- *  by May 15."). Null for anything else ("Does not expire.", "by the tax return due date"): no date is made up. */
-export type Cycle = { months: number } | { month: number; day: number };
-const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-const WORDS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, ten: 10 };
-export function renewalCycle(text: string | undefined): Cycle | null {
-  const s = (text ?? "").trim().toLowerCase().replace(/[.。]+$/, "").replace(/\s+/g, " ");
-  if (!s || /not expire|never expires|永久/.test(s)) return null;
-  if (/^(renew |update |certify )?(every year|yearly|annually)( renewal)?$/.test(s) || /^每年(续期一次|续期|一次)?$/.test(s)) return { months: 12 };
-  let m = /^(?:renew |update )?every (\d{1,2}|one|two|three|four|five|ten) years?$/.exec(s);
-  if (m) { const n = WORDS[m[1]] ?? Number(m[1]); return n >= 1 && n <= 10 ? { months: n * 12 } : null; }
-  m = /^每\s*(\d{1,2}|两|二|三|五)\s*年(一次)?$/.exec(s);
-  if (m) { const n = ({ 两: 2, 二: 2, 三: 3, 五: 5 } as Record<string, number>)[m[1]] ?? Number(m[1]); return n >= 1 && n <= 10 ? { months: n * 12 } : null; }
-  m = /^(?:renew )?every year by (jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* (\d{1,2})$/.exec(s);
-  if (m) { const d = Number(m[2]); return d >= 1 && d <= 31 ? { month: MONTHS.indexOf(m[1]) + 1, day: d } : null; }
-  return null;
-}
-
-const pad = (n: number) => String(n).padStart(2, "0");
-/** The renewal after an approval on `from` (YYYY-MM-DD): that many months on (the last day of a shorter month), or the
- *  next named day after it. */
-export function nextRenewal(from: string, c: Cycle): string {
-  const [y, mo, d] = from.split("-").map(Number);
-  if ("months" in c) {
-    const t = mo - 1 + c.months, yy = y + Math.floor(t / 12), mm = (t % 12) + 1;
-    const last = new Date(Date.UTC(yy, mm, 0)).getUTCDate();
-    return `${yy}-${pad(mm)}-${pad(Math.min(d, last))}`;
-  }
-  const at = (yy: number) => { const last = new Date(Date.UTC(yy, c.month, 0)).getUTCDate(); return `${yy}-${pad(c.month)}-${pad(Math.min(c.day, last))}`; };
-  return at(y) > from ? at(y) : at(y + 1);
-}
+export { renewalCycle, nextRenewal, PROJECTED_RENEWAL, type Cycle } from "./renewal";
+import { renewalCycle, nextRenewal, PROJECTED_RENEWAL } from "./renewal";
 
 const lower = (s: string) => (/^[A-Z][a-z]/.test(s) && !/^[A-Z][a-z]+ [A-Z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 
@@ -107,7 +78,9 @@ export function scheduleRenewals<W extends Workspace>(w: W, today: string): W {
     const c = renewalCycle(a.renews?.en) ?? renewalCycle(a.renews?.zh);
     if (!c) continue;
     const date = nextRenewal(decided, c);
-    if (date < today || n.deadlines.some(d => d.kind === "renewal" && d.app === a.id && d.date > decided)) continue;
+    // a renewal the instant plan projected from the target opening gives way to the one counted from the approval
+    const projected = (d: Deadline) => d.id.startsWith(PROJECTED_RENEWAL) && d.app === a.id;
+    if (date < today || n.deadlines.some(d => d.kind === "renewal" && d.app === a.id && d.date > decided && !projected(d))) continue;
     const ag = a.agency;
     const dl: Deadline = {
       id: `renew-${a.id}-${date}`, date, kind: "renewal", app: a.id, agency: ag,
@@ -115,7 +88,7 @@ export function scheduleRenewals<W extends Workspace>(w: W, today: string): W {
       ask: B("Start the renewal", "开始续办"),
       prompt: B(`Start the renewal of the ${lower(a.name.en)}, due ${date}. Find ${ag.en}'s renewal form or online renewal, prepare it, fill it from the workspace and put it up for my approval.`, `开始续办${a.name.zh}，${date} 到期。找到${ag.zh}的续办表格或网上续办入口，准备好并根据工作区资料填写，然后提交给我批准。`),
     };
-    const withDl: W = { ...n, deadlines: [...n.deadlines, dl] };
+    const withDl: W = { ...n, deadlines: [...n.deadlines.filter(d => !projected(d)), dl] };
     n = { ...withDl, audit: audit("agent", B("Put the next renewal on Deadlines", "已把下次续办加入截止日期"), a.name,
       B(`${date}: counted from ${ag.en}'s approval on ${decided} and its published cycle ("${a.renews!.en}")`, `${date}：按${ag.zh}于 ${decided} 的批准日期及其公布的周期（“${a.renews!.zh || a.renews!.en}”）推算`))(withDl).audit };
   }

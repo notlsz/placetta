@@ -6,14 +6,26 @@
 //   aphis-ppq505        Lacey Act plant and plant product declaration (PPQ Form 505), wood products, at entry
 //   epa-tsca-import     TSCA Title VI import certification for composite wood in finished goods
 //   cpsc-1261           clothing storage units (dressers, chests, armoires): 16 CFR part 1261 and its certificate
-//   cbp-isf             Importer Security Filing for ocean shipments: CBP's pages refused every automated read, so the
-//                       row abstains and links CBP's own page
+//   cbp-isf             Importer Security Filing (10+2) for ocean shipments, 24 hours before lading abroad: CBP's pages
+//                       refuse automated reads, so it is quoted from 19 CFR part 149 as GovInfo publishes it
+//   cpsc-cpc            Children's Product Certificate (16 CFR part 1110) for children's furniture, before it ships
 //   ca-bhgs-importer    California importer's license, for upholstered furniture made outside the US
 //   ca-bhgs-retail      California retail furniture dealer's license, for a store selling upholstered furniture that
 //                       doesn't hold an importer's license
+//   oh-bedding          Ohio's registration for makers and wholesalers of upholstered furniture sold in Ohio ($50 a year)
+//   or-epr, co-epr      Oregon's and Colorado's packaging producer responsibility (EPR): the brand joins the producer
+//                       responsibility organization before it sells there, and pays its dues every year
 //
-// What a furniture plan says beyond its filings (labels, the tip-over tests, other states' registrations, the EU) is in
-// src/forms/kinds.ts, quoted the same way.
+// Read 2026-10-21 (second pass): the customs bond's proof moved to 19 CFR 142.4 on GovInfo (src/forms/proof.ts), which
+// curl reads, where CBP's own bond page only opened through WebFetch.
+//
+// Plan order: what clears the first shipment (importer number, bond, ISF, the Lacey and TSCA declarations, the product
+// certificates) comes before what the first sale needs (state furniture licenses, EPR), and each store's own steps after.
+// What recurs (the bond, the California license every 2 years, Ohio's registration and the EPR dues every year) carries
+// the agency's cycle in `renews`, so it lands on the renewal calendar (src/finish.ts scheduleRenewals).
+//
+// What a furniture plan says beyond its filings (labels, the tip-over tests, tariffs and the antidumping order, other
+// states' registrations, the EU and the UK) is in src/forms/kinds.ts, quoted the same way.
 import { B } from "../bi";
 import type { Needs, OfficialForm } from "./registry";
 
@@ -26,23 +38,48 @@ export const CPSC_CSU = "https://www.cpsc.gov/Business--Manufacturing/Business-E
 export const BHGS_IMPORTER = "https://bhgs.dca.ca.gov/forms_pubs/app_importer.pdf";
 export const BHGS_FLYER = "https://bhgs.dca.ca.gov/forms_pubs/19-012_statelicflyer.pdf";
 export const BHGS_LABELS = "https://bhgs.dca.ca.gov/forms_pubs/19-014_furnbedlawflyer.pdf";
+/** 19 CFR part 149 (Importer Security Filing), the April 1, 2025 edition as GovInfo publishes it. */
+export const CFR_149 = "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf";
+/** 19 CFR part 142 (entry), whose section 142.4 requires the bond at entry. */
+export const CFR_142 = "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf";
+export const CPSC_CPC = "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/Childrens-Product-Certificate-CPC";
+export const CPSC_TRACKING = "https://cpsc.gov/Business--Manufacturing/Business-Education/tracking-label";
+const OH_RULE = "https://codes.ohio.gov/ohio-administrative-code/rule-4101:6-1-03";
+const OR_EPR = "https://www.oregon.gov/deq/recycling/Documents/RMAProducerObligationsSummary.pdf";
+const CO_EPR = "https://cdphe.colorado.gov/hm/epr-program";
 
 /** Furniture, in the words a brand uses: "Upholstered furniture brand", "Furniture showroom", "dressers", "家具". */
-export const FURNITURE = /\bfurniture\b|\bsofas?\b|\bcouch(es)?\b|\bsectionals?\b|\brecliners?\b|\bloveseats?\b|\bupholster(y|ed)\b|\bdressers?\b|\barmoires?\b|\bwardrobes?\b|chests? of drawers|\bcase ?goods\b|\bcasegoods\b|\b(coffee|dining|side|end|console) tables?\b|\bnightstands?\b|\bbed ?frames?\b|\bbar ?stools?\b|\bsideboards?\b|\bcredenzas?\b|\bbookcases?\b|家具|沙发|衣柜|斗柜/i;
+export const FURNITURE = /\bbunk ?beds?\b|\bcribs?\b|\bfurniture\b|\bsofas?\b|\bcouch(es)?\b|\bsectionals?\b|\brecliners?\b|\bloveseats?\b|\bupholster(y|ed)\b|\bdressers?\b|\barmoires?\b|\bwardrobes?\b|chests? of drawers|\bcase[- ]?goods\b|\bcasegoods\b|\b(coffee|dining|side|end|console) tables?\b|\bnightstands?\b|\bbed ?frames?\b|\bbar ?stools?\b|\bsideboards?\b|\bcredenzas?\b|\bbookcases?\b|家具|沙发|衣柜|斗柜/i;
 const UPHOLSTERED = /\bupholster(y|ed)\b|\bsofas?\b|\bcouch(es)?\b|\bsectionals?\b|\brecliners?\b|\bloveseats?\b|\barmchairs?\b|沙发|软体/i;
 /** Only wood case goods named, nothing upholstered: a dresser brand doesn't sell upholstered furniture. */
-const CASE_ONLY = /\bdressers?\b|\barmoires?\b|\bwardrobes?\b|chests? of drawers|\bcase ?goods\b|\bcasegoods\b|\bcabinets?\b|\bbookcases?\b|\bdesks?\b|\btables?\b|\bnightstands?\b|\bbed ?frames?\b|\bstools?\b|\bsideboards?\b|\bcredenzas?\b|衣柜|斗柜/i;
+const CASE_ONLY = /\bdressers?\b|\barmoires?\b|\bwardrobes?\b|chests? of drawers|\bcase[- ]?goods\b|\bcasegoods\b|\bcabinets?\b|\bbookcases?\b|\bdesks?\b|\btables?\b|\bnightstands?\b|\bbed ?frames?\b|\bstools?\b|\bsideboards?\b|\bcredenzas?\b|衣柜|斗柜/i;
 /** A clothing storage unit, as CPSC's page names them: chests, chests of drawers, armoires, bureaus, dressers. */
 const CLOTHING_STORAGE = /\bdressers?\b|\barmoires?\b|\bwardrobes?\b|chests? of drawers|\bchifferobes?\b|\bbureaus?\b|衣柜|斗柜/i;
 
+/** Furniture for children, as CPSC's children's product rules name them (designed or intended primarily for children 12
+    or younger): "children's furniture", "kids' beds", "nursery", "toddler", "bunk beds", "cribs". */
+const CHILDREN = /\bkids?'?s?\b|\bchild(ren)?'?s?\b|\btoddlers?\b|\bnursery\b|\bbab(y|ies)\b|\binfants?\b|\bbunk ?beds?\b|\bcribs?\b|儿童|婴儿|宝宝/i;
+/** Made in China, as the words say it ("importing Chinese bedroom furniture", "from China", "中国"). A brand that only
+    says it is Chinese-owned still reads as China here, so every fact that turns on it names the condition. */
+const CHINA = /\bchin(a|ese)\b|\bprc\b|中国|国产/i;
+/** Bedroom furniture, the antidumping order's product: beds, headboards, nightstands, dressers, chests, armoires. */
+const BEDROOM = /\bbedroom\b|\bbeds?\b|\bbed ?frames?\b|\bheadboards?\b|\bnightstands?\b|\bnight ?tables?\b|\bdressers?\b|\bchests?\b|\barmoires?\b|\bwardrobes?\b|卧室|床/i;
+
 export const isFurniture = (what: string) => FURNITURE.test(what);
 /** What the words say a furniture business makes or sells: wood (a furniture brand, unless it names only metal or
-    plastic), upholstered furniture (named, or furniture in general unless only case goods are named), and clothing
-    storage units (named). Nothing for a business that isn't furniture. */
-export function furnitureNeeds(what: string): Pick<Needs, "wood" | "upholstered" | "clothingStorage"> {
+    plastic), upholstered furniture (named, or furniture in general unless only case goods are named), clothing storage
+    units (named) and children's furniture (named). Nothing for a business that isn't furniture. */
+export function furnitureNeeds(what: string): Pick<Needs, "wood" | "upholstered" | "clothingStorage" | "children"> {
   if (!isFurniture(what)) return {};
   const upholstered = UPHOLSTERED.test(what) || !CASE_ONLY.test(what);
-  return { wood: !/\b(metal|steel|plastic)\s+(only\s+)?furniture\b/i.test(what), ...(upholstered ? { upholstered: true } : {}), ...(CLOTHING_STORAGE.test(what) ? { clothingStorage: true } : {}) };
+  return { wood: !/\b(metal|steel|plastic)\s+(only\s+)?furniture\b/i.test(what), ...(upholstered ? { upholstered: true } : {}), ...(CLOTHING_STORAGE.test(what) ? { clothingStorage: true } : {}),
+    ...(CHILDREN.test(what) ? { children: true } : {}) };
+}
+/** Where the words say the furniture is made, for the duties that turn on it: China (Section 301), and Chinese bedroom
+    furniture (the antidumping order on wooden bedroom furniture). */
+export function furnitureOrigin(what: string): { china?: boolean; chinaBedroom?: boolean } {
+  if (!isFurniture(what) || !CHINA.test(what)) return {};
+  return { china: true, ...(BEDROOM.test(what) ? { chinaBedroom: true } : {}) };
 }
 
 const IMPORTERS = ["seller", "retail", "warehouse"] as const;
@@ -66,7 +103,7 @@ export const FURNITURE_FORMS: OfficialForm[] = [
   },
   {
     id: "cpsc-1261", form: "General Certificate of Conformity (16 CFR part 1261)", title: B("Clothing storage unit tip-over standard and certificate (16 CFR part 1261)", "衣物收纳家具防倾倒标准及合格证书（16 CFR 第 1261 部分）"),
-    agency: B("U.S. Consumer Product Safety Commission (CPSC)", "美国消费品安全委员会（CPSC）"), level: "federal", where: "US", segments: [...IMPORTERS], needs: { imports: true, clothingStorage: true }, method: "none", order: 51,
+    agency: B("U.S. Consumer Product Safety Commission (CPSC)", "美国消费品安全委员会（CPSC）"), level: "federal", where: "US", segments: [...IMPORTERS], needs: { imports: true, clothingStorage: true }, method: "none", order: 43,
     how: B("Dressers, chests and armoires must pass the rule's three stability tests and ship with an anti-tip device that meets ASTM F3096. The importer issues the certificate itself, citing 16 CFR part 1261.", "梳妆柜、五斗柜和衣柜须通过该规定的三项稳定性测试，并随附符合 ASTM F3096 的防倾倒装置。由进口商自行出具证书，注明 16 CFR 第 1261 部分。"),
     url: CPSC_CSU, info: CPSC_CSU, fee: 0, feeNote: B("No government form or fee: the importer issues the certificate.", "无政府表格或费用：由进口商出具证书。"), checked: "page",
     plain: B("The tip-over rule for dressers and chests: tested, shipped with an anti-tip device, and certified by the importer.", "梳妆柜和五斗柜的防倾倒规定：须经测试、随附防倾倒装置，并由进口商出具证书。"),
@@ -75,11 +112,47 @@ export const FURNITURE_FORMS: OfficialForm[] = [
   {
     id: "cbp-isf", form: "Importer Security Filing (ISF, 10+2)", title: B("Importer Security Filing (ISF) for ocean shipments", "进口商安全申报（ISF，适用于海运）"),
     agency: B("U.S. Customs and Border Protection", "美国海关与边境保护局（CBP）"), level: "federal", where: "US", segments: [...IMPORTERS], needs: { imports: true, wood: true }, method: "portal", order: 36,
-    how: B("Filed electronically for goods arriving by ocean, usually by the customs broker, before the cargo is loaded abroad.", "海运货物须电子申报，通常由报关行在境外装船前提交。"),
-    url: "https://www.cbp.gov/border-security/ports-entry/cargo-security/importer-security-filing-102", info: "https://www.cbp.gov/border-security/ports-entry/cargo-security/importer-security-filing-102",
-    fee: 0, checked: "known",
-    plain: B("The security filing for each ocean container, sent before it is loaded.", "每个海运集装箱装船前提交的安全申报。"),
-    fields: [],
+    how: B("Filed electronically for goods arriving by ocean, usually by the customs broker: seller, buyer, importer of record and consignee numbers, manufacturer, ship-to party, country of origin and HTS number no later than 24 hours before the cargo is loaded at the foreign port; the container stuffing location and consolidator no later than 24 hours before arrival. The ISF importer holds a bond first; without one, the agent filing the ISF may post its own.",
+      "海运货物须电子申报，通常由报关行办理：卖方、买方、进口商记录号和收货人编号，以及制造商、送达方、原产国和 HTS 编码，须在境外港口装船前至少 24 小时提交；装箱地点和拼箱人须在抵港前至少 24 小时提交。ISF 进口商须先持有保证金；如没有，代为申报 ISF 的代理人可使用其自身的保证金。"),
+    url: "https://www.cbp.gov/border-security/ports-entry/cargo-security/importer-security-filing-102", info: CFR_149,
+    fee: 0, feeNote: B("CBP charges no fee; the broker charges for filing it.", "CBP 不收费；报关行收取代理费。"), checked: "page",
+    plain: B("The security filing for each ocean shipment, sent before it is loaded abroad.", "每批海运货物在境外装船前提交的安全申报。"),
+    fields: [], proof: P("later than 24 hours before the cargo is laden aboard the vessel at the foreign port.", CFR_149),
+  },
+  {
+    id: "cpsc-cpc", form: "Children's Product Certificate (16 CFR part 1110)", title: B("Children's Product Certificate, from a CPSC-accepted lab's tests", "儿童产品合格证书（依据 CPSC 认可实验室的检测）"),
+    agency: B("U.S. Consumer Product Safety Commission (CPSC)", "美国消费品安全委员会（CPSC）"), level: "federal", where: "US", segments: [...IMPORTERS], needs: { imports: true, children: true }, method: "none", order: 43,
+    how: B("Children's furniture is tested by a third-party, CPSC-accepted laboratory to the children's product safety rules that apply, and the importer issues the certificate, with its test reports, in English, citing each rule. Since July 8, 2026 most certificates are eFiled with CBP at entry, so it is ready before the goods ship. There is no government form.",
+      "儿童家具须由 CPSC 认可的第三方实验室按适用的儿童产品安全规定检测，进口商出具英文证书（连同检测报告）并列明每项规定。自 2026 年 7 月 8 日起，大多数证书须在入境时向 CBP 电子申报，因此须在发货前备妥。没有政府表格。"),
+    url: CPSC_CPC, info: CPSC_CPC, fee: 0, feeNote: B("No government fee: the lab charges for testing.", "无政府费用：实验室收取检测费。"), checked: "page",
+    plain: B("The certificate that children's furniture meets the children's safety rules, based on an accepted lab's tests.", "证明儿童家具符合儿童安全规定的证书，以认可实验室的检测为依据。"),
+    fields: [], proof: P("requires domestic manufacturers and importers of children’s products to certify in a written Children’s Product Certificate (CPC),", CPSC_CPC),
+  },
+  {
+    id: "oh-bedding", form: "Certificate of registration (Ohio Revised Code chapter 3713)", title: B("Ohio registration for upholstered furniture makers and wholesalers", "俄亥俄州软体家具制造商和批发商登记"),
+    agency: B("Ohio Department of Commerce, Division of Industrial Compliance", "俄亥俄州商务部工业合规处"), level: "state", where: "OH", segments: [...IMPORTERS], needs: { imports: true, upholstered: true }, method: "pdf_mail", order: 46,
+    how: B("Applied for with the Division before selling upholstered furniture in Ohio, with the $50 annual fee. Registrants other than Ohio-based wholesalers report the number of articles every 12 months.", "在俄亥俄州销售软体家具前向该处申请，缴纳每年 50 美元的登记费。除在俄亥俄州设有营业场所的批发商外，登记人每 12 个月申报一次件数。"),
+    url: OH_RULE, info: OH_RULE, fee: 50, renews: B("Every year.", "每年一次。"), checked: "page",
+    plain: B("Ohio's registration for anyone making or wholesaling upholstered furniture sold in Ohio, renewed every year.", "在俄亥俄州销售的软体家具，其制造商或批发商须办理的登记，每年续期。"),
+    fields: [], proof: P("Any person who engages in manufacturing or wholesaling bedding or upholstered furniture that is to be sold or offered for sale in this state;", OH_RULE),
+  },
+  {
+    id: "or-epr", form: "Producer responsibility organization membership (Recycling Modernization Act)", title: B("Oregon packaging producer responsibility (EPR): join the PRO, unless exempt", "俄勒冈州包装生产者责任（EPR）：加入生产者责任组织（豁免者除外）"),
+    agency: B("Oregon Department of Environmental Quality, through Circular Action Alliance", "俄勒冈州环境质量部（经 Circular Action Alliance）"), level: "state", where: "OR", segments: ["seller", "retail"], needs: { imports: true }, method: "portal", order: 47,
+    how: B("The brand that imports packaged goods sold into Oregon registers with the producer responsibility organization (Circular Action Alliance) and pays its annual membership fee. Exempt: under $5 million gross revenue, under one metric ton of covered products into Oregon, or a single store with no online sales.",
+      "向俄勒冈州销售包装商品的进口品牌须在生产者责任组织（Circular Action Alliance）登记并缴纳年度会费。豁免情形：年总收入低于 500 万美元、进入俄勒冈州的受管产品不足 1 公吨，或只有一家门店且无网上销售。"),
+    url: OR_EPR, info: OR_EPR, fee: null, feeNote: B("The PRO sets the fee every year by the quantity and type of packaging.", "生产者责任组织每年按包装数量和类型核定费用。"), renews: B("Every year.", "每年一次。"), checked: "page",
+    plain: B("Oregon's packaging law: the brand pays into the state's recycling system through the PRO, every year, unless exempt.", "俄勒冈州包装法：品牌每年通过生产者责任组织为州回收体系付费（豁免者除外）。"),
+    fields: [], proof: P("Register with and be a member of a producer responsibility organization (PRO) that administers a state-approved producer responsibility program.", OR_EPR),
+  },
+  {
+    id: "co-epr", form: "Producer Responsibility Program participation (Circular Action Alliance)", title: B("Colorado packaging producer responsibility (EPR): join before selling, unless exempt", "科罗拉多州包装生产者责任（EPR）：销售前加入（豁免者除外）"),
+    agency: B("Colorado Department of Public Health and Environment, through Circular Action Alliance", "科罗拉多州公共卫生与环境部（经 Circular Action Alliance）"), level: "state", where: "CO", segments: ["seller", "retail"], needs: { imports: true }, method: "portal", order: 47,
+    how: B("The brand registers with Circular Action Alliance and submits a supply report before selling packaged goods in Colorado, then pays dues on covered materials every year, starting January 2026. Producers under the state's revenue threshold, adjusted for inflation each year, are exempt.",
+      "品牌须在科罗拉多州销售包装商品前向 Circular Action Alliance 登记并提交供应报告，自 2026 年 1 月起每年就受管材料缴纳会费。收入低于州门槛（每年按通胀调整）的生产者可豁免。"),
+    url: CO_EPR, info: CO_EPR, fee: null, feeNote: B("Dues are set on the covered materials sold into Colorado.", "会费按销往科罗拉多州的受管材料核定。"), renews: B("Every year.", "每年一次。"), checked: "page",
+    plain: B("Colorado's packaging law: a producer can't sell there unless it participates in the program, and pays dues every year.", "科罗拉多州包装法：生产者须参加该计划才能在当地销售，并每年缴纳会费。"),
+    fields: [], proof: P("a producer cannot sell or distribute products that use covered materials in Colorado unless they participate in the Producer Responsibility Program.", CO_EPR),
   },
   {
     id: "ca-bhgs-importer", form: "Application for Importer's License (HFTI Imp App)", title: B("California importer's license for upholstered furniture", "加州软体家具进口商执照"),

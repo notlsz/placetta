@@ -14,18 +14,30 @@
 // Title VI label on finished goods, the clothing storage unit tests and anti-tip device, California's law label and
 // TB 117-2013 statement, Massachusetts's and Pennsylvania's upholstered furniture licensing, and, abroad, the EU's General
 // Product Safety Regulation. They are kinds "furniture", "upholstered" and "storage" (clothing storage units).
+//
+// Furniture, second pass (2026-10-21): children's furniture (CPSC tracking labels and certificate eFiling), the duties a
+// furniture importer pays beyond the bond (Section 232 on upholstered wooden products, Section 301 and the antidumping
+// order on Chinese wooden bedroom furniture, UFLPA's presumption), California's Proposition 65, Ohio's registration for
+// brands selling there from another state, the EU Deforestation Regulation (read on the Commission's environment pages,
+// where EUR-Lex refused) and, for a brand expanding to Great Britain, its product safety, timber and furniture fire rules.
+// Kinds "children", "china" (furniture the words say is made in China) and "cnbedroom" (Chinese bedroom furniture).
+// A fact with `needs` holds only when the business does those things (a duty on imports, never for a showroom that
+// buys from a US distributor).
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
-import { BHGS_LABELS, CPSC_CSU, EPA_TSCA, isFurniture, furnitureNeeds } from "./furniture";
+import type { Needs } from "./registry";
+import { BHGS_LABELS, CPSC_CPC, CPSC_CSU, CPSC_TRACKING, EPA_TSCA, isFurniture, furnitureNeeds, furnitureOrigin } from "./furniture";
 
-export type StoreKind = "tea" | "coffee" | "bakery" | "restaurant" | "furniture" | "upholstered" | "storage";
+export type StoreKind = "tea" | "coffee" | "bakery" | "restaurant" | "furniture" | "upholstered" | "storage" | "children" | "china" | "cnbedroom";
 /** The kinds that aren't food: their facts hold for any segment (a showroom, an importer, a warehouse). */
-export const FURNITURE_KINDS: StoreKind[] = ["furniture", "upholstered", "storage"];
+export const FURNITURE_KINDS: StoreKind[] = ["furniture", "upholstered", "storage", "children", "china", "cnbedroom"];
 export type KindFact = {
   id: string;
   kinds: StoreKind[];          // the kinds of business it is about
   where: string | string[];    // where it applies: a state ("CA"), a county ("KC"), a city ("NYC") or countries, as in the registry
   abroad?: boolean;            // only outside the US (the EU's "DE" is also Delaware's code)
+  except?: string[];           // not at these places (a state whose own filing is in the plan instead)
+  needs?: (keyof Needs)[];     // only when the business does all of these (imports)
   about?: "food" | "plan" | "building" | "license";   // the plan row it bears on (src/plan/preview.ts roles)
   form?: string[];             // the library forms it bears on, first found wins (before `about`)
   title: Bi;                   // one line
@@ -51,6 +63,23 @@ const MA_DFP = "https://www.mass.gov/how-to/apply-for-a-license-to-manufacture-a
 const PA_BU = "https://www.pa.gov/agencies/dli/programs-services/labor-management-relations/bureau-of-occupational-and-industrial-safety/bedding-and-upholstery";
 const GPSR = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R0988";
 /** The EU's member states, by the registry's country codes. */
+/** The Federal Register and the CFR as GovInfo publishes them: CBP, DHS and USTR pages refuse automated reads. */
+const AD_WBF = "https://www.govinfo.gov/content/pkg/FR-2026-08-12/pdf/2026-16446.pdf";           // A-570-890, final results, Aug 12, 2026
+const S301_25 = "https://www.govinfo.gov/content/pkg/FR-2019-05-09/pdf/2019-09681.pdf";          // List 3 raised to 25 percent
+const S301_LIST3 = "https://www.govinfo.gov/content/pkg/FR-2018-09-21/pdf/2018-20610.pdf";       // List 3 and its annex
+const S232_WOOD = "https://www.govinfo.gov/content/pkg/FR-2026-01-09/pdf/2026-00327.pdf";        // Proclamation 11000
+const CFR_113 = "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-part113.pdf";   // 19 CFR part 113, bonds
+const UFLPA = "https://www.govinfo.gov/content/pkg/FR-2026-08-03/pdf/2026-15628.pdf";            // UFLPA Entity List notice
+const P65_FURNITURE = "https://www.p65warnings.ca.gov/sites/default/files/downloads/factsheets/furniture_products_fact_sheet.pdf";
+const OH_RULE = "https://codes.ohio.gov/ohio-administrative-code/rule-4101:6-1-03";
+const EUDR = "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en";
+const GB_GPSR = "https://www.gov.uk/government/publications/general-product-safety-regulations-2005/general-product-safety-regulations-2005-great-britain";
+const GB_TIMBER = "https://www.gov.uk/guidance/regulations-timber-and-flegt-licences";
+const GB_FIRE_5 = "https://www.legislation.gov.uk/uksi/1988/1324/regulation/5";
+const GB_FIRE_8 = "https://www.legislation.gov.uk/uksi/1988/1324/regulation/8";
+const CUSTOMS = ["cbp-301", "cbp-5106"];   // a duty on an entry bears on the bond that secures it
+/** Abroad, what bears on placing goods on the market sits with the import number (the EORI rows of src/forms/world.ts). */
+const EU_ENTRY = ["fr-eori", "de-eori"];
 const EU27 = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 
 export const KIND_FACTS: KindFact[] = [
@@ -80,7 +109,100 @@ export const KIND_FACTS: KindFact[] = [
     proof: P(CPSC_CSU, "Anti-tip device that meets ASTM F3096 must be packaged with the product"),
   },
 
+  {
+    id: "us-cpsc-efile", kinds: ["storage", "children"], where: "US", needs: ["imports"], form: ["cpsc-cpc", "cpsc-1261"], level: "federal",
+    title: B("The certificate is filed electronically with CBP at entry", "入境时向 CBP 电子申报证书"),
+    text: B("Since July 8, 2026, importers of most regulated consumer products eFile their certificates of compliance with CBP at entry, so the certificate is ready before the goods ship.",
+      "自 2026 年 7 月 8 日起，大多数受监管消费品的进口商须在入境时向 CBP 电子申报合格证书，因此证书须在发货前备妥。"),
+    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会"),
+    proof: P(CPSC_CPC, "Beginning July 8, 2026, importers of most regulated consumer products will be required to electronically file (eFile) certificates of compliance"),
+  },
+  {
+    id: "us-cpsc-tracking-label", kinds: ["children"], where: "US", form: ["cpsc-cpc"], level: "federal",
+    title: B("Children's furniture carries a permanent tracking label", "儿童家具须有永久性追踪标签"),
+    text: B("Every children's product, and its packaging where practicable, carries a visible, permanent tracking label: the manufacturer or importer's name, where and when it was made, and the batch or run.",
+      "每件儿童产品及其包装（在可行时）须有清晰、永久的追踪标签：制造商或进口商名称、生产地点和日期，以及批次或生产批号。"),
+    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会"),
+    proof: P(CPSC_TRACKING, "requires all children’s products to bear distinguishing marks (generally referred to as “tracking labels”) that:"),
+  },
+
+  /* ------------------------------------------------ Furniture: duties at import ------------------------------------------------ */
+  {
+    id: "us-isf-bond", kinds: ["furniture"], where: "US", needs: ["imports"], form: ["cbp-isf", "cbp-301"], level: "federal",
+    title: B("A late or missing ISF is a claim on your bond: $5,000 a violation", "ISF 迟报或漏报即构成保证金违约：每次 5,000 美元"),
+    text: B("The importation bond (19 CFR 113.62) binds the importer to file every ISF in the manner and time the rule sets; a default costs liquidated damages of $5,000 for each violation, paid by the importer and its surety. So each ocean shipment's ISF goes in at least 24 hours before it is loaded abroad, every time.",
+      "进口保证金（19 CFR 113.62）约定进口商须按规定的方式和时间提交每份 ISF；违约须支付每次 5,000 美元的违约赔偿金，由进口商及其担保人承担。因此每批海运货物的 ISF 都须在境外装船前至少 24 小时提交。"),
+    agency: B("U.S. Customs and Border Protection (19 CFR part 113)", "美国海关与边境保护局（19 CFR 第 113 部分）"),
+    proof: P(CFR_113, "the principal and surety (jointly and severally) agree to pay liquidated damages of $5,000 for each violation."),
+  },
+  {
+    id: "us-uflpa", kinds: ["furniture"], where: "US", needs: ["imports"], form: CUSTOMS, level: "federal",
+    title: B("Forced labor: goods from UFLPA-listed entities are presumed barred", "强迫劳动：UFLPA 清单实体的货物被推定禁止入境"),
+    text: B("Under the Uyghur Forced Labor Prevention Act, CBP presumes that goods made by an entity on the UFLPA Entity List are made with forced labor and keeps them out. Before the first order, Odelia checks your factories and their wood, fabric and foam suppliers against the list.",
+      "根据《维吾尔强迫劳动预防法》，CBP 推定 UFLPA 实体清单上的实体所生产的货物使用了强迫劳动，并禁止其入境。首次下单前，Odelia 会对照该清单核查您的工厂及其木材、面料和海绵供应商。"),
+    agency: B("U.S. Department of Homeland Security (Forced Labor Enforcement Task Force)", "美国国土安全部（强迫劳动执法工作组）"),
+    proof: P(UFLPA, "apply a rebuttable presumption that goods mined, produced, or manufactured by entities on the UFLPA Entity List are made with forced labor,"),
+  },
+  {
+    id: "us-232-upholstered", kinds: ["upholstered"], where: "US", needs: ["imports"], form: CUSTOMS, level: "federal",
+    title: B("Section 232: 25 percent on certain upholstered wooden furniture", "232 条款：部分木制软体家具加征 25% 关税"),
+    text: B("Certain upholstered wooden products entering since October 14, 2025 pay a 25 percent Section 232 tariff on top of other duties. The rise to 30 percent for upholstered furniture was moved to January 1, 2027, except for countries with an agreement. Price your landed cost with it.",
+      "自 2025 年 10 月 14 日起入境的部分木制软体产品，在其他关税之外加征 25% 的 232 条款关税。软体家具升至 30% 的时间已推迟至 2027 年 1 月 1 日（已与美国达成协议的国家除外）。核算到岸成本时须计入。"),
+    agency: B("The President (Proclamation 11000), collected by U.S. Customs and Border Protection", "美国总统（第 11000 号公告），由美国海关与边境保护局征收"),
+    proof: P(S232_WOOD, "a 25 percent ad valorem tariff on imports of certain upholstered wooden products, kitchen cabinets, and vanities."),
+  },
+  {
+    id: "us-301-furniture", kinds: ["china"], where: "US", needs: ["imports"], form: CUSTOMS, level: "federal",
+    title: B("Section 301: wooden furniture from China is on List 3", "301 条款：中国产木制家具在清单 3 上"),
+    text: B("If your furniture is made in China, check its HTS codes against Section 301's List 3: its annex names wooden bedroom, kitchen and office furniture, among others. List 3 goods pay an additional 25 percent.",
+      "如果您的家具在中国制造，请对照 301 条款清单 3 核对 HTS 编码：其附件列有木制卧室、厨房和办公家具等。清单 3 商品须额外缴纳 25% 关税。"),
+    agency: B("Office of the U.S. Trade Representative", "美国贸易代表办公室"),
+    proof: P(S301_LIST3, "Furniture (a/than seats) of wood (a/than bentwood), of a kind used in the bedroom"),
+  },
+  {
+    id: "us-301-rate", kinds: ["china"], where: "US", needs: ["imports"], form: CUSTOMS, level: "federal",
+    title: B("Section 301 List 3 goods pay an extra 25 percent", "301 条款清单 3 商品额外缴纳 25%"),
+    text: B("Since May 10, 2019 the additional duty on the September 2018 list of Chinese products (List 3) is 25 percent, paid at entry with the other duties.",
+      "自 2019 年 5 月 10 日起，2018 年 9 月清单（清单 3）上的中国产品附加关税为 25%，在入境时与其他关税一并缴纳。"),
+    agency: B("Office of the U.S. Trade Representative", "美国贸易代表办公室"),
+    proof: P(S301_25, "increasing the rate of additional duty from 10 percent to 25 percent for the products of China covered by the September 2018 action"),
+  },
+  {
+    id: "us-ad-bedroom", kinds: ["cnbedroom"], where: "US", needs: ["imports"], form: CUSTOMS, level: "federal",
+    title: B("Antidumping order on wooden bedroom furniture from China (A-570-890)", "中国木制卧室家具反倾销令（A-570-890）"),
+    text: B("If your bedroom furniture is wooden and made in China, it falls under the antidumping order: a cash deposit is paid at entry, 216.01 percent for exporters without their own rate (the China-wide rate), so Odelia confirms your exporter's rate before you order.",
+      "如果您的卧室家具为木制且在中国制造，即受反倾销令约束：入境时须缴纳现金保证金，没有单独税率的出口商适用 216.01%（中国统一税率），因此 Odelia 会在您下单前核实出口商的税率。"),
+    agency: B("U.S. Department of Commerce, International Trade Administration", "美国商务部国际贸易管理局"),
+    proof: P(AD_WBF, "The product covered by the Order is wooden bedroom furniture from China."),
+  },
+  {
+    id: "us-ad-reimbursement", kinds: ["cnbedroom"], where: "US", needs: ["imports"], form: CUSTOMS, level: "federal",
+    title: B("The importer files a reimbursement certificate before liquidation", "清算前进口商须提交补偿证明"),
+    text: B("For entries under the order, the importer files a certificate that the exporter hasn't reimbursed its antidumping duties, before the entries liquidate; without it Commerce may presume reimbursement and assess double duties.",
+      "对受该命令约束的报关，进口商须在清算前提交出口商未补偿其反倾销税的证明；否则商务部可推定存在补偿并征收双倍反倾销税。"),
+    agency: B("U.S. Department of Commerce, International Trade Administration", "美国商务部国际贸易管理局"),
+    proof: P(AD_WBF, "to file a certificate regarding the reimbursement of antidumping duties prior to liquidation of the relevant entries"),
+  },
+
   /* ------------------------------------------------ Furniture: states ------------------------------------------------ */
+  {
+    id: "ca-prop65-furniture", kinds: ["furniture"], where: "CA", form: ["ca-bhgs-importer", "ca-bhgs-retail", "ca-cdtfa"], level: "state",
+    title: B("Proposition 65: decide whether your furniture needs a warning", "65 号提案：判断家具是否需要警示"),
+    text: B("Furniture can expose people to chemicals on California's Proposition 65 list: formaldehyde from composite wood and coatings, flame retardants in foam and fabric, phthalates in vinyl, PFOA and PFOS in stain-resistant upholstery. The business determines whether a warning is required before selling in California.",
+      "家具可能使人接触加州 65 号提案清单上的化学物质：复合木材和涂料释放的甲醛、海绵和面料中的阻燃剂、乙烯基中的邻苯二甲酸酯，以及防污软体中的 PFOA 和 PFOS。企业须在加州销售前判断是否需要警示。"),
+    agency: B("California Office of Environmental Health Hazard Assessment", "加州环境健康危害评估办公室"),
+    proof: P(P65_FURNITURE, "Proposition 65 requires businesses to determine if they must provide a warning about significant exposure to listed chemicals."),
+  },
+  {
+    id: "us-oh-upholstered", kinds: ["upholstered"], where: "US", except: ["OH"], needs: ["imports"], level: "state",
+    title: B("Selling upholstered furniture into Ohio takes Ohio's registration", "向俄亥俄州销售软体家具须办理该州登记"),
+    text: B("Ohio requires anyone making or wholesaling upholstered furniture sold in Ohio to register with its Division of Industrial Compliance, $50 a year, wherever the business is based. If you sell into Ohio, register before your first sale there.",
+      "俄亥俄州要求在该州销售的软体家具的制造商或批发商向其工业合规处登记，每年 50 美元，无论企业设在何处。如果您向俄亥俄州销售，须在当地首次销售前登记。"),
+    agency: B("Ohio Department of Commerce, Division of Industrial Compliance", "俄亥俄州商务部工业合规处"),
+    proof: P(OH_RULE, "Any person who engages in manufacturing or wholesaling bedding or upholstered furniture that is to be sold or offered for sale in this state;"),
+  },
+
+  /* ------------------------------------------------ Furniture: states (their own pages) ------------------------------------------------ */
   {
     id: "ca-law-label", kinds: ["upholstered"], where: "CA", form: ["ca-bhgs-importer", "ca-bhgs-retail"], level: "state",
     title: B("Every piece carries California's law label", "每件家具须贴加州法定标签"),
@@ -122,6 +244,56 @@ export const KIND_FACTS: KindFact[] = [
       "根据欧盟《通用产品安全法规》（EU）2023/988，欧盟境外制造的家具须有一家设在欧盟境内、对其负责的经济运营商，方可投放欧盟市场，其联系方式须随产品提供。Odelia 会跟进此项，它不是一项申报。"),
     agency: B("European Union (Regulation (EU) 2023/988)", "欧盟（第 2023/988 号法规）"),
     proof: P(GPSR, "A product covered by this Regulation shall not be placed on the market unless there is an economic operator"),
+  },
+  {
+    id: "eu-eudr", kinds: ["furniture"], where: EU27, abroad: true, form: EU_ENTRY, level: "federal",
+    title: B("EU Deforestation Regulation: prove the wood isn't from deforested land", "欧盟《零毁林法规》：证明木材并非来自毁林土地"),
+    text: B("Wood and its derived products, furniture among them, are in scope: any operator or trader placing them on the EU market must be able to prove they don't come from recently deforested land. The Regulation repeals the EU Timber Regulation.",
+      "木材及其衍生产品（包括家具）均在适用范围内：将其投放欧盟市场的任何经营者或贸易商都必须能够证明产品并非来自近期毁林的土地。该法规废止《欧盟木材法规》。"),
+    agency: B("European Commission (Regulation (EU) 2023/1115)", "欧盟委员会（第 2023/1115 号法规）"),
+    proof: P(EUDR, "must be able to prove that the products do not originate from recently deforested land"),
+  },
+  {
+    id: "eu-eudr-dates", kinds: ["furniture"], where: EU27, abroad: true, form: EU_ENTRY, level: "federal",
+    title: B("It applies from 30 December 2026 for large and medium operators", "大中型经营者自 2026 年 12 月 30 日起适用"),
+    text: B("Large and medium operators apply the Deforestation Regulation from 30 December 2026; micro and small operators from 30 June 2027 (or 30 December 2026 if the EU Timber Regulation already covered them).",
+      "大中型经营者自 2026 年 12 月 30 日起适用《零毁林法规》；微型和小型经营者自 2027 年 6 月 30 日起适用（如已受《欧盟木材法规》约束，则自 2026 年 12 月 30 日起）。"),
+    agency: B("European Commission (Regulation (EU) 2023/1115)", "欧盟委员会（第 2023/1115 号法规）"),
+    proof: P(EUDR, "Large and medium operators: 30 December 2026 Micro and small operators: 30 June 2027"),
+  },
+
+  /* ------------------------------------------------ Furniture: Great Britain (track and explain) ------------------------------------------------ */
+  {
+    id: "gb-gpsr-traceability", kinds: ["furniture"], where: "GB", form: ["gb-eori"], level: "federal",
+    title: B("Your name and address on the product or its packaging", "产品或包装上须有您的名称和地址"),
+    text: B("Under Great Britain's General Product Safety Regulations 2005, the producer (a UK importer counts) places only safe products on the market and marks the product or its packaging with its name, address and a product or batch reference.",
+      "根据英国（大不列颠）《2005 年通用产品安全条例》，生产者（包括英国进口商）只能将安全产品投放市场，并在产品或包装上标明其名称、地址以及产品或批次编号。"),
+    agency: B("Office for Product Safety and Standards", "英国产品安全与标准办公室"),
+    proof: P(GB_GPSR, "The producer must also allow for traceability by indicating on the product or its packaging, where reasonable to do so:"),
+  },
+  {
+    id: "gb-timber", kinds: ["furniture"], where: "GB", form: ["gb-eori"], level: "federal",
+    title: B("UK Timber Regulations: due diligence before the first sale", "英国木材法规：首次销售前完成尽职调查"),
+    text: B("The business that first places wooden furniture on the GB market is the operator: it must not place illegally harvested timber there, and applies a due diligence system first.",
+      "首次将木制家具投放英国市场的企业即为经营者：不得投放非法采伐的木材，并须事先实行尽职调查体系。"),
+    agency: B("Office for Product Safety and Standards (for Defra)", "英国产品安全与标准办公室（代表环境、食品和农村事务部）"),
+    proof: P(GB_TIMBER, "Operators must not place illegally harvested timber on the GB market and to avoid doing so must first apply a due diligence system,"),
+  },
+  {
+    id: "gb-fire-cigarette", kinds: ["upholstered"], where: "GB", form: ["gb-eori"], level: "federal",
+    title: B("Upholstery passes the cigarette test", "软体部分须通过香烟测试"),
+    text: B("Under the Furniture and Furnishings (Fire) (Safety) Regulations 1988, upholstered furniture sold in Great Britain includes only upholstery that passes the cigarette test in Schedule 4.",
+      "根据《1988 年家具及陈设（防火）（安全）条例》，在英国销售的软体家具只能使用通过附表 4 香烟测试的软体材料。"),
+    agency: B("UK Furniture and Furnishings (Fire) (Safety) Regulations 1988", "英国《1988 年家具及陈设（防火）（安全）条例》"),
+    proof: P(GB_FIRE_5, "no furniture to which this regulation applies shall include upholstery which does not pass the cigarette test in Part I of Schedule 4"),
+  },
+  {
+    id: "gb-fire-match", kinds: ["upholstered"], where: "GB", form: ["gb-eori"], level: "federal",
+    title: B("Covers pass the match test", "面料须通过火柴测试"),
+    text: B("Upholstered furniture supplied with a cover: the cover's visible parts pass the match test in Schedule 5 (an interliner that passes Schedule 3 can stand in for some cover materials).",
+      "带面料供应的软体家具：面料可见部分须通过附表 5 的火柴测试（部分面料材质可改用通过附表 3 测试的隔层）。"),
+    agency: B("UK Furniture and Furnishings (Fire) (Safety) Regulations 1988", "英国《1988 年家具及陈设（防火）（安全）条例》"),
+    proof: P(GB_FIRE_8, "any visible part of the cover shall pass the match test in Part I of Schedule 5 to these Regulations"),
   },
 
   /* ------------------------------------------------ New York ------------------------------------------------ */
@@ -332,7 +504,9 @@ export const KIND_FACTS: KindFact[] = [
 export function kindsOf(what: string): StoreKind[] {
   if (isFurniture(what)) {
     const n = furnitureNeeds(what);
-    return ["furniture", ...(n.upholstered ? ["upholstered" as const] : []), ...(n.clothingStorage ? ["storage" as const] : [])];
+    const o = furnitureOrigin(what);
+    return ["furniture", ...(n.upholstered ? ["upholstered" as const] : []), ...(n.clothingStorage ? ["storage" as const] : []), ...(n.children ? ["children" as const] : []),
+      ...(o.china ? ["china" as const] : []), ...(o.chinaBedroom ? ["cnbedroom" as const] : [])];
   }
   const w = what.toLowerCase(), out: StoreKind[] = [];
   if (/\b(tea|boba)\b|奶茶|茶饮|茶铺|茶店/.test(w)) out.push("tea");
@@ -342,8 +516,10 @@ export function kindsOf(what: string): StoreKind[] {
   return out;
 }
 
-/** The facts for these kinds of business at these places (the registry's jurisdictions for the address). */
-export function kindFactsAt(kinds: StoreKind[], places: string[]): KindFact[] {
+/** The facts for these kinds of business at these places (the registry's jurisdictions for the address), for a business
+    that does what `have` says (a fact that needs imports isn't stated without it). */
+export function kindFactsAt(kinds: StoreKind[], places: string[], have: Needs = {}): KindFact[] {
   const abroad = !places.includes("US");
-  return KIND_FACTS.filter(k => (Array.isArray(k.where) ? k.where : [k.where]).some(w => places.includes(w)) && (!k.abroad || abroad) && k.kinds.some(x => kinds.includes(x)));
+  return KIND_FACTS.filter(k => (Array.isArray(k.where) ? k.where : [k.where]).some(w => places.includes(w)) && (!k.abroad || abroad) && !(k.except ?? []).some(w => places.includes(w))
+    && (k.needs ?? []).every(n => have[n]) && k.kinds.some(x => kinds.includes(x)));
 }
