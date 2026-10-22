@@ -98,6 +98,7 @@ export async function journeyTests(ok: Ok, eq: Eq) {
     const r = await run({ ws: workspace(), prompt: "Open Moonleaf milk tea in San José, Irvine, NYC and Houston, all by March 2027.", script: [
       () => ask(...cities.map(([c, s]) => ["add_store", { name: `Moonleaf ${c}`, city: c, state: s, planned_open: "2027-03-01" }] as [string, unknown])),
       () => ask(...cities.map(([, , place]) => ["find_official_forms", { business: "milk tea shop", place, hires_staff: true, new_us_company: false, builds_out: true, exterior_sign: true }] as [string, unknown])),
+      () => ask(["plan_markets", { business: "milk tea shop", places: cities.map(c => c[2]), opening: "2027-03-01" }]),
       () => say("Four stores added, each with its own city's permits mapped from the agencies' pages."),
     ] });
     const stores = r.w.stores ?? [];
@@ -110,6 +111,19 @@ export async function journeyTests(ok: Ok, eq: Eq) {
     ok(local(ids[0], /^(sj|scc)-/) && local(ids[1], /^(irv|oc)-/) && local(ids[2], /^nyc-/) && local(ids[3], /^hou-/), "and none of another city's", ids);
     ok(found.flat().every(f => host(f.official_link) !== ""), "every form carries its official link");
     ok(found.flat().filter(f => f.claim).every(f => /^\d{4}-\d{2}-\d{2}$/.test(String(f.info_read_on ?? ""))), "every form stated as required carries the date its agency page was read");
+    // one packet for the four markets (plan_markets, src/plan/packet.ts): shared steps once, the company formed once and
+    // registered in each other state, every step cited with the day its page was read
+    const pk = r.calls.find(c => c.name === "plan_markets")!;
+    const pm = pk.parsed as { formed_in: string; shared_once: string[]; markets: { place: string; steps: string[]; register_as_foreign_company?: string }[]; agency_fees_published: { currency: string; published: number }[]; fees_not_published: number };
+    ok(pk.ok && pm.formed_in === "CA" && pm.shared_once.filter(l => l.startsWith("irs-ss4 |")).length === 1 && !pm.markets.some(m => m.steps.some(l => l.startsWith("irs-ss4 |"))), "the EIN is in the packet once, for all four markets", pm?.shared_once);
+    ok(pm.markets[0].steps.some(l => l.startsWith("ca-llc-1 |")) && !pm.markets.slice(1).some(m => m.steps.some(l => /^(ca-llc-1|ny-dos-1336|tx-205) \|/.test(l))), "the company is formed once, in San José, not again in each state");
+    ok(!pm.markets[0].register_as_foreign_company && !pm.markets[1].register_as_foreign_company && !!pm.markets[2].register_as_foreign_company && !!pm.markets[3].register_as_foreign_company, "a California company registers as a foreign company in New York and Texas", pm.markets.map(m => m.register_as_foreign_company));
+    const steps = [...pm.shared_once, ...pm.markets.flatMap(m => [...m.steps, ...(m.register_as_foreign_company ? [m.register_as_foreign_company] : [])])];
+    ok(steps.every(l => /https:\/\//.test(l)), "every step in the packet carries its agency page", steps.filter(l => !/https:\/\//.test(l)));
+    ok(steps.filter(l => !/confirm with this agency/.test(l)).every(l => /read \d{4}-\d{2}-\d{2}/.test(l)), "every stated step carries the day its page was read; the rest say to confirm with the agency", steps.filter(l => !/read \d{4}/.test(l) && !/confirm/.test(l)));
+    ok(pm.agency_fees_published.length === 1 && pm.agency_fees_published[0].currency === "USD" && pm.fees_not_published > 0, "the published fees are added up in dollars, the unpublished ones counted, never guessed", pm.agency_fees_published);
+    const forms4 = r.calls.filter(c => c.name === "find_official_forms").reduce((n, c) => n + c.out.length, 0);
+    ok(pk.out.length < forms4 / 2, "the packet is less than half the words of four searches", { packet: pk.out.length, searches: forms4 });
     // the instant plan for each city, and what the four openings cost
     const plans = cities.map(([, , place]) => previewPlan("Milk tea shop", place, "2027-03-01", { today: TODAY }));
     ok(plans.every(p => p.apps.every(a => !!a.source?.url)), "every row of every city's plan has a source");

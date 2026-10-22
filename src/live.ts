@@ -40,6 +40,7 @@ import type { Lang } from "./i18n";
 import { anthropicMessage } from "../supabase/functions/_shared/stream.ts";
 import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
 import { dealsInFood, libraryAnswer } from "./plan/preview";
+import { entryPacket, packetForModel } from "./plan/packet";
 import { proofCurrent } from "./plan/ask";
 import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy } from "./sources";
 import { STAFF_LANGS, staffLanguageCheck, staffLanguages } from "./staff";
@@ -170,7 +171,7 @@ export async function runTool(tools: Tool[], u: Block): Promise<ToolResult> {
 /** Tools that only look things up. When the model asks for several in one round, they run at the same time; anything
  *  that changes the workspace runs on its own, in the order the model asked, so a lookup after a change sees it. */
 export const READ_ONLY = new Set(["find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "check_progress", "address_rules",
-  "inspection_guide", "city_records", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments", "load_tools"]);
+  "inspection_guide", "city_records", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments", "load_tools", "plan_markets"]);
 /** Every tool the model asked for in one round, results in its order: a run of lookups together, everything else one by one. */
 export async function runAll<R>(uses: Block[], one: (u: Block) => Promise<R>): Promise<R[]> {
   const out: R[] = [];
@@ -752,6 +753,25 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             : list.length ? "Check the agency pages for anything local not listed (signage, alcohol, outdoor seating)." : "Nothing in the library for this. Research the agency's official page.",
           library_size: FORMS.length,
         };
+      },
+    },
+    {
+      name: "plan_markets",
+      description: "One filing-ready packet for entering several markets at once (2 to 12 cities, in the US or abroad): every market's steps from Placetta's registry side by side, the steps they share filed once (an EIN), the company formed in the first US market and registered in each other state, each step with its agency page and the day it was read, the fees agencies publish by currency, the ones they don't, and Placetta's price. Use it instead of one find_official_forms per city when a request covers several places.",
+      inputSchema: { type: "object", properties: {
+        business: { type: "string", description: "What the business does, e.g. 'milk tea shop'" },
+        places: { type: "array", items: { type: "string" }, minItems: 2, maxItems: 12, description: "Each market as city and state or country, e.g. 'Irvine, CA', 'Mexico City, Mexico'" },
+        opening: { type: "string", description: "Target opening, YYYY-MM-DD, if known" },
+        company: { type: "string", description: "The company's legal name if it already exists (then nothing is formed)" },
+      }, required: ["business", "places"] },
+      execute(i) {
+        const places = arr(i.places).map(v => str(v, 120)).filter(Boolean);
+        if (places.length < 2) throw new Error("Give two or more places; for one, use find_official_forms.");
+        const opening = str(i.opening);
+        if (opening && !isDate(opening)) throw new Error(`opening "${opening.slice(0, 40)}" isn't a real date. Use YYYY-MM-DD.`);
+        S("searching", L(`Planning ${places.length} markets side by side`, `同时规划 ${places.length} 个市场`));
+        mark();
+        return packetForModel(entryPacket(str(i.business, 120) || get().business.en, places, { opening: opening || undefined, entity: str(i.company, 160) || undefined, today: daysFromNow(0) }), lang);
       },
     },
     {

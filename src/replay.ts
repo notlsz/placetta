@@ -41,6 +41,7 @@ const safe = (s: unknown, n = 80) => clip(redact(String(s ?? "")), n);
 /** What each tool does, in the words a person would use. */
 const WORDS: Record<string, Bi> = {
   find_official_forms: B("Looked up the official forms", "查找官方表格"),
+  plan_markets: B("Planned several markets side by side", "同时规划多个市场"),
   prepare_application: B("Prepared an application", "准备申请"),
   fill_fields: B("Filled form lines", "填写表格"),
   update_application: B("Updated an application", "更新申请"),
@@ -100,7 +101,7 @@ export function toolWords(name: string): Bi {
   return B(h.charAt(0).toUpperCase() + h.slice(1), `使用工具：${h}`);
 }
 const STATE: Record<string, OrbState> = {
-  find_official_forms: "searching", network_lessons: "searching", memory_search: "searching", search_past_chats: "searching", city_records: "searching",
+  find_official_forms: "searching", plan_markets: "searching", network_lessons: "searching", memory_search: "searching", search_past_chats: "searching", city_records: "searching",
   check_progress: "searching", search_email: "searching", read_email: "searching", find_files: "searching", address_rules: "searching", inspection_guide: "searching", read_comments: "searching",
   draft_message: "composing", draft_document: "composing", send_email: "composing", request_filing_approval: "composing",
   set_plan: "weaving", split_job: "weaving", hand_off: "shaping", skill_save: "weaving", skill_read: "weaving",

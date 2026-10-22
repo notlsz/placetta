@@ -159,7 +159,7 @@ export function familyReport(w: Workspace, parents: string[], res: ChildResult[]
 }
 /** Plain SMS only reads and drafts: these tools, and no other. */
 const PLAIN_SMS_MAY = new Set([
-  "find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "show_licenses", "city_records", "check_progress",
+  "find_official_forms", "plan_markets", "network_lessons", "skill_read", "memory_search", "search_past_chats", "show_licenses", "city_records", "check_progress",
   "address_rules", "inspection_guide", "search_email", "read_email", "find_files", "get_income", "review_documents",
   "draft_message", "send_email", "draft_document",
 ]);

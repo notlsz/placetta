@@ -771,6 +771,7 @@ async function toolMatrix() {
     script: [
       () => askAll(
         ["find_official_forms", { business: "milk tea shop", place: "Flushing, NY" }], bad("find_official_forms", { search: "zzqx-no-such-form-99" }),
+        ["plan_markets", { business: "milk tea shop", places: ["Flushing, NY", "Houston, TX"] }], bad("plan_markets", { business: "milk tea shop", places: ["Flushing, NY"], opening: "2027-02-31" }),
         ["prepare_application", { official_form_id: "irs-ss4" }], bad("prepare_application", { name: "Sign permit" }),
         ["fill_fields", { application_id: "a1", fields: [{ label: "Business name", value: "Lucky Leaf" }] }], bad("fill_fields", { application_id: "a1", fields: "not a list" }),
         ["update_application", { application_id: "a1", next_step: "Upload the lease" }], bad("update_application", { application_id: "a1", status: "approved" }),

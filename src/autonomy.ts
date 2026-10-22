@@ -48,7 +48,7 @@ export const AUTONOMY: { id: Autonomy; label: Bi; sub: Bi }[] = [
 /* ------------------------------------------------------------------ the tools, sorted */
 
 /** Reading and looking things up: never changes the workspace. */
-const READ = new Set(["find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "show_licenses", "city_records", "check_progress",
+const READ = new Set(["find_official_forms", "plan_markets", "network_lessons", "skill_read", "memory_search", "search_past_chats", "show_licenses", "city_records", "check_progress",
   "address_rules", "inspection_guide", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments"]);
 /** Her own plan and notes for a job, and handing a job's parts to the stores' bots (split_job): each store's bot then
  *  works under these same controls, so under Ask me first its changes wait on its own card. */

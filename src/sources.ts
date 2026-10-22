@@ -35,6 +35,11 @@ export function usedBy(tool: string, input: Record<string, unknown>, out: unknow
   switch (tool) {
     case "find_official_forms":
       return list(o.forms).flatMap(x => formOf(obj(x).official_form_id));
+    case "plan_markets": {
+      // each step is a line that starts with its registry id
+      const lines = [...list(o.shared_once), ...list(o.markets).flatMap(m => [...list(obj(m).steps), obj(m).register_as_foreign_company])];
+      return lines.filter((l): l is string => typeof l === "string").flatMap(l => formOf(l.split(" | ")[0]));
+    }
     case "prepare_application":
       return [...formOf(input.official_form_id), ...appForm(o.application_id)];
     case "fill_fields": case "update_application": case "request_filing_approval":

@@ -297,7 +297,7 @@ async function previewRefine() {
   const r = await agent({
     ws, svc: account().svc, prompt: "Start the plan: verify every permit and fill what you can.",
     script: [
-      () => ask(["find_official_forms", { business: "milk tea shop", place: "Flushing, NY" }]),
+      () => ask(["find_official_forms", { business: "milk tea shop", place: "Flushing, NY" }], ["plan_markets", { business: "milk tea shop", places: ["Flushing, NY", "Irvine, CA"] }]),
       () => ask(
         ["prepare_application", { official_form_id: "nyc-fse", store_id: "flushing", fields: [{ label: "Premises address", value: "136-20 Roosevelt Ave, Flushing, NY 11354" }] }],
         ["fill_fields", { application_id: ss4.id, fields: [{ label: "1", value: "Lucky Leaf Tea LLC" }] }],
