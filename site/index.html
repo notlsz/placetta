@@ -2790,15 +2790,13 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 @media (min-width:1024px){.seg95{margin-bottom:32px}}
 @media (max-width:767px){.seg95{display:flex;flex-wrap:wrap;width:100%;overflow:visible}.seg95 button{flex:1 1 auto;padding:8px 10px;font-size:13px}}
 /* folded panels sit flush under their tabs */
-#how .p95,#diff .p95,#case .p95,#pricing .p95,#backers .p95{margin-top:0!important;padding-top:0}
+#how .p95,#pricing .p95{margin-top:0!important;padding-top:0}
 #how .p95h.h2{font-size:24px;line-height:1.2;letter-spacing:-.24px}
 @media (min-width:1024px){#how .p95h.h2{font-size:28px;letter-spacing:-.28px}}
 #how .sh + .seg95{margin-top:8px}
 #how #teammate .sh{margin-bottom:24px}
 #how #portal .ptrow{margin-top:0}
 #how #itl .irow{margin-top:0}
-#cost .d95s{margin-top:10px;font-size:15px;line-height:1.45;color:var(--ink2);max-width:320px}
-#diff #cost .dl{gap:28px}
 
 /* ---------- folds: "Show all" in the page's own pill button; the list keeps its first few ---------- */
 .more95{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:9px 16px;border:0;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(15,27,51,.08),inset 0 0 0 1px rgba(15,27,51,.06);font-size:14px;font-weight:500;color:var(--ink);justify-self:start;align-self:start}
@@ -2816,13 +2814,13 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 
 /* ---------- one rhythm: 96px between sections on desktop, 64px on phones; security sits closer under trust ---------- */
 @media (min-width:1024px){
-  #diff,#case,#industries,#how,#agencies,#cn,#trust,#backers,#franchise,#pricing,#faq,#together{margin-top:96px!important}
+  #diff,#case,#industries,#cost,#how,#agencies,#cn,#trust,#backers,#experts,#franchise,#pricing,#faq,#together{margin-top:96px!important}
   #security{margin-top:72px!important}
   #backers{padding-top:0}
   .ctas{padding:64px 16px 72px}
 }
 @media (max-width:1023px){
-  #diff,#case,#industries,#how,#agencies,#cn,#trust,#backers,#franchise,#pricing,#faq,#together{margin-top:64px!important}
+  #diff,#case,#industries,#cost,#how,#agencies,#cn,#trust,#backers,#experts,#franchise,#pricing,#faq,#together{margin-top:64px!important}
   #security{margin-top:56px!important}
   #backers{padding-top:0}
   .ctas{padding:56px 24px 72px}
@@ -2831,8 +2829,6 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 @media (max-width:767px){.sc95b>div{min-height:104px;padding:16px 8px}.sc95lists{margin-top:24px}.sc95lists li{padding:8px 0;font-size:15px;line-height:22px}}
 
 /* ---------- fit: blocks that now open under a tab lose the gap they had as stand-alone blocks ---------- */
-#case #c95a .tssec{margin-top:0}
-#case #c95b .cshd.cshd{margin-top:0}
 #pricing #p95a .pmath{margin-top:0}
 #pricing .pr95{margin-top:48px}
 @media (max-width:1023px){#pricing .pr95{margin-top:32px}}
@@ -3009,8 +3005,7 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 <!-- ======================= BEFORE / AFTER: the team you'd hire, or Odelia ======================= -->
 <section class="ox mt160 rv" data-rv="up" id="diff" aria-labelledby="diffH">
   <div class="ctr">
-    <div class="seg95" role="tablist" id="d95" aria-label="Two ways to see it" data-i18n-aria="d95.aria"><button type="button" role="tab" id="d95t0" aria-selected="true" aria-controls="d95a" tabindex="0" data-i18n="d95.t1">Who you'd hire</button><button type="button" role="tab" id="d95t1" aria-selected="false" aria-controls="cost" tabindex="-1" data-i18n="d95.t2">What waiting costs</button></div>
-    <div class="drow p95" id="d95a" role="tabpanel" aria-labelledby="d95t0">
+    <div class="drow">
       <div class="dl">
         <h2 class="t28" id="diffH" data-i18n="diff.h">Four people on the clock, and still no permit</h2>
         <div>
@@ -3029,13 +3024,6 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
         </div>
         <p class="dsrc" data-i18n="diff.src">Sources: <a href="https://permitplace.com/permit-expediter-cost-guide/" target="_blank" rel="noopener">PermitPlace</a> (expediter, restaurant permits), <a href="https://clio.com/resources/legal-trends/compare-lawyer-rates/" target="_blank" rel="noopener">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href="https://www.bls.gov/oes/current/oes111021.htm" target="_blank" rel="noopener">operations managers</a> (May 2023) and <a href="https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm" target="_blank" rel="noopener">bookkeepers</a> (May 2025)</p>
       </div>
-    </div>
-    <div class="drow p95" id="cost" role="tabpanel" aria-labelledby="d95t1" hidden>
-      <div class="dl cbig"><h3 class="t28" id="costH" data-i18n="cost.h">Permits set your opening date.</h3><p class="d95s" data-i18n="cost.sub">One permit running late moves the whole opening, and the rules keep changing while you wait.</p>
-        <div class="cbn"><b data-i18n="cost.big">3–6 mo</b><span data-i18n="cost.bigs">The typical permit phase for a new restaurant. One late approval holds up every step that depends on it.</span></div>
-        <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
-      </div>
-      <div class="dcard wcard" id="wcard"></div>
     </div>
   </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><g id="sil" fill="#D3D9E3"><circle cx="15" cy="9" r="8.6"/><path d="M5.5 21.5h19a5.5 5.5 0 0 1 5.5 5.5v21.5a4.5 4.5 0 0 1-4.5 4.5h-1.6L22 87.2a2.2 2.2 0 0 1-2.2 2.1h-9.6A2.2 2.2 0 0 1 8 87.2L6.1 53H4.5A4.5 4.5 0 0 1 0 48.5V27a5.5 5.5 0 0 1 5.5-5.5z"/></g></defs></svg>
@@ -3091,15 +3079,11 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
       <div role="listitem"><b>2</b><span>languages for every plan and dashboard: English and Chinese</span></div>
       <div role="listitem"><b>0</b><span>filings sent without your approval</span></div>
     </div>
-    <div class="seg95" role="tablist" id="c95" aria-label="Customers" data-i18n-aria="c95.aria"><button type="button" role="tab" id="c95t0" aria-selected="true" aria-controls="c95a" tabindex="0" data-i18n="ts.tabs">Customer stories</button><button type="button" role="tab" id="c95t1" aria-selected="false" aria-controls="c95b" tabindex="-1" data-i18n="bel.cases">Case studies</button></div>
-    <div class="p95" id="c95a" role="tabpanel" aria-labelledby="c95t0">
     <div class="tssec" id="tsSec">
       <h3 class="tsh3" id="tsH" data-i18n="ts.h">Don't just take our word for it.</h3>
       <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
       <div class="tsgrid" id="tsGrid" role="tabpanel" tabindex="0"></div>
     </div>
-    </div>
-    <div class="p95" id="c95b" role="tabpanel" aria-labelledby="c95t1" hidden>
     <div class="cshd">
       <h3 class="h3" data-i18n="bel.cases">Case studies</h3>
       <div class="tstabs cstabs" role="tablist" id="caseTabs" aria-label="Case studies" data-i18n-aria="bel.cases"></div>
@@ -3142,7 +3126,6 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
         <p class="belsrc" id="teaSrc"></p>
       </div>
     </div>
-    </div>
   </div>
 </section>
 
@@ -3163,6 +3146,20 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 </section>
 
 
+
+
+<section class="sec rv" data-rv="up" id="cost" aria-labelledby="costH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="costH" data-i18n="cost.h">Permits set your opening date.</h2><p class="sub" data-i18n="cost.sub">One permit running late moves the whole opening, and the rules keep changing while you wait.</p></div>
+    <div class="drow">
+      <div class="dl cbig">
+        <div class="cbn"><b data-i18n="cost.big">3–6 mo</b><span data-i18n="cost.bigs">The typical permit phase for a new restaurant. One late approval holds up every step that depends on it.</span></div>
+        <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
+      </div>
+      <div class="dcard wcard" id="wcard"></div>
+    </div>
+  </div>
+</section>
 
 
 <!-- ======================= HOW IT WORKS: map, approve and file, keep current ======================= -->
@@ -3466,8 +3463,6 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 <!-- ======================= BACKED BY OPERATORS ======================= -->
 <section class="mt160 rv" data-rv="up" id="backers" aria-labelledby="bkH">
   <div class="ctr">
-    <div class="seg95" role="tablist" id="bk95" aria-label="People behind Placetta" data-i18n-aria="bk95.aria"><button type="button" role="tab" id="bk95t0" aria-selected="true" aria-controls="bk95a" tabindex="0" data-i18n="bk95.t1">Our backers</button><button type="button" role="tab" id="bk95t1" aria-selected="false" aria-controls="experts" tabindex="-1" data-i18n="bk95.t2">Our experts</button></div>
-    <div class="p95" id="bk95a" role="tabpanel" aria-labelledby="bk95t0">
     <p class="t28 bkh" id="bkH" data-i18n="bk.h">Backed by operators from</p>
     <ul class="bkg bkt fold" id="bkG"></ul>
     <button type="button" class="bkmore" id="bkMore" aria-controls="bkG" aria-expanded="false"><span data-i18n="bk.more">Show all</span><i aria-hidden="true"></i></button>
@@ -3476,14 +3471,17 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
       <p class="invl" id="invL" data-i18n="inv.l">The brands we serve are backed by</p>
       <div class="invr" id="invR"></div>
     </div>
-      </div>
-    <div class="p95" id="experts" role="tabpanel" aria-labelledby="bk95t1" hidden>
+  </div>
+</section>
+
+<!-- ======================= EXPERTS ======================= -->
+<section class="mt160 rv" data-rv="up" id="experts" aria-labelledby="xpH">
+  <div class="ctr">
     <p class="t28 xph" id="xpH" data-i18n="xp.h">Our experts previously worked at:</p>
     <div class="xpwall" aria-hidden="true"><canvas id="xpWall"></canvas></div>
     <div class="xpart" id="xpArt" aria-label="Placetta advisors" data-i18n-aria="xp.ppl"></div>
     <button type="button" class="xpmore" id="xpMore" aria-expanded="false" aria-controls="xpArt">Show all</button>
     <p class="bknote" data-i18n="xp.note">Our advisors previously worked at these organizations. The organizations are not affiliated with Placetta and do not endorse it.</p>
-      </div>
   </div>
 </section>
 
@@ -3909,14 +3907,10 @@ Object.assign(T.zh, {"map.ccnt": "{m}：我们的表格库中有市县级许可�
 /* land95 (Oct 21): the trust and security sections, and the folds and tabs that shorten the page */
 Object.assign(T.en, {"sc.h1": "Enterprise security", "sc.h2": "with every step on the record", "sc.b1": "SOC 2 Type I", "sc.b1s": "In progress", "sc.b2": "SAML 2.0 SSO", "sc.b2s": "Rolling out", "sc.b3": "SCIM 2.0", "sc.b3s": "Rolling out", "sc.l1": "Owner, admin, member and viewer roles, enforced by the database", "sc.l2": "SAML 2.0 single sign-on, plus Google Workspace, Microsoft Entra ID and OpenID Connect sign-in", "sc.l3": "Single sign-on required for everyone at your verified email domain", "sc.l4": "SCIM 2.0 provisioning for users and groups", "sc.r1": "An append-only audit trail, exportable as CSV", "sc.r2": "Each portal filing runs in its own new browser session, with its temporary files deleted after", "sc.r3": "Nothing filed or paid without your approval", "sc.r4": "Every requirement linked to its official source", "sc.note": "Roles, single sign-on, SCIM and the audit trail are rolling out now. Our Trust Center shows where each control stands."});
 Object.assign(T.zh, {"sc.h1": "企业级安全", "sc.h2": "每一步都有据可查", "sc.b1": "SOC 2 Type I", "sc.b1s": "进行中", "sc.b2": "SAML 2.0 单点登录", "sc.b2s": "陆续上线", "sc.b3": "SCIM 2.0", "sc.b3s": "陆续上线", "sc.l1": "所有者、管理员、成员和查看者四种角色，由数据库强制执行", "sc.l2": "SAML 2.0 单点登录，并支持 Google Workspace、Microsoft Entra ID 和 OpenID Connect 登录", "sc.l3": "可要求您已验证邮箱域名下的所有人使用单点登录", "sc.l4": "通过 SCIM 2.0 开通和停用用户与用户组", "sc.r1": "只增不改的审计记录，可导出为 CSV", "sc.r2": "每次在政府网站上的申报都在全新的浏览器会话中进行，临时文件随后删除", "sc.r3": "未经您批准，不提交、不付款", "sc.r4": "每项要求都附官方来源链接", "sc.note": "角色、单点登录、SCIM 和审计记录正在陆续上线。信任中心列出每项控制的进展。"});
-Object.assign(T.en, {"d95.aria": "Two ways to see it", "d95.t1": "Who you'd hire", "d95.t2": "What waiting costs", "h95.aria": "What Odelia does", "h95.t1": "Maps and files", "h95.t2": "Joins your team", "h95.t3": "Works in portals", "h95.t4": "Asks first"});
-Object.assign(T.zh, {"d95.aria": "两种角度", "d95.t1": "您原本要请的人", "d95.t2": "等待的代价", "h95.aria": "Odelia 的工作", "h95.t1": "梳理与申报", "h95.t2": "加入您的团队", "h95.t3": "在政府网站上办理", "h95.t4": "先问再办"});
-Object.assign(T.en, {"c95.aria": "Customers"});
-Object.assign(T.zh, {"c95.aria": "客户"});
+Object.assign(T.en, {"h95.aria": "What Odelia does", "h95.t1": "Maps and files", "h95.t2": "Joins your team", "h95.t3": "Works in portals", "h95.t4": "Asks first"});
+Object.assign(T.zh, {"h95.aria": "Odelia 的工作", "h95.t1": "梳理与申报", "h95.t2": "加入您的团队", "h95.t3": "在政府网站上办理", "h95.t4": "先问再办"});
 Object.assign(T.en, {"p95.aria": "Why it pays", "p95.t2": "Three ways to open", "f95.all": "Show all {n} questions", "f95.less": "Show fewer", "m95.more": "Show deadlines and all markets", "m95.less": "Hide deadlines and markets", "in95.all": "Show all {n} industries", "in95.less": "Show fewer"});
 Object.assign(T.zh, {"p95.aria": "为什么划算", "p95.t2": "三种开店方式", "f95.all": "显示全部 {n} 个问题", "f95.less": "收起", "m95.more": "查看截止日期和全部市场", "m95.less": "收起截止日期和市场", "in95.all": "显示全部 {n} 个行业", "in95.less": "收起"});
-Object.assign(T.en, {"bk95.aria": "People behind Placetta", "bk95.t1": "Our backers", "bk95.t2": "Our experts"});
-Object.assign(T.zh, {"bk95.aria": "快哉背后的人", "bk95.t1": "我们的投资人", "bk95.t2": "我们的专家"});
 Object.assign(T.en, {"h95.t5": "Tracks rule changes"});
 Object.assign(T.zh, {"h95.t5": "追踪规则变化"});
 Object.assign(T.en, {"g95.all": "Show all {n}", "g95.less": "Show fewer", "ag95.all": "Show all {n} regions", "calc95.open": "Try it with your rent", "calc95.less": "Hide the calculator"});
@@ -4401,7 +4395,7 @@ const valid = {
 };
 function contactOk(){
   if (Q.contact === "wechat") return /^[A-Za-z0-9_+\-]{5,30}$/.test(Q.wechat.trim());
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(Q.email.trim());
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2}$/.test(Q.email.trim());
 }
 function chips(key, arr){ return `<div class="qchips" role="group">${arr.map(a => { const v = Array.isArray(a) ? a[0] : a; const lab = Array.isArray(a) ? (a.length === 2 ? a[L()] : a[1 + L()]) : a; return `<button type="button" data-k="${key}" data-v="${esc(v)}" aria-pressed="${Q[key] === v}">${lab}</button>`; }).join("")}</div>`; }
 
@@ -5968,9 +5962,6 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
     list.addEventListener("keydown", e => { const d = {ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1}[e.key]; if (!d) return; e.preventDefault();
       const tabs = [...list.querySelectorAll('[role="tab"]')], k = tabs.indexOf(document.activeElement); pick(list, tabs[(k + d + tabs.length) % tabs.length], true); });
   });
-  // customers: with no quotes to show (PROOF.testimonials off), no tabs, just the case studies
-  const ts = document.getElementById("tsGrid"), cs = document.getElementById("c95");
-  if (cs && ts && ts.hidden) { cs.hidden = true; document.getElementById("c95a").hidden = true; document.getElementById("c95b").hidden = false; }
 
   /* folds: a long list shows its first few, and a button opens the rest. The CSS decides where a fold applies
      (some only on phones); the button hides itself where nothing is folded */
