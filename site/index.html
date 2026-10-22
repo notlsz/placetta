@@ -2684,6 +2684,12 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 .fuc li b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
 .fuc li a{color:var(--ink2);text-decoration:underline;text-underline-offset:2px;font-size:12px}
 .funote{margin-top:18px;font-size:12px;color:var(--muted)}
+
+/* demo: shorter frame, value up front (Oct 21) */
+@media (min-width:768px){.vcard{aspect-ratio:auto;padding:24px 16px 56px}.vdemo .arow{padding-block:4px}.vdemo .alist{padding-block:12px 14px}}
+@media (max-width:767px){.vcard{aspect-ratio:auto;padding:16px 12px 52px}.vdemo #appRows .arow:nth-child(n+6){display:none}.vdemo .ahead em{font-size:12px}}
+/* market tracker: shorter on phones (Oct 21) */
+@media (max-width:767px){#monitor .mndone,#monitor .mnst,#monitor .mnside .mnsc:not(.mnsc2){display:none}#monitor .mnls>*:nth-child(n+5){display:none}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3810,7 +3816,7 @@ document.getElementById("lBtn").addEventListener("click", e => { const m = docum
 /* ============ video-style sample plan ============ */
 const DUR = 18; let vt = 6, vPlaying = !RM, vVisible = false, vLast = 0;
 /* the intro runs on negative time: the line types itself (-INTRO to -INTRO+TYPE), then the rows land one by one with their dates */
-const INTRO = 4.4, TYPE = 2, vSeen = {v: false};
+const INTRO = 1.8, TYPE = .8, vSeen = {v: false}, VSPD = 1.8;
 const W0 = Date.UTC(2026, 10, 16); // week 1 of the sample plan starts Mon Nov 16, 2026, so week 16 ends in Mar 2027
 function wkDates(w){ const a = new Date(W0 + (w[0] - 1) * 6048e5), b = new Date(W0 + (w[1] * 7 - 1) * 864e5), zh = lang === "zh";
   if (zh) return `${a.getUTCMonth() + 1}月${a.getUTCDate()}日–${b.getUTCMonth() !== a.getUTCMonth() ? (b.getUTCMonth() + 1) + "月" : ""}${b.getUTCDate()}日`;
@@ -3840,7 +3846,7 @@ function paintApp(){
   if (el){ const n = vt >= 0 || vt < -INTRO ? ask.length : Math.min(ask.length, Math.round(ask.length * it / TYPE));
     if (el.textContent.length !== n || el.textContent !== ask.slice(0, n)) el.textContent = ask.slice(0, n);
     el.parentNode.classList.toggle("typing", vt < 0 && it < TYPE + .4); }
-  PLAN.forEach((r,k) => { const on = vt >= 0 || vt + INTRO >= TYPE + .3 + k * .22; const row = document.getElementById("ar"+k), g = document.getElementById("gb"+k);
+  PLAN.forEach((r,k) => { const on = vt >= 0 || vt + INTRO >= TYPE + .15 + k * .09; const row = document.getElementById("ar"+k), g = document.getElementById("gb"+k);
     if (row) row.classList.toggle("pre", !on); if (g) g.classList.toggle("pre", !on); });
   PLAN.forEach((r,k) => { const s = status(r, vt); if (s === "d") done++;
     const p = document.getElementById("ap"+k); if (!p) return; if (p.dataset.s !== s){ p.dataset.s = s; p.className = "asx "+s; p.textContent = t("st."+s); document.getElementById("as"+k).className = "ast "+s; }
@@ -3865,7 +3871,7 @@ function paintApp(){
   document.getElementById("vBar").style.width = ((Math.min(vt, DUR) + INTRO) / (DUR + INTRO) * 100) + "%";
 }
 function vLoop(ts){
-  if (vPlaying && vVisible){ if (vLast) { vt += (ts - vLast) / 1000; if (vt > DUR + 2.5) vt = -INTRO; } vLast = ts; paintApp(); } else vLast = 0;
+  if (vPlaying && vVisible){ if (vLast) { vt += (ts - vLast) / 1000 * (vt < 0 ? 1 : VSPD); if (vt > DUR + 3) vt = -INTRO; } vLast = ts; paintApp(); } else vLast = 0;
   requestAnimationFrame(vLoop);
 }
 function setPlay(p){ vPlaying = p; const ic = document.getElementById("vIcon"), b = document.getElementById("vPlay");
@@ -4130,7 +4136,7 @@ const io = new IntersectionObserver(es => es.forEach(e => {
 }), {threshold:0, rootMargin:"0px 0px -4% 0px"});
 document.querySelectorAll(".rv").forEach(el => { if (!RM && el.getBoundingClientRect().top > innerHeight) { el.classList.add("pre"); io.observe(el); } });
 // the finished plan is the still frame; the first time it scrolls into view (motion allowed) it plays from the typed line
-new IntersectionObserver(es => es.forEach(e => { vVisible = e.isIntersecting; if (vVisible && !vSeen.v){ vSeen.v = true; if (vPlaying){ vt = -INTRO; paintApp(); } } })).observe(document.getElementById("vcard"));
+new IntersectionObserver(es => es.forEach(e => { vVisible = e.isIntersecting; if (vVisible && !vSeen.v){ vSeen.v = true; if (vPlaying){ vt = 0; paintApp(); } } })).observe(document.getElementById("vcard"));
 
 /* ============ sample-plan links ============ */
 document.addEventListener("click", e => { if (e.target.closest('a[data-sec="sample"]')) { track("sample_plan_click", {}); vt = -INTRO; setPlay(true); } });
