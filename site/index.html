@@ -2887,6 +2887,111 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 /* final call to action: devin.ai sets its closing line in two lines at about 64px */
 @media (min-width:1024px){.ctas .ctah,.ctas p.ctah{font-size:clamp(40px,4.4vw,64px)}}
 /* /land95:css */
+/* phone95:css (Oct 21): the phone pass. Every tap target is 44px, reading text is 16px, nothing fixed sits on the
+   page while you read, tab bars that run past the screen say so, and the menu and language sit one tap away */
+.mnb,.msheet{display:none}
+@media (max-width:1023px){
+  .mnb{display:grid;place-items:center;width:44px;height:44px;flex:none;border:0;border-radius:10px;background:none;color:#fff;transition:color .3s}
+  .hdr.light .mnb{color:var(--ink)}
+  .mnb path{transition:transform .25s;transform-origin:10px 10px}
+  .mnb[aria-expanded="true"] .mn1{transform:translateY(3px) rotate(45deg)}
+  .mnb[aria-expanded="true"] .mn2{transform:translateY(-3px) rotate(-45deg)}
+  .hwrap{flex-direction:column;align-items:center;gap:8px;transition:transform .3s cubic-bezier(.16,1,.3,1)}
+  .msheet:not([hidden]){pointer-events:auto;display:flex;flex-direction:column;gap:16px;width:100%;padding:12px 16px 16px;border-radius:16px;background:rgba(255,255,255,.97);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 18px 50px rgba(10,23,48,.22);animation:pop .25s cubic-bezier(.16,1,.3,1)}
+  .msheet nav{display:flex;flex-direction:column}
+  .msheet nav a{display:flex;align-items:center;min-height:48px;font-size:18px;letter-spacing:-.2px;color:var(--ink);text-decoration:none}
+  .msheet .mslang{gap:8px;color:var(--ink)}
+  .msheet .mslang button{flex:1;min-height:44px;padding:0 12px;border-radius:10px;font-size:15px;opacity:1;background:var(--card);color:var(--ink2)}
+  .msheet .mslang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .msheet>.btn{min-height:48px;font-size:16px}
+  /* hidden while you read down the page, back as soon as you scroll up */
+  html.p95hide .hwrap{transform:translateY(calc(-100% - 24px - env(safe-area-inset-top,0px)))}
+  html.p95hide .mbar{transform:translateY(110%)!important;visibility:hidden!important;transition:transform .3s,visibility 0s .3s!important}
+  html{scroll-padding-top:88px}
+}
+@media (max-width:767px){
+  /* nav: the language that is not showing, one tap; the full pair is in the menu */
+  .hdr{padding:4px 4px 4px 6px}
+  .hdr .right{gap:2px}
+  .hdr .lgt>span,.hdr .lgt>button[aria-pressed="true"]{display:none}
+  .hdr .lgt>button{min-width:44px;min-height:44px;padding:0 8px;font-size:15px;opacity:.9}
+  .hdr .login{min-height:44px;display:inline-flex;align-items:center;font-size:15px;padding:0 14px}
+
+  /* tap targets: 44px */
+  .btn,.more95,.seg95 button,.bkmore,.mpddb{min-height:44px}
+  .btn{font-size:15px}
+  .starter{padding:4px 4px 4px 14px}
+  .starter input{padding:12px 0}
+  .vctl button{width:44px;height:44px}
+  .vctl{right:6px;bottom:14px;gap:0}
+  .howtry,#hBk,.sc95a a{min-height:44px;display:inline-flex;align-items:center}
+  .hero .hbtn2,.hero a[data-open],.hero .hlink{min-height:44px;display:inline-flex;align-items:center}
+  .xpmore{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:16px;padding:0 16px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(15,27,51,.08),inset 0 0 0 1px rgba(15,27,51,.06);font-size:14px;font-weight:500;color:var(--ink);text-decoration:none}
+  .xpmore::after{content:"";width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translate(-1px,-2px);transition:transform .2s}
+  .xpmore[aria-expanded="true"]::after{transform:rotate(225deg) translate(-1px,-1px)}
+  .flinks{font-size:15px;gap:24px}
+  .flinks .col{gap:0}
+  .flinks a,.flinks button{min-height:44px;display:inline-flex;align-items:center}
+  #pricing .psrc a,#pricing p a{padding-block:12px;margin-block:-12px}
+
+  /* reading text: 16px; sources, notes and mock screens keep their small size */
+  .hsub{font-size:16px!important}
+  .insub,.cnlp,#pricing .pmsub{font-size:16px!important;line-height:1.5!important}
+  .nproof .npc span,#diff .ds span{font-size:15px!important}
+  .sc95lists li{font-size:16px!important}
+  #franchise .frcap{font-size:16px!important}
+  #pricing .pms span,#pricing .pn{font-size:15px!important}
+  #together .chn{font-size:15px!important}
+  #mpinfo{font-size:15px!important}
+  #mpddq{font-size:16px!important}
+
+  .stalt a,.wtabs button,.mptabs button,#lBtn{min-height:44px}
+  .stalt a{display:inline-flex;align-items:center}
+  .stnote a{display:inline-block;padding-block:12px;margin-block:-12px}
+  .flinks a,.flinks button{min-width:44px}
+  .feat .fct p,.faqcta p{font-size:16px!important}
+  #caseSt span,#cost .ds span,.plist li p,#pfRow span{font-size:15px!important}
+  .hnote,.hero .badge p{font-size:14px!important}
+  /* trust: one row per promise, its mark beside it */
+  .tr95c{flex-direction:column;flex-wrap:nowrap;gap:8px}
+  .tr95k{width:100%;min-height:0;flex-direction:row;align-items:center;gap:16px;padding:16px;border-radius:12px}
+  .tr95k p{flex:1;font-size:17px;line-height:1.25}
+  .tr95k small{font-size:15px;line-height:1.4;margin-top:4px}
+  .tr95i{order:-1;margin:0;padding:0;align-self:flex-start}
+  .tr95i svg{width:36px;height:36px}
+
+  /* security: the first four controls, the rest behind "Show all" */
+  .sc95lists.p95f:not(.p95o)>ul:nth-child(n+2){display:none}
+
+  /* tabs that run past the screen: the last one fades and an arrow says there is more */
+  #case #tsBar{position:relative}
+  #case #tsTabs{-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent);scroll-snap-type:x proximity}
+  #case #tsTabs.p95end{-webkit-mask-image:none;mask-image:none}
+  #case #tsTabs .tstab{scroll-snap-align:start}
+  .p95arr{position:absolute;right:0;top:50%;transform:translateY(-50%);width:44px;height:44px;display:grid;place-items:center;border:0;background:none;color:var(--ink);z-index:2}
+  .p95arr[hidden]{display:none}
+  #case #tsTabs .tstab i{display:none}
+  /* rhythm: 56px between sections on phones (96 on desktop) */
+  #diff,#case,#industries,#cost,#how,#agencies,#cn,#trust,#backers,#experts,#franchise,#pricing,#faq,#together{margin-top:56px!important}
+  #security{margin-top:48px!important}
+  .ctas{padding:48px 16px 56px!important}
+  .nproof .npi{padding-top:32px!important}
+  .ctas .ctah,.ctas p.ctah{text-wrap:balance}
+  /* case studies: every tab in view as wrapping pills */
+  #case .cstabs{display:flex!important;flex-wrap:wrap!important;gap:6px;overflow:visible!important;margin:0!important;padding:0!important;background:none!important;border-radius:0!important}
+  #case .cstabs .tstab{flex:0 0 auto!important;min-width:0!important;min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:0 16px!important;border-radius:999px!important;background:var(--card)!important;color:var(--ink2)!important}
+  #case .cstabs .tstab[aria-selected="true"]{background:var(--ink)!important;color:#fff!important}
+  #case .cstabs .tstab[aria-selected="true"] span{color:rgba(255,255,255,.7)!important}
+  #case .cstabs .tstab b{font-weight:500;font-size:14px}
+  #case .cstabs .tstab span{font-size:11.5px;line-height:1.2}
+  #case .cstabs .tstab span.p95dup,#case .cstabs .tstab i{display:none}
+  /* how it works: five tabs as wrapping pills, every one in view */
+  #h95{flex-wrap:wrap!important;overflow:visible!important;-webkit-mask-image:none!important;mask-image:none!important;padding:0!important;gap:6px;background:none}
+  #h95 button{flex:0 0 auto!important;background:var(--card);border-radius:999px;padding:0 12px!important;font-size:13px!important}
+  #h95 button[aria-selected="true"]{background:var(--ink);color:#fff}
+}
+@media (min-width:768px){.p95fb{display:none!important}}
+/* /phone95:css */
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2934,7 +3039,7 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
         <div class="stwrap hst">
           <form class="starter" data-src="hero" novalidate>
             <label class="sr" for="st-hero" data-i18n="st.label">Where are you opening?</label>
-            <input id="st-hero" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
+            <input id="st-hero" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
             <button type="submit" class="btn b-white" data-i18n="cta.plan">Get my plan</button>
           </form>
           <p class="hnote" data-i18n="hero.note">Four quick questions, about a minute. Nothing is filed or paid without your approval.</p>
@@ -2961,8 +3066,20 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
       <div class="lgt" role="group" aria-label="Language" data-i18n-aria="aria.lang"><button type="button" data-lang="en" aria-pressed="true">EN</button><span>/</span><button type="button" data-lang="zh" aria-pressed="false">中文</button></div>
       <a href="/app/" class="login" data-track="nav_login" data-i18n="nav.login">Log in</a>
       <button type="button" class="btn b-white" data-open="nav" data-i18n="cta.plan">Get my plan</button>
+      <button type="button" class="mnb" id="mnBtn" aria-expanded="false" aria-controls="mSheet" aria-label="Menu" data-i18n-aria="menu.open"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path class="mn1" d="M3 7h14"/><path class="mn2" d="M3 13h14"/></svg></button>
     </div>
   </header>
+  <div class="msheet" id="mSheet" hidden>
+    <nav aria-label="Site menu" data-i18n-aria="menu.aria">
+      <a href="/how-it-works" data-sec="how" data-i18n="nav.how">How it works</a>
+      <a href="/customers" data-sec="case" data-i18n="nav.cases">Customers</a>
+      <a href="/pricing" data-sec="pricing" data-i18n="foot.pricing">Pricing</a>
+      <a href="/faq" data-sec="faq" data-i18n="nav.faq">FAQ</a>
+      <a href="/guides/" data-i18n="foot.guides">License guides</a>
+    </nav>
+    <div class="lgt mslang" role="group" aria-label="Language" data-i18n-aria="aria.lang"><button type="button" data-lang="en" aria-pressed="true">English</button><button type="button" data-lang="zh" aria-pressed="false">中文</button></div>
+    <button type="button" class="btn b-ink" data-open="menu" data-i18n="cta.plan">Get my plan</button>
+  </div>
 </div>
 
 <!-- ======================= NAMED PROOF: three customers, one hard number each ======================= -->
@@ -3636,7 +3753,7 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
     <div class="stwrap light">
       <form class="starter" data-src="final" novalidate>
         <label class="sr" for="st-final" data-i18n="st.label">Where are you opening?</label>
-        <input id="st-final" autocomplete="off" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
+        <input id="st-final" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
         <button type="submit" class="btn b-ink" data-i18n="st.btn">Get my plan</button>
       </form>
       <p class="stnote"><span data-i18n="st.note">$149 per location a month, billed yearly, or start with a $299 one-time entry plan per market, credited toward your first year if you start a plan within 60 days.</span> <a href="/sample-plan" data-sec="sample" data-i18n="hero.sample">See a sample plan</a></p>
@@ -3780,7 +3897,7 @@ en:{
  "demo.brand":"Qinghuan Tea House",
  "itl.m1":"14-page PDF",
  "q.siteph":"brand.com",
- "aria.map":"Map", "aria.restart":"Restart", "aria.pause":"Pause", "aria.play":"Play", "aria.brands":"Industries", "aria.lang":"Language", "aria.nav":"Primary", "aria.close":"Close", "aria.back":"Back",
+ "aria.map":"Map", "aria.restart":"Restart", "aria.pause":"Pause", "aria.play":"Play", "aria.brands":"Industries", "aria.lang":"Language", "aria.nav":"Primary", "menu.open":"Menu", "menu.close":"Close menu", "menu.aria":"Site menu", "aria.close":"Close", "aria.back":"Back",
  "price.h":"One price per location.", "cmp.h":"Three ways to open a store.", "cmp.sub":"Every opening needs the same licenses. What changes is who finds them, who files them and who remembers to renew them.", "cmp.a":"Doing it yourself", "cmp.a.1":"Weeks on agency websites to work out what you need", "cmp.a.2":"One agency at a time, in whatever order you find them", "cmp.a.3":"Renewal dates kept in a spreadsheet, if anywhere", "cmp.a.4":"English only, and the rules change without notice", "cmp.b":"A permit expediter", "cmp.b.1":"Quoted per job, often per filing", "cmp.b.2":"Usually one city, so every new market means a new firm", "cmp.b.3":"The work often ends on opening day", "cmp.b.4":"Updates by phone and email", "cmp.c":"Placetta", "cmp.c.1":"Every license mapped in minutes, each one linked to the agency's own page", "cmp.c.2":"Federal to city, in the order agencies require, for every location", "cmp.c.3":"Renewals, inspections and rule changes tracked for as long as you're open", "cmp.c.4":"English or Chinese, and nothing is filed until you approve it",
  "brand":"Placetta",
  "cost.s1b":"3–6 months", "cost.s1s":"The typical permit phase for a new restaurant", "cost.s2b":"8 months instead of 2", "cost.s2s":"One Sacramento restaurant's wait, at an estimated cost of $1M", "cost.s3s":"New state and local laws passed every year", "cost.s3src":"Source: Gusto", "cost.cap":"in rent paid before your first sale, waiting on {m} months of permits",
@@ -3863,7 +3980,7 @@ zh:{
  "demo.brand":"清欢茶舍",
  "itl.m1":"14 页文件",
  "q.siteph":"品牌官网网址",
- "aria.map":"地图", "aria.restart":"重播", "aria.pause":"暂停", "aria.play":"播放", "aria.brands":"适用行业", "aria.lang":"语言", "aria.nav":"主导航", "aria.close":"关闭", "aria.back":"返回",
+ "aria.map":"地图", "aria.restart":"重播", "aria.pause":"暂停", "aria.play":"播放", "aria.brands":"适用行业", "aria.lang":"语言", "aria.nav":"主导航", "menu.open":"菜单", "menu.close":"关闭菜单", "menu.aria":"网站菜单", "aria.close":"关闭", "aria.back":"返回",
  "price.h":"每家门店，一个价格。", "cmp.h":"开一家店，三种方式。", "cmp.sub":"每次开店需要的执照都一样。不同的是：由谁来梳理、由谁来提交、由谁记得续期。", "cmp.a":"自己办理", "cmp.a.1":"花几周时间在各机构网站上摸索需要办什么", "cmp.a.2":"一个机构一个机构地办，顺序全凭摸索", "cmp.a.3":"续期日期记在表格里，甚至没人记", "cmp.a.4":"只有英文，规则变了也没人提醒", "cmp.b":"许可代办", "cmp.b.1":"按单报价，常常按每项申报收费", "cmp.b.2":"通常只做一个城市，每进一个新市场就要换一家", "cmp.b.3":"服务往往在开业当天结束", "cmp.b.4":"靠电话和邮件沟通进度", "cmp.c":"快哉", "cmp.c.1":"几分钟梳理出每一项执照，每项都附机构官方页面", "cmp.c.2":"从联邦到城市，按机构要求的顺序，覆盖每一家门店", "cmp.c.3":"开业之后持续跟踪续期、检查和规则变化", "cmp.c.4":"中英文均可，未经您批准不会提交任何申请",
  "brand":"快哉",
  "cost.s1b":"3–6 个月", "cost.s1s":"新餐厅常见的许可审批周期", "cost.s2b":"8 个月，而非 2 个月", "cost.s2s":"萨克拉门托一家餐厅的等待，预估损失约 100 万美元", "cost.s3s":"美国每年新通过的州和地方法律", "cost.s3src":"来源：Gusto", "cost.cap":"开业前白付的房租：许可审批拖了 {m} 个月",
@@ -4403,14 +4520,14 @@ function qHTML(){
   const i = L();
   if (qStep === 0) return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.0t")}</h3><p class="qs">${t("q.0s")}</p>
-      <div class="qblk"><label class="sr" for="q-market">${t("q.0t")}</label><input class="qin" id="q-market" autocomplete="off" enterkeyhint="next" placeholder="${t("q.0ph")}" value="${esc(MARKETS.find(x=>x[0]===Q.market) ? "" : Q.market)}"></div>
+      <div class="qblk"><label class="sr" for="q-market">${t("q.0t")}</label><input class="qin" id="q-market" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="${t("q.0ph")}" value="${esc(MARKETS.find(x=>x[0]===Q.market) ? "" : Q.market)}"></div>
       <div class="qblk" style="margin-top:12px">${chips("market", MARKETS)}</div>
       <div class="qfoot"><small>${t("st.note")}</small><button type="button" class="btn b-ink" data-next ${valid[0]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
   if (qStep === 1) return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.1t")}</h3>
       <div class="qblk"><span class="qlab">${t("q.1a")}</span>${chips("industry", INDUSTRIES)}</div>
       <div class="qblk"><span class="qlab">${t("q.1b")}</span>${chips("hq", HQS)}
-        ${Q.hq === "other" ? `<input class="qin" id="q-hqo" style="margin-top:10px" autocomplete="country-name" enterkeyhint="next" placeholder="${t("q.1ph")}" value="${esc(Q.hqOther)}">` : ""}</div>
+        ${Q.hq === "other" ? `<input class="qin" id="q-hqo" style="margin-top:10px" autocomplete="country-name" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="${t("q.1ph")}" value="${esc(Q.hqOther)}">` : ""}</div>
       <div class="qfoot"><small>${t("st.note")}</small><button type="button" class="btn b-ink" data-next ${valid[1]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
   if (qStep === 2) return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.2t")}</h3>
@@ -4432,12 +4549,12 @@ function qHTML(){
       <div class="qblk">
         <div class="qseg" role="group"><button type="button" data-contact="email" aria-pressed="${!isW}">${t("q.email")}</button><button type="button" data-contact="wechat" aria-pressed="${isW}">${t("q.wechat")}</button></div>
         <label class="sr" for="q-contact">${isW ? t("q.wechat") : t("q.email")}</label>
-        <input class="qin" id="q-contact" ${isW ? 'autocomplete="off"' : 'type="email" autocomplete="email" inputmode="email"'} enterkeyhint="send" placeholder="${isW ? t("q.wechatph") : t("q.emailph")}" value="${esc(isW ? Q.wechat : Q.email)}">
+        <input class="qin" id="q-contact" ${isW ? 'autocomplete="off"' : 'type="email" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false"'} enterkeyhint="send" placeholder="${isW ? t("q.wechatph") : t("q.emailph")}" value="${esc(isW ? Q.wechat : Q.email)}">
         <p class="qerr" id="qErr" ${errShown && !contactOk() ? "" : "hidden"}>${isW ? t("q.errWechat") : t("q.errEmail")}</p>
         <div class="qrow2"><span class="qlab">${t("q.plang")}</span><div class="qmini" role="group"><button type="button" data-pl="en" aria-pressed="${Q.plang === "en"}">English</button><button type="button" data-pl="zh" aria-pressed="${Q.plang === "zh"}">中文</button></div></div>
         <details class="qopt" ${Q.company || Q.website ? "open" : ""}><summary>${t("q.opt")}</summary><div class="g2">
-          <div><label class="qlab" for="q-company">${t("q.company")}</label><input class="qin" id="q-company" autocomplete="organization" value="${esc(Q.company)}"></div>
-          <div><label class="qlab" for="q-site">${t("q.site")}</label><input class="qin" id="q-site" inputmode="url" autocomplete="url" placeholder="${t("q.siteph")}" value="${esc(Q.website)}"></div></div></details>
+          <div><label class="qlab" for="q-company">${t("q.company")}</label><input class="qin" id="q-company" autocomplete="organization" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next" value="${esc(Q.company)}"></div>
+          <div><label class="qlab" for="q-site">${t("q.site")}</label><input class="qin" id="q-site" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${t("q.siteph")}" value="${esc(Q.website)}"></div></div></details>
       </div>
       <div class="qfoot"><small>${t("q.fine")}</small><button type="button" class="btn b-ink" data-send>${t("q.send")}</button></div></div>`;
   }
@@ -5210,7 +5327,7 @@ const TS_ALL = [
 // PROOF: a quote shows only with PROOF.testimonials on, its own flag on where it has one, and, where the person has a
 // connection to Placetta or its founder (needsMc), that connection written in mc: ["...", "..."] and shown under the name
 const TS = TS_ALL.filter(v => PROOF.testimonials && (!v.flag || PROOF[v.flag]) && (!v.needsMc || v.mc));
-let tsK = 0, tsHold = false;
+let tsK = 0, tsHold = false, tsVis = true;
 document.addEventListener("click", e => { const b = e.target.closest(".tsx"); if (!b) return; const t2 = document.querySelector(`.tstab[data-ts="${b.dataset.ts}"]`); if (t2) { t2.click(); document.getElementById("tsBar").scrollIntoView({behavior: RM ? "auto" : "smooth", block: "center"}); } });
 function renderTsStrip(){
   const el = document.getElementById("tsStrip"); if (!el) return; const i = L();
@@ -5245,7 +5362,7 @@ function renderTs(swap){
 /* testimonial portraits are CSS backgrounds (no image menu, no drag, no open-in-tab); the card blocks the menu and drag too */
 ["contextmenu", "dragstart", "copy"].forEach(ev => document.getElementById("tsGrid").addEventListener(ev, e => { if (e.target.closest(".tsph,.tsp")) e.preventDefault(); }));
 let tsT = null;
-function tsNext(){ clearTimeout(tsT); if (RM || !TS.length) return; tsT = setTimeout(() => { if (document.hidden) { tsNext(); renderTsTabs(); return; } tsK = (tsK + 1) % TS.length; renderTs(true); tsNext(); }, 8000); }
+function tsNext(){ clearTimeout(tsT); if (RM || !TS.length) return; tsT = setTimeout(() => { if (document.hidden || !tsVis) { tsNext(); renderTsTabs(); return; } tsK = (tsK + 1) % TS.length; renderTs(true); tsNext(); }, 8000); }
 document.getElementById("tsTabs").addEventListener("click", e => { const b = e.target.closest("[data-ts]"); if (!b) return; const k = Number(b.dataset.ts); if (k !== tsK) { tsK = k; renderTs(true); track("testimonial_nav", {to: tsK}); } if (!tsHold) tsNext(); });
 document.getElementById("tsTabs").addEventListener("keydown", e => {
   const n = TS.length, to = {ArrowRight: tsK + 1, ArrowDown: tsK + 1, ArrowLeft: tsK - 1, ArrowUp: tsK - 1, Home: 0, End: n - 1}[e.key];
@@ -5992,6 +6109,50 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
   const orig = applyAll; applyAll = function(){ orig.apply(this, arguments); relabel(); };
 })();
 /* /land95:js */
+/* phone95:js (Oct 21): the phone menu, the nav and price bar that step aside while you read, a testimonial card that
+   keeps one height, a visible "more" on the stories tab bar, and the security list folded to four */
+(function phone95(){
+  const root = document.documentElement, hdr = document.getElementById("hdr"), sheet = document.getElementById("mSheet"), mb = document.getElementById("mnBtn");
+  const setMenu = open => { if (!sheet || !mb) return; sheet.hidden = !open; mb.setAttribute("aria-expanded", open); mb.setAttribute("aria-label", t(open ? "menu.close" : "menu.open")); if (open) root.classList.remove("p95hide"); };
+  if (mb) mb.addEventListener("click", () => { setMenu(sheet.hidden); track("menu_toggle", {open: !sheet.hidden}); });
+  if (sheet) sheet.addEventListener("click", e => { if (e.target.closest("a,[data-open]")) setMenu(false); });
+  document.addEventListener("click", e => { if (sheet && !sheet.hidden && !e.target.closest(".hwrap")) setMenu(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && sheet && !sheet.hidden) { setMenu(false); mb.focus(); } });
+  /* scrolling down hides the nav and the price bar; scrolling up brings them back */
+  const phone = matchMedia("(max-width:1023px)");
+  let lastY = scrollY;
+  addEventListener("scroll", () => { const y = scrollY, d = y - lastY; if (Math.abs(d) < 8) return; lastY = y;
+    const hide = phone.matches && y > 120 && d > 0 && (!sheet || sheet.hidden) && !hdr.contains(document.activeElement);
+    root.classList.toggle("p95hide", hide); }, {passive: true});
+  /* testimonials: they turn on their own only while the card is on screen, and on phones only when tapped, so the
+     page below never jumps while you read */
+  const grid = document.getElementById("tsGrid");
+  if (grid) new IntersectionObserver(es => { tsVis = es.some(e => e.isIntersecting) && !phone.matches; }, {threshold: .15}).observe(grid);
+  /* stories tab bar: an arrow at the end while more names sit past the edge */
+  const tabs = document.getElementById("tsTabs"), bar = document.getElementById("tsBar");
+  if (tabs && bar) {
+    const arr = document.createElement("button"); arr.type = "button"; arr.className = "p95arr"; arr.tabIndex = -1; arr.setAttribute("aria-hidden", "true");
+    arr.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>';
+    bar.appendChild(arr);
+    const upd = () => { const end = tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 4; tabs.classList.toggle("p95end", end); arr.hidden = end || !phone.matches; };
+    arr.addEventListener("click", () => tabs.scrollBy({left: tabs.clientWidth * .7, behavior: "smooth"}));
+    tabs.addEventListener("scroll", upd, {passive: true}); addEventListener("resize", upd);
+    new MutationObserver(upd).observe(tabs, {childList: true}); upd();
+  }
+  /* case studies: on phones the tabs drop the "Case study" line each one repeats */
+  const ct = document.getElementById("caseTabs");
+  if (ct) { const dup = () => ct.querySelectorAll(".tstab span").forEach(x => x.classList.toggle("p95dup", x.textContent === t("bel.tag")));
+    new MutationObserver(dup).observe(ct, {childList: true}); dup(); }
+  /* security: four controls, then "Show all" */
+  const sl = document.querySelector(".sc95lists");
+  if (sl) { const btn = document.createElement("button"); btn.type = "button"; btn.className = "more95 p95fb"; btn.setAttribute("aria-expanded", "false");
+    sl.id = sl.id || "scList"; btn.setAttribute("aria-controls", sl.id); sl.classList.add("p95f");
+    const label = () => { const open = sl.classList.contains("p95o"); btn.textContent = open ? t("g95.less") : t("g95.all").replace("{n}", sl.querySelectorAll("li").length); };
+    btn.addEventListener("click", () => { const open = sl.classList.toggle("p95o"); btn.setAttribute("aria-expanded", open); label(); track("fold_security", {open}); });
+    sl.after(btn); label(); const orig = applyAll; applyAll = function(){ orig.apply(this, arguments); label(); };
+  }
+})();
+/* /phone95:js */
 track("page_view", {});
 })();
 
