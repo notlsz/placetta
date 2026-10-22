@@ -7,7 +7,7 @@ export type Reply = { text: Bi[]; approvals?: string[]; apps?: string[]; files?:
 export type Audit = { id: string; at: string; actor: "you" | "agent" | "agency" | "team" | "placetta"; action: Bi; object: Bi; detail?: Bi };
 export type Workspace = { audit: Audit[]; meta?: { city?: string; region?: string; what?: string; entity?: string }; [k: string]: unknown };
 export type Turn = { role: "user" | "assistant"; content: string };
-export type RunState = { messages: { role: string; content: unknown }[]; rounds: number; plainSms?: boolean; spent?: number; toolCalls?: number; toolErrors?: number; trace?: unknown[]; [k: string]: unknown };
+export type RunState = { messages: { role: string; content: unknown }[]; rounds: number; plainSms?: boolean; spent?: number; events?: number[]; toolCalls?: number; toolErrors?: number; trace?: unknown[]; [k: string]: unknown };
 export type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] };
 /** What a model call is for; the server routes each role to its own model (../_shared/llm.ts). */
 export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";

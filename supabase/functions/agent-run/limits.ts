@@ -33,3 +33,11 @@ export function tokenLimit(env: (k: string) => string | undefined): number {
 }
 /** A task that has already cost its limit stops before the next model call, whichever instance holds it. */
 export const overTaskLimit = (spent: number, limit: number) => spent >= limit;
+
+/** A run that fails for one of these reasons was stopped by its own limits or by the person: its model calls stay
+ *  counted (giving them back would let a run past the allowance repeat for free). Any other failure (an upstream error,
+ *  a crash, a run that stopped responding) is on Placetta's side or the vendor's: its calls are given back. */
+const KEEP_CHARGED = new Set(["cancelled", "task_limit", "over_budget", "plan_required", "entry_ended", "paused", "not_allowed", "trial_used"]);
+export const refundable = (code: string | undefined) => !KEEP_CHARGED.has(code ?? "");
+/** Said with a failed run whose calls were given back. */
+export const NOT_CHARGED_EN = "This run wasn't counted against your allowance.";

@@ -78,6 +78,9 @@ export type RunState = {
   plainSms?: boolean;
   /** What the whole task has cost so far in US dollars, across every chunk a fresh instance picked up. */
   spent?: number;
+  /** The allowance events of its model calls (ai_events ids), so a run that fails on Placetta's or the vendor's side
+   *  gives them back (ai_refund_events): a failed run isn't charged. */
+  events?: number[];
   /** What this run's tools actually read (registry forms, agency pages, documents), for the reply's Sources line. */
   used?: Used[];
   /** The person's words were read for details to remember (src/recall.ts), so a resumed chunk doesn't read them again. */

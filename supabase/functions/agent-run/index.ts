@@ -35,7 +35,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { callModel, canConverse, type Role } from "../_shared/llm.ts";
 import { accessRpc, WORKS } from "../_shared/access.ts";
-import { overTaskLimit, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
+import { NOT_CHARGED_EN, overTaskLimit, refundable, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
 import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
@@ -141,7 +141,7 @@ const runsTable: RunsTable<Run> = {
 
 
 /** One task's tally across its model calls: who asked, what it has cost, and whether saver mode was on (and why). */
-type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttle"; renews?: string | null };
+type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttle"; renews?: string | null; events?: number[] };
 
 /**
  * One model call: the company keys, the role's route (../_shared/llm.ts), research on official sites, the gate and the
@@ -156,6 +156,8 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   // budget, rate limits and the company's ceiling
   const g = await gate(admin, (k) => Deno.env.get(k), ws, who.uid, "call");
   if (!g.ok) throw err(g.code, g.message);
+  // kept with the run, so a run that fails on our side or the vendor's gives these calls back (refundFailed)
+  if (who.events && who.events.length < 500) who.events.push(g.event);
   // Odelia has about 31 tools in a signed-in workspace; a cap of 24 silently dropped email, calendar, drive and QuickBooks.
   const pageTools = (Array.isArray(body.tools) ? (body.tools as Block[]) : []).filter((t) => t && typeof t.name === "string" && !("type" in t)).slice(0, MAX_TOOLS);
   let maxTokens = Math.min(Math.max(Number(body.max_tokens) || 2000, 256), 4000);
@@ -195,6 +197,13 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   who.spent += usd;
   // the model and price ride along for the run's trace (src/trace.ts)
   return { ...data, model: out.model, usd } as unknown as { content: never[]; stop_reason: string };
+}
+
+/** Gives a failed run's model calls back to the allowance (and any pack credit to the pack). Never throws. */
+async function refundFailed(ws: string, events: number[]): Promise<boolean> {
+  const { data, error } = await admin.rpc("ai_refund_events", { p_ws: ws, p_events: events });
+  if (error) { console.error("ai_refund_events", error.message); return false; }
+  return Number((data as { events?: number } | null)?.events ?? 0) > 0;
 }
 
 /** The function's own secret values (any env var named like a key, secret, token or password), read once. */
@@ -680,7 +689,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     }
     const state = counting = run.state ?? startState([], run.prompt);
     // The task's spend so far, from every earlier chunk: the ceiling is for the whole task.
-    const who: Who = { uid: run.created_by, spent: Number(state.spent) || 0 };
+    const who: Who = { uid: run.created_by, spent: Number(state.spent) || 0, events: Array.isArray(state.events) ? state.events.filter((x) => Number.isInteger(x)).slice(-500) : [] };
     const mainRole = roleOfRun(run);
     // The network: the run starts from what other businesses' jobs taught Odelia about these places, agencies and forms.
     if (state.network === undefined) {
@@ -706,7 +715,7 @@ export async function work(runId: string, token: string | null, ticket: string |
       draft: (t) => { draft = t; flush(); },
       send: async (body, deep, role, onText) => {
         try { return await model(ws, body, deep, location, ctl.signal, role ?? mainRole, who, onText) as never; }
-        finally { state.spent = who.spent; }
+        finally { state.spent = who.spent; state.events = who.events; }
       },
       // Every channel, so a request from outside the app gets the remote rules (src/serverRun.ts).
       channel: run.channel ?? "app",
@@ -784,7 +793,10 @@ export async function work(runId: string, token: string | null, ticket: string |
     if (code === "cancelled" || ctl.signal.aborted) await lease.write({ steps, draft: null, state: null, updated_at: new Date().toISOString() });
     else {
       console.error("run failed", runId, code, String((e as Error)?.message ?? e).slice(0, 200));
-      const failed = await lease.write({ status: "failed", error: ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit", "not_allowed"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.", steps, state: null, updated_at: new Date().toISOString() }, { running: true });
+      // a failure on our side or the vendor's: the run's model calls are given back, and the person is told
+      const free = refundable(code) && (counting?.events?.length ?? 0) > 0 ? await refundFailed(ws, counting!.events!) : false;
+      const said = ["rate_limited", "not_configured", "over_budget", "plan_required", "entry_ended", "paused", "task_limit", "not_allowed"].includes(code ?? "") ? (e as Error).message : "The agent hit a problem and stopped. Try again.";
+      const failed = await lease.write({ status: "failed", error: free ? `${said} ${NOT_CHARGED_EN}` : said, steps, state: null, updated_at: new Date().toISOString() }, { running: true });
       // Someone who asked by text or on a call hears about it the same way.
       if (failed) await textBack(run, SAY.failed[run.lang], []).catch((x) => console.error("text back", String(x).slice(0, 120)));
       if (failed && run.channel === "email") await mailBack(run, SAY.failed[run.lang], []).catch((x) => console.error("mail back", String(x).slice(0, 120)));
@@ -1000,7 +1012,11 @@ export async function handle(req: Request): Promise<Response> {
       const { data: stale } = await admin.from("agent_runs").select("id, attempts, heartbeat_at").eq("status", "running").lt("heartbeat_at", cutoff).limit(20);
       for (const r of stale ?? []) {
         // Only if it's still the same quiet run: an instance may have taken it up since the list was read.
-        if (r.attempts >= MAX_ATTEMPTS) await admin.from("agent_runs").update({ status: "failed", error: "The agent stopped responding. Try again." }).eq("id", r.id).eq("status", "running").eq("heartbeat_at", r.heartbeat_at);
+        if (r.attempts >= MAX_ATTEMPTS) {
+          const { data: dead } = await admin.from("agent_runs").update({ status: "failed", error: "The agent stopped responding. Try again." }).eq("id", r.id).eq("status", "running").eq("heartbeat_at", r.heartbeat_at).select("workspace_id, state");
+          // it stopped on our side: its model calls are given back
+          for (const d of dead ?? []) { const ev = (d.state as RunState | null)?.events; if (ev?.length) await refundFailed(String(d.workspace_id), ev); }
+        }
         else await handOver(r.id, null, null);   // no ticket: it's taken only while its holder is still quiet
       }
       // Store bots: runs waiting their turn start where there's room, and a run whose stores all finished (its wake-up

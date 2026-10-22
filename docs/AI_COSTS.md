@@ -53,6 +53,17 @@ told once per period at the end of a reply ("Running in saver mode until your al
 Settings shows it on the allowance line. At 100% the gate answers `over_budget` as before. Owners get an Update at
 50% and 80% saying what is left and that saver mode starts at 60%.
 
+## A failed run isn't charged
+
+A run keeps the allowance events of its model calls in its state (`events`). When it fails on Placetta's side or the
+vendor's (an upstream error, a crash, a save that failed, a run the watchdog finds stopped), agent-run calls
+`ai_refund_events` (migration `20261024090000_failed_runs_free`): those calls stop counting against the allowance and
+any pack credit they used goes back to the pack, once, in that workspace only. `cost_usd` keeps the real cost for our
+own accounting. A run the person stopped, or one stopped by its own limits (`task_limit`, `over_budget`, the daily
+ceiling), stays counted, so a run past the allowance can't repeat for free. The run's error says "This run wasn't
+counted against your allowance." Tests: `supabase/tests/failed_runs.sql`, `agent-run/limits_test.ts`, and the e2e
+"model is down" scenario.
+
 ## The allowance per plan
 
 From `ai_rules()` in the database (`per_location_month` and friends):

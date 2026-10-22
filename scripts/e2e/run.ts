@@ -590,6 +590,9 @@ try {
     await settle();
     const [downRun] = await sql`select status, error from public.agent_runs where prompt = 'Is there anything new from the city?'`;
     check("when the model is down the run fails and the owner is told by text", downRun?.status === "failed" && /busy/.test(downRun.error ?? "") && sms(mark, OWNER_PHONE).length === 1 && /hit a problem/.test(sms(mark, OWNER_PHONE)[0].body.text), { downRun, texts: sms(mark).map((x) => x.body.text) });
+    // a run that failed on the vendor's side isn't charged: its calls are given back to the allowance (20261024090000)
+    const [given] = await sql`select count(*)::int n from public.ai_events where workspace_id = ${ws} and refunded_at is not null`;
+    check("the failed run isn't charged: its model calls are given back, and it says so", given.n >= 1 && /wasn't counted against your allowance/.test(downRun?.error ?? ""), { given, error: downRun?.error });
 
     // a number nobody linked, with a line that isn't "<business> in <city>": one question, then silence
     mark = recorded.length;
