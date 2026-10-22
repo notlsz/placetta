@@ -3596,5 +3596,65 @@
   "found": true,
   "sha256": "3a246cb59c51e882",
   "context": "e di qualsiasi natura giuridica si debbono iscrivere al registro delle imprese. l'iscrizione prevede il pagamento di un diritto annuale. per creare una nuova impresa la modalità è esclusivamente digitale e si chiama"
+ },
+ {
+  "id": "es-sl",
+  "read": "https://paeelectronico.es/Documents/Formacion/SociedadResponsabilidadLimitada/1.1%20INFOGRAFIA_sociedad%20limitada_constitucion_DEF.pdf",
+  "quote": "firmen la Escritura Pública de constitución de la sociedad. Este es un trámite obligatorio.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "8acff707b35f5443",
+  "context": " ley de sociedades de capital). acudir a la notaría para que todos los socios 3 firmen la escritura pública de constitución de la sociedad. este es un trámite obligatorio. realizar dentro de los 3 meses posteriores a la expedición de la certificación "
+ },
+ {
+  "id": "es-nif",
+  "read": "https://sede.agenciatributaria.gob.es/Sede/censos/plazo-presentacion-modelo-306-037.html",
+  "quote": "Las personas jurídicas y entidades sin personalidad jurídica, deberán solicitar su NIF antes de realizar cualquier actividad u operación con trascendencia tributaria.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "87e460e1f44f285e",
+  "context": "deuden o de la concurrencia de las circunstancias previstas reglamentariamente. las personas jurídicas y entidades sin personalidad jurídica, deberán solicitar su nif antes de realizar cualquier actividad u operación con trascendencia tributaria. en todo caso, la solicitud la debes formular dentro del mes siguiente a la fech"
+ },
+ {
+  "id": "es-036",
+  "read": "https://sede.agenciatributaria.gob.es/Sede/censos/plazo-presentacion-modelo-306-037.html",
+  "quote": "Debes presentar la declaración censal de alta antes del inicio de tus actividades u operaciones",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "87e460e1f44f285e",
+  "context": "laración de alta infórmate de cuándo tienes que presentar el modelo 036 de alta debes presentar la declaración censal de alta antes del inicio de tus actividades u operaciones, del nacimiento de la obligación de retener o ingresar a cuenta sobre las renta"
+ },
+ {
+  "id": "es-ss",
+  "read": "https://www.seg-social.es/wps/portal/wss/internet/Empresarios/Inscripcion/1227/1234",
+  "quote": "Applications for Contribution Account Codes, changes to details or end of active contributor status must be formalised by filling in the following forms:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "553a9ad38b4111a3",
+  "context": "mployers registration employer registration application forms application forms applications for contribution account codes, changes to details or end of active contributor status must be formalised by filling in the following forms: scheme main | c.c.c. registration secondary or subsequent c.c.c. application no"
+ },
+ {
+  "id": "es-mad-dr",
+  "read": "https://www.madrid.es/portales/munimadrid/es/Como-poner-en-marcha-una-actividad-economica/?vgnextfmt=default&vgnextoid=b13a369f792f7710VgnVCM1000001d4a900aRCRD&vgnextchannel=2af331d3b28fe410VgnVCM1000000b205a0aRCRD",
+  "quote": "Declaración responsable, con carácter general, que permite una tramitación ágil y directa.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "227dc4876bfe88e4",
+  "context": "de madrid simplifica los trámites estableciendo dos procedimientos principales: declaración responsable, con carácter general, que permite una tramitación ágil y directa. solicitud de licencia urbanística, únicamente en aquellos casos en los que esté"
+ },
+ {
+  "id": "es-mad-terraza",
+  "read": "https://www.madrid.es/portales/munimadrid/es/Como-poner-en-marcha-una-actividad-economica/?vgnextfmt=default&vgnextoid=b13a369f792f7710VgnVCM1000001d4a900aRCRD&vgnextchannel=2af331d3b28fe410VgnVCM1000000b205a0aRCRD",
+  "quote": "La ocupación de la vía pública, cuando resulte necesario.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "227dc4876bfe88e4",
+  "context": "tirada y gestión de residuos procedentes de obras de construcción y demolición. la ocupación de la vía pública, cuando resulte necesario. asimismo, deberá comunicarse el cambio de titularidad cuando se produzca una mo"
  }
 ]

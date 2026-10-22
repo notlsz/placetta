@@ -374,4 +374,43 @@ export const ITALY_FORMS: OfficialForm[] = [
     proof: [IT_SETUP, "L'iscrizione prevede il pagamento di un diritto annuale", "Registration requires paying a yearly fee"] }),
 ];
 
-export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS, ...ITALY_FORMS];
+/* ------------------------------------------------------------------ Spain (Madrid; Barcelona through the Ajuntament) */
+const AEAT = "https://sede.agenciatributaria.gob.es/Sede/censos/plazo-presentacion-modelo-306-037.html";
+const MAD_ACT = "https://www.madrid.es/portales/munimadrid/es/Como-poner-en-marcha-una-actividad-economica/?vgnextfmt=default&vgnextoid=b13a369f792f7710VgnVCM1000001d4a900aRCRD&vgnextchannel=2af331d3b28fe410VgnVCM1000000b205a0aRCRD";
+
+export const SPAIN_FORMS: OfficialForm[] = [
+  E({ id: "es-sl", where: "ES", level: "federal", needs: { newEntity: true }, method: "in_person", order: 10, cur: "EUR",
+    form: "Escritura pública de constitución (SL)", title: ["Limited company (SL) deed and commercial register entry", "有限责任公司（SL）设立公证书与商业登记"], agency: ["Notary and Registro Mercantil", "公证人与商业登记处"],
+    how: ["The company name is reserved with the central commercial register, the capital is deposited, and all partners sign the deed of incorporation before a notary, which is then entered in the provincial commercial register. It can also be started online through CIRCE.", "先向中央商业登记处预留公司名称并存入资本，再由全体股东在公证人面前签署设立公证书，之后在省商业登记处登记。也可通过 CIRCE 在线启动。"],
+    url: "https://paeelectronico.es/es-es/CreaEmpresaPorTiMismo/Paginas/CIRCE.aspx",
+    specialist: ["A Spanish notary (notario) executes the deed of incorporation: Placetta prepares the file and hands it to one.", "设立公证书须由西班牙公证人（notario）出具：快哉准备材料并交给公证人。"],
+    foreign: ["Foreign partners and directors need a Spanish tax identity number (NIE or NIF) before signing.", "外国股东和董事在签署前须取得西班牙税号（NIE 或 NIF）。"],
+    proof: ["https://paeelectronico.es/Documents/Formacion/SociedadResponsabilidadLimitada/1.1%20INFOGRAFIA_sociedad%20limitada_constitucion_DEF.pdf", "firmen la Escritura Pública de constitución de la sociedad. Este es un trámite obligatorio.", "sign the public deed of incorporation of the company. This step is mandatory."] }),
+  E({ id: "es-nif", where: "ES", level: "federal", method: "online", order: 20, cur: "EUR",
+    form: "NIF de persona jurídica", title: ["Company tax number (NIF)", "公司税号（NIF）"], agency: ["Agencia Tributaria", "西班牙税务局"],
+    how: ["The company asks the tax agency for its NIF before any operation with tax effect, and within a month of its incorporation or establishment in Spain.", "公司须在进行任何涉税经营前、并在设立或在西班牙设立机构后一个月内，向税务局申请 NIF。"], url: "https://sede.agenciatributaria.gob.es",
+    proof: [AEAT, "Las personas jurídicas y entidades sin personalidad jurídica, deberán solicitar su NIF antes de realizar cualquier actividad u operación con trascendencia tributaria.", "Companies and entities without legal personality must apply for their NIF before carrying out any activity or operation with tax effect."] }),
+  E({ id: "es-036", where: "ES", level: "federal", method: "online", order: 25, cur: "EUR",
+    form: "Modelo 036", title: ["Tax census declaration (Modelo 036) for VAT and income tax", "税务登记申报（036 表），用于增值税和所得税"], agency: ["Agencia Tributaria", "西班牙税务局"],
+    how: ["Filed online with the tax agency before the business starts, registering it for VAT and the other taxes it owes.", "开业前向税务局在线提交，登记增值税及其他应缴税种。"], url: "https://sede.agenciatributaria.gob.es",
+    proof: [AEAT, "Debes presentar la declaración censal de alta antes del inicio de tus actividades u operaciones", "You must file the census registration return before you start your activities or operations"] }),
+  E({ id: "es-ss", where: "ES", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR",
+    form: "TA.6 (código cuenta de cotización)", title: ["Employer registration with Social Security (contribution account code)", "社会保障雇主登记（缴费账户代码）"], agency: ["Tesorería General de la Seguridad Social", "西班牙社会保障总署"],
+    how: ["The employer applies for its contribution account code on form TA.6 before the first hire, online with a digital certificate or at a Treasury office.", "雇主须在首次雇用前以 TA.6 表申请缴费账户代码，可凭电子证书在线办理或前往社保总署办事处。"], url: "https://www.seg-social.es",
+    proof: ["https://www.seg-social.es/wps/portal/wss/internet/Empresarios/Inscripcion/1227/1234", "Applications for Contribution Account Codes, changes to details or end of active contributor status must be formalised by filling in the following forms:"] }),
+  /* Madrid */
+  E({ id: "es-mad-dr", where: "ES-MAD", level: "city", segs: PREMISES, method: "online", order: 55, cur: "EUR",
+    form: "Declaración responsable de actividades económicas", title: ["Responsible declaration to open (or a licence where required)", "开业责任声明（或须申请许可时的许可）"], agency: ["Ayuntamiento de Madrid, Agencia de Actividades (or an authorised ECU)", "马德里市政府活动管理局（或经授权的城市规划合作机构 ECU）"],
+    how: ["Most shops and restaurants open, with their works, on a signed responsible declaration filed with the city or an authorised collaborating body (ECU); it takes effect when filed. A licence is needed only where safety, public health or the environment justify it.", "多数门店和餐厅（含装修）以签署的责任声明开业，向市政府或经授权的合作机构（ECU）提交，提交即生效。仅在安全、公共卫生或环境需要时才须申请许可。"],
+    url: "https://sede.madrid.es",
+    proof: [MAD_ACT, "Declaración responsable, con carácter general, que permite una tramitación ágil y directa.", "A responsible declaration, as the general rule, which allows a quick and direct procedure."] }),
+  E({ id: "es-mad-terraza", where: "ES-MAD", level: "city", segs: STORES, needs: { terrace: true }, method: "online", order: 73, cur: "EUR",
+    form: "Autorización de ocupación de la vía pública (terraza)", title: ["Terrace permit on the public street", "公共街道露台许可"], agency: ["Ayuntamiento de Madrid", "马德里市政府"],
+    how: ["Tables on the street need the city's specific authorisation to occupy the public way, besides the opening declaration.", "在街道摆放桌椅，除开业声明外，还须取得市政府的公共道路占用专项许可。"], url: "https://sede.madrid.es",
+    proof: [MAD_ACT, "La ocupación de la vía pública, cuando resulte necesario.", "Occupation of the public street, when necessary."] }),
+  E({ id: "es-bcn-licencia", where: "ES-BCN", level: "city", segs: PREMISES, method: "online", order: 55, cur: "EUR",
+    form: "Comunicació d'activitat / llicència", title: ["Activity notice or licence", "经营活动申报或许可"], agency: ["Ajuntament de Barcelona", "巴塞罗那市政府"],
+    how: ["Shops and restaurants notify the city of their activity online before opening; some need a licence.", "门店和餐厅开业前须在线向市政府申报经营活动，部分需申请许可。"], url: "https://ajuntament.barcelona.cat" }),
+];
+
+export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS, ...ITALY_FORMS, ...SPAIN_FORMS];
