@@ -306,9 +306,9 @@ export async function runRounds(o: {
     const t0 = Date.now(), at = since();
     try {
       const data = await send0(body, deep, role, onText);
-      addSpan(st.trace ??= [], modelSpan(role ?? "plan", at, Date.now() - t0, data as { usage?: unknown; model?: unknown; usd?: unknown }));
+      addSpan(st.trace ??= [], { ...modelSpan(role ?? "plan", at, Date.now() - t0, data as { usage?: unknown; model?: unknown; usd?: unknown }), r: st.rounds });
       return data;
-    } catch (e) { addSpan(st.trace ??= [], modelSpan(role ?? "plan", at, Date.now() - t0, {}, false)); throw e; }
+    } catch (e) { addSpan(st.trace ??= [], { ...modelSpan(role ?? "plan", at, Date.now() - t0, {}, false), r: st.rounds }); throw e; }
   } };
   // each application's answers as the run found them: the ones it changes get their form filled again at the end
   st.forms ??= Object.fromEntries(o.ws().apps.map(a => [a.id, answersHash(a)]));
@@ -521,7 +521,7 @@ export async function runRounds(o: {
           content = r.content; error = !!r.is_error;
         }
         if (error) st.toolErrors = (st.toolErrors ?? 0) + 1;
-        addSpan(st.trace ??= [], { k: "tool", n: name.slice(0, 80), at, ms: Date.now() - t0, ...(error ? { ok: false } : {}) });
+        addSpan(st.trace ??= [], { k: "tool", n: name.slice(0, 80), at, ms: Date.now() - t0, ...(error ? { ok: false } : {}), r: st.rounds });
         // the replay: what she used, what she gave it, what came back and what it changed, and any approval it put up
         if ((st.moments ?? 0) < MAX_MOMENTS) {
           st.moments = (st.moments ?? 0) + 1;

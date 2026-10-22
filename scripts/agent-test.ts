@@ -36,7 +36,7 @@ import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
 import { groupOf, groupsFor, toolTokens } from "../src/toolIntent";
 import { checkArgs } from "../src/toolArgs";
 import { elapsed, fromRow, merge, napper, pollDelay, reveal, startFeed, stepTimes } from "../src/cloud/runFeed";
-import { addSpan, MAX_SPANS, totals, type Span } from "../src/trace";
+import { addSpan, keep, MAX_SPANS, totals, tree, type Span, type TraceFilter } from "../src/trace";
 import { readdirSync, readFileSync } from "node:fs";
 import { addRule, allowOptions, allowRule, autoOk, HOUSE_MAX, houseBrief, houseCheck, jobsDone, markSecond, planApprovalId, runMode, secondStep, workPrompt } from "../src/autonomy";
 import { addUndo, undoRun } from "../src/rewind";
@@ -2449,6 +2449,18 @@ console.log("\n# Audit trail export (CSV)");
   const many: Span[] = [];
   for (let i = 0; i < 200; i++) addSpan(many, { k: "tool", n: "x", at: i, ms: 1 });
   eq(many.length, MAX_SPANS, "a long run keeps at most 150 spans");
+  // the tree: each round's tool calls under its model call
+  ok(spans.every(x => typeof x.r === "number" && x.r >= 1), "every span knows its round", spans);
+  const g = tree([
+    { k: "tool", n: "fill_fields", at: 1550, ms: 15, ok: false, r: 2 },
+    { k: "model", n: "plan", at: 0, ms: 900, in: 200, out: 120, usd: 0.0012, r: 1 },
+    { k: "tool", n: "check_progress", at: 900, ms: 40, r: 1 },
+    { k: "model", n: "plan", at: 950, ms: 600, in: 100, out: 60, usd: 0.0008, r: 2 },
+    { k: "model", n: "extract", at: 5, ms: 3000 },
+  ]);
+  eq(g.map(x => [x.r, x.spans.map(s => s.n), x.errors]), [[1, ["plan", "check_progress"], 0], [-1, ["extract"], 0], [2, ["plan", "fill_fields"], 1]], "rounds in time order, the model call first, then its tools");
+  eq([g[0].ms, g[0].tokens, g[2].usd], [940, 320, 0.0008], "each round's time, tokens and cost");
+  eq(["all", "model", "tool", "failed", "slow"].map(f => g.flatMap(x => x.spans).filter(s => keep(s, f as TraceFilter)).length), [5, 3, 2, 1, 1], "filters: all, model, tool, failed, slow (2 s or more)");
 }
 
 /* ------------------------------------------------------------------ live run updates: pushed and polled, merged */

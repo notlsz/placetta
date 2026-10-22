@@ -57,6 +57,12 @@ button.pt-tag { cursor: pointer; }
 .tr-t .tr-bar { display: block; height: 8px; border-radius: 4px; background: rgba(var(--e), .35); }
 .tr-t .tr-bar.tool { background: rgba(var(--e), .16); }
 .tr-t tr.bad td { color: var(--warm, #a33); }
+/* the tree: a round's header row, its tool calls indented under its model call */
+.tr-t tr.tr-rh td { padding-top: 10px; background: rgba(var(--e), .03); font-size: 12.5px; }
+.tr-t tr.tr-kid td:nth-child(2) { padding-left: 22px; }
+.tr-f { margin: 8px 0; flex-wrap: wrap; }
+.tr-find { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.tr-find input[type="text"] { flex: 1 1 200px; min-width: 0; }
 .ah-t td { white-space: nowrap; }
 .pt-pay { display: flex; flex-direction: column; gap: 2px; margin: 12px 0 0; padding: 6px; list-style: none; border-radius: 16px; background: var(--mist); }
 .pt-pay li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 10px; font-size: 13.5px; }

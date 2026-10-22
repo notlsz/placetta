@@ -55,6 +55,7 @@ begin
   res := res || jsonb_build_object('tool counts are saved', (select tool_calls = 8 and tool_errors = 1 from public.agent_runs where id = r1),
     'errors are capped at calls', (select tool_errors = 2 from public.agent_runs where id = r2));
   insert into public.odelia_job_checks (workspace_id, run_id, job_id, passed, of) values (w, r1, 'job-1', 3, 3), (w2, r2, 'job-2', 1, 3);
+  update public.agent_runs set input_tokens = 200, output_tokens = 120, cache_read_tokens = 800, cache_write_tokens = 0, cost_usd = 0.0012 where id = r1;
 
   execute 'set local role authenticated';
   perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated', 'aal', 'aal1')::text, true);
@@ -68,6 +69,10 @@ begin
   res := res || jsonb_build_object('nor change tool counts', ok);
   begin perform public.agent_run_trace(r1, '[]'); ok := false; exception when insufficient_privilege then ok := true; end;
   res := res || jsonb_build_object('nor write a trace', ok);
+  begin perform public.agent_usage_by_workspace(7); ok := false; exception when others then ok := true; end;
+  res := res || jsonb_build_object('nor see cost by workspace', ok);
+  begin perform public.agent_trace_find('check_progress'); ok := false; exception when others then ok := true; end;
+  res := res || jsonb_build_object('nor search traces', ok);
 
   perform set_config('request.jwt.claims', json_build_object('sub', st, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   j := public.agent_health(7);
@@ -85,6 +90,14 @@ begin
   res := res || jsonb_build_object('a replay has the steps', jsonb_array_length(j->'steps') = 1, 'its calls', jsonb_array_length(j->'calls') = 1,
     'its timing', (j->>'first_reply_at') is not null and (j->>'done_at') is not null, 'and its checks', jsonb_array_length(j->'checks') = 1,
     'and its trace', jsonb_array_length(j->'trace') = 2 and j->'trace'->0->>'n' = 'plan', 'and the run''s token and cache totals', j->'run_tokens' ? 'cache_read');
+  -- the cross-run views (20261023141500_trace_rollup)
+  j := public.agent_usage_by_workspace(7);
+  res := res || jsonb_build_object('cost and tokens per workspace and day', jsonb_array_length(j) = 2
+      and exists (select 1 from jsonb_array_elements(j) x where x->>'business' = 'Lucky Leaf Tea' and (x->>'cache_read')::int = 800 and (x->>'cost_usd')::numeric = 0.0012 and (x->>'tool_calls')::int = 8));
+  j := public.agent_trace_find('check_progress', false, null, 7);
+  res := res || jsonb_build_object('runs found by a tool in their trace', jsonb_array_length(j) = 1 and j->0->>'id' = r1::text and (j->0->>'hits')::int = 1);
+  res := res || jsonb_build_object('none with a failed call', jsonb_array_length(public.agent_trace_find(null, true, null, 7)) = 0,
+    'slow calls found by time', jsonb_array_length(public.agent_trace_find(null, false, 500, 7)) = 1);
 
   -- the incident log
   iid := public.incident_add(now() - interval '2 days', 'Fax confirmations were late', 'Six customers saw "sending" for 3 hours', 'Retry the status check every 10 minutes', true);

@@ -68,6 +68,13 @@ export const reviewFinish = (id: string, outcome: "looks_right" | "changes_neede
 
 export const agentHealth = (days = 14) => rpc<Health>("agent_health", { p_days: days });
 export const runReplay = (id: string) => rpc<RunReplay>("agent_run_replay", { p_id: id });
+/** Cost and tokens per workspace and day, from each run's own totals (migration 20261023141500_trace_rollup). */
+export type WorkspaceDay = { workspace_id: string; business: string | null; day: string; runs: number; input: number; output: number; cache_read: number; cache_write: number; cost_usd: number; tool_calls: number; tool_errors: number };
+export const usageByWorkspace = (days = 14) => rpc<WorkspaceDay[]>("agent_usage_by_workspace", { p_days: days });
+/** Runs whose trace has a call to this tool, a failed call or a slow one. */
+export type TraceHit = HealthRun & { prompt: string; hits: number };
+export const traceFind = (o: { tool: string | null; failed: boolean; slowMs: number | null; days: number }) =>
+  rpc<TraceHit[]>("agent_trace_find", { p_tool: o.tool, p_failed: o.failed, p_slow_ms: o.slowMs, p_days: o.days });
 export const incidentsList = () => rpc<{ since: string | null; incidents: Incident[] }>("incidents_list");
 export const incidentAdd = (i: { happened_at: string; title: string; impact: string; fix?: string; public: boolean }) =>
   rpc<string>("incident_add", { p_happened_at: i.happened_at, p_title: i.title, p_impact: i.impact, p_fix: i.fix ?? null, p_public: i.public });

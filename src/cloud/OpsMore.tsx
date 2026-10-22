@@ -8,7 +8,7 @@ import * as ops from "./opsApi";
 import * as pa from "./partnersApi";
 import { KIND as PARTNER_KIND } from "../Partner";
 import "../ode.css";
-import { totals, type Span } from "../trace";
+import { keep, SLOW_MS, totals, tree, type Span, type TraceFilter } from "../trace";
 
 /* The team's pages beside the filing queue (src/cloud/Ops.tsx): the specialist review queue with its one-business-day
    target, Agent health (how Odelia runs: speed, first-try checks, tool errors, cost by vendor and model, saver mode,
@@ -148,6 +148,8 @@ function Trace({ spans }: { spans: Span[] }) {
   const { lang } = useApp();
   const zh = lang === "zh";
   const t = totals(spans);
+  const [filter, setFilter] = useState<TraceFilter>("all");
+  const rounds = useMemo(() => tree(spans), [spans]);
   const wall = Math.max(t.wall_ms, 1);
   const n = (x: number | undefined) => (x == null ? "-" : x.toLocaleString("en-US"));
   const sec = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`);
@@ -159,19 +161,71 @@ function Trace({ spans }: { spans: Span[] }) {
       <div><dt>{zh ? "缓存命中" : "Cache hits"}</dt><dd>{t.hit == null ? "-" : `${t.hit}%`}{t.read ? (zh ? `，${n(t.read)} 个令牌` : `, ${n(t.read)} tokens`) : ""}</dd></div>
       <div><dt>{zh ? "成本" : "Cost"}</dt><dd>{usd(t.usd, 4)}</dd></div>
     </dl>
+    <div className="seg sm tr-f" role="group" aria-label={zh ? "筛选" : "Filter"}>
+      {FILTERS.map(f => <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>{f.label[zh ? "zh" : "en"]}{f.id !== "all" ? ` ${spans.filter(s => keep(s, f.id)).length}` : ""}</button>)}
+    </div>
     <div className="tscroll"><table className="ah-t tr-t">
       <thead><tr><th>{zh ? "开始" : "Start"}</th><th>{zh ? "调用" : "Call"}</th><th className="tr-line">{zh ? "时间线" : "Time line"}</th><th>{zh ? "耗时" : "Took"}</th><th>{zh ? "输入" : "In"}</th><th>{zh ? "缓存读取" : "Cache read"}</th><th>{zh ? "输出" : "Out"}</th><th>{zh ? "成本" : "Cost"}</th></tr></thead>
-      <tbody>{spans.map((s, i) => (
-        <tr key={i} className={s.ok === false ? "bad" : undefined}>
-          <td>+{sec(s.at)}</td>
-          <td>{s.k === "model" ? <><b>{word(s.n, zh)}</b><small> {s.model ?? ""}</small></> : <code>{s.n}</code>}{s.ok === false && <small>{zh ? "，失败" : ", failed"}</small>}</td>
-          <td className="tr-line"><span className={"tr-bar " + s.k} style={{ marginLeft: `${(100 * s.at) / wall}%`, width: `${Math.max(0.6, (100 * s.ms) / wall)}%` }} /></td>
-          <td>{sec(s.ms)}</td>
-          <td>{s.k === "model" ? n(s.in) : ""}</td><td>{s.k === "model" ? n(s.read) : ""}</td><td>{s.k === "model" ? n(s.out) : ""}</td>
-          <td>{s.k === "model" ? usd(s.usd, 4) : ""}</td>
-        </tr>
-      ))}</tbody>
+      {rounds.map((g, gi) => {
+        const shown = g.spans.filter(s => keep(s, filter));
+        if (!shown.length) return null;
+        return (
+          <tbody key={gi} className="tr-round">
+            {g.r >= 0 && <tr className="tr-rh"><td>+{sec(g.at)}</td><td colSpan={2}><b>{g.r === 0 ? (zh ? "开始之前" : "Before the first round") : (zh ? `第 ${g.r} 轮` : `Round ${g.r}`)}</b><small>{zh ? `，${g.spans.length} 次调用${g.errors ? `，${g.errors} 次失败` : ""}` : `, ${g.spans.length} calls${g.errors ? `, ${g.errors} failed` : ""}`}</small></td><td>{sec(g.ms)}</td><td colSpan={3}>{g.tokens ? n(g.tokens) : ""}</td><td>{g.usd ? usd(g.usd, 4) : ""}</td></tr>}
+            {shown.map((s, i) => (
+              <tr key={i} className={(s.ok === false ? "bad " : "") + (g.r >= 0 && s.k === "tool" ? "tr-kid" : "")}>
+                <td>+{sec(s.at)}</td>
+                <td>{s.k === "model" ? <><b>{word(s.n, zh)}</b><small> {s.model ?? ""}</small></> : <code>{s.n}</code>}{s.ok === false && <small>{zh ? "，失败" : ", failed"}</small>}</td>
+                <td className="tr-line"><span className={"tr-bar " + s.k} style={{ marginLeft: `${(100 * s.at) / wall}%`, width: `${Math.max(0.6, (100 * s.ms) / wall)}%` }} /></td>
+                <td>{sec(s.ms)}</td>
+                <td>{s.k === "model" ? n(s.in) : ""}</td><td>{s.k === "model" ? n(s.read) : ""}</td><td>{s.k === "model" ? n(s.out) : ""}</td>
+                <td>{s.k === "model" ? usd(s.usd, 4) : ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        );
+      })}
     </table></div>
+  </>);
+}
+
+const FILTERS: { id: TraceFilter; label: Bi }[] = [
+  { id: "all", label: B("All", "全部") }, { id: "model", label: B("Model calls", "模型调用") }, { id: "tool", label: B("Tool calls", "工具调用") },
+  { id: "failed", label: B("Failed", "失败") }, { id: "slow", label: B("Slow, 2 s or more", "慢，2 秒以上") },
+];
+
+/** Cost and tokens per workspace and day (agent_usage_by_workspace), and runs whose trace has a given tool, a failure
+ *  or a slow call (agent_trace_find): the cross-run views LangSmith and Langfuse give a team. */
+function UsageAndSearch({ days, onOpen }: { days: number; onOpen: (id: string) => void }) {
+  const { lang, say } = useApp();
+  const zh = lang === "zh";
+  const [rows, setRows] = useState<ops.WorkspaceDay[] | null>(null);
+  const [q, setQ] = useState<{ tool: string; failed: boolean; slow: boolean }>({ tool: "", failed: true, slow: false });
+  const [found, setFound] = useState<ops.TraceHit[] | null>(null);
+  useEffect(() => { void ops.usageByWorkspace(days).then(setRows).catch(e => say((e as api.ApiError).message)); }, [days, say]);
+  const find = () => void ops.traceFind({ tool: q.tool.trim() || null, failed: q.failed, slowMs: q.slow ? SLOW_MS : null, days }).then(setFound).catch(e => say((e as api.ApiError).message));
+  const n = (x: number) => x.toLocaleString("en-US");
+  return (<>
+    <section className="sec">
+      <div className="sec-h"><h2>{zh ? "按工作区和日期的成本与令牌" : "Cost and tokens by workspace and day"}</h2></div>
+      {!rows ? <p className="quiet">{zh ? "加载中…" : "Loading…"}</p> : rows.length ? (
+        <div className="tscroll"><table className="ah-t"><thead><tr><th>{zh ? "日期" : "Day"}</th><th>{zh ? "企业" : "Business"}</th><th>{zh ? "运行" : "Runs"}</th><th>{zh ? "令牌（输入，输出）" : "Tokens in, out"}</th><th>{zh ? "缓存命中" : "Cache hits"}</th><th>{zh ? "工具出错" : "Tool errors"}</th><th>{zh ? "成本" : "Cost"}</th></tr></thead>
+          <tbody>{rows.map(r => { const prompt = r.input + r.cache_read + r.cache_write; return (
+            <tr key={r.workspace_id + r.day}><td>{fmtDay(r.day, lang)}</td><td>{r.business ?? r.workspace_id.slice(0, 8)}</td><td>{r.runs}</td><td>{n(prompt)}, {n(r.output)}</td>
+              <td>{prompt ? `${Math.round((1000 * r.cache_read) / prompt) / 10}%` : "-"}</td><td>{r.tool_calls ? `${r.tool_errors} / ${r.tool_calls}` : "-"}</td><td>{usd(r.cost_usd, 4)}</td></tr>); })}</tbody></table></div>
+      ) : <p className="quiet">{zh ? "这段时间没有运行。" : "No runs in this window."}</p>}
+    </section>
+    <section className="sec">
+      <div className="sec-h"><h2>{zh ? "查找运行" : "Find runs by their trace"}</h2></div>
+      <form className="tr-find" onSubmit={e => { e.preventDefault(); find(); }}>
+        <input type="text" value={q.tool} maxLength={80} onChange={e => setQ({ ...q, tool: e.target.value })} placeholder={zh ? "工具名，例如 fill_fields" : "Tool name, e.g. fill_fields"} aria-label={zh ? "工具名" : "Tool name"} autoComplete="off" />
+        <label className="check"><input type="checkbox" checked={q.failed} onChange={e => setQ({ ...q, failed: e.target.checked })} /><span>{zh ? "只看失败" : "Failed only"}</span></label>
+        <label className="check"><input type="checkbox" checked={q.slow} onChange={e => setQ({ ...q, slow: e.target.checked })} /><span>{zh ? "只看慢调用" : "Slow calls only"}</span></label>
+        <button type="submit" className="sbtn ink">{zh ? "查找" : "Find"}</button>
+      </form>
+      {found && (found.length ? <RunRows rows={found.map(h => ({ ...h, title: `${h.title || h.prompt} (${zh ? `${h.hits} 次匹配` : `${h.hits} matching`})` }))} onOpen={onOpen} />
+        : <p className="quiet">{zh ? "没有符合的运行。" : "No runs match."}</p>)}
+    </section>
   </>);
 }
 
@@ -284,6 +338,8 @@ function AgentHealth() {
         <section className="sec"><div className="sec-h"><h2>{zh ? "最慢的 10 次运行" : "The 10 slowest runs"}</h2></div><RunRows rows={h.slowest} onOpen={setRun} /></section>
         <section className="sec"><div className="sec-h"><h2>{zh ? "最贵的 10 次运行" : "The 10 most expensive runs"}</h2></div><RunRows rows={h.costliest} onOpen={setRun} />
           <p className="note">{zh ? "单次运行的成本，按运行期间该工作区的 AI 调用计算；同一工作区同时进行的运行会共享这些调用。" : "A run's cost counts its workspace's AI calls while it ran, so runs at the same moment in one workspace share them."}</p></section>
+
+        <UsageAndSearch days={days} onOpen={setRun} />
 
         <section className="sec">
           <div className="sec-h"><h2>{zh ? "每周摘要" : "Weekly summaries"}</h2></div>
