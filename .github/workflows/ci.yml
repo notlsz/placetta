@@ -113,8 +113,8 @@ jobs:
           npm audit --audit-level=high --package-lock-only --prefix worker/filer
       - name: Dependabot watches every manifest
         run: node scripts/check-dependabot.mjs
-      - name: Evidence collector tests
-        run: node --test scripts/soc2-evidence.test.mjs
+      - name: Evidence collector, log export and access review tests
+        run: node --test scripts/soc2-evidence.test.mjs scripts/log-export.test.mjs scripts/access-review.test.mjs
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with: { go-version: stable, cache: false }
       # Built from the Go module proxy at an exact version, so the download is checked against sum.golang.org.

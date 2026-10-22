@@ -1,0 +1,64 @@
+# Keeps a year of Supabase's platform logs (sign-ins and auth events, every server function call and its console
+# output, API gateway requests), which Supabase itself keeps for 1 day on Free and 7 on Pro. Every hour it copies the
+# hour that ended an hour ago (scripts/log-export.mjs), encrypts it with the backup age key, and uploads it to a bucket
+# outside Supabase whose lock keeps every object for a year. docs/soc2/runbooks/log-retention.md: setup, the weekly
+# review, and how to read the copies in an investigation. SOC 2 CC7.2, CC7.3; ISO/IEC 27001 A.8.15; FedRAMP AU-11.
+#
+# Skips, with a warning, until these repository secrets exist:
+#   SUPABASE_LOGS_TOKEN      a Supabase access token with only the analytics_logs_read permission
+#   BACKUP_AGE_RECIPIENT     the same age public key the database backup uses
+#   LOG_BUCKET, LOG_AWS_ACCESS_KEY_ID, LOG_AWS_SECRET_ACCESS_KEY (put-only), LOG_S3_ENDPOINT and LOG_S3_REGION (optional)
+name: Log export
+on:
+  schedule:
+    - cron: "23 * * * *"      # every hour at :23
+  workflow_dispatch:
+    inputs:
+      from: { description: "Backfill from (UTC, on the hour, e.g. 2026-10-21T00:00Z); empty for the usual hour", required: false }
+      to: { description: "Backfill to (UTC, on the hour); at most what Supabase still keeps", required: false }
+concurrency: { group: log-export, cancel-in-progress: false }
+permissions: { contents: read }
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_LOGS_TOKEN }}
+      BACKUP_AGE_RECIPIENT: ${{ secrets.BACKUP_AGE_RECIPIENT }}
+      LOG_BUCKET: ${{ secrets.LOG_BUCKET }}
+      LOG_S3_ENDPOINT: ${{ secrets.LOG_S3_ENDPOINT }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.LOG_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.LOG_AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.LOG_S3_REGION || 'auto' }}
+      FROM: ${{ inputs.from }}
+      TO: ${{ inputs.to }}
+    steps:
+      - name: Check the settings
+        id: cfg
+        run: |
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$BACKUP_AGE_RECIPIENT" ] && [ -n "$LOG_BUCKET" ] && [ -n "$AWS_ACCESS_KEY_ID" ]; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Log export is not set up yet (docs/soc2/runbooks/log-retention.md). Nothing was copied."
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        if: steps.cfg.outputs.ok
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: steps.cfg.outputs.ok
+        with: { node-version: 22 }
+      - name: Export
+        if: steps.cfg.outputs.ok
+        run: |
+          args=(--out "$RUNNER_TEMP/logs")
+          if [ -n "$FROM" ]; then args+=(--from "$FROM" --to "$TO"); fi
+          node scripts/log-export.mjs "${args[@]}"
+      - name: Encrypt and upload
+        if: steps.cfg.outputs.ok
+        run: |
+          sudo apt-get install -y -qq age >/dev/null
+          m=$(ls "$RUNNER_TEMP/logs"/manifest-*.json | head -1); stamp=$(basename "$m" .json | sed 's/^manifest-//')
+          tar -C "$RUNNER_TEMP" -cf - logs | age -r "$BACKUP_AGE_RECIPIENT" -o "$RUNNER_TEMP/placetta-logs-$stamp.tar.age"
+          ep=(); [ -n "$LOG_S3_ENDPOINT" ] && ep=(--endpoint-url "$LOG_S3_ENDPOINT")
+          key="logs/${stamp:0:4}/${stamp:5:2}/${stamp:8:2}/placetta-logs-$stamp.tar.age"   # stamp looks like 2026-10-22T0300Z
+          aws s3 cp "${ep[@]}" --only-show-errors "$RUNNER_TEMP/placetta-logs-$stamp.tar.age" "s3://$LOG_BUCKET/$key"
+          node -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));console.log(`Uploaded ${process.argv[2]}: ${m.files.reduce((a,f)=>a+f.events,0)} events from ${m.from} to ${m.to}`)' "$m" "$key" >> "$GITHUB_STEP_SUMMARY"

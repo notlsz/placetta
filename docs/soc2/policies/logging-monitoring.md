@@ -18,7 +18,7 @@
 | Agent runs (`agent_runs`) | Each job: status, timings, tool calls and errors | Supabase | Working notes cleared after 365 days, once the purge is live |
 | Text and call consent (`phone_consent_log`) | Every change to consent | Supabase | 5 years, append-only |
 | The incident log (`public.incidents`) | What happened, impact, fix | Supabase, once its migration is applied | Permanent |
-| Supabase platform logs | API requests, Postgres, Auth, server function logs | Supabase | 1 day on Free, 7 on Pro, 28 on Team ([pricing](https://supabase.com/pricing.md)). Supabase notes connection logging is off by default for new projects and that customers with evidence needs must turn it on ([SOC 2 and Supabase](https://supabase.com/docs/guides/security/soc-2-compliance)) |
+| Supabase platform logs | API requests, Postgres, Auth, server function logs | Supabase | 1 day on Free, 7 on Pro, 28 on Team ([pricing](https://supabase.com/pricing.md)). Supabase notes connection logging is off by default for new projects and that customers with evidence needs must turn it on ([SOC 2 and Supabase](https://supabase.com/docs/guides/security/soc-2-compliance)). Our copy: auth, function and API gateway logs exported hourly and kept 1 year under a lock, once set up ([runbooks/log-retention.md](../runbooks/log-retention.md); written 2026-10-22, not running yet) |
 | Vercel, Render and GitHub Actions logs | Requests, builds, deploys, CI runs | Each provider | Per the provider's plan |
 
 ## Protecting the audit trail
@@ -42,7 +42,7 @@ Logs never hold secrets: Odelia's replay scrubs secrets from every input (`scrip
 
 | Every | Who | What |
 | --- | --- | --- |
-| Week | Founder | The Monday agent health summary; Supabase logs for failed function calls and auth errors (with 1 day of logs on Free, this has to be daily until the project is on Pro) |
+| Week | Founder | The Monday agent health summary; Supabase logs for failed function calls and auth errors (with 1 day of logs on Free, this has to be daily until the project is on Pro or the hourly export runs); the steps are in [runbooks/log-retention.md](../runbooks/log-retention.md#the-weekly-log-review-15-minutes-every-monday) |
 | Month | Founder | Run `scripts/soc2-evidence.mjs` and read its "Needs attention" list: audit entries by actor, staff logins, saved-login openings, incidents without a fix; the Supabase security advisors. Record it in [RECORDS.md](../RECORDS.md#monthly-review) |
 | Quarter | Founder | The access review ([access-control.md](access-control.md)) |
 
