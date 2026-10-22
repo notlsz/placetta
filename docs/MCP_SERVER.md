@@ -11,6 +11,26 @@ server is `supabase/functions/mcp`, read only.
 | `plan_preview` | plan | The permits a kind of business needs in a US city, from the registry, each with its source |
 | `filing_status` | filings | Filings the team submits: status, confirmation number, dates |
 
+**Resources** (an assistant attaches them as context, or a person @-mentions them in Claude), each needing the scope
+shown: `placetta://status` (status), `placetta://stores/<id>/status` (status, one per store, also a template),
+`placetta://stores/<id>/readiness` (readiness, template), `placetta://deadlines` (deadlines, next 60 days) and
+`placetta://filings/open` (filings). They are built from the same tools, so a resource and its tool always agree.
+
+**Prompts** (Claude shows them as slash commands), each with its data attached so it answers in one turn:
+`renewal_checklist` (days, store_id, lang), `weekly_brief` (lang) and `opening_readiness` (store_id, lang). A prompt
+is listed only for a token with every scope it reads.
+
+**Pages and errors.** Every list (`tools/list`, `resources/list`, `resources/templates/list`, `prompts/list`) and the
+two long tools (`upcoming_deadlines`, `filing_status`) return 50 at a time with an opaque `nextCursor` /
+`next_cursor`; an invalid cursor is `-32602`. Every error carries a stable code: protocol errors in `error.data.code`
+(`unauthorized`, `rate_limited`, `scope_missing`, `unknown_tool`, `not_found`, `invalid_cursor`, `workspace_gone`,
+`method_not_found`, `internal`), tool errors in `structuredContent.error.code` with `isError: true`, so the model can
+correct itself. Each tool has an `outputSchema`.
+
+Copied from: the MCP spec's resources, prompts, pagination and tools pages (2025-11-25 and 2026-07-28); GitHub's and
+Linear's servers (resources for records, read-only annotations); Stripe's API (stable error codes); Devin's server
+(`mcp.devin.ai`, Streamable HTTP with a bearer key).
+
 ## How it works
 
 - **Protocol.** Streamable HTTP, stateless: one JSON-RPC request per POST, answered with JSON. It speaks 2026-07-28
@@ -35,4 +55,7 @@ server is `supabase/functions/mcp`, read only.
 1. Apply migrations `20261023090000_run_push` and `20261023100000_mcp_tokens`.
 2. Deploy the function: `supabase functions deploy mcp` (`verify_jwt = false` is in `supabase/config.toml`).
 3. Make a token in Settings, Connections, AI assistants, and add it to Claude with the address shown there. Ask
-   "which of my stores have deadlines in the next 60 days?".
+   "which of my stores have deadlines in the next 60 days?", or pick "Prepare my renewal checklist" from the prompts.
+4. List it in the MCP Registry (optional, free): `docs/mcp/server.json` is ready. Prove you own placetta.com with a
+   DNS TXT record (`mcp-publisher login dns --domain placetta.com`), then `mcp-publisher publish docs/mcp/server.json`.
+   See https://modelcontextprotocol.io/registry/remote-servers.

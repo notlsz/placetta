@@ -6,7 +6,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Audit, type Deps, handle, type Token } from "./logic.ts";
 // @ts-types="./tools.d.ts"
-import { checkArgs, runMcpTool, ToolError, TOOLS, type FilingRow } from "./tools.js";
+import { checkArgs, getPrompt, listResources, page, PROMPTS, readResource, RESOURCE_TEMPLATES, resourceScope, runMcpTool, ToolError, TOOLS, type FilingRow } from "./tools.js";
 
 const URL_ = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(URL_, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
@@ -46,6 +46,7 @@ const deps: Deps = {
   check: checkArgs,
   today: () => new Date().toISOString().slice(0, 10),
   origins,
+  x: { page, RESOURCE_TEMPLATES, listResources, resourceScope, readResource, PROMPTS, getPrompt },
 };
 
 Deno.serve(async (req) => {

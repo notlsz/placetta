@@ -1352,6 +1352,7 @@ function AssistantAccess() {
                 <Btn onClick={() => copy(x.code, say, zh)}>{zh ? "复制" : "Copy"}</Btn>
               </div>
             ))}
+            <p className="sg-fine">{zh ? "然后试试助手菜单里的“准备我的续期清单”，或在 Claude 中用 @ 附上某家门店的合规状态。" : "Then try \"Prepare my renewal checklist\" from the assistant's prompts, or attach a store's compliance status with @ in Claude."}</p>
             <div className="sst-act"><button type="button" className="sbtn ink" onClick={() => setShown(null)}>{zh ? "完成" : "Done"}</button></div>
           </div>
         </SetSheet>

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.placetta/placetta",
+  "title": "Placetta",
+  "description": "Read-only compliance status, deadlines, store readiness, permit plans and filings for your stores.",
+  "version": "1.1.0",
+  "websiteUrl": "https://www.placetta.com",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://esquxzcfsylffuijvzec.supabase.co/functions/v1/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer plc_mcp_... (make a token in Placetta, Settings, AI assistants)",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
