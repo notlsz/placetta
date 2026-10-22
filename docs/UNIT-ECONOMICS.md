@@ -208,6 +208,21 @@ Fixed platform cost before the first customer: $172 a month ($2,064 a year): Sup
 | Gemini 3.8 Flash doubling on 2027-01-01 | AI per run doubles | not a loss at these volumes (a chat turn goes from about $0.012 to $0.025); the price table applies it on the day |
 | Unpriced thinking tokens | Gemini 3 thinks on every call and bills it as output | now counted however the vendor reports it (`billedOutput`); the first live eval measures how much |
 
+## Each change, before and after (kept only when better)
+
+| Change | Before | After | Kept |
+|---|---|---|---|
+| Model prices re-read from the vendors | Gemini 3.8 Flash recorded at half its list price; Sonnet 5.5 cache reads at twice theirs | recorded at what the vendors bill, with 2027's price change applied on its day | yes: the allowance and margin views were wrong |
+| Thinking billed as output | a vendor reporting thinking apart from `completion_tokens` went unpriced | counted however it's reported | yes |
+| The $50 store ceiling | store plan AI capped at $25, saver from $15, no total-cost line | $44 of AI (saver from $29), $50 all in, tested against `src/economics.ts` | yes: the founder's rule |
+| Never stopped mid-task | a run that crossed the allowance part way through a filing stopped there | finishes in saver mode, within its $1.50 task cap | yes |
+| Margin watch and team-time alert | no alert on AI against revenue or on a filing's team time | a staff task for each, once | yes |
+| Filing playbooks | 7 model rounds, 5 tool calls, $0.025 a filing (one store, one question) | 4 rounds, 2 calls, $0.018; three stores in 2 calls instead of 13 | yes |
+| Field validators | an EIN with a prefix the IRS doesn't assign, an ITIN on the EIN line, a P.O. box as the premises passed the check | refused or questioned before approval | yes |
+| Edge-case fixes | food trucks got a restaurant's permits; a county-only address lost the county; deadlines counted from UTC | each fixed, each with a test | yes |
+| Quality loops | rules re-checked only by age (90 days), no grading of real runs, no mutation testing | nightly sweep, 20% online grading, 459 mutations, a triage queue | yes: the first sweep found two real changes |
+| A separate chat limit | | | no: the allowance, saver mode and rate limits already hold it (below) |
+
 ## What was checked and left alone
 
 - **Cheap-model routing for the main loop.** Measured again at today's prices: with its cache hitting, Gemini 3.8 Flash
