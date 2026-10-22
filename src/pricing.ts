@@ -141,16 +141,18 @@ export type ComplexId = "liquor" | "plan_review" | "import";
 /** The complex list, fixed: a license is complex only when its name matches one of these. Nothing else costs $999. */
 export const COMPLEX_LIST: { id: ComplexId; name: { en: string; zh: string }; match: RegExp; not?: RegExp }[] = [
   { id: "liquor", name: { en: "Liquor licenses", zh: "酒类执照" },
-    match: /\b(liquor|alcoholic beverage|beer and wine|wine and beer)\b|sell alcohol|酒类|酒牌|售酒/i, not: /dealer registration|server (training|permit|card)|responsible beverage/i },
+    match: /\b(liquor|alcoholic beverage|beer and wine|wine and beer)\b|sell alcohol|酒类|酒牌|售酒/i, not: /dealer registration|server (training|permit|card)|responsible beverage|community board|\bnotice\b|通知/i },
   { id: "plan_review", name: { en: "Building plan review", zh: "建筑图纸审查" },
     match: /plan (check|review)|building permit|tenant improvement|build-?out permit|DOB alteration|图纸审查|建筑许可|装修许可/i },
   { id: "import", name: { en: "Import permits", zh: "进口许可" },
     match: /\bimport (permit|licen[cs]e)|permit to import|importer (registration|license|number)|进口许可|进口执照/i },
 ];
 
-/** Never charged: an inspection that is part of a permit already paid for, and a certificate staff earn themselves
- *  (a course and an exam). Placetta tracks them for free. */
-export const NOT_CHARGED = /\b(final|pre-?opening|routine) inspection\b|\binspection$|food handler (cards?|certificates?)|food (protection )?manager|food protection certificate|食品经理|食品处理员/i;
+/** Never charged: an inspection that is part of a permit already paid for, a notice that is a step of a license already
+ *  priced (New York's 30-day community board notice is part of the liquor license), a certificate or training staff
+ *  earn themselves (a course and an exam), and rules with nothing to file (the EU's food hygiene regulation). Placetta
+ *  tracks them for free. */
+export const NOT_CHARGED = /\b(final|pre-?opening|routine) inspection\b|\binspection$|food handler (cards?|certificates?)|food (protection )?manager|food protection certificate|food hygiene (training|rules)|community board notice|食品经理|食品处理员|食品卫生培训|社区委员会通知/i;
 
 export type LicenseTier = "license" | "complex" | "renewal" | "free";
 /** What a quote can be: a priced tier, or included (in the store plan: a renewal Odelia files on her own; in the chain

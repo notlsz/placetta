@@ -22,6 +22,10 @@ Deno.test("the complex list is fixed: liquor, building plan review, import permi
 
 Deno.test("what staff complete and inspections inside a permit are never charged", () => {
   for (const n of ["Food handler cards for staff", "Certified food protection manager", "Building final inspection", "Food Protection Certificate (course and exam)"]) assertEquals(licenseTierOf(n), "free", n);
+  // found by the liquor-license journey: New York's community board notice is a step of the liquor license ($999 once),
+  // not a second complex license; France's hygiene training and the EU's hygiene rules have nothing to file
+  for (const n of ["Community board notice for the liquor license", "Food hygiene training (the operator and at least one staff member)", "EU food hygiene rules (Regulation (EC) 852/2004)"]) assertEquals(licenseTierOf(n), "free", n);
+  assertEquals(licenseTierOf("Restaurant wine license (beer and wine)"), "complex");
 });
 
 Deno.test("a quote: $299, $999, a $99 renewal, included on the plan, or a team quote without its Stripe price", () => {
