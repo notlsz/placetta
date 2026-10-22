@@ -65,7 +65,7 @@ jobs:
         run: |
           npm ci --prefix worker/filer
           npm run typecheck --prefix worker/filer
-          cd worker/filer && npx playwright install --with-deps chromium && node --experimental-strip-types --test test/store.test.ts test/docker.test.ts test/reroute.test.ts test/replay.test.ts
+          cd worker/filer && node node_modules/playwright-core/cli.js install --with-deps chromium && node --experimental-strip-types --test test/store.test.ts test/docker.test.ts test/reroute.test.ts test/replay.test.ts
   functions:
     runs-on: ubuntu-latest
     steps:
