@@ -40,6 +40,11 @@ const ABROAD = new RegExp("(^|\\.)(" + [
   "stockholm", "erhvervsstyrelsen\\.dk", "prh\\.fi", "vero\\.fi", "ytj\\.fi", "suomi\\.fi", "hel\\.fi",
   // Poland's government domain (biznes.gov.pl, gunb.gov.pl) and the City of Warsaw's service portal; Belgium's social
   // security portal; Portugal's social security
+  // China's government domain (the State Council's gov.cn, the ministries' and every city's own gov.cn sites)
+  "gov\\.cn",
+  // the UAE federal government's portal (u.ae) and the federal and emirate governments' gov.ae sites; Türkiye's gov.tr
+  // and the Istanbul Metropolitan Municipality's own domain; Saudi Arabia's and Qatar's government domains
+  "u\\.ae", "gov\\.ae", "gov\\.tr", "bel\\.tr", "ibb\\.istanbul", "gov\\.sa", "gov\\.qa",
   // Germany's federal law site (the Federal Ministry of Justice's gesetze-im-internet.de)
   "gesetze-im-internet\\.de",
   "gov\\.pl", "warszawa19115\\.pl", "um\\.warszawa\\.pl", "socialsecurity\\.be", "seg-social\\.pt",

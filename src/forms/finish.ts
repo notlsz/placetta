@@ -516,7 +516,69 @@ const GERMANY_SPAIN_ITALY: OfficialForm[] = [
     proof: [BCN_OBRES, "The Prior Consultation procedure is mandatory and allows you to find out the intervention regime that will be applied to the works"] }),
 ];
 
-export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY];
+/* ------------------------------------------------------------------ United Arab Emirates (Dubai, Abu Dhabi, Sharjah)
+   The emirates' own licensing sites (dubaidet.gov.ae, investindubai.gov.ae, sedd.ae, TAMM's pages, ADAFSA, Sharjah
+   Municipality's documents) refused every read from here, so the steps are quoted from the federal government's own
+   portal (u.ae), the Ministry of Finance, Dubai Municipality and the federal food safety law the emirates apply. */
+const AE_STEPS = "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland";
+const AE_CT = "https://mof.gov.ae/en/public-finance/tax/corporate-tax-in-the-uae/";
+const AE_WP = "https://u.ae/en/information-and-services/jobs/Sector-of-employment/employment-in-the-private-sector/work-permits";
+const AE_FOODLAW = "https://moccae.gov.ae/assets/download/3d703379/L10-15%20Eng.pdf.aspx";
+const DXB_FOOD = "https://www.dm.gov.ae/municipality-business/food-safety-department-2/important-information-to-food-establishment/";
+const AE_PREMISES = (where: string, en: string, zh: string, agency: T) => N({ id: `ae-${where.slice(3).toLowerCase()}-premises`, where, level: "city", segs: PREMISES, method: "online", order: 50, cur: "AED",
+  form: "Premises location approval with the licence (lease and land use)", title: [`Premises zoning and lease for the licence (${en})`, `营业执照所需的场所用地与租约（${zh}）`], agency,
+  how: [`The premises' location must meet ${en}'s economic department requirements and the municipality's land planning rules; the attested lease goes with the licence application.`, `场所位置须符合${zh}经济部门的要求和市政土地规划规定；经认证的租约随执照申请一并提交。`],
+  url: AE_STEPS,
+  proof: [AE_STEPS, "The business premises and location must comply with the requirements defined by the respective emirate’s Department of Economic Development"] });
+
+const UAE: OfficialForm[] = [
+  N({ id: "ae-company", where: "AE", level: "federal", needs: { newEntity: true }, method: "online", order: 8, cur: "AED",
+    form: "Trade name, initial approval and memorandum of association (mainland company)", title: ["Company formation on the mainland: trade name, initial approval and memorandum of association", "在大陆设立公司：商号、初步批准与公司章程"],
+    agency: ["The emirate's economic department, under the federal Commercial Companies Law", "所在酋长国经济部门（依联邦商业公司法）"],
+    how: ["A mainland company reserves its trade name and gets initial approval from the emirate's economic department, then signs an attested memorandum of association before the licence is issued; a free zone company forms with its free zone authority instead.", "大陆公司须先向所在酋长国经济部门预留商号并取得初步批准，再签署经认证的公司章程，然后签发执照；自贸区公司改向自贸区管理局设立。"],
+    url: AE_STEPS,
+    proof: [AE_STEPS, "drafting a Memorandum of Association and local service agent agreement"] }),
+  N({ id: "ae-food-consent", where: "AE", level: "federal", segs: ["restaurant", "retail", "warehouse", "seller"], needs: { food: true }, except: ["AE-DXB"], method: "online", order: 60, cur: "AED",
+    form: "Food establishment approval (the emirate's food authority)", title: ["Food establishment approval before trading food", "经营食品前的食品场所审批"],
+    agency: ["The emirate's food authority (Abu Dhabi Agriculture and Food Safety Authority; Sharjah Municipality, Public Health)", "所在酋长国食品主管机关（阿布扎比农业与食品安全局；沙迦市政局公共卫生部）"],
+    how: ["A business that trades in food needs the competent authority's prior consent before it starts; the emirate's food authority approves the premises and inspects it.", "经营食品的企业须在开业前取得主管机关的事先同意；由所在酋长国食品主管机关审批场所并检查。"],
+    url: AE_FOODLAW,
+    proof: [AE_FOODLAW, "related to the trading of food or feed, including the initial production facilities, before obtaining the prior official consent of the competent authority"] }),
+  AE_PREMISES("AE-DXB", "Dubai", "迪拜", ["Dubai Department of Economy and Tourism; Dubai Land Department (Ejari); Dubai Municipality", "迪拜经济与旅游局；迪拜土地局（Ejari）；迪拜市政局"]),
+  AE_PREMISES("AE-AUH", "Abu Dhabi", "阿布扎比", ["Abu Dhabi Department of Economic Development; Department of Municipalities and Transport", "阿布扎比经济发展局；市政与交通局"]),
+  AE_PREMISES("AE-SHJ", "Sharjah", "沙迦", ["Sharjah Economic Development Department; Sharjah Municipality", "沙迦经济发展局；沙迦市政局"]),
+];
+
+/* ------------------------------------------------------------------ Türkiye (Istanbul) */
+const TR_MERSIS = "https://ticaret.gov.tr/ic-ticaret/ticaret-sicili/merkezi-sicil-kayit-sistemi-mersis";
+const TR_GIB = "https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv%2Fonceki-dokumanlar%2Fuser_upload%2Fyayinlar%2Fkurumlar_vergisi.pdf";
+const TR_SGK = "https://www.sgk.gov.tr/Content/Post/3affeaef-df73-4c5b-926f-86376b4e07bf/Isyeri-Isveren-ve-Isyerinin-Bildirimi-2022-05-15-06-04-21";
+const IST_GIDA = "https://istanbul.tarimorman.gov.tr/Belgeler/DepoPerakende%20ve%20Toplu%20T%C3%BCketim%20Yerleri%20Kay%C4%B1t%20%C4%B0%C5%9Flemleri%20(04.01.2023).pdf";
+const IST_RUHSAT = "https://beyoglu.bel.tr/hizmetlerimiz/basvuru-kaynaklari/isyeri-acma-ve-calisma-ruhsatlari/";
+const IST_SIHHI = "https://beyoglu.bel.tr/hizmetlerimiz/basvuru-kaynaklari/isyeri-acma-ve-calisma-ruhsatlari/sihhi-muesseseler-ve-aranacak-sartlar/";
+
+const TURKIYE: OfficialForm[] = [
+  N({ id: "tr-sgk", where: "TR", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "TRY", fee: 0,
+    form: "İşyeri bildirgesi and sigortalı işe giriş bildirgesi (e-SGK)", title: ["Employer workplace registration with social security (SGK)", "向社会保障局（SGK）登记雇主工作场所"],
+    agency: ["Sosyal Güvenlik Kurumu (SGK)", "土耳其社会保障局（SGK）"],
+    how: ["An employer files the workplace registration with SGK electronically by the day it first employs an insured worker, and registers each employee's start.", "雇主须最迟在首次雇用参保员工当日以电子方式向 SGK 提交工作场所登记，并为每名员工办理入职登记。"],
+    url: TR_SGK, takes: ["By the day the first employee starts.", "最迟于首名员工入职当日。"],
+    proof: [TR_SGK, "işverenler, örneği Kurumca hazırlanacak işyeri bildirgesini en geç sigortalı çalıştırmaya başladığı tarihte, Kuruma vermekle yükümlü tutulmuşlardır.", "employers must file the workplace registration form, as prepared by the Institution, at the latest on the day they start employing insured workers."] }),
+  N({ id: "tr-ist-gida", where: "TR-IST", level: "city", segs: ["restaurant", "retail", "warehouse"], needs: { food: true }, method: "pdf_mail", order: 74, cur: "TRY",
+    form: "İşletme Kayıt Belgesi başvuru ve beyannamesi", title: ["Food business registration certificate (İşletme Kayıt Belgesi)", "食品经营登记证（İşletme Kayıt Belgesi）"],
+    agency: ["Istanbul Provincial Directorate of Agriculture and Forestry (the district directorate for the address)", "伊斯坦布尔省农林局（地址所属区分局）"],
+    how: ["Shops, restaurants and stores that handle food apply to the district directorate with the registration application and declaration, and get the business registration certificate.", "经营食品的商店、餐厅和仓储须向区分局提交登记申请和声明，取得经营登记证。"],
+    url: IST_GIDA,
+    proof: [IST_GIDA, "gıda işletmelerinin kayıt belgesi alma zorunluluğu bulunmaktadır.", "food businesses are obliged to obtain a registration certificate."] }),
+  N({ id: "tr-ist-imar-itfaiye", where: "TR-IST", level: "city", segs: PREMISES, method: "in_person", order: 52, cur: "TRY",
+    form: "İmar ve itfaiye uygunluk görüşü (with the opening licence)", title: ["Zoning and fire compliance opinions for the premises", "场所规划与消防合规意见"],
+    agency: ["The district municipality's zoning department and the Istanbul Metropolitan Fire Department", "区政府规划部门与伊斯坦布尔大都市消防局"],
+    how: ["With the opening licence application, the district's licensing department asks the metropolitan fire department (fire and explosion) and the municipality's zoning department (land use) for compliance opinions before the on-site inspection.", "提交营业许可申请后，区许可部门会在现场检查前征求大都市消防局（火灾与爆炸）和市政规划部门（用地）的合规意见。"],
+    url: IST_SIHHI,
+    proof: [IST_SIHHI, "İstanbul Büyük Şehir İtfaiye Müdürlüğüne (Yangın, patlama v.b yönünden), Belediye İmar ve Şehircilik Müdürlüğüne (imar yönünden)", "to the Istanbul Metropolitan Fire Department (for fire, explosion and the like), to the municipality's zoning department (for zoning)"] }),
+];
+
+export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY, ...UAE, ...TURKIYE];
 
 export const FINISH_FIXES: Fix[] = [
   P("at-fb", AT_FB, "In der Regel erlangt die Gesellschaft mit der Eintragung in das Firmenbuch Rechtspersönlichkeit.", "As a rule the company becomes a legal person on its entry in the company register.",
@@ -561,6 +623,50 @@ export const FINISH_FIXES: Fix[] = [
     title: { en: "Company registration in the business register (ComUnica)", zh: "在企业登记处注册公司（ComUnica）" } },
   P("it-vvf", VVF, "considerate a maggior rischio d'incendio, che sono sottoposte a controllo dei Vigili del Fuoco.", "considered at higher fire risk, which are subject to the fire brigade's control.",
     "Proof added from the fire brigade's own page (vigilfuoco.it): the 80 activities listed in annex I of DPR 151/2011 are subject to its control."),
+  /* China: the national steps quoted from the State Council's and the ministries' own publications of the law, and each
+     city's one-stop opening from that city's own government site. Hangzhou, Chengdu, Chongqing, Tianjin and Xi'an
+     refused every read from here (no connection, or a 412 bot wall), so their portals stay unverified. */
+  P("cn-business-license", "https://www.gov.cn/zhengce/content/2021-08/24/content_5632964.htm", "未经登记，不得以市场主体名义从事经营活动。", "Without registration, no one may do business in the name of a market entity.",
+    "Proof added from the Regulations on the Registration of Market Entities as the State Council publishes them (gov.cn)."),
+  P("cn-tax", "https://fgk.chinatax.gov.cn/zcfgk/c100009/c5195081/content.html", "自领取营业执照之日起三十日内，持有关证件，向税务机关申报办理税务登记。", "Within thirty days of receiving the business licence, register for tax with the tax authority, with the relevant documents.",
+    "Proof added from the Tax Collection Administration Law, article 15, in the State Taxation Administration's law database (chinatax.gov.cn)."),
+  P("cn-social", "https://shanghai.chinatax.gov.cn/zcfw/zcfgk/sbf/202202/t462174.html", "用人单位应当自用工之日起三十日内为其职工向社会保险经办机构申请办理社会保险登记。", "An employer must register its employees for social insurance within thirty days of hiring them.",
+    "Proof added from the Social Insurance Law, article 58, as published by the State Taxation Administration's Shanghai bureau (which collects social insurance contributions)."),
+  P("cn-food-license", "https://www.gov.cn/gongbao/2023/issue_10606/202307/content_6894763.html", "从事食品销售和餐饮服务活动，应当依法取得食品经营许可。", "Selling food or providing catering services requires a food business licence.",
+    "Proof added from SAMR Order 78 (Measures for Food Business Licensing and Filing, in force since 1 December 2023) in the State Council Gazette (gov.cn)."),
+  P("cn-fire", "https://js.119.gov.cn/202111/608cd5a920fb4644b27aa41edc5ab073_c_86038aff349a45b5824e.html", "公众聚集场所投入使用、营业前消防安全检查实行告知承诺管理。", "The fire safety check before a public venue opens is done by notification and commitment.",
+    "Proof added from the Fire Protection Law, article 15, as the Jiangsu Fire and Rescue Corps (119.gov.cn) publishes it."),
+  P("cn-open-bj", "https://scjgj.beijing.gov.cn/ztzl/qykb/zcwjkb/202104/t20210413_2353382.html", "近年来，北京市已实现开办企业一网通办", "Beijing has made business opening a single online service",
+    "Proof added from the Beijing Administration for Market Regulation's own page."),
+  P("cn-open-sh", "https://www.shanghai.gov.cn/lctjkbqy/index.html", "开办企业一网通办 最快2天可营业", "Business opening as one online service; open for business in as little as 2 days",
+    "Proof added from the Shanghai Municipal People's Government's own page."),
+  P("cn-open-sz", "https://amr.sz.gov.cn/xxgk/qt/ztlm/qykb/", "整合企业设立登记、公章刻制、申领发票、员工参保登记、住房公积金企业缴存登记等环节。", "It combines company registration, seal making, invoices, employee social insurance and the housing fund registration.",
+    "Proof added from the Shenzhen Administration for Market Regulation's one-window page."),
+  P("cn-open-gz", "https://scjgj.gz.gov.cn/zmhd/cjwt/ssdj/content/post_8663614.html", "各部门在平台同步联办，最快0.5天就可以办结", "The departments handle it together on the platform; it can be done in as little as half a day",
+    "Proof added from the Guangzhou Administration for Market Regulation's own answer on the one-network platform."),
+  P("cn-open-wh", "https://fgw.wuhan.gov.cn/xwzx/fgyw/202102/t20210223_1638311.html", "我市全面推行企业开办“一事联办”“全城通办”", "The city has made business opening a single joint service available city-wide",
+    "Proof added from the Wuhan Development and Reform Commission's own page."),
+  P("cn-open-nj", "https://njsj.nanjing.gov.cn/xwdt/202308/t20230823_3993598.html", "已将企业开办涉及的市场主体登记、公章刻制、银行开户、税务登记、就业参保登记、医保参保登记、公积金登记等七个事项合并办理", "Business opening's seven steps (registration, seal, bank account, tax, employment and social insurance, medical insurance, housing fund) are handled together",
+    "Proof added from the Nanjing Municipal Data Bureau's own page."),
+  P("cn-open-su", "https://www.suzhou.gov.cn/szsrmzf/szyw/202603/4e27892a644d4fa19f6c544811639a30.shtml", "创业者通过“全链通”平台即可完成登录、信息填报、电子签名、提交审核全流程操作", "Founders complete the whole process (login, forms, e-signature, submission) on the Quanliantong platform",
+    "Proof added from the Suzhou Municipal People's Government's own page."),
+  /* UAE: the licences, the tax and the employer steps quoted from the federal portal and ministries */
+  P("ae-tax", AE_CT, "All Taxable Persons (including Free Zone Persons) will be required to register for Corporate Tax and obtain a Corporate Tax Registration Number.", undefined,
+    "Proof added from the Ministry of Finance's corporate tax page (mof.gov.ae)."),
+  P("ae-mohre", AE_WP, "employers may not recruit or employ any worker unless a work permit is issued in accordance with MoHRE procedures.", undefined,
+    "Proof added from the UAE government portal (u.ae): mohre.gov.ae refused every read."),
+  P("ae-dxb-food", DXB_FOOD, "Request for Layout Assessment for Food Establishment Licensing", undefined,
+    "Proof added from Dubai Municipality's Food Safety Department services page (its PDF guides now redirect to the home page)."),
+  ...(["ae-dxb-licence", "ae-auh-licence", "ae-shj-licence"].map(id => P(id, AE_STEPS, "investor can collect the business licence from service centres of the economic departments or through their websites.", undefined,
+    "Proof added from the UAE government portal (u.ae): each emirate's economic department issues the licence; the emirates' own licensing sites refused every read."))),
+  /* Türkiye */
+  { ...P("tr-mersis", TR_MERSIS, "Bu sayede, ticaret sicili müdürlükleri şirket kuruluşlarında tek temas noktası haline getirilmiştir.", "This makes the trade registry offices the single point of contact for forming a company.",
+    "Proof added from the Ministry of Trade's own MERSİS page (ticaret.gov.tr); mersis.gtb.gov.tr refused reads."),
+    title: { en: "Company registration (MERSİS and the trade registry)", zh: "公司注册（MERSİS 与商业登记处）" } },
+  P("tr-gib", TR_GIB, "İşe başlama bildirimi, şirketlerin kuruluş aşamasında işe başlama tarihinden itibaren 10 gün içinde ticaret sicili memurluğunca ilgili vergi dairesine yapılır.", "For a company, the trade registry notifies the tax office of the start of business within 10 days, at formation.",
+    "Proof added from the Revenue Administration's corporate tax guide (gib.gov.tr)."),
+  { ...P("tr-ist-ruhsat", IST_RUHSAT, "İşyeri Açma ve Çalışma Ruhsatı Müracaatları Gerekli evraklar hazırlandıktan sonra Belediyemiz Ruhsat ve Denetim Müdürlüğüne Şahsen veya şirkette imzaya yetkili kişilerce yapılır.", "Applications for the business opening and operating licence are made to the municipality's licensing department, in person or by the company's signatories.",
+    "Proof added from Beyoğlu Municipality's own page (one of Istanbul's district municipalities, each of which issues the licence for its district)."), url: IST_RUHSAT },
   P("ch-ahv", CH_AHV, "Als Arbeitgeber melden Sie sich bei der Ausgleichskasse an.", "As an employer you register with the compensation fund.",
     "Proof added from the Federal Social Insurance Office's FAQ (bsv.admin.ch)."),
 ];
