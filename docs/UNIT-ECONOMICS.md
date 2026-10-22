@@ -15,6 +15,13 @@ from production data, because there is none yet: every margin is an estimate (es
   Essentials' $25 with saver from $15). Every customer type and every journey fits, with room: see "The $50 ceiling"
   in the tables. Nothing measured exceeds it, so no cost cut had to be built for it; the gate makes it a hard line
   rather than an estimate.
+- **Every common filing now has a playbook** (`src/filingPlaybooks`): business license, health permit, seller's
+  permit, sign and building permits, liquor, company formation, and the sales tax return. Odelia runs one tool,
+  `follow_playbook`, instead of reasoning each filing out: it finds each store's own form, fills it from the profile,
+  reuses uploaded documents, checks every line in code and asks for everything missing in one message. Measured on
+  the seven kinds with a registry form: model rounds down 43%, tool calls down 60%, AI per filing down 26%, three
+  stores in 2 tool calls instead of 13, and one run instead of two when the profile already has the answers. Runs per
+  filing: 2 when something must be asked, 1 when not (see "Each filing type" in the tables).
 - **We don't lose money on AI.** A store's typical month of Odelia costs about $0.70 of AI (20 chat turns and four
   weekly checks), under 1% of the $149 plan; with running cost, about $6.40. A heavy month (200 chat turns, five new
   licenses, a liquor license, two team renewals) costs $8.61 of AI on the dearest route, $14.09 with running cost. AI is
@@ -72,11 +79,11 @@ don't give a cycle Placetta reads.
 
 | Journey | Model calls | Prompt tokens | From cache | Output tokens | Gemini 3.8 Flash, 2026 | Same, 2027 price | Gemini, no cache hit | Anthropic only (Sonnet 5.5) | Per 1,000 thinking tokens a call |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| One chat turn on an open store (the average of "what's due" and "which licenses") | 2 | 28,076 | 46.7% | 41.5 | $0.0124 | $0.0247 | $0.0212 | $0.0391 | $0.0075 |
-| A new license: found, prepared, filled from the workspace, put up for approval | 5 | 53,463 | 78.8% | 429 | $0.0133 | $0.0265 | $0.0417 | $0.0368 | $0.0188 |
-| A complex license: beer and wine in Flushing (SLA license, community board notice, TTB registration) | 5 | 54,561 | 74.1% | 626 | $0.0160 | $0.0320 | $0.0433 | $0.0457 | $0.0188 |
-| A renewal the monitor starts: found, prepared, filled, put up for approval | 5 | 64,838 | 79% | 282 | $0.0151 | $0.0302 | $0.0497 | $0.0420 | $0.0188 |
-| A four-city entry: four stores added, one plan_markets packet | 3 | 32,579 | 45% | 219 | $0.0154 | $0.0307 | $0.0253 | $0.0485 | $0.0113 |
+| One chat turn on an open store (the average of "what's due" and "which licenses") | 2 | 29,111.5 | 46.9% | 41.5 | $0.0128 | $0.0256 | $0.0220 | $0.0405 | $0.0075 |
+| A new license: found, prepared, filled from the workspace, put up for approval | 5 | 56,051 | 78.9% | 429 | $0.0138 | $0.0276 | $0.0436 | $0.0383 | $0.0188 |
+| A complex license: beer and wine in Flushing (SLA license, community board notice, TTB registration) | 5 | 57,150 | 74.3% | 626 | $0.0165 | $0.0331 | $0.0452 | $0.0472 | $0.0188 |
+| A renewal the monitor starts: found, prepared, filled, put up for approval | 5 | 67,426 | 79% | 282 | $0.0157 | $0.0313 | $0.0516 | $0.0435 | $0.0188 |
+| A four-city entry: four stores added, one plan_markets packet | 3 | 34,133 | 45.7% | 219 | $0.0159 | $0.0318 | $0.0264 | $0.0501 | $0.0113 |
 
 The portal filer (worker/filer, Sonnet 5.5, no prompt cache): 1,732 tokens a step, $0.0041 a step, $0.12 for 30 steps (est.), $0.33 at its 80-step cap.
 
@@ -99,8 +106,8 @@ Renewals: 2.21 a store a year from the plans' own cycles; 38.5% of them go to th
 
 | Item | Price | AI | Delivery | Team | Stripe | Cost | Margin | Basis |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
-| Store plan, a store a month (typical) | $149.00 | $0.69 | $0.08 | $0.57 | $5.39 | $6.73 | 95.5% | 20 chat turns, 4 weekly checks, 0.11 included renewals |
-| Store plan, a store a month (heavy chat) | $149.00 | $2.92 | $0.08 | $0.57 | $5.39 | $8.96 | 94% | 200 chat turns |
+| Store plan, a store a month (typical) | $149.00 | $0.70 | $0.08 | $0.57 | $5.39 | $6.74 | 95.5% | 20 chat turns, 4 weekly checks, 0.11 included renewals |
+| Store plan, a store a month (heavy chat) | $149.00 | $3.00 | $0.08 | $0.57 | $5.39 | $9.04 | 93.9% | 200 chat turns |
 | Store plan, a store a month (abusive: at the allowance) | $149.00 | $44.00 | $0.08 | $0.57 | $5.39 | $50.04 | 66.4% | the gate holds AI at the store plan's $44 allowance (the $50 ceiling less running cost) |
 | New license | $299.00 | $0.01 | $0.06 | $31.34 | $8.97 | $40.38 | 86.5% | route mix measured over 580 licenses |
 | New license, pessimistic AI and all by the team | $299.00 | $0.04 | $0.00 | $45.00 | $8.97 | $54.01 | 81.9% | worst route, the team files it |
@@ -113,11 +120,11 @@ Renewals: 2.21 a store a year from the plans' own cycles; 38.5% of them go to th
 | Customer | Stores | Opens | Revenue | Cost | Margin | Licenses included free |
 |---|---:|---:|---:|---:|---:|---:|
 | One store, open | 1 | 0 | $1,872 | $109 | 94.2% | 0 |
-| One store, opening (the typical San José restaurant) | 1 | 1 | $7,455 | $1,171 | 84.3% | 0 |
-| 5-store chain, opens 1 a year | 5 | 1 | $14,944 | $1,607 | 89.2% | 0 |
-| 20-store chain, opens 1 a year | 20 | 1 | $38,339 | $3,103 | 91.9% | 11 |
-| 20-store chain, opens 5 a year (25% growth) | 20 | 5 | $41,915 | $6,796 | 83.8% | 55 |
-| 10-store chain, opens 3 a year (25% growth, just over the line) | 10 | 3 | $21,404 | $3,859 | 82% | 33 |
+| One store, opening (the typical San José restaurant) | 1 | 1 | $7,455 | $1,172 | 84.3% | 0 |
+| 5-store chain, opens 1 a year | 5 | 1 | $14,944 | $1,608 | 89.2% | 0 |
+| 20-store chain, opens 1 a year | 20 | 1 | $38,339 | $3,106 | 91.9% | 11 |
+| 20-store chain, opens 5 a year (25% growth) | 20 | 5 | $41,915 | $6,798 | 83.8% | 55 |
+| 10-store chain, opens 3 a year (25% growth, just over the line) | 10 | 3 | $21,404 | $3,861 | 82% | 33 |
 
 ### The $50 ceiling a store a month
 
@@ -127,24 +134,40 @@ Each journey on the dearest of the four routes (with 1,000 thinking tokens a cal
 
 | Journey | AI, dearest route | Fits in $44 |
 |---|---:|---:|
-| One chat turn on an open store (the average of "what's due" and "which licenses") | $0.0541 | 813 |
-| A new license: found, prepared, filled from the workspace, put up for approval | $0.0792 | 555 |
-| A complex license: beer and wine in Flushing (SLA license, community board notice, TTB registration) | $0.0832 | 528 |
-| A renewal the monitor starts: found, prepared, filled, put up for approval | $0.0872 | 504 |
-| A four-city entry: four stores added, one plan_markets packet | $0.0710 | 619 |
+| One chat turn on an open store (the average of "what's due" and "which licenses") | $0.0555 | 792 |
+| A new license: found, prepared, filled from the workspace, put up for approval | $0.0811 | 542 |
+| A complex license: beer and wine in Flushing (SLA license, community board notice, TTB registration) | $0.0847 | 519 |
+| A renewal the monitor starts: found, prepared, filled, put up for approval | $0.0891 | 493 |
+| A four-city entry: four stores added, one plan_markets packet | $0.0726 | 606 |
 
 Each customer type, a store-month: AI and running cost against the ceiling, and team time apart, against the fees that pay it:
 
 | Customer | AI and running a store-month | Under $50 | Team a store-month | License and renewal fees a store-month | Profit a store-month |
 |---|---:|---|---:|---:|---:|
-| One store, open | $6.39 | yes | $2.70 | $7.02 | $146.94 |
-| One store, opening (the typical San José restaurant) | $14.09 | yes | $50.99 | $265.18 | $349.10 |
-| 5-store chain, opens 1 a year | $8.49 | yes | $15.87 | $77.43 | $202.07 |
-| 20-store chain, opens 1 a year | $6.38 | yes | $6.23 | $6.85 | $143.23 |
-| 20-store chain, opens 5 a year (25% growth) | $6.37 | yes | $18.80 | $6.24 | $130.07 |
-| 10-store chain, opens 3 a year (25% growth, just over the line) | $6.37 | yes | $21.59 | $6.10 | $127.14 |
+| One store, open | $6.40 | yes | $2.70 | $7.02 | $146.93 |
+| One store, opening (the typical San José restaurant) | $14.10 | yes | $50.99 | $265.18 | $349.09 |
+| 5-store chain, opens 1 a year | $8.50 | yes | $15.87 | $77.43 | $202.06 |
+| 20-store chain, opens 1 a year | $6.39 | yes | $6.23 | $6.85 | $143.22 |
+| 20-store chain, opens 5 a year (25% growth) | $6.38 | yes | $18.80 | $6.24 | $130.06 |
+| 10-store chain, opens 3 a year (25% growth, just over the line) | $6.38 | yes | $21.59 | $6.10 | $127.13 |
 
-A heavy month for one store, everything on the dearest route: 200 chat turns, 5 new licenses, 1 complex, 2 renewals the team sends and the weekly checks cost $8.61 of AI, $14.09 with running cost: under $50. The licenses' and renewals' own AI is $0.35; their fees ($2,692) pay it many times over, and pay their team time ($516.70) and Stripe ($80.46) too, so none of it has to come out of the $50. Their AI still counts against the store's allowance in the gate; at about $0.044 a filing it never decides whether one fits.
+A heavy month for one store, everything on the dearest route: 200 chat turns, 5 new licenses, 1 complex, 2 renewals the team sends and the weekly checks cost $8.91 of AI, $14.39 with running cost: under $50. The licenses' and renewals' own AI is $0.37; their fees ($2,692) pay it many times over, and pay their team time ($516.70) and Stripe ($80.46) too, so none of it has to come out of the $50. Their AI still counts against the store's allowance in the gate; at about $0.046 a filing it never decides whether one fits.
+
+### Each filing type, first request to approval, before and after its playbook
+
+Measured on one store whose profile lacks the form's own answers (the usual case: two runs, one question in between), through runRounds with a scripted model. "Before" is Odelia reasoning it out: find the form, prepare it, try the approval, ask; then fill the answers and put it up. "After" is follow_playbook twice. "Profile complete" is the playbook when nothing is missing. AI on Gemini 3.8 Flash at 2026's price. Team minutes are the estimate for the route the dispatcher picks for that store's form (FOUNDER TO CONFIRM).
+
+| Filing | Form | Runs before / after | Model rounds before / after | Tool calls before / after | Prompt tokens before / after | AI before / after | Profile complete: runs, rounds, AI | Three stores: tool calls before / after | Route | Team minutes (est.) | Agency time | Renews |
+|---|---|---|---|---|---|---|---|---|---|---:|---|---|
+| Business license or tax certificate | sj-business-tax | 2 / 2 | 7 / 4 | 5 / 2 | 81,852 / 41,977 | $0.0253 / $0.0186 | 1, 2, $0.0093 | 13 / 2 | team | 45 | If you pay during registration, the account activates in 2 to 3 business days; otherwise the invoice is mailed within 5 to 10 business days. | Every year, due on the 15th of the month your business started in San José; a 25% penalty is added the day after it's due, and another 25% a month later. |
+| Health permit (food facility) | nyc-fse | 2 / 2 | 7 / 4 | 5 / 2 | 79,557 / 42,239 | $0.0241 / $0.0184 | 1, 2, $0.0095 | 13 / 2 | portal | 15 | You may open 22 days after applying, even before the pre-permit inspection. | Every year. |
+| Seller's permit or sales tax registration | ca-cdtfa | 2 / 2 | 7 / 4 | 5 / 2 | 85,973 / 43,851 | $0.0265 / $0.0195 | 1, 2, $0.0101 | 13 / 2 | portal | 15 | Often issued the same day. | Does not expire. |
+| Sign permit | sj-sign | 2 / 2 | 7 / 4 | 5 / 2 | 81,165 / 41,484 | $0.0243 / $0.0178 | 1, 2, $0.0093 | 13 / 2 | portal | 15 | Average: 2 weeks. | not stated |
+| Building permit for the build-out | sj-building-ti | 2 / 2 | 7 / 4 | 5 / 2 | 81,650 / 41,801 | $0.0247 / $0.0180 | 1, 2, $0.0094 | 13 / 2 | portal | 15 | San José's standard plan review for a commercial tenant improvement takes about 10 working days for the first round and 5 working days for each recheck. | not stated |
+| Liquor license | ny-sla-rw | 2 / 2 | 7 / 4 | 5 / 2 | 79,722 / 41,423 | $0.0238 / $0.0178 | 1, 2, $0.0093 | 13 / 2 | portal | 300 | not published | Every 2 years. |
+| Company formation or foreign registration | ca-llc-1 | 2 / 2 | 7 / 4 | 5 / 2 | 83,600 / 42,275 | $0.0265 / $0.0192 | 1, 2, $0.0093 | 13 / 2 | portal | 15 | Online filings are currently reviewed about 3 days after receipt (mail about 8 days), per the Oct 8, 2026 queue. | Statement of Information (LLC-12, $20) within 90 days, then every two years. |
+
+Across the 7 kinds: model rounds down 42.9%, tool calls down 60%, AI cost down 26.2%. Runs stay at two when something must be asked (one question, one answer) and drop to one when the profile already has it. A rejection by the agency adds one run either way (read the reason, fix, approve again); the playbook's checks in code are there to make it rarer, and there is no production rejection rate yet to measure it against. Sales tax returns have no registry form yet, so their playbook hands them to the team (no row).
 
 Fixed platform cost before the first customer: $172 a month ($2,064 a year): Supabase Pro, Vercel Pro, the Render worker, Resend Pro, a Telnyx number and Browserbase Startup. It is left out of the per-customer margin above.
 <!-- econ:end -->

@@ -2525,6 +2525,37 @@ console.log("\n# Audit trail export (CSV)");
   eq(stepTimes([{}, { at: "2026-10-22T10:00:03Z" }], 0, false), [null, null], "no time without both ends");
 }
 
+console.log("\n# Filing playbooks: one call per kind, every store, one question");
+{
+  const { PLAYBOOKS } = await import("../src/filingPlaybooks");
+  const { FORMS } = await import("../src/forms/registry");
+  const { VALIDATORS } = await import("../src/validate");
+  for (const p of PLAYBOOKS) {
+    const n = FORMS.filter(f => p.match(f)).length;
+    ok(p.id === "sales_tax_return" ? n === 0 : n > 0, `${p.id}: covers ${n} registry forms`);
+    ok(p.inputs.every(i => !i.validator || i.validator in VALIDATORS) && p.rejections.length > 0 && p.fallback.en && p.fallback.zh, `${p.id}: every input's validator exists, rejections and the team fallback are named in both languages`);
+  }
+  const two = workspace({ stores: [
+    { id: "s1", name: same("Flushing"), address: "136-20 Roosevelt Ave, Flushing, NY 11354", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] },
+    { id: "s2", name: same("Bayside"), address: "39-01 Bell Blvd, Bayside, NY 11361", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] });
+  const first = await agent({ ws: two, prompt: "Get the health permits for both stores.", script: [
+    () => ask(["follow_playbook", { playbook: "health_permit" }]),
+    () => say("Both permits are prepared; I need a few answers."),
+  ] });
+  const r1 = callNamed(first, "follow_playbook")[0]?.parsed as { filings: { store: string; form: string | null; application_id: string }[]; ask_once?: { answers: string[]; documents: string[] } } | undefined;
+  ok(r1 && r1.filings.length === 2 && r1.filings.every(f => f.form === "nyc-fse"), "one call: each store's own form (New York City's food service permit) for both stores", r1?.filings ?? callNamed(first, "follow_playbook")[0]?.out);
+  const asked = r1?.ask_once?.answers ?? [];
+  ok(asked.length > 0 && new Set(asked).size === asked.length, "what's missing is one list, each line once for both stores", asked);
+  const answers = asked.map(l => ({ label: l.replace(/ \(.*\)$/, ""), value: /date/i.test(l) ? "2027-03-01" : /phone/i.test(l) ? "(718) 555-0134" : /seat/i.test(l) ? "24 seats, 10am to 10pm" : /ein|employer/i.test(l) ? "84-1234567" : "Lucky Leaf Tea LLC" }));
+  const second = await agent({ ws: first.w, prompt: "Here are the answers.", script: [
+    () => ask(["follow_playbook", { playbook: "health_permit", answers }]),
+    () => say("Filled."),
+  ] });
+  const r2 = callNamed(second, "follow_playbook")[0]?.parsed as { filings: { empty: number; approval_requested: boolean }[]; ask_once?: { answers: string[] } } | undefined;
+  ok(r2 && r2.filings.every(f => f.empty === 0), "the second call fills every line on both stores from the one set of answers", r2);
+  ok(callNamed(first, "follow_playbook").length + callNamed(second, "follow_playbook").length === 2 && first.calls.length + second.calls.length === 2, "two tool calls in two runs for two stores' permits, instead of a find, prepare, fill and approve per store");
+}
+
 growthTests(ok, eq);
 await memoryTests(ok, eq);
 await journeyTests(ok, eq);

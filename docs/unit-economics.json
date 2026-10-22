@@ -7,13 +7,13 @@
       "id": "chat_turn",
       "what": "One chat turn on an open store (the average of \"what's due\" and \"which licenses\")",
       "calls": 2,
-      "prompt": 28076,
-      "cached": 13122,
+      "prompt": 29111.5,
+      "cached": 13639.5,
       "output": 41.5,
-      "gemini": 0.0124,
-      "gemini2027": 0.0247,
-      "geminiNoCache": 0.0212,
-      "anthropic": 0.0391,
+      "gemini": 0.0128,
+      "gemini2027": 0.0256,
+      "geminiNoCache": 0.022,
+      "anthropic": 0.0405,
       "thinkingPer1k": 0.0075,
       "thinkingPer1k2027": 0.015
     },
@@ -21,13 +21,13 @@
       "id": "new_license",
       "what": "A new license: found, prepared, filled from the workspace, put up for approval",
       "calls": 5,
-      "prompt": 53463,
-      "cached": 42136,
+      "prompt": 56051,
+      "cached": 44208,
       "output": 429,
-      "gemini": 0.0133,
-      "gemini2027": 0.0265,
-      "geminiNoCache": 0.0417,
-      "anthropic": 0.0368,
+      "gemini": 0.0138,
+      "gemini2027": 0.0276,
+      "geminiNoCache": 0.0436,
+      "anthropic": 0.0383,
       "thinkingPer1k": 0.0188,
       "thinkingPer1k2027": 0.0375
     },
@@ -35,13 +35,13 @@
       "id": "complex_license",
       "what": "A complex license: beer and wine in Flushing (SLA license, community board notice, TTB registration)",
       "calls": 5,
-      "prompt": 54561,
-      "cached": 40406,
+      "prompt": 57150,
+      "cached": 42476,
       "output": 626,
-      "gemini": 0.016,
-      "gemini2027": 0.032,
-      "geminiNoCache": 0.0433,
-      "anthropic": 0.0457,
+      "gemini": 0.0165,
+      "gemini2027": 0.0331,
+      "geminiNoCache": 0.0452,
+      "anthropic": 0.0472,
       "thinkingPer1k": 0.0188,
       "thinkingPer1k2027": 0.0375
     },
@@ -49,13 +49,13 @@
       "id": "renewal",
       "what": "A renewal the monitor starts: found, prepared, filled, put up for approval",
       "calls": 5,
-      "prompt": 64838,
-      "cached": 51224,
+      "prompt": 67426,
+      "cached": 53294,
       "output": 282,
-      "gemini": 0.0151,
-      "gemini2027": 0.0302,
-      "geminiNoCache": 0.0497,
-      "anthropic": 0.042,
+      "gemini": 0.0157,
+      "gemini2027": 0.0313,
+      "geminiNoCache": 0.0516,
+      "anthropic": 0.0435,
       "thinkingPer1k": 0.0188,
       "thinkingPer1k2027": 0.0375
     },
@@ -63,13 +63,13 @@
       "id": "plan_markets_4",
       "what": "A four-city entry: four stores added, one plan_markets packet",
       "calls": 3,
-      "prompt": 32579,
-      "cached": 14656,
+      "prompt": 34133,
+      "cached": 15586,
       "output": 219,
-      "gemini": 0.0154,
-      "gemini2027": 0.0307,
-      "geminiNoCache": 0.0253,
-      "anthropic": 0.0485,
+      "gemini": 0.0159,
+      "gemini2027": 0.0318,
+      "geminiNoCache": 0.0264,
+      "anthropic": 0.0501,
       "thinkingPer1k": 0.0113,
       "thinkingPer1k2027": 0.0225
     }
@@ -108,23 +108,23 @@
     {
       "item": "Store plan, a store a month (typical)",
       "price": 149,
-      "ai": 0.69,
+      "ai": 0.7,
       "delivery": 0.08,
       "team": 0.57,
       "stripe": 5.39,
-      "cost": 6.73,
-      "margin": 0.9548322147651007,
+      "cost": 6.74,
+      "margin": 0.9547651006711408,
       "note": "20 chat turns, 4 weekly checks, 0.11 included renewals"
     },
     {
       "item": "Store plan, a store a month (heavy chat)",
       "price": 149,
-      "ai": 2.92,
+      "ai": 3,
       "delivery": 0.08,
       "team": 0.57,
       "stripe": 5.39,
-      "cost": 8.96,
-      "margin": 0.9398657718120805,
+      "cost": 9.04,
+      "margin": 0.9393288590604028,
       "note": "200 chat turns"
     },
     {
@@ -200,84 +200,84 @@
       "stores": 1,
       "opens": 0,
       "revenue": 1872.23,
-      "cost": 109,
-      "margin": 0.941780657291038,
+      "cost": 109.12,
+      "margin": 0.9417165626018171,
       "licensesIncluded": 0,
-      "aiRunStoreMonth": 6.39,
+      "aiRunStoreMonth": 6.4,
       "teamStoreMonth": 2.7,
       "feesStoreMonth": 7.02,
       "fits": true,
-      "profitStoreMonth": 146.94
+      "profitStoreMonth": 146.93
     },
     {
       "who": "One store, opening (the typical San José restaurant)",
       "stores": 1,
       "opens": 1,
       "revenue": 7455.23,
-      "cost": 1171.38,
-      "margin": 0.8428780869268956,
+      "cost": 1171.56,
+      "margin": 0.8428539428025695,
       "licensesIncluded": 0,
-      "aiRunStoreMonth": 14.09,
+      "aiRunStoreMonth": 14.1,
       "teamStoreMonth": 50.99,
       "feesStoreMonth": 265.18,
       "fits": true,
-      "profitStoreMonth": 349.1
+      "profitStoreMonth": 349.09
     },
     {
       "who": "5-store chain, opens 1 a year",
       "stores": 5,
       "opens": 1,
       "revenue": 14944.14,
-      "cost": 1607.37,
-      "margin": 0.8924414519671257,
+      "cost": 1608.03,
+      "margin": 0.8923972874986449,
       "licensesIncluded": 0,
-      "aiRunStoreMonth": 8.49,
+      "aiRunStoreMonth": 8.5,
       "teamStoreMonth": 15.87,
       "feesStoreMonth": 77.43,
       "fits": true,
-      "profitStoreMonth": 202.07
+      "profitStoreMonth": 202.06
     },
     {
       "who": "20-store chain, opens 1 a year",
       "stores": 20,
       "opens": 1,
       "revenue": 38338.57,
-      "cost": 3103.07,
-      "margin": 0.919061404742013,
+      "cost": 3105.53,
+      "margin": 0.9189972395944868,
       "licensesIncluded": 11,
-      "aiRunStoreMonth": 6.38,
+      "aiRunStoreMonth": 6.39,
       "teamStoreMonth": 6.23,
       "feesStoreMonth": 6.85,
       "fits": true,
-      "profitStoreMonth": 143.23
+      "profitStoreMonth": 143.22
     },
     {
       "who": "20-store chain, opens 5 a year (25% growth)",
       "stores": 20,
       "opens": 5,
       "revenue": 41914.57,
-      "cost": 6795.51,
-      "margin": 0.8378723675323402,
+      "cost": 6798.21,
+      "margin": 0.8378079507913359,
       "licensesIncluded": 55,
-      "aiRunStoreMonth": 6.37,
+      "aiRunStoreMonth": 6.38,
       "teamStoreMonth": 18.8,
       "feesStoreMonth": 6.24,
       "fits": true,
-      "profitStoreMonth": 130.07
+      "profitStoreMonth": 130.06
     },
     {
       "who": "10-store chain, opens 3 a year (25% growth, just over the line)",
       "stores": 10,
       "opens": 3,
       "revenue": 21404.29,
-      "cost": 3859.31,
-      "margin": 0.8196945565585216,
+      "cost": 3860.69,
+      "margin": 0.8196300835019522,
       "licensesIncluded": 33,
-      "aiRunStoreMonth": 6.37,
+      "aiRunStoreMonth": 6.38,
       "teamStoreMonth": 21.59,
       "feesStoreMonth": 6.1,
       "fits": true,
-      "profitStoreMonth": 127.14
+      "profitStoreMonth": 127.13
     }
   ],
   "guardrail": {
@@ -299,15 +299,192 @@
     "licenses": 5,
     "complex": 1,
     "teamRenewals": 2,
-    "ai": 8.61,
+    "ai": 8.91,
     "running": 5.48,
-    "licenseAi": 0.35,
+    "licenseAi": 0.37,
     "fees": 2692,
     "team": 516.7,
     "feeStripe": 80.46
   },
   "perChatTurn": {
-    "typical": 0.0124,
-    "worst": 0.0391
-  }
+    "typical": 0.0128,
+    "worst": 0.0405
+  },
+  "filingKinds": [
+    {
+      "kind": "business_license",
+      "form": "sj-business-tax",
+      "route": "team",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 81852,
+        "usd": 0.0253
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 41977,
+        "usd": 0.0186
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0093
+      },
+      "teamMinutes": 45
+    },
+    {
+      "kind": "health_permit",
+      "form": "nyc-fse",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 79557,
+        "usd": 0.0241
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 42239,
+        "usd": 0.0184
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0095
+      },
+      "teamMinutes": 15
+    },
+    {
+      "kind": "sellers_permit",
+      "form": "ca-cdtfa",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 85973,
+        "usd": 0.0265
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 43851,
+        "usd": 0.0195
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0101
+      },
+      "teamMinutes": 15
+    },
+    {
+      "kind": "sign_permit",
+      "form": "sj-sign",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 81165,
+        "usd": 0.0243
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 41484,
+        "usd": 0.0178
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0093
+      },
+      "teamMinutes": 15
+    },
+    {
+      "kind": "building_permit",
+      "form": "sj-building-ti",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 81650,
+        "usd": 0.0247
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 41801,
+        "usd": 0.018
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0094
+      },
+      "teamMinutes": 15
+    },
+    {
+      "kind": "liquor",
+      "form": "ny-sla-rw",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 79722,
+        "usd": 0.0238
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 41423,
+        "usd": 0.0178
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0093
+      },
+      "teamMinutes": 300
+    },
+    {
+      "kind": "entity_registration",
+      "form": "ca-llc-1",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 83600,
+        "usd": 0.0265
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 42275,
+        "usd": 0.0192
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0093
+      },
+      "teamMinutes": 15
+    }
+  ]
 }

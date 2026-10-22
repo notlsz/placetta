@@ -210,6 +210,67 @@ async function journeys(): Promise<Journey[]> {
   return out;
 }
 
+/* ------------------------------------------------------------------ each filing type, before and after its playbook */
+
+type FlowCount = { runs: number; rounds: number; tools: number; priced: Priced };
+type KindRow = { kind: string; name: string; form: string; route: Route; before: FlowCount; after: FlowCount; afterKnown: FlowCount; teamMin: number; agencyTime: string; renews: string; batch3Before: number; batch3After: number };
+const sum = (ps: Priced[]): Priced => ps.reduce((a, p) => Object.fromEntries(Object.keys(a).map(k => [k, r4((a as Record<string, number>)[k] + (p as Record<string, number>)[k])])) as Priced);
+const answerFor = (l: string) => /date/i.test(l) ? "2027-03-01" : /phone|tel/i.test(l) ? "(408) 555-0134" : /ein|employer id/i.test(l) ? "84-1234567" : /seat|hours/i.test(l) ? "24 seats, 10am to 10pm" : /valu|cost|\$/i.test(l) ? "85000" : "Moonleaf Tea LLC";
+
+async function filingKinds(): Promise<KindRow[]> {
+  const { PLAYBOOKS } = await import("../../src/filingPlaybooks");
+  const places: Record<string, [string, string]> = {
+    business_license: ["Milk tea shop", "100 N First St, San Jose, CA 95113"], health_permit: ["Hot pot restaurant", "136-20 Roosevelt Ave, Flushing, NY 11354"],
+    sellers_permit: ["Milk tea shop", "100 N First St, San Jose, CA 95113"], sign_permit: ["Milk tea shop", "100 N First St, San Jose, CA 95113"],
+    building_permit: ["Milk tea shop", "100 N First St, San Jose, CA 95113"], liquor: ["Hot pot restaurant", "136-20 Roosevelt Ave, Flushing, NY 11354"],
+    entity_registration: ["Milk tea shop", "100 N First St, San Jose, CA 95113"],
+  };
+  const rows: KindRow[] = [];
+  for (const pb of PLAYBOOKS) {
+    const at = places[pb.id];
+    if (!at) continue;
+    const mk = (n = 1) => workspace("Moonleaf Tea", { goal: B(`Open a ${at[0].toLowerCase()}`, "开店"), facts: [...workspace("Moonleaf Tea").facts, { id: "f9", group: "business", label: same("What you sell"), value: same(at[0]), source: same("You told me") }],
+      stores: Array.from({ length: n }, (_, k) => store(`s${k + 1}`, at[1])) });
+    // before: Odelia reasons it out (find, prepare, fill, ask; then fill the answers and put it up), as the eval's mapping scripts do
+    let formId = "";
+    const b1 = await run(mk(), `File the ${pb.name.en.toLowerCase()} for the store.`, [
+      () => ask(["follow_playbook", { playbook: pb.id }]),   // only to learn which form the playbook picks: not priced
+    ]);
+    formId = String((b1.outs.get("follow_playbook")?.[0]?.filings as { form?: string }[] | undefined)?.[0]?.form ?? "");
+    if (!formId) { must(false, `${pb.id}: no form at ${at[1]}`); continue; }
+    const before1 = await run(mk(), `File the ${pb.name.en.toLowerCase()} for the store.`, [
+      () => ask(["find_official_forms", { business: at[0], place: at[1], serves_alcohol: pb.id === "liquor", new_us_company: pb.id === "entity_registration", builds_out: true, exterior_sign: true }]),
+      () => ask(["prepare_application", { official_form_id: formId, store_id: "s1" }]),
+      (o) => ask(["request_filing_approval", { application_id: prepared(o)[0]?.application_id }]),
+      () => say("I need a few answers before it can go: the lines below."),
+    ]);
+    const empties = (prepared(before1.outs)[0]?.empty_fields ?? []) as string[];
+    const appId = prepared(before1.outs)[0]?.application_id;
+    const before2 = await run(before1.ws, "Here are the answers.", [
+      () => ask(["fill_fields", { application_id: appId, fields: empties.map(l => ({ label: l, value: answerFor(l), source: "You told me" })) }]),
+      () => ask(["request_filing_approval", { application_id: appId }]),
+      () => say("Filled and up for your approval."),
+    ]);
+    // after: the playbook, twice (the second time with the answers), or once when the profile already has everything
+    const after1 = await run(mk(), `File the ${pb.name.en.toLowerCase()} for the store.`, [() => ask(["follow_playbook", { playbook: pb.id }]), () => say("I need a few answers.")]);
+    const asked = ((after1.outs.get("follow_playbook")?.[0]?.ask_once as { answers?: string[] } | undefined)?.answers ?? []);
+    const after2 = await run(after1.ws, "Here are the answers.", [() => ask(["follow_playbook", { playbook: pb.id, answers: asked.map(l => ({ label: l, value: answerFor(l) })) }]), () => say("Up for your approval.")]);
+    const known = await run(after2.ws, `File the ${pb.name.en.toLowerCase()} for the store.`, [() => ask(["follow_playbook", { playbook: pb.id }]), () => say("Up for your approval.")]);
+    // three stores at once: tool calls before (each store's prepare, fill and approval) and after (one call)
+    const off = formById(formId)!;
+    const f = { payload: { official: formId }, fee_estimate: off.fee ?? null, agent_log: [] } as unknown as Filing;
+    const route = pick(f, DEST[formId], ALL_ON, { hasLogin: true, mailConnected: true });
+    const teamMin = pb.id === "liquor" ? ASSUME.teamMinutes.complex : route === "team" ? ASSUME.teamMinutes.team : route === "owner" ? ASSUME.teamMinutes.owner : ASSUME.teamMinutes.automated + ASSUME.teamMinutes.twoKeyReview;
+    const count = (rs: { ex: Exchange[] }[]): FlowCount => ({ runs: rs.length, rounds: rs.reduce((n, r) => n + r.ex.filter(e => e.tools).length, 0),
+      tools: rs.reduce((n, r) => n + r.ex.filter(e => e.tools).reduce((m, e) => m + e.resp.content.filter(c => c.type === "tool_use").length, 0), 0), priced: sum(rs.map(r => price(r.ex))) });
+    must(String(asked.length) !== "" && (after2.outs.get("follow_playbook")?.[0]?.filings as { empty: number }[])?.[0]?.empty === 0, `${pb.id}: the answers fill every line`);
+    rows.push({ kind: pb.id, name: pb.name.en, form: formId, route, before: count([before1, before2]), after: count([after1, after2]), afterKnown: count([known]), teamMin,
+      // three stores: before, one find, then a prepare and an approval a store, then a fill and an approval a store; after, two calls
+      agencyTime: off.takes?.en ?? "not published", renews: off.renews?.en ?? "not stated", batch3Before: 1 + 4 * 3, batch3After: 2 });
+  }
+  return rows;
+}
+
 /* ------------------------------------------------------------------ routes and renewals, from the registry */
 
 const ALL_ON: Env = { agencies: [], channels: ["email", "fax", "mail", "portal", "team"], portalWorker: true, dryRun: false, twoKey: 10, dailyCap: 10, fax: true, mail: true, holdMinutes: 10 };
@@ -274,6 +335,7 @@ function line(item: string, price: number, ai: number, delivery: number, teamMin
 
 async function main() {
   const js = await journeys();
+  const kinds = await filingKinds();
   const by = Object.fromEntries(js.map(j => [j.id, j.priced])) as Record<string, Priced>;
   const mix = routeMix();
   const step = filerStep();
@@ -378,6 +440,8 @@ async function main() {
     teamMinutesPerLicense: r2(teamMinLicense), fixedMonthUsd: fixedMonthUsd(), fixedYearUsd: fixedYear,
     items, customers, guardrail: GUARDRAIL, ceiling: { max: MAX_COST_PER_STORE_MONTH_USD, soft: SOFT_COST_PER_STORE_MONTH_USD, running: runningCostPerStoreMonth(), aiHard: ceiling.hard, aiSoft: ceiling.soft }, heavyMonth: heavy,
     perChatTurn: { typical: r4(chat), worst: r4(chatWorst) },
+    filingKinds: kinds.map(k => ({ kind: k.kind, form: k.form, route: k.route, before: { runs: k.before.runs, rounds: k.before.rounds, tools: k.before.tools, prompt: k.before.priced.prompt, usd: k.before.priced.gemini },
+      after: { runs: k.after.runs, rounds: k.after.rounds, tools: k.after.tools, prompt: k.after.priced.prompt, usd: k.after.priced.gemini }, profileComplete: { runs: k.afterKnown.runs, rounds: k.afterKnown.rounds, usd: k.afterKnown.priced.gemini }, teamMinutes: k.teamMin })),
   };
   writeFileSync("docs/unit-economics.json", JSON.stringify(result, null, 2) + "\n");
 
@@ -402,6 +466,16 @@ async function main() {
     "| Customer | AI and running a store-month | Under $50 | Team a store-month | License and renewal fees a store-month | Profit a store-month |", "|---|---:|---|---:|---:|---:|");
   for (const c of customers) t.push(`| ${c.who} | ${usd(c.aiRunStoreMonth)} | ${c.fits ? "yes" : "no"} | ${usd(c.teamStoreMonth)} | ${usd(c.feesStoreMonth)} | ${usd(c.profitStoreMonth)} |`);
   t.push("", `A heavy month for one store, everything on the dearest route: ${heavy.chats} chat turns, ${heavy.licenses} new licenses, ${heavy.complex} complex, ${heavy.teamRenewals} renewals the team sends and the weekly checks cost ${usd(heavy.ai)} of AI, ${usd(heavy.ai + heavy.running)} with running cost: ${heavy.ai + heavy.running <= MAX_COST_PER_STORE_MONTH_USD ? "under" : "over"} $${MAX_COST_PER_STORE_MONTH_USD}. The licenses' and renewals' own AI is ${usd(heavy.licenseAi)}; their fees (${usd(heavy.fees, 0)}) pay it many times over, and pay their team time (${usd(heavy.team)}) and Stripe (${usd(heavy.feeStripe)}) too, so none of it has to come out of the $${MAX_COST_PER_STORE_MONTH_USD}. Their AI still counts against the store's allowance in the gate; at about ${usd(heavy.licenseAi / (heavy.licenses + heavy.complex + heavy.teamRenewals), 3)} a filing it never decides whether one fits.`);
+  t.push("", "### Each filing type, first request to approval, before and after its playbook", "",
+    "Measured on one store whose profile lacks the form's own answers (the usual case: two runs, one question in between), through runRounds with a scripted model. \"Before\" is Odelia reasoning it out: find the form, prepare it, try the approval, ask; then fill the answers and put it up. \"After\" is follow_playbook twice. \"Profile complete\" is the playbook when nothing is missing. AI on Gemini 3.8 Flash at 2026's price. Team minutes are the estimate for the route the dispatcher picks for that store's form (FOUNDER TO CONFIRM).", "",
+    "| Filing | Form | Runs before / after | Model rounds before / after | Tool calls before / after | Prompt tokens before / after | AI before / after | Profile complete: runs, rounds, AI | Three stores: tool calls before / after | Route | Team minutes (est.) | Agency time | Renews |",
+    "|---|---|---|---|---|---|---|---|---|---|---:|---|---|");
+  for (const k of kinds) t.push(`| ${k.name} | ${k.form} | ${k.before.runs} / ${k.after.runs} | ${k.before.rounds} / ${k.after.rounds} | ${k.before.tools} / ${k.after.tools} | ${k.before.priced.prompt.toLocaleString("en-US")} / ${k.after.priced.prompt.toLocaleString("en-US")} | ${usd(k.before.priced.gemini, 4)} / ${usd(k.after.priced.gemini, 4)} | ${k.afterKnown.runs}, ${k.afterKnown.rounds}, ${usd(k.afterKnown.priced.gemini, 4)} | ${k.batch3Before} / ${k.batch3After} | ${k.route} | ${k.teamMin} | ${k.agencyTime.replace(/\|/g, "/")} | ${k.renews.replace(/\|/g, "/")} |`);
+  if (kinds.length) {
+    const avg = (f: (k: KindRow) => number) => kinds.reduce((a, k) => a + f(k), 0) / kinds.length;
+    const dr = 1 - avg(k => k.after.rounds) / avg(k => k.before.rounds), dt = 1 - avg(k => k.after.tools) / avg(k => k.before.tools), dc = 1 - avg(k => k.after.priced.gemini) / avg(k => k.before.priced.gemini);
+    t.push("", `Across the ${kinds.length} kinds: model rounds down ${pct(dr)}, tool calls down ${pct(dt)}, AI cost down ${pct(dc)}. Runs stay at two when something must be asked (one question, one answer) and drop to one when the profile already has it. A rejection by the agency adds one run either way (read the reason, fix, approve again); the playbook's checks in code are there to make it rarer, and there is no production rejection rate yet to measure it against. Sales tax returns have no registry form yet, so their playbook hands them to the team (no row).`);
+  }
   t.push("", `Fixed platform cost before the first customer: ${usd(fixedMonthUsd(), 0)} a month (${usd(fixedYear, 0)} a year): Supabase Pro, Vercel Pro, the Render worker, Resend Pro, a Telnyx number and Browserbase Startup. It is left out of the per-customer margin above.`);
   const table = t.join("\n");
   const doc = "docs/UNIT-ECONOMICS.md";
