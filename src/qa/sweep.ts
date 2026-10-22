@@ -47,7 +47,9 @@ export function feesOnPage(text: string): number[] {
 
 /** One rule against its page today. null: it holds, and was read recently enough. */
 export function sweepFinding(p: Proofed, page: Page, today: string, staleDays = 90): Finding | null {
-  if (!(page.status >= 200 && page.status < 300) || !page.text.trim())
+  // a page that blocks robots (an "Access Denied" or a challenge) is unreachable, never a changed rule
+  const blocked = /access denied|request rejected|attention required|verify you are (a )?human|are you a robot|captcha/i.test(page.text.slice(0, 3000)) && page.text.length < 20000;
+  if (!(page.status >= 200 && page.status < 300) || !page.text.trim() || blocked)
     return { kind: "unreachable", severity: "low", source: p.url, subject: p.id, repro: `GET ${p.url} answered ${page.status || "nothing"} on ${today}.`,
       fix: "Nothing changes: the page is re-read on the next sweep. Two sweeps in a row unreachable: check whether the agency moved the page." };
   const words = pageWords(page.text), quote = norm(p.quote);
@@ -60,8 +62,11 @@ export function sweepFinding(p: Proofed, page: Page, today: string, staleDays = 
   }
   if (p.fee != null && p.fee > 0) {
     const fees = feesOnPage(page.text);
-    if (fees.length && !fees.includes(p.fee)) {
-      const only = fees.length === 1 ? fees[0] : null;
+    // the registry's amount anywhere on the page still holds it (a convenience fee near the word "fee" isn't the fee)
+    const anywhere = [...pageWords(page.text).matchAll(/\$\s?([\d,]+(?:\.\d{2})?)/g)].map(m => Number(m[1].replace(/,/g, "")));
+    if (fees.length && !fees.includes(p.fee) && !anywhere.includes(p.fee)) {
+      // safe only when there is one candidate, in the same range as the old fee (a fee rarely more than triples or halves)
+      const only = fees.length === 1 && fees[0] >= p.fee / 2 && fees[0] <= p.fee * 3 ? fees[0] : null;
       return { kind: "fee", severity: "medium", source: p.url, subject: p.id,
         repro: `${p.id}'s fee is $${p.fee} in the registry; ${p.url} shows ${fees.map(f => `$${f}`).join(", ")} near the word "fee" on ${today}.`,
         fix: only != null ? `Change ${p.id}'s fee from $${p.fee} to $${only}, citing ${p.url} read ${today}.` : `Read ${p.url} and set ${p.id}'s fee from it; it shows more than one amount.`,

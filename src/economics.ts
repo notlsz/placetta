@@ -120,6 +120,9 @@ export const GUARDRAIL = {
   sweepStaleDays: 90,
 } as const;
 
+/** The online grader's share of runs, for the server (src/server/agent-entry.ts). */
+export const GRADER_SAMPLE_RATE = GUARDRAIL.graderSampleRate;
+
 /** What a payment costs in Stripe fees: a card, or a yearly subscription invoice paid by card or by ACH. */
 export function stripeFee(amountUsd: number, how: "card" | "subscription_card" | "subscription_ach" = "card"): number {
   const card = amountUsd * VENDOR.stripeCardPct.usd + VENDOR.stripeCardFixed.usd;

@@ -26,3 +26,4 @@ site/beam.js
 leads/
 .claude/worktrees/
 bundles/
+qa-findings.json

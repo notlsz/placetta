@@ -21,3 +21,6 @@ export { finishWork, stampFilings } from "../finish";
 export { CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier } from "../security/detect";
 export type { ToolLog } from "../security/secure";
 export type { Actor } from "../security/policy";
+// The online grader (src/qa/grade.ts) and its sample rate (src/economics.ts, FOUNDER TO CONFIRM)
+export { gradeRun, sampled } from "../qa/grade";
+export { GRADER_SAMPLE_RATE } from "../economics";

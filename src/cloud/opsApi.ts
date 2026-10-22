@@ -79,4 +79,13 @@ export const incidentsList = () => rpc<{ since: string | null; incidents: Incide
 export const incidentAdd = (i: { happened_at: string; title: string; impact: string; fix?: string; public: boolean }) =>
   rpc<string>("incident_add", { p_happened_at: i.happened_at, p_title: i.title, p_impact: i.impact, p_fix: i.fix ?? null, p_public: i.public });
 export const incidentUpdate = (id: string, fix: string, isPublic: boolean) => rpc<null>("incident_update", { p_id: id, p_fix: fix, p_public: isPublic });
+/** The quality triage queue (migration 20261025100000_quality): what the sweeper, the mutation generator and the online
+ *  grader found, each with a repro and a proposed fix. */
+export type QaFinding = {
+  id: string; kind: "drift" | "unreachable" | "stale" | "fee" | "grader" | "edge"; severity: "high" | "medium" | "low"; source: string; subject: string;
+  repro: string; fix: string; safe: { form: string; from: number | null; to: number; cite: string } | null; status: "open" | "approved" | "dismissed" | "fixed";
+  seen: number; first_seen: string; last_seen: string; due_at: string; note: string | null;
+};
+export const qaQueue = () => rpc<QaFinding[]>("qa_queue");
+export const qaDecide = (id: string, status: "approved" | "dismissed" | "fixed", note?: string) => rpc<QaFinding>("qa_decide", { p_id: id, p_status: status, p_note: note ?? null });
 export const governanceReports = () => rpc<GovernanceReport[]>("governance_reports_list");
