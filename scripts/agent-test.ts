@@ -35,6 +35,7 @@ import { ADDRESS_RULES } from "../src/forms/address-rules/index";
 import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
 import { groupOf, groupsFor, toolTokens } from "../src/toolIntent";
 import { checkArgs } from "../src/toolArgs";
+import { fromRow, merge, napper, pollDelay, startFeed } from "../src/cloud/runFeed";
 import { readdirSync, readFileSync } from "node:fs";
 import { addRule, allowOptions, allowRule, autoOk, HOUSE_MAX, houseBrief, houseCheck, jobsDone, markSecond, planApprovalId, runMode, secondStep, workPrompt } from "../src/autonomy";
 import { addUndo, undoRun } from "../src/rewind";
@@ -2422,6 +2423,26 @@ console.log("\n# Audit trail export (CSV)");
   ok(b4.ok && (bad.w.deadlines ?? []).filter(d => d.title.en === "Opening").length === 1, "the fixed call runs; an extra argument the schema doesn't name doesn't block it", b4.out);
   eq(checkArgs({ type: "object", properties: { n: { type: "integer", minimum: 1 }, tags: { type: "array", items: { type: "string" }, maxItems: 2 } } }, { n: 0, tags: ["a", 3, "c"] }).errors,
     ["n must be at least 1, got 0", "tags takes at most 2 items, got 3", "tags[1] must be string, got integer 3"], "checkArgs: minimum, maxItems, item types");
+}
+
+/* ------------------------------------------------------------------ live run updates: pushed and polled, merged */
+{
+  console.log("\n# Live run updates (src/cloud/runFeed.ts): pushes and polls merge into one view");
+  const st = (n: number) => ({ state: "working", label: same(`step ${n}`) }) as Step;
+  let f = startFeed();
+  let m = merge(f, { from: 0, steps: [st(0), st(1)], draft: "Hel", at: "2026-10-22T10:00:01Z" }); f = m.feed;
+  eq([m.steps.length, m.draft, f.shown], [2, "Hel", 2], "a push shows its steps and words");
+  m = merge(f, fromRow({ steps: [st(0)], draft: "H", updated_at: "2026-10-22T10:00:00Z" })); f = m.feed;
+  eq([m.steps.length, m.draft, f.draft], [0, undefined, "Hel"], "an older poll adds nothing and never puts back older words");
+  m = merge(f, { from: 1, steps: [st(1), st(2)], draft: "Hello", at: "2026-10-22T10:00:02Z" }); f = m.feed;
+  eq([m.steps.map(x => x.label.en), m.draft, f.shown], [["step 2"], "Hello", 3], "overlapping steps show once, in order");
+  m = merge(f, { from: 5, steps: [st(5)], draft: "Hello!", at: "2026-10-22T10:00:03Z" });
+  ok(m.gap && !m.steps.length && m.feed === f, "a push past a step this view never got waits for the next poll");
+  m = merge(f, fromRow({ steps: [st(0), st(1), st(2), st(3), st(4), st(5)], draft: null, updated_at: "2026-10-22T10:00:04Z" }));
+  eq([m.steps.map(x => x.label.en), m.feed.shown], [["step 3", "step 4", "step 5"], 6], "the poll fills the gap");
+  eq([pollDelay(true, true), pollDelay(false, true), pollDelay(false, false)], [4000, 300, 700], "polling slows to every 4 s while pushes arrive");
+  const z = napper(); const t0 = Date.now(); const p = z.nap(5000); z.wake(); await p;
+  ok(Date.now() - t0 < 1000, "a push wakes the poll at once");
 }
 
 growthTests(ok, eq);

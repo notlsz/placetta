@@ -43,6 +43,7 @@ import { daysFromNow, daysUntil, inDays, nowIso } from "./time";
 import { preflight } from "./smart";
 import { I, Menu, Modal } from "./ui";
 import * as api from "./cloud/api";
+import { fromRow, merge, napper, pollDelay, startFeed, type Pushed } from "./cloud/runFeed";
 import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
 import { runApproved, type McpTool } from "./mcp";
 import { normalize, withServer, type CloudSession } from "./cloud/session";
@@ -455,18 +456,26 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const follow = useCallback(async (id: string, onEvent: (e: AgentEvent) => void, signal: AbortSignal) => {
     if (!cloud) return;
     serverRun.current = id;
+    // steps, tool calls and the words so far are pushed as the server saves them (src/cloud/runFeed.ts); polling stays
+    // as the fallback, every 4 s while pushes arrive and every 300 to 700 ms when they don't
+    let feed = startFeed();
+    const z = napper();
+    const show = (u: Pushed) => {
+      const m = merge(feed, u); feed = m.feed;
+      m.steps.forEach((s, i) => onEvent({ type: "step", index: feed.shown - m.steps.length + i, step: s }));
+      if (m.draft) onEvent({ type: "draft", text: m.draft });
+      if (m.gap) z.wake();
+      return !!m.draft;
+    };
+    const watch = api.watchRun(id, { progress: show, end: z.wake });
     try {
-      let shown = 0, draft = "", r: api.RunRow;
+      let r: api.RunRow;
       for (;;) {
         if (signal.aborted) { await api.stopRun(id).catch(() => undefined); throw { code: "cancelled" }; }
         r = await api.pollRun(id);
-        r.steps.slice(shown).forEach((s, i) => onEvent({ type: "step", index: shown + i, step: s }));
-        shown = r.steps.length;
-        const moved = !!r.draft && r.draft !== draft;
-        if (moved) { draft = r.draft!; onEvent({ type: "draft", text: draft }); }
+        const moved = show(fromRow(r));
         if (r.status !== "running") break;
-        // while words are arriving the server saves them every 300 ms, so look as often; otherwise less
-        await new Promise(res => setTimeout(res, moved ? 300 : 700));
+        await z.nap(pollDelay(watch.live(), moved));
       }
       const row = await api.loadWorkspace(cloud.wsId);
       const next = normalize(row.name, row.state);
@@ -478,7 +487,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       else if (r.status === "done" && r.reply) onEvent({ type: "reply", reply: r.reply });
       else if (r.status === "stopped") throw { code: "cancelled" };
       else throw { code: "run_failed", message: r.error ?? "" };
-    } finally { serverRun.current = null; }
+    } finally { serverRun.current = null; watch.close(); }
   }, [cloud, refresh, watchFamily]);
 
   /* The agency's own form, always current (src/forms/versions.ts). Whenever an application's answers change in this
@@ -686,14 +695,24 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     setSideJobs(n => n + 1);
     const upd = (f: (m: Turn) => Partial<Turn>) => setFeed(ms => ms.map(m => (m.id === tid && m.kind === "turn" ? { ...m, ...f(m) } : m)));
     const t0 = performance.now();
+    // pushed as the server saves it, polled as the fallback (src/cloud/runFeed.ts)
+    let feed = startFeed();
+    const z = napper();
+    const show = (u: Pushed) => {
+      const m = merge(feed, u); feed = m.feed;
+      const add = m.steps.filter(inChat);
+      if (add.length) upd(x => ({ steps: [...x.steps, ...add], active: x.steps.length + add.length - 1 }));
+      if (m.draft) upd(() => ({ draft: m.draft }));
+      if (m.gap) z.wake();
+    };
+    const watch = api.watchRun(id, { progress: show, end: z.wake });
     try {
-      let shown = 0, r: api.RunRow;
+      let r: api.RunRow;
       for (;;) {
         r = await api.pollRun(id);
-        if (r.steps.length > shown) { const add = r.steps.slice(shown).filter(inChat); shown = r.steps.length; if (add.length) upd(m => ({ steps: [...m.steps, ...add], active: m.steps.length + add.length - 1 })); }
-        if (r.draft) upd(() => ({ draft: r.draft ?? undefined }));
+        show(fromRow(r));
         if (r.status !== "running") break;
-        await new Promise(res => setTimeout(res, 1500));
+        await z.nap(watch.live() ? 4000 : 1500);
       }
       const row = await api.loadWorkspace(cloud.wsId);
       const next = normalize(row.name, row.state);
@@ -703,7 +722,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       if (r.status === "waiting") watchFamily(id);
       upd(() => ({ reply: (r.status === "done" || r.status === "waiting") && r.reply ? r.reply : { text: [same(r.error ?? (lang === "zh" ? "已停止。" : "Stopped."))] }, active: -1, ms: performance.now() - t0, draft: undefined }));
     } catch { upd(() => ({ reply: { text: [B("I lost track of that job. It's still in Work.", "我暂时跟丢了这项工作，它仍在“工作”页中。")] }, active: -1 })); }
-    finally { setSideJobs(n => n - 1); }
+    finally { setSideJobs(n => n - 1); watch.close(); }
   };
   const alongsideRef = useRef(alongside);
   alongsideRef.current = alongside;

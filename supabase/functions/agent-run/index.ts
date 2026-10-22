@@ -51,6 +51,7 @@ import { deliverNotice } from "../_shared/business_rules.ts";
 import { filledLines, formAttachments, linkForms, type FilledForm } from "../_shared/form_links.ts";
 import type { Attachment } from "../_shared/mail.ts";
 import { type FamilyDb, fill, spawn, stillOpen, wake } from "./family.ts";
+import { pusher } from "./push.ts";
 import { actorOf } from "./actor.ts";
 import { secretValues, withoutEnv } from "../_shared/secrets.ts";
 // Agent memory (src/odeliaMemory/): read before a run, saved after it
@@ -580,10 +581,12 @@ export async function work(runId: string, token: string | null, ticket: string |
   const pending: Patch[] = [];
   const steps: Step[] = Array.isArray(run.steps) ? [...run.steps] : [];
   let draft: string | null = null, flushT: ReturnType<typeof setTimeout> | undefined, flushing: PromiseLike<unknown> = Promise.resolve();
+  // and pushed to the app on the run's private Realtime channel as it's saved (push.ts); polling stays as the fallback
+  const push = pusher(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", run.id, steps.length);
   // At most one write every DRAFT_MS while the model writes: the app polls the draft and shows the words arriving. (It
   // used to wait for 600 ms of quiet, which a streaming answer never gives, so nothing showed until the end.)
   const flush = (now = false) => {
-    const go = () => { flushT = undefined; flushing = lease.write({ steps, draft, updated_at: new Date().toISOString() }); };
+    const go = () => { flushT = undefined; const at = new Date().toISOString(); flushing = lease.write({ steps, draft, updated_at: at }).then(ok => { if (ok) push.progress(steps, draft, at); return ok; }); };
     if (now) { clearTimeout(flushT); go(); } else if (flushT === undefined) flushT = setTimeout(go, DRAFT_MS);
   };
   // Save the agent's changes onto the newest saved state (the person may have changed things meanwhile), and log them.
@@ -781,6 +784,8 @@ export async function work(runId: string, token: string | null, ticket: string |
     }
   } finally {
     clearInterval(watchStop); clearTimeout(flushT); await flushing;
+    // done, waiting, handed to a fresh instance, failed or stopped: the app reads the row now instead of at its next poll
+    if (!lease.lost) push.end("saved");
     await flushLog().catch(() => undefined);
     if (ended && !lease.lost) await afterRun(run);
   }

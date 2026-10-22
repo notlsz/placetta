@@ -6,6 +6,7 @@ import type { Quote } from "../overage.ts";
 import type { ModuleQuote } from "../modules.ts";
 import { readSSE } from "../../supabase/functions/_shared/stream.ts";
 import { tempChat } from "../odeliaMemory/tempChat";
+import type { Pushed } from "./runFeed";
 
 /* ------------------------------------------------------------------ *
  * Placetta's backend (Supabase): accounts, saved workspaces, private
@@ -468,6 +469,25 @@ export async function pollRun(id: string): Promise<RunRow> {
   const { data, error } = await supabase().rpc("poll_agent_run", { p_id: id });
   if (error) throw fromPg(error);
   return data as RunRow;
+}
+/** Live updates for a run on the server, on its private Realtime channel (supabase/functions/agent-run/push.ts; only
+ *  the workspace's members may listen). live() is whether the channel is connected; the caller keeps polling either
+ *  way, more slowly while it is. Off in the preview. */
+export type RunWatch = { live(): boolean; close(): void };
+export function watchRun(id: string, on: { progress(u: Pushed): void; end(): void }): RunWatch {
+  if (PREVIEW || !cloudConfigured) return { live: () => false, close() {} };
+  let ok = false;
+  try {
+    const sb = supabase();
+    const ch = sb.channel(`run:${id}`, { config: { private: true } })
+      .on("broadcast", { event: "progress" }, m => {
+        const p = (m.payload ?? {}) as Record<string, unknown>;
+        on.progress({ from: Number(p.from) || 0, steps: Array.isArray(p.steps) ? p.steps as Step[] : [], draft: typeof p.draft === "string" ? p.draft : null, at: String(p.at ?? "") });
+      })
+      .on("broadcast", { event: "end" }, () => on.end())
+      .subscribe(st => { ok = st === "SUBSCRIBED"; });
+    return { live: () => ok, close() { ok = false; void sb.removeChannel(ch).catch(() => undefined); } };
+  } catch { return { live: () => false, close() {} }; }
 }
 export async function stopRun(id: string) {
   const { error } = await supabase().rpc("stop_agent_run", { p_id: id });
