@@ -621,13 +621,14 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         builds_out: { type: "boolean", description: "Construction or remodeling of the space" }, exterior_sign: { type: "boolean" },
         hazmat_or_batteries: { type: "boolean" }, sells_cosmetics: { type: "boolean" }, food_warehouse: { type: "boolean" }, manhattan_below_96th: { type: "boolean" },
         serves_alcohol: { type: "boolean", description: "Sells or serves beer, wine or spirits" },
+        outdoor_seating: { type: "boolean", description: "Puts tables and chairs outside on the street or pavement (a terrace)" },
       } },
       execute(i) {
         const segment = segmentOf(str(i.business) || get().business.en);
         const place = str(i.place) || get().locations.map(l => `${l.name.en}, ${l.county.en}`).join("; ");
         const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}),
           ...(i.builds_out ? { buildout: true } : {}), ...(i.exterior_sign ? { signage: true } : {}), ...(i.hazmat_or_batteries ? { hazmat: true } : {}), ...(i.sells_cosmetics ? { cosmetics: true } : {}),
-          ...(i.food_warehouse || segment === "restaurant" ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}),
+          ...(i.food_warehouse || segment === "restaurant" ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}), ...(i.outdoor_seating ? { terrace: true } : {}),
           // a furniture brand: wood goods, upholstered furniture, dressers and chests (src/forms/furniture.ts)
           ...furnitureNeeds(str(i.business) || get().business.en) };
         const list: OfficialForm[] = str(i.search) ? searchForms({ text: str(i.search), where: str(i.place) || undefined }) : formsFor({ segment, where: place, needs });
@@ -641,10 +642,10 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         return {
           segment, place, country: info.country ?? "unknown", city: info.city?.en, currency: info.currency,
           forms: list.slice(0, 30).map(f => ({ official_form_id: f.id, form: f.form, title: f.title[lang], agency: f.agency[lang], level: f.level, how_filed: `${METHOD[f.method][lang]}. ${f.how[lang]}`, official_link: f.url, info: f.info,
-            ...(claimed(f) ? { claim: true, ...(f.proof ? { info_quote: f.proof.quote, info_read_on: proofCurrent(f.proof, daysFromNow(0)) ?? f.proof.checked } : {}) }
+            ...(claimed(f) ? { claim: true, ...(f.proof ? { info_quote: f.proof.quote, ...(f.proof.en ? { info_quote_in_english: f.proof.en } : {}), info_read_on: proofCurrent(f.proof, daysFromNow(0)) ?? f.proof.checked } : {}) }
               : { claim: false, not_claimed: `No current quote from the agency's own page says this applies here${known?.conflicts.length ? ", or two official sources disagree on who issues it" : ""}. Don't tell the person it's required: say you're not sure, and that ${f.agency[lang]} (${f.info || f.url}) decides. Read that page; if it says so, cite its words.` }),
             fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.length ? f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`) : "Not listed yet: prepare_application adds the lines every agency asks; read the official link for the rest",
-            attachments: f.attach?.map(a => a[lang]), for_foreign_owners: f.foreign?.[lang], placetta_fills_official_pdf: canFill(f), reread_agency_page_first: f.checked === "known" })),
+            attachments: f.attach?.map(a => a[lang]), for_foreign_owners: f.foreign?.[lang], ...(f.specialist ? { needs_local_professional: f.specialist[lang] } : {}), placetta_fills_official_pdf: canFill(f), reread_agency_page_first: f.checked === "known" })),
           ...(known?.steps.length ? { local_steps: known.steps.map(a => ({ step: a.name[lang], agency: a.agency[lang], level: a.level, link: a.source.url,
             ...(a.abstain ? { claim: false, who_to_ask: a.source.url } : { claim: true, quote: a.source.quote, read_on: a.source.checked }) })) } : {}),
           // what an official page says differs for this kind of business here (a milk tea shop, a coffee shop, a bakery):
