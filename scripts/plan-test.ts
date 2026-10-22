@@ -107,3 +107,15 @@ for (const [where, x] of Object.entries(want)) {
   const odd = costToOpen({ ...w, apps: [...w.apps, { ...w.apps[0], id: "x", official: undefined, fees: [{ label: B("Fee", "费用"), amount: 999 }] }] }, { today: "2026-10-17" });
   eq([odd.agencyUSD, odd.unpublished], [costToOpen(w, { today: "2026-10-17" }).agencyUSD, 5], "an amount the registry doesn't publish is never added");
 }
+
+// An importer of tea or coffee deals in food: FDA's facility registration, and never CPSC's product certificate (the Consumer
+// Product Safety Act excludes food, 15 U.S.C. 2052(a)(5)(I)). A furniture brand with "teak" or a "coffee table" is not food.
+{
+  const ids = (what: string, where: string) => previewPlan(what, where, "2027-03-01", { today: "2026-10-22" }).apps.map(a => a.official);
+  const tea = ids("Tea importer", "Houston, TX"), coffee = ids("Coffee bean importer, online seller", "Los Angeles, CA"), zh = ids("茶叶进口商", "Houston, TX");
+  eq([tea.includes("fda-ffr"), tea.includes("cpsc-cert"), tea.includes("cbp-5106")], [true, false, true], "a tea importer gets FDA registration and CBP's importer form, not CPSC's certificate");
+  eq([coffee.includes("fda-ffr"), coffee.includes("cpsc-cert")], [true, false], "so does a coffee importer selling online");
+  eq([zh.includes("fda-ffr"), zh.includes("cpsc-cert")], [true, false], "and one described in Chinese (茶叶进口商)");
+  const teak = ids("Teak furniture importer", "Houston, TX"), tables = ids("Coffee table and dining table store", "Dallas, TX");
+  eq([teak.includes("fda-ffr"), teak.includes("cpsc-cert"), tables.includes("fda-ffr")], [false, true, false], "teak furniture and coffee tables aren't food; the furniture importer keeps its CPSC certificate");
+}

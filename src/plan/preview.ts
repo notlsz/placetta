@@ -8,7 +8,7 @@ import { B, same, type Bi } from "../bi";
 import { formsEntity as formsEntityFor, formsFor, placeInfo, placesOf, segmentOf, type OfficialForm, type Segment, type Where } from "../forms/registry";
 import { usPlace } from "../forms/usplace";
 import { FURNITURE_KINDS, kindFactsAt, kindsOf, type KindFact, type StoreKind } from "../forms/kinds";
-import { furnitureNeeds } from "../forms/furniture";
+import { FURNITURE, furnitureNeeds } from "../forms/furniture";
 import { FOOD_PERMITTER, MUNICIPAL_BUILDING, proofCurrent, whoToAsk, type Src } from "./ask";
 import type { Application, CheckItem, Deadline, Field, Level, Store, Workspace } from "../model";
 import { publishedDays } from "../plan";
@@ -279,7 +279,10 @@ function generic(g: GenericRow, today: string): Application {
 export function previewPlan(what: string, where: string, opening?: string, o: PreviewOptions = {}): PreviewPlan {
   const today = o.today ?? daysFromNow(0);
   const segment = segmentOf(what);
-  const food = segment === "restaurant" || /grocery|supermarket|market|food|snack|超市|生鲜|食品|零食/i.test(what);
+  // an importer or seller of tea, coffee or drinks deals in food too (FDA registers it; CPSC's certificate isn't for it).
+  // Whole words, and never a furniture brand: "teak", a "coffee table" or a "tea cabinet" isn't food
+  const food = segment === "restaurant" || /grocery|supermarket|market|food|snack|超市|生鲜|食品|零食/i.test(what)
+    || (!FURNITURE.test(what) && /\b(teas?|coffees?|beverages?|drinks?|juices?|candy|candies|confectionery|spices?|sauces?|seasonings?|noodles?)\b|茶|咖啡|饮料|饮品|糖果|调料|酱/i.test(what));
   const employees = o.employees ?? true, buildout = o.buildout ?? true;
   const alcohol = o.alcohol ?? sellsAlcohol(what);
   // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)

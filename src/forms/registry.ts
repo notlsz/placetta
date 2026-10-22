@@ -284,7 +284,9 @@ export const FORMS: OfficialForm[] = [
   },
   {
     id: "cpsc-cert", form: "General Certificate of Conformity / Children's Product Certificate (16 CFR 1110)", title: B("Product safety certificate, filed electronically at entry", "产品安全合格证书（入境时电子申报）"),
-    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会（CPSC）"), level: "federal", where: "US", segments: ["seller", "retail"], needs: { imports: true }, method: "online", order: 50,
+    // not for a food importer: the Consumer Product Safety Act's "consumer product" excludes "(I) food" as the FD&C Act
+    // defines it (15 U.S.C. 2052(a)(5)(I), govinfo.gov USCODE-2023); FDA's registration and prior notice cover it instead
+    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会（CPSC）"), level: "federal", where: "US", segments: ["seller", "retail"], needs: { imports: true }, unless: ["food"], method: "online", order: 50,
     how: B("The importer issues the certificate itself (there is no government form) and, under the eFiling rule, files the certificate data with CBP at entry.", "由进口商自行出具证书（无政府表格），并按电子申报规则在入境报关时向 CBP 申报证书数据。"),
     url: "https://www.cpsc.gov/eFiling", info: "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification", fee: 0, checked: "page", fields: [],
   },
