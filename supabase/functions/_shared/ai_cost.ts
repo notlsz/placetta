@@ -6,6 +6,8 @@
 // A model not listed here is priced like the most expensive one, so an unknown route can never look cheap.
 // The first matching pattern wins, so the specific ones come before the family names.
 
+import { cacheRates } from "./cache_rates.ts";
+
 type Price = { in: number; out: number; /** the rate past `longAt` input tokens, when the vendor has one */ long?: Price; longAt?: number };
 const PRICES: [RegExp, Price][] = [
   // Anthropic
@@ -67,7 +69,9 @@ export function costOf(model: string, u: Usage | undefined): number {
   if (!u) return 0;
   const n = (v: unknown) => (typeof v === "number" && v > 0 ? v : 0);
   const p = priceOf(model, n(u.input_tokens) + n(u.cache_creation_input_tokens) + n(u.cache_read_input_tokens));
-  const usd = (n(u.input_tokens) * p.in + n(u.cache_creation_input_tokens) * p.in * 1.25 + n(u.cache_read_input_tokens) * p.in * 0.1 + n(u.output_tokens) * p.out) / 1e6
+  // cached input at the vendor's own cached rate (cache_rates.ts): Anthropic reads 0.1x and writes 1.25x, Gemini 2.5 reads 0.25x
+  const r = cacheRates(model);
+  const usd = (n(u.input_tokens) * p.in + n(u.cache_creation_input_tokens) * p.in * r.write + n(u.cache_read_input_tokens) * p.in * r.read + n(u.output_tokens) * p.out) / 1e6
     + n(u.server_tool_use?.web_search_requests) * SEARCH_USD;
   return Math.round(usd * 1e6) / 1e6;
 }

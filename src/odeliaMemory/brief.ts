@@ -56,7 +56,9 @@ export function briefsBlock(m: AgentMemory, names: Record<string, string> = {}, 
 
 /** Sentences that carry something a long conversation must not lose: dates, amounts, case and confirmation numbers,
  *  decisions and requirements. */
-const IMPORTANT = /\b(\d{4}-\d{2}-\d{2}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2}|\$\s?\d[\d,]*|case|confirmation|license|permit|renew\w*|expir\w*|deadline|due|decid\w*|agreed|we('ll| will)|must|requires?|landlord|lease|inspector|llc|inc\b|corp\b)\b|\d{4}年|\d{1,2}月\d{1,2}日|决定|同意|必须|要求|截止|到期|续期|房东|租约|案件|确认号/i;
+// Only strong signals: a date, an amount, a case or confirmation number, a decision or a requirement. Words that are
+// merely on topic (permit, lease, landlord) would flood the list and push the decisions out.
+const IMPORTANT = /\b(\d{4}-\d{2}-\d{2}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2}(st|nd|rd|th)?\b|\$\s?\d[\d,]*|(case|confirmation)( number| no\.?| #)?:? ?[A-Z0-9-]*\d|decid\w*|agreed|we('ll| will) (sign|file|open|renew|pay|use|close)|must|requires?)\b|\d{4}年|\d{1,2}月\d{1,2}日|决定|同意|必须|要求|截止|到期|续期|案件号|确认号/i;
 type Msg = { role: string; content: unknown };
 /** A turn's own words: not the processors' provenance notes, the harness's notes or a summary already folded. */
 const NOT_SAID = /^(Where these results came from:|You're out of room|Summary of the earlier conversation)/;
@@ -64,7 +66,7 @@ const textOf = (c: unknown): string => typeof c === "string" ? (NOT_SAID.test(c)
 
 /** The important lines in turns about to be folded: what the person said, and what Odelia told them (never tool output,
  *  which is data from outside). Each is kept verbatim in the running summary and proposed for the brief. */
-export function flushLines(turns: Msg[], max = 12): { line: string; role: "user" | "assistant" }[] {
+export function flushLines(turns: Msg[], max = 24): { line: string; role: "user" | "assistant" }[] {
   const out: { line: string; role: "user" | "assistant" }[] = [];
   const seen = new Set<string>();
   for (const t of turns) {

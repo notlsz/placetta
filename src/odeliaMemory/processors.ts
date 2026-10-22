@@ -1,4 +1,4 @@
-import { redact } from "../guard";
+import { redactKeepDates } from "./privacy";
 import { flushLines } from "./brief";
 import { tokenCount } from "./retrieve";
 
@@ -83,7 +83,7 @@ export const provenance: Processor = { name: "provenance", run: c => {
 
 /** Secrets masked everywhere they'd be sent. */
 export const redactor: Processor = { name: "redact", run: c => {
-  const clean = (s: string) => { const r = redact(s); if (r !== s) bump(c, "redacted"); return r; };
+  const clean = (s: string) => { const r = redactKeepDates(s); if (r !== s) bump(c, "redacted"); return r; };
   const ms = c.messages.map(m => {
     if (typeof m.content === "string") return { ...m, content: clean(m.content) };
     const bs = blocks(m.content);
@@ -169,7 +169,7 @@ function fold(c: Ctx, upTo: number): Ctx {
   const at = foldPoint(c.messages, upTo);
   if (at <= 0) return c;
   const old = c.messages.slice(0, at);
-  const flushed = [...c.flushed, ...flushLines(old)].filter((f, i, a) => a.findIndex(x => x.line === f.line) === i).slice(-24);
+  const flushed = [...c.flushed, ...flushLines(old)].filter((f, i, a) => a.findIndex(x => x.line === f.line) === i).slice(-40);
   const summary = summaryOf(old, c.names, c.cfg.summarize.maxChars, flushed);
   bump(c, "folded", at);
   return { ...c, summary, flushed, messages: [{ role: "user", content: summary }, ...c.messages.slice(at)] };

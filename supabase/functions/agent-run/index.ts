@@ -53,13 +53,19 @@ import type { Attachment } from "../_shared/mail.ts";
 import { type FamilyDb, fill, spawn, stillOpen, wake } from "./family.ts";
 import { actorOf } from "./actor.ts";
 import { secretValues, withoutEnv } from "../_shared/secrets.ts";
+// Agent memory (src/odeliaMemory/): read before a run, saved after it
+// @ts-types="./agent.d.ts"
+import { loadMemory, saveRun, type RunMemory } from "./agent.js";
+import { memoryDb, pastRuns } from "./memory.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
 type Block = Record<string, unknown>;
 type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark" | "wechat" | "email"; reply_to?: string | null; chat_to?: ChatTo | null;
   /** A store's bot: the run that split the work, the store's job and the store. */
-  parent_run?: string | null; job_id?: string | null; store_id?: string | null };
+  parent_run?: string | null; job_id?: string | null; store_id?: string | null;
+  /** "Don't remember this chat": no memory read beyond the records and briefs, none saved. */
+  no_memory?: boolean };
 /** The channels a chat bot answers in: Slack, Lark and WeChat. */
 const CHATS = new Set(["slack", "lark", "wechat"]);
 
@@ -164,6 +170,9 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   const anthropicModel = role === "deep" ? MODEL_DEEP : MODEL;
   const payload: Record<string, unknown> = { model: anthropicModel, max_tokens: maxTokens, messages: body.messages };
   if (typeof body.system === "string" && body.system) payload.system = body.system.slice(0, 80000);
+  // prompt caching (src/odeliaMemory/cache.ts): where the stable segments end, and their fingerprint (../_shared/llm.ts)
+  if (Array.isArray(body.cache_breaks)) payload.cache_breaks = (body.cache_breaks as unknown[]).filter((b) => typeof b === "number").slice(0, 2);
+  if (typeof body.cache_key === "string") payload.cache_key = body.cache_key.slice(0, 64);
   // The instructions were written with research on; in saver mode the model is told it's off, so it doesn't reach for web_search.
   if (g.tier === "reduced" && pageTools.length && typeof payload.system === "string") payload.system += "\n\nWeb research (web_search, web_fetch) is off for now. Work from the workspace and your other tools, keep the answer short, and say plainly when something would need checking on the agency's own site.";
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
@@ -438,6 +447,40 @@ async function recallFor(run: Run, w: Workspace, who: Who): Promise<Recall[]> {
   } catch (e) { console.error("recall", run.id, String((e as Error)?.message ?? e).slice(0, 120)); return []; }
 }
 
+/* ------------------------------ agent memory ------------------------------ */
+// The workspace's memory and briefs go into the run (src/odeliaMemory/context.ts); what the run learned is saved when it
+// ends, with the observation step on the cheap extract model. Off until an owner or admin turns it on; a store's bot
+// reads its store's part; a "don't remember this chat" run reads only the records and briefs and saves nothing.
+
+async function memoryFor(run: Run): Promise<RunMemory | undefined> {
+  try {
+    const memory = await loadMemory(memoryDb(admin, run.workspace_id), run.created_by ?? undefined);
+    return { memory, me: run.created_by ?? undefined, temporary: run.no_memory === true, past: () => pastRuns(admin, run.workspace_id, run.id) };
+  } catch (e) { console.error("memory load", run.id, String((e as Error)?.message ?? e).slice(0, 120)); return undefined; }
+}
+async function saveMemory(run: Run, rm: RunMemory | undefined, state: RunState, w: Workspace, reply: Reply, who: Who, role?: string) {
+  if (!rm || run.kind !== "task" || run.no_memory) return;
+  try {
+    const r = await saveRun(memoryDb(admin, run.workspace_id), {
+      ws: run.workspace_id, memory: rm.memory, out: (state.mem ?? { suggested: [], remembered: [], forget: [], proposals: [], flushed: [] }) as never, w, now: new Date().toISOString(),
+      run: { id: run.id, prompt: run.prompt, channel: run.channel ?? "app", created_by: run.created_by, no_memory: run.no_memory, store: run.store_id ?? null },
+      reply: replyText(reply), messages: state.messages, role,
+      ask: async (prompt) => {
+        const d = await model(run.workspace_id, { messages: [{ role: "user", content: prompt }], max_tokens: 1200 }, false, undefined, new AbortController().signal, "extract", who) as unknown as { content: Block[] };
+        return d.content.filter((c) => c.type === "text").map((c) => String(c.text ?? "")).join("");
+      },
+    });
+    if (Object.values(r).some((n) => n)) console.log("memory", run.id, JSON.stringify(r));
+  } catch (e) { console.error("memory save", run.id, String((e as Error)?.message ?? e).slice(0, 120)); }
+}
+/** The run's prompt cache use and cost, for the agent run log (agent_runs.cache_*). Best effort before the migration. */
+async function cacheLog(runId: string, st: RunState) {
+  const c = st.cache as { calls: number; input: number; read: number; write: number; output: number; prefix?: string } | undefined;
+  if (!c) return;
+  const { error } = await admin.rpc("agent_run_cache", { p_id: runId, p_calls: c.calls, p_in: c.input, p_read: c.read, p_write: c.write, p_out: c.output, p_cost: Number(st.spent) || 0, p_prefix: c.prefix ?? null });
+  if (error) console.error("agent_run_cache", error.code ?? "");
+}
+
 /* ------------------------------ a run ------------------------------ */
 
 const short = (s: string, n = 90) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
@@ -637,6 +680,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     const location = cur.meta?.city ? { city: cur.meta.city, region: cur.meta.region } : undefined;
     // memory: read alongside the work on a fresh run (a resumed one reads it when it ends), so it adds no wait
     const recalling = !state.rounds && !state.recalled ? recallFor(run, cur, who) : null;
+    const memory = await memoryFor(run);
     const out = await runRounds({
       state, ws: () => cur, lang: run.lang, deep: run.deep, account: true, svc, signal: ctl.signal, until,
       apply: (p) => { cur = p(cur); pending.push(p); },
@@ -669,6 +713,7 @@ export async function work(runId: string, token: string | null, ticket: string |
         const d = await model(ws, { system: CLASSIFIER_SYSTEM, messages: [{ role: "user", content: classifierPrompt(text) }], max_tokens: 8 }, false, undefined, ctl.signal, "extract", who) as unknown as { content: Block[] };
         return parseClassifier(d.content.filter((c) => c.type === "text").map((c) => String(c.text ?? "")).join(""));
       } } : {}),
+      ...(memory ? { memory } : {}),
       ...(child ? { child } : {}),
       ...(!child ? { family: {
         pending: async () => stillOpen(await fam.children(run.id)),
@@ -714,6 +759,8 @@ export async function work(runId: string, token: string | null, ticket: string |
     await finish(run, out.reply, steps, lease, cur);
     ended = true;
     bg(toolCounts(runId, state));
+    bg(cacheLog(runId, state));
+    bg(saveMemory(run, memory, state, cur, out.reply, who, who0.actor.role));
     bg(learnFromRun(run, cur, state, out.reply));
   } catch (e) {
     clearTimeout(flushT);
@@ -1093,6 +1140,8 @@ export async function handle(req: Request): Promise<Response> {
   const { data: run, error } = await admin.from("agent_runs").insert({
     workspace_id: ws, created_by: user.id, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: body.deep === true,
     state: startState(history, prompt), seen_at: new Date().toISOString(), heartbeat_at: ticket, dedupe: key,
+    // "don't remember this chat" (only sent when on, so a database without the column still starts runs)
+    ...(body.no_memory === true ? { no_memory: true } : {}),
   }).select("id").single();
   if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
   bg(work(run.id, jwt, ticket));

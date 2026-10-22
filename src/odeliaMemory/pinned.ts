@@ -23,12 +23,12 @@ export function pinnedFacts(w: Workspace, o: { allowLast4?: boolean; mem?: Agent
     out.push({ key: `entity:${e.id}|name`, critical: "entity", value: e.name, ref: `entity:${e.id}`, text: B(`Legal entity: ${e.name} (${e.kind.toUpperCase()})${where ? `, registered ${where}` : ""}`, `法律实体：${e.name}（${e.kind.toUpperCase()}）${where ? `，注册于 ${where}` : ""}`) });
   }
   if (!w.entities?.length && w.meta?.entity) out.push({ key: "entity:main|name", critical: "entity", value: w.meta.entity, ref: "entity:main", text: B(`Legal entity: ${w.meta.entity}`, `法律实体：${w.meta.entity}`) });
-  for (const f of w.facts) if (f.group === "business" && /legal (business )?name|entity|法定名称|实体/i.test(f.label.en + f.label.zh) && f.value.en.trim())
+  for (const f of w.facts) if (f.group === "business" && /legal (business )?name|entity|法定名称|实体/i.test(f.label.en + " " + f.label.zh) && f.value.en.trim())
     out.push({ key: `fact:${f.id}|value`, critical: "entity", value: f.value.en, ref: `fact:${f.id}`, text: B(`${f.label.en}: ${f.value.en}`, `${f.label.zh}：${f.value.zh}`) });
   for (const a of w.apps) {
     const conf = a.filed?.confirmation;
     if (conf) out.push({ key: `app:${a.id}|confirmation`, critical: "case", value: conf, ref: `app:${a.id}`, text: B(`${a.name.en}, ${a.agency.en}: case or confirmation ${conf}${a.filed?.submitted ? `, filed ${a.filed.submitted}` : ""}`, `${a.name.zh}，${a.agency.zh}：案件或确认号 ${conf}${a.filed?.submitted ? `，提交于 ${a.filed.submitted}` : ""}`) });
-    const lic = a.fields.find(f => /\b(license|permit) (no|number|#)\b|执照号|许可证号/i.test(f.label.en + f.label.zh) && f.value.trim());
+    const lic = a.fields.find(f => /\b(license|permit) (no|number|#)\b|执照号|许可证号/i.test(f.label.en + " " + f.label.zh) && f.value.trim());
     if (lic && a.status === "approved" && o.allowLast4) { const l4 = lastFour(lic.value); if (l4) out.push({ key: `app:${a.id}|license`, critical: "license", value: l4, ref: `app:${a.id}`, text: B(`${a.name.en}: license ${l4}`, `${a.name.zh}：执照尾号 ${l4.replace("ending ", "")}`) }); }
   }
   const dls = [...w.deadlines].filter(d => !today || d.date >= today).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)).slice(0, MAX.deadlines);

@@ -11,18 +11,25 @@ const CREDENTIAL = /\b(password|passcode|passwd|pass ?phrase|pin( code| number)?
 /** "license ending 4821", "permit ••••4821", "last 4: 4821". */
 const LAST4 = /(ending( in)?|last (4|four)( digits)?:?|•{2,}|\*{2,}|尾号)\s*(\d{4})\b/i;
 
+/** Secrets masked, as src/guard.ts redact does, except that dates are never taken for a card number: "2027-03-01
+ *  2027-04-01" is sixteen digits in a row to a card pattern. Each stretch between dates is masked on its own. */
+const ISO_DAY = /(\b\d{4}-\d{2}-\d{2}\b)/;
+export function redactKeepDates(s: string): string {
+  return String(s ?? "").split(ISO_DAY).map((part, i) => (i % 2 ? part : redact(part))).join("");
+}
+
 /** Why a line can't be kept in memory, or null when it can. */
 export function blocked(text: string, o: { allowLast4?: boolean; untrusted?: boolean } = {}): Blocked | null {
   const t = String(text ?? "").trim();
   if (!t) return "empty";
-  if (redact(t) !== t || secretNumber("", t)) return "secret";
+  if (redactKeepDates(t) !== t || secretNumber("", t)) return "secret";
   if (CREDENTIAL.test(t)) return "credential";
   if (SENSITIVE.test(t)) return "sensitive";
   // instructions hidden in data: never a memory, from anywhere (a person who wants a rule says it in the app)
   if (injected(t)) return "instruction";
   if (o.untrusted && /\b(ignore|disregard|you (must|should) (now )?(always|never)|from now on|new instructions?|system prompt|odelia,? (always|never|must))\b|忽略|从现在起|新的指令/i.test(t)) return "instruction";
   // a license number only as its last 4, and only when allowed; any other ID number never
-  const masked = t.replace(LAST4, " ");
+  const masked = t.replace(LAST4, " ").replace(/\b\d{4}-\d{2}-\d{2}\b/g, " date ");
   if (LAST4.test(t) && !o.allowLast4) return "id_number";
   if (idNumber(masked)) return "id_number";
   return null;

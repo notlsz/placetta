@@ -1,3 +1,5 @@
+import { cacheRates } from "../../supabase/functions/_shared/cache_rates.ts";
+
 /* ------------------------------------------------------------------ *
  * Prompt caching: the stable parts of a prompt first, so every provider
  * can serve them from its cache instead of reading them again.
@@ -53,11 +55,13 @@ export function splitRules(rules: string): { stable: string; volatile: string } 
 
 /** The system prompt in cache order. profile is the workspace's stable memory (briefs, pinned facts, approved
  *  memories); tail is everything that changes per run. */
-export function layout(o: { rules: string; profile?: string; tail?: string[] }): Layout {
+export function layout(o: { rules: string; profile?: string; tail?: string[]; clean?: (s: string) => string }): Layout {
+  // clean (the credential scrub) runs on each segment before the offsets are counted, so the breakpoints stay exact
+  const c = o.clean ?? ((s: string) => s);
   const { stable, volatile } = splitRules(o.rules);
-  const head = stable.trimEnd();
-  const profile = (o.profile ?? "").trim();
-  const tail = [volatile, ...(o.tail ?? [])].map(s => s.trim()).filter(Boolean).join("\n\n");
+  const head = c(stable).trimEnd();
+  const profile = c(o.profile ?? "").trim();
+  const tail = [volatile, ...(o.tail ?? [])].map(s => c(s).trim()).filter(Boolean).join("\n\n");
   const seg1 = head + "\n\n";
   const seg2 = profile ? `${profile}\n\n` : "";
   const system = seg1 + seg2 + tail;
@@ -98,17 +102,8 @@ export function addCall(s: CacheStats, u: CacheUse, prefix?: string): CacheStats
 /** Share of input tokens served from the cache (0 to 1). */
 export const hitRate = (s: CacheUse) => { const all = s.input + s.read + s.write; return all ? s.read / all : 0; };
 
-/** What a provider charges for a cached input token, as a share of a fresh one. Anthropic: reads 10%, writes 125%.
- *  OpenAI: GPT-5 family 10%, older 4.1 and 4o family 25 to 50%. Gemini: 2.5 models 25%, 3 and later 10%. */
-export function cacheRates(model: string): { read: number; write: number } {
-  const m = model.toLowerCase();
-  if (m.startsWith("anthropic:") || m.includes("claude")) return { read: 0.1, write: 1.25 };
-  if (/gemini-2\.5|gemini-2\.0/.test(m)) return { read: 0.25, write: 1 };
-  if (m.includes("gemini")) return { read: 0.1, write: 1 };
-  if (/gpt-4o/.test(m)) return { read: 0.5, write: 1 };
-  if (/gpt-4\.1|o3|o4/.test(m)) return { read: 0.25, write: 1 };
-  return { read: 0.1, write: 1 };
-}
+/** What a provider charges for a cached input token, as a share of a fresh one (the same table prices every call). */
+export { cacheRates };
 
 /** What caching saved on a run, as a share of what the same input would have cost uncached. */
 export function savedShare(s: CacheUse, model: string): number {

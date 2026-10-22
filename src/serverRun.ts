@@ -25,6 +25,10 @@ import { sanitizeOutput } from "./security/output";
 import { scrubCredentials } from "./security/secrets";
 import { keepOwnerControls } from "./security/controls";
 import { scanServerResults } from "./security/web";
+// Agent memory (src/odeliaMemory/): the cache-ordered prompt, the memory tools, and the processors every call goes through
+import { commandNote, emptyOut, memoryTools, systemFor, type RunMemory, type RunMemoryOut } from "./odeliaMemory/context";
+import { addCall, cacheUse, emptyStats, type CacheStats } from "./odeliaMemory/cache";
+import { shape } from "./odeliaMemory/processors";
 
 /* ------------------------------------------------------------------ *
  * The agent's tool loop as the server runs it: the same tools and
@@ -86,6 +90,10 @@ export type RunState = {
    *  outside and where, and whether it read something poisoned. A resumed chunk picks it up, so a limit or a taint
    *  isn't reset by a hand-over. */
   security?: { used: Record<string, number>; spent: number; untrusted: [string, { label: string; bad: boolean }][]; taint: "none" | "flagged" | "quarantined" };
+  /** Agent memory (src/odeliaMemory/context.ts): what this run learned, for agent-run to save when it ends. */
+  mem?: RunMemoryOut;
+  /** The prompt cache: tokens each provider served from its cache, and the stable prefix's fingerprint. */
+  cache?: CacheStats;
 };
 
 const MAX_ROUNDS = 16;
@@ -274,6 +282,10 @@ export async function runRounds(o: {
   log?: (e: ToolLog) => void;
   /** The optional model check for untrusted text the heuristics score in the grey zone (src/security/detect.ts). */
   classify?: (text: string) => Promise<boolean>;
+  /** Agent memory: the workspace's memory and briefs, who asked, a "don't remember this chat" run, past conversations to
+   *  search, and the processors' settings (src/odeliaMemory/). Without it the run still gets the pinned facts from the
+   *  records, the cache-ordered prompt and the processors. */
+  memory?: RunMemory;
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
@@ -356,8 +368,11 @@ export async function runRounds(o: {
   // The agencies' own forms (src/forms/versions.ts): the PDFs come through the server's own way (the site's /app/forms/)
   // and the copies filled to check a form before approval are kept, so the run doesn't fill the same answers twice.
   const forms = { load: loaderWith(o.svc?.formPdf), cache: new Map<string, FilledCopy>() };
-  const tools = secureTools(withControls(makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request, forms, shield,
-    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) }), ctl), shield, { get: o.ws, apply, appReadOnly: mcpReads });
+  const memOut: RunMemoryOut = st.mem ??= emptyOut();
+  // the memory tools (when memory is on and this chat is remembered) go through the same policy gate as every other tool
+  const tools = secureTools([...withControls(makeTools(o.ws, apply, step, made, o.lang, () => st.text.length, o.account, { model, files: o.files ?? new Map(), svc: o.svc, signal: o.signal, me, mcp, request: st.request, forms, shield,
+    ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) }), ctl),
+    ...(o.memory ? memoryTools(o.memory, memOut, { w: o.ws, runId: o.runId, now: () => new Date().toISOString(), store: o.child?.store, remote: isRemote(o.channel) }) : [])], shield, { get: o.ws, apply, appReadOnly: mcpReads });
   if (isRemote(o.channel)) from.mcpReads = new Set(tools.map(t => t.name).filter(n => n.startsWith(MCP_PREFIX)));
   /* The agency's forms, once the work is done: every application whose answers this run changed (by any tool) is filled
      again, one new version each, kept in Documents and handed back with the reply; a card for answers that changed is
@@ -397,9 +412,24 @@ export async function runRounds(o: {
   }
   const mode = ctl.mode;
   const childJob = o.child ? (o.ws().jobs ?? []).find(j => j.id === o.child!.job) : undefined;
-  // no credential ever goes into a prompt, whatever the workspace holds (src/security/secrets.ts)
-  const system = scrubCredentials(rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }) + (st.network ?? "") + channelHint(o.channel, from.plainSms) + controlsBrief(o.ws(), mode)
-    + (childJob ? storeRules(o.ws(), childJob, o.lang) : ""));
+  /* The system prompt in cache order (src/odeliaMemory/cache.ts): the rules, then the workspace profile (briefs, the
+     pinned facts from the records, approved memories), then what changes every run. "Remember this" and "forget that"
+     are told to the model here and carried out by agent-run when the run ends. */
+  const memNote = memOut.note ??= o.child ? "" : commandNote(o.memory, st.request ?? "", memOut, { runId: o.runId, remote: isRemote(o.channel), now: new Date().toISOString() });
+  // no credential ever goes into a prompt, whatever the workspace or its memory holds (src/security/secrets.ts): every
+  // segment is scrubbed before it's laid out, so the cache breakpoints still fall where they should
+  const shaped = systemFor(o.ws(), rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }), o.memory,
+    [st.network ?? "", channelHint(o.channel, from.plainSms), controlsBrief(o.ws(), mode), childJob ? storeRules(o.ws(), childJob, o.lang) : "", memNote], { store: o.child?.store, request: st.request, now: new Date().toISOString(), clean: scrubCredentials });
+  const system = shaped.system;
+  /** The conversation as each call sends it: through the processors (src/odeliaMemory/processors.ts). The run keeps the
+   *  whole conversation; the important lines of turns folded away are kept for the brief's proposals. */
+  const context = () => {
+    if (o.memory?.processors === false) return st.messages;
+    const s = shape(st.messages, o.memory?.processors || {});
+    for (const f of s.flushed) if (!memOut.flushed.includes(f.line)) memOut.flushed = [...memOut.flushed, f.line].slice(-40);
+    return s.messages;
+  };
+  const counted = (data: { usage?: unknown; model?: unknown }) => { st.cache = addCall(st.cache ?? emptyStats(), cacheUse(data.usage as Record<string, unknown> | undefined), shaped.prefix); };
   const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
@@ -424,8 +454,9 @@ export async function runRounds(o: {
       st.rounds++; st.seatRounds = (st.seatRounds ?? 0) + 1;
       // streamed into the draft: the app shows the words as the model writes them, not when the round ends
       const before = st.text;
-      const data = await o.send({ messages: st.messages, max_tokens: 3500, system, tools: defs }, o.deep, mainRole,
+      const data = await o.send({ messages: context(), max_tokens: 3500, system, tools: defs, cache_breaks: shaped.breaks, cache_key: shaped.prefix }, o.deep, mainRole,
         o.draft ? t => { if (t) o.draft!(clean((before ? before + "\n\n" + t : t).slice(made.lastToolAt))); } : undefined);
+      counted(data as { usage?: unknown });
       last = data.content;
       // pages the model fetched or searched on the vendor's side: scored like anything else from outside, so a poisoned
       // page taints the run (and is in the audit trail) even though it reached the model directly

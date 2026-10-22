@@ -51,6 +51,7 @@ import { evidence, formFailures } from "../src/harness";
 import type { FilledNote } from "../src/core";
 import type { Bi } from "../src/bi";
 import { growthTests } from "./growth-test";
+import { memoryTests } from "./memory-test";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -2372,6 +2373,7 @@ console.log("\n# Audit trail export (CSV)");
 }
 
 growthTests(ok, eq);
+await memoryTests(ok, eq);
 
 console.log("\n# Every declared tool is exercised");
 const missed = declared.filter(n => !covered.has(n));

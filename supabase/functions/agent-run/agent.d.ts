@@ -71,7 +71,38 @@ export declare function runRounds(o: {
   log?: (e: ToolLog) => void;
   /** The optional model check for untrusted text in the grey zone. */
   classify?: (text: string) => Promise<boolean>;
+  /** Agent memory (src/odeliaMemory/context.ts RunMemory). */
+  memory?: RunMemory;
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }>;
+
+// Agent memory (src/odeliaMemory/)
+export type MemSettings = { enabled: boolean; suggest: boolean; allowLast4: boolean; cap: number };
+export type AgentMemory = { settings: MemSettings; items: Record<string, unknown>[]; briefs: Record<string, unknown>[]; conflicts: Record<string, unknown>[] };
+export type PastRun = { id: string; prompt: string; reply?: string; at: string };
+export type RunMemory = { memory: AgentMemory; me?: string; temporary?: boolean; past?: (q: string) => Promise<PastRun[]> | PastRun[]; names?: Record<string, string>; processors?: Record<string, unknown> | false };
+/** What a run left for memory, in its state (RunState.mem). */
+export type RunMemoryOut = { suggested: unknown[]; remembered: unknown[]; forget: string[]; proposals: unknown[]; flushed: string[]; command?: "remember" | "forget"; note?: string };
+/** The prompt cache over a run (RunState.cache). */
+export type CacheStats = { calls: number; hits: number; input: number; read: number; write: number; output: number; prefix?: string; prefixChanged?: number };
+export type MemoryRow = Record<string, unknown> & { id: string };
+export type MemoryDb = {
+  settings(): Promise<{ enabled: boolean; suggest: boolean; allow_last4: boolean; cap: number } | null>;
+  items(): Promise<MemoryRow[]>;
+  briefs(): Promise<Record<string, unknown>[]>;
+  proposals(): Promise<Record<string, unknown>[]>;
+  conflicts(): Promise<Record<string, unknown>[]>;
+  insert(rows: MemoryRow[]): Promise<void>;
+  touch(id: string, seen: number, lastSeen: string): Promise<void>;
+  remove(ids: string[]): Promise<void>;
+  close(id: string, validTo: string, supersededBy: string): Promise<void>;
+  propose(rows: Record<string, unknown>[]): Promise<void>;
+  conflict(rows: Record<string, unknown>[]): Promise<void>;
+};
+export declare const MEMORY_COLS: string;
+export declare function loadMemory(db: MemoryDb, me?: string): Promise<AgentMemory>;
+export declare function saveRun(db: MemoryDb, o: { ws: string; memory: AgentMemory; out: RunMemoryOut; w: Workspace; now: string;
+  run: { id: string; prompt: string; channel?: string | null; created_by?: string | null; no_memory?: boolean; store?: string | null };
+  reply: string; messages: { role: string; content: unknown }[]; role?: string; ask?: (prompt: string) => Promise<string> }): Promise<Record<string, number>>;
 /** What a business rule asks the server to tell someone (src/businessRules.ts). */
 export type Notice = { rule: string; key: string; via: "email" | "text" | "slack" | "lark" | "wechat"; to?: string; text: Bi };
 export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";

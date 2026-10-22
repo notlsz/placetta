@@ -117,16 +117,18 @@ export function parseObservations(raw: unknown, materials: Material[], o: Observ
 
 /** "Remember this", "forget that": memory commands in chat, in English and Chinese. */
 export type ChatCommand = { op: "remember" | "forget"; text: string };
+/** What to remember is the first sentence; whatever follows is the rest of their request. */
+const firstSentence = (s: string) => s.trim().split(/(?<=[.!?。！？])\s*/)[0].trim().replace(/[.。!！]+$/, "");
 export function chatCommand(said: string): ChatCommand | null {
   const s = String(said ?? "").trim();
   let m = /^(?:please\s+)?(?:odelia,?\s+)?remember(?:\s+(?:this|that))?\s*[:,-]?\s*(?:that\s+)?([\s\S]*)$/i.exec(s);
-  if (m) return { op: "remember", text: m[1].trim().replace(/[.。]+$/, "") };
+  if (m) return { op: "remember", text: firstSentence(m[1]) };
   m = /^(?:请)?(?:帮我)?记住[:：，,]?\s*([\s\S]*)$/.exec(s);
-  if (m) return { op: "remember", text: m[1].trim().replace(/[.。]+$/, "") };
+  if (m) return { op: "remember", text: firstSentence(m[1]) };
   m = /^(?:please\s+)?(?:odelia,?\s+)?forget(?:\s+(?:about|that))?\s*[:,-]?\s*([\s\S]*)$/i.exec(s);
-  if (m) return { op: "forget", text: m[1].trim().replace(/[.。]+$/, "") };
+  if (m) return { op: "forget", text: firstSentence(m[1]) };
   m = /^(?:请)?(?:忘记|忘掉)[:：，,]?\s*([\s\S]*)$/.exec(s);
-  if (m) return { op: "forget", text: m[1].trim().replace(/[.。]+$/, "") };
+  if (m) return { op: "forget", text: firstSentence(m[1]) };
   return null;
 }
 

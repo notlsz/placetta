@@ -36,6 +36,7 @@
 
 import { anthropicMessage, openaiCompletion, type OnText } from "./stream.ts";
 import { ZDR_REFUSED, zdrAllows, zdrRequired, zdrWebTools } from "./zdr.ts";
+import { ensureCache, explicitOn, useCache } from "./gemini_cache.ts";
 
 type Block = Record<string, unknown>;
 export type Role ="plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
@@ -201,10 +202,13 @@ export function fromOpenAI(d: Record<string, unknown>, model: string): Record<st
   }
   const fr = String(ch.finish_reason ?? "");
   const u = (d.usage as Block) ?? {};
+  // the share of the prompt the vendor served from its cache (OpenAI's automatic prefix cache, Gemini's implicit or
+  // explicit context cache), so the call is priced at the cached rate and the run's hit rate is measured
+  const cached = Math.max(0, Number(((u.prompt_tokens_details as Block) ?? {}).cached_tokens ?? 0) || 0);
   return {
     id: String(d.id ?? ""), type: "message", role: "assistant", model, content,
     stop_reason: content.some((b) => b.type === "tool_use") ? "tool_use" : fr === "length" ? "max_tokens" : "end_turn",
-    usage: { input_tokens: Number(u.prompt_tokens ?? 0), output_tokens: Number(u.completion_tokens ?? 0) },
+    usage: { input_tokens: Math.max(0, Number(u.prompt_tokens ?? 0) - cached), output_tokens: Number(u.completion_tokens ?? 0), ...(cached ? { cache_read_input_tokens: cached } : {}) },
   };
 }
 
@@ -223,7 +227,19 @@ async function anthropic(f: Fetch, key: string, payload: Record<string, unknown>
  */
 export function withCache(payload: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = { ...payload };
-  if (typeof out.system === "string" && out.system) out.system = [{ type: "text", text: out.system, cache_control: { type: "ephemeral" } }];
+  // cache_breaks (src/odeliaMemory/cache.ts layout): where the stable segments of the system prompt end (the rules; the
+  // workspace profile). Each gets its own breakpoint, so a run whose per-run part changed still reads both from the
+  // cache; with the tools' and the last message's that's four, the API's limit. Never sent to a provider.
+  const breaks = (Array.isArray(out.cache_breaks) ? out.cache_breaks as unknown[] : []).filter((b): b is number => typeof b === "number" && Number.isInteger(b) && b > 0);
+  delete out.cache_breaks; delete out.cache_key;
+  if (typeof out.system === "string" && out.system && breaks.length) {
+    const s = out.system, cuts = [...new Set(breaks)].filter((b) => b < s.length).sort((a, b) => a - b).slice(0, 2);
+    const parts: Block[] = [];
+    let at = 0;
+    for (const c of cuts) { parts.push({ type: "text", text: s.slice(at, c), cache_control: { type: "ephemeral" } }); at = c; }
+    parts.push({ type: "text", text: s.slice(at), ...(cuts.length ? {} : { cache_control: { type: "ephemeral" } }) });
+    out.system = parts.filter((p) => String(p.text).length);
+  } else if (typeof out.system === "string" && out.system) out.system = [{ type: "text", text: out.system, cache_control: { type: "ephemeral" } }];
   const tools = Array.isArray(out.tools) ? [...(out.tools as Block[])] : [];
   if (tools.length) { tools[tools.length - 1] = { ...tools[tools.length - 1], cache_control: { type: "ephemeral" } }; out.tools = tools; }
   const msgs = Array.isArray(out.messages) ? [...(out.messages as Block[])] : [];
@@ -301,13 +317,21 @@ export async function callModel(env: Env, call: Call, fallbackModel: string, res
         last = { ok: false, status: res.status, text, model: `${p}:${model}` };
       } else {
         const cfg = OPENAI_STYLE[p], key = env(cfg.key); if (!key) continue;
-        const body = toOpenAI({ ...call.payload, tools: research ? research.pageTools : call.payload.tools }, model);
+        let body = toOpenAI({ ...call.payload, tools: research ? research.pageTools : call.payload.tools }, model);
         // OpenRouter routes to many hosts: only those that don't keep or train on prompts may serve our calls.
         if (p === "openrouter") (body as Record<string, unknown>).provider = { data_collection: "deny" };
+        // prompt caching: OpenAI caches a repeated prefix by itself, and routes calls with the same key to the same cache;
+        // Gemini, where explicit caching is on, refers to a stored copy of the stable prefix (gemini_cache.ts)
+        if (p === "openai" && typeof call.payload.cache_key === "string") body.prompt_cache_key = call.payload.cache_key.slice(0, 64);
+        const plain = body;
+        if (p === "gemini" && explicitOn(env)) { const c = await ensureCache(env, model, call.payload, f); if (c) body = useCache(body, c); }
         // the usage comes in the stream's last piece where the vendor supports asking for it (Gemini's endpoint isn't
         // asked; withUsage estimates when it's missing)
-        if (stream) Object.assign(body, { stream: true, ...(p === "gemini" ? {} : { stream_options: { include_usage: true } }) });
-        const res = await f(cfg.url, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(body) });
+        if (stream) { Object.assign(body, { stream: true, ...(p === "gemini" ? {} : { stream_options: { include_usage: true } }) }); Object.assign(plain, { stream: true, ...(p === "gemini" ? {} : { stream_options: { include_usage: true } }) }); }
+        const post = (b: Record<string, unknown>) => f(cfg.url, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(b) });
+        let res = await post(body);
+        // a cache that expired or was refused: the same call without it
+        if (!res.ok && body !== plain && res.status === 400) { await res.text().catch(() => ""); res = await post(plain); }
         if (res.ok && stream) { const data = withUsage(fromOpenAI(await openaiCompletion(res, onText), `${p}:${model}`), call.payload); return { ok: true, status: 200, data, text: JSON.stringify(data), model: `${p}:${model}` }; }
         const text = await res.text();
         if (res.ok) { const data = fromOpenAI(JSON.parse(text), `${p}:${model}`); return { ok: true, status: 200, data, text, model: `${p}:${model}` }; }

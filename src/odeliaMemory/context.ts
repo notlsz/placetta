@@ -27,7 +27,9 @@ export type RunMemory = {
   processors?: Partial<ProcessorConfig> | false;
 };
 /** What the run leaves for agent-run to save, carried in its state across chunks. */
-export type RunMemoryOut = { suggested: Observation[]; remembered: Observation[]; forget: string[]; proposals: { scope: Scope; line: string; why: string }[]; flushed: string[]; command?: ChatCommand["op"] };
+export type RunMemoryOut = { suggested: Observation[]; remembered: Observation[]; forget: string[]; proposals: { scope: Scope; line: string; why: string }[]; flushed: string[]; command?: ChatCommand["op"];
+  /** What the model was told about a memory command, kept so a resumed chunk tells it the same. */
+  note?: string };
 export const emptyOut = (): RunMemoryOut => ({ suggested: [], remembered: [], forget: [], proposals: [], flushed: [] });
 
 /** Memory is used in this run: on for the workspace, and not a temporary chat. */
@@ -39,19 +41,19 @@ export function scopeNames(w: Workspace): Record<string, string> {
 }
 
 /** The workspace profile, the stable middle of the prompt: the briefs, the pinned facts and the approved memories. */
-export function profileBlock(w: Workspace, rm: RunMemory | undefined, o: { store?: string; lang?: "en" | "zh" } = {}): string {
+export function profileBlock(w: Workspace, rm: RunMemory | undefined, o: { store?: string; lang?: "en" | "zh"; today?: string } = {}): string {
   const mem = rm?.memory;
   const names = { ...scopeNames(w), ...(rm?.names ?? {}) };
   const parts = [
     mem ? briefsBlock(mem, names, o.store ? { store: o.store } : undefined) : "",
-    pinnedBlock(pinnedFacts(w, { allowLast4: mem?.settings.allowLast4, mem: using(rm) ? mem : undefined }), "en"),
+    pinnedBlock(pinnedFacts(w, { allowLast4: mem?.settings.allowLast4, mem: using(rm) ? mem : undefined, today: o.today }), "en"),
     using(rm) ? approvedBlock(mem!, { me: rm!.me, store: o.store, names }) : "",
   ].filter(Boolean);
   return parts.join("\n\n");
 }
 
 /** The system prompt for a run, in cache order. */
-export function systemFor(w: Workspace, rules: string, rm: RunMemory | undefined, tail: string[], o: { store?: string; request?: string; now: string } ): Layout {
+export function systemFor(w: Workspace, rules: string, rm: RunMemory | undefined, tail: string[], o: { store?: string; request?: string; now: string; clean?: (s: string) => string } ): Layout {
   const extra: string[] = [];
   if (using(rm) && o.request) {
     // the memories for this request that the always-loaded block left out (it is capped), from hybrid search
@@ -60,7 +62,8 @@ export function systemFor(w: Workspace, rules: string, rm: RunMemory | undefined
     if (more.length) extra.push(`Memory that fits this request:\n${more.map(r => memoryLine(r.item, scopeNames(w))).join("\n")}`);
   }
   if (rm && !using(rm)) extra.push(rm.temporary ? "This chat isn't remembered: don't save or suggest memories, and don't refer to memories beyond the records and briefs above." : "Agent memory is off for this workspace: don't save or suggest memories. If they ask you to remember something, say an owner or admin can turn on Agent memory in Settings.");
-  return layout({ rules, profile: profileBlock(w, rm, { store: o.store }), tail: [...tail, ...extra] });
+  // deadlines that passed leave the pinned set the day after (the prefix changes at most once a day for that)
+  return layout({ rules, profile: profileBlock(w, rm, { store: o.store, today: o.now.slice(0, 10) }), tail: [...tail, ...extra], clean: o.clean });
 }
 
 /** "Remember this" and "forget that" in the request: carried out after the run (saved by agent-run), and said to the
