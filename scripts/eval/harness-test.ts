@@ -7,11 +7,12 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { abReport, applyPrompt, entryOf, gate, kindOf, load, parseVariant, rates, record, scoreboard, toolChecks, variantEnv, withOpenAI, type Entry, type Outcome } from "./harness";
+import { abReport, alert, applyPrompt, consistency, datasetOf, diffReport, diffRuns, entryOf, gate, kindOf, load, parseVariant, rates, record, scoreboard, toolChecks, variantEnv, versionOf, withOpenAI, type Entry, type Outcome } from "./harness";
 import { argError, checkArgs, type Schema } from "../../src/toolArgs";
 
 let n = 0;
 const t = (name: string, f: () => void) => { f(); n++; console.log(`ok  ${name}`); };
+const tAsync = async (name: string, f: () => Promise<void>) => { await f(); n++; console.log(`ok  ${name}`); };
 const envOf = (o: Record<string, string>) => (k: string) => o[k];
 
 /* ---------------- arguments against schemas */
@@ -126,6 +127,55 @@ t("the A/B table lists where variants disagree", () => {
   assert.equal(abReport([ent([true])]), "");
 });
 
+/* ---------------- dataset versions, the per-scenario diff, consistency, the alert */
+t("versions: stable, order-free, and a changed scenario is never compared with its old self", () => {
+  assert.equal(versionOf({ b: 1, a: [1, { c: "x" }] }), versionOf({ a: [1, { c: "x" }], b: 1 }));
+  assert.notEqual(versionOf({ prompt: "Map my permits" }), versionOf({ prompt: "Map my permits." }));
+  assert.equal(datasetOf({ s0: "aa", s1: "bb" }), datasetOf({ s1: "bb", s0: "aa" }));
+  const v1 = { s0: "v1", s1: "v1", s2: "v1" }, v2 = { ...v1, s1: "v2" };
+  const base = ent([true, true, true], { cases: v1 }), head = ent([true, false, true], { cases: v2 });
+  assert.ok(base.dataset && base.dataset !== head.dataset, "the set's version moves when a scenario changes");
+  const g = gate(base, head);
+  assert.equal(g.regressed, false, "s1 changed: its new failure isn't a regression of the old one");
+  assert.ok(g.lines.some(l => /Changed since the baseline, so not compared: s1/.test(l)), g.lines.join(" "));
+  assert.equal(gate(base, ent([true, false, true], { cases: v1 })).regressed, true, "the same s1 failing is");
+});
+t("the diff: newly failing and fixed checks, judge and cost moves, each with how it ran", () => {
+  const tr = { rounds: 3, calls: 3, tools: 4, tool_errors: 1, wall_ms: 12_300, usd: 0.02, slowest: ["fill_fields"] };
+  const mk = (pass: boolean[], judge: number[], o: Partial<Parameters<typeof entryOf>[0]> = {}) => entryOf({ date: "2026-10-22T10:00:00.000Z", mode: "live", variant: "default", total_usd: 0, median_usd: 0,
+    outcomes: pass.map((p, k) => out(`s${k}`, p, { judge: { pass: p, score: judge[k] }, usd: 0.01 * (k + 1), ...(k === 0 ? { trace: tr } : {}) })), ...o });
+  const d = diffRuns(mk([true, false, true], [5, 2, 4]), mk([false, true, true], [3, 4, 4]));
+  assert.deepEqual([d.regressions, d.improvements, d.unchanged], [1, 1, 1]);
+  assert.deepEqual(d.rows.map(r => [r.id, r.was, r.now]), [["s0", "pass", "fail"], ["s1", "fail", "pass"], ["s2", "pass", "pass"]], "regressions first, then improvements");
+  assert.deepEqual([d.rows[0].broke, d.rows[1].fixed, d.rows[0].judge, d.rows[0].trace?.slowest], [["a deadline on 2027-01-01"], ["a deadline on 2027-01-01"], [5, 3], ["fill_fields"]]);
+  const md = diffReport(d, "the baseline");
+  assert.match(md, /1 regressed, 1 improved, 1 unchanged/);
+  assert.match(md, /\| s0 \| pass \| fail \| a deadline on 2027-01-01 \| +\| 5 to 3 \| \$0\.010 to \$0\.010 \| 3 rounds, 3 model and 4 tool calls \(1 failed\), 12\.3 s, slowest fill_fields \|/);
+  assert.doesNotMatch(md, /\| s2 \|/, "only rows that moved");
+});
+t("consistency: pass^k over the last live runs, flaky ones named", () => {
+  const runs = [[true, true, true], [true, false, true], [true, true, true]].map((p, k) => ent(p, { date: `2026-10-2${k}T10:00:00.000Z` }));
+  const md = consistency(runs);
+  assert.match(md, /2 of 3 scenarios passed every one of the last 3 runs \(pass\^3\)\. Flaky: s1\./);
+  assert.match(md, /\| s1 \| 2 of 3 \| P F P \|/);
+  assert.equal(consistency(runs.slice(0, 1)), "", "nothing to say with one run");
+});
+await tAsync("the alert: posted only on a regression, only to https, never throws", async () => {
+  const sent: string[] = [];
+  const f = ((url: string, init: { body: string }) => { sent.push(`${url} ${init.body}`); return Promise.resolve(new Response("ok")); }) as unknown as typeof fetch;
+  const base = ent([true, true, true, true, false]), worse = ent([true, false, true, false, false]);
+  const g = gate(base, worse), d = diffRuns(base, worse);
+  assert.equal(await alert("https://hooks.slack.test/x", g, d, { variant: "default", commit: "abcdef1234" }, f), true);
+  assert.match(sent[0], /^https:\/\/hooks\.slack\.test\/x \{"text":"Odelia eval regression on default at abcdef12\./);
+  assert.match(sent[0], /s1: a deadline on 2027-01-01/);
+  assert.equal(await alert("https://hooks.slack.test/x", gate(base, base), null, { variant: "default", commit: "" }, f), false, "no regression, no post");
+  assert.equal(await alert("http://plain.test", g, d, { variant: "default", commit: "" }, f), false, "https only");
+  assert.equal(await alert(undefined, g, d, { variant: "default", commit: "" }, f), false);
+  const boom = (() => Promise.reject(new Error("down"))) as unknown as typeof fetch;
+  assert.equal(await alert("https://hooks.slack.test/x", g, d, { variant: "default", commit: "" }, boom), false);
+  assert.equal(sent.length, 1);
+});
+
 /* ---------------- end to end, on the scripted model */
 t("the whole harness: A/B, history, baseline, gate, and skipping without a key", () => {
   const dir = mkdtempSync(join(tmpdir(), "eval-e2e-"));
@@ -144,6 +194,10 @@ t("the whole harness: A/B, history, baseline, gate, and skipping without a key",
     assert.match(readFileSync(join(dir, "e.md"), "utf8"), /## A\/B: default vs sonnet/);
     const same = run(["--dry", "--only", "tools", "--gate", join(dir, "h", "baseline.json"), "--no-history", ...files]);
     assert.equal(same.code, 0, same.out); assert.match(same.out, /gate: ok/);
+    assert.match(readFileSync(join(dir, "e.md"), "utf8"), /## Scenario by scenario, against the baseline/);
+    const saved = JSON.parse(readFileSync(join(dir, "h", "baseline.json"), "utf8")) as Entry;
+    assert.ok(saved.dataset && Object.keys(saved.cases ?? {}).length === saved.scenarios, "the run saves the dataset's version and each scenario's");
+    assert.ok(Object.values(saved.results).every(r => r.trace && r.trace.calls >= 1), "each scenario keeps its run's trace totals");
     // a real regression end to end: a baseline whose judge scored 5 of 5, against the stand-in judge's 4, fails the run
     const base = JSON.parse(readFileSync(join(dir, "h", "baseline.json"), "utf8")) as Entry;
     writeFileSync(join(dir, "better.json"), JSON.stringify({ ...base, judge_mean: 5 }));
