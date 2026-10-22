@@ -1,3 +1,4 @@
+import { PUBLIC_BUNDLE } from "./publicBundle";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { filingKindOf, IN_PLAN } from "./overage.ts";
 import { shownCharges, shownLicense } from "./FilingCharge";
@@ -380,6 +381,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     let on = true;
+    // the public app has no in-browser model: Odelia runs on the server in a signed-in workspace (src/publicBundle.ts)
+    if (PUBLIC_BUNDLE) return;
     void claudeModel().then(m => {
       if (!on) return;
       if (m) { setModel(m); return; }

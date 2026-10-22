@@ -1,3 +1,4 @@
+import { PUBLIC_BUNDLE } from "./publicBundle";
 import { inspectionsFor } from "./inspections/forStore";
 import { priceFacts } from "./pricing";
 import { DEFAULT_POLICY, SPEND_CATEGORIES, decide, suggestBudgets, type Budget, type Purchase, type SpendCategory } from "./spend.ts";
@@ -310,6 +311,8 @@ function snapshot(w: Workspace, lang: Lang) {
 /** The instructions. `extra.names`: the tools the model actually has, so the instructions never send it to a tool it
  *  doesn't have (email, calendar, drive, settings and memory tools only exist in a signed-in workspace). */
 export function rules(w: Workspace, lang: Lang, account: boolean, research: boolean, connected: string[], tools: boolean, extra: { me?: string; speak?: string; names?: string[] } = {}) {
+  // the public app never carries Odelia's instructions: she runs on the server there (src/publicBundle.ts)
+  if (PUBLIC_BUNDLE) return "";
   const book = extra.me ? w.memories?.[extra.me] : undefined, mem = memoryBrief(book), ms = book?.settings;
   const can = (n: string) => tools && (!extra.names || extra.names.includes(n));
   const has = (k: string[]) => connected.some(c => k.includes(c));

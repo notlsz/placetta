@@ -23,7 +23,7 @@ import { mcpReads } from "./mcp";
 import { secureTools, Shield, type ToolLog } from "./security/secure";
 import { newRunPolicy, type Actor } from "./security/policy";
 import { neutralize } from "./security/untrusted";
-import { sanitizeOutput } from "./security/output";
+import { sanitizeOutput, withoutInstructions } from "./security/output";
 import { scrubCredentials } from "./security/secrets";
 import { keepOwnerControls } from "./security/controls";
 import { scanServerResults } from "./security/web";
@@ -462,7 +462,11 @@ export async function runRounds(o: {
   const memNote = memOut.note ??= o.child ? "" : commandNote(o.memory, st.request ?? "", memOut, { runId: o.runId, remote: isRemote(o.channel), now: new Date().toISOString() });
   // no credential ever goes into a prompt, whatever the workspace or its memory holds (src/security/secrets.ts): every
   // segment is scrubbed before it's laid out, so the cache breakpoints still fall where they should
-  const shaped = systemFor(o.ws(), rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) }), o.memory,
+  const instructions = rules(o.ws(), o.lang, o.account, o.research !== false, o.svc?.connected() ?? [], true, { me, names: tools.map(t => t.name) });
+  /** What the model wrote, safe to show: no link that can carry data out, and never a recital of Odelia's own
+   *  instructions, whatever a prompt injection talked the model into (src/security/output.ts). */
+  const safeOut = (t: string) => withoutInstructions(sanitizeOutput(t).text, instructions, o.lang === "zh" ? "zh" : "en").text;
+  const shaped = systemFor(o.ws(), instructions, o.memory,
     [st.network ?? "", channelHint(o.channel, from.plainSms), controlsBrief(o.ws(), mode), childJob ? storeRules(o.ws(), childJob, o.lang) : "", memNote], { store: o.child?.store, request: st.request, now: new Date().toISOString(), clean: scrubCredentials });
   const system = shaped.system;
   /** The conversation as each call sends it: through the processors (src/odeliaMemory/processors.ts). The run keeps the
@@ -510,7 +514,7 @@ export async function runRounds(o: {
       st.sources = [...sources.values()];
       addUsed(st.used ??= [], usedInBlocks(data.content));
       const text = data.content.filter(c => c.type === "text").map(c => c.text).join("");
-      if (text) { st.text += (st.text ? "\n\n" : "") + text; o.draft?.(sanitizeOutput(clean(st.text.slice(made.lastToolAt))).text); }
+      if (text) { st.text += (st.text ? "\n\n" : "") + text; o.draft?.(safeOut(clean(st.text.slice(made.lastToolAt)))); }
       if (data.stop_reason === "pause_turn") { st.messages.push({ role: "assistant", content: data.content }); continue; }
       const uses = data.content.filter(c => c.type === "tool_use");
       if (!uses.length || data.stop_reason !== "tool_use") { finished = true; break; }
@@ -576,7 +580,7 @@ export async function runRounds(o: {
     if (o.family && made.split?.length && !st.woke) {
       const pending = await o.family.pending();
       if (pending > 0) {
-        const said = sanitizeOutput(clean(st.text.slice(made.lastToolAt).trim() || st.text.trim())).text;
+        const said = safeOut(clean(st.text.slice(made.lastToolAt).trim() || st.text.trim()));
         st.waiting = true;
         st.messages.push({ role: "assistant", content: last });
         made.lastToolAt = st.text.length;
@@ -658,7 +662,7 @@ export async function runRounds(o: {
   const undoId = keepUndo();
   // a reply that says "done" while a job it worked is still open gets that job's open steps, so it can't claim more
   // no image, link or address in the reply that could carry data out (src/security/output.ts)
-  const said = sanitizeOutput(clean(st.text.slice(made.lastToolAt).trim() || st.text.trim())).text;
+  const said = safeOut(clean(st.text.slice(made.lastToolAt).trim() || st.text.trim()));
   const open = saysDone(said) || !said ?(o.ws().jobs ?? []).filter(j => own(j) && j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(s => !s.done) && !checkedNow.includes(j.id)).slice(0, 2) : [];
   const proof = [...open.map(j => openLine(j, o.lang)),...checkedNow.map(id => (o.ws().jobs ?? []).find(j => j.id === id)).filter((j): j is Job => !!j).map(j => proofLine(j, o.lang)),
     ...unchecked.filter(id => !checkedNow.includes(id)).slice(0, 1).map(() => (o.lang === "zh" ? "独立检查暂时无法核对，所以这项工作仍未完成。" : "A separate reviewer couldn't check the work yet, so the job stays open."))].filter(Boolean).join(" ");

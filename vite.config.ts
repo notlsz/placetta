@@ -30,6 +30,8 @@ const pdfjsAssets = (): Plugin => ({
 // `npm run build`: the whole site for production. The website at /, the app at /app/ (one origin, so the
 //   website's "Get my plan" answers carry straight into the app).
 // `npm run build:single`: the app inlined into one HTML file (the shareable preview and the sample demo).
+// Both are public, so Odelia's instructions are compiled out of them (src/publicBundle.ts); she runs on the server.
+const define = { __PLACETTA_PUBLIC_BUNDLE__: "true" };
 export default defineConfig(({ mode }) => mode === "single"
-  ? { plugins: [react(), viteSingleFile()], build: { outDir: "dist-single" } }
-  : { base: "/app/", plugins: [react(), website(), pdfjsAssets()], build: { outDir: "dist/app", emptyOutDir: true } });
+  ? { define, plugins: [react(), viteSingleFile()], build: { outDir: "dist-single" } }
+  : { define, base: "/app/", plugins: [react(), website(), pdfjsAssets()], build: { outDir: "dist/app", emptyOutDir: true } });
